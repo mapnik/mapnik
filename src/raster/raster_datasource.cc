@@ -78,7 +78,7 @@ FeaturesetPtr raster_datasource::featuresInBox(const CoordTransform& t,
 					       const mapnik::Envelope<double>& box) const
 {
     RasterInfo info(filename_,format_,extent_);
-    single_file_policy policy(info);              //todo: handle different policies!
+    single_file_policy policy(info); //todo: handle different policies!
     return FeaturesetPtr(new RasterFeatureset<single_file_policy>(policy,box,t));
 }
 

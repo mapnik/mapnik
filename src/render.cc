@@ -48,11 +48,13 @@ namespace mapnik
 	    const Style& style=styles->find(l.getStyle());
 	    //TODO fix scale 
             Style::Iterator itr = style.find(1.0/t.scale());
-	    if (itr!=style.end()) {
+	    
+	    if (itr!=style.end()) 
+	    {
 		Feature* feature=0;
 		while (feature=fs->next())
 		{
-		    // TODO refactor!!!!
+		    // TODO 
 		    if (feature->isRaster())
 		    {
 			const RasterPtr& ras=feature->getRaster();

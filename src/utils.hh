@@ -47,6 +47,7 @@ namespace mapnik
 	    delete obj;
 	}
     };
+
     template <typename T>
     class CreateStatic
     {

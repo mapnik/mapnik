@@ -23,6 +23,7 @@
 
 #include <stdexcept>
 #include <map>
+#include "utils.hh"
 
 namespace mapnik
 {
@@ -50,8 +51,9 @@ namespace mapnik
         typename key_type,
         typename product_creator=product_type* (*)(),
         template <typename,typename> class factory_error_policy=default_factory_error
-        >
-    class factory : public factory_error_policy <key_type,product_type>
+    >
+    class factory : public singleton<factory <product_type,key_type,product_creator,factory_error_policy> >,
+					     factory_error_policy <key_type,product_type>
     {
     private:
 	typedef std::map<key_type,product_creator> product_map;

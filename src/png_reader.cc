@@ -49,10 +49,8 @@ namespace mapnik
 	{
 	    return new PngReader(file);
 	}
-	const bool registered = 
-	ImageReaderFactory::instance()->register_product("png",createPngReader);
+	const bool registered = register_image_reader("png",createPngReader);
     }
-
 
     PngReader::PngReader(const std::string& fileName) 
 	: fileName_(fileName),

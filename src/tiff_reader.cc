@@ -63,8 +63,7 @@ namespace mapnik
 	    return new TiffReader(file);
 	}
 
-	const bool registered = 
-	    ImageReaderFactory::instance()->register_product("tiff",createTiffReader);
+	const bool registered = register_image_reader("tiff",createTiffReader);
     }
 
     TiffReader::TiffReader(const std::string& file_name)

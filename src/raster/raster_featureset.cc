@@ -28,7 +28,9 @@ RasterFeatureset<LookupPolicy>::RasterFeatureset(const LookupPolicy& policy,
       extent_(box),
       t_(t),
       curIter_(policy_.query(box)),
-      endIter_(policy_.end()) {}
+      endIter_(policy_.end()) 
+
+{}
 
 template <typename LookupPolicy>
 RasterFeatureset<LookupPolicy>::~RasterFeatureset() {}
@@ -41,8 +43,10 @@ Feature* RasterFeatureset<LookupPolicy>::next()
     {
         try
         {
-            std::auto_ptr<ImageReader> reader(ImageReaderFactory::instance()->create_object(curIter_->format(),curIter_->file()));
-            if (reader.get())
+	    std::cout<<"RasterFeatureset "<<curIter_->format()<<" "<<curIter_->file()<<std::endl;
+            std::auto_ptr<ImageReader> reader(get_image_reader(curIter_->format(),curIter_->file()));
+	    std::cout<<reader.get()<<std::endl;
+	    if (reader.get())
             {
                 int image_width=reader->width();
                 int image_height=reader->height();

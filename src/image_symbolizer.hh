@@ -41,7 +41,7 @@ namespace mapnik
 	{
 	    try 
 	    {
-		std::auto_ptr<ImageReader> reader(ImageReaderFactory::instance()->create_object(type,file));
+		std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
 		std::cout<<"image width="<<reader->width()<<std::endl;
 		std::cout<<"image height="<<reader->height()<<std::endl;
 		reader->read(0,0,symbol_);		

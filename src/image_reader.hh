@@ -23,6 +23,7 @@
 
 #include "mapnik.hh"
 #include <stdexcept>
+#include <string>
 
 namespace mapnik {
 
@@ -49,9 +50,10 @@ namespace mapnik {
 	virtual void read(unsigned x,unsigned y,ImageData32& image)=0;
 	virtual ~ImageReader() {}
     };
+
+    bool register_image_reader(const std::string& type,ImageReader* (*)(const std::string&));
+    ImageReader* get_image_reader(const std::string& type,const std::string& file);
     
-    typedef singleton<factory<ImageReader,std::string, 
-			      ImageReader* (*)(const std::string&)> > ImageReaderFactory;
 }
 
 #endif                                            //IMAGE_READER_HH

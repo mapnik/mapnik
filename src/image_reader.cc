@@ -16,30 +16,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: raster_feature.hh 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
-#ifndef RASTER_FEATURE_HH
-#define RASTER_FEATURE_HH
 
-#include "feature.hh"
-#include "raster.hh"
-
+#include "image_reader.hh"
 namespace mapnik
-{
-
-    class RasterFeature : public FeatureImpl
+{  
+    typedef factory<ImageReader,std::string, 
+		    ImageReader* (*)(const std::string&)>  ImageReaderFactory;
+    
+    
+    bool register_image_reader(const std::string& type,ImageReader* (* fun)(const std::string&))
     {
-    private:
-	RasterPtr ras_;
-    public:
-	RasterFeature(int id,const RasterPtr& ras);
-	virtual ~RasterFeature();
-	bool isRaster() const;
-	geometry_ptr& getGeometry();
-	const RasterPtr& getRaster() const;
-    private:
-	RasterFeature(const RasterFeature&);
-	RasterFeature& operator=(const RasterFeature&);
-    };
+	return ImageReaderFactory::instance()->register_product(type,fun);
+    }
+    
+    ImageReader* get_image_reader(const std::string& type,const std::string& file) 
+    {
+	return ImageReaderFactory::instance()->create_object(type,file);
+    }
 }
-#endif                                            //RASTER_FEATURE_HH
