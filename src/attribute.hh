@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: attribute.hh 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
 #ifndef ATTRIBUTE_HH
 #define ATTRIBUTE_HH
@@ -84,7 +84,7 @@ namespace mapnik
 	~attribute()
 	{
 	}
-            
+             
 	attribute<T>* clone() const
 	{
 	    return new attribute<T>(*this);

@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: mapnik.hh 61 2004-11-04 23:16:30Z artem $
+//$Id$
 
 #ifndef MAPNIK_HH
 #define MAPNIK_HH
@@ -53,7 +53,7 @@
 
 namespace mapnik
 {
-    typedef geometry_type geometry_type;
+    //typedef geometry_type geometry_type;
 }
 
 #endif                                            //MAPNIK_HH
