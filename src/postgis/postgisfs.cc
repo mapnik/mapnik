@@ -21,18 +21,14 @@
 
 #include "postgis.hh"
 
-PostgisFeatureset::PostgisFeatureset(const ref_ptr<ResultSet>& rs,const CoordTransform& t)
+PostgisFeatureset::PostgisFeatureset(const ref_ptr<ResultSet>& rs)
     : rs_(rs),
-      t_(t),
       totalGeomSize_(0),
-      count_(0)
-{
-}
-
+      count_(0) {}
 
 Feature* PostgisFeatureset::next()
 {
-    VectorFeature *feature=0;
+    Feature *feature=0;
     if (rs_->next())
     {
         // read gid,srid,geometry and create feature
@@ -43,7 +39,7 @@ Feature* PostgisFeatureset::next()
 
         if (geom)
         {
-            feature=new VectorFeature(id,geom);
+            feature=new Feature(id,geom);
             totalGeomSize_+=size;
             ++count_;
         }

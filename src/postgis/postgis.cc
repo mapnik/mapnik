@@ -130,7 +130,6 @@ FeaturesetPtr PostgisDatasource::featuresAll(const CoordTransform& t) const
     return FeaturesetPtr(0);
 }
 
-
 FeaturesetPtr PostgisDatasource::featuresInBox(const CoordTransform& t,
 					       const mapnik::Envelope<double>& box) const
 {
@@ -150,12 +149,36 @@ FeaturesetPtr PostgisDatasource::featuresInBox(const CoordTransform& t,
 	    s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
 	    std::cout << s.str()<<std::endl;
 	    ref_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-	    fs=new PostgisFeatureset(rs,t);
+	    fs=new PostgisFeatureset(rs);
 	}
     }
     return FeaturesetPtr(fs);
 }
 
+FeaturesetPtr PostgisDatasource::features(const query& q) const
+{
+    Featureset *fs=0;
+    const Envelope<double>& box=q.get_bbox();
+    ConnectionManager *mgr=ConnectionManager::instance();
+    ref_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
+    if (pool)
+    {
+	const ref_ptr<Connection>& conn = pool->borrowObject();
+	if (conn && conn->isOK())
+	{       
+	    PoolGuard<ref_ptr<Connection>,ref_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
+	    std::ostringstream s;
+	    s << "select gid,asbinary("<<geometryColumn_<<") as geom from ";
+	    s << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
+	    s << box.minx() << " " << box.miny() << ",";
+	    s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
+	    std::cout << s.str()<<std::endl;
+	    ref_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
+	    fs=new PostgisFeatureset(rs);
+	}
+    }
+    return FeaturesetPtr(fs);
+}
 
 FeaturesetPtr PostgisDatasource::featuresAtPoint(const CoordTransform& t,
 						 const mapnik::coord2d& pt) const
@@ -177,7 +200,7 @@ FeaturesetPtr PostgisDatasource::featuresAtPoint(const CoordTransform& t,
 	    s << pt.x << " " << pt.y << ")'::box3d,"<<srid_<<") && "<<geometryColumn_;
 	    std::cout << s.str()<<std::endl;
 	    ref_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-	    fs=new PostgisFeatureset(rs,t);
+	    fs=new PostgisFeatureset(rs);
 	}
     }
     return FeaturesetPtr(fs);

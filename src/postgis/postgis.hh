@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: postgis.hh 68 2004-11-23 22:39:58Z artem $
+//$Id$
 
 #ifndef POSTGIS_HH
 #define POSTGIS_HH
@@ -46,6 +46,8 @@ public:
     FeaturesetPtr featuresAll(const CoordTransform& t) const;
     FeaturesetPtr featuresInBox(const CoordTransform& t,const mapnik::Envelope<double>& box) const;
     FeaturesetPtr featuresAtPoint(const CoordTransform& t,const mapnik::coord2d& pt) const;
+    FeaturesetPtr features(const query& q) const;
+
     const mapnik::Envelope<double>& envelope() const;
     PostgisDatasource(const Parameters &params);
     ~PostgisDatasource();
@@ -59,11 +61,10 @@ class PostgisFeatureset : public Featureset
 {
 private:
     ref_ptr<ResultSet> rs_;
-    CoordTransform t_;
     mutable int totalGeomSize_;
     mutable int count_;
 public:
-    PostgisFeatureset(const ref_ptr<ResultSet>& rs,const CoordTransform& t);
+    PostgisFeatureset(const ref_ptr<ResultSet>& rs);
     void dispose();
     Feature* next();
     ~PostgisFeatureset();
