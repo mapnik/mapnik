@@ -54,7 +54,7 @@ namespace mapnik
 
 	virtual ~ImageSymbolizer() {}
 
-	void render(const geometry_type& geom,Image32& image) const 
+	void render(geometry_type& geom,Image32& image) const 
 	{
 	    int w=symbol_.width();
 	    int h=symbol_.height();

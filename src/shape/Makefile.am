@@ -4,5 +4,5 @@ shape_la_SOURCES = dbffile.cc shape.cc shape_io.cc shape_featureset.cc shape_ind
 
 shape_la_LIBDADD = 
 shape_la_LDFLAGS = -module -version-info 0:0:0 -lpthread 
-INCLUDES = -I ../
+shape_la_CXXFLAGS = -I$(top_srcdir)/src
 

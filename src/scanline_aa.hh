@@ -24,7 +24,7 @@
 //  render_hline remain intact. 
 
 
-//$Id: scanline_aa.hh 60 2004-11-04 09:40:49Z artem $
+//$Id$
 
 #ifndef SCANLINE_AA_HH
 #define SCANLINE_AA_HH

@@ -8,6 +8,7 @@ extension mapnik
   mapnik_layer.cc 
   mapnik_envelope.cc
   mapnik_map.cc
+  mapnik_image.cc
   mapnik_python.cc 
   # requirements and dependencies for Boost.Python extensions
   <template>@boost/libs/python/build/extension

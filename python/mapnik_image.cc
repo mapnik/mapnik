@@ -21,30 +21,18 @@
 #include <mapnik.hh>
 #include <boost/python.hpp>
 
-using mapnik::coord;
-using mapnik::Envelope;
+using mapnik::Image32;
 
-struct envelope_pickle_suite : boost::python::pickle_suite
+
+char const* rawdata(const Image32& image)
 {
-    static boost::python::tuple
-    getinitargs(const Envelope<double>& e)
-    {
-        using namespace boost::python;
-        return make_tuple(e.minx(),e.miny(),e.maxx(),e.maxy());
-    }
-};
+    return (char const* )image.raw_data();
+}
 
-void export_envelope()
+void export_image()
 {
     using namespace boost::python;
-    class_<Envelope<double> >("envelope",init<double,double,double,double>())
-        .def(init<>())
-	.def(init<const coord<double,2>&, const coord<double,2>&>())
-        .add_property("minx",&Envelope<double>::minx)
-        .add_property("miny",&Envelope<double>::miny)
-        .add_property("maxx",&Envelope<double>::maxx)
-        .add_property("maxy",&Envelope<double>::maxy)
-        .def("center",&Envelope<double>::center)
-        .def_pickle(envelope_pickle_suite())
-        ;
+    class_<Image32>("image",init<int,int>())
+    ;
+    def("rawdata",&rawdata);
 }

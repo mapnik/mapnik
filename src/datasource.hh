@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: datasource.hh 68 2004-11-23 22:39:58Z artem $
+//$Id$
 
 #ifndef DATASOURCE_HH
 #define DATASOURCE_HH
@@ -56,17 +56,19 @@ namespace mapnik
     class datasource
     {
     public:
-	enum
-            {
-                Point=1,
-                Line,
-                Polygon,
-                Raster
-            };
+	enum {
+	    Point=1,
+	    Line,
+	    Polygon,
+	    Raster
+	};
 	virtual int type() const=0;
 	virtual FeaturesetPtr featuresAll(const CoordTransform& t) const=0;
 	virtual FeaturesetPtr featuresInBox(const CoordTransform& t,const Envelope<double>& box) const=0;
 	virtual FeaturesetPtr featuresAtPoint(const CoordTransform& t,const coord2d& pt) const=0;
+	
+	//virtual FeaturesetPtr query(const Envelope<double>& box,);
+	
 	virtual const Envelope<double>& envelope() const=0;
 	virtual ~datasource() {};
     };

@@ -24,6 +24,7 @@
 #include "graphics.hh"
 #include "image_util.hh"
 #include "memory.hh"
+
 namespace mapnik
 {
 

@@ -4,5 +4,5 @@ raster_la_SOURCES = raster_datasource.hh raster_featureset.hh raster_info.hh ras
 
 raster_la_LIBDADD = 
 raster_la_LDFLAGS = -module -version-info 0:0:0 -lpthread
-INCLUDES = -I ../
+raster_la_CXXFLAGS = -I$(top_srcdir)/src
 

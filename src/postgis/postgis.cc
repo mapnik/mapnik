@@ -36,7 +36,8 @@ PostgisDatasource::PostgisDatasource(const Parameters& params)
       creator_(params.get("host"),
 	       params.get("dbname"),
 	       params.get("user"),
-	       params.get("pass"))
+	       params.get("pass")),
+      type_(0)
     
 {
  
@@ -73,10 +74,25 @@ PostgisDatasource::PostgisDatasource(const Parameters& params)
 		    type_=datasource::Line;
 		else if (postgisType=="POLYGON" || postgisType=="MULTIPOLYGON")
 		    type_=datasource::Polygon;
-		else
-		    type_=0;
-		rs->close();
+
 	    }
+	    rs->close();
+	    s.str("");
+	    s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)";
+	    s << " from (select estimated_extent('"<<table_name<<"','"<<geometryColumn_<<"') as ext) as tmp";
+	    std::cout<<s.str()<<"\n";
+	    rs=conn->executeQuery(s.str());
+	    if (rs->next())
+	    {
+		double lox,loy,hix,hiy;
+		fromString(rs->getValue(0),lox);
+		fromString(rs->getValue(1),loy);
+		fromString(rs->getValue(2),hix);
+		fromString(rs->getValue(3),hiy);
+		extent_.init(lox,loy,hix,hiy);
+		std::cout<<extent_<<"\n";
+	    }
+	    rs->close();
 	}
     }
 }

@@ -22,30 +22,55 @@
 #define FILTER_HH
 
 #include "envelope.hh"
+#include "feature.hh"
+#include "filter_visitor.hh"
 
 namespace mapnik
 {
-    struct filter_in_box
+    template <typename Feature>	
+    struct filter
     {
-        Envelope<double> box_;
-        explicit filter_in_box(const Envelope<double>& box)
-            : box_(box) {}
-
-        bool pass(const Envelope<double>& extent) const
-        {
-            return extent.intersects(box_);
-        }
+	enum {
+	    NULL_OPS,
+	    SPATIAL_OPS,
+	    COMPARISON_OPS,
+	    LOGICAL_OPS,
+	    FEATUREID_OPS
+	};
+        
+	virtual int  type() const=0;
+	virtual bool pass (const Feature& feature) const=0;
+	virtual filter<Feature>* clone() const=0;
+	virtual void accept(filter_visitor<Feature>& v)=0;
+	virtual ~filter() {}
     };
-
-    struct filter_at_point
+    
+    template <typename Feature>
+    struct null_filter : public filter<Feature>
     {
-        coord2d pt_;
-        explicit filter_at_point(const coord2d& pt)
-            : pt_(pt) {}
-        bool pass(const Envelope<double>& extent) const
-        {
-            return extent.contains(pt_);
-        }
+	typedef filter<Feature> _Base_;
+	int  type() const 
+	{ 
+	    return _Base_::NULL_OPS;
+	}
+
+	bool pass (const Feature&) const
+	{
+	    return true;
+	}
+
+	_Base_* clone() const 
+	{ 
+	    return new null_filter<Feature>;
+	}
+
+	void accept(filter_visitor<Feature>& v)
+	{
+	    v.visit(*this);
+	}
+
+	~null_filter() {}
     };
 }
-#endif                                            //FILTER_HH
+
+#endif //FILTER_HH

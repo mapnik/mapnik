@@ -25,7 +25,6 @@
 
 namespace mapnik
 {
-
     class attribute_base
     {
     public:
@@ -78,7 +77,7 @@ namespace mapnik
 	attribute& operator=(const attribute& other)
 	{
 	    attribute<T> temp(other);
-	    Swap(temp);
+	    swap(temp);
 	    return *this;
 	}
 	~attribute()
@@ -98,7 +97,7 @@ namespace mapnik
 	    return ATraits::to_string(value_);
 	}
     private:
-	void Swap(attribute<T>& other) throw()
+	void swap(attribute<T>& other) throw()
 	{
 	    std::swap(value_,other.value_);
 	}

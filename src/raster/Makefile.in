@@ -58,8 +58,8 @@ am__installdirs = "$(DESTDIR)$(pluginsdir)"
 pluginsLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(plugins_LTLIBRARIES)
 raster_la_LIBADD =
-am_raster_la_OBJECTS = raster_datasource.lo raster_featureset.lo \
-	raster_info.lo
+am_raster_la_OBJECTS = raster_la-raster_datasource.lo \
+	raster_la-raster_featureset.lo raster_la-raster_info.lo
 raster_la_OBJECTS = $(am_raster_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -201,7 +201,7 @@ plugins_LTLIBRARIES = raster.la
 raster_la_SOURCES = raster_datasource.hh raster_featureset.hh raster_info.hh raster_datasource.cc  raster_featureset.cc  raster_info.cc
 raster_la_LIBDADD = 
 raster_la_LDFLAGS = -module -version-info 0:0:0 -lpthread
-INCLUDES = -I ../
+raster_la_CXXFLAGS = -I$(top_srcdir)/src
 all: all-am
 
 .SUFFIXES:
@@ -271,9 +271,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster_datasource.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster_featureset.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster_info.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster_la-raster_datasource.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster_la-raster_featureset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster_la-raster_info.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -295,6 +295,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+raster_la-raster_datasource.lo: raster_datasource.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(raster_la_CXXFLAGS) $(CXXFLAGS) -MT raster_la-raster_datasource.lo -MD -MP -MF "$(DEPDIR)/raster_la-raster_datasource.Tpo" -c -o raster_la-raster_datasource.lo `test -f 'raster_datasource.cc' || echo '$(srcdir)/'`raster_datasource.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/raster_la-raster_datasource.Tpo" "$(DEPDIR)/raster_la-raster_datasource.Plo"; else rm -f "$(DEPDIR)/raster_la-raster_datasource.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='raster_datasource.cc' object='raster_la-raster_datasource.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(raster_la_CXXFLAGS) $(CXXFLAGS) -c -o raster_la-raster_datasource.lo `test -f 'raster_datasource.cc' || echo '$(srcdir)/'`raster_datasource.cc
+
+raster_la-raster_featureset.lo: raster_featureset.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(raster_la_CXXFLAGS) $(CXXFLAGS) -MT raster_la-raster_featureset.lo -MD -MP -MF "$(DEPDIR)/raster_la-raster_featureset.Tpo" -c -o raster_la-raster_featureset.lo `test -f 'raster_featureset.cc' || echo '$(srcdir)/'`raster_featureset.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/raster_la-raster_featureset.Tpo" "$(DEPDIR)/raster_la-raster_featureset.Plo"; else rm -f "$(DEPDIR)/raster_la-raster_featureset.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='raster_featureset.cc' object='raster_la-raster_featureset.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(raster_la_CXXFLAGS) $(CXXFLAGS) -c -o raster_la-raster_featureset.lo `test -f 'raster_featureset.cc' || echo '$(srcdir)/'`raster_featureset.cc
+
+raster_la-raster_info.lo: raster_info.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(raster_la_CXXFLAGS) $(CXXFLAGS) -MT raster_la-raster_info.lo -MD -MP -MF "$(DEPDIR)/raster_la-raster_info.Tpo" -c -o raster_la-raster_info.lo `test -f 'raster_info.cc' || echo '$(srcdir)/'`raster_info.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/raster_la-raster_info.Tpo" "$(DEPDIR)/raster_la-raster_info.Plo"; else rm -f "$(DEPDIR)/raster_la-raster_info.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='raster_info.cc' object='raster_la-raster_info.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(raster_la_CXXFLAGS) $(CXXFLAGS) -c -o raster_la-raster_info.lo `test -f 'raster_info.cc' || echo '$(srcdir)/'`raster_info.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo

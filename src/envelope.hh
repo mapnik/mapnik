@@ -61,7 +61,6 @@ namespace mapnik
 	EnvelopeType intersect(const EnvelopeType& other) const;
 	bool operator==(const EnvelopeType &other) const;
 	void re_center(T cx,T cy);
-    private:
 	void init(T x0,T y0,T x1,T y1);
     };
 
@@ -78,4 +77,4 @@ namespace mapnik
         return out;
     }
 }
-#endif                                            // ENVELOPE_HH
+#endif // ENVELOPE_HH

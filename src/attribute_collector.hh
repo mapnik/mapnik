@@ -18,43 +18,40 @@
 
 //$Id$
 
-#ifndef SYMBOLIZER_HH
-#define SYMBOLIZER_HH
+#ifndef ATTRIBUTE_COLLECTOR
+#define ATTROBUTE_COLLECTOR
 
-#include "graphics.hh" 
-#include "geometry.hh"
-#include <limits>
+#include "filter_visitor.hh"
+#include <set>
+#include "comparison.hh"
 
-namespace mapnik 
+namespace mapnik
 {
-    class Image32;
-    struct Symbolizer
-    {
-    	virtual bool active(double scale) const=0;
-    	virtual void render(geometry_type& geom, Image32& image) const=0;
-    	virtual ~Symbolizer() {}
-    };
-    
-    struct SymbolizerImpl : public Symbolizer
+    template <typename Feature>
+    class attribute_collector : public filter_visitor<Feature>
     {
     private:
-	double min_scale_;
-	double max_scale_;	
+	std::set<std::string> names_;
     public:
-	SymbolizerImpl()
-	    : min_scale_(0),
-	      max_scale_(std::numeric_limits<double>::max()) {}
-	SymbolizerImpl(double min_scale,double max_scale) 
-	    : min_scale_(min_scale),
-	      max_scale_(max_scale) {}
-	
-	virtual ~SymbolizerImpl() {}
-	
-	bool active(double scale) const
-	{
-	    return ( scale > min_scale_ && scale < max_scale_ ); 
+	attribute_collector() {}
+	void visit(filter<Feature>& filter) 
+	{   
+	    property_filter<Feature>* pf_;
+	    if((pf_=dynamic_cast<property_filter<Feature>*>(&filter)))
+	    {
+		names_.insert(pf_->name_);
+	    }
 	}
+	const std::set<std::string>& property_names() const
+	{
+	    return names_;
+	}
+	
+	virtual ~attribute_collector() {}
+    private:
+	attribute_collector(const attribute_collector&);
+	attribute_collector& operator=(const attribute_collector&);
     };
 }
 
-#endif //SYMBOLIZER_HH
+#endif //ATTRIBUTE_COLLECTOR_HH

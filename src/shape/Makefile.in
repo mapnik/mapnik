@@ -58,9 +58,10 @@ am__installdirs = "$(DESTDIR)$(pluginsdir)"
 pluginsLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(plugins_LTLIBRARIES)
 shape_la_LIBADD =
-am_shape_la_OBJECTS = dbffile.lo shape.lo shape_io.lo \
-	shape_featureset.lo shapefile.lo shp_index.lo dbf_test.lo \
-	shape_index_featureset.lo
+am_shape_la_OBJECTS = shape_la-dbffile.lo shape_la-shape.lo \
+	shape_la-shape_io.lo shape_la-shape_featureset.lo \
+	shape_la-shapefile.lo shape_la-shp_index.lo \
+	shape_la-dbf_test.lo shape_la-shape_index_featureset.lo
 shape_la_OBJECTS = $(am_shape_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -202,7 +203,7 @@ plugins_LTLIBRARIES = shape.la
 shape_la_SOURCES = dbffile.cc shape.cc shape_io.cc shape_featureset.cc shape_index_featureset.hh dbffile.hh shapefile.cc shape_featureset.hh shape_io.hh shp_index.cc dbf_test.cc shapefile.hh shape.hh shape_index_featureset.cc shp_index.hh
 shape_la_LIBDADD = 
 shape_la_LDFLAGS = -module -version-info 0:0:0 -lpthread 
-INCLUDES = -I ../
+shape_la_CXXFLAGS = -I$(top_srcdir)/src
 all: all-am
 
 .SUFFIXES:
@@ -272,14 +273,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbf_test.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbffile.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_featureset.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_index_featureset.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_io.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shapefile.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shp_index.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_la-dbf_test.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_la-dbffile.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_la-shape.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_la-shape_featureset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_la-shape_index_featureset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_la-shape_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_la-shapefile.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shape_la-shp_index.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -301,6 +302,62 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+shape_la-dbffile.lo: dbffile.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -MT shape_la-dbffile.lo -MD -MP -MF "$(DEPDIR)/shape_la-dbffile.Tpo" -c -o shape_la-dbffile.lo `test -f 'dbffile.cc' || echo '$(srcdir)/'`dbffile.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/shape_la-dbffile.Tpo" "$(DEPDIR)/shape_la-dbffile.Plo"; else rm -f "$(DEPDIR)/shape_la-dbffile.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dbffile.cc' object='shape_la-dbffile.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -c -o shape_la-dbffile.lo `test -f 'dbffile.cc' || echo '$(srcdir)/'`dbffile.cc
+
+shape_la-shape.lo: shape.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -MT shape_la-shape.lo -MD -MP -MF "$(DEPDIR)/shape_la-shape.Tpo" -c -o shape_la-shape.lo `test -f 'shape.cc' || echo '$(srcdir)/'`shape.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/shape_la-shape.Tpo" "$(DEPDIR)/shape_la-shape.Plo"; else rm -f "$(DEPDIR)/shape_la-shape.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='shape.cc' object='shape_la-shape.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -c -o shape_la-shape.lo `test -f 'shape.cc' || echo '$(srcdir)/'`shape.cc
+
+shape_la-shape_io.lo: shape_io.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -MT shape_la-shape_io.lo -MD -MP -MF "$(DEPDIR)/shape_la-shape_io.Tpo" -c -o shape_la-shape_io.lo `test -f 'shape_io.cc' || echo '$(srcdir)/'`shape_io.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/shape_la-shape_io.Tpo" "$(DEPDIR)/shape_la-shape_io.Plo"; else rm -f "$(DEPDIR)/shape_la-shape_io.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='shape_io.cc' object='shape_la-shape_io.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -c -o shape_la-shape_io.lo `test -f 'shape_io.cc' || echo '$(srcdir)/'`shape_io.cc
+
+shape_la-shape_featureset.lo: shape_featureset.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -MT shape_la-shape_featureset.lo -MD -MP -MF "$(DEPDIR)/shape_la-shape_featureset.Tpo" -c -o shape_la-shape_featureset.lo `test -f 'shape_featureset.cc' || echo '$(srcdir)/'`shape_featureset.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/shape_la-shape_featureset.Tpo" "$(DEPDIR)/shape_la-shape_featureset.Plo"; else rm -f "$(DEPDIR)/shape_la-shape_featureset.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='shape_featureset.cc' object='shape_la-shape_featureset.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -c -o shape_la-shape_featureset.lo `test -f 'shape_featureset.cc' || echo '$(srcdir)/'`shape_featureset.cc
+
+shape_la-shapefile.lo: shapefile.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -MT shape_la-shapefile.lo -MD -MP -MF "$(DEPDIR)/shape_la-shapefile.Tpo" -c -o shape_la-shapefile.lo `test -f 'shapefile.cc' || echo '$(srcdir)/'`shapefile.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/shape_la-shapefile.Tpo" "$(DEPDIR)/shape_la-shapefile.Plo"; else rm -f "$(DEPDIR)/shape_la-shapefile.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='shapefile.cc' object='shape_la-shapefile.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -c -o shape_la-shapefile.lo `test -f 'shapefile.cc' || echo '$(srcdir)/'`shapefile.cc
+
+shape_la-shp_index.lo: shp_index.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -MT shape_la-shp_index.lo -MD -MP -MF "$(DEPDIR)/shape_la-shp_index.Tpo" -c -o shape_la-shp_index.lo `test -f 'shp_index.cc' || echo '$(srcdir)/'`shp_index.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/shape_la-shp_index.Tpo" "$(DEPDIR)/shape_la-shp_index.Plo"; else rm -f "$(DEPDIR)/shape_la-shp_index.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='shp_index.cc' object='shape_la-shp_index.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -c -o shape_la-shp_index.lo `test -f 'shp_index.cc' || echo '$(srcdir)/'`shp_index.cc
+
+shape_la-dbf_test.lo: dbf_test.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -MT shape_la-dbf_test.lo -MD -MP -MF "$(DEPDIR)/shape_la-dbf_test.Tpo" -c -o shape_la-dbf_test.lo `test -f 'dbf_test.cc' || echo '$(srcdir)/'`dbf_test.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/shape_la-dbf_test.Tpo" "$(DEPDIR)/shape_la-dbf_test.Plo"; else rm -f "$(DEPDIR)/shape_la-dbf_test.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dbf_test.cc' object='shape_la-dbf_test.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -c -o shape_la-dbf_test.lo `test -f 'dbf_test.cc' || echo '$(srcdir)/'`dbf_test.cc
+
+shape_la-shape_index_featureset.lo: shape_index_featureset.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -MT shape_la-shape_index_featureset.lo -MD -MP -MF "$(DEPDIR)/shape_la-shape_index_featureset.Tpo" -c -o shape_la-shape_index_featureset.lo `test -f 'shape_index_featureset.cc' || echo '$(srcdir)/'`shape_index_featureset.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/shape_la-shape_index_featureset.Tpo" "$(DEPDIR)/shape_la-shape_index_featureset.Plo"; else rm -f "$(DEPDIR)/shape_la-shape_index_featureset.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='shape_index_featureset.cc' object='shape_la-shape_index_featureset.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(shape_la_CXXFLAGS) $(CXXFLAGS) -c -o shape_la-shape_index_featureset.lo `test -f 'shape_index_featureset.cc' || echo '$(srcdir)/'`shape_index_featureset.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo

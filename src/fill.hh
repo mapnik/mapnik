@@ -18,43 +18,15 @@
 
 //$Id$
 
-#ifndef SYMBOLIZER_HH
-#define SYMBOLIZER_HH
+#ifndef FILL_HH
+#define FILL_HH
 
-#include "graphics.hh" 
-#include "geometry.hh"
-#include <limits>
-
-namespace mapnik 
+namespace mapnik
 {
-    class Image32;
-    struct Symbolizer
+    class fill 
     {
-    	virtual bool active(double scale) const=0;
-    	virtual void render(geometry_type& geom, Image32& image) const=0;
-    	virtual ~Symbolizer() {}
-    };
-    
-    struct SymbolizerImpl : public Symbolizer
-    {
-    private:
-	double min_scale_;
-	double max_scale_;	
-    public:
-	SymbolizerImpl()
-	    : min_scale_(0),
-	      max_scale_(std::numeric_limits<double>::max()) {}
-	SymbolizerImpl(double min_scale,double max_scale) 
-	    : min_scale_(min_scale),
-	      max_scale_(max_scale) {}
 	
-	virtual ~SymbolizerImpl() {}
-	
-	bool active(double scale) const
-	{
-	    return ( scale > min_scale_ && scale < max_scale_ ); 
-	}
     };
 }
 
-#endif //SYMBOLIZER_HH
+#endif //FILL_HH

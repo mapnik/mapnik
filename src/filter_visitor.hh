@@ -16,48 +16,21 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id$
+#ifndef FILTER_VISITOR_HH
+#define FILTER_VISITOR_HH
 
-#ifndef MAPNIK_HH
-#define MAPNIK_HH
-
-#include <config.hh>
-
-#include <map>
-#include <vector>
-#include <cassert>
-#include "ptr.hh"
-#include "factory.hh"
 #include "filter.hh"
-#include "rule.hh"
-#include "spatial.hh"
-#include "logical.hh"
-#include "comparison.hh"
-#include "utils.hh"
-#include "style.hh"
-#include "symbolizer.hh"
-#include "style_cache.hh"
-#include "geometry.hh"
-#include "geom_util.hh"
-#include "raster.hh"
 #include "feature.hh"
-#include "vector_feature.hh"
-#include "raster_feature.hh"
-#include "attribute.hh"
-#include "attribute_container.hh"
-#include "render.hh"
-#include "graphics.hh"
-#include "image_reader.hh"
-#include "image_util.hh"
-#include "datasource.hh"
-#include "layer.hh"
-#include "datasource_cache.hh"
-#include "wkb.hh"
-#include "map.hh"
 
 namespace mapnik
 {
-    //typedef geometry_type geometry_type;
+    template <typename Feature> class filter;
+    template <typename Feature>
+    struct filter_visitor
+    {
+	virtual void visit(filter<Feature>& filter)=0;
+	virtual ~filter_visitor() {}
+    };    
 }
 
-#endif                                            //MAPNIK_HH
+#endif //FILTER_VISITOR_HH

@@ -43,11 +43,13 @@ namespace mapnik
 	typedef Container<vertex_type> container_type;
     private:
 	int srid_;
+	mutable unsigned itr_;
     protected:
 	container_type cont_;
     public:
 	geometry (int srid=-1)
 	    : srid_(srid),
+	      itr_(0),
 	      cont_() {}	
 	
 	virtual int type() const=0;
@@ -56,7 +58,7 @@ namespace mapnik
 	{
 	    return srid_;
 	}
-
+	
 	void move_to(value_type x,value_type y)
 	{
 	    cont_.push_back(x,y,SEG_MOVETO);
@@ -66,7 +68,16 @@ namespace mapnik
 	{
 	    cont_.push_back(x,y,SEG_LINETO);
 	}
-
+	
+	//unsigned vertex(double* x, double* y)
+	//	{
+	//    return cont_.get_vertex(itr_++,x,y);
+	//	}
+	
+	//void rewind(unsigned )
+	//	{
+	//    itr_=0;
+	//	}
 	template <typename Transform>
 	class path_iterator
 	{

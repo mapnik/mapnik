@@ -23,7 +23,7 @@
 //  rasterizing algorithm to work with my library, but render_line and 
 //  render_hline remain intact. 
 
-//$Id: scanline_aa.cc 60 2004-11-04 09:40:49Z artem $
+//$Id$
 
 #include "scanline_aa.hh"
 
@@ -578,14 +578,13 @@ namespace mapnik
             }
         }
     }
-
     template <typename PixBuffer>
     inline void ScanlineRasterizerAA<PixBuffer>::blend_hline(int x0,int len,int y,const unsigned char* covers,
 							     unsigned rgba)
     {
         if (y<0) return;
         if (y>pixbuf_->height()-1) return;
-
+  
         if(x0<0)
         {
             len -= 0 - x0;
@@ -604,6 +603,8 @@ namespace mapnik
             pixbuf_->blendPixel(x,y,rgba,alpha);
         }
     }
+
+
 
     template <typename PixBuffer>
     inline void ScanlineRasterizerAA<PixBuffer>::render_hline(int x0,int x1,int y,unsigned rgba)

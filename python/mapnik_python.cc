@@ -32,6 +32,7 @@ void export_color();
 void export_layer();
 void export_parameters();
 void export_envelope();
+void export_image();
 void export_map();
 
 using namespace mapnik;
@@ -68,6 +69,11 @@ void render_to_file(const Map& map,const std::string& file,const std::string& fo
     image.saveToFile(file,format);
 }
 
+void render(const Map& map,Image32& image)
+{
+    Renderer<Image32>::render(map,image);    
+}
+
 //BEGIN quick hack 
 ref_ptr<Symbolizer> create_point_symbolizer(const std::string& file,unsigned w,unsigned h)
 {
@@ -100,6 +106,7 @@ BOOST_PYTHON_MODULE(mapnik)
     export_parameters();
     export_color(); 
     export_envelope();   
+    export_image();
 
     class_<Style>("style",init<>("Style default constructor"))
 	.def(init<ref_ptr<Symbolizer> >())
@@ -145,7 +152,7 @@ BOOST_PYTHON_MODULE(mapnik)
     export_map();
   
     def("render_to_file",&render_to_file);
-
+    def("render",&render);
     def("create_point_symbolizer",&create_point_symbolizer);
     def("create_line_symbolizer",&create_line_symbolizer);
     def("create_polygon_symbolizer",&create_polygon_symbolizer);

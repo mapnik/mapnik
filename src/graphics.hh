@@ -56,7 +56,12 @@ namespace mapnik
 	{
 	    return data_.getBytes();
 	}
-
+	
+	inline unsigned char* raw_data()
+	{
+	    return data_.getBytes();
+	}
+	
 	void saveToFile(const std::string& file,const std::string& format="auto"); 
     private:
 
@@ -88,6 +93,7 @@ namespace mapnik
 	    int r=gammaTable_.l2g[(gammaTable_.g2l[red]*alpha+gammaTable_.g2l[bgRed]*(255-alpha))>>8];
 	    int g=gammaTable_.l2g[(gammaTable_.g2l[green]*alpha+gammaTable_.g2l[bgGreen]*(255-alpha))>>8];
 	    int b=gammaTable_.l2g[(gammaTable_.g2l[blue]*alpha+gammaTable_.g2l[bgBlue]*(255-alpha))>>8];
+	    
 	    return 0xff<<24 | r<<16 | g<<8 | b;
 	}
 

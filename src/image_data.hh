@@ -78,10 +78,22 @@ namespace mapnik
 	{
 	    return pData_;
 	}
+
+	inline T* getData()
+	{
+	    return pData_;
+	}
+
 	inline const unsigned char* getBytes() const
 	{
 	    return (unsigned char*)pData_;
 	}
+	
+	inline unsigned char* getBytes()
+	{
+	    return (unsigned char*)pData_;
+	}
+	
 	inline const T* getRow(unsigned row) const
 	{
 	    return pData_+row*width_;
@@ -96,14 +108,15 @@ namespace mapnik
 	{
 	    memcpy(pData_+row*width_+x0,buf,(x1-x0)*sizeof(T));
 	}
+
 	inline ~ImageData()
 	{
 	    ::operator delete(pData_),pData_=0;
 	}
+	
     };
 
     typedef ImageData<unsigned> ImageData32;
-    typedef ImageData<unsigned char> ImageData8;
 }
 
 #endif //IMAGE_DATA_HH

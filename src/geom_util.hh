@@ -202,6 +202,30 @@ namespace mapnik
 	}
 	return false; 
     }
+
+    struct filter_in_box
+    {
+        Envelope<double> box_;
+        explicit filter_in_box(const Envelope<double>& box)
+            : box_(box) {}
+
+        bool pass(const Envelope<double>& extent) const
+        {
+            return extent.intersects(box_);
+        }
+    };
+
+    struct filter_at_point
+    {
+        coord2d pt_;
+        explicit filter_at_point(const coord2d& pt)
+            : pt_(pt) {}
+        bool pass(const Envelope<double>& extent) const
+        {
+            return extent.contains(pt_);
+        }
+    };
+    
 }
 
 #endif                                            //GEOM_UTIL_HH

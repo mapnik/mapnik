@@ -58,7 +58,7 @@ am__installdirs = "$(DESTDIR)$(pluginsdir)"
 pluginsLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(plugins_LTLIBRARIES)
 postgis_la_LIBADD =
-am_postgis_la_OBJECTS = postgis.lo postgisfs.lo
+am_postgis_la_OBJECTS = postgis_la-postgis.lo postgis_la-postgisfs.lo
 postgis_la_OBJECTS = $(am_postgis_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -200,7 +200,7 @@ plugins_LTLIBRARIES = postgis.la
 postgis_la_SOURCES = resultset.hh connection.hh connection_manager.hh postgis.cc  postgisfs.cc  postgis.hh
 postgis_la_LIBDADD = 
 postgis_la_LDFLAGS = -module -version-info 0:0:0 $(POSTGRESQL_LIBS) -lpthread
-INCLUDES = -I ../ $(POSTGRESQL_CFLAGS)
+postgis_la_CXXFLAGS = -I$(top_srcdir)/src $(POSTGRESQL_CFLAGS)
 all: all-am
 
 .SUFFIXES:
@@ -270,8 +270,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postgis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postgisfs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postgis_la-postgis.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postgis_la-postgisfs.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -293,6 +293,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+postgis_la-postgis.lo: postgis.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(postgis_la_CXXFLAGS) $(CXXFLAGS) -MT postgis_la-postgis.lo -MD -MP -MF "$(DEPDIR)/postgis_la-postgis.Tpo" -c -o postgis_la-postgis.lo `test -f 'postgis.cc' || echo '$(srcdir)/'`postgis.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/postgis_la-postgis.Tpo" "$(DEPDIR)/postgis_la-postgis.Plo"; else rm -f "$(DEPDIR)/postgis_la-postgis.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='postgis.cc' object='postgis_la-postgis.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(postgis_la_CXXFLAGS) $(CXXFLAGS) -c -o postgis_la-postgis.lo `test -f 'postgis.cc' || echo '$(srcdir)/'`postgis.cc
+
+postgis_la-postgisfs.lo: postgisfs.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(postgis_la_CXXFLAGS) $(CXXFLAGS) -MT postgis_la-postgisfs.lo -MD -MP -MF "$(DEPDIR)/postgis_la-postgisfs.Tpo" -c -o postgis_la-postgisfs.lo `test -f 'postgisfs.cc' || echo '$(srcdir)/'`postgisfs.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/postgis_la-postgisfs.Tpo" "$(DEPDIR)/postgis_la-postgisfs.Plo"; else rm -f "$(DEPDIR)/postgis_la-postgisfs.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='postgisfs.cc' object='postgis_la-postgisfs.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(postgis_la_CXXFLAGS) $(CXXFLAGS) -c -o postgis_la-postgisfs.lo `test -f 'postgisfs.cc' || echo '$(srcdir)/'`postgisfs.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo

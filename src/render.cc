@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: render.cc 67 2004-11-23 10:04:32Z artem $
+//$Id$
 
 #include <algorithm>
 #include <cmath>
@@ -70,7 +70,6 @@ namespace mapnik
 		}
 	    }
         }
-
 
         if (l.isSelectable())
         {

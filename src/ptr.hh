@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: ptr.hh 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
 #ifndef PTR_HH
 #define PTR_HH
@@ -31,76 +31,77 @@ namespace mapnik
             delete p;
         }
     };
-
+    
     template <typename T,
-        template <typename T> class DeallocPolicy=DefaultDeletePolicy>
-        class ref_ptr
+	      template <typename T> class DeallocPolicy=DefaultDeletePolicy>
+    class ref_ptr
     {
-        private:
-            T* ptr_;
-            int* pCount_;
-        public:
-            T* operator->() {return ptr_;}
-            const T* operator->() const {return ptr_;}
-            T* get() {return ptr_;}
-            const T* get() const {return ptr_;}
-            const T& operator *() const {return *ptr_;}
-            explicit ref_ptr(T* ptr=0)
-                :ptr_(ptr),pCount_(new int(1)) {}
-            ref_ptr(const ref_ptr& rhs)
-                :ptr_(rhs.ptr_),pCount_(rhs.pCount_)
-            {
-                (*pCount_)++;
-            }
-            ref_ptr& operator=(const ref_ptr& rhs)
-            {
-                if (ptr_==rhs.ptr_) return *this;
-                if (--(*pCount_)==0)
-                {
-                    DeallocPolicy<T>::destroy(ptr_);
-                    delete pCount_;
-                }
-                ptr_=rhs.ptr_;
-                pCount_=rhs.pCount_;
-                (*pCount_)++;
-                return *this;
-            }
-            bool operator !() const
-            {
-                return ptr_==0;
-            }
-            operator bool () const
-            {
-                return ptr_!=0;
-            }
-            inline friend bool operator==(const ref_ptr& lhs,
-                const T* rhs)
-            {
-                return lhs.ptr_==rhs;
-            }
-            inline friend bool operator==(const T* lhs,
-                const ref_ptr& rhs)
-            {
-                return lhs==rhs.ptr_;
-            }
-            inline friend bool operator!=(const ref_ptr& lhs,
-                const T* rhs)
-            {
-                return lhs.ptr_!=rhs;
-            }
-            inline friend bool operator!=(const T* lhs,
-                const ref_ptr& rhs)
-            {
-                return lhs!=rhs.ptr_;
-            }
-            ~ref_ptr()
-            {
-                if (--(*pCount_)==0)
-                {
-                    DeallocPolicy<T>::destroy(ptr_);
-                    delete pCount_;
-                }
-            }
+    private:
+	T* ptr_;
+	int* pCount_;
+    public:
+	T* operator->() {return ptr_;}
+	const T* operator->() const {return ptr_;}
+	T* get() {return ptr_;}
+	const T* get() const {return ptr_;}
+	const T& operator *() const {return *ptr_;}
+	T& operator *() {return *ptr_;}
+	explicit ref_ptr(T* ptr=0)
+	    :ptr_(ptr),pCount_(new int(1)) {}
+	ref_ptr(const ref_ptr& rhs)
+	    :ptr_(rhs.ptr_),pCount_(rhs.pCount_)
+	{
+	    (*pCount_)++;
+	}
+	ref_ptr& operator=(const ref_ptr& rhs)
+	{
+	    if (ptr_==rhs.ptr_) return *this;
+	    if (--(*pCount_)==0)
+	    {
+		DeallocPolicy<T>::destroy(ptr_);
+		delete pCount_;
+	    }
+	    ptr_=rhs.ptr_;
+	    pCount_=rhs.pCount_;
+	    (*pCount_)++;
+	    return *this;
+	}
+	bool operator !() const
+	{
+	    return ptr_==0;
+	}
+	operator bool () const
+	{
+	    return ptr_!=0;
+	}
+	inline friend bool operator==(const ref_ptr& lhs,
+				      const T* rhs)
+	{
+	    return lhs.ptr_==rhs;
+	}
+	inline friend bool operator==(const T* lhs,
+				      const ref_ptr& rhs)
+	{
+	    return lhs==rhs.ptr_;
+	}
+	inline friend bool operator!=(const ref_ptr& lhs,
+				      const T* rhs)
+	{
+	    return lhs.ptr_!=rhs;
+	}
+	inline friend bool operator!=(const T* lhs,
+				      const ref_ptr& rhs)
+	{
+	    return lhs!=rhs.ptr_;
+	}
+	~ref_ptr()
+	{
+	    if (--(*pCount_)==0)
+	    {
+		DeallocPolicy<T>::destroy(ptr_);
+		delete pCount_;
+	    }
+	}
     };
 }
 #endif                                            //PTR_HH

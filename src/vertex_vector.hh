@@ -92,7 +92,15 @@ namespace mapnik
 	    *vertex   = y;
 	    ++pos_;
 	}
-	
+	unsigned get_vertex(unsigned pos,value_type* x,value_type* y) const
+	{
+	    if (pos >= pos_) return SEG_END;
+	    unsigned block = pos >> block_shift;
+	    const value_type* vertex = vertexs_[block] + (( pos & block_mask) << 1);
+	    *x = (*vertex++);
+	    *y = (*vertex);
+	    return commands_[block] [pos & block_mask];
+	}
 	unsigned get_at(unsigned pos,value_type& x,value_type& y) const
 	{
 	    if (pos >= pos_) return SEG_END;

@@ -21,7 +21,6 @@
 #ifndef POLYGON_SYMBOLIZER_HH
 #define POLYGON_SYMBOLIZER_HH
 
-
 #include "symbolizer.hh"
 #include "scanline_aa.hh"
 #include "line_aa.hh"
@@ -44,7 +43,7 @@ namespace mapnik
 	
 	virtual ~PolygonSymbolizer() {}
 
-	void render(const geometry_type& geom,Image32& image) const 
+	void render(geometry_type& geom,Image32& image) const 
 	{
 	    ScanlineRasterizerAA<Image32> rasterizer(image);
 	    rasterizer.render<SHIFT8>(geom,fill_);
@@ -72,7 +71,7 @@ namespace mapnik
 	      fill_(fill),
 	      stroke_(stroke) {}
 	
-	void render(const geometry_type& geom,Image32& image) const 
+	void render(geometry_type& geom,Image32& image) const 
 	{
 	    ScanlineRasterizerAA<Image32> rasterizer1(image);
 	    rasterizer1.render<SHIFT8>(geom,fill_);
