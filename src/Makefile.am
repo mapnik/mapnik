@@ -11,7 +11,7 @@ endif
 
 libmapnik_la_CPPFLAGS = $(FREETYPE2_CFLAGS)
 libmapnik_la_CPPFLAGS += @INCLTDL@
-libmapnik_la_LIBADD = @LIBLTDL@ -lpthread -lpng $(FREETYPE2_LIBS) -lz -lm
+libmapnik_la_LIBADD = @LIBLTDL@ -lpthread -lpng -ljpeg $(FREETYPE2_LIBS) -lz -lm
 libmapnik_la_LDFLAGS= -version-info 0:0:0  $(TIFF_LDFLAGS)
 
 if SHAPE_DATASOURCE
