@@ -157,7 +157,7 @@ namespace mapnik
 	TIFF* tif = TIFFOpen(file_name_.c_str(), "r");
 	if (tif)
 	{
-	    //todo
+	    std::cerr<<"TODO:tiff is not stripped or tiled\n";
 	    TIFFClose(tif);
 	}
     }
@@ -165,7 +165,6 @@ namespace mapnik
 
     void TiffReader::read_tiled(unsigned x0,unsigned y0,ImageData32& image)
     {
-
 	TIFF* tif=TIFFOpen(file_name_.c_str(), "r");
 	if (tif)
 	{
@@ -175,28 +174,33 @@ namespace mapnik
 
 	    int start_y=(y0/tile_height_)*tile_height_;
 	    int end_y=((y0+height)/tile_height_+1)*tile_height_;
+	    bool bottomtiles=((unsigned)end_y > height_)?true:false;
 
 	    int start_x=(x0/tile_width_)*tile_width_;
 	    int end_x=((x0+width)/tile_width_+1)*tile_width_;
 
-	    int row=0;
-	    int tx0,tx1,ty0,ty1;
+	    
+	    int row,tx0,tx1,ty0,ty1;
 	    for (int y=start_y;y<end_y;y+=tile_height_)
 	    {
 		ty0=std::max(y0,(unsigned)y)-y;
 		ty1=std::min(height+y0,(unsigned)(y+tile_height_))-y;
+
+		int n0=bottomtiles ? 0:(tile_height_-ty1);
+		int n1=bottomtiles ? (ty1-ty0-1):(tile_height_-ty0-1);
+
 		for (int x=start_x;x<end_x;x+=tile_width_)
 		{
 
 		    if (!TIFFReadRGBATile(tif,x,y,buf)) break;
 
-		    tx0=std::max(x0,(unsigned)x)-x;
-		    tx1=std::min(width+x0,(unsigned)(x+tile_width_))-x;
+		    tx0=std::max(x0,(unsigned)x);
+		    tx1=std::min(width+x0,(unsigned)(x+tile_width_));
 
 		    row=y+ty0-y0;
-		    for (int n=tile_height_-ty0-1;n>=tile_height_-ty1;--n)
+		    for (int n=n1;n>=n0;--n)
 		    {
-			image.setRow(row,x+tx0-x0,x+tx1-x0,(const unsigned*)&buf[n*tile_width_+tx0]);
+			image.setRow(row,tx0-x0,tx1-x0,(const unsigned*)&buf[n*tile_width_+tx0-x]);
 			++row;
 		    }
 		}
@@ -207,31 +211,39 @@ namespace mapnik
     }
 
 
-    void TiffReader::read_stripped(unsigned x,unsigned  y,ImageData32& image)
+    void TiffReader::read_stripped(unsigned x0,unsigned y0,ImageData32& image)
     {
 	TIFF* tif = TIFFOpen(file_name_.c_str(), "r");
 	if (tif)
 	{
 	    uint32* buf = (uint32*)_TIFFmalloc(width_*rows_per_strip_*sizeof(uint32));
+
 	    int width=image.width();
 	    int height=image.height();
+   
+	    int start_y=(y0/rows_per_strip_)*rows_per_strip_;
+	    int end_y=((y0+height)/rows_per_strip_+1)*rows_per_strip_;
+	    bool laststrip=((unsigned)end_y > height_)?true:false;
+	    int row,tx0,tx1,ty0,ty1;
 
-	    int start=(y/rows_per_strip_)*rows_per_strip_;
-	    int end=((y+height)/rows_per_strip_+1)*rows_per_strip_;
-	    int extra=y%rows_per_strip_;
-	    int j=-extra;
-	    int w=std::min(width_,(unsigned)width);//todo should be unsigned
-	    for (int row=start; row < end; row+=rows_per_strip_)
+	    tx0=x0;
+	    tx1=std::min(width+x0,(unsigned)width_);
+
+	    for (unsigned y=start_y; y < end_y; y+=rows_per_strip_)
 	    {
-		if (!TIFFReadRGBAStrip(tif,row,buf)) break;
-		for (int i=rows_per_strip_-1;i>=0;--i)
+		ty0=std::max(y0,y)-y;
+		ty1=std::min(height+y0,y+rows_per_strip_)-y;
+		memset(buf,0xff,width_*rows_per_strip_*sizeof(uint32));
+		if (!TIFFReadRGBAStrip(tif,y,buf)) break;
+		
+		row=y+ty0-y0;
+	
+		int n0=laststrip ? 0:(rows_per_strip_-ty1);
+		int n1=laststrip ? (ty1-ty0-1):(rows_per_strip_-ty0-1);
+		for (int n=n1;n>=n0;--n)
 		{
-		    if (j>=0 && j<height)
-		    {
-			image.setRow(j,(const unsigned*)&buf[i*width_+x],
-				     w*sizeof(uint32));
-		    }
-		    ++j;
+		    image.setRow(row,tx0-x0,tx1-x0,(const unsigned*)&buf[n*width_+tx0]);
+		    ++row;
 		}
 	    }
 	    _TIFFfree(buf);
