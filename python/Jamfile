@@ -1,0 +1,18 @@
+project-root ;
+import python ;
+
+extension mapnik
+: # source
+  mapnik_parameters.cc
+  mapnik_color.cc
+  mapnik_layer.cc 
+  mapnik_envelope.cc
+  mapnik_map.cc
+  mapnik_python.cc 
+  # requirements and dependencies for Boost.Python extensions
+  <template>@boost/libs/python/build/extension
+:  # path to mapnik include dir e.g. 
+  <include>$(MAPNIK_ROOT)/include
+   # path to libmapnik.so e.g.
+  <library-file>$(MAPNIK_ROOT)/lib/libmapnik.so
+;

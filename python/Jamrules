@@ -1,0 +1,5 @@
+path-global BOOST_ROOT : /opt/boost ;
+PYTHON_VERSION = 2.4 ;
+PYTHON_ROOT = /opt/python ;
+project boost : $(BOOST_ROOT) ;
+path-global MAPNIK_ROOT : /opt/mapnik ;
