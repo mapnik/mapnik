@@ -22,6 +22,7 @@
 #define COORD_ARRAY_HH
 
 #include "coord.hh"
+#include <cassert>
 
 namespace mapnik
 {
