@@ -1,0 +1,22 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+AC_INIT(shapeindex, 0.1, bugs@shapeindex)
+AM_INIT_AUTOMAKE()
+AC_CONFIG_SRCDIR([shapeindex.cc])
+AC_CONFIG_HEADER([config.hh])
+
+# Checks for programs.
+AC_PROG_CXX
+
+# Checks for libraries.
+
+# Checks for header files.
+
+# Checks for typedefs, structures, and compiler characteristics.
+
+# Checks for library functions.
+#AP_ENABLE_DEBUG
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
