@@ -23,10 +23,9 @@ shape_file::shape_file() {}
 
 shape_file::shape_file(const std::string& file_name)
 {
-    file_.rdbuf()->pubsetbuf(buff_,buffer_size);
+    //file_.rdbuf()->pubsetbuf(buff_,buffer_size);
     file_.open(file_name.c_str(),std::ios::in|std::ios::binary);
 }
-
 
 shape_file::~shape_file()
 {
@@ -37,7 +36,7 @@ shape_file::~shape_file()
 
 bool shape_file::open(const std::string& file_name)
 {
-    file_.rdbuf()->pubsetbuf(buff_,buffer_size);
+    //file_.rdbuf()->pubsetbuf(buff_,buffer_size);
     file_.open(file_name.c_str(),std::ios::in | std::ios::binary);
     return file_?true:false;
 }

@@ -23,8 +23,6 @@
 #include <string>
 #include <fstream>
 #include <cassert>
-//#include <iostream>
-
 
 #include "mapnik.hh"
 
@@ -32,13 +30,12 @@ using namespace mapnik;
 
 struct field_descriptor
 {
-    public:
-        int index_;
-        std::string name_;
-        char type_;
-        int length_;
-        int dec_;
-        int offset_;
+    int index_;
+    std::string name_;
+    char type_;
+    int length_;
+    int dec_;
+    int offset_;
 };
 
 class dbf_file
@@ -76,9 +73,8 @@ class dbf_file
         dbf_file(const dbf_file&);
         dbf_file& operator=(const dbf_file&);
         void read_header();
-        void read_short(int& n);
-        void read_int(int& n);
-        void read_double(double& d);
+        int read_short();
+        int read_int();
         void skip(int bytes);
 };
 #endif                                            //DBFFILE_HH

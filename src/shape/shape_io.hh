@@ -34,7 +34,9 @@ struct shape_io
     shape_file shp_;
     shape_file shx_;
     dbf_file   dbf_;
-    int type_;
+    unsigned type_;
+    unsigned reclength_;
+    unsigned id_;
     Envelope<double> cur_extent_;
 
 public:
@@ -65,10 +67,12 @@ public:
     void move_to(int id);
     int type() const;
     const Envelope<double>& current_extent() const;
+
     geometry_ptr read_polyline();
     geometry_ptr read_polygon();
-    geometry_ptr read_multipolygon();
+    //geometry_ptr read_multipolygon(shape_record& record); 
 private:
+    //void read_record(const shape_record& record);
     // no copying
     shape_io(const shape_io&);
     shape_io& operator=(const shape_io&);

@@ -21,11 +21,14 @@
 #include "shape_io.hh"
 #include "shape.hh"
 
+
 const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";
 
 shape_io::shape_io(const std::string& shape_name)
-    : type_(shape_null)
+    : type_(shape_null),
+      reclength_(0),
+      id_(0)
 {
     bool ok = (shp_.open(shape_name + SHP) &&
 	       dbf_.open(shape_name + DBF));
@@ -45,9 +48,10 @@ shape_io::~shape_io()
 void shape_io::move_to (int pos)
 {
     shp_.seek(pos);
-    int id = shp_.read_xdr_integer();
-    int reclength_ = shp_.read_xdr_integer();
+    id_ = shp_.read_xdr_integer();
+    reclength_ = shp_.read_xdr_integer();
     type_ = shp_.read_ndr_integer();
+
     if (type_ != shape_point)
     {
         shp_.read_envelope(cur_extent_);
@@ -80,53 +84,75 @@ dbf_file& shape_io::dbf()
     return dbf_;
 }
 
-mapnik::geometry_ptr shape_io::read_polyline()
-{
-    int num_parts=shp_.read_ndr_integer();
-    int num_points=shp_.read_ndr_integer();
-    std::vector<int> parts(num_parts);;
-    for (int i=0;i<num_parts;++i)
-    {
-        parts[i]=shp_.read_ndr_integer();
-    }
 
-    coord_array<coord<double,2> >  ar(num_points);
-    shp_.read_coords(ar);
-
+geometry_ptr shape_io::read_polyline()
+{    
+    shape_record record(reclength_*2-36);
+    shp_.read_record(record);
+    int num_parts=record.read_ndr_integer();
+    int num_points=record.read_ndr_integer();
     geometry_ptr line(new line_string_impl(-1));
-
-    for (int k=0;k<num_parts;++k)
+    
+    if (num_parts == 1)
     {
-        int start=parts[k];
-        int end;
-        if (k==num_parts-1)
-            end=num_points;
-        else
-            end=parts[k+1];
-        line->move_to(ar[start].x,ar[start].y);
-        for (int j=start+1;j<end;++j)
-        {
-             line->line_to(ar[j].x,ar[j].y);
-        }
+	record.skip(4);
+	double x=record.read_double();
+	double y=record.read_double();
+	line->move_to(x,y);
+	for (int i=1;i<num_points;++i)
+	{
+	    x=record.read_double();
+	    y=record.read_double();
+	    line->line_to(x,y);
+	}
+    }
+    else
+    {
+	std::vector<int> parts(num_parts);
+	for (int i=0;i<num_parts;++i)
+	{
+	    parts[i]=record.read_ndr_integer();
+	}
+
+	int start,end;
+	for (int k=0;k<num_parts;++k)
+	{
+	    start=parts[k];
+	    if (k==num_parts-1)
+		end=num_points;
+	    else
+		end=parts[k+1];
+	    
+	    double x=record.read_double();
+	    double y=record.read_double();
+	    line->move_to(x,y);
+	    
+	    for (int j=start+1;j<end;++j)
+	    {
+		x=record.read_double();
+		y=record.read_double();
+		line->line_to(x,y);
+	    }
+	}
     }
     return line;
 }
 
-mapnik::geometry_ptr shape_io::read_polygon()
+geometry_ptr shape_io::read_polygon()
 {
-    int num_parts=shp_.read_ndr_integer();
-    int num_points=shp_.read_ndr_integer();
+    shape_record record(reclength_*2-36);
+    shp_.read_record(record);
+    int num_parts=record.read_ndr_integer();
+    int num_points=record.read_ndr_integer();
     std::vector<int> parts(num_parts);
     geometry_ptr poly(new polygon_impl(-1));
+    
     for (int i=0;i<num_parts;++i)
     {
-        parts[i]=shp_.read_ndr_integer();
+        parts[i]=record.read_ndr_integer();
     }
 
-    coord_array<coord<double,2> >  ar(num_points);
-    shp_.read_coords(ar);
-
-    for (int k=0;k<num_parts;++k)
+    for (int k=0;k<num_parts;k++)
     {
         int start=parts[k];
         int end;
@@ -138,14 +164,17 @@ mapnik::geometry_ptr shape_io::read_polygon()
         {
             end=parts[k+1];
         }
-        poly->move_to(ar[start].x,ar[start].y);
+	double x=record.read_double();
+	double y=record.read_double();
+        poly->move_to(x,y);
    
         for (int j=start+1;j<end;j++)
         {
-            poly->line_to(ar[j].x,ar[j].y);
+	    x=record.read_double();
+	    y=record.read_double();
+            poly->line_to(x,y);
         }
-
-	poly->line_to(ar[start].x,ar[start].y);
     }
     return poly;
 }
+

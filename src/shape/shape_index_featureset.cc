@@ -55,49 +55,49 @@ Feature* ShapeIndexFeatureset<filterT>::next()
         int type=shape_.type();
         if (type==shape_io::shape_point)
         {
-            coord2d c;
-            shape_.shp().read_coord(c);
-            
+            double x=shape_.shp().read_double();
+	    double y=shape_.shp().read_double();	    
 	    geometry_ptr point(new point_impl(-1));
-	    point->move_to(c.x,c.y);
-            f=new VectorFeature(pos,point);
+	    point->move_to(x,y);
+            f=new VectorFeature(shape_.id_,point);
 	    ++count_;
         }
 	else if (type == shape_io::shape_pointz)
 	{
-	    coord<double,3> c;
-	    shape_.shp().read_coord(c);
+	    double x=shape_.shp().read_double();
+	    double y=shape_.shp().read_double();
+	    double z=shape_.shp().read_double();
 	    geometry_ptr point(new point_impl(-1));
-	    point->move_to(c.x,c.y);
-            f=new VectorFeature(pos,point);
+	    point->move_to(x,y);
+            f=new VectorFeature(shape_.id_,point);
 	    ++count_;
 	}
         else
         {
             while(!filter_.pass(shape_.current_extent()) && 
-		  itr_!=ids_.end())
-            {
+	    		  itr_!=ids_.end())
+	    {
                 pos=*itr_++;
                 shape_.move_to(pos);
-            }
-
+	    }
+	    
             switch (type)
             {
-	    case shape_io::shape_polyline:
-                {
-                    geometry_ptr line = shape_.read_polyline();
-                    f=new VectorFeature(pos,line);
+	        case shape_io::shape_polyline:
+		{
+		    geometry_ptr line = shape_.read_polyline();
+		    f=new VectorFeature(shape_.id_,line);
 		    ++count_;
-                    break;
-
-                }
-	    case shape_io::shape_polygon:
-                {
-                    geometry_ptr poly = shape_.read_polygon();
-                    f=new VectorFeature(pos,poly);
+		    break;
+		}
+	        case shape_io::shape_polygon:
+		{
+		 
+		    geometry_ptr poly = shape_.read_polygon();
+		    f=new VectorFeature(shape_.id_,poly);
 		    ++count_;
-                    break;
-                }
+		    break;
+		}
             }
             if (0)
             {

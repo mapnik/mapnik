@@ -42,7 +42,7 @@ dbf_file::dbf_file(const char* file_name)
 
 dbf_file::~dbf_file()
 {
-    delete [] record_;
+    ::operator delete(record_);
     file_.close();
 }
 
@@ -118,7 +118,7 @@ void dbf_file::add_attribute(int col,Feature* f) const
         switch (fields_[col].type_)
         {
 	case 'C':
-	case 'D':                             //todo handle date?
+	case 'D'://todo handle date?
 	case 'M':
 	    f->add(name,attribute<std::string>(str));
 	    break;
@@ -132,16 +132,15 @@ void dbf_file::add_attribute(int col,Feature* f) const
     }
 }
 
-
 void dbf_file::read_header()
 {
     char c=file_.get();
     if (c=='\3' || c=='\131')
     {
         skip(3);
-        read_int(num_records_);
+        num_records_=read_int();
         assert(num_records_>0);
-        read_short(num_fields_);
+        num_fields_=read_short();
         assert(num_fields_>0);
         num_fields_=(num_fields_-33)/32;
         skip(22);
@@ -163,39 +162,31 @@ void dbf_file::read_header()
             skip(14);
             desc.offset_=offset;
             offset+=desc.length_;
-            //std::cout <<"name="<<desc.name_<<std::endl;
             fields_.push_back(desc);
         }
         record_length_=offset;
         if (record_length_>0)
         {
-            record_=new char[record_length_];
+            record_=static_cast<char*>(::operator new (sizeof(char)*record_length_));
         }
     }
 }
 
 
-void dbf_file::read_short(int& n)
+int dbf_file::read_short()
 {
     char b[2];
     file_.read(b,2);
-    memcpy(&n,b,2);
+    return (b[0] & 0xff) | (b[1] & 0xff) << 8;   
 }
 
 
-void dbf_file::read_int(int& n)
-{
+int dbf_file::read_int()
+{    
     char b[4];
     file_.read(b,4);
-    memcpy(&n,b,4);
-}
-
-
-void dbf_file::read_double(double& d)
-{
-    char b[8];
-    file_.read(b,8);
-    memcpy(&d,b,8);
+    return (b[0] & 0xff) | (b[1] & 0xff) << 8 |
+	(b[2] & 0xff) << 16 | (b[3] & 0xff) <<24;
 }
 
 

@@ -47,19 +47,20 @@ Feature* ShapeFeatureset<filterT>::next()
         
 	if (type == shape_io::shape_point)
 	{
-	    coord<double,2> c;
-            shape_.shp().read_coord(c);
+	    double x=shape_.shp().read_double();
+	    double y=shape_.shp().read_double();
 	    geometry_ptr point(new point_impl(-1));
-	    point->move_to(c.x,c.y);
+	    point->move_to(x,y);
             feature=new VectorFeature(pos,point);
 	    ++count_;
 	}
 	else if (type == shape_io::shape_pointz)
 	{
-	    coord<double,3> c;
-	    shape_.shp().read_coord(c);
+	    double x=shape_.shp().read_double();
+	    double y=shape_.shp().read_double();
+	    double z=shape_.shp().read_double();
 	    geometry_ptr point(new point_impl(-1));
-	    point->move_to(c.x,c.y);
+	    point->move_to(x,y);
             feature=new VectorFeature(pos,point);
 	    ++count_;
 	}

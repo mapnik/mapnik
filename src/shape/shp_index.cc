@@ -29,8 +29,8 @@ void shp_index<filterT>::query(const filterT& filter,std::ifstream& file,std::se
 template <typename filterT>
 void shp_index<filterT>::query_node(const filterT& filter,std::ifstream& file,std::set<int>& ids)
 {
-
     int offset=read_ndr_integer(file);
+
     Envelope<double> node_ext;
     read_envelope(file,node_ext);
 
@@ -62,7 +62,7 @@ int shp_index<filterT>::read_ndr_integer(std::ifstream& file)
 {
     char b[4];
     file.read(b,4);
-    return b[0]&0xff | (b[1]&0xff)<<8 | (b[2]&0xff)<<16 | (b[3]&0xff)<<24;
+    return (b[0]&0xff) | (b[1]&0xff)<<8 | (b[2]&0xff)<<16 | (b[3]&0xff)<<24;
 }
 
 
