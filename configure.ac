@@ -7,6 +7,7 @@ AC_REVISION([$Revision: 1.1 $])
 AC_CONFIG_SRCDIR([src/params.cc])
 AM_INIT_AUTOMAKE([dist-bzip2])
 
+AC_PREFIX_DEFAULT (/usr/local)
 AC_LIBTOOL_DLOPEN
 AC_CONFIG_SUBDIRS(libltdl utils/shapeindex)
 
@@ -46,10 +47,6 @@ AC_FUNC_CLOSEDIR_VOID
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([floor gettimeofday memset pow sqrt])
 
-
-AC_SUBST([pluginsdir],["${prefix}/plugins"])
-AC_DEFINE_UNQUOTED([_DATASOURCE_PLUGINS_DIR],["$pluginsdir"],[datasource plugins dir])
-
 AP_ENABLE_DEBUG
 #AP_CHECK_FREETYPE2
 
@@ -86,9 +83,13 @@ fi
 
 AC_CONFIG_FILES([Makefile m4/Makefile src/Makefile src/shape/Makefile src/raster/Makefile src/postgis/Makefile])
 
+AC_SUBST([pluginsdir],["$(prefix)/plugins"])
+AC_DEFINE_UNQUOTED([_DATASOURCE_PLUGINS_DIR],["$pluginsdir"],[datasource plugins dir])
+
 AM_CONDITIONAL([BUILD_TIFF_READER],[test "$HAVE_LIBTIFF" = yes])
 AM_CONDITIONAL([SHAPE_DATASOURCE],[test "$package_shape_enabled" = yes ])
 AM_CONDITIONAL([RASTER_DATASOURCE],[test "$package_raster_enabled" = yes])
 AM_CONDITIONAL([POSTGIS_DATASOURCE],[test "$package_postgis_enabled" = yes])
+
 
 AC_OUTPUT
