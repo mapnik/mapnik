@@ -29,6 +29,7 @@ namespace mapnik
 	static void save_to_file(const std::string& filename,const std::string& type,const Image32& image);
     private:
 	static void save_as_png(const std::string& filename,const Image32& image);
+	static void save_as_jpeg(const std::string& filename,int quality, const Image32& image);
     };
 
     template <typename T>
