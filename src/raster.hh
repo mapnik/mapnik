@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: raster.hh 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
 #ifndef RASTER_HH
 #define RASTER_HH
@@ -30,8 +30,11 @@ namespace mapnik
         int x_;
         int y_;
         ImageData32 data_;
-        raster(int x,int y,ImageData32& data);
-        ~raster();
+	raster(int x,int y,ImageData32& data)
+	    : x_(x),
+	      y_(y),
+	      data_(data) {}
     };
 }
-#endif                                            //RASTER_HH
+
+#endif //RASTER_HH

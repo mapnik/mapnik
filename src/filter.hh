@@ -39,9 +39,9 @@ namespace mapnik
 	};
         
 	virtual int  type() const=0;
-	virtual bool pass (const Feature& feature) const=0;
-	virtual filter<Feature>* clone() const=0;
-	virtual void accept(filter_visitor<Feature>& v)=0;
+	virtual bool pass (const Feature& feature) const = 0;
+	virtual filter<Feature>* clone() const = 0;
+	virtual void accept(filter_visitor<Feature>& v) = 0;
 	virtual ~filter() {}
     };
     

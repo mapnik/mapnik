@@ -32,16 +32,17 @@
 #include "image_reader.hh"
 #include "polygon_symbolizer.hh"
 #include "line_symbolizer.hh"
+#include "query.hh"
 
 namespace mapnik
 {  
     template <typename Image>
     void Renderer<Image>::renderLayer(const Layer& l,const CoordTransform& t,
-				      const Envelope<double>& extent,Image& image)
+				      const query& q,Image& image)
     {
         const datasource_p& ds=l.datasource();
         if (!ds) return; 
-        FeaturesetPtr fs=ds->featuresInBox(t,extent);
+        FeaturesetPtr fs=ds->features(q);
         if (fs)
         {     
 	    volatile style_cache* styles=style_cache::instance();
@@ -54,6 +55,14 @@ namespace mapnik
 		Feature* feature=0;
 		while (feature=fs->next())
 		{
+		    geometry_ptr& geom=feature->get_geometry();
+		    if (geom)
+		    {
+			geom->transform(t);
+			(*itr)->render(*geom,image);
+		    }
+		    
+		    /*
 		    // TODO 
 		    if (feature->isRaster())
 		    {
@@ -63,9 +72,10 @@ namespace mapnik
 		    else
 		    {
 			geometry_ptr& geom=feature->getGeometry();
-			geom->transform(t);
+			
 			(*itr)->render(*geom,image);
 		    }
+		    */
 		    delete feature,feature=0; 
 		}
 	    }
@@ -84,7 +94,7 @@ namespace mapnik
 		
 		while (itr!=selection.end())
 		{
-		    geometry_ptr& geom=(*itr)->getGeometry();
+		    geometry_ptr& geom=(*itr)->get_geometry();
 		    geom->transform(t);
 		    (*pos)->render(*geom,image);
 		    ++itr;
@@ -103,21 +113,19 @@ namespace mapnik
         double scale=map.scale();
         std::cout<<" scale="<<scale<<"\n";
         
-	int width=map.getWidth();
-        int height=map.getHeight();
-
+	unsigned width=map.getWidth();
+        unsigned height=map.getHeight();
         CoordTransform t(width,height,extent);
         const Color& background=map.getBackground();
-
         image.setBackground(background);
-
+	query q(extent);
         for (size_t n=0;n<map.layerCount();++n)
         {
             const Layer& l=map.getLayer(n);
             if (l.isVisible(scale))
             {
                 //TODO make datasource to return its extent!!!
-                renderLayer(l,t,extent,image);
+                renderLayer(l,t,q,image);
             }
         }
         

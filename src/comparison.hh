@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+//$Id$
 
 #ifndef COMPARISON_HH
 #define COMPARISON_HH
@@ -52,21 +53,19 @@ namespace mapnik
 	
 	bool pass(const Feature& feature) const
 	{
-	    //TODO
-	    
-	    //attribute attr=feature.attribute_by_name(name_);
-	    //bool result=false;
-	    //try 
-	    // {
-	    //		result=(value_==boost::any_cast<T>(attr.value_))?true:false;
-	    // }
-	    //catch (boost::bad_any_cast& ex)
-	    // {
-	    //		std::cerr<<ex.what()<<std::endl;
-	    //}	
-	    //return result;
-	    return false;
+	    attribute attr=feature.attribute_by_name(name_);
+	    bool result=false;
+	    try 
+	    {
+		result=(value_==attribute_cast<T>(attr))?true:false;
+	    }
+	    catch (bad_attribute_cast<T>& ex)
+	    {
+		std::cerr<<ex.what()<<std::endl;
+	    }	
+	    return result;
 	}
+	
 	filter<Feature>* clone() const
 	{
 	    return new property_is_equal_to(name_,value_);
@@ -76,7 +75,7 @@ namespace mapnik
 	{
 	    v.visit(*this);
 	}
-  
+
 	virtual ~property_is_equal_to() {}
     };
     
@@ -95,18 +94,17 @@ namespace mapnik
 	
 	bool pass(const Feature& feature) const
 	{
-	    //attribute attr=feature.attribute_by_name(name_);
-	    //bool result=false;
-	    //try 
-	    // {
-	    //		result=(value_ > boost::any_cast<T>(attr.value_))?true:false;
-	    //}
-	    //catch (boost::bad_any_cast& ex)
-	    // {
-	    //		std::cerr<<ex.what()<<std::endl;
-	    // }	
-	    //return result;
-	    return false;
+	    attribute attr=feature.attribute_by_name(name_);
+	    bool result=false;
+	    try 
+	    {
+		result = (value_ > attribute_cast<T>(attr))?true:false;
+	    }
+	    catch (bad_attribute_cast<T>& ex)
+	    {
+		std::cerr<<ex.what()<<std::endl;
+	    }	
+	    return result;
 	}
 	filter<Feature>* clone() const
 	{
@@ -134,26 +132,24 @@ namespace mapnik
 	
 	bool pass(const Feature& feature) const
 	{
-	    //attribute attr=feature.attribute_by_name(name_);
-	    //bool result=false;
-	    //try 
-	    //{
-	    //	result=(value_ > boost::any_cast<T>(attr.value_))?true:false;
-	    // }
-	    //catch (boost::bad_any_cast& ex)
-	    // {
-	    //		std::cerr<<ex.what()<<std::endl;
-	    //}	
-	    //return result;
-	    return false;
-	}
+	    attribute attr=feature.attribute_by_name(name_);
+	    bool result=false;
+	    try 
+	    {
+	    	result=(value_ > attribute_cast<T>(attr))?true:false;
+	    }
+	    catch (bad_attribute_cast<T>& ex)
+	    {
+		std::cerr<<ex.what()<<std::endl;
+	    }	
+	    return result; 
+	}	
 	void accept(filter_visitor<Feature>& v)
 	{
 	    v.visit(*this);
 	}
     };
-    
-          
+           
     template <typename Feature,typename T>
     struct property_is_between :  public property_filter<Feature>
     {
@@ -173,20 +169,20 @@ namespace mapnik
 	
 	bool pass(const Feature& feature) const
 	{
-	    //attribute attr=feature.attribute_by_name(name_);
-	    //bool result=false;
-	    //try 
-	    // {
-	    //		T const&  a=boost::any_cast<T>(attr.value_);
-	    //		result=(lo_value_ < a && a < hi_value_) ? true : false;
-	    // }
-	    //catch (boost::bad_any_cast& ex)
-	    // {
-	    //		std::cerr<<ex.what()<<std::endl;
-	    //}	
-	    //return result;
-	    return false;
+	    attribute attr=feature.attribute_by_name(name_);
+	    bool result=false;
+	    try 
+	    {
+		T const&  a=attribute_cast<T>(attr);
+		result=(lo_value_ < a && a < hi_value_) ? true : false;
+	    }
+	    catch (bad_attribute_cast<T>& ex)
+	    {
+		std::cerr<<ex.what()<<std::endl;
+	    }	
+	    return result;
 	}
+	
 	filter<Feature>* clone() const
 	{
 	    return new property_is_between(name_,lo_value_,hi_value_);

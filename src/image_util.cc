@@ -87,6 +87,8 @@ namespace mapnik
         }
 
         png_init_io(png_ptr, fp);
+	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+	png_set_compression_strategy(png_ptr, Z_FILTERED);
         png_set_IHDR(png_ptr, info_ptr,image.width(),image.height(),8,
             PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
             PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);

@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: utils.hh 70 2004-11-25 22:09:48Z artem $
+//$Id$
 
 #ifndef UTILS_HH
 #define UTILS_HH
@@ -275,6 +275,25 @@ namespace mapnik
 	    throw BadConversion("fromString("+s+")");
     }
     
+  
+
+    inline bool space (char c)
+    {
+	return isspace(c);
+    }
+    
+    inline bool not_space (char c)
+    {
+	return !isspace(c);
+    }
+    
+    inline std::string trim_left(const std::string& str)
+    {
+	typedef std::string::const_iterator iter;
+	iter i = find_if(str.begin(),str.end(),not_space);
+	return std::string(i,str.end());	
+    }
 }
+
 
 #endif                                            //UTILS_HH

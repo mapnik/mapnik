@@ -16,7 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: render.hh 64 2004-11-12 10:29:32Z artem $
+//$Id$
+
 #ifndef RENDER_HH
 #define RENDER_HH
 
@@ -38,7 +39,7 @@ namespace mapnik
 	static void render(const Map& map,Image& image);
     private:
 	Renderer();
-	static void renderLayer(const Layer& l,const CoordTransform& t,const Envelope<double>& extent,Image& image);
+	static void renderLayer(const Layer& l,const CoordTransform& t,const query& q,Image& image);
     };
 }
 

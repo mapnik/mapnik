@@ -22,116 +22,178 @@
 #define ATTRIBUTE_HH
 
 #include <sstream>
+#include <typeinfo>
+#include <map>
 
 namespace mapnik
 {
-    class attribute_base
-    {
-    public:
-	virtual std::string to_string() const=0;
-	virtual attribute_base* clone() const=0;
-	virtual ~attribute_base() {}
-    };
-
     template <typename T>
     struct attribute_traits
     {
-        static std::string to_string(const T& val)
-        {
-            std::stringstream ss;
-            ss << val;
-            return ss.str();
-        }
-        static T default_value()
-        {
-            return 0;
-        }
+	static std::string to_string(const T& value)
+	{
+	    std::stringstream ss;
+	    ss << value;
+	    return ss.str();
+	}
     };
 
     template <>
     struct attribute_traits<std::string>
     {
-        static std::string to_string(const std::string& s)
-        {
-            return s;
-        }
-        static std::string default_value()
-        {
-            return std::string();
-        }
-    };
-
-    template <typename T,typename ATraits=attribute_traits<T> >
-    class attribute : public attribute_base
-    {
-        typedef T value_type;
-    private:
-	value_type value_;
-    public:
-	attribute(const T& value)
-	    : attribute_base(),
-	      value_(value) {}
-	attribute(const attribute& other)
-	    : attribute_base(),
-	      value_(other.value_) {}
-	attribute& operator=(const attribute& other)
+	static std::string to_string(const std::string& value)
 	{
-	    attribute<T> temp(other);
-	    swap(temp);
+	    return value;
+	}
+    };
+    
+    class attribute
+    {	
+    public:
+	attribute()
+	    : base_(0) {}
+
+	template <typename T>
+	attribute(const T& value)
+	    : base_(new attribute_impl<T>(value)) 
+	{}
+
+	attribute(const attribute& rhs)
+	    : base_(rhs.base_ ? rhs.base_->clone() : 0)
+	{}
+
+	~attribute() 
+	{
+	    delete base_;
+	}
+
+	template<typename T>
+	attribute& operator=(const T& rhs)
+	{
+	    attribute(rhs).swap(*this);
 	    return *this;
 	}
-	~attribute()
+
+	attribute& operator=(const attribute& rhs)
 	{
+	    attribute(rhs).swap(*this);
+	    return *this;
 	}
-             
-	attribute<T>* clone() const
+
+	bool empty() const
 	{
-	    return new attribute<T>(*this);
+	    return !base_;
 	}
-	value_type value() const
+
+	const std::type_info & type() const
+        {
+            return base_ ? base_->type() : typeid(void);
+        }
+
+	const std::string to_string() const
 	{
-	    return value_;
-	}
-	std::string to_string() const
-	{
-	    return ATraits::to_string(value_);
+	    return base_ ? base_->to_string() : "";
 	}
     private:
-	void swap(attribute<T>& other) throw()
+	attribute& swap(attribute& rhs)
 	{
-	    std::swap(value_,other.value_);
+	    std::swap(base_,rhs.base_);
+	    return *this;
+	}
+	
+	struct attribute_base
+	{
+	    virtual ~attribute_base() {}
+	    virtual attribute_base* clone() const=0;
+	    virtual std::string to_string() const=0;
+	    virtual const std::type_info& type()  const=0;
+	};
+
+	template <typename T,typename ATraits=attribute_traits<T> >
+	class attribute_impl : public attribute_base
+	{	    
+	public:
+	    typedef T value_type;
+	    attribute_impl(const value_type& value)
+		: value_(value) {}
+	    
+	    std::string to_string() const
+	    {
+		return  ATraits::to_string(value_);
+	    }
+	    attribute_base* clone() const
+	    {
+		return new attribute_impl(value_);
+	    }
+	    const std::type_info& type() const 
+	    {
+		return typeid(value_);
+	    }
+	    value_type value_;
+	};
+	template<typename value_type>
+	friend value_type* attribute_cast(attribute*);
+    public:
+	attribute_base* base_;
+    };
+      
+    template<typename T>
+    struct bad_attribute_cast : public std::bad_cast
+    {
+	virtual const char* what() const throw()
+	{
+	    return "attribute::failed conversion";
 	}
     };
-
-    template <class charT,class traits>
-    inline std::basic_ostream<charT,traits>&
-    operator << (std::basic_ostream<charT,traits>& out,
-		 const attribute_base& base)
+    
+    template <typename T> 
+    bool is_type(const attribute& attr)
     {
-        std::basic_ostringstream<charT,traits> s;
-        s.copyfmt(out);
-        s.width(0);
-        s<<base.to_string();
-        out << s.str();
-        return out;
+	return attr.type()==typeid(T);
+    }
+    
+    template <typename T>
+    T* attribute_cast(attribute* attr)
+    {
+	return attr && attr->type() == typeid(T)
+	    ? &static_cast<attribute::attribute_impl<T>*>(attr->base_)->value_
+	    : 0;
     }
 
-    
-    class invalid_attribute : public attribute<std::string>
-    {
-    public:
-	invalid_attribute()
-	    :attribute<std::string>("#INVALID_ATTRIBUTE#") {}
-    }; 
-
     template <typename T>
-    attribute<T> attribute_from_string(const std::string& val)
+    T* attribute_cast(const attribute* attr)
+    {
+	return attribute_cast<T>(const_cast<attribute*>(attr));
+    }
+    
+    template <typename T>
+    T attribute_cast(const attribute& attr)
+    {
+	const T* result=attribute_cast<T>(&attr);
+	if (!result)
+	    throw bad_attribute_cast<T>();
+	return *result;
+    }
+    
+    template <typename T>
+    T attribute_cast(attribute& attr)
+    {
+	T* result=attribute_cast<T>(&attr);
+	if (!result)
+	    throw bad_attribute_cast<T>();
+	return *result;
+    }
+    
+    typedef std::map<std::string,attribute> attributes; 
+    
+    template <typename T>
+    attribute attribute_from_string(const std::string& val)
     {
 	std::istringstream is(val);
 	T t;
 	is >> t;
-	return attribute<T>(t);
-    }
+	return attribute(t);
+    }   
 }
 
 #endif                                            //ATTRIBUTE_HH

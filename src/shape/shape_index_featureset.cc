@@ -46,8 +46,7 @@ ShapeIndexFeatureset<filterT>::ShapeIndexFeatureset(const filterT& filter,
 template <typename filterT>
 Feature* ShapeIndexFeatureset<filterT>::next()
 {
-    VectorFeature *f=0;
-
+    Feature *f=0;
     if (itr_!=ids_.end())
     {
         int pos=*itr_++;
@@ -59,7 +58,7 @@ Feature* ShapeIndexFeatureset<filterT>::next()
 	    double y=shape_.shp().read_double();	    
 	    geometry_ptr point(new point_impl(-1));
 	    point->move_to(x,y);
-            f=new VectorFeature(shape_.id_,point);
+            f=new Feature(shape_.id_,point);
 	    ++count_;
         }
 	else if (type == shape_io::shape_pointz)
@@ -69,7 +68,7 @@ Feature* ShapeIndexFeatureset<filterT>::next()
 	    double z=shape_.shp().read_double();
 	    geometry_ptr point(new point_impl(-1));
 	    point->move_to(x,y);
-            f=new VectorFeature(shape_.id_,point);
+            f=new Feature(shape_.id_,point);
 	    ++count_;
 	}
         else
@@ -86,7 +85,7 @@ Feature* ShapeIndexFeatureset<filterT>::next()
 	        case shape_io::shape_polyline:
 		{
 		    geometry_ptr line = shape_.read_polyline();
-		    f=new VectorFeature(shape_.id_,line);
+		    f=new Feature(shape_.id_,line);
 		    ++count_;
 		    break;
 		}
@@ -94,17 +93,25 @@ Feature* ShapeIndexFeatureset<filterT>::next()
 		{
 		 
 		    geometry_ptr poly = shape_.read_polygon();
-		    f=new VectorFeature(shape_.id_,poly);
+		    f=new Feature(shape_.id_,poly);
 		    ++count_;
 		    break;
 		}
             }
             if (0)
             {
-                //shape_.dbf().move_to(id);
-                //for (int j=0;j<shape_.dbf().num_fields();++j) {
-                //  shape_.dbf().add_attribute(j,f);//TODO optimize!!!
-                //}
+                shape_.dbf().move_to(shape_.id_);
+                for (int j=0;j<shape_.dbf().num_fields();++j) 
+		{
+		    try 
+		    {
+			shape_.dbf().add_attribute(j,f);//TODO optimize!!!
+		    }
+		    catch (...)
+		    {
+			//TODO
+		    }
+                }
             }
         }
     }

@@ -53,7 +53,9 @@ namespace mapnik
 	      cont_() {}	
 	
 	virtual int type() const=0;
+	
 	virtual bool hit_test(value_type x,value_type y) const=0;
+	
 	int srid() const
 	{
 	    return srid_;
@@ -200,10 +202,12 @@ namespace mapnik
     template <typename T, template <typename> class Container=vertex_vector>
     class polygon : public geometry<T,Container>
     {
-	typedef typename   geometry<T,Container>::value_type value_type;
+	typedef geometry<T,Container> geometry_base;
+	typedef typename geometry_base::value_type value_type;
+	typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
     public:
 	polygon(int srid)
-	    : geometry<T,Container>(srid)
+	    : geometry_base(srid)
 	{}
 
 	int type() const 
@@ -212,8 +216,10 @@ namespace mapnik
 	}
 	
 	bool hit_test(value_type x,value_type y) const
-	{
-	    return point_inside_path(x,y,*this);
+	{	    
+	    path_iterator start = geometry_base::template begin<NO_SHIFT>();
+	    path_iterator end = geometry_base::template end<NO_SHIFT>();
+	    return point_inside_path(start,end,x,y);
 	} 
     };
     

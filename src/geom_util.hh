@@ -48,7 +48,7 @@ namespace mapnik
     }
 
     template <typename T,typename Image>
-        bool clip_line(T& x0,T& y0,T& x1,T& y1,const Image* image)
+    bool clip_line(T& x0,T& y0,T& x1,T& y1,const Image* image)
     {
         double tmin=0.0;
         double tmax=1.0;
@@ -79,37 +79,32 @@ namespace mapnik
         }
         return false;
     }
-
-    inline bool point_inside_path(double x,double y,const geometry<vertex2d>& geom)
+    
+    template <typename Iter> 
+    inline bool point_inside_path(Iter start,Iter end,double x,double y)
     {
 	bool inside=false;
-	if (geom.num_points()>2) 
+	double x0=start->x;
+	double y0=start->y;
+	double x1,y1;
+	while (++start!=end) 
 	{
-	    geometry<vertex2d>::path_iterator<NO_SHIFT> itr=geom.begin<NO_SHIFT>();
-	    geometry<vertex2d>::path_iterator<NO_SHIFT> end=geom.end<NO_SHIFT>();
-	    
-	    double x0=itr->x;
-	    double y0=itr->y;
-	    double x1,y1;
-	    while (++itr!=end) 
+	    if (start->cmd == SEG_MOVETO)
 	    {
-		if (itr->cmd == SEG_MOVETO)
-		{
-		    x0=itr->x;
-		    y0=itr->y;
-		    continue;
-		}		
-		x1=itr->x;
-		y1=itr->y;
-		if ((((y1 <= y) && (y < y0)) ||
-		     ((y0 <= y) && (y < y1))) &&
-		    ( x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
-		    inside=!inside;
-		x0=itr->x;
-		y0=itr->y;
-	    }
+		x0=start->x;
+		y0=start->y;
+		continue;
+	    }		
+	    x1=start->x;
+	    y1=start->y;
+	    if ((((y1 <= y) && (y < y0)) ||
+		 ((y0 <= y) && (y < y1))) &&
+		( x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
+		inside=!inside;
+	    x0=x1;
+	    y0=y1;
 	}
-	return inside;
+    	return inside;
     }
 
 #define TOL 0.00001
@@ -161,6 +156,7 @@ namespace mapnik
 	    
 	    double x0=itr->x;
 	    double y0=itr->y;
+	    
 	    while (++itr!=end) 
 	    {
 		if (itr->cmd == SEG_MOVETO)

@@ -132,6 +132,15 @@ FeaturesetPtr shape_datasource::featuresAtPoint(const CoordTransform& t,const ma
     return FeaturesetPtr(new ShapeFeatureset<filter_at_point>(filter,shape_name_,file_length_,-1));
 }
 
+FeaturesetPtr shape_datasource::features(const query& q) const
+{
+    filter_in_box filter(q.get_bbox());
+    if (indexed_)
+    {
+	return FeaturesetPtr(new ShapeIndexFeatureset<filter_in_box>(filter,shape_name_,-1));
+    }
+    return FeaturesetPtr(new ShapeFeatureset<filter_in_box>(filter,shape_name_,file_length_,-1));
+}
 
 const Envelope<double>& shape_datasource::envelope() const
 {

@@ -63,40 +63,35 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmapnik_la_DEPENDENCIES =
-am__libmapnik_la_SOURCES_DIST = attribute_container.cc \
-	attribute_container.hh attribute.hh color.cc color.hh coord.hh \
-	coord_array.hh vertex_vector.hh ctrans.hh datasource.hh \
-	datasource_cache.cc datasource_cache.hh envelope.cc \
-	envelope.hh factory.hh feature.cc feature.hh filter.hh \
-	filter_visitor.hh geometry.hh gamma.hh geom_util.hh \
+am__libmapnik_la_SOURCES_DIST = attribute.hh color.cc color.hh \
+	coord.hh coord_array.hh vertex_vector.hh ctrans.hh \
+	datasource.hh datasource_cache.cc datasource_cache.hh \
+	envelope.cc envelope.hh query.hh factory.hh feature.hh \
+	filter.hh filter_visitor.hh geometry.hh gamma.hh geom_util.hh \
 	graphics.cc graphics.hh image_data.hh image_reader.cc \
 	image_reader.hh image_util.cc image_util.hh layer.cc layer.hh \
 	line_aa.cc line_aa.hh map.cc map.hh mapnik.hh memory.cc \
 	memory.hh params.cc params.hh plugin.cc plugin.hh \
 	png_reader.cc line_symbolizer.hh polygon_symbolizer.hh \
-	image_symbolizer.hh pool.hh ptr.hh raster.cc raster_feature.cc \
-	raster_feature.hh raster.hh render.cc render.hh scanline_aa.cc \
-	scanline_aa.hh scanline.cc scanline.hh style.cc style.hh \
-	style_cache.cc style_cache.hh style_factory.hh symbolizer.hh \
-	text.cc text.hh utils.hh vector_feature.cc vector_feature.hh \
+	image_symbolizer.hh pool.hh ptr.hh raster.hh render.cc \
+	render.hh scanline_aa.cc scanline_aa.hh scanline.cc \
+	scanline.hh style.cc style.hh style_cache.cc style_cache.hh \
+	style_factory.hh symbolizer.hh text.cc text.hh utils.hh \
 	vertex.hh vertex_transform.hh wkb.cc wkb.hh logical.hh rule.hh \
 	comparison.hh fill.hh spatial.hh expression.hh stroke.hh \
-	attribute_collector.hh tiff_reader.cc
+	attribute_collector.hh colorcube.hh tiff_reader.cc
 @BUILD_TIFF_READER_TRUE@am__objects_1 = libmapnik_la-tiff_reader.lo
-am_libmapnik_la_OBJECTS = libmapnik_la-attribute_container.lo \
-	libmapnik_la-color.lo libmapnik_la-datasource_cache.lo \
-	libmapnik_la-envelope.lo libmapnik_la-feature.lo \
+am_libmapnik_la_OBJECTS = libmapnik_la-color.lo \
+	libmapnik_la-datasource_cache.lo libmapnik_la-envelope.lo \
 	libmapnik_la-graphics.lo libmapnik_la-image_reader.lo \
 	libmapnik_la-image_util.lo libmapnik_la-layer.lo \
 	libmapnik_la-line_aa.lo libmapnik_la-map.lo \
 	libmapnik_la-memory.lo libmapnik_la-params.lo \
 	libmapnik_la-plugin.lo libmapnik_la-png_reader.lo \
-	libmapnik_la-raster.lo libmapnik_la-raster_feature.lo \
 	libmapnik_la-render.lo libmapnik_la-scanline_aa.lo \
 	libmapnik_la-scanline.lo libmapnik_la-style.lo \
 	libmapnik_la-style_cache.lo libmapnik_la-text.lo \
-	libmapnik_la-vector_feature.lo libmapnik_la-wkb.lo \
-	$(am__objects_1)
+	libmapnik_la-wkb.lo $(am__objects_1)
 libmapnik_la_OBJECTS = $(am_libmapnik_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -244,26 +239,24 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 lib_LTLIBRARIES = libmapnik.la
-nobase_include_HEADERS = attribute_container.hh attribute.hh color.hh config.hh coord.hh coord_array.hh vertex_vector.hh ctrans.hh datasource.hh datasource_cache.hh factory.hh feature.hh filter.hh filter_visitor.hh envelope.hh gamma.hh geometry.hh geom_util.hh graphics.hh image_data.hh image_reader.hh image_util.hh layer.hh line_aa.hh map.hh mapnik.hh memory.hh params.hh plugin.hh line_symbolizer.hh polygon_symbolizer.hh image_symbolizer.hh pool.hh ptr.hh raster_feature.hh raster.hh render.hh scanline_aa.hh scanline.hh style.hh style_cache.hh style_factory.hh symbolizer.hh text.hh utils.hh vector_feature.hh vertex.hh vertex_transform.hh wkb.hh logical.hh rule.hh comparison.hh fill.hh spatial.hh expression.hh stroke.hh attribute_collector.hh
-libmapnik_la_SOURCES = attribute_container.cc attribute_container.hh \
-	attribute.hh color.cc color.hh coord.hh coord_array.hh \
-	vertex_vector.hh ctrans.hh datasource.hh datasource_cache.cc \
-	datasource_cache.hh envelope.cc envelope.hh factory.hh \
-	feature.cc feature.hh filter.hh filter_visitor.hh geometry.hh \
-	gamma.hh geom_util.hh graphics.cc graphics.hh image_data.hh \
-	image_reader.cc image_reader.hh image_util.cc image_util.hh \
-	layer.cc layer.hh line_aa.cc line_aa.hh map.cc map.hh \
-	mapnik.hh memory.cc memory.hh params.cc params.hh plugin.cc \
-	plugin.hh png_reader.cc line_symbolizer.hh \
-	polygon_symbolizer.hh image_symbolizer.hh pool.hh ptr.hh \
-	raster.cc raster_feature.cc raster_feature.hh raster.hh \
-	render.cc render.hh scanline_aa.cc scanline_aa.hh scanline.cc \
+nobase_include_HEADERS = attribute.hh color.hh config.hh coord.hh coord_array.hh vertex_vector.hh ctrans.hh datasource.hh datasource_cache.hh factory.hh feature.hh query.hh filter.hh filter_visitor.hh envelope.hh gamma.hh geometry.hh geom_util.hh graphics.hh image_data.hh image_reader.hh image_util.hh layer.hh line_aa.hh map.hh mapnik.hh memory.hh params.hh plugin.hh line_symbolizer.hh polygon_symbolizer.hh image_symbolizer.hh pool.hh ptr.hh raster.hh render.hh scanline_aa.hh scanline.hh style.hh style_cache.hh style_factory.hh symbolizer.hh text.hh utils.hh vertex.hh vertex_transform.hh wkb.hh logical.hh rule.hh comparison.hh fill.hh spatial.hh expression.hh stroke.hh attribute_collector.hh colorcube.hh
+libmapnik_la_SOURCES = attribute.hh color.cc color.hh coord.hh \
+	coord_array.hh vertex_vector.hh ctrans.hh datasource.hh \
+	datasource_cache.cc datasource_cache.hh envelope.cc \
+	envelope.hh query.hh factory.hh feature.hh filter.hh \
+	filter_visitor.hh geometry.hh gamma.hh geom_util.hh \
+	graphics.cc graphics.hh image_data.hh image_reader.cc \
+	image_reader.hh image_util.cc image_util.hh layer.cc layer.hh \
+	line_aa.cc line_aa.hh map.cc map.hh mapnik.hh memory.cc \
+	memory.hh params.cc params.hh plugin.cc plugin.hh \
+	png_reader.cc line_symbolizer.hh polygon_symbolizer.hh \
+	image_symbolizer.hh pool.hh ptr.hh raster.hh render.cc \
+	render.hh scanline_aa.cc scanline_aa.hh scanline.cc \
 	scanline.hh style.cc style.hh style_cache.cc style_cache.hh \
 	style_factory.hh symbolizer.hh text.cc text.hh utils.hh \
-	vector_feature.cc vector_feature.hh vertex.hh \
-	vertex_transform.hh wkb.cc wkb.hh logical.hh rule.hh \
+	vertex.hh vertex_transform.hh wkb.cc wkb.hh logical.hh rule.hh \
 	comparison.hh fill.hh spatial.hh expression.hh stroke.hh \
-	attribute_collector.hh $(am__append_1)
+	attribute_collector.hh colorcube.hh $(am__append_1)
 libmapnik_la_CPPFLAGS = $(FREETYPE2_CFLAGS) @INCLTDL@
 libmapnik_la_LIBADD = @LIBLTDL@ -lpthread -lpng -ljpeg $(FREETYPE2_LIBS) -lz -lm 
 libmapnik_la_LDFLAGS = -version-info 0:0:0  $(TIFF_LDFLAGS)
@@ -358,11 +351,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-attribute_container.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-color.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-datasource_cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-envelope.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-feature.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-graphics.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-image_reader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-image_util.Plo@am__quote@
@@ -373,8 +364,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-params.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-png_reader.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-raster.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-raster_feature.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-render.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-scanline.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-scanline_aa.Plo@am__quote@
@@ -382,7 +371,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-style_cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-text.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-tiff_reader.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-vector_feature.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmapnik_la-wkb.Plo@am__quote@
 
 .cc.o:
@@ -406,13 +394,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-libmapnik_la-attribute_container.lo: attribute_container.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-attribute_container.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-attribute_container.Tpo" -c -o libmapnik_la-attribute_container.lo `test -f 'attribute_container.cc' || echo '$(srcdir)/'`attribute_container.cc; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-attribute_container.Tpo" "$(DEPDIR)/libmapnik_la-attribute_container.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-attribute_container.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='attribute_container.cc' object='libmapnik_la-attribute_container.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-attribute_container.lo `test -f 'attribute_container.cc' || echo '$(srcdir)/'`attribute_container.cc
-
 libmapnik_la-color.lo: color.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-color.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-color.Tpo" -c -o libmapnik_la-color.lo `test -f 'color.cc' || echo '$(srcdir)/'`color.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-color.Tpo" "$(DEPDIR)/libmapnik_la-color.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-color.Tpo"; exit 1; fi
@@ -433,13 +414,6 @@ libmapnik_la-envelope.lo: envelope.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='envelope.cc' object='libmapnik_la-envelope.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-envelope.lo `test -f 'envelope.cc' || echo '$(srcdir)/'`envelope.cc
-
-libmapnik_la-feature.lo: feature.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-feature.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-feature.Tpo" -c -o libmapnik_la-feature.lo `test -f 'feature.cc' || echo '$(srcdir)/'`feature.cc; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-feature.Tpo" "$(DEPDIR)/libmapnik_la-feature.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-feature.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='feature.cc' object='libmapnik_la-feature.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-feature.lo `test -f 'feature.cc' || echo '$(srcdir)/'`feature.cc
 
 libmapnik_la-graphics.lo: graphics.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-graphics.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-graphics.Tpo" -c -o libmapnik_la-graphics.lo `test -f 'graphics.cc' || echo '$(srcdir)/'`graphics.cc; \
@@ -511,20 +485,6 @@ libmapnik_la-png_reader.lo: png_reader.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-png_reader.lo `test -f 'png_reader.cc' || echo '$(srcdir)/'`png_reader.cc
 
-libmapnik_la-raster.lo: raster.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-raster.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-raster.Tpo" -c -o libmapnik_la-raster.lo `test -f 'raster.cc' || echo '$(srcdir)/'`raster.cc; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-raster.Tpo" "$(DEPDIR)/libmapnik_la-raster.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-raster.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='raster.cc' object='libmapnik_la-raster.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-raster.lo `test -f 'raster.cc' || echo '$(srcdir)/'`raster.cc
-
-libmapnik_la-raster_feature.lo: raster_feature.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-raster_feature.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-raster_feature.Tpo" -c -o libmapnik_la-raster_feature.lo `test -f 'raster_feature.cc' || echo '$(srcdir)/'`raster_feature.cc; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-raster_feature.Tpo" "$(DEPDIR)/libmapnik_la-raster_feature.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-raster_feature.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='raster_feature.cc' object='libmapnik_la-raster_feature.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-raster_feature.lo `test -f 'raster_feature.cc' || echo '$(srcdir)/'`raster_feature.cc
-
 libmapnik_la-render.lo: render.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-render.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-render.Tpo" -c -o libmapnik_la-render.lo `test -f 'render.cc' || echo '$(srcdir)/'`render.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-render.Tpo" "$(DEPDIR)/libmapnik_la-render.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-render.Tpo"; exit 1; fi
@@ -566,13 +526,6 @@ libmapnik_la-text.lo: text.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='text.cc' object='libmapnik_la-text.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-text.lo `test -f 'text.cc' || echo '$(srcdir)/'`text.cc
-
-libmapnik_la-vector_feature.lo: vector_feature.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-vector_feature.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-vector_feature.Tpo" -c -o libmapnik_la-vector_feature.lo `test -f 'vector_feature.cc' || echo '$(srcdir)/'`vector_feature.cc; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-vector_feature.Tpo" "$(DEPDIR)/libmapnik_la-vector_feature.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-vector_feature.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='vector_feature.cc' object='libmapnik_la-vector_feature.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-vector_feature.lo `test -f 'vector_feature.cc' || echo '$(srcdir)/'`vector_feature.cc
 
 libmapnik_la-wkb.lo: wkb.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-wkb.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-wkb.Tpo" -c -o libmapnik_la-wkb.lo `test -f 'wkb.cc' || echo '$(srcdir)/'`wkb.cc; \

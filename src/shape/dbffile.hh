@@ -41,14 +41,7 @@ struct field_descriptor
 class dbf_file
 {
     private:
-        enum
-        {
-            String=1,
-            Numeric,
-            Date,
-            Float,
-            Other
-        };
+
         int num_records_;
         int num_fields_;
         int record_length_;
@@ -68,7 +61,7 @@ class dbf_file
         const field_descriptor& descriptor(int col) const;
         void move_to(int index);
         std::string string_value(int col) const;
-        void add_attribute(int col,Feature* f) const;
+        void add_attribute(int col,Feature* f) const throw();
     private:
         dbf_file(const dbf_file&);
         dbf_file& operator=(const dbf_file&);

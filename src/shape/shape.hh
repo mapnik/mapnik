@@ -37,7 +37,10 @@ public:
     FeaturesetPtr featuresAll(const CoordTransform& t) const;
     FeaturesetPtr featuresInBox(const CoordTransform& t,const mapnik::Envelope<double>& box) const;
     FeaturesetPtr featuresAtPoint(const CoordTransform& t,const mapnik::coord2d& pt) const;
-    const mapnik::Envelope<double>& envelope() const;
+
+    FeaturesetPtr features(const query& q) const;
+
+    const Envelope<double>& envelope() const;
     shape_datasource(const Parameters &params);
     virtual ~shape_datasource();
 private:

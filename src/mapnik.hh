@@ -29,6 +29,7 @@
 #include "ptr.hh"
 #include "factory.hh"
 #include "filter.hh"
+#include "query.hh"
 #include "rule.hh"
 #include "spatial.hh"
 #include "logical.hh"
@@ -41,10 +42,8 @@
 #include "geom_util.hh"
 #include "raster.hh"
 #include "feature.hh"
-#include "vector_feature.hh"
-#include "raster_feature.hh"
 #include "attribute.hh"
-#include "attribute_container.hh"
+#include "attribute_collector.hh"
 #include "render.hh"
 #include "graphics.hh"
 #include "image_reader.hh"
@@ -54,6 +53,7 @@
 #include "datasource_cache.hh"
 #include "wkb.hh"
 #include "map.hh"
+#include "colorcube.hh"
 
 namespace mapnik
 {

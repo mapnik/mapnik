@@ -109,26 +109,45 @@ const field_descriptor& dbf_file::descriptor(int col) const
 }
 
 
-void dbf_file::add_attribute(int col,Feature* f) const
+void dbf_file::add_attribute(int col,Feature* f) const throw()
 {
     if (col>=0 && col<num_fields_)
     {
         std::string name=fields_[col].name_;
-        std::string str(record_+fields_[col].offset_,fields_[col].length_);
+	std::string str=trim_left(std::string(record_+fields_[col].offset_,fields_[col].length_));
+        
         switch (fields_[col].type_)
         {
 	case 'C':
 	case 'D'://todo handle date?
 	case 'M':
-	    f->add(name,attribute<std::string>(str));
-	    break;
+	case 'L':
+	    {
+		f->add_attribute<std::string>(name,str);
+		break;
+	    }
 	case 'N':
-	    f->add(name,attribute_from_string<int>(str));
-	    break;
-	case 'F':
-	    f->add(name,attribute_from_string<double>(str));
-	    break;
-        }
+        case 'F':
+	    {
+		if (str[0]=='*')
+		{
+		    break;
+		}
+		if (fields_[col].dec_>0)
+		{   
+		    double val;
+		    fromString(str,val);
+		    f->add_attribute<double>(name,val);
+		}
+		else
+		{
+		    int val;
+		    fromString(str,val);
+		    f->add_attribute<int>(name,val);
+		}
+		break;
+	    }
+	}
     }
 }
 
@@ -153,7 +172,7 @@ void dbf_file::read_header()
             field_descriptor desc;
             desc.index_=i;
             file_.read(name,10);
-            desc.name_=name;                      //TODO trim ws
+            desc.name_=trim_left(name);
             skip(1);
             desc.type_=file_.get();
             skip(4);

@@ -27,6 +27,7 @@
 #include "ctrans.hh"
 #include "params.hh"
 #include "feature.hh"
+#include "query.hh"
 
 namespace mapnik
 {
@@ -66,8 +67,7 @@ namespace mapnik
 	virtual FeaturesetPtr featuresAll(const CoordTransform& t) const=0;
 	virtual FeaturesetPtr featuresInBox(const CoordTransform& t,const Envelope<double>& box) const=0;
 	virtual FeaturesetPtr featuresAtPoint(const CoordTransform& t,const coord2d& pt) const=0;
-	
-	//virtual FeaturesetPtr query(const Envelope<double>& box,);
+	virtual FeaturesetPtr features(const query& q) const=0;
 	
 	virtual const Envelope<double>& envelope() const=0;
 	virtual ~datasource() {};
@@ -75,7 +75,7 @@ namespace mapnik
 
     typedef std::string datasource_name();
     typedef datasource* create_ds(const Parameters& params);
-    typedef void destroy_ds(datasource *);
+    typedef void destroy_ds(datasource *ds);
 
     template <typename DATASOURCE>
     struct datasource_delete

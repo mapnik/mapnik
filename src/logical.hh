@@ -23,6 +23,7 @@
 #define LOGICAL_HH
 
 #include "filter.hh"
+#include "feature.hh"
 
 namespace mapnik
 {

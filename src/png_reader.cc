@@ -23,7 +23,7 @@
 
 namespace mapnik
 {
-     class PngReader : public ImageReader 
+    class PngReader : public ImageReader 
     {
     private:
 	std::string fileName_;

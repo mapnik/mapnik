@@ -161,7 +161,7 @@ public:
 #endif  
     }
 
-    inline void skip(int bytes)
+    inline void skip(std::streampos bytes)
     {
 	file_.seekg(bytes,std::ios::cur);
     }
@@ -171,13 +171,13 @@ public:
 	seek(100);
     }
 
-    inline void seek(long pos)
+    inline void seek(std::streampos pos)
     {
 	file_.seekg(pos,std::ios::beg);
     }
 
 
-    inline long pos()
+    inline std::streampos pos()
     {
 	return file_.tellg();
     }

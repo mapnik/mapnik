@@ -20,7 +20,9 @@
 #include <iostream>
 
 template <typename filterT>
-ShapeFeatureset<filterT>::ShapeFeatureset(const filterT& filter, const std::string& shape_file, long file_length, int srid)
+ShapeFeatureset<filterT>::ShapeFeatureset(const filterT& filter, 
+					  const std::string& shape_file, 
+					  long file_length, int srid)
     : srid_(srid),
       filter_(filter),
       shape_type_(shape_io::shape_null),
@@ -36,22 +38,21 @@ ShapeFeatureset<filterT>::ShapeFeatureset(const filterT& filter, const std::stri
 template <typename filterT>
 Feature* ShapeFeatureset<filterT>::next()
 {
-    VectorFeature* feature=0;
-    unsigned long pos=shape_.shp().pos(); // should be pos_type (or streampos)!!!
+    Feature* feature=0;
+    std::streampos pos=shape_.shp().pos();
     
-    if (pos < file_length_ * 2)
+    if (pos < std::streampos(file_length_ * 2))
     {
-	int id = shape_.shp().read_xdr_integer();
-	int record_len = shape_.shp().read_xdr_integer();
-	int type = shape_.shp().read_ndr_integer();
-        
+        shape_.move_to(pos);
+	int type=shape_.type();
+	int id=shape_.id_;
 	if (type == shape_io::shape_point)
 	{
 	    double x=shape_.shp().read_double();
 	    double y=shape_.shp().read_double();
 	    geometry_ptr point(new point_impl(-1));
 	    point->move_to(x,y);
-            feature=new VectorFeature(pos,point);
+            feature=new Feature(id,point);
 	    ++count_;
 	}
 	else if (type == shape_io::shape_pointz)
@@ -61,22 +62,17 @@ Feature* ShapeFeatureset<filterT>::next()
 	    double z=shape_.shp().read_double();
 	    geometry_ptr point(new point_impl(-1));
 	    point->move_to(x,y);
-            feature=new VectorFeature(pos,point);
+            feature=new Feature(id,point);
 	    ++count_;
 	}
 	else
 	{
-	    Envelope<double> extent;
-	    shape_.shp().read_envelope(extent);
-	    while (!filter_.pass(extent))
+	    while (!filter_.pass(shape_.current_extent()))
 	    {	
-		shape_.shp().skip(2 * record_len + 8 - (4 * 3 + 8 * 4));
-		if (shape_.shp().pos() >= file_length_ * 2)
+		unsigned reclen=shape_.reclength_;
+		shape_.move_to(long(shape_.shp().pos()) + 2 * reclen - 36);
+		if ((unsigned long)shape_.shp().pos() >= file_length_ * 2)
 		    return 0;
-		id = shape_.shp().read_xdr_integer();
-		record_len = shape_.shp().read_xdr_integer();
-		type = shape_.shp().read_ndr_integer();
-		shape_.shp().read_envelope(extent);
 	    }
 	    
 	    switch (type)
@@ -84,19 +80,19 @@ Feature* ShapeFeatureset<filterT>::next()
 	    case shape_io::shape_polyline:
                 {
                     geometry_ptr line = shape_.read_polyline();
-                    feature=new VectorFeature(pos,line);
+                    feature=new Feature(id,line);
 		    ++count_;
                     break;
                 }
 	    case shape_io::shape_polygon:
                 {
                     geometry_ptr poly = shape_.read_polygon();
-                    feature=new VectorFeature(pos,poly);
+                    feature=new Feature(id,poly);
 		    ++count_;
                     break;
                 }
 	    default:
-		return 0;//TODO
+		return 0;
             }
 	    
             if (0)
