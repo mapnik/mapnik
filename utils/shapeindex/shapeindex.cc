@@ -109,7 +109,8 @@ int main (int argc,char** argv) {
     arguments.ratio = DEFAULT_RATIO;
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
   
-    std::cout<<"start processing "<<arguments.args[0]<<std::endl;
+    std::cout<<"processing "<<arguments.args[0]<<std::endl;
+
     std::cout<<"max tree depth:"<<arguments.depth<<std::endl;
     std::cout<<"split ratio:"<<arguments.ratio<<std::endl;
   
@@ -131,8 +132,8 @@ int main (int argc,char** argv) {
     shp.read_envelope(extent);
 
     if (!arguments.silent) {
-	std::cout<<"length="<<file_length<<std::endl;
-	std::cout<<"version="<<version<<std::endl;
+	//std::cout<<"length="<<file_length<<std::endl;
+	//std::cout<<"version="<<version<<std::endl;
 	std::cout<<"type="<<shape_type<<std::endl;
 	std::cout<<"extent:"<<extent<<std::endl;
     }
@@ -176,15 +177,20 @@ int main (int argc,char** argv) {
 	}  
     } 
     shp.close();
-    std::cout<<" number shapes "<<count<<std::endl;  
-    std::cout<<" number nodes  "<<tree.count()<<std::endl;
   
+    std::cout<<" number shapes="<<count<<std::endl;  
+    
     std::fstream file((shapename+".index").c_str(),
 		      std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
     if (!file) {
 	std::cerr << "cannot open index file for writing file \""
 		  <<(shapename+".index")<<"\""<<std::endl;
     } else {
+	tree.trim();
+	
+	std::cout<<" number nodes="<<tree.count()<<std::endl;
+	
+
 	tree.write(file);
 	file.close();
     }

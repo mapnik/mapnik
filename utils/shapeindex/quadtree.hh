@@ -34,227 +34,254 @@ struct quadtree_node
     Envelope<double> ext_;
     quadtree_node<T>* children_[4];
     quadtree_node(const Envelope<double>& ext)
-        :ext_(ext)
+        : ext_(ext),data_()
     {
         memset(children_,0,sizeof(quadtree_node<T>*)*4);
     }
-    ~quadtree_node()
+
+    ~quadtree_node() 
     {
+	for (int i=0;i<4;++i) 
+	{
+	    if (children_[i]) 
+	    {
+		delete children_[i],children_[i]=0;
+	    }
+	}
     }
+
+    int num_subnodes() const 
+    {
+	int count=0;
+	for (int i=0;i<4;++i) 
+	{
+	    if (children_[i]) 
+	    {
+		++count;
+	    }
+	}
+	return count;
+    }     
 };
 
 template <typename T>
 class quadtree
 {
-    private:
-        quadtree_node<T>* root_;
-        const int maxdepth_;
-        const double ratio_;
-    public:
-        quadtree(const Envelope<double>& extent,int maxdepth,double ratio)
-            : root_(new quadtree_node<T>(extent)),
-            maxdepth_(maxdepth),
-            ratio_(ratio){}
-        ~quadtree()
-        {
-            destroy_node(root_);
-        }
-        void insert(const T& data,const Envelope<double>& item_ext)
-        {
-            insert(data,item_ext,root_,maxdepth_);
-        }
-        int count() const
-        {
-            return count_nodes(root_);
-        }
+private:
+    quadtree_node<T>* root_;
+    const int maxdepth_;
+    const double ratio_;
+public:
+    quadtree(const Envelope<double>& extent,int maxdepth,double ratio)
+	: root_(new quadtree_node<T>(extent)),
+	  maxdepth_(maxdepth),
+	  ratio_(ratio){}
+    ~quadtree()
+    {
+	if (root_) delete root_;
+    }
+    void insert(const T& data,const Envelope<double>& item_ext)
+    {
+	insert(data,item_ext,root_,maxdepth_);
+    }
+    int count() const
+    {
+	return count_nodes(root_);
+    }
+    int count_items() const 
+    {
+	int count=0;
+	count_items(root_,count);
+	return count;
+    }
+    void print() const
+    {
+	print(root_);
+    }
+    void trim() 
+    {
+	trim_tree(root_);
+    }     
+    
+    void write(std::ostream& out)
+    {
+	char header[16];
+	memset(header,0,16);
+	header[0]='m';
+	header[1]='a';
+	header[2]='p';
+	header[4]='n';
+	header[5]='i';
+	header[6]='k';
+	out.write(header,16);
+	write_node(out,root_);
+    }
 
-        void print() const
-        {
-            print(root_);
-        }
+private:
 
-        void write(std::ostream& out)
-        {
-            char header[16];
-            memset(header,0,16);
-            header[0]='m';
-            header[1]='a';
-            header[2]='p';
-            header[4]='n';
-	    header[5]='i';
-	    header[6]='k';
-            out.write(header,16);
-            //trim_tree(root_);//TODO trim empty nodes
-            write_node(out,root_);
-        }
+    void trim_tree(quadtree_node<T>*&  node)
+    {   
+	if (node) 
+	{
+	    for (int i=0;i<4;++i)
+	    {	
+		trim_tree(node->children_[i]);	
+	    }
 
-    private:
+	    if (node->num_subnodes()==1 && node->data_.size()==0)
+	    {
+		for (int i=0;i<4;++i) 
+		{
+		    if (node->children_[i])
+		    {   
+			node=node->children_[i];
+			break;	
+		    }
+		}
+	    }	
+	}
+    }
 
-        void destroy_node(quadtree_node<T>* node)
-        {
-            if (node)
-            {
-                for (int i=0;i<4;++i)
-                {
-                    destroy_node(node->children_[i]);
-                }
-                delete node,node=0;
-            }
-        }
+    int count_nodes(const quadtree_node<T>*  node) const
+    {
+	if (!node)
+	{
+	    return 0;
+	}
+	else
+	{
+	    int count = 1;
+	    for (int i=0;i<4;++i)
+	    {
+		count += count_nodes(node->children_[i]);
+	    }
+	    return count;
+	}
+    }
 
-        bool trim_tree(quadtree_node<T>* node)
-        {
+    void count_items(const quadtree_node<T>* node,int& count) const
+    {
+	if (node)
+	{
+	    count += node->data_.size();    
+	    for (int i=0;i<4;++i)
+	    {
+		count_items(node->children_[i],count);
+	    }    
+	}
+    }
 
-            for (int i=0;i<4;++i)
-            {
-                if (node->children_[i] && trim_tree(node->children_[i]))
-                {
-                    std::cout << "destroy"<<std::endl;
-                    destroy_node(node->children_[i]);
-                }
-            }
+    int subnode_offset(const quadtree_node<T>* node) const
+    {
+	int offset=0;
+	for (int i=0;i<4;i++)
+	{
+	    if (node->children_[i])
+	    {
+		offset +=sizeof(Envelope<double>)+(node->children_[i]->data_.size()*sizeof(T))+3*sizeof(int);
+		offset +=subnode_offset(node->children_[i]);
+	    }
+	}
+	return offset;
+    }
 
-            int num_shapes=node->data_.size();
-            int num_subnodes=0;
-            if (num_shapes==0)
-            {
-                quadtree_node<T>* subnode=0;
-                for (int i=0;i<4;++i)
-                {
-                    if (node->children_[i])
-                    {
-                        subnode=node->children_[i];
-                        ++num_subnodes;
-                    }
-                }
-                if (num_subnodes==1)
-                {
-                    node=subnode;                 // memory leak!
-                }
-            }
-            return (num_shapes == 0 && num_subnodes == 0);
-        }
+    void write_node(std::ostream& out,const quadtree_node<T>* node) const
+    {
+	if (node)
+	{
+	    int offset=subnode_offset(node);
+	    int shape_count=node->data_.size();
+	    int recsize=sizeof(Envelope<double>) + 3 * sizeof(int) + shape_count * sizeof(T);
+	    char* node_record=new char[recsize];
+	    memset(node_record,0,recsize);
+	    memcpy(node_record,&offset,4);
+	    memcpy(node_record+4,&node->ext_,sizeof(Envelope<double>));
+	    memcpy(node_record+36,&shape_count,4);
+	    for (int i=0;i<shape_count;++i)
+	    {
+		memcpy(node_record + 40 + i * sizeof(T),&(node->data_[i]),sizeof(T));
+	    }
+	    int num_subnodes=0;
+	    for (int i=0;i<4;++i)
+	    {
+		if (node->children_[i])
+		{
+		    ++num_subnodes;
+		}
+	    }
+	    memcpy(node_record + 40 + shape_count * sizeof(T),&num_subnodes,4);
+	    out.write(node_record,recsize);
+	    delete [] node_record;
 
-        int count_nodes(const quadtree_node<T>* node) const
-        {
-            if (!node)
-            {
-                return 0;
-            }
-            else
-            {
-                int count = 1;
-                for (int i=0;i<4;++i)
-                {
-                    count += count_nodes(node->children_[i]);
-                }
-                return count;
-            }
-        }
+	    for (int i=0;i<4;++i)
+	    {
+		write_node(out,node->children_[i]);
+	    }
+	}
+    }
 
-        int subnode_offset(const quadtree_node<T>* node) const
-        {
-            int offset=0;
-            for (int i=0;i<4;i++)
-            {
-                if (node->children_[i])
-                {
-                    offset +=sizeof(Envelope<double>)+(node->children_[i]->data_.size()*sizeof(T))+3*sizeof(int);
-                    offset +=subnode_offset(node->children_[i]);
-                }
-            }
-            return offset;
-        }
+    void print(const quadtree_node<T>* node,int level=0) const
+    {
+	if (node)
+	{
+	    typename std::vector<T>::const_iterator itr=node->data_.begin();
+	    std::string pad;
+	    for (int i=0;i<level;++i)
+	    {
+		pad+=" ";
+	    }
+	    std::cout<<pad<<"node "<<node<<" extent:"<<node->ext_<<std::endl;
+	    std::cout<<pad;
+	    while(itr!=node->data_.end())
+	    {
+		std::cout<<*itr<<" ";
+		++itr;
+	    }
+	    std::cout<<std::endl;
+	    for (int i=0;i<4;++i)
+	    {
+		print(node->children_[i],level+4);
+	    }
+	}
+    }
 
-        void write_node(std::ostream& out,const quadtree_node<T>* node) const
-        {
-            if (node)
-            {
-                int offset=subnode_offset(node);
-                int shape_count=node->data_.size();
-                int recsize=sizeof(Envelope<double>) + 3 * sizeof(int) + shape_count * sizeof(T);
-                char* node_record=new char[recsize];
-                memset(node_record,0,recsize);
-                memcpy(node_record,&offset,4);
-                memcpy(node_record+4,&node->ext_,sizeof(Envelope<double>));
-                memcpy(node_record+36,&shape_count,4);
-                for (int i=0;i<shape_count;++i)
-                {
-                    memcpy(node_record + 40 + i * sizeof(T),&(node->data_[i]),sizeof(T));
-                }
-                int num_subnodes=0;
-                for (int i=0;i<4;++i)
-                {
-                    if (node->children_[i])
-                        ++num_subnodes;
-                }
-                memcpy(node_record + 40 + shape_count * sizeof(T),&num_subnodes,4);
-                out.write(node_record,recsize);
-                delete [] node_record;
+    void insert(const T& data,const Envelope<double>& item_ext,quadtree_node<T>*  node,int maxdepth)
+    {
+	if (node && node->ext_.contains(item_ext))
+	{
+	    coord2d c=node->ext_.center();
 
-                for (int i=0;i<4;++i)
-                {
-                    write_node(out,node->children_[i]);
-                }
-            }
-        }
+	    double width=node->ext_.width();
+	    double height=node->ext_.height();
 
-        void print(const quadtree_node<T>* node) const
-        {
-            if (node)
-            {
-                typename std::vector<T>::const_iterator itr=node->data_.begin();
-                std::cout<<"node extent:"<<node->ext_<<std::endl;
-                while(itr!=node->data_.end())
-                {
-                    std::cout<<*itr<<" ";
-                    ++itr;
-                }
-                std::cout<<std::endl;
-                for (int i=0;i<4;++i)
-                {
-                    print(node->children_[i]);
-                }
-            }
-        }
+	    double lox=node->ext_.minx();
+	    double loy=node->ext_.miny();
+	    double hix=node->ext_.maxx();
+	    double hiy=node->ext_.maxy();
 
-        void insert(const T& data,const Envelope<double>& item_ext,quadtree_node<T>* node,int maxdepth)
-        {
-            if (node && node->ext_.contains(item_ext))
-            {
-                coord2d c=node->ext_.center();
+	    Envelope<double> ext[4];
+	    ext[0]=Envelope<double>(lox,loy,lox + width * ratio_,loy + height * ratio_);
+	    ext[1]=Envelope<double>(hix - width * ratio_,loy,hix,loy + height * ratio_);
+	    ext[2]=Envelope<double>(lox,hiy - height*ratio_,lox + width * ratio_,hiy);
+	    ext[3]=Envelope<double>(hix - width * ratio_,hiy - height*ratio_,hix,hiy);
 
-                double width=node->ext_.width();
-                double height=node->ext_.height();
-
-                double lox=node->ext_.minx();
-                double loy=node->ext_.miny();
-                double hix=node->ext_.maxx();
-                double hiy=node->ext_.maxy();
-
-                Envelope<double> ext[4];
-                ext[0]=Envelope<double>(lox,loy,lox + width * ratio_,loy + height * ratio_);
-                ext[1]=Envelope<double>(hix - width * ratio_,loy,hix,loy + height * ratio_);
-                ext[2]=Envelope<double>(lox,hiy - height*ratio_,lox + width * ratio_,hiy);
-                ext[3]=Envelope<double>(hix - width * ratio_,hiy - height*ratio_,hix,hiy);
-
-                if (maxdepth > 1)
-                {
-                    for (int i=0;i<4;++i)
-                    {
-                        if (ext[i].contains(item_ext))
-                        {
-                            if (!node->children_[i])
-                            {
-                                node->children_[i]=new quadtree_node<T>(ext[i]);
-                            }
-                            insert(data,item_ext,node->children_[i],maxdepth-1);
-                            return;
-                        }
-                    }
-                }
-                node->data_.push_back(data);
-            }
-        }
+	    if (maxdepth > 1)
+	    {
+		for (int i=0;i<4;++i)
+		{
+		    if (ext[i].contains(item_ext))
+		    {
+			if (!node->children_[i])
+			{
+			    node->children_[i]=new quadtree_node<T>(ext[i]);
+			}
+			insert(data,item_ext,node->children_[i],maxdepth-1);
+			return;
+		    }
+		}
+	    }
+	    node->data_.push_back(data);
+	}
+    }
 };
 #endif                                            //QUADTREE_HH
