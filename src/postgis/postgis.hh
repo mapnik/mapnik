@@ -43,11 +43,7 @@ class PostgisDatasource : public datasource
 public:
     static std::string name();
     int type() const;
-    FeaturesetPtr featuresAll(const CoordTransform& t) const;
-    FeaturesetPtr featuresInBox(const CoordTransform& t,const mapnik::Envelope<double>& box) const;
-    FeaturesetPtr featuresAtPoint(const CoordTransform& t,const mapnik::coord2d& pt) const;
     FeaturesetPtr features(const query& q) const;
-
     const mapnik::Envelope<double>& envelope() const;
     PostgisDatasource(const Parameters &params);
     ~PostgisDatasource();

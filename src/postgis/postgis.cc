@@ -108,7 +108,6 @@ int PostgisDatasource::type() const
     return type_;
 }
 
-
 std::string PostgisDatasource::table_from_sql(const std::string& sql)
 {
     std::string table_name(sql);
@@ -122,37 +121,6 @@ std::string PostgisDatasource::table_from_sql(const std::string& sql)
         return table_name.substr(0,idx);
     }
     return table_name;
-}
-
-
-FeaturesetPtr PostgisDatasource::featuresAll(const CoordTransform& t) const
-{
-    return FeaturesetPtr(0);
-}
-
-FeaturesetPtr PostgisDatasource::featuresInBox(const CoordTransform& t,
-					       const mapnik::Envelope<double>& box) const
-{
-    Featureset *fs=0;
-    ConnectionManager *mgr=ConnectionManager::instance();
-    ref_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
-    if (pool)
-    {
-	const ref_ptr<Connection>& conn = pool->borrowObject();
-	if (conn && conn->isOK())
-	{
-	    PoolGuard<ref_ptr<Connection>,ref_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
-	    std::ostringstream s;
-	    s << "select gid,asbinary("<<geometryColumn_<<") as geom from ";
-	    s << table_<<" where "<<geometryColumn_<<"&& setSRID('BOX3D(";
-	    s << box.minx() << " " << box.miny() << ",";
-	    s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
-	    std::cout << s.str()<<std::endl;
-	    ref_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-	    fs=new PostgisFeatureset(rs);
-	}
-    }
-    return FeaturesetPtr(fs);
 }
 
 FeaturesetPtr PostgisDatasource::features(const query& q) const
@@ -179,33 +147,6 @@ FeaturesetPtr PostgisDatasource::features(const query& q) const
     }
     return FeaturesetPtr(fs);
 }
-
-FeaturesetPtr PostgisDatasource::featuresAtPoint(const CoordTransform& t,
-						 const mapnik::coord2d& pt) const
-{
-    Featureset *fs=0;
-    ConnectionManager *mgr=ConnectionManager::instance();
-    ref_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
-    if (pool)
-    {
-	const ref_ptr<Connection>& conn = pool->borrowObject();
-	if (conn && conn->isOK())
-	{
-	    PoolGuard<ref_ptr<Connection>,ref_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
-	
-	    std::ostringstream s;	    
-	    s << "select gid,asbinary("<<geometryColumn_<<") as geom from ";
-	    s << table_<<" where setSRID('BOX3D(";
-	    s << pt.x << " " << pt.y << ",";
-	    s << pt.x << " " << pt.y << ")'::box3d,"<<srid_<<") && "<<geometryColumn_;
-	    std::cout << s.str()<<std::endl;
-	    ref_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-	    fs=new PostgisFeatureset(rs);
-	}
-    }
-    return FeaturesetPtr(fs);
-}
-
 
 const Envelope<double>& PostgisDatasource::envelope() const
 {

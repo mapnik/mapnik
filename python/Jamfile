@@ -12,8 +12,8 @@ extension mapnik
   mapnik_python.cc 
   # requirements and dependencies for Boost.Python extensions
   <template>@boost/libs/python/build/extension
-:  # path to mapnik include dir e.g. 
+:  # path to mapnik include dir 
   <include>$(MAPNIK_DIR)/include
-   # path to libmapnik.so e.g.
+   # path to libmapnik.so
   <library-file>$(MAPNIK_DIR)/lib/libmapnik.so
 ;

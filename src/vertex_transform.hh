@@ -31,9 +31,9 @@ namespace mapnik
     {
 	typedef T0 value_type;
 	typedef T1 return_type;
-	static return_type apply(const value_type val)
+	static return_type apply(value_type val)
 	{
-	    return return_type(val*(1<<shift));
+	    return static_cast<return_type>(val*(1<<shift));
 	}
     };
 
@@ -42,9 +42,9 @@ namespace mapnik
     {
 	typedef T0 value_type;
 	typedef T1 return_type;
-	static return_type apply(const value_type val)
+	static return_type apply(value_type val)
 	{
-	    return return_type(val);
+	    return static_cast<return_type>(val);
 	}
     };
 

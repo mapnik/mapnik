@@ -16,31 +16,20 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef SHAPE_FS_HH
-#define SHAPE_FS_HH
+//$Id$
 
-#include "shape.hh"
+#ifndef ATTRIBUTE_DESCRIPTOR
+#define ATTRIBUTE_DESCRIPTOR
 
-using namespace mapnik;
+#include <string>
 
-template <typename filterT>
-class shape_featureset : public Featureset
+namespace mapnik
 {
-    filterT filter_;
-    int shape_type_;
-    shape_io shape_;
-    Envelope<double> query_ext_;
-    long file_length_;
-    mutable Envelope<double> feature_ext_;
-    mutable int total_geom_size;
-    mutable int count_;
-public:
-    shape_featureset(const filterT& filter, const std::string& shape_file,long file_length);
-    virtual ~shape_featureset();
-    Feature* next();
-private:
-    shape_featureset(const shape_featureset&);
-    const shape_featureset& operator=(const shape_featureset&);
-};
+    struct attribute_desc
+    {
+	std::string name;
+	eType type;
+    };
+}
 
-#endif                                            //SHAPE_FS_HH
+#endif

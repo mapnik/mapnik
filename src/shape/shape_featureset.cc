@@ -20,11 +20,10 @@
 #include <iostream>
 
 template <typename filterT>
-ShapeFeatureset<filterT>::ShapeFeatureset(const filterT& filter, 
-					  const std::string& shape_file, 
-					  long file_length, int srid)
-    : srid_(srid),
-      filter_(filter),
+shape_featureset<filterT>::shape_featureset(const filterT& filter, 
+					    const std::string& shape_file, 
+					    long file_length )
+    : filter_(filter),
       shape_type_(shape_io::shape_null),
       shape_(shape_file),
       query_ext_(),
@@ -36,7 +35,7 @@ ShapeFeatureset<filterT>::ShapeFeatureset(const filterT& filter,
 
 
 template <typename filterT>
-Feature* ShapeFeatureset<filterT>::next()
+Feature* shape_featureset<filterT>::next()
 {
     Feature* feature=0;
     std::streampos pos=shape_.shp().pos();
@@ -111,7 +110,6 @@ Feature* ShapeFeatureset<filterT>::next()
 
 
 template <typename filterT>
-ShapeFeatureset<filterT>::~ShapeFeatureset() {}
+shape_featureset<filterT>::~shape_featureset() {}
 
-template class ShapeFeatureset<filter_in_box>;
-template class ShapeFeatureset<filter_at_point>;
+template class shape_featureset<filter_in_box>;

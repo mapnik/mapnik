@@ -21,29 +21,29 @@
 
 #include "shape_featureset.hh"
 #include <set>
+#include <vector>
 
 template <typename filterT>
-class ShapeIndexFeatureset : public Featureset
+class shape_index_featureset : public Featureset
 {
-    int srid_;
     filterT filter_;
     int shape_type_;
     shape_io shape_;
-    Envelope<double> query_ext_;
     std::set<int> ids_;
     std::set<int>::iterator itr_;
-
+    std::vector<int> attr_ids_;
     mutable Envelope<double> feature_ext_;
     mutable int total_geom_size;
     mutable int count_;
 
 public:
-    ShapeIndexFeatureset(const filterT& filter,const std::string& shape_file,int srid);
-    virtual ~ShapeIndexFeatureset();
+    shape_index_featureset(const filterT& filter,const std::string& shape_file,
+			   const std::set<std::string>& attribute_names);
+    virtual ~shape_index_featureset();
     Feature* next();
 private:
     //no copying
-    ShapeIndexFeatureset(const ShapeIndexFeatureset&);
-    ShapeIndexFeatureset& operator=(const ShapeIndexFeatureset&);
+    shape_index_featureset(const shape_index_featureset&);
+    shape_index_featureset& operator=(const shape_index_featureset&);
 };
 #endif //SHAPE_SQT_FS_HH

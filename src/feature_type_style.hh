@@ -18,48 +18,45 @@
 
 //$Id$
 
-#ifndef MAPNIK_HH
-#define MAPNIK_HH
+#ifndef FEATURE_TYPE_STYLE
+#define FEATURE_TYPE_STYLE
 
-#include <config.hh>
-
-#include <map>
-#include <vector>
-#include <cassert>
-#include "ptr.hh"
-#include "factory.hh"
-#include "filter.hh"
-#include "query.hh"
 #include "rule.hh"
-#include "spatial.hh"
-#include "logical.hh"
-#include "comparison.hh"
-#include "utils.hh"
-#include "style.hh"
-#include "symbolizer.hh"
-#include "style_cache.hh"
-#include "geometry.hh"
-#include "geom_util.hh"
-#include "raster.hh"
 #include "feature.hh"
-#include "attribute.hh"
-#include "attribute_collector.hh"
-#include "render.hh"
-#include "graphics.hh"
-#include "image_reader.hh"
-#include "image_util.hh"
-#include "datasource.hh"
-#include "layer.hh"
-#include "datasource_cache.hh"
-#include "wkb.hh"
-#include "map.hh"
-#include "colorcube.hh"
-#include "feature_type_style.hh"
-
+#include "ptr.hh"
+#include <vector>
 
 namespace mapnik
 {
-    //typedef geometry_type geometry_type;
+    
+    //typedef feature<geometry_ptr,raster_ptr> Feature;
+    typedef ref_ptr<rule<Feature,filter> > rule_ptr;
+
+    class feature_type_style
+    {
+    private:
+	std::vector<rule_ptr>  rules_;
+    public:
+	feature_type_style() {}
+	feature_type_style(const feature_type_style& rhs)
+	    : rules_(rhs.rules_) {}
+	feature_type_style& operator=(const feature_type_style& rhs)
+	{
+	    if (this == &rhs) return *this;
+	    rules_=rhs.rules_;
+	    return *this;
+	}
+	void add_rule(const rule_ptr& rule)
+	{
+	    rules_.push_back(rule);
+	} 
+	const std::vector<rule_ptr>& rules() const
+	{
+	    return rules_;
+	}
+	
+	~feature_type_style() {}
+    };
 }
 
-#endif                                            //MAPNIK_HH
+#endif //FEATURE_TYPE_STYLE

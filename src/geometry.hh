@@ -96,7 +96,7 @@ namespace mapnik
 		if (pos_ < cont_->size())
 		{
 		    value_type x,y;
-		    vertex_.cmd=cont_->get_at(pos_,x,y);
+		    vertex_.cmd=cont_->get_vertex(pos_,&x,&y);
 		    vertex_.x=Transform::apply(x);
 		    vertex_.y=Transform::apply(y);
 		}

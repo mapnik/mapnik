@@ -21,11 +21,10 @@
 #include "shape_index_featureset.hh"
 
 template <typename filterT>
-ShapeIndexFeatureset<filterT>::ShapeIndexFeatureset(const filterT& filter,
-						    const std::string& shape_file,
-						    int srid)
-    : srid_(srid),
-      filter_(filter),
+shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
+							const std::string& shape_file,
+							const std::set<std::string>& attribute_names)
+    : filter_(filter),
       shape_type_(0),
       shape_(shape_file),
       count_(0)
@@ -41,10 +40,25 @@ ShapeIndexFeatureset<filterT>::ShapeIndexFeatureset(const filterT& filter,
     }
     std::cout<< "query size=" << ids_.size() << "\n";
     itr_ = ids_.begin();
+
+    // deal with attributes
+    typename std::set<std::string>::const_iterator pos=attribute_names.begin();
+    while (pos!=attribute_names.end())
+    {
+	for (int i=0;i<shape_.dbf().num_fields();++i)
+	{
+	    if (shape_.dbf().descriptor(i).name_ == *pos)
+	    {
+		attr_ids_.push_back(i);
+		break;
+	    }
+	}
+	++pos;
+    }
 }
 
 template <typename filterT>
-Feature* ShapeIndexFeatureset<filterT>::next()
+Feature* shape_index_featureset<filterT>::next()
 {
     Feature *f=0;
     if (itr_!=ids_.end())
@@ -98,19 +112,21 @@ Feature* ShapeIndexFeatureset<filterT>::next()
 		    break;
 		}
             }
-            if (0)
+            if (attr_ids_.size())
             {
                 shape_.dbf().move_to(shape_.id_);
-                for (int j=0;j<shape_.dbf().num_fields();++j) 
+		typename std::vector<int>::const_iterator pos=attr_ids_.begin();
+		while (pos!=attr_ids_.end())
 		{
 		    try 
 		    {
-			shape_.dbf().add_attribute(j,f);//TODO optimize!!!
+			shape_.dbf().add_attribute(*pos,f);//TODO optimize!!!
 		    }
 		    catch (...)
 		    {
 			//TODO
 		    }
+		    ++pos;
                 }
             }
         }
@@ -121,8 +137,7 @@ Feature* ShapeIndexFeatureset<filterT>::next()
 
 
 template <typename filterT>
-ShapeIndexFeatureset<filterT>::~ShapeIndexFeatureset() {}
+shape_index_featureset<filterT>::~shape_index_featureset() {}
 
-template class ShapeIndexFeatureset<filter_at_point>;
-template class ShapeIndexFeatureset<filter_in_box>;
+template class shape_index_featureset<filter_in_box>;
 

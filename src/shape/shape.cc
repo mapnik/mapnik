@@ -102,44 +102,14 @@ std::string shape_datasource::name()
     return "shape";
 }
 
-
-FeaturesetPtr shape_datasource::featuresAll(const CoordTransform& t) const
-{
-    return FeaturesetPtr(0);
-}
-
-
-FeaturesetPtr shape_datasource::featuresInBox(const CoordTransform& t,const mapnik::Envelope<double>& box) const
-{
-    std::cout << "query box="<<box<<std::endl;
-    filter_in_box filter(box);
-    if (indexed_)
-    {
-        return FeaturesetPtr(new ShapeIndexFeatureset<filter_in_box>(filter,shape_name_,-1));
-    }
-    return FeaturesetPtr(new ShapeFeatureset<filter_in_box>(filter,shape_name_,file_length_,-1));
-}
-
-
-FeaturesetPtr shape_datasource::featuresAtPoint(const CoordTransform& t,const mapnik::coord2d& pt) const
-{
-    std::cout << "query point="<<"..todo: pt .." <<std::endl;
-    filter_at_point filter(pt);
-    if (indexed_)
-    {
-        return FeaturesetPtr(new ShapeIndexFeatureset<filter_at_point>(filter,shape_name_,-1));
-    }
-    return FeaturesetPtr(new ShapeFeatureset<filter_at_point>(filter,shape_name_,file_length_,-1));
-}
-
 FeaturesetPtr shape_datasource::features(const query& q) const
 {
     filter_in_box filter(q.get_bbox());
     if (indexed_)
     {
-	return FeaturesetPtr(new ShapeIndexFeatureset<filter_in_box>(filter,shape_name_,-1));
+	return FeaturesetPtr(new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
     }
-    return FeaturesetPtr(new ShapeFeatureset<filter_in_box>(filter,shape_name_,file_length_,-1));
+    return FeaturesetPtr(new shape_featureset<filter_in_box>(filter,shape_name_,file_length_));
 }
 
 const Envelope<double>& shape_datasource::envelope() const

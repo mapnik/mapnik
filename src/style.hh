@@ -21,9 +21,11 @@
 #ifndef STYLE_HH
 #define STYLE_HH
 
+//#include "feature.hh"
 #include "color.hh"
 #include "ptr.hh"
 #include "symbolizer.hh"
+//#include "rule.hh"
 
 #include <vector>
 #include <algorithm>
@@ -86,7 +88,7 @@ namespace mapnik
 	{
 	    return symbols_.end();
 	}
-    };   
+    };    
 }
 
-#endif                                            //STYLE_HH
+#endif //STYLE_HH

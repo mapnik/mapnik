@@ -119,6 +119,7 @@ namespace mapnik
         const Color& background=map.getBackground();
         image.setBackground(background);
 	query q(extent);
+	
         for (size_t n=0;n<map.layerCount();++n)
         {
             const Layer& l=map.getLayer(n);
