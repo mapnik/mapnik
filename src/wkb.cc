@@ -16,28 +16,27 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: wkb.cc 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
 #include "wkb.hh"
 #include "geom_util.hh"
 
 namespace mapnik
 {
-
     struct wkb_reader
     {
     private:
+	enum wkbByteOrder {
+	    wkbXDR=0,
+	    wkbNDR=1
+	};
 	const char* wkb_;
 	unsigned size_;
 	int srid_;
 	unsigned pos_;
-	unsigned byteOrder_;
+	wkbByteOrder byteOrder_;
+	bool needSwap_;
     public:
-
-	enum wkbByteOrder {
-	    wkbNDR=0,
-	    wkbXDR=1
-	};
 	
 	enum wkbGeometryType {
 	    wkbPoint=1,
@@ -54,9 +53,15 @@ namespace mapnik
 	      size_(size),
 	      srid_(srid),
 	      pos_(0),
-	      byteOrder_(wkb_[0]) 
+	      byteOrder_((wkbByteOrder)wkb_[0])
 	{
 	    ++pos_;
+	    
+#ifndef WORDS_BIGENDIAN
+	    needSwap_=byteOrder_?wkbXDR:wkbNDR;
+#else
+	    needSwap_=byteOrder_?wkbNDR:wkbXDR;	
+#endif	    
 	}
 
 	~wkb_reader() {}
@@ -100,23 +105,66 @@ namespace mapnik
 	int read_integer() 
 	{
 	    int n;
-	    memcpy(&n,wkb_+pos_,4);
+
+	    if (!needSwap_)
+	    {
+		memcpy(&n,wkb_+pos_,4);
+	    } 
+	    else 
+	    {
+		const char* b=wkb_+pos_;
+		n = b[3]&0xff | (b[2]&0xff)<<8 | (b[1]&0xff)<<16 | (b[0]&0xff)<<24;
+	    }
 	    pos_+=4;
+
 	    return n;
 	}
 	
 	double read_double()
 	{
 	    double d;
-	    memcpy(&d,wkb_+pos_,8);
+
+	    if (!needSwap_)
+	    {
+		memcpy(&d,wkb_+pos_,8);
+	    }
+	    else 
+	    {
+		// we rely on the fact that "long long" is in C standard,
+		// but not in C++ yet
+		// this is not quite portable
+		const char* b= wkb_+pos_;
+		long long n = (long long)b[7]&0xff | 
+		    ((long long)b[6]&0xff)<<8 | 
+		    ((long long)b[5]&0xff)<<16 | 
+		    ((long long)b[4]&0xff)<<24 |
+		    ((long long)b[3]&0xff)<<32 |
+		    ((long long)b[2]&0xff)<<40 |
+		    ((long long)b[1]&0xff)<<48 |
+		    ((long long)b[0]&0xff)<<56;
+		memcpy(&d,&n,8);
+	    }
 	    pos_+=8;
+
 	    return d;
 	}
 	
 	void read_coords(CoordinateArray& ar)
 	{
 	    int size=sizeof(coord<double,2>)*ar.size();
-	    std::memcpy(&ar[0],wkb_+pos_,size);
+	    if (!needSwap_)
+	    {
+		std::memcpy(&ar[0],wkb_+pos_,size);
+		
+	    }
+	    else 
+	    {
+		for (int i=0;i<ar.size();++i)
+		{
+		    ar[i].x=read_double();
+		    ar[i].y=read_double();
+		}
+	    }
 	    pos_+=size;
 	}
 	

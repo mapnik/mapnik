@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: wkb.hh 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
 #ifndef WKB_HH
 #define WKB_HH
@@ -29,7 +29,7 @@ namespace mapnik
     class geometry_utils 
     {
     public:
-	static geometry_ptr from_wkb(const char* wkb, unsigned  size,int srid);
+	static geometry_ptr from_wkb(const char* wkb, unsigned size,int srid);
     private:
 	geometry_utils();
 	geometry_utils(const geometry_utils&);
