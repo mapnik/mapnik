@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: line_aa.cc 60 2004-11-04 09:40:49Z artem $
+//$Id$
 
 #include "line_aa.hh"
 #include "geom_util.hh"
@@ -24,15 +24,16 @@
 namespace mapnik
 {
     using std::swap;
+
     template <typename PixBuffer>
     template <typename Transform>
     void LineRasterizerAA<PixBuffer>::render(const geometry_type& path,const Color& c)
     {
         unsigned rgba=c.rgba();
-        geometry_type::path_iterator<Transform> itr=path.begin<Transform>();
-       
+        typename geometry_type::path_iterator<Transform> itr=path.template begin<Transform>();
+         
 	int x0,y0;
-        while (itr!=path.end<Transform>())
+        while (itr!=path.template end<Transform>())
         {
             int x1=itr->x;
             int y1=itr->y;

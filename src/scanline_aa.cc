@@ -543,8 +543,8 @@ namespace mapnik
         reset();
         unsigned rgba=c.rgba();
         clip_box(0,0,pixbuf_->width(),pixbuf_->height());
-        geometry_type::path_iterator<Transform> itr=geom.begin<Transform>();
-        while(itr!=geom.end<Transform>())
+        geometry_type::path_iterator<Transform> itr=geom.template begin<Transform>();
+        while(itr!=geom.template end<Transform>())
         {
             if (itr->cmd == SEG_MOVETO)
             {
