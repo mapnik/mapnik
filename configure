@@ -1517,7 +1517,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
           ac_config_headers="$ac_config_headers src/config.hh"
 
-#AC_COPYRIGHT([Copyright (C) 2004 Artem Pavlenko])
 
 
 am__api_version="1.9"
@@ -3687,7 +3686,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3690 "configure"' > conftest.$ac_ext
+  echo '#line 3689 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5266,7 +5265,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5269:" \
+echo "$as_me:5268:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6323,11 +6322,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6326: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6325: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6330: \$? = $ac_status" >&5
+   echo "$as_me:6329: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -6566,11 +6565,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6569: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6568: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6573: \$? = $ac_status" >&5
+   echo "$as_me:6572: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -6626,11 +6625,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6629: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6628: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:6633: \$? = $ac_status" >&5
+   echo "$as_me:6632: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8811,7 +8810,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8814 "configure"
+#line 8813 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8909,7 +8908,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8912 "configure"
+#line 8911 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11102,11 +11101,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11105: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11104: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11109: \$? = $ac_status" >&5
+   echo "$as_me:11108: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -11162,11 +11161,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11165: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11164: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11169: \$? = $ac_status" >&5
+   echo "$as_me:11168: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12523,7 +12522,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12526 "configure"
+#line 12525 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12621,7 +12620,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12624 "configure"
+#line 12623 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13458,11 +13457,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13461: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13460: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13465: \$? = $ac_status" >&5
+   echo "$as_me:13464: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -13518,11 +13517,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13521: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13520: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13525: \$? = $ac_status" >&5
+   echo "$as_me:13524: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15553,11 +15552,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15556: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15555: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15560: \$? = $ac_status" >&5
+   echo "$as_me:15559: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -15796,11 +15795,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15799: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15798: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15803: \$? = $ac_status" >&5
+   echo "$as_me:15802: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -15856,11 +15855,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15859: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15858: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15863: \$? = $ac_status" >&5
+   echo "$as_me:15862: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18041,7 +18040,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18044 "configure"
+#line 18043 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18139,7 +18138,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18142 "configure"
+#line 18141 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -22805,7 +22804,7 @@ if test "${ac_cv_lib_tiff_TIFFReadRGBATile+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-ltiff libtiff $LIBS"
+LIBS="-ltiff  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -22864,14 +22863,13 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_tiff_TIFFReadRGBATile" >&5
 echo "${ECHO_T}$ac_cv_lib_tiff_TIFFReadRGBATile" >&6
 if test $ac_cv_lib_tiff_TIFFReadRGBATile = yes; then
-  HAVE_LIBTIFF="yes"
-fi
- TIFF_LDFLAGS="-L${TIFF_HOME} -ltiff"
+  HAVE_LIBTIFF="yes" TIFF_LDFLAGS="-L${TIFF_HOME} -ltiff"
 
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-fi;
+fi
+
 
 else
   echo "$as_me:$LINENO: result: no" >&5
@@ -22885,6 +22883,158 @@ echo "${ECHO_T}no" >&6
 echo "$as_me: error: sorry, libtiff needed try --with-tiff-dir=<DIR>" >&2;}
    { (exit 1); exit 1; }; }
 	 fi
+
+else
+
+	  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+          echo "$as_me:$LINENO: checking for TIFFReadRGBAStrip in -ltiff" >&5
+echo $ECHO_N "checking for TIFFReadRGBAStrip in -ltiff... $ECHO_C" >&6
+if test "${ac_cv_lib_tiff_TIFFReadRGBAStrip+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ltiff  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char TIFFReadRGBAStrip ();
+int
+main ()
+{
+TIFFReadRGBAStrip ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_tiff_TIFFReadRGBAStrip=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_tiff_TIFFReadRGBAStrip=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_tiff_TIFFReadRGBAStrip" >&5
+echo "${ECHO_T}$ac_cv_lib_tiff_TIFFReadRGBAStrip" >&6
+if test $ac_cv_lib_tiff_TIFFReadRGBAStrip = yes; then
+  echo "$as_me:$LINENO: checking for TIFFReadRGBATile in -ltiff" >&5
+echo $ECHO_N "checking for TIFFReadRGBATile in -ltiff... $ECHO_C" >&6
+if test "${ac_cv_lib_tiff_TIFFReadRGBATile+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ltiff  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char TIFFReadRGBATile ();
+int
+main ()
+{
+TIFFReadRGBATile ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_tiff_TIFFReadRGBATile=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_tiff_TIFFReadRGBATile=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_tiff_TIFFReadRGBATile" >&5
+echo "${ECHO_T}$ac_cv_lib_tiff_TIFFReadRGBATile" >&6
+if test $ac_cv_lib_tiff_TIFFReadRGBATile = yes; then
+  HAVE_LIBTIFF="yes" TIFF_LDFLAGS="-ltiff"
+
+else
+  { { echo "$as_me:$LINENO: error: sorry, libtiff needed try --with-tiff-dir=<DIR>" >&5
+echo "$as_me: error: sorry, libtiff needed try --with-tiff-dir=<DIR>" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+else
+  { { echo "$as_me:$LINENO: error: sorry, libtiff needed try --with-tiff-dir=<DIR>" >&5
+echo "$as_me: error: sorry, libtiff needed try --with-tiff-dir=<DIR>" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+fi;
 
   #config_files="${config_files} src/raster/Makefile"
 fi
@@ -22939,7 +23089,7 @@ fi
 
 
 
-if test "HAVE_LIBTIFF" !=:; then
+if test "$HAVE_LIBTIFF" = yes; then
   BUILD_TIFF_READER_TRUE=
   BUILD_TIFF_READER_FALSE='#'
 else

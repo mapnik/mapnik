@@ -3,7 +3,6 @@
 AC_PREREQ(2.59)
 AC_INIT([mapnik],[0.1])
 AC_CONFIG_HEADERS([src/config.hh])
-#AC_COPYRIGHT([Copyright (C) 2004 Artem Pavlenko])
 AC_REVISION([$Revision: 1.1 $])
 AC_CONFIG_SRCDIR([src/params.cc])
 AM_INIT_AUTOMAKE([dist-bzip2])
@@ -85,7 +84,7 @@ fi
 
 AC_CONFIG_FILES([Makefile m4/Makefile src/Makefile src/shape/Makefile src/raster/Makefile src/postgis/Makefile])
 
-AM_CONDITIONAL([BUILD_TIFF_READER],[test "HAVE_LIBTIFF" !=:])
+AM_CONDITIONAL([BUILD_TIFF_READER],[test "$HAVE_LIBTIFF" = yes])
 AM_CONDITIONAL([SHAPE_DATASOURCE],[test "$package_shape_enabled" = yes ])
 AM_CONDITIONAL([RASTER_DATASOURCE],[test "$package_raster_enabled" = yes])
 AM_CONDITIONAL([POSTGIS_DATASOURCE],[test "$package_postgis_enabled" = yes])

@@ -63,7 +63,7 @@ AC_DEFUN([AP_CHECK_LIBTIFF],
 	    TIFF_HOME="/usr/local"
 	  fi
 	  AC_CHECK_LIB(tiff,TIFFReadRGBAStrip,
-	   AC_CHECK_LIB(tiff,TIFFReadRGBATile, [HAVE_LIBTIFF="yes"],[],[libtiff])] [AC_SUBST([TIFF_LDFLAGS],["-L${TIFF_HOME} -ltiff"])],
+	   AC_CHECK_LIB(tiff,TIFFReadRGBATile, [HAVE_LIBTIFF="yes"] [AC_SUBST([TIFF_LDFLAGS],["-L${TIFF_HOME} -ltiff"])],
 	   [AC_MSG_RESULT(no)],)
 	  ,[AC_MSG_RESULT(no)],)
 	 else
