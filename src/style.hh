@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: style.hh 60 2004-11-04 09:40:49Z artem $
+//$Id$
 
 #ifndef STYLE_HH
 #define STYLE_HH
@@ -47,11 +47,12 @@ namespace mapnik
 
     class Style 
     {
-	typedef std::vector<ref_ptr<Symbolizer> >::const_iterator Iterator; 
     private:
 	std::vector<ref_ptr<Symbolizer> > symbols_;
 	static ref_ptr<Symbolizer> zero_symbol_;
     public:
+	typedef std::vector<ref_ptr<Symbolizer> >::const_iterator Iterator; 
+
 	Style() {}
 
 	Style(const ref_ptr<Symbolizer>& symbol) 
