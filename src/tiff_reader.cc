@@ -174,21 +174,19 @@ namespace mapnik
 
 	    int start_y=(y0/tile_height_)*tile_height_;
 	    int end_y=((y0+height)/tile_height_+1)*tile_height_;
-	    bool bottomtiles=((unsigned)end_y > height_)?true:false;
 
 	    int start_x=(x0/tile_width_)*tile_width_;
 	    int end_x=((x0+width)/tile_width_+1)*tile_width_;
-
-	    
 	    int row,tx0,tx1,ty0,ty1;
+
 	    for (int y=start_y;y<end_y;y+=tile_height_)
 	    {
 		ty0=std::max(y0,(unsigned)y)-y;
 		ty1=std::min(height+y0,(unsigned)(y+tile_height_))-y;
 
-		int n0=bottomtiles ? 0:(tile_height_-ty1);
-		int n1=bottomtiles ? (ty1-ty0-1):(tile_height_-ty0-1);
-
+		int n0=tile_height_-ty1;
+		int n1=tile_height_-ty0-1;
+	        
 		for (int x=start_x;x<end_x;x+=tile_width_)
 		{
 
@@ -233,7 +231,7 @@ namespace mapnik
 	    {
 		ty0=std::max(y0,y)-y;
 		ty1=std::min(height+y0,y+rows_per_strip_)-y;
-		memset(buf,0xff,width_*rows_per_strip_*sizeof(uint32));
+
 		if (!TIFFReadRGBAStrip(tif,y,buf)) break;
 		
 		row=y+ty0-y0;
