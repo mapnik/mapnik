@@ -16,11 +16,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: dsfactory.cc 67 2004-11-23 10:04:32Z artem $
+//$Id$
 
 #include "datasource_cache.hh"
 #include "config.hh"
-#include <unistd.h>
 #include <dirent.h>
 #include <algorithm>
 #include <stdexcept>
