@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: graphics.hh 70 2004-11-25 22:09:48Z artem $
+//$Id$
 
 #ifndef GRAPHICS_HH
 #define GRAPHICS_HH
@@ -52,6 +52,11 @@ namespace mapnik
 	inline ImageData32& data() {
 	    return data_;
 	}
+	inline const unsigned char* raw_data() const
+	{
+	    return data_.getBytes();
+	}
+
 	void saveToFile(const std::string& file,const std::string& format="auto"); 
     private:
 
