@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: postgisfs.cc 66 2004-11-16 09:25:15Z artem $
+//$Id$
 
 
 #include "postgis.hh"
