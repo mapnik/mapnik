@@ -7,7 +7,6 @@ AC_REVISION([$Revision: 1.1 $])
 AC_CONFIG_SRCDIR([src/params.cc])
 AM_INIT_AUTOMAKE([dist-bzip2])
 
-AC_PREFIX_DEFAULT (/usr/local)
 AC_LIBTOOL_DLOPEN
 AC_CONFIG_SUBDIRS(libltdl utils/shapeindex)
 
@@ -83,7 +82,7 @@ fi
 
 AC_CONFIG_FILES([Makefile m4/Makefile src/Makefile src/shape/Makefile src/raster/Makefile src/postgis/Makefile])
 
-AC_SUBST([pluginsdir],["$(prefix)/plugins"])
+AC_SUBST([pluginsdir],["${prefix}/plugins"])
 AC_DEFINE_UNQUOTED([_DATASOURCE_PLUGINS_DIR],["$pluginsdir"],[datasource plugins dir])
 
 AM_CONDITIONAL([BUILD_TIFF_READER],[test "$HAVE_LIBTIFF" = yes])
