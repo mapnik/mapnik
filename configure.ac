@@ -23,13 +23,15 @@ AC_HEADER_STDC
 
 # Checks for libraries.
 AC_CHECK_LIB(m,floor)
-
+AC_CHECK_LIB(png,png_read_info)
+AC_CHECK_LIB(jpeg,jpeg_read_header)
 AC_C_BIGENDIAN
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([string.h sys/time.h unistd.h])
 AC_CHECK_HEADER(png.h,,AC_MSG_ERROR(install png-devel))
+AC_CHECK_HEADER(jpeglib.h,,AC_MSG_ERROR(install jpeg-devel))
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
