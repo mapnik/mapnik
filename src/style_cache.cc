@@ -52,4 +52,33 @@ namespace mapnik
 	static const Style default_style(ref_ptr<Symbolizer>(new LineSymbolizer(Color(255,0,0))));
 	return default_style;
     }
+    ////////////////////////////////////////////////////////////////////////////    
+    named_style_cache::named_style_cache() {}
+    named_style_cache::~named_style_cache() {}
+    
+    std::map<std::string,feature_type_style> named_style_cache::styles_;
+
+    bool named_style_cache::insert(const std::string& name,const feature_type_style& style) 
+    {
+	Lock lock(&mutex_);
+	return styles_.insert(make_pair(name,style)).second;
+    }
+    
+    void named_style_cache::remove(const std::string& name) 
+    {
+	Lock lock(&mutex_);
+	styles_.erase(name);
+    }
+    
+    const feature_type_style& named_style_cache::find(const std::string& name) 
+    {
+	Lock lock(&mutex_);
+	std::map<std::string,feature_type_style>::iterator itr=styles_.find(name);
+	//if (itr!=styles_.end()) 
+	//	{
+	return itr->second;
+	    //}
+	    //static const Style default_style(ref_ptr<Symbolizer>(new LineSymbolizer(Color(255,0,0))));
+	    //return default_style;
+    }
 }

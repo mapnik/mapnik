@@ -27,6 +27,8 @@
 
 namespace mapnik
 {
+    typedef ref_ptr<filter<Feature> > filter_ptr;
+
     template <typename Feature>	
     struct filter
     {

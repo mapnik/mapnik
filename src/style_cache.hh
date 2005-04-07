@@ -25,6 +25,7 @@
 #include "ptr.hh"
 #include "style.hh"
 #include <map>
+#include "feature_type_style.hh"
 
 namespace mapnik {
     
@@ -42,6 +43,21 @@ namespace mapnik {
 	static void remove(const std::string& name);
 	static const Style& find(const std::string& name);
     };
+    
+    class named_style_cache : public singleton <named_style_cache,CreateStatic>
+    {
+	friend class CreateStatic<named_style_cache>;
+    private:
+	static std::map<std::string,feature_type_style> styles_;  
+	named_style_cache();
+	~named_style_cache();
+	named_style_cache(const named_style_cache&);
+	named_style_cache& operator=(const named_style_cache&);
+    public:
+	static bool insert(const std::string& name,const feature_type_style& style);
+	static void remove(const std::string& name);
+	static const feature_type_style& find(const std::string& name);
+    }; 
 }
 
 

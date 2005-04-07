@@ -293,6 +293,15 @@ namespace mapnik
 	iter i = find_if(str.begin(),str.end(),not_space);
 	return std::string(i,str.end());	
     }
+    inline std::string trim_right(const std::string& str)
+    {
+	std::string::size_type idx=str.find_last_not_of(" ");
+	return str.substr(0,idx+1);
+    }
+    inline std::string trim(const std::string& str)
+    {
+	return trim_left(trim_right(str));
+    }
 }
 
 

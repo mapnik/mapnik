@@ -35,6 +35,7 @@ namespace mapnik
 	const std::string name_;
 	explicit property_filter(const std::string& name)
 	    : name_(name) {}	
+	virtual ~property_filter() {}
     };
 
     template <typename Feature,typename T>
@@ -57,7 +58,7 @@ namespace mapnik
 	    bool result=false;
 	    try 
 	    {
-		result=(value_==attribute_cast<T>(attr))?true:false;
+		result=(value_ == attribute_cast<T>(attr)) ? true:false;
 	    }
 	    catch (bad_attribute_cast<T>& ex)
 	    {
@@ -98,7 +99,7 @@ namespace mapnik
 	    bool result=false;
 	    try 
 	    {
-		result = (value_ > attribute_cast<T>(attr))?true:false;
+		result = (value_ < attribute_cast<T>(attr))?true:false;
 	    }
 	    catch (bad_attribute_cast<T>& ex)
 	    {
@@ -114,6 +115,7 @@ namespace mapnik
 	{
 	    v.visit(*this);
 	}
+	
 	virtual ~property_is_greater_then() {}
     };
     
@@ -143,11 +145,18 @@ namespace mapnik
 		std::cerr<<ex.what()<<std::endl;
 	    }	
 	    return result; 
-	}	
+	}
+	
+	filter<Feature>* clone() const
+	{
+	    return new property_is_less_then(name_,value_);
+	}
+	
 	void accept(filter_visitor<Feature>& v)
 	{
 	    v.visit(*this);
 	}
+	virtual ~property_is_less_then() {}
     };
            
     template <typename Feature,typename T>

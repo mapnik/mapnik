@@ -39,7 +39,7 @@ namespace mapnik
 	static void render(const Map& map,Image& image);
     private:
 	Renderer();
-	static void renderLayer(const Layer& l,const CoordTransform& t,const query& q,Image& image);
+	static void renderLayer(const Layer& l,const CoordTransform& t,const Envelope<double>& bbox,Image& image);
     };
 }
 

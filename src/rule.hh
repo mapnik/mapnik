@@ -93,11 +93,22 @@ namespace mapnik
 	    swap(tmp);
 	    return *this;
 	}
-	
+
+	const std::string& name() const
+	{
+	    return name_;
+	}
+
+	const std::string& title() const
+	{
+	    return  title_;
+	}
+
 	void abstract(const std::string& abstract)
 	{
 	    abstract_=abstract;
 	}
+	
 	const std::string& abstract() const
 	{
 	    return abstract_;
@@ -132,7 +143,12 @@ namespace mapnik
 	{
 	    return else_filter_;
 	}
-	
+        
+	bool active(double scale) const
+	{
+	    return ( scale > min_scale_ && scale < max_scale_ );
+	}
+
     private:
 	
 	void swap(rule& rhs) throw()

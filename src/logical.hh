@@ -30,7 +30,7 @@ namespace mapnik
     template <typename Feature> 
     struct logical_and : public filter<Feature>  
     {
-	logical_and(const filter<Feature>& filter1,filter<Feature>& filter2)
+	logical_and(const filter<Feature>& filter1,const filter<Feature>& filter2)
 	    : filter1_(filter1.clone()),
 	      filter2_(filter2.clone()) {}
 
@@ -71,7 +71,7 @@ namespace mapnik
     struct logical_or : public filter<Feature>  
     {
 	
-	logical_or(const filter<Feature>& filter1,filter<Feature>& filter2)
+	logical_or(const filter<Feature>& filter1,const filter<Feature>& filter2)
 	    : filter1_(filter1.clone()),
 	      filter2_(filter2.clone()) {}
 

@@ -30,27 +30,30 @@ namespace mapnik
 {
     
     //typedef feature<geometry_ptr,raster_ptr> Feature;
-    typedef ref_ptr<rule<Feature,filter> > rule_ptr;
+    typedef rule<Feature,filter> rule_type;
 
     class feature_type_style
     {
     private:
-	std::vector<rule_ptr>  rules_;
+	std::vector<rule_type>  rules_;
     public:
 	feature_type_style() {}
+
 	feature_type_style(const feature_type_style& rhs)
 	    : rules_(rhs.rules_) {}
+
 	feature_type_style& operator=(const feature_type_style& rhs)
 	{
 	    if (this == &rhs) return *this;
 	    rules_=rhs.rules_;
 	    return *this;
 	}
-	void add_rule(const rule_ptr& rule)
+
+	void add_rule(const rule_type& rule)
 	{
 	    rules_.push_back(rule);
 	} 
-	const std::vector<rule_ptr>& rules() const
+	const std::vector<rule_type>& rules() const
 	{
 	    return rules_;
 	}

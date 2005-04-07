@@ -77,10 +77,10 @@ am__libmapnik_la_SOURCES_DIST = attribute.hh color.cc color.hh \
 	render.hh scanline_aa.cc scanline_aa.hh scanline.cc \
 	scanline.hh style.cc style.hh style_cache.cc style_cache.hh \
 	style_factory.hh symbolizer.hh text.cc text.hh utils.hh \
-	vertex.hh vertex_transform.hh wkb.cc wkb.hh logical.hh rule.hh \
-	comparison.hh fill.hh spatial.hh expression.hh stroke.hh \
-	attribute_collector.hh colorcube.hh feature_type_style.hh \
-	tiff_reader.cc
+	vertex.hh vertex_transform.hh wkb.cc wkb.hh rule.hh \
+	comparison.hh logical.hh fill.hh spatial.hh expression.hh \
+	stroke.hh attribute_collector.hh colorcube.hh \
+	feature_type_style.hh tiff_reader.cc
 @BUILD_TIFF_READER_TRUE@am__objects_1 = libmapnik_la-tiff_reader.lo
 am_libmapnik_la_OBJECTS = libmapnik_la-color.lo \
 	libmapnik_la-datasource_cache.lo libmapnik_la-envelope.lo \
@@ -255,10 +255,10 @@ libmapnik_la_SOURCES = attribute.hh color.cc color.hh coord.hh \
 	render.hh scanline_aa.cc scanline_aa.hh scanline.cc \
 	scanline.hh style.cc style.hh style_cache.cc style_cache.hh \
 	style_factory.hh symbolizer.hh text.cc text.hh utils.hh \
-	vertex.hh vertex_transform.hh wkb.cc wkb.hh logical.hh rule.hh \
-	comparison.hh fill.hh spatial.hh expression.hh stroke.hh \
-	attribute_collector.hh colorcube.hh feature_type_style.hh \
-	$(am__append_1)
+	vertex.hh vertex_transform.hh wkb.cc wkb.hh rule.hh \
+	comparison.hh logical.hh fill.hh spatial.hh expression.hh \
+	stroke.hh attribute_collector.hh colorcube.hh \
+	feature_type_style.hh $(am__append_1)
 libmapnik_la_CPPFLAGS = $(FREETYPE2_CFLAGS) @INCLTDL@
 libmapnik_la_LIBADD = @LIBLTDL@ -lpthread -lpng -ljpeg $(FREETYPE2_LIBS) -lz -lm 
 libmapnik_la_LDFLAGS = -version-info 0:0:0  $(TIFF_LDFLAGS)

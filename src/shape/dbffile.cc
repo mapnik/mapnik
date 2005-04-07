@@ -114,7 +114,7 @@ void dbf_file::add_attribute(int col,Feature* f) const throw()
     if (col>=0 && col<num_fields_)
     {
         std::string name=fields_[col].name_;
-	std::string str=trim_left(std::string(record_+fields_[col].offset_,fields_[col].length_));
+	std::string str=trim(std::string(record_+fields_[col].offset_,fields_[col].length_));
         
         switch (fields_[col].type_)
         {
