@@ -204,7 +204,7 @@ namespace mapnik
     {
 	typedef geometry<T,Container> geometry_base;
 	typedef typename geometry_base::value_type value_type;
-	typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
+	
     public:
 	polygon(int srid)
 	    : geometry_base(srid)
@@ -217,6 +217,7 @@ namespace mapnik
 	
 	bool hit_test(value_type x,value_type y) const
 	{	    
+	    typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
 	    path_iterator start = geometry_base::template begin<NO_SHIFT>();
 	    path_iterator end = geometry_base::template end<NO_SHIFT>();
 	    return point_inside_path(start,end,x,y);
