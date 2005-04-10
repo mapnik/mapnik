@@ -16,37 +16,29 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: text.hh 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
-#ifndef TEXT_HH
-#define TEXT_HH
+#ifndef PLUGIN_HH
+#define PLUGIN_HH
 
-#ifdef __HAVE_FREETYPE2__ //TODO:: fix configure.ac AP_CHECK_FREETYPE2
- 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include <iostream>
+#include <ltdl.h>
 #include <string>
-#include "style.hh"
-#include "graphics.hh"
 
 namespace mapnik
 {
-    template <typename PixBuffer> class TextRasterizer
+    class PluginInfo
     {
         private:
-            PixBuffer* pixbuf_;
-            std::string fontName_;
+            lt_dlhandle module_;
+            std::string name_;
         public:
-            TextRasterizer(PixBuffer& pixbuf,const char* fontName)
-                :pixbuf_(&pixbuf),
-                fontName_(fontName) {}
-            void render(const char* text);
+            PluginInfo (const std::string& name,const lt_dlhandle module);
+            ~PluginInfo();
+            const std::string& name() const;
+            lt_dlhandle handle() const;
         private:
-            TextRasterizer(const TextRasterizer&);
-            TextRasterizer& operator=(const TextRasterizer&);
-            void render_bitmap(FT_Bitmap *bitmap,int x,int y);
+            PluginInfo(const PluginInfo&);
+            PluginInfo& operator=(const PluginInfo&);
     };
 }
-#endif
-#endif                                            //TEXT_HH
+#endif                                            //PLUGIN_HH

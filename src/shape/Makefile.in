@@ -46,7 +46,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/config.hh
+CONFIG_HEADER = $(top_builddir)/include/config.hh
 CONFIG_CLEAN_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -63,7 +63,7 @@ am_shape_la_OBJECTS = shape_la-dbffile.lo shape_la-shape.lo \
 	shape_la-shapefile.lo shape_la-shp_index.lo \
 	shape_la-dbf_test.lo shape_la-shape_index_featureset.lo
 shape_la_OBJECTS = $(am_shape_la_OBJECTS)
-DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
+DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -203,7 +203,7 @@ plugins_LTLIBRARIES = shape.la
 shape_la_SOURCES = dbffile.cc shape.cc shape_io.cc shape_featureset.cc shape_index_featureset.hh dbffile.hh shapefile.cc shape_featureset.hh shape_io.hh shp_index.cc dbf_test.cc shapefile.hh shape.hh shape_index_featureset.cc shp_index.hh
 shape_la_LIBDADD = 
 shape_la_LDFLAGS = -module -version-info 0:0:0 -lpthread
-shape_la_CXXFLAGS = -I$(top_srcdir)/src
+shape_la_CXXFLAGS = -I$(top_srcdir)/include
 all: all-am
 
 .SUFFIXES:

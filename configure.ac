@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 AC_INIT([mapnik],[0.1])
-AC_CONFIG_HEADERS([src/config.hh])
+AC_CONFIG_HEADERS([include/config.hh])
 AC_REVISION([$Revision: 1.1 $])
 AC_CONFIG_SRCDIR([src/params.cc])
 AM_INIT_AUTOMAKE([dist-bzip2])
@@ -80,7 +80,7 @@ if test "$package_postgis_enabled" = yes ; then
   AP_CHECK_POSTGRESQL
 fi 
 
-AC_CONFIG_FILES([Makefile m4/Makefile src/Makefile src/shape/Makefile src/raster/Makefile src/postgis/Makefile])
+AC_CONFIG_FILES([Makefile m4/Makefile include/Makefile src/Makefile src/shape/Makefile src/raster/Makefile src/postgis/Makefile])
 
 AC_SUBST([pluginsdir],["${prefix}/plugins"])
 AC_DEFINE_UNQUOTED([_DATASOURCE_PLUGINS_DIR],["$pluginsdir"],[datasource plugins dir])

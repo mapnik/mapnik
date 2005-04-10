@@ -16,31 +16,28 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: line_aa.hh 60 2004-11-04 09:40:49Z artem $
+#ifndef SHP_INDEX_HH
+#define SHP_INDEX_HH
 
-#ifndef LINE_AA_HH
-#define LINE_AA_HH
+#include "mapnik.hh"
+#include <fstream>
+#include <set>
 
-#include "geometry.hh"
-#include "graphics.hh"
-#include "style.hh"
+using namespace mapnik;
 
-namespace mapnik
+template <typename filterT>
+class shp_index
 {
-    template <typename PixBuffer> class LineRasterizerAA
-    {
-    private:
-	PixBuffer* pixbuf_;
-    public:
-	LineRasterizerAA(PixBuffer& pixbuf)
-                :pixbuf_(&pixbuf) {}
-	
-	template <typename Transform>
-	void render(const geometry_type& geom,const Color& c);
-    private:
-	LineRasterizerAA(const LineRasterizerAA&);
-	LineRasterizerAA& operator=(const LineRasterizerAA&);
-	void render_line(int x0,int y0,int x1,int y1,unsigned rgba);
-    };
-}
-#endif                                            //LINE_AA_HH
+public:
+    static void query(const filterT& filter,std::ifstream& file,std::set<int>& pos);
+private:
+    shp_index();
+    ~shp_index();
+    shp_index(const shp_index&);
+    shp_index& operator=(const shp_index&);
+    static int read_ndr_integer(std::ifstream& in);
+    static void read_envelope(std::ifstream& in,Envelope<double> &envelope);
+    static void query_node(const filterT& filter,std::ifstream& file,std::set<int>& pos);
+};
+
+#endif //SHP_INDEX_HH

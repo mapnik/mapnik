@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: ctrans.hh 59 2004-11-02 22:55:30Z artem $
+//$Id$
 
 #ifndef CTRANS_HH
 #define CTRANS_HH

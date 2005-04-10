@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: map.hh 69 2004-11-24 11:08:45Z artem $
+//$Id$
 
 #ifndef MAP_HH
 #define MAP_HH

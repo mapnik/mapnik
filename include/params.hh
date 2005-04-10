@@ -16,29 +16,32 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: scanline.hh 60 2004-11-04 09:40:49Z artem $
+//$Id$
 
-#ifndef SCANLINE_HH
-#define SCANLINE_HH
+#ifndef PARAMS_HH
+#define PARAMS_HH
 
-#include "geometry.hh"
+#include <map>
 
 namespace mapnik
 {
-    template <typename PixBuffer> class ScanlineRasterizer
+
+    typedef std::pair<std::string,std::string> Parameter;
+
+    class Parameters
     {
+        typedef std::map<std::string,std::string> ParamMap;
     private:
-	PixBuffer* pixbuf_;
+	ParamMap data_;
     public:
-	ScanlineRasterizer(PixBuffer& pixbuf)
-	    :pixbuf_(&pixbuf) {}
-	
-	template <typename Transform>
-	void render(const geometry_type& geom,const Color& c);
-    private:
-	ScanlineRasterizer(const ScanlineRasterizer&);
-	ScanlineRasterizer& operator=(const ScanlineRasterizer&);
-	void render_hline(int x0,int x1,int y,unsigned int rgba);
+	typedef ParamMap::const_iterator const_iterator;
+	Parameters() {}
+	const std::string get(const std::string& name) const;
+	void add(const Parameter& param);
+	void add(const std::string& name,const std::string& value);
+	const_iterator begin() const;
+	const_iterator end() const;
+	virtual ~Parameters();
     };
 }
-#endif                                            //SCANLINE_HH
+#endif                                            //PARAMS_HH

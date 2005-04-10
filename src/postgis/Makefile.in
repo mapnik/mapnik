@@ -46,7 +46,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/config.hh
+CONFIG_HEADER = $(top_builddir)/include/config.hh
 CONFIG_CLEAN_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -60,7 +60,7 @@ LTLIBRARIES = $(plugins_LTLIBRARIES)
 postgis_la_LIBADD =
 am_postgis_la_OBJECTS = postgis_la-postgis.lo postgis_la-postgisfs.lo
 postgis_la_OBJECTS = $(am_postgis_la_OBJECTS)
-DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
+DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -200,7 +200,7 @@ plugins_LTLIBRARIES = postgis.la
 postgis_la_SOURCES = resultset.hh connection.hh connection_manager.hh postgis.cc  postgisfs.cc  postgis.hh
 postgis_la_LIBDADD = 
 postgis_la_LDFLAGS = -module -version-info 0:0:0 $(POSTGRESQL_LIBS) -lpthread
-postgis_la_CXXFLAGS = -I$(top_srcdir)/src $(POSTGRESQL_CFLAGS)
+postgis_la_CXXFLAGS = -I$(top_srcdir)/include $(POSTGRESQL_CFLAGS)
 all: all-am
 
 .SUFFIXES:

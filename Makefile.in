@@ -49,7 +49,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/config.hh
+CONFIG_HEADER = $(top_builddir)/include/config.hh
 CONFIG_CLEAN_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -185,7 +185,7 @@ sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = m4 libltdl src utils/shapeindex
+SUBDIRS = m4 libltdl include src utils/shapeindex
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = config.rpath mkinstalldirs
 all: all-recursive

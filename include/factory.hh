@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: factory.hh 64 2004-11-12 10:29:32Z artem $
+//$Id$
 
 #ifndef FACTORY_HH
 #define FACTORY_HH

@@ -1515,7 +1515,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-          ac_config_headers="$ac_config_headers src/config.hh"
+          ac_config_headers="$ac_config_headers include/config.hh"
 
 
 
@@ -23368,7 +23368,7 @@ POSTGRESQL_CFLAGS="-I${POSTGRESQL_PREFIX}/include"
 
 fi
 
-                                                            ac_config_files="$ac_config_files Makefile m4/Makefile src/Makefile src/shape/Makefile src/raster/Makefile src/postgis/Makefile"
+                                                                      ac_config_files="$ac_config_files Makefile m4/Makefile include/Makefile src/Makefile src/shape/Makefile src/raster/Makefile src/postgis/Makefile"
 
 
 pluginsdir="${prefix}/plugins"
@@ -24021,12 +24021,13 @@ do
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "m4/Makefile" ) CONFIG_FILES="$CONFIG_FILES m4/Makefile" ;;
+  "include/Makefile" ) CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "src/shape/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/shape/Makefile" ;;
   "src/raster/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/raster/Makefile" ;;
   "src/postgis/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/postgis/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
-  "src/config.hh" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.hh" ;;
+  "include/config.hh" ) CONFIG_HEADERS="$CONFIG_HEADERS include/config.hh" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;

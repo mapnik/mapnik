@@ -16,33 +16,29 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: dsfactory.hh 61 2004-11-04 23:16:30Z artem $
+//$Id$
 
-#ifndef DSFACTORY_HH
-#define DSFACTORY_HH
+#ifndef SCANLINE_HH
+#define SCANLINE_HH
 
-#include "utils.hh"
-#include "ptr.hh"
-#include "params.hh"
-#include "plugin.hh"
-#include "datasource.hh"
-#include <map>
+#include "geometry.hh"
 
 namespace mapnik
 {
-    class datasource_cache : public singleton <datasource_cache,CreateStatic>
+    template <typename PixBuffer> class ScanlineRasterizer
     {
-        friend class CreateStatic<datasource_cache>;
     private:
-	datasource_cache();
-	~datasource_cache();
-	datasource_cache(const datasource_cache&);
-	datasource_cache& operator=(const datasource_cache&);
-	static std::map<std::string,ref_ptr<PluginInfo> > plugins_;
-	static void insert(const std::string&  name,const lt_dlhandle module);
+	PixBuffer* pixbuf_;
     public:
-	static void register_datasources(const std::string& path);
-	static ref_ptr<datasource,datasource_delete> create(const Parameters& params);
+	ScanlineRasterizer(PixBuffer& pixbuf)
+	    :pixbuf_(&pixbuf) {}
+	
+	template <typename Transform>
+	void render(const geometry_type& geom,const Color& c);
+    private:
+	ScanlineRasterizer(const ScanlineRasterizer&);
+	ScanlineRasterizer& operator=(const ScanlineRasterizer&);
+	void render_hline(int x0,int x1,int y,unsigned int rgba);
     };
 }
-#endif                                            //DSFACTORY_HH
+#endif                                            //SCANLINE_HH

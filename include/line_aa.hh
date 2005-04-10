@@ -16,32 +16,31 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: params.hh 68 2004-11-23 22:39:58Z artem $
+//$Id$
 
-#ifndef PARAMS_HH
-#define PARAMS_HH
+#ifndef LINE_AA_HH
+#define LINE_AA_HH
 
-#include <map>
+#include "geometry.hh"
+#include "graphics.hh"
+#include "style.hh"
 
 namespace mapnik
 {
-
-    typedef std::pair<std::string,std::string> Parameter;
-
-    class Parameters
+    template <typename PixBuffer> class LineRasterizerAA
     {
-        typedef std::map<std::string,std::string> ParamMap;
     private:
-	ParamMap data_;
+	PixBuffer* pixbuf_;
     public:
-	typedef ParamMap::const_iterator const_iterator;
-	Parameters() {}
-	const std::string get(const std::string& name) const;
-	void add(const Parameter& param);
-	void add(const std::string& name,const std::string& value);
-	const_iterator begin() const;
-	const_iterator end() const;
-	virtual ~Parameters();
+	LineRasterizerAA(PixBuffer& pixbuf)
+                :pixbuf_(&pixbuf) {}
+	
+	template <typename Transform>
+	void render(const geometry_type& geom,const Color& c);
+    private:
+	LineRasterizerAA(const LineRasterizerAA&);
+	LineRasterizerAA& operator=(const LineRasterizerAA&);
+	void render_line(int x0,int y0,int x1,int y1,unsigned rgba);
     };
 }
-#endif                                            //PARAMS_HH
+#endif                                            //LINE_AA_HH

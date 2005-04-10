@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: pool.hh 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
 #ifndef POOL_HH
 #define POOL_HH

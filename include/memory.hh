@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: memory.hh 58 2004-10-31 16:21:26Z artem $
+//$Id$
 
 #ifndef MEMORY_HH
 #define MEMORY_HH

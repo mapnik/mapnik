@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: layer.hh 68 2004-11-23 22:39:58Z artem $
+//$Id$
 
 #ifndef LAYER_HH
 #define LAYER_HH
