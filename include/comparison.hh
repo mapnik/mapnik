@@ -54,7 +54,7 @@ namespace mapnik
 	
 	bool pass(const Feature& feature) const
 	{
-	    attribute attr=feature.attribute_by_name(name_);
+	    const attribute& attr=feature.attribute_by_name(name_);
 	    bool result=false;
 	    try 
 	    {
@@ -95,7 +95,7 @@ namespace mapnik
 	
 	bool pass(const Feature& feature) const
 	{
-	    attribute attr=feature.attribute_by_name(name_);
+	    const attribute& attr=feature.attribute_by_name(name_);
 	    bool result=false;
 	    try 
 	    {
@@ -134,7 +134,7 @@ namespace mapnik
 	
 	bool pass(const Feature& feature) const
 	{
-	    attribute attr=feature.attribute_by_name(name_);
+	    const attribute& attr=feature.attribute_by_name(name_);
 	    bool result=false;
 	    try 
 	    {
@@ -178,7 +178,7 @@ namespace mapnik
 	
 	bool pass(const Feature& feature) const
 	{
-	    attribute attr=feature.attribute_by_name(name_);
+	    const attribute& attr=feature.attribute_by_name(name_);
 	    bool result=false;
 	    try 
 	    {

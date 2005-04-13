@@ -92,12 +92,13 @@ namespace mapnik
 	    attr_.insert(std::make_pair(name,attribute(value)));
 	}
 	
-	attribute attribute_by_name(const std::string& name) const
+	const attribute& attribute_by_name(const std::string& name) const
 	{
 	    typename attributes::const_iterator pos=attr_.find(name);
 	    if (pos!=attr_.end())
 		return pos->second;
-	    return attribute();
+	    static attribute empty;
+	    return empty;
 	}
 	
 	const attributes& get_attributes() const 
