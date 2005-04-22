@@ -83,7 +83,7 @@ namespace mapnik
 	    ++namesIter;
 	}
 	
-	FeaturesetPtr fs=ds->features(q);
+	featureset_ptr fs=ds->features(q);
         if (fs)
         {   	    
 	    Feature* feature=0;

@@ -31,15 +31,11 @@ class shape_datasource : public datasource
     long file_length_;
     mapnik::Envelope<double> extent_;
     bool indexed_;
+    static std::string name_;
 public:
     int type() const;
     static std::string name();
-    FeaturesetPtr featuresAll(const CoordTransform& t) const;
-    FeaturesetPtr featuresInBox(const CoordTransform& t,const mapnik::Envelope<double>& box) const;
-    FeaturesetPtr featuresAtPoint(const CoordTransform& t,const mapnik::coord2d& pt) const;
-
-    FeaturesetPtr features(const query& q) const;
-
+    featureset_ptr features(const query& q) const;
     const Envelope<double>& envelope() const;
     shape_datasource(const Parameters &params);
     virtual ~shape_datasource();

@@ -40,10 +40,11 @@ class PostgisDatasource : public datasource
     int srid_;
     mapnik::Envelope<double> extent_;
     ConnectionCreator<Connection> creator_;
+    static std::string name_;
 public:
     static std::string name();
     int type() const;
-    FeaturesetPtr features(const query& q) const;
+    featureset_ptr features(const query& q) const;
     const mapnik::Envelope<double>& envelope() const;
     PostgisDatasource(const Parameters &params);
     ~PostgisDatasource();

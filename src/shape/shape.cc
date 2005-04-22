@@ -28,7 +28,8 @@ DATASOURCE_PLUGIN(shape_datasource);
 shape_datasource::shape_datasource(const Parameters &params)
     : shape_name_(params.get("file")),
       file_length_(0),
-      indexed_(false)
+      indexed_(false),
+      type_(datasource::Vector)
 {
     try
     {
@@ -47,6 +48,7 @@ shape_datasource::~shape_datasource()
 {
 }
 
+std::string shape_datasource::name_="shape";
 
 void  shape_datasource::init(shape_io& shape)
 {
@@ -66,13 +68,6 @@ void  shape_datasource::init(shape_io& shape)
         throw datasource_exception("invalid version number");
     }
     int shape_type=shape.shp().read_ndr_integer();
-    if (shape_type==1 || shape_type==8 || shape_type==18 || shape_type==28)
-        type_=datasource::Point;
-    else if (shape_type==3 || shape_type==13 || shape_type==23)
-        type_=datasource::Line;
-    else if (shape_type==5 || shape_type==15 || shape_type==25)
-        type_=datasource::Polygon;
-
     shape.shp().read_envelope(extent_);
     shape.shp().skip(4*8);
 
@@ -99,17 +94,17 @@ int shape_datasource::type() const
 
 std::string shape_datasource::name()
 {
-    return "shape";
+    return name_;
 }
 
-FeaturesetPtr shape_datasource::features(const query& q) const
+featureset_ptr shape_datasource::features(const query& q) const
 {
     filter_in_box filter(q.get_bbox());
     if (indexed_)
     {
-	return FeaturesetPtr(new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
+	return featureset_ptr(new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
     }
-    return FeaturesetPtr(new shape_featureset<filter_in_box>(filter,shape_name_,file_length_));
+    return featureset_ptr(new shape_featureset<filter_in_box>(filter,shape_name_,file_length_));
 }
 
 const Envelope<double>& shape_datasource::envelope() const

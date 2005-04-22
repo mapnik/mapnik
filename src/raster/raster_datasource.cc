@@ -45,6 +45,7 @@ raster_datasource::~raster_datasource()
 {
 }
 
+std::string raster_datasource::name_="raster";
 
 int raster_datasource::type() const
 {
@@ -54,7 +55,7 @@ int raster_datasource::type() const
 
 std::string raster_datasource::name()
 {
-    return "raster";
+    return name_;
 }
 
 bool raster_datasource::parseEnvelope(const std::string& str,Envelope<double>& envelope) 
@@ -68,23 +69,23 @@ const mapnik::Envelope<double>& raster_datasource::envelope() const
 }
 
 
-FeaturesetPtr raster_datasource::featuresAll(const CoordTransform& t) const
+featureset_ptr raster_datasource::featuresAll(const CoordTransform& t) const
 {
-    return FeaturesetPtr(0);
+    return featureset_ptr(0);
 }
 
 
-FeaturesetPtr raster_datasource::featuresInBox(const CoordTransform& t,
+featureset_ptr raster_datasource::featuresInBox(const CoordTransform& t,
 					       const mapnik::Envelope<double>& box) const
 {
     RasterInfo info(filename_,format_,extent_);
     single_file_policy policy(info); //todo: handle different policies!
-    return FeaturesetPtr(new RasterFeatureset<single_file_policy>(policy,box,t));
+    return featureset_ptr(new RasterFeatureset<single_file_policy>(policy,box,t));
 }
 
 
-FeaturesetPtr raster_datasource::featuresAtPoint(const CoordTransform& t,
+featureset_ptr raster_datasource::featuresAtPoint(const CoordTransform& t,
 						 const coord2d& pt) const
 {
-    return FeaturesetPtr(0);
+    return featureset_ptr(0);
 }

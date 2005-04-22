@@ -37,7 +37,7 @@ PostgisDatasource::PostgisDatasource(const Parameters& params)
 	       params.get("dbname"),
 	       params.get("user"),
 	       params.get("pass")),
-      type_(0)
+      type_(datasource::Vector)
     
 {
  
@@ -67,14 +67,6 @@ PostgisDatasource::PostgisDatasource(const Parameters& params)
 		srid_=atoi(rs->getValue("srid"));
 		geometryColumn_=rs->getValue("f_geometry_column");
 		std::string postgisType=rs->getValue("type");
-		
-		if (postgisType=="POINT" || postgisType=="POINTM" || postgisType=="MULTIPOINT" )
-		    type_=datasource::Point;
-		else if (postgisType=="LINESTRING" || postgisType=="MULTILINESTRING")
-		    type_=datasource::Line;
-		else if (postgisType=="POLYGON" || postgisType=="MULTIPOLYGON")
-		    type_=datasource::Polygon;
-
 	    }
 	    rs->close();
 	    s.str("");
@@ -97,11 +89,12 @@ PostgisDatasource::PostgisDatasource(const Parameters& params)
     }
 }
 
+std::string PostgisDatasource::name_="postgis";
+
 std::string PostgisDatasource::name()
 {
-    return "postgis";
+    return name_;
 }
-
 
 int PostgisDatasource::type() const
 {
@@ -123,7 +116,7 @@ std::string PostgisDatasource::table_from_sql(const std::string& sql)
     return table_name;
 }
 
-FeaturesetPtr PostgisDatasource::features(const query& q) const
+featureset_ptr PostgisDatasource::features(const query& q) const
 {
     Featureset *fs=0;
     const Envelope<double>& box=q.get_bbox();
@@ -145,7 +138,7 @@ FeaturesetPtr PostgisDatasource::features(const query& q) const
 	    fs=new PostgisFeatureset(rs);
 	}
     }
-    return FeaturesetPtr(fs);
+    return featureset_ptr(fs);
 }
 
 const Envelope<double>& PostgisDatasource::envelope() const
@@ -153,7 +146,4 @@ const Envelope<double>& PostgisDatasource::envelope() const
     return extent_;
 }
 
-
-PostgisDatasource::~PostgisDatasource()
-{
-}
+PostgisDatasource::~PostgisDatasource() {}

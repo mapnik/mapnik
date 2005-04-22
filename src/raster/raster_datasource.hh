@@ -32,14 +32,15 @@ private:
     std::string                  filename_;
     std::string                  format_;
     mapnik::Envelope<double>     extent_;
+    static std::string           name_;
 public:
     raster_datasource(const Parameters& params);
     virtual            ~raster_datasource();
-    int                type() const;
-    static std::string name();
-    FeaturesetPtr      featuresAll(const CoordTransform& t) const;
-    FeaturesetPtr      featuresInBox(const CoordTransform& t,const mapnik::Envelope<double>& box) const;
-    FeaturesetPtr      featuresAtPoint(const CoordTransform& t,const coord2d& pt) const;
+    int                 type() const;
+    std::string         name();
+    featureset_ptr      featuresAll(const CoordTransform& t) const;
+    featureset_ptr      featuresInBox(const CoordTransform& t,const mapnik::Envelope<double>& box) const;
+    featureset_ptr      featuresAtPoint(const CoordTransform& t,const coord2d& pt) const;
     const mapnik::Envelope<double>& envelope() const;
 private:
     //no copying
