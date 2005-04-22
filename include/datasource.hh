@@ -30,15 +30,15 @@
 #include "query.hh"
 
 namespace mapnik
-{
+{    
+    typedef ref_ptr<Feature> feature_ptr;
     struct Featureset
     {
         virtual Feature* next()=0;
         virtual ~Featureset() {};
     };
-
-    typedef ref_ptr<Featureset> FeaturesetPtr;
-
+    
+    typedef ref_ptr<Featureset> featureset_ptr;    
     class datasource_exception : public std::exception
     {
     private:
@@ -58,13 +58,11 @@ namespace mapnik
     {
     public:
 	enum {
-	    Point=1,
-	    Line,
-	    Polygon,
+	    Vector,
 	    Raster
 	};
 	virtual int type() const=0;
-	virtual FeaturesetPtr features(const query& q) const=0;
+	virtual featureset_ptr features(const query& q) const=0;
 	virtual const Envelope<double>& envelope() const=0;
 	virtual ~datasource() {};
     };
