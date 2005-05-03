@@ -55,7 +55,12 @@
 #include "map.hh"
 #include "colorcube.hh"
 #include "feature_type_style.hh"
-
+#include "filter_visitor.hh"
+#include "math_expr.hh"
+#include "value.hh"
+#include "expression.hh"
+#include "filter_parser.hh"
+#include "filter_factory.hh"
 
 namespace mapnik
 {

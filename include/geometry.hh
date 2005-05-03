@@ -70,16 +70,7 @@ namespace mapnik
 	{
 	    cont_.push_back(x,y,SEG_LINETO);
 	}
-	
-	//unsigned vertex(double* x, double* y)
-	//	{
-	//    return cont_.get_vertex(itr_++,x,y);
-	//	}
-	
-	//void rewind(unsigned )
-	//	{
-	//    itr_=0;
-	//	}
+		
 	template <typename Transform>
 	class path_iterator
 	{
@@ -173,6 +164,16 @@ namespace mapnik
 	    return cont_.size();
 	}
 
+	unsigned vertex(double* x, double* y)
+	{
+	    return cont_.get_vertex(itr_++,x,y);
+	}
+	
+	void rewind(unsigned )
+	{
+	    itr_=0;
+	}
+	
 	virtual ~geometry() {}
     private:
 	geometry(const geometry&);

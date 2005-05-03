@@ -97,7 +97,7 @@ namespace mapnik
 	    typename attributes::const_iterator pos=attr_.find(name);
 	    if (pos!=attr_.end())
 		return pos->second;
-	    static attribute empty;
+	    static attribute empty(0);
 	    return empty;
 	}
 	

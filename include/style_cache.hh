@@ -56,7 +56,7 @@ namespace mapnik {
     public:
 	static bool insert(const std::string& name,const feature_type_style& style);
 	static void remove(const std::string& name);
-	static const feature_type_style& find(const std::string& name);
+	static feature_type_style find(const std::string& name);
     }; 
 }
 

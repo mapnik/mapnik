@@ -16,48 +16,97 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+//$Id$
+
 #ifndef EXPRESSION_HH
 #define EXPRESSION_HH
 
+#include "value.hh"
+#include "filter_visitor.hh"
+
 namespace mapnik
 {
-    //arithmetic expressions
-    template <typename T>
-    struct add
+    template <typename FeatureT> class filter_visitor;
+    template <typename FeatureT>
+    struct expression
     {
-	T operator()(T operand1,T operand2) const
-	{
-	    return operand1 + operand2;
-	}
+	virtual value get_value(FeatureT const& feature) const=0;
+	virtual void accept(filter_visitor<FeatureT>& v)=0;
+	virtual expression<FeatureT>* clone() const=0;
+	virtual ~expression() {}
     };
 
-    template <typename T>
-    struct divide
+    template <typename FeatureT> 
+    class literal : public expression<FeatureT>
     {
-	T operator()(T operand1,T operand2) const
+    public:
+	literal(int val)
+	    : expression<FeatureT>(),
+	      value_(val) {}
+	literal(double val)
+	    : expression<FeatureT>(),
+	      value_(val) {}
+	literal(std::string const& val)
+	    : expression<FeatureT>(),
+	      value_(val) {}
+	literal(literal const& other)
+	    : expression<FeatureT>(),
+	      value_(other.value_) {}
+	
+	value get_value(FeatureT const& /*feature*/) const
 	{
-	    assert(operand2);
-	    return operand1 / operand2;
+	    return value_;
 	}
+	void accept(filter_visitor<FeatureT>& v)
+	{
+	    v.visit(*this);
+	}
+	expression<FeatureT>* clone() const
+	{
+	    return new literal(*this); 
+	}
+
+        ~literal() {}
+    private:
+	value value_;
+	
     };
-    
-    template <typename T>
-    struct mult
+  
+
+    template <typename FeatureT> 
+    class property : public expression<FeatureT>
     {
-	T operator() (T operand1,T operand2) const
+    public:
+	property(std::string const& name)
+	    : expression<FeatureT>(),
+	      name_(name) {}
+	
+	property(property const& other)
+	    : expression<FeatureT>(),
+	      name_(other.name_) {}
+
+	value get_value(FeatureT const& feature) const
 	{
-	    return operand1 * operand2;
+	    const attribute& attr=feature.attribute_by_name(name_);
+	    return value(attr);
 	}
+	void accept(filter_visitor<FeatureT>& v)
+	{
+	    v.visit(*this);
+	}
+	expression<FeatureT>* clone() const
+	{
+	    return new property(*this); 
+	}
+	std::string const& name() const
+	{
+	    return name_;
+	}
+        ~property() {}
+    private:
+	std::string name_;
     };
 
-    template <typename T>
-    struct sub
-    {
-	T operator() (T operand1,T operand2) const
-	{
-	    return operand1 - operand2;
-	}
-    }; 
 }
 
 #endif //EXPRESSION_HH

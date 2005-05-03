@@ -16,40 +16,41 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: logical.hh 11 2005-03-16 19:46:18Z artem $
-
+//$Id$
 
 #ifndef LOGICAL_HH
 #define LOGICAL_HH
 
 #include "filter.hh"
-#include "feature.hh"
 
 namespace mapnik
 {
-    template <typename Feature> 
-    struct logical_and : public filter<Feature>  
+    template <typename FeatureT> 
+    struct logical_and : public filter<FeatureT>  
     {
-	logical_and(const filter<Feature>& filter1,const filter<Feature>& filter2)
-	    : filter1_(filter1.clone()),
+	logical_and(filter<FeatureT> const& filter1,
+		    filter<FeatureT> const& filter2)
+	    : filter<FeatureT>(),
+	      filter1_(filter1.clone()),
 	      filter2_(filter2.clone()) {}
+	
+	logical_and(logical_and const& other)
+	    : filter<FeatureT>(),
+	      filter1_(other.filter1_->clone()),
+	      filter2_(other.filter2_->clone()) {}
 
-	int type() const
-	{
-	    return filter<Feature>::LOGICAL_OPS;
-	}
-
-	bool pass(const Feature& feature) const
+	bool pass(const FeatureT& feature) const
 	{
 	    return (filter1_->pass(feature) && 
 		filter2_->pass(feature));
 	}
-	filter<Feature>* clone() const
+
+	filter<FeatureT>* clone() const
 	{
-	    return new logical_and(*filter1_,*filter2_);
+	    return new logical_and(*this);
 	}
 
-	void accept(filter_visitor<Feature>& v)
+	void accept(filter_visitor<FeatureT>& v)
 	{
 	    filter1_->accept(v);
 	    filter2_->accept(v);
@@ -63,34 +64,41 @@ namespace mapnik
 	}
 	
     private:
-	filter<Feature>* filter1_;
-	filter<Feature>* filter2_;
+	filter<FeatureT>* filter1_;
+	filter<FeatureT>* filter2_;
     };
 
-    template <typename Feature> 
-    struct logical_or : public filter<Feature>  
+    template <typename FeatureT> 
+    struct logical_or : public filter<FeatureT>  
     {
 	
-	logical_or(const filter<Feature>& filter1,const filter<Feature>& filter2)
-	    : filter1_(filter1.clone()),
+	logical_or(const filter<FeatureT>& filter1,const filter<FeatureT>& filter2)
+	    : filter<FeatureT>(),
+	      filter1_(filter1.clone()),
 	      filter2_(filter2.clone()) {}
+	
+	logical_or(logical_or const& other)
+	    : filter<FeatureT>(),
+	      filter1_(other.filter1_->clone()),
+	      filter2_(other.filter2_->clone()) {}
 
-	int type() const
+	bool pass(const FeatureT& feature) const
 	{
-	    return filter<Feature>::LOGICAL_OPS;
+	    if (filter1_->pass(feature))
+	    {
+		return true;
+	    }
+	    else
+	    {
+		return filter2_->pass(feature);
+	    }
+	}
+	filter<FeatureT>* clone() const
+	{
+	    return new logical_or(*this);
 	}
 
-	bool pass(const Feature& feature) const
-	{
-	    return (filter1_->pass(feature) ||
-		filter2_->pass(feature));
-	}
-	filter<Feature>* clone() const
-	{
-	    return new logical_or(*filter1_,*filter2_);
-	}
-
-	void accept(filter_visitor<Feature>& v)
+	void accept(filter_visitor<FeatureT>& v)
 	{
 	    filter1_->accept(v);
 	    filter2_->accept(v);
@@ -103,31 +111,36 @@ namespace mapnik
 	    delete filter2_;
 	}
     private:
-	filter<Feature>* filter1_;
-	filter<Feature>* filter2_;
+	filter<FeatureT>* filter1_;
+	filter<FeatureT>* filter2_;
     };
 
-    template <typename Feature> 
-    struct logical_not : public filter<Feature>  
+    template <typename FeatureT> 
+    struct logical_not : public filter<FeatureT>  
     {
-	logical_not(const filter<Feature>& filter)
-	    : filter_(filter.clone()) {}
+	logical_not(filter<FeatureT> const& _filter)
+	    : filter<FeatureT>(),
+	      filter_(_filter.clone()) {}
+	logical_not(logical_not const& other)
+	    : filter<FeatureT>(),
+	      filter_(other.filter_->clone()) {}
+
 	int type() const
 	{
-	    return filter<Feature>::LOGICAL_OPS;
+	    return filter<FeatureT>::LOGICAL_OPS;
 	}
 
-	bool pass(const Feature& feature) const
+	bool pass(const FeatureT& feature) const
 	{
 	    return !(filter_->pass(feature));
 	}
 
-	filter<Feature>* clone() const
+	filter<FeatureT>* clone() const
 	{
-	    return new logical_not(*filter_);
+	    return new logical_not(*this);
 	}
 	
-	void accept(filter_visitor<Feature>& v)
+	void accept(filter_visitor<FeatureT>& v)
 	{
 	    filter_->accept(v);
 	    v.visit(*this);
@@ -138,8 +151,8 @@ namespace mapnik
 	    delete filter_;
 	}
     private:
-	filter<Feature>* filter_;
+	filter<FeatureT>* filter_;
     };
 }
-
+ 
 #endif //LOGICAL_HH

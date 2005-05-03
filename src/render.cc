@@ -44,7 +44,9 @@ namespace mapnik
         if (!ds) return;
 	
 	volatile named_style_cache* styles=named_style_cache::instance();
-	const feature_type_style& style=styles->find(l.getStyle());
+
+	//get copy
+	feature_type_style style=styles->find(l.getStyle());
 	
 	const std::vector<rule_type>& rules=style.rules();
 	

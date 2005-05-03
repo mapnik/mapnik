@@ -21,36 +21,40 @@
 #ifndef ATTRIBUTE_COLLECTOR
 #define ATTROBUTE_COLLECTOR
 
-#include "filter_visitor.hh"
+#include "filter.hh"
+#include "expression.hh"
 #include <set>
-#include "comparison.hh"
 
 namespace mapnik
 {
-    template <typename Feature>
-    class attribute_collector : public filter_visitor<Feature>
+    template <typename FeatureT>
+    class attribute_collector : public filter_visitor<FeatureT>
     {
     private:
 	std::set<std::string> names_;
     public:
 	attribute_collector() {}
-	void visit(filter<Feature>& filter) 
-	{   
-	    property_filter<Feature>* pf_;
-	    if((pf_=dynamic_cast<property_filter<Feature>*>(&filter)))
+	void visit(filter<FeatureT>& /*filter*/) 
+	{ 
+	    //not interested
+	}
+	void visit(expression<FeatureT>& exp)
+	{
+	    property<FeatureT>* pf;
+	    if ((pf = dynamic_cast<property<FeatureT>*>(&exp)))
 	    {
-		names_.insert(pf_->name_);
+		names_.insert(pf->name());
 	    }
 	}
-	const std::set<std::string>& property_names() const
+	std::set<std::string> const& property_names() const
 	{
 	    return names_;
 	}
 	
 	virtual ~attribute_collector() {}
     private:
-	attribute_collector(const attribute_collector&);
-	attribute_collector& operator=(const attribute_collector&);
+	attribute_collector(attribute_collector const&);
+	attribute_collector& operator=(attribute_collector const&);
     };
 }
 

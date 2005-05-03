@@ -8,9 +8,13 @@ if BUILD_TIFF_READER
    libmapnik_la_SOURCES += tiff_reader.cc
 endif
 
-libmapnik_la_CPPFLAGS = -I$(top_srcdir)/include $(FREETYPE2_CFLAGS)
-libmapnik_la_CPPFLAGS += @INCLTDL@
-libmapnik_la_LIBADD = @LIBLTDL@ -lpthread -lpng -ljpeg $(FREETYPE2_LIBS) -lz -lm 
+SPIRIT_ROOT = "/home/artem/projects/spirit_1_8_2"
+
+libmapnik_la_CXXFLAGS = -I$(top_srcdir)/include $(FREETYPE2_CFLAGS) 
+libmapnik_la_CXXFLAGS += -I$//home/artem/projects/spirit_1_8_2 -I$//home/artem/projects/spirit_1_8_2/miniboost
+libmapnik_la_CXXFLAGS += -I$//home/artem/projects/agg2/include
+libmapnik_la_CXXFLAGS += @INCLTDL@
+libmapnik_la_LIBADD = @LIBLTDL@ -lpthread -lpng -ljpeg $(FREETYPE2_LIBS) -lz -lm -L$//home/artem/projects/agg2/src -lagg 
 libmapnik_la_LDFLAGS= -version-info 0:0:0  $(TIFF_LDFLAGS)
 
 if SHAPE_DATASOURCE

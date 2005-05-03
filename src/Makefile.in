@@ -220,9 +220,12 @@ libmapnik_la_SOURCES = color.cc datasource_cache.cc envelope.cc \
 	map.cc memory.cc params.cc plugin.cc png_reader.cc render.cc \
 	scanline_aa.cc scanline.cc style.cc style_cache.cc text.cc \
 	wkb.cc $(am__append_1)
-libmapnik_la_CPPFLAGS = -I$(top_srcdir)/include $(FREETYPE2_CFLAGS) \
-	@INCLTDL@ $(am__empty)
-libmapnik_la_LIBADD = @LIBLTDL@ -lpthread -lpng -ljpeg $(FREETYPE2_LIBS) -lz -lm 
+SPIRIT_ROOT = "/home/artem/projects/spirit_1_8_2"
+libmapnik_la_CXXFLAGS = -I$(top_srcdir)/include $(FREETYPE2_CFLAGS) \
+	-I$//home/artem/projects/spirit_1_8_2 \
+	-I$//home/artem/projects/spirit_1_8_2/miniboost \
+	-I$//home/artem/projects/agg2/include @INCLTDL@
+libmapnik_la_LIBADD = @LIBLTDL@ -lpthread -lpng -ljpeg $(FREETYPE2_LIBS) -lz -lm -L$//home/artem/projects/agg2/src -lagg 
 libmapnik_la_LDFLAGS = -version-info 0:0:0  $(TIFF_LDFLAGS)
 @SHAPE_DATASOURCE_TRUE@SHAPE_DATASOURCE_DIR = shape
 @RASTER_DATASOURCE_TRUE@RASTER_DATASOURCE_DIR = raster
@@ -341,151 +344,151 @@ distclean-compile:
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 libmapnik_la-color.lo: color.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-color.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-color.Tpo" -c -o libmapnik_la-color.lo `test -f 'color.cc' || echo '$(srcdir)/'`color.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-color.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-color.Tpo" -c -o libmapnik_la-color.lo `test -f 'color.cc' || echo '$(srcdir)/'`color.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-color.Tpo" "$(DEPDIR)/libmapnik_la-color.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-color.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='color.cc' object='libmapnik_la-color.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-color.lo `test -f 'color.cc' || echo '$(srcdir)/'`color.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-color.lo `test -f 'color.cc' || echo '$(srcdir)/'`color.cc
 
 libmapnik_la-datasource_cache.lo: datasource_cache.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-datasource_cache.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-datasource_cache.Tpo" -c -o libmapnik_la-datasource_cache.lo `test -f 'datasource_cache.cc' || echo '$(srcdir)/'`datasource_cache.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-datasource_cache.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-datasource_cache.Tpo" -c -o libmapnik_la-datasource_cache.lo `test -f 'datasource_cache.cc' || echo '$(srcdir)/'`datasource_cache.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-datasource_cache.Tpo" "$(DEPDIR)/libmapnik_la-datasource_cache.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-datasource_cache.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='datasource_cache.cc' object='libmapnik_la-datasource_cache.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-datasource_cache.lo `test -f 'datasource_cache.cc' || echo '$(srcdir)/'`datasource_cache.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-datasource_cache.lo `test -f 'datasource_cache.cc' || echo '$(srcdir)/'`datasource_cache.cc
 
 libmapnik_la-envelope.lo: envelope.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-envelope.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-envelope.Tpo" -c -o libmapnik_la-envelope.lo `test -f 'envelope.cc' || echo '$(srcdir)/'`envelope.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-envelope.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-envelope.Tpo" -c -o libmapnik_la-envelope.lo `test -f 'envelope.cc' || echo '$(srcdir)/'`envelope.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-envelope.Tpo" "$(DEPDIR)/libmapnik_la-envelope.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-envelope.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='envelope.cc' object='libmapnik_la-envelope.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-envelope.lo `test -f 'envelope.cc' || echo '$(srcdir)/'`envelope.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-envelope.lo `test -f 'envelope.cc' || echo '$(srcdir)/'`envelope.cc
 
 libmapnik_la-graphics.lo: graphics.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-graphics.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-graphics.Tpo" -c -o libmapnik_la-graphics.lo `test -f 'graphics.cc' || echo '$(srcdir)/'`graphics.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-graphics.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-graphics.Tpo" -c -o libmapnik_la-graphics.lo `test -f 'graphics.cc' || echo '$(srcdir)/'`graphics.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-graphics.Tpo" "$(DEPDIR)/libmapnik_la-graphics.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-graphics.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='graphics.cc' object='libmapnik_la-graphics.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-graphics.lo `test -f 'graphics.cc' || echo '$(srcdir)/'`graphics.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-graphics.lo `test -f 'graphics.cc' || echo '$(srcdir)/'`graphics.cc
 
 libmapnik_la-image_reader.lo: image_reader.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-image_reader.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-image_reader.Tpo" -c -o libmapnik_la-image_reader.lo `test -f 'image_reader.cc' || echo '$(srcdir)/'`image_reader.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-image_reader.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-image_reader.Tpo" -c -o libmapnik_la-image_reader.lo `test -f 'image_reader.cc' || echo '$(srcdir)/'`image_reader.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-image_reader.Tpo" "$(DEPDIR)/libmapnik_la-image_reader.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-image_reader.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='image_reader.cc' object='libmapnik_la-image_reader.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-image_reader.lo `test -f 'image_reader.cc' || echo '$(srcdir)/'`image_reader.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-image_reader.lo `test -f 'image_reader.cc' || echo '$(srcdir)/'`image_reader.cc
 
 libmapnik_la-image_util.lo: image_util.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-image_util.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-image_util.Tpo" -c -o libmapnik_la-image_util.lo `test -f 'image_util.cc' || echo '$(srcdir)/'`image_util.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-image_util.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-image_util.Tpo" -c -o libmapnik_la-image_util.lo `test -f 'image_util.cc' || echo '$(srcdir)/'`image_util.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-image_util.Tpo" "$(DEPDIR)/libmapnik_la-image_util.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-image_util.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='image_util.cc' object='libmapnik_la-image_util.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-image_util.lo `test -f 'image_util.cc' || echo '$(srcdir)/'`image_util.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-image_util.lo `test -f 'image_util.cc' || echo '$(srcdir)/'`image_util.cc
 
 libmapnik_la-layer.lo: layer.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-layer.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-layer.Tpo" -c -o libmapnik_la-layer.lo `test -f 'layer.cc' || echo '$(srcdir)/'`layer.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-layer.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-layer.Tpo" -c -o libmapnik_la-layer.lo `test -f 'layer.cc' || echo '$(srcdir)/'`layer.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-layer.Tpo" "$(DEPDIR)/libmapnik_la-layer.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-layer.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='layer.cc' object='libmapnik_la-layer.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-layer.lo `test -f 'layer.cc' || echo '$(srcdir)/'`layer.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-layer.lo `test -f 'layer.cc' || echo '$(srcdir)/'`layer.cc
 
 libmapnik_la-line_aa.lo: line_aa.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-line_aa.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-line_aa.Tpo" -c -o libmapnik_la-line_aa.lo `test -f 'line_aa.cc' || echo '$(srcdir)/'`line_aa.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-line_aa.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-line_aa.Tpo" -c -o libmapnik_la-line_aa.lo `test -f 'line_aa.cc' || echo '$(srcdir)/'`line_aa.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-line_aa.Tpo" "$(DEPDIR)/libmapnik_la-line_aa.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-line_aa.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='line_aa.cc' object='libmapnik_la-line_aa.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-line_aa.lo `test -f 'line_aa.cc' || echo '$(srcdir)/'`line_aa.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-line_aa.lo `test -f 'line_aa.cc' || echo '$(srcdir)/'`line_aa.cc
 
 libmapnik_la-map.lo: map.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-map.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-map.Tpo" -c -o libmapnik_la-map.lo `test -f 'map.cc' || echo '$(srcdir)/'`map.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-map.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-map.Tpo" -c -o libmapnik_la-map.lo `test -f 'map.cc' || echo '$(srcdir)/'`map.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-map.Tpo" "$(DEPDIR)/libmapnik_la-map.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-map.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='map.cc' object='libmapnik_la-map.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-map.lo `test -f 'map.cc' || echo '$(srcdir)/'`map.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-map.lo `test -f 'map.cc' || echo '$(srcdir)/'`map.cc
 
 libmapnik_la-memory.lo: memory.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-memory.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-memory.Tpo" -c -o libmapnik_la-memory.lo `test -f 'memory.cc' || echo '$(srcdir)/'`memory.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-memory.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-memory.Tpo" -c -o libmapnik_la-memory.lo `test -f 'memory.cc' || echo '$(srcdir)/'`memory.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-memory.Tpo" "$(DEPDIR)/libmapnik_la-memory.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-memory.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='memory.cc' object='libmapnik_la-memory.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-memory.lo `test -f 'memory.cc' || echo '$(srcdir)/'`memory.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-memory.lo `test -f 'memory.cc' || echo '$(srcdir)/'`memory.cc
 
 libmapnik_la-params.lo: params.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-params.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-params.Tpo" -c -o libmapnik_la-params.lo `test -f 'params.cc' || echo '$(srcdir)/'`params.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-params.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-params.Tpo" -c -o libmapnik_la-params.lo `test -f 'params.cc' || echo '$(srcdir)/'`params.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-params.Tpo" "$(DEPDIR)/libmapnik_la-params.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-params.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='params.cc' object='libmapnik_la-params.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-params.lo `test -f 'params.cc' || echo '$(srcdir)/'`params.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-params.lo `test -f 'params.cc' || echo '$(srcdir)/'`params.cc
 
 libmapnik_la-plugin.lo: plugin.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-plugin.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-plugin.Tpo" -c -o libmapnik_la-plugin.lo `test -f 'plugin.cc' || echo '$(srcdir)/'`plugin.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-plugin.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-plugin.Tpo" -c -o libmapnik_la-plugin.lo `test -f 'plugin.cc' || echo '$(srcdir)/'`plugin.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-plugin.Tpo" "$(DEPDIR)/libmapnik_la-plugin.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-plugin.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='plugin.cc' object='libmapnik_la-plugin.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-plugin.lo `test -f 'plugin.cc' || echo '$(srcdir)/'`plugin.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-plugin.lo `test -f 'plugin.cc' || echo '$(srcdir)/'`plugin.cc
 
 libmapnik_la-png_reader.lo: png_reader.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-png_reader.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-png_reader.Tpo" -c -o libmapnik_la-png_reader.lo `test -f 'png_reader.cc' || echo '$(srcdir)/'`png_reader.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-png_reader.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-png_reader.Tpo" -c -o libmapnik_la-png_reader.lo `test -f 'png_reader.cc' || echo '$(srcdir)/'`png_reader.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-png_reader.Tpo" "$(DEPDIR)/libmapnik_la-png_reader.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-png_reader.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='png_reader.cc' object='libmapnik_la-png_reader.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-png_reader.lo `test -f 'png_reader.cc' || echo '$(srcdir)/'`png_reader.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-png_reader.lo `test -f 'png_reader.cc' || echo '$(srcdir)/'`png_reader.cc
 
 libmapnik_la-render.lo: render.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-render.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-render.Tpo" -c -o libmapnik_la-render.lo `test -f 'render.cc' || echo '$(srcdir)/'`render.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-render.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-render.Tpo" -c -o libmapnik_la-render.lo `test -f 'render.cc' || echo '$(srcdir)/'`render.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-render.Tpo" "$(DEPDIR)/libmapnik_la-render.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-render.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='render.cc' object='libmapnik_la-render.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-render.lo `test -f 'render.cc' || echo '$(srcdir)/'`render.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-render.lo `test -f 'render.cc' || echo '$(srcdir)/'`render.cc
 
 libmapnik_la-scanline_aa.lo: scanline_aa.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-scanline_aa.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-scanline_aa.Tpo" -c -o libmapnik_la-scanline_aa.lo `test -f 'scanline_aa.cc' || echo '$(srcdir)/'`scanline_aa.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-scanline_aa.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-scanline_aa.Tpo" -c -o libmapnik_la-scanline_aa.lo `test -f 'scanline_aa.cc' || echo '$(srcdir)/'`scanline_aa.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-scanline_aa.Tpo" "$(DEPDIR)/libmapnik_la-scanline_aa.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-scanline_aa.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='scanline_aa.cc' object='libmapnik_la-scanline_aa.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-scanline_aa.lo `test -f 'scanline_aa.cc' || echo '$(srcdir)/'`scanline_aa.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-scanline_aa.lo `test -f 'scanline_aa.cc' || echo '$(srcdir)/'`scanline_aa.cc
 
 libmapnik_la-scanline.lo: scanline.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-scanline.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-scanline.Tpo" -c -o libmapnik_la-scanline.lo `test -f 'scanline.cc' || echo '$(srcdir)/'`scanline.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-scanline.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-scanline.Tpo" -c -o libmapnik_la-scanline.lo `test -f 'scanline.cc' || echo '$(srcdir)/'`scanline.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-scanline.Tpo" "$(DEPDIR)/libmapnik_la-scanline.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-scanline.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='scanline.cc' object='libmapnik_la-scanline.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-scanline.lo `test -f 'scanline.cc' || echo '$(srcdir)/'`scanline.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-scanline.lo `test -f 'scanline.cc' || echo '$(srcdir)/'`scanline.cc
 
 libmapnik_la-style.lo: style.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-style.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-style.Tpo" -c -o libmapnik_la-style.lo `test -f 'style.cc' || echo '$(srcdir)/'`style.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-style.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-style.Tpo" -c -o libmapnik_la-style.lo `test -f 'style.cc' || echo '$(srcdir)/'`style.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-style.Tpo" "$(DEPDIR)/libmapnik_la-style.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-style.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='style.cc' object='libmapnik_la-style.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-style.lo `test -f 'style.cc' || echo '$(srcdir)/'`style.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-style.lo `test -f 'style.cc' || echo '$(srcdir)/'`style.cc
 
 libmapnik_la-style_cache.lo: style_cache.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-style_cache.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-style_cache.Tpo" -c -o libmapnik_la-style_cache.lo `test -f 'style_cache.cc' || echo '$(srcdir)/'`style_cache.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-style_cache.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-style_cache.Tpo" -c -o libmapnik_la-style_cache.lo `test -f 'style_cache.cc' || echo '$(srcdir)/'`style_cache.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-style_cache.Tpo" "$(DEPDIR)/libmapnik_la-style_cache.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-style_cache.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='style_cache.cc' object='libmapnik_la-style_cache.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-style_cache.lo `test -f 'style_cache.cc' || echo '$(srcdir)/'`style_cache.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-style_cache.lo `test -f 'style_cache.cc' || echo '$(srcdir)/'`style_cache.cc
 
 libmapnik_la-text.lo: text.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-text.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-text.Tpo" -c -o libmapnik_la-text.lo `test -f 'text.cc' || echo '$(srcdir)/'`text.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-text.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-text.Tpo" -c -o libmapnik_la-text.lo `test -f 'text.cc' || echo '$(srcdir)/'`text.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-text.Tpo" "$(DEPDIR)/libmapnik_la-text.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-text.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='text.cc' object='libmapnik_la-text.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-text.lo `test -f 'text.cc' || echo '$(srcdir)/'`text.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-text.lo `test -f 'text.cc' || echo '$(srcdir)/'`text.cc
 
 libmapnik_la-wkb.lo: wkb.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-wkb.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-wkb.Tpo" -c -o libmapnik_la-wkb.lo `test -f 'wkb.cc' || echo '$(srcdir)/'`wkb.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-wkb.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-wkb.Tpo" -c -o libmapnik_la-wkb.lo `test -f 'wkb.cc' || echo '$(srcdir)/'`wkb.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-wkb.Tpo" "$(DEPDIR)/libmapnik_la-wkb.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-wkb.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wkb.cc' object='libmapnik_la-wkb.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-wkb.lo `test -f 'wkb.cc' || echo '$(srcdir)/'`wkb.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-wkb.lo `test -f 'wkb.cc' || echo '$(srcdir)/'`wkb.cc
 
 libmapnik_la-tiff_reader.lo: tiff_reader.cc
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-tiff_reader.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-tiff_reader.Tpo" -c -o libmapnik_la-tiff_reader.lo `test -f 'tiff_reader.cc' || echo '$(srcdir)/'`tiff_reader.cc; \
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -MT libmapnik_la-tiff_reader.lo -MD -MP -MF "$(DEPDIR)/libmapnik_la-tiff_reader.Tpo" -c -o libmapnik_la-tiff_reader.lo `test -f 'tiff_reader.cc' || echo '$(srcdir)/'`tiff_reader.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libmapnik_la-tiff_reader.Tpo" "$(DEPDIR)/libmapnik_la-tiff_reader.Plo"; else rm -f "$(DEPDIR)/libmapnik_la-tiff_reader.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tiff_reader.cc' object='libmapnik_la-tiff_reader.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmapnik_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-tiff_reader.lo `test -f 'tiff_reader.cc' || echo '$(srcdir)/'`tiff_reader.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmapnik_la_CXXFLAGS) $(CXXFLAGS) -c -o libmapnik_la-tiff_reader.lo `test -f 'tiff_reader.cc' || echo '$(srcdir)/'`tiff_reader.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo

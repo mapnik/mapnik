@@ -24,186 +24,96 @@
 
 #include "filter.hh"
 #include "expression.hh"
-#include "feature.hh"
 #include "attribute.hh"
 
 namespace mapnik
-{
-      
-    template<typename Feature>
-    struct property_filter : public filter<Feature> {
-	const std::string name_;
-	explicit property_filter(const std::string& name)
-	    : name_(name) {}	
-	virtual ~property_filter() {}
+{   
+    template <typename T>  
+    struct greater_than
+    {
+	bool operator() (T const& left, T const& right) const
+	{
+	    return left > right;
+	}
     };
 
-    template <typename Feature,typename T>
-    struct property_is_equal_to : public property_filter<Feature>
+    template <typename T>  
+    struct greater_than_or_equal
     {
-	using property_filter<Feature>::name_;
-	T value_;
-
-	property_is_equal_to(const std::string& name,const T& value)
-	    : property_filter<Feature>(name), value_(value) {}
-
-	int type() const
+	bool operator() (T const& left, T const& right) const
 	{
-	    return filter<Feature>::COMPARISON_OPS;
+	    return left >= right;
 	}
-	
-	bool pass(const Feature& feature) const
+    };
+    template <typename T>  
+    struct less_than
+    {
+	bool operator() (T const& left, T const& right) const
 	{
-	    const attribute& attr=feature.attribute_by_name(name_);
-	    bool result=false;
-	    try 
-	    {
-		result=(value_ == attribute_cast<T>(attr)) ? true:false;
-	    }
-	    catch (bad_attribute_cast<T>& ex)
-	    {
-		std::cerr<<ex.what()<<std::endl;
-	    }	
-	    return result;
+	    return left < right;
 	}
-	
-	filter<Feature>* clone() const
+    };
+    template <typename T>  
+    struct less_than_or_equal
+    {
+	bool operator() (T const& left, T const& right) const
 	{
-	    return new property_is_equal_to(name_,value_);
+	    return left <= right;
 	}
-
-	void accept(filter_visitor<Feature>& v)
+    };
+    template <typename T>  
+    struct equals
+    {
+	bool operator() (T const& left, T const& right) const
 	{
-	    v.visit(*this);
+	    return left == right;
 	}
-
-	virtual ~property_is_equal_to() {}
     };
     
-    template <typename Feature,typename T>
-    struct property_is_greater_then :  public property_filter<Feature>
-    {   
-	using property_filter<Feature>::name_;
-	T value_;
-	property_is_greater_then(const std::string& name,const T& value)
-	    : property_filter<Feature>(name), value_(value) {}
-
-	int type() const
+    template <typename T>  
+    struct not_equals
+    {
+	bool operator() (T const& left, T const& right) const
 	{
-	    return filter<Feature>::COMPARISON_OPS;
+	    return left != right;
 	}
-	
-	bool pass(const Feature& feature) const
-	{
-	    const attribute& attr=feature.attribute_by_name(name_);
-	    bool result=false;
-	    try 
-	    {
-		result = (value_ < attribute_cast<T>(attr))?true:false;
-	    }
-	    catch (bad_attribute_cast<T>& ex)
-	    {
-		std::cerr<<ex.what()<<std::endl;
-	    }	
-	    return result;
-	}
-	filter<Feature>* clone() const
-	{
-	    return new property_is_greater_then(name_,value_);
-	}
-	void accept(filter_visitor<Feature>& v)
-	{
-	    v.visit(*this);
-	}
-	
-	virtual ~property_is_greater_then() {}
     };
     
-    template <typename Feature,typename T>
-    struct property_is_less_then :  public property_filter<Feature>
+    template <typename FeatureT,typename Op>
+    struct compare_filter : public filter<FeatureT>
     {
-	using property_filter<Feature>::name_;
-	T value_;
-	property_is_less_then(const std::string& name,const T& value)
-	    : property_filter<Feature>(name), value_(value) {}
+	compare_filter(expression<FeatureT> const& left,
+		       expression<FeatureT> const& right)
+	    : filter<FeatureT>(),
+	      left_(left.clone()), right_(right.clone()) {}
 
-	int type() const
-	{
-	    return filter<Feature>::COMPARISON_OPS;
-	}
+	compare_filter(compare_filter const& other)
+	    : filter<FeatureT>(),
+	      left_(other.left_->clone()),right_(other.right_->clone()) {}
 	
-	bool pass(const Feature& feature) const
+	bool pass(const FeatureT& feature) const
 	{
-	    const attribute& attr=feature.attribute_by_name(name_);
-	    bool result=false;
-	    try 
-	    {
-	    	result=(value_ > attribute_cast<T>(attr))?true:false;
-	    }
-	    catch (bad_attribute_cast<T>& ex)
-	    {
-		std::cerr<<ex.what()<<std::endl;
-	    }	
-	    return result; 
+	    return Op()(left_->get_value(feature),right_->get_value(feature));     
 	}
-	
-	filter<Feature>* clone() const
+	void accept(filter_visitor<FeatureT>& v)
 	{
-	    return new property_is_less_then(name_,value_);
-	}
-	
-	void accept(filter_visitor<Feature>& v)
-	{
+	    left_->accept(v);
+	    right_->accept(v);
 	    v.visit(*this);
 	}
-	virtual ~property_is_less_then() {}
+	filter<FeatureT>* clone() const
+	{
+	    return new compare_filter<FeatureT,Op>(*this);
+	}
+	virtual ~compare_filter() 
+	{
+	    delete left_;
+	    delete right_;
+	}
+    private:
+	expression<FeatureT>* left_;
+	expression<FeatureT>* right_;
     };
-           
-    template <typename Feature,typename T>
-    struct property_is_between :  public property_filter<Feature>
-    {
-	using property_filter<Feature>::name_;
-	T lo_value_;
-	T hi_value_;
-	
-	property_is_between(const std::string& name,const T& lo_value,const T& hi_value)
-	    : property_filter<Feature>(name), 
-	      lo_value_(lo_value),
-	      hi_value_(hi_value) {}
-
-	int type() const
-	{
-	    return filter<Feature>::COMPARISON_OPS;
-	}
-	
-	bool pass(const Feature& feature) const
-	{
-	    const attribute& attr=feature.attribute_by_name(name_);
-	    bool result=false;
-	    try 
-	    {
-		T const&  a=attribute_cast<T>(attr);
-		result=(lo_value_ < a && a < hi_value_) ? true : false;
-	    }
-	    catch (bad_attribute_cast<T>& ex)
-	    {
-		std::cerr<<ex.what()<<std::endl;
-	    }	
-	    return result;
-	}
-	
-	filter<Feature>* clone() const
-	{
-	    return new property_is_between(name_,lo_value_,hi_value_);
-	}
-	
-	void accept(filter_visitor<Feature>& v)
-	{
-	    v.visit(*this);
-	}
-	
-	virtual ~property_is_between() {}
-    };    
 }
 
 #endif //COMPARISON_HH

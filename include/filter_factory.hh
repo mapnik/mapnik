@@ -18,45 +18,35 @@
 
 //$Id$
 
-#ifndef FILTER_HH
-#define FILTER_HH
+#include "filter_parser.hh"
 
-#include "filter_visitor.hh"
-#include "feature.hh"
+using std::string;
+
 namespace mapnik
 {
-    typedef ref_ptr<filter<Feature> > filter_ptr;
-
-    template <typename FeatureT> class filter_visitor;
-    template <typename FeatureT>
-    struct filter
+    template<typename FeatureT>
+    class filter_factory
     {
-	virtual bool pass(const FeatureT& feature) const=0; 
-	virtual filter<FeatureT>* clone() const=0;
-	virtual void accept(filter_visitor<FeatureT>& v) = 0;
-	virtual ~filter() {}
-    };
-
-    
-    template <typename FeatureT>
-    struct null_filter : public filter<FeatureT>
-    {
-
-	bool pass (const FeatureT&) const
+    public:
+	filter_factory() {}
+	filter_ptr compile(string const& str) const
 	{
-	    return true;
+	    stack<ref_ptr<filter<FeatureT> > > filters;
+	    stack<ref_ptr<expression<FeatureT> > > exps;
+	    filter_grammar<FeatureT>  grammar(filters,exps);
+	    char const *text = str.c_str();
+	    parse_info<> info = parse(text,text+strlen(text),grammar,space_p);
+	    if (info.full && !filters.empty())
+	    {
+		cout<<"success parsing filter expression\n";
+		return filters.top();	
+	    }
+	    else 
+	    {
+		cout << "failed at: \": " << info.stop << "\n";
+		return filter_ptr(new null_filter<FeatureT>());
+	    }  
 	}
-	
-	filter<FeatureT>* clone() const
-	{
-	    return new null_filter<FeatureT>;
-	}
-        void accept(filter_visitor<FeatureT>&)
-	{}
-	virtual ~null_filter() {}
 
     };
-    
 }
-
-#endif //FILTER_HH

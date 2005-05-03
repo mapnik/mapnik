@@ -20,151 +20,125 @@
 #define SPATIAL_HH
 
 #include "filter.hh"
+#include "filter_visitor.hh"
 
 namespace mapnik
 {    
-    template <typename Feature>
-    struct equals : public filter<Feature>
+
+    template <typename FeatureT>
+    struct equals_ : public filter<FeatureT>
     {
-	int type() const 
-	{
-	    return filter<Feature>::SPATIAL_OPS;
-	}
-	
-	bool pass(const Feature& feature) const
+
+	bool pass(const FeatureT& feature) const
 	{
 	    return false;
 	}
 	
-	void accept(const filter_visitor<Feature>& v)
+	void accept(const filter_visitor<FeatureT>& v)
 	{
 	    v.visit(*this);
 	}
     };
     
-    template <typename Feature>
-    struct disjoint : public filter<Feature>
+    template <typename FeatureT>
+    struct disjoint : public filter<FeatureT>
     {
-	int type() const 
-	{
-	    return filter<Feature>::SPATIAL_OPS;
-	}
+	  
 	
-	bool pass(const Feature& feature) const
+	bool pass(const FeatureT& feature) const
 	{
 	    return false;
 	}
 	
-	void accept(const filter_visitor<Feature>& v)
+	void accept(const filter_visitor<FeatureT>& v)
 	{
 	    v.visit(*this);
 	}
     };
   
-    template <typename Feature>
-    struct touches : public filter<Feature>
+    template <typename FeatureT>
+    struct touches : public filter<FeatureT>
     {
-	int type() const 
-	{
-	    return filter<Feature>::SPATIAL_OPS;
-	}
+
 	
-	bool pass(const Feature& feature) const
+	bool pass(const FeatureT& feature) const
 	{
 	    return false;
 	}
 	
-	void accept(const filter_visitor<Feature>& v)
+	void accept(const filter_visitor<FeatureT>& v)
 	{
 	    v.visit(*this);
 	}
     };
 
-    template <typename Feature>
-    struct within : public filter<Feature>
+    template <typename FeatureT>
+    struct within : public filter<FeatureT>
     {
-	int type() const 
-	{
-	    return filter<Feature>::SPATIAL_OPS;
-	}
-	
-	bool pass(const Feature& feature) const
+
+	bool pass(const FeatureT& feature) const
 	{
 	    return false;
 	}
 
-	void accept(const filter_visitor<Feature>& v)
+	void accept(const filter_visitor<FeatureT>& v)
 	{
 	    v.visit(*this);
 	}
     };
 
-    template <typename Feature>
-    struct overlaps : public filter<Feature>
+    template <typename FeatureT>
+    struct overlaps : public filter<FeatureT>
     {
-	int type() const 
-	{
-	    return filter<Feature>::SPATIAL_OPS;
-	}
-	
-	bool pass(const Feature& feature) const
+
+	bool pass(const FeatureT& feature) const
 	{
 	    return false;
 	}
 	
-	void accept(const filter_visitor<Feature>& v)
+	void accept(const filter_visitor<FeatureT>& v)
 	{
 	    v.visit(*this);
 	}
     };
 
-    template <typename Feature>
-    struct crosses : public filter<Feature>
+    template <typename FeatureT>
+    struct crosses : public filter<FeatureT>
     {
-	int type() const 
-	{
-	    return filter<Feature>::SPATIAL_OPS;
-	}
+
 	
-	bool pass(const Feature& feature) const
+	bool pass(const FeatureT& feature) const
 	{
 	    return false;
 	}
 	
-	void accept(const filter_visitor<Feature>& v)
+	void accept(const filter_visitor<FeatureT>& v)
 	{
 	    v.visit(*this);
 	}
     };
     
-    template <typename Feature>
-    struct bbox  : public filter<Feature> 
+    template <typename FeatureT>
+    struct bbox  : public filter<FeatureT> 
     {
     private:
 	Envelope<double> box_;
     public:
 	bbox(const Envelope<double>& box)
 	    : box_(box) {}
+
 	
-	int type() const 
-	{
-	    return filter<Feature>::SPATIAL_OPS;
-	}
-	
-	bool pass(const Feature& feature) const
+	bool pass(const FeatureT& feature) const
 	{
 	    return box_.contains(feature.get_geometry()->bbox());
 	}
 	
-	std::string to_string() 
+
+	filter<FeatureT>* clone() const
 	{
-	    return "BBOX filter";
+	    return new bbox<FeatureT>(box_);
 	}
-	filter<Feature>* clone() const
-	{
-	    return new bbox<Feature>(box_);
-	}
-	void accept(const filter_visitor<Feature>& v)
+	void accept(const filter_visitor<FeatureT>& v)
 	{
 	    v.visit(*this);
 	}

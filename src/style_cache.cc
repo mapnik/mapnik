@@ -70,15 +70,14 @@ namespace mapnik
 	styles_.erase(name);
     }
     
-    const feature_type_style& named_style_cache::find(const std::string& name) 
+    feature_type_style named_style_cache::find(const std::string& name)
     {
 	Lock lock(&mutex_);
 	std::map<std::string,feature_type_style>::iterator itr=styles_.find(name);
-	//if (itr!=styles_.end()) 
-	//	{
-	return itr->second;
-	    //}
-	    //static const Style default_style(ref_ptr<Symbolizer>(new LineSymbolizer(Color(255,0,0))));
-	    //return default_style;
+	if (itr!=styles_.end()) 
+	{
+	    return itr->second;
+	}
+	return feature_type_style();
     }
 }

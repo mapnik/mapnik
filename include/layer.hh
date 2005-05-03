@@ -24,10 +24,10 @@
 #include <vector>
 #include "feature.hh"
 #include "ptr.hh"
+#include "datasource.hh"
 
 namespace mapnik
 {
-
     class Layer
     {
     private:

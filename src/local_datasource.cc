@@ -18,45 +18,25 @@
 
 //$Id$
 
-#ifndef FILTER_HH
-#define FILTER_HH
+#include "local_datasource.hh"
 
-#include "filter_visitor.hh"
-#include "feature.hh"
 namespace mapnik
 {
-    typedef ref_ptr<filter<Feature> > filter_ptr;
-
-    template <typename FeatureT> class filter_visitor;
-    template <typename FeatureT>
-    struct filter
+    local_datasource::local_datasource(Parameters const& params) {}
+    local_datasource::~local_datasource() {}
+    std::string local_datasource::name_="local";
+    std::string local_datasource::name()
     {
-	virtual bool pass(const FeatureT& feature) const=0; 
-	virtual filter<FeatureT>* clone() const=0;
-	virtual void accept(filter_visitor<FeatureT>& v) = 0;
-	virtual ~filter() {}
-    };
-
+	return name_; 
+    }
     
-    template <typename FeatureT>
-    struct null_filter : public filter<FeatureT>
+    const Envelope<double>& local_datasource::envelope() const
     {
+	return extent_;
+    }
 
-	bool pass (const FeatureT&) const
-	{
-	    return true;
-	}
+    featureset_ptr features(query const& q) const
+    {
 	
-	filter<FeatureT>* clone() const
-	{
-	    return new null_filter<FeatureT>;
-	}
-        void accept(filter_visitor<FeatureT>&)
-	{}
-	virtual ~null_filter() {}
-
-    };
-    
+    }
 }
-
-#endif //FILTER_HH

@@ -121,6 +121,7 @@ namespace mapnik
 	    {
 		return  ATraits::to_string(value_);
 	    }
+	    
 	    attribute_base* clone() const
 	    {
 		return new attribute_impl(value_);
@@ -136,7 +137,8 @@ namespace mapnik
     public:
 	attribute_base* base_;
     };
-      
+    
+    
     template<typename T>
     struct bad_attribute_cast : public std::bad_cast
     {

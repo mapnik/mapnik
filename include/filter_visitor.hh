@@ -20,15 +20,17 @@
 #define FILTER_VISITOR_HH
 
 #include "filter.hh"
-#include "feature.hh"
+#include "expression.hh"
 
 namespace mapnik
 {
-    template <typename Feature> class filter;
-    template <typename Feature>
+    template <typename FeatureT> class filter;
+    template <typename FeatureT> class expression;
+    template <typename FeatureT>
     struct filter_visitor
     {
-	virtual void visit(filter<Feature>& filter)=0;
+	virtual void visit(filter<FeatureT>& filter)=0;
+	virtual void visit(expression<FeatureT>&)=0;
 	virtual ~filter_visitor() {}
     };    
 }
