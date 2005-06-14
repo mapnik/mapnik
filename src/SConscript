@@ -1,0 +1,48 @@
+##
+import glob
+
+Import ('env')
+
+prefix = env['PREFIX']
+boost_root = env['BOOST_ROOT']
+agg_root = env['AGG_ROOT']
+agg_headers = agg_root + '/include'
+
+freetype2_root = env['FREETYPE2_ROOT']
+
+headers =[ '#include',boost_root,freetype2_root,agg_headers]
+
+libraries=['rt','z','png','ltdl','jpeg','tiff','agg','boost-filesystem','boost-regex']
+libpaths = [prefix+'/lib','#agg']
+linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
+
+source = Split(
+    """color.cpp
+    datasource_cache.cpp
+    envelope.cpp
+    graphics.cpp
+    image_reader.cpp
+    image_util.cpp
+    layer.cpp
+    line_aa.cpp
+    map.cpp
+    memory.cpp
+    params.cpp
+    plugin.cpp
+    png_reader.cpp
+    render.cpp
+    scanline_aa.cpp
+    scanline.cpp
+    style_cache.cpp
+    style.cpp
+    text.cpp
+    tiff_reader.cpp
+    wkb.cpp"""
+    )
+
+lib_mapnik = env.SharedLibrary('libmapnik',source,CPPPATH=headers,LIBS=libraries,LIBPATH=libpaths,LINKFLAGS=linkflags)
+
+env.Alias(target="install",source=env.Install(prefix+"/lib",lib_mapnik))
+includes = glob.glob('../include' + '/*.hpp')
+env.Alias(target="install",source=env.Install(prefix+"/include",includes))
+

@@ -1,0 +1,10 @@
+#
+import glob
+
+Import('env')
+prefix = env['PREFIX']
+agg_root = env['AGG_ROOT']
+agg_headers = agg_root + '/include'
+agg_src_dir = agg_root + '/src/' 
+agg_src = glob.glob(agg_src_dir + '*.cpp')
+agg_lib = env.StaticLibrary('libagg',agg_src,CPPPATH=agg_headers)

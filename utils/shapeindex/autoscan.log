@@ -1,4 +1,0 @@
-autoscan: warning: missing AC_PREREQ wanted by: 
-	autoscan
-autoscan: warning: missing AC_PROG_CXX wanted by: 
-	shapeindex.cc

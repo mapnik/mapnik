@@ -1,7 +1,0 @@
-2004-11-29  gettextize  <bug-gnu-gettext@gnu.org>
-
-	* Makefile.am (SUBDIRS): New variable.
-	(ACLOCAL_AMFLAGS): New variable.
-	(EXTRA_DIST): New variable.
-	* configure.ac (AC_CONFIG_FILES): Add po/Makefile.in,
-
