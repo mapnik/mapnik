@@ -1,0 +1,131 @@
+/* This file is part of Mapnik (c++ mapping toolkit)
+ * Copyright (C) 2005 Artem Pavlenko
+ *
+ * Mapnik is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.#include "memory.hpp"
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+//$Id: coord.hpp 39 2005-04-10 20:39:53Z pavlenko $
+
+#ifndef COORD_HPP
+#define COORD_HPP
+
+#include <iostream>
+#include <sstream>
+
+namespace mapnik 
+{   
+    template <typename T,int dim>
+    struct coord {
+	typedef T type;
+    };
+    
+    template <typename T>
+    struct coord<T,2> 
+    {
+	typedef T type;
+	T x;
+	T y;
+    public:
+	coord()
+	    : x(),y() {}
+	coord(T x,T y)
+	    : x(x),y(y) {}
+	template <typename T2>
+	coord (const coord<T2,2>& rhs)
+	    : x(type(rhs.x)),
+	      y(type(rhs.y)) {}
+
+	template <typename T2>
+	coord<T,2>& operator=(const coord<T2,2>& rhs)
+	{
+	    if ((void*)this==(void*)&rhs)
+	    {
+		return *this;
+	    }
+	    x=type(rhs.x);
+	    y=type(rhs.y);
+	    return *this;
+	}
+    };
+
+    template <typename T>
+    struct coord<T,3> 
+    {
+	typedef T type;
+	T x;
+	T y;
+	T z;
+    public:
+	coord()
+	    : x(),y(),z() {}
+	coord(T x,T y,T z)
+	    : x(x),y(y),z(z) {}
+	template <typename T2>
+	coord (const coord<T2,3>& rhs)
+	    : x(type(rhs.x)),
+	      y(type(rhs.y)),
+	      z(type(rhs.z)) {}
+
+	template <typename T2>
+	coord<T,3>& operator=(const coord<T2,3>& rhs)
+	{
+	    if ((void*)this==(void*)&rhs)
+	    {
+		return *this;
+	    }
+	    x=type(rhs.x);
+	    y=type(rhs.y);
+	    z=type(rhs.z);
+	    return *this;
+	}
+    };
+
+    typedef coord<double,2> coord2d;
+    typedef coord<int,2> coord2i;
+
+     
+    template <typename charT,typename traits,typename T ,int dim>
+    inline std::basic_ostream<charT,traits>&
+    operator << (std::basic_ostream<charT,traits>& out,
+    		 const coord<T,dim>& c);
+    
+    template <typename charT,typename traits,typename T>
+    inline std::basic_ostream<charT,traits>&
+    operator << (std::basic_ostream<charT,traits>& out,
+		 const coord<T,2>& c)
+    {
+        std::basic_ostringstream<charT,traits> s;
+        s.copyfmt(out);
+        s.width(0);
+        s<<"coord2("<<c.x<<","<<c.y<<")";
+        out << s.str();
+        return out;
+    }
+
+    template <typename charT,typename traits,typename T>
+    inline std::basic_ostream<charT,traits>&
+    operator << (std::basic_ostream<charT,traits>& out,
+		 const coord<T,3>& c)
+    {
+        std::basic_ostringstream<charT,traits> s;
+        s.copyfmt(out);
+        s.width(0);
+        s<<"coord3("<<c.x<<","<<c.y<<","<<c.z<<")";
+        out << s.str();
+        return out;
+    } 
+}
+
+#endif // COORD_HPP

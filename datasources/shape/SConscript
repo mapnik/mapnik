@@ -1,0 +1,26 @@
+#mapnik 
+
+Import ('env')
+
+prefix = env['PREFIX']
+boost_root = env['BOOST_ROOT']
+agg_root = env['AGG_ROOT']
+agg_headers = agg_root + '/include'
+
+shape_src = Split(
+	"""
+        dbffile.cc
+        shape.cc
+        shape_featureset.cc
+        shapefile.cc
+        shape_index_featureset.cc
+        shape_io.cc
+        shp_index.cc
+	"""
+        )
+
+headers = ['#include',boost_root,agg_headers]
+
+shape_datasource = env.SharedLibrary('shape',source=shape_src,SHLIBPREFIX='',CPPPATH=headers)
+env.Install('#stage/datasources',shape_datasource)
+#env.Default(shape_datasource)
