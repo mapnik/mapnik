@@ -1,0 +1,24 @@
+#mapnik 
+
+Import ('env')
+
+prefix = env['PREFIX']
+boost_root = env['BOOST_ROOT']
+postgresql_root = env['POSTGRESQL_ROOT']
+agg_root = env['AGG_ROOT']
+agg_headers = agg_root + '/include'
+
+postgresql_headers=postgresql_root+"/include"
+postgresql_libs=postgresql_root+"/lib"
+
+postgis_src = Split(
+	"""
+        postgis.cpp
+        postgisfs.cpp
+	"""
+        )
+
+headers = ['#include',boost_root,agg_headers,postgresql_headers]
+postgis_datasource = env.SharedLibrary('postgis',source=postgis_src,SHLIBPREFIX='',CPPPATH=headers,LIBS="pq",LIBPATH=postgresql_libs)
+env.Install(prefix + '/datasources',postgis_datasource)
+env.Alias("install",prefix + '/datasources')
