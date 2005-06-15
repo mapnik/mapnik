@@ -126,6 +126,9 @@ PostgisDatasource::PostgisDatasource(const Parameters& params)
 		    case 23:    // int4
 			desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,length));
  			break;
+                    case 701:  // float8
+ 			desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,length));
+		    case 1042:  // bpchar
 		    case 1043:  // varchar
 			desc_.add_descriptor(attribute_descriptor(fld_name,String));
 			break;

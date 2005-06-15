@@ -24,6 +24,7 @@
 #include <map>
 #include <vector>
 #include <cassert>
+#include "global.hpp"
 #include "ptr.hpp"
 #include "factory.hpp"
 #include "filter.hpp"
@@ -65,12 +66,10 @@
 #include "filter_factory.hpp"
 #include "text_symbolizer.hpp"
 #include "label_placement.hpp"
-
 #include "feature_layer_desc.hpp"
 
 namespace mapnik
 {
-    //typedef geometry_type geometry_type;
 }
 
 #endif                                            //MAPNIK_HPP

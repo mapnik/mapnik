@@ -1,4 +1,26 @@
-Installation Instructions
-*************************
+INSTALLATION INSTRUCTIONS
 
-TODO!
+Prerequisites
+First of all you will have to install 'scons'. See scons user guide on how to get started.
+
+Mapnik is relying on a number of boost libraries (filesystem, python, regex, spirit etc). You can download the latest release (1.32.0) or grab a CVS snapshot from http://boost.org. You don't need to build anything, just unzip the source into read/write location on your disk.
+
+The same requirements apply for AGG library (available from http://www.antigrain.com)
+
+Other dependencies include:
+1. libltdl  (dynamic linking)
+2. libz
+3. libpng
+4. libjpeg
+5. freetype2
+6. postgresql (+postgis)
+
+Building
+Once you satisfy all dependencies you can build mapnik by issuing the following  command:
+
+:/> scons DATASOURCES=postgis PREFIX=/where/to/install install
+
+This should compile, link and install all relevant libraries/headers in PREFIX.
+
+By default release versions are built, but you can specify "debug=yes" to build debug versions. At this time only GCC toolkit is supported and you'll have to modify SConstruct/SConscript files if you're planning to use something else.
+

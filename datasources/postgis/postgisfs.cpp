@@ -30,11 +30,7 @@ PostgisFeatureset::PostgisFeatureset(const ref_ptr<ResultSet>& rs,
     : rs_(rs),
       num_attrs_(num_attrs),
       totalGeomSize_(0),
-      count_(0) 
-{
-    
-}
-
+      count_(0)  {}
 
 Feature* PostgisFeatureset::next()
 {
@@ -42,7 +38,7 @@ Feature* PostgisFeatureset::next()
     if (rs_->next())
     { 
 	const char* buf = rs_->getValue(0);
-        int id = (buf[0]&255) << 24 | (buf[1]&255) << 16 | (buf[2] & 255) << 8 | buf[3] & 255;
+        int id = int4net(buf);
         
         int size=rs_->getFieldLength(1);
         const char *data=rs_->getValue(1);
@@ -59,12 +55,30 @@ Feature* PostgisFeatureset::next()
 		const char* buf=rs_->getValue(start + pos);
 		int field_size = rs_->getFieldLength(start + pos);
 		int oid = rs_->getTypeOID(start + pos);
-		if (oid==23)
+		
+		if (oid==23) //int4
 		{
-		    int val = (buf[0]&255) << 24 | (buf[1]&255) << 16 | (buf[2] & 255) << 8 | buf[3] & 255;
+		    int val = int4net(buf);
 		    feature->add_property(val);
 		}
-		else if (oid==1043)
+		else if (oid==21) //int2
+		{
+		    int val = int2net(buf);
+		    feature->add_property(val);
+		}
+		else if (oid == 700) // float4
+		{
+		    float val;
+		    float4net(val,buf);
+		    feature->add_property((double)val);
+		}
+		else if (oid == 701) // float8
+		{
+		    double val;
+		    float8net(val,buf);
+		    feature->add_property(val);
+		}
+		else if (oid==1042 || oid==1043) //bpchar or varchar
 		{
 		    feature->add_property(string(buf));
 		}
