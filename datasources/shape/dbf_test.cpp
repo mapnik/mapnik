@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include "dbffile.hh"
+#include "dbffile.hpp"
 
 using namespace std;
 

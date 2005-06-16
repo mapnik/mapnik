@@ -95,14 +95,7 @@ namespace mapnik
 
 	value get_value(FeatureT const& feature) const
 	{
-	    if (valid_)
-	    {
-		return feature.get_property(index_);
-	    }
-	    else
-	    {
-		return value("");
-	    }
+	    return feature.get_property(index_);
 	}
 	void accept(filter_visitor<FeatureT>& v)
 	{

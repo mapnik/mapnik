@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "dbffile.hh"
+#include "dbffile.hpp"
 
 #include <string>
 
@@ -113,7 +113,7 @@ void dbf_file::add_attribute(int col,Feature* f) const throw()
 {
     if (col>=0 && col<num_fields_)
     {
-        std::string name=fields_[col].name_;
+        
 	std::string str=trim(std::string(record_+fields_[col].offset_,fields_[col].length_));
         
         switch (fields_[col].type_)
@@ -122,29 +122,27 @@ void dbf_file::add_attribute(int col,Feature* f) const throw()
 	case 'D'://todo handle date?
 	case 'M':
 	case 'L':
-	    {
-		f->add_property(name,str);
-		break;
-	    }
+	    f->add_property(str);
+	    break;
 	case 'N':
         case 'F':
 	    {
 		if (str[0]=='*')
 		{
+		    f->add_property("null");
 		    break;
 		}
 		if (fields_[col].dec_>0)
 		{   
 		    double d;
 		    fromString(str,d);
-	
-		    f->add_property(name,d);
+		    f->add_property(d);
 		}
 		else
 		{
 		    int i;
 		    fromString(str,i);
-		    f->add_property(name,i);
+		    f->add_property(i);
 		}
 		break;
 	    }

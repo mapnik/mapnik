@@ -19,30 +19,35 @@
 #ifndef SHAPE_HH
 #define SHAPE_HH
 
-#include "mapnik.hh"
-#include "shape_io.hh"
+#include "mapnik.hpp"
+#include "shape_io.hpp"
 
 using namespace mapnik;
 
 class shape_datasource : public datasource
 {
-    std::string shape_name_;
-    int type_;
-    long file_length_;
-    mapnik::Envelope<double> extent_;
-    bool indexed_;
-    static std::string name_;
+
 public:
     int type() const;
     static std::string name();
     featureset_ptr features(const query& q) const;
     const Envelope<double>& envelope() const;
     shape_datasource(const Parameters &params);
+    layer_descriptor const& get_descriptor() const;
     virtual ~shape_datasource();
 private:
     shape_datasource(const shape_datasource&);
     shape_datasource& operator=(const shape_datasource&);
     void init(shape_io& shape);
+private:
+    std::string shape_name_;
+    int type_;
+    long file_length_;
+    mapnik::Envelope<double> extent_;
+    bool indexed_;
+    layer_descriptor desc_;
+    static std::string name_;
+    
 };
 
 #endif                                            //SHAPE_HH

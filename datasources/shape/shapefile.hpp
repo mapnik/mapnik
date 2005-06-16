@@ -21,7 +21,7 @@
 #ifndef SHAPEFILE_HH
 #define SHAPEFILE_HH
 
-#include "mapnik.hh"
+#include "mapnik.hpp"
 #include <fstream>
 
 using namespace mapnik;

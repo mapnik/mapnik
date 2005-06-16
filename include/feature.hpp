@@ -104,8 +104,10 @@ namespace mapnik
 
 	value get_property(size_t index) const
 	{
-	    assert(index < props_.size());
-	    return props_[index];
+	    if (index < props_.size())
+		return props_[index]; 
+	    else
+		return value("");
 	}
 	
 	const properties& get_properties() const 

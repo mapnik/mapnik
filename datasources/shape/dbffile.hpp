@@ -24,7 +24,7 @@
 #include <fstream>
 #include <cassert>
 
-#include "mapnik.hh"
+#include "mapnik.hpp"
 
 using namespace mapnik;
 
@@ -58,7 +58,7 @@ class dbf_file
         void close();
         int num_records() const;
         int num_fields() const;
-        const field_descriptor& descriptor(int col) const;
+        field_descriptor const& descriptor(int col) const;
         void move_to(int index);
         std::string string_value(int col) const;
         void add_attribute(int col,Feature* f) const throw();

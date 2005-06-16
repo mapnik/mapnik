@@ -19,9 +19,9 @@
 #ifndef SHAPE_IO_HH
 #define SHAPE_IO_HH
 
-#include "dbffile.hh"
-#include "shapefile.hh"
-#include "shp_index.hh"
+#include "dbffile.hpp"
+#include "shapefile.hpp"
+#include "shp_index.hpp"
 
 using mapnik::geometry_ptr;
 

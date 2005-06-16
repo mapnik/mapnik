@@ -18,8 +18,8 @@
 
 //$Id: shape_io.cc 26 2005-03-29 19:18:59Z pavlenko $
 
-#include "shape_io.hh"
-#include "shape.hh"
+#include "shape_io.hpp"
+#include "shape.hpp"
 
 
 const std::string shape_io::SHP = ".shp";

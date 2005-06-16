@@ -19,7 +19,7 @@
 #ifndef SHP_INDEX_HH
 #define SHP_INDEX_HH
 
-#include "mapnik.hh"
+#include "mapnik.hpp"
 #include <fstream>
 #include <set>
 

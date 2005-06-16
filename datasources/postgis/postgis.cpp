@@ -19,7 +19,6 @@
 //$Id: postgis.cc 44 2005-04-22 18:53:54Z pavlenko $
 
 #include "postgis.hpp"
-#include <netinet/in.h>
 #include <string>
 #include <algorithm>
 #include <set>

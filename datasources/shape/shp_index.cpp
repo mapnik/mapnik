@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "shp_index.hh"
+#include "shp_index.hpp"
 
 template <typename filterT>
 void shp_index<filterT>::query(const filterT& filter,std::ifstream& file,std::set<int>& pos)

@@ -19,7 +19,7 @@
 #ifndef SHAPE_SQT_FS_HH
 #define SHAPE_SQT_FS_HH
 
-#include "shape_featureset.hh"
+#include "shape_featureset.hpp"
 #include <set>
 #include <vector>
 

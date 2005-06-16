@@ -16,9 +16,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "shape.hh"
-#include "shape_featureset.hh"
-#include "shape_index_featureset.hh"
+#include "shape.hpp"
+#include "shape_featureset.hpp"
+#include "shape_index_featureset.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -29,12 +29,46 @@ shape_datasource::shape_datasource(const Parameters &params)
     : shape_name_(params.get("file")),
       type_(datasource::Vector),
       file_length_(0),
-      indexed_(false)
+      indexed_(false),
+      desc_(params.get("name"))
 {
     try
     {
         shape_io shape(shape_name_);
         init(shape);
+	for (int i=0;i<shape.dbf().num_fields();++i)
+	{
+	    field_descriptor const& fd=shape.dbf().descriptor(i);
+	    std::string fld_name=fd.name_;
+
+	    switch (fd.type_)
+	    {
+	    case 'C':
+	    case 'D':
+	    case 'M':
+	    case 'L':		
+		desc_.add_descriptor(attribute_descriptor(fld_name,String));
+		break;
+	    case 'N':
+	    case 'F':
+		{
+		    if (fd.dec_>0)
+		    {   
+			desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,8));
+		    }
+		    else
+		    {
+			desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,4));
+		    }
+		    break;
+		}
+	    default:
+		//
+		std::cout << "uknown type "<<fd.type_<<"\n";
+		break;
+		
+	    }
+	}
     }
     catch  (datasource_exception& ex)
     {
@@ -91,6 +125,10 @@ int shape_datasource::type() const
     return type_;
 }
 
+layer_descriptor const& shape_datasource::get_descriptor() const
+{
+    return desc_;
+}
 
 std::string shape_datasource::name()
 {

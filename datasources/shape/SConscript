@@ -9,18 +9,18 @@ agg_headers = agg_root + '/include'
 
 shape_src = Split(
 	"""
-        dbffile.cc
-        shape.cc
-        shape_featureset.cc
-        shapefile.cc
-        shape_index_featureset.cc
-        shape_io.cc
-        shp_index.cc
+        dbffile.cpp
+        shape.cpp
+        shape_featureset.cpp
+        shapefile.cpp
+        shape_index_featureset.cpp
+        shape_io.cpp
+        shp_index.cpp
 	"""
         )
 
 headers = ['#include',boost_root,agg_headers]
 
 shape_datasource = env.SharedLibrary('shape',source=shape_src,SHLIBPREFIX='',CPPPATH=headers)
-env.Install('#stage/datasources',shape_datasource)
-#env.Default(shape_datasource)
+env.Install(prefix+"/datasources",shape_datasource)
+

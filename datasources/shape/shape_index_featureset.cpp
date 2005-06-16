@@ -18,7 +18,7 @@
 
 //$Id: shape_index_featureset.cc 36 2005-04-05 14:32:18Z pavlenko $
 
-#include "shape_index_featureset.hh"
+#include "shape_index_featureset.hpp"
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,

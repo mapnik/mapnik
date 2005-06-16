@@ -19,7 +19,7 @@
 #ifndef SHAPE_FS_HH
 #define SHAPE_FS_HH
 
-#include "shape.hh"
+#include "shape.hpp"
 
 using namespace mapnik;
 
