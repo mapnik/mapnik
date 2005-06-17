@@ -25,6 +25,7 @@
 #include "vertex_transform.hpp"
 #include "ctrans.hpp"
 #include "ptr.hpp"
+#include "geom_util.hpp"
 
 namespace mapnik
 {
@@ -183,6 +184,7 @@ namespace mapnik
     template <typename T, template <typename> class Container=vertex_vector>
     class point : public geometry<T,Container>
     {
+	typedef geometry<T,Container> geometry_base;
 	typedef typename   geometry<T,Container>::value_type value_type;
 	using geometry<T,Container>::cont_;
     public:
@@ -196,7 +198,10 @@ namespace mapnik
 	}
 	bool hit_test(value_type x,value_type y) const
 	{
-	    return point_on_points(x,y,*this);
+	    typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
+	    path_iterator start = geometry_base::template begin<NO_SHIFT>();
+	    path_iterator end = geometry_base::template end<NO_SHIFT>();
+	    return point_on_points(x,y,start,end);
 	}
     };
 
@@ -221,13 +226,14 @@ namespace mapnik
 	    typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
 	    path_iterator start = geometry_base::template begin<NO_SHIFT>();
 	    path_iterator end = geometry_base::template end<NO_SHIFT>();
-	    return point_inside_path(start,end,x,y);
+	    return point_inside_path(x,y, start,end);
 	} 
     };
     
     template <typename T, template <typename> class Container=vertex_vector>
     class line_string : public geometry<T,Container>
     {
+	typedef geometry<T,Container> geometry_base;
 	typedef typename   geometry<T,Container>::value_type value_type; 
     public:
 	line_string(int srid)
@@ -241,7 +247,10 @@ namespace mapnik
 	
 	bool hit_test(value_type x,value_type y) const
 	{
-	    return point_on_path(x,y,*this);
+	    typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
+	    path_iterator start = geometry_base::template begin<NO_SHIFT>();
+	    path_iterator end = geometry_base::template end<NO_SHIFT>();
+	    return point_on_path(x,y,start,end);
 	}
     };
 

@@ -20,6 +20,8 @@
 
 
 #include "postgis.hpp"
+#include "global.hpp"
+#include "wkb.hpp"
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
@@ -53,7 +55,7 @@ Feature* PostgisFeatureset::next()
 	    for (unsigned pos=0;pos<num_attrs_;++pos)
 	    {
 		const char* buf=rs_->getValue(start + pos);
-		int field_size = rs_->getFieldLength(start + pos);
+		//int field_size = rs_->getFieldLength(start + pos);
 		int oid = rs_->getTypeOID(start + pos);
 		
 		if (oid==23) //int4

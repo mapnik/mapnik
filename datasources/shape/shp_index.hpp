@@ -19,7 +19,8 @@
 #ifndef SHP_INDEX_HH
 #define SHP_INDEX_HH
 
-#include "mapnik.hpp"
+#include "envelope.hpp"
+#include "query.hpp"
 #include <fstream>
 #include <set>
 

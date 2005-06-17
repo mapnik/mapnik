@@ -24,7 +24,7 @@
 #include <fstream>
 #include <cassert>
 
-#include "mapnik.hpp"
+#include "feature.hpp"
 
 using namespace mapnik;
 

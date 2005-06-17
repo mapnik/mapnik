@@ -20,6 +20,7 @@
 #define SHAPE_FS_HH
 
 #include "shape.hpp"
+#include "geom_util.hpp"
 
 using namespace mapnik;
 

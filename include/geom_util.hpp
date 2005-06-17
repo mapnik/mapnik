@@ -21,7 +21,6 @@
 #ifndef GEOM_UTIL_HPP
 #define GEOM_UTIL_HPP
 
-#include "geometry.hpp"
 #include <cmath>
 
 namespace mapnik
@@ -81,7 +80,7 @@ namespace mapnik
     }
     
     template <typename Iter> 
-    inline bool point_inside_path(Iter start,Iter end,double x,double y)
+    inline bool point_inside_path(double x,double y,Iter start,Iter end)
     {
 	bool inside=false;
 	double x0=start->x;
@@ -145,57 +144,15 @@ namespace mapnik
     }
     
 #undef TOL
-
-    inline bool point_on_path(double x,double y,const geometry<vertex2d>& geom)
+    template <typename Iter> 
+    inline bool point_on_path(double x,double y,Iter start,Iter end)
     {
-	bool on_path=false;
-	if (geom.num_points()>1) 
-	{
-	    geometry<vertex2d>::path_iterator<NO_SHIFT> itr=geom.begin<NO_SHIFT>();
-	    geometry<vertex2d>::path_iterator<NO_SHIFT> end=geom.end<NO_SHIFT>();
-	    
-	    double x0=itr->x;
-	    double y0=itr->y;
-	    
-	    while (++itr!=end) 
-	    {
-		if (itr->cmd == SEG_MOVETO)
-		{
-		    x0=itr->x;
-		    y0=itr->y;
-		    continue;
-		}		
-		double x1=itr->x;
-		double y1=itr->y;
-		
-		on_path = point_on_segment(x,y,x0,y0,x1,y1);
-		if (on_path)
-		    break;
-		
-		x0=itr->x;
-		y0=itr->y;
-	    }
-	}
-	return on_path;
+	return false;
     }
-
-    inline bool point_on_points (double x,double y,const geometry_type& geom) 
+    
+    template <typename Iter> 
+    inline bool point_on_points (double x,double y,Iter start,Iter end) 
     {
-	geometry<vertex2d>::path_iterator<NO_SHIFT> itr=geom.begin<NO_SHIFT>();
-	geometry<vertex2d>::path_iterator<NO_SHIFT> end=geom.end<NO_SHIFT>();
-	while (itr!=end) 
-	{
-	    double dx = x - itr->x;
-	    double dy = y - itr->y;
-	    double d = sqrt(dx*dx+dy*dy);
-	    
-	    if (d < 0.02)
-	    {
-		std::cout<<"d="<<d<<" x="<<x<<" y="<<y<<" itr->x="<<itr->x<<" itr->y="<<itr->y<<std::endl;
-		return true;
-	    }
-	    ++itr;
-	}
 	return false; 
     }
 
@@ -221,7 +178,6 @@ namespace mapnik
             return extent.contains(pt_);
         }
     };
-    
 }
 
 #endif                                            //GEOM_UTIL_HPP

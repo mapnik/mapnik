@@ -17,6 +17,7 @@
  */
 
 #include "dbffile.hpp"
+#include "utils.hpp"
 
 #include <string>
 

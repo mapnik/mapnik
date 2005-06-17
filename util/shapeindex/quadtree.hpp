@@ -21,7 +21,7 @@
 #ifndef QUADTREE_HH
 #define QUADTREE_HH
 
-#include "mapnik.hh"
+#include "envelope.hpp"
 #include <vector>
 #include <fstream>
 

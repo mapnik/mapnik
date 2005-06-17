@@ -22,7 +22,10 @@
 #define POSTGIS_HPP
 
 
-#include "mapnik.hpp"
+#include "datasource.hpp"
+#include "envelope.hpp"
+#include "feature.hpp"
+
 #include "connection_manager.hpp"
 #include <boost/lexical_cast.hpp>
 

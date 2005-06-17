@@ -19,7 +19,8 @@
 #ifndef SHAPE_HH
 #define SHAPE_HH
 
-#include "mapnik.hpp"
+#include "datasource.hpp"
+#include "envelope.hpp"
 #include "shape_io.hpp"
 
 using namespace mapnik;

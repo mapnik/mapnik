@@ -21,8 +21,9 @@
 #ifndef SHAPEFILE_HH
 #define SHAPEFILE_HH
 
-#include "mapnik.hpp"
 #include <fstream>
+
+#include "envelope.hpp"
 
 using namespace mapnik;
 

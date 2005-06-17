@@ -19,6 +19,7 @@
 #include "shape.hpp"
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
+#include "geom_util.hpp"
 
 #include <iostream>
 #include <stdexcept>

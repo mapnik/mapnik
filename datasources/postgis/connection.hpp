@@ -23,7 +23,6 @@
 
 
 #include "libpq-fe.h"
-#include "mapnik.hpp"
 #include "resultset.hpp"
 
 using namespace mapnik;
