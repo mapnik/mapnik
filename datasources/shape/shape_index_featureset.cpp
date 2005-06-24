@@ -153,13 +153,14 @@ Feature* shape_index_featureset<filterT>::next()
             }
             if (attr_ids_.size())
             {
+		f->reserve_props(attr_ids_.size());
                 shape_.dbf().move_to(shape_.id_);
 		std::vector<int>::const_iterator pos=attr_ids_.begin();
 		while (pos!=attr_ids_.end())
 		{
 		    try 
 		    {
-			shape_.dbf().add_attribute(*pos,f);//TODO optimize!!!
+			shape_.dbf().add_attribute(*pos,f);
 		    }
 		    catch (...)
 		    {

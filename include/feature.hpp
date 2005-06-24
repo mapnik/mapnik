@@ -86,7 +86,11 @@ namespace mapnik
 	{
 	    return raster_;
 	}
-        
+        void reserve_props(unsigned n)
+	{
+	    props_.reserve(n);
+	}
+
 	void add_property(int v)
 	{
 	    return props_.push_back(value(v));

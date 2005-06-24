@@ -21,7 +21,6 @@
 #ifndef LOCAL_DATASOURCE_HPP
 #define LOCAL_DATASOURCE_HPP
 
-#include "mapnik.hpp"
 #include <vector>
 
 namespace mapnik

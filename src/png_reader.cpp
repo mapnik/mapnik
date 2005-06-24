@@ -20,6 +20,7 @@
 
 #include "image_reader.hpp"
 #include <png.h>
+#include <iostream>
 
 namespace mapnik
 {

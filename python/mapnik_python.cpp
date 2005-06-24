@@ -98,6 +98,10 @@ ref_ptr<symbolizer> create_polygon_symbolizer(const Color& fill)
     return ref_ptr<symbolizer>(new polygon_symbolizer(fill));
 } 
 
+ref_ptr<symbolizer> create_polygon_symbolizer2(std::string const& file,unsigned w,unsigned h) 
+{   
+    return ref_ptr<symbolizer>(new pattern_symbolizer(file,"png",w,h));
+} 
 
 BOOST_PYTHON_MODULE(mapnik)
 {
@@ -136,7 +140,7 @@ BOOST_PYTHON_MODULE(mapnik)
     def("line_symbolizer",&create_line_symbolizer);
     def("line_symbolizer",&create_line_symbolizer2);
     def("polygon_symbolizer",&create_polygon_symbolizer);
-
+    def("polygon_symbolizer",&create_polygon_symbolizer2);
     register_ptr_to_python<ref_ptr<symbolizer> >();
     register_ptr_to_python<filter_ptr>();
 }

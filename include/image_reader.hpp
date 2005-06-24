@@ -21,9 +21,10 @@
 #ifndef IMAGE_READER_HPP
 #define IMAGE_READER_HPP
 
-#include "mapnik.hpp"
+#include "image_data.hpp"
 #include <stdexcept>
 #include <string>
+
 
 namespace mapnik 
 {

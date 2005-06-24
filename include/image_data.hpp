@@ -21,6 +21,8 @@
 #ifndef IMAGE_DATA_HPP
 #define IMAGE_DATA_HPP
 
+#include <cassert>
+
 namespace mapnik 
 {
     template <class T> class ImageData

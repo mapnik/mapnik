@@ -50,7 +50,7 @@ Feature* PostgisFeatureset::next()
         if (geom)
         {
             feature=new Feature(id,geom);
-	    
+	    feature->reserve_props(num_attrs_);
 	    unsigned start=2;
 	    for (unsigned pos=0;pos<num_attrs_;++pos)
 	    {

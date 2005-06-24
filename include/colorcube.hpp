@@ -18,7 +18,6 @@
 
 //$Id$
 
-#include "mapnik.hpp"
 #include <iostream>
 
 #ifndef COLORCUBE_HPP

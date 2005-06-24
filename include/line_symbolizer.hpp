@@ -47,8 +47,8 @@
 
 #include "symbolizer.hpp"
 #include "stroke.hpp"
-#include "line_aa.hpp"
-#include "scanline_aa.hpp"
+//#include "line_aa.hpp"
+//#include "scanline_aa.hpp"
 
 namespace mapnik 
 {

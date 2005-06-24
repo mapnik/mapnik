@@ -32,6 +32,7 @@
 #include "line_symbolizer.hpp"
 #include "query.hpp"
 #include "feature_layer_desc.hpp"
+#include "attribute_collector.hpp"
 #include "property_index.hpp"
 
 #include <algorithm>
@@ -126,6 +127,7 @@ namespace mapnik
 					(*symIter)->render(*geom,image);
 					++symIter;
 				    }
+				    break;// not sure !!
 				}			    
 				++itr;
 			    }

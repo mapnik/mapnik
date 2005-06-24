@@ -22,8 +22,18 @@
 #define POLYGON_SYMBOLIZER_HPP
 
 #include "symbolizer.hpp"
-#include "scanline_aa.hpp"
-#include "line_aa.hpp"
+#include "image_reader.hpp"
+//#include "scanline_aa.hpp"
+//#include "line_aa.hpp"
+#include "agg_basics.h"
+#include "agg_rendering_buffer.h"
+#include "agg_rasterizer_scanline_aa.h"
+#include "agg_scanline_p.h"
+#include "agg_scanline_u.h"
+#include "agg_renderer_scanline.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_path_storage.h"
+#include "agg_span_pattern_rgba.h"
 
 namespace mapnik 
 {
@@ -40,15 +50,102 @@ namespace mapnik
 
 	void render(geometry_type& geom,Image32& image) const 
 	{
-	    ScanlineRasterizerAA<Image32> rasterizer(image);
-	    rasterizer.render<SHIFT8>(geom,fill_);
+	    //ScanlineRasterizerAA<Image32> rasterizer(image);
+	    //rasterizer.render<SHIFT8>(geom,fill_);
+	    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
+	    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
+					       image.width()*4);
+	    agg::pixfmt_rgba32 pixf(buf);
+	    ren_base renb(pixf);	    
+	    
+	    double r=fill_.red()/255.0;
+	    double g=fill_.green()/255.0;
+	    double b=fill_.blue()/255.0;
+	    
+	    renderer ren(renb);
+	    
+	    agg::rasterizer_scanline_aa<> ras;
+	    agg::scanline_u8 sl;
+	    ras.clip_box(0,0,image.width(),image.height());
+	    ras.add_path(geom);
+	    ren.color(agg::rgba(r, g, b, 1.0));
+	    agg::render_scanlines(ras, sl, ren);
 	}
 	
     private:
 	polygon_symbolizer(const polygon_symbolizer&);
-	polygon_symbolizer& operator=(const polygon_symbolizer&);
-	
+	polygon_symbolizer& operator=(const polygon_symbolizer&);	
     };
+    
+    struct pattern_symbolizer : public symbolizer
+    {
+    private:
+	ImageData32 pattern_;
+    public:
+	pattern_symbolizer(std::string const& file,
+			 std::string const& type,
+			 unsigned width,unsigned height) 
+	    : symbolizer(),
+	      pattern_(width,height)
+	{
+	    try 
+	    {
+		std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
+		std::cout<<"image width="<<reader->width()<<std::endl;
+		std::cout<<"image height="<<reader->height()<<std::endl;
+		reader->read(0,0,pattern_);		
+	    } 
+	    catch (...) 
+	    {
+		std::cerr<<"exception caught..."<<std::endl;
+	    }
+	}
+
+	virtual ~pattern_symbolizer() {}
+
+	void render(geometry_type& geom,Image32& image) const
+	{
+	    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
+	    typedef agg::renderer_scanline_aa_solid<ren_base> renderer_solid;
+
+	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
+					       image.width()*4);
+	    agg::pixfmt_rgba32 pixf(buf);
+	    ren_base renb(pixf);
+ 
+	    unsigned w=pattern_.width();
+	    unsigned h=pattern_.height();
+	    agg::row_ptr_cache<agg::int8u> pattern_rbuf((agg::int8u*)pattern_.getBytes(),w,h,w*4);  
+
+	    typedef agg::wrap_mode_repeat wrap_x_type;
+	    typedef agg::wrap_mode_repeat wrap_y_type;
+	    typedef agg::span_pattern_rgba<agg::rgba8, 
+		agg::order_rgba,
+		wrap_x_type,
+		wrap_y_type> span_gen_type;
+	    typedef agg::renderer_scanline_aa<ren_base, span_gen_type> renderer_type;  
+	    
+	    unsigned offset_x = 0;
+	    unsigned offset_y = 0;
+	    agg::span_allocator<agg::rgba8> sa;
+	    span_gen_type sg(sa, pattern_rbuf, offset_x, offset_y);
+	    renderer_type rp(renb, sg);
+
+	    agg::rasterizer_scanline_aa<> ras;
+	    agg::scanline_u8 sl;
+	    ras.clip_box(0,0,image.width(),image.height());
+	    ras.add_path(geom);
+	    //ren.color(agg::rgba(r, g, b, 1.0));
+	    agg::render_scanlines(ras, sl, rp);
+	    
+	}
+	
+    private:
+	pattern_symbolizer(const pattern_symbolizer&);
+	pattern_symbolizer& operator=(const pattern_symbolizer&);	
+    };
+    
 }
 
 #endif // POLYGON_SYMBOLIZER_HPP

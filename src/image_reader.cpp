@@ -20,6 +20,8 @@
 
 
 #include "image_reader.hpp"
+#include "factory.hpp"
+
 namespace mapnik
 {  
     typedef factory<ImageReader,std::string, 
