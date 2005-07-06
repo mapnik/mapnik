@@ -41,12 +41,12 @@ namespace mapnik
 		    std::numeric_limits<double>::min(),
 		    std::numeric_limits<double>::max(),
 		    std::numeric_limits<double>::max()),
-	      filter_(new null_filter<Feature>)
+	      filter_(new all_filter<Feature>)
 	{}
 	
 	query(const Envelope<double>& bbox)
 	    : bbox_(bbox),
-	      filter_(new null_filter<Feature>)
+	      filter_(new all_filter<Feature>)
 	{}
 	
 	query(const Envelope<double>& bbox,const filter<Feature>& f)

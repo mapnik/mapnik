@@ -30,8 +30,8 @@ using namespace mapnik;
 template <typename T>
 struct quadtree_node
 {
-    std::vector<T> data_;
     Envelope<double> ext_;
+    std::vector<T> data_;
     quadtree_node<T>* children_[4];
     quadtree_node(const Envelope<double>& ext)
         : ext_(ext),data_()

@@ -40,7 +40,7 @@ namespace mapnik
 
     
     template <typename FeatureT>
-    struct null_filter : public filter<FeatureT>
+    struct all_filter : public filter<FeatureT>
     {
 
 	bool pass (const FeatureT&) const
@@ -50,16 +50,36 @@ namespace mapnik
 	
 	filter<FeatureT>* clone() const
 	{
-	    return new null_filter<FeatureT>;
+	    return new all_filter<FeatureT>;
 	}
 	std::string to_string() const
 	{
 	    return "true";
 	}  
         void accept(filter_visitor<FeatureT>&) {}
-	virtual ~null_filter() {}
+	virtual ~all_filter() {}
     };
-        
+      
+    template <typename FeatureT>
+    struct none_filter : public filter<FeatureT>
+    {
+
+	bool pass (const FeatureT&) const
+	{
+	    return false;
+	}
+	
+	filter<FeatureT>* clone() const
+	{
+	    return new none_filter<FeatureT>;
+	}
+	std::string to_string() const
+	{
+	    return "false";
+	}  
+        void accept(filter_visitor<FeatureT>&) {}
+	virtual ~none_filter() {}
+    };
 }
 
 #endif //FILTER_HPP

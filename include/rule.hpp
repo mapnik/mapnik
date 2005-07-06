@@ -29,7 +29,7 @@ namespace mapnik
 {
     typedef ref_ptr<symbolizer> symbolizer_ptr;
     typedef std::vector<symbolizer_ptr> symbolizers;    
-    template <typename FeatureT> class null_filter;
+    template <typename FeatureT> class all_filter;
 
     template <typename FeatureT,template <typename> class Filter>
     class rule
@@ -54,7 +54,7 @@ namespace mapnik
 	      min_scale_(0),
 	      max_scale_(std::numeric_limits<double>::infinity()),
 	      syms_(),
-	      filter_(new null_filter<FeatureT>),
+	      filter_(new all_filter<FeatureT>),
 	      else_filter_(false) {}
 	
 	rule(const std::string& name,const std::string& title)
@@ -64,7 +64,7 @@ namespace mapnik
 	      min_scale_(0),
 	      max_scale_(std::numeric_limits<double>::infinity()),
 	      syms_(),
-	      filter_(new null_filter<FeatureT>),
+	      filter_(new all_filter<FeatureT>),
 	      else_filter_(false) {}
         
 	rule(const std::string& name,const std::string& title,
@@ -74,7 +74,7 @@ namespace mapnik
 	      min_scale_(min_scale_denominator),
 	      max_scale_(max_scale_denominator),
 	      syms_(),
-	      filter_(new null_filter<FeatureT>),
+	      filter_(new all_filter<FeatureT>),
 	      else_filter_(false) {}
 	    
 	rule(const rule& rhs)    

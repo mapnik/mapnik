@@ -115,8 +115,7 @@ int main (int argc,char** argv)
 	    continue;
 	}
 
-	int file_code=shp.read_xdr_integer();
-	assert(file_code==9994);
+	shp.read_xdr_integer(); //file_code == 9994
 	shp.skip(5*4); 
 	
 	int file_length=shp.read_xdr_integer();

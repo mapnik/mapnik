@@ -45,7 +45,7 @@ namespace mapnik
 	    else 
 	    {
 		cout << "failed at :" << info.stop << "\n";
-		return filter_ptr(new null_filter<FeatureT>());
+		return filter_ptr(new all_filter<FeatureT>());
 	    }  
 	}
     };
