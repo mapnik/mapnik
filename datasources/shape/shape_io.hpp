@@ -40,7 +40,7 @@ struct shape_io
     Envelope<double> cur_extent_;
 
 public:
-    enum
+    enum shapeType
     {
 	shape_null = 0,
 	shape_point = 1,
