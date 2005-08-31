@@ -26,7 +26,7 @@ using mapnik::Parameter;
 using mapnik::Parameters;
 
 
-void (Parameters::*add1)(const Parameter& param)=&Parameters::add;
+void (Parameters::*add1)(const Parameter&)=&Parameters::add;
 void (Parameters::*add2)(const std::string&,const std::string&)=&Parameters::add;
 
 struct parameter_pickle_suite : boost::python::pickle_suite
