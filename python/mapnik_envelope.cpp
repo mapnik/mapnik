@@ -34,6 +34,26 @@ struct envelope_pickle_suite : boost::python::pickle_suite
     }
 };
 
+//define overloads here
+void (Envelope<double>::*width_p1)(double) = &Envelope<double>::width;
+double (Envelope<double>::*width_p2)() const = &Envelope<double>::width;
+
+void (Envelope<double>::*height_p1)(double) = &Envelope<double>::height;
+double (Envelope<double>::*height_p2)() const = &Envelope<double>::height;
+
+void (Envelope<double>::*expand_to_include_p1)(double,double) = &Envelope<double>::expand_to_include;
+void (Envelope<double>::*expand_to_include_p2)(coord<double,2> const& ) = &Envelope<double>::expand_to_include;
+void (Envelope<double>::*expand_to_include_p3)(Envelope<double> const& ) = &Envelope<double>::expand_to_include;
+
+bool (Envelope<double>::*contains_p1)(double,double) const = &Envelope<double>::contains;
+bool (Envelope<double>::*contains_p2)(coord<double,2> const&) const = &Envelope<double>::contains;
+bool (Envelope<double>::*contains_p3)(Envelope<double> const&) const = &Envelope<double>::contains;
+
+bool (Envelope<double>::*intersects_p1)(double,double) const = &Envelope<double>::intersects;
+bool (Envelope<double>::*intersects_p2)(coord<double,2> const&) const = &Envelope<double>::intersects;
+bool (Envelope<double>::*intersects_p3)(Envelope<double> const&) const = &Envelope<double>::intersects;
+
+
 void export_envelope()
 {
     using namespace boost::python;
@@ -45,6 +65,21 @@ void export_envelope()
         .add_property("maxx",&Envelope<double>::maxx)
         .add_property("maxy",&Envelope<double>::maxy)
         .def("center",&Envelope<double>::center)
+	.def("center",&Envelope<double>::re_center)
+	.def("width",width_p1)
+	.def("width",width_p2)
+	.def("height",height_p1)
+	.def("height",height_p2)
+	.def("expand_to_include",expand_to_include_p1)
+	.def("expand_to_include",expand_to_include_p2)
+	.def("expand_to_include",expand_to_include_p3)
+	.def("contains",contains_p1)
+	.def("contains",contains_p2)
+	.def("contains",contains_p3)
+	.def("intersects",intersects_p1)
+	.def("intersects",intersects_p2)
+	.def("intersects",intersects_p3)
+	.def(self == self)
         .def_pickle(envelope_pickle_suite())
         ;
 }

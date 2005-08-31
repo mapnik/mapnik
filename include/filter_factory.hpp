@@ -28,8 +28,7 @@ namespace mapnik
     class filter_factory
     {
     public:
-	filter_factory() {}
-	filter_ptr compile(string const& str) const
+	static filter_ptr compile(string const& str)
 	{
 	    stack<ref_ptr<filter<FeatureT> > > filters;
 	    stack<ref_ptr<expression<FeatureT> > > exps;
@@ -38,14 +37,12 @@ namespace mapnik
 	    parse_info<> info = parse(text,text+strlen(text),grammar,space_p);
 	    if (info.full && !filters.empty())
 	    {
-		cout<<"success parsing filter expression:\n";
-		cout<<filters.top()->to_string()<<"\n";
 		return filters.top();	
 	    }
 	    else 
 	    {
-		cout << "failed at :" << info.stop << "\n";
-		return filter_ptr(new all_filter<FeatureT>());
+		cerr << "failed at :" << info.stop << "\n";
+		return filter_ptr(new none_filter<FeatureT>());
 	    }  
 	}
     };

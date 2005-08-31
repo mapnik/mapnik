@@ -32,8 +32,7 @@ namespace
     using namespace boost::python;
     filter_ptr create_filter(string const& filter_text)
     {
-	filter_factory<Feature> factory;
-	return factory.compile(filter_text);
+	return filter_factory<Feature>::compile(filter_text);
     }
 }
 

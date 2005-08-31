@@ -421,7 +421,7 @@ namespace mapnik { namespace impl {
 
 	value& operator-=(value const& other)
 	{
-	    v_ = apply_visitor(sub(),v_,other.get());
+	    v_ = apply_visitor(sub(),v_,other.get());	    //cout << "string(\""<<str<<"\")\n";
 	    return *this;
 	}
 

@@ -38,7 +38,6 @@
 
 using namespace boost::spirit;
 using std::string;
-using std::cout;
 using std::cerr;
 using std::stack;
 
@@ -87,7 +86,6 @@ namespace mapnik
 		str.erase(idx,1);
 		idx = str.find(quote);
 	    }
-	    cout << "string(\""<<str<<"\")\n";
 	    exprs_.push(ref_ptr<expression<FeatureT> >(new literal<FeatureT>(str)));
 	}
 	stack<ref_ptr<expression<FeatureT> > >& exprs_;
@@ -153,9 +151,9 @@ namespace mapnik
 		    {
 			filters_.push(ref_ptr<filter<FeatureT> >(new regex_filter<FeatureT>(*exp,pattern)));
 		    }
-		    catch (boost::regex_error& ex)
+		    catch (...)//boost::regex_error& ex)
 		    {
-			cerr<<ex.what()<<"\n";
+		      cerr<<"error\n";//ex.what()<<"\n";
 		    }
 		    
 		}
