@@ -49,14 +49,14 @@ namespace mapnik
         const datasource_p& ds=l.datasource();
         if (!ds) return;
 	
-	volatile named_style_cache* styles=named_style_cache::instance();
+	//volatile named_style_cache* styles=named_style_cache::instance();
 
 	//get copy
 	std::vector<std::string> const& namedStyles=l.styles();
 	std::vector<std::string>::const_iterator stylesIter=namedStyles.begin();
 	while (stylesIter!=namedStyles.end())
 	{
-	    feature_type_style style=styles->find(*stylesIter++);
+	    feature_type_style style=named_style_cache::instance()->find(*stylesIter++);
 	    
 	    std::set<std::string> names;
 	    attribute_collector<Feature> collector(names);
@@ -105,7 +105,7 @@ namespace mapnik
 		if (fs)
 		{   	    
 		    Feature* feature=0;
-		    while (feature = fs->next())
+		    while ((feature = fs->next()))
 		    {		   
 			bool do_else=true;
 			geometry_ptr& geom=feature->get_geometry();
@@ -153,8 +153,8 @@ namespace mapnik
 		}
 		if (l.isSelectable() && l.selection().size()) //TODO !!!
 		{
-		    volatile style_cache* styles=style_cache::instance();
-		    const Style& style=styles->find(l.selection_style());
+		  //volatile style_cache* styles=style_cache::instance();
+		    const Style& style=style_cache::instance()->find(l.selection_style());
 		
 		    std::vector<ref_ptr<Feature> >& selection=l.selection();
 		

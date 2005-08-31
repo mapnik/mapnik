@@ -41,8 +41,9 @@ namespace mapnik
         try
         {
             name_=params_.get("name");
-            volatile datasource_cache* factory=datasource_cache::instance();
-            ds_=factory->create(params_);
+            //volatile datasource_cache* factory=datasource_cache::instance();
+            //ds_=factory->create(params_);
+	    ds_=datasource_cache::instance()->create(params_);
 
         }
         catch (...)
