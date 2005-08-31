@@ -31,9 +31,9 @@ namespace mapnik {
 	Color()
 	    :rgba_(0xffffffff) {}
 
-	Color(int red,int green,int blue)
-	    : rgba_(0xff<<24 | (blue&0xff) << 16 | (green&0xff) << 8 | red&0xff) {}
-
+	Color(int red,int green,int blue,int alpha=0xff)
+	    : rgba_((alpha&0xff) << 24 | (blue&0xff) << 16 | (green&0xff) << 8 | red&0xff) {}
+	
 	explicit Color(int rgba)
 	    : rgba_(rgba) {}
 
@@ -58,6 +58,12 @@ namespace mapnik {
 	{
 	    return rgba_&0xff;
 	}
+
+	inline int alpha() const
+	{
+	    return (rgba_>>24)&0xff;
+	}
+	
 	inline int rgba() const
 	{
 	    return rgba_;
