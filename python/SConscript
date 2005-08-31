@@ -40,7 +40,8 @@ boost_python_src.append(glob.glob(boost_python_src_dir + 'object/*.cpp'))
 boost_python_src.append(glob.glob(boost_python_src_dir + 'converter/*.cpp'))
 
 python_cpppath  = python_root+'/include/python'+python_version
-lib_boost_python = env.SharedLibrary('libboost-python',boost_python_src,CPPPATH=[boost_root,python_cpppath])
+
+lib_boost_python = env.SharedLibrary('libboost-python',boost_python_src,LIBS=[],CPPPATH=[boost_root,python_cpppath])
 
 env.Install(prefix + '/lib',lib_boost_python)
 
