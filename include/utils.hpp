@@ -217,12 +217,6 @@ namespace mapnik
 	Lock* operator&();
     };
 
-    class Functor
-    {
-    public:
-	virtual void operator()() const=0;
-    };
-
     struct timer
     {
         struct timeval tv_;
