@@ -103,7 +103,7 @@ ref_ptr<symbolizer> create_polygon_symbolizer2(std::string const& file,unsigned 
     return ref_ptr<symbolizer>(new pattern_symbolizer(file,"png",w,h));
 } 
 
-BOOST_PYTHON_MODULE(mapnik)
+BOOST_PYTHON_MODULE(_mapnik)
 {
     using namespace boost::python;
     

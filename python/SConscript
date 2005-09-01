@@ -52,7 +52,7 @@ freetype2_root = env['FREETYPE2_ROOT']
 
 def createPythonExtBuilder(env):
     """This is a utility function that creates boost-python  
-    etxension Builder in an Environment if it is not there already. 
+    extension Builder in an Environment if it is not there already. 
     If it is already there, we return the existing one.
     """
 
@@ -96,6 +96,27 @@ headers =[ '#include',boost_root,freetype2_root,agg_headers,python_headers]
 libraries=['mapnik','agg','boost-filesystem','boost-regex','boost-python']
 libpaths = [prefix+"/lib",'#agg']
 
-mapnik_python = env.PythonExtension(target='mapnik',source=mapnik_python_src,CPPPATH=headers,LIBS=libraries,LIBPATH=libpaths)
+_mapnik_python = env.PythonExtension(target='_mapnik',\
+                                     source=mapnik_python_src,\
+                                     CPPPATH=headers,\
+                                     LIBS=libraries,\
+                                     LIBPATH=libpaths)
 
-env.Alias(target="install",source=env.Install(prefix+'/lib',mapnik_python))
+def substitute_prefix(target,source,env):
+    from string import Template
+    s = Template(source[0].get_contents())
+    str = s.substitute(PREFIX=prefix)
+    _out = file(target[0].abspath,'w')
+    _out.write(str)
+    _out.close()
+    return None
+
+env.Command('mapnik/__init__.py','mapnik/__init__.py.in', substitute_prefix)
+
+__init1__ = env.Install(prefix+'/lib','__init__.py')
+__init2__ = env.Install(prefix+'/lib/mapnik','mapnik/__init__.py')
+_source=env.Install(prefix+'/lib/mapnik',_mapnik_python)
+_source.append(__init1__)
+_source.append(__init2__)
+
+env.Alias(target="install",source=_source)
