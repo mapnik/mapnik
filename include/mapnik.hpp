@@ -56,7 +56,6 @@
 #include "datasource_cache.hpp"
 #include "wkb.hpp"
 #include "map.hpp"
-#include "colorcube.hpp"
 #include "feature_type_style.hpp"
 #include "math_expr.hpp"
 #include "value.hpp"
@@ -67,6 +66,8 @@
 #include "text_symbolizer.hpp"
 #include "label_placement.hpp"
 #include "feature_layer_desc.hpp"
+#include "css_color_parser.hpp"
+#include "color_factory.hpp"
 
 namespace mapnik
 {

@@ -22,6 +22,7 @@
 #include <mapnik.hpp>
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 using mapnik::Layer;
 using mapnik::Parameters;
@@ -42,8 +43,8 @@ struct layer_pickle_suite : boost::python::pickle_suite
 	
 	std::vector<std::string> const& styles=l.styles();
 	std::vector<std::string>::const_iterator itr=styles.begin();
-	list py_styles;
-
+	boost::python::list py_styles;
+        
 	while (itr!=styles.end())
 	{
 	    py_styles.append(*itr++);
@@ -70,7 +71,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
 	l.setMinZoom(extract<double>(state[0]));
 	l.setMaxZoom(extract<double>(state[1]));
 
-	list styles=extract<list>(state[2]);
+	boost::python::list styles=extract<boost::python::list>(state[2]);
 	for (int i=0;i<len(styles);++i)
 	{
 	    l.add_style(extract<std::string>(styles[i]));
@@ -85,7 +86,7 @@ namespace
     Layer create_layer(const dict& d)
     {
 	Parameters params;
-	list keys=d.keys();
+	boost::python::list keys=d.keys();
 	for (int i=0;i<len(keys);++i)
 	{
 	    std::string key=extract<std::string>(keys[i]);
@@ -100,14 +101,18 @@ namespace
 void export_layer()
 {
     using namespace boost::python;
-    class_<Layer>("layer",init<const Parameters&>("Layer constructor"))
-	//class_<Layer>("layer",no_init)
+    class_<std::vector<std::string> >("styles")
+    	.def(vector_indexing_suite<std::vector<std::string>,true >())
+    	;
+    //class_<Layer>("layer",init<const Parameters&>("Layer constructor"))
+    class_<Layer>("layer",no_init)
         .def("name",&Layer::name,return_value_policy<copy_const_reference>())
         .def("params",&Layer::params,return_value_policy<reference_existing_object>())
         .def("envelope",&Layer::envelope,return_value_policy<reference_existing_object>())
-	.def("minzoom",&Layer::setMinZoom)
-	.def("maxzoom",&Layer::setMaxZoom)
-	.def("style",&Layer::add_style)
+	.add_property("minzoom",&Layer::getMinZoom,&Layer::setMinZoom)
+	.add_property("maxzoom",&Layer::getMaxZoom,&Layer::setMaxZoom)
+	.add_property("styles",make_function
+		      (&Layer::styles,return_value_policy<reference_existing_object>()))
         .def_pickle(layer_pickle_suite())
         ;
     def("create_layer",&create_layer);

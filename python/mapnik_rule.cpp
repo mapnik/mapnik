@@ -32,32 +32,33 @@ void export_rule()
 {
     using namespace boost::python;
     
-    class_<symbolizers>("symbolizers",init<>("symbolizers TODO"))
+    class_<symbolizers>("symbolizers",init<>("TODO"))
 	.def(vector_indexing_suite<symbolizers>())
 	;
     
-    class_<rule_type>("rule",init<>("default rule constructor"))
-	 //name,title
-	.def(init<std::string,std::string>())
-	//name,title,min_scale_denominator,max_scale_denominator
-	.def(init<std::string,std::string,double,double>())
- 	.def("name",&rule_type::get_name,return_value_policy<copy_const_reference>())
-	.def("name",&rule_type::set_name)
-	.def("title",&rule_type::get_title,return_value_policy<copy_const_reference>())
-	.def("title",&rule_type::set_title)
-	.def("abstract",&rule_type::get_abstract,return_value_policy<copy_const_reference>())
-	.def("abstract",&rule_type::set_abstract)
-	.def("filter",&rule_type::get_filter,return_value_policy<copy_const_reference>())
-	.def("filter",&rule_type::set_filter)
+    class_<rule_type>("rule",init<>("default ctor"))
+	.def(init<std::string const&,
+	     boost::python::optional<std::string const&,double,double> >())
+	.add_property("name",make_function
+		      (&rule_type::get_name,
+		       return_value_policy<copy_const_reference>()),
+		      &rule_type::set_name)
+	.add_property("title",make_function
+		      (&rule_type::get_title,return_value_policy<copy_const_reference>()),
+		      &rule_type::set_title)
+	.add_property("abstract",make_function
+		      (&rule_type::get_abstract,return_value_policy<copy_const_reference>()),
+		      &rule_type::set_abstract)
+	.add_property("filter",make_function
+		      (&rule_type::get_filter,return_value_policy<copy_const_reference>()),
+		      &rule_type::set_filter)
 	.add_property("min_scale",&rule_type::get_min_scale,&rule_type::set_min_scale)
 	.add_property("max_scale",&rule_type::get_max_scale,&rule_type::set_max_scale)
 	.def("set_else",&rule_type::set_else)
 	.def("has_else",&rule_type::has_else_filter)
 	.def("active",&rule_type::active)
-	.def("append",&rule_type::append)
-	.def("remove",&rule_type::remove_at)
-	.def("__iter__",boost::python::range(&rule_type::begin,&rule_type::end))
-	.def("symbols",&rule_type::get_symbolizers,return_value_policy<copy_const_reference>())
+	.add_property("symbols",make_function
+		      (&rule_type::get_symbolizers,return_value_policy<reference_existing_object>()))
 	;
 }
 

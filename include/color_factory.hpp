@@ -18,46 +18,31 @@
 
 //$Id$
 
-#ifndef FEATURE_TYPE_STYLE
-#define FEATURE_TYPE_STYLE
+#ifndef COLOR_FACTORY_HPP
+#define COLOR_FACTORY_HPP
 
-#include "rule.hpp"
-#include "feature.hpp"
-#include "ptr.hpp"
-#include <vector>
+#include "css_color_parser.hpp"
 
 namespace mapnik
 {
-    typedef rule<Feature,filter> rule_type;
-    typedef std::vector<rule_type> rules;
-    class feature_type_style
+    using namespace boost::spirit;
+    class color_factory
     {
-    private:
-	rules  rules_;
     public:
-	feature_type_style() {}
-
-	feature_type_style(const feature_type_style& rhs)
-	    : rules_(rhs.rules_) {}
-
-	feature_type_style& operator=(const feature_type_style& rhs)
-	{
-	    if (this == &rhs) return *this;
-	    rules_=rhs.rules_;
-	    return *this;
-	}
-
-	void add_rule(const rule_type& rule)
-	{
-	    rules_.push_back(rule);
-	} 
-	rules const& get_rules() const
-	{
-	    return rules_;
-	}
-	
-	~feature_type_style() {}
+	static Color from_string(char const* css_color)
+	{   
+	    Color color;
+	    actions<Color> a(color);
+	    css_color_grammar<actions<Color> > grammar(a);
+	    parse_info<> info = parse(css_color, grammar, space_p);
+	    if (info.full) return color;
+	    return Color(0,0,0);	
+	}    
+    private:
+	color_factory();
+	color_factory(color_factory const&);
+	color_factory& operator=(color_factory const&);
     };
 }
 
-#endif //FEATURE_TYPE_STYLE
+#endif //COLOR_FACTORY_HPP

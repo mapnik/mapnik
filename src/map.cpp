@@ -68,12 +68,15 @@ namespace mapnik
     {
         //todo
     }
-
     const Layer& Map::getLayer(size_t index) const
     {
         return layers_[index];
     }
-
+    std::vector<Layer> const& Map::layers() const
+    {
+	return layers_;
+    }
+    
     int Map::getWidth() const
     {
         return width_;

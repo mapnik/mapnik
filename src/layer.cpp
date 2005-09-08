@@ -70,6 +70,11 @@ namespace mapnik
         return *this;
     }
 
+    bool Layer::operator==(Layer const& other) const
+    {
+	return (this == &other);
+    }
+    
     void Layer::swap(const Layer& rhs)
     {
         params_=rhs.params_;

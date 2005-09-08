@@ -56,19 +56,11 @@ namespace mapnik
 	      syms_(),
 	      filter_(new all_filter<FeatureT>),
 	      else_filter_(false) {}
-	
-	rule(const std::string& name,const std::string& title)
-	    : name_(name),
-	      title_(title),
-	      abstract_(),
-	      min_scale_(0),
-	      max_scale_(std::numeric_limits<double>::infinity()),
-	      syms_(),
-	      filter_(new all_filter<FeatureT>),
-	      else_filter_(false) {}
-        
-	rule(const std::string& name,const std::string& title,
-	     double min_scale_denominator,double max_scale_denominator)
+                
+	rule(const std::string& name,
+	     const std::string& title="",
+	     double min_scale_denominator=0,
+	     double max_scale_denominator=std::numeric_limits<double>::infinity())
 	    : name_(name),
 	      title_(title),
 	      min_scale_(min_scale_denominator),
@@ -93,7 +85,11 @@ namespace mapnik
 	    swap(tmp);
 	    return *this;
 	}
-
+	bool operator==(rule const& other)
+	{
+	    return  (this == &other); 
+	}
+	
 	void set_max_scale(double scale)
 	{
 	    max_scale_=scale;

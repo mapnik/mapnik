@@ -26,7 +26,7 @@ namespace mapnik {
     class Color
     {
     private:
-	int rgba_;
+	unsigned int rgba_;
     public:
 	Color()
 	    :rgba_(0xffffffff) {}
@@ -46,11 +46,11 @@ namespace mapnik {
 	    rgba_=rhs.rgba_;
 	    return *this;
 	}
-	inline int blue() const
+	inline unsigned int blue() const
 	{
 	    return (rgba_>>16)&0xff;
 	}
-	inline int green() const
+	inline unsigned int green() const
 	{
 	    return (rgba_>>8)&0xff;
 	}
@@ -58,23 +58,39 @@ namespace mapnik {
 	{
 	    return rgba_&0xff;
 	}
+	
+	inline void set_red(unsigned int r)
+	{
+	    rgba_ = (rgba_ & 0xffffff00) | (r&0xff);
+	}
+	
+	inline void set_green(unsigned int g)
+	{
+	    rgba_ = (rgba_ & 0xffff00ff) | ((g&0xff) << 8);
+	}
+	
+	inline void set_blue(unsigned int b)
+	{
+	    rgba_ = (rgba_ & 0xff00ffff) | ((b&0xff) << 16);
+	}
 
-	inline int alpha() const
+	inline unsigned int alpha() const
 	{
 	    return (rgba_>>24)&0xff;
 	}
 	
-	inline int rgba() const
+	inline unsigned int rgba() const
 	{
 	    return rgba_;
 	}
-	static const Color White;
-	static const Color Black;
-	static const Color Gray;
-	static const Color Red;
-	static const Color Green;
-	static const Color Blue;
-	static const Color Yellow;
+	inline void set_bgr(unsigned bgr)
+	{
+	    rgba_ = (rgba_ & 0xff000000) | (bgr & 0xffffff);
+	}
+	inline bool operator==(Color const& other) const
+	{
+	    return rgba_ == other.rgba_;
+	}
     };    
 }
 

@@ -31,7 +31,7 @@
 
 namespace mapnik
 {
-   template <typename T, typename PoolT>
+    template <typename T, typename PoolT>
     class PoolGuard
     {
     private:

@@ -112,9 +112,12 @@ BOOST_PYTHON_MODULE(_mapnik)
         .def("envelope",&datasource::envelope,
 	     return_value_policy<reference_existing_object>())
         ;
-    class_<symbolizer,boost::noncopyable> ("symbolizer",no_init) 
-    	;
     
+    class_<symbolizer,boost::noncopyable> ("symbolizer_",no_init) 
+    	;
+    class_<ref_ptr<symbolizer,mapnik::DefaultDeletePolicy>,
+	boost::noncopyable>("symbolizer",no_init)
+	;
     export_parameters();
     export_color(); 
     export_envelope();   

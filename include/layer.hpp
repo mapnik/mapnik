@@ -44,8 +44,9 @@ namespace mapnik
 	
     public:
 	explicit Layer(const Parameters& params);
-	Layer(const Layer& l);
-	Layer& operator=(const Layer& l);
+	Layer(Layer const& l);
+	Layer& operator=(Layer const& l);
+	bool operator==(Layer const& other) const;
 	Parameters const& params() const;	
 	const std::string& name() const;
 	void add_style(std::string const& stylename);

@@ -355,7 +355,7 @@ namespace mapnik
 		
 		string_ = confix_p(L'\'',(*lex_escape_ch_p)
 			 [push_string<FeatureT>(self.exprs)],
-				   '\'');
+				   L'\'');
 		
 		property = L'[' >> ( (Letter | L'_' | L':') 
 				    >> *NameChar )[push_property<FeatureT>(self.exprs)] >> L']';

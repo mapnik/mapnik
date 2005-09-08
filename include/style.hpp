@@ -21,11 +21,9 @@
 #ifndef STYLE_HPP
 #define STYLE_HPP
 
-//#include "feature.hpp"
 #include "color.hpp"
 #include "ptr.hpp"
 #include "symbolizer.hpp"
-//#include "rule.hpp"
 
 #include <vector>
 #include <algorithm>

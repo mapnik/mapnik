@@ -67,7 +67,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             throw_error_already_set();
         }
         dict d = extract<dict>(state[0]);
-        list keys=d.keys();
+        boost::python::list keys=d.keys();
         for (int i=0;i<len(keys);++i)
         {
             std::string key=extract<std::string>(keys[i]);

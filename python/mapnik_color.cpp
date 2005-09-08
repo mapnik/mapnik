@@ -19,10 +19,12 @@
 //$Id: mapnik_color.cc 17 2005-03-08 23:58:43Z pavlenko $
 
 
-#include <mapnik.hpp>
+
 #include <boost/python.hpp>
+#include <mapnik.hpp>
 
 using mapnik::Color;
+using mapnik::color_factory;
 
 struct color_pickle_suite : boost::python::pickle_suite
 {
@@ -34,17 +36,22 @@ struct color_pickle_suite : boost::python::pickle_suite
     }
 };
 
+Color create_from_string(const char* str)
+{
+    return color_factory::from_string(str);
+}
+
 void export_color () 
 {
     using namespace boost::python;
     class_<Color>("color",init<>())
-        .def(init<int,int,int>())
-        .def("red",&Color::red)
-        .def("green",&Color::green)
-        .def("blue",&Color::blue)
+        .def(init<int,int,int,boost::python::optional<int> >())
+        .add_property("r",&Color::red,&Color::set_red)
+        .add_property("g",&Color::green,&Color::set_green)
+        .add_property("b",&Color::blue,&Color::set_blue)
+	.add_property("a",&Color::alpha)
         .def_pickle(color_pickle_suite())
         ;
+    def("color_from_string",&create_from_string);
 }
-
-
 

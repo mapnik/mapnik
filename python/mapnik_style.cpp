@@ -20,18 +20,24 @@
 
 #include "mapnik.hpp"
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 using mapnik::feature_type_style;
 using mapnik::named_style_cache;
 using mapnik::singleton;
 using mapnik::CreateStatic;
+using mapnik::rules;
 
 void export_style()
 {
     using namespace boost::python;
+
+    class_<rules>("rules",init<>("default ctor"))
+	.def(vector_indexing_suite<rules>())
+	;
     class_<feature_type_style>("style",init<>("default style constructor"))
-	.def("append_rule",&feature_type_style::add_rule)
-	//.def("rules",&feature_type_style::rules)
+	.add_property("rules",make_function
+		      (&feature_type_style::get_rules,return_value_policy<reference_existing_object>()))
 	;
     
     class_<singleton<named_style_cache,CreateStatic>,boost::noncopyable>("singleton",no_init)

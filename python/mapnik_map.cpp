@@ -21,6 +21,7 @@
 #include <mapnik.hpp>
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 using mapnik::Color;
 using mapnik::coord;
@@ -33,15 +34,13 @@ struct map_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getinitargs(const Map& m)
     {
-        using namespace boost::python;
         return boost::python::make_tuple(m.getWidth(),m.getHeight(),m.srid());
     }
 
     static  boost::python::tuple
     getstate(const Map& m)
     {
-        using namespace boost::python;
-        list l;
+        boost::python::list l;
         for (unsigned i=0;i<m.layerCount();++i)
         {
             l.append(m.getLayer(i));
@@ -65,7 +64,7 @@ struct map_pickle_suite : boost::python::pickle_suite
         Color bg = extract<Color>(state[1]);
         m.zoomToBox(ext);
         m.setBackground(bg);
-        list l=extract<list>(state[2]);
+        boost::python::list l=extract<boost::python::list>(state[2]);
         for (int i=0;i<len(l);++i)
         {
             m.addLayer(extract<Layer>(l[i]));
@@ -76,17 +75,23 @@ struct map_pickle_suite : boost::python::pickle_suite
 void export_map() 
 {
     using namespace boost::python;
+    class_<std::vector<Layer> >("layers")
+    	.def(vector_indexing_suite<std::vector<Layer> >())
+    	;
     class_<Map>("map",init<int,int,boost::python::optional<int> >())
         .add_property("width",&Map::getWidth)
         .add_property("height",&Map::getHeight)
-        .def("background",&Map::setBackground)
+	.add_property("srid",&Map::srid)
+	.add_property("background",make_function
+		      (&Map::getBackground,return_value_policy<copy_const_reference>()),
+		      &Map::setBackground)
         .def("scale", &Map::scale)
         .def("add",&Map::addLayer)
         .def("zoom_to_box",&Map::zoomToBox)
         .def("pan",&Map::pan)
         .def("zoom",&Map::zoom)
         .def("pan_and_zoom",&Map::pan_and_zoom)
+	.def("layers",&Map::layers,return_value_policy<reference_existing_object>())
         .def_pickle(map_pickle_suite())
         ;
-    
 }
