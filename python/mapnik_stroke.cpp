@@ -41,8 +41,9 @@ void export_stroke ()
 
     class_<stroke>("stroke",init<>())
 	.def(init<Color,float>())
-	.def("color",&stroke::get_color,return_value_policy<reference_existing_object>())
-	.def("color",&stroke::set_color)
+	.add_property("color",make_function
+		      (&stroke::get_color,return_value_policy<reference_existing_object>()),
+		      &stroke::set_color)
 	.add_property("width",&stroke::get_width,&stroke::set_width) 
 	.add_property("opacity",&stroke::get_opacity,&stroke::set_opacity)
 	.add_property("line_cap",&stroke::get_line_cap,&stroke::set_line_cap)
