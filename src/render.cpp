@@ -68,7 +68,7 @@ namespace mapnik
 	    std::vector<rule_type*> else_rules;
 	    
 	    bool active_rules=false;
-	    const std::vector<rule_type>& rules=style.rules();
+	    const std::vector<rule_type>& rules=style.get_rules();
 	    std::vector<rule_type>::const_iterator ruleIter=rules.begin();
 	    
 	    while (ruleIter!=rules.end())
@@ -104,7 +104,7 @@ namespace mapnik
 		featureset_ptr fs=ds->features(q);
 		if (fs)
 		{   	    
-		    Feature* feature=0;
+		    feature_ptr feature;
 		    while ((feature = fs->next()))
 		    {		   
 			bool do_else=true;
@@ -148,30 +148,31 @@ namespace mapnik
 				}
 			    }
 			}  
-			delete feature;
+			//delete feature;
 		    }
 		}
-		if (l.isSelectable() && l.selection().size()) //TODO !!!
-		{
+		
+		//if (l.isSelectable() && l.selection().size()) //TODO !!!
+		//{
 		  //volatile style_cache* styles=style_cache::instance();
-		    const Style& style=style_cache::instance()->find(l.selection_style());
+		  //  const Style& style=style_cache::instance()->find(l.selection_style());
 		
-		    std::vector<ref_ptr<Feature> >& selection=l.selection();
+		//	    std::vector<ref_ptr<Feature> >& selection=l.selection();
 		
-		    Style::Iterator pos = style.begin();
-		    if (pos!=style.end()) {
-			std::vector<ref_ptr<Feature> >::iterator itr=selection.begin();
-		    
-			while (itr!=selection.end())
-			{
-			    geometry_ptr& geom=(*itr)->get_geometry();
-			    geom->transform(t);
-			    (*pos)->render(*geom,image);
-			    ++itr;
-			} 
-		    }
-		    l.clear_selection();
-		} 
+		//	    Style::Iterator pos = style.begin();
+		//   if (pos!=style.end()) {
+		//	std::vector<ref_ptr<Feature> >::iterator itr=selection.begin();
+		//   
+		//	while (itr!=selection.end())
+		//	{
+		//	    geometry_ptr& geom=(*itr)->get_geometry();
+		//	    geom->transform(t);
+		//	    (*pos)->render(*geom,image);
+		//	    ++itr;
+		//	} 
+		//   }
+		//    l.clear_selection();
+		//} 
 	    }
 	}
     }

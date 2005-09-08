@@ -40,7 +40,7 @@ public:
     shape_index_featureset(const filterT& filter,const std::string& shape_file,
 			   const std::set<std::string>& attribute_names);
     virtual ~shape_index_featureset();
-    Feature* next();
+    feature_ptr next();
 private:
     //no copying
     shape_index_featureset(const shape_index_featureset&);

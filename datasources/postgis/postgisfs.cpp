@@ -27,21 +27,20 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using std::string;
 
-PostgisFeatureset::PostgisFeatureset(const ref_ptr<ResultSet>& rs,
+postgis_featureset::postgis_featureset(const ref_ptr<ResultSet>& rs,
 				     unsigned num_attrs=0)
     : rs_(rs),
       num_attrs_(num_attrs),
       totalGeomSize_(0),
       count_(0)  {}
 
-Feature* PostgisFeatureset::next()
+feature_ptr postgis_featureset::next()
 {
-    Feature *feature=0;
     if (rs_->next())
     { 
 	const char* buf = rs_->getValue(0);
         int id = int4net(buf);
-        
+	feature_ptr feature(new Feature(id));
         int size=rs_->getFieldLength(1);
         const char *data=rs_->getValue(1);
         geometry_ptr geom=geometry_utils::from_wkb(data,size,-1);
@@ -49,7 +48,7 @@ Feature* PostgisFeatureset::next()
 	     
         if (geom)
         {
-            feature=new Feature(id,geom);
+            feature->set_geometry(geom);
 	    feature->reserve_props(num_attrs_);
 	    unsigned start=2;
 	    for (unsigned pos=0;pos<num_attrs_;++pos)
@@ -91,18 +90,19 @@ Feature* PostgisFeatureset::next()
 	    }
             ++count_;
         }
+	return feature;
     }
     else
     {
         rs_->close();
         std::cout << "totalGeomSize="<<totalGeomSize_<<" bytes"<<std::endl;
         std::cout << "count="<<count_<<std::endl;
+	return feature_ptr(0);
     }
-    return feature;
 }
 
 
-PostgisFeatureset::~PostgisFeatureset()
+postgis_featureset::~postgis_featureset()
 {
     rs_->close();
 }

@@ -33,7 +33,7 @@
 
 using namespace mapnik;
 
-class PostgisDatasource : public datasource
+class postgis_datasource : public datasource
 {
     static const std::string GEOMETRY_COLUMNS;
     static const std::string SPATIAL_REF_SYS;
@@ -54,15 +54,15 @@ public:
     featureset_ptr features(const query& q) const;
     mapnik::Envelope<double> const& envelope() const;
     layer_descriptor const& get_descriptor() const;
-    PostgisDatasource(const Parameters &params);
-    ~PostgisDatasource();
+    postgis_datasource(const Parameters &params);
+    ~postgis_datasource();
 private:
     static std::string table_from_sql(const std::string& sql);
-    PostgisDatasource(const PostgisDatasource&);
-    PostgisDatasource& operator=(const PostgisDatasource&);
+    postgis_datasource(const postgis_datasource&);
+    postgis_datasource& operator=(const postgis_datasource&);
 };
 
-class PostgisFeatureset : public Featureset
+class postgis_featureset : public Featureset
 {
 private:
     ref_ptr<ResultSet> rs_;
@@ -70,13 +70,13 @@ private:
     mutable int totalGeomSize_;
     mutable int count_;
 public:
-    PostgisFeatureset(const ref_ptr<ResultSet>& rs,unsigned num_attrs);
+    postgis_featureset(const ref_ptr<ResultSet>& rs,unsigned num_attrs);
     void dispose();
-    Feature* next();
-    ~PostgisFeatureset();
+    feature_ptr next();
+    ~postgis_featureset();
 private:
-    PostgisFeatureset(const PostgisFeatureset&);
-    const PostgisFeatureset& operator=(const PostgisFeatureset&);
+    postgis_featureset(const postgis_featureset&);
+    const postgis_featureset& operator=(const postgis_featureset&);
 };
 
 #endif                                            //POSTGIS_HPP

@@ -40,7 +40,7 @@ public:
     shape_featureset(const filterT& filter, const std::string& shape_file,
 		     const std::set<std::string>& attribute_names,long file_length);
     virtual ~shape_featureset();
-    Feature* next();
+    feature_ptr next();
 private:
     shape_featureset(const shape_featureset&);
     const shape_featureset& operator=(const shape_featureset&);

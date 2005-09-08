@@ -35,7 +35,7 @@ namespace mapnik
     typedef ref_ptr<Feature> feature_ptr;
     struct Featureset
     {
-        virtual Feature* next()=0;
+        virtual feature_ptr next()=0;
         virtual ~Featureset() {};
     };
     

@@ -25,10 +25,10 @@
 #include <sstream>
 #include "connection_manager.hpp"
 
-DATASOURCE_PLUGIN(PostgisDatasource);
+DATASOURCE_PLUGIN(postgis_datasource);
 
-const std::string PostgisDatasource::GEOMETRY_COLUMNS="geometry_columns";
-const std::string PostgisDatasource::SPATIAL_REF_SYS="spatial_ref_system";
+const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
+const std::string postgis_datasource::SPATIAL_REF_SYS="spatial_ref_system";
 
 using std::cerr;
 using std::cout;
@@ -37,7 +37,7 @@ using std::endl;
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
-PostgisDatasource::PostgisDatasource(const Parameters& params)
+postgis_datasource::postgis_datasource(const Parameters& params)
     : table_(params.get("table")),
       type_(datasource::Vector), 
       desc_(params.get("name")),
@@ -142,24 +142,24 @@ PostgisDatasource::PostgisDatasource(const Parameters& params)
     }
 }
 
-std::string PostgisDatasource::name_="postgis";
+std::string postgis_datasource::name_="postgis";
 
-std::string PostgisDatasource::name()
+std::string postgis_datasource::name()
 {
     return name_;
 }
 
-int PostgisDatasource::type() const
+int postgis_datasource::type() const
 {
     return type_;
 }
 
-layer_descriptor const& PostgisDatasource::get_descriptor() const
+layer_descriptor const& postgis_datasource::get_descriptor() const
 {
     return desc_;
 }
 
-std::string PostgisDatasource::table_from_sql(const std::string& sql)
+std::string postgis_datasource::table_from_sql(const std::string& sql)
 {
     std::string table_name(sql);
     transform(table_name.begin(),table_name.end(),table_name.begin(),tolower);
@@ -174,7 +174,7 @@ std::string PostgisDatasource::table_from_sql(const std::string& sql)
     return table_name;
 }
 
-featureset_ptr PostgisDatasource::features(const query& q) const
+featureset_ptr postgis_datasource::features(const query& q) const
 {
     Featureset *fs=0;
     Envelope<double> const& box=q.get_bbox();
@@ -202,15 +202,15 @@ featureset_ptr PostgisDatasource::features(const query& q) const
 	    s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
 	    cout << s.str() << endl;
 	    ref_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-	    fs=new PostgisFeatureset(rs,props.size());
+	    fs=new postgis_featureset(rs,props.size());
 	}
     }
     return featureset_ptr(fs);
 }
 
-const Envelope<double>& PostgisDatasource::envelope() const
+const Envelope<double>& postgis_datasource::envelope() const
 {
     return extent_;
 }
 
-PostgisDatasource::~PostgisDatasource() {}
+postgis_datasource::~postgis_datasource() {}

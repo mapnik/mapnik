@@ -58,21 +58,23 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 }
 
 template <typename filterT>
-Feature* shape_index_featureset<filterT>::next()
-{
-    Feature *f=0;
+feature_ptr shape_index_featureset<filterT>::next()
+{   
+    
     if (itr_!=ids_.end())
     {
         int pos=*itr_++;
 	shape_.move_to(pos);
         int type=shape_.type();
+	feature_ptr feature(new Feature(shape_.id_));
+
         if (type==shape_io::shape_point)
         {
             double x=shape_.shp().read_double();
 	    double y=shape_.shp().read_double();	    
 	    geometry_ptr point(new point_impl(-1));
 	    point->move_to(x,y);
-            f=new Feature(shape_.id_,point);
+	    feature->set_geometry(point);
 	    ++count_;
         }
 	else if (type == shape_io::shape_pointm)
@@ -82,7 +84,7 @@ Feature* shape_index_featureset<filterT>::next()
 	    shape_.shp().read_double();// m
 	    geometry_ptr point(new point_impl(-1));
 	    point->move_to(x,y);
-            f=new Feature(shape_.id_,point);
+	    feature->set_geometry(point);
 	    ++count_;
 	}
 	else if (type == shape_io::shape_pointz)
@@ -93,7 +95,7 @@ Feature* shape_index_featureset<filterT>::next()
 	    shape_.shp().read_double();// m 
 	    geometry_ptr point(new point_impl(-1));
 	    point->move_to(x,y);
-            f=new Feature(shape_.id_,point);
+	    feature->set_geometry(point);
 	    ++count_;
 	}	
         else
@@ -110,21 +112,21 @@ Feature* shape_index_featureset<filterT>::next()
 	        case shape_io::shape_polyline:
 		{
 		    geometry_ptr line = shape_.read_polyline();
-		    f=new Feature(shape_.id_,line);
+		    feature->set_geometry(line);
 		    ++count_;
 		    break;
 		}
 		case shape_io::shape_polylinem:
 		{
 		    geometry_ptr line = shape_.read_polylinem();
-		    f=new Feature(shape_.id_,line);
+		    feature->set_geometry(line);
 		    ++count_;
 		    break;
 		}
 		case shape_io::shape_polylinez:
 		{
 		    geometry_ptr line = shape_.read_polylinez();
-		    f=new Feature(shape_.id_,line);
+		    feature->set_geometry(line);
 		    ++count_;
 		    break;
 		}
@@ -132,35 +134,35 @@ Feature* shape_index_featureset<filterT>::next()
 		{
 		 
 		    geometry_ptr poly = shape_.read_polygon();
-		    f=new Feature(shape_.id_,poly);
+		    feature->set_geometry(poly);
 		    ++count_;
 		    break;
 		}
 	        case shape_io::shape_polygonm:
 		{ 
 		    geometry_ptr poly = shape_.read_polygonm();
-		    f=new Feature(shape_.id_,poly);
+		    feature->set_geometry(poly);
 		    ++count_;
 		    break;
 		}
 	        case shape_io::shape_polygonz:
 		{
 		    geometry_ptr poly = shape_.read_polygonz();
-		    f=new Feature(shape_.id_,poly);
+		    feature->set_geometry(poly);
 		    ++count_;
 		    break;
 		}
             }
             if (attr_ids_.size())
             {
-		f->reserve_props(attr_ids_.size());
+		feature->reserve_props(attr_ids_.size());
                 shape_.dbf().move_to(shape_.id_);
 		std::vector<int>::const_iterator pos=attr_ids_.begin();
 		while (pos!=attr_ids_.end())
 		{
 		    try 
 		    {
-			shape_.dbf().add_attribute(*pos,f);
+			shape_.dbf().add_attribute(*pos,feature.get());
 		    }
 		    catch (...)
 		    {
@@ -170,9 +172,13 @@ Feature* shape_index_featureset<filterT>::next()
                 }
             }
         }
+	return feature;
     }
-    if (!f) std::cout<<count_<<" features\n";
-    return f;
+    else
+    {
+	std::cout<<count_<<" features\n";
+	return feature_ptr(0);
+    }
 }
 
 
