@@ -98,30 +98,20 @@ namespace mapnik
 		if (!is_directory( *itr ))
                 {
                     std::string file_name(str+"/"+itr->leaf());
-
-		    if (file_name=="." || file_name=="..")
-			continue;
-                    std::string::size_type len=file_name.size();
-		    
-                    if (len>3 && 
-			file_name[len-1]=='o' && 
-			file_name[len-2]=='s')
-                    {
-                        lt_dlhandle module=lt_dlopenext(file_name.c_str());
-                        if (module)
-                        {
-                            datasource_name* ds_name = (datasource_name*) lt_dlsym(module, "datasource_name");
-                            if (ds_name && insert(ds_name(),module))
-                            {                           
-				std::cout<<"registered datasource : "<<ds_name()<<std::endl;
-				registered_=true;
-                            }
-                        }
-                        else
-                        {
-                            std::cerr<<lt_dlerror()<<std::endl;
-                        }
-                    }
+		    lt_dlhandle module=lt_dlopenext(file_name.c_str());
+		    if (module)
+		    {
+			datasource_name* ds_name = (datasource_name*) lt_dlsym(module, "datasource_name");
+			if (ds_name && insert(ds_name(),module))
+			{                           
+			    std::cout<<"registered datasource : "<<ds_name()<<std::endl;
+			    registered_=true;
+			}
+		    }
+		    else
+		    {
+			std::cerr<<lt_dlerror()<<std::endl;
+		    }
                 }
             }
 	    
