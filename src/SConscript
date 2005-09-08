@@ -35,7 +35,7 @@ libpaths = [prefix+'/lib','#agg']
 linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 
 source = Split(
-    """color.cpp
+    """
     datasource_cache.cpp
     envelope.cpp
     graphics.cpp
