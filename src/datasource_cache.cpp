@@ -95,10 +95,9 @@ namespace mapnik
         {
 	    for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
 	    {
-		if (!is_directory( *itr ))
+		if (!is_directory( *itr ) && itr->leaf()[0]!='.')
                 {
-                    std::string file_name(str+"/"+itr->leaf());
-		    lt_dlhandle module=lt_dlopenext(file_name.c_str());
+		    lt_dlhandle module=lt_dlopenext(itr->string().c_str());
 		    if (module)
 		    {
 			datasource_name* ds_name = (datasource_name*) lt_dlsym(module, "datasource_name");
@@ -113,8 +112,7 @@ namespace mapnik
 			std::cerr<<lt_dlerror()<<std::endl;
 		    }
                 }
-            }
-	    
+            }   
         }	
     }
 }
