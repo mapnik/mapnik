@@ -47,7 +47,11 @@ class _envelope(envelope,_injector):
         return 'envelope(%s,%s,%s,%s)' % \
                (self.minx,self.miny,self.maxx,self.maxy)
 
-
+class _color(color,_injector):
+    def __repr__(self):
+        return 'color(%s,%s,%s,%s)' % \
+               (self.r,self.g,self.b,self.a)
+    
 #register datasources
 from mapnik import datasource_cache
 datasource_cache.instance().register_datasources("${PREFIX}/datasources")
