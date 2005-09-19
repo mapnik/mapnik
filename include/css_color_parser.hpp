@@ -322,7 +322,7 @@ namespace mapnik
 	
 	void operator () (double r) const
 	{
-	    c_.set_red(unsigned((255.0 * r)/100.0));
+	    c_.set_red(unsigned((255.0 * r)/100.0 + 0.5));
 	}
 	ColorT& c_;
     };
@@ -335,7 +335,7 @@ namespace mapnik
 	
 	void operator () (double g) const
 	{
-	    c_.set_green(unsigned((255.0 * g)/100.0));
+	    c_.set_green(unsigned((255.0 * g)/100.0 + 0.5));
 	}
 	ColorT& c_;
     };
@@ -348,7 +348,7 @@ namespace mapnik
 	
 	void operator () (double b) const
 	{
-	    c_.set_blue(unsigned((255.0 * b)/100.0));
+	    c_.set_blue(unsigned((255.0 * b)/100.0 + 0.5));
 	}
 	ColorT& c_;
     };
