@@ -50,6 +50,7 @@ void export_color ()
         .add_property("g",&Color::green,&Color::set_green)
         .add_property("b",&Color::blue,&Color::set_blue)
 	.add_property("a",&Color::alpha)
+	.def(self == self)
         .def_pickle(color_pickle_suite())
         ;
     def("color_from_string",&create_from_string);

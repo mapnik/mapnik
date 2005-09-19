@@ -91,7 +91,6 @@ namespace
 	{
 	    std::string key=extract<std::string>(keys[i]);
             std::string value=extract<std::string>(d[key]);
-	    std::cout<<key<<":"<<value<<std::endl;
 	    params.add(key,value);
 	}
 	return Layer(params);

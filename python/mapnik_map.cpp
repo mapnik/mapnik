@@ -86,12 +86,12 @@ void export_map()
 		      (&Map::getBackground,return_value_policy<copy_const_reference>()),
 		      &Map::setBackground)
         .def("scale", &Map::scale)
-        .def("add",&Map::addLayer)
         .def("zoom_to_box",&Map::zoomToBox)
         .def("pan",&Map::pan)
         .def("zoom",&Map::zoom)
         .def("pan_and_zoom",&Map::pan_and_zoom)
-	.def("layers",&Map::layers,return_value_policy<reference_existing_object>())
+	.add_property("layers",make_function
+		      (&Map::layers,return_value_policy<reference_existing_object>()))
         .def_pickle(map_pickle_suite())
         ;
 }
