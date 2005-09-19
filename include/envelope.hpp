@@ -62,16 +62,8 @@ namespace mapnik
 	bool operator==(const EnvelopeType &other) const;
 	void re_center(T cx,T cy);
 	void init(T x0,T y0,T x1,T y1);
-	std::string to_string() const;
     };
     
-    
-    template <typename T> 
-    inline std::string Envelope<T>::to_string() const
-    {
-	return "envelope - TODO";
-    }
-
     template <class charT,class traits,class T>
     inline std::basic_ostream<charT,traits>&
     operator << (std::basic_ostream<charT,traits>& out,
