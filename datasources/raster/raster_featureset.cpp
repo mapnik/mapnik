@@ -16,34 +16,33 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "raster_featureset.hh"
-#include "image_reader.hh"
+#include "raster_featureset.hpp"
+#include "image_reader.hpp"
+#include "image_util.hpp"
 
 template <typename LookupPolicy>
-RasterFeatureset<LookupPolicy>::RasterFeatureset(const LookupPolicy& policy,
-						 const Envelope<double>& box,
-						 const CoordTransform& t)
+raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,query const& q)
     : policy_(policy),
       id_(1),
-      extent_(box),
-      t_(t),
-      curIter_(policy_.query(box)),
+      extent_(q.get_bbox()),
+      t_(q.get_width(),q.get_height(),extent_),
+      curIter_(policy_.query(extent_)),
       endIter_(policy_.end()) 
 
 {}
 
 template <typename LookupPolicy>
-RasterFeatureset<LookupPolicy>::~RasterFeatureset() {}
+raster_featureset<LookupPolicy>::~raster_featureset() {}
 
 template <typename LookupPolicy>
-Feature* RasterFeatureset<LookupPolicy>::next()
+feature_ptr raster_featureset<LookupPolicy>::next()
 {
-    Feature* f=0;
     if (curIter_!=endIter_)
     {
+	feature_ptr feature(new Feature(+id_));
         try
         {
-	    std::cout<<"RasterFeatureset "<<curIter_->format()<<" "<<curIter_->file()<<std::endl;
+	    std::cout<<"raster_featureset "<<curIter_->format()<<" "<<curIter_->file()<<std::endl;
             std::auto_ptr<ImageReader> reader(get_image_reader(curIter_->format(),curIter_->file()));
 	    std::cout<<reader.get()<<std::endl;
 	    if (reader.get())
@@ -60,11 +59,10 @@ Feature* RasterFeatureset<LookupPolicy>::next()
                     
 		    ImageData32 image((int)ext.width(),(int)ext.height());
                     reader->read((int)ext.minx(),(int)ext.miny(),image);
-                    ImageData32 target((int)(image_ext.width()+0.5),(int)(image_ext.height()+0.5));
+                    
+		    ImageData32 target((int)(image_ext.width()+0.5),(int)(image_ext.height()+0.5));
                     scale_image<ImageData32>(target,image);
-
-                    f=new RasterFeature(++id_,RasterPtr(new raster((int)(image_ext.minx()+0.5),
-								   (int)(image_ext.miny()+0.5),target)));
+		    feature->set_raster(raster_ptr(new raster(int(image_ext.minx()+0.5),int(image_ext.miny()+0.5),target)));
                 }
             }
         }
@@ -72,10 +70,11 @@ Feature* RasterFeatureset<LookupPolicy>::next()
         {
         }
         ++curIter_;
+	return feature;
     }
-    return f;
+    return feature_ptr(0);
 }
 
 
-template class RasterFeatureset<single_file_policy>;
-//template RasterFeatureset<os_name_policy>;
+template class raster_featureset<single_file_policy>;
+//template raster_featureset<os_name_policy>;

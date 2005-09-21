@@ -21,26 +21,26 @@
 #ifndef RASTER_INFO
 #define RASTER_INFO
 
-#include "raster_datasource.hh"
+#include "raster_datasource.hpp"
 #include <string>
 
 using mapnik::Envelope;
 
-class RasterInfo
+class raster_info
 {
     std::string file_;
     std::string format_;
     Envelope<double> extent_;
     int srid_;
     public:
-    RasterInfo(const std::string& file,const std::string& format,const Envelope<double>& extent,int srid=-1);
-    RasterInfo(const RasterInfo& rhs);
-    RasterInfo& operator=(const RasterInfo& rhs);
+    raster_info(const std::string& file,const std::string& format,const Envelope<double>& extent,int srid=-1);
+    raster_info(const raster_info& rhs);
+    raster_info& operator=(const raster_info& rhs);
     const Envelope<double>& envelope() const;
     const std::string& file() const;
     const std::string& format() const;
     const int srid() const;
 private:
-    void swap(RasterInfo& other) throw();
+    void swap(raster_info& other) throw();
 };
 #endif                                            //RASTER_INFO

@@ -19,15 +19,15 @@
 #ifndef RASTER_FEATURESET_HH
 #define RASTER_FEATURESET_HH
 
-#include "raster_datasource.hh"
-#include "raster_info.hh"
+#include "raster_datasource.hpp"
+#include "raster_info.hpp"
 #include <vector>
 
 using std::vector;
 
 class single_file_policy
 {
-    RasterInfo info_;
+    raster_info info_;
 public:
     class const_iterator
     {
@@ -52,12 +52,12 @@ public:
 	    return *this;
 	}
 
-	const RasterInfo& operator*() const
+	const raster_info& operator*() const
 	{
 	    return p_->info_;
 	}
 
-	const RasterInfo* operator->() const
+	const raster_info* operator->() const
 	{
 	    return &(p_->info_);
 	}
@@ -68,7 +68,7 @@ public:
 	}
     };
 
-    explicit single_file_policy(const RasterInfo& info)
+    explicit single_file_policy(const raster_info& info)
 	:info_(info) {}
 
     const_iterator begin()
@@ -97,7 +97,7 @@ class os_name_policy
 };
 
 template <typename LookupPolicy>
-class RasterFeatureset : public Featureset
+class raster_featureset : public Featureset
 {
     typedef typename LookupPolicy::const_iterator iterator_type;
     LookupPolicy policy_;
@@ -107,9 +107,9 @@ class RasterFeatureset : public Featureset
     iterator_type curIter_;
     iterator_type endIter_;
 public:
-    RasterFeatureset(const LookupPolicy& policy,const Envelope<double>& box,const CoordTransform& t);
-    virtual ~RasterFeatureset();
-    Feature* next();
+    raster_featureset(LookupPolicy const& policy,query const& q);
+    virtual ~raster_featureset();
+    feature_ptr next();
 };
 
-#endif                                            //RASTER_FEATURESET_HH
+#endif //RASTER_FEATURESET_HH

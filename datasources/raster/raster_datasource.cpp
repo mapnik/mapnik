@@ -18,26 +18,37 @@
 
 //$Id: raster_datasource.cc 44 2005-04-22 18:53:54Z pavlenko $
 
-#include "raster_datasource.hh"
-#include "image_reader.hh"
-#include "raster_featureset.hh"
-#include "raster_info.hh"
+#include "raster_datasource.hpp"
+#include "image_reader.hpp"
+#include "raster_featureset.hpp"
+#include "raster_info.hpp"
+#include <boost/lexical_cast.hpp>
 
 DATASOURCE_PLUGIN(raster_datasource);
 
+using std::cerr;
+using std::endl;
+using boost::lexical_cast;
+using boost::bad_lexical_cast;
+
 raster_datasource::raster_datasource(const Parameters& params)
-    : extent_()
+    : desc_(params.get("name"))
 {
     filename_=params.get("file");
     format_=params.get("format");
-
-    double lox,loy,hix,hiy;
-    fromString<double>(params.get("lox"),lox);
-    fromString<double>(params.get("loy"),loy);
-    fromString<double>(params.get("hix"),hix);
-    fromString<double>(params.get("hiy"),hiy);
-
-    extent_=Envelope<double>(lox,loy,hix,hiy);
+    
+    try 
+    {
+	double lox=lexical_cast<double>(params.get("lox"));
+	double loy=lexical_cast<double>(params.get("loy"));
+	double hix=lexical_cast<double>(params.get("hix"));
+	double hiy=lexical_cast<double>(params.get("hiy"));
+	extent_.init(lox,loy,hix,hiy);
+    }
+    catch (bad_lexical_cast& ex)
+    {
+	cerr << ex.what() << endl;
+    }  
 }
 
 
@@ -45,22 +56,15 @@ raster_datasource::~raster_datasource()
 {
 }
 
-std::string raster_datasource::name_="raster";
-
 int raster_datasource::type() const
 {
     return datasource::Raster;
 }
 
-
+std::string raster_datasource::name_="raster";
 std::string raster_datasource::name()
 {
     return name_;
-}
-
-bool raster_datasource::parseEnvelope(const std::string& str,Envelope<double>& envelope) 
-{   
-    return true;
 }
 
 const mapnik::Envelope<double>& raster_datasource::envelope() const
@@ -68,24 +72,16 @@ const mapnik::Envelope<double>& raster_datasource::envelope() const
     return extent_;
 }
 
-
-featureset_ptr raster_datasource::featuresAll(const CoordTransform& t) const
+layer_descriptor const& raster_datasource::get_descriptor() const
 {
-    return featureset_ptr(0);
+    return desc_;
 }
 
-
-featureset_ptr raster_datasource::featuresInBox(const CoordTransform& t,
-					       const mapnik::Envelope<double>& box) const
+featureset_ptr raster_datasource::features(query const& q) const
 {
-    RasterInfo info(filename_,format_,extent_);
+    raster_info info(filename_,format_,extent_);
     single_file_policy policy(info); //todo: handle different policies!
-    return featureset_ptr(new RasterFeatureset<single_file_policy>(policy,box,t));
+    return featureset_ptr(new raster_featureset<single_file_policy>(policy,q));
 }
 
 
-featureset_ptr raster_datasource::featuresAtPoint(const CoordTransform& t,
-						 const coord2d& pt) const
-{
-    return featureset_ptr(0);
-}

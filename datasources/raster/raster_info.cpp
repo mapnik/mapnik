@@ -18,21 +18,21 @@
 
 //$Id: raster_info.cc 17 2005-03-08 23:58:43Z pavlenko $
 
-#include "raster_info.hh"
+#include "raster_info.hpp"
 
-RasterInfo::RasterInfo(const std::string& file,const std::string& format,const mapnik::Envelope<double>& extent,int srid)
+raster_info::raster_info(const std::string& file,const std::string& format,const mapnik::Envelope<double>& extent,int srid)
     :file_(file),
      format_(format),
      extent_(extent),
      srid_(srid) {}
 
-RasterInfo::RasterInfo(const RasterInfo& rhs)
+raster_info::raster_info(const raster_info& rhs)
     :file_(rhs.file_),
      format_(rhs.format_),
      extent_(rhs.extent_),
      srid_(rhs.srid_) {}
 
-void RasterInfo::swap(RasterInfo& other) throw()
+void raster_info::swap(raster_info& other) throw()
 {
     file_=other.file_;
     format_=other.format_;
@@ -41,31 +41,31 @@ void RasterInfo::swap(RasterInfo& other) throw()
 }
 
 
-RasterInfo& RasterInfo::operator=(const RasterInfo& rhs)
+raster_info& raster_info::operator=(const raster_info& rhs)
 {
-    RasterInfo tmp(rhs);
+    raster_info tmp(rhs);
     swap(tmp);
     return *this;
 }
 
 
-const Envelope<double>& RasterInfo::envelope() const
+const Envelope<double>& raster_info::envelope() const
 {
     return extent_;
 }
 
 
-const std::string& RasterInfo::file() const
+const std::string& raster_info::file() const
 {
     return file_;
 }
 
-const std::string& RasterInfo::format() const
+const std::string& raster_info::format() const
 {
     return format_;
 }
 
-const int RasterInfo::srid() const
+const int raster_info::srid() const
 {
     return srid_;
 }

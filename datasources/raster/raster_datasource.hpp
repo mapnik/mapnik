@@ -19,10 +19,12 @@
 //$Id: raster_datasource.hh 44 2005-04-22 18:53:54Z pavlenko $
 
 #ifndef RASTER_DATASOURCE_HH
-#define RASTER_DATASOURCE_HH
+#define RASTER_DATASOURCE_HH 
 
-#include "mapnik.hh"
-#include "image_reader.hh"
+#include "datasource.hpp"
+#include "envelope.hpp"
+#include "feature.hpp"
+#include "image_reader.hpp"
 
 using namespace mapnik;
 
@@ -32,22 +34,21 @@ private:
     std::string                  filename_;
     std::string                  format_;
     mapnik::Envelope<double>     extent_;
-    static std::string           name_;
+    layer_descriptor             desc_;
+    static std::string           name_;  
 public:
     raster_datasource(const Parameters& params);
     virtual            ~raster_datasource();
     int                 type() const;
-    std::string         name();
-    featureset_ptr      featuresAll(const CoordTransform& t) const;
-    featureset_ptr      featuresInBox(const CoordTransform& t,const mapnik::Envelope<double>& box) const;
-    featureset_ptr      featuresAtPoint(const CoordTransform& t,const coord2d& pt) const;
-    const mapnik::Envelope<double>& envelope() const;
+    static std::string  name();
+    featureset_ptr      features(const query& q) const;
+    mapnik::Envelope<double> const& envelope() const;
+    layer_descriptor const& get_descriptor() const;
 private:
     //no copying
     raster_datasource(const raster_datasource&);
     raster_datasource& operator=(const raster_datasource&);
     //
-    bool parseEnvelope(const std::string& str,Envelope<double>& envelope);
 };
 
-#endif                                            //RASTER_DATASOURCE_H
+#endif //RASTER_DATASOURCE_H
