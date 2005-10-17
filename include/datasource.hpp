@@ -78,7 +78,7 @@ namespace mapnik
     {
         static void destroy(DATASOURCE* ds)
         {
-            destroy_ds(ds);
+	    delete ds;
         }
     };
 
