@@ -94,9 +94,16 @@ feature_ptr shape_featureset<filterT>::next()
 	    while (!filter_.pass(shape_.current_extent()))
 	    {	
 		unsigned reclen=shape_.reclength_;
-		shape_.move_to(long(shape_.shp().pos()) + 2 * reclen - 36);
-		if ((long)shape_.shp().pos() >= file_length_ * 2)
+		if (!shape_.shp().is_eof())
+		{
+		    long pos = shape_.shp().pos();
+		    shape_.move_to(pos + 2 * reclen - 36);
+		}
+		else
+		{
 		    return feature_ptr(0);
+
+		}
 	    }
 	    
 	    switch (type)

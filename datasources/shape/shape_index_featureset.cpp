@@ -19,6 +19,7 @@
 //$Id: shape_index_featureset.cc 36 2005-04-05 14:32:18Z pavlenko $
 
 #include "shape_index_featureset.hpp"
+#include "feature_factory.hpp"
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
@@ -66,8 +67,8 @@ feature_ptr shape_index_featureset<filterT>::next()
         int pos=*itr_++;
 	shape_.move_to(pos);
         int type=shape_.type();
-	feature_ptr feature(new Feature(shape_.id_));
-
+	feature_ptr feature(feature_factory::create(shape_.id_));
+        
         if (type==shape_io::shape_point)
         {
             double x=shape_.shp().read_double();
