@@ -86,6 +86,11 @@ namespace mapnik
 	{
 	    return raster_;
 	}
+	void set_raster(raster_type const& raster)
+	{
+	    raster_=raster;
+	}
+
         void reserve_props(unsigned n)
 	{
 	    props_.reserve(n);

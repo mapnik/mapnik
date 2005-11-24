@@ -23,8 +23,6 @@
 
 #include "symbolizer.hpp"
 #include "image_reader.hpp"
-//#include "scanline_aa.hpp"
-//#include "line_aa.hpp"
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_rasterizer_scanline_aa.h"
@@ -33,6 +31,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_path_storage.h"
+#include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
 
 namespace mapnik 
@@ -50,8 +49,6 @@ namespace mapnik
 
 	void render(geometry_type& geom,Image32& image) const 
 	{
-	    //ScanlineRasterizerAA<Image32> rasterizer(image);
-	    //rasterizer.render<SHIFT8>(geom,fill_);
 	    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
 	    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
@@ -62,14 +59,14 @@ namespace mapnik
 	    double r=fill_.red()/255.0;
 	    double g=fill_.green()/255.0;
 	    double b=fill_.blue()/255.0;
-	    
+	    double a=fill_.alpha()/255.0;
 	    renderer ren(renb);
 	    
 	    agg::rasterizer_scanline_aa<> ras;
 	    agg::scanline_u8 sl;
 	    ras.clip_box(0,0,image.width(),image.height());
 	    ras.add_path(geom);
-	    ren.color(agg::rgba(r, g, b, 1.0));
+	    ren.color(agg::rgba(r, g, b, a));
 	    agg::render_scanlines(ras, sl, ren);
 	}
 	
@@ -92,8 +89,6 @@ namespace mapnik
 	    try 
 	    {
 		std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-		std::cout<<"image width="<<reader->width()<<std::endl;
-		std::cout<<"image height="<<reader->height()<<std::endl;
 		reader->read(0,0,pattern_);		
 	    } 
 	    catch (...) 
@@ -107,7 +102,6 @@ namespace mapnik
 	void render(geometry_type& geom,Image32& image) const
 	{
 	    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
-	    typedef agg::renderer_scanline_aa_solid<ren_base> renderer_solid;
 
 	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
 					       image.width()*4);
@@ -124,19 +118,23 @@ namespace mapnik
 		agg::order_rgba,
 		wrap_x_type,
 		wrap_y_type> span_gen_type;
-	    typedef agg::renderer_scanline_aa<ren_base, span_gen_type> renderer_type;  
+
+	    
+	    typedef agg::renderer_scanline_aa<ren_base, 
+		agg::span_allocator<agg::rgba8>,
+		span_gen_type> renderer_type;  
 	    
 	    unsigned offset_x = 0;
 	    unsigned offset_y = 0;
+	    
 	    agg::span_allocator<agg::rgba8> sa;
-	    span_gen_type sg(sa, pattern_rbuf, offset_x, offset_y);
-	    renderer_type rp(renb, sg);
+	    span_gen_type sg(pattern_rbuf,offset_x, offset_y);
+	    renderer_type rp(renb,sa, sg);
 
 	    agg::rasterizer_scanline_aa<> ras;
 	    agg::scanline_u8 sl;
 	    ras.clip_box(0,0,image.width(),image.height());
 	    ras.add_path(geom);
-	    //ren.color(agg::rgba(r, g, b, 1.0));
 	    agg::render_scanlines(ras, sl, rp);
 	    
 	}

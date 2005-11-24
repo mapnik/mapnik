@@ -18,13 +18,12 @@
 # $Id$
 
 #edit this file
-
 PREFIX = '/opt/mapnik'
-BOOST_ROOT = '/opt/boost'
-FREETYPE2_ROOT = '/opt/freetype2'
+BOOST_ROOT = '/home/artem/projects/boost_1_33_0'
+FREETYPE2_ROOT = '/usr/include/freetype2'
 PYTHON_VERSION = '2.4'
 PYTHON_ROOT = '/opt/python'
-AGG_ROOT = '/opt/agg23'
+AGG_ROOT = '/opt/agg24'
 
 # postgis datasource
 POSTGRESQL_ROOT = '/opt/postgresql8'

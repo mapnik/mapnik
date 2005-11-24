@@ -28,7 +28,7 @@ opts.Add(PathOption('AGG_ROOT','agg source root directory','/opt/agg23'))
 opts.Add(PathOption('FREETYPE2_ROOT','freetype2 root directory','/opt/freetype2'))
 opts.Add(PathOption('PYTHON_ROOT','python root directory','/opt/python'))
 opts.Add('PYTHON_VERSION','python version','2.4')
-opts.Add(ListOption('DATASOURCES','list of available datasources','postgis',['postgis','shape'])) 
+opts.Add(ListOption('DATASOURCES','list of available datasources','shape',['postgis','shape','raster'])) 
 opts.Add('POSTGRESQL_ROOT','path to postgresql prefix','/usr/local')
     
 platform = ARGUMENTS.get("OS",Platform())
@@ -36,9 +36,9 @@ platform = ARGUMENTS.get("OS",Platform())
 build_dir = 'build'
 build_prefix = build_dir+'/'+str(platform)
 
-cxx = 'g++'
+#cxx = 'g++'
 
-env = Environment(CXX=cxx,ENV=os.environ, options=opts)
+env = Environment(ENV=os.environ, options=opts)
 
 cxx_debug='-Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG'
 cxx_release='-Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG'

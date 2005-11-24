@@ -16,34 +16,22 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: render.hpp 39 2005-04-10 20:39:53Z pavlenko $
+//$Id$
 
-#ifndef RENDER_HPP
-#define RENDER_HPP
+#ifndef FEATURE_FACTORY_HPP
+#define FEATURE_FACTORY_HPP
 
-#include <stack>
-#include "memory.hpp"
-#include "ptr.hpp"
-#include "style.hpp"
-#include "envelope.hpp"
-#include "graphics.hpp"
-#include "datasource.hpp"
-#include "layer.hpp"
-#include "map.hpp"
-
+#include "feature.hpp"
 namespace mapnik
 {
-    template <typename Image> class Renderer
+    struct feature_factory
     {
-    public:
-	static void render(const Map& map,Image& image);
-    private:
-	Renderer();
-	static void render_vector_layer(const Layer& l,unsigned width,unsigned height,
-					const Envelope<double>& bbox,Image& image);
-	static void render_raster_layer(const Layer& l,unsigned width,unsigned height,
-					const Envelope<double>& bbox,Image& image);
-    };
+	static Feature* create (int fid)
+	{
+	    return new Feature(fid);
+	}
+    }; 
 }
 
-#endif //RENDER_HPP
+
+#endif //FEATURE_FACTORY_HPP

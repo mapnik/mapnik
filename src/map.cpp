@@ -77,14 +77,42 @@ namespace mapnik
 	return layers_;
     }
     
-    int Map::getWidth() const
+    unsigned Map::getWidth() const
     {
         return width_;
     }
 
-    int Map::getHeight() const
+    unsigned Map::getHeight() const
     {
         return height_;
+    }
+    
+    void Map::setWidth(unsigned width)
+    {
+	if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE)
+	{
+	    width_=width;
+	    fixAspectRatio();
+	}	
+    }
+
+    void Map::setHeight(unsigned height)
+    {
+	if (height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
+	{
+	    height_=height;
+	    fixAspectRatio();
+	}
+    }
+    void Map::resize(unsigned width,unsigned height)
+    {
+	if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE &&
+	    height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
+	{
+	    width_=width;
+	    height_=height;
+	    fixAspectRatio();
+	}
     }
 
     int Map::srid() const
@@ -121,28 +149,15 @@ namespace mapnik
     {
         double ratio1 = (double) width_ / (double) height_;
         double ratio2 = currentExtent_.width() / currentExtent_.height();
-        if (ratio1 >= 1.0)
-        {
-            if (ratio2 > ratio1)
-            {
-                currentExtent_.height(currentExtent_.width() / ratio1);
-            }
-            else
-            {
-                currentExtent_.width(currentExtent_.height() * ratio1);
-            }
-        }
-        else
-        {
-            if (ratio2 > ratio1)
-            {
-                currentExtent_.width(currentExtent_.height() * ratio1);
-            }
-            else
-            {
-                currentExtent_.height(currentExtent_.width() / ratio1);
-            }
-        }
+         
+	if (ratio2 > ratio1)
+	{
+	    currentExtent_.height(currentExtent_.width() / ratio1);
+	}
+	else if (ratio2 < ratio1)
+	{
+	    currentExtent_.width(currentExtent_.height() * ratio1);
+	}       
     }
 
     const Envelope<double>& Map::getCurrentExtent() const

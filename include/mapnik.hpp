@@ -57,6 +57,7 @@
 #include "wkb.hpp"
 #include "map.hpp"
 #include "feature_type_style.hpp"
+#include "feature_factory.hpp"
 #include "math_expr.hpp"
 #include "value.hpp"
 #include "expression.hpp"
@@ -73,4 +74,4 @@ namespace mapnik
 {
 }
 
-#endif                                            //MAPNIK_HPP
+#endif //MAPNIK_HPP

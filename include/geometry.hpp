@@ -71,7 +71,7 @@ namespace mapnik
 	{
 	    cont_.push_back(x,y,SEG_LINETO);
 	}
-		
+	
 	template <typename Transform>
 	class path_iterator
 	{

@@ -28,10 +28,10 @@ namespace mapnik
     class Map
     {
     private:
-	static const int MIN_MAPSIZE=16;
-	static const int MAX_MAPSIZE=1024;
-	int width_;
-	int height_;
+	static const unsigned MIN_MAPSIZE=16;
+	static const unsigned MAX_MAPSIZE=1024;
+	unsigned width_;
+	unsigned height_;
 	int srid_;
 	Color background_;
 	std::vector<Layer> layers_;
@@ -46,8 +46,11 @@ namespace mapnik
 	void removeLayer(size_t index);
 	void removeLayer(const char* lName);
 	std::vector<Layer> const& layers() const;
-	int getWidth() const;
-	int getHeight() const;
+	unsigned getWidth() const;
+	unsigned getHeight() const;
+	void setWidth(unsigned width);
+	void setHeight(unsigned height);
+	void resize(unsigned width,unsigned height);
 	int srid() const;
 	void setBackground(const Color& c);
 	const Color& getBackground() const;

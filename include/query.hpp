@@ -33,29 +33,39 @@ namespace mapnik
     {
     private:
 	Envelope<double> bbox_;
+	unsigned width_;
+	unsigned height_;
 	filter<Feature>* filter_;
 	std::set<std::string> names_;
     public:
-	query() 
+	query(unsigned width,unsigned height) 
 	    : bbox_(std::numeric_limits<double>::min(),
 		    std::numeric_limits<double>::min(),
 		    std::numeric_limits<double>::max(),
 		    std::numeric_limits<double>::max()),
+	      width_(width),
+	      height_(height),
 	      filter_(new all_filter<Feature>)
 	{}
 	
-	query(const Envelope<double>& bbox)
+	query(const Envelope<double>& bbox,unsigned width,unsigned height)
 	    : bbox_(bbox),
+	      width_(width),
+	      height_(height),
 	      filter_(new all_filter<Feature>)
 	{}
 	
-	query(const Envelope<double>& bbox,const filter<Feature>& f)
+	query(const Envelope<double>& bbox,unsigned width,unsigned height,const filter<Feature>& f)
 	    : bbox_(bbox),
+	      width_(width),
+	      height_(height),
 	      filter_(f.clone())
 	{}
 	
 	query(const query& other)
 	    : bbox_(other.bbox_),
+	      width_(other.width_),
+	      height_(other.height_),
 	      filter_(other.filter_->clone())
 	{}
 	
@@ -65,6 +75,8 @@ namespace mapnik
 	    delete filter_;
 	    filter_=tmp;
 	    bbox_=other.bbox_;
+	    width_=other.width_;
+	    height_=other.height_;
 	    names_=other.names_;
 	    return *this;
 	}
@@ -77,6 +89,16 @@ namespace mapnik
 	const Envelope<double>& get_bbox() const
 	{
 	    return bbox_;
+	}
+
+	unsigned get_width() const
+	{
+	    return width_;
+	}
+
+	unsigned get_height() const
+	{
+	    return height_;
 	}
 
 	void set_filter(const filter<Feature>& f)

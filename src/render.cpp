@@ -43,15 +43,12 @@ namespace mapnik
 {  
     
     template <typename Image>
-    void Renderer<Image>::renderLayer(const Layer& l,const CoordTransform& t,
+    void Renderer<Image>::render_vector_layer(const Layer& l,unsigned width,unsigned height,
 				      const Envelope<double>& bbox,Image& image)
     {
         const datasource_p& ds=l.datasource();
         if (!ds) return;
-	
-	//volatile named_style_cache* styles=named_style_cache::instance();
-
-	//get copy
+	CoordTransform t(width,height,bbox);
 	std::vector<std::string> const& namedStyles=l.styles();
 	std::vector<std::string>::const_iterator stylesIter=namedStyles.begin();
 	while (stylesIter!=namedStyles.end())
@@ -62,7 +59,7 @@ namespace mapnik
 	    attribute_collector<Feature> collector(names);
 	    property_index<Feature> indexer(names);
 
-	    query q(bbox);
+	    query q(bbox,width,height);
 	    double scale = 1.0/t.scale();
 	    std::vector<rule_type*> if_rules;
 	    std::vector<rule_type*> else_rules;
@@ -148,7 +145,6 @@ namespace mapnik
 				}
 			    }
 			}  
-			//delete feature;
 		    }
 		}
 		
@@ -176,6 +172,28 @@ namespace mapnik
 	    }
 	}
     }
+    
+    template <typename Image>
+    void Renderer<Image>::render_raster_layer(const Layer& l,unsigned width,unsigned height,
+				      const Envelope<double>& bbox,Image& image)
+    {	
+	const datasource_p& ds=l.datasource();
+        if (!ds) return;
+	query q(bbox,width,height);
+	featureset_ptr fs=ds->features(q);
+	if (fs)
+	{   	    
+	    feature_ptr feature;
+	    while ((feature = fs->next()))
+	    {
+		raster_ptr const& raster=feature->get_raster();
+		if (raster)
+		{
+		    image.set_rectangle(raster->x_,raster->y_,raster->data_);
+		}
+	    }
+	}		   	
+    }
 
     template <typename Image>
     void Renderer<Image>::render(const Map& map,Image& image)
@@ -183,26 +201,31 @@ namespace mapnik
         timer clock;
         //////////////////////////////////////////////////////
         const Envelope<double>& extent=map.getCurrentExtent();
-	std::cout<<"BBOX:"<<extent<<"\n";
+	std::cout<<"BBOX:"<<extent<<std::endl;
         double scale=map.scale();
-        std::cout<<" scale="<<scale<<"\n";
+        std::cout<<" scale="<<scale<<std::endl;
         
 	unsigned width=map.getWidth();
         unsigned height=map.getHeight();
-        CoordTransform t(width,height,extent);
-        const Color& background=map.getBackground();
+
+        Color const& background=map.getBackground();
         image.setBackground(background);
 	
         for (size_t n=0;n<map.layerCount();++n)
         {
             const Layer& l=map.getLayer(n);
-            if (l.isVisible(scale))
-            {
-                //TODO make datasource to return its extent!!!
-                renderLayer(l,t,extent,image);
+            if (l.isVisible(scale)) // TODO: extent check
+	    {
+                if (l.datasource()->type() == datasource::Vector)
+		{
+		    render_vector_layer(l,width,height,extent,image);
+		}
+		else if (l.datasource()->type() == datasource::Raster)
+		{
+		    render_raster_layer(l,width,height,extent,image);
+		}
             }
-        }
-        
+        }        
         clock.stop();
     }
 
