@@ -107,7 +107,7 @@ public:
     bool is_open();
     void close();
     
-    inline void shape_file::read_record(shape_record& rec)
+    inline void read_record(shape_record& rec)
     {
 	file_.read(rec.rawdata(),rec.size);  
     }
