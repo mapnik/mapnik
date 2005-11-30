@@ -162,7 +162,9 @@ namespace mapnik
 
     const Envelope<double>& Layer::envelope() const
     {
-        return ds_->envelope();
+	if (ds_)
+	    return ds_->envelope();
+	return Envelope<double>();
     }
 
     void Layer::selection_style(const std::string& name) 
