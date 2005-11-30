@@ -33,7 +33,7 @@ namespace mapnik
     {
 	named_colors()
 	{
-	    add
+	    symbols<ColorT>::add
 		("aliceblue", ColorT(240, 248, 255))
 		("antiquewhite", ColorT(250, 235, 215))
 		("aqua", ColorT(0, 255, 255))
