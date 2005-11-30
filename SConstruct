@@ -28,7 +28,8 @@ opts.Add(PathOption('AGG_ROOT','agg source root directory','/opt/agg23'))
 opts.Add(PathOption('FREETYPE2_ROOT','freetype2 root directory','/opt/freetype2'))
 opts.Add(PathOption('PYTHON_ROOT','python root directory','/opt/python'))
 opts.Add('PYTHON_VERSION','python version','2.4')
-opts.Add(ListOption('DATASOURCES','list of available datasources','shape',['postgis','shape','raster'])) 
+opts.Add(ListOption('DATASOURCES','list of available datasources','all',['postgis','shape','raster'])) 
+opts.Add(ListOption('EXTENSIONS','list of available extensions','none',['python']))
 opts.Add('POSTGRESQL_ROOT','path to postgresql prefix','/usr/local')
     
 platform = ARGUMENTS.get("OS",Platform())
@@ -86,16 +87,23 @@ env.SConscript('agg/SConscript')
 #main lib
 SConscript('src/SConscript')
 
-#python ext
-SConscript('python/SConscript')
+import string
+
+#python bindings
+
+if 'python' in [string.strip(m) for m in Split(env['EXTENSIONS'])]:
+    SConscript('python/SConscript')
 
 #shapeindex
 SConscript('util/shapeindex/SConscript')
 
 #datasources
-for datasource in Split(env['DATASOURCES']):
-    env.BuildDir('build/datasources/'+datasource,'src/datasources/'+datasource,duplicate=0)
-    SConscript('datasources/'+datasource+'/SConscript')
+def build_datasource(name):
+    env.BuildDir('build/datasources/' + name,'src/datasources/'+name,duplicate=0)
+    SConscript('datasources/' + name + '/SConscript')
+    
+[build_datasource(name) for name in Split(env['DATASOURCES'])]
+
 
 
 
