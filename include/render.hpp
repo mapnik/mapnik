@@ -39,9 +39,15 @@ namespace mapnik
 	static void render(const Map& map,Image& image);
     private:
 	Renderer();
-	static void render_vector_layer(const Layer& l,unsigned width,unsigned height,
+	static void render_vector_layer(datasource_p const& ds,
+					std::vector<std::string> const& , 
+					unsigned width,
+					unsigned height,
 					const Envelope<double>& bbox,Image& image);
-	static void render_raster_layer(const Layer& l,unsigned width,unsigned height,
+	static void render_raster_layer(datasource_p const& ds,
+					std::vector<std::string> const& namedStyles,
+					unsigned width,
+					unsigned height,
 					const Envelope<double>& bbox,Image& image);
     };
 }

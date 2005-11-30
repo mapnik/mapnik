@@ -43,13 +43,12 @@ namespace mapnik
 {  
     
     template <typename Image>
-    void Renderer<Image>::render_vector_layer(const Layer& l,unsigned width,unsigned height,
-				      const Envelope<double>& bbox,Image& image)
+    void Renderer<Image>::render_vector_layer(datasource_p const& ds,
+					      std::vector<std::string> const& namedStyles,
+					      unsigned width,unsigned height,
+					      const Envelope<double>& bbox,Image& image)
     {
-        const datasource_p& ds=l.datasource();
-        if (!ds) return;
 	CoordTransform t(width,height,bbox);
-	std::vector<std::string> const& namedStyles=l.styles();
 	std::vector<std::string>::const_iterator stylesIter=namedStyles.begin();
 	while (stylesIter!=namedStyles.end())
 	{
@@ -174,11 +173,11 @@ namespace mapnik
     }
     
     template <typename Image>
-    void Renderer<Image>::render_raster_layer(const Layer& l,unsigned width,unsigned height,
-				      const Envelope<double>& bbox,Image& image)
+    void Renderer<Image>::render_raster_layer(datasource_p const& ds,
+					      std::vector<std::string> const& ,
+					      unsigned width,unsigned height,
+					      const Envelope<double>& bbox,Image& image)
     {	
-	const datasource_p& ds=l.datasource();
-        if (!ds) return;
 	query q(bbox,width,height);
 	featureset_ptr fs=ds->features(q);
 	if (fs)
@@ -216,13 +215,15 @@ namespace mapnik
             const Layer& l=map.getLayer(n);
             if (l.isVisible(scale)) // TODO: extent check
 	    {
-                if (l.datasource()->type() == datasource::Vector)
+		const datasource_p& ds=l.datasource();
+		if (!ds) continue;
+                if (ds->type() == datasource::Vector)
 		{
-		    render_vector_layer(l,width,height,extent,image);
+		    render_vector_layer(ds,l.styles(),width,height,extent,image);
 		}
-		else if (l.datasource()->type() == datasource::Raster)
+		else if (ds->type() == datasource::Raster)
 		{
-		    render_raster_layer(l,width,height,extent,image);
+		    render_raster_layer(ds,l.styles(),width,height,extent,image);
 		}
             }
         }        
