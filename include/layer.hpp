@@ -66,7 +66,7 @@ namespace mapnik
 	std::vector<ref_ptr<Feature> >& selection() const;
 	void clear_selection() const;
 	datasource_p const& datasource() const;
-	Envelope<double> const& envelope() const;
+	Envelope<double> envelope() const;
 	virtual ~Layer();
     private:
 	void swap(const Layer& other);

@@ -160,7 +160,7 @@ namespace mapnik
         return ds_;
     }
 
-    const Envelope<double>& Layer::envelope() const
+    Envelope<double> Layer::envelope() const
     {
 	if (ds_)
 	    return ds_->envelope();
