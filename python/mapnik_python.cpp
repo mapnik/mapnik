@@ -18,8 +18,8 @@
 
 //$Id: mapnik_python.cc 27 2005-03-30 21:45:40Z pavlenko $
 
-#include <boost/get_pointer.hpp>
 #include <boost/python.hpp>
+#include <boost/get_pointer.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 
 #include "mapnik.hpp"

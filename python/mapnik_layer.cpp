@@ -19,10 +19,10 @@
 //$Id: mapnik_layer.cc 17 2005-03-08 23:58:43Z pavlenko $
 
 
-#include <mapnik.hpp>
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <mapnik.hpp>
 
 using mapnik::Layer;
 using mapnik::Parameters;
@@ -107,7 +107,7 @@ void export_layer()
     class_<Layer>("layer",no_init)
         .def("name",&Layer::name,return_value_policy<copy_const_reference>())
         .def("params",&Layer::params,return_value_policy<reference_existing_object>())
-        .def("envelope",&Layer::envelope,return_value_policy<reference_existing_object>())
+        .def("envelope",&Layer::envelope)
 	.add_property("minzoom",&Layer::getMinZoom,&Layer::setMinZoom)
 	.add_property("maxzoom",&Layer::getMaxZoom,&Layer::setMaxZoom)
 	.add_property("styles",make_function

@@ -18,8 +18,9 @@
 
 //$Id: mapnik_envelope.cc 27 2005-03-30 21:45:40Z pavlenko $
 
-#include <mapnik.hpp>
 #include <boost/python.hpp>
+#include <mapnik.hpp>
+
 
 using mapnik::coord;
 using mapnik::Envelope;

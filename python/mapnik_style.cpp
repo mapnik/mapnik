@@ -18,9 +18,9 @@
 
 //$Id$
 
-#include "mapnik.hpp"
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include "mapnik.hpp"
 
 using mapnik::feature_type_style;
 using mapnik::named_style_cache;

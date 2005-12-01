@@ -18,8 +18,8 @@
 
 //$Id$
 
-#include <mapnik.hpp>
 #include <boost/python.hpp>
+#include <mapnik.hpp>
 
 using mapnik::Image32;
 

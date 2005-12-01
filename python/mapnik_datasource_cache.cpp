@@ -18,8 +18,9 @@
 
 //$Id$
 
-#include "mapnik.hpp"
 #include <boost/python.hpp>
+#include "mapnik.hpp"
+
 
 void export_datasource_cache()
 {

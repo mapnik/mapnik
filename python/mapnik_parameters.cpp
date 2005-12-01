@@ -18,9 +18,9 @@
 
 //$Id: mapnik_parameters.cc 17 2005-03-08 23:58:43Z pavlenko $
 
-#include <mapnik.hpp>
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
+#include <mapnik.hpp>
 
 using mapnik::Parameter;
 using mapnik::Parameters;

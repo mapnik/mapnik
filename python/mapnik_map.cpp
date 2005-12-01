@@ -18,10 +18,11 @@
 
 //$Id: mapnik_map.cc 17 2005-03-08 23:58:43Z pavlenko $
 
-#include <mapnik.hpp>
+
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <mapnik.hpp>
 
 using mapnik::Color;
 using mapnik::coord;
