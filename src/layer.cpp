@@ -19,7 +19,6 @@
 //$Id: layer.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
 #include <string>
-#include "ptr.hpp"
 #include "style.hpp"
 #include "datasource.hpp"
 #include "datasource_cache.hpp"
@@ -41,17 +40,14 @@ namespace mapnik
         try
         {
             name_=params_.get("name");
-            //volatile datasource_cache* factory=datasource_cache::instance();
-            //ds_=factory->create(params_);
 	    ds_=datasource_cache::instance()->create(params_);
-
         }
         catch (...)
         {
             throw;
         }
     }
-
+    
     Layer::Layer(const Layer& rhs)
         :params_(rhs.params_),
 	 name_(rhs.name_),
@@ -177,12 +173,12 @@ namespace mapnik
 	return selection_style_;
     }
 
-    void Layer::add_to_selection(ref_ptr<Feature>& feature) const
+    void Layer::add_to_selection(shared_ptr<Feature>& feature) const
     {
 	selection_.push_back(feature);
     }
  
-    vector<ref_ptr<Feature> >& Layer::selection() const
+    vector<shared_ptr<Feature> >& Layer::selection() const
     {
 	return selection_;
     }

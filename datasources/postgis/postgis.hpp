@@ -65,12 +65,12 @@ private:
 class postgis_featureset : public Featureset
 {
 private:
-    ref_ptr<ResultSet> rs_;
+    boost::shared_ptr<ResultSet> rs_;
     unsigned num_attrs_;
     mutable int totalGeomSize_;
     mutable int count_;
 public:
-    postgis_featureset(const ref_ptr<ResultSet>& rs,unsigned num_attrs);
+    postgis_featureset(const boost::shared_ptr<ResultSet>& rs,unsigned num_attrs);
     void dispose();
     feature_ptr next();
     ~postgis_featureset();

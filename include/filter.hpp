@@ -25,7 +25,7 @@
 #include "feature.hpp"
 namespace mapnik
 {
-    typedef ref_ptr<filter<Feature> > filter_ptr;
+    typedef boost::shared_ptr<filter<Feature> > filter_ptr;
 
     template <typename FeatureT> class filter_visitor;
     template <typename FeatureT>

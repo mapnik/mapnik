@@ -93,8 +93,8 @@ mapnik_python_src=Split(
 
 headers =[ '#include',boost_root,freetype2_root,agg_headers,python_headers]
 
-libraries=['mapnik','agg','boost-filesystem','boost-regex','boost-python']
-libpaths = [prefix+"/lib",'#agg']
+libraries=['mapnik','boost-python']
+libpaths = [prefix+"/lib"]
 
 _mapnik_python = env.PythonExtension(target='_mapnik',\
                                      source=mapnik_python_src,\

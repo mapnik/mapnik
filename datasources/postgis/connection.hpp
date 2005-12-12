@@ -56,16 +56,16 @@ public:
 	PQclear(result);
 	return ok;
     }
-    ref_ptr<ResultSet> executeQuery(const std::string& sql,int type=0) const
+    boost::shared_ptr<ResultSet> executeQuery(const std::string& sql,int type=0) const
     {
 	PGresult *result=0;
 	if (type==1)
 	{
 	    result=PQexecParams(conn_,sql.c_str(),0,0,0,0,0,1);
-	    return ref_ptr<ResultSet>(new ResultSet(result));
+	    return boost::shared_ptr<ResultSet>(new ResultSet(result));
 	}
 	result=PQexec(conn_,sql.c_str());
-	return ref_ptr<ResultSet>(new ResultSet(result));
+	return boost::shared_ptr<ResultSet>(new ResultSet(result));
     }
     bool isOK() const
     {

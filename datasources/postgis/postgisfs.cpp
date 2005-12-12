@@ -27,7 +27,7 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using std::string;
 
-postgis_featureset::postgis_featureset(const ref_ptr<ResultSet>& rs,
+postgis_featureset::postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
 				     unsigned num_attrs=0)
     : rs_(rs),
       num_attrs_(num_attrs),
@@ -97,7 +97,7 @@ feature_ptr postgis_featureset::next()
         rs_->close();
         std::cout << "totalGeomSize="<<totalGeomSize_<<" bytes"<<std::endl;
         std::cout << "count="<<count_<<std::endl;
-	return feature_ptr(0);
+	return feature_ptr();
     }
 }
 

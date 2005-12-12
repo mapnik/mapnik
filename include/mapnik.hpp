@@ -25,7 +25,6 @@
 #include <vector>
 #include <cassert>
 #include "global.hpp"
-#include "ptr.hpp"
 #include "factory.hpp"
 #include "filter.hpp"
 #include "query.hpp"

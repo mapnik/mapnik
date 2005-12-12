@@ -18,6 +18,9 @@
 
 //$Id$
 
+#ifndef FILTER_FACTORY_HPP
+#define FILTER_FACTORY_HPP
+
 #include "filter_parser.hpp"
 
 using std::string;
@@ -30,8 +33,8 @@ namespace mapnik
     public:
 	static filter_ptr compile(string const& str)
 	{
-	    stack<ref_ptr<filter<FeatureT> > > filters;
-	    stack<ref_ptr<expression<FeatureT> > > exps;
+	    stack<shared_ptr<filter<FeatureT> > > filters;
+	    stack<shared_ptr<expression<FeatureT> > > exps;
 	    filter_grammar<FeatureT>  grammar(filters,exps);
 	    char const *text = str.c_str();
 	    parse_info<> info = parse(text,text+strlen(text),grammar,space_p);
@@ -47,3 +50,5 @@ namespace mapnik
 	}
     };
 }
+
+#endif //FILTER_FACTORY_HPP

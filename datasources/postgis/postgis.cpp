@@ -36,6 +36,7 @@ using std::endl;
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
+using boost::shared_ptr;
 
 postgis_datasource::postgis_datasource(const Parameters& params)
     : table_(params.get("table")),
@@ -50,13 +51,13 @@ postgis_datasource::postgis_datasource(const Parameters& params)
     ConnectionManager *mgr=ConnectionManager::instance();   
     mgr->registerPool(creator_,10,20);
 
-    ref_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
+    shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
     {
-	const ref_ptr<Connection>& conn = pool->borrowObject();
+	const shared_ptr<Connection>& conn = pool->borrowObject();
 	if (conn && conn->isOK())
 	{
-	    PoolGuard<ref_ptr<Connection>,ref_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
+	    PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
 
 	    std::string table_name=table_from_sql(table_);
 	    
@@ -64,7 +65,7 @@ postgis_datasource::postgis_datasource(const Parameters& params)
 	    s << "select f_geometry_column,srid,type from ";
 	    s << GEOMETRY_COLUMNS <<" where f_table_name='"<<table_name<<"'";
 	   
-	    ref_ptr<ResultSet> rs=conn->executeQuery(s.str());
+	    shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
 	    
 	    if (rs->next())
 	    {
@@ -179,13 +180,13 @@ featureset_ptr postgis_datasource::features(const query& q) const
     Featureset *fs=0;
     Envelope<double> const& box=q.get_bbox();
     ConnectionManager *mgr=ConnectionManager::instance();
-    ref_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
+    shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
     {
-	const ref_ptr<Connection>& conn = pool->borrowObject();
+	const shared_ptr<Connection>& conn = pool->borrowObject();
 	if (conn && conn->isOK())
 	{       
-	    PoolGuard<ref_ptr<Connection>,ref_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
+	    PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
 	    std::ostringstream s;
 	    // can we rely on 'gid' name???
 	    s << "select gid,asbinary("<<geometryColumn_<<") as geom";
@@ -201,7 +202,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
 	    s << box.minx() << " " << box.miny() << ",";
 	    s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
 	    cout << s.str() << endl;
-	    ref_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
+	    shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
 	    fs=new postgis_featureset(rs,props.size());
 	}
     }

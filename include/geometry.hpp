@@ -24,8 +24,9 @@
 #include "vertex_vector.hpp"
 #include "vertex_transform.hpp"
 #include "ctrans.hpp"
-#include "ptr.hpp"
 #include "geom_util.hpp"
+
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
@@ -259,7 +260,7 @@ namespace mapnik
     typedef polygon<vertex2d> polygon_impl;
     
     typedef geometry<vertex2d> geometry_type;
-    typedef ref_ptr<geometry_type> geometry_ptr;
+    typedef boost::shared_ptr<geometry_type> geometry_ptr;
 }
 
 #endif //GEOMETRY_HPP

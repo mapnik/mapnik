@@ -21,6 +21,7 @@
 #ifndef FILTER_PARSER_HPP
 #define FILTER_PARSER_HPP
 
+#include <boost/shared_ptr.hpp>
 #include <boost/spirit/core.hpp>
 #include <boost/spirit/symbols.hpp>
 #include <boost/spirit/utility/confix.hpp>
@@ -46,32 +47,32 @@ namespace mapnik
     template <typename FeatureT>
     struct push_integer
     {
-	push_integer(stack<ref_ptr<expression<FeatureT> > >& exprs)
+	push_integer(stack<shared_ptr<expression<FeatureT> > >& exprs)
 	    : exprs_(exprs) {}
 	
 	void operator() (int val) const
 	{
-	    exprs_.push(ref_ptr<expression<FeatureT> >(new literal<FeatureT>(val)));
+	    exprs_.push(shared_ptr<expression<FeatureT> >(new literal<FeatureT>(val)));
 	}
-	stack<ref_ptr<expression<FeatureT> > >& exprs_;
+	stack<shared_ptr<expression<FeatureT> > >& exprs_;
     };
    
     template <typename FeatureT>
     struct push_real
     {
-	push_real(stack<ref_ptr<expression<FeatureT> > >& exprs)
+	push_real(stack<shared_ptr<expression<FeatureT> > >& exprs)
 	    : exprs_(exprs) {}
 	void operator() (double val) const
 	{
-	    exprs_.push(ref_ptr<expression<FeatureT> >(new literal<FeatureT>(val)));
+	    exprs_.push(shared_ptr<expression<FeatureT> >(new literal<FeatureT>(val)));
 	}
-	stack<ref_ptr<expression<FeatureT> > >& exprs_;
+	stack<shared_ptr<expression<FeatureT> > >& exprs_;
     };
     
     template <typename FeatureT>
     struct push_string
     {
-	push_string(stack<ref_ptr<expression<FeatureT> > >& exprs)
+	push_string(stack<shared_ptr<expression<FeatureT> > >& exprs)
 	    : exprs_(exprs) {}
 	
 	template <typename Iter>
@@ -86,30 +87,30 @@ namespace mapnik
 		str.erase(idx,1);
 		idx = str.find(quote);
 	    }
-	    exprs_.push(ref_ptr<expression<FeatureT> >(new literal<FeatureT>(str)));
+	    exprs_.push(shared_ptr<expression<FeatureT> >(new literal<FeatureT>(str)));
 	}
-	stack<ref_ptr<expression<FeatureT> > >& exprs_;
+	stack<shared_ptr<expression<FeatureT> > >& exprs_;
     };
     
     template <typename FeatureT>
     struct push_property
     {
-	push_property(stack<ref_ptr<expression<FeatureT> > >& exprs)
+	push_property(stack<shared_ptr<expression<FeatureT> > >& exprs)
 	    : exprs_(exprs) {}
 	
 	template <typename Iter>
 	void operator() (Iter start,Iter end) const
 	{
 	    string str(start,end);
-	    exprs_.push(ref_ptr<expression<FeatureT> >(new property<FeatureT>(str)));
+	    exprs_.push(shared_ptr<expression<FeatureT> >(new property<FeatureT>(str)));
 	}
-	stack<ref_ptr<expression<FeatureT> > >& exprs_;
+	stack<shared_ptr<expression<FeatureT> > >& exprs_;
     };
 
     template <typename FeatureT,typename Op>
     struct compose_expression
     {
-	compose_expression(stack<ref_ptr<expression<FeatureT> > >& exprs)
+	compose_expression(stack<shared_ptr<expression<FeatureT> > >& exprs)
 	    : exprs_(exprs) {}
 
 	template <typename Iter>
@@ -117,24 +118,24 @@ namespace mapnik
 	{
 	    if (exprs_.size()>=2)
 	    {
-		ref_ptr<expression<FeatureT> > right = exprs_.top();
+		shared_ptr<expression<FeatureT> > right = exprs_.top();
 		exprs_.pop();
-		ref_ptr<expression<FeatureT> > left = exprs_.top();
+		shared_ptr<expression<FeatureT> > left = exprs_.top();
 		exprs_.pop();
 		if (left && right)
 		{
-		    exprs_.push(ref_ptr<expression<FeatureT> >(new math_expr_b<FeatureT,Op>(*left,*right)));
+		    exprs_.push(shared_ptr<expression<FeatureT> >(new math_expr_b<FeatureT,Op>(*left,*right)));
 		}
 	    }
 	}
-	stack<ref_ptr<expression<FeatureT> > >& exprs_;
+	stack<shared_ptr<expression<FeatureT> > >& exprs_;
     };
     
     template <typename FeatureT>
     struct compose_regex
     {
-	compose_regex(stack<ref_ptr<filter<FeatureT> > >& filters,
-		       stack<ref_ptr<expression<FeatureT> > >& exprs)
+	compose_regex(stack<shared_ptr<filter<FeatureT> > >& filters,
+		       stack<shared_ptr<expression<FeatureT> > >& exprs)
 	    : filters_(filters),exprs_(exprs) {}
 
 	template <typename Iter>
@@ -142,14 +143,14 @@ namespace mapnik
 	{
 	    if (exprs_.size()>=1)
 	    {
-		ref_ptr<expression<FeatureT> > exp = exprs_.top();
+		shared_ptr<expression<FeatureT> > exp = exprs_.top();
 		exprs_.pop();
 		if (exp)
 		{		    
 		    std::string pattern(start,end);
 		    try 
 		    {
-			filters_.push(ref_ptr<filter<FeatureT> >(new regex_filter<FeatureT>(*exp,pattern)));
+			filters_.push(shared_ptr<filter<FeatureT> >(new regex_filter<FeatureT>(*exp,pattern)));
 		    }
 		    catch (...)//boost::regex_error& ex)
 		    {
@@ -159,16 +160,16 @@ namespace mapnik
 		}
 	    }
 	}
-	stack<ref_ptr<filter<FeatureT> > >& filters_;
-	stack<ref_ptr<expression<FeatureT> > >& exprs_;
+	stack<shared_ptr<filter<FeatureT> > >& filters_;
+	stack<shared_ptr<expression<FeatureT> > >& exprs_;
     };
 
   
     template <typename FeatureT,typename Op>
     struct compose_filter
     {
-	compose_filter(stack<ref_ptr<filter<FeatureT> > >& filters,
-		       stack<ref_ptr<expression<FeatureT> > >& exprs)
+	compose_filter(stack<shared_ptr<filter<FeatureT> > >& filters,
+		       stack<shared_ptr<expression<FeatureT> > >& exprs)
 	    : filters_(filters),exprs_(exprs) {}
 
 	template <typename Iter>
@@ -176,24 +177,24 @@ namespace mapnik
 	{
 	    if (exprs_.size()>=2)
 	    {
-		ref_ptr<expression<FeatureT> > right = exprs_.top();
+		shared_ptr<expression<FeatureT> > right = exprs_.top();
 		exprs_.pop();
-		ref_ptr<expression<FeatureT> > left = exprs_.top();
+		shared_ptr<expression<FeatureT> > left = exprs_.top();
 		exprs_.pop();
 		if (left && right)
 		{
-		    filters_.push(ref_ptr<filter<FeatureT> >(new compare_filter<FeatureT,Op>(*left,*right)));
+		    filters_.push(shared_ptr<filter<FeatureT> >(new compare_filter<FeatureT,Op>(*left,*right)));
 		}
 	    }
 	}
-	stack<ref_ptr<filter<FeatureT> > >& filters_;
-	stack<ref_ptr<expression<FeatureT> > >& exprs_;
+	stack<shared_ptr<filter<FeatureT> > >& filters_;
+	stack<shared_ptr<expression<FeatureT> > >& exprs_;
     };
     
     template <typename FeatureT>
     struct compose_and_filter
     {
-	compose_and_filter(stack<ref_ptr<filter<FeatureT> > >& filters)
+	compose_and_filter(stack<shared_ptr<filter<FeatureT> > >& filters)
 	    : filters_(filters) {}
 
 	template <typename Iter>
@@ -201,23 +202,23 @@ namespace mapnik
 	{
 	    if (filters_.size()>=2)
 	    {
-		ref_ptr<filter<FeatureT> > right = filters_.top();
+		shared_ptr<filter<FeatureT> > right = filters_.top();
 		filters_.pop();
-		ref_ptr<filter<FeatureT> > left = filters_.top();
+		shared_ptr<filter<FeatureT> > left = filters_.top();
 		filters_.pop();
 		if (left && right)
 		{
-		    filters_.push(ref_ptr<filter<FeatureT> >(new logical_and<FeatureT>(*left,*right)));
+		    filters_.push(shared_ptr<filter<FeatureT> >(new logical_and<FeatureT>(*left,*right)));
 		}
 	    }
 	}
-	stack<ref_ptr<filter<FeatureT> > >& filters_;
+	stack<shared_ptr<filter<FeatureT> > >& filters_;
     };
     
     template <typename FeatureT>
     struct compose_or_filter
     {
-	compose_or_filter(stack<ref_ptr<filter<FeatureT> > >& filters)
+	compose_or_filter(stack<shared_ptr<filter<FeatureT> > >& filters)
 	    : filters_(filters) {}
 
 	template <typename Iter>
@@ -225,23 +226,23 @@ namespace mapnik
 	{
 	    if (filters_.size()>=2)
 	    {
-		ref_ptr<filter<FeatureT> > right = filters_.top();
+		shared_ptr<filter<FeatureT> > right = filters_.top();
 		filters_.pop();
-		ref_ptr<filter<FeatureT> > left = filters_.top();
+		shared_ptr<filter<FeatureT> > left = filters_.top();
 		filters_.pop();
 		if (left && right)
 		{
-		    filters_.push(ref_ptr<filter<FeatureT> >(new logical_or<FeatureT>(*left,*right)));
+		    filters_.push(shared_ptr<filter<FeatureT> >(new logical_or<FeatureT>(*left,*right)));
 		}
 	    }
 	}
-	stack<ref_ptr<filter<FeatureT> > >& filters_;
+	stack<shared_ptr<filter<FeatureT> > >& filters_;
     };
     
     template <typename FeatureT>
     struct compose_not_filter
     {
-	compose_not_filter(stack<ref_ptr<filter<FeatureT> > >& filters)
+	compose_not_filter(stack<shared_ptr<filter<FeatureT> > >& filters)
 	    : filters_(filters) {}
 
 	template <typename Iter>
@@ -249,22 +250,22 @@ namespace mapnik
 	{
 	    if (filters_.size()>=1)
 	    {
-		ref_ptr<filter<FeatureT> > filter_ = filters_.top();
+		shared_ptr<filter<FeatureT> > filter_ = filters_.top();
 		filters_.pop();
 		if (filter_)
 		{
-		    filters_.push(ref_ptr<filter<FeatureT> >(new logical_not<FeatureT>(*filter_)));
+		    filters_.push(shared_ptr<filter<FeatureT> >(new logical_not<FeatureT>(*filter_)));
 		}
 	    }
 	}
-	stack<ref_ptr<filter<FeatureT> > >& filters_;
+	stack<shared_ptr<filter<FeatureT> > >& filters_;
     };
     
     template <typename FeatureT>
     struct filter_grammar : public grammar<filter_grammar<FeatureT> >
     {
-	filter_grammar(stack<ref_ptr<filter<FeatureT> > >& filters_,
-		       stack<ref_ptr<expression<FeatureT> > >& exprs_)
+	filter_grammar(stack<shared_ptr<filter<FeatureT> > >& filters_,
+		       stack<shared_ptr<expression<FeatureT> > >& exprs_)
 	    : filters(filters_),exprs(exprs_) {}
 	
 	template <typename ScannerT>
@@ -430,8 +431,8 @@ namespace mapnik
 	    symbols<string> func2_op;
 	    symbols<string> spatial_op;
 	};
-	stack<ref_ptr<filter<FeatureT> > >& filters;
-	stack<ref_ptr<expression<FeatureT> > >& exprs;
+	stack<shared_ptr<filter<FeatureT> > >& filters;
+	stack<shared_ptr<expression<FeatureT> > >& exprs;
     };    
 }
 

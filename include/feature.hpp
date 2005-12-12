@@ -28,7 +28,7 @@
 
 namespace mapnik
 {
-    typedef ref_ptr<raster> raster_ptr;    
+    typedef boost::shared_ptr<raster> raster_ptr;    
     typedef std::vector<value> properties;
     
     template <typename T1,typename T2>

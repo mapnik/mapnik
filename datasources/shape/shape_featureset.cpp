@@ -101,7 +101,7 @@ feature_ptr shape_featureset<filterT>::next()
 		}
 		else
 		{
-		    return feature_ptr(0);
+		    return feature_ptr();
 
 		}
 	    }
@@ -152,7 +152,7 @@ feature_ptr shape_featureset<filterT>::next()
 		    break;
 		}
 	    default:
-		return feature_ptr(0);
+		return feature_ptr();
             }
 	    
 	    if (attr_ids_.size())
@@ -178,7 +178,7 @@ feature_ptr shape_featureset<filterT>::next()
     else
     {
 	std::cout<<" total shapes read="<<count_<<"\n";
-	return feature_ptr(0);
+	return feature_ptr();
     }
 }
 

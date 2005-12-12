@@ -23,8 +23,8 @@
 
 #include <vector>
 #include "feature.hpp"
-#include "ptr.hpp"
 #include "datasource.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
@@ -40,7 +40,7 @@ namespace mapnik
 	datasource_p ds_;	
 	std::vector<std::string>  styles_;
 	std::string selection_style_;
-	mutable std::vector<ref_ptr<Feature> > selection_;
+	mutable std::vector<boost::shared_ptr<Feature> > selection_;
 	
     public:
 	explicit Layer(const Parameters& params);
@@ -62,8 +62,8 @@ namespace mapnik
 	void setSelectable(bool selectable);
 	bool isSelectable() const;
 	bool isVisible(double scale) const;
-	void add_to_selection(ref_ptr<Feature>& feature) const;
-	std::vector<ref_ptr<Feature> >& selection() const;
+	void add_to_selection(boost::shared_ptr<Feature>& feature) const;
+	std::vector<boost::shared_ptr<Feature> >& selection() const;
 	void clear_selection() const;
 	datasource_p const& datasource() const;
 	Envelope<double> envelope() const;
@@ -72,4 +72,4 @@ namespace mapnik
 	void swap(const Layer& other);
     };
 }
-#endif                                            //LAYER_HPP
+#endif //LAYER_HPP

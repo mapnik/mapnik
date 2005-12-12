@@ -39,16 +39,16 @@ namespace mapnik
         lt_dlexit();
     }
 
-    std::map<string,ref_ptr<PluginInfo> > datasource_cache::plugins_;
+    std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
     bool datasource_cache::registered_=false;
         
     datasource_p datasource_cache::create(const Parameters& params)
     {
-        datasource *ds=0;
+        datasource_p ds;
         try
         {
             std::string type=params.get("type");	    
-            map<string,ref_ptr<PluginInfo> >::iterator itr=plugins_.find(type);
+            map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(type);
             if (itr!=plugins_.end())
             {
                 if (itr->second->handle())
@@ -60,7 +60,7 @@ namespace mapnik
                     }
                     else
                     {
-                        ds=create_datasource(params);
+                        ds=datasource_p(create_datasource(params),datasource_deleter());
                     }
                 }
                 else
@@ -78,12 +78,12 @@ namespace mapnik
         {
             std::cerr<<"exception caught "<<std::endl;
         }
-        return ref_ptr<datasource,datasource_delete>(ds);
+        return ds;
     }
 
     bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
     {	      
-	return plugins_.insert(make_pair(type,ref_ptr<PluginInfo>(new PluginInfo(type,module)))).second;     
+	return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>(new PluginInfo(type,module)))).second;     
     }
 
     void datasource_cache::register_datasources(const std::string& str)

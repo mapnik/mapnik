@@ -22,26 +22,26 @@
 #define STYLE_HPP
 
 #include "color.hpp"
-#include "ptr.hpp"
 #include "symbolizer.hpp"
 
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
     class Style 
     {
     private:
-	std::vector<ref_ptr<symbolizer> > symbols_;
-	static ref_ptr<symbolizer> zero_symbol_;
+	std::vector<boost::shared_ptr<symbolizer> > symbols_;
+	static boost::shared_ptr<symbolizer> zero_symbol_;
     public:
-	typedef std::vector<ref_ptr<symbolizer> >::const_iterator Iterator; 
+	typedef std::vector<boost::shared_ptr<symbolizer> >::const_iterator Iterator; 
 
 	Style() {}
 
-	Style(const ref_ptr<symbolizer>& symbol) 
+	Style(const boost::shared_ptr<symbolizer>& symbol) 
 	{
 	    symbols_.push_back(symbol);
 	}
@@ -58,7 +58,7 @@ namespace mapnik
 	    return *this;
 	}
 	
-	void add(const ref_ptr<symbolizer>& symbol) 
+	void add(const boost::shared_ptr<symbolizer>& symbol) 
 	{
 	    symbols_.push_back(symbol);
 	}

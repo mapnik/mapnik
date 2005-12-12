@@ -178,7 +178,7 @@ feature_ptr shape_index_featureset<filterT>::next()
     else
     {
 	std::cout<<count_<<" features\n";
-	return feature_ptr(0);
+	return feature_ptr();
     }
 }
 

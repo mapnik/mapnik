@@ -45,11 +45,10 @@ namespace mapnik
 	}
     private:
 	expression<FeatureT>* label_;
-	fill fill_;
-		    
+	fill fill_;		    
     private:
-        text_symbolizer(const text_symbolizer&);
-	text_symbolizer& operator=(const text_symbolizer&);
+        text_symbolizer(text_symbolizer const&);
+	text_symbolizer& operator=(text_symbolizer const&);
     };
 }
 

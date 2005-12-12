@@ -21,13 +21,13 @@
 
 #include "symbolizer.hpp"
 #include "filter.hpp"
-#include <ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 
 namespace mapnik
 {
-    typedef ref_ptr<symbolizer> symbolizer_ptr;
+    typedef boost::shared_ptr<symbolizer> symbolizer_ptr;
     typedef std::vector<symbolizer_ptr> symbolizers;    
     template <typename FeatureT> class all_filter;
 
@@ -35,7 +35,7 @@ namespace mapnik
     class rule
     {
 	typedef Filter<FeatureT> filter_type;
-	typedef ref_ptr<filter_type> filter_ptr;
+	typedef boost::shared_ptr<filter_type> filter_ptr;
     private:
 
 	std::string name_;

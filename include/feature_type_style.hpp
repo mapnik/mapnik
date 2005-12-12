@@ -23,7 +23,6 @@
 
 #include "rule.hpp"
 #include "feature.hpp"
-#include "ptr.hpp"
 #include <vector>
 
 namespace mapnik

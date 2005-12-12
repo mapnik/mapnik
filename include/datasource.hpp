@@ -23,23 +23,25 @@
 
 #include <map>
 #include <string>
-#include "ptr.hpp"
 #include "ctrans.hpp"
 #include "params.hpp"
 #include "feature.hpp"
 #include "query.hpp"
 #include "feature_layer_desc.hpp"
 
+//#include "ptr.hpp"
+#include <boost/shared_ptr.hpp>
+
 namespace mapnik
 {    
-    typedef ref_ptr<Feature> feature_ptr;
+    typedef shared_ptr<Feature> feature_ptr;
     struct Featureset
     {
         virtual feature_ptr next()=0;
         virtual ~Featureset() {};
     };
     
-    typedef ref_ptr<Featureset> featureset_ptr;    
+    typedef shared_ptr<Featureset> featureset_ptr;    
     class datasource_exception : public std::exception
     {
     private:
@@ -73,17 +75,18 @@ namespace mapnik
     typedef datasource* create_ds(const Parameters& params);
     typedef void destroy_ds(datasource *ds);
 
-    template <typename DATASOURCE>
-    struct datasource_delete
+    
+    class datasource_deleter
     {
-        static void destroy(DATASOURCE* ds)
-        {
+    public:
+	void operator() (datasource* ds)
+	{
 	    delete ds;
-        }
+	}
     };
 
-    typedef ref_ptr<datasource,datasource_delete> datasource_p;
-
+    typedef boost::shared_ptr<datasource> datasource_p;
+    
     ///////////////////////////////////////////
     #define DATASOURCE_PLUGIN(classname) \
         extern "C" std::string datasource_name() \
@@ -92,7 +95,7 @@ namespace mapnik
         }\
         extern "C"  datasource* create(const Parameters &params) \
         { \
-        return new classname(params);\
+	    return new classname(params);	\
         }\
         extern "C" void destroy(datasource *ds) \
         { \

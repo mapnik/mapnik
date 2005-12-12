@@ -22,7 +22,6 @@
 #define STYLE_CACHE_HPP
 
 #include "utils.hpp"
-#include "ptr.hpp"
 #include "style.hpp"
 #include <map>
 #include "feature_type_style.hpp"

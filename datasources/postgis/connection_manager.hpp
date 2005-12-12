@@ -25,6 +25,7 @@
 #include "pool.hpp"
 #include "utils.hpp"
 #include "connection.hpp"
+#include <boost/shared_ptr.hpp>
 
 using namespace mapnik;
 using std::string;
@@ -59,8 +60,8 @@ class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
 
     friend class CreateStatic<ConnectionManager>;
     typedef Pool<Connection,ConnectionCreator> PoolType;
-    typedef std::map<std::string,ref_ptr<PoolType> > ContType;
-    typedef ref_ptr<Connection> HolderType;   
+    typedef std::map<std::string,boost::shared_ptr<PoolType> > ContType;
+    typedef boost::shared_ptr<Connection> HolderType;   
     ContType pools_;
 
 public:
@@ -71,13 +72,13 @@ public:
 	if (pools_.find(creator.id())==pools_.end())
 	{
 	    return pools_.insert(std::make_pair(creator.id(),
-					    ref_ptr<PoolType>(new PoolType(creator,initialSize,maxSize)))).second;
+						boost::shared_ptr<PoolType>(new PoolType(creator,initialSize,maxSize)))).second;
 	}
 
 	return false;
 	   	     
     }
-    const ref_ptr<PoolType>& getPool(const std::string& key) 
+    const boost::shared_ptr<PoolType>& getPool(const std::string& key) 
     {
 	Lock lock(&mutex_);
 	ContType::const_iterator itr=pools_.find(key);
@@ -85,7 +86,7 @@ public:
 	{
 	    return itr->second;
 	}
-	static const ref_ptr<PoolType> emptyPool(0);
+	static const boost::shared_ptr<PoolType> emptyPool;
 	return emptyPool;
     }
 	
@@ -95,10 +96,10 @@ public:
 	ContType::const_iterator itr=pools_.find(key);
 	if (itr!=pools_.end()) 
 	{
-	    ref_ptr<PoolType> pool=itr->second;
+	    boost::shared_ptr<PoolType> pool=itr->second;
 	    return pool->borrowObject();
 	}
-	static const HolderType EmptyConn(0);
+	static const HolderType EmptyConn;
 	return EmptyConn;
     }
         

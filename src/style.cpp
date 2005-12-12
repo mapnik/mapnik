@@ -22,5 +22,5 @@
 
 namespace mapnik 
 {
-    ref_ptr<symbolizer> Style::zero_symbol_=ref_ptr<symbolizer>(0);
+    boost::shared_ptr<symbolizer> Style::zero_symbol_ = boost::shared_ptr<symbolizer>();
 }

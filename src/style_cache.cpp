@@ -49,7 +49,7 @@ namespace mapnik
 	{
 	    return itr->second;
 	}
-	static const Style default_style(ref_ptr<symbolizer>(new line_symbolizer(Color(255,0,0))));
+	static const Style default_style(boost::shared_ptr<symbolizer>(new line_symbolizer(Color(255,0,0))));
 	return default_style;
     }
     ////////////////////////////////////////////////////////////////////////////    

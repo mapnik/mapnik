@@ -67,11 +67,15 @@ if not conf.CheckLib('z'):
     Exit(1)
 
 if not conf.CheckLibWithHeader('png','png.h','C'):
-    print 'Could not find libpng/headers, exiting!'
+    print 'Could not find png lib and/or headers, exiting!'
     Exit(1)
 
 if not conf.CheckLib('jpeg'):
     print 'Could not find jpeg lib, exiting!'
+    Exit(1)
+    
+if not conf.CheckLibWithHeader('tiff','tiff.h','C'):
+    print 'Could not find tiff lib and/or headers, exiting!'
     Exit(1)
     
 env  = conf.Finish()

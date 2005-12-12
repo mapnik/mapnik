@@ -18,14 +18,14 @@
 
 //$Id: datasource_cache.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef DSFACTORY_HPP
-#define DSFACTORY_HPP
+#ifndef DATASOURCE_CACHE_HPP
+#define DATASOURCE_CACHE_HPP
 
 #include "utils.hpp"
-#include "ptr.hpp"
 #include "params.hpp"
 #include "plugin.hpp"
 #include "datasource.hpp"
+#include <boost/shared_ptr.hpp>
 #include <map>
 
 namespace mapnik
@@ -38,12 +38,12 @@ namespace mapnik
 	~datasource_cache();
 	datasource_cache(const datasource_cache&);
 	datasource_cache& operator=(const datasource_cache&);
-	static std::map<std::string,ref_ptr<PluginInfo> > plugins_;
+	static std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
 	static bool registered_;
 	static bool insert(const std::string&  name,const lt_dlhandle module);
     public:
 	static void register_datasources(const std::string& path);
-	static ref_ptr<datasource,datasource_delete> create(const Parameters& params);
+	static boost::shared_ptr<datasource> create(Parameters const& params);
     };
 }
-#endif                                            //DSFACTORY_HPP
+#endif   //DATASOURCE_CACHE_HPP

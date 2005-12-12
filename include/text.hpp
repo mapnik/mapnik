@@ -39,8 +39,8 @@ namespace mapnik
             std::string fontName_;
         public:
             TextRasterizer(PixBuffer& pixbuf,const char* fontName)
-                :pixbuf_(&pixbuf),
-                fontName_(fontName) {}
+		: pixbuf_(&pixbuf),
+		  fontName_(fontName) {}
             void render(const char* text);
         private:
             TextRasterizer(const TextRasterizer&);

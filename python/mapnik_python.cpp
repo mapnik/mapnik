@@ -27,31 +27,6 @@
 
 using namespace mapnik;
 
-namespace boost
-{
-    namespace python
-    {
-	
-	template <typename T,
-		  template <typename T> class DeallocPolicy>
-	T* get_pointer(ref_ptr< T , DeallocPolicy> const& ptr)
-	{
-	    return ( T* )ptr.get();
-	}
-
-        template <typename T>	    
-	struct pointee<ref_ptr<T> > 
-	{
-	    typedef T type;
-	};
-	
-	template <> struct pointee<ref_ptr<datasource,datasource_delete> >
-	{
-	    typedef datasource type;
-	};
-    }
-}
-
 void export_color();
 void export_layer();
 void export_parameters();
@@ -78,36 +53,36 @@ void render(const Map& map,Image32& image)
 }
 
 
-ref_ptr<symbolizer> create_point_symbolizer(std::string const& file,unsigned w,unsigned h)
+boost::shared_ptr<symbolizer> create_point_symbolizer(std::string const& file,unsigned w,unsigned h)
 {
-    return ref_ptr<symbolizer>(new image_symbolizer(file,"png",w,h));
+    return boost::shared_ptr<symbolizer>(new image_symbolizer(file,"png",w,h));
 }
 
-ref_ptr<symbolizer> create_line_symbolizer(const Color& pen,float width)
+boost::shared_ptr<symbolizer> create_line_symbolizer(const Color& pen,float width)
 {
-    return ref_ptr<symbolizer>(new line_symbolizer(pen,width));
+    return boost::shared_ptr<symbolizer>(new line_symbolizer(pen,width));
 } 
 
-ref_ptr<symbolizer> create_line_symbolizer2(stroke const& strk)
+boost::shared_ptr<symbolizer> create_line_symbolizer2(stroke const& strk)
 {
-    return ref_ptr<symbolizer>(new line_symbolizer(strk));
+    return boost::shared_ptr<symbolizer>(new line_symbolizer(strk));
 } 
 
-ref_ptr<symbolizer> create_polygon_symbolizer(const Color& fill) 
+boost::shared_ptr<symbolizer> create_polygon_symbolizer(const Color& fill) 
 {   
-    return ref_ptr<symbolizer>(new polygon_symbolizer(fill));
+    return boost::shared_ptr<symbolizer>(new polygon_symbolizer(fill));
 } 
 
-ref_ptr<symbolizer> create_polygon_symbolizer2(std::string const& file,unsigned w,unsigned h) 
+boost::shared_ptr<symbolizer> create_polygon_symbolizer2(std::string const& file,unsigned w,unsigned h) 
 {   
-    return ref_ptr<symbolizer>(new pattern_symbolizer(file,"png",w,h));
+    return boost::shared_ptr<symbolizer>(new pattern_symbolizer(file,"png",w,h));
 } 
 
 BOOST_PYTHON_MODULE(_mapnik)
 {
     using namespace boost::python;
     
-    class_<datasource,ref_ptr<datasource,datasource_delete>,
+    class_<datasource,boost::shared_ptr<datasource>,
 	boost::noncopyable>("datasource",no_init)
         .def("envelope",&datasource::envelope,
 	     return_value_policy<reference_existing_object>())
@@ -115,7 +90,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     
     class_<symbolizer,boost::noncopyable> ("symbolizer_",no_init) 
     	;
-    class_<ref_ptr<symbolizer,mapnik::DefaultDeletePolicy>,
+    class_<boost::shared_ptr<symbolizer>,
 	boost::noncopyable>("symbolizer",no_init)
 	;
     export_parameters();
@@ -144,6 +119,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("line_symbolizer",&create_line_symbolizer2);
     def("polygon_symbolizer",&create_polygon_symbolizer);
     def("polygon_symbolizer",&create_polygon_symbolizer2);
-    register_ptr_to_python<ref_ptr<symbolizer> >();
+    register_ptr_to_python<boost::shared_ptr<symbolizer> >();
     register_ptr_to_python<filter_ptr>();
 }

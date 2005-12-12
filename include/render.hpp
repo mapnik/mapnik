@@ -22,8 +22,6 @@
 #define RENDER_HPP
 
 #include <stack>
-#include "memory.hpp"
-#include "ptr.hpp"
 #include "style.hpp"
 #include "envelope.hpp"
 #include "graphics.hpp"

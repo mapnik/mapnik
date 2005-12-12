@@ -72,7 +72,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
         ++curIter_;
 	return feature;
     }
-    return feature_ptr(0);
+    return feature_ptr();
 }
 
 

@@ -25,9 +25,8 @@
 #include <map>
 #include <deque>
 #include <ctime>
-
-#include "ptr.hpp"
 #include "utils.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
@@ -56,7 +55,7 @@ namespace mapnik
     template <typename T,template <typename> class Creator>
     class Pool 
     {
-	typedef ref_ptr<T> HolderType;
+	typedef boost::shared_ptr<T> HolderType;
 	typedef std::deque<HolderType> ContType;	
 	
 	Creator<T> creator_;
@@ -90,7 +89,7 @@ namespace mapnik
 		mutex_.unlock();
 		return usedPool_[usedPool_.size()-1];
 	    }
-	    static const HolderType defaultObj(0);
+	    static const HolderType defaultObj;
 	    return defaultObj;
 	} 
 

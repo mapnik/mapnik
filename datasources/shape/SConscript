@@ -36,6 +36,6 @@ shape_src = Split(
 
 headers = ['#include',boost_root]
 
-shape_datasource = env.SharedLibrary('shape',source=shape_src,SHLIBPREFIX='',LIBS="",CPPPATH=headers)
+shape_datasource = env.SharedLibrary('shape',source=shape_src,SHLIBPREFIX='',LIBS=[],CPPPATH=headers)
 env.Install(prefix+"/datasources",shape_datasource)
 env.Alias("install",prefix + '/datasources')

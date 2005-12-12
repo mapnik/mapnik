@@ -20,7 +20,7 @@
 #edit this file
 PREFIX = '/opt/mapnik'
 BOOST_ROOT = '/opt/boost/boost_1_33_1'
-FREETYPE2_ROOT = '/usr/include/freetype2'
+FREETYPE2_ROOT = '/opt/freetype'
 PYTHON_VERSION = '2.4'
 PYTHON_ROOT = '/opt/python'
 AGG_ROOT = '/opt/agg-2.4'
