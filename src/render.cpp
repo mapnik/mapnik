@@ -123,7 +123,6 @@ namespace mapnik
 					(*symIter)->render(*geom,image);
 					++symIter;
 				    }
-				    break;// not sure !!
 				}			    
 				++itr;
 			    }
