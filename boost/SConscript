@@ -24,16 +24,23 @@ Import('env')
 prefix = env['PREFIX']
 boost_root = env['BOOST_ROOT']
 
-# boost filesystem
+#boost filesystem
 filesystem_src_dir = boost_root + '/libs/filesystem/src/'
 boost_fs_src= glob.glob(filesystem_src_dir + '*.cpp')
 lib_boost_filesystem = env.SharedLibrary('libboost-filesystem',boost_fs_src,LIBS=[],CPPPATH=boost_root)
 env.Install(prefix+'/lib',lib_boost_filesystem)
+
 #boost regex
 regex_src_dir = boost_root + '/libs/regex/src/'
 boost_regex_src = glob.glob(regex_src_dir+ '*.cpp')
 lib_boost_regex = env.SharedLibrary('libboost-regex',boost_regex_src,LIBS=[],CPPPATH=boost_root)
-
 env.Install(prefix+'/lib',lib_boost_regex)
 
+#boost serialization
+serialization_src_dir = boost_root + '/libs/serialization/src/'
+boost_serialization_src = glob.glob(serialization_src_dir+ '*.cpp')
+#cxxflags = env['CXXFLAGS'] + " -Wno-non-virtual-dtor -Wno-ctor-dtor-privacy"
+#lib_boost_serialization = env.SharedLibrary('libboost-serialization',boost_serialization_src,CXXFLAGS=cxxflags,LIBS=[],CPPPATH=boost_root)
+lib_boost_serialization = env.SharedLibrary('libboost-serialization',boost_serialization_src,LIBS=[],CPPPATH=boost_root)
+env.Install(prefix+'/lib',lib_boost_serialization)
 

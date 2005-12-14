@@ -37,7 +37,7 @@ private:
     layer_descriptor             desc_;
     static std::string           name_;  
 public:
-    raster_datasource(const Parameters& params);
+    raster_datasource(const parameters& params);
     virtual            ~raster_datasource();
     int                 type() const;
     static std::string  name();

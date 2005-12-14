@@ -25,12 +25,15 @@
 
 namespace mapnik
 {
-
+    Map::Map()
+	: width_(400),
+	  height_(400),
+	  srid_(-1) {}
     Map::Map(int width,int height,int srid)
         : width_(width),
-        height_(height),
-        srid_(srid),
-        background_(Color(255,255,255)) {}
+	  height_(height),
+	  srid_(srid),
+	  background_(Color(255,255,255)) {}
 
     Map::Map(const Map& rhs)
         : width_(rhs.width_),

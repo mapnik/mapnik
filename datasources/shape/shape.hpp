@@ -33,7 +33,7 @@ public:
     static std::string name();
     featureset_ptr features(const query& q) const;
     const Envelope<double>& envelope() const;
-    shape_datasource(const Parameters &params);
+    shape_datasource(const parameters &params);
     layer_descriptor const& get_descriptor() const;
     virtual ~shape_datasource();
 private:

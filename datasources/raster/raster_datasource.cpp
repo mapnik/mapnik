@@ -31,7 +31,7 @@ using std::endl;
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
-raster_datasource::raster_datasource(const Parameters& params)
+raster_datasource::raster_datasource(const parameters& params)
     : desc_(params.get("name"))
 {
     filename_=params.get("file");

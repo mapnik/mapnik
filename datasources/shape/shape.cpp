@@ -26,7 +26,7 @@
 
 DATASOURCE_PLUGIN(shape_datasource);
 
-shape_datasource::shape_datasource(const Parameters &params)
+shape_datasource::shape_datasource(const parameters &params)
     : shape_name_(params.get("file")),
       type_(datasource::Vector),
       file_length_(0),

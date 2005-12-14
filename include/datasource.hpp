@@ -72,7 +72,7 @@ namespace mapnik
     };
     
     typedef std::string datasource_name();
-    typedef datasource* create_ds(const Parameters& params);
+    typedef datasource* create_ds(const parameters& params);
     typedef void destroy_ds(datasource *ds);
 
     
@@ -93,7 +93,7 @@ namespace mapnik
         { \
         return classname::name();\
         }\
-        extern "C"  datasource* create(const Parameters &params) \
+        extern "C"  datasource* create(const parameters &params)	\
         { \
 	    return new classname(params);	\
         }\

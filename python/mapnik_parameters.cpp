@@ -22,17 +22,16 @@
 #include <boost/python/detail/api_placeholder.hpp>
 #include <mapnik.hpp>
 
-using mapnik::Parameter;
-using mapnik::Parameters;
+using mapnik::parameter;
+using mapnik::parameters;
 
-
-void (Parameters::*add1)(const Parameter&)=&Parameters::add;
-void (Parameters::*add2)(const std::string&,const std::string&)=&Parameters::add;
+//void (parameters::*add1)(const parameter&)=&parameters::insert;
+//void (parameters::*add2)(std::make_pair(const std::string&,const std::string&))=&parameters::insert;
 
 struct parameter_pickle_suite : boost::python::pickle_suite
 {
     static boost::python::tuple
-    getinitargs(const Parameter& p)
+    getinitargs(const parameter& p)
     {
         using namespace boost::python;
         return boost::python::make_tuple(p.first,p.second);
@@ -42,11 +41,11 @@ struct parameter_pickle_suite : boost::python::pickle_suite
 struct parameters_pickle_suite : boost::python::pickle_suite
 {
     static boost::python::tuple
-    getstate(const Parameters& p)
+    getstate(const parameters& p)
     {
         using namespace boost::python;
         dict d;
-        Parameters::const_iterator pos=p.begin();
+        parameters::const_iterator pos=p.begin();
         while(pos!=p.end())
         {
             d[pos->first]=pos->second;
@@ -55,7 +54,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
         return boost::python::make_tuple(d);
     }
 
-    static void setstate(Parameters& p, boost::python::tuple state)
+    static void setstate(parameters& p, boost::python::tuple state)
     {
         using namespace boost::python;
         if (len(state) != 1)
@@ -72,7 +71,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
         {
             std::string key=extract<std::string>(keys[i]);
             std::string value=extract<std::string>(d[key]);
-            p.add(key,value);
+            p[key] = value;
         }
     }
 };
@@ -81,14 +80,14 @@ struct parameters_pickle_suite : boost::python::pickle_suite
 void export_parameters()
 {
     using namespace boost::python;
-    class_<Parameter>("parameter",init<std::string,std::string>())
+    class_<parameter>("parameter",init<std::string,std::string>())
         .def_pickle(parameter_pickle_suite())
         ;
 
-    class_<Parameters>("parameters",init<>())
-        .def("add",add1)
-        .def("add",add2)
-        .def("get",&Parameters::get)
+    class_<parameters>("parameters",init<>())
+        //.def("add",add1)
+        //.def("add",add2)
+        .def("get",&parameters::get)
         .def_pickle(parameters_pickle_suite())
         ;
 }

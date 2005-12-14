@@ -54,7 +54,7 @@ public:
     featureset_ptr features(const query& q) const;
     mapnik::Envelope<double> const& envelope() const;
     layer_descriptor const& get_descriptor() const;
-    postgis_datasource(const Parameters &params);
+    postgis_datasource(const parameters &params);
     ~postgis_datasource();
 private:
     static std::string table_from_sql(const std::string& sql);

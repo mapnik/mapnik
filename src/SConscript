@@ -30,12 +30,13 @@ freetype2_root = env['FREETYPE2_ROOT']
 
 headers =[ '#include',boost_root,freetype2_root,agg_headers]
 
-libraries=['rt','z','png','ltdl','jpeg','tiff','agg','boost-filesystem','boost-regex']
+libraries=['rt','z','png','ltdl','jpeg','tiff','agg','boost-filesystem','boost-regex','boost-serialization']
 libpaths = [prefix+'/lib','#agg']
 linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 
 source = Split(
     """
+    mapnik.cpp
     datasource_cache.cpp
     envelope.cpp
     graphics.cpp

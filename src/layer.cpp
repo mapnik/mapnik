@@ -18,35 +18,28 @@
 
 //$Id: layer.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
-#include <string>
+
 #include "style.hpp"
 #include "datasource.hpp"
 #include "datasource_cache.hpp"
 #include "layer.hpp"
 
+#include <string>
+#include <iostream>
+
 namespace mapnik
 {
     using namespace std;
-   
-    Layer::Layer(const Parameters& params)
+    Layer::Layer() {}
+    Layer::Layer(const parameters& params)
         :params_(params),
+	 name_(params_["name"]),
 	 minZoom_(0),
 	 maxZoom_(std::numeric_limits<double>::max()),
 	 active_(true),
 	 selectable_(false),
 	 selection_style_("default_selection")
-    {
-
-        try
-        {
-            name_=params_.get("name");
-	    ds_=datasource_cache::instance()->create(params_);
-        }
-        catch (...)
-        {
-            throw;
-        }
-    }
+    {}
     
     Layer::Layer(const Layer& rhs)
         :params_(rhs.params_),
@@ -55,7 +48,7 @@ namespace mapnik
 	 maxZoom_(rhs.maxZoom_),
 	 active_(rhs.active_),
 	 selectable_(rhs.selectable_),
-	 ds_(rhs.ds_),
+	 //ds_(rhs.ds_),
 	 styles_(rhs.styles_),
 	 selection_style_(rhs.selection_style_) {}
     
@@ -79,14 +72,14 @@ namespace mapnik
         maxZoom_=rhs.maxZoom_;
         active_=rhs.active_;
         selectable_=rhs.selectable_;
-        ds_=rhs.ds_;
+        //ds_=rhs.ds_;
         styles_=rhs.styles_;
 	selection_style_=rhs.selection_style_;
     }
 
     Layer::~Layer() {}
 
-    Parameters const& Layer::params() const
+    parameters const& Layer::params() const
     {
         return params_;
     }
@@ -153,14 +146,28 @@ namespace mapnik
 
     const datasource_p& Layer::datasource() const
     {
-        return ds_;
+	if (!ds_)
+	{
+	    try
+	    {
+		ds_=datasource_cache::instance()->create(params_);
+	    }
+	    catch (...)
+	    {
+		std::cerr << "exception caught : can not create datasorce" << std::endl;  
+	    }
+	}
+	return ds_;
     }
 
     Envelope<double> Layer::envelope() const
     {
-	if (ds_)
-	    return ds_->envelope();
-	return Envelope<double>();
+	datasource_p const& ds = datasource();
+	if (ds)
+	{
+	    return ds->envelope();
+	}
+    	return Envelope<double>();
     }
 
     void Layer::selection_style(const std::string& name) 

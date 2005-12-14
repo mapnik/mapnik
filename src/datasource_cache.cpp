@@ -42,12 +42,12 @@ namespace mapnik
     std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
     bool datasource_cache::registered_=false;
         
-    datasource_p datasource_cache::create(const Parameters& params)
+    datasource_p datasource_cache::create(const parameters& params)
     {
         datasource_p ds;
         try
         {
-            std::string type=params.get("type");	    
+            const std::string type=params.get("type");	    
             map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(type);
             if (itr!=plugins_.end())
             {

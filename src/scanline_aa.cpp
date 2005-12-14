@@ -603,9 +603,7 @@ namespace mapnik
             pixbuf_->blendPixel(x,y,rgba,alpha);
         }
     }
-
-
-
+    
     template <typename PixBuffer>
     inline void ScanlineRasterizerAA<PixBuffer>::render_hline(int x0,int x1,int y,unsigned rgba)
     {

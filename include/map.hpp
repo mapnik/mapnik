@@ -21,13 +21,25 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/vector.hpp>
+
 namespace mapnik
 {
     class Layer;
 
     class Map
     {
-    private:
+	friend class boost::serialization::access;
+	template <typename Archive>
+	void serialize(Archive & ar, const unsigned int /*version*/)
+	{
+	    ar  & boost::serialization::make_nvp("width",width_) 
+		& boost::serialization::make_nvp("height",height_) 
+		& boost::serialization::make_nvp("srid",srid_)
+		& boost::serialization::make_nvp("layers",layers_);
+	}
+	
 	static const unsigned MIN_MAPSIZE=16;
 	static const unsigned MAX_MAPSIZE=1024;
 	unsigned width_;
@@ -37,6 +49,7 @@ namespace mapnik
 	std::vector<Layer> layers_;
 	Envelope<double> currentExtent_;
     public:
+	Map();
 	Map(int width,int height,int srid=-1);
 	Map(const Map& rhs);
 	Map& operator=(const Map& rhs);
@@ -65,4 +78,11 @@ namespace mapnik
 	void fixAspectRatio();
     };
 }
+
+BOOST_CLASS_IMPLEMENTATION(std::vector<mapnik::Layer>, boost::serialization::object_serializable)
+BOOST_CLASS_TRACKING(std::vector<mapnik::Layer>, boost::serialization::track_never)
+
+BOOST_CLASS_IMPLEMENTATION(mapnik::Map, boost::serialization::object_serializable)
+BOOST_CLASS_TRACKING(mapnik::Map, boost::serialization::track_never)
+
 #endif //MAP_HPP

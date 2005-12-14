@@ -25,29 +25,45 @@
 #include "feature.hpp"
 #include "datasource.hpp"
 #include <boost/shared_ptr.hpp>
+#include <boost/serialization/serialization.hpp>
 
 namespace mapnik
 {
     class Layer
     {
-    private:
-	Parameters params_;
+	friend class boost::serialization::access;
+	template <typename Archive>
+	void serialize(Archive & ar, const unsigned int /*version*/)
+	{
+	    ar  & boost::serialization::make_nvp("name",name_)
+		& boost::serialization::make_nvp("params",params_)
+		& boost::serialization::make_nvp("min_zoom",minZoom_)
+		& boost::serialization::make_nvp("max_zoom",maxZoom_)
+		& boost::serialization::make_nvp("active",active_)
+		& boost::serialization::make_nvp("selectable",selectable_)
+		& boost::serialization::make_nvp("styles",styles_)
+		;
+	}
+	parameters params_;
 	std::string name_;
 	double minZoom_;
 	double maxZoom_;
 	bool active_;
 	bool selectable_;
-	datasource_p ds_;	
+	
 	std::vector<std::string>  styles_;
 	std::string selection_style_;
+
+	mutable datasource_p ds_;
 	mutable std::vector<boost::shared_ptr<Feature> > selection_;
-	
+        
     public:
-	explicit Layer(const Parameters& params);
+	Layer();
+	explicit Layer(const parameters& params);
 	Layer(Layer const& l);
 	Layer& operator=(Layer const& l);
 	bool operator==(Layer const& other) const;
-	Parameters const& params() const;	
+	parameters const& params() const;	
 	const std::string& name() const;
 	void add_style(std::string const& stylename);
 	std::vector<std::string> const& styles() const;
@@ -72,4 +88,11 @@ namespace mapnik
 	void swap(const Layer& other);
     };
 }
+
+BOOST_CLASS_IMPLEMENTATION(std::vector<std::string>, boost::serialization::object_serializable)
+BOOST_CLASS_TRACKING(std::vector<std::string>, boost::serialization::track_never)
+
+BOOST_CLASS_IMPLEMENTATION(mapnik::Layer, boost::serialization::object_serializable)
+BOOST_CLASS_TRACKING(mapnik::Layer, boost::serialization::track_never)
+
 #endif //LAYER_HPP

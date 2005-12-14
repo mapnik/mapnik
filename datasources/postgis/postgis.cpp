@@ -38,7 +38,7 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using boost::shared_ptr;
 
-postgis_datasource::postgis_datasource(const Parameters& params)
+postgis_datasource::postgis_datasource(const parameters& params)
     : table_(params.get("table")),
       type_(datasource::Vector), 
       desc_(params.get("name")),

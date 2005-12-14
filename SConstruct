@@ -41,11 +41,11 @@ build_prefix = build_dir+'/'+str(platform)
 
 env = Environment(ENV=os.environ, options=opts)
 
-cxx_debug='-Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG'
-cxx_release='-Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG'
+cxx_debug='-Wall -Wno-non-virtual-dtor -Wno-ctor-dtor-privacy -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG'
+cxx_release='-Wall -Wno-non-virtual-dtor -Wno-ctor-dtor-privacy -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG '
 
-release_env = env.Copy(CXXFLAGS = cxx_release)
-debug_env = env.Copy(CXXFLAGS = cxx_debug)
+#release_env = env.Copy(CXXFLAGS = cxx_release)
+#debug_env = env.Copy(CXXFLAGS = cxx_debug)
 
 if ARGUMENTS.get('debug',0):
     env.Append(CXXFLAGS = cxx_debug)

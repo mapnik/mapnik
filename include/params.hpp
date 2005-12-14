@@ -22,26 +22,75 @@
 #define PARAMS_HPP
 
 #include <map>
+//#include <boost/serialization/serialization.hpp>
+//#include <boost/serialization/split_member.hpp>
+//#include <boost/serialization/map.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/utility.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/level.hpp>
+#include <boost/serialization/tracking.hpp>
+#include <boost/serialization/base_object.hpp>
 
 namespace mapnik
 {
 
-    typedef std::pair<std::string,std::string> Parameter;
+    typedef std::pair<const std::string,std::string> parameter;
+    typedef std::map<const std::string,std::string> param_map;
 
-    class Parameters
+    class parameters : public param_map
     {
-        typedef std::map<std::string,std::string> ParamMap;
-    private:
-	ParamMap data_;
+	friend class boost::serialization::access;
+	
+	template <typename Archive>
+	void save(Archive & ar, const unsigned int /*version*/) const
+	{
+	    const size_t size = param_map::size();
+	    ar & boost::serialization::make_nvp("count",size);
+	    param_map::const_iterator itr;
+	    for (itr=param_map::begin();itr!=param_map::end();++itr)
+	    {
+		ar & boost::serialization::make_nvp("name",itr->first);
+		ar & boost::serialization::make_nvp("value",itr->second);
+	    }
+	}
+	
+	template <typename Archive>
+	void load(Archive & ar, const unsigned int /*version*/)
+	{	    
+	    size_t size;
+	    ar & boost::serialization::make_nvp("size",size);
+	    for (size_t i=0;i<size;++i)
+	    {
+		std::string name;
+		std::string value;
+		ar & boost::serialization::make_nvp("name",name);
+		ar & boost::serialization::make_nvp("value",value);
+		param_map::insert(make_pair(name,value));
+	    }
+	}
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
     public:
-	typedef ParamMap::const_iterator const_iterator;
-	Parameters() {}
-	const std::string get(const std::string& name) const;
-	void add(const Parameter& param);
-	void add(const std::string& name,const std::string& value);
-	const_iterator begin() const;
-	const_iterator end() const;
-	virtual ~Parameters();
+	parameters() {}
+	const std::string get(std::string const& key) const
+	{
+	    param_map::const_iterator itr=find(key);
+	    if (itr != end())
+	    {
+		return itr->second;
+	    }
+	    return std::string();
+	}
     };
 }
-#endif                                            //PARAMS_HPP
+
+BOOST_CLASS_IMPLEMENTATION(mapnik::parameter, boost::serialization::object_serializable)
+BOOST_CLASS_TRACKING(mapnik::parameter, boost::serialization::track_never)
+
+BOOST_CLASS_IMPLEMENTATION(mapnik::parameters, boost::serialization::object_serializable)
+BOOST_CLASS_TRACKING(mapnik::parameters, boost::serialization::track_never)
+
+#endif //PARAMS_HPP
