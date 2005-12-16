@@ -18,18 +18,11 @@
 
 //$Id: render.cpp 44 2005-04-22 18:53:54Z pavlenko $
 
-
 #include "render.hpp"
-#include "line_aa.hpp"
-#include "scanline.hpp"
-#include "scanline_aa.hpp"
-#include "text.hpp"
 #include "image_util.hpp"
 #include "utils.hpp"
 #include "style_cache.hpp"
-#include "image_reader.hpp"
-#include "polygon_symbolizer.hpp"
-#include "line_symbolizer.hpp"
+#include "symbolizer.hpp"
 #include "query.hpp"
 #include "feature_layer_desc.hpp"
 #include "attribute_collector.hpp"

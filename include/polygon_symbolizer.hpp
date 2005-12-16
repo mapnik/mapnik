@@ -33,6 +33,7 @@
 #include "agg_path_storage.h"
 #include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
+#include "agg_image_accessors.h"
 
 namespace mapnik 
 {
@@ -101,6 +102,7 @@ namespace mapnik
 
 	void render(geometry_type& geom,Image32& image) const
 	{
+	    /*
 	    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
 
 	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
@@ -114,6 +116,10 @@ namespace mapnik
 
 	    typedef agg::wrap_mode_repeat wrap_x_type;
 	    typedef agg::wrap_mode_repeat wrap_y_type;
+	    typedef agg::image_accessor_wrap<agg::pixfmt_rgba32, 
+		wrap_x_type,
+		wrap_y_type> img_source_type;
+
 	    typedef agg::span_pattern_rgba<agg::rgba8, 
 		agg::order_rgba,
 		wrap_x_type,
@@ -136,7 +142,7 @@ namespace mapnik
 	    ras.clip_box(0,0,image.width(),image.height());
 	    ras.add_path(geom);
 	    agg::render_scanlines(ras, sl, rp);
-	    
+	    */   
 	}
 	
     private:
