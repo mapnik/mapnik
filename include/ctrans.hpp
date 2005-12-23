@@ -41,7 +41,7 @@ namespace mapnik
 	{
 	    double sx=((double)width)/extent.width();
 	    double sy=((double)height)/extent.height();
-	    scale_=sx;//std::min(sx,sy);
+	    scale_=std::min(sx,sy);
 	}
 	
 	inline double scale() const
