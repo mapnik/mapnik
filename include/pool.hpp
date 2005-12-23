@@ -27,6 +27,8 @@
 #include <ctime>
 #include "utils.hpp"
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/utility.hpp>
 
 namespace mapnik
 {
@@ -53,7 +55,7 @@ namespace mapnik
     };
 
     template <typename T,template <typename> class Creator>
-    class Pool 
+    class Pool : private boost::noncopyable
     {
 	typedef boost::shared_ptr<T> HolderType;
 	typedef std::deque<HolderType> ContType;	
@@ -63,7 +65,7 @@ namespace mapnik
 	const int maxSize_;
 	ContType usedPool_;
 	ContType unusedPool_;
-	Mutex mutex_;
+	boost::mutex mutex_;
     public:
 
 	Pool(const Creator<T>& creator,int initialSize=5,int maxSize=20)
@@ -79,14 +81,13 @@ namespace mapnik
 
 	const HolderType& borrowObject()
 	{	    
-	    Lock lock(&mutex_);
+	    mutex::scoped_lock lock(mutex_);
 	    typename ContType::iterator itr=unusedPool_.begin();
 	    if (itr!=unusedPool_.end())
 	    {  
 		std::cout<<"borrow "<<(*itr).get()<<"\n";
 		usedPool_.push_back(*itr);
 		itr=unusedPool_.erase(itr);
-		mutex_.unlock();
 		return usedPool_[usedPool_.size()-1];
 	    }
 	    static const HolderType defaultObj;
@@ -95,7 +96,7 @@ namespace mapnik
 
 	void returnObject(const HolderType& obj)
 	{
-	    Lock lock(&mutex_);    
+	    mutex::scoped_lock lock(mutex_);
 	    typename ContType::iterator itr=usedPool_.begin();
 	    while (itr != usedPool_.end())
 	    {
@@ -109,11 +110,6 @@ namespace mapnik
 		++itr;
 	    }
 	}
-	
-    private:
-	Pool(const Pool&);
-	Pool& operator=(const Pool&);
     };
-
 }
 #endif                                            //POOL_HPP
