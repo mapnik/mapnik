@@ -35,14 +35,13 @@ namespace mapnik
 	int height;
 	double scale_;
 	Envelope<double> extent;
-	coord2d center_;
     public:
 	CoordTransform(int width,int height,const Envelope<double>& extent)
-            :width(width),height(height),extent(extent),center_(extent.center())
+            :width(width),height(height),extent(extent)
 	{
 	    double sx=((double)width)/extent.width();
 	    double sy=((double)height)/extent.height();
-	    scale_=std::min(sx,sy);
+	    scale_=sx;//std::min(sx,sy);
 	}
 	
 	inline double scale() const
@@ -50,51 +49,64 @@ namespace mapnik
 	    return scale_;
 	}
 	
-	double forward_x(double x) const 
+	inline void forward_x(double* x) const 
 	{
-	    return (x-center_.x)*scale_+0.5*width;
+	    *x = (*x - extent.minx() ) * scale_;   
 	}
 	
-	double forward_y(double y) const 
+	inline void forward_y(double* y) const 
 	{
-	    return -(y-center_.y)*scale_+0.5*height;
+	    *y = (extent.maxy() - *y) * scale_;
 	}
-
+	
+	inline void backward_x(double* x) const
+	{
+	    *x = extent.minx() + *x/scale_;
+	}
+	
+	inline void backward_y(double* y) const
+	{
+	    *y = extent.maxy() - *y/scale_;
+	}
+	
 	inline coord2d& forward(coord2d& c) const
 	{
-	    c.x=(c.x-center_.x)*scale_+0.5*width;
-	    c.y=-(c.y-center_.y)*scale_+0.5*height;
+	    forward_x(&c.x);
+	    forward_y(&c.y);
 	    return c;
 	}
 
 	inline coord2d& backward(coord2d& c) const
 	{
-	    c.x=(c.x-0.5*width)/scale_+center_.x;
-	    c.y=-(c.y-0.5*height)/scale_+center_.y;
+	    backward_x(&c.x);
+	    backward_y(&c.y);
 	    return c;
 	}
 
 	inline Envelope<double> forward(const Envelope<double>& e) const
 	{
-	    
-	    double x0=(e.minx()-center_.x)*scale_+0.5*width;
-	    double x1=(e.maxx()-center_.x)*scale_+0.5*width;
-	    
-	    double y0=-(e.miny()-center_.y)*scale_+0.5*height;
-	    double y1=-(e.maxy()-center_.y)*scale_+0.5*height;
-	    
+	    double x0 = e.minx();
+	    double y0 = e.miny();
+	    double x1 = e.maxx();
+	    double y1 = e.maxy();
+	    forward_x(&x0);
+	    forward_y(&y0);
+	    forward_x(&x1);
+	    forward_y(&y1);
 	    return Envelope<double>(x0,y0,x1,y1);
 	}
 
 	inline Envelope<double> backward(const Envelope<double>& e) const
 	{
-
-	    double x0=(e.minx()-0.5*width)/scale_+center_.x;
-	    double x1=(e.maxx()-0.5*width)/scale_+center_.x;
-
-	    double y0=-(e.miny()-0.5*height)/scale_+center_.y;
-	    double y1=-(e.maxy()-0.5*height)/scale_+center_.y;
-
+	    double x0 = e.minx();
+	    double y0 = e.miny();
+	    double x1 = e.maxx();
+	    double y1 = e.maxy();
+	    backward_x(&x0);
+	    backward_y(&y0);
+	    backward_x(&x1);
+	    backward_y(&y1);
+	    
 	    return Envelope<double>(x0,y0,x1,y1);
 	}
 
@@ -102,8 +114,7 @@ namespace mapnik
 	{
 	    for (unsigned i=0;i<coords.size();++i)
 	    {
-		coords[i].x=(coords[i].x-center_.x)*scale_+0.5*width;
-		coords[i].y=-(coords[i].y-center_.y)*scale_+0.5*height;
+		forward(coords[i]);
 	    }
 	    return coords;
 	}
@@ -112,8 +123,7 @@ namespace mapnik
 	{
 	    for (unsigned i=0;i<coords.size();++i)
 	    {
-		coords[i].x=(coords[i].x-0.5*width)/scale_+center_.x;
-		coords[i].y=-(coords[i].y-0.5*height)/scale_+center_.y;
+		backward(coords[i]);
 	    }
 	    return coords;
 	}

@@ -29,11 +29,12 @@
 #include <iostream>
 #include <cmath>
 
+#include <boost/thread/mutex.hpp>
+
 namespace mapnik
 {
-    class Mutex;
-    class Lock;
-
+    using boost::mutex;
+    
     template <typename T>
     class CreateUsingNew
     {
@@ -90,7 +91,7 @@ namespace mapnik
 		      throw std::runtime_error("dead reference!");
 		  }
 	      protected:
-		  static Mutex mutex_;
+		  static mutex mutex_;
 		  singleton() {}
 		  virtual ~singleton()
 		  {
@@ -102,7 +103,7 @@ namespace mapnik
 		  {
 		      if (!pInstance_)
 		      {
-			  Lock lock(&mutex_);
+			  mutex::scoped_lock lock(mutex_);
 			  if (!pInstance_)
 			  {
 			      if (destroyed_)
@@ -120,7 +121,7 @@ namespace mapnik
 	      };
 
     template <typename T,
-	      template <typename T> class CreatePolicy> Mutex singleton<T,CreatePolicy>::mutex_;
+	      template <typename T> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
     template <typename T,
 	      template <typename T> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
     template <typename T,
@@ -163,59 +164,6 @@ namespace mapnik
 	}
     };
 
-    class Mutex
-    {
-    private:
-	pthread_mutex_t mutex_;
-    public:
-	Mutex()
-	{
-	    pthread_mutex_init(&mutex_,0);
-	}
-	void lock()
-	{
-	    pthread_mutex_lock(&mutex_);
-	}
-	void unlock()
-	{
-	    pthread_mutex_unlock(&mutex_);
-	}
-	bool trylock()
-	{
-	    return (pthread_mutex_trylock(&mutex_)==0);
-	}
-	~Mutex()
-	{
-	    pthread_mutex_destroy(&mutex_);
-	}
-    };
-
-    class Lock
-    {
-    private:
-	Mutex* mutex_;
-    public:
-	explicit Lock(Mutex* mutex)
-	    :mutex_(mutex)
-	{
-	    if (mutex_) mutex_->lock();
-	}
-
-	~Lock()
-	{
-	    if (mutex_)
-		mutex_->unlock();
-	}
-    private:
-	Lock();
-	Lock(const Lock&);
-	Lock& operator=(const Lock&);
-	void* operator new(std::size_t);
-	void* operator new[](std::size_t);
-	void operator delete(void*);
-	void operator delete[](void*);
-	Lock* operator&();
-    };
 
     struct timer
     {
@@ -239,7 +187,7 @@ namespace mapnik
             std::cout<<s.str()<<std::endl;
         }
     };
-
+    
     //converters
     class BadConversion : public std::runtime_error
     {
@@ -269,8 +217,6 @@ namespace mapnik
 	    throw BadConversion("fromString("+s+")");
     }
     
-  
-
     inline bool space (char c)
     {
 	return isspace(c);

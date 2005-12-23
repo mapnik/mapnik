@@ -26,6 +26,7 @@
 #include "utils.hpp"
 #include "connection.hpp"
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 using namespace mapnik;
 using std::string;
@@ -68,7 +69,7 @@ public:
 	
     bool registerPool(const ConnectionCreator<Connection>& creator,int initialSize,int maxSize) 
     {	    
-	Lock lock(&mutex_);
+	mutex::scoped_lock lock(mutex_);
 	if (pools_.find(creator.id())==pools_.end())
 	{
 	    return pools_.insert(std::make_pair(creator.id(),
@@ -80,7 +81,7 @@ public:
     }
     const boost::shared_ptr<PoolType>& getPool(const std::string& key) 
     {
-	Lock lock(&mutex_);
+	mutex::scoped_lock lock(mutex_);
 	ContType::const_iterator itr=pools_.find(key);
 	if (itr!=pools_.end())
 	{
@@ -92,7 +93,7 @@ public:
 	
     const HolderType& get(const std::string& key)
     {
-	Lock lock(&mutex_);
+	mutex::scoped_lock lock(mutex_);
 	ContType::const_iterator itr=pools_.find(key);
 	if (itr!=pools_.end()) 
 	{

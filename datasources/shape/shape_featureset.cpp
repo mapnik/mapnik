@@ -151,27 +151,25 @@ feature_ptr shape_featureset<filterT>::next()
 		    ++count_;
 		    break;
 		}
-	    default:
-		return feature_ptr();
+
             }
-	    
-	    if (attr_ids_.size())
-            {
-                shape_.dbf().move_to(shape_.id_);
-		typename std::vector<int>::const_iterator pos=attr_ids_.begin();
-		while (pos!=attr_ids_.end())
+	}
+	if (attr_ids_.size())
+	{
+	    shape_.dbf().move_to(shape_.id_);
+	    typename std::vector<int>::const_iterator pos=attr_ids_.begin();
+	    while (pos!=attr_ids_.end())
+	    {
+		try 
 		{
-		    try 
-		    {
-			shape_.dbf().add_attribute(*pos,feature.get());//TODO optimize!!!
-		    }
-		    catch (...)
-		    {
-			//TODO
-		    }
-		    ++pos;
-                }
-            }
+		    shape_.dbf().add_attribute(*pos,feature.get());//TODO optimize!!!
+		}
+		catch (...)
+		{
+		    std::cerr << "error processing attributes " << std::endl;
+		}
+		++pos;
+	    }
 	}
 	return feature;
     }

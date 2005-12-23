@@ -35,7 +35,7 @@ namespace mapnik
 	{
 	    stack<shared_ptr<filter<FeatureT> > > filters;
 	    stack<shared_ptr<expression<FeatureT> > > exps;
-	    filter_grammar<FeatureT>  grammar(filters,exps);
+	    filter_grammar<FeatureT> grammar(filters,exps);
 	    char const *text = str.c_str();
 	    parse_info<> info = parse(text,text+strlen(text),grammar,space_p);
 	    if (info.full && !filters.empty())

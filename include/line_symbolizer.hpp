@@ -45,12 +45,13 @@
 
 #include "symbolizer.hpp"
 #include "stroke.hpp"
-//#include "line_aa.hpp"
-//#include "scanline_aa.hpp"
+
+#include <boost/utility.hpp>
 
 namespace mapnik 
 {
-    struct line_symbolizer : public symbolizer
+    struct line_symbolizer : public symbolizer,
+			     private boost::noncopyable
     {
     private:
 	stroke stroke_;
@@ -77,110 +78,84 @@ namespace mapnik
 	    double g=col.green()/255.0;
 	    double b=col.blue()/255.0;
 	    
-	    if (0) //stroke_.width() == 1.0) 
-	    {				
-		typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
-		typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
-		agg::line_profile_aa prof;
-		prof.width(stroke_.get_width());
-		renderer_oaa ren_oaa(renb, prof);
-		rasterizer_outline_aa ras_oaa(ren_oaa);
 
-		ren_oaa.color(agg::rgba(r, g, b, stroke_.get_opacity()));
-		ras_oaa.add_path(geom);
+	    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+	    renderer ren(renb);
 		
+	    agg::rasterizer_scanline_aa<> ras;
+	    agg::scanline_u8 sl;
 		
-		//LineRasterizerAA<Image32> rasterizer(image);
-		//rasterizer.render<SHIFT0>(geom,stroke_.get_color());
+	    if (stroke_.has_dash())
+	    {
+		    
+		agg::conv_dash<geometry<vertex2d> > dash(geom);
+		dash_array const& d = stroke_.get_dash_array();
+		dash_array::const_iterator itr = d.begin();
+		dash_array::const_iterator end = d.end();
+		while (itr != end)
+		{
+		    dash.add_dash(itr->first, itr->second);
+		    ++itr;
+		}
+		agg::conv_stroke<agg::conv_dash<geometry<vertex2d> > > stroke(dash);
 		
+		line_join_e join=stroke_.get_line_join();
+		if ( join == MITER_JOIN)
+		    stroke.generator().line_join(agg::miter_join);
+		else if( join == MITER_REVERT_JOIN) 
+		    stroke.generator().line_join(agg::miter_join);
+		else if( join == ROUND_JOIN) 
+		    stroke.generator().line_join(agg::round_join);
+		else
+		    stroke.generator().line_join(agg::bevel_join);
+		    
+		line_cap_e cap=stroke_.get_line_cap();
+		if (cap == BUTT_CAP)    
+		    stroke.generator().line_cap(agg::butt_cap);
+		else if (cap == SQUARE_CAP)
+		    stroke.generator().line_cap(agg::square_cap);
+		else 
+		    stroke.generator().line_cap(agg::round_cap);
+
+		stroke.generator().miter_limit(4.0);
+		stroke.generator().width(stroke_.get_width());
+		
+		ras.clip_box(0,0,image.width(),image.height());
+		ras.add_path(stroke);
+		ren.color(agg::rgba(r, g, b, stroke_.get_opacity()));
+		agg::render_scanlines(ras, sl, ren);
 	    }
 	    else 
 	    {
+		agg::conv_stroke<geometry<vertex2d> >  stroke(geom);
 		
-		//typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    	
-				
-		typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-		renderer ren(renb);
-		
-		agg::rasterizer_scanline_aa<> ras;
-		agg::scanline_u8 sl;
-		
-		if (stroke_.has_dash())
-		{
+		line_join_e join=stroke_.get_line_join();
+		if ( join == MITER_JOIN)
+		    stroke.generator().line_join(agg::miter_join);
+		else if( join == MITER_REVERT_JOIN) 
+		    stroke.generator().line_join(agg::miter_join);
+		else if( join == ROUND_JOIN) 
+		    stroke.generator().line_join(agg::round_join);
+		else
+		    stroke.generator().line_join(agg::bevel_join);
 		    
-		    agg::conv_dash<geometry<vertex2d,vertex_vector> > dash(geom);
-		    dash_array const& d = stroke_.get_dash_array();
-		    dash_array::const_iterator itr = d.begin();
-		    dash_array::const_iterator end = d.end();
-		    while (itr != end)
-		    {
-			dash.add_dash(itr->first, itr->second);
-			++itr;
-		    }
-		    agg::conv_stroke<agg::conv_dash<geometry<vertex2d,vertex_vector> > > stroke(dash);
-		
-		    line_join_e join=stroke_.get_line_join();
-		    if ( join == MITER_JOIN)
-			stroke.generator().line_join(agg::miter_join);
-		    else if( join == MITER_REVERT_JOIN) 
-			stroke.generator().line_join(agg::miter_join);
-		    else if( join == ROUND_JOIN) 
-			stroke.generator().line_join(agg::round_join);
-		    else
-			stroke.generator().line_join(agg::bevel_join);
-		    
-		    line_cap_e cap=stroke_.get_line_cap();
-		    if (cap == BUTT_CAP)    
-			stroke.generator().line_cap(agg::butt_cap);
-		    else if (cap == SQUARE_CAP)
-			stroke.generator().line_cap(agg::square_cap);
-		    else 
-			stroke.generator().line_cap(agg::round_cap);
-
-		    stroke.generator().miter_limit(4.0);
-		    stroke.generator().width(stroke_.get_width());
-		
-		    ras.clip_box(0,0,image.width(),image.height());
-		    ras.add_path(stroke);
-		    ren.color(agg::rgba(r, g, b, stroke_.get_opacity()));
-		    agg::render_scanlines(ras, sl, ren);
-		}
+		line_cap_e cap=stroke_.get_line_cap();
+		if (cap == BUTT_CAP)    
+		    stroke.generator().line_cap(agg::butt_cap);
+		else if (cap == SQUARE_CAP)
+		    stroke.generator().line_cap(agg::square_cap);
 		else 
-		{
-		    agg::conv_stroke<geometry<vertex2d,vertex_vector> >  stroke(geom);
-		
-		    line_join_e join=stroke_.get_line_join();
-		    if ( join == MITER_JOIN)
-			stroke.generator().line_join(agg::miter_join);
-		    else if( join == MITER_REVERT_JOIN) 
-			stroke.generator().line_join(agg::miter_join);
-		    else if( join == ROUND_JOIN) 
-			stroke.generator().line_join(agg::round_join);
-		    else
-			stroke.generator().line_join(agg::bevel_join);
-		    
-		    line_cap_e cap=stroke_.get_line_cap();
-		    if (cap == BUTT_CAP)    
-			stroke.generator().line_cap(agg::butt_cap);
-		    else if (cap == SQUARE_CAP)
-			stroke.generator().line_cap(agg::square_cap);
-		    else 
-			stroke.generator().line_cap(agg::round_cap);
+		    stroke.generator().line_cap(agg::round_cap);
 
-		    stroke.generator().miter_limit(4.0);
-		    stroke.generator().width(stroke_.get_width());
+		stroke.generator().miter_limit(4.0);
+		stroke.generator().width(stroke_.get_width());
 		    
-		    ras.clip_box(0,0,image.width(),image.height());
-		    ras.add_path(stroke);
-		    ren.color(agg::rgba(r, g, b, stroke_.get_opacity()));
-		    agg::render_scanlines(ras, sl, ren);
-		}
+		ras.clip_box(0,0,image.width(),image.height());
+		ras.add_path(stroke);
+		ren.color(agg::rgba(r, g, b, stroke_.get_opacity()));
+		agg::render_scanlines(ras, sl, ren);
 	    }
-	    
 	}
-    private:
-	line_symbolizer(const line_symbolizer&);
-	line_symbolizer& operator=(const line_symbolizer&);
     };
 }
 

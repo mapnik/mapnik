@@ -29,7 +29,6 @@
 #include "query.hpp"
 #include "feature_layer_desc.hpp"
 
-//#include "ptr.hpp"
 #include <boost/shared_ptr.hpp>
 
 namespace mapnik

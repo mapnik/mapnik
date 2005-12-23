@@ -50,7 +50,6 @@ namespace mapnik
 	    std::set<std::string> names;
 	    attribute_collector<Feature> collector(names);
 	    property_index<Feature> indexer(names);
-
 	    query q(bbox,width,height);
 	    double scale = 1.0/t.scale();
 	    std::vector<rule_type*> if_rules;
@@ -138,28 +137,6 @@ namespace mapnik
 			}  
 		    }
 		}
-		
-		//if (l.isSelectable() && l.selection().size()) //TODO !!!
-		//{
-		  //volatile style_cache* styles=style_cache::instance();
-		  //  const Style& style=style_cache::instance()->find(l.selection_style());
-		
-		//	    std::vector<ref_ptr<Feature> >& selection=l.selection();
-		
-		//	    Style::Iterator pos = style.begin();
-		//   if (pos!=style.end()) {
-		//	std::vector<ref_ptr<Feature> >::iterator itr=selection.begin();
-		//   
-		//	while (itr!=selection.end())
-		//	{
-		//	    geometry_ptr& geom=(*itr)->get_geometry();
-		//	    geom->transform(t);
-		//	    (*pos)->render(*geom,image);
-		//	    ++itr;
-		//	} 
-		//   }
-		//    l.clear_selection();
-		//} 
 	    }
 	}
     }
@@ -187,27 +164,27 @@ namespace mapnik
     }
 
     template <typename Image>
-    void Renderer<Image>::render(const Map& map,Image& image)
+    void Renderer<Image>::render(Map const& map,Image& image)
     {
         timer clock;
         //////////////////////////////////////////////////////
-        const Envelope<double>& extent=map.getCurrentExtent();
+	Envelope<double> const& extent=map.getCurrentExtent();
 	std::cout<<"BBOX:"<<extent<<std::endl;
         double scale=map.scale();
         std::cout<<" scale="<<scale<<std::endl;
         
 	unsigned width=map.getWidth();
         unsigned height=map.getHeight();
-
+        
         Color const& background=map.getBackground();
         image.setBackground(background);
 	
         for (size_t n=0;n<map.layerCount();++n)
         {
-            const Layer& l=map.getLayer(n);
+            Layer const& l=map.getLayer(n);
             if (l.isVisible(scale)) // TODO: extent check
 	    {
-		const datasource_p& ds=l.datasource();
+		datasource_p const& ds=l.datasource();
 		if (!ds) continue;
                 if (ds->type() == datasource::Vector)
 		{

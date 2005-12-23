@@ -127,9 +127,9 @@ namespace mapnik
 	    if (pos >= pos_) return;
 	    unsigned block = pos >> block_shift;
 	    value_type* vertex = vertexs_[block] + (( pos & block_mask) << 1);
-	    *vertex=t.forward_x(*vertex);
+	    t.forward_x(vertex);
 	    ++vertex;
-	    *vertex=t.forward_y(*vertex);
+	    t.forward_y(vertex);
 	}
 	
     private:

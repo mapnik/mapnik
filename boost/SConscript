@@ -44,3 +44,8 @@ boost_serialization_src = glob.glob(serialization_src_dir+ '*.cpp')
 lib_boost_serialization = env.SharedLibrary('libboost-serialization',boost_serialization_src,LIBS=[],CPPPATH=boost_root)
 env.Install(prefix+'/lib',lib_boost_serialization)
 
+#boost thread
+thread_src_dir = boost_root + '/libs/thread/src/'
+boost_thread_src = glob.glob(thread_src_dir+ '*.cpp')
+lib_boost_thread = env.SharedLibrary('libboost-thread',boost_thread_src,LIBS=[],CPPPATH=boost_root)
+env.Install(prefix+'/lib',lib_boost_thread)

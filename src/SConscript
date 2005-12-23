@@ -30,7 +30,7 @@ freetype2_root = env['FREETYPE2_ROOT']
 
 headers =[ '#include',boost_root,freetype2_root,agg_headers]
 
-libraries=['rt','z','png','ltdl','jpeg','tiff','agg','boost-filesystem','boost-regex','boost-serialization']
+libraries=['rt','z','png','ltdl','jpeg','tiff','agg','boost-filesystem','boost-regex','boost-serialization','boost-thread']
 libpaths = [prefix+'/lib','#agg']
 linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 
@@ -43,15 +43,12 @@ source = Split(
     image_reader.cpp
     image_util.cpp
     layer.cpp
-    line_aa.cpp
     map.cpp
     memory.cpp
     params.cpp
     plugin.cpp
     png_reader.cpp
     render.cpp
-    scanline_aa.cpp
-    scanline.cpp
     style_cache.cpp
     style.cpp
     text.cpp

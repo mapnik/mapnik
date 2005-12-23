@@ -81,13 +81,10 @@ if not conf.CheckLibWithHeader('tiff','tiff.h','C'):
 env  = conf.Finish()
 
 Export('env')
-
-#build boost libs (filesystem, regex, python)
-env.SConscript('boost/SConscript')
-
 #build agg lib
 env.SConscript('agg/SConscript')
-
+#build boost libs (filesystem, regex, python etc)
+env.SConscript('boost/SConscript')
 #main lib
 SConscript('src/SConscript')
 

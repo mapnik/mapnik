@@ -140,6 +140,7 @@ namespace mapnik
         double h = factor * currentExtent_.height();
         currentExtent_ = Envelope<double>(center.x - 0.5 * w, center.y - 0.5 * h,
             center.x + 0.5 * w, center.y + 0.5 * h);
+	fixAspectRatio();
     }
 
     void Map::zoomToBox(const Envelope<double> &box)
@@ -170,10 +171,14 @@ namespace mapnik
 
     void Map::pan(int x,int y)
     {
-        CoordTransform t(width_,height_,currentExtent_);
-        coord2d pt(x,y);
-        t.backward(pt);
-        currentExtent_.re_center(pt.x,pt.y);
+        int dx = x - int(0.5 * width_);
+	int dy = int(0.5 * height_) - y;
+	double s = width_/currentExtent_.width();
+	double minx  = currentExtent_.minx() + dx/s;
+	double maxx  = currentExtent_.maxx() + dx/s;
+	double miny  = currentExtent_.miny() + dy/s;
+	double maxy  = currentExtent_.maxy() + dy/s;
+	currentExtent_.init(minx,miny,maxx,maxy);
     }
 
     void Map::pan_and_zoom(int x,int y,double factor)

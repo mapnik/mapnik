@@ -25,6 +25,7 @@
 #include "feature.hpp"
 #include <vector>
 
+
 namespace mapnik
 {
     typedef rule<Feature,filter> rule_type;
@@ -50,6 +51,7 @@ namespace mapnik
 	{
 	    rules_.push_back(rule);
 	} 
+	
 	rules const& get_rules() const
 	{
 	    return rules_;

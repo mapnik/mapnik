@@ -154,25 +154,25 @@ feature_ptr shape_index_featureset<filterT>::next()
 		    break;
 		}
             }
-            if (attr_ids_.size())
-            {
-		feature->reserve_props(attr_ids_.size());
-                shape_.dbf().move_to(shape_.id_);
-		std::vector<int>::const_iterator pos=attr_ids_.begin();
-		while (pos!=attr_ids_.end())
-		{
-		    try 
-		    {
-			shape_.dbf().add_attribute(*pos,feature.get());
-		    }
-		    catch (...)
-		    {
-			std::cerr<<"exception caught\n";
-		    }
-		    ++pos;
-                }
-            }
         }
+	if (attr_ids_.size())
+	{
+	    feature->reserve_props(attr_ids_.size());
+	    shape_.dbf().move_to(shape_.id_);
+	    std::vector<int>::const_iterator pos=attr_ids_.begin();
+	    while (pos!=attr_ids_.end())
+	    {
+		try 
+		{
+		    shape_.dbf().add_attribute(*pos,feature.get());
+		}
+		catch (...)
+		{
+		    std::cerr<<"exception caught\n";
+		}
+		++pos;
+	    }
+	}
 	return feature;
     }
     else

@@ -27,22 +27,7 @@
 #include "feature_type_style.hpp"
 
 namespace mapnik {
-    
-    class style_cache :  public singleton <style_cache,CreateStatic>
-    {
-	friend class CreateStatic<style_cache>;
-    private:
-	static std::map<std::string,Style > styles_;  
-	style_cache();
-	~style_cache();
-	style_cache(const style_cache&);
-	style_cache& operator=(const style_cache&);
-    public:
-	static bool insert(const std::string& name,const Style& style);
-	static void remove(const std::string& name);
-	static const Style& find(const std::string& name);
-    };
-    
+      
     class named_style_cache : public singleton <named_style_cache,CreateStatic>
     {
 	friend class CreateStatic<named_style_cache>;
