@@ -23,10 +23,11 @@
 
 #include <ltdl.h>
 #include <string>
+#include <boost/utility.hpp>
 
 namespace mapnik
 {
-    class PluginInfo
+    class PluginInfo : boost::noncopyable
     {
     private:
 	std::string name_;
@@ -37,9 +38,6 @@ namespace mapnik
 	~PluginInfo();
 	const std::string& name() const;
 	lt_dlhandle handle() const;
-    private:
-	PluginInfo(const PluginInfo&);
-	PluginInfo& operator=(const PluginInfo&);
     };
 }
 
