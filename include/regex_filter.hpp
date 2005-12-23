@@ -25,7 +25,6 @@
 #include "expression.hpp"
 
 #include <boost/regex.hpp>
-#include <iostream>
 
 namespace mapnik
 { 
