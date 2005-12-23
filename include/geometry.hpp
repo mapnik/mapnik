@@ -27,6 +27,7 @@
 #include "geom_util.hpp"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/utility.hpp>
 
 namespace mapnik
 {
@@ -36,136 +37,133 @@ namespace mapnik
     	Polygon = 3,
     };
              
-    template <typename T,template <typename> class Container=vertex_vector>
-    class geometry
+    template <typename T>
+    class geometry : private boost::noncopyable
     {   
     public:
 	typedef T vertex_type;
 	typedef typename vertex_type::type value_type;
-	typedef Container<vertex_type> container_type;
     private:
 	int srid_;
-	mutable unsigned itr_;
-    protected:
-	container_type cont_;
     public:
 	geometry (int srid=-1)
-	    : srid_(srid),
-	      itr_(0),
-	      cont_() {}	
-	
-	virtual int type() const=0;
-	
-	virtual bool hit_test(value_type x,value_type y) const=0;
-	
+	    : srid_(srid) {}	
+
 	int srid() const
 	{
 	    return srid_;
 	}
 	
+	virtual int type() const=0;
+	virtual bool hit_test(value_type x,value_type y) const=0;
+	virtual void move_to(value_type x,value_type y)=0;
+
+	virtual void line_to(value_type x,value_type y)=0;
+	virtual void transform(const mapnik::CoordTransform& t)=0;
+	virtual unsigned num_points() const = 0;
+	virtual unsigned vertex(double* x, double* y)=0;
+	virtual void rewind(unsigned )=0;
+	virtual ~geometry() {}
+    };
+    
+    template <typename T>
+    class point : public geometry<T>
+    {
+	typedef geometry<T> geometry_base;
+	typedef typename geometry<T>::vertex_type vertex_type;
+	typedef typename geometry<T>::value_type value_type;
+    private:
+	vertex_type pt_;
+    public:
+	point(int srid)
+	    : geometry<T>(srid)
+	{}
+	 
+	int type() const 
+	{
+	    return Point;
+	}
+	
 	void move_to(value_type x,value_type y)
 	{
-	    cont_.push_back(x,y,SEG_MOVETO);
+	    pt_.x = x;
+	    pt_.y = y;
 	}
+	
+	void line_to(value_type ,value_type ) {}
+	
+	void transform(const mapnik::CoordTransform& t)
+	{
+	    t.forward_x(&pt_.x);
+	    t.forward_y(&pt_.y);
+	}
+	
+	unsigned num_points() const
+	{
+	    return 1;
+	}
+	
+	unsigned vertex(double* x, double* y)
+	{
+	    *x = pt_.x;
+	    *y = pt_.y;
+	    return SEG_LINETO;
+	}
+	
+	void rewind(unsigned ) {}
+	
+	bool hit_test(value_type x,value_type y) const
+	{
+	    return false;
+	}
+	virtual ~point() {}
+    };
 
+    template <typename T, template <typename> class Container=vertex_vector>
+    class polygon : public geometry<T>
+    {
+	typedef geometry<T> geometry_base;
+	typedef typename geometry<T>::vertex_type vertex_type;
+	typedef typename geometry_base::value_type value_type;
+	typedef Container<vertex_type> container_type;
+    private:
+	container_type cont_;
+	mutable unsigned itr_;
+    public:
+	polygon(int srid)
+	    : geometry_base(srid),
+	      itr_(0)
+	{}
+        
+	int type() const 
+	{
+	    return Polygon;
+	}
+	
 	void line_to(value_type x,value_type y)
 	{
 	    cont_.push_back(x,y,SEG_LINETO);
 	}
-	
-	template <typename Transform>
-	class path_iterator
+
+	void move_to(value_type x,value_type y)
 	{
-	    typedef vertex<typename Transform::return_type,2> vertex_type;
-	    const container_type* cont_;
-	    unsigned pos_;
-	    unsigned cmd_;
-	    vertex_type vertex_; 
-	    
-	private:
-
-	    void advance () 
-	    {
-		if (pos_ < cont_->size())
-		{
-		    value_type x,y;
-		    vertex_.cmd=cont_->get_vertex(pos_,&x,&y);
-		    vertex_.x=Transform::apply(x);
-		    vertex_.y=Transform::apply(y);
-		}
-		else 
-		{
-		    vertex_.cmd=SEG_END;
-		    vertex_.x=0;
-		    vertex_.y=0;
-		}
-		++pos_;
-	    } 
-
-	public:
-
-	    path_iterator()
-		: cont_(0),
-		  pos_(0),
-		  cmd_(SEG_END),
-		  vertex_(0,0,cmd_) {}
-
-	    explicit path_iterator(const container_type& cont)
-		: cont_(&cont),
-		  pos_(0),
-		  cmd_(SEG_MOVETO),
-		  vertex_(0,0,cmd_)
-	    {
-		advance();
-	    }
-
-	    path_iterator& operator++()
-	    {
-		advance();
-		return *this;
-	    }
-	    
-	    const vertex_type& operator*() const
-	    {
-		return vertex_;
-	    }
-	    
-	    const vertex_type* operator->() const
-	    {
-		return &vertex_;
-	    }
-	    
-	    bool operator !=(const path_iterator& itr)
-	    {
-		return vertex_.cmd !=itr.vertex_.cmd;
-	    }
-	};
-	
-	template <typename Transform>
-	path_iterator<Transform> begin() const 
-	{
-	    return path_iterator<Transform>(cont_);
+	    cont_.push_back(x,y,SEG_MOVETO);
 	}
 	
-	template <typename Transform>
-	path_iterator<Transform> end() const 
+	void transform(mapnik::CoordTransform const& t)
 	{
-	    return path_iterator<Transform>();
-	}
-
-	void transform(const mapnik::CoordTransform& t)
-	{
-	    for (unsigned pos=0;pos<cont_.size();++pos)
-	    {   
-		cont_.transform_at(pos,t);	
+	    unsigned size = cont_.size();
+	    for (unsigned pos=0; pos < size; ++pos)
+	    {	
+		cont_.transform_at(pos,t);
 	    }
 	}
-        	
-	unsigned num_points() const 
+	
+        unsigned num_points() const
 	{
 	    return cont_.size();
 	}
-
+	
 	unsigned vertex(double* x, double* y)
 	{
 	    return cont_.get_vertex(itr_++,x,y);
@@ -176,83 +174,73 @@ namespace mapnik
 	    itr_=0;
 	}
 	
-	virtual ~geometry() {}
-    private:
-	geometry(const geometry&);
-	geometry& operator=(const geometry&);
-    };
-
-    template <typename T, template <typename> class Container=vertex_vector>
-    class point : public geometry<T,Container>
-    {
-	typedef geometry<T,Container> geometry_base;
-	typedef typename   geometry<T,Container>::value_type value_type;
-	using geometry<T,Container>::cont_;
-    public:
-	point(int srid)
-	    : geometry<T,Container>(srid)
-	{}
-	 
-	int type() const 
-	{
-	    return Point;
-	}
-	bool hit_test(value_type x,value_type y) const
-	{
-	    typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
-	    path_iterator start = geometry_base::template begin<NO_SHIFT>();
-	    path_iterator end = geometry_base::template end<NO_SHIFT>();
-	    return point_on_points(x,y,start,end);
-	}
-    };
-
-    template <typename T, template <typename> class Container=vertex_vector>
-    class polygon : public geometry<T,Container>
-    {
-	typedef geometry<T,Container> geometry_base;
-	typedef typename geometry_base::value_type value_type;
-	
-    public:
-	polygon(int srid)
-	    : geometry_base(srid)
-	{}
-
-	int type() const 
-	{
-	    return Polygon;
-	}
-	
 	bool hit_test(value_type x,value_type y) const
 	{	    
-	    typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
-	    path_iterator start = geometry_base::template begin<NO_SHIFT>();
-	    path_iterator end = geometry_base::template end<NO_SHIFT>();
-	    return point_inside_path(x,y, start,end);
+	    return false;
 	} 
+	virtual ~polygon() {}
     };
     
     template <typename T, template <typename> class Container=vertex_vector>
-    class line_string : public geometry<T,Container>
+    class line_string : public geometry<T>
     {
-	typedef geometry<T,Container> geometry_base;
-	typedef typename   geometry<T,Container>::value_type value_type; 
+	typedef geometry<T> geometry_base;
+	typedef typename geometry_base::value_type value_type;
+	typedef typename geometry<T>::vertex_type vertex_type;
+	typedef Container<vertex_type> container_type;
+    private:
+	container_type cont_;
+	mutable unsigned itr_;
     public:
 	line_string(int srid)
-	    : geometry<T,Container>(srid)
+	    : geometry_base(srid),
+	      itr_(0)
 	{}
-	
+        
 	int type() const 
 	{
 	    return LineString;
 	}
 	
-	bool hit_test(value_type x,value_type y) const
+	void line_to(value_type x,value_type y)
 	{
-	    typedef typename geometry_base::template path_iterator<NO_SHIFT> path_iterator;
-	    path_iterator start = geometry_base::template begin<NO_SHIFT>();
-	    path_iterator end = geometry_base::template end<NO_SHIFT>();
-	    return point_on_path(x,y,start,end);
+	    cont_.push_back(x,y,SEG_LINETO);
 	}
+
+	void move_to(value_type x,value_type y)
+	{
+	    cont_.push_back(x,y,SEG_MOVETO);
+	}
+	
+	void transform(mapnik::CoordTransform const& t)
+	{
+	    unsigned size = cont_.size();
+	    for (unsigned pos=0; pos < size; ++pos)
+	    {	
+		cont_.transform_at(pos,t);
+	    }
+	}
+	
+        unsigned num_points() const
+	{
+	    return cont_.size();
+	}
+	
+	unsigned vertex(double* x, double* y)
+	{
+	    return cont_.get_vertex(itr_++,x,y);
+	}
+	
+	void rewind(unsigned )
+	{
+	    itr_=0;
+	}
+	
+	bool hit_test(value_type x,value_type y) const
+	{	    
+	    return false;
+	} 
+	virtual ~line_string() {}
     };
 
     typedef point<vertex2d> point_impl;
