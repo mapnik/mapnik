@@ -63,7 +63,7 @@ namespace mapnik
 		geom.vertex(&x,&y);
 		int px=int(x - 0.5 * w);
 		int py=int(y - 0.5 * h);
-		image.set_rectangle(px,py,symbol_);
+		image.set_rectangle_alpha(px,py,symbol_);
 	    }
 	}
     };

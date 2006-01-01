@@ -56,26 +56,7 @@ namespace mapnik
     {
         return background_;
     }
-
-    void Image32::set_rectangle(unsigned x0,unsigned y0,const ImageData32& data)
-    {
-	if (x0>=width_ || y0>=height_) return;
-     
-	unsigned w=std::min(data.width(),width_-x0);
-        unsigned h=std::min(data.height(),height_-y0);
-
-        for (unsigned y=0;y<h;++y)
-        {
-            for (unsigned x=0;x<w;++x)
-            {
-		if ((data(x,y) & 0xff000000)) 
-		{
-		    data_(x0+x,y0+y)=data(x,y);
-		}
-            }
-        }
-    }
-
+    
     void Image32::saveToFile(const std::string& file,const std::string& format) 
     {
 	//TODO: image writer factory

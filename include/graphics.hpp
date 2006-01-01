@@ -44,8 +44,7 @@ namespace mapnik
 	~Image32();
 	static void setGamma(double gamma);
 	void setBackground(const Color& background);
-	const Color& getBackground() const;
-	void set_rectangle(unsigned  x,unsigned y,const ImageData32& data);           
+	const Color& getBackground() const;     
 	const ImageData32& data() const;
 	inline ImageData32& data() {
 	    return data_;
@@ -92,7 +91,7 @@ namespace mapnik
 	    int g=gammaTable_.l2g[(gammaTable_.g2l[green]*alpha+gammaTable_.g2l[bgGreen]*(255-alpha))>>8];
 	    int b=gammaTable_.l2g[(gammaTable_.g2l[blue]*alpha+gammaTable_.g2l[bgBlue]*(255-alpha))>>8];
 	    
-	    return 0xff<<24 | r<<16 | g<<8 | b;
+	    return 0xff << 24 | r << 16 | g << 8 | b;
 	}
 
 	inline void blendPixel(int x,int y,unsigned int rgba,int t)
@@ -113,6 +112,64 @@ namespace mapnik
 	inline unsigned height() const
 	{
 	    return height_;
+	}
+
+	inline void Image32::set_rectangle(unsigned x0,unsigned y0,const ImageData32& data)
+	{
+	    if (checkBounds(x0,y0))
+	    {
+		unsigned w=std::min(data.width(),width_-x0);
+		unsigned h=std::min(data.height(),height_-y0);
+		
+		for (unsigned y=0;y<h;++y)
+		{
+		    for (unsigned x=0;x<w;++x)
+		    {
+			if ((data(x,y) & 0xff000000)) 
+			{
+			    data_(x0+x,y0+y)=data(x,y);
+			}
+		    }
+		}   
+	    }
+	}
+	
+	inline void set_rectangle_alpha(unsigned x0,unsigned y0,const ImageData32& data)
+	{
+	    if (checkBounds(x0,y0))
+	    {
+		unsigned w=std::min(data.width(),width_-x0);
+		unsigned h=std::min(data.height(),height_-y0);
+	    
+		for (unsigned y=0;y<h;++y)
+		{
+		    for (unsigned x=0;x<w;++x)
+		    {
+			unsigned rgba0 = data_(x0+x,y0+y);
+			unsigned rgba1 = data(x,y);
+		    
+			unsigned a1 = (rgba1 >> 24) & 0xff;
+			if (a1 == 0) continue;
+			unsigned r1 = rgba1 & 0xff;
+			unsigned g1 = (rgba1 >> 8 ) & 0xff;
+			unsigned b1 = (rgba1 >> 16) & 0xff;
+		    
+			unsigned a0 = (rgba0 >> 24) & 0xff;
+			unsigned r0 = (rgba0 & 0xff) * a0;
+			unsigned g0 = ((rgba0 >> 8 ) & 0xff) * a0;
+			unsigned b0 = ((rgba0 >> 16) & 0xff) * a0;
+		    
+		    
+			a0 = ((a1 + a0) << 8) - a0*a1;
+		    
+			r0 = ((((r1 << 8) - r0) * a1 + (r0 << 8)) / a0);
+			g0 = ((((g1 << 8) - g0) * a1 + (g0 << 8)) / a0);
+			b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
+			a0 = a0 >> 8;
+			data_(x0+x,y0+y)= (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
+		    }
+		}
+	    }
 	}
     };
 }
