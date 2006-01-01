@@ -54,7 +54,7 @@ namespace mapnik {
 	{
 	    return (rgba_>>8)&0xff;
 	}
-	inline int red() const
+	inline unsigned int red() const
 	{
 	    return rgba_&0xff;
 	}
