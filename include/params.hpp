@@ -22,9 +22,7 @@
 #define PARAMS_HPP
 
 #include <map>
-//#include <boost/serialization/serialization.hpp>
-//#include <boost/serialization/split_member.hpp>
-//#include <boost/serialization/map.hpp>
+#include <boost/serialization/split_member.hpp>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/utility.hpp>
