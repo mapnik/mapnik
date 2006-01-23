@@ -120,7 +120,6 @@ namespace mapnik
 	    return name_;
 	}
 	
-
 	const std::string& get_title() const
 	{
 	    return  title_;

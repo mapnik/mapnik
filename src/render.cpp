@@ -182,7 +182,7 @@ namespace mapnik
         for (size_t n=0;n<map.layerCount();++n)
         {
             Layer const& l=map.getLayer(n);
-            if (l.isVisible(scale)) // TODO: extent check
+            if (l.isVisible(scale) && l.envelope().intersects(extent))
 	    {
 		datasource_p const& ds=l.datasource();
 		if (!ds) continue;

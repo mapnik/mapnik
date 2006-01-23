@@ -48,6 +48,7 @@
 #include "image_reader.hpp"
 #include "line_symbolizer.hpp"
 #include "polygon_symbolizer.hpp"
+#include "line_pattern_symbolizer.hpp"
 //#include "image_symbolizer.hpp"
 #include "image_util.hpp"
 #include "datasource.hpp"
