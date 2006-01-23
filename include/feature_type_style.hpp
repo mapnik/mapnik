@@ -37,17 +37,17 @@ namespace mapnik
     public:
 	feature_type_style() {}
 
-	feature_type_style(const feature_type_style& rhs)
+	feature_type_style(feature_type_style const& rhs)
 	    : rules_(rhs.rules_) {}
-
-	feature_type_style& operator=(const feature_type_style& rhs)
+	
+	feature_type_style& operator=(feature_type_style const& rhs)
 	{
 	    if (this == &rhs) return *this;
 	    rules_=rhs.rules_;
 	    return *this;
 	}
-
-	void add_rule(const rule_type& rule)
+	
+	void add_rule(rule_type const& rule)
 	{
 	    rules_.push_back(rule);
 	} 

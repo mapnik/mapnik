@@ -25,6 +25,7 @@
 #include "expression.hpp"
 
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace mapnik
 { 
@@ -46,6 +47,7 @@ namespace mapnik
 	bool pass(FeatureT const& feature) const
 	{
 	    std::string text=exp_->get_value(feature).to_string();
+	    boost::trim_if(text,is_any_of("'"));
 	    return boost::regex_match(text,pattern_);
 	}
 	

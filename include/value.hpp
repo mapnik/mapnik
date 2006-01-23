@@ -364,6 +364,21 @@ namespace mapnik { namespace impl {
 	    return lhs / rhs;
 	}
     };
+    
+    struct to_string : public boost::static_visitor<std::string>
+    {
+	template <typename T>
+	std::string operator() (T val) const
+	{
+	    std::stringstream ss;
+	    ss << val;
+	    return ss.str();
+	} 
+	std::string operator() (std::string const& val) const
+	{
+	    return "'" + val + "'";
+	}
+    };
 }
     
     using namespace impl;
@@ -421,7 +436,7 @@ namespace mapnik { namespace impl {
 
 	value& operator-=(value const& other)
 	{
-	    v_ = apply_visitor(sub(),v_,other.get());	    //cout << "string(\""<<str<<"\")\n";
+	    v_ = apply_visitor(sub(),v_,other.get());
 	    return *this;
 	}
 
@@ -444,9 +459,7 @@ namespace mapnik { namespace impl {
 
 	string to_string() const
 	{
-	    std::stringstream ss;
-	    ss << v_;
-	    return ss.str();
+	    return apply_visitor(impl::to_string(),v_);
 	}
      
     private:
