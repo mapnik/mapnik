@@ -68,12 +68,11 @@ namespace mapnik
 	}
 	std::string to_string() const
 	{
-	    return "'"+value_.to_string()+"'";
+	    return value_.to_string();
 	}
         ~literal() {}
     private:
 	value value_;
-	
     };
   
 
