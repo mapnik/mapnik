@@ -57,17 +57,17 @@ namespace mapnik
 	    agg::pixfmt_rgba32 pixf(buf);
 	    ren_base renb(pixf);	    
 	    
-	    double r=fill_.red()/255.0;
-	    double g=fill_.green()/255.0;
-	    double b=fill_.blue()/255.0;
-	    double a=fill_.alpha()/255.0;
+	    unsigned r=fill_.red();
+	    unsigned g=fill_.green();
+	    unsigned b=fill_.blue();
+	    unsigned a=fill_.alpha();
 	    renderer ren(renb);
 	    
 	    agg::rasterizer_scanline_aa<> ras;
 	    agg::scanline_u8 sl;
 	    ras.clip_box(0,0,image.width(),image.height());
 	    ras.add_path(geom);
-	    ren.color(agg::rgba(r, g, b, a));
+	    ren.color(agg::rgba8(r, g, b, a));
 	    agg::render_scanlines(ras, sl, ren);
 	}
 	
@@ -102,9 +102,7 @@ namespace mapnik
 
 	void render(geometry_type& geom,Image32& image) const
 	{
-	    /*
 	    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
-
 	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
 					       image.width()*4);
 	    agg::pixfmt_rgba32 pixf(buf);
@@ -120,29 +118,29 @@ namespace mapnik
 		wrap_x_type,
 		wrap_y_type> img_source_type;
 
-	    typedef agg::span_pattern_rgba<agg::rgba8, 
-		agg::order_rgba,
-		wrap_x_type,
-		wrap_y_type> span_gen_type;
-
+	    typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
 	    
 	    typedef agg::renderer_scanline_aa<ren_base, 
 		agg::span_allocator<agg::rgba8>,
 		span_gen_type> renderer_type;  
 	    
-	    unsigned offset_x = 0;
-	    unsigned offset_y = 0;
+	    double x0,y0;
+	    geom.vertex(&x0,&y0);
+	    geom.rewind(0);
+
+	    unsigned offset_x = unsigned(image.width() - x0);
+	    unsigned offset_y = unsigned(image.height() - y0);
 	    
 	    agg::span_allocator<agg::rgba8> sa;
-	    span_gen_type sg(pattern_rbuf,offset_x, offset_y);
+	    img_source_type img_src(pattern_rbuf);
+	    span_gen_type sg(img_src, offset_x, offset_y);
 	    renderer_type rp(renb,sa, sg);
 
 	    agg::rasterizer_scanline_aa<> ras;
 	    agg::scanline_u8 sl;
 	    ras.clip_box(0,0,image.width(),image.height());
 	    ras.add_path(geom);
-	    agg::render_scanlines(ras, sl, rp);
-	    */   
+	    agg::render_scanlines(ras, sl, rp);   
 	}
 	
     private:
