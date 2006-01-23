@@ -21,7 +21,7 @@
 #ifndef STYLE_FACTORY_HPP
 #define STYLE_FACTORY_HPP
 
-#include "style.hpp"
+//#include "style.hpp"
 
 namespace mapnik {
     

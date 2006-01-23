@@ -27,7 +27,6 @@
 #include FT_FREETYPE_H
 #include <iostream>
 #include <string>
-#include "style.hpp"
 #include "graphics.hpp"
 
 namespace mapnik

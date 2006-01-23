@@ -16,11 +16,32 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: style.cpp 17 2005-03-08 23:58:43Z pavlenko $
+//$Id: style_cache.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#include "style.hpp"
+#ifndef STYLE_CACHE_HPP
+#define STYLE_CACHE_HPP
 
-namespace mapnik 
-{
-    boost::shared_ptr<symbolizer> Style::zero_symbol_ = boost::shared_ptr<symbolizer>();
+#include "utils.hpp"
+#include <map>
+#include "feature_type_style.hpp"
+
+namespace mapnik {
+      
+    class named_style_cache : public singleton <named_style_cache,CreateStatic>
+    {
+	friend class CreateStatic<named_style_cache>;
+    private:
+	static std::map<std::string,feature_type_style> styles_;  
+	named_style_cache();
+	~named_style_cache();
+	named_style_cache(const named_style_cache&);
+	named_style_cache& operator=(const named_style_cache&);
+    public:
+	static bool insert(const std::string& name,const feature_type_style& style);
+	static void remove(const std::string& name);
+	static feature_type_style find(const std::string& name);
+    }; 
 }
+
+
+#endif //STYLE_CACHE_HPP

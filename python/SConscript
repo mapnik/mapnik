@@ -45,9 +45,9 @@ lib_boost_python = env.SharedLibrary('libboost-python',boost_python_src,LIBS=[],
 
 env.Install(prefix + '/lib',lib_boost_python)
 
-agg_root = env['AGG_ROOT']
-agg_headers = agg_root +'/include'
-freetype2_root = env['FREETYPE2_ROOT']
+#agg_root = env['AGG_ROOT']
+#agg_headers = agg_root +'/include'
+#freetype2_root = env['FREETYPE2_ROOT']
 
 
 def createPythonExtBuilder(env):
@@ -91,7 +91,7 @@ mapnik_python_src=Split(
     """
     )
 
-headers =[ '#include',boost_root,freetype2_root,agg_headers,python_headers]
+headers =[ '#include',boost_root,python_headers]
 
 libraries=['mapnik','boost-python']
 libpaths = [prefix+"/lib"]

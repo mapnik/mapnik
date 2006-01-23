@@ -21,7 +21,7 @@
 #include "render.hpp"
 #include "image_util.hpp"
 #include "utils.hpp"
-#include "style_cache.hpp"
+#include "named_style_cache.hpp"
 #include "symbolizer.hpp"
 #include "query.hpp"
 #include "feature_layer_desc.hpp"

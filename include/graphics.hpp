@@ -24,7 +24,7 @@
 #include <cmath>
 #include <string>
 #include <cassert>
-#include "style.hpp"
+#include "color.hpp"
 #include "gamma.hpp"
 #include "image_data.hpp"
 

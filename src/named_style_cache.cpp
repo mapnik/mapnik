@@ -18,8 +18,7 @@
 
 //$Id: style_cache.cpp 37 2005-04-07 17:09:38Z pavlenko $
 
-#include "style_cache.hpp"
-#include "line_symbolizer.hpp"
+#include "named_style_cache.hpp"
 #include <boost/thread/mutex.hpp>
 
 namespace mapnik 

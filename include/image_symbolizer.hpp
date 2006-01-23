@@ -22,7 +22,6 @@
 #define IMAGE_SYMBOLIZER_HPP
 
 #include "symbolizer.hpp"
-#include "image_data.hpp"
 #include <boost/utility.hpp>
 
 namespace mapnik 
@@ -30,42 +29,15 @@ namespace mapnik
     struct image_symbolizer : public symbolizer,
 			      private boost::noncopyable
     {
-    private:
-	ImageData32 symbol_;
-    public:
+	  
 	image_symbolizer(std::string const& file,
 			 std::string const& type,
-			 unsigned width,unsigned height) 
-	    : symbolizer(),
-	      symbol_(width,height)
-	{
-	    try 
-	    {
-		std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-		reader->read(0,0,symbol_);		
-	    } 
-	    catch (...) 
-	    {
-		std::cerr<<"exception caught..."<<std::endl;
-	    }
-	}
+			 unsigned width,unsigned height);
+	
+	void render(geometry_type& geom,Image32& image) const;
 
-	virtual ~image_symbolizer() {}
-
-	void render(geometry_type& geom,Image32& image) const 
-	{
-	    int w=symbol_.width();
-	    int h=symbol_.height();
-	    double x,y;
-	    unsigned size = geom.num_points();
-	    for (unsigned pos = 0; pos < size ;++pos)
-	    {
-		geom.vertex(&x,&y);
-		int px=int(x - 0.5 * w);
-		int py=int(y - 0.5 * h);
-		image.set_rectangle_alpha(px,py,symbol_);
-	    }
-	}
+    private:
+	ImageData32 symbol_;
     };
 }
 

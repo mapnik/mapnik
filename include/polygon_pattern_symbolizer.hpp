@@ -16,33 +16,28 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: style_cache.hpp 39 2005-04-10 20:39:53Z pavlenko $
+//$Id$
 
-#ifndef STYLE_CACHE_HPP
-#define STYLE_CACHE_HPP
+#ifndef POLYGON_PATTERN_SYMBOLIZER_HPP
+#define POLYGON_PATTERN_SYMBOLIZER_HPP
 
-#include "utils.hpp"
-#include "style.hpp"
-#include <map>
-#include "feature_type_style.hpp"
+#include "symbolizer.hpp"
+#include <boost/utility.hpp>
 
-namespace mapnik {
-      
-    class named_style_cache : public singleton <named_style_cache,CreateStatic>
+namespace mapnik
+{
+    struct polygon_pattern_symbolizer : public symbolizer,
+					private boost::noncopyable
     {
-	friend class CreateStatic<named_style_cache>;
+	
+	polygon_pattern_symbolizer(std::string const& file,
+				   std::string const& type,
+				   unsigned width,unsigned height);
+	
+	void render(geometry_type& geom,Image32& image) const;
     private:
-	static std::map<std::string,feature_type_style> styles_;  
-	named_style_cache();
-	~named_style_cache();
-	named_style_cache(const named_style_cache&);
-	named_style_cache& operator=(const named_style_cache&);
-    public:
-	static bool insert(const std::string& name,const feature_type_style& style);
-	static void remove(const std::string& name);
-	static feature_type_style find(const std::string& name);
-    }; 
+	ImageData32 pattern_;
+    };
 }
 
-
-#endif //STYLE_CACHE_HPP
+#endif //POLYGON_PATTERN_SYMBOLIZER_HPP

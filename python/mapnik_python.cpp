@@ -23,7 +23,6 @@
 #include <boost/python/detail/api_placeholder.hpp>
 
 #include "mapnik.hpp"
-#include "image_symbolizer.hpp"
 
 using namespace mapnik;
 
@@ -68,6 +67,11 @@ boost::shared_ptr<symbolizer> create_line_symbolizer2(stroke const& strk)
     return boost::shared_ptr<symbolizer>(new line_symbolizer(strk));
 } 
 
+boost::shared_ptr<symbolizer> create_line_symbolizer3(std::string const& file,unsigned w,unsigned h)
+{
+    return boost::shared_ptr<symbolizer>(new line_pattern_symbolizer(file,"png",w,h));
+} 
+
 boost::shared_ptr<symbolizer> create_polygon_symbolizer(const Color& fill) 
 {   
     return boost::shared_ptr<symbolizer>(new polygon_symbolizer(fill));
@@ -75,7 +79,7 @@ boost::shared_ptr<symbolizer> create_polygon_symbolizer(const Color& fill)
 
 boost::shared_ptr<symbolizer> create_polygon_symbolizer2(std::string const& file,unsigned w,unsigned h) 
 {   
-    return boost::shared_ptr<symbolizer>(new pattern_symbolizer(file,"png",w,h));
+    return boost::shared_ptr<symbolizer>(new polygon_pattern_symbolizer(file,"png",w,h));
 } 
 
 BOOST_PYTHON_MODULE(_mapnik)
@@ -117,6 +121,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("point_symbolizer",&create_point_symbolizer);
     def("line_symbolizer",&create_line_symbolizer);
     def("line_symbolizer",&create_line_symbolizer2);
+    def("line_symbolizer",&create_line_symbolizer3);
     def("polygon_symbolizer",&create_polygon_symbolizer);
     def("polygon_symbolizer",&create_polygon_symbolizer2);
     register_ptr_to_python<boost::shared_ptr<symbolizer> >();

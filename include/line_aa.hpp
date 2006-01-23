@@ -23,7 +23,7 @@
 
 #include "geometry.hpp"
 #include "graphics.hpp"
-#include "style.hpp"
+
 
 namespace mapnik
 {
