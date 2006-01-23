@@ -41,18 +41,24 @@ namespace mapnik
 	    }
 	}
   
-    void image_symbolizer::render(geometry_type& geom,Image32& image) const 
+    void image_symbolizer::render(Feature const& feat,CoordTransform const& t,Image32& image) const	
     {
-	int w=symbol_.width();
-	int h=symbol_.height();
-	double x,y;
-	unsigned size = geom.num_points();
-	for (unsigned pos = 0; pos < size ;++pos)
+	typedef coord_transform<CoordTransform,geometry_type> path_type;
+	geometry_ptr const& geom=feat.get_geometry();
+	if (geom)
 	{
-	    geom.vertex(&x,&y);
-	    int px=int(x - 0.5 * w);
-	    int py=int(y - 0.5 * h);
-	    image.set_rectangle_alpha(px,py,symbol_);
+	    path_type path(t,*geom);
+	    unsigned num_points=geom->num_points();
+	    int w=symbol_.width();
+	    int h=symbol_.height();
+	    double x,y;
+	    for(unsigned i=0;i<num_points;++i)
+	    {
+		path.vertex(&x,&y);
+		int px=int(x - 0.5 * w);
+		int py=int(y - 0.5 * h);
+		image.set_rectangle_alpha(px,py,symbol_);
+	    }
 	}
     }
 }

@@ -38,26 +38,34 @@ namespace mapnik
 	: symbolizer(),
 	  fill_(fill) {}
     
-    void polygon_symbolizer::render(geometry_type& geom,Image32& image) const 
+ 
+    void  polygon_symbolizer::render(Feature const& feat,CoordTransform const& t,Image32& image) const
     {
+	typedef  coord_transform<CoordTransform,geometry_type> path_type;
 	typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
 	typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-	agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
-					   image.width()*4);
-	agg::pixfmt_rgba32 pixf(buf);
-	ren_base renb(pixf);	    
-	
-	unsigned r=fill_.red();
-	unsigned g=fill_.green();
-	unsigned b=fill_.blue();
-	unsigned a=fill_.alpha();
-	renderer ren(renb);
-	
-	agg::rasterizer_scanline_aa<> ras;
-	agg::scanline_u8 sl;
-	ras.clip_box(0,0,image.width(),image.height());
-	ras.add_path(geom);
-	ren.color(agg::rgba8(r, g, b, a));
-	agg::render_scanlines(ras, sl, ren);
+
+	geometry_ptr const& geom=feat.get_geometry();
+	if (geom)
+	{
+	    path_type path(t,*geom);
+	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
+					       image.width()*4);
+	    agg::pixfmt_rgba32 pixf(buf);
+	    ren_base renb(pixf);	    
+	    
+	    unsigned r=fill_.red();
+	    unsigned g=fill_.green();
+	    unsigned b=fill_.blue();
+	    unsigned a=fill_.alpha();
+	    renderer ren(renb);
+	    
+	    agg::rasterizer_scanline_aa<> ras;
+	    agg::scanline_u8 sl;
+	    ras.clip_box(0,0,image.width(),image.height());
+	    ras.add_path(path);
+	    ren.color(agg::rgba8(r, g, b, a));
+	    agg::render_scanlines(ras, sl, ren);
+	}
     }
 }

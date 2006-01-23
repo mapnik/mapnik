@@ -22,6 +22,7 @@
 #define SYMBOLIZER_HPP
 
 #include "graphics.hpp" 
+#include "feature.hpp"
 #include "geometry.hpp"
 #include <limits>
 
@@ -31,7 +32,7 @@ namespace mapnik
 
     struct symbolizer
     {
-    	virtual void render(geometry_type& geom, Image32& image) const=0;
+    	virtual void render(Feature const& feat, CoordTransform const& t, Image32& image) const=0;
     	virtual ~symbolizer() {}
     }; 
 }

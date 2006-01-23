@@ -30,7 +30,7 @@ namespace mapnik
 				private boost::noncopyable
     {
 	polygon_symbolizer(const Color& fill);
-	void render(geometry_type& geom,Image32& image) const;
+	void render(Feature const& feat, CoordTransform const& t,Image32& image) const;
     private:
 	Color fill_;
     };  

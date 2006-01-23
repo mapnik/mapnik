@@ -73,29 +73,34 @@ namespace mapnik
 	} 
 	catch (...) 
 	{
-	    std::cerr<<"exception caught..."<<std::endl;
+	    std::cerr << "exception caught..." << std::endl;
 	}
     }
     
-    void line_pattern_symbolizer::render(geometry_type& geom,Image32& image) const
+    void line_pattern_symbolizer::render(Feature const& feat, CoordTransform const& t,Image32& image) const
     { 
-	
+	typedef  coord_transform<CoordTransform,geometry_type> path_type;
 	typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
 	typedef agg::renderer_base<agg::pixfmt_rgba32> renderer_base;
 	typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
 	typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
-	
-	unsigned int width=image.width();
-	unsigned int height=image.height();
-	agg::row_ptr_cache<agg::int8u> buf(image.raw_data(), width, height,width*4);
-	agg::pixfmt_rgba32 pixf(buf);
-	renderer_base ren_base(pixf);  
-	agg::pattern_filter_bilinear_rgba8 filter; 
-	pattern_source source(pattern_);
-	pattern_type pattern (filter,source);
-	renderer_type ren(ren_base, pattern);
-	ren.clip_box(0,0,width,height);
-	rasterizer_type ras(ren);	    
-	ras.add_path(geom);    
+
+	geometry_ptr const& geom=feat.get_geometry();
+	if (geom)
+	{
+	    path_type path(t,*geom);
+	    unsigned int width=image.width();
+	    unsigned int height=image.height();
+	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(), width, height,width*4);
+	    agg::pixfmt_rgba32 pixf(buf);
+	    renderer_base ren_base(pixf);  
+	    agg::pattern_filter_bilinear_rgba8 filter; 
+	    pattern_source source(pattern_);
+	    pattern_type pattern (filter,source);
+	    renderer_type ren(ren_base, pattern);
+	    ren.clip_box(0,0,width,height);
+	    rasterizer_type ras(ren);	    
+	    ras.add_path(path);    
+	}
     }
 }

@@ -34,7 +34,7 @@ namespace mapnik
     {
 	line_symbolizer(stroke const& stroke);
 	line_symbolizer(const Color& pen,float width=1.0);	
-	void render(geometry_type& geom, Image32& image) const;
+	void render(Feature const& feat, CoordTransform const& t,Image32& image) const;
     private:
 	stroke stroke_;
     };

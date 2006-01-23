@@ -33,8 +33,8 @@ namespace mapnik
 	polygon_pattern_symbolizer(std::string const& file,
 				   std::string const& type,
 				   unsigned width,unsigned height);
-	
-	void render(geometry_type& geom,Image32& image) const;
+        
+	void render(Feature const& feat, CoordTransform const& t,Image32& image) const;
     private:
 	ImageData32 pattern_;
     };

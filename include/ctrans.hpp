@@ -27,7 +27,30 @@
 namespace mapnik
 {
     typedef coord_array<coord2d> CoordinateArray;
-
+    
+    template <typename Transform,typename Geometry>
+    struct coord_transform
+    {
+	coord_transform(Transform const& t,Geometry& geom)
+	    : t_(t), geom_(geom) {}
+	
+	unsigned  vertex(double *x , double *y) const
+	{
+	    unsigned command = geom_.vertex(x,y);
+	    *x = t_.forward_x_(x);
+	    *y = t_.forward_y_(y);
+	    return command;
+	}
+	void rewind (unsigned pos)
+	{
+	    geom_.rewind(pos);
+	}
+	
+    private:
+	Transform const& t_;
+	Geometry& geom_;
+    };
+    
     class CoordTransform
     {
     private:
@@ -58,7 +81,17 @@ namespace mapnik
 	{
 	    *y = (extent.maxy() - *y) * scale_;
 	}
+
+	inline double forward_x_(double* x) const 
+	{
+	    return (*x - extent.minx() ) * scale_;   
+	}
 	
+	inline double forward_y_(double* y) const 
+	{
+	    return (extent.maxy() - *y) * scale_;
+	}
+
 	inline void backward_x(double* x) const
 	{
 	    *x = extent.minx() + *x/scale_;

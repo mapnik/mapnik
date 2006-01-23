@@ -34,8 +34,7 @@ namespace mapnik
 			 std::string const& type,
 			 unsigned width,unsigned height);
 	
-	void render(geometry_type& geom,Image32& image) const;
-
+	void render(Feature const& feat, CoordTransform const& t,Image32& image) const;
     private:
 	ImageData32 symbol_;
     };

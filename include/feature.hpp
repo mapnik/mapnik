@@ -77,7 +77,7 @@ namespace mapnik
 	    geom_=geom;
 	}
 	
-	geometry_type& get_geometry()
+	geometry_type const& get_geometry() const
 	{
 	    return geom_;
 	}

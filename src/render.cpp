@@ -96,45 +96,45 @@ namespace mapnik
 		    while ((feature = fs->next()))
 		    {		   
 			bool do_else=true;
-			geometry_ptr& geom=feature->get_geometry();
-			if (geom)
-			{
-			    geom->transform(t);//todo: transform once
+			//geometry_ptr& geom=feature->get_geometry();
+			//if (geom)
 			
-			    std::vector<rule_type*>::const_iterator itr=if_rules.begin();
-			    while (itr!=if_rules.end())
+			    //geom->transform(t);//todo: transform once
+			    //  coord_transform<CoordTransform,geometry_type> path(t,*geom);
+			    
+			std::vector<rule_type*>::const_iterator itr=if_rules.begin();
+			while (itr!=if_rules.end())
+			{
+			    const filter_ptr& filter=(*itr)->get_filter();    
+			    if (filter->pass(*feature))
+			    {   
+				do_else=false;
+				const symbolizers& symbols = (*itr)->get_symbolizers();
+				symbolizers::const_iterator symIter=symbols.begin();
+				while (symIter!=symbols.end())
+				{
+				    (*symIter)->render(*feature,t,image);
+				    ++symIter;
+				}
+			    }			    
+			    ++itr;
+			}
+			if (do_else)
+			{
+			    //else filter
+			    std::vector<rule_type*>::const_iterator itr=else_rules.begin();
+			    while (itr != else_rules.end())
 			    {
-				const filter_ptr& filter=(*itr)->get_filter();    
-				if (filter->pass(*feature))
-				{   
-				    do_else=false;
-				    const symbolizers& symbols = (*itr)->get_symbolizers();
-				    symbolizers::const_iterator symIter=symbols.begin();
-				    while (symIter!=symbols.end())
-				    {
-					(*symIter)->render(*geom,image);
-					++symIter;
-				    }
-				}			    
+				const symbolizers& symbols = (*itr)->get_symbolizers();
+				symbolizers::const_iterator symIter=symbols.begin();
+				while (symIter!=symbols.end())
+				{
+				    (*symIter)->render(*feature,t,image);
+				    ++symIter;
+				}
 				++itr;
 			    }
-			    if (do_else)
-			    {
-				//else filter
-				std::vector<rule_type*>::const_iterator itr=else_rules.begin();
-				while (itr != else_rules.end())
-				{
-				    const symbolizers& symbols = (*itr)->get_symbolizers();
-				    symbolizers::const_iterator symIter=symbols.begin();
-				    while (symIter!=symbols.end())
-				    {
-					(*symIter)->render(*geom,image);
-					++symIter;
-				    }
-				    ++itr;
-				}
-			    }
-			}  
+			}	  
 		    }
 		}
 	    }
