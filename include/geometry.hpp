@@ -57,7 +57,6 @@ namespace mapnik
 	virtual int type() const=0;
 	virtual bool hit_test(value_type x,value_type y) const=0;
 	virtual void move_to(value_type x,value_type y)=0;
-
 	virtual void line_to(value_type x,value_type y)=0;
 	virtual void transform(const mapnik::CoordTransform& t)=0;
 	virtual unsigned num_points() const = 0;
@@ -244,8 +243,8 @@ namespace mapnik
     };
 
     typedef point<vertex2d> point_impl;
-    typedef line_string<vertex2d> line_string_impl;
-    typedef polygon<vertex2d> polygon_impl;
+    typedef line_string<vertex2d,vertex_vector> line_string_impl;
+    typedef polygon<vertex2d,vertex_vector> polygon_impl;
     
     typedef geometry<vertex2d> geometry_type;
     typedef boost::shared_ptr<geometry_type> geometry_ptr;

@@ -30,10 +30,14 @@
 #include "vertex.hpp"
 #include "ctrans.hpp"
 
+#include <vector>
+#include <boost/utility.hpp>
+#include <boost/tuple/tuple.hpp>
+
 namespace mapnik
 {
     template <typename T>
-    class vertex_vector 
+    class vertex_vector : private boost::noncopyable
     {
 	typedef typename T::type value_type;
 	typedef vertex<value_type,2> vertex_type;
@@ -101,27 +105,7 @@ namespace mapnik
 	    *y = (*vertex);
 	    return commands_[block] [pos & block_mask];
 	}
-	unsigned get_at(unsigned pos,value_type& x,value_type& y) const
-	{
-	    if (pos >= pos_) return SEG_END;
-	    unsigned block = pos >> block_shift;
-	    const value_type* vertex = vertexs_[block] + (( pos & block_mask) << 1);
-	    x = (*vertex++);
-	    y = (*vertex);
-	    return commands_[block] [pos & block_mask];
-	}
-	    
-	unsigned get_at(unsigned pos,vertex_type& v) const 
-	{
-	    if (pos >= pos_) return SEG_END;
-	    unsigned block = pos >> block_shift;
-	    const value_type* vertex = vertexs_[block] + (( pos & block_mask) << 1);
-	    unsigned char* cmd= commands_[block] + (pos_ & block_mask);
-	    v.x=(*vertex++);
-	    v.y=(*vertex);
-	    return commands_[block] [pos & block_mask];
-	}
-	
+        	
 	void transform_at(unsigned pos,const CoordTransform& t)
 	{
 	    if (pos >= pos_) return;
@@ -133,8 +117,6 @@ namespace mapnik
 	}
 	
     private:
-	vertex_vector(const vertex_vector&);
-	vertex_vector& operator=(const vertex_vector&);
 	void allocate_block(unsigned block)
 	{
 	    if (block >= max_blocks_)
@@ -155,6 +137,43 @@ namespace mapnik
 	    commands_[block] = (unsigned char*)(vertexs_[block] + block_size*2);
 	    ++num_blocks_;
 	}
+    };
+
+    template <typename T>
+    struct vertex_vector2 : boost::noncopyable
+    {
+	typedef typename T::type value_type;
+	typedef boost::tuple<value_type,value_type,char> coord;
+	vertex_vector2() {}
+	
+	unsigned size() const 
+	{
+	    return cont_.size();
+	}
+
+	void push_back (value_type x,value_type y,unsigned command)
+	{
+	    cont_.push_back(coord(x,y,command));
+	}
+	unsigned get_vertex(unsigned pos,value_type* x,value_type* y) const
+	{
+	    if (pos >= cont_.size()) return SEG_END;
+	    coord const& c = cont_[pos];
+	    *x = boost::get<0>(c);
+	    *y = boost::get<1>(c);
+	    return boost::get<2>(c);
+	}
+
+	void transform_at(unsigned pos,const CoordTransform& t)
+	{
+	    if (pos >= cont_.size()) return;
+	    coord & c = cont_[pos];
+	    t.forward_x(&boost::get<0>(c));
+	    t.forward_y(&boost::get<1>(c));
+	}
+	
+    private:
+	std::vector<coord> cont_;
     };
 }
 
