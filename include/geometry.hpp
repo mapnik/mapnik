@@ -56,6 +56,7 @@ namespace mapnik
 	
 	virtual int type() const=0;
 	virtual bool hit_test(value_type x,value_type y) const=0;
+	virtual void label_position(double *x, double *y) const=0;
 	virtual void move_to(value_type x,value_type y)=0;
 	virtual void line_to(value_type x,value_type y)=0;
 	virtual void transform(const mapnik::CoordTransform& t)=0;
@@ -81,6 +82,11 @@ namespace mapnik
 	int type() const 
 	{
 	    return Point;
+	}
+	void label_position(double *x, double *y) const
+	{
+	    *x = pt_.x;
+	    *y = pt_.y;
 	}
 	
 	void move_to(value_type x,value_type y)
@@ -139,6 +145,40 @@ namespace mapnik
 	    return Polygon;
 	}
 	
+	void label_position(double *x, double *y) const
+	{
+	    unsigned size = cont_.size();
+	    if (size < 3) 
+	    {
+		cont_.get_vertex(0,x,y);
+		return;
+	    }
+	    
+	    value_type x0,y0,x1,y1;
+	    double ai;
+	    double atmp = 0;
+	    double xtmp = 0;
+	    double ytmp = 0;
+	    unsigned i,j;
+	    for (i = size-1,j = 0; j < size; i = j, ++j)
+	    {
+		cont_.get_vertex(i,&x0,&y0);
+		cont_.get_vertex(j,&x1,&y1);
+		ai = x0 * y1 - x1 * y0;
+		atmp += ai;
+		xtmp += (x1 + x0) * ai;
+		ytmp += (y1 + y0) * ai;
+	    }	  
+	    if (atmp != 0)
+	    {
+		*x = xtmp/(3*atmp);
+		*y = ytmp /(3*atmp);
+		return;
+	    }
+	    *x=x0;
+	    *y=y0;	    	    
+	}
+
 	void line_to(value_type x,value_type y)
 	{
 	    cont_.push_back(x,y,SEG_LINETO);
@@ -200,7 +240,10 @@ namespace mapnik
 	{
 	    return LineString;
 	}
-	
+        void label_position(double *x, double *y) const
+	{
+	    cont_.get_vertex(0,x,y);
+	}
 	void line_to(value_type x,value_type y)
 	{
 	    cont_.push_back(x,y,SEG_LINETO);

@@ -29,36 +29,33 @@ namespace mapnik
 			 unsigned width,unsigned height) 
 	    : symbolizer(),
 	      symbol_(width,height)
+    {
+	try 
 	{
-	    try 
-	    {
-		std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-		reader->read(0,0,symbol_);		
-	    } 
-	    catch (...) 
-	    {
-		std::cerr<<"exception caught..." << std::endl;
-	    }
+	    std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
+	    reader->read(0,0,symbol_);		
+	} 
+	catch (...) 
+	{
+	    std::cerr<<"exception caught..." << std::endl;
 	}
-  
+    }
+    
     void image_symbolizer::render(Feature const& feat,CoordTransform const& t,Image32& image) const	
     {
-	typedef coord_transform<CoordTransform,geometry_type> path_type;
 	geometry_ptr const& geom=feat.get_geometry();
 	if (geom)
 	{
-	    path_type path(t,*geom);
-	    unsigned num_points=geom->num_points();
+	    double x;
+	    double y;
+	    geom->label_position(&x,&y);
+	    t.forward_x(&x);
+	    t.forward_y(&y);
 	    int w=symbol_.width();
-	    int h=symbol_.height();
-	    double x,y;
-	    for(unsigned i=0;i<num_points;++i)
-	    {
-		path.vertex(&x,&y);
-		int px=int(x - 0.5 * w);
-		int py=int(y - 0.5 * h);
-		image.set_rectangle_alpha(px,py,symbol_);
-	    }
+	    int h=symbol_.height();    
+	    int px=int(x - 0.5 * w);
+	    int py=int(y - 0.5 * h);
+	    image.set_rectangle_alpha(px,py,symbol_);
 	}
     }
 }
