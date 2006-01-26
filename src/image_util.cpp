@@ -64,13 +64,13 @@ namespace mapnik
         png_set_mem_fn(png_ptr,mem_ptr,malloc_fn,free_fn);
 
         // switch on optimization
-	//#if defined(PNG_LIBPNG_VER) && (PNG_LIBPNG_VER >= 10200)
-        //png_uint_32 mask, flags;
+	#if defined(PNG_LIBPNG_VER) && (PNG_LIBPNG_VER >= 10200)
+        png_uint_32 mask, flags;
 
-        //flags = png_get_asm_flags(png_ptr);
-        //mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
-        //png_set_asm_flags(png_ptr, flags | mask);
-	//#endif
+        flags = png_get_asm_flags(png_ptr);
+        mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
+        png_set_asm_flags(png_ptr, flags | mask);
+	#endif
 	png_set_filter (png_ptr, 0, PNG_FILTER_NONE);
         png_infop info_ptr = png_create_info_struct(png_ptr);
         if (!info_ptr)
