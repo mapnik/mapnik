@@ -55,7 +55,11 @@ namespace mapnik
     void line_symbolizer::render(Feature const& feat, CoordTransform const& t,Image32& image) const 
     {
 	typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
-	typedef  coord_transform<CoordTransform,geometry_type> path_type;
+	typedef coord_transform<CoordTransform,geometry_type> path_type;
+	typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
+	typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
+	typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+	
 	geometry_ptr const& geom=feat.get_geometry();
 	if (geom)
 	{
@@ -70,11 +74,51 @@ namespace mapnik
 	    unsigned g=col.green();
 	    unsigned b=col.blue();	    
              
-	    
-	    if (0)//stroke_.get_width() <= 1.0)
+	    if (stroke_.has_dash())
 	    {
-		typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
-		typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
+		renderer ren(renb);	
+		agg::rasterizer_scanline_aa<> ras;
+		agg::scanline_u8 sl;
+		agg::conv_dash<path_type> dash(path);
+		dash_array const& d = stroke_.get_dash_array();
+		dash_array::const_iterator itr = d.begin();
+		dash_array::const_iterator end = d.end();
+		while (itr != end)
+		{
+		    dash.add_dash(itr->first, itr->second);
+		    ++itr;
+		}
+		agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
+		    
+		line_join_e join=stroke_.get_line_join();
+		if ( join == MITER_JOIN)
+		    stroke.generator().line_join(agg::miter_join);
+		else if( join == MITER_REVERT_JOIN) 
+		    stroke.generator().line_join(agg::miter_join);
+		else if( join == ROUND_JOIN) 
+		    stroke.generator().line_join(agg::round_join);
+		else
+		    stroke.generator().line_join(agg::bevel_join);
+		    
+		line_cap_e cap=stroke_.get_line_cap();
+		if (cap == BUTT_CAP)    
+		    stroke.generator().line_cap(agg::butt_cap);
+		else if (cap == SQUARE_CAP)
+		    stroke.generator().line_cap(agg::square_cap);
+		else 
+		    stroke.generator().line_cap(agg::round_cap);
+		    
+		stroke.generator().miter_limit(4.0);
+		stroke.generator().width(stroke_.get_width());
+		    
+		ras.clip_box(0,0,image.width(),image.height());
+		ras.add_path(stroke);
+		ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
+		agg::render_scanlines(ras, sl, ren);
+	    }
+	    else if (0)//(stroke_.get_width() <= 1.0)
+	    {
+		//faster but clipping doesn't work 
 		agg::line_profile_aa prof;
 		prof.width(stroke_.get_width());
 		renderer_oaa ren_oaa(renb, prof);
@@ -87,81 +131,36 @@ namespace mapnik
 	    }
 	    else 
 	    {
-		typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 		renderer ren(renb);	
 		agg::rasterizer_scanline_aa<> ras;
-		agg::scanline_u8 sl;
+		agg::scanline_p8 sl;
+		agg::conv_stroke<path_type>  stroke(path);
 		
-		if (stroke_.has_dash())
-		{
+		line_join_e join=stroke_.get_line_join();
+		if ( join == MITER_JOIN)
+		    stroke.generator().line_join(agg::miter_join);
+		else if( join == MITER_REVERT_JOIN) 
+		    stroke.generator().line_join(agg::miter_join);
+		else if( join == ROUND_JOIN) 
+		    stroke.generator().line_join(agg::round_join);
+		else
+		    stroke.generator().line_join(agg::bevel_join);
 		    
-		    agg::conv_dash<path_type> dash(path);
-		    dash_array const& d = stroke_.get_dash_array();
-		    dash_array::const_iterator itr = d.begin();
-		    dash_array::const_iterator end = d.end();
-		    while (itr != end)
-		    {
-			dash.add_dash(itr->first, itr->second);
-			++itr;
-		    }
-		    agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
-		    
-		    line_join_e join=stroke_.get_line_join();
-		    if ( join == MITER_JOIN)
-			stroke.generator().line_join(agg::miter_join);
-		    else if( join == MITER_REVERT_JOIN) 
-			stroke.generator().line_join(agg::miter_join);
-		    else if( join == ROUND_JOIN) 
-			stroke.generator().line_join(agg::round_join);
-		    else
-			stroke.generator().line_join(agg::bevel_join);
-		    
-		    line_cap_e cap=stroke_.get_line_cap();
-		    if (cap == BUTT_CAP)    
-			stroke.generator().line_cap(agg::butt_cap);
-		    else if (cap == SQUARE_CAP)
-			stroke.generator().line_cap(agg::square_cap);
-		    else 
-			stroke.generator().line_cap(agg::round_cap);
-		    
-		    stroke.generator().miter_limit(4.0);
-		    stroke.generator().width(stroke_.get_width());
-		    
-		    ras.clip_box(0,0,image.width(),image.height());
-		    ras.add_path(stroke);
-		    ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
-		    agg::render_scanlines(ras, sl, ren);
-		}
+		line_cap_e cap=stroke_.get_line_cap();
+		if (cap == BUTT_CAP)    
+		    stroke.generator().line_cap(agg::butt_cap);
+		else if (cap == SQUARE_CAP)
+		    stroke.generator().line_cap(agg::square_cap);
 		else 
-		{
-		    agg::conv_stroke<path_type>  stroke(path);
-		    
-		    line_join_e join=stroke_.get_line_join();
-		    if ( join == MITER_JOIN)
-			stroke.generator().line_join(agg::miter_join);
-		    else if( join == MITER_REVERT_JOIN) 
-			stroke.generator().line_join(agg::miter_join);
-		    else if( join == ROUND_JOIN) 
-			stroke.generator().line_join(agg::round_join);
-		    else
-			stroke.generator().line_join(agg::bevel_join);
-		    
-		    line_cap_e cap=stroke_.get_line_cap();
-		    if (cap == BUTT_CAP)    
-			stroke.generator().line_cap(agg::butt_cap);
-		    else if (cap == SQUARE_CAP)
-			stroke.generator().line_cap(agg::square_cap);
-		    else 
-			stroke.generator().line_cap(agg::round_cap);
-		    
-		    stroke.generator().miter_limit(4.0);
-		    stroke.generator().width(stroke_.get_width());
-		    
-		    ras.clip_box(0,0,image.width(),image.height());
-		    ras.add_path(stroke);
-		    ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
-		    agg::render_scanlines(ras, sl, ren);
-		}
+		    stroke.generator().line_cap(agg::round_cap);
+		
+		stroke.generator().miter_limit(4.0);
+		stroke.generator().width(stroke_.get_width());
+		
+		ras.clip_box(0,0,image.width(),image.height());
+		ras.add_path(stroke);
+		ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
+		agg::render_scanlines(ras, sl, ren);
 	    }
 	}
     }
