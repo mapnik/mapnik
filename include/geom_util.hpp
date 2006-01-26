@@ -47,19 +47,19 @@ namespace mapnik
     }
 
     template <typename T,typename Image>
-    bool clip_line(T& x0,T& y0,T& x1,T& y1,const Image* image)
+    bool clip_line(T& x0,T& y0,T& x1,T& y1,Envelope<T> const& box)
     {
         double tmin=0.0;
         double tmax=1.0;
         double dx=x1-x0;
         if (clip_test<double>(-dx,x0,tmin,tmax))
         {
-            if (clip_test<double>(dx,image->width()-x0,tmin,tmax))
+            if (clip_test<double>(dx,box.width()-x0,tmin,tmax))
             {
                 double dy=y1-y0;
                 if (clip_test<double>(-dy,y0,tmin,tmax))
                 {
-                    if (clip_test<double>(dy,image->height()-y0,tmin,tmax))
+                    if (clip_test<double>(dy,box.height()-y0,tmin,tmax))
                     {
                         if (tmax<1.0)
                         {
