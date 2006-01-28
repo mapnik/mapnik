@@ -95,13 +95,7 @@ namespace mapnik
 		    feature_ptr feature;
 		    while ((feature = fs->next()))
 		    {		   
-			bool do_else=true;
-			//geometry_ptr& geom=feature->get_geometry();
-			//if (geom)
-			
-			    //geom->transform(t);//todo: transform once
-			    //  coord_transform<CoordTransform,geometry_type> path(t,*geom);
-			    
+			bool do_else=true;		    
 			std::vector<rule_type*>::const_iterator itr=if_rules.begin();
 			while (itr!=if_rules.end())
 			{

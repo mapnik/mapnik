@@ -27,6 +27,7 @@
 #include "color.hpp"
 #include "gamma.hpp"
 #include "image_data.hpp"
+#include "envelope.hpp"
 
 namespace mapnik
 {
@@ -62,9 +63,9 @@ namespace mapnik
 	void saveToFile(const std::string& file,const std::string& format="auto"); 
     private:
 
-	inline bool checkBounds(unsigned x,unsigned y) const
+	inline bool checkBounds(unsigned x, unsigned y) const
 	{
-	    return ( x < width_ && y < height_);
+	    return (x < width_ && y < height_);
 	}
 
     public:
@@ -114,39 +115,41 @@ namespace mapnik
 	    return height_;
 	}
 
-	inline void Image32::set_rectangle(unsigned x0,unsigned y0,const ImageData32& data)
+	inline void set_rectangle(int x0,int y0,ImageData32 const& data)
 	{
-	    if (checkBounds(x0,y0))
-	    {
-		unsigned w=std::min(data.width(),width_-x0);
-		unsigned h=std::min(data.height(),height_-y0);
-		
-		for (unsigned y=0;y<h;++y)
+	    Envelope<int> ext0(0,0,width_,height_);   
+	    Envelope<int> ext1(x0,y0,x0+data.width(),y0+data.height());
+	    
+	    if (ext0.intersects(ext1))
+	    {	
+		Envelope<int> box = ext0.intersect(ext1);
+		for (int y = box.miny(); y < box.maxy(); ++y)
 		{
-		    for (unsigned x=0;x<w;++x)
+		    for (int x = box.minx(); x < box.maxx(); ++x)
 		    {
-			if ((data(x,y) & 0xff000000)) 
+			if ((data(x-x0,y-y0) & 0xff000000)) 
 			{
-			    data_(x0+x,y0+y)=data(x,y);
+			    data_(x,y)=data(x-x0,y-y0);
 			}
 		    }
 		}   
 	    }
 	}
 	
-	inline void set_rectangle_alpha(unsigned x0,unsigned y0,const ImageData32& data)
+	inline void set_rectangle_alpha(int x0,int y0,const ImageData32& data)
 	{
-	    if (checkBounds(x0,y0))
-	    {
-		unsigned w=std::min(data.width(),width_-x0);
-		unsigned h=std::min(data.height(),height_-y0);
+	    Envelope<int> ext0(0,0,width_,height_);   
+	    Envelope<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
 	    
-		for (unsigned y=0;y<h;++y)
+	    if (ext0.intersects(ext1))
+	    {	                		
+		Envelope<int> box = ext0.intersect(ext1);		
+		for (int y = box.miny(); y < box.maxy(); ++y)
 		{
-		    for (unsigned x=0;x<w;++x)
+		    for (int x = box.minx(); x < box.maxx(); ++x)
 		    {
-			unsigned rgba0 = data_(x0+x,y0+y);
-			unsigned rgba1 = data(x,y);
+			unsigned rgba0 = data_(x,y);
+			unsigned rgba1 = data(x-x0,y-y0);
 		    
 			unsigned a1 = (rgba1 >> 24) & 0xff;
 			if (a1 == 0) continue;
@@ -166,7 +169,7 @@ namespace mapnik
 			g0 = ((((g1 << 8) - g0) * a1 + (g0 << 8)) / a0);
 			b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
 			a0 = a0 >> 8;
-			data_(x0+x,y0+y)= (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
+			data_(x,y)= (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
 		    }
 		}
 	    }

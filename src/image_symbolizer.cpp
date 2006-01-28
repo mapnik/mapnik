@@ -53,8 +53,8 @@ namespace mapnik
 	    t.forward_y(&y);
 	    int w=symbol_.width();
 	    int h=symbol_.height();    
-	    int px=int(x - 0.5 * w);
-	    int py=int(y - 0.5 * h);
+	    int px=int(ceil(x - 0.5 * w));
+	    int py=int(ceil(y - 0.5 * h));
 	    image.set_rectangle_alpha(px,py,symbol_);
 	}
     }
