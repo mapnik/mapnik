@@ -61,7 +61,7 @@ namespace mapnik
 	typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	
 	geometry_ptr const& geom=feat.get_geometry();
-	if (geom)
+	if (geom && geom->num_points() > 1)
 	{
 	    path_type path(t,*geom);
 	    agg::row_ptr_cache<agg::int8u> buf(image.raw_data(),image.width(),image.height(),
