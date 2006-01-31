@@ -19,42 +19,28 @@
 
 import glob
 
-Import('env')
+Import ('env')
 
 prefix = env['PREFIX']
 
-libraries = ['agg'] + env['LIBS']
-linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
-
 source = Split(
     """
-    mapnik.cpp
-    datasource_cache.cpp
-    envelope.cpp
-    graphics.cpp
-    image_reader.cpp
-    image_util.cpp
-    layer.cpp
-    map.cpp
-    memory.cpp
-    params.cpp
-    plugin.cpp
-    png_reader.cpp
-    render.cpp
-    named_style_cache.cpp
-    text.cpp
-    tiff_reader.cpp
-    wkb.cpp
-    line_symbolizer.cpp
-    line_pattern_symbolizer.cpp
-    polygon_symbolizer.cpp
-    polygon_pattern_symbolizer.cpp
-    image_symbolizer.cpp
+    shapeindex.cpp
+    #src/envelope.cpp
+    #plugins/input/shape/shapefile.cpp
     """
     )
 
-mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
+headers = ['#plugins/input/shape'] + env['CPPPATH']
 
-env.Alias(target='install', source=env.Install(prefix+'/lib', mapnik))
-includes = glob.glob('../include' + '/*.hpp')
-env.Alias(target='install', source=env.Install(prefix+'/include/mapnik', includes))
+if 'boost_program_options-gcc-mt' in env['LIBS']:
+    libraries = 'boost_program_options-gcc-mt'
+    env['LIBS'].remove('boost_program_options-gcc-mt')
+else:
+    libraries = 'boost_program_options'
+    env['LIBS'].remove('boost_program_options')
+
+shapeindex = env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries)
+
+env.Install(prefix + '/bin', shapeindex)
+env.Alias('install', prefix + '/bin')

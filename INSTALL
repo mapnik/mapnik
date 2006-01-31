@@ -1,26 +1,164 @@
+# $Id$
+
 INSTALLATION INSTRUCTIONS
 
 Prerequisites
-First of all you will have to install 'scons'. See scons user guide on how to get started.
+-------------
 
-Mapnik is relying on a number of boost libraries (filesystem, python, regex, spirit etc). You can download the latest release (1.32.0) or grab a CVS snapshot from http://boost.org. You don't need to build anything, just unzip the source into read/write location on your disk.
+First, here is a quick list of the software dependencies:
 
-The same requirements apply for AGG library (available from http://www.antigrain.com)
+- Linux/UNIX with g++ compiler
 
-Other dependencies include:
-1. libltdl  (dynamic linking)
-2. libz
-3. libpng
-4. libjpeg
-5. freetype2
-6. postgresql (+postgis) - if you want to build postgis datasource
+- libboost 1.32.0 or greater with the following libraries included:
+	- thread
+	- wserialization
+	- filesystem
+	- regex
+	- (Optional) program_options
+	- (Optional) python
+
+- libpng
+- libjpeg
+- libtiff
+- libz
+- libfreetype2
+- (Optional) PostgreSQL libraries
+
+- Python 1.5.2 or greater to build Mapnik
+- (Optional) Python 2.2 or greater for the Python language bindings
+
+All of these will normally come with any modern Linux distribution.
+
+If your system does NOT have one of these installed, you will need to install the mandatory ones at the very least before proceeding further.  Instructions on how to do this will come with each individual package.
+
 
 Building
-Once you satisfy all dependencies you can build mapnik by issuing the following  command:
+--------
 
-:/> scons DATASOURCES=all PREFIX=/where/to/install install
+Once you've installed the required software packages, the simplest way to build mapnik is to run "scons" (The software builder) without any options:
 
-This should compile, link and install all relevant libraries/headers in PREFIX.
+$ cd /path/to/mapnik-sourcecode
+$ /path/to/python scons/scons.py
 
-By default release versions are built, but you can specify "debug=yes" to build debug versions. At this time only GCC toolkit is supported and you'll have to modify SConstruct/SConscript files if you're planning to use something else.
+This should compile and link the mapnik library, the input plugins and the python language binding (if possible).  If any mandatory dependencies are not found the build will fail, and you will need to specify custom paths to your libraries and include files (see below).
+
+Note that the python used to run "scons" does NOT have to be the same as the one used for the python bindings.
+
+"scons" accepts a variety of options to customize your build.  This allows you to specify which components are compiled, where to find dependencies, where to install mapnik, and so on.
+
+To see the list of available options, from the root of the source distribution, run:
+
+$ /path/to/python scons/scons.py -h
+
+You will get:
+
+PREFIX: The install path "prefix"
+    default: /usr/local
+    actual: /usr/local
+
+BOOST_INCLUDES: Search path for boost include files ( /path/to/BOOST_INCLUDES )
+    default: /usr/include
+    actual: /usr/include
+
+BOOST_LIBS: Search path for boost library files ( /path/to/BOOST_LIBS )
+    default: /usr/lib
+    actual: /usr/lib
+
+FREETYPE_INCLUDES: Search path for FreeType include files ( /path/to/FREETYPE_INCLUDES )
+    default: /usr/include
+    actual: /usr/include
+
+FREETYPE_LIBS: Search path for FreeType library files ( /path/to/FREETYPE_LIBS )
+    default: /usr/lib
+    actual: /usr/lib
+
+PNG_INCLUDES: Search path for libpng include files ( /path/to/PNG_INCLUDES )
+    default: /usr/include
+    actual: /usr/include
+
+PNG_LIBS: Search path for libpng include files ( /path/to/PNG_LIBS )
+    default: /usr/lib
+    actual: /usr/lib
+
+JPEG_INCLUDES: Search path for libjpeg include files ( /path/to/JPEG_INCLUDES )
+    default: /usr/include
+    actual: /usr/include
+
+JPEG_LIBS: Search path for libjpeg library files ( /path/to/JPEG_LIBS )
+    default: /usr/lib
+    actual: /usr/lib
+
+TIFF_INCLUDES: Search path for libtiff include files ( /path/to/TIFF_INCLUDES )
+    default: /usr/include
+    actual: /usr/include
+
+TIFF_LIBS: Search path for libtiff library files ( /path/to/TIFF_LIBS )
+    default: /usr/lib
+    actual: /usr/lib
+
+PGSQL_INCLUDES: Search path for PostgreSQL include files ( /path/to/PGSQL_INCLUDES )
+    default: /usr/include
+    actual: /usr/include
+
+PGSQL_LIBS: Search path for PostgreSQL library files ( /path/to/PGSQL_LIBS )
+    default: /usr/lib
+    actual: /usr/lib
+
+PYTHON: Python executable ( /path/to/PYTHON )
+    default: /usr/local/bin/python2.4
+    actual: /usr/local/bin/python2.4
+
+INPUT_PLUGINS: Input drivers to include
+    (all|none|comma-separated list of names)
+    allowed names: postgis shape raster
+    default: all
+    actual: postgis shape raster
+
+BINDINGS: Language bindings to build
+    (all|none|comma-separated list of names)
+    allowed names: python
+    default: all
+    actual: python
+
+This help should be self-explanatory!
+
+For example, if you compiled your own set of Boost libraries, you might use:
+
+$ /path/to/python scons/scons.py BOOST_INCLUDES=/usr/local/include/boost-1_33_1 BOOST_LIBS=/usr/local/lib
+
+
+Installation
+------------
+
+Once the build has successfully completed, you can install the various files on your system by executing:
+
+$ /path/to/python scons/scons.py install
+
+By default, everything will be installed under the PREFIX '/usr/local' as such:
+
+$PREFIX/lib: libmapnik.so
+$PREFIX/lib/mapnik/input: input plug-ins
+$PREFIX/include: mapnik include files
+$PREFIX/bin: shapeindex utility
+$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages/mapnik: Python bindings
+
+If you're using the default PREFIX, you will most likely need to be root to perform the install.
+
+
+Test
+----
+
+There currently are no easy way to test your setup, other than write some code to generate a map.
+
+One simple thing you can do is try to load the Python module, and make sure it does so without errors:
+
+$ /path/to/python
+Python 2.4.2 (#1, Jan 11 2006, 10:59:28)
+[GCC 3.4.4 20050721 (Red Hat 3.4.4-2)] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from mapnik import *
+registered datasource : shape
+registered datasource : raster
+registered datasource : postgis
+>>>
 
