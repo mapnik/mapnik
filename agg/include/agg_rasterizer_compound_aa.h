@@ -93,13 +93,16 @@ namespace agg
         {
             aa_shift  = 8,
             aa_scale  = 1 << aa_shift,
-            aa_mask   = aa_scale - 1
+            aa_mask   = aa_scale - 1,
+            aa_scale2 = aa_scale * 2,
+            aa_mask2  = aa_scale2 - 1
         };
 
         //--------------------------------------------------------------------
         rasterizer_compound_aa() : 
             m_outline(),
             m_clipper(),
+            m_filling_rule(fill_non_zero),
             m_styles(),  // Active Styles
             m_ast(),     // Active Style Table (unique values)
             m_asm(),     // Active Style Mask 
@@ -113,6 +116,7 @@ namespace agg
         void reset(); 
         void reset_clipping();
         void clip_box(double x1, double y1, double x2, double y2);
+        void filling_rule(filling_rule_e filling_rule);
 
         //--------------------------------------------------------------------
         void styles(int left, int right);
@@ -161,6 +165,14 @@ namespace agg
         {
             int cover = area >> (poly_subpixel_shift*2 + 1 - aa_shift);
             if(cover < 0) cover = -cover;
+            if(m_filling_rule == fill_even_odd)
+            {
+                cover &= aa_mask2;
+                if(cover > aa_scale)
+                {
+                    cover = aa_scale2 - cover;
+                }
+            }
             if(cover > aa_mask) cover = aa_mask;
             return cover;
         }
@@ -229,6 +241,7 @@ namespace agg
     private:
         rasterizer_cells_aa<cell_style_aa> m_outline;
         clip_type              m_clipper;
+        filling_rule_e         m_filling_rule;
         pod_vector<style_info> m_styles;  // Active Styles
         pod_vector<unsigned>   m_ast;     // Active Style Table (unique values)
         pod_vector<int8u>      m_asm;     // Active Style Mask 
@@ -256,6 +269,13 @@ namespace agg
         m_min_style =  0x7FFFFFFF;
         m_max_style = -0x7FFFFFFF;
         m_scan_y    =  0x7FFFFFFF;
+    }
+
+    //------------------------------------------------------------------------
+    template<class Clip> 
+    void rasterizer_compound_aa<Clip>::filling_rule(filling_rule_e filling_rule) 
+    { 
+        m_filling_rule = filling_rule; 
     }
 
     //------------------------------------------------------------------------

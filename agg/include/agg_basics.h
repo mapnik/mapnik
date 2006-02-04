@@ -193,6 +193,13 @@ namespace agg
         poly_subpixel_mask  = poly_subpixel_scale-1,  //----poly_subpixel_mask 
     };
 
+    //----------------------------------------------------------filling_rule_e
+    enum filling_rule_e
+    {
+        fill_non_zero,
+        fill_even_odd
+    };
+
     //-----------------------------------------------------------------------pi
     const double pi = 3.14159265358979323846;
 

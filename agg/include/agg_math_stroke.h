@@ -38,9 +38,9 @@ namespace agg
     {
         miter_join         = 0,
         miter_join_revert  = 1,
-        miter_join_round   = 4,
         round_join         = 2,
-        bevel_join         = 3
+        bevel_join         = 3,
+        miter_join_round   = 4
     };
 
 
@@ -70,14 +70,6 @@ namespace agg
         double a1 = atan2(dy1, dx1);
         double a2 = atan2(dy2, dx2);
         double da = a1 - a2;
-
-        //  Possible optimization. Not important at all; consumes time but happens rarely
-        //if(fabs(da) < stroke_theta)
-        //{
-        //    out_vertices.add(coord_type((x + x + dx1 + dx2) * 0.5, 
-        //                                (y + y + dy1 + dy2) * 0.5));
-        //    return;
-        //}
 
         bool ccw = da > 0.0 && da < pi;
 
@@ -280,6 +272,7 @@ namespace agg
         typedef typename VertexConsumer::value_type coord_type;
 
         double dx1, dy1, dx2, dy2;
+        double d;
 
         dx1 = width * (v1.y - v0.y) / len1;
         dy1 = width * (v1.x - v0.x) / len1;
@@ -312,7 +305,7 @@ namespace agg
             case inner_jag:
             case inner_round:
                 {
-                    double d = (dx1-dx2) * (dx1-dx2) + (dy1-dy2) * (dy1-dy2);
+                    d = (dx1-dx2) * (dx1-dx2) + (dy1-dy2) * (dy1-dy2);
                     if(d < len1 * len1 && d < len2 * len2)
                     {
                         stroke_calc_miter(out_vertices,
@@ -349,6 +342,34 @@ namespace agg
         {
             // Outer join
             //---------------
+            if(line_join == round_join || line_join == bevel_join)
+            {
+                // This is an optimization that reduces the number of points 
+                // in cases of almost collonear segments. If there's no
+                // visible difference between bevel and miter joins we'd rather
+                // use miter join because it adds only one point instead of two. 
+                //
+                // Here we calculate the middle point between the bevel points 
+                // and then, the distance between v1 and this middle point. 
+                // At outer joins this distance always less than stroke width, 
+                // because it's actually the height of an isosceles triangle of
+                // v1 and its two bevel points. If the difference between this
+                // width and this value is small (no visible bevel) we can switch
+                // to the miter join. 
+                //
+                // The constant in the expression makes the result approximately 
+                // the same as in round joins and caps. One can safely comment 
+                // out this "if".
+                //-------------------
+                double dx = (dx1 + dx2) / 2;
+                double dy = (dy1 + dy2) / 2;
+                d = width - sqrt(dx * dx + dy * dy);
+                if(d < 0.0625 / approximation_scale)
+                {
+                    line_join = miter_join;
+                }
+            }
+
             switch(line_join)
             {
             case miter_join:

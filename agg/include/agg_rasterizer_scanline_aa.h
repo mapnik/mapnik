@@ -65,13 +65,6 @@ namespace agg
         }
     };
 
-    //----------------------------------------------------------filling_rule_e
-    enum filling_rule_e
-    {
-        fill_non_zero,
-        fill_even_odd
-    };
-
 
     //==================================================rasterizer_scanline_aa
     // Polygon rasterizer that is used to render filled polygons with 
