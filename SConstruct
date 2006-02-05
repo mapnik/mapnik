@@ -34,9 +34,10 @@ opts.Add(PathOption('TIFF_INCLUDES', 'Search path for libtiff include files', '/
 opts.Add(PathOption('TIFF_LIBS', 'Search path for libtiff library files', '/usr/lib'))
 opts.Add(PathOption('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include'))
 opts.Add(PathOption('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/lib'))
-opts.Add(PathOption('PYTHON','Python executable','/usr/local/bin/python2.4'))
+opts.Add(PathOption('PYTHON','Python executable', sys.executable))
 opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
+opts.Add(ListOption('DEBUG', 'Compile a debug version of mapnik', 'no', ['no', 'yes']))
 
 env = Environment(ENV=os.environ, options=opts)
 
@@ -116,7 +117,7 @@ env = conf.Finish()
 
 # Setup the c++ args for our own codebase
 
-if ARGUMENTS.get('DEBUG',0):
+if env['DEBUG']:
     env.Append(CXXFLAGS = '-Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG')
 else:
     env.Append(CXXFLAGS = '-Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG')
