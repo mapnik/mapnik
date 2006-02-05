@@ -121,10 +121,8 @@ BINDINGS: Language bindings to build
     actual: python
 
 DEBUG: Compile a debug version of mapnik
-    (all|none|comma-separated list of names)
-    allowed names: no yes
-    default: no
-    actual: no
+    default:
+    actual:
 
 This help should be self-explanatory!
 
