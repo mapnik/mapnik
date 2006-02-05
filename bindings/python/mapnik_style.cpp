@@ -23,9 +23,6 @@
 #include "mapnik.hpp"
 
 using mapnik::feature_type_style;
-using mapnik::named_style_cache;
-using mapnik::singleton;
-using mapnik::CreateStatic;
 using mapnik::rules;
 
 void export_style()
@@ -40,18 +37,5 @@ void export_style()
 		      (&feature_type_style::get_rules,return_value_policy<reference_existing_object>()))
 	;
     
-    class_<singleton<named_style_cache,CreateStatic>,boost::noncopyable>("singleton",no_init)
-    	.def("instance",&singleton<named_style_cache,CreateStatic>::instance,
-    	     return_value_policy<reference_existing_object>())
-    	.staticmethod("instance")
-    	;
-    
-    class_<named_style_cache,bases<singleton<named_style_cache,CreateStatic> >,
-	boost::noncopyable>("style_cache",no_init)
-	.def("insert",&named_style_cache::insert)
-	.staticmethod("insert")
-	.def("remove",&named_style_cache::remove)
-	.staticmethod("remove")
-	;
 }
 

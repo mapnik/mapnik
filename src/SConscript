@@ -41,7 +41,6 @@ source = Split(
     plugin.cpp
     png_reader.cpp
     render.cpp
-    named_style_cache.cpp
     text.cpp
     tiff_reader.cpp
     wkb.cpp

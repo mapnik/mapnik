@@ -56,7 +56,6 @@
 #include "wkb.hpp"
 #include "map.hpp"
 #include "feature_type_style.hpp"
-#include "named_style_cache.hpp"
 #include "feature_factory.hpp"
 #include "math_expr.hpp"
 #include "value.hpp"

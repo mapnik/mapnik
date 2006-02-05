@@ -91,6 +91,8 @@ void export_map()
         .def("pan",&Map::pan)
         .def("zoom",&Map::zoom)
         .def("pan_and_zoom",&Map::pan_and_zoom)
+	.def("append_style",&Map::insert_style)
+	.def("remove_style",&Map::remove_style)
 	.add_property("layers",make_function
 		      (&Map::layers,return_value_policy<reference_existing_object>()))
         .def_pickle(map_pickle_suite())

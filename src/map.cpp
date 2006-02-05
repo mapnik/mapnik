@@ -37,12 +37,13 @@ namespace mapnik
 
     Map::Map(const Map& rhs)
         : width_(rhs.width_),
-        height_(rhs.height_),
-        srid_(rhs.srid_),
-        background_(rhs.background_),
-        layers_(rhs.layers_),
-        currentExtent_(rhs.currentExtent_) {}
-
+	  height_(rhs.height_),
+	  srid_(rhs.srid_),
+	  background_(rhs.background_),
+	  styles_(rhs.styles_),
+	  layers_(rhs.layers_),
+	  currentExtent_(rhs.currentExtent_) {}
+    
     Map& Map::operator=(const Map& rhs)
     {
         if (this==&rhs) return *this;
@@ -50,15 +51,34 @@ namespace mapnik
         height_=rhs.height_;
         srid_=rhs.srid_;
         background_=rhs.background_;
+	styles_=rhs.styles_;
         layers_=rhs.layers_;
         return *this;
     }
 
+    bool Map::insert_style(std::string const& name,feature_type_style const& style) 
+    {
+	return styles_.insert(make_pair(name,style)).second;
+    }
+    
+    void Map::remove_style(std::string const& name) 
+    {
+	styles_.erase(name);
+    }
+    
+    feature_type_style Map::find_style(std::string const& name) const
+    {
+	std::map<std::string,feature_type_style>::const_iterator itr=styles_.find(name);
+	if (itr!=styles_.end()) 
+	    return itr->second;
+	return feature_type_style();
+    }
+    
     size_t Map::layerCount() const
     {
         return layers_.size();
     }
-
+    
     void Map::addLayer(const Layer& l)
     {
         layers_.push_back(l);
@@ -67,10 +87,7 @@ namespace mapnik
     {
         layers_.erase(layers_.begin()+index);
     }
-    void Map::removeLayer(const char* lName)
-    {
-        //todo
-    }
+
     const Layer& Map::getLayer(size_t index) const
     {
         return layers_[index];

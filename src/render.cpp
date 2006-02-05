@@ -21,7 +21,6 @@
 #include "render.hpp"
 #include "image_util.hpp"
 #include "utils.hpp"
-#include "named_style_cache.hpp"
 #include "symbolizer.hpp"
 #include "query.hpp"
 #include "feature_layer_desc.hpp"
@@ -36,7 +35,7 @@ namespace mapnik
 {  
     
     template <typename Image>
-    void Renderer<Image>::render_vector_layer(datasource_p const& ds,
+    void Renderer<Image>::render_vector_layer(datasource_p const& ds,Map const& map,
 					      std::vector<std::string> const& namedStyles,
 					      unsigned width,unsigned height,
 					      const Envelope<double>& bbox,Image& image)
@@ -45,7 +44,7 @@ namespace mapnik
 	std::vector<std::string>::const_iterator stylesIter=namedStyles.begin();
 	while (stylesIter!=namedStyles.end())
 	{
-	    feature_type_style style=named_style_cache::instance()->find(*stylesIter++);
+	    //feature_type_style style=named_style_cache::instance()->find(*stylesIter++);
 	    
 	    std::set<std::string> names;
 	    attribute_collector<Feature> collector(names);
@@ -56,6 +55,9 @@ namespace mapnik
 	    std::vector<rule_type*> else_rules;
 	    
 	    bool active_rules=false;
+
+	    feature_type_style style=map.find_style(*stylesIter++);
+
 	    const std::vector<rule_type>& rules=style.get_rules();
 	    std::vector<rule_type>::const_iterator ruleIter=rules.begin();
 	    
@@ -182,7 +184,7 @@ namespace mapnik
 		if (!ds) continue;
                 if (ds->type() == datasource::Vector)
 		{
-		    render_vector_layer(ds,l.styles(),width,height,extent,image);
+		    render_vector_layer(ds,map,l.styles(),width,height,extent,image);
 		}
 		else if (ds->type() == datasource::Raster)
 		{

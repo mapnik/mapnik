@@ -23,6 +23,7 @@
 
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
+#include "feature_type_style.hpp"
 
 namespace mapnik
 {
@@ -46,6 +47,7 @@ namespace mapnik
 	unsigned height_;
 	int srid_;
 	Color background_;
+	std::map<std::string,feature_type_style> styles_;
 	std::vector<Layer> layers_;
 	Envelope<double> currentExtent_;
     public:
@@ -53,11 +55,15 @@ namespace mapnik
 	Map(int width,int height,int srid=-1);
 	Map(const Map& rhs);
 	Map& operator=(const Map& rhs);
+
+	bool insert_style(std::string const& name,feature_type_style const& style);
+	void remove_style(const std::string& name);
+	feature_type_style find_style(std::string const& name) const;
+	
 	size_t layerCount() const;
 	void addLayer(const Layer& l);
 	const Layer& getLayer(size_t index) const;
 	void removeLayer(size_t index);
-	void removeLayer(const char* lName);
 	std::vector<Layer> const& layers() const;
 	unsigned getWidth() const;
 	unsigned getHeight() const;

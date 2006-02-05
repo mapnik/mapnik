@@ -36,7 +36,7 @@ namespace mapnik
 	static void render(const Map& map,Image& image);
     private:
 	Renderer();
-	static void render_vector_layer(datasource_p const& ds,
+	static void render_vector_layer(datasource_p const& ds,Map const& map,
 					std::vector<std::string> const& , 
 					unsigned width,
 					unsigned height,
