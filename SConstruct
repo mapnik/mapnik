@@ -37,7 +37,7 @@ opts.Add(PathOption('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/
 opts.Add(PathOption('PYTHON','Python executable', sys.executable))
 opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
-opts.Add(ListOption('DEBUG', 'Compile a debug version of mapnik', 'no', ['no', 'yes']))
+opts.Add('DEBUG', 'Compile a debug version of mapnik', '')
 
 env = Environment(ENV=os.environ, options=opts)
 
