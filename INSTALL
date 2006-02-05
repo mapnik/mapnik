@@ -105,8 +105,8 @@ PGSQL_LIBS: Search path for PostgreSQL library files ( /path/to/PGSQL_LIBS )
     actual: /usr/lib
 
 PYTHON: Python executable ( /path/to/PYTHON )
-    default: /usr/local/bin/python2.4
-    actual: /usr/local/bin/python2.4
+    default: /usr/bin/python
+    actual: /usr/bin/python
 
 INPUT_PLUGINS: Input drivers to include
     (all|none|comma-separated list of names)
@@ -119,6 +119,12 @@ BINDINGS: Language bindings to build
     allowed names: python
     default: all
     actual: python
+
+DEBUG: Compile a debug version of mapnik
+    (all|none|comma-separated list of names)
+    allowed names: no yes
+    default: no
+    actual: no
 
 This help should be self-explanatory!
 
