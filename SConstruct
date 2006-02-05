@@ -89,11 +89,17 @@ for libinfo in BOOST_LIBSHEADERS:
             print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
             Exit(1)
 
+Export('env')
+
+inputplugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
+
+bindings = [ binding.strip() for binding in Split(env['BINDINGS'])]
+
 # Check out the Python situation
 
 if 'python' in env['BINDINGS']:
     if not os.access(env['PYTHON'], os.X_OK):
-        print 'Cannot run python, make sure that you have the permissions to execute it.'
+        print "Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON']
         Exit(1)
 
     env['PYTHON_PREFIX'] = os.popen("%s -c 'import sys; print sys.prefix'" % env['PYTHON']).read().strip()
@@ -113,6 +119,8 @@ if 'python' in env['BINDINGS']:
 
     print 'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_PREFIX'])
 
+    SConscript('bindings/python/SConscript')
+
 env = conf.Finish()
 
 # Setup the c++ args for our own codebase
@@ -122,20 +130,16 @@ if env['DEBUG']:
 else:
     env.Append(CXXFLAGS = '-Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG')
 
-# Build the input plug-ins
-
-inputplugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
-
-Export('env')
-
 # Build agg first, doesn't need anything special
 
 SConscript('agg/SConscript')
 
-# Build shapeindex and remove it's dependency from the LIBS
+# Build shapeindex and remove its dependency from the LIBS
 
 if 'boost_program_options' in env['LIBS'] or 'boost_program_options-gcc-mt' in env['LIBS']:
     SConscript('utils/shapeindex/SConscript')
+
+# Build the input plug-ins
 
 if 'postgis' in inputplugins and 'pq' in env['LIBS']:
     SConscript('plugins/input/postgis/SConscript')
@@ -150,10 +154,3 @@ if 'raster' in inputplugins:
 # Build the core library
 
 SConscript('src/SConscript')
-
-# Build python bindings
-
-bindings = [ binding.strip() for binding in Split(env['BINDINGS'])]
-
-if 'python' in bindings:
-    SConscript('bindings/python/SConscript')
