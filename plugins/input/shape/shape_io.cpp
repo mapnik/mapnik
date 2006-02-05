@@ -92,9 +92,10 @@ geometry_ptr shape_io::read_polyline()
     int num_parts=record.read_ndr_integer();
     int num_points=record.read_ndr_integer();
     geometry_ptr line(new line_string_impl(-1));
-    
+    line->set_capacity(num_points + num_parts);
     if (num_parts == 1)
     {
+	line->set_capacity(num_points + 1);
 	record.skip(4);
 	double x=record.read_double();
 	double y=record.read_double();
@@ -145,7 +146,7 @@ geometry_ptr shape_io::read_polylinem()
     int num_parts=record.read_ndr_integer();
     int num_points=record.read_ndr_integer();
     geometry_ptr line(new line_string_impl(-1));
-    
+    line->set_capacity(num_points + num_parts);
     if (num_parts == 1)
     {
 	record.skip(4);
@@ -207,7 +208,7 @@ geometry_ptr shape_io::read_polylinez()
     int num_parts=record.read_ndr_integer();
     int num_points=record.read_ndr_integer();
     geometry_ptr line(new line_string_impl(-1));
-    
+    line->set_capacity(num_points + num_parts);
     if (num_parts == 1)
     {
 	record.skip(4);
@@ -277,7 +278,7 @@ geometry_ptr shape_io::read_polygon()
     int num_points=record.read_ndr_integer();
     std::vector<int> parts(num_parts);
     geometry_ptr poly(new polygon_impl(-1));
-    
+    poly->set_capacity(num_points + num_parts);
     for (int i=0;i<num_parts;++i)
     {
         parts[i]=record.read_ndr_integer();
@@ -317,7 +318,7 @@ geometry_ptr shape_io::read_polygonm()
     int num_points=record.read_ndr_integer();
     std::vector<int> parts(num_parts);
     geometry_ptr poly(new polygon_impl(-1));
-    
+    poly->set_capacity(num_points + num_parts);
     for (int i=0;i<num_parts;++i)
     {
         parts[i]=record.read_ndr_integer();
@@ -365,7 +366,7 @@ geometry_ptr shape_io::read_polygonz()
     int num_points=record.read_ndr_integer();
     std::vector<int> parts(num_parts);
     geometry_ptr poly(new polygon_impl(-1));
-    
+    poly->set_capacity(num_points + num_parts);
     for (int i=0;i<num_parts;++i)
     {
         parts[i]=record.read_ndr_integer();

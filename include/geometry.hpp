@@ -62,6 +62,7 @@ namespace mapnik
 	virtual unsigned num_points() const = 0;
 	virtual unsigned vertex(double* x, double* y)=0;
 	virtual void rewind(unsigned )=0;
+	virtual void set_capacity(size_t size)=0;
 	virtual ~geometry() {}
     };
     
@@ -120,6 +121,7 @@ namespace mapnik
 	{
 	    return false;
 	}
+	void set_capacity(size_t) {}
 	virtual ~point() {}
     };
 
@@ -216,6 +218,10 @@ namespace mapnik
 	{	    
 	    return false;
 	} 
+	void set_capacity(size_t size) 
+	{
+	    cont_.set_capacity(size);
+	}
 	virtual ~polygon() {}
     };
     
@@ -332,12 +338,17 @@ namespace mapnik
 	{	    
 	    return false;
 	} 
+	
+	void set_capacity(size_t size) 
+	{
+	    cont_.set_capacity(size);
+	}
 	virtual ~line_string() {}
     };
 
     typedef point<vertex2d> point_impl;
-    typedef line_string<vertex2d,vertex_vector> line_string_impl;
-    typedef polygon<vertex2d,vertex_vector> polygon_impl;
+    typedef line_string<vertex2d,vertex_vector2> line_string_impl;
+    typedef polygon<vertex2d,vertex_vector2> polygon_impl;
     
     typedef geometry<vertex2d> geometry_type;
     typedef boost::shared_ptr<geometry_type> geometry_ptr;

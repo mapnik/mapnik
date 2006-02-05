@@ -115,7 +115,10 @@ namespace mapnik
 	    ++vertex;
 	    t.forward_y(vertex);
 	}
-	
+	void set_capacity(size_t)
+	{
+	    //do nothing
+	}
     private:
 	void allocate_block(unsigned block)
 	{
@@ -143,9 +146,8 @@ namespace mapnik
     struct vertex_vector2 : boost::noncopyable
     {
 	typedef typename T::type value_type;
-	typedef boost::tuple<value_type,value_type,char> coord;
+	typedef boost::tuple<value_type,value_type,char> vertex_type;
 	vertex_vector2() {}
-	
 	unsigned size() const 
 	{
 	    return cont_.size();
@@ -153,27 +155,30 @@ namespace mapnik
 
 	void push_back (value_type x,value_type y,unsigned command)
 	{
-	    cont_.push_back(coord(x,y,command));
+	    cont_.push_back(vertex_type(x,y,command));
 	}
 	unsigned get_vertex(unsigned pos,value_type* x,value_type* y) const
 	{
 	    if (pos >= cont_.size()) return SEG_END;
-	    coord const& c = cont_[pos];
+	    vertex_type const& c = cont_[pos];
 	    *x = boost::get<0>(c);
 	    *y = boost::get<1>(c);
 	    return boost::get<2>(c);
 	}
-
+	
 	void transform_at(unsigned pos,const CoordTransform& t)
 	{
 	    if (pos >= cont_.size()) return;
-	    coord & c = cont_[pos];
+	    vertex_type & c = cont_[pos];
 	    t.forward_x(&boost::get<0>(c));
 	    t.forward_y(&boost::get<1>(c));
 	}
-	
+	void set_capacity(size_t size)
+	{
+	    cont_.reserve(size);
+	}
     private:
-	std::vector<coord> cont_;
+	std::vector<vertex_type> cont_;
     };
 }
 
