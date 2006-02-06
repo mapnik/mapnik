@@ -33,14 +33,7 @@ source = Split(
 
 headers = ['#plugins/input/shape'] + env['CPPPATH']
 
-if 'boost_program_options-gcc-mt' in env['LIBS']:
-    libraries = 'boost_program_options-gcc-mt'
-    env['LIBS'].remove('boost_program_options-gcc-mt')
-else:
-    libraries = 'boost_program_options'
-    env['LIBS'].remove('boost_program_options')
-
-shapeindex = env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries)
+shapeindex = env.Program('shapeindex', source, CPPPATH=headers, LIBS='boost_program_options%s' % env['BOOST_APPEND'])
 
 env.Install(prefix + '/bin', shapeindex)
 env.Alias('install', prefix + '/bin')

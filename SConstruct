@@ -83,11 +83,15 @@ for libinfo in C_LIBSHEADERS:
         print 'Could not find header or shared library for %s, exiting!' % libinfo[0]
         Exit(1)
 
+env['BOOST_APPEND'] = ''
+
 for libinfo in BOOST_LIBSHEADERS:
-    if not conf.CheckLibWithHeader('boost_%s' % libinfo[0], libinfo[1], 'C++'):
+    if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++'):
         if not conf.CheckLibWithHeader('boost_%s-%s-mt' % (libinfo[0], env['CC']), libinfo[1], 'C++') and libinfo[2]:
             print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
             Exit(1)
+        else:
+            env['BOOST_APPEND'] = '-%s-mt' % env['CC']
 
 Export('env')
 
@@ -136,8 +140,9 @@ SConscript('agg/SConscript')
 
 # Build shapeindex and remove its dependency from the LIBS
 
-if 'boost_program_options' in env['LIBS'] or 'boost_program_options-gcc-mt' in env['LIBS']:
+if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
     SConscript('utils/shapeindex/SConscript')
+    env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
 
 # Build the input plug-ins
 
