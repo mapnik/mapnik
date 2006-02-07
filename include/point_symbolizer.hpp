@@ -18,26 +18,25 @@
 
 //$Id: image_symbolizer.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef IMAGE_SYMBOLIZER_HPP
-#define IMAGE_SYMBOLIZER_HPP
+#ifndef POINT_SYMBOLIZER_HPP
+#define POINT_SYMBOLIZER_HPP
 
-#include "symbolizer.hpp"
-#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
+#include "graphics.hpp" 
 
 namespace mapnik 
 {   
-    struct image_symbolizer : public symbolizer,
-			      private boost::noncopyable
+    struct point_symbolizer
     {
-	  
-	image_symbolizer(std::string const& file,
+	
+	point_symbolizer(std::string const& file,
 			 std::string const& type,
 			 unsigned width,unsigned height);
-	
-	void render(Feature const& feat, CoordTransform const& t,Image32& image) const;
+	point_symbolizer(point_symbolizer const& rhs);
+	ImageData32 const& get_data() const;
     private:
-	ImageData32 symbol_;
+	boost::shared_ptr<ImageData32> symbol_;
     };
 }
 
-#endif // IMAGE_SYMBOLIZER_HPP
+#endif // POINT_SYMBOLIZER_HPP

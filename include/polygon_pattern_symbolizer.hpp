@@ -21,22 +21,23 @@
 #ifndef POLYGON_PATTERN_SYMBOLIZER_HPP
 #define POLYGON_PATTERN_SYMBOLIZER_HPP
 
-#include "symbolizer.hpp"
-#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
+#include "graphics.hpp" 
 
 namespace mapnik
 {
-    struct polygon_pattern_symbolizer : public symbolizer,
-					private boost::noncopyable
+    struct polygon_pattern_symbolizer
     {
 	
 	polygon_pattern_symbolizer(std::string const& file,
 				   std::string const& type,
 				   unsigned width,unsigned height);
         
-	void render(Feature const& feat, CoordTransform const& t,Image32& image) const;
+	polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs);
+        
+	ImageData32 const& get_pattern() const;
     private:
-	ImageData32 pattern_;
+	boost::shared_ptr<ImageData32> pattern_;
     };
 }
 

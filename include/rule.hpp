@@ -19,16 +19,27 @@
 #ifndef RULE_HPP
 #define RULE_HPP
 
-#include "symbolizer.hpp"
+#include "line_symbolizer.hpp"
+#include "line_pattern_symbolizer.hpp"
+#include "polygon_symbolizer.hpp"
+#include "polygon_pattern_symbolizer.hpp"
+#include "point_symbolizer.hpp"
 #include "filter.hpp"
 #include <boost/shared_ptr.hpp>
+#include <boost/variant.hpp>
 #include <string>
 #include <vector>
 
 namespace mapnik
 {
-    typedef boost::shared_ptr<symbolizer> symbolizer_ptr;
-    typedef std::vector<symbolizer_ptr> symbolizers;    
+    
+    typedef boost::variant<point_symbolizer,
+			   line_symbolizer,
+			   line_pattern_symbolizer,
+			   polygon_symbolizer,
+			   polygon_pattern_symbolizer> symbolizer;
+    
+    typedef std::vector<symbolizer> symbolizers;    
     template <typename FeatureT> class all_filter;
 
     template <typename FeatureT,template <typename> class Filter>
@@ -140,9 +151,9 @@ namespace mapnik
 	    return abstract_;
 	}
 		
-	void append(const symbolizer_ptr& symbol)
+	void append(const symbolizer& sym)
 	{
-	    syms_.push_back(symbol);
+	    syms_.push_back(sym);
 	}
 	
 	void remove_at(size_t index)

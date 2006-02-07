@@ -1,5 +1,5 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2006 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,32 +18,25 @@
 
 //$Id$
 
-#include "polygon_pattern_symbolizer.hpp"
+#ifndef AGG_RENDERER_HPP
+#define AGG_RENDERER_HPP
 
-#include "image_reader.hpp"
+#include "feature_style_processor.hpp"
 
 namespace mapnik
 {
-    polygon_pattern_symbolizer::polygon_pattern_symbolizer(std::string const& file,
-							   std::string const& type,
-							   unsigned width,unsigned height) 
-	: pattern_(new ImageData32(width,height))
+    struct agg_renderer : public feature_style_processor<agg_renderer> 
     {
-	try 
-	{
-	    std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-	    reader->read(0,0,*pattern_);		
-	} 
-	catch (...) 
-	{
-	    std::cerr<<"exception caught..."<<std::endl;
-	}
-    }
-    polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)
-	: pattern_(rhs.pattern_) {}
-    
-    ImageData32 const& polygon_pattern_symbolizer::get_pattern() const
-    {
-	return *pattern_;
-    }
+	agg_renderer(Map const& m, Image32 & pixmap);
+	void process(point_symbolizer const& sym,Feature const& feature);	    	       
+	void process(line_symbolizer const& sym,Feature const& feature);
+	void process(line_pattern_symbolizer const& sym,Feature const& feature);
+	void process(polygon_symbolizer const& sym,Feature const& feature);
+	void process(polygon_pattern_symbolizer const& sym,Feature const& feature);
+    private:
+	Image32 & pixmap_;
+	CoordTransform t_;
+    };
 }
+
+#endif //AGG_RENDERER_HPP

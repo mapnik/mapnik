@@ -58,8 +58,7 @@ namespace mapnik
 
 	bool insert_style(std::string const& name,feature_type_style const& style);
 	void remove_style(const std::string& name);
-	feature_type_style find_style(std::string const& name) const;
-	
+	feature_type_style const& find_style(std::string const& name) const;
 	size_t layerCount() const;
 	void addLayer(const Layer& l);
 	const Layer& getLayer(size_t index) const;

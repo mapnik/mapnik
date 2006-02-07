@@ -18,22 +18,21 @@
 
 //$Id$
 
-#include "image_symbolizer.hpp"
+#include "point_symbolizer.hpp"
 #include "image_data.hpp"
 #include "image_reader.hpp"
 
 namespace mapnik
 {
-    image_symbolizer::image_symbolizer(std::string const& file,
-			 std::string const& type,
-			 unsigned width,unsigned height) 
-	    : symbolizer(),
-	      symbol_(width,height)
+    point_symbolizer::point_symbolizer(std::string const& file,
+				       std::string const& type,
+				       unsigned width,unsigned height) 
+	: symbol_(new ImageData32(width,height))
     {
 	try 
 	{
 	    std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-	    reader->read(0,0,symbol_);		
+	    reader->read(0,0,*symbol_);		
 	} 
 	catch (...) 
 	{
@@ -41,22 +40,13 @@ namespace mapnik
 	}
     }
     
-    void image_symbolizer::render(Feature const& feat,CoordTransform const& t,Image32& image) const	
+    point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
+	: symbol_(rhs.symbol_) 
+    {}
+    
+    ImageData32 const& point_symbolizer::get_data() const
     {
-	geometry_ptr const& geom=feat.get_geometry();
-	if (geom)
-	{
-	    double x;
-	    double y;
-	    geom->label_position(&x,&y);
-	    t.forward_x(&x);
-	    t.forward_y(&y);
-	    int w=symbol_.width();
-	    int h=symbol_.height();    
-	    int px=int(ceil(x - 0.5 * w));
-	    int py=int(ceil(y - 0.5 * h));
-	    image.set_rectangle_alpha(px,py,symbol_);
-	}
+	return *(symbol_.get());
     }
 }
 

@@ -66,12 +66,13 @@ namespace mapnik
 	styles_.erase(name);
     }
     
-    feature_type_style Map::find_style(std::string const& name) const
+    feature_type_style const&  Map::find_style(std::string const& name) const
     {
 	std::map<std::string,feature_type_style>::const_iterator itr=styles_.find(name);
 	if (itr!=styles_.end()) 
 	    return itr->second;
-	return feature_type_style();
+	static feature_type_style default_style;
+	return default_style;
     }
     
     size_t Map::layerCount() const

@@ -40,17 +40,21 @@ source = Split(
     params.cpp
     plugin.cpp
     png_reader.cpp
-    render.cpp
     text.cpp
     tiff_reader.cpp
     wkb.cpp
-    line_symbolizer.cpp
-    line_pattern_symbolizer.cpp
-    polygon_symbolizer.cpp
+    agg_renderer.cpp
+    point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
-    image_symbolizer.cpp
+    line_pattern_symbolizer.cpp
     """
     )
+#render.cpp
+#line_symbolizer.cpp
+#    line_pattern_symbolizer.cpp
+#    polygon_symbolizer.cpp
+#    polygon_pattern_symbolizer.cpp
+#    image_symbolizer.cpp
 
 mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
 

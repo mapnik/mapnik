@@ -21,20 +21,20 @@
 #ifndef SYMBOLIZER_HPP
 #define SYMBOLIZER_HPP
 
-#include "graphics.hpp" 
-#include "feature.hpp"
-#include "geometry.hpp"
-#include <limits>
+//#include "graphics.hpp" 
+//#include "feature.hpp"
+//#include "geometry.hpp"
+//#include <limits>
 
 namespace mapnik 
 {
-    class Image32;
+    //class Image32;
 
-    struct symbolizer
-    {
-    	virtual void render(Feature const& feat, CoordTransform const& t, Image32& image) const=0;
-    	virtual ~symbolizer() {}
-    }; 
+    //struct symbolizer
+    //{
+    //	virtual void render(Feature const& feat, CoordTransform const& t, Image32& image) const=0;
+    //	virtual ~symbolizer() {}
+    //}; 
 }
 
 #endif //SYMBOLIZER_HPP

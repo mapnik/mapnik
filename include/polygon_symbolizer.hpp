@@ -21,16 +21,19 @@
 #ifndef POLYGON_SYMBOLIZER_HPP
 #define POLYGON_SYMBOLIZER_HPP
 
-#include "symbolizer.hpp"
-#include <boost/utility.hpp>
+//#include "symbolizer.hpp"
+//#include <boost/utility.hpp>
 
 namespace mapnik 
 {
-    struct polygon_symbolizer : public symbolizer,
-				private boost::noncopyable
+    struct polygon_symbolizer
     {
-	polygon_symbolizer(const Color& fill);
-	void render(Feature const& feat, CoordTransform const& t,Image32& image) const;
+	polygon_symbolizer(Color const& fill)
+	    : fill_(fill) {}
+	Color const& get_fill() const
+	{
+	    return fill_;
+	}
     private:
 	Color fill_;
     };  

@@ -44,8 +44,6 @@ namespace mapnik
 	std::vector<std::string>::const_iterator stylesIter=namedStyles.begin();
 	while (stylesIter!=namedStyles.end())
 	{
-	    //feature_type_style style=named_style_cache::instance()->find(*stylesIter++);
-	    
 	    std::set<std::string> names;
 	    attribute_collector<Feature> collector(names);
 	    property_index<Feature> indexer(names);
@@ -56,8 +54,8 @@ namespace mapnik
 	    
 	    bool active_rules=false;
 
-	    feature_type_style style=map.find_style(*stylesIter++);
-
+	    feature_type_style const& style=map.find_style(*stylesIter++);
+	    
 	    const std::vector<rule_type>& rules=style.get_rules();
 	    std::vector<rule_type>::const_iterator ruleIter=rules.begin();
 	    

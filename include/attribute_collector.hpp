@@ -18,8 +18,8 @@
 
 //$Id$
 
-#ifndef ATTRIBUTE_COLLECTOR
-#define ATTROBUTE_COLLECTOR
+#ifndef ATTRIBUTE_COLLECTOR_HPP
+#define ATTRIBUTE_COLLECTOR_HPP
 
 #include "filter.hpp"
 #include "expression.hpp"

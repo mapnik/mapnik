@@ -30,49 +30,7 @@
 #include <boost/shared_ptr.hpp>
 
 namespace mapnik
-{
-    class Style 
-    {
-    private:
-	std::vector<boost::shared_ptr<symbolizer> > symbols_;
-	static boost::shared_ptr<symbolizer> zero_symbol_;
-    public:
-	typedef std::vector<boost::shared_ptr<symbolizer> >::const_iterator Iterator; 
-
-	Style() {}
-
-	Style(const boost::shared_ptr<symbolizer>& symbol) 
-	{
-	    symbols_.push_back(symbol);
-	}
-
-	~Style() {}
-
-	Style(const Style& rhs) 
-	    : symbols_(rhs.symbols_) {}
-	
-	Style& operator=(const Style& rhs)
-	{
-	    if (this==&rhs) return *this;
-	    symbols_=rhs.symbols_;
-	    return *this;
-	}
-	
-	void add(const boost::shared_ptr<symbolizer>& symbol) 
-	{
-	    symbols_.push_back(symbol);
-	}
-        
-	Iterator begin() const 
-	{
-	    return symbols_.begin();
-	} 
-
-	Iterator end() const 
-	{
-	    return symbols_.end();
-	}
-    };    
+{      
 }
 
 #endif //STYLE_HPP
