@@ -43,36 +43,12 @@ namespace mapnik
 	    symbol_dispatch (Processor & output,Feature const& f)
 		: output_(output),f_(f) {}
 	    
-	    void operator () (polygon_symbolizer const& sym) const
+	    template <typename T>
+	    void operator () (T const& sym) const
 	    {
 		output_.process(sym,f_);
 	    }
 
-	    void operator () (polygon_pattern_symbolizer const& sym) const
-	    {
-		output_.process(sym,f_);
-	    }
-	    
-	    void operator () (line_symbolizer const& sym) const
-	    {
-		output_.process(sym,f_);
-	    }
-	    
-	    void operator () (line_pattern_symbolizer const& sym) const
-	    {
-		output_.process(sym,f_);
-	    }
-	   
-	    void operator () (point_symbolizer const& sym) const
-	    {
-		output_.process(sym,f_);
-	    }
-
-	    void operator () (raster_symbolizer const& sym) const
-	    {
-		output_.process(sym,f_);
-	    }
-	    
 	    Processor & output_;
 	    Feature const& f_;
 	};
