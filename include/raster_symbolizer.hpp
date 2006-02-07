@@ -1,5 +1,5 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,26 +18,14 @@
 
 //$Id$
 
-#ifndef AGG_RENDERER_HPP
-#define AGG_RENDERER_HPP
+#ifndef RASTER_SYMBOLIZER_HPP
+#define RASTER_SYMBOLIZER_HPP
 
-#include "feature_style_processor.hpp"
+#include <boost/shared_ptr.hpp> 
 
 namespace mapnik
 {
-    struct agg_renderer : public feature_style_processor<agg_renderer> 
-    {
-	agg_renderer(Map const& m, Image32 & pixmap);
-	void process(point_symbolizer const& sym,Feature const& feature);	    	       
-	void process(line_symbolizer const& sym,Feature const& feature);
-	void process(line_pattern_symbolizer const& sym,Feature const& feature);
-	void process(polygon_symbolizer const& sym,Feature const& feature);
-	void process(polygon_pattern_symbolizer const& sym,Feature const& feature);
-	void process(raster_symbolizer const& sym,Feature const& feature);
-    private:
-	Image32 & pixmap_;
-	CoordTransform t_;
-    };
+    struct raster_symbolizer { /* TODO */};
 }
 
-#endif //AGG_RENDERER_HPP
+#endif //RASTER_SYMBOLIZER

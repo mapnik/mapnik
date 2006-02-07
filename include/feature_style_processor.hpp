@@ -67,6 +67,11 @@ namespace mapnik
 	    {
 		output_.process(sym,f_);
 	    }
+
+	    void operator () (raster_symbolizer const& sym) const
+	    {
+		output_.process(sym,f_);
+	    }
 	    
 	    Processor & output_;
 	    Feature const& f_;

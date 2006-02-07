@@ -332,4 +332,15 @@ namespace mapnik
 	    agg::render_scanlines(ras, sl, rp);   
 	}
     }
+    void agg_renderer::process(raster_symbolizer const& ,Feature const& feature)
+    {
+	// TODO -- at the moment raster_symbolizer is an empty class 
+	// used for type dispatching, but we can have some fancy raster
+	// processing in a future (filters??). Just copy raster into pixmap for now.
+	raster_ptr const& raster=feature.get_raster();
+	if (raster)
+	{
+	    pixmap_.set_rectangle(raster->x_,raster->y_,raster->data_);
+	}
+    }
 }

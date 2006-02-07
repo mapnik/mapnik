@@ -24,6 +24,7 @@
 #include "polygon_symbolizer.hpp"
 #include "polygon_pattern_symbolizer.hpp"
 #include "point_symbolizer.hpp"
+#include "raster_symbolizer.hpp"
 #include "filter.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
@@ -37,7 +38,8 @@ namespace mapnik
 			   line_symbolizer,
 			   line_pattern_symbolizer,
 			   polygon_symbolizer,
-			   polygon_pattern_symbolizer> symbolizer;
+			   polygon_pattern_symbolizer,
+			   raster_symbolizer> symbolizer;
     
     typedef std::vector<symbolizer> symbolizers;    
     template <typename FeatureT> class all_filter;
