@@ -22,10 +22,12 @@
 #define AGG_RENDERER_HPP
 
 #include "feature_style_processor.hpp"
+#include <boost/utility.hpp>
 
 namespace mapnik
 {
-    struct agg_renderer : public feature_style_processor<agg_renderer> 
+    struct agg_renderer : public feature_style_processor<agg_renderer>,
+			  private boost::noncopyable
     {
 	agg_renderer(Map const& m, Image32 & pixmap);
 	void process(point_symbolizer const& sym,Feature const& feature);	    	       
