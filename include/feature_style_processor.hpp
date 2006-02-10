@@ -29,7 +29,6 @@
 #include "layer.hpp"
 #include "map.hpp"
 #include "attribute_collector.hpp"
-#include "property_index.hpp"
 #include "utils.hpp"
 
 namespace mapnik
@@ -64,7 +63,8 @@ namespace mapnik
 	    std::vector<Layer>::const_iterator itr = m_.layers().begin();
 	    while (itr != m_.layers().end())
 	    {
-		if (itr->isVisible(m_.scale()))// && itr->envelope().intersects(extent))
+		if (itr->isVisible(m_.scale()) && 
+		    itr->envelope().intersects(m_.getCurrentExtent()))
 		{
 		    apply_to_layer(*itr,p);
 		}
@@ -87,7 +87,7 @@ namespace mapnik
 		{
 		    std::set<std::string> names;
 		    attribute_collector<Feature> collector(names);
-		    property_index<Feature> indexer(names);
+		    //property_index<Feature> indexer(names);
 		    std::vector<rule_type*> if_rules;
 		    std::vector<rule_type*> else_rules;
 		
@@ -104,9 +104,10 @@ namespace mapnik
 			if (ruleIter->active(scale))
 			{
 			    active_rules=true;
-			    filter_ptr& filter=const_cast<filter_ptr&>(ruleIter->get_filter());
-			    filter->accept(collector);
-			    filter->accept(indexer);
+			    //filter_ptr& filter=const_cast<filter_ptr&>(ruleIter->get_filter());
+			    //filter->accept(collector);
+			    ruleIter->accept(collector);
+			    //filter->accept(indexer);
 			    if (ruleIter->has_else_filter())
 			    {
 				else_rules.push_back(const_cast<rule_type*>(&(*ruleIter)));

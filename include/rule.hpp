@@ -25,7 +25,10 @@
 #include "polygon_pattern_symbolizer.hpp"
 #include "point_symbolizer.hpp"
 #include "raster_symbolizer.hpp"
+#include "text_symbolizer.hpp"
 #include "filter.hpp"
+#include "filter_visitor.hpp"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <string>
@@ -39,7 +42,8 @@ namespace mapnik
 			   line_pattern_symbolizer,
 			   polygon_symbolizer,
 			   polygon_pattern_symbolizer,
-			   raster_symbolizer> symbolizer;
+			   raster_symbolizer,
+			   text_symbolizer> symbolizer;
     
     typedef std::vector<symbolizer> symbolizers;    
     template <typename FeatureT> class all_filter;
@@ -128,12 +132,12 @@ namespace mapnik
 	    name_=name;
 	}
 	
-	const std::string& get_name() const
+	std::string const& get_name() const
 	{
 	    return name_;
 	}
 	
-	const std::string& get_title() const
+	std::string const& get_title() const
 	{
 	    return  title_;
 	}
@@ -143,12 +147,12 @@ namespace mapnik
 	    title_=title;
 	}
   
-	void set_abstract(const std::string& abstract)
+	void set_abstract(std::string const& abstract)
 	{
 	    abstract_=abstract;
 	}
 	
-	const std::string& get_abstract() const
+	std::string const& get_abstract() const
 	{
 	    return abstract_;
 	}
@@ -186,7 +190,7 @@ namespace mapnik
 	    filter_=filter;
 	}
 
-	const filter_ptr& get_filter() const
+	filter_ptr const& get_filter() const
 	{
 	    return filter_;
 	}
@@ -206,6 +210,11 @@ namespace mapnik
 	    return ( scale > min_scale_ && scale < max_scale_ );
 	}
 
+	void accept(filter_visitor<FeatureT>& v) const
+	{
+	    v.visit(*this);
+	}
+	
     private:
 	
 	void swap(rule& rhs) throw()
@@ -220,6 +229,8 @@ namespace mapnik
 	    else_filter_=rhs.else_filter_;
 	}
     };
+
+    typedef rule<Feature,filter> rule_type;
 }
 
 #endif //RULE_HPP

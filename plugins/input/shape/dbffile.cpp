@@ -110,11 +110,11 @@ const field_descriptor& dbf_file::descriptor(int col) const
 }
 
 
-void dbf_file::add_attribute(int col,Feature* f) const throw()
+void dbf_file::add_attribute(int col,Feature const& f) const throw()
 {
     if (col>=0 && col<num_fields_)
     {
-        
+        std::string name=fields_[col].name_;
 	std::string str=trim(std::string(record_+fields_[col].offset_,fields_[col].length_));
         
         switch (fields_[col].type_)
@@ -123,27 +123,27 @@ void dbf_file::add_attribute(int col,Feature* f) const throw()
 	case 'D'://todo handle date?
 	case 'M':
 	case 'L':
-	    f->add_property(str);
+	    f[name] = str; 
 	    break;
 	case 'N':
         case 'F':
 	    {
 		if (str[0]=='*')
 		{
-		    f->add_property("null");
+		    boost::put(f,name,0);
 		    break;
 		}
 		if (fields_[col].dec_>0)
 		{   
 		    double d;
 		    fromString(str,d);
-		    f->add_property(d);
+		    boost::put(f,name,d);
 		}
 		else
 		{
 		    int i;
 		    fromString(str,i);
-		    f->add_property(i);
+		    boost::put(f,name,i);
 		}
 		break;
 	    }

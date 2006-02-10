@@ -25,445 +25,376 @@
 #include <sstream>
 #include <boost/variant.hpp>
 
-using std::string;
 using namespace boost;
-namespace mapnik { namespace impl {
+namespace mapnik {
 
-    typedef variant<int,double,string> value_holder;
+    typedef variant<int,double,std::string> value_base;
     
-    class equals
-	: public boost::static_visitor<bool>
+    namespace impl {
+	struct equals
+	    : public boost::static_visitor<bool>
+	{
+	    template <typename T, typename U>
+	    bool operator() (const T &, const U & ) const
+	    {
+		return false;
+	    }
+	
+	    template <typename T>
+	    bool operator() (T lhs, T rhs) const
+	    {
+		return lhs == rhs;
+	    }
+	
+	    bool operator() (int lhs, double rhs) const
+	    {
+		return  lhs == rhs;
+	    }
+	
+	    bool operator() (double lhs, int rhs) const
+	    {
+		return  lhs == rhs;
+	    }
+	
+	    bool operator() (std::string const& lhs, std::string const& rhs) const
+	    {
+		return  lhs == rhs;
+	    }
+	};
+    
+	struct greater_than
+	    : public boost::static_visitor<bool>
+	{
+	    template <typename T, typename U>
+	    bool operator()( const T &, const U & ) const
+	    {
+		return false;
+	    }
+	
+	    template <typename T>
+	    bool operator()( T lhs, T rhs ) const
+	    {
+		return lhs > rhs;
+	    }
+	
+	    bool operator() (int lhs, double rhs) const
+	    {
+		return  lhs > rhs;
+	    }
+	
+	    bool operator() (double lhs, int rhs) const
+	    {
+		return  lhs > rhs;
+	    }
+	
+	    bool operator() (std::string const& lhs, std::string const& rhs) const
+	    {
+		return  lhs > rhs;
+	    }
+	};
+    
+	struct greater_or_equal
+	    : public boost::static_visitor<bool>
+	{	
+	    template <typename T, typename U>
+	    bool operator()( const T &, const U & ) const
+	    {
+		return false;
+	    }
+	
+	    template <typename T>
+	    bool operator() (T lhs, T rhs) const
+	    {
+		return lhs >= rhs;
+	    }
+      
+	    bool operator() (int lhs, double rhs) const
+	    {
+		return  lhs >= rhs;
+	    }
+	
+	    bool operator() (double lhs, int rhs) const
+	    {
+		return  lhs >= rhs;
+	    }
+	
+	    bool operator() (std::string const& lhs, std::string const& rhs ) const
+	    {
+		return lhs >= rhs;
+	    }
+	};
+    
+	struct less_than
+	    : public boost::static_visitor<bool>
+	{	
+	    template <typename T, typename U>
+	    bool operator()( const T &, const U & ) const
+	    {
+		return false;
+	    }
+	
+	    template <typename T>
+	    bool operator()( T  lhs,T  rhs) const
+	    {
+		return lhs < rhs;
+	    }
+	
+	    bool operator() (int lhs, double rhs) const
+	    {
+		return  lhs < rhs;
+	    }
+	   
+	    bool operator() (double lhs, int rhs) const
+	    {
+		return  lhs < rhs;
+	    }
+	
+	    bool operator()( std::string const& lhs, std::string const& rhs ) const
+	    {
+		return lhs < rhs;
+	    }
+	};
+
+	struct less_or_equal
+	    : public boost::static_visitor<bool>
+	{	
+	    template <typename T, typename U>
+	    bool operator()( const T &, const U & ) const
+	    {
+		return false;
+	    }
+	
+	    template <typename T>
+	    bool operator()(T lhs, T rhs ) const
+	    {
+		return lhs <= rhs;
+	    }
+	    
+	    bool operator() (int lhs, double rhs) const
+	    {
+		return  lhs <= rhs;
+	    }
+	
+	    bool operator() (double lhs, int rhs) const
+	    {
+		return  lhs <= rhs;
+	    }
+	
+	    template <typename T>
+	    bool operator()( std::string const& lhs, std::string const& rhs ) const
+	    {
+		return lhs <= rhs;
+	    }
+	};
+    
+	template <typename V>
+	struct add : public boost::static_visitor<V>
+	{ 
+	    typedef V value_type;
+	    template <typename T1, typename T2>
+	    value_type operator() (T1 const& lhs, T2 const&) const
+	    {
+		return lhs;
+	    }
+	    template <typename T>
+	    value_type operator() (T lhs, T rhs) const
+	    {
+		return lhs + rhs ;
+	    }
+	
+	    value_type operator() (std::string const& lhs,std::string const& rhs ) const
+	    {
+		return lhs + rhs;
+	    }
+	
+	    value_type operator() (double lhs, int rhs) const
+	    {
+		return lhs + rhs;
+	    }
+	
+	    value_type operator() (int lhs, double rhs) const
+	    {
+		return lhs + rhs;
+	    }
+	};
+	template <typename V>
+	struct sub : public boost::static_visitor<V>
+	{ 
+	    typedef V value_type;
+	    template <typename T1, typename T2>
+	    value_type operator() (T1 const& lhs, T2 const&) const
+	    {
+		return lhs;
+	    }
+
+	    template <typename T>
+	    value_type operator() (T  lhs, T rhs) const
+	    {
+		return lhs - rhs ;
+	    }
+
+	    value_type operator() (std::string const& lhs,std::string const& ) const
+	    {
+		return lhs;
+	    }
+        	
+	    value_type operator() (double lhs, int rhs) const
+	    {
+		return lhs - rhs;
+	    }
+	
+	    value_type operator() (int lhs, double rhs) const
+	    {
+		return lhs - rhs;
+	    }
+	};
+    
+	template <typename V>
+	struct mult : public boost::static_visitor<V>
+	{ 
+	    typedef V value_type;
+	    template <typename T1, typename T2>
+	    value_type operator() (T1 const& lhs , T2 const& ) const
+	    {
+		return lhs;
+	    }
+	    template <typename T>
+	    value_type operator() (T lhs, T rhs) const
+	    {
+		return lhs * rhs;
+	    }
+	
+	    value_type operator() (std::string const& lhs,std::string const& ) const
+	    {
+		return lhs;
+	    }	
+	
+	    value_type operator() (double lhs, int rhs) const
+	    {
+		return lhs * rhs;
+	    }
+	
+	    value_type operator() (int lhs, double rhs) const
+	    {
+		return lhs * rhs;
+	    }
+	};
+
+	template <typename V>
+	struct div: public boost::static_visitor<V>
+	{ 
+	    typedef V value_type;
+	    template <typename T1, typename T2>
+	    value_type operator() (T1 const& lhs, T2 const&) const
+	    {
+		return lhs;
+	    }
+	    
+	    template <typename T>
+	    value_type operator() (T lhs, T rhs) const
+	    {
+		return lhs / rhs;
+	    }
+	
+	    value_type operator() (std::string const& lhs,std::string const&) const
+	    {
+		return lhs;
+	    }
+	
+	    value_type operator() (double lhs, int rhs) const
+	    {
+		return lhs / rhs;
+	    }
+	
+	    value_type operator() (int lhs, double rhs) const
+	    {
+		return lhs / rhs;
+	    }
+	};
+    
+	struct to_string : public boost::static_visitor<std::string>
+	{
+	    template <typename T>
+	    std::string operator() (T val) const
+	    {
+		std::stringstream ss;
+		ss << val;
+		return ss.str();
+	    } 
+	    std::string operator() (std::string const& val) const
+	    {
+		return "'" + val + "'";
+	    }
+	};
+    }
+    
+    class value : public value_base
     {
     public:
-	template <typename T, typename U>
-	bool operator()( const T &, const U & ) const
-	{
-	    return false;
-	}
+	value ()
+	    : value_base(0) {}
 	
-	bool operator() (int lhs, int rhs) const
-	{
-	    return  lhs == rhs;
-	}
-	
-	bool operator() (double lhs, double rhs) const
-	{
-	    return  lhs == rhs;
-	}
-
-	bool operator() (int lhs, double rhs) const
-	{
-	    return  lhs == rhs;
-	}
-	
-	bool operator() (double lhs, int rhs) const
-	{
-	    return  lhs == rhs;
-	}
-	
-	template <typename T>
-	bool operator()( const T & lhs, const T & rhs ) const
-	{
-	    return lhs == rhs;
-	}
-    };
-    
-    class greater_than
-	: public boost::static_visitor<bool>
-    {
-    public:	
-	template <typename T, typename U>
-	bool operator()( const T &, const U & ) const
-	{
-	    return false;
-	}
-	
-	bool operator() (int lhs, int rhs) const
-	{
-	    return  lhs > rhs;
-	}
-	
-	bool operator() (double lhs, double rhs) const
-	{
-	    return  lhs > rhs;
-	}
-	
-	bool operator() (int lhs, double rhs) const
-	{
-	    return  lhs > rhs;
-	}
-	
-	bool operator() (double lhs, int rhs) const
-	{
-	    return  lhs > rhs;
-	}
-	
-	template <typename T>
-	bool operator()( const T & lhs, const T & rhs ) const
-	{
-	    return lhs > rhs;
-	}
-    };
-    class greater_or_equal
-	: public boost::static_visitor<bool>
-    {
-    public:	
-	template <typename T, typename U>
-	bool operator()( const T &, const U & ) const
-	{
-	    return false;
-	}
-	
-	bool operator() (int lhs, int rhs) const
-	{
-	    return  lhs >= rhs;
-	}
-	
-	bool operator() (double lhs, double rhs) const
-	{
-	    return  lhs >= rhs;
-	}
-	
-	bool operator() (int lhs, double rhs) const
-	{
-	    return  lhs >= rhs;
-	}
-	
-	bool operator() (double lhs, int rhs) const
-	{
-	    return  lhs >= rhs;
-	}
-	
-	template <typename T>
-	bool operator()( const T & lhs, const T & rhs ) const
-	{
-	    return lhs >= rhs;
-	}
-    };
-    
-    class less_than
-	: public boost::static_visitor<bool>
-    {
-    public:	
-	template <typename T, typename U>
-	bool operator()( const T &, const U & ) const
-	{
-	    return false;
-	}
-	
-	bool operator() (int lhs, int rhs) const
-	{
-	    return  lhs < rhs;
-	}
-	
-	bool operator() (double lhs, double rhs) const
-	{
-	    return  lhs < rhs;
-	}
-	
-	bool operator() (int lhs, double rhs) const
-	{
-	    return  lhs < rhs;
-	}
-	
-	bool operator() (double lhs, int rhs) const
-	{
-	    return  lhs < rhs;
-	}
-	
-	template <typename T>
-	bool operator()( const T & lhs, const T & rhs ) const
-	{
-	    return lhs < rhs;
-	}
-    };
-
-    class less_or_equal
-	: public boost::static_visitor<bool>
-    {
-    public:	
-	template <typename T, typename U>
-	bool operator()( const T &, const U & ) const
-	{
-	    return false;
-	}
-	
-	bool operator() (int lhs, int rhs) const
-	{
-	    return  lhs <= rhs;
-	}
-	
-	bool operator() (double lhs, double rhs) const
-	{
-	    return  lhs <= rhs;
-	}
-	
-	bool operator() (int lhs, double rhs) const
-	{
-	    return  lhs <= rhs;
-	}
-	
-	bool operator() (double lhs, int rhs) const
-	{
-	    return  lhs <= rhs;
-	}
-	
-	template <typename T>
-	bool operator()( const T & lhs, const T & rhs ) const
-	{
-	    return lhs <= rhs;
-	}
-    };
-    
-    struct add : public boost::static_visitor<value_holder>
-    { 
-	template <typename T1, typename T2>
-	value_holder operator() (T1 const& , T2 const&) const
-	{
-	    return value_holder();
-	}
-	template <typename T>
-	value_holder operator() (T const& lhs, T const&  rhs) const
-	{
-	    return lhs + rhs ;
-	}
-	value_holder operator() (int lhs,int rhs) const
-	{
-	    return lhs + rhs;
-	}
-	value_holder operator() (double lhs, double rhs) const
-	{
-	    return lhs + rhs;
-	}
-	
-	value_holder operator() (double lhs, int rhs) const
-	{
-	    return lhs + rhs;
-	}
-	
-	value_holder operator() (int lhs, double rhs) const
-	{
-	    return lhs + rhs;
-	}
-    };
-    
-    struct sub : public boost::static_visitor<value_holder>
-    { 
-	template <typename T1, typename T2>
-	value_holder operator() (T1 const& lhs, T2 const&) const
-	{
-	    return value_holder(lhs);
-	}
-
-	template <typename T>
-	value_holder operator() (T const& lhs, T const&  rhs) const
-	{
-	    return lhs - rhs ;
-	}
-
-	value_holder operator() (string const& lhs,string const& ) const
-	{
-	    return lhs;
-	}
-
-	value_holder operator() (int lhs,int rhs) const
-	{
-	    return lhs - rhs;
-	}
-
-	value_holder operator() (double lhs, double rhs) const
-	{
-	    return lhs - rhs;
-	}
-	
-	value_holder operator() (double lhs, int rhs) const
-	{
-	    return lhs - rhs;
-	}
-	
-	value_holder operator() (int lhs, double rhs) const
-	{
-	    return lhs - rhs;
-	}
-    };
-    
-    struct mult : public boost::static_visitor<value_holder>
-    { 
-	template <typename T1, typename T2>
-	value_holder operator() (T1 const&, T2 const& ) const
-	{
-	    return value_holder();
-	}
-	template <typename T>
-	value_holder operator() (T const& lhs, T const&  rhs) const
-	{
-	    return lhs * rhs;
-	}
-	
-	value_holder operator() (string const& lhs,string const& ) const
-	{
-	    return lhs;
-	}
-
-	value_holder operator() (int lhs,int rhs) const
-	{
-	    return lhs * rhs;
-	}
-
-	value_holder operator() (double lhs, double rhs) const
-	{
-	    return lhs * rhs;
-	}
-	
-	value_holder operator() (double lhs, int rhs) const
-	{
-	    return lhs * rhs;
-	}
-	
-	value_holder operator() (int lhs, double rhs) const
-	{
-	    return lhs * rhs;
-	}
-    };
-
-    struct div: public boost::static_visitor<value_holder>
-    { 
-	template <typename T1, typename T2>
-	value_holder operator() (T1 const&, T2 const&) const
-	{
-	    return value_holder();
-	}
-	template <typename T>
-	value_holder operator() (T const& lhs, T const&  rhs) const
-	{
-	    return lhs / rhs;
-	}
-	
-	value_holder operator() (string const& lhs,string const&) const
-	{
-	    return lhs;
-	}
-
-	value_holder operator() (int lhs,int rhs) const
-	{
-	    return lhs / rhs;
-	}
-
-	value_holder operator() (double lhs, double rhs) const
-	{
-	    return lhs / rhs;
-	}
-	
-	value_holder operator() (double lhs, int rhs) const
-	{
-	    return lhs / rhs;
-	}
-	
-	value_holder operator() (int lhs, double rhs) const
-	{
-	    return lhs / rhs;
-	}
-    };
-    
-    struct to_string : public boost::static_visitor<std::string>
-    {
-	template <typename T>
-	std::string operator() (T val) const
-	{
-	    std::stringstream ss;
-	    ss << val;
-	    return ss.str();
-	} 
-	std::string operator() (std::string const& val) const
-	{
-	    return "'" + val + "'";
-	}
-    };
-}
-    
-    using namespace impl;
-
-    class value 
-    {
-    public:
-	value(int i)
-	    : v_(i) {}
-	
-	value(double d)
-	    : v_(d) {}
-	
-	value(string const& str)
-	    : v_(str) {}
-	
-	value(value const& other)
-	    : v_ (other.v_) {}
+	template <typename T> value(T _val_)
+	    : value_base(_val_) {}
 	
 	bool operator==(value const& other) const
 	{
-	    return apply_visitor(equals(),v_,other.get());
+	    return boost::apply_visitor(impl::equals(),*this,other);
 	}
 
 	bool operator!=(value const& other) const
 	{
-	    return !(apply_visitor(equals(),v_,other.get()));
+	    return !(boost::apply_visitor(impl::equals(),*this,other));
 	}
 	
 	bool operator>(value const& other) const
 	{
-	    return apply_visitor(greater_than(),v_,other.get());
+	    return boost::apply_visitor(impl::greater_than(),*this,other);
 	}
 
 	bool operator>=(value const& other) const
 	{
-	    return apply_visitor(greater_or_equal(),v_,other.get());
+	    return boost::apply_visitor(impl::greater_or_equal(),*this,other);
 	}
 
 	bool operator<(value const& other) const
 	{
-	    return apply_visitor(less_than(),v_,other.get());
+	    return boost::apply_visitor(impl::less_than(),*this,other);
 	}
 
 	bool operator<=(value const& other) const
 	{
-	    return apply_visitor(less_or_equal(),v_,other.get());
+	    return boost::apply_visitor(impl::less_or_equal(),*this,other);
 	}
 
 	value& operator+=(value const& other)
 	{
-	    v_ = apply_visitor(add(),v_,other.get());
+	    *this = boost::apply_visitor(impl::add<value>(),*this,other);
 	    return *this;
 	}
 
 	value& operator-=(value const& other)
 	{
-	    v_ = apply_visitor(sub(),v_,other.get());
+	    *this = boost::apply_visitor(impl::sub<value>(),*this,other);
 	    return *this;
 	}
 
 	value& operator*=(value const& other)
 	{
-	    v_ = apply_visitor(mult(),v_,other.get());
+	    *this = boost::apply_visitor(impl::mult<value>(),*this,other);
 	    return *this;
 	}
 	
 	value& operator/=(value const& other)
 	{
-	    v_ = apply_visitor(div(),v_,other.get());
+	    *this = boost::apply_visitor(impl::div<value>(),*this,other);
 	    return *this;
 	}
 	
-	value_holder const& get() const
+	std::string to_string() const
 	{
-	    return v_;
+	    return boost::apply_visitor(impl::to_string(),*this);
 	}
-
-	string to_string() const
-	{
-	    return apply_visitor(impl::to_string(),v_);
-	}
-     
-    private:
-	value_holder v_;
     };
     
     inline const value operator+(value const& p1,value const& p2)
@@ -494,14 +425,14 @@ namespace mapnik { namespace impl {
 	return tmp;
     }
 
-    template <typename charT, typename traits>
-    inline std::basic_ostream<charT,traits>& 
-    operator << (std::basic_ostream<charT,traits>& out,
-		 value const& v)
-    {
-	out << v.get();
-	return out; 
-    }
+    //template <typename charT, typename traits>
+    //inline std::basic_ostream<charT,traits>& 
+    //operator << (std::basic_ostream<charT,traits>& out,/
+    //		 value const& v)
+    // {
+    //	out << v.get();
+    //	return out; 
+    //}
 }
 
 #endif //VALUE_HPP

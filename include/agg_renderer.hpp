@@ -26,18 +26,20 @@
 
 namespace mapnik
 {
-    struct agg_renderer : public feature_style_processor<agg_renderer>,
+    template <typename T>
+    struct agg_renderer : public feature_style_processor<agg_renderer<T> >,
 			  private boost::noncopyable
     {
-	agg_renderer(Map const& m, Image32 & pixmap);
+	agg_renderer(Map const& m, T & pixmap);
 	void process(point_symbolizer const& sym,Feature const& feature);	    	       
 	void process(line_symbolizer const& sym,Feature const& feature);
 	void process(line_pattern_symbolizer const& sym,Feature const& feature);
 	void process(polygon_symbolizer const& sym,Feature const& feature);
 	void process(polygon_pattern_symbolizer const& sym,Feature const& feature);
 	void process(raster_symbolizer const& sym,Feature const& feature);
+	void process(text_symbolizer const& sym,Feature const& feature);
     private:
-	Image32 & pixmap_;
+	T & pixmap_;
 	CoordTransform t_;
     };
 }

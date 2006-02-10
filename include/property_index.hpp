@@ -28,6 +28,8 @@
 
 namespace mapnik
 {
+
+    /*
     template <typename FeatureT>
     class property_index : public filter_visitor<FeatureT>
     {
@@ -63,6 +65,7 @@ namespace mapnik
 	std::set<std::string> const& names_;
 
     };
+*/
 }
 
 #endif //PROPERTY_INDEX_HPP

@@ -21,34 +21,33 @@
 #ifndef TEXT_SYMBOLIZER_HPP
 #define TEXT_SYMBOLIZER_HPP
 
-#include "symbolizer.hpp"
-#include "fill.hpp"
-#include "expression.hpp"
+//#include "symbolizer.hpp"
+//#include "fill.hpp"
+//#include "expression.hpp"
 
 namespace mapnik
 {
-    template <typename FeatureT>
-    struct text_symbolizer : public symbolizer
+    struct text_symbolizer
     {
-	text_symbolizer(expression<FeatureT> const& label,fill const& f)
-	    : label_(label.clone()),
-	      fill_(f) {}
+	text_symbolizer(std::string const& name,Color const& fill)
+	    : name_(name),
+	      fill_(fill) {}
+
+	text_symbolizer(text_symbolizer const& rhs)
+	    : name_(rhs.name_),
+	      fill_(rhs.fill_) {}
 	
 	~text_symbolizer()
 	{
-	    delete label_;
+	    //
 	}
-	
-	void render(geometry_type& geom,Image32& image) const
+	std::string const& get_name() const
 	{
-	    //todo : render text
+	    return name_;
 	}
     private:
-	expression<FeatureT>* label_;
-	fill fill_;		    
-    private:
-        text_symbolizer(text_symbolizer const&);
-	text_symbolizer& operator=(text_symbolizer const&);
+	std::string name_;
+	Color fill_;		    
     };
 }
 

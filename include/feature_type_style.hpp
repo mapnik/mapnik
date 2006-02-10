@@ -28,7 +28,6 @@
 
 namespace mapnik
 {
-    typedef rule<Feature,filter> rule_type;
     typedef std::vector<rule_type> rules;
     class feature_type_style
     {

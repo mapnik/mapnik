@@ -82,19 +82,19 @@ namespace mapnik
     public:
 	property(std::string const& name)
 	    : expression<FeatureT>(),
-	      name_(name),
-	      index_(0),
-	      valid_(false) {}
+	      name_(name)
+	{}
 	
 	property(property const& other)
 	    : expression<FeatureT>(),
-	      name_(other.name_),
-	      index_(other.index_),
-	      valid_(other.valid_) {}
+	      name_(other.name_)
+	      //index_(other.index_),
+	      //valid_(other.valid_)
+	{}
 
 	value get_value(FeatureT const& feature) const
 	{
-	    return feature.get_property(index_);
+	    return feature[name_];
 	}
 	void accept(filter_visitor<FeatureT>& v)
 	{
@@ -110,8 +110,8 @@ namespace mapnik
 	}
 	void set_index(size_t index) 
 	{
-	    index_=index;
-	    valid_=true;
+	    //index_=index;
+	    //valid_=true;
 	}
 	std::string to_string() const
 	{
@@ -120,8 +120,8 @@ namespace mapnik
         ~property() {}
     private:
 	std::string name_;
-	size_t index_;
-	bool valid_;
+	//size_t index_;
+	//bool valid_;
     };
 }
 

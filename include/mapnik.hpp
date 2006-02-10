@@ -50,6 +50,7 @@
 #include "line_pattern_symbolizer.hpp"
 #include "point_symbolizer.hpp"
 #include "raster_symbolizer.hpp"
+#include "text_symbolizer.hpp"
 #include "image_util.hpp"
 #include "datasource.hpp"
 #include "layer.hpp"

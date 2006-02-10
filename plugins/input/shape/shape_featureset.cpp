@@ -162,7 +162,7 @@ feature_ptr shape_featureset<filterT>::next()
 	    {
 		try 
 		{
-		    shape_.dbf().add_attribute(*pos,feature.get());//TODO optimize!!!
+		    shape_.dbf().add_attribute(*pos,*feature);//TODO optimize!!!
 		}
 		catch (...)
 		{

@@ -24,15 +24,20 @@
 #include "geometry.hpp"
 #include "raster.hpp"
 #include "value.hpp"
-#include <vector>
+#include <map>
+
+#include <boost/property_map.hpp>
+#include <boost/utility.hpp>
 
 namespace mapnik
 {
     typedef boost::shared_ptr<raster> raster_ptr;    
-    typedef std::vector<value> properties;
+    //typedef std::vector<value> properties;
+    typedef boost::associative_property_map<std::map<std::string,value> > properties;
     
     template <typename T1,typename T2>
-    struct feature
+    struct feature : public properties,
+		     private boost::noncopyable
     {
     public:
 	typedef T1 geometry_type;
@@ -41,31 +46,19 @@ namespace mapnik
 	int id_;
 	geometry_type geom_;
 	raster_type   raster_;
-	properties props_;
+	std::map<std::string,value> props_;
     public:
 	explicit feature(int id)
-	    : id_(id),
+	    : properties(props_),
+	      id_(id),
 	      geom_(),
 	      raster_() {}
 
 	feature(int id,const geometry_type& geom)
-	    : id_(id),
+	    : properties(props_),
+	      id_(id),
 	      geom_(geom),
 	      raster_() {}
-
-	feature(const feature<T1,T2>& rhs)
-	    : id_(rhs.id_),
-	      geom_(rhs.geom_),
-	      raster_(rhs.raster_) {}
-
-	feature<T1,T2>& operator=(const feature<T1,T2>& rhs) 
-	{
-	    feature<T1,T2> tmp;
-	    swap(tmp);
-	    return *this;
-	}
-	
-	~feature() {}
 
 	int id() const 
 	{
@@ -90,51 +83,32 @@ namespace mapnik
 	{
 	    raster_=raster;
 	}
-
-        void reserve_props(unsigned n)
-	{
-	    props_.reserve(n);
-	}
-
-	void add_property(int v)
-	{
-	    return props_.push_back(value(v));
-	}
-	
-	void add_property(double v)
-	{
-	    return props_.push_back(value(v));
-	}
-	
-	void add_property(std::string const& v)
-	{
-	    return props_.push_back(value(v));
-	}
-
-	value get_property(size_t index) const
-	{
-	    if (index < props_.size())
-		return props_[index]; 
-	    else
-		return value("");
-	}
 	
 	const properties& get_properties() const 
 	{
 	    return props_;
 	}
-   
-    private:
-	void swap(const feature<T1,T2>& rhs) throw()
+	
+	std::string to_string() const
 	{
-	    std::swap(id_,rhs.id_);
-	    std::swap(geom_,rhs.geom_);
-	    std::swap(raster_,rhs.raster_);
-	    std::swap(props_,rhs.props_);
+	    std::stringstream ss;
+	    ss << "feature (" << std::endl;
+	    for (std::map<std::string,value>::const_iterator itr=props_.begin();
+		 itr != props_.end();++itr)
+	    {
+		ss << "  " << itr->first  << ":" <<  itr->second << std::endl;
+	    }
+	    ss << ")" << std::endl;
+	    return ss.str();
 	}
     };
 
     typedef feature<geometry_ptr,raster_ptr> Feature;
     
+    inline std::ostream& operator<< (std::ostream & out,Feature const& f)
+    {
+	out << f.to_string();
+    	return out;
+    }
 }
 #endif                                            //FEATURE_HPP

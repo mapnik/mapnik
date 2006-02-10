@@ -21,12 +21,11 @@
 #ifndef FILTER_HPP
 #define FILTER_HPP
 
-#include "filter_visitor.hpp"
+//#include "filter_visitor.hpp"
 #include "feature.hpp"
+
 namespace mapnik
 {
-    typedef boost::shared_ptr<filter<Feature> > filter_ptr;
-
     template <typename FeatureT> class filter_visitor;
     template <typename FeatureT>
     struct filter
@@ -37,7 +36,8 @@ namespace mapnik
         virtual std::string to_string() const=0;
 	virtual ~filter() {}
     };
-
+    
+    typedef boost::shared_ptr<filter<Feature> > filter_ptr;
     
     template <typename FeatureT>
     struct all_filter : public filter<FeatureT>

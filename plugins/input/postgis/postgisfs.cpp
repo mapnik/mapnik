@@ -49,10 +49,10 @@ feature_ptr postgis_featureset::next()
         if (geom)
         {
             feature->set_geometry(geom);
-	    feature->reserve_props(num_attrs_);
 	    unsigned start=2;
 	    for (unsigned pos=0;pos<num_attrs_;++pos)
 	    {
+		std::string name = rs_->getFieldName(start + pos);
 		const char* buf=rs_->getValue(start + pos);
 		//int field_size = rs_->getFieldLength(start + pos);
 		int oid = rs_->getTypeOID(start + pos);
@@ -60,32 +60,32 @@ feature_ptr postgis_featureset::next()
 		if (oid==23) //int4
 		{
 		    int val = int4net(buf);
-		    feature->add_property(val);
+		    boost::put(*feature,name,val);
 		}
 		else if (oid==21) //int2
 		{
 		    int val = int2net(buf);
-		    feature->add_property(val);
+		    boost::put(*feature,name,val);
 		}
 		else if (oid == 700) // float4
 		{
 		    float val;
 		    float4net(val,buf);
-		    feature->add_property((double)val);
+		    boost::put(*feature,name,val);
 		}
 		else if (oid == 701) // float8
 		{
 		    double val;
 		    float8net(val,buf);
-		    feature->add_property(val);
+		    boost::put(*feature,name,val);
 		}
 		else if (oid==1042 || oid==1043) //bpchar or varchar
 		{
-		    feature->add_property(string(buf));
+		    boost::put(*feature,name,buf);
 		}
 		else 
 		{
-		    feature->add_property(string("null"));
+		    boost::put(*feature,name,0);
 		}
 	    }
             ++count_;

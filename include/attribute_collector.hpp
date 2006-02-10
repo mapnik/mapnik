@@ -24,15 +24,35 @@
 #include "filter.hpp"
 #include "expression.hpp"
 #include "feature_layer_desc.hpp"
-
+#include "rule.hpp"
 #include <set>
+#include <iostream>
 
 namespace mapnik
 {
+    
+    struct symbolizer_attributes : public boost::static_visitor<>
+    {
+	symbolizer_attributes(std::set<std::string>& names)
+	    : names_(names) {}
+	
+	template <typename T>
+	void operator () (T const&) const {}
+	void operator () (text_symbolizer const& sym)
+	{
+	    names_.insert(sym.get_name());
+	}
+    private:
+	std::set<std::string>& names_;
+    };
+
     template <typename FeatureT>
     class attribute_collector : public filter_visitor<FeatureT>
     {
+    private:
+	std::set<std::string>& names_;
     public:
+	
 	attribute_collector(std::set<std::string>& names)
 	    : names_(names) {}
 	
@@ -48,15 +68,27 @@ namespace mapnik
 	    {
 		names_.insert(pf->name());
 	    }
-	}	
+	}
+	void visit(rule_type const& r)
+	{	    
+	    const symbolizers& symbols = r.get_symbolizers();
+	    symbolizers::const_iterator symIter=symbols.begin();
+	    symbolizer_attributes attr(names_);
+	    while (symIter != symbols.end())
+	    {
+		boost::apply_visitor(attr,*symIter++);
+	    }
+	    filter_ptr const& filter = r.get_filter();
+	    filter->accept(*this);
+	}
+
 	virtual ~attribute_collector() {}
     private:
+	
 	// no copying 
 	attribute_collector(attribute_collector const&);
 	attribute_collector& operator=(attribute_collector const&);
-    private:
-	std::set<std::string>& names_;
-    };
+    };   
 }
 
 #endif //ATTRIBUTE_COLLECTOR_HPP

@@ -52,10 +52,10 @@
 
 #include <boost/utility.hpp>
 
+#include <iostream>
+
 namespace mapnik
 {
-
-
     class pattern_source : private boost::noncopyable
     {
     public:
@@ -79,16 +79,18 @@ namespace mapnik
 	ImageData32 const& pattern_;
     };
 
-    
-    agg_renderer::agg_renderer(Map const& m, Image32 & pixmap)
-	: feature_style_processor<agg_renderer>(m),pixmap_(pixmap),
+    template <typename T>
+    agg_renderer<T>::agg_renderer(Map const& m, T & pixmap)
+	: feature_style_processor<agg_renderer>(m),
+	  pixmap_(pixmap),
 	  t_(m.getWidth(),m.getHeight(),m.getCurrentExtent())
     {
 	Color const& bg=m.getBackground();
 	pixmap_.setBackground(bg);
+	std::cout << "scale="<<m.scale()<<std::endl;
     }
-		
-    void agg_renderer::process(polygon_symbolizer const& sym,Feature const& feature)
+    template <typename T>	
+    void agg_renderer<T>::process(polygon_symbolizer const& sym,Feature const& feature)
     {
 	typedef  coord_transform<CoordTransform,geometry_type> path_type;
 	typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
@@ -120,7 +122,9 @@ namespace mapnik
 	    agg::render_scanlines(ras, sl, ren);
 	}
     }
-    void agg_renderer::process(line_symbolizer const& sym,Feature const& feature)
+
+    template <typename T>
+    void agg_renderer<T>::process(line_symbolizer const& sym,Feature const& feature)
     {   
 	typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
 	typedef coord_transform<CoordTransform,geometry_type> path_type;
@@ -186,7 +190,7 @@ namespace mapnik
 		ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
 		agg::render_scanlines(ras, sl, ren);
 	    }
-	    else if (0) //(stroke_.get_width() <= 1.0)
+	    else if (stroke_.get_width() <= 1.0)
 	    {
 		//faster but clipping doesn't work 
 		agg::line_profile_aa prof;
@@ -234,8 +238,9 @@ namespace mapnik
 	    }
 	}
     }
-    
-    void agg_renderer::process(point_symbolizer const& sym,Feature const& feature)
+
+    template <typename T>
+    void agg_renderer<T>::process(point_symbolizer const& sym,Feature const& feature)
     {
 	geometry_ptr const& geom=feature.get_geometry();
 	if (geom)
@@ -253,7 +258,9 @@ namespace mapnik
 	    pixmap_.set_rectangle_alpha(px,py,data);
 	}
     }
-    void  agg_renderer::process(line_pattern_symbolizer const& sym,Feature const& feature)
+    
+    template <typename T>
+    void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,Feature const& feature)
     {
 	typedef  coord_transform<CoordTransform,geometry_type> path_type;
 	typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
@@ -281,7 +288,8 @@ namespace mapnik
 	}
     }
     
-    void agg_renderer::process(polygon_pattern_symbolizer const& sym,Feature const& feature)
+    template <typename T>
+    void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,Feature const& feature)
     {
 	typedef  coord_transform<CoordTransform,geometry_type> path_type;
 	typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
@@ -332,7 +340,9 @@ namespace mapnik
 	    agg::render_scanlines(ras, sl, rp);   
 	}
     }
-    void agg_renderer::process(raster_symbolizer const& ,Feature const& feature)
+
+    template <typename T>
+    void agg_renderer<T>::process(raster_symbolizer const& ,Feature const& feature)
     {
 	// TODO -- at the moment raster_symbolizer is an empty class 
 	// used for type dispatching, but we can have some fancy raster
@@ -343,4 +353,14 @@ namespace mapnik
 	    pixmap_.set_rectangle(raster->x_,raster->y_,raster->data_);
 	}
     }
+    
+    template <typename T>
+    void agg_renderer<T>::process(text_symbolizer const& sym ,Feature const& feature)
+    {
+	//TODO - implement text
+	//std::cout << feature << std::endl;
+	std::cout << sym.get_name() <<":" << feature[sym.get_name()] << std::endl;
+    }
+
+    template class agg_renderer<Image32>;
 }
