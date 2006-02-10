@@ -262,9 +262,9 @@ namespace agg
         double dx3 = x4 - x3;
         double dy3 = y4 - y3;
 
-        double len = sqrt(dx1 * dx1 + dy1 * dy1) + 
-                     sqrt(dx2 * dx2 + dy2 * dy2) + 
-                     sqrt(dx3 * dx3 + dy3 * dy3) * 0.25 * m_scale;
+        double len = (sqrt(dx1 * dx1 + dy1 * dy1) + 
+                      sqrt(dx2 * dx2 + dy2 * dy2) + 
+                      sqrt(dx3 * dx3 + dy3 * dy3)) * 0.25 * m_scale;
 
 #if defined(_MSC_VER) && _MSC_VER <= 1200
         m_num_steps = uround(MSC60_fix_ICE(len));

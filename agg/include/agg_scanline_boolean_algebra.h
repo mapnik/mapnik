@@ -850,8 +850,8 @@ namespace agg
         unsigned num1 = sl1.num_spans();
         unsigned num2 = sl2.num_spans();
 
-        typename Scanline1::const_iterator span1;
-        typename Scanline2::const_iterator span2;
+        typename Scanline1::const_iterator span1;// = sl1.begin();
+        typename Scanline2::const_iterator span2;// = sl2.begin();
 
         enum invalidation_e 
         { 
@@ -1046,7 +1046,11 @@ namespace agg
 
         // Calculate the union of the bounding boxes
         //-----------------
-        rect_i ur = unite_rectangles(r1, r2);
+        rect_i ur(1,1,0,0);
+             if(flag1 && flag2) ur = unite_rectangles(r1, r2);
+        else if(flag1)          ur = r1;
+        else if(flag2)          ur = r2;
+
         if(!ur.is_valid()) return;
 
         ren.prepare();
@@ -1176,7 +1180,7 @@ namespace agg
         ren.prepare();
 
         // A fake span2 processor
-        sbool_add_span_empty<Scanline1, Scanline> add_span2;
+        sbool_add_span_empty<Scanline2, Scanline> add_span2;
 
         // The main loop
         // Here we synchronize the scanlines with 

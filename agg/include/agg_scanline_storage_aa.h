@@ -196,6 +196,7 @@ namespace agg
                     const T* covers;
                 };
 
+                const_iterator() : m_storage(0) {}
                 const_iterator(const embedded_scanline& sl) :
                     m_storage(sl.m_storage),
                     m_span_idx(sl.m_scanline.start_span)
@@ -554,6 +555,7 @@ namespace agg
                     const T* covers; 
                 };
 
+                const_iterator() : m_ptr(0) {}
                 const_iterator(const embedded_scanline& sl) :
                     m_ptr(sl.m_ptr),
                     m_dx(sl.m_dx)
@@ -721,9 +723,8 @@ namespace agg
                 m_min_y = read_int32() + m_dy;
                 m_max_x = read_int32() + m_dx;
                 m_max_y = read_int32() + m_dy;
-                return true;
             }
-            return false;
+            return m_ptr < m_end;
         }
 
         //--------------------------------------------------------------------

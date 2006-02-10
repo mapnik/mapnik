@@ -123,7 +123,6 @@ namespace agg
                 int x_lr = x_hr >> image_subpixel_shift;
                 int y_lr = y_hr >> image_subpixel_shift;
 
-                unsigned weight;
                 fg = image_subpixel_scale * image_subpixel_scale / 2;
 
                 x_hr &= image_subpixel_mask;
@@ -139,7 +138,7 @@ namespace agg
                 fg    += *fg_ptr * (image_subpixel_scale - x_hr) * y_hr;
 
                 fg_ptr = (const value_type*)base_type::source().next_x();
-                fg    += fg_ptr * x_hr * y_hr;
+                fg    += *fg_ptr * x_hr * y_hr;
 
                 span->v = value_type(fg >> (image_subpixel_shift * 2));
                 span->a = base_mask;
