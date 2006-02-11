@@ -192,7 +192,6 @@ namespace mapnik
 	    }
 	    else if (stroke_.get_width() <= 1.0)
 	    {
-		//faster but clipping doesn't work 
 		agg::line_profile_aa prof;
 		prof.width(stroke_.get_width());
 		renderer_oaa ren_oaa(renb, prof);
