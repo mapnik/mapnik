@@ -18,12 +18,12 @@
 
 //$Id$
 
-#include "mapnik.hpp"
 #include <fstream>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
+#include "mapnik.hpp"
 
 namespace mapnik
 {
