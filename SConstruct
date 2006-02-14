@@ -85,9 +85,9 @@ for libinfo in C_LIBSHEADERS:
 
 env['BOOST_APPEND'] = ''
 
-for libinfo in BOOST_LIBSHEADERS:
+for count, libinfo in enumerate(BOOST_LIBSHEADERS):
     if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++'):
-        if not conf.CheckLibWithHeader('boost_%s-%s-mt' % (libinfo[0], env['CC']), libinfo[1], 'C++') and libinfo[2]:
+        if not conf.CheckLibWithHeader('boost_%s-%s-mt' % (libinfo[0], env['CC']), libinfo[1], 'C++') and libinfo[2] and count == 0:
             print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
             Exit(1)
         else:
