@@ -113,11 +113,7 @@ if 'python' in env['BINDINGS']:
 
     majver, minver = env['PYTHON_VERSION'].split('.')
 
-    if int(majver) > 1:
-        if int(minver) < 3:
-           print "Python version 2.2 or greater required"
-           Exit(1)
-    else:
+    if (int(majver), int(minver)) < (2, 2):
         print "Python version 2.2 or greater required"
         Exit(1)
 
