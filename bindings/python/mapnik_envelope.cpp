@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -58,7 +58,7 @@ bool (Envelope<double>::*intersects_p3)(Envelope<double> const&) const = &Envelo
 void export_envelope()
 {
     using namespace boost::python;
-    class_<Envelope<double> >("envelope",init<double,double,double,double>())
+    class_<Envelope<double> >("Envelope",init<double,double,double,double>())
         .def(init<>())
 	.def(init<const coord<double,2>&, const coord<double,2>&>())
         .add_property("minx",&Envelope<double>::minx)

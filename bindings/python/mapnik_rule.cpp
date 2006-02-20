@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,11 +33,11 @@ void export_rule()
 {
     using namespace boost::python;
     
-    class_<symbolizers>("symbolizers",init<>("TODO"))
+    class_<symbolizers>("Symbolizers",init<>("TODO"))
 	.def(vector_indexing_suite<symbolizers>())
 	;
     
-    class_<rule_type>("rule",init<>("default ctor"))
+    class_<rule_type>("Rule",init<>("default ctor"))
 	.def(init<std::string const&,
 	     boost::python::optional<std::string const&,double,double> >())
 	.add_property("name",make_function

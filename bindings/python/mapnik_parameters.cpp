@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -80,11 +80,11 @@ struct parameters_pickle_suite : boost::python::pickle_suite
 void export_parameters()
 {
     using namespace boost::python;
-    class_<parameter>("parameter",init<std::string,std::string>())
+    class_<parameter>("Parameter",init<std::string,std::string>())
         .def_pickle(parameter_pickle_suite())
         ;
 
-    class_<parameters>("parameters",init<>())
+    class_<parameters>("Parameters",init<>())
         //.def("add",add1)
         //.def("add",add2)
         .def("get",&parameters::get)

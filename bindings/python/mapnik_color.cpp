@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,7 +44,7 @@ Color create_from_string(const char* str)
 void export_color () 
 {
     using namespace boost::python;
-    class_<Color>("color",init<>())
+    class_<Color>("Color",init<>())
         .def(init<int,int,int,boost::python::optional<int> >())
         .add_property("r",&Color::red,&Color::set_red)
         .add_property("g",&Color::green,&Color::set_green)

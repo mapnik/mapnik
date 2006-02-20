@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -87,15 +87,15 @@ BOOST_PYTHON_MODULE(_mapnik)
     using namespace boost::python;
     
     class_<datasource,boost::shared_ptr<datasource>,
-	boost::noncopyable>("datasource",no_init)
+	boost::noncopyable>("Datasource",no_init)
         .def("envelope",&datasource::envelope,
 	     return_value_policy<reference_existing_object>())
         ;
     
-    class_<symbolizer,boost::noncopyable> ("symbolizer_",no_init) 
+    class_<symbolizer,boost::noncopyable> ("Symbolizer_",no_init) 
     	;
     class_<boost::shared_ptr<symbolizer>,
-	boost::noncopyable>("symbolizer",no_init)
+	boost::noncopyable>("Symbolizer",no_init)
 	;
     export_parameters();
     export_color(); 
@@ -109,7 +109,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_datasource_cache();
     
     
-    class_<coord<double,2> >("coord",init<double,double>())
+    class_<coord<double,2> >("Coord",init<double,double>())
         .def_readwrite("x", &coord<double,2>::x)
         .def_readwrite("y", &coord<double,2>::y)
         ;

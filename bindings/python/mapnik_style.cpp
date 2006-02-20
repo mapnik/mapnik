@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,10 +29,10 @@ void export_style()
 {
     using namespace boost::python;
 
-    class_<rules>("rules",init<>("default ctor"))
+    class_<rules>("Rules",init<>("default ctor"))
 	.def(vector_indexing_suite<rules>())
 	;
-    class_<feature_type_style>("style",init<>("default style constructor"))
+    class_<feature_type_style>("Style",init<>("default style constructor"))
 	.add_property("rules",make_function
 		      (&feature_type_style::get_rules,return_value_policy<reference_existing_object>()))
 	;

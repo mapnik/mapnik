@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@ namespace
 void export_filter()
 {
     using namespace boost::python;
-    class_<filter<Feature>,boost::noncopyable>("filter",no_init)
+    class_<filter<Feature>,boost::noncopyable>("Filter",no_init)
 	.def("__str__",&filter<Feature>::to_string);
 	;
     def("filter",&create_filter);

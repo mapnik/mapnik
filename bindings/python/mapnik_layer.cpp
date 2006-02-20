@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -100,11 +100,11 @@ namespace
 void export_layer()
 {
     using namespace boost::python;
-    class_<std::vector<std::string> >("styles")
+    class_<std::vector<std::string> >("Styles")
     	.def(vector_indexing_suite<std::vector<std::string>,true >())
     	;
     //class_<Layer>("layer",init<const Parameters&>("Layer constructor"))
-    class_<Layer>("layer",no_init)
+    class_<Layer>("Layer",no_init)
         .def("name",&Layer::name,return_value_policy<copy_const_reference>())
         .def("params",&Layer::params,return_value_policy<reference_existing_object>())
         .def("envelope",&Layer::envelope)

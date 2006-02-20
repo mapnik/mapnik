@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -76,10 +76,10 @@ struct map_pickle_suite : boost::python::pickle_suite
 void export_map() 
 {
     using namespace boost::python;
-    class_<std::vector<Layer> >("layers")
+    class_<std::vector<Layer> >("Layers")
     	.def(vector_indexing_suite<std::vector<Layer> >())
     	;
-    class_<Map>("map",init<int,int,boost::python::optional<int> >())
+    class_<Map>("Map",init<int,int,boost::python::optional<int> >())
         .add_property("width",&Map::getWidth)
         .add_property("height",&Map::getHeight)
 	.add_property("srid",&Map::srid)

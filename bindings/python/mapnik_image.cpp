@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ char const* rawdata(const Image32& image)
 void export_image()
 {
     using namespace boost::python;
-    class_<Image32>("image",init<int,int>())
+    class_<Image32>("Image",init<int,int>())
     ;
     def("rawdata",&rawdata);
 }

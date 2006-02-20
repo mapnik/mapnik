@@ -1,5 +1,5 @@
 /* This file is part of python_mapnik (c++/python mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@ void export_stroke ()
 	.value("BEVEL_JOIN",BEVEL_JOIN)
 	;
 
-    class_<stroke>("stroke",init<>())
+    class_<stroke>("Stroke",init<>())
 	.def(init<Color,float>())
 	.add_property("color",make_function
 		      (&stroke::get_color,return_value_policy<reference_existing_object>()),
