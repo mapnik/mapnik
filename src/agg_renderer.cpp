@@ -102,13 +102,13 @@ namespace mapnik
     }
     
     template <typename T>
-    void agg_renderer<T>::start_layer_processing()
+    void agg_renderer<T>::start_layer_processing(Layer const& lay)
     {
-	std::cout << "start layer processing" << std::endl;
+	std::cout << "start layer processing : " << lay.name()  << std::endl;
     }
     
     template <typename T>
-    void agg_renderer<T>::end_layer_processing()
+    void agg_renderer<T>::end_layer_processing(Layer const&)
     {
 	std::cout << "end layer processing" << std::endl;
     }

@@ -58,8 +58,10 @@ namespace mapnik
 	void apply()
 	{
 	    timer clock;
-	    
 	    Processor & p = static_cast<Processor&>(*this);
+
+	    p.start_map_processing();
+	    
 	    std::vector<Layer>::const_iterator itr = m_.layers().begin();
 	    while (itr != m_.layers().end())
 	    {
@@ -70,11 +72,16 @@ namespace mapnik
 		}
 		++itr;
 	    }
+	    
+	    p.end_map_processing();
+	    
 	    clock.stop();
+	    
 	}	
     private:
 	void apply_to_layer(Layer const& lay,Processor & p)
 	{
+	    p.start_layer_processing(lay);
 	    datasource *ds=lay.datasource().get();
 	    if (ds)
 	    {
@@ -87,7 +94,6 @@ namespace mapnik
 		{
 		    std::set<std::string> names;
 		    attribute_collector<Feature> collector(names);
-		    //property_index<Feature> indexer(names);
 		    std::vector<rule_type*> if_rules;
 		    std::vector<rule_type*> else_rules;
 		
@@ -104,10 +110,8 @@ namespace mapnik
 			if (ruleIter->active(scale))
 			{
 			    active_rules=true;
-			    //filter_ptr& filter=const_cast<filter_ptr&>(ruleIter->get_filter());
-			    //filter->accept(collector);
 			    ruleIter->accept(collector);
-			    //filter->accept(indexer);
+
 			    if (ruleIter->has_else_filter())
 			    {
 				else_rules.push_back(const_cast<rule_type*>(&(*ruleIter)));
@@ -171,6 +175,7 @@ namespace mapnik
 		    }
 		}
 	    }
+	    p.end_layer_processing(lay);
 	}
 	
 	Map const& m_;

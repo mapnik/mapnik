@@ -23,7 +23,6 @@
 
 #include "feature_style_processor.hpp"
 #include <boost/utility.hpp>
-//#include "agg_font_freetype.h"
 #include "font_engine_freetype.hpp"
 
 namespace mapnik
@@ -35,8 +34,8 @@ namespace mapnik
 	agg_renderer(Map const& m, T & pixmap);
 	void start_map_processing();
 	void end_map_processing();
-	void start_layer_processing();
-	void end_layer_processing();
+	void start_layer_processing(Layer const& lay);
+	void end_layer_processing(Layer const& lay);
 	void process(point_symbolizer const& sym,Feature const& feature);	    	       
 	void process(line_symbolizer const& sym,Feature const& feature);
 	void process(line_pattern_symbolizer const& sym,Feature const& feature);
