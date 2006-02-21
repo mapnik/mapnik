@@ -24,8 +24,8 @@ opts = Options()
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include'))
 opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/lib'))
-opts.Add(PathOption('FREETYPE_INCLUDES', 'Search path for FreeType include files', '/usr/include'))
-opts.Add(PathOption('FREETYPE_LIBS', 'Search path for FreeType library files', '/usr/lib'))
+opts.Add(PathOption('FREETYPE_INCLUDES', 'Search path for FreeType include files', '/opt/freetype/include/freetype2'))
+opts.Add(PathOption('FREETYPE_LIBS', 'Search path for FreeType library files', '/opt/freetype/lib'))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
 opts.Add(PathOption('PNG_LIBS', 'Search path for libpng include files', '/usr/lib'))
 opts.Add(PathOption('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include'))
@@ -63,6 +63,7 @@ C_LIBSHEADERS = [
     ['tiff', 'tiff.h', True],
     ['z', 'zlib.h', True],
     ['jpeg', ['stdio.h','jpeglib.h'], True],
+    #['freetype', 'ft2build.h', True],
     ['pq', 'libpq-fe.h', False]
 ]
 

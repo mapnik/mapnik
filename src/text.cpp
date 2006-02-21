@@ -69,7 +69,7 @@ namespace mapnik
     }
 
     template <class PixBuffer>
-        void TextRasterizer<PixBuffer>::render_bitmap(FT_Bitmap *bitmap,int x,int y)
+    void TextRasterizer<PixBuffer>::render_bitmap(FT_Bitmap *bitmap,int x,int y)
     {
         int x_max=x+bitmap->width;
         int y_max=y+bitmap->rows;

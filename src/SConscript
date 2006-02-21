@@ -24,6 +24,8 @@ Import('env')
 prefix = env['PREFIX']
 
 libraries = ['agg'] + env['LIBS']
+libraries += ['freetype']
+
 linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 
 source = Split(
@@ -47,6 +49,7 @@ source = Split(
     point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
     line_pattern_symbolizer.cpp
+    font_engine_freetype.cpp
     """
     )
 #render.cpp

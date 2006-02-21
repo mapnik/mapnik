@@ -27,15 +27,22 @@
 
 namespace mapnik
 {
+    enum label_placement_e {
+	point_placement=1,
+	line_placement=2
+    };
+        
     struct text_symbolizer
-    {
+    {		
 	text_symbolizer(std::string const& name,Color const& fill)
 	    : name_(name),
-	      fill_(fill) {}
-
+	      fill_(fill),
+	      label_p_(point_placement){}
+	
 	text_symbolizer(text_symbolizer const& rhs)
 	    : name_(rhs.name_),
-	      fill_(rhs.fill_) {}
+	      fill_(rhs.fill_),
+	      label_p_(rhs.label_p_) {}
 	
 	~text_symbolizer()
 	{
@@ -45,9 +52,25 @@ namespace mapnik
 	{
 	    return name_;
 	}
+	Color const& get_fill() const
+	{
+	    return fill_;
+	}
+	
+	void set_label_placement(label_placement_e label_p)
+	{
+	    label_p_ = label_p;
+	}
+	
+	label_placement_e get_label_placement() const
+	{
+	    return label_p_;
+	}
+	
     private:
 	std::string name_;
-	Color fill_;		    
+	Color fill_;
+	label_placement_e label_p_;
     };
 }
 

@@ -95,13 +95,30 @@ namespace mapnik
 	    return 0xff << 24 | r << 16 | g << 8 | b;
 	}
 
-	inline void blendPixel(int x,int y,unsigned int rgba,int t)
+	inline void blendPixel(int x,int y,unsigned int rgba1,int t)
 	{
 	    if (checkBounds(x,y))
 	    {
-		int bg=data_(x,y);
-		int nc=blendColor(rgba,bg,t);
-		data_(x,y)=nc;
+		unsigned rgba0 = data_(x,y);	
+		unsigned a1 = t;//(rgba1 >> 24) & 0xff;
+		if (a1 == 0) return;
+		unsigned r1 = rgba1 & 0xff;
+		unsigned g1 = (rgba1 >> 8 ) & 0xff;
+		unsigned b1 = (rgba1 >> 16) & 0xff;
+		
+		unsigned a0 = (rgba0 >> 24) & 0xff;
+		unsigned r0 = (rgba0 & 0xff) * a0;
+		unsigned g0 = ((rgba0 >> 8 ) & 0xff) * a0;
+		unsigned b0 = ((rgba0 >> 16) & 0xff) * a0;
+		
+		
+		a0 = ((a1 + a0) << 8) - a0*a1;
+		
+		r0 = ((((r1 << 8) - r0) * a1 + (r0 << 8)) / a0);
+		g0 = ((((g1 << 8) - g0) * a1 + (g0 << 8)) / a0);
+		b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
+		a0 = a0 >> 8;
+		data_(x,y)= (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
 	    }
 	}
 

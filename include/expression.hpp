@@ -68,7 +68,7 @@ namespace mapnik
 	}
 	std::string to_string() const
 	{
-	    return value_.to_string();
+	    return value_.to_expression_string();
 	}
         ~literal() {}
     private:
@@ -88,8 +88,6 @@ namespace mapnik
 	property(property const& other)
 	    : expression<FeatureT>(),
 	      name_(other.name_)
-	      //index_(other.index_),
-	      //valid_(other.valid_)
 	{}
 
 	value get_value(FeatureT const& feature) const
@@ -108,11 +106,7 @@ namespace mapnik
 	{
 	    return name_;
 	}
-	void set_index(size_t index) 
-	{
-	    //index_=index;
-	    //valid_=true;
-	}
+
 	std::string to_string() const
 	{
 	    return "["+name_+"]";
@@ -120,8 +114,7 @@ namespace mapnik
         ~property() {}
     private:
 	std::string name_;
-	//size_t index_;
-	//bool valid_;
+
     };
 }
 

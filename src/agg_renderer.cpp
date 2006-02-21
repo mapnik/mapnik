@@ -51,7 +51,6 @@
 #include "agg_renderer_outline_image.h"
 
 #include <boost/utility.hpp>
-
 #include <iostream>
 
 namespace mapnik
@@ -89,6 +88,31 @@ namespace mapnik
 	pixmap_.setBackground(bg);
 	std::cout << "scale="<<m.scale()<<std::endl;
     }
+    
+    template <typename T>
+    void agg_renderer<T>::start_map_processing()
+    {
+	std::cout << "start map processing" << std::endl;
+    }
+
+    template <typename T>
+    void agg_renderer<T>::end_map_processing()
+    {
+	std::cout << "end map processing" << std::endl;
+    }
+    
+    template <typename T>
+    void agg_renderer<T>::start_layer_processing()
+    {
+	std::cout << "start layer processing" << std::endl;
+    }
+    
+    template <typename T>
+    void agg_renderer<T>::end_layer_processing()
+    {
+	std::cout << "end layer processing" << std::endl;
+    }
+    
     template <typename T>	
     void agg_renderer<T>::process(polygon_symbolizer const& sym,Feature const& feature)
     {
@@ -356,10 +380,51 @@ namespace mapnik
     template <typename T>
     void agg_renderer<T>::process(text_symbolizer const& sym ,Feature const& feature)
     {
-	//TODO - implement text
-	//std::cout << feature << std::endl;
-	std::cout << sym.get_name() <<":" << feature[sym.get_name()] << std::endl;
+	typedef  coord_transform<CoordTransform,geometry_type> path_type;
+	geometry_ptr const& geom=feature.get_geometry();
+	if (geom)
+	{
+	    double angle = 0.0;	    
+	    if (sym.get_label_placement() == line_placement && 
+		geom->num_points() > 1)
+	    {
+	       
+		path_type path(t_,*geom);
+		double x0,y0,x1,y1;
+		path.vertex(&x0,&y0);
+		path.vertex(&x1,&y1);
+		double dx = x1 - x0;
+		double dy = y1 - y0;
+		angle = atan( dx/ dy ) - 0.5 * 3.1459;
+		
+		//TODO!!!!!!!!!!!!!!!!!!!!
+	    }   
+	    
+	    std::string text = feature[sym.get_name()].to_string();
+	    if (text.length() > 0)
+	    {
+		Color const& fill  = sym.get_fill();
+	
+		double x;
+		double y;
+		geom->label_position(&x,&y);
+		t_.forward_x(&x);
+		t_.forward_y(&y);
+		
+		face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
+		
+		if (face)
+		{
+		    text_renderer<mapnik::Image32> ren(pixmap_,face);
+		    ren.set_pixel_size(12);
+		    ren.set_fill(fill);
+		    ren.set_halo_radius(1);
+		    ren.set_angle(angle);
+		    ren.render(text,x,y);
+		}
+	    }  
+	}
     }
-
+    
     template class agg_renderer<Image32>;
 }

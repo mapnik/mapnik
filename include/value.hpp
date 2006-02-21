@@ -321,6 +321,21 @@ namespace mapnik {
 		ss << val;
 		return ss.str();
 	    } 
+	    std::string const& operator() (std::string const& val) const
+	    {
+		return val;
+	    }
+	};
+	
+	struct to_expression_string : public boost::static_visitor<std::string>
+	{
+	    template <typename T>
+	    std::string operator() (T val) const
+	    {
+		std::stringstream ss;
+		ss << val;
+		return ss.str();
+	    } 
 	    std::string operator() (std::string const& val) const
 	    {
 		return "'" + val + "'";
@@ -390,7 +405,12 @@ namespace mapnik {
 	    *this = boost::apply_visitor(impl::div<value>(),*this,other);
 	    return *this;
 	}
-	
+
+	std::string to_expression_string() const
+	{
+	    return boost::apply_visitor(impl::to_expression_string(),*this);
+	}
+
 	std::string to_string() const
 	{
 	    return boost::apply_visitor(impl::to_string(),*this);
