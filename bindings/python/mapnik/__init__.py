@@ -29,7 +29,7 @@ from _mapnik import *
 from paths import inputpluginspath
 
 # The base Boost.Python class
-BoostPythonMetaclass = coord.__class__
+BoostPythonMetaclass = Coord.__class__
 
 class _injector(object):
     class __metaclass__(BoostPythonMetaclass):
@@ -40,23 +40,23 @@ class _injector(object):
                         setattr(b,k,v)
             return type.__init__(self, name, bases, dict)
 
-class _coord(coord,_injector):
+class _Coord(Coord,_injector):
     def __repr__(self):
-        return 'coord(%s,%s)' % (self.x, self.y)
+        return 'Coord(%s,%s)' % (self.x, self.y)
 
-class _envelope(envelope,_injector):
+class _Envelope(Envelope,_injector):
     def __repr__(self):
-        return 'envelope(%s,%s,%s,%s)' % \
+        return 'Envelope(%s,%s,%s,%s)' % \
                (self.minx,self.miny,self.maxx,self.maxy)
 
-class _color(color,_injector):
+class _Color(Color,_injector):
     def __repr__(self):
-        return 'color(%s,%s,%s,%s)' % \
+        return 'Color(%s,%s,%s,%s)' % \
                (self.r,self.g,self.b,self.a)
 
 #register datasources
-from mapnik import datasource_cache
-datasource_cache.instance().register_datasources('%s' % inputpluginspath)
+from mapnik import DatasourceCache
+DatasourceCache.instance().register_datasources('%s' % inputpluginspath)
 #set dlopen flags back to the original
 setdlopenflags(flags)
 

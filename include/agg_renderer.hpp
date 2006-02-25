@@ -24,6 +24,7 @@
 #include "feature_style_processor.hpp"
 #include <boost/utility.hpp>
 #include "font_engine_freetype.hpp"
+#include "label_collision_detector.hpp"
 
 namespace mapnik
 {
@@ -32,8 +33,8 @@ namespace mapnik
 			  private boost::noncopyable
     {
 	agg_renderer(Map const& m, T & pixmap);
-	void start_map_processing();
-	void end_map_processing();
+	void start_map_processing(Map const& map);
+	void end_map_processing(Map const& map);
 	void start_layer_processing(Layer const& lay);
 	void end_layer_processing(Layer const& lay);
 	void process(point_symbolizer const& sym,Feature const& feature);	    	       
@@ -47,6 +48,7 @@ namespace mapnik
 	T & pixmap_;
 	CoordTransform t_;
 	face_manager<freetype_engine> font_manager_;
+	label_collision_detector detector_;
     };
 }
 

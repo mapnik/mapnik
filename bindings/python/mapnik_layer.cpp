@@ -103,7 +103,7 @@ void export_layer()
     class_<std::vector<std::string> >("Styles")
     	.def(vector_indexing_suite<std::vector<std::string>,true >())
     	;
-    //class_<Layer>("layer",init<const Parameters&>("Layer constructor"))
+    
     class_<Layer>("Layer",no_init)
         .def("name",&Layer::name,return_value_policy<copy_const_reference>())
         .def("params",&Layer::params,return_value_policy<reference_existing_object>())

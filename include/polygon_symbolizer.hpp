@@ -34,6 +34,10 @@ namespace mapnik
 	{
 	    return fill_;
 	}
+	void set_fill(Color const& fill)
+	{
+	    fill_ = fill;
+	}
     private:
 	Color fill_;
     };  

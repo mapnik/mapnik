@@ -1,5 +1,5 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+ * Copyright (C) 2006 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,26 +16,41 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: image_symbolizer.hpp 39 2005-04-10 20:39:53Z pavlenko $
+//$Id$
 
-#ifndef POINT_SYMBOLIZER_HPP
-#define POINT_SYMBOLIZER_HPP
 
-#include <boost/shared_ptr.hpp>
-#include "graphics.hpp" 
+#if !defined LABEL_COLLISION_DETECTOR
+#define LABEL_COLLISION_DETECTOR
 
-namespace mapnik 
-{   
-    struct point_symbolizer
-    {	
-	point_symbolizer(std::string const& file,
-			 std::string const& type,
-			 unsigned width,unsigned height);
-	point_symbolizer(point_symbolizer const& rhs);
-	ImageData32 const& get_data() const;
+#include "envelope.hpp"
+#include <vector>
+
+namespace mapnik
+{
+    //this needs to be tree structure 
+    //as a proof of a concept _only_ we use sequential scan 
+
+    struct label_collision_detector
+    {
+	typedef std::vector<Envelope<double> > label_placements;
+
+	bool allowed_to_render(Envelope<double> const& box)
+	{
+	    label_placements::const_iterator itr=labels_.begin();
+	    for( ; itr !=labels_.end();++itr)
+	    {
+		if (itr->intersects(box))
+		{
+		    return false;
+		}
+	    }
+	    labels_.push_back(box);
+	    return true;
+	}
     private:
-	boost::shared_ptr<ImageData32> symbol_;
+
+	label_placements labels_;
     };
 }
 
-#endif // POINT_SYMBOLIZER_HPP
+#endif 

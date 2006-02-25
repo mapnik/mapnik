@@ -20,6 +20,7 @@
 
 
 #include <boost/python.hpp>
+#include <boost/python/implicit.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <mapnik.hpp>
 
@@ -27,17 +28,34 @@ using mapnik::rule_type;
 using mapnik::filter;
 using mapnik::filter_ptr;
 using mapnik::Feature;
+
+using mapnik::point_symbolizer;
+using mapnik::line_symbolizer;
+using mapnik::line_pattern_symbolizer;
+using mapnik::polygon_symbolizer;
+using mapnik::polygon_pattern_symbolizer;
+using mapnik::raster_symbolizer;
+using mapnik::text_symbolizer;
+using mapnik::symbolizer;
 using mapnik::symbolizers;
 
 void export_rule()
 {
     using namespace boost::python;
+
+    implicitly_convertible<point_symbolizer,symbolizer>();
+    implicitly_convertible<line_symbolizer,symbolizer>();
+    implicitly_convertible<line_pattern_symbolizer,symbolizer>();
+    implicitly_convertible<polygon_symbolizer,symbolizer>();
+    implicitly_convertible<polygon_pattern_symbolizer,symbolizer>();
+    implicitly_convertible<raster_symbolizer,symbolizer>();
+    implicitly_convertible<text_symbolizer,symbolizer>();
     
     class_<symbolizers>("Symbolizers",init<>("TODO"))
-	.def(vector_indexing_suite<symbolizers>())
-	;
+    	.def(vector_indexing_suite<symbolizers>())
+    	;
     
-    class_<rule_type>("Rule",init<>("default ctor"))
+    class_<rule_type>("Rule",init<>("default constructor"))
 	.def(init<std::string const&,
 	     boost::python::optional<std::string const&,double,double> >())
 	.add_property("name",make_function

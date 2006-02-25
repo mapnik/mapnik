@@ -38,49 +38,27 @@ void export_rule();
 void export_style();
 void export_stroke();
 void export_datasource_cache();
+void export_point_symbolizer();
+void export_line_symbolizer();
+void export_line_pattern_symbolizer();
+void export_polygon_symbolizer();
+void export_polygon_pattern_symbolizer();
+void export_raster_symbolizer();
+void export_text_symbolizer();
 
 void render_to_file(const Map& map,const std::string& file,const std::string& format)
 {
     Image32 image(map.getWidth(),map.getHeight());
-    Renderer<Image32>::render(map,image);
+    agg_renderer<Image32> ren(map,image);
+    ren.apply();
     image.saveToFile(file,format);
 }
 
 void render(const Map& map,Image32& image)
 {
-    Renderer<Image32>::render(map,image);    
+    agg_renderer<Image32> ren(map,image);
+    ren.apply();
 }
-
-
-boost::shared_ptr<symbolizer> create_point_symbolizer(std::string const& file,unsigned w,unsigned h)
-{
-    return boost::shared_ptr<symbolizer>(new image_symbolizer(file,"png",w,h));
-}
-
-boost::shared_ptr<symbolizer> create_line_symbolizer(const Color& pen,float width)
-{
-    return boost::shared_ptr<symbolizer>(new line_symbolizer(pen,width));
-} 
-
-boost::shared_ptr<symbolizer> create_line_symbolizer2(stroke const& strk)
-{
-    return boost::shared_ptr<symbolizer>(new line_symbolizer(strk));
-} 
-
-boost::shared_ptr<symbolizer> create_line_symbolizer3(std::string const& file,unsigned w,unsigned h)
-{
-    return boost::shared_ptr<symbolizer>(new line_pattern_symbolizer(file,"png",w,h));
-} 
-
-boost::shared_ptr<symbolizer> create_polygon_symbolizer(const Color& fill) 
-{   
-    return boost::shared_ptr<symbolizer>(new polygon_symbolizer(fill));
-} 
-
-boost::shared_ptr<symbolizer> create_polygon_symbolizer2(std::string const& file,unsigned w,unsigned h) 
-{   
-    return boost::shared_ptr<symbolizer>(new polygon_pattern_symbolizer(file,"png",w,h));
-} 
 
 BOOST_PYTHON_MODULE(_mapnik)
 {
@@ -91,12 +69,7 @@ BOOST_PYTHON_MODULE(_mapnik)
         .def("envelope",&datasource::envelope,
 	     return_value_policy<reference_existing_object>())
         ;
-    
-    class_<symbolizer,boost::noncopyable> ("Symbolizer_",no_init) 
-    	;
-    class_<boost::shared_ptr<symbolizer>,
-	boost::noncopyable>("Symbolizer",no_init)
-	;
+        
     export_parameters();
     export_color(); 
     export_envelope();   
@@ -107,8 +80,14 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_layer();
     export_stroke();
     export_datasource_cache();
-    
-    
+    export_point_symbolizer();
+    export_line_symbolizer();
+    export_line_pattern_symbolizer();
+    export_polygon_symbolizer();
+    export_polygon_pattern_symbolizer();
+    export_raster_symbolizer();
+    export_text_symbolizer();
+
     class_<coord<double,2> >("Coord",init<double,double>())
         .def_readwrite("x", &coord<double,2>::x)
         .def_readwrite("y", &coord<double,2>::y)
@@ -118,12 +97,5 @@ BOOST_PYTHON_MODULE(_mapnik)
   
     def("render_to_file",&render_to_file);
     def("render",&render);
-    def("point_symbolizer",&create_point_symbolizer);
-    def("line_symbolizer",&create_line_symbolizer);
-    def("line_symbolizer",&create_line_symbolizer2);
-    def("line_symbolizer",&create_line_symbolizer3);
-    def("polygon_symbolizer",&create_polygon_symbolizer);
-    def("polygon_symbolizer",&create_polygon_symbolizer2);
-    register_ptr_to_python<boost::shared_ptr<symbolizer> >();
     register_ptr_to_python<filter_ptr>();
 }

@@ -90,13 +90,13 @@ namespace mapnik
     }
     
     template <typename T>
-    void agg_renderer<T>::start_map_processing()
+    void agg_renderer<T>::start_map_processing(Map const& map)
     {
-	std::cout << "start map processing" << std::endl;
+	std::cout << "start map processing bbox=" << map.getCurrentExtent() <<  std::endl;
     }
 
     template <typename T>
-    void agg_renderer<T>::end_map_processing()
+    void agg_renderer<T>::end_map_processing(Map const& )
     {
 	std::cout << "end map processing" << std::endl;
     }
@@ -275,10 +275,16 @@ namespace mapnik
 	    t_.forward_x(&x);
 	    t_.forward_y(&y);
 	    int w=data.width();
-	    int h=data.height();    
-	    int px=int(ceil(x - 0.5 * w));
-	    int py=int(ceil(y - 0.5 * h));
-	    pixmap_.set_rectangle_alpha(px,py,data);
+	    int h=data.height();
+	    if (detector_.allowed_to_render(Envelope<double>(x - 0.5 * w,
+							     y - 0.5 * h,
+							     x + 0.5 * w,
+							     y + 0.5 * h)))
+	    {
+		int px=int(ceil(x - 0.5 * w));
+		int py=int(ceil(y - 0.5 * h));
+		pixmap_.set_rectangle_alpha(px,py,data);
+	    }
 	}
     }
     
@@ -412,7 +418,7 @@ namespace mapnik
 		t_.forward_y(&y);
 		
 		face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
-		
+		//face_ptr face = font_manager_.get_face("Times New Roman Regular");//TODO
 		if (face)
 		{
 		    text_renderer<mapnik::Image32> ren(pixmap_,face);
@@ -420,7 +426,7 @@ namespace mapnik
 		    ren.set_fill(fill);
 		    ren.set_halo_radius(1);
 		    ren.set_angle(angle);
-		    ren.render(text,x,y);
+		    ren.render(text,x+6,y+6);
 		}
 	    }  
 	}

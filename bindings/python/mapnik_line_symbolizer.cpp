@@ -1,5 +1,5 @@
-/* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2005 Artem Pavlenko
+/* This file is part of python_mapnik (c++/python mapping toolkit)
+ * Copyright (C) 2005 Artem Pavlenko, Jean-Francois Doyon
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,26 +16,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id: image_symbolizer.hpp 39 2005-04-10 20:39:53Z pavlenko $
+//$Id$
 
-#ifndef POINT_SYMBOLIZER_HPP
-#define POINT_SYMBOLIZER_HPP
+#include <boost/python.hpp>
+#include <mapnik.hpp>
 
-#include <boost/shared_ptr.hpp>
-#include "graphics.hpp" 
+using mapnik::line_symbolizer;
+using mapnik::stroke;
+using mapnik::Color;
 
-namespace mapnik 
-{   
-    struct point_symbolizer
-    {	
-	point_symbolizer(std::string const& file,
-			 std::string const& type,
-			 unsigned width,unsigned height);
-	point_symbolizer(point_symbolizer const& rhs);
-	ImageData32 const& get_data() const;
-    private:
-	boost::shared_ptr<ImageData32> symbol_;
-    };
+void export_line_symbolizer()
+{
+    using namespace boost::python;
+    
+    class_<line_symbolizer>("LineSymbolizer",init<stroke const&>("TODO"))
+	.def(init<Color const& ,float>())
+	.add_property("stroke",make_function
+		      (&line_symbolizer::get_stroke,return_value_policy<reference_existing_object>()),
+		      &line_symbolizer::set_stroke)
+	;    
 }
-
-#endif // POINT_SYMBOLIZER_HPP

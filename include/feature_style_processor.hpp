@@ -60,7 +60,7 @@ namespace mapnik
 	    timer clock;
 	    Processor & p = static_cast<Processor&>(*this);
 
-	    p.start_map_processing();
+	    p.start_map_processing(m_);
 	    
 	    std::vector<Layer>::const_iterator itr = m_.layers().begin();
 	    while (itr != m_.layers().end())
@@ -73,7 +73,7 @@ namespace mapnik
 		++itr;
 	    }
 	    
-	    p.end_map_processing();
+	    p.end_map_processing(m_);
 	    
 	    clock.stop();
 	    

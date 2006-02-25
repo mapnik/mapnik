@@ -38,6 +38,11 @@ namespace mapnik
 	{
 	    return stroke_;
 	}
+	void set_stroke(stroke const& stroke)
+	{
+	    stroke_ = stroke;
+	}
+
     private:
 	stroke stroke_;
     };

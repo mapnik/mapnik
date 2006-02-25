@@ -21,10 +21,6 @@
 #ifndef TEXT_SYMBOLIZER_HPP
 #define TEXT_SYMBOLIZER_HPP
 
-//#include "symbolizer.hpp"
-//#include "fill.hpp"
-//#include "expression.hpp"
-
 namespace mapnik
 {
     enum label_placement_e {

@@ -28,7 +28,6 @@
 #include "text_symbolizer.hpp"
 #include "filter.hpp"
 #include "filter_visitor.hpp"
-
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <string>
@@ -36,6 +35,45 @@
 
 namespace mapnik
 {
+    inline bool operator==(point_symbolizer const& lhs,
+			   point_symbolizer const& rhs)
+    {
+	return (&lhs == &rhs); 
+    }
+    inline bool operator==(line_symbolizer const& lhs,
+			   line_symbolizer const& rhs)
+    {
+	return (&lhs == &rhs); 
+    }
+    inline bool operator==(line_pattern_symbolizer const& lhs,
+			   line_pattern_symbolizer const& rhs)
+    {
+	return (&lhs == &rhs); 
+    }
+
+    inline bool operator==(polygon_symbolizer const& lhs,
+			   polygon_symbolizer const& rhs)
+    {
+	return (&lhs == &rhs); 
+    }
+    
+    inline bool operator==(polygon_pattern_symbolizer const& lhs,
+			   polygon_pattern_symbolizer const& rhs)
+    {
+	return (&lhs == &rhs); 
+    }
+    
+    inline bool operator==(raster_symbolizer const& lhs,
+			   raster_symbolizer const& rhs)
+    {
+	return (&lhs == &rhs); 
+    }
+    
+    inline bool operator==(text_symbolizer const& lhs,
+			   text_symbolizer const& rhs)
+    {
+	return (&lhs == &rhs); 
+    }
     
     typedef boost::variant<point_symbolizer,
 			   line_symbolizer,
@@ -45,6 +83,7 @@ namespace mapnik
 			   raster_symbolizer,
 			   text_symbolizer> symbolizer;
     
+        
     typedef std::vector<symbolizer> symbolizers;    
     template <typename FeatureT> class all_filter;
 

@@ -219,7 +219,57 @@ namespace mapnik
     private:
 	faces faces_;
     };
-
+        
+    inline std::wstring to_unicode(std::string const& text)
+    {
+	std::wstring out;
+	unsigned long code = 0;
+	int expect = 0;
+	std::string::const_iterator itr=text.begin();
+	
+	while ( itr != text.end())
+	{
+	    unsigned p = (*itr++) & 0xff;
+	    if ( p >= 0xc0)
+	    {
+		if ( p < 0xe0)      // U+0080 - U+07ff
+		{
+		    expect = 1;
+		    code = p & 0x1f;
+		}
+		else if ( p < 0xf0)  // U+0800 - U+ffff
+		{
+		    expect = 2;
+		    code = p & 0x0f;
+		}
+		else if ( p  < 0xf8) // U+1000 - U+10ffff
+		{
+		    expect = 3;
+		    code = p & 0x07;
+		}
+		continue;
+	    }
+	    else if (p >= 0x80)
+	    {
+		--expect;
+		if (expect >= 0)
+		{
+		    code <<= 6;
+		    code += p & 0x3f;
+		}
+		if (expect > 0)
+		    continue;
+		expect = 0;
+	    }
+	    else 
+	    {
+		code = p;            // U+0000 - U+007f (ascii)
+	    }
+	    out.push_back(code);
+	}
+	return out;
+    }
+    
     template <typename T>
     struct text_renderer : private boost::noncopyable
     {
@@ -270,7 +320,7 @@ namespace mapnik
 	    FT_GlyphSlot slot = face->glyph;
 	    FT_UInt glyph_index;
 	    FT_Bool use_kerning;
-	    FT_UInt previous;
+	    FT_UInt previous = 0;
 	
 	    unsigned height = pixmap_.height();
 	
@@ -280,12 +330,10 @@ namespace mapnik
 	    pen.y = unsigned((height - y0) * 64);
         
 	    use_kerning = FT_HAS_KERNING(face);
-	
-	    //unsigned count=1;
-	
-	    for (std::string::const_iterator i=text.begin();i!=text.end();++i)
+
+	    std::string::const_iterator i;
+	    for (i=text.begin();i!=text.end();++i)
 	    {
-	    
 		matrix.xx = (FT_Fixed)( cos( angle_ ) * 0x10000L ); 
 		matrix.xy = (FT_Fixed)(-sin( angle_ ) * 0x10000L ); 
 		matrix.yx = (FT_Fixed)( sin( angle_ ) * 0x10000L ); 
@@ -293,7 +341,7 @@ namespace mapnik
 	    	     
 		FT_Set_Transform (face,&matrix,&pen);
 	    
-		glyph_index = FT_Get_Char_Index( face, *i );
+		glyph_index = FT_Get_Char_Index( face, unsigned(*i) & 0xff );
 		if ( use_kerning && previous && glyph_index)
 		{
 		    FT_Vector delta;
@@ -301,7 +349,6 @@ namespace mapnik
 				   FT_KERNING_DEFAULT,&delta);
 		    pen.x += delta.x;
 		    pen.y += delta.y;
-		    std::cout<< "use kerning "<< std::endl;
 		}
 	    
 		error = FT_Load_Glyph (face,glyph_index,FT_LOAD_DEFAULT); 
@@ -337,8 +384,8 @@ namespace mapnik
 		previous = glyph_index;
 	    
 		//angle_ = sin ( 0.1 * count++);
-	    
 	    }
+	    std::cout << std::endl;
 	}
     private:
     
