@@ -24,8 +24,7 @@ opts = Options()
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include'))
 opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/lib'))
-opts.Add(PathOption('FREETYPE_INCLUDES', 'Search path for FreeType include files', '/opt/freetype/include/freetype2'))
-opts.Add(PathOption('FREETYPE_LIBS', 'Search path for FreeType library files', '/opt/freetype/lib'))
+opts.Add(PathOption('FREETYPE_CONFIG', 'The path to the freetype-config executable.', '/usr/bin/freetype-config'))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
 opts.Add(PathOption('PNG_LIBS', 'Search path for libpng include files', '/usr/lib'))
 opts.Add(PathOption('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include'))
@@ -49,21 +48,22 @@ conf = Configure(env)
 
 env['CPPPATH'] = ['#agg/include', '#include']
 
-for path in [env['BOOST_INCLUDES'], env['FREETYPE_INCLUDES'], env['PNG_INCLUDES'], env['JPEG_INCLUDES'], env['TIFF_INCLUDES'], env['PGSQL_INCLUDES']]:
+for path in [env['BOOST_INCLUDES'], env['PNG_INCLUDES'], env['JPEG_INCLUDES'], env['TIFF_INCLUDES'], env['PGSQL_INCLUDES']]:
     if path not in env['CPPPATH']: env['CPPPATH'].append(path)
 
 env['LIBPATH'] = ['#agg', '#src']
 
-for path in [env['BOOST_LIBS'], env['FREETYPE_LIBS'], env['PNG_LIBS'], env['JPEG_LIBS'], env['TIFF_LIBS'], env['PGSQL_LIBS']]:
+for path in [env['BOOST_LIBS'], env['PNG_LIBS'], env['JPEG_LIBS'], env['TIFF_LIBS'], env['PGSQL_LIBS']]:
     if path not in env['LIBPATH']: env['LIBPATH'].append(path)
+
+env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
 
 C_LIBSHEADERS = [
     ['ltdl', 'ltdl.h', True],
     ['png', 'png.h', True],
     ['tiff', 'tiff.h', True],
     ['z', 'zlib.h', True],
-    ['jpeg', ['stdio.h','jpeglib.h'], True],
-    #['freetype', 'ft2build.h', True],
+    ['jpeg', ['stdio.h', 'jpeglib.h'], True],
     ['pq', 'libpq-fe.h', False]
 ]
 

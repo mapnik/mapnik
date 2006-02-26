@@ -32,7 +32,7 @@ char const* rawdata(const Image32& image)
 void export_image()
 {
     using namespace boost::python;
-    class_<Image32>("Image",init<int,int>())
+    class_<Image32>("Image","This class represents a 32 bit image.",init<int,int>())
     ;
     def("rawdata",&rawdata);
 }

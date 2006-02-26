@@ -24,7 +24,6 @@ Import('env')
 prefix = env['PREFIX']
 
 libraries = ['agg'] + env['LIBS']
-libraries += ['freetype']
 
 linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 

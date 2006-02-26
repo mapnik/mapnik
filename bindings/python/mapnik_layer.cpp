@@ -104,7 +104,7 @@ void export_layer()
     	.def(vector_indexing_suite<std::vector<std::string>,true >())
     	;
     
-    class_<Layer>("Layer",no_init)
+    class_<Layer>("Layer","A map layer.",no_init)
         .def("name",&Layer::name,return_value_policy<copy_const_reference>())
         .def("params",&Layer::params,return_value_policy<reference_existing_object>())
         .def("envelope",&Layer::envelope)

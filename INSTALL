@@ -31,6 +31,7 @@ All of these will normally come with any modern Linux distribution.
 
 If your system does NOT have one of these installed, you will need to install the mandatory ones at the very least before proceeding further.  Instructions on how to do this will come with each individual package.
 
+Also, a minimum of 256MB of RAM is recommended for the build process.
 
 Building
 --------
@@ -64,13 +65,9 @@ BOOST_LIBS: Search path for boost library files ( /path/to/BOOST_LIBS )
     default: /usr/lib
     actual: /usr/lib
 
-FREETYPE_INCLUDES: Search path for FreeType include files ( /path/to/FREETYPE_INCLUDES )
-    default: /usr/include
-    actual: /usr/include
-
-FREETYPE_LIBS: Search path for FreeType library files ( /path/to/FREETYPE_LIBS )
-    default: /usr/lib
-    actual: /usr/lib
+FREETYPE_CONFIG: The path to the freetype-config executable. ( /path/to/FREETYPE_CONFIG )
+    default: /usr/bin/freetype-config
+    actual: /usr/bin/freetype-config
 
 PNG_INCLUDES: Search path for libpng include files ( /path/to/PNG_INCLUDES )
     default: /usr/include
@@ -152,7 +149,7 @@ If you're using the default PREFIX, you will most likely need to be root to perf
 Test
 ----
 
-There currently are no easy way to test your setup, other than write some code to generate a map.
+There currently is no easy way to test your setup, other than write some code to generate a map.
 
 One simple thing you can do is try to load the Python module, and make sure it does so without errors:
 

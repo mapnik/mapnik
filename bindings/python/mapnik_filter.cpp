@@ -38,7 +38,7 @@ namespace
 void export_filter()
 {
     using namespace boost::python;
-    class_<filter<Feature>,boost::noncopyable>("Filter",no_init)
+    class_<filter<Feature>,boost::noncopyable>("Filter","An expression which allows to select features.",no_init)
 	.def("__str__",&filter<Feature>::to_string);
 	;
     def("filter",&create_filter);

@@ -58,7 +58,7 @@ bool (Envelope<double>::*intersects_p3)(Envelope<double> const&) const = &Envelo
 void export_envelope()
 {
     using namespace boost::python;
-    class_<Envelope<double> >("Envelope",init<double,double,double,double>())
+    class_<Envelope<double> >("Envelope","A spacial envelope (i.e. bounding box) which also defines some basic operators.",init<double,double,double,double>())
         .def(init<>())
 	.def(init<const coord<double,2>&, const coord<double,2>&>())
         .add_property("minx",&Envelope<double>::minx)
