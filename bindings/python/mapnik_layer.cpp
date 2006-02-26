@@ -114,5 +114,5 @@ void export_layer()
 		      (&Layer::styles,return_value_policy<reference_existing_object>()))
         .def_pickle(layer_pickle_suite())
         ;
-    def("create_layer",&create_layer);
+    def("Layer",&create_layer);
 }

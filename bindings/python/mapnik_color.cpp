@@ -53,6 +53,6 @@ void export_color ()
 	.def(self == self)
         .def_pickle(color_pickle_suite())
         ;
-    def("color_from_string",&create_from_string);
+    def("Color",&create_from_string);
 }
 

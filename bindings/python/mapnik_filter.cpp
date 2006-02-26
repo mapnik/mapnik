@@ -41,5 +41,5 @@ void export_filter()
     class_<filter<Feature>,boost::noncopyable>("Filter","An expression which allows to select features.",no_init)
 	.def("__str__",&filter<Feature>::to_string);
 	;
-    def("filter",&create_filter);
+    def("Filter",&create_filter);
 }
