@@ -41,20 +41,31 @@ Color create_from_string(const char* str)
     return color_factory::from_string(str);
 }
 
+Color create_from_rgb(unsigned r, unsigned g,unsigned b)
+{
+    return Color(r,g,b);
+}
+
+Color create_from_rgba(unsigned r, unsigned g,unsigned b,unsigned a)
+{
+    return Color(r,g,b,a);
+}
+
 void export_color () 
 {
     using namespace boost::python;
     class_<Color>("Color",init<>())
-        .def(init<int,int,int,boost::python::optional<int> >())
         .add_property("r",&Color::red,&Color::set_red)
         .add_property("g",&Color::green,&Color::set_green)
         .add_property("b",&Color::blue,&Color::set_blue)
 	.add_property("a",&Color::alpha)
 	.def(self == self)
         .def_pickle(color_pickle_suite())
-	.def("fromString",&create_from_string)
-	.staticmethod("fromString")	
-        ;
-    //def("Color",&create_from_string);
+	.def("__str__",&Color::to_string)
+	;
+    
+    def("Color",&create_from_string);
+    def("Color",&create_from_rgba);
+    def("Color",&create_from_rgb);
 }
 

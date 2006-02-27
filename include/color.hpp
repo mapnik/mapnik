@@ -21,6 +21,8 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
+#include <sstream>
+
 namespace mapnik {
 
     class Color
@@ -91,6 +93,13 @@ namespace mapnik {
 	{
 	    return rgba_ == other.rgba_;
 	}
+
+	inline std::string to_string() const
+	{
+	    std::stringstream ss;
+	    ss << "rgb (" << red() << ","  << green() << ","  << blue() <<")";
+	    return ss.str();
+	} 
     };    
 }
 
