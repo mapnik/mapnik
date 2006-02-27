@@ -385,7 +385,6 @@ namespace mapnik
 	    
 		//angle_ = sin ( 0.1 * count++);
 	    }
-	    std::cout << std::endl;
 	}
     private:
     

@@ -22,7 +22,7 @@
 #if !defined LABEL_COLLISION_DETECTOR
 #define LABEL_COLLISION_DETECTOR
 
-#include "envelope.hpp"
+#include "quad_tree.hpp"
 #include <vector>
 
 namespace mapnik
@@ -34,7 +34,7 @@ namespace mapnik
     {
 	typedef std::vector<Envelope<double> > label_placements;
 
-	bool allowed_to_render(Envelope<double> const& box)
+	bool has_plasement(Envelope<double> const& box)
 	{
 	    label_placements::const_iterator itr=labels_.begin();
 	    for( ; itr !=labels_.end();++itr)
@@ -50,6 +50,34 @@ namespace mapnik
     private:
 
 	label_placements labels_;
+    };
+
+    // quad_tree based label collision detector
+    class label_collision_detector2 : boost::noncopyable
+    {
+	typedef quad_tree<Envelope<double> > tree_t;
+	tree_t tree_;
+    public:
+	
+	explicit label_collision_detector2(Envelope<double> const& extent)
+	    : tree_(extent) {}
+	
+	bool has_placement(Envelope<double> const& box)
+	{
+	    tree_t::query_iterator itr = tree_.query_in_box(box);
+	    tree_t::query_iterator end = tree_.query_end();
+	    
+	    for ( ;itr != end; ++itr)
+	    {
+		if (itr->intersects(box))
+		{
+		    return false;
+		}
+	    }
+	    
+	    tree_.insert(box,box);
+	    return true;
+	}	
     };
 }
 

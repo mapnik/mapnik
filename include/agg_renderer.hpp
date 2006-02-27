@@ -48,7 +48,7 @@ namespace mapnik
 	T & pixmap_;
 	CoordTransform t_;
 	face_manager<freetype_engine> font_manager_;
-	label_collision_detector detector_;
+	label_collision_detector2 detector_;
     };
 }
 

@@ -82,7 +82,8 @@ namespace mapnik
     agg_renderer<T>::agg_renderer(Map const& m, T & pixmap)
 	: feature_style_processor<agg_renderer>(m),
 	  pixmap_(pixmap),
-	  t_(m.getWidth(),m.getHeight(),m.getCurrentExtent())
+	  t_(m.getWidth(),m.getHeight(),m.getCurrentExtent()),
+	  detector_(Envelope<double>(0,0,m.getWidth(),m.getHeight()))
     {
 	Color const& bg=m.getBackground();
 	pixmap_.setBackground(bg);
@@ -276,7 +277,7 @@ namespace mapnik
 	    t_.forward_y(&y);
 	    int w=data.width();
 	    int h=data.height();
-	    if (detector_.allowed_to_render(Envelope<double>(x - 0.5 * w,
+	    if (detector_.has_placement(Envelope<double>(x - 0.5 * w,
 							     y - 0.5 * h,
 							     x + 0.5 * w,
 							     y + 0.5 * h)))

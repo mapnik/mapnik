@@ -52,7 +52,9 @@ void export_color ()
 	.add_property("a",&Color::alpha)
 	.def(self == self)
         .def_pickle(color_pickle_suite())
+	.def("fromString",&create_from_string)
+	.staticmethod("fromString")	
         ;
-    def("Color",&create_from_string);
+    //def("Color",&create_from_string);
 }
 
