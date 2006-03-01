@@ -24,7 +24,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/noncopyable.hpp>
 #include <vector>
-#include <mapnik/envelope.hpp>
+#include "envelope.hpp"
 
 
 namespace mapnik

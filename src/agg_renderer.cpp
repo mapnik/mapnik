@@ -83,7 +83,7 @@ namespace mapnik
 	: feature_style_processor<agg_renderer>(m),
 	  pixmap_(pixmap),
 	  t_(m.getWidth(),m.getHeight(),m.getCurrentExtent()),
-	  detector_(Envelope<double>(0,0,m.getWidth(),m.getHeight()))
+	  detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
     {
 	Color const& bg=m.getBackground();
 	pixmap_.setBackground(bg);
@@ -401,7 +401,8 @@ namespace mapnik
 		path.vertex(&x0,&y0);
 		path.vertex(&x1,&y1);
 		double dx = x1 - x0;
-		double dy = y1 - y0;
+		double dy = ( y1 - y0 > 1e-7 ) ?  y1 - y0 : 1.0;
+	        
 		angle = atan( dx/ dy ) - 0.5 * 3.1459;
 		
 		//TODO!!!!!!!!!!!!!!!!!!!!
@@ -417,17 +418,35 @@ namespace mapnik
 		geom->label_position(&x,&y);
 		t_.forward_x(&x);
 		t_.forward_y(&y);
-		
+
+		//x += 6; //TODO!!!
+		//y += 6; //TODO!!!
+
 		face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
 		//face_ptr face = font_manager_.get_face("Times New Roman Regular");//TODO
 		if (face)
 		{
 		    text_renderer<mapnik::Image32> ren(pixmap_,face);
-		    ren.set_pixel_size(12);
+		    ren.set_pixel_size(sym.get_text_size());
 		    ren.set_fill(fill);
-		    ren.set_halo_radius(1);
+		    ren.set_halo_fill(sym.get_halo_fill());
+		    ren.set_halo_radius(sym.get_halo_radius());
 		    ren.set_angle(angle);
-		    ren.render(text,x+6,y+6);
+
+		    std::pair<unsigned,unsigned> dim = ren.prepare_glyphs(text);
+		    Envelope<double> text_box(x - 0.5*dim.first,y - 0.5 * dim.second ,
+					      x + 0.5*dim.first,y + 0.5 * dim.second);
+		    
+		    if (sym.get_halo_radius() > 0)
+		    {
+			text_box.width(text_box.width() + sym.get_halo_radius()*2);
+			text_box.height(text_box.height() + sym.get_halo_radius()*2);
+		    }
+
+		    if (detector_.has_placement(text_box))
+		    {
+			ren.render(x - 0.5 * dim.first,y - 0.5 * dim.second);
+		    }
 		}
 	    }  
 	}

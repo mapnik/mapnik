@@ -27,6 +27,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <string>
@@ -65,34 +66,6 @@ namespace mapnik
 	{
 	    return face_->glyph;
 	}
-
-	/*
-	unsigned glyph_index(unsigned charcode) const
-	{
-	    return FT_Get_Char_Index(face_, charcode );
-	}
-	
-	void set_transform (FT_Matrix * m,FT_Vector *v)
-	{
-	    FT_Set_Transform(face_,m,v);
-	}
-	
-	bool render_glyph (unsigned charcode) const
-	{
-	    unsigned glyph_index = FT_Get_Char_Index(face_, charcode );
-	    FT_Error  error;
-	    error = FT_Load_Glyph(face_,glyph_index,FT_LOAD_DEFAULT);
-	    if (error == 0 )
-	    {
-		error = FT_Render_Glyph(face_->glyph, FT_RENDER_MODE_NORMAL );
-		if (error == 0)
-		{
-		    return true;
-		}
-	    }
-	    return false;
-	}
-	*/
 	
 	FT_Face get_face() const
 	{
@@ -273,8 +246,18 @@ namespace mapnik
     template <typename T>
     struct text_renderer : private boost::noncopyable
     {
+
+	struct glyph_t : boost::noncopyable
+	{
+	    FT_Glyph image;
+	    glyph_t(FT_Glyph image_) : image(image_) {}
+	    ~glyph_t ()	{ FT_Done_Glyph(image);}
+	};
+	
+	typedef boost::ptr_vector<glyph_t> glyphs_t;
+	typedef std::pair<unsigned,unsigned> dimension_t;
 	typedef T pixmap_type;
-    
+	
 	text_renderer (pixmap_type & pixmap, face_ptr face)
 	    : pixmap_(pixmap),
 	      face_(face),
@@ -307,41 +290,44 @@ namespace mapnik
 	{
 	    halo_radius_=radius;
 	}
-    
-	void render(std::string const& text, double x0, double y0)
+
+	dimension_t prepare_glyphs(std::string const& text)
 	{
+	    //clear glyphs
+	    glyphs_.clear();
+	    
 	    FT_Matrix matrix;
-	    FT_Vector origin;
 	    FT_Vector pen;
-	    FT_Error  error;	
-	    FT_Glyph glyph;
-	
+	    FT_Error  error;
+	    
 	    FT_Face face = face_->get_face();
 	    FT_GlyphSlot slot = face->glyph;
-	    FT_UInt glyph_index;
 	    FT_Bool use_kerning;
-	    FT_UInt previous = 0;
-	
-	    unsigned height = pixmap_.height();
-	
-	    origin.x = 0;
-	    origin.y = 0;
-	    pen.x = unsigned(x0 * 64);
-	    pen.y = unsigned((height - y0) * 64);
-        
+	    FT_UInt previous;
+	    
+	    pen.x = 0;
+	    pen.y = 0;
+	    
 	    use_kerning = FT_HAS_KERNING(face);
-
-	    std::string::const_iterator i;
-	    for (i=text.begin();i!=text.end();++i)
+	    
+	    FT_BBox bbox;   
+	    bbox.xMin = bbox.yMin = 32000; 
+	    bbox.xMax = bbox.yMax = -32000; //hmm?? 
+	    
+	    for (std::string::const_iterator i=text.begin();i!=text.end();++i)
 	    {
+		FT_BBox glyph_bbox; 
+		FT_Glyph image;
+		
 		matrix.xx = (FT_Fixed)( cos( angle_ ) * 0x10000L ); 
 		matrix.xy = (FT_Fixed)(-sin( angle_ ) * 0x10000L ); 
 		matrix.yx = (FT_Fixed)( sin( angle_ ) * 0x10000L ); 
 		matrix.yy = (FT_Fixed)( cos( angle_ ) * 0x10000L );
-	    	     
+	        	
 		FT_Set_Transform (face,&matrix,&pen);
-	    
-		glyph_index = FT_Get_Char_Index( face, unsigned(*i) & 0xff );
+		
+		FT_UInt glyph_index = FT_Get_Char_Index( face, unsigned(*i) & 0xff );
+		
 		if ( use_kerning && previous && glyph_index)
 		{
 		    FT_Vector delta;
@@ -350,42 +336,94 @@ namespace mapnik
 		    pen.x += delta.x;
 		    pen.y += delta.y;
 		}
-	    
+		
 		error = FT_Load_Glyph (face,glyph_index,FT_LOAD_DEFAULT); 
 		if ( error )
 		    continue;
-
-		error = FT_Get_Glyph( face->glyph, &glyph );
+		
+		error = FT_Get_Glyph( face->glyph, &image);
 		if ( error )
 		    continue;
-	  
-		//FT_Glyph_Transform(glyph,&matrix,&pen);
-	    
-		error = FT_Glyph_To_Bitmap( &glyph,FT_RENDER_MODE_NORMAL,0,1);
-		if ( error )
-		    continue;
-
-		FT_BitmapGlyph bit = (FT_BitmapGlyph)glyph;
-		if (halo_radius_)
+		
+		FT_Glyph_Get_CBox(image,ft_glyph_bbox_pixels, &glyph_bbox); 
+		if (glyph_bbox.xMin < bbox.xMin) 
+		    bbox.xMin = glyph_bbox.xMin; 
+		if (glyph_bbox.yMin < bbox.yMin) 
+		    bbox.yMin = glyph_bbox.yMin; 
+		if (glyph_bbox.xMax > bbox.xMax) 
+		    bbox.xMax = glyph_bbox.xMax; 
+		if (glyph_bbox.yMax > bbox.yMax) 
+		    bbox.yMax = glyph_bbox.yMax;
+		
+		if ( bbox.xMin > bbox.xMax )
 		{
-		    render_halo(&bit->bitmap, halo_fill_.rgba(), 
-				bit->left,
-				height - bit->top,halo_radius_);
+		    bbox.xMin = 0; 
+		    bbox.yMin = 0; 
+		    bbox.xMax = 0; 
+		    bbox.yMax = 0; 
 		}
-            	    
-		render_bitmap(&bit->bitmap, fill_.rgba(), 
-			      bit->left,
-			      height - bit->top);
-
-		FT_Done_Glyph(glyph);   
+		
 		pen.x += slot->advance.x;
 		pen.y += slot->advance.y;
-	    
+		
 		previous = glyph_index;
-	    
-		//angle_ = sin ( 0.1 * count++);
+		// take ownership of the glyph
+		glyphs_.push_back(new glyph_t(image));
 	    }
+	    
+	    unsigned string_width = (bbox.xMax - bbox.xMin); 
+	    unsigned string_height = (bbox.yMax - bbox.yMin);
+	    return dimension_t(string_width,string_height);
 	}
+	
+	void render(double x0, double y0)
+	{
+	    FT_Error  error;
+	    FT_Vector start;
+	    unsigned height = pixmap_.height();
+	    
+	    start.x = unsigned(x0 * (1 << 6)); 
+	    start.y = unsigned((height - y0) * (1 << 6));
+	    // now render transformed glyphs
+	    typename glyphs_t::iterator pos;
+
+	    if (halo_radius_ > 0)
+	    {
+		//render halo 
+		for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+		{
+	    
+		    FT_Glyph_Transform(pos->image,0,&start);
+	    
+		    error = FT_Glyph_To_Bitmap( &(pos->image),FT_RENDER_MODE_NORMAL,0,1);
+		    if ( ! error )
+		    {
+			
+			FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
+			render_halo(&bit->bitmap, halo_fill_.rgba(), 
+				    bit->left,
+				    height - bit->top,halo_radius_);
+		    }
+		}  
+	    }
+	    //render actual text
+	    for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+	    {
+	    
+		FT_Glyph_Transform(pos->image,0,&start);
+	    
+		error = FT_Glyph_To_Bitmap( &(pos->image),FT_RENDER_MODE_NORMAL,0,1);
+		if ( ! error )
+		{
+		   
+		    FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
+		    render_bitmap(&bit->bitmap, fill_.rgba(), 
+				  bit->left,
+				  height - bit->top);
+		}
+	    }  
+	}
+   	
     private:
     
 	void render_halo(FT_Bitmap *bitmap,unsigned rgba,int x,int y,int radius)
@@ -434,6 +472,7 @@ namespace mapnik
 	mapnik::Color halo_fill_;
 	int halo_radius_;
 	float angle_;
+	glyphs_t glyphs_;
     }; 
 }
 
