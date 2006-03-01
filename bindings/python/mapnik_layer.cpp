@@ -83,7 +83,7 @@ namespace
 {
     //user-friendly wrapper that uses Python dictionary
     using namespace boost::python;
-    _Layer create_layer(const dict& d)
+    Layer create_layer(const dict& d)
     {
 	parameters params;
 	boost::python::list keys=d.keys();
@@ -114,5 +114,5 @@ void export_layer()
 		      (&Layer::styles,return_value_policy<reference_existing_object>()))
         .def_pickle(layer_pickle_suite())
         ;
-    def("_Layer",&create_layer);
+    def("CreateLayer",&create_layer);
 }

@@ -50,7 +50,7 @@ class _Envelope(Envelope,_injector):
                (self.minx,self.miny,self.maxx,self.maxy)
 
 def Layer (**keywords):
-    return _Layer(keywords)
+    return CreateLayer(keywords)
     
     
 #register datasources
