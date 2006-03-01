@@ -81,13 +81,18 @@ struct layer_pickle_suite : boost::python::pickle_suite
 
 namespace  
 {
+    //user-friendly wrapper that uses Python dictionary
     using namespace boost::python;
-    Layer create_layer(const char* name, const char* type, const char* file)
+    _Layer create_layer(const dict& d)
     {
 	parameters params;
-	params["name"] = name;
-        params["type"] = type;
-        params["file"] = file;
+	boost::python::list keys=d.keys();
+	for (int i=0;i<len(keys);++i)
+	{
+	    std::string key=extract<std::string>(keys[i]);
+            std::string value=extract<std::string>(d[key]);
+	    params[key] = value;
+	}
 	return Layer(params);
     }
 }
@@ -109,5 +114,5 @@ void export_layer()
 		      (&Layer::styles,return_value_policy<reference_existing_object>()))
         .def_pickle(layer_pickle_suite())
         ;
-    def("Layer",&create_layer);
+    def("_Layer",&create_layer);
 }

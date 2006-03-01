@@ -29,6 +29,6 @@ void export_text_symbolizer()
     using namespace boost::python;
     
     class_<text_symbolizer>("TextSymbolizer",
-			    init<std::string const&,Color const&>("TODO"))
+			    init<std::string const&,unsigned,Color const&>("TODO"))
 	;
 }
