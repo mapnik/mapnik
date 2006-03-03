@@ -156,3 +156,7 @@ if 'raster' in inputplugins:
 # Build the core library
 
 SConscript('src/SConscript')
+
+# Install some free default fonts
+
+SConscript('fonts/SConscript')
