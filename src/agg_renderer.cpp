@@ -277,13 +277,14 @@ namespace mapnik
 	    t_.forward_y(&y);
 	    int w=data.width();
 	    int h=data.height();
-	    if (detector_.has_placement(Envelope<double>(x - 0.5 * w,
-							     y - 0.5 * h,
-							     x + 0.5 * w,
-							     y + 0.5 * h)))
+	    
+	    if (detector_.has_placement(Envelope<double>(floor(x - 0.5 * w),
+							 floor(y - 0.5 * h),
+							 ceil (x + 0.5 * w),
+							 ceil (y + 0.5 * h))))
 	    {
-		int px=int(ceil(x - 0.5 * w));
-		int py=int(ceil(y - 0.5 * h));
+		int px=int(floor(x - 0.5 * w));
+		int py=int(floor(y - 0.5 * h));
 		pixmap_.set_rectangle_alpha(px,py,data);
 	    }
 	}
@@ -419,9 +420,6 @@ namespace mapnik
 		t_.forward_x(&x);
 		t_.forward_y(&y);
 
-		//x += 6; //TODO!!!
-		//y += 6; //TODO!!!
-
 		face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
 		//face_ptr face = font_manager_.get_face("Times New Roman Regular");//TODO
 		if (face)
@@ -445,7 +443,7 @@ namespace mapnik
 
 		    if (detector_.has_placement(text_box))
 		    {
-			ren.render(x - 0.5 * dim.first,y - 0.5 * dim.second);
+			ren.render(x - 0.5 * dim.first,y + 0.5 * dim.second);
 		    }
 		}
 	    }  
