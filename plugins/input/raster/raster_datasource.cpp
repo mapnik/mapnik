@@ -24,7 +24,7 @@
 #include "raster_info.hpp"
 #include <boost/lexical_cast.hpp>
 
-DATASOURCE_PLUGIN(raster_datasource);
+DATASOURCE_PLUGIN(raster_datasource)
 
 using std::cerr;
 using std::endl;

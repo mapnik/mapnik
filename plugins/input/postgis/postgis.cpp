@@ -25,7 +25,7 @@
 #include <sstream>
 #include "connection_manager.hpp"
 
-DATASOURCE_PLUGIN(postgis_datasource);
+DATASOURCE_PLUGIN(postgis_datasource)
 
 const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS="spatial_ref_system";

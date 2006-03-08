@@ -120,7 +120,7 @@ namespace mapnik
 	expression<FeatureT>* left_;
 	expression<FeatureT>* right_;	
     }; 
-};
+}
 
 
 #endif //

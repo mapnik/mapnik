@@ -24,7 +24,7 @@
 #include <iostream>
 #include <stdexcept>
 
-DATASOURCE_PLUGIN(shape_datasource);
+DATASOURCE_PLUGIN(shape_datasource)
 
 shape_datasource::shape_datasource(const parameters &params)
     : shape_name_(params.get("file")),

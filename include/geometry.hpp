@@ -33,7 +33,7 @@ namespace mapnik
     enum {
     	Point = 1,
     	LineString = 2,
-    	Polygon = 3,
+    	Polygon = 3
     };
              
     template <typename T>
