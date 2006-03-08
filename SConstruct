@@ -70,7 +70,7 @@ C_LIBSHEADERS = [
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
     ['filesystem', 'boost/filesystem/operations.hpp', True],
-    ['wserialization', ['boost/archive/text_oarchive.hpp',
+    ['serialization', ['boost/archive/text_oarchive.hpp',
                         'boost/archive/text_iarchive.hpp',
                         'boost/archive/xml_oarchive.hpp',
                         'boost/archive/xml_iarchive.hpp'], True
@@ -127,9 +127,9 @@ env = conf.Finish()
 # Setup the c++ args for our own codebase
 
 if env['DEBUG']:
-    env.Append(CXXFLAGS = '-Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG')
+    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG')
 else:
-    env.Append(CXXFLAGS = '-Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG')
+    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG')
 
 # Build agg first, doesn't need anything special
 
