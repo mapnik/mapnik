@@ -48,10 +48,11 @@ source = Split(
     point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
     line_pattern_symbolizer.cpp
+    text_symbolizer.cpp
     font_engine_freetype.cpp
     """
     )
-#render.cpp
+
 #line_symbolizer.cpp
 #    line_pattern_symbolizer.cpp
 #    polygon_symbolizer.cpp

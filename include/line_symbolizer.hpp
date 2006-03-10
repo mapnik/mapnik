@@ -21,8 +21,6 @@
 #ifndef LINE_SYMBOLIZER_HPP
 #define LINE_SYMBOLIZER_HPP
 
-
-//#include "symbolizer.hpp"
 #include "stroke.hpp"
 
 namespace mapnik 

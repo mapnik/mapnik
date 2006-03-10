@@ -21,6 +21,10 @@
 #ifndef TEXT_SYMBOLIZER_HPP
 #define TEXT_SYMBOLIZER_HPP
 
+#include <string>
+#include <boost/tuple/tuple.hpp>
+#include "color.hpp"
+
 namespace mapnik
 {
     enum label_placement_e {
@@ -28,72 +32,26 @@ namespace mapnik
 	line_placement=2
     };
         
+    typedef boost::tuple<double,double> position;
+    
     struct text_symbolizer
     {		
-	text_symbolizer(std::string const& name,unsigned size,Color const& fill)
-	    : name_(name),
-	      size_(size),
-	      fill_(fill),
-	      halo_fill_(Color(255,255,255)),
-	      halo_radius_(0),
-	      label_p_(point_placement) {}
-	
-	text_symbolizer(text_symbolizer const& rhs)
-	    : name_(rhs.name_),
-	      size_(rhs.size_),
-	      fill_(rhs.fill_),
-	      halo_fill_(rhs.halo_fill_),
-	      halo_radius_(rhs.halo_radius_),
-	      label_p_(rhs.label_p_) {}
-	
-	~text_symbolizer()
-	{
-	    //
-	}
-	std::string const& get_name() const
-	{
-	    return name_;
-	}
-	
-	unsigned get_text_size() const
-	{
-	    return size_;
-	}
-	
-	Color const& get_fill() const
-	{
-	    return fill_;
-	}
-	
-	void set_halo_fill(Color const& fill)
-	{
-	    halo_fill_ = fill;
-	}
-
-	Color const& get_halo_fill() const
-	{
-	    return halo_fill_;
-	}
-	
-	void set_halo_radius(unsigned radius)
-	{
-	    halo_radius_ = radius;
-	}
-	
-	unsigned get_halo_radius() const
-	{
-	    return halo_radius_;
-	}
-	
-	void set_label_placement(label_placement_e label_p)
-	{
-	    label_p_ = label_p;
-	}
-	
-	label_placement_e get_label_placement() const
-	{
-	    return label_p_;
-	}
+	text_symbolizer(std::string const& name,unsigned size,Color const& fill);	
+	text_symbolizer(text_symbolizer const& rhs);
+	text_symbolizer& operator=(text_symbolizer const& rhs);
+	std::string const& get_name() const;
+	unsigned get_text_size() const;
+	Color const& get_fill() const;
+	void set_halo_fill(Color const& fill);
+	Color const& get_halo_fill() const;
+	void set_halo_radius(unsigned radius);
+	unsigned get_halo_radius() const;
+	void set_label_placement(label_placement_e label_p);
+	label_placement_e get_label_placement() const;
+        void set_anchor(double x, double y);	
+	position const& get_anchor() const;	
+	void set_displacement(double x, double y);
+	position const& get_displacement() const;
 	
     private:
 	std::string name_;
@@ -102,6 +60,8 @@ namespace mapnik
 	Color halo_fill_;
 	unsigned halo_radius_;
 	label_placement_e label_p_;
+	position anchor_;
+	position displacement_;
     };
 }
 
