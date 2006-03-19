@@ -19,8 +19,6 @@
 //$Id$
 
 #include <fstream>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include "mapnik.hpp"
@@ -34,14 +32,6 @@ namespace mapnik
 	boost::archive::xml_oarchive oa(ofs);
 	oa << boost::serialization::make_nvp("map",m);
     }
-    
-    void save_to_text(Map const& m,const char* filename)
-    {
-	std::ofstream ofs(filename);
-	assert(ofs.good());
-	boost::archive::text_oarchive oa(ofs);
-	oa << m;
-    }
 
     void load_from_xml(Map & m,const char* filename)
     {
@@ -49,14 +39,6 @@ namespace mapnik
 	assert(ifs.good());
 	boost::archive::xml_iarchive ia(ifs);
 	ia >> boost::serialization::make_nvp("map",m);
-    }
-    
-    void load_from_text(Map & m,const char* filename)
-    {
-	std::ifstream ifs(filename);
-	assert(ifs.good());
-	boost::archive::text_iarchive ia(ifs);
-	ia >> m;
     }
 }
 
