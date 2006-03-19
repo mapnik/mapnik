@@ -8,7 +8,8 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURP
+OSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -45,6 +46,7 @@ void export_polygon_symbolizer();
 void export_polygon_pattern_symbolizer();
 void export_raster_symbolizer();
 void export_text_symbolizer();
+void export_font_engine();
 
 void render_to_file(const Map& map,const std::string& file,const std::string& format)
 {
@@ -87,7 +89,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_polygon_pattern_symbolizer();
     export_raster_symbolizer();
     export_text_symbolizer();
-
+    export_font_engine();
     class_<coord<double,2> >("Coord",init<double,double>())
         .def_readwrite("x", &coord<double,2>::x)
         .def_readwrite("y", &coord<double,2>::y)
