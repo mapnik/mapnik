@@ -67,13 +67,13 @@ int main (int argc,char** argv)
 	
 	if (vm.count("version"))
 	{
-	    cout<<"version 0.2.0a" <<endl;
+	    clog<<"version 0.2.0a" <<endl;
 	    return 1;
 	}
 
 	if (vm.count("help")) 
 	{
-	    cout << desc << "\n";
+	    clog << desc << "\n";
 	    return 1;
 	}
 	if (vm.count("depth"))
@@ -92,26 +92,26 @@ int main (int argc,char** argv)
     }
     catch (...)
     {
-	cerr << "Exception of unknown type!"<<endl;
+	clog << "Exception of unknown type!"<<endl;
 	return -1;
     }
     
-    std::cout<<"max tree depth:"<<depth<<std::endl;
-    std::cout<<"split ratio:"<<ratio<<std::endl;
+    std::clog<<"max tree depth:"<<depth<<std::endl;
+    std::clog<<"split ratio:"<<ratio<<std::endl;
   
     vector<string>::const_iterator itr=shape_files.begin();
     if (itr==shape_files.end())
     {
-	std::cout << "no shape files to index"<<std::endl;
+	std::clog << "no shape files to index"<<std::endl;
 	return 0;
     }
     while (itr != shape_files.end())
     {
-	std::cout<<"processing "<<*itr << std::endl;
+	std::clog<<"processing "<<*itr << std::endl;
 	shape_file shp;
 	std::string shapename(*itr++);
 	if (!shp.open(shapename+".shp")) {
-	    std::cerr<<"error : cannot open "<< (shapename+".shp") <<"\n";
+	    std::clog<<"error : cannot open "<< (shapename+".shp") <<"\n";
 	    continue;
 	}
 
@@ -125,10 +125,10 @@ int main (int argc,char** argv)
 	shp.read_envelope(extent);
 	
 	
-	std::cout<<"length="<<file_length<<std::endl;
-	std::cout<<"version="<<version<<std::endl;
-	std::cout<<"type="<<shape_type<<std::endl;
-	std::cout<<"extent:"<<extent<<std::endl;
+	std::clog<<"length="<<file_length<<std::endl;
+	std::clog<<"version="<<version<<std::endl;
+	std::clog<<"type="<<shape_type<<std::endl;
+	std::clog<<"extent:"<<extent<<std::endl;
 	  
 	int pos=50;
 	shp.seek(pos*2);  
@@ -169,7 +169,7 @@ int main (int argc,char** argv)
 
 	    tree.insert(offset,item_ext);
 	    if (verbose) {
-		std::cout<<"record number "<<record_number<<" box="<<item_ext<<std::endl;
+		std::clog<<"record number "<<record_number<<" box="<<item_ext<<std::endl;
 	    }
 
 	    pos+=4+content_length;
@@ -181,20 +181,20 @@ int main (int argc,char** argv)
 	} 
 	shp.close();
   
-	std::cout<<" number shapes="<<count<<std::endl;  
+	std::clog<<" number shapes="<<count<<std::endl;  
     
 	std::fstream file((shapename+".index").c_str(),
 			  std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
 	if (!file) {
-	    std::cerr << "cannot open index file for writing file \""
+	    std::clog << "cannot open index file for writing file \""
 		      <<(shapename+".index")<<"\""<<std::endl;
 	} else {
 	    tree.trim();
-	    std::cout<<" number nodes="<<tree.count()<<std::endl;
+	    std::clog<<" number nodes="<<tree.count()<<std::endl;
 	    tree.write(file);
 	    file.close();
 	}
     }
-    std::cout<<"done!"<<std::endl;
+    std::clog<<"done!"<<std::endl;
     return 0;
 }

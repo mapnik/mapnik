@@ -230,14 +230,14 @@ private:
 	    {
 		pad+=" ";
 	    }
-	    std::cout<<pad<<"node "<<node<<" extent:"<<node->ext_<<std::endl;
-	    std::cout<<pad;
+	    std::clog<<pad<<"node "<<node<<" extent:"<<node->ext_<<std::endl;
+	    std::clog<<pad;
 	    while(itr!=node->data_.end())
 	    {
-		std::cout<<*itr<<" ";
+		std::clog<<*itr<<" ";
 		++itr;
 	    }
-	    std::cout<<std::endl;
+	    std::clog<<std::endl;
 	    for (int i=0;i<4;++i)
 	    {
 		print(node->children_[i],level+4);
