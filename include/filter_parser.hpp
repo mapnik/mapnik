@@ -39,7 +39,7 @@
 
 using namespace boost::spirit;
 using std::string;
-using std::cerr;
+using std::clog;
 using std::stack;
 
 namespace mapnik
@@ -154,7 +154,7 @@ namespace mapnik
 		    }
 		    catch (...)//boost::regex_error& ex)
 		    {
-		      cerr<<"error\n";//ex.what()<<"\n";
+		      clog<<"error\n";//ex.what()<<"\n";
 		    }
 		    
 		}

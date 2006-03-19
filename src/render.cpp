@@ -163,9 +163,9 @@ namespace mapnik
         timer clock;
         //////////////////////////////////////////////////////
 	Envelope<double> const& extent=map.getCurrentExtent();
-	std::cout<<"BBOX:"<<extent<<std::endl;
+	std::clog<<"BBOX:"<<extent<<std::endl;
         double scale=map.scale();
-        std::cout<<" scale="<<scale<<std::endl;
+        std::clog<<" scale="<<scale<<std::endl;
         
 	unsigned width=map.getWidth();
         unsigned height=map.getHeight();

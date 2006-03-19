@@ -87,31 +87,31 @@ namespace mapnik
     {
 	Color const& bg=m.getBackground();
 	pixmap_.setBackground(bg);
-	std::cout << "scale="<<m.scale()<<std::endl;
+	std::clog << "scale="<<m.scale()<<std::endl;
     }
     
     template <typename T>
     void agg_renderer<T>::start_map_processing(Map const& map)
     {
-	std::cout << "start map processing bbox=" << map.getCurrentExtent() <<  std::endl;
+	std::clog << "start map processing bbox=" << map.getCurrentExtent() <<  std::endl;
     }
 
     template <typename T>
     void agg_renderer<T>::end_map_processing(Map const& )
     {
-	std::cout << "end map processing" << std::endl;
+	std::clog << "end map processing" << std::endl;
     }
     
     template <typename T>
     void agg_renderer<T>::start_layer_processing(Layer const& lay)
     {
-	std::cout << "start layer processing : " << lay.name()  << std::endl;
+	std::clog << "start layer processing : " << lay.name()  << std::endl;
     }
     
     template <typename T>
     void agg_renderer<T>::end_layer_processing(Layer const&)
     {
-	std::cout << "end layer processing" << std::endl;
+	std::clog << "end layer processing" << std::endl;
     }
     
     template <typename T>	
@@ -300,7 +300,7 @@ namespace mapnik
 	typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
 
 	geometry_ptr const& geom=feature.get_geometry();
-	if (geom)
+	if (geom && geom->num_points() > 1)
 	{
 	    unsigned width = pixmap_.width();
 	    unsigned height = pixmap_.height();
@@ -336,7 +336,7 @@ namespace mapnik
 	    agg::span_allocator<agg::rgba8>,
 	    span_gen_type> renderer_type;  
 	geometry_ptr const& geom=feature.get_geometry();
-	if (geom)
+	if (geom && geom->num_points() > 2)
 	{
 	    ImageData32 const& pattern = sym.get_pattern();
 	    

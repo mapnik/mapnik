@@ -26,7 +26,7 @@
 
 DATASOURCE_PLUGIN(raster_datasource)
 
-using std::cerr;
+using std::clog;
 using std::endl;
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
@@ -47,7 +47,7 @@ raster_datasource::raster_datasource(const parameters& params)
     }
     catch (bad_lexical_cast& ex)
     {
-	cerr << ex.what() << endl;
+	clog << ex.what() << endl;
     }  
 }
 

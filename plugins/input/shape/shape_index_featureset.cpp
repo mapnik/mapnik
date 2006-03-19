@@ -39,7 +39,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
         shp_index<filterT>::query(filter,file,ids_);
         file.close();
     }
-    std::cout<< "query size=" << ids_.size() << "\n";
+    std::clog<< "query size=" << ids_.size() << "\n";
     itr_ = ids_.begin();
 
     // deal with attributes
@@ -168,7 +168,7 @@ feature_ptr shape_index_featureset<filterT>::next()
 		}
 		catch (...)
 		{
-		    std::cerr<<"exception caught\n";
+		    std::clog<<"exception caught\n";
 		}
 		++pos;
 	    }
@@ -177,7 +177,7 @@ feature_ptr shape_index_featureset<filterT>::next()
     }
     else
     {
-	std::cout<<count_<<" features\n";
+	std::clog<<count_<<" features\n";
 	return feature_ptr();
     }
 }

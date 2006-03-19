@@ -21,8 +21,6 @@
 #ifndef FEATURE_LAYER_DESC_HPP
 #define FEATURE_LAYER_DESC_HPP
 
-//#include "array.hpp"
-
 #include <string>
 #include <vector>
 #include <iostream>
@@ -32,8 +30,7 @@ namespace mapnik
     
     using std::string;
     using std::vector;
-    using std::cout;
-    using std::cerr;
+    using std::clog;
     using std::endl;
     
     enum {
@@ -231,7 +228,7 @@ namespace mapnik
 	{
 	    string name = wkb+pos;
 	    pos += name.size()+1;
-	    //std::cout<<"name="<<name<<"\n";
+	    //std::clog<<"name="<<name<<"\n";
 	    
 	    int type;
 	    memcpy(&type,wkb+pos,sizeof(int));

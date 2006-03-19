@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+//#include "array.hpp"
+
 //$Id$
 
 #ifndef FILTER_FACTORY_HPP
@@ -44,7 +46,7 @@ namespace mapnik
 	    }
 	    else 
 	    {
-		cerr << "failed at :" << info.stop << "\n";
+		clog << "failed at :" << info.stop << "\n";
 		return filter_ptr(new none_filter<FeatureT>());
 	    }  
 	}

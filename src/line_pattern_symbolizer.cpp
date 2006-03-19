@@ -37,7 +37,7 @@ namespace mapnik
 	} 
 	catch (...) 
 	{
-	    std::cerr << "exception caught..." << std::endl;
+	    std::clog << "exception caught..." << std::endl;
 	}
     }
 

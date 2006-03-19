@@ -66,7 +66,7 @@ namespace mapnik
 	} 
 	catch (const ImageReaderException& e) 
 	{
-	    std::cerr<<e.what()<<std::endl;
+	    std::clog<<e.what()<<std::endl;
 	    throw;
 	}
     }
@@ -112,7 +112,7 @@ namespace mapnik
 	width_=width;
 	height_=height;
 	
-	std::cout<<"bit_depth="<<bit_depth_<<" color_type="<<color_type_<<std::endl;
+	std::clog<<"bit_depth="<<bit_depth_<<" color_type="<<color_type_<<std::endl;
 	png_destroy_read_struct(&png_ptr,&info_ptr,0);	
 	fclose(fp);
     }

@@ -41,12 +41,12 @@ public:
 	conn_=PQconnectdb(connStr.c_str());
 	if (PQstatus(conn_) == CONNECTION_BAD)
 	{
-	    std::cerr << "connection to "<< connStr << " failed\n"
+	    std::clog << "connection to "<< connStr << " failed\n"
 		      << PQerrorMessage(conn_)<< std::endl;
 	}
 	else
 	{
-	    std::cout <<"connected ok "<<std::endl;
+	    std::clog <<"connected ok "<<std::endl;
 	}
     }
     bool execute(const std::string& sql) const

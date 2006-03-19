@@ -166,7 +166,7 @@ feature_ptr shape_featureset<filterT>::next()
 		}
 		catch (...)
 		{
-		    std::cerr << "error processing attributes " << std::endl;
+		    std::clog << "error processing attributes " << std::endl;
 		}
 		++pos;
 	    }
@@ -175,7 +175,7 @@ feature_ptr shape_featureset<filterT>::next()
     }
     else
     {
-	std::cout<<" total shapes read="<<count_<<"\n";
+	std::clog<<" total shapes read="<<count_<<"\n";
 	return feature_ptr();
     }
 }

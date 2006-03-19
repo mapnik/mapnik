@@ -1,4 +1,4 @@
-/* This file is part of Mapnik (c++ mapping toolkit)
+ /* This file is part of Mapnik (c++ mapping toolkit)
  * Copyright (C) 2005 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
@@ -58,7 +58,7 @@ namespace mapnik
                     create_ds* create_datasource = (create_ds*) lt_dlsym(itr->second->handle(), "create");
                     if (!create_datasource)
                     {
-                        std::cerr << "Cannot load symbols: " << lt_dlerror() << std::endl;
+                        std::clog << "Cannot load symbols: " << lt_dlerror() << std::endl;
                     }
                     else
                     {
@@ -67,18 +67,18 @@ namespace mapnik
                 }
                 else
                 {
-                    std::cerr << "Cannot load library: " << "  "<< lt_dlerror() << std::endl;
+                    std::clog << "Cannot load library: " << "  "<< lt_dlerror() << std::endl;
                 }
             }
-            std::cout<<"datasource="<<ds<<" type="<<type<<std::endl;
+            std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
         }
 	catch (datasource_exception& ex)
 	{
-	    std::cerr<<ex.what()<<std::endl;
+	    std::clog<<ex.what()<<std::endl;
 	}
         catch (...)
         {
-            std::cerr<<"exception caught "<<std::endl;
+            std::clog<<"exception caught "<<std::endl;
         }
         return ds;
     }
@@ -106,13 +106,13 @@ namespace mapnik
 			datasource_name* ds_name = (datasource_name*) lt_dlsym(module, "datasource_name");
 			if (ds_name && insert(ds_name(),module))
 			{                           
-			    std::cout<<"registered datasource : "<<ds_name()<<std::endl;
+			    std::clog<<"registered datasource : "<<ds_name()<<std::endl;
 			    registered_=true;
 			}
 		    }
 		    else
 		    {
-			std::cerr<<lt_dlerror()<<std::endl;
+			std::clog<<lt_dlerror()<<std::endl;
 		    }
                 }
             }   

@@ -41,7 +41,6 @@ source = Split(
     params.cpp
     plugin.cpp
     png_reader.cpp
-    text.cpp
     tiff_reader.cpp
     wkb.cpp
     agg_renderer.cpp

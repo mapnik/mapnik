@@ -65,7 +65,7 @@ shape_datasource::shape_datasource(const parameters &params)
 		}
 	    default:
 		//
-		std::cout << "uknown type "<<fd.type_<<"\n";
+		std::clog << "uknown type "<<fd.type_<<"\n";
 		break;
 		
 	    }
@@ -73,7 +73,7 @@ shape_datasource::shape_datasource(const parameters &params)
     }
     catch  (datasource_exception& ex)
     {
-        std::cerr<<ex.what()<<std::endl;
+        std::clog<<ex.what()<<std::endl;
         throw;
     }
 }
@@ -115,9 +115,9 @@ void  shape_datasource::init(shape_io& shape)
 	file.close();
     }
 
-    std::cout<<extent_<<std::endl;
-    std::cout<<"file_length="<<file_length_<<std::endl;
-    std::cout<<"shape_type="<<shape_type<<std::endl;
+    std::clog << extent_ << std::endl;
+    std::clog << "file_length=" << file_length_ << std::endl;
+    std::clog << "shape_type=" << shape_type << std::endl;
 }
 
 

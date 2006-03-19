@@ -82,7 +82,7 @@ namespace mapnik
 	
     	~font_face()
     	{
-    	    std::cout << "clean up face:" << family_name()<<":" << style_name() << std::endl;
+    	    std::clog << "clean up face:" << family_name()<<":" << style_name() << std::endl;
     	    FT_Done_Face(face_);
     	}
 	

@@ -30,8 +30,8 @@ DATASOURCE_PLUGIN(postgis_datasource)
 const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS="spatial_ref_system";
 
-using std::cerr;
-using std::cout;
+using std::clog;
+using std::clog;
 using std::endl;
 
 using boost::lexical_cast;
@@ -76,7 +76,7 @@ postgis_datasource::postgis_datasource(const parameters& params)
 		}
 		catch (bad_lexical_cast &ex)
 		{
-		    cerr << ex.what() << endl;
+		    clog << ex.what() << endl;
 		}
 		geometryColumn_=rs->getValue("f_geometry_column");
 		std::string postgisType=rs->getValue("type");
@@ -99,7 +99,7 @@ postgis_datasource::postgis_datasource(const parameters& params)
 		}
 		catch (bad_lexical_cast &ex)
 		{
-		    cerr << ex.what() << endl;
+		    clog << ex.what() << endl;
 		}
 	    }
 	    rs->close();
@@ -133,7 +133,7 @@ postgis_datasource::postgis_datasource(const parameters& params)
 			desc_.add_descriptor(attribute_descriptor(fld_name,String));
 			break;
 		    default: // shouldn't get here
-			cout << "unknown type_oid="<<type_oid<<endl;
+			clog << "unknown type_oid="<<type_oid<<endl;
 			desc_.add_descriptor(attribute_descriptor(fld_name,String));
 			break;
 		    }	  
@@ -201,7 +201,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
 	    s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
 	    s << box.minx() << " " << box.miny() << ",";
 	    s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
-	    cout << s.str() << endl;
+	    clog << s.str() << endl;
 	    shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
 	    fs=new postgis_featureset(rs,props.size());
 	}

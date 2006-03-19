@@ -162,10 +162,10 @@ namespace mapnik
     
     void process_node(iter_t const& i,string& text)
     {
-	//cout << "In eval_expression. i->value = " <<
+	//clog << "In eval_expression. i->value = " <<
 	//   string(i->value.begin(), i->value.end()) <<
 	//   " i->children.size() = " << i->children.size() << endl;
-	//std::cout<<typeid(*i).name()<<"\n";
+	//std::clog<<typeid(*i).name()<<"\n";
 
 	if (i->value.id() == filter_grammar_ast::integerID)
 	{	

@@ -154,7 +154,7 @@ namespace mapnik
 	    }
 	    catch (...)
 	    {
-		std::cerr << "exception caught : can not create datasorce" << std::endl;  
+		std::clog << "exception caught : can not create datasorce" << std::endl;  
 	    }
 	}
 	return ds_;

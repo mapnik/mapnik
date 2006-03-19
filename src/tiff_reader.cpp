@@ -81,7 +81,7 @@ namespace mapnik
 	}
 	catch (ImageReaderException& ex)
 	{
-	    std::cerr<<ex.what()<<std::endl;
+	    std::clog<<ex.what()<<std::endl;
 	    throw;
 	}
     }
@@ -157,7 +157,7 @@ namespace mapnik
 	TIFF* tif = TIFFOpen(file_name_.c_str(), "r");
 	if (tif)
 	{
-	    std::cerr<<"TODO:tiff is not stripped or tiled\n";
+	    std::clog<<"TODO:tiff is not stripped or tiled\n";
 	    TIFFClose(tif);
 	}
     }

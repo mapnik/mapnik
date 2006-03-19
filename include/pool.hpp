@@ -85,7 +85,7 @@ namespace mapnik
 	    typename ContType::iterator itr=unusedPool_.begin();
 	    if (itr!=unusedPool_.end())
 	    {  
-		std::cout<<"borrow "<<(*itr).get()<<"\n";
+		std::clog<<"borrow "<<(*itr).get()<<"\n";
 		usedPool_.push_back(*itr);
 		itr=unusedPool_.erase(itr);
 		return usedPool_[usedPool_.size()-1];
@@ -102,7 +102,7 @@ namespace mapnik
 	    {
 		if (obj.get()==(*itr).get()) 
 		{
-		    std::cout<<"return "<<(*itr).get()<<"\n";
+		    std::clog<<"return "<<(*itr).get()<<"\n";
 		    unusedPool_.push_back(*itr);
 		    usedPool_.erase(itr);
 		    return;
