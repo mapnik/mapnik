@@ -29,6 +29,10 @@ void export_text_symbolizer()
     using namespace boost::python;
     
     class_<text_symbolizer>("TextSymbolizer",
-			    init<std::string const&,unsigned,Color const&>("TODO"))
+			    init<std::string const&,unsigned,Color const&>())
+        .add_property("halo_fill",make_function(
+                      &text_symbolizer::get_halo_fill,return_value_policy<copy_const_reference>()),
+                      &text_symbolizer::set_halo_fill)
+        .add_property("halo_radius",&text_symbolizer::get_halo_radius, &text_symbolizer::set_halo_radius)
 	;
 }
