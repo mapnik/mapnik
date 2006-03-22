@@ -1,5 +1,5 @@
-#!/usr/bin/python2.3
-
+# $Id$
+#
 # This file is part of Mapnik (c++ mapping toolkit)
 # Copyright (C) 2005 Jean-Francois Doyon
 #
@@ -294,3 +294,9 @@ m.zoom_to_box(Envelope(7622019.99659767, 2966323.17001496, 7909470.44644348, 275
 
 render_to_file(m, 'demo.png', 'png')
 render_to_file(m, 'demo.jpg', 'jpeg')
+
+print """\n\nTwo maps have been rendered in the current directory:
+- demo.jpg
+- demo.png
+
+Have a look!\n\n"""
