@@ -18,7 +18,7 @@
 
 #include "dbffile.hpp"
 #include "utils.hpp"
-
+#include <boost/algorithm/string.hpp>
 #include <string>
 
 dbf_file::dbf_file()
@@ -50,7 +50,7 @@ dbf_file::~dbf_file()
 
 bool dbf_file::open(const std::string& file_name)
 {
-    file_.open(file_name.c_str());
+    file_.open(file_name.c_str(),std::ios::in|std::ios::binary);
     if (file_.is_open())
         read_header();
     return file_?true:false;
@@ -115,39 +115,39 @@ void dbf_file::add_attribute(int col,Feature const& f) const throw()
     if (col>=0 && col<num_fields_)
     {
         std::string name=fields_[col].name_;
-	std::string str=trim(std::string(record_+fields_[col].offset_,fields_[col].length_));
-        
+        std::string str=boost::trim_copy(std::string(record_+fields_[col].offset_,fields_[col].length_));
+
         switch (fields_[col].type_)
         {
-	case 'C':
-	case 'D'://todo handle date?
-	case 'M':
-	case 'L':
-	    f[name] = str; 
-	    break;
-	case 'N':
+        case 'C':
+        case 'D'://todo handle date?
+        case 'M':
+        case 'L':
+            f[name] = str; 
+            break;
+        case 'N':
         case 'F':
-	    {
-		if (str[0]=='*')
-		{
-		    boost::put(f,name,0);
-		    break;
-		}
-		if (fields_[col].dec_>0)
-		{   
-		    double d;
-		    fromString(str,d);
-		    boost::put(f,name,d);
-		}
-		else
-		{
-		    int i;
-		    fromString(str,i);
-		    boost::put(f,name,i);
-		}
-		break;
-	    }
-	}
+            {
+                if (str[0]=='*')
+                {
+                    boost::put(f,name,0);
+                    break;
+                }
+                if (fields_[col].dec_>0)
+                {   
+                    double d;
+                    fromString(str,d);
+                    boost::put(f,name,d);
+                }
+                else
+                {
+                    int i;
+                    fromString(str,i);
+                    boost::put(f,name,i);
+                }
+                break;
+            }
+        }
     }
 }
 
@@ -172,7 +172,8 @@ void dbf_file::read_header()
             field_descriptor desc;
             desc.index_=i;
             file_.read(name,10);
-            desc.name_=trim_left(name);
+            desc.name_=boost::trim_left_copy(std::string(name));
+            std::clog << "name=" << name << std::endl;
             skip(1);
             desc.type_=file_.get();
             skip(4);
@@ -205,7 +206,7 @@ int dbf_file::read_int()
     char b[4];
     file_.read(b,4);
     return (b[0] & 0xff) | (b[1] & 0xff) << 8 |
-	(b[2] & 0xff) << 16 | (b[3] & 0xff) <<24;
+        (b[2] & 0xff) << 16 | (b[3] & 0xff) <<24;
 }
 
 
