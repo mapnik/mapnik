@@ -80,8 +80,8 @@ void export_map()
     	.def(vector_indexing_suite<std::vector<Layer> >())
     	;
     class_<Map>("Map",init<int,int,boost::python::optional<int> >())
-        .add_property("width",&Map::getWidth)
-        .add_property("height",&Map::getHeight)
+        .add_property("width",&Map::getWidth,&Map::setWidth)
+        .add_property("height",&Map::getHeight,&Map::setHeight)
 	.add_property("srid",&Map::srid)
 	.add_property("background",make_function
 		      (&Map::getBackground,return_value_policy<copy_const_reference>()),

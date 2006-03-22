@@ -105,9 +105,9 @@ void export_layer()
     	;
     
     class_<Layer>("Layer","A map layer.",no_init)
-        .def("name",&Layer::name,return_value_policy<copy_const_reference>())
+        .def("name",&Layer::name,return_value_policy<copy_const_reference>(), "Return the name of the layer.")
         .def("params",&Layer::params,return_value_policy<reference_existing_object>())
-        .def("envelope",&Layer::envelope)
+        .def("envelope",&Layer::envelope, "Return the geographic envelope/bounding box of the data in the layer.")
 	.add_property("minzoom",&Layer::getMinZoom,&Layer::setMinZoom)
 	.add_property("maxzoom",&Layer::getMaxZoom,&Layer::setMaxZoom)
 	.add_property("styles",make_function
