@@ -28,7 +28,7 @@
 using namespace boost;
 namespace mapnik {
 
-	typedef variant<std::string,int,double> value_base;
+    typedef variant<int,double,std::string> value_base;
     
     namespace impl {
 	struct equals
@@ -327,72 +327,83 @@ namespace mapnik {
 	    }
 	};
 	
-	struct to_expression_string : public boost::static_visitor<std::string>
-	{
-	    template <typename T>
-	    std::string operator() (T val) const
-	    {
-		std::stringstream ss;
-		ss << val;
-		return ss.str();
-	    } 
-	    std::string operator() (std::string const& val) const
-	    {
-		return "'" + val + "'";
-	    }
-	};
+    struct to_expression_string : public boost::static_visitor<std::string>
+    {
+        template <typename T>
+        std::string operator() (T val) const
+        {
+            std::stringstream ss;
+            ss << val;
+            return ss.str();
+        } 
+        std::string operator() (std::string const& val) const
+        {
+            return "'" + val + "'";
+        }
+    };
     }
     
-    class value : public value_base
+    class value
     {
+        value_base base_;
+        friend const value operator+(value const&,value const&);
+        friend const value operator-(value const&,value const&);
+        friend const value operator*(value const&,value const&);
+        friend const value operator/(value const&,value const&);
+        //friend template <typename charT, typename traits> 
+          //      std::basic_ostream<charT,traits>&  operator << (std::basic_ostream<charT,traits>&,
+    		//                                                       value const& );     
     public:
 	value ()
-	    : value_base(0) {}
+	    : base_(0) {}
 	
 	template <typename T> value(T _val_)
-	    : value_base(_val_) {}
+	    : base_(_val_) {}
 	
-	value (const value& rhs)
-	{
-        //todo!!!!!!!!!
-	}
-	value& operator=(value const& rhs)
-	{
-		if (this == &rhs)
-			return  *this;
-		//TODO!!!!!	
-		return *this;	
-	}
+    //value (std::string const& str)
+     //   : base(str) {}
+    
+	//value& operator=(value const& rhs)
+	//{
+	//	if (this == &rhs)
+	//		return  *this;
+//		//TODO!!!!!	
+//		return *this;	
+	//}
 	bool operator==(value const& other) const
 	{
-	    return boost::apply_visitor(impl::equals(),*this,other);
+	    return boost::apply_visitor(impl::equals(),base_,other.base_);
 	}
 
 	bool operator!=(value const& other) const
 	{
-	    return !(boost::apply_visitor(impl::equals(),*this,other));
+	    return !(boost::apply_visitor(impl::equals(),base_,other.base_));
 	}
 	
 	bool operator>(value const& other) const
 	{
-	    return boost::apply_visitor(impl::greater_than(),*this,other);
+	    return boost::apply_visitor(impl::greater_than(),base_,other.base_);
 	}
 
 	bool operator>=(value const& other) const
 	{
-	    return boost::apply_visitor(impl::greater_or_equal(),*this,other);
+	    return boost::apply_visitor(impl::greater_or_equal(),base_,other.base_);
 	}
 
 	bool operator<(value const& other) const
 	{
-	    return boost::apply_visitor(impl::less_than(),*this,other);
+	    return boost::apply_visitor(impl::less_than(),base_,other.base_);
 	}
 
 	bool operator<=(value const& other) const
 	{
-	    return boost::apply_visitor(impl::less_or_equal(),*this,other);
+	    return boost::apply_visitor(impl::less_or_equal(),base_,other.base_);
 	}
-
+    value_base const& base() const
+    {
+        return base_;
+    }
+/*
 	value& operator+=(value const& other)
 	{
 	    *this = boost::apply_visitor(impl::add<value>(),*this,other);
@@ -416,15 +427,15 @@ namespace mapnik {
 	    *this = boost::apply_visitor(impl::div<value>(),*this,other);
 	    return *this;
 	}
-
+*/
 	std::string to_expression_string() const
 	{
-	    return boost::apply_visitor(impl::to_expression_string(),*this);
+	    return boost::apply_visitor(impl::to_expression_string(),base_);
 	}
 
 	std::string to_string() const
 	{
-	    return boost::apply_visitor(impl::to_string(),*this);
+	    return boost::apply_visitor(impl::to_string(),base_);
 	}
     };
     
@@ -433,7 +444,7 @@ namespace mapnik {
 	//value tmp(p1);
 	//tmp+=p2;
 	//return tmp;
-		return boost::apply_visitor(impl::add<value>(),p1, p2);
+		return value(boost::apply_visitor(impl::add<value>(),p1.base_, p2.base_));
     }
 
     inline const value operator-(value const& p1,value const& p2)
@@ -441,7 +452,7 @@ namespace mapnik {
 	//value tmp(p1);
 	//tmp-=p2;
 	//return tmp;
-		return boost::apply_visitor(impl::sub<value>(),p1, p2);
+		return value(boost::apply_visitor(impl::sub<value>(),p1.base_, p2.base_));
     }
 
     inline const value operator*(value const& p1,value const& p2)
@@ -449,7 +460,7 @@ namespace mapnik {
 	//value tmp(p1);
 	//tmp*=p2;
 	//return tmp;
-		return boost::apply_visitor(impl::mult<value>(),p1, p2);
+		return value(boost::apply_visitor(impl::mult<value>(),p1.base_, p2.base_));
     }
 
     inline const value operator/(value const& p1,value const& p2)
@@ -457,17 +468,17 @@ namespace mapnik {
 	//value tmp(p1);
 	//tmp/=p2;
 	//return tmp;
-	    return boost::apply_visitor(impl::div<value>(),p1, p2);
+	    return value(boost::apply_visitor(impl::div<value>(),p1.base_, p2.base_));
 	}
 
-    //template <typename charT, typename traits>
-    //inline std::basic_ostream<charT,traits>& 
-    //operator << (std::basic_ostream<charT,traits>& out,/
-    //		 value const& v)
-    // {
-    //	out << v.get();
-    //	return out; 
-    //}
+    template <typename charT, typename traits>
+    inline std::basic_ostream<charT,traits>& 
+    operator << (std::basic_ostream<charT,traits>& out,
+    		 value const& v)
+    {
+    	out << v.base();
+    	return out; 
+    }
 }
 
 #endif //VALUE_HPP
