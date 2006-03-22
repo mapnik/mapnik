@@ -25,6 +25,9 @@
 namespace mapnik 
 {
 
+	using std::min;
+	using std::max;
+	
     class TiffReader : public ImageReader
     {
     private:
@@ -181,27 +184,26 @@ namespace mapnik
 
 	    for (int y=start_y;y<end_y;y+=tile_height_)
 	    {
-		ty0=std::max(y0,(unsigned)y)-y;
-		ty1=std::min(height+y0,(unsigned)(y+tile_height_))-y;
+			ty0 = max(y0,(unsigned)y) - y;
+			ty1 = min(height+y0,(unsigned)(y+tile_height_)) - y;
 
-		int n0=tile_height_-ty1;
-		int n1=tile_height_-ty0-1;
+			int n0=tile_height_-ty1;
+			int n1=tile_height_-ty0-1;
 	        
-		for (int x=start_x;x<end_x;x+=tile_width_)
-		{
+			for (int x=start_x;x<end_x;x+=tile_width_)
+			{
 
-		    if (!TIFFReadRGBATile(tif,x,y,buf)) break;
+				if (!TIFFReadRGBATile(tif,x,y,buf)) break;
 
-		    tx0=std::max(x0,(unsigned)x);
-		    tx1=std::min(width+x0,(unsigned)(x+tile_width_));
-
-		    row=y+ty0-y0;
-		    for (int n=n1;n>=n0;--n)
-		    {
-			image.setRow(row,tx0-x0,tx1-x0,(const unsigned*)&buf[n*tile_width_+tx0-x]);
-			++row;
-		    }
-		}
+				tx0=max(x0,(unsigned)x);
+				tx1=min(width+x0,(unsigned)(x+tile_width_));
+				row=y+ty0-y0;
+				for (int n=n1;n>=n0;--n)
+				{
+					image.setRow(row,tx0-x0,tx1-x0,(const unsigned*)&buf[n*tile_width_+tx0-x]);
+					++row;
+				}
+			}
 	    }
 	    _TIFFfree(buf);
 	    TIFFClose(tif);
@@ -225,12 +227,12 @@ namespace mapnik
 	    int row,tx0,tx1,ty0,ty1;
 
 	    tx0=x0;
-	    tx1=std::min(width+x0,(unsigned)width_);
+	    tx1=min(width+x0,(unsigned)width_);
 
 	    for (unsigned y=start_y; y < end_y; y+=rows_per_strip_)
 	    {
-		ty0=std::max(y0,y)-y;
-		ty1=std::min(height+y0,y+rows_per_strip_)-y;
+		ty0 = max(y0,y)-y;
+		ty1 = min(height+y0,y+rows_per_strip_)-y;
 
 		if (!TIFFReadRGBAStrip(tif,y,buf)) break;
 		

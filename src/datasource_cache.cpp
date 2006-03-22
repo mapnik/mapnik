@@ -90,30 +90,30 @@ namespace mapnik
 
     void datasource_cache::register_datasources(const std::string& str)
     {	
-	mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache, 
-				mapnik::CreateStatic>::mutex_);
-	filesystem::path path(str);
-	filesystem::directory_iterator end_itr;
-	if (exists(path))
+        mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache, 
+            mapnik::CreateStatic>::mutex_);
+        filesystem::path path(str);
+        filesystem::directory_iterator end_itr;
+        if (exists(path))
         {
-	    for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
-	    {
-		if (!is_directory( *itr ) && itr->leaf()[0]!='.')
+            for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
+            {
+                if (!is_directory( *itr ) && itr->leaf()[0]!='.')
                 {
-		    lt_dlhandle module=lt_dlopenext(itr->string().c_str());
-		    if (module)
-		    {
-			datasource_name* ds_name = (datasource_name*) lt_dlsym(module, "datasource_name");
-			if (ds_name && insert(ds_name(),module))
-			{                           
-			    std::clog<<"registered datasource : "<<ds_name()<<std::endl;
-			    registered_=true;
-			}
-		    }
-		    else
-		    {
-			std::clog<<lt_dlerror()<<std::endl;
-		    }
+                    lt_dlhandle module=lt_dlopenext(itr->string().c_str());
+                    if (module)
+                    {
+                        datasource_name* ds_name = (datasource_name*) lt_dlsym(module, "datasource_name");
+                        if (ds_name && insert(ds_name(),module))
+                        {                           
+                            std::clog<<"registered datasource : "<<ds_name()<<std::endl;
+                            registered_=true;
+                        }
+                    }
+                    else
+                    {
+                        std::clog<<lt_dlerror()<<std::endl;
+                    }
                 }
             }   
         }	

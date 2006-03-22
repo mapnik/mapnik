@@ -39,7 +39,7 @@ namespace mapnik
 
     Image32::~Image32() {}
 
-    gamma Image32::gammaTable_;
+    //gamma MAPNIK_DECL Image32::gammaTable_;
 
     const ImageData32& Image32::data() const
     {
@@ -59,7 +59,7 @@ namespace mapnik
     
     void Image32::saveToFile(const std::string& file,const std::string& format) 
     {
-	//TODO: image writer factory
-	ImageUtils::save_to_file(file,format,*this);
+	    //TODO: image writer factory
+	    ImageUtils::save_to_file(file,format,*this);
     }
 }

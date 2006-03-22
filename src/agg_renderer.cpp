@@ -429,7 +429,7 @@ namespace mapnik
 		    ren.set_fill(fill);
 		    ren.set_halo_fill(sym.get_halo_fill());
 		    ren.set_halo_radius(sym.get_halo_radius());
-		    ren.set_angle(angle);
+		    ren.set_angle(float(angle));
 
 		    std::pair<unsigned,unsigned> dim = ren.prepare_glyphs(text);
 		    Envelope<double> text_box(x - 0.5*dim.first,y - 0.5 * dim.second ,
