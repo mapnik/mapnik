@@ -21,4 +21,4 @@ import glob
 
 Import('env')
 
-env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O3')
+env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O3 -fPIC ')
