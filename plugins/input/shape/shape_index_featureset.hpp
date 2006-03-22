@@ -24,7 +24,7 @@
 #include <vector>
 
 template <typename filterT>
-class shape_index_featureset : public Featureset
+class MAPNIK_DECL shape_index_featureset : public Featureset
 {
     filterT filter_;
     int shape_type_;

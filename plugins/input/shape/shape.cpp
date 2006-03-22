@@ -27,49 +27,48 @@
 DATASOURCE_PLUGIN(shape_datasource)
 
 shape_datasource::shape_datasource(const parameters &params)
-    : shape_name_(params.get("file")),
-      type_(datasource::Vector),
-      file_length_(0),
-      indexed_(false),
-      desc_(params.get("name"))
+: shape_name_(params.get("file")),
+type_(datasource::Vector),
+file_length_(0),
+indexed_(false),
+desc_(params.get("name"))
 {
     try
     {
         shape_io shape(shape_name_);
         init(shape);
-	for (int i=0;i<shape.dbf().num_fields();++i)
-	{
-	    field_descriptor const& fd=shape.dbf().descriptor(i);
-	    std::string fld_name=fd.name_;
+        for (int i=0;i<shape.dbf().num_fields();++i)
+        {
+            field_descriptor const& fd=shape.dbf().descriptor(i);
+            std::string fld_name=fd.name_;
+            switch (fd.type_)
+            {
+            case 'C':
+            case 'D':
+            case 'M':
+            case 'L':		
+                desc_.add_descriptor(attribute_descriptor(fld_name,String));
+                break;
+            case 'N':
+            case 'F':
+                {
+                    if (fd.dec_>0)
+                    {   
+                        desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,8));
+                    }
+                    else
+                    {
+                        desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,4));
+                    }
+                    break;
+                }
+            default:
+                //
+                std::clog << "unknown type "<<fd.type_<<"\n";
+                break;
 
-	    switch (fd.type_)
-	    {
-	    case 'C':
-	    case 'D':
-	    case 'M':
-	    case 'L':		
-		desc_.add_descriptor(attribute_descriptor(fld_name,String));
-		break;
-	    case 'N':
-	    case 'F':
-		{
-		    if (fd.dec_>0)
-		    {   
-			desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,8));
-		    }
-		    else
-		    {
-			desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,4));
-		    }
-		    break;
-		}
-	    default:
-		//
-		std::clog << "uknown type "<<fd.type_<<"\n";
-		break;
-		
-	    }
-	}
+            }
+        }
     }
     catch  (datasource_exception& ex)
     {
@@ -111,8 +110,8 @@ void  shape_datasource::init(shape_io& shape)
     std::ifstream file(index_name.c_str(),std::ios::in | std::ios::binary);
     if (file)
     {
-	indexed_=true;
-	file.close();
+        indexed_=true;
+        file.close();
     }
 
     std::clog << extent_ << std::endl;
@@ -141,7 +140,7 @@ featureset_ptr shape_datasource::features(const query& q) const
     filter_in_box filter(q.get_bbox());
     if (indexed_)
     {
-	return featureset_ptr(new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
+        return featureset_ptr(new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
     }
     return featureset_ptr(new shape_featureset<filter_in_box>(filter,shape_name_,q.property_names(),file_length_));
 }

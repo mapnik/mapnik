@@ -25,7 +25,7 @@
 
 using namespace mapnik;
 
-class shape_datasource : public datasource
+class MAPNIK_DECL shape_datasource : public datasource
 {
 
 public:
