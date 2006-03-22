@@ -26,7 +26,7 @@ flags = getdlopenflags()
 setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
 
 from _mapnik import *
-from paths import inputpluginspath
+from paths import inputpluginspath, fontscollectionpath
 
 # The base Boost.Python class
 BoostPythonMetaclass = Coord.__class__
@@ -58,7 +58,7 @@ from mapnik import DatasourceCache
 DatasourceCache.instance().register_datasources('%s' % inputpluginspath)
 #register some fonts
 from mapnik import FontEngine
-FontEngine.instance().register_font('/usr/local/lib/mapnik/fonts/Vera.ttf')
+FontEngine.instance().register_font('%s/Vera.ttf' % fontscollectionpath)
 #set dlopen flags back to the original
 setdlopenflags(flags)
 
