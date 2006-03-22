@@ -173,7 +173,6 @@ void dbf_file::read_header()
             desc.index_=i;
             file_.read(name,10);
             desc.name_=boost::trim_left_copy(std::string(name));
-            std::clog << "name=" << name << std::endl;
             skip(1);
             desc.type_=file_.get();
             skip(4);
