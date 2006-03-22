@@ -29,7 +29,7 @@ namespace mapnik
     typedef coord_array<coord2d> CoordinateArray;
     
     template <typename Transform,typename Geometry>
-    struct coord_transform
+    struct MAPNIK_DECL coord_transform
     {
 	coord_transform(Transform const& t,Geometry& geom)
 	    : t_(t), geom_(geom) {}
@@ -54,10 +54,10 @@ namespace mapnik
     class CoordTransform
     {
     private:
-	int width;
-	int height;
-	double scale_;
-	Envelope<double> extent;
+	    int width;
+	    int height;
+	    double scale_;
+	    Envelope<double> extent;
     public:
 	CoordTransform(int width,int height,const Envelope<double>& extent)
             :width(width),height(height),extent(extent)

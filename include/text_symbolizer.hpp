@@ -34,7 +34,7 @@ namespace mapnik
         
     typedef boost::tuple<double,double> position;
     
-    struct text_symbolizer
+    struct MAPNIK_DECL text_symbolizer
     {		
 	text_symbolizer(std::string const& name,unsigned size,Color const& fill);	
 	text_symbolizer(text_symbolizer const& rhs);

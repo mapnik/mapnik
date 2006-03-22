@@ -23,7 +23,7 @@
 
 namespace mapnik 
 {
-    struct gamma
+    struct MAPNIK_DECL gamma
     {
 	unsigned char g2l[256];
 	unsigned char l2g[256];
@@ -33,7 +33,7 @@ namespace mapnik
 	    for (int i=0;i< 256;i++)
 	    {
 		result=(int)(pow(i/255.0,gamma) * 255.0 + 0.5);
-		g2l[i]=(unsigned short)result;
+		g2l[i]=(unsigned char)result;
 	    }
 	    for (int i = 0; i < 256; i++)
 	    {

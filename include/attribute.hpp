@@ -49,7 +49,7 @@ namespace mapnik
 	}
     };
     
-    class attribute
+    class MAPNIK_DECL attribute
     {	
     public:
 	attribute()

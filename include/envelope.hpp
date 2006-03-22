@@ -21,12 +21,13 @@
 #ifndef ENVELOPE_HPP
 #define ENVELOPE_HPP
 
+#include "config.hpp"
 #include "coord.hpp"
 
 namespace mapnik
 {
 
-    template <class T> class Envelope
+	template <class T> class MAPNIK_DECL Envelope
     {
     public:
 	typedef Envelope<T> EnvelopeType;

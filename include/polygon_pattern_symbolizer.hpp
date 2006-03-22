@@ -26,7 +26,7 @@
 
 namespace mapnik
 {
-    struct polygon_pattern_symbolizer
+    struct MAPNIK_DECL polygon_pattern_symbolizer
     {
 	
 	polygon_pattern_symbolizer(std::string const& file,

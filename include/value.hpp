@@ -28,7 +28,7 @@
 using namespace boost;
 namespace mapnik {
 
-    typedef variant<int,double,std::string> value_base;
+	typedef variant<std::string,int,double> value_base;
     
     namespace impl {
 	struct equals
@@ -352,6 +352,17 @@ namespace mapnik {
 	template <typename T> value(T _val_)
 	    : value_base(_val_) {}
 	
+	value (const value& rhs)
+	{
+        //todo!!!!!!!!!
+	}
+	value& operator=(value const& rhs)
+	{
+		if (this == &rhs)
+			return  *this;
+		//TODO!!!!!	
+		return *this;	
+	}
 	bool operator==(value const& other) const
 	{
 	    return boost::apply_visitor(impl::equals(),*this,other);
@@ -419,31 +430,35 @@ namespace mapnik {
     
     inline const value operator+(value const& p1,value const& p2)
     {
-	value tmp(p1);
-	tmp+=p2;
-	return tmp;
+	//value tmp(p1);
+	//tmp+=p2;
+	//return tmp;
+		return boost::apply_visitor(impl::add<value>(),p1, p2);
     }
 
     inline const value operator-(value const& p1,value const& p2)
     {
-	value tmp(p1);
-	tmp-=p2;
-	return tmp;
+	//value tmp(p1);
+	//tmp-=p2;
+	//return tmp;
+		return boost::apply_visitor(impl::sub<value>(),p1, p2);
     }
 
     inline const value operator*(value const& p1,value const& p2)
     {
-	value tmp(p1);
-	tmp*=p2;
-	return tmp;
+	//value tmp(p1);
+	//tmp*=p2;
+	//return tmp;
+		return boost::apply_visitor(impl::mult<value>(),p1, p2);
     }
 
     inline const value operator/(value const& p1,value const& p2)
     {
-	value tmp(p1);
-	tmp/=p2;
-	return tmp;
-    }
+	//value tmp(p1);
+	//tmp/=p2;
+	//return tmp;
+	    return boost::apply_visitor(impl::div<value>(),p1, p2);
+	}
 
     //template <typename charT, typename traits>
     //inline std::basic_ostream<charT,traits>& 

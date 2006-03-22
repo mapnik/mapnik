@@ -25,7 +25,7 @@
 
 namespace mapnik 
 {
-    struct line_symbolizer
+    struct MAPNIK_DECL line_symbolizer
     {
 	line_symbolizer(stroke const& stroke)
 	    : stroke_(stroke) {}
@@ -42,7 +42,7 @@ namespace mapnik
 	}
 
     private:
-	stroke stroke_;
+		stroke stroke_;
     };
 }
 

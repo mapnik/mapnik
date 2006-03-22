@@ -30,7 +30,7 @@ using std::string;
 namespace mapnik
 {
     template<typename FeatureT>
-    class filter_factory
+    class MAPNIK_DECL filter_factory
     {
     public:
 	static filter_ptr compile(string const& str)

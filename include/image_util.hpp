@@ -23,7 +23,7 @@
 
 namespace mapnik
 {
-    class ImageUtils
+    class MAPNIK_DECL ImageUtils
     {
     public:
 	static void save_to_file(const std::string& filename,const std::string& type,const Image32& image);

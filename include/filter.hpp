@@ -28,58 +28,59 @@ namespace mapnik
 {
     template <typename FeatureT> class filter_visitor;
     template <typename FeatureT>
-    struct filter
+    class MAPNIK_DECL filter
     {
-	virtual bool pass(const FeatureT& feature) const=0; 
-	virtual filter<FeatureT>* clone() const=0;
-	virtual void accept(filter_visitor<FeatureT>& v) = 0;
+	public:
+		virtual bool pass(const FeatureT& feature) const=0; 
+		virtual filter<FeatureT>* clone() const=0;
+		virtual void accept(filter_visitor<FeatureT>& v) = 0;
         virtual std::string to_string() const=0;
-	virtual ~filter() {}
+		virtual ~filter() {}
     };
     
     typedef boost::shared_ptr<filter<Feature> > filter_ptr;
     
     template <typename FeatureT>
-    struct all_filter : public filter<FeatureT>
+    class all_filter : public filter<FeatureT>
     {
-
-	bool pass (const FeatureT&) const
-	{
-	    return true;
-	}
+	public:
+		bool pass (const FeatureT&) const
+		{
+			return true;
+		}
 	
-	filter<FeatureT>* clone() const
-	{
-	    return new all_filter<FeatureT>;
-	}
-	std::string to_string() const
-	{
-	    return "true";
-	}  
+		filter<FeatureT>* clone() const
+		{
+			return new all_filter<FeatureT>;
+		}
+		std::string to_string() const
+		{
+			return "true";
+		}  
         void accept(filter_visitor<FeatureT>&) {}
-	virtual ~all_filter() {}
+		virtual ~all_filter() {}
     };
       
     template <typename FeatureT>
-    struct none_filter : public filter<FeatureT>
+    class none_filter : public filter<FeatureT>
     {
-
-	bool pass (const FeatureT&) const
-	{
-	    return false;
-	}
+	public:
+		bool pass (const FeatureT&) const
+		{
+			return false;
+		}
 	
-	filter<FeatureT>* clone() const
-	{
-	    return new none_filter<FeatureT>;
-	}
-	std::string to_string() const
-	{
-	    return "false";
-	}  
-        void accept(filter_visitor<FeatureT>&) {}
-	virtual ~none_filter() {}
-    };
+		filter<FeatureT>* clone() const
+		{
+			return new none_filter<FeatureT>;
+		}
+		std::string to_string() const
+		{
+			return "false";
+		}  
+	    void accept(filter_visitor<FeatureT>&) {}
+		virtual ~none_filter() {}
+	};
 }
 
 #endif //FILTER_HPP

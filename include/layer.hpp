@@ -29,7 +29,7 @@
 
 namespace mapnik
 {
-    class Layer
+    class MAPNIK_DECL Layer
     {
 	friend class boost::serialization::access;
 	template <typename Archive>

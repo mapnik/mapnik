@@ -23,10 +23,11 @@
 
 //#include "symbolizer.hpp"
 //#include <boost/utility.hpp>
+#include "color.hpp"
 
 namespace mapnik 
 {
-    struct polygon_symbolizer
+    struct MAPNIK_DECL polygon_symbolizer
     {
 	polygon_symbolizer(Color const& fill)
 	    : fill_(fill) {}

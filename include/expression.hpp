@@ -28,8 +28,9 @@ namespace mapnik
 {
     template <typename FeatureT> class filter_visitor;
     template <typename FeatureT>
-    struct expression
+    class expression
     {
+    public:
 	virtual value get_value(FeatureT const& feature) const=0;
 	virtual void accept(filter_visitor<FeatureT>& v)=0;
 	virtual expression<FeatureT>* clone() const=0;
@@ -81,14 +82,14 @@ namespace mapnik
     {
     public:
 	property(std::string const& name)
-	    : expression<FeatureT>(),
-	      name_(name)
-	{}
+        : expression<FeatureT>(),
+	    name_(name)
+	    {}
 	
 	property(property const& other)
 	    : expression<FeatureT>(),
-	      name_(other.name_)
-	{}
+	     name_(other.name_)
+	    {}
 
 	value get_value(FeatureT const& feature) const
 	{
@@ -111,10 +112,11 @@ namespace mapnik
 	{
 	    return "["+name_+"]";
 	}
-        ~property() {}
-    private:
-	std::string name_;
 
+    ~property() {}
+
+    private:
+	    std::string name_;
     };
 }
 

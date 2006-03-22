@@ -25,7 +25,7 @@
 
 namespace mapnik
 {
-    struct raster_symbolizer { /* TODO */};
+    struct MAPNIK_DECL raster_symbolizer { /* TODO */};
 }
 
 #endif //RASTER_SYMBOLIZER

@@ -31,19 +31,19 @@
 
 namespace mapnik
 {
-    class Image32
+    class MAPNIK_DECL Image32
     {
     private:
 	unsigned width_;
 	unsigned height_;
 	Color background_;
 	ImageData32 data_;
-	static gamma gammaTable_;
+	//static gamma gammaTable_;
     public:
 	Image32(int width,int height);
 	Image32(const Image32& rhs);
 	~Image32();
-	static void setGamma(double gamma);
+	//static void setGamma(double gamma);
 	void setBackground(const Color& background);
 	const Color& getBackground() const;     
 	const ImageData32& data() const;
@@ -76,6 +76,7 @@ namespace mapnik
 		data_(x,y)=rgba;
 	    }
 	}
+    /*
 	inline int blendColor(int c0,int c1,int t)
 	{
 	    int bgRed=(c1>>16)&0xff;
@@ -94,7 +95,7 @@ namespace mapnik
 	    
 	    return 0xff << 24 | r << 16 | g << 8 | b;
 	}
-
+*/
 	inline void blendPixel(int x,int y,unsigned int rgba1,int t)
 	{
 	    if (checkBounds(x,y))

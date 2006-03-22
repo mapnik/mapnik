@@ -26,7 +26,7 @@
 namespace mapnik
 {
     using namespace boost::spirit;
-    class color_factory
+    class MAPNIK_DECL color_factory
     {
     public:
 	static Color from_string(char const* css_color)

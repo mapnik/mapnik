@@ -21,11 +21,12 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
+#include "config.hpp"
 #include <sstream>
 
 namespace mapnik {
 
-    class Color
+    class MAPNIK_DECL Color
     {
     private:
 	unsigned int rgba_;

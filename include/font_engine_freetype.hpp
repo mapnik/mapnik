@@ -92,7 +92,7 @@ namespace mapnik
     
     typedef boost::shared_ptr<font_face> face_ptr;
     
-    class freetype_engine : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
+    class MAPNIK_DECL freetype_engine : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
 		       private boost::noncopyable
     {
 	friend class mapnik::CreateStatic<freetype_engine>;
@@ -165,7 +165,7 @@ namespace mapnik
     
     
     template <typename T>
-    class face_manager : private boost::noncopyable
+    class MAPNIK_DECL face_manager : private boost::noncopyable
     {
 	typedef T font_engine_type;
 	typedef std::map<std::string,face_ptr> faces;
@@ -238,7 +238,7 @@ namespace mapnik
 	    {
 		code = p;            // U+0000 - U+007f (ascii)
 	    }
-	    out.push_back(code);
+	    out.push_back(wchar_t(code));
 	}
 	return out;
     }
@@ -308,7 +308,7 @@ namespace mapnik
 	    pen.x = 0;
 	    pen.y = 0;
 	    
-	    use_kerning = FT_HAS_KERNING(face);
+        use_kerning = FT_HAS_KERNING(face)>0?true:false;
 	    
 	    FT_BBox bbox;   
 	    bbox.xMin = bbox.yMin = 32000; 

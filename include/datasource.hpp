@@ -33,15 +33,15 @@
 
 namespace mapnik
 {    
-    typedef shared_ptr<Feature> feature_ptr;
-    struct Featureset
+    typedef MAPNIK_DECL shared_ptr<Feature> feature_ptr;
+    struct MAPNIK_DECL Featureset
     {
         virtual feature_ptr next()=0;
         virtual ~Featureset() {};
     };
     
     typedef shared_ptr<Featureset> featureset_ptr;    
-    class datasource_exception : public std::exception
+    class MAPNIK_DECL datasource_exception : public std::exception
     {
     private:
         const std::string message_;
@@ -56,7 +56,7 @@ namespace mapnik
 	}
     };
     
-    class datasource
+    class MAPNIK_DECL datasource
     {
     public:
 	enum {
@@ -88,15 +88,15 @@ namespace mapnik
     
     ///////////////////////////////////////////
     #define DATASOURCE_PLUGIN(classname) \
-        extern "C" std::string datasource_name() \
+        extern "C" MAPNIK_DECL std::string datasource_name() \
         { \
         return classname::name();\
         }\
-        extern "C"  datasource* create(const parameters &params)	\
+        extern "C"  MAPNIK_DECL datasource* create(const parameters &params)	\
         { \
 	    return new classname(params);	\
         }\
-        extern "C" void destroy(datasource *ds) \
+        extern "C" MAPNIK_DECL void destroy(datasource *ds) \
         { \
         delete ds;\
         }\

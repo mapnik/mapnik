@@ -24,9 +24,10 @@
 #include <stdexcept>
 #include <limits>
 #include <ctime>
-#include <sys/time.h>
+//#include <sys/time.h>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include <cmath>
 
 #include <boost/thread/mutex.hpp>
@@ -167,24 +168,24 @@ namespace mapnik
 
     struct timer
     {
-        struct timeval tv_;
+        //struct timeval tv_;
         timer()
         {
-            gettimeofday (&tv_,0);
+            //gettimeofday (&tv_,0);
         }
         void start()
         {
-            gettimeofday (&tv_,0);
+            //gettimeofday (&tv_,0);
         }
         void stop()
         {
-            timeval tv;
-            gettimeofday (&tv,0);
-            std::ostringstream s;
-            long sec=1000*(tv.tv_sec-tv_.tv_sec);
-            long total_ms=sec+static_cast<long>(0.001*(tv.tv_usec-tv_.tv_usec));
-            s << "elapsed time is "<<total_ms<<" ms";
-            std::clog<<s.str()<<std::endl;
+            //timeval tv;
+            //gettimeofday (&tv,0);
+            //std::ostringstream s;
+            //long sec=1000*(tv.tv_sec-tv_.tv_sec);
+            //long total_ms=sec+static_cast<long>(0.001*(tv.tv_usec-tv_.tv_usec));
+            //s << "elapsed time is "<<total_ms<<" ms";
+            //std::clog<<s.str()<<std::endl;
         }
     };
     
@@ -217,31 +218,31 @@ namespace mapnik
 	    throw BadConversion("fromString("+s+")");
     }
     
-    inline bool space (char c)
-    {
-	return isspace(c);
-    }
+    //inline bool space (char c)
+    //{
+//		return isspace(c);
+ //   }
     
-    inline bool not_space (char c)
-    {
-	return !isspace(c);
-    }
+   // inline bool not_space (char c)
+    //{
+//		return !isspace(c);
+ //   }
     
-    inline std::string trim_left(const std::string& str)
-    {
-	typedef std::string::const_iterator iter;
-	iter i = find_if(str.begin(),str.end(),not_space);
-	return std::string(i,str.end());	
-    }
-    inline std::string trim_right(const std::string& str)
-    {
-	std::string::size_type idx=str.find_last_not_of(" ");
-	return str.substr(0,idx+1);
-    }
-    inline std::string trim(const std::string& str)
-    {
-	return trim_left(trim_right(str));
-    }
+    //inline std::string trim_left(const std::string& str)
+    //{
+//		typedef std::string::const_iterator iter;
+//		iter i = std::find_if(str.begin(),str.end(),not_space);
+		//return std::string(i,str.end());	
+    //}
+    //inline std::string trim_right(const std::string& str)
+    //{
+	//	std::string::size_type idx=str.find_last_not_of(" ");
+//		return str.substr(0,idx+1);
+ //   }
+//	inline std::string trim(const std::string& str)
+  //  {
+	//	return trim_left(trim_right(str));
+	//}
 }
 
 

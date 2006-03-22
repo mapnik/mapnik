@@ -29,12 +29,13 @@ namespace mapnik
     template <typename FeatureT> class expression;
     template <typename Feature,template <typename> class Filter> class rule;
     template <typename FeatureT>
-    struct filter_visitor
+    class filter_visitor
     {
-	virtual void visit(filter<FeatureT>& filter)=0;
-	virtual void visit(expression<FeatureT>&)=0;
-	virtual void visit(rule<FeatureT,filter> const& r)=0;
-	virtual ~filter_visitor() {}
+	public:
+		virtual void visit(filter<FeatureT>& filter)=0;
+		virtual void visit(expression<FeatureT>&)=0;
+		virtual void visit(rule<FeatureT,filter> const& r)=0;
+		virtual ~filter_visitor() {}
     };    
 }
 

@@ -26,7 +26,7 @@
 
 namespace mapnik 
 {   
-    struct point_symbolizer
+    struct MAPNIK_DECL point_symbolizer
     {	
 	point_symbolizer(std::string const& file,
 			 std::string const& type,

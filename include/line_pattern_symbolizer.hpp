@@ -26,7 +26,7 @@
 
 namespace mapnik 
 {      
-    struct line_pattern_symbolizer
+    struct MAPNIK_DECL line_pattern_symbolizer
     {
 	line_pattern_symbolizer(std::string const& file,
 				std::string const& type,

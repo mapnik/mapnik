@@ -30,7 +30,7 @@
 
 namespace mapnik
 {
-    class datasource_cache : public singleton <datasource_cache,CreateStatic>
+    class MAPNIK_DECL datasource_cache : public singleton <datasource_cache,CreateStatic>
     {
         friend class CreateStatic<datasource_cache>;
     private:

@@ -142,7 +142,7 @@ namespace mapnik
 	}
 	bool has_dash() const 
 	{
-	    return dash_.size();
+		return dash_.size()>0 ? true : false ;
 	}
 	
 	dash_array const& get_dash_array() const
