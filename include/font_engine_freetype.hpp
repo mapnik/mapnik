@@ -248,12 +248,12 @@ namespace mapnik
 	    FT_Face face = face_->get_face();
 	    FT_GlyphSlot slot = face->glyph;
 	    FT_Bool use_kerning;
-	    FT_UInt previous;
+	    FT_UInt previous = 0;
 	    
 	    pen.x = 0;
 	    pen.y = 0;
 	    
-        use_kerning = FT_HAS_KERNING(face)>0?true:false;
+	    use_kerning = FT_HAS_KERNING(face)>0?true:false;
 	    
 	    FT_BBox bbox;   
 	    bbox.xMin = bbox.yMin = 32000; 
