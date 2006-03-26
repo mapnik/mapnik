@@ -33,6 +33,8 @@ opts.Add(PathOption('TIFF_INCLUDES', 'Search path for libtiff include files', '/
 opts.Add(PathOption('TIFF_LIBS', 'Search path for libtiff library files', '/usr/lib'))
 opts.Add(PathOption('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include'))
 opts.Add(PathOption('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/lib'))
+opts.Add(PathOption('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include'))
+opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 include files', '/usr/local/lib'))
 opts.Add(PathOption('PYTHON','Python executable', sys.executable))
 opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
@@ -64,7 +66,8 @@ C_LIBSHEADERS = [
     ['tiff', 'tiff.h', True],
     ['z', 'zlib.h', True],
     ['jpeg', ['stdio.h', 'jpeglib.h'], True],
-    ['pq', 'libpq-fe.h', False]
+    ['pq', 'libpq-fe.h', False],
+    ['proj', 'proj_api.h', False]
 ]
 
 BOOST_LIBSHEADERS = [
@@ -140,6 +143,10 @@ SConscript('agg/SConscript')
 if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
     SConscript('utils/shapeindex/SConscript')
     env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
+
+if 'proj' in env['LIBS']:
+    SConscript('bindings/python/pyprojection/SConscript')
+    env['LIBS'].remove('proj')
 
 # Build the input plug-ins
 
