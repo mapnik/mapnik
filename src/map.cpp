@@ -93,6 +93,13 @@ namespace mapnik
     {
         return layers_[index];
     }
+
+    Layer& Map::getLayer(size_t index)
+    {
+        return layers_[index];
+    }
+
+
     std::vector<Layer> const& Map::layers() const
     {
 	return layers_;
