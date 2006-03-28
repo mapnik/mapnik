@@ -106,6 +106,7 @@ namespace mapnik
     void agg_renderer<T>::start_layer_processing(Layer const& lay)
     {
 	std::clog << "start layer processing : " << lay.name()  << std::endl;
+	std::clog << "datasource = " << lay.datasource().get() << std::endl;
     }
     
     template <typename T>

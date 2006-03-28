@@ -150,12 +150,22 @@ int main (int argc,char** argv)
 		item_ext=Envelope<double>(x,y,x,y);
 	
 	    }
+	    if (shape_type==shape_io::shape_pointm)
+	    {
+		double x=shp.read_double();
+		double y=shp.read_double();
+		shp.read_double();
+		shp.skip(2*content_length-3*8-4);
+		item_ext=Envelope<double>(x,y,x,y);
+	
+	    }
 	    else if (shape_type==shape_io::shape_pointz)
 	    {
 		double x=shp.read_double();
 		double y=shp.read_double();
 		shp.read_double();
-		shp.skip(2*content_length-2*8-4);
+		shp.read_double();
+		shp.skip(2*content_length-4*8-4);
 		item_ext=Envelope<double>(x,y,x,y);
 	    }
 	

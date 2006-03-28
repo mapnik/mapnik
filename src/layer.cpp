@@ -30,7 +30,16 @@
 namespace mapnik
 {
     using namespace std;
-    Layer::Layer() {}
+    Layer::Layer()
+	: params_(),
+	  name_("uknown"),
+	  minZoom_(0),
+	  maxZoom_(std::numeric_limits<double>::max()),
+	  active_(true),
+	  selectable_(false),
+	  selection_style_("default_selection")
+    {}
+
     Layer::Layer(const parameters& params)
         :params_(params),
 	 name_(params_["name"]),
@@ -48,7 +57,7 @@ namespace mapnik
 	 maxZoom_(rhs.maxZoom_),
 	 active_(rhs.active_),
 	 selectable_(rhs.selectable_),
-	 //ds_(rhs.ds_),
+	 ds_(rhs.ds_),
 	 styles_(rhs.styles_),
 	 selection_style_(rhs.selection_style_) {}
     
@@ -154,12 +163,17 @@ namespace mapnik
 	    }
 	    catch (...)
 	    {
-		std::clog << "exception caught : can not create datasorce" << std::endl;  
+		std::clog << "exception caught : can not create datasource" << std::endl;  
 	    }
 	}
 	return ds_;
     }
-
+    // TODO: !!!!
+    void Layer::set_datasource(datasource_p const& ds)
+    {
+	ds_ = ds;
+    }
+    
     Envelope<double> Layer::envelope() const
     {
 	datasource_p const& ds = datasource();

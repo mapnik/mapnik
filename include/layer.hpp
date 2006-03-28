@@ -81,6 +81,7 @@ namespace mapnik
 	void add_to_selection(boost::shared_ptr<Feature>& feature) const;
 	std::vector<boost::shared_ptr<Feature> >& selection() const;
 	void clear_selection() const;
+	void set_datasource(datasource_p const& ds);
 	datasource_p const& datasource() const;
 	Envelope<double> envelope() const;
 	virtual ~Layer();
