@@ -28,6 +28,11 @@ setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
 from _mapnik import *
 from paths import inputpluginspath, fontscollectionpath
 
+try:
+    from mapnik.Projection import Projection, DEGREES
+except:
+    pass
+
 # The base Boost.Python class
 BoostPythonMetaclass = Coord.__class__
 

@@ -29,17 +29,16 @@ headers = [env['PYTHON_PREFIX'] + '/include/python' + env['PYTHON_VERSION']] + e
 _mapnik = env.SharedLibrary('_mapnik', glob.glob('*.cpp'), LIBS=libraries, SHLIBPREFIX='', CPPPATH=headers)
 
 paths = """
-pluginsrootpath = '%s'
-inputpluginspath = pluginsrootpath + '/input'
+mapniklibpath = '%s'
+inputpluginspath = mapniklibpath + '/input'
+fontscollectionpath = mapniklibpath + '/fonts'
 """
 
 file('mapnik/paths.py','w').write(paths % (env['PREFIX'] + '/lib/mapnik',))
 
-__init__ = env.Install(prefix+'/mapnik','mapnik/__init__.py')
-pathspy = env.Install(prefix+'/mapnik','mapnik/paths.py')
-_source=env.Install(prefix+'/mapnik',_mapnik)
-_source.append(__init__)
-_source.append(pathspy)
-
-env.Alias(target="install",source=_source)
-
+pymapnik = glob.glob('mapnik/*.py')
+env.Alias(target='install', source=env.Install(prefix+'/mapnik', pymapnik))
+pymapnik2 = glob.glob('mapnik/ogcserver/*.py')
+env.Alias(target='install', source=env.Install(prefix+'/mapnik/ogcserver', pymapnik2))
+pymapniklib = env.Install(prefix+'/mapnik',_mapnik)
+env.Alias(target="install",source=pymapniklib)
