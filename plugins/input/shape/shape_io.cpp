@@ -52,7 +52,7 @@ void shape_io::move_to (int pos)
     reclength_ = shp_.read_xdr_integer();
     type_ = shp_.read_ndr_integer();
 
-    if (type_ != shape_point)
+    if (type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
     {
         shp_.read_envelope(cur_extent_);
     }

@@ -139,14 +139,15 @@ int main (int argc,char** argv)
 	    int offset=shp.pos();
 	    int record_number=shp.read_xdr_integer();
 	    int content_length=shp.read_xdr_integer();
-    
+	    
 	    shp.skip(4);
+	    std::cout << "offset= "<< offset << std::endl;
+	    
 	    Envelope<double> item_ext;
 	    if (shape_type==shape_io::shape_point)
 	    {
 		double x=shp.read_double();
 		double y=shp.read_double();
-		shp.skip(2*content_length-2*8-4);
 		item_ext=Envelope<double>(x,y,x,y);
 	
 	    }
@@ -155,7 +156,6 @@ int main (int argc,char** argv)
 		double x=shp.read_double();
 		double y=shp.read_double();
 		shp.read_double();
-		shp.skip(2*content_length-3*8-4);
 		item_ext=Envelope<double>(x,y,x,y);
 	
 	    }
@@ -165,7 +165,6 @@ int main (int argc,char** argv)
 		double y=shp.read_double();
 		shp.read_double();
 		shp.read_double();
-		shp.skip(2*content_length-4*8-4);
 		item_ext=Envelope<double>(x,y,x,y);
 	    }
 	

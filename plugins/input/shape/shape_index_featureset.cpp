@@ -93,7 +93,7 @@ feature_ptr shape_index_featureset<filterT>::next()
 	    double x=shape_.shp().read_double();
 	    double y=shape_.shp().read_double();
 	    shape_.shp().read_double();// z
-	    shape_.shp().read_double();// m 
+	    shape_.shp().read_double();// m
 	    geometry_ptr point(new point_impl(-1));
 	    point->move_to(x,y);
 	    feature->set_geometry(point);
@@ -157,7 +157,6 @@ feature_ptr shape_index_featureset<filterT>::next()
         }
 	if (attr_ids_.size())
 	{
-	    //feature->reserve_props(attr_ids_.size());
 	    shape_.dbf().move_to(shape_.id_);
 	    std::vector<int>::const_iterator pos=attr_ids_.begin();
 	    while (pos!=attr_ids_.end())
