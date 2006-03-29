@@ -18,21 +18,30 @@
 
 //$Id$
 
-#include <boost/python.hpp>
-#include <mapnik.hpp>
+# include <boost/python.hpp>
+# include <boost/python/module.hpp>
+# include <boost/python/def.hpp>
+# include <mapnik.hpp>
 
 using mapnik::Image32;
 
 
-char const* rawdata(const Image32& image)
+using namespace boost::python;
+
+
+PyObject* rawdata( Image32 const& im)
 {
-    return (char const* )image.raw_data();
+    int size = im.width() * im.height() * 4;
+    return ::PyString_FromStringAndSize((const char*)im.raw_data(),size);
 }
 
 void export_image()
 {
     using namespace boost::python;
     class_<Image32>("Image","This class represents a 32 bit image.",init<int,int>())
-    ;
+	.def("width",&Image32::width)
+	.def("height",&Image32::height)
+	;
+    
     def("rawdata",&rawdata);
 }
