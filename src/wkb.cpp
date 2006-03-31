@@ -197,6 +197,7 @@ namespace mapnik
 	    int num_points=read_integer();
 	    CoordinateArray ar(num_points);
 	    read_coords(ar);
+	    line->set_capacity(num_points);
 	    line->move_to(ar[0].x,ar[0].y);
 	    for (int i=1;i<num_points;++i)
 	    {

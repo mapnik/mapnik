@@ -41,7 +41,6 @@ void export_image()
     class_<Image32>("Image","This class represents a 32 bit image.",init<int,int>())
 	.def("width",&Image32::width)
 	.def("height",&Image32::height)
-	;
-    
+	;    
     def("rawdata",&rawdata);
 }
