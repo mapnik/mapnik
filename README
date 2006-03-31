@@ -12,4 +12,4 @@ but not exclusively, at web-based development.
 High-level Python bindings (boost.python) facilitate rapid application development, 
 targeting zope3, django etc.
 
-Mapnik is a free software and is released under GPL (General Public Licence) (see COPYING)
+Mapnik is a free software and is released under LGPL (GNU Lesser General Public Licence) (see COPYING)
