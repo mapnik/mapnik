@@ -189,7 +189,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
 	    PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
 	    std::ostringstream s;
 	    // can we rely on 'gid' name???
-	    s << "select gid,asbinary("<<geometryColumn_<<") as geom";
+	    s << "select ogc_fid,asbinary("<<geometryColumn_<<") as geom";
 	    std::set<std::string> const& props=q.property_names();
 	    std::set<std::string>::const_iterator pos=props.begin();
 	    while (pos!=props.end())
