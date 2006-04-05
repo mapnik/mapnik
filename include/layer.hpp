@@ -53,11 +53,9 @@ namespace mapnik
 	double maxZoom_;
 	bool active_;
 	bool selectable_;
-	
-	std::vector<std::string>  styles_;
-	std::string selection_style_;
-
 	mutable datasource_p ds_;
+	std::vector<std::string>  styles_;
+	std::string selection_style_;	
 	mutable std::vector<boost::shared_ptr<Feature> > selection_;
         
     public:

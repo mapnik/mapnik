@@ -85,11 +85,11 @@ namespace mapnik
         maxZoom_=rhs.maxZoom_;
         active_=rhs.active_;
         selectable_=rhs.selectable_;
-        //ds_=rhs.ds_;
         styles_=rhs.styles_;
+	ds_=rhs.ds_;
 	selection_style_=rhs.selection_style_;
     }
-
+    
     Layer::~Layer() {}
 
     parameters const& Layer::params() const

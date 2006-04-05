@@ -36,7 +36,8 @@ namespace mapnik
 	try 
 	{
 	    std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-	    reader->read(0,0,*pattern_);		
+	    if (reader.get())
+		reader->read(0,0,*pattern_);		
 	} 
 	catch (...) 
 	{

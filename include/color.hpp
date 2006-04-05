@@ -100,11 +100,11 @@ namespace mapnik {
 	}
 
 	inline std::string to_string() const
-	{
+        {
 	    std::stringstream ss;
 	    ss << "rgb (" << red() << ","  << green() << ","  << blue() <<")";
 	    return ss.str();
-	} 
+        } 
     };    
 }
 
