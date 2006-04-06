@@ -288,7 +288,7 @@ m.layers.append(popplaces_lyr)
 
 # Set the initial extent of the map.
 
-m.zoom_to_box(Envelope(7622019.99659767, 2966323.17001496, 7909470.44644348, 2755360.15422466))
+m.zoom_to_box(Envelope(1405120.04127408,-247003.813399447,1706357.31328276,-25098.593149577))
 
 # Render two maps, one PNG, one JPEG.
 
