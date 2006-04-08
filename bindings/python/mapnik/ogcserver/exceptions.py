@@ -19,8 +19,21 @@
 #
 # $Id$
 
+from copy import deepcopy
+
 class OGCException(Exception):
     pass
 
 class ServerConfigurationError(Exception):
     pass
+
+class BaseExceptionHandler:
+    
+    def getexcetree(self, exc):
+        ogcexcetree = deepcopy(self.xmltemplate)
+        e = ogcexcetree.find(self.xpath)
+        if len(exc.args) > 0:
+            e.text = exc.args[0]
+            if len(exc.args) > 1:
+                e.set('code', exc.args[1])
+        return ogcexcetree

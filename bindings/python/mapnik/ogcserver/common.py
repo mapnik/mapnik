@@ -20,14 +20,22 @@
 # $Id$
 
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Color
+from mapnik import Map, Color, Envelope, render, rawdata, Image, Projection
+from PIL.Image import fromstring
+from StringIO import StringIO
 import re
+# from elementtree import ElementTree
+# ElementTree._namespace_map.update({'http://www.opengis.net/wms': 'wms',
+#                                    'http://www.opengis.net/ogc': 'ogc',
+#                                    'http://www.w3.org/1999/xlink': 'xlink',
+#                                    'http://www.w3.org/2001/XMLSchema-instance': 'xsi'
+#                                    })
 
 PIL_TYPE_MAPPING = {'image/jpeg': 'JPEG', 'image/png': 'PNG', 'image/gif': 'GIF'}
 
 class ParameterDefinition:
 
-    def __init__(self, mandatory, default=None, allowedvalues=None, fallback=False, match=None, cast=None):
+    def __init__(self, mandatory, cast, default=None, allowedvalues=None, fallback=False):
         """ An OGC request parameter definition.  Used to describe a
             parameter's characteristics.
 
@@ -50,23 +58,12 @@ class ParameterDefinition:
             
             @return: A L{ParameterDefinition} instance.
         """
-        if match and cast:
-            raise ServerConfigurationError("'cast' and 'match' are mutually exclusive.")
-        if not match and not cast:
-            raise ServerConfigurationError("One of 'cast' or 'match' MUST be used.")
-        if match:
-            try:
-                self.pattern = re.compile(match)
-            except:
-                raise ServerConfigurationError("Invalid regular expression.")
-        else:
-            self.pattern = None
-        if cast and not callable(cast):
-            raise ServerConfigurationError('Cast parameter definition must be callable.')
-        self.cast = cast
         if mandatory not in [True, False]:
             raise ServerConfigurationError("Bad value for 'mandatory' parameter, must be True or False.")
         self.mandatory = mandatory
+        if not callable(cast):
+            raise ServerConfigurationError('Cast parameter definition must be callable.')
+        self.cast = cast
         self.default = default
         if allowedvalues and type(allowedvalues) != type(()):
             raise ServerConfigurationError("Bad value for 'allowedvalues' parameter, must be a tuple.")
@@ -83,14 +80,12 @@ class BaseServiceHandler:
             if paramname not in params.keys() and paramdef.mandatory:
                 raise OGCException("Mandatory parameter '%s' missing from request." % paramname)
             elif paramname in params.keys():
-                if paramdef.pattern:
-                    if not paramdef.pattern.match(params[paramname]):
-                        raise OGCException("Parameter '%s' has an illegal value." % paramname)
-                elif paramdef.cast:
-                    try:
-                        params[paramname] = paramdef.cast(params[paramname])
-                    except:
-                        raise OGCException("Parameter '%s' has an illegal value." % paramname)
+                try:
+                    params[paramname] = paramdef.cast(params[paramname])
+                except OGCException:
+                    raise
+                except:
+                    raise OGCException('Invalid value "%s" for parameter "%s".' % (params[paramname], paramname))
                 if paramdef.allowedvalues and params[paramname] not in paramdef.allowedvalues:
                     if not paramdef.fallback:
                         raise OGCException("Parameter '%s' has an illegal value." % paramname)
@@ -126,8 +121,6 @@ class Version:
     def __cmp__(self, other):
         if isinstance(other, str):
             other = Version(other)
-        if not isinstance(other, Version):
-            raise TypeError('Version instances can only be compared to each other, or version strings.')
         if self.version[0] < other.version[0]:
             return -1
         elif self.version[0] > other.version[0]:
@@ -158,4 +151,69 @@ def ColorFactory(colorstring):
     if re.match('^0x[a-fA-F0-9]{6}$', colorstring):
         return Color(eval('0x' + colorstring[2:4]), eval('0x' + colorstring[4:6]), eval('0x' + colorstring[6:8]))
     else:
-        raise OGCException("Invalid color value.")
+        raise OGCException('Invalid color value. Must be of format "0xFFFFFF".')
+
+class CRS:
+    
+    def __init__(self, namespace, code):
+        self.namespace = namespace
+        self.code = int(code)
+        self.proj = None
+    
+    def __repr__(self):
+        return '%s:%s' % (self.namespace, self.code)
+    
+    def __eq__(self, other):
+        if str(other) == str(self):
+            return True
+        return False
+
+    def Inverse(self, x, y):
+        if not self.proj:
+            self.proj = Projection(['init=%s' % str(self).lower()])
+        return self.proj.Inverse(x, y)
+    
+    def Forward(self, x, y):
+        if not self.proj:
+            self.proj = Projection(['init=%s' % str(self).lower()])
+        return self.proj.Forward(x, y)
+
+class CRSFactory:
+    
+    def __init__(self, allowednamespaces):
+        self.allowednamespaces = allowednamespaces
+    
+    def __call__(self, crsstring):
+        if not re.match('^[A-Z]{3,5}:\d+$', crsstring):
+            raise OGCException('Invalid format for the CRS parameter: %s' % crsstring, 'InvalidCRS')
+        crsparts = crsstring.split(':')
+        if crsparts[0] in self.allowednamespaces:
+            return CRS(crsparts[0], crsparts[1])
+        else:
+            raise OGCException('Invalid CRS Namespace: %s' % crsparts[0], 'InvalidCRS')
+
+class WMSBaseServiceHandler(BaseServiceHandler):
+    
+    def getmap(self, params):
+        if str(params['crs']) != str(self.crs):
+            raise OGCException('Unsupported CRS requested.  Must be "%s" and not "%s".' % (self.crs, params['crs']), 'InvalidCRS')
+        m = Map(params['width'], params['height'])
+        if params.has_key('transparent') and params['transparent'] == 'FALSE':
+            m.background = params['bgcolor']
+        mo = self.factory()
+        for layername in params['layers']:
+            for layer in mo['layers']:
+                if layer.name() == layername:
+                    for stylename in layer.styles:
+                        if stylename in mo['styles'].keys():
+                            m.append_style(stylename, mo['styles'][stylename])
+                    m.layers.append(layer)
+        m.zoom_to_box(Envelope(params['bbox'][0], params['bbox'][1], params['bbox'][2], params['bbox'][3]))
+        im = Image(params['width'], params['height'])
+        render(m, im)
+        im2 = fromstring('RGBA', (params['width'], params['height']), rawdata(im))
+        fh = StringIO()
+        im2.save(fh, PIL_TYPE_MAPPING[params['format']])
+        fh.seek(0)
+        response = Response(params['format'], fh.read())
+        return response
