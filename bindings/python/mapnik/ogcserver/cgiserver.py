@@ -19,22 +19,25 @@
 #
 # $Id$
 
-from os import environ, access
+from os import environ
 from tempfile import gettempdir
 environ['PYTHON_EGG_CACHE'] = gettempdir()
 
-import jon.cgi as cgi
-from exceptions import OGCException
 import sys
-from copy import deepcopy
-from traceback import print_tb
-from StringIO import StringIO
+from jon import cgi
+from exceptions import OGCException
 from wms130 import ExceptionHandler
 from lxml import etree as ElementTree
+from ConfigParser import SafeConfigParser
 
 class Handler(cgi.DebugHandler):
 
     def __init__(self):
+        conf = SafeConfigParser()
+        conf.readfp(open(self.configpath))
+        self.conf = conf
+        mapfactorymodule = __import__(conf.get('server', 'mapfactorymodule'))
+        self.mapfactory = getattr(mapfactorymodule, conf.get('server', 'mapfactoryclass'))()
         self.requesthandlers = {}
 
     def process(self, req):
@@ -60,8 +63,8 @@ class Handler(cgi.DebugHandler):
                     mapnikmodule = __import__('mapnik.ogcserver.' + service)
                 except:
                     raise OGCException('Unsupported service "%s".' % service)
-                ServiceFactory = getattr(mapnikmodule.ogcserver, service).ServiceFactory
-                servicehandler, exceptionhandler = ServiceFactory(self.configpath, self.factory, onlineresource, reqparams.get('version', None))
+                ServiceHandlerFactory = getattr(mapnikmodule.ogcserver, service).ServiceHandlerFactory
+                servicehandler, exceptionhandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
                 if request not in servicehandler.SERVICE_PARAMS.keys():
                     raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
                 ogcparams = servicehandler.processParameters(request, reqparams)
@@ -73,10 +76,9 @@ class Handler(cgi.DebugHandler):
                     self.requesthandlers[srkey] = requesthandler
             response = requesthandler(ogcparams)
         except OGCException:
-            exc_type, exc_value, exc_tb = sys.exc_info()
             eh = exceptionhandler()
             req.set_header('Content-Type', eh.mimetype)
-            req.write(ElementTree.tostring(eh.getexcetree(exc_value)))
+            req.write(ElementTree.tostring(eh.getexcetree(sys.exc_info()[1])))
         else:
             req.set_header('Content-Type', response.content_type)
             req.write(response.content)

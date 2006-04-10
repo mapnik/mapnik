@@ -1,3 +1,4 @@
+#!/usr/bin/python2.3
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
@@ -19,20 +20,10 @@
 #
 # $Id$
 
-from common import Version
-from exceptions import OGCException
-from wms111 import ServiceHandler as ServiceHandler111, \
-                   ExceptionHandler as ExceptionHandler111
-from wms130 import ServiceHandler as ServiceHandler130, \
-                   ExceptionHandler as ExceptionHandler130
+from mapnik.ogcserver.cgiserver import Handler
+from jon import cgi
 
-def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
+class OGCServerHandler(Handler):
+    configpath = '/etc/ogcserver.conf'
 
-    if not version:
-        version = Version('1.3.0')
-    else:
-        version = Version(version)
-    if version >= '1.3.0':
-        return (ServiceHandler130(conf, mapfactory, onlineresource), ExceptionHandler130)
-    else:
-        return (ServiceHandler111(conf, mapfactory, onlineresource), ExceptionHandler111)
+cgi.CGIRequest(OGCServerHandler).process()

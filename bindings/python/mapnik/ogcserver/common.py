@@ -200,13 +200,14 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         m = Map(params['width'], params['height'])
         if params.has_key('transparent') and params['transparent'] == 'FALSE':
             m.background = params['bgcolor']
-        mo = self.factory()
+        maplayers = self.mapfactory.getlayers()
+        mapstyles = self.mapfactory.getstyles()
         for layername in params['layers']:
-            for layer in mo['layers']:
+            for layer in maplayers:
                 if layer.name() == layername:
                     for stylename in layer.styles:
-                        if stylename in mo['styles'].keys():
-                            m.append_style(stylename, mo['styles'][stylename])
+                        if stylename in mapstyles.keys():
+                            m.append_style(stylename, mapstyles[stylename])
                     m.layers.append(layer)
         m.zoom_to_box(Envelope(params['bbox'][0], params['bbox'][1], params['bbox'][2], params['bbox'][3]))
         im = Image(params['width'], params['height'])

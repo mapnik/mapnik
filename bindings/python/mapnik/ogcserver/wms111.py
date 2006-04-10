@@ -19,11 +19,9 @@
 #
 # $Id$
 
-from common import ParameterDefinition, BaseServiceHandler, Response, \
-                   PIL_TYPE_MAPPING, Version, ListFactory, ColorFactory, \
-                   CRSFactory, WMSBaseServiceHandler, CRS
+from common import ParameterDefinition, Response, Version, ListFactory, \
+                   ColorFactory, CRSFactory, WMSBaseServiceHandler, CRS
 from exceptions import OGCException, ServerConfigurationError, BaseExceptionHandler
-from ConfigParser import SafeConfigParser
 from lxml import etree as ElementTree
 
 class ServiceHandler(WMSBaseServiceHandler):
@@ -104,10 +102,9 @@ class ServiceHandler(WMSBaseServiceHandler):
     </WMT_MS_Capabilities>
     """
 
-    def __init__(self, configpath, factory, opsonlineresource):
-        self.factory = factory
-        self.conf = SafeConfigParser()
-        self.conf.readfp(open(configpath))
+    def __init__(self, conf, mapfactory, opsonlineresource):
+        self.conf = conf
+        self.mapfactory = mapfactory
         if self.conf.has_option('service', 'epsg'):
             self.crs = CRS('EPSG', self.conf.get('service', 'epsg'))
         else:
@@ -144,9 +141,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         rootlayersrs = rootlayerelem.find('SRS')
         rootlayersrs.text = str(self.crs)
 
-        dict = self.factory()
-
-        for layer in dict['layers']:
+        for layer in self.mapfactory.getlayers():
             layername = ElementTree.Element('Name')
             layername.text = layer.name()
             layertitle = ElementTree.Element('Title')
