@@ -36,8 +36,8 @@ class Handler(cgi.DebugHandler):
         conf = SafeConfigParser()
         conf.readfp(open(self.configpath))
         self.conf = conf
-        mapfactorymodule = __import__(conf.get('server', 'mapfactorymodule'))
-        self.mapfactory = getattr(mapfactorymodule, conf.get('server', 'mapfactoryclass'))()
+        mapfactorymodule = __import__(conf.get('server', 'module'))
+        self.mapfactory = getattr(mapfactorymodule, 'MapFactory')()
         self.requesthandlers = {}
 
     def process(self, req):

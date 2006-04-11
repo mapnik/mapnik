@@ -197,6 +197,10 @@ class WMSBaseServiceHandler(BaseServiceHandler):
     def getmap(self, params):
         if str(params['crs']) != str(self.crs):
             raise OGCException('Unsupported CRS requested.  Must be "%s" and not "%s".' % (self.crs, params['crs']), 'InvalidCRS')
+        if params['bbox'][0] >= params['bbox'][2]:
+            raise OGCException("BBOX values don't make sense.  minx is greater than maxx.")
+        if params['bbox'][1] >= params['bbox'][3]:
+            raise OGCException("BBOX values don't make sense.  miny is greater than maxy.")
         m = Map(params['width'], params['height'])
         if params.has_key('transparent') and params['transparent'] == 'FALSE':
             m.background = params['bgcolor']
@@ -209,6 +213,9 @@ class WMSBaseServiceHandler(BaseServiceHandler):
                         if stylename in mapstyles.keys():
                             m.append_style(stylename, mapstyles[stylename])
                     m.layers.append(layer)
+        if len(m.layers) != len(params['layers']):
+            badnames = [ layername for layername in params['layers'] if layername not in [ layer.name() for layer in m.layers ] ]
+            raise OGCException('The following layers are not defined by this server: %s.' % ','.join(badnames), 'LayerNotDefined')
         m.zoom_to_box(Envelope(params['bbox'][0], params['bbox'][1], params['bbox'][2], params['bbox'][3]))
         im = Image(params['width'], params['height'])
         render(m, im)
