@@ -27,10 +27,10 @@ from lxml import etree as ElementTree
 class ServiceHandler(WMSBaseServiceHandler):
 
     SERVICE_PARAMS = {
-        'getcapabilities': {
+        'GetCapabilities': {
             'updatesequence': ParameterDefinition(False, str)
         },
-        'getmap': {
+        'GetMap': {
             'version': ParameterDefinition(True, Version, allowedvalues=(Version('1.1.1'),)),
             'layers': ParameterDefinition(True, ListFactory(str)),
             'styles': ParameterDefinition(True, ListFactory(str)),
@@ -109,7 +109,6 @@ class ServiceHandler(WMSBaseServiceHandler):
             self.crs = CRS('EPSG', self.conf.get('service', 'epsg'))
         else:
             ServerConfigurationError('EPSG code not properly configured.')
-        if not opsonlineresource.endswith('?'): opsonlineresource += '?'
 
         capetree = ElementTree.fromstring(self.capabilitiesxmltemplate)
         
@@ -169,7 +168,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         
         self.capabilities = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + ElementTree.tostring(capetree)
 
-    def getcapabilities(self, params):
+    def GetCapabilities(self, params):
         response = Response('application/vnd.ogc.wms_xml', self.capabilities)
         return response
 

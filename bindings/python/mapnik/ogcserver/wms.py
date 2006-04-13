@@ -36,3 +36,11 @@ def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
         return (ServiceHandler130(conf, mapfactory, onlineresource), ExceptionHandler130)
     else:
         return (ServiceHandler111(conf, mapfactory, onlineresource), ExceptionHandler111)
+
+class BaseWMSFactory:
+    
+    def registerLayer(self, layer):
+        pass
+    
+    def registerStyle(self, name, style):
+        pass

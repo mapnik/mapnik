@@ -194,7 +194,7 @@ class CRSFactory:
 
 class WMSBaseServiceHandler(BaseServiceHandler):
     
-    def getmap(self, params):
+    def GetMap(self, params):
         if str(params['crs']) != str(self.crs):
             raise OGCException('Unsupported CRS requested.  Must be "%s" and not "%s".' % (self.crs, params['crs']), 'InvalidCRS')
         if params['bbox'][0] >= params['bbox'][2]:

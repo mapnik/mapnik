@@ -3,11 +3,14 @@
 Mapnik OGC Server
 -----------------
 
+
 Introduction
 ------------
 
-	Mapnik provides an OGC server package to allow the publishing of maps
-through open and standard interfaces.  It is in implemented in Python.
+	Mapnik provides a server package to allow the publishing of maps
+through the open and standard WMS interface published by the Open Geospatial
+Consortium (OGC).  It is in implemented in Python, around the core C++
+library.
 
 
 Features/Caveats
@@ -19,6 +22,7 @@ Features/Caveats
 - GIF/JPEG/PNG output
 - XML error handling only
 - No real layer metadata support yet
+- No re-projection support
 
 
 Dependencies
@@ -70,21 +74,23 @@ Configuring the server
 - Copy the sample configuration "ogcserver.conf" file in utils/ogcserver to
   the location you specified in the previous step.
   
-- Edit the file to your liking, the comments within the file will help you
-  further.  Be sure to at the very minimum edit the "module" parameter, the
-  server will not work without you setting it properly first.
+- Edit the configuration file to your liking, the comments within the file will
+  help you further.  Be sure to at the very minimum edit the "module"
+  parameter, the server will not work without you setting it properly first.
   
 
-Creating a map for use by the ogcserver
----------------------------------------
+Defining layers and styles for use by the ogcserver
+---------------------------------------------------
 
-	The ogcserver obviously needs a map to publish.  For now, with Mapnik, this
+	The ogcserver obviously needs layers to publish.  For now, with Mapnik, this
 can only be done by writing code. In this case, a Python script will need to be
-written to describe the map's layers and styles.  For information on the Python
+written to describe the layers and respective styles.  For information on the Python
 API, look in demo/python, or in docs/epydocs.
 
-	The server needs a module, and a class that looks like this:
-	
+The server needs a python module, with code that looks like this:
+
+from mapnik.ogcserver.wms import BaseWMSFactory
+
 class MapFactory:
 
 	def __init(self):

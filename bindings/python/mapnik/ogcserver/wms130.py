@@ -27,11 +27,11 @@ from lxml import etree as ElementTree
 class ServiceHandler(WMSBaseServiceHandler):
 
     SERVICE_PARAMS = {
-        'getcapabilities': {
+        'GetCapabilities': {
             'format': ParameterDefinition(False, str, 'text/xml', ('text/xml',), True),
             'updatesequence': ParameterDefinition(False, str)
         },
-        'getmap': {
+        'GetMap': {
             'version': ParameterDefinition(True, Version, allowedvalues=(Version('1.3.0'),)),
             'layers': ParameterDefinition(True, ListFactory(str)),
             'styles': ParameterDefinition(True, ListFactory(str)),
@@ -115,7 +115,6 @@ class ServiceHandler(WMSBaseServiceHandler):
             self.crs = CRS('EPSG', self.conf.get('service', 'epsg'))
         else:
             raise ServerConfigurationError('EPSG code not properly configured.')
-        if not opsonlineresource.endswith('?'): opsonlineresource += '?'
 
         capetree = ElementTree.fromstring(self.capabilitiesxmltemplate)
         
@@ -184,14 +183,14 @@ class ServiceHandler(WMSBaseServiceHandler):
         
         self.capabilities = '<?xml version="1.0" encoding="UTF-8"?>' + ElementTree.tostring(capetree)
 
-    def getcapabilities(self, params):
+    def GetCapabilities(self, params):
         response = Response('text/xml', self.capabilities)
         return response
         
-    def getmap(self, params):
+    def GetMap(self, params):
         if params['width'] > int(self.conf.get('service', 'maxwidth')) or params['height'] > int(self.conf.get('service', 'maxheight')):
             raise OGCException('Requested map size exceeds limits set by this server.')
-        return WMSBaseServiceHandler.getmap(self, params)
+        return WMSBaseServiceHandler.GetMap(self, params)
 
 class ExceptionHandler(BaseExceptionHandler):
     
