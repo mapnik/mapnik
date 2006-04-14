@@ -89,15 +89,27 @@ API, look in demo/python, or in docs/epydocs.
 
 The server needs a python module, with code that looks like this:
 
-from mapnik.ogcserver.wms import BaseWMSFactory
+from mapnik.ogcserver.WMS import BaseWMSFactory
 
-class MapFactory:
+class WMSFactory(BaseWMSFactory):
 
 	def __init(self):
+		BaseWMSFactory.__init__(self)
+		sty = Style()
 		...
-	
-	def getlayers(self):
+		self.register_style('stylename', sty)
+		
+		lyr = Layer(name='layername')
 		...
-	
-	def getstyles(self):
-		...
+		self.register_layer(lyr)
+		
+The rules for writing this class are:
+
+- It MUST be called 'WMSFactory'.
+- It MUST sub-class mapnik.ogcserver.WMS.BaseWMSFactory.
+- The __init__ MUST call the base class'.
+- Layers MUST be named with the 'name' parameter to the constructor.
+- style and layer names are meant for machine readability, not human.  Keep
+  them short and simple, without spaces or special characters.
+- The layers must have at least one style associated with them (a default).
+- No Map() object is used or needed here.

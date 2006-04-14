@@ -126,7 +126,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             servicee = capetree.find('{http://www.opengis.net/wms}Service')
             for item in self.CONF_SERVICE:
                 if self.conf.has_option('service', item[0]):
-                    value = self.conf.get('service', item[0])
+                    value = self.conf.get('service', item[0]).strip()
                     try:
                         item[2](value)
                     except:
@@ -147,7 +147,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         rootlayercrs = rootlayerelem.find('{http://www.opengis.net/wms}CRS')
         rootlayercrs.text = str(self.crs)
         
-        for layer in self.mapfactory.getlayers():
+        for layer in self.mapfactory.layers.values():
             layername = ElementTree.Element('Name')
             layername.text = layer.name()
             layertitle = ElementTree.Element('Title')
@@ -190,6 +190,8 @@ class ServiceHandler(WMSBaseServiceHandler):
     def GetMap(self, params):
         if params['width'] > int(self.conf.get('service', 'maxwidth')) or params['height'] > int(self.conf.get('service', 'maxheight')):
             raise OGCException('Requested map size exceeds limits set by this server.')
+        if str(params['crs']) != str(self.crs):
+            raise OGCException('Unsupported CRS requested.  Must be "%s" and not "%s".' % (self.crs, params['crs']), 'InvalidCRS')
         return WMSBaseServiceHandler.GetMap(self, params)
 
 class ExceptionHandler(BaseExceptionHandler):

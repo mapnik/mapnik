@@ -140,7 +140,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         rootlayersrs = rootlayerelem.find('SRS')
         rootlayersrs.text = str(self.crs)
 
-        for layer in self.mapfactory.getlayers():
+        for layer in self.mapfactory.layers.values():
             layername = ElementTree.Element('Name')
             layername.text = layer.name()
             layertitle = ElementTree.Element('Title')
@@ -171,6 +171,11 @@ class ServiceHandler(WMSBaseServiceHandler):
     def GetCapabilities(self, params):
         response = Response('application/vnd.ogc.wms_xml', self.capabilities)
         return response
+
+    def GetMap(self, params):
+        if str(params['srs']) != str(self.crs):
+            raise OGCException('Unsupported SRS requested.  Must be "%s" and not "%s".' % (self.crs, params['crs']), 'InvalidCRS')
+        return WMSBaseServiceHandler.GetMap(self, params)
 
 class ExceptionHandler(BaseExceptionHandler):
     

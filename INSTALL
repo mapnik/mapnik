@@ -22,7 +22,8 @@ First, here is a quick list of the software dependencies:
 - libtiff
 - libz
 - libfreetype2
-- (Optional) PostgreSQL libraries
+- (Optional) PostgreSQL libraries (For PostGIS support)
+- (Optional) PROJ.4 (More on this below)
 
 - Python 1.5.2 or greater to build Mapnik
 - (Optional) Python 2.2 or greater for the Python language bindings
@@ -32,6 +33,7 @@ All of these will normally come with any modern Linux distribution.
 If your system does NOT have one of these installed, you will need to install the mandatory ones at the very least before proceeding further.  Instructions on how to do this will come with each individual package.
 
 Also, a minimum of 256MB of RAM is recommended for the build process.
+
 
 Building
 --------
@@ -101,6 +103,14 @@ PGSQL_LIBS: Search path for PostgreSQL library files ( /path/to/PGSQL_LIBS )
     default: /usr/lib
     actual: /usr/lib
 
+PROJ_INCLUDES: Search path for PROJ.4 include files ( /path/to/PROJ_INCLUDES )
+    default: /usr/local/include
+    actual: /usr/local/include
+
+PROJ_LIBS: Search path for PROJ.4 include files ( /path/to/PROJ_LIBS )
+    default: /usr/local/lib
+    actual: /usr/local/lib
+
 PYTHON: Python executable ( /path/to/PYTHON )
     default: /usr/bin/python
     actual: /usr/bin/python
@@ -144,6 +154,30 @@ $PREFIX/bin: shapeindex utility
 $PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages/mapnik: Python bindings
 
 If you're using the default PREFIX, you will most likely need to be root to perform the install.
+
+
+A note on projection support
+----------------------------
+
+At this time Mapnik's core C++ library and map rendering engine does NOT support on-the-fly cartographic
+reprojections.
+
+Mapnik can however be configured to build the Python API to the PROJ.4 library.  This provides projection
+support through Python, and is used by the WMS ogcserver feature, since that server is written in Python.
+
+Here is an example on how to use it:
+
+>>> from mapnik import Projection
+registered datasource : raster
+registered datasource : shape
+registered datasource : postgis
+>>> p = Projection(['init=epsg:42304'])
+>>> p.Inverse(12345.245,143225.56)
+[-94.825927695613018, 50.290732340975467]
+>>>
+
+The Projection() instance provides Inverse() and Forward() methods.  For details on the possible parameters,
+see the PROJ.4 documentation.
 
 
 Test

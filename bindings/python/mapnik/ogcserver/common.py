@@ -195,8 +195,6 @@ class CRSFactory:
 class WMSBaseServiceHandler(BaseServiceHandler):
     
     def GetMap(self, params):
-        if str(params['crs']) != str(self.crs):
-            raise OGCException('Unsupported CRS requested.  Must be "%s" and not "%s".' % (self.crs, params['crs']), 'InvalidCRS')
         if params['bbox'][0] >= params['bbox'][2]:
             raise OGCException("BBOX values don't make sense.  minx is greater than maxx.")
         if params['bbox'][1] >= params['bbox'][3]:
@@ -204,18 +202,19 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         m = Map(params['width'], params['height'])
         if params.has_key('transparent') and params['transparent'] == 'FALSE':
             m.background = params['bgcolor']
-        maplayers = self.mapfactory.getlayers()
-        mapstyles = self.mapfactory.getstyles()
+        maplayers = self.mapfactory.layers
+        mapstyles = self.mapfactory.styles
         for layername in params['layers']:
-            for layer in maplayers:
-                if layer.name() == layername:
-                    for stylename in layer.styles:
-                        if stylename in mapstyles.keys():
-                            m.append_style(stylename, mapstyles[stylename])
-                    m.layers.append(layer)
-        if len(m.layers) != len(params['layers']):
-            badnames = [ layername for layername in params['layers'] if layername not in [ layer.name() for layer in m.layers ] ]
-            raise OGCException('The following layers are not defined by this server: %s.' % ','.join(badnames), 'LayerNotDefined')
+            try:
+                layer = maplayers[layername]
+            except KeyError:
+                raise OGCException('Layer not defined: %s.' % layername, 'LayerNotDefined')
+            for stylename in layer.styles:
+                if stylename in mapstyles.keys():
+                    m.append_style(stylename, mapstyles[stylename])
+                else:
+                    raise ServerConfigurationError('Layer "%s" refers to non-existent style "%s".' % (layername, stylename))
+            m.layers.append(layer)
         m.zoom_to_box(Envelope(params['bbox'][0], params['bbox'][1], params['bbox'][2], params['bbox'][3]))
         im = Image(params['width'], params['height'])
         render(m, im)
