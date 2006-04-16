@@ -83,7 +83,7 @@ class BaseServiceHandler:
         finalparams = {}
         for paramname, paramdef in self.SERVICE_PARAMS[requestname].items():
             if paramname not in params.keys() and paramdef.mandatory:
-                raise OGCException("Mandatory parameter '%s' missing from request." % paramname)
+                raise OGCException('Mandatory parameter "%s" missing from request.' % paramname)
             elif paramname in params.keys():
                 try:
                     params[paramname] = paramdef.cast(params[paramname])
@@ -93,7 +93,7 @@ class BaseServiceHandler:
                     raise OGCException('Invalid value "%s" for parameter "%s".' % (params[paramname], paramname))
                 if paramdef.allowedvalues and params[paramname] not in paramdef.allowedvalues:
                     if not paramdef.fallback:
-                        raise OGCException("Parameter '%s' has an illegal value." % paramname)
+                        raise OGCException('Parameter "%s" has an illegal value.' % paramname)
                     else:
                         finalparams[paramname] = paramdef.default
                 else:
@@ -262,10 +262,25 @@ class BaseExceptionHandler:
         return Response(self.xmlmimetype, ElementTree.tostring(ogcexcetree))
 
     def inimagehandler(self, code, message, params):
-        im = new('L', (int(params['width']), int(params['height'])))
+        im = new('RGBA', (int(params['width']), int(params['height'])))
+        im.putalpha(new('1', (int(params['width']), int(params['height']))))
         draw = Draw(im)
         for count, line in enumerate(message.strip().split('\n')):
-            draw.text((12,15*(count+1)), line, fill='#FFFFFF')
+            draw.text((12,15*(count+1)), line, fill='#000000')
+        fh = StringIO()
+        im.save(fh, PIL_TYPE_MAPPING[params['format']])
+        fh.seek(0)
+        return Response(params['format'], fh.read())
+    
+    def blankhandler(self, code, message, params):
+        bgcolor = params.get('bgcolor', '#FFFFFF')
+        bgcolor.replace('0x', '#')
+        transparent = params.get('transparent', 'FALSE')
+        if transparent == 'TRUE':
+            im = new('RGBA', (int(params['width']), int(params['height'])))
+            im.putalpha(new('1', (int(params['width']), int(params['height']))))
+        else:
+            im = new('RGBA', (int(params['width']), int(params['height'])), bgcolor)
         fh = StringIO()
         im.save(fh, PIL_TYPE_MAPPING[params['format']])
         fh.seek(0)

@@ -100,6 +100,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         <Exception>
           <Format>XML</Format>
           <Format>INIMAGE</Format>
+          <Format>BLANK</Format>
         </Exception>
         <Layer>
           <Title>A Mapnik WMS Server</Title>
@@ -212,6 +213,7 @@ class ExceptionHandler(BaseExceptionHandler):
     xpath = '{http://www.opengis.net/ogc}ServiceException'
     
     handlers = {'XML': BaseExceptionHandler.xmlhandler,
-                'INIMAGE': BaseExceptionHandler.inimagehandler}
+                'INIMAGE': BaseExceptionHandler.inimagehandler,
+                'BLANK': BaseExceptionHandler.blankhandler}
     
     defaulthandler = 'XML'

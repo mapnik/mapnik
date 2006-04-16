@@ -94,6 +94,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         <Exception>
           <Format>application/vnd.ogc.se_xml</Format>
           <Format>application/vnd.ogc.se_inimage</Format>
+          <Format>application/vnd.ogc.se_blank</Format>
         </Exception>
         <Layer>
           <Title>A Mapnik WMS Server</Title>
@@ -193,6 +194,7 @@ class ExceptionHandler(BaseExceptionHandler):
     xpath = 'ServiceException'
 
     handlers = {'application/vnd.ogc.se_xml': BaseExceptionHandler.xmlhandler,
-                'application/vnd.ogc.se_inimage': BaseExceptionHandler.inimagehandler}
+                'application/vnd.ogc.se_inimage': BaseExceptionHandler.inimagehandler,
+                'application/vnd.ogc.se_blank': BaseExceptionHandler.blankhandler}
     
     defaulthandler = 'application/vnd.ogc.se_xml'

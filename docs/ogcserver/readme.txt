@@ -18,9 +18,9 @@ Features/Caveats
 
 - WMS 1.1.1 and 1.3.0
 - CGI/FastCGI
-- GetCapabilities and GetMap support only
+- GetCapabilities and GetMap support only (NO GetFeatureInfo)
 - GIF/JPEG/PNG output
-- XML error handling only
+- XML/INIMAGE/BLANK error handling
 - No real layer metadata support yet
 - No re-projection support
 
