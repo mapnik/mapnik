@@ -89,8 +89,9 @@ class Handler(cgi.DebugHandler):
             eh = ExceptionHandler130(self.debug)
         else:
             eh = ExceptionHandler111(self.debug)
-        req.set_header('Content-Type', eh.mimetype)
-        req.write(eh.getcontent())
+        response = eh.getresponse(reqparams)
+        req.set_header('Content-Type', response.content_type)
+        req.write(response.content)
 
 def lowerparams(params):
     reqparams = {}

@@ -20,8 +20,9 @@
 # $Id$
 
 from common import ParameterDefinition, Response, Version, ListFactory, \
-                   ColorFactory, CRSFactory, CRS, WMSBaseServiceHandler
-from exceptions import OGCException, ServerConfigurationError, BaseExceptionHandler
+                   ColorFactory, CRSFactory, CRS, WMSBaseServiceHandler, \
+                   BaseExceptionHandler
+from exceptions import OGCException, ServerConfigurationError
 from lxml import etree as ElementTree
 
 class ServiceHandler(WMSBaseServiceHandler):
@@ -39,10 +40,10 @@ class ServiceHandler(WMSBaseServiceHandler):
             'bbox': ParameterDefinition(True, ListFactory(float)),
             'width': ParameterDefinition(True, int),
             'height': ParameterDefinition(True, int),
-            'format': ParameterDefinition(True, str, allowedvalues=('image/gif','image/png','image/jpeg')),
-            'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE','FALSE')),
+            'format': ParameterDefinition(True, str, allowedvalues=('image/gif','image/png', 'image/jpeg')),
+            'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
-            'exceptions': ParameterDefinition(False, str, 'XML', ('XML',)),
+            'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE')),
         }
     }
 
@@ -98,6 +99,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         </Request>
         <Exception>
           <Format>XML</Format>
+          <Format>INIMAGE</Format>
         </Exception>
         <Layer>
           <Title>A Mapnik WMS Server</Title>
@@ -196,7 +198,7 @@ class ServiceHandler(WMSBaseServiceHandler):
 
 class ExceptionHandler(BaseExceptionHandler):
     
-    mimetype = "text/xml"
+    xmlmimetype = "text/xml"
     
     xmltemplate = ElementTree.fromstring("""<?xml version='1.0' encoding="UTF-8"?>
     <ServiceExceptionReport version="1.3.0"
@@ -208,3 +210,8 @@ class ExceptionHandler(BaseExceptionHandler):
     """)
     
     xpath = '{http://www.opengis.net/ogc}ServiceException'
+    
+    handlers = {'XML': BaseExceptionHandler.xmlhandler,
+                'INIMAGE': BaseExceptionHandler.inimagehandler}
+    
+    defaulthandler = 'XML'

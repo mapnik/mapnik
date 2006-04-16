@@ -20,8 +20,9 @@
 # $Id$
 
 from common import ParameterDefinition, Response, Version, ListFactory, \
-                   ColorFactory, CRSFactory, WMSBaseServiceHandler, CRS
-from exceptions import OGCException, ServerConfigurationError, BaseExceptionHandler
+                   ColorFactory, CRSFactory, WMSBaseServiceHandler, CRS, \
+                   BaseExceptionHandler
+from exceptions import OGCException, ServerConfigurationError
 from lxml import etree as ElementTree
 
 class ServiceHandler(WMSBaseServiceHandler):
@@ -38,10 +39,10 @@ class ServiceHandler(WMSBaseServiceHandler):
             'bbox': ParameterDefinition(True, ListFactory(float)),
             'width': ParameterDefinition(True, int),
             'height': ParameterDefinition(True, int),
-            'format': ParameterDefinition(True, str, allowedvalues=('image/png','image/jpeg','image/gif')),
-            'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE','FALSE')),
+            'format': ParameterDefinition(True, str, allowedvalues=('image/png', 'image/jpeg', 'image/gif')),
+            'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
-            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml',))
+            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage'))
         }
     }
 
@@ -92,6 +93,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         </Request>
         <Exception>
           <Format>application/vnd.ogc.se_xml</Format>
+          <Format>application/vnd.ogc.se_inimage</Format>
         </Exception>
         <Layer>
           <Title>A Mapnik WMS Server</Title>
@@ -179,7 +181,7 @@ class ServiceHandler(WMSBaseServiceHandler):
 
 class ExceptionHandler(BaseExceptionHandler):
     
-    mimetype = "application/vnd.ogc.se_xml"
+    xmlmimetype = "application/vnd.ogc.se_xml"
     
     xmltemplate = ElementTree.fromstring("""<?xml version='1.0' encoding="UTF-8" standalone="no"?>
     <!DOCTYPE ServiceExceptionReport SYSTEM "http://www.digitalearth.gov/wmt/xml/exception_1_1_1.dtd">
@@ -189,3 +191,8 @@ class ExceptionHandler(BaseExceptionHandler):
     """)
     
     xpath = 'ServiceException'
+
+    handlers = {'application/vnd.ogc.se_xml': BaseExceptionHandler.xmlhandler,
+                'application/vnd.ogc.se_inimage': BaseExceptionHandler.inimagehandler}
+    
+    defaulthandler = 'application/vnd.ogc.se_xml'

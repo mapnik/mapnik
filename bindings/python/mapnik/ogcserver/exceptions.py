@@ -19,34 +19,8 @@
 #
 # $Id$
 
-from copy import deepcopy
-from lxml import etree as ElementTree
-from StringIO import StringIO
-from traceback import print_tb
-from sys import exc_info
-
 class OGCException(Exception):
     pass
 
 class ServerConfigurationError(Exception):
     pass
-
-class BaseExceptionHandler:
-    
-    def __init__(self, debug):
-        self.debug = debug
-    
-    def getcontent(self):
-        excinfo = exc_info()
-        ogcexcetree = deepcopy(self.xmltemplate)
-        e = ogcexcetree.find(self.xpath)
-        if self.debug:
-            fh = StringIO()
-            print_tb(excinfo[2], None, fh)
-            fh.seek(0)
-            e.text = '\n' + fh.read() + '\n' + str(excinfo[0]) + ': ' + ', '.join(excinfo[1].args) + '\n'
-        elif len(excinfo[1].args) > 0:
-            e.text = excinfo[1].args[0]
-        if isinstance(excinfo[1], OGCException) and len(excinfo[1].args) > 1:
-            e.set('code', excinfo[1].args[1])
-        return ElementTree.tostring(ogcexcetree)
