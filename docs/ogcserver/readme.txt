@@ -101,7 +101,8 @@ class WMSFactory(BaseWMSFactory):
 		
 		lyr = Layer(name='layername')
 		...
-		self.register_layer(lyr)
+		self.register_layer(lyr, ('extra', 'style', 'names'))
+		self.finalize()
 		
 The rules for writing this class are:
 
@@ -113,3 +114,5 @@ The rules for writing this class are:
   them short and simple, without spaces or special characters.
 - The layers must have at least one style associated with them (a default).
 - No Map() object is used or needed here.
+- Be sure to call self.finalize() once you've registered everything! This will
+  validate everything and let you know if there's problems.
