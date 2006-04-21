@@ -23,6 +23,7 @@ from common import Version
 from exceptions import OGCException, ServerConfigurationError
 from wms111 import ServiceHandler as ServiceHandler111
 from wms130 import ServiceHandler as ServiceHandler130
+from mapnik import Style, Layer
 
 def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
 
@@ -41,13 +42,29 @@ class BaseWMSFactory:
         self.layers = {}
         self.styles = {}
     
-    def register_layer(self, layer):
+    def register_layer(self, layer, extrastyles=()):
         layername = layer.name()
         if not layername:
-            raise ServerConfigurationError('There is an un-named layer.')
+            raise ServerConfigurationError('Attempted to register an unnamed layer.')
         self.layers[layername] = layer
+        if isinstance(extrastyles, tuple):
+            layer.wmsextrastyles = extrastyles
+        else:
+            raise ServerConfigurationError('Layer "%s" was passed an invalid list of extra styles.  List must be a tuple of strings.' % layername)
     
     def register_style(self, name, style):
         if not name:
-            raise ServerConfigurationError('There is an un-named style.')
+            raise ServerConfigurationError('Attempted to register a style without providing a name.')
+        if not isinstance(style, Style):
+            raise ServerConfigurationError('Bad style object passed to register_style() for style "%s".' % name)
         self.styles[name] = style
+    
+    def finalize(self):
+        if len(self.layers) == 0:
+            raise ServerConfigurationError('No layers defined!')
+        if len(self.styles) == 0:
+            raise ServerConfigurationError('No styles defined!')
+        for layer in self.layers.values():
+            for style in list(layer.styles) + list(layer.wmsextrastyles):
+                if style not in self.styles.keys():
+                    raise ServerConfigurationError('Layer "%s" refers to undefined style "%s".' % (layer.name(), style))

@@ -182,6 +182,16 @@ class ServiceHandler(WMSBaseServiceHandler):
             layere.append(layertitle)
             layere.append(layerexgbb)
             layere.append(layerbbox)
+            if len(layer.wmsextrastyles) > 0:
+                for extrastyle in list(layer.wmsextrastyles):
+                    style = ElementTree.Element('Style')
+                    stylename = ElementTree.Element('Name')
+                    stylename.text = extrastyle
+                    styletitle = ElementTree.Element('Title')
+                    styletitle.text = extrastyle
+                    style.append(stylename)
+                    style.append(styletitle)
+                    layere.append(style)
             rootlayerelem.append(layere)
         
         self.capabilities = '<?xml version="1.0" encoding="UTF-8"?>' + ElementTree.tostring(capetree)
