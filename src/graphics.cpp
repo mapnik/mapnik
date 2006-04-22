@@ -42,8 +42,6 @@ namespace mapnik
 
     Image32::~Image32() {}
 
-    //gamma MAPNIK_DECL Image32::gammaTable_;
-
     const ImageData32& Image32::data() const
     {
         return data_;

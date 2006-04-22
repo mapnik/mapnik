@@ -42,12 +42,10 @@ namespace mapnik
 	unsigned height_;
 	Color background_;
 	ImageData32 data_;
-	//static gamma gammaTable_;
     public:
 	Image32(int width,int height);
 	Image32(const Image32& rhs);
 	~Image32();
-	//static void setGamma(double gamma);
 	void setBackground(const Color& background);
 	const Color& getBackground() const;     
 	const ImageData32& data() const;
@@ -80,26 +78,6 @@ namespace mapnik
 		data_(x,y)=rgba;
 	    }
 	}
-    /*
-	inline int blendColor(int c0,int c1,int t)
-	{
-	    int bgRed=(c1>>16)&0xff;
-	    int bgGreen=(c1>>8)&0xff;
-	    int bgBlue=c1&0xff;
-
-	    int red=(c0>>16)&0xff;
-	    int green=(c0>>8)&0xff;
-	    int blue=c0&0xff;
-
-	    int alpha=t;
-
-	    int r=gammaTable_.l2g[(gammaTable_.g2l[red]*alpha+gammaTable_.g2l[bgRed]*(255-alpha))>>8];
-	    int g=gammaTable_.l2g[(gammaTable_.g2l[green]*alpha+gammaTable_.g2l[bgGreen]*(255-alpha))>>8];
-	    int b=gammaTable_.l2g[(gammaTable_.g2l[blue]*alpha+gammaTable_.g2l[bgBlue]*(255-alpha))>>8];
-	    
-	    return 0xff << 24 | r << 16 | g << 8 | b;
-	}
-*/
 	inline void blendPixel(int x,int y,unsigned int rgba1,int t)
 	{
 	    if (checkBounds(x,y))
