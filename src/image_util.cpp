@@ -25,8 +25,6 @@
 #include <string>
 #include <png.h>
 #include <jpeglib.h>
-#include <gif_lib.h>
-#include <fstream>
 #include "graphics.hpp"
 #include "image_util.hpp"
 #include "memory.hpp"
@@ -56,10 +54,6 @@ namespace mapnik
 	{
 	    save_as_jpeg(filename,85,image);
 	}
-        else if (type=="gif")
-        {
-	    save_as_gif(filename,image);
-        }
     }
 
     void ImageUtils::save_as_png(const std::string& filename,const Image32& image)
@@ -156,27 +150,5 @@ namespace mapnik
 	jpeg_finish_compress(&cinfo);
 	fclose(fp);
 	jpeg_destroy_compress(&cinfo);
-    }
-
-    void ImageUtils::save_as_gif(const std::string& filename,const Image32& image)
-    {
-        GifFileType *fp=EGifOpenFileName(filename.c_str(),0);
-        if (!fp) return;
-        int width=image.width();
-        int height=image.height();
- 	ColorMapObject *OutputColorMap = MakeMapObject(256, NULL);
-
-	EGifPutScreenDesc(fp, width, height, 8, 0, OutputColorMap);
-        EGifPutImageDesc(fp, 0, 0, width, height, FALSE, NULL);
-
-	const ImageData32& imageData=image.data();
-
-        for (int i=0;i<height;i++)
-        {
-            EGifPutLine(fp, (GifPixelType*)imageData.getRow(i), width);
-        }
-
-        EGifCloseFile(fp);
-	FreeMapObject(OutputColorMap);
     }
 }
