@@ -26,6 +26,9 @@
 #ifndef FILTER_PARSER_HPP
 #define FILTER_PARSER_HPP
 
+#include <stack>
+#include <iostream>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/spirit/core.hpp>
 #include <boost/spirit/symbols.hpp>
@@ -39,8 +42,6 @@
 #include "filter.hpp"
 #include "regex_filter.hpp"
 
-#include <stack>
-#include <iostream>
 
 using namespace boost::spirit;
 using std::string;
