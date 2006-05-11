@@ -19,7 +19,7 @@ Features/Caveats
 - WMS 1.1.1 and 1.3.0
 - CGI/FastCGI
 - GetCapabilities and GetMap support only (NO GetFeatureInfo)
-- GIF/JPEG/PNG output
+- JPEG/PNG output
 - XML/INIMAGE/BLANK error handling
 - No real layer metadata support yet
 - No re-projection support
@@ -116,3 +116,18 @@ The rules for writing this class are:
 - No Map() object is used or needed here.
 - Be sure to call self.finalize() once you've registered everything! This will
   validate everything and let you know if there's problems.
+- You can associate more styles to a given layer by passing a tuple of style
+  names along with the layer itself to register_layer().  As of this writing
+  this is useless as the core engine doesn't yet support named styles :)
+
+
+Conclusion
+----------
+
+	This is the very first implementation of a WMS for Mapnik.  Although inital
+testing seems to suggest it works well, there may be bugs, and it lacks some
+useful features.  Comments, contributions, and requests for help should all be
+directed to the Mapnik mailing list.
+
+Enjoy!
+J.F.
