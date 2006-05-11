@@ -46,21 +46,21 @@ class ParameterDefinition:
 
             @param mandatory: Is this parameter required by the request?
             @type mandatory: Boolean.
-            
+
             @param default: Default value to use if one is not provided
                             and the parameter is optional.
             @type default: None or any valid value.
-            
+
             @param allowedvalues: A list of allowed values for the parameter.
                                   If a value is provided that is not in this
                                   list, an error is raised.
             @type allowedvalues: A python tuple of values.
-            
+
             @param fallback: Whether the value of the parameter should fall
                              back to the default should an illegal value be
                              provided.
             @type fallback: Boolean.
-            
+
             @return: A L{ParameterDefinition} instance.
         """
         if mandatory not in [True, False]:
@@ -81,6 +81,9 @@ class BaseServiceHandler:
 
     def processParameters(self, requestname, params):
         finalparams = {}
+        for paramname in params.keys():
+            if paramname not in self.SERVICE_PARAMS[requestname].keys():
+                raise OGCException('Unknown request parameter "%s".' % paramname)
         for paramname, paramdef in self.SERVICE_PARAMS[requestname].items():
             if paramname not in params.keys() and paramdef.mandatory:
                 raise OGCException('Mandatory parameter "%s" missing from request.' % paramname)
@@ -144,10 +147,10 @@ class Version:
                     return 0
 
 class ListFactory:
-    
+
     def __init__(self, cast):
         self.cast = cast
-    
+
     def __call__(self, string):
         seq = string.split(',')
         return map(self.cast, seq)
@@ -159,15 +162,15 @@ def ColorFactory(colorstring):
         raise OGCException('Invalid color value. Must be of format "0xFFFFFF".')
 
 class CRS:
-    
+
     def __init__(self, namespace, code):
         self.namespace = namespace
         self.code = int(code)
         self.proj = None
-    
+
     def __repr__(self):
         return '%s:%s' % (self.namespace, self.code)
-    
+
     def __eq__(self, other):
         if str(other) == str(self):
             return True
@@ -177,17 +180,17 @@ class CRS:
         if not self.proj:
             self.proj = Projection(['init=%s' % str(self).lower()])
         return self.proj.Inverse(x, y)
-    
+
     def Forward(self, x, y):
         if not self.proj:
             self.proj = Projection(['init=%s' % str(self).lower()])
         return self.proj.Forward(x, y)
 
 class CRSFactory:
-    
+
     def __init__(self, allowednamespaces):
         self.allowednamespaces = allowednamespaces
-    
+
     def __call__(self, crsstring):
         if not re.match('^[A-Z]{3,5}:\d+$', crsstring):
             raise OGCException('Invalid format for the CRS parameter: %s' % crsstring, 'InvalidCRS')
@@ -198,12 +201,14 @@ class CRSFactory:
             raise OGCException('Invalid CRS Namespace: %s' % crsparts[0], 'InvalidCRS')
 
 class WMSBaseServiceHandler(BaseServiceHandler):
-    
+
     def GetMap(self, params):
         if params['bbox'][0] >= params['bbox'][2]:
             raise OGCException("BBOX values don't make sense.  minx is greater than maxx.")
         if params['bbox'][1] >= params['bbox'][3]:
             raise OGCException("BBOX values don't make sense.  miny is greater than maxy.")
+        if params.has_key('styles') and len(params['styles']) != len(params['layers']):
+            raise OGCException('STYLES length does not match LAYERS length.')
         m = Map(params['width'], params['height'])
         if params.has_key('transparent') and params['transparent'] == 'FALSE':
             m.background = params['bgcolor']
@@ -225,7 +230,6 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         m.zoom_to_box(Envelope(params['bbox'][0], params['bbox'][1], params['bbox'][2], params['bbox'][3]))
         im = Image(params['width'], params['height'])
         render(m, im)
-        render_to_file(m, '/tmp/ogcserver.png', 'png')
         im = fromstring('RGBA', (params['width'], params['height']), rawdata(im))
         fh = StringIO()
         im.save(fh, PIL_TYPE_MAPPING[params['format']], quality=100)
@@ -233,10 +237,10 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         return Response(params['format'], fh.read())
 
 class BaseExceptionHandler:
-    
+
     def __init__(self, debug):
         self.debug = debug
-    
+
     def getresponse(self, params):
         code = ''
         message = ''
@@ -252,10 +256,10 @@ class BaseExceptionHandler:
         if isinstance(excinfo[1], OGCException) and len(excinfo[1].args) > 1:
             code = excinfo[1].args[1]
         exceptions = params.get('exceptions', None)
-        if not exceptions:
+        if not exceptions or not self.handlers.has_key(exceptions):
             exceptions = self.defaulthandler
         return self.handlers[exceptions](self, code, message, params)
-    
+
     def xmlhandler(self, code, message, params):
         ogcexcetree = deepcopy(self.xmltemplate)
         e = ogcexcetree.find(self.xpath)
@@ -274,10 +278,10 @@ class BaseExceptionHandler:
         im.save(fh, PIL_TYPE_MAPPING[params['format']])
         fh.seek(0)
         return Response(params['format'], fh.read())
-    
+
     def blankhandler(self, code, message, params):
         bgcolor = params.get('bgcolor', '#FFFFFF')
-        bgcolor.replace('0x', '#')
+        bgcolor = bgcolor.replace('0x', '#')
         transparent = params.get('transparent', 'FALSE')
         if transparent == 'TRUE':
             im = new('RGBA', (int(params['width']), int(params['height'])))

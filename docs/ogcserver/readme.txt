@@ -23,6 +23,7 @@ Features/Caveats
 - XML/INIMAGE/BLANK error handling
 - No real layer metadata support yet
 - No re-projection support
+- Needs to be able to write to tempfile.gettempdir() (most likely "/tmp")
 
 
 Dependencies
@@ -101,7 +102,8 @@ class WMSFactory(BaseWMSFactory):
 		
 		lyr = Layer(name='layername')
 		...
-		self.register_layer(lyr, ('extra', 'style', 'names'))
+		lyr.styles.append('stylename')
+		self.register_layer(lyr)
 		self.finalize()
 		
 The rules for writing this class are:
@@ -116,9 +118,22 @@ The rules for writing this class are:
 - No Map() object is used or needed here.
 - Be sure to call self.finalize() once you've registered everything! This will
   validate everything and let you know if there's problems.
-- You can associate more styles to a given layer by passing a tuple of style
-  names along with the layer itself to register_layer().  As of this writing
-  this is useless as the core engine doesn't yet support named styles :)
+- Be sure to associate a default style with the layer.  In the future, there
+  will be a mechanism to assign other non-default styles to a layer, to support
+  named styles through the STYLES= parameter.
+
+To Do
+-----
+
+- Named style support.
+- Improve configuration to allow for full server metadata.
+- Add support for richer layer metadata.
+- Investigate moving to cElementTree from lxml.
+- Add some internal "caching" for performance improvements.
+- Support GetFeatureInfo (Requires core changes).
+- Switch to using C/C++ libs for image generation, instead of PIL (also
+  requires core changes). PIL requirement will remain for INIMAGE/BLANK
+  error handling.
 
 
 Conclusion

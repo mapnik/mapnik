@@ -32,17 +32,16 @@ class ServiceHandler(WMSBaseServiceHandler):
             'updatesequence': ParameterDefinition(False, str)
         },
         'GetMap': {
-            'version': ParameterDefinition(True, Version, allowedvalues=(Version('1.1.1'),)),
             'layers': ParameterDefinition(True, ListFactory(str)),
             'styles': ParameterDefinition(True, ListFactory(str)),
             'srs': ParameterDefinition(True, CRSFactory(['EPSG'])),
             'bbox': ParameterDefinition(True, ListFactory(float)),
             'width': ParameterDefinition(True, int),
             'height': ParameterDefinition(True, int),
-            'format': ParameterDefinition(True, str, allowedvalues=('image/png', 'image/jpeg', 'image/gif')),
+            'format': ParameterDefinition(True, str, allowedvalues=('image/png', 'image/jpeg')),
             'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
-            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage'))
+            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage', 'application/vnd.ogc.se_blank'))
         }
     }
 
@@ -113,7 +112,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             ServerConfigurationError('EPSG code not properly configured.')
 
         capetree = ElementTree.fromstring(self.capabilitiesxmltemplate)
-        
+
         elements = capetree.findall('Capability//OnlineResource')
         for element in elements:
             element.set('{http://www.w3.org/1999/xlink}href', opsonlineresource)
@@ -138,7 +137,7 @@ class ServiceHandler(WMSBaseServiceHandler):
                         servicee.append(element)
 
         rootlayerelem = capetree.find('Capability/Layer')
-        
+
         rootlayersrs = rootlayerelem.find('SRS')
         rootlayersrs.text = str(self.crs)
 
@@ -177,7 +176,7 @@ class ServiceHandler(WMSBaseServiceHandler):
                     style.append(styletitle)
                     layere.append(style)
             rootlayerelem.append(layere)
-        
+
         self.capabilities = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + ElementTree.tostring(capetree)
 
     def GetCapabilities(self, params):
@@ -190,20 +189,20 @@ class ServiceHandler(WMSBaseServiceHandler):
         return WMSBaseServiceHandler.GetMap(self, params)
 
 class ExceptionHandler(BaseExceptionHandler):
-    
+
     xmlmimetype = "application/vnd.ogc.se_xml"
-    
+
     xmltemplate = ElementTree.fromstring("""<?xml version='1.0' encoding="UTF-8" standalone="no"?>
     <!DOCTYPE ServiceExceptionReport SYSTEM "http://www.digitalearth.gov/wmt/xml/exception_1_1_1.dtd">
     <ServiceExceptionReport version="1.1.1">
       <ServiceException />
     </ServiceExceptionReport>
     """)
-    
+
     xpath = 'ServiceException'
 
     handlers = {'application/vnd.ogc.se_xml': BaseExceptionHandler.xmlhandler,
                 'application/vnd.ogc.se_inimage': BaseExceptionHandler.inimagehandler,
                 'application/vnd.ogc.se_blank': BaseExceptionHandler.blankhandler}
-    
+
     defaulthandler = 'application/vnd.ogc.se_xml'

@@ -37,11 +37,11 @@ def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
         return ServiceHandler111(conf, mapfactory, onlineresource)
 
 class BaseWMSFactory:
-    
+
     def __init__(self):
         self.layers = {}
         self.styles = {}
-    
+
     def register_layer(self, layer, extrastyles=()):
         layername = layer.name()
         if not layername:
@@ -51,14 +51,14 @@ class BaseWMSFactory:
             layer.wmsextrastyles = extrastyles
         else:
             raise ServerConfigurationError('Layer "%s" was passed an invalid list of extra styles.  List must be a tuple of strings.' % layername)
-    
+
     def register_style(self, name, style):
         if not name:
             raise ServerConfigurationError('Attempted to register a style without providing a name.')
         if not isinstance(style, Style):
             raise ServerConfigurationError('Bad style object passed to register_style() for style "%s".' % name)
         self.styles[name] = style
-    
+
     def finalize(self):
         if len(self.layers) == 0:
             raise ServerConfigurationError('No layers defined!')

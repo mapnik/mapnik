@@ -24,6 +24,7 @@
  * this copyright message remains intact.
  ************************************************************************/
 
+#include "Python.h"
 #include <string.h>
 
 #if defined(_WIN32) || defined(__WIN32__)
@@ -173,7 +174,6 @@ SWIG_TypeQuery(const char *name) {
  ************************************************************************/
 
 #include <stdlib.h>
-#include "Python.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -33,17 +33,16 @@ class ServiceHandler(WMSBaseServiceHandler):
             'updatesequence': ParameterDefinition(False, str)
         },
         'GetMap': {
-            'version': ParameterDefinition(True, Version, allowedvalues=(Version('1.3.0'),)),
             'layers': ParameterDefinition(True, ListFactory(str)),
             'styles': ParameterDefinition(True, ListFactory(str)),
             'crs': ParameterDefinition(True, CRSFactory(['EPSG'])),
             'bbox': ParameterDefinition(True, ListFactory(float)),
             'width': ParameterDefinition(True, int),
             'height': ParameterDefinition(True, int),
-            'format': ParameterDefinition(True, str, allowedvalues=('image/gif','image/png', 'image/jpeg')),
+            'format': ParameterDefinition(True, str, allowedvalues=('image/png', 'image/jpeg')),
             'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
-            'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE')),
+            'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE', 'BLANK')),
         }
     }
 
@@ -119,7 +118,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             raise ServerConfigurationError('EPSG code not properly configured.')
 
         capetree = ElementTree.fromstring(self.capabilitiesxmltemplate)
-        
+
         elements = capetree.findall('{http://www.opengis.net/wms}Capability//{http://www.opengis.net/wms}OnlineResource')
         for element in elements:
             element.set('{http://www.w3.org/1999/xlink}href', opsonlineresource)
@@ -143,12 +142,11 @@ class ServiceHandler(WMSBaseServiceHandler):
                         element.text = value
                         servicee.append(element)
 
-        
         rootlayerelem = capetree.find('{http://www.opengis.net/wms}Capability/{http://www.opengis.net/wms}Layer')
 
         rootlayercrs = rootlayerelem.find('{http://www.opengis.net/wms}CRS')
         rootlayercrs.text = str(self.crs)
-        
+
         for layer in self.mapfactory.layers.values():
             layername = ElementTree.Element('Name')
             layername.text = layer.name()
@@ -192,13 +190,13 @@ class ServiceHandler(WMSBaseServiceHandler):
                     style.append(styletitle)
                     layere.append(style)
             rootlayerelem.append(layere)
-        
+
         self.capabilities = '<?xml version="1.0" encoding="UTF-8"?>' + ElementTree.tostring(capetree)
 
     def GetCapabilities(self, params):
         response = Response('text/xml', self.capabilities)
         return response
-        
+
     def GetMap(self, params):
         if params['width'] > int(self.conf.get('service', 'maxwidth')) or params['height'] > int(self.conf.get('service', 'maxheight')):
             raise OGCException('Requested map size exceeds limits set by this server.')
@@ -207,9 +205,9 @@ class ServiceHandler(WMSBaseServiceHandler):
         return WMSBaseServiceHandler.GetMap(self, params)
 
 class ExceptionHandler(BaseExceptionHandler):
-    
+
     xmlmimetype = "text/xml"
-    
+
     xmltemplate = ElementTree.fromstring("""<?xml version='1.0' encoding="UTF-8"?>
     <ServiceExceptionReport version="1.3.0"
                             xmlns="http://www.opengis.net/ogc"
@@ -218,11 +216,11 @@ class ExceptionHandler(BaseExceptionHandler):
       <ServiceException/>
     </ServiceExceptionReport>
     """)
-    
+
     xpath = '{http://www.opengis.net/ogc}ServiceException'
-    
+
     handlers = {'XML': BaseExceptionHandler.xmlhandler,
                 'INIMAGE': BaseExceptionHandler.inimagehandler,
                 'BLANK': BaseExceptionHandler.blankhandler}
-    
+
     defaulthandler = 'XML'
