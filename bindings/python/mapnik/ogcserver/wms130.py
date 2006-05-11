@@ -84,7 +84,6 @@ class ServiceHandler(WMSBaseServiceHandler):
           <GetMap>
             <Format>image/png</Format>
             <Format>image/jpeg</Format>
-            <Format>image/gif</Format>
             <DCPType>
               <HTTP>
                 <Get>

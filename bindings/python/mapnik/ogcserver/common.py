@@ -20,7 +20,7 @@
 # $Id$
 
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Map, Color, Envelope, render, rawdata, Image, Projection
+from mapnik import Map, Color, Envelope, render, rawdata, Image, Projection, render_to_file
 from PIL.Image import fromstring, new
 from PIL.ImageDraw import Draw
 from StringIO import StringIO
@@ -36,7 +36,7 @@ import re
 #                                    'http://www.w3.org/2001/XMLSchema-instance': 'xsi'
 #                                    })
 
-PIL_TYPE_MAPPING = {'image/jpeg': 'JPEG', 'image/png': 'PNG', 'image/gif': 'GIF'}
+PIL_TYPE_MAPPING = {'image/jpeg': 'JPEG', 'image/png': 'PNG'}
 
 class ParameterDefinition:
 
@@ -207,6 +207,8 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         m = Map(params['width'], params['height'])
         if params.has_key('transparent') and params['transparent'] == 'FALSE':
             m.background = params['bgcolor']
+        else:
+            m.background = Color(0, 0, 0, 0)
         maplayers = self.mapfactory.layers
         mapstyles = self.mapfactory.styles
         for layername in params['layers']:
@@ -223,9 +225,10 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         m.zoom_to_box(Envelope(params['bbox'][0], params['bbox'][1], params['bbox'][2], params['bbox'][3]))
         im = Image(params['width'], params['height'])
         render(m, im)
-        im2 = fromstring('RGBA', (params['width'], params['height']), rawdata(im))
+        render_to_file(m, '/tmp/ogcserver.png', 'png')
+        im = fromstring('RGBA', (params['width'], params['height']), rawdata(im))
         fh = StringIO()
-        im2.save(fh, PIL_TYPE_MAPPING[params['format']])
+        im.save(fh, PIL_TYPE_MAPPING[params['format']], quality=100)
         fh.seek(0)
         return Response(params['format'], fh.read())
 
