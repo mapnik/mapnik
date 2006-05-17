@@ -31,13 +31,13 @@ namespace mapnik
 {   
     struct MAPNIK_DECL point_symbolizer
     {	
-	point_symbolizer(std::string const& file,
-			 std::string const& type,
-			 unsigned width,unsigned height);
-	point_symbolizer(point_symbolizer const& rhs);
-	ImageData32 const& get_data() const;
+        point_symbolizer(std::string const& file,
+                         std::string const& type,
+                         unsigned width,unsigned height);
+        point_symbolizer(point_symbolizer const& rhs);
+        ImageData32 const& get_data() const;
     private:
-	boost::shared_ptr<ImageData32> symbol_;
+        boost::shared_ptr<ImageData32> symbol_;
     };
 }
 
