@@ -23,6 +23,7 @@
 #include "dbffile.hpp"
 #include "utils.hpp"
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <string>
 
 dbf_file::dbf_file()
@@ -137,17 +138,29 @@ void dbf_file::add_attribute(int col,Feature const& f) const throw()
                     boost::put(f,name,0);
                     break;
                 }
-                if (fields_[col].dec_>0)
+                if ( fields_[col].dec_>0 )
                 {   
-                    double d;
-                    fromString(str,d);
-                    boost::put(f,name,d);
+                    try 
+                    {
+                        double d = boost::lexical_cast<double>(str);
+                        boost::put(f,name,d);
+                    }
+                    catch (boost::bad_lexical_cast &)
+                    {
+                        boost::put(f,name,0.0);
+                    }
                 }
                 else
                 {
-                    int i;
-                    fromString(str,i);
-                    boost::put(f,name,i);
+                    try 
+                    {
+                        int i =  boost::lexical_cast<int>(str); 
+                        boost::put(f,name,i);
+                    }
+                    catch (boost::lexical_cast &)
+                    {
+                        boost::put(f,name,0);
+                    }
                 }
                 break;
             }
