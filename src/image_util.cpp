@@ -45,15 +45,15 @@ namespace mapnik
     //
     void ImageUtils::save_to_file(const std::string& filename,const std::string& type,const Image32& image)
     {
-	//all that should go into image_writer factory
+        //all that should go into image_writer factory
         if (type=="png")
         {
             save_as_png(filename,image);
         } 
-	else if (type=="jpeg")
-	{
-	    save_as_jpeg(filename,85,image);
-	}
+        else if (type=="jpeg")
+        {
+            save_as_jpeg(filename,85,image);
+        }
     }
 
     void ImageUtils::save_as_png(const std::string& filename,const Image32& image)
