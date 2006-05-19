@@ -157,7 +157,7 @@ void dbf_file::add_attribute(int col,Feature const& f) const throw()
                         int i =  boost::lexical_cast<int>(str); 
                         boost::put(f,name,i);
                     }
-                    catch (boost::lexical_cast &)
+                    catch (boost::bad_lexical_cast &)
                     {
                         boost::put(f,name,0);
                     }

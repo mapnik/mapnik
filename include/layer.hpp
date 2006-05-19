@@ -57,8 +57,8 @@ namespace mapnik
         std::vector<std::string>  styles_;
         std::string selection_style_;
 
-        mutable datasource_p ds_;
         mutable std::vector<boost::shared_ptr<Feature> > selection_;
+        mutable datasource_p ds_;
         
     public:
         Layer();
