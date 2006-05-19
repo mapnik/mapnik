@@ -201,21 +201,21 @@ namespace mapnik
     template <typename T>
     inline std::string toString(const T& x)
     {
-	std::ostringstream o;
-	if (!(o << x))
-	    throw BadConversion(std::string("toString(")
-				+ typeid(x).name() + ")");
-	return o.str();
+        std::ostringstream o;
+        if (!(o << x))
+            throw BadConversion(std::string("toString(")
+                                + typeid(x).name() + ")");
+        return o.str();
     }
     
     template<typename T>
     inline void fromString(const std::string& s, T& x,
-			   bool failIfLeftoverChars = true)
+                           bool failIfLeftoverChars = true)
     {
-	std::istringstream i(s);
-	char c;
-	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
-	    throw BadConversion("fromString("+s+")");
+        std::istringstream i(s);
+        char c;
+        if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
+            throw BadConversion("fromString("+s+")");
     }
     
     //inline bool space (char c)

@@ -31,18 +31,21 @@ namespace mapnik
 {
     struct MAPNIK_DECL polygon_symbolizer
     {
-	polygon_symbolizer(Color const& fill)
-	    : fill_(fill) {}
-	Color const& get_fill() const
-	{
-	    return fill_;
-	}
-	void set_fill(Color const& fill)
-	{
-	    fill_ = fill;
-	}
+        explicit polygon_symbolizer() 
+            : fill_(Color(128,128,128) {}
+
+        polygon_symbolizer(Color const& fill)
+            : fill_(fill) {}
+        Color const& get_fill() const
+        {
+            return fill_;
+        }
+        void set_fill(Color const& fill)
+        {
+            fill_ = fill;
+        }
     private:
-	Color fill_;
+        Color fill_;
     };  
 }
 
