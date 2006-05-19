@@ -35,35 +35,35 @@ namespace mapnik
 {
     using namespace std;
     Layer::Layer()
-	: params_(),
-	  name_("uknown"),
-	  minZoom_(0),
-	  maxZoom_(std::numeric_limits<double>::max()),
-	  active_(true),
-	  selectable_(false),
-	  selection_style_("default_selection")
+        : params_(),
+          name_("unknown"),
+          minZoom_(0),
+          maxZoom_(std::numeric_limits<double>::max()),
+          active_(true),
+          selectable_(false),
+          selection_style_("default_selection")
     {}
 
     Layer::Layer(const parameters& params)
         :params_(params),
-	 name_(params_["name"]),
-	 minZoom_(0),
-	 maxZoom_(std::numeric_limits<double>::max()),
-	 active_(true),
-	 selectable_(false),
-	 selection_style_("default_selection")
+         name_(params_["name"]),
+         minZoom_(0),
+         maxZoom_(std::numeric_limits<double>::max()),
+         active_(true),
+         selectable_(false),
+         selection_style_("default_selection")
     {}
     
     Layer::Layer(const Layer& rhs)
         :params_(rhs.params_),
-	 name_(rhs.name_),
-	 minZoom_(rhs.minZoom_),
-	 maxZoom_(rhs.maxZoom_),
-	 active_(rhs.active_),
-	 selectable_(rhs.selectable_),
-	 ds_(rhs.ds_),
-	 styles_(rhs.styles_),
-	 selection_style_(rhs.selection_style_) {}
+         name_(rhs.name_),
+         minZoom_(rhs.minZoom_),
+         maxZoom_(rhs.maxZoom_),
+         active_(rhs.active_),
+         selectable_(rhs.selectable_),
+         ds_(rhs.ds_),
+         styles_(rhs.styles_),
+         selection_style_(rhs.selection_style_) {}
     
     Layer& Layer::operator=(const Layer& rhs)
     {
@@ -74,7 +74,7 @@ namespace mapnik
 
     bool Layer::operator==(Layer const& other) const
     {
-	return (this == &other);
+        return (this == &other);
     }
     
     void Layer::swap(const Layer& rhs)
@@ -85,11 +85,11 @@ namespace mapnik
         maxZoom_=rhs.maxZoom_;
         active_=rhs.active_;
         selectable_=rhs.selectable_;
+        //ds_=rhs.ds_;
         styles_=rhs.styles_;
-	ds_=rhs.ds_;
-	selection_style_=rhs.selection_style_;
+        selection_style_=rhs.selection_style_;
     }
-    
+
     Layer::~Layer() {}
 
     parameters const& Layer::params() const
@@ -97,7 +97,12 @@ namespace mapnik
         return params_;
     }
     
-    const string& Layer::name() const
+    void Layer::set_name( std::string const& name)
+    {
+        name_ = name;
+    }
+ 
+    string const& Layer::name() const
     {
         return name_;
     }
@@ -159,57 +164,57 @@ namespace mapnik
 
     const datasource_p& Layer::datasource() const
     {
-	if (!ds_)
-	{
-	    try
-	    {
-		ds_=datasource_cache::instance()->create(params_);
-	    }
-	    catch (...)
-	    {
-		std::clog << "exception caught : can not create datasource" << std::endl;  
-	    }
-	}
-	return ds_;
+        if (!ds_)
+        {
+            try
+            {
+                ds_=datasource_cache::instance()->create(params_);
+            }
+            catch (...)
+            {
+                std::clog << "exception caught : can not create datasource" << std::endl;  
+            }
+        }
+        return ds_;
     }
     // TODO: !!!!
     void Layer::set_datasource(datasource_p const& ds)
     {
-	ds_ = ds;
+        ds_ = ds;
     }
     
     Envelope<double> Layer::envelope() const
     {
-	datasource_p const& ds = datasource();
-	if (ds)
-	{
-	    return ds->envelope();
-	}
+        datasource_p const& ds = datasource();
+        if (ds)
+        {
+            return ds->envelope();
+        }
     	return Envelope<double>();
     }
 
     void Layer::selection_style(const std::string& name) 
     {
-	selection_style_=name;
+        selection_style_=name;
     }
     
     const std::string& Layer::selection_style() const 
     {
-	return selection_style_;
+        return selection_style_;
     }
 
     void Layer::add_to_selection(shared_ptr<Feature>& feature) const
     {
-	selection_.push_back(feature);
+        selection_.push_back(feature);
     }
  
     vector<shared_ptr<Feature> >& Layer::selection() const
     {
-	return selection_;
+        return selection_;
     }
 
     void Layer::clear_selection() const 
     {
-	selection_.clear();
+        selection_.clear();
     }
 }
