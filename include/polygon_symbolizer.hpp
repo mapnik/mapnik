@@ -32,10 +32,11 @@ namespace mapnik
     struct MAPNIK_DECL polygon_symbolizer
     {
         explicit polygon_symbolizer() 
-            : fill_(Color(128,128,128) {}
+            : fill_(Color(128,128,128)) {}
 
         polygon_symbolizer(Color const& fill)
             : fill_(fill) {}
+        
         Color const& get_fill() const
         {
             return fill_;
