@@ -100,7 +100,7 @@ class WMSFactory(BaseWMSFactory):
 		...
 		self.register_style('stylename', sty)
 		
-		lyr = Layer(name='layername', title='Highways', description='Highways')
+		lyr = Layer(name='layername', title='Highways', abstract='Highways')
 		...
 		lyr.styles.append('stylename')
 		self.register_layer(lyr)
