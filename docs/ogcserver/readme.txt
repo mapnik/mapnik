@@ -100,7 +100,7 @@ class WMSFactory(BaseWMSFactory):
 		...
 		self.register_style('stylename', sty)
 		
-		lyr = Layer(name='layername')
+		lyr = Layer(name='layername', title='Highways', description='Highways')
 		...
 		lyr.styles.append('stylename')
 		self.register_layer(lyr)
@@ -114,6 +114,8 @@ The rules for writing this class are:
 - Layers MUST be named with the 'name' parameter to the constructor.
 - style and layer names are meant for machine readability, not human.  Keep
   them short and simple, without spaces or special characters.
+- For human readable info, pass title='' and abstract='' parameters to the
+  Layer() call.
 - The layers must have at least one style associated with them (a default).
 - No Map() object is used or needed here.
 - Be sure to call self.finalize() once you've registered everything! This will
@@ -127,7 +129,6 @@ To Do
 
 - Named style support.
 - Improve configuration to allow for full server metadata.
-- Add support for richer layer metadata.
 - Investigate moving to cElementTree from lxml.
 - Add some internal "caching" for performance improvements.
 - Support GetFeatureInfo (Requires core changes).

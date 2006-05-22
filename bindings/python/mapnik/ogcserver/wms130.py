@@ -150,8 +150,6 @@ class ServiceHandler(WMSBaseServiceHandler):
         for layer in self.mapfactory.layers.values():
             layername = ElementTree.Element('Name')
             layername.text = layer.name()
-            layertitle = ElementTree.Element('Title')
-            layertitle.text = layer.name()
             env = layer.envelope()
             layerexgbb = ElementTree.Element('EX_GeographicBoundingBox')
             ll = self.crs.Inverse(env.minx, env.miny)
@@ -176,7 +174,14 @@ class ServiceHandler(WMSBaseServiceHandler):
             layerbbox.set('maxy', str(env.maxy))
             layere = ElementTree.Element('Layer')
             layere.append(layername)
-            layere.append(layertitle)
+            if layer.title():
+                layertitle = ElementTree.Element('Title')
+                layertitle.text = layer.title()
+                layere.append(layertitle)
+            if layer.abstract():
+                layerabstract = ElementTree.Element('Abstract')
+                layerabstract.text = layer.abstract()
+                layere.append(layerabstract)
             layere.append(layerexgbb)
             layere.append(layerbbox)
             if len(layer.wmsextrastyles) > 0:
