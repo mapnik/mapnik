@@ -81,9 +81,6 @@ class BaseServiceHandler:
 
     def processParameters(self, requestname, params):
         finalparams = {}
-        for paramname in params.keys():
-            if paramname not in self.SERVICE_PARAMS[requestname].keys():
-                raise OGCException('Unknown request parameter "%s".' % paramname)
         for paramname, paramdef in self.SERVICE_PARAMS[requestname].items():
             if paramname not in params.keys() and paramdef.mandatory:
                 raise OGCException('Mandatory parameter "%s" missing from request.' % paramname)

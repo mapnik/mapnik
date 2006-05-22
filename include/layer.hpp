@@ -39,6 +39,8 @@ namespace mapnik
         void serialize(Archive & ar, const unsigned int /*version*/)
         {
             ar  & boost::serialization::make_nvp("name",name_)
+            	& boost::serialization::make_nvp("title",title_)
+            	& boost::serialization::make_nvp("abstract",abstract_)
                 & boost::serialization::make_nvp("params",params_)
                 & boost::serialization::make_nvp("min_zoom",minZoom_)
                 & boost::serialization::make_nvp("max_zoom",maxZoom_)
@@ -49,6 +51,8 @@ namespace mapnik
         }
         parameters params_;
         std::string name_;
+        std::string title_;
+        std::string abstract_;
         double minZoom_;
         double maxZoom_;
         bool active_;
@@ -69,6 +73,10 @@ namespace mapnik
         parameters const& params() const;
         void set_name(std::string const& name);
         const std::string& name() const;
+        void set_title(std::string const& title);
+        const std::string& title() const;
+        void set_abstract(std::string const& abstract);
+        const std::string& abstract() const;
         void add_style(std::string const& stylename);
         std::vector<std::string> const& styles() const;
         void selection_style(const std::string& name);

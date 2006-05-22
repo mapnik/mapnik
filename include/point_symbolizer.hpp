@@ -31,6 +31,7 @@ namespace mapnik
 {   
     struct MAPNIK_DECL point_symbolizer
     {	
+        explicit point_symbolizer();
         point_symbolizer(std::string const& file,
                          std::string const& type,
                          unsigned width,unsigned height);
