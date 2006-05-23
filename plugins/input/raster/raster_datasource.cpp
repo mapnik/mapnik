@@ -35,22 +35,23 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
 raster_datasource::raster_datasource(const parameters& params)
-    : desc_(params.get("name"))
+    : datasource (params),
+      desc_(params.get("name"))
 {
     filename_=params.get("file");
     format_=params.get("format");
     
     try 
     {
-	double lox=lexical_cast<double>(params.get("lox"));
-	double loy=lexical_cast<double>(params.get("loy"));
-	double hix=lexical_cast<double>(params.get("hix"));
-	double hiy=lexical_cast<double>(params.get("hiy"));
-	extent_.init(lox,loy,hix,hiy);
+        double lox=lexical_cast<double>(params.get("lox"));
+        double loy=lexical_cast<double>(params.get("loy"));
+        double hix=lexical_cast<double>(params.get("hix"));
+        double hiy=lexical_cast<double>(params.get("hiy"));
+        extent_.init(lox,loy,hix,hiy);
     }
     catch (bad_lexical_cast& ex)
     {
-	clog << ex.what() << endl;
+        clog << ex.what() << endl;
     }  
 }
 

@@ -30,23 +30,23 @@
 namespace mapnik
 {
     Map::Map()
-	: width_(400),
-	  height_(400),
-	  srid_(-1) {}
+        : width_(400),
+          height_(400),
+          srid_(-1) {}
     Map::Map(int width,int height,int srid)
         : width_(width),
-	  height_(height),
-	  srid_(srid),
-	  background_(Color(255,255,255)) {}
+          height_(height),
+          srid_(srid),
+          background_(Color(255,255,255)) {}
 
     Map::Map(const Map& rhs)
         : width_(rhs.width_),
-	  height_(rhs.height_),
-	  srid_(rhs.srid_),
-	  background_(rhs.background_),
-	  styles_(rhs.styles_),
-	  layers_(rhs.layers_),
-	  currentExtent_(rhs.currentExtent_) {}
+          height_(rhs.height_),
+          srid_(rhs.srid_),
+          background_(rhs.background_),
+          styles_(rhs.styles_),
+          layers_(rhs.layers_),
+          currentExtent_(rhs.currentExtent_) {}
     
     Map& Map::operator=(const Map& rhs)
     {
@@ -55,28 +55,28 @@ namespace mapnik
         height_=rhs.height_;
         srid_=rhs.srid_;
         background_=rhs.background_;
-	styles_=rhs.styles_;
+        styles_=rhs.styles_;
         layers_=rhs.layers_;
         return *this;
     }
 
     bool Map::insert_style(std::string const& name,feature_type_style const& style) 
     {
-	return styles_.insert(make_pair(name,style)).second;
+        return styles_.insert(make_pair(name,style)).second;
     }
     
     void Map::remove_style(std::string const& name) 
     {
-	styles_.erase(name);
+        styles_.erase(name);
     }
     
     feature_type_style const&  Map::find_style(std::string const& name) const
     {
-	std::map<std::string,feature_type_style>::const_iterator itr=styles_.find(name);
-	if (itr!=styles_.end()) 
-	    return itr->second;
-	static feature_type_style default_style;
-	return default_style;
+        std::map<std::string,feature_type_style>::const_iterator itr=styles_.find(name);
+        if (itr!=styles_.end()) 
+            return itr->second;
+        static feature_type_style default_style;
+        return default_style;
     }
     
     size_t Map::layerCount() const
@@ -106,7 +106,7 @@ namespace mapnik
 
     std::vector<Layer> const& Map::layers() const
     {
-	return layers_;
+        return layers_;
     }
     
     unsigned Map::getWidth() const
@@ -121,30 +121,30 @@ namespace mapnik
     
     void Map::setWidth(unsigned width)
     {
-	if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE)
-	{
-	    width_=width;
-	    fixAspectRatio();
-	}	
+        if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE)
+        {
+            width_=width;
+            fixAspectRatio();
+        }	
     }
 
     void Map::setHeight(unsigned height)
     {
-	if (height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
-	{
-	    height_=height;
-	    fixAspectRatio();
-	}
+        if (height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
+        {
+            height_=height;
+            fixAspectRatio();
+        }
     }
     void Map::resize(unsigned width,unsigned height)
     {
-	if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE &&
-	    height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
-	{
-	    width_=width;
-	    height_=height;
-	    fixAspectRatio();
-	}
+        if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE &&
+            height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
+        {
+            width_=width;
+            height_=height;
+            fixAspectRatio();
+        }
     }
 
     int Map::srid() const
@@ -168,8 +168,29 @@ namespace mapnik
         double w = factor * currentExtent_.width();
         double h = factor * currentExtent_.height();
         currentExtent_ = Envelope<double>(center.x - 0.5 * w, center.y - 0.5 * h,
-            center.x + 0.5 * w, center.y + 0.5 * h);
-	fixAspectRatio();
+                                          center.x + 0.5 * w, center.y + 0.5 * h);
+        fixAspectRatio();
+    }
+    
+    void Map::zoom_all() 
+    {
+        std::vector<Layer>::const_iterator itr = layers_.begin();
+        Envelope<double> ext;
+        bool first = true;
+        while (itr != layers_.end())
+        {
+            if (first)
+            {
+                ext = itr->envelope();
+                first = false;
+            }
+            else 
+            {
+                ext.expand_to_include(itr->envelope());
+            }
+            ++itr;
+        }
+        zoomToBox(ext);
     }
 
     void Map::zoomToBox(const Envelope<double> &box)
@@ -183,14 +204,14 @@ namespace mapnik
         double ratio1 = (double) width_ / (double) height_;
         double ratio2 = currentExtent_.width() / currentExtent_.height();
          
-	if (ratio2 > ratio1)
-	{
-	    currentExtent_.height(currentExtent_.width() / ratio1);
-	}
-	else if (ratio2 < ratio1)
-	{
-	    currentExtent_.width(currentExtent_.height() * ratio1);
-	}       
+        if (ratio2 > ratio1)
+        {
+            currentExtent_.height(currentExtent_.width() / ratio1);
+        }
+        else if (ratio2 < ratio1)
+        {
+            currentExtent_.width(currentExtent_.height() * ratio1);
+        }       
     }
 
     const Envelope<double>& Map::getCurrentExtent() const
@@ -201,13 +222,13 @@ namespace mapnik
     void Map::pan(int x,int y)
     {
         int dx = x - int(0.5 * width_);
-	int dy = int(0.5 * height_) - y;
-	double s = width_/currentExtent_.width();
-	double minx  = currentExtent_.minx() + dx/s;
-	double maxx  = currentExtent_.maxx() + dx/s;
-	double miny  = currentExtent_.miny() + dy/s;
-	double maxy  = currentExtent_.maxy() + dy/s;
-	currentExtent_.init(minx,miny,maxx,maxy);
+        int dy = int(0.5 * height_) - y;
+        double s = width_/currentExtent_.width();
+        double minx  = currentExtent_.minx() + dx/s;
+        double maxx  = currentExtent_.maxx() + dx/s;
+        double miny  = currentExtent_.miny() + dy/s;
+        double maxy  = currentExtent_.maxy() + dy/s;
+        currentExtent_.init(minx,miny,maxx,maxy);
     }
 
     void Map::pan_and_zoom(int x,int y,double factor)

@@ -37,8 +37,11 @@ namespace mapnik
                          unsigned width,unsigned height);
         point_symbolizer(point_symbolizer const& rhs);
         ImageData32 const& get_data() const;
+        void set_allow_overlap(bool overlap);
+        bool get_allow_overlap() const;
     private:
         boost::shared_ptr<ImageData32> symbol_;
+        bool overlap_;
     };
 }
 

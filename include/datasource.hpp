@@ -50,28 +50,38 @@ namespace mapnik
     private:
         const std::string message_;
     public:
-	datasource_exception(const std::string& message=std::string())
-	    :message_(message) {}
+        datasource_exception(const std::string& message=std::string())
+            :message_(message) {}
 
-	~datasource_exception() throw() {}
-	virtual const char* what() const throw()
-	{
-	    return message_.c_str();
-	}
+        ~datasource_exception() throw() {}
+        virtual const char* what() const throw()
+        {
+            return message_.c_str();
+        }
     };
     
-    class MAPNIK_DECL datasource
+    class MAPNIK_DECL datasource : private boost::noncopyable
     {
-    public:
-	enum {
-	    Vector,
-	    Raster
-	};
-	virtual int type() const=0;
-	virtual featureset_ptr features(const query& q) const=0;
-	virtual Envelope<double> const& envelope() const=0;
-	virtual layer_descriptor const& get_descriptor() const=0;
-	virtual ~datasource() {};
+        parameters params_;
+    public:        
+        enum {
+            Vector,
+            Raster
+        };
+        
+        datasource (parameters const& params)
+            : params_(params) {}
+
+        parameters const& params() const
+        {
+            return params_;
+        }
+        
+        virtual int type() const=0;
+        virtual featureset_ptr features(const query& q) const=0;
+        virtual Envelope<double> const& envelope() const=0;
+        virtual layer_descriptor const& get_descriptor() const=0;
+        virtual ~datasource() {};
     };
     
     typedef std::string datasource_name();
@@ -82,28 +92,28 @@ namespace mapnik
     class datasource_deleter
     {
     public:
-	void operator() (datasource* ds)
-	{
-	    delete ds;
-	}
+        void operator() (datasource* ds)
+        {
+            delete ds;
+        }
     };
 
     typedef boost::shared_ptr<datasource> datasource_p;
     
     ///////////////////////////////////////////
-    #define DATASOURCE_PLUGIN(classname) \
-        extern "C" MAPNIK_DECL std::string datasource_name() \
-        { \
-        return classname::name();\
-        }\
-        extern "C"  MAPNIK_DECL datasource* create(const parameters &params)	\
-        { \
-	    return new classname(params);	\
-        }\
-        extern "C" MAPNIK_DECL void destroy(datasource *ds) \
-        { \
-        delete ds;\
-        }\
+#define DATASOURCE_PLUGIN(classname)                                    \
+    extern "C" MAPNIK_DECL std::string datasource_name()                \
+    {                                                                   \
+        return classname::name();                                       \
+    }                                                                   \
+        extern "C"  MAPNIK_DECL datasource* create(const parameters &params) \
+        {                                                               \
+            return new classname(params);                               \
+        }                                                               \
+        extern "C" MAPNIK_DECL void destroy(datasource *ds)             \
+        {                                                               \
+            delete ds;                                                  \
+        }                                                               \
         ///////////////////////////////////////////
 }
 #endif                                            //DATASOURCE_HPP

@@ -31,15 +31,15 @@ using namespace mapnik;
 
 class MAPNIK_DECL shape_datasource : public datasource
 {
-
 public:
+    shape_datasource(const parameters &params);
+    virtual ~shape_datasource();
+ 
     int type() const;
     static std::string name();
     featureset_ptr features(const query& q) const;
     const Envelope<double>& envelope() const;
-    shape_datasource(const parameters &params);
-    layer_descriptor const& get_descriptor() const;
-    virtual ~shape_datasource();
+    layer_descriptor const& get_descriptor() const;   
 private:
     shape_datasource(const shape_datasource&);
     shape_datasource& operator=(const shape_datasource&);
@@ -52,7 +52,6 @@ private:
     bool indexed_;
     layer_descriptor desc_;
     static std::string name_;
-    
 };
 
-#endif                                            //SHAPE_HH
+#endif //SHAPE_HH

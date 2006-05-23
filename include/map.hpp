@@ -78,6 +78,7 @@ namespace mapnik
         const Color& getBackground() const;
         void zoom(double zoom);
         void zoomToBox(const Envelope<double>& box);
+        void zoom_all();
         void pan(int x,int y);
         void pan_and_zoom(int x,int y,double zoom);
         const Envelope<double>& getCurrentExtent() const;

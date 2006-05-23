@@ -30,7 +30,8 @@
 namespace mapnik
 {
     point_symbolizer::point_symbolizer()
-        : symbol_(new ImageData32(4,4))
+        : symbol_(new ImageData32(4,4)),
+          overlap_(false)
     {
         //default point symbol is black 4x4px square
         symbol_->set(0xff000000);
@@ -56,12 +57,23 @@ namespace mapnik
     }
     
     point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
-        : symbol_(rhs.symbol_) 
+        : symbol_(rhs.symbol_),
+          overlap_(rhs.overlap_)
     {}
     
     ImageData32 const& point_symbolizer::get_data() const
     {
         return *(symbol_.get());
+    }
+    
+    void point_symbolizer::set_allow_overlap(bool overlap)
+    {
+        overlap_ = overlap;
+    }
+    
+    bool point_symbolizer::get_allow_overlap() const
+    {
+        return overlap_;
     }
 }
 

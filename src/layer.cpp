@@ -37,8 +37,6 @@ namespace mapnik
     Layer::Layer()
         : params_(),
           name_("unknown"),
-          title_(""),
-          abstract_(""),
           minZoom_(0),
           maxZoom_(std::numeric_limits<double>::max()),
           active_(true),
@@ -49,8 +47,6 @@ namespace mapnik
     Layer::Layer(const parameters& params)
         :params_(params),
          name_(params_["name"]),
-         title_(params_["title"]),
-         abstract_(params_["abstract"]),
          minZoom_(0),
          maxZoom_(std::numeric_limits<double>::max()),
          active_(true),
@@ -59,17 +55,15 @@ namespace mapnik
     {}
     
     Layer::Layer(const Layer& rhs)
-        :params_(rhs.params_),
-         name_(rhs.name_),
-         title_(rhs.title_),
-         abstract_(rhs.abstract_),
-         minZoom_(rhs.minZoom_),
-         maxZoom_(rhs.maxZoom_),
-         active_(rhs.active_),
-         selectable_(rhs.selectable_),
-         ds_(rhs.ds_),
-         styles_(rhs.styles_),
-         selection_style_(rhs.selection_style_) {}
+        : params_(rhs.params_),
+          name_(rhs.name_),
+          minZoom_(rhs.minZoom_),
+          maxZoom_(rhs.maxZoom_),
+          active_(rhs.active_),
+          selectable_(rhs.selectable_),
+          styles_(rhs.styles_),
+          selection_style_(rhs.selection_style_), 
+          ds_(rhs.ds_)  {}
     
     Layer& Layer::operator=(const Layer& rhs)
     {
@@ -87,13 +81,11 @@ namespace mapnik
     {
         params_=rhs.params_;
         name_=rhs.name_;
-        title_=rhs.title_;
-        abstract_=rhs.abstract_;
         minZoom_=rhs.minZoom_;
         maxZoom_=rhs.maxZoom_;
         active_=rhs.active_;
         selectable_=rhs.selectable_;
-        //ds_=rhs.ds_;
+        ds_=rhs.ds_;
         styles_=rhs.styles_;
         selection_style_=rhs.selection_style_;
     }
@@ -113,26 +105,6 @@ namespace mapnik
     string const& Layer::name() const
     {
         return name_;
-    }
-
-    void Layer::set_title( std::string const& title)
-    {
-        title_ = title;
-    }
- 
-    string const& Layer::title() const
-    {
-        return title_;
-    }
-
-    void Layer::set_abstract( std::string const& abstract)
-    {
-        abstract_ = abstract;
-    }
- 
-    string const& Layer::abstract() const
-    {
-        return abstract_;
     }
 
     void Layer::add_style(std::string const& stylename)
