@@ -41,148 +41,148 @@ namespace mapnik
     template <typename Processor>
     class feature_style_processor 
     {
-	struct symbol_dispatch : public boost::static_visitor<>
-	{
-	    symbol_dispatch (Processor & output,Feature const& f)
-		: output_(output),f_(f) {}
+        struct symbol_dispatch : public boost::static_visitor<>
+        {
+            symbol_dispatch (Processor & output,Feature const& f)
+                : output_(output),f_(f) {}
 	    
-	    template <typename T>
-	    void operator () (T const& sym) const
-	    {
-		output_.process(sym,f_);
-	    }
+            template <typename T>
+            void operator () (T const& sym) const
+            {
+                output_.process(sym,f_);
+            }
 
-	    Processor & output_;
-	    Feature const& f_;
-	};
+            Processor & output_;
+            Feature const& f_;
+        };
     public:
-	feature_style_processor(Map const& m)
-	    : m_(m) {}
+        feature_style_processor(Map const& m)
+            : m_(m) {}
 	
-	void apply()
-	{
-	    timer clock;
-	    Processor & p = static_cast<Processor&>(*this);
+        void apply()
+        {
+            timer clock;
+            Processor & p = static_cast<Processor&>(*this);
 
-	    p.start_map_processing(m_);
+            p.start_map_processing(m_);
 	    
-	    std::vector<Layer>::const_iterator itr = m_.layers().begin();
-	    while (itr != m_.layers().end())
-	    {
-		if (itr->isVisible(m_.scale()) && 
-		    itr->envelope().intersects(m_.getCurrentExtent()))
-		{
-		    apply_to_layer(*itr,p);
-		}
-		++itr;
-	    }
+            std::vector<Layer>::const_iterator itr = m_.layers().begin();
+            while (itr != m_.layers().end())
+            {
+                if (itr->isVisible(m_.scale()) && 
+                    itr->envelope().intersects(m_.getCurrentExtent()))
+                {
+                    apply_to_layer(*itr,p);
+                }
+                ++itr;
+            }
 	    
-	    p.end_map_processing(m_);
+            p.end_map_processing(m_);
 	    
-	    clock.stop();
+            clock.stop();
 	    
-	}	
+        }	
     private:
-	void apply_to_layer(Layer const& lay,Processor & p)
-	{
-	    p.start_layer_processing(lay);
-	    datasource *ds=lay.datasource().get();
-	    if (ds)
-	    {
-		Envelope<double> const& bbox=m_.getCurrentExtent();
-		double scale = m_.scale();
+        void apply_to_layer(Layer const& lay,Processor & p)
+        {
+            p.start_layer_processing(lay);
+            datasource *ds=lay.datasource().get();
+            if (ds)
+            {
+                Envelope<double> const& bbox=m_.getCurrentExtent();
+                double scale = m_.scale();
 	
-		std::vector<std::string> const& style_names = lay.styles();
-		std::vector<std::string>::const_iterator stylesIter = style_names.begin();
-		while (stylesIter != style_names.end())
-		{
-		    std::set<std::string> names;
-		    attribute_collector<Feature> collector(names);
-		    std::vector<rule_type*> if_rules;
-		    std::vector<rule_type*> else_rules;
+                std::vector<std::string> const& style_names = lay.styles();
+                std::vector<std::string>::const_iterator stylesIter = style_names.begin();
+                while (stylesIter != style_names.end())
+                {
+                    std::set<std::string> names;
+                    attribute_collector<Feature> collector(names);
+                    std::vector<rule_type*> if_rules;
+                    std::vector<rule_type*> else_rules;
 		
-		    bool active_rules=false;
+                    bool active_rules=false;
 		    
-		    feature_type_style const& style=m_.find_style(*stylesIter++);
+                    feature_type_style const& style=m_.find_style(*stylesIter++);
 		    
-		    const std::vector<rule_type>& rules=style.get_rules();
-		    std::vector<rule_type>::const_iterator ruleIter=rules.begin();
+                    const std::vector<rule_type>& rules=style.get_rules();
+                    std::vector<rule_type>::const_iterator ruleIter=rules.begin();
 		    
-		    query q(bbox,m_.getWidth(),m_.getHeight());
-		    while (ruleIter!=rules.end())
-		    {
-			if (ruleIter->active(scale))
-			{
-			    active_rules=true;
-			    ruleIter->accept(collector);
+                    query q(bbox,m_.getWidth(),m_.getHeight());
+                    while (ruleIter!=rules.end())
+                    {
+                        if (ruleIter->active(scale))
+                        {
+                            active_rules=true;
+                            ruleIter->accept(collector);
 
-			    if (ruleIter->has_else_filter())
-			    {
-				else_rules.push_back(const_cast<rule_type*>(&(*ruleIter)));
-			    }
-			    else
-			    {
-				if_rules.push_back(const_cast<rule_type*>(&(*ruleIter))); 		    
-			    }
-			}
-			++ruleIter;
-		    }
-		    std::set<std::string>::const_iterator namesIter=names.begin();
-		    // push all property names
-		    while (namesIter!=names.end())
-		    {
-			q.add_property_name(*namesIter);
-			++namesIter;
-		    }
-		    if (active_rules)
-		    {
-			featureset_ptr fs=ds->features(q);
-			if (fs)
-			{   	    
-			    feature_ptr feature;
-			    while ((feature = fs->next()))
-			    {		   
-				bool do_else=true;		    
-				std::vector<rule_type*>::const_iterator itr=if_rules.begin();
-				while (itr!=if_rules.end())
-				{
-				    filter_ptr const& filter=(*itr)->get_filter();    
-				    if (filter->pass(*feature))
-				    {   
-					do_else=false;
-					const symbolizers& symbols = (*itr)->get_symbolizers();
-					symbolizers::const_iterator symIter=symbols.begin();
-					while (symIter!=symbols.end())
-					{   
-					    boost::apply_visitor(symbol_dispatch(p,*feature),*symIter++);
-					}
-				    }			    
-				    ++itr;
-				}
-				if (do_else)
-				{
-				    //else filter
-				    std::vector<rule_type*>::const_iterator itr=else_rules.begin();
-				    while (itr != else_rules.end())
-				    {
-					const symbolizers& symbols = (*itr)->get_symbolizers();
-					symbolizers::const_iterator symIter=symbols.begin();
-					while (symIter!=symbols.end())
-					{
-					    boost::apply_visitor(symbol_dispatch(p,*feature),*symIter++);
-					}
-					++itr;
-				    }
-				}	  
-			    }
-			}
-		    }
-		}
-	    }
-	    p.end_layer_processing(lay);
-	}
+                            if (ruleIter->has_else_filter())
+                            {
+                                else_rules.push_back(const_cast<rule_type*>(&(*ruleIter)));
+                            }
+                            else
+                            {
+                                if_rules.push_back(const_cast<rule_type*>(&(*ruleIter))); 		    
+                            }
+                        }
+                        ++ruleIter;
+                    }
+                    std::set<std::string>::const_iterator namesIter=names.begin();
+                    // push all property names
+                    while (namesIter!=names.end())
+                    {
+                        q.add_property_name(*namesIter);
+                        ++namesIter;
+                    }
+                    if (active_rules)
+                    {
+                        featureset_ptr fs=ds->features(q);
+                        if (fs)
+                        {   	    
+                            feature_ptr feature;
+                            while ((feature = fs->next()))
+                            {		   
+                                bool do_else=true;		    
+                                std::vector<rule_type*>::const_iterator itr=if_rules.begin();
+                                while (itr!=if_rules.end())
+                                {
+                                    filter_ptr const& filter=(*itr)->get_filter();    
+                                    if (filter->pass(*feature))
+                                    {   
+                                        do_else=false;
+                                        const symbolizers& symbols = (*itr)->get_symbolizers();
+                                        symbolizers::const_iterator symIter=symbols.begin();
+                                        while (symIter!=symbols.end())
+                                        {   
+                                            boost::apply_visitor(symbol_dispatch(p,*feature),*symIter++);
+                                        }
+                                    }			    
+                                    ++itr;
+                                }
+                                if (do_else)
+                                {
+                                    //else filter
+                                    std::vector<rule_type*>::const_iterator itr=else_rules.begin();
+                                    while (itr != else_rules.end())
+                                    {
+                                        const symbolizers& symbols = (*itr)->get_symbolizers();
+                                        symbolizers::const_iterator symIter=symbols.begin();
+                                        while (symIter!=symbols.end())
+                                        {
+                                            boost::apply_visitor(symbol_dispatch(p,*feature),*symIter++);
+                                        }
+                                        ++itr;
+                                    }
+                                }	  
+                            }
+                        }
+                    }
+                }
+            }
+            p.end_layer_processing(lay);
+        }
 	
-	Map const& m_;
+        Map const& m_;
     };
 }
 
