@@ -36,31 +36,31 @@ namespace mapnik
     class feature_type_style
     {
     private:
-	rules  rules_;
+        rules  rules_;
     public:
-	feature_type_style() {}
+        feature_type_style() {}
 
-	feature_type_style(feature_type_style const& rhs)
-	    : rules_(rhs.rules_) {}
+        feature_type_style(feature_type_style const& rhs)
+            : rules_(rhs.rules_) {}
 	
-	feature_type_style& operator=(feature_type_style const& rhs)
-	{
-	    if (this == &rhs) return *this;
-	    rules_=rhs.rules_;
-	    return *this;
-	}
+        feature_type_style& operator=(feature_type_style const& rhs)
+        {
+            if (this == &rhs) return *this;
+            rules_=rhs.rules_;
+            return *this;
+        }
 	
-	void add_rule(rule_type const& rule)
-	{
-	    rules_.push_back(rule);
-	} 
+        void add_rule(rule_type const& rule)
+        {
+            rules_.push_back(rule);
+        } 
 	
-	rules const& get_rules() const
-	{
-	    return rules_;
-	}
+        rules const& get_rules() const
+        {
+            return rules_;
+        }
 	
-	~feature_type_style() {}
+        ~feature_type_style() {}
     };
 }
 

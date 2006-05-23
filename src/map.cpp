@@ -59,7 +59,15 @@ namespace mapnik
         layers_=rhs.layers_;
         return *this;
     }
-
+    Map::style_iterator  Map::begin_styles() const
+    {
+        return styles_.begin();
+    }
+    Map::style_iterator  Map::end_styles() const
+    {
+        return styles_.end();
+    }
+    
     bool Map::insert_style(std::string const& name,feature_type_style const& style) 
     {
         return styles_.insert(make_pair(name,style)).second;

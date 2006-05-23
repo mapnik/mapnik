@@ -55,10 +55,15 @@ namespace mapnik
         Envelope<double> currentExtent_;
         
     public:
+        
+        typedef  std::map<std::string,feature_type_style>::const_iterator style_iterator;
+        
         Map();
         Map(int width,int height,int srid=-1);
         Map(const Map& rhs);
-        Map& operator=(const Map& rhs);        
+        Map& operator=(const Map& rhs);
+        style_iterator begin_styles() const;
+        style_iterator end_styles() const;
         bool insert_style(std::string const& name,feature_type_style const& style);
         void remove_style(const std::string& name);
         feature_type_style const& find_style(std::string const& name) const;
