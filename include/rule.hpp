@@ -154,22 +154,23 @@ namespace mapnik
         {
             max_scale_=scale;
         }
+        
+        double get_max_scale() const
+        {
+            return max_scale_;
+        }
+        
+        void set_min_scale(double scale)
+        {
+            min_scale_=scale;
+        }
 
         double get_min_scale() const
         {
             return min_scale_;
         }
 
-        double get_max_scale() const
-        {
-            return max_scale_;
-        }
-
-        void set_min_scale(double scale)
-        {
-            min_scale_=scale;
-        }
-
+       
         void set_name(std::string const& name)
         {
             name_=name;
