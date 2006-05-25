@@ -30,7 +30,7 @@
 
 namespace mapnik
 {
-    class geometry_utils 
+    class MAPNIK_DECL geometry_utils 
     {
     public:
 	static geometry_ptr from_wkb(const char* wkb, unsigned size,int srid);
