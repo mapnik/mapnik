@@ -275,22 +275,25 @@ namespace mapnik
         {
             double x;
             double y;
-            ImageData32 const& data = sym.get_data();
-            geom->label_position(&x,&y);
-            t_.forward_x(&x);
-            t_.forward_y(&y);
-            int w = data.width();
-            int h = data.height();
-            int px=int(floor(x - 0.5 * w));
-            int py=int(floor(y - 0.5 * h));
-            
-            if (sym.get_allow_overlap() || 
-                detector_.has_placement(Envelope<double>(floor(x - 0.5 * w),
-                                                         floor(y - 0.5 * h),
-                                                         ceil (x + 0.5 * w),
-                                                         ceil (y + 0.5 * h))))
-            {    
-                pixmap_.set_rectangle_alpha(px,py,data);
+            boost::shared_ptr<ImageData32> const& data = sym.get_data();
+            if ( data )
+            {
+                geom->label_position(&x,&y);
+                t_.forward_x(&x);
+                t_.forward_y(&y);
+                int w = data->width();
+                int h = data->height();
+                int px=int(floor(x - 0.5 * w));
+                int py=int(floor(y - 0.5 * h));
+                
+                if (sym.get_allow_overlap() || 
+                    detector_.has_placement(Envelope<double>(floor(x - 0.5 * w),
+                                                             floor(y - 0.5 * h),
+                                                             ceil (x + 0.5 * w),
+                                                             ceil (y + 0.5 * h))))
+                {    
+                    pixmap_.set_rectangle_alpha(px,py,*data);
+                }
             }
         }
     }

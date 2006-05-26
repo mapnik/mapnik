@@ -61,9 +61,14 @@ namespace mapnik
           overlap_(rhs.overlap_)
     {}
     
-    ImageData32 const& point_symbolizer::get_data() const
+    void point_symbolizer::set_data( boost::shared_ptr<ImageData32> symbol)
     {
-        return *(symbol_.get());
+        symbol_ = symbol;
+    }
+
+    boost::shared_ptr<ImageData32> const& point_symbolizer::get_data() const
+    {
+        return symbol_;
     }
     
     void point_symbolizer::set_allow_overlap(bool overlap)

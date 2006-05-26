@@ -25,12 +25,13 @@
 #ifndef DATASOURCE_CACHE_HPP
 #define DATASOURCE_CACHE_HPP
 
+#include <map>
+#include <boost/shared_ptr.hpp>
+
 #include "utils.hpp"
 #include "params.hpp"
 #include "plugin.hpp"
 #include "datasource.hpp"
-#include <boost/shared_ptr.hpp>
-#include <map>
 
 namespace mapnik
 {
@@ -38,16 +39,16 @@ namespace mapnik
     {
         friend class CreateStatic<datasource_cache>;
     private:
-	datasource_cache();
-	~datasource_cache();
-	datasource_cache(const datasource_cache&);
-	datasource_cache& operator=(const datasource_cache&);
-	static std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
-	static bool registered_;
-	static bool insert(const std::string&  name,const lt_dlhandle module);
+        datasource_cache();
+        ~datasource_cache();
+        datasource_cache(const datasource_cache&);
+        datasource_cache& operator=(const datasource_cache&);
+        static std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
+        static bool registered_;
+        static bool insert(const std::string&  name,const lt_dlhandle module);
     public:
-	static void register_datasources(const std::string& path);
-	static boost::shared_ptr<datasource> create(parameters const& params);
+        static void register_datasources(const std::string& path);
+        static boost::shared_ptr<datasource> create(parameters const& params);
     };
 }
 #endif   //DATASOURCE_CACHE_HPP
