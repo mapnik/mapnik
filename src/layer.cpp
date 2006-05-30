@@ -93,7 +93,7 @@ namespace mapnik
         maxZoom_=rhs.maxZoom_;
         active_=rhs.active_;
         selectable_=rhs.selectable_;
-        //ds_=rhs.ds_;
+        ds_=rhs.ds_;
         styles_=rhs.styles_;
         selection_style_=rhs.selection_style_;
     }
