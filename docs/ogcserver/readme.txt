@@ -94,7 +94,7 @@ from mapnik.ogcserver.WMS import BaseWMSFactory
 
 class WMSFactory(BaseWMSFactory):
 
-	def __init(self):
+	def __init__(self):
 		BaseWMSFactory.__init__(self)
 		sty = Style()
 		...
