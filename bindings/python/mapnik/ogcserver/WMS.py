@@ -37,7 +37,6 @@ def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
         return ServiceHandler111(conf, mapfactory, onlineresource)
 
 class BaseWMSFactory:
-
     def __init__(self):
         self.layers = {}
         self.styles = {}
