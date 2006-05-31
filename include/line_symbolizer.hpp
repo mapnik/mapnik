@@ -30,19 +30,22 @@ namespace mapnik
 {
     struct MAPNIK_DECL line_symbolizer
     {
-	line_symbolizer(stroke const& stroke)
-	    : stroke_(stroke) {}
+        explicit line_symbolizer()
+            : stroke_() {}
+        
+        line_symbolizer(stroke const& stroke)
+            : stroke_(stroke) {}
 	
-	line_symbolizer(const Color& pen,float width=1.0)
-	    : stroke_(pen,width) {}
-	stroke const& get_stroke() const
-	{
-	    return stroke_;
-	}
-	void set_stroke(stroke const& stroke)
-	{
-	    stroke_ = stroke;
-	}
+        line_symbolizer(const Color& pen,float width=1.0)
+            : stroke_(pen,width) {}
+        stroke const& get_stroke() const
+        {
+            return stroke_;
+        }
+        void set_stroke(stroke const& stroke)
+        {
+            stroke_ = stroke;
+        }
 
     private:
 		stroke stroke_;

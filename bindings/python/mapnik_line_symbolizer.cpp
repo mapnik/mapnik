@@ -32,10 +32,13 @@ void export_line_symbolizer()
 {
     using namespace boost::python;
     
-    class_<line_symbolizer>("LineSymbolizer",init<stroke const&>("TODO"))
-	.def(init<Color const& ,float>())
-	.add_property("stroke",make_function
-		      (&line_symbolizer::get_stroke,return_value_policy<reference_existing_object>()),
-		      &line_symbolizer::set_stroke)
+    class_<line_symbolizer>("LineSymbolizer",
+                            init<>("Default LineSymbolizer - 1px solid black"))
+        .def(init<stroke const&>("TODO"))
+        .def(init<Color const& ,float>())
+        .add_property("stroke",make_function
+                      (&line_symbolizer::get_stroke,
+                       return_value_policy<reference_existing_object>()),
+                      &line_symbolizer::set_stroke)
 	;    
 }

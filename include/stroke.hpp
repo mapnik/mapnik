@@ -57,7 +57,7 @@ namespace mapnik
         line_join_e line_join_;
         dash_array dash_;	
     public:
-        stroke() 
+        explicit stroke() 
             : c_(0,0,0),
               width_(1.0),
               opacity_(1.0),

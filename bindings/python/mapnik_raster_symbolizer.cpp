@@ -31,6 +31,6 @@ void export_raster_symbolizer()
     using namespace boost::python;
     
     class_<raster_symbolizer>("RasterSymbolizer",
-				    init<>("TODO"))
+				    init<>("Default ctor"))
 	;    
 }

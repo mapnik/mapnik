@@ -59,28 +59,28 @@ void export_rule()
     	;
     
     class_<rule_type>("Rule",init<>("default constructor"))
-	.def(init<std::string const&,
-	     boost::python::optional<std::string const&,double,double> >())
-	.add_property("name",make_function
-		      (&rule_type::get_name,
-		       return_value_policy<copy_const_reference>()),
-		      &rule_type::set_name)
-	.add_property("title",make_function
-		      (&rule_type::get_title,return_value_policy<copy_const_reference>()),
-		      &rule_type::set_title)
-	.add_property("abstract",make_function
-		      (&rule_type::get_abstract,return_value_policy<copy_const_reference>()),
-		      &rule_type::set_abstract)
-	.add_property("filter",make_function
-		      (&rule_type::get_filter,return_value_policy<copy_const_reference>()),
-		      &rule_type::set_filter)
-	.add_property("min_scale",&rule_type::get_min_scale,&rule_type::set_min_scale)
-	.add_property("max_scale",&rule_type::get_max_scale,&rule_type::set_max_scale)
-	.def("set_else",&rule_type::set_else)
-	.def("has_else",&rule_type::has_else_filter)
-	.def("active",&rule_type::active)
-	.add_property("symbols",make_function
-		      (&rule_type::get_symbolizers,return_value_policy<reference_existing_object>()))
-	;
+        .def(init<std::string const&,
+             boost::python::optional<std::string const&,double,double> >())
+        .add_property("name",make_function
+                      (&rule_type::get_name,
+                       return_value_policy<copy_const_reference>()),
+                      &rule_type::set_name)
+        .add_property("title",make_function
+                      (&rule_type::get_title,return_value_policy<copy_const_reference>()),
+                      &rule_type::set_title)
+        .add_property("abstract",make_function
+                      (&rule_type::get_abstract,return_value_policy<copy_const_reference>()),
+                      &rule_type::set_abstract)
+        .add_property("filter",make_function
+                      (&rule_type::get_filter,return_value_policy<copy_const_reference>()),
+                      &rule_type::set_filter)
+        .add_property("min_scale",&rule_type::get_min_scale,&rule_type::set_min_scale)
+        .add_property("max_scale",&rule_type::get_max_scale,&rule_type::set_max_scale)
+        .def("set_else",&rule_type::set_else)
+        .def("has_else",&rule_type::has_else_filter)
+        .def("active",&rule_type::active)
+        .add_property("symbols",make_function
+                      (&rule_type::get_symbolizers,return_value_policy<reference_existing_object>()))
+        ;
 }
 

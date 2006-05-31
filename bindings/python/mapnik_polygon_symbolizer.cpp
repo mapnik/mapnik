@@ -32,11 +32,15 @@ void export_polygon_symbolizer()
     using namespace boost::python;
     
     class_<polygon_symbolizer>("PolygonSymbolizer",
-				    init<Color const&>("TODO"))
-	.add_property("fill",make_function
-		      (&polygon_symbolizer::get_fill,
-		       return_value_policy<reference_existing_object>()),
-		      &polygon_symbolizer::set_fill)
-	;    
+				    init<>("Default PolygonSymbolizer - solid fill grey"))
+        .def(init<Color const&>("TODO"))
+        .add_property("fill",make_function
+                      (&polygon_symbolizer::get_fill,
+                       return_value_policy<reference_existing_object>()),
+                      &polygon_symbolizer::set_fill)
+        .add_property("fill_opacity",
+                      &polygon_symbolizer::get_opacity,
+                      &polygon_symbolizer::set_opacity)
+        ;    
 
 }

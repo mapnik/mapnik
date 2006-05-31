@@ -30,8 +30,10 @@ void export_point_symbolizer()
 {
     using namespace boost::python;
     
-    class_<point_symbolizer>("PointSymbolizer",init<std::string const&,
-			     std::string const&,unsigned,unsigned>("TODO"))
-	;
+    class_<point_symbolizer>("PointSymbolizer",
+                             init<>("Default Point Symbolizer - 4x4 black square"))
+        .def (init<std::string const&,
+              std::string const&,unsigned,unsigned>("TODO"))
+        ;
     
 }
