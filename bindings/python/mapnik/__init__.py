@@ -21,7 +21,12 @@
 #
 
 from sys import getdlopenflags,setdlopenflags
-from dl import RTLD_NOW,RTLD_GLOBAL
+try:
+  from dl import RTLD_NOW, RTLD_GLOBAL
+except ImportError:
+  RTLD_NOW = 2
+  RTLD_GLOBAL = 256
+
 flags = getdlopenflags()
 setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
 
