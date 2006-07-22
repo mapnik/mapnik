@@ -18,7 +18,7 @@ Features/Caveats
 
 - WMS 1.1.1 and 1.3.0
 - CGI/FastCGI
-- GetCapabilities and GetMap support only (NO GetFeatureInfo)
+- GetCapabilities and GetMap support only (NO GetFeatureInfo ... yet)
 - JPEG/PNG output
 - XML/INIMAGE/BLANK error handling
 - No real layer metadata support yet
@@ -128,7 +128,6 @@ To Do
 -----
 
 - Named style support.
-- Improve configuration to allow for full server metadata.
 - Investigate moving to cElementTree from lxml.
 - Add some internal "caching" for performance improvements.
 - Support GetFeatureInfo (Requires core changes).

@@ -54,7 +54,8 @@ class ServiceHandler(WMSBaseServiceHandler):
         ['accessconstraints', 'AccessConstraints', str],
         ['layerlimit', 'LayerLimit', int],
         ['maxwidth', 'MaxWidth', int],
-        ['maxheight', 'MaxHeight', int]
+        ['maxheight', 'MaxHeight', int],
+        ['keywordlist', 'KeywordList', str]
     ]
 
     capabilitiesxmltemplate = """<?xml version="1.0" encoding="UTF-8"?>
@@ -123,24 +124,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         for element in elements:
             element.set('{http://www.w3.org/1999/xlink}href', opsonlineresource)
 
-        if len(self.conf.items('service')) > 0:
-            servicee = capetree.find('{http://www.opengis.net/wms}Service')
-            for item in self.CONF_SERVICE:
-                if self.conf.has_option('service', item[0]):
-                    value = self.conf.get('service', item[0]).strip()
-                    try:
-                        item[2](value)
-                    except:
-                        raise ServerConfigurationError('Configuration parameter [%s]->%s has an invalid value: %s.' % ('service', item[0], value))
-                    if item[0] == 'onlineresource':
-                        element = ElementTree.Element('%s' % item[1])
-                        servicee.append(element)
-                        element.set('{http://www.w3.org/1999/xlink}href', value)
-                        element.set('{http://www.w3.org/1999/xlink}type', 'simple')
-                    else:
-                        element = ElementTree.Element('%s' % item[1])
-                        element.text = value
-                        servicee.append(element)
+        self.processServiceCapabilities(capetree)
 
         rootlayerelem = capetree.find('{http://www.opengis.net/wms}Capability/{http://www.opengis.net/wms}Layer')
 

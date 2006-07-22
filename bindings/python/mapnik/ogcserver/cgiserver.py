@@ -28,7 +28,7 @@ from jon import cgi
 from exceptions import OGCException, ServerConfigurationError
 from wms111 import ExceptionHandler as ExceptionHandler111
 from wms130 import ExceptionHandler as ExceptionHandler130
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 from common import Version
 
 class Handler(cgi.DebugHandler):
@@ -37,7 +37,7 @@ class Handler(cgi.DebugHandler):
         conf = SafeConfigParser()
         conf.readfp(open(self.configpath))
         self.conf = conf
-        if not conf.has_option('server', 'module'):
+        if not conf.has_option_with_value('server', 'module'):
             raise ServerConfigurationError('The factory module is not defined in the configuration file.')
         try:
             mapfactorymodule = __import__(conf.get('server', 'module'))

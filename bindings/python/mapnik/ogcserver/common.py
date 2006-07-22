@@ -79,6 +79,26 @@ class ParameterDefinition:
 
 class BaseServiceHandler:
 
+    CONF_CONTACT_PERSON_PRIMARY = [
+        ['contactperson', 'ContactPerson', str],
+        ['contactorganization', 'ContactOrganization', str]
+    ]
+    
+    CONF_CONTACT_ADDRESS = [   
+        ['addresstype', 'AddressType', str],
+        ['address', 'Address', str],
+        ['city', 'City', str],
+        ['stateorprovince', 'StateOrProvince', str],
+        ['postcode', 'PostCode', str],
+        ['country', 'Country', str]
+    ]
+    
+    CONF_CONTACT = [
+        ['contactposition', 'ContactPosition', str],
+        ['contactvoicetelephone', 'ContactVoiceTelephone', str],
+        ['contactelectronicmailaddress', 'ContactElectronicMailAddress', str]
+    ]
+
     def processParameters(self, requestname, params):
         finalparams = {}
         for paramname, paramdef in self.SERVICE_PARAMS[requestname].items():
@@ -101,6 +121,65 @@ class BaseServiceHandler:
             elif not paramdef.mandatory and paramdef.default:
                 finalparams[paramname] = paramdef.default
         return finalparams
+    
+    def processServiceCapabilities(self, capetree):
+        if len(self.conf.items('service')) > 0:
+            servicee = capetree.find('{http://www.opengis.net/wms}Service')
+            for item in self.CONF_SERVICE:
+                if self.conf.has_option_with_value('service', item[0]):
+                    value = self.conf.get('service', item[0]).strip()
+                    try:
+                        item[2](value)
+                    except:
+                        raise ServerConfigurationError('Configuration parameter [%s]->%s has an invalid value: %s.' % ('service', item[0], value))
+                    if item[0] == 'onlineresource':
+                        element = ElementTree.Element('%s' % item[1])
+                        servicee.append(element)
+                        element.set('{http://www.w3.org/1999/xlink}href', value)
+                        element.set('{http://www.w3.org/1999/xlink}type', 'simple')
+                    elif item[0] == 'keywordlist':
+                        element = ElementTree.Element('%s' % item[1])
+                        servicee.append(element)
+                        keywords = value.split(',')
+                        keywords = map(str.strip, keywords)
+                        for keyword in keywords:
+                            kelement = ElementTree.Element('Keyword')
+                            kelement.text = keyword
+                            element.append(kelement)
+                    else:
+                        element = ElementTree.Element('%s' % item[1])
+                        element.text = value
+                        servicee.append(element)
+            if len(self.conf.items_with_value('contact')) > 0:
+                element = ElementTree.Element('ContactInformation')
+                servicee.append(element)
+                for item in self.CONF_CONTACT:
+                    if self.conf.has_option_with_value('contact', item[0]):
+                        value = self.conf.get('contact', item[0]).strip()
+                        try:
+                            item[2](value)
+                        except:
+                            raise ServerConfigurationError('Configuration parameter [%s]->%s has an invalid value: %s.' % ('service', item[0], value))
+                        celement = ElementTree.Element('%s' % item[1])
+                        celement.text = value
+                        element.append(celement)
+                for item in self.CONF_CONTACT_PERSON_PRIMARY + self.CONF_CONTACT_ADDRESS:
+                    if item in self.CONF_CONTACT_PERSON_PRIMARY:
+                        tagname = 'ContactPersonPrimary'
+                    else:
+                        tagname = 'ContactAddress'
+                    if self.conf.has_option_with_value('contact', item[0]):
+                        if element.find(tagname) == None:
+                            subelement = ElementTree.Element(tagname)
+                            element.append(subelement)
+                        value = self.conf.get('contact', item[0]).strip()
+                        try:
+                            item[2](value)
+                        except:
+                            raise ServerConfigurationError('Configuration parameter [%s]->%s has an invalid value: %s.' % ('service', item[0], value))
+                        celement = ElementTree.Element('%s' % item[1])
+                        celement.text = value
+                        subelement.append(celement)
 
 class Response:
 

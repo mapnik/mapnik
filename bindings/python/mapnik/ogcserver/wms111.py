@@ -51,11 +51,12 @@ class ServiceHandler(WMSBaseServiceHandler):
         ['onlineresource', 'OnlineResource', str],
         ['fees', 'Fees', str],
         ['accessconstraints', 'AccessConstraints', str],
+        ['keywordlist', 'KeywordList', str]
     ]
 
     capabilitiesxmltemplate = """<?xml version='1.0' encoding="UTF-8" standalone="no"?>
     <!DOCTYPE WMT_MS_Capabilities SYSTEM "http://www.digitalearth.gov/wmt/xml/capabilities_1_1_1.dtd">
-    <WMT_MS_Capabilities version="1.1.1" updateSequence="0" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <WMT_MS_Capabilities version="1.1.1" updateSequence="0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.opengis.net/wms">
       <Service>
         <Name>WMS</Name>
       </Service>
@@ -117,28 +118,11 @@ class ServiceHandler(WMSBaseServiceHandler):
         for element in elements:
             element.set('{http://www.w3.org/1999/xlink}href', opsonlineresource)
 
-        if len(self.conf.items('service')) > 0:
-            servicee = capetree.find('Service')
-            for item in self.CONF_SERVICE:
-                if self.conf.has_option('service', item[0]):
-                    value = self.conf.get('service', item[0])
-                    try:
-                        item[2](value)
-                    except:
-                        raise ServerConfigurationError('Configuration parameter [%s]->%s has an invalid value: %s.' % ('service', item[0], value))
-                    if item[0] == 'onlineresource':
-                        element = ElementTree.Element('%s' % item[1])
-                        servicee.append(element)
-                        element.set('{http://www.w3.org/1999/xlink}href', value)
-                        element.set('{http://www.w3.org/1999/xlink}type', 'simple')
-                    else:
-                        element = ElementTree.Element('%s' % item[1])
-                        element.text = value
-                        servicee.append(element)
+        self.processServiceCapabilities(capetree)
 
-        rootlayerelem = capetree.find('Capability/Layer')
+        rootlayerelem = capetree.find('{http://www.opengis.net/wms}Capability/{http://www.opengis.net/wms}Layer')
 
-        rootlayersrs = rootlayerelem.find('SRS')
+        rootlayersrs = rootlayerelem.find('{http://www.opengis.net/wms}SRS')
         rootlayersrs.text = str(self.crs)
 
         for layer in self.mapfactory.layers.values():
