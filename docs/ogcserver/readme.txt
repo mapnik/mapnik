@@ -21,6 +21,7 @@ Features/Caveats
 - GetCapabilities and GetMap support only (NO GetFeatureInfo ... yet)
 - JPEG/PNG output
 - XML/INIMAGE/BLANK error handling
+- Multiple named styles support
 - No real layer metadata support yet
 - No re-projection support
 - Needs to be able to write to tempfile.gettempdir() (most likely "/tmp")
@@ -102,8 +103,7 @@ class WMSFactory(BaseWMSFactory):
 		
 		lyr = Layer(name='layername', title='Highways', abstract='Highways')
 		...
-		lyr.styles.append('stylename')
-		self.register_layer(lyr)
+		self.register_layer(lyr, 'stylename')
 		self.finalize()
 		
 The rules for writing this class are:
@@ -116,18 +116,19 @@ The rules for writing this class are:
   them short and simple, without spaces or special characters.
 - For human readable info, pass title='' and abstract='' parameters to the
   Layer() call.
-- The layers must have at least one style associated with them (a default).
+- DO NOT register styles using layer.styles.append(), instead, provide style
+  information to the register_layer() call:
+  
+  register_layer(layerobject, defaultstylename, tuple of alternative style names)
+
 - No Map() object is used or needed here.
 - Be sure to call self.finalize() once you've registered everything! This will
   validate everything and let you know if there's problems.
-- Be sure to associate a default style with the layer.  In the future, there
-  will be a mechanism to assign other non-default styles to a layer, to support
-  named styles through the STYLES= parameter.
+
 
 To Do
 -----
 
-- Named style support.
 - Investigate moving to cElementTree from lxml.
 - Add some internal "caching" for performance improvements.
 - Support GetFeatureInfo (Requires core changes).

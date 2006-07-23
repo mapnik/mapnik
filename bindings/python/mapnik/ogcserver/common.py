@@ -29,6 +29,7 @@ from traceback import print_tb
 from sys import exc_info
 from lxml import etree as ElementTree
 import re
+import sys
 # from elementtree import ElementTree
 # ElementTree._namespace_map.update({'http://www.opengis.net/wms': 'wms',
 #                                    'http://www.opengis.net/ogc': 'ogc',
@@ -292,11 +293,22 @@ class WMSBaseServiceHandler(BaseServiceHandler):
             m.background = Color(0, 0, 0, 0)
         maplayers = self.mapfactory.layers
         mapstyles = self.mapfactory.styles
-        for layername in params['layers']:
+        mapaggregatestyles = self.mapfactory.aggregatestyles
+        for layerindex, layername in enumerate(params['layers']):
             try:
                 layer = maplayers[layername]
             except KeyError:
                 raise OGCException('Layer "%s" not defined.' % layername, 'LayerNotDefined')
+            reqstyle = params['styles'][layerindex]
+            if reqstyle and reqstyle not in layer.wmsextrastyles:
+                raise OGCException('Invalid style "%s" requested for layer "%s".' % (reqstyle, layername), 'StyleNotDefined')
+            if not reqstyle:
+                reqstyle = layer.wmsdefaultstyle
+            if reqstyle in mapaggregatestyles.keys():
+                for stylename in mapaggregatestyles[reqstyle]:
+                    layer.styles.append(stylename)
+            else:
+                layer.styles.append(reqstyle)
             for stylename in layer.styles:
                 if stylename in mapstyles.keys():
                     m.append_style(stylename, mapstyles[stylename])

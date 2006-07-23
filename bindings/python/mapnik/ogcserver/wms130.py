@@ -169,7 +169,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             layere.append(layerexgbb)
             layere.append(layerbbox)
             if len(layer.wmsextrastyles) > 0:
-                for extrastyle in list(layer.wmsextrastyles):
+                for extrastyle in [layer.wmsdefaultstyle] + list(layer.wmsextrastyles):
                     style = ElementTree.Element('Style')
                     stylename = ElementTree.Element('Name')
                     stylename.text = extrastyle

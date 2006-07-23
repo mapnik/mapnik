@@ -40,23 +40,46 @@ class BaseWMSFactory:
     def __init__(self):
         self.layers = {}
         self.styles = {}
+        self.aggregatestyles = {}
 
-    def register_layer(self, layer, extrastyles=()):
+    def register_layer(self, layer, defaultstyle, extrastyles=()):
         layername = layer.name()
         if not layername:
             raise ServerConfigurationError('Attempted to register an unnamed layer.')
-        self.layers[layername] = layer
+        if defaultstyle not in self.styles.keys() + self.aggregatestyles.keys():
+            raise ServerConfigurationError('Attempted to register a layer with an non-existent default style.')
+        layer.wmsdefaultstyle = defaultstyle
         if isinstance(extrastyles, tuple):
+            for stylename in extrastyles:
+                if type(stylename) == type(''):
+                    if stylename not in self.styles.keys() + self.aggregatestyles.keys():
+                        raise ServerConfigurationError('Attempted to register a layer with an non-existent extra style.')
+                else:
+                    ServerConfigurationError('Attempted to register a layer with an invalid extra style name.')
             layer.wmsextrastyles = extrastyles
         else:
             raise ServerConfigurationError('Layer "%s" was passed an invalid list of extra styles.  List must be a tuple of strings.' % layername)
+        self.layers[layername] = layer
 
     def register_style(self, name, style):
         if not name:
             raise ServerConfigurationError('Attempted to register a style without providing a name.')
+        if name in self.aggregatestyles.keys() or name in self.styles.keys():
+            raise ServerConfigurationError('Attempted to register an aggregate style with a name already in use.')
         if not isinstance(style, Style):
             raise ServerConfigurationError('Bad style object passed to register_style() for style "%s".' % name)
         self.styles[name] = style
+
+    def register_aggregate_style(self, name, stylenames):
+        if not name:
+            raise ServerConfigurationError('Attempted to register an aggregate style without providing a name.')
+        if name in self.aggregatestyles.keys() or name in self.styles.keys():
+            raise ServerConfigurationError('Attempted to register an aggregate style with a name already in use.')
+        self.aggregatestyles[name] = []
+        for stylename in stylenames:
+            if stylename not in self.styles.keys():
+                raise ServerConfigurationError('Attempted to register an aggregate style containing a style that does not exist.')
+            self.aggregatestyles[name].append(stylename)
 
     def finalize(self):
         if len(self.layers) == 0:
@@ -65,5 +88,5 @@ class BaseWMSFactory:
             raise ServerConfigurationError('No styles defined!')
         for layer in self.layers.values():
             for style in list(layer.styles) + list(layer.wmsextrastyles):
-                if style not in self.styles.keys():
+                if style not in self.styles.keys() + self.aggregatestyles.keys():
                     raise ServerConfigurationError('Layer "%s" refers to undefined style "%s".' % (layer.name(), style))
