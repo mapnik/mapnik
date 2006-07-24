@@ -35,30 +35,30 @@ namespace mapnik
     class filter_to_string : public filter_visitor<FeatureT>
     {
     private:
-	std::string text_;
+        std::string text_;
     public:
-	filter_to_string() {}
-	void visit(filter<FeatureT>& /*filter*/) 
-	{ 
-	    //not interested
-	}
-	void visit(expression<FeatureT>& exp)
-	{
-	    property<FeatureT>* pf;
-	    if ((pf = dynamic_cast<property<FeatureT>*>(&exp)))
-	    {
-		names_.insert(pf->name());
-	    }
-	}
-	std::string const& text() const
-	{
-	    return text_;
-	}
+        filter_to_string() {}
+        void visit(filter<FeatureT>& /*filter*/) 
+        { 
+            //not interested
+        }
+        void visit(expression<FeatureT>& exp)
+        {
+            property<FeatureT>* pf;
+            if ((pf = dynamic_cast<property<FeatureT>*>(&exp)))
+            {
+                names_.insert(pf->name());
+            }
+        }
+        std::string const& text() const
+        {
+            return text_;
+        }
 	
-	virtual ~filter_to_string() {}
+        virtual ~filter_to_string() {}
     private:
-	filter_to_string(filter_to_string const&);
-	filter_to_string& operator=(filter_to_string const&);
+        filter_to_string(filter_to_string const&);
+        filter_to_string& operator=(filter_to_string const&);
     };
 }
 

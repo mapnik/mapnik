@@ -32,68 +32,68 @@ namespace mapnik
 {   
     template <typename T,int dim>
     struct coord {
-	typedef T type;
+        typedef T type;
     };
     
     template <typename T>
     struct coord<T,2> 
     {
-	typedef T type;
-	T x;
-	T y;
+        typedef T type;
+        T x;
+        T y;
     public:
-	coord()
-	    : x(),y() {}
-	coord(T x,T y)
-	    : x(x),y(y) {}
-	template <typename T2>
-	coord (const coord<T2,2>& rhs)
-	    : x(type(rhs.x)),
-	      y(type(rhs.y)) {}
+        coord()
+            : x(),y() {}
+        coord(T x,T y)
+            : x(x),y(y) {}
+        template <typename T2>
+        coord (const coord<T2,2>& rhs)
+            : x(type(rhs.x)),
+              y(type(rhs.y)) {}
 
-	template <typename T2>
-	coord<T,2>& operator=(const coord<T2,2>& rhs)
-	{
-	    if ((void*)this==(void*)&rhs)
-	    {
-		return *this;
-	    }
-	    x=type(rhs.x);
-	    y=type(rhs.y);
-	    return *this;
-	}
+        template <typename T2>
+        coord<T,2>& operator=(const coord<T2,2>& rhs)
+        {
+            if ((void*)this==(void*)&rhs)
+            {
+                return *this;
+            }
+            x=type(rhs.x);
+            y=type(rhs.y);
+            return *this;
+        }
     };
 
     template <typename T>
     struct coord<T,3> 
     {
-	typedef T type;
-	T x;
-	T y;
-	T z;
+        typedef T type;
+        T x;
+        T y;
+        T z;
     public:
-	coord()
-	    : x(),y(),z() {}
-	coord(T x,T y,T z)
-	    : x(x),y(y),z(z) {}
-	template <typename T2>
-	coord (const coord<T2,3>& rhs)
-	    : x(type(rhs.x)),
-	      y(type(rhs.y)),
-	      z(type(rhs.z)) {}
+        coord()
+            : x(),y(),z() {}
+        coord(T x,T y,T z)
+            : x(x),y(y),z(z) {}
+        template <typename T2>
+        coord (const coord<T2,3>& rhs)
+            : x(type(rhs.x)),
+              y(type(rhs.y)),
+              z(type(rhs.z)) {}
 
-	template <typename T2>
-	coord<T,3>& operator=(const coord<T2,3>& rhs)
-	{
-	    if ((void*)this==(void*)&rhs)
-	    {
-		return *this;
-	    }
-	    x=type(rhs.x);
-	    y=type(rhs.y);
-	    z=type(rhs.z);
-	    return *this;
-	}
+        template <typename T2>
+        coord<T,3>& operator=(const coord<T2,3>& rhs)
+        {
+            if ((void*)this==(void*)&rhs)
+            {
+                return *this;
+            }
+            x=type(rhs.x);
+            y=type(rhs.y);
+            z=type(rhs.z);
+            return *this;
+        }
     };
 
     typedef coord<double,2> coord2d;
@@ -103,12 +103,12 @@ namespace mapnik
     template <typename charT,typename traits,typename T ,int dim>
     inline std::basic_ostream<charT,traits>&
     operator << (std::basic_ostream<charT,traits>& out,
-    		 const coord<T,dim>& c);
+                 const coord<T,dim>& c);
     
     template <typename charT,typename traits,typename T>
     inline std::basic_ostream<charT,traits>&
     operator << (std::basic_ostream<charT,traits>& out,
-		 const coord<T,2>& c)
+                 const coord<T,2>& c)
     {
         std::basic_ostringstream<charT,traits> s;
         s.copyfmt(out);
@@ -121,7 +121,7 @@ namespace mapnik
     template <typename charT,typename traits,typename T>
     inline std::basic_ostream<charT,traits>&
     operator << (std::basic_ostream<charT,traits>& out,
-		 const coord<T,3>& c)
+                 const coord<T,3>& c)
     {
         std::basic_ostringstream<charT,traits> s;
         s.copyfmt(out);

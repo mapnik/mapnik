@@ -30,10 +30,10 @@ namespace mapnik
     class MAPNIK_DECL ImageUtils
     {
     public:
-	static void save_to_file(const std::string& filename,const std::string& type,const Image32& image);
+        static void save_to_file(const std::string& filename,const std::string& type,const Image32& image);
     private:
-	static void save_as_png(const std::string& filename,const Image32& image);
-	static void save_as_jpeg(const std::string& filename,int quality, const Image32& image);
+        static void save_as_png(const std::string& filename,const Image32& image);
+        static void save_as_jpeg(const std::string& filename,int quality, const Image32& image);
     };
 
     template <typename T>
@@ -121,7 +121,7 @@ namespace mapnik
     namespace
     {
         template <typename Image>
-	inline void scale_up(Image& target,const Image& source,unsigned scale)
+        inline void scale_up(Image& target,const Image& source,unsigned scale)
         {
             int source_width=source.width();
             int source_height=source.height();

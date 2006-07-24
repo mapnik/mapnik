@@ -32,21 +32,21 @@
 namespace mapnik
 {
     template <typename key_type,
-	      typename product_type>
+              typename product_type>
     class default_factory_error
     {
     public:
-	struct factory_exception : public std::exception
-	{
-	    const char* what() const throw()
-	    {
-		return "uknown object type";
-	    }
-	};
-	static product_type* on_unknown_type(const key_type&)
-	{
-	    return 0;
-	}
+        struct factory_exception : public std::exception
+        {
+            const char* what() const throw()
+            {
+                return "uknown object type";
+            }
+        };
+        static product_type* on_unknown_type(const key_type&)
+        {
+            return 0;
+        }
     };
 
     template
@@ -55,34 +55,34 @@ namespace mapnik
         typename key_type,
         typename product_creator=product_type* (*)(),
         template <typename,typename> class factory_error_policy=default_factory_error
-    >
+        >
     class factory : public singleton<factory <product_type,key_type,product_creator,factory_error_policy> >,
-					     factory_error_policy <key_type,product_type>
+        factory_error_policy <key_type,product_type>
     {
     private:
-	typedef std::map<key_type,product_creator> product_map;
-	product_map map_;
+        typedef std::map<key_type,product_creator> product_map;
+        product_map map_;
     public:
 
-	bool register_product(const key_type& key,product_creator creator)
-	{
-	    return map_.insert(typename product_map::value_type(key,creator)).second;
-	}
+        bool register_product(const key_type& key,product_creator creator)
+        {
+            return map_.insert(typename product_map::value_type(key,creator)).second;
+        }
 
-	bool unregister_product(const key_type& key)
-	{
-	    return map_.erase(key)==1;
-	}
+        bool unregister_product(const key_type& key)
+        {
+            return map_.erase(key)==1;
+        }
 
-	product_type* create_object(const key_type& key,const std::string& file)
-	{
-	    typename product_map::const_iterator pos=map_.find(key);
-	    if (pos!=map_.end())
-	    {
-		return (pos->second)(file);
-	    }
-	    return on_unknown_type(key);
-	}
+        product_type* create_object(const key_type& key,const std::string& file)
+        {
+            typename product_map::const_iterator pos=map_.find(key);
+            if (pos!=map_.end())
+            {
+                return (pos->second)(file);
+            }
+            return on_unknown_type(key);
+        }
     };
 }
 #endif                                            //FACTORY_HPP

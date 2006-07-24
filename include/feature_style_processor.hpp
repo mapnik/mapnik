@@ -27,7 +27,7 @@
 
 #include <vector>
 #include <iostream>
-
+#include <boost/progress.hpp>
 #include "envelope.hpp"
 #include "datasource.hpp"
 #include "layer.hpp"
@@ -36,8 +36,7 @@
 #include "utils.hpp"
 
 namespace mapnik
-{    
-    
+{       
     template <typename Processor>
     class feature_style_processor 
     {
@@ -61,7 +60,7 @@ namespace mapnik
 	
         void apply()
         {
-            timer clock;
+            boost::progress_timer t;
             Processor & p = static_cast<Processor&>(*this);
 
             p.start_map_processing(m_);
@@ -76,11 +75,7 @@ namespace mapnik
                 }
                 ++itr;
             }
-	    
             p.end_map_processing(m_);
-	    
-            clock.stop();
-	    
         }	
     private:
         void apply_to_layer(Layer const& lay,Processor & p)

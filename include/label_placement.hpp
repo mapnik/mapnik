@@ -28,25 +28,25 @@ namespace mapnik
 {
     struct point_
     {
-	double x;
-	double y;
-	point_()
-	    : x(0),y(0) {}
-	point_(double x_,double y_)
-	    : x(x_),y(y_) {}	
+        double x;
+        double y;
+        point_()
+            : x(0),y(0) {}
+        point_(double x_,double y_)
+            : x(x_),y(y_) {}	
     };
-
+    
     class label_placement
     {
     private:
-	point_ anchor_;
-	point_ displacement_;
-	double rotation_;
+        point_ anchor_;
+        point_ displacement_;
+        double rotation_;
     public:
-	label_placement() 
-	    : anchor_(),
-	      displacement_(),
-	      rotation_(0.0) {}
+        label_placement() 
+            : anchor_(),
+              displacement_(),
+              rotation_(0.0) {}
 	
     };
 }
