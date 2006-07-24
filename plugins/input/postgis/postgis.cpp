@@ -31,7 +31,7 @@
 
 DATASOURCE_PLUGIN(postgis_datasource)
 
-const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
+    const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS="spatial_ref_system";
 
 using std::clog;
@@ -48,9 +48,9 @@ postgis_datasource::postgis_datasource(const parameters& params)
       type_(datasource::Vector), 
       desc_(params.get("name")),
       creator_(params.get("host"),
-	       params.get("dbname"),
-	       params.get("user"),
-	       params.get("password"))
+               params.get("dbname"),
+               params.get("user"),
+               params.get("password"))
       
 {     
     ConnectionManager *mgr=ConnectionManager::instance();   
@@ -59,92 +59,92 @@ postgis_datasource::postgis_datasource(const parameters& params)
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
     {
-	const shared_ptr<Connection>& conn = pool->borrowObject();
-	if (conn && conn->isOK())
-	{
-	    PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
+        const shared_ptr<Connection>& conn = pool->borrowObject();
+        if (conn && conn->isOK())
+        {
+            PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
 
-	    std::string table_name=table_from_sql(table_);
+            std::string table_name=table_from_sql(table_);
 	    
-	    std::ostringstream s;
-	    s << "select f_geometry_column,srid,type from ";
-	    s << GEOMETRY_COLUMNS <<" where f_table_name='"<<table_name<<"'";
+            std::ostringstream s;
+            s << "select f_geometry_column,srid,type from ";
+            s << GEOMETRY_COLUMNS <<" where f_table_name='"<<table_name<<"'";
 	   
-	    shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
+            shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
 	    
-	    if (rs->next())
-	    {
-		try 
-		{
-		    srid_ = lexical_cast<int>(rs->getValue("srid"));
-		    desc_.set_srid(srid_);
-		}
-		catch (bad_lexical_cast &ex)
-		{
-		    clog << ex.what() << endl;
-		}
-		geometryColumn_=rs->getValue("f_geometry_column");
-		std::string postgisType=rs->getValue("type");
-	    }
-	    rs->close();
-	    s.str("");
-	    s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)";
-	    s << " from (select estimated_extent('"<<table_name<<"','"<<geometryColumn_<<"') as ext) as tmp";
+            if (rs->next())
+            {
+                try 
+                {
+                    srid_ = lexical_cast<int>(rs->getValue("srid"));
+                    desc_.set_srid(srid_);
+                }
+                catch (bad_lexical_cast &ex)
+                {
+                    clog << ex.what() << endl;
+                }
+                geometryColumn_=rs->getValue("f_geometry_column");
+                std::string postgisType=rs->getValue("type");
+            }
+            rs->close();
+            s.str("");
+            s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)";
+            s << " from (select estimated_extent('"<<table_name<<"','"<<geometryColumn_<<"') as ext) as tmp";
 
-	    rs=conn->executeQuery(s.str());
-	    if (rs->next())
-	    {
-		try 
-		{
-		    double lox=lexical_cast<double>(rs->getValue(0));
-		    double loy=lexical_cast<double>(rs->getValue(1));
-		    double hix=lexical_cast<double>(rs->getValue(2));
-		    double hiy=lexical_cast<double>(rs->getValue(3));		    
-		    extent_.init(lox,loy,hix,hiy);
-		}
-		catch (bad_lexical_cast &ex)
-		{
-		    clog << ex.what() << endl;
-		}
-	    }
-	    rs->close();
+            rs=conn->executeQuery(s.str());
+            if (rs->next())
+            {
+                try 
+                {
+                    double lox=lexical_cast<double>(rs->getValue(0));
+                    double loy=lexical_cast<double>(rs->getValue(1));
+                    double hix=lexical_cast<double>(rs->getValue(2));
+                    double hiy=lexical_cast<double>(rs->getValue(3));		    
+                    extent_.init(lox,loy,hix,hiy);
+                }
+                catch (bad_lexical_cast &ex)
+                {
+                    clog << ex.what() << endl;
+                }
+            }
+            rs->close();
 
-	    // collect attribute desc
-	    s.str("");
-	    s << "select * from "<<table_<<" limit 1";
-	    rs=conn->executeQuery(s.str());
-	    if (rs->next())
-	    {
-		int count = rs->getNumFields();
-		for (int i=0;i<count;++i)
-		{
-		    std::string fld_name=rs->getFieldName(i);
-		    int length = rs->getFieldLength(i);
+            // collect attribute desc
+            s.str("");
+            s << "select * from "<<table_<<" limit 1";
+            rs=conn->executeQuery(s.str());
+            if (rs->next())
+            {
+                int count = rs->getNumFields();
+                for (int i=0;i<count;++i)
+                {
+                    std::string fld_name=rs->getFieldName(i);
+                    int length = rs->getFieldLength(i);
 		    
-		    int type_oid = rs->getTypeOID(i);
-		    switch (type_oid)
-		    {
-		    case 17285: // geometry
-			desc_.add_descriptor(attribute_descriptor(fld_name,Geometry));
-			break;
-		    case 21:    // int2
-		    case 23:    // int4
-			desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,length));
- 			break;
+                    int type_oid = rs->getTypeOID(i);
+                    switch (type_oid)
+                    {
+                    case 17285: // geometry
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Geometry));
+                        break;
+                    case 21:    // int2
+                    case 23:    // int4
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer,false,length));
+                        break;
                     case 701:  // float8
- 			desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,length));
-		    case 1042:  // bpchar
-		    case 1043:  // varchar
-			desc_.add_descriptor(attribute_descriptor(fld_name,String));
-			break;
-		    default: // shouldn't get here
-			clog << "unknown type_oid="<<type_oid<<endl;
-			desc_.add_descriptor(attribute_descriptor(fld_name,String));
-			break;
-		    }	  
-		}
-	    }
-	}
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double,false,length));
+                    case 1042:  // bpchar
+                    case 1043:  // varchar
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                        break;
+                    default: // shouldn't get here
+                        clog << "unknown type_oid="<<type_oid<<endl;
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                        break;
+                    }	  
+                }
+            }
+        }
     }
 }
 
@@ -188,28 +188,28 @@ featureset_ptr postgis_datasource::features(const query& q) const
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
     {
-	const shared_ptr<Connection>& conn = pool->borrowObject();
-	if (conn && conn->isOK())
-	{       
-	    PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
-	    std::ostringstream s;
-	    // can we rely on 'gid' name???
-	    s << "select ogc_fid,asbinary("<<geometryColumn_<<") as geom";
-	    std::set<std::string> const& props=q.property_names();
-	    std::set<std::string>::const_iterator pos=props.begin();
-	    while (pos!=props.end())
-	    {
-		s <<",\""<<*pos<<"\"";
-		++pos;
-	    }	
+        const shared_ptr<Connection>& conn = pool->borrowObject();
+        if (conn && conn->isOK())
+        {       
+            PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
+            std::ostringstream s;
+            // can we rely on 'gid' name???
+            s << "select ogc_fid,asbinary("<<geometryColumn_<<") as geom";
+            std::set<std::string> const& props=q.property_names();
+            std::set<std::string>::const_iterator pos=props.begin();
+            while (pos!=props.end())
+            {
+                s <<",\""<<*pos<<"\"";
+                ++pos;
+            }	
     
-	    s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
-	    s << box.minx() << " " << box.miny() << ",";
-	    s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
-	    clog << s.str() << endl;
-	    shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-	    fs=new postgis_featureset(rs,props.size());
-	}
+            s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
+            s << box.minx() << " " << box.miny() << ",";
+            s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
+            clog << s.str() << endl;
+            shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
+            fs=new postgis_featureset(rs,props.size());
+        }
     }
     return featureset_ptr(fs);
 }
