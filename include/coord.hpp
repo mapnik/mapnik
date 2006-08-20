@@ -26,6 +26,7 @@
 #define COORD_HPP
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 
 namespace mapnik 
@@ -113,7 +114,8 @@ namespace mapnik
         std::basic_ostringstream<charT,traits> s;
         s.copyfmt(out);
         s.width(0);
-        s<<"coord2("<<c.x<<","<<c.y<<")";
+        s << "coord2(" << std::setprecision(16) 
+          << c.x << "," << c.y<< ")";
         out << s.str();
         return out;
     }
@@ -126,7 +128,8 @@ namespace mapnik
         std::basic_ostringstream<charT,traits> s;
         s.copyfmt(out);
         s.width(0);
-        s<<"coord3("<<c.x<<","<<c.y<<","<<c.z<<")";
+        s << "coord3(" << std::setprecision(16) 
+          << c.x << "," << c.y<< "," << c.z<<")";
         out << s.str();
         return out;
     } 

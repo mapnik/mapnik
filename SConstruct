@@ -76,11 +76,6 @@ C_LIBSHEADERS = [
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
     ['filesystem', 'boost/filesystem/operations.hpp', True],
-    ['serialization', ['boost/archive/text_oarchive.hpp',
-                        'boost/archive/text_iarchive.hpp',
-                        'boost/archive/xml_oarchive.hpp',
-                        'boost/archive/xml_iarchive.hpp'], True
-    ],
     ['regex', 'boost/regex.hpp', True],
     ['program_options', 'boost/program_options.hpp', False]
 ]

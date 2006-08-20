@@ -79,8 +79,6 @@
 
 namespace mapnik
 {
-    void MAPNIK_DECL save_to_xml(Map const& map,const char* filename);  
-    void MAPNIK_DECL load_from_xml(Map & map, const char * filename);
 }
 
 #endif //MAPNIK_HPP

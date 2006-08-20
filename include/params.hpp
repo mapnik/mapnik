@@ -44,36 +44,6 @@ namespace mapnik
 
     class parameters : public param_map
     {
-        friend class boost::serialization::access;
-        
-        template <typename Archive>
-        void save(Archive & ar, const unsigned int /*version*/) const
-        {
-            const size_t size = param_map::size();
-            ar & boost::serialization::make_nvp("count",size);
-            param_map::const_iterator itr;
-            for (itr=param_map::begin();itr!=param_map::end();++itr)
-            {
-                ar & boost::serialization::make_nvp("name",itr->first);
-                ar & boost::serialization::make_nvp("value",itr->second);
-            }
-        }
-	
-        template <typename Archive>
-        void load(Archive & ar, const unsigned int /*version*/)
-        {	    
-            size_t size;
-            ar & boost::serialization::make_nvp("size",size);
-            for (size_t i=0;i<size;++i)
-            {
-                std::string name;
-                std::string value;
-                ar & boost::serialization::make_nvp("name",name);
-                ar & boost::serialization::make_nvp("value",value);
-                param_map::insert(make_pair(name,value));
-            }
-        }
-        BOOST_SERIALIZATION_SPLIT_MEMBER()
      public:
 
         parameters() {}
@@ -88,11 +58,5 @@ namespace mapnik
         }
     };
 }
-
-BOOST_CLASS_IMPLEMENTATION(mapnik::parameter, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(mapnik::parameter, boost::serialization::track_never)
-
-BOOST_CLASS_IMPLEMENTATION(mapnik::parameters, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(mapnik::parameters, boost::serialization::track_never)
 
 #endif //PARAMS_HPP
