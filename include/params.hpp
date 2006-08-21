@@ -24,6 +24,7 @@
 #ifndef PARAMS_HPP
 #define PARAMS_HPP
 
+#include <string>
 #include <map>
 
 namespace mapnik
