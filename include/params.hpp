@@ -25,16 +25,6 @@
 #define PARAMS_HPP
 
 #include <map>
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/nvp.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
-#include <boost/serialization/base_object.hpp>
 
 namespace mapnik
 {
