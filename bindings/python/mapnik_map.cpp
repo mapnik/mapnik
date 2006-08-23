@@ -93,8 +93,10 @@ void export_map()
         .def("envelope",make_function(&Map::getCurrentExtent,
                                       return_value_policy<copy_const_reference>()),
              "The current extent of the map")
-        
         .def("scale", &Map::scale)
+        .def("zoom_all",&Map::zoom_all,
+             "Set the geographical extent of the map "
+             "to the combined extents of all active layers")
         .def("zoom_to_box",&Map::zoomToBox, "Set the geographical extent of the map.")
         .def("pan",&Map::pan)
         .def("zoom",&Map::zoom)
