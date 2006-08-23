@@ -55,12 +55,6 @@ source = Split(
     """
     )
 
-#line_symbolizer.cpp
-#    line_pattern_symbolizer.cpp
-#    polygon_symbolizer.cpp
-#    polygon_pattern_symbolizer.cpp
-#    image_symbolizer.cpp
-
 mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
 
 env.Alias(target='install', source=env.Install(prefix+'/lib', mapnik))
