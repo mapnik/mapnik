@@ -22,9 +22,13 @@
 
 //$Id: tiff_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
-#include "image_reader.hpp"
-#include <tiffio.h>
 #include <iostream>
+#include "image_reader.hpp"
+extern "C" 
+{
+   #include <tiffio.h>    
+}
+
 
 namespace mapnik 
 {
@@ -43,12 +47,11 @@ namespace mapnik
         int tile_width_;
         int tile_height_;
     public:
-        enum
-	    {
-		generic=1,
-		stripped,
-		tiled
-	    };
+        enum {
+            generic=1,
+            stripped,
+            tiled
+        };
         explicit TiffReader(const std::string& file_name);
         virtual ~TiffReader();
         unsigned width() const;
@@ -75,12 +78,12 @@ namespace mapnik
 
     TiffReader::TiffReader(const std::string& file_name)
         : file_name_(file_name),
-	  read_method_(generic),
-	  width_(0),
-	  height_(0),
-	  rows_per_strip_(0),
-	  tile_width_(0),
-	  tile_height_(0)
+          read_method_(generic),
+          width_(0),
+          height_(0),
+          rows_per_strip_(0),
+          tile_width_(0),
+          tile_height_(0)
     {
         try
         {

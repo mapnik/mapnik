@@ -25,9 +25,12 @@
 #if !defined FONT_ENGINE_FREETYPE_HPP
 #define FONT_ENGINE_FREETYPE_HPP
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
+extern "C"
+{
+  #include <ft2build.h>
+  #include FT_FREETYPE_H
+  #include FT_GLYPH_H
+}
 
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>

@@ -25,8 +25,11 @@
 #ifndef CONNECTION_HPP
 #define CONNECTION_HPP
 
+extern "C" 
+{
+   #include "libpq-fe.h"
+}
 
-#include "libpq-fe.h"
 #include "resultset.hpp"
 
 using namespace mapnik;

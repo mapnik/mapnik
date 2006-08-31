@@ -23,11 +23,15 @@
 //$Id: image_util.cpp 36 2005-04-05 14:32:18Z pavlenko $
 
 #include <string>
-#include <png.h>
-#include <jpeglib.h>
 #include "graphics.hpp"
-#include "image_util.hpp"
 #include "memory.hpp"
+#include "image_util.hpp"
+
+extern "C"
+{
+  #include <png.h>
+  #include <jpeglib.h>
+}
 
 namespace mapnik
 {
