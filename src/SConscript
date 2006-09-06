@@ -57,6 +57,6 @@ source = Split(
 
 mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
 
-env.Alias(target='install', source=env.Install(prefix+'/lib', mapnik))
+env.Alias(target='install', source=env.Install(prefix + '/' + env['LIB_PLATFORM'], mapnik))
 includes = glob.glob('../include' + '/*.hpp')
 env.Alias(target='install', source=env.Install(prefix+'/include/mapnik', includes))

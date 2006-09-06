@@ -38,5 +38,5 @@ shape_src = Split(
 
 shape_inputdriver = env.SharedLibrary('shape', source=shape_src, SHLIBPREFIX='', LIBS=[])
 
-env.Install(prefix+'/lib/mapnik/input', shape_inputdriver)
-env.Alias('install', prefix + '/lib/mapnik/input')
+env.Install(prefix + '/' + env['LIB_PLATFORM'] + '/mapnik/input', shape_inputdriver)
+env.Alias('install', prefix + '/' + env['LIB_PLATFORM'] + '/mapnik/input')

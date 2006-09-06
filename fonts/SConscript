@@ -24,4 +24,4 @@ Import('env')
 prefix = env['PREFIX']
 
 includes = glob.glob('*/*.ttf')
-env.Alias(target='install', source=env.Install(prefix+'/lib/mapnik/fonts', includes))
+env.Alias(target='install', source=env.Install(prefix+'/' + env['LIB_PLATFORM'] + '/mapnik/fonts', includes))
