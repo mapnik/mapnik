@@ -25,14 +25,13 @@
 #include <boost/get_pointer.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 
-#include "mapnik.hpp"
-
-using namespace mapnik;
+//#include <mapnik.hpp>
 
 void export_color();
 void export_layer();
 void export_parameters();
 void export_envelope();
+void export_query();
 void export_image();
 void export_map();
 void export_python();
@@ -50,30 +49,50 @@ void export_raster_symbolizer();
 void export_text_symbolizer();
 void export_font_engine();
 
-void render_to_file(const Map& map,const std::string& file,const std::string& format)
+//using namespace mapnik;
+#include <map.hpp>
+#include <agg_renderer.hpp>
+#include <graphics.hpp>
+//#include <filter.hpp>
+//#include <coord.hpp>
+
+void render_to_file(const mapnik::Map& map,
+                    const std::string& file,
+                    const std::string& format)
 {
-    Image32 image(map.getWidth(),map.getHeight());
-    agg_renderer<Image32> ren(map,image);
+    mapnik::Image32 image(map.getWidth(),map.getHeight());
+    mapnik::agg_renderer<mapnik::Image32> ren(map,image);
     ren.apply();
     image.saveToFile(file,format);
 }
 
-void render(const Map& map,Image32& image)
+void render(const mapnik::Map& map,mapnik::Image32& image)
 {
-    agg_renderer<Image32> ren(map,image);
+    mapnik::agg_renderer<mapnik::Image32> ren(map,image);
     ren.apply();
 }
 
 BOOST_PYTHON_MODULE(_mapnik)
 {
     using namespace boost::python;
+    using mapnik::Featureset;
+    using mapnik::featureset_ptr;
+    using mapnik::datasource;
+    using mapnik::coord;
+    using mapnik::filter_ptr;
+    
+    export_query();
+    
+    class_<Featureset,featureset_ptr,boost::noncopyable>("FeatureSet",no_init)
+      ;
     
     class_<datasource,boost::shared_ptr<datasource>,
-	boost::noncopyable>("Datasource",no_init)
-        .def("envelope",&datasource::envelope,
-	     return_value_policy<reference_existing_object>())
-        ;
-        
+      boost::noncopyable>("Datasource",no_init)
+      .def("envelope",&datasource::envelope,
+	   return_value_policy<reference_existing_object>())
+      .def("features",&datasource::features)
+      ;
+    
     export_parameters();
     export_color(); 
     export_envelope();   

@@ -19,17 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: mapnik_parameters.cc 17 2005-03-08 23:58:43Z pavlenko $
+//$Id: mapnik_parameters.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
-#include <mapnik.hpp>
+#include <params.hpp>
 
 using mapnik::parameter;
 using mapnik::parameters;
-
-//void (parameters::*add1)(const parameter&)=&parameters::insert;
-//void (parameters::*add2)(std::make_pair(const std::string&,const std::string&))=&parameters::insert;
 
 struct parameter_pickle_suite : boost::python::pickle_suite
 {

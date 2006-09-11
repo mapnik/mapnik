@@ -22,13 +22,12 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <mapnik.hpp>
-
-using mapnik::raster_symbolizer;
+#include <raster_symbolizer.hpp>
 
 void export_raster_symbolizer()
 {
     using namespace boost::python;
+    using mapnik::raster_symbolizer;
     
     class_<raster_symbolizer>("RasterSymbolizer",
 				    init<>("Default ctor"))

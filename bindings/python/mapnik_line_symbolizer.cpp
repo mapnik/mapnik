@@ -22,7 +22,7 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <mapnik.hpp>
+#include <line_symbolizer.hpp>
 
 using mapnik::line_symbolizer;
 using mapnik::stroke;

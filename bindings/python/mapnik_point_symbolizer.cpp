@@ -22,13 +22,12 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <mapnik.hpp>
-
-using mapnik::point_symbolizer;
+#include <point_symbolizer.hpp>
 
 void export_point_symbolizer()
 {
     using namespace boost::python;
+    using mapnik::point_symbolizer;
     
     class_<point_symbolizer>("PointSymbolizer",
                              init<>("Default Point Symbolizer - 4x4 black square"))

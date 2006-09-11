@@ -25,6 +25,7 @@
 #define RASTER_SYMBOLIZER_HPP
 
 #include <boost/shared_ptr.hpp> 
+#include <config.hpp>
 
 namespace mapnik
 {

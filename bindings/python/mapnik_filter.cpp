@@ -22,7 +22,12 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <mapnik.hpp>
+#include <spatial.hpp>
+#include <logical.hpp>
+#include <comparison.hpp>
+#include <regex_filter.hpp>
+#include <filter.hpp>
+#include <filter_factory.hpp>
 
 using mapnik::filter;
 using mapnik::filter_ptr;
@@ -34,15 +39,18 @@ namespace
     using namespace boost::python;
     filter_ptr create_filter(string const& filter_text)
     {
-	return filter_factory<Feature>::compile(filter_text);
+        return filter_factory<Feature>::compile(filter_text);
     }
 }
 
 void export_filter()
 {
     using namespace boost::python;
-    class_<filter<Feature>,boost::noncopyable>("Filter","An expression which allows to select features.",no_init)
-	.def("__str__",&filter<Feature>::to_string);
+    class_<filter<Feature>,boost::noncopyable>("Filter",
+                                               "An expression which allows "
+                                               "to select features.",no_init)
+        .def("__str__",&filter<Feature>::to_string);
 	;
+    
     def("Filter",&create_filter);
 }

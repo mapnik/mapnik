@@ -22,20 +22,23 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <mapnik.hpp>
-
-using mapnik::text_symbolizer;
-using mapnik::Color;
+#include <text_symbolizer.hpp>
 
 void export_text_symbolizer()
 {
     using namespace boost::python;
-    
+
+    using mapnik::text_symbolizer;
+    using mapnik::Color;
+ 
     class_<text_symbolizer>("TextSymbolizer",
 			    init<std::string const&,unsigned,Color const&>())
         .add_property("halo_fill",make_function(
-                      &text_symbolizer::get_halo_fill,return_value_policy<copy_const_reference>()),
+                      &text_symbolizer::get_halo_fill,
+                      return_value_policy<copy_const_reference>()),
                       &text_symbolizer::set_halo_fill)
-        .add_property("halo_radius",&text_symbolizer::get_halo_radius, &text_symbolizer::set_halo_radius)
+        .add_property("halo_radius",
+                      &text_symbolizer::get_halo_radius, 
+                      &text_symbolizer::set_halo_radius)
 	;
 }

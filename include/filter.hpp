@@ -25,7 +25,6 @@
 #ifndef FILTER_HPP
 #define FILTER_HPP
 
-//#include "filter_visitor.hpp"
 #include "feature.hpp"
 
 namespace mapnik

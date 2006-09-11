@@ -31,99 +31,98 @@ namespace mapnik
     template <typename T>
     struct add
     {
-	T operator () (T const& left, T const& right)
-	{
-	    return left + right;
-	}
-	static std::string to_string()
-	{
-	    return "+";
-	} 
+        T operator () (T const& left, T const& right)
+        {
+            return left + right;
+        }
+        static std::string to_string()
+        {
+            return "+";
+        } 
     };
 
     template <typename T>
     struct sub
     {
-	T operator () (T const& left, T const& right)
-	{
-	    return left - right;
-	}
-	static std::string to_string()
-	{
-	    return "-";
-	} 
+        T operator () (T const& left, T const& right)
+        {
+            return left - right;
+        }
+        static std::string to_string()
+        {
+            return "-";
+        } 
     };
     
     template <typename T>
     struct mult
     {
-	T operator () (T const& left, T const& right)
-	{
-	    return left * right;
-	}
-	static std::string to_string()
-	{
-	    return "*";
-	} 
+        T operator () (T const& left, T const& right)
+        {
+            return left * right;
+        }
+        static std::string to_string()
+        {
+            return "*";
+        } 
     };
     
     template <typename T>
     struct div
     {
-	T operator () (T const& left, T const& right)
-	{
-	    return left / right;
-	}
-	static std::string to_string()
-	{
-	    return "/";
-	} 
+        T operator () (T const& left, T const& right)
+        {
+            return left / right;
+        }
+        static std::string to_string()
+        {
+            return "/";
+        } 
     };
     
     template <typename FeatureT,typename Op>
     struct math_expr_b : public expression<FeatureT>
     {
-	math_expr_b(expression<FeatureT> const& left,
-		    expression<FeatureT> const& right)
-	    : expression<FeatureT>(),
-	      left_(left.clone()), 
-	      right_(right.clone()) {}
-	math_expr_b(math_expr_b const& other)
-	    : expression<FeatureT>(),
-	      left_(other.left_->clone()),
-	      right_(other.right_->clone()) {}
+        math_expr_b(expression<FeatureT> const& left,
+                    expression<FeatureT> const& right)
+            : expression<FeatureT>(),
+              left_(left.clone()), 
+              right_(right.clone()) {}
+        math_expr_b(math_expr_b const& other)
+            : expression<FeatureT>(),
+              left_(other.left_->clone()),
+              right_(other.right_->clone()) {}
 
-	value get_value(FeatureT const& feature) const
-	{
-	    return Op ()(left_->get_value(feature),right_->get_value(feature));
-	}
+        value get_value(FeatureT const& feature) const
+        {
+            return Op ()(left_->get_value(feature),right_->get_value(feature));
+        }
 
-	void accept(filter_visitor<FeatureT>& v)
-	{
-	    left_->accept(v);
-	    right_->accept(v);
-	    v.visit(*this);
-	}
+        void accept(filter_visitor<FeatureT>& v)
+        {
+            left_->accept(v);
+            right_->accept(v);
+            v.visit(*this);
+        }
 
-	expression<FeatureT>* clone() const
-	{
-	    return new math_expr_b<FeatureT,Op>(*this);
-	}
-	std::string to_string() const
-	{
-	    return "("+left_->to_string() + Op::to_string() + right_->to_string()+")";
-	}
+        expression<FeatureT>* clone() const
+        {
+            return new math_expr_b<FeatureT,Op>(*this);
+        }
+        std::string to_string() const
+        {
+            return "("+left_->to_string() + Op::to_string() + right_->to_string()+")";
+        }
 
-	~math_expr_b() 
-	{
-	    delete left_;
-	    delete right_;
-	}
+        ~math_expr_b() 
+        {
+            delete left_;
+            delete right_;
+        }
     private:
-	expression<FeatureT>* left_;
-	expression<FeatureT>* right_;	
+        expression<FeatureT>* left_;
+        expression<FeatureT>* right_;	
     }; 
 }
-
 
 #endif //

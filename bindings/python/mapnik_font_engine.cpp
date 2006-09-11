@@ -22,7 +22,7 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include "font_engine_freetype.hpp"
+#include <font_engine_freetype.hpp>
 
 void export_font_engine()
 {

@@ -49,9 +49,12 @@ namespace mapnik
         void setBackground(const Color& background);
         const Color& getBackground() const;     
         const ImageData32& data() const;
-        inline ImageData32& data() {
+        
+        inline ImageData32& data() 
+        {
             return data_;
         }
+        
         inline const unsigned char* raw_data() const
         {
             return data_.getBytes();

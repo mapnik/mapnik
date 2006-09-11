@@ -22,14 +22,13 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <mapnik.hpp>
-
-using mapnik::polygon_symbolizer;
-using mapnik::Color;
+#include <polygon_symbolizer.hpp>
 
 void export_polygon_symbolizer()
 {
     using namespace boost::python;
+    using mapnik::polygon_symbolizer;
+    using mapnik::Color;
     
     class_<polygon_symbolizer>("PolygonSymbolizer",
 				    init<>("Default PolygonSymbolizer - solid fill grey"))

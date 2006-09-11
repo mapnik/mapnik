@@ -22,13 +22,12 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <mapnik.hpp>
-
-using mapnik::polygon_pattern_symbolizer;
+#include <polygon_pattern_symbolizer.hpp>
 
 void export_polygon_pattern_symbolizer()
 {
     using namespace boost::python;
+    using mapnik::polygon_pattern_symbolizer;
     
     class_<polygon_pattern_symbolizer>("PolygonPatternSymbolizer",
 				       init<std::string const&,

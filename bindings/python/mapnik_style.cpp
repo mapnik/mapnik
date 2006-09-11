@@ -23,21 +23,23 @@
 
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include "mapnik.hpp"
-
-using mapnik::feature_type_style;
-using mapnik::rules;
+#include <feature_type_style.hpp>
 
 void export_style()
 {
     using namespace boost::python;
+
+    
+    using mapnik::feature_type_style;
+    using mapnik::rules;
 
     class_<rules>("Rules",init<>("default ctor"))
 	.def(vector_indexing_suite<rules>())
 	;
     class_<feature_type_style>("Style",init<>("default style constructor"))
 	.add_property("rules",make_function
-		      (&feature_type_style::get_rules,return_value_policy<reference_existing_object>()))
+		      (&feature_type_style::get_rules,
+               return_value_policy<reference_existing_object>()))
 	;
     
 }
