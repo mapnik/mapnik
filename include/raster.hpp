@@ -30,12 +30,10 @@ namespace mapnik
 {
     struct raster
     {
-        int x_;
-        int y_;
+        Envelope<double> ext_;
         ImageData32 data_;
-	raster(int x,int y,ImageData32& data)
-	    : x_(x),
-	      y_(y),
+	raster(Envelope<double> const ext,ImageData32& data)
+	    : ext_(ext),
 	      data_(data) {}
     };
 }

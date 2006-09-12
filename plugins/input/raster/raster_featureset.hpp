@@ -34,69 +34,64 @@ class single_file_policy
 public:
     class const_iterator
     {
-	enum {start,end};
-	bool status_;
-	const single_file_policy* p_;
+        enum {start,end};
+        bool status_;
+        const single_file_policy* p_;
     public:
-	explicit const_iterator(const single_file_policy* p)
-	    :status_(start),
-	     p_(p) {}
+        explicit const_iterator(const single_file_policy* p)
+            :status_(start),
+             p_(p) {}
 
-	const_iterator()
-	    :status_(end){}
+        const_iterator()
+            :status_(end){}
 
-	const_iterator(const const_iterator& other)
-	    :status_(other.status_),
-	     p_(other.p_) {}
+        const_iterator(const const_iterator& other)
+            :status_(other.status_),
+             p_(other.p_) {}
 
-	const_iterator& operator++()
-	{
-	    status_=end;
-	    return *this;
-	}
+        const_iterator& operator++()
+        {
+            status_=end;
+            return *this;
+        }
 
-	const raster_info& operator*() const
-	{
-	    return p_->info_;
-	}
+        const raster_info& operator*() const
+        {
+            return p_->info_;
+        }
 
-	const raster_info* operator->() const
-	{
-	    return &(p_->info_);
-	}
+        const raster_info* operator->() const
+        {
+            return &(p_->info_);
+        }
 
-	bool operator!=(const const_iterator& itr)
-	{
-	    return status_!=itr.status_;
-	}
+        bool operator!=(const const_iterator& itr)
+        {
+            return status_!=itr.status_;
+        }
     };
 
     explicit single_file_policy(const raster_info& info)
-	:info_(info) {}
+        :info_(info) {}
 
     const_iterator begin()
     {
-	return const_iterator(this);
+        return const_iterator(this);
     }
 
     const_iterator query(const Envelope<double>& box)
     {
-	if (box.intersects(info_.envelope()))
-	{
-	    return begin();
-	}
-	return end();
+        if (box.intersects(info_.envelope()))
+        {
+            return begin();
+        }
+        return end();
     }
 
     const_iterator end()
     {
-	return const_iterator();
+        return const_iterator();
     }
-};
-
-class os_name_policy
-{
-    //TODO
 };
 
 template <typename LookupPolicy>
@@ -106,7 +101,6 @@ class raster_featureset : public Featureset
     LookupPolicy policy_;
     size_t id_;
     Envelope<double> extent_;
-    CoordTransform t_;
     iterator_type curIter_;
     iterator_type endIter_;
 public:

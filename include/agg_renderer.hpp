@@ -34,26 +34,26 @@ namespace mapnik
 {
     template <typename T>
     class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
-				     private boost::noncopyable
+                                     private boost::noncopyable
     {
     public:
-	agg_renderer(Map const& m, T & pixmap);
-	void start_map_processing(Map const& map);
-	void end_map_processing(Map const& map);
-	void start_layer_processing(Layer const& lay);
-	void end_layer_processing(Layer const& lay);
-	void process(point_symbolizer const& sym,Feature const& feature);
-	void process(line_symbolizer const& sym,Feature const& feature);
-	void process(line_pattern_symbolizer const& sym,Feature const& feature);
-	void process(polygon_symbolizer const& sym,Feature const& feature);
-	void process(polygon_pattern_symbolizer const& sym,Feature const& feature);
-	void process(raster_symbolizer const& sym,Feature const& feature);
-	void process(text_symbolizer const& sym,Feature const& feature);
+        agg_renderer(Map const& m, T & pixmap);
+        void start_map_processing(Map const& map);
+        void end_map_processing(Map const& map);
+        void start_layer_processing(Layer const& lay);
+        void end_layer_processing(Layer const& lay);
+        void process(point_symbolizer const& sym,Feature const& feature);
+        void process(line_symbolizer const& sym,Feature const& feature);
+        void process(line_pattern_symbolizer const& sym,Feature const& feature);
+        void process(polygon_symbolizer const& sym,Feature const& feature);
+        void process(polygon_pattern_symbolizer const& sym,Feature const& feature);
+        void process(raster_symbolizer const& sym,Feature const& feature);
+        void process(text_symbolizer const& sym,Feature const& feature);
     private:
-	T & pixmap_;
-	CoordTransform t_;
-	face_manager<freetype_engine> font_manager_;
-	label_collision_detector2 detector_;
+        T & pixmap_;
+        CoordTransform t_;
+        face_manager<freetype_engine> font_manager_;
+        label_collision_detector2 detector_;
     };
 }
 

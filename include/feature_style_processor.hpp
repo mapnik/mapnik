@@ -103,7 +103,7 @@ namespace mapnik
                     const std::vector<rule_type>& rules=style.get_rules();
                     std::vector<rule_type>::const_iterator ruleIter=rules.begin();
 		    
-                    query q(bbox,m_.getWidth(),m_.getHeight());
+                    query q(bbox); //BBOX query
                     while (ruleIter!=rules.end())
                     {
                         if (ruleIter->active(scale))

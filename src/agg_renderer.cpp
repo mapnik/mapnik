@@ -55,6 +55,7 @@
 
 #include <boost/utility.hpp>
 #include <iostream>
+#include "image_util.hpp"
 
 namespace mapnik
 {
@@ -389,7 +390,10 @@ namespace mapnik
         raster_ptr const& raster=feature.get_raster();
         if (raster)
         {
-            pixmap_.set_rectangle(raster->x_,raster->y_,raster->data_);
+            Envelope<double> ext=t_.forward(raster->ext_);
+            ImageData32 target((int)(ext.width() + 0.5),(int)(ext.height() + 0.5));
+            scale_image<ImageData32>(target,raster->data_);
+            pixmap_.set_rectangle(int(ext.minx()),int(ext.miny()),target);
         }
     }
     

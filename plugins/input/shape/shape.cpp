@@ -124,7 +124,6 @@ void  shape_datasource::init(shape_io& shape)
     std::clog << "shape_type=" << shape_type << std::endl;
 }
 
-
 int shape_datasource::type() const
 {
     return type_;

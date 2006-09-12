@@ -27,7 +27,7 @@
 void export_query()
 {
     using mapnik::query;
-    
+    //class_<query>("Query",init<
 }
 
 
