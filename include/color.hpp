@@ -100,13 +100,18 @@ namespace mapnik {
         {
             return abgr_ == other.abgr_;
         }
-
+        
         inline std::string to_string() const
         {
             std::stringstream ss;
-            ss << "rgb (" << red() << ","  << green() << ","  << blue() <<")";
+            ss << "rgb (" 
+               << red()   << ","  
+               << green() << ","  
+               << blue()  << ","
+               << alpha() << ")";
             return ss.str();
         }
+        
         inline std::string to_hex_string() const
         {
             std::stringstream ss;
