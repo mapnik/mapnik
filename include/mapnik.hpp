@@ -74,11 +74,11 @@
 #include "feature_layer_desc.hpp"
 #include "css_color_parser.hpp"
 #include "color_factory.hpp"
-
-
+#include "config.hpp"
 
 namespace mapnik
 {
+    MAPNIK_DECL filter_ptr create_filter (std::string const& wkt);
 }
 
 #endif //MAPNIK_HPP

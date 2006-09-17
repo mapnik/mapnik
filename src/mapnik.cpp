@@ -22,11 +22,15 @@
 
 //$Id$
 
-#include <fstream>
 #include "mapnik.hpp"
 
 namespace mapnik
 {
+    filter_ptr create_filter (std::string const& wkt)
+    {
+        filter_factory<Feature> factory;
+        return factory.compile(wkt);
+    }
 }
 
 

@@ -40,8 +40,11 @@ namespace mapnik {
             :abgr_(0xffffffff) {}
 
         Color(int red,int green,int blue,int alpha=0xff)
-            : abgr_((alpha&0xff) << 24 | (blue&0xff) << 16 | (green&0xff) << 8 | red&0xff) {}
-	
+            : abgr_((alpha&0xff) << 24 | 
+                    (blue&0xff) << 16  | 
+                    (green&0xff) << 8  | 
+                    red&0xff) {}
+        
         explicit Color(int rgba)
             : abgr_(rgba) {}
 

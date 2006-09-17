@@ -28,20 +28,13 @@
 #include <regex_filter.hpp>
 #include <filter.hpp>
 #include <filter_factory.hpp>
+#include <mapnik.hpp>
 
 using mapnik::filter;
 using mapnik::filter_ptr;
 using mapnik::filter_factory;
 using mapnik::Feature;
-
-namespace  
-{
-    using namespace boost::python;
-    filter_ptr create_filter(string const& filter_text)
-    {
-        return filter_factory<Feature>::compile(filter_text);
-    }
-}
+using mapnik::create_filter;
 
 void export_filter()
 {

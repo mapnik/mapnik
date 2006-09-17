@@ -4,17 +4,16 @@
 
 using namespace mapnik;
 
-// helper function 
-filter_ptr create_filter (std::string const& wkt)
-{
-    filter_factory<Feature> factory;
-    return factory.compile(wkt);
-}
-
 int main ( int argc , char** argv)
 {    
+    if (argc != 2)
+    {
+        std::cout << "usage: ./rundemo <plugins_dir>\n";
+        return EXIT_SUCCESS;
+    }
+    
     std::cout << " running demo ... \n";
-    datasource_cache::instance()->register_datasources("/usr/local/lib/mapnik/input"); 
+    datasource_cache::instance()->register_datasources(argv[1]); 
     freetype_engine::instance()->register_font("/usr/share/fonts/bitstream-vera/Vera.ttf");
     
     Map m(800,600);
@@ -217,5 +216,5 @@ int main ( int argc , char** argv)
         "- demo.png\n"
         "Have a look!\n";
     
-    return 0;
+    return EXIT_SUCCESS;
 }
