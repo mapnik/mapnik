@@ -36,7 +36,7 @@
 //#include "filter_factory.hpp"
 //#include "layer.hpp"
 //#include "datasource_cache.hpp"
-//#include "save_map.hpp"
+#include "save_map.hpp"
 
 namespace mapnik 
 {
