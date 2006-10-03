@@ -51,6 +51,8 @@ void export_font_engine();
 #include <agg_renderer.hpp>
 #include <graphics.hpp>
 #include <datasource_cache.hpp>
+#include <load_map.hpp>
+#include <save_map.hpp>
 
 void render_to_file(const mapnik::Map& map,
                     const std::string& file,
@@ -95,6 +97,8 @@ BOOST_PYTHON_MODULE(_mapnik)
     using mapnik::datasource;
     using mapnik::coord;
     using mapnik::filter_ptr;
+    using mapnik::load_map;
+    using mapnik::save_map;
     
     export_query();
     
@@ -141,5 +145,9 @@ BOOST_PYTHON_MODULE(_mapnik)
     
     def("render_to_file",&render_to_file);
     def("render",&render);
+    
+    def("load_map",&load_map,"load Map object from XML");
+    def("save_map",&load_map,"sace Map object to XML");
+    
     register_ptr_to_python<filter_ptr>();
 }
