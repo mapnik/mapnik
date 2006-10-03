@@ -43,8 +43,8 @@ namespace mapnik
         Envelope<double> currentExtent_;
         
     public:
-        
-        typedef  std::map<std::string,feature_type_style>::const_iterator style_iterator;
+ 
+        typedef std::map<std::string,feature_type_style>::const_iterator style_iterator;
         
         Map();
         Map(int width,int height,int srid=-1);
@@ -76,7 +76,7 @@ namespace mapnik
         void pan_and_zoom(int x,int y,double zoom);
         const Envelope<double>& getCurrentExtent() const;
         double scale() const;
-        virtual ~Map();
+        ~Map();
     private:
         void fixAspectRatio();
     };

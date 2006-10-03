@@ -251,6 +251,6 @@ namespace mapnik
             return currentExtent_.width()/width_;
         return currentExtent_.width();
     }
-
+    
     Map::~Map() {}
 }

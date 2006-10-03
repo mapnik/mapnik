@@ -25,8 +25,6 @@
 #include <boost/get_pointer.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 
-//#include <mapnik.hpp>
-
 void export_color();
 void export_layer();
 void export_parameters();
@@ -49,12 +47,10 @@ void export_raster_symbolizer();
 void export_text_symbolizer();
 void export_font_engine();
 
-//using namespace mapnik;
 #include <map.hpp>
 #include <agg_renderer.hpp>
 #include <graphics.hpp>
-//#include <filter.hpp>
-//#include <coord.hpp>
+#include <datasource_cache.hpp>
 
 void render_to_file(const mapnik::Map& map,
                     const std::string& file,
@@ -72,6 +68,25 @@ void render(const mapnik::Map& map,mapnik::Image32& image)
     ren.apply();
 }
 
+namespace  
+{
+    //user-friendly wrapper that uses Python dictionary
+    using namespace boost::python;
+    boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
+    {
+        mapnik::parameters params;
+        boost::python::list keys=d.keys();
+        for (int i=0; i<len(keys); ++i)
+        {
+            std::string key=extract<std::string>(keys[i]);
+            std::string value=extract<std::string>(d[key]);
+            params[key] = value;
+        }
+        
+        return mapnik::datasource_cache::create(params);
+    }
+}
+
 BOOST_PYTHON_MODULE(_mapnik)
 {
     using namespace boost::python;
@@ -87,11 +102,16 @@ BOOST_PYTHON_MODULE(_mapnik)
       ;
     
     class_<datasource,boost::shared_ptr<datasource>,
-      boost::noncopyable>("Datasource",no_init)
-      .def("envelope",&datasource::envelope,
-	   return_value_policy<reference_existing_object>())
-      .def("features",&datasource::features)
-      ;
+        boost::noncopyable>("Datasource",no_init)
+        .def("envelope",&datasource::envelope,
+             return_value_policy<reference_existing_object>())
+        .def("features",&datasource::features)
+        .def("params",&datasource::params,return_value_policy<reference_existing_object>(), 
+             "The configuration parameters of the data source. "  
+             "These vary depending on the type of data source.")
+        ;
+    
+    def("CreateDatasource",&create_datasource);
     
     export_parameters();
     export_color(); 
@@ -111,13 +131,14 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_raster_symbolizer();
     export_text_symbolizer();
     export_font_engine();
+    
     class_<coord<double,2> >("Coord",init<double,double>())
         .def_readwrite("x", &coord<double,2>::x)
         .def_readwrite("y", &coord<double,2>::y)
         ;
-
+    
     export_map();
-  
+    
     def("render_to_file",&render_to_file);
     def("render",&render);
     register_ptr_to_python<filter_ptr>();

@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
@@ -75,26 +75,26 @@ namespace mapnik
             }
             std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
         }
-	catch (datasource_exception& ex)
-	{
-	    std::clog<<ex.what()<<std::endl;
-	}
+        catch (datasource_exception& ex)
+        {
+            std::clog<<ex.what()<<std::endl;
+        }
         catch (...)
         {
-            std::clog<<"exception caught "<<std::endl;
+            std::clog<<" exception caught\n";
         }
         return ds;
     }
 
     bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
     {	      
-	return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>(new PluginInfo(type,module)))).second;     
+        return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>(new PluginInfo(type,module)))).second;     
     }
 
     void datasource_cache::register_datasources(const std::string& str)
     {	
         mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache, 
-            mapnik::CreateStatic>::mutex_);
+                                mapnik::CreateStatic>::mutex_);
         filesystem::path path(str);
         filesystem::directory_iterator end_itr;
         if (exists(path))

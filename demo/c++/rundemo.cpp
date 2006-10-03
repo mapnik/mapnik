@@ -1,5 +1,13 @@
 
-#include <mapnik.hpp>
+#include <map.hpp>
+
+#include <datasource_cache.hpp>
+#include <font_engine_freetype.hpp>
+#include <agg_renderer.hpp>
+#include <filter_factory.hpp>
+#include <color_factory.hpp>
+#include <image_util.hpp>
+
 #include <iostream>
 
 using namespace mapnik;
@@ -133,11 +141,11 @@ int main ( int argc , char** argv)
     // Provincial  polygons
     {
         parameters p;
-        p["name"]="Provinces";
         p["type"]="shape";
         p["file"]="../data/boundaries";
         
-        Layer lyr(p); 
+        Layer lyr("Provinces"); 
+        lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("provinces");    
         m.addLayer(lyr);
     }
@@ -145,21 +153,21 @@ int main ( int argc , char** argv)
     // Drainage
     {
         parameters p;
-        p["name"]="Quebec Hydrography";
         p["type"]="shape";
         p["file"]="../data/qcdrainage";
-        
-        Layer lyr(p); 
+        Layer lyr("Quebec Hydrography");
+        lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("drainage");    
         m.addLayer(lyr);
     }
+    
     {
         parameters p;
-        p["name"]="Ontario Hydrography";
         p["type"]="shape";
         p["file"]="../data/ontdrainage";
         
-        Layer lyr(p); 
+        Layer lyr("Ontario Hydrography"); 
+        lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("drainage");    
         m.addLayer(lyr);
     }
@@ -167,11 +175,10 @@ int main ( int argc , char** argv)
     // Provincial boundaries
     {
         parameters p;
-        p["name"]="Provincial borders";
         p["type"]="shape";
         p["file"]="../data/boundaries_l";
-        
-        Layer lyr(p); 
+        Layer lyr("Provincial borders"); 
+        lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("provlines");    
         m.addLayer(lyr);
     }
@@ -179,29 +186,29 @@ int main ( int argc , char** argv)
     // Roads
     {
         parameters p;
-        p["name"]="Roads";
         p["type"]="shape";
-        p["file"]="../data/roads";
-        
-        Layer lyr(p); 
+        p["file"]="../data/roads";        
+        Layer lyr("Roads"); 
+        lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("smallroads");
         lyr.add_style("road-border");
         lyr.add_style("road-fill");
         lyr.add_style("highway-border");
         lyr.add_style("highway-fill");
+
         m.addLayer(lyr);        
     }
     // popplaces
     {
         parameters p;
-        p["name"]="Populated Places";
         p["type"]="shape";
         p["file"]="../data/popplaces";
-        
-        Layer lyr(p); 
+        Layer lyr("Populated Places");
+        lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("popplaces");    
         m.addLayer(lyr);
     }
+    
     m.zoomToBox(Envelope<double>(1405120.04127408,-247003.813399447,1706357.31328276,-25098.593149577));
     
     Image32 buf(m.getWidth(),m.getHeight());

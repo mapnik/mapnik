@@ -32,7 +32,6 @@ linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 
 source = Split(
     """
-    mapnik.cpp
     datasource_cache.cpp
     envelope.cpp
     graphics.cpp

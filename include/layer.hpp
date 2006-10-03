@@ -15,11 +15,10 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * #include <boost/serialization/serialization.hpp>
-License along with this library; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*
-*****************************************************************************/
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *****************************************************************************/
 //$Id: layer.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
 #ifndef LAYER_HPP
@@ -34,7 +33,6 @@ namespace mapnik
 {
     class MAPNIK_DECL Layer
     {
-        parameters params_;
         std::string name_;
         std::string title_;
         std::string abstract_;
@@ -42,20 +40,18 @@ namespace mapnik
         double maxZoom_;
         bool active_;
         bool selectable_;
-	
+        
         std::vector<std::string>  styles_;
         std::string selection_style_;
-
+        
         mutable std::vector<boost::shared_ptr<Feature> > selection_;
         mutable datasource_p ds_;
         
     public:
-        Layer();
-        explicit Layer(const parameters& params);
+        explicit Layer(std::string const& name);
         Layer(Layer const& l);
         Layer& operator=(Layer const& l);
         bool operator==(Layer const& other) const;
-        parameters const& params() const;
         void set_name(std::string const& name);
         const std::string& name() const;
         void set_title(std::string const& title);
@@ -79,9 +75,9 @@ namespace mapnik
         std::vector<boost::shared_ptr<Feature> >& selection() const;
         void clear_selection() const;
         void set_datasource(datasource_p const& ds);
-        datasource_p const& datasource() const;
+        datasource_p datasource() const;
         Envelope<double> envelope() const;
-        virtual ~Layer();
+        ~Layer();
     private:
         void swap(const Layer& other);
     };

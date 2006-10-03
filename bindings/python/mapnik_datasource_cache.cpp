@@ -33,15 +33,15 @@ void export_datasource_cache()
     using namespace boost::python;
     class_<singleton<datasource_cache,CreateStatic>,boost::noncopyable>("Singleton",no_init)
         .def("instance",&singleton<datasource_cache,CreateStatic>::instance,
-	     return_value_policy<reference_existing_object>())
+             return_value_policy<reference_existing_object>())
         .staticmethod("instance")
         ;
-
+    
     class_<datasource_cache,bases<singleton<datasource_cache,CreateStatic> >,
         boost::noncopyable>("DatasourceCache",no_init)
         .def("create",&datasource_cache::create)
         .staticmethod("create")
-	.def("register_datasources",&datasource_cache::register_datasources)
-	.staticmethod("register_datasources")
+        .def("register_datasources",&datasource_cache::register_datasources)
+        .staticmethod("register_datasources")
         ;
 }

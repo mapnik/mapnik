@@ -42,7 +42,7 @@
 #include "expression.hpp"
 #include "filter.hpp"
 #include "regex_filter.hpp"
-
+#include "logical.hpp"
 
 using namespace boost::spirit;
 using std::string;

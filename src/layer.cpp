@@ -34,9 +34,8 @@
 namespace mapnik
 {
     using namespace std;
-    Layer::Layer()
-        : params_(),
-          name_("unknown"),
+    Layer::Layer(std::string const& name)
+        : name_(name),
           title_(""),
           abstract_(""),
           minZoom_(0),
@@ -45,31 +44,18 @@ namespace mapnik
           selectable_(false),
           selection_style_("default_selection")
     {}
-
-    Layer::Layer(const parameters& params)
-        :params_(params),
-         name_(params_["name"]),
-         title_(params_["title"]),
-         abstract_(params_["abstract"]),
-         minZoom_(0),
-         maxZoom_(std::numeric_limits<double>::max()),
-         active_(true),
-         selectable_(false),
-         selection_style_("default_selection")
-    {}
     
     Layer::Layer(const Layer& rhs)
-        :params_(rhs.params_),
-         name_(rhs.name_),
-         title_(rhs.title_),
-         abstract_(rhs.abstract_),
-         minZoom_(rhs.minZoom_),
-         maxZoom_(rhs.maxZoom_),
-         active_(rhs.active_),
-         selectable_(rhs.selectable_),
-         ds_(rhs.ds_),
-         styles_(rhs.styles_),
-         selection_style_(rhs.selection_style_) {}
+        : name_(rhs.name_),
+          title_(rhs.title_),
+          abstract_(rhs.abstract_),
+          minZoom_(rhs.minZoom_),
+          maxZoom_(rhs.maxZoom_),
+          active_(rhs.active_),
+          selectable_(rhs.selectable_),
+          styles_(rhs.styles_),
+          ds_(rhs.ds_),
+          selection_style_(rhs.selection_style_) {}
     
     Layer& Layer::operator=(const Layer& rhs)
     {
@@ -85,7 +71,6 @@ namespace mapnik
     
     void Layer::swap(const Layer& rhs)
     {
-        params_=rhs.params_;
         name_=rhs.name_;
         title_=rhs.title_;
         abstract_=rhs.abstract_;
@@ -93,17 +78,12 @@ namespace mapnik
         maxZoom_=rhs.maxZoom_;
         active_=rhs.active_;
         selectable_=rhs.selectable_;
-        ds_=rhs.ds_;
         styles_=rhs.styles_;
+        ds_=rhs.ds_;
         selection_style_=rhs.selection_style_;
     }
-
+    
     Layer::~Layer() {}
-
-    parameters const& Layer::params() const
-    {
-        return params_;
-    }
     
     void Layer::set_name( std::string const& name)
     {
@@ -124,7 +104,7 @@ namespace mapnik
     {
         return title_;
     }
-
+    
     void Layer::set_abstract( std::string const& abstract)
     {
         abstract_ = abstract;
@@ -190,22 +170,11 @@ namespace mapnik
         return selectable_;
     }
 
-    const datasource_p& Layer::datasource() const
+    datasource_p Layer::datasource() const
     {
-        if (!ds_)
-        {
-            try
-            {
-                ds_=datasource_cache::instance()->create(params_);
-            }
-            catch (...)
-            {
-                std::clog << "exception caught : can not create datasource" << std::endl;  
-            }
-        }
         return ds_;
     }
-    // TODO: !!!!
+    
     void Layer::set_datasource(datasource_p const& ds)
     {
         ds_ = ds;
@@ -213,14 +182,10 @@ namespace mapnik
     
     Envelope<double> Layer::envelope() const
     {
-        datasource_p const& ds = datasource();
-        if (ds)
-        {
-            return ds->envelope();
-        }
+        if (ds_) return ds_->envelope();
     	return Envelope<double>();
     }
-
+    
     void Layer::selection_style(const std::string& name) 
     {
         selection_style_=name;

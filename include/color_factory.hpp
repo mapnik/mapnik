@@ -25,6 +25,7 @@
 #ifndef COLOR_FACTORY_HPP
 #define COLOR_FACTORY_HPP
 
+#include "config.hpp"
 #include "css_color_parser.hpp"
 
 namespace mapnik
@@ -33,19 +34,19 @@ namespace mapnik
     class MAPNIK_DECL color_factory
     {
     public:
-	static Color from_string(char const* css_color)
-	{   
-	    Color color;
-	    actions<Color> a(color);
-	    css_color_grammar<actions<Color> > grammar(a);
-	    parse_info<> info = parse(css_color, grammar, space_p);
-	    if (info.full) return color;
-	    return Color(0,0,0);	
-	}    
+        static Color from_string(char const* css_color)
+        {   
+            Color color;
+            actions<Color> a(color);
+            css_color_grammar<actions<Color> > grammar(a);
+            parse_info<> info = parse(css_color, grammar, space_p);
+            if (info.full) return color;
+            return Color(0,0,0);	
+        }    
     private:
-	color_factory();
-	color_factory(color_factory const&);
-	color_factory& operator=(color_factory const&);
+        color_factory();
+        color_factory(color_factory const&);
+        color_factory& operator=(color_factory const&);
     };
 }
 

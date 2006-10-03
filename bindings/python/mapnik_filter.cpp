@@ -28,7 +28,6 @@
 #include <regex_filter.hpp>
 #include <filter.hpp>
 #include <filter_factory.hpp>
-#include <mapnik.hpp>
 
 using mapnik::filter;
 using mapnik::filter_ptr;

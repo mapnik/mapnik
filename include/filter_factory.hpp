@@ -35,24 +35,26 @@ namespace mapnik
     class MAPNIK_DECL filter_factory
     {
     public:
-	static filter_ptr compile(string const& str)
-	{
-	    stack<shared_ptr<filter<FeatureT> > > filters;
-	    stack<shared_ptr<expression<FeatureT> > > exps;
-	    filter_grammar<FeatureT> grammar(filters,exps);
-	    char const *text = str.c_str();
-	    parse_info<> info = parse(text,text+strlen(text),grammar,space_p);
-	    if (info.full && !filters.empty())
-	    {
-		return filters.top();	
-	    }
-	    else 
-	    {
-		clog << "failed at :" << info.stop << "\n";
-		return filter_ptr(new none_filter<FeatureT>());
-	    }  
-	}
+        static filter_ptr compile(string const& str)
+        {
+            stack<shared_ptr<filter<FeatureT> > > filters;
+            stack<shared_ptr<expression<FeatureT> > > exps;
+            filter_grammar<FeatureT> grammar(filters,exps);
+            char const *text = str.c_str();
+            parse_info<> info = parse(text,text+strlen(text),grammar,space_p);
+            if (info.full && !filters.empty())
+            {
+                return filters.top();	
+            }
+            else 
+            {
+                clog << "failed at :" << info.stop << "\n";
+                return filter_ptr(new none_filter<FeatureT>());
+            }  
+        }
     };
+
+    MAPNIK_DECL filter_ptr create_filter (std::string const& wkt);
 }
 
 #endif //FILTER_FACTORY_HPP

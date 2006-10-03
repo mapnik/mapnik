@@ -34,13 +34,13 @@ void export_style()
     using mapnik::rules;
 
     class_<rules>("Rules",init<>("default ctor"))
-	.def(vector_indexing_suite<rules>())
-	;
+        .def(vector_indexing_suite<rules>())
+        ;
     class_<feature_type_style>("Style",init<>("default style constructor"))
-	.add_property("rules",make_function
-		      (&feature_type_style::get_rules,
-               return_value_policy<reference_existing_object>()))
-	;
+        .add_property("rules",make_function
+                      (&feature_type_style::get_rules,
+                       return_value_policy<reference_existing_object>()))
+        ;
     
 }
 
