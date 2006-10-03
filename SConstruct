@@ -60,7 +60,7 @@ conf = Configure(env)
 
 # Libraries and headers dependency checks
 
-env['CPPPATH'] = ['#agg/include', '#include']
+env['CPPPATH'] = ['#agg/include', '#include', '#']
 
 for path in [env['BOOST_INCLUDES'], env['PNG_INCLUDES'], env['JPEG_INCLUDES'], env['TIFF_INCLUDES'], env['PGSQL_INCLUDES'], env['PROJ_INCLUDES']]:
     if path not in env['CPPPATH']: env['CPPPATH'].append(path)

@@ -51,6 +51,8 @@ source = Split(
     line_pattern_symbolizer.cpp
     text_symbolizer.cpp
     font_engine_freetype.cpp
+    load_map.cpp
+    save_map.cpp
     """
     )
 
