@@ -73,6 +73,7 @@ for path in [env['BOOST_LIBS'], env['PNG_LIBS'], env['JPEG_LIBS'], env['TIFF_LIB
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
 
 C_LIBSHEADERS = [
+    ['m', 'math.h', True],
     ['ltdl', 'ltdl.h', True],
     ['png', 'png.h', True],
     ['tiff', 'tiff.h', True],
