@@ -32,32 +32,33 @@ linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 
 source = Split(
     """
+    agg_renderer.cpp
     datasource_cache.cpp
     envelope.cpp
+    filter_factory.cpp
+    font_engine_freetype.cpp
     graphics.cpp
     image_reader.cpp
     image_util.cpp
     layer.cpp
+    line_pattern_symbolizer.cpp
+    load_map.cpp
     map.cpp
     memory.cpp
     params.cpp
     plugin.cpp
     png_reader.cpp
-    tiff_reader.cpp
-    wkb.cpp
-    agg_renderer.cpp
     point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
-    line_pattern_symbolizer.cpp
-    text_symbolizer.cpp
-    font_engine_freetype.cpp
-    load_map.cpp
     save_map.cpp
+    text_symbolizer.cpp
+    tiff_reader.cpp
+    wkb.cpp
     """
     )
 
 mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
 
-env.Alias(target='install', source=env.Install(prefix + '/' + env['LIB_PLATFORM'], mapnik))
-includes = glob.glob('../include' + '/*.hpp')
+env.Alias(target='install', source=env.Install(prefix + '/' + env['LIBDIR_SCHEMA'], mapnik))
+includes = glob.glob('../include/mapnik' + '/*.hpp')
 env.Alias(target='install', source=env.Install(prefix+'/include/mapnik', includes))

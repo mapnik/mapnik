@@ -59,10 +59,10 @@ class _Envelope(Envelope,_injector):
         return 'Envelope(%s,%s,%s,%s)' % \
                (self.minx,self.miny,self.maxx,self.maxy)
 
-def Layer (**keywords):
-    return CreateLayer(keywords)
-    
-    
+def Datasource (**keywords):
+    return CreateDatasource(keywords)
+
+
 #register datasources
 from mapnik import DatasourceCache
 DatasourceCache.instance().register_datasources('%s' % inputpluginspath)

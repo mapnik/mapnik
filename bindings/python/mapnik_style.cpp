@@ -23,7 +23,8 @@
 
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <feature_type_style.hpp>
+
+#include <mapnik/feature_type_style.hpp>
 
 void export_style()
 {

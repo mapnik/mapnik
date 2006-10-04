@@ -21,12 +21,11 @@
  *****************************************************************************/
 //$Id$
 
-
 #include <boost/python.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <rule.hpp>
 
+#include <mapnik/rule.hpp>
 
 void export_rule()
 {
@@ -45,7 +44,7 @@ void export_rule()
     using mapnik::text_symbolizer;
     using mapnik::symbolizer;
     using mapnik::symbolizers;
-
+    
     
     implicitly_convertible<point_symbolizer,symbolizer>();
     implicitly_convertible<line_symbolizer,symbolizer>();

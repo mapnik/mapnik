@@ -20,15 +20,15 @@
  *
  *****************************************************************************/
 
-#ifndef DBFFILE_HH
-#define DBFFILE_HH
+#ifndef DBFFILE_HPP
+#define DBFFILE_HPP
 
 #include <vector>
 #include <string>
 #include <fstream>
 #include <cassert>
 
-#include "feature.hpp"
+#include <mapnik/feature.hpp>
 
 using namespace mapnik;
 
@@ -44,34 +44,35 @@ struct field_descriptor
 
 class dbf_file
 {
-    private:
+private:
 
-        int num_records_;
-        int num_fields_;
-        int record_length_;
-        std::vector<field_descriptor> fields_;
-        std::ifstream file_;
-        char* record_;
-    public:
-        dbf_file();
-        dbf_file(const char* file_name);
-        dbf_file(const std::string& file_name);
-        ~dbf_file();
-        bool open(const std::string& file_name);
-        bool is_open();
-        void close();
-        int num_records() const;
-        int num_fields() const;
-        field_descriptor const& descriptor(int col) const;
-        void move_to(int index);
-        std::string string_value(int col) const;
-        void add_attribute(int col,Feature const& f) const throw();
-    private:
-        dbf_file(const dbf_file&);
-        dbf_file& operator=(const dbf_file&);
-        void read_header();
-        int read_short();
-        int read_int();
-        void skip(int bytes);
+    int num_records_;
+    int num_fields_;
+    int record_length_;
+    std::vector<field_descriptor> fields_;
+    std::ifstream file_;
+    char* record_;
+public:
+    dbf_file();
+    dbf_file(const char* file_name);
+    dbf_file(const std::string& file_name);
+    ~dbf_file();
+    bool open(const std::string& file_name);
+    bool is_open();
+    void close();
+    int num_records() const;
+    int num_fields() const;
+    field_descriptor const& descriptor(int col) const;
+    void move_to(int index);
+    std::string string_value(int col) const;
+    void add_attribute(int col,Feature const& f) const throw();
+private:
+    dbf_file(const dbf_file&);
+    dbf_file& operator=(const dbf_file&);
+    void read_header();
+    int read_short();
+    int read_int();
+    void skip(int bytes);
 };
-#endif                                            //DBFFILE_HH
+
+#endif //DBFFILE_HPP

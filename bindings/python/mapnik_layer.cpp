@@ -25,7 +25,7 @@
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <layer.hpp>
+#include <mapnik/layer.hpp>
 
 using mapnik::Layer;
 using mapnik::parameters;

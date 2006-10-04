@@ -23,7 +23,7 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include "datasource_cache.hpp"
+#include <mapnik/datasource_cache.hpp>
 
 void export_datasource_cache()
 {

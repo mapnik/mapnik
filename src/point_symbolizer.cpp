@@ -21,11 +21,14 @@
  *****************************************************************************/
 
 //$Id$
-
+// stl
+#include <iostream>
+// boost
 #include <boost/scoped_ptr.hpp>
-#include "point_symbolizer.hpp"
-#include "image_data.hpp"
-#include "image_reader.hpp"
+// mapnik
+#include <mapnik/point_symbolizer.hpp>
+#include <mapnik/image_data.hpp>
+#include <mapnik/image_reader.hpp>
 
 namespace mapnik
 {

@@ -22,7 +22,7 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <raster_symbolizer.hpp>
+#include <mapnik/raster_symbolizer.hpp>
 
 void export_raster_symbolizer()
 {

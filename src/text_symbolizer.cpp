@@ -22,7 +22,7 @@
 
 //$Id$
 
-#include "text_symbolizer.hpp"
+#include <mapnik/text_symbolizer.hpp>
 
 namespace mapnik
 {

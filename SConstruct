@@ -22,37 +22,34 @@
 
 import os, sys, platform
 
-
-
 if platform.uname()[4] == 'x86_64':
-    LIB_PLATFORM = 'lib64'
-else :
-    LIB_PLATFORM = 'lib'
+    LIBDIR_SCHEMA='lib64' 
+else:
+    LIBDIR_SCHEMA='lib'
 
-    
 opts = Options()
-
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include'))
-opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIB_PLATFORM))
+opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('FREETYPE_CONFIG', 'The path to the freetype-config executable.', '/usr/bin/freetype-config'))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
-opts.Add(PathOption('PNG_LIBS', 'Search path for libpng include files', '/usr/' + LIB_PLATFORM))
+opts.Add(PathOption('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include'))
-opts.Add(PathOption('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIB_PLATFORM))
+opts.Add(PathOption('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include'))
-opts.Add(PathOption('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIB_PLATFORM))
+opts.Add(PathOption('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include'))
-opts.Add(PathOption('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIB_PLATFORM))
+opts.Add(PathOption('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include'))
-opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 include files', '/usr/local/' + LIB_PLATFORM))
+opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 include files', '/usr/local/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PYTHON','Python executable', sys.executable))
 opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
+
 opts.Add('DEBUG', 'Compile a debug version of mapnik', '')
 
 env = Environment(ENV=os.environ, options=opts)
-env['LIB_PLATFORM'] = LIB_PLATFORM
+env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
 
 Help(opts.GenerateHelpText(env))
 

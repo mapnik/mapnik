@@ -21,14 +21,15 @@
  *****************************************************************************/
 
 //$Id: tiff_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
-
+// stl
 #include <iostream>
-#include "image_reader.hpp"
+// mapnik
+#include <mapnik/image_reader.hpp>
+
 extern "C" 
 {
    #include <tiffio.h>    
 }
-
 
 namespace mapnik 
 {

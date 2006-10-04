@@ -23,8 +23,8 @@
 #ifndef SHAPE_FS_HH
 #define SHAPE_FS_HH
 
+#include <mapnik/geom_util.hpp>
 #include "shape.hpp"
-#include "geom_util.hpp"
 
 using namespace mapnik;
 
@@ -42,7 +42,7 @@ class MAPNIK_DECL shape_featureset : public Featureset
     mutable int count_;
 public:
     shape_featureset(const filterT& filter, const std::string& shape_file,
-		     const std::set<std::string>& attribute_names,long file_length);
+                     const std::set<std::string>& attribute_names,long file_length);
     virtual ~shape_featureset();
     feature_ptr next();
 private:

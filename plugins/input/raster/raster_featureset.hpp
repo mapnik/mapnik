@@ -22,9 +22,10 @@
 #ifndef RASTER_FEATURESET_HH
 #define RASTER_FEATURESET_HH
 
+#include <vector>
+
 #include "raster_datasource.hpp"
 #include "raster_info.hpp"
-#include <vector>
 
 using std::vector;
 

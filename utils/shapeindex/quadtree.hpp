@@ -23,10 +23,11 @@
 
 #ifndef QUADTREE_HH
 #define QUADTREE_HH
-
-#include "envelope.hpp"
+// stl
 #include <vector>
 #include <fstream>
+// mapnik
+#include <mapnik/envelope.hpp>
 
 using namespace mapnik;
 

@@ -24,13 +24,10 @@
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
-#include <graphics.hpp>
+#include <mapnik/graphics.hpp>
 
 using mapnik::Image32;
-
-
 using namespace boost::python;
-
 
 PyObject* rawdata( Image32 const& im)
 {

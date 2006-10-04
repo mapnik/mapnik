@@ -20,12 +20,12 @@
  *
  *****************************************************************************/
 
-//$Id: map.cpp 17 2005-03-08 23:58:43Z pavlenko $
+//$Id: map.cpp 17 2005-03-08 23:58:43Z pavlenko $,
 
-#include "style.hpp"
-#include "datasource.hpp"
-#include "layer.hpp"
-#include "map.hpp"
+#include <mapnik/style.hpp>
+#include <mapnik/datasource.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/map.hpp>
 
 namespace mapnik
 {

@@ -21,8 +21,11 @@
  *****************************************************************************/
 //$Id$
 
-#include "agg_renderer.hpp"
-
+// stl
+#include <iostream>
+// boost
+#include <boost/utility.hpp>
+// agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_rasterizer_scanline_aa.h"
@@ -52,12 +55,11 @@
 #include "agg_renderer_scanline.h"
 #include "agg_pattern_filters_rgba.h"
 #include "agg_renderer_outline_image.h"
+// mapnik
+#include <mapnik/image_util.hpp>
+#include <mapnik/agg_renderer.hpp>
 
-#include <boost/utility.hpp>
-#include <iostream>
-#include "image_util.hpp"
-
-namespace mapnik
+namespace mapnik 
 {
     class pattern_source : private boost::noncopyable
     {
@@ -76,7 +78,10 @@ namespace mapnik
         agg::rgba8 pixel(int x, int y) const
         {
             unsigned c = pattern_(x,y);
-            return agg::rgba8(c & 0xff, (c >> 8) & 0xff, (c >> 16) & 0xff,(c >> 24) & 0xff);
+            return agg::rgba8(c & 0xff, 
+                              (c >> 8) & 0xff, 
+                              (c >> 16) & 0xff,
+                              (c >> 24) & 0xff);
         }
     private:
         ImageData32 const& pattern_;
@@ -97,7 +102,8 @@ namespace mapnik
     template <typename T>
     void agg_renderer<T>::start_map_processing(Map const& map)
     {
-        std::clog << "start map processing bbox=" << map.getCurrentExtent() <<  std::endl;
+        std::clog << "start map processing bbox=" 
+                  << map.getCurrentExtent() << "\n";
     }
 
     template <typename T>
@@ -460,7 +466,6 @@ namespace mapnik
                 }
             }  
         }
-    }
-    
+    }   
     template class agg_renderer<Image32>;
 }

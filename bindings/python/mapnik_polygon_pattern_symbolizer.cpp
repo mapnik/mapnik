@@ -22,7 +22,7 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <polygon_pattern_symbolizer.hpp>
+#include <mapnik/polygon_pattern_symbolizer.hpp>
 
 void export_polygon_pattern_symbolizer()
 {

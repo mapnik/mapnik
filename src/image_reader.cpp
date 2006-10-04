@@ -21,9 +21,8 @@
  *****************************************************************************/
 //$Id: image_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
-
-#include "image_reader.hpp"
-#include "factory.hpp"
+#include <mapnik/factory.hpp>
+#include <mapnik/image_reader.hpp>
 
 namespace mapnik
 {  

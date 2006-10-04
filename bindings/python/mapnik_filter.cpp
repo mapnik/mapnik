@@ -22,12 +22,13 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <spatial.hpp>
-#include <logical.hpp>
-#include <comparison.hpp>
-#include <regex_filter.hpp>
-#include <filter.hpp>
-#include <filter_factory.hpp>
+
+#include <mapnik/spatial.hpp>
+#include <mapnik/logical.hpp>
+#include <mapnik/comparison.hpp>
+#include <mapnik/regex_filter.hpp>
+#include <mapnik/filter.hpp>
+#include <mapnik/filter_factory.hpp>
 
 using mapnik::filter;
 using mapnik::filter_ptr;

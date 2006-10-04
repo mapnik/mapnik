@@ -22,7 +22,7 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <point_symbolizer.hpp>
+#include <mapnik/point_symbolizer.hpp>
 
 void export_point_symbolizer()
 {

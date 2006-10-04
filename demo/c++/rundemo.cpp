@@ -21,14 +21,13 @@
  *****************************************************************************/
 // $Id$
 
-#include <map.hpp>
-
-#include <datasource_cache.hpp>
-#include <font_engine_freetype.hpp>
-#include <agg_renderer.hpp>
-#include <filter_factory.hpp>
-#include <color_factory.hpp>
-#include <image_util.hpp>
+#include <mapnik/map.hpp>
+#include <mapnik/datasource_cache.hpp>
+#include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/agg_renderer.hpp>
+#include <mapnik/filter_factory.hpp>
+#include <mapnik/color_factory.hpp>
+#include <mapnik/image_util.hpp>
 
 #include <iostream>
 
@@ -231,7 +230,8 @@ int main ( int argc , char** argv)
         m.addLayer(lyr);
     }
     
-    m.zoomToBox(Envelope<double>(1405120.04127408,-247003.813399447,1706357.31328276,-25098.593149577));
+    m.zoomToBox(Envelope<double>(1405120.04127408,-247003.813399447,
+                                 1706357.31328276,-25098.593149577));
     
     Image32 buf(m.getWidth(),m.getHeight());
     agg_renderer<Image32> ren(m,buf);

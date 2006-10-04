@@ -23,8 +23,8 @@
 
 
 #include <boost/python.hpp>
-#include <color.hpp>
-#include <color_factory.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/color_factory.hpp>
 
 using mapnik::Color;
 using mapnik::color_factory;

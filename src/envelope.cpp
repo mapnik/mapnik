@@ -21,34 +21,34 @@
  *****************************************************************************/
 //$Id: envelope.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
-#include "envelope.hpp"
+#include <mapnik/envelope.hpp>
 
 namespace mapnik
 {
     template <typename T>
-        Envelope<T>::Envelope()
+    Envelope<T>::Envelope()
         :minx_(0),miny_(0),maxx_(-1),maxy_(-1) {}
 
     template <typename T>
-        Envelope<T>::Envelope(T minx_,T miny_,T maxx_,T maxy_)
+    Envelope<T>::Envelope(T minx_,T miny_,T maxx_,T maxy_)
     {
         init(minx_,miny_,maxx_,maxy_);
     }
 
     template <typename T>
-        Envelope<T>::Envelope(const coord<T,2> &c0,const coord<T,2> &c1)
+    Envelope<T>::Envelope(const coord<T,2> &c0,const coord<T,2> &c1)
     {
         init(c0.x,c0.y,c1.x,c1.y);
     }
 
     template <typename T>
-        Envelope<T>::Envelope(const Envelope &rhs)
+    Envelope<T>::Envelope(const Envelope &rhs)
     {
         init(rhs.minx_,rhs.miny_,rhs.maxx_,rhs.maxy_);
     }
 
     template <typename T>
-        inline bool Envelope<T>::operator==(const Envelope<T>& other) const
+    inline bool Envelope<T>::operator==(const Envelope<T>& other) const
     {
         return minx_==other.minx_ &&
             miny_==other.miny_ &&
@@ -57,43 +57,43 @@ namespace mapnik
     }
 
     template <typename T>
-        inline T Envelope<T>::minx() const
+    inline T Envelope<T>::minx() const
     {
         return minx_;
     }
 
     template <typename T>
-        inline T Envelope<T>::maxx() const
+    inline T Envelope<T>::maxx() const
     {
         return maxx_;
     }
 
     template <typename T>
-        inline T Envelope<T>::miny() const
+    inline T Envelope<T>::miny() const
     {
         return miny_;
     }
 
     template <typename T>
-        inline T Envelope<T>::maxy() const
+    inline T Envelope<T>::maxy() const
     {
         return maxy_;
     }
 
     template <typename T>
-        inline T Envelope<T>::width() const
+    inline T Envelope<T>::width() const
     {
         return maxx_-minx_;
     }
 
     template <typename T>
-        inline T Envelope<T>::height() const
+    inline T Envelope<T>::height() const
     {
         return maxy_-miny_;
     }
 
     template <typename T>
-        inline void Envelope<T>::width(T w)
+    inline void Envelope<T>::width(T w)
     {
         T cx=center().x;
         minx_=static_cast<T>(cx-w*0.5);
@@ -101,7 +101,7 @@ namespace mapnik
     }
 
     template <typename T>
-        inline void Envelope<T>::height(T h)
+    inline void Envelope<T>::height(T h)
     {
         T cy=center().y;
         miny_=static_cast<T>(cy-h*0.5);
@@ -109,20 +109,20 @@ namespace mapnik
     }
 
     template <typename T>
-        inline coord<T,2> Envelope<T>::center() const
+    inline coord<T,2> Envelope<T>::center() const
     {
         return coord<T,2>(static_cast<T>(0.5*(minx_+maxx_)),
-            static_cast<T>(0.5*(miny_+maxy_)));
+                          static_cast<T>(0.5*(miny_+maxy_)));
     }
 
     template <typename T>
-        inline void Envelope<T>::expand_to_include(const coord<T,2>& c)
+    inline void Envelope<T>::expand_to_include(const coord<T,2>& c)
     {
         expand_to_include(c.x,c.y);
     }
 
     template <typename T>
-        inline void Envelope<T>::expand_to_include(T x,T y)
+    inline void Envelope<T>::expand_to_include(T x,T y)
     {
         if (x<minx_) minx_=x;
         if (x>maxx_) maxx_=x;
@@ -131,7 +131,7 @@ namespace mapnik
     }
 
     template <typename T>
-        void Envelope<T>::expand_to_include(const Envelope<T> &other)
+    void Envelope<T>::expand_to_include(const Envelope<T> &other)
     {
         if (other.minx_<minx_) minx_=other.minx_;
         if (other.maxx_>maxx_) maxx_=other.maxx_;
@@ -140,19 +140,19 @@ namespace mapnik
     }
 
     template <typename T>
-        inline bool Envelope<T>::contains(const coord<T,2> &c) const
+    inline bool Envelope<T>::contains(const coord<T,2> &c) const
     {
         return contains(c.x,c.y);
     }
 
     template <typename T>
-        inline bool Envelope<T>::contains(T x,T y) const
+    inline bool Envelope<T>::contains(T x,T y) const
     {
         return x>=minx_ && x<=maxx_ && y>=miny_ && y<=maxy_;
     }
 
     template <typename T>
-        inline bool Envelope<T>::contains(const Envelope<T> &other) const
+    inline bool Envelope<T>::contains(const Envelope<T> &other) const
     {
         return other.minx_>=minx_ &&
             other.maxx_<=maxx_ &&
@@ -161,26 +161,26 @@ namespace mapnik
     }
 
     template <typename T>
-        inline bool Envelope<T>::intersects(const coord<T,2> &c) const
+    inline bool Envelope<T>::intersects(const coord<T,2> &c) const
     {
         return intersects(c.x,c.y);
     }
 
     template <typename T>
-        bool Envelope<T>::intersects(T x,T y) const
+    bool Envelope<T>::intersects(T x,T y) const
     {
         return !(x>maxx_ || x<minx_ || y>maxy_ || y<miny_);
     }
 
     template <typename T>
-        inline bool Envelope<T>::intersects(const Envelope<T> &other) const
+    inline bool Envelope<T>::intersects(const Envelope<T> &other) const
     {
         return !(other.minx_>maxx_ || other.maxx_<minx_ ||
-            other.miny_>maxy_ || other.maxy_<miny_);
+                 other.miny_>maxy_ || other.maxy_<miny_);
     }
 
     template <typename T>
-        inline Envelope<T> Envelope<T>::intersect(const EnvelopeType& other) const
+    inline Envelope<T> Envelope<T>::intersect(const EnvelopeType& other) const
     {
 
         T x0=std::max(minx_,other.minx_);
@@ -193,7 +193,7 @@ namespace mapnik
     }
 
     template <typename T>
-        inline void Envelope<T>::re_center(T cx,T cy)
+    inline void Envelope<T>::re_center(T cx,T cy)
     {
         T dx=cx-center().x;
         T dy=cy-center().y;
@@ -204,7 +204,7 @@ namespace mapnik
     }
 
     template <typename T>
-        inline void Envelope<T>::init(T x0,T y0,T x1,T y1)
+    inline void Envelope<T>::init(T x0,T y0,T x1,T y1)
     {
         if (x0<x1)
         {

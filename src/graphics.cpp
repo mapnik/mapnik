@@ -21,24 +21,26 @@
  *****************************************************************************/
 //$Id: graphics.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
+// stl
 #include <cassert>
 #include <string.h>
 #include <stack>
 #include <iostream>
-#include "graphics.hpp"
-#include "image_util.hpp"
+// mapnik
+#include <mapnik/graphics.hpp>
+#include <mapnik/image_util.hpp>
 
 namespace mapnik
 {
     Image32::Image32(int width,int height)
         :width_(width),
-        height_(height),
-        data_(width,height) {}
+         height_(height),
+         data_(width,height) {}
 
     Image32::Image32(const Image32& rhs)
         :width_(rhs.width_),
-        height_(rhs.height_),
-        data_(rhs.data_) {}
+         height_(rhs.height_),
+         data_(rhs.data_) {}
 
     Image32::~Image32() {}
 

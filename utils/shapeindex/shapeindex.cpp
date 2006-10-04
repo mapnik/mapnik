@@ -21,16 +21,17 @@
  *****************************************************************************/
 //$Id: shapeindex.cc 27 2005-03-30 21:45:40Z pavlenko $
 
-#include "shape.hpp"
-#include "quadtree.hpp"
-
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/program_options.hpp>
 
 #include <iostream>
 #include <vector>
 #include <string>
+
+
+#include <boost/tokenizer.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/program_options.hpp>
+#include "quadtree.hpp"
+#include "shape.hpp"
 
 const int MAXDEPTH = 64;
 const int DEFAULT_DEPTH = 8;

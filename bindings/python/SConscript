@@ -23,7 +23,7 @@ import glob
 
 Import('env')
 
-prefix = env['PYTHON_PREFIX'] + '/'+env['LIB_PLATFORM']+ '/python' + env['PYTHON_VERSION'] + '/site-packages/'
+prefix = env['PYTHON_PREFIX'] + '/'+ 'lib' + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
 
 libraries = ['mapnik', 'boost_python%s' % env['BOOST_APPEND']]
 headers = [env['PYTHON_PREFIX'] + '/include/python' + env['PYTHON_VERSION']] + env['CPPPATH']
@@ -36,7 +36,7 @@ inputpluginspath = mapniklibpath + '/input'
 fontscollectionpath = mapniklibpath + '/fonts'
 """
 
-file('mapnik/paths.py','w').write(paths % (env['PREFIX'] + '/'+env['LIB_PLATFORM']+'/mapnik',))
+file('mapnik/paths.py','w').write(paths % (env['PREFIX'] + '/'+env['LIBDIR_SCHEMA']+'/mapnik',))
 
 pymapnik = glob.glob('mapnik/*.py')
 env.Alias(target='install', source=env.Install(prefix+'/mapnik', pymapnik))

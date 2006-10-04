@@ -22,12 +22,12 @@
 
 //$Id: shapefile.hh 33 2005-04-04 13:01:03Z pavlenko $
 
-#ifndef SHAPEFILE_HH
-#define SHAPEFILE_HH
+#ifndef SHAPEFILE_HPP
+#define SHAPEFILE_HPP
 
 #include <fstream>
 
-#include "envelope.hpp"
+#include <mapnik/envelope.hpp>
 
 using namespace mapnik;
 
@@ -37,64 +37,66 @@ struct shape_record
     size_t size;
     size_t pos;
     explicit shape_record(size_t size)
-	: data(static_cast<char*>(::operator new(sizeof(char)*size))),
-	  size(size),
-	  pos(0) {}
+        : data(static_cast<char*>(::operator new(sizeof(char)*size))),
+          size(size),
+          pos(0) {}
     
     char* rawdata()
     {
-	return &data[0]; 
+        return &data[0]; 
     }
+
     void skip(unsigned n)
     {
-	pos+=n;
+        pos+=n;
     }
+
     int read_ndr_integer()
     {
-	int val=(data[pos] & 0xff)     | 
-	    (data[pos+1] & 0xff) << 8  |
-	    (data[pos+2] & 0xff) << 16 |
-	    (data[pos+3] & 0xff) << 24;
-	pos+=4;
-	return val;
+        int val=(data[pos] & 0xff)     | 
+            (data[pos+1] & 0xff) << 8  |
+            (data[pos+2] & 0xff) << 16 |
+            (data[pos+3] & 0xff) << 24;
+        pos+=4;
+        return val;
     }
     
     int read_xdr_integer()
     {
-	int val=(data[pos] & 0xff) << 24 | 
-	    (data[pos+1] & 0xff)   << 16   |
-	    (data[pos+2] & 0xff)   << 8    |
-	    (data[pos+3] & 0xff);
-	pos+=4;
-	return val;
+        int val=(data[pos] & 0xff) << 24 | 
+            (data[pos+1] & 0xff)   << 16   |
+            (data[pos+2] & 0xff)   << 8    |
+            (data[pos+3] & 0xff);
+        pos+=4;
+        return val;
     }
     
     double read_double()
     {
-	double val;		
+        double val;		
 #ifndef WORDS_BIGENDIAN
-	std::memcpy(&val,&data[pos],8);	
+        std::memcpy(&val,&data[pos],8);	
 #else
        	long long bits = ((long long)data[pos] & 0xff) | 
-	    ((long long)data[pos+1] & 0xff) << 8   |
-	    ((long long)data[pos+2] & 0xff) << 16  |
-	    ((long long)data[pos+3] & 0xff) << 24  |
-	    ((long long)data[pos+4] & 0xff) << 32  |
-	    ((long long)data[pos+5] & 0xff) << 40  |
-	    ((long long)data[pos+6] & 0xff) << 48  |
-	    ((long long)data[pos+7] & 0xff) << 56  ;
-	std::memcpy(&val,&bits,8);
+            ((long long)data[pos+1] & 0xff) << 8   |
+            ((long long)data[pos+2] & 0xff) << 16  |
+            ((long long)data[pos+3] & 0xff) << 24  |
+            ((long long)data[pos+4] & 0xff) << 32  |
+            ((long long)data[pos+5] & 0xff) << 40  |
+            ((long long)data[pos+6] & 0xff) << 48  |
+            ((long long)data[pos+7] & 0xff) << 56  ;
+        std::memcpy(&val,&bits,8);
 #endif 
-	pos+=8;
-	return val;
+        pos+=8;
+        return val;
     }
     long remains() 
     {
-	return (size-pos);
+        return (size-pos);
     }
     ~shape_record() 
     {
-	::operator delete(data);
+        ::operator delete(data);
     }	
 };
 
@@ -113,88 +115,87 @@ public:
     
     inline void read_record(shape_record& rec)
     {
-	file_.read(rec.rawdata(),rec.size);  
+        file_.read(rec.rawdata(),rec.size);  
     }
 
     inline int read_xdr_integer()
     {
-	char b[4];
-	file_.read(b, 4);
-	return b[3] & 0xffu | (b[2] & 0xffu) << 8 |
-	    (b[1] & 0xffu) << 16 | (b[0] & 0xffu) << 24;
+        char b[4];
+        file_.read(b, 4);
+        return b[3] & 0xffu | (b[2] & 0xffu) << 8 |
+            (b[1] & 0xffu) << 16 | (b[0] & 0xffu) << 24;
     }
 
     inline int read_ndr_integer()
     {
-	char b[4];
-	file_.read(b,4);
-	return b[0]&0xffu | (b[1]&0xffu) << 8 | 
-	    (b[2]&0xffu) << 16 | (b[3]&0xffu) << 24;
+        char b[4];
+        file_.read(b,4);
+        return b[0]&0xffu | (b[1]&0xffu) << 8 | 
+            (b[2]&0xffu) << 16 | (b[3]&0xffu) << 24;
     }
 
     inline double read_double()
     {
-	double val;
+        double val;
 #ifndef WORDS_BIGENDIAN
-	file_.read(reinterpret_cast<char*>(&val),8);
+        file_.read(reinterpret_cast<char*>(&val),8);
 #else
-	char b[8];
-	file_.read(b,8);
-	long long bits = ((long long)b[0] & 0xff) | 
-	    ((long long)b[1] & 0xff) << 8   |
-	    ((long long)b[2] & 0xff) << 16  |
-	    ((long long)b[3] & 0xff) << 24  |
-	    ((long long)b[4] & 0xff) << 32  |
-	    ((long long)b[5] & 0xff) << 40  |
-	    ((long long)b[6] & 0xff) << 48  |
-	    ((long long)b[7] & 0xff) << 56  ;
-	memcpy(&val,&bits,8);
+        char b[8];
+        file_.read(b,8);
+        long long bits = ((long long)b[0] & 0xff) | 
+            ((long long)b[1] & 0xff) << 8   |
+            ((long long)b[2] & 0xff) << 16  |
+            ((long long)b[3] & 0xff) << 24  |
+            ((long long)b[4] & 0xff) << 32  |
+            ((long long)b[5] & 0xff) << 40  |
+            ((long long)b[6] & 0xff) << 48  |
+            ((long long)b[7] & 0xff) << 56  ;
+        memcpy(&val,&bits,8);
 #endif
-	return val;
+        return val;
     }
 
     inline void read_envelope(Envelope<double>& envelope)
     {
 #ifndef WORDS_BIGENDIAN
-	file_.read(reinterpret_cast<char*>(&envelope),sizeof(envelope));
+        file_.read(reinterpret_cast<char*>(&envelope),sizeof(envelope));
 #else
-	double minx=read_double();
-	double miny=read_double();
-	double maxx=read_double();
-	double maxy=read_double();
-	envelope.init(minx,miny,maxx,maxy);
+        double minx=read_double();
+        double miny=read_double();
+        double maxx=read_double();
+        double maxy=read_double();
+        envelope.init(minx,miny,maxx,maxy);
 #endif  
     }
 
     inline void skip(std::streampos bytes)
     {
-	file_.seekg(bytes,std::ios::cur);
+        file_.seekg(bytes,std::ios::cur);
     }
 
     inline void rewind()
     {
-	seek(100);
+        seek(100);
     }
 
     inline void seek(std::streampos pos)
     {
-	file_.seekg(pos,std::ios::beg);
+        file_.seekg(pos,std::ios::beg);
     }
-
 
     inline std::streampos pos()
     {
-	return file_.tellg();
+        return file_.tellg();
     }
-
 
     inline bool is_eof()
     {
-	return file_.eof();
+        return file_.eof();
     }
     
 private:
     shape_file(const shape_file&);
     shape_file& operator=(const shape_file&);
 };
-#endif                                            //SHAPEFILE_HH
+
+#endif //SHAPEFILE_HPP

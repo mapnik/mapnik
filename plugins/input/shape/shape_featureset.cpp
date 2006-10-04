@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#include "shape_featureset.hpp"
 #include <iostream>
+#include "shape_featureset.hpp"
 
 template <typename filterT>
 shape_featureset<filterT>::shape_featureset(const filterT& filter, 

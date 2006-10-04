@@ -22,7 +22,7 @@
 //$Id: mapnik_envelope.cc 27 2005-03-30 21:45:40Z pavlenko $
 
 #include <boost/python.hpp>
-#include <envelope.hpp>
+#include <mapnik/envelope.hpp>
 
 using mapnik::coord;
 using mapnik::Envelope;

@@ -20,12 +20,15 @@
  *
  *****************************************************************************/
 //$Id: raster_datasource.cc 44 2005-04-22 18:53:54Z pavlenko $
+// boost
+#include <boost/lexical_cast.hpp>
+// mapnik
+#include <mapnik/image_reader.hpp>
 
-#include "raster_datasource.hpp"
-#include "image_reader.hpp"
 #include "raster_featureset.hpp"
 #include "raster_info.hpp"
-#include <boost/lexical_cast.hpp>
+
+#include "raster_datasource.hpp"
 
 DATASOURCE_PLUGIN(raster_datasource)
 

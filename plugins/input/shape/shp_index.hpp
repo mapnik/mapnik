@@ -23,10 +23,12 @@
 #ifndef SHP_INDEX_HH
 #define SHP_INDEX_HH
 
-#include "envelope.hpp"
-#include "query.hpp"
+// st
 #include <fstream>
 #include <set>
+// mapnik
+#include <mapnik/envelope.hpp>
+#include <mapnik/query.hpp>
 
 using namespace mapnik;
 

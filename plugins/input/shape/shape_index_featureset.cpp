@@ -22,8 +22,8 @@
 
 //$Id: shape_index_featureset.cc 36 2005-04-05 14:32:18Z pavlenko $
 
+#include <mapnik/feature_factory.hpp>
 #include "shape_index_featureset.hpp"
-#include "feature_factory.hpp"
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,

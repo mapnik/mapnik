@@ -33,5 +33,5 @@ raster_src = Split(
 
 raster_inputdriver = env.SharedLibrary('raster', source=raster_src, SHLIBPREFIX='', LIBS=[])
 
-env.Install(prefix + '/' + env['LIB_PLATFORM'] + '/mapnik/input', raster_inputdriver)
-env.Alias('install', prefix + '/' + env['LIB_PLATFORM'] + '/mapnik/input')
+env.Install(prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', raster_inputdriver)
+env.Alias('install', prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')

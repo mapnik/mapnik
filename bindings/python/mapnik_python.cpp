@@ -47,12 +47,12 @@ void export_raster_symbolizer();
 void export_text_symbolizer();
 void export_font_engine();
 
-#include <map.hpp>
-#include <agg_renderer.hpp>
-#include <graphics.hpp>
-#include <datasource_cache.hpp>
-#include <load_map.hpp>
-#include <save_map.hpp>
+#include <mapnik/map.hpp>
+#include <mapnik/agg_renderer.hpp>
+#include <mapnik/graphics.hpp>
+#include <mapnik/datasource_cache.hpp>
+#include <mapnik/load_map.hpp>
+#include <mapnik/save_map.hpp>
 
 void render_to_file(const mapnik::Map& map,
                     const std::string& file,

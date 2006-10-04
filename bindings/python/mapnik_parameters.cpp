@@ -23,7 +23,7 @@
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
-#include <params.hpp>
+#include <mapnik/params.hpp>
 
 using mapnik::parameter;
 using mapnik::parameters;

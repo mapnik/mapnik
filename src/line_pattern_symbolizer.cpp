@@ -21,36 +21,37 @@
  *****************************************************************************/
 
 //$Id$
-
-#include "line_pattern_symbolizer.hpp"
-#include "image_reader.hpp"
-
+// stl
+#include <iostream>
+// mapnik
+#include <mapnik/image_reader.hpp>
+#include <mapnik/line_pattern_symbolizer.hpp>
 
 namespace mapnik
 {
     
     line_pattern_symbolizer::line_pattern_symbolizer(std::string const& file,
-			    std::string const& type,
-			    unsigned width,unsigned height) 
-	: pattern_(new ImageData32(width,height))
+                                                     std::string const& type,
+                                                     unsigned width,unsigned height) 
+        : pattern_(new ImageData32(width,height))
     {
-	try 
-	{
-	    std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-	    if (reader.get())
-		reader->read(0,0,*pattern_);		
-	} 
-	catch (...) 
-	{
-	    std::clog << "exception caught..." << std::endl;
-	}
+        try 
+        {
+            std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
+            if (reader.get())
+                reader->read(0,0,*pattern_);		
+        } 
+        catch (...) 
+        {
+            std::clog << "exception caught..." << std::endl;
+        }
     }
 
     line_pattern_symbolizer::line_pattern_symbolizer(line_pattern_symbolizer const& rhs)
-	: pattern_(rhs.pattern_) {}
+        : pattern_(rhs.pattern_) {}
 
     ImageData32 const& line_pattern_symbolizer::get_pattern() const
     {
-	return *pattern_;
+        return *pattern_;
     }
 }

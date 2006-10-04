@@ -26,8 +26,8 @@
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include <layer.hpp>
-#include <map.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/map.hpp>
 
 using mapnik::Color;
 using mapnik::coord;

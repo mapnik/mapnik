@@ -22,13 +22,12 @@
 
 //$Id: png_reader.cpp 33 2005-04-04 13:01:03Z pavlenko $
 
-
 #include <iostream>
-#include "image_reader.hpp"
+#include <mapnik/image_reader.hpp>
 
 extern "C"
 {
-   #include <png.h>
+#include <png.h>
 }
 
 namespace mapnik
@@ -64,10 +63,10 @@ namespace mapnik
 
     PngReader::PngReader(const std::string& fileName) 
         : fileName_(fileName),
-	  width_(0),
-	  height_(0),
-	  bit_depth_(0),
-	  color_type_(0)
+          width_(0),
+          height_(0),
+          bit_depth_(0),
+          color_type_(0)
     {
         try 
         {
@@ -87,7 +86,7 @@ namespace mapnik
     {
         png_size_t check;
         check = (png_size_t)fread(data, (png_size_t)1, length,
-				  (FILE *)png_ptr->io_ptr);
+                                  (FILE *)png_ptr->io_ptr);
 
         if (check != length)
         {

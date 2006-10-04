@@ -20,13 +20,17 @@
  *
  *****************************************************************************/
 
-#include "shape.hpp"
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
+
+#include <mapnik/geom_util.hpp>
+
+
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
-#include "geom_util.hpp"
 
-#include <iostream>
-#include <stdexcept>
+#include "shape.hpp"
 
 DATASOURCE_PLUGIN(shape_datasource)
 

@@ -32,5 +32,5 @@ postgis_src = Split(
 
 postgis_inputdriver = env.SharedLibrary('postgis', source=postgis_src, SHLIBPREFIX='', LIBS='pq')
 
-env.Install(prefix + '/' + env['LIB_PLATFORM'] + '/mapnik/input', postgis_inputdriver)
-env.Alias('install', prefix + '/' + env['LIB_PLATFORM'] + '/mapnik/input')
+env.Install(prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', postgis_inputdriver)
+env.Alias('install', prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')

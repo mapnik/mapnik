@@ -19,9 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
+// stl
 #include <iostream>
-
+// boost
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
@@ -29,13 +29,18 @@
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+// mapnik
+#include <mapnik/color.hpp>
+#include <mapnik/color_factory.hpp>
+#include <mapnik/filter_factory.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/datasource_cache.hpp>
 
-#include "color.hpp"
-#include "color_factory.hpp"
-#include "filter_factory.hpp"
-#include "layer.hpp"
-#include "datasource_cache.hpp"
-#include "load_map.hpp"
+#include <mapnik/load_map.hpp>
+
+using boost::lexical_cast;
+using boost::bad_lexical_cast;
+using boost::tokenizer;
 
 namespace mapnik 
 {

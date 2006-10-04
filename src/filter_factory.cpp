@@ -21,7 +21,7 @@
  *****************************************************************************/
 //$Id$
 
-#include "filter_factory.hpp"
+#include <mapnik/filter_factory.hpp>
 
 namespace mapnik
 {

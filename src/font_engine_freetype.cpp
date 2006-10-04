@@ -21,7 +21,7 @@
  *****************************************************************************/
 //$Id$
 
-#include "font_engine_freetype.hpp"
+#include <mapnik/font_engine_freetype.hpp>
 
 namespace mapnik
 {

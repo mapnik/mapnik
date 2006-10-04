@@ -20,11 +20,14 @@
  *
  *****************************************************************************/
 
-#ifndef SHAPE_HH
-#define SHAPE_HH
+// $Id$
 
-#include "datasource.hpp"
-#include "envelope.hpp"
+#ifndef SHAPE_HPP
+#define SHAPE_HPP
+
+#include <mapnik/datasource.hpp>
+#include <mapnik/envelope.hpp>
+
 #include "shape_io.hpp"
 
 using namespace mapnik;
@@ -54,4 +57,4 @@ private:
     static std::string name_;
 };
 
-#endif //SHAPE_HH
+#endif //SHAPE_HPP

@@ -21,13 +21,14 @@
  *****************************************************************************/
 //$Id: datasource_cache.cpp 23 2005-03-22 22:16:34Z pavlenko $
 
-#include "datasource_cache.hpp"
-
+// stl
 #include <algorithm>
 #include <stdexcept>
-
+// boost
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem/operations.hpp>
+// mapnik
+#include <mapnik/datasource_cache.hpp>
 
 namespace mapnik
 {
@@ -58,7 +59,8 @@ namespace mapnik
             {
                 if (itr->second->handle())
                 {
-                    create_ds* create_datasource = (create_ds*) lt_dlsym(itr->second->handle(), "create");
+                    create_ds* create_datasource = 
+                        (create_ds*) lt_dlsym(itr->second->handle(), "create");
                     if (!create_datasource)
                     {
                         std::clog << "Cannot load symbols: " << lt_dlerror() << std::endl;
@@ -88,7 +90,8 @@ namespace mapnik
 
     bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
     {	      
-        return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>(new PluginInfo(type,module)))).second;     
+        return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>
+                                         (new PluginInfo(type,module)))).second;     
     }
 
     void datasource_cache::register_datasources(const std::string& str)
@@ -106,7 +109,8 @@ namespace mapnik
                     lt_dlhandle module=lt_dlopenext(itr->string().c_str());
                     if (module)
                     {
-                        datasource_name* ds_name = (datasource_name*) lt_dlsym(module, "datasource_name");
+                        datasource_name* ds_name = 
+                            (datasource_name*) lt_dlsym(module, "datasource_name");
                         if (ds_name && insert(ds_name(),module))
                         {                           
                             std::clog<<"registered datasource : "<<ds_name()<<std::endl;

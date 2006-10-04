@@ -22,10 +22,7 @@
 
 //$Id: memory.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
-#include "memory.hpp"
-
-//#define GC_THREADS
-//#include "gc.h"
+#include <mapnik/memory.hpp>
 
 namespace mapnik
 {

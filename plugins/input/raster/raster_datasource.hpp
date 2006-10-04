@@ -24,10 +24,9 @@
 #ifndef RASTER_DATASOURCE_HH
 #define RASTER_DATASOURCE_HH 
 
-#include "datasource.hpp"
-#include "envelope.hpp"
-#include "feature.hpp"
-#include "image_reader.hpp"
+#include <mapnik/envelope.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/datasource.hpp>
 
 using namespace mapnik;
 

@@ -22,7 +22,7 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <query.hpp>
+#include <mapnik/query.hpp>
 
 void export_query()
 {

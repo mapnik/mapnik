@@ -22,7 +22,8 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <stroke.hpp>
+
+#include <mapnik/stroke.hpp>
 
 void export_stroke ()
 {

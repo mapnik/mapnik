@@ -22,7 +22,8 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <text_symbolizer.hpp>
+
+#include <mapnik/text_symbolizer.hpp>
 
 void export_text_symbolizer()
 {

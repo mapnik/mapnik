@@ -19,9 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
+#include <mapnik/geom_util.hpp>
 #include "shp_index.hpp"
-#include "geom_util.hpp"
 
 template <typename filterT>
 void shp_index<filterT>::query(const filterT& filter,std::ifstream& file,std::set<int>& pos)

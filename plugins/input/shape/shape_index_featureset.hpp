@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef SHAPE_SQT_FS_HH
-#define SHAPE_SQT_FS_HH
+#ifndef SHAPE_INDEX_FEATURESET_HPP
+#define SHAPE_INDEX_FEATURESET_HPP
 
-#include "shape_featureset.hpp"
 #include <set>
 #include <vector>
+
+#include "shape_featureset.hpp"
 
 template <typename filterT>
 class MAPNIK_DECL shape_index_featureset : public Featureset
@@ -42,7 +43,7 @@ class MAPNIK_DECL shape_index_featureset : public Featureset
 
 public:
     shape_index_featureset(const filterT& filter,const std::string& shape_file,
-			   const std::set<std::string>& attribute_names);
+                           const std::set<std::string>& attribute_names);
     virtual ~shape_index_featureset();
     feature_ptr next();
 private:
@@ -50,4 +51,5 @@ private:
     shape_index_featureset(const shape_index_featureset&);
     shape_index_featureset& operator=(const shape_index_featureset&);
 };
-#endif //SHAPE_SQT_FS_HH
+
+#endif //SHAPE_INDEX_FEATURESET_HPP

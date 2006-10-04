@@ -19,12 +19,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
-#include "dbffile.hpp"
-#include "utils.hpp"
+// stl
+#include <string>
+// boost
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <string>
+// mapnik
+#include <mapnik/utils.hpp>
+
+#include "dbffile.hpp"
 
 dbf_file::dbf_file()
     : num_records_(0),

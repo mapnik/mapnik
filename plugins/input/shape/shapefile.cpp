@@ -24,7 +24,6 @@
 
 shape_file::shape_file() {}
 
-
 shape_file::shape_file(const std::string& file_name)
 {
     //file_.rdbuf()->pubsetbuf(buff_,buffer_size);

@@ -19,9 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+// mapnik
+#include <mapnik/image_reader.hpp>
+#include <mapnik/image_util.hpp>
+
 #include "raster_featureset.hpp"
-#include "image_reader.hpp"
-#include "image_util.hpp"
 
 template <typename LookupPolicy>
 raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,

@@ -22,18 +22,22 @@
 
 //$Id: layer.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
-
-#include "style.hpp"
-#include "datasource.hpp"
-#include "datasource_cache.hpp"
-#include "layer.hpp"
-
+// stl
 #include <string>
 #include <iostream>
+// boost
+#include <boost/shared_ptr.hpp>
+// mapnik
+#include <mapnik/style.hpp>
+#include <mapnik/datasource.hpp>
+#include <mapnik/datasource_cache.hpp>
+#include <mapnik/layer.hpp>
+
+using namespace std;
+using boost::shared_ptr;
 
 namespace mapnik
-{
-    using namespace std;
+{   
     Layer::Layer(std::string const& name)
         : name_(name),
           title_(""),
@@ -42,8 +46,8 @@ namespace mapnik
           maxZoom_(std::numeric_limits<double>::max()),
           active_(true),
           selectable_(false),
-          selection_style_("default_selection")
-    {}
+          selection_style_("default_selection"),
+          ds_() {}
     
     Layer::Layer(const Layer& rhs)
         : name_(rhs.name_),
@@ -54,8 +58,8 @@ namespace mapnik
           active_(rhs.active_),
           selectable_(rhs.selectable_),
           styles_(rhs.styles_),
-          ds_(rhs.ds_),
-          selection_style_(rhs.selection_style_) {}
+          selection_style_(rhs.selection_style_),
+          ds_(rhs.ds_) {}
     
     Layer& Layer::operator=(const Layer& rhs)
     {
@@ -79,8 +83,8 @@ namespace mapnik
         active_=rhs.active_;
         selectable_=rhs.selectable_;
         styles_=rhs.styles_;
-        ds_=rhs.ds_;
         selection_style_=rhs.selection_style_;
+        ds_=rhs.ds_;
     }
     
     Layer::~Layer() {}
