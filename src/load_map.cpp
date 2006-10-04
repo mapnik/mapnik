@@ -22,7 +22,6 @@
 // stl
 #include <iostream>
 // boost
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -59,15 +58,23 @@ namespace mapnik
             map.setBackground(bg);
         }
         
-        BOOST_FOREACH (ptree::value_type & v, pt.get_child("Map"))
+        ptree::const_iterator itr = pt.get_child("Map").begin();
+        ptree::const_iterator end = pt.get_child("Map").end();
+        for (; itr != end; ++itr)
         {
+            ptree::value_type const& v = *itr;
+            
             if (v.first == "Style")
             {
                 std::string name = v.second.get<std::string>("<xmlattr>.name");
                 feature_type_style style;
                 
-                BOOST_FOREACH(ptree::value_type & rule_tag, v.second)
+                ptree::const_iterator ruleIter = v.second.begin();
+                ptree::const_iterator endRule = v.second.end();
+                
+                for (; ruleIter!=endRule; ++ruleIter)    
                 {
+                    ptree::value_type const& rule_tag = *ruleIter;
                     if (rule_tag.first == "Rule")
                     {
                         std::string name = 
@@ -98,8 +105,13 @@ namespace mapnik
                             rule.set_max_scale(*max_scale);   
                         }    
                         
-                        BOOST_FOREACH(ptree::value_type & sym, rule_tag.second)
+                        ptree::const_iterator symIter = rule_tag.second.begin();
+                        ptree::const_iterator endSym = rule_tag.second.end();
+                        
+                        for( ;symIter != endSym; ++symIter)
                         {
+                            ptree::value_type const& sym = *symIter;
+                            
                             if ( sym.first == "PointSymbolizer")
                             {
                                 std::cout << sym.first << "\n";
@@ -107,8 +119,12 @@ namespace mapnik
                             else  if ( sym.first == "LineSymbolizer")
                             {
                                 stroke strk;
-                                BOOST_FOREACH (ptree::value_type & css, sym.second)
+                                ptree::const_iterator cssIter = sym.second.begin();
+                                ptree::const_iterator endCss = sym.second.end();
+                                
+                                for(; cssIter != endCss; ++cssIter)
                                 {
+                                    ptree::value_type const& css = * cssIter;
                                     std::string css_name  = 
                                         css.second.get<std::string>("<xmlattr>.name");
                                     std::string data = css.second.data();
@@ -211,8 +227,14 @@ namespace mapnik
                             else if ( sym.first == "PolygonSymbolizer")
                             {
                                 polygon_symbolizer poly_sym;
-                                BOOST_FOREACH (ptree::value_type & css, sym.second)
+                                
+                                ptree::const_iterator cssIter = sym.second.begin();
+                                ptree::const_iterator endCss = sym.second.end();
+                                
+                                for(; cssIter != endCss; ++cssIter)
                                 {
+                                    ptree::value_type const& css = * cssIter;
+                                    
                                     std::string css_name  = 
                                         css.second.get<std::string>("<xmlattr>.name");
                                     std::string data = css.second.data();
@@ -268,8 +290,13 @@ namespace mapnik
                 }
                 
                 
-                BOOST_FOREACH (ptree::value_type & child, v.second)
+                ptree::const_iterator itr2 = v.second.begin();
+                ptree::const_iterator end2 = v.second.end();
+                
+                for(; itr2 != end2; ++itr2)
                 {
+                    ptree::value_type const& child = *itr2;
+                    
                     if (child.first == "StyleName")
                     {
                         lyr.add_style(child.second.data());
@@ -277,9 +304,12 @@ namespace mapnik
                     else if (child.first == "Datasource")
                     {
                         parameters params;
-                        BOOST_FOREACH (ptree::value_type & param_tag, child.second)
+                        ptree::const_iterator paramIter = child.second.begin();
+                        ptree::const_iterator endParam = child.second.end();
+                        for (; paramIter != endParam; ++paramIter)
                         {
-
+                            ptree::value_type const& param_tag=*paramIter;
+                            
                             if (param_tag.first == "Parameter")
                             {
                                 std::string name = param_tag.second.get<std::string>("<xmlattr>.name");
