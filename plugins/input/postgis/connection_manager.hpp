@@ -26,8 +26,8 @@
 #define CONNECTION_MANAGER_HPP
 
 #include <string>
-#include "pool.hpp"
-#include "utils.hpp"
+#include <mapnik/pool.hpp>
+#include <mapnik/utils.hpp>
 #include "connection.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>

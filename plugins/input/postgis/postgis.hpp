@@ -26,9 +26,9 @@
 #define POSTGIS_HPP
 
 
-#include "datasource.hpp"
-#include "envelope.hpp"
-#include "feature.hpp"
+#include <mapnik/datasource.hpp>
+#include <mapnik/envelope.hpp>
+#include <mapnik/feature.hpp>
 
 #include "connection_manager.hpp"
 #include <boost/lexical_cast.hpp>

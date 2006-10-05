@@ -24,8 +24,8 @@
 
 
 #include "postgis.hpp"
-#include "global.hpp"
-#include "wkb.hpp"
+#include <mapnik/global.hpp>
+#include <mapnik/wkb.hpp>
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
