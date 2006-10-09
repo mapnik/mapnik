@@ -110,19 +110,11 @@ namespace mapnik
             return commands_[block] [pos & block_mask];
         }
         	
-        void transform_at(unsigned pos,const CoordTransform& t)
-        {
-            if (pos >= pos_) return;
-            unsigned block = pos >> block_shift;
-            value_type* vertex = vertexs_[block] + (( pos & block_mask) << 1);
-            t.forward_x(vertex);
-            ++vertex;
-            t.forward_y(vertex);
-        }
         void set_capacity(size_t)
         {
             //do nothing
         }
+        
     private:
         void allocate_block(unsigned block)
         {
@@ -181,13 +173,6 @@ namespace mapnik
             return cont_.end();
         }
 
-        void transform_at(unsigned pos,const CoordTransform& t)
-        {
-            if (pos >= cont_.size()) return;
-            vertex_type & c = cont_[pos];
-            t.forward_x(&boost::get<0>(c));
-            t.forward_y(&boost::get<1>(c));
-        }
         void set_capacity(size_t size)
         {
             cont_.reserve(size);

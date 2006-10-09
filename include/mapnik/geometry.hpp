@@ -31,7 +31,6 @@
 #include <boost/utility.hpp>
 // mapnik
 #include <mapnik/vertex_vector.hpp>
-#include <mapnik/vertex_transform.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geom_util.hpp>
 
@@ -83,7 +82,6 @@ namespace mapnik {
         virtual void label_position(double *x, double *y) const=0;
         virtual void move_to(value_type x,value_type y)=0;
         virtual void line_to(value_type x,value_type y)=0;
-        virtual void transform(const mapnik::CoordTransform& t)=0;
         virtual unsigned num_points() const = 0;
         virtual unsigned vertex(double* x, double* y)=0;
         virtual void rewind(unsigned )=0;
@@ -121,13 +119,7 @@ namespace mapnik {
         }
 	
         void line_to(value_type ,value_type ) {}
-	
-        void transform(const mapnik::CoordTransform& t)
-        {
-            t.forward_x(&pt_.x);
-            t.forward_y(&pt_.y);
-        }
-	
+        
         unsigned num_points() const
         {
             return 1;
@@ -193,7 +185,6 @@ namespace mapnik {
             unsigned i,j;
             for (i = size-1,j = 0; j < size; i = j, ++j)
             {
-		
                 cont_.get_vertex(i,&x0,&y0);
                 cont_.get_vertex(j,&x1,&y1);
                 ai = x0 * y1 - x1 * y0;
@@ -219,15 +210,6 @@ namespace mapnik {
         void move_to(value_type x,value_type y)
         {
             cont_.push_back(x,y,SEG_MOVETO);
-        }
-	
-        void transform(mapnik::CoordTransform const& t)
-        {
-            unsigned size = cont_.size();
-            for (unsigned pos=0; pos < size; ++pos)
-            {	
-                cont_.transform_at(pos,t);
-            }
         }
 	
         unsigned num_points() const
@@ -339,16 +321,7 @@ namespace mapnik {
         {
             cont_.push_back(x,y,SEG_MOVETO);
         }
-	
-        void transform(mapnik::CoordTransform const& t)
-        {
-            unsigned size = cont_.size();
-            for (unsigned pos=0; pos < size; ++pos)
-            {	
-                cont_.transform_at(pos,t);
-            }
-        }
-	
+
         unsigned num_points() const
         {
             return cont_.size();

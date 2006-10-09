@@ -96,7 +96,7 @@ namespace mapnik
     {
         Color const& bg=m.getBackground();
         pixmap_.setBackground(bg);
-        std::clog << "scale="<<m.scale()<<std::endl;
+        std::clog << "scale=" << m.scale() << "\n";
     }
     
     template <typename T>
@@ -172,7 +172,9 @@ namespace mapnik
         if (geom && geom->num_points() > 1)
         {
             path_type path(t_,*geom);
-            agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(),pixmap_.width(),pixmap_.height(),
+            agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(),
+                                               pixmap_.width(),
+                                               pixmap_.height(),
                                                pixmap_.width()*4);
             agg::pixfmt_rgba32 pixf(buf);
             ren_base renb(pixf);	    
@@ -286,8 +288,7 @@ namespace mapnik
             if ( data )
             {
                 geom->label_position(&x,&y);
-                t_.forward_x(&x);
-                t_.forward_y(&y);
+                t_.forward(&x,&y);
                 int w = data->width();
                 int h = data->height();
                 int px=int(floor(x - 0.5 * w));
@@ -435,8 +436,7 @@ namespace mapnik
                 double x;
                 double y;
                 geom->label_position(&x,&y);
-                t_.forward_x(&x);
-                t_.forward_y(&y);
+                t_.forward(&x,&y);
 
                 face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
                 //face_ptr face = font_manager_.get_face("Times New Roman Regular");//TODO

@@ -33,34 +33,34 @@ namespace mapnik
     template <typename T0 ,typename T1,int shift=8>
     struct Shift
     {
-	typedef T0 value_type;
-	typedef T1 return_type;
-	static return_type apply(value_type val)
-	{
-	    return static_cast<return_type>(val*(1<<shift));
-	}
+        typedef T0 value_type;
+        typedef T1 return_type;
+        static return_type apply(value_type val)
+        {
+            return static_cast<return_type>(val*(1<<shift));
+        }
     };
 
     template <typename T0,typename T1>
     struct Shift<T0,T1,0> 
     {
-	typedef T0 value_type;
-	typedef T1 return_type;
-	static return_type apply(value_type val)
-	{
-	    return static_cast<return_type>(val);
-	}
+        typedef T0 value_type;
+        typedef T1 return_type;
+        static return_type apply(value_type val)
+        {
+            return static_cast<return_type>(val);
+        }
     };
 
     template <typename T>
     struct Shift<T,T,0>
     {
-	typedef T value_type;
-	typedef T return_type;
-	static T& apply(T& val)
-	{
-	    return val;
-	}
+        typedef T value_type;
+        typedef T return_type;
+        static T& apply(T& val)
+        {
+            return val;
+        }
     };
 
     typedef Shift<double,double,0> NO_SHIFT;
