@@ -90,7 +90,13 @@ namespace mapnik
                         {
                             rule.set_filter(create_filter(*filter_expr));
                         }
-                        
+                        boost::optional<std::string> else_filter = 
+                            rule_tag.second.get_optional<std::string>("ElseFilter");
+                        if (else_filter)
+                        {
+                            rule.set_else(true);
+                        }
+                                                                      
                         boost::optional<double> min_scale = 
                             rule_tag.second.get_optional<double>("MinScaleDenominator");
                         if (min_scale)
