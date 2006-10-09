@@ -80,9 +80,13 @@ namespace
         boost::python::list keys=d.keys();
         for (int i=0; i<len(keys); ++i)
         {
-            std::string key=extract<std::string>(keys[i]);
-            std::string value=extract<std::string>(d[key]);
-            params[key] = value;
+            std::string key = extract<std::string>(keys[i]);
+            object obj = d[key];
+            extract<std::string> ex(obj);
+            if (ex.check())
+            {
+                params[key] = ex();
+            }            
         }
         
         return mapnik::datasource_cache::create(params);
