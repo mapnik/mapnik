@@ -22,16 +22,17 @@
 
 //$Id: postgis.cc 44 2005-04-22 18:53:54Z pavlenko $
 
-#include "postgis.hpp"
 #include <string>
 #include <algorithm>
 #include <set>
 #include <sstream>
+#include <iomanip>
 #include "connection_manager.hpp"
+#include "postgis.hpp"
 
 DATASOURCE_PLUGIN(postgis_datasource)
 
-    const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
+const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS="spatial_ref_system";
 
 using std::clog;
@@ -68,10 +69,10 @@ postgis_datasource::postgis_datasource(const parameters& params)
 	    
             std::ostringstream s;
             s << "select f_geometry_column,srid,type from ";
-            s << GEOMETRY_COLUMNS <<" where f_table_name='"<<table_name<<"'";
-	   
+            s << GEOMETRY_COLUMNS <<" where f_table_name='" << table_name<<"'";
+            
             shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
-	    
+            
             if (rs->next())
             {
                 try 
@@ -88,9 +89,21 @@ postgis_datasource::postgis_datasource(const parameters& params)
             }
             rs->close();
             s.str("");
-            s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)";
-            s << " from (select estimated_extent('"<<table_name<<"','"<<geometryColumn_<<"') as ext) as tmp";
-
+            
+            if (params.get("estimate_extent") == "true")
+            {
+                s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
+                  << " from (select estimated_extent('" 
+                  << table_name <<"','" 
+                  << geometryColumn_ << "') as ext) as tmp";
+            }
+            else 
+            {
+                s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
+                  << " from (select extent(" <<geometryColumn_<< ") as ext from " 
+                  << table_name << ") as tmp";
+            }
+            
             rs=conn->executeQuery(s.str());
             if (rs->next())
             {
@@ -108,7 +121,7 @@ postgis_datasource::postgis_datasource(const parameters& params)
                 }
             }
             rs->close();
-
+            
             // collect attribute desc
             s.str("");
             s << "select * from "<<table_<<" limit 1";
@@ -204,6 +217,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }	
     
             s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
+            s << std::setprecision(16);
             s << box.minx() << " " << box.miny() << ",";
             s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
             clog << s.str() << endl;
