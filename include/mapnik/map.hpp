@@ -61,6 +61,7 @@ namespace mapnik
         Layer& getLayer(size_t index);
         void removeLayer(size_t index);
         std::vector<Layer> const& layers() const;
+        void remove_all();        
         unsigned getWidth() const;
         unsigned getHeight() const;
         void setWidth(unsigned width);
