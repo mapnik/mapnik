@@ -83,7 +83,7 @@ namespace mapnik
         void apply_to_layer(Layer const& lay,Processor & p)
         {
             p.start_layer_processing(lay);
-            datasource *ds=lay.datasource().get();
+            boost::shared_ptr<datasource> ds=lay.datasource();
             if (ds)
             {
                 Envelope<double> const& bbox=m_.getCurrentExtent();
