@@ -80,7 +80,8 @@ namespace mapnik
     
     feature_type_style const&  Map::find_style(std::string const& name) const
     {
-        std::map<std::string,feature_type_style>::const_iterator itr=styles_.find(name);
+        std::map<std::string,feature_type_style>::const_iterator itr
+            = styles_.find(name);
         if (itr!=styles_.end()) 
             return itr->second;
         static feature_type_style default_style;
@@ -100,7 +101,12 @@ namespace mapnik
     {
         layers_.erase(layers_.begin()+index);
     }
-
+    
+    void Map::remove_all() 
+    {
+        layers_.clear();
+    }
+    
     const Layer& Map::getLayer(size_t index) const
     {
         return layers_[index];
