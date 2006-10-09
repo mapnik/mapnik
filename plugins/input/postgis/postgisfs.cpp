@@ -52,7 +52,7 @@ feature_ptr postgis_featureset::next()
         {
             feature->set_geometry(geom);
             
-            for (unsigned pos=1;pos<num_attrs_;++pos)
+            for (unsigned pos=1;pos<num_attrs_+1;++pos)
             {
                 std::string name = rs_->getFieldName(pos);
                 const char* buf=rs_->getValue(pos);
