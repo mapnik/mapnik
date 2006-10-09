@@ -105,6 +105,7 @@ namespace mapnik
     void Map::remove_all() 
     {
         layers_.clear();
+        styles_.clear();
     }
     
     const Layer& Map::getLayer(size_t index) const
@@ -181,8 +182,10 @@ namespace mapnik
         coord2d center = currentExtent_.center();
         double w = factor * currentExtent_.width();
         double h = factor * currentExtent_.height();
-        currentExtent_ = Envelope<double>(center.x - 0.5 * w, center.y - 0.5 * h,
-                                          center.x + 0.5 * w, center.y + 0.5 * h);
+        currentExtent_ = Envelope<double>(center.x - 0.5 * w, 
+                                          center.y - 0.5 * h,
+                                          center.x + 0.5 * w, 
+                                          center.y + 0.5 * h);
         fixAspectRatio();
     }
     
