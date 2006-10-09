@@ -68,15 +68,17 @@ namespace mapnik
             p.start_map_processing(m_);
 	    
             std::vector<Layer>::const_iterator itr = m_.layers().begin();
-            while (itr != m_.layers().end())
+            std::vector<Layer>::const_iterator end = m_.layers().end();
+            while (itr != end)
             {
                 if (itr->isVisible(m_.scale()) && 
                     itr->envelope().intersects(m_.getCurrentExtent()))
-                {
+                {    
                     apply_to_layer(*itr,p);
                 }
                 ++itr;
             }
+            
             p.end_map_processing(m_);
         }	
     private:
