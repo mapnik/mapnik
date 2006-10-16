@@ -20,11 +20,11 @@
  *
  *****************************************************************************/
 //$Id$
-// stl
-#include <sstream>
 // boost
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
+// stl
+#include <sstream>
 // mapnik
 #include <mapnik/envelope.hpp>
 #include <mapnik/datasource.hpp>
