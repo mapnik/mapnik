@@ -70,10 +70,21 @@ class _Datasource(Datasource,_injector):
     return Describe(self)
 
 def Datasource (**keywords):
-    return CreateDatasource(keywords)
+  return CreateDatasource(keywords)
 
+# convinience factory methods
 
+def Shapefile(**keywords):
+  keywords['type'] = 'shape'
+  return CreateDatasource(keywords)
 
+def PostGIS(**keywords):
+  keywords['type'] = 'postgis'
+  return CreateDatasource(keywords)
+
+def Raster(**keywords):
+  keywords['type'] = 'raster'
+  return CreateDatasource(keywords)
 
 #register datasources
 from mapnik import DatasourceCache

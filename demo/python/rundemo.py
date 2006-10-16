@@ -56,7 +56,7 @@ m.background = Color('white')
 #     table= TODO
 
 provpoly_lyr = Layer('Provinces')
-provpoly_lyr.datasource = Datasource(type='shape', file='../data/boundaries')
+provpoly_lyr.datasource = Shapefile(file='../data/boundaries')
 
 # We then define a style for the layer.  A layer can have one or many styles.
 # Styles are named, so they can be shared across different layers.
@@ -121,8 +121,7 @@ m.layers.append(provpoly_lyr)
 
 qcdrain_lyr = Layer('Quebec Hydrography')
 
-qcdrain_lyr.datasource = Datasource( type='shape',
-                                     file='../data/qcdrainage')
+qcdrain_lyr.datasource = Shapefile(file='../data/qcdrainage')
 
 qcdrain_style = Style()
 qcdrain_rule = Rule()
@@ -139,8 +138,7 @@ m.layers.append(qcdrain_lyr)
 # re-use the style defined in the above layer for the next one.
 
 ondrain_lyr = Layer('Ontario Hydrography')
-ondrain_lyr.datasource = Datasource(type='shape',
-                                    file='../data/ontdrainage')
+ondrain_lyr.datasource = Shapefile(file='../data/ontdrainage')
 
 ondrain_lyr.styles.append('drainage')
 m.layers.append(ondrain_lyr)
@@ -148,8 +146,7 @@ m.layers.append(ondrain_lyr)
 # Provincial boundaries
 
 provlines_lyr = Layer('Provincial borders')
-provlines_lyr.datasource = Datasource (type='shape',
-                                       file='../data/boundaries_l')
+provlines_lyr.datasource = Shapefile(file='../data/boundaries_l')
 
 # Here we define a "dash dot dot dash" pattern for the provincial boundaries.
 
@@ -172,7 +169,9 @@ m.layers.append(provlines_lyr)
 # Roads 3 and 4 (The "grey" roads)
 
 roads34_lyr = Layer('Roads')
-roads34_lyr.datasource = Datasource(type='shape', file='../data/roads')
+# create roads datasource (we're going to re-use it later) 
+
+roads34_lyr.datasource = Shapefile(file='../data/roads')
 
 roads34_style = Style()
 roads34_rule = Rule()
@@ -203,7 +202,9 @@ m.layers.append(roads34_lyr)
 # Roads 2 (The thin yellow ones)
 
 roads2_lyr = Layer('Roads')
-roads2_lyr.datasource = Datasource (type='shape', file='../data/roads')
+
+# Just get a copy from roads34_lyr
+roads2_lyr.datasource = roads34_lyr.datasource 
 
 roads2_style_1 = Style()
 roads2_rule_1 = Rule()
@@ -237,7 +238,7 @@ m.layers.append(roads2_lyr)
 # Roads 1 (The big orange ones, the highways)
 
 roads1_lyr = Layer('Roads')
-roads1_lyr.datasource = Datasource(type='shape', file='../data/roads')
+roads1_lyr.datasource = roads34_lyr.datasource
 
 roads1_style_1 = Style()
 roads1_rule_1 = Rule()
@@ -270,8 +271,7 @@ m.layers.append(roads1_lyr)
 # Populated Places
 
 popplaces_lyr = Layer('Populated Places')
-popplaces_lyr.datasource = Datasource (type='shape',
-                                       file='../data/popplaces')
+popplaces_lyr.datasource = Shapefile(file='../data/popplaces')
 
 popplaces_style = Style()
 popplaces_rule = Rule()
