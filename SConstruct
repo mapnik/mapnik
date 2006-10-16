@@ -45,7 +45,6 @@ opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 include files', '/usr/l
 opts.Add(PathOption('PYTHON','Python executable', sys.executable))
 opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
-
 opts.Add('DEBUG', 'Compile a debug version of mapnik', '')
 
 env = Environment(ENV=os.environ, options=opts)
@@ -59,14 +58,24 @@ conf = Configure(env)
 
 env['CPPPATH'] = ['#agg/include', '#include', '#']
 
-for path in [env['BOOST_INCLUDES'], env['PNG_INCLUDES'], env['JPEG_INCLUDES'], env['TIFF_INCLUDES'], env['PGSQL_INCLUDES'], env['PROJ_INCLUDES']]:
+for path in [env['BOOST_INCLUDES'],
+             env['PNG_INCLUDES'],
+             env['JPEG_INCLUDES'],
+             env['TIFF_INCLUDES'],
+             env['PGSQL_INCLUDES'],
+             env['PROJ_INCLUDES']]:
     if path not in env['CPPPATH']: env['CPPPATH'].append(path)
 
 env['LIBPATH'] = ['#agg', '#src']
 
-for path in [env['BOOST_LIBS'], env['PNG_LIBS'], env['JPEG_LIBS'], env['TIFF_LIBS'], env['PGSQL_LIBS'], env['PROJ_LIBS']]:
+for path in [env['BOOST_LIBS'],
+             env['PNG_LIBS'],
+             env['JPEG_LIBS'],
+             env['TIFF_LIBS'],
+             env['PGSQL_LIBS'],
+             env['PROJ_LIBS']]:
     if path not in env['LIBPATH']: env['LIBPATH'].append(path)
-
+    
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
 
 C_LIBSHEADERS = [
@@ -76,8 +85,8 @@ C_LIBSHEADERS = [
     ['tiff', 'tiff.h', True],
     ['z', 'zlib.h', True],
     ['jpeg', ['stdio.h', 'jpeglib.h'], True],
-    ['pq', 'libpq-fe.h', False],
-    ['proj', 'proj_api.h', False]
+    ['proj', 'proj_api.h', True],
+    ['pq', 'libpq-fe.h', False]
 ]
 
 BOOST_LIBSHEADERS = [
@@ -130,10 +139,7 @@ if 'python' in env['BINDINGS']:
 
     SConscript('bindings/python/SConscript')
 
-    if 'proj' in env['LIBS']:
-        SConscript('bindings/python/pyprojection/SConscript')
-        env['LIBS'].remove('proj')
-
+    
 env = conf.Finish()
 
 # Setup the c++ args for our own codebase

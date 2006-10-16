@@ -40,7 +40,7 @@ struct map_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getinitargs(const Map& m)
     {
-        return boost::python::make_tuple(m.getWidth(),m.getHeight(),m.srid());
+        return boost::python::make_tuple(m.getWidth(),m.getHeight(),m.srs());
     }
 
     static  boost::python::tuple
@@ -85,10 +85,11 @@ void export_map()
     	.def(vector_indexing_suite<std::vector<Layer> >())
     	;
     
-    class_<Map>("Map","The map object.",init<int,int,boost::python::optional<int> >())
+    class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >())
         .add_property("width",&Map::getWidth,"The width of the map image.")
         .add_property("height",&Map::getHeight,"The height of the map image.")
-        .add_property("srid",&Map::srid)
+        .add_property("srs",make_function(&Map::srs,return_value_policy<copy_const_reference>()),
+                      &Map::set_srs,"Spatial reference in proj4 format e.g. \"+proj=latlong +datum=WGS84\"")
         .add_property("background",make_function
                       (&Map::getBackground,return_value_policy<copy_const_reference>()),
                       &Map::setBackground, "The background color of the map.")
@@ -102,6 +103,7 @@ void export_map()
         .def("zoom_to_box",&Map::zoomToBox, "Set the geographical extent of the map.")
         .def("pan",&Map::pan)
         .def("zoom",&Map::zoom)
+        .def("zoom_all",&Map::zoom_all)
         .def("pan_and_zoom",&Map::pan_and_zoom)
         .def("append_style",&Map::insert_style)
         .def("remove_style",&Map::remove_style)

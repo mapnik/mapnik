@@ -36,18 +36,17 @@ namespace mapnik
         static const unsigned MAX_MAPSIZE=2048;
         unsigned width_;
         unsigned height_;
-        int srid_;
+        std::string  srs_;
         Color background_;
         std::map<std::string,feature_type_style> styles_;
         std::vector<Layer> layers_;
         Envelope<double> currentExtent_;
         
     public:
- 
         typedef std::map<std::string,feature_type_style>::const_iterator style_iterator;
         
         Map();
-        Map(int width,int height,int srid=-1);
+        Map(int width, int height, std::string const& srs="+proj=latlong +datum=WGS84");
         Map(const Map& rhs);
         Map& operator=(const Map& rhs);
         style_iterator begin_styles() const;
@@ -67,7 +66,8 @@ namespace mapnik
         void setWidth(unsigned width);
         void setHeight(unsigned height);
         void resize(unsigned width,unsigned height);
-        int srid() const;
+        std::string const& srs() const;
+        void set_srs(std::string const& srs);
         void setBackground(const Color& c);
         const Color& getBackground() const;
         void zoom(double zoom);

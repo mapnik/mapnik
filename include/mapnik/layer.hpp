@@ -38,6 +38,8 @@ namespace mapnik
         std::string name_;
         std::string title_;
         std::string abstract_;
+        std::string srs_;
+        
         double minZoom_;
         double maxZoom_;
         bool active_;
@@ -49,7 +51,7 @@ namespace mapnik
         mutable std::vector<boost::shared_ptr<Feature> > selection_;
         
     public:
-        explicit Layer(std::string const& name);
+        explicit Layer(std::string const& name, std::string const& srs="+proj=latlong +datum=WGS84");
         Layer(Layer const& l);
         Layer& operator=(Layer const& l);
         bool operator==(Layer const& other) const;
@@ -59,6 +61,8 @@ namespace mapnik
         const std::string& title() const;
         void set_abstract(std::string const& abstract);
         const std::string& abstract() const;
+        void set_srs(std::string const& srs);
+        std::string const& srs() const;
         void add_style(std::string const& stylename);
         std::vector<std::string> const& styles() const;
         void selection_style(const std::string& name);

@@ -35,7 +35,7 @@ void export_polygon_symbolizer()
         .def(init<Color const&>("TODO"))
         .add_property("fill",make_function
                       (&polygon_symbolizer::get_fill,
-                       return_value_policy<reference_existing_object>()),
+                       return_value_policy<copy_const_reference>()),
                       &polygon_symbolizer::set_fill)
         .add_property("fill_opacity",
                       &polygon_symbolizer::get_opacity,

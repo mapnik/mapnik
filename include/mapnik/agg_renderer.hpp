@@ -45,13 +45,27 @@ namespace mapnik {
         void end_map_processing(Map const& map);
         void start_layer_processing(Layer const& lay);
         void end_layer_processing(Layer const& lay);
-        void process(point_symbolizer const& sym,Feature const& feature);
-        void process(line_symbolizer const& sym,Feature const& feature);
-        void process(line_pattern_symbolizer const& sym,Feature const& feature);
-        void process(polygon_symbolizer const& sym,Feature const& feature);
-        void process(polygon_pattern_symbolizer const& sym,Feature const& feature);
-        void process(raster_symbolizer const& sym,Feature const& feature);
-        void process(text_symbolizer const& sym,Feature const& feature);
+        void process(point_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
+        void process(line_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
+        void process(line_pattern_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
+        void process(polygon_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
+        void process(polygon_pattern_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
+        void process(raster_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
+        void process(text_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
     private:
         T & pixmap_;
         CoordTransform t_;

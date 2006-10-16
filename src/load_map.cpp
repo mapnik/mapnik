@@ -47,19 +47,24 @@ namespace mapnik
     {
         using boost::property_tree::ptree;
         ptree pt;
-        
         read_xml(filename,pt);
         
         boost::optional<std::string> bgcolor = 
             pt.get_optional<std::string>("Map.<xmlattr>.bgcolor");
-        if ( bgcolor)
+        
+        if (bgcolor)
         {
             Color bg = color_factory::from_string(bgcolor->c_str());
             map.setBackground(bg);
         }
         
+        std::string srs = pt.get<std::string>("Map.<xmlattr>.srs",
+                                           "+proj=latlong +datum=WGS84");
+        map.set_srs(srs);
+        
         ptree::const_iterator itr = pt.get_child("Map").begin();
         ptree::const_iterator end = pt.get_child("Map").end();
+        
         for (; itr != end; ++itr)
         {
             ptree::value_type const& v = *itr;
@@ -284,17 +289,18 @@ namespace mapnik
             else if (v.first == "Layer")
             {
                 
-                std::string name = v.second.get<std::string>("<xmlattr>.name","");
-                Layer lyr(name);
+                std::string name = v.second.get<std::string>("<xmlattr>.name","Unnamed");
+                std::string srs = v.second.get<std::string>("<xmlattr>.srs","+proj=latlong +datum=WGS84");
+                
+                Layer lyr(name, srs);
                 
                 boost::optional<std::string> status = 
-                    v.second.get<std::string>("<xmlattr>.status");
+                    v.second.get_optional<std::string>("<xmlattr>.status");
                 
                 if (status && *status == "off")
                 {
                     lyr.setActive(false);
                 }
-                
                 
                 ptree::const_iterator itr2 = v.second.begin();
                 ptree::const_iterator end2 = v.second.end();

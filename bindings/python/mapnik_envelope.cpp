@@ -85,7 +85,12 @@ void export_envelope()
         .def("intersects",intersects_p1)
         .def("intersects",intersects_p2)
         .def("intersects",intersects_p3)
-        .def(self == self)
+        .def(self == self) // __eq__
+        .def(self + self)  // __add__
+        .def(self - self)  // __sub__
+        .def(self * float()) // __mult__
+        .def(float() * self) 
+        .def(self / float()) // __div__
         .def_pickle(envelope_pickle_suite())
         ;
 }

@@ -27,6 +27,7 @@
 
 #include <mapnik/envelope.hpp>
 #include <mapnik/coord_array.hpp>
+#include <mapnik/projection.hpp>
 
 namespace mapnik {
     typedef coord_array<coord2d> CoordinateArray;
@@ -53,7 +54,38 @@ namespace mapnik {
         Transform const& t_;
         Geometry& geom_;
     };
+
+    template <typename Transform,typename Geometry>
+    struct MAPNIK_DECL coord_transform2
+    {
+        coord_transform2(Transform const& t, 
+                         Geometry& geom, 
+                         proj_transform const& prj_trans)
+            : t_(t), 
+              geom_(geom), 
+              prj_trans_(prj_trans)  {}
+        
+        unsigned  vertex(double * x , double  * y) const
+        {
+            unsigned command = geom_.vertex(x,y);
+            double z=0;
+            prj_trans_.backward(*x,*y,z);
+            t_.forward(x,y);
+            return command;
+        }
+        
+        void rewind (unsigned pos)
+        {
+            geom_.rewind(pos);
+        }
+        
+    private:
+        Transform const& t_;
+        Geometry& geom_;
+        proj_transform const& prj_trans_;
+    };
     
+
     class CoordTransform
     {
     private:

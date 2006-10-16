@@ -22,23 +22,43 @@
 //$Id$
 
 #include <boost/python.hpp>
-#include <mapnik/line_symbolizer.hpp>
+#include <mapnik/coord.hpp>
+#include <mapnik/projection.hpp>
 
-using mapnik::line_symbolizer;
-using mapnik::stroke;
-using mapnik::Color;
-
-void export_line_symbolizer()
-{
-    using namespace boost::python;
+namespace {
+    mapnik::coord2d forward(mapnik::coord2d const& pt, 
+                            mapnik::projection const& prj)
+    {
+        double x = pt.x;
+        double y = pt.y;
+        prj.forward(x,y);
+        return mapnik::coord2d(x,y);
+    }
     
-    class_<line_symbolizer>("LineSymbolizer",
-                            init<>("Default LineSymbolizer - 1px solid black"))
-        .def(init<stroke const&>("TODO"))
-        .def(init<Color const& ,float>())
-        .add_property("stroke",make_function
-                      (&line_symbolizer::get_stroke,
-                       return_value_policy<copy_const_reference>()),
-                      &line_symbolizer::set_stroke)
-	;    
+    mapnik::coord2d inverse(mapnik::coord2d const& pt, 
+                            mapnik::projection const& prj)
+    {
+        double x = pt.x;
+        double y = pt.y;
+        prj.inverse(x,y);
+        return mapnik::coord2d(x,y);
+    }
+    
+}
+
+void export_projection ()
+{
+    using namespace boost::python; 
+    using mapnik::projection;
+    
+    class_<projection>("Projection", init<optional<std::string const&> >())
+        .def ("forward",&projection::forward)
+        .def ("inverse",&projection::inverse)
+        .def ("params", make_function(&projection::params,
+                                      return_value_policy<copy_const_reference>()))
+        ;
+    
+    def("forward",&forward);
+    def("inverse",&inverse);
+    
 }

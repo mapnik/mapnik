@@ -30,7 +30,7 @@ installed successfully before running this script.\n\n'
 # Instanciate a map, giving it a width and height. Remember: the word "map" is
 # reserved in Python! :)
 
-m = Map(800,600)
+m = Map(800,600,"+proj=latlong")
 
 # Set its background colour. More on colours later ...
 

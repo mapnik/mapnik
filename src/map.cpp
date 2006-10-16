@@ -24,6 +24,7 @@
 
 #include <mapnik/style.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/projection.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 
@@ -32,17 +33,18 @@ namespace mapnik
     Map::Map()
         : width_(400),
           height_(400),
-          srid_(-1) {}
-    Map::Map(int width,int height,int srid)
+          srs_("+proj=latlong +datum=WGS84") {}
+    
+    Map::Map(int width,int height, std::string const& srs)
         : width_(width),
           height_(height),
-          srid_(srid),
+          srs_(srs),
           background_(Color(255,255,255)) {}
 
     Map::Map(const Map& rhs)
         : width_(rhs.width_),
           height_(rhs.height_),
-          srid_(rhs.srid_),
+          srs_(rhs.srs_),
           background_(rhs.background_),
           styles_(rhs.styles_),
           layers_(rhs.layers_),
@@ -53,12 +55,13 @@ namespace mapnik
         if (this==&rhs) return *this;
         width_=rhs.width_;
         height_=rhs.height_;
-        srid_=rhs.srid_;
+        srs_=rhs.srs_;
         background_=rhs.background_;
         styles_=rhs.styles_;
         layers_=rhs.layers_;
         return *this;
     }
+    
     Map::style_iterator  Map::begin_styles() const
     {
         return styles_.begin();
@@ -78,10 +81,9 @@ namespace mapnik
         styles_.erase(name);
     }
     
-    feature_type_style const&  Map::find_style(std::string const& name) const
+    feature_type_style const& Map::find_style(std::string const& name) const
     {
-        std::map<std::string,feature_type_style>::const_iterator itr
-            = styles_.find(name);
+        std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
         if (itr!=styles_.end()) 
             return itr->second;
         static feature_type_style default_style;
@@ -118,7 +120,6 @@ namespace mapnik
         return layers_[index];
     }
 
-
     std::vector<Layer> const& Map::layers() const
     {
         return layers_;
@@ -151,6 +152,7 @@ namespace mapnik
             fixAspectRatio();
         }
     }
+    
     void Map::resize(unsigned width,unsigned height)
     {
         if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE &&
@@ -162,11 +164,16 @@ namespace mapnik
         }
     }
 
-    int Map::srid() const
+    std::string const&  Map::srs() const
     {
-        return srid_;
+        return srs_;
     }
-
+    
+    void Map::set_srs(std::string const& srs)
+    {
+        srs_ = srs;
+    }
+    
     void Map::setBackground(const Color& c)
     {
         background_=c;
@@ -176,7 +183,7 @@ namespace mapnik
     {
         return background_;
     }
-
+    
     void Map::zoom(double factor)
     {
         coord2d center = currentExtent_.center();
@@ -191,23 +198,50 @@ namespace mapnik
     
     void Map::zoom_all() 
     {
-        std::vector<Layer>::const_iterator itr = layers_.begin();
-        Envelope<double> ext;
-        bool first = true;
-        while (itr != layers_.end())
+        try 
         {
-            if (first)
+            projection proj0(srs_);
+            Envelope<double> ext;
+            bool first = true;
+            std::vector<Layer>::const_iterator itr = layers_.begin();
+            std::vector<Layer>::const_iterator end = layers_.end();
+            while (itr != end)
             {
-                ext = itr->envelope();
-                first = false;
+                std::string const& layer_srs = itr->srs();
+                projection proj1(layer_srs);
+                proj_transform prj_trans(proj0,proj1);
+                
+                Envelope<double> layerExt = itr->envelope();
+                double x0 = layerExt.minx();
+                double y0 = layerExt.miny();
+                double z0 = 0.0;
+                double x1 = layerExt.maxx();
+                double y1 = layerExt.maxy();
+                double z1 = 0.0;
+                prj_trans.backward(x0,y0,z0);
+                prj_trans.backward(x1,y1,z1);
+                
+                Envelope<double> layerExt2(x0,y0,x1,y1);
+                std::clog << " layer1 - > " << layerExt << "\n";
+                std::clog << " layer2 - > " << layerExt2 << "\n";
+                
+                if (first)
+                {
+                    ext = layerExt2;
+                    first = false;
+                }
+                else 
+                {
+                    ext.expand_to_include(layerExt2);
+                }
+                ++itr;
             }
-            else 
-            {
-                ext.expand_to_include(itr->envelope());
-            }
-            ++itr;
+            zoomToBox(ext);
         }
-        zoomToBox(ext);
+        catch (proj_init_error & ex)
+        {
+            std::clog << ex.what() << '\n';
+        }
     }
 
     void Map::zoomToBox(const Envelope<double> &box)

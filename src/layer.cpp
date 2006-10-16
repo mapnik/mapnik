@@ -38,10 +38,11 @@ using boost::shared_ptr;
 
 namespace mapnik
 {   
-    Layer::Layer(std::string const& name)
+    Layer::Layer(std::string const& name, std::string const& srs)
         : name_(name),
           title_(""),
           abstract_(""),
+          srs_(srs),
           minZoom_(0),
           maxZoom_(std::numeric_limits<double>::max()),
           active_(true),
@@ -53,6 +54,7 @@ namespace mapnik
         : name_(rhs.name_),
           title_(rhs.title_),
           abstract_(rhs.abstract_),
+          srs_(rhs.srs_),
           minZoom_(rhs.minZoom_),
           maxZoom_(rhs.maxZoom_),
           active_(rhs.active_),
@@ -119,11 +121,21 @@ namespace mapnik
         return abstract_;
     }
 
+    void Layer::set_srs(std::string const& srs)
+    {
+        srs_ = srs;
+    }
+    
+    std::string const& Layer::srs() const
+    {
+        return srs_;
+    }
+    
     void Layer::add_style(std::string const& stylename)
     {
         styles_.push_back(stylename);
     }
-
+    
     std::vector<std::string> const& Layer::styles() const
     {
         return styles_;

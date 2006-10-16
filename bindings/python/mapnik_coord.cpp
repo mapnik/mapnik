@@ -22,35 +22,24 @@
 //$Id$
 
 #include <boost/python.hpp>
+#include <mapnik/coord.hpp>
 
-#include <mapnik/stroke.hpp>
-
-void export_stroke ()
+void export_coord()
 {
-    using namespace mapnik;
     using namespace boost::python;
-
-    enum_<line_cap_e>("line_cap")
-        .value("BUTT_CAP",BUTT_CAP)
-        .value("SQUARE_CAP",SQUARE_CAP)
-        .value("ROUND_CAP",ROUND_CAP)
+    using mapnik::coord;
+    class_<coord<double,2> >("Coord",init<double,double>())
+        .def_readwrite("x", &coord<double,2>::x)
+        .def_readwrite("y", &coord<double,2>::y)
+        .def(self == self) // __eq__
+        .def(self + self) // __add__
+        .def(self + float())
+        .def(float() + self)
+        .def(self - self) // __sub__
+        .def(self - float())
+        .def(self * float()) //__mult__
+        .def(float() * self) 
+        .def(self / float()) // __div__
         ;
-    enum_<line_join_e>("line_join")
-        .value("MITER_JOIN",MITER_JOIN)
-        .value("MITER_REVERT_JOIN",MITER_REVERT_JOIN)
-        .value("ROUND_JOIN",ROUND_JOIN)
-        .value("BEVEL_JOIN",BEVEL_JOIN)
-        ;
-
-    class_<stroke>("Stroke",init<>())
-        .def(init<Color,float>())
-        .add_property("color",make_function
-                      (&stroke::get_color,return_value_policy<copy_const_reference>()),
-                      &stroke::set_color)
-        .add_property("width",&stroke::get_width,&stroke::set_width) 
-        .add_property("opacity",&stroke::get_opacity,&stroke::set_opacity)
-        .add_property("line_cap",&stroke::get_line_cap,&stroke::set_line_cap)
-        .add_property("line_join",&stroke::get_line_join,&stroke::set_line_join)
-        .def("add_dash",&stroke::add_dash)
-        ;
+    
 }

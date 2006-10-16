@@ -126,9 +126,11 @@ namespace mapnik
     }
     
     template <typename T>	
-    void agg_renderer<T>::process(polygon_symbolizer const& sym,Feature const& feature)
+    void agg_renderer<T>::process(polygon_symbolizer const& sym,
+                                  Feature const& feature,
+                                  proj_transform const& prj_trans)
     {
-        typedef  coord_transform<CoordTransform,geometry_type> path_type;
+        typedef  coord_transform2<CoordTransform,geometry_type> path_type;
         typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
         typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	    
@@ -139,7 +141,7 @@ namespace mapnik
         {
             unsigned width = pixmap_.width();
             unsigned height = pixmap_.height();
-            path_type path(t_,*geom);
+            path_type path(t_,*geom,prj_trans);
             agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(),width,height,width * 4);
             agg::pixfmt_rgba32 pixf(buf);
             ren_base renb(pixf);	    
@@ -147,9 +149,8 @@ namespace mapnik
             unsigned r=fill_.red();
             unsigned g=fill_.green();
             unsigned b=fill_.blue();
-            //unsigned a=fill_.alpha();
             renderer ren(renb);
-		
+            
             agg::rasterizer_scanline_aa<> ras;
             agg::scanline_u8 sl;
             ras.clip_box(0,0,width,height);
@@ -160,10 +161,12 @@ namespace mapnik
     }
 
     template <typename T>
-    void agg_renderer<T>::process(line_symbolizer const& sym,Feature const& feature)
+    void agg_renderer<T>::process(line_symbolizer const& sym,
+                                  Feature const& feature,
+                                  proj_transform const& prj_trans)
     {   
         typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
-        typedef coord_transform<CoordTransform,geometry_type> path_type;
+        typedef coord_transform2<CoordTransform,geometry_type> path_type;
         typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
         typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
         typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
@@ -171,7 +174,7 @@ namespace mapnik
         geometry_ptr const& geom=feature.get_geometry();
         if (geom && geom->num_points() > 1)
         {
-            path_type path(t_,*geom);
+            path_type path(t_,*geom,prj_trans);
             agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(),
                                                pixmap_.width(),
                                                pixmap_.height(),
@@ -277,17 +280,21 @@ namespace mapnik
     }
 
     template <typename T>
-    void agg_renderer<T>::process(point_symbolizer const& sym,Feature const& feature)
+    void agg_renderer<T>::process(point_symbolizer const& sym,
+                                  Feature const& feature,
+                                  proj_transform const& prj_trans)
     {
         geometry_ptr const& geom=feature.get_geometry();
         if (geom)
         {
             double x;
             double y;
+            double z=0;
             boost::shared_ptr<ImageData32> const& data = sym.get_data();
             if ( data )
             {
                 geom->label_position(&x,&y);
+                prj_trans.backward(x,y,z);
                 t_.forward(&x,&y);
                 int w = data->width();
                 int h = data->height();
@@ -307,9 +314,11 @@ namespace mapnik
     }
     
     template <typename T>
-    void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,Feature const& feature)
+    void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
+                                   Feature const& feature,
+                                   proj_transform const& prj_trans)
     {
-        typedef  coord_transform<CoordTransform,geometry_type> path_type;
+        typedef  coord_transform2<CoordTransform,geometry_type> path_type;
         typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
         typedef agg::renderer_base<agg::pixfmt_rgba32> renderer_base;
         typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
@@ -321,7 +330,7 @@ namespace mapnik
             unsigned width = pixmap_.width();
             unsigned height = pixmap_.height();
             ImageData32 const& pat = sym.get_pattern();
-            path_type path(t_,*geom);
+            path_type path(t_,*geom,prj_trans);
             agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(), width, height,width*4);
             agg::pixfmt_rgba32 pixf(buf);
             renderer_base ren_base(pixf);  
@@ -336,9 +345,11 @@ namespace mapnik
     }
     
     template <typename T>
-    void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,Feature const& feature)
+    void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
+                                  Feature const& feature,
+                                  proj_transform const& prj_trans)
     {
-        typedef  coord_transform<CoordTransform,geometry_type> path_type;
+        typedef  coord_transform2<CoordTransform,geometry_type> path_type;
         typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
         typedef agg::wrap_mode_repeat wrap_x_type;
         typedef agg::wrap_mode_repeat wrap_y_type;
@@ -358,7 +369,7 @@ namespace mapnik
 	    
             unsigned width = pixmap_.width();
             unsigned height = pixmap_.height();
-            path_type path(t_,*geom);
+            path_type path(t_,*geom,prj_trans);
 	    
             agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(),width,height,width * 4);
             agg::pixfmt_rgba32 pixf(buf);
@@ -389,7 +400,9 @@ namespace mapnik
     }
 
     template <typename T>
-    void agg_renderer<T>::process(raster_symbolizer const& ,Feature const& feature)
+    void agg_renderer<T>::process(raster_symbolizer const&,
+                                  Feature const& feature,
+                                  proj_transform const& prj_trans)
     {
         // TODO -- at the moment raster_symbolizer is an empty class 
         // used for type dispatching, but we can have some fancy raster
@@ -405,9 +418,11 @@ namespace mapnik
     }
     
     template <typename T>
-    void agg_renderer<T>::process(text_symbolizer const& sym ,Feature const& feature)
+    void agg_renderer<T>::process(text_symbolizer const& sym,
+                                  Feature const& feature,
+                                  proj_transform const& prj_trans)
     {
-        typedef  coord_transform<CoordTransform,geometry_type> path_type;
+        typedef  coord_transform2<CoordTransform,geometry_type> path_type;
         geometry_ptr const& geom=feature.get_geometry();
         if (geom)
         {
@@ -416,7 +431,7 @@ namespace mapnik
                 geom->num_points() > 1)
             {
 	       
-                path_type path(t_,*geom);
+                path_type path(t_,*geom,prj_trans);
                 double x0,y0,x1,y1;
                 path.vertex(&x0,&y0);
                 path.vertex(&x1,&y1);

@@ -37,21 +37,26 @@ void export_layer()
     	.def(vector_indexing_suite<std::vector<std::string>,true >())
     	;
     
-    class_<Layer>("Layer","A map layer.", init<std::string const&>())
+    class_<Layer>("Layer", "A map layer.", init<std::string const&,optional<std::string const&> >())
         .add_property("name", 
-                      make_function(&Layer::name, return_value_policy<reference_existing_object>()),
+                      make_function(&Layer::name, return_value_policy<copy_const_reference>()),
                       &Layer::set_name,
                       "Get/Set the name of the layer.")
         
         .add_property("title",
-                      make_function(&Layer::title, return_value_policy<reference_existing_object>()),
+                      make_function(&Layer::title, return_value_policy<copy_const_reference>()),
                       &Layer::set_title,
                       "Get/Set the title of the layer.")
  
         .add_property("abstract", 
-                      make_function(&Layer::abstract,return_value_policy<reference_existing_object>()),
+                      make_function(&Layer::abstract,return_value_policy<copy_const_reference>()),
                       &Layer::set_abstract,
                       "Get/Set the abstract of the layer.")
+        
+        .add_property("src", 
+                      make_function(&Layer::srs,return_value_policy<copy_const_reference>()),
+                      &Layer::set_srs,
+                      "Get/Set the SRS of the layer.")
         
         .add_property("minzoom",
                       &Layer::getMinZoom,

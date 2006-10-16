@@ -36,6 +36,7 @@
 #include <mapnik/map.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/utils.hpp>
+#include <mapnik/projection.hpp>
 
 namespace mapnik
 {       
@@ -44,17 +45,22 @@ namespace mapnik
     {
         struct symbol_dispatch : public boost::static_visitor<>
         {
-            symbol_dispatch (Processor & output,Feature const& f)
-                : output_(output),f_(f) {}
-	    
+            symbol_dispatch (Processor & output,
+                             Feature const& f, 
+                             proj_transform const& prj_trans)
+                : output_(output),
+                  f_(f),
+                  prj_trans_(prj_trans)  {}
+            
             template <typename T>
             void operator () (T const& sym) const
             {
-                output_.process(sym,f_);
+                output_.process(sym,f_,prj_trans_);
             }
-
+            
             Processor & output_;
             Feature const& f_;
+            proj_transform const& prj_trans_;
         };
     public:
         feature_style_processor(Map const& m)
@@ -63,52 +69,82 @@ namespace mapnik
         void apply()
         {
             boost::progress_timer t;
+            
             Processor & p = static_cast<Processor&>(*this);
-
+            
             p.start_map_processing(m_);
-	    
+            
             std::vector<Layer>::const_iterator itr = m_.layers().begin();
             std::vector<Layer>::const_iterator end = m_.layers().end();
-            while (itr != end)
-            {
-                if (itr->isVisible(m_.scale()) && 
-                    itr->envelope().intersects(m_.getCurrentExtent()))
-                {    
-                    apply_to_layer(*itr,p);
-                }
-                ++itr;
-            }
             
+            try
+            {
+                projection proj(m_.srs()); // map projection
+                
+                while (itr != end)
+                {
+                    if (itr->isVisible(m_.scale()))// && 
+                        //itr->envelope().intersects(m_.getCurrentExtent())) TODO
+                    {    
+                        apply_to_layer(*itr, p, proj);
+                    }
+                    ++itr;
+                }
+            }
+            catch (proj_init_error& ex)
+            {
+                std::clog << ex.what() << "\n"; 
+            }
+
             p.end_map_processing(m_);
         }	
     private:
-        void apply_to_layer(Layer const& lay,Processor & p)
+        void apply_to_layer(Layer const& lay, Processor & p, projection const& proj0)
         {
             p.start_layer_processing(lay);
             boost::shared_ptr<datasource> ds=lay.datasource();
             if (ds)
             {
-                Envelope<double> const& bbox=m_.getCurrentExtent();
+                Envelope<double> const& ext=m_.getCurrentExtent();
+              
+                projection proj1(lay.srs());
+                proj_transform prj_trans(proj0,proj1);
+                
+                double x0 = ext.minx();
+                double y0 = ext.miny();
+                double z0 = 0.0;
+                double x1 = ext.maxx();
+                double y1 = ext.maxy();
+                double z1 = 0.0;
+                prj_trans.forward(x0,y0,z0);
+                prj_trans.forward(x1,y1,z1);
+                Envelope<double> bbox(x0,y0,x1,y1);
+                std::clog << bbox << "\n";
+                
                 double scale = m_.scale();
-	
+                
                 std::vector<std::string> const& style_names = lay.styles();
                 std::vector<std::string>::const_iterator stylesIter = style_names.begin();
-                while (stylesIter != style_names.end())
+                std::vector<std::string>::const_iterator stylesEnd = style_names.end();
+                
+                while (stylesIter != stylesEnd)
                 {
                     std::set<std::string> names;
                     attribute_collector<Feature> collector(names);
                     std::vector<rule_type*> if_rules;
                     std::vector<rule_type*> else_rules;
-		
+                    
                     bool active_rules=false;
-		    
+                    
                     feature_type_style const& style=m_.find_style(*stylesIter++);
-		    
+                        
+                    query q(bbox); //BBOX query
+
                     const std::vector<rule_type>& rules=style.get_rules();
                     std::vector<rule_type>::const_iterator ruleIter=rules.begin();
-		    
-                    query q(bbox); //BBOX query
-                    while (ruleIter!=rules.end())
+                    std::vector<rule_type>::const_iterator ruleEnd=rules.end();
+                                        
+                    while (ruleIter!=ruleEnd)
                     {
                         if (ruleIter->active(scale))
                         {
@@ -127,8 +163,10 @@ namespace mapnik
                         ++ruleIter;
                     }
                     std::set<std::string>::const_iterator namesIter=names.begin();
+                    std::set<std::string>::const_iterator namesEnd =names.end();
+                    
                     // push all property names
-                    while (namesIter!=names.end())
+                    while (namesIter!=namesEnd)
                     {
                         q.add_property_name(*namesIter);
                         ++namesIter;
@@ -143,7 +181,8 @@ namespace mapnik
                             {		   
                                 bool do_else=true;		    
                                 std::vector<rule_type*>::const_iterator itr=if_rules.begin();
-                                while (itr!=if_rules.end())
+                                std::vector<rule_type*>::const_iterator end=if_rules.end();
+                                while (itr != end)
                                 {
                                     filter_ptr const& filter=(*itr)->get_filter();    
                                     if (filter->pass(*feature))
@@ -151,10 +190,11 @@ namespace mapnik
                                         do_else=false;
                                         const symbolizers& symbols = (*itr)->get_symbolizers();
                                         symbolizers::const_iterator symIter=symbols.begin();
-                                        while (symIter!=symbols.end())
+                                        symbolizers::const_iterator symEnd =symbols.end();
+                                        while (symIter != symEnd)
                                         {   
                                             boost::apply_visitor
-                                                (symbol_dispatch(p,*feature),*symIter++);
+                                                (symbol_dispatch(p,*feature,prj_trans),*symIter++);
                                         }
                                     }			    
                                     ++itr;
@@ -164,14 +204,19 @@ namespace mapnik
                                     //else filter
                                     std::vector<rule_type*>::const_iterator itr=
                                         else_rules.begin();
-                                    while (itr != else_rules.end())
+                                    std::vector<rule_type*>::const_iterator end=
+                                        else_rules.end();
+                                    while (itr != end)
                                     {
                                         const symbolizers& symbols = (*itr)->get_symbolizers();
-                                        symbolizers::const_iterator symIter=symbols.begin();
-                                        while (symIter!=symbols.end())
+                                        symbolizers::const_iterator symIter= symbols.begin();
+                                        symbolizers::const_iterator symEnd = symbols.end();
+                                        
+                                        while (symIter!=symEnd)
                                         {
                                             boost::apply_visitor
-                                                (symbol_dispatch(p,*feature),*symIter++);
+                                                (symbol_dispatch(p,*feature,prj_trans),
+                                                 *symIter++);
                                         }
                                         ++itr;
                                     }
@@ -180,10 +225,10 @@ namespace mapnik
                         }
                     }
                 }
+                
             }
             p.end_layer_processing(lay);
-        }
-	
+        }	
         Map const& m_;
     };
 }

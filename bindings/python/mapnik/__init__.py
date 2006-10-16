@@ -55,10 +55,16 @@ class _Coord(Coord,_injector):
         return 'Coord(%s,%s)' % (self.x, self.y)
 
 class _Envelope(Envelope,_injector):
-    def __repr__(self):
-        return 'Envelope(%s,%s,%s,%s)' % \
-               (self.minx,self.miny,self.maxx,self.maxy)
+  def __repr__(self):
+    return 'Envelope(%s,%s,%s,%s)' % \
+           (self.minx,self.miny,self.maxx,self.maxy)
 
+class _Projection(Projection,_injector):
+  def forward(self,pt):
+    return forward(pt,self)
+  def inverse(self,pt):
+    return inverse(pt,self)
+    
 def Datasource (**keywords):
     return CreateDatasource(keywords)
 
