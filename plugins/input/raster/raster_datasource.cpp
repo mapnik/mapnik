@@ -92,3 +92,8 @@ featureset_ptr raster_datasource::features(query const& q) const
 }
 
 
+featureset_ptr raster_datasource::features_at_point(coord2d const&) const
+{
+    return featureset_ptr();
+}
+

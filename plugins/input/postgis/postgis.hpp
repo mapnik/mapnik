@@ -56,6 +56,7 @@ public:
     static std::string name();
     int type() const;
     featureset_ptr features(const query& q) const;
+    featureset_ptr features_at_point(coord2d const& pt) const;
     mapnik::Envelope<double> const& envelope() const;
     layer_descriptor const& get_descriptor() const;
     postgis_datasource(const parameters &params);

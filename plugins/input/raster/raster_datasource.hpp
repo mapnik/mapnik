@@ -40,10 +40,11 @@ private:
     static std::string           name_;  
 public:
     raster_datasource(const parameters& params);
-    virtual            ~raster_datasource();
-    int                 type() const;
-    static std::string  name();
-    featureset_ptr      features(const query& q) const;
+    virtual ~raster_datasource();
+    int type() const;
+    static std::string name();
+    featureset_ptr features(const query& q) const;
+    featureset_ptr features_at_point(coord2d const& pt) const;
     mapnik::Envelope<double> const& envelope() const;
     layer_descriptor const& get_descriptor() const;
 private:

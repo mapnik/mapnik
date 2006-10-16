@@ -228,6 +228,11 @@ featureset_ptr postgis_datasource::features(const query& q) const
     return featureset_ptr(fs);
 }
 
+featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
+{
+    return featureset_ptr();
+}
+
 const Envelope<double>& postgis_datasource::envelope() const
 {
     return extent_;

@@ -148,9 +148,16 @@ featureset_ptr shape_datasource::features(const query& q) const
     filter_in_box filter(q.get_bbox());
     if (indexed_)
     {
-        return featureset_ptr(new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
+        return featureset_ptr
+            (new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
     }
-    return featureset_ptr(new shape_featureset<filter_in_box>(filter,shape_name_,q.property_names(),file_length_));
+    return featureset_ptr
+        (new shape_featureset<filter_in_box>(filter,shape_name_,q.property_names(),file_length_));
+}
+
+featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
+{
+    return featureset_ptr();
 }
 
 const Envelope<double>& shape_datasource::envelope() const
