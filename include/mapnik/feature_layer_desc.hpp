@@ -183,68 +183,7 @@ namespace mapnik
         }
         return out;
     }
-    /*    
-          bool layer_descriptor_to_wkb(layer_descriptor const& desc,array<>& wkb)
-          {
-          //srid	
-          int srid = desc.get_srid();
-          wkb.write(&srid,sizeof(int));
 
-          //attribute descriptors
-          vector<attribute_descriptor> const& desc_ar = desc.get_descriptors();
-          vector<attribute_descriptor>::const_iterator itr=desc_ar.begin();
-          size_t num_desc = desc_ar.size();
-          wkb.write(&num_desc,sizeof(int));
-	
-          while (itr != desc_ar.end())
-          {
-          string name = itr->get_name();
-          wkb.write(name.c_str(),name.size()+1);
-	       
-          unsigned type = static_cast<int>(itr->get_type());
-          wkb.write(&type,sizeof(unsigned));
-
-          bool prim_key = itr->is_primary_key();
-          wkb.write(&prim_key,sizeof(bool));
-
-          int size = itr->get_size();
-          wkb.write(&size,sizeof(int));
-            
-          ++itr;
-          }	
-          return true;
-          }
-    
-          bool layer_descriptor_from_wkb(const char* wkb, layer_descriptor &desc)
-          {
-          unsigned pos=0;
-          int srid;
-	
-          memcpy(&srid,wkb+pos,sizeof(int));
-          desc.set_srid(srid);
-          pos+=sizeof(int);
-	
-          int num_desc;
-          memcpy(&num_desc,wkb+pos,sizeof(int));
-          pos+=sizeof(int);
-	
-          for (int i=0;i<num_desc;++i)
-          {
-          string name = wkb+pos;
-          pos += name.size()+1;
-          //std::clog<<"name="<<name<<"\n";
-	    
-          int type;
-          memcpy(&type,wkb+pos,sizeof(int));
-          pos += sizeof(int);
-          attribute_descriptor ad(name,type);
-          desc.add_descriptor(ad);
-          //todo!!!
-          pos += 4+1;
-          }
-          return true;
-          }
-    */    
 }
 
 #endif //FEATURE_LAYER_DESC_HPP
