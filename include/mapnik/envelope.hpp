@@ -27,12 +27,18 @@
 
 // stl
 #include <iomanip>
+// boost
+#include <boost/operators.hpp>
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/coord.hpp>
 
 namespace mapnik {
-	template <class T> class MAPNIK_DECL Envelope
+	template <typename T> class MAPNIK_DECL Envelope 
+    : boost::addable<Envelope<T>, 
+      boost::subtractable<Envelope<T>, 
+      boost::dividable2<Envelope<T>, T,
+      boost::multipliable2<Envelope<T>, T > > > >
     {
     public:
         typedef Envelope<T> EnvelopeType;
@@ -68,6 +74,12 @@ namespace mapnik {
         bool operator==(const EnvelopeType &other) const;
         void re_center(T cx,T cy);
         void init(T x0,T y0,T x1,T y1);
+        
+        // define some operators 
+        EnvelopeType& operator+=(EnvelopeType const& other);
+        EnvelopeType& operator-=(EnvelopeType const& other);
+        EnvelopeType& operator*=(T);
+        EnvelopeType& operator/=(T);    
     };
     
     template <class charT,class traits,class T>

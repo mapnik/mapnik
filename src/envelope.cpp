@@ -223,7 +223,41 @@ namespace mapnik
             miny_=y1;maxy_=y0;
         }
     }
+    
+    template <typename T>
+    Envelope<T>&  Envelope<T>::operator+=(Envelope<T> const& other)
+    {
+        expand_to_include(other);
+        return *this;
+    }
+    
+    template <typename T>    
+    Envelope<T>& Envelope<T>::operator-=(Envelope<T> const& other)
+    {
+        // not sure what to do here. intersect?
+        return *this;
+    }
+    
+    template <typename T>    
+    Envelope<T>& Envelope<T>::operator*=(T t)
+    {
+        minx_ *= t;
+        miny_ *= t;
+        maxx_ *= t;
+        maxy_ *= t;
+        return *this;
+    }
 
+    template <typename T>    
+    Envelope<T>& Envelope<T>::operator/=(T t)
+    {
+        minx_ /= t;
+        miny_ /= t;
+        maxx_ /= t;
+        maxy_ /= t;
+        return *this;
+    }
+    
     template class Envelope<int>;
     template class Envelope<double>;
 }
