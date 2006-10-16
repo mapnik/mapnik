@@ -20,11 +20,15 @@
  *
  *****************************************************************************/
 //$Id$
-
+// stl
+#include <sstream>
+// boost
 #include <boost/python.hpp>
+// mapnik
 #include <mapnik/envelope.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/feature_layer_desc.hpp>
 
 namespace  
 {
@@ -47,6 +51,20 @@ namespace
         
         return mapnik::datasource_cache::create(params);
     }
+    
+    std::string describe(boost::shared_ptr<mapnik::datasource> const& ds)
+    {
+        std::stringstream ss;
+        if (ds)
+        {
+            ss << ds->get_descriptor() << "\n";
+        }
+        else
+        {
+            ss << "Null\n";
+        }
+        return ss.str();
+    }
 }
 
 void export_datasource()
@@ -64,5 +82,6 @@ void export_datasource()
              "These vary depending on the type of data source.")
         ;
     
+    def("Describe",&describe);
     def("CreateDatasource",&create_datasource);
 }

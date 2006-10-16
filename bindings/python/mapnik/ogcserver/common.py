@@ -255,12 +255,12 @@ class CRS:
 
     def Inverse(self, x, y):
         if not self.proj:
-            self.proj = Projection(['init=%s' % str(self).lower()])
+            self.proj = Projection('init=%s' % str(self).lower())
         return self.proj.Inverse(x, y)
 
     def Forward(self, x, y):
         if not self.proj:
-            self.proj = Projection(['init=%s' % str(self).lower()])
+            self.proj = Projection('init=%s' % str(self).lower())
         return self.proj.Forward(x, y)
 
 class CRSFactory:

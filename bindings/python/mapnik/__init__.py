@@ -64,9 +64,15 @@ class _Projection(Projection,_injector):
     return forward(pt,self)
   def inverse(self,pt):
     return inverse(pt,self)
-    
+
+class _Datasource(Datasource,_injector):
+  def describe(self):
+    return Describe(self)
+
 def Datasource (**keywords):
     return CreateDatasource(keywords)
+
+
 
 
 #register datasources
