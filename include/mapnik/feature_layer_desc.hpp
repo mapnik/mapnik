@@ -183,7 +183,6 @@ namespace mapnik
         }
         return out;
     }
-
 }
 
 #endif //FEATURE_LAYER_DESC_HPP

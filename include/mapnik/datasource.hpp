@@ -83,6 +83,7 @@ namespace mapnik {
         
         virtual int type() const=0;
         virtual featureset_ptr features(const query& q) const=0;
+        virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
         virtual Envelope<double> const& envelope() const=0;
         virtual layer_descriptor const& get_descriptor() const=0;
         virtual ~datasource() {};
