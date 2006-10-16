@@ -27,6 +27,7 @@
 
 #include <iomanip>
 #include <sstream>
+#include <boost/operators.hpp>
 
 namespace mapnik {   
     template <typename T,int dim>
@@ -36,6 +37,13 @@ namespace mapnik {
     
     template <typename T>
     struct coord<T,2> 
+        : boost::addable<coord<T,2>,
+          boost::addable2<coord<T,2>,T,
+          boost::subtractable<coord<T,2>,
+          boost::subtractable2<coord<T,2>,T,
+          boost::dividable2<coord<T,2>, T,
+          boost::multipliable2<coord<T,2>, T > > > > > >
+                    
     {
         typedef T type;
         T x;
@@ -59,6 +67,52 @@ namespace mapnik {
             }
             x=type(rhs.x);
             y=type(rhs.y);
+            return *this;
+        }
+        template <typename T2>
+        bool operator==(coord<T2,2> const& rhs)
+        {
+            return x == rhs.x && y == rhs.y;
+        }
+
+        coord<T,2>& operator+=(coord<T,2> const& rhs)
+        {
+            x+=rhs.x;
+            y+=rhs.y;
+            return *this;
+        }
+        
+        coord<T,2>& operator+=(T rhs)
+        {
+            x+=rhs;
+            y+=rhs;
+            return *this;
+        }
+        
+        coord<T,2>& operator-=(coord<T,2> const& rhs)
+        {
+            x-=rhs.x;
+            y-=rhs.y;
+            return *this;
+        }
+        
+        coord<T,2>& operator-=(T rhs)
+        {
+            x-=rhs;
+            y-=rhs;
+            return *this;
+        }
+        
+        coord<T,2>& operator*=(T t)
+        {
+            x*=t;
+            y*=t;
+            return *this;
+        }
+        coord<T,2>& operator/=(T t)
+        {
+            x/=t;
+            y/=t;
             return *this;
         }
     };
