@@ -24,6 +24,7 @@
 #include <sstream>
 // boost
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 // mapnik
 #include <mapnik/envelope.hpp>
 #include <mapnik/datasource.hpp>
