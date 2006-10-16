@@ -43,7 +43,7 @@ class BaseWMSFactory:
         self.aggregatestyles = {}
 
     def register_layer(self, layer, defaultstyle, extrastyles=()):
-        layername = layer.name()
+        layername = layer.name
         if not layername:
             raise ServerConfigurationError('Attempted to register an unnamed layer.')
         if defaultstyle not in self.styles.keys() + self.aggregatestyles.keys():

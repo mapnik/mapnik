@@ -133,7 +133,7 @@ class ServiceHandler(WMSBaseServiceHandler):
 
         for layer in self.mapfactory.layers.values():
             layername = ElementTree.Element('Name')
-            layername.text = layer.name()
+            layername.text = layer.name
             env = layer.envelope()
             layerexgbb = ElementTree.Element('EX_GeographicBoundingBox')
             ll = self.crs.Inverse(env.minx, env.miny)

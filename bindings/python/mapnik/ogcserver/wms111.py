@@ -127,7 +127,7 @@ class ServiceHandler(WMSBaseServiceHandler):
 
         for layer in self.mapfactory.layers.values():
             layername = ElementTree.Element('Name')
-            layername.text = layer.name()
+            layername.text = layer.name
             env = layer.envelope()
             llp = self.crs.Inverse(env.minx, env.miny)
             urp = self.crs.Inverse(env.maxx, env.maxy)
