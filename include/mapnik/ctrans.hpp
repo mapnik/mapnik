@@ -27,7 +27,7 @@
 
 #include <mapnik/envelope.hpp>
 #include <mapnik/coord_array.hpp>
-#include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
 
 namespace mapnik {
     typedef coord_array<coord2d> CoordinateArray;

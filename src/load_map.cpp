@@ -127,7 +127,29 @@ namespace mapnik
                             {
                                 std::cout << sym.first << "\n";
                             } 
-                            else  if ( sym.first == "LineSymbolizer")
+                            else if ( sym.first == "TextSymbolizer")
+                            {
+                                std::string name =  
+                                    sym.second.get<std::string>("<xmlattr>.name");                      
+                                unsigned size = 
+                                    sym.second.get<unsigned>("<xmlattr>.size",10);                      
+                                std::string color_str = 
+                                    sym.second.get<std::string>("<xmlattr>.fill","black");
+                                Color c = color_factory::from_string(color_str.c_str());
+                                
+                                text_symbolizer text_symbol(name,size,c);
+                                
+                                std::string placement_str = 
+                                    sym.second.get<std::string>("<xmlattr>.placement","point");
+                                
+                                if (placement_str == "line")
+                                {
+                                    text_symbol.set_label_placement(line_placement);
+                                }
+                                
+                                rule.append(text_symbol);
+                            }
+                            else if ( sym.first == "LineSymbolizer")
                             {
                                 stroke strk;
                                 ptree::const_iterator cssIter = sym.second.begin();

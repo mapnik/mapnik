@@ -22,51 +22,31 @@
 
 //$Id$
 
-#ifndef PROJECTION_HPP
-#define PROJECTION_HPP
+#ifndef PROJ_TRANSFORM_HPP
+#define PROJ_TRANSFORM_HPP
 
-// stl
-#include <string>
-#include <iostream>
-#include <stdexcept>
 // boost
 #include <boost/utility.hpp>
 // mapnik
-#include <mapnik/envelope.hpp>
+#include <mapnik/projection.hpp>
 
 namespace mapnik {
     
-    class proj_init_error : public std::runtime_error
+    class proj_transform : private boost::noncopyable
     {
     public:
-        proj_init_error(std::string const& params)
-            : std::runtime_error("failed to initialize projection with:" + params) {}
-    };
-    
-    class projection
-    {
-        friend class proj_transform;
-    public:
-        explicit projection(std::string params = "+proj=latlong +ellps=WGS84");
-        projection(projection const& rhs);
-        ~projection();
+        proj_transform(projection const& source, 
+                       projection const& dest);
         
-        projection& operator=(projection const& rhs);
-        bool is_initialized() const;
-        bool is_geographic() const;
-        std::string const& params() const;
-      
-        void forward(double & x, double &y ) const;
-        void inverse(double & x,double & y) const;
+        bool forward (double& x, double& y , double& z) const;
+        bool backward (double& x, double& y , double& z) const;
         
     private:
-        void init(); 
-        void swap (projection& rhs);
-       
-    private:
-        std::string params_;
-        void * proj_;
+        projection const& source_;
+        projection const& dest_;
+        bool is_source_latlong_;
+        bool is_dest_latlong_;
     };
 }
 
-#endif //PROJECTION_HPP
+#endif // PROJ_TRANSFORM_HPP

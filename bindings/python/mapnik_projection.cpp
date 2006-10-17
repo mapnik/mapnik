@@ -56,6 +56,7 @@ void export_projection ()
         .def ("inverse",&projection::inverse)
         .def ("params", make_function(&projection::params,
                                       return_value_policy<copy_const_reference>()))
+        .add_property ("geographic",&projection::is_geographic)
         ;
     
     def("forward",&forward);
