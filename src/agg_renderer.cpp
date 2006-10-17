@@ -59,6 +59,8 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/agg_renderer.hpp>
 
+#include <mapnik/placement_finder.hpp>
+
 namespace mapnik 
 {
     class pattern_source : private boost::noncopyable
@@ -92,7 +94,8 @@ namespace mapnik
         : feature_style_processor<agg_renderer>(m),
           pixmap_(pixmap),
           t_(m.getWidth(),m.getHeight(),m.getCurrentExtent()),
-          detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
+          finder_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
+          point_detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
     {
         Color const& bg=m.getBackground();
         pixmap_.setBackground(bg);
@@ -302,12 +305,63 @@ namespace mapnik
                 int py=int(floor(y - 0.5 * h));
                 
                 if (sym.get_allow_overlap() || 
-                    detector_.has_placement(Envelope<double>(floor(x - 0.5 * w),
+                    point_detector_.has_placement(Envelope<double>(floor(x - 0.5 * w),
                                                              floor(y - 0.5 * h),
                                                              ceil (x + 0.5 * w),
                                                              ceil (y + 0.5 * h))))
                 {    
                     pixmap_.set_rectangle_alpha(px,py,*data);
+                }
+            }
+        }
+    }
+    
+    template <typename T>
+    void  agg_renderer<T>::process(shield_symbolizer const& sym,
+                                   Feature const& feature,
+                                   proj_transform const& prj_trans)
+    {
+        geometry_ptr const& geom=feature.get_geometry();
+        if (geom)
+        {
+            std::string text = feature[sym.get_name()].to_string();
+            boost::shared_ptr<ImageData32> const& data = sym.get_data();
+            
+            if (text.length() > 0 && data)
+            {
+                face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
+                if (face)
+                {
+                    int w = data->width();
+                    int h = data->height();
+
+                    text_renderer<mapnik::Image32> ren(pixmap_,face);
+                    ren.set_pixel_size(sym.get_text_size());
+                    ren.set_fill(sym.get_fill());
+
+                    string_info info;
+                    ren.get_string_info(text, &info);
+                 
+                    placement text_placement(&info, &t_, &prj_trans, geom, std::pair<double, double>(w, h) );
+                    
+                    bool found = finder_.find_placement(&text_placement);
+                    if (!found) {
+                      return;
+                    }
+                    
+                    double x = text_placement.starting_x;
+                    double y = text_placement.starting_y;
+                    
+                    int px=int(floor(x - 0.5 * w));
+                    int py=int(floor(y - 0.5 * h));
+                    
+                    pixmap_.set_rectangle_alpha(px,py,*data);
+            
+                    Envelope<double> dim = ren.prepare_glyphs(&text_placement.path);
+                    
+                    //If has_placement 
+                    
+                    ren.render(x,y);
                 }
             }
         }
@@ -422,37 +476,15 @@ namespace mapnik
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
     {
-        typedef  coord_transform2<CoordTransform,geometry_type> path_type;
         geometry_ptr const& geom=feature.get_geometry();
+       
         if (geom)
         {
-            double angle = 0.0;	    
-            if (sym.get_label_placement() == line_placement && 
-                geom->num_points() > 1)
-            {
-	       
-                path_type path(t_,*geom,prj_trans);
-                double x0,y0,x1,y1;
-                path.vertex(&x0,&y0);
-                path.vertex(&x1,&y1);
-                double dx = x1 - x0;
-                double dy = ( y1 - y0 > 1e-7 ) ?  y1 - y0 : 1.0;
-	        
-                angle = atan( dx/ dy ) - 0.5 * 3.1459;
-		
-                //TODO!!!!!!!!!!!!!!!!!!!!
-            }   
-	    
             std::string text = feature[sym.get_name()].to_string();
             if (text.length() > 0)
             {
                 Color const& fill  = sym.get_fill();
 	
-                double x;
-                double y;
-                geom->label_position(&x,&y);
-                t_.forward(&x,&y);
-
                 face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
                 //face_ptr face = font_manager_.get_face("Times New Roman Regular");//TODO
                 if (face)
@@ -462,25 +494,35 @@ namespace mapnik
                     ren.set_fill(fill);
                     ren.set_halo_fill(sym.get_halo_fill());
                     ren.set_halo_radius(sym.get_halo_radius());
-                    ren.set_angle(float(angle));
 
-                    std::pair<unsigned,unsigned> dim = ren.prepare_glyphs(text);
-                    Envelope<double> text_box(x - 0.5*dim.first,y - 0.5 * dim.second ,
-                                              x + 0.5*dim.first,y + 0.5 * dim.second);
+                    string_info info;
+                  
+                    ren.get_string_info(text, &info);
+                 
+                    placement text_placement(&info, &t_, &prj_trans, geom, sym.get_label_placement());
+                  
+                    bool found = finder_.find_placement(&text_placement);
+                    if (!found) {
+                      return;
+                    }
+                    
+                    double x = text_placement.starting_x;
+                    double y = text_placement.starting_y;
+                    
+                    Envelope<double> dim = ren.prepare_glyphs(&text_placement.path);
+                    
+                    Envelope<double> text_box(x + dim.minx() ,y - dim.maxy(), x + dim.maxx(),y - dim.miny());
 		    
                     if (sym.get_halo_radius() > 0)
                     {
                         text_box.width(text_box.width() + sym.get_halo_radius()*2);
                         text_box.height(text_box.height() + sym.get_halo_radius()*2);
                     }
-
-                    if (detector_.has_placement(text_box))
-                    {
-                        ren.render(x - 0.5 * dim.first,y + 0.5 * dim.second);
-                    }
+                    ren.render(x,y);
                 }
             }  
         }
     }   
+    
     template class agg_renderer<Image32>;
 }

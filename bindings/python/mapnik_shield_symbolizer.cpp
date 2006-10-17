@@ -3,6 +3,7 @@
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+ * Copyright (C) 2006 10East Corp.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,31 +23,17 @@
 //$Id$
 
 #include <boost/python.hpp>
+#include <mapnik/shield_symbolizer.hpp>
 
-#include <mapnik/text_symbolizer.hpp>
-
-void export_text_symbolizer()
+void export_shield_symbolizer()
 {
     using namespace boost::python;
-
-    using mapnik::text_symbolizer;
-    using mapnik::Color;
- 
-    enum_<mapnik::label_placement_e>("label_placement")
-        .value("LINE_PLACEMENT",mapnik::line_placement)
-        .value("POINT_PLACEMENT",mapnik::point_placement)
+    using mapnik::shield_symbolizer;
+    
+    class_<shield_symbolizer>("ShieldSymbolizer",
+                             init<>("Default Shield Symbolizer - 4x4 black square"))
+        .def (init< std::string const&, unsigned, mapnik::Color const&,
+              std::string const&, std::string const&,unsigned,unsigned>("TODO"))
         ;
-
-    class_<text_symbolizer>("TextSymbolizer",
-			    init<std::string const&,unsigned,Color const&>())
-        .add_property("halo_fill",make_function(
-                      &text_symbolizer::get_halo_fill,
-                      return_value_policy<copy_const_reference>()),
-                      &text_symbolizer::set_halo_fill)
-        .add_property("halo_radius",
-                      &text_symbolizer::get_halo_radius, 
-                      &text_symbolizer::set_halo_radius)
-        .def("set_label_placement",&text_symbolizer::set_label_placement,
-             "Set the placement of the label")
-	;
+    
 }

@@ -31,6 +31,7 @@
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/label_collision_detector.hpp>
+#include <mapnik/placement_finder.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/config.hpp>
 
@@ -63,6 +64,9 @@ namespace mapnik {
         void process(raster_symbolizer const& sym,
                      Feature const& feature,
                      proj_transform const& prj_trans);
+        void process(shield_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
         void process(text_symbolizer const& sym,
                      Feature const& feature,
                      proj_transform const& prj_trans);
@@ -70,7 +74,9 @@ namespace mapnik {
         T & pixmap_;
         CoordTransform t_;
         face_manager<freetype_engine> font_manager_;
-        label_collision_detector2 detector_;
+//        label_collision_detector2 label_detector_;
+        placement_finder finder_;
+        label_collision_detector2 point_detector_; //Note: May want to merge this with placement_finder
     };
 }
 

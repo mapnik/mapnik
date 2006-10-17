@@ -83,6 +83,38 @@ namespace mapnik
             return true;
         }	
     };
+    
+    // quad_tree based label collision detector with seperate check/insert
+    class label_collision_detector3 : boost::noncopyable
+    {
+      typedef quad_tree< Envelope<double> > tree_t;
+      tree_t tree_;
+    public:
+	
+      explicit label_collision_detector3(Envelope<double> const& extent)
+          : tree_(extent) {}
+	
+      bool has_placement(Envelope<double> const& box)
+      {
+          tree_t::query_iterator itr = tree_.query_in_box(box);
+          tree_t::query_iterator end = tree_.query_end();
+          
+          for ( ;itr != end; ++itr)
+          {
+            if (itr->intersects(box))
+            {
+                return false;
+            }
+          }
+          
+          return true;
+      }
+
+      void insert(Envelope<double> const& box)
+      {
+        tree_.insert(box, box);
+      }
+    };
 }
 
 #endif 

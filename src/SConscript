@@ -46,11 +46,13 @@ source = Split(
     map.cpp
     memory.cpp
     params.cpp
+    placement_finder.cpp
     plugin.cpp
     png_reader.cpp
     point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
     save_map.cpp
+    shield_symbolizer.cpp
     text_symbolizer.cpp
     tiff_reader.cpp
     wkb.cpp

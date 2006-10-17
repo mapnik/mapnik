@@ -46,6 +46,10 @@ extern "C"
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/utils.hpp>
+#include <mapnik/ctrans.hpp>
+#include <mapnik/geometry.hpp>
+
+#include <mapnik/text_path.hpp>
 
 namespace mapnik
 {
@@ -84,6 +88,7 @@ namespace mapnik
         {
             if (! FT_Set_Pixel_Sizes( face_, 0, size ))
                 return true;
+            
             return false;
         }
         
@@ -199,7 +204,6 @@ namespace mapnik
     template <typename T>
     struct text_renderer : private boost::noncopyable
     {
-
         struct glyph_t : boost::noncopyable
         {
             FT_Glyph image;
@@ -216,19 +220,13 @@ namespace mapnik
               face_(face),
               fill_(0,0,0), 
               halo_fill_(255,255,255),
-              halo_radius_(0),
-              angle_(0.0) {}
+              halo_radius_(0) {}
     
         void set_pixel_size(unsigned size)
         {
             face_->set_pixel_sizes(size);
         }
     
-        void set_angle(float angle)
-        {
-            angle_=angle;
-        }
-
         void set_fill(mapnik::Color const& fill)
         {
             fill_=fill;
@@ -244,7 +242,7 @@ namespace mapnik
             halo_radius_=radius;
         }
 
-        dimension_t prepare_glyphs(std::string const& text)
+        Envelope<double> prepare_glyphs(text_path *path)
         {
             //clear glyphs
             glyphs_.clear();
@@ -254,43 +252,35 @@ namespace mapnik
             FT_Error  error;
 	    
             FT_Face face = face_->get_face();
-            FT_GlyphSlot slot = face->glyph;
-            FT_Bool use_kerning;
-            FT_UInt previous = 0;
-	    
-            pen.x = 0;
-            pen.y = 0;
-	    
-            use_kerning = FT_HAS_KERNING(face)>0?true:false;
+//            FT_GlyphSlot slot = face->glyph;
 	    
             FT_BBox bbox;   
             bbox.xMin = bbox.yMin = 32000; 
             bbox.xMax = bbox.yMax = -32000; //hmm?? 
 	    
-            for (std::string::const_iterator i=text.begin();i!=text.end();++i)
+            for (int i = 0; i < path->num_nodes(); i++) 
             {
+                int c;
+                double x, y, angle;
+                
+                path->vertex(&c, &x, &y, &angle);
+
                 FT_BBox glyph_bbox; 
                 FT_Glyph image;
 		
-                matrix.xx = (FT_Fixed)( cos( angle_ ) * 0x10000L ); 
-                matrix.xy = (FT_Fixed)(-sin( angle_ ) * 0x10000L ); 
-                matrix.yx = (FT_Fixed)( sin( angle_ ) * 0x10000L ); 
-                matrix.yy = (FT_Fixed)( cos( angle_ ) * 0x10000L );
+                pen.x = int(x * 64);
+                pen.y = int(y * 64);
 	        	
+                matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L ); 
+                matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L ); 
+                matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L ); 
+                matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
+		
                 FT_Set_Transform (face,&matrix,&pen);
 		
-                FT_UInt glyph_index = FT_Get_Char_Index( face, unsigned(*i) & 0xff );
+                FT_UInt glyph_index = FT_Get_Char_Index( face, unsigned(c) & 0xff );
 		
-                if ( use_kerning && previous && glyph_index)
-                {
-                    FT_Vector delta;
-                    FT_Get_Kerning(face,previous,glyph_index,
-                                   FT_KERNING_DEFAULT,&delta);
-                    pen.x += delta.x;
-                    pen.y += delta.y;
-                }
-		
-                error = FT_Load_Glyph (face,glyph_index,FT_LOAD_DEFAULT); 
+                error = FT_Load_Glyph (face,glyph_index, FT_LOAD_NO_HINTING); 
                 if ( error )
                     continue;
 		
@@ -316,17 +306,66 @@ namespace mapnik
                     bbox.yMax = 0; 
                 }
 		
-                pen.x += slot->advance.x;
-                pen.y += slot->advance.y;
-		
-                previous = glyph_index;
                 // take ownership of the glyph
                 glyphs_.push_back(new glyph_t(image));
             }
 	    
-            unsigned string_width = (bbox.xMax - bbox.xMin); 
-            unsigned string_height = (bbox.yMax - bbox.yMin);
-            return dimension_t(string_width,string_height);
+          return Envelope<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
+        }
+      
+        dimension_t character_dimensions(const unsigned c)
+        {
+            FT_Matrix matrix;
+            FT_Vector pen;
+            FT_Error  error;
+            
+            FT_Face face = face_->get_face();
+            FT_GlyphSlot slot = face->glyph;
+            
+            pen.x = 0;
+            pen.y = 0;
+            
+            FT_BBox glyph_bbox; 
+            FT_Glyph image;
+            
+            matrix.xx = (FT_Fixed)( 1 * 0x10000L ); 
+            matrix.xy = (FT_Fixed)( 0 * 0x10000L ); 
+            matrix.yx = (FT_Fixed)( 0 * 0x10000L ); 
+            matrix.yy = (FT_Fixed)( 1 * 0x10000L );
+                    
+            FT_Set_Transform (face,&matrix,&pen);
+            
+            FT_UInt glyph_index = FT_Get_Char_Index( face, c & 0xff );
+            
+            error = FT_Load_Glyph (face,glyph_index,FT_LOAD_NO_HINTING); 
+            if ( error )
+                return dimension_t(0, 0);
+            
+            error = FT_Get_Glyph( face->glyph, &image);
+            if ( error )
+                return dimension_t(0, 0);
+            
+            FT_Glyph_Get_CBox(image,ft_glyph_bbox_pixels, &glyph_bbox); 
+          
+            return dimension_t(slot->advance.x >> 6, glyph_bbox.yMax - glyph_bbox.yMin);
+        }
+        
+        void get_string_info(std::string const& text, string_info *info)
+        {
+            unsigned width = 0;
+            unsigned height = 0;
+          
+            for (std::string::const_iterator i=text.begin();i!=text.end();++i)
+            {
+              dimension_t char_dim = character_dimensions(*i);
+              
+              info->add_info(*i, char_dim.first, char_dim.second);
+              
+              width += char_dim.first;
+              height = char_dim.second > height ? char_dim.second : height;
+            }
+            
+            info->set_dimensions(width, height);
         }
 	
         void render(double x0, double y0)
@@ -421,12 +460,12 @@ namespace mapnik
     
         pixmap_type & pixmap_;
         face_ptr face_;
-        Color fill_;
-        Color halo_fill_;
+      mapnik::Color fill_;
+      mapnik::Color halo_fill_;
         int halo_radius_;
-        float angle_;
         glyphs_t glyphs_;
     }; 
 }
+
 
 #endif // FONT_ENGINE_FREETYPE_HPP

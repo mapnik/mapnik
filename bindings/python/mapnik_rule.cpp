@@ -41,6 +41,7 @@ void export_rule()
     using mapnik::polygon_symbolizer;
     using mapnik::polygon_pattern_symbolizer;
     using mapnik::raster_symbolizer;
+    using mapnik::shield_symbolizer;
     using mapnik::text_symbolizer;
     using mapnik::symbolizer;
     using mapnik::symbolizers;
@@ -52,6 +53,7 @@ void export_rule()
     implicitly_convertible<polygon_symbolizer,symbolizer>();
     implicitly_convertible<polygon_pattern_symbolizer,symbolizer>();
     implicitly_convertible<raster_symbolizer,symbolizer>();
+    implicitly_convertible<shield_symbolizer,symbolizer>();
     implicitly_convertible<text_symbolizer,symbolizer>();
     
     class_<symbolizers>("Symbolizers",init<>("TODO"))
