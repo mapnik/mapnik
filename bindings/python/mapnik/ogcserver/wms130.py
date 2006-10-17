@@ -136,19 +136,19 @@ class ServiceHandler(WMSBaseServiceHandler):
             layername.text = layer.name
             env = layer.envelope()
             layerexgbb = ElementTree.Element('EX_GeographicBoundingBox')
-            ll = self.crs.Inverse(env.minx, env.miny)
-            ur = self.crs.Inverse(env.maxx, env.maxy)
+            ll = self.crs.inverse(env.minx, env.miny)
+            ur = self.crs.inverse(env.maxx, env.maxy)
             exgbb_wbl = ElementTree.Element('westBoundLongitude')
-            exgbb_wbl.text = str(ll[0])
+            exgbb_wbl.text = str(ll.x)
             layerexgbb.append(exgbb_wbl)
             exgbb_ebl = ElementTree.Element('eastBoundLongitude')
-            exgbb_ebl.text = str(ur[0])
+            exgbb_ebl.text = str(ur.x)
             layerexgbb.append(exgbb_ebl)
             exgbb_sbl = ElementTree.Element('southBoundLatitude')
-            exgbb_sbl.text = str(ll[1])
+            exgbb_sbl.text = str(ll.y)
             layerexgbb.append(exgbb_sbl)
             exgbb_nbl = ElementTree.Element('northBoundLatitude')
-            exgbb_nbl.text = str(ur[1])
+            exgbb_nbl.text = str(ur.y)
             layerexgbb.append(exgbb_nbl)
             layerbbox = ElementTree.Element('BoundingBox')
             layerbbox.set('CRS', str(self.crs))
@@ -158,13 +158,13 @@ class ServiceHandler(WMSBaseServiceHandler):
             layerbbox.set('maxy', str(env.maxy))
             layere = ElementTree.Element('Layer')
             layere.append(layername)
-            if layer.title():
+            if layer.title:
                 layertitle = ElementTree.Element('Title')
-                layertitle.text = layer.title()
+                layertitle.text = layer.title
                 layere.append(layertitle)
-            if layer.abstract():
+            if layer.abstract:
                 layerabstract = ElementTree.Element('Abstract')
-                layerabstract.text = layer.abstract()
+                layerabstract.text = layer.abstract
                 layere.append(layerabstract)
             layere.append(layerexgbb)
             layere.append(layerbbox)

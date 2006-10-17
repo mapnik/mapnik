@@ -20,7 +20,7 @@
 # $Id$
 
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Map, Color, Envelope, render, rawdata, Image, Projection, render_to_file
+from mapnik import Map, Color, Envelope, render, rawdata, Image, Projection, render_to_file, Coord
 from PIL.Image import fromstring, new
 from PIL.ImageDraw import Draw
 from StringIO import StringIO
@@ -253,15 +253,15 @@ class CRS:
             return True
         return False
 
-    def Inverse(self, x, y):
+    def inverse(self, x, y):
         if not self.proj:
-            self.proj = Projection('init=%s' % str(self).lower())
-        return self.proj.Inverse(x, y)
+            self.proj = Projection('+init=%s' % str(self).lower())
+        return self.proj.inverse(Coord(x, y))
 
-    def Forward(self, x, y):
+    def forward(self, x, y):
         if not self.proj:
-            self.proj = Projection('init=%s' % str(self).lower())
-        return self.proj.Forward(x, y)
+            self.proj = Projection('+init=%s' % str(self).lower())
+        return self.proj.forward(Coord(x, y))
 
 class CRSFactory:
 
