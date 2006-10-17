@@ -80,12 +80,13 @@ feature_ptr postgis_featureset::next()
                     float8net(val,buf);
                     boost::put(*feature,name,val);
                 }
-                else if (oid==1042 || oid==1043) //bpchar or varchar
+                else if (oid==25 || oid==1042 || oid==1043) // text or bpchar or varchar
                 {
                     boost::put(*feature,name,buf);
                 }
                 else 
                 {
+                    std::clog << "uknown OID = " << oid << " FIXME \n";
                     boost::put(*feature,name,0);
                 }
             }
