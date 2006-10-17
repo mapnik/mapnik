@@ -129,13 +129,13 @@ class ServiceHandler(WMSBaseServiceHandler):
             layername = ElementTree.Element('Name')
             layername.text = layer.name
             env = layer.envelope()
-            llp = self.crs.Inverse(env.minx, env.miny)
-            urp = self.crs.Inverse(env.maxx, env.maxy)
+            llp = self.crs.inverse(env.minx, env.miny)
+            urp = self.crs.inverse(env.maxx, env.maxy)
             latlonbb = ElementTree.Element('LatLonBoundingBox')
-            latlonbb.set('minx', str(llp[0]))
-            latlonbb.set('miny', str(llp[1]))
-            latlonbb.set('maxx', str(urp[0]))
-            latlonbb.set('maxy', str(urp[1]))
+            latlonbb.set('minx', str(llp.x))
+            latlonbb.set('miny', str(llp.y))
+            latlonbb.set('maxx', str(urp.x))
+            latlonbb.set('maxy', str(urp.y))
             layerbbox = ElementTree.Element('BoundingBox')
             layerbbox.set('SRS', str(self.crs))
             layerbbox.set('minx', str(env.minx))
@@ -144,13 +144,13 @@ class ServiceHandler(WMSBaseServiceHandler):
             layerbbox.set('maxy', str(env.maxy))
             layere = ElementTree.Element('Layer')
             layere.append(layername)
-            if layer.title():
+            if layer.title:
                 layertitle = ElementTree.Element('Title')
-                layertitle.text = layer.title()
+                layertitle.text = layer.title
                 layere.append(layertitle)
-            if layer.abstract():
+            if layer.abstract:
                 layerabstract = ElementTree.Element('Abstract')
-                layerabstract.text = layer.abstract()
+                layerabstract.text = layer.abstract
                 layere.append(layerabstract)
             layere.append(latlonbb)
             layere.append(layerbbox)
