@@ -68,7 +68,7 @@ namespace mapnik
 	
         void apply()
         {
-            boost::progress_timer t;
+            boost::progress_timer t(std::clog);
             
             Processor & p = static_cast<Processor&>(*this);
             
