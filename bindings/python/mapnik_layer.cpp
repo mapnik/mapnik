@@ -53,7 +53,7 @@ void export_layer()
                       &Layer::set_abstract,
                       "Get/Set the abstract of the layer.")
         
-        .add_property("src", 
+        .add_property("srs", 
                       make_function(&Layer::srs,return_value_policy<copy_const_reference>()),
                       &Layer::set_srs,
                       "Get/Set the SRS of the layer.")
