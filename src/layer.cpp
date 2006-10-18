@@ -173,7 +173,7 @@ namespace mapnik
 
     bool Layer::isVisible(double scale) const
     {
-        return isActive() && scale>=minZoom_ && scale<maxZoom_;
+        return isActive() && scale >= minZoom_ && scale < maxZoom_;
     }
 
     void Layer::setSelectable(bool selectable)

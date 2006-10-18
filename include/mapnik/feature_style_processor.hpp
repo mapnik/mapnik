@@ -37,6 +37,7 @@
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/scale_denominator.hpp>
 
 namespace mapnik
 {       
@@ -68,25 +69,24 @@ namespace mapnik
 	
         void apply()
         {
-            boost::progress_timer t(std::clog);
-            
+            boost::progress_timer t(std::clog);            
             Processor & p = static_cast<Processor&>(*this);
-            
             p.start_map_processing(m_);
-            
-            std::vector<Layer>::const_iterator itr = m_.layers().begin();
-            std::vector<Layer>::const_iterator end = m_.layers().end();
-            
+                       
             try
             {
                 projection proj(m_.srs()); // map projection
+                double scale_denom = scale_denominator(m_,proj);
+                std::clog << "scale denominator = " << scale_denom << "\n";
                 
+                std::vector<Layer>::const_iterator itr = m_.layers().begin();
+                std::vector<Layer>::const_iterator end = m_.layers().end();
+            
                 while (itr != end)
                 {
-                    if (itr->isVisible(m_.scale()))// && 
-                        //itr->envelope().intersects(m_.getCurrentExtent())) TODO
-                    {    
-                        apply_to_layer(*itr, p, proj);
+                    if (itr->isVisible(scale_denom))
+                    {
+                        apply_to_layer(*itr, p, proj, scale_denom);
                     }
                     ++itr;
                 }
@@ -99,7 +99,8 @@ namespace mapnik
             p.end_map_processing(m_);
         }	
     private:
-        void apply_to_layer(Layer const& lay, Processor & p, projection const& proj0)
+        void apply_to_layer(Layer const& lay, Processor & p, 
+                            projection const& proj0,double scale_denom)
         {
             p.start_layer_processing(lay);
             boost::shared_ptr<datasource> ds=lay.datasource();
@@ -120,8 +121,6 @@ namespace mapnik
                 prj_trans.forward(x1,y1,z1);
                 Envelope<double> bbox(x0,y0,x1,y1);
                 std::clog << bbox << "\n";
-                
-                double scale = m_.scale();
                 
                 std::vector<std::string> const& style_names = lay.styles();
                 std::vector<std::string>::const_iterator stylesIter = style_names.begin();
@@ -146,7 +145,7 @@ namespace mapnik
                                         
                     while (ruleIter!=ruleEnd)
                     {
-                        if (ruleIter->active(scale))
+                        if (ruleIter->active(scale_denom))
                         {
                             active_rules=true;
                             ruleIter->accept(collector);
