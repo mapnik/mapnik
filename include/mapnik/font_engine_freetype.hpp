@@ -28,9 +28,9 @@
 // freetype2
 extern "C"
 {
-  #include <ft2build.h>
-  #include FT_FREETYPE_H
-  #include FT_GLYPH_H
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
 }
 
 // stl
@@ -252,7 +252,7 @@ namespace mapnik
             FT_Error  error;
 	    
             FT_Face face = face_->get_face();
-//            FT_GlyphSlot slot = face->glyph;
+            //            FT_GlyphSlot slot = face->glyph;
 	    
             FT_BBox bbox;   
             bbox.xMin = bbox.yMin = 32000; 
@@ -310,7 +310,7 @@ namespace mapnik
                 glyphs_.push_back(new glyph_t(image));
             }
 	    
-          return Envelope<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
+            return Envelope<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
         }
       
         dimension_t character_dimensions(const unsigned c)
@@ -346,7 +346,7 @@ namespace mapnik
                 return dimension_t(0, 0);
             
             FT_Glyph_Get_CBox(image,ft_glyph_bbox_pixels, &glyph_bbox); 
-          
+            FT_Done_Glyph(image); 
             return dimension_t(slot->advance.x >> 6, glyph_bbox.yMax - glyph_bbox.yMin);
         }
         
@@ -357,12 +357,12 @@ namespace mapnik
           
             for (std::string::const_iterator i=text.begin();i!=text.end();++i)
             {
-              dimension_t char_dim = character_dimensions(*i);
+                dimension_t char_dim = character_dimensions(*i);
               
-              info->add_info(*i, char_dim.first, char_dim.second);
+                info->add_info(*i, char_dim.first, char_dim.second);
               
-              width += char_dim.first;
-              height = char_dim.second > height ? char_dim.second : height;
+                width += char_dim.first;
+                height = char_dim.second > height ? char_dim.second : height;
             }
             
             info->set_dimensions(width, height);
@@ -460,8 +460,8 @@ namespace mapnik
     
         pixmap_type & pixmap_;
         face_ptr face_;
-      mapnik::Color fill_;
-      mapnik::Color halo_fill_;
+        mapnik::Color fill_;
+        mapnik::Color halo_fill_;
         int halo_radius_;
         glyphs_t glyphs_;
     }; 
