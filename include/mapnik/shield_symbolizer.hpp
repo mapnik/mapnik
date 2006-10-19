@@ -34,6 +34,7 @@ namespace mapnik
     {	
         explicit shield_symbolizer();
         shield_symbolizer(std::string const& name,
+                          std::string const& face_name,
                           unsigned size,
                           Color const& fill, 
                           std::string const& file,
@@ -44,6 +45,7 @@ namespace mapnik
         boost::shared_ptr<ImageData32> const& get_data() const;
       
         std::string const& get_name() const;
+        std::string const& get_face_name() const;
 
         unsigned get_text_size() const;
         Color const& get_fill() const;
@@ -53,6 +55,7 @@ namespace mapnik
         
     private:
         std::string name_;
+        std::string face_name_;
         unsigned size_;
         Color fill_;
         boost::shared_ptr<ImageData32> symbol_;

@@ -32,7 +32,7 @@ void export_shield_symbolizer()
     
     class_<shield_symbolizer>("ShieldSymbolizer",
                              init<>("Default Shield Symbolizer - 4x4 black square"))
-        .def (init< std::string const&, unsigned, mapnik::Color const&,
+        .def (init< std::string const&, std::string const&, unsigned, mapnik::Color const&,
               std::string const&, std::string const&,unsigned,unsigned>("TODO"))
         ;
     

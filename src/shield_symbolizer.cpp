@@ -44,12 +44,13 @@ namespace mapnik
     
     shield_symbolizer::shield_symbolizer(
                           std::string const& name,
+                          std::string const& face_name,
                           unsigned size,
                           Color const& fill, 
                           std::string const& file,
                           std::string const& type,
                           unsigned width,unsigned height)
-        : name_(name), size_(size), fill_(fill), symbol_(new ImageData32(width,height))
+        : name_(name), face_name_(face_name), size_(size), fill_(fill), symbol_(new ImageData32(width,height))
     {
         try 
         {
@@ -67,6 +68,7 @@ namespace mapnik
     
     shield_symbolizer::shield_symbolizer(shield_symbolizer const& rhs)
         : name_(rhs.name_),
+          face_name_(rhs.face_name_),
           size_(rhs.size_),
           fill_(rhs.fill_),
           symbol_(rhs.symbol_),
@@ -86,6 +88,11 @@ namespace mapnik
     std::string const& shield_symbolizer::get_name() const
     {
       return name_;
+    }
+    
+    std::string const& shield_symbolizer::get_face_name() const
+    {
+      return face_name_;
     }
     
     void shield_symbolizer::set_allow_overlap(bool overlap)

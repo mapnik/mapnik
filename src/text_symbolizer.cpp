@@ -26,8 +26,9 @@
 
 namespace mapnik
 {
-    text_symbolizer::text_symbolizer(std::string const& name,unsigned size,Color const& fill)
+    text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size,Color const& fill)
 	: name_(name),
+    face_name_(face_name),
 	  size_(size),
 	  fill_(fill),
 	  halo_fill_(Color(255,255,255)),
@@ -38,6 +39,7 @@ namespace mapnik
            
     text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
 	: name_(rhs.name_),
+    face_name_(rhs.face_name_),
 	  size_(rhs.size_),
 	  fill_(rhs.fill_),
 	  halo_fill_(rhs.halo_fill_),
@@ -51,6 +53,7 @@ namespace mapnik
 	if (this == &other)
 	    return *this;
 	name_ = other.name_;
+  face_name_ = other.face_name_;
 	size_ = other.size_;
 	fill_ = other.fill_;
 	halo_fill_ = other.halo_fill_;
@@ -63,6 +66,11 @@ namespace mapnik
     std::string const&  text_symbolizer::get_name() const
     {
 	return name_;
+    }
+    
+    std::string const&  text_symbolizer::get_face_name() const
+    {
+	return face_name_;
     }
     
     unsigned  text_symbolizer::get_text_size() const

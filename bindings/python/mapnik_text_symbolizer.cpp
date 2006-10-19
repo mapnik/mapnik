@@ -38,7 +38,7 @@ void export_text_symbolizer()
         ;
 
     class_<text_symbolizer>("TextSymbolizer",
-			    init<std::string const&,unsigned,Color const&>())
+			    init<std::string const&,std::string const&, unsigned,Color const&>())
         .add_property("halo_fill",make_function(
                       &text_symbolizer::get_halo_fill,
                       return_value_policy<copy_const_reference>()),

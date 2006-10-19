@@ -331,7 +331,7 @@ namespace mapnik
             
             if (text.length() > 0 && data)
             {
-                face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
+                face_ptr face = font_manager_.get_face(sym.get_face_name());
                 if (face)
                 {
                     int w = data->width();
@@ -488,8 +488,7 @@ namespace mapnik
             {
                 Color const& fill  = sym.get_fill();
 	
-                face_ptr face = font_manager_.get_face("Bitstream Vera Sans Roman");//TODO
-                //face_ptr face = font_manager_.get_face("Times New Roman Regular");//TODO
+                face_ptr face = font_manager_.get_face(sym.get_face_name());
                 if (face)
                 {
                     text_renderer<mapnik::Image32> ren(pixmap_,face);
