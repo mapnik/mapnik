@@ -25,6 +25,7 @@
 #include <iostream>
 // boost
 #include <boost/utility.hpp>
+#include <boost/algorithm/string.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -325,6 +326,7 @@ namespace mapnik
         if (geom)
         {
             std::string text = feature[sym.get_name()].to_string();
+            boost::trim(text);
             boost::shared_ptr<ImageData32> const& data = sym.get_data();
             
             if (text.length() > 0 && data)
@@ -481,6 +483,7 @@ namespace mapnik
         if (geom)
         {
             std::string text = feature[sym.get_name()].to_string();
+            boost::trim(text);
             if (text.length() > 0)
             {
                 Color const& fill  = sym.get_fill();
