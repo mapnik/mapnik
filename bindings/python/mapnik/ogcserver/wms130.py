@@ -21,9 +21,10 @@
 
 from common import ParameterDefinition, Response, Version, ListFactory, \
                    ColorFactory, CRSFactory, CRS, WMSBaseServiceHandler, \
-                   BaseExceptionHandler
+                   BaseExceptionHandler, Projection
 from exceptions import OGCException, ServerConfigurationError
 from lxml import etree as ElementTree
+from mapnik import Coord
 
 class ServiceHandler(WMSBaseServiceHandler):
 
@@ -104,7 +105,6 @@ class ServiceHandler(WMSBaseServiceHandler):
         <Layer>
           <Title>A Mapnik WMS Server</Title>
           <Abstract>A Mapnik WMS Server</Abstract>
-          <CRS/>
         </Layer>
       </Capability>
     </WMS_Capabilities>
@@ -113,10 +113,10 @@ class ServiceHandler(WMSBaseServiceHandler):
     def __init__(self, conf, mapfactory, opsonlineresource):
         self.conf = conf
         self.mapfactory = mapfactory
-        if self.conf.has_option('service', 'epsg'):
-            self.crs = CRS('EPSG', self.conf.get('service', 'epsg'))
+        if self.conf.has_option('service', 'allowedepsgcodes'):
+            self.allowedepsgcodes = map(lambda code: 'epsg:%s' % code, self.conf.get('service', 'allowedepsgcodes').split(','))
         else:
-            raise ServerConfigurationError('EPSG code not properly configured.')
+            raise ServerConfigurationError('Allowed EPSG codes not properly configured.')
 
         capetree = ElementTree.fromstring(self.capabilitiesxmltemplate)
 
@@ -128,16 +128,19 @@ class ServiceHandler(WMSBaseServiceHandler):
 
         rootlayerelem = capetree.find('{http://www.opengis.net/wms}Capability/{http://www.opengis.net/wms}Layer')
 
-        rootlayercrs = rootlayerelem.find('{http://www.opengis.net/wms}CRS')
-        rootlayercrs.text = str(self.crs)
+        for epsgcode in self.allowedepsgcodes:
+            rootlayercrs = ElementTree.Element('CRS')
+            rootlayercrs.text = epsgcode.upper()
+            rootlayerelem.append(rootlayercrs)
 
         for layer in self.mapfactory.layers.values():
+            layerproj = Projection(layer.srs)
             layername = ElementTree.Element('Name')
             layername.text = layer.name
             env = layer.envelope()
             layerexgbb = ElementTree.Element('EX_GeographicBoundingBox')
-            ll = self.crs.inverse(env.minx, env.miny)
-            ur = self.crs.inverse(env.maxx, env.maxy)
+            ll = layerproj.inverse(Coord(env.minx, env.miny))
+            ur = layerproj.inverse(Coord(env.maxx, env.maxy))
             exgbb_wbl = ElementTree.Element('westBoundLongitude')
             exgbb_wbl.text = str(ll.x)
             layerexgbb.append(exgbb_wbl)
@@ -151,7 +154,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             exgbb_nbl.text = str(ur.y)
             layerexgbb.append(exgbb_nbl)
             layerbbox = ElementTree.Element('BoundingBox')
-            layerbbox.set('CRS', str(self.crs))
+            layerbbox.set('CRS', layerproj.epsgstring())
             layerbbox.set('minx', str(env.minx))
             layerbbox.set('miny', str(env.miny))
             layerbbox.set('maxx', str(env.maxx))
@@ -189,8 +192,8 @@ class ServiceHandler(WMSBaseServiceHandler):
     def GetMap(self, params):
         if params['width'] > int(self.conf.get('service', 'maxwidth')) or params['height'] > int(self.conf.get('service', 'maxheight')):
             raise OGCException('Requested map size exceeds limits set by this server.')
-        if str(params['crs']) != str(self.crs):
-            raise OGCException('Unsupported CRS requested.  Must be "%s" and not "%s".' % (self.crs, params['crs']), 'InvalidCRS')
+        if str(params['crs']) not in self.allowedepsgcodes:
+            raise OGCException('Unsupported CRS "%s" requested.' % str(params['crs']).upper(), 'InvalidCRS')
         return WMSBaseServiceHandler.GetMap(self, params)
 
 class ExceptionHandler(BaseExceptionHandler):

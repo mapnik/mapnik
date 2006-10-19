@@ -20,7 +20,7 @@
 # $Id$
 
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Map, Color, Envelope, render, rawdata, Image, Projection, render_to_file, Coord
+from mapnik import Map, Color, Envelope, render, rawdata, Image, Projection as MapnikProjection, render_to_file, Coord
 from PIL.Image import fromstring, new
 from PIL.ImageDraw import Draw
 from StringIO import StringIO
@@ -241,7 +241,7 @@ def ColorFactory(colorstring):
 class CRS:
 
     def __init__(self, namespace, code):
-        self.namespace = namespace
+        self.namespace = namespace.lower()
         self.code = int(code)
         self.proj = None
 
@@ -255,12 +255,12 @@ class CRS:
 
     def inverse(self, x, y):
         if not self.proj:
-            self.proj = Projection('+init=%s' % str(self).lower())
+            self.proj = Projection('+init=%s:%s' % (self.namespace, self.code))
         return self.proj.inverse(Coord(x, y))
 
     def forward(self, x, y):
         if not self.proj:
-            self.proj = Projection('+init=%s' % str(self).lower())
+            self.proj = Projection('+init=%s:%s' % (self.namespace, self.code))        
         return self.proj.forward(Coord(x, y))
 
 class CRSFactory:
@@ -286,7 +286,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
             raise OGCException("BBOX values don't make sense.  miny is greater than maxy.")
         if params.has_key('styles') and len(params['styles']) != len(params['layers']):
             raise OGCException('STYLES length does not match LAYERS length.')
-        m = Map(params['width'], params['height'])
+        m = Map(params['width'], params['height'], '+init=%s' % params['crs'])
         if params.has_key('transparent') and params['transparent'] == 'FALSE':
             m.background = params['bgcolor']
         else:
@@ -380,3 +380,8 @@ class BaseExceptionHandler:
         im.save(fh, PIL_TYPE_MAPPING[params['format']])
         fh.seek(0)
         return Response(params['format'], fh.read())
+
+class Projection(MapnikProjection):
+    
+    def epsgstring(self):
+        return self.params().split('=')[1].upper()

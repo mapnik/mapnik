@@ -22,8 +22,8 @@ Features/Caveats
 - JPEG/PNG output
 - XML/INIMAGE/BLANK error handling
 - Multiple named styles support
-- No real layer metadata support yet
-- No re-projection support
+- Reprojection support
+- Supported layer metadata: title, abstract
 - Needs to be able to write to tempfile.gettempdir() (most likely "/tmp")
 
 
@@ -41,22 +41,8 @@ Please properly install the following before proceeding further:
 Installation
 ------------
 
-- Make sure you compile or re-compile Mapnik after installing PROJ.4, if this
-  was not done already.  Mapnik includes a Python API to the PROJ.4 library
-  used by the ogcserver.  The PROJ_INCLUDES and PROJ_LIBS parameters can
-  be passed to mapnik's scons build script to help with this.
-  
-  You can test the availability of the PROJ.4 bindings by trying:
-  
-  $ python
-  Python 2.3.4 (#1, Feb 22 2005, 04:09:37)
-  [GCC 3.4.3 20041212 (Red Hat 3.4.3-9.EL4)] on linux2
-  Type "help", "copyright", "credits" or "license" for more information.
-  >>> from mapnik import Projection
-  registered datasource : raster
-  registered datasource : shape
-  registered datasource : postgis
-  >>>
+- Make sure Mapnik was compiled and linked with PROJ.4 support.  If this isn't
+  the case, recompile Mapnik and make sure it is.
 
 - The executable "ogcserver" in utils/ogcserver will work for both CGI and
   FastCGI operations.  Where to place it will depend on your server's
@@ -92,6 +78,7 @@ API, look in demo/python, or in docs/epydocs.
 The server needs a python module, with code that looks like this:
 
 from mapnik.ogcserver.WMS import BaseWMSFactory
+from mapnik import Layer, Style
 
 class WMSFactory(BaseWMSFactory):
 
@@ -101,7 +88,9 @@ class WMSFactory(BaseWMSFactory):
 		...
 		self.register_style('stylename', sty)
 		
-		lyr = Layer(name='layername', title='Highways', abstract='Highways')
+		lyr = Layer('layername', '+init=epsg:4326')
+		lyr.title = 'Layer title'
+		lyr.abstract = 'Layer abstract'
 		...
 		self.register_layer(lyr, 'stylename')
 		self.finalize()
@@ -111,11 +100,14 @@ The rules for writing this class are:
 - It MUST be called 'WMSFactory'.
 - It MUST sub-class mapnik.ogcserver.WMS.BaseWMSFactory.
 - The __init__ MUST call the base class'.
-- Layers MUST be named with the 'name' parameter to the constructor.
+- Layers MUST be named with the first parameter to the constructor.
+- Layers MUST define an EPSG projection in the second parameter to the
+  constructor.  This implies that the underlying data must be in an EPSG
+  projection already.
 - style and layer names are meant for machine readability, not human.  Keep
   them short and simple, without spaces or special characters.
-- For human readable info, pass title='' and abstract='' parameters to the
-  Layer() call.
+- For human readable info, set the title and abstract properties on the layer
+  object.
 - DO NOT register styles using layer.styles.append(), instead, provide style
   information to the register_layer() call:
   

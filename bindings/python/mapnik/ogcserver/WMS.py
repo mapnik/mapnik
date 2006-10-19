@@ -24,6 +24,7 @@ from exceptions import OGCException, ServerConfigurationError
 from wms111 import ServiceHandler as ServiceHandler111
 from wms130 import ServiceHandler as ServiceHandler130
 from mapnik import Style, Layer
+import re
 
 def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
 
@@ -46,6 +47,8 @@ class BaseWMSFactory:
         layername = layer.name
         if not layername:
             raise ServerConfigurationError('Attempted to register an unnamed layer.')
+        if not re.match('^\+init=epsg:\d+$', layer.srs):
+            raise ServerConfigurationError('Attempted to register a layer without an epsg projection defined.')
         if defaultstyle not in self.styles.keys() + self.aggregatestyles.keys():
             raise ServerConfigurationError('Attempted to register a layer with an non-existent default style.')
         layer.wmsdefaultstyle = defaultstyle
