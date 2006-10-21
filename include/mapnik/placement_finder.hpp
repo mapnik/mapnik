@@ -72,7 +72,7 @@ namespace mapnik
     //helpers
     std::pair<double, double> get_position_at_distance(double target_distance);
     double get_total_distance();
-    void placement::clear_envelopes();
+    void clear_envelopes();
     
     double total_distance_; //cache for distance
   };
