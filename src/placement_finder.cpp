@@ -395,6 +395,11 @@ namespace mapnik
     else
     {
       p->geom->label_position(&p->starting_x, &p->starting_y);
+      //  TODO: 
+      //  We would only want label position in final 'paper' coords.
+      //  Move view and proj transforms to e.g. label_position(x,y,proj_trans,ctrans)?
+      double z=0;  
+      p->proj_trans->backward(p->starting_x, p->starting_y, z);
       p->ctrans->forward(&p->starting_x, &p->starting_y);
     }
     
