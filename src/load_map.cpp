@@ -27,7 +27,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
+
+// use tinyxml 
+#define BOOST_PROPERTY_TREE_XML_PARSER_TINYXML
 #include <boost/property_tree/xml_parser.hpp>
+
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
@@ -127,12 +131,26 @@ namespace mapnik
                             {
                                 std::cout << sym.first << "\n";
                             } 
+                            else if ( sym.first == "LinePatternSymbolizer")
+                            {
+                                std::string file =  
+                                    sym.second.get<std::string>("<xmlattr>.file"); 
+                                std::string type =  
+                                    sym.second.get<std::string>("<xmlattr>.type");
+                                unsigned width =  
+                                    sym.second.get<unsigned>("<xmlattr>.width");
+                                unsigned height =  
+                                    sym.second.get<unsigned>("<xmlattr>.height");
+                                
+                                rule.append(line_pattern_symbolizer(file,type,width,height));
+                                
+                            }
                             else if ( sym.first == "TextSymbolizer")
                             {
                                 std::string name =  
                                     sym.second.get<std::string>("<xmlattr>.name");                      
                                 std::string face_name =  
-                                    sym.second.get<std::string>("<xmlattr>.face_name");                      
+                                    sym.second.get<std::string>("<xmlattr>.face_name");              
                                 unsigned size = 
                                     sym.second.get<unsigned>("<xmlattr>.size",10);                      
                                 std::string color_str = 
@@ -150,6 +168,32 @@ namespace mapnik
                                 }
                                 
                                 rule.append(text_symbol);
+                            }
+                            else if ( sym.first == "ShieldSymbolizer")
+                            {
+                                std::string name =  
+                                    sym.second.get<std::string>("<xmlattr>.name");                      
+                                std::string face_name =  
+                                    sym.second.get<std::string>("<xmlattr>.face_name");              
+                                unsigned size = 
+                                    sym.second.get<unsigned>("<xmlattr>.size",10);                      
+                                std::string color_str = 
+                                    sym.second.get<std::string>("<xmlattr>.fill","black");
+                                Color fill = color_factory::from_string(color_str.c_str());
+                                
+                                std::string image_file =
+                                    sym.second.get<std::string>("<xmlattr>.file");
+                                std::string type =
+                                    sym.second.get<std::string>("<xmlattr>.type");
+                                unsigned width =  
+                                    sym.second.get<unsigned>("<xmlattr>.width");
+                                unsigned height =  
+                                    sym.second.get<unsigned>("<xmlattr>.height");
+                                
+                                shield_symbolizer shield_symbol(name,face_name,size,fill,
+                                                                image_file,type,width,height);
+                                
+                                rule.append(shield_symbol);
                             }
                             else if ( sym.first == "LineSymbolizer")
                             {
