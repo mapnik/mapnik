@@ -75,8 +75,8 @@ namespace mapnik
         if (!png_ptr) return;
         png_set_mem_fn(png_ptr,mem_ptr,malloc_fn,free_fn);
 
-        // switch on optimization
-#if defined(PNG_LIBPNG_VER) && (PNG_LIBPNG_VER >= 10200)
+        // switch on optimization only if supported
+#if defined(PNG_LIBPNG_VER) && (PNG_LIBPNG_VER >= 10200) && defined(PNG_ASSEMBLER_CODE_SUPPORTED)
         png_uint_32 mask, flags;
 
         flags = png_get_asm_flags(png_ptr);
