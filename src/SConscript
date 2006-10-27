@@ -62,9 +62,16 @@ source = Split(
     scale_denominator.cpp
     """
     )
+source += Split(
+    """
+    ../tinyxml/tinystr.cpp
+    ../tinyxml/tinyxml.cpp
+    ../tinyxml/tinyxmlerror.cpp
+    ../tinyxml/tinyxmlparser.cpp
+    """)
 
 mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
 
 env.Alias(target='install', source=env.Install(prefix + '/' + env['LIBDIR_SCHEMA'], mapnik))
-includes = glob.glob('../include/mapnik' + '/*.hpp')
+includes = glob.glob('../include/mapnik/*.hpp')
 env.Alias(target='install', source=env.Install(prefix+'/include/mapnik', includes))

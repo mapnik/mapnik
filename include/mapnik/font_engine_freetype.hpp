@@ -264,6 +264,8 @@ namespace mapnik
                 double x, y, angle;
                 
                 path->vertex(&c, &x, &y, &angle);
+//                std::clog << "   prepare_glyph: " << (unsigned char)c << "," << x << "," << y << "," << angle << std::endl;
+
 
                 FT_BBox glyph_bbox; 
                 FT_Glyph image;
@@ -363,8 +365,8 @@ namespace mapnik
               
                 width += char_dim.first;
                 height = char_dim.second > height ? char_dim.second : height;
+                
             }
-            
             info->set_dimensions(width, height);
         }
 	
@@ -376,10 +378,14 @@ namespace mapnik
 	    
             start.x = unsigned(x0 * (1 << 6)); 
             start.y = unsigned((height - y0) * (1 << 6));
+
+//            std::clog << "Render text at: " << x0 << "," << y0 << " " << start.x << "," << start.y << std::endl;
+
             // now render transformed glyphs
             typename glyphs_t::iterator pos;
-
-            if (halo_radius_ > 0)
+            
+            //make sure we've got reasonable values.
+            if (halo_radius_ > 0 && halo_radius_ < 256)
             {
                 //render halo 
                 for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
@@ -463,6 +469,8 @@ namespace mapnik
         mapnik::Color fill_;
         mapnik::Color halo_fill_;
         int halo_radius_;
+        unsigned text_ratio_;
+        unsigned wrap_width_;
         glyphs_t glyphs_;
     }; 
 }

@@ -502,6 +502,8 @@ namespace mapnik
                     ren.get_string_info(text, &info);
                  
                     placement text_placement(&info, &t_, &prj_trans, geom, sym.get_label_placement());
+                    text_placement.text_ratio = sym.get_text_ratio();
+                    text_placement.wrap_width = sym.get_wrap_width();
                   
                     bool found = finder_.find_placement(&text_placement);
                     if (!found) {

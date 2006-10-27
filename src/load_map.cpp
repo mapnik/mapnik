@@ -27,9 +27,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
-
-// use tinyxml 
-#define BOOST_PROPERTY_TREE_XML_PARSER_TINYXML
 #include <boost/property_tree/xml_parser.hpp>
 
 // mapnik
@@ -165,6 +162,37 @@ namespace mapnik
                                 if (placement_str == "line")
                                 {
                                     text_symbol.set_label_placement(line_placement);
+                                }
+                                // halo fill and radius
+                                boost::optional<std::string> halo_fill = 
+                                    sym.second.get_optional<std::string>("<xmlattr>.halo_fill");
+                                
+                                if (halo_fill)
+                                {
+                                    text_symbol.set_halo_fill
+                                        (color_factory::from_string(halo_fill->c_str()));
+                                }
+                                boost::optional<unsigned> halo_radius = 
+                                    sym.second.get_optional<unsigned>("<xmlattr>.halo_radius");
+                                if (halo_radius)
+                                {
+                                    text_symbol.set_halo_radius(*halo_radius);
+                                }
+                                
+                                // text ratio and wrap width
+                                boost::optional<unsigned> text_ratio = 
+                                    sym.second.get_optional<unsigned>("<xmlattr>.text_ratio");
+                                
+                                if (text_ratio)
+                                {
+                                    text_symbol.set_text_ratio(*text_ratio);
+                                }
+                                
+                                boost::optional<unsigned> wrap_width = 
+                                    sym.second.get_optional<unsigned>("<xmlattr>.wrap_width");
+                                if (wrap_width)
+                                {
+                                    text_symbol.set_wrap_width(*wrap_width);
                                 }
                                 
                                 rule.append(text_symbol);

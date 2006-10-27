@@ -36,13 +36,19 @@ void export_text_symbolizer()
         .value("LINE_PLACEMENT",mapnik::line_placement)
         .value("POINT_PLACEMENT",mapnik::point_placement)
         ;
-
+    
     class_<text_symbolizer>("TextSymbolizer",
 			    init<std::string const&,std::string const&, unsigned,Color const&>())
         .add_property("halo_fill",make_function(
                       &text_symbolizer::get_halo_fill,
                       return_value_policy<copy_const_reference>()),
                       &text_symbolizer::set_halo_fill)
+        .add_property("wrap_width",
+                      &text_symbolizer::get_wrap_width,
+                      &text_symbolizer::set_wrap_width)
+        .add_property("text_ratio",
+                      &text_symbolizer::get_text_ratio,
+                      &text_symbolizer::set_text_ratio)
         .add_property("halo_radius",
                       &text_symbolizer::get_halo_radius, 
                       &text_symbolizer::set_halo_radius)

@@ -110,6 +110,7 @@ void export_map()
         .add_property("layers",make_function
                       (&Map::layers,return_value_policy<reference_existing_object>()), 
                       "Get the list of layers in this map.")
+        .def("find_style",&Map::find_style,return_value_policy<copy_const_reference>())
         .def_pickle(map_pickle_suite())
         ;
 }

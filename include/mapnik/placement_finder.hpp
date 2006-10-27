@@ -67,7 +67,7 @@ namespace mapnik
     double starting_y;
     
     text_path path;
-    
+
     
     //helpers
     std::pair<double, double> get_position_at_distance(double target_distance);
@@ -75,6 +75,9 @@ namespace mapnik
     void clear_envelopes();
     
     double total_distance_; //cache for distance
+    
+    int wrap_width;
+    int text_ratio;
   };
   
   class placement_finder : boost::noncopyable

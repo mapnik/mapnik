@@ -38,12 +38,17 @@ namespace mapnik
     
     struct MAPNIK_DECL text_symbolizer
     {		
-	text_symbolizer(std::string const& name,std::string const& face_name, unsigned size,Color const& fill);	
+        text_symbolizer(std::string const& name,std::string const& face_name, 
+                        unsigned size,Color const& fill);	
         text_symbolizer(text_symbolizer const& rhs);
         text_symbolizer& operator=(text_symbolizer const& rhs);
         std::string const& get_name() const;
+        unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
+        void set_text_ratio(unsigned ratio);
+        unsigned get_wrap_width() const; // target ratio for text bounding box in pixels
+        void set_wrap_width(unsigned ratio);
         unsigned get_text_size() const;
-	std::string const& get_face_name() const;
+        std::string const& get_face_name() const;
         Color const& get_fill() const;
         void set_halo_fill(Color const& fill);
         Color const& get_halo_fill() const;
@@ -57,8 +62,10 @@ namespace mapnik
         position const& get_displacement() const;
     private:
         std::string name_;
-  std::string face_name_;
+        std::string face_name_;
         unsigned size_;
+        unsigned text_ratio_;
+        unsigned wrap_width_;
         Color fill_;
         Color halo_fill_;
         unsigned halo_radius_;
