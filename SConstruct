@@ -56,7 +56,7 @@ conf = Configure(env)
 
 # Libraries and headers dependency checks
 
-env['CPPPATH'] = ['#agg/include', '#include', '#']
+env['CPPPATH'] = ['#agg/include', '#tinyxml', '#include', '#']
 
 for path in [env['BOOST_INCLUDES'],
              env['PNG_INCLUDES'],
@@ -145,9 +145,9 @@ env = conf.Finish()
 # Setup the c++ args for our own codebase
 
 if env['DEBUG']:
-    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG')
+    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
 else:
-    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG')
+    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
 
 # Build agg first, doesn't need anything special
 
