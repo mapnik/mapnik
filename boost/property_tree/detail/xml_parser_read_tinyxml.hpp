@@ -15,7 +15,10 @@
 #include <boost/property_tree/detail/xml_parser_flags.hpp>
 #include <boost/property_tree/detail/xml_parser_utils.hpp>
 
+#ifndef TIXML_USE_STL
 #define TIXML_USE_STL
+#endif
+
 #include <tinyxml.h>
 
 namespace boost { namespace property_tree { namespace xml_parser
