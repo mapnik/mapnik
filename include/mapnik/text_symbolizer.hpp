@@ -45,8 +45,10 @@ namespace mapnik
         std::string const& get_name() const;
         unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
         void set_text_ratio(unsigned ratio);
-        unsigned get_wrap_width() const; // target ratio for text bounding box in pixels
+        unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
         void set_wrap_width(unsigned ratio);
+        unsigned get_label_spacing() const; // spacing between repeated labels on lines
+        void set_label_spacing(unsigned spacing);
         unsigned get_text_size() const;
         std::string const& get_face_name() const;
         Color const& get_fill() const;
@@ -66,6 +68,7 @@ namespace mapnik
         unsigned size_;
         unsigned text_ratio_;
         unsigned wrap_width_;
+        unsigned label_spacing_;
         Color fill_;
         Color halo_fill_;
         unsigned halo_radius_;

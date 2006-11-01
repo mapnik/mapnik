@@ -148,7 +148,7 @@ postgis_datasource::postgis_datasource(const parameters& params)
                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double,false,length));
                     case 1042:  // bpchar
                     case 1043:  // varchar
-                    case 25:   // text
+                    case 25:    // text
                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
                         break;
                     default: // shouldn't get here

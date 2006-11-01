@@ -126,7 +126,16 @@ namespace mapnik
                             
                             if ( sym.first == "PointSymbolizer")
                             {
-                                std::cout << sym.first << "\n";
+                                std::string file =  
+                                    sym.second.get<std::string>("<xmlattr>.file"); 
+                                std::string type =  
+                                    sym.second.get<std::string>("<xmlattr>.type");
+                                unsigned width =  
+                                    sym.second.get<unsigned>("<xmlattr>.width");
+                                unsigned height =  
+                                    sym.second.get<unsigned>("<xmlattr>.height");
+                                
+                                rule.append(point_symbolizer(file,type,width,height));
                             } 
                             else if ( sym.first == "LinePatternSymbolizer")
                             {
@@ -163,6 +172,7 @@ namespace mapnik
                                 {
                                     text_symbol.set_label_placement(line_placement);
                                 }
+                                
                                 // halo fill and radius
                                 boost::optional<std::string> halo_fill = 
                                     sym.second.get_optional<std::string>("<xmlattr>.halo_fill");
@@ -195,6 +205,13 @@ namespace mapnik
                                     text_symbol.set_wrap_width(*wrap_width);
                                 }
                                 
+                                // spacing between repeated labels on lines
+                                boost::optional<unsigned> spacing = 
+                                    sym.second.get_optional<unsigned>("<xmlattr>.spacing");
+                                if (spacing)
+                                {
+                                    text_symbol.set_label_spacing(*spacing);
+                                }
                                 rule.append(text_symbol);
                             }
                             else if ( sym.first == "ShieldSymbolizer")

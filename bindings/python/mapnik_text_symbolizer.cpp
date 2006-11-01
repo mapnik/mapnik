@@ -49,6 +49,9 @@ void export_text_symbolizer()
         .add_property("text_ratio",
                       &text_symbolizer::get_text_ratio,
                       &text_symbolizer::set_text_ratio)
+        .add_property("label_spacing",
+                      &text_symbolizer::get_label_spacing,
+                      &text_symbolizer::set_label_spacing)
         .add_property("halo_radius",
                       &text_symbolizer::get_halo_radius, 
                       &text_symbolizer::set_halo_radius)

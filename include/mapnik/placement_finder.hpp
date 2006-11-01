@@ -36,6 +36,15 @@
 
 namespace mapnik
 {
+
+    struct placement_element
+    {
+        double starting_x;
+        double starting_y;
+    
+        text_path path;
+    };
+
   struct placement
   {
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
@@ -48,7 +57,8 @@ namespace mapnik
     
     ~placement();
 
-    string_info *info;
+      unsigned path_size() const;
+      string_info *info;
     
     CoordTransform *ctrans;
     const proj_transform *proj_trans;
@@ -63,11 +73,10 @@ namespace mapnik
     std::queue< Envelope<double> > envelopes;
     
     //output
-    double starting_x;
-    double starting_y;
-    
-    text_path path;
+    std::vector<placement_element> placements;
 
+    // caching output
+    placement_element current_placement;
     
     //helpers
     std::pair<double, double> get_position_at_distance(double target_distance);
@@ -78,14 +87,18 @@ namespace mapnik
     
     int wrap_width;
     int text_ratio;
+
+    int label_spacing; // distance between repeated labels on a single geometry
   };
+
+
   
   class placement_finder : boost::noncopyable
   {
   public:
     placement_finder(Envelope<double> e);
   
-    bool find_placement(placement *placement);
+    bool find_placements(placement *p);
     
   protected:
     bool find_placement_follow(placement *p);

@@ -35,6 +35,7 @@ namespace mapnik
           size_(size),
           text_ratio_(0),
           wrap_width_(0),
+          label_spacing_(0),
           fill_(fill),
           halo_fill_(Color(255,255,255)),
           halo_radius_(0),
@@ -48,6 +49,7 @@ namespace mapnik
           size_(rhs.size_),
           text_ratio_(rhs.text_ratio_),
           wrap_width_(rhs.wrap_width_),
+          label_spacing_(rhs.label_spacing_),
           fill_(rhs.fill_),
           halo_fill_(rhs.halo_fill_),
           halo_radius_(rhs.halo_radius_),
@@ -64,6 +66,7 @@ namespace mapnik
         size_ = other.size_;
         text_ratio_ = other.text_ratio_;
         wrap_width_ = other.wrap_width_;
+        label_spacing_ = other.label_spacing_;
         fill_ = other.fill_;
         halo_fill_ = other.halo_fill_;
         halo_radius_ = other.halo_radius_;
@@ -85,7 +88,7 @@ namespace mapnik
     
     unsigned  text_symbolizer::get_text_ratio() const
     {
-        return text_ratio_;
+    return text_ratio_;
     }
 
     void  text_symbolizer::set_text_ratio(unsigned ratio) 
@@ -95,12 +98,22 @@ namespace mapnik
 
     unsigned  text_symbolizer::get_wrap_width() const
     {
-        return wrap_width_;
+    return wrap_width_;
     }
 
     void  text_symbolizer::set_wrap_width(unsigned width) 
     {
         wrap_width_ = width;
+    }    
+
+    unsigned  text_symbolizer::get_label_spacing() const
+    {
+    return label_spacing_;
+    }
+
+    void  text_symbolizer::set_label_spacing(unsigned spacing) 
+    {
+        label_spacing_ = spacing;
     }
 
     unsigned  text_symbolizer::get_text_size() const

@@ -346,24 +346,26 @@ namespace mapnik
                  
                     placement text_placement(&info, &t_, &prj_trans, geom, std::pair<double, double>(w, h) );
                     
-                    bool found = finder_.find_placement(&text_placement);
+                    bool found = finder_.find_placements(&text_placement);
                     if (!found) {
                       return;
                     }
                     
-                    double x = text_placement.starting_x;
-                    double y = text_placement.starting_y;
-                    
-                    int px=int(floor(x - 0.5 * w));
-                    int py=int(floor(y - 0.5 * h));
-                    
-                    pixmap_.set_rectangle_alpha(px,py,*data);
-            
-                    Envelope<double> dim = ren.prepare_glyphs(&text_placement.path);
-                    
-                    //If has_placement 
-                    
-                    ren.render(x,y);
+
+                    for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                    {
+                        double x = text_placement.placements[ii].starting_x;
+                        double y = text_placement.placements[ii].starting_y;
+
+                        int px=int(floor(x - 0.5 * w));
+                        int py=int(floor(y - 0.5 * h));
+                        
+                        pixmap_.set_rectangle_alpha(px,py,*data);
+                        
+                        Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii].path);
+                        
+                        ren.render(x,y);
+                    }
                 }
             }
         }
@@ -496,33 +498,37 @@ namespace mapnik
                     ren.set_fill(fill);
                     ren.set_halo_fill(sym.get_halo_fill());
                     ren.set_halo_radius(sym.get_halo_radius());
-
+                    
                     string_info info;
-                  
+                    
                     ren.get_string_info(text, &info);
-                 
+                    
                     placement text_placement(&info, &t_, &prj_trans, geom, sym.get_label_placement());
                     text_placement.text_ratio = sym.get_text_ratio();
                     text_placement.wrap_width = sym.get_wrap_width();
-                  
-                    bool found = finder_.find_placement(&text_placement);
+                    text_placement.label_spacing = sym.get_label_spacing();
+                    
+                    bool found = finder_.find_placements(&text_placement);
                     if (!found) {
                       return;
                     }
                     
-                    double x = text_placement.starting_x;
-                    double y = text_placement.starting_y;
-                    
-                    Envelope<double> dim = ren.prepare_glyphs(&text_placement.path);
-                    
-                    Envelope<double> text_box(x + dim.minx() ,y - dim.maxy(), x + dim.maxx(),y - dim.miny());
-		    
-                    if (sym.get_halo_radius() > 0)
+                    for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                     {
-                        text_box.width(text_box.width() + sym.get_halo_radius()*2);
-                        text_box.height(text_box.height() + sym.get_halo_radius()*2);
+                        double x = text_placement.placements[ii].starting_x;
+                        double y = text_placement.placements[ii].starting_y;
+                        
+                        Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii].path);
+                        
+                        Envelope<double> text_box(x + dim.minx() ,y - dim.maxy(), x + dim.maxx(),y - dim.miny());
+		        
+                        if (sym.get_halo_radius() > 0)
+                        {
+                            text_box.width(text_box.width() + sym.get_halo_radius()*2);
+                            text_box.height(text_box.height() + sym.get_halo_radius()*2);
+                        }
+                        ren.render(x,y);
                     }
-                    ren.render(x,y);
                 }
             }  
         }

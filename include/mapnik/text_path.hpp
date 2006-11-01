@@ -93,9 +93,9 @@ namespace mapnik
       }
     };
     
-    struct text_path : private boost::noncopyable
+    struct text_path 
     {
-        struct character_node : boost::noncopyable
+        struct character_node
         {
             int c;
             double x, y, angle;
@@ -112,7 +112,7 @@ namespace mapnik
             }
         };
 
-        typedef boost::ptr_vector<character_node> character_nodes_t;
+        typedef std::vector<character_node> character_nodes_t;
         
         character_nodes_t nodes_;
         int itr_;
@@ -120,11 +120,17 @@ namespace mapnik
         std::pair<unsigned,unsigned> string_dimensions;
         
         text_path() :  itr_(0) {} 
+        text_path(const text_path & other) : itr_(0)
+        {
+            nodes_ = other.nodes_;
+            string_dimensions = other.string_dimensions;
+        }
+ 
         ~text_path() {}
           
         void add_node(int c, double x, double y, double angle)
         {
-            nodes_.push_back(new character_node(c, x, y, angle));
+            nodes_.push_back(character_node(c, x, y, angle));
         }
         
         void vertex(int *c, double *x, double *y, double *angle)

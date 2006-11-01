@@ -41,26 +41,31 @@
 namespace mapnik
 {
     placement::placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, std::pair<double, double> dimensions_)
-        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(point_placement), dimensions(dimensions_), has_dimensions(true), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0)
+        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(point_placement), dimensions(dimensions_), has_dimensions(true), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0)
     {
     }
-  
+
     //For text
     placement::placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, label_placement_e placement_)
-        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(placement_), has_dimensions(false), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0)
+        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(placement_), has_dimensions(false), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0)
     {
     }
   
     placement::~placement()
     {
     }
-
+    
+    unsigned placement::path_size() const
+    {
+        return geom->num_points();
+    }
+    
     std::pair<double, double> placement::get_position_at_distance(double target_distance)
     {
         double old_x, old_y, new_x, new_y;
         double x, y;
         x = y = 0.0;
-    
+        
         double distance = 0.0;
     
         shape_path.rewind(0);
@@ -132,11 +137,12 @@ namespace mapnik
   
   
     placement_finder::placement_finder(Envelope<double> e)
-        : detector_(e)
+      : detector_(e)
     {
     }
 
-    bool placement_finder::find_placement(placement *p)
+
+    bool placement_finder::find_placements(placement *p)
     {
         if (p->label_placement == point_placement)
         {
@@ -156,37 +162,76 @@ namespace mapnik
         double string_width = string_dimensions.first;
         //    double string_height = string_dimensions.second;
     
+
+        std::clog << "trying to place string: ";
+        for (unsigned int ii = 0; ii < p->info->num_characters(); ++ii)
+            std::clog << static_cast<char> (p->info->at(ii).character);
+        std::clog << std::endl;
+
         double distance = p->get_total_distance();
     
-        //~ double delta = string_width/distance;
-        double delta = distance/100.0;
-    
-        for (double i = 0; i < (distance - string_width)/2.0; i += delta)
+        if (string_width > distance)
         {
-            p->clear_envelopes();
-      
-            if ( build_path_follow(p, (distance - string_width)/2.0 + i) ) {
-                update_detector(p);
-                return true;
-            }
-      
-            p->clear_envelopes();
-      
-            if ( build_path_follow(p, (distance - string_width)/2.0 - i) ) {
-                update_detector(p);
-                return true;
-            }
+            std::clog << "String longer than segment, bailing" << std::endl;
+            return false;
         }
+
     
-        p->starting_x = 0;
-        p->starting_y = 0;
+        int num_labels = 0;
+        if (p->label_spacing)
+            num_labels = static_cast<int> (floor(distance / (p->label_spacing + string_width)));
+        if (num_labels == 0)
+            num_labels = 1;
+
+        double ideal_spacing = distance/num_labels;
+        std::vector<double> ideal_label_distances;
+        for (double label_pos = ideal_spacing/2; label_pos < distance; label_pos += ideal_spacing)
+            ideal_label_distances.push_back(label_pos);
+
+        double delta = distance/100.0;
+        bool FoundPlacement = false;
+        for (std::vector<double>::const_iterator itr = ideal_label_distances.begin(); itr < ideal_label_distances.end(); ++itr)
+        {
+            std::clog << "Trying to find txt placement at distance: " << *itr << std::endl;
+            for (double i = 0; i < ideal_spacing; i += delta)
+            {
+                p->clear_envelopes();
+        
+                // check position +- delta for valid placement
+                if ( build_path_follow(p, *itr - string_width/2 + i)) {
+                    update_detector(p);
+                    FoundPlacement = true;
+                    break;
+                }
+
+                p->clear_envelopes();
+                if (build_path_follow(p, *itr - string_width/2 - i) ) {
+                    update_detector(p);
+                    FoundPlacement = true;
+                    break;
+                }
+            }
+        }    
     
-        return false;
+        if (FoundPlacement)
+            std::clog << "Found Placement" << string_width << " " << distance << std::endl;
+
+        return FoundPlacement;
     }
   
     bool placement_finder::find_placement_horizontal(placement *p)
     {
-        double distance = p->get_total_distance();
+        if (p->path_size() == 1) // point geometry
+        {
+            if ( build_path_horizontal(p, 0) ) 
+            {
+                update_detector(p);
+                return true;
+            }
+            return false;
+        }
+        
+        double distance = p->get_total_distance();    
         //~ double delta = string_width/distance;
         double delta = distance/100.0;
     
@@ -206,10 +251,6 @@ namespace mapnik
                 return true;
             }
         }
-    
-        p->starting_x = 0;
-        p->starting_y = 0;
-    
         return false;
     }
   
@@ -226,14 +267,14 @@ namespace mapnik
     }
 
     bool placement_finder::build_path_follow(placement *p, double target_distance)
-    {
+     {
         double new_x, new_y, old_x, old_y;
         unsigned cur_node = 0;
 
         double angle = 0.0;
         int orientation = 0;
     
-        p->path.clear();
+        p->current_placement.path.clear();
     
         double x, y;
         x = y = 0.0;
@@ -265,9 +306,9 @@ namespace mapnik
             distance += segment_length;
             if (distance > target_distance)
             {
-                p->starting_x = new_x - dx*(distance - target_distance)/segment_length;
-                p->starting_y = new_y - dy*(distance - target_distance)/segment_length;
-
+                p->current_placement.starting_x = new_x - dx*(distance - target_distance)/segment_length;
+                p->current_placement.starting_y = new_y - dy*(distance - target_distance)/segment_length;
+    
                 angle = atan2(-dy, dx);
 
                 if (angle > M_PI/2 || angle <= -M_PI/2) {
@@ -282,13 +323,14 @@ namespace mapnik
                 break;
             }
         }
-
+    
         for (unsigned i = 0; i < p->info->num_characters(); i++)
         {
             character_info ci;
             unsigned c;
-      
-            while (distance <= 0) {
+    
+            while (distance <= 0) 
+            {
                 double dx, dy;
 
                 cur_node++;
@@ -332,7 +374,7 @@ namespace mapnik
                 //Center the text on the line.
                 x += (((double)string_height/2.0) - 1.0)*cos(angle+M_PI/2);
                 y -= (((double)string_height/2.0) - 1.0)*sin(angle+M_PI/2);
-          
+        
                 if (!p->has_dimensions)
                 {
                     e.init(x, y, x + ci.width*cos(angle+M_PI), y - ci.width*sin(angle+M_PI));
@@ -364,87 +406,26 @@ namespace mapnik
         
             p->envelopes.push(e);
         
-            p->path.add_node(c, x - p->starting_x, -y + p->starting_y, (orientation == -1 ? angle + M_PI : angle));
+            p->current_placement.path.add_node(c, x - p->current_placement.starting_x, -y + p->current_placement.starting_y, (orientation == -1 ? angle + M_PI : angle));
         
             distance -= ci.width;
         }
-    
+        p->placements.push_back(p->current_placement);
+
         return true;
     }
 
-    /*
-   bool placement_finder::build_path_horizontal(placement *p, double target_distance)
-  {
-    double x, y;
-  
-    p->path.clear();
-    
-    std::pair<double, double> string_dimensions = p->info->get_dimensions();
-    double string_width = string_dimensions.first;
-    double string_height = string_dimensions.second;
-    
-    x = -string_width/2.0;
-    y = -string_height/2.0 + 1.0;
-    
-    if (p->geom->type() == LineString)
-    {
-      std::pair<double, double> starting_pos = p->get_position_at_distance(target_distance);
-      
-      p->starting_x = starting_pos.first;
-      p->starting_y = starting_pos.second;
-    }
-    else
-    {
-      p->geom->label_position(&p->starting_x, &p->starting_y);
-      //  TODO: 
-      //  We would only want label position in final 'paper' coords.
-      //  Move view and proj transforms to e.g. label_position(x,y,proj_trans,ctrans)?
-      double z=0;  
-      p->proj_trans->backward(p->starting_x, p->starting_y, z);
-      p->ctrans->forward(&p->starting_x, &p->starting_y);
-    }
-    
-    for (unsigned i = 0; i < p->info->num_characters(); i++)
-    {
-        character_info ci;;
-        ci = p->info->at(i);
-        
-        unsigned c = ci.character;
-      
-        p->path.add_node(c, x, y, 0.0);
 
-        Envelope<double> e;
-        if (p->has_dimensions)
-        {
-            e.init(p->starting_x - (p->dimensions.first/2.0), p->starting_y - (p->dimensions.second/2.0), p->starting_x + (p->dimensions.first/2.0), p->starting_y + (p->dimensions.second/2.0));
-        }
-        else
-        {
-          e.init(p->starting_x + x, p->starting_y - y, p->starting_x + x + ci.width, p->starting_y - y - ci.height);
-        }
-        
-        if (!detector_.has_placement(e))
-        {
-          return false;
-        }
-        
-        p->envelopes.push(e);
-      
-        x += ci.width;
-    }
-    return true;
-  }
-    */
-    
     bool placement_finder::build_path_horizontal(placement *p, double target_distance)
     {
+        double x, y;
     
-        p->path.clear();
-    
+        p->current_placement.path.clear();
+        
         std::pair<double, double> string_dimensions = p->info->get_dimensions();
         double string_width = string_dimensions.first;
         double string_height = string_dimensions.second;
-    
+        
         // check if we need to wrap the string
         double wrap_at = string_width + 1;
         if (p->wrap_width && string_width > p->wrap_width)
@@ -455,7 +436,7 @@ namespace mapnik
                 wrap_at = p->wrap_width;
             //std::clog << "Wrapping string at" << wrap_at << std::endl;
         }
-
+    
         // work out where our line breaks need to be
         std::vector<int> line_breaks;
         std::vector<double> line_widths;
@@ -471,14 +452,14 @@ namespace mapnik
             double word_height = 0;
             for (unsigned int ii = 0; ii < p->info->num_characters(); ii++)
             {
-                character_info ci;
+                character_info ci;;
                 ci = p->info->at(ii);
-            
+                
                 unsigned c = ci.character;
                 word_width += ci.width;
                 word_height = word_height > ci.height ? word_height : ci.height;
                 ++line_count;
-    
+        
                 if (c == ' ')
                 {
                     last_space = ii;
@@ -511,42 +492,42 @@ namespace mapnik
             line_breaks.push_back(p->info->num_characters() + 1);
             line_widths.push_back(string_width);
         }
-
-        p->info->set_dimensions(string_width, string_height);
     
+        p->info->set_dimensions(string_width, string_height);
+        
         if (p->geom->type() == LineString)
         {
             std::pair<double, double> starting_pos = p->get_position_at_distance(target_distance);
-      
-            p->starting_x = starting_pos.first;
-            p->starting_y = starting_pos.second;
+            
+            p->current_placement.starting_x = starting_pos.first;
+            p->current_placement.starting_y = starting_pos.second;
         }
         else
         {
-            p->geom->label_position(&p->starting_x, &p->starting_y);
+            p->geom->label_position(&p->current_placement.starting_x, &p->current_placement.starting_y);
             //  TODO: 
             //  We would only want label position in final 'paper' coords.
             //  Move view and proj transforms to e.g. label_position(x,y,proj_trans,ctrans)?
             double z=0;  
-            p->proj_trans->backward(p->starting_x, p->starting_y, z);
-            p->ctrans->forward(&p->starting_x, &p->starting_y);
+            p->proj_trans->backward(p->current_placement.starting_x, p->current_placement.starting_y, z);
+            p->ctrans->forward(&p->current_placement.starting_x, &p->current_placement.starting_y);
         }
-    
+        
         double line_height = 0;
         unsigned int line_number = 0;
         unsigned int index_to_wrap_at = line_breaks[line_number];
         double line_width = line_widths[line_number];
-
-        double x = -line_width/2.0;
-        double y = -string_height/2.0 + 1.0;
+    
+        x = -line_width/2.0;
+        y = string_height/2.0;
     
         for (unsigned i = 0; i < p->info->num_characters(); i++)
         {
-            character_info ci;
+            character_info ci;;
             ci = p->info->at(i);
-        
+            
             unsigned c = ci.character;
-      
+        
             if (i == index_to_wrap_at)
             {
                 index_to_wrap_at = line_breaks[++line_number];
@@ -558,35 +539,31 @@ namespace mapnik
             }
             else
             {
-                p->path.add_node(c, x, y, 0.0);
-
+                p->current_placement.path.add_node(c, x, y, 0.0);
+    
                 Envelope<double> e;
                 if (p->has_dimensions)
                 {
-                    e.init(p->starting_x - (p->dimensions.first/2.0), 
-                           p->starting_y - (p->dimensions.second/2.0), 
-                           p->starting_x + (p->dimensions.first/2.0), 
-                           p->starting_y + (p->dimensions.second/2.0));
+                    e.init(p->current_placement.starting_x - (p->dimensions.first/2.0), p->current_placement.starting_y - (p->dimensions.second/2.0), p->current_placement.starting_x + (p->dimensions.first/2.0), p->current_placement.starting_y + (p->dimensions.second/2.0));
                 }
                 else
                 {
-                    e.init(p->starting_x + x, 
-                           p->starting_y - y, 
-                           p->starting_x + x + ci.width, 
-                           p->starting_y - y - ci.height);
+                    e.init(p->current_placement.starting_x + x, p->current_placement.starting_y - y, p->current_placement.starting_x + x + ci.width, p->current_placement.starting_y - y - ci.height);
                 }
-            
+                
                 if (!detector_.has_placement(e))
                 {
                     return false;
                 }
-            
+                
                 p->envelopes.push(e);
             }
             x += ci.width;
             line_height = line_height > ci.height ? line_height : ci.height;
         }
+        p->placements.push_back(p->current_placement);
+    
         return true;
     }
-}
 
+} // namespace

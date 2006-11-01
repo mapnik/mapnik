@@ -280,11 +280,13 @@ popplaces_rule = Rule()
 # The first parameter is the name of the attribute to use as the source of the
 # text to label with.  Then there is font size in points (I think?), and colour.
 
-popplaces_text_symbolizer = TextSymbolizer('GEONAME', 10, Color('black'))
+popplaces_text_symbolizer = TextSymbolizer('GEONAME',
+                                           'Bitstream Vera Sans Roman',
+                                           10, Color('black'))
 
 # We set a "halo" around the text, which looks like an outline if thin enough,
 # or an outright background if large enough.
-
+popplaces_text_symbolizer.set_label_placement=label_placement.POINT_PLACEMENT
 popplaces_text_symbolizer.halo_fill = Color('white')
 popplaces_text_symbolizer.halo_radius = 1
 popplaces_rule.symbols.append(popplaces_text_symbolizer)
