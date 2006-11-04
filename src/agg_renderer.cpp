@@ -507,7 +507,8 @@ namespace mapnik
                     text_placement.text_ratio = sym.get_text_ratio();
                     text_placement.wrap_width = sym.get_wrap_width();
                     text_placement.label_spacing = sym.get_label_spacing();
-                    
+                    text_placement.max_char_angle_delta = sym.get_max_char_angle_delta();
+                  
                     bool found = finder_.find_placements(&text_placement);
                     if (!found) {
                       return;

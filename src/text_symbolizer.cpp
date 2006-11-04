@@ -30,18 +30,19 @@
 namespace mapnik
 {
     text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size,Color const& fill)
-        : name_(name),
+	: name_(name),
           face_name_(face_name),
-          size_(size),
+	  size_(size),
           text_ratio_(0),
           wrap_width_(0),
           label_spacing_(0),
-          fill_(fill),
-          halo_fill_(Color(255,255,255)),
-          halo_radius_(0),
-          label_p_(point_placement),
-          anchor_(0.0,0.5),
-          displacement_(0.0,0.0)  {}
+          max_char_angle_delta_(0),
+	  fill_(fill),
+	  halo_fill_(Color(255,255,255)),
+	  halo_radius_(0),
+	  label_p_(point_placement),
+	  anchor_(0.0,0.5),
+	  displacement_(0.0,0.0)  {}
            
     text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
         : name_(rhs.name_),
@@ -50,6 +51,7 @@ namespace mapnik
           text_ratio_(rhs.text_ratio_),
           wrap_width_(rhs.wrap_width_),
           label_spacing_(rhs.label_spacing_),
+          max_char_angle_delta_(rhs.max_char_angle_delta_),
           fill_(rhs.fill_),
           halo_fill_(rhs.halo_fill_),
           halo_radius_(rhs.halo_radius_),
@@ -67,6 +69,7 @@ namespace mapnik
         text_ratio_ = other.text_ratio_;
         wrap_width_ = other.wrap_width_;
         label_spacing_ = other.label_spacing_;
+        max_char_angle_delta_ = other.max_char_angle_delta_;
         fill_ = other.fill_;
         halo_fill_ = other.halo_fill_;
         halo_radius_ = other.halo_radius_;
@@ -108,12 +111,22 @@ namespace mapnik
 
     unsigned  text_symbolizer::get_label_spacing() const
     {
-    return label_spacing_;
+        return label_spacing_;
     }
 
     void  text_symbolizer::set_label_spacing(unsigned spacing) 
     {
         label_spacing_ = spacing;
+    }
+
+    double text_symbolizer::get_max_char_angle_delta() const
+    {
+        return max_char_angle_delta_;
+    }
+
+    void text_symbolizer::set_max_char_angle_delta(double angle) 
+    {
+        max_char_angle_delta_ = angle;
     }
 
     unsigned  text_symbolizer::get_text_size() const

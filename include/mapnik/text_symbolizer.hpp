@@ -49,6 +49,8 @@ namespace mapnik
         void set_wrap_width(unsigned ratio);
         unsigned get_label_spacing() const; // spacing between repeated labels on lines
         void set_label_spacing(unsigned spacing);
+        double get_max_char_angle_delta() const; // maximum change in angle between adjacent characters
+        void set_max_char_angle_delta(double angle);
         unsigned get_text_size() const;
         std::string const& get_face_name() const;
         Color const& get_fill() const;
@@ -69,6 +71,7 @@ namespace mapnik
         unsigned text_ratio_;
         unsigned wrap_width_;
         unsigned label_spacing_;
+        double max_char_angle_delta_;
         Color fill_;
         Color halo_fill_;
         unsigned halo_radius_;

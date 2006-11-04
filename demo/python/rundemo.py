@@ -290,6 +290,8 @@ popplaces_text_symbolizer.set_label_placement=label_placement.POINT_PLACEMENT
 popplaces_text_symbolizer.halo_fill = Color('white')
 popplaces_text_symbolizer.halo_radius = 1
 popplaces_rule.symbols.append(popplaces_text_symbolizer)
+popplaces_rule.symbols.append(PointSymbolizer("/home/artem/dot.png","png",10,10))
+
 popplaces_style.rules.append(popplaces_rule)
 
 m.append_style('popplaces', popplaces_style)

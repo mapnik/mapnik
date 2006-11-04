@@ -43,6 +43,9 @@ void export_text_symbolizer()
                       &text_symbolizer::get_halo_fill,
                       return_value_policy<copy_const_reference>()),
                       &text_symbolizer::set_halo_fill)
+        .add_property("halo_radius",
+                      &text_symbolizer::get_halo_radius, 
+                      &text_symbolizer::set_halo_radius)
         .add_property("wrap_width",
                       &text_symbolizer::get_wrap_width,
                       &text_symbolizer::set_wrap_width)
@@ -52,9 +55,9 @@ void export_text_symbolizer()
         .add_property("label_spacing",
                       &text_symbolizer::get_label_spacing,
                       &text_symbolizer::set_label_spacing)
-        .add_property("halo_radius",
-                      &text_symbolizer::get_halo_radius, 
-                      &text_symbolizer::set_halo_radius)
+        .add_property("max_char_angle_delta",
+                      &text_symbolizer::get_max_char_angle_delta,
+                      &text_symbolizer::set_max_char_angle_delta)
         .def("set_label_placement",&text_symbolizer::set_label_placement,
              "Set the placement of the label")
 	;

@@ -89,6 +89,8 @@ namespace mapnik
     int text_ratio;
 
     int label_spacing; // distance between repeated labels on a single geometry
+
+    double max_char_angle_delta;
   };
 
 
@@ -110,6 +112,7 @@ namespace mapnik
     void update_detector(placement *p);
   
     label_collision_detector3 detector_;
+
   };
   
 }
