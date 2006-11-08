@@ -43,7 +43,8 @@ namespace mapnik
     point_symbolizer::point_symbolizer(std::string const& file,
                                        std::string const& type,
                                        unsigned width,unsigned height) 
-        : symbol_(new ImageData32(width,height))
+        : symbol_(new ImageData32(width,height)),
+          overlap_(false)
     {
         try 
         {

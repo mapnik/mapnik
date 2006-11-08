@@ -600,7 +600,7 @@ namespace mapnik
         double line_width = line_widths[line_number];
     
         x = -line_width/2.0;
-        y = string_height/2.0;
+        y = -string_height/2.0 + 1.0;
     
         for (unsigned i = 0; i < p->info->num_characters(); i++)
         {
