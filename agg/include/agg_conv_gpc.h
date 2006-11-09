@@ -89,8 +89,8 @@ namespace agg
             memset(&m_result, 0, sizeof(m_result));
         }
 
-        void set_source1(VSA& source) { m_src_a = &source; }
-        void set_source2(VSB& source) { m_src_b = &source; }
+        void attach1(VSA& source) { m_src_a = &source; }
+        void attach2(VSB& source) { m_src_b = &source; }
 
         void operation(gpc_op_e v) { m_operation = v; }
 
@@ -191,10 +191,10 @@ namespace agg
         int i;
         for(i = 0; i < p.num_contours; i++)
         {
-            delete [] p.contour[i].vertex;
+            pod_allocator<gpc_vertex>::deallocate(p.contour[i].vertex, 
+                                                  p.contour[i].num_vertices);
         }
-        delete [] p.hole;
-        delete [] p.contour;
+        pod_allocator<gpc_vertex_list>::deallocate(p.contour, p.num_contours);
         memset(&p, 0, sizeof(gpc_polygon));
     }
 
@@ -260,7 +260,7 @@ namespace agg
                 // TO DO: Clarify the "holes"
                 //if(is_cw(orientation)) h.hole_flag = 1;
 
-                h.vertices = new gpc_vertex [h.num_vertices];
+                h.vertices = pod_allocator<gpc_vertex>::allocate(h.num_vertices);
                 gpc_vertex* d = h.vertices;
                 int i;
                 for(i = 0; i < h.num_vertices; i++)
@@ -288,19 +288,14 @@ namespace agg
         {
             p.num_contours = m_contour_accumulator.size();
 
-            // TO DO: Clarify the "holes"
-            //p.hole = new int[p.num_contours];
             p.hole = 0;
-
-            p.contour = new gpc_vertex_list[p.num_contours];
+            p.contour = pod_allocator<gpc_vertex_list>::allocate(p.num_contours);
 
             int i;
-            //int* ph = p.hole;
             gpc_vertex_list* pv = p.contour;
             for(i = 0; i < p.num_contours; i++)
             {
                 const contour_header_type& h = m_contour_accumulator[i];
-                // *ph++ = h.hole_flag;
                 pv->num_vertices = h.num_vertices;
                 pv->vertex = h.vertices;
                 ++pv;

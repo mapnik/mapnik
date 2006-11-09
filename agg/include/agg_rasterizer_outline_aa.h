@@ -85,21 +85,21 @@ namespace agg
         typedef line_aa_vertex                  vertex_type;
         typedef vertex_sequence<vertex_type, 6> vertex_storage_type;
 
-        rasterizer_outline_aa(Renderer& ren) : 
-            m_ren(ren), 
+        explicit rasterizer_outline_aa(Renderer& ren) : 
+            m_ren(&ren), 
             m_line_join(ren.accurate_join_only() ? 
                             outline_miter_accurate_join : 
                             outline_round_join),
             m_round_cap(false),
             m_start_x(0),
             m_start_y(0)
-        {
-        }
+        {}
+        void attach(Renderer& ren) { m_ren = &ren; }
 
         //------------------------------------------------------------------------
         void line_join(outline_aa_join_e join) 
         { 
-            m_line_join = m_ren.accurate_join_only() ? 
+            m_line_join = m_ren->accurate_join_only() ? 
                 outline_miter_accurate_join : 
                 join; 
         }
@@ -187,7 +187,7 @@ namespace agg
         {
             for(unsigned i = 0; i < num_paths; i++)
             {
-                m_ren.color(colors[i]);
+                m_ren->color(colors[i]);
                 add_path(vs, path_id[i]);
             }
         }
@@ -199,7 +199,7 @@ namespace agg
             unsigned i;
             for(i = 0; i < c.num_paths(); i++)
             {
-                m_ren.color(c.color(i));
+                m_ren->color(c.color(i));
                 add_path(c, i);
             }
         }
@@ -209,7 +209,7 @@ namespace agg
         const rasterizer_outline_aa<Renderer, Coord>& operator = 
             (const rasterizer_outline_aa<Renderer, Coord>&);
 
-        Renderer&           m_ren;
+        Renderer*           m_ren;
         vertex_storage_type m_src_vertices;
         outline_aa_join_e   m_line_join;
         bool                m_round_cap;
@@ -245,19 +245,19 @@ namespace agg
 
             switch(dv.flags)
             {
-            case 0: m_ren.line3(dv.curr, dv.xb1, dv.yb1, dv.xb2, dv.yb2); break;
-            case 1: m_ren.line2(dv.curr, dv.xb2, dv.yb2); break;
-            case 2: m_ren.line1(dv.curr, dv.xb1, dv.yb1); break;
-            case 3: m_ren.line0(dv.curr); break;
+            case 0: m_ren->line3(dv.curr, dv.xb1, dv.yb1, dv.xb2, dv.yb2); break;
+            case 1: m_ren->line2(dv.curr, dv.xb2, dv.yb2); break;
+            case 2: m_ren->line1(dv.curr, dv.xb1, dv.yb1); break;
+            case 3: m_ren->line0(dv.curr); break;
             }
 
             if(m_line_join == outline_round_join && (dv.flags & 2) == 0)
             {
-                m_ren.pie(dv.curr.x2, dv.curr.y2, 
-                          dv.curr.x2 + (dv.curr.y2 - dv.curr.y1),
-                          dv.curr.y2 - (dv.curr.x2 - dv.curr.x1),
-                          dv.curr.x2 + (dv.next.y2 - dv.next.y1),
-                          dv.curr.y2 - (dv.next.x2 - dv.next.x1));
+                m_ren->pie(dv.curr.x2, dv.curr.y2, 
+                           dv.curr.x2 + (dv.curr.y2 - dv.curr.y1),
+                           dv.curr.y2 - (dv.curr.x2 - dv.curr.x1),
+                           dv.curr.x2 + (dv.next.y2 - dv.next.y1),
+                           dv.curr.y2 - (dv.next.x2 - dv.next.x1));
             }
 
             dv.x1 = dv.x2;
@@ -406,16 +406,16 @@ namespace agg
                     line_parameters lp(x1, y1, x2, y2, lprev);
                     if(m_round_cap) 
                     {
-                        m_ren.semidot(cmp_dist_start, x1, y1, x1 + (y2 - y1), y1 - (x2 - x1));
+                        m_ren->semidot(cmp_dist_start, x1, y1, x1 + (y2 - y1), y1 - (x2 - x1));
                     }
-                    m_ren.line3(lp, 
-                                x1 + (y2 - y1), 
-                                y1 - (x2 - x1),
-                                x2 + (y2 - y1), 
-                                y2 - (x2 - x1));
+                    m_ren->line3(lp, 
+                                 x1 + (y2 - y1), 
+                                 y1 - (x2 - x1),
+                                 x2 + (y2 - y1), 
+                                 y2 - (x2 - x1));
                     if(m_round_cap) 
                     {
-                        m_ren.semidot(cmp_dist_end, x2, y2, x2 + (y2 - y1), y2 - (x2 - x1));
+                        m_ren->semidot(cmp_dist_end, x2, y2, x2 + (y2 - y1), y2 - (x2 - x1));
                     }
                 }
                 break;
@@ -440,32 +440,32 @@ namespace agg
 
                     if(m_round_cap) 
                     {
-                        m_ren.semidot(cmp_dist_start, x1, y1, x1 + (y2 - y1), y1 - (x2 - x1));
+                        m_ren->semidot(cmp_dist_start, x1, y1, x1 + (y2 - y1), y1 - (x2 - x1));
                     }
 
                     if(m_line_join == outline_round_join)
                     {
-                        m_ren.line3(lp1, x1 + (y2 - y1), y1 - (x2 - x1), 
-                                         x2 + (y2 - y1), y2 - (x2 - x1));
+                        m_ren->line3(lp1, x1 + (y2 - y1), y1 - (x2 - x1), 
+                                          x2 + (y2 - y1), y2 - (x2 - x1));
 
-                        m_ren.pie(x2, y2, x2 + (y2 - y1), y2 - (x2 - x1),
-                                          x2 + (y3 - y2), y2 - (x3 - x2));
+                        m_ren->pie(x2, y2, x2 + (y2 - y1), y2 - (x2 - x1),
+                                           x2 + (y3 - y2), y2 - (x3 - x2));
 
-                        m_ren.line3(lp2, x2 + (y3 - y2), y2 - (x3 - x2),
-                                         x3 + (y3 - y2), y3 - (x3 - x2));
+                        m_ren->line3(lp2, x2 + (y3 - y2), y2 - (x3 - x2),
+                                          x3 + (y3 - y2), y3 - (x3 - x2));
                     }
                     else
                     {
                         bisectrix(lp1, lp2, &dv.xb1, &dv.yb1);
-                        m_ren.line3(lp1, x1 + (y2 - y1), y1 - (x2 - x1),
-                                         dv.xb1,         dv.yb1);
+                        m_ren->line3(lp1, x1 + (y2 - y1), y1 - (x2 - x1),
+                                          dv.xb1,         dv.yb1);
 
-                        m_ren.line3(lp2, dv.xb1,         dv.yb1,
-                                         x3 + (y3 - y2), y3 - (x3 - x2));
+                        m_ren->line3(lp2, dv.xb1,         dv.yb1,
+                                          x3 + (y3 - y2), y3 - (x3 - x2));
                     }
                     if(m_round_cap) 
                     {
-                        m_ren.semidot(cmp_dist_end, x3, y3, x3 + (y3 - y2), y3 - (x3 - x2));
+                        m_ren->semidot(cmp_dist_end, x3, y3, x3 + (y3 - y2), y3 - (x3 - x2));
                     }
                 }
                 break;
@@ -521,31 +521,31 @@ namespace agg
 
                     if(m_round_cap) 
                     {
-                        m_ren.semidot(cmp_dist_start, x1, y1, x1 + (y2 - y1), y1 - (x2 - x1));
+                        m_ren->semidot(cmp_dist_start, x1, y1, x1 + (y2 - y1), y1 - (x2 - x1));
                     }
                     if((dv.flags & 1) == 0)
                     {
                         if(m_line_join == outline_round_join)
                         {
-                            m_ren.line3(prev, x1 + (y2 - y1), y1 - (x2 - x1),
-                                              x2 + (y2 - y1), y2 - (x2 - x1));
-                            m_ren.pie(prev.x2, prev.y2, 
-                                      x2 + (y2 - y1), y2 - (x2 - x1),
-                                      dv.curr.x1 + (dv.curr.y2 - dv.curr.y1), 
-                                      dv.curr.y1 - (dv.curr.x2 - dv.curr.x1));
+                            m_ren->line3(prev, x1 + (y2 - y1), y1 - (x2 - x1),
+                                               x2 + (y2 - y1), y2 - (x2 - x1));
+                            m_ren->pie(prev.x2, prev.y2, 
+                                       x2 + (y2 - y1), y2 - (x2 - x1),
+                                       dv.curr.x1 + (dv.curr.y2 - dv.curr.y1), 
+                                       dv.curr.y1 - (dv.curr.x2 - dv.curr.x1));
                         }
                         else
                         {
                             bisectrix(prev, dv.curr, &dv.xb1, &dv.yb1);
-                            m_ren.line3(prev, x1 + (y2 - y1), y1 - (x2 - x1),
-                                              dv.xb1,         dv.yb1);
+                            m_ren->line3(prev, x1 + (y2 - y1), y1 - (x2 - x1),
+                                               dv.xb1,         dv.yb1);
                         }
                     }
                     else
                     {
-                        m_ren.line1(prev, 
-                                    x1 + (y2 - y1), 
-                                    y1 - (x2 - x1));
+                        m_ren->line1(prev, 
+                                     x1 + (y2 - y1), 
+                                     y1 - (x2 - x1));
                     }
                     if((dv.flags & 2) == 0 && m_line_join != outline_round_join)
                     {
@@ -558,30 +558,30 @@ namespace agg
                     {
                         if(m_line_join == outline_round_join)
                         {
-                            m_ren.line3(dv.curr, 
-                                        dv.curr.x1 + (dv.curr.y2 - dv.curr.y1), 
-                                        dv.curr.y1 - (dv.curr.x2 - dv.curr.x1),
-                                        dv.curr.x2 + (dv.curr.y2 - dv.curr.y1), 
-                                        dv.curr.y2 - (dv.curr.x2 - dv.curr.x1));
+                            m_ren->line3(dv.curr, 
+                                         dv.curr.x1 + (dv.curr.y2 - dv.curr.y1), 
+                                         dv.curr.y1 - (dv.curr.x2 - dv.curr.x1),
+                                         dv.curr.x2 + (dv.curr.y2 - dv.curr.y1), 
+                                         dv.curr.y2 - (dv.curr.x2 - dv.curr.x1));
                         }
                         else
                         {
-                            m_ren.line3(dv.curr, dv.xb1, dv.yb1,
-                                        dv.curr.x2 + (dv.curr.y2 - dv.curr.y1), 
-                                        dv.curr.y2 - (dv.curr.x2 - dv.curr.x1));
+                            m_ren->line3(dv.curr, dv.xb1, dv.yb1,
+                                         dv.curr.x2 + (dv.curr.y2 - dv.curr.y1), 
+                                         dv.curr.y2 - (dv.curr.x2 - dv.curr.x1));
                         }
                     }
                     else
                     {
-                        m_ren.line2(dv.curr, 
-                                    dv.curr.x2 + (dv.curr.y2 - dv.curr.y1), 
-                                    dv.curr.y2 - (dv.curr.x2 - dv.curr.x1));
+                        m_ren->line2(dv.curr, 
+                                     dv.curr.x2 + (dv.curr.y2 - dv.curr.y1), 
+                                     dv.curr.y2 - (dv.curr.x2 - dv.curr.x1));
                     }
                     if(m_round_cap) 
                     {
-                        m_ren.semidot(cmp_dist_end, dv.curr.x2, dv.curr.y2,
-                                      dv.curr.x2 + (dv.curr.y2 - dv.curr.y1),
-                                      dv.curr.y2 - (dv.curr.x2 - dv.curr.x1));
+                        m_ren->semidot(cmp_dist_end, dv.curr.x2, dv.curr.y2,
+                                       dv.curr.x2 + (dv.curr.y2 - dv.curr.y1),
+                                       dv.curr.y2 - (dv.curr.x2 - dv.curr.x1));
                     }
 
                 }

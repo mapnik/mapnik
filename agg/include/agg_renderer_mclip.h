@@ -37,11 +37,15 @@ namespace agg
         typedef renderer_base<pixfmt_type> base_ren_type;
 
         //--------------------------------------------------------------------
-        renderer_mclip(pixfmt_type& ren) :
-            m_ren(ren),
+        explicit renderer_mclip(pixfmt_type& pixf) :
+            m_ren(pixf),
             m_curr_cb(0),
             m_bounds(m_ren.xmin(), m_ren.ymin(), m_ren.xmax(), m_ren.ymax())
+        {}
+        void attach(pixfmt_type& pixf)
         {
+            m_ren.attach(pixf);
+            reset_clipping(true);
         }
           
         //--------------------------------------------------------------------

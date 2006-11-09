@@ -35,14 +35,14 @@ namespace agg
         typedef typename base_ren_type::color_type color_type;
 
         //--------------------------------------------------------------------
-        renderer_primitives(base_ren_type& ren) :
+        explicit renderer_primitives(base_ren_type& ren) :
             m_ren(&ren),
             m_fill_color(),
             m_line_color(),
             m_curr_x(0),
             m_curr_y(0)
-        {
-        }
+        {}
+        void attach(base_ren_type& ren) { m_ren = &ren; }
 
         //--------------------------------------------------------------------
         static int coord(double c) 

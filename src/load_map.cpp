@@ -126,16 +126,23 @@ namespace mapnik
                             
                             if ( sym.first == "PointSymbolizer")
                             {
-                                std::string file =  
-                                    sym.second.get<std::string>("<xmlattr>.file"); 
-                                std::string type =  
-                                    sym.second.get<std::string>("<xmlattr>.type");
-                                unsigned width =  
-                                    sym.second.get<unsigned>("<xmlattr>.width");
-                                unsigned height =  
-                                    sym.second.get<unsigned>("<xmlattr>.height");
+                                boost::optional<std::string> file =  
+                                    sym.second.get_optional<std::string>("<xmlattr>.file"); 
+                                boost::optional<std::string> type =  
+                                    sym.second.get_optional<std::string>("<xmlattr>.type");
+                                boost::optional<unsigned> width =  
+                                    sym.second.get_optional<unsigned>("<xmlattr>.width");
+                                boost::optional<unsigned> height =  
+                                    sym.second.get_optional<unsigned>("<xmlattr>.height");
                                 
-                                rule.append(point_symbolizer(file,type,width,height));
+                                if (file && type && width && height)
+                                {
+                                    rule.append(point_symbolizer(*file,*type,*width,*height));
+                                }
+                                else
+                                {
+                                    rule.append(point_symbolizer());
+                                }
                             } 
                             else if ( sym.first == "LinePatternSymbolizer")
                             {

@@ -45,12 +45,11 @@ namespace agg
         };
 
     public:
-        conv_adaptor_vcgen(VertexSource& source) :
+        explicit conv_adaptor_vcgen(VertexSource& source) :
             m_source(&source), 
             m_status(initial)
         {}
-
-        void set_source(VertexSource& source) { m_source = &source; }
+        void attach(VertexSource& source) { m_source = &source; }
 
         Generator& generator() { return m_generator; }
         const Generator& generator() const { return m_generator; }

@@ -676,35 +676,10 @@ namespace agg
                 int ry_inv = image_subpixel_scale;
                 base_type::interpolator().coordinates(&x,  &y);
                 base_type::interpolator().local_scale(&rx, &ry);
+                base_type::adjust_scale(&rx, &ry);
 
-                rx = (rx * base_type::m_blur_x) >> image_subpixel_shift;
-                ry = (ry * base_type::m_blur_y) >> image_subpixel_shift;
-
-                if(rx < image_subpixel_scale)
-                {
-                    rx = image_subpixel_scale;
-                }
-                else
-                {
-                    if(rx > image_subpixel_scale * base_type::m_scale_limit) 
-                    {
-                        rx = image_subpixel_scale * base_type::m_scale_limit;
-                    }
-                    rx_inv = image_subpixel_scale * image_subpixel_scale / rx;
-                }
-
-                if(ry < image_subpixel_scale)
-                {
-                    ry = image_subpixel_scale;
-                }
-                else
-                {
-                    if(ry > image_subpixel_scale * base_type::m_scale_limit) 
-                    {
-                        ry = image_subpixel_scale * base_type::m_scale_limit;
-                    }
-                    ry_inv = image_subpixel_scale * image_subpixel_scale / ry;
-                }
+                rx_inv = image_subpixel_scale * image_subpixel_scale / rx;
+                ry_inv = image_subpixel_scale * image_subpixel_scale / ry;
 
                 int radius_x = (diameter * rx) >> 1;
                 int radius_y = (diameter * ry) >> 1;

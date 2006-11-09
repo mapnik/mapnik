@@ -45,14 +45,14 @@ namespace agg
 
         ~gamma_lut()
         {
-            delete [] m_inv_gamma;
-            delete [] m_dir_gamma;
+            pod_allocator<LoResT>::deallocate(m_inv_gamma, hi_res_size);
+            pod_allocator<HiResT>::deallocate(m_dir_gamma, gamma_size);
         }
 
         gamma_lut() : 
             m_gamma(1.0), 
-            m_dir_gamma(new HiResT[gamma_size]),
-            m_inv_gamma(new LoResT[hi_res_size])
+            m_dir_gamma(pod_allocator<HiResT>::allocate(gamma_size)),
+            m_inv_gamma(pod_allocator<LoResT>::allocate(hi_res_size))
         {
             unsigned i;
             for(i = 0; i < gamma_size; i++)
@@ -68,8 +68,8 @@ namespace agg
 
         gamma_lut(double g) :
             m_gamma(1.0), 
-            m_dir_gamma(new HiResT[gamma_size]),
-            m_inv_gamma(new LoResT[hi_res_size])
+            m_dir_gamma(pod_allocator<HiResT>::allocate(gamma_size)),
+            m_inv_gamma(pod_allocator<LoResT>::allocate(hi_res_size))
         {
             gamma(g);
         }

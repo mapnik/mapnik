@@ -90,10 +90,13 @@ namespace agg
             T** coord_blk = m_coord_blocks + m_total_blocks - 1;
             while(m_total_blocks--)
             {
-                delete [] *coord_blk;
+                pod_allocator<T>::deallocate(
+                    *coord_blk,
+                    block_size * 2 + 
+                    block_size / (sizeof(T) / sizeof(unsigned char)));
                 --coord_blk;
             }
-            delete [] m_coord_blocks;
+            pod_allocator<T*>::deallocate(m_coord_blocks, m_max_blocks * 2);
             m_total_blocks   = 0;
             m_max_blocks     = 0;
             m_coord_blocks   = 0;
@@ -145,7 +148,7 @@ namespace agg
             unsigned cmd = v.vertex(i, &x, &y);
             add_vertex(x, y, cmd);
         }
-	return *this;
+	    return *this;
     }
 
     //------------------------------------------------------------------------
@@ -298,7 +301,7 @@ namespace agg
         if(nb >= m_max_blocks) 
         {
             T** new_coords = 
-                new T* [(m_max_blocks + block_pool) * 2];
+                pod_allocator<T*>::allocate((m_max_blocks + block_pool) * 2);
 
             unsigned char** new_cmds = 
                 (unsigned char**)(new_coords + m_max_blocks + block_pool);
@@ -313,15 +316,15 @@ namespace agg
                        m_cmd_blocks, 
                        m_max_blocks * sizeof(unsigned char*));
 
-                delete [] m_coord_blocks;
+                pod_allocator<T*>::deallocate(m_coord_blocks, m_max_blocks * 2);
             }
             m_coord_blocks = new_coords;
-            m_cmd_blocks = new_cmds;
-            m_max_blocks += block_pool;
+            m_cmd_blocks   = new_cmds;
+            m_max_blocks  += block_pool;
         }
         m_coord_blocks[nb] = 
-            new T [block_size * 2 + 
-                   block_size / (sizeof(T) / sizeof(unsigned char))];
+            pod_allocator<T>::allocate(block_size * 2 + 
+                   block_size / (sizeof(T) / sizeof(unsigned char)));
 
         m_cmd_blocks[nb]  = 
             (unsigned char*)(m_coord_blocks[nb] + block_size * 2);
@@ -766,7 +769,7 @@ namespace agg
                 while(!is_stop(cmd = vs.vertex(&x, &y)))
                 {
                     m_vertices.add_vertex(x, y, is_move_to(cmd) ? 
-                                                    path_cmd_line_to : 
+                                                    unsigned(path_cmd_line_to) : 
                                                     cmd);
                 }
             }
@@ -791,6 +794,46 @@ namespace agg
             poly_plain_adaptor<T> poly(data, num_points, closed);
             join_path(poly);
         }
+
+        //--------------------------------------------------------------------
+        void translate(double dx, double dy, unsigned path_id=0);
+        void translate_all_paths(double dx, double dy);
+
+        //--------------------------------------------------------------------
+        template<class Trans>
+        void transform(const Trans& trans, unsigned path_id=0)
+        {
+            unsigned num_ver = m_vertices.total_vertices();
+            for(; path_id < num_ver; path_id++)
+            {
+                double x, y;
+                unsigned cmd = m_vertices.vertex(path_id, &x, &y);
+                if(is_stop(cmd)) break;
+                if(is_vertex(cmd))
+                {
+                    trans.transform(&x, &y);
+                    m_vertices.modify_vertex(path_id, x, y);
+                }
+            }
+        }
+
+        //--------------------------------------------------------------------
+        template<class Trans>
+        void transform_all_paths(const Trans& trans)
+        {
+            unsigned idx;
+            unsigned num_ver = m_vertices.total_vertices();
+            for(idx = 0; idx < num_ver; idx++)
+            {
+                double x, y;
+                if(is_vertex(m_vertices.vertex(idx, &x, &y)))
+                {
+                    trans.transform(&x, &y);
+                    m_vertices.modify_vertex(idx, x, y);
+                }
+            }
+        }
+
 
 
     private:
@@ -1167,7 +1210,6 @@ namespace agg
         return m_vertices.vertex(m_iterator++, x, y);
     }
 
-
     //------------------------------------------------------------------------
     template<class VC> 
     unsigned path_base<VC>::perceive_polygon_orientation(unsigned start,
@@ -1187,7 +1229,6 @@ namespace agg
         }
         return (area < 0.0) ? path_flags_cw : path_flags_ccw;
     }
-
 
     //------------------------------------------------------------------------
     template<class VC> 
@@ -1232,10 +1273,7 @@ namespace agg
         while(end < m_vertices.total_vertices() && 
               !is_next_poly(m_vertices.command(end))) ++end;
 
-        if(end - start > 2)
-        {
-            invert_polygon(start, end);
-        }
+        invert_polygon(start, end);
     }
 
     //------------------------------------------------------------------------
@@ -1276,7 +1314,6 @@ namespace agg
         return end;
     }
 
-
     //------------------------------------------------------------------------
     template<class VC> 
     unsigned path_base<VC>::arrange_orientations(unsigned start, 
@@ -1297,7 +1334,6 @@ namespace agg
         return start;
     }
 
-
     //------------------------------------------------------------------------
     template<class VC> 
     void path_base<VC>::arrange_orientations_all_paths(path_flags_e orientation)
@@ -1311,7 +1347,6 @@ namespace agg
             }
         }
     }
-
 
     //------------------------------------------------------------------------
     template<class VC> 
@@ -1329,7 +1364,6 @@ namespace agg
         }
     }
 
-
     //------------------------------------------------------------------------
     template<class VC> 
     void path_base<VC>::flip_y(double y1, double y2)
@@ -1346,9 +1380,42 @@ namespace agg
         }
     }
 
+    //------------------------------------------------------------------------
+    template<class VC> 
+    void path_base<VC>::translate(double dx, double dy, unsigned path_id)
+    {
+        unsigned num_ver = m_vertices.total_vertices();
+        for(; path_id < num_ver; path_id++)
+        {
+            double x, y;
+            unsigned cmd = m_vertices.vertex(path_id, &x, &y);
+            if(is_stop(cmd)) break;
+            if(is_vertex(cmd))
+            {
+                x += dx;
+                y += dy;
+                m_vertices.modify_vertex(path_id, x, y);
+            }
+        }
+    }
 
-
-
+    //------------------------------------------------------------------------
+    template<class VC> 
+    void path_base<VC>::translate_all_paths(double dx, double dy)
+    {
+        unsigned idx;
+        unsigned num_ver = m_vertices.total_vertices();
+        for(idx = 0; idx < num_ver; idx++)
+        {
+            double x, y;
+            if(is_vertex(m_vertices.vertex(idx, &x, &y)))
+            {
+                x += dx;
+                y += dy;
+                m_vertices.modify_vertex(idx, x, y);
+            }
+        }
+    }
 
     //-----------------------------------------------------vertex_stl_storage
     template<class Container> class vertex_stl_storage

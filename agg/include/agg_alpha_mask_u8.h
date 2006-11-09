@@ -57,7 +57,7 @@ namespace agg
         };
 
         alpha_mask_u8() : m_rbuf(0) {}
-        alpha_mask_u8(rendering_buffer& rbuf) : m_rbuf(&rbuf) {}
+        explicit alpha_mask_u8(rendering_buffer& rbuf) : m_rbuf(&rbuf) {}
 
         void attach(rendering_buffer& rbuf) { m_rbuf = &rbuf; }
 
@@ -70,7 +70,7 @@ namespace agg
         {
             if(x >= 0 && y >= 0 && 
                x < (int)m_rbuf->width() && 
-               y <= (int)m_rbuf->height())
+               y < (int)m_rbuf->height())
             {
                 return (cover_type)m_mask_function.calculate(
                                         m_rbuf->row_ptr(y) + x * Step + Offset);
@@ -83,7 +83,7 @@ namespace agg
         {
             if(x >= 0 && y >= 0 && 
                x < (int)m_rbuf->width() && 
-               y <= (int)m_rbuf->height())
+               y < (int)m_rbuf->height())
             {
                 return (cover_type)((cover_full + val * 
                                      m_mask_function.calculate(
@@ -361,7 +361,7 @@ namespace agg
         };
 
         amask_no_clip_u8() : m_rbuf(0) {}
-        amask_no_clip_u8(rendering_buffer& rbuf) : m_rbuf(&rbuf) {}
+        explicit amask_no_clip_u8(rendering_buffer& rbuf) : m_rbuf(&rbuf) {}
 
         void attach(rendering_buffer& rbuf) { m_rbuf = &rbuf; }
 

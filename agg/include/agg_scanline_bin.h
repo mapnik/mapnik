@@ -54,15 +54,9 @@ namespace agg
         typedef const span* const_iterator;
 
         //--------------------------------------------------------------------
-        ~scanline_bin()
-        {
-            delete [] m_spans;
-        }
-
         scanline_bin() :
-            m_max_len(0),
             m_last_x(0x7FFFFFF0),
-            m_spans(0),
+            m_spans(),
             m_cur_span(0)
         {
         }
@@ -71,14 +65,12 @@ namespace agg
         void reset(int min_x, int max_x)
         {
             unsigned max_len = max_x - min_x + 3;
-            if(max_len > m_max_len)
+            if(max_len > m_spans.size())
             {
-                delete [] m_spans;
-                m_spans   = new span [max_len];
-                m_max_len = max_len;
+                m_spans.resize(max_len);
             }
             m_last_x   = 0x7FFFFFF0;
-            m_cur_span = m_spans;
+            m_cur_span = &m_spans[0];
         }
 
         //--------------------------------------------------------------------
@@ -129,23 +121,22 @@ namespace agg
         void reset_spans()
         {
             m_last_x    = 0x7FFFFFF0;
-            m_cur_span  = m_spans;
+            m_cur_span  = &m_spans[0];
         }
 
         //--------------------------------------------------------------------
         int            y()         const { return m_y; }
-        unsigned       num_spans() const { return unsigned(m_cur_span - m_spans); }
-        const_iterator begin()     const { return m_spans + 1; }
+        unsigned       num_spans() const { return unsigned(m_cur_span - &m_spans[0]); }
+        const_iterator begin()     const { return &m_spans[1]; }
 
     private:
         scanline_bin(const scanline_bin&);
         const scanline_bin operator = (const scanline_bin&);
 
-        unsigned  m_max_len;
-        int       m_last_x;
-        int       m_y;
-        span*     m_spans;
-        span*     m_cur_span;
+        int             m_last_x;
+        int             m_y;
+        pod_array<span> m_spans;
+        span*           m_cur_span;
     };
 
 

@@ -23,13 +23,14 @@ namespace agg
     template<class Renderer> class rasterizer_outline
     {
     public:
-        rasterizer_outline(Renderer& ren) : 
+        explicit rasterizer_outline(Renderer& ren) : 
             m_ren(&ren), 
             m_start_x(0), 
             m_start_y(0), 
             m_vertices(0)
-        {
-        }
+        {}
+        void attach(Renderer& ren) { m_ren = &ren; }
+
 
         //--------------------------------------------------------------------
         void move_to(int x, int y)

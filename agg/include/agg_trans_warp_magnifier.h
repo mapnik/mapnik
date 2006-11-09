@@ -33,6 +33,11 @@ namespace agg
         void magnification(double m)    { m_magn = m;         }
         void radius(double r)           { m_radius = r;       }
 
+        double xc()            const { return m_xc; }
+        double yc()            const { return m_yc; }
+        double magnification() const { return m_magn;   }
+        double radius()        const { return m_radius; }
+
         void transform(double* x, double* y) const;
         void inverse_transform(double* x, double* y) const;
 

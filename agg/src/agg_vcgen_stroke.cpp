@@ -25,30 +25,16 @@ namespace agg
 
     //------------------------------------------------------------------------
     vcgen_stroke::vcgen_stroke() :
+        m_stroker(),
         m_src_vertices(),
         m_out_vertices(),
-        m_width(0.5),
-        m_miter_limit(4.0),
-        m_inner_miter_limit(1.01),
-        m_approx_scale(1.0),
         m_shorten(0.0),
-        m_line_cap(butt_cap),
-        m_line_join(miter_join),
-        m_inner_join(inner_miter),
         m_closed(0),
         m_status(initial),
         m_src_vertex(0),
         m_out_vertex(0)
     {
     }
-
-
-    //------------------------------------------------------------------------
-    void vcgen_stroke::miter_limit_theta(double t)
-    { 
-        m_miter_limit = 1.0 / sin(t * 0.5) ;
-    }
-
 
     //------------------------------------------------------------------------
     void vcgen_stroke::remove_all()
@@ -78,22 +64,6 @@ namespace agg
                 m_closed = get_close_flag(cmd);
             }
         }
-    }
-
-
-    //------------------------------------------------------------------------
-    static inline void calc_butt_cap(double* cap,
-                                     const vertex_dist& v0, 
-                                     const vertex_dist& v1, 
-                                     double len,
-                                     double width)
-    {
-        double dx = (v1.y - v0.y) * width / len;
-        double dy = (v1.x - v0.x) * width / len;
-        cap[0] = v0.x - dx; 
-        cap[1] = v0.y + dy;
-        cap[2] = v0.x + dx;
-        cap[3] = v0.y - dy;
     }
 
     //------------------------------------------------------------------------
@@ -135,13 +105,10 @@ namespace agg
                 break;
 
             case cap1:
-                stroke_calc_cap(m_out_vertices,
-                                m_src_vertices[0], 
-                                m_src_vertices[1], 
-                                m_src_vertices[0].dist,
-                                m_line_cap,
-                                m_width,
-                                m_approx_scale);
+                m_stroker.calc_cap(m_out_vertices,
+                                   m_src_vertices[0], 
+                                   m_src_vertices[1], 
+                                   m_src_vertices[0].dist);
                 m_src_vertex = 1;
                 m_prev_status = outline1;
                 m_status = out_vertices;
@@ -149,13 +116,10 @@ namespace agg
                 break;
 
             case cap2:
-                stroke_calc_cap(m_out_vertices,
-                                m_src_vertices[m_src_vertices.size() - 1], 
-                                m_src_vertices[m_src_vertices.size() - 2], 
-                                m_src_vertices[m_src_vertices.size() - 2].dist,
-                                m_line_cap,
-                                m_width,
-                                m_approx_scale);
+                m_stroker.calc_cap(m_out_vertices,
+                                   m_src_vertices[m_src_vertices.size() - 1], 
+                                   m_src_vertices[m_src_vertices.size() - 2], 
+                                   m_src_vertices[m_src_vertices.size() - 2].dist);
                 m_prev_status = outline2;
                 m_status = out_vertices;
                 m_out_vertex = 0;
@@ -179,18 +143,12 @@ namespace agg
                         break;
                     }
                 }
-                stroke_calc_join(m_out_vertices, 
-                                 m_src_vertices.prev(m_src_vertex), 
-                                 m_src_vertices.curr(m_src_vertex), 
-                                 m_src_vertices.next(m_src_vertex), 
-                                 m_src_vertices.prev(m_src_vertex).dist,
-                                 m_src_vertices.curr(m_src_vertex).dist,
-                                 m_width, 
-                                 m_line_join,
-                                 m_inner_join,
-                                 m_miter_limit,
-                                 m_inner_miter_limit,
-                                 m_approx_scale);
+                m_stroker.calc_join(m_out_vertices, 
+                                    m_src_vertices.prev(m_src_vertex), 
+                                    m_src_vertices.curr(m_src_vertex), 
+                                    m_src_vertices.next(m_src_vertex), 
+                                    m_src_vertices.prev(m_src_vertex).dist,
+                                    m_src_vertices.curr(m_src_vertex).dist);
                 ++m_src_vertex;
                 m_prev_status = m_status;
                 m_status = out_vertices;
@@ -210,18 +168,12 @@ namespace agg
                 }
 
                 --m_src_vertex;
-                stroke_calc_join(m_out_vertices,
-                                 m_src_vertices.next(m_src_vertex), 
-                                 m_src_vertices.curr(m_src_vertex), 
-                                 m_src_vertices.prev(m_src_vertex), 
-                                 m_src_vertices.curr(m_src_vertex).dist, 
-                                 m_src_vertices.prev(m_src_vertex).dist,
-                                 m_width, 
-                                 m_line_join,
-                                 m_inner_join,
-                                 m_miter_limit,
-                                 m_inner_miter_limit,
-                                 m_approx_scale);
+                m_stroker.calc_join(m_out_vertices,
+                                    m_src_vertices.next(m_src_vertex), 
+                                    m_src_vertices.curr(m_src_vertex), 
+                                    m_src_vertices.prev(m_src_vertex), 
+                                    m_src_vertices.curr(m_src_vertex).dist, 
+                                    m_src_vertices.prev(m_src_vertex).dist);
 
                 m_prev_status = m_status;
                 m_status = out_vertices;

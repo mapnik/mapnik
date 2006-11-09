@@ -614,12 +614,15 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type s1a = base_mask - sa;
-            calc_type d1a = base_mask - p[Order::A];
-            p[Order::R] = (value_type)((p[Order::R] * s1a + sr * d1a + base_mask) >> base_shift);
-            p[Order::G] = (value_type)((p[Order::G] * s1a + sg * d1a + base_mask) >> base_shift);
-            p[Order::B] = (value_type)((p[Order::B] * s1a + sb * d1a + base_mask) >> base_shift);
-            p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask/2) >> (base_shift - 1)));
+            if(sa)
+            {
+                calc_type s1a = base_mask - sa;
+                calc_type d1a = base_mask - p[Order::A];
+                p[Order::R] = (value_type)((p[Order::R] * s1a + sr * d1a + base_mask) >> base_shift);
+                p[Order::G] = (value_type)((p[Order::G] * s1a + sg * d1a + base_mask) >> base_shift);
+                p[Order::B] = (value_type)((p[Order::B] * s1a + sb * d1a + base_mask) >> base_shift);
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask/2) >> (base_shift - 1)));
+            }
         }
     };
 
@@ -649,14 +652,17 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type dr = p[Order::R] + sr;
-            calc_type dg = p[Order::G] + sg;
-            calc_type db = p[Order::B] + sb;
-            calc_type da = p[Order::A] + sa;
-            p[Order::R] = (dr > base_mask) ? base_mask : dr;
-            p[Order::G] = (dg > base_mask) ? base_mask : dg;
-            p[Order::B] = (db > base_mask) ? base_mask : db;
-            p[Order::A] = (da > base_mask) ? base_mask : da;
+            if(sa)
+            {
+                calc_type dr = p[Order::R] + sr;
+                calc_type dg = p[Order::G] + sg;
+                calc_type db = p[Order::B] + sb;
+                calc_type da = p[Order::A] + sa;
+                p[Order::R] = (dr > base_mask) ? (value_type)base_mask : dr;
+                p[Order::G] = (dg > base_mask) ? (value_type)base_mask : dg;
+                p[Order::B] = (db > base_mask) ? (value_type)base_mask : db;
+                p[Order::A] = (da > base_mask) ? (value_type)base_mask : da;
+            }
         }
     };
 
@@ -686,13 +692,17 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type dr = p[Order::R] - sr;
-            calc_type dg = p[Order::G] - sg;
-            calc_type db = p[Order::B] - sb;
-            p[Order::R] = (dr > base_mask) ? 0 : dr;
-            p[Order::G] = (dg > base_mask) ? 0 : dg;
-            p[Order::B] = (db > base_mask) ? 0 : db;
-            p[Order::A] = (value_type)(base_mask - (((base_mask - sa) * (base_mask - p[Order::A]) + base_mask) >> base_shift));
+            if(sa)
+            {
+                calc_type dr = p[Order::R] - sr;
+                calc_type dg = p[Order::G] - sg;
+                calc_type db = p[Order::B] - sb;
+                p[Order::R] = (dr > base_mask) ? 0 : dr;
+                p[Order::G] = (dg > base_mask) ? 0 : dg;
+                p[Order::B] = (db > base_mask) ? 0 : db;
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+                //p[Order::A] = (value_type)(base_mask - (((base_mask - sa) * (base_mask - p[Order::A]) + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -722,15 +732,18 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type s1a = base_mask - sa;
-            calc_type d1a = base_mask - p[Order::A];
-            calc_type dr = p[Order::R];
-            calc_type dg = p[Order::G];
-            calc_type db = p[Order::B];
-            p[Order::R] = (value_type)((sr * dr + sr * d1a + dr * s1a + base_mask) >> base_shift);
-            p[Order::G] = (value_type)((sg * dg + sg * d1a + dg * s1a + base_mask) >> base_shift);
-            p[Order::B] = (value_type)((sb * db + sb * d1a + db * s1a + base_mask) >> base_shift);
-            p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+            if(sa)
+            {
+                calc_type s1a = base_mask - sa;
+                calc_type d1a = base_mask - p[Order::A];
+                calc_type dr = p[Order::R];
+                calc_type dg = p[Order::G];
+                calc_type db = p[Order::B];
+                p[Order::R] = (value_type)((sr * dr + sr * d1a + dr * s1a + base_mask) >> base_shift);
+                p[Order::G] = (value_type)((sg * dg + sg * d1a + dg * s1a + base_mask) >> base_shift);
+                p[Order::B] = (value_type)((sb * db + sb * d1a + db * s1a + base_mask) >> base_shift);
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -760,14 +773,17 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type dr = p[Order::R];
-            calc_type dg = p[Order::G];
-            calc_type db = p[Order::B];
-            calc_type da = p[Order::A];
-            p[Order::R] = (value_type)(sr + dr - ((sr * dr + base_mask) >> base_shift));
-            p[Order::G] = (value_type)(sg + dg - ((sg * dg + base_mask) >> base_shift));
-            p[Order::B] = (value_type)(sb + db - ((sb * db + base_mask) >> base_shift));
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            if(sa)
+            {
+                calc_type dr = p[Order::R];
+                calc_type dg = p[Order::G];
+                calc_type db = p[Order::B];
+                calc_type da = p[Order::A];
+                p[Order::R] = (value_type)(sr + dr - ((sr * dr + base_mask) >> base_shift));
+                p[Order::G] = (value_type)(sg + dg - ((sg * dg + base_mask) >> base_shift));
+                p[Order::B] = (value_type)(sb + db - ((sb * db + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -801,27 +817,30 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type d1a  = base_mask - p[Order::A];
-            calc_type s1a  = base_mask - sa;
-            calc_type dr   = p[Order::R];
-            calc_type dg   = p[Order::G];
-            calc_type db   = p[Order::B];
-            calc_type da   = p[Order::A];
-            calc_type sada = sa * p[Order::A];
+            if(sa)
+            {
+                calc_type d1a  = base_mask - p[Order::A];
+                calc_type s1a  = base_mask - sa;
+                calc_type dr   = p[Order::R];
+                calc_type dg   = p[Order::G];
+                calc_type db   = p[Order::B];
+                calc_type da   = p[Order::A];
+                calc_type sada = sa * p[Order::A];
 
-            p[Order::R] = (value_type)(((2*dr < da) ? 
-                2*sr*dr + sr*d1a + dr*s1a : 
-                sada - 2*(da - dr)*(sa - sr) + sr*d1a + dr*s1a) >> base_shift);
+                p[Order::R] = (value_type)(((2*dr < da) ? 
+                    2*sr*dr + sr*d1a + dr*s1a : 
+                    sada - 2*(da - dr)*(sa - sr) + sr*d1a + dr*s1a + base_mask) >> base_shift);
 
-            p[Order::G] = (value_type)(((2*dg < da) ? 
-                2*sg*dg + sg*d1a + dg*s1a : 
-                sada - 2*(da - dg)*(sa - sg) + sg*d1a + dg*s1a) >> base_shift);
+                p[Order::G] = (value_type)(((2*dg < da) ? 
+                    2*sg*dg + sg*d1a + dg*s1a : 
+                    sada - 2*(da - dg)*(sa - sg) + sg*d1a + dg*s1a + base_mask) >> base_shift);
 
-            p[Order::B] = (value_type)(((2*db < da) ? 
-                2*sb*db + sb*d1a + db*s1a : 
-                sada - 2*(da - db)*(sa - sb) + sb*d1a + db*s1a) >> base_shift);
+                p[Order::B] = (value_type)(((2*db < da) ? 
+                    2*sb*db + sb*d1a + db*s1a : 
+                    sada - 2*(da - db)*(sa - sb) + sb*d1a + db*s1a + base_mask) >> base_shift);
 
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -855,17 +874,20 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type d1a = base_mask - p[Order::A];
-            calc_type s1a = base_mask - sa;
-            calc_type dr  = p[Order::R];
-            calc_type dg  = p[Order::G];
-            calc_type db  = p[Order::B];
-            calc_type da  = p[Order::A];
+            if(sa)
+            {
+                calc_type d1a = base_mask - p[Order::A];
+                calc_type s1a = base_mask - sa;
+                calc_type dr  = p[Order::R];
+                calc_type dg  = p[Order::G];
+                calc_type db  = p[Order::B];
+                calc_type da  = p[Order::A];
 
-            p[Order::R] = (value_type)((sd_min(sr * da, dr * sa) + sr * d1a + dr * s1a) >> base_shift);
-            p[Order::G] = (value_type)((sd_min(sg * da, dg * sa) + sg * d1a + dg * s1a) >> base_shift);
-            p[Order::B] = (value_type)((sd_min(sb * da, db * sa) + sb * d1a + db * s1a) >> base_shift);
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::R] = (value_type)((sd_min(sr * da, dr * sa) + sr * d1a + dr * s1a + base_mask) >> base_shift);
+                p[Order::G] = (value_type)((sd_min(sg * da, dg * sa) + sg * d1a + dg * s1a + base_mask) >> base_shift);
+                p[Order::B] = (value_type)((sd_min(sb * da, db * sa) + sb * d1a + db * s1a + base_mask) >> base_shift);
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -895,17 +917,20 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type d1a = base_mask - p[Order::A];
-            calc_type s1a = base_mask - sa;
-            calc_type dr  = p[Order::R];
-            calc_type dg  = p[Order::G];
-            calc_type db  = p[Order::B];
-            calc_type da  = p[Order::A];
+            if(sa)
+            {
+                calc_type d1a = base_mask - p[Order::A];
+                calc_type s1a = base_mask - sa;
+                calc_type dr  = p[Order::R];
+                calc_type dg  = p[Order::G];
+                calc_type db  = p[Order::B];
+                calc_type da  = p[Order::A];
 
-            p[Order::R] = (value_type)((sd_max(sr * da, dr * sa) + sr * d1a + dr * s1a) >> base_shift);
-            p[Order::G] = (value_type)((sd_max(sg * da, dg * sa) + sg * d1a + dg * s1a) >> base_shift);
-            p[Order::B] = (value_type)((sd_max(sb * da, db * sa) + sb * d1a + db * s1a) >> base_shift);
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::R] = (value_type)((sd_max(sr * da, dr * sa) + sr * d1a + dr * s1a + base_mask) >> base_shift);
+                p[Order::G] = (value_type)((sd_max(sg * da, dg * sa) + sg * d1a + dg * s1a + base_mask) >> base_shift);
+                p[Order::B] = (value_type)((sd_max(sb * da, db * sa) + sb * d1a + db * s1a + base_mask) >> base_shift);
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -940,33 +965,36 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type d1a  = base_mask - p[Order::A];
-            calc_type s1a  = base_mask - sa;
-            calc_type dr   = p[Order::R];
-            calc_type dg   = p[Order::G];
-            calc_type db   = p[Order::B];
-            calc_type da   = p[Order::A];
-            long_type drsa = dr * sa;
-            long_type dgsa = dg * sa;
-            long_type dbsa = db * sa;
-            long_type srda = sr * da;
-            long_type sgda = sg * da;
-            long_type sbda = sb * da;
-            long_type sada = sa * da;
+            if(sa)
+            {
+                calc_type d1a  = base_mask - p[Order::A];
+                calc_type s1a  = base_mask - sa;
+                calc_type dr   = p[Order::R];
+                calc_type dg   = p[Order::G];
+                calc_type db   = p[Order::B];
+                calc_type da   = p[Order::A];
+                long_type drsa = dr * sa;
+                long_type dgsa = dg * sa;
+                long_type dbsa = db * sa;
+                long_type srda = sr * da;
+                long_type sgda = sg * da;
+                long_type sbda = sb * da;
+                long_type sada = sa * da;
 
-            p[Order::R] = (value_type)((srda + drsa >= sada) ? 
-                (sada + sr * d1a + dr * s1a) >> base_shift :
-                drsa / (base_mask - (sr << base_shift) / sa) + ((sr * d1a + dr * s1a) >> base_shift));
+                p[Order::R] = (value_type)((srda + drsa >= sada) ? 
+                    (sada + sr * d1a + dr * s1a + base_mask) >> base_shift :
+                    drsa / (base_mask - (sr << base_shift) / sa) + ((sr * d1a + dr * s1a + base_mask) >> base_shift));
 
-            p[Order::G] = (value_type)((sgda + dgsa >= sada) ? 
-                (sada + sg * d1a + dg * s1a) >> base_shift :
-                dgsa / (base_mask - (sg << base_shift) / sa) + ((sg * d1a + dg * s1a) >> base_shift));
+                p[Order::G] = (value_type)((sgda + dgsa >= sada) ? 
+                    (sada + sg * d1a + dg * s1a + base_mask) >> base_shift :
+                    dgsa / (base_mask - (sg << base_shift) / sa) + ((sg * d1a + dg * s1a + base_mask) >> base_shift));
 
-            p[Order::B] = (value_type)((sbda + dbsa >= sada) ? 
-                (sada + sb * d1a + db * s1a) >> base_shift :
-                dbsa / (base_mask - (sb << base_shift) / sa) + ((sb * d1a + db * s1a) >> base_shift));
+                p[Order::B] = (value_type)((sbda + dbsa >= sada) ? 
+                    (sada + sb * d1a + db * s1a + base_mask) >> base_shift :
+                    dbsa / (base_mask - (sb << base_shift) / sa) + ((sb * d1a + db * s1a + base_mask) >> base_shift));
 
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -1001,33 +1029,36 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type d1a  = base_mask - p[Order::A];
-            calc_type s1a  = base_mask - sa;
-            calc_type dr   = p[Order::R];
-            calc_type dg   = p[Order::G];
-            calc_type db   = p[Order::B];
-            calc_type da   = p[Order::A];
-            long_type drsa = dr * sa;
-            long_type dgsa = dg * sa;
-            long_type dbsa = db * sa;
-            long_type srda = sr * da;
-            long_type sgda = sg * da;
-            long_type sbda = sb * da;
-            long_type sada = sa * da;
+            if(sa)
+            {
+                calc_type d1a  = base_mask - p[Order::A];
+                calc_type s1a  = base_mask - sa;
+                calc_type dr   = p[Order::R];
+                calc_type dg   = p[Order::G];
+                calc_type db   = p[Order::B];
+                calc_type da   = p[Order::A];
+                long_type drsa = dr * sa;
+                long_type dgsa = dg * sa;
+                long_type dbsa = db * sa;
+                long_type srda = sr * da;
+                long_type sgda = sg * da;
+                long_type sbda = sb * da;
+                long_type sada = sa * da;
 
-            p[Order::R] = (value_type)(((srda + drsa <= sada) ? 
-                sr * d1a + dr * s1a :
-                sa * (srda + drsa - sada) / sr + sr * d1a + dr * s1a) >> base_shift);
+                p[Order::R] = (value_type)(((srda + drsa <= sada) ? 
+                    sr * d1a + dr * s1a :
+                    sa * (srda + drsa - sada) / sr + sr * d1a + dr * s1a + base_mask) >> base_shift);
 
-            p[Order::G] = (value_type)(((sgda + dgsa <= sada) ? 
-                sg * d1a + dg * s1a :
-                sa * (sgda + dgsa - sada) / sg + sg * d1a + dg * s1a) >> base_shift);
+                p[Order::G] = (value_type)(((sgda + dgsa <= sada) ? 
+                    sg * d1a + dg * s1a :
+                    sa * (sgda + dgsa - sada) / sg + sg * d1a + dg * s1a + base_mask) >> base_shift);
 
-            p[Order::B] = (value_type)(((sbda + dbsa <= sada) ? 
-                sb * d1a + db * s1a :
-                sa * (sbda + dbsa - sada) / sb + sb * d1a + db * s1a) >> base_shift);
+                p[Order::B] = (value_type)(((sbda + dbsa <= sada) ? 
+                    sb * d1a + db * s1a :
+                    sa * (sbda + dbsa - sada) / sb + sb * d1a + db * s1a + base_mask) >> base_shift);
 
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -1062,27 +1093,30 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type d1a  = base_mask - p[Order::A];
-            calc_type s1a  = base_mask - sa;
-            calc_type dr   = p[Order::R];
-            calc_type dg   = p[Order::G];
-            calc_type db   = p[Order::B];
-            calc_type da   = p[Order::A];
-            calc_type sada = sa * da;
+            if(sa)
+            {
+                calc_type d1a  = base_mask - p[Order::A];
+                calc_type s1a  = base_mask - sa;
+                calc_type dr   = p[Order::R];
+                calc_type dg   = p[Order::G];
+                calc_type db   = p[Order::B];
+                calc_type da   = p[Order::A];
+                calc_type sada = sa * da;
 
-            p[Order::R] = (value_type)(((2*sr < sa) ? 
-                2*sr*dr + sr*d1a + dr*s1a : 
-                sada - 2*(da - dr)*(sa - sr) + sr*d1a + dr*s1a) >> base_shift);
+                p[Order::R] = (value_type)(((2*sr < sa) ? 
+                    2*sr*dr + sr*d1a + dr*s1a : 
+                    sada - 2*(da - dr)*(sa - sr) + sr*d1a + dr*s1a + base_mask) >> base_shift);
 
-            p[Order::G] = (value_type)(((2*sg < sa) ? 
-                2*sg*dg + sg*d1a + dg*s1a : 
-                sada - 2*(da - dg)*(sa - sg) + sg*d1a + dg*s1a) >> base_shift);
+                p[Order::G] = (value_type)(((2*sg < sa) ? 
+                    2*sg*dg + sg*d1a + dg*s1a : 
+                    sada - 2*(da - dg)*(sa - sg) + sg*d1a + dg*s1a + base_mask) >> base_shift);
 
-            p[Order::B] = (value_type)(((2*sb < sa) ? 
-                2*sb*db + sb*d1a + db*s1a : 
-                sada - 2*(da - db)*(sa - sb) + sb*d1a + db*s1a) >> base_shift);
+                p[Order::B] = (value_type)(((2*sb < sa) ? 
+                    2*sb*db + sb*d1a + db*s1a : 
+                    sada - 2*(da - db)*(sa - sb) + sb*d1a + db*s1a + base_mask) >> base_shift);
 
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -1117,31 +1151,34 @@ namespace agg
             double sg = double(g * cover) / (base_mask * 255);
             double sb = double(b * cover) / (base_mask * 255);
             double sa = double(a * cover) / (base_mask * 255);
-            double dr = double(p[Order::R]) / base_mask;
-            double dg = double(p[Order::G]) / base_mask;
-            double db = double(p[Order::B]) / base_mask;
-            double da = double(p[Order::A] ? p[Order::A] : 1) / base_mask;
-            if(cover < 255)
+            if(sa > 0)
             {
-                a = (a * cover + 255) >> 8;
+                double dr = double(p[Order::R]) / base_mask;
+                double dg = double(p[Order::G]) / base_mask;
+                double db = double(p[Order::B]) / base_mask;
+                double da = double(p[Order::A] ? p[Order::A] : 1) / base_mask;
+                if(cover < 255)
+                {
+                    a = (a * cover + 255) >> 8;
+                }
+
+                if(2*sr < sa)       dr = dr*(sa + (1 - dr/da)*(2*sr - sa)) + sr*(1 - da) + dr*(1 - sa);
+                else if(8*dr <= da) dr = dr*(sa + (1 - dr/da)*(2*sr - sa)*(3 - 8*dr/da)) + sr*(1 - da) + dr*(1 - sa);
+                else                dr = (dr*sa + (sqrt(dr/da)*da - dr)*(2*sr - sa)) + sr*(1 - da) + dr*(1 - sa);
+
+                if(2*sg < sa)       dg = dg*(sa + (1 - dg/da)*(2*sg - sa)) + sg*(1 - da) + dg*(1 - sa);
+                else if(8*dg <= da) dg = dg*(sa + (1 - dg/da)*(2*sg - sa)*(3 - 8*dg/da)) + sg*(1 - da) + dg*(1 - sa);
+                else                dg = (dg*sa + (sqrt(dg/da)*da - dg)*(2*sg - sa)) + sg*(1 - da) + dg*(1 - sa);
+
+                if(2*sb < sa)       db = db*(sa + (1 - db/da)*(2*sb - sa)) + sb*(1 - da) + db*(1 - sa);
+                else if(8*db <= da) db = db*(sa + (1 - db/da)*(2*sb - sa)*(3 - 8*db/da)) + sb*(1 - da) + db*(1 - sa);
+                else                db = (db*sa + (sqrt(db/da)*da - db)*(2*sb - sa)) + sb*(1 - da) + db*(1 - sa);
+
+                p[Order::R] = (value_type)uround(dr * base_mask);
+                p[Order::G] = (value_type)uround(dg * base_mask);
+                p[Order::B] = (value_type)uround(db * base_mask);
+                p[Order::A] = (value_type)(a + p[Order::A] - ((a * p[Order::A] + base_mask) >> base_shift));
             }
-
-            if(2*sr < sa)       dr = dr*(sa + (1 - dr/da)*(2*sr - sa)) + sr*(1 - da) + dr*(1 - sa);
-            else if(8*dr <= da) dr = dr*(sa + (1 - dr/da)*(2*sr - sa)*(3 - 8*dr/da)) + sr*(1 - da) + dr*(1 - sa);
-            else                dr = (dr*sa + (sqrt(dr/da)*da - dr)*(2*sr - sa)) + sr*(1 - da) + dr*(1 - sa);
-
-            if(2*sg < sa)       dg = dg*(sa + (1 - dg/da)*(2*sg - sa)) + sg*(1 - da) + dg*(1 - sa);
-            else if(8*dg <= da) dg = dg*(sa + (1 - dg/da)*(2*sg - sa)*(3 - 8*dg/da)) + sg*(1 - da) + dg*(1 - sa);
-            else                dg = (dg*sa + (sqrt(dg/da)*da - dg)*(2*sg - sa)) + sg*(1 - da) + dg*(1 - sa);
-
-            if(2*sb < sa)       db = db*(sa + (1 - db/da)*(2*sb - sa)) + sb*(1 - da) + db*(1 - sa);
-            else if(8*db <= da) db = db*(sa + (1 - db/da)*(2*sb - sa)*(3 - 8*db/da)) + sb*(1 - da) + db*(1 - sa);
-            else                db = (db*sa + (sqrt(db/da)*da - db)*(2*sb - sa)) + sb*(1 - da) + db*(1 - sa);
-
-            p[Order::R] = (value_type)uround(dr * base_mask);
-            p[Order::G] = (value_type)uround(dg * base_mask);
-            p[Order::B] = (value_type)uround(db * base_mask);
-            p[Order::A] = (value_type)(a + p[Order::A] - ((a * p[Order::A] + base_mask) >> base_shift));
         }
     };
 
@@ -1156,6 +1193,7 @@ namespace agg
         enum base_scale_e
         { 
             base_shift = color_type::base_shift,
+            base_scale = color_type::base_scale,
             base_mask  = color_type::base_mask
         };
 
@@ -1172,14 +1210,17 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type dr = p[Order::R];
-            calc_type dg = p[Order::G];
-            calc_type db = p[Order::B];
-            calc_type da = p[Order::A];
-            p[Order::R] = (value_type)(sr + dr - ((2 * sd_min(sr*da, dr*sa)) >> base_shift));
-            p[Order::G] = (value_type)(sg + dg - ((2 * sd_min(sg*da, dg*sa)) >> base_shift));
-            p[Order::B] = (value_type)(sb + db - ((2 * sd_min(sb*da, db*sa)) >> base_shift));
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            if(sa)
+            {
+                calc_type dr = p[Order::R];
+                calc_type dg = p[Order::G];
+                calc_type db = p[Order::B];
+                calc_type da = p[Order::A];
+                p[Order::R] = (value_type)(sr + dr - ((2 * sd_min(sr*da, dr*sa) + base_mask) >> base_shift));
+                p[Order::G] = (value_type)(sg + dg - ((2 * sd_min(sg*da, dg*sa) + base_mask) >> base_shift));
+                p[Order::B] = (value_type)(sb + db - ((2 * sd_min(sb*da, db*sa) + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -1210,16 +1251,19 @@ namespace agg
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            calc_type d1a = base_mask - p[Order::A];
-            calc_type s1a = base_mask - sa;
-            calc_type dr = p[Order::R];
-            calc_type dg = p[Order::G];
-            calc_type db = p[Order::B];
-            calc_type da = p[Order::A];
-            p[Order::R] = (value_type)((sr*da + dr*sa - 2*sr*dr + sr*d1a + dr*s1a) >> base_shift);
-            p[Order::G] = (value_type)((sg*da + dg*sa - 2*sg*dg + sg*d1a + dg*s1a) >> base_shift);
-            p[Order::B] = (value_type)((sb*da + db*sa - 2*sb*db + sb*d1a + db*s1a) >> base_shift);
-            p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            if(sa)
+            {
+                calc_type d1a = base_mask - p[Order::A];
+                calc_type s1a = base_mask - sa;
+                calc_type dr = p[Order::R];
+                calc_type dg = p[Order::G];
+                calc_type db = p[Order::B];
+                calc_type da = p[Order::A];
+                p[Order::R] = (value_type)((sr*da + dr*sa - 2*sr*dr + sr*d1a + dr*s1a + base_mask) >> base_shift);
+                p[Order::G] = (value_type)((sg*da + dg*sa - 2*sg*dg + sg*d1a + dg*s1a + base_mask) >> base_shift);
+                p[Order::B] = (value_type)((sb*da + db*sa - 2*sb*db + sb*d1a + db*s1a + base_mask) >> base_shift);
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
         }
     };
 
@@ -1270,11 +1314,83 @@ namespace agg
         }
     };
 
+    //=====================================================comp_op_rgba_invert
+    template<class ColorT, class Order> struct comp_op_rgba_invert
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        { 
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
 
+        // Dca' = (Da - Dca) * Sa + Dca.(1 - Sa)
+        // Da'  = Sa + Da - Sa.Da 
+        static AGG_INLINE void blend_pix(value_type* p, 
+                                         unsigned sr, unsigned sg, unsigned sb, 
+                                         unsigned sa, unsigned cover)
+        {
+            sa = (sa * cover + 255) >> 8;
+            if(sa)
+            {
+                calc_type da = p[Order::A];
+                calc_type dr = ((da - p[Order::R]) * sa + base_mask) >> base_shift;
+                calc_type dg = ((da - p[Order::G]) * sa + base_mask) >> base_shift;
+                calc_type db = ((da - p[Order::B]) * sa + base_mask) >> base_shift;
+                calc_type s1a = base_mask - sa;
+                p[Order::R] = (value_type)(dr + ((p[Order::R] * s1a + base_mask) >> base_shift));
+                p[Order::G] = (value_type)(dg + ((p[Order::G] * s1a + base_mask) >> base_shift));
+                p[Order::B] = (value_type)(db + ((p[Order::B] * s1a + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
+        }
+    };
 
+    //=================================================comp_op_rgba_invert_rgb
+    template<class ColorT, class Order> struct comp_op_rgba_invert_rgb
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        { 
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
 
-
-
+        // Dca' = (Da - Dca) * Sca + Dca.(1 - Sa)
+        // Da'  = Sa + Da - Sa.Da 
+        static AGG_INLINE void blend_pix(value_type* p, 
+                                         unsigned sr, unsigned sg, unsigned sb, 
+                                         unsigned sa, unsigned cover)
+        {
+            if(cover < 255)
+            {
+                sr = (sr * cover + 255) >> 8;
+                sg = (sg * cover + 255) >> 8;
+                sb = (sb * cover + 255) >> 8;
+                sa = (sa * cover + 255) >> 8;
+            }
+            if(sa)
+            {
+                calc_type da = p[Order::A];
+                calc_type dr = ((da - p[Order::R]) * sr + base_mask) >> base_shift;
+                calc_type dg = ((da - p[Order::G]) * sg + base_mask) >> base_shift;
+                calc_type db = ((da - p[Order::B]) * sb + base_mask) >> base_shift;
+                calc_type s1a = base_mask - sa;
+                p[Order::R] = (value_type)(dr + ((p[Order::R] * s1a + base_mask) >> base_shift));
+                p[Order::G] = (value_type)(dg + ((p[Order::G] * s1a + base_mask) >> base_shift));
+                p[Order::B] = (value_type)(db + ((p[Order::B] * s1a + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
+        }
+    };
 
 
 
@@ -1324,6 +1440,8 @@ namespace agg
         comp_op_rgba_difference <ColorT,Order>::blend_pix,
         comp_op_rgba_exclusion  <ColorT,Order>::blend_pix,
         comp_op_rgba_contrast   <ColorT,Order>::blend_pix,
+        comp_op_rgba_invert     <ColorT,Order>::blend_pix,
+        comp_op_rgba_invert_rgb <ColorT,Order>::blend_pix,
         0
     };
 
@@ -1357,6 +1475,8 @@ namespace agg
         comp_op_difference,    //----comp_op_difference
         comp_op_exclusion,     //----comp_op_exclusion
         comp_op_contrast,      //----comp_op_contrast
+        comp_op_invert,        //----comp_op_invert
+        comp_op_invert_rgb,    //----comp_op_invert_rgb
 
         end_of_comp_op_e
     };
@@ -1652,30 +1772,47 @@ namespace agg
 
         //--------------------------------------------------------------------
         pixfmt_alpha_blend_rgba() : m_rbuf(0) {}
-        pixfmt_alpha_blend_rgba(rbuf_type& rb) : m_rbuf(&rb) {}
+        explicit pixfmt_alpha_blend_rgba(rbuf_type& rb) : m_rbuf(&rb) {}
         void attach(rbuf_type& rb) { m_rbuf = &rb; }
+
+        //--------------------------------------------------------------------
+        template<class PixFmt>
+        bool attach(PixFmt& pixf, int x1, int y1, int x2, int y2)
+        {
+            rect_i r(x1, y1, x2, y2);
+            if(r.clip(rect_i(0, 0, pixf.width()-1, pixf.height()-1)))
+            {
+                int stride = pixf.stride();
+                m_rbuf->attach(pixf.pix_ptr(r.x1, stride < 0 ? r.y2 : r.y1), 
+                               (r.x2 - r.x1) + 1,
+                               (r.y2 - r.y1) + 1,
+                               stride);
+                return true;
+            }
+            return false;
+        }
 
         //--------------------------------------------------------------------
         AGG_INLINE unsigned width()  const { return m_rbuf->width();  }
         AGG_INLINE unsigned height() const { return m_rbuf->height(); }
+        AGG_INLINE int      stride() const { return m_rbuf->stride(); }
 
         //--------------------------------------------------------------------
-        const int8u* row_ptr(int y) const
-        {
-            return m_rbuf->row_ptr(y);
-        }
+        AGG_INLINE       int8u* row_ptr(int y)       { return m_rbuf->row_ptr(y); }
+        AGG_INLINE const int8u* row_ptr(int y) const { return m_rbuf->row_ptr(y); }
+        AGG_INLINE row_data     row(int y)     const { return m_rbuf->row(y); }
 
         //--------------------------------------------------------------------
-        const int8u* pix_ptr(int x, int y) const
+        AGG_INLINE int8u* pix_ptr(int x, int y)
         {
             return m_rbuf->row_ptr(y) + x * pix_width;
         }
 
-        //--------------------------------------------------------------------
-        row_data row(int y) const
+        AGG_INLINE const int8u* pix_ptr(int x, int y) const
         {
-            return m_rbuf->row(y);
+            return m_rbuf->row_ptr(y) + x * pix_width;
         }
+
 
         //--------------------------------------------------------------------
         AGG_INLINE static void make_pix(int8u* p, const color_type& c)
@@ -1939,6 +2076,24 @@ namespace agg
 
 
         //--------------------------------------------------------------------
+        void copy_color_vspan(int x, int y,
+                              unsigned len, 
+                              const color_type* colors)
+        {
+            do 
+            {
+                value_type* p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + (x << 2);
+                p[order_type::R] = colors->r;
+                p[order_type::G] = colors->g;
+                p[order_type::B] = colors->b;
+                p[order_type::A] = colors->a;
+                ++colors;
+            }
+            while(--len);
+        }
+
+
+        //--------------------------------------------------------------------
         void blend_color_hspan(int x, int y,
                                unsigned len, 
                                const color_type* colors,
@@ -2170,6 +2325,77 @@ namespace agg
             }
         }
 
+        //--------------------------------------------------------------------
+        template<class SrcPixelFormatRenderer>
+        void blend_from_color(const SrcPixelFormatRenderer& from, 
+                              const color_type& color,
+                              int xdst, int ydst,
+                              int xsrc, int ysrc,
+                              unsigned len,
+                              int8u cover)
+        {
+            typedef typename SrcPixelFormatRenderer::value_type src_value_type;
+            const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
+            if(psrc)
+            {
+                value_type* pdst = 
+                    (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + (xdst << 2);
+                do 
+                {
+                    cob_type::copy_or_blend_pix(pdst, 
+                                                color.r, color.g, color.b, color.a,
+                                                (*psrc * cover + base_mask) >> base_shift);
+                    ++psrc;
+                    pdst += 4;
+                }
+                while(--len);
+            }
+        }
+
+        //--------------------------------------------------------------------
+        template<class SrcPixelFormatRenderer>
+        void blend_from_lut(const SrcPixelFormatRenderer& from, 
+                            const color_type* color_lut,
+                            int xdst, int ydst,
+                            int xsrc, int ysrc,
+                            unsigned len,
+                            int8u cover)
+        {
+            typedef typename SrcPixelFormatRenderer::value_type src_value_type;
+            const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
+            if(psrc)
+            {
+                value_type* pdst = 
+                    (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + (xdst << 2);
+
+                if(cover == 255)
+                {
+                    do 
+                    {
+                        const color_type& color = color_lut[*psrc];
+                        cob_type::copy_or_blend_pix(pdst, 
+                                                    color.r, color.g, color.b, color.a);
+                        ++psrc;
+                        pdst += 4;
+                    }
+                    while(--len);
+                }
+                else
+                {
+                    do 
+                    {
+                        const color_type& color = color_lut[*psrc];
+                        cob_type::copy_or_blend_pix(pdst, 
+                                                    color.r, color.g, color.b, color.a,
+                                                    cover);
+                        ++psrc;
+                        pdst += 4;
+                    }
+                    while(--len);
+                }
+            }
+        }
+
     private:
         rbuf_type* m_rbuf;
     };
@@ -2199,37 +2425,53 @@ namespace agg
 
         //--------------------------------------------------------------------
         pixfmt_custom_blend_rgba() : m_rbuf(0), m_comp_op(3) {}
-        pixfmt_custom_blend_rgba(rbuf_type& rb, unsigned comp_op=3) : 
+        explicit pixfmt_custom_blend_rgba(rbuf_type& rb, unsigned comp_op=3) : 
             m_rbuf(&rb),
             m_comp_op(comp_op)
         {}
         void attach(rbuf_type& rb) { m_rbuf = &rb; }
 
         //--------------------------------------------------------------------
-        unsigned width()  const { return m_rbuf->width();  }
-        unsigned height() const { return m_rbuf->height(); }
-
-        //--------------------------------------------------------------------
-        void comp_op(unsigned op) { m_comp_op = op; }
-        unsigned comp_op() const  { return m_comp_op; }
-
-        //--------------------------------------------------------------------
-        const int8u* row_ptr(int y) const
+        template<class PixFmt>
+        bool attach(PixFmt& pixf, int x1, int y1, int x2, int y2)
         {
-            return m_rbuf->row_ptr(y);
+            rect_i r(x1, y1, x2, y2);
+            if(r.clip(rect_i(0, 0, pixf.width()-1, pixf.height()-1)))
+            {
+                int stride = pixf.stride();
+                m_rbuf->attach(pixf.pix_ptr(r.x1, stride < 0 ? r.y2 : r.y1), 
+                               (r.x2 - r.x1) + 1,
+                               (r.y2 - r.y1) + 1,
+                               stride);
+                return true;
+            }
+            return false;
         }
 
         //--------------------------------------------------------------------
-        const int8u* pix_ptr(int x, int y) const
+        AGG_INLINE unsigned width()  const { return m_rbuf->width();  }
+        AGG_INLINE unsigned height() const { return m_rbuf->height(); }
+        AGG_INLINE int      stride() const { return m_rbuf->stride(); }
+
+        //--------------------------------------------------------------------
+        AGG_INLINE       int8u* row_ptr(int y)       { return m_rbuf->row_ptr(y); }
+        AGG_INLINE const int8u* row_ptr(int y) const { return m_rbuf->row_ptr(y); }
+        AGG_INLINE row_data     row(int y)     const { return m_rbuf->row(y); }
+
+        //--------------------------------------------------------------------
+        AGG_INLINE int8u* pix_ptr(int x, int y)
+        {
+            return m_rbuf->row_ptr(y) + x * pix_width;
+        }
+
+        AGG_INLINE const int8u* pix_ptr(int x, int y) const
         {
             return m_rbuf->row_ptr(y) + x * pix_width;
         }
 
         //--------------------------------------------------------------------
-        row_data row(int x, int y) const
-        {
-            return m_rbuf->row(y);
-        }
+        void comp_op(unsigned op) { m_comp_op = op; }
+        unsigned comp_op() const  { return m_comp_op; }
 
         //--------------------------------------------------------------------
         AGG_INLINE static void make_pix(int8u* p, const color_type& c)
@@ -2374,6 +2616,23 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
+        void copy_color_vspan(int x, int y,
+                              unsigned len, 
+                              const color_type* colors)
+        {
+            do 
+            {
+                value_type* p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + (x << 2);
+                p[order_type::R] = colors->r;
+                p[order_type::G] = colors->g;
+                p[order_type::B] = colors->b;
+                p[order_type::A] = colors->a;
+                ++colors;
+            }
+            while(--len);
+        }
+
+        //--------------------------------------------------------------------
         void blend_color_hspan(int x, int y, unsigned len, 
                                const color_type* colors, 
                                const int8u* covers,
@@ -2513,6 +2772,63 @@ namespace agg
                                             cover);
                     psrc += incp;
                     pdst += incp;
+                }
+                while(--len);
+            }
+        }
+
+        //--------------------------------------------------------------------
+        template<class SrcPixelFormatRenderer>
+        void blend_from_color(const SrcPixelFormatRenderer& from, 
+                              const color_type& color,
+                              int xdst, int ydst,
+                              int xsrc, int ysrc,
+                              unsigned len,
+                              int8u cover)
+        {
+            typedef typename SrcPixelFormatRenderer::value_type src_value_type;
+            const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
+            if(psrc)
+            {
+                value_type* pdst = 
+                    (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + (xdst << 2);
+                do 
+                {
+                    blender_type::blend_pix(m_comp_op,
+                                            pdst, 
+                                            color.r, color.g, color.b, color.a,
+                                            (*psrc * cover + base_mask) >> base_shift);
+                    ++psrc;
+                    pdst += 4;
+                }
+                while(--len);
+            }
+        }
+
+        //--------------------------------------------------------------------
+        template<class SrcPixelFormatRenderer>
+        void blend_from_lut(const SrcPixelFormatRenderer& from, 
+                            const color_type* color_lut,
+                            int xdst, int ydst,
+                            int xsrc, int ysrc,
+                            unsigned len,
+                            int8u cover)
+        {
+            typedef typename SrcPixelFormatRenderer::value_type src_value_type;
+            const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
+            if(psrc)
+            {
+                value_type* pdst = 
+                    (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + (xdst << 2);
+                do 
+                {
+                    const color_type& color = color_lut[*psrc];
+                    blender_type::blend_pix(m_comp_op,
+                                            pdst, 
+                                            color.r, color.g, color.b, color.a,
+                                            cover);
+                    ++psrc;
+                    pdst += 4;
                 }
                 while(--len);
             }

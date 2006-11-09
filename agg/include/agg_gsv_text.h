@@ -20,7 +20,7 @@
 #ifndef AGG_GSV_TEXT_INCLUDED
 #define AGG_GSV_TEXT_INCLUDED
 
-#include "agg_basics.h"
+#include "agg_array.h"
 #include "agg_conv_stroke.h"
 #include "agg_conv_transform.h"
 
@@ -43,7 +43,6 @@ namespace agg
         };
 
     public:
-        ~gsv_text();
         gsv_text();
 
         void font(const void* font);
@@ -54,6 +53,8 @@ namespace agg
         void line_space(double line_space);
         void start_point(double x, double y);
         void text(const char* text);
+        
+        double text_width();
 
         void rewind(unsigned path_id);
         unsigned vertex(double* x, double* y);
@@ -80,30 +81,28 @@ namespace agg
         }
 
     private:
-        double      m_x;
-        double      m_y;
-        double      m_start_x;
-        double      m_width;
-        double      m_height;
-        double      m_space;
-        double      m_line_space;
-        char        m_chr[2];
-        char*       m_text;
-        char*       m_text_buf;
-        unsigned    m_buf_size;
-        char*       m_cur_chr;
-        const void* m_font;
-        char*       m_loaded_font;
-        status      m_status;
-        bool        m_big_endian;
-        bool        m_flip;
-
-        int8u*      m_indices;
-        int8*       m_glyphs;
-        int8*       m_bglyph;
-        int8*       m_eglyph;
-        double      m_w;
-        double      m_h;
+        double          m_x;
+        double          m_y;
+        double          m_start_x;
+        double          m_width;
+        double          m_height;
+        double          m_space;
+        double          m_line_space;
+        char            m_chr[2];
+        char*           m_text;
+        pod_array<char> m_text_buf;
+        char*           m_cur_chr;
+        const void*     m_font;
+        pod_array<char> m_loaded_font;
+        status          m_status;
+        bool            m_big_endian;
+        bool            m_flip;
+        int8u*          m_indices;
+        int8*           m_glyphs;
+        int8*           m_bglyph;
+        int8*           m_eglyph;
+        double          m_w;
+        double          m_h;
     };
 
 

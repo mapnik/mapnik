@@ -34,8 +34,8 @@ namespace agg
         renderer_raster_htext_solid(ren_type& ren, glyph_gen_type& glyph) :
             m_ren(&ren),
             m_glyph(&glyph)
-        {
-        }
+        {}
+        void attach(ren_type& ren) { m_ren = &ren; }
 
         //--------------------------------------------------------------------
         void color(const color_type& c) { m_color = c; }

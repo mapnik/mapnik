@@ -443,32 +443,43 @@ namespace agg
     }
 
 
-    //-----------------------------------------------------------rgb8_packed
+    //-------------------------------------------------------------rgb8_packed
     inline rgba8 rgb8_packed(unsigned v)
     {
         return rgba8((v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
     }
 
-    //-----------------------------------------------------------bgr8_packed
+    //-------------------------------------------------------------bgr8_packed
     inline rgba8 bgr8_packed(unsigned v)
     {
         return rgba8(v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF);
     }
 
-    //----------------------------------------------------------argb8_packed
+    //------------------------------------------------------------argb8_packed
     inline rgba8 argb8_packed(unsigned v)
     {
         return rgba8((v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF, v >> 24);
+    }
+
+    //---------------------------------------------------------rgba8_gamma_dir
+    template<class GammaLUT>
+    rgba8 rgba8_gamma_dir(rgba8 c, const GammaLUT& gamma)
+    {
+        return rgba8(gamma.dir(c.r), gamma.dir(c.g), gamma.dir(c.b), c.a);
+    }
+
+    //---------------------------------------------------------rgba8_gamma_inv
+    template<class GammaLUT>
+    rgba8 rgba8_gamma_inv(rgba8 c, const GammaLUT& gamma)
+    {
+        return rgba8(gamma.inv(c.r), gamma.inv(c.g), gamma.inv(c.b), c.a);
     }
 
 
 
 
 
-
-
-
-    //=================================================================rgba16
+    //==================================================================rgba16
     struct rgba16
     {
         typedef int16u value_type;
@@ -708,6 +719,22 @@ namespace agg
     {
         return rgba16(c,a).premultiply();
     }
+
+
+    //------------------------------------------------------rgba16_gamma_dir
+    template<class GammaLUT>
+    rgba16 rgba16_gamma_dir(rgba16 c, const GammaLUT& gamma)
+    {
+        return rgba16(gamma.dir(c.r), gamma.dir(c.g), gamma.dir(c.b), c.a);
+    }
+
+    //------------------------------------------------------rgba16_gamma_inv
+    template<class GammaLUT>
+    rgba16 rgba16_gamma_inv(rgba16 c, const GammaLUT& gamma)
+    {
+        return rgba16(gamma.inv(c.r), gamma.inv(c.g), gamma.inv(c.b), c.a);
+    }
+
 
 }
 

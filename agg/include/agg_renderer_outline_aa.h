@@ -15,7 +15,7 @@
 #ifndef AGG_RENDERER_OUTLINE_AA_INCLUDED
 #define AGG_RENDERER_OUTLINE_AA_INCLUDED
 
-#include "agg_basics.h"
+#include "agg_array.h"
 #include "agg_math.h"
 #include "agg_line_aa_basics.h"
 #include "agg_dda_line.h"
@@ -1274,12 +1274,7 @@ namespace agg
         };
         
         //---------------------------------------------------------------------
-        ~line_profile_aa() { delete [] m_profile; }
-
-        //---------------------------------------------------------------------
         line_profile_aa() : 
-            m_size(0), 
-            m_profile(0), 
             m_subpixel_width(0),
             m_min_width(1.0),
             m_smoother_width(1.0)
@@ -1291,8 +1286,6 @@ namespace agg
         //---------------------------------------------------------------------
         template<class GammaF> 
         line_profile_aa(double w, const GammaF& gamma_function) : 
-            m_size(0), 
-            m_profile(0), 
             m_subpixel_width(0),
             m_min_width(1.0),
             m_smoother_width(1.0)
@@ -1318,7 +1311,7 @@ namespace agg
 
         void width(double w);
 
-        unsigned profile_size() const { return m_size; }
+        unsigned profile_size() const { return m_profile.size(); }
         int subpixel_width() const { return m_subpixel_width; }
 
         //---------------------------------------------------------------------
@@ -1339,12 +1332,11 @@ namespace agg
         void set(double center_width, double smoother_width);
 
         //---------------------------------------------------------------------
-        unsigned    m_size;
-        value_type* m_profile;
-        value_type  m_gamma[aa_scale];
-        int         m_subpixel_width;
-        double      m_min_width;
-        double      m_smoother_width;
+        pod_array<value_type> m_profile;
+        value_type            m_gamma[aa_scale];
+        int                   m_subpixel_width;
+        double                m_min_width;
+        double                m_smoother_width;
     };
 
 
@@ -1363,8 +1355,8 @@ namespace agg
             m_profile(&prof),
             m_clip_box(0,0,0,0),
             m_clipping(false)
-        {
-        }
+        {}
+        void attach(base_ren_type& ren) { m_ren = &ren; }
 
         //---------------------------------------------------------------------
         void color(const color_type& c) { m_color = c; }
@@ -1657,7 +1649,7 @@ namespace agg
                         }
                         else
                         {
-                            while(abs(sx - lp.x1) + abs(sy - lp.y1) > 2 * lp2.len)
+                            while(abs(sx - lp.x1) + abs(sy - lp.y1) > lp2.len)
                             {
                                 sx = (lp.x1 + sx) >> 1;
                                 sy = (lp.y1 + sy) >> 1;
@@ -1724,7 +1716,7 @@ namespace agg
                         }
                         else
                         {
-                            while(abs(ex - lp.x2) + abs(ey - lp.y2) > 2 * lp2.len)
+                            while(abs(ex - lp.x2) + abs(ey - lp.y2) > lp2.len)
                             {
                                 ex = (lp.x2 + ex) >> 1;
                                 ey = (lp.y2 + ey) >> 1;
@@ -1796,7 +1788,7 @@ namespace agg
                         }
                         else
                         {
-                            while(abs(sx - lp.x1) + abs(sy - lp.y1) > 2 * lp2.len)
+                            while(abs(sx - lp.x1) + abs(sy - lp.y1) > lp2.len)
                             {
                                 sx = (lp.x1 + sx) >> 1;
                                 sy = (lp.y1 + sy) >> 1;
@@ -1809,7 +1801,7 @@ namespace agg
                         }
                         else
                         {
-                            while(abs(ex - lp.x2) + abs(ey - lp.y2) > 2 * lp2.len)
+                            while(abs(ex - lp.x2) + abs(ey - lp.y2) > lp2.len)
                             {
                                 ex = (lp.x2 + ex) >> 1;
                                 ey = (lp.y2 + ey) >> 1;

@@ -146,6 +146,10 @@ namespace agg
     };
 
 
+
+
+
+
     //==========================================================gradient_circle
     class gradient_circle
     {
@@ -168,7 +172,6 @@ namespace agg
         }
     };
 
-
     //========================================================gradient_radial_d
     class gradient_radial_d
     {
@@ -179,25 +182,24 @@ namespace agg
         }
     };
 
-
     //====================================================gradient_radial_focus
     class gradient_radial_focus
     {
     public:
         //---------------------------------------------------------------------
         gradient_radial_focus() : 
-            m_radius(100 * gradient_subpixel_scale), 
-            m_focus_x(0), 
-            m_focus_y(0)
+            m_r(100 * gradient_subpixel_scale), 
+            m_fx(0), 
+            m_fy(0)
         {
             update_values();
         }
 
         //---------------------------------------------------------------------
         gradient_radial_focus(double r, double fx, double fy) : 
-            m_radius (iround(r  * gradient_subpixel_scale)), 
-            m_focus_x(iround(fx * gradient_subpixel_scale)), 
-            m_focus_y(iround(fy * gradient_subpixel_scale))
+            m_r (iround(r  * gradient_subpixel_scale)), 
+            m_fx(iround(fx * gradient_subpixel_scale)), 
+            m_fy(iround(fy * gradient_subpixel_scale))
         {
             update_values();
         }
@@ -205,109 +207,60 @@ namespace agg
         //---------------------------------------------------------------------
         void init(double r, double fx, double fy)
         {
-            m_radius  = iround(r  * gradient_subpixel_scale);
-            m_focus_x = iround(fx * gradient_subpixel_scale);
-            m_focus_y = iround(fy * gradient_subpixel_scale);
+            m_r  = iround(r  * gradient_subpixel_scale);
+            m_fx = iround(fx * gradient_subpixel_scale);
+            m_fy = iround(fy * gradient_subpixel_scale);
             update_values();
         }
 
         //---------------------------------------------------------------------
-        double radius()  const { return double(m_radius)  / gradient_subpixel_scale; }
-        double focus_x() const { return double(m_focus_x) / gradient_subpixel_scale; }
-        double focus_y() const { return double(m_focus_y) / gradient_subpixel_scale; }
+        double radius()  const { return double(m_r)  / gradient_subpixel_scale; }
+        double focus_x() const { return double(m_fx) / gradient_subpixel_scale; }
+        double focus_y() const { return double(m_fy) / gradient_subpixel_scale; }
 
         //---------------------------------------------------------------------
         int calculate(int x, int y, int) const
         {
-            double solution_x;
-            double solution_y;
-
-            // Special case to avoid divide by zero or very near zero
-            //---------------------------------
-            if(x == iround(m_focus_x))
-            {		   
-                solution_x = m_focus_x;
-                solution_y = 0.0;
-                solution_y += (y > m_focus_y) ? m_trivial : -m_trivial;
-            }
-            else 
-            {    
-                // Slope of the focus-current line
-                //-------------------------------
-                double slope = double(y - m_focus_y) / double(x - m_focus_x);
-
-                // y-intercept of that same line
-                //--------------------------------
-                double yint  = double(y) - (slope * x); 
-		
-                // Use the classical quadratic formula to calculate 
-                // the intersection point		  
-                //--------------------------------
-                double a = (slope * slope) + 1; 
-                double b =  2 * slope * yint;
-                double c =  yint * yint - m_radius2;
-                double det = sqrt((b * b) - (4.0 * a * c));
-		        solution_x = -b;
-		
-                // Choose the positive or negative root depending
-                // on where the X coord lies with respect to the focus.
-                solution_x += (x < m_focus_x) ? -det : det;
-		        solution_x /= 2.0 * a;
-
-                // Calculating of Y is trivial
-                solution_y  = (slope * solution_x) + yint;
-            }	                    	
-
-            // Calculate the percentage (0...1) of the current point along the 
-            // focus-circumference line and return the normalized (0...d) value
-            //-------------------------------
-            solution_x -= double(m_focus_x);
-            solution_y -= double(m_focus_y);
-            double int_to_focus = solution_x * solution_x + solution_y * solution_y;
-            double cur_to_focus = double(x - m_focus_x) * double(x - m_focus_x) +
-                                  double(y - m_focus_y) * double(y - m_focus_y);
-
-            return iround(sqrt(cur_to_focus / int_to_focus) * m_radius);
+            double dx = x - m_fx;
+            double dy = y - m_fy;
+            double d2 = dx * m_fy - dy * m_fx;
+            double d3 = m_r2 * (dx * dx + dy * dy) - d2 * d2;
+            return iround((dx * m_fx + dy * m_fy + sqrt(fabs(d3))) * m_mul);
         }
 
     private:
         //---------------------------------------------------------------------
         void update_values()
         {
-            // For use in the quadratic equation
-            //-------------------------------
-            m_radius2 = double(m_radius) * double(m_radius);
-
-            double dist = sqrt(double(m_focus_x) * double(m_focus_x) + 
-                               double(m_focus_y) * double(m_focus_y));
-
-            // Test if distance from focus to center is greater than the radius
-            // For the sake of assurance factor restrict the point to be 
-            // no further than 99% of the radius.
-            //-------------------------------
-            double r = m_radius * 0.99;
-            if(dist > r) 
-            { 
-                // clamp focus to radius
-                // x = r cos theta, y = r sin theta
-                //------------------------
-                double a = atan2(double(m_focus_y), double(m_focus_x));
-                m_focus_x = iround(r * cos(a));
-                m_focus_y = iround(r * sin(a));
+            // Calculate the invariant values. In case the focal center
+            // lies exactly on the gradient circle the divisor degenerates
+            // into zero. In this case we just move the focal center by
+            // one subpixel unit possibly in the direction to the origin (0,0)
+            // and calculate the values again.
+            //-------------------------
+            m_r2  = double(m_r)  * double(m_r);
+            m_fx2 = double(m_fx) * double(m_fx);
+            m_fy2 = double(m_fy) * double(m_fy);
+            double d = (m_r2 - (m_fx2 + m_fy2));
+            if(d == 0)
+            {
+                if(m_fx) { if(m_fx < 0) ++m_fx; else --m_fx; }
+                if(m_fy) { if(m_fy < 0) ++m_fy; else --m_fy; }
+                m_fx2 = double(m_fx) * double(m_fx);
+                m_fy2 = double(m_fy) * double(m_fy);
+                d = (m_r2 - (m_fx2 + m_fy2));
             }
-
-            // Calculate the solution to be used in the case where x == focus_x
-            //------------------------------
-            m_trivial = sqrt(m_radius2 - (m_focus_x * m_focus_x));
+            m_mul = m_r / d;
         }
 
-        int m_radius;
-        int m_focus_x;
-        int m_focus_y;
-        double m_radius2;
-        double m_trivial;
+        int    m_r;
+        int    m_fx;
+        int    m_fy;
+        double m_r2;
+        double m_fx2;
+        double m_fy2;
+        double m_mul;
     };
-
 
 
     //==============================================================gradient_x
@@ -325,7 +278,6 @@ namespace agg
         static int calculate(int, int y, int) { return y; }
     };
 
-
     //========================================================gradient_diamond
     class gradient_diamond
     {
@@ -338,7 +290,6 @@ namespace agg
         }
     };
 
-
     //=============================================================gradient_xy
     class gradient_xy
     {
@@ -348,7 +299,6 @@ namespace agg
             return abs(x) * abs(y) / d; 
         }
     };
-
 
     //========================================================gradient_sqrt_xy
     class gradient_sqrt_xy
@@ -360,7 +310,6 @@ namespace agg
         }
     };
 
-
     //==========================================================gradient_conic
     class gradient_conic
     {
@@ -370,7 +319,6 @@ namespace agg
             return uround(fabs(atan2(double(y), double(x))) * double(d) / pi);
         }
     };
-
 
     //=================================================gradient_repeat_adaptor
     template<class GradientF> class gradient_repeat_adaptor
@@ -389,7 +337,6 @@ namespace agg
     private:
         const GradientF* m_gradient;
     };
-
 
     //================================================gradient_reflect_adaptor
     template<class GradientF> class gradient_reflect_adaptor

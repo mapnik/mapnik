@@ -23,20 +23,6 @@
 
 namespace agg
 {
-
-    //--------------------------------------------------------------------
-    image_filter_lut::~image_filter_lut()
-    {
-        delete [] m_weight_array;
-    }
-
-
-    //--------------------------------------------------------------------
-    image_filter_lut::image_filter_lut() :
-        m_weight_array(0),
-        m_max_size(0)
-    {}
-
     //--------------------------------------------------------------------
     void image_filter_lut::realloc_lut(double radius)
     {
@@ -44,11 +30,9 @@ namespace agg
         m_diameter = uceil(radius) * 2;
         m_start = -int(m_diameter / 2 - 1);
         unsigned size = m_diameter << image_subpixel_shift;
-        if(size > m_max_size)
+        if(size > m_weight_array.size())
         {
-            delete [] m_weight_array;
-            m_weight_array = new int16 [size];
-            m_max_size = size;
+            m_weight_array.resize(size);
         }
     }
 

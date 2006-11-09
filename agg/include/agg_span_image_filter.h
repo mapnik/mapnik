@@ -46,6 +46,7 @@ namespace agg
             m_dx_int(image_subpixel_scale / 2),
             m_dy_int(image_subpixel_scale / 2)
         {}
+        void attach(source_type& v) { m_src = &v; }
 
         //--------------------------------------------------------------------
                source_type& source()            { return *m_src; }
@@ -57,7 +58,6 @@ namespace agg
         double filter_dy_dbl()            const { return m_dy_dbl; }
 
         //--------------------------------------------------------------------
-        void set_source(source_type& v)          { m_src = &v; }
         void interpolator(interpolator_type& v)  { m_interpolator = &v; }
         void filter(const image_filter_lut& v)   { m_filter = &v; }
         void filter_offset(double dx, double dy)
@@ -136,33 +136,29 @@ namespace agg
 
             base_type::interpolator().transformer().scaling_abs(&scale_x, &scale_y);
 
-            m_rx     = image_subpixel_scale;
-            m_ry     = image_subpixel_scale;
-            m_rx_inv = image_subpixel_scale;
-            m_ry_inv = image_subpixel_scale;
-
-            scale_x *= m_blur_x;
-            scale_y *= m_blur_y;
-
             if(scale_x * scale_y > m_scale_limit)
             {
                 scale_x = scale_x * m_scale_limit / (scale_x * scale_y);
                 scale_y = scale_y * m_scale_limit / (scale_x * scale_y);
             }
 
-            if(scale_x > 1.0001)
-            {
-                if(scale_x > m_scale_limit) scale_x = m_scale_limit;
-                m_rx     = uround(    scale_x * double(image_subpixel_scale));
-                m_rx_inv = uround(1.0/scale_x * double(image_subpixel_scale));
-            }
+            if(scale_x < 1) scale_x = 1;
+            if(scale_y < 1) scale_y = 1;
 
-            if(scale_y > 1.0001)
-            {
-                if(scale_y > m_scale_limit) scale_y = m_scale_limit;
-                m_ry     = uround(    scale_y * double(image_subpixel_scale));
-                m_ry_inv = uround(1.0/scale_y * double(image_subpixel_scale));
-            }
+            if(scale_x > m_scale_limit) scale_x = m_scale_limit;
+            if(scale_y > m_scale_limit) scale_y = m_scale_limit;
+
+            scale_x *= m_blur_x;
+            scale_y *= m_blur_y;
+
+            if(scale_x < 1) scale_x = 1;
+            if(scale_y < 1) scale_y = 1;
+
+            m_rx     = uround(    scale_x * double(image_subpixel_scale));
+            m_rx_inv = uround(1.0/scale_x * double(image_subpixel_scale));
+
+            m_ry     = uround(    scale_y * double(image_subpixel_scale));
+            m_ry_inv = uround(1.0/scale_y * double(image_subpixel_scale));
         }
 
     protected:
@@ -219,6 +215,24 @@ namespace agg
                                 m_blur_y = uround(v * double(image_subpixel_scale)); }
 
     protected:
+        AGG_INLINE void adjust_scale(int* rx, int* ry)
+        {
+            if(*rx < image_subpixel_scale) *rx = image_subpixel_scale;
+            if(*ry < image_subpixel_scale) *ry = image_subpixel_scale;
+            if(*rx > image_subpixel_scale * m_scale_limit) 
+            {
+                *rx = image_subpixel_scale * m_scale_limit;
+            }
+            if(*ry > image_subpixel_scale * m_scale_limit) 
+            {
+                *ry = image_subpixel_scale * m_scale_limit;
+            }
+            *rx = (*rx * m_blur_x) >> image_subpixel_shift;
+            *ry = (*ry * m_blur_y) >> image_subpixel_shift;
+            if(*rx < image_subpixel_scale) *rx = image_subpixel_scale;
+            if(*ry < image_subpixel_scale) *ry = image_subpixel_scale;
+        }
+
         int m_scale_limit;
         int m_blur_x;
         int m_blur_y;

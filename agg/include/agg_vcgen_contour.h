@@ -43,22 +43,27 @@ namespace agg
 
         vcgen_contour();
 
-        void line_join(line_join_e lj) { m_line_join = lj; }
-        void inner_join(inner_join_e ij) { m_inner_join = ij; }
-        void width(double w) { m_width = w * 0.5; }
-        void miter_limit(double ml) { m_miter_limit = ml; }
-        void miter_limit_theta(double t);
-        void inner_miter_limit(double ml) { m_inner_miter_limit = ml; }
-        void approximation_scale(double as) { m_approx_scale = as; }
-        void auto_detect_orientation(bool v) { m_auto_detect = v; }
+        void line_cap(line_cap_e lc)     { m_stroker.line_cap(lc); }
+        void line_join(line_join_e lj)   { m_stroker.line_join(lj); }
+        void inner_join(inner_join_e ij) { m_stroker.inner_join(ij); }
 
-        line_join_e line_join() const { return m_line_join; }
-        inner_join_e inner_join() const { return m_inner_join; }
-        double width() const { return m_width * 2.0; }
-        double miter_limit() const { return m_miter_limit; }
-        double inner_miter_limit() const { return m_inner_miter_limit; }
-        double approximation_scale() const { return m_approx_scale; }
-        bool   auto_detect_orientation() const { return m_auto_detect; }
+        line_cap_e   line_cap()   const { return m_stroker.line_cap(); }
+        line_join_e  line_join()  const { return m_stroker.line_join(); }
+        inner_join_e inner_join() const { return m_stroker.inner_join(); }
+
+        void width(double w) { m_stroker.width(m_width = w); }
+        void miter_limit(double ml) { m_stroker.miter_limit(ml); }
+        void miter_limit_theta(double t) { m_stroker.miter_limit_theta(t); }
+        void inner_miter_limit(double ml) { m_stroker.inner_miter_limit(ml); }
+        void approximation_scale(double as) { m_stroker.approximation_scale(as); }
+
+        double width() const { return m_width; }
+        double miter_limit() const { return m_stroker.miter_limit(); }
+        double inner_miter_limit() const { return m_stroker.inner_miter_limit(); }
+        double approximation_scale() const { return m_stroker.approximation_scale(); }
+
+        void auto_detect_orientation(bool v) { m_auto_detect = v; }
+        bool auto_detect_orientation() const { return m_auto_detect; }
 
         // Generator interface
         void remove_all();
@@ -72,22 +77,16 @@ namespace agg
         vcgen_contour(const vcgen_contour&);
         const vcgen_contour& operator = (const vcgen_contour&);
 
-        vertex_storage m_src_vertices;
-        coord_storage  m_out_vertices;
-        double         m_width;
-        line_join_e    m_line_join;
-        inner_join_e   m_inner_join;
-        double         m_approx_scale;
-        double         m_abs_width;
-        double         m_signed_width;
-        double         m_miter_limit;
-        double         m_inner_miter_limit;
-        status_e       m_status;
-        unsigned       m_src_vertex;
-        unsigned       m_out_vertex;
-        unsigned       m_closed;
-        unsigned       m_orientation;
-        bool           m_auto_detect;
+        math_stroke<coord_storage> m_stroker;
+        double                     m_width;
+        vertex_storage             m_src_vertices;
+        coord_storage              m_out_vertices;
+        status_e                   m_status;
+        unsigned                   m_src_vertex;
+        unsigned                   m_out_vertex;
+        unsigned                   m_closed;
+        unsigned                   m_orientation;
+        bool                       m_auto_detect;
     };
 
 }

@@ -31,8 +31,7 @@ namespace agg
     public:
         conv_transform(VertexSource& source, const Transformer& tr) :
             m_source(&source), m_trans(&tr) {}
-
-        void set_source(VertexSource& source) { m_source = &source; }
+        void attach(VertexSource& source) { m_source = &source; }
 
         void rewind(unsigned path_id) 
         { 

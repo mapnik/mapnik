@@ -152,7 +152,6 @@ namespace agg
 
         double               m_approximation_scale;
         double               m_distance_tolerance_square;
-        double               m_distance_tolerance_manhattan;
         double               m_angle_tolerance;
         unsigned             m_count;
         pod_bvector<point_d> m_points;
@@ -464,7 +463,6 @@ namespace agg
 
         double               m_approximation_scale;
         double               m_distance_tolerance_square;
-        double               m_distance_tolerance_manhattan;
         double               m_angle_tolerance;
         double               m_cusp_limit;
         unsigned             m_count;

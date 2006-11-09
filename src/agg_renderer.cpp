@@ -146,7 +146,7 @@ namespace mapnik
             unsigned width = pixmap_.width();
             unsigned height = pixmap_.height();
             path_type path(t_,*geom,prj_trans);
-            agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(),width,height,width * 4);
+            agg::row_accessor<agg::int8u> buf(pixmap_.raw_data(),width,height,width * 4);
             agg::pixfmt_rgba32 pixf(buf);
             ren_base renb(pixf);	    
 		
@@ -179,13 +179,13 @@ namespace mapnik
         if (geom && geom->num_points() > 1)
         {
             path_type path(t_,*geom,prj_trans);
-            agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(),
+            agg::row_accessor<agg::int8u> buf(pixmap_.raw_data(),
                                                pixmap_.width(),
                                                pixmap_.height(),
                                                pixmap_.width()*4);
             agg::pixfmt_rgba32 pixf(buf);
             ren_base renb(pixf);	    
-		
+            
             mapnik::stroke const&  stroke_ = sym.get_stroke();
 		
             Color const& col = stroke_.get_color();
@@ -241,7 +241,7 @@ namespace mapnik
                 prof.width(stroke_.get_width());
                 renderer_oaa ren_oaa(renb, prof);
                 rasterizer_outline_aa ras_oaa(ren_oaa);
-		    
+                
                 ren_oaa.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
                 ren_oaa.clip_box(0,0,pixmap_.width(),pixmap_.height());
                 ras_oaa.add_path(path);		
@@ -389,7 +389,7 @@ namespace mapnik
             unsigned height = pixmap_.height();
             ImageData32 const& pat = sym.get_pattern();
             path_type path(t_,*geom,prj_trans);
-            agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(), width, height,width*4);
+            agg::row_accessor<agg::int8u> buf(pixmap_.raw_data(), width, height,width*4);
             agg::pixfmt_rgba32 pixf(buf);
             renderer_base ren_base(pixf);  
             agg::pattern_filter_bilinear_rgba8 filter; 
@@ -429,13 +429,13 @@ namespace mapnik
             unsigned height = pixmap_.height();
             path_type path(t_,*geom,prj_trans);
 	    
-            agg::row_ptr_cache<agg::int8u> buf(pixmap_.raw_data(),width,height,width * 4);
+            agg::row_accessor<agg::int8u> buf(pixmap_.raw_data(),width,height,width * 4);
             agg::pixfmt_rgba32 pixf(buf);
             ren_base renb(pixf);
 	
             unsigned w=pattern.width();
             unsigned h=pattern.height();
-            agg::row_ptr_cache<agg::int8u> pattern_rbuf((agg::int8u*)pattern.getBytes(),w,h,w*4);  
+            agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)pattern.getBytes(),w,h,w*4);  
 	    
             double x0,y0;
             path.vertex(&x0,&y0);
@@ -443,12 +443,13 @@ namespace mapnik
 	
             unsigned offset_x = unsigned(width - x0);
             unsigned offset_y = unsigned(height - y0);
-	
+            
             agg::span_allocator<agg::rgba8> sa;
-            img_source_type img_src(pattern_rbuf);
+            agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);
+            img_source_type img_src(pixf_pattern);
             span_gen_type sg(img_src, offset_x, offset_y);
             renderer_type rp(renb,sa, sg);
-	
+            
             agg::rasterizer_scanline_aa<> ras;
             agg::scanline_u8 sl;
             ras.clip_box(0,0,width,height);

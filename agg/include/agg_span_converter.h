@@ -29,6 +29,9 @@ namespace agg
         span_converter(SpanGenerator& span_gen, SpanConverter& span_cnv) : 
             m_span_gen(&span_gen), m_span_cnv(&span_cnv) {}
 
+        void attach_generator(SpanGenerator& span_gen) { m_span_gen = &span_gen; }
+        void attach_converter(SpanConverter& span_cnv) { m_span_cnv = &span_cnv; }
+
         //--------------------------------------------------------------------
         void prepare() 
         { 

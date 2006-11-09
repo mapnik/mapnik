@@ -51,24 +51,24 @@ namespace agg
 
         vcgen_stroke();
 
-        void line_cap(line_cap_e lc)     { m_line_cap = lc; }
-        void line_join(line_join_e lj)   { m_line_join = lj; }
-        void inner_join(inner_join_e ij) { m_inner_join = ij; }
+        void line_cap(line_cap_e lc)     { m_stroker.line_cap(lc); }
+        void line_join(line_join_e lj)   { m_stroker.line_join(lj); }
+        void inner_join(inner_join_e ij) { m_stroker.inner_join(ij); }
 
-        line_cap_e   line_cap()   const { return m_line_cap; }
-        line_join_e  line_join()  const { return m_line_join; }
-        inner_join_e inner_join() const { return m_inner_join; }
+        line_cap_e   line_cap()   const { return m_stroker.line_cap(); }
+        line_join_e  line_join()  const { return m_stroker.line_join(); }
+        inner_join_e inner_join() const { return m_stroker.inner_join(); }
 
-        void width(double w) { m_width = w * 0.5; }
-        void miter_limit(double ml) { m_miter_limit = ml; }
-        void miter_limit_theta(double t);
-        void inner_miter_limit(double ml) { m_inner_miter_limit = ml; }
-        void approximation_scale(double as) { m_approx_scale = as; }
+        void width(double w) { m_stroker.width(w); }
+        void miter_limit(double ml) { m_stroker.miter_limit(ml); }
+        void miter_limit_theta(double t) { m_stroker.miter_limit_theta(t); }
+        void inner_miter_limit(double ml) { m_stroker.inner_miter_limit(ml); }
+        void approximation_scale(double as) { m_stroker.approximation_scale(as); }
 
-        double width() const { return m_width * 2.0; }
-        double miter_limit() const { return m_miter_limit; }
-        double inner_miter_limit() const { return m_inner_miter_limit; }
-        double approximation_scale() const { return m_approx_scale; }
+        double width() const { return m_stroker.width(); }
+        double miter_limit() const { return m_stroker.miter_limit(); }
+        double inner_miter_limit() const { return m_stroker.inner_miter_limit(); }
+        double approximation_scale() const { return m_stroker.approximation_scale(); }
 
         void shorten(double s) { m_shorten = s; }
         double shorten() const { return m_shorten; }
@@ -85,21 +85,15 @@ namespace agg
         vcgen_stroke(const vcgen_stroke&);
         const vcgen_stroke& operator = (const vcgen_stroke&);
 
-        vertex_storage m_src_vertices;
-        coord_storage  m_out_vertices;
-        double         m_width;
-        double         m_miter_limit;
-        double         m_inner_miter_limit;
-        double         m_approx_scale;
-        double         m_shorten;
-        line_cap_e     m_line_cap;
-        line_join_e    m_line_join;
-        inner_join_e   m_inner_join;
-        unsigned       m_closed;
-        status_e       m_status;
-        status_e       m_prev_status;
-        unsigned       m_src_vertex;
-        unsigned       m_out_vertex;
+        math_stroke<coord_storage> m_stroker;
+        vertex_storage             m_src_vertices;
+        coord_storage              m_out_vertices;
+        double                     m_shorten;
+        unsigned                   m_closed;
+        status_e                   m_status;
+        status_e                   m_prev_status;
+        unsigned                   m_src_vertex;
+        unsigned                   m_out_vertex;
     };
 
 

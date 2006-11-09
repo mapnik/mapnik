@@ -125,18 +125,9 @@ namespace agg
         typedef const span* const_iterator;
 
         //--------------------------------------------------------------------
-        ~scanline_u8()
-        {
-            delete [] m_spans;
-            delete [] m_covers;
-        }
-
         scanline_u8() :
             m_min_x(0),
-            m_max_len(0),
             m_last_x(0x7FFFFFF0),
-            m_covers(0),
-            m_spans(0),
             m_cur_span(0)
         {}
 
@@ -144,17 +135,14 @@ namespace agg
         void reset(int min_x, int max_x)
         {
             unsigned max_len = max_x - min_x + 2;
-            if(max_len > m_max_len)
+            if(max_len > m_spans.size())
             {
-                delete [] m_spans;
-                delete [] m_covers;
-                m_covers  = new cover_type [max_len];
-                m_spans   = new span       [max_len];
-                m_max_len = max_len;
+                m_spans.resize(max_len);
+                m_covers.resize(max_len);
             }
-            m_last_x        = 0x7FFFFFF0;
-            m_min_x         = min_x;
-            m_cur_span      = m_spans;
+            m_last_x   = 0x7FFFFFF0;
+            m_min_x    = min_x;
+            m_cur_span = &m_spans[0];
         }
 
         //--------------------------------------------------------------------
@@ -171,7 +159,7 @@ namespace agg
                 m_cur_span++;
                 m_cur_span->x      = (coord_type)(x + m_min_x);
                 m_cur_span->len    = 1;
-                m_cur_span->covers = m_covers + x;
+                m_cur_span->covers = &m_covers[x];
             }
             m_last_x = x;
         }
@@ -180,7 +168,7 @@ namespace agg
         void add_cells(int x, unsigned len, const cover_type* covers)
         {
             x -= m_min_x;
-            memcpy(m_covers + x, covers, len * sizeof(cover_type));
+            memcpy(&m_covers[x], covers, len * sizeof(cover_type));
             if(x == m_last_x+1)
             {
                 m_cur_span->len += (coord_type)len;
@@ -190,7 +178,7 @@ namespace agg
                 m_cur_span++;
                 m_cur_span->x      = (coord_type)(x + m_min_x);
                 m_cur_span->len    = (coord_type)len;
-                m_cur_span->covers = m_covers + x;
+                m_cur_span->covers = &m_covers[x];
             }
             m_last_x = x + len - 1;
         }
@@ -199,7 +187,7 @@ namespace agg
         void add_span(int x, unsigned len, unsigned cover)
         {
             x -= m_min_x;
-            memset(m_covers + x, cover, len);
+            memset(&m_covers[x], cover, len);
             if(x == m_last_x+1)
             {
                 m_cur_span->len += (coord_type)len;
@@ -209,7 +197,7 @@ namespace agg
                 m_cur_span++;
                 m_cur_span->x      = (coord_type)(x + m_min_x);
                 m_cur_span->len    = (coord_type)len;
-                m_cur_span->covers = m_covers + x;
+                m_cur_span->covers = &m_covers[x];
             }
             m_last_x = x + len - 1;
         }
@@ -224,27 +212,26 @@ namespace agg
         void reset_spans()
         {
             m_last_x    = 0x7FFFFFF0;
-            m_cur_span  = m_spans;
+            m_cur_span  = &m_spans[0];
         }
 
         //--------------------------------------------------------------------
         int      y()           const { return m_y; }
-        unsigned num_spans()   const { return unsigned(m_cur_span - m_spans); }
-        const_iterator begin() const { return m_spans + 1; }
-        iterator       begin()       { return m_spans + 1; }
+        unsigned num_spans()   const { return unsigned(m_cur_span - &m_spans[0]); }
+        const_iterator begin() const { return &m_spans[1]; }
+        iterator       begin()       { return &m_spans[1]; }
 
     private:
         scanline_u8(const self_type&);
         const self_type& operator = (const self_type&);
 
     private:
-        int           m_min_x;
-        unsigned      m_max_len;
-        int           m_last_x;
-        int           m_y;
-        cover_type*   m_covers;
-        span*         m_spans;
-        span*         m_cur_span;
+        int                   m_min_x;
+        int                   m_last_x;
+        int                   m_y;
+        pod_array<cover_type> m_covers;
+        pod_array<span>       m_spans;
+        span*                 m_cur_span;
     };
 
 
@@ -357,27 +344,19 @@ namespace agg
 
 
         //--------------------------------------------------------------------
-        ~scanline32_u8()
-        {
-            delete [] m_covers;
-        }
-
         scanline32_u8() :
             m_min_x(0),
-            m_max_len(0),
             m_last_x(0x7FFFFFF0),
-            m_covers(0)
+            m_covers()
         {}
 
         //--------------------------------------------------------------------
         void reset(int min_x, int max_x)
         {
             unsigned max_len = max_x - min_x + 2;
-            if(max_len > m_max_len)
+            if(max_len > m_covers.size())
             {
-                delete [] m_covers;
-                m_covers  = new cover_type [max_len];
-                m_max_len = max_len;
+                m_covers.resize(max_len);
             }
             m_last_x = 0x7FFFFFF0;
             m_min_x  = min_x;
@@ -395,7 +374,7 @@ namespace agg
             }
             else
             {
-                m_spans.add(span(coord_type(x + m_min_x), 1, m_covers + x));
+                m_spans.add(span(coord_type(x + m_min_x), 1, &m_covers[x]));
             }
             m_last_x = x;
         }
@@ -404,14 +383,16 @@ namespace agg
         void add_cells(int x, unsigned len, const cover_type* covers)
         {
             x -= m_min_x;
-            memcpy(m_covers + x, covers, len * sizeof(cover_type));
+            memcpy(&m_covers[x], covers, len * sizeof(cover_type));
             if(x == m_last_x+1)
             {
                 m_spans.last().len += coord_type(len);
             }
             else
             {
-                m_spans.add(span(coord_type(x + m_min_x), coord_type(len), m_covers + x));
+                m_spans.add(span(coord_type(x + m_min_x), 
+                                 coord_type(len), 
+                                 &m_covers[x]));
             }
             m_last_x = x + len - 1;
         }
@@ -420,14 +401,16 @@ namespace agg
         void add_span(int x, unsigned len, unsigned cover)
         {
             x -= m_min_x;
-            memset(m_covers + x, cover, len);
+            memset(&m_covers[x], cover, len);
             if(x == m_last_x+1)
             {
                 m_spans.last().len += coord_type(len);
             }
             else
             {
-                m_spans.add(span(coord_type(x + m_min_x), coord_type(len), m_covers + x));
+                m_spans.add(span(coord_type(x + m_min_x), 
+                                 coord_type(len), 
+                                 &m_covers[x]));
             }
             m_last_x = x + len - 1;
         }
@@ -456,12 +439,11 @@ namespace agg
         const self_type& operator = (const self_type&);
 
     private:
-        int             m_min_x;
-        unsigned        m_max_len;
-        int             m_last_x;
-        int             m_y;
-        cover_type*     m_covers;
-        span_array_type m_spans;
+        int                   m_min_x;
+        int                   m_last_x;
+        int                   m_y;
+        pod_array<cover_type> m_covers;
+        span_array_type       m_spans;
     };
 
 

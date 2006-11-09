@@ -30,7 +30,7 @@ namespace agg
     // Modified agg::pod_bvector. The data is interpreted as a sequence 
     // of vertices. It means that the type T must expose:
     //
-    // bool operator() (const T& val)
+    // bool T::operator() (const T& val)
     // 
     // that is called every time new vertex is being added. The main purpose
     // of this operator is the possibility to calculate some values during 

@@ -18,6 +18,7 @@
 
 
 #include <string.h>
+#include "agg_array.h"
 #include "agg_rendering_buffer.h"
 
 
@@ -38,37 +39,39 @@ namespace agg
 
         void realloc_span(unsigned len)
         {
-            if(len > m_max_len)
+            if(len > m_span.size())
             {
-                delete [] m_span;
-                m_span = new cover_type[m_max_len = len + span_extra_tail];
+                m_span.resize(len + span_extra_tail);
             }
         }
 
         void init_span(unsigned len)
         {
             realloc_span(len);
-
-            // ATTN! May work incorrectly if cover_type is more that one byte
-            memset(m_span, amask_type::cover_full, len * sizeof(cover_type));
+            memset(&m_span[0], amask_type::cover_full, len * sizeof(cover_type));
         }
 
         void init_span(unsigned len, const cover_type* covers)
         {
             realloc_span(len);
-            memcpy(m_span, covers, len * sizeof(cover_type));
+            memcpy(&m_span[0], covers, len * sizeof(cover_type));
         }
 
 
     public:
-        ~pixfmt_amask_adaptor() { delete [] m_span; }
-
         pixfmt_amask_adaptor(pixfmt_type& pixf, const amask_type& mask) :
-            m_pixf(&pixf), m_mask(&mask), m_span(0), m_max_len(0)
+            m_pixf(&pixf), m_mask(&mask), m_span()
         {}
 
         void attach_pixfmt(pixfmt_type& pixf)          { m_pixf = &pixf; }
         void attach_alpha_mask(const amask_type& mask) { m_mask = &mask; }
+
+        //--------------------------------------------------------------------
+        template<class PixFmt2>
+        bool attach_pixfmt(PixFmt2& pixf, int x1, int y1, int x2, int y2)
+        {
+            return m_pixf->attach(pixf, x1, y1, x2, y2);
+        }
 
         //--------------------------------------------------------------------
         unsigned width()  const { return m_pixf->width();  }
@@ -98,8 +101,8 @@ namespace agg
                         const color_type& c)
         {
             realloc_span(len);
-            m_mask->fill_hspan(x, y, m_span, len);
-            m_pixf->blend_solid_hspan(x, y, len, c, m_span);
+            m_mask->fill_hspan(x, y, &m_span[0], len);
+            m_pixf->blend_solid_hspan(x, y, len, c, &m_span[0]);
         }
 
         //--------------------------------------------------------------------
@@ -109,8 +112,8 @@ namespace agg
                          cover_type cover)
         {
             init_span(len);
-            m_mask->combine_hspan(x, y, m_span, len);
-            m_pixf->blend_solid_hspan(x, y, len, c, m_span);
+            m_mask->combine_hspan(x, y, &m_span[0], len);
+            m_pixf->blend_solid_hspan(x, y, len, c, &m_span[0]);
         }
 
         //--------------------------------------------------------------------
@@ -119,8 +122,8 @@ namespace agg
                         const color_type& c)
         {
             realloc_span(len);
-            m_mask->fill_vspan(x, y, m_span, len);
-            m_pixf->blend_solid_vspan(x, y, len, c, m_span);
+            m_mask->fill_vspan(x, y, &m_span[0], len);
+            m_pixf->blend_solid_vspan(x, y, len, c, &m_span[0]);
         }
 
         //--------------------------------------------------------------------
@@ -130,8 +133,8 @@ namespace agg
                          cover_type cover)
         {
             init_span(len);
-            m_mask->combine_vspan(x, y, m_span, len);
-            m_pixf->blend_solid_vspan(x, y, len, c, m_span);
+            m_mask->combine_vspan(x, y, &m_span[0], len);
+            m_pixf->blend_solid_vspan(x, y, len, c, &m_span[0]);
         }
 
         //--------------------------------------------------------------------
@@ -151,8 +154,8 @@ namespace agg
                                const cover_type* covers)
         {
             init_span(len, covers);
-            m_mask->combine_hspan(x, y, m_span, len);
-            m_pixf->blend_solid_hspan(x, y, len, c, m_span);
+            m_mask->combine_hspan(x, y, &m_span[0], len);
+            m_pixf->blend_solid_hspan(x, y, len, c, &m_span[0]);
         }
 
 
@@ -163,8 +166,8 @@ namespace agg
                                const cover_type* covers)
         {
             init_span(len, covers);
-            m_mask->combine_vspan(x, y, m_span, len);
-            m_pixf->blend_solid_vspan(x, y, len, c, m_span);
+            m_mask->combine_vspan(x, y, &m_span[0], len);
+            m_pixf->blend_solid_vspan(x, y, len, c, &m_span[0]);
         }
 
 
@@ -172,10 +175,17 @@ namespace agg
         void copy_color_hspan(int x, int y, unsigned len, const color_type* colors)
         {
             realloc_span(len);
-            m_mask->fill_hspan(x, y, m_span, len);
-            m_pixf->blend_color_hspan(x, y, len, colors, m_span, cover_full);
+            m_mask->fill_hspan(x, y, &m_span[0], len);
+            m_pixf->blend_color_hspan(x, y, len, colors, &m_span[0], cover_full);
         }
 
+        //--------------------------------------------------------------------
+        void copy_color_vspan(int x, int y, unsigned len, const color_type* colors)
+        {
+            realloc_span(len);
+            m_mask->fill_vspan(x, y, &m_span[0], len);
+            m_pixf->blend_color_vspan(x, y, len, colors, &m_span[0], cover_full);
+        }
 
         //--------------------------------------------------------------------
         void blend_color_hspan(int x, int y,
@@ -187,14 +197,14 @@ namespace agg
             if(covers) 
             {
                 init_span(len, covers);
-                m_mask->combine_hspan(x, y, m_span, len);
+                m_mask->combine_hspan(x, y, &m_span[0], len);
             }
             else
             {
                 realloc_span(len);
-                m_mask->fill_hspan(x, y, m_span, len);
+                m_mask->fill_hspan(x, y, &m_span[0], len);
             }
-            m_pixf->blend_color_hspan(x, y, len, colors, m_span, cover);
+            m_pixf->blend_color_hspan(x, y, len, colors, &m_span[0], cover);
         }
 
 
@@ -208,22 +218,20 @@ namespace agg
             if(covers) 
             {
                 init_span(len, covers);
-                m_mask->combine_vspan(x, y, m_span, len);
+                m_mask->combine_vspan(x, y, &m_span[0], len);
             }
             else
             {
                 realloc_span(len);
-                m_mask->fill_vspan(x, y, m_span, len);
+                m_mask->fill_vspan(x, y, &m_span[0], len);
             }
-            m_pixf->blend_color_vspan(x, y, len, colors, m_span, cover);
+            m_pixf->blend_color_vspan(x, y, len, colors, &m_span[0], cover);
         }
 
     private:
-        pixfmt_type*      m_pixf;
-        const amask_type* m_mask;
-
-        cover_type*       m_span;
-        unsigned          m_max_len;
+        pixfmt_type*          m_pixf;
+        const amask_type*     m_mask;
+        pod_array<cover_type> m_span;
     };
 
 }

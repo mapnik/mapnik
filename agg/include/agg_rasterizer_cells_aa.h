@@ -103,21 +103,21 @@ namespace agg
         void allocate_block();
         
     private:
-        unsigned    m_num_blocks;
-        unsigned    m_max_blocks;
-        unsigned    m_curr_block;
-        unsigned    m_num_cells;
-        cell_type** m_cells;
-        cell_type*  m_curr_cell_ptr;
-        pod_vector<cell_type*> m_sorted_cells;
-        pod_vector<sorted_y>   m_sorted_y;
-        cell_type   m_curr_cell;
-        cell_type   m_style_cell;
-        int         m_min_x;
-        int         m_min_y;
-        int         m_max_x;
-        int         m_max_y;
-        bool        m_sorted;
+        unsigned                m_num_blocks;
+        unsigned                m_max_blocks;
+        unsigned                m_curr_block;
+        unsigned                m_num_cells;
+        cell_type**             m_cells;
+        cell_type*              m_curr_cell_ptr;
+        pod_vector<cell_type*>  m_sorted_cells;
+        pod_vector<sorted_y>    m_sorted_y;
+        cell_type               m_curr_cell;
+        cell_type               m_style_cell;
+        int                     m_min_x;
+        int                     m_min_y;
+        int                     m_max_x;
+        int                     m_max_y;
+        bool                    m_sorted;
     };
 
 
@@ -132,10 +132,10 @@ namespace agg
             cell_type** ptr = m_cells + m_num_blocks - 1;
             while(m_num_blocks--)
             {
-                delete [] *ptr;
+                pod_allocator<cell_type>::deallocate(*ptr, cell_block_size);
                 ptr--;
             }
-            delete [] m_cells;
+            pod_allocator<cell_type*>::deallocate(m_cells, m_max_blocks);
         }
     }
 
@@ -188,10 +188,6 @@ namespace agg
             }
             *m_curr_cell_ptr++ = m_curr_cell;
             ++m_num_cells;
-            //if(m_curr_cell.x < m_min_x) m_min_x = m_curr_cell.x;
-            //if(m_curr_cell.x > m_max_x) m_max_x = m_curr_cell.x;
-            //if(m_curr_cell.y < m_min_y) m_min_y = m_curr_cell.y;
-            //if(m_curr_cell.y > m_max_y) m_max_y = m_curr_cell.y;
         }
     }
 
@@ -474,16 +470,22 @@ namespace agg
         {
             if(m_num_blocks >= m_max_blocks)
             {
-                cell_type** new_cells = new cell_type* [m_max_blocks + cell_block_pool];
+                cell_type** new_cells = 
+                    pod_allocator<cell_type*>::allocate(m_max_blocks + 
+                                                        cell_block_pool);
+
                 if(m_cells)
                 {
                     memcpy(new_cells, m_cells, m_max_blocks * sizeof(cell_type*));
-                    delete [] m_cells;
+                    pod_allocator<cell_type*>::deallocate(m_cells, m_max_blocks);
                 }
                 m_cells = new_cells;
                 m_max_blocks += cell_block_pool;
             }
-            m_cells[m_num_blocks++] = new cell_type [unsigned(cell_block_size)];
+
+            m_cells[m_num_blocks++] = 
+                pod_allocator<cell_type>::allocate(cell_block_size);
+
         }
         m_curr_cell_ptr = m_cells[m_curr_block++];
     }
@@ -642,7 +644,6 @@ namespace agg
 //        cell = cell; // Breakpoint here
 //    }
 //}
-
         // Allocate the array of cell pointers
         m_sorted_cells.allocate(m_num_cells, 16);
 
@@ -720,6 +721,33 @@ namespace agg
         }
         m_sorted = true;
     }
+
+
+
+    //------------------------------------------------------scanline_hit_test
+    class scanline_hit_test
+    {
+    public:
+        scanline_hit_test(int x) : m_x(x), m_hit(false) {}
+
+        void reset_spans() {}
+        void finalize(int) {}
+        void add_cell(int x, int)
+        {
+            if(m_x == x) m_hit = true;
+        }
+        void add_span(int x, int len, int)
+        {
+            if(m_x >= x && m_x < x+len) m_hit = true;
+        }
+        unsigned num_spans() const { return 1; }
+        bool hit() const { return m_hit; }
+
+    private:
+        int  m_x;
+        bool m_hit;
+    };
+
 
 }
 

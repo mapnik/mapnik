@@ -20,6 +20,7 @@
 #ifndef AGG_IMAGE_FILTERS_INCLUDED
 #define AGG_IMAGE_FILTERS_INCLUDED
 
+#include "agg_array.h"
 #include "agg_math.h"
 
 namespace agg
@@ -46,9 +47,6 @@ namespace agg
     class image_filter_lut
     {
     public:
-        ~image_filter_lut();
-        image_filter_lut();
-
         template<class FilterF> void calculate(const FilterF& filter,
                                                bool normalization=true)
         {
@@ -71,18 +69,18 @@ namespace agg
             }
         }
 
+        image_filter_lut() : m_radius(0), m_diameter(0), m_start(0) {}
+
         template<class FilterF> image_filter_lut(const FilterF& filter, 
-                                                 bool normalization=true) : 
-            m_weight_array(0),
-            m_max_size(0)
+                                                 bool normalization=true)
         {
             calculate(filter, normalization);
         }
 
-        double       radius()       const { return m_radius;       }
-        unsigned     diameter()     const { return m_diameter;     }
-        int          start()        const { return m_start;        }
-        const int16* weight_array() const { return m_weight_array; }
+        double       radius()       const { return m_radius;   }
+        unsigned     diameter()     const { return m_diameter; }
+        int          start()        const { return m_start;    }
+        const int16* weight_array() const { return &m_weight_array[0]; }
         void         normalize();
 
     private:
@@ -90,11 +88,10 @@ namespace agg
         image_filter_lut(const image_filter_lut&);
         const image_filter_lut& operator = (const image_filter_lut&);
 
-        double   m_radius;
-        unsigned m_diameter;
-        int      m_start;
-        int16*   m_weight_array;
-        unsigned m_max_size;
+        double           m_radius;
+        unsigned         m_diameter;
+        int              m_start;
+        pod_array<int16> m_weight_array;
     };
 
 

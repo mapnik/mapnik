@@ -24,9 +24,8 @@ namespace agg
     template<class VertexSource> class conv_unclose_polygon
     {
     public:
-        conv_unclose_polygon(VertexSource& vs) : m_source(&vs) {}
-
-        void set_source(VertexSource& source) { m_source = &source; }
+        explicit conv_unclose_polygon(VertexSource& vs) : m_source(&vs) {}
+        void attach(VertexSource& source) { m_source = &source; }
 
         void rewind(unsigned path_id)
         {

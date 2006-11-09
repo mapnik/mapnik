@@ -44,12 +44,11 @@ namespace agg
     {
         m_subpixel_width = uround(w * subpixel_scale);
         unsigned size = m_subpixel_width + subpixel_scale * 6;
-        if(size > m_size)
+        if(size > m_profile.size())
         {
-            delete [] m_profile;
-            m_profile = new value_type[m_size = size];
+            m_profile.resize(size);
         }
-        return m_profile;
+        return &m_profile[0];
     }
 
 

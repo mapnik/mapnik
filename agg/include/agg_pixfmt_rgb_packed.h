@@ -828,29 +828,47 @@ namespace agg
 
     public:
         //--------------------------------------------------------------------
-        pixfmt_alpha_blend_rgb_packed(rbuf_type& rb) : m_rbuf(&rb) {}
+        explicit pixfmt_alpha_blend_rgb_packed(rbuf_type& rb) : m_rbuf(&rb) {}
+        void attach(rbuf_type& rb) { m_rbuf = &rb; }
+
+        //--------------------------------------------------------------------
+        template<class PixFmt>
+        bool attach(PixFmt& pixf, int x1, int y1, int x2, int y2)
+        {
+            rect_i r(x1, y1, x2, y2);
+            if(r.clip(rect_i(0, 0, pixf.width()-1, pixf.height()-1)))
+            {
+                int stride = pixf.stride();
+                m_rbuf->attach(pixf.pix_ptr(r.x1, stride < 0 ? r.y2 : r.y1), 
+                               (r.x2 - r.x1) + 1,
+                               (r.y2 - r.y1) + 1,
+                               stride);
+                return true;
+            }
+            return false;
+        }
+
         Blender& blender() { return m_blender; }
 
         //--------------------------------------------------------------------
         AGG_INLINE unsigned width()  const { return m_rbuf->width();  }
         AGG_INLINE unsigned height() const { return m_rbuf->height(); }
+        AGG_INLINE int      stride() const { return m_rbuf->stride(); }
 
         //--------------------------------------------------------------------
-        const int8u* row_ptr(int y) const
-        {
-            return m_rbuf->row_ptr(y);
-        }
+        AGG_INLINE       int8u* row_ptr(int y)       { return m_rbuf->row_ptr(y); }
+        AGG_INLINE const int8u* row_ptr(int y) const { return m_rbuf->row_ptr(y); }
+        AGG_INLINE row_data     row(int y)     const { return m_rbuf->row(y); }
 
         //--------------------------------------------------------------------
-        const int8u* pix_ptr(int x, int y) const
+        AGG_INLINE int8u* pix_ptr(int x, int y)
         {
             return m_rbuf->row_ptr(y) + x * pix_width;
         }
 
-        //--------------------------------------------------------------------
-        row_data row(int x, int y) const
+        AGG_INLINE const int8u* pix_ptr(int x, int y) const
         {
-            return m_rbuf->row(y);
+            return m_rbuf->row_ptr(y) + x * pix_width;
         }
 
         //--------------------------------------------------------------------
@@ -1013,6 +1031,20 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
+        void copy_color_vspan(int x, int y,
+                              unsigned len, 
+                              const color_type* colors)
+        {
+            do 
+            {
+                pixel_type* p = (pixel_type*)m_rbuf->row_ptr(x, y++, 1) + x;
+                *p = m_blender.make_pix(colors->r, colors->g, colors->b);
+                ++colors;
+            }
+            while(--len);
+        }
+
+        //--------------------------------------------------------------------
         void blend_color_hspan(int x, int y,
                                unsigned len, 
                                const color_type* colors,
@@ -1101,6 +1133,65 @@ namespace agg
                 while(--len);
             }
         }
+
+        //--------------------------------------------------------------------
+        template<class SrcPixelFormatRenderer>
+        void blend_from_color(const SrcPixelFormatRenderer& from, 
+                              const color_type& color,
+                              int xdst, int ydst,
+                              int xsrc, int ysrc,
+                              unsigned len,
+                              int8u cover)
+        {
+            typedef typename SrcPixelFormatRenderer::value_type src_value_type;
+            const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
+            if(psrc)
+            {
+                pixel_type* pdst = 
+                    (pixel_type*)m_rbuf->row_ptr(xdst, ydst, len) + xdst;
+
+                do 
+                {
+                    m_blender.blend_pix(pdst, 
+                                        color.r, color.g, color.b, color.a,
+                                        cover);
+                    ++psrc;
+                    ++pdst;
+                }
+                while(--len);
+            }
+        }
+
+        //--------------------------------------------------------------------
+        template<class SrcPixelFormatRenderer>
+        void blend_from_lut(const SrcPixelFormatRenderer& from, 
+                            const color_type* color_lut,
+                            int xdst, int ydst,
+                            int xsrc, int ysrc,
+                            unsigned len,
+                            int8u cover)
+        {
+            typedef typename SrcPixelFormatRenderer::value_type src_value_type;
+            const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
+            if(psrc)
+            {
+                pixel_type* pdst = 
+                    (pixel_type*)m_rbuf->row_ptr(xdst, ydst, len) + xdst;
+
+                do 
+                {
+                    const color_type& color = color_lut[*psrc];
+                    m_blender.blend_pix(pdst, 
+                                        color.r, color.g, color.b, color.a,
+                                        cover);
+                    ++psrc;
+                    ++pdst;
+                }
+                while(--len);
+            }
+        }
+
+
 
     private:
         rbuf_type* m_rbuf;

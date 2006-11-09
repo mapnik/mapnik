@@ -20,8 +20,7 @@
 #ifndef AGG_RENDERING_BUFFER_DYNAROW_INCLUDED
 #define AGG_RENDERING_BUFFER_DYNAROW_INCLUDED
 
-#include <string.h>
-#include "agg_basics.h"
+#include "agg_array.h"
 
 namespace agg
 {
@@ -36,12 +35,7 @@ namespace agg
     class rendering_buffer_dynarow
     {
     public:
-        //----------------------------------------------------------------------
-        struct row_data
-        {
-            int x1, x2;
-            const int8u* ptr;
-        };
+        typedef row_info<int8u> row_data;
 
         //-------------------------------------------------------------------
         ~rendering_buffer_dynarow()
@@ -51,9 +45,10 @@ namespace agg
 
         //-------------------------------------------------------------------
         rendering_buffer_dynarow() :
-            m_rows(0),
+            m_rows(),
             m_width(0),
-            m_height(0)
+            m_height(0),
+            m_byte_width(0)
         {
         }
 
@@ -61,12 +56,12 @@ namespace agg
         //--------------------------------------------------------------------
         rendering_buffer_dynarow(unsigned width, unsigned height, 
                                  unsigned byte_width) :
-            m_rows(new row_data[height]),
+            m_rows(height),
             m_width(width),
             m_height(height),
             m_byte_width(byte_width)
         {
-            memset(m_rows, 0, sizeof(row_data) * height);
+            memset(&m_rows[0], 0, sizeof(row_data) * height);
         }
 
         // Allocate and clear the buffer
@@ -74,16 +69,17 @@ namespace agg
         void init(unsigned width, unsigned height, unsigned byte_width)
         {
             unsigned i;
-            for(i = 0; i < m_height; ++i) delete [] (int8u*)m_rows[i].ptr;
-            delete [] m_rows;
-            m_rows = 0;
+            for(i = 0; i < m_height; ++i) 
+            {
+                pod_allocator<int8u>::deallocate((int8u*)m_rows[i].ptr, m_byte_width);
+            }
             if(width && height)
             {
                 m_width  = width;
                 m_height = height;
                 m_byte_width = byte_width;
-                m_rows = new row_data[height];
-                memset(m_rows, 0, sizeof(row_data) * height);
+                m_rows.resize(height);
+                memset(&m_rows[0], 0, sizeof(row_data) * height);
             }
         }
 
@@ -97,7 +93,7 @@ namespace agg
         //--------------------------------------------------------------------
         int8u* row_ptr(int x, int y, unsigned len)
         {
-            row_data* r = m_rows + y;
+            row_data* r = &m_rows[y];
             int x2 = x + len - 1;
             if(r->ptr)
             {
@@ -106,7 +102,7 @@ namespace agg
             }
             else
             {
-                int8u* p = new int8u [m_byte_width];
+                int8u* p = pod_allocator<int8u>::allocate(m_byte_width);
                 r->ptr = p;
                 r->x1  = x;
                 r->x2  = x2;
@@ -128,10 +124,10 @@ namespace agg
 
     private:
         //--------------------------------------------------------------------
-        row_data* m_rows;       // Pointers to each row of the buffer
-        unsigned  m_width;      // Width in pixels
-        unsigned  m_height;     // Height in pixels
-        unsigned  m_byte_width; // Width in bytes
+        pod_array<row_data> m_rows;       // Pointers to each row of the buffer
+        unsigned            m_width;      // Width in pixels
+        unsigned            m_height;     // Height in pixels
+        unsigned            m_byte_width; // Width in bytes
     };
 
 

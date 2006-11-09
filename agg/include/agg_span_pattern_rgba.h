@@ -50,9 +50,9 @@ namespace agg
         {}
 
         //--------------------------------------------------------------------
+        void   attach(source_type& v)      { m_src = &v; }
                source_type& source()       { return *m_src; }
         const  source_type& source() const { return *m_src; }
-        void   set_source(source_type& v)  { m_src = &v; }
 
         //--------------------------------------------------------------------
         void       offset_x(unsigned v) { m_offset_x = v; }
@@ -75,7 +75,7 @@ namespace agg
                 span->g = p[order_type::G];
                 span->b = p[order_type::B];
                 span->a = p[order_type::A];
-                p = m_src->next_x();
+                p = (const value_type*)m_src->next_x();
                 ++span;
             }
             while(--len);

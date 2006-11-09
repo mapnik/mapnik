@@ -65,8 +65,7 @@ namespace agg
         //--------------------------------------------------------------------
         renderer_markers(base_ren_type& rbuf) :
             base_type(rbuf)
-        {
-        }
+        {}
 
         //--------------------------------------------------------------------
         bool visible(int x, int y, int r) const

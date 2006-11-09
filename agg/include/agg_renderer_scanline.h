@@ -52,7 +52,6 @@ namespace agg
         }
     }
 
-
     //===============================================render_scanlines_aa_solid
     template<class Rasterizer, class Scanline, 
              class BaseRenderer, class ColorT>
@@ -103,7 +102,6 @@ namespace agg
         }
     }
 
-
     //==============================================renderer_scanline_aa_solid
     template<class BaseRenderer> class renderer_scanline_aa_solid
     {
@@ -113,7 +111,7 @@ namespace agg
 
         //--------------------------------------------------------------------
         renderer_scanline_aa_solid() : m_ren(0) {}
-        renderer_scanline_aa_solid(base_ren_type& ren) : m_ren(&ren) {}
+        explicit renderer_scanline_aa_solid(base_ren_type& ren) : m_ren(&ren) {}
         void attach(base_ren_type& ren)
         {
             m_ren = &ren;
@@ -176,8 +174,6 @@ namespace agg
         }
     }
 
-
-
     //=====================================================render_scanlines_aa
     template<class Rasterizer, class Scanline, class BaseRenderer, 
              class SpanAllocator, class SpanGenerator>
@@ -194,8 +190,6 @@ namespace agg
             }
         }
     }
-
-
 
     //====================================================renderer_scanline_aa
     template<class BaseRenderer, class SpanAllocator, class SpanGenerator> 
@@ -244,318 +238,6 @@ namespace agg
 
 
 
-
-
-
-
-
-
-
-
-
-/*
-    //===================================================renderer_scanline_bin
-    template<class BaseRenderer, class SpanGenerator> class renderer_scanline_bin
-    {
-    public:
-        typedef BaseRenderer  base_ren_type;
-        typedef SpanGenerator span_gen_type;
-
-        //--------------------------------------------------------------------
-        renderer_scanline_bin() : m_ren(0), m_span_gen(0) {}
-        renderer_scanline_bin(base_ren_type& ren, span_gen_type& span_gen) :
-            m_ren(&ren),
-            m_span_gen(&span_gen)
-        {}
-        void attach(base_ren_type& ren, span_gen_type& span_gen)
-        {
-            m_ren = &ren;
-            m_span_gen = &span_gen;
-        }
-        
-        //--------------------------------------------------------------------
-        void prepare(unsigned max_span_len) 
-        { 
-            m_span_gen->prepare(max_span_len); 
-        }
-
-        //--------------------------------------------------------------------
-        template<class Scanline> void render(const Scanline& sl)
-        {
-            int y = sl.y();
-            m_ren->first_clip_box();
-            do
-            {
-                int xmin = m_ren->xmin();
-                int xmax = m_ren->xmax();
-
-                if(y >= m_ren->ymin() && y <= m_ren->ymax())
-                {
-                    unsigned num_spans = sl.num_spans();
-                    typename Scanline::const_iterator span = sl.begin();
-                    for(;;)
-                    {
-                        int x = span->x;
-                        int len = span->len;
-
-                        if(len < 0) len = -len;
-                        if(x < xmin)
-                        {
-                            len -= xmin - x;
-                            x = xmin;
-                        }
-                        if(len > 0)
-                        {
-                            if(x + len > xmax)
-                            {
-                                len = xmax - x + 1;
-                            }
-                            if(len > 0)
-                            {
-                                m_ren->blend_color_hspan_no_clip(
-                                    x, y, len, 
-                                    m_span_gen->generate(x, y, len),
-                                    0);
-                            }
-                        }
-                        if(--num_spans == 0) break;
-                        ++span;
-                    }
-                }
-            }
-            while(m_ren->next_clip_box());
-        }
-        
-    private:
-        base_ren_type* m_ren;
-        SpanGenerator* m_span_gen;
-    };
-
-
-
-
-
-    //================================================renderer_scanline_direct
-    template<class BaseRenderer, class SpanGenerator> class renderer_scanline_direct
-    {
-    public:
-        typedef BaseRenderer  base_ren_type;
-        typedef SpanGenerator span_gen_type;
-
-        //--------------------------------------------------------------------
-        renderer_scanline_direct() : m_ren(0), m_span_gen(0) {}
-        renderer_scanline_direct(base_ren_type& ren, span_gen_type& span_gen) :
-            m_ren(&ren),
-            m_span_gen(&span_gen)
-        {}
-        void attach(base_ren_type& ren, span_gen_type& span_gen)
-        {
-            m_ren = &ren;
-            m_span_gen = &span_gen;
-        }
-
-        //--------------------------------------------------------------------
-        void prepare(unsigned max_span_len) 
-        { 
-            m_span_gen->prepare(max_span_len); 
-        }
-
-        //--------------------------------------------------------------------
-        template<class Scanline> void render(const Scanline& sl)
-        {
-            int y = sl.y();
-            m_ren->first_clip_box();
-            do
-            {
-                int xmin = m_ren->xmin();
-                int xmax = m_ren->xmax();
-
-                if(y >= m_ren->ymin() && y <= m_ren->ymax())
-                {
-                    unsigned num_spans = sl.num_spans();
-                    typename Scanline::const_iterator span = sl.begin();
-                    for(;;)
-                    {
-                        int x = span->x;
-                        int len = span->len;
-
-                        if(len < 0) len = -len;
-                        if(x < xmin)
-                        {
-                            len -= xmin - x;
-                            x = xmin;
-                        }
-                        if(len > 0)
-                        {
-                            if(x + len > xmax)
-                            {
-                                len = xmax - x + 1;
-                            }
-                            if(len > 0)
-                            {
-                                span_data span = m_ren->span(x, y, len);
-                                if(span.ptr)
-                                {
-                                    m_span_gen->generate(span.x, y, span.len, span.ptr);
-                                }
-                            }
-                        }
-                        if(--num_spans == 0) break;
-                        ++span;
-                    }
-                }
-            }
-            while(m_ren->next_clip_box());
-        }
-        
-    private:
-        base_ren_type* m_ren;
-        SpanGenerator* m_span_gen;
-    };
-
-
-
-
-
-
-    //===============================================renderer_scanline_bin_copy
-    template<class BaseRenderer, class SpanGenerator> class renderer_scanline_bin_copy
-    {
-    public:
-        typedef BaseRenderer  base_ren_type;
-        typedef SpanGenerator span_gen_type;
-
-        //--------------------------------------------------------------------
-        renderer_scanline_bin_copy() : m_ren(0), m_span_gen(0) {}
-        renderer_scanline_bin_copy(base_ren_type& ren, span_gen_type& span_gen) :
-            m_ren(&ren),
-            m_span_gen(&span_gen)
-        {}
-        void attach(base_ren_type& ren, span_gen_type& span_gen)
-        {
-            m_ren = &ren;
-            m_span_gen = &span_gen;
-        }
-        
-        //--------------------------------------------------------------------
-        void prepare(unsigned max_span_len) 
-        { 
-            m_span_gen->prepare(max_span_len); 
-        }
-
-        //--------------------------------------------------------------------
-        template<class Scanline> void render(const Scanline& sl)
-        {
-            int y = sl.y();
-            m_ren->first_clip_box();
-            do
-            {
-                int xmin = m_ren->xmin();
-                int xmax = m_ren->xmax();
-
-                if(y >= m_ren->ymin() && y <= m_ren->ymax())
-                {
-                    unsigned num_spans = sl.num_spans();
-                    typename Scanline::const_iterator span = sl.begin();
-                    for(;;)
-                    {
-                        int x = span->x;
-                        int len = span->len;
-
-                        if(len < 0) len = -len;
-                        if(x < xmin)
-                        {
-                            len -= xmin - x;
-                            x = xmin;
-                        }
-                        if(len > 0)
-                        {
-                            if(x + len > xmax)
-                            {
-                                len = xmax - x + 1;
-                            }
-                            if(len > 0)
-                            {
-                                m_ren->copy_color_hspan_no_clip(
-                                    x, y, len, 
-                                    m_span_gen->generate(x, y, len));
-                            }
-                        }
-                        if(--num_spans == 0) break;
-                        ++span;
-                    }
-                }
-            }
-            while(m_ren->next_clip_box());
-        }
-        
-    private:
-        base_ren_type* m_ren;
-        SpanGenerator* m_span_gen;
-    };
-
-
-
-    //=============================================renderer_scanline_bin_solid
-    template<class BaseRenderer> class renderer_scanline_bin_solid
-    {
-    public:
-        typedef BaseRenderer base_ren_type;
-        typedef typename base_ren_type::color_type color_type;
-
-        //--------------------------------------------------------------------
-        renderer_scanline_bin_solid() : m_ren(0) {}
-        renderer_scanline_bin_solid(base_ren_type& ren) :
-            m_ren(&ren)
-        {}
-        void attach(base_ren_type& ren)
-        {
-            m_ren = &ren;
-        }
-        
-        //--------------------------------------------------------------------
-        void color(const color_type& c) { m_color = c; }
-        const color_type& color() const { return m_color; }
-
-        //--------------------------------------------------------------------
-        void prepare(unsigned) {}
-
-        //--------------------------------------------------------------------
-        template<class Scanline> void render(const Scanline& sl)
-        {
-            unsigned num_spans = sl.num_spans();
-            typename Scanline::const_iterator span = sl.begin();
-            for(;;)
-            {
-                m_ren->blend_hline(span->x, 
-                                   sl.y(), 
-                                   span->x - 1 + ((span->len < 0) ? 
-                                                     -span->len : 
-                                                      span->len), 
-                                   m_color, 
-                                   cover_full);
-                if(--num_spans == 0) break;
-                ++span;
-            }
-        }
-        
-    private:
-        base_ren_type* m_ren;
-        color_type m_color;
-    };
-*/
-
-
-
-
-
-
-
-
-
-
-
-
     //===============================================render_scanline_bin_solid
     template<class Scanline, class BaseRenderer, class ColorT> 
     void render_scanline_bin_solid(const Scanline& sl, 
@@ -577,7 +259,6 @@ namespace agg
             ++span;
         }
     }
-
 
     //==============================================render_scanlines_bin_solid
     template<class Rasterizer, class Scanline, 
@@ -621,7 +302,6 @@ namespace agg
         }
     }
 
-
     //=============================================renderer_scanline_bin_solid
     template<class BaseRenderer> class renderer_scanline_bin_solid
     {
@@ -631,7 +311,7 @@ namespace agg
 
         //--------------------------------------------------------------------
         renderer_scanline_bin_solid() : m_ren(0) {}
-        renderer_scanline_bin_solid(base_ren_type& ren) : m_ren(&ren) {}
+        explicit renderer_scanline_bin_solid(base_ren_type& ren) : m_ren(&ren) {}
         void attach(base_ren_type& ren)
         {
             m_ren = &ren;
@@ -662,6 +342,92 @@ namespace agg
 
 
 
+    //======================================================render_scanline_bin
+    template<class Scanline, class BaseRenderer, 
+             class SpanAllocator, class SpanGenerator> 
+    void render_scanline_bin(const Scanline& sl, BaseRenderer& ren, 
+                             SpanAllocator& alloc, SpanGenerator& span_gen)
+    {
+        int y = sl.y();
+
+        unsigned num_spans = sl.num_spans();
+        typename Scanline::const_iterator span = sl.begin();
+        for(;;)
+        {
+            int x = span->x;
+            int len = span->len;
+            if(len < 0) len = -len;
+            typename BaseRenderer::color_type* colors = alloc.allocate(len);
+            span_gen.generate(colors, x, y, len);
+            ren.blend_color_hspan(x, y, len, colors, 0, cover_full); 
+            if(--num_spans == 0) break;
+            ++span;
+        }
+    }
+
+    //=====================================================render_scanlines_bin
+    template<class Rasterizer, class Scanline, class BaseRenderer, 
+             class SpanAllocator, class SpanGenerator>
+    void render_scanlines_bin(Rasterizer& ras, Scanline& sl, BaseRenderer& ren, 
+                              SpanAllocator& alloc, SpanGenerator& span_gen)
+    {
+        if(ras.rewind_scanlines())
+        {
+            sl.reset(ras.min_x(), ras.max_x());
+            span_gen.prepare();
+            while(ras.sweep_scanline(sl))
+            {
+                render_scanline_bin(sl, ren, alloc, span_gen);
+            }
+        }
+    }
+
+    //====================================================renderer_scanline_bin
+    template<class BaseRenderer, class SpanAllocator, class SpanGenerator> 
+    class renderer_scanline_bin
+    {
+    public:
+        typedef BaseRenderer  base_ren_type;
+        typedef SpanAllocator alloc_type;
+        typedef SpanGenerator span_gen_type;
+
+        //--------------------------------------------------------------------
+        renderer_scanline_bin() : m_ren(0), m_alloc(0), m_span_gen(0) {}
+        renderer_scanline_bin(base_ren_type& ren, 
+                              alloc_type& alloc, 
+                              span_gen_type& span_gen) :
+            m_ren(&ren),
+            m_alloc(&alloc),
+            m_span_gen(&span_gen)
+        {}
+        void attach(base_ren_type& ren, 
+                    alloc_type& alloc, 
+                    span_gen_type& span_gen)
+        {
+            m_ren = &ren;
+            m_alloc = &alloc;
+            m_span_gen = &span_gen;
+        }
+        
+        //--------------------------------------------------------------------
+        void prepare() { m_span_gen->prepare(); }
+
+        //--------------------------------------------------------------------
+        template<class Scanline> void render(const Scanline& sl)
+        {
+            render_scanline_bin(sl, *m_ren, *m_alloc, *m_span_gen);
+        }
+
+    private:
+        base_ren_type* m_ren;
+        alloc_type*    m_alloc;
+        span_gen_type* m_span_gen;
+    };
+
+
+
+
+
 
 
 
@@ -682,7 +448,6 @@ namespace agg
         }
     }
 
-
     //========================================================render_all_paths
     template<class Rasterizer, class Scanline, class Renderer, 
              class VertexSource, class ColorStorage, class PathId>
@@ -702,6 +467,7 @@ namespace agg
             render_scanlines(ras, sl, r);
         }
     }
+
 
 
 
@@ -821,7 +587,14 @@ namespace agg
                                         covers = span_aa->covers;
                                         do
                                         {
-                                            colors->add(c, *covers);
+                                            if(*covers == cover_full) 
+                                            {
+                                                *colors = c;
+                                            }
+                                            else
+                                            {
+                                                colors->add(c, *covers);
+                                            }
                                             ++colors;
                                             ++covers;
                                         }
@@ -847,7 +620,14 @@ namespace agg
                                         covers = span_aa->covers;
                                         do
                                         {
-                                            colors->add(*cspan, *covers);
+                                            if(*covers == cover_full) 
+                                            {
+                                                *colors = *cspan;
+                                            }
+                                            else
+                                            {
+                                                colors->add(*cspan, *covers);
+                                            }
                                             ++cspan;
                                             ++colors;
                                             ++covers;
@@ -875,15 +655,196 @@ namespace agg
                             if(--num_spans == 0) break;
                             ++span_bin;
                         }
-
-                    }
-                }
-            }
-        }
+                    } // if(ras.sweep_scanline(sl_bin, -1))
+                } // if(num_styles == 1) ... else
+            } // while((num_styles = ras.sweep_styles()) > 0)
+        } // if(ras.rewind_scanlines())
     }
 
+    //=======================================render_scanlines_compound_layered
+    template<class Rasterizer, 
+             class ScanlineAA, 
+             class BaseRenderer, 
+             class SpanAllocator,
+             class StyleHandler>
+    void render_scanlines_compound_layered(Rasterizer& ras, 
+                                           ScanlineAA& sl_aa,
+                                           BaseRenderer& ren,
+                                           SpanAllocator& alloc,
+                                           StyleHandler& sh)
+    {
+        if(ras.rewind_scanlines())
+        {
+            int min_x = ras.min_x();
+            int len = ras.max_x() - min_x + 2;
+            sl_aa.reset(min_x, ras.max_x());
 
+            typedef typename BaseRenderer::color_type color_type;
+            color_type* color_span   = alloc.allocate(len * 2);
+            color_type* mix_buffer   = color_span + len;
+            cover_type* cover_buffer = ras.allocate_cover_buffer(len);
+            unsigned num_spans;
 
+            unsigned num_styles;
+            unsigned style;
+            bool     solid;
+            while((num_styles = ras.sweep_styles()) > 0)
+            {
+                typename ScanlineAA::const_iterator span_aa;
+                if(num_styles == 1)
+                {
+                    // Optimization for a single style. Happens often
+                    //-------------------------
+                    if(ras.sweep_scanline(sl_aa, 0))
+                    {
+                        style = ras.style(0);
+                        if(sh.is_solid(style))
+                        {
+                            // Just solid fill
+                            //-----------------------
+                            render_scanline_aa_solid(sl_aa, ren, sh.color(style));
+                        }
+                        else
+                        {
+                            // Arbitrary span generator
+                            //-----------------------
+                            span_aa   = sl_aa.begin();
+                            num_spans = sl_aa.num_spans();
+                            for(;;)
+                            {
+                                len = span_aa->len;
+                                sh.generate_span(color_span, 
+                                                 span_aa->x, 
+                                                 sl_aa.y(), 
+                                                 len, 
+                                                 style);
+
+                                ren.blend_color_hspan(span_aa->x, 
+                                                      sl_aa.y(), 
+                                                      span_aa->len,
+                                                      color_span,
+                                                      span_aa->covers);
+                                if(--num_spans == 0) break;
+                                ++span_aa;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    int      sl_start = ras.scanline_start();
+                    unsigned sl_len   = ras.scanline_length();
+
+                    if(sl_len)
+                    {
+                        memset(mix_buffer + sl_start - min_x, 
+                               0, 
+                               sl_len * sizeof(color_type));
+
+                        memset(cover_buffer + sl_start - min_x, 
+                               0, 
+                               sl_len * sizeof(cover_type));
+
+                        int sl_y = 0x7FFFFFFF;
+                        unsigned i;
+                        for(i = 0; i < num_styles; i++)
+                        {
+                            style = ras.style(i);
+                            solid = sh.is_solid(style);
+
+                            if(ras.sweep_scanline(sl_aa, i))
+                            {
+                                unsigned    cover;
+                                color_type* colors;
+                                color_type* cspan;
+                                cover_type* src_covers;
+                                cover_type* dst_covers;
+                                span_aa   = sl_aa.begin();
+                                num_spans = sl_aa.num_spans();
+                                sl_y      = sl_aa.y();
+                                if(solid)
+                                {
+                                    // Just solid fill
+                                    //-----------------------
+                                    for(;;)
+                                    {
+                                        color_type c = sh.color(style);
+                                        len    = span_aa->len;
+                                        colors = mix_buffer + span_aa->x - min_x;
+                                        src_covers = span_aa->covers;
+                                        dst_covers = cover_buffer + span_aa->x - min_x;
+                                        do
+                                        {
+                                            cover = *src_covers;
+                                            if(*dst_covers + cover > cover_full)
+                                            {
+                                                cover = cover_full - *dst_covers;
+                                            }
+                                            if(cover)
+                                            {
+                                                colors->add(c, cover);
+                                                *dst_covers += cover;
+                                            }
+                                            ++colors;
+                                            ++src_covers;
+                                            ++dst_covers;
+                                        }
+                                        while(--len);
+                                        if(--num_spans == 0) break;
+                                        ++span_aa;
+                                    }
+                                }
+                                else
+                                {
+                                    // Arbitrary span generator
+                                    //-----------------------
+                                    for(;;)
+                                    {
+                                        len = span_aa->len;
+                                        colors = mix_buffer + span_aa->x - min_x;
+                                        cspan  = color_span;
+                                        sh.generate_span(cspan, 
+                                                         span_aa->x, 
+                                                         sl_aa.y(), 
+                                                         len, 
+                                                         style);
+                                        src_covers = span_aa->covers;
+                                        dst_covers = cover_buffer + span_aa->x - min_x;
+                                        do
+                                        {
+                                            cover = *src_covers;
+                                            if(*dst_covers + cover > cover_full)
+                                            {
+                                                cover = cover_full - *dst_covers;
+                                            }
+                                            if(cover)
+                                            {
+                                                colors->add(*cspan, cover);
+                                                *dst_covers += cover;
+                                            }
+                                            ++cspan;
+                                            ++colors;
+                                            ++src_covers;
+                                            ++dst_covers;
+                                        }
+                                        while(--len);
+                                        if(--num_spans == 0) break;
+                                        ++span_aa;
+                                    }
+                                }
+                            }
+                        }
+                        ren.blend_color_hspan(sl_start, 
+                                              sl_y, 
+                                              sl_len,
+                                              mix_buffer + sl_start - min_x,
+                                              0,
+                                              cover_full);
+                    } //if(sl_len)
+                } //if(num_styles == 1) ... else
+            } //while((num_styles = ras.sweep_styles()) > 0)
+        } //if(ras.rewind_scanlines())
+    }
 
 
 }

@@ -142,8 +142,8 @@ namespace agg
         int octant;
 
         //---------------------------------------------------------------------
-        static int8u s_orthogonal_quadrant[8];
-        static int8u s_diagonal_quadrant[8];
+        static const int8u s_orthogonal_quadrant[8];
+        static const int8u s_diagonal_quadrant[8];
     };
 
 
