@@ -23,7 +23,7 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-// Window DLL support
+// Windows DLL support
 
 #ifdef _WINDOWS
 # define MAPNIK_DECL __declspec (dllexport)

@@ -43,7 +43,7 @@ namespace mapnik {
             : std::runtime_error("failed to initialize projection with:" + params) {}
     };
     
-    class projection
+    class MAPNIK_DECL projection
     {
         friend class proj_transform;
     public:

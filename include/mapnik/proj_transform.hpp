@@ -32,7 +32,7 @@
 
 namespace mapnik {
     
-    class proj_transform : private boost::noncopyable
+    class MAPNIK_DECL proj_transform : private boost::noncopyable
     {
     public:
         proj_transform(projection const& source, 

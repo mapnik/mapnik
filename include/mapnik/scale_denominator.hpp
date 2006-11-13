@@ -21,10 +21,11 @@
  *****************************************************************************/
 
 //$Id$
+#include <mapnik/config.hpp>
 
 namespace mapnik {
  
     class Map;
     class projection;
-    double scale_denominator(Map const& map,projection const& prj); 
+    MAPNIK_DECL double scale_denominator(Map const& map,projection const& prj); 
 }
