@@ -26,6 +26,5 @@
 namespace mapnik {
  
     class Map;
-    class projection;
-    MAPNIK_DECL double scale_denominator(Map const& map,projection const& prj); 
+    MAPNIK_DECL double scale_denominator(Map const& map, bool geographic);
 }

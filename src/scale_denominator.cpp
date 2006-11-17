@@ -23,32 +23,17 @@
 //$Id$
 #include <cmath>
 #include <mapnik/map.hpp>
-#include <mapnik/projection.hpp>
-#include <mapnik/distance.hpp>
 #include <mapnik/scale_denominator.hpp>
 
 namespace mapnik {
  
-    static const double dpi = 90.0; // display resolution
+    static const double pi = 3.14159265359; 
+    static const double meters_per_degree = 6378137 * 2 * pi/ 360;
     
-    double scale_denominator(Map const& map,projection const& prj)
+    double scale_denominator(Map const& map, bool geographic)
     {
-        double map_width = map.getWidth();
-        double map_height = map.getHeight();
-        Envelope<double> const& extent = map.getCurrentExtent();
-        double x0 = extent.minx();
-        double y0 = extent.miny();
-        double x1 = extent.maxx();
-        double y1 = extent.maxy();
-        
-        if (!prj.is_geographic())
-        {
-            prj.inverse(x0,y0);
-            prj.inverse(x1,y1); 
-        }
-        great_circle_distance distance;
-        double d1 = distance(coord2d(x0,y0),coord2d(x1, y1));
-        double d0 = sqrt(map_width * map_width + map_height * map_height) / dpi * 0.0254;
-        return d1 / d0;
+        double denom = map.scale() / 0.00028;
+        if (geographic) denom *= meters_per_degree;
+        return denom; 
     }
 }
