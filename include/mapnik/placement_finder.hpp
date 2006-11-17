@@ -91,6 +91,8 @@ namespace mapnik
     int label_spacing; // distance between repeated labels on a single geometry
 
     double max_char_angle_delta;
+    
+    bool avoid_edges;
   };
 
 
@@ -98,7 +100,8 @@ namespace mapnik
   class placement_finder : boost::noncopyable
   {
   public:
-    placement_finder(Envelope<double> e);
+    //E is the dimensions of the map, buffer is the buffer used for collission detection.
+    placement_finder(Envelope<double> e, unsigned buffer);
   
     bool find_placements(placement *p);
     
@@ -111,8 +114,8 @@ namespace mapnik
 
     void update_detector(placement *p);
   
+    Envelope<double> dimensions_;
     label_collision_detector3 detector_;
-
   };
   
 }

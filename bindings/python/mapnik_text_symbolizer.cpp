@@ -58,6 +58,9 @@ void export_text_symbolizer()
         .add_property("max_char_angle_delta",
                       &text_symbolizer::get_max_char_angle_delta,
                       &text_symbolizer::set_max_char_angle_delta)
+        .add_property("avoid_edges",
+                      &text_symbolizer::get_avoid_edges,
+                      &text_symbolizer::set_avoid_edges)
         .def("set_label_placement",&text_symbolizer::set_label_placement,
              "Set the placement of the label")
 	;

@@ -42,7 +42,8 @@ namespace mapnik
 	  halo_radius_(0),
 	  label_p_(point_placement),
 	  anchor_(0.0,0.5),
-	  displacement_(0.0,0.0)  {}
+	  displacement_(0.0,0.0),
+    avoid_edges_(false) {}
            
     text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
         : name_(rhs.name_),
@@ -57,7 +58,8 @@ namespace mapnik
           halo_radius_(rhs.halo_radius_),
           label_p_(rhs.label_p_),
           anchor_(rhs.anchor_),
-          displacement_(rhs.displacement_) {}
+          displacement_(rhs.displacement_),
+          avoid_edges_(rhs.avoid_edges_) {}
 
     text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     {
@@ -76,6 +78,8 @@ namespace mapnik
         label_p_ = other.label_p_;
         anchor_ = other.anchor_;
         displacement_ = other.displacement_; 
+        avoid_edges_ = other.avoid_edges_;
+        
         return *this;
     } 
 
@@ -186,5 +190,15 @@ namespace mapnik
     position const&  text_symbolizer::get_displacement() const
     {
         return displacement_;
+    }
+    
+    bool text_symbolizer::get_avoid_edges() const
+    {
+        return avoid_edges_;
+    }
+    
+    void text_symbolizer::set_avoid_edges(bool avoid)
+    {
+        avoid_edges_ = avoid;
     }
 }

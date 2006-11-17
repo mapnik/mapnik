@@ -64,6 +64,9 @@ namespace mapnik
         position const& get_anchor() const;	
         void set_displacement(double x, double y);
         position const& get_displacement() const;
+
+        void set_avoid_edges(bool avoid);
+        bool get_avoid_edges() const;
     private:
         std::string name_;
         std::string face_name_;
@@ -78,6 +81,7 @@ namespace mapnik
         label_placement_e label_p_;
         position anchor_;
         position displacement_;
+        bool avoid_edges_;
     };
 }
 

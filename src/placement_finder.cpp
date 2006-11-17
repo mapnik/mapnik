@@ -40,14 +40,15 @@
 
 namespace mapnik
 {
+    //For shields
     placement::placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, std::pair<double, double> dimensions_)
-        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(point_placement), dimensions(dimensions_), has_dimensions(true), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), max_char_angle_delta(0.0)
+        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(point_placement), dimensions(dimensions_), has_dimensions(true), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), max_char_angle_delta(0.0), avoid_edges(false)
     {
     }
 
     //For text
     placement::placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, label_placement_e placement_)
-        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(placement_), has_dimensions(false), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), max_char_angle_delta(0.0)
+        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(placement_), has_dimensions(false), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), max_char_angle_delta(0.0), avoid_edges(false)
     {
     }
   
@@ -136,8 +137,8 @@ namespace mapnik
   
   
   
-    placement_finder::placement_finder(Envelope<double> e)
-      : detector_(e)
+    placement_finder::placement_finder(Envelope<double> e, unsigned buffer)
+      : dimensions_(e), detector_(Envelope<double>(e.minx() - buffer, e.miny() - buffer, e.maxx() + buffer, e.maxy() + buffer))
     {
     }
 
@@ -476,6 +477,11 @@ namespace mapnik
             {
                 return false;
             }
+            
+            if (p->avoid_edges && !dimensions_.contains(e))
+            {
+                return false;
+            }
         
             p->envelopes.push(e);
 
@@ -632,6 +638,11 @@ namespace mapnik
                 }
                 
                 if (!detector_.has_placement(e))
+                {
+                    return false;
+                }
+
+                if (p->avoid_edges && !dimensions_.contains(e))
                 {
                     return false;
                 }

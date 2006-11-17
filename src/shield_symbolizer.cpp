@@ -50,7 +50,7 @@ namespace mapnik
                           std::string const& file,
                           std::string const& type,
                           unsigned width,unsigned height)
-        : name_(name), face_name_(face_name), size_(size), fill_(fill), symbol_(new ImageData32(width,height))
+        : name_(name), face_name_(face_name), size_(size), fill_(fill), symbol_(new ImageData32(width,height)), avoid_edges_(false)
     {
         try 
         {
@@ -72,7 +72,8 @@ namespace mapnik
           size_(rhs.size_),
           fill_(rhs.fill_),
           symbol_(rhs.symbol_),
-          overlap_(rhs.overlap_)
+          overlap_(rhs.overlap_),
+          avoid_edges_(rhs.avoid_edges_)
     {}
     
     void shield_symbolizer::set_data( boost::shared_ptr<ImageData32> symbol)
@@ -113,6 +114,16 @@ namespace mapnik
     Color const& shield_symbolizer::get_fill() const
     {
         return fill_;
+    }
+    
+    bool shield_symbolizer::get_avoid_edges() const
+    {
+        return avoid_edges_;
+    }
+    
+    void shield_symbolizer::set_avoid_edges(bool avoid)
+    {
+        avoid_edges_ = avoid;
     }
 }
 

@@ -95,7 +95,7 @@ namespace mapnik
         : feature_style_processor<agg_renderer>(m),
           pixmap_(pixmap),
           t_(m.getWidth(),m.getHeight(),m.getCurrentExtent()),
-          finder_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
+          finder_(Envelope<double>(0 ,0, m.getWidth(), m.getHeight()), 64),
           point_detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
     {
         Color const& bg=m.getBackground();
@@ -345,7 +345,8 @@ namespace mapnik
                     ren.get_string_info(text, &info);
                  
                     placement text_placement(&info, &t_, &prj_trans, geom, std::pair<double, double>(w, h) );
-                    
+                    text_placement.avoid_edges = sym.get_avoid_edges();
+                  
                     bool found = finder_.find_placements(&text_placement);
                     if (!found) {
                       return;
@@ -509,6 +510,7 @@ namespace mapnik
                     text_placement.wrap_width = sym.get_wrap_width();
                     text_placement.label_spacing = sym.get_label_spacing();
                     text_placement.max_char_angle_delta = sym.get_max_char_angle_delta();
+                    text_placement.avoid_edges = sym.get_avoid_edges();
                   
                     bool found = finder_.find_placements(&text_placement);
                     if (!found) {

@@ -53,6 +53,8 @@ namespace mapnik
         void set_allow_overlap(bool overlap);
         bool get_allow_overlap() const;
         
+        void set_avoid_edges(bool avoid);
+        bool get_avoid_edges() const;
     private:
         std::string name_;
         std::string face_name_;
@@ -60,6 +62,7 @@ namespace mapnik
         Color fill_;
         boost::shared_ptr<ImageData32> symbol_;
         bool overlap_;
+        bool avoid_edges_;
     };
 }
 
