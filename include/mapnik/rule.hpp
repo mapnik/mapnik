@@ -262,7 +262,7 @@ namespace mapnik
         
         bool active(double scale) const
         {
-            return ( scale > min_scale_ && scale < max_scale_ );
+            return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6);
         }
 
         void accept(filter_visitor<FeatureT>& v) const
