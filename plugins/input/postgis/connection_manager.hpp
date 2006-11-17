@@ -39,24 +39,29 @@ template <typename T>
 class ConnectionCreator
 {
     string url_;
+    string port_;
     string dbname_;
     string user_;
     string pass_;
 public:
-    ConnectionCreator(const string& url,const string& dbname,
-		      const string& user,const string& pass)
-	: url_(url),
-	  dbname_(dbname),
-	  user_(user),
-	  pass_(pass) {}
+    ConnectionCreator(string const& url,
+                      string const& port,
+                      string const& dbname,
+                      string const& user,
+                      string const& pass)
+        : url_(url),
+          port_(port),
+          dbname_(dbname),
+          user_(user),
+          pass_(pass) {}
     
     T* operator()() const
     {
-	return new T(url_,dbname_,user_,pass_);
+        return new T(url_,port_,dbname_,user_,pass_);
     }
     std::string id() const 
     {
-	return url_+":"+dbname_+":"+user_+":"+pass_;
+        return url_ + ":" + dbname_;
     }
 };
 
@@ -73,39 +78,40 @@ public:
 	
     bool registerPool(const ConnectionCreator<Connection>& creator,int initialSize,int maxSize) 
     {	    
-	mutex::scoped_lock lock(mutex_);
-	if (pools_.find(creator.id())==pools_.end())
-	{
-	    return pools_.insert(std::make_pair(creator.id(),
-						boost::shared_ptr<PoolType>(new PoolType(creator,initialSize,maxSize)))).second;
-	}
+        mutex::scoped_lock lock(mutex_);
+        if (pools_.find(creator.id())==pools_.end())
+        {
+            return pools_.insert(std::make_pair(creator.id(),
+                                                boost::shared_ptr<PoolType>(new PoolType(creator,initialSize,maxSize)))).second;
+        }
 
-	return false;
+        return false;
 	   	     
     }
+    
     const boost::shared_ptr<PoolType>& getPool(const std::string& key) 
     {
-	mutex::scoped_lock lock(mutex_);
-	ContType::const_iterator itr=pools_.find(key);
-	if (itr!=pools_.end())
-	{
-	    return itr->second;
-	}
-	static const boost::shared_ptr<PoolType> emptyPool;
-	return emptyPool;
+        mutex::scoped_lock lock(mutex_);
+        ContType::const_iterator itr=pools_.find(key);
+        if (itr!=pools_.end())
+        {
+            return itr->second;
+        }
+        static const boost::shared_ptr<PoolType> emptyPool;
+        return emptyPool;
     }
 	
     const HolderType& get(const std::string& key)
     {
-	mutex::scoped_lock lock(mutex_);
-	ContType::const_iterator itr=pools_.find(key);
-	if (itr!=pools_.end()) 
-	{
-	    boost::shared_ptr<PoolType> pool=itr->second;
-	    return pool->borrowObject();
-	}
-	static const HolderType EmptyConn;
-	return EmptyConn;
+        mutex::scoped_lock lock(mutex_);
+        ContType::const_iterator itr=pools_.find(key);
+        if (itr!=pools_.end()) 
+        {
+            boost::shared_ptr<PoolType> pool=itr->second;
+            return pool->borrowObject();
+        }
+        static const HolderType EmptyConn;
+        return EmptyConn;
     }
         
 private:

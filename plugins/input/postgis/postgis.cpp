@@ -43,20 +43,20 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using boost::shared_ptr;
 
-postgis_datasource::postgis_datasource(const parameters& params)
+postgis_datasource::postgis_datasource(parameters const& params)
     : datasource (params),
       table_(params.get("table")),
       type_(datasource::Vector), 
-      desc_(params.get("name")),
+      desc_(params.get("type")),
       creator_(params.get("host"),
+               params.get("port"),
                params.get("dbname"),
                params.get("user"),
-               params.get("password"))
-      
+               params.get("password"))    
 {     
     ConnectionManager *mgr=ConnectionManager::instance();   
     mgr->registerPool(creator_,10,20);
-
+    
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
     {
@@ -64,9 +64,7 @@ postgis_datasource::postgis_datasource(const parameters& params)
         if (conn && conn->isOK())
         {
             PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
-
             std::string table_name=table_from_sql(table_);
-	    
             std::ostringstream s;
             s << "select f_geometry_column,srid,type from ";
             s << GEOMETRY_COLUMNS <<" where f_table_name='" << table_name<<"'";
