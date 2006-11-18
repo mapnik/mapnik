@@ -235,18 +235,19 @@ namespace mapnik
                 ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
                 agg::render_scanlines(ras, sl, ren);
             }
-            else if (stroke_.get_width() <= 1.0)
-            {
-                agg::line_profile_aa prof;
-                prof.width(stroke_.get_width());
-                renderer_oaa ren_oaa(renb, prof);
-                rasterizer_outline_aa ras_oaa(ren_oaa);
+            
+            //else if (stroke_.get_width() <= 1.0)
+            //{
+            //   agg::line_profile_aa prof;
+            //   prof.width(stroke_.get_width());
+            //   renderer_oaa ren_oaa(renb, prof);
+            //   rasterizer_outline_aa ras_oaa(ren_oaa);
                 
-                ren_oaa.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
-                ren_oaa.clip_box(0,0,pixmap_.width(),pixmap_.height());
-                ras_oaa.add_path(path);		
-		    
-            }
+            //    ren_oaa.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
+            //    ren_oaa.clip_box(0,0,pixmap_.width(),pixmap_.height());
+            //    ras_oaa.add_path(path);		
+		 
+            //    }
             else 
             {
                 renderer ren(renb);	
