@@ -71,7 +71,7 @@ int main (int argc,char** argv)
 	
         if (vm.count("version"))
         {
-            clog<<"version 0.2.0a" <<endl;
+            clog<<"version 0.3.0" <<endl;
             return 1;
         }
 

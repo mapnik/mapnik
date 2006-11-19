@@ -59,10 +59,6 @@ public:
             std::clog << "connection to "<< connStr << " failed\n"
                       << PQerrorMessage(conn_)<< std::endl;
         }
-        else
-        {
-            std::clog <<"connected ok "<<std::endl;
-        }
     }
     bool execute(const std::string& sql) const
     {

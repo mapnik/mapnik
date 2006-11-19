@@ -163,30 +163,6 @@ namespace mapnik
             }
         }
     };
-
-
-    struct timer
-    {
-        //struct timeval tv_;
-        timer()
-        {
-            //gettimeofday (&tv_,0);
-        }
-        void start()
-        {
-            //gettimeofday (&tv_,0);
-        }
-        void stop()
-        {
-            //timeval tv;
-            //gettimeofday (&tv,0);
-            //std::ostringstream s;
-            //long sec=1000*(tv.tv_sec-tv_.tv_sec);
-            //long total_ms=sec+static_cast<long>(0.001*(tv.tv_usec-tv_.tv_usec));
-            //s << "elapsed time is "<<total_ms<<" ms";
-            //std::clog<<s.str()<<std::endl;
-        }
-    };
     
     //converters
     class BadConversion : public std::runtime_error

@@ -95,7 +95,9 @@ namespace mapnik
 	
     	~font_face()
     	{
+#ifdef MAPNIK_DEBUG
     	    std::clog << "clean up face:" << family_name()<<":" << style_name() << std::endl;
+#endif
     	    FT_Done_Face(face_);
     	}
 	

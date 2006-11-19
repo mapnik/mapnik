@@ -36,7 +36,6 @@ const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS="spatial_ref_system";
 
 using std::clog;
-using std::clog;
 using std::endl;
 
 using boost::lexical_cast;
@@ -219,7 +218,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             s << std::setprecision(16);
             s << box.minx() << " " << box.miny() << ",";
             s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
-            clog << s.str() << endl;
+            
             shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
             fs=new postgis_featureset(rs,props.size());
         }

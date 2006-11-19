@@ -446,7 +446,6 @@ namespace mapnik
                             {
                                 std::string name = param_tag.second.get<std::string>("<xmlattr>.name");
                                 std::string value = param_tag.second.data();
-                                std::clog << "name = " << name << " value = " << value << "\n";
                                 params[name] = value; 
                             }
                         }

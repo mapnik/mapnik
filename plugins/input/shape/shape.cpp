@@ -72,10 +72,10 @@ shape_datasource::shape_datasource(const parameters &params)
                     break;
                 }
             default:
-                //
+#ifdef MAPNIK_DEBUG                
                 std::clog << "unknown type "<<fd.type_<<"\n";
+#endif 
                 break;
-
             }
         }
     }
@@ -123,9 +123,12 @@ void  shape_datasource::init(shape_io& shape)
         file.close();
     }
 
+#ifdef MAPNIK_DEBUG
     std::clog << extent_ << std::endl;
     std::clog << "file_length=" << file_length_ << std::endl;
     std::clog << "shape_type=" << shape_type << std::endl;
+#endif
+
 }
 
 int shape_datasource::type() const

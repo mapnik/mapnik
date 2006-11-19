@@ -41,7 +41,7 @@ namespace mapnik
         } 
         catch (...) 
         {
-            std::clog<<"exception caught..."<<std::endl;
+            std::clog << "exception caught...\n";
         }
     }
     polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)

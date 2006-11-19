@@ -75,15 +75,17 @@ namespace mapnik
                     std::clog << "Cannot load library: " << "  "<< lt_dlerror() << std::endl;
                 }
             }
+#ifdef MAPNIK_DEBUG
             std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
+#endif
         }
         catch (datasource_exception& ex)
         {
-            std::clog<<ex.what()<<std::endl;
+            std::clog << ex.what() << "\n";
         }
         catch (...)
         {
-            std::clog<<" exception caught\n";
+            std::clog << " exception caught\n";
         }
         return ds;
     }
@@ -112,14 +114,16 @@ namespace mapnik
                         datasource_name* ds_name = 
                             (datasource_name*) lt_dlsym(module, "datasource_name");
                         if (ds_name && insert(ds_name(),module))
-                        {                           
+                        {            
+#ifdef MAPNIK_DEBUG
                             std::clog<<"registered datasource : "<<ds_name()<<std::endl;
+#endif 
                             registered_=true;
                         }
                     }
                     else
                     {
-                        std::clog<<lt_dlerror()<<std::endl;
+                        std::clog << lt_dlerror() << "\n";
                     }
                 }
             }   

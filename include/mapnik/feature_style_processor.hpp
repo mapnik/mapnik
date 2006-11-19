@@ -77,8 +77,9 @@ namespace mapnik
             {
                 projection proj(m_.srs()); // map projection
                 double scale_denom = scale_denominator(m_,proj.is_geographic());
+#ifdef MAPNIK_DEBUG
                 std::clog << "scale denominator = " << scale_denom << "\n";
-                
+#endif
                 std::vector<Layer>::const_iterator itr = m_.layers().begin();
                 std::vector<Layer>::const_iterator end = m_.layers().end();
             
@@ -120,8 +121,9 @@ namespace mapnik
                 prj_trans.forward(x0,y0,z0);
                 prj_trans.forward(x1,y1,z1);
                 Envelope<double> bbox(x0,y0,x1,y1);
+#ifdef MAPNIK_DEBUG
                 std::clog << bbox << "\n";
-                
+#endif                
                 std::vector<std::string> const& style_names = lay.styles();
                 std::vector<std::string>::const_iterator stylesIter = style_names.begin();
                 std::vector<std::string>::const_iterator stylesEnd = style_names.end();

@@ -100,33 +100,43 @@ namespace mapnik
     {
         Color const& bg=m.getBackground();
         pixmap_.setBackground(bg);
+#ifdef MAPNIK_DEBUG
         std::clog << "scale=" << m.scale() << "\n";
+#endif
     }
     
     template <typename T>
     void agg_renderer<T>::start_map_processing(Map const& map)
     {
+#ifdef MAPNIK_DEBUG
         std::clog << "start map processing bbox=" 
                   << map.getCurrentExtent() << "\n";
+#endif
     }
 
     template <typename T>
     void agg_renderer<T>::end_map_processing(Map const& )
     {
+#ifdef MAPNIK_DEBUG
         std::clog << "end map processing" << std::endl;
+#endif
     }
     
     template <typename T>
     void agg_renderer<T>::start_layer_processing(Layer const& lay)
     {
+#ifdef MAPNIK_DEBUG
         std::clog << "start layer processing : " << lay.name()  << std::endl;
         std::clog << "datasource = " << lay.datasource().get() << std::endl;
+#endif 
     }
     
     template <typename T>
     void agg_renderer<T>::end_layer_processing(Layer const&)
     {
+#ifdef MAPNIK_DEBUG
         std::clog << "end layer processing" << std::endl;
+#endif
     }
     
     template <typename T>	

@@ -91,8 +91,10 @@ namespace mapnik
             mutex::scoped_lock lock(mutex_);
             typename ContType::iterator itr=unusedPool_.begin();
             if (itr!=unusedPool_.end())
-            {  
+            { 
+#ifdef MAPNIK_DEBUG
                 std::clog<<"borrow "<<(*itr).get()<<"\n";
+#endif
                 usedPool_.push_back(*itr);
                 itr=unusedPool_.erase(itr);
                 return usedPool_[usedPool_.size()-1];
@@ -109,7 +111,9 @@ namespace mapnik
             {
                 if (obj.get()==(*itr).get()) 
                 {
+#ifdef MAPNIK_DEBUG
                     std::clog<<"return "<<(*itr).get()<<"\n";
+#endif
                     unusedPool_.push_back(*itr);
                     usedPool_.erase(itr);
                     return;

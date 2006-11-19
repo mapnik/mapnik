@@ -97,8 +97,6 @@ feature_ptr postgis_featureset::next()
     else
     {
         rs_->close();
-        std::clog << "totalGeomSize="<<totalGeomSize_<<" bytes"<<std::endl;
-        std::clog << "count="<<count_<<std::endl;
         return feature_ptr();
     }
 }

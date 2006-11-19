@@ -145,7 +145,7 @@ env = conf.Finish()
 # Setup the c++ args for our own codebase
 
 if env['DEBUG']:
-    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
+    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG -DMAPNIK_DEBUG -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
 else:
     env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
 

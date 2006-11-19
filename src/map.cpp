@@ -222,9 +222,10 @@ namespace mapnik
                 prj_trans.backward(x1,y1,z1);
                 
                 Envelope<double> layerExt2(x0,y0,x1,y1);
+#ifdef MAPNIK_DEBUG
                 std::clog << " layer1 - > " << layerExt << "\n";
                 std::clog << " layer2 - > " << layerExt2 << "\n";
-                
+#endif                
                 if (first)
                 {
                     ext = layerExt2;

@@ -45,10 +45,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
     {
         feature_ptr feature(new Feature(+id_));
         try
-        {
-            std::clog<<"raster_featureset "<<curIter_->format()<<" "<<curIter_->file()<<std::endl;
+        {         
             std::auto_ptr<ImageReader> reader(get_image_reader(curIter_->format(),curIter_->file()));
-            std::clog<<reader.get()<<std::endl;
             if (reader.get())
             {
                 int image_width=reader->width();
