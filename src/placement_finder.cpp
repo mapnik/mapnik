@@ -184,27 +184,27 @@ namespace mapnik
 
         double ideal_spacing = distance/num_labels;
         std::vector<double> ideal_label_distances;
-        for (double label_pos = ideal_spacing/2; label_pos < distance; label_pos += ideal_spacing)
+        for (double label_pos = string_width/2.0; label_pos < distance - string_width/2.0; label_pos += ideal_spacing)
             ideal_label_distances.push_back(label_pos);
 
-        double delta = distance/100.0;
+        double delta = ideal_spacing/100.0;
         bool FoundPlacement = false;
         for (std::vector<double>::const_iterator itr = ideal_label_distances.begin(); itr < ideal_label_distances.end(); ++itr)
         {
             //std::clog << "Trying to find txt placement at distance: " << *itr << std::endl;
-            for (double i = 0; i < ideal_spacing; i += delta)
+            for (double i = 0; i < ideal_spacing/2.0; i += delta)
             {
                 p->clear_envelopes();
         
                 // check position +- delta for valid placement
-                if ( build_path_follow(p, *itr - string_width/2 + i)) {
+                if ( build_path_follow(p, *itr + i) ) {
                     update_detector(p);
                     FoundPlacement = true;
                     break;
                 }
 
                 p->clear_envelopes();
-                if (build_path_follow(p, *itr - string_width/2 - i) ) {
+                if ( build_path_follow(p, *itr - i) ) {
                     update_detector(p);
                     FoundPlacement = true;
                     break;
@@ -323,7 +323,7 @@ namespace mapnik
                 break;
             }
         }
-    
+        
         // now find the placement of each character starting from our initial segment
         // determined above
         double last_angle = angle; 
@@ -346,21 +346,21 @@ namespace mapnik
                 while (distance <= ci.width) 
                 {
                     double dx, dy;
-    
+                    
                     cur_node++;
-                
+                    
                     if (cur_node >= p->geom->num_points()) {
-                        break;
+                        return false;
                     }
                     
                     old_x = new_x;
                     old_y = new_y;
-
+                    
                     p->shape_path.vertex(&new_x,&new_y);
-    
+                    
                     dx = new_x - old_x;
                     dy = new_y - old_y;
-    
+                    
                     angle = atan2(-dy, dx );
                     distance += sqrt(dx*dx+dy*dy);
                 }
@@ -372,12 +372,13 @@ namespace mapnik
                     angle_delta -= M_PI;
                 while (angle_delta < -M_PI)
                     angle_delta += M_PI;
-                if (p->max_char_angle_delta > 0 && fabs(angle_delta) > p->max_char_angle_delta)
+                if (p->max_char_angle_delta > 0 && fabs(angle_delta) > p->max_char_angle_delta*(M_PI/180))
+                {
                     return false;
-
+                }
             }
-
-
+            
+            
             Envelope<double> e;
             if (p->has_dimensions)
             {
@@ -387,80 +388,14 @@ namespace mapnik
 
             double render_angle = angle;
 
-            if (fabs(angle_delta) > 0.05 && i > 0)
-            {
-                // paramatise the new line segment
-                double last_dist_from_line = string_height;
-                double line_origin_x = sqrt(pow(old_x-x,2)+pow(old_y-y,2));
-                double line_origin_y = 0;
-                double closest_lp_x = cos(fabs(angle_delta));
-                double closest_lp_y = sin(fabs(angle_delta));
-
-                // iterate over placement points to find the angle to actually render the letter at
-                for (double pax = 0; pax < string_height/2 && pax < line_origin_x; pax += 0.1)
-                {
-                    // calculate dependant parameters
-                    double letter_angle = asin(pax/(string_height/2));
-                    double pbx = pax+ci.width*cos(letter_angle);
-                    double pby = ci.width*sin(letter_angle);
-
-                    // find closest point on the new segment
-                    double closest_param = ((pbx - line_origin_x)*closest_lp_x + (pby - line_origin_y)*closest_lp_y)/(closest_lp_x*closest_lp_x + closest_lp_y*closest_lp_y);
-                    double closest_point_x = line_origin_x + closest_param*closest_lp_x;
-                    double closest_point_y = line_origin_y + closest_param*closest_lp_y;
-
-                    // calculate the error between this and the letter
-                    double dist_from_line = sqrt(pow(pbx - closest_point_x,2) + pow(pby - closest_point_y,2));
-
-                    // if  our error is getting worse then stop
-                    if (dist_from_line > last_dist_from_line)
-                    {
-                        double pcx, pcy;
-                        double extra_space = (ci.height/2)*sin(fabs(angle_delta)-letter_angle);
-                        double extra_space_x = extra_space * cos(fabs(angle_delta));
-                        double extra_space_y = extra_space * sin(fabs(angle_delta));
-                        // remove extra distance used in corner
-                        distance -= line_origin_x + closest_param + extra_space;
-
-                        // transform local calculation space to a global position for placement
-                        if (angle_delta < 0)
-                        {
-                            // left turn
-                            render_angle = letter_angle + last_angle;
-                            pcx = 2*pax;
-                            pcy = 0;//-(ci.height/2)*cos(letter_angle);
-                        }
-                        else
-                        {   // right turn
-                            render_angle = -letter_angle + last_angle;
-                            pcx = 0;
-                            pcy = 0;//-(ci.height/2)*cos(letter_angle);
-                        }
-                        double rdx = pcx * cos(-last_angle) - pcy*sin(-last_angle);
-                        double rdy = pcy*cos(-last_angle) + pcx * sin(-last_angle);
-                        x += rdx;
-                        y += rdy;
-                        next_char_x = (ci.width+extra_space_x)*cos(render_angle) - extra_space_y*sin(render_angle);
-                        next_char_y = (ci.width+extra_space_x)*sin(render_angle) + extra_space_y*cos(render_angle);
-
-                        //distance -= 5;
-                        break;
-
-                    }
-                    last_dist_from_line = dist_from_line;
-                }
-            }
-            else
-            {
-                x = new_x - (distance)*cos(angle);
-                y = new_y + (distance)*sin(angle);
-                //Center the text on the line.
-                x -= (((double)string_height/2.0) - 1.0)*cos(render_angle+M_PI/2);
-                y += (((double)string_height/2.0) - 1.0)*sin(render_angle+M_PI/2);
-                distance -= ci.width;
-                next_char_x = ci.width*cos(render_angle);
-                next_char_y = ci.width*sin(render_angle);
-            }
+            x = new_x - (distance)*cos(angle);
+            y = new_y + (distance)*sin(angle);
+            //Center the text on the line.
+            x -= (((double)string_height/2.0) - 1.0)*cos(render_angle+M_PI/2);
+            y += (((double)string_height/2.0) - 1.0)*sin(render_angle+M_PI/2);
+            distance -= ci.width;
+            next_char_x = ci.width*cos(render_angle);
+            next_char_y = ci.width*sin(render_angle);
 
             double render_x = x;
             double render_y = y;
