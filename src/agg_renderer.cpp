@@ -59,7 +59,7 @@
 // mapnik
 #include <mapnik/image_util.hpp>
 #include <mapnik/agg_renderer.hpp>
-
+#include <mapnik/unicode.hpp>
 #include <mapnik/placement_finder.hpp>
 
 namespace mapnik 
@@ -336,7 +336,7 @@ namespace mapnik
         geometry_ptr const& geom=feature.get_geometry();
         if (geom)
         {
-            std::string text = feature[sym.get_name()].to_string();
+            std::wstring text = to_unicode(feature[sym.get_name()].to_string());
             boost::trim(text);
             boost::shared_ptr<ImageData32> const& data = sym.get_data();
             
@@ -354,7 +354,7 @@ namespace mapnik
 
                     string_info info;
                     ren.get_string_info(text, &info);
-                 
+                    
                     placement text_placement(&info, &t_, &prj_trans, geom, std::pair<double, double>(w, h) );
                     text_placement.avoid_edges = sym.get_avoid_edges();
                   
@@ -497,7 +497,7 @@ namespace mapnik
        
         if (geom)
         {
-            std::string text = feature[sym.get_name()].to_string();
+            std::wstring text = to_unicode(feature[sym.get_name()].to_string());
             boost::trim(text);
             if (text.length() > 0)
             {
