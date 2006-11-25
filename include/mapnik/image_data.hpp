@@ -31,12 +31,9 @@ namespace mapnik
 {
     template <class T> class ImageData
     {
-    private:
-        const unsigned width_;
-        const unsigned height_;
-        T *pData_;
-        ImageData& operator=(const ImageData&);
     public:
+        typedef T pixel_type;
+        
         ImageData(unsigned width,unsigned height)
             : width_(width),
               height_(height),
@@ -119,6 +116,12 @@ namespace mapnik
         {
             ::operator delete(pData_),pData_=0;
         }
+        
+    private:
+        const unsigned width_;
+        const unsigned height_;
+        T *pData_;
+        ImageData& operator=(const ImageData&);
 	
     };
 

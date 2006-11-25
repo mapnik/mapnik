@@ -32,6 +32,7 @@ void export_parameters();
 void export_envelope();
 void export_query();
 void export_image();
+void export_image_view();
 void export_map();
 void export_python();
 void export_filter();
@@ -96,6 +97,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_color(); 
     export_envelope();   
     export_image();
+    export_image_view();
     export_filter();
     export_rule();
     export_style();    

@@ -136,7 +136,7 @@ int shape_datasource::type() const
     return type_;
 }
 
-layer_descriptor const& shape_datasource::get_descriptor() const
+layer_descriptor shape_datasource::get_descriptor() const
 {
     return desc_;
 }
@@ -154,16 +154,41 @@ featureset_ptr shape_datasource::features(const query& q) const
         return featureset_ptr
             (new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
     }
-    return featureset_ptr
-        (new shape_featureset<filter_in_box>(filter,shape_name_,q.property_names(),file_length_));
+    else
+    {
+        return featureset_ptr
+            (new shape_featureset<filter_in_box>(filter,shape_name_,q.property_names(),file_length_));
+    }
 }
 
 featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
 {
-    return featureset_ptr();
+    filter_at_point filter(pt);
+    // collect all attribute names
+    std::vector<attribute_descriptor> const& desc_vector = desc_.get_descriptors();
+    std::vector<attribute_descriptor>::const_iterator itr = desc_vector.begin();
+    std::vector<attribute_descriptor>::const_iterator end = desc_vector.end();
+    std::set<std::string> names;
+    
+    while (itr != end)
+    {    
+        names.insert(itr->get_name());
+        ++itr;
+    }
+    
+    if (indexed_)
+    {
+        return featureset_ptr
+            (new shape_index_featureset<filter_at_point>(filter,shape_name_,names));
+    }
+    else
+    {
+        return featureset_ptr
+            (new shape_featureset<filter_at_point>(filter,shape_name_,names,file_length_));
+    }
 }
 
-const Envelope<double>& shape_datasource::envelope() const
+Envelope<double> shape_datasource::envelope() const
 {
     return extent_;
 }

@@ -31,21 +31,21 @@
 #include <mapnik/config.hpp>
 #include <mapnik/graphics.hpp>
 
-namespace mapnik
-{
-    class MAPNIK_DECL ImageUtils
-    {
-    public:
-        static void save_to_file(const std::string& filename,
-                                 const std::string& type,
-                                 const Image32& image);
-    private:
-        static void save_as_png(const std::string& filename,
-                                const Image32& image);
-        static void save_as_jpeg(const std::string& filename,
-                                 int quality, 
-                                 const Image32& image);
-    };
+namespace mapnik {
+    
+    template <typename T>
+    void save_to_file(std::string const& filename,
+                      std::string const& type,
+                      T const& image);
+    
+    template <typename T>
+    void save_as_png(std::string const& filename,
+                     Image32 const& image);
+    template <typename T>
+    void save_as_jpeg(std::string const& filename,
+                      int quality, 
+                      T const& image);
+    
     
     template <typename T>
     double distance(T x0,T y0,T x1,T y1)

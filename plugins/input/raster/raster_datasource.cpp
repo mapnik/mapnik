@@ -74,12 +74,12 @@ std::string raster_datasource::name()
     return name_;
 }
 
-const mapnik::Envelope<double>& raster_datasource::envelope() const
+mapnik::Envelope<double> raster_datasource::envelope() const
 {
     return extent_;
 }
 
-layer_descriptor const& raster_datasource::get_descriptor() const
+layer_descriptor raster_datasource::get_descriptor() const
 {
     return desc_;
 }

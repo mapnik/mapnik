@@ -76,9 +76,9 @@ namespace mapnik {
             }
             return result;
         }
-
+        
         virtual int type() const=0;
-        virtual bool hit_test(value_type x,value_type y) const=0;	
+        virtual bool hit_test(value_type x,value_type y, double tol) const=0;	
         virtual void label_position(double *x, double *y) const=0;
         virtual void move_to(value_type x,value_type y)=0;
         virtual void line_to(value_type x,value_type y)=0;
@@ -134,10 +134,11 @@ namespace mapnik {
 	
         void rewind(unsigned ) {}
 	
-        bool hit_test(value_type x,value_type y) const
+        bool hit_test(value_type x,value_type y, double tol) const
         {
-            return false;
+            return point_in_circle(pt_.x,pt_.y, x,y,tol);
         }
+        
         void set_capacity(size_t) {}
         virtual ~point() {}
     };
@@ -227,7 +228,7 @@ namespace mapnik {
             itr_=0;
         }
 	
-        bool hit_test(value_type x,value_type y) const
+        bool hit_test(value_type x,value_type y, double) const
         {	    
             return point_inside_path(x,y,cont_.begin(),cont_.end());
         } 
@@ -239,7 +240,7 @@ namespace mapnik {
         virtual ~polygon() {}
     };
     
-    template <typename T, template <typename> class Container=vertex_vector>
+    template <typename T, template <typename> class Container=vertex_vector2>
     class line_string : public geometry<T>
     {
         typedef geometry<T> geometry_base;
@@ -337,9 +338,9 @@ namespace mapnik {
             itr_=0;
         }
 	
-        bool hit_test(value_type x,value_type y) const
+        bool hit_test(value_type x,value_type y, double tol) const
         {	    
-            return false;
+            return point_on_path(x,y,cont_.begin(),cont_.end(),tol);
         } 
 	
         void set_capacity(size_t size) 

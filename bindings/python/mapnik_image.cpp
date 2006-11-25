@@ -39,8 +39,9 @@ void export_image()
 {
     using namespace boost::python;
     class_<Image32>("Image","This class represents a 32 bit image.",init<int,int>())
-	.def("width",&Image32::width)
-	.def("height",&Image32::height)
+        .def("width",&Image32::width)
+        .def("height",&Image32::height)
+        .def("view",&Image32::get_view)
         .add_property("background",make_function
                       (&Image32::getBackground,return_value_policy<copy_const_reference>()),
                        &Image32::setBackground, "The background color of the image.")

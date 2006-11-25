@@ -186,12 +186,12 @@ namespace mapnik
         return selectable_;
     }
 
-    datasource_p Layer::datasource() const
+    datasource_ptr Layer::datasource() const
     {
         return ds_;
     }
     
-    void Layer::set_datasource(datasource_p const& ds)
+    void Layer::set_datasource(datasource_ptr const& ds)
     {
         ds_ = ds;
     }

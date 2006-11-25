@@ -78,6 +78,9 @@ struct map_pickle_suite : boost::python::pickle_suite
     }
 };
 
+std::vector<Layer>& (Map::*layers_nonconst)() =  &Map::layers;
+std::vector<Layer> const& (Map::*layers_const)() const =  &Map::layers;
+
 void export_map() 
 {
     using namespace boost::python;
@@ -108,7 +111,7 @@ void export_map()
         .def("append_style",&Map::insert_style)
         .def("remove_style",&Map::remove_style)
         .add_property("layers",make_function
-                      (&Map::layers,return_value_policy<reference_existing_object>()), 
+                      (layers_nonconst,return_value_policy<reference_existing_object>()), 
                       "Get the list of layers in this map.")
         .def("find_style",&Map::find_style,return_value_policy<copy_const_reference>())
         .def_pickle(map_pickle_suite())

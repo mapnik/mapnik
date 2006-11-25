@@ -48,9 +48,9 @@ namespace mapnik
     std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
     bool datasource_cache::registered_=false;
         
-    datasource_p datasource_cache::create(const parameters& params)
+    datasource_ptr datasource_cache::create(const parameters& params)
     {
-        datasource_p ds;
+        datasource_ptr ds;
         try
         {
             const std::string type=params.get("type");	    
@@ -67,7 +67,7 @@ namespace mapnik
                     }
                     else
                     {
-                        ds=datasource_p(create_datasource(params),datasource_deleter());
+                        ds=datasource_ptr(create_datasource(params),datasource_deleter());
                     }
                 }
                 else

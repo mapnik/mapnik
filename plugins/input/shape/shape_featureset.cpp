@@ -191,3 +191,5 @@ template <typename filterT>
 shape_featureset<filterT>::~shape_featureset() {}
 
 template class shape_featureset<filter_in_box>;
+template class shape_featureset<filter_at_point>;
+

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,43 +19,27 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+//$Id$
 
-// $Id$
+#include <boost/python.hpp>
 
-#ifndef SHAPE_HPP
-#define SHAPE_HPP
+//#include <boost/python/module.hpp>
+//#include <boost/python/def.hpp>
+//#include <mapnik/graphics.hpp>
+#include <mapnik/image_util.hpp>
+#include <mapnik/image_view.hpp>
 
-#include <mapnik/datasource.hpp>
-#include <mapnik/envelope.hpp>
+using mapnik::ImageData32;
+using mapnik::image_view;
+using mapnik::save_to_file;
 
-#include "shape_io.hpp"
-
-using namespace mapnik;
-
-class MAPNIK_DECL shape_datasource : public datasource
+void export_image_view()
 {
-public:
-    shape_datasource(const parameters &params);
-    virtual ~shape_datasource();
+    using namespace boost::python;
+    class_<image_view<ImageData32> >("ImageView","A view into an image.",no_init)
+        .def("width",&image_view<ImageData32>::width)
+        .def("height",&image_view<ImageData32>::height)
+        ;
     
-    int type() const;
-    static std::string name();
-    featureset_ptr features(const query& q) const;
-    featureset_ptr features_at_point(coord2d const& pt) const;
-    Envelope<double> envelope() const;
-    layer_descriptor get_descriptor() const;   
-private:
-    shape_datasource(const shape_datasource&);
-    shape_datasource& operator=(const shape_datasource&);
-    void init(shape_io& shape);
-private:
-    std::string shape_name_;
-    int type_;
-    long file_length_;
-    Envelope<double> extent_;
-    bool indexed_;
-    layer_descriptor desc_;
-    static std::string name_;
-};
-
-#endif //SHAPE_HPP
+    def("save_to_file",save_to_file<image_view<ImageData32> >);
+}

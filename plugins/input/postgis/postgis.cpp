@@ -171,7 +171,7 @@ int postgis_datasource::type() const
     return type_;
 }
 
-layer_descriptor const& postgis_datasource::get_descriptor() const
+layer_descriptor postgis_datasource::get_descriptor() const
 {
     return desc_;
 }
@@ -231,7 +231,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
     return featureset_ptr();
 }
 
-const Envelope<double>& postgis_datasource::envelope() const
+Envelope<double> postgis_datasource::envelope() const
 {
     return extent_;
 }

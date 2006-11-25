@@ -63,6 +63,6 @@ namespace mapnik
     void Image32::saveToFile(const std::string& file,const std::string& format) 
     {
 	    //TODO: image writer factory
-	    ImageUtils::save_to_file(file,format,*this);
+	    save_to_file(file,format,data_);
     }
 }

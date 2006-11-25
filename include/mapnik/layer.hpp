@@ -46,7 +46,7 @@ namespace mapnik
         bool selectable_;
         std::vector<std::string>  styles_;
         std::string selection_style_;
-        datasource_p ds_;
+        datasource_ptr ds_;
         
         mutable std::vector<boost::shared_ptr<Feature> > selection_;
         
@@ -79,8 +79,8 @@ namespace mapnik
         void add_to_selection(boost::shared_ptr<Feature>& feature) const;
         std::vector<boost::shared_ptr<Feature> >& selection() const;
         void clear_selection() const;
-        void set_datasource(datasource_p const& ds);
-        datasource_p datasource() const;
+        void set_datasource(datasource_ptr const& ds);
+        datasource_ptr datasource() const;
         Envelope<double> envelope() const;
         ~Layer();
     private:

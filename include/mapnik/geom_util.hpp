@@ -34,7 +34,6 @@
 
 namespace mapnik
 {
-
     template <typename T>
     bool clip_test(T p,T q,double& tmin,double& tmax)
     {
@@ -117,14 +116,6 @@ namespace mapnik
     	return inside;
     }
 
-#define TOL 0.00001
-
-    /*
-      (Ay-Cy)(Bx-Ax)-(Ax-Cx)(By-Ay)
-      s = -----------------------------
-      L^2
-    */
-
     inline bool point_in_circle(double x,double y,double cx,double cy,double r)
     {
         double dx = x - cx;
@@ -133,40 +124,75 @@ namespace mapnik
         return (d2 <= r * r);
     }
     
-    inline bool point_on_segment(double x,double y,double x0,double y0,double x1,double y1)
-    {	
+    template <typename T>
+    inline T sqr(T x)
+    {
+        return x * x;
+    }
+
+    inline double distance2(double x0,double y0,double x1,double y1)
+    {
         double dx = x1 - x0;
         double dy = y1 - y0;
-        if ( fabs(dx) > TOL  ||  fabs(dy) > TOL )
+        return sqr(dx) + sqr(dy);
+    }
+    
+    inline double distance(double x0,double y0, double x1,double y1)
+    {
+        return sqrt(distance2(x0,y0,x1,y1));
+    }
+    
+    inline double point_to_segment_distance(double x, double y, 
+                                            double ax, double ay, 
+                                            double bx, double by)
+    {
+        double len2 = distance2(ax,ay,bx,by);
+        
+        if (len2 < 1e-7) 
         {
-            double s = (y0 - y) * dx - (x0 - x) * dy;
-            return ( fabs (s) < TOL ) ;
-        } 
-        return false;
+            return distance(x,y,ax,ay);
+        }
+        
+        double r = ((x - ax)*(bx - ax) + (y - ay)*(by -ay))/len2;
+        if ( r < 0 )
+        {
+            return distance(x,y,ax,ay);
+        }
+        else if (r > 1)
+        {
+            return distance(x,y,bx,by);
+        }
+        double s = ((ay - y)*(bx - ax) - (ax - x)*(by - ay))/len2;
+        return fabs(s) * sqrt(len2);
     }
-
-    inline bool point_on_segment2(double x,double y,double x0,double y0,double x1,double y1)
-    {	 
-        double d  = sqrt ((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
-        double d0 = sqrt ((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y));
-        double d1 = sqrt ((x1 - x) * (x1 - x) + (y1 - y) * (y1 - y));
-        double d2 = d0 + d1;
-        return ( d2 - d < 0.01);
+        
+    template <typename Iter> 
+    inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
+    {
+        double x0=boost::get<0>(*start);
+        double y0=boost::get<1>(*start);
+        double x1,y1;
+        while (++start!=end) 
+        {
+            if ( boost::get<2>(*start) == SEG_MOVETO)
+            {
+                x0 = boost::get<0>(*start);
+                y0 = boost::get<1>(*start);
+                continue;
+            }		
+            x1=boost::get<0>(*start);
+            y1=boost::get<1>(*start);
+            
+            double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
+            if (distance < tol)
+                return true;
+            x0=x1;
+            y0=y1;
+        }
+    	return false;
     }
     
-#undef TOL
-    template <typename Iter> 
-    inline bool point_on_path(double x,double y,Iter start,Iter end)
-    {
-        return false;
-    }
-    
-    template <typename Iter> 
-    inline bool point_on_points (double x,double y,Iter start,Iter end) 
-    {
-        return false; 
-    }
-
+    // filters
     struct filter_in_box
     {
         Envelope<double> box_;
@@ -191,4 +217,4 @@ namespace mapnik
     };
 }
 
-#endif                                            //GEOM_UTIL_HPP
+#endif //GEOM_UTIL_HPP

@@ -28,6 +28,7 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_view.hpp>
 // jpeg png
 extern "C"
 {
@@ -37,9 +38,7 @@ extern "C"
 
 namespace mapnik
 {
-
     //use memory manager for mem allocation in libpng
-
     png_voidp malloc_fn(png_structp png_ptr,png_size_t size)
     {
         return Object::operator new(size);
@@ -48,10 +47,11 @@ namespace mapnik
     {
         Object::operator delete(ptr);
     }
-    //
-    void ImageUtils::save_to_file(const std::string& filename,
-                                  const std::string& type,
-                                  const Image32& image)
+    
+    template <typename T>
+    void save_to_file(std::string const& filename,
+                      std::string const& type,
+                      T const& image)
     {
         //all that should go into image_writer factory
         if (type=="png")
@@ -63,8 +63,9 @@ namespace mapnik
             save_as_jpeg(filename,85,image);
         }
     }
-
-    void ImageUtils::save_as_png(const std::string& filename,const Image32& image)
+    
+    template <typename T>
+    void save_as_png(std::string const& filename, T const& image)
     {
         FILE *fp=fopen(filename.c_str(), "wb");
         if (!fp) return;
@@ -105,20 +106,18 @@ namespace mapnik
                      PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                      PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
         png_write_info(png_ptr, info_ptr);
-
-        const ImageData32& imageData=image.data();
-
         for (unsigned i=0;i<image.height();i++)
         {
-            png_write_row(png_ptr,(png_bytep)imageData.getRow(i));
+            png_write_row(png_ptr,(png_bytep)image.getRow(i));
         }
 
         png_write_end(png_ptr, info_ptr);
         png_destroy_write_struct(&png_ptr, &info_ptr);
         fclose(fp);
     }
-
-    void ImageUtils::save_as_jpeg(const std::string& filename,int quality, const Image32& image)
+    
+    template <typename T>
+    void save_as_jpeg(std::string const& filename,int quality, T const& image)
     {
         FILE *fp=fopen(filename.c_str(), "wb");
         if (!fp) return;
@@ -140,10 +139,10 @@ namespace mapnik
         jpeg_start_compress(&cinfo, 1);
         JSAMPROW row_pointer[1];
         JSAMPLE* row=new JSAMPLE[width*3];
-        const ImageData32& imageData=image.data();
+        
         while (cinfo.next_scanline < cinfo.image_height) 
         {
-            const unsigned* imageRow=imageData.getRow(cinfo.next_scanline);
+            const unsigned* imageRow=image.getRow(cinfo.next_scanline);
             int index=0;
             for (int i=0;i<width;++i)
             {
@@ -158,5 +157,14 @@ namespace mapnik
         jpeg_finish_compress(&cinfo);
         fclose(fp);
         jpeg_destroy_compress(&cinfo);
-    }
+    }  
+    
+    template void save_to_file<ImageData32>(std::string const&,
+                                            std::string const& , 
+                                            ImageData32 const&);
+
+    template void save_to_file<image_view<ImageData32> > (std::string const&,
+                                                          std::string const& , 
+                                                          image_view<ImageData32> const&);
+    
 }

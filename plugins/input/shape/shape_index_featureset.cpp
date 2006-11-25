@@ -197,4 +197,5 @@ template <typename filterT>
 shape_index_featureset<filterT>::~shape_index_featureset() {}
 
 template class shape_index_featureset<filter_in_box>;
+template class shape_index_featureset<filter_at_point>;
 

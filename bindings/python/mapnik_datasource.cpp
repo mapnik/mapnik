@@ -75,8 +75,8 @@ void export_datasource()
     
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
-        .def("envelope",&datasource::envelope,
-             return_value_policy<copy_const_reference>())
+        .def("envelope",&datasource::envelope)
+        .def("descriptor",&datasource::get_descriptor) //todo
         .def("features",&datasource::features)
         .def("params",&datasource::params,return_value_policy<copy_const_reference>(), 
              "The configuration parameters of the data source. "  

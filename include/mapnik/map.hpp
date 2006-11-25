@@ -60,6 +60,7 @@ namespace mapnik
         Layer& getLayer(size_t index);
         void removeLayer(size_t index);
         std::vector<Layer> const& layers() const;
+        std::vector<Layer> & layers();
         void remove_all();        
         unsigned getWidth() const;
         unsigned getHeight() const;
@@ -77,6 +78,7 @@ namespace mapnik
         void pan_and_zoom(int x,int y,double zoom);
         const Envelope<double>& getCurrentExtent() const;
         double scale() const;
+        CoordTransform view_transform() const;
         ~Map();
     private:
         void fixAspectRatio();

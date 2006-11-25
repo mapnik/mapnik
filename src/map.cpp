@@ -124,7 +124,12 @@ namespace mapnik
     {
         return layers_;
     }
-    
+
+    std::vector<Layer> & Map::layers()
+    {
+        return layers_;
+    }
+
     unsigned Map::getWidth() const
     {
         return width_;
@@ -294,6 +299,11 @@ namespace mapnik
         if (width_>0)
             return currentExtent_.width()/width_;
         return currentExtent_.width();
+    }
+
+    CoordTransform Map::view_transform() const
+    {
+        return CoordTransform(width_,height_,currentExtent_);
     }
     
     Map::~Map() {}

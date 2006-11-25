@@ -46,8 +46,8 @@ namespace mapnik {
         virtual feature_ptr next()=0;
         virtual ~Featureset() {};
     };
-
-    typedef boost::shared_ptr<Featureset> featureset_ptr;
+    
+    typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
     
     class MAPNIK_DECL datasource_exception : public std::exception
     {
@@ -84,8 +84,8 @@ namespace mapnik {
         virtual int type() const=0;
         virtual featureset_ptr features(const query& q) const=0;
         virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
-        virtual Envelope<double> const& envelope() const=0;
-        virtual layer_descriptor const& get_descriptor() const=0;
+        virtual Envelope<double> envelope() const=0;
+        virtual layer_descriptor get_descriptor() const=0;
         virtual ~datasource() {};
     };
     
@@ -103,7 +103,7 @@ namespace mapnik {
         }
     };
 
-    typedef boost::shared_ptr<datasource> datasource_p;
+    typedef boost::shared_ptr<datasource> datasource_ptr;
     
     
     #define DATASOURCE_PLUGIN(classname)                              \

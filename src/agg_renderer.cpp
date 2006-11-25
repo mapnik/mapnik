@@ -419,7 +419,7 @@ namespace mapnik
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
     {
-        typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+        typedef coord_transform2<CoordTransform,geometry_type> path_type;
         typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
         typedef agg::wrap_mode_repeat wrap_x_type;
         typedef agg::wrap_mode_repeat wrap_y_type;

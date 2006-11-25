@@ -33,6 +33,7 @@
 #include <mapnik/gamma.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/envelope.hpp>
+#include <mapnik/image_view.hpp>
 
 namespace mapnik
 {
@@ -45,9 +46,9 @@ namespace mapnik
         ImageData32 data_;
     public:
         Image32(int width,int height);
-        Image32(const Image32& rhs);
+        Image32(Image32 const& rhs);
         ~Image32();
-        void setBackground(const Color& background);
+        void setBackground(Color const& background);
         const Color& getBackground() const;     
         const ImageData32& data() const;
         
@@ -65,10 +66,16 @@ namespace mapnik
         {
             return data_.getBytes();
         }
-	
+        
+        inline image_view<ImageData32> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
+        {
+            return image_view<ImageData32>(x,y,w,h,data_);
+        }
+        
         void saveToFile(const std::string& file,const std::string& format="auto"); 
-    private:
 
+    private:
+        
         inline bool checkBounds(unsigned x, unsigned y) const
         {
             return (x < width_ && y < height_);
