@@ -54,7 +54,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                params.get("password"))    
 {     
     ConnectionManager *mgr=ConnectionManager::instance();   
-    mgr->registerPool(creator_,10,20);
+    mgr->registerPool(creator_,5,10);
     
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)

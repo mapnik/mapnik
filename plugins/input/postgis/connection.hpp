@@ -89,6 +89,9 @@ public:
     ~Connection()
     {
         PQfinish(conn_);
+#ifdef MAPNIK_DEBUG
+        std::clog << "close connection " << conn_ << "\n";
+#endif 
     }
 };
 

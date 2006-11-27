@@ -76,7 +76,7 @@ class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
 
 public:
 	
-    bool registerPool(const ConnectionCreator<Connection>& creator,int initialSize,int maxSize) 
+    bool registerPool(const ConnectionCreator<Connection>& creator,unsigned initialSize,unsigned maxSize) 
     {	    
         mutex::scoped_lock lock(mutex_);
         if (pools_.find(creator.id())==pools_.end())
@@ -89,7 +89,7 @@ public:
 	   	     
     }
     
-    const boost::shared_ptr<PoolType>& getPool(const std::string& key) 
+    boost::shared_ptr<PoolType> getPool(std::string const& key) 
     {
         mutex::scoped_lock lock(mutex_);
         ContType::const_iterator itr=pools_.find(key);
@@ -101,7 +101,7 @@ public:
         return emptyPool;
     }
 	
-    const HolderType& get(const std::string& key)
+    HolderType get(std::string const& key)
     {
         mutex::scoped_lock lock(mutex_);
         ContType::const_iterator itr=pools_.find(key);
@@ -110,10 +110,9 @@ public:
             boost::shared_ptr<PoolType> pool=itr->second;
             return pool->borrowObject();
         }
-        static const HolderType EmptyConn;
-        return EmptyConn;
+        return HolderType();
     }
-        
+    
 private:
     ConnectionManager() {}
     ConnectionManager(const ConnectionManager&);

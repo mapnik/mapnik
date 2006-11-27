@@ -68,25 +68,25 @@ namespace mapnik
         typedef std::deque<HolderType> ContType;	
 	
         Creator<T> creator_;
-        const int initialSize_; 
-        const int maxSize_;
+        const unsigned initialSize_; 
+        const unsigned maxSize_;
         ContType usedPool_;
         ContType unusedPool_;
         boost::mutex mutex_;
     public:
 
-        Pool(const Creator<T>& creator,int initialSize=5,int maxSize=20)
+        Pool(const Creator<T>& creator,unsigned initialSize=1, unsigned maxSize=10)
             :creator_(creator),
              initialSize_(initialSize),
              maxSize_(maxSize)
         {
-            for (int i=0;i<initialSize_;++i) 
+            for (unsigned i=0; i < initialSize_; ++i) 
             {
                 unusedPool_.push_back(HolderType(creator_()));
             }
         }
 
-        const HolderType& borrowObject()
+        HolderType borrowObject()
         {	    
             mutex::scoped_lock lock(mutex_);
             typename ContType::iterator itr=unusedPool_.begin();
@@ -99,11 +99,20 @@ namespace mapnik
                 itr=unusedPool_.erase(itr);
                 return usedPool_[usedPool_.size()-1];
             }
-            static const HolderType defaultObj;
-            return defaultObj;
+            else if (unusedPool_.size() < maxSize_)
+            {
+                HolderType conn(creator_());
+                usedPool_.push_back(conn);
+#ifdef MAPNIK_DEBUG
+                std::clog << "create << " << conn.get() << "\n";
+#endif
+                return conn;
+            }
+            
+            return HolderType();
         } 
 
-        void returnObject(const HolderType& obj)
+        void returnObject(HolderType obj)
         {
             mutex::scoped_lock lock(mutex_);
             typename ContType::iterator itr=usedPool_.begin();

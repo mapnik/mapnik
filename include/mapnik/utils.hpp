@@ -22,6 +22,7 @@
 #define UTILS_HPP
 // stl
 #include <stdexcept>
+#include <cstdlib>
 #include <limits>
 #include <ctime>
 #include <sstream>
@@ -66,18 +67,21 @@ namespace mapnik
             int Test::* pMember_;
             int (Test::*pMemberFn_)(int);
         };
+
     public:
+        
         static T* create()
         {
             static MaxAlign staticMemory;
             return new(&staticMemory) T;
         }
+        
         static void destroy(volatile T* obj)
         {
             obj->~T();
         }
     };
-
+    
     template <typename T,
               template <typename T> class CreatePolicy=CreateStatic> class singleton
               {
@@ -90,14 +94,20 @@ namespace mapnik
                   {
                       throw std::runtime_error("dead reference!");
                   }
+                  
+                  static void DestroySingleton()
+                  {
+                      CreatePolicy<T>::destroy(pInstance_);
+                      pInstance_ = 0;
+                      destroyed_=true;
+#ifdef MAPNIK_DEBUG
+                      std::clog << " destroyed singleton \n";
+#endif
+                  }
+                  
               protected:
                   static mutex mutex_;
                   singleton() {}
-                  virtual ~singleton()
-                  {
-                      CreatePolicy<T>::destroy(pInstance_);
-                      destroyed_=true;
-                  }
               public:
                   static  T* instance()
                   {
@@ -113,6 +123,8 @@ namespace mapnik
                               else
                               {
                                   pInstance_=CreatePolicy<T>::create();
+                                  // register destruction
+                                  std::atexit(&DestroySingleton);
                               }
                           }
                       }
@@ -126,72 +138,7 @@ namespace mapnik
               template <typename T> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
     template <typename T,
               template <typename T> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
-
-    template <class T> class Handle
-    {
-        T* ptr_;
-        int* pCount_;
-    public:
-        T* operator->() {return ptr_;}
-        const T* operator->() const {return ptr_;}
-        Handle(T* ptr)
-            :ptr_(ptr),pCount_(new int(1)) {}
-        Handle(const Handle& rhs)
-            :ptr_(rhs.ptr_),pCount_(rhs.pCount_)
-        {
-            (*pCount_)++;
-        }
-        Handle& operator=(const Handle& rhs)
-        {
-            if (ptr_==rhs.ptr_) return *this;
-            if (--(*pCount_)==0)
-            {
-                delete ptr_;
-                delete pCount_;
-            }
-            ptr_=rhs.ptr_;
-            pCount_=rhs.pCount_;
-            (*pCount_)++;
-            return *this;
-        }
-        ~Handle()
-        {
-            if (--(*pCount_)==0)
-            {
-                delete ptr_;
-                delete pCount_;
-            }
-        }
-    };
-    
-    //converters
-    class BadConversion : public std::runtime_error
-    {
-    public:
-        BadConversion(const std::string& s)
-            :std::runtime_error(s)
-        {}
-    };
-    
-    template <typename T>
-    inline std::string toString(const T& x)
-    {
-        std::ostringstream o;
-        if (!(o << x))
-            throw BadConversion(std::string("toString(")
-                                + typeid(x).name() + ")");
-        return o.str();
-    }
-    
-    template<typename T>
-    inline void fromString(const std::string& s, T& x,
-                           bool failIfLeftoverChars = true)
-    {
-        std::istringstream i(s);
-        char c;
-        if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
-            throw BadConversion("fromString("+s+")");
-    }
+   
 }
 
 
