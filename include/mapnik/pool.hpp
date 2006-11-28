@@ -82,7 +82,9 @@ namespace mapnik
         {
             for (unsigned i=0; i < initialSize_; ++i) 
             {
-                unusedPool_.push_back(HolderType(creator_()));
+                HolderType conn(creator_());
+                if (conn->isOK())
+                    unusedPool_.push_back(conn);
             }
         }
 
@@ -102,13 +104,15 @@ namespace mapnik
             else if (unusedPool_.size() < maxSize_)
             {
                 HolderType conn(creator_());
-                usedPool_.push_back(conn);
+                if (conn->isOK())
+                {
+                    usedPool_.push_back(conn);
 #ifdef MAPNIK_DEBUG
                 std::clog << "create << " << conn.get() << "\n";
 #endif
                 return conn;
+                }
             }
-            
             return HolderType();
         } 
 
