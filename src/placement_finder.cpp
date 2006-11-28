@@ -38,6 +38,10 @@
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/text_path.hpp>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace mapnik
 {
     //For shields
