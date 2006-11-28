@@ -37,17 +37,7 @@ extern "C"
 }
 
 namespace mapnik
-{
-    //use memory manager for mem allocation in libpng
-    png_voidp malloc_fn(png_structp png_ptr,png_size_t size)
-    {
-        return Object::operator new(size);
-    }
-    void free_fn(png_structp png_ptr, png_voidp ptr)
-    {
-        Object::operator delete(ptr);
-    }
-    
+{ 
     template <typename T>
     void save_to_file(std::string const& filename,
                       std::string const& type,
@@ -69,12 +59,11 @@ namespace mapnik
     {
         FILE *fp=fopen(filename.c_str(), "wb");
         if (!fp) return;
-        png_voidp mem_ptr=0;
+        png_voidp error_ptr=0;
         png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
-                                                    (png_voidp)mem_ptr,0, 0);
-	
+                                                    error_ptr,0, 0);
+
         if (!png_ptr) return;
-        png_set_mem_fn(png_ptr,mem_ptr,malloc_fn,free_fn);
 
         // switch on optimization only if supported
 #if defined(PNG_LIBPNG_VER) && (PNG_LIBPNG_VER >= 10200) && defined(PNG_ASSEMBLER_CODE_SUPPORTED)
