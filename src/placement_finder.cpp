@@ -373,9 +373,9 @@ namespace mapnik
                 angle_delta = last_angle - angle;
                 // normalise between -180 and 180
                 while (angle_delta > M_PI)
-                    angle_delta -= M_PI;
+                    angle_delta -= 2*M_PI;
                 while (angle_delta < -M_PI)
-                    angle_delta += M_PI;
+                    angle_delta += 2*M_PI;
                 if (p->max_char_angle_delta > 0 && fabs(angle_delta) > p->max_char_angle_delta*(M_PI/180))
                 {
                     return false;
