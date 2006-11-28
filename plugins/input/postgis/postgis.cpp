@@ -27,6 +27,7 @@
 #include <set>
 #include <sstream>
 #include <iomanip>
+#include <boost/lexical_cast.hpp>
 #include "connection_manager.hpp"
 #include "postgis.hpp"
 
@@ -52,9 +53,31 @@ postgis_datasource::postgis_datasource(parameters const& params)
                params.get("dbname"),
                params.get("user"),
                params.get("password"))    
-{     
+{   
+
+    unsigned initial_size;
+    unsigned max_size;
+    
+    try 
+    {
+        initial_size = boost::lexical_cast<unsigned>(params.get("initial_size")); 
+    }
+    catch (bad_lexical_cast& )
+    {
+        initial_size = 1;
+    }
+    
+    try 
+    {
+        max_size = boost::lexical_cast<unsigned>(params.get("initial_size")); 
+    }
+    catch (bad_lexical_cast&)
+    {
+        max_size = 10;
+    }
+    
     ConnectionManager *mgr=ConnectionManager::instance();   
-    mgr->registerPool(creator_,5,10);
+    mgr->registerPool(creator_, initial_size, max_size);
     
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
