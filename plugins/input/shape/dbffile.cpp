@@ -178,7 +178,7 @@ void dbf_file::read_header()
     {
         skip(3);
         num_records_=read_int();
-        assert(num_records_>0);
+        assert(num_records_>=0);
         num_fields_=read_short();
         assert(num_fields_>0);
         num_fields_=(num_fields_-33)/32;
