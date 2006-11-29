@@ -91,7 +91,7 @@ shape_datasource::~shape_datasource()
 {
 }
 
-std::string shape_datasource::name_="shape";
+const std::string shape_datasource::name_="shape";
 
 void  shape_datasource::init(shape_io& shape)
 {

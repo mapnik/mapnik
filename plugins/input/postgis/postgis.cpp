@@ -46,7 +46,8 @@ using boost::shared_ptr;
 postgis_datasource::postgis_datasource(parameters const& params)
     : datasource (params),
       table_(params.get("table")),
-      type_(datasource::Vector), 
+      type_(datasource::Vector),
+      extent_initialized_(false),
       desc_(params.get("type")),
       creator_(params.get("host"),
                params.get("port"),
@@ -60,7 +61,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
     
     try 
     {
-        initial_size = boost::lexical_cast<unsigned>(params.get("initial_size")); 
+        initial_size = boost::lexical_cast<unsigned>(params_.get("initial_size")); 
     }
     catch (bad_lexical_cast& )
     {
@@ -69,7 +70,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
     
     try 
     {
-        max_size = boost::lexical_cast<unsigned>(params.get("initial_size")); 
+        max_size = boost::lexical_cast<unsigned>(params_.get("initial_size")); 
     }
     catch (bad_lexical_cast&)
     {
@@ -82,7 +83,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
     {
-        const shared_ptr<Connection>& conn = pool->borrowObject();
+        shared_ptr<Connection> conn = pool->borrowObject();
         if (conn && conn->isOK())
         {
             PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
@@ -106,39 +107,6 @@ postgis_datasource::postgis_datasource(parameters const& params)
                 }
                 geometryColumn_=rs->getValue("f_geometry_column");
                 std::string postgisType=rs->getValue("type");
-            }
-            rs->close();
-            s.str("");
-            
-            if (params.get("estimate_extent") == "true")
-            {
-                s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
-                  << " from (select estimated_extent('" 
-                  << table_name <<"','" 
-                  << geometryColumn_ << "') as ext) as tmp";
-            }
-            else 
-            {
-                s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
-                  << " from (select extent(" <<geometryColumn_<< ") as ext from " 
-                  << table_name << ") as tmp";
-            }
-            
-            rs=conn->executeQuery(s.str());
-            if (rs->next())
-            {
-                try 
-                {
-                    double lox=lexical_cast<double>(rs->getValue(0));
-                    double loy=lexical_cast<double>(rs->getValue(1));
-                    double hix=lexical_cast<double>(rs->getValue(2));
-                    double hiy=lexical_cast<double>(rs->getValue(3));		    
-                    extent_.init(lox,loy,hix,hiy);
-                }
-                catch (bad_lexical_cast &ex)
-                {
-                    clog << ex.what() << endl;
-                }
             }
             rs->close();
             
@@ -182,7 +150,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
     }
 }
 
-std::string postgis_datasource::name_="postgis";
+std::string const postgis_datasource::name_="postgis";
 
 std::string postgis_datasource::name()
 {
@@ -216,13 +184,12 @@ std::string postgis_datasource::table_from_sql(const std::string& sql)
 
 featureset_ptr postgis_datasource::features(const query& q) const
 {
-    Featureset *fs=0;
     Envelope<double> const& box=q.get_bbox();
     ConnectionManager *mgr=ConnectionManager::instance();
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
     {
-        const shared_ptr<Connection>& conn = pool->borrowObject();
+        shared_ptr<Connection> conn = pool->borrowObject();
         if (conn && conn->isOK())
         {       
             PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
@@ -235,18 +202,17 @@ featureset_ptr postgis_datasource::features(const query& q) const
             {
                 s <<",\""<<*pos<<"\"";
                 ++pos;
-            }	
-    
+            }	 
             s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
             s << std::setprecision(16);
             s << box.minx() << " " << box.miny() << ",";
             s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
             
             shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-            fs=new postgis_featureset(rs,props.size());
+            return featureset_ptr(new postgis_featureset(rs,props.size()));
         }
     }
-    return featureset_ptr(fs);
+    return featureset_ptr();
 }
 
 featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
@@ -256,6 +222,51 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
 
 Envelope<double> postgis_datasource::envelope() const
 {
+    if (extent_initialized_) return extent_;
+    
+    ConnectionManager *mgr=ConnectionManager::instance();
+    shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
+    if (pool)
+    {
+        shared_ptr<Connection> conn = pool->borrowObject();
+        if (conn && conn->isOK())
+        {
+            std::ostringstream s;
+            std::string table_name = table_from_sql(table_);
+            if (params_.get("estimate_extent") == "true")
+            {
+                s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
+                  << " from (select estimated_extent('" 
+                  << table_name <<"','" 
+                  << geometryColumn_ << "') as ext) as tmp";
+            }
+            else 
+            {
+                s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
+                  << " from (select extent(" <<geometryColumn_<< ") as ext from " 
+                  << table_name << ") as tmp";
+            }
+            
+            shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
+            if (rs->next())
+            {
+                try 
+                {
+                    double lox=lexical_cast<double>(rs->getValue(0));
+                    double loy=lexical_cast<double>(rs->getValue(1));
+                    double hix=lexical_cast<double>(rs->getValue(2));
+                    double hiy=lexical_cast<double>(rs->getValue(3));		    
+                    extent_.init(lox,loy,hix,hiy);
+                    extent_initialized_ = true;
+                }
+                catch (bad_lexical_cast &ex)
+                {
+                    clog << ex.what() << endl;
+                }
+            }
+            rs->close();
+        }
+    }
     return extent_;
 }
 

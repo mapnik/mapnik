@@ -48,10 +48,11 @@ class postgis_datasource : public datasource
     std::string geometryColumn_;
     int type_;
     int srid_;
-    mapnik::Envelope<double> extent_;
+    mutable bool extent_initialized_;
+    mutable mapnik::Envelope<double> extent_;
     layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
-    static std::string name_;
+    static const std::string name_;
 public:
     static std::string name();
     int type() const;
@@ -76,7 +77,6 @@ private:
     mutable int count_;
 public:
     postgis_featureset(const boost::shared_ptr<ResultSet>& rs,unsigned num_attrs);
-    void dispose();
     feature_ptr next();
     ~postgis_featureset();
 private:

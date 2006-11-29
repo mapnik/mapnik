@@ -22,10 +22,9 @@
 
 //$Id: postgisfs.cc 34 2005-04-04 13:27:23Z pavlenko $
 
-
-#include "postgis.hpp"
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
+#include "postgis.hpp"
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;

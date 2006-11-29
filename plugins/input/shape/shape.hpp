@@ -55,7 +55,7 @@ private:
     Envelope<double> extent_;
     bool indexed_;
     layer_descriptor desc_;
-    static std::string name_;
+    static const std::string name_;
 };
 
 #endif //SHAPE_HPP
