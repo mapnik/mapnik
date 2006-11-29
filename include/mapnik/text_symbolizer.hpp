@@ -53,6 +53,10 @@ namespace mapnik
         void set_wrap_width(unsigned ratio);
         unsigned get_label_spacing() const; // spacing between repeated labels on lines
         void set_label_spacing(unsigned spacing);
+        unsigned get_label_position_tolerance() const; //distance the label can be moved on the line to fit, if 0 the default is used
+        void set_label_position_tolerance(unsigned tolerance);
+		bool get_force_odd_labels() const; // try render an odd amount of labels
+		void set_force_odd_labels(bool force);
         double get_max_char_angle_delta() const; // maximum change in angle between adjacent characters
         void set_max_char_angle_delta(double angle);
         unsigned get_text_size() const;
@@ -78,6 +82,8 @@ namespace mapnik
         unsigned text_ratio_;
         unsigned wrap_width_;
         unsigned label_spacing_;
+        unsigned label_position_tolerance_;
+        bool force_odd_labels_;
         double max_char_angle_delta_;
         Color fill_;
         Color halo_fill_;

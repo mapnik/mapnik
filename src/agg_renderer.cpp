@@ -256,7 +256,6 @@ namespace mapnik
             //    ren_oaa.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
             //    ren_oaa.clip_box(0,0,pixmap_.width(),pixmap_.height());
             //    ras_oaa.add_path(path);		
-		 
             //    }
             else 
             {
@@ -520,6 +519,8 @@ namespace mapnik
                     text_placement.text_ratio = sym.get_text_ratio();
                     text_placement.wrap_width = sym.get_wrap_width();
                     text_placement.label_spacing = sym.get_label_spacing();
+                    text_placement.label_position_tolerance = sym.get_label_position_tolerance();
+                    text_placement.force_odd_labels = sym.get_force_odd_labels();
                     text_placement.max_char_angle_delta = sym.get_max_char_angle_delta();
                     text_placement.avoid_edges = sym.get_avoid_edges();
                   

@@ -46,13 +46,13 @@ namespace mapnik
 {
     //For shields
     placement::placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, std::pair<double, double> dimensions_)
-        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(point_placement), dimensions(dimensions_), has_dimensions(true), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), max_char_angle_delta(0.0), avoid_edges(false)
+        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(point_placement), dimensions(dimensions_), has_dimensions(true), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), label_position_tolerance(0), force_odd_labels(false), max_char_angle_delta(0.0), avoid_edges(false)
     {
     }
 
     //For text
     placement::placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, label_placement_e placement_)
-        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(placement_), has_dimensions(false), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), max_char_angle_delta(0.0), avoid_edges(false)
+        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(placement_), has_dimensions(false), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), label_position_tolerance(0), force_odd_labels(false), max_char_angle_delta(0.0), avoid_edges(false)
     {
     }
   
@@ -183,20 +183,55 @@ namespace mapnik
         int num_labels = 0;
         if (p->label_spacing)
             num_labels = static_cast<int> (floor(distance / (p->label_spacing + string_width)));
-        if (num_labels == 0)
+		if (p->force_odd_labels && num_labels%2 == 0)
+			num_labels--;
+        if (num_labels <= 0)
             num_labels = 1;
 
         double ideal_spacing = distance/num_labels;
         std::vector<double> ideal_label_distances;
-        for (double label_pos = string_width/2.0; label_pos < distance - string_width/2.0; label_pos += ideal_spacing)
-            ideal_label_distances.push_back(label_pos);
+		
+		double middle = (distance / 2.0) - (string_width/2.0); //try draw text centered
+		
+		if (num_labels % 2) //odd amount of labels
+		{
+			for (int a = 0; a < (num_labels+1)/2; a++)
+			{
+				ideal_label_distances.push_back(middle - (a*ideal_spacing));
+	
+				if (a != 0)
+					ideal_label_distances.push_back(middle + (a*ideal_spacing));
+			}
+		}
+		else //even amount of labels
+		{
+			for (int a = 0; a < num_labels/2; a++)
+			{
+				ideal_label_distances.push_back(middle - (ideal_spacing/2.0) - (a*ideal_spacing));
+				ideal_label_distances.push_back(middle + (ideal_spacing/2.0) + (a*ideal_spacing));
+			}
+		}
 
-        double delta = ideal_spacing/100.0;
+        double delta;
+		double tolerance;
+
+		if (p->label_position_tolerance > 0)
+		{
+			tolerance = p->label_position_tolerance;
+			delta = std::max ( 1.0, p->label_position_tolerance/100.0);
+		}
+		else
+		{
+			tolerance = ideal_spacing/2.0;
+			delta = ideal_spacing/100.0;
+		}
+
+
         bool FoundPlacement = false;
         for (std::vector<double>::const_iterator itr = ideal_label_distances.begin(); itr < ideal_label_distances.end(); ++itr)
         {
             //std::clog << "Trying to find txt placement at distance: " << *itr << std::endl;
-            for (double i = 0; i < ideal_spacing/2.0; i += delta)
+            for (double i = 0; i < tolerance; i += delta)
             {
                 p->clear_envelopes();
         
@@ -431,7 +466,7 @@ namespace mapnik
                 render_y -= ci.width*sin(render_angle) + (string_height-2)*cos(render_angle);
                 render_angle += M_PI;
             }
-
+        
         
             p->current_placement.path.add_node(c, render_x - p->current_placement.starting_x, -render_y + p->current_placement.starting_y, render_angle);
             x += next_char_x;

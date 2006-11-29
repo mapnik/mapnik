@@ -89,6 +89,8 @@ namespace mapnik
     int text_ratio;
 
     int label_spacing; // distance between repeated labels on a single geometry
+    unsigned label_position_tolerance; //distance the label can be moved on the line to fit, if 0 the default is used
+	bool force_odd_labels; //Always try render an odd amount of labels
 
     double max_char_angle_delta;
     

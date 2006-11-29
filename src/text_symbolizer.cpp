@@ -36,6 +36,8 @@ namespace mapnik
           text_ratio_(0),
           wrap_width_(0),
           label_spacing_(0),
+          label_position_tolerance_(0),
+          force_odd_labels_(false),
           max_char_angle_delta_(0),
 	  fill_(fill),
 	  halo_fill_(Color(255,255,255)),
@@ -52,6 +54,8 @@ namespace mapnik
           text_ratio_(rhs.text_ratio_),
           wrap_width_(rhs.wrap_width_),
           label_spacing_(rhs.label_spacing_),
+          label_position_tolerance_(rhs.label_position_tolerance_),
+          force_odd_labels_(rhs.force_odd_labels_),
           max_char_angle_delta_(rhs.max_char_angle_delta_),
           fill_(rhs.fill_),
           halo_fill_(rhs.halo_fill_),
@@ -71,6 +75,8 @@ namespace mapnik
         text_ratio_ = other.text_ratio_;
         wrap_width_ = other.wrap_width_;
         label_spacing_ = other.label_spacing_;
+        label_position_tolerance_ = other.label_position_tolerance_;
+        force_odd_labels_ = other.force_odd_labels_;
         max_char_angle_delta_ = other.max_char_angle_delta_;
         fill_ = other.fill_;
         halo_fill_ = other.halo_fill_;
@@ -121,6 +127,26 @@ namespace mapnik
     void  text_symbolizer::set_label_spacing(unsigned spacing) 
     {
         label_spacing_ = spacing;
+    }
+
+    unsigned  text_symbolizer::get_label_position_tolerance() const
+    {
+        return label_position_tolerance_;
+    }
+
+    void  text_symbolizer::set_label_position_tolerance(unsigned tolerance)
+    {
+        label_position_tolerance_ = tolerance;
+    }
+
+    bool  text_symbolizer::get_force_odd_labels() const
+    {
+        return force_odd_labels_;
+    }
+
+    void  text_symbolizer::set_force_odd_labels(bool force) 
+    {
+        force_odd_labels_ = force;
     }
 
     double text_symbolizer::get_max_char_angle_delta() const
