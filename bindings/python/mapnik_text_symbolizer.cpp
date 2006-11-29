@@ -55,6 +55,12 @@ void export_text_symbolizer()
         .add_property("label_spacing",
                       &text_symbolizer::get_label_spacing,
                       &text_symbolizer::set_label_spacing)
+        .add_property("label_position_tolerance",
+                      &text_symbolizer::get_label_position_tolerance,
+                      &text_symbolizer::set_label_position_tolerance)
+        .add_property("force_odd_labels",
+                      &text_symbolizer::get_force_odd_labels,
+                      &text_symbolizer::set_force_odd_labels)
         .add_property("max_char_angle_delta",
                       &text_symbolizer::get_max_char_angle_delta,
                       &text_symbolizer::set_max_char_angle_delta)
