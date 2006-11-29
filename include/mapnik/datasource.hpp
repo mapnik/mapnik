@@ -66,7 +66,6 @@ namespace mapnik {
     
     class MAPNIK_DECL datasource : private boost::noncopyable
     {
-        parameters params_;
     public:        
         enum {
             Vector,
@@ -87,6 +86,8 @@ namespace mapnik {
         virtual Envelope<double> envelope() const=0;
         virtual layer_descriptor get_descriptor() const=0;
         virtual ~datasource() {};
+    protected:
+        parameters params_;
     };
     
     typedef std::string datasource_name();
