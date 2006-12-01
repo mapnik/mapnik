@@ -125,14 +125,12 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     int type_oid = rs->getTypeOID(i);
                     switch (type_oid)
                     {
-                    case 17285: // geometry
-                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Geometry));
-                        break;
                     case 21:    // int2
                     case 23:    // int4
                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer,false,length));
                         break;
-                    case 701:  // float8
+                    case 700:   // float4 
+                    case 701:   // float8
                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double,false,length));
                     case 1042:  // bpchar
                     case 1043:  // varchar
@@ -140,8 +138,9 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
                         break;
                     default: // shouldn't get here
+#ifdef MAPNIK_DEBUG
                         clog << "unknown type_oid="<<type_oid<<endl;
-                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+#endif
                         break;
                     }	  
                 }
@@ -207,7 +206,10 @@ featureset_ptr postgis_datasource::features(const query& q) const
             s << std::setprecision(16);
             s << box.minx() << " " << box.miny() << ",";
             s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
-            
+           
+#ifdef MAPNIK_DEBUG
+            std::clog << s.str() << "\n";
+#endif           
             shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
             return featureset_ptr(new postgis_featureset(rs,props.size()));
         }

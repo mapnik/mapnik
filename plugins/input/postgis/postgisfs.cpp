@@ -56,7 +56,7 @@ feature_ptr postgis_featureset::next()
                 std::string name = rs_->getFieldName(pos);
                 const char* buf=rs_->getValue(pos);
                 int oid = rs_->getTypeOID(pos);
-		
+                
                 if (oid==23) //int4
                 {
                     int val = int4net(buf);
@@ -85,8 +85,10 @@ feature_ptr postgis_featureset::next()
                 }
                 else 
                 {
+#ifdef MAPNIK_DEBUG
                     std::clog << "uknown OID = " << oid << " FIXME \n";
-                    boost::put(*feature,name,0);
+#endif
+                    //boost::put(*feature,name,0);
                 }
             }
             ++count_;
