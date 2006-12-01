@@ -189,8 +189,8 @@ namespace mapnik
             png_set_gray_to_rgb(png_ptr);
 
         // quick hack -- only work in >=libpng 1.2.7
-        png_set_add_alpha(png_ptr,1,1);
-
+        png_set_add_alpha(png_ptr,0xff,PNG_FILLER_AFTER); //rgba
+        
         double gamma;
         if (png_get_gAMA(png_ptr, info_ptr, &gamma))
             png_set_gamma(png_ptr, 2.2, gamma);
