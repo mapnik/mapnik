@@ -53,7 +53,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                 int image_height=reader->height();
                 if (image_width>0 && image_height>0)
                 {
-                    CoordTransform t(image_width,image_height,curIter_->envelope());
+                    CoordTransform t(image_width,image_height,curIter_->envelope(),0,0);
                     Envelope<double> intersect=extent_.intersect(curIter_->envelope());
                     Envelope<double> ext=t.forward(intersect);
                     

@@ -93,9 +93,11 @@ namespace mapnik {
 	    int height;
 	    double scale_;
 	    Envelope<double> extent_;
+        double offset_x_,offset_y_;
     public:
-        CoordTransform(int width,int height,const Envelope<double>& extent)
-            :width(width),height(height),extent_(extent)
+        CoordTransform(int width,int height,const Envelope<double>& extent,
+                       double offset_x = 0, double offset_y = 0)
+            :width(width),height(height),extent_(extent),offset_x_(offset_x),offset_y_(offset_y)
         {
             double sx=((double)width)/extent_.width();
             double sy=((double)height)/extent_.height();
@@ -110,14 +112,14 @@ namespace mapnik {
         inline void forward(double * x, double * y) const
         {
             
-            *x = (*x - extent_.minx()) * scale_;
-            *y = (extent_.maxy() - *y) * scale_;
+            *x = (*x - extent_.minx()) * scale_ - offset_x_;
+            *y = (extent_.maxy() - *y) * scale_ - offset_y_;
         }
         
         inline void backward(double * x, double * y) const
         {
-            *x = extent_.minx() + *x/scale_;
-            *y = extent_.maxy() - *y/scale_;
+            *x = extent_.minx() + (*x + offset_x_)/scale_;
+            *y = extent_.maxy() - (*y + offset_y_)/scale_;
         }
         
         inline coord2d& forward(coord2d& c) const

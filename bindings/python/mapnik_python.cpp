@@ -55,7 +55,6 @@ void export_projection();
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
-#include <mapnik/datasource_cache.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
 
@@ -79,19 +78,11 @@ void render(const mapnik::Map& map,mapnik::Image32& image)
 BOOST_PYTHON_MODULE(_mapnik)
 {
     using namespace boost::python;
-    using mapnik::Featureset;
-    using mapnik::featureset_ptr;
-    using mapnik::datasource;
-    using mapnik::coord;
-    using mapnik::filter_ptr;
+ 
     using mapnik::load_map;
     using mapnik::save_map;
     
-    export_query();
-    
-    class_<Featureset,featureset_ptr,boost::noncopyable>("FeatureSet",no_init)
-      ;
-    
+    export_query();    
     export_datasource();
     export_parameters();
     export_color(); 
@@ -123,5 +114,5 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("load_map",&load_map,"load Map object from XML");
     def("save_map",&load_map,"sace Map object to XML");
     
-    register_ptr_to_python<filter_ptr>();
+    register_ptr_to_python<mapnik::filter_ptr>();
 }

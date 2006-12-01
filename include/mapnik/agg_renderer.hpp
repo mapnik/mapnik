@@ -41,7 +41,7 @@ namespace mapnik {
                                      private boost::noncopyable
     {
     public:
-        agg_renderer(Map const& m, T & pixmap);
+        agg_renderer(Map const& m, T & pixmap, unsigned offset_x=0, unsigned offset_y=0);
         void start_map_processing(Map const& map);
         void end_map_processing(Map const& map);
         void start_layer_processing(Layer const& lay);

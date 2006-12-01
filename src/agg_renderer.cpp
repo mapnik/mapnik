@@ -91,10 +91,10 @@ namespace mapnik
     };
 
     template <typename T>
-    agg_renderer<T>::agg_renderer(Map const& m, T & pixmap)
+    agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, unsigned offset_x, unsigned offset_y)
         : feature_style_processor<agg_renderer>(m),
           pixmap_(pixmap),
-          t_(m.getWidth(),m.getHeight(),m.getCurrentExtent()),
+          t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
           finder_(Envelope<double>(0 ,0, m.getWidth(), m.getHeight()), 64),
           point_detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
     {
