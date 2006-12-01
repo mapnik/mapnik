@@ -22,12 +22,14 @@
 
 //$Id: postgisfs.cc 34 2005-04-04 13:27:23Z pavlenko $
 
+#include <boost/algorithm/string.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
 #include "postgis.hpp"
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
+using boost::trim;
 using std::string;
 
 postgis_featureset::postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
@@ -81,7 +83,9 @@ feature_ptr postgis_featureset::next()
                 }
                 else if (oid==25 || oid==1042 || oid==1043) // text or bpchar or varchar
                 {
-                    boost::put(*feature,name,buf);
+                    std::string str(buf);
+                    trim(str);
+                    boost::put(*feature,name,str);
                 }
                 else 
                 {
