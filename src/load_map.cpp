@@ -158,14 +158,26 @@ namespace mapnik
                                 rule.append(line_pattern_symbolizer(file,type,width,height));
                                 
                             }
+                            else if ( sym.first == "PolygonPatternSymbolizer")
+                            {
+                                std::string file =  
+                                    sym.second.get<std::string>("<xmlattr>.file"); 
+                                std::string type =  
+                                    sym.second.get<std::string>("<xmlattr>.type");
+                                unsigned width =  
+                                    sym.second.get<unsigned>("<xmlattr>.width");
+                                unsigned height =  
+                                    sym.second.get<unsigned>("<xmlattr>.height");
+                                rule.append(polygon_pattern_symbolizer(file,type,width,height)); 
+                            }
                             else if ( sym.first == "TextSymbolizer")
                             {
                                 std::string name =  
-                                    sym.second.get<std::string>("<xmlattr>.name");                      
+                                    sym.second.get<std::string>("<xmlattr>.name");                     
                                 std::string face_name =  
                                     sym.second.get<std::string>("<xmlattr>.face_name");              
                                 unsigned size = 
-                                    sym.second.get<unsigned>("<xmlattr>.size",10);                      
+                                    sym.second.get<unsigned>("<xmlattr>.size",10); 
                                 std::string color_str = 
                                     sym.second.get<std::string>("<xmlattr>.fill","black");
                                 Color c = color_factory::from_string(color_str.c_str());
