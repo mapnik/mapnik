@@ -89,8 +89,8 @@ void export_map()
     	;
     
     class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >())
-        .add_property("width",&Map::getWidth,"The width of the map image.")
-        .add_property("height",&Map::getHeight,"The height of the map image.")
+        .add_property("width",&Map::getWidth, &Map::setWidth, "The width of the map.")
+        .add_property("height",&Map::getHeight, &Map::setHeight, "The height of the map.")
         .add_property("srs",make_function(&Map::srs,return_value_policy<copy_const_reference>()),
                       &Map::set_srs,"Spatial reference in proj4 format e.g. \"+proj=latlong +datum=WGS84\"")
         .add_property("background",make_function
