@@ -332,7 +332,7 @@ namespace mapnik
                                    proj_transform const& prj_trans)
     {
         geometry_ptr const& geom=feature.get_geometry();
-        if (geom)
+        if (geom && geom->num_points() > 0)
         {
             std::wstring text = to_unicode(feature[sym.get_name()].to_string());
             boost::shared_ptr<ImageData32> const& data = sym.get_data();
@@ -492,7 +492,7 @@ namespace mapnik
     {
         geometry_ptr const& geom=feature.get_geometry();
        
-        if (geom)
+        if (geom && geom->num_points() > 0)
         {
             std::wstring text = to_unicode(feature[sym.get_name()].to_string());
             if (text.length() > 0)

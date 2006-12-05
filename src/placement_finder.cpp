@@ -75,7 +75,8 @@ namespace mapnik
     
         shape_path.rewind(0);
         shape_path.vertex(&new_x,&new_y);
-        for (unsigned i = 0; i < geom->num_points() - 1; i++)
+        unsigned num_points =  geom->num_points();
+        for (unsigned i = 1; i < num_points; ++i)
         {
             double dx, dy;
 
@@ -113,13 +114,13 @@ namespace mapnik
             shape_path.vertex(&old_x,&old_y);
 
             total_distance_ = 0.0;
-      
-            for (unsigned i = 0; i < geom->num_points() - 1; i++)
+            
+            unsigned num_points = geom->num_points();
+            for (unsigned i = 1; i < num_points ; ++i)
             {
                 double dx, dy;
-          
                 shape_path.vertex(&new_x,&new_y);
-          
+                
                 dx = new_x - old_x;
                 dy = new_y - old_y;
           
@@ -330,7 +331,8 @@ namespace mapnik
         p->shape_path.vertex(&new_x,&new_y);
         old_x = new_x;
         old_y = new_y;
-        for (unsigned i = 0; i < p->geom->num_points() - 1; i++)
+        unsigned num_points = geom->num_points();
+        for (unsigned i = 1; i < num_points; ++i)
         {
             double dx, dy;
 
