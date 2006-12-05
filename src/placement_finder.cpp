@@ -143,7 +143,7 @@ namespace mapnik
   
   
     placement_finder::placement_finder(Envelope<double> e, unsigned buffer)
-      : dimensions_(e), detector_(Envelope<double>(e.minx() - buffer, e.miny() - buffer, e.maxx() + buffer, e.maxy() + buffer))
+        : dimensions_(e), detector_(Envelope<double>(e.minx() - buffer, e.miny() - buffer, e.maxx() + buffer, e.maxy() + buffer))
     {
     }
 
@@ -168,9 +168,9 @@ namespace mapnik
         double string_width = string_dimensions.first;
         //    double string_height = string_dimensions.second;
     
-//         for (unsigned int ii = 0; ii < p->info->num_characters(); ++ii)
-//             std::clog << static_cast<char> (p->info->at(ii).character);
-//         std::clog << std::endl;
+        //         for (unsigned int ii = 0; ii < p->info->num_characters(); ++ii)
+        //             std::clog << static_cast<char> (p->info->at(ii).character);
+        //         std::clog << std::endl;
 
         double distance = p->get_total_distance();
     
@@ -252,8 +252,8 @@ namespace mapnik
             }
         }    
     
-//         if (FoundPlacement)
-//             std::clog << "Found Placement" << string_width << " " << distance << std::endl;
+        //         if (FoundPlacement)
+        //             std::clog << "Found Placement" << string_width << " " << distance << std::endl;
 
         return FoundPlacement;
     }
@@ -306,7 +306,7 @@ namespace mapnik
     }
 
     bool placement_finder::build_path_follow(placement *p, double target_distance)
-     {
+    {
         double new_x, new_y, old_x, old_y;
         unsigned cur_node = 0;
         double next_char_x = 0;
@@ -331,7 +331,7 @@ namespace mapnik
         p->shape_path.vertex(&new_x,&new_y);
         old_x = new_x;
         old_y = new_y;
-        unsigned num_points = geom->num_points();
+        unsigned num_points = p->geom->num_points();
         for (unsigned i = 1; i < num_points; ++i)
         {
             double dx, dy;
@@ -632,5 +632,4 @@ namespace mapnik
     
         return true;
     }
-
 } // namespace
