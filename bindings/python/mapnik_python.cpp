@@ -65,6 +65,12 @@ void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0
     ren.apply();
 }
 
+void render2(const mapnik::Map& map,mapnik::Image32& image)
+{
+    mapnik::agg_renderer<mapnik::Image32> ren(map,image);
+    ren.apply();
+}
+
 void render_tile_to_file(const mapnik::Map& map, unsigned offset_x, unsigned offset_y,
                     unsigned width, unsigned height,
                     const std::string& file,
@@ -118,7 +124,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     
     def("render_to_file",&render_to_file);
     def("render_tile_to_file",&render_tile_to_file);
-    def("render",&render);
+    def("render",&render2);
     
     def("load_map",&load_map,"load Map object from XML");
     def("save_map",&load_map,"sace Map object to XML");
