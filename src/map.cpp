@@ -26,6 +26,8 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/layer.hpp>
+#include <mapnik/filter_featureset.hpp>
+#include <mapnik/hit_test_filter.hpp>
 #include <mapnik/map.hpp>
 
 namespace mapnik
@@ -305,6 +307,52 @@ namespace mapnik
     {
         return CoordTransform(width_,height_,currentExtent_);
     }
-    
+
+    featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
+    {
+        if ( index< layers_.size())
+        {
+            mapnik::Layer const& layer = layers_[index];
+            CoordTransform tr = view_transform();
+            tr.backward(&x,&y);
+            
+            try
+            {
+                mapnik::projection dest(srs_);
+                mapnik::projection source(layer.srs());
+                proj_transform prj_trans(source,dest);
+                double z;
+                prj_trans.backward(x,y,z);
+                
+                double minx = currentExtent_.minx();
+                double miny = currentExtent_.miny();
+                double maxx = currentExtent_.maxx();
+                double maxy = currentExtent_.maxy();
+                
+                prj_trans.backward(minx,miny,z);
+                prj_trans.backward(maxx,maxy,z);
+                double tol = (maxx - minx) / width_ * 3;
+                mapnik::datasource_ptr ds = layer.datasource();
+                if (ds)
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << " query at point tol = " << tol << " (" << x << "," << y << ")\n";
+#endif
+                    
+                    featureset_ptr fs(new filter_featureset<hit_test_filter>(ds->features_at_point(mapnik::coord2d(x,y)),
+                                                                             hit_test_filter(x,y,tol)));
+                    return fs;
+                }
+            }
+            catch (...)
+            {
+#ifdef MAPNIK_DEBUG
+                std::clog << "exception caught in \"query_map_point\"\n";
+#endif
+            }
+        }
+        return featureset_ptr();
+    }
+
     Map::~Map() {}
 }

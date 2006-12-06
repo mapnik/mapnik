@@ -60,6 +60,7 @@ source = Split(
     proj_transform.cpp
     distance.cpp
     scale_denominator.cpp
+    memory_datasource.cpp
     """
     )
 source += Split(

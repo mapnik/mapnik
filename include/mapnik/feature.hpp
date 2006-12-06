@@ -48,12 +48,14 @@ namespace mapnik {
     public:
         typedef T1 geometry_type;
         typedef T2 raster_type;
+       
     private:
         int id_;
         geometry_type geom_;
         raster_type   raster_;
         std::map<std::string,value> props_;
     public:
+        typedef std::map<std::string,value>::iterator iterator;
         explicit feature(int id)
             : properties(props_),
               id_(id),
@@ -70,7 +72,7 @@ namespace mapnik {
         {
             return id_;
         }
-	
+        
         void set_geometry(geometry_type& geom)
         {
             geom_=geom;
@@ -94,7 +96,17 @@ namespace mapnik {
         {
             return props_;
         }
-	
+        
+        iterator begin() const
+        {
+            return props_.begin();
+        }
+        
+        iterator end() const
+        {
+            return props_.end();
+        }
+        
         std::string to_string() const
         {
             std::stringstream ss;

@@ -27,7 +27,6 @@
 #include <sstream>
 // mapnik
 #include <mapnik/envelope.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature_layer_desc.hpp>
@@ -69,38 +68,11 @@ namespace
     }
 }
 
-inline object pass_through(object const& o) { return o; }
-
-inline mapnik::feature_ptr next(mapnik::featureset_ptr const& itr)
-{
-    mapnik::feature_ptr f = itr->next();
-    if (!f)
-    {
-        PyErr_SetString(PyExc_StopIteration, "No more features.");
-        boost::python::throw_error_already_set();
-    }
-    return f; 
-}
-
 void export_datasource()
 {
     using namespace boost::python;
     using mapnik::datasource;
-    using mapnik::Featureset;
-    using mapnik::Feature;
-
-    class_<Feature,boost::shared_ptr<Feature>,
-        boost::noncopyable>("Feature",no_init)
-        .def("id",&Feature::id)
-        .def("__str__",&Feature::to_string)
-        ;
-    
-    class_<Featureset,boost::shared_ptr<Featureset>,
-        boost::noncopyable>("Datasource",no_init)
-        .def("next",next)
-        .def("__iter__",pass_through)
-        ;
-    
+        
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
         .def("envelope",&datasource::envelope)

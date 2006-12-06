@@ -110,6 +110,7 @@ void export_map()
         .def("pan_and_zoom",&Map::pan_and_zoom)
         .def("append_style",&Map::insert_style)
         .def("remove_style",&Map::remove_style)
+        .def("query_map_point",&Map::query_map_point)
         .add_property("layers",make_function
                       (layers_nonconst,return_value_policy<reference_existing_object>()), 
                       "Get the list of layers in this map.")

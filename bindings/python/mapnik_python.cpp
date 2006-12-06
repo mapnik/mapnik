@@ -39,6 +39,8 @@ void export_filter();
 void export_rule();
 void export_style();
 void export_stroke();
+void export_feature();
+void export_featureset();
 void export_datasource();
 void export_datasource_cache();
 void export_point_symbolizer();
@@ -97,6 +99,8 @@ BOOST_PYTHON_MODULE(_mapnik)
     using mapnik::save_map;
     
     export_query();    
+    export_feature();
+    export_featureset();
     export_datasource();
     export_parameters();
     export_color(); 
@@ -124,6 +128,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     
     def("render_to_file",&render_to_file);
     def("render_tile_to_file",&render_tile_to_file);
+    def("render",&render); 
     def("render",&render2);
     
     def("load_map",&load_map,"load Map object from XML");
