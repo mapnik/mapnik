@@ -80,6 +80,7 @@ namespace mapnik
         const Envelope<double>& getCurrentExtent() const;
         double scale() const;
         CoordTransform view_transform() const;
+        featureset_ptr query_point(unsigned index, double x, double y) const;
         featureset_ptr query_map_point(unsigned index, double x, double y) const;
         ~Map();
     private:
