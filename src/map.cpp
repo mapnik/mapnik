@@ -338,9 +338,9 @@ namespace mapnik
 #ifdef MAPNIK_DEBUG
                     std::clog << " query at point tol = " << tol << " (" << x << "," << y << ")\n";
 #endif    
-                    featureset_ptr fs(new filter_featureset<hit_test_filter>(ds->features_at_point(mapnik::coord2d(x,y)),
-                                                                             hit_test_filter(x,y,tol)));
-                    return fs;
+                    featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
+                    if (fs) 
+                        return featureset_ptr(new filter_featureset<hit_test_filter>(fs,hit_test_filter(x,y,tol)));
                 }
             }
             catch (...)
@@ -383,10 +383,9 @@ namespace mapnik
 #ifdef MAPNIK_DEBUG
                     std::clog << " query at point tol = " << tol << " (" << x << "," << y << ")\n";
 #endif
-                    
-                    featureset_ptr fs(new filter_featureset<hit_test_filter>(ds->features_at_point(mapnik::coord2d(x,y)),
-                                                                             hit_test_filter(x,y,tol)));
-                    return fs;
+                    featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
+                    if (fs) 
+                        return featureset_ptr(new filter_featureset<hit_test_filter>(fs,hit_test_filter(x,y,tol)));
                 }
             }
             catch (...)
