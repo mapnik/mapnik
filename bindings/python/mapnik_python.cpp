@@ -90,6 +90,11 @@ void render_to_file(const mapnik::Map& map,
     render_tile_to_file(map,0,0,map.getWidth(),map.getHeight(),file,format);
 }
 
+double scale_denominator(mapnik::Map const &map, bool geographic)
+{
+	return mapnik::scale_denominator(map, geographic);
+}
+
 
 BOOST_PYTHON_MODULE(_mapnik)
 {
@@ -130,6 +135,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("render_tile_to_file",&render_tile_to_file);
     def("render",&render); 
     def("render",&render2);
+    def("scale_denominator", &scale_denominator);
     
     def("load_map",&load_map,"load Map object from XML");
     def("save_map",&load_map,"sace Map object to XML");
