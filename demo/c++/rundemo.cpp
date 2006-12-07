@@ -237,8 +237,8 @@ int main ( int argc , char** argv)
     agg_renderer<Image32> ren(m,buf);
     ren.apply();
     
-    ImageUtils::save_to_file("demo.jpg","jpeg",buf);
-    ImageUtils::save_to_file("demo.png","png",buf);
+    save_to_file<ImageData32>("demo.jpg","jpeg",buf.data());
+    save_to_file<ImageData32>("demo.png","png",buf.data());
     
     std::cout << "Two maps have been rendered in the current directory:\n"
         "- demo.jpg\n"
