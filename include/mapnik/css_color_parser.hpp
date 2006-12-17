@@ -183,6 +183,7 @@ namespace mapnik {
                 ("whitesmoke", ColorT(245, 245, 245))
                 ("yellow", ColorT(255, 255, 0))
                 ("yellowgreen", ColorT(154, 205, 50))
+                ("transparent", ColorT(0, 0, 0, 0))
                 ;
         }
     };
