@@ -24,6 +24,7 @@ import glob
 Import ('env')
 
 prefix = env['PREFIX']
+install_prefix = env['DESTDIR'] + '/' + prefix
 
 source = Split(
     """
@@ -37,5 +38,5 @@ headers = ['#plugins/input/shape'] + env['CPPPATH']
 
 shapeindex = env.Program('shapeindex', source, CPPPATH=headers, LIBS='boost_program_options%s' % env['BOOST_APPEND'])
 
-env.Install(prefix + '/bin', shapeindex)
-env.Alias('install', prefix + '/bin')
+env.Install(install_prefix + '/bin', shapeindex)
+env.Alias('install', install_prefix + '/bin')

@@ -25,6 +25,7 @@ import glob
 Import('env')
 
 prefix = env['PREFIX']
+install_prefix = env['DESTDIR'] + '/' + prefix
 
 libraries = ['agg'] + env['LIBS']
 
@@ -73,6 +74,6 @@ source += Split(
 
 mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
 
-env.Alias(target='install', source=env.Install(prefix + '/' + env['LIBDIR_SCHEMA'], mapnik))
+env.Alias(target='install', source=env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'], mapnik))
 includes = glob.glob('../include/mapnik/*.hpp')
-env.Alias(target='install', source=env.Install(prefix+'/include/mapnik', includes))
+env.Alias(target='install', source=env.Install(install_prefix+'/include/mapnik', includes))

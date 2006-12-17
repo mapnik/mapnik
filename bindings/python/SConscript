@@ -24,6 +24,7 @@ import glob
 Import('env')
 
 prefix = env['PYTHON_PREFIX'] + '/'+ 'lib' + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
+install_prefix = env['DESTDIR'] + '/' + prefix
 
 libraries = ['mapnik', 'boost_python%s' % env['BOOST_APPEND']]
 headers = [env['PYTHON_PREFIX'] + '/include/python' + env['PYTHON_VERSION']] + env['CPPPATH']
@@ -39,8 +40,8 @@ fontscollectionpath = mapniklibpath + '/fonts'
 file('mapnik/paths.py','w').write(paths % (env['PREFIX'] + '/'+env['LIBDIR_SCHEMA']+'/mapnik',))
 
 pymapnik = glob.glob('mapnik/*.py')
-env.Alias(target='install', source=env.Install(prefix+'/mapnik', pymapnik))
+env.Alias(target='install', source=env.Install(install_prefix+'/mapnik', pymapnik))
 pymapnik2 = glob.glob('mapnik/ogcserver/*.py')
-env.Alias(target='install', source=env.Install(prefix+'/mapnik/ogcserver', pymapnik2))
-pymapniklib = env.Install(prefix+'/mapnik',_mapnik)
+env.Alias(target='install', source=env.Install(install_prefix+'/mapnik/ogcserver', pymapnik2))
+pymapniklib = env.Install(install_prefix+'/mapnik',_mapnik)
 env.Alias(target="install",source=pymapniklib)

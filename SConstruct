@@ -48,6 +48,7 @@ opts.Add(PathOption('PYTHON','Python executable', sys.executable))
 opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
 opts.Add('DEBUG', 'Compile a debug version of mapnik', '')
+opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
 opts.Add('BIDI', 'BIDI support', '')
 
 env = Environment(ENV=os.environ, options=opts)

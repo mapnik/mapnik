@@ -23,6 +23,7 @@
 Import ('env')
 
 prefix = env['PREFIX']
+install_prefix = env['DESTDIR'] + '/' + prefix
 
 shape_src = Split(
 	"""
@@ -38,5 +39,5 @@ shape_src = Split(
 
 shape_inputdriver = env.SharedLibrary('shape', source=shape_src, SHLIBPREFIX='', LIBS=[])
 
-env.Install(prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', shape_inputdriver)
-env.Alias('install', prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')
+env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', shape_inputdriver)
+env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')

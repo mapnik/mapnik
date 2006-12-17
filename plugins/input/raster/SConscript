@@ -22,6 +22,7 @@
 Import ('env')
 
 prefix = env['PREFIX']
+install_prefix = env['DESTDIR'] + '/' + prefix
 
 raster_src = Split(
 	"""
@@ -33,5 +34,5 @@ raster_src = Split(
 
 raster_inputdriver = env.SharedLibrary('raster', source=raster_src, SHLIBPREFIX='', LIBS=[])
 
-env.Install(prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', raster_inputdriver)
-env.Alias('install', prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')
+env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', raster_inputdriver)
+env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')
