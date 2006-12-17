@@ -74,6 +74,10 @@ void export_layer()
                       &Layer::datasource,
                       &Layer::set_datasource,
                       "The datasource attached to this layer")
+
+        .add_property("active",
+                      &Layer::isActive,
+                      &Layer::setActive)
         
         .def("envelope",&Layer::envelope, 
              "Return the geographic envelope/bounding box "
