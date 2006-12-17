@@ -26,8 +26,53 @@
 
 #include <string>
 
+#ifdef USE_FRIBIDI
+#include <fribidi/fribidi.h>
+#endif
+
 namespace mapnik {
     
+/*
+** Use FRIBIDI to encode the string.
+** The return value must be freed by the caller.
+*/
+
+#ifdef USE_FRIBIDI
+    inline wchar_t* bidi_string(const wchar_t *logical)
+    {
+        FriBidiCharType base = FRIBIDI_TYPE_ON;
+        size_t len;
+
+        len = wcslen(logical);
+
+        FriBidiChar *visual;
+
+        FriBidiStrIndex *ltov, *vtol;
+        FriBidiLevel *levels;
+        FriBidiStrIndex new_len;
+        fribidi_boolean log2vis;
+        
+        visual = (FriBidiChar *) malloc (sizeof (FriBidiChar) * (len + 1));
+        ltov = 0;
+        vtol = 0;
+        levels = 0;
+
+        /* Create a bidi string. */
+        log2vis = fribidi_log2vis ((FriBidiChar *)logical, len, &base,
+                /* output */
+                visual, ltov, vtol, levels);
+
+        if (!log2vis) {
+            return 0;
+        }
+
+        new_len = len;
+
+        return (wchar_t *)visual;
+    }
+#endif
+
+
     inline std::wstring to_unicode(std::string const& text)
     {
         std::wstring out;
@@ -75,6 +120,12 @@ namespace mapnik {
             }
             out.push_back(wchar_t(code));
         }
+#ifdef USE_FRIBIDI
+        wchar_t *bidi_text = bidi_string(out.c_str());
+        out = bidi_text;
+        free(bidi_text);
+#endif
+        
         return out;
     }
 }

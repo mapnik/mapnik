@@ -32,6 +32,8 @@ opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include'))
 opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('FREETYPE_CONFIG', 'The path to the freetype-config executable.', '/usr/bin/freetype-config'))
+opts.Add(PathOption('FRIBIDI_INCLUDES', 'Search path for fribidi include files', '/usr/include'))
+opts.Add(PathOption('FRIBIDI_LIBS','Search path for fribidi include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
 opts.Add(PathOption('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include'))
@@ -46,6 +48,7 @@ opts.Add(PathOption('PYTHON','Python executable', sys.executable))
 opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
 opts.Add('DEBUG', 'Compile a debug version of mapnik', '')
+opts.Add('BIDI', 'BIDI support', '')
 
 env = Environment(ENV=os.environ, options=opts)
 env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
@@ -78,6 +81,14 @@ for path in [env['BOOST_LIBS'],
     
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
 
+if env['BIDI']:
+    env.Append(CXXFLAGS = '-DUSE_FRIBIDI')
+    if env['FRIBIDI_INCLUDES'] not in env['CPPPATH']:
+        env['CPPPATH'].append(env['FRIBIDI_INCLUDES'])
+    if env['FRIBIDI_LIBS'] not in env['LIBPATH']:
+        env['CPPPATH'].append(env['FRIBIDI_LIBS'])  
+    env['LIBS'].append('fribidi')
+
 C_LIBSHEADERS = [
     ['m', 'math.h', True],
     ['ltdl', 'ltdl.h', True],
@@ -88,6 +99,8 @@ C_LIBSHEADERS = [
     ['proj', 'proj_api.h', True],
     ['pq', 'libpq-fe.h', False]
 ]
+
+if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
