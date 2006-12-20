@@ -65,6 +65,7 @@ namespace mapnik
         std::string const& srs() const;
         void add_style(std::string const& stylename);
         std::vector<std::string> const& styles() const;
+        std::vector<std::string>& styles();
         void selection_style(const std::string& name);
         const std::string& selection_style() const;
         void setMinZoom(double minZoom);

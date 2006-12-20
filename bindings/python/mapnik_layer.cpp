@@ -30,6 +30,8 @@
 using mapnik::Layer;
 using mapnik::parameters;
 
+std::vector<std::string> & (mapnik::Layer::*_styles_)() = &mapnik::Layer::styles;
+
 void export_layer()
 {
     using namespace boost::python;
@@ -67,7 +69,7 @@ void export_layer()
                       &Layer::setMaxZoom)
         
         .add_property("styles",
-                      make_function(&Layer::styles,
+                      make_function(_styles_,
                                     return_value_policy<reference_existing_object>()))
 
         .add_property("datasource",

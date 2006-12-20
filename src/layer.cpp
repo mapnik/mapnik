@@ -140,6 +140,11 @@ namespace mapnik
     {
         return styles_;
     }
+    
+    std::vector<std::string> & Layer::styles()
+    {
+        return styles_;
+    }
 
     void Layer::setMinZoom(double minZoom)
     {

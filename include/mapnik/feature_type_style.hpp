@@ -59,7 +59,7 @@ namespace mapnik
         {
             return rules_;
         }
-	
+        
         ~feature_type_style() {}
     };
 }

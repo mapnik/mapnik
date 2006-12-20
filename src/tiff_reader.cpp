@@ -23,6 +23,7 @@
 //$Id: tiff_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 // stl
 #include <iostream>
+#include <boost/filesystem/operations.hpp>
 // mapnik
 #include <mapnik/image_reader.hpp>
 
@@ -65,6 +66,7 @@ namespace mapnik
         void read_generic(unsigned x,unsigned y,ImageData32& image);
         void read_stripped(unsigned x,unsigned y,ImageData32& image);
         void read_tiled(unsigned x,unsigned y,ImageData32& image);
+        TIFF* load_if_exists(const std::string& filename);
     };
 
     namespace
@@ -100,8 +102,9 @@ namespace mapnik
 
     void TiffReader::init()
     {
-        TIFF* tif = TIFFOpen(file_name_.c_str(), "rb");
-        if (!tif) throw ImageReaderException("cannot open "+file_name_);
+	TIFF* tif = load_if_exists(file_name_);
+        if (!tif) return;
+	
         char msg[1024];
 
         if (TIFFRGBAImageOK(tif,msg))
@@ -165,7 +168,7 @@ namespace mapnik
 
     void TiffReader::read_generic(unsigned x,unsigned y,ImageData32& image)
     {
-        TIFF* tif = TIFFOpen(file_name_.c_str(), "rb");
+	TIFF* tif = load_if_exists(file_name_);
         if (tif)
         {
             std::clog<<"TODO:tiff is not stripped or tiled\n";
@@ -176,7 +179,7 @@ namespace mapnik
 
     void TiffReader::read_tiled(unsigned x0,unsigned y0,ImageData32& image)
     {
-        TIFF* tif=TIFFOpen(file_name_.c_str(), "rb");
+	TIFF* tif = load_if_exists(file_name_);
         if (tif)
         {
             uint32* buf = (uint32*)_TIFFmalloc(tile_width_*tile_height_*sizeof(uint32));
@@ -221,7 +224,7 @@ namespace mapnik
 
     void TiffReader::read_stripped(unsigned x0,unsigned y0,ImageData32& image)
     {
-        TIFF* tif = TIFFOpen(file_name_.c_str(), "rb");
+	TIFF* tif = load_if_exists(file_name_);
         if (tif)
         {
             uint32* buf = (uint32*)_TIFFmalloc(width_*rows_per_strip_*sizeof(uint32));
@@ -257,6 +260,22 @@ namespace mapnik
             _TIFFfree(buf);
             TIFFClose(tif);
         }
+    }
+    
+    TIFF* TiffReader::load_if_exists(const std::string& filename)
+    {
+        TIFF* tif = 0;
+        boost::filesystem::path path(file_name_);
+        if (exists(path) && is_regular(path)) {
+            // File path is a full file path and does exist
+            tif = TIFFOpen(filename.c_str(), "rb");
+        } else {
+            return 0;
+        }
+        if (!tif) {
+            throw ImageReaderException("cannot open "+file_name_);
+        }
+        return tif;
     }
 }
 

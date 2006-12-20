@@ -44,14 +44,17 @@ namespace mapnik
         Envelope<double> currentExtent_;
         
     public:
-        typedef std::map<std::string,feature_type_style>::const_iterator style_iterator;
+        typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
+        typedef std::map<std::string,feature_type_style>::iterator style_iterator;
         
         Map();
         Map(int width, int height, std::string const& srs="+proj=latlong +datum=WGS84");
         Map(const Map& rhs);
         Map& operator=(const Map& rhs);
-        style_iterator begin_styles() const;
-        style_iterator end_styles() const;
+        const_style_iterator begin_styles() const;
+        const_style_iterator end_styles() const;
+        style_iterator begin_styles();
+        style_iterator end_styles();
         bool insert_style(std::string const& name,feature_type_style const& style);
         void remove_style(const std::string& name);
         feature_type_style const& find_style(std::string const& name) const;

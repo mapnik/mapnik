@@ -64,11 +64,22 @@ namespace mapnik
         return *this;
     }
     
-    Map::style_iterator  Map::begin_styles() const
+    Map::style_iterator Map::begin_styles()
     {
         return styles_.begin();
     }
-    Map::style_iterator  Map::end_styles() const
+    
+    Map::style_iterator Map::end_styles()
+    {
+        return styles_.end();
+    }
+    
+    Map::const_style_iterator  Map::begin_styles() const
+    {
+        return styles_.begin();
+    }
+    
+    Map::const_style_iterator  Map::end_styles() const
     {
         return styles_.end();
     }

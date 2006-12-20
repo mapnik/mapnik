@@ -47,6 +47,17 @@ namespace mapnik
             }
             return std::string();
         }
+        
+        param_map::const_iterator iterator(std::string const& key) const
+        {
+	    return find(key);
+        }
+        
+        param_map::iterator iterator(std::string const& key)
+        {
+	    return find(key);
+        }
+        
     };
 }
 
