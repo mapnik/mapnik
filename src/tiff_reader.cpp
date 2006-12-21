@@ -23,7 +23,7 @@
 //$Id: tiff_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 // stl
 #include <iostream>
-#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem.hpp>
 // mapnik
 #include <mapnik/image_reader.hpp>
 
@@ -262,19 +262,16 @@ namespace mapnik
         }
     }
     
-    TIFF* TiffReader::load_if_exists(const std::string& filename)
+    TIFF* TiffReader::load_if_exists(std::string const& filename)
     {
-        TIFF* tif = 0;
+        TIFF * tif = 0;
         boost::filesystem::path path(file_name_);
-        if (exists(path) && is_regular(path)) {
+        if (exists(path)) //  && is_regular(path)) { -- not supported in boost-1.33.*
+        {    
             // File path is a full file path and does exist
             tif = TIFFOpen(filename.c_str(), "rb");
-        } else {
-            return 0;
         }
-        if (!tif) {
-            throw ImageReaderException("cannot open "+file_name_);
-        }
+        
         return tif;
     }
 }
