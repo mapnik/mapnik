@@ -52,6 +52,7 @@ public:
         connStr+=" dbname="+dbname;
         connStr+=" user="+username;
         connStr+=" password="+password;
+        connStr+=" connect_timeout=4"; // todo: set by client (param) 
         
         conn_=PQconnectdb(connStr.c_str());
         if (PQstatus(conn_) == CONNECTION_BAD)
@@ -60,6 +61,7 @@ public:
                       << PQerrorMessage(conn_)<< std::endl;
         }
     }
+    
     bool execute(const std::string& sql) const
     {
         PGresult *result=PQexec(conn_,sql.c_str());
