@@ -23,7 +23,7 @@
 //$Id: tiff_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 // stl
 #include <iostream>
-#include <boost/filesystem.hpp>
+#include "boost/filesystem/operations.hpp"
 // mapnik
 #include <mapnik/image_reader.hpp>
 
