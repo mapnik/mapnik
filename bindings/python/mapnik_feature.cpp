@@ -22,6 +22,7 @@
 //$Id$
 
 // boost
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <boost/python.hpp>
 // mapnik
 #include <mapnik/feature.hpp>
@@ -33,7 +34,19 @@ void export_feature()
     class_<Feature,boost::shared_ptr<Feature>,
         boost::noncopyable>("Feature",no_init)
         .def("id",&Feature::id)
-        //.def("__iter__", range<>())
         .def("__str__",&Feature::to_string)
+	.add_property("properties", 
+		      make_function(&Feature::props,return_value_policy<reference_existing_object>()))
         ;
+    
+    //implicitly_convertible<std::string,mapnik::value>();
+    
+    class_<std::map<std::string, mapnik::value> >("Properties")
+	.def(map_indexing_suite<std::map<std::string, mapnik::value
+	     > >())
+	;
+    
+    class_<mapnik::value>("Value")
+	.def("__str__",&mapnik::value::to_string)
+	;
 }

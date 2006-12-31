@@ -92,7 +92,7 @@ namespace mapnik {
             raster_=raster;
         }
 	
-        const properties& get_properties() const 
+        std::map<std::string,value> const& props() const 
         {
             return props_;
         }
