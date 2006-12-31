@@ -329,8 +329,13 @@ namespace mapnik
                 double x = lon;
                 double y = lat;
                 double z = 0;
-                mapnik::projection dest(srs_); 
-                dest.forward(x,y);
+                mapnik::projection dest(srs_);
+
+		if (!dest.is_geographic())
+		{
+		    dest.forward(x,y);
+		}
+		
                 mapnik::projection source(layer.srs());
                 proj_transform prj_trans(source,dest);
                 prj_trans.backward(x,y,z);
@@ -371,7 +376,7 @@ namespace mapnik
             mapnik::Layer const& layer = layers_[index];
             CoordTransform tr = view_transform();
             tr.backward(&x,&y);
-            
+	    
             try
             {
                 mapnik::projection dest(srs_);
