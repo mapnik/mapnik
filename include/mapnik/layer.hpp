@@ -43,7 +43,7 @@ namespace mapnik
         double minZoom_;
         double maxZoom_;
         bool active_;
-        bool selectable_;
+        bool queryable_;
         std::vector<std::string>  styles_;
         std::string selection_style_;
         datasource_ptr ds_;
@@ -74,8 +74,8 @@ namespace mapnik
         double getMaxZoom() const;
         void setActive(bool active);
         bool isActive() const;
-        void setSelectable(bool selectable);
-        bool isSelectable() const;
+        void setQueryable(bool queryable);
+        bool isQueryable() const;
         bool isVisible(double scale) const;
         void add_to_selection(boost::shared_ptr<Feature>& feature) const;
         std::vector<boost::shared_ptr<Feature> >& selection() const;

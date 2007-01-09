@@ -80,7 +80,10 @@ void export_layer()
         .add_property("active",
                       &Layer::isActive,
                       &Layer::setActive)
-        
+        .add_property("queryable",
+		      &Layer::isQueryable,
+		      &Layer::setQueryable)
+        .def("visible", &Layer::isVisible)
         .def("envelope",&Layer::envelope, 
              "Return the geographic envelope/bounding box "
              "of the data in the layer.")

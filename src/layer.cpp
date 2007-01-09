@@ -46,7 +46,7 @@ namespace mapnik
           minZoom_(0),
           maxZoom_(std::numeric_limits<double>::max()),
           active_(true),
-          selectable_(false),
+          queryable_(false),
           selection_style_("default_selection"),
           ds_() {}
     
@@ -58,7 +58,7 @@ namespace mapnik
           minZoom_(rhs.minZoom_),
           maxZoom_(rhs.maxZoom_),
           active_(rhs.active_),
-          selectable_(rhs.selectable_),
+          queryable_(rhs.queryable_),
           styles_(rhs.styles_),
           selection_style_(rhs.selection_style_),
           ds_(rhs.ds_) {}
@@ -83,7 +83,7 @@ namespace mapnik
         minZoom_=rhs.minZoom_;
         maxZoom_=rhs.maxZoom_;
         active_=rhs.active_;
-        selectable_=rhs.selectable_;
+        queryable_=rhs.queryable_;
         styles_=rhs.styles_;
         selection_style_=rhs.selection_style_;
         ds_=rhs.ds_;
@@ -181,14 +181,14 @@ namespace mapnik
         return isActive() && scale >= minZoom_ - 1e-6 && scale < maxZoom_ + 1e-6;
     }
 
-    void Layer::setSelectable(bool selectable)
+    void Layer::setQueryable(bool queryable)
     {
-        selectable_=selectable;
+        queryable_=queryable;
     }
 
-    bool Layer::isSelectable() const
+    bool Layer::isQueryable() const
     {
-        return selectable_;
+        return queryable_;
     }
 
     datasource_ptr Layer::datasource() const

@@ -48,7 +48,9 @@ namespace mapnik {
     public:
         typedef T1 geometry_type;
         typedef T2 raster_type;
-       
+      typedef std::map<std::string,value>::value_type value_type;
+      typedef std::map<std::string,value>::size_type size_type;
+      
     private:
         int id_;
         geometry_type geom_;
