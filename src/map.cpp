@@ -25,7 +25,6 @@
 #include <mapnik/style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/projection.hpp>
-#include <mapnik/layer.hpp>
 #include <mapnik/filter_featureset.hpp>
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/map.hpp>

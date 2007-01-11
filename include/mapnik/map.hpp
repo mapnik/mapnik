@@ -26,11 +26,10 @@
 
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/layer.hpp>
 
 namespace mapnik
 {
-    class Layer;
-
     class MAPNIK_DECL Map
     {	
         static const unsigned MIN_MAPSIZE=16;
