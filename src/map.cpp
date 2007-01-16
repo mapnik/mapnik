@@ -318,23 +318,15 @@ namespace mapnik
         return CoordTransform(width_,height_,currentExtent_);
     }
     
-    featureset_ptr Map::query_point(unsigned index, double lat, double lon) const
+    featureset_ptr Map::query_point(unsigned index, double x, double y) const
     {
         if ( index< layers_.size())
         {
             mapnik::Layer const& layer = layers_[index];    
             try
             {
-                double x = lon;
-                double y = lat;
                 double z = 0;
                 mapnik::projection dest(srs_);
-
-		if (!dest.is_geographic())
-		{
-		    dest.forward(x,y);
-		}
-		
                 mapnik::projection source(layer.srs());
                 proj_transform prj_trans(source,dest);
                 prj_trans.backward(x,y,z);
