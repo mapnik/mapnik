@@ -38,11 +38,7 @@ using std::string;
 template <typename T>
 class ConnectionCreator
 {
-    string url_;
-    string port_;
-    string dbname_;
-    string user_;
-    string pass_;
+
 public:
     ConnectionCreator(string const& url,
                       string const& port,
@@ -59,10 +55,21 @@ public:
     {
         return new T(url_,port_,dbname_,user_,pass_);
     }
+    
     std::string id() const 
     {
-        return url_ + ":" + dbname_;
+        return url_ + ":" 
+	  + dbname_ + ":" 
+	  + port_ +":" 
+	  + user_ ; 
     }
+private:
+    string url_;
+    string port_;
+    string dbname_;
+    string user_;
+    string pass_;
+
 };
 
 class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
