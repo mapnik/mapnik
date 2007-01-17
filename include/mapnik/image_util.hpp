@@ -33,7 +33,7 @@
 
 namespace mapnik {
     
-    template <typename T> MAPNIK_DECL
+    template <typename T>
     void save_to_file(std::string const& filename,
                       std::string const& type,
                       T const& image);
@@ -210,6 +210,15 @@ namespace mapnik {
             }
         }
     }
+#ifdef _MSC_VER
+    template MAPNIK_DECL void save_to_file<ImageData32>(std::string const&,
+                                            std::string const& , 
+                                            ImageData32 const&);
+
+    template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (std::string const&,
+                                                          std::string const& , 
+                                                          image_view<ImageData32> const&);
+#endif
 }
 
 #endif //IMAGE_UTIL_HPP
