@@ -29,7 +29,7 @@
 using namespace mapnik;
 
 template <typename filterT>
-class MAPNIK_DECL shape_featureset : public Featureset
+class shape_featureset : public Featureset
 {
     filterT filter_;
     int shape_type_;

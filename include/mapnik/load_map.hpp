@@ -29,7 +29,7 @@
 
 namespace mapnik
 {
-    void load_map(Map & map, std::string const& filename);
+    MAPNIK_DECL void load_map(Map & map, std::string const& filename);
 }
 
 #endif // LOAD_MAP_HPP

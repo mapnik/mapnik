@@ -148,7 +148,7 @@ namespace mapnik
     {
         double len2 = distance2(ax,ay,bx,by);
         
-        if (len2 < 1e-7) 
+        if (len2 < 1e-14) 
         {
             return distance(x,y,ax,ay);
         }
@@ -172,7 +172,7 @@ namespace mapnik
         double x0=boost::get<0>(*start);
         double y0=boost::get<1>(*start);
         double x1,y1;
-        while (++start!=end) 
+        while (++start != end) 
         {
             if ( boost::get<2>(*start) == SEG_MOVETO)
             {
@@ -184,7 +184,7 @@ namespace mapnik
             y1=boost::get<1>(*start);
             
             double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
-            if (distance < tol)
+	    if (distance < tol)
                 return true;
             x0=x1;
             y0=y1;

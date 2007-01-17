@@ -33,17 +33,9 @@
 
 namespace mapnik {
     
-    template <typename T>
+    template <typename T> MAPNIK_DECL
     void save_to_file(std::string const& filename,
                       std::string const& type,
-                      T const& image);
-    
-    template <typename T>
-    void save_as_png(std::string const& filename,
-                     Image32 const& image);
-    template <typename T>
-    void save_as_jpeg(std::string const& filename,
-                      int quality, 
                       T const& image);
     
     

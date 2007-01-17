@@ -108,15 +108,15 @@ namespace mapnik {
     
     
     #define DATASOURCE_PLUGIN(classname)                              \
-        extern "C" MAPNIK_DECL std::string datasource_name()            \
+        extern "C" MAPNIK_EXP std::string datasource_name()            \
         {                                                               \
             return classname::name();                                   \
         }                                                               \
-        extern "C"  MAPNIK_DECL datasource* create(const parameters &params) \
+        extern "C"  MAPNIK_EXP datasource* create(const parameters &params) \
         {                                                               \
             return new classname(params);                               \
         }                                                               \
-        extern "C" MAPNIK_DECL void destroy(datasource *ds)             \
+        extern "C" MAPNIK_EXP void destroy(datasource *ds)             \
         {                                                               \
             delete ds;                                                  \
         }                                                               \

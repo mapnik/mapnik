@@ -29,7 +29,7 @@
 #include "shape_featureset.hpp"
 
 template <typename filterT>
-class MAPNIK_DECL shape_index_featureset : public Featureset
+class shape_index_featureset : public Featureset
 {
     filterT filter_;
     int shape_type_;

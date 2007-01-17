@@ -30,7 +30,7 @@
 
 namespace mapnik
 {
-    void save_map(Map const& map, std::string const& filename);
+    MAPNIK_DECL void save_map(Map const& map, std::string const& filename);
 }
 
 #endif // SAVE_MAP_HPP

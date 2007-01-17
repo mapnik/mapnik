@@ -26,14 +26,22 @@
 // Windows DLL support
 
 #ifdef _WINDOWS
-# define MAPNIK_DECL __declspec (dllexport)
-# pragma warning( disable: 4251 )
-# pragma warning( disable: 4275 )
-# if (_MSC_VER >= 1400) // vc8
-#   pragma warning(disable : 4996) //_CRT_SECURE_NO_DEPRECATE
-# endif
+#  define MAPNIK_EXP __declspec (dllexport)
+#  define MAPNIK_IMP __declspec (dllimport)
+#  ifdef MAPNIK_EXPORTS
+#    define MAPNIK_DECL __declspec (dllexport)
+#  else
+#    define MAPNIK_DECL __declspec (dllimport)
+#  endif
+#  pragma warning( disable: 4251 )
+#  pragma warning( disable: 4275 )
+#  if (_MSC_VER >= 1400) // vc8
+#    pragma warning(disable : 4996) //_CRT_SECURE_NO_DEPRECATE
+#  endif
 #else
-# define MAPNIK_DECL 
+#  define MAPNIK_EXP
+#  define MAPNIK_IMP
+#  define MAPNIK_DECL
 #endif
 
 #endif // CONFIG_HPP

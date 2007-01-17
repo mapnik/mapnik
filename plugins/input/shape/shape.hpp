@@ -32,7 +32,7 @@
 
 using namespace mapnik;
 
-class MAPNIK_DECL shape_datasource : public datasource
+class shape_datasource : public datasource
 {
 public:
     shape_datasource(const parameters &params);
