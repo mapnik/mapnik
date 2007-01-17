@@ -70,7 +70,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
     
     try 
     {
-        max_size = boost::lexical_cast<unsigned>(params_.get("initial_size")); 
+        max_size = boost::lexical_cast<unsigned>(params_.get("max_size")); 
     }
     catch (bad_lexical_cast&)
     {
