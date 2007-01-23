@@ -107,8 +107,8 @@ if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
-    ['system', 'boost/system/system_error.hpp', True],
-    ['filesystem', 'boost/filesystem.hpp', True],
+    #['system', 'boost/system/system_error.hpp', True],
+    ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
     ['program_options', 'boost/program_options.hpp', False]
 ]
