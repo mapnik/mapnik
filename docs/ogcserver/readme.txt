@@ -18,7 +18,8 @@ Features/Caveats
 
 - WMS 1.1.1 and 1.3.0
 - CGI/FastCGI
-- GetCapabilities and GetMap support only (NO GetFeatureInfo ... yet)
+- Supports all 3 requests: GetCapabilities, GetMap and GetFeatureInfo
+- GetFeatureInfo supports text/plain output only
 - JPEG/PNG output
 - XML/INIMAGE/BLANK error handling
 - Multiple named styles support
@@ -116,6 +117,10 @@ The rules for writing this class are:
 - No Map() object is used or needed here.
 - Be sure to call self.finalize() once you've registered everything! This will
   validate everything and let you know if there's problems.
+- For a layer to be queryable via GetFeatureInfo, simply set the 'queryable'
+  property to True:
+  
+  lyr.queryable = True
 
 
 To Do
@@ -123,10 +128,10 @@ To Do
 
 - Investigate moving to cElementTree from lxml.
 - Add some internal "caching" for performance improvements.
-- Support GetFeatureInfo (Requires core changes).
 - Switch to using C/C++ libs for image generation, instead of PIL (also
   requires core changes). PIL requirement will remain for INIMAGE/BLANK
   error handling.
+- Implement other connectors than CGI/FastCGI (Such as WSGI, SCGI, etc ...)
 
 
 Conclusion
