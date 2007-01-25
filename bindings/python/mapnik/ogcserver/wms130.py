@@ -44,6 +44,23 @@ class ServiceHandler(WMSBaseServiceHandler):
             'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
             'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE', 'BLANK')),
+        },
+        'GetFeatureInfo': {
+            'layers': ParameterDefinition(True, ListFactory(str)),
+            'styles': ParameterDefinition(False, ListFactory(str)),
+            'crs': ParameterDefinition(True, CRSFactory(['EPSG'])),
+            'bbox': ParameterDefinition(True, ListFactory(float)),
+            'width': ParameterDefinition(True, int),
+            'height': ParameterDefinition(True, int),
+            'format': ParameterDefinition(False, str, allowedvalues=('image/png', 'image/jpeg')),
+            'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
+            'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
+            'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE', 'BLANK')),
+            'query_layers': ParameterDefinition(True, ListFactory(str)),
+            'info_format': ParameterDefinition(True, str, allowedvalues=('text/plain',)),
+            'feature_count': ParameterDefinition(False, int, 1),
+            'i': ParameterDefinition(True, float),
+            'j': ParameterDefinition(True, float)
         }
     }
 
@@ -76,9 +93,6 @@ class ServiceHandler(WMSBaseServiceHandler):
                 <Get>
                   <OnlineResource xlink:type="simple"/>
                 </Get>
-                <Post>
-                  <OnlineResource xlink:type="simple"/>
-                </Post>
               </HTTP>
             </DCPType>
           </GetCapabilities>
@@ -90,12 +104,19 @@ class ServiceHandler(WMSBaseServiceHandler):
                 <Get>
                   <OnlineResource xlink:type="simple"/>
                 </Get>
-                <Post>
-                  <OnlineResource xlink:type="simple"/>
-                </Post>
               </HTTP>
             </DCPType>
           </GetMap>
+          <GetFeatureInfo>
+            <Format>text/plain</Format>
+            <DCPType>
+              <HTTP>
+                <Get>
+                  <OnlineResource xlink:type="simple"/>
+                </Get>
+              </HTTP>
+            </DCPType>
+          </GetFeatureInfo>
         </Request>
         <Exception>
           <Format>XML</Format>
@@ -169,6 +190,8 @@ class ServiceHandler(WMSBaseServiceHandler):
                 layerabstract = ElementTree.Element('Abstract')
                 layerabstract.text = layer.abstract
                 layere.append(layerabstract)
+            if layer.queryable:
+                layere.set('queryable', '1')
             layere.append(layerexgbb)
             layere.append(layerbbox)
             if len(layer.wmsextrastyles) > 0:
@@ -192,8 +215,6 @@ class ServiceHandler(WMSBaseServiceHandler):
     def GetMap(self, params):
         if params['width'] > int(self.conf.get('service', 'maxwidth')) or params['height'] > int(self.conf.get('service', 'maxheight')):
             raise OGCException('Requested map size exceeds limits set by this server.')
-        if str(params['crs']) not in self.allowedepsgcodes:
-            raise OGCException('Unsupported CRS "%s" requested.' % str(params['crs']).upper(), 'InvalidCRS')
         return WMSBaseServiceHandler.GetMap(self, params)
 
 class ExceptionHandler(BaseExceptionHandler):

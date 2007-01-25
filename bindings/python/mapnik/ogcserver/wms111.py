@@ -43,7 +43,24 @@ class ServiceHandler(WMSBaseServiceHandler):
             'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
             'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage', 'application/vnd.ogc.se_blank'))
-        }
+        },
+        'GetFeatureInfo': {
+            'layers': ParameterDefinition(True, ListFactory(str)),
+            'styles': ParameterDefinition(False, ListFactory(str)),
+            'srs': ParameterDefinition(True, CRSFactory(['EPSG'])),
+            'bbox': ParameterDefinition(True, ListFactory(float)),
+            'width': ParameterDefinition(True, int),
+            'height': ParameterDefinition(True, int),
+            'format': ParameterDefinition(False, str, allowedvalues=('image/png', 'image/jpeg')),
+            'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
+            'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
+            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage', 'application/vnd.ogc.se_blank')),
+            'query_layers': ParameterDefinition(True, ListFactory(str)),
+            'info_format': ParameterDefinition(True, str, allowedvalues=('text/plain',)),
+            'feature_count': ParameterDefinition(False, int, 1),
+            'x': ParameterDefinition(True, int),
+            'y': ParameterDefinition(True, int)
+        }        
     }
 
     CONF_SERVICE = [
@@ -70,9 +87,6 @@ class ServiceHandler(WMSBaseServiceHandler):
                 <Get>
                   <OnlineResource xlink:type="simple"/>
                 </Get>
-                <Post>
-                  <OnlineResource xlink:type="simple"/>
-                </Post>
               </HTTP>
             </DCPType>
           </GetCapabilities>
@@ -84,12 +98,19 @@ class ServiceHandler(WMSBaseServiceHandler):
                 <Get>
                   <OnlineResource xlink:type="simple"/>
                 </Get>
-                <Post>
-                  <OnlineResource xlink:type="simple"/>
-                </Post>
               </HTTP>
             </DCPType>
           </GetMap>
+          <GetFeatureInfo>
+            <Format>text/plain</Format>
+            <DCPType>
+              <HTTP>
+                <Get>
+                  <OnlineResource xlink:type="simple"/>
+                </Get>
+              </HTTP>
+            </DCPType>
+          </GetFeatureInfo>
         </Request>
         <Exception>
           <Format>application/vnd.ogc.se_xml</Format>
@@ -155,6 +176,8 @@ class ServiceHandler(WMSBaseServiceHandler):
                 layerabstract = ElementTree.Element('Abstract')
                 layerabstract.text = layer.abstract
                 layere.append(layerabstract)
+            if layer.queryable:
+                layere.set('queryable', '1')                
             layere.append(latlonbb)
             layere.append(layerbbox)
             if len(layer.wmsextrastyles) > 0:
@@ -176,10 +199,14 @@ class ServiceHandler(WMSBaseServiceHandler):
         return response
 
     def GetMap(self, params):
-        if str(params['srs']) not in self.allowedepsgcodes:
-            raise OGCException('Unsupported SRS "%s" requested.' % str(params['srs']).upper(), 'InvalidSRS')
         params['crs'] = params['srs']
         return WMSBaseServiceHandler.GetMap(self, params)
+
+    def GetFeatureInfo(self, params):
+        params['crs'] = params['srs']
+        params['i'] = params['x']
+        params['j'] = params['y']
+        return WMSBaseServiceHandler.GetFeatureInfo(self, params, 'query_map_point')        
 
 class ExceptionHandler(BaseExceptionHandler):
 

@@ -280,6 +280,34 @@ class CRSFactory:
 class WMSBaseServiceHandler(BaseServiceHandler):
 
     def GetMap(self, params):
+        m = self._buildMap(params)
+        im = Image(params['width'], params['height'])
+        render(m, im)
+        im = fromstring('RGBA', (params['width'], params['height']), rawdata(im))
+        fh = StringIO()
+        im.save(fh, PIL_TYPE_MAPPING[params['format']], quality=100)
+        fh.seek(0)
+        return Response(params['format'], fh.read())
+
+    def GetFeatureInfo(self, params, querymethodname='query_point'):
+        m = self._buildMap(params)
+        output = ''
+        for layerindex, layername in enumerate(params['query_layers']):
+            if layername in params['layers']:
+                if m.layers[layerindex].queryable:
+                    for feature in getattr(m, querymethodname)(layerindex, params['i'], params['j']):
+                        output += '[%s]\n' % m.layers[layerindex].name
+                        for prop in feature.properties:
+                            output += '%s=%s\n' % (prop.key(), prop.data())
+                else:
+                    raise OGCException('Requested query layer "%s" is not marked queryable.' % layername, 'LayerNotQueryable')
+            else:
+                raise OGCException('Requested query layer "%s" not in the LAYERS parameter.' % layername)
+        return Response('text/plain', output)
+
+    def _buildMap(self, params):
+        if str(params['crs']) not in self.allowedepsgcodes:
+            raise OGCException('Unsupported CRS "%s" requested.' % str(params['crs']).upper(), 'InvalidCRS')
         if params['bbox'][0] >= params['bbox'][2]:
             raise OGCException("BBOX values don't make sense.  minx is greater than maxx.")
         if params['bbox'][1] >= params['bbox'][3]:
@@ -316,13 +344,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
                     raise ServerConfigurationError('Layer "%s" refers to non-existent style "%s".' % (layername, stylename))
             m.layers.append(layer)
         m.zoom_to_box(Envelope(params['bbox'][0], params['bbox'][1], params['bbox'][2], params['bbox'][3]))
-        im = Image(params['width'], params['height'])
-        render(m, im)
-        im = fromstring('RGBA', (params['width'], params['height']), rawdata(im))
-        fh = StringIO()
-        im.save(fh, PIL_TYPE_MAPPING[params['format']], quality=100)
-        fh.seek(0)
-        return Response(params['format'], fh.read())
+        return m
 
 class BaseExceptionHandler:
 
