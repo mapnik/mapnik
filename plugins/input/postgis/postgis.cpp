@@ -169,7 +169,7 @@ layer_descriptor postgis_datasource::get_descriptor() const
 std::string postgis_datasource::table_from_sql(const std::string& sql)
 {
     std::string table_name(sql);
-    transform(table_name.begin(),table_name.end(),table_name.begin(),tolower);
+    std::transform(table_name.begin(),table_name.end(),table_name.begin(),tolower);
     std::string::size_type idx=table_name.rfind("from");
     if (idx!=std::string::npos)
     {
