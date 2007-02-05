@@ -68,7 +68,7 @@ void export_text_symbolizer()
                       &text_symbolizer::get_avoid_edges,
                       &text_symbolizer::set_avoid_edges)
         
-        .add_property("set_label_placement",
+        .add_property("label_placement",
                       &text_symbolizer::get_label_placement,
                       &text_symbolizer::set_label_placement,
                       "Set/get the placement of the label")
