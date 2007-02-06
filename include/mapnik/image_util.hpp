@@ -37,8 +37,15 @@ namespace mapnik {
     void save_to_file(std::string const& filename,
                       std::string const& type,
                       T const& image);
-    
-    
+    template <typename T>
+    void save_as_png(std::string const& filename,
+		     T const& image);
+
+    template <typename T>
+    void save_as_jpeg(std::string const& filename,
+		      int quality,
+		      T const& image);
+
     template <typename T>
     double distance(T x0,T y0,T x1,T y1)
     {
@@ -210,15 +217,16 @@ namespace mapnik {
             }
         }
     }
-#ifdef _MSC_VER
-    template MAPNIK_DECL void save_to_file<ImageData32>(std::string const&,
-                                            std::string const& , 
-                                            ImageData32 const&);
 
-    template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (std::string const&,
-                                                          std::string const& , 
-                                                          image_view<ImageData32> const&);
+#ifdef _MSC_VER
+  template MAPNIK_DECL void save_to_file<ImageData32>(std::string const&,
+						      std::string const& ,
+						      ImageData32 const&);
+  template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (std::string const&,
+								    std::string const& ,
+								    image_view<ImageData32> const&);
 #endif
+
 }
 
 #endif //IMAGE_UTIL_HPP

@@ -25,10 +25,13 @@
 #define UNICODE_HPP
 
 #include <string>
+#include <boost/utility.hpp>
 
 #ifdef USE_FRIBIDI
 #include <fribidi/fribidi.h>
 #endif
+
+#include <iconv.h>
 
 namespace mapnik {
     
@@ -79,8 +82,8 @@ namespace mapnik {
         unsigned long code = 0;
         int expect = 0;
         std::string::const_iterator itr=text.begin();
-        
-        while ( itr != text.end())
+        std::string::const_iterator end=text.end();
+        while ( itr != end)
         {
             unsigned p = (*itr++) & 0xff;
             if ( p >= 0xc0)
@@ -128,6 +131,76 @@ namespace mapnik {
         
         return out;
     }
+   
+   inline std::wstring latin1_to_unicode(std::string const& text)
+   {
+      std::wstring out;
+      std::string::const_iterator itr=text.begin();
+      std::string::const_iterator end=text.end();
+      while ( itr != end)
+      {
+         unsigned p = (*itr++) & 0xff;     
+         out.push_back(wchar_t(p));
+      }      
+      return out;
+   }
+
+   class transcoder : private boost::noncopyable
+   {
+      public:
+         explicit transcoder (std::string const& encoding)
+         {
+            desc_ = iconv_open("UCS-2",encoding.c_str());
+         }
+         
+         std::wstring transcode(std::string const& input)
+         {
+            std::string buf(input.size() * 2,0);
+            size_t inleft = input.size();
+            char * in  = const_cast<char*>(input.data());
+            size_t outleft = buf.size();
+            char * out = const_cast<char*>(buf.data());
+            
+            iconv(desc_,&in,&inleft,&out,&outleft);
+            
+            std::string::const_iterator itr = buf.begin();
+            std::string::const_iterator end = buf.end();
+            wchar_t wch = 0;
+            bool state = false;
+            std::wstring unicode;
+            size_t num_char = buf.size() - outleft;
+            for ( ; itr != end; ++itr)
+            {
+               if (!state)
+               {
+                  wch = (*itr & 0xff);
+                  state = true;
+               }
+               else 
+               {
+                  wch |= *itr << 8 ;
+                  unicode.push_back(wchar_t(wch));
+                  state = false;
+               }
+               if (!num_char--) break;
+            }
+                     
+#ifdef USE_FRIBIDI
+            wchar_t *bidi_text = bidi_string(unicode.c_str());
+            unicode = bidi_text;
+            free(bidi_text);
+#endif
+            return unicode;
+         }
+         
+         ~transcoder()
+         {
+            iconv_close(desc_);
+         }
+
+   private:
+      iconv_t desc_;
+   };
 }
 
 #endif // UNICODE_HPP

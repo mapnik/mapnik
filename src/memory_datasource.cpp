@@ -85,7 +85,7 @@ namespace mapnik {
     
     layer_descriptor memory_datasource::get_descriptor() const
     {
-        return layer_descriptor("in-memory datasource");
+        return layer_descriptor("in-memory datasource","utf-8");
     }
     
     size_t memory_datasource::size() const

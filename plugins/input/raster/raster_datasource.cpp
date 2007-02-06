@@ -39,7 +39,7 @@ using boost::bad_lexical_cast;
 
 raster_datasource::raster_datasource(const parameters& params)
     : datasource (params),
-      desc_(params.get("name"))
+      desc_(params.get("name"),"utf-8")
 {
     filename_=params.get("file");
     format_=params.get("format");

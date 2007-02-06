@@ -53,7 +53,7 @@ namespace mapnik
         } else if (q<0.0) result=false;
         return result;
     }
-
+    
     template <typename T,typename Image>
     bool clip_line(T& x0,T& y0,T& x1,T& y1,Envelope<T> const& box)
     {

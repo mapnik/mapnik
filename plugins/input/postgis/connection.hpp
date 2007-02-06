@@ -38,63 +38,71 @@ class ResultSet;
 
 class Connection
 {
-private:
-    PGconn *conn_;
-public:
-    Connection(std::string const& uri, 
-               std::string const& port,
-               std::string const& dbname, 
-               std::string const& username,
-               std::string const& password)
-    {
-        std::string connStr="host="+uri;
-        if (port.length()) connStr+=" port="+port;
-        connStr+=" dbname="+dbname;
-        connStr+=" user="+username;
-        connStr+=" password="+password;
-        connStr+=" connect_timeout=4"; // todo: set by client (param) 
+   private:
+      PGconn *conn_;
+   public:
+      Connection(std::string const& uri, 
+                 std::string const& port,
+                 std::string const& dbname, 
+                 std::string const& username,
+                 std::string const& password)
+      {
+         std::string connStr="host="+uri;
+         if (port.length()) connStr+=" port="+port;
+         connStr+=" dbname="+dbname;
+         connStr+=" user="+username;
+         connStr+=" password="+password;
+         connStr+=" connect_timeout=4"; // todo: set by client (param) 
         
-        conn_=PQconnectdb(connStr.c_str());
-        if (PQstatus(conn_) == CONNECTION_BAD)
-        {
+         conn_=PQconnectdb(connStr.c_str());
+         if (PQstatus(conn_) == CONNECTION_BAD)
+         {
             std::clog << "connection to "<< connStr << " failed\n"
                       << PQerrorMessage(conn_)<< std::endl;
-        }
-    }
+         }
+      }
     
-    bool execute(const std::string& sql) const
-    {
-        PGresult *result=PQexec(conn_,sql.c_str());
-        bool ok=(result && PQresultStatus(result)==PGRES_COMMAND_OK);
-        PQclear(result);
-        return ok;
-    }
-    boost::shared_ptr<ResultSet> executeQuery(const std::string& sql,int type=0) const
-    {
-        PGresult *result=0;
-        if (type==1)
-        {
+      bool execute(const std::string& sql) const
+      {
+         PGresult *result=PQexec(conn_,sql.c_str());
+         bool ok=(result && PQresultStatus(result)==PGRES_COMMAND_OK);
+         PQclear(result);
+         return ok;
+      }
+      boost::shared_ptr<ResultSet> executeQuery(const std::string& sql,int type=0) const
+      {
+         PGresult *result=0;
+         if (type==1)
+         {
             result=PQexecParams(conn_,sql.c_str(),0,0,0,0,0,1);
             return boost::shared_ptr<ResultSet>(new ResultSet(result));
-        }
-        result=PQexec(conn_,sql.c_str());
-        return boost::shared_ptr<ResultSet>(new ResultSet(result));
-    }
-    bool isOK() const
-    {
-        return (PQstatus(conn_)!=CONNECTION_BAD);
-    }
-    void close()
-    {
-        PQfinish(conn_);
-    }
-    ~Connection()
-    {
-        PQfinish(conn_);
+         }
+         result=PQexec(conn_,sql.c_str());
+         return boost::shared_ptr<ResultSet>(new ResultSet(result));
+      }
+      
+      std::string client_encoding() const
+      {
+         return PQparameterStatus(conn_,"client_encoding");
+      }
+      
+      bool isOK() const
+      {
+         return (PQstatus(conn_)!=CONNECTION_BAD);
+      }
+      
+      void close()
+      {
+         PQfinish(conn_);
+      }
+      
+      ~Connection()
+      {
+         PQfinish(conn_);
 #ifdef MAPNIK_DEBUG
-        std::clog << "close connection " << conn_ << "\n";
+         std::clog << "close connection " << conn_ << "\n";
 #endif 
-    }
+      }
 };
 
 #endif //CONNECTION_HPP

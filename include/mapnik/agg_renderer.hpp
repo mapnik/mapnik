@@ -27,13 +27,15 @@
 
 // boost
 #include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/map.hpp>
-#include <mapnik/config.hpp>
+#include <mapnik/unicode.hpp>
 
 namespace mapnik {
     template <typename T>
@@ -71,12 +73,12 @@ namespace mapnik {
                      Feature const& feature,
                      proj_transform const& prj_trans);
     private:
-        T & pixmap_;
-        CoordTransform t_;
-        face_manager<freetype_engine> font_manager_;
-//        label_collision_detector2 label_detector_;
-        placement_finder finder_;
-        label_collision_detector2 point_detector_; //Note: May want to merge this with placement_finder
+          T & pixmap_;
+          CoordTransform t_;
+          face_manager<freetype_engine> font_manager_;
+          placement_finder finder_;
+          label_collision_detector2 point_detector_; //Note: May want to merge this with placement_finder
+          boost::shared_ptr<transcoder> tr_;
     };
 }
 

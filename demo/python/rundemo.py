@@ -271,7 +271,7 @@ m.layers.append(roads1_lyr)
 # Populated Places
 
 popplaces_lyr = Layer('Populated Places')
-popplaces_lyr.datasource = Shapefile(file='../data/popplaces')
+popplaces_lyr.datasource = Shapefile(file='../data/popplaces',encoding='latin1')
 
 popplaces_style = Style()
 popplaces_rule = Rule()
