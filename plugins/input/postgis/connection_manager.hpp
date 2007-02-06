@@ -40,12 +40,12 @@ class ConnectionCreator
 {
 
 public:
-    ConnectionCreator(string const& url,
+    ConnectionCreator(string const& host,
                       string const& port,
                       string const& dbname,
                       string const& user,
                       string const& pass)
-        : url_(url),
+        : host_(host),
           port_(port),
           dbname_(dbname),
           user_(user),
@@ -53,18 +53,18 @@ public:
     
     T* operator()() const
     {
-        return new T(url_,port_,dbname_,user_,pass_);
+        return new T(host_,port_,dbname_,user_,pass_);
     }
     
     std::string id() const 
     {
-        return url_ + ":" 
+        return host_ + ":" 
 	  + dbname_ + ":" 
 	  + port_ +":" 
 	  + user_ ; 
     }
 private:
-    string url_;
+    string host_;
     string port_;
     string dbname_;
     string user_;

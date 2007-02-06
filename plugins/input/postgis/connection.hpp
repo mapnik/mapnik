@@ -41,19 +41,21 @@ class Connection
    private:
       PGconn *conn_;
    public:
-      Connection(std::string const& uri, 
+      Connection(std::string const& host, 
                  std::string const& port,
                  std::string const& dbname, 
                  std::string const& username,
                  std::string const& password)
       {
-         std::string connStr="host="+uri;
-         if (port.length()) connStr+=" port="+port;
+         
+         std::string connStr;
+         if (host.length()) connStr += "host="+host;
+         if (port.length()) connStr += " port="+port;
          connStr+=" dbname="+dbname;
          connStr+=" user="+username;
          connStr+=" password="+password;
          connStr+=" connect_timeout=4"; // todo: set by client (param) 
-        
+         
          conn_=PQconnectdb(connStr.c_str());
          if (PQstatus(conn_) == CONNECTION_BAD)
          {
