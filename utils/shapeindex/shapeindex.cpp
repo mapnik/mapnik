@@ -71,7 +71,7 @@ int main (int argc,char** argv)
 	
         if (vm.count("version"))
         {
-            clog<<"version 0.3.0" <<endl;
+            clog<<"version 0.3.0" <<std::endl;
             return 1;
         }
 
@@ -96,7 +96,7 @@ int main (int argc,char** argv)
     }
     catch (...)
     {
-        clog << "Exception of unknown type!"<<endl;
+        clog << "Exception of unknown type!"<<std::endl;
         return -1;
     }
     
