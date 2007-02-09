@@ -187,6 +187,12 @@ namespace mapnik
                                 std::string placement_str = 
                                     sym.second.get<std::string>("<xmlattr>.placement","point");
                                 
+                                // displacement 
+                                
+                                int dx = sym.second.get<int>("<xmlattr>.dx",0);
+                                int dy = sym.second.get<int>("<xmlattr>.dy",0);
+                                text_symbol.set_displacement(dx,dy);
+                                
                                 if (placement_str == "line")
                                 {
                                     text_symbol.set_label_placement(line_placement);
@@ -400,10 +406,6 @@ namespace mapnik
                                     }
                                 }
                                 rule.append(poly_sym);
-                            }
-                            else if ( sym.first == "TextSymbolizer")
-                            {
-                                std::cout << sym.first << "\n";
                             } 
                             else if ( sym.first == "RasterSymbolizer")
                             {

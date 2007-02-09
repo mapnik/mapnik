@@ -521,7 +521,10 @@ namespace mapnik
                     
                ren.get_string_info(text, &info);
                     
-               placement text_placement(&info, &t_, &prj_trans, geom, sym.get_label_placement());
+               placement text_placement(&info, &t_, &prj_trans, geom, 
+                                        sym.get_displacement(),
+                                        sym.get_label_placement());
+               
                text_placement.text_ratio = sym.get_text_ratio();
                text_placement.wrap_width = sym.get_wrap_width();
                text_placement.label_spacing = sym.get_label_spacing();
@@ -530,25 +533,22 @@ namespace mapnik
                text_placement.max_char_angle_delta = sym.get_max_char_angle_delta();
                text_placement.avoid_edges = sym.get_avoid_edges();
                   
-               bool found = finder_.find_placements(&text_placement);
-               if (!found) {
-                  return;
-               }
+               if ( !finder_.find_placements(&text_placement)) return;
                     
                for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                {
                   double x = text_placement.placements[ii].starting_x;
                   double y = text_placement.placements[ii].starting_y;
-                        
+                  
                   Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii].path);
-                        
-                  Envelope<double> text_box(x + dim.minx() ,y - dim.maxy(), x + dim.maxx(),y - dim.miny());
+                  
+                  //Envelope<double> text_box(x + dim.minx() ,y - dim.maxy(), x + dim.maxx(),y - dim.miny());
 		        
-                  if (sym.get_halo_radius() > 0)
-                  {
-                     text_box.width(text_box.width() + sym.get_halo_radius()*2);
-                     text_box.height(text_box.height() + sym.get_halo_radius()*2);
-                  }
+                  //if (sym.get_halo_radius() > 0)
+                  //{
+                  //   text_box.width(text_box.width() + sym.get_halo_radius()*2);
+                  //   text_box.height(text_box.height() + sym.get_halo_radius()*2);
+                  //}
                   ren.render(x,y);
                }
             }

@@ -213,7 +213,7 @@ namespace mapnik
         displacement_ = boost::make_tuple(x,y);
     }
     
-    position const&  text_symbolizer::get_displacement() const
+    position const& text_symbolizer::get_displacement() const
     {
         return displacement_;
     }

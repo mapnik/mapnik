@@ -37,88 +37,98 @@
 namespace mapnik
 {
 
-    struct placement_element
-    {
-        double starting_x;
-        double starting_y;
+   struct placement_element
+   {
+         double starting_x;
+         double starting_y;
     
-        text_path path;
-    };
+         text_path path;
+   };
 
-  struct placement
-  {
-    typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+   struct placement
+   {
+         typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+         
+         //For shields
+         placement(string_info *info_, 
+                   CoordTransform *ctrans_, 
+                   const proj_transform *proj_trans_, 
+                   geometry_ptr geom_, 
+                   std::pair<double, double> dimensions_);
+    
+         //For text
+         placement(string_info *info_, 
+                   CoordTransform *ctrans_, 
+                   const proj_transform *proj_trans_, 
+                   geometry_ptr geom_,
+                   position const& displacement,
+                   label_placement_e placement_);
+         
+         ~placement();
+        
+         unsigned path_size() const;
+         string_info *info;
+    
+         CoordTransform *ctrans;
+         const proj_transform *proj_trans;
 
-    //For shields
-    placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, std::pair<double, double> dimensions_);
-    
-    //For text
-    placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, label_placement_e placement_);
-    
-    ~placement();
+         geometry_ptr geom;
+         position displacement_;
+         label_placement_e label_placement;
+         std::pair<double, double> dimensions;
 
-      unsigned path_size() const;
-      string_info *info;
+         bool has_dimensions;
     
-    CoordTransform *ctrans;
-    const proj_transform *proj_trans;
+         path_type shape_path;
+         std::queue< Envelope<double> > envelopes;
+    
+         //output
+         std::vector<placement_element> placements;
 
-    geometry_ptr geom;
-    label_placement_e label_placement;
-    std::pair<double, double> dimensions;
+         // caching output
+         placement_element current_placement;
+    
+         //helpers
+         std::pair<double, double> get_position_at_distance(double target_distance);
+         double get_total_distance();
+         void clear_envelopes();
+    
+         double total_distance_; //cache for distance
+    
+         int wrap_width;
+         int text_ratio;
 
-    bool has_dimensions;
-    
-    path_type shape_path;
-    std::queue< Envelope<double> > envelopes;
-    
-    //output
-    std::vector<placement_element> placements;
+         int label_spacing; // distance between repeated labels on a single geometry
+         unsigned label_position_tolerance; //distance the label can be moved on the line to fit, if 0 the default is used
+         bool force_odd_labels; //Always try render an odd amount of labels
 
-    // caching output
-    placement_element current_placement;
+         double max_char_angle_delta;
     
-    //helpers
-    std::pair<double, double> get_position_at_distance(double target_distance);
-    double get_total_distance();
-    void clear_envelopes();
-    
-    double total_distance_; //cache for distance
-    
-    int wrap_width;
-    int text_ratio;
-
-    int label_spacing; // distance between repeated labels on a single geometry
-    unsigned label_position_tolerance; //distance the label can be moved on the line to fit, if 0 the default is used
-	bool force_odd_labels; //Always try render an odd amount of labels
-
-    double max_char_angle_delta;
-    
-    bool avoid_edges;
-  };
+         bool avoid_edges;
+   };
 
 
   
-  class placement_finder : boost::noncopyable
-  {
-  public:
-    //E is the dimensions of the map, buffer is the buffer used for collission detection.
-    placement_finder(Envelope<double> e, unsigned buffer);
+   class placement_finder : boost::noncopyable
+   {
+      public:
+         //e is the dimensions of the map, buffer is the buffer used for collission detection.
+         placement_finder(Envelope<double> e, unsigned buffer);
   
-    bool find_placements(placement *p);
+         bool find_placements(placement *p);
     
-  protected:
-    bool find_placement_follow(placement *p);
-    bool find_placement_horizontal(placement *p);
+      protected:
+         bool find_placement_follow(placement *p);
+         bool find_placement_horizontal(placement *p);
 
-    bool build_path_follow(placement *p, double target_distance);
-    bool build_path_horizontal(placement *p, double target_distance);
+         bool build_path_follow(placement *p, double target_distance);
+         bool build_path_horizontal(placement *p, double target_distance);
 
-    void update_detector(placement *p);
+         void update_detector(placement *p);
   
-    Envelope<double> dimensions_;
-    label_collision_detector3 detector_;
-  };
+         Envelope<double> dimensions_;
+         label_collision_detector3 detector_;
+   };
   
 }
 

@@ -32,6 +32,7 @@
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/tuple/tuple.hpp>
 
 //mapnik
 #include <mapnik/geometry.hpp>
@@ -45,14 +46,53 @@
 namespace mapnik
 {
     //For shields
-    placement::placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, std::pair<double, double> dimensions_)
-        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(point_placement), dimensions(dimensions_), has_dimensions(true), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), label_position_tolerance(0), force_odd_labels(false), max_char_angle_delta(0.0), avoid_edges(false)
+    placement::placement(string_info *info_, 
+                         CoordTransform *ctrans_, 
+                         const proj_transform *proj_trans_, 
+                         geometry_ptr geom_, 
+                         std::pair<double, double> dimensions_)
+        : info(info_), 
+          ctrans(ctrans_), 
+          proj_trans(proj_trans_), 
+          geom(geom_),
+          displacement_(0,0),
+          label_placement(point_placement), 
+          dimensions(dimensions_), 
+          has_dimensions(true), 
+          shape_path(*ctrans_, *geom_, *proj_trans_), 
+          total_distance_(-1.0), 
+          wrap_width(0), 
+          text_ratio(0), 
+          label_spacing(0), 
+          label_position_tolerance(0), 
+          force_odd_labels(false), 
+          max_char_angle_delta(0.0), avoid_edges(false)
     {
     }
 
     //For text
-    placement::placement(string_info *info_, CoordTransform *ctrans_, const proj_transform *proj_trans_, geometry_ptr geom_, label_placement_e placement_)
-        : info(info_), ctrans(ctrans_), proj_trans(proj_trans_), geom(geom_), label_placement(placement_), has_dimensions(false), shape_path(*ctrans_, *geom_, *proj_trans_), total_distance_(-1.0), wrap_width(0), text_ratio(0), label_spacing(0), label_position_tolerance(0), force_odd_labels(false), max_char_angle_delta(0.0), avoid_edges(false)
+    placement::placement(string_info *info_, 
+                         CoordTransform *ctrans_, 
+                         const proj_transform *proj_trans_, 
+                         geometry_ptr geom_,
+                         position const& displacement,
+                         label_placement_e placement_)
+       : info(info_), 
+         ctrans(ctrans_), 
+         proj_trans(proj_trans_), 
+         geom(geom_), 
+         displacement_(displacement),
+         label_placement(placement_), 
+         has_dimensions(false), 
+         shape_path(*ctrans_, *geom_, *proj_trans_), 
+         total_distance_(-1.0), 
+         wrap_width(0), 
+         text_ratio(0), 
+         label_spacing(0), 
+         label_position_tolerance(0), 
+         force_odd_labels(false), 
+         max_char_angle_delta(0.0), 
+         avoid_edges(false)
     {
     }
   
@@ -143,7 +183,8 @@ namespace mapnik
   
   
     placement_finder::placement_finder(Envelope<double> e, unsigned buffer)
-        : dimensions_(e), detector_(Envelope<double>(e.minx() - buffer, e.miny() - buffer, e.maxx() + buffer, e.maxy() + buffer))
+        : dimensions_(e), 
+          detector_(Envelope<double>(e.minx() - buffer, e.miny() - buffer, e.maxx() + buffer, e.maxy() + buffer))
     {
     }
 
@@ -574,6 +615,9 @@ namespace mapnik
             double z=0;  
             p->proj_trans->backward(p->current_placement.starting_x, p->current_placement.starting_y, z);
             p->ctrans->forward(&p->current_placement.starting_x, &p->current_placement.starting_y);
+            // apply displacement ( in pixels ) 
+            p->current_placement.starting_x += boost::tuples::get<0>(p->displacement_);
+            p->current_placement.starting_y += boost::tuples::get<1>(p->displacement_); 
         }
         
         double line_height = 0;
@@ -606,11 +650,17 @@ namespace mapnik
                 Envelope<double> e;
                 if (p->has_dimensions)
                 {
-                    e.init(p->current_placement.starting_x - (p->dimensions.first/2.0), p->current_placement.starting_y - (p->dimensions.second/2.0), p->current_placement.starting_x + (p->dimensions.first/2.0), p->current_placement.starting_y + (p->dimensions.second/2.0));
+                    e.init(p->current_placement.starting_x - (p->dimensions.first/2.0), 
+                           p->current_placement.starting_y - (p->dimensions.second/2.0), 
+                           p->current_placement.starting_x + (p->dimensions.first/2.0), 
+                           p->current_placement.starting_y + (p->dimensions.second/2.0));
                 }
                 else
                 {
-                    e.init(p->current_placement.starting_x + x, p->current_placement.starting_y - y, p->current_placement.starting_x + x + ci.width, p->current_placement.starting_y - y - ci.height);
+                    e.init(p->current_placement.starting_x + x, 
+                           p->current_placement.starting_y - y, 
+                           p->current_placement.starting_x + x + ci.width, 
+                           p->current_placement.starting_y - y - ci.height);
                 }
                 
                 if (!detector_.has_placement(e))
