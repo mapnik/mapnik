@@ -107,7 +107,7 @@ if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
-#    ['system', 'boost/system/system_error.hpp', True],
+    #['system', 'boost/system/system_error.hpp', True],
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
     ['program_options', 'boost/program_options.hpp', False]
@@ -124,14 +124,12 @@ if len(env['BOOST_TOOLKIT']): toolkit = env['BOOST_TOOLKIT']
 else: toolkit = env['CC']
 
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
-    if not conf.CheckLibWithHeader('boost_%s-%s-mt' % (libinfo[0], toolkit), libinfo[1], 'C++'):
-        if not conf.CheckLibWithHeader('boost_%s-%s' % (libinfo[0], toolkit), libinfo[1], 'C++') and libinfo[2] and count == 0:
+    if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++'):
+        if not conf.CheckLibWithHeader('boost_%s-%s-mt' % (libinfo[0], toolkit), libinfo[1], 'C++') and libinfo[2] and count == 0:
             print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
             Exit(1)
         else:
-            env['BOOST_APPEND'] = '-%s' % toolkit
-    else:
-    	env['BOOST_APPEND'] = '-%s-mt' % toolkit
+            env['BOOST_APPEND'] = '-%s-mt' % toolkit
 
 Export('env')
 
