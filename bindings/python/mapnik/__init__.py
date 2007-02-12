@@ -86,7 +86,7 @@ from mapnik import DatasourceCache
 DatasourceCache.instance().register_datasources('%s' % inputpluginspath)
 #register some fonts
 from mapnik import FontEngine
-FontEngine.instance().register_font('%s/Vera.ttf' % fontscollectionpath)
+FontEngine.instance().register_font('%s/DejaVuSans.ttf' % fontscollectionpath)
 #set dlopen flags back to the original
 setdlopenflags(flags)
 

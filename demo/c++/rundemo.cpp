@@ -43,7 +43,7 @@ int main ( int argc , char** argv)
     
     std::cout << " running demo ... \n";
     datasource_cache::instance()->register_datasources(argv[1]); 
-    freetype_engine::instance()->register_font("/opt/mapnik/lib64/mapnik/fonts//Vera.ttf");
+    freetype_engine::instance()->register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf.ttf");
     
     Map m(800,600);
     m.setBackground(color_factory::from_string("white"));
@@ -150,7 +150,7 @@ int main ( int argc , char** argv)
     
     feature_type_style popplaces_style;
     rule_type popplaces_rule;
-    text_symbolizer popplaces_text_symbolizer("GEONAME","Bitstream Vera Sans Roman",10,Color(0,0,0));
+    text_symbolizer popplaces_text_symbolizer("GEONAME","DejaVu Sans Book",10,Color(0,0,0));
     popplaces_text_symbolizer.set_halo_fill(Color(255,255,200));
     popplaces_text_symbolizer.set_halo_radius(1);
     popplaces_rule.append(popplaces_text_symbolizer);

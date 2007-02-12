@@ -281,7 +281,7 @@ popplaces_rule = Rule()
 # text to label with.  Then there is font size in points (I think?), and colour.
 
 popplaces_text_symbolizer = TextSymbolizer('GEONAME',
-                                           'Bitstream Vera Sans Roman',
+                                           'DejaVu Sans Book',
                                            10, Color('black'))
 
 # We set a "halo" around the text, which looks like an outline if thin enough,
