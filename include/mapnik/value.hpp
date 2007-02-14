@@ -347,15 +347,16 @@ namespace mapnik  {
                for (;pos!=val.end();++pos)
                {
                   wchar_t c = *pos;
-                  if (c < 0x7f) 
+                  if (c < 0x80) 
                   {
                      ss << char(c);
                   }
                   else
                   {
                      ss << "\\x";
-                     ss << ((c >> 8) & 0xff);
-                     ss <<  (c & 0xff);
+                     unsigned c0 = (c >> 8) & 0xff;
+                     if (c0) ss << c0;
+                     ss << (c & 0xff);
                   }
                }
 	       return ss.str();
@@ -375,7 +376,9 @@ namespace mapnik  {
             template <typename T>
             std::wstring operator() (T val) const
 	    {
-	       return L"TODO";
+               std::basic_ostringstream<wchar_t> out;
+	       out << val;
+               return out.str();
 	    }
             // specializations 
             std::wstring const& operator() (std::wstring const& val) const
@@ -394,18 +397,19 @@ namespace mapnik  {
                for (;pos!=val.end();++pos)
                {
                   wchar_t c = *pos;
-                  if (c < 0x7f) 
+                  if (c < 0x80) 
                   {
                      ss << char(c);
                   }
                   else
                   {
                      ss << "\\x";
-                     ss << ((c >> 8) & 0xff);
-                     ss <<  (c & 0xff);
+                     unsigned c0 = (c >> 8) & 0xff;
+                     if (c0) ss << c0;
+                     ss << (c & 0xff);
                   }
                }
-	       return ss.str();
+	       return "\'" + ss.str() + "\'";
 	    } 
             
             template <typename T>
