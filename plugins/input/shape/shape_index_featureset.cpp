@@ -28,11 +28,12 @@
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
                                                         const std::string& shape_file,
-                                                        const std::set<std::string>& attribute_names)
+                                                        const std::set<std::string>& attribute_names,
+                                                        std::string const& encoding)
     : filter_(filter),
       shape_type_(0),
       shape_(shape_file),
-      tr_(new transcoder("latin1")),
+      tr_(new transcoder(encoding)),
       count_(0)
 
 {

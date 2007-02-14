@@ -43,8 +43,10 @@ class shape_index_featureset : public Featureset
       mutable int count_;
 
    public:
-      shape_index_featureset(const filterT& filter,const std::string& shape_file,
-                             const std::set<std::string>& attribute_names);
+      shape_index_featureset(const filterT& filter,
+                             const std::string& shape_file,
+                             const std::set<std::string>& attribute_names,
+                             std::string const& encoding);
       virtual ~shape_index_featureset();
       feature_ptr next();
    private:

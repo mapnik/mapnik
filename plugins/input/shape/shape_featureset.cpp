@@ -27,12 +27,13 @@ template <typename filterT>
 shape_featureset<filterT>::shape_featureset(const filterT& filter, 
                                             const std::string& shape_file,
                                             const std::set<std::string>& attribute_names,
+                                            std::string const& encoding,
                                             long file_length )
    : filter_(filter),
      shape_type_(shape_io::shape_null),
      shape_(shape_file),
      query_ext_(),
-     tr_(new transcoder("latin1")),
+     tr_(new transcoder(encoding)),
      file_length_(file_length),
      count_(0)
 {

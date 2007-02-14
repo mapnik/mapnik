@@ -23,10 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-
 #include <mapnik/geom_util.hpp>
-
-
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
 
@@ -40,10 +37,12 @@ shape_datasource::shape_datasource(const parameters &params)
      type_(datasource::Vector),
      file_length_(0),
      indexed_(false),
-     desc_(params.get("name"),"latin1")
+     desc_(params.get("name"),"utf-8")
 {
    try
    {
+      std::string encoding = params.get("encoding");
+      if (encoding.length() > 0) desc_.set_encoding(encoding);
       shape_io shape(shape_name_);
       init(shape);
       for (int i=0;i<shape.dbf().num_fields();++i)
@@ -110,7 +109,7 @@ void  shape_datasource::init(shape_io& shape)
       //invalid version number
       throw datasource_exception("invalid version number");
    }
-   int shape_type=shape.shp().read_ndr_integer();
+   int shape_type = shape.shp().read_ndr_integer();
    shape.shp().read_envelope(extent_);
    shape.shp().skip(4*8);
 
@@ -152,12 +151,19 @@ featureset_ptr shape_datasource::features(const query& q) const
    if (indexed_)
    {
       return featureset_ptr
-         (new shape_index_featureset<filter_in_box>(filter,shape_name_,q.property_names()));
+         (new shape_index_featureset<filter_in_box>(filter,
+                                                    shape_name_,
+                                                    q.property_names(),
+                                                    desc_.get_encoding()));
    }
    else
    {
       return featureset_ptr
-         (new shape_featureset<filter_in_box>(filter,shape_name_,q.property_names(),file_length_));
+         (new shape_featureset<filter_in_box>(filter,
+                                              shape_name_,
+                                              q.property_names(),
+                                              desc_.get_encoding(),
+                                              file_length_));
    }
 }
 
@@ -179,12 +185,19 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
    if (indexed_)
    {
       return featureset_ptr
-         (new shape_index_featureset<filter_at_point>(filter,shape_name_,names));
+         (new shape_index_featureset<filter_at_point>(filter,
+                                                      shape_name_,
+                                                      names,
+                                                      desc_.get_encoding()));
    }
    else
    {
       return featureset_ptr
-         (new shape_featureset<filter_at_point>(filter,shape_name_,names,file_length_));
+         (new shape_featureset<filter_at_point>(filter,
+                                                shape_name_,
+                                                names,
+                                                desc_.get_encoding(),
+                                                file_length_));
    }
 }
 

@@ -43,8 +43,11 @@ class shape_featureset : public Featureset
       mutable int total_geom_size;
       mutable int count_;
    public:
-      shape_featureset(const filterT& filter, const std::string& shape_file,
-                       const std::set<std::string>& attribute_names,long file_length);
+      shape_featureset(const filterT& filter, 
+                       const std::string& shape_file,
+                       const std::set<std::string>& attribute_names,
+                       std::string const& encoding,
+                       long file_length);
       virtual ~shape_featureset();
       feature_ptr next();
    private:
