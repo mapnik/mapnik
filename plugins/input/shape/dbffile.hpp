@@ -32,6 +32,7 @@
 
 using namespace mapnik;
 
+class mapnik::transcoder;
 struct field_descriptor
 {
     int index_;
@@ -65,7 +66,7 @@ public:
     field_descriptor const& descriptor(int col) const;
     void move_to(int index);
     std::string string_value(int col) const;
-    void add_attribute(int col,Feature const& f) const throw();
+    void add_attribute(int col, transcoder const& tr, Feature const& f) const throw();
 private:
     dbf_file(const dbf_file&);
     dbf_file& operator=(const dbf_file&);

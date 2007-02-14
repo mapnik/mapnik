@@ -88,9 +88,9 @@ namespace mapnik
         template <typename Iter>
         void operator() (Iter start,Iter end) const
         {
-            string str(start,end);
-            char quote='\\';
-            string::size_type idx;
+            std::wstring str(start,end);
+            std::wstring quote = L"\\";
+            std::wstring::size_type idx;
             idx = str.find(quote);
             while (idx != string::npos)
             {	    		

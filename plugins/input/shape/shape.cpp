@@ -34,13 +34,13 @@
 
 DATASOURCE_PLUGIN(shape_datasource)
 
-   shape_datasource::shape_datasource(const parameters &params)
-      : datasource (params) ,
-        shape_name_(params.get("file")),
-        type_(datasource::Vector),
-        file_length_(0),
-        indexed_(false),
-        desc_(params.get("name"),"latin1")
+shape_datasource::shape_datasource(const parameters &params)
+   : datasource (params) ,
+     shape_name_(params.get("file")),
+     type_(datasource::Vector),
+     file_length_(0),
+     indexed_(false),
+     desc_(params.get("name"),"latin1")
 {
    try
    {

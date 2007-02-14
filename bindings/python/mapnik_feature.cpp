@@ -29,23 +29,24 @@
 
 void export_feature()
 {
-    using namespace boost::python;
-    using mapnik::Feature;
-    class_<Feature,boost::shared_ptr<Feature>,
-        boost::noncopyable>("Feature",no_init)
-        .def("id",&Feature::id)
-        .def("__str__",&Feature::to_string)
+   using namespace boost::python;
+   using mapnik::Feature;
+   class_<Feature,boost::shared_ptr<Feature>,
+      boost::noncopyable>("Feature",no_init)
+      .def("id",&Feature::id)
+      .def("__str__",&Feature::to_string)
       //.def(map_indexing_suite<mapnik::Feature>())
-	.add_property("properties", 
-		      make_function(&Feature::props,return_value_policy<reference_existing_object>()))
-        ;
+      .add_property("properties", 
+                    make_function(&Feature::props,return_value_policy<reference_existing_object>()))
+      ;
     
-    class_<std::map<std::string, mapnik::value> >("Properties")
+   class_<std::map<std::string, mapnik::value> >("Properties")
       .def(map_indexing_suite<std::map<std::string, mapnik::value
 	   > >())
       ;
     
-    class_<mapnik::value>("Value")
-	.def("__str__",&mapnik::value::to_string)
-	;
+   class_<mapnik::value>("Value")
+      .def("__str__",&mapnik::value::to_string)
+      .def("unicode",&mapnik::value::to_unicode)
+      ;
 }

@@ -32,6 +32,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
     : filter_(filter),
       shape_type_(0),
       shape_(shape_file),
+      tr_(new transcoder("latin1")),
       count_(0)
 
 {
@@ -171,7 +172,7 @@ feature_ptr shape_index_featureset<filterT>::next()
             {
                 try 
                 {
-                    shape_.dbf().add_attribute(*pos,*feature);
+                    shape_.dbf().add_attribute(*pos,*tr_,*feature);
                 }
                 catch (...)
                 {

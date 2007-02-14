@@ -51,7 +51,7 @@ namespace mapnik {
         literal(double val)
             : expression<FeatureT>(),
               value_(val) {}
-        literal(std::string const& val)
+        literal(std::wstring const& val)
             : expression<FeatureT>(),
               value_(val) {}
         literal(literal const& other)
@@ -62,14 +62,17 @@ namespace mapnik {
         {
             return value_;
         }
+          
         void accept(filter_visitor<FeatureT>& v)
         {
             v.visit(*this);
         }
+          
         expression<FeatureT>* clone() const
         {
             return new literal(*this); 
         }
+          
         std::string to_string() const
         {
             return value_.to_expression_string();

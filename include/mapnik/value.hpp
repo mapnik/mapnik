@@ -32,9 +32,12 @@
 
 // boost
 #include <boost/variant.hpp>
+// mapnik
+#include <mapnik/unicode.hpp>
 
 namespace mapnik  {
-   typedef boost::variant<int,double,std::string> value_base;
+   
+   typedef boost::variant<int,double,std::wstring> value_base;
    
    namespace impl {
       struct equals
@@ -51,7 +54,7 @@ namespace mapnik  {
 	    {
 	       return lhs == rhs;
 	    }
-	
+            
             bool operator() (int lhs, double rhs) const
 	    {
 	       return  lhs == rhs;
@@ -62,8 +65,8 @@ namespace mapnik  {
 	       return  lhs == rhs;
 	    }
 	
-            bool operator() (std::string const& lhs, 
-                             std::string const& rhs) const
+            bool operator() (std::wstring const& lhs, 
+                             std::wstring const& rhs) const
 	    {
 	       return  lhs == rhs;
 	    }
@@ -94,7 +97,7 @@ namespace mapnik  {
 	       return  lhs > rhs;
 	    }
 	
-            bool operator() (std::string const& lhs, std::string const& rhs) const
+            bool operator() (std::wstring const& lhs, std::wstring const& rhs) const
 	    {
 	       return  lhs > rhs;
 	    }
@@ -125,7 +128,7 @@ namespace mapnik  {
 	       return  lhs >= rhs;
 	    }
 	
-            bool operator() (std::string const& lhs, std::string const& rhs ) const
+            bool operator() (std::wstring const& lhs, std::wstring const& rhs ) const
 	    {
 	       return lhs >= rhs;
 	    }
@@ -156,8 +159,8 @@ namespace mapnik  {
 	       return  lhs < rhs;
 	    }
 	
-            bool operator()( std::string const& lhs, 
-                             std::string const& rhs ) const
+            bool operator()( std::wstring const& lhs, 
+                             std::wstring const& rhs ) const
 	    {
 	       return lhs < rhs;
 	    }
@@ -189,8 +192,8 @@ namespace mapnik  {
 	    }
 	
             template <typename T>
-            bool operator()( std::string const& lhs, 
-                             std::string const& rhs ) const
+            bool operator()( std::wstring const& lhs, 
+                             std::wstring const& rhs ) const
 	    {
 	       return lhs <= rhs;
 	    }
@@ -211,8 +214,8 @@ namespace mapnik  {
 	       return lhs + rhs ;
 	    }
 	
-            value_type operator() (std::string const& lhs , 
-                                   std::string const& rhs ) const
+            value_type operator() (std::wstring const& lhs , 
+                                   std::wstring const& rhs ) const
 	    {
 	       return lhs + rhs;
 	    }
@@ -243,8 +246,8 @@ namespace mapnik  {
 	       return lhs - rhs ;
 	    }
 
-            value_type operator() (std::string const& lhs,
-                                   std::string const& ) const
+            value_type operator() (std::wstring const& lhs,
+                                   std::wstring const& ) const
 	    {
 	       return lhs;
 	    }
@@ -275,8 +278,8 @@ namespace mapnik  {
 	       return lhs * rhs;
 	    }
 	
-            value_type operator() (std::string const& lhs,
-                                   std::string const& ) const
+            value_type operator() (std::wstring const& lhs,
+                                   std::wstring const& ) const
 	    {
 	       return lhs;
 	    }	
@@ -308,8 +311,8 @@ namespace mapnik  {
 	       return lhs / rhs;
 	    }
 	
-            value_type operator() (std::string const& lhs,
-                                   std::string const&) const
+            value_type operator() (std::wstring const& lhs,
+                                   std::wstring const&) const
 	    {
 	       return lhs;
 	    }
@@ -336,9 +339,26 @@ namespace mapnik  {
 	       return ss.str();
 	    }
             // specializations 
-            std::string const& operator() (std::string const& val) const
+            std::string operator() (std::wstring const& val) const
 	    {
-	       return val;
+               std::stringstream ss;
+               std::wstring::const_iterator pos = val.begin();
+               ss << std::hex ;
+               for (;pos!=val.end();++pos)
+               {
+                  wchar_t c = *pos;
+                  if (c < 0x7f) 
+                  {
+                     ss << char(c);
+                  }
+                  else
+                  {
+                     ss << "\\x";
+                     ss << ((c >> 8) & 0xff);
+                     ss <<  (c & 0xff);
+                  }
+               }
+	       return ss.str();
 	    }
             
             std::string operator() (double val) const
@@ -348,14 +368,46 @@ namespace mapnik  {
 	       return ss.str();
             }
       };
-	
+
+      struct to_unicode : public boost::static_visitor<std::wstring>
+      {
+                
+            template <typename T>
+            std::wstring operator() (T val) const
+	    {
+	       return L"TODO";
+	    }
+            // specializations 
+            std::wstring const& operator() (std::wstring const& val) const
+	    {
+               return val;
+	    }
+      };
+      
       struct to_expression_string : public boost::static_visitor<std::string>
       {
-            std::string operator() (std::string const& val) const
+            std::string operator() (std::wstring const& val) const
 	    {
-	       return "'" + val + "'";
+               std::stringstream ss;
+               std::wstring::const_iterator pos = val.begin();
+               ss << std::hex ;
+               for (;pos!=val.end();++pos)
+               {
+                  wchar_t c = *pos;
+                  if (c < 0x7f) 
+                  {
+                     ss << char(c);
+                  }
+                  else
+                  {
+                     ss << "\\x";
+                     ss << ((c >> 8) & 0xff);
+                     ss <<  (c & 0xff);
+                  }
+               }
+	       return ss.str();
 	    } 
-
+            
             template <typename T>
             std::string operator() (T val) const
 	    {
@@ -417,6 +469,7 @@ namespace mapnik  {
 	 {
 	    return boost::apply_visitor(impl::less_or_equal(),base_,other.base_);
 	 }
+         
 	 value_base const& base() const
 	 {
 	    return base_;
@@ -431,8 +484,13 @@ namespace mapnik  {
 	 {
 	    return boost::apply_visitor(impl::to_string(),base_);
 	 }
+         
+         std::wstring to_unicode() const
+         {
+            return boost::apply_visitor(impl::to_unicode(),base_);
+         }
    };
-    
+   
    inline const value operator+(value const& p1,value const& p2)
    {
 
@@ -462,7 +520,7 @@ namespace mapnik  {
    operator << (std::basic_ostream<charT,traits>& out,
 		value const& v)
    {
-      out << v.base();
+      out << v.to_string();
       return out; 
    }
 }

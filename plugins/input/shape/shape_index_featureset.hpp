@@ -25,31 +25,32 @@
 
 #include <set>
 #include <vector>
-
+#include <boost/scoped_ptr.hpp>
 #include "shape_featureset.hpp"
 
 template <typename filterT>
 class shape_index_featureset : public Featureset
 {
-    filterT filter_;
-    int shape_type_;
-    shape_io shape_;
-    std::set<int> ids_;
-    std::set<int>::iterator itr_;
-    std::vector<int> attr_ids_;
-    mutable Envelope<double> feature_ext_;
-    mutable int total_geom_size;
-    mutable int count_;
+      filterT filter_;
+      int shape_type_;
+      shape_io shape_;
+      boost::scoped_ptr<transcoder> tr_;
+      std::set<int> ids_;
+      std::set<int>::iterator itr_;
+      std::vector<int> attr_ids_;
+      mutable Envelope<double> feature_ext_;
+      mutable int total_geom_size;
+      mutable int count_;
 
-public:
-    shape_index_featureset(const filterT& filter,const std::string& shape_file,
-                           const std::set<std::string>& attribute_names);
-    virtual ~shape_index_featureset();
-    feature_ptr next();
-private:
-    //no copying
-    shape_index_featureset(const shape_index_featureset&);
-    shape_index_featureset& operator=(const shape_index_featureset&);
+   public:
+      shape_index_featureset(const filterT& filter,const std::string& shape_file,
+                             const std::set<std::string>& attribute_names);
+      virtual ~shape_index_featureset();
+      feature_ptr next();
+   private:
+      //no copying
+      shape_index_featureset(const shape_index_featureset&);
+      shape_index_featureset& operator=(const shape_index_featureset&);
 };
 
 #endif //SHAPE_INDEX_FEATURESET_HPP

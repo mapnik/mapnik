@@ -95,10 +95,9 @@ namespace mapnik
         pixmap_(pixmap),
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
         finder_(Envelope<double>(0 ,0, m.getWidth(), m.getHeight()), 64),
-        point_detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
-        tr_(new transcoder("utf-8"))
+        point_detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
    {
-      Color const& bg=m.getBackground();
+      Color const& bg = m.getBackground();
       pixmap_.setBackground(bg);
 #ifdef MAPNIK_DEBUG
       std::clog << "scale=" << m.scale() << "\n";
@@ -129,14 +128,8 @@ namespace mapnik
       std::clog << "start layer processing : " << lay.name()  << "\n";
       std::clog << "datasource = " << lay.datasource().get() << "\n";
 #endif 
-      datasource_ptr ds = lay.datasource();
-      if (ds)
-      {
-         layer_descriptor desc = ds->get_descriptor();
-         tr_ = boost::shared_ptr<transcoder>(new transcoder(desc.get_encoding()));
-      }
    }
-    
+   
    template <typename T>
    void agg_renderer<T>::end_layer_processing(Layer const&)
    {
@@ -342,12 +335,12 @@ namespace mapnik
       if (geom && geom->num_points() > 0)
       {
          //std::wstring text = to_unicode(feature[sym.get_name()].to_string());
-         std::string str = feature[sym.get_name()].to_string();
+         std::wstring text = feature[sym.get_name()].to_unicode();
          boost::shared_ptr<ImageData32> const& data = sym.get_data();
            
-         if (str.length() > 0 && data)
+         if (text.length() > 0 && data)
          {
-            std::wstring text = tr_->transcode(str);
+            //std::wstring text = tr_->transcode(str);
             face_ptr face = font_manager_.get_face(sym.get_face_name());
             if (face)
             {
@@ -503,10 +496,10 @@ namespace mapnik
        
       if (geom && geom->num_points() > 0)
       {
-         std::string str = feature[sym.get_name()].to_string();
-         if ( str.length() > 0 )
+         std::wstring text = feature[sym.get_name()].to_unicode();
+         if ( text.length() > 0 )
          {
-            std::wstring text = tr_->transcode(str);
+            //std::wstring text = tr_->transcode(str);
             Color const& fill  = sym.get_fill();
             face_ptr face = font_manager_.get_face(sym.get_face_name());
             if (face)

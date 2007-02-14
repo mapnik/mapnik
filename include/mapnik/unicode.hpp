@@ -145,6 +145,19 @@ namespace mapnik {
       return out;
    }
 
+   inline std::string latin1_to_unicode2(std::string const& text)
+   {
+      std::string out;
+      std::string::const_iterator itr=text.begin();
+      std::string::const_iterator end=text.end();
+      while ( itr != end)
+      {
+         out.push_back(0x00);
+         out.push_back(*itr++);  
+      }      
+      return out;
+   }
+   
    class transcoder : private boost::noncopyable
    {
       public:
@@ -153,7 +166,7 @@ namespace mapnik {
             desc_ = iconv_open("UCS-2",encoding.c_str());
          }
          
-         std::wstring transcode(std::string const& input)
+         std::wstring transcode(std::string const& input) const
          {
             std::string buf(input.size() * 2,0);
             size_t inleft = input.size();

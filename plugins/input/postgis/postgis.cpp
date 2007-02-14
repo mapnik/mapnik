@@ -88,9 +88,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
       {
          PoolGuard<shared_ptr<Connection>,
             shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
-           
-         //std::cout << "encoding = " << conn->client_encoding()<< "\n";
-         //desc_.set_encoding(conn->client_encoding());
+         
+         desc_.set_encoding(conn->client_encoding());
          
          std::string table_name=table_from_sql(table_);
          std::ostringstream s;
@@ -215,7 +214,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
          std::clog << s.str() << "\n";
 #endif           
          shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-         return featureset_ptr(new postgis_featureset(rs,props.size()));
+         return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),props.size()));
       }
    }
    return featureset_ptr();
@@ -254,7 +253,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
          std::clog << s.str() << "\n";
 #endif           
          shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-         return featureset_ptr(new postgis_featureset(rs, size));
+         return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),size));
       }
    }
    return featureset_ptr();

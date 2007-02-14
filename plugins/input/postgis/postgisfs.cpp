@@ -25,6 +25,7 @@
 #include <boost/algorithm/string.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/unicode.hpp>
 #include "postgis.hpp"
 
 using boost::lexical_cast;
@@ -33,10 +34,12 @@ using boost::trim;
 using std::string;
 
 postgis_featureset::postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
+                                       std::string const& encoding,
                                        unsigned num_attrs=0)
     : rs_(rs),
       num_attrs_(num_attrs),
       totalGeomSize_(0),
+      tr_(new transcoder(encoding)),
       count_(0)  {}
 
 feature_ptr postgis_featureset::next()
@@ -85,7 +88,8 @@ feature_ptr postgis_featureset::next()
                 {
                     std::string str(buf);
                     trim(str);
-                    boost::put(*feature,name,str);
+                    std::wstring wstr = tr_->transcode(str);
+                    boost::put(*feature,name,wstr);
                 }
                 else 
                 {
