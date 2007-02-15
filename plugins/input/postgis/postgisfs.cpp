@@ -38,8 +38,8 @@ postgis_featureset::postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
                                        unsigned num_attrs=0)
     : rs_(rs),
       num_attrs_(num_attrs),
-      totalGeomSize_(0),
       tr_(new transcoder(encoding)),
+      totalGeomSize_(0),
       count_(0)  {}
 
 feature_ptr postgis_featureset::next()
