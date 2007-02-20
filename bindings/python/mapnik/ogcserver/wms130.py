@@ -57,7 +57,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
             'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE', 'BLANK')),
             'query_layers': ParameterDefinition(True, ListFactory(str)),
-            'info_format': ParameterDefinition(True, str, allowedvalues=('text/plain',)),
+            'info_format': ParameterDefinition(True, str, allowedvalues=('text/plain', 'text/xml')),
             'feature_count': ParameterDefinition(False, int, 1),
             'i': ParameterDefinition(True, float),
             'j': ParameterDefinition(True, float)

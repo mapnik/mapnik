@@ -56,7 +56,7 @@ m.background = Color('white')
 #     table= TODO
 
 provpoly_lyr = Layer('Provinces')
-provpoly_lyr.datasource = Shapefile(file='../data/boundaries')
+provpoly_lyr.datasource = Shapefile(file='../data/boundaries', encoding='latin1')
 
 # We then define a style for the layer.  A layer can have one or many styles.
 # Styles are named, so they can be shared across different layers.

@@ -291,19 +291,25 @@ class WMSBaseServiceHandler(BaseServiceHandler):
 
     def GetFeatureInfo(self, params, querymethodname='query_point'):
         m = self._buildMap(params)
-        output = ''
+        if params['info_format'] == 'text/plain':
+            writer = TextFeatureInfo()
+        elif params['info_format'] == 'text/xml':
+            writer = XMLFeatureInfo()
         for layerindex, layername in enumerate(params['query_layers']):
             if layername in params['layers']:
                 if m.layers[layerindex].queryable:
-                    for feature in getattr(m, querymethodname)(layerindex, params['i'], params['j']):
-                        output += '[%s]\n' % m.layers[layerindex].name
+                    features = getattr(m, querymethodname)(layerindex, params['i'], params['j'])
+                    if features:
+                        writer.addlayer(m.layers[layerindex].name)
+                    for feature in features:
+                        writer.addfeature()
                         for prop in feature.properties:
-                            output += '%s=%s\n' % (prop.key(), prop.data())
+                            writer.addattribute(prop.key(), prop.data())
                 else:
                     raise OGCException('Requested query layer "%s" is not marked queryable.' % layername, 'LayerNotQueryable')
             else:
                 raise OGCException('Requested query layer "%s" not in the LAYERS parameter.' % layername)
-        return Response('text/plain', output)
+        return Response(params['info_format'], str(writer))
 
     def _buildMap(self, params):
         if str(params['crs']) not in self.allowedepsgcodes:
@@ -359,7 +365,7 @@ class BaseExceptionHandler:
             fh = StringIO()
             print_tb(excinfo[2], None, fh)
             fh.seek(0)
-            message = '\n' + fh.read() + '\n' + str(excinfo[0]) + ': ' + ', '.join(excinfo[1].args) + '\n'
+            message = '\n' + fh.read() + '\n' + str(excinfo[0]) + ': ' + ', '.join(str(excinfo[1].args)) + '\n'
             fh.close()
         elif len(excinfo[1].args) > 0:
             message = excinfo[1].args[0]
@@ -407,3 +413,54 @@ class Projection(MapnikProjection):
     
     def epsgstring(self):
         return self.params().split('=')[1].upper()
+
+class TextFeatureInfo:
+
+    def __init__(self):
+        self.buffer = ''
+
+    def addlayer(self, name):
+        self.buffer += '[%s]\n' % name
+
+    def addfeature(self):
+        self.buffer += '\n'
+
+    def addattribute(self, name, value):
+        self.buffer += '%s=%s\n' % (name, str(value))
+
+    def __str__(self):
+        return self.buffer
+
+class XMLFeatureInfo:
+
+    basexml = """<?xml version="1.0"?>
+    <resultset>
+    </resultset>
+    """
+
+    def __init__(self):
+        self.rootelement = ElementTree.fromstring(self.basexml)
+
+    def addlayer(self, name):
+        layer = ElementTree.Element('layer')
+        layer.set('name', name)
+        self.rootelement.append(layer)
+        self.currentlayer = layer
+
+    def addfeature(self):
+        feature = ElementTree.Element('feature')
+        self.currentlayer.append(feature)
+        self.currentfeature = feature
+    
+    def addattribute(self, name, value):
+        attribute = ElementTree.Element('attribute')
+        attname = ElementTree.Element('name')
+        attname.text = name
+        attvalue = ElementTree.Element('value')
+        attvalue.text = value.unicode()
+        attribute.append(attname)
+        attribute.append(attvalue)
+        self.currentfeature.append(attribute)
+    
+    def __str__(self):
+        return '<?xml version="1.0"?>\n' + ElementTree.tostring(self.rootelement)

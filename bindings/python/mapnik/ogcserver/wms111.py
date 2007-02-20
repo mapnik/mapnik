@@ -56,7 +56,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
             'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage', 'application/vnd.ogc.se_blank')),
             'query_layers': ParameterDefinition(True, ListFactory(str)),
-            'info_format': ParameterDefinition(True, str, allowedvalues=('text/plain',)),
+            'info_format': ParameterDefinition(True, str, allowedvalues=('text/plain', 'text/xml')),
             'feature_count': ParameterDefinition(False, int, 1),
             'x': ParameterDefinition(True, int),
             'y': ParameterDefinition(True, int)
@@ -72,7 +72,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         ['keywordlist', 'KeywordList', str]
     ]
 
-    capabilitiesxmltemplate = """<?xml version='1.0' encoding="UTF-8" standalone="no"?>
+    capabilitiesxmltemplate = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     <!DOCTYPE WMT_MS_Capabilities SYSTEM "http://www.digitalearth.gov/wmt/xml/capabilities_1_1_1.dtd">
     <WMT_MS_Capabilities version="1.1.1" updateSequence="0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.opengis.net/wms">
       <Service>
