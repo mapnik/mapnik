@@ -380,11 +380,19 @@ namespace mapnik  {
 	       out << val;
                return out.str();
 	    }
+
             // specializations 
             std::wstring const& operator() (std::wstring const& val) const
 	    {
                return val;
 	    }
+
+            std::wstring operator() (double val) const
+            {
+               std::basic_ostringstream<wchar_t> out;
+	       out << std::setprecision(16) << val;
+	       return out.str();
+            }
       };
       
       struct to_expression_string : public boost::static_visitor<std::string>
