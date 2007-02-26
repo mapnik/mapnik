@@ -199,9 +199,12 @@ namespace mapnik {
             }
                      
 #ifdef USE_FRIBIDI
-            wchar_t *bidi_text = bidi_string(unicode.c_str());
-            unicode = bidi_text;
-            free(bidi_text);
+            if (unicode.length() > 0)
+            {
+               wchar_t *bidi_text = bidi_string(unicode.c_str());
+               unicode = bidi_text;
+               free(bidi_text);
+            }
 #endif
             return unicode;
          }
