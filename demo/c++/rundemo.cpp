@@ -43,7 +43,7 @@ int main ( int argc , char** argv)
     
     std::cout << " running demo ... \n";
     datasource_cache::instance()->register_datasources(argv[1]); 
-    freetype_engine::instance()->register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf.ttf");
+    freetype_engine::instance()->register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf");
     
     Map m(800,600);
     m.setBackground(color_factory::from_string("white"));
