@@ -109,7 +109,6 @@ void  shape_datasource::init(shape_io& shape)
       //invalid version number
       throw datasource_exception("invalid version number");
    }
-   int shape_type = shape.shp().read_ndr_integer();
    shape.shp().read_envelope(extent_);
    shape.shp().skip(4*8);
 
@@ -123,6 +122,7 @@ void  shape_datasource::init(shape_io& shape)
    }
 
 #ifdef MAPNIK_DEBUG
+   int shape_type = shape.shp().read_ndr_integer();
    std::clog << extent_ << std::endl;
    std::clog << "file_length=" << file_length_ << std::endl;
    std::clog << "shape_type=" << shape_type << std::endl;
