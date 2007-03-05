@@ -134,81 +134,82 @@ class ServiceHandler(WMSBaseServiceHandler):
     def __init__(self, conf, mapfactory, opsonlineresource):
         self.conf = conf
         self.mapfactory = mapfactory
+        self.opsonlineresource = opsonlineresource
         if self.conf.has_option('service', 'allowedepsgcodes'):
             self.allowedepsgcodes = map(lambda code: 'epsg:%s' % code, self.conf.get('service', 'allowedepsgcodes').split(','))
         else:
             raise ServerConfigurationError('Allowed EPSG codes not properly configured.')
-
-        capetree = ElementTree.fromstring(self.capabilitiesxmltemplate)
-
-        elements = capetree.findall('{http://www.opengis.net/wms}Capability//{http://www.opengis.net/wms}OnlineResource')
-        for element in elements:
-            element.set('{http://www.w3.org/1999/xlink}href', opsonlineresource)
-
-        self.processServiceCapabilities(capetree)
-
-        rootlayerelem = capetree.find('{http://www.opengis.net/wms}Capability/{http://www.opengis.net/wms}Layer')
-
-        for epsgcode in self.allowedepsgcodes:
-            rootlayercrs = ElementTree.Element('CRS')
-            rootlayercrs.text = epsgcode.upper()
-            rootlayerelem.append(rootlayercrs)
-
-        for layer in self.mapfactory.layers.values():
-            layerproj = Projection(layer.srs)
-            layername = ElementTree.Element('Name')
-            layername.text = layer.name
-            env = layer.envelope()
-            layerexgbb = ElementTree.Element('EX_GeographicBoundingBox')
-            ll = layerproj.inverse(Coord(env.minx, env.miny))
-            ur = layerproj.inverse(Coord(env.maxx, env.maxy))
-            exgbb_wbl = ElementTree.Element('westBoundLongitude')
-            exgbb_wbl.text = str(ll.x)
-            layerexgbb.append(exgbb_wbl)
-            exgbb_ebl = ElementTree.Element('eastBoundLongitude')
-            exgbb_ebl.text = str(ur.x)
-            layerexgbb.append(exgbb_ebl)
-            exgbb_sbl = ElementTree.Element('southBoundLatitude')
-            exgbb_sbl.text = str(ll.y)
-            layerexgbb.append(exgbb_sbl)
-            exgbb_nbl = ElementTree.Element('northBoundLatitude')
-            exgbb_nbl.text = str(ur.y)
-            layerexgbb.append(exgbb_nbl)
-            layerbbox = ElementTree.Element('BoundingBox')
-            layerbbox.set('CRS', layerproj.epsgstring())
-            layerbbox.set('minx', str(env.minx))
-            layerbbox.set('miny', str(env.miny))
-            layerbbox.set('maxx', str(env.maxx))
-            layerbbox.set('maxy', str(env.maxy))
-            layere = ElementTree.Element('Layer')
-            layere.append(layername)
-            if layer.title:
-                layertitle = ElementTree.Element('Title')
-                layertitle.text = layer.title
-                layere.append(layertitle)
-            if layer.abstract:
-                layerabstract = ElementTree.Element('Abstract')
-                layerabstract.text = layer.abstract
-                layere.append(layerabstract)
-            if layer.queryable:
-                layere.set('queryable', '1')
-            layere.append(layerexgbb)
-            layere.append(layerbbox)
-            if len(layer.wmsextrastyles) > 0:
-                for extrastyle in [layer.wmsdefaultstyle] + list(layer.wmsextrastyles):
-                    style = ElementTree.Element('Style')
-                    stylename = ElementTree.Element('Name')
-                    stylename.text = extrastyle
-                    styletitle = ElementTree.Element('Title')
-                    styletitle.text = extrastyle
-                    style.append(stylename)
-                    style.append(styletitle)
-                    layere.append(style)
-            rootlayerelem.append(layere)
-
-        self.capabilities = '<?xml version="1.0" encoding="UTF-8"?>' + ElementTree.tostring(capetree)
+        self.capabilities = None
 
     def GetCapabilities(self, params):
+        if not self.capabilities:
+            capetree = ElementTree.fromstring(self.capabilitiesxmltemplate)
+    
+            elements = capetree.findall('{http://www.opengis.net/wms}Capability//{http://www.opengis.net/wms}OnlineResource')
+            for element in elements:
+                element.set('{http://www.w3.org/1999/xlink}href', self.opsonlineresource)
+    
+            self.processServiceCapabilities(capetree)
+    
+            rootlayerelem = capetree.find('{http://www.opengis.net/wms}Capability/{http://www.opengis.net/wms}Layer')
+    
+            for epsgcode in self.allowedepsgcodes:
+                rootlayercrs = ElementTree.Element('CRS')
+                rootlayercrs.text = epsgcode.upper()
+                rootlayerelem.append(rootlayercrs)
+    
+            for layer in self.mapfactory.layers.values():
+                layerproj = Projection(layer.srs)
+                layername = ElementTree.Element('Name')
+                layername.text = layer.name
+                env = layer.envelope()
+                layerexgbb = ElementTree.Element('EX_GeographicBoundingBox')
+                ll = layerproj.inverse(Coord(env.minx, env.miny))
+                ur = layerproj.inverse(Coord(env.maxx, env.maxy))
+                exgbb_wbl = ElementTree.Element('westBoundLongitude')
+                exgbb_wbl.text = str(ll.x)
+                layerexgbb.append(exgbb_wbl)
+                exgbb_ebl = ElementTree.Element('eastBoundLongitude')
+                exgbb_ebl.text = str(ur.x)
+                layerexgbb.append(exgbb_ebl)
+                exgbb_sbl = ElementTree.Element('southBoundLatitude')
+                exgbb_sbl.text = str(ll.y)
+                layerexgbb.append(exgbb_sbl)
+                exgbb_nbl = ElementTree.Element('northBoundLatitude')
+                exgbb_nbl.text = str(ur.y)
+                layerexgbb.append(exgbb_nbl)
+                layerbbox = ElementTree.Element('BoundingBox')
+                layerbbox.set('CRS', layerproj.epsgstring())
+                layerbbox.set('minx', str(env.minx))
+                layerbbox.set('miny', str(env.miny))
+                layerbbox.set('maxx', str(env.maxx))
+                layerbbox.set('maxy', str(env.maxy))
+                layere = ElementTree.Element('Layer')
+                layere.append(layername)
+                if layer.title:
+                    layertitle = ElementTree.Element('Title')
+                    layertitle.text = layer.title
+                    layere.append(layertitle)
+                if layer.abstract:
+                    layerabstract = ElementTree.Element('Abstract')
+                    layerabstract.text = layer.abstract
+                    layere.append(layerabstract)
+                if layer.queryable:
+                    layere.set('queryable', '1')
+                layere.append(layerexgbb)
+                layere.append(layerbbox)
+                if len(layer.wmsextrastyles) > 0:
+                    for extrastyle in [layer.wmsdefaultstyle] + list(layer.wmsextrastyles):
+                        style = ElementTree.Element('Style')
+                        stylename = ElementTree.Element('Name')
+                        stylename.text = extrastyle
+                        styletitle = ElementTree.Element('Title')
+                        styletitle.text = extrastyle
+                        style.append(stylename)
+                        style.append(styletitle)
+                        layere.append(style)
+                rootlayerelem.append(layere)
+            self.capabilities = '<?xml version="1.0" encoding="UTF-8"?>' + ElementTree.tostring(capetree)
         response = Response('text/xml', self.capabilities)
         return response
 
