@@ -127,7 +127,6 @@ void  shape_datasource::init(shape_io& shape)
    }
 
 #ifdef MAPNIK_DEBUG
-   int shape_type = shape.shp().read_ndr_integer();
    std::clog << extent_ << std::endl;
    std::clog << "file_length=" << file_length_ << std::endl;
    std::clog << "shape_type=" << shape_type << std::endl;
