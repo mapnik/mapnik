@@ -109,6 +109,11 @@ void  shape_datasource::init(shape_io& shape)
       //invalid version number
       throw datasource_exception("invalid version number");
    }
+#ifdef MAPNIK_DEBUG
+   int shape_type = shape.shp().read_ndr_integer();
+#else
+   shape.shp().skip(4);
+#endif
    shape.shp().read_envelope(extent_);
    shape.shp().skip(4*8);
 
