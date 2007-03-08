@@ -62,6 +62,7 @@ namespace mapnik {
         {
             Envelope<double> result;		
             double x,y;
+            rewind(0);
             for (unsigned i=0;i<num_points();++i)
             {
                 vertex(&x,&y);
@@ -166,12 +167,11 @@ namespace mapnik {
 	
         void label_position(double *x, double *y) const
         {
-	    
             unsigned size = cont_.size();
-            if (size < 3) 
+            if (size < 4)  
             {
-                cont_.get_vertex(0,x,y);
-                return;
+               x=0;y=0;
+               return;
             }
 	      
             double ai;
@@ -184,7 +184,7 @@ namespace mapnik {
             double y1 =0;
 	    
             unsigned i,j;
-            for (i = size-1,j = 0; j < size; i = j, ++j)
+            for (i = size-2,j = 0; j < size-1; i = j, ++j)
             {
                 cont_.get_vertex(i,&x0,&y0);
                 cont_.get_vertex(j,&x1,&y1);
