@@ -25,7 +25,7 @@ from PIL.Image import fromstring, new
 from PIL.ImageDraw import Draw
 from StringIO import StringIO
 from copy import deepcopy
-from traceback import print_tb
+from traceback import format_exception, format_exception_only
 from sys import exc_info
 from lxml import etree as ElementTree
 import re
@@ -359,16 +359,13 @@ class BaseExceptionHandler:
 
     def getresponse(self, params):
         code = ''
-        message = ''
+        message = '\n'
         excinfo = exc_info()
         if self.debug:
-            fh = StringIO()
-            print_tb(excinfo[2], None, fh)
-            fh.seek(0)
-            message = '\n' + fh.read() + '\n' + str(excinfo[0]) + ': ' + ', '.join(str(excinfo[1].args)) + '\n'
-            fh.close()
-        elif len(excinfo[1].args) > 0:
-            message = excinfo[1].args[0]
+            messagelist = format_exception(excinfo[0], excinfo[1], excinfo[2])
+        else:
+            messagelist = format_exception_only(excinfo[0], excinfo[1])
+        message += ''.join(messagelist)
         if isinstance(excinfo[1], OGCException) and len(excinfo[1].args) > 1:
             code = excinfo[1].args[1]
         exceptions = params.get('exceptions', None)
