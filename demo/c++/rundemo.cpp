@@ -31,8 +31,6 @@
 
 #include <iostream>
 
-using namespace mapnik;
-
 int main ( int argc , char** argv)
 {    
     if (argc != 2)
@@ -42,6 +40,7 @@ int main ( int argc , char** argv)
     }
     
     std::cout << " running demo ... \n";
+    using namespace mapnik;
     datasource_cache::instance()->register_datasources(argv[1]); 
     freetype_engine::instance()->register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf");
     
