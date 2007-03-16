@@ -191,12 +191,13 @@ if 'python' in env['BINDINGS']:
 env = conf.Finish()
 
 # Setup the c++ args for our own codebase
+if env['PLATFORM'] == 'Darwin': pthread = ''
+else: pthread = '-pthread'
 
 if env['DEBUG']:
-    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG -D%s -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL' % env['PLATFORM'].upper() )
+    env.Append(CXXFLAGS = '-ansi -Wall %s -ftemplate-depth-100 -O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG -D%s -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL' % (pthread, env['PLATFORM'].upper()))
 else:
-    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -DNDEBUG -D%s -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL' % env['PLATFORM'].upper())
-
+    env.Append(CXXFLAGS = '-ansi -Wall %s -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -DNDEBUG -D%s -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL' % (pthread,env['PLATFORM'].upper()))
 
 # Install some free default fonts
 
