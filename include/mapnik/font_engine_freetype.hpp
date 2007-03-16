@@ -328,11 +328,9 @@ namespace mapnik
             FT_Vector start;
             unsigned height = pixmap_.height();
 	    
-            start.x =  x0 * (1 << 6); 
-            start.y =  (height - y0) * (1 << 6);
+            start.x =  static_cast<FT_Pos>(x0 * (1 << 6)); 
+            start.y =  static_cast<FT_Pos>((height - y0) * (1 << 6));
 	    
-//            std::clog << "Render text at: " << x0 << "," << y0 << " " << start.x << "," << start.y << std::endl;
-
             // now render transformed glyphs
             typename glyphs_t::iterator pos;
             
