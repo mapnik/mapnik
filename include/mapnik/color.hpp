@@ -117,10 +117,10 @@ namespace mapnik {
         
         inline std::string to_hex_string() const
         {
-            return (boost::format("#%1$02x%2$02x%3$02x") 
-		    % red() 
-		    % green() 
-		    % blue() ).str();
+	  return (boost::format("#%1$02x%2$02x%3$02x") 
+		  % red() 
+		  % green() 
+		  % blue() ).str();
         }
     };    
 }

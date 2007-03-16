@@ -27,15 +27,13 @@
 #include "raster_datasource.hpp"
 #include "raster_info.hpp"
 
-using std::vector;
-
 class single_file_policy
 {
     raster_info info_;
 public:
     class const_iterator
     {
-        enum {start,end};
+        enum iterator_e {start,end};
         bool status_;
         const single_file_policy* p_;
     public:
@@ -96,18 +94,18 @@ public:
 };
 
 template <typename LookupPolicy>
-class raster_featureset : public Featureset
+class raster_featureset : public mapnik::Featureset
 {
-    typedef typename LookupPolicy::const_iterator iterator_type;
-    LookupPolicy policy_;
-    size_t id_;
-    Envelope<double> extent_;
-    iterator_type curIter_;
-    iterator_type endIter_;
+      typedef typename LookupPolicy::const_iterator iterator_type;
+      LookupPolicy policy_;
+      size_t id_;
+      mapnik::Envelope<double> extent_;
+      iterator_type curIter_;
+      iterator_type endIter_;
 public:
-    raster_featureset(LookupPolicy const& policy,query const& q);
-    virtual ~raster_featureset();
-    feature_ptr next();
+      raster_featureset(LookupPolicy const& policy,mapnik::query const& q);
+      virtual ~raster_featureset();
+      mapnik::feature_ptr next();
 };
 
 #endif //RASTER_FEATURESET_HH

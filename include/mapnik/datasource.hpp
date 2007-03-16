@@ -67,7 +67,7 @@ namespace mapnik {
     class MAPNIK_DECL datasource : private boost::noncopyable
     {
     public:        
-        enum {
+        enum datasource_t {
             Vector,
             Raster
         };

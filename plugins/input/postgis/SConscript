@@ -31,7 +31,13 @@ postgis_src = Split(
 	"""
         )
 
-postgis_inputdriver = env.SharedLibrary('postgis', source=postgis_src, SHLIBPREFIX='', LIBS='pq')
+libraries = ['pq']
+
+if env['PLATFORM'] == 'Darwin':
+    libraries.append('mapnik')
+    libraries.append('iconv')
+
+postgis_inputdriver = env.SharedLibrary('postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', postgis_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')

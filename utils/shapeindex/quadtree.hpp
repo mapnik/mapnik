@@ -21,51 +21,52 @@
  *****************************************************************************/
 //$Id: quadtree.hh 17 2005-03-08 23:58:43Z pavlenko $
 
-#ifndef QUADTREE_HH
-#define QUADTREE_HH
+#ifndef QUADTREE_HPP
+#define QUADTREE_HPP
 // stl
 #include <vector>
 #include <fstream>
 // mapnik
 #include <mapnik/envelope.hpp>
 
-using namespace mapnik;
+using mapnik::Envelope;
+using mapnik::coord2d;
 
 template <typename T>
 struct quadtree_node
 {
-    Envelope<double> ext_;
-    std::vector<T> data_;
-    quadtree_node<T>* children_[4];
-    quadtree_node(const Envelope<double>& ext)
-        : ext_(ext),data_()
-    {
-        memset(children_,0,sizeof(quadtree_node<T>*)*4);
-    }
+      Envelope<double> ext_;
+      std::vector<T> data_;
+      quadtree_node<T>* children_[4];
+      quadtree_node(const Envelope<double>& ext)
+         : ext_(ext),data_()
+      {
+         memset(children_,0,sizeof(quadtree_node<T>*)*4);
+      }
 
-    ~quadtree_node() 
-    {
-        for (int i=0;i<4;++i) 
-        {
+      ~quadtree_node() 
+      {
+         for (int i=0;i<4;++i) 
+         {
             if (children_[i]) 
             {
-                delete children_[i],children_[i]=0;
+               delete children_[i],children_[i]=0;
             }
-        }
-    }
+         }
+      }
 
-    int num_subnodes() const 
-    {
-        int count=0;
-        for (int i=0;i<4;++i) 
-        {
+      int num_subnodes() const 
+      {
+         int count=0;
+         for (int i=0;i<4;++i) 
+         {
             if (children_[i]) 
             {
-                ++count;
+               ++count;
             }
-        }
-        return count;
-    }     
+         }
+         return count;
+      }     
 };
 
 template <typename T>
@@ -294,4 +295,4 @@ private:
         }
     }
 };
-#endif                                            //QUADTREE_HH
+#endif //QUADTREE_HPP

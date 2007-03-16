@@ -328,9 +328,9 @@ namespace mapnik
             FT_Vector start;
             unsigned height = pixmap_.height();
 	    
-            start.x = unsigned(x0 * (1 << 6)); 
-            start.y = unsigned((height - y0) * (1 << 6));
-
+            start.x =  x0 * (1 << 6); 
+            start.y =  (height - y0) * (1 << 6);
+	    
 //            std::clog << "Render text at: " << x0 << "," << y0 << " " << start.x << "," << start.y << std::endl;
 
             // now render transformed glyphs

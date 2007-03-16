@@ -29,7 +29,10 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 
 libraries = ['agg'] + env['LIBS']
 
-linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
+if env['PLATFORM'] == 'Darwin':
+    linkflags = ' '
+else: # Linux and others
+    linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 
 source = Split(
     """

@@ -30,7 +30,12 @@
 
 #include "shape_io.hpp"
 
-using namespace mapnik;
+using mapnik::datasource;
+using mapnik::parameters;
+using mapnik::query;
+using mapnik::featureset_ptr;
+using mapnik::layer_descriptor;
+using mapnik::coord2d;
 
 class shape_datasource : public datasource
 {

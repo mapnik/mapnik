@@ -43,6 +43,9 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using boost::shared_ptr;
 
+using mapnik::PoolGuard;
+using mapnik::attribute_descriptor;
+
 postgis_datasource::postgis_datasource(parameters const& params)
    : datasource (params),
      table_(params.get("table")),

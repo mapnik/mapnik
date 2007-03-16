@@ -30,7 +30,8 @@
 #include <mapnik/envelope.hpp>
 #include <mapnik/query.hpp>
 
-using namespace mapnik;
+using mapnik::Envelope;
+using mapnik::query;
 
 template <typename filterT>
 class shp_index

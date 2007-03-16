@@ -29,7 +29,7 @@
 
 #include <mapnik/envelope.hpp>
 
-using namespace mapnik;
+using mapnik::Envelope;
 
 struct shape_record
 {

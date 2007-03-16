@@ -45,7 +45,7 @@ namespace mapnik
     {
         typedef typename T::type value_type;
         typedef vertex<value_type,2> vertex_type;
-        enum {
+        enum block_e {
             block_shift = 8,
             block_size  = 1<<block_shift,
             block_mask  = block_size - 1,

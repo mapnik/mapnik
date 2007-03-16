@@ -26,10 +26,17 @@
 #include <mapnik/geom_util.hpp>
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
-
 #include "shape.hpp"
 
 DATASOURCE_PLUGIN(shape_datasource)
+
+using mapnik::String;
+using mapnik::Double;
+using mapnik::Integer;
+using mapnik::datasource_exception;
+using mapnik::filter_in_box;
+using mapnik::filter_at_point;
+using mapnik::attribute_descriptor;
 
 shape_datasource::shape_datasource(const parameters &params)
    : datasource (params) ,
@@ -55,18 +62,18 @@ shape_datasource::shape_datasource(const parameters &params)
             case 'D':
             case 'M':
             case 'L':		
-               desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+	      //desc_.add_descriptor(attribute_descriptor(fld_name, String));
                break;
             case 'N':
             case 'F':
             {
                if (fd.dec_>0)
                {   
-                  desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double,false,8));
+		 //desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,8));
                }
                else
                {
-                  desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer,false,4));
+		 //desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,4));
                }
                break;
             }
@@ -114,6 +121,7 @@ void  shape_datasource::init(shape_io& shape)
 #else
    shape.shp().skip(4);
 #endif
+   
    shape.shp().read_envelope(extent_);
    shape.shp().skip(4*8);
 
@@ -125,7 +133,7 @@ void  shape_datasource::init(shape_io& shape)
       indexed_=true;
       file.close();
    }
-
+ 
 #ifdef MAPNIK_DEBUG
    std::clog << extent_ << std::endl;
    std::clog << "file_length=" << file_length_ << std::endl;

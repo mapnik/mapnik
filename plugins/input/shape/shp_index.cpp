@@ -76,5 +76,5 @@ void shp_index<filterT>::read_envelope(std::ifstream& file,Envelope<double>& env
     file.read(reinterpret_cast<char*>(&envelope),sizeof(envelope));
 }
 
-template class shp_index<filter_in_box>;
-template class shp_index<filter_at_point>;
+template class shp_index<mapnik::filter_in_box>;
+template class shp_index<mapnik::filter_at_point>;

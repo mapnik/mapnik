@@ -29,7 +29,7 @@
 
 namespace mapnik 
 {
-    enum {
+    enum CommandType {
         SEG_END   =0,
         SEG_MOVETO=1,
         SEG_LINETO=2,

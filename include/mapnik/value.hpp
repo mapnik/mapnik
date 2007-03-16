@@ -527,14 +527,14 @@ namespace mapnik  {
       return value(boost::apply_visitor(impl::div<value>(),p1.base_, p2.base_));
    }
 
-   template <typename charT, typename traits>
-   inline std::basic_ostream<charT,traits>& 
-   operator << (std::basic_ostream<charT,traits>& out,
-		value const& v)
-   {
-      out << v.to_string();
-      return out; 
-   }
+  template <typename charT, typename traits>
+  inline std::basic_ostream<charT,traits>& 
+  operator << (std::basic_ostream<charT,traits>& out,
+	       value const& v)
+  {
+    out << v.to_string();
+    return out; 
+  }
 }
 
 #endif //VALUE_HPP

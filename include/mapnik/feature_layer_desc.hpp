@@ -36,7 +36,7 @@ namespace mapnik
    using std::vector;
    using std::clog;
     
-   enum {
+   enum eAttributeType {
       Integer=1,
       Float  =2,
       Double =3,

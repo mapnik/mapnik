@@ -27,9 +27,16 @@ prefix = env['PYTHON_PREFIX'] + '/'+ 'lib' + '/python' + env['PYTHON_VERSION'] +
 install_prefix = env['DESTDIR'] + '/' + prefix
 
 libraries = ['mapnik', 'boost_python%s' % env['BOOST_APPEND']]
+
+if env['PLATFORM'] == 'Darwin':
+    libraries.append('boost_regex%s' % env['BOOST_APPEND'])
+    linkflags = '-F/ -framework Python'
+else :
+    linkflags = ''
+
 headers = [env['PYTHON_PREFIX'] + '/include/python' + env['PYTHON_VERSION']] + env['CPPPATH']
 
-_mapnik = env.SharedLibrary('_mapnik', glob.glob('*.cpp'), LIBS=libraries, SHLIBPREFIX='', CPPPATH=headers)
+_mapnik = env.SharedLibrary('_mapnik', glob.glob('*.cpp'), LIBS=libraries, SHLIBPREFIX='', SHLIBSUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
 
 paths = """
 mapniklibpath = '%s'

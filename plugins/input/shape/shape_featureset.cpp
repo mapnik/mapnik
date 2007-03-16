@@ -58,6 +58,8 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
 template <typename filterT>
 feature_ptr shape_featureset<filterT>::next()
 {
+   
+  using mapnik::point_impl;
    std::streampos pos=shape_.shp().pos();
     
    if (pos < std::streampos(file_length_ * 2))
@@ -194,7 +196,7 @@ feature_ptr shape_featureset<filterT>::next()
 template <typename filterT>
 shape_featureset<filterT>::~shape_featureset() {}
 
-template class shape_featureset<filter_in_box>;
-template class shape_featureset<filter_at_point>;
+template class shape_featureset<mapnik::filter_in_box>;
+template class shape_featureset<mapnik::filter_at_point>;
 
          

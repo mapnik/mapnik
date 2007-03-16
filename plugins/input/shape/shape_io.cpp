@@ -26,6 +26,7 @@
 #include "shape.hpp"
 
 
+using mapnik::datasource_exception;
 const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";
 
@@ -91,6 +92,7 @@ dbf_file& shape_io::dbf()
 
 geometry_ptr shape_io::read_polyline()
 {    
+  using mapnik::line_string_impl;
     shape_record record(reclength_*2-36);
     shp_.read_record(record);
     int num_parts=record.read_ndr_integer();
@@ -145,6 +147,7 @@ geometry_ptr shape_io::read_polyline()
 
 geometry_ptr shape_io::read_polylinem()
 {    
+  using mapnik::line_string_impl;
     shape_record record(reclength_*2-36);
     shp_.read_record(record);
     int num_parts=record.read_ndr_integer();
@@ -206,7 +209,8 @@ geometry_ptr shape_io::read_polylinem()
 }
 
 geometry_ptr shape_io::read_polylinez()
-{    
+{
+  using mapnik::line_string_impl;
     shape_record record(reclength_*2-36);
     shp_.read_record(record);
     int num_parts=record.read_ndr_integer();
@@ -276,6 +280,7 @@ geometry_ptr shape_io::read_polylinez()
 
 geometry_ptr shape_io::read_polygon()
 {
+  using mapnik::polygon_impl;
     shape_record record(reclength_*2-36);
     shp_.read_record(record);
     int num_parts=record.read_ndr_integer();
@@ -316,6 +321,7 @@ geometry_ptr shape_io::read_polygon()
 
 geometry_ptr shape_io::read_polygonm()
 {
+  using mapnik::polygon_impl;
     shape_record record(reclength_*2-36);
     shp_.read_record(record);
     int num_parts=record.read_ndr_integer();
@@ -364,6 +370,7 @@ geometry_ptr shape_io::read_polygonm()
 
 geometry_ptr shape_io::read_polygonz()
 {
+  using mapnik::polygon_impl;
     shape_record record(reclength_*2-36);
     shp_.read_record(record);
     int num_parts=record.read_ndr_integer();

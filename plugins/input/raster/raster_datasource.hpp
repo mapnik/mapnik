@@ -28,30 +28,28 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 
-using namespace mapnik;
-
-class raster_datasource : public datasource
+class raster_datasource : public mapnik::datasource
 {
-private:
-    std::string                  filename_;
-    std::string                  format_;
-    mapnik::Envelope<double>     extent_;
-    layer_descriptor             desc_;
-    static std::string           name_;  
-public:
-    raster_datasource(const parameters& params);
-    virtual ~raster_datasource();
-    int type() const;
-    static std::string name();
-    featureset_ptr features(const query& q) const;
-    featureset_ptr features_at_point(coord2d const& pt) const;
-    mapnik::Envelope<double> envelope() const;
-    layer_descriptor get_descriptor() const;
-private:
-    //no copying
-    raster_datasource(const raster_datasource&);
-    raster_datasource& operator=(const raster_datasource&);
-    //
+   private:
+      std::string                  filename_;
+      std::string                  format_;
+      mapnik::Envelope<double>     extent_;
+      mapnik::layer_descriptor     desc_;
+      static std::string           name_;  
+   public:
+      raster_datasource(const mapnik::parameters& params);
+      virtual ~raster_datasource();
+      int type() const;
+      static std::string name();
+      mapnik::featureset_ptr features(const mapnik::query& q) const;
+      mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+      mapnik::Envelope<double> envelope() const;
+      mapnik::layer_descriptor get_descriptor() const;
+   private:
+      //no copying
+      raster_datasource(const raster_datasource&);
+      raster_datasource& operator=(const raster_datasource&);
+      //
 };
 
 #endif //RASTER_DATASOURCE_H

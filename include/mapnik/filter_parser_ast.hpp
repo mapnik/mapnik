@@ -126,7 +126,7 @@ namespace mapnik
     class node_data
     {
     public:
-        enum  {
+        enum node_e {
             Unknown=0,
             Integer=1,
             Real   =2,

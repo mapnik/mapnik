@@ -71,12 +71,14 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 template <typename filterT>
 feature_ptr shape_index_featureset<filterT>::next()
 {   
-    
-    if (itr_!=ids_.end())
+  using mapnik::feature_factory;
+  using mapnik::point_impl;
+  if (itr_!=ids_.end())
     {
         int pos=*itr_++;
         shape_.move_to(pos);
         int type=shape_.type();
+	
         feature_ptr feature(feature_factory::create(shape_.id_));
         
         if (type==shape_io::shape_point)
@@ -198,6 +200,6 @@ feature_ptr shape_index_featureset<filterT>::next()
 template <typename filterT>
 shape_index_featureset<filterT>::~shape_index_featureset() {}
 
-template class shape_index_featureset<filter_in_box>;
-template class shape_index_featureset<filter_at_point>;
+template class shape_index_featureset<mapnik::filter_in_box>;
+template class shape_index_featureset<mapnik::filter_at_point>;
 

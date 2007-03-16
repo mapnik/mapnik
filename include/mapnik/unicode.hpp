@@ -163,14 +163,17 @@ namespace mapnik {
       public:
          explicit transcoder (std::string const& encoding)
          {
-            desc_ = iconv_open("UCS-2",encoding.c_str());
+	   //desc_ = iconv_open("UCS-2",encoding.c_str());
          }
          
          std::wstring transcode(std::string const& input) const
          {
+	   //return to_unicode(input);
+	   return to_unicode(input);
+	   /*
             std::string buf(input.size() * 2,0);
             size_t inleft = input.size();
-            char * in  = const_cast<char*>(input.data());
+            const char * in  = input.data();
             size_t outleft = buf.size();
             char * out = const_cast<char*>(buf.data());
             
@@ -207,11 +210,12 @@ namespace mapnik {
             }
 #endif
             return unicode;
+	   */
          }
          
          ~transcoder()
          {
-            iconv_close(desc_);
+           //iconv_close(desc_);
          }
 
    private:

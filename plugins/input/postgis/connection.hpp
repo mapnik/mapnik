@@ -32,10 +32,7 @@ extern "C"
 
 #include "resultset.hpp"
 
-using namespace mapnik;
-
 class ResultSet;
-
 class Connection
 {
    private:

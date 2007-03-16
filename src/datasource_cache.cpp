@@ -47,7 +47,7 @@ namespace mapnik
 
     std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
     bool datasource_cache::registered_=false;
-        
+    
     datasource_ptr datasource_cache::create(const parameters& params)
     {
         datasource_ptr ds;
@@ -108,7 +108,7 @@ namespace mapnik
             {
                 if (!is_directory( *itr ) && itr->leaf()[0]!='.')
                 {
-                    lt_dlhandle module=lt_dlopenext(itr->string().c_str());
+                    lt_dlhandle module=lt_dlopen(itr->string().c_str());
                     if (module)
                     {
                         datasource_name* ds_name = 

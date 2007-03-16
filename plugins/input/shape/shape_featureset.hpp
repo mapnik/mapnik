@@ -27,7 +27,9 @@
 #include <mapnik/geom_util.hpp>
 #include "shape.hpp"
 
-using namespace mapnik;
+using mapnik::Featureset;
+using mapnik::Envelope;
+using mapnik::feature_ptr;
 
 template <typename filterT>
 class shape_featureset : public Featureset

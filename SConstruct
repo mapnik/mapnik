@@ -33,7 +33,7 @@ opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/u
 opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add('BOOST_TOOLKIT','Specify boost toolkit e.g. gcc41.','',False)
 
-opts.Add(PathOption('FREETYPE_CONFIG', 'The path to the freetype-config executable.', '/usr/bin/freetype-config'))
+opts.Add(PathOption('FREETYPE_CONFIG', 'The path to the freetype-config executable.', '/usr/local/bin/freetype-config'))
 opts.Add(PathOption('FRIBIDI_INCLUDES', 'Search path for fribidi include files', '/usr/include'))
 opts.Add(PathOption('FRIBIDI_LIBS','Search path for fribidi include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
@@ -55,7 +55,8 @@ opts.Add('BIDI', 'BIDI support', '')
 
 env = Environment(ENV=os.environ, options=opts)
 env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
-
+env['PLATFORM'] = platform.uname()[0]
+print "Building on %s ..." % env['PLATFORM']
 Help(opts.GenerateHelpText(env))
 
 conf = Configure(env)
@@ -107,7 +108,7 @@ if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
-    #['system', 'boost/system/system_error.hpp', True],
+    ['system', 'boost/system/system_error.hpp', True], 
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
     ['program_options', 'boost/program_options.hpp', False]
@@ -121,10 +122,10 @@ for libinfo in C_LIBSHEADERS:
 env['BOOST_APPEND'] = ''
 
 if len(env['BOOST_TOOLKIT']): toolkit = env['BOOST_TOOLKIT']
-else: toolkit = env['CC']
+else:  toolkit = ''  #toolkit = env['CC']
 
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
-    if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++'):
+    if not conf.CheckLibWithHeader('boost_%s%s-mt' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++'):
         if not conf.CheckLibWithHeader('boost_%s-%s-mt' % (libinfo[0], toolkit), libinfo[1], 'C++') and libinfo[2] and count == 0:
             print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
             Exit(1)
@@ -136,6 +137,33 @@ Export('env')
 inputplugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
 bindings = [ binding.strip() for binding in Split(env['BINDINGS'])]
+
+
+# Build agg first, doesn't need anything special
+
+SConscript('agg/SConscript')
+
+# Build the core library
+
+SConscript('src/SConscript')
+
+# Build shapeindex and remove its dependency from the LIBS
+
+if 'boost_program_options%s-mt' % env['BOOST_APPEND'] in env['LIBS']:
+    SConscript('utils/shapeindex/SConscript')
+    env['LIBS'].remove('boost_program_options%s-mt' % env['BOOST_APPEND'])
+
+# Build the input plug-ins
+
+if 'postgis' in inputplugins and 'pq' in env['LIBS']:
+    SConscript('plugins/input/postgis/SConscript')
+    env['LIBS'].remove('pq')
+
+if 'shape' in inputplugins:
+    SConscript('plugins/input/shape/SConscript')
+
+if 'raster' in inputplugins:
+    SConscript('plugins/input/raster/SConscript')
 
 # Check out the Python situation
 
@@ -165,35 +193,10 @@ env = conf.Finish()
 # Setup the c++ args for our own codebase
 
 if env['DEBUG']:
-    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O0 -fno-inline -g -pthread -DDEBUG -DMAPNIK_DEBUG -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
+    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG -D%s -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL' % env['PLATFORM'].upper() )
 else:
-    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -pthread -DNDEBUG -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
+    env.Append(CXXFLAGS = '-ansi -Wall -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -DNDEBUG -D%s -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL' % env['PLATFORM'].upper())
 
-# Build agg first, doesn't need anything special
-
-SConscript('agg/SConscript')
-
-# Build shapeindex and remove its dependency from the LIBS
-
-if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
-    SConscript('utils/shapeindex/SConscript')
-    env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
-
-# Build the input plug-ins
-
-if 'postgis' in inputplugins and 'pq' in env['LIBS']:
-    SConscript('plugins/input/postgis/SConscript')
-    env['LIBS'].remove('pq')
-
-if 'shape' in inputplugins:
-    SConscript('plugins/input/shape/SConscript')
-
-if 'raster' in inputplugins:
-    SConscript('plugins/input/raster/SConscript')
-
-# Build the core library
-
-SConscript('src/SConscript')
 
 # Install some free default fonts
 

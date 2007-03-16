@@ -30,12 +30,19 @@
 
 #include "raster_datasource.hpp"
 
+using mapnik::datasource;
+using mapnik::parameters;
+
 DATASOURCE_PLUGIN(raster_datasource)
 
 using std::clog;
 using std::endl;
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
+using mapnik::layer_descriptor;
+using mapnik::featureset_ptr;
+using mapnik::query;
+using mapnik::coord2d;
 
 raster_datasource::raster_datasource(const parameters& params)
     : datasource (params),

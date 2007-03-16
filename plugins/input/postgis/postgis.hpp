@@ -29,15 +29,24 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/envelope.hpp>
 #include <mapnik/feature.hpp>
-
+#include <mapnik/feature_layer_desc.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <set>
 
 #include "connection_manager.hpp"
 
-using namespace mapnik;
-class mapnik::transcoder;
+using mapnik::transcoder;
+using mapnik::datasource;
+using mapnik::Envelope;
+using mapnik::layer_descriptor;
+using mapnik::featureset_ptr;
+using mapnik::feature_ptr;
+using mapnik::query;
+using mapnik::parameters;
+using mapnik::coord2d;
+
+class transcoder;
 class postgis_datasource : public datasource
 {
       static const std::string GEOMETRY_COLUMNS;
@@ -69,7 +78,7 @@ class postgis_datasource : public datasource
       postgis_datasource& operator=(const postgis_datasource&);
 };
 
-class postgis_featureset : public Featureset
+class postgis_featureset : public mapnik::Featureset
 {
    private:
       boost::shared_ptr<ResultSet> rs_;

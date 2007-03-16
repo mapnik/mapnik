@@ -32,8 +32,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 
-using namespace mapnik;
+using mapnik::Pool;
+using mapnik::singleton;
+using mapnik::CreateStatic;
 using std::string;
+using boost::mutex;
 
 template <typename T>
 class ConnectionCreator

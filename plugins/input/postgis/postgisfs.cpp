@@ -32,6 +32,10 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using boost::trim;
 using std::string;
+using mapnik::Feature;
+using mapnik::geometry_ptr;
+using mapnik::byte;
+using mapnik::geometry_utils;
 
 postgis_featureset::postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
                                        std::string const& encoding,
@@ -48,8 +52,8 @@ feature_ptr postgis_featureset::next()
     { 
         feature_ptr feature(new Feature(count_));
         int size=rs_->getFieldLength(0);
-        const char *data=rs_->getValue(0);
-        geometry_ptr geom=geometry_utils::from_wkb(data,size,-1);
+        const char *data = rs_->getValue(0);
+        geometry_ptr geom = geometry_utils::from_wkb(data,size,-1);
         totalGeomSize_+=size;
 	     
         if (geom)

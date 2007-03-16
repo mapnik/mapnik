@@ -32,7 +32,11 @@ raster_src = Split(
 	"""
         )
 
-raster_inputdriver = env.SharedLibrary('raster', source=raster_src, SHLIBPREFIX='', LIBS=[])
+libraries = []
+if env['PLATFORM'] == 'Darwin':
+    libraries.append('mapnik')
+
+raster_inputdriver = env.SharedLibrary('raster', source=raster_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', raster_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')

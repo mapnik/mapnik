@@ -49,7 +49,7 @@ namespace mapnik
         int tile_width_;
         int tile_height_;
     public:
-        enum {
+        enum TiffType {
             generic=1,
             stripped,
             tiled

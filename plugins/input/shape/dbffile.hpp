@@ -30,9 +30,10 @@
 
 #include <mapnik/feature.hpp>
 
-using namespace mapnik;
-
+using mapnik::transcoder;
+using mapnik::Feature;
 class mapnik::transcoder;
+
 struct field_descriptor
 {
     int index_;

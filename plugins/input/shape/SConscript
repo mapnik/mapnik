@@ -37,7 +37,12 @@ shape_src = Split(
 	"""
         )
 
-shape_inputdriver = env.SharedLibrary('shape', source=shape_src, SHLIBPREFIX='', LIBS=[])
+libraries = []
+if env['PLATFORM'] == 'Darwin':
+    libraries.append('mapnik')
+    libraries.append('iconv')
+
+shape_inputdriver = env.SharedLibrary('shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', shape_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')
