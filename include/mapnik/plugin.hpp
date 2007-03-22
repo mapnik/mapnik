@@ -24,27 +24,25 @@
 
 #ifndef PLUGIN_HPP
 #define PLUGIN_HPP
-// ltdl
-#include <ltdl.h>
 // stl
 #include <string>
 // boost
 #include <boost/utility.hpp>
 
+typedef struct lt_dlhandle_struct * lt_dlhandle;
 namespace mapnik
 {
-    class PluginInfo : boost::noncopyable
-    {
+   class PluginInfo : boost::noncopyable
+   {         
     private:
-        std::string name_;
-        lt_dlhandle module_;
-	
+         std::string name_;
+         lt_dlhandle module_;     
     public:
-        PluginInfo (const std::string& name,const lt_dlhandle module);
-        ~PluginInfo();
-        const std::string& name() const;
-        lt_dlhandle handle() const;
-    };
+         PluginInfo (const std::string& name,const lt_dlhandle module);
+         ~PluginInfo();
+         const std::string& name() const;
+         lt_dlhandle handle() const;
+   };
 }
 
 #endif //PLUGIN_HPP

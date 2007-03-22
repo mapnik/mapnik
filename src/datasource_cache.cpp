@@ -29,6 +29,8 @@
 #include <boost/filesystem/operations.hpp>
 // mapnik
 #include <mapnik/datasource_cache.hpp>
+// ltdl
+#include <ltdl.h>
 
 namespace mapnik
 {
