@@ -26,13 +26,18 @@ Import('env')
 prefix = env['PYTHON_PREFIX'] + '/'+ 'lib' + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
 install_prefix = env['DESTDIR'] + '/' + prefix
 
-libraries = ['mapnik', 'boost_python%s' % env['BOOST_APPEND']]
+linkflags = ''
+if env['THREADING'] == 'multi':
+    libraries = ['mapnik', 'boost_python%s-mt' % env['BOOST_APPEND']]
+else :
+    libraries = ['mapnik', 'boost_python%s' % env['BOOST_APPEND']]
 
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('boost_regex%s' % env['BOOST_APPEND'])
+    if env['THREADING'] == 'multi':
+        libraries.append('boost_regex%s-mt' % env['BOOST_APPEND'])
+    else :
+        libraries.append('boost_regex%s' % env['BOOST_APPEND'])
     linkflags = '-F/ -framework Python'
-else :
-    linkflags = ''
 
 headers = [env['PYTHON_PREFIX'] + '/include/python' + env['PYTHON_VERSION']] + env['CPPPATH']
 

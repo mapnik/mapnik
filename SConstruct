@@ -51,8 +51,10 @@ opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
 opts.Add('DEBUG', 'Compile a debug version of mapnik', '')
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
 opts.Add('BIDI', 'BIDI support', '')
+opts.Add(EnumOption('THREADING','Set threading support','multi', ['multi','single']))
 
 env = Environment(ENV=os.environ, options=opts)
+
 env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
 env['PLATFORM'] = platform.uname()[0]
 print "Building on %s ..." % env['PLATFORM']
@@ -107,7 +109,7 @@ if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
-    # ['system', 'boost/system/system_error.hpp', True], # comment this out if building on Darwin + boost_1_35
+    # ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
     ['program_options', 'boost/program_options.hpp', False]
@@ -120,16 +122,19 @@ for libinfo in C_LIBSHEADERS:
 
 
 if len(env['BOOST_TOOLKIT']):
-    env['BOOST_APPEND'] = '-%s-mt' % env['BOOST_TOOLKIT']
+    env['BOOST_APPEND'] = '-%s' % env['BOOST_TOOLKIT']
 else:
     env['BOOST_APPEND']=''
     
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
-    if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++'):
-        if not conf.CheckLibWithHeader('boost_%s%s-mt' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++') and libinfo[2] and count == 0:
+    if  env['THREADING'] == 'multi' :
+        if not conf.CheckLibWithHeader('boost_%s%s-mt' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++') and libinfo[2] :
             print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
             Exit(1)
-            
+    elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :
+        print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
+        Exit(1)    
+  
 Export('env')
 
 inputplugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
