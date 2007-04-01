@@ -48,9 +48,9 @@ class Connection
          std::string connStr;
          if (host.length()) connStr += "host="+host;
          if (port.length()) connStr += " port="+port;
-         connStr+=" dbname="+dbname;
-         connStr+=" user="+username;
-         connStr+=" password="+password;
+         if (dbname.length()) connStr+=" dbname="+dbname;
+         if (username.length()) connStr+=" user="+username;
+         if (password.length()) connStr+=" password="+password;
          connStr+=" connect_timeout=4"; // todo: set by client (param) 
          
          conn_=PQconnectdb(connStr.c_str());
