@@ -104,29 +104,33 @@ namespace mapnik
                                 mapnik::CreateStatic>::mutex_);
         filesystem::path path(str);
         filesystem::directory_iterator end_itr;
-        if (exists(path))
+        if (exists(path) && is_directory(path))
         {
             for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
             {
                 if (!is_directory( *itr ) && itr->leaf()[0]!='.')
                 {
-                    lt_dlhandle module=lt_dlopen(itr->string().c_str());
-                    if (module)
-                    {
-                        datasource_name* ds_name = 
+                   try 
+                   {
+                      lt_dlhandle module=lt_dlopen(itr->string().c_str());
+                      if (module)
+                      {
+                         datasource_name* ds_name = 
                             (datasource_name*) lt_dlsym(module, "datasource_name");
-                        if (ds_name && insert(ds_name(),module))
-                        {            
+                         if (ds_name && insert(ds_name(),module))
+                         {            
 #ifdef MAPNIK_DEBUG
                             std::clog<<"registered datasource : "<<ds_name()<<std::endl;
 #endif 
                             registered_=true;
-                        }
-                    }
-                    else
-                    {
-                        std::clog << lt_dlerror() << "\n";
-                    }
+                         }
+                      }
+                      else
+                      {
+                         std::clog << lt_dlerror() << "\n";
+                      }
+                   }
+                   catch (...) {}
                 }
             }   
         }	
