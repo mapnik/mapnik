@@ -21,8 +21,8 @@
  *****************************************************************************/
 //$Id: raster_datasource.hh 44 2005-04-22 18:53:54Z pavlenko $
 
-#ifndef RASTER_DATASOURCE_HH
-#define RASTER_DATASOURCE_HH 
+#ifndef RASTER_DATASOURCE_HPP
+#define RASTER_DATASOURCE_HPP
 
 #include <mapnik/envelope.hpp>
 #include <mapnik/feature.hpp>
@@ -52,4 +52,4 @@ class raster_datasource : public mapnik::datasource
       //
 };
 
-#endif //RASTER_DATASOURCE_H
+#endif //RASTER_DATASOURCE_HPP
