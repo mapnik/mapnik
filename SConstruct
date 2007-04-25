@@ -44,9 +44,13 @@ opts.Add(PathOption('TIFF_LIBS', 'Search path for libtiff library files', '/usr/
 opts.Add(PathOption('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include'))
 opts.Add(PathOption('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include'))
-opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 include files', '/usr/local/' + LIBDIR_SCHEMA))
+opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA))
+opts.Add(PathOption('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/local/include'))
+opts.Add(PathOption('GDAL_LIBS', 'Search path for GDAL library files', '/usr/local/lib' + LIBDIR_SCHEMA))
+opts.Add(PathOption('GIGABASE_INCLUDES', 'Search path for Gigabase include files', '/usr/local/include'))
+opts.Add(PathOption('GIGABASE_LIBS', 'Search path for Gigabase library files', '/usr/local/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PYTHON','Python executable', sys.executable))
-opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster']))
+opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal','gigabase']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
 opts.Add('DEBUG', 'Compile a debug version of mapnik', '')
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
@@ -71,7 +75,9 @@ for path in [env['BOOST_INCLUDES'],
              env['JPEG_INCLUDES'],
              env['TIFF_INCLUDES'],
              env['PGSQL_INCLUDES'],
-             env['PROJ_INCLUDES']]:
+             env['PROJ_INCLUDES'],
+             env['GDAL_INCLUDES'],
+             env['GIGABASE_INCLUDES']] :
     if path not in env['CPPPATH']: env['CPPPATH'].append(path)
 
 env['LIBPATH'] = ['#agg', '#src']
@@ -81,7 +87,9 @@ for path in [env['BOOST_LIBS'],
              env['JPEG_LIBS'],
              env['TIFF_LIBS'],
              env['PGSQL_LIBS'],
-             env['PROJ_LIBS']]:
+             env['PROJ_LIBS'],
+             env['GDAL_LIBS'],
+             env['GIGABASE_LIBS']]:
     if path not in env['LIBPATH']: env['LIBPATH'].append(path)
     
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
@@ -105,6 +113,11 @@ C_LIBSHEADERS = [
     ['pq', 'libpq-fe.h', False]
 ]
 
+CXX_LIBSHEADERS = [
+    ['gdal', 'gdal_priv.h',False],
+    ['gigabase_r','gigabase/gigabase.h',False]
+]
+
 if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
@@ -120,6 +133,10 @@ for libinfo in C_LIBSHEADERS:
         print 'Could not find header or shared library for %s, exiting!' % libinfo[0]
         Exit(1)
 
+for libinfo in CXX_LIBSHEADERS:
+    if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C++') and libinfo[2]:
+        print 'Could not find header or shared library for %s, exiting!' % libinfo[0]
+        Exit(1)
 
 if len(env['BOOST_TOOLKIT']):
     env['BOOST_APPEND'] = '-%s' % env['BOOST_TOOLKIT']
@@ -167,6 +184,12 @@ if 'shape' in inputplugins:
 
 if 'raster' in inputplugins:
     SConscript('plugins/input/raster/SConscript')
+
+if 'gdal' in inputplugins and 'gdal' in env['LIBS']:
+    SConscript('plugins/input/gdal/SConscript')
+
+if 'gigabase' in inputplugins and 'gigabase_r' in env['LIBS']:
+    SConscript('plugins/input/gigabase/SConscript')
 
 # Check out the Python situation
 
