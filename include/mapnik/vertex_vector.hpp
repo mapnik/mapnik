@@ -28,7 +28,7 @@
 //$Id: vertex_vector.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
 #ifndef VERTEX_VECTOR_HPP
-#define VERTEX_VECTOT_HPP
+#define VERTEX_VECTOR_HPP
 // stl
 #include <vector>
 // boost
