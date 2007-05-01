@@ -35,21 +35,6 @@ namespace mapnik
 {
     class MAPNIK_DECL Layer
     {
-        std::string name_;
-        std::string title_;
-        std::string abstract_;
-        std::string srs_;
-        
-        double minZoom_;
-        double maxZoom_;
-        bool active_;
-        bool queryable_;
-        std::vector<std::string>  styles_;
-        std::string selection_style_;
-        datasource_ptr ds_;
-        
-        mutable std::vector<boost::shared_ptr<Feature> > selection_;
-        
     public:
         explicit Layer(std::string const& name, std::string const& srs="+proj=latlong +datum=WGS84");
         Layer(Layer const& l);
@@ -66,8 +51,6 @@ namespace mapnik
         void add_style(std::string const& stylename);
         std::vector<std::string> const& styles() const;
         std::vector<std::string>& styles();
-        void selection_style(const std::string& name);
-        const std::string& selection_style() const;
         void setMinZoom(double minZoom);
         void setMaxZoom(double maxZoom);
         double getMinZoom() const;
@@ -77,15 +60,27 @@ namespace mapnik
         void setQueryable(bool queryable);
         bool isQueryable() const;
         bool isVisible(double scale) const;
-        void add_to_selection(boost::shared_ptr<Feature>& feature) const;
-        std::vector<boost::shared_ptr<Feature> >& selection() const;
-        void clear_selection() const;
+        void set_clear_label_cache(bool clear_cache);
+        bool clear_label_cache() const; 
         void set_datasource(datasource_ptr const& ds);
         datasource_ptr datasource() const;
         Envelope<double> envelope() const;
         ~Layer();
     private:
         void swap(const Layer& other);
+
+        std::string name_;
+        std::string title_;
+        std::string abstract_;
+        std::string srs_;
+        
+        double minZoom_;
+        double maxZoom_;
+        bool active_;
+        bool queryable_;
+        bool clear_label_cache_;
+        std::vector<std::string>  styles_;
+        datasource_ptr ds_;
     };
 }
 

@@ -47,7 +47,7 @@ namespace mapnik
           maxZoom_(std::numeric_limits<double>::max()),
           active_(true),
           queryable_(false),
-          selection_style_("default_selection"),
+          clear_label_cache_(false),
           ds_() {}
     
     Layer::Layer(const Layer& rhs)
@@ -59,8 +59,8 @@ namespace mapnik
           maxZoom_(rhs.maxZoom_),
           active_(rhs.active_),
           queryable_(rhs.queryable_),
+          clear_label_cache_(rhs.clear_label_cache_),
           styles_(rhs.styles_),
-          selection_style_(rhs.selection_style_),
           ds_(rhs.ds_) {}
     
     Layer& Layer::operator=(const Layer& rhs)
@@ -85,7 +85,6 @@ namespace mapnik
         active_=rhs.active_;
         queryable_=rhs.queryable_;
         styles_=rhs.styles_;
-        selection_style_=rhs.selection_style_;
         ds_=rhs.ds_;
     }
     
@@ -207,28 +206,13 @@ namespace mapnik
     	return Envelope<double>();
     }
     
-    void Layer::selection_style(const std::string& name) 
-    {
-        selection_style_=name;
-    }
-    
-    const std::string& Layer::selection_style() const 
-    {
-        return selection_style_;
-    }
-
-    void Layer::add_to_selection(shared_ptr<Feature>& feature) const
-    {
-        selection_.push_back(feature);
-    }
- 
-    vector<shared_ptr<Feature> >& Layer::selection() const
-    {
-        return selection_;
-    }
-
-    void Layer::clear_selection() const 
-    {
-        selection_.clear();
-    }
+   void Layer::set_clear_label_cache(bool clear)
+   {
+      clear_label_cache_ = clear;
+   }
+   
+   bool Layer::clear_label_cache() const
+   {
+      return clear_label_cache_;
+   }
 }

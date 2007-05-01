@@ -83,10 +83,13 @@ void export_layer()
         .add_property("queryable",
 		      &Layer::isQueryable,
 		      &Layer::setQueryable)
-        .def("visible", &Layer::isVisible)
-        .def("envelope",&Layer::envelope, 
-             "Return the geographic envelope/bounding box "
-             "of the data in the layer.")
-        
+       .def("visible", &Layer::isVisible)
+       .add_property("clear_label_cache",
+            &Layer::clear_label_cache,
+            &Layer::set_clear_label_cache)
+       
+       .def("envelope",&Layer::envelope, 
+            "Return the geographic envelope/bounding box "
+            "of the data in the layer.")
         ;
 }

@@ -89,12 +89,11 @@ dbf_file& shape_io::dbf()
     return dbf_;
 }
 
-
 geometry_ptr shape_io::read_polyline()
 {    
   using mapnik::line_string_impl;
-    shape_record record(reclength_*2-36);
-    shp_.read_record(record);
+  shape_record record(reclength_*2-36);
+  shp_.read_record(record);
     int num_parts=record.read_ndr_integer();
     int num_points=record.read_ndr_integer();
     geometry_ptr line(new line_string_impl(-1));

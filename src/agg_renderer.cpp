@@ -128,6 +128,10 @@ namespace mapnik
       std::clog << "start layer processing : " << lay.name()  << "\n";
       std::clog << "datasource = " << lay.datasource().get() << "\n";
 #endif 
+      if (lay.clear_label_cache())
+      {
+         finder_.clear();
+      }
    }
    
    template <typename T>

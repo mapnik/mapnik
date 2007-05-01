@@ -425,7 +425,7 @@ namespace mapnik
                 
                 std::string name = v.second.get<std::string>("<xmlattr>.name","Unnamed");
                 std::string srs = v.second.get<std::string>("<xmlattr>.srs","+proj=latlong +datum=WGS84");
-                
+               
                 Layer lyr(name, srs);
                 
                 boost::optional<std::string> status = 
@@ -435,6 +435,13 @@ namespace mapnik
                 {
                     lyr.setActive(false);
                 }
+                
+                boost::optional<std::string> clear_cache = v.second.get_optional<std::string>("<xmlattr>.clear_label_cache");
+                if (clear_cache  && (*clear_cache == "yes" || *clear_cache == "true"))
+                {
+                   lyr.set_clear_label_cache(true);
+                }
+                
                 
                 ptree::const_iterator itr2 = v.second.begin();
                 ptree::const_iterator end2 = v.second.end();

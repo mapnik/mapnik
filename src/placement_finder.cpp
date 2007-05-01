@@ -679,4 +679,9 @@ namespace mapnik
     
       return true;
    }
+
+   void placement_finder::clear()
+   {
+      detector_.clear();
+   }
 } // namespace

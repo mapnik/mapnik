@@ -31,90 +31,106 @@
 
 namespace mapnik
 {
-    //this needs to be tree structure 
-    //as a proof of a concept _only_ we use sequential scan 
+   //this needs to be tree structure 
+   //as a proof of a concept _only_ we use sequential scan 
 
-    struct label_collision_detector
-    {
-        typedef std::vector<Envelope<double> > label_placements;
+   struct label_collision_detector
+   {
+         typedef std::vector<Envelope<double> > label_placements;
 
-        bool has_plasement(Envelope<double> const& box)
-        {
+         bool has_plasement(Envelope<double> const& box)
+         {
             label_placements::const_iterator itr=labels_.begin();
             for( ; itr !=labels_.end();++itr)
             {
-                if (itr->intersects(box))
-                {
-                    return false;
-                }
+               if (itr->intersects(box))
+               {
+                  return false;
+               }
             }
             labels_.push_back(box);
             return true;
-        }
-    private:
+         }
+         void clear()
+         {
+            labels_.clear();
+         }
+          
+      private:
 
-        label_placements labels_;
-    };
+         label_placements labels_;
+   };
 
-    // quad_tree based label collision detector
-    class label_collision_detector2 : boost::noncopyable
-    {
-        typedef quad_tree<Envelope<double> > tree_t;
-        tree_t tree_;
-    public:
-	
-        explicit label_collision_detector2(Envelope<double> const& extent)
+   // quad_tree based label collision detector
+   class label_collision_detector2 : boost::noncopyable
+   {
+         typedef quad_tree<Envelope<double> > tree_t;
+         tree_t tree_;
+      public:
+         
+         explicit label_collision_detector2(Envelope<double> const& extent)
             : tree_(extent) {}
 	
-        bool has_placement(Envelope<double> const& box)
-        {
+         bool has_placement(Envelope<double> const& box)
+         {
             tree_t::query_iterator itr = tree_.query_in_box(box);
             tree_t::query_iterator end = tree_.query_end();
 	    
             for ( ;itr != end; ++itr)
             {
-                if (itr->intersects(box))
-                {
-                    return false;
-                }
+               if (itr->intersects(box))
+               {
+                  return false;
+               }
             }
 	    
             tree_.insert(box,box);
             return true;
-        }	
-    };
+         }
+         
+         void clear()
+         {
+            tree_.clear();
+         } 
+         
+   };
     
-    // quad_tree based label collision detector with seperate check/insert
-    class label_collision_detector3 : boost::noncopyable
-    {
-      typedef quad_tree< Envelope<double> > tree_t;
-      tree_t tree_;
-    public:
+   // quad_tree based label collision detector with seperate check/insert
+   class label_collision_detector3 : boost::noncopyable
+   {
+         typedef quad_tree< Envelope<double> > tree_t;
+         tree_t tree_;
+      public:
 	
-      explicit label_collision_detector3(Envelope<double> const& extent)
-          : tree_(extent) {}
+         explicit label_collision_detector3(Envelope<double> const& extent)
+            : tree_(extent) {}
 	
-      bool has_placement(Envelope<double> const& box)
-      {
-          tree_t::query_iterator itr = tree_.query_in_box(box);
-          tree_t::query_iterator end = tree_.query_end();
+         bool has_placement(Envelope<double> const& box)
+         {
+            tree_t::query_iterator itr = tree_.query_in_box(box);
+            tree_t::query_iterator end = tree_.query_end();
           
-          for ( ;itr != end; ++itr)
-          {
-            if (itr->intersects(box))
+            for ( ;itr != end; ++itr)
             {
-                return false;
+               if (itr->intersects(box))
+               {
+                  return false;
+               }
             }
-          }
           
-          return true;
-      }
+            return true;
+         }
 
-      void insert(Envelope<double> const& box)
-      {
-        tree_.insert(box, box);
-      }
-    };
+         void insert(Envelope<double> const& box)
+         {
+            tree_.insert(box, box);
+         }
+         
+         void clear()
+         {
+            tree_.clear();
+         }
+   };
 }
 
 #endif 

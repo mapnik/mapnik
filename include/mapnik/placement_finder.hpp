@@ -114,22 +114,18 @@ namespace mapnik
       public:
          //e is the dimensions of the map, buffer is the buffer used for collission detection.
          placement_finder(Envelope<double> e, unsigned buffer);
-  
          bool find_placements(placement *p);
-    
+         void clear();
+         
       protected:
          bool find_placement_follow(placement *p);
          bool find_placement_horizontal(placement *p);
-
          bool build_path_follow(placement *p, double target_distance);
          bool build_path_horizontal(placement *p, double target_distance);
-
          void update_detector(placement *p);
-  
          Envelope<double> dimensions_;
          label_collision_detector3 detector_;
-   };
-  
+   };  
 }
 
 #endif
