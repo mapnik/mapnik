@@ -85,8 +85,8 @@ namespace mapnik
 	
          nodes_t nodes_;
          node * root_;	
+         const unsigned int max_depth_;
          const double ratio_; 
-	
       public:
          typedef typename nodes_t::iterator iterator;
          typedef typename nodes_t::const_iterator const_iterator;
@@ -95,8 +95,11 @@ namespace mapnik
    
          result_t query_result_;
 	
-         explicit quad_tree(Envelope<double> const& ext,double ratio=0.55) 
-            : ratio_(ratio)
+         explicit quad_tree(Envelope<double> const& ext, 
+                            unsigned int max_depth = 8, 
+                            double ratio = 0.55) 
+            : max_depth_(max_depth),
+              ratio_(ratio)
          {
             nodes_.push_back(new node(ext));
             root_ = &nodes_[0];
@@ -104,9 +107,10 @@ namespace mapnik
 		
          void insert(T data, Envelope<double> const& box)
          {
-            do_insert_data(data,box,root_);
+            unsigned int depth=0;
+            do_insert_data(data,box,root_,depth);
          }
-        
+         
          query_iterator query_in_box(Envelope<double> const& box)
          {
             query_result_.clear();
@@ -170,9 +174,13 @@ namespace mapnik
             }
          }
 	
-         void do_insert_data(T data, Envelope<double> const& box, node * n)
+         void do_insert_data(T data, Envelope<double> const& box, node * n, unsigned int& depth)
          {
-            if (n)
+            if (++depth >= max_depth_)
+            {
+               n->cont_.push_back(data);
+            }
+            else 
             {
                Envelope<double> const& node_extent = n->extent();
                Envelope<double> ext[4];
@@ -186,7 +194,7 @@ namespace mapnik
                         nodes_.push_back(new node(ext[i]));
                         n->children_[i]=&nodes_.back();
                      }
-                     do_insert_data(data,box,n->children_[i]);
+                     do_insert_data(data,box,n->children_[i],depth);
                      return;
                   }
                }
