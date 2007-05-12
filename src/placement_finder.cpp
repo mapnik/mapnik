@@ -181,15 +181,16 @@ namespace mapnik
    }
   
   
-  
-   placement_finder::placement_finder(Envelope<double> e, unsigned buffer)
-      : dimensions_(e), 
-        detector_(Envelope<double>(e.minx() - buffer, e.miny() - buffer, e.maxx() + buffer, e.maxy() + buffer))
+   template <typename DetectorT>
+   placement_finder<DetectorT>::placement_finder(DetectorT & detector,Envelope<double> const& e)
+      : detector_(detector),
+        dimensions_(e)
+        //detector_(Envelope<double>(e.minx() - buffer, e.miny() - buffer, e.maxx() + buffer, e.maxy() + buffer))
    {
    }
 
-
-   bool placement_finder::find_placements(placement *p)
+   template <typename DetectorT>
+   bool placement_finder<DetectorT>::find_placements(placement *p)
    {
       if (p->label_placement == point_placement)
       {
@@ -203,7 +204,8 @@ namespace mapnik
       return false;
    }
 
-   bool placement_finder::find_placement_follow(placement *p)
+   template <typename DetectorT>
+   bool placement_finder<DetectorT>::find_placement_follow(placement *p)
    {
       std::pair<double, double> string_dimensions = p->info->get_dimensions();
       double string_width = string_dimensions.first;
@@ -293,8 +295,9 @@ namespace mapnik
 
       return FoundPlacement;
    }
-  
-   bool placement_finder::find_placement_horizontal(placement *p)
+   
+   template <typename DetectorT>
+   bool placement_finder<DetectorT>::find_placement_horizontal(placement *p)
    {
       if (p->path_size() == 1) // point geometry
       {
@@ -328,8 +331,9 @@ namespace mapnik
       }
       return false;
    }
-  
-   void placement_finder::update_detector(placement *p)
+   
+   template <typename DetectorT>
+   void placement_finder<DetectorT>::update_detector(placement *p)
    {
       while (!p->envelopes.empty())
       {
@@ -341,7 +345,8 @@ namespace mapnik
       }
    }
 
-   bool placement_finder::build_path_follow(placement *p, double target_distance)
+   template <typename DetectorT>
+   bool placement_finder<DetectorT>::build_path_follow(placement *p, double target_distance)
    {
       double new_x, new_y, old_x, old_y;
       unsigned cur_node = 0;
@@ -517,8 +522,8 @@ namespace mapnik
       return true;
    }
 
-
-   bool placement_finder::build_path_horizontal(placement *p, double target_distance)
+   template <typename DetectorT>
+   bool placement_finder<DetectorT>::build_path_horizontal(placement *p, double target_distance)
    {
       double x, y;
     
@@ -679,9 +684,13 @@ namespace mapnik
     
       return true;
    }
-
-   void placement_finder::clear()
+   
+   template <typename DetectorT>
+   void placement_finder<DetectorT>::clear()
    {
       detector_.clear();
    }
+   
+   template class placement_finder<label_collision_detector3>;
+   
 } // namespace

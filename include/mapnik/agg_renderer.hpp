@@ -75,8 +75,9 @@ namespace mapnik {
           T & pixmap_;
           CoordTransform t_;
           face_manager<freetype_engine> font_manager_;
-          placement_finder finder_;
-          label_collision_detector2 point_detector_; //Note: May want to merge this with placement_finder
+          label_collision_detector3 detector_;
+          placement_finder<label_collision_detector3> finder_;
+          //label_collision_detector2 point_detector_; //Note: May want to merge this with placement_finder
     };
 }
 

@@ -94,8 +94,9 @@ namespace mapnik
       : feature_style_processor<agg_renderer>(m),
         pixmap_(pixmap),
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
-        finder_(Envelope<double>(0 ,0, m.getWidth(), m.getHeight()), 64),
-        point_detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
+        detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
+        finder_(detector_,Envelope<double>(0 ,0, m.getWidth(), m.getHeight()))
+        //point_detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
    {
       Color const& bg = m.getBackground();
       pixmap_.setBackground(bg);
@@ -317,14 +318,15 @@ namespace mapnik
             int h = data->height();
             int px=int(floor(x - 0.5 * w));
             int py=int(floor(y - 0.5 * h));
-                
+            Envelope<double> label_ext (floor(x - 0.5 * w),
+                                        floor(y - 0.5 * h),
+                                        ceil (x + 0.5 * w),
+                                        ceil (y + 0.5 * h));
             if (sym.get_allow_overlap() || 
-                point_detector_.has_placement(Envelope<double>(floor(x - 0.5 * w),
-                                                               floor(y - 0.5 * h),
-                                                               ceil (x + 0.5 * w),
-                                                               ceil (y + 0.5 * h))))
+                detector_.has_placement(label_ext))
             {    
                pixmap_.set_rectangle_alpha(px,py,*data);
+               detector_.insert(label_ext);
             }
          }
       }

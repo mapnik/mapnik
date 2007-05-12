@@ -109,11 +109,12 @@ namespace mapnik
 
 
   
+   template <typename DetectorT>
    class placement_finder : boost::noncopyable
    {
       public:
          //e is the dimensions of the map, buffer is the buffer used for collission detection.
-         placement_finder(Envelope<double> e, unsigned buffer);
+         placement_finder(DetectorT & detector,Envelope<double> const& e);
          bool find_placements(placement *p);
          void clear();
          
@@ -124,7 +125,7 @@ namespace mapnik
          bool build_path_horizontal(placement *p, double target_distance);
          void update_detector(placement *p);
          Envelope<double> dimensions_;
-         label_collision_detector3 detector_;
+         DetectorT & detector_;
    };  
 }
 
