@@ -55,7 +55,7 @@ namespace mapnik {
         FriBidiStrIndex new_len;
         fribidi_boolean log2vis;
         
-        visual = (FriBidiChar *) malloc (sizeof (FriBidiChar) * (len + 1));
+        visual = (FriBidiChar *) calloc (sizeof (FriBidiChar), len + 1);
         ltov = 0;
         vtol = 0;
         levels = 0;
