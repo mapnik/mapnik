@@ -62,18 +62,18 @@ shape_datasource::shape_datasource(const parameters &params)
             case 'D':
             case 'M':
             case 'L':		
-	      //desc_.add_descriptor(attribute_descriptor(fld_name, String));
+               desc_.add_descriptor(attribute_descriptor(fld_name, String));
                break;
             case 'N':
             case 'F':
             {
                if (fd.dec_>0)
                {   
-		 //desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,8));
+                  desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,8));
                }
                else
                {
-		 //desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,4));
+                  desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,4));
                }
                break;
             }
