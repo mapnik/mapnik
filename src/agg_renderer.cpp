@@ -88,7 +88,7 @@ namespace mapnik
       private:
          ImageData32 const& pattern_;
    };
-
+   
    template <typename T>
    agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, unsigned offset_x, unsigned offset_y)
       : feature_style_processor<agg_renderer>(m),

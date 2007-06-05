@@ -60,7 +60,7 @@ int main (int argc,char** argv)
             ("verbose,v","verbose output")
             ("depth,d", po::value<unsigned int>(), "max tree depth\n(default 8)")   
             ("ratio,r",po::value<double>(),"split ratio (default 0.55)")
-            ("shape_files",po::value<vector<string> >(),"shape files to index file1 file2 ...fileN")
+            ("shape_files",po::value<vector<string> >(),"shape files to index: file1 file2 ...fileN")
             ;
 	
         po::positional_options_description p;

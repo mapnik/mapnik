@@ -111,7 +111,6 @@ namespace mapnik {
         
         inline void forward(double * x, double * y) const
         {
-            
             *x = (*x - extent_.minx()) * scale_ - offset_x_;
             *y = (extent_.maxy() - *y) * scale_ - offset_y_;
         }
