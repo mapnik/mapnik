@@ -217,14 +217,22 @@ namespace mapnik {
             }
         }
     }
-
+   
+   inline MAPNIK_DECL void save_to_file (std::string const& file,
+                                         std::string const& type,
+                                         Image32 const& image) 
+   {
+      save_to_file<ImageData32>(file,type,image.data());
+   }
+   
 #ifdef _MSC_VER
-  template MAPNIK_DECL void save_to_file<ImageData32>(std::string const&,
-						      std::string const& ,
-						      ImageData32 const&);
-  template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (std::string const&,
-								    std::string const& ,
-								    image_view<ImageData32> const&);
+   template MAPNIK_DECL void save_to_file<ImageData32>(std::string const&,
+                                                       std::string const& ,
+                                                       ImageData32 const&);
+         
+   template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (std::string const&,
+                                                                     std::string const& ,
+                                                                     image_view<ImageData32> const&);
 #endif
 
 }

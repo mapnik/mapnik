@@ -22,10 +22,6 @@
 //$Id$
 
 #include <boost/python.hpp>
-
-//#include <boost/python/module.hpp>
-//#include <boost/python/def.hpp>
-//#include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_view.hpp>
 

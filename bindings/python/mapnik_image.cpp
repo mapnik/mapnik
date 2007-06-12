@@ -25,9 +25,11 @@
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/image_util.hpp>
 
 using mapnik::Image32;
 using namespace boost::python;
+using mapnik::save_to_file;
 
 PyObject* rawdata( Image32 const& im)
 {
@@ -35,6 +37,7 @@ PyObject* rawdata( Image32 const& im)
     return ::PyString_FromStringAndSize((const char*)im.raw_data(),size);
 }
 
+void (*save_to_file2)(std::string const&,std::string const&, mapnik::Image32 const&) = mapnik::save_to_file;
 void export_image()
 {
     using namespace boost::python;
@@ -46,5 +49,6 @@ void export_image()
                       (&Image32::getBackground,return_value_policy<copy_const_reference>()),
                        &Image32::setBackground, "The background color of the image.")
 	;    
-    def("rawdata",&rawdata);
+    def("rawdata",&rawdata); // FIXME : I dont think we need this one
+    def("save_to_file", save_to_file2);
 }
