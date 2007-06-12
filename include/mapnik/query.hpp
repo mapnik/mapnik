@@ -32,80 +32,56 @@
 #include <mapnik/envelope.hpp>
 #include <mapnik/feature.hpp>
 
-namespace mapnik
-{
-    class query 
-    {
-    private:
-        Envelope<double> bbox_;
-        filter<Feature>* filter_;
-        std::set<std::string> names_;
-    public:
-        query() 
-            : bbox_(std::numeric_limits<double>::min(),
-                    std::numeric_limits<double>::min(),
-                    std::numeric_limits<double>::max(),
-                    std::numeric_limits<double>::max()),
-              filter_(new all_filter<Feature>)
-        {}
+namespace mapnik {
+   class query 
+   {
+      private:
+         Envelope<double> bbox_;
+         double resolution_;
+         std::set<std::string> names_;
+      public:
+         
+         explicit query(const Envelope<double>& bbox, double resolution)
+            : bbox_(bbox),
+              resolution_(resolution)
+         {}
+         
         
-        query(const Envelope<double>& bbox)
-            : bbox_(bbox),
-              filter_(new all_filter<Feature>)
-        {}
-	
-        query(const Envelope<double>& bbox, const filter<Feature>& f)
-            : bbox_(bbox),
-              filter_(f.clone())
-        {}
-	
-        query(const query& other)
+         query(const query& other)
             : bbox_(other.bbox_),
-              filter_(other.filter_->clone())
-        {}
-        
-        query& operator=(const query& other)
-        {
-            filter<Feature>* tmp=other.filter_->clone();
-            delete filter_;
-            filter_=tmp;
+              resolution_(other.resolution_),
+              names_(other.names_)
+         {}
+         
+         query& operator=(const query& other)
+         {
+            if (this == &other) return *this;
             bbox_=other.bbox_;
+            resolution_=other.resolution_;
             names_=other.names_;
             return *this;
-        }
-	
-        const filter<Feature>* get_filter() const
-        {
-            return  filter_;
-        }
-	
-        const Envelope<double>& get_bbox() const
-        {
+         }
+         
+         double resolution() const
+         {
+            return resolution_;
+         }
+         
+         const Envelope<double>& get_bbox() const
+         {
             return bbox_;
-        }
-
-        void set_filter(const filter<Feature>& f)
-        {
-            filter<Feature>* tmp=f.clone();
-            delete filter_;
-            filter_=tmp;
-        }
-        
-        void add_property_name(const std::string& name)
-        {
+         }
+         
+         void add_property_name(const std::string& name)
+         {
             names_.insert(name);
-        } 
-	
-        const std::set<std::string>& property_names() const
-        {
+         } 
+         
+         const std::set<std::string>& property_names() const
+         {
             return names_;
-        }
-	
-        ~query() 
-        {
-            delete filter_;
-        }
-    };
+         }
+   };
 }
 
 

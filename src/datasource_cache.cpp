@@ -55,28 +55,31 @@ namespace mapnik
         datasource_ptr ds;
         try
         {
-            const std::string type=params.get("type");	    
-            map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(type);
-            if (itr!=plugins_.end())
-            {
-                if (itr->second->handle())
-                {
+           boost::optional<std::string> type = params.get<std::string>("type");
+           if (type)
+           {
+              map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
+              if (itr!=plugins_.end())
+              {
+                 if (itr->second->handle())
+                 {
                     create_ds* create_datasource = 
-                        (create_ds*) lt_dlsym(itr->second->handle(), "create");
+                       (create_ds*) lt_dlsym(itr->second->handle(), "create");
                     if (!create_datasource)
                     {
-                        std::clog << "Cannot load symbols: " << lt_dlerror() << std::endl;
+                       std::clog << "Cannot load symbols: " << lt_dlerror() << std::endl;
                     }
                     else
                     {
-                        ds=datasource_ptr(create_datasource(params),datasource_deleter());
+                        ds=datasource_ptr(create_datasource(params), datasource_deleter());
                     }
                 }
                 else
                 {
-                    std::clog << "Cannot load library: " << "  "<< lt_dlerror() << std::endl;
+                    std::clog << "Cannot load library: " << lt_dlerror() << std::endl;
                 }
-            }
+              }
+           }
 #ifdef MAPNIK_DEBUG
             std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
 #endif

@@ -43,11 +43,22 @@ namespace
         {
             std::string key = extract<std::string>(keys[i]);
             object obj = d[key];
-            extract<std::string> ex(obj);
-            if (ex.check())
+            extract<std::string> ex0(obj);
+            extract<int> ex1(obj);
+            extract<double> ex2(obj);
+            
+            if (ex0.check())
             {
-                params[key] = ex();
-            }            
+               params[key] = ex0();
+            }
+            else if (ex1.check())
+            {
+               params[key] = ex1();
+            }
+            else if (ex2.check())
+            {
+               params[key] = ex2();
+            }
         }
         
         return mapnik::datasource_cache::create(params);

@@ -43,32 +43,30 @@ using mapnik::layer_descriptor;
 using mapnik::featureset_ptr;
 using mapnik::query;
 using mapnik::coord2d;
+using mapnik::datasource_exception;
 
 raster_datasource::raster_datasource(const parameters& params)
     : datasource (params),
-      desc_(params.get("name"),"utf-8")
+      desc_(*params.get<std::string>("type"),"utf-8")
 {
-    filename_=params.get("file");
-    format_=params.get("format");
-    
-    try 
-    {
-        double lox=lexical_cast<double>(params.get("lox"));
-        double loy=lexical_cast<double>(params.get("loy"));
-        double hix=lexical_cast<double>(params.get("hix"));
-        double hiy=lexical_cast<double>(params.get("hiy"));
-        extent_.init(lox,loy,hix,hiy);
-    }
-    catch (bad_lexical_cast& ex)
-    {
-        clog << ex.what() << endl;
-    }  
+ 
+   boost::optional<std::string> file=params.get<std::string>("file");
+   if (!file) throw datasource_exception("missing <file> parameter ");
+   filename_ = *file;
+   format_=*params.get<std::string>("format","tiff");
+   boost::optional<double> lox = params.get<double>("lox");
+   boost::optional<double> loy = params.get<double>("loy");
+   boost::optional<double> hix = params.get<double>("hix");
+   boost::optional<double> hiy = params.get<double>("hiy");
+   
+   if (lox && loy && hix && hiy)
+   {
+      extent_.init(*lox,*loy,*hix,*hiy);
+   }
+   else throw datasource_exception("<lox> <loy> <hix> <hiy> are required");
 }
 
-
-raster_datasource::~raster_datasource()
-{
-}
+raster_datasource::~raster_datasource() {}
 
 int raster_datasource::type() const
 {

@@ -48,40 +48,22 @@ using mapnik::attribute_descriptor;
 
 postgis_datasource::postgis_datasource(parameters const& params)
    : datasource (params),
-     table_(params.get("table")),
+     table_(*params.get<std::string>("table","")),
      type_(datasource::Vector),
      extent_initialized_(false),
-     desc_(params.get("type"),"utf-8"),
-     creator_(params.get("host"),
-              params.get("port"),
-              params.get("dbname"),
-              params.get("user"),
-              params.get("password"))    
+     desc_(*params.get<std::string>("type"),"utf-8"),
+     creator_(params.get<std::string>("host"),
+              params.get<std::string>("port"),
+              params.get<std::string>("dbname"),
+              params.get<std::string>("user"),
+              params.get<std::string>("password"))    
 {   
 
-   unsigned initial_size;
-   unsigned max_size;
-    
-   try 
-   {
-      initial_size = boost::lexical_cast<unsigned>(params_.get("initial_size")); 
-   }
-   catch (bad_lexical_cast& )
-   {
-      initial_size = 1;
-   }
-    
-   try 
-   {
-      max_size = boost::lexical_cast<unsigned>(params_.get("max_size")); 
-   }
-   catch (bad_lexical_cast&)
-   {
-      max_size = 10;
-   }
-    
+   boost::optional<int> initial_size = params_.get<int>("inital_size",1);
+   boost::optional<int> max_size = params_.get<int>("max_size",10);
+     
    ConnectionManager *mgr=ConnectionManager::instance();   
-   mgr->registerPool(creator_, initial_size, max_size);
+   mgr->registerPool(creator_, *initial_size, *max_size);
     
    shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
    if (pool)
@@ -275,7 +257,9 @@ Envelope<double> postgis_datasource::envelope() const
       {
          std::ostringstream s;
          std::string table_name = table_from_sql(table_);
-         if (params_.get("estimate_extent") == "true")
+         boost::optional<std::string> estimate_extent = params_.get<std::string>("estimate_extent");
+         
+         if (estimate_extent && *estimate_extent == "true")
          {
             s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
               << " from (select estimated_extent('" 

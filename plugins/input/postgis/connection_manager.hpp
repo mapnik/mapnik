@@ -31,6 +31,7 @@
 #include "connection.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/optional.hpp>
 
 using mapnik::Pool;
 using mapnik::singleton;
@@ -43,35 +44,45 @@ class ConnectionCreator
 {
 
 public:
-    ConnectionCreator(string const& host,
-                      string const& port,
-                      string const& dbname,
-                      string const& user,
-                      string const& pass)
-        : host_(host),
-          port_(port),
-          dbname_(dbname),
-          user_(user),
-          pass_(pass) {}
-    
-    T* operator()() const
-    {
-        return new T(host_,port_,dbname_,user_,pass_);
-    }
-    
-    std::string id() const 
-    {
-        return host_ + ":" 
-	  + dbname_ + ":" 
-	  + port_ +":" 
-	  + user_ ; 
-    }
+      ConnectionCreator(boost::optional<string> const& host,
+                        boost::optional<string> const& port,
+                        boost::optional<string> const& dbname,
+                        boost::optional<string> const& user,
+                        boost::optional<string> const& pass)
+         : host_(host),
+           port_(port),
+           dbname_(dbname),
+           user_(user),
+           pass_(pass) {}
+      
+      T* operator()() const
+      {
+         return new T(connection_string());
+      }
+      
+      inline std::string id() const 
+      {
+         return connection_string();
+      }
+      
+      inline std::string connection_string() const
+      {
+         std::string connect_str;
+         if (host_) connect_str += "host=" + *host_;
+         if (port_) connect_str += " port=" + *port_;
+         if (dbname_) connect_str += " dbname=" + *dbname_;
+         if (user_) connect_str += " user=" + *user_;
+         if (pass_) connect_str += " password=" + *pass_;
+         connect_str += " connect_timeout=4"; // todo: set by client (param)
+         return connect_str;
+      }
+      
 private:
-    string host_;
-    string port_;
-    string dbname_;
-    string user_;
-    string pass_;
+      boost::optional<string> host_;
+      boost::optional<string> port_;
+      boost::optional<string> dbname_;
+      boost::optional<string> user_;
+      boost::optional<string> pass_;
 
 };
 

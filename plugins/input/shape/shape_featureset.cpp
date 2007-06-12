@@ -71,7 +71,7 @@ feature_ptr shape_featureset<filterT>::next()
       {
          double x=shape_.shp().read_double();
          double y=shape_.shp().read_double();
-         geometry_ptr point(new point_impl(-1));
+         geometry_ptr point(new point_impl);
          point->move_to(x,y);
          feature->set_geometry(point);
          ++count_;
@@ -81,7 +81,7 @@ feature_ptr shape_featureset<filterT>::next()
          double x=shape_.shp().read_double();
          double y=shape_.shp().read_double();
          shape_.shp().read_double();//m
-         geometry_ptr point(new point_impl(-1));
+         geometry_ptr point(new point_impl);
          point->move_to(x,y);
          feature->set_geometry(point);
          ++count_;
@@ -92,7 +92,7 @@ feature_ptr shape_featureset<filterT>::next()
          double y=shape_.shp().read_double();
          shape_.shp().read_double();//z
          shape_.shp().read_double();//m
-         geometry_ptr point(new point_impl(-1));
+         geometry_ptr point(new point_impl);
          point->move_to(x,y);
          feature->set_geometry(point);
          ++count_;

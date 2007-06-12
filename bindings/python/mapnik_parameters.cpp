@@ -70,7 +70,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
         for (int i=0;i<len(keys);++i)
         {
             std::string key=extract<std::string>(keys[i]);
-            std::string value=extract<std::string>(d[key]);
+            std::string value=extract<std::string>(d[key]); // FIXME: use boost::variant as a value object. Add Py_Int/Py_Float/Py_String extractors. 
             p[key] = value;
         }
     }
@@ -85,9 +85,6 @@ void export_parameters()
         ;
 
     class_<parameters>("Parameters",init<>())
-        //.def("add",add1)
-        //.def("add",add2)
-        .def("get",&parameters::get)
         .def_pickle(parameters_pickle_suite())
         ;
 }

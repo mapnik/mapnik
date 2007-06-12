@@ -53,7 +53,7 @@ feature_ptr postgis_featureset::next()
         feature_ptr feature(new Feature(count_));
         int size=rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
-        geometry_ptr geom = geometry_utils::from_wkb(data,size,-1);
+        geometry_ptr geom = geometry_utils::from_wkb(data,size);
         totalGeomSize_+=size;
 	     
         if (geom)

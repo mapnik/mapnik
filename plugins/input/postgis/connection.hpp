@@ -38,29 +38,16 @@ class Connection
    private:
       PGconn *conn_;
    public:
-      Connection(std::string const& host, 
-                 std::string const& port,
-                 std::string const& dbname, 
-                 std::string const& username,
-                 std::string const& password)
+      Connection(std::string const& connection_str)
       {
-         
-         std::string connStr;
-         if (host.length()) connStr += "host="+host;
-         if (port.length()) connStr += " port="+port;
-         if (dbname.length()) connStr+=" dbname="+dbname;
-         if (username.length()) connStr+=" user="+username;
-         if (password.length()) connStr+=" password="+password;
-         connStr+=" connect_timeout=4"; // todo: set by client (param) 
-         
-         conn_=PQconnectdb(connStr.c_str());
+         conn_=PQconnectdb(connection_str.c_str());
          if (PQstatus(conn_) == CONNECTION_BAD)
          {
-            std::clog << "connection to "<< connStr << " failed\n"
+            std::clog << "connection  ["<< connection_str<< "] failed\n"
                       << PQerrorMessage(conn_)<< std::endl;
          }
       }
-    
+      
       bool execute(const std::string& sql) const
       {
          PGresult *result=PQexec(conn_,sql.c_str());

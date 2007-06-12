@@ -34,24 +34,26 @@ using mapnik::coord2d;
 using mapnik::query;
 using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
+using mapnik::datasource_exception;
 
 gdal_datasource::gdal_datasource( parameters const& params)
    : datasource(params),
      extent_(),
-     desc_(params.get("name"),"utf-8")
+     desc_(*params.get<std::string>("type"),"utf-8")
 {
    GDALAllRegister();
-   dataset_ = boost::shared_ptr<GDALDataset>(reinterpret_cast<GDALDataset*>(GDALOpen(params.get("file").c_str(),GA_ReadOnly)));
-   if (dataset_)
-   {
-      double tr[6];
-      dataset_->GetGeoTransform(tr);
-      double x0 = tr[0];
-      double y0 = tr[3];
-      double x1 = tr[0] + dataset_->GetRasterXSize()*tr[1] + dataset_->GetRasterYSize()*tr[2];
-      double y1 = tr[3] + dataset_->GetRasterXSize()*tr[4] + dataset_->GetRasterYSize()*tr[5];
-      extent_.init(x0,y0,x1,y1);
-   }
+   boost::optional<std::string> file = params.get<std::string>("file");
+   if (!file) throw datasource_exception("missing <file> paramater");
+
+   dataset_ = boost::shared_ptr<GDALDataset>(reinterpret_cast<GDALDataset*>(GDALOpen((*file).c_str(),GA_ReadOnly)));
+   if (!dataset_) throw datasource_exception("failed to create GDALDataset");
+   double tr[6];
+   dataset_->GetGeoTransform(tr);
+   double x0 = tr[0];
+   double y0 = tr[3];
+   double x1 = tr[0] + dataset_->GetRasterXSize()*tr[1] + dataset_->GetRasterYSize()*tr[2];
+   double y1 = tr[3] + dataset_->GetRasterXSize()*tr[4] + dataset_->GetRasterYSize()*tr[5];
+   extent_.init(x0,y0,x1,y1);
 }
 
 gdal_datasource::~gdal_datasource() {}

@@ -36,7 +36,6 @@ namespace mapnik
         };
         const char* wkb_;
         unsigned size_;
-        int srid_;
         unsigned pos_;
         wkbByteOrder byteOrder_;
         bool needSwap_;
@@ -52,10 +51,9 @@ namespace mapnik
             wkbGeometryCollection=7
         };
 	
-        wkb_reader(const char* wkb,unsigned size,int srid)
+        wkb_reader(const char* wkb,unsigned size)
             : wkb_(wkb),
               size_(size),
-              srid_(srid),
               pos_(0),
               byteOrder_((wkbByteOrder)wkb_[0])
         {
@@ -174,7 +172,7 @@ namespace mapnik
 	
         geometry_ptr read_point()
         {
-            geometry_ptr pt(new point<vertex2d>(srid_));
+            geometry_ptr pt(new point<vertex2d>);
             double x = read_double();
             double y = read_double();
             pt->move_to(x,y);
@@ -183,7 +181,7 @@ namespace mapnik
 	
         geometry_ptr read_multipoint()
         {
-            geometry_ptr pt(new point<vertex2d>(srid_));
+            geometry_ptr pt(new point<vertex2d>);
             int num_points = read_integer();
             for (int i=0;i<num_points;++i) 
             {
@@ -197,7 +195,7 @@ namespace mapnik
 
         geometry_ptr read_linestring()
         {
-            geometry_ptr line(new line_string<vertex2d>(srid_));
+            geometry_ptr line(new line_string<vertex2d>);
             int num_points=read_integer();
             CoordinateArray ar(num_points);
             read_coords(ar);
@@ -212,7 +210,7 @@ namespace mapnik
 
         geometry_ptr read_multilinestring()
         {
-            geometry_ptr line(new line_string<vertex2d>(srid_));
+            geometry_ptr line(new line_string<vertex2d>);
             int num_lines=read_integer();
 
             for (int i=0;i<num_lines;++i)
@@ -234,7 +232,7 @@ namespace mapnik
 
         geometry_ptr read_polygon() 
         {
-            geometry_ptr poly(new polygon<vertex2d>(srid_));
+            geometry_ptr poly(new polygon<vertex2d>);
 	    
             int num_rings=read_integer();
 
@@ -257,7 +255,7 @@ namespace mapnik
 	
         geometry_ptr read_multipolygon()
         {
-            geometry_ptr poly(new polygon<vertex2d>(srid_));
+            geometry_ptr poly(new polygon<vertex2d>);
 
             int num_polys=read_integer();
             for (int i=0;i<num_polys;++i)
@@ -281,9 +279,9 @@ namespace mapnik
         }
     };
     
-    geometry_ptr geometry_utils::from_wkb(const char* wkb, unsigned size,int srid) 
+    geometry_ptr geometry_utils::from_wkb(const char* wkb, unsigned size) 
     {
-        wkb_reader reader(wkb,size,srid);
+        wkb_reader reader(wkb,size);
         return reader.read();
     }    
 }

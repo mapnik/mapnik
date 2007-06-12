@@ -52,14 +52,12 @@ void export_projection ()
     using mapnik::projection;
     
     class_<projection>("Projection", init<optional<std::string const&> >())
-        .def ("forward",&projection::forward)
-        .def ("inverse",&projection::inverse)
         .def ("params", make_function(&projection::params,
                                       return_value_policy<copy_const_reference>()))
         .add_property ("geographic",&projection::is_geographic)
         ;
     
-    def("forward",&forward);
-    def("inverse",&inverse);
+    def("forward_",&forward);
+    def("inverse_",&inverse);
     
 }

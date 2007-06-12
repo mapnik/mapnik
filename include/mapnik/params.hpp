@@ -26,39 +26,84 @@
 
 #include <string>
 #include <map>
+#include <boost/variant.hpp>
+#include <boost/optional.hpp>
+#include <boost/none.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace mapnik
 {
-
-    typedef std::pair<const std::string,std::string> parameter;
-    typedef std::map<const std::string,std::string> param_map;
-
-    class parameters : public param_map
-    {
-    public:
-
-        parameters() {}
-        const std::string get(std::string const& key) const
-        {
-            param_map::const_iterator itr=find(key);
-            if (itr != end())
+   typedef boost::variant<int,double,std::string> value_holder;
+   typedef std::pair<const std::string, value_holder> parameter;
+   typedef std::map<const std::string, value_holder> param_map;
+   
+   template <typename T>
+   struct value_extractor_visitor : public boost::static_visitor<>
+   {
+         value_extractor_visitor(boost::optional<T> & var)
+            :var_(var) {}
+         
+         void operator () (T val) const
+         {
+            var_ = val;
+         }
+         
+         template <typename T1>
+         void operator () (T1 val) const 
+         {
+            try 
             {
-                return itr->second;
+               var_ = boost::lexical_cast<T>(val);
             }
-            return std::string();
-        }
-        
-        param_map::const_iterator iterator(std::string const& key) const
-        {
+            catch (boost::bad_lexical_cast & ) {}
+         }
+         
+         boost::optional<T> & var_;
+   };
+   
+  
+   class parameters : public param_map
+   {
+         template <typename T> 
+         struct converter
+         {
+               typedef boost::optional<T> return_type;       
+               static return_type extract(parameters const& params,std::string const& name, boost::optional<T> const& default_value)
+               {
+                  boost::optional<T> result(default_value);
+                  parameters::const_iterator itr = params.find(name);
+                  if (itr != params.end())
+                  {
+                     boost::apply_visitor(value_extractor_visitor<T>(result),itr->second);
+                  }
+                  return result;
+               }
+         };
+      public: 
+         parameters() {}
+         
+         template <typename T>
+         boost::optional<T> get(std::string const& key) const
+         {
+            return converter<T>::extract(*this,key, boost::none);
+         }
+         
+         template <typename T>
+         boost::optional<T> get(std::string const& key, T const& default_value) const
+         {
+            return converter<T>::extract(*this,key,boost::optional<T>(default_value));
+         }
+         
+         param_map::const_iterator iterator(std::string const& key) const
+         {
 	    return find(key);
-        }
+         }
         
-        param_map::iterator iterator(std::string const& key)
-        {
+         param_map::iterator iterator(std::string const& key)
+         {
 	    return find(key);
-        }
-        
-    };
+         } 
+   };
 }
 
 #endif //PARAMS_HPP

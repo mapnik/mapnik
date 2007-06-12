@@ -39,17 +39,15 @@ using mapnik::filter_at_point;
 using mapnik::attribute_descriptor;
 
 shape_datasource::shape_datasource(const parameters &params)
-   : datasource (params) ,
-     shape_name_(params.get("file")),
+   : datasource (params),
+     shape_name_(*params_.get<std::string>("file","")),
      type_(datasource::Vector),
      file_length_(0),
      indexed_(false),
-     desc_(params.get("name"),"utf-8")
+     desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
    try
-   {
-      std::string encoding = params.get("encoding");
-      if (encoding.length() > 0) desc_.set_encoding(encoding);
+   {  
       shape_io shape(shape_name_);
       init(shape);
       for (int i=0;i<shape.dbf().num_fields();++i)
@@ -85,17 +83,19 @@ shape_datasource::shape_datasource(const parameters &params)
          }
       }
    }
-   catch  (datasource_exception& ex)
+   catch (datasource_exception& ex)
    {
       std::clog<<ex.what()<<std::endl;
       throw;
    }
+   catch (...)
+   {
+      std::clog << " got exception ... \n";
+      throw;
+   }
 }
 
-
-shape_datasource::~shape_datasource()
-{
-}
+shape_datasource::~shape_datasource() {}
 
 const std::string shape_datasource::name_="shape";
 

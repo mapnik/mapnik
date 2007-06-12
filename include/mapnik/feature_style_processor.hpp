@@ -113,7 +113,7 @@ namespace mapnik
               
                projection proj1(lay.srs());
                proj_transform prj_trans(proj0,proj1);
-                
+               
                double x0 = ext.minx();
                double y0 = ext.miny();
                double z0 = 0.0;
@@ -123,6 +123,8 @@ namespace mapnik
                prj_trans.forward(x0,y0,z0);
                prj_trans.forward(x1,y1,z1);
                Envelope<double> bbox(x0,y0,x1,y1);
+
+               double resolution = m_.getWidth()/bbox.width();
 #ifdef MAPNIK_DEBUG
                std::clog << bbox << "\n";
 #endif                
@@ -140,8 +142,8 @@ namespace mapnik
                   bool active_rules=false;
                     
                   feature_type_style const& style=m_.find_style(*stylesIter++);
-                        
-                  query q(bbox); //BBOX query
+                  
+                  query q(bbox,resolution); //BBOX query
 
                   const std::vector<rule_type>& rules=style.get_rules();
                   std::vector<rule_type>::const_iterator ruleIter=rules.begin();

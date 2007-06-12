@@ -39,28 +39,28 @@ using mapnik::coord2d;
 
 class shape_datasource : public datasource
 {
-public:
-    shape_datasource(const parameters &params);
-    virtual ~shape_datasource();
+   public:
+      shape_datasource(const parameters &params);
+      virtual ~shape_datasource();
     
-    int type() const;
-    static std::string name();
-    featureset_ptr features(const query& q) const;
-    featureset_ptr features_at_point(coord2d const& pt) const;
-    Envelope<double> envelope() const;
-    layer_descriptor get_descriptor() const;   
-private:
-    shape_datasource(const shape_datasource&);
-    shape_datasource& operator=(const shape_datasource&);
-    void init(shape_io& shape);
-private:
-    std::string shape_name_;
-    int type_;
-    long file_length_;
-    Envelope<double> extent_;
-    bool indexed_;
-    layer_descriptor desc_;
-    static const std::string name_;
+      int type() const;
+      static std::string name();
+      featureset_ptr features(const query& q) const;
+      featureset_ptr features_at_point(coord2d const& pt) const;
+      Envelope<double> envelope() const;
+      layer_descriptor get_descriptor() const;   
+   private:
+      shape_datasource(const shape_datasource&);
+      shape_datasource& operator=(const shape_datasource&);
+      void init(shape_io& shape);
+   private:
+      int type_;
+      std::string shape_name_;
+      long file_length_;
+      Envelope<double> extent_;
+      bool indexed_;
+      layer_descriptor desc_;
+      static const std::string name_;
 };
 
 #endif //SHAPE_HPP

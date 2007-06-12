@@ -16,9 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
-#
-#
-#
+
 
 from sys import getdlopenflags,setdlopenflags
 try:
@@ -56,10 +54,10 @@ class _Envelope(Envelope,_injector):
 
 class _Projection(Projection,_injector):
   def forward(self,pt):
-    return forward(pt,self)
+    return forward_(pt,self)
   def inverse(self,pt):
-    return inverse(pt,self)
-
+    return inverse_(pt,self)
+  
 class _Datasource(Datasource,_injector):
   def describe(self):
     return Describe(self)
@@ -79,6 +77,10 @@ def PostGIS(**keywords):
 
 def Raster(**keywords):
   keywords['type'] = 'raster'
+  return CreateDatasource(keywords)
+
+def Gdal (**keywords):
+  keywords['type'] = 'gdal'
   return CreateDatasource(keywords)
 
 #register datasources
