@@ -45,7 +45,8 @@ namespace mapnik
 	  label_p_(point_placement),
 	  anchor_(0.0,0.5),
 	  displacement_(0.0,0.0),
-    avoid_edges_(false) {}
+          avoid_edges_(false),
+          overlap_(false) {}
            
     text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
         : name_(rhs.name_),
@@ -63,8 +64,9 @@ namespace mapnik
           label_p_(rhs.label_p_),
           anchor_(rhs.anchor_),
           displacement_(rhs.displacement_),
-          avoid_edges_(rhs.avoid_edges_) {}
-
+          avoid_edges_(rhs.avoid_edges_),
+          overlap_(rhs.overlap_) {}
+   
     text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     {
         if (this == &other)
@@ -85,7 +87,7 @@ namespace mapnik
         anchor_ = other.anchor_;
         displacement_ = other.displacement_; 
         avoid_edges_ = other.avoid_edges_;
-        
+        overlap_ = other.overlap_;
         return *this;
     } 
 
@@ -227,4 +229,14 @@ namespace mapnik
     {
         avoid_edges_ = avoid;
     }
+
+   void text_symbolizer::set_allow_overlap(bool overlap)
+   {
+      overlap_ = overlap;
+   }
+   
+   bool text_symbolizer::get_allow_overlap() const
+   {
+      return overlap_;
+   }
 }

@@ -127,9 +127,12 @@ namespace mapnik
                             if ( sym.first == "PointSymbolizer")
                             {
                                 boost::optional<std::string> file =  
-                                    sym.second.get_optional<std::string>("<xmlattr>.file"); 
+                                   sym.second.get_optional<std::string>("<xmlattr>.file"); 
                                 boost::optional<std::string> type =  
-                                    sym.second.get_optional<std::string>("<xmlattr>.type");
+                                   sym.second.get_optional<std::string>("<xmlattr>.type");
+                                boost::optional<std::string> allow_overlap = 
+                                   sym.second.get_optional<std::string>("<xmlattr>.allow_overlap");
+                                
                                 boost::optional<unsigned> width =  
                                     sym.second.get_optional<unsigned>("<xmlattr>.width");
                                 boost::optional<unsigned> height =  
@@ -137,12 +140,19 @@ namespace mapnik
                                 
                                 if (file && type && width && height)
                                 {
-                                    rule.append(point_symbolizer(*file,*type,*width,*height));
+                                   point_symbolizer symbol(*file,*type,*width,*height);
+                                   if (allow_overlap && (*allow_overlap == "yes" || *allow_overlap == "true"))
+                                   {
+                                      symbol.set_allow_overlap(true); // default is 'false'
+                                   }
+                                   rule.append(symbol);
+                                   
                                 }
                                 else
                                 {
                                     rule.append(point_symbolizer());
                                 }
+                                
                             } 
                             else if ( sym.first == "LinePatternSymbolizer")
                             {
@@ -237,6 +247,15 @@ namespace mapnik
                                 {
                                     text_symbol.set_label_spacing(*spacing);
                                 }
+
+                                // allow_overlap 
+                                boost::optional<std::string> allow_overlap = 
+                                   sym.second.get_optional<std::string>("<xmlattr>.allow_overlap");
+                                if (allow_overlap && (*allow_overlap == "yes" || *allow_overlap == "true"))
+                                {
+                                   text_symbol.set_allow_overlap(true); // default is 'false'
+                                }
+                                
                                 rule.append(text_symbol);
                             }
                             else if ( sym.first == "ShieldSymbolizer")

@@ -72,9 +72,11 @@ namespace mapnik
          position const& get_anchor() const;	
          void set_displacement(double x, double y);
          position const& get_displacement() const;
-
          void set_avoid_edges(bool avoid);
          bool get_avoid_edges() const;
+         void set_allow_overlap(bool overlap);
+         bool get_allow_overlap() const;
+         
       private:
          std::string name_;
          std::string face_name_;
@@ -92,6 +94,7 @@ namespace mapnik
          position anchor_;
          position displacement_;
          bool avoid_edges_;
+         bool overlap_;
    };
 }
 

@@ -96,7 +96,6 @@ namespace mapnik
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
         detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
         finder_(detector_,Envelope<double>(0 ,0, m.getWidth(), m.getHeight()))
-        //point_detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
    {
       Color const& bg = m.getBackground();
       pixmap_.setBackground(bg);
@@ -340,13 +339,11 @@ namespace mapnik
       geometry_ptr const& geom=feature.get_geometry();
       if (geom && geom->num_points() > 0)
       {
-         //std::wstring text = to_unicode(feature[sym.get_name()].to_string());
          std::wstring text = feature[sym.get_name()].to_unicode();
          boost::shared_ptr<ImageData32> const& data = sym.get_data();
            
          if (text.length() > 0 && data)
          {
-            //std::wstring text = tr_->transcode(str);
             face_ptr face = font_manager_.get_face(sym.get_face_name());
             if (face)
             {
@@ -505,7 +502,6 @@ namespace mapnik
          std::wstring text = feature[sym.get_name()].to_unicode();
          if ( text.length() > 0 )
          {
-            //std::wstring text = tr_->transcode(str);
             Color const& fill  = sym.get_fill();
             face_ptr face = font_manager_.get_face(sym.get_face_name());
             if (face)
@@ -531,23 +527,16 @@ namespace mapnik
                text_placement.force_odd_labels = sym.get_force_odd_labels();
                text_placement.max_char_angle_delta = sym.get_max_char_angle_delta();
                text_placement.avoid_edges = sym.get_avoid_edges();
-                  
+
+               bool allow_overlap = sym.get_allow_overlap(); //FIXME!!!
+               
                if ( !finder_.find_placements(&text_placement)) return;
                     
                for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                {
                   double x = text_placement.placements[ii].starting_x;
                   double y = text_placement.placements[ii].starting_y;
-                  
                   Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii].path);
-                  
-                  //Envelope<double> text_box(x + dim.minx() ,y - dim.maxy(), x + dim.maxx(),y - dim.miny());
-		        
-                  //if (sym.get_halo_radius() > 0)
-                  //{
-                  //   text_box.width(text_box.width() + sym.get_halo_radius()*2);
-                  //   text_box.height(text_box.height() + sym.get_halo_radius()*2);
-                  //}
                   ren.render(x,y);
                }
             }
