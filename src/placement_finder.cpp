@@ -272,6 +272,9 @@ namespace mapnik
          //std::clog << "Trying to find txt placement at distance: " << *itr << std::endl;
          for (double i = 0; i < tolerance; i += delta)
          {
+           if (*itr + i > distance || *itr -i < 0.0) 
+             continue;
+                 
             p->clear_envelopes();
         
             // check position +- delta for valid placement
