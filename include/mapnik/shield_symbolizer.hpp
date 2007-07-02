@@ -27,43 +27,28 @@
 
 #include <boost/shared_ptr.hpp>
 #include <mapnik/graphics.hpp> 
+#include <mapnik/text_symbolizer.hpp>
 
 namespace mapnik 
 {   
-    struct MAPNIK_DECL shield_symbolizer
-    {	
-        explicit shield_symbolizer();
-        shield_symbolizer(std::string const& name,
-                          std::string const& face_name,
-                          unsigned size,
-                          Color const& fill, 
-                          std::string const& file,
-                          std::string const& type,
-                          unsigned width,unsigned height);
-        shield_symbolizer(shield_symbolizer const& rhs);
-        void set_data (boost::shared_ptr<ImageData32> symbol);
-        boost::shared_ptr<ImageData32> const& get_data() const;
-      
-        std::string const& get_name() const;
-        std::string const& get_face_name() const;
+  struct MAPNIK_DECL shield_symbolizer : public text_symbolizer
+  {	
+    shield_symbolizer(std::string const& name,
+                      std::string const& face_name,
+                      unsigned size,
+                      Color const& fill, 
+                      std::string const& file,
+                      std::string const& type,
+                      unsigned width,unsigned height);
+    
+    
+    void set_background_image(boost::shared_ptr<ImageData32>);
+    boost::shared_ptr<ImageData32> const& get_background_image() const;
 
-        unsigned get_text_size() const;
-        Color const& get_fill() const;
-      
-        void set_allow_overlap(bool overlap);
-        bool get_allow_overlap() const;
-        
-        void set_avoid_edges(bool avoid);
-        bool get_avoid_edges() const;
-    private:
-        std::string name_;
-        std::string face_name_;
-        unsigned size_;
-        Color fill_;
-        boost::shared_ptr<ImageData32> symbol_;
-        bool overlap_;
-        bool avoid_edges_;
-    };
+  private:
+    boost::shared_ptr<ImageData32> background_image_;
+
+  };
 }
 
 #endif // SHIELD_SYMBOLIZER_HPP

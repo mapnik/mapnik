@@ -28,8 +28,10 @@
 #include <string>
 // boost
 #include <boost/tuple/tuple.hpp>
+#include <boost/shared_ptr.hpp>
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/graphics.hpp> 
 
 namespace mapnik
 {
@@ -74,9 +76,10 @@ namespace mapnik
          position const& get_displacement() const;
          void set_avoid_edges(bool avoid);
          bool get_avoid_edges() const;
+         void set_minimum_distance(double distance);
+         double get_minimum_distance() const;
          void set_allow_overlap(bool overlap);
          bool get_allow_overlap() const;
-         
       private:
          std::string name_;
          std::string face_name_;
@@ -94,6 +97,7 @@ namespace mapnik
          position anchor_;
          position displacement_;
          bool avoid_edges_;
+         double minimum_distance_;
          bool overlap_;
    };
 }

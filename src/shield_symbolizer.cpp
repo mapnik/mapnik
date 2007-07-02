@@ -34,14 +34,6 @@
 
 namespace mapnik
 {
-    shield_symbolizer::shield_symbolizer()
-        : symbol_(new ImageData32(4,4)),
-          overlap_(false)
-    {
-        //default point symbol is black 4x4px square
-        symbol_->set(0xff000000);
-    }
-    
     shield_symbolizer::shield_symbolizer(
                           std::string const& name,
                           std::string const& face_name,
@@ -50,14 +42,15 @@ namespace mapnik
                           std::string const& file,
                           std::string const& type,
                           unsigned width,unsigned height)
-        : name_(name), face_name_(face_name), size_(size), fill_(fill), symbol_(new ImageData32(width,height)), avoid_edges_(false)
+        : text_symbolizer(name, face_name, size, fill),
+          background_image_(new ImageData32(width, height))
     {
         try 
         {
             boost::scoped_ptr<ImageReader> reader(get_image_reader(type,file));
             if (reader.get())
             {
-                reader->read(0,0,*symbol_);		
+                reader->read(0,0,*background_image_);		
             }
         } 
         catch (...) 
@@ -65,65 +58,15 @@ namespace mapnik
             std::clog << "exception caught..." << std::endl;
         }
     }
-    
-    shield_symbolizer::shield_symbolizer(shield_symbolizer const& rhs)
-        : name_(rhs.name_),
-          face_name_(rhs.face_name_),
-          size_(rhs.size_),
-          fill_(rhs.fill_),
-          symbol_(rhs.symbol_),
-          overlap_(rhs.overlap_),
-          avoid_edges_(rhs.avoid_edges_)
-    {}
-    
-    void shield_symbolizer::set_data( boost::shared_ptr<ImageData32> symbol)
+
+    void shield_symbolizer::set_background_image(boost::shared_ptr<ImageData32> background_image)
     {
-        symbol_ = symbol;
+      background_image_ = background_image;
     }
 
-    boost::shared_ptr<ImageData32> const& shield_symbolizer::get_data() const
+    boost::shared_ptr<ImageData32> const& shield_symbolizer::get_background_image() const
     {
-        return symbol_;
-    }
-    
-    std::string const& shield_symbolizer::get_name() const
-    {
-      return name_;
-    }
-    
-    std::string const& shield_symbolizer::get_face_name() const
-    {
-      return face_name_;
-    }
-    
-    void shield_symbolizer::set_allow_overlap(bool overlap)
-    {
-        overlap_ = overlap;
-    }
-    
-    bool shield_symbolizer::get_allow_overlap() const
-    {
-        return overlap_;
-    }
-
-    unsigned shield_symbolizer::get_text_size() const
-    {
-        return size_;
-    }
-
-    Color const& shield_symbolizer::get_fill() const
-    {
-        return fill_;
-    }
-    
-    bool shield_symbolizer::get_avoid_edges() const
-    {
-        return avoid_edges_;
-    }
-    
-    void shield_symbolizer::set_avoid_edges(bool avoid)
-    {
-        avoid_edges_ = avoid;
+      return background_image_;
     }
 }
 

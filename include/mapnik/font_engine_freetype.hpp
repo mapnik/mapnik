@@ -304,11 +304,13 @@ namespace mapnik
             return dimension_t(slot->advance.x >> 6, glyph_bbox.yMax - glyph_bbox.yMin);
         }
         
-        void get_string_info(std::wstring const& text, string_info *info)
+        void get_string_info(string_info *info)
         {
             unsigned width = 0;
             unsigned height = 0;
-          
+
+            std::wstring text = info->get_string();
+
             for (std::wstring::const_iterator i=text.begin();i!=text.end();++i)
             {
                 dimension_t char_dim = character_dimensions(*i);

@@ -38,6 +38,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/shield_symbolizer.hpp>
+#include <mapnik/text_symbolizer.hpp>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -45,56 +47,61 @@
 
 namespace mapnik
 {
-   //For shields
+   template<>
    placement::placement(string_info *info_, 
-                        CoordTransform *ctrans_, 
-                        const proj_transform *proj_trans_, 
-                        geometry_ptr geom_, 
-                        std::pair<double, double> dimensions_)
+                                            CoordTransform *ctrans_, 
+                                            const proj_transform *proj_trans_, 
+                                            geometry_ptr geom_, 
+                                            shield_symbolizer sym)
       : info(info_), 
         ctrans(ctrans_), 
         proj_trans(proj_trans_), 
         geom(geom_),
-        displacement_(0,0),
-        label_placement(point_placement), 
-        dimensions(dimensions_), 
-        has_dimensions(true), 
         shape_path(*ctrans_, *geom_, *proj_trans_), 
         total_distance_(-1.0), 
-        wrap_width(0), 
-        text_ratio(0), 
-        label_spacing(0), 
-        label_position_tolerance(0), 
-        force_odd_labels(false), 
-        max_char_angle_delta(0.0), avoid_edges(false)
+        displacement_(sym.get_displacement()),
+        label_placement(sym.get_label_placement()), 
+        wrap_width(sym.get_wrap_width()), 
+        text_ratio(sym.get_text_ratio()), 
+        label_spacing(sym.get_label_spacing()), 
+        label_position_tolerance(sym.get_label_position_tolerance()), 
+        force_odd_labels(sym.get_force_odd_labels()), 
+        max_char_angle_delta(sym.get_max_char_angle_delta()),
+        minimum_distance(sym.get_minimum_distance()),
+        avoid_edges(sym.get_avoid_edges()),
+        has_dimensions(true), 
+        dimensions(std::make_pair(sym.get_background_image()->width(),
+                             sym.get_background_image()->height()))
    {
    }
-
-   //For text
+  
+   template<>
    placement::placement(string_info *info_, 
-                        CoordTransform *ctrans_, 
-                        const proj_transform *proj_trans_, 
-                        geometry_ptr geom_,
-                        position const& displacement,
-                        label_placement_e placement_)
+                                          CoordTransform *ctrans_, 
+                                          const proj_transform *proj_trans_, 
+                                          geometry_ptr geom_, 
+                                          text_symbolizer sym)
       : info(info_), 
         ctrans(ctrans_), 
         proj_trans(proj_trans_), 
-        geom(geom_), 
-        displacement_(displacement),
-        label_placement(placement_), 
-        has_dimensions(false), 
+        geom(geom_),
         shape_path(*ctrans_, *geom_, *proj_trans_), 
         total_distance_(-1.0), 
-        wrap_width(0), 
-        text_ratio(0), 
-        label_spacing(0), 
-        label_position_tolerance(0), 
-        force_odd_labels(false), 
-        max_char_angle_delta(0.0), 
-        avoid_edges(false)
+        displacement_(sym.get_displacement()),
+        label_placement(sym.get_label_placement()), 
+        wrap_width(sym.get_wrap_width()), 
+        text_ratio(sym.get_text_ratio()), 
+        label_spacing(sym.get_label_spacing()), 
+        label_position_tolerance(sym.get_label_position_tolerance()), 
+        force_odd_labels(sym.get_force_odd_labels()), 
+        max_char_angle_delta(sym.get_max_char_angle_delta()),
+        minimum_distance(sym.get_minimum_distance()),
+        avoid_edges(sym.get_avoid_edges()),
+        has_dimensions(false), 
+        dimensions()
    {
    }
+
   
    placement::~placement()
    {
@@ -185,50 +192,43 @@ namespace mapnik
    placement_finder<DetectorT>::placement_finder(DetectorT & detector,Envelope<double> const& e)
       : detector_(detector),
         dimensions_(e)
-        //detector_(Envelope<double>(e.minx() - buffer, e.miny() - buffer, e.maxx() + buffer, e.maxy() + buffer))
    {
    }
 
    template <typename DetectorT>
-   bool placement_finder<DetectorT>::find_placements(placement *p)
+   std::vector<double> placement_finder<DetectorT>::get_ideal_placements(placement *p)
    {
-      if (p->label_placement == point_placement)
-      {
-         return find_placement_horizontal(p);
-      }
-      else if (p->label_placement == line_placement)
-      {
-         return find_placement_follow(p);
-      }
-    
-      return false;
-   }
+      std::vector<double> ideal_label_distances;
 
-   template <typename DetectorT>
-   bool placement_finder<DetectorT>::find_placement_follow(placement *p)
-   {
       std::pair<double, double> string_dimensions = p->info->get_dimensions();
       double string_width = string_dimensions.first;
 
       double distance = p->get_total_distance();
     
-      if (string_width > distance)
+      if (p->label_placement == line_placement && string_width > distance)
       {
-         return false;
+         //Empty!
+         return ideal_label_distances;
       }
       
       int num_labels = 0;
-      if (p->label_spacing)
+      if (p->label_spacing && p->label_placement == line_placement)
          num_labels = static_cast<int> (floor(distance / (p->label_spacing + string_width)));
+      else if (p->label_spacing && p->label_placement == point_placement)
+         num_labels = static_cast<int> (floor(distance / p->label_spacing));
+
       if (p->force_odd_labels && num_labels%2 == 0)
          num_labels--;
       if (num_labels <= 0)
          num_labels = 1;
       
       double ideal_spacing = distance/num_labels;
-      std::vector<double> ideal_label_distances;
       
-      double middle = (distance / 2.0) - (string_width/2.0); //try draw text centered
+      double middle; //try draw text centered
+      if (p->label_placement == line_placement)
+        middle = (distance / 2.0) - (string_width/2.0);
+      else if (p->label_placement == point_placement)
+        middle = distance / 2.0;
 		
       if (num_labels % 2) //odd amount of labels
       {
@@ -248,91 +248,59 @@ namespace mapnik
             ideal_label_distances.push_back(middle + (ideal_spacing/2.0) + (a*ideal_spacing));
          }
       }
-
-      double delta;
-      double tolerance;
-
-      if (p->label_position_tolerance > 0)
+      
+      if (p->label_position_tolerance == 0)
       {
-         tolerance = p->label_position_tolerance;
-         delta = std::max ( 1.0, p->label_position_tolerance/100.0);
-      }
-      else
-      {
-         tolerance = ideal_spacing/2.0;
-         delta = ideal_spacing/100.0;
+         p->label_position_tolerance = unsigned(ideal_spacing/2.0);
       }
 
-
-      bool FoundPlacement = false;
-      std::vector<double>::const_iterator itr = ideal_label_distances.begin();
-      std::vector<double>::const_iterator end = ideal_label_distances.end();
-      for (; itr != end; ++itr)
-      {
-         //std::clog << "Trying to find txt placement at distance: " << *itr << std::endl;
-         for (double i = 0; i < tolerance; i += delta)
-         {
-           if (*itr + i > distance || *itr -i < 0.0) 
-             continue;
-                 
-            p->clear_envelopes();
-        
-            // check position +- delta for valid placement
-            if ( build_path_follow(p, *itr + i) ) {
-               update_detector(p);
-               FoundPlacement = true;
-               break;
-            }
-
-            p->clear_envelopes();
-            if ( build_path_follow(p, *itr - i) ) {
-               update_detector(p);
-               FoundPlacement = true;
-               break;
-            }
-         }
-      }    
-    
-      //         if (FoundPlacement)
-      //             std::clog << "Found Placement" << string_width << " " << distance << std::endl;
-
-      return FoundPlacement;
+      return ideal_label_distances;
    }
-   
+
    template <typename DetectorT>
-   bool placement_finder<DetectorT>::find_placement_horizontal(placement *p)
+   void placement_finder<DetectorT>::find_placements(placement *p)
    {
       if (p->path_size() == 1) // point geometry
       {
          if ( build_path_horizontal(p, 0) ) 
          {
             update_detector(p);
-            return true;
          }
-         return false;
+         return;
       }
-        
-      double distance = p->get_total_distance();    
-      //~ double delta = string_width/distance;
-      double delta = distance/100.0;
-    
-      for (double i = 0; i < distance/2.0; i += delta)
+
+      std::vector<double> ideal_label_distances = get_ideal_placements(p);
+
+      double delta, tolerance, distance;
+      distance = p->get_total_distance();
+      tolerance = p->label_position_tolerance;
+      delta = std::max ( 1.0, tolerance/100.0);
+
+      std::vector<double>::const_iterator itr = ideal_label_distances.begin();
+      std::vector<double>::const_iterator end = ideal_label_distances.end();
+      for (; itr != end; ++itr)
       {
-         p->clear_envelopes();
-      
-         if ( build_path_horizontal(p, distance/2.0 + i) ) {
-            update_detector(p);
-            return true;
+         bool placed = false;
+         for (double i = 0; i < tolerance && !placed; i += delta)
+         {
+            for (int s = 1; s != -1; s-=2) {
+               if (*itr + i*s > distance || *itr + i*s < 0.0) {
+                 continue;
+               }
+               p->clear_envelopes();
+               // check position +- delta for valid placement
+               if ((p->label_placement == line_placement &&
+                    build_path_follow(p, *itr + (i*s)) ) ||
+                   (p->label_placement == point_placement &&
+                    build_path_horizontal(p, *itr + (i*s))) )
+               {
+                  update_detector(p);
+                  placed = true;
+                  break;
+               }
+            }
          }
-      
-         p->clear_envelopes();
-      
-         if ( build_path_horizontal(p, distance/2.0 - i) ) {
-            update_detector(p);
-            return true;
-         }
-      }
-      return false;
+      }    
    }
    
    template <typename DetectorT>
@@ -342,7 +310,7 @@ namespace mapnik
       {
          Envelope<double> e = p->envelopes.front();
 
-         detector_.insert(e);
+         detector_.insert(e, p->info->get_string());
 
          p->envelopes.pop();
       }
@@ -493,7 +461,7 @@ namespace mapnik
             e.expand_to_include(render_x + (ci.width*cos(render_angle) - ci.height*sin(render_angle)), render_y - (ci.width*sin(render_angle) + ci.height*cos(render_angle)));
          }
 
-         if (!detector_.has_placement(e))
+         if (!detector_.has_placement(e, p->info->get_string(), p->minimum_distance))
          {
             return false;
          }
@@ -529,7 +497,7 @@ namespace mapnik
    bool placement_finder<DetectorT>::build_path_horizontal(placement *p, double target_distance)
    {
       double x, y;
-    
+
       p->current_placement.path.clear();
         
       std::pair<double, double> string_dimensions = p->info->get_dimensions();
@@ -630,7 +598,7 @@ namespace mapnik
       unsigned int index_to_wrap_at = line_breaks[line_number];
       double line_width = line_widths[line_number];
     
-      x = -line_width/2.0;
+      x = -line_width/2.0 - 1.0;
       y = -string_height/2.0 + 1.0;
     
       for (unsigned i = 0; i < p->info->num_characters(); i++)
@@ -668,7 +636,7 @@ namespace mapnik
                       p->current_placement.starting_y - y - ci.height);
             }
                 
-            if (!detector_.has_placement(e))
+            if (!detector_.has_placement(e, p->info->get_string(), p->minimum_distance))
             {
                return false;
             }
@@ -694,6 +662,6 @@ namespace mapnik
       detector_.clear();
    }
    
-   template class placement_finder<label_collision_detector3>;
+   template class placement_finder<label_collision_detector4>;
    
 } // namespace

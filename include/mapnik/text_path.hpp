@@ -53,14 +53,17 @@ namespace mapnik
       
       typedef boost::ptr_vector<character_info> characters_t;
       
+      std::wstring string_;
       characters_t characters_;
-      unsigned itr_;
 
       double width_;
       double height_;
     public:
-      string_info() : itr_(0), width_(0), height_(0) {}
-      
+      string_info(std::wstring string)
+        : string_(string),
+          width_(0),
+          height_(0) {}
+
       void add_info(int c, double width, double height)
       {
         characters_.push_back(new character_info(c, width, height));
@@ -90,6 +93,10 @@ namespace mapnik
       std::pair<double, double> get_dimensions()
       {
         return std::pair<double, double>(width_, height_);
+      }
+
+      std::wstring get_string() {
+        return string_;
       }
     };
     

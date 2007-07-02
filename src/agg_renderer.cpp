@@ -340,39 +340,35 @@ namespace mapnik
       if (geom && geom->num_points() > 0)
       {
          std::wstring text = feature[sym.get_name()].to_unicode();
-         boost::shared_ptr<ImageData32> const& data = sym.get_data();
+         boost::shared_ptr<ImageData32> const& data = sym.get_background_image();
            
          if (text.length() > 0 && data)
          {
             face_ptr face = font_manager_.get_face(sym.get_face_name());
             if (face)
             {
-               int w = data->width();
-               int h = data->height();
-
                text_renderer<mapnik::Image32> ren(pixmap_,face);
                ren.set_pixel_size(sym.get_text_size());
                ren.set_fill(sym.get_fill());
 
-               string_info info;
-               ren.get_string_info(text, &info);
+               string_info info(text);
+               ren.get_string_info(&info);
                     
-               placement text_placement(&info, &t_, &prj_trans, geom, std::pair<double, double>(w, h) );
+               placement text_placement(&info, &t_, &prj_trans, geom, sym);
                text_placement.avoid_edges = sym.get_avoid_edges();
                   
-               bool found = finder_.find_placements(&text_placement);
-               if (!found) {
-                  return;
-               }
-                    
+               finder_.find_placements(&text_placement);
 
                for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
-               {
+               { 
+                  int w = data->width();
+                  int h = data->height();
+
                   double x = text_placement.placements[ii].starting_x;
                   double y = text_placement.placements[ii].starting_y;
 
-                  int px=int(floor(x - 0.5 * w));
-                  int py=int(floor(y - 0.5 * h));
+                  int px=int(x - (w/2));
+                  int py=int(y - (h/2));
                         
                   pixmap_.set_rectangle_alpha(px,py,*data);
                         
@@ -512,25 +508,12 @@ namespace mapnik
                ren.set_halo_fill(sym.get_halo_fill());
                ren.set_halo_radius(sym.get_halo_radius());
                     
-               string_info info;
+               string_info info(text);
+               ren.get_string_info(&info);
                     
-               ren.get_string_info(text, &info);
-                    
-               placement text_placement(&info, &t_, &prj_trans, geom, 
-                                        sym.get_displacement(),
-                                        sym.get_label_placement());
+               placement text_placement(&info, &t_, &prj_trans, geom, sym);
                
-               text_placement.text_ratio = sym.get_text_ratio();
-               text_placement.wrap_width = sym.get_wrap_width();
-               text_placement.label_spacing = sym.get_label_spacing();
-               text_placement.label_position_tolerance = sym.get_label_position_tolerance();
-               text_placement.force_odd_labels = sym.get_force_odd_labels();
-               text_placement.max_char_angle_delta = sym.get_max_char_angle_delta();
-               text_placement.avoid_edges = sym.get_avoid_edges();
-
-               bool allow_overlap = sym.get_allow_overlap(); //FIXME!!!
-               
-               if ( !finder_.find_placements(&text_placement)) return;
+               finder_.find_placements(&text_placement);
                     
                for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                {

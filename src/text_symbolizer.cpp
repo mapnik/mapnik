@@ -22,32 +22,34 @@
 
 //$Id$
 
-
+//stl
 #include <iostream>
-
+// boost
+#include <boost/scoped_ptr.hpp>
+//mapnik
 #include <mapnik/text_symbolizer.hpp>
 
 namespace mapnik
 {
     text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size,Color const& fill)
-	: name_(name),
+        : name_(name),
           face_name_(face_name),
-	  size_(size),
+          size_(size),
           text_ratio_(0),
           wrap_width_(0),
           label_spacing_(0),
           label_position_tolerance_(0),
           force_odd_labels_(false),
           max_char_angle_delta_(0),
-	  fill_(fill),
-	  halo_fill_(Color(255,255,255)),
-	  halo_radius_(0),
-	  label_p_(point_placement),
-	  anchor_(0.0,0.5),
-	  displacement_(0.0,0.0),
+          fill_(fill),
+          halo_fill_(Color(255,255,255)),
+          halo_radius_(0),
+          label_p_(point_placement),
+          anchor_(0.0,0.5),
+          displacement_(0.0,0.0),
           avoid_edges_(false),
+          minimum_distance_(0.0),
           overlap_(false) {}
-           
     text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
         : name_(rhs.name_),
           face_name_(rhs.face_name_),
@@ -65,6 +67,7 @@ namespace mapnik
           anchor_(rhs.anchor_),
           displacement_(rhs.displacement_),
           avoid_edges_(rhs.avoid_edges_),
+          minimum_distance_(rhs.minimum_distance_),
           overlap_(rhs.overlap_) {}
    
     text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
@@ -87,7 +90,9 @@ namespace mapnik
         anchor_ = other.anchor_;
         displacement_ = other.displacement_; 
         avoid_edges_ = other.avoid_edges_;
+        minimum_distance_ = other.minimum_distance_;
         overlap_ = other.overlap_;
+
         return *this;
     } 
 
@@ -230,13 +235,23 @@ namespace mapnik
         avoid_edges_ = avoid;
     }
 
-   void text_symbolizer::set_allow_overlap(bool overlap)
-   {
-      overlap_ = overlap;
-   }
+    double text_symbolizer::get_minimum_distance() const
+    {
+        return minimum_distance_;
+    }
+    
+    void text_symbolizer::set_minimum_distance(double distance)
+    {
+        minimum_distance_ = distance;
+    }
+
+    void text_symbolizer::set_allow_overlap(bool overlap)
+    {
+       overlap_ = overlap;
+    }
    
-   bool text_symbolizer::get_allow_overlap() const
-   {
+    bool text_symbolizer::get_allow_overlap() const
+    {
       return overlap_;
-   }
+    }
 }

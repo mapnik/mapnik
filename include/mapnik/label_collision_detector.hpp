@@ -131,6 +131,77 @@ namespace mapnik
             tree_.clear();
          }
    };
+
+    
+    //quad tree based label collission detector so labels dont appear within a given distance
+    class label_collision_detector4 : boost::noncopyable
+    {
+        struct label
+        {
+            label(Envelope<double> const& b) : box(b) {}
+            label(Envelope<double> const& b, std::wstring const& t) : box(b), text(t) {}
+              
+            Envelope<double> box;
+            std::wstring text;
+        };
+      
+        typedef quad_tree< label > tree_t;
+        tree_t tree_;
+    public:
+	
+        explicit label_collision_detector4(Envelope<double> const& extent)
+            : tree_(extent) {}
+	
+        bool has_placement(Envelope<double> const& box)
+        {
+            tree_t::query_iterator itr = tree_.query_in_box(box);
+            tree_t::query_iterator end = tree_.query_end();
+          
+            for ( ;itr != end; ++itr)
+            {
+               if (itr->box.intersects(box))
+               {
+                  return false;
+               }
+            }
+          
+            return true;
+        }	
+
+        bool has_placement(Envelope<double> const& box, std::wstring const& text, double distance)
+        {
+            Envelope<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
+	    
+            tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
+            tree_t::query_iterator end = tree_.query_end();
+          
+            for ( ;itr != end; ++itr)
+            {
+                if (itr->box.intersects(box) || (text == itr->text && itr->box.intersects(bigger_box)))
+                {
+                    return false;
+                }
+            }
+	    
+            return true;
+        }	
+
+
+         void insert(Envelope<double> const& box)
+         {
+            tree_.insert(label(box), box);
+         }
+         
+         void insert(Envelope<double> const& box, std::wstring const& text)
+         {
+            tree_.insert(label(box, text), box);
+         }
+         
+         void clear()
+         {
+            tree_.clear();
+         }
+    };
 }
 
 #endif 

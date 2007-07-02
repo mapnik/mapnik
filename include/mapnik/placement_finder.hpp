@@ -49,37 +49,34 @@ namespace mapnik
    {
          typedef  coord_transform2<CoordTransform,geometry_type> path_type;
          
-         //For shields
-         placement(string_info *info_, 
-                   CoordTransform *ctrans_, 
-                   const proj_transform *proj_trans_, 
-                   geometry_ptr geom_, 
-                   std::pair<double, double> dimensions_);
-    
-         //For text
+         template <typename SymbolizerT>
          placement(string_info *info_, 
                    CoordTransform *ctrans_, 
                    const proj_transform *proj_trans_, 
                    geometry_ptr geom_,
-                   position const& displacement,
-                   label_placement_e placement_);
+                   SymbolizerT sym);
          
          ~placement();
         
+         //helpers
+         std::pair<double, double> get_position_at_distance(double target_distance);
+         double get_total_distance();
+         void clear_envelopes();
+    
          unsigned path_size() const;
+
          string_info *info;
     
          CoordTransform *ctrans;
          const proj_transform *proj_trans;
-
          geometry_ptr geom;
+         path_type shape_path;
+
+         double total_distance_; //cache for distance
+    
          position displacement_;
          label_placement_e label_placement;
-         std::pair<double, double> dimensions;
 
-         bool has_dimensions;
-    
-         path_type shape_path;
          std::queue< Envelope<double> > envelopes;
     
          //output
@@ -87,13 +84,6 @@ namespace mapnik
 
          // caching output
          placement_element current_placement;
-    
-         //helpers
-         std::pair<double, double> get_position_at_distance(double target_distance);
-         double get_total_distance();
-         void clear_envelopes();
-    
-         double total_distance_; //cache for distance
     
          int wrap_width;
          int text_ratio;
@@ -103,8 +93,12 @@ namespace mapnik
          bool force_odd_labels; //Always try render an odd amount of labels
 
          double max_char_angle_delta;
+         double minimum_distance;
     
          bool avoid_edges;
+
+         bool has_dimensions;
+         std::pair<double, double> dimensions;
    };
 
 
@@ -115,7 +109,7 @@ namespace mapnik
       public:
          //e is the dimensions of the map, buffer is the buffer used for collission detection.
          placement_finder(DetectorT & detector,Envelope<double> const& e);
-         bool find_placements(placement *p);
+         void find_placements(placement *p);
          void clear();
          
       protected:
@@ -123,9 +117,10 @@ namespace mapnik
          bool find_placement_horizontal(placement *p);
          bool build_path_follow(placement *p, double target_distance);
          bool build_path_horizontal(placement *p, double target_distance);
+         std::vector<double> get_ideal_placements(placement *p);
          void update_detector(placement *p);
-         Envelope<double> dimensions_;
          DetectorT & detector_;
+         Envelope<double> dimensions_;
    };  
 }
 

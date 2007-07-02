@@ -67,6 +67,9 @@ void export_text_symbolizer()
         .add_property("avoid_edges",
                       &text_symbolizer::get_avoid_edges,
                       &text_symbolizer::set_avoid_edges)
+        .add_property("minimum_distance",
+                      &text_symbolizer::get_minimum_distance,
+                      &text_symbolizer::set_minimum_distance)
         
         .add_property("label_placement",
                       &text_symbolizer::get_label_placement,

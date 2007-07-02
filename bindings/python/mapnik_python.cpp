@@ -49,8 +49,8 @@ void export_line_pattern_symbolizer();
 void export_polygon_symbolizer();
 void export_polygon_pattern_symbolizer();
 void export_raster_symbolizer();
-void export_shield_symbolizer();
 void export_text_symbolizer();
+void export_shield_symbolizer();
 void export_font_engine();
 void export_projection();
 
@@ -124,8 +124,8 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_polygon_symbolizer();
     export_polygon_pattern_symbolizer();
     export_raster_symbolizer();
-    export_shield_symbolizer();
     export_text_symbolizer();
+    export_shield_symbolizer();
     export_font_engine();
     export_projection();
     export_coord();
