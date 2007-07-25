@@ -247,6 +247,14 @@ namespace mapnik
                                 {
                                     text_symbol.set_label_spacing(*spacing);
                                 }
+                                
+                                // minimum distance between labels
+                                boost::optional<unsigned> min_distance = 
+                                   sym.second.get_optional<unsigned>("<xmlattr>.min_distance");
+                                if (min_distance)
+                                {
+                                   text_symbol.set_minimum_distance(*min_distance);
+                                }
 
                                 // allow_overlap 
                                 boost::optional<std::string> allow_overlap = 
@@ -282,6 +290,13 @@ namespace mapnik
                                 shield_symbolizer shield_symbol(name,face_name,size,fill,
                                                                 image_file,type,width,height);
                                 
+                                // minimum distance between labels
+                                boost::optional<unsigned> min_distance = 
+                                   sym.second.get_optional<unsigned>("<xmlattr>.min_distance");
+                                if (min_distance)
+                                {
+                                   shield_symbol.set_minimum_distance(*min_distance);
+                                }
                                 rule.append(shield_symbol);
                             }
                             else if ( sym.first == "LineSymbolizer")
