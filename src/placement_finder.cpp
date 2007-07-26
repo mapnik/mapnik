@@ -326,6 +326,7 @@ namespace mapnik
 
       double angle = 0.0;
       int orientation = 0;
+      double displacement = boost::tuples::get<1>(p->displacement_); // displace by dy
     
       p->current_placement.path.clear();
     
@@ -443,9 +444,17 @@ namespace mapnik
 
          x = new_x - (distance)*cos(angle);
          y = new_y + (distance)*sin(angle);
-         //Center the text on the line.
-         x -= (((double)string_height/2.0) - 1.0)*cos(render_angle+M_PI/2);
-         y += (((double)string_height/2.0) - 1.0)*sin(render_angle+M_PI/2);
+         //Center the text on the line, unless displacement != 0
+         if (displacement == 0.0) {
+           x -= (((double)string_height/2.0) - 1.0)*cos(render_angle+M_PI/2);
+           y += (((double)string_height/2.0) - 1.0)*sin(render_angle+M_PI/2);
+         } else if (displacement > 0.0) {
+           x -= ((displacement + (double)string_height) - 1.0)*cos(render_angle+M_PI/2);
+           y += ((displacement + (double)string_height) - 1.0)*sin(render_angle+M_PI/2);
+         } else { // displacement < 0
+           x -= ((displacement - (double)string_height) - 1.0)*cos(render_angle+M_PI/2);
+           y += ((displacement - (double)string_height) - 1.0)*sin(render_angle+M_PI/2);
+         }
          distance -= ci.width;
          next_char_x = ci.width*cos(render_angle);
          next_char_y = ci.width*sin(render_angle);
