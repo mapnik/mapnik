@@ -121,9 +121,9 @@ public:
         header[0]='m';
         header[1]='a';
         header[2]='p';
-        header[4]='n';
-        header[5]='i';
-        header[6]='k';
+        header[3]='n';
+        header[4]='i';
+        header[5]='k';
         out.write(header,16);
         write_node(out,root_);
     }
