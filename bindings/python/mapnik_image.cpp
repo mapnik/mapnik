@@ -38,17 +38,25 @@ PyObject* rawdata( Image32 const& im)
 }
 
 void (*save_to_file2)(std::string const&,std::string const&, mapnik::Image32 const&) = mapnik::save_to_file;
+
+void blend (Image32 & im, unsigned x, unsigned y, Image32 const& im2, float opacity)
+{
+   im.set_rectangle_alpha2(im2.data(),x,y,opacity);
+}
+
 void export_image()
 {
     using namespace boost::python;
     class_<Image32>("Image","This class represents a 32 bit image.",init<int,int>())
-        .def("width",&Image32::width)
-        .def("height",&Image32::height)
-        .def("view",&Image32::get_view)
-        .add_property("background",make_function
-                      (&Image32::getBackground,return_value_policy<copy_const_reference>()),
-                       &Image32::setBackground, "The background color of the image.")
-	;    
+       .def("width",&Image32::width)
+       .def("height",&Image32::height)
+       .def("view",&Image32::get_view)
+       .add_property("background",make_function
+                     (&Image32::getBackground,return_value_policy<copy_const_reference>()),
+                     &Image32::setBackground, "The background color of the image.")
+       .def("set_alpha",&Image32::set_alpha)
+       .def("blend",&blend)
+       ;    
     def("rawdata",&rawdata); // FIXME : I dont think we need this one
     def("save_to_file", save_to_file2);
 }

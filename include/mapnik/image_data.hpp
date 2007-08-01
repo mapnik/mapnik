@@ -39,7 +39,7 @@ namespace mapnik
               height_(height),
               pData_((width!=0 && height!=0)? static_cast<T*>(::operator new(sizeof(T)*width*height)):0)
         {
-            if (pData_) memset(pData_,0,sizeof(T)*width_*height_);
+           //if (pData_) memset(pData_,0,sizeof(T)*width_*height_);
         }
 
         ImageData(const ImageData<T>& rhs)
@@ -77,6 +77,7 @@ namespace mapnik
                 }
             }
         }
+        
         inline const T* getData() const
         {
             return pData_;

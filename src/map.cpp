@@ -39,9 +39,8 @@ namespace mapnik
     Map::Map(int width,int height, std::string const& srs)
         : width_(width),
           height_(height),
-          srs_(srs),
-          background_(Color(255,255,255)) {}
-
+          srs_(srs) {}
+   
     Map::Map(const Map& rhs)
         : width_(rhs.width_),
           height_(rhs.height_),
@@ -190,17 +189,17 @@ namespace mapnik
     {
         srs_ = srs;
     }
-    
-    void Map::setBackground(const Color& c)
-    {
-        background_=c;
-    }
-
-    const Color& Map::getBackground() const
-    {
-        return background_;
-    }
-    
+  
+   boost::optional<Color> const& Map::background() const
+   {
+      return background_;
+   }
+   
+   void Map::set_background(const Color& c)
+   {
+      background_ = c;
+   }
+   
     void Map::zoom(double factor)
     {
         coord2d center = currentExtent_.center();

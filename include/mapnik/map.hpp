@@ -27,6 +27,7 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
+#include <boost/optional/optional.hpp>
 
 namespace mapnik
 {
@@ -37,11 +38,10 @@ namespace mapnik
         unsigned width_;
         unsigned height_;
         std::string  srs_;
-        Color background_;
+        boost::optional<Color> background_;
         std::map<std::string,feature_type_style> styles_;
         std::vector<Layer> layers_;
-        Envelope<double> currentExtent_;
-        
+        Envelope<double> currentExtent_;  
     public:
         typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
         typedef std::map<std::string,feature_type_style>::iterator style_iterator;
@@ -72,8 +72,8 @@ namespace mapnik
         void resize(unsigned width,unsigned height);
         std::string const& srs() const;
         void set_srs(std::string const& srs);
-        void setBackground(const Color& c);
-        const Color& getBackground() const;
+        void set_background(const Color& c);
+        boost::optional<Color> const& background() const;
         void zoom(double zoom);
         void zoomToBox(const Envelope<double>& box);
         void zoom_all();

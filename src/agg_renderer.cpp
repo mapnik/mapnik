@@ -97,8 +97,8 @@ namespace mapnik
         detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
         finder_(detector_,Envelope<double>(0 ,0, m.getWidth(), m.getHeight()))
    {
-      Color const& bg = m.getBackground();
-      pixmap_.setBackground(bg);
+      boost::optional<Color> bg = m.background();
+      if (bg) pixmap_.setBackground(*bg);
 #ifdef MAPNIK_DEBUG
       std::clog << "scale=" << m.scale() << "\n";
 #endif

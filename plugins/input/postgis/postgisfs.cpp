@@ -100,7 +100,7 @@ feature_ptr postgis_featureset::next()
 #ifdef MAPNIK_DEBUG
                     std::clog << "uknown OID = " << oid << " FIXME \n";
 #endif
-                    //boost::put(*feature,name,0);
+                    //boost::put(*feature,name,0); 
                 }
             }
             ++count_;

@@ -56,7 +56,7 @@ namespace mapnik
         if (bgcolor)
         {
             Color bg = color_factory::from_string(bgcolor->c_str());
-            map.setBackground(bg);
+            map.set_background(bg);
         }
         
         std::string srs = pt.get<std::string>("Map.<xmlattr>.srs",

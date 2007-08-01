@@ -146,7 +146,26 @@ namespace mapnik
                 }   
             }
         }
-	
+        
+	inline void set_alpha(float alpha) // 0...1 
+        {
+           unsigned w = data_.width();
+           unsigned h = data_.height();
+           unsigned a = int(0xff * alpha) & 0xff;
+           
+           for (unsigned y = 0; y < h ; ++y)
+           {
+              for (unsigned x = 0; x < w ; ++x)
+              {
+                 unsigned rgba = data_(x,y);
+                 if (rgba > 0)
+                 {
+                    data_(x,y) = (rgba & 0x00ffffff) | (a << 24);
+                 }
+              }
+           }
+        }
+        
         inline void set_rectangle_alpha(int x0,int y0,const ImageData32& data)
         {
             Envelope<int> ext0(0,0,width_,height_);   
@@ -181,6 +200,44 @@ namespace mapnik
                         b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
                         a0 = a0 >> 8;
                         data_(x,y)= (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
+                    }
+                }
+            }
+        }
+         
+        inline void set_rectangle_alpha2(ImageData32 const& data, unsigned x0, unsigned y0, float opacity)
+        {
+            Envelope<int> ext0(0,0,width_,height_);   
+            Envelope<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
+            unsigned a1 = int(opacity * 255);
+            
+            if (ext0.intersects(ext1))
+            {	                		
+                Envelope<int> box = ext0.intersect(ext1);		
+                for (int y = box.miny(); y < box.maxy(); ++y)
+                {
+                    for (int x = box.minx(); x < box.maxx(); ++x)
+                    {
+                        unsigned rgba0 = data_(x,y);
+                        unsigned rgba1 = data(x-x0,y-y0);
+
+                        if (((rgba1 >> 24) & 255)== 0) continue;
+                        unsigned r1 = rgba1 & 0xff;
+                        unsigned g1 = (rgba1 >> 8 ) & 0xff;
+                        unsigned b1 = (rgba1 >> 16) & 0xff;
+                        
+                        unsigned a0 = (rgba0 >> 24) & 0xff;
+                        unsigned r0 = rgba0 & 0xff ;
+                        unsigned g0 = (rgba0 >> 8 ) & 0xff;
+                        unsigned b0 = (rgba0 >> 16) & 0xff;
+                        
+                        unsigned a = (a1 * 255 + (255 - a1) * a0 + 127)/255;
+                        
+                        r0 = (r1*a1 + (((255 - a1) * a0 + 127)/255) * r0 + 127)/a;
+                        g0 = (g1*a1 + (((255 - a1) * a0 + 127)/255) * g0 + 127)/a;
+                        b0 = (b1*a1 + (((255 - a1) * a0 + 127)/255) * b0 + 127)/a;
+                        
+                        data_(x,y)= (a << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
                     }
                 }
             }

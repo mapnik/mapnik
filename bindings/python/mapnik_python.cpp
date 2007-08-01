@@ -140,5 +140,9 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("load_map",&load_map,"load Map object from XML");
     def("save_map",&load_map,"sace Map object to XML");
     
+    using mapnik::symbolizer;
+    class_<symbolizer>("Symbolizer",no_init)
+       ;
+    
     register_ptr_to_python<mapnik::filter_ptr>();
 }

@@ -34,12 +34,12 @@ namespace mapnik
     template <typename FeatureT>
     class MAPNIK_DECL filter
     {
-	public:
-		virtual bool pass(const FeatureT& feature) const=0; 
-		virtual filter<FeatureT>* clone() const=0;
-		virtual void accept(filter_visitor<FeatureT>& v) = 0;
-        virtual std::string to_string() const=0;
-		virtual ~filter() {}
+      public:
+       virtual bool pass(const FeatureT& feature) const=0; 
+       virtual filter<FeatureT>* clone() const=0;
+       virtual void accept(filter_visitor<FeatureT>& v) = 0;
+       virtual std::string to_string() const=0;
+       virtual ~filter() {}
     };
     
     typedef boost::shared_ptr<filter<Feature> > filter_ptr;
@@ -47,43 +47,43 @@ namespace mapnik
     template <typename FeatureT>
     class all_filter : public filter<FeatureT>
     {
-	public:
-		bool pass (const FeatureT&) const
-		{
-			return true;
-		}
-	
-		filter<FeatureT>* clone() const
-		{
-			return new all_filter<FeatureT>;
-		}
-		std::string to_string() const
-		{
-			return "true";
-		}  
-        void accept(filter_visitor<FeatureT>&) {}
-		virtual ~all_filter() {}
+       public:
+          bool pass (const FeatureT&) const
+          {
+             return true;
+          }
+          
+          filter<FeatureT>* clone() const
+          {
+             return new all_filter<FeatureT>;
+          }
+          std::string to_string() const
+          {
+             return "true";
+          }  
+          void accept(filter_visitor<FeatureT>&) {}
+          virtual ~all_filter() {}
     };
-      
-    template <typename FeatureT>
-    class none_filter : public filter<FeatureT>
-    {
-	public:
-		bool pass (const FeatureT&) const
-		{
-			return false;
-		}
-	
-		filter<FeatureT>* clone() const
-		{
-			return new none_filter<FeatureT>;
-		}
-		std::string to_string() const
-		{
-			return "false";
-		}  
-	    void accept(filter_visitor<FeatureT>&) {}
-		virtual ~none_filter() {}
+   
+   template <typename FeatureT>
+   class none_filter : public filter<FeatureT>
+   {
+      public:
+         bool pass (const FeatureT&) const
+         {
+            return false;
+         }
+         
+         filter<FeatureT>* clone() const
+         {
+            return new none_filter<FeatureT>;
+         }
+         std::string to_string() const
+         {
+            return "false";
+         }  
+         void accept(filter_visitor<FeatureT>&) {}
+         virtual ~none_filter() {}
 	};
 }
 

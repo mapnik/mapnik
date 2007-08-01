@@ -29,6 +29,8 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 
+#include "python_optional.hpp"
+
 using mapnik::Color;
 using mapnik::coord;
 using mapnik::Envelope;
@@ -51,7 +53,7 @@ struct map_pickle_suite : boost::python::pickle_suite
         {
             l.append(m.getLayer(i));
         }
-        return boost::python::make_tuple(m.getCurrentExtent(),m.getBackground(),l);
+        return boost::python::make_tuple(m.getCurrentExtent(),m.background(),l);
     }
 
     static void
@@ -69,7 +71,7 @@ struct map_pickle_suite : boost::python::pickle_suite
         Envelope<double> ext = extract<Envelope<double> >(state[0]);
         Color bg = extract<Color>(state[1]);
         m.zoomToBox(ext);
-        m.setBackground(bg);
+        m.set_background(bg);
         boost::python::list l=extract<boost::python::list>(state[2]);
         for (int i=0;i<len(l);++i)
         {
@@ -83,39 +85,40 @@ std::vector<Layer> const& (Map::*layers_const)() const =  &Map::layers;
 
 void export_map() 
 {
-    using namespace boost::python;
-    class_<std::vector<Layer> >("Layers")
+   using namespace boost::python;
+   python_optional<mapnik::Color> ();
+   class_<std::vector<Layer> >("Layers")
     	.def(vector_indexing_suite<std::vector<Layer> >())
-    	;
-    
-    class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >())
-        .add_property("width",&Map::getWidth, &Map::setWidth, "The width of the map.")
-        .add_property("height",&Map::getHeight, &Map::setHeight, "The height of the map.")
-        .add_property("srs",make_function(&Map::srs,return_value_policy<copy_const_reference>()),
-                      &Map::set_srs,"Spatial reference in proj4 format e.g. \"+proj=latlong +datum=WGS84\"")
-        .add_property("background",make_function
-                      (&Map::getBackground,return_value_policy<copy_const_reference>()),
-                      &Map::setBackground, "The background color of the map.")
-        .def("envelope",make_function(&Map::getCurrentExtent,
-                                      return_value_policy<copy_const_reference>()),
-             "The current extent of the map")
-        .def("scale", &Map::scale)
-        .def("zoom_all",&Map::zoom_all,
-             "Set the geographical extent of the map "
-             "to the combined extents of all active layers")
-        .def("zoom_to_box",&Map::zoomToBox, "Set the geographical extent of the map.")
-        .def("pan",&Map::pan)
-        .def("zoom",&Map::zoom)
-        .def("zoom_all",&Map::zoom_all)
-        .def("pan_and_zoom",&Map::pan_and_zoom)
-        .def("append_style",&Map::insert_style)
-        .def("remove_style",&Map::remove_style)
-        .def("query_point",&Map::query_point)
-        .def("query_map_point",&Map::query_map_point)
-        .add_property("layers",make_function
-                      (layers_nonconst,return_value_policy<reference_existing_object>()), 
-                      "Get the list of layers in this map.")
-        .def("find_style",&Map::find_style,return_value_policy<copy_const_reference>())
-        .def_pickle(map_pickle_suite())
-        ;
+      ;
+   
+   class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >())
+      .add_property("width",&Map::getWidth, &Map::setWidth, "The width of the map.")
+      .add_property("height",&Map::getHeight, &Map::setHeight, "The height of the map.")
+      .add_property("srs",make_function(&Map::srs,return_value_policy<copy_const_reference>()),
+                    &Map::set_srs,"Spatial reference in proj4 format e.g. \"+proj=latlong +datum=WGS84\"")
+      .add_property("background",make_function
+                    (&Map::background,return_value_policy<copy_const_reference>()),
+                    &Map::set_background, "The background color of the map.")
+      .def("envelope",make_function(&Map::getCurrentExtent,
+                                    return_value_policy<copy_const_reference>()),
+           "The current extent of the map")
+      .def("scale", &Map::scale)
+      .def("zoom_all",&Map::zoom_all,
+           "Set the geographical extent of the map "
+           "to the combined extents of all active layers")
+      .def("zoom_to_box",&Map::zoomToBox, "Set the geographical extent of the map.")
+      .def("pan",&Map::pan)
+      .def("zoom",&Map::zoom)
+      .def("zoom_all",&Map::zoom_all)
+      .def("pan_and_zoom",&Map::pan_and_zoom)
+      .def("append_style",&Map::insert_style)
+      .def("remove_style",&Map::remove_style)
+      .def("query_point",&Map::query_point)
+      .def("query_map_point",&Map::query_map_point)
+      .add_property("layers",make_function
+                    (layers_nonconst,return_value_policy<reference_existing_object>()), 
+                    "Get the list of layers in this map.")
+      .def("find_style",&Map::find_style,return_value_policy<copy_const_reference>())
+      .def_pickle(map_pickle_suite())
+      ;
 }
