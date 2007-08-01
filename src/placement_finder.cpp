@@ -227,7 +227,7 @@ namespace mapnik
       double middle; //try draw text centered
       if (p->label_placement == line_placement)
         middle = (distance / 2.0) - (string_width/2.0);
-      else if (p->label_placement == point_placement)
+      else //  (p->label_placement == point_placement)
         middle = distance / 2.0;
 		
       if (num_labels % 2) //odd amount of labels
@@ -370,7 +370,7 @@ namespace mapnik
     
             // angle text starts at and orientation
             angle = atan2(-dy, dx);
-            orientation = fabs(angle) > M_PI/2 ? -1 : 1;
+            orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
 
             distance -= target_distance;
             
@@ -448,12 +448,12 @@ namespace mapnik
          if (displacement == 0.0) {
            x -= (((double)string_height/2.0) - 1.0)*cos(render_angle+M_PI/2);
            y += (((double)string_height/2.0) - 1.0)*sin(render_angle+M_PI/2);
-         } else if (displacement > 0.0) {
-           x -= ((displacement + (double)string_height) - 1.0)*cos(render_angle+M_PI/2);
-           y += ((displacement + (double)string_height) - 1.0)*sin(render_angle+M_PI/2);
+         } else if (displacement*orientation > 0.0) {
+           x -= ((fabs(displacement) - (double)string_height) + 1.0)*cos(render_angle+M_PI/2);
+           y += ((fabs(displacement) - (double)string_height) + 1.0)*sin(render_angle+M_PI/2);
          } else { // displacement < 0
-           x -= ((displacement - (double)string_height) - 1.0)*cos(render_angle+M_PI/2);
-           y += ((displacement - (double)string_height) - 1.0)*sin(render_angle+M_PI/2);
+           x -= ((fabs(displacement) + (double)string_height) - 1.0)*cos(render_angle+M_PI/2);
+           y += ((fabs(displacement) + (double)string_height) - 1.0)*sin(render_angle+M_PI/2);
          }
          distance -= ci.width;
          next_char_x = ci.width*cos(render_angle);
