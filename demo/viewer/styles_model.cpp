@@ -1,0 +1,268 @@
+/* This file is part of Mapnik (c++ mapping toolkit)
+ * Copyright (C) 2007 Artem Pavlenko
+ *
+ * Mapnik is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+//$Id$
+
+#include "styles_model.hpp"
+#include <boost/scoped_ptr.hpp>
+#include <boost/utility.hpp>
+#include <QList>
+#include <QIcon>
+
+class node : private boost::noncopyable
+{
+      struct node_base
+      {
+            virtual QString name() const=0;
+            virtual QIcon   icon() const=0;
+            virtual ~node_base() {}
+      };
+      
+      template <typename T>
+      struct wrap : public node_base
+      {
+            wrap(T const& obj)
+               : obj_(obj) {}
+            
+            ~wrap() {}
+            
+            QString name () const
+            {
+               return obj_.name();
+            }
+            
+            QIcon icon() const
+            {
+               return obj_.icon();
+            }
+            
+            T obj_;
+      };
+      
+   public:
+      template <typename T> 
+      node ( T const& obj, node * parent=0)
+         : impl_(new wrap<T>(obj)),
+           parent_(parent)
+      {}
+      
+      QString name() const
+      {
+         return impl_->name();
+      }
+      
+      QIcon icon() const
+      {
+         return impl_->icon();
+      }
+      
+      unsigned num_children() const
+      {
+         return children_.count();
+      }
+      
+      node * child(unsigned row) const
+      {
+         return children_.value(row);
+      }
+      
+      node * parent() const
+      {
+         return parent_;
+      }
+      
+      node * add_child(node * child)
+      {
+         children_.push_back(child);
+         return child;
+      }
+      int row () const
+      {
+         if (parent_)
+            return parent_->children_.indexOf(const_cast<node*>(this));
+         else
+            return 0;
+      }
+      
+      ~node() 
+      {
+         qDeleteAll(children_);
+      }
+      
+   private:
+      boost::scoped_ptr<node_base> impl_;
+      QList<node*> children_;
+      node * parent_;
+};
+
+class rule_node
+{
+   public:
+      rule_node(QString name,mapnik::rule_type const & r)
+         : name_(name),
+           rule_(r) {}
+      ~rule_node() {}
+      QString name() const
+      {
+         mapnik::filter_ptr filter = rule_.get_filter();
+         
+         return QString(filter->to_string().c_str());
+      } 
+      
+      QIcon icon() const
+      {
+         return QIcon(":/images/filter.png");
+      }
+      
+   private:
+      QString name_;
+      mapnik::rule_type const& rule_;
+};
+
+class style_node
+{
+   public:
+      style_node(QString name, mapnik::feature_type_style const& style)
+         : name_(name),
+           style_(style) {}
+      
+      ~style_node() {}
+      
+      QString name() const
+      {
+         return name_;
+      }
+      
+      QIcon icon() const
+      {
+         return QIcon(":/images/style.png");
+      }
+      
+   private:
+      QString name_;
+      mapnik::feature_type_style const& style_;
+};
+
+class map_node
+{
+   public:
+      explicit map_node(boost::shared_ptr<mapnik::Map> map)
+         : map_(map)  {}
+      ~map_node() {}
+      
+      QString name() const
+      {
+         return QString("Map");
+      }
+      
+      QIcon icon() const
+      {
+         return QIcon(":/images/map.png");
+      }
+      
+   private:
+      boost::shared_ptr<mapnik::Map> map_;
+};
+
+StyleModel::StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent)
+   : QAbstractItemModel(parent),
+     root_(new node(map_node(map))) 
+{
+   typedef std::map<std::string,mapnik::feature_type_style> style_type; 
+   style_type const & styles = map->styles();
+   style_type::const_iterator itr = styles.begin();
+   style_type::const_iterator end = styles.end();
+   for (; itr != end; ++itr)
+   {
+      node * style = root_->add_child(new node(style_node(QString(itr->first.c_str()),itr->second),root_.get()));
+      mapnik::rules const& rules = itr->second.get_rules();
+      mapnik::rules::const_iterator itr2 = rules.begin();
+      for ( ; itr2 != rules.end();++itr2)
+      {
+         style->add_child(new node(rule_node(QString("Rule"),*itr2),style));
+      }
+   }   
+}
+
+StyleModel::~StyleModel() {}
+
+// interface 
+QModelIndex StyleModel::index (int row, int col, QModelIndex const& parent) const
+{
+   qDebug("index() row=%d col=%d parent::internalId() = %lld", row,col,parent.internalId());
+   node * parent_node;
+   
+   if (!parent.isValid())
+      parent_node = root_.get();
+   else
+      parent_node = static_cast<node*>(parent.internalPointer());
+   
+   node * child_node = parent_node->child(row);
+   if (child_node)
+      return createIndex(row,col,child_node);
+   else
+      return QModelIndex();
+}
+
+QModelIndex StyleModel::parent (QModelIndex const& index) const
+{
+   node * child_node = static_cast<node*>(index.internalPointer());
+   node * parent_node = child_node->parent();
+   if (parent_node == root_.get())
+      return QModelIndex();
+  
+   return createIndex(parent_node->row(),0,parent_node);
+}
+
+int StyleModel::rowCount(QModelIndex const& parent) const
+{
+   qDebug("rowCount");
+   node * parent_node;
+   if (parent.column() > 0) return 0;
+   if (!parent.isValid())
+      parent_node = root_.get();
+   else
+      parent_node = static_cast<node*>(parent.internalPointer());
+   return parent_node->num_children();
+}
+
+int StyleModel::columnCount( QModelIndex const&) const
+{
+   return 1;
+}
+
+QVariant StyleModel::data(const QModelIndex & index, int role) const
+{
+   qDebug("data index::internalId() = %lld", index.internalId());
+   if (!index.isValid())
+      return QVariant();
+   node * cur_node = static_cast<node*>(index.internalPointer());
+   if (cur_node)
+   {
+      if (role == Qt::DisplayRole)
+      {
+         
+         return QVariant(cur_node->name());
+      }
+      else if ( role == Qt::DecorationRole)
+      {
+         return cur_node->icon();
+      }
+   }
+   return QVariant();
+}

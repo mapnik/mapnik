@@ -1,0 +1,83 @@
+<ui version="4.0" >
+ <class>InfoDialog</class>
+ <widget class="QDialog" name="InfoDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>277</width>
+    <height>249</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Feature Info</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>258</width>
+     <height>226</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" >
+    <item row="0" column="0" colspan="3" >
+     <widget class="QTableWidget" name="tableWidget" />
+    </item>
+    <item row="1" column="0" >
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>61</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="1" column="1" >
+     <widget class="QPushButton" name="pushButton" >
+      <property name="text" >
+       <string>OK</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2" >
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>71</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>InfoDialog</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>216</x>
+     <y>408</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>195</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,107 @@
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>484</width>
+    <height>558</height>
+   </rect>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>484</width>
+    <height>558</height>
+   </size>
+  </property>
+  <property name="maximumSize" >
+   <size>
+    <width>484</width>
+    <height>585</height>
+   </size>
+  </property>
+  <property name="windowTitle" >
+   <string>About</string>
+  </property>
+  <widget class="QLabel" name="label" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>20</y>
+     <width>461</width>
+     <height>351</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string/>
+   </property>
+   <property name="textFormat" >
+    <enum>Qt::RichText</enum>
+   </property>
+   <property name="pixmap" >
+    <pixmap resource="../mapviewer.qrc" >:/images/canada_map.png</pixmap>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="okButton" >
+   <property name="geometry" >
+    <rect>
+     <x>190</x>
+     <y>500</y>
+     <width>87</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>380</y>
+     <width>441</width>
+     <height>128</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;/head>&lt;body style=" white-space: pre-wrap; font-family:Bitstream Vera Sans; font-size:11pt; font-weight:400; font-style:normal; text-decoration:none;">&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">This is a simple viewer for testing new features and fixing bugs. For more information visit http://mapnik.org&lt;/p>&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-style:italic;">Copyright © 2006 Artem Pavlenko&lt;/span>&lt;/p>&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"> &lt;/p>&lt;/body>&lt;/html></string>
+   </property>
+   <property name="textFormat" >
+    <enum>Qt::RichText</enum>
+   </property>
+   <property name="alignment" >
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="wordWrap" >
+    <bool>true</bool>
+   </property>
+  </widget>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <resources>
+  <include location="../mapviewer.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>okButton</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>278</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>96</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
