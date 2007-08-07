@@ -50,6 +50,9 @@ namespace mapnik
         Map(int width, int height, std::string const& srs="+proj=latlong +datum=WGS84");
         Map(const Map& rhs);
         Map& operator=(const Map& rhs);
+        std::map<std::string,feature_type_style> const& styles() const;
+        std::map<std::string,feature_type_style> & styles();
+        
         const_style_iterator begin_styles() const;
         const_style_iterator end_styles() const;
         style_iterator begin_styles();

@@ -61,7 +61,17 @@ namespace mapnik
         layers_=rhs.layers_;
         return *this;
     }
-    
+   
+   std::map<std::string,feature_type_style> const& Map::styles() const
+   {
+      return styles_;
+   }
+   
+   std::map<std::string,feature_type_style> & Map::styles()
+   {
+      return styles_;
+   }
+   
     Map::style_iterator Map::begin_styles()
     {
         return styles_.begin();
