@@ -54,9 +54,8 @@ void export_image()
        .add_property("background",make_function
                      (&Image32::getBackground,return_value_policy<copy_const_reference>()),
                      &Image32::setBackground, "The background color of the image.")
-       .def("set_alpha",&Image32::set_alpha)
        .def("blend",&blend)
        ;    
-    def("rawdata",&rawdata); // FIXME : I dont think we need this one
+    def("rawdata",&rawdata); // FIXME : I dont think we need this one anymore
     def("save_to_file", save_to_file2);
 }
