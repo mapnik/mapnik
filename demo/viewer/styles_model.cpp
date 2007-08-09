@@ -110,6 +110,70 @@ class node : private boost::noncopyable
       node * parent_;
 };
 
+struct symbolizer_info : public boost::static_visitor<QString>
+{
+      QString operator() (mapnik::point_symbolizer const& sym) const
+      {
+         return QString("PointSymbolizer");
+      }
+      
+      QString operator() (mapnik::line_symbolizer const& sym) const
+      {
+         return QString("LineSymbolizer");
+      }
+
+      QString operator() (mapnik::line_pattern_symbolizer const& sym) const
+      {
+         return QString("LinePatternSymbolizer");
+      }
+
+      QString operator() (mapnik::polygon_symbolizer const& sym) const
+      {
+         return QString("PolygonSymbolizer");
+      }
+
+      QString operator() (mapnik::polygon_pattern_symbolizer const& sym) const
+      {
+         return QString("PolygonSymbolizer");
+      }
+            
+      QString operator() (mapnik::text_symbolizer const& sym) const
+      {
+         return QString("TextSymbolizer");
+      }
+      
+      QString operator() (mapnik::shield_symbolizer const& sym) const
+      {
+         return QString("ShieldSymbolizer");
+      }
+      
+      template <typename T>
+      QString operator() (T const& ) const
+      {
+         return QString ("FIXME");
+      }
+};
+
+class symbolizer_node
+{
+   public:
+      symbolizer_node(mapnik::symbolizer const & sym)
+         : sym_(sym) {}
+      ~symbolizer_node(){}
+      
+      QString name() const 
+      {
+         //return QString("Symbolizer:fixme");
+         return boost::apply_visitor(symbolizer_info(),sym_);
+      }
+      
+      QIcon icon() const
+      {
+         return QIcon(":/images/filter.png");
+      }
+      mapnik::symbolizer const& sym_;
+};
+
 class rule_node
 {
    public:
@@ -189,12 +253,17 @@ StyleModel::StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent)
    style_type::const_iterator end = styles.end();
    for (; itr != end; ++itr)
    {
-      node * style = root_->add_child(new node(style_node(QString(itr->first.c_str()),itr->second),root_.get()));
+      node * style_n = root_->add_child(new node(style_node(QString(itr->first.c_str()),itr->second),root_.get()));
       mapnik::rules const& rules = itr->second.get_rules();
       mapnik::rules::const_iterator itr2 = rules.begin();
       for ( ; itr2 != rules.end();++itr2)
       {
-         style->add_child(new node(rule_node(QString("Rule"),*itr2),style));
+         node* rule_n = style_n->add_child(new node(rule_node(QString("Rule"),*itr2),style_n));
+         mapnik::symbolizers::const_iterator itr3 = (*itr2).begin();
+         for ( ; itr3 !=itr2->end();++itr3)
+         {
+            rule_n->add_child(new node(symbolizer_node(*itr3),rule_n));
+         }
       }
    }   
 }
