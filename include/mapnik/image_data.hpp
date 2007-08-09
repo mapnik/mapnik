@@ -69,12 +69,13 @@ namespace mapnik
         }
         inline void set(const T& t)
         {
-            for (unsigned i=0;i<width_;++i)
+            for (unsigned y = 0; y < height_; ++y)
             {
-                for (unsigned j=0;j<height_;++j)
-                {
-                    (*this)(i,j)=t;
-                }
+               T * row = getRow(y);    
+               for (unsigned x = 0; x < width_; ++x)
+               {
+                  row[x] = t;
+               }
             }
         }
         
@@ -102,6 +103,12 @@ namespace mapnik
         {
             return pData_+row*width_;
         }
+          
+        inline T* getRow(unsigned row)
+        {
+            return pData_+row*width_;
+        }
+          
         inline void setRow(unsigned row,const T* buf,unsigned size)
         {
             assert(row<height_);
