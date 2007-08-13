@@ -76,12 +76,12 @@ namespace mapnik
          */
         Map& operator=(const Map& rhs);
         
-        /*! \brief Get all style names 
+        /*! \brief Get all styles
          * @return Const reference to styles
          */
         std::map<std::string,feature_type_style> const& styles() const; 
         
-        /*! \brief Get all style names 
+        /*! \brief Get all styles 
          * @return Non-constant reference to styles
          */
         std::map<std::string,feature_type_style> & styles();
