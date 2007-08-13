@@ -23,7 +23,7 @@ import glob
 
 Import('env')
 
-prefix = env['PYTHON_PREFIX'] + '/'+ 'lib' + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
+prefix = env['PYTHON_PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
 install_prefix = env['DESTDIR'] + '/' + prefix
 
 linkflags = ''
