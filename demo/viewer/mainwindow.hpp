@@ -97,6 +97,7 @@ public slots:
       QAction *panUpAct;
       QAction *panDownAct;
       QAction *reloadAct;
+      QAction *layerInfo;
       //toolbars
       QToolBar *fileToolBar;
       QToolBar *editToolBar;

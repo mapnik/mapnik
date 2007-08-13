@@ -1,5 +1,5 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2007 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,35 +18,22 @@
 
 //$Id$
 
-#ifndef LAYERWIDGET_HPP
-#define LAYERWIDGET_HPP
 
-#include <QTabWidget>
-#include <QListView>
-#include <QTreeView>
+#ifndef LAYER_INFO_DIALOG_HPP
+#define LAYER_INFO_DIALOG_HPP
 
-class LayerTab : public QListView
+#include "ui_layer_info.h"
+#include <QDialog>
+
+class layer_info_dialog : public QDialog
 {
-   Q_OBJECT
-   public:
-      LayerTab(QWidget* parent=0);
-      void paintEvent(QPaintEvent *e);
-   signals:
-      void update_mapwidget();
-   public slots:
-      void layerInfo();   
-      void layerInfo2(QModelIndex const&);     
-   protected slots:
-      void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+  Q_OBJECT
+  public:
+      layer_info_dialog(QVector<QPair<QString,QString> > const& params,QWidget * parent = 0);
+      Ui::LayerInfoDialog& getUI();
+   private:
+      Ui::LayerInfoDialog ui;
 };
 
-class StyleTab : public QTreeView
-{
-    Q_OBJECT
-public:
-    StyleTab(QWidget* parent=0);
-protected:
-      void contextMenuEvent(QContextMenuEvent * event );
-};
 
-#endif 
+#endif //LAYER_INFO_DIALOG_HPP

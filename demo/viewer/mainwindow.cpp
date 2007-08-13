@@ -109,6 +109,7 @@ void MainWindow::createContextMenu()
 {
    layerTab_->setContextMenuPolicy(Qt::ActionsContextMenu);
    layerTab_->addAction(openAct);
+   layerTab_->addAction(layerInfo);
 }
 
 void MainWindow::open(QString const& path)
@@ -299,6 +300,9 @@ void MainWindow::createActions()
    reloadAct = new QAction(QIcon(":/images/reload.png"),tr("Reload"),this);
    connect(reloadAct, SIGNAL(triggered()), this, SLOT(reload()));
    
+   layerInfo = new QAction(QIcon(":/images/info.png"),tr("&Layer info"),layerTab_);
+   connect(layerInfo, SIGNAL(triggered()), layerTab_,SLOT(layerInfo()));
+   connect(layerTab_, SIGNAL(doubleClicked(QModelIndex const&)), layerTab_,SLOT(layerInfo2(QModelIndex const&)));
    foreach (QByteArray format, QImageWriter::supportedImageFormats()) 
    {
       QString text = tr("%1...").arg(QString(format).toUpper());

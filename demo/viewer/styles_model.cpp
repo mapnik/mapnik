@@ -23,6 +23,8 @@
 #include <boost/utility.hpp>
 #include <QList>
 #include <QIcon>
+#include <QPainter>
+#include <QPixmap>
 
 class node : private boost::noncopyable
 {
@@ -110,6 +112,7 @@ class node : private boost::noncopyable
       node * parent_;
 };
 
+
 struct symbolizer_info : public boost::static_visitor<QString>
 {
       QString operator() (mapnik::point_symbolizer const& sym) const
@@ -154,6 +157,37 @@ struct symbolizer_info : public boost::static_visitor<QString>
       }
 };
 
+struct symbolizer_icon : public boost::static_visitor<QIcon>
+{
+      QIcon operator() (mapnik::polygon_symbolizer const& sym) const
+      {
+         QPixmap pix(16,16);
+         QPainter painter(&pix);
+         mapnik::Color fill = sym.get_fill();
+         QBrush brush(QColor(fill.red(),fill.green(),fill.blue(),fill.alpha()));
+         painter.fillRect(0, 0, 16, 16, brush);
+         return QIcon(pix);
+      }
+
+      QIcon operator() (mapnik::point_symbolizer const& sym) const
+      {
+         boost::shared_ptr<mapnik::ImageData32> symbol = sym.get_data();
+         if (symbol)
+         {
+            QImage image(symbol->getBytes(),symbol->width(),symbol->height(),QImage::Format_ARGB32);
+            QPixmap pix = QPixmap::fromImage(image.rgbSwapped());
+            return QIcon(pix);
+         }
+         return QIcon();
+      }
+
+      template <typename T>
+      QIcon operator() (T const& ) const
+      {
+         return QIcon (":/images/filter.png");
+      }
+};
+
 class symbolizer_node
 {
    public:
@@ -169,7 +203,7 @@ class symbolizer_node
       
       QIcon icon() const
       {
-         return QIcon(":/images/filter.png");
+         return boost::apply_visitor(symbolizer_icon(),sym_);//QIcon(":/images/filter.png");
       }
       mapnik::symbolizer const& sym_;
 };

@@ -30,6 +30,8 @@
 #include <qrubberband.h>
 #include <qdebug.h>
 #include <iostream>
+#include "layerlistmodel.hpp"
+#include "layer_info_dialog.hpp"
 
 using namespace std;
 
@@ -48,6 +50,64 @@ void LayerTab::dataChanged(const QModelIndex &topLeft,
    QListView::dataChanged(topLeft, bottomRight);
    qDebug("FIXME : update map view!");
    emit update_mapwidget();
+}
+
+void LayerTab::layerInfo()
+{
+   qDebug("Layer info");
+   QModelIndexList indexes = selectedIndexes();
+   if (indexes.size() > 0)
+   {
+      qDebug("id = %d",indexes[0].row());
+      
+   }
+}
+
+void LayerTab::layerInfo2(QModelIndex const& index)
+{
+   qDebug("LayerInfo id = %d",index.row());
+   QVector<QPair<QString,QString> > params;
+   unsigned i = index.row();
+   LayerListModel * model = static_cast<LayerListModel*>(this->model());
+   boost::optional<mapnik::Layer&> layer = model->map_layer(i);
+   
+   if (layer)
+   {
+      mapnik::datasource_ptr ds = (*layer).datasource();
+      if (ds)
+      {
+         mapnik::parameters ps = ds->params();
+
+         //mapnik::parameters::extract_iterator_type itr = ps.extract_begin();
+         //mapnik::parameters::extract_iterator_type end = ps.extract_end();
+         
+         //for (;itr != end;++itr)
+         //{
+            //if (itr->second)
+         //   {
+         ///     params.push_back(QPair<QString,QString>(itr->first.c_str(),itr->first.c_str()));
+         //   }
+         //}
+
+         
+         mapnik::parameters::const_iterator pos;
+         
+         for (pos = ps.begin();pos != ps.end();++pos)
+         {
+            boost::optional<std::string> result;
+            boost::apply_visitor(mapnik::value_extractor_visitor<std::string>(result),pos->second);
+            if (result)
+            {
+               params.push_back(QPair<QString,QString>(pos->first.c_str(),(*result).c_str()));
+            }
+         }   
+      }
+      layer_info_dialog dlg(params,this);
+      dlg.getUI().layerNameEdit->setText(QString((*layer).name().c_str()));
+
+      
+      dlg.exec();
+   }
 }
 
 StyleTab::StyleTab(QWidget*)
