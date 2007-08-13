@@ -27,13 +27,14 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
+#include <boost/optional/optional.hpp>
 
 namespace mapnik
 {
     class MAPNIK_DECL Map
     {	
         static const unsigned MIN_MAPSIZE=16;
-        static const unsigned MAX_MAPSIZE=2048;
+        static const unsigned MAX_MAPSIZE=MIN_MAPSIZE<<10;
         unsigned width_;
         unsigned height_;
         std::string  srs_;
@@ -74,7 +75,17 @@ namespace mapnik
          *  
          */
         Map& operator=(const Map& rhs);
-
+        
+        /*! \brief Get all style names 
+         * @return Const reference to styles
+         */
+        std::map<std::string,feature_type_style> const& styles() const; 
+        
+        /*! \brief Get all style names 
+         * @return Non-constant reference to styles
+         */
+        std::map<std::string,feature_type_style> & styles();
+        
         /*! \brief Get first iterator in styles.
          *  @return Constant style iterator.
          */
@@ -187,12 +198,13 @@ namespace mapnik
         /*! \brief Set the map background color.
          *  @param c Background color.
          */
-        void setBackground(const Color& c);
-
-        /*! \brief Get the map background color.
-         *  @return Background color.
+        void set_background(const Color& c);
+        
+        /*! \brief Get the map background color 
+         *  @return Background color as boost::optional
+         *  object
          */
-        const Color& getBackground() const;
+        boost::optional<Color> const& background() const;
 
         /*! \brief Zoom the map at the current position.
          *  @param factor The factor how much the map is zoomed in or out.
