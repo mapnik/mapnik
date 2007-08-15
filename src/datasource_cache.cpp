@@ -27,6 +27,7 @@
 // boost
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/algorithm/string.hpp>
 // mapnik
 #include <mapnik/datasource_cache.hpp>
 // ltdl
@@ -34,108 +35,114 @@
 
 namespace mapnik
 {
-    using namespace std;
-    using namespace boost;
-     
-    datasource_cache::datasource_cache()
-    {
-        if (lt_dlinit()) throw;
-    }
+   using namespace std;
+   using namespace boost;
+   
+   bool is_input_plugin (std::string const& filename)
+   {
+      return boost::algorithm::ends_with(filename,".input");
+   }
+   
 
-    datasource_cache::~datasource_cache()
-    {
-        lt_dlexit();
-    }
+   datasource_cache::datasource_cache()
+   {
+      if (lt_dlinit()) throw;
+   }
 
-    std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
-    bool datasource_cache::registered_=false;
+   datasource_cache::~datasource_cache()
+   {
+      lt_dlexit();
+   }
+
+   std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
+   bool datasource_cache::registered_=false;
     
-    datasource_ptr datasource_cache::create(const parameters& params)
-    {
-        datasource_ptr ds;
-        try
-        {
-           boost::optional<std::string> type = params.get<std::string>("type");
-           if (type)
-           {
-              map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
-              if (itr!=plugins_.end())
-              {
-                 if (itr->second->handle())
-                 {
-                    create_ds* create_datasource = 
-                       (create_ds*) lt_dlsym(itr->second->handle(), "create");
-                    if (!create_datasource)
-                    {
-                       std::clog << "Cannot load symbols: " << lt_dlerror() << std::endl;
-                    }
-                    else
-                    {
-                        ds=datasource_ptr(create_datasource(params), datasource_deleter());
-                    }
-                }
-                else
-                {
-                    std::clog << "Cannot load library: " << lt_dlerror() << std::endl;
-                }
-              }
-           }
-#ifdef MAPNIK_DEBUG
-            std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
-#endif
-        }
-        catch (datasource_exception& ex)
-        {
-            std::clog << ex.what() << "\n";
-        }
-        catch (...)
-        {
-            std::clog << " exception caught\n";
-        }
-        return ds;
-    }
-
-    bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
-    {	      
-        return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>
-                                         (new PluginInfo(type,module)))).second;     
-    }
-
-    void datasource_cache::register_datasources(const std::string& str)
-    {	
-        mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache, 
-                                mapnik::CreateStatic>::mutex_);
-        filesystem::path path(str);
-        filesystem::directory_iterator end_itr;
-        if (exists(path) && is_directory(path))
-        {
-            for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
+   datasource_ptr datasource_cache::create(const parameters& params)
+   {
+      datasource_ptr ds;
+      try
+      {
+         boost::optional<std::string> type = params.get<std::string>("type");
+         if (type)
+         {
+            map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
+            if (itr!=plugins_.end())
             {
-                if (!is_directory( *itr ) && itr->leaf()[0]!='.')
-                {
-                   try 
-                   {
-                      lt_dlhandle module=lt_dlopen(itr->string().c_str());
-                      if (module)
-                      {
-                         datasource_name* ds_name = 
-                            (datasource_name*) lt_dlsym(module, "datasource_name");
-                         if (ds_name && insert(ds_name(),module))
-                         {            
+               if (itr->second->handle())
+               {
+                  create_ds* create_datasource = 
+                     (create_ds*) lt_dlsym(itr->second->handle(), "create");
+                  if (!create_datasource)
+                  {
+                     std::clog << "Cannot load symbols: " << lt_dlerror() << std::endl;
+                  }
+                  else
+                  {
+                     ds=datasource_ptr(create_datasource(params), datasource_deleter());
+                  }
+               }
+               else
+               {
+                  std::clog << "Cannot load library: " << lt_dlerror() << std::endl;
+               }
+            }
+         }
 #ifdef MAPNIK_DEBUG
-                            std::clog<<"registered datasource : "<<ds_name()<<std::endl;
+         std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
+#endif
+      }
+      catch (datasource_exception& ex)
+      {
+         std::clog << ex.what() << "\n";
+      }
+      catch (...)
+      {
+         std::clog << " exception caught\n";
+      }
+      return ds;
+   }
+
+   bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
+   {	      
+      return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>
+                                       (new PluginInfo(type,module)))).second;     
+   }
+
+   void datasource_cache::register_datasources(const std::string& str)
+   {	
+      mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache, 
+                              mapnik::CreateStatic>::mutex_);
+      filesystem::path path(str);
+      filesystem::directory_iterator end_itr;
+      if (exists(path) && is_directory(path))
+      {
+         for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
+         {
+            if (!is_directory( *itr ) && is_input_plugin(itr->leaf()))
+            {
+               try 
+               {
+                  lt_dlhandle module=lt_dlopen(itr->string().c_str());
+                  if (module)
+                  {
+                     datasource_name* ds_name = 
+                        (datasource_name*) lt_dlsym(module, "datasource_name");
+                     if (ds_name && insert(ds_name(),module))
+                     {            
+#ifdef MAPNIK_DEBUG
+                        std::clog<<"registered datasource : "<<ds_name()<<std::endl;
 #endif 
-                            registered_=true;
-                         }
-                      }
-                      else
-                      {
-                         std::clog << lt_dlerror() << "\n";
-                      }
-                   }
-                   catch (...) {}
-                }
-            }   
-        }	
-    }
+                        registered_=true;
+                     }
+                  }
+                  else
+                  {
+                     std::clog << lt_dlerror() << "\n";
+                  }
+               }
+               catch (...) {}
+            }
+         }   
+      }	
+   }
 }
