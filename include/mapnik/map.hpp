@@ -115,12 +115,12 @@ namespace mapnik
         bool insert_style(std::string const& name,feature_type_style const& style);
 
         /*! \brief Remove a style from the map.
-         *  @param The name of the style.
+         *  @param name The name of the style.
          */
         void remove_style(const std::string& name);
 
         /*! \brief Find a style.
-         * @param name The name of the style.
+         *  @param name The name of the style.
          *  @return The style if found. If not found return the default map style.
          */
         feature_type_style const& find_style(std::string const& name) const;
