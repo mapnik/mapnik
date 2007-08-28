@@ -37,11 +37,15 @@ if env['PLATFORM'] == 'Darwin':
         libraries.append('boost_regex%s-mt' % env['BOOST_APPEND'])
     else :
         libraries.append('boost_regex%s' % env['BOOST_APPEND'])
+    
+    if env['THREADING'] == 'multi':
+        libraries.append('boost_thread%s-mt' % env['BOOST_APPEND'])
+
     linkflags = '-F/ -framework Python'
 
 headers = [env['PYTHON_PREFIX'] + '/include/python' + env['PYTHON_VERSION']] + env['CPPPATH']
 
-_mapnik = env.SharedLibrary('_mapnik', glob.glob('*.cpp'), LIBS=libraries, SHLIBPREFIX='', SHLIBSUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
+_mapnik = env.LoadableModule('_mapnik', glob.glob('*.cpp'), LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
 
 paths = """
 mapniklibpath = '%s'

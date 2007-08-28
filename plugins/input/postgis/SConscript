@@ -36,6 +36,8 @@ libraries = ['pq']
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('iconv')
+    if env['THREADING'] == 'multi':
+        libraries.append('boost_thread%s-mt' % env['BOOST_APPEND'])
 
 postgis_inputdriver = env.SharedLibrary('postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 

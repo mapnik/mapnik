@@ -32,7 +32,7 @@ opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include'))
 opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add('BOOST_TOOLKIT','Specify boost toolkit e.g. gcc41.','',False)
-opts.Add(PathOption('FREETYPE_CONFIG', 'The path to the freetype-config executable.', '/usr/bin/freetype-config'))
+opts.Add(('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'))
 opts.Add(PathOption('FRIBIDI_INCLUDES', 'Search path for fribidi include files', '/usr/include'))
 opts.Add(PathOption('FRIBIDI_LIBS','Search path for fribidi include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
@@ -228,3 +228,4 @@ else:
 # Install some free default fonts
 
 SConscript('fonts/SConscript')
+
