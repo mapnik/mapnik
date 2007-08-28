@@ -40,7 +40,7 @@ namespace mapnik
    
    bool is_input_plugin (std::string const& filename)
    {
-      return boost::algorithm::ends_with(filename,".input");
+      return boost::algorithm::ends_with(filename,std::string(".input"));
    }
    
 
@@ -118,7 +118,7 @@ namespace mapnik
       {
          for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
          {
-            if (!is_directory( *itr ) && is_input_plugin(itr->leaf()))
+            if (!is_directory( *itr )  && is_input_plugin(itr->leaf()))
             {
                try 
                {
