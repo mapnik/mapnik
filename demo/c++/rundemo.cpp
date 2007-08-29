@@ -42,7 +42,7 @@ int main ( int argc , char** argv)
     std::cout << " running demo ... \n";
     using namespace mapnik;
     datasource_cache::instance()->register_datasources(argv[1]); 
-    freetype_engine::instance()->register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf");
+    freetype_engine::instance()->register_font("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
     
     Map m(800,600);
     m.set_background(color_factory::from_string("white"));
@@ -223,6 +223,7 @@ int main ( int argc , char** argv)
         parameters p;
         p["type"]="shape";
         p["file"]="../data/popplaces";
+        p["encoding"] = "latin1";
         Layer lyr("Populated Places");
         lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("popplaces");    
