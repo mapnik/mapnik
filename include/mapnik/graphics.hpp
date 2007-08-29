@@ -140,9 +140,9 @@ namespace mapnik
                   
                   for (int x = box.minx(); x < box.maxx(); ++x)
                   {
-                     if (row_to[x-x0] & 0xff000000)
+                     if (row_from[x-x0] & 0xff000000)
                      {
-                        row_to[x-x0] = row_from[x-x0];
+                        row_to[x] = row_from[x-x0];
                      } 
                   }
                }   
