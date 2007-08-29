@@ -30,6 +30,7 @@
 #include <boost/optional.hpp>
 #include <boost/none.hpp>
 #include <boost/lexical_cast.hpp>
+//#include <boost/iterator/transform_iterator.hpp>
 
 namespace mapnik
 {
@@ -68,7 +69,9 @@ namespace mapnik
          struct converter
          {
                typedef boost::optional<T> return_type;       
-               static return_type extract(parameters const& params,std::string const& name, boost::optional<T> const& default_value)
+               static return_type extract(parameters const& params,
+                                          std::string const& name, 
+                                          boost::optional<T> const& default_value)
                {
                   boost::optional<T> result(default_value);
                   parameters::const_iterator itr = params.find(name);
@@ -79,7 +82,9 @@ namespace mapnik
                   return result;
                }
          };
-      public: 
+         
+      public:
+         
          parameters() {}
          
          template <typename T>
@@ -93,16 +98,6 @@ namespace mapnik
          {
             return converter<T>::extract(*this,key,boost::optional<T>(default_value));
          }
-         
-         param_map::const_iterator iterator(std::string const& key) const
-         {
-	    return find(key);
-         }
-        
-         param_map::iterator iterator(std::string const& key)
-         {
-	    return find(key);
-         } 
    };
 }
 
