@@ -163,44 +163,23 @@ namespace mapnik {
       public:
          explicit transcoder (std::string const& encoding)
          {
-	   //desc_ = iconv_open("UCS-2",encoding.c_str());
+#ifdef MAPNIK_DEBUG
+            std::cerr << "ENCODING = " << encoding << "\n"; 
+#endif 
+            desc_ = iconv_open("UTF-8",encoding.c_str());
          }
          
          std::wstring transcode(std::string const& input) const
          {
-	   //return to_unicode(input);
-	   return to_unicode(input);
-	   /*
-            std::string buf(input.size() * 2,0);
+            if (desc_ == iconv_t(-1)) return to_unicode(input); 
+            
+            std::string buf(input.size() /* * sizeof(wchar_t)*/,0);
             size_t inleft = input.size();
             const char * in  = input.data();
             size_t outleft = buf.size();
             char * out = const_cast<char*>(buf.data());
-            
             iconv(desc_,&in,&inleft,&out,&outleft);
-            
-            std::string::const_iterator itr = buf.begin();
-            std::string::const_iterator end = buf.end();
-            wchar_t wch = 0;
-            bool state = false;
-            std::wstring unicode;
-            size_t num_char = buf.size() - outleft;
-            for ( ; itr != end; ++itr)
-            {
-               if (!state)
-               {
-                  wch = (*itr & 0xff);
-                  state = true;
-               }
-               else 
-               {
-                  wch |= *itr << 8 ;
-                  unicode.push_back(wchar_t(wch));
-                  state = false;
-               }
-               if (!num_char--) break;
-            }
-                     
+            std::wstring unicode =  to_unicode(buf);
 #ifdef USE_FRIBIDI
             if (unicode.length() > 0)
             {
@@ -210,14 +189,13 @@ namespace mapnik {
             }
 #endif
             return unicode;
-	   */
          }
          
          ~transcoder()
          {
-           //iconv_close(desc_);
+            if (desc_ != iconv_t(-1)) iconv_close(desc_);
          }
-
+         
    private:
       iconv_t desc_;
    };
