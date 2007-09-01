@@ -175,7 +175,11 @@ namespace mapnik {
             
             std::string buf(input.size() /* * sizeof(wchar_t)*/,0);
             size_t inleft = input.size();
-            const char * in  = input.data();
+#ifdef DARWIN
+            const char * in = input.data();
+#else
+	    char * in = const_cast<char*>(input.data());
+#endif
             size_t outleft = buf.size();
             char * out = const_cast<char*>(buf.data());
             iconv(desc_,&in,&inleft,&out,&outleft);
