@@ -99,38 +99,33 @@ postgis_datasource::postgis_datasource(parameters const& params)
             
          // collect attribute desc
          s.str("");
-         s << "select * from " << table_ << " limit 1";
+         s << "select * from " << table_ << " limit 0";
          rs=conn->executeQuery(s.str());
-         if (rs->next())
+         int count = rs->getNumFields();
+         for (int i=0;i<count;++i)
          {
-            int count = rs->getNumFields();
-            for (int i=0;i<count;++i)
+            std::string fld_name=rs->getFieldName(i);
+            int type_oid = rs->getTypeOID(i);
+            switch (type_oid)
             {
-               std::string fld_name=rs->getFieldName(i);
-               int length = rs->getFieldLength(i);
-		    
-               int type_oid = rs->getTypeOID(i);
-               switch (type_oid)
-               {
-                  case 21:    // int2
-                  case 23:    // int4
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer,false,length));
-                     break;
-                  case 700:   // float4 
-                  case 701:   // float8
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double,false,length));
-                  case 1042:  // bpchar
-                  case 1043:  // varchar
-                  case 25:    // text
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-                     break;
-                  default: // shouldn't get here
+               case 21:    // int2
+               case 23:    // int4
+                  desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+                  break;
+               case 700:   // float4 
+               case 701:   // float8
+                  desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+               case 1042:  // bpchar
+               case 1043:  // varchar
+               case 25:    // text
+                  desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                  break;
+               default: // shouldn't get here
 #ifdef MAPNIK_DEBUG
-                     clog << "unknown type_oid="<<type_oid<<endl;
+                  clog << "unknown type_oid="<<type_oid<<endl;
 #endif
-                     break;
-               }	  
-            }
+                  break;
+            }	  
          }
       }
    }
