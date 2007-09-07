@@ -36,6 +36,7 @@ libraries = ['pq']
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('iconv')
+    if env['BIDI'] : libraries.append('fribidi')
     if env['THREADING'] == 'multi':
         libraries.append('boost_thread%s-mt' % env['BOOST_APPEND'])
 
