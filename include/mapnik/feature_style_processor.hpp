@@ -134,12 +134,12 @@ namespace mapnik
                prj_trans.forward(lx1,ly1,lz1);
                Envelope<double> bbox(lx0,ly0,lx1,ly1);
                double resolution = m_.getWidth()/bbox.width();
+               query q(bbox,resolution); //BBOX query
                
                std::vector<std::string> const& style_names = lay.styles();
                std::vector<std::string>::const_iterator stylesIter = style_names.begin();
-               std::vector<std::string>::const_iterator stylesEnd = style_names.end();
-                
-               while (stylesIter != stylesEnd)
+               std::vector<std::string>::const_iterator stylesEnd = style_names.end(); 
+               for (;stylesIter != stylesEnd; ++stylesIter)
                {
                   std::set<std::string> names;
                   attribute_collector<Feature> collector(names);
@@ -147,16 +147,12 @@ namespace mapnik
                   std::vector<rule_type*> else_rules;
                     
                   bool active_rules=false;
-                  
-                  feature_type_style const& style=m_.find_style(*stylesIter++);
-                  
-                  query q(bbox,resolution); //BBOX query
-
+                  feature_type_style const& style=m_.find_style(*stylesIter);
                   const std::vector<rule_type>& rules=style.get_rules();
                   std::vector<rule_type>::const_iterator ruleIter=rules.begin();
                   std::vector<rule_type>::const_iterator ruleEnd=rules.end();
                                         
-                  while (ruleIter!=ruleEnd)
+                  for (;ruleIter!=ruleEnd;++ruleIter)
                   {
                      if (ruleIter->active(scale_denom))
                      {
@@ -172,16 +168,14 @@ namespace mapnik
                            if_rules.push_back(const_cast<rule_type*>(&(*ruleIter))); 		    
                         }
                      }
-                     ++ruleIter;
                   }
                   std::set<std::string>::const_iterator namesIter=names.begin();
                   std::set<std::string>::const_iterator namesEnd =names.end();
                     
                   // push all property names
-                  while (namesIter!=namesEnd)
+                  for (;namesIter!=namesEnd;++namesIter)
                   {
                      q.add_property_name(*namesIter);
-                     ++namesIter;
                   }
                   if (active_rules)
                   {
@@ -194,7 +188,7 @@ namespace mapnik
                            bool do_else=true;		    
                            std::vector<rule_type*>::const_iterator itr=if_rules.begin();
                            std::vector<rule_type*>::const_iterator end=if_rules.end();
-                           while (itr != end)
+                           for (;itr != end;++itr)
                            {
                               filter_ptr const& filter=(*itr)->get_filter();    
                               if (filter->pass(*feature))
@@ -203,13 +197,12 @@ namespace mapnik
                                  const symbolizers& symbols = (*itr)->get_symbolizers();
                                  symbolizers::const_iterator symIter=symbols.begin();
                                  symbolizers::const_iterator symEnd =symbols.end();
-                                 while (symIter != symEnd)
+                                 for (;symIter != symEnd;++symIter)
                                  {   
                                     boost::apply_visitor
-                                       (symbol_dispatch(p,*feature,prj_trans),*symIter++);
+                                       (symbol_dispatch(p,*feature,prj_trans),*symIter);
                                  }
                               }			    
-                              ++itr;
                            }
                            if (do_else)
                            {
@@ -218,26 +211,23 @@ namespace mapnik
                                  else_rules.begin();
                               std::vector<rule_type*>::const_iterator end=
                                  else_rules.end();
-                              while (itr != end)
+                              for (;itr != end;++itr)
                               {
                                  const symbolizers& symbols = (*itr)->get_symbolizers();
                                  symbolizers::const_iterator symIter= symbols.begin();
                                  symbolizers::const_iterator symEnd = symbols.end();
                                         
-                                 while (symIter!=symEnd)
+                                 for (;symIter!=symEnd;++symIter)
                                  {
                                     boost::apply_visitor
-                                       (symbol_dispatch(p,*feature,prj_trans),
-                                        *symIter++);
+                                       (symbol_dispatch(p,*feature,prj_trans),*symIter);
                                  }
-                                 ++itr;
                               }
                            }	  
                         }
                      }
                   }
-               }
-                
+               }               
             }
             p.end_layer_processing(lay);
          }	
