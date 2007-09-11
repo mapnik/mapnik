@@ -67,6 +67,7 @@ namespace mapnik
          feature_style_processor(Map const& m)
             : m_(m) {}
 	
+         
          void apply()
          {
 #ifdef MAPNIK_DEBUG           
@@ -96,9 +97,9 @@ namespace mapnik
             }
             catch (proj_init_error& ex)
             {
-               std::clog << ex.what() << "\n"; 
+               std::clog << "proj_init_error:" << ex.what() << "\n"; 
             }
-
+            
             p.end_map_processing(m_);
          }	
       private:
@@ -110,24 +111,30 @@ namespace mapnik
             if (ds)
             {
                Envelope<double> const& ext=m_.getCurrentExtent();
-              
                projection proj1(lay.srs());
                proj_transform prj_trans(proj0,proj1);
-               
-               double x0 = ext.minx();
-               double y0 = ext.miny();
-               double z0 = 0.0;
-               double x1 = ext.maxx();
-               double y1 = ext.maxy();
-               double z1 = 0.0;
-               prj_trans.forward(x0,y0,z0);
-               prj_trans.forward(x1,y1,z1);
-               Envelope<double> bbox(x0,y0,x1,y1);
 
+               Envelope<double> layer_ext = lay.envelope();
+               double lx0 = layer_ext.minx();
+               double ly0 = layer_ext.miny();
+               double lz0 = 0.0;
+               double lx1 = layer_ext.maxx();
+               double ly1 = layer_ext.maxy();
+               double lz1 = 0.0;
+               // back project layers extent into main map projection
+               prj_trans.backward(lx0,ly0,lz0);
+               prj_trans.backward(lx1,ly1,lz1);
+               // clip query bbox
+               lx0 = std::max(ext.minx(),lx0);
+               ly0 = std::max(ext.miny(),ly0);
+               lx1 = std::min(ext.maxx(),lx1);
+               ly1 = std::min(ext.maxy(),ly1);
+               
+               prj_trans.forward(lx0,ly0,lz0);
+               prj_trans.forward(lx1,ly1,lz1);
+               Envelope<double> bbox(lx0,ly0,lx1,ly1);
                double resolution = m_.getWidth()/bbox.width();
-#ifdef MAPNIK_DEBUG
-               std::clog << bbox << "\n";
-#endif                
+               
                std::vector<std::string> const& style_names = lay.styles();
                std::vector<std::string>::const_iterator stylesIter = style_names.begin();
                std::vector<std::string>::const_iterator stylesEnd = style_names.end();
@@ -140,7 +147,7 @@ namespace mapnik
                   std::vector<rule_type*> else_rules;
                     
                   bool active_rules=false;
-                    
+                  
                   feature_type_style const& style=m_.find_style(*stylesIter++);
                   
                   query q(bbox,resolution); //BBOX query
