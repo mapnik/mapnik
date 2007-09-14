@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@prefix@
+libdir=@exec_prefix@/lib
+includedir=@prefix@/include
+
+Name: @PACKAGE@
+Description: Free Toolkit for developing mapping applications
+Version: @VERSION@
+Requires: 
+Conflicts: 
+Libs: -L${libdir} -lmapnik
+Cflags: -I${includedir}
+
