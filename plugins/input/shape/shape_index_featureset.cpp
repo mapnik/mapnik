@@ -85,9 +85,9 @@ feature_ptr shape_index_featureset<filterT>::next()
         {
             double x=shape_.shp().read_double();
             double y=shape_.shp().read_double();	    
-            geometry_ptr point(new point_impl);
+            geometry2d * point = new point_impl;
             point->move_to(x,y);
-            feature->set_geometry(point);
+            feature->add_geometry(point);
             ++count_;
         }
         else if (type == shape_io::shape_pointm)
@@ -95,9 +95,9 @@ feature_ptr shape_index_featureset<filterT>::next()
             double x=shape_.shp().read_double();
             double y=shape_.shp().read_double();
             shape_.shp().read_double();// m
-            geometry_ptr point(new point_impl);
+            geometry2d * point = new point_impl;
             point->move_to(x,y);
-            feature->set_geometry(point);
+            feature->add_geometry(point);
             ++count_;
         }
         else if (type == shape_io::shape_pointz)
@@ -106,9 +106,9 @@ feature_ptr shape_index_featureset<filterT>::next()
             double y=shape_.shp().read_double();
             shape_.shp().read_double();// z
             shape_.shp().read_double();// m
-            geometry_ptr point(new point_impl);
+            geometry2d * point = new point_impl;
             point->move_to(x,y);
-            feature->set_geometry(point);
+            feature->add_geometry(point);
             ++count_;
         }	
         else
@@ -122,49 +122,49 @@ feature_ptr shape_index_featureset<filterT>::next()
 	    
             switch (type)
             {
-	        case shape_io::shape_polyline:
-                {
-                    geometry_ptr line = shape_.read_polyline();
-                    feature->set_geometry(line);
+               case shape_io::shape_polyline:
+               {
+                  geometry2d * line = shape_.read_polyline();
+                  feature->add_geometry(line);
+                  ++count_;
+                  break;
+               }
+               case shape_io::shape_polylinem:
+               {
+                  geometry2d * line = shape_.read_polylinem();
+                  feature->add_geometry(line);
+                  ++count_;
+                  break;
+               }
+               case shape_io::shape_polylinez:
+               {
+                  geometry2d * line = shape_.read_polylinez();
+                  feature->add_geometry(line);
+                  ++count_;
+                  break;
+               }
+               case shape_io::shape_polygon:
+               {
+                  
+                  geometry2d * poly = shape_.read_polygon();
+                  feature->add_geometry(poly);
+                  ++count_;
+                  break;
+               }
+               case shape_io::shape_polygonm:
+               { 
+                    geometry2d * poly = shape_.read_polygonm();
+                    feature->add_geometry(poly);
                     ++count_;
                     break;
-                }
-            case shape_io::shape_polylinem:
-                {
-                    geometry_ptr line = shape_.read_polylinem();
-                    feature->set_geometry(line);
-                    ++count_;
-                    break;
-                }
-            case shape_io::shape_polylinez:
-                {
-                    geometry_ptr line = shape_.read_polylinez();
-                    feature->set_geometry(line);
-                    ++count_;
-                    break;
-                }
-	        case shape_io::shape_polygon:
-                {
-		 
-                    geometry_ptr poly = shape_.read_polygon();
-                    feature->set_geometry(poly);
-                    ++count_;
-                    break;
-                }
-	        case shape_io::shape_polygonm:
-                { 
-                    geometry_ptr poly = shape_.read_polygonm();
-                    feature->set_geometry(poly);
-                    ++count_;
-                    break;
-                }
-	        case shape_io::shape_polygonz:
-                {
-                    geometry_ptr poly = shape_.read_polygonz();
-                    feature->set_geometry(poly);
-                    ++count_;
-                    break;
-                }
+               }
+               case shape_io::shape_polygonz:
+               {
+                  geometry2d * poly = shape_.read_polygonz();
+                  feature->add_geometry(poly);
+                  ++count_;
+                  break;
+               }
             }
         }
         if (attr_ids_.size())

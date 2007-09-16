@@ -88,6 +88,12 @@ namespace mapnik
       return (&lhs == &rhs); 
    }
     
+   inline bool operator==(building_symbolizer const& lhs,
+                          building_symbolizer const& rhs)
+   {
+      return (&lhs == &rhs); 
+   }
+   
    typedef boost::variant<point_symbolizer,
                           line_symbolizer,
                           line_pattern_symbolizer,
@@ -95,7 +101,8 @@ namespace mapnik
                           polygon_pattern_symbolizer,
                           raster_symbolizer,
                           shield_symbolizer,
-                          text_symbolizer> symbolizer;
+                          text_symbolizer,
+                          building_symbolizer> symbolizer;
     
         
    typedef std::vector<symbolizer> symbolizers;

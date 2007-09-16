@@ -53,10 +53,10 @@ class _Envelope(Envelope,_injector):
            (self.minx,self.miny,self.maxx,self.maxy)
 
 class _Projection(Projection,_injector):
-  def forward(self,pt):
-    return forward_(pt,self)
-  def inverse(self,pt):
-    return inverse_(pt,self)
+  def forward(self,obj):
+    return forward_(obj,self)
+  def inverse(self,obj):
+    return inverse_(obj,self)
   
 class _Datasource(Datasource,_injector):
   def describe(self):

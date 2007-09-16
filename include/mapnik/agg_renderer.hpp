@@ -35,6 +35,10 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/map.hpp>
+// agg
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_rasterizer_scanline_aa.h"
 
 namespace mapnik {
     template <typename T>
@@ -71,12 +75,20 @@ namespace mapnik {
         void process(text_symbolizer const& sym,
                      Feature const& feature,
                      proj_transform const& prj_trans);
+        void process(building_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
     private:
           T & pixmap_;
+          unsigned width_;
+          unsigned height_;
+          agg::row_ptr_cache<agg::int8u> buf_;
+          agg::pixfmt_rgba32 pixf_;
           CoordTransform t_;
           face_manager<freetype_engine> font_manager_;
           label_collision_detector4 detector_;
           placement_finder<label_collision_detector4> finder_;
+          agg::rasterizer_scanline_aa<> ras_;
     };
 }
 

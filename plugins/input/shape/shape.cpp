@@ -40,8 +40,8 @@ using mapnik::attribute_descriptor;
 
 shape_datasource::shape_datasource(const parameters &params)
    : datasource (params),
-     shape_name_(*params_.get<std::string>("file","")),
      type_(datasource::Vector),
+     shape_name_(*params_.get<std::string>("file","")),
      file_length_(0),
      indexed_(false),
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))

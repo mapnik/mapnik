@@ -26,7 +26,7 @@
 #include <mapnik/projection.hpp>
 
 namespace {
-    mapnik::coord2d forward(mapnik::coord2d const& pt, 
+    mapnik::coord2d forward_pt(mapnik::coord2d const& pt, 
                             mapnik::projection const& prj)
     {
         double x = pt.x;
@@ -35,7 +35,7 @@ namespace {
         return mapnik::coord2d(x,y);
     }
     
-    mapnik::coord2d inverse(mapnik::coord2d const& pt, 
+    mapnik::coord2d inverse_pt(mapnik::coord2d const& pt, 
                             mapnik::projection const& prj)
     {
         double x = pt.x;
@@ -43,7 +43,31 @@ namespace {
         prj.inverse(x,y);
         return mapnik::coord2d(x,y);
     }
-    
+   
+   mapnik::Envelope<double> forward_env(mapnik::Envelope<double> const & box,
+                                    mapnik::projection const& prj)
+   {
+      double minx = box.minx();
+      double miny = box.miny();
+      double maxx = box.maxx();
+      double maxy = box.maxy();
+      prj.forward(minx,miny);
+      prj.forward(maxx,maxy);
+      return mapnik::Envelope<double>(minx,miny,maxx,maxy);
+   }
+   
+   mapnik::Envelope<double> inverse_env(mapnik::Envelope<double> const & box,
+                                    mapnik::projection const& prj)
+   {
+      double minx = box.minx();
+      double miny = box.miny();
+      double maxx = box.maxx();
+      double maxy = box.maxy();
+      prj.inverse(minx,miny);
+      prj.inverse(maxx,maxy);
+      return mapnik::Envelope<double>(minx,miny,maxx,maxy);
+   }
+   
 }
 
 void export_projection ()
@@ -57,7 +81,9 @@ void export_projection ()
         .add_property ("geographic",&projection::is_geographic)
         ;
     
-    def("forward_",&forward);
-    def("inverse_",&inverse);
+    def("forward_",&forward_pt);
+    def("inverse_",&inverse_pt);
+    def("forward_",&forward_env);
+    def("inverse_",&inverse_env);
     
 }

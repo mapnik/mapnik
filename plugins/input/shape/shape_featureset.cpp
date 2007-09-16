@@ -1,3 +1,4 @@
+
 /*****************************************************************************
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -59,9 +60,9 @@ template <typename filterT>
 feature_ptr shape_featureset<filterT>::next()
 {
    
-  using mapnik::point_impl;
+   using mapnik::point_impl;
    std::streampos pos=shape_.shp().pos();
-    
+   
    if (pos < std::streampos(file_length_ * 2))
    {
       shape_.move_to(pos);
@@ -71,9 +72,9 @@ feature_ptr shape_featureset<filterT>::next()
       {
          double x=shape_.shp().read_double();
          double y=shape_.shp().read_double();
-         geometry_ptr point(new point_impl);
+         geometry2d * point = new point_impl;
          point->move_to(x,y);
-         feature->set_geometry(point);
+         feature->add_geometry(point);
          ++count_;
       }
       else if (type == shape_io::shape_pointm)
@@ -81,9 +82,9 @@ feature_ptr shape_featureset<filterT>::next()
          double x=shape_.shp().read_double();
          double y=shape_.shp().read_double();
          shape_.shp().read_double();//m
-         geometry_ptr point(new point_impl);
+         geometry2d * point = new point_impl;
          point->move_to(x,y);
-         feature->set_geometry(point);
+         feature->add_geometry(point);
          ++count_;
       }
       else if (type == shape_io::shape_pointz)
@@ -92,9 +93,9 @@ feature_ptr shape_featureset<filterT>::next()
          double y=shape_.shp().read_double();
          shape_.shp().read_double();//z
          shape_.shp().read_double();//m
-         geometry_ptr point(new point_impl);
+         geometry2d * point=new point_impl;
          point->move_to(x,y);
-         feature->set_geometry(point);
+         feature->add_geometry(point);
          ++count_;
       }
       else
@@ -119,43 +120,43 @@ feature_ptr shape_featureset<filterT>::next()
 	  
             case shape_io::shape_polyline:
             {
-               geometry_ptr line = shape_.read_polyline();
-               feature->set_geometry(line);
+               geometry2d * line = shape_.read_polyline();
+               feature->add_geometry(line);
                ++count_;
                break;
             }
             case shape_io::shape_polylinem:
             {
-               geometry_ptr line = shape_.read_polylinem();
-               feature->set_geometry(line);
+               geometry2d * line = shape_.read_polylinem();
+               feature->add_geometry(line);
                ++count_;
                break;
             }
             case shape_io::shape_polylinez:
             {
-               geometry_ptr line = shape_.read_polylinez();
-               feature->set_geometry(line);
+               geometry2d * line = shape_.read_polylinez();
+               feature->add_geometry(line);
                ++count_;
                break;
             }
             case shape_io::shape_polygon:
             {		 
-               geometry_ptr poly = shape_.read_polygon();
-               feature->set_geometry(poly);
+               geometry2d * poly = shape_.read_polygon();
+               feature->add_geometry(poly);
                ++count_;
                break;
             }
             case shape_io::shape_polygonm:
             {		 
-               geometry_ptr poly = shape_.read_polygonm();
-               feature->set_geometry(poly);
+               geometry2d * poly = shape_.read_polygonm();
+               feature->add_geometry(poly);
                ++count_;
                break;
             }
             case shape_io::shape_polygonz:
             {
-               geometry_ptr poly = shape_.read_polygonz();
-               feature->set_geometry(poly);
+               geometry2d * poly = shape_.read_polygonz();
+               feature->add_geometry(poly);
                ++count_;
                break;
             }

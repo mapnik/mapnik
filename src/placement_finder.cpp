@@ -49,15 +49,15 @@ namespace mapnik
 {
    template<>
    placement::placement(string_info *info_, 
-                                            CoordTransform *ctrans_, 
-                                            const proj_transform *proj_trans_, 
-                                            geometry_ptr geom_, 
-                                            shield_symbolizer sym)
+                        CoordTransform *ctrans_, 
+                        const proj_transform *proj_trans_, 
+                        geometry2d const& geom_, 
+                        shield_symbolizer const& sym)
       : info(info_), 
         ctrans(ctrans_), 
         proj_trans(proj_trans_), 
         geom(geom_),
-        shape_path(*ctrans_, *geom_, *proj_trans_), 
+        shape_path(*ctrans_, geom_, *proj_trans_), 
         total_distance_(-1.0), 
         displacement_(sym.get_displacement()),
         label_placement(sym.get_label_placement()), 
@@ -77,15 +77,15 @@ namespace mapnik
   
    template<>
    placement::placement(string_info *info_, 
-                                          CoordTransform *ctrans_, 
-                                          const proj_transform *proj_trans_, 
-                                          geometry_ptr geom_, 
-                                          text_symbolizer sym)
+                        CoordTransform *ctrans_, 
+                        const proj_transform *proj_trans_, 
+                        geometry2d const& geom_, 
+                        text_symbolizer const& sym)
       : info(info_), 
         ctrans(ctrans_), 
         proj_trans(proj_trans_), 
         geom(geom_),
-        shape_path(*ctrans_, *geom_, *proj_trans_), 
+        shape_path(*ctrans_, geom_, *proj_trans_), 
         total_distance_(-1.0), 
         displacement_(sym.get_displacement()),
         label_placement(sym.get_label_placement()), 
@@ -109,7 +109,7 @@ namespace mapnik
     
    unsigned placement::path_size() const
    {
-      return geom->num_points();
+      return geom.num_points();
    }
     
    std::pair<double, double> placement::get_position_at_distance(double target_distance)
@@ -122,7 +122,7 @@ namespace mapnik
     
       shape_path.rewind(0);
       shape_path.vertex(&new_x,&new_y);
-      unsigned num_points =  geom->num_points();
+      unsigned num_points =  geom.num_points();
       for (unsigned i = 1; i < num_points; ++i)
       {
          double dx, dy;
@@ -162,7 +162,7 @@ namespace mapnik
 
          total_distance_ = 0.0;
             
-         unsigned num_points = geom->num_points();
+         unsigned num_points = geom.num_points();
          for (unsigned i = 1; i < num_points ; ++i)
          {
             double dx, dy;
@@ -268,9 +268,9 @@ namespace mapnik
          }
          return;
       }
-
+      
       std::vector<double> ideal_label_distances = get_ideal_placements(p);
-
+      
       double delta, tolerance, distance;
       distance = p->get_total_distance();
       tolerance = p->label_position_tolerance;
@@ -327,9 +327,10 @@ namespace mapnik
       double angle = 0.0;
       int orientation = 0;
       double displacement = boost::tuples::get<1>(p->displacement_); // displace by dy
-    
-      p->current_placement.path.clear();
-    
+      
+      //p->current_placement.clear(); //TODO !!
+      std::auto_ptr<placement_element> current_placement(new placement_element);
+      
       double x, y;
       x = y = 0.0;
     
@@ -344,7 +345,7 @@ namespace mapnik
       p->shape_path.vertex(&new_x,&new_y);
       old_x = new_x;
       old_y = new_y;
-      unsigned num_points = p->geom->num_points();
+      unsigned num_points = p->geom.num_points();
       for (unsigned i = 1; i < num_points; ++i)
       {
          double dx, dy;
@@ -365,8 +366,8 @@ namespace mapnik
          if (distance > target_distance)
          {
             // this segment is greater that the target starting distance so start here
-            p->current_placement.starting_x = new_x - dx*(distance - target_distance)/segment_length;
-            p->current_placement.starting_y = new_y - dy*(distance - target_distance)/segment_length;
+            current_placement->starting_x = new_x - dx*(distance - target_distance)/segment_length;
+            current_placement->starting_y = new_y - dy*(distance - target_distance)/segment_length;
     
             // angle text starts at and orientation
             angle = atan2(-dy, dx);
@@ -403,7 +404,7 @@ namespace mapnik
                     
                cur_node++;
                     
-               if (cur_node >= p->geom->num_points()) {
+               if (cur_node >= p->geom.num_points()) {
                   return false;
                }
                     
@@ -491,14 +492,15 @@ namespace mapnik
          }
         
         
-         p->current_placement.path.add_node(c,render_x - p->current_placement.starting_x, 
-                                            -render_y + p->current_placement.starting_y, 
-                                            render_angle);
+         current_placement->add_node(c,render_x - current_placement->starting_x, 
+                                     -render_y + current_placement->starting_y, 
+                                     render_angle);
          x += next_char_x;
          y -= next_char_y;
       }
-      p->placements.push_back(p->current_placement);
-
+      
+      p->placements.push_back(current_placement.release());
+      
       return true;
    }
 
@@ -507,8 +509,9 @@ namespace mapnik
    {
       double x, y;
 
-      p->current_placement.path.clear();
-        
+      //p->current_placement.clear(); // TODO
+      std::auto_ptr<placement_element> current_placement(new placement_element);
+      
       std::pair<double, double> string_dimensions = p->info->get_dimensions();
       double string_width = string_dimensions.first;
       double string_height = string_dimensions.second;
@@ -538,7 +541,7 @@ namespace mapnik
          double word_height = 0;
          for (unsigned int ii = 0; ii < p->info->num_characters(); ii++)
          {
-            character_info ci;;
+            character_info ci;
             ci = p->info->at(ii);
                 
             unsigned c = ci.character;
@@ -581,25 +584,25 @@ namespace mapnik
         
       p->info->set_dimensions(string_width, string_height);
         
-      if (p->geom->type() == LineString)
+      if (p->geom.type() == LineString)
       {
          std::pair<double, double> starting_pos = p->get_position_at_distance(target_distance);
             
-         p->current_placement.starting_x = starting_pos.first;
-         p->current_placement.starting_y = starting_pos.second;
+         current_placement->starting_x = starting_pos.first;
+         current_placement->starting_y = starting_pos.second;
       }
       else
       {
-         p->geom->label_position(&p->current_placement.starting_x, &p->current_placement.starting_y);
+         p->geom.label_position(&current_placement->starting_x, &current_placement->starting_y);
          //  TODO: 
          //  We would only want label position in final 'paper' coords.
          //  Move view and proj transforms to e.g. label_position(x,y,proj_trans,ctrans)?
          double z=0;  
-         p->proj_trans->backward(p->current_placement.starting_x, p->current_placement.starting_y, z);
-         p->ctrans->forward(&p->current_placement.starting_x, &p->current_placement.starting_y);
+         p->proj_trans->backward(current_placement->starting_x,current_placement->starting_y, z);
+         p->ctrans->forward(&current_placement->starting_x, &current_placement->starting_y);
          // apply displacement ( in pixels ) 
-         p->current_placement.starting_x += boost::tuples::get<0>(p->displacement_);
-         p->current_placement.starting_y += boost::tuples::get<1>(p->displacement_); 
+         current_placement->starting_x += boost::tuples::get<0>(p->displacement_);
+         current_placement->starting_y += boost::tuples::get<1>(p->displacement_); 
       }
         
       double line_height = 0;
@@ -627,22 +630,22 @@ namespace mapnik
          }
          else
          {
-            p->current_placement.path.add_node(c, x, y, 0.0);
+            current_placement->add_node(c, x, y, 0.0);
     
             Envelope<double> e;
             if (p->has_dimensions)
             {
-               e.init(p->current_placement.starting_x - (p->dimensions.first/2.0), 
-                      p->current_placement.starting_y - (p->dimensions.second/2.0), 
-                      p->current_placement.starting_x + (p->dimensions.first/2.0), 
-                      p->current_placement.starting_y + (p->dimensions.second/2.0));
+               e.init(current_placement->starting_x - (p->dimensions.first/2.0), 
+                      current_placement->starting_y - (p->dimensions.second/2.0), 
+                      current_placement->starting_x + (p->dimensions.first/2.0), 
+                      current_placement->starting_y + (p->dimensions.second/2.0));
             }
             else
             {
-               e.init(p->current_placement.starting_x + x, 
-                      p->current_placement.starting_y - y, 
-                      p->current_placement.starting_x + x + ci.width, 
-                      p->current_placement.starting_y - y - ci.height);
+               e.init(current_placement->starting_x + x, 
+                      current_placement->starting_y - y, 
+                      current_placement->starting_x + x + ci.width, 
+                      current_placement->starting_y - y - ci.height);
             }
                 
             if (!detector_.has_placement(e, p->info->get_string(), p->minimum_distance))
@@ -660,8 +663,8 @@ namespace mapnik
          x += ci.width;
          line_height = line_height > ci.height ? line_height : ci.height;
       }
-      p->placements.push_back(p->current_placement);
-    
+      p->placements.push_back(current_placement.release());
+      
       return true;
    }
    

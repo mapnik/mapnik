@@ -33,7 +33,7 @@ using boost::bad_lexical_cast;
 using boost::trim;
 using std::string;
 using mapnik::Feature;
-using mapnik::geometry_ptr;
+using mapnik::geometry2d;
 using mapnik::byte;
 using mapnik::geometry_utils;
 
@@ -53,58 +53,53 @@ feature_ptr postgis_featureset::next()
         feature_ptr feature(new Feature(count_));
         int size=rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
-        geometry_ptr geom = geometry_utils::from_wkb(data,size);
+        geometry_utils::from_wkb(*feature,data,size);
         totalGeomSize_+=size;
-	     
-        if (geom)
+	        
+        for (unsigned pos=1;pos<num_attrs_+1;++pos)
         {
-            feature->set_geometry(geom);
-            
-            for (unsigned pos=1;pos<num_attrs_+1;++pos)
-            {
-                std::string name = rs_->getFieldName(pos);
-                const char* buf=rs_->getValue(pos);
-                int oid = rs_->getTypeOID(pos);
-                
-                if (oid==23) //int4
-                {
-                    int val = int4net(buf);
-                    boost::put(*feature,name,val);
-                }
-                else if (oid==21) //int2
-                {
-                    int val = int2net(buf);
-                    boost::put(*feature,name,val);
-                }
-                else if (oid == 700) // float4
-                {
-                    float val;
-                    float4net(val,buf);
-                    boost::put(*feature,name,val);
-                }
-                else if (oid == 701) // float8
-                {
-                    double val;
-                    float8net(val,buf);
-                    boost::put(*feature,name,val);
-                }
-                else if (oid==25 || oid==1042 || oid==1043) // text or bpchar or varchar
-                {
-                    std::string str(buf);
-                    trim(str);
-                    std::wstring wstr = tr_->transcode(str);
-                    boost::put(*feature,name,wstr);
-                }
-                else 
-                {
+           std::string name = rs_->getFieldName(pos);
+           const char* buf=rs_->getValue(pos);
+           int oid = rs_->getTypeOID(pos);
+           
+           if (oid==23) //int4
+           {
+              int val = int4net(buf);
+              boost::put(*feature,name,val);
+           }
+           else if (oid==21) //int2
+           {
+              int val = int2net(buf);
+              boost::put(*feature,name,val);
+           }
+           else if (oid == 700) // float4
+           {
+              float val;
+              float4net(val,buf);
+              boost::put(*feature,name,val);
+           }
+           else if (oid == 701) // float8
+           {
+              double val;
+              float8net(val,buf);
+              boost::put(*feature,name,val);
+           }
+           else if (oid==25 || oid==1042 || oid==1043) // text or bpchar or varchar
+           {
+              std::string str(buf);
+              trim(str);
+              std::wstring wstr = tr_->transcode(str);
+              boost::put(*feature,name,wstr);
+           }
+           else 
+           {
 #ifdef MAPNIK_DEBUG
-                    std::clog << "uknown OID = " << oid << " FIXME \n";
+              std::clog << "uknown OID = " << oid << " FIXME \n";
 #endif
-                    //boost::put(*feature,name,0); 
-                }
-            }
-            ++count_;
+              //boost::put(*feature,name,0); 
+           }
         }
+        ++count_;   
         return feature;
     }
     else

@@ -31,395 +31,395 @@ const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";
 
 shape_io::shape_io(const std::string& shape_name)
-    : type_(shape_null),
-      reclength_(0),
-      id_(0)
+   : type_(shape_null),
+     reclength_(0),
+     id_(0)
 {
-    bool ok = (shp_.open(shape_name + SHP) &&
-	       dbf_.open(shape_name + DBF));
-    if (!ok)
-    { 
-	throw datasource_exception("cannot read shape file");
-    }
+   bool ok = (shp_.open(shape_name + SHP) &&
+              dbf_.open(shape_name + DBF));
+   if (!ok)
+   { 
+      throw datasource_exception("cannot read shape file");
+   }
 }
 
 shape_io::~shape_io()
 {
-    shp_.close();
-    dbf_.close();
+   shp_.close();
+   dbf_.close();
 }
 
 
 void shape_io::move_to (int pos)
 {
-    shp_.seek(pos);
-    id_ = shp_.read_xdr_integer();
-    reclength_ = shp_.read_xdr_integer();
-    type_ = shp_.read_ndr_integer();
+   shp_.seek(pos);
+   id_ = shp_.read_xdr_integer();
+   reclength_ = shp_.read_xdr_integer();
+   type_ = shp_.read_ndr_integer();
 
-    if (type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
-    {
-        shp_.read_envelope(cur_extent_);
-    }
+   if (type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
+   {
+      shp_.read_envelope(cur_extent_);
+   }
 }
 
 int shape_io::type() const
 {
-    return type_;
+   return type_;
 }
 
 const Envelope<double>& shape_io::current_extent() const
 {
-    return cur_extent_;
+   return cur_extent_;
 }
 
 shape_file& shape_io::shp()
 {
-    return shp_;
+   return shp_;
 }
 
 shape_file& shape_io::shx()
 {
-    return shx_;
+   return shx_;
 }
 
 
 dbf_file& shape_io::dbf()
 {
-    return dbf_;
+   return dbf_;
 }
 
-geometry_ptr shape_io::read_polyline()
+geometry2d * shape_io::read_polyline()
 {    
-  using mapnik::line_string_impl;
-  shape_record record(reclength_*2-36);
-  shp_.read_record(record);
-    int num_parts=record.read_ndr_integer();
-    int num_points=record.read_ndr_integer();
-    geometry_ptr line(new line_string_impl);
-    line->set_capacity(num_points + num_parts);
-    if (num_parts == 1)
-    {
-	line->set_capacity(num_points + 1);
-	record.skip(4);
-	double x=record.read_double();
-	double y=record.read_double();
-	line->move_to(x,y);
-	for (int i=1;i<num_points;++i)
-	{
-	    x=record.read_double();
-	    y=record.read_double();
-	    line->line_to(x,y);
-	}
-    }
-    else
-    {
-	std::vector<int> parts(num_parts);
-	for (int i=0;i<num_parts;++i)
-	{
-	    parts[i]=record.read_ndr_integer();
-	}
+   using mapnik::line_string_impl;
+   shape_record record(reclength_*2-36);
+   shp_.read_record(record);
+   int num_parts=record.read_ndr_integer();
+   int num_points=record.read_ndr_integer();
+   geometry2d * line = new line_string_impl;
+   line->set_capacity(num_points + num_parts);
+   if (num_parts == 1)
+   {
+      line->set_capacity(num_points + 1);
+      record.skip(4);
+      double x=record.read_double();
+      double y=record.read_double();
+      line->move_to(x,y);
+      for (int i=1;i<num_points;++i)
+      {
+         x=record.read_double();
+         y=record.read_double();
+         line->line_to(x,y);
+      }
+   }
+   else
+   {
+      std::vector<int> parts(num_parts);
+      for (int i=0;i<num_parts;++i)
+      {
+         parts[i]=record.read_ndr_integer();
+      }
 
-	int start,end;
-	for (int k=0;k<num_parts;++k)
-	{
-	    start=parts[k];
-	    if (k==num_parts-1)
-		end=num_points;
-	    else
-		end=parts[k+1];
+      int start,end;
+      for (int k=0;k<num_parts;++k)
+      {
+         start=parts[k];
+         if (k==num_parts-1)
+            end=num_points;
+         else
+            end=parts[k+1];
 	    
-	    double x=record.read_double();
-	    double y=record.read_double();
-	    line->move_to(x,y);
+         double x=record.read_double();
+         double y=record.read_double();
+         line->move_to(x,y);
 	    
-	    for (int j=start+1;j<end;++j)
-	    {
-		x=record.read_double();
-		y=record.read_double();
-		line->line_to(x,y);
-	    }
-	}
-    }
-    return line;
+         for (int j=start+1;j<end;++j)
+         {
+            x=record.read_double();
+            y=record.read_double();
+            line->line_to(x,y);
+         }
+      }
+   }
+   return line;
 }
 
-geometry_ptr shape_io::read_polylinem()
+geometry2d * shape_io::read_polylinem()
 {    
-  using mapnik::line_string_impl;
-    shape_record record(reclength_*2-36);
-    shp_.read_record(record);
-    int num_parts=record.read_ndr_integer();
-    int num_points=record.read_ndr_integer();
-    geometry_ptr line(new line_string_impl);
-    line->set_capacity(num_points + num_parts);
-    if (num_parts == 1)
-    {
-	record.skip(4);
-	double x=record.read_double();
-	double y=record.read_double();
-	line->move_to(x,y);
-	for (int i=1;i<num_points;++i)
-	{
-	    x=record.read_double();
-	    y=record.read_double();
-	    line->line_to(x,y);
-	}
-    }
-    else
-    {
-	std::vector<int> parts(num_parts);
-	for (int i=0;i<num_parts;++i)
-	{
-	    parts[i]=record.read_ndr_integer();
-	}
+   using mapnik::line_string_impl;
+   shape_record record(reclength_*2-36);
+   shp_.read_record(record);
+   int num_parts=record.read_ndr_integer();
+   int num_points=record.read_ndr_integer();
+   geometry2d * line = new line_string_impl;
+   line->set_capacity(num_points + num_parts);
+   if (num_parts == 1)
+   {
+      record.skip(4);
+      double x=record.read_double();
+      double y=record.read_double();
+      line->move_to(x,y);
+      for (int i=1;i<num_points;++i)
+      {
+         x=record.read_double();
+         y=record.read_double();
+         line->line_to(x,y);
+      }
+   }
+   else
+   {
+      std::vector<int> parts(num_parts);
+      for (int i=0;i<num_parts;++i)
+      {
+         parts[i]=record.read_ndr_integer();
+      }
 
-	int start,end;
-	for (int k=0;k<num_parts;++k)
-	{
-	    start=parts[k];
-	    if (k==num_parts-1)
-		end=num_points;
-	    else
-		end=parts[k+1];
-	    
-	    double x=record.read_double();
-	    double y=record.read_double();
-	    line->move_to(x,y);
-	    
-	    for (int j=start+1;j<end;++j)
-	    {
-		x=record.read_double();
-		y=record.read_double();
-		line->line_to(x,y);
-	    }
-	}
-    }
-    // m-range
-    //double m0=record.read_double();
-    //double m1=record.read_double();
-    
-    //for (int i=0;i<num_points;++i)
-    //{
-    //   double m=record.read_double();
-    //}
-    
-    return line;
-}
-
-geometry_ptr shape_io::read_polylinez()
-{
-  using mapnik::line_string_impl;
-    shape_record record(reclength_*2-36);
-    shp_.read_record(record);
-    int num_parts=record.read_ndr_integer();
-    int num_points=record.read_ndr_integer();
-    geometry_ptr line(new line_string_impl);
-    line->set_capacity(num_points + num_parts);
-    if (num_parts == 1)
-    {
-	record.skip(4);
-	double x=record.read_double();
-	double y=record.read_double();
-	line->move_to(x,y);
-	for (int i=1;i<num_points;++i)
-	{
-	    x=record.read_double();
-	    y=record.read_double();
-	    line->line_to(x,y);
-	}
-    }
-    else
-    {
-	std::vector<int> parts(num_parts);
-	for (int i=0;i<num_parts;++i)
-	{
-	    parts[i]=record.read_ndr_integer();
-	}
-
-	int start,end;
-	for (int k=0;k<num_parts;++k)
-	{
-	    start=parts[k];
-	    if (k==num_parts-1)
-		end=num_points;
-	    else
-		end=parts[k+1];
-	    
-	    double x=record.read_double();
-	    double y=record.read_double();
-	    line->move_to(x,y);
-	    
-	    for (int j=start+1;j<end;++j)
-	    {
-		x=record.read_double();
-		y=record.read_double();
-		line->line_to(x,y);
-	    }
-	}
-    }
-    // z-range
-    //double z0=record.read_double();
-    //double z1=record.read_double();
-    //for (int i=0;i<num_points;++i)
-    // {
-    //	double z=record.read_double();
-    // }
-    
-    // m-range
-    //double m0=record.read_double();
-    //double m1=record.read_double();
-    
-    //for (int i=0;i<num_points;++i)
-    //{
-    //   double m=record.read_double();
-    //} 
-    return line;
-}
-
-geometry_ptr shape_io::read_polygon()
-{
-  using mapnik::polygon_impl;
-    shape_record record(reclength_*2-36);
-    shp_.read_record(record);
-    int num_parts=record.read_ndr_integer();
-    int num_points=record.read_ndr_integer();
-    std::vector<int> parts(num_parts);
-    geometry_ptr poly(new polygon_impl);
-    poly->set_capacity(num_points + num_parts);
-    for (int i=0;i<num_parts;++i)
-    {
-        parts[i]=record.read_ndr_integer();
-    }
-
-    for (int k=0;k<num_parts;k++)
-    {
-        int start=parts[k];
-        int end;
-        if (k==num_parts-1)
-        {
+      int start,end;
+      for (int k=0;k<num_parts;++k)
+      {
+         start=parts[k];
+         if (k==num_parts-1)
             end=num_points;
-        }
-        else
-        {
+         else
             end=parts[k+1];
-        }
-	double x=record.read_double();
-	double y=record.read_double();
-        poly->move_to(x,y);
-   
-        for (int j=start+1;j<end;j++)
-        {
-	    x=record.read_double();
-	    y=record.read_double();
-            poly->line_to(x,y);
-        }
-    }
-    return poly;
+	    
+         double x=record.read_double();
+         double y=record.read_double();
+         line->move_to(x,y);
+	    
+         for (int j=start+1;j<end;++j)
+         {
+            x=record.read_double();
+            y=record.read_double();
+            line->line_to(x,y);
+         }
+      }
+   }
+   // m-range
+   //double m0=record.read_double();
+   //double m1=record.read_double();
+    
+   //for (int i=0;i<num_points;++i)
+   //{
+   //   double m=record.read_double();
+   //}
+    
+   return line;
 }
 
-geometry_ptr shape_io::read_polygonm()
+geometry2d * shape_io::read_polylinez()
 {
-  using mapnik::polygon_impl;
-    shape_record record(reclength_*2-36);
-    shp_.read_record(record);
-    int num_parts=record.read_ndr_integer();
-    int num_points=record.read_ndr_integer();
-    std::vector<int> parts(num_parts);
-    geometry_ptr poly(new polygon_impl);
-    poly->set_capacity(num_points + num_parts);
-    for (int i=0;i<num_parts;++i)
-    {
-        parts[i]=record.read_ndr_integer();
-    }
-    
-    for (int k=0;k<num_parts;k++)
-    {
-        int start=parts[k];
-        int end;
-        if (k==num_parts-1)
-        {
+   using mapnik::line_string_impl;
+   shape_record record(reclength_*2-36);
+   shp_.read_record(record);
+   int num_parts=record.read_ndr_integer();
+   int num_points=record.read_ndr_integer();
+   geometry2d * line = new line_string_impl;
+   line->set_capacity(num_points + num_parts);
+   if (num_parts == 1)
+   {
+      record.skip(4);
+      double x=record.read_double();
+      double y=record.read_double();
+      line->move_to(x,y);
+      for (int i=1;i<num_points;++i)
+      {
+         x=record.read_double();
+         y=record.read_double();
+         line->line_to(x,y);
+      }
+   }
+   else
+   {
+      std::vector<int> parts(num_parts);
+      for (int i=0;i<num_parts;++i)
+      {
+         parts[i]=record.read_ndr_integer();
+      }
+
+      int start,end;
+      for (int k=0;k<num_parts;++k)
+      {
+         start=parts[k];
+         if (k==num_parts-1)
             end=num_points;
-        }
-        else
-        {
+         else
             end=parts[k+1];
-        }
-	double x=record.read_double();
-	double y=record.read_double();
-        poly->move_to(x,y);
-   
-        for (int j=start+1;j<end;j++)
-        {
-	    x=record.read_double();
-	    y=record.read_double();
-            poly->line_to(x,y);
-        }
-    }
-    // m-range
-    //double m0=record.read_double();
-    //double m1=record.read_double();
+	    
+         double x=record.read_double();
+         double y=record.read_double();
+         line->move_to(x,y);
+	    
+         for (int j=start+1;j<end;++j)
+         {
+            x=record.read_double();
+            y=record.read_double();
+            line->line_to(x,y);
+         }
+      }
+   }
+   // z-range
+   //double z0=record.read_double();
+   //double z1=record.read_double();
+   //for (int i=0;i<num_points;++i)
+   // {
+   //	double z=record.read_double();
+   // }
     
-    //for (int i=0;i<num_points;++i)
-    //{
-    //   double m=record.read_double();
-    //} 
-    return poly;
+   // m-range
+   //double m0=record.read_double();
+   //double m1=record.read_double();
+    
+   //for (int i=0;i<num_points;++i)
+   //{
+   //   double m=record.read_double();
+   //} 
+   return line;
 }
 
-geometry_ptr shape_io::read_polygonz()
+geometry2d * shape_io::read_polygon()
 {
-  using mapnik::polygon_impl;
-    shape_record record(reclength_*2-36);
-    shp_.read_record(record);
-    int num_parts=record.read_ndr_integer();
-    int num_points=record.read_ndr_integer();
-    std::vector<int> parts(num_parts);
-    geometry_ptr poly(new polygon_impl);
-    poly->set_capacity(num_points + num_parts);
-    for (int i=0;i<num_parts;++i)
-    {
-        parts[i]=record.read_ndr_integer();
-    }
-    
-    for (int k=0;k<num_parts;k++)
-    {
-        int start=parts[k];
-        int end;
-        if (k==num_parts-1)
-        {
-            end=num_points;
-        }
-        else
-        {
-            end=parts[k+1];
-        }
-	double x=record.read_double();
-	double y=record.read_double();
-        poly->move_to(x,y);
+   using mapnik::polygon_impl;
+   shape_record record(reclength_*2-36);
+   shp_.read_record(record);
+   int num_parts=record.read_ndr_integer();
+   int num_points=record.read_ndr_integer();
+   std::vector<int> parts(num_parts);
+   geometry2d * poly = new polygon_impl;
+   poly->set_capacity(num_points + num_parts);
+   for (int i=0;i<num_parts;++i)
+   {
+      parts[i]=record.read_ndr_integer();
+   }
+
+   for (int k=0;k<num_parts;k++)
+   {
+      int start=parts[k];
+      int end;
+      if (k==num_parts-1)
+      {
+         end=num_points;
+      }
+      else
+      {
+         end=parts[k+1];
+      }
+      double x=record.read_double();
+      double y=record.read_double();
+      poly->move_to(x,y);
    
-        for (int j=start+1;j<end;j++)
-        {
-	    x=record.read_double();
-	    y=record.read_double();
-            poly->line_to(x,y);
-        }
-    }
-    // z-range
-    //double z0=record.read_double();
-    //double z1=record.read_double();
-    //for (int i=0;i<num_points;++i)
-    //{
-    //	double z=record.read_double();
-    //}
+      for (int j=start+1;j<end;j++)
+      {
+         x=record.read_double();
+         y=record.read_double();
+         poly->line_to(x,y);
+      }
+   }
+   return poly;
+}
+
+geometry2d * shape_io::read_polygonm()
+{
+   using mapnik::polygon_impl;
+   shape_record record(reclength_*2-36);
+   shp_.read_record(record);
+   int num_parts=record.read_ndr_integer();
+   int num_points=record.read_ndr_integer();
+   std::vector<int> parts(num_parts);
+   geometry2d * poly = new polygon_impl;
+   poly->set_capacity(num_points + num_parts);
+   for (int i=0;i<num_parts;++i)
+   {
+      parts[i]=record.read_ndr_integer();
+   }
     
-    // m-range
-    //double m0=record.read_double();
-    //double m1=record.read_double();
+   for (int k=0;k<num_parts;k++)
+   {
+      int start=parts[k];
+      int end;
+      if (k==num_parts-1)
+      {
+         end=num_points;
+      }
+      else
+      {
+         end=parts[k+1];
+      }
+      double x=record.read_double();
+      double y=record.read_double();
+      poly->move_to(x,y);
+   
+      for (int j=start+1;j<end;j++)
+      {
+         x=record.read_double();
+         y=record.read_double();
+         poly->line_to(x,y);
+      }
+   }
+   // m-range
+   //double m0=record.read_double();
+   //double m1=record.read_double();
     
-    //for (int i=0;i<num_points;++i)
-    //{
-    //   double m=record.read_double();
-    //} 
-    return poly;
+   //for (int i=0;i<num_points;++i)
+   //{
+   //   double m=record.read_double();
+   //} 
+   return poly;
+}
+
+geometry2d * shape_io::read_polygonz()
+{
+   using mapnik::polygon_impl;
+   shape_record record(reclength_*2-36);
+   shp_.read_record(record);
+   int num_parts=record.read_ndr_integer();
+   int num_points=record.read_ndr_integer();
+   std::vector<int> parts(num_parts);
+   geometry2d * poly=new polygon_impl;
+   poly->set_capacity(num_points + num_parts);
+   for (int i=0;i<num_parts;++i)
+   {
+      parts[i]=record.read_ndr_integer();
+   }
+    
+   for (int k=0;k<num_parts;k++)
+   {
+      int start=parts[k];
+      int end;
+      if (k==num_parts-1)
+      {
+         end=num_points;
+      }
+      else
+      {
+         end=parts[k+1];
+      }
+      double x=record.read_double();
+      double y=record.read_double();
+      poly->move_to(x,y);
+   
+      for (int j=start+1;j<end;j++)
+      {
+         x=record.read_double();
+         y=record.read_double();
+         poly->line_to(x,y);
+      }
+   }
+   // z-range
+   //double z0=record.read_double();
+   //double z1=record.read_double();
+   //for (int i=0;i<num_points;++i)
+   //{
+   //	double z=record.read_double();
+   //}
+    
+   // m-range
+   //double m0=record.read_double();
+   //double m1=record.read_double();
+    
+   //for (int i=0;i<num_points;++i)
+   //{
+   //   double m=record.read_double();
+   //} 
+   return poly;
 }

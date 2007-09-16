@@ -7,10 +7,10 @@ TEMPLATE = app
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /opt/boost_1_35/include/boost-1_35
 INCLUDEPATH += /usr/local/include/freetype2
-
+INCLUDEPATH += /Users/artem/projects/mapnik/agg/include
 INCLUDEPATH += .
 
-
+QMAKE_CXXFLAGS +=' -DDARWIN'
 unix:LIBS =  -L/usr/local/lib -lmapnik -lfreetype
 
 # Input

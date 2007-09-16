@@ -41,6 +41,7 @@ namespace mapnik {
         
         feature_ptr next()
         {
+           /*
             while (pos_ != end_)
             {
                 geometry_ptr geom = (*pos_)->get_geometry();
@@ -50,6 +51,7 @@ namespace mapnik {
                 }
                 ++pos_;
             }
+           */
             return feature_ptr();
         }
         

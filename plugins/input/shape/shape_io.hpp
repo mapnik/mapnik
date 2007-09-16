@@ -27,7 +27,7 @@
 #include "shapefile.hpp"
 #include "shp_index.hpp"
 
-using mapnik::geometry_ptr;
+using mapnik::geometry2d;
 
 struct shape_io
 {
@@ -62,25 +62,24 @@ public:
 	shape_multipatch = 31
     };
 
-    shape_io(const std::string& shape_name);
-    ~shape_io();
-    shape_file& shp();
-    shape_file& shx();
-    dbf_file& dbf();
-    void move_to(int id);
-    int type() const;
-    const Envelope<double>& current_extent() const;
-
-    geometry_ptr read_polyline();
-    geometry_ptr read_polylinem();
-    geometry_ptr read_polylinez();
-    geometry_ptr read_polygon();
-    geometry_ptr read_polygonm();
-    geometry_ptr read_polygonz();
-private:
-    //void read_record(const shape_record& record);
-    // no copying
-    shape_io(const shape_io&);
-    shape_io& operator=(const shape_io&);
+      shape_io(const std::string& shape_name);
+      ~shape_io();
+      shape_file& shp();
+      shape_file& shx();
+      dbf_file& dbf();
+      void move_to(int id);
+      int type() const;
+      const Envelope<double>& current_extent() const;
+      geometry2d * read_polyline();
+      geometry2d * read_polylinem();
+      geometry2d * read_polylinez();
+      geometry2d * read_polygon();
+      geometry2d * read_polygonm();
+      geometry2d * read_polygonz();
+   private:
+      //void read_record(const shape_record& record);
+      // no copying
+      shape_io(const shape_io&);
+      shape_io& operator=(const shape_io&);
 };
 #endif                                            //SHAPE_IO_HH

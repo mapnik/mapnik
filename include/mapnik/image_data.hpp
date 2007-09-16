@@ -41,7 +41,7 @@ namespace mapnik
         {
            //if (pData_) memset(pData_,0,sizeof(T)*width_*height_);
         }
-
+          
         ImageData(const ImageData<T>& rhs)
             :width_(rhs.width_),
              height_(rhs.height_),

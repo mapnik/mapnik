@@ -170,11 +170,11 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                  itr->second.to_string().c_str()));
                         }
                      }
-                       
-                     geometry_ptr geom = feat->get_geometry();
-                     if (geom)
+                     
+                     if (feat->num_geometries() > 0)
                      {
-                        (*feat)["mapnik:geometry"] = geom->type();
+                        mapnik::geometry2d & geom = feat->get_geometry(0);                       
+                        (*feat)["mapnik:geometry"] = geom.type();
                         data->push(feat);
                      }
                   }

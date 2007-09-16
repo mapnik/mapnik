@@ -41,6 +41,8 @@ libraries = []
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('iconv')
+    if env['BIDI'] : libraries.append('fribidi')
+
 
 shape_inputdriver = env.SharedLibrary('shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries)
 

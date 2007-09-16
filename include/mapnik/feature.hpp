@@ -36,100 +36,111 @@
 #include <mapnik/raster.hpp>
 
 namespace mapnik {
-    typedef boost::shared_ptr<raster> raster_ptr;    
-    typedef boost::associative_property_map<
-        std::map<std::string,value
-                 > > properties;
-    
-    template <typename T1,typename T2>
-    struct feature : public properties,
-                     private boost::noncopyable
-    {
-    public:
-          typedef T1 geometry_type;
-          typedef T2 raster_type;
-          typedef std::map<std::string,value>::value_type value_type;
-          typedef std::map<std::string,value>::size_type size_type;
-      
-    private:
-        int id_;
-        geometry_type geom_;
-        raster_type   raster_;
-        std::map<std::string,value> props_;
-    public:
-        typedef std::map<std::string,value>::iterator iterator;
-        explicit feature(int id)
+   typedef boost::shared_ptr<raster> raster_ptr;    
+   typedef boost::associative_property_map<
+      std::map<std::string,value
+               > > properties;
+   
+   template <typename T1,typename T2>
+   struct feature : public properties,
+                    private boost::noncopyable
+   {
+      public:
+         typedef T1 geometry_type;
+         typedef T2 raster_type;
+         typedef std::map<std::string,value>::value_type value_type;
+         typedef std::map<std::string,value>::size_type size_type;
+         
+      private:
+         int id_;
+         boost::ptr_vector<geometry_type> geom_cont_;
+         raster_type   raster_;
+         std::map<std::string,value> props_;
+      public:
+         typedef std::map<std::string,value>::iterator iterator;
+         explicit feature(int id)
             : properties(props_),
               id_(id),
-              geom_(),
+              geom_cont_(),
               raster_() {}
-
-        feature(int id,const geometry_type& geom)
-            : properties(props_),
-              id_(id),
-              geom_(geom),
-              raster_() {}
-
-        int id() const 
-        {
+         
+         //feature(int id,const geometry_type& geom)
+         //  : properties(props_),
+         //   id_(id),
+         //   geom_(geom),
+         //   raster_() {}
+         
+         int id() const 
+         {
             return id_;
-        }
-        
-        void set_geometry(geometry_type& geom)
-        {
-            geom_=geom;
-        }
-	
-        geometry_type const& get_geometry() const
-        {
-            return geom_;
-        }
-        
-        const raster_type& get_raster() const
-        {
+         }
+          
+         void add_geometry(geometry_type * geom)
+         {
+            geom_cont_.push_back(geom);
+         }
+         
+         unsigned num_geometries() const
+         {
+            return geom_cont_.size();
+         }
+         
+         geometry_type const& get_geometry(unsigned index) const
+         {
+            return geom_cont_[index];
+         }
+         
+         geometry_type& get_geometry(unsigned index)
+         {
+            return geom_cont_[index];
+         }
+         
+         const raster_type& get_raster() const
+         {
             return raster_;
-        }
-        void set_raster(raster_type const& raster)
-        {
+         }
+          
+         void set_raster(raster_type const& raster)
+         {
             raster_=raster;
-        }
-	
-        std::map<std::string,value> const& props() const 
-        {
+         }
+          
+         std::map<std::string,value> const& props() const 
+         {
             return props_;
-        }
-        
-        iterator begin() const
-        {
+         }
+          
+         iterator begin() const
+         {
             return props_.begin();
-        }
-        
-        iterator end() const
-        {
+         }
+          
+         iterator end() const
+         {
             return props_.end();
-        }
-        
-        std::string to_string() const
-        {
+         }
+          
+         std::string to_string() const
+         {
             std::stringstream ss;
             ss << "feature (" << std::endl;
             for (std::map<std::string,value>::const_iterator itr=props_.begin();
                  itr != props_.end();++itr)
             {
-                ss << "  " << itr->first  << ":" <<  itr->second << std::endl;
+               ss << "  " << itr->first  << ":" <<  itr->second << std::endl;
             }
             ss << ")" << std::endl;
             return ss.str();
-        }
-    };
-
-    typedef feature<geometry_ptr,raster_ptr> Feature;
-    
-    inline std::ostream& operator<< (std::ostream & out,Feature const& f)
-    {
-        out << f.to_string();
-    	return out;
-    }
+         }
+   };
+   
+   typedef feature<geometry2d,raster_ptr> Feature;
+   
+   inline std::ostream& operator<< (std::ostream & out,Feature const& f)
+   {
+      out << f.to_string();
+      return out;
+   }
 }
 
 #endif //FEATURE_HPP

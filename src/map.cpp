@@ -267,7 +267,7 @@ namespace mapnik
         }
         catch (proj_init_error & ex)
         {
-            std::clog << ex.what() << '\n';
+           std::clog << "proj_init_error:" << ex.what() << '\n';
         }
     }
 

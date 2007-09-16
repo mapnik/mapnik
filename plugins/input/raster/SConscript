@@ -35,6 +35,7 @@ raster_src = Split(
 libraries = []
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
+    if env['BIDI'] : libraries.append('fribidi')
 
 raster_inputdriver = env.SharedLibrary('raster', source=raster_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 

@@ -27,17 +27,17 @@
 
 #include <mapnik/geometry.hpp>
 #include <mapnik/ctrans.hpp>
-
+#include <mapnik/feature.hpp>
 namespace mapnik
 {
     class MAPNIK_DECL geometry_utils 
     {
     public:
-        static geometry_ptr from_wkb(const char* wkb, unsigned size);
+       static void from_wkb(Feature & feature,const char* wkb, unsigned size);
     private:
-        geometry_utils();
-        geometry_utils(geometry_utils const&);
-        geometry_utils& operator=(const geometry_utils&);
+       geometry_utils();
+       geometry_utils(geometry_utils const&);
+       geometry_utils& operator=(const geometry_utils&);
     };
 }
 #endif //WKB_HPP

@@ -29,6 +29,7 @@
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 // mapnik
 #include <mapnik/vertex_vector.hpp>
 #include <mapnik/ctrans.hpp>
@@ -76,8 +77,8 @@ namespace mapnik {
         virtual void move_to(value_type x,value_type y)=0;
         virtual void line_to(value_type x,value_type y)=0;
         virtual unsigned num_points() const = 0;
-        virtual unsigned vertex(double* x, double* y)=0;
-        virtual void rewind(unsigned )=0;
+        virtual unsigned vertex(double* x, double* y) const=0;
+        virtual void rewind(unsigned) const=0;
         virtual void set_capacity(size_t size)=0;
         virtual ~geometry() {}
     };
@@ -117,14 +118,14 @@ namespace mapnik {
             return 1;
          }
          
-         unsigned vertex(double* x, double* y)
+         unsigned vertex(double* x, double* y) const
          {
             *x = pt_.x;
             *y = pt_.y;
             return SEG_LINETO;
          }
          
-         void rewind(unsigned ) {}
+         void rewind(unsigned ) const {}
          
          bool hit_test(value_type x,value_type y, double tol) const
          {
@@ -209,12 +210,12 @@ namespace mapnik {
             return cont_.size();
          }
          
-         unsigned vertex(double* x, double* y)
+         unsigned vertex(double* x, double* y) const
          {
             return cont_.get_vertex(itr_++,x,y);
          }
          
-         void rewind(unsigned )
+         void rewind(unsigned ) const
          {
             itr_=0;
          }
@@ -318,12 +319,12 @@ namespace mapnik {
             return cont_.size();
          }
          
-         unsigned vertex(double* x, double* y)
+         unsigned vertex(double* x, double* y) const
          {
             return cont_.get_vertex(itr_++,x,y);
          }
          
-         void rewind(unsigned )
+         void rewind(unsigned ) const
          {
             itr_=0;
          }
@@ -344,8 +345,9 @@ namespace mapnik {
    typedef line_string<vertex2d,vertex_vector2> line_string_impl;
    typedef polygon<vertex2d,vertex_vector2> polygon_impl;
    
-   typedef geometry<vertex2d> geometry_type;
-   typedef boost::shared_ptr<geometry_type> geometry_ptr;
+   typedef geometry<vertex2d> geometry2d;
+   typedef boost::shared_ptr<geometry2d> geometry_ptr;
+   typedef boost::ptr_vector<geometry2d> geometry_containter;
 }
 
 #endif //GEOMETRY_HPP

@@ -290,8 +290,8 @@ namespace agg
 #ifdef AGG_RENDERING_BUFFER
     typedef AGG_RENDERING_BUFFER rendering_buffer;
 #else
-//  typedef row_ptr_cache<int8u> rendering_buffer;
-    typedef row_accessor<int8u> rendering_buffer;
+    typedef row_ptr_cache<int8u> rendering_buffer;
+    //typedef row_accessor<int8u> rendering_buffer;
 #endif
 
 }

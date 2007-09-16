@@ -167,7 +167,7 @@ namespace mapnik
     }
 
     template <typename T>
-    bool Envelope<T>::intersects(T x,T y) const
+    inline bool Envelope<T>::intersects(T x,T y) const
     {
         return !(x>maxx_ || x<minx_ || y>maxy_ || y<miny_);
     }

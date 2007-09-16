@@ -33,17 +33,19 @@ namespace mapnik {
         
         void operator() (feature_ptr feat)
         {
-            geometry_ptr geom = feat->get_geometry();
-            if ( !geom ) return;
-            if ( first_ ) 
-            {
-                first_ = false;
-                ext_ = geom->envelope();
-            }
-            else
-            {
-                ext_.expand_to_include(geom->envelope());
-            }
+           for (unsigned i=0;i<feat->num_geometries();++i)
+           {
+              geometry2d & geom = feat->get_geometry(i);
+              if ( first_ ) 
+              {
+                 first_ = false;
+                 ext_ = geom.envelope();
+              }
+              else
+              {
+                 ext_.expand_to_include(geom.envelope());
+              }
+           }
         }
         
         Envelope<double> & ext_;

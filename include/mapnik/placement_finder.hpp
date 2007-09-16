@@ -36,25 +36,18 @@
 
 namespace mapnik
 {
-
-   struct placement_element
+   typedef text_path placement_element;
+   
+   struct placement : boost::noncopyable
    {
-         double starting_x;
-         double starting_y;
-    
-         text_path path;
-   };
-
-   struct placement
-   {
-         typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+         typedef  coord_transform2<CoordTransform,geometry2d> path_type;
          
          template <typename SymbolizerT>
          placement(string_info *info_, 
                    CoordTransform *ctrans_, 
                    const proj_transform *proj_trans_, 
-                   geometry_ptr geom_,
-                   SymbolizerT sym);
+                   geometry2d const& geom_,
+                   SymbolizerT const& sym);
          
          ~placement();
         
@@ -69,7 +62,7 @@ namespace mapnik
     
          CoordTransform *ctrans;
          const proj_transform *proj_trans;
-         geometry_ptr geom;
+         geometry2d const& geom;
          path_type shape_path;
 
          double total_distance_; //cache for distance
@@ -80,11 +73,8 @@ namespace mapnik
          std::queue< Envelope<double> > envelopes;
     
          //output
-         std::vector<placement_element> placements;
-
-         // caching output
-         placement_element current_placement;
-    
+         boost::ptr_vector<placement_element> placements;
+         
          int wrap_width;
          int text_ratio;
 

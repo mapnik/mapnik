@@ -52,10 +52,11 @@ opts.Add(PathOption('GIGABASE_LIBS', 'Search path for Gigabase library files', '
 opts.Add(PathOption('PYTHON','Python executable', sys.executable))
 opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal','gigabase']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
-opts.Add('DEBUG', 'Compile a debug version of mapnik', '')
+opts.Add(BoolOption('DEBUG', 'Compile a debug version of mapnik', 'False'))
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
-opts.Add('BIDI', 'BIDI support', '')
+opts.Add(BoolOption('BIDI', 'BIDI support', 'False'))
 opts.Add(EnumOption('THREADING','Set threading support','multi', ['multi','single']))
+opts.Add(EnumOption('XMLPARSER','Set xml parser ','tinyxml', ['tinyxml','spirit']))
 
 env = Environment(ENV=os.environ, options=opts)
 
@@ -99,9 +100,12 @@ if env['BIDI']:
     if env['FRIBIDI_INCLUDES'] not in env['CPPPATH']:
         env['CPPPATH'].append(env['FRIBIDI_INCLUDES'])
     if env['FRIBIDI_LIBS'] not in env['LIBPATH']:
-        env['CPPPATH'].append(env['FRIBIDI_LIBS'])  
+        env['LIBPATH'].append(env['FRIBIDI_LIBS'])  
     env['LIBS'].append('fribidi')
 
+if env['XMLPARSER'] == 'tinyxml':
+    env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
+    
 C_LIBSHEADERS = [
     ['m', 'math.h', True],
     ['ltdl', 'ltdl.h', True],
@@ -122,7 +126,7 @@ if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
-    # ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
+    ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
     ['program_options', 'boost/program_options.hpp', False]
@@ -221,9 +225,9 @@ if env['PLATFORM'] == 'Darwin': pthread = ''
 else: pthread = '-pthread'
 
 if env['DEBUG']:
-    env.Append(CXXFLAGS = '-ansi -Wall %s -ftemplate-depth-100 -O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG -D%s -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL' % (pthread, env['PLATFORM'].upper()))
+    env.Append(CXXFLAGS = '-ansi -Wall %s -ftemplate-depth-100 -O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG -D%s ' % (pthread, env['PLATFORM'].upper()))
 else:
-    env.Append(CXXFLAGS = '-ansi -Wall %s -ftemplate-depth-100 -O3 -finline-functions -Wno-inline -DNDEBUG -D%s -DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL' % (pthread,env['PLATFORM'].upper()))
+    env.Append(CXXFLAGS = '-ansi -Wall %s -ftemplate-depth-100 -O2 -finline-functions -Wno-inline -DNDEBUG -D%s' % (pthread,env['PLATFORM'].upper()))
 
 # Install some free default fonts
 

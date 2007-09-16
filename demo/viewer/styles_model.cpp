@@ -163,7 +163,7 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
       {
          QPixmap pix(16,16);
          QPainter painter(&pix);
-         mapnik::Color fill = sym.get_fill();
+         mapnik::Color const& fill = sym.get_fill();
          QBrush brush(QColor(fill.red(),fill.green(),fill.blue(),fill.alpha()));
          painter.fillRect(0, 0, 16, 16, brush);
          return QIcon(pix);
@@ -179,6 +179,21 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
             return QIcon(pix);
          }
          return QIcon();
+      }
+      QIcon operator() (mapnik::line_symbolizer const& sym) const
+      {
+         QPixmap pix(48,16);
+         pix.fill();
+         QPainter painter(&pix);
+         mapnik::stroke const&  strk = sym.get_stroke();	
+         mapnik::Color const& col = strk.get_color();
+         QPen pen(QColor(col.red(),col.green(),col.blue(),col.alpha()));
+         pen.setWidth(strk.get_width());
+         painter.setPen(pen);
+         painter.drawLine(0,7,47,7);
+         //painter.drawLine(7,15,12,0);
+         //painter.drawLine(12,0,8,15);      
+         return QIcon(pix);
       }
 
       template <typename T>

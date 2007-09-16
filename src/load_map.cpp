@@ -441,6 +441,40 @@ namespace mapnik
                                 }
                                 rule.append(poly_sym);
                             } 
+                            else if ( sym.first == "BuildingSymbolizer")
+                            {
+                                building_symbolizer building_sym;
+                                
+                                ptree::const_iterator cssIter = sym.second.begin();
+                                ptree::const_iterator endCss = sym.second.end();
+                                
+                                for(; cssIter != endCss; ++cssIter)
+                                {
+                                    ptree::value_type const& css = * cssIter;
+                                    
+                                    std::string css_name  = 
+                                        css.second.get<std::string>("<xmlattr>.name");
+                                    std::string data = css.second.data();
+                                    if (css_name == "fill")
+                                    {
+                                        Color c = color_factory::from_string(css.second.data().c_str());
+                                        building_sym.set_fill(c);
+                                    }
+                                    else if (css_name == "fill-opacity")
+                                    {
+                                        try 
+                                        {
+                                            float opacity = lexical_cast<float>(data);
+                                            building_sym.set_opacity(opacity);
+                                        }
+                                        catch (bad_lexical_cast & ex)
+                                        {
+                                            std::clog << ex.what() << "\n";
+                                        }
+                                    }
+                                }
+                                rule.append(building_sym);
+                            } 
                             else if ( sym.first == "RasterSymbolizer")
                             {
                                 rule.append(raster_symbolizer());

@@ -25,14 +25,16 @@
 #include <iostream>
 // boost
 #include <boost/utility.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
 // agg
 #include "agg_basics.h"
-#include "agg_rendering_buffer.h"
-#include "agg_rasterizer_scanline_aa.h"
+//#include "agg_rendering_buffer.h"
+//#include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_p.h"
 #include "agg_scanline_u.h"
 #include "agg_renderer_scanline.h"
-#include "agg_pixfmt_rgba.h"
+//#include "agg_pixfmt_rgba.h"
 #include "agg_path_storage.h"
 #include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
@@ -93,6 +95,10 @@ namespace mapnik
    agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, unsigned offset_x, unsigned offset_y)
       : feature_style_processor<agg_renderer>(m),
         pixmap_(pixmap),
+        width_(pixmap_.width()),
+        height_(pixmap_.height()),
+        buf_(pixmap_.raw_data(),width_,height_, width_ * 4),
+        pixf_(buf_),
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
         detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
         finder_(detector_,Envelope<double>(0 ,0, m.getWidth(), m.getHeight()))
@@ -111,6 +117,7 @@ namespace mapnik
       std::clog << "start map processing bbox=" 
                 << map.getCurrentExtent() << "\n";
 #endif
+      ras_.clip_box(0,0,width_,height_);
    }
 
    template <typename T>
@@ -147,33 +154,141 @@ namespace mapnik
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
-      typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+      typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	    
       Color const& fill_  = sym.get_fill();
-	    
-      geometry_ptr const& geom=feature.get_geometry();
-      if (geom && geom->num_points() > 2) 
+      ras_.reset();
+      agg::scanline_u8 sl;
+      ren_base renb(pixf_);  
+      unsigned r=fill_.red();
+      unsigned g=fill_.green();
+      unsigned b=fill_.blue();
+      renderer ren(renb); 
+      for (unsigned i=0;i<feature.num_geometries();++i)
       {
-         unsigned width = pixmap_.width();
-         unsigned height = pixmap_.height();
-         path_type path(t_,*geom,prj_trans);
-         agg::row_accessor<agg::int8u> buf(pixmap_.raw_data(),width,height,width * 4);
-         agg::pixfmt_rgba32 pixf(buf);
-         ren_base renb(pixf);	    
-		
-         unsigned r=fill_.red();
-         unsigned g=fill_.green();
-         unsigned b=fill_.blue();
-         renderer ren(renb);
+         geometry2d const& geom=feature.get_geometry(i);
+         if (geom.num_points() > 2) 
+         {
+            path_type path(t_,geom,prj_trans);                
+            ras_.add_path(path);
+         }
+      }
+      ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
+      agg::render_scanlines(ras_, sl, ren);
+   }
+   
+   typedef boost::tuple<double,double,double,double> segment_t;
+   bool y_order(segment_t const& first,segment_t const& second)
+   {
+      double miny0 = std::min(first.get<1>(),first.get<3>());
+      double miny1 = std::min(second.get<1>(),second.get<3>());  
+      return  miny0 > miny1;
+   }
+      
+   template <typename T>	
+   void agg_renderer<T>::process(building_symbolizer const& sym,
+                                 Feature const& feature,
+                                 proj_transform const& prj_trans)
+   {
+      typedef  coord_transform2<CoordTransform,geometry2d> path_type;
+      typedef  coord_transform3<CoordTransform,geometry2d> path_type_roof;
+      typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
+      typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+      
+      
+      ren_base renb(pixf_);
+      Color const& fill_  = sym.get_fill();
+      unsigned r=fill_.red();
+      unsigned g=fill_.green();
+      unsigned b=fill_.blue();
+      renderer ren(renb);         
+      agg::scanline_u8 sl;
+      ras_.reset();
+      
+      int height = 60 << 8;
+      
+      for (unsigned i=0;i<feature.num_geometries();++i)
+      {
+         geometry2d const& geom = feature.get_geometry(i);
+         if (geom.num_points() > 2) 
+         {  
+            boost::scoped_ptr<geometry2d> frame(new line_string_impl);
             
-         agg::rasterizer_scanline_aa<> ras;
-         agg::scanline_u8 sl;
-         ras.clip_box(0,0,width,height);
-         ras.add_path(path);
-         ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
-         agg::render_scanlines(ras, sl, ren);
+            boost::scoped_ptr<geometry2d> roof(new polygon_impl);
+            std::deque<segment_t> face_segments;
+            double x0,y0;
+            for (unsigned j=0;j<geom.num_points();++j)
+            {
+               double x,y;
+               unsigned cm = geom.vertex(&x,&y);
+               if (cm == SEG_MOVETO)
+               {
+                  frame->move_to(x,y);
+               }
+               else if (cm == SEG_LINETO)
+               {
+                  frame->line_to(x,y);
+               }
+               if (j!=0)
+               {
+                  face_segments.push_back(segment_t(x0,y0,x,y));
+               }
+               x0 = x; 
+               y0 = y;
+            }
+            std::sort(face_segments.begin(),face_segments.end(), y_order);
+            std::deque<segment_t>::const_iterator itr=face_segments.begin();
+            for (;itr!=face_segments.end();++itr)
+            {
+               boost::scoped_ptr<geometry2d> faces(new polygon_impl);
+               faces->move_to(itr->get<0>(),itr->get<1>());
+               faces->line_to(itr->get<2>(),itr->get<3>());
+               faces->line_to(itr->get<2>(),itr->get<3>() + height);
+               faces->line_to(itr->get<0>(),itr->get<1>() + height);
+               
+               path_type faces_path (t_,*faces,prj_trans);
+               ras_.add_path(faces_path);
+               ren.color(agg::rgba8(int(r*0.7), int(g*0.7), int(b*0.7), int(255 * sym.get_opacity())));
+               agg::render_scanlines(ras_, sl, ren);
+               ras_.reset();
+               
+               frame->move_to(itr->get<0>(),itr->get<1>());
+               frame->line_to(itr->get<0>(),itr->get<1>()+height);   
+               
+            }
+            
+            geom.rewind(0);
+            for (unsigned j=0;j<geom.num_points();++j)
+            {
+               double x,y;
+               unsigned cm = geom.vertex(&x,&y);
+               if (cm == SEG_MOVETO)
+               {
+                  frame->move_to(x,y+height);
+                  roof->move_to(x,y+height);
+               }
+               else if (cm == SEG_LINETO)
+               {
+                  frame->line_to(x,y+height);
+                  roof->line_to(x,y+height);
+               }
+            }           
+            path_type path(t_,*frame,prj_trans); 
+            agg::conv_stroke<path_type>  stroke(path);
+            ras_.add_path(stroke);
+            ren.color(agg::rgba8(128, 128, 128, int(255 * sym.get_opacity())));
+            agg::render_scanlines(ras_, sl, ren);
+            ras_.reset();
+            
+            path_type roof_path (t_,*roof,prj_trans);
+            ras_.add_path(roof_path);
+            ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
+            agg::render_scanlines(ras_, sl, ren);
+
+            
+         }
       }
    }
 
@@ -183,134 +298,113 @@ namespace mapnik
                                  proj_transform const& prj_trans)
    {   
       typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
-      typedef coord_transform2<CoordTransform,geometry_type> path_type;
+      typedef coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
       typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-	    
-      geometry_ptr const& geom=feature.get_geometry();
-      if (geom && geom->num_points() > 1)
+      
+      ren_base renb(pixf_);	          
+      mapnik::stroke const&  stroke_ = sym.get_stroke();
+      Color const& col = stroke_.get_color();
+      unsigned r=col.red();
+      unsigned g=col.green();
+      unsigned b=col.blue();
+      renderer ren(renb);
+      ras_.reset();
+      agg::scanline_p8 sl;
+ 
+      for (unsigned i=0;i<feature.num_geometries();++i)
       {
-         path_type path(t_,*geom,prj_trans);
-         agg::row_accessor<agg::int8u> buf(pixmap_.raw_data(),
-                                           pixmap_.width(),
-                                           pixmap_.height(),
-                                           pixmap_.width()*4);
-         agg::pixfmt_rgba32 pixf(buf);
-         ren_base renb(pixf);	    
-            
-         mapnik::stroke const&  stroke_ = sym.get_stroke();
-		
-         Color const& col = stroke_.get_color();
-         unsigned r=col.red();
-         unsigned g=col.green();
-         unsigned b=col.blue();	    
-		
-         if (stroke_.has_dash())
+         geometry2d const& geom = feature.get_geometry(i);
+         if (geom.num_points() > 1)
          {
-            renderer ren(renb);	
-            agg::rasterizer_scanline_aa<> ras;
-            agg::scanline_u8 sl;
-            agg::conv_dash<path_type> dash(path);
-            dash_array const& d = stroke_.get_dash_array();
-            dash_array::const_iterator itr = d.begin();
-            dash_array::const_iterator end = d.end();
-            while (itr != end)
-            {
-               dash.add_dash(itr->first, itr->second);
-               ++itr;
+            path_type path(t_,geom,prj_trans);
+            
+            if (stroke_.has_dash())
+            {              
+               agg::conv_dash<path_type> dash(path);
+               dash_array const& d = stroke_.get_dash_array();
+               dash_array::const_iterator itr = d.begin();
+               dash_array::const_iterator end = d.end();
+               for (;itr != end;++itr)
+               {
+                  dash.add_dash(itr->first, itr->second); 
+               }
+               
+               agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
+               
+               line_join_e join=stroke_.get_line_join();
+               if ( join == MITER_JOIN)
+                  stroke.generator().line_join(agg::miter_join);
+               else if( join == MITER_REVERT_JOIN) 
+                  stroke.generator().line_join(agg::miter_join);
+               else if( join == ROUND_JOIN) 
+                  stroke.generator().line_join(agg::round_join);
+               else
+                  stroke.generator().line_join(agg::bevel_join);
+               
+               line_cap_e cap=stroke_.get_line_cap();
+               if (cap == BUTT_CAP)    
+                  stroke.generator().line_cap(agg::butt_cap);
+               else if (cap == SQUARE_CAP)
+                  stroke.generator().line_cap(agg::square_cap);
+               else 
+                  stroke.generator().line_cap(agg::round_cap);
+               
+               stroke.generator().miter_limit(4.0);
+               stroke.generator().width(stroke_.get_width());
+               
+               ras_.add_path(stroke);
+               
             }
-            agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
-		    
-            line_join_e join=stroke_.get_line_join();
-            if ( join == MITER_JOIN)
-               stroke.generator().line_join(agg::miter_join);
-            else if( join == MITER_REVERT_JOIN) 
-               stroke.generator().line_join(agg::miter_join);
-            else if( join == ROUND_JOIN) 
-               stroke.generator().line_join(agg::round_join);
-            else
-               stroke.generator().line_join(agg::bevel_join);
-		    
-            line_cap_e cap=stroke_.get_line_cap();
-            if (cap == BUTT_CAP)    
-               stroke.generator().line_cap(agg::butt_cap);
-            else if (cap == SQUARE_CAP)
-               stroke.generator().line_cap(agg::square_cap);
             else 
-               stroke.generator().line_cap(agg::round_cap);
-		    
-            stroke.generator().miter_limit(4.0);
-            stroke.generator().width(stroke_.get_width());
-		    
-            ras.clip_box(0,0,pixmap_.width(),pixmap_.height());
-            ras.add_path(stroke);
-            ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
-            agg::render_scanlines(ras, sl, ren);
-         }
-            
-         //else if (stroke_.get_width() <= 1.0)
-         //{
-         //   agg::line_profile_aa prof;
-         //   prof.width(stroke_.get_width());
-         //   renderer_oaa ren_oaa(renb, prof);
-         //   rasterizer_outline_aa ras_oaa(ren_oaa);
-                
-         //    ren_oaa.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
-         //    ren_oaa.clip_box(0,0,pixmap_.width(),pixmap_.height());
-         //    ras_oaa.add_path(path);		
-         //    }
-         else 
-         {
-            renderer ren(renb);	
-            agg::rasterizer_scanline_aa<> ras;
-            agg::scanline_p8 sl;
-            agg::conv_stroke<path_type>  stroke(path);
-		    
-            line_join_e join=stroke_.get_line_join();
-            if ( join == MITER_JOIN)
-               stroke.generator().line_join(agg::miter_join);
-            else if( join == MITER_REVERT_JOIN) 
-               stroke.generator().line_join(agg::miter_join);
-            else if( join == ROUND_JOIN) 
-               stroke.generator().line_join(agg::round_join);
-            else
-               stroke.generator().line_join(agg::bevel_join);
-		    
-            line_cap_e cap=stroke_.get_line_cap();
-            if (cap == BUTT_CAP)    
-               stroke.generator().line_cap(agg::butt_cap);
-            else if (cap == SQUARE_CAP)
-               stroke.generator().line_cap(agg::square_cap);
-            else 
-               stroke.generator().line_cap(agg::round_cap);
-		
-            stroke.generator().miter_limit(4.0);
-            stroke.generator().width(stroke_.get_width());
-		    
-            ras.clip_box(0,0,pixmap_.width(),pixmap_.height());
-            ras.add_path(stroke);
-            ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
-            agg::render_scanlines(ras, sl, ren);
+            {
+               agg::conv_stroke<path_type>  stroke(path);
+               
+               line_join_e join=stroke_.get_line_join();
+               if ( join == MITER_JOIN)
+                  stroke.generator().line_join(agg::miter_join);
+               else if( join == MITER_REVERT_JOIN) 
+                  stroke.generator().line_join(agg::miter_join);
+               else if( join == ROUND_JOIN) 
+                  stroke.generator().line_join(agg::round_join);
+               else
+                  stroke.generator().line_join(agg::bevel_join);
+               
+               line_cap_e cap=stroke_.get_line_cap();
+               if (cap == BUTT_CAP)    
+                  stroke.generator().line_cap(agg::butt_cap);
+               else if (cap == SQUARE_CAP)
+                  stroke.generator().line_cap(agg::square_cap);
+               else 
+                  stroke.generator().line_cap(agg::round_cap);
+               
+               stroke.generator().miter_limit(4.0);
+               stroke.generator().width(stroke_.get_width());
+               ras_.add_path(stroke);
+            }
          }
       }
+      ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
+      agg::render_scanlines(ras_, sl, ren);
    }
-
+   
    template <typename T>
    void agg_renderer<T>::process(point_symbolizer const& sym,
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
-      geometry_ptr const& geom=feature.get_geometry();
-      if (geom)
+      double x;
+      double y;
+      double z=0;
+      boost::shared_ptr<ImageData32> const& data = sym.get_data();
+      if ( data )
       {
-         double x;
-         double y;
-         double z=0;
-         boost::shared_ptr<ImageData32> const& data = sym.get_data();
-         if ( data )
+         for (unsigned i=0;i<feature.num_geometries();++i)
          {
-            geom->label_position(&x,&y);
+            geometry2d const& geom = feature.get_geometry(i);
+            
+            geom.label_position(&x,&y);
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
             int w = data->width();
@@ -336,79 +430,80 @@ namespace mapnik
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
    {
-      geometry_ptr const& geom=feature.get_geometry();
-      if (geom && geom->num_points() > 0)
+      std::wstring text = feature[sym.get_name()].to_unicode();
+      boost::shared_ptr<ImageData32> const& data = sym.get_background_image();
+      if (text.length() > 0 && data)
       {
-         std::wstring text = feature[sym.get_name()].to_unicode();
-         boost::shared_ptr<ImageData32> const& data = sym.get_background_image();
-           
-         if (text.length() > 0 && data)
+         face_ptr face = font_manager_.get_face(sym.get_face_name());
+         if (face)
          {
-            face_ptr face = font_manager_.get_face(sym.get_face_name());
-            if (face)
+            text_renderer<mapnik::Image32> ren(pixmap_,face);
+            ren.set_pixel_size(sym.get_text_size());
+            ren.set_fill(sym.get_fill());
+            string_info info(text);
+            ren.get_string_info(&info);
+            unsigned num_geom = feature.num_geometries();
+            for (unsigned i=0;i<num_geom;++i)
             {
-               text_renderer<mapnik::Image32> ren(pixmap_,face);
-               ren.set_pixel_size(sym.get_text_size());
-               ren.set_fill(sym.get_fill());
-
-               string_info info(text);
-               ren.get_string_info(&info);
-                    
-               placement text_placement(&info, &t_, &prj_trans, geom, sym);
-               text_placement.avoid_edges = sym.get_avoid_edges();
+               geometry2d const& geom = feature.get_geometry(i);
+               if (geom.num_points() > 0) // don't bother with empty geometries 
+               {    
+                  placement text_placement(&info, &t_, &prj_trans, geom, sym);
+                  text_placement.avoid_edges = sym.get_avoid_edges();
                   
-               finder_.find_placements(&text_placement);
+                  finder_.find_placements(&text_placement);
 
-               for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
-               { 
-                  int w = data->width();
-                  int h = data->height();
-
-                  double x = text_placement.placements[ii].starting_x;
-                  double y = text_placement.placements[ii].starting_y;
-
-                  int px=int(x - (w/2));
-                  int py=int(y - (h/2));
+                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                  { 
+                     int w = data->width();
+                     int h = data->height();
+                     
+                     double x = text_placement.placements[ii].starting_x;
+                     double y = text_placement.placements[ii].starting_y;
+                     
+                     int px=int(x - (w/2));
+                     int py=int(y - (h/2));
+                     
+                     pixmap_.set_rectangle_alpha(px,py,*data);
+                     
+                     Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
                         
-                  pixmap_.set_rectangle_alpha(px,py,*data);
-                        
-                  Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii].path);
-                        
-                  ren.render(x,y);
+                     ren.render(x,y);
+                  }
                }
             }
          }
       }
    }
-    
+   
    template <typename T>
    void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
    {
-      typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+      typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
       typedef agg::renderer_base<agg::pixfmt_rgba32> renderer_base;
       typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
       typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
-
-      geometry_ptr const& geom=feature.get_geometry();
-      if (geom && geom->num_points() > 1)
+      
+      ImageData32 const& pat = sym.get_pattern();
+      renderer_base ren_base(pixf_);  
+      agg::pattern_filter_bilinear_rgba8 filter; 
+      pattern_source source(pat);
+      pattern_type pattern (filter,source);
+      renderer_type ren(ren_base, pattern);
+      ren.clip_box(0,0,width_,height_);
+      rasterizer_type ras(ren);
+      
+      for (unsigned i=0;i<feature.num_geometries();++i)
       {
-         unsigned width = pixmap_.width();
-         unsigned height = pixmap_.height();
-         ImageData32 const& pat = sym.get_pattern();
-         path_type path(t_,*geom,prj_trans);
-         agg::row_accessor<agg::int8u> buf(pixmap_.raw_data(), width, height,width*4);
-         agg::pixfmt_rgba32 pixf(buf);
-         renderer_base ren_base(pixf);  
-         agg::pattern_filter_bilinear_rgba8 filter; 
-         pattern_source source(pat);
-         pattern_type pattern (filter,source);
-         renderer_type ren(ren_base, pattern);
-         ren.clip_box(0,0,width,height);
-         rasterizer_type ras(ren);	    
-         ras.add_path(path);    
+         geometry2d const& geom = feature.get_geometry(i);
+         if (geom.num_points() > 1)
+         {
+            path_type path(t_,geom,prj_trans);
+            ras.add_path(path);    
+         } 
       }
    }
     
@@ -417,11 +512,13 @@ namespace mapnik
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
-      typedef coord_transform2<CoordTransform,geometry_type> path_type;
+      typedef coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
       typedef agg::wrap_mode_repeat wrap_x_type;
       typedef agg::wrap_mode_repeat wrap_y_type;
-      typedef agg::image_accessor_wrap<agg::pixfmt_rgba32, 
+      typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
+         agg::row_accessor<agg::int8u>, agg::pixel32_type> rendering_buffer;
+      typedef agg::image_accessor_wrap<rendering_buffer, 
          wrap_x_type,
          wrap_y_type> img_source_type;
 	
@@ -430,42 +527,41 @@ namespace mapnik
       typedef agg::renderer_scanline_aa<ren_base, 
          agg::span_allocator<agg::rgba8>,
          span_gen_type> renderer_type;  
-      geometry_ptr const& geom=feature.get_geometry();
-      if (geom && geom->num_points() > 2)
+      
+      ras_.reset();
+      ren_base renb(pixf_);
+      agg::scanline_u8 sl;
+      
+      ImageData32 const& pattern = sym.get_pattern();
+      unsigned w=pattern.width();
+      unsigned h=pattern.height();
+      agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)pattern.getBytes(),w,h,w*4);  
+      agg::span_allocator<agg::rgba8> sa;
+      agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
+         agg::row_accessor<agg::int8u>, agg::pixel32_type> pixf_pattern(pattern_rbuf);
+      img_source_type img_src(pixf_pattern);
+      
+      double x0=0,y0=0;
+      unsigned num_geometries = feature.num_geometries();
+      if (num_geometries>0)
       {
-         ImageData32 const& pattern = sym.get_pattern();
-	    
-         unsigned width = pixmap_.width();
-         unsigned height = pixmap_.height();
-         path_type path(t_,*geom,prj_trans);
-	    
-         agg::row_accessor<agg::int8u> buf(pixmap_.raw_data(),width,height,width * 4);
-         agg::pixfmt_rgba32 pixf(buf);
-         ren_base renb(pixf);
-	
-         unsigned w=pattern.width();
-         unsigned h=pattern.height();
-         agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)pattern.getBytes(),w,h,w*4);  
-	    
-         double x0,y0;
+         path_type path(t_,feature.get_geometry(0),prj_trans);
          path.vertex(&x0,&y0);
-         path.rewind(0);
-	
-         unsigned offset_x = unsigned(width - x0);
-         unsigned offset_y = unsigned(height - y0);
-            
-         agg::span_allocator<agg::rgba8> sa;
-         agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);
-         img_source_type img_src(pixf_pattern);
-         span_gen_type sg(img_src, offset_x, offset_y);
-         renderer_type rp(renb,sa, sg);
-            
-         agg::rasterizer_scanline_aa<> ras;
-         agg::scanline_u8 sl;
-         ras.clip_box(0,0,width,height);
-         ras.add_path(path);
-         agg::render_scanlines(ras, sl, rp);   
       }
+      unsigned offset_x = unsigned(width_-x0);
+      unsigned offset_y = unsigned(height_-y0);
+      span_gen_type sg(img_src, offset_x, offset_y);      
+      renderer_type rp(renb,sa, sg);
+      for (unsigned i=0;i<num_geometries;++i)
+      {
+         geometry2d const& geom = feature.get_geometry(i);
+         if (geom.num_points() > 2)
+         {     
+            path_type path(t_,geom,prj_trans);            
+            ras_.add_path(path); 
+         }
+      }
+      agg::render_scanlines(ras_, sl, rp);   
    }
 
    template <typename T>
@@ -480,7 +576,7 @@ namespace mapnik
       if (raster)
       {
          Envelope<double> ext=t_.forward(raster->ext_);
-         ImageData32 target((int)(ext.width() + 0.5),(int)(ext.height() + 0.5));
+         ImageData32 target(int(ext.width() + 0.5),int(ext.height() + 0.5));
          scale_image<ImageData32>(target,raster->data_);
          pixmap_.set_rectangle(int(ext.minx()),int(ext.miny()),target);
       }
@@ -491,41 +587,41 @@ namespace mapnik
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
-      geometry_ptr const& geom=feature.get_geometry();
-       
-      if (geom && geom->num_points() > 0)
+  
+      std::wstring text = feature[sym.get_name()].to_unicode();
+      if ( text.length() > 0 )
       {
-         std::wstring text = feature[sym.get_name()].to_unicode();
-         if ( text.length() > 0 )
+         Color const& fill  = sym.get_fill();
+         face_ptr face = font_manager_.get_face(sym.get_face_name());
+         if (face)
          {
-            Color const& fill  = sym.get_fill();
-            face_ptr face = font_manager_.get_face(sym.get_face_name());
-            if (face)
+            text_renderer<mapnik::Image32> ren(pixmap_,face);
+            ren.set_pixel_size(sym.get_text_size());
+            ren.set_fill(fill);
+            ren.set_halo_fill(sym.get_halo_fill());
+            ren.set_halo_radius(sym.get_halo_radius());
+            
+            string_info info(text);
+            ren.get_string_info(&info);
+            unsigned num_geom = feature.num_geometries();
+            for (unsigned i=0;i<num_geom;++i)
             {
-               text_renderer<mapnik::Image32> ren(pixmap_,face);
-               ren.set_pixel_size(sym.get_text_size());
-               ren.set_fill(fill);
-               ren.set_halo_fill(sym.get_halo_fill());
-               ren.set_halo_radius(sym.get_halo_radius());
-                    
-               string_info info(text);
-               ren.get_string_info(&info);
-                    
-               placement text_placement(&info, &t_, &prj_trans, geom, sym);
-               
-               finder_.find_placements(&text_placement);
-                    
-               for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+               geometry2d const& geom = feature.get_geometry(i);
+               if (geom.num_points() > 0) // don't bother with empty geometries 
                {
-                  double x = text_placement.placements[ii].starting_x;
-                  double y = text_placement.placements[ii].starting_y;
-                  Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii].path);
-                  ren.render(x,y);
+                  placement text_placement(&info, &t_, &prj_trans, geom, sym);            
+                  finder_.find_placements(&text_placement);  
+                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                  {
+                     double x = text_placement.placements[ii].starting_x;
+                     double y = text_placement.placements[ii].starting_y;
+                     Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
+                     ren.render(x,y);
+                  }
                }
-            }
-         }  
+            }  
+         }
       }
-   }   
-    
+   }
    template class agg_renderer<Image32>;
 }
