@@ -2,7 +2,6 @@
 ## Created by Anjuta
 
 SUBDIRS = src \
-	agg\
 	plugins\
 	include
 

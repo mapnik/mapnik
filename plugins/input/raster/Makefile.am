@@ -1,18 +1,19 @@
 
 pkglib_LTLIBRARIES = \
-	raster.input.la
+	raster.la
 
-raster_input_la_SOURCES = \
+raster_la_SOURCES = \
 	raster_datasource.cpp\
 	raster_featureset.cpp\
 	raster_info.cpp
 
-raster_input_la_CXXFLAGS = \
+raster_la_CXXFLAGS = \
 	-I../../../include
 
-raster_input_la_LDFLAGS = \
+raster_la_LDFLAGS = \
 	-module \
-	-avoid-version
+	-avoid-version \
+	-shrext .input
 
 ## File created by the gnome-build tools
 

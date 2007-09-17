@@ -1,8 +1,8 @@
 
 pkglib_LTLIBRARIES = \
-	shape.input.la
+	shape.la
 
-shape_input_la_SOURCES = \
+shape_la_SOURCES = \
 	dbffile.cpp        \
 	dbf_test.cpp        \
 	shape.cpp        \
@@ -12,12 +12,13 @@ shape_input_la_SOURCES = \
 	shape_io.cpp        \
 	shp_index.cpp
 
-shape_input_la_CXXFLAGS = \
+shape_la_CXXFLAGS = \
 	-I../../../include
 
-shape_input_la_LDFLAGS = \
+shape_la_LDFLAGS = \
 	-module \
-	-avoid-version
+	-avoid-version \
+	-shrext .input
 
 ## File created by the gnome-build tools
 

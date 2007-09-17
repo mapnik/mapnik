@@ -2,22 +2,23 @@
 if BUILD_POSTGRESQL
 
 pkglib_LTLIBRARIES = \
-	postgis.input.la
+	postgis.la
 
-postgis_input_la_SOURCES = \
+postgis_la_SOURCES = \
 	postgis.cpp          \
 	postgisfs.cpp
 
-postgis_input_la_LIBADD = \
+postgis_la_LIBADD = \
 	${POSTGRESQL_LDFLAGS}
 
-postgis_input_la_CXXFLAGS = \
+postgis_la_CXXFLAGS = \
 	${POSTGRESQL_CFLAGS} \
 	-I../../../include
 
-postgis_input_la_LDFLAGS = \
+postgis_la_LDFLAGS = \
 	-module \
-	-avoid-version
+	-avoid-version \
+	-shrext .input
 
 endif
 

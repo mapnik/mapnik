@@ -90,9 +90,6 @@ AC_SUBST(AGG_LIBS)
 
 AC_OUTPUT([
 Makefile
-agg/Makefile
-agg/src/Makefile
-agg/include/Makefile
 include/Makefile
 include/mapnik/Makefile
 plugins/Makefile
