@@ -67,7 +67,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
     
    shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
    if (pool)
-   {
+   {      
       shared_ptr<Connection> conn = pool->borrowObject();
       if (conn && conn->isOK())
       {
@@ -250,6 +250,7 @@ Envelope<double> postgis_datasource::envelope() const
       shared_ptr<Connection> conn = pool->borrowObject();
       if (conn && conn->isOK())
       {
+         PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
          std::ostringstream s;
          std::string table_name = table_from_sql(table_);
          boost::optional<std::string> estimate_extent = params_.get<std::string>("estimate_extent");
