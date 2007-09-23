@@ -84,9 +84,24 @@ PKG_CHECK_MODULES(FREETYPE2, freetype2)
 AC_SUBST(FREETYPE2_CFLAGS)
 AC_SUBST(FREETYPE2_LIBS)
 
-PKG_CHECK_MODULES(AGG, libagg)
-AC_SUBST(AGG_CFLAGS)
-AC_SUBST(AGG_LIBS)
+dnl Check for option to enable included-agg
+AC_MSG_CHECKING(whether to enable included libagg building)
+AC_ARG_ENABLE(included_agg,
+        [  --enable-included-agg=[no/yes]        enables included libagg build (default=yes)],,
+                 enable_included_agg=yes)
+
+if [ test "x$enable_included_agg" = "xyes"]; then
+  AM_CONDITIONAL(BUILD_AGG, test "x$enable_included_agg" = "xyes")
+  AGG_LIBS=-L../agg/src
+  AGG_CFLAGS=-I../agg/include
+  AC_SUBST(AGG_LIBS)
+  AC_SUBST(AGG_CFLAGS)
+  
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+  PKG_CHECK_MODULES(AGG, libagg)
+fi
 
 AC_OUTPUT([
 Makefile
@@ -101,4 +116,7 @@ plugins/input/shape/Makefile
 src/Makefile
 mapnik.pc
 mapnik-uninstalled.pc
+agg/Makefile
+agg/src/Makefile
+agg/include/Makefile
 ])

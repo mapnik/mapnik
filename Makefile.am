@@ -2,17 +2,17 @@
 ## Created by Anjuta
 
 SUBDIRS = src \
+	agg\
 	plugins\
 	include
+
 
 mapnikdocdir = ${prefix}/doc/mapnik
 mapnikdoc_DATA = \
 	README\
 	COPYING\
 	AUTHORS\
-	ChangeLog\
-	INSTALL\
-	NEWS
+	INSTALL
 
 EXTRA_DIST = $(mapnikdoc_DATA) \
 	$(fonts_DATA)\

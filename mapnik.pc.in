@@ -9,5 +9,5 @@ Version: @VERSION@
 Requires: 
 Conflicts: 
 Libs: -L${libdir} -lmapnik
-Cflags: -I${includedir}
+Cflags: -I${includedir} -I${includedir}/agg
 
