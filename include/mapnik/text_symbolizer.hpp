@@ -30,22 +30,25 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
 // mapnik
+#include <mapnik/enumeration.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/graphics.hpp> 
 
 namespace mapnik
 {
-   enum label_placement_e {
-      point_placement=1,
-      line_placement=2
+   enum label_placement_enum {
+      POINT_PLACEMENT,
+      LINE_PLACEMENT,
+      label_placement_enum_MAX
    };
+   DEFINE_ENUM( label_placement_e, label_placement_enum );
         
    typedef boost::tuple<double,double> position;
     
    struct MAPNIK_DECL text_symbolizer
    {		
          text_symbolizer(std::string const& name,std::string const& face_name, 
-                         unsigned size,Color const& fill);	
+                         unsigned size, Color const& fill);	
          text_symbolizer(text_symbolizer const& rhs);
          text_symbolizer& operator=(text_symbolizer const& rhs);
          std::string const& get_name() const;

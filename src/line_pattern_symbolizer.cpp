@@ -33,25 +33,10 @@ namespace mapnik
     line_pattern_symbolizer::line_pattern_symbolizer(std::string const& file,
                                                      std::string const& type,
                                                      unsigned width,unsigned height) 
-        : pattern_(new ImageData32(width,height))
-    {
-        try 
-        {
-            std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-            if (reader.get())
-                reader->read(0,0,*pattern_);		
-        } 
-        catch (...) 
-        {
-            std::clog << "exception caught..." << std::endl;
-        }
-    }
+        : symbolizer_with_image( file, type, width, height )
+    { }
 
     line_pattern_symbolizer::line_pattern_symbolizer(line_pattern_symbolizer const& rhs)
-        : pattern_(rhs.pattern_) {}
+        : symbolizer_with_image(rhs) {}
 
-    ImageData32 const& line_pattern_symbolizer::get_pattern() const
-    {
-        return *pattern_;
-    }
 }

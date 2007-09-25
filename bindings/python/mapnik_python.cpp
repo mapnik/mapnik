@@ -24,6 +24,7 @@
 #include <boost/python.hpp>
 #include <boost/get_pointer.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
+#include <boost/python/exception_translator.hpp>
 
 void export_color();
 void export_coord();
@@ -58,6 +59,7 @@ void export_projection();
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/load_map.hpp>
+#include <mapnik/config_error.hpp>
 #include <mapnik/save_map.hpp>
 
 
@@ -95,14 +97,21 @@ double scale_denominator(mapnik::Map const &map, bool geographic)
 	return mapnik::scale_denominator(map, geographic);
 }
 
+void translator(mapnik::config_error const & ex) {
+    PyErr_SetString(PyExc_UserWarning, ex.what());
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
 
 BOOST_PYTHON_MODULE(_mapnik)
 {
-    using namespace boost::python;
  
+    using namespace boost::python;
+
     using mapnik::load_map;
     using mapnik::save_map;
-    
+
+    register_exception_translator<mapnik::config_error>(translator);
     export_query();    
     export_feature();
     export_featureset();
@@ -137,8 +146,8 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("render",&render2);
     def("scale_denominator", &scale_denominator);
     
-    def("load_map",&load_map,"load Map object from XML");
-    def("save_map",&load_map,"sace Map object to XML");
+    def("load_map", & load_map, load_map_overloads());
+    def("save_map", & save_map, "save Map object to XML");
     
     using mapnik::symbolizer;
     class_<symbolizer>("Symbolizer",no_init)

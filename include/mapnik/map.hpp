@@ -199,7 +199,7 @@ namespace mapnik
          *  @param c Background color.
          */
         void set_background(const Color& c);
-        
+
         /*! \brief Get the map background color 
          *  @return Background color as boost::optional
          *  object

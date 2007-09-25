@@ -46,8 +46,8 @@ source = Split(
     image_util.cpp
     layer.cpp
     line_pattern_symbolizer.cpp
-    load_map.cpp
     map.cpp
+    load_map.cpp
     memory.cpp
     params.cpp
     placement_finder.cpp
@@ -65,15 +65,25 @@ source = Split(
     distance.cpp
     scale_denominator.cpp
     memory_datasource.cpp
+    stroke.cpp
+    symbolizer.cpp
     """
     )
-source += Split(
-    """
-    ../tinyxml/tinystr.cpp
-    ../tinyxml/tinyxml.cpp
-    ../tinyxml/tinyxmlerror.cpp
-    ../tinyxml/tinyxmlparser.cpp
-    """)
+
+if env['XMLPARSER'] == 'tinyxml':
+    source += Split(
+        """
+        ../tinyxml/tinystr.cpp
+        ../tinyxml/tinyxml.cpp
+        ../tinyxml/tinyxmlerror.cpp
+        ../tinyxml/tinyxmlparser.cpp
+        """)
+elif env['XMLPARSER'] == 'libxml2':
+    source += Split(
+        """
+        libxml2_loader.cpp
+        """)
+
 
 mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
 

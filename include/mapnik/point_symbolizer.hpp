@@ -26,23 +26,22 @@
 
 #include <boost/shared_ptr.hpp>
 #include <mapnik/graphics.hpp> 
+#include <mapnik/symbolizer.hpp> 
 
 namespace mapnik 
 {   
-    struct MAPNIK_DECL point_symbolizer
+    struct MAPNIK_DECL point_symbolizer : 
+        public symbolizer_with_image
     {	
         explicit point_symbolizer();
         point_symbolizer(std::string const& file,
                          std::string const& type,
                          unsigned width,unsigned height);
         point_symbolizer(point_symbolizer const& rhs);
-        void set_data (boost::shared_ptr<ImageData32> symbol);
-        boost::shared_ptr<ImageData32> const& get_data() const;        
         void set_allow_overlap(bool overlap);
         bool get_allow_overlap() const;
         
     private:
-        boost::shared_ptr<ImageData32> symbol_;
         bool overlap_;
     };
 }

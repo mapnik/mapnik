@@ -104,6 +104,11 @@ namespace mapnik {
             return abgr_ == other.abgr_;
         }
         
+        inline bool operator!=(Color const& other) const
+        {
+            return abgr_ != other.abgr_;
+        }
+        
         inline std::string to_string() const
         {
             std::stringstream ss;

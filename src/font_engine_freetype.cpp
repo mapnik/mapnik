@@ -23,6 +23,9 @@
 
 #include <mapnik/font_engine_freetype.hpp>
 
+using std::cerr;
+using std::endl;
+
 namespace mapnik
 {
     freetype_engine::freetype_engine()
@@ -30,7 +33,7 @@ namespace mapnik
 	    FT_Error error = FT_Init_FreeType( &library_ );
 	    if (error)
 	    {
-		    throw std::runtime_error("can not load FreeType2 library");
+		    throw std::runtime_error("Failed to initialize FreeType2 library");
 	    }
 	}
 
@@ -43,6 +46,7 @@ namespace mapnik
     {
         mutex::scoped_lock lock(mapnik::singleton<freetype_engine, 
             mapnik::CreateStatic>::mutex_);
+        //cerr << "freetype_engine::register_font() '" << file_name << "'" << endl;
         FT_Face face;
         FT_Error error = FT_New_Face (library_,file_name.c_str(),0,&face);
         if ( !error )

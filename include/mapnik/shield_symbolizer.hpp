@@ -25,13 +25,16 @@
 #ifndef SHIELD_SYMBOLIZER_HPP
 #define SHIELD_SYMBOLIZER_HPP
 
-#include <boost/shared_ptr.hpp>
 #include <mapnik/graphics.hpp> 
 #include <mapnik/text_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
+
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik 
 {   
-  struct MAPNIK_DECL shield_symbolizer : public text_symbolizer
+  struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
+                                         public symbolizer_with_image
   {	
     shield_symbolizer(std::string const& name,
                       std::string const& face_name,
@@ -41,13 +44,6 @@ namespace mapnik
                       std::string const& type,
                       unsigned width,unsigned height);
     
-    
-    void set_background_image(boost::shared_ptr<ImageData32>);
-    boost::shared_ptr<ImageData32> const& get_background_image() const;
-
-  private:
-    boost::shared_ptr<ImageData32> background_image_;
-
   };
 }
 

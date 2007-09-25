@@ -25,6 +25,7 @@
 #ifndef FILTER_FACTORY_HPP
 #define FILTER_FACTORY_HPP
 
+#include <mapnik/config_error.hpp>
 #include <mapnik/filter_parser.hpp>
 
 namespace mapnik
@@ -41,14 +42,23 @@ namespace mapnik
             stack<shared_ptr<expression<FeatureT> > > exps;
             filter_grammar<FeatureT> grammar(filters,exps);
             char const *text = str.c_str();
-            parse_info<> info = parse(text,text+strlen(text),grammar,space_p);
-            if (info.full && !filters.empty())
+            parse_info<> info = parse(text, grammar, space_p);
+            if ( ! info.full) {
+                std::ostringstream os;
+                os << "Failed to parse filter expression:" << std::endl
+                   << str << std::endl
+                   << "Parsing aborted at '" << info.stop << "'";
+
+                throw config_error( os.str() );
+            }
+
+            if ( ! filters.empty())
             {
                 return filters.top();	
             }
             else 
             {
-                clog << "failed at :" << info.stop << "\n";
+                // XXX: do we ever get here? [DS]
                 return filter_ptr(new none_filter<FeatureT>());
             }  
         }

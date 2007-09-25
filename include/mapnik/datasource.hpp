@@ -52,9 +52,9 @@ namespace mapnik {
     class MAPNIK_DECL datasource_exception : public std::exception
     {
     private:
-        const std::string message_;
+        std::string message_;
     public:
-        datasource_exception(const std::string& message=std::string())
+        datasource_exception(const std::string& message=std::string("no reason"))
             :message_(message) {}
 
         ~datasource_exception() throw() {}

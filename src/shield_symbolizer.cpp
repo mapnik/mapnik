@@ -43,30 +43,8 @@ namespace mapnik
                           std::string const& type,
                           unsigned width,unsigned height)
         : text_symbolizer(name, face_name, size, fill),
-          background_image_(new ImageData32(width, height))
+          symbolizer_with_image( file, type, width, height )
     {
-        try 
-        {
-            boost::scoped_ptr<ImageReader> reader(get_image_reader(type,file));
-            if (reader.get())
-            {
-                reader->read(0,0,*background_image_);		
-            }
-        } 
-        catch (...) 
-        {
-            std::clog << "exception caught..." << std::endl;
-        }
-    }
-
-    void shield_symbolizer::set_background_image(boost::shared_ptr<ImageData32> background_image)
-    {
-      background_image_ = background_image;
-    }
-
-    boost::shared_ptr<ImageData32> const& shield_symbolizer::get_background_image() const
-    {
-      return background_image_;
     }
 }
 

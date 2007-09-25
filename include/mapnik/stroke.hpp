@@ -27,6 +27,7 @@
 #include <vector>
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/enumeration.hpp>
  
 namespace mapnik
 {
@@ -34,20 +35,30 @@ namespace mapnik
     using std::vector;
     typedef vector<pair<float,float> > dash_array;
     
-    enum line_cap_e
+    // if you add new tokens, don't forget to add them to the corresponding
+    // string array in the cpp file too.
+    enum line_cap_enum
         {
             BUTT_CAP,
             SQUARE_CAP,
-            ROUND_CAP
+            ROUND_CAP,
+            line_cap_enum_MAX
         }; 
+
+    DEFINE_ENUM( line_cap_e, line_cap_enum );
     
-    enum line_join_e
+    // if you add new tokens, don't forget to add them to the corresponding
+    // string array in the cpp file too.
+    enum line_join_enum
         {
             MITER_JOIN,
             MITER_REVERT_JOIN,
             ROUND_JOIN,
-            BEVEL_JOIN
+            BEVEL_JOIN,
+            line_join_enum_MAX
         };
+
+    DEFINE_ENUM( line_join_e, line_join_enum );
     
     class stroke
     {	
@@ -58,112 +69,34 @@ namespace mapnik
         line_join_e line_join_;
         dash_array dash_;	
     public:
-        explicit stroke() 
-            : c_(0,0,0),
-              width_(1.0),
-              opacity_(1.0),
-              line_cap_(BUTT_CAP),
-              line_join_(MITER_JOIN),
-              dash_() {}
-	
-        stroke(Color const& c, float width=1.0)
-            : c_(c),
-              width_(width),
-              opacity_(1.0),
-              line_cap_(BUTT_CAP),
-              line_join_(MITER_JOIN),
-              dash_() {}
+        explicit stroke();
+        stroke(Color const& c, float width=1.0);
+        stroke(stroke const& other);
+        stroke& operator=(const stroke& rhs);
 
-        stroke(stroke const& other)
-            : c_(other.c_),
-              width_(other.width_),
-              opacity_(other.opacity_),
-              line_cap_(other.line_cap_),
-              line_join_(other.line_join_),
-              dash_(other.dash_) {}
-	    
-        stroke& operator=(const stroke& rhs)
-        {
-            stroke tmp(rhs);
-            swap(tmp);
-            return *this;
-        }
+        void set_color(const Color& c);
+	
+        Color const& get_color() const;
+	
+        float get_width() const;
+        void set_width(float w);
+        void set_opacity(float opacity);
 
-        void set_color(const Color& c) 
-        {
-            c_=c;
-        }
+        float get_opacity() const;
 	
-        Color const& get_color() const
-        {
-            return c_;
-        }
+        void set_line_cap(line_cap_e line_cap);
+        line_cap_e get_line_cap() const;
 	
-        float get_width() const
-        {
-            return width_;
-        }
-        void set_width(float w)
-        {
-            width_=w;
-        }
-
-        void set_opacity(float opacity)
-        {    
-            if (opacity > 1.0) opacity_=1.0;
-            else if (opacity < 0.0) opacity_=0.0;
-            else opacity_=opacity;
-        }
-
-        float get_opacity() const 
-        {
-            return opacity_;
-        }
+        void set_line_join(line_join_e line_join);
+        line_join_e get_line_join() const;
 	
-        void set_line_cap(line_cap_e line_cap)
-        {
-            line_cap_=line_cap;
-        }
-
-        line_cap_e get_line_cap() const 
-        {
-            return line_cap_;
-        }
+        void add_dash(float dash,float gap);
+        bool has_dash() const;
 	
-        void set_line_join(line_join_e line_join) 
-        {
-            line_join_=line_join;
-        }
-	
-        line_join_e get_line_join() const 
-        {
-            return line_join_;
-        }
-	
-        void add_dash(float dash,float gap)
-        {
-            dash_.push_back(std::make_pair(dash,gap));
-        }
-        bool has_dash() const 
-        {
-            return dash_.size()>0 ? true : false ;
-        }
-	
-        dash_array const& get_dash_array() const
-        {
-            return  dash_;
-        }
+        dash_array const& get_dash_array() const;
 	
     private:
-        void swap(const stroke& other) throw()
-        {
-            c_=other.c_;
-            width_=other.width_;
-            opacity_=other.opacity_;
-            line_cap_=other.line_cap_;
-            line_join_=other.line_join_;
-            dash_ = other.dash_;
-        }
+        void swap(const stroke& other) throw();
     };
 }
 

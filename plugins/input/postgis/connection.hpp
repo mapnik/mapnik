@@ -25,6 +25,8 @@
 #ifndef CONNECTION_HPP
 #define CONNECTION_HPP
 
+#include <mapnik/datasource.hpp>
+
 extern "C" 
 {
 #include "libpq-fe.h"
@@ -41,10 +43,18 @@ class Connection
       Connection(std::string const& connection_str)
       {
          conn_=PQconnectdb(connection_str.c_str());
-         if (PQstatus(conn_) == CONNECTION_BAD)
+         if (PQstatus(conn_) != CONNECTION_OK)
          {
-            std::clog << "connection  ["<< connection_str<< "] failed\n"
-                      << PQerrorMessage(conn_)<< std::endl;
+             std::string s("PSQL error");
+             if (conn_ )
+             {
+                 std::string msg = PQerrorMessage( conn_ );
+                 if ( ! msg.empty() )
+                 {
+                     s += ":\n" + msg.substr( 0, msg.size() - 1 );
+                 }
+             } 
+             throw mapnik::datasource_exception( s );
          }
       }
       

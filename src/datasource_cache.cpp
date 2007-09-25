@@ -30,6 +30,7 @@
 #include <boost/algorithm/string.hpp>
 // mapnik
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/config_error.hpp>
 // ltdl
 #include <ltdl.h>
 
@@ -46,7 +47,7 @@ namespace mapnik
 
    datasource_cache::datasource_cache()
    {
-      if (lt_dlinit()) throw;
+      if (lt_dlinit()) throw std::runtime_error("lt_dlinit() failed");
    }
 
    datasource_cache::~datasource_cache()
@@ -57,49 +58,43 @@ namespace mapnik
    std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
    bool datasource_cache::registered_=false;
     
-   datasource_ptr datasource_cache::create(const parameters& params)
+   datasource_ptr datasource_cache::create(const parameters& params) 
    {
-      datasource_ptr ds;
-      try
-      {
-         boost::optional<std::string> type = params.get<std::string>("type");
-         if (type)
-         {
-            map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
-            if (itr!=plugins_.end())
-            {
-               if (itr->second->handle())
-               {
-                  create_ds* create_datasource = 
-                     (create_ds*) lt_dlsym(itr->second->handle(), "create");
-                  if (!create_datasource)
-                  {
-                     std::clog << "Cannot load symbols: " << lt_dlerror() << std::endl;
-                  }
-                  else
-                  {
-                     ds=datasource_ptr(create_datasource(params), datasource_deleter());
-                  }
-               }
-               else
-               {
-                  std::clog << "Cannot load library: " << lt_dlerror() << std::endl;
-               }
-            }
-         }
+       boost::optional<std::string> type = params.get<std::string>("type");
+       if ( ! type)
+       {
+           throw config_error(string("Could not create datasource. Required ") +
+                   "parameter 'type' is missing");
+       }
+
+       datasource_ptr ds;
+       map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
+       if ( itr == plugins_.end() )
+       {
+           throw config_error(string("Could not create datasource. No plugin ") +
+                   "found for type '" + * type + "'");
+       }
+       if ( ! itr->second->handle())
+       {
+           throw std::runtime_error(string("Cannot load library: ") + 
+                   lt_dlerror());
+       }
+
+       create_ds* create_datasource = 
+           (create_ds*) lt_dlsym(itr->second->handle(), "create");
+
+       if ( ! create_datasource)
+       {
+           throw std::runtime_error(string("Cannot load symbols: ") + 
+                   lt_dlerror());
+       }
+
+       ds=datasource_ptr(create_datasource(params), datasource_deleter());
+
 #ifdef MAPNIK_DEBUG
-         std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
+       std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
 #endif
-      }
-      catch (datasource_exception& ex)
-      {
-         std::clog << ex.what() << "\n";
-      }
-      catch (...)
-      {
-         std::clog << " exception caught\n";
-      }
-      return ds;
+       return ds;
    }
 
    bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)

@@ -26,10 +26,12 @@
 
 #include <boost/shared_ptr.hpp>
 #include <mapnik/graphics.hpp> 
+#include <mapnik/symbolizer.hpp> 
 
 namespace mapnik
 {
-    struct MAPNIK_DECL polygon_pattern_symbolizer
+    struct MAPNIK_DECL polygon_pattern_symbolizer :
+            public symbolizer_with_image
     {
 	
         polygon_pattern_symbolizer(std::string const& file,
@@ -37,10 +39,6 @@ namespace mapnik
                                    unsigned width,unsigned height);
         
         polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs);
-        
-        ImageData32 const& get_pattern() const;
-    private:
-        boost::shared_ptr<ImageData32> pattern_;
     };
 }
 

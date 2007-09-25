@@ -19,47 +19,48 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
 //$Id$
-// stl
-#include <iostream>
-// boost
-#include <boost/scoped_ptr.hpp>
-// mapnik
-#include <mapnik/point_symbolizer.hpp>
-#include <mapnik/image_data.hpp>
+
+#include <mapnik/symbolizer.hpp>
+
 #include <mapnik/image_reader.hpp>
 
-namespace mapnik
-{
-    point_symbolizer::point_symbolizer()
-        : symbolizer_with_image(boost::shared_ptr<ImageData32>(new ImageData32(4,4))),
-          overlap_(false)
+#include <iostream>
+
+namespace mapnik {
+
+    symbolizer_with_image::symbolizer_with_image(boost::shared_ptr<ImageData32> img) :
+        image_( img ) {}
+
+    symbolizer_with_image::symbolizer_with_image(std::string const& file,
+            std::string const& type, unsigned width,unsigned height)
+        : image_(new ImageData32(width,height)),
+          image_filename_( file )
     {
-        //default point symbol is black 4x4px square
-        image_->set(0xff000000);
+        std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
+        if (reader.get())
+            reader->read(0,0,*image_);		
     }
-    
-    point_symbolizer::point_symbolizer(std::string const& file,
-                                       std::string const& type,
-                                       unsigned width,unsigned height) 
-        : symbolizer_with_image(file, type, width, height),
-          overlap_(false)
-    { }
-    
-    point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
-        : symbolizer_with_image(rhs),
-          overlap_(rhs.overlap_)
-    {}
-    
-    void point_symbolizer::set_allow_overlap(bool overlap)
+            
+
+    symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
+        : image_(rhs.image_), image_filename_(rhs.image_filename_) {}
+
+
+    boost::shared_ptr<ImageData32> symbolizer_with_image::get_image() const
     {
-        overlap_ = overlap;
+        return image_;
     }
-    
-    bool point_symbolizer::get_allow_overlap() const
+    void symbolizer_with_image::set_image(boost::shared_ptr<ImageData32> symbol) 
     {
-        return overlap_;
+        image_ = symbol;
     }
-}
+    const std::string & symbolizer_with_image::get_filename() const
+    {
+        return image_filename_;
+    }
+
+} // end of namespace mapnik
+
+
 

@@ -32,9 +32,9 @@ void export_text_symbolizer()
     using mapnik::text_symbolizer;
     using mapnik::Color;
  
-    enum_<mapnik::label_placement_e>("label_placement")
-        .value("LINE_PLACEMENT",mapnik::line_placement)
-        .value("POINT_PLACEMENT",mapnik::point_placement)
+    enum_<mapnik::label_placement_enum>("label_placement")
+        .value("LINE_PLACEMENT",mapnik::LINE_PLACEMENT)
+        .value("POINT_PLACEMENT",mapnik::POINT_PLACEMENT)
         ;
     
     class_<text_symbolizer>("TextSymbolizer",

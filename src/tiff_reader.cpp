@@ -88,21 +88,14 @@ namespace mapnik
           tile_width_(0),
           tile_height_(0)
     {
-        try
-        {
-            init();
-        }
-        catch (ImageReaderException& ex)
-        {
-            std::clog<<ex.what()<<std::endl;
-            throw;
-        }
+        init();
     }
 
 
     void TiffReader::init()
     {
-	TIFF* tif = load_if_exists(file_name_);
+        // TODO: error handling
+        TIFF* tif = load_if_exists(file_name_);
         if (!tif) return;
 	
         char msg[1024];

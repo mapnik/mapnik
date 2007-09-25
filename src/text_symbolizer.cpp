@@ -29,6 +29,14 @@
 //mapnik
 #include <mapnik/text_symbolizer.hpp>
 
+static const char * label_placement_strings[] = {
+    "point",
+    "line",
+    ""
+};
+
+IMPLEMENT_ENUM( mapnik::label_placement_e, label_placement_strings );
+
 namespace mapnik
 {
     text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size,Color const& fill)
@@ -44,7 +52,7 @@ namespace mapnik
           fill_(fill),
           halo_fill_(Color(255,255,255)),
           halo_radius_(0),
-          label_p_(point_placement),
+          label_p_(POINT_PLACEMENT),
           anchor_(0.0,0.5),
           displacement_(0.0,0.0),
           avoid_edges_(false),

@@ -30,12 +30,12 @@ void export_stroke ()
     using namespace mapnik;
     using namespace boost::python;
 
-    enum_<line_cap_e>("line_cap")
+    enum_<line_cap_enum>("line_cap")
         .value("BUTT_CAP",BUTT_CAP)
         .value("SQUARE_CAP",SQUARE_CAP)
         .value("ROUND_CAP",ROUND_CAP)
         ;
-    enum_<line_join_e>("line_join")
+    enum_<line_join_enum>("line_join")
         .value("MITER_JOIN",MITER_JOIN)
         .value("MITER_REVERT_JOIN",MITER_REVERT_JOIN)
         .value("ROUND_JOIN",ROUND_JOIN)

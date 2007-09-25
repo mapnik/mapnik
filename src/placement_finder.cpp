@@ -70,8 +70,8 @@ namespace mapnik
         minimum_distance(sym.get_minimum_distance()),
         avoid_edges(sym.get_avoid_edges()),
         has_dimensions(true), 
-        dimensions(std::make_pair(sym.get_background_image()->width(),
-                             sym.get_background_image()->height()))
+        dimensions(std::make_pair(sym.get_image()->width(),
+                             sym.get_image()->height()))
    {
    }
   
@@ -205,16 +205,16 @@ namespace mapnik
 
       double distance = p->get_total_distance();
     
-      if (p->label_placement == line_placement && string_width > distance)
+      if (p->label_placement == LINE_PLACEMENT && string_width > distance)
       {
          //Empty!
          return ideal_label_distances;
       }
       
       int num_labels = 0;
-      if (p->label_spacing && p->label_placement == line_placement)
+      if (p->label_spacing && p->label_placement == LINE_PLACEMENT)
          num_labels = static_cast<int> (floor(distance / (p->label_spacing + string_width)));
-      else if (p->label_spacing && p->label_placement == point_placement)
+      else if (p->label_spacing && p->label_placement == POINT_PLACEMENT)
          num_labels = static_cast<int> (floor(distance / p->label_spacing));
 
       if (p->force_odd_labels && num_labels%2 == 0)
@@ -225,7 +225,7 @@ namespace mapnik
       double ideal_spacing = distance/num_labels;
       
       double middle; //try draw text centered
-      if (p->label_placement == line_placement)
+      if (p->label_placement == LINE_PLACEMENT)
         middle = (distance / 2.0) - (string_width/2.0);
       else //  (p->label_placement == point_placement)
         middle = distance / 2.0;
@@ -289,9 +289,9 @@ namespace mapnik
                }
                p->clear_envelopes();
                // check position +- delta for valid placement
-               if ((p->label_placement == line_placement &&
+               if ((p->label_placement == LINE_PLACEMENT &&
                     build_path_follow(p, *itr + (i*s)) ) ||
-                   (p->label_placement == point_placement &&
+                   (p->label_placement == POINT_PLACEMENT &&
                     build_path_horizontal(p, *itr + (i*s))) )
                {
                   update_detector(p);

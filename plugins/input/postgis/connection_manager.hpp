@@ -57,7 +57,7 @@ public:
       
       T* operator()() const
       {
-         return new T(connection_string());
+          return new T(connection_string());
       }
       
       inline std::string id() const 

@@ -68,15 +68,7 @@ namespace mapnik
           bit_depth_(0),
           color_type_(0)
     {
-        try 
-        {
-            init();
-        } 
-        catch (const ImageReaderException& e) 
-        {
-            std::clog << e.what() << '\n';
-            throw;
-        }
+        init();
     }
 
     PngReader::~PngReader() {}

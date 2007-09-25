@@ -31,24 +31,11 @@ namespace mapnik
     polygon_pattern_symbolizer::polygon_pattern_symbolizer(std::string const& file,
                                                            std::string const& type,
                                                            unsigned width,unsigned height) 
-        : pattern_(new ImageData32(width,height))
+        : symbolizer_with_image( file, type, width, height )
     {
-        try 
-        {
-            std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
-            if (reader.get())
-                reader->read(0,0,*pattern_);		
-        } 
-        catch (...) 
-        {
-            std::clog << "exception caught...\n";
-        }
     }
     polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)
-        : pattern_(rhs.pattern_) {}
+        : symbolizer_with_image(rhs) {}
     
-    ImageData32 const& polygon_pattern_symbolizer::get_pattern() const
-    {
-        return *pattern_;
-    }
 }
+

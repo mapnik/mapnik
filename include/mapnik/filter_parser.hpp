@@ -29,6 +29,9 @@
 #include <stack>
 #include <iostream>
 // boost
+
+//#define BOOST_SPIRIT_DEBUG
+
 #include <boost/shared_ptr.hpp>
 #include <boost/spirit/core.hpp>
 #include <boost/spirit/symbols.hpp>
@@ -404,7 +407,7 @@ namespace mapnik
                          [compose_filter<FeatureT,mapnik::less_than<value> >(self.filters,self.exprs)]
                          | (L"<=" >> expression)
                          [compose_filter<FeatureT,less_than_or_equal<value> >(self.filters,self.exprs)]
-                         | regex );
+                       /*  | regex */);
 
                 equation = relation >> *( ( L'=' >> relation)
                                           [compose_filter<FeatureT,mapnik::equals<value> >(self.filters,self.exprs)]
@@ -417,7 +420,26 @@ namespace mapnik
 
                 or_expr  = and_expr >> *(L"or" >> and_expr)[compose_or_filter<FeatureT>(self.filters)];
 
-                filter_statement = or_expr;	
+                filter_statement = or_expr >> *(space_p) >> end_p;	
+
+#ifdef BOOST_SPIRIT_DEBUG
+                BOOST_SPIRIT_DEBUG_RULE( factor ); 
+                BOOST_SPIRIT_DEBUG_RULE( term );
+                BOOST_SPIRIT_DEBUG_RULE( expression );
+                BOOST_SPIRIT_DEBUG_RULE( relation );
+                BOOST_SPIRIT_DEBUG_RULE( equation );
+                BOOST_SPIRIT_DEBUG_RULE( not_expr );
+                BOOST_SPIRIT_DEBUG_RULE( and_expr );
+                BOOST_SPIRIT_DEBUG_RULE( or_expr );
+
+                BOOST_SPIRIT_DEBUG_RULE( filter_statement );   
+                BOOST_SPIRIT_DEBUG_RULE( literal );
+                BOOST_SPIRIT_DEBUG_RULE( number );
+                BOOST_SPIRIT_DEBUG_RULE( string_ );
+                BOOST_SPIRIT_DEBUG_RULE( property );
+                BOOST_SPIRIT_DEBUG_RULE( function );
+                BOOST_SPIRIT_DEBUG_RULE( regex );
+#endif
             }
 	    
             boost::spirit::rule<ScannerT> const& start() const
@@ -444,6 +466,8 @@ namespace mapnik
             symbols<string> func1_op;
             symbols<string> func2_op;
             symbols<string> spatial_op;
+
+
         };
         stack<shared_ptr<filter<FeatureT> > >& filters;
         stack<shared_ptr<expression<FeatureT> > >& exprs;

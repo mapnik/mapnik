@@ -27,12 +27,13 @@ if platform.uname()[4] == 'x86_64':
 else:
     LIBDIR_SCHEMA='lib'
 
-opts = Options()
+opts = Options('config.py')
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include'))
 opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add('BOOST_TOOLKIT','Specify boost toolkit e.g. gcc41.','',False)
 opts.Add(('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'))
+opts.Add(('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'))
 opts.Add(PathOption('FRIBIDI_INCLUDES', 'Search path for fribidi include files', '/usr/include'))
 opts.Add(PathOption('FRIBIDI_LIBS','Search path for fribidi include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
@@ -56,7 +57,7 @@ opts.Add(BoolOption('DEBUG', 'Compile a debug version of mapnik', 'False'))
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
 opts.Add(BoolOption('BIDI', 'BIDI support', 'False'))
 opts.Add(EnumOption('THREADING','Set threading support','multi', ['multi','single']))
-opts.Add(EnumOption('XMLPARSER','Set xml parser ','tinyxml', ['tinyxml','spirit']))
+opts.Add(EnumOption('XMLPARSER','Set xml parser ','tinyxml', ['tinyxml','spirit','libxml2']))
 
 env = Environment(ENV=os.environ, options=opts)
 
@@ -105,6 +106,9 @@ if env['BIDI']:
 
 if env['XMLPARSER'] == 'tinyxml':
     env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
+elif env['XMLPARSER'] == 'libxml2':
+    env.ParseConfig(env['XML2_CONFIG'] + ' --libs --cflags')
+    env.Append(CXXFLAGS = '-DHAVE_LIBXML2');
     
 C_LIBSHEADERS = [
     ['m', 'math.h', True],
@@ -224,10 +228,12 @@ env = conf.Finish()
 if env['PLATFORM'] == 'Darwin': pthread = ''
 else: pthread = '-pthread'
 
+common_cxx_flags = '-ansi -Wall %s -ftemplate-depth-100  -D%s ' % (pthread, env['PLATFORM'].upper());
+
 if env['DEBUG']:
-    env.Append(CXXFLAGS = '-ansi -Wall %s -ftemplate-depth-100 -O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG -D%s ' % (pthread, env['PLATFORM'].upper()))
+    env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG')
 else:
-    env.Append(CXXFLAGS = '-ansi -Wall %s -ftemplate-depth-100 -O2 -finline-functions -Wno-inline -DNDEBUG -D%s' % (pthread,env['PLATFORM'].upper()))
+    env.Append(CXXFLAGS = common_cxx_flags + '-O2 -finline-functions -Wno-inline -DNDEBUG')
 
 # Install some free default fonts
 

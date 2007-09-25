@@ -26,19 +26,17 @@
 
 #include <boost/shared_ptr.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/symbolizer.hpp>
 
 namespace mapnik 
 {      
-    struct MAPNIK_DECL line_pattern_symbolizer
+    struct MAPNIK_DECL line_pattern_symbolizer :
+        public symbolizer_with_image
     {
         line_pattern_symbolizer(std::string const& file,
                                 std::string const& type,
                                 unsigned width,unsigned height);
-        
         line_pattern_symbolizer(line_pattern_symbolizer const& rhs);
-        ImageData32 const& get_pattern() const;
-    private:
-        boost::shared_ptr<ImageData32> pattern_;
     };    
 }
 

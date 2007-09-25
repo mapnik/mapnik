@@ -27,6 +27,7 @@
 
 #include <mapnik/config.hpp>
 #include <mapnik/css_color_parser.hpp>
+#include <mapnik/config_error.hpp>
 
 using namespace boost::spirit;
 
@@ -40,8 +41,11 @@ namespace mapnik {
             actions<Color> a(color);
             css_color_grammar<actions<Color> > grammar(a);
             parse_info<> info = parse(css_color, grammar, space_p);
-            if (info.full) return color;
-            return Color(0,0,0);	
+            if ( ! info.full) {
+                throw config_error(std::string("Failed to parse color value: ") +
+                        "Expected a color, but got '" + css_color + "'");
+            }
+            return color;
         }    
     private:
         color_factory();
