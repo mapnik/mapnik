@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map bgcolor="#b5d0d0" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
+    <Style name="test 1">
+        <Rule name="rule t1">
+            <Filter>[landuse] = 'meadow' or [landuse] = 'wood' or [landuse] = 'forest'</Filter>
+            <MinScaleDenominator>1000</MinScaleDenominator>
+            <PointSymbolizer/>
+        </Rule>
+    </Style>
+    <Style name="test 2">
+        <Rule title="foo">
+            <ElseFilter/>
+            <MaxScaleDenominator>1000000</MaxScaleDenominator>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16" height="16"/>
+        </Rule>
+    </Style>
+</Map>

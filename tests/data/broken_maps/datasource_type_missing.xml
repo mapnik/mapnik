@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map bgcolor="red">
+  <Layer name="some_layer" status="on" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
+    <Datasource>
+      <Parameter name="user">some_one</Parameter>
+      <Parameter name="password">SECRET</Parameter>
+      <Parameter name="dbname">gis</Parameter>
+    </Datasource>
+  </Layer>
+
+</Map>

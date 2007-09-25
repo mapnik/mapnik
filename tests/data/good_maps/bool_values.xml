@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map bgcolor="#b5d0d0" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
+    <Style name="test 1">
+        <Rule>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16"
+                        height="16" allow_overlap="true" />
+        </Rule>
+    </Style>
+    <Style name="test 2">
+        <Rule>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16"
+                        height="16" allow_overlap="yes" />
+        </Rule>
+    </Style>
+    <Style name="test 3">
+        <Rule>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16"
+                        height="16" allow_overlap="on" />
+        </Rule>
+    </Style>
+    <Style name="test 4">
+        <Rule>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16"
+                        height="16" allow_overlap="1" />
+        </Rule>
+    </Style>
+    <Style name="test 5">
+        <Rule>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16"
+                        height="16" allow_overlap="false" />
+        </Rule>
+    </Style>
+    <Style name="test 6">
+        <Rule>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16"
+                        height="16" allow_overlap="no" />
+        </Rule>
+    </Style>
+    <Style name="test 7">
+        <Rule>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16"
+                        height="16" allow_overlap="off" />
+        </Rule>
+    </Style>
+    <Style name="test 8">
+        <Rule>
+            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16"
+                        height="16" allow_overlap="0" />
+        </Rule>
+    </Style>
+</Map>

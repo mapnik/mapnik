@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map>
+    <Style name="some_style">
+      <Rule>
+        <LineSymbolizer>
+          <CssParameter name="stroke-width">foobar</CssParameter>
+        </LineSymbolizer>
+      </Rule>
+    </Style>
+</Map>

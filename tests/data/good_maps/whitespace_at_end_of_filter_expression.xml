@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map bgcolor="#b5d0d0" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
+  <Style name="text">
+    <Rule>
+      <Filter>[leisure] &lt;&gt; '' or [landuse] &lt;&gt; '' </Filter>
+      <MaxScaleDenominator>20000</MaxScaleDenominator>
+      <TextSymbolizer name="name" face_name="DejaVu Sans Book" size="10" fill="#000" halo_radius="2" wrap_width="10"/>
+    </Rule>
+  </Style>
+</Map>

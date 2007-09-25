@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map[
+    <!ENTITY db_user "foobar">
+    <!ENTITY db_name "gis">
+]>
+<Map bgcolor="red">
+  <Layer name="some_layer" status="on" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
+    <Datasource>
+      <Parameter name="type">postgis</Parameter>
+      <Parameter name="user">&db_user;</Parameter>
+      <Parameter name="password">SECRET</Parameter>
+      <Parameter name="dbname">&db_name;</Parameter>
+    </Datasource>
+  </Layer>
+
+</Map>
