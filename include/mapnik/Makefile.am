@@ -1,6 +1,11 @@
 
 libmapnikdir = $(pkgincludedir)
 
+if HAVE_LIBXML2
+libxml2_inc = \
+  libxml2_loader.hpp
+endif
+
 libmapnik_HEADERS = \
 	agg_renderer.hpp\
 	attribute.hpp \
@@ -10,6 +15,7 @@ libmapnik_HEADERS = \
 	color_factory.hpp \
 	comparison.hpp \
 	config.hpp \
+  config_error.hpp \
 	coord.hpp \
 	coord_array.hpp \
 	css_color_parser.hpp \
@@ -18,6 +24,7 @@ libmapnik_HEADERS = \
 	datasource_cache.hpp \
 	distance.hpp \
 	ellipsoid.hpp \
+  enumeration.hpp \
 	envelope.hpp \
 	expression.hpp \
 	factory.hpp \
@@ -48,6 +55,7 @@ libmapnik_HEADERS = \
 	label_collision_detector.hpp \
 	label_placement.hpp \
 	layer.hpp \
+  ${libxml2_inc} \
 	line_pattern_symbolizer.hpp \
 	line_symbolizer.hpp \
 	load_map.hpp \
@@ -67,6 +75,7 @@ libmapnik_HEADERS = \
 	pool.hpp \
 	projection.hpp \
 	proj_transform.hpp \
+  ptree_helpers.hpp \
 	quad_tree.hpp \
 	query.hpp \
 	raster.hpp \

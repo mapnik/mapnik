@@ -24,6 +24,10 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
+
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>

@@ -90,8 +90,9 @@ AC_ARG_ENABLE(included_agg,
         [  --enable-included-agg=[no/yes]        enables included libagg build (default=yes)],,
                  enable_included_agg=yes)
 
+AM_CONDITIONAL(BUILD_AGG, test "x$enable_included_agg" = "xyes")
+
 if [ test "x$enable_included_agg" = "xyes"]; then
-  AM_CONDITIONAL(BUILD_AGG, test "x$enable_included_agg" = "xyes")
   AGG_LIBS=-L../agg/src
   AGG_CFLAGS=-I../agg/include
   AC_SUBST(AGG_LIBS)
@@ -101,6 +102,22 @@ if [ test "x$enable_included_agg" = "xyes"]; then
 else
   AC_MSG_RESULT(no)
   PKG_CHECK_MODULES(AGG, libagg)
+fi
+
+
+dnl Check for option to enable libxml2
+AC_MSG_CHECKING(whether to enable included libxml2 building)
+AC_ARG_ENABLE(libxml2,
+        [  --enable-libxml2=[no/yes]        enables included libxml2 build (default=no)],,
+                 enable_libxml2=no)
+
+AM_CONDITIONAL(HAVE_LIBXML2, test "x$enable_libxml2" = "xyes")
+
+if [ test "x$enable_libxml2" = "xyes"]; then
+  AC_MSG_RESULT(yes)
+  PKG_CHECK_MODULES(LIBXML2, libxml-2.0)
+else
+  AC_MSG_RESULT(no)
 fi
 
 AC_OUTPUT([

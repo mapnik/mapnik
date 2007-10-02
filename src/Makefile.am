@@ -14,6 +14,11 @@ AM_CXXFLAGS =\
 lib_LTLIBRARIES = \
 	libmapnik.la
 
+if HAVE_LIBXML2
+libxml2_src = \
+  libxml2_loader.cpp
+endif
+
 libmapnik_la_SOURCES = \
 	agg_renderer.cpp\
 	datasource_cache.cpp \
@@ -25,6 +30,7 @@ libmapnik_la_SOURCES = \
 	image_reader.cpp \
 	image_util.cpp \
 	layer.cpp \
+  ${libxml2_src} \
 	line_pattern_symbolizer.cpp \
 	load_map.cpp \
 	map.cpp \
@@ -41,9 +47,12 @@ libmapnik_la_SOURCES = \
 	save_map.cpp \
 	scale_denominator.cpp \
 	shield_symbolizer.cpp \
+  stroke.cpp \
+  symbolizer.cpp \
 	text_symbolizer.cpp \
 	tiff_reader.cpp \
 	wkb.cpp
+  
 
 libmapnik_la_LIBADD = \
 	${PNG_LIBS} \
@@ -56,7 +65,8 @@ libmapnik_la_LIBADD = \
   ${JPEG_LIBS} \
   ${TIFF_LIBS} \
   ${PROJ_LIBS} \
-  ${LTDL_LIBS}
+  ${LTDL_LIBS} \
+  ${LIBXML2_LIBS}
 
 libmapnik_la_CXXFLAGS = \
   -I../include        \
@@ -67,7 +77,8 @@ libmapnik_la_CXXFLAGS = \
   ${TIFF_CFLAGS} \
   ${PROJ_CFLAGS} \
   ${LTDL_CFLAGS} \
-  ${BOOST_CPPFLAGS}
+  ${BOOST_CPPFLAGS} \
+  ${LIBXML2_CFLAGS}
 	
 	
 
