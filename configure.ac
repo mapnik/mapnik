@@ -7,6 +7,10 @@ AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
+dnl Disable libtool 1.5 support for languages we don't use
+define([AC_LIBTOOL_LANG_F77_CONFIG], [:])dnl
+define([AC_LIBTOOL_LANG_GCJ_CONFIG], [:])dnl
+
 AC_ISC_POSIX
 AC_PROG_CXX
 AM_PROG_CC_STDC
@@ -116,6 +120,7 @@ AM_CONDITIONAL(HAVE_LIBXML2, test "x$enable_libxml2" = "xyes")
 if [ test "x$enable_libxml2" = "xyes"]; then
   AC_MSG_RESULT(yes)
   PKG_CHECK_MODULES(LIBXML2, libxml-2.0)
+  AC_DEFINE(HAVE_LIBXML2, 1,"")
 else
   AC_MSG_RESULT(no)
 fi

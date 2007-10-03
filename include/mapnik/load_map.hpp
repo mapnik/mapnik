@@ -24,6 +24,10 @@
 #ifndef MAP_LOADER_HPP
 #define MAP_LOADER_HPP
 
+#ifdef HAVE_CONFIG_H
+  #include <config.h>
+#endif
+
 #include <string>
 #include <mapnik/map.hpp>
 
