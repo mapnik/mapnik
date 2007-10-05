@@ -33,11 +33,13 @@ class LayerTab : public QListView
       void paintEvent(QPaintEvent *e);
    signals:
       void update_mapwidget();
+      void layerSelected(int) const;                       
    public slots:
       void layerInfo();   
       void layerInfo2(QModelIndex const&);     
    protected slots:
       void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+      void selectionChanged(const QItemSelection & selected, const QItemSelection &);
 };
 
 class StyleTab : public QTreeView

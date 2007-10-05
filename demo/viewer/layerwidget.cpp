@@ -52,6 +52,16 @@ void LayerTab::dataChanged(const QModelIndex &topLeft,
    emit update_mapwidget();
 }
 
+void LayerTab::selectionChanged(const QItemSelection & selected, const QItemSelection &)
+{
+   QModelIndexList list = selected.indexes();
+   if (list.size() != 0) 
+   {
+      std::cout << "SELECTED LAYER ->" << list[0].row() << "\n";
+      emit layerSelected(list[0].row());
+   }
+}
+
 void LayerTab::layerInfo()
 {
    qDebug("Layer info");

@@ -144,7 +144,7 @@ namespace mapnik {
          {
             return scale_;
          }
-        
+         
          inline void forward(double * x, double * y) const
          {
             *x = (*x - extent_.minx()) * scale_ - offset_x_;
@@ -156,13 +156,13 @@ namespace mapnik {
             *x = extent_.minx() + (*x + offset_x_)/scale_;
             *y = extent_.maxy() - (*y + offset_y_)/scale_;
          }
-        
+         
          inline coord2d& forward(coord2d& c) const
          {
             forward(&c.x,&c.y);
             return c;
          }
-
+         
          inline coord2d& backward(coord2d& c) const
          {
             backward(&c.x,&c.y);
@@ -207,6 +207,10 @@ namespace mapnik {
                backward(coords[i]);
             }
             return coords;
+         }
+         inline Envelope<double> const& extent() const
+         {
+            return extent_;
          }
    };
 }

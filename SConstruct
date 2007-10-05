@@ -46,7 +46,7 @@ opts.Add(PathOption('PGSQL_INCLUDES', 'Search path for PostgreSQL include files'
 opts.Add(PathOption('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include'))
 opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA))
-opts.Add(PathOption('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/include/gdal'))
+opts.Add(PathOption('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/include'))
 opts.Add(PathOption('GDAL_LIBS', 'Search path for GDAL library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('GIGABASE_INCLUDES', 'Search path for Gigabase include files', '/usr/local/include'))
 opts.Add(PathOption('GIGABASE_LIBS', 'Search path for Gigabase library files', '/usr/local/' + LIBDIR_SCHEMA))
@@ -130,7 +130,7 @@ if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
     ['thread', 'boost/thread/mutex.hpp', True],
-    # ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
+    ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
     ['program_options', 'boost/program_options.hpp', False]
@@ -228,7 +228,7 @@ env = conf.Finish()
 if env['PLATFORM'] == 'Darwin': pthread = ''
 else: pthread = '-pthread'
 
-common_cxx_flags = '-ansi -Wall %s -ftemplate-depth-100  -D%s ' % (pthread, env['PLATFORM'].upper());
+common_cxx_flags = '-ansi -Wall %s -ftemplate-depth-100  -D%s -DBOOST_SPIRIT_THREADSAFE ' % (pthread, env['PLATFORM'].upper());
 
 if env['DEBUG']:
     env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG')

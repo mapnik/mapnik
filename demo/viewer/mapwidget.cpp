@@ -62,18 +62,19 @@ double scales [] = {279541132.014,
                     533.182395962};
 
 MapWidget::MapWidget(QWidget *parent) 
-   :QWidget(parent),
-    map_(),
-    selected_(1),
-    extent_(),
-    cur_tool_(ZoomToBox),
-    start_x_(0),
-    start_y_(0),
-    end_x_(0),
-    end_y_(0),
-    drag_(false),
-    first_(true),
-    pen_(QColor(0,0,255,96))
+   : QWidget(parent),
+     map_(),
+     selected_(1),
+     extent_(),
+     cur_tool_(ZoomToBox),
+     start_x_(0),
+     start_y_(0),
+     end_x_(0),
+     end_y_(0),
+     drag_(false),
+     first_(true),
+     pen_(QColor(0,0,255,96)),
+     selectedLayer_(-1)
 {
    pen_.setWidth(3);
    pen_.setCapStyle(Qt::RoundCap);
@@ -140,19 +141,23 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
          {     
             QVector<QPair<QString,QString> > info;
             
-            projection proj(map_->srs()); // map projection
-            double scale_denom = scale_denominator(*map_,proj.is_geographic());
+            projection map_proj(map_->srs()); // map projection
+            double scale_denom = scale_denominator(*map_,map_proj.is_geographic());
+            CoordTransform t(map_->getWidth(),map_->getHeight(),map_->getCurrentExtent());
             
             for (unsigned index = 0; index <  map_->layerCount();++index)
             {
+               if (int(index) != selectedLayer_) continue;
+               
                Layer & layer = map_->layers()[index];
                if (!layer.isVisible(scale_denom)) continue;
                std::string name = layer.name();
                double x = e->x();
                double y = e->y();
                std::cout << "query at " << x << "," << y << "\n";
-               
-               std::auto_ptr<mapnik::memory_datasource> data(new mapnik::memory_datasource);
+               projection layer_proj(layer.srs());
+               mapnik::proj_transform prj_trans(map_proj,layer_proj);
+               //std::auto_ptr<mapnik::memory_datasource> data(new mapnik::memory_datasource);
                mapnik::featureset_ptr fs = map_->query_map_point(index,x,y);
 	         	
                if (fs)
@@ -170,24 +175,38 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                  itr->second.to_string().c_str()));
                         }
                      }
+                     typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry2d> path_type;
                      
-                     if (feat->num_geometries() > 0)
+                     for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
-                        mapnik::geometry2d & geom = feat->get_geometry(0);                       
-                        (*feat)["mapnik:geometry"] = geom.type();
-                        data->push(feat);
+                        mapnik::geometry2d & geom = feat->get_geometry(i);                       
+                        path_type path(t,geom,prj_trans);
+                        if (geom.num_points() > 0)
+                        {
+                           QPainterPath qpath;
+                           double x,y;
+                           path.vertex(&x,&y);
+                           qpath.moveTo(x,y);
+                           for (int j=1; j < geom.num_points(); ++j)
+                           {
+                              path.vertex(&x,&y);
+                              qpath.lineTo(x,y);
+                           }
+                           QPainter painter(&pix_);
+                           QPen pen(QColor(255,0,0,96));
+                           pen.setWidth(3);
+                           pen.setCapStyle(Qt::RoundCap);
+                           pen.setJoinStyle(Qt::RoundJoin);
+                           painter.setPen(pen);
+                           painter.drawPath(qpath);
+                           update();
+                        }
                      }
                   }
                }
-            
-               if (data->size())
+                  
+               if (info.size() > 0)
                {
-                  mapnik::Layer annotations("*annotations*");
-                  annotations.set_srs(map_->layers()[index].srs());
-                  annotations.add_style("mapnik:selection");
-                  annotations.set_datasource(mapnik::datasource_ptr(data.release()));
-                  map_->addLayer(annotations);
-                  updateMap();
                   info_dialog info_dlg(info,this);
                   info_dlg.exec();
                   break;
@@ -421,6 +440,7 @@ void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::strin
    //image.saveToFile(filename,type);
 }
        
+
 void MapWidget::updateMap() 
 {   
    if (map_)
@@ -449,4 +469,10 @@ boost::shared_ptr<Map> MapWidget::getMap()
 void MapWidget::setMap(boost::shared_ptr<Map> map)
 {
    map_ = map;
+}
+
+
+void MapWidget::layerSelected(int index)
+{
+   selectedLayer_ = index;
 }

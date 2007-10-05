@@ -66,8 +66,7 @@ namespace mapnik
       public:
          feature_style_processor(Map const& m)
             : m_(m) {}
-	
-         
+	 
          void apply()
          {
 #ifdef MAPNIK_DEBUG           

@@ -62,14 +62,17 @@ namespace mapnik
    
    struct MAPNIK_DECL building_symbolizer
     {
-        explicit building_symbolizer() 
-            : fill_(Color(128,128,128)),
-              opacity_(1.0) {}
+       explicit building_symbolizer() 
+          : fill_(Color(128,128,128)),
+          height_(0),
+          opacity_(1.0)
+          {}
 
-        building_symbolizer(Color const& fill)
-            : fill_(fill),
-              opacity_(1.0) {}
-        
+       building_symbolizer(Color const& fill,double height)
+          : fill_(fill),
+          height_(height),
+          opacity_(1.0) {}
+       
         Color const& get_fill() const
         {
             return fill_;
@@ -77,6 +80,14 @@ namespace mapnik
         void set_fill(Color const& fill)
         {
             fill_ = fill;
+        }
+        double height() const
+        {
+           return height_;
+        }
+        void set_height(double height) 
+        {
+           height_=height;
         }
         void set_opacity(float opacity)
         {
@@ -88,6 +99,7 @@ namespace mapnik
         }
     private:
         Color fill_;
+        double height_;
         float opacity_;
     };  
 }

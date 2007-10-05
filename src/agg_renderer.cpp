@@ -57,6 +57,8 @@
 #include "agg_renderer_scanline.h"
 #include "agg_pattern_filters_rgba.h"
 #include "agg_renderer_outline_image.h"
+#include "agg_vpgen_clip_polyline.h"
+
 // mapnik
 #include <mapnik/image_util.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -100,6 +102,8 @@ namespace mapnik
         buf_(pixmap_.raw_data(),width_,height_, width_ * 4),
         pixf_(buf_),
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
+        font_engine_(),
+        font_manager_(font_engine_),
         detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
         finder_(detector_,Envelope<double>(0 ,0, m.getWidth(), m.getHeight()))
    {
@@ -197,7 +201,6 @@ namespace mapnik
       typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
       
-      
       ren_base renb(pixf_);
       Color const& fill_  = sym.get_fill();
       unsigned r=fill_.red();
@@ -207,7 +210,7 @@ namespace mapnik
       agg::scanline_u8 sl;
       ras_.reset();
       
-      int height = 60 << 8;
+      double height = 0.7071 * sym.height(); // height in meters
       
       for (unsigned i=0;i<feature.num_geometries();++i)
       {
@@ -215,12 +218,12 @@ namespace mapnik
          if (geom.num_points() > 2) 
          {  
             boost::scoped_ptr<geometry2d> frame(new line_string_impl);
-            
             boost::scoped_ptr<geometry2d> roof(new polygon_impl);
             std::deque<segment_t> face_segments;
             double x0(0);
             double y0(0);
-            for (unsigned j=0;j<geom.num_points();++j)
+            unsigned cm = geom.vertex(&x0,&y0);
+            for (unsigned j=1;j<geom.num_points();++j)
             {
                double x,y;
                unsigned cm = geom.vertex(&x,&y);
@@ -251,7 +254,7 @@ namespace mapnik
                
                path_type faces_path (t_,*faces,prj_trans);
                ras_.add_path(faces_path);
-               ren.color(agg::rgba8(int(r*0.7), int(g*0.7), int(b*0.7), int(255 * sym.get_opacity())));
+               ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(255 * sym.get_opacity())));
                agg::render_scanlines(ras_, sl, ren);
                ras_.reset();
                
@@ -602,6 +605,7 @@ namespace mapnik
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
             
+            Envelope<double> ext = t_.extent();
             string_info info(text);
             ren.get_string_info(&info);
             unsigned num_geom = feature.num_geometries();
@@ -610,9 +614,39 @@ namespace mapnik
                geometry2d const& geom = feature.get_geometry(i);
                if (geom.num_points() > 0) // don't bother with empty geometries 
                {
-                  placement text_placement(&info, &t_, &prj_trans, geom, sym);            
+                  //agg::vpgen_clip_polyline clipped_path;
+                  // clip to the bbox
+                  
+                  //clipped_path.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
+                  
+                  //for (unsigned j=0;j<geom.num_points();++j)
+                  //{
+                  //  double x,y;
+                  ///  unsigned c = geom.vertex(&x,&y);
+                  //   if (c == SEG_MOVETO)
+                  //     clipped_path.move_to(x,y);
+                  //  else if (c == SEG_LINETO)
+                  //     clipped_path.line_to(x,y);
+                  //}
+                  //line_string_impl line;
+                  //while (1)
+                  //{
+                  //  double x,y;
+                  //  unsigned cmd = clipped_path.vertex(&x,&y);
+                  //  if (cmd == SEG_END) break;
+                  //  else if (cmd == SEG_MOVETO)
+                  //  {
+                  //     line.move_to(x,y);
+                  //  }
+                  //  else if (cmd == SEG_LINETO)
+                  //  {
+                  //     line.line_to(x,y);
+                  //  }
+                  //}
+                  
+                  placement text_placement(&info, &t_, &prj_trans, geom, sym);         
                   finder_.find_placements(&text_placement);  
-                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
                   {
                      double x = text_placement.placements[ii].starting_x;
                      double y = text_placement.placements[ii].starting_y;

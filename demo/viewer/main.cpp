@@ -32,9 +32,9 @@ int main( int argc, char **argv )
   
    datasource_cache::instance()->register_datasources("/usr/local/lib/mapnik/input");
    
-   freetype_engine::instance()->register_font("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
-   freetype_engine::instance()->register_font("/usr/local/lib/mapnik/fonts/DejaVuSans-Bold.ttf");
-   freetype_engine::instance()->register_font("/usr/local/lib/mapnik/fonts/DejaVuSansMono.ttf");
+   freetype_engine::register_font("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
+   freetype_engine::register_font("/usr/local/lib/mapnik/fonts/DejaVuSans-Bold.ttf");
+   freetype_engine::register_font("/usr/local/lib/mapnik/fonts/DejaVuSansMono.ttf");
     
         
    QApplication app( argc, argv ); 

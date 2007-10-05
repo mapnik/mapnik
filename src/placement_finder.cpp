@@ -177,7 +177,7 @@ namespace mapnik
             old_y = new_y;
          }
       }
-    
+      
       return total_distance_;
    }
   
@@ -213,15 +213,20 @@ namespace mapnik
       
       int num_labels = 0;
       if (p->label_spacing && p->label_placement == LINE_PLACEMENT)
+      {
          num_labels = static_cast<int> (floor(distance / (p->label_spacing + string_width)));
+      }
       else if (p->label_spacing && p->label_placement == POINT_PLACEMENT)
+      {
          num_labels = static_cast<int> (floor(distance / p->label_spacing));
-
+      }
+      
       if (p->force_odd_labels && num_labels%2 == 0)
          num_labels--;
       if (num_labels <= 0)
          num_labels = 1;
-      
+
+
       double ideal_spacing = distance/num_labels;
       
       double middle; //try draw text centered

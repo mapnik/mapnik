@@ -53,32 +53,35 @@ using std::endl;
 
 namespace mapnik 
 {
-    using boost::optional;
+   using boost::optional;
 
-    class map_parser {
-        public:
-            map_parser( bool strict ) : strict_( strict ) {};
-
-            void parse_map( Map & map, ptree const & sty);
-        private:
-            void parse_style( Map & map, ptree const & sty);
-            void parse_layer( Map & map, ptree const & lay);
-
-            void parse_rule( feature_type_style & style, ptree const & r);
-
-            void parse_point_symbolizer( rule_type & rule, ptree const & sym);
-            void parse_line_pattern_symbolizer( rule_type & rule, ptree const & sym);
-            void parse_polygon_pattern_symbolizer( rule_type & rule, ptree const & sym);
-            void parse_text_symbolizer( rule_type & rule, ptree const & sym);
-            void parse_shield_symbolizer( rule_type & rule, ptree const & sym);
-            void parse_line_symbolizer( rule_type & rule, ptree const & sym);
-            void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
-            void parse_building_symbolizer( rule_type & rule, ptree const & sym );
-
-            void ensure_font_face( const text_symbolizer & text_symbol );
-
-            bool strict_;
-            face_manager<freetype_engine> font_manager_;
+   class map_parser : boost::noncopyable {
+      public:
+         map_parser( bool strict ) : 
+            strict_( strict ),
+            font_manager_(font_engine_) {}
+         
+         void parse_map( Map & map, ptree const & sty);
+      private:
+         void parse_style( Map & map, ptree const & sty);
+         void parse_layer( Map & map, ptree const & lay);
+         
+         void parse_rule( feature_type_style & style, ptree const & r);
+         
+         void parse_point_symbolizer( rule_type & rule, ptree const & sym);
+         void parse_line_pattern_symbolizer( rule_type & rule, ptree const & sym);
+         void parse_polygon_pattern_symbolizer( rule_type & rule, ptree const & sym);
+         void parse_text_symbolizer( rule_type & rule, ptree const & sym);
+         void parse_shield_symbolizer( rule_type & rule, ptree const & sym);
+         void parse_line_symbolizer( rule_type & rule, ptree const & sym);
+         void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
+         void parse_building_symbolizer( rule_type & rule, ptree const & sym );
+         
+         void ensure_font_face( const text_symbolizer & text_symbol );
+         
+         bool strict_;
+         freetype_engine font_engine_;
+         face_manager<freetype_engine> font_manager_;
     };
 
     void load_map(Map & map, std::string const& filename, bool strict)
@@ -788,6 +791,11 @@ namespace mapnik
                 {
                     float opacity = get_css<float>(css, css_name);
                     building_sym.set_opacity(opacity);
+                }
+                else if (css_name == "height")
+                {
+                   float height = get_css<float>(css,css_name);
+                   building_sym.set_height(height);
                 }
             }
             rule.append(building_sym);

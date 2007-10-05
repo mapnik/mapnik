@@ -32,6 +32,7 @@
 #include <QSlider>
 
 // mapnik
+#include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
 
 #include "mainwindow.hpp"
@@ -92,6 +93,8 @@ MainWindow::MainWindow()
    connect(slider_,SIGNAL(valueChanged(int)),mapWidget_,SLOT(zoomToLevel(int)));
    // 
    connect(layerTab_,SIGNAL(update_mapwidget()),mapWidget_,SLOT(updateMap()));
+   connect(layerTab_,SIGNAL(layerSelected(int)), 
+           mapWidget_,SLOT(layerSelected(int)));
 }
 
 
@@ -171,9 +174,9 @@ void MainWindow::load_map_file(QString const& filename)
       layerTab_->setModel(new LayerListModel(map,this));
       styleTab_->setModel(new StyleModel(map,this));
    }
-   catch (...) 
+   catch (mapnik::config_error & ex) 
    {
-      std::cout << "Unexpected Exception\n";
+      std::cout << ex.what() << "\n";
    }
 }
 
@@ -366,3 +369,5 @@ void MainWindow::createToolBars()
    fileToolBar->addWidget(slider_);
    fileToolBar->addAction(aboutAct);
 }
+
+

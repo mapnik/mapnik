@@ -85,6 +85,7 @@ namespace mapnik {
           agg::row_ptr_cache<agg::int8u> buf_;
           agg::pixfmt_rgba32 pixf_;
           CoordTransform t_;
+          freetype_engine font_engine_;
           face_manager<freetype_engine> font_manager_;
           label_collision_detector4 detector_;
           placement_finder<label_collision_detector4> finder_;

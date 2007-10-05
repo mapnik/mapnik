@@ -171,7 +171,7 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
 
       QIcon operator() (mapnik::point_symbolizer const& sym) const
       {
-         boost::shared_ptr<mapnik::ImageData32> symbol = sym.get_data();
+         boost::shared_ptr<mapnik::ImageData32> symbol = sym.get_image();
          if (symbol)
          {
             QImage image(symbol->getBytes(),symbol->width(),symbol->height(),QImage::Format_ARGB32);
@@ -322,7 +322,7 @@ StyleModel::~StyleModel() {}
 // interface 
 QModelIndex StyleModel::index (int row, int col, QModelIndex const& parent) const
 {
-   qDebug("index() row=%d col=%d parent::internalId() = %lld", row,col,parent.internalId());
+//   qDebug("index() row=%d col=%d parent::internalId() = %lld", row,col,parent.internalId());
    node * parent_node;
    
    if (!parent.isValid())
@@ -349,7 +349,7 @@ QModelIndex StyleModel::parent (QModelIndex const& index) const
 
 int StyleModel::rowCount(QModelIndex const& parent) const
 {
-   qDebug("rowCount");
+   //qDebug("rowCount");
    node * parent_node;
    if (parent.column() > 0) return 0;
    if (!parent.isValid())
@@ -366,7 +366,7 @@ int StyleModel::columnCount( QModelIndex const&) const
 
 QVariant StyleModel::data(const QModelIndex & index, int role) const
 {
-   qDebug("data index::internalId() = %lld", index.internalId());
+   //qDebug("data index::internalId() = %lld", index.internalId());
    if (!index.isValid())
       return QVariant();
    node * cur_node = static_cast<node*>(index.internalPointer());

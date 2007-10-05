@@ -25,6 +25,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QPen>
+#include <QItemSelection>
 #include <iostream>
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -56,6 +57,7 @@ class MapWidget : public QWidget
       bool drag_;
       bool first_;
       QPen pen_;
+      int selectedLayer_;
    public:
       MapWidget(QWidget *parent=0);
       void setTool(eTool tool);
@@ -72,7 +74,8 @@ class MapWidget : public QWidget
       void panDown();
  public slots:
       void zoomToLevel(int level);
-      void updateMap();   
+      void updateMap();
+      void layerSelected(int);
    signals:
       void mapViewChanged();
    protected:    

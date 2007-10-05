@@ -40,7 +40,7 @@ namespace mapnik
    
    struct placement : boost::noncopyable
    {
-         typedef  coord_transform2<CoordTransform,geometry2d> path_type;
+         typedef coord_transform2<CoordTransform,geometry2d> path_type;
          
          template <typename SymbolizerT>
          placement(string_info *info_, 

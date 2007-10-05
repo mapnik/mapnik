@@ -33,23 +33,25 @@ extern "C"
 #include FT_GLYPH_H
 }
 
-// stl
-#include <string>
-#include <vector>
-#include <map>
-#include <iostream>
-// boost
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/thread/mutex.hpp>
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geometry.hpp>
-
 #include <mapnik/text_path.hpp>
+
+// boost
+#include <boost/shared_ptr.hpp>
+#include <boost/utility.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/mutex.hpp>
+
+// stl
+#include <string>
+#include <vector>
+#include <map>
+#include <iostream>
 
 namespace mapnik
 {
@@ -105,22 +107,20 @@ namespace mapnik
     	FT_Face face_;
     };
     
-    typedef boost::shared_ptr<font_face> face_ptr;
-    
-    class MAPNIK_DECL freetype_engine : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
-                                        private boost::noncopyable
+   typedef boost::shared_ptr<font_face> face_ptr;
+   class MAPNIK_DECL freetype_engine  // : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
+         // private boost::noncopyable
     {
-        friend class mapnik::CreateStatic<freetype_engine>;
-    public:
-
+       // friend class mapnik::CreateStatic<freetype_engine>;
+      public:
         static bool register_font(std::string const& file_name);
         static std::vector<std::string> face_names ();
-        static face_ptr create_face(std::string const& family_name);
-
-    private:
-        freetype_engine();
+        face_ptr create_face(std::string const& family_name);
         virtual ~freetype_engine();
-        static FT_Library library_;
+        freetype_engine();
+      private:
+        FT_Library library_;
+        static boost::mutex mutex_;
         static std::map<std::string,std::string> name2file_;
     }; 
     
@@ -129,8 +129,11 @@ namespace mapnik
     {
         typedef T font_engine_type;
         typedef std::map<std::string,face_ptr> faces;
-	
+        
     public:
+        face_manager(T & engine)
+           : engine_(engine) {}
+        
         face_ptr get_face(std::string const& name)
         {
             typename faces::iterator itr;
@@ -141,7 +144,7 @@ namespace mapnik
             }
             else
             {
-                face_ptr face = font_engine_type::instance()->create_face(name);
+                face_ptr face = engine_.create_face(name);
                 if (face)
                 {
                     faces_.insert(make_pair(name,face));
@@ -151,6 +154,7 @@ namespace mapnik
         }
     private:
         faces faces_;
+        font_engine_type & engine_;
     };
         
     template <typename T>
