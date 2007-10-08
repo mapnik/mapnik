@@ -82,7 +82,7 @@ namespace mapnik {
           T & pixmap_;
           unsigned width_;
           unsigned height_;
-          agg::row_ptr_cache<agg::int8u> buf_;
+          agg::rendering_buffer buf_;
           agg::pixfmt_rgba32 pixf_;
           CoordTransform t_;
           freetype_engine font_engine_;
