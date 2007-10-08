@@ -23,9 +23,13 @@
 
 //$Id$
 
-//stl
-#include <string>
-#include <vector>
+//mapnik
+#include <mapnik/placement_finder.hpp>
+
+#include <mapnik/geometry.hpp>
+#include <mapnik/text_path.hpp>
+#include <mapnik/shield_symbolizer.hpp>
+#include <mapnik/text_symbolizer.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -34,12 +38,9 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/tuple/tuple.hpp>
 
-//mapnik
-#include <mapnik/geometry.hpp>
-#include <mapnik/placement_finder.hpp>
-#include <mapnik/text_path.hpp>
-#include <mapnik/shield_symbolizer.hpp>
-#include <mapnik/text_symbolizer.hpp>
+//stl
+#include <string>
+#include <vector>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

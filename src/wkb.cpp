@@ -23,6 +23,7 @@
 //$Id: wkb.cpp 19 2005-03-22 13:53:27Z pavlenko $
 
 #include <mapnik/wkb.hpp>
+
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
 

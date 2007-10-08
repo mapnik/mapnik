@@ -22,12 +22,11 @@
 
 //$Id: image_util.cpp 36 2005-04-05 14:32:18Z pavlenko $
 
-// stl
-#include <string>
 // mapnik
+#include <mapnik/image_util.hpp>
+
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
-#include <mapnik/image_util.hpp>
 #include <mapnik/image_view.hpp>
 // jpeg png
 extern "C"
@@ -35,6 +34,9 @@ extern "C"
 #include <png.h>
 #include <jpeglib.h>
 }
+
+// stl
+#include <string>
 
 namespace mapnik
 { 

@@ -19,18 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// stl
-#include <iostream>
-// boost
-#include <boost/optional.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/static_assert.hpp>
-
 // mapnik
+#include <mapnik/load_map.hpp>
+
 #include <mapnik/image_reader.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
@@ -41,7 +32,17 @@
 
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/libxml2_loader.hpp>
-#include <mapnik/load_map.hpp>
+
+// boost
+#include <boost/optional.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/static_assert.hpp>
+// stl
+#include <iostream>
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;

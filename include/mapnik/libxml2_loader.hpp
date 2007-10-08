@@ -23,6 +23,10 @@
 #ifndef LOAD_MAP_XML2_INCLUDED
 #define LOAD_MAP_XML2_INCLUDED
 
+#include <boost/property_tree/ptree.hpp>
+
+#include <string>
+
 namespace mapnik 
 {
     void read_xml2( std::string const & filename, boost::property_tree::ptree & pt);

@@ -22,12 +22,12 @@
 
 //$Id$
 
-//stl
-#include <iostream>
-// boost
-#include <boost/scoped_ptr.hpp>
 //mapnik
 #include <mapnik/text_symbolizer.hpp>
+// boost
+#include <boost/scoped_ptr.hpp>
+//stl
+#include <iostream>
 
 static const char * label_placement_strings[] = {
     "point",

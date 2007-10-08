@@ -22,16 +22,17 @@
 
 //$Id: layer.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
-// stl
-#include <string>
-#include <iostream>
-// boost
-#include <boost/shared_ptr.hpp>
 // mapnik
+#include <mapnik/layer.hpp>
+
 #include <mapnik/style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
-#include <mapnik/layer.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
+// stl
+#include <string>
+#include <iostream>
 
 using namespace std;
 using boost::shared_ptr;

@@ -22,9 +22,9 @@
 
 //$Id$
 
-#include <proj_api.h>
-
 #include <mapnik/proj_transform.hpp>
+
+#include <proj_api.h>
 
 namespace mapnik {
     

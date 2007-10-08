@@ -21,8 +21,10 @@
  *****************************************************************************/
 
 //$Id$
-#include <algorithm>
+#include <mapnik/memory_datasource.hpp>
+
 #include <mapnik/memory_featureset.hpp>
+#include <algorithm>
 
 namespace mapnik {
     

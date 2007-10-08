@@ -22,8 +22,8 @@
 
 //$Id: plugin.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
-#include <ltdl.h>
 #include <mapnik/plugin.hpp>
+#include <ltdl.h>
 
 namespace mapnik
 {

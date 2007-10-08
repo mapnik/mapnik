@@ -21,12 +21,13 @@
  *****************************************************************************/
 //$Id$
 
-// stl
-#include <iostream>
-// boost
-#include <boost/utility.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
+// mapnik
+#include <mapnik/agg_renderer.hpp>
+
+#include <mapnik/image_util.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/placement_finder.hpp>
+
 // agg
 #include "agg_basics.h"
 //#include "agg_rendering_buffer.h"
@@ -59,11 +60,13 @@
 #include "agg_renderer_outline_image.h"
 #include "agg_vpgen_clip_polyline.h"
 
-// mapnik
-#include <mapnik/image_util.hpp>
-#include <mapnik/agg_renderer.hpp>
-#include <mapnik/unicode.hpp>
-#include <mapnik/placement_finder.hpp>
+// boost
+#include <boost/utility.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
+
+// stl
+#include <iostream>
 
 namespace mapnik 
 {

@@ -21,14 +21,15 @@
  *****************************************************************************/
 //$Id: graphics.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
+// mapnik
+#include <mapnik/graphics.hpp>
+
+#include <mapnik/image_util.hpp>
 // stl
 #include <cassert>
 #include <string.h>
 #include <stack>
 #include <iostream>
-// mapnik
-#include <mapnik/graphics.hpp>
-#include <mapnik/image_util.hpp>
 
 namespace mapnik
 {

@@ -22,13 +22,14 @@
 
 //$Id: png_reader.cpp 33 2005-04-04 13:01:03Z pavlenko $
 
-#include <iostream>
 #include <mapnik/image_reader.hpp>
 
 extern "C"
 {
 #include <png.h>
 }
+
+#include <iostream>
 
 namespace mapnik
 {

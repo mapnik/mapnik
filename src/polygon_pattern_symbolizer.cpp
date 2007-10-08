@@ -20,11 +20,12 @@
  *
  *****************************************************************************/
 //$Id$
+// mapnik
+#include <mapnik/polygon_pattern_symbolizer.hpp>
+
+#include <mapnik/image_reader.hpp>
 // stl
 #include <iostream>
-// mapnik
-#include <mapnik/image_reader.hpp>
-#include <mapnik/polygon_pattern_symbolizer.hpp>
 
 namespace mapnik
 {

@@ -23,14 +23,14 @@
 
 //$Id$
 
-// stl
-#include <iostream>
-// boost
-#include <boost/scoped_ptr.hpp>
 // mapnik
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_reader.hpp>
+// boost
+#include <boost/scoped_ptr.hpp>
+// stl
+#include <iostream>
 
 namespace mapnik
 {

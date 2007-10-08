@@ -22,10 +22,10 @@
 
 //$Id$
 
-// proj4
-#include <proj_api.h>
 // mapnik
 #include <mapnik/projection.hpp>
+// proj4
+#include <proj_api.h>
 
 namespace mapnik {
     projection::projection(std::string  params)

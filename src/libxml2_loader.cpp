@@ -20,15 +20,17 @@
  *
  *****************************************************************************/
 
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <libxml/parserInternals.h>
- 
+#include <mapnik/libxml2_loader.hpp>
+
+#include <mapnik/config_error.hpp>
+
 #include <boost/utility.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include <mapnik/config_error.hpp>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/parserInternals.h>
 
 #include <iostream>
 

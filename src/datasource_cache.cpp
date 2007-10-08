@@ -21,18 +21,22 @@
  *****************************************************************************/
 //$Id: datasource_cache.cpp 23 2005-03-22 22:16:34Z pavlenko $
 
-// stl
-#include <algorithm>
-#include <stdexcept>
+// mapnik
+#include <mapnik/datasource_cache.hpp>
+
+#include <mapnik/config_error.hpp>
+
 // boost
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
-// mapnik
-#include <mapnik/datasource_cache.hpp>
-#include <mapnik/config_error.hpp>
+
 // ltdl
 #include <ltdl.h>
+
+// stl
+#include <algorithm>
+#include <stdexcept>
 
 namespace mapnik
 {

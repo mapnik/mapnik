@@ -21,11 +21,12 @@
  *****************************************************************************/
 
 //$Id$
+// mapnik
+#include <mapnik/line_pattern_symbolizer.hpp>
+
+#include <mapnik/image_reader.hpp>
 // stl
 #include <iostream>
-// mapnik
-#include <mapnik/image_reader.hpp>
-#include <mapnik/line_pattern_symbolizer.hpp>
 
 namespace mapnik
 {

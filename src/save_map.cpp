@@ -20,8 +20,11 @@
  *
  *****************************************************************************/
 // $Id$
-// stl
-#include <iostream>
+// mapnik
+#include <mapnik/save_map.hpp>
+
+#include <mapnik/ptree_helpers.hpp>
+
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -29,9 +32,9 @@
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-// mapnik
-#include <mapnik/save_map.hpp>
-#include <mapnik/ptree_helpers.hpp>
+
+// stl
+#include <iostream>
 
 namespace mapnik 
 {
