@@ -25,15 +25,15 @@
 #ifndef DATASOURCE_CACHE_HPP
 #define DATASOURCE_CACHE_HPP
 
-// stl
-#include <map>
-// boost
-#include <boost/shared_ptr.hpp>
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
 #include <mapnik/datasource.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
+// stl
+#include <map>
 
 namespace mapnik {
     class MAPNIK_DECL datasource_cache : 

@@ -23,10 +23,10 @@
 
 #ifndef SAVE_MAP_HPP
 #define SAVE_MAP_HPP
-// stl
-#include <string>
 // mapnik
 #include <mapnik/map.hpp>
+// stl
+#include <string>
 
 namespace mapnik
 {

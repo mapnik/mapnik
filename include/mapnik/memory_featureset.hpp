@@ -24,8 +24,8 @@
 #ifndef MEMORY_FEATURESET_HPP
 #define MEMORY_FEATURESET_HPP
 
-#include <boost/utility.hpp>
 #include <mapnik/memory_datasource.hpp>
+#include <boost/utility.hpp>
 
 namespace mapnik {
     

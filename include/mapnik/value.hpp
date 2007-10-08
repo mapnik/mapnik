@@ -24,16 +24,15 @@
 #ifndef VALUE_HPP
 #define VALUE_HPP
 
+// mapnik
+#include <mapnik/unicode.hpp>
+// boost
+#include <boost/variant.hpp>
 // stl
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <iomanip>
-
-// boost
-#include <boost/variant.hpp>
-// mapnik
-#include <mapnik/unicode.hpp>
 
 namespace mapnik  {
    

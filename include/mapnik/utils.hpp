@@ -24,6 +24,8 @@
 
 #ifndef UTILS_HPP
 #define UTILS_HPP
+// boost
+#include <boost/thread/mutex.hpp>
 // stl
 #include <stdexcept>
 #include <cstdlib>
@@ -33,8 +35,6 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-// boost
-#include <boost/thread/mutex.hpp>
 
 namespace mapnik
 {

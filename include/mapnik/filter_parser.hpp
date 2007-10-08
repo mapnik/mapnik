@@ -25,19 +25,6 @@
 
 #ifndef FILTER_PARSER_HPP
 #define FILTER_PARSER_HPP
-// stl
-#include <stack>
-#include <iostream>
-// boost
-
-//#define BOOST_SPIRIT_DEBUG
-
-#include <boost/shared_ptr.hpp>
-#include <boost/spirit/core.hpp>
-#include <boost/spirit/symbols.hpp>
-#include <boost/spirit/utility/confix.hpp>
-#include <boost/spirit/utility/escape_char.hpp>
-#include <boost/spirit/utility/chset.hpp> 
 // mapnik
 #include <mapnik/value.hpp>
 #include <mapnik/comparison.hpp>
@@ -46,6 +33,19 @@
 #include <mapnik/filter.hpp>
 #include <mapnik/regex_filter.hpp>
 #include <mapnik/logical.hpp>
+
+// boost
+//#define BOOST_SPIRIT_DEBUG
+#include <boost/shared_ptr.hpp>
+#include <boost/spirit/core.hpp>
+#include <boost/spirit/symbols.hpp>
+#include <boost/spirit/utility/confix.hpp>
+#include <boost/spirit/utility/escape_char.hpp>
+#include <boost/spirit/utility/chset.hpp> 
+
+// stl
+#include <stack>
+#include <iostream>
 
 using namespace boost::spirit;
 using boost::shared_ptr;

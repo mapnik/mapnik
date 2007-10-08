@@ -24,13 +24,13 @@
 
 #ifndef GEOM_UTIL_HPP
 #define GEOM_UTIL_HPP
-// stl
-#include <cmath>
-// boost
-#include <boost/tuple/tuple.hpp>
 // mapnik
 #include <mapnik/envelope.hpp>
 #include <mapnik/vertex.hpp>
+// boost
+#include <boost/tuple/tuple.hpp>
+// stl
+#include <cmath>
 
 namespace mapnik
 {

@@ -25,12 +25,12 @@
 #ifndef ATTRIBUTE_HPP
 #define ATTRIBUTE_HPP
 
+// boost
+#include <boost/any.hpp>
 // stl
 #include <typeinfo>
 #include <sstream>
 #include <map>
-// boost
-#include <boost/any.hpp>
 
 namespace mapnik {
     template <typename T>

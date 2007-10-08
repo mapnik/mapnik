@@ -24,13 +24,13 @@
 
 #ifndef QUERY_HPP
 #define QUERY_HPP
-// stl
-#include <set>
-#include <limits>
 //mapnik
 #include <mapnik/filter.hpp>
 #include <mapnik/envelope.hpp>
 #include <mapnik/feature.hpp>
+// stl
+#include <set>
+#include <limits>
 
 namespace mapnik {
    class query 

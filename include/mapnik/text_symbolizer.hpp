@@ -24,15 +24,15 @@
 
 #ifndef TEXT_SYMBOLIZER_HPP
 #define TEXT_SYMBOLIZER_HPP
-// stl
-#include <string>
-// boost
-#include <boost/tuple/tuple.hpp>
-#include <boost/shared_ptr.hpp>
 // mapnik
 #include <mapnik/enumeration.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/graphics.hpp> 
+// boost
+#include <boost/tuple/tuple.hpp>
+#include <boost/shared_ptr.hpp>
+// stl
+#include <string>
 
 namespace mapnik
 {

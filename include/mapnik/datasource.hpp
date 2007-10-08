@@ -24,12 +24,6 @@
 
 #ifndef DATASOURCE_HPP
 #define DATASOURCE_HPP
-// stl
-#include <map>
-#include <string>
-// boost
-#include <boost/utility.hpp>
-#include <boost/shared_ptr.hpp>
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/ctrans.hpp>
@@ -37,6 +31,12 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+// boost
+#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
+// stl
+#include <map>
+#include <string>
 
 namespace mapnik {    
     typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;

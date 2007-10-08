@@ -24,6 +24,12 @@
 
 #ifndef FONT_ENGINE_FREETYPE_HPP
 #define FONT_ENGINE_FREETYPE_HPP
+// mapnik
+#include <mapnik/color.hpp>
+#include <mapnik/utils.hpp>
+#include <mapnik/ctrans.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/text_path.hpp>
 
 // freetype2
 extern "C"
@@ -32,13 +38,6 @@ extern "C"
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 }
-
-// mapnik
-#include <mapnik/color.hpp>
-#include <mapnik/utils.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/geometry.hpp>
-#include <mapnik/text_path.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>

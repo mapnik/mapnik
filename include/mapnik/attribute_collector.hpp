@@ -25,14 +25,14 @@
 #ifndef ATTRIBUTE_COLLECTOR_HPP
 #define ATTRIBUTE_COLLECTOR_HPP
 
-// stl
-#include <set>
-#include <iostream>
 // mapnik
 #include <mapnik/filter.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/rule.hpp>
+// stl
+#include <set>
+#include <iostream>
 
 namespace mapnik {
     

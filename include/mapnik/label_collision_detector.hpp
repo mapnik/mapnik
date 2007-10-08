@@ -24,10 +24,10 @@
 
 #if !defined LABEL_COLLISION_DETECTOR
 #define LABEL_COLLISION_DETECTOR
-// stl
-#include <vector>
 // mapnik
 #include <mapnik/quad_tree.hpp>
+// stl
+#include <vector>
 
 namespace mapnik
 {

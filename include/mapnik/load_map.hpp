@@ -28,8 +28,8 @@
   #include <config.h>
 #endif
 
-#include <string>
 #include <mapnik/map.hpp>
+#include <string>
 
 namespace mapnik
 {

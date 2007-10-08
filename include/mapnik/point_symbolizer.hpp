@@ -24,9 +24,9 @@
 #ifndef POINT_SYMBOLIZER_HPP
 #define POINT_SYMBOLIZER_HPP
 
-#include <boost/shared_ptr.hpp>
 #include <mapnik/graphics.hpp> 
 #include <mapnik/symbolizer.hpp> 
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik 
 {   

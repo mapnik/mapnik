@@ -24,13 +24,13 @@
 #ifndef PARAMS_HPP
 #define PARAMS_HPP
 
-#include <string>
-#include <map>
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
 #include <boost/none.hpp>
 #include <boost/lexical_cast.hpp>
 //#include <boost/iterator/transform_iterator.hpp>
+#include <string>
+#include <map>
 
 namespace mapnik
 {

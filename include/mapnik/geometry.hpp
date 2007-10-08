@@ -26,14 +26,14 @@
 #ifndef GEOMETRY_HPP
 #define GEOMETRY_HPP
 
-// boost
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 // mapnik
 #include <mapnik/vertex_vector.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geom_util.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
+#include <boost/utility.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace mapnik {
     enum GeomType {

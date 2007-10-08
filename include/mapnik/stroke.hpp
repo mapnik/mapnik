@@ -23,11 +23,11 @@
 
 #ifndef STROKE_HPP
 #define STROKE_HPP
-// stl
-#include <vector>
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/enumeration.hpp>
+// stl
+#include <vector>
  
 namespace mapnik
 {

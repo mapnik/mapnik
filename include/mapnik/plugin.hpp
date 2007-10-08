@@ -24,10 +24,10 @@
 
 #ifndef PLUGIN_HPP
 #define PLUGIN_HPP
-// stl
-#include <string>
 // boost
 #include <boost/utility.hpp>
+// stl
+#include <string>
 
 typedef struct lt_dlhandle_struct * lt_dlhandle;
 namespace mapnik

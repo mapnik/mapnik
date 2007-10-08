@@ -24,14 +24,13 @@
 #ifndef UNICODE_HPP
 #define UNICODE_HPP
 
-#include <string>
-#include <boost/utility.hpp>
 
 #ifdef USE_FRIBIDI
 #include <fribidi/fribidi.h>
 #endif
-
+#include <boost/utility.hpp>
 #include <iconv.h>
+#include <string>
 
 namespace mapnik {
     

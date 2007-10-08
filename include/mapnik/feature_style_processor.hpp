@@ -25,10 +25,6 @@
 #ifndef FEATURE_STYLE_PROCESSOR_HPP
 #define FEATURE_STYLE_PROCESSOR_HPP
 
-//stl
-#include <vector>
-// boost
-#include <boost/progress.hpp>
 // mapnik
 #include <mapnik/envelope.hpp>
 #include <mapnik/datasource.hpp>
@@ -38,6 +34,10 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
+// boost
+#include <boost/progress.hpp>
+//stl
+#include <vector>
 
 namespace mapnik
 {       

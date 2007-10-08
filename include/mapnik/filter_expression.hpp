@@ -25,11 +25,11 @@
 #ifndef FILTER_TO_STRING_HPP
 #define FILTER_TO_STRING_HPP
 
-// stl
-#include <set>
 // mapnik
 #include <mapnik/filter.hpp>
 #include <mapnik/expression.hpp>
+// stl
+#include <set>
 
 namespace mapnik
 {

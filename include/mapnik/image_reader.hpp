@@ -24,12 +24,12 @@
 
 #ifndef IMAGE_READER_HPP
 #define IMAGE_READER_HPP
-// stl
-#include <stdexcept>
-#include <string>
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/config.hpp>
+// stl
+#include <stdexcept>
+#include <string>
 
 namespace mapnik 
 {

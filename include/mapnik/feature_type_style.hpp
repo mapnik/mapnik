@@ -24,11 +24,11 @@
 
 #ifndef FEATURE_TYPE_STYLE_HPP
 #define FEATURE_TYPE_STYLE_HPP
-// stl
-#include <vector>
 // mapnik 
 #include <mapnik/rule.hpp>
 #include <mapnik/feature.hpp>
+// stl
+#include <vector>
 
 namespace mapnik
 {

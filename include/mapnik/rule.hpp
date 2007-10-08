@@ -22,12 +22,6 @@
 
 #ifndef RULE_HPP
 #define RULE_HPP
-// stl
-#include <string>
-#include <vector>
-// boost
-#include <boost/shared_ptr.hpp>
-#include <boost/variant.hpp>
 // mapnik
 #include <mapnik/line_symbolizer.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
@@ -39,6 +33,12 @@
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/filter.hpp>
 #include <mapnik/filter_visitor.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
+#include <boost/variant.hpp>
+// stl
+#include <string>
+#include <vector>
 
 namespace mapnik
 {

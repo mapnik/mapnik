@@ -24,11 +24,11 @@
 
 #ifndef FILTER_PARSER_AST_HPP
 #define FILTER_PARSER_AST_HPP
-// stl
-#include <iostream>
 // boost
 #include <boost/spirit/core.hpp>
 #include <boost/spirit/tree/ast.hpp>
+// stl
+#include <iostream>
 
 using namespace std;
 using namespace boost::spirit;

@@ -25,8 +25,8 @@
 #ifndef MEMORY_DATASOURCE_HPP
 #define MEMORY_DATASOURCE_HPP
 
-#include <vector>
 #include <mapnik/datasource.hpp>
+#include <vector>
 
 namespace mapnik {
     

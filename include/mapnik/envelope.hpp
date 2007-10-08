@@ -25,13 +25,13 @@
 #ifndef ENVELOPE_HPP
 #define ENVELOPE_HPP
 
-// stl
-#include <iomanip>
-// boost
-#include <boost/operators.hpp>
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/coord.hpp>
+// boost
+#include <boost/operators.hpp>
+// stl
+#include <iomanip>
 
 namespace mapnik {
 	template <typename T> class MAPNIK_DECL Envelope 

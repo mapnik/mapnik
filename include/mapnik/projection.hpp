@@ -25,14 +25,14 @@
 #ifndef PROJECTION_HPP
 #define PROJECTION_HPP
 
+// mapnik
+#include <mapnik/envelope.hpp>
+// boost
+#include <boost/utility.hpp>
 // stl
 #include <string>
 #include <iostream>
 #include <stdexcept>
-// boost
-#include <boost/utility.hpp>
-// mapnik
-#include <mapnik/envelope.hpp>
 
 namespace mapnik {
     

@@ -25,11 +25,11 @@
 #ifndef IMAGE_UTIL_HPP
 #define IMAGE_UTIL_HPP
 
-// stl
-#include <string>
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/graphics.hpp>
+// stl
+#include <string>
 
 namespace mapnik {
     

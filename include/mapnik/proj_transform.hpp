@@ -25,10 +25,10 @@
 #ifndef PROJ_TRANSFORM_HPP
 #define PROJ_TRANSFORM_HPP
 
-// boost
-#include <boost/utility.hpp>
 // mapnik
 #include <mapnik/projection.hpp>
+// boost
+#include <boost/utility.hpp>
 
 namespace mapnik {
     

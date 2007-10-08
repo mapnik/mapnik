@@ -23,13 +23,13 @@
 
 #ifndef LAYER_HPP
 #define LAYER_HPP
-// stl
-#include <vector>
-// boost
-#include <boost/shared_ptr.hpp>
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
+// stl
+#include <vector>
 
 namespace mapnik
 {

@@ -23,13 +23,13 @@
 
 #ifndef QUAD_TREE_HPP
 #define QUAD_TREE_HPP
-// stl
-#include <vector>
+// mapnik
+#include <mapnik/envelope.hpp>
 // boost
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/noncopyable.hpp>
-// mapnik
-#include <mapnik/envelope.hpp>
+// stl
+#include <vector>
 
 namespace mapnik
 {

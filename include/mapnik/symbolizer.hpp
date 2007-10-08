@@ -24,8 +24,8 @@
 #ifndef SYMBOLIZER_HPP
 #define SYMBOLIZER_HPP
 
-#include <boost/shared_ptr.hpp>
 #include <mapnik/graphics.hpp> 
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik 
 {

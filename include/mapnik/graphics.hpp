@@ -24,16 +24,16 @@
 
 #ifndef GRAPHICS_HPP
 #define GRAPHICS_HPP
-// stl
-#include <cmath>
-#include <string>
-#include <cassert>
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/gamma.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/envelope.hpp>
 #include <mapnik/image_view.hpp>
+// stl
+#include <cmath>
+#include <string>
+#include <cassert>
 
 namespace mapnik
 {

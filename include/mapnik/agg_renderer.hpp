@@ -25,9 +25,6 @@
 #ifndef AGG_RENDERER_HPP
 #define AGG_RENDERER_HPP
 
-// boost
-#include <boost/utility.hpp>
-#include <boost/shared_ptr.hpp>
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
@@ -39,6 +36,9 @@
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
+// boost
+#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik {
     template <typename T>

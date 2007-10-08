@@ -25,9 +25,9 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
-#include <sstream>
-#include <boost/format.hpp>
 #include <mapnik/config.hpp>
+#include <boost/format.hpp>
+#include <sstream>
 
 namespace mapnik {
 

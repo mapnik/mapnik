@@ -25,12 +25,12 @@
 
 #ifndef REGEX_FILTER_HPP
 #define REGEX_FILTER_HPP
-// boost
-#include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
 // mapnik
 #include <mapnik/filter.hpp>
 #include <mapnik/expression.hpp>
+// boost
+#include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace mapnik
 { 

@@ -25,17 +25,17 @@
 #ifndef POOL_HPP
 #define POOL_HPP
 
+// mapnik
+#include <mapnik/utils.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/utility.hpp>
 // stl
 #include <iostream>
 #include <map>
 #include <deque>
 #include <ctime>
-// boost
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/utility.hpp>
-// mapnik
-#include <mapnik/utils.hpp>
 
 namespace mapnik
 {
