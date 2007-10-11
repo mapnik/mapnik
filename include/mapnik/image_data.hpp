@@ -39,13 +39,14 @@ namespace mapnik
               height_(height),
               pData_((width!=0 && height!=0)? static_cast<T*>(::operator new(sizeof(T)*width*height)):0)
         {
-           //if (pData_) memset(pData_,0,sizeof(T)*width_*height_);
+           if (pData_) memset(pData_,0,sizeof(T)*width_*height_);
         }
           
         ImageData(const ImageData<T>& rhs)
             :width_(rhs.width_),
              height_(rhs.height_),
-             pData_((rhs.width_!=0 && rhs.height_!=0)? new T[rhs.width_*rhs.height_]:0)
+             pData_((rhs.width_!=0 && rhs.height_!=0)? 
+                    static_cast<T*>(::operator new(sizeof(T)*rhs.width_*rhs.height_)) :0)
         {
             if (pData_) memcpy(pData_,rhs.pData_,sizeof(T)*rhs.width_* rhs.height_);
         }
@@ -126,11 +127,10 @@ namespace mapnik
         }
         
     private:
-        const unsigned width_;
-        const unsigned height_;
-        T *pData_;
-        ImageData& operator=(const ImageData&);
-	
+          const unsigned width_;
+          const unsigned height_;
+          T *pData_;
+          ImageData& operator=(const ImageData&);
     };
 
     typedef ImageData<unsigned> ImageData32;

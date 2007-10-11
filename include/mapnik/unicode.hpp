@@ -32,6 +32,10 @@
 #include <iconv.h>
 #include <string>
 
+#ifdef MAPNIK_DEBUG
+#include <iostream>
+#endif 
+
 namespace mapnik {
     
 /*
