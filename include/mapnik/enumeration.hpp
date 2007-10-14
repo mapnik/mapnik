@@ -134,12 +134,17 @@ class enumeration {
         typedef ENUM Native;
         enumeration() {};
         enumeration( ENUM v ) : value_(v) {} 
+        enumeration( long v ) : value_(ENUM(v)) {} 
         enumeration( const enumeration & other ) : value_(other.value_) {} 
         
         /** Assignment operator for native enum values. */
         void operator=(ENUM v)
         {
             value_ = v;
+        }
+        void operator=(long v)
+        {
+            value_ = ENUM(v);
         }
 
         /** Assignment operator. */
