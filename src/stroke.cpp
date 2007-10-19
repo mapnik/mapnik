@@ -22,29 +22,33 @@
 
 #include <mapnik/stroke.hpp>
 
-static const char * line_cap_strings[] = {
-    "butt",
-    "square",
-    "round",
-    ""
-};
-
-IMPLEMENT_ENUM( mapnik::line_cap_e, line_cap_strings );
-
-static const char * line_join_strings[] = {
-    "miter",
-    "miter_revert",
-    "round",
-    "bevel",
-    ""
-};
-
-IMPLEMENT_ENUM( mapnik::line_join_e, line_join_strings );
-
 namespace mapnik
 {
 
+    static const char * line_cap_strings[] = {
+        "butt",
+        "square",
+        "round",
+        ""
+    };
 
+
+    static const char * line_join_strings[] = {
+        "miter",
+        "miter_revert",
+        "round",
+        "bevel",
+        ""
+    };
+
+}
+
+IMPLEMENT_ENUM( mapnik::line_cap_e, line_cap_strings );
+IMPLEMENT_ENUM( mapnik::line_join_e, line_join_strings );
+
+
+namespace mapnik
+{
     stroke::stroke() 
         : c_(0,0,0),
         width_(1.0),

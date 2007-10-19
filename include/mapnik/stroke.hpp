@@ -36,7 +36,7 @@ namespace mapnik
     typedef vector<pair<float,float> > dash_array;
     
     // if you add new tokens, don't forget to add them to the corresponding
-    // string array in the cpp file too.
+    // string array in the cpp file.
     enum line_cap_enum
         {
             BUTT_CAP,
@@ -48,7 +48,7 @@ namespace mapnik
     DEFINE_ENUM( line_cap_e, line_cap_enum );
     
     // if you add new tokens, don't forget to add them to the corresponding
-    // string array in the cpp file too.
+    // string array in the cpp file.
     enum line_join_enum
         {
             MITER_JOIN,

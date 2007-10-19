@@ -128,23 +128,19 @@ class illegal_enum_value : public std::exception
  * }
  * @endcode
  */
+
 template <class ENUM, int THE_MAX>
 class enumeration {
     public:
-        typedef ENUM Native;
+        typedef ENUM native_type;
         enumeration() {};
         enumeration( ENUM v ) : value_(v) {} 
-        enumeration( long v ) : value_(ENUM(v)) {} 
         enumeration( const enumeration & other ) : value_(other.value_) {} 
         
         /** Assignment operator for native enum values. */
         void operator=(ENUM v)
         {
             value_ = v;
-        }
-        void operator=(long v)
-        {
-            value_ = ENUM(v);
         }
 
         /** Assignment operator. */
@@ -266,14 +262,24 @@ class enumeration {
             }
             return true;
         }
-        static const char * get_name()
+        static const std::string & get_full_qualified_name()
         {
             return our_name_;
+        }
+        static std::string get_name()
+        {
+            std::string::size_type idx = our_name_.find_last_of(":");
+            if ( idx == std::string::npos )
+            {
+                return our_name_;
+            } else {
+                return our_name_.substr( idx + 1 );
+            }
         }
     private:
         ENUM value_;
         static const char ** our_strings_ ;
-        static const char * our_name_ ;
+        static std::string our_name_ ;
         static bool  our_verified_flag_; 
 };
 
@@ -312,7 +318,7 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
  */
 #define IMPLEMENT_ENUM( name, strings ) \
     template <> const char ** name ::our_strings_ = strings; \
-    template <> const char * name ::our_name_ = #name; \
+    template <> std::string name ::our_name_ = #name; \
     template <> bool name ::our_verified_flag_( name ::verify(__FILE__, __LINE__));
 
 #endif // MAPNIK_ENUMERATION_INCLUDED
