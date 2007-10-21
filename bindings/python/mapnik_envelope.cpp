@@ -52,10 +52,13 @@ bool (Envelope<double>::*contains_p1)(double,double) const = &Envelope<double>::
 bool (Envelope<double>::*contains_p2)(coord<double,2> const&) const = &Envelope<double>::contains;
 bool (Envelope<double>::*contains_p3)(Envelope<double> const&) const = &Envelope<double>::contains;
 
+//intersects
 bool (Envelope<double>::*intersects_p1)(double,double) const = &Envelope<double>::intersects;
 bool (Envelope<double>::*intersects_p2)(coord<double,2> const&) const = &Envelope<double>::intersects;
 bool (Envelope<double>::*intersects_p3)(Envelope<double> const&) const = &Envelope<double>::intersects;
 
+// intersect
+Envelope<double> (Envelope<double>::*intersect)(Envelope<double> const&) const = &Envelope<double>::intersect;
 
 void export_envelope()
 {
@@ -85,6 +88,7 @@ void export_envelope()
         .def("intersects",intersects_p1)
         .def("intersects",intersects_p2)
         .def("intersects",intersects_p3)
+        .def("intersect",intersect)
         .def(self == self) // __eq__
         .def(self + self)  // __add__
         .def(self - self)  // __sub__
