@@ -32,8 +32,8 @@ namespace mapnik
   using boost::int32_t;
   using boost::uint8_t;
   
-#define int2net(A)  (int32_t) (((uint32_t) ((uint8_t) (A)[1]))      |   \
-                               (((uint32_t) ((uint8_t) (A)[0])) << 8))
+#define int2net(A)  (int16_t) (((uint16_t) ((uint8_t) (A)[1]))      |   \
+                               (((uint16_t) ((uint8_t) (A)[0])) << 8))
 
 #define int4net(A)  (int32_t) (((uint32_t) ((uint8_t) (A)[3]))      |   \
                                (((uint32_t) ((uint8_t) (A)[2])) << 8)  | \
