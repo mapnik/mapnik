@@ -37,27 +37,46 @@ fi
 dnl Check for boost
 AX_BOOST_BASE
 if test "$succeeded" != "yes" ; then
+  echo "Error: You need to install the boost library!"
   exit
 fi
 
 AX_BOOST_THREAD
-if test "x$link_thread" = "xno"; then
+if test "x$ax_cv_boost_thread" = "xno"; then
+  echo
+  echo "Error: You need to install the boost thread library!"
+  echo
   exit
 fi
 
 AX_BOOST_FILESYSTEM
-if test "x$link_filesystem" = "xno"; then
+if test "x$ax_cv_boost_filesystem" = "xno"; then
+  echo
+  echo "Error: You need to install the boost filesystem library!"
+  echo
   exit
 fi
 
 AX_BOOST_REGEX
-if test "x$link_regex" = "xno"; then
+if test "x$ax_cv_boost_regex" = "xno"; then
+  echo
+  echo "Error: You need to install the boost regex library!"
+  echo
   exit
 fi
 
-dnl only for postgis plugin
+AX_BOOST_SERIALIZATION
+if test "x$ax_cv_boost_serialization" = "xno"; then
+  echo
+  echo "Error: You need to install the boost serialization library!"
+  echo
+  exit
+fi
+
 AX_LIB_POSTGRESQL
-AM_CONDITIONAL(BUILD_POSTGRESQL, test "x$found_postgresql" = "xyes")
+if test "$found_postgresql" = "yes"; then
+  AM_CONDITIONAL(BUILD_POSTGRESQL, test "x$found_postgresql" = "xyes")
+fi
 
 AX_CHECK_TIFF
 if test "x$link_tiff" = "xno"; then
