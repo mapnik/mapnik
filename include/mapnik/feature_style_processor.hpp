@@ -58,7 +58,7 @@ namespace mapnik
                {
                   output_.process(sym,f_,prj_trans_);
                }
-            
+               
                Processor & output_;
                Feature const& f_;
                proj_transform const& prj_trans_;

@@ -62,6 +62,7 @@ class postgis_datasource : public datasource
       mutable mapnik::Envelope<double> extent_;
       layer_descriptor desc_;
       ConnectionCreator<Connection> creator_;
+      bool multiple_geometries_;
       static const std::string name_;
    public:
       static std::string name();
@@ -82,6 +83,7 @@ class postgis_featureset : public mapnik::Featureset
 {
    private:
       boost::shared_ptr<ResultSet> rs_;
+      bool multiple_geometries_;
       unsigned num_attrs_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
       mutable int totalGeomSize_;
@@ -89,6 +91,7 @@ class postgis_featureset : public mapnik::Featureset
    public:
       postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
                          std::string const& encoding,
+                         bool multiple_geometries,
                          unsigned num_attrs);
       feature_ptr next();
       ~postgis_featureset();

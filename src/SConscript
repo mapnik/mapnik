@@ -67,6 +67,7 @@ source = Split(
     memory_datasource.cpp
     stroke.cpp
     symbolizer.cpp
+    arrow.cpp
     """
     )
 

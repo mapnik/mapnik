@@ -176,6 +176,11 @@ namespace mapnik
                     set_css( sym_node, "fill-opacity", sym.get_opacity() );    
                 }
             }
+
+          void operator () ( markers_symbolizer const& )
+          {
+             // FIXME!!!!!
+          }
         private:
             serialize_symbolizer();
             void add_image_attributes(ptree & node, const symbolizer_with_image & sym)

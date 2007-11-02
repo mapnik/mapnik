@@ -22,14 +22,21 @@
 
 //$Id: postgis.cc 44 2005-04-22 18:53:54Z pavlenko $
 
+// mapnik
+#include "connection_manager.hpp"
+#include "postgis.hpp"
+#include <mapnik/ptree_helpers.hpp>
+
+// boost
+#include <boost/lexical_cast.hpp>
+
+// stl
 #include <string>
 #include <algorithm>
 #include <set>
 #include <sstream>
 #include <iomanip>
-#include <boost/lexical_cast.hpp>
-#include "connection_manager.hpp"
-#include "postgis.hpp"
+
 
 DATASOURCE_PLUGIN(postgis_datasource)
 
@@ -61,7 +68,9 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
    boost::optional<int> initial_size = params_.get<int>("inital_size",1);
    boost::optional<int> max_size = params_.get<int>("max_size",10);
-     
+
+   multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
+   
    ConnectionManager *mgr=ConnectionManager::instance();   
    mgr->registerPool(creator_, *initial_size, *max_size);
     
@@ -194,7 +203,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
          std::clog << s.str() << "\n";
 #endif           
          shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-         return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),props.size()));
+         return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),multiple_geometries_,props.size()));
       }
    }
    return featureset_ptr();
@@ -233,7 +242,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
          std::clog << s.str() << "\n";
 #endif           
          shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
-         return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),size));
+         return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),multiple_geometries_, size));
       }
    }
    return featureset_ptr();

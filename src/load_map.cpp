@@ -77,6 +77,7 @@ namespace mapnik
          void parse_line_symbolizer( rule_type & rule, ptree const & sym);
          void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
          void parse_building_symbolizer( rule_type & rule, ptree const & sym );
+         void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
          
          void ensure_font_face( const text_symbolizer & text_symbol );
          
@@ -364,6 +365,11 @@ namespace mapnik
                 {
                     rule.append(raster_symbolizer());
                 } 
+                else if ( sym.first == "MarkersSymbolizer")
+                {
+                    rule.append(markers_symbolizer());
+                } 
+                
                 else if ( sym.first != "MinScaleDenominator" &&
                         sym.first != "MaxScaleDenominator" &&
                         sym.first != "Filter" &&
@@ -584,7 +590,15 @@ namespace mapnik
             {
                 text_symbol.set_allow_overlap( * allow_overlap );
             }
-
+            
+            // max_char_angle_delta
+            optional<double> max_char_angle_delta = 
+               get_opt_attr<double>(sym, "max_char_angle_delta");
+            if (max_char_angle_delta)
+            {
+               text_symbol.set_max_char_angle_delta( * max_char_angle_delta);
+            }
+               
             if ( strict_ )
             {
                 ensure_font_face( text_symbol );

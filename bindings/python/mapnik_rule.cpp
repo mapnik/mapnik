@@ -43,6 +43,7 @@ void export_rule()
     using mapnik::raster_symbolizer;
     using mapnik::shield_symbolizer;
     using mapnik::text_symbolizer;
+    using mapnik::building_symbolizer;
     using mapnik::symbolizer;
     using mapnik::symbolizers;
     
@@ -51,6 +52,7 @@ void export_rule()
     implicitly_convertible<line_symbolizer,symbolizer>();
     implicitly_convertible<line_pattern_symbolizer,symbolizer>();
     implicitly_convertible<polygon_symbolizer,symbolizer>();
+    implicitly_convertible<building_symbolizer,symbolizer>();
     implicitly_convertible<polygon_pattern_symbolizer,symbolizer>();
     implicitly_convertible<raster_symbolizer,symbolizer>();
     implicitly_convertible<shield_symbolizer,symbolizer>();

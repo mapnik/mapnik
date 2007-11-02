@@ -29,6 +29,7 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/text_symbolizer.hpp>
+#include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_path.hpp>
 
@@ -39,33 +40,24 @@ namespace mapnik
    typedef text_path placement_element;
    
    struct placement : boost::noncopyable
-   {
-         typedef coord_transform2<CoordTransform,geometry2d> path_type;
+   { 
+         placement(string_info & info_, 
+                   //path_type & shape_path_,
+                   shield_symbolizer const& sym);
          
-         template <typename SymbolizerT>
-         placement(string_info *info_, 
-                   CoordTransform *ctrans_, 
-                   const proj_transform *proj_trans_, 
-                   geometry2d const& geom_,
-                   SymbolizerT const& sym);
+         placement(string_info & info_, 
+                   //path_type & shape_path_,
+                   text_symbolizer const& sym);
          
          ~placement();
         
          //helpers
-         std::pair<double, double> get_position_at_distance(double target_distance);
-         double get_total_distance();
-         void clear_envelopes();
-    
-         unsigned path_size() const;
+         //std::pair<double, double> get_position_at_distance(double target_distance);
+         //double get_total_distance();
 
-         string_info *info;
-    
-         CoordTransform *ctrans;
-         const proj_transform *proj_trans;
-         geometry2d const& geom;
-         path_type shape_path;
-
-         double total_distance_; //cache for distance
+         string_info & info;
+         //path_type & shape_path;
+         //double total_distance_; //cache for distance
     
          position displacement_;
          label_placement_e label_placement;
@@ -84,33 +76,47 @@ namespace mapnik
 
          double max_char_angle_delta;
          double minimum_distance;
-    
          bool avoid_edges;
-
          bool has_dimensions;
          std::pair<double, double> dimensions;
    };
-
-
-  
+   
    template <typename DetectorT>
    class placement_finder : boost::noncopyable
    {
       public:
-         //e is the dimensions of the map, buffer is the buffer used for collission detection.
+         //e is the dimensions of the map, buffer is the buffer used for collision detection.
          placement_finder(DetectorT & detector,Envelope<double> const& e);
-         void find_placements(placement *p);
+         
+         template <typename T>
+         void find_placements(placement & p, T & path);
+         
+         void find_point_placement(placement & p, double, double);
+         
+         template <typename T>
+         void find_placements_with_spacing(placement & p, T & path);
+         
          void clear();
          
-      protected:
-         bool find_placement_follow(placement *p);
-         bool find_placement_horizontal(placement *p);
-         bool build_path_follow(placement *p, double target_distance);
-         bool build_path_horizontal(placement *p, double target_distance);
-         std::vector<double> get_ideal_placements(placement *p);
-         void update_detector(placement *p);
+      private:
+         template <typename T>
+         bool find_placement_follow(placement & p, T & path);
+         
+         template <typename T>
+         bool find_placement_horizontal(placement & p, T & path);
+         
+         template <typename T>
+         bool build_path_follow(placement & p, double target_distance, T & path);
+         
+         template <typename T>
+         bool build_path_horizontal(placement & p, double target_distance, T & path);
+         
+         void get_ideal_placements(placement & p, double distance, std::vector<double>&);
+         
+         void update_detector(placement & p);
+         
          DetectorT & detector_;
-         Envelope<double> dimensions_;
+         Envelope<double> const& dimensions_;
    };  
 }
 

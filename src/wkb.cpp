@@ -70,7 +70,7 @@ namespace mapnik
 
          ~wkb_reader() {}
 
-         void read(Feature & feature) 
+         void read_multi(Feature & feature) 
          {
             int type=read_integer();
             switch (type)
@@ -92,6 +92,36 @@ namespace mapnik
                   break;
                case wkbMultiPolygon:
                   read_multipolygon(feature);
+                  break;
+               case wkbGeometryCollection:
+                  break;
+               default:
+                  break;
+            }
+         }
+         
+         void read(Feature & feature) 
+         {
+            int type=read_integer();
+            switch (type)
+            {
+               case wkbPoint:
+                  read_point(feature);
+                  break;
+               case wkbLineString:
+                  read_linestring(feature);
+                  break;
+               case wkbPolygon:
+                  read_polygon(feature);
+                  break;
+               case wkbMultiPoint:
+                  read_multipoint_2(feature);
+                  break;
+               case wkbMultiLineString:
+                  read_multilinestring_2(feature);
+                  break;
+               case wkbMultiPolygon:
+                  read_multipolygon_2(feature);
                   break;
                case wkbGeometryCollection:
                   break;
@@ -189,6 +219,20 @@ namespace mapnik
             }
          }
          
+         void read_multipoint_2(Feature & feature)
+         {
+            geometry2d * pt = new point<vertex2d>;
+            int num_points = read_integer(); 
+            for (int i=0;i<num_points;++i) 
+            {
+               pos_+=5;
+               double x = read_double();
+               double y = read_double();
+               pt->move_to(x,y);
+            }
+            feature.add_geometry(pt);
+         }
+         
          void read_linestring(Feature & feature)
          {
             geometry2d * line = new line_string<vertex2d>;
@@ -214,17 +258,41 @@ namespace mapnik
             }
          }
 
+         void read_multilinestring_2(Feature & feature)
+         {
+            geometry2d * line = new line_string<vertex2d>;
+            int num_lines=read_integer();
+            unsigned capacity = 0;
+            for (int i=0;i<num_lines;++i)
+            {
+               pos_+=5;
+               int num_points=read_integer();
+               capacity+=num_points;
+               CoordinateArray ar(num_points); 
+               read_coords(ar);
+               line->set_capacity(capacity);
+               line->move_to(ar[0].x,ar[0].y); 
+               for (int i=1;i<num_points;++i) 
+               { 
+                  line->line_to(ar[i].x,ar[i].y); 
+               } 
+            }
+            feature.add_geometry(line);
+         }
+         
          void read_polygon(Feature & feature) 
          {
             geometry2d * poly = new polygon<vertex2d>;
             int num_rings=read_integer();
+            unsigned capacity = 0;
             for (int i=0;i<num_rings;++i)
             {
                int num_points=read_integer();
+               capacity+=num_points;
                CoordinateArray ar(num_points);
                read_coords(ar);
+               poly->set_capacity(capacity);
                poly->move_to(ar[0].x,ar[0].y);
-
                for (int j=1;j<num_points;++j)
                {
                   poly->line_to(ar[j].x,ar[j].y);
@@ -243,11 +311,42 @@ namespace mapnik
                read_polygon(feature);
             }
          }
+
+         void read_multipolygon_2(Feature & feature)
+         {
+            geometry2d * poly = new polygon<vertex2d>;
+            int num_polys=read_integer();
+            unsigned capacity = 0;
+            for (int i=0;i<num_polys;++i)
+            {
+               pos_+=5;
+               int num_rings=read_integer();
+               for (int i=0;i<num_rings;++i)
+               {
+                  int num_points=read_integer();
+                  capacity += num_points;
+                  CoordinateArray ar(num_points);
+                  read_coords(ar);
+                  poly->set_capacity(capacity);
+                  poly->move_to(ar[0].x,ar[0].y);
+                  
+                  for (int j=1;j<num_points;++j)
+                  {
+                     poly->line_to(ar[j].x,ar[j].y);
+                  }
+                  poly->line_to(ar[0].x,ar[0].y);
+               }
+            }
+            feature.add_geometry(poly);
+         }
    };
    
-   void geometry_utils::from_wkb(Feature & feature,const char* wkb, unsigned size) 
+   void geometry_utils::from_wkb(Feature & feature,const char* wkb, unsigned size, bool multiple_geometries) 
    {
       wkb_reader reader(wkb,size);
-      return reader.read(feature);
+      if (multiple_geometries)
+         return reader.read_multi(feature);
+      else
+         return reader.read(feature);
    }    
 }

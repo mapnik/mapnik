@@ -20,24 +20,22 @@
  *
  *****************************************************************************/
 
-//$Id: wkb.hpp 39 2005-04-10 20:39:53Z pavlenko $
+//$Id$
 
-#ifndef WKB_HPP
-#define WKB_HPP
+#ifndef MARKERS_SYMBOLIZER_HPP
+#define MARKERS_SYMBOLIZER_HPP
 
-#include <mapnik/geometry.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/feature.hpp>
-namespace mapnik
-{
-    class MAPNIK_DECL geometry_utils 
-    {
-    public:
-       static void from_wkb(Feature & feature,const char* wkb, unsigned size, bool multiple_geometries = false);
-    private:
-       geometry_utils();
-       geometry_utils(geometry_utils const&);
-       geometry_utils& operator=(const geometry_utils&);
-    };
+namespace mapnik {
+   
+   struct MAPNIK_DECL markers_symbolizer
+   {
+     public:
+      markers_symbolizer() 
+         : allow_overlap_(false) {}
+     private:
+      bool allow_overlap_;
+      
+   };
 }
-#endif //WKB_HPP
+
+#endif // MARKERS_SYMBOLIZER_HPP

@@ -20,24 +20,28 @@
  *
  *****************************************************************************/
 
-//$Id: wkb.hpp 39 2005-04-10 20:39:53Z pavlenko $
+//$Id$
 
-#ifndef WKB_HPP
-#define WKB_HPP
+#ifndef ARROW_HPP
+#define ARROW_HPP
 
-#include <mapnik/geometry.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/feature.hpp>
-namespace mapnik
-{
-    class MAPNIK_DECL geometry_utils 
-    {
-    public:
-       static void from_wkb(Feature & feature,const char* wkb, unsigned size, bool multiple_geometries = false);
-    private:
-       geometry_utils();
-       geometry_utils(geometry_utils const&);
-       geometry_utils& operator=(const geometry_utils&);
-    };
+#include <mapnik/envelope.hpp>
+
+namespace mapnik {
+
+   class arrow
+   {
+      public:
+         arrow();
+         void rewind(unsigned path_id);
+         unsigned vertex(double* x, double* y);
+         Envelope<double> extent() const;   
+      private:
+         unsigned pos_;
+         double x_[7];
+         double y_[7];
+         unsigned cmd_[9];
+   };   
 }
-#endif //WKB_HPP
+
+#endif // ARROW_HPP

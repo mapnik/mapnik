@@ -23,19 +23,17 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
-
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/placement_finder.hpp>
+#include <mapnik/markers_converter.hpp>
+#include <mapnik/arrow.hpp>
 
 // agg
 #include "agg_basics.h"
-//#include "agg_rendering_buffer.h"
-//#include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_p.h"
 #include "agg_scanline_u.h"
 #include "agg_renderer_scanline.h"
-//#include "agg_pixfmt_rgba.h"
 #include "agg_path_storage.h"
 #include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
@@ -43,11 +41,11 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
 #include "agg_conv_contour.h"
+#include "agg_conv_clip_polyline.h"
 #include "agg_vcgen_stroke.h"
 #include "agg_conv_adaptor_vcgen.h"
 #include "agg_conv_smooth_poly1.h"
 #include "agg_conv_marker.h"
-#include "agg_arrowhead.h"
 #include "agg_vcgen_markers_term.h"
 #include "agg_renderer_outline_aa.h"
 #include "agg_rasterizer_outline_aa.h"
@@ -59,6 +57,7 @@
 #include "agg_pattern_filters_rgba.h"
 #include "agg_renderer_outline_image.h"
 #include "agg_vpgen_clip_polyline.h"
+#include "agg_arrowhead.h"
 
 // boost
 #include <boost/utility.hpp>
@@ -107,8 +106,8 @@ namespace mapnik
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
         font_engine_(),
         font_manager_(font_engine_),
-        detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
-        finder_(detector_,Envelope<double>(0 ,0, m.getWidth(), m.getHeight()))
+        detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
+        //finder_(detector_,Envelope<double>(0 ,0, m.getWidth(), m.getHeight()))
    {
       boost::optional<Color> bg = m.background();
       if (bg) pixmap_.setBackground(*bg);
@@ -144,7 +143,7 @@ namespace mapnik
 #endif 
       if (lay.clear_label_cache())
       {
-         finder_.clear();
+         //finder_.clear(); // FIXME!!!!!!!!
       }
    }
    
@@ -165,7 +164,7 @@ namespace mapnik
       typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	    
-      Color const& fill_  = sym.get_fill();
+      Color const& fill_ = sym.get_fill();
       ras_.reset();
       agg::scanline_u8 sl;
       ren_base renb(pixf_);  
@@ -178,8 +177,12 @@ namespace mapnik
          geometry2d const& geom=feature.get_geometry(i);
          if (geom.num_points() > 2) 
          {
-            path_type path(t_,geom,prj_trans);                
+            path_type path(t_,geom,prj_trans);
+            //agg::conv_smooth_poly1<path_type> smooth(path);
+            //smooth.smooth_value(0.6);
+            //agg::conv_curve<agg::conv_smooth_poly1<path_type> > curve(smooth);
             ras_.add_path(path);
+            //ras_.add_path(curve);
          }
       }
       ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
@@ -229,7 +232,7 @@ namespace mapnik
             for (unsigned j=1;j<geom.num_points();++j)
             {
                double x,y;
-               unsigned cm = geom.vertex(&x,&y);
+               cm = geom.vertex(&x,&y);
                if (cm == SEG_MOVETO)
                {
                   frame->move_to(x,y);
@@ -367,7 +370,6 @@ namespace mapnik
             else 
             {
                agg::conv_stroke<path_type>  stroke(path);
-               
                line_join_e join=stroke_.get_line_join();
                if ( join == MITER_JOIN)
                   stroke.generator().line_join(agg::miter_join);
@@ -437,6 +439,7 @@ namespace mapnik
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
    {
+      typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       std::wstring text = feature[sym.get_name()].to_unicode();
       boost::shared_ptr<ImageData32> const& data = sym.get_image();
       if (text.length() > 0 && data)
@@ -449,17 +452,21 @@ namespace mapnik
             ren.set_fill(sym.get_fill());
             string_info info(text);
             ren.get_string_info(&info);
+            
+            Envelope<double> box(-64,-64,width_+64,height_+64);
+            placement_finder<label_collision_detector4> finder(detector_,box);
+            
             unsigned num_geom = feature.num_geometries();
             for (unsigned i=0;i<num_geom;++i)
             {
                geometry2d const& geom = feature.get_geometry(i);
                if (geom.num_points() > 0) // don't bother with empty geometries 
                {    
-                  placement text_placement(&info, &t_, &prj_trans, geom, sym);
+                  path_type path(t_,geom,prj_trans);
+                  placement text_placement(info, sym);
                   text_placement.avoid_edges = sym.get_avoid_edges();
+                  finder.find_placements<path_type>(text_placement,path);
                   
-                  finder_.find_placements(&text_placement);
-
                   for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                   { 
                      int w = data->width();
@@ -590,11 +597,52 @@ namespace mapnik
    }
     
    template <typename T>
+   void agg_renderer<T>::process(markers_symbolizer const& sym,
+                                 Feature const& feature,
+                                 proj_transform const& prj_trans)
+   {
+      typedef  coord_transform2<CoordTransform,geometry2d> path_type;
+      typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
+      typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+      arrow arrow_;
+      //double k = ::pow(1.2, 0.7);
+      //arrow_.head(4 * k, 4   * k, 3 * k, 2 * k);
+      //Color const& fill_ = sym.get_fill();
+      ras_.reset();
+      agg::scanline_u8 sl;
+      ren_base renb(pixf_);  
+      unsigned r = 0;// fill_.red();
+      unsigned g = 0; //fill_.green();
+      unsigned b = 255; //fill_.blue();
+      renderer ren(renb); 
+      for (unsigned i=0;i<feature.num_geometries();++i)
+      {
+         geometry2d const& geom=feature.get_geometry(i);
+         if (geom.num_points() > 1) 
+         {
+            path_type path(t_,geom,prj_trans);
+            
+            agg::conv_dash <path_type> dash(path);
+            dash.add_dash(20.0,200.0);
+            //dash.dash_start(100.0);
+            markers_converter<agg::conv_dash<path_type>, 
+               arrow, 
+               label_collision_detector4>
+               marker(dash, arrow_, detector_);
+            ras_.add_path(marker);
+         }
+      }
+      ren.color(agg::rgba8(r, g, b, 255));
+      agg::render_scanlines(ras_, sl, ren);
+}
+   
+   template <typename T>
    void agg_renderer<T>::process(text_symbolizer const& sym,
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
-  
+      typedef  coord_transform2<CoordTransform,geometry2d> path_type;
+      
       std::wstring text = feature[sym.get_name()].to_unicode();
       if ( text.length() > 0 )
       {
@@ -608,7 +656,9 @@ namespace mapnik
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
             
-            Envelope<double> ext = t_.extent();
+            Envelope<double> box(-64,-64,width_+64,height_+64);
+            placement_finder<label_collision_detector4> finder(detector_,box);
+           
             string_info info(text);
             ren.get_string_info(&info);
             unsigned num_geom = feature.num_geometries();
@@ -617,38 +667,31 @@ namespace mapnik
                geometry2d const& geom = feature.get_geometry(i);
                if (geom.num_points() > 0) // don't bother with empty geometries 
                {
-                  //agg::vpgen_clip_polyline clipped_path;
-                  // clip to the bbox
+                  path_type path(t_,geom,prj_trans);
+                  //agg::conv_clip_polyline<path_type> clipped_path(path);
+                  //clipped_path.clip_box(0,0,width_,height_);
+                  //placement<agg::conv_clip_polyline<path_type> > 
+                  //   text_placement(&info, &t_, &prj_trans, clipped_path, sym);         
+                  //placement_finder<agg::conv_clip_polyline<path_type>, 
+                  //   label_collision_detector4> finder(detector_,box);
+                  placement text_placement(info,sym);  
+                  if (sym.get_label_placement() == POINT_PLACEMENT) 
+                  {
+                     double label_x, label_y, z=0.0;
+                     geom.label_position(&label_x, &label_y);
+                     prj_trans.backward(label_x,label_y, z);
+                     t_.forward(&label_x,&label_y);
+                     finder.find_point_placement(text_placement,label_x,label_y);
+                  }
+                  else if (sym.get_label_spacing() > 0 )
+                  {
+                     finder.find_placements_with_spacing<path_type>(text_placement,path);
+                  }
+                  else
+                  {
+                     finder.find_placements<path_type>(text_placement,path);
+                  }
                   
-                  //clipped_path.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
-                  
-                  //for (unsigned j=0;j<geom.num_points();++j)
-                  //{
-                  //  double x,y;
-                  ///  unsigned c = geom.vertex(&x,&y);
-                  //   if (c == SEG_MOVETO)
-                  //     clipped_path.move_to(x,y);
-                  //  else if (c == SEG_LINETO)
-                  //     clipped_path.line_to(x,y);
-                  //}
-                  //line_string_impl line;
-                  //while (1)
-                  //{
-                  //  double x,y;
-                  //  unsigned cmd = clipped_path.vertex(&x,&y);
-                  //  if (cmd == SEG_END) break;
-                  //  else if (cmd == SEG_MOVETO)
-                  //  {
-                  //     line.move_to(x,y);
-                  //  }
-                  //  else if (cmd == SEG_LINETO)
-                  //  {
-                  //     line.line_to(x,y);
-                  //  }
-                  //}
-                  
-                  placement text_placement(&info, &t_, &prj_trans, geom, sym);         
-                  finder_.find_placements(&text_placement);  
                   for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
                   {
                      double x = text_placement.placements[ii].starting_x;

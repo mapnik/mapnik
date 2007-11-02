@@ -66,17 +66,17 @@ namespace mapnik
             characters_.push_back(new character_info(c, width, height));
          }
       
-         unsigned num_characters()
+         unsigned num_characters() const
          {
             return characters_.size();
          }
       
-         character_info at(unsigned i)
+         character_info at(unsigned i) const
          {
             return characters_[i];
          }
       
-         character_info operator[](unsigned i)
+         character_info operator[](unsigned i) const
          {
             return at(i);
          }
@@ -87,12 +87,13 @@ namespace mapnik
             height_ = height;
          }
       
-         std::pair<double, double> get_dimensions()
+         std::pair<double, double> get_dimensions() const
          {
             return std::pair<double, double>(width_, height_);
          }
 
-         std::wstring get_string() {
+         std::wstring const&  get_string() const 
+         {
             return string_;
          }
    };

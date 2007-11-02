@@ -81,6 +81,9 @@ namespace mapnik {
         void process(building_symbolizer const& sym,
                      Feature const& feature,
                      proj_transform const& prj_trans);
+        void process(markers_symbolizer const& sym,
+                     Feature const& feature,
+                     proj_transform const& prj_trans);
     private:
           T & pixmap_;
           unsigned width_;
@@ -91,7 +94,7 @@ namespace mapnik {
           freetype_engine font_engine_;
           face_manager<freetype_engine> font_manager_;
           label_collision_detector4 detector_;
-          placement_finder<label_collision_detector4> finder_;
+          //placement_finder<label_collision_detector4> finder_;
           agg::rasterizer_scanline_aa<> ras_;
     };
 }
