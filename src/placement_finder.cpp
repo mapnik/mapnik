@@ -52,8 +52,6 @@ namespace mapnik
    placement::placement(string_info & info_, 
                         shield_symbolizer const& sym)
       : info(info_), 
-        //shape_path(shape_path_), 
-        //total_distance_(-1.0), 
         displacement_(sym.get_displacement()),
         label_placement(sym.get_label_placement()), 
         wrap_width(sym.get_wrap_width()), 
@@ -73,8 +71,6 @@ namespace mapnik
    placement::placement(string_info & info_,
                         text_symbolizer const& sym)
       : info(info_), 
-        // shape_path(shape_path_),
-        //total_distance_(-1.0), 
         displacement_(sym.get_displacement()),
         label_placement(sym.get_label_placement()), 
         wrap_width(sym.get_wrap_width()), 
@@ -515,8 +511,10 @@ namespace mapnik
                      e.expand_to_include(render_x + (ci.width*cos(render_angle) - ci.height*sin(render_angle)), 
                                         render_y - (ci.width*sin(render_angle) + ci.height*cos(render_angle)));
                   }
-                   
-                  if (!dimensions_.intersects(e) || !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
+                  
+                  if (!dimensions_.contains(e) || 
+//                  if (!dimensions_.intersects(e) || 
+                      !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
                   {
                      status = false;
                   }
@@ -707,7 +705,8 @@ namespace mapnik
                                 render_y - (ci.width*sin(render_angle) + ci.height*cos(render_angle)));
          }
          
-         if (!dimensions_.intersects(e) || !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
+         if (!dimensions_.contains(e) || 
+             !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
          {
             return false;
          }
@@ -862,7 +861,8 @@ namespace mapnik
                       current_placement->starting_y - y - ci.height);
             }
                 
-            if (!dimensions_.intersects(e) || !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
+            if (!dimensions_.contains(e) || 
+                !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
             {
                return false;
             }
