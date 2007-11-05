@@ -24,17 +24,19 @@
 #include <boost/python.hpp>
 
 #include <mapnik/text_symbolizer.hpp>
+#include "mapnik_enumeration.hpp"
 
 void export_text_symbolizer()
 {
     using namespace boost::python;
+    using namespace mapnik;
 
     using mapnik::text_symbolizer;
     using mapnik::Color;
  
-    enum_<mapnik::label_placement_enum>("label_placement")
-        .value("LINE_PLACEMENT",mapnik::LINE_PLACEMENT)
-        .value("POINT_PLACEMENT",mapnik::POINT_PLACEMENT)
+    enumeration_<label_placement_e>("label_placement")
+        .value("LINE_PLACEMENT",LINE_PLACEMENT)
+        .value("POINT_PLACEMENT",POINT_PLACEMENT)
         ;
     
     class_<text_symbolizer>("TextSymbolizer",
