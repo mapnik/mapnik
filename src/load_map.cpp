@@ -583,6 +583,14 @@ namespace mapnik
                 text_symbol.set_minimum_distance(*min_distance);
             }
 
+            // don't render labels around edges
+            optional<boolean> avoid_edges =
+                get_opt_attr<boolean>(sym, "avoid_edges");
+            if (avoid_edges)
+            {
+                text_symbol.set_avoid_edges( * avoid_edges);
+            }
+
             // allow_overlap 
             optional<boolean> allow_overlap = 
                 get_opt_attr<boolean>(sym, "allow_overlap");

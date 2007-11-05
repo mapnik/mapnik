@@ -143,7 +143,7 @@ namespace mapnik
 #endif 
       if (lay.clear_label_cache())
       {
-         //finder_.clear(); // FIXME!!!!!!!!
+         detector_.clear();
       }
    }
    
@@ -453,7 +453,7 @@ namespace mapnik
             string_info info(text);
             ren.get_string_info(&info);
             
-            Envelope<double> box(-64,-64,width_+64,height_+64);
+            Envelope<double> box(0,0,width_,height_);
             placement_finder<label_collision_detector4> finder(detector_,box);
             
             unsigned num_geom = feature.num_geometries();
@@ -656,7 +656,7 @@ namespace mapnik
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
             
-            Envelope<double> box(-64,-64,width_+64,height_+64);
+            Envelope<double> box(0,0,width_,height_);
             placement_finder<label_collision_detector4> finder(detector_,box);
            
             string_info info(text);

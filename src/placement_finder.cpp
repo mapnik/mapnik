@@ -506,19 +506,25 @@ namespace mapnik
                   if (!p.has_dimensions)
                   {
                      // put four corners of the letter into envelope
-                     e.init(render_x, render_y, render_x + ci.width*cos(render_angle), render_y - ci.width*sin(render_angle));
-                     e.expand_to_include(render_x - ci.height*sin(render_angle), render_y - ci.height*cos(render_angle));
+                     e.init(render_x, render_y, render_x + ci.width*cos(render_angle), 
+                            render_y - ci.width*sin(render_angle));
+                     e.expand_to_include(render_x - ci.height*sin(render_angle), 
+                                         render_y - ci.height*cos(render_angle));
                      e.expand_to_include(render_x + (ci.width*cos(render_angle) - ci.height*sin(render_angle)), 
                                         render_y - (ci.width*sin(render_angle) + ci.height*cos(render_angle)));
                   }
                   
-                  if (!dimensions_.contains(e) || 
-//                  if (!dimensions_.intersects(e) || 
+                  if (!dimensions_.intersects(e) || 
                       !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
                   {
                      status = false;
                   }
                   
+                  if (p.avoid_edges && !dimensions_.contains(e))
+                  {
+                     status = false;
+                  }
+
                   p.envelopes.push(e);
                   
                   if (orientation < 0)
@@ -705,8 +711,13 @@ namespace mapnik
                                 render_y - (ci.width*sin(render_angle) + ci.height*cos(render_angle)));
          }
          
-         if (!dimensions_.contains(e) || 
+         if (!dimensions_.intersects(e) || 
              !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
+         {
+            return false;
+         }
+         
+         if (p.avoid_edges && !dimensions_.contains(e))
          {
             return false;
          }
@@ -861,8 +872,13 @@ namespace mapnik
                       current_placement->starting_y - y - ci.height);
             }
                 
-            if (!dimensions_.contains(e) || 
+            if (!dimensions_.intersects(e) || 
                 !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
+            {
+               return false;
+            }
+            
+            if (p.avoid_edges && !dimensions_.contains(e))
             {
                return false;
             }
