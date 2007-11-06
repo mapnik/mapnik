@@ -64,7 +64,7 @@ namespace mapnik
         avoid_edges(sym.get_avoid_edges()),
         has_dimensions(true), 
         dimensions(std::make_pair(sym.get_image()->width(),
-                             sym.get_image()->height()))
+                                  sym.get_image()->height()))
    {
    }
    
@@ -355,10 +355,13 @@ namespace mapnik
                       current_placement->starting_y - y - ci.height);
             }
                 
-            if (!dimensions_.intersects(e) || !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
+            if (!dimensions_.intersects(e) || 
+                !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
             {
-               return ;
+               return;
             }
+            
+            if (p.avoid_edges && !dimensions_.contains(e)) return;
             
             p.envelopes.push(e);
          }
@@ -462,7 +465,8 @@ namespace mapnik
                         angle_delta -= 2*M_PI;
                      while (angle_delta < -M_PI)
                         angle_delta += 2*M_PI;
-                     if (p.max_char_angle_delta > 0 && fabs(angle_delta) > p.max_char_angle_delta*(M_PI/180))
+                     if (p.max_char_angle_delta > 0 && 
+                         fabs(angle_delta) > p.max_char_angle_delta*(M_PI/180))
                      {
                         status = false;
                      }
@@ -569,7 +573,9 @@ namespace mapnik
 
    template <typename DetectorT>
    template <typename PathT>
-   bool placement_finder<DetectorT>::build_path_follow(placement & p, double target_distance, PathT & shape_path)
+   bool placement_finder<DetectorT>::build_path_follow(placement & p, 
+                                                       double target_distance, 
+                                                       PathT & shape_path)
    {
       double new_x = 0.0;
       double new_y = 0.0;
