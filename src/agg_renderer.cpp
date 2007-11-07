@@ -107,7 +107,6 @@ namespace mapnik
         font_engine_(),
         font_manager_(font_engine_),
         detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
-        //finder_(detector_,Envelope<double>(0 ,0, m.getWidth(), m.getHeight()))
    {
       boost::optional<Color> bg = m.background();
       if (bg) pixmap_.setBackground(*bg);
