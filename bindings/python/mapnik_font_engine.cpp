@@ -36,9 +36,11 @@ void export_font_engine()
         .staticmethod("instance")
         ;
 
-    class_<freetype_engine,bases<singleton<freetype_engine,CreateStatic> >,
-        boost::noncopyable>("FontEngine",no_init)
-	.def("register_font",&freetype_engine::register_font)
-	.staticmethod("register_font")
+	class_<freetype_engine,bases<singleton<freetype_engine,CreateStatic> >,
+  		boost::noncopyable>("FontEngine",no_init)
+		.def("register_font",&freetype_engine::register_font)
+		.def("face_names",&freetype_engine::face_names)
+		.staticmethod("register_font")
+		.staticmethod("face_names")
         ;
 }

@@ -35,7 +35,7 @@ std::vector<std::string> & (mapnik::Layer::*_styles_)() = &mapnik::Layer::styles
 void export_layer()
 {
     using namespace boost::python;
-    class_<std::vector<std::string> >("Styles")
+    class_<std::vector<std::string> >("Names")
     	.def(vector_indexing_suite<std::vector<std::string>,true >())
     	;
     
