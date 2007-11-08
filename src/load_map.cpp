@@ -151,7 +151,7 @@ namespace mapnik
                 }
             }
         }
-        catch (const boost::property_tree::ptree_bad_path & ex)
+        catch (const boost::property_tree::ptree_bad_path &)
         {
             throw config_error("Not a map file. Node 'Map' not found.");
         }
@@ -720,7 +720,7 @@ namespace mapnik
                             float f = boost::lexical_cast<float>(*itr);
                             dash_array.push_back(f);
                         }
-                        catch ( boost::bad_lexical_cast & ex)
+                        catch ( boost::bad_lexical_cast &)
                         {
                             throw config_error(std::string("Failed to parse CSS ") +
                                     "parameter '" + css_name + "'. Expected a " +
