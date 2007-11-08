@@ -50,12 +50,14 @@ feature_ptr gdal_featureset::next()
       GDALRasterBand * grey = 0; 
       for (int i = 0; i < dataset_.GetRasterCount() ;++i)
       {
-         GDALRasterBand * band = dataset_.GetRasterBand(i+1);
-         //int bsx,bsy;
-         //band->GetBlockSize(&bsx,&bsy);
-         //std::cout << boost::format("Block=%dx%d Type=%s Color=%s \n") % bsx % bsy 
-         //   % GDALGetDataTypeName(band->GetRasterDataType())
-         //   % GDALGetColorInterpretationName(band->GetColorInterpretation());   
+   		GDALRasterBand * band = dataset_.GetRasterBand(i+1);
+#ifdef MAPNIK_DEBUG         
+		int bsx,bsy;
+        band->GetBlockSize(&bsx,&bsy);
+         std::cout << boost::format("Block=%dx%d Type=%s Color=%s \n") % bsx % bsy 
+            % GDALGetDataTypeName(band->GetRasterDataType())
+            % GDALGetColorInterpretationName(band->GetColorInterpretation());   
+#endif
          GDALColorInterp color_interp = band->GetColorInterpretation();
          switch (color_interp)
          {
@@ -74,10 +76,32 @@ feature_ptr gdal_featureset::next()
             case GCI_GrayIndex:
                grey = band;
                break;
+            case GCI_PaletteIndex:
+			{	
+				grey = band;
+				GDALColorTable *color_table = band->GetColorTable();
+				
+			    if ( color_table)
+			    {
+			      int count = color_table->GetColorEntryCount();
+#ifdef MAPNIK_DEBUG
+				  std::cout << "Color Table count = " << count << "\n";´
+#endif 
+			      for ( int i = 0; i < count; i++ )
+			      {
+			        const GDALColorEntry *ce = color_table->GetColorEntry ( i );
+			        if (!ce ) continue;
+#ifdef MAPNIK_DEBUG
+					std::cout << "color entry RGB (" << ce->c1 <<"," <<ce->c2 << "," << ce->c3 << ")\n"; 
+#endif
+			      }
+			    }	
+				break;
+			}
             case GCI_Undefined:
-               grey = band;
+               	grey = band;
+				break;	
             default:
-               //grey = band;
                break;
                ;
          }

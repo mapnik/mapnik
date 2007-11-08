@@ -60,8 +60,8 @@ namespace mapnik
 
     DEFINE_ENUM( line_join_e, line_join_enum );
     
-    class stroke
-    {	
+  class MAPNIK_DECL stroke
+  {	
         Color c_;
         float width_;
         float opacity_; // 0.0 - 1.0

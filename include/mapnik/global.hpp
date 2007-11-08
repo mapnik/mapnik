@@ -27,11 +27,15 @@
 
 #include <boost/cstdint.hpp>
 
+using boost::int32_t;
+using boost::uint32_t;
+using boost::int16_t;
+using boost::uint16_t;
+using boost::uint8_t;
+
 namespace mapnik
 {
-  using boost::int32_t;
-  using boost::uint8_t;
-  
+ 
 #define int2net(A)  (int16_t) (((uint16_t) ((uint8_t) (A)[1]))      |   \
                                (((uint16_t) ((uint8_t) (A)[0])) << 8))
 
@@ -41,23 +45,23 @@ namespace mapnik
                                (((uint32_t) ((uint8_t) (A)[0])) << 24))
 
 
-    typedef char byte;
+  typedef char byte;
 #define float8net(V,M)   do { double def_temp;  \
-        ((byte*) &def_temp)[0]=(M)[7];          \
-        ((byte*) &def_temp)[1]=(M)[6];          \
-        ((byte*) &def_temp)[2]=(M)[5];          \
-        ((byte*) &def_temp)[3]=(M)[4];          \
-        ((byte*) &def_temp)[4]=(M)[3];          \
-        ((byte*) &def_temp)[5]=(M)[2];          \
-        ((byte*) &def_temp)[6]=(M)[1];          \
-        ((byte*) &def_temp)[7]=(M)[0];          \
-        (V) = def_temp; } while(0)
+    ((byte*) &def_temp)[0]=(M)[7];		\
+    ((byte*) &def_temp)[1]=(M)[6];		\
+    ((byte*) &def_temp)[2]=(M)[5];		\
+    ((byte*) &def_temp)[3]=(M)[4];		\
+    ((byte*) &def_temp)[4]=(M)[3];		\
+    ((byte*) &def_temp)[5]=(M)[2];		\
+    ((byte*) &def_temp)[6]=(M)[1];		\
+    ((byte*) &def_temp)[7]=(M)[0];		\
+    (V) = def_temp; } while(0)
 #define float4net(V,M)   do { float def_temp;   \
-        ((byte*) &def_temp)[0]=(M)[3];          \
-        ((byte*) &def_temp)[1]=(M)[2];          \
-        ((byte*) &def_temp)[2]=(M)[1];          \
-        ((byte*) &def_temp)[3]=(M)[0];          \
-        (V)=def_temp; } while(0)
+    ((byte*) &def_temp)[0]=(M)[3];		\
+    ((byte*) &def_temp)[1]=(M)[2];		\
+    ((byte*) &def_temp)[2]=(M)[1];		\
+    ((byte*) &def_temp)[3]=(M)[0];		\
+    (V)=def_temp; } while(0)
 }
 
 #endif //GLOBAL_HPP

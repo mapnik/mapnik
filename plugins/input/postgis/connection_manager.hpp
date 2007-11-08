@@ -133,9 +133,8 @@ public:
         }
         return HolderType();
     }
-    
-private:
     ConnectionManager() {}
+private:
     ConnectionManager(const ConnectionManager&);
     ConnectionManager& operator=(const ConnectionManager);
 };    

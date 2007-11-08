@@ -266,7 +266,7 @@ namespace mapnik {
             {
                 return boost::lexical_cast<T>( * str );
             }
-            catch (const boost::bad_lexical_cast & ex)
+            catch (const boost::bad_lexical_cast & )
             {
                 throw config_error(string("Failed to parse ") +
                         (is_attribute ? "attribute" : "child node") + " '" +
@@ -300,7 +300,7 @@ namespace mapnik {
         {
             return boost::lexical_cast<T>( *str );
         }
-        catch (const boost::bad_lexical_cast & ex)
+        catch (const boost::bad_lexical_cast & )
         {
             throw config_error(string("Failed to parse ") +
                     (is_attribute ? "attribute" : "child node") + " '" +
@@ -344,7 +344,7 @@ namespace mapnik {
             {
                 result = boost::lexical_cast<T>( *str );
             }
-            catch (const boost::bad_lexical_cast & ex)
+            catch (const boost::bad_lexical_cast &)
             {
                 throw config_error(string("Failed to parse ") +
                         (is_attribute ? "attribute" : "child node") + " '" +

@@ -23,6 +23,8 @@
 #ifndef MAPNIK_ENUMERATION_INCLUDED
 #define MAPNIK_ENUMERATION_INCLUDED
 
+#include <mapnik/config.hpp>
+
 #include <vector>
 #include <bitset>
 #include <iostream>
@@ -130,7 +132,7 @@ class illegal_enum_value : public std::exception
  */
 
 template <class ENUM, int THE_MAX>
-class enumeration {
+class MAPNIK_DECL enumeration {
     public:
         typedef ENUM native_type;
         enumeration() {};
@@ -211,7 +213,7 @@ class enumeration {
             {
                 from_string( word );
             }
-            catch (const illegal_enum_value & ex)
+            catch (const illegal_enum_value &)
             {
                 is.setstate(std::ios::failbit);
             }
