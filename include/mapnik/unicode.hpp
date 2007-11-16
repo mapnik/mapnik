@@ -29,7 +29,9 @@
 #include <fribidi/fribidi.h>
 #endif
 #include <boost/utility.hpp>
+extern "C" {
 #include <iconv.h>
+}
 #include <string>
 
 #ifdef MAPNIK_DEBUG
@@ -168,34 +170,38 @@ namespace mapnik {
          {
 #ifdef MAPNIK_DEBUG
             std::cerr << "ENCODING = " << encoding << "\n"; 
-#endif 
-            desc_ = iconv_open("UTF-8",encoding.c_str());
+#endif
+ 
+#ifndef WORDS_BIGENDIAN
+            desc_ = iconv_open("UCS-4LE",encoding.c_str());
+#else
+            desc_ = iconv_open("UCS-4BE",encoding.c_str());
+#endif
          }
          
          std::wstring transcode(std::string const& input) const
          {
             if (desc_ == iconv_t(-1)) return to_unicode(input); 
-            
-            std::string buf(input.size() /* * sizeof(wchar_t)*/,0);
-            size_t inleft = input.size();
+			size_t inleft = input.size();
+			std::wstring output(inleft,0);
+			size_t outleft = inleft * sizeof(wchar_t);
 #ifdef DARWIN
-            const char * in = input.data();
+            const char * in = input.c_str();
 #else
-	    char * in = const_cast<char*>(input.data());
+	    	char * in = const_cast<char*>(input.data());
 #endif
-            size_t outleft = buf.size();
-            char * out = const_cast<char*>(buf.data());
+			char * out = const_cast<char*>(reinterpret_cast<const char*>(output.data()));			
             iconv(desc_,&in,&inleft,&out,&outleft);
-            std::wstring unicode =  to_unicode(buf);
+			output = output.substr(0,output.size()-(outleft/sizeof(wchar_t)));
 #ifdef USE_FRIBIDI
-            if (unicode.length() > 0)
+            if (output.length() > 0)
             {
-               wchar_t *bidi_text = bidi_string(unicode.c_str());
-               unicode = bidi_text;
+               wchar_t *bidi_text = bidi_string(output.c_str());
+               output = bidi_text;
                free(bidi_text);
             }
 #endif
-            return unicode;
+            return output;
          }
          
          ~transcoder()
