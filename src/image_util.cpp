@@ -82,7 +82,6 @@ namespace mapnik
       // switch on optimization only if supported
 #if defined(PNG_LIBPNG_VER) && (PNG_LIBPNG_VER >= 10200) && defined(PNG_MMX_CODE_SUPPORTED)
       png_uint_32 mask, flags;
-
       flags = png_get_asm_flags(png_ptr);
       mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
       png_set_asm_flags(png_ptr, flags | mask);
@@ -99,7 +98,7 @@ namespace mapnik
          png_destroy_write_struct(&png_ptr, &info_ptr);
          return;
       }
-      png_set_write_fn (png_ptr, &file, &write_data<std::ofstream>, &flush_data<std::ofstream>);
+      png_set_write_fn (png_ptr, &file, &write_data<T1>, &flush_data<T1>);
         
       //png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
       //png_set_compression_strategy(png_ptr, Z_FILTERED);
@@ -115,6 +114,7 @@ namespace mapnik
       png_write_end(png_ptr, info_ptr);
       png_destroy_write_struct(&png_ptr, &info_ptr);
    }
+   
    
 #define BUFFER_SIZE 4096
 
@@ -203,7 +203,7 @@ namespace mapnik
       jpeg_finish_compress(&cinfo);
       jpeg_destroy_compress(&cinfo);
    }  
-    
+   
    template void save_to_file<ImageData32>(std::string const&,
                                            std::string const&, 
                                            ImageData32 const&);
