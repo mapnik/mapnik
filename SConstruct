@@ -48,10 +48,8 @@ opts.Add(PathOption('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/u
 opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/include'))
 opts.Add(PathOption('GDAL_LIBS', 'Search path for GDAL library files', '/usr/' + LIBDIR_SCHEMA))
-opts.Add(PathOption('GIGABASE_INCLUDES', 'Search path for Gigabase include files', '/usr/local/include'))
-opts.Add(PathOption('GIGABASE_LIBS', 'Search path for Gigabase library files', '/usr/local/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PYTHON','Python executable', sys.executable))
-opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal','gigabase']))
+opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
 opts.Add(BoolOption('DEBUG', 'Compile a debug version of mapnik', 'False'))
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
@@ -78,8 +76,7 @@ for path in [env['BOOST_INCLUDES'],
              env['TIFF_INCLUDES'],
              env['PGSQL_INCLUDES'],
              env['PROJ_INCLUDES'],
-             env['GDAL_INCLUDES'],
-             env['GIGABASE_INCLUDES']] :
+             env['GDAL_INCLUDES']] :
     if path not in env['CPPPATH']: env['CPPPATH'].append(path)
 
 env['LIBPATH'] = ['#agg', '#src']
@@ -90,8 +87,7 @@ for path in [env['BOOST_LIBS'],
              env['TIFF_LIBS'],
              env['PGSQL_LIBS'],
              env['PROJ_LIBS'],
-             env['GDAL_LIBS'],
-             env['GIGABASE_LIBS']]:
+             env['GDAL_LIBS']]:
     if path not in env['LIBPATH']: env['LIBPATH'].append(path)
     
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
@@ -122,8 +118,7 @@ C_LIBSHEADERS = [
 ]
 
 CXX_LIBSHEADERS = [
-    ['gdal', 'gdal_priv.h',False],
-    ['gigabase_r','gigabase/gigabase.h',False]
+    ['gdal', 'gdal_priv.h',False]
 ]
 
 if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
