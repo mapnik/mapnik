@@ -58,6 +58,7 @@ void export_projection();
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/save_map.hpp>
@@ -75,26 +76,38 @@ void render2(const mapnik::Map& map,mapnik::Image32& image)
     ren.apply();
 }
 
-void render_tile_to_file(const mapnik::Map& map, unsigned offset_x, unsigned offset_y,
-                    unsigned width, unsigned height,
-                    const std::string& file,
-                    const std::string& format)
+void render_tile_to_file(const mapnik::Map& map, 
+                         unsigned offset_x, unsigned offset_y,
+                         unsigned width, unsigned height,
+                         const std::string& file,
+                         const std::string& format)
 {
     mapnik::Image32 image(width,height);
     render(map,image,offset_x, offset_y);
     image.saveToFile(file,format);
 }
 
-void render_to_file(const mapnik::Map& map,
-                    const std::string& file,
+void render_to_file1(const mapnik::Map& map,
+                    const std::string& filename,
                     const std::string& format)
 {
-    render_tile_to_file(map,0,0,map.getWidth(),map.getHeight(),file,format);
+   mapnik::Image32 image(map.getWidth(),map.getHeight());
+   render(map,image,0,0);
+   mapnik::save_to_file(filename,format,image); 
 }
+
+void render_to_file2(const mapnik::Map& map,
+                    const std::string& filename)
+{
+   mapnik::Image32 image(map.getWidth(),map.getHeight());
+   render(map,image,0,0);
+   mapnik::save_to_file(filename,image); 
+}
+
 
 double scale_denominator(mapnik::Map const &map, bool geographic)
 {
-	return mapnik::scale_denominator(map, geographic);
+   return mapnik::scale_denominator(map, geographic);
 }
 
 void translator(mapnik::config_error const & ex) {
@@ -140,7 +153,8 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_coord();
     export_map();
     
-    def("render_to_file",&render_to_file);
+    def("render_to_file",&render_to_file1);
+    def("render_to_file",&render_to_file2);
     def("render_tile_to_file",&render_tile_to_file);
     def("render",&render); 
     def("render",&render2);

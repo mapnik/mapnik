@@ -55,7 +55,15 @@ namespace mapnik
          else if (type=="jpeg") save_as_jpeg(file,85,image);
       } 
    }
-  
+   
+   template <typename T>
+   void save_to_file(std::string const& filename,
+                     T const& image)
+   {
+      std::string type = type_from_filename(filename);
+      save_to_file<T>(filename,type,image);
+   }
+   
    template <typename T>
    void write_data (png_structp png_ptr, png_bytep data, png_size_t length)
    {
@@ -208,8 +216,14 @@ namespace mapnik
                                            std::string const&, 
                                            ImageData32 const&);
 
+   template void save_to_file<ImageData32>(std::string const&, 
+                                           ImageData32 const&);
+
    template void save_to_file<image_view<ImageData32> > (std::string const&,
                                                          std::string const&, 
                                                          image_view<ImageData32> const&);
-    
+
+   template void save_to_file<image_view<ImageData32> > (std::string const&, 
+                                                         image_view<ImageData32> const&);
+   
 }

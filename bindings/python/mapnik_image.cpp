@@ -37,7 +37,8 @@ PyObject* rawdata( Image32 const& im)
     return ::PyString_FromStringAndSize((const char*)im.raw_data(),size);
 }
 
-void (*save_to_file2)(std::string const&,std::string const&, mapnik::Image32 const&) = mapnik::save_to_file;
+void (*save_to_file1)(std::string const&,std::string const&, mapnik::Image32 const&) = mapnik::save_to_file;
+void (*save_to_file2)(std::string const&, mapnik::Image32 const&) = mapnik::save_to_file;
 
 void blend (Image32 & im, unsigned x, unsigned y, Image32 const& im2, float opacity)
 {
@@ -57,5 +58,6 @@ void export_image()
        .def("blend",&blend)
        ;    
     def("rawdata",&rawdata); // FIXME : I dont think we need this one anymore
+    def("save_to_file", save_to_file1);
     def("save_to_file", save_to_file2);
 }

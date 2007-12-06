@@ -33,9 +33,9 @@ void export_image_view()
 {
     using namespace boost::python;
     class_<image_view<ImageData32> >("ImageView","A view into an image.",no_init)
-        .def("width",&image_view<ImageData32>::width)
-        .def("height",&image_view<ImageData32>::height)
-        ;
+       .def("width",&image_view<ImageData32>::width)
+       .def("height",&image_view<ImageData32>::height)
+       ;
     
-    def("save_to_file",save_to_file<image_view<ImageData32> >);
+    //def("save_to_file",save_to_file<image_view<ImageData32> >);
 }
