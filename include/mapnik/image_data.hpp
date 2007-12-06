@@ -133,7 +133,8 @@ namespace mapnik
           ImageData& operator=(const ImageData&);
     };
 
-    typedef ImageData<unsigned> ImageData32;
+   typedef ImageData<unsigned> ImageData32;
+   typedef ImageData<uint8_t>  ImageData8;
 }
 
 #endif //IMAGE_DATA_HPP
