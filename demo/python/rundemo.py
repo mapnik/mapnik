@@ -305,7 +305,7 @@ m.zoom_to_box(Envelope(1405120.04127408,-247003.813399447,1706357.31328276,-2509
 
 # Render two maps, one PNG, one JPEG.
 
-render_to_file(m, 'demo.png', 'png')
+render_to_file(m, 'demo.png', 'png256') # save to palette based (max 256 colours) png 
 render_to_file(m, 'demo.jpg', 'jpeg')
 
 print """\n\nTwo maps have been rendered in the current directory:

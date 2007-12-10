@@ -50,11 +50,16 @@ feature_ptr gdal_featureset::next()
       GDALRasterBand * grey = 0; 
       for (int i = 0; i < dataset_.GetRasterCount() ;++i)
       {
-   		GDALRasterBand * band = dataset_.GetRasterBand(i+1);
+         GDALRasterBand * band = dataset_.GetRasterBand(i+1);
+         //if (band->GetOverviewCount() > 0)
+         //{
+         //  band = band->GetOverview(0);
+         //}
+         
 #ifdef MAPNIK_DEBUG         
-		int bsx,bsy;
-        band->GetBlockSize(&bsx,&bsy);
-         std::cout << boost::format("Block=%dx%d Type=%s Color=%s \n") % bsx % bsy 
+         int bsx,bsy;
+         band->GetBlockSize(&bsx,&bsy);
+         std::cout << boost::format("Block=%dx%d Type=%s Color=%s \n") % bsx % bsy
             % GDALGetDataTypeName(band->GetRasterDataType())
             % GDALGetColorInterpretationName(band->GetColorInterpretation());   
 #endif
@@ -77,30 +82,30 @@ feature_ptr gdal_featureset::next()
                grey = band;
                break;
             case GCI_PaletteIndex:
-			{	
-				grey = band;
-				GDALColorTable *color_table = band->GetColorTable();
+            {	
+               grey = band;
+               GDALColorTable *color_table = band->GetColorTable();
 				
-			    if ( color_table)
-			    {
-			      int count = color_table->GetColorEntryCount();
+               if ( color_table)
+               {
+                  int count = color_table->GetColorEntryCount();
 #ifdef MAPNIK_DEBUG
-				  std::cout << "Color Table count = " << count << "\n";´
+                  std::cout << "Color Table count = " << count << "\n";
 #endif 
-			      for ( int i = 0; i < count; i++ )
-			      {
-			        const GDALColorEntry *ce = color_table->GetColorEntry ( i );
-			        if (!ce ) continue;
+                  for ( int i = 0; i < count; i++ )
+                  {
+                     const GDALColorEntry *ce = color_table->GetColorEntry ( i );
+                     if (!ce ) continue;
 #ifdef MAPNIK_DEBUG
-					std::cout << "color entry RGB (" << ce->c1 <<"," <<ce->c2 << "," << ce->c3 << ")\n"; 
+                     std::cout << "color entry RGB (" << ce->c1 <<"," <<ce->c2 << "," << ce->c3 << ")\n"; 
 #endif
-			      }
-			    }	
-				break;
-			}
+                  }
+               }	
+               break;
+            }
             case GCI_Undefined:
-               	grey = band;
-				break;	
+               grey = band;
+               break;	
             default:
                break;
                ;

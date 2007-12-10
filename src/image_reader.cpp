@@ -22,7 +22,7 @@
 //$Id: image_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
 #include <mapnik/image_reader.hpp>
-
+#include <mapnik/image_util.hpp>
 #include <mapnik/factory.hpp>
 
 namespace mapnik
@@ -36,8 +36,14 @@ namespace mapnik
         return ImageReaderFactory::instance()->register_product(type,fun);
     }
     
-    ImageReader* get_image_reader(const std::string& type,const std::string& file) 
+    ImageReader* get_image_reader(const std::string& filename,const std::string& type) 
     {
-        return ImageReaderFactory::instance()->create_object(type,file);
+        return ImageReaderFactory::instance()->create_object(type,filename);
     }
+
+   ImageReader* get_image_reader(const std::string& filename) 
+   {
+      std::string type = type_from_filename(filename);
+      return ImageReaderFactory::instance()->create_object(filename,type);
+   }
 }

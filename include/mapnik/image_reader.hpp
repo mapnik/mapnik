@@ -57,8 +57,10 @@ namespace mapnik
         virtual ~ImageReader() {}
     };
 
-    bool register_image_reader(const std::string& type,ImageReader* (*)(const std::string&));
-    MAPNIK_DECL ImageReader* get_image_reader(const std::string& type,const std::string& file);
+   bool register_image_reader(const std::string& type,ImageReader* (*)(const std::string&));
+   MAPNIK_DECL ImageReader* get_image_reader(const std::string& file,const std::string& type);
+   MAPNIK_DECL ImageReader* get_image_reader(const std::string& file);
+   
 }
 
 #endif //IMAGE_READER_HPP

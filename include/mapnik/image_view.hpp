@@ -31,8 +31,9 @@ namespace mapnik {
     template <typename T> 
     class image_view  
     {
-        typedef typename T::pixel_type pixel_type;
-    public:
+       public:
+          typedef typename T::pixel_type pixel_type;
+          
         image_view(unsigned x, unsigned y, unsigned width, unsigned height, T const& data)
             : x_(x),
               y_(y),

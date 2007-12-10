@@ -29,6 +29,9 @@ using mapnik::ImageData32;
 using mapnik::image_view;
 using mapnik::save_to_file;
 
+void (*view_to_file1)(std::string const&,std::string const&, image_view<ImageData32> const&) = mapnik::save_to_file;
+void (*view_to_file2)(std::string const&, image_view<ImageData32> const&) = mapnik::save_to_file;
+
 void export_image_view()
 {
     using namespace boost::python;
@@ -37,5 +40,6 @@ void export_image_view()
        .def("height",&image_view<ImageData32>::height)
        ;
     
-    //def("save_to_file",save_to_file<image_view<ImageData32> >);
+    def("save_to_file",view_to_file1);
+    def("save_to_file",view_to_file2);
 }
