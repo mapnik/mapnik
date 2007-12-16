@@ -45,7 +45,7 @@ namespace mapnik
                                (((uint32_t) ((uint8_t) (A)[0])) << 24))
 
 
-  typedef char byte;
+  typedef uint8_t byte;
 #define float8net(V,M)   do { double def_temp;  \
     ((byte*) &def_temp)[0]=(M)[7];		\
     ((byte*) &def_temp)[1]=(M)[6];		\

@@ -25,6 +25,7 @@
 #ifndef IMAGE_DATA_HPP
 #define IMAGE_DATA_HPP
 
+#include <mapnik/octree.hpp>
 #include <cassert>
 
 namespace mapnik 

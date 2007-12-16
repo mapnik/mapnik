@@ -41,7 +41,7 @@ Building
 Once you've installed the required software packages, the simplest way to build mapnik is to run "scons" (The software builder) without any options:
 
 $ cd /path/to/mapnik-sourcecode
-$ /path/to/python scons/scons.py
+$ /path/to/python scons/scons
 
 This should compile and link the mapnik library, the input plugins and the python language binding (if possible).  If any mandatory dependencies are not found the build will fail, and you will need to specify custom paths to your libraries and include files (see below).
 
@@ -135,7 +135,7 @@ This help should be self-explanatory!
 
 For example, if you compiled your own set of Boost libraries, you might use:
 
-$ /path/to/python scons/scons.py BOOST_INCLUDES=/usr/local/include/boost-1_33_1 BOOST_LIBS=/usr/local/lib
+$ /path/to/python scons/scons BOOST_INCLUDES=/usr/local/include/boost-1_33_1 BOOST_LIBS=/usr/local/lib
 
 
 Installation
@@ -143,7 +143,7 @@ Installation
 
 Once the build has successfully completed, you can install the various files on your system by executing:
 
-$ /path/to/python scons/scons.py install
+$ /path/to/python scons/scons install
 
 By default, everything will be installed under the PREFIX '/usr/local' as such:
 

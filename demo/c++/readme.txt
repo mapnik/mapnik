@@ -2,7 +2,7 @@ This directory contains a simple c++ program demonstrating Mapnik API. It mimics
 
 To build (using GCC/G++ toolkit):
 
-g++ -O3 -I/usr/local/include/mapnik -I/opt/boost/include/boost-1_33_1 -I/usr/include/freetype2  -L/usr/local/lib -lmapnik rundemo.cpp -o rundemo
+g++ -O3 -I/usr/local/include/mapnik -I/opt/boost/include/boost-1_33_1 -I/usr/include/freetype2 -I../../agg/include -L/usr/local/lib -lmapnik rundemo.cpp -o rundemo
 
 
 To run:
