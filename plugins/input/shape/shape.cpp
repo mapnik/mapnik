@@ -41,11 +41,15 @@ using mapnik::attribute_descriptor;
 shape_datasource::shape_datasource(const parameters &params)
    : datasource (params),
      type_(datasource::Vector),
-     shape_name_(*params_.get<std::string>("file","")),
      file_length_(0),
      indexed_(false),
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
+   boost::optional<std::string> base = params.get<std::string>("base");
+   if (base)
+      shape_name_ = *base + "/" + *params_.get<std::string>("file","");
+   else
+      shape_name_ = *params_.get<std::string>("file","");
    try
    {  
       shape_io shape(shape_name_);

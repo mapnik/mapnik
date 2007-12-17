@@ -82,8 +82,10 @@ namespace mapnik
          void ensure_font_face( const text_symbolizer & text_symbol );
          
          bool strict_;
+         std::map<std::string,parameters> datasource_templates_;
          freetype_engine font_engine_;
          face_manager<freetype_engine> font_manager_;
+         std::map<std::string,std::string> file_sources_;
     };
 
     void load_map(Map & map, std::string const& filename, bool strict)
@@ -142,6 +144,38 @@ namespace mapnik
                 {
 
                     parse_layer(map, v.second );
+                }
+                else if (v.first == "FileSource")
+                {
+                  std::string name = get_attr<string>( v.second, "name");
+                  std::string value = get_own<string>( v.second, "");
+                  file_sources_[name] = value;
+                }
+                else if (v.first == "Datasource")
+                {
+                    std::string name = get_attr(v.second, "name", string("Unnamed"));
+                    parameters params;
+                    ptree::const_iterator paramIter = v.second.begin();
+                    ptree::const_iterator endParam = v.second.end();
+                    for (; paramIter != endParam; ++paramIter)
+                    {
+                        ptree const& param = paramIter->second;
+
+                        if (paramIter->first == "Parameter")
+                        {
+                            std::string name = get_attr<string>(param, "name");
+                            std::string value = get_own<string>( param,
+                                    "datasource parameter");
+                            params[name] = value; 
+                        }
+                        else if( paramIter->first != "<xmlattr>" )
+                        {
+                            throw config_error(std::string("Unknown child node in ") +
+                                    "'Datasource'. Expected 'Parameter' but got '" +
+                                    paramIter->first + "'");
+                        }
+                    }
+                    datasource_templates_[name] = params;
                 }
                 else if (v.first != "<xmlcomment>" &&
                         v.first != "<xmlattr>")
@@ -233,6 +267,14 @@ namespace mapnik
                 else if (child.first == "Datasource")
                 {
                     parameters params;
+                    optional<std::string> base = get_opt_attr<std::string>( child.second, "base" );
+                    if( base )
+                    {
+                       std::map<std::string,parameters>::const_iterator base_itr = datasource_templates_.find(*base);
+                       if (base_itr!=datasource_templates_.end())
+                          params = base_itr->second;
+                    }   
+                    
                     ptree::const_iterator paramIter = child.second.begin();
                     ptree::const_iterator endParam = child.second.end();
                     for (; paramIter != endParam; ++paramIter)
@@ -246,7 +288,7 @@ namespace mapnik
                                     "datasource parameter");
                             params[name] = value; 
                         }
-                        else
+                        else if( paramIter->first != "<xmlattr>" )
                         {
                             throw config_error(std::string("Unknown child node in ") +
                                     "'Datasource'. Expected 'Parameter' but got '" +
@@ -400,6 +442,7 @@ namespace mapnik
         try 
         {
             optional<std::string> file =  get_opt_attr<string>(sym, "file");
+            optional<std::string> base =  get_opt_attr<string>(sym, "base");
             optional<std::string> type =  get_opt_attr<string>(sym, "type"); 
             optional<boolean> allow_overlap = 
                 get_opt_attr<boolean>(sym, "allow_overlap");
@@ -411,12 +454,20 @@ namespace mapnik
             {
                 try
                 {
-                    point_symbolizer symbol(*file,*type,*width,*height);
-                    if (allow_overlap)
-                    {
-                        symbol.set_allow_overlap( * allow_overlap );
-                    }
-                    rule.append(symbol);
+                   if( base )
+                   {
+                      std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+                      if (itr!=file_sources_.end())
+                      {
+                         *file = itr->second + "/" + *file;
+                      }
+                   }
+                   point_symbolizer symbol(*file,*type,*width,*height);
+                   if (allow_overlap)
+                   {
+                      symbol.set_allow_overlap( * allow_overlap );
+                   }
+                   rule.append(symbol);
                 }
                 catch (ImageReaderException const & ex )
                 {
@@ -460,13 +511,22 @@ namespace mapnik
         try 
         {
             std::string file = get_attr<string>(sym, "file");
+            optional<std::string> base = get_opt_attr<string>(sym, "base");
             std::string type = get_attr<string>(sym, "type"); 
             unsigned width = get_attr<unsigned>(sym, "width");
             unsigned height = get_attr<unsigned>(sym, "height");
 
             try
             {
-                rule.append(line_pattern_symbolizer(file,type,width,height));
+               if( base )
+               {
+                   std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+                   if (itr!=file_sources_.end())
+                   {
+                      file = itr->second + "/" + file;
+                   }
+               }
+               rule.append(line_pattern_symbolizer(file,type,width,height));
             }
             catch (ImageReaderException const & ex )
             {
@@ -495,12 +555,21 @@ namespace mapnik
         try 
         {
             std::string file = get_attr<string>(sym, "file");
+            optional<std::string> base = get_opt_attr<string>(sym, "base");
             std::string type = get_attr<string>(sym, "type"); 
             unsigned width = get_attr<unsigned>(sym, "width");
             unsigned height = get_attr<unsigned>(sym, "height");
 
             try
             {
+                if( base )
+                {
+                   std::map<std::string,std::string>::iterator itr = file_sources_.find(*base);
+                   if (itr!=file_sources_.end())
+                   {
+                      file = itr->second + "/" + file;
+                   }
+                }
                 rule.append(polygon_pattern_symbolizer(file,type,width,height)); 
             }
             catch (ImageReaderException const & ex )
@@ -631,15 +700,24 @@ namespace mapnik
             Color fill = get_attr(sym, "fill", Color(0,0,0));
 
             std::string image_file = get_attr<string>(sym, "file");
+            optional<std::string> base = get_opt_attr<string>(sym, "base");
             std::string type = get_attr<string>(sym, "type");
             unsigned width =  get_attr<unsigned>(sym, "width");
             unsigned height =  get_attr<unsigned>(sym, "height");
 
             try
             {
+                if( base )
+                {
+                    std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+                    if (itr!=file_sources_.end())
+                    {
+                       image_file = itr->second + "/" + image_file;
+                    }
+                }
                 shield_symbolizer shield_symbol(name,face_name,size,fill,
-                        image_file,type,width,height);
-
+                                                image_file,type,width,height);
+                
                 // minimum distance between labels
                 optional<unsigned> min_distance = 
                     get_opt_attr<unsigned>(sym, "min_distance");
@@ -651,18 +729,18 @@ namespace mapnik
             }
             catch (ImageReaderException const & ex )
             {
-                    string msg("Failed to load image file '" + image_file +
+               string msg("Failed to load image file '" + image_file +
                             "': " + ex.what());
-                if (strict_)
-                {
-                    throw config_error(msg);
-                }
-                else
-                {
-                    clog << "### WARNING: " << msg << endl;
-                }
+               if (strict_)
+               {
+                  throw config_error(msg);
+               }
+               else
+               {
+                  clog << "### WARNING: " << msg << endl;
+               }
             }
-
+            
         }
         catch (const config_error & ex) 
         {

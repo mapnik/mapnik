@@ -51,8 +51,12 @@ raster_datasource::raster_datasource(const parameters& params)
 {
  
    boost::optional<std::string> file=params.get<std::string>("file");
+   boost::optional<std::string> base=params.get<std::string>("base");
    if (!file) throw datasource_exception("missing <file> parameter ");
-   filename_ = *file;
+   if (base)
+      filename_ = *base + "/" + *file;
+   else
+      filename_ = *file;
    format_=*params.get<std::string>("format","tiff");
    boost::optional<double> lox = params.get<double>("lox");
    boost::optional<double> loy = params.get<double>("loy");
