@@ -37,7 +37,7 @@ namespace mapnik {
       : image_(new ImageData32(width,height)),
         image_filename_( file )
    {
-      std::auto_ptr<ImageReader> reader(get_image_reader(type,file));
+      std::auto_ptr<ImageReader> reader(get_image_reader(file,type));
       if (reader.get())
          reader->read(0,0,*image_);		
    }
@@ -50,11 +50,12 @@ namespace mapnik {
    {
       return image_;
    }
-   void symbolizer_with_image::set_image(boost::shared_ptr<ImageData32> symbol) 
+   void symbolizer_with_image::set_image(boost::shared_ptr<ImageData32> image) 
    {
-      image_ = symbol;
+      image_ = image;
    }
-   const std::string & symbolizer_with_image::get_filename() const
+   
+   std::string const& symbolizer_with_image::get_filename() const
    {
       return image_filename_;
    }
