@@ -37,6 +37,22 @@
 
 namespace mapnik {
     
+    class ImageWriterException : public std::exception
+    {
+    private:
+        std::string message_;
+    public:
+        ImageWriterException(const std::string& message) 
+            : message_(message) {}
+
+        ~ImageWriterException() throw() {}
+
+        virtual const char* what() const throw()
+        {
+            return message_.c_str();
+        }
+    };
+
    template <typename T>
    MAPNIK_DECL void save_to_file(std::string const& filename,
                                  std::string const& type,

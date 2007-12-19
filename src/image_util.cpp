@@ -55,6 +55,7 @@ namespace mapnik
          if (type=="png")  save_as_png(file,image);
          else if (type == "png256") save_as_png256(file,image);
          else if (type=="jpeg") save_as_jpeg(file,85,image);
+         else throw ImageWriterException("unknown file type: " + type);
       } 
    }
    
