@@ -30,7 +30,7 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 libraries = ['agg'] + env['LIBS']
 
 if env['PLATFORM'] == 'Darwin':
-    linkflags = ' '
+    linkflags = '-Wl,-install_name,libmapnik.dylib'
 else: # Linux and others
     linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
 
