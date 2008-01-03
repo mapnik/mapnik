@@ -59,9 +59,16 @@ opts.Add(EnumOption('XMLPARSER','Set xml parser ','tinyxml', ['tinyxml','spirit'
 
 env = Environment(ENV=os.environ, options=opts)
 
+def color_print(color,text):
+    # 1 - red
+    # 2 - green
+    # 3 - yellow
+    # 4 - blue
+    print "\033[9%sm%s\033[0m" % (color,text)
+
 env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
 env['PLATFORM'] = platform.uname()[0]
-print "Building on %s ..." % env['PLATFORM']
+color_print (4,"Building on %s ..." % env['PLATFORM'])
 Help(opts.GenerateHelpText(env))
 
 conf = Configure(env)
@@ -133,12 +140,12 @@ BOOST_LIBSHEADERS = [
 
 for libinfo in C_LIBSHEADERS:
     if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C') and libinfo[2]:
-        print 'Could not find header or shared library for %s, exiting!' % libinfo[0]
+        color_print (1,'Could not find header or shared library for %s, exiting!' % libinfo[0])
         Exit(1)
 
 for libinfo in CXX_LIBSHEADERS:
     if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C++') and libinfo[2]:
-        print 'Could not find header or shared library for %s, exiting!' % libinfo[0]
+        color_print(1,'Could not find header or shared library for %s, exiting!' % libinfo[0])
         Exit(1)
 
 if len(env['BOOST_TOOLKIT']):
@@ -149,10 +156,10 @@ else:
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
     if  env['THREADING'] == 'multi' :
         if not conf.CheckLibWithHeader('boost_%s%s-mt' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++') and libinfo[2] :
-            print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
+            color_print(1,'Could not find header or shared library for boost %s, exiting!' % libinfo[0])
             Exit(1)
     elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :
-        print 'Could not find header or shared library for boost %s, exiting!' % libinfo[0]
+        color_print(1,'Could not find header or shared library for boost %s, exiting!' % libinfo[0])
         Exit(1)    
   
 Export('env')
@@ -198,21 +205,21 @@ if 'gigabase' in inputplugins and 'gigabase_r' in env['LIBS']:
 
 if 'python' in env['BINDINGS']:
     if not os.access(env['PYTHON'], os.X_OK):
-        print "Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON']
+        color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
         Exit(1)
 
     env['PYTHON_PREFIX'] = os.popen("%s -c 'import sys; print sys.prefix'" % env['PYTHON']).read().strip()
     env['PYTHON_VERSION'] = os.popen("%s -c 'import sys; print sys.version'" % env['PYTHON']).read()[0:3]
 
-    print 'Bindings Python version... %s' % env['PYTHON_VERSION']
+    color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
 
     majver, minver = env['PYTHON_VERSION'].split('.')
 
     if (int(majver), int(minver)) < (2, 2):
-        print "Python version 2.2 or greater required"
+        color_print(1,"Python version 2.2 or greater required")
         Exit(1)
 
-    print 'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_PREFIX'])
+    color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_PREFIX']))
 
     SConscript('bindings/python/SConscript')
 

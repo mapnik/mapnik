@@ -30,16 +30,17 @@ int main( int argc, char **argv )
    using mapnik::datasource_cache;
    using mapnik::freetype_engine;
   
-   datasource_cache::instance()->register_datasources("/usr/local/lib/mapnik/input");
+   datasource_cache::instance()->register_datasources("/opt/mapnik/lib/mapnik/input");
    
-   freetype_engine::register_font("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
-   freetype_engine::register_font("/usr/local/lib/mapnik/fonts/DejaVuSans-Bold.ttf");
-   freetype_engine::register_font("/usr/local/lib/mapnik/fonts/DejaVuSansMono.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-Bold.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono.ttf");
     
         
    QApplication app( argc, argv ); 
    MainWindow window;
    window.show();
+   if (argc > 1) window.open(argv[1]);
    if (argc == 3)
    {
       QStringList list = QString(argv[2]).split(",");
@@ -50,20 +51,9 @@ int main( int argc, char **argv )
          double y0 = list[1].toDouble(&ok);
          double x1 = list[2].toDouble(&ok);
          double y1 = list[3].toDouble(&ok);
-         if (ok)
-         {
-            try 
-            {
-               mapnik::projection prj("+proj=merc +datum=WGS84");
-               prj.forward(x0,y0);
-               prj.forward(x1,y1);
-               window.set_default_extent(x0,y0,x1,y1);
-            }
-            catch (...) {}
-         }
+         if (ok) window.set_default_extent(x0,y0,x1,y1); 
       }
    }
    
-   if (argc > 1) window.open(argv[1]);
    return app.exec(); 
 }

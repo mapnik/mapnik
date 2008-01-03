@@ -42,11 +42,7 @@ class MainWindow : public QMainWindow
    public:
       MainWindow();
       virtual ~MainWindow();
-      inline void set_default_extent(double x0,double y0,double x1, double y1)
-      {
-         default_extent_=mapnik::Envelope<double>(x0,y0,x1,y1);
-      }
-      
+      void set_default_extent(double x0,double y0,double x1, double y1);
    protected:
       void closeEvent(QCloseEvent* event);
 public slots:

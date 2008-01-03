@@ -371,3 +371,23 @@ void MainWindow::createToolBars()
 }
 
 
+
+void MainWindow::set_default_extent(double x0,double y0, double x1, double y1)
+{
+    try 
+    {
+       boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
+       if (map_ptr) 
+       {
+          mapnik::projection prj(map_ptr->srs());
+          prj.forward(x0,y0);
+          prj.forward(x1,y1);
+          default_extent_=mapnik::Envelope<double>(x0,y0,x1,y1);
+          mapWidget_->zoomToBox(default_extent_);
+          std::cout << "SET DEFAULT EXT\n";
+       }
+    }
+    catch (...) {}
+    
+    
+}
