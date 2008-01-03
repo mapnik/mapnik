@@ -199,7 +199,7 @@ namespace mapnik {
     template <typename T>
     struct name_trait
     {
-        static const char * name()
+        static std::string name()
         {
             return "<unknown>";
         }
@@ -214,7 +214,7 @@ namespace mapnik {
     template <> \
     struct name_trait<type> \
     { \
-        static const char * name() { return "type " type_name; } \
+        static std::string name() { return std::string("type ") + type_name; } \
     };
 
 #define DEFINE_NAME_TRAIT( type ) \
@@ -229,11 +229,11 @@ namespace mapnik {
     DEFINE_NAME_TRAIT_WITH_NAME( Color, "color" );
 
     template <typename ENUM, int MAX>
-    struct name_trait< enumeration<ENUM, MAX> >
+    struct name_trait< mapnik::enumeration<ENUM, MAX> >
     {
         typedef enumeration<ENUM, MAX> Enum;
 
-        static const char * name()
+        static std::string name()
         {
             std::string value_list("one of [");
             for (unsigned i = 0; i < Enum::MAX; ++i)
@@ -243,7 +243,7 @@ namespace mapnik {
             }
             value_list += "]";
             
-            return value_list.c_str();
+            return value_list;
         }
     };
 
