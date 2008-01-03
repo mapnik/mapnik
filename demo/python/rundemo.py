@@ -303,13 +303,18 @@ m.layers.append(popplaces_lyr)
 
 m.zoom_to_box(Envelope(1405120.04127408,-247003.813399447,1706357.31328276,-25098.593149577))
 
-# Render two maps, one PNG, one JPEG.
+# Render two maps, two PNGs, one JPEG.
+im = Image(m.width,m.height)
+render(m, im)
 
-render_to_file(m, 'demo.png', 'png256') # save to palette based (max 256 colours) png 
-render_to_file(m, 'demo.jpg', 'jpeg')
+# Save image to file
+save_to_file('demo.png', 'png',im) # true-colour RGBA
+save_to_file('demo256.png', 'png256',im) # save to palette based (max 256 colours) png 
+save_to_file('demo.jpg', 'jpeg',im)
 
-print """\n\nTwo maps have been rendered in the current directory:
+print """\n\nThree maps have been rendered in the current directory:
 - demo.jpg
 - demo.png
+- demo256.png
 
 Have a look!\n\n"""
