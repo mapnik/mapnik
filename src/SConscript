@@ -68,6 +68,7 @@ source = Split(
     stroke.cpp
     symbolizer.cpp
     arrow.cpp
+    unicode.cpp
     """
     )
 
