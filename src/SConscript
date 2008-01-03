@@ -21,8 +21,11 @@
 
 
 import glob
+import os
 
 Import('env')
+
+ABI_VERSION=[0,5,0]
 
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
@@ -32,7 +35,7 @@ libraries = ['agg'] + env['LIBS']
 if env['PLATFORM'] == 'Darwin':
     linkflags = '-Wl,-install_name,libmapnik.dylib'
 else: # Linux and others
-    linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so'
+    linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1])) 
 
 source = Split(
     """
@@ -88,7 +91,30 @@ elif env['XMLPARSER'] == 'libxml2':
 
 
 mapnik = env.SharedLibrary('mapnik', source, LIBS=libraries, LINKFLAGS=linkflags)
+if env['PLATFORM'] != 'Darwin':
+    # Symlink command, only works if both files are in same directory
+    def symlink(env, target, source):
+        trgt = str(target[0])
+        src = str(source[0])
 
-env.Alias(target='install', source=env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'], mapnik))
+        if os.path.islink(trgt) or os.path.exists(trgt):
+            os.remove(trgt)
+        os.symlink(os.path.basename(src), trgt)
+
+    major, minor, micro = ABI_VERSION
+    
+    soFile = "%s.%d.%d.%d" % (os.path.basename(str(mapnik[0])), major, minor, micro)
+    libDir = install_prefix + '/' + env['LIBDIR_SCHEMA']
+    env.Alias(target='install', source=env.InstallAs(target=os.path.join(libDir, soFile), source=mapnik))
+    # Install symlinks
+    link1 = env.Command(os.path.join(libDir, "%s.%d.%d" % (os.path.basename(str(mapnik[0])),major, minor)), 
+                        os.path.join(libDir, soFile), symlink)
+    env.Alias(target='install', source=link1)
+    link2 = env.Command(os.path.join(libDir, os.path.basename(str(mapnik[0]))), 
+                        os.path.join(libDir, "%s.%d.%d" % (os.path.basename(str(mapnik[0])),major, minor)), symlink)
+    env.Alias(target='install', source=link2)
+else:
+    env.Alias(target='install', source=env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'], mapnik))
+
 includes = glob.glob('../include/mapnik/*.hpp')
 env.Alias(target='install', source=env.Install(install_prefix+'/include/mapnik', includes))
