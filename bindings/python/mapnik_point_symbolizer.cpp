@@ -33,6 +33,8 @@ void export_point_symbolizer()
                              init<>("Default Point Symbolizer - 4x4 black square"))
         .def (init<std::string const&,
               std::string const&,unsigned,unsigned>("TODO"))
+        .add_property("allow_overlap",
+              &point_symbolizer::get_allow_overlap,
+              &point_symbolizer::set_allow_overlap)
         ;
-    
 }
