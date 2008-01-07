@@ -54,11 +54,14 @@ feature_ptr raster_featureset<LookupPolicy>::next()
       feature_ptr feature(new Feature(++id_));
       try
       {         
-         std::auto_ptr<ImageReader> reader(mapnik::get_image_reader(curIter_->format(),curIter_->file()));
+         std::auto_ptr<ImageReader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
+         
+         std::cout << "READER = " << curIter_->format() << " " << curIter_->file() << "\n";
          if (reader.get())
          {
             int image_width=reader->width();
             int image_height=reader->height();
+            
             if (image_width>0 && image_height>0)
             {
                CoordTransform t(image_width,image_height,curIter_->envelope(),0,0);
