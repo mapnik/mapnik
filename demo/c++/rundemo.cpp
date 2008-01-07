@@ -42,11 +42,7 @@ int main ( int argc , char** argv)
     std::cout << " running demo ... \n";
     using namespace mapnik;
     datasource_cache::instance()->register_datasources(argv[1]); 
-<<<<<<< .mine
-    freetype_engine::instance()->register_font("../lib/mapnik/fonts/DejaVuSans.ttf");
-=======
-    freetype_engine::instance()->register_font("/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf");
->>>>>>> .r549
+    freetype_engine::register_font("/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf");
     
     Map m(800,600);
     m.set_background(color_factory::from_string("white"));
