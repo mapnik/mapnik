@@ -41,28 +41,16 @@ namespace mapnik {
 
             virtual const char * what() const throw()
             {
-                std::ostringstream os;
-                os << what_;
-                if ( ! context_.empty() )
-                {
-                    os << std::endl << context_;
-                }
-                os << ".";
-                return os.str().c_str();    
+                return what_.c_str();    
             }
 
             void append_context(const std::string & ctx) const
             {
-                if ( ! context_.empty() )
-                {
-                    context_ += " ";
-                }
-                context_ += ctx;
+                what_ += " " + ctx;
             }
 
         protected:
-            std::string what_;
-            mutable std::string context_;
+            mutable std::string what_;
     };
 }
 
