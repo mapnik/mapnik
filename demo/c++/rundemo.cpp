@@ -21,6 +21,9 @@
  *****************************************************************************/
 // $Id$
 
+// define before any includes
+#define BOOST_SPIRIT_THREADSAFE
+
 #include <mapnik/map.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -32,19 +35,21 @@
 
 #include <iostream>
 
+
 int main ( int argc , char** argv)
 {    
     if (argc != 2)
     {
-        std::cout << "usage: ./rundemo <plugins_dir>\n";
+        std::cout << "usage: ./rundemo <mapnik_install_dir>\n";
         return EXIT_SUCCESS;
     }
     
     using namespace mapnik;
     try {
         std::cout << " running demo ... \n";
-        datasource_cache::instance()->register_datasources(argv[1]); 
-        freetype_engine::register_font("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
+        std::string mapnik_dir(argv[1]);
+        datasource_cache::instance()->register_datasources(mapnik_dir + "/lib/mapnik/input/"); 
+        freetype_engine::register_font(mapnik_dir + "/lib/mapnik/fonts/DejaVuSans.ttf");
         
         Map m(800,600);
         m.set_background(color_factory::from_string("white"));
@@ -241,12 +246,12 @@ int main ( int argc , char** argv)
         
         save_to_file<ImageData32>("demo.jpg","jpeg",buf.data());
         save_to_file<ImageData32>("demo.png","png",buf.data());
-        
-        std::cout << "Two maps have been rendered in the current directory:\n"
-            "- demo.jpg\n"
-            "- demo.png\n"
-            "Have a look!\n";
-        
+        save_to_file<ImageData32>("demo256.png","png256",buf.data());
+        std::cout << "Three maps have been rendered in the current directory:\n"
+           "- demo.jpg\n"
+           "- demo.png\n"
+           "- demo256.png\n"
+           "Have a look!\n";
     }
     catch ( const mapnik::config_error & ex )
     {
