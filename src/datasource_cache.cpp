@@ -92,12 +92,14 @@ namespace mapnik
            throw std::runtime_error(string("Cannot load symbols: ") + 
                    lt_dlerror());
        }
-       std::cout << "size = " << params.size() << "\n";
+#ifdef MAPNIK_DEBUG
+       std::clog << "size = " << params.size() << "\n";
        parameters::const_iterator i = params.begin();
        for (;i!=params.end();++i)
        {
-          std::cout << i->first << "=" << i->second << "\n";  
+          std::clog << i->first << "=" << i->second << "\n";  
        }
+#endif
        ds=datasource_ptr(create_datasource(params), datasource_deleter());
 
 #ifdef MAPNIK_DEBUG
