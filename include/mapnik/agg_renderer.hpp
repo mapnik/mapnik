@@ -89,7 +89,7 @@ namespace mapnik {
           unsigned width_;
           unsigned height_;
           agg::rendering_buffer buf_;
-          agg::pixfmt_rgba32 pixf_;
+          agg::pixfmt_rgba32_plain pixf_;
           CoordTransform t_;
           freetype_engine font_engine_;
           face_manager<freetype_engine> font_manager_;

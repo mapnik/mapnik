@@ -160,7 +160,7 @@ namespace mapnik
                                  proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-      typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	    
       Color const& fill_ = sym.get_fill();
@@ -203,7 +203,7 @@ namespace mapnik
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       typedef  coord_transform3<CoordTransform,geometry2d> path_type_roof;
-      typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
       
       ren_base renb(pixf_);
@@ -306,7 +306,7 @@ namespace mapnik
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {   
-      typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base; 
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
       typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
@@ -496,7 +496,7 @@ namespace mapnik
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
-      typedef agg::renderer_base<agg::pixfmt_rgba32> renderer_base;
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> renderer_base;
       typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
       typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
       
@@ -526,7 +526,7 @@ namespace mapnik
                                  proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
-      typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base; 
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base; 
       typedef agg::wrap_mode_repeat wrap_x_type;
       typedef agg::wrap_mode_repeat wrap_y_type;
       typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
@@ -601,7 +601,7 @@ namespace mapnik
                                  proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-      typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;    
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
       arrow arrow_;
       //double k = ::pow(1.2, 0.7);
