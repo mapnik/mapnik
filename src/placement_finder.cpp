@@ -400,28 +400,31 @@ namespace mapnik
       int orientation = 0;
       double displacement = boost::tuples::get<1>(p.displacement_); // displace by dy
       double target_distance = spacing;
-      while (!agg::is_stop(cmd = shape_path.vertex(&new_x,&new_y)))
+      
+      while (!agg::is_stop(cmd = shape_path.vertex(&new_x,&new_y))) //For each node in the shape
       {
-         if (first || agg::is_move_to(cmd)) 
+         if (first || agg::is_move_to(cmd)) //Don't do any processing if it is the first node
          {
             first = false;
          }
          else 
          {
+            //Add the length of this segment to the total we have saved up
             double dx = new_x - old_x;
             double dy = new_y - old_y;
             double segment_length = ::sqrt(dx*dx + dy*dy);
             distance += segment_length;
             
+            //While we have enough distance to place text in
             while (distance > target_distance)
             {
-               // got initial segment
+               //Record details for the start of the string placement
                std::auto_ptr<placement_element> current_placement(new placement_element);
                current_placement->starting_x = new_x - dx*(distance - target_distance)/segment_length;
                current_placement->starting_y = new_y - dy*(distance - target_distance)/segment_length;
                angle = atan2(-dy, dx);
                orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
-               distance -= target_distance;
+               distance -= target_distance; //Consume the spacing gap we have used up
                // now find the placement of each character starting from our initial segment
                // determined above
                double last_angle = angle; 
@@ -445,7 +448,8 @@ namespace mapnik
                      while (distance <= ci.width) 
                      {
                         old_x = new_x;
-                        old_y = new_y;  
+                        old_y = new_y;
+                        //Stop if we run off the end of the shape
                         if (agg::is_stop(shape_path.vertex(&new_x,&new_y))) 
                         {
                            status = false;
