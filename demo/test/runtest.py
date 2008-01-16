@@ -38,6 +38,7 @@ road_rule = Rule()
 road_stroke = Stroke(Color('white'), 12)
 road_stroke.line_cap = line_cap.ROUND_CAP
 road_stroke.line_join = line_join.ROUND_JOIN
+#road_rule.filter = Filter("[CLASS] = 'STRAIGHT'")
 road_rule.symbols.append(LineSymbolizer(road_stroke))
 road_style.rules.append(road_rule);
 
@@ -46,12 +47,14 @@ text_symbolizer = TextSymbolizer('NAME', 'DejaVu Sans Book', 10, Color('black'))
 text_symbolizer.label_placement=label_placement.LINE_PLACEMENT
 text_symbolizer.minimum_distance = 0
 #text_symbolizer.max_char_angle_delta = 40
+#text_symbolizer.force_odd_labels = 1
 text_symbolizer.label_spacing = 80
 text_symbolizer.label_position_tolerance = 5
 text_symbolizer.avoid_edges = 0
 text_symbolizer.halo_fill = Color('yellow')
 text_symbolizer.halo_radius = 1
 road_rule = Rule()
+#road_rule.filter = Filter("[CLASS] = 'STRAIGHT'")
 road_rule.symbols.append(text_symbolizer)
 road_style.rules.append(road_rule)
 

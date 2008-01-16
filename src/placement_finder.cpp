@@ -393,6 +393,7 @@ namespace mapnik
       double distance = 0.0;
       std::pair<double, double> string_dimensions = p.info.get_dimensions();
       
+      double string_width = string_dimensions.first;
       double string_height = string_dimensions.second;
       double spacing = p.label_spacing;
       
@@ -401,6 +402,24 @@ namespace mapnik
       double displacement = boost::tuples::get<1>(p.displacement_); // displace by dy
       double target_distance = spacing;
       
+      //Calculate a target_distance that will place the labels centered evenly rather than offset from the start of the linestring
+      const double total_distance = get_total_distance(shape_path);
+      shape_path.rewind(0);
+      
+      if (total_distance < string_width) //Can't place any strings
+        return;
+      
+      int num_labels = static_cast<int> (floor(total_distance / (spacing + string_width)));
+      if (p.force_odd_labels && num_labels%2 == 0)
+         num_labels--;
+      if (num_labels <= 0)
+         num_labels = 1;
+      
+      //Now we know how many labels we are going to place, recalculate the spacing so that they will get placed evenly
+      spacing = (total_distance - (num_labels * string_width)) / num_labels;
+      target_distance = spacing / 2;
+      
+
       while (!agg::is_stop(cmd = shape_path.vertex(&new_x,&new_y))) //For each node in the shape
       {
          if (first || agg::is_move_to(cmd)) //Don't do any processing if it is the first node
@@ -425,6 +444,7 @@ namespace mapnik
                angle = atan2(-dy, dx);
                orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
                distance -= target_distance; //Consume the spacing gap we have used up
+               target_distance = spacing; //Need to reset the target_distance as it is spacing/2 for the first label.
                // now find the placement of each character starting from our initial segment
                // determined above
                double last_angle = angle; 
