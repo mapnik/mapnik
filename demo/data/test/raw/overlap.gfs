@@ -1,7 +1,7 @@
 <GMLFeatureClassList>
   <GMLFeatureClass>
-    <Name>roadsmall</Name>
-    <ElementPath>roadsmall</ElementPath>
+    <Name>overlap</Name>
+    <ElementPath>overlap</ElementPath>
     <DatasetSpecificInfo>
       <FeatureCount>1</FeatureCount>
       <ExtentXMin>1.00000</ExtentXMin>

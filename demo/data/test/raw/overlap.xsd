@@ -9,8 +9,8 @@
     </xs:extension>
   </xs:complexContent>
 </xs:complexType>
-<xs:element name="road" type="ogr:road_Type" substitutionGroup="gml:_Feature"/>
-<xs:complexType name="road_Type">
+<xs:element name="overlap" type="ogr:overlap_Type" substitutionGroup="gml:_Feature"/>
+<xs:complexType name="overlap_Type">
   <xs:complexContent>
     <xs:extension base="gml:AbstractFeatureType">
       <xs:sequence>

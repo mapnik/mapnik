@@ -60,7 +60,7 @@ road_style.rules.append(road_rule)
 
 
 road_layer = Layer('road')
-road_layer.datasource = Shapefile(file='../data/test/road')
+road_layer.datasource = Shapefile(file='../data/test/textspacing')
 
 m.append_style('road', road_style)
 road_layer.styles.append('road')
