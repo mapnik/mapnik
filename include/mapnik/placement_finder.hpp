@@ -100,12 +100,6 @@ namespace mapnik
          
       private:
          template <typename T>
-         bool find_placement_follow(placement & p, T & path);
-         
-         template <typename T>
-         bool find_placement_horizontal(placement & p, T & path);
-         
-         template <typename T>
          bool build_path_follow(placement & p, double target_distance, T & path);
          
          template <typename T>
