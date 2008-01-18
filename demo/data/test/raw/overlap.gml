@@ -89,5 +89,39 @@
     </ogr:overlap>
 
 
+    <ogr:overlap fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>8.8,-6 8.8,-8</gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Long Road Name</ogr:NAME>
+      <ogr:CLASS>BENDOVER</ogr:CLASS>
+    </ogr:overlap>
+    <ogr:overlap fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>8,-6 8,-7 10,-7 10,-8</gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Long Road Name</ogr:NAME>
+      <ogr:CLASS>BENDUNDER</ogr:CLASS>
+    </ogr:overlap>
+
+    <ogr:overlap fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>12.2,-6 12.2,-8</gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Long Road Name</ogr:NAME>
+      <ogr:CLASS>BENDOVER</ogr:CLASS>
+    </ogr:overlap>
+    <ogr:overlap fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>11,-6 11,-7 13,-7 13,-8</gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Long Road Name</ogr:NAME>
+      <ogr:CLASS>BENDUNDER</ogr:CLASS>
+    </ogr:overlap>
+
+    <ogr:overlap fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>12.2,-3.5 12.2,-5.5</gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Long Road Name</ogr:NAME>
+      <ogr:CLASS>BENDOVER</ogr:CLASS>
+    </ogr:overlap>
+    <ogr:overlap fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>11,-4.5 13,-4.5</gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Long Road Name</ogr:NAME>
+      <ogr:CLASS>BENDUNDER</ogr:CLASS>
+    </ogr:overlap>
+
+
   </gml:featureMember>
 </ogr:FeatureCollection>
