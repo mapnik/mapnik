@@ -8,3 +8,8 @@ rm -f overlap.shp overlap.shx overlap.dbf
 ogr2ogr -f "ESRI Shapefile" overlap raw/overlap.gml
 mv overlap/* ./
 rmdir overlap
+
+rm -f displacement.shp displacement.shx displacement.dbf
+ogr2ogr -f "ESRI Shapefile" displacement raw/displacement.gml
+mv displacement/* ./
+rmdir displacement
