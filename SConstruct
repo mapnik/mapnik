@@ -111,7 +111,7 @@ if SUNCC:
 
 # Adding the prerequisite library directories to the include path for
 # compiling and the library path for linking, respectively.
-for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PROJ', 'GDAL',):
+for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PGSQL', 'PROJ', 'GDAL',):
     inc_path = env['%s_INCLUDES' % prereq]
     lib_path = env['%s_LIBS' % prereq]
     uniq_add(env, 'CPPPATH', inc_path)
