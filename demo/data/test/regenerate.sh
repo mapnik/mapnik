@@ -13,3 +13,8 @@ rm -f displacement.shp displacement.shx displacement.dbf
 ogr2ogr -f "ESRI Shapefile" displacement raw/displacement.gml
 mv displacement/* ./
 rmdir displacement
+
+rm -f charplacement.shp charplacement.shx charplacement.dbf
+ogr2ogr -f "ESRI Shapefile" charplacement raw/charplacement.gml
+mv charplacement/* ./
+rmdir charplacement

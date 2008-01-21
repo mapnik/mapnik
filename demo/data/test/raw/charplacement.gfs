@@ -1,0 +1,25 @@
+<GMLFeatureClassList>
+  <GMLFeatureClass>
+    <Name>charplacement</Name>
+    <ElementPath>charplacement</ElementPath>
+    <DatasetSpecificInfo>
+      <FeatureCount>1</FeatureCount>
+      <ExtentXMin>1.00000</ExtentXMin>
+      <ExtentXMax>2.00000</ExtentXMax>
+      <ExtentYMin>1.00000</ExtentYMin>
+      <ExtentYMax>5.00000</ExtentYMax>
+    </DatasetSpecificInfo>
+    <PropertyDefn>
+      <Name>NAME</Name>
+      <ElementPath>NAME</ElementPath>
+      <Type>String</Type>
+      <Width>0</Width>
+    </PropertyDefn>
+    <PropertyDefn>
+      <Name>CLASS</Name>
+      <ElementPath>CLASS</ElementPath>
+      <Type>String</Type>
+      <Width>0</Width>
+    </PropertyDefn>
+  </GMLFeatureClass>
+</GMLFeatureClassList>
