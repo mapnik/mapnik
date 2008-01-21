@@ -85,8 +85,7 @@ namespace mapnik
    class placement_finder : boost::noncopyable
    {
       public:
-         //e is the dimensions of the map, buffer is the buffer used for collision detection.
-         placement_finder(DetectorT & detector,Envelope<double> const& e);
+         placement_finder(DetectorT & detector);
          
          template <typename T>
          void find_placements(placement & p, T & path);

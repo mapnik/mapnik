@@ -452,8 +452,7 @@ namespace mapnik
             string_info info(text);
             ren.get_string_info(&info);
             
-            Envelope<double> box(0,0,width_,height_);
-            placement_finder<label_collision_detector4> finder(detector_,box);
+            placement_finder<label_collision_detector4> finder(detector_);
             
             unsigned num_geom = feature.num_geometries();
             for (unsigned i=0;i<num_geom;++i)
@@ -654,9 +653,8 @@ namespace mapnik
             ren.set_fill(fill);
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
-            
-            Envelope<double> box(0,0,width_,height_);
-            placement_finder<label_collision_detector4> finder(detector_,box);
+           
+            placement_finder<label_collision_detector4> finder(detector_);
            
             string_info info(text);
             ren.get_string_info(&info);
@@ -672,7 +670,7 @@ namespace mapnik
                   //placement<agg::conv_clip_polyline<path_type> > 
                   //   text_placement(&info, &t_, &prj_trans, clipped_path, sym);         
                   //placement_finder<agg::conv_clip_polyline<path_type>, 
-                  //   label_collision_detector4> finder(detector_,box);
+                  //   label_collision_detector4> finder(detector_);
                   placement text_placement(info,sym);  
                   if (sym.get_label_placement() == POINT_PLACEMENT) 
                   {

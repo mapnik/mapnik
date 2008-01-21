@@ -136,9 +136,9 @@ namespace mapnik
    }
    
    template <typename DetectorT>
-   placement_finder<DetectorT>::placement_finder(DetectorT & detector,Envelope<double> const& e)
+   placement_finder<DetectorT>::placement_finder(DetectorT & detector)
       : detector_(detector),
-        dimensions_(e)
+        dimensions_(detector_.extent())
    {
    }
 
