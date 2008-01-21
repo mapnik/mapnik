@@ -94,7 +94,8 @@ namespace mapnik
             if (checkBounds(x,y))
             {
                 unsigned rgba0 = data_(x,y);	
-                unsigned a1 = t;//(rgba1 >> 24) & 0xff;
+                unsigned a1 = (rgba1 >> 24) & 0xff; //t;
+                a1 = (t*a1) / 255;
                 if (a1 == 0) return;
                 unsigned r1 = rgba1 & 0xff;
                 unsigned g1 = (rgba1 >> 8 ) & 0xff;
@@ -193,7 +194,6 @@ namespace mapnik
         {
             Envelope<int> ext0(0,0,width_,height_);   
             Envelope<int> ext1(x0,y0,x0 + data.width(),y0 + data.height());
-            unsigned a1 = int(opacity * 255);
             
             if (ext0.intersects(ext1))
             {	                		
@@ -206,7 +206,8 @@ namespace mapnik
                    {
                       unsigned rgba0 = row_to[x];
                       unsigned rgba1 = row_from[x-x0];
-                      if (((rgba1 >> 24) & 255)== 0) continue;
+                      unsigned a1 = int( ((rgba1 >> 24) & 0xff) * opacity );
+                      if (a1 == 0) continue;
                       unsigned r1 = rgba1 & 0xff;
                       unsigned g1 = (rgba1 >> 8 ) & 0xff;
                       unsigned b1 = (rgba1 >> 16) & 0xff;
