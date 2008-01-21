@@ -39,6 +39,8 @@ import os.path
 
 cplusplus = __import__('c++', globals(), locals(), [])
 
+compilers = ['CC', 'sunCC']
+
 # use the package installer tool lslpp to figure out where cppc and what
 # version of it is installed
 def get_cppc(env):
@@ -69,16 +71,11 @@ def generate(env):
     cplusplus.generate(env)
 
     env['CXX'] = cxx
-    env['SHCXX'] = shcxx
+    #env['SHCXX'] = shcxx
     env['CXXVERSION'] = version
     env['SHCXXFLAGS']   = SCons.Util.CLVar('$CXXFLAGS -KPIC')
     env['SHOBJPREFIX']  = 'so_'
     env['SHOBJSUFFIX']  = '.o'
     
 def exists(env):
-    path, cxx, shcxx, version = get_cppc(env)
-    if path and cxx:
-        cppc = os.path.join(path, cxx)
-        if os.path.exists(cppc):
-            return cppc
-    return None
+    return env.Detect(compilers)

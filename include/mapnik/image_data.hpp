@@ -28,6 +28,12 @@
 #include <mapnik/octree.hpp>
 #include <cassert>
 
+// When using Sun's C++ compiler, use the `std` namespace to get memcpy, memset routines.
+#ifdef __SUNPRO_CC
+using std::memcpy;
+using std::memset;
+#endif
+
 namespace mapnik 
 {
     template <class T> class ImageData

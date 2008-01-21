@@ -26,6 +26,15 @@
 #include <mapnik/ellipsoid.hpp>
 #include <cmath>
 
+// When using Sun's C++ compiler, use the `std` namespace to get the math routines.
+#ifdef __SUNPRO_CC
+using std::atan2;
+using std::cos;
+using std::pow;
+using std::sin;
+using std::sqrt;
+#endif
+
 namespace mapnik {
     
     static const double deg2rad = 0.0174532925199432958;

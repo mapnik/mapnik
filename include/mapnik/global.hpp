@@ -27,11 +27,15 @@
 
 #include <boost/cstdint.hpp>
 
+#ifdef __SUNPRO_CC
+// Foo
+#else
 using boost::int32_t;
 using boost::uint32_t;
 using boost::int16_t;
 using boost::uint16_t;
 using boost::uint8_t;
+#endif
 
 namespace mapnik
 {

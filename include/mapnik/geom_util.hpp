@@ -32,6 +32,12 @@
 // stl
 #include <cmath>
 
+// When using Sun's C++ compiler, use the `std` namespace to get the math routines.
+#ifdef __SUNPRO_CC
+using std::fabs;
+using std::sqrt;
+#endif
+
 namespace mapnik
 {
     template <typename T>

@@ -251,7 +251,7 @@ class MAPNIK_DECL enumeration {
                     std::cerr << "### FATAL: Not enough strings for enum "
                               << our_name_ << " defined in file '" << filename 
                               << "' at line " << line_no << std::endl;
-                    exit(1);
+		    std::exit(1);
                 }
             }
             if ( std::string("") != our_strings_[THE_MAX])
@@ -260,7 +260,7 @@ class MAPNIK_DECL enumeration {
                           << " defined in file '" << filename << "' at line " << line_no
                           << " has too many items or is not terminated with an "
                           << "empty string." << std::endl;
-                exit(1);
+		std::exit(1);
             }
             return true;
         }

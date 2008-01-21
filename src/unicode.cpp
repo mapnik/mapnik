@@ -179,7 +179,7 @@ namespace mapnik {
       size_t inleft = input.size();
       std::wstring output(inleft,0);
       size_t outleft = inleft * sizeof(wchar_t);
-#ifdef DARWIN
+#if (!defined(OSX_LEOPARD) && defined(DARWIN)) || defined(SUNOS)
       const char * in = input.c_str();
 #else
       char * in = const_cast<char*>(input.data());

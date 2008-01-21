@@ -27,7 +27,12 @@ if platform.uname()[4] == 'x86_64':
 else:
     LIBDIR_SCHEMA='lib'
 
+#### SCons build options and initial setup ####
+
+# All of the following options may be modified at the command-line, for example:
+# `python scons/scons PREFIX=/opt`
 opts = Options('config.py')
+opts.Add('CXX', 'The C++ compiler to use (defaults to g++).', 'g++')
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include'))
 opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA))
@@ -73,29 +78,44 @@ Help(opts.GenerateHelpText(env))
 
 conf = Configure(env)
 
+#### Libraries and headers dependency checks ####
+
+# Helper function for uniquely appending paths to a SCons path listing.
+def uniq_add(env, key, val):
+    if not val in env[key]: env[key].append(val)
+
 # Libraries and headers dependency checks
-
 env['CPPPATH'] = ['#agg/include', '#tinyxml', '#include', '#']
-
-for path in [env['BOOST_INCLUDES'],
-             env['PNG_INCLUDES'],
-             env['JPEG_INCLUDES'],
-             env['TIFF_INCLUDES'],
-             env['PGSQL_INCLUDES'],
-             env['PROJ_INCLUDES'],
-             env['GDAL_INCLUDES']] :
-    if path not in env['CPPPATH']: env['CPPPATH'].append(path)
-
 env['LIBPATH'] = ['#agg', '#src']
 
-for path in [env['BOOST_LIBS'],
-             env['PNG_LIBS'],
-             env['JPEG_LIBS'],
-             env['TIFF_LIBS'],
-             env['PGSQL_LIBS'],
-             env['PROJ_LIBS'],
-             env['GDAL_LIBS']]:
-    if path not in env['LIBPATH']: env['LIBPATH'].append(path)
+# Solaris & Sun Studio settings (the `SUNCC` flag will only be
+# set if the `CXX` option begins with `CC`)
+SOLARIS = env['PLATFORM'] == 'SunOS'
+SUNCC = SOLARIS and env['CXX'].startswith('CC')
+
+# For Solaris include paths (e.g., for freetype2, ltdl, etc.).
+if SOLARIS:
+    blastwave_dir = '/opt/csw/%s'
+    uniq_add(env, 'CPPPATH', blastwave_dir % 'include')
+    uniq_add(env, 'LIBPATH', blastwave_dir % LIBDIR_SCHEMA)
+
+# If the Sun Studio C++ compiler (`CC`) is used instead of GCC.
+if SUNCC:
+    env['CC'] = 'cc'
+    # To be compatible w/Boost everything needs to be compiled
+    # with the `-library=stlport4` flag (which needs to come
+    # before the `-o` flag).
+    env['CXX'] = 'CC -library=stlport4'
+    if env['THREADING'] == 'multi':
+        env['CXXFLAGS'] = ['-mt']
+
+# Adding the prerequisite library directories to the include path for
+# compiling and the library path for linking, respectively.
+for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PROJ', 'GDAL',):
+    inc_path = env['%s_INCLUDES' % prereq]
+    lib_path = env['%s_LIBS' % prereq]
+    uniq_add(env, 'CPPPATH', inc_path)
+    uniq_add(env, 'LIBPATH', lib_path)
     
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
 
@@ -121,6 +141,7 @@ C_LIBSHEADERS = [
     ['z', 'zlib.h', True],
     ['jpeg', ['stdio.h', 'jpeglib.h'], True],
     ['proj', 'proj_api.h', True],
+    ['iconv', 'iconv.h', True],
     ['pq', 'libpq-fe.h', False]
 ]
 
@@ -168,23 +189,20 @@ inputplugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
 bindings = [ binding.strip() for binding in Split(env['BINDINGS'])]
 
+#### Build instructions & settings ####
 
 # Build agg first, doesn't need anything special
-
 SConscript('agg/SConscript')
 
 # Build the core library
-
 SConscript('src/SConscript')
 
 # Build shapeindex and remove its dependency from the LIBS
-
 if 'boost_program_options%s-mt' % env['BOOST_APPEND'] in env['LIBS']:
     SConscript('utils/shapeindex/SConscript')
     env['LIBS'].remove('boost_program_options%s-mt' % env['BOOST_APPEND'])
 
 # Build the input plug-ins
-
 if 'postgis' in inputplugins and 'pq' in env['LIBS']:
     SConscript('plugins/input/postgis/SConscript')
     env['LIBS'].remove('pq')
@@ -201,8 +219,7 @@ if 'gdal' in inputplugins and 'gdal' in env['LIBS']:
 if 'gigabase' in inputplugins and 'gigabase_r' in env['LIBS']:
     SConscript('plugins/input/gigabase/SConscript')
 
-# Check out the Python situation
-
+# Build the Python bindings.
 if 'python' in env['BINDINGS']:
     if not os.access(env['PYTHON'], os.X_OK):
         color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
@@ -222,22 +239,44 @@ if 'python' in env['BINDINGS']:
     color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_PREFIX']))
 
     SConscript('bindings/python/SConscript')
-
     
 env = conf.Finish()
 
-# Setup the c++ args for our own codebase
-if env['PLATFORM'] == 'Darwin': pthread = ''
-else: pthread = '-pthread'
+# Common C++ flags.
+common_cxx_flags = '-D%s -DBOOST_SPIRIT_THREADSAFE ' % env['PLATFORM'].upper()
 
-common_cxx_flags = '-ansi -Wall %s -ftemplate-depth-100  -D%s -DBOOST_SPIRIT_THREADSAFE ' % (pthread, env['PLATFORM'].upper());
-
-if env['DEBUG']:
-    env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline -g -DDEBUG -DMAPNIK_DEBUG')
+# Mac OSX (Darwin) special settings
+if env['PLATFORM'] == 'Darwin':
+    pthread = ''
+    # Getting the macintosh version number, sticking as a compiler macro
+    # for Leopard -- needed because different workarounds are needed than
+    # for Tiger.
+    if platform.mac_ver()[0].startswith('10.5'):
+        common_cxx_flags += '-DOSX_LEOPARD '
 else:
-    env.Append(CXXFLAGS = common_cxx_flags + '-O2 -finline-functions -Wno-inline -DNDEBUG')
+    pthread = '-pthread'
 
-# Install some free default fonts
+# Common debugging flags.
+debug_flags  = '-g -DDEBUG -DMAPNIK_DEBUG'
+ndebug_flags = '-DNDEBUG'
+
+# Customizing the C++ compiler flags depending on: 
+#  (1) the C++ compiler used; and
+#  (2) whether debug binaries are requested.
+if SUNCC:
+    if env['DEBUG']:
+        env.Append(CXXFLAGS = common_cxx_flags + debug_flags)
+    else:
+        env.Append(CXXFLAGS = common_cxx_flags + '-O %s' % ndebug_flags)
+else:
+    # Common flags for GCC.
+    gcc_cxx_flags = '-ansi -Wall %s -ftemplate-depth-100 %s' % (pthread, common_cxx_flags)
+
+    if env['DEBUG']:
+        env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
+    else:
+        env.Append(CXXFLAGS = gcc_cxx_flags + '-O2 -finline-functions -Wno-inline %s' % ndebug_flags)
+
 
 SConscript('fonts/SConscript')
 

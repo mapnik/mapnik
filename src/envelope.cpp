@@ -48,7 +48,10 @@ namespace mapnik
     }
 
     template <typename T>
-    inline bool Envelope<T>::operator==(const Envelope<T>& other) const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    bool Envelope<T>::operator==(const Envelope<T>& other) const
     {
         return minx_==other.minx_ &&
             miny_==other.miny_ &&
@@ -57,43 +60,64 @@ namespace mapnik
     }
 
     template <typename T>
-    inline T Envelope<T>::minx() const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    T Envelope<T>::minx() const
     {
         return minx_;
     }
 
     template <typename T>
-    inline T Envelope<T>::maxx() const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    T Envelope<T>::maxx() const
     {
         return maxx_;
     }
 
     template <typename T>
-    inline T Envelope<T>::miny() const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    T Envelope<T>::miny() const
     {
         return miny_;
     }
 
     template <typename T>
-    inline T Envelope<T>::maxy() const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    T Envelope<T>::maxy() const
     {
         return maxy_;
     }
 
     template <typename T>
-    inline T Envelope<T>::width() const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    T Envelope<T>::width() const
     {
         return maxx_-minx_;
     }
 
     template <typename T>
-    inline T Envelope<T>::height() const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    T Envelope<T>::height() const
     {
         return maxy_-miny_;
     }
 
     template <typename T>
-    inline void Envelope<T>::width(T w)
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    void Envelope<T>::width(T w)
     {
         T cx=center().x;
         minx_=static_cast<T>(cx-w*0.5);
@@ -101,7 +125,10 @@ namespace mapnik
     }
 
     template <typename T>
-    inline void Envelope<T>::height(T h)
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    void Envelope<T>::height(T h)
     {
         T cy=center().y;
         miny_=static_cast<T>(cy-h*0.5);
@@ -109,20 +136,29 @@ namespace mapnik
     }
 
     template <typename T>
-    inline coord<T,2> Envelope<T>::center() const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    coord<T,2> Envelope<T>::center() const
     {
         return coord<T,2>(static_cast<T>(0.5*(minx_+maxx_)),
                           static_cast<T>(0.5*(miny_+maxy_)));
     }
 
     template <typename T>
-    inline void Envelope<T>::expand_to_include(const coord<T,2>& c)
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    void Envelope<T>::expand_to_include(const coord<T,2>& c)
     {
         expand_to_include(c.x,c.y);
     }
 
     template <typename T>
-    inline void Envelope<T>::expand_to_include(T x,T y)
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    void Envelope<T>::expand_to_include(T x,T y)
     {
         if (x<minx_) minx_=x;
         if (x>maxx_) maxx_=x;
@@ -140,19 +176,28 @@ namespace mapnik
     }
 
     template <typename T>
-    inline bool Envelope<T>::contains(const coord<T,2> &c) const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    bool Envelope<T>::contains(const coord<T,2> &c) const
     {
         return contains(c.x,c.y);
     }
 
     template <typename T>
-    inline bool Envelope<T>::contains(T x,T y) const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    bool Envelope<T>::contains(T x,T y) const
     {
         return x>=minx_ && x<=maxx_ && y>=miny_ && y<=maxy_;
     }
 
     template <typename T>
-    inline bool Envelope<T>::contains(const Envelope<T> &other) const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    bool Envelope<T>::contains(const Envelope<T> &other) const
     {
         return other.minx_>=minx_ &&
             other.maxx_<=maxx_ &&
@@ -161,26 +206,38 @@ namespace mapnik
     }
 
     template <typename T>
-    inline bool Envelope<T>::intersects(const coord<T,2> &c) const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    bool Envelope<T>::intersects(const coord<T,2> &c) const
     {
         return intersects(c.x,c.y);
     }
 
     template <typename T>
-    inline bool Envelope<T>::intersects(T x,T y) const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    bool Envelope<T>::intersects(T x,T y) const
     {
         return !(x>maxx_ || x<minx_ || y>maxy_ || y<miny_);
     }
 
     template <typename T>
-    inline bool Envelope<T>::intersects(const Envelope<T> &other) const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    bool Envelope<T>::intersects(const Envelope<T> &other) const
     {
         return !(other.minx_>maxx_ || other.maxx_<minx_ ||
                  other.miny_>maxy_ || other.maxy_<miny_);
     }
 
     template <typename T>
-    inline Envelope<T> Envelope<T>::intersect(const EnvelopeType& other) const
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    Envelope<T> Envelope<T>::intersect(const EnvelopeType& other) const
     {
 
         T x0=std::max(minx_,other.minx_);
@@ -193,7 +250,10 @@ namespace mapnik
     }
 
     template <typename T>
-    inline void Envelope<T>::re_center(T cx,T cy)
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    void Envelope<T>::re_center(T cx,T cy)
     {
         T dx=cx-center().x;
         T dy=cy-center().y;
@@ -204,7 +264,10 @@ namespace mapnik
     }
 
     template <typename T>
-    inline void Envelope<T>::init(T x0,T y0,T x1,T y1)
+#if !defined(__SUNPRO_CC)
+    inline
+#endif
+    void Envelope<T>::init(T x0,T y0,T x1,T y1)
     {
         if (x0<x1)
         {

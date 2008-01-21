@@ -906,7 +906,12 @@ namespace boost { namespace property_tree
         // Make sure that no pointer other than char_type * is allowed
         BOOST_STATIC_ASSERT((is_pointer<Type>::value == false ||
                              is_same<char_type, typename remove_const<typename remove_pointer<Type>::type>::type>::value == true));
+#ifdef __SUNPRO_CC
+	// For the Sun Studio compiler the declaration needs to be within a statement.
+	if (typename traits_type::template inserter<Type>()(m_impl->m_data, value, loc)){}
+#else
         typename traits_type::template inserter<Type>()(m_impl->m_data, value, loc);
+#endif
     }
 
     // Put value in data of child ptree (custom path separator)

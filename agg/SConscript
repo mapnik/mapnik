@@ -21,4 +21,7 @@ import glob
 
 Import('env')
 
-env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O3 -fPIC -DNDEBUG')
+if env['PLATFORM'] == 'SunOS':
+    env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O -KPIC -DNDEBUG')
+else:
+    env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O3 -fPIC -DNDEBUG')

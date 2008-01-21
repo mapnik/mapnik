@@ -35,6 +35,8 @@ libraries = ['agg'] + env['LIBS']
 if env['PLATFORM'] == 'Darwin':
     libraries.append('iconv')
     linkflags = '-Wl,-install_name,libmapnik.dylib'
+elif env['PLATFORM'] == 'SunOS' and env['CXX'].startswith('CC'):
+    linkflags = '-R. -h libmapnik.so'
 else: # Linux and others
     linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1])) 
 
