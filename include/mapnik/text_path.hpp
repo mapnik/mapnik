@@ -148,8 +148,13 @@ namespace mapnik
          {
             nodes_[itr_++].vertex(c, x, y, angle);
          }
-        
-         int num_nodes()
+         
+         void rewind()
+         {
+            itr_ = 0;
+         }
+         
+         int num_nodes() const
          {
             return nodes_.size();
          }

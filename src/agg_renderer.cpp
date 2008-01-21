@@ -682,13 +682,9 @@ namespace mapnik
                      t_.forward(&label_x,&label_y);
                      finder.find_point_placement(text_placement,label_x,label_y);
                   }
-                  else if (sym.get_label_spacing() > 0 )
+                  else //LINE_PLACEMENT
                   {
-                     finder.find_placements_with_spacing<path_type>(text_placement,path);
-                  }
-                  else
-                  {
-                     finder.find_placements<path_type>(text_placement,path);
+                     finder.find_line_placement<path_type>(text_placement,path);
                   }
                   
                   for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)

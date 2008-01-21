@@ -94,7 +94,7 @@ namespace mapnik
          void find_point_placement(placement & p, double, double);
          
          template <typename T>
-         void find_placements_with_spacing(placement & p, T & path);
+         void find_line_placement(placement & p, T & path);
          
          void clear();
          
@@ -106,6 +106,20 @@ namespace mapnik
          bool build_path_horizontal(placement & p, double target_distance, T & path);
          
          void get_ideal_placements(placement & p, double distance, std::vector<double>&);
+         
+         //Helpers for find_line_placement
+         
+         ///Returns a possible placement on the given line, does not test for collisions
+         //index: index of the node the current line ends on
+         //distance: distance along the given index that the placement should start at, this includes the offset,
+         //          as such it may be > or < the length of the current line, so this must be checked for
+         //orientation: 1/-1 depending which way up the string ends up being, set in get_placement_offset
+         std::auto_ptr<placement_element> get_placement_offset(placement & p, const std::vector<vertex2d> & path_positions, const std::vector<double> & path_distances, int & orientation, unsigned index, double distance);
+         
+         ///Tests wether the given placement_element be placed without a collision
+         // Returns true if it can
+         // NOTE: This edits p.envelopes so it can be used afterwards (you must clear it otherwise)
+         bool test_placement(placement & p, const std::auto_ptr<placement_element> & current_placement, const int & orientation);
          
          void update_detector(placement & p);
          
