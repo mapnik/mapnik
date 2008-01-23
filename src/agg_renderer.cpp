@@ -695,6 +695,11 @@ namespace mapnik
                }
             }  
          }
+         else
+         {
+            std::cerr << "### FATAL: Unable to find specified font face '" << sym.get_face_name() << "'" << std::endl;
+            std::exit(1);
+         }
       }
    }
    template class agg_renderer<Image32>;
