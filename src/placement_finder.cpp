@@ -590,8 +590,6 @@ namespace mapnik
       
       unsigned upside_down_char_count = 0; //Count of characters that are placed upside down.
       
-      std::clog << "Starting @ " << current_placement->starting_x << ", " << current_placement->starting_y << " @ " << angle << " OR: " << orientation << std::endl;
-
       for (unsigned i = 0; i < p.info.num_characters(); ++i)
       {
          character_info ci;
@@ -698,7 +696,6 @@ namespace mapnik
          
          if (render_angle > M_PI/2 && render_angle < 1.5*M_PI)
             upside_down_char_count++;
-         std::clog << "Rendering angle: " << render_angle << std::endl;
       }
       
       //If we placed too many characters upside down 
@@ -713,7 +710,7 @@ namespace mapnik
          else
          {
             //Otherwise we have failed to find a placement
-            std::clog << "FAIL: Double upside-down!" << std::endl;
+            //std::clog << "FAIL: Double upside-down!" << std::endl;
             return std::auto_ptr<placement_element>(NULL);
          }
       }
