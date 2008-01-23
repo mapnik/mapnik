@@ -28,6 +28,7 @@
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/markers_converter.hpp>
 #include <mapnik/arrow.hpp>
+#include <mapnik/config_error.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -697,8 +698,7 @@ namespace mapnik
          }
          else
          {
-            std::cerr << "### FATAL: Unable to find specified font face '" << sym.get_face_name() << "'" << std::endl;
-            std::exit(1);
+            throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
          }
       }
    }
