@@ -141,7 +141,7 @@ C_LIBSHEADERS = [
     ['z', 'zlib.h', True],
     ['jpeg', ['stdio.h', 'jpeglib.h'], True],
     ['proj', 'proj_api.h', True],
-    ['iconv', 'iconv.h', True],
+    ['iconv', 'iconv.h', False],
     ['pq', 'libpq-fe.h', False]
 ]
 
