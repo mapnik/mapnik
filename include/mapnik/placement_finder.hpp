@@ -112,7 +112,10 @@ namespace mapnik
          //index: index of the node the current line ends on
          //distance: distance along the given index that the placement should start at, this includes the offset,
          //          as such it may be > or < the length of the current line, so this must be checked for
-         //orientation: 1/-1 depending which way up the string ends up being, set in get_placement_offset
+         //orientation: if set to != 0 the placement will be attempted with the given orientation
+         //             otherwise it will autodetect the orientation.
+         //             If >= 50% of the characters end up upside down, it will be retried the other way.
+         //             RETURN: 1/-1 depending which way up the string ends up being.
          std::auto_ptr<placement_element> get_placement_offset(placement & p, const std::vector<vertex2d> & path_positions, const std::vector<double> & path_distances, int & orientation, unsigned index, double distance);
          
          ///Tests wether the given placement_element be placed without a collision

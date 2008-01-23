@@ -562,6 +562,10 @@ namespace mapnik
       if (index >= path_distances.size())
          return std::auto_ptr<placement_element>(NULL);
       
+      //Keep track of the initial index,distance incase we need to re-call get_placement_offset
+      const unsigned initial_index = index;
+      const double initial_distance = distance;
+      
       std::auto_ptr<placement_element> current_placement(new placement_element);
 
       double string_height = p.info.get_dimensions().second;
@@ -578,10 +582,16 @@ namespace mapnik
       
       current_placement->starting_x = old_x + dx*distance/segment_length;
       current_placement->starting_y = old_y + dy*distance/segment_length;
-      
       double angle = atan2(-dy, dx);
-      orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
       
+      bool orientation_forced = (orientation != 0); //Wether the orientation was set by the caller
+      if (!orientation_forced)
+         orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
+      
+      unsigned upside_down_char_count = 0; //Count of characters that are placed upside down.
+      
+      std::clog << "Starting @ " << current_placement->starting_x << ", " << current_placement->starting_y << " @ " << angle << " OR: " << orientation << std::endl;
+
       for (unsigned i = 0; i < p.info.num_characters(); ++i)
       {
          character_info ci;
@@ -679,6 +689,33 @@ namespace mapnik
          current_placement->add_node(c,render_x - current_placement->starting_x, 
                                        -render_y + current_placement->starting_y, 
                                        render_angle);
+         
+         //Normalise to 0 <= angle < 2PI
+         while (render_angle >= 2*M_PI)
+            render_angle -= 2*M_PI;
+         while (render_angle < 0)
+            render_angle += 2*M_PI;
+         
+         if (render_angle > M_PI/2 && render_angle < 1.5*M_PI)
+            upside_down_char_count++;
+         std::clog << "Rendering angle: " << render_angle << std::endl;
+      }
+      
+      //If we placed too many characters upside down 
+      if (upside_down_char_count >= p.info.num_characters()/2)
+      {
+         //if we auto-detected the orientation then retry with the opposite orientation
+         if (!orientation_forced)
+         {
+            orientation = -orientation;
+            current_placement = get_placement_offset(p, path_positions, path_distances, orientation, initial_index, initial_distance);
+         }
+         else
+         {
+            //Otherwise we have failed to find a placement
+            std::clog << "FAIL: Double upside-down!" << std::endl;
+            return std::auto_ptr<placement_element>(NULL);
+         }
       }
       
       return current_placement;
