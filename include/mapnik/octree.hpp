@@ -28,7 +28,7 @@
 #include <boost/utility.hpp>
 #include <vector>
 #include <iostream>
-#include <set>
+#include <deque>
 
 namespace mapnik {
 	
@@ -60,8 +60,7 @@ namespace mapnik {
          struct node 
          {
                node ()
-                  :  next_node_(0),
-                     reds(0),
+                  :  reds(0),
                      greens(0),
                      blues(0),
                      count(0),
@@ -77,30 +76,16 @@ namespace mapnik {
                   }
                }	
 
-               bool is_leaf() const { return count != 0; }	
-               node * children_[8];
-               node * next_node_;	
+               bool is_leaf() const { return count == 0; }	
+               node * children_[8];	
                unsigned reds;
                unsigned greens;
                unsigned blues;
                unsigned count;	
                uint8_t  index;					
          };
-         struct node_cmp
-         {
-               bool operator() ( const node * lhs,const node* rhs ) const
-               {
-                  unsigned left_total=0;
-                  unsigned right_total=0;
-                  for (unsigned i=0; i<8;++i)
-                  {
-                     if (lhs->children_[i]) left_total+=lhs->children_[i]->count;
-                     if (rhs->children_[i]) right_total+=rhs->children_[i]->count;
-                  }
-                  return lhs > rhs;
-               }
-         };
-         std::set<node*,node_cmp> reducible_[InsertPolicy::MAX_LEVELS];
+         
+         std::deque<node*> reducible_[InsertPolicy::MAX_LEVELS];
          unsigned max_colors_;
          unsigned colors_;
          unsigned leaf_level_; 
@@ -128,18 +113,19 @@ namespace mapnik {
                   cur_node->blues  += data.b;
                   cur_node->count  += 1;
                   if (cur_node->count == 1) ++colors_;
-                  if (colors_ >= max_colors_ - 1) 
-                  { 
+                  
+                  while ( colors_ >= max_colors_ - 1)
                      reduce();   
-                  }
+                  
                   break;
                }
                
                unsigned idx = InsertPolicy::index_from_level(level,data);
                if (cur_node->children_[idx] == 0) {
                   cur_node->children_[idx] = new node();
-                  if (level < leaf_level_-1) {
-                       reducible_[level+1].insert(cur_node->children_[idx]);
+                  if (level < leaf_level_-1) 
+                  {
+                     reducible_[level+1].push_back(cur_node->children_[idx]);
                   }
                }
                cur_node = cur_node->children_[idx];
@@ -175,7 +161,7 @@ namespace mapnik {
 
             if (leaf_level_ < 1) return;
             
-            typename std::set<node*,node_cmp>::iterator pos = reducible_[leaf_level_-1].begin();
+            typename std::deque<node*>::iterator pos = reducible_[leaf_level_-1].begin();
             if (pos == reducible_[leaf_level_-1].end()) return; 
             
             node * cur_node = *pos;
