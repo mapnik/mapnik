@@ -120,6 +120,17 @@ namespace mapnik
          // NOTE: This edits p.envelopes so it can be used afterwards (you must clear it otherwise)
          bool test_placement(placement & p, const std::auto_ptr<placement_element> & current_placement, const int & orientation);
          
+         ///Does a line-circle intersect calculation
+         // NOTE: Follow the strict pre conditions
+         // Pre Conditions: x1,y1 is within radius distance of cx,cy. x2,y2 is outside radius distance of cx,cy
+         //                 This means there is exactly one intersect point
+         // Result is returned in ix, iy
+         void find_line_circle_intersection(
+            const double &cx, const double &cy, const double &radius, 
+            const double &x1, const double &y1, const double &x2, const double &y2, 
+            double &ix, double &iy);
+         
+         
          void update_detector(placement & p);
          
          DetectorT & detector_;

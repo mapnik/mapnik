@@ -582,30 +582,42 @@ namespace mapnik
       double angle = atan2(-dy, dx);
       orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
       
-      double last_angle = angle; 
       for (unsigned i = 0; i < p.info.num_characters(); ++i)
       {
          character_info ci;
          unsigned c;
          
+         double last_character_angle = angle;
+         
          // grab the next character according to the orientation
          ci = orientation > 0 ? p.info.at(i) : p.info.at(p.info.num_characters() - i - 1);
          c = ci.character;
 
-         double angle_delta = 0;
+         //Coordinates this character will start at
+         double start_x = old_x + dx*distance/segment_length;
+         double start_y = old_y + dy*distance/segment_length;
+         //Coordinates this character ends at, calculated below
+         double end_x = 0;
+         double end_y = 0;
          
-         // if the distance remaining in this segment is less than the character width
-         // move to the next segment
-         if (segment_length - distance  <= ci.width) 
+         if (segment_length - distance  >= ci.width) 
          {
-            last_angle = angle;
-            while (segment_length - distance  <= ci.width)
+            //if the distance remaining in this segment is enough, we just go further along the segment
+            distance += ci.width;
+            
+            end_x = old_x + dx*distance/segment_length;
+            end_y = old_y + dy*distance/segment_length;
+         }
+         else
+         {
+            //If there isn't enough distance left on this segment
+            // then we need to search untill we find the line segment that ends further than ci.width away
+            do
             {
                old_x = new_x;
                old_y = new_y;
-               //Stop if we run off the end of the shape
                index++;
-               if (index >= path_positions.size()) 
+               if (index >= path_positions.size()) //Bail out if we run off the end of the shape
                {
                   //std::clog << "FAIL: Out of space" << std::endl;
                   return std::auto_ptr<placement_element>(NULL);
@@ -615,44 +627,48 @@ namespace mapnik
                dx = new_x - old_x;
                dy = new_y - old_y;
                
-               angle = atan2(-dy, dx );
-               distance -= segment_length;
-               //^^This lets the distance go negative, which means that the character will be drawn between 2 (or more) lines
-               //Unfortunately this causes badly drawn text for many cases.
-               //   We could use it as a weight for the angles and set the angle and position of the character to be between the 2 lines.
-               
                segment_length = path_distances[index];
             }
-            // since our rendering angle has changed then check against our
-            // max allowable angle change.
-            angle_delta = last_angle - angle;
-            // normalise between -180 and 180
-            while (angle_delta > M_PI)
-               angle_delta -= 2*M_PI;
-            while (angle_delta < -M_PI)
-               angle_delta += 2*M_PI;
-            if (p.max_char_angle_delta > 0 && 
-                  fabs(angle_delta) > p.max_char_angle_delta*(M_PI/180))
-            {
-               //std::clog << "FAIL: Too Bendy!" << std::endl;
-               return std::auto_ptr<placement_element>(NULL);
-            }
+            while (sqrt(pow(start_x - new_x, 2) + pow(start_y - new_y, 2)) < ci.width); //Distance from start_ to new_
+            
+            //Calculate the position to place the end of the character on
+            find_line_circle_intersection(
+               start_x, start_y, ci.width, 
+               old_x, old_y, new_x, new_y, 
+               end_x, end_y); //results are stored in end_x, end_y
+
+            //Need to calculate distance on the new segment
+            distance = sqrt(pow(old_x - end_x, 2) + pow(old_y - end_y, 2));
+         }
+         
+         //Calculate angle from the start of the character to the end based on start_/end_ position
+         angle = atan2(start_y-end_y, end_x-start_x);
+         
+         //Test last_character_angle vs angle
+         // since our rendering angle has changed then check against our
+         // max allowable angle change.
+         double angle_delta = last_character_angle - angle;
+         // normalise between -180 and 180
+         while (angle_delta > M_PI)
+            angle_delta -= 2*M_PI;
+         while (angle_delta < -M_PI)
+            angle_delta += 2*M_PI;
+         if (p.max_char_angle_delta > 0 && 
+               fabs(angle_delta) > p.max_char_angle_delta*(M_PI/180))
+         {
+            //std::clog << "FAIL: Too Bendy!" << std::endl;
+            return std::auto_ptr<placement_element>(NULL);
          }
          
          double render_angle = angle;
          
-         double x = old_x + distance*cos(angle);
-         double y = old_y - distance*sin(angle);
+         double render_x = start_x;
+         double render_y = start_y;
          
          //Center the text on the line
-         x -= (((double)string_height/2.0) - 1.0)*cos(render_angle+M_PI/2);
-         y += (((double)string_height/2.0) - 1.0)*sin(render_angle+M_PI/2);
+         render_x -= (((double)string_height/2.0) - 1.0)*cos(render_angle+M_PI/2);
+         render_y += (((double)string_height/2.0) - 1.0)*sin(render_angle+M_PI/2);
          
-         distance += ci.width;
-
-         double render_x = x;
-         double render_y = y;
-
          if (orientation < 0)
          {
             // rotate in place
@@ -735,6 +751,53 @@ namespace mapnik
       return status;
    }
    
+   template <typename DetectorT>
+   void placement_finder<DetectorT>::find_line_circle_intersection(
+      const double &cx, const double &cy, const double &radius, 
+      const double &x1, const double &y1, const double &x2, const double &y2, 
+      double &ix, double &iy)
+   {
+      double dx = x2 - x1;
+      double dy = y2 - y1;
+   
+      double A = dx * dx + dy * dy;
+      double B = 2 * (dx * (x1 - cx) + dy * (y1 - cy));
+      double C = (x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy) - radius * radius;
+   
+      double det = B * B - 4 * A * C;
+      if (A <= 0.0000001 || det < 0)
+      {
+         //Should never happen
+         //' No real solutions.
+         return;
+      }
+      else if (det == 0)
+      {
+         //Could potentially happen....
+         //One solution.
+         double t = -B / (2 * A);
+         ix = x1 + t * dx;
+         iy = y1 + t * dy;
+         return;
+      }
+      else
+      {
+         //Two solutions.
+         
+         //Always use the 1st one
+         //We only really have one solution here, as we know the line segment will start in the circle and end outside
+         double t = (-B + sqrt(det)) / (2 * A);
+         ix = x1 + t * dx;
+         iy = y1 + t * dy;
+         
+         //t = (-B - sqrt(det)) / (2 * A);
+         //ix = x1 + t * dx;
+         //iy = y1 + t * dy;
+         
+         return;
+      }
+   }
+
    template <typename DetectorT>
    void placement_finder<DetectorT>::update_detector(placement & p)
    {
