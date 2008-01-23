@@ -125,5 +125,49 @@
       <ogr:CLASS>VERTCURVE</ogr:CLASS>
     </ogr:displacement>
 
+    <ogr:displacement fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>
+        9.2,-4 9,-3 10,-3 10.2,-4
+      </gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Road Name</ogr:NAME>
+      <ogr:CLASS>PARALLELOGRAM</ogr:CLASS>
+    </ogr:displacement>
+    <ogr:displacement fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>
+        9,-2 9.2,-1 10.2,-1 10,-2
+      </gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Road Name</ogr:NAME>
+      <ogr:CLASS>PARALLELOGRAM</ogr:CLASS>
+    </ogr:displacement>
+
+    <ogr:displacement fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>
+        11,-1 11,-2 12,-2
+      </gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Road Name</ogr:NAME>
+      <ogr:CLASS>CORNER</ogr:CLASS>
+    </ogr:displacement>
+    <ogr:displacement fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>
+        11,-4 12,-4 12,-3
+      </gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Road Name</ogr:NAME>
+      <ogr:CLASS>CORNER</ogr:CLASS>
+    </ogr:displacement>
+    <ogr:displacement fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>
+        12.5,-1 13.5,-1 13.5,-2
+      </gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Road Name</ogr:NAME>
+      <ogr:CLASS>CORNER</ogr:CLASS>
+    </ogr:displacement>
+    <ogr:displacement fid="F0">
+      <ogr:geometryProperty><gml:LineString><gml:coordinates>
+        12.5,-4 12.5,-3 13.5,-3
+      </gml:coordinates></gml:LineString></ogr:geometryProperty>
+      <ogr:NAME>Road Name</ogr:NAME>
+      <ogr:CLASS>CORNER</ogr:CLASS>
+    </ogr:displacement>
+
   </gml:featureMember>
 </ogr:FeatureCollection>
