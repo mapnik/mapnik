@@ -20,6 +20,8 @@
 # $Id$
 
 import glob
+import re
+import os
 
 Import('env')
 
@@ -53,7 +55,9 @@ inputpluginspath = mapniklibpath + '/input'
 fontscollectionpath = mapniklibpath + '/fonts'
 """
 
-file('mapnik/paths.py','w').write(paths % (env['PREFIX'] + '/'+env['LIBDIR_SCHEMA']+'/mapnik',))
+exp =  r"%s{2,}" % os.sep
+mapnik_plugins_dir  = re.sub(exp,os.sep,env['DESTDIR'] + '/' + env['PREFIX'] + '/'+env['LIBDIR_SCHEMA']+'/mapnik')
+file('mapnik/paths.py','w').write(paths % (mapnik_plugins_dir,))
 
 pymapnik = glob.glob('mapnik/*.py')
 env.Alias(target='install', source=env.Install(install_prefix+'/mapnik', pymapnik))
