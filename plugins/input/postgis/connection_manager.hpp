@@ -68,11 +68,11 @@ public:
       inline std::string connection_string() const
       {
          std::string connect_str;
-         if (host_) connect_str += "host=" + *host_;
-         if (port_) connect_str += " port=" + *port_;
-         if (dbname_) connect_str += " dbname=" + *dbname_;
-         if (user_) connect_str += " user=" + *user_;
-         if (pass_) connect_str += " password=" + *pass_;
+         if (host_   && (*host_).size()) connect_str += "host=" + *host_;
+         if (port_   && (*port_).size()) connect_str += " port=" + *port_;
+         if (dbname_ && (*dbname_).size()) connect_str += " dbname=" + *dbname_;
+         if (user_   && (*user_).size()) connect_str += " user=" + *user_;
+         if (pass_   && (*pass_).size()) connect_str += " password=" + *pass_;
          connect_str += " connect_timeout=4"; // todo: set by client (param)
          return connect_str;
       }
