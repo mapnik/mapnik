@@ -464,7 +464,7 @@ namespace mapnik
                   path_type path(t_,geom,prj_trans);
                   placement text_placement(info, sym);
                   text_placement.avoid_edges = sym.get_avoid_edges();
-                  finder.find_placements<path_type>(text_placement,path);
+                  finder.find_point_placements<path_type>(text_placement,path);
                   
                   for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                   { 
@@ -683,7 +683,7 @@ namespace mapnik
                   }
                   else //LINE_PLACEMENT
                   {
-                     finder.find_line_placement<path_type>(text_placement,path);
+                     finder.find_line_placements<path_type>(text_placement,path);
                   }
                   
                   for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)

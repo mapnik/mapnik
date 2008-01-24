@@ -87,26 +87,21 @@ namespace mapnik
       public:
          placement_finder(DetectorT & detector);
          
-         template <typename T>
-         void find_placements(placement & p, T & path);
-         
+         //Try place a single label at the given point
          void find_point_placement(placement & p, double, double);
          
+         //Iterate over the given path, placing point labels with respect to label_spacing
          template <typename T>
-         void find_line_placement(placement & p, T & path);
+         void find_point_placements(placement & p, T & path);
+         
+         //Iterate over the given path, placing line-following labels with respect to label_spacing
+         template <typename T>
+         void find_line_placements(placement & p, T & path);
          
          void clear();
          
       private:
-         template <typename T>
-         bool build_path_follow(placement & p, double target_distance, T & path);
-         
-         template <typename T>
-         bool build_path_horizontal(placement & p, double target_distance, T & path);
-         
-         void get_ideal_placements(placement & p, double distance, std::vector<double>&);
-         
-         //Helpers for find_line_placement
+         ///Helpers for find_line_placement
          
          ///Returns a possible placement on the given line, does not test for collisions
          //index: index of the node the current line ends on
@@ -133,6 +128,7 @@ namespace mapnik
             const double &x1, const double &y1, const double &x2, const double &y2, 
             double &ix, double &iy);
          
+         ///General Internals
          
          void update_detector(placement & p);
          
