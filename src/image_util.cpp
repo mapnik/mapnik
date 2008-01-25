@@ -38,9 +38,9 @@
 namespace mapnik
 {    
    template <typename T>
-   void save_to_file(std::string const& filename,
-                     std::string const& type,
-                     T const& image)
+   void save_to_file(T const& image,
+                     std::string const& filename,
+                     std::string const& type)
    {
       std::ofstream file (filename.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
       if (file)
@@ -54,26 +54,25 @@ namespace mapnik
    }
    
    template <typename T>
-   void save_to_file(std::string const& filename,
-                     T const& image)
+   void save_to_file(T const& image,std::string const& filename)
    {
       std::string type = type_from_filename(filename);
-      save_to_file<T>(filename,type,image);
+      save_to_file<T>(image,filename,type);
    }
      
 
-   template void save_to_file<ImageData32>(std::string const&,
-                                           std::string const&, 
-                                           ImageData32 const&);
+   template void save_to_file<ImageData32>(ImageData32 const&,
+                                           std::string const&,
+                                           std::string const&);
 
-   template void save_to_file<ImageData32>(std::string const&, 
-                                           ImageData32 const&);
+   template void save_to_file<ImageData32>(ImageData32 const&,
+                                           std::string const&);
 
-   template void save_to_file<image_view<ImageData32> > (std::string const&,
-                                                         std::string const&, 
-                                                         image_view<ImageData32> const&);
+   template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
+                                                         std::string const&,
+                                                         std::string const&);
    
-   template void save_to_file<image_view<ImageData32> > (std::string const&, 
-                                                         image_view<ImageData32> const&);
+   template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
+                                                         std::string const&);
    
 }
