@@ -60,10 +60,4 @@ namespace mapnik
     {
         return background_;
     }
-    
-    void Image32::saveToFile(const std::string& file,const std::string& format) 
-    {
-	    //TODO: image writer factory
-	    save_to_file(file,format,data_);
-    }
 }

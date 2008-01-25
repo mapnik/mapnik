@@ -72,8 +72,6 @@ namespace mapnik
             return image_view<ImageData32>(x,y,w,h,data_);
         }
         
-        void saveToFile(const std::string& file,const std::string& format="auto"); 
-
     private:
         
         inline bool checkBounds(unsigned x, unsigned y) const

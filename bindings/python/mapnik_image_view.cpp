@@ -24,13 +24,34 @@
 #include <boost/python.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_view.hpp>
+#include <mapnik/jpeg_io.hpp>
+#include <mapnik/png_io.hpp>
+#include <sstream>
 
 using mapnik::ImageData32;
 using mapnik::image_view;
 using mapnik::save_to_file;
 
-void (*view_to_file1)(std::string const&,std::string const&, image_view<ImageData32> const&) = mapnik::save_to_file;
-void (*view_to_file2)(std::string const&, image_view<ImageData32> const&) = mapnik::save_to_file;
+// output 'raw' pixels
+PyObject* view_tostring1(image_view<ImageData32> const& view)
+{
+    int size = view.width() * view.height() * 4;
+    return ::PyString_FromStringAndSize((const char*)view.data().getBytes(),size);
+}
+
+// encode (png,jpeg)
+PyObject* view_tostring2(image_view<ImageData32> const & view, std::string const& format)
+{
+   std::ostringstream ss(std::ios::out|std::ios::binary);
+   if (format == "png") save_as_png(ss,view.data());
+   else if (format == "png256") save_as_png256(ss,view.data());
+   else if (format == "jpeg") save_as_jpeg(ss,85,view.data());
+   else throw mapnik::ImageWriterException("unknown format: " + format);
+   return ::PyString_FromStringAndSize((const char*)ss.str().c_str(),ss.str().size());
+}
+
+void (*save_view1)(image_view<ImageData32> const&, std::string const&,std::string const&) = mapnik::save_to_file;
+void (*save_view2)(image_view<ImageData32> const&, std::string const&) = mapnik::save_to_file;
 
 void export_image_view()
 {
@@ -38,8 +59,9 @@ void export_image_view()
     class_<image_view<ImageData32> >("ImageView","A view into an image.",no_init)
        .def("width",&image_view<ImageData32>::width)
        .def("height",&image_view<ImageData32>::height)
+       .def("tostring",&view_tostring1)
+       .def("tostring",&view_tostring2)
+       .def("save",save_view1)
+       .def("save",save_view2)
        ;
-    
-    def("save_to_file",view_to_file1);
-    def("save_to_file",view_to_file2);
 }

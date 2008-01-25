@@ -84,7 +84,7 @@ void render_tile_to_file(const mapnik::Map& map,
 {
     mapnik::Image32 image(width,height);
     render(map,image,offset_x, offset_y);
-    image.saveToFile(file,format);
+    mapnik::save_to_file(image.data(),file,format);
 }
 
 void render_to_file1(const mapnik::Map& map,
@@ -93,7 +93,7 @@ void render_to_file1(const mapnik::Map& map,
 {
    mapnik::Image32 image(map.getWidth(),map.getHeight());
    render(map,image,0,0);
-   mapnik::save_to_file(filename,format,image); 
+   mapnik::save_to_file(image,filename,format); 
 }
 
 void render_to_file2(const mapnik::Map& map,
@@ -101,7 +101,7 @@ void render_to_file2(const mapnik::Map& map,
 {
    mapnik::Image32 image(map.getWidth(),map.getHeight());
    render(map,image,0,0);
-   mapnik::save_to_file(filename,image); 
+   mapnik::save_to_file(image,filename); 
 }
 
 

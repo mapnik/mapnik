@@ -307,10 +307,10 @@ m.zoom_to_box(Envelope(1405120.04127408,-247003.813399447,1706357.31328276,-2509
 im = Image(m.width,m.height)
 render(m, im)
 
-# Save image to file
-save_to_file('demo.png', 'png',im) # true-colour RGBA
-save_to_file('demo256.png', 'png256',im) # save to palette based (max 256 colours) png 
-save_to_file('demo.jpg', 'jpeg',im)
+# Save image to files
+im.save('demo.png', 'png') # true-colour RGBA
+im.save('demo256.png', 'png256') # save to palette based (max 256 colours) png 
+im.save('demo.jpg', 'jpeg')
 
 print """\n\nThree maps have been rendered in the current directory:
 - demo.jpg

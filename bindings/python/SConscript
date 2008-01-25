@@ -29,10 +29,11 @@ prefix = env['PYTHON_PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/python' + env['PY
 install_prefix = env['DESTDIR'] + '/' + prefix
 
 linkflags = ''
+libraries = ['mapnik','png','jpeg']
 if env['THREADING'] == 'multi':
-    libraries = ['mapnik', 'boost_python%s-mt' % env['BOOST_APPEND']]
+    libraries.append('boost_python%s-mt' % env['BOOST_APPEND'])
 else :
-    libraries = ['mapnik', 'boost_python%s' % env['BOOST_APPEND']]
+    libraries.append('mapnik', 'boost_python%s' % env['BOOST_APPEND'])
 
 if env['PLATFORM'] == 'Darwin':
     if env['THREADING'] == 'multi':

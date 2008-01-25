@@ -38,7 +38,7 @@ namespace mapnik {
          JOCTET * buffer;
    } dest_mgr;
    
-   void init_destination( j_compress_ptr cinfo)
+   inline void init_destination( j_compress_ptr cinfo)
    {
       dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
       dest->buffer = (JOCTET*) (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
@@ -47,7 +47,7 @@ namespace mapnik {
       dest->pub.free_in_buffer = BUFFER_SIZE;
    }
 
-   boolean empty_output_buffer (j_compress_ptr cinfo)
+   inline boolean empty_output_buffer (j_compress_ptr cinfo)
    {
       dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
       dest->out->write((char*)dest->buffer, BUFFER_SIZE);
@@ -57,7 +57,7 @@ namespace mapnik {
       return true;
    }
    
-   void term_destination( j_compress_ptr cinfo)
+   inline void term_destination( j_compress_ptr cinfo)
    {
       dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
       size_t size  = BUFFER_SIZE - dest->pub.free_in_buffer;
