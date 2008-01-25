@@ -22,11 +22,14 @@
 
 //$Id: postgisfs.cc 34 2005-04-04 13:27:23Z pavlenko $
 
+#include <boost/lexical_cast.hpp>
+#include <boost/scoped_array.hpp>
 #include <boost/algorithm/string.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include "postgis.hpp"
+#include <sstream>
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
@@ -36,6 +39,47 @@ using mapnik::Feature;
 using mapnik::geometry2d;
 using mapnik::byte;
 using mapnik::geometry_utils;
+
+
+std::string numeric2string(const char* buf)
+{
+   int16_t ndigits = int2net(buf);
+   int16_t weight  = int2net(buf+2);
+   int16_t sign    = int2net(buf+4);
+   int16_t dscale  = int2net(buf+6);
+   
+   boost::scoped_array<int16_t> digits(new int16_t[ndigits]); 
+   for (int n=0; n < ndigits ;++n)
+   {
+      digits[n] = int2net(buf+8+n*2);
+   }
+   
+   std::ostringstream ss;
+   
+   if (sign == 0x4000) ss << "-";
+   
+   int i = std::max(weight,int16_t(0));
+   int d = 0;
+   while ( i >= 0)
+   {
+      if (i <= weight && d < ndigits)
+         ss <<  digits[d++];
+      else
+         ss <<  '0';
+      i--;
+   }
+   if (dscale > 0)
+   {
+      ss << '.';
+      while ( i >= -dscale)
+      {
+         if (i <= weight && d < ndigits)
+            ss <<  digits[d++];
+         i--;
+      }
+   }
+   return ss.str();
+}
 
 postgis_featureset::postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
                                        std::string const& encoding,
@@ -93,12 +137,24 @@ feature_ptr postgis_featureset::next()
               std::wstring wstr = tr_->transcode(str);
               boost::put(*feature,name,wstr);
            }
+           else if (oid == 1700) // numeric
+           {
+              std::string str = numeric2string(buf);
+              try 
+              {
+                 double val = boost::lexical_cast<double>(str);
+                 boost::put(*feature,name,val);
+              }
+              catch (boost::bad_lexical_cast & ex)
+              {
+                 std::clog << ex.what() << "\n"; 
+              }
+           }
            else 
            {
 #ifdef MAPNIK_DEBUG
               std::clog << "uknown OID = " << oid << " FIXME \n";
 #endif
-              //boost::put(*feature,name,0); 
            }
         }
         ++count_;   
