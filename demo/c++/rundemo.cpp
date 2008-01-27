@@ -244,9 +244,9 @@ int main ( int argc , char** argv)
         agg_renderer<Image32> ren(m,buf);
         ren.apply();
         
-        save_to_file<ImageData32>("demo.jpg","jpeg",buf.data());
-        save_to_file<ImageData32>("demo.png","png",buf.data());
-        save_to_file<ImageData32>("demo256.png","png256",buf.data());
+        save_to_file<ImageData32>(buf.data(),"demo.jpg","jpeg");
+        save_to_file<ImageData32>(buf.data(),"demo.png","png");
+        save_to_file<ImageData32>(buf.data(),"demo256.png","png256");
         std::cout << "Three maps have been rendered in the current directory:\n"
            "- demo.jpg\n"
            "- demo.png\n"
