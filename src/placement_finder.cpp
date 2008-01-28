@@ -681,7 +681,7 @@ namespace mapnik
       }
       
       //If we placed too many characters upside down 
-      if (upside_down_char_count >= p.info.num_characters()/2)
+      if (upside_down_char_count >= p.info.num_characters()/2.0)
       {
          //if we auto-detected the orientation then retry with the opposite orientation
          if (!orientation_forced)
