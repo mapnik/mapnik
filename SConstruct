@@ -76,6 +76,12 @@ env['PLATFORM'] = platform.uname()[0]
 color_print (4,"Building on %s ..." % env['PLATFORM'])
 Help(opts.GenerateHelpText(env))
 
+thread_suffix = '-mt'
+
+if env['PLATFORM'] == 'FreeBSD':
+    thread_suffix = ''
+    env.Append(LIBS = 'pthread')
+
 conf = Configure(env)
 
 #### Libraries and headers dependency checks ####
@@ -176,7 +182,7 @@ else:
     
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
     if  env['THREADING'] == 'multi' :
-        if not conf.CheckLibWithHeader('boost_%s%s-mt' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++') and libinfo[2] :
+        if not conf.CheckLibWithHeader('boost_%s%s%s' % (libinfo[0],env['BOOST_APPEND'],thread_suffix), libinfo[1], 'C++') and libinfo[2] :
             color_print(1,'Could not find header or shared library for boost %s, exiting!' % libinfo[0])
             Exit(1)
     elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :
@@ -198,9 +204,9 @@ SConscript('agg/SConscript')
 SConscript('src/SConscript')
 
 # Build shapeindex and remove its dependency from the LIBS
-if 'boost_program_options%s-mt' % env['BOOST_APPEND'] in env['LIBS']:
+if 'boost_program_options%s%s' % (env['BOOST_APPEND'],thread_suffix) in env['LIBS']:
     SConscript('utils/shapeindex/SConscript')
-    env['LIBS'].remove('boost_program_options%s-mt' % env['BOOST_APPEND'])
+    env['LIBS'].remove('boost_program_options%s%s' % (env['BOOST_APPEND'],thread_suffix))
 
 # Build the input plug-ins
 if 'postgis' in inputplugins and 'pq' in env['LIBS']:
