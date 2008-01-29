@@ -29,6 +29,7 @@
 
 // boost
 #include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
 
 // stl
 #include <string>
@@ -71,6 +72,40 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
    
+   boost::optional<std::string> ext  = params_.get<std::string>("extent");
+   if (ext)
+   {
+      boost::char_separator<char> sep(",");
+      boost::tokenizer<boost::char_separator<char> > tok(*ext,sep);
+      unsigned i = 0;
+      bool success = false;
+      double d[4];
+      for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tok.begin(); 
+           beg!=tok.end();++beg)
+      {
+         try 
+         {
+             d[i] = boost::lexical_cast<double>(*beg);
+         }
+         catch (boost::bad_lexical_cast & ex)
+         {
+            std::clog << ex.what() << "\n";
+            break;
+         }
+         if (i==3) 
+         {
+            success = true;
+            break;
+         }
+         ++i;
+      }
+      if (success)
+      {
+         extent_.init(d[0],d[1],d[2],d[3]);
+         extent_initialized_ = true;
+      }
+   } 
+
    ConnectionManager *mgr=ConnectionManager::instance();   
    mgr->registerPool(creator_, *initial_size, *max_size);
     
@@ -123,6 +158,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                   break;
                case 700:   // float4 
                case 701:   // float8
+               case 1700:  // numeric ??
                   desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
                case 1042:  // bpchar
                case 1043:  // varchar
