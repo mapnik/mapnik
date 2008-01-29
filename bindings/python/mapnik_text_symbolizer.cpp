@@ -28,54 +28,58 @@
 
 void export_text_symbolizer()
 {
-    using namespace boost::python;
-    using namespace mapnik;
+   using namespace boost::python;
+   using namespace mapnik;
 
-    using mapnik::text_symbolizer;
-    using mapnik::Color;
+   using mapnik::text_symbolizer;
+   using mapnik::Color;
  
-    enumeration_<label_placement_e>("label_placement")
-        .value("LINE_PLACEMENT",LINE_PLACEMENT)
-        .value("POINT_PLACEMENT",POINT_PLACEMENT)
-        ;
+   enumeration_<label_placement_e>("label_placement")
+      .value("LINE_PLACEMENT",LINE_PLACEMENT)
+      .value("POINT_PLACEMENT",POINT_PLACEMENT)
+      ;
     
-    class_<text_symbolizer>("TextSymbolizer",
-			    init<std::string const&,std::string const&, unsigned,Color const&>())
-        .add_property("halo_fill",make_function(
-                      &text_symbolizer::get_halo_fill,
-                      return_value_policy<copy_const_reference>()),
-                      &text_symbolizer::set_halo_fill)
-        .add_property("halo_radius",
-                      &text_symbolizer::get_halo_radius, 
-                      &text_symbolizer::set_halo_radius)
-        .add_property("wrap_width",
-                      &text_symbolizer::get_wrap_width,
-                      &text_symbolizer::set_wrap_width)
-        .add_property("text_ratio",
-                      &text_symbolizer::get_text_ratio,
-                      &text_symbolizer::set_text_ratio)
-        .add_property("label_spacing",
-                      &text_symbolizer::get_label_spacing,
-                      &text_symbolizer::set_label_spacing)
-        .add_property("label_position_tolerance",
-                      &text_symbolizer::get_label_position_tolerance,
-                      &text_symbolizer::set_label_position_tolerance)
-        .add_property("force_odd_labels",
-                      &text_symbolizer::get_force_odd_labels,
-                      &text_symbolizer::set_force_odd_labels)
-        .add_property("max_char_angle_delta",
-                      &text_symbolizer::get_max_char_angle_delta,
-                      &text_symbolizer::set_max_char_angle_delta)
-        .add_property("avoid_edges",
-                      &text_symbolizer::get_avoid_edges,
-                      &text_symbolizer::set_avoid_edges)
-        .add_property("minimum_distance",
-                      &text_symbolizer::get_minimum_distance,
-                      &text_symbolizer::set_minimum_distance)
-        
-        .add_property("label_placement",
-                      &text_symbolizer::get_label_placement,
-                      &text_symbolizer::set_label_placement,
-                      "Set/get the placement of the label")
-	;
+   class_<text_symbolizer>("TextSymbolizer",
+                           init<std::string const&,std::string const&, unsigned,Color const&>())
+      .add_property("halo_fill",make_function(
+                       &text_symbolizer::get_halo_fill,
+                       return_value_policy<copy_const_reference>()),
+                    &text_symbolizer::set_halo_fill)
+      .add_property("halo_radius",
+                    &text_symbolizer::get_halo_radius, 
+                    &text_symbolizer::set_halo_radius)
+      .add_property("wrap_width",
+                    &text_symbolizer::get_wrap_width,
+                    &text_symbolizer::set_wrap_width)
+      .add_property("text_ratio",
+                    &text_symbolizer::get_text_ratio,
+                    &text_symbolizer::set_text_ratio)
+      .add_property("label_spacing",
+                    &text_symbolizer::get_label_spacing,
+                    &text_symbolizer::set_label_spacing)
+      .add_property("label_position_tolerance",
+                    &text_symbolizer::get_label_position_tolerance,
+                    &text_symbolizer::set_label_position_tolerance)
+      .add_property("force_odd_labels",
+                    &text_symbolizer::get_force_odd_labels,
+                    &text_symbolizer::set_force_odd_labels)
+      .add_property("max_char_angle_delta",
+                    &text_symbolizer::get_max_char_angle_delta,
+                    &text_symbolizer::set_max_char_angle_delta)
+      .add_property("avoid_edges",
+                    &text_symbolizer::get_avoid_edges,
+                    &text_symbolizer::set_avoid_edges)
+      .add_property("minimum_distance",
+                    &text_symbolizer::get_minimum_distance,
+                    &text_symbolizer::set_minimum_distance)
+      .def("displacement",&text_symbolizer::set_displacement)
+      .add_property("label_placement",
+                    &text_symbolizer::get_label_placement,
+                    &text_symbolizer::set_label_placement,
+                    "Set/get the placement of the label")
+      .add_property("allow_overlap",
+                    &text_symbolizer::get_allow_overlap,
+                    &text_symbolizer::set_allow_overlap,
+                    "Set/get the allow_overlap property of the label")
+      ;
 }
