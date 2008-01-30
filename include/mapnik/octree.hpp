@@ -47,7 +47,7 @@ namespace mapnik {
          const static unsigned MAX_LEVELS = 6;
          inline static unsigned index_from_level(unsigned level, rgb const& c)
          {
-            unsigned shift = 7 - level;
+            unsigned shift = (MAX_LEVELS + 1) - level;
             return (((c.r >> shift) & 1) << 2) 
                | (((c.g >> shift) & 1) << 1) 
                | ((c.b >> shift) & 1);
@@ -84,14 +84,28 @@ namespace mapnik {
                unsigned count;	
                uint8_t  index;					
          };
-         
+         struct node_cmp
+         {
+               bool operator() ( const node * lhs,const node* rhs) const
+               {
+                  unsigned left_total=0;
+                  unsigned right_total=0;
+                  for (unsigned i=0; i<8;++i)
+                  {
+                     if (lhs->children_[i]) left_total+=lhs->children_[i]->count;
+                     if (rhs->children_[i]) right_total+=rhs->children_[i]->count;
+                  }
+                  return left_total > right_total;
+               }
+         };
+
          std::deque<node*> reducible_[InsertPolicy::MAX_LEVELS];
          unsigned max_colors_;
          unsigned colors_;
          unsigned leaf_level_; 
     
       public:
-         explicit octree(unsigned max_colors=255) 
+         explicit octree(unsigned max_colors=256) 
             : max_colors_(max_colors),
               colors_(0),
               leaf_level_(InsertPolicy::MAX_LEVELS),
@@ -113,10 +127,8 @@ namespace mapnik {
                   cur_node->blues  += data.b;
                   cur_node->count  += 1;
                   if (cur_node->count == 1) ++colors_;
-                  
-                  while ( colors_ >= max_colors_ - 1)
-                     reduce();   
-                  
+                  //if (colors_ >= max_colors_ - 1)
+                  //reduce();   
                   break;
                }
                
@@ -132,6 +144,7 @@ namespace mapnik {
                ++level; 
             }
          }  
+         
          int quantize(rgb const& c) const 
          {
             unsigned level = 0;
@@ -146,43 +159,53 @@ namespace mapnik {
             return -1;
          }
 	
-         void create_palette(std::vector<rgb> & palette) const
+         void create_palette(std::vector<rgb> & palette)
          {
+            reduce();
             palette.reserve(colors_);
             create_palette(palette, root_);
          }
-      private:	    
+         
          void reduce()
          {	
-            while (leaf_level_ >0  && reducible_[leaf_level_-1].size() == 0) 
+            // sort reducible 
+            for (unsigned i=0;i<InsertPolicy::MAX_LEVELS;++i)
             {
-               --leaf_level_;
+               std::sort(reducible_[i].begin(), reducible_[i].end(),node_cmp());
             }
-
-            if (leaf_level_ < 1) return;
             
-            typename std::deque<node*>::iterator pos = reducible_[leaf_level_-1].begin();
-            if (pos == reducible_[leaf_level_-1].end()) return; 
-            
-            node * cur_node = *pos;
-            unsigned num_children = 0;
-            for (unsigned idx=0; idx < 8; ++idx)
-            {
-               if (cur_node->children_[idx] != 0)
+            while ( colors_ >= max_colors_ - 1)
+            {                 
+               while (leaf_level_ >0  && reducible_[leaf_level_-1].size() == 0) 
                {
-                  ++num_children;
-                  cur_node->reds   += cur_node->children_[idx]->reds;
-                  cur_node->greens += cur_node->children_[idx]->greens;
-                  cur_node->blues  += cur_node->children_[idx]->blues;
-                  cur_node->count  += cur_node->children_[idx]->count;
-                  delete cur_node->children_[idx], cur_node->children_[idx]=0;
+                  --leaf_level_;
                }
-            }
-            
-            reducible_[leaf_level_-1].erase(pos);
-            if (num_children > 0 ) 
-            {
-               colors_ -= (num_children - 1);
+               
+               if (leaf_level_ < 1) continue;
+               
+               if ( reducible_[leaf_level_-1].size() == 0) return;
+               
+               typename std::deque<node*>::iterator pos = reducible_[leaf_level_-1].begin();
+               node * cur_node = *pos;
+               unsigned num_children = 0;
+               for (unsigned idx=0; idx < 8; ++idx)
+               {
+                  if (cur_node->children_[idx] != 0)
+                  {
+                     ++num_children;
+                     cur_node->reds   += cur_node->children_[idx]->reds;
+                     cur_node->greens += cur_node->children_[idx]->greens;
+                     cur_node->blues  += cur_node->children_[idx]->blues;
+                     cur_node->count  += cur_node->children_[idx]->count;
+                     delete cur_node->children_[idx], cur_node->children_[idx]=0;
+                  }
+               }
+               
+               reducible_[leaf_level_-1].erase(pos);
+               if (num_children > 0 ) 
+               {
+                  colors_ -= (num_children - 1);
+               }
             }
          }
        
@@ -200,8 +223,7 @@ namespace mapnik {
             {
                if (itr->children_[i] != 0) 
                   create_palette(palette, itr->children_[i]);
-            }
-    
+            }  
          }
       private:	
          node * root_;		
