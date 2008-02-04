@@ -22,8 +22,10 @@
 
 //$Id$
 
+// mapnik
 #include <mapnik/proj_transform.hpp>
-
+#include <mapnik/utils.hpp>
+// proj4
 #include <proj_api.h>
 
 namespace mapnik {
@@ -33,12 +35,16 @@ namespace mapnik {
             : source_(source),
               dest_(dest) 
     {
+        mutex::scoped_lock lock(projection::mutex_);
+
         is_source_latlong_ = pj_is_latlong(source_.proj_);
         is_dest_latlong_ = pj_is_latlong(dest_.proj_);
     }
     
     bool proj_transform::forward (double & x, double & y , double & z) const
     {
+        mutex::scoped_lock lock(projection::mutex_);
+
         if (is_source_latlong_)
         {
             x *= DEG_TO_RAD;
@@ -62,6 +68,8 @@ namespace mapnik {
         
     bool proj_transform::backward (double & x, double & y , double & z) const
     {
+        mutex::scoped_lock lock(projection::mutex_);
+
         if (is_dest_latlong_)
         {
             x *= DEG_TO_RAD;

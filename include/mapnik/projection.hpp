@@ -28,6 +28,7 @@
 // mapnik
 #include <mapnik/envelope.hpp>
 // boost
+#include <boost/thread/mutex.hpp>
 #include <boost/utility.hpp>
 // stl
 #include <string>
@@ -66,6 +67,7 @@ namespace mapnik {
     private:
         std::string params_;
         void * proj_;
+        static boost::mutex mutex_;
     };
 }
 

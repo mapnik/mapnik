@@ -24,10 +24,13 @@
 
 // mapnik
 #include <mapnik/projection.hpp>
+#include <mapnik/utils.hpp>
 // proj4
 #include <proj_api.h>
 
 namespace mapnik {
+    boost::mutex projection::mutex_;
+
     projection::projection(std::string  params)
         : params_(params)
     { 
@@ -54,6 +57,7 @@ namespace mapnik {
     
     bool projection::is_geographic() const
     {
+        mutex::scoped_lock lock(mutex_);
         return pj_is_latlong(proj_);  
     }
     
@@ -64,6 +68,7 @@ namespace mapnik {
     
     void projection::forward(double & x, double &y ) const
     {
+        mutex::scoped_lock lock(mutex_);
         projUV p;
         p.u = x * DEG_TO_RAD;
         p.v = y * DEG_TO_RAD;
@@ -74,6 +79,7 @@ namespace mapnik {
     
     void projection::inverse(double & x,double & y) const
     {
+        mutex::scoped_lock lock(mutex_);
         projUV p;
         p.u = x;
         p.v = y;
@@ -84,11 +90,13 @@ namespace mapnik {
     
     projection::~projection() 
     {
+        mutex::scoped_lock lock(mutex_);
         if (proj_) pj_free(proj_);
     }
     
     void projection::init()
     {
+        mutex::scoped_lock lock(mutex_);
         proj_=pj_init_plus(params_.c_str());
         if (!proj_) throw proj_init_error(params_);
     }
