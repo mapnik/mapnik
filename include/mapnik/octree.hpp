@@ -95,7 +95,7 @@ namespace mapnik {
                      if (lhs->children_[i]) left_total+=lhs->children_[i]->count;
                      if (rhs->children_[i]) right_total+=rhs->children_[i]->count;
                   }
-                  return left_total > right_total;
+                  return left_total < right_total;
                }
          };
 
