@@ -16,5 +16,6 @@
         <file>images/zoombox.png</file>
 	<file>images/style.png</file>
 	<file>images/filter.png</file>
+	<file>images/reload.png</file>
     </qresource>
 </RCC>
