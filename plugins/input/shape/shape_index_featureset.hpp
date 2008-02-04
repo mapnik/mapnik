@@ -35,9 +35,9 @@ class shape_index_featureset : public Featureset
       int shape_type_;
       shape_io shape_;
       boost::scoped_ptr<transcoder> tr_;
-      std::set<int> ids_;
-      std::set<int>::iterator itr_;
-      std::vector<int> attr_ids_;
+      std::vector<int> ids_;
+      std::vector<int>::iterator itr_;
+      std::set<int> attr_ids_;
       mutable Envelope<double> feature_ext_;
       mutable int total_geom_size;
       mutable int count_;

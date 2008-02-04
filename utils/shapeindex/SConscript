@@ -42,9 +42,13 @@ source = Split(
 headers = ['#plugins/input/shape'] + env['CPPPATH'] 
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
+boost_iostreams  = 'boost_iostreams%s' % env['BOOST_APPEND']
 if env['THREADING'] == 'multi':
     boost_program_options = '%s%s' % (boost_program_options,thread_suffix)
-shapeindex = env.Program('shapeindex', source, CPPPATH=headers, LIBS=boost_program_options)
+    boost_iostreams = '%s%s' % (boost_iostreams,thread_suffix)
+libraries =  [boost_program_options,boost_iostreams]
+
+shapeindex = env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries)
 
 env.Install(install_prefix + '/bin', shapeindex)
 env.Alias('install', install_prefix + '/bin')

@@ -35,13 +35,13 @@ dbf_file::dbf_file()
      record_length_(0),
      record_(0) {}
 
-dbf_file::dbf_file(const char* file_name)
+dbf_file::dbf_file(std::string const& file_name)
    :num_records_(0),
     num_fields_(0),
     record_length_(0),
+    file_(file_name),
     record_(0)
 {
-   file_.open(file_name);
    if (file_.is_open())
    {
       read_header();
@@ -52,16 +52,6 @@ dbf_file::dbf_file(const char* file_name)
 dbf_file::~dbf_file()
 {
    ::operator delete(record_);
-   file_.close();
-}
-
-
-bool dbf_file::open(const std::string& file_name)
-{
-   file_.open(file_name.c_str(),std::ios::in|std::ios::binary);
-   if (file_.is_open())
-      read_header();
-   return file_?true:false;
 }
 
 

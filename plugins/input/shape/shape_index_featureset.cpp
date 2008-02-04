@@ -23,7 +23,14 @@
 //$Id: shape_index_featureset.cc 36 2005-04-05 14:32:18Z pavlenko $
 
 #include <mapnik/feature_factory.hpp>
+// boost
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
+
 #include "shape_index_featureset.hpp"
+
+using namespace boost::iostreams;
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
@@ -38,17 +45,17 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 
 {
     shape_.shp().skip(100);
-    std::string indexname(shape_file + ".index");
-    std::ifstream file(indexname.c_str(),std::ios::in|std::ios::binary);
+    stream<mapped_file_source> file(shape_file + ".index");
     if (file)
     {
-        shp_index<filterT>::query(filter,file,ids_);
-        file.close();
+       shp_index<filterT,stream<mapped_file_source> >::query(filter,file,ids_);
+       file.close();
     }
-
-#ifdef MAPNIK_DEBUG
+    std::sort(ids_.begin(),ids_.end());    
+    
+//#ifdef MAPNIK_DEBUG
     std::clog<< "query size=" << ids_.size() << "\n";
-#endif
+//#endif
 
     itr_ = ids_.begin();
 
@@ -60,7 +67,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
         {
             if (shape_.dbf().descriptor(i).name_ == *pos)
             {
-                attr_ids_.push_back(i);
+                attr_ids_.insert(i);
                 break;
             }
         }
@@ -170,7 +177,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         if (attr_ids_.size())
         {
             shape_.dbf().move_to(shape_.id_);
-            std::vector<int>::const_iterator pos=attr_ids_.begin();
+            std::set<int>::const_iterator pos=attr_ids_.begin();
             while (pos!=attr_ids_.end())
             {
                 try 

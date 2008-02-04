@@ -32,11 +32,12 @@ const std::string shape_io::DBF = ".dbf";
 
 shape_io::shape_io(const std::string& shape_name)
    : type_(shape_null),
+     shp_(shape_name + SHP),
+     dbf_(shape_name + DBF),
      reclength_(0),
      id_(0)
 {
-   bool ok = (shp_.open(shape_name + SHP) &&
-              dbf_.open(shape_name + DBF));
+   bool ok = (shp_.is_open() && dbf_.is_open());
    if (!ok)
    { 
       throw datasource_exception("cannot read shape file");
@@ -49,13 +50,18 @@ shape_io::~shape_io()
    dbf_.close();
 }
 
-
 void shape_io::move_to (int pos)
 {
    shp_.seek(pos);
    id_ = shp_.read_xdr_integer();
    reclength_ = shp_.read_xdr_integer();
    type_ = shp_.read_ndr_integer();
+
+   if (shp_.is_eof()) {
+       id_ = 0;
+       reclength_ = 0;
+       type_ = shape_null;
+   }
 
    if (type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
    {

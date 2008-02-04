@@ -31,7 +31,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include "quadtree.hpp"
-#include "shape.hpp"
+#include "shapefile.hpp"
+#include "shape_io.hpp"
 
 const int MAXDEPTH = 64;
 const int DEFAULT_DEPTH = 8;
@@ -45,6 +46,7 @@ int main (int argc,char** argv)
     namespace po = boost::program_options;
     using std::string;
     using std::vector;
+    using std::clog;
     
     bool verbose=false;
     unsigned int depth=DEFAULT_DEPTH;
@@ -112,14 +114,17 @@ int main (int argc,char** argv)
     while (itr != shape_files.end())
     {
         std::clog<<"processing "<<*itr << std::endl;
-        shape_file shp;
+        //shape_file shp;
         std::string shapename(*itr++);
-        if (!shp.open(shapename+".shp")) {
+        shape_file shp(shapename+".shp");
+
+        if (!shp.is_open()) {
             std::clog<<"error : cannot open "<< (shapename+".shp") <<"\n";
             continue;
         }
-
-        shp.read_xdr_integer(); //file_code == 9994
+        
+        int code = shp.read_xdr_integer(); //file_code == 9994
+        std::clog << code << "\n";
         shp.skip(5*4); 
 	
         int file_length=shp.read_xdr_integer();

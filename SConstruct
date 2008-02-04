@@ -162,6 +162,7 @@ BOOST_LIBSHEADERS = [
     # ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
+    ['iostreams','boost/iostreams/device/mapped_file.hpp',True],
     ['program_options', 'boost/program_options.hpp', False]
 ]
 
