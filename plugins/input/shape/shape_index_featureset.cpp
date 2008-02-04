@@ -53,9 +53,9 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
     }
     std::sort(ids_.begin(),ids_.end());    
     
-//#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_DEBUG
     std::clog<< "query size=" << ids_.size() << "\n";
-//#endif
+#endif
 
     itr_ = ids_.begin();
 
