@@ -24,8 +24,11 @@
 
 #ifndef UTILS_HPP
 #define UTILS_HPP
-// boost
+
+#ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
+#endif
+
 // stl
 #include <stdexcept>
 #include <cstdlib>
@@ -38,8 +41,10 @@
 
 namespace mapnik
 {
+#ifdef MAPNIK_THREADSAFE
     using boost::mutex;
-    
+#endif
+   
     template <typename T>
     class CreateUsingNew
     {
@@ -121,35 +126,42 @@ namespace mapnik
 #endif
                   }
                   
-              protected:
-                  static mutex mutex_;
-                  singleton() {}
-              public:
+                 protected:
+#ifdef MAPNIK_THREADSAFE
+                    static mutex mutex_;
+#endif
+                    singleton() {}
+                                  public:
                   static  T* instance()
                   {
-                      if (!pInstance_)
-                      {
-                          mutex::scoped_lock lock(mutex_);
-                          if (!pInstance_)
-                          {
-                              if (destroyed_)
-                              {
-                                  onDeadReference();
-                              }
-                              else
-                              {
+                     if (!pInstance_)
+                     {
+#ifdef MAPNIK_THREADSAFE
+                        mutex::scoped_lock lock(mutex_);
+#endif                        
+                        if (!pInstance_)
+                        {
+                           
+                           if (destroyed_)
+                           {
+                              onDeadReference();
+                           }
+                           else
+                           {
                                   pInstance_=CreatePolicy<T>::create();
                                   // register destruction
                                   std::atexit(&DestroySingleton);
-                              }
-                          }
-                      }
-                      return pInstance_;
+                           }
+                        }
+                     }
+                     return pInstance_;
                   }
               };
-
+#ifdef MAPNIK_THREADSAFE
     template <typename T,
               template <typename T> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
+#endif
+    
     template <typename T,
               template <typename T> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
     template <typename T,

@@ -29,8 +29,12 @@
 #include <mapnik/utils.hpp>
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/utility.hpp>
+
+#ifdef MAPNIK_THREADSAFE
+#include <boost/thread/mutex.hpp>
+#endif
+
 // stl
 #include <iostream>
 #include <map>
@@ -72,7 +76,9 @@ namespace mapnik
          const unsigned maxSize_;
          ContType usedPool_;
          ContType unusedPool_;
+#ifdef MAPNIK_THREADSAFE
          mutable boost::mutex mutex_;
+#endif
       public:
 
          Pool(const Creator<T>& creator,unsigned initialSize=1, unsigned maxSize=10)
@@ -89,8 +95,10 @@ namespace mapnik
          }
 
          HolderType borrowObject()
-         {	    
+         {	
+#ifdef MAPNIK_THREADSAFE    
             mutex::scoped_lock lock(mutex_);
+#endif
             typename ContType::iterator itr=unusedPool_.begin();
             if (itr!=unusedPool_.end())
             { 
@@ -118,7 +126,9 @@ namespace mapnik
 
          void returnObject(HolderType obj)
          {
+#ifdef MAPNIK_THREADSAFE
             mutex::scoped_lock lock(mutex_);
+#endif
             typename ContType::iterator itr=usedPool_.begin();
             while (itr != usedPool_.end())
             {
@@ -137,7 +147,9 @@ namespace mapnik
          
          std::pair<unsigned,unsigned> size() const
          {
+#ifdef MAPNIK_THREADSAFE
             mutex::scoped_lock lock(mutex_);
+#endif
             std::pair<unsigned,unsigned> size(unusedPool_.size(),usedPool_.size());
             return size;
          }

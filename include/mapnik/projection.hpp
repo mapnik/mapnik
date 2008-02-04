@@ -27,8 +27,12 @@
 
 // mapnik
 #include <mapnik/envelope.hpp>
+
 // boost
+#ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
+#endif
+
 #include <boost/utility.hpp>
 // stl
 #include <string>
@@ -67,7 +71,9 @@ namespace mapnik {
     private:
         std::string params_;
         void * proj_;
+#ifdef MAPNIK_THREADSAFE
         static boost::mutex mutex_;
+#endif
     };
 }
 

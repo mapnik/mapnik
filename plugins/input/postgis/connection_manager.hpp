@@ -30,14 +30,17 @@
 #include <mapnik/utils.hpp>
 #include "connection.hpp"
 #include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/optional.hpp>
+
+#ifdef MAPNIK_THREADSAFE
+#include <boost/thread/mutex.hpp>
+using boost::mutex;
+#endif
 
 using mapnik::Pool;
 using mapnik::singleton;
 using mapnik::CreateStatic;
 using std::string;
-using boost::mutex;
 
 template <typename T>
 class ConnectionCreator
@@ -99,7 +102,9 @@ public:
 	
     bool registerPool(const ConnectionCreator<Connection>& creator,unsigned initialSize,unsigned maxSize) 
     {	    
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(mutex_);
+#endif
         if (pools_.find(creator.id())==pools_.end())
         {
             return pools_.insert(std::make_pair(creator.id(),
@@ -112,7 +117,9 @@ public:
     
     boost::shared_ptr<PoolType> getPool(std::string const& key) 
     {
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(mutex_);
+#endif 
         ContType::const_iterator itr=pools_.find(key);
         if (itr!=pools_.end())
         {
@@ -124,7 +131,9 @@ public:
 	
     HolderType get(std::string const& key)
     {
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(mutex_);
+#endif 
         ContType::const_iterator itr=pools_.find(key);
         if (itr!=pools_.end()) 
         {

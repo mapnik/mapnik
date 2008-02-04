@@ -29,8 +29,11 @@
 #include <proj_api.h>
 
 namespace mapnik {
-    boost::mutex projection::mutex_;
 
+#ifdef MAPNIK_THREADSAFE
+    boost::mutex projection::mutex_;
+#endif
+   
     projection::projection(std::string  params)
         : params_(params)
     { 
@@ -57,7 +60,9 @@ namespace mapnik {
     
     bool projection::is_geographic() const
     {
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(mutex_);
+#endif
         return pj_is_latlong(proj_);  
     }
     
@@ -68,7 +73,9 @@ namespace mapnik {
     
     void projection::forward(double & x, double &y ) const
     {
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(mutex_);
+#endif
         projUV p;
         p.u = x * DEG_TO_RAD;
         p.v = y * DEG_TO_RAD;
@@ -79,7 +86,9 @@ namespace mapnik {
     
     void projection::inverse(double & x,double & y) const
     {
-        mutex::scoped_lock lock(mutex_);
+#ifdef MAPNIK_THREADSAFE
+       mutex::scoped_lock lock(mutex_);
+#endif
         projUV p;
         p.u = x;
         p.v = y;
@@ -90,15 +99,19 @@ namespace mapnik {
     
     projection::~projection() 
     {
-        mutex::scoped_lock lock(mutex_);
-        if (proj_) pj_free(proj_);
+#ifdef MAPNIK_THREADSAFE
+       mutex::scoped_lock lock(mutex_);
+#endif
+       if (proj_) pj_free(proj_);
     }
     
     void projection::init()
     {
-        mutex::scoped_lock lock(mutex_);
-        proj_=pj_init_plus(params_.c_str());
-        if (!proj_) throw proj_init_error(params_);
+#ifdef MAPNIK_THREADSAFE
+       mutex::scoped_lock lock(mutex_);
+#endif
+       proj_=pj_init_plus(params_.c_str());
+       if (!proj_) throw proj_init_error(params_);
     }
     
     void projection::swap (projection& rhs)

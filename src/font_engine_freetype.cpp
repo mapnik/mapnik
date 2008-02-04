@@ -41,7 +41,9 @@ namespace mapnik
    
    bool freetype_engine::register_font(std::string const& file_name)
    {
+#ifdef MAPNIK_THREADSAFE
       mutex::scoped_lock lock(mutex_);
+#endif
       FT_Library library;
       FT_Error error = FT_Init_FreeType(&library);
       if (error)
@@ -76,9 +78,6 @@ namespace mapnik
 
    face_ptr freetype_engine::create_face(std::string const& family_name)
    {
-      //mutex::scoped_lock lock(mapnik::singleton<freetype_engine, 
-      //                        mapnik::CreateStatic>::mutex_);
-      
       std::map<std::string,std::string>::iterator itr;
       itr = name2file_.find(family_name);
       if (itr != name2file_.end())
@@ -93,8 +92,8 @@ namespace mapnik
       }
       return face_ptr();
    }
-   
-   //FT_Library freetype_engine::library_;
+#ifdef MAPNIK_THREADSAFE
    boost::mutex freetype_engine::mutex_;
+#endif
    std::map<std::string,std::string> freetype_engine::name2file_;
 }

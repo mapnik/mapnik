@@ -35,16 +35,18 @@ namespace mapnik {
             : source_(source),
               dest_(dest) 
     {
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(projection::mutex_);
-
+#endif
         is_source_latlong_ = pj_is_latlong(source_.proj_);
         is_dest_latlong_ = pj_is_latlong(dest_.proj_);
     }
     
     bool proj_transform::forward (double & x, double & y , double & z) const
     {
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(projection::mutex_);
-
+#endif
         if (is_source_latlong_)
         {
             x *= DEG_TO_RAD;
@@ -68,8 +70,10 @@ namespace mapnik {
         
     bool proj_transform::backward (double & x, double & y , double & z) const
     {
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(projection::mutex_);
-
+#endif
+      
         if (is_dest_latlong_)
         {
             x *= DEG_TO_RAD;

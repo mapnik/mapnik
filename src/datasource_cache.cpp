@@ -27,7 +27,6 @@
 #include <mapnik/config_error.hpp>
 
 // boost
-#include <boost/thread/mutex.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -116,8 +115,10 @@ namespace mapnik
 
    void datasource_cache::register_datasources(const std::string& str)
    {	
+#ifdef MAPNIK_THREADSAFE
       mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache, 
                               mapnik::CreateStatic>::mutex_);
+#endif
       filesystem::path path(str);
       filesystem::directory_iterator end_itr;
       if (exists(path) && is_directory(path))
