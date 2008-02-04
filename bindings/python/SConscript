@@ -38,7 +38,7 @@ libraries = ['mapnik','png','jpeg']
 if env['THREADING'] == 'multi':
     libraries.append('boost_python%s%s' % (env['BOOST_APPEND'],thread_suffix))
 else :
-    libraries.append('mapnik', 'boost_python%s' % env['BOOST_APPEND'])
+    libraries.append('boost_python%s' % env['BOOST_APPEND'])
 
 if env['PLATFORM'] == 'Darwin':
     if env['THREADING'] == 'multi':
