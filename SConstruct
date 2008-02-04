@@ -158,7 +158,6 @@ CXX_LIBSHEADERS = [
 if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
-    ['thread', 'boost/thread/mutex.hpp', True],
     # ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
@@ -166,6 +165,9 @@ BOOST_LIBSHEADERS = [
     ['program_options', 'boost/program_options.hpp', False]
 ]
 
+if env['THREADING'] == 'multi':
+    BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
+    
 for libinfo in C_LIBSHEADERS:
     if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C') and libinfo[2]:
         color_print (1,'Could not find header or shared library for %s, exiting!' % libinfo[0])
@@ -250,8 +252,11 @@ if 'python' in env['BINDINGS']:
 env = conf.Finish()
 
 # Common C++ flags.
-common_cxx_flags = '-D%s -DBOOST_SPIRIT_THREADSAFE ' % env['PLATFORM'].upper()
-
+if env['THREADING'] == 'multi' :
+    common_cxx_flags = '-D%s -DBOOST_SPIRIT_THREADSAFE -DMAPNIK_THREADSAFE ' % env['PLATFORM'].upper()
+else :
+    common_cxx_flags = '-D%s ' % env['PLATFORM'].upper()
+    
 # Mac OSX (Darwin) special settings
 if env['PLATFORM'] == 'Darwin':
     pthread = ''
