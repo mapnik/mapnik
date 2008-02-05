@@ -31,6 +31,10 @@
 #include <mapnik/config_error.hpp>
 
 // agg
+#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_rasterizer_scanline_aa.h"
 #include "agg_basics.h"
 #include "agg_scanline_p.h"
 #include "agg_scanline_u.h"
@@ -62,11 +66,12 @@
 
 // boost
 #include <boost/utility.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
 // stl
+#ifdef MAPNIK_DEBUG
 #include <iostream>
+#endif
 
 namespace mapnik 
 {
@@ -96,18 +101,19 @@ namespace mapnik
          ImageData32 const& pattern_;
    };
    
+   struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
+   
    template <typename T>
-   agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, unsigned offset_x, unsigned offset_y)
+   agg_renderer<T>::agg_renderer(Map const& m, Image32 & pixmap, unsigned offset_x, unsigned offset_y)
       : feature_style_processor<agg_renderer>(m),
         pixmap_(pixmap),
         width_(pixmap_.width()),
         height_(pixmap_.height()),
-        buf_(pixmap_.raw_data(),width_,height_, width_ * 4),
-        pixf_(buf_),
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
         font_engine_(),
         font_manager_(font_engine_),
-        detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
+        detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
+        ras_ptr(new rasterizer)
    {
       boost::optional<Color> bg = m.background();
       if (bg) pixmap_.setBackground(*bg);
@@ -115,7 +121,10 @@ namespace mapnik
       std::clog << "scale=" << m.scale() << "\n";
 #endif
    }
-    
+   
+   template <typename T>
+   agg_renderer<T>::~agg_renderer() {}
+
    template <typename T>
    void agg_renderer<T>::start_map_processing(Map const& map)
    {
@@ -123,7 +132,7 @@ namespace mapnik
       std::clog << "start map processing bbox=" 
                 << map.getCurrentExtent() << "\n";
 #endif
-      ras_.clip_box(0,0,width_,height_);
+      ras_ptr->clip_box(0,0,width_,height_);
    }
 
    template <typename T>
@@ -165,28 +174,30 @@ namespace mapnik
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	    
       Color const& fill_ = sym.get_fill();
-      ras_.reset();
       agg::scanline_u8 sl;
-      ren_base renb(pixf_);  
+      
+      agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+      agg::pixfmt_rgba32_plain pixf(buf);
+      
+      ren_base renb(pixf);  
       unsigned r=fill_.red();
       unsigned g=fill_.green();
       unsigned b=fill_.blue();
-      renderer ren(renb); 
+      renderer ren(renb);
+      
+      ras_ptr->reset();
+      
       for (unsigned i=0;i<feature.num_geometries();++i)
       {
          geometry2d const& geom=feature.get_geometry(i);
          if (geom.num_points() > 2) 
          {
             path_type path(t_,geom,prj_trans);
-            //agg::conv_smooth_poly1<path_type> smooth(path);
-            //smooth.smooth_value(0.6);
-            //agg::conv_curve<agg::conv_smooth_poly1<path_type> > curve(smooth);
-            ras_.add_path(path);
-            //ras_.add_path(curve);
+            ras_ptr->add_path(path);
          }
       }
       ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
-      agg::render_scanlines(ras_, sl, ren);
+      agg::render_scanlines(*ras_ptr, sl, ren);
    }
    
    typedef boost::tuple<double,double,double,double> segment_t;
@@ -207,15 +218,18 @@ namespace mapnik
       typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
       
-      ren_base renb(pixf_);
+      agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+      agg::pixfmt_rgba32_plain pixf(buf);
+      ren_base renb(pixf);
+      
       Color const& fill_  = sym.get_fill();
       unsigned r=fill_.red();
       unsigned g=fill_.green();
       unsigned b=fill_.blue();
       renderer ren(renb);         
       agg::scanline_u8 sl;
-      ras_.reset();
-      
+     
+      ras_ptr->reset();
       double height = 0.7071 * sym.height(); // height in meters
       
       for (unsigned i=0;i<feature.num_geometries();++i)
@@ -259,10 +273,10 @@ namespace mapnik
                faces->line_to(itr->get<0>(),itr->get<1>() + height);
                
                path_type faces_path (t_,*faces,prj_trans);
-               ras_.add_path(faces_path);
+               ras_ptr->add_path(faces_path);
                ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(255 * sym.get_opacity())));
-               agg::render_scanlines(ras_, sl, ren);
-               ras_.reset();
+               agg::render_scanlines(*ras_ptr, sl, ren);
+               ras_ptr->reset();
                
                frame->move_to(itr->get<0>(),itr->get<1>());
                frame->line_to(itr->get<0>(),itr->get<1>()+height);   
@@ -287,16 +301,15 @@ namespace mapnik
             }           
             path_type path(t_,*frame,prj_trans); 
             agg::conv_stroke<path_type>  stroke(path);
-            ras_.add_path(stroke);
+            ras_ptr->add_path(stroke);
             ren.color(agg::rgba8(128, 128, 128, int(255 * sym.get_opacity())));
-            agg::render_scanlines(ras_, sl, ren);
-            ras_.reset();
+            agg::render_scanlines(*ras_ptr, sl, ren);
+            ras_ptr->reset();
             
             path_type roof_path (t_,*roof,prj_trans);
-            ras_.add_path(roof_path);
+            ras_ptr->add_path(roof_path);
             ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
-            agg::render_scanlines(ras_, sl, ren);
-
+            agg::render_scanlines(*ras_ptr, sl, ren);
             
          }
       }
@@ -304,8 +317,8 @@ namespace mapnik
 
    template <typename T>
    void agg_renderer<T>::process(line_symbolizer const& sym,
-                                 Feature const& feature,
-                                 proj_transform const& prj_trans)
+                              Feature const& feature,
+                              proj_transform const& prj_trans)
    {   
       typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base; 
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
@@ -313,14 +326,17 @@ namespace mapnik
       typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
       
-      ren_base renb(pixf_);	          
+      agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+      agg::pixfmt_rgba32_plain pixf(buf); 
+
+      ren_base renb(pixf);	          
       mapnik::stroke const&  stroke_ = sym.get_stroke();
       Color const& col = stroke_.get_color();
       unsigned r=col.red();
       unsigned g=col.green();
       unsigned b=col.blue();
       renderer ren(renb);
-      ras_.reset();
+      ras_ptr->reset();
       agg::scanline_p8 sl;
  
       for (unsigned i=0;i<feature.num_geometries();++i)
@@ -364,7 +380,7 @@ namespace mapnik
                stroke.generator().miter_limit(4.0);
                stroke.generator().width(stroke_.get_width());
                
-               ras_.add_path(stroke);
+               ras_ptr->add_path(stroke);
                
             }
             else 
@@ -390,18 +406,18 @@ namespace mapnik
                
                stroke.generator().miter_limit(4.0);
                stroke.generator().width(stroke_.get_width());
-               ras_.add_path(stroke);
+               ras_ptr->add_path(stroke);
             }
          }
       }
       ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
-      agg::render_scanlines(ras_, sl, ren);
+      agg::render_scanlines(*ras_ptr, sl, ren);
    }
    
    template <typename T>
    void agg_renderer<T>::process(point_symbolizer const& sym,
-                                 Feature const& feature,
-                                 proj_transform const& prj_trans)
+                              Feature const& feature,
+                              proj_transform const& prj_trans)
    {
       double x;
       double y;
@@ -491,8 +507,8 @@ namespace mapnik
    
    template <typename T>
    void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
-                                  Feature const& feature,
-                                  proj_transform const& prj_trans)
+                               Feature const& feature,
+                               proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
@@ -500,8 +516,11 @@ namespace mapnik
       typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
       typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
       
+      agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+      agg::pixfmt_rgba32_plain pixf(buf);
+      
       ImageData32 pat =  * sym.get_image();
-      renderer_base ren_base(pixf_);  
+      renderer_base ren_base(pixf);  
       agg::pattern_filter_bilinear_rgba8 filter; 
       pattern_source source(pat);
       pattern_type pattern (filter,source);
@@ -541,9 +560,13 @@ namespace mapnik
          agg::span_allocator<agg::rgba8>,
          span_gen_type> renderer_type;  
       
-      ras_.reset();
-      ren_base renb(pixf_);
+      
+      agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+      agg::pixfmt_rgba32_plain pixf(buf);
+      ren_base renb(pixf);
+      
       agg::scanline_u8 sl;
+      ras_ptr->reset();
       
       ImageData32 const& pattern =  * sym.get_image();
       unsigned w=pattern.width();
@@ -571,10 +594,10 @@ namespace mapnik
          if (geom.num_points() > 2)
          {     
             path_type path(t_,geom,prj_trans);            
-            ras_.add_path(path); 
+            ras_ptr->add_path(path); 
          }
       }
-      agg::render_scanlines(ras_, sl, rp);   
+      agg::render_scanlines(*ras_ptr, sl, rp);   
    }
 
    template <typename T>
@@ -604,12 +627,13 @@ namespace mapnik
       typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
       arrow arrow_;
-      //double k = ::pow(1.2, 0.7);
-      //arrow_.head(4 * k, 4   * k, 3 * k, 2 * k);
-      //Color const& fill_ = sym.get_fill();
-      ras_.reset();
+      ras_ptr->reset();
+   
       agg::scanline_u8 sl;
-      ren_base renb(pixf_);  
+      agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+      agg::pixfmt_rgba32_plain pixf(buf);
+      ren_base renb(pixf);  
+      
       unsigned r = 0;// fill_.red();
       unsigned g = 0; //fill_.green();
       unsigned b = 255; //fill_.blue();
@@ -623,17 +647,16 @@ namespace mapnik
             
             agg::conv_dash <path_type> dash(path);
             dash.add_dash(20.0,200.0);
-            //dash.dash_start(100.0);
             markers_converter<agg::conv_dash<path_type>, 
                arrow, 
                label_collision_detector4>
                marker(dash, arrow_, detector_);
-            ras_.add_path(marker);
+            ras_ptr->add_path(marker);
          }
       }
       ren.color(agg::rgba8(r, g, b, 255));
-      agg::render_scanlines(ras_, sl, ren);
-}
+      agg::render_scanlines(*ras_ptr, sl, ren);
+   }
    
    template <typename T>
    void agg_renderer<T>::process(text_symbolizer const& sym,
@@ -666,12 +689,6 @@ namespace mapnik
                if (geom.num_points() > 0) // don't bother with empty geometries 
                {
                   path_type path(t_,geom,prj_trans);
-                  //agg::conv_clip_polyline<path_type> clipped_path(path);
-                  //clipped_path.clip_box(0,0,width_,height_);
-                  //placement<agg::conv_clip_polyline<path_type> > 
-                  //   text_placement(&info, &t_, &prj_trans, clipped_path, sym);         
-                  //placement_finder<agg::conv_clip_polyline<path_type>, 
-                  //   label_collision_detector4> finder(detector_);
                   placement text_placement(info,sym);  
                   if (sym.get_label_placement() == POINT_PLACEMENT) 
                   {
