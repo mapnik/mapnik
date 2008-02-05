@@ -52,8 +52,8 @@ namespace mapnik {
          status_e status_;
          agg::trans_affine transform_;
          agg::trans_affine mtx_;
-         unsigned marker_;
          unsigned num_markers_;
+         unsigned marker_;
    };
 
    template <typename Locator,typename Shape,typename Detector>
