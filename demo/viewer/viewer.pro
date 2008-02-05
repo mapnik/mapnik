@@ -7,7 +7,6 @@ TEMPLATE = app
 INCLUDEPATH += /opt/mapnik/include
 INCLUDEPATH += /opt/boost/include/boost-1_34_1
 INCLUDEPATH += /usr/local/include/freetype2
-INCLUDEPATH += /Users/artem/projects/mapnik/agg/include
 INCLUDEPATH += .
 
 QMAKE_CXXFLAGS +=' -DDARWIN'
