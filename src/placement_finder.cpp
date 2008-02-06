@@ -431,7 +431,7 @@ namespace mapnik
       }
       else
       {
-         tolerance = spacing/3.0;
+         tolerance = spacing/2.0;
          tolerance_delta = std::max ( 1.0, spacing/100.0 );
       }
 
