@@ -21,6 +21,11 @@
  *****************************************************************************/
 //$Id$
 
+extern "C"
+{
+#include <png.h>
+}
+
 #include <boost/python.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_view.hpp>
