@@ -1,28 +1,42 @@
 # Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007 The SCons Foundation
-# src/README.txt 0.97.D001 2007/05/17 11:35:19 knight
-
 
                  SCons - a software construction tool
 
-                         Version 0.97
+This is the scons-README file for a version of SCons packaged for local
+execution--that is, execution out of a specific local directory, without
+having to install SCons as a system-wide utility.
 
+You are likely reading this file in one of the following two situations:
 
-This is a beta release of SCons, a tool for building software (and other
-files).  SCons is implemented in Python, and its "configuration files"
-are actually Python scripts, allowing you to use the full power of a
-real scripting language to solve build problems.  You do not, however,
-need to know Python to use SCons effectively.
+    1)  You have unpacked an scons-local-{version} package and are
+        examining the contents.
 
-See the RELEASE.txt file for notes about this specific release,
-including known problems.  See the CHANGES.txt file for a list of
-changes since the previous release.
+        In this case, you are presumably interested in using this
+        package to include a local copy of SCons with some other
+        software that you package, so that you can use SCons to build
+        your software without forcing all of your users to have it fully
+        installed.  Instructions for this can be found below.
 
+        If you are not looking to use SCons in this way, then please
+        use either the scons-{version} package to install SCons on your
+        system, or the scons-src-{version} package if you want the full
+        source to SCons, including its packaging code and underlying
+        tests and testing infrastructure.
+
+    2)  This file was included in some other software package so that
+        the package could be built using SCons.
+
+        In this case, follow the instructions provided with the
+        rest of the software package for how to use SCons to build
+        and/or install the software.  The file containing build and
+        installation instructions will typically be named README or
+        INSTALL.
 
 LATEST VERSION
 ==============
 
-Before going further, you can check that this package you have is
-the latest version by checking the SCons download page at:
+Before going further, you can check for the latest version of the
+scons-local package, or any SCons package, at the SCons download page:
 
         http://www.scons.org/download.html
 
@@ -31,149 +45,93 @@ EXECUTION REQUIREMENTS
 ======================
 
 Running SCons requires Python version 1.5.2 or later.  There should be
-no other dependencies or requirements to run SCons.  (There is, however,
-an additional requirement to *install* SCons from this particular
-package; see the next section.)
+no other dependencies or requirements to run SCons.
 
-By default, SCons knows how to search for available programming tools
-on various systems--see the SCons man page for details.  You may,
-of course, override the default SCons choices made by appropriate
+The default SCons configuration assumes use of the Microsoft Visual C++
+compiler suite on WIN32 systems, and assumes a C compiler named 'cc',
+a C++ compiler named 'c++', and a Fortran compiler named 'g77' (such
+as found in the GNU C compiler suite) on any other type of system.
+You may, of course, override these default values by appropriate
 configuration of Environment construction variables.
-
-
-INSTALLATION REQUIREMENTS
-=========================
-
-Installing SCons from this package requires the Python distutils
-package.  The distutils package was not shipped as a standard part of
-Python until Python version 1.6, so if your system is running Python
-1.5.2, you may not have distutils installed.  If you are running
-Python version 1.6 or later, you should be fine.
-
-NOTE TO RED HAT USERS:  Red Hat shipped Python 1.5.2 as the default all
-the way up to Red Hat Linux 7.3, so you probably do *not* have distutils
-installed, unless you have already done so manually or are running Red
-Hat 8.0 or later.
-
-In this case, your options are:
-
-    --  (Recommended.)  Install from a pre-packaged SCons package that
-        does not require distutils:
-
-            Red Hat Linux       scons-0.97-1.noarch.rpm
-
-            Debian GNU/Linux    scons_0.97-1_all.deb
-                                (or use apt-get)
-
-            Windows             scons-0.97.win32.exe
-
-    --  (Optional.)  Download the latest distutils package from the
-        following URL:
-
-            http://www.python.org/sigs/distutils-sig/download.html
-
-        Install the distutils according to the instructions on the page.
-        You can then proceed to the next section to install SCons from
-        this package.
 
 
 INSTALLATION
 ============
 
-Assuming your system satisfies the installation requirements in the
-previous section, install SCons from this package simply by running the
-provided Python-standard setup script as follows:
+Installation of this package should be as simple as unpacking the
+archive (either .tar.gz or .zip) in any directory (top-level or a
+subdirectory) within the software package with which you want to ship
+SCons.
 
-        # python setup.py install
+Once you have installed this package, you should write an SConstruct
+file at the top level of your source tree to build your software as you
+see fit.
 
-By default, the above command will do the following:
+Then modify the build/install instructions for your package to instruct
+your users to execute SCons as follows (if you installed this package in
+your top-level directory):
 
-    --  Install the version-numbered "scons-0.97" and "sconsign-0.97"
-        scripts in the default system script directory (/usr/bin or
-        C:\Python*\Scripts, for example).  This can be disabled by
-        specifying the "--no-version-script" option on the command
-        line.
+        $ python scons.py
 
-    --  Install scripts named "scons" and "sconsign" scripts in the
-        default system script directory (/usr/bin or C:\Python*\Scripts,
-        for example).  This can be disabled by specifying the
-        "--no-scons-script" option on the command line, which is useful
-        if you want to install and experiment with a new version before
-        making it the default on your system.
+Or (if, for example, you installed this package in a subdirectory named
+"scons"):
 
-        On UNIX or Linux systems, you can have the "scons" and "sconsign"
-        scripts be hard links or symbolic links to the "scons-0.97" and
-        "sconsign-0.97" scripts by specifying the "--hardlink-scons"
-        or "--symlink-scons" options on the command line.
+        $ python scons/scons.py
 
-    --  Install "scons-0.97.bat" and "scons.bat" wrapper scripts in the
-        Python prefix directory on Windows (C:\Python*, for example).
-        This can be disabled by specifying the "--no-install-bat" option
-        on the command line.
+That should be all you have to do.  (If it isn't that simple, please let
+us know!)
 
-        On UNIX or Linux systems, the "--install-bat" option may be
-        specified to have "scons-0.97.bat" and "scons.bat" files
-        installed in the default system script directory, which is useful
-        if you want to install SCons in a shared file system directory
-        that can be used to execute SCons from both UNIX/Linux and
-        Windows systems.
 
-    --  Install the SCons build engine (a Python module) in an
-        appropriate version-numbered SCons library directory
-        (/usr/lib/scons-0.97 or C:\Python*\scons-0.97, for example).
-        See below for more options related to installing the build
-        engine library.
+CONTENTS OF THIS PACKAGE
+========================
 
-    --  Install the troff-format man pages in an appropriate directory
-        on UNIX or Linux systems (/usr/share/man/man1 or /usr/man/man1,
-        for example).  This can be disabled by specifying the
-        "--no-install-man" option on the command line.  The man pages
-        can be installed on Windows systems by specifying the
-        "--install-man" option on the command line.
+This scons-local package consists of the following:
 
-Note that, by default, SCons does not install its build engine library
-in the standard Python library directories.  If you want to be able to
-use the SCons library modules (the build engine) in other Python
-scripts, specify the "--standard-lib" option on the command line, as
-follows:
+scons-LICENSE
+        A copy of the copyright and terms under which SCons is
+        distributed (the Open Source Initiative-approved MIT license).
 
-        # python setup.py install --standard-lib
+        A disclaimer has been added to the beginning to make clear that
+        this license applies only to SCons, and not to any separate
+        software you've written with which you're planning to package
+        SCons.
 
-This will install the build engine in the standard Python library
-directory (/usr/lib/python*/site-packages or
-C:\Python*\Lib\site-packages).
+scons-README
+        What you're looking at right now.
 
-Alternatively, you can have SCons install its build engine library in a
-hard-coded standalone library directory, instead of the default
-version-numbered directory, by specifying the "--standalone-lib" option
-on the command line, as follows:
+scons-local-{version}/
+        The SCons build engine.  This is structured as a Python
+        library.
 
-        # python setup.py install --standalone-lib
-
-This is usually not recommended, however.
-
-Note that, to install SCons in any of the above system directories,
-you should have system installation privileges (that is, "root" or
-"Administrator") when running the setup.py script.  If you don't have
-system installation privileges, you can use the --prefix option to
-specify an alternate installation location, such as your home directory:
-
-        $ python setup.py install --prefix=$HOME
-
-This will install SCons in the appropriate locations relative to
-$HOME--that is, the scons script itself $HOME/bin and the associated
-library in $HOME/lib/scons, for example.
+scons.py
+        The SCons script itself.  The script sets up the Python
+        sys.path variable to use the build engine found in the
+        scons-local-{version}/ directory in preference to any other
+        SCons build engine installed on your system.
 
 
 DOCUMENTATION
 =============
 
-See the RELEASE.txt file for notes about this specific release,
-including known problems.  See the CHANGES.txt file for a list of
-changes since the previous release.
+Because this package is intended to be included with other software by
+experienced users, we have not included any SCons documentation in this
+package (other than this scons-README file you're reading right now).
 
-The scons.1 man page is included in this package, and contains a section
-of small examples for getting started using SCons.
+If, however, you need documentation about SCons, then consult any of the
+following from the corresponding scons-{version} or scons-src-{version}
+package:
+
+        The RELEASE.txt file (src/RELEASE.txt file in the
+        scons-src-{version} package), which contains notes about this
+        specific release, including known problems.
+
+        The CHANGES.txt file (src/CHANGES.txt file in the
+        scons-src-{version} package), which contains a list of changes
+        since the previous release.
+
+        The scons.1 man page (doc/man/scons.1 in the scons-src-{version}
+        package), which contains a section of small examples for getting
+        started using SCons.
 
 Additional documentation for SCons is available at:
 
@@ -184,8 +142,8 @@ LICENSING
 =========
 
 SCons is distributed under the MIT license, a full copy of which is
-available in the LICENSE.txt file. The MIT license is an approved Open
-Source license, which means:
+available in the scons-LICENSE file in this package. The MIT license is
+an approved Open Source license, which means:
 
         This software is OSI Certified Open Source Software.  OSI
         Certified is a certification mark of the Open Source Initiative.
@@ -199,51 +157,27 @@ available at:
 REPORTING BUGS
 ==============
 
-Please report bugs by following the detailed instructions on our Bug
-Submission page:
+You can report bugs either by following the "Tracker - Bugs" link
+on the SCons project page:
 
-        http://scons.tigris.org/bug-submission.html
+        http://sourceforge.net/projects/scons/
 
-You can also send mail to the SCons developers' mailing list:
+or by sending mail to the SCons developers mailing list:
 
-        dev@scons.tigris.org
-
-But even if you send email to the mailing list please make sure that you
-ALSO submit a bug report to the project page bug tracker, because bug
-reports in email often get overlooked in the general flood of messages.
+        scons-devel@lists.sourceforge.net
 
 
 MAILING LISTS
 =============
 
-An active mailing list for users of SCons is available.  You may send
-questions or comments to the list at:
+A mailing list for users of SCons is available.  You may send questions
+or comments to the list at:
 
-        users@scons.tigris.org
+        scons-users@lists.sourceforge.net
 
-You may subscribe to the mailing list by sending email to:
+You may subscribe to the scons-users mailing list at:
 
-        users-subscribe@scons.tigris.org
-
-There is also a low-volume mailing list available for announcements
-about SCons.  Subscribe by sending email to:
-
-        announce-subscribe@scons.tigris.org
-
-There are other mailing lists available for SCons developers, for
-notification of SCons code changes, and for notification of updated
-bug reports and project documents.  Please see our mailing lists page
-for details.
-
-
-DONATIONS
-=========
-
-If you find SCons helpful, please consider making a donation (of cash,
-software, or hardware) to support continued work on the project.
-Information is available at:
-
-        http://www.scons.org/donate.html
+        http://lists.sourceforge.net/lists/listinfo/scons-users
 
 
 FOR MORE INFORMATION
@@ -265,9 +199,6 @@ With plenty of help from the SCons Development team:
         Chad Austin
         Charles Crain
         Steve Leblanc
-        Greg Noel
-        Gary Oberbrunner
         Anthony Roach
-        Greg Spencer
-        Christoph Wiedemann
+        Terrel Shumway
 
