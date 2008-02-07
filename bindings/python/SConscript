@@ -62,7 +62,7 @@ fontscollectionpath = mapniklibpath + '/fonts'
 """
 
 exp =  r"%s{2,}" % os.sep
-mapnik_plugins_dir  = re.sub(exp,os.sep,env['DESTDIR'] + '/' + env['PREFIX'] + '/'+env['LIBDIR_SCHEMA']+'/mapnik')
+mapnik_plugins_dir  = re.sub(exp,os.sep, env['PREFIX'] + '/'+env['LIBDIR_SCHEMA']+'/mapnik')
 file('mapnik/paths.py','w').write(paths % (mapnik_plugins_dir,))
 
 pymapnik = glob.glob('mapnik/*.py')
