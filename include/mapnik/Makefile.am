@@ -8,6 +8,7 @@ endif
 
 libmapnik_HEADERS = \
 	agg_renderer.hpp\
+	arrow.hpp \
 	attribute.hpp \
 	attribute_collector.hpp \
 	attribute_descriptor.hpp \
@@ -15,7 +16,7 @@ libmapnik_HEADERS = \
 	color_factory.hpp \
 	comparison.hpp \
 	config.hpp \
-  config_error.hpp \
+	config_error.hpp \
 	coord.hpp \
 	coord_array.hpp \
 	css_color_parser.hpp \
@@ -24,7 +25,7 @@ libmapnik_HEADERS = \
 	datasource_cache.hpp \
 	distance.hpp \
 	ellipsoid.hpp \
-  enumeration.hpp \
+  	enumeration.hpp \
 	envelope.hpp \
 	expression.hpp \
 	factory.hpp \
@@ -52,30 +53,35 @@ libmapnik_HEADERS = \
 	image_reader.hpp \
 	image_util.hpp \
 	image_view.hpp \
+	jpeg_io.hpp \
 	label_collision_detector.hpp \
 	label_placement.hpp \
 	layer.hpp \
-  ${libxml2_inc} \
+  	${libxml2_inc} \
 	line_pattern_symbolizer.hpp \
 	line_symbolizer.hpp \
 	load_map.hpp \
 	local_datasource.hpp \
 	logical.hpp \
 	map.hpp \
+	markers_converter.hpp \
+	markers_symbolizer.hpp \
 	math_expr.hpp \
 	memory.hpp \
 	memory_datasource.hpp \
 	memory_featureset.hpp \
+	octree.hpp \
 	params.hpp \
 	placement_finder.hpp \
 	plugin.hpp \
+	png_io.hpp \
 	point_symbolizer.hpp \
 	polygon_pattern_symbolizer.hpp \
 	polygon_symbolizer.hpp \
 	pool.hpp \
 	projection.hpp \
 	proj_transform.hpp \
-  ptree_helpers.hpp \
+  	ptree_helpers.hpp \
 	quad_tree.hpp \
 	query.hpp \
 	raster.hpp \

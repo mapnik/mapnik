@@ -3,14 +3,13 @@ pkglib_LTLIBRARIES = \
 	shape.la
 
 shape_la_SOURCES = \
-	dbffile.cpp        \
-	dbf_test.cpp        \
-	shape.cpp        \
-	shape_featureset.cpp        \
-	shapefile.cpp        \
-	shape_index_featureset.cpp        \
-	shape_io.cpp        \
-	shp_index.cpp
+	dbffile.cpp \
+	dbf_test.cpp \
+	shape.cpp \
+	shape_featureset.cpp \
+	shapefile.cpp \
+	shape_index_featureset.cpp \
+	shape_io.cpp
 
 shape_la_CXXFLAGS = \
 	-I../../../include

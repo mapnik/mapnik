@@ -20,7 +20,8 @@ libxml2_src = \
 endif
 
 libmapnik_la_SOURCES = \
-	agg_renderer.cpp\
+	agg_renderer.cpp \
+	arrow.cpp \
 	datasource_cache.cpp \
 	distance.cpp \
 	envelope.cpp \
@@ -30,7 +31,7 @@ libmapnik_la_SOURCES = \
 	image_reader.cpp \
 	image_util.cpp \
 	layer.cpp \
-  ${libxml2_src} \
+  	${libxml2_src} \
 	line_pattern_symbolizer.cpp \
 	load_map.cpp \
 	map.cpp \
@@ -47,38 +48,39 @@ libmapnik_la_SOURCES = \
 	save_map.cpp \
 	scale_denominator.cpp \
 	shield_symbolizer.cpp \
-  stroke.cpp \
-  symbolizer.cpp \
+  	stroke.cpp \
+  	symbolizer.cpp \
 	text_symbolizer.cpp \
 	tiff_reader.cpp \
+	unicode.cpp \
 	wkb.cpp
   
 
 libmapnik_la_LIBADD = \
 	${PNG_LIBS} \
-  ${FREETYPE2_LIBS} \
-  ${AGG_LIBS} \
+  	${FREETYPE2_LIBS} \
+  	${AGG_LIBS} \
 	${BOOST_LDFLAGS} \
 	${BOOST_THREAD_LIB} \
 	${BOOST_REGEX_LIB} \
 	${BOOST_FILESYSTEM_LIB} \
-  ${JPEG_LIBS} \
-  ${TIFF_LIBS} \
-  ${PROJ_LIBS} \
-  ${LTDL_LIBS} \
-  ${LIBXML2_LIBS}
+  	${JPEG_LIBS} \
+  	${TIFF_LIBS} \
+  	${PROJ_LIBS} \
+  	${LTDL_LIBS} \
+  	${LIBXML2_LIBS}
 
 libmapnik_la_CXXFLAGS = \
-  -I../include        \
+  	-I../include        \
 	${PNG_CFLAGS} \
-  ${FREETYPE2_CFLAGS} \
-  ${AGG_CFLAGS} \
-  ${JPEG_CFLAGS} \
-  ${TIFF_CFLAGS} \
-  ${PROJ_CFLAGS} \
-  ${LTDL_CFLAGS} \
-  ${BOOST_CPPFLAGS} \
-  ${LIBXML2_CFLAGS}
+  	${FREETYPE2_CFLAGS} \
+  	${AGG_CFLAGS} \
+  	${JPEG_CFLAGS} \
+  	${TIFF_CFLAGS} \
+  	${PROJ_CFLAGS} \
+  	${LTDL_CFLAGS} \
+  	${BOOST_CPPFLAGS} \
+  	${LIBXML2_CFLAGS}
 	
 	
 
