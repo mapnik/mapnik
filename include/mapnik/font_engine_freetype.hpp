@@ -307,26 +307,26 @@ namespace mapnik
             return dimension_t(slot->advance.x >> 6, glyph_bbox.yMax - glyph_bbox.yMin);
         }
         
-        void get_string_info(string_info *info)
-        {
-            unsigned width = 0;
-            unsigned height = 0;
-
-            std::wstring text = info->get_string();
-
-            for (std::wstring::const_iterator i=text.begin();i!=text.end();++i)
-            {
+          void get_string_info(string_info & info)
+          {
+             unsigned width = 0;
+             unsigned height = 0;
+             
+             std::wstring const& text = info.get_string();
+            
+             for (std::wstring::const_iterator i=text.begin();i!=text.end();++i)
+             {
                 dimension_t char_dim = character_dimensions(*i);
-              
-                info->add_info(*i, char_dim.first, char_dim.second);
-              
+                
+                info.add_info(*i, char_dim.first, char_dim.second);
+                
                 width += char_dim.first;
                 height = char_dim.second > height ? char_dim.second : height;
                 
-            }
-            info->set_dimensions(width, height);
-        }
-	
+             }
+             info.set_dimensions(width, height);
+          }
+          
         void render(double x0, double y0)
         {
             FT_Error  error;

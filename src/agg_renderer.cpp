@@ -466,8 +466,9 @@ namespace mapnik
             text_renderer<mapnik::Image32> ren(pixmap_,face);
             ren.set_pixel_size(sym.get_text_size());
             ren.set_fill(sym.get_fill());
+            
             string_info info(text);
-            ren.get_string_info(&info);
+            ren.get_string_info(info);
             
             placement_finder<label_collision_detector4> finder(detector_);
             
@@ -681,7 +682,7 @@ namespace mapnik
             placement_finder<label_collision_detector4> finder(detector_);
            
             string_info info(text);
-            ren.get_string_info(&info);
+            ren.get_string_info(info);
             unsigned num_geom = feature.num_geometries();
             for (unsigned i=0;i<num_geom;++i)
             {
