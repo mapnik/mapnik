@@ -306,6 +306,10 @@ namespace mapnik
                     {
                         throw config_error( ex.what() );
                     }
+                    catch (...)
+                    {
+                       //throw config_error("exception...");
+                    }
                 }
                 else if (child.first != "<xmlattr>" &&
                         child.first != "<xmlcomment>")
