@@ -43,9 +43,9 @@ namespace boost { namespace python {
                return ::PyFloat_FromDouble(val);
             }
             
-            PyObject * operator() (std::wstring const& s) const
+            PyObject * operator() (UnicodeString const& s) const
             {
-               return ::PyUnicode_FromWideChar(s.data(),implicit_cast<ssize_t>(s.size()));
+               return ::PyUnicode_FromWideChar((wchar_t*)s.getBuffer(),implicit_cast<ssize_t>(s.length()));
             }
       };
       

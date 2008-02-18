@@ -41,6 +41,8 @@ else :
     libraries.append('boost_python%s' % env['BOOST_APPEND'])
 
 if env['PLATFORM'] == 'Darwin':
+    libraries.append('icuuc')
+    libraries.append('icudata')
     if env['THREADING'] == 'multi':
         libraries.append('boost_regex%s%s' % (env['BOOST_APPEND'],thread_suffix))
     else :

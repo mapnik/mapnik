@@ -1,4 +1,4 @@
-#
+	
 # This file is part of Mapnik (c++ mapping toolkit)
 #
 # Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -46,9 +46,8 @@ else:
     
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
-    libraries.append('iconv')
-    if env['BIDI'] : libraries.append('fribidi')
-
+    libraries.append('icuuc')
+    libraries.append('icudata')
 
 shape_inputdriver = env.SharedLibrary('shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries)
 

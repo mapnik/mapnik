@@ -78,6 +78,8 @@ source = Split(
     """
     )
 
+#source.append("cairo_renderer.cpp")
+
 if env['XMLPARSER'] == 'tinyxml':
     source += Split(
         """

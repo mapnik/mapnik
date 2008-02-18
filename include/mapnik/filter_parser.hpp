@@ -91,16 +91,17 @@ namespace mapnik
         template <typename Iter>
         void operator() (Iter start,Iter end) const
         {
-            std::wstring str(start,end);
-            std::wstring quote = L"\\";
-            std::wstring::size_type idx;
-            idx = str.find(quote);
-            while (idx != string::npos)
-            {	    		
-                str.erase(idx,1);
-                idx = str.find(quote);
-            }
-            exprs_.push(shared_ptr<expression<FeatureT> >(new literal<FeatureT>(str)));
+           //std::wstring str(start,end);
+           //std::wstring quote = L"\\";
+           //std::wstring::size_type idx;
+           //idx = str.find(quote);
+           //while (idx != string::npos)
+           ///{	    		
+           //   str.erase(idx,1);
+           //    idx = str.find(quote);
+           //}
+           UnicodeString str(start,end-start);
+           exprs_.push(shared_ptr<expression<FeatureT> >(new literal<FeatureT>(str)));
         }
         stack<shared_ptr<expression<FeatureT> > >& exprs_;
     };

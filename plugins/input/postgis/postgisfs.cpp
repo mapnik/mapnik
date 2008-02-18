@@ -132,10 +132,11 @@ feature_ptr postgis_featureset::next()
            }
            else if (oid==25 || oid==1042 || oid==1043) // text or bpchar or varchar
            {
-              std::string str(buf);
-              trim(str);
-              std::wstring wstr = tr_->transcode(str);
-              boost::put(*feature,name,wstr);
+              //std::string str(buf);
+              //trim(str);
+              //std::wstring wstr = tr_->transcode(str);
+              UnicodeString ustr = tr_->transcode(buf);
+              boost::put(*feature,name,ustr);
            }
            else if (oid == 1700) // numeric
            {

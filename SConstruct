@@ -39,8 +39,8 @@ opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/'
 opts.Add('BOOST_TOOLKIT','Specify boost toolkit e.g. gcc41.','',False)
 opts.Add(('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'))
 opts.Add(('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'))
-opts.Add(PathOption('FRIBIDI_INCLUDES', 'Search path for fribidi include files', '/usr/include'))
-opts.Add(PathOption('FRIBIDI_LIBS','Search path for fribidi include files','/usr/' + LIBDIR_SCHEMA))
+opts.Add(PathOption('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include'))
+opts.Add(PathOption('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
 opts.Add(PathOption('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include'))
@@ -58,7 +58,6 @@ opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis',
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
 opts.Add(BoolOption('DEBUG', 'Compile a debug version of mapnik', 'False'))
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
-opts.Add(BoolOption('BIDI', 'BIDI support', 'False'))
 opts.Add(EnumOption('THREADING','Set threading support','multi', ['multi','single']))
 opts.Add(EnumOption('XMLPARSER','Set xml parser ','tinyxml', ['tinyxml','spirit','libxml2']))
 
@@ -124,14 +123,8 @@ for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PGSQL', 'PROJ', 'GDAL',):
     uniq_add(env, 'LIBPATH', lib_path)
     
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
-
-if env['BIDI']:
-    env.Append(CXXFLAGS = '-DUSE_FRIBIDI')
-    if env['FRIBIDI_INCLUDES'] not in env['CPPPATH']:
-        env['CPPPATH'].append(env['FRIBIDI_INCLUDES'])
-    if env['FRIBIDI_LIBS'] not in env['LIBPATH']:
-        env['LIBPATH'].append(env['FRIBIDI_LIBS'])  
-    env['LIBS'].append('fribidi')
+   
+#env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
 
 if env['XMLPARSER'] == 'tinyxml':
     env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
@@ -147,15 +140,14 @@ C_LIBSHEADERS = [
     ['z', 'zlib.h', True],
     ['jpeg', ['stdio.h', 'jpeglib.h'], True],
     ['proj', 'proj_api.h', True],
-    ['iconv', 'iconv.h', False],
     ['pq', 'libpq-fe.h', False]
 ]
 
 CXX_LIBSHEADERS = [
+    ['icuuc','unicode/unistr.h',True],
+    ['icudata','unicode/utypes.h' , True],
     ['gdal', 'gdal_priv.h',False]
 ]
-
-if env['BIDI'] : C_LIBSHEADERS.append(['fribidi','fribidi/fribidi.h',True])
 
 BOOST_LIBSHEADERS = [
     # ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35

@@ -24,9 +24,8 @@
 #ifndef UNICODE_HPP
 #define UNICODE_HPP
 
-extern "C" {
-#include <iconv.h>
-}
+#include <unicode/unistr.h>
+#include <unicode/ucnv.h>
 
 #include <boost/utility.hpp>
 
@@ -35,10 +34,11 @@ namespace mapnik {
    {
       public:
          explicit transcoder (std::string const& encoding);
-         std::wstring transcode(std::string const& input) const;  
+         UnicodeString transcode(const char* data) const;  
          ~transcoder(); 
       private:
-         iconv_t desc_;
+         bool ok_;
+         UConverter * conv_;
    };
 }
 

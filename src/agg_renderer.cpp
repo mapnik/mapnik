@@ -456,7 +456,7 @@ namespace mapnik
                                   proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-      std::wstring text = feature[sym.get_name()].to_unicode();
+      UnicodeString text = feature[sym.get_name()].to_unicode();
       boost::shared_ptr<ImageData32> const& data = sym.get_image();
       if (text.length() > 0 && data)
       {
@@ -666,7 +666,7 @@ namespace mapnik
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       
-      std::wstring text = feature[sym.get_name()].to_unicode();
+      UnicodeString text = feature[sym.get_name()].to_unicode();
       if ( text.length() > 0 )
       {
          Color const& fill  = sym.get_fill();

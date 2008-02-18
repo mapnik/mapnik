@@ -113,8 +113,9 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
    if (col>=0 && col<num_fields_)
    {
       std::string name=fields_[col].name_;
-      std::string str=boost::trim_copy(std::string(record_+fields_[col].offset_,fields_[col].length_));
-        
+      std::string str(record_+fields_[col].offset_,fields_[col].length_);
+      boost::trim(str);
+      
       switch (fields_[col].type_)
       {
          case 'C':
@@ -122,7 +123,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
          case 'M':
          case 'L':
          {
-            f[name] = tr.transcode(str); 
+            f[name] = tr.transcode(str.c_str()); 
             break;
          }
          case 'N':

@@ -51,7 +51,7 @@ namespace mapnik {
         literal(double val)
             : expression<FeatureT>(),
               value_(val) {}
-        literal(std::wstring const& val)
+        literal(UnicodeString const& val)
             : expression<FeatureT>(),
               value_(val) {}
         literal(literal const& other)

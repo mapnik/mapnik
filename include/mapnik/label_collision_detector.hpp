@@ -28,6 +28,7 @@
 #include <mapnik/quad_tree.hpp>
 // stl
 #include <vector>
+#include <unicode/unistr.h>
 
 namespace mapnik
 {
@@ -139,10 +140,10 @@ namespace mapnik
          struct label
          {
                label(Envelope<double> const& b) : box(b) {}
-               label(Envelope<double> const& b, std::wstring const& t) : box(b), text(t) {}
+               label(Envelope<double> const& b, UnicodeString const& t) : box(b), text(t) {}
                
                Envelope<double> box;
-               std::wstring text;
+               UnicodeString text;
          };
          
          typedef quad_tree< label > tree_t;
@@ -171,7 +172,7 @@ namespace mapnik
             return true;
         }	
 
-        bool has_placement(Envelope<double> const& box, std::wstring const& text, double distance)
+        bool has_placement(Envelope<double> const& box, UnicodeString const& text, double distance)
         {
             Envelope<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
 	    
@@ -195,7 +196,7 @@ namespace mapnik
             tree_.insert(label(box), box);
          }
          
-         void insert(Envelope<double> const& box, std::wstring const& text)
+         void insert(Envelope<double> const& box, UnicodeString const& text)
          {
             tree_.insert(label(box, text), box);
          }

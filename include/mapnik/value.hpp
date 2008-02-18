@@ -33,10 +33,12 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+// uci
+#include <unicode/unistr.h>
 
 namespace mapnik  {
    
-   typedef boost::variant<int,double,std::wstring> value_base;
+   typedef boost::variant<int,double,UnicodeString> value_base;
    
    namespace impl {
       struct equals
@@ -64,8 +66,8 @@ namespace mapnik  {
 	       return  lhs == rhs;
 	    }
 	
-            bool operator() (std::wstring const& lhs, 
-                             std::wstring const& rhs) const
+            bool operator() (UnicodeString const& lhs, 
+                             UnicodeString const& rhs) const
 	    {
 	       return  lhs == rhs;
 	    }
@@ -96,7 +98,7 @@ namespace mapnik  {
 	       return  lhs > rhs;
 	    }
 	
-            bool operator() (std::wstring const& lhs, std::wstring const& rhs) const
+            bool operator() (UnicodeString const& lhs, UnicodeString const& rhs) const
 	    {
 	       return  lhs > rhs;
 	    }
@@ -127,7 +129,7 @@ namespace mapnik  {
 	       return  lhs >= rhs;
 	    }
 	
-            bool operator() (std::wstring const& lhs, std::wstring const& rhs ) const
+            bool operator() (UnicodeString const& lhs, UnicodeString const& rhs ) const
 	    {
 	       return lhs >= rhs;
 	    }
@@ -158,8 +160,8 @@ namespace mapnik  {
 	       return  lhs < rhs;
 	    }
 	
-            bool operator()( std::wstring const& lhs, 
-                             std::wstring const& rhs ) const
+            bool operator()( UnicodeString const& lhs, 
+                             UnicodeString const& rhs ) const
 	    {
 	       return lhs < rhs;
 	    }
@@ -191,8 +193,8 @@ namespace mapnik  {
 	    }
 	
             template <typename T>
-            bool operator()( std::wstring const& lhs, 
-                             std::wstring const& rhs ) const
+            bool operator()( UnicodeString const& lhs, 
+                             UnicodeString const& rhs ) const
 	    {
 	       return lhs <= rhs;
 	    }
@@ -213,8 +215,8 @@ namespace mapnik  {
 	       return lhs + rhs ;
 	    }
 	
-            value_type operator() (std::wstring const& lhs , 
-                                   std::wstring const& rhs ) const
+            value_type operator() (UnicodeString const& lhs , 
+                                   UnicodeString const& rhs ) const
 	    {
 	       return lhs + rhs;
 	    }
@@ -245,8 +247,8 @@ namespace mapnik  {
 	       return lhs - rhs ;
 	    }
 
-            value_type operator() (std::wstring const& lhs,
-                                   std::wstring const& ) const
+            value_type operator() (UnicodeString const& lhs,
+                                   UnicodeString const& ) const
 	    {
 	       return lhs;
 	    }
@@ -277,8 +279,8 @@ namespace mapnik  {
 	       return lhs * rhs;
 	    }
 	
-            value_type operator() (std::wstring const& lhs,
-                                   std::wstring const& ) const
+            value_type operator() (UnicodeString const& lhs,
+                                   UnicodeString const& ) const
 	    {
 	       return lhs;
 	    }	
@@ -310,8 +312,8 @@ namespace mapnik  {
 	       return lhs / rhs;
 	    }
 	
-            value_type operator() (std::wstring const& lhs,
-                                   std::wstring const&) const
+            value_type operator() (UnicodeString const& lhs,
+                                   UnicodeString const&) const
 	    {
 	       return lhs;
 	    }
@@ -338,27 +340,28 @@ namespace mapnik  {
 	       return ss.str();
 	    }
             // specializations 
-            std::string operator() (std::wstring const& val) const
+            std::string operator() (UnicodeString const& val) const
 	    {
-               std::stringstream ss;
-               std::wstring::const_iterator pos = val.begin();
-               ss << std::hex ;
-               for (;pos!=val.end();++pos)
-               {
-                  wchar_t c = *pos;
-                  if (c < 0x80) 
-                  {
-                     ss << char(c);
-                  }
-                  else
-                  {
-                     ss << "\\x";
-                     unsigned c0 = (c >> 8) & 0xff;
-                     if (c0) ss << c0;
-                     ss << (c & 0xff);
-                  }
-               }
-	       return ss.str();
+               //std::stringstream ss;
+               //std::wstring::const_iterator pos = val.begin();
+               //ss << std::hex ;
+               //for (;pos!=val.end();++pos)
+               //{
+               //  wchar_t c = *pos;
+               //  if (c < 0x80) 
+               //  {
+               //     ss << char(c);
+               //  }
+               //  else
+               //  {
+               //     ss << "\\x";
+               //     unsigned c0 = (c >> 8) & 0xff;
+               //     if (c0) ss << c0;
+               //     ss << (c & 0xff);
+               //  }
+               //}
+	       //return ss.str();
+               return "TODO";
 	    }
             
             std::string operator() (double val) const
@@ -369,37 +372,38 @@ namespace mapnik  {
             }
       };
 
-      struct to_unicode : public boost::static_visitor<std::wstring>
+      struct to_unicode : public boost::static_visitor<UnicodeString>
       {
                 
             template <typename T>
-            std::wstring operator() (T val) const
+            UnicodeString operator() (T val) const
 	    {
-               std::basic_ostringstream<wchar_t> out;
+               std::basic_ostringstream<char> out;
 	       out << val;
-               return out.str();
+               return UnicodeString(out.str().c_str());
 	    }
 
             // specializations 
-            std::wstring const& operator() (std::wstring const& val) const
+            UnicodeString const& operator() (UnicodeString const& val) const
 	    {
                return val;
 	    }
 
-            std::wstring operator() (double val) const
+            UnicodeString operator() (double val) const
             {
-               std::basic_ostringstream<wchar_t> out;
+               std::basic_ostringstream<char> out;
 	       out << std::setprecision(16) << val;
-	       return out.str();
+               return UnicodeString(out.str().c_str());
             }
       };
       
       struct to_expression_string : public boost::static_visitor<std::string>
       {
-            std::string operator() (std::wstring const& val) const
+            std::string operator() (UnicodeString const& val) const
 	    {
+               /*
                std::stringstream ss;
-               std::wstring::const_iterator pos = val.begin();
+               UnicodeString::const_iterator pos = val.begin();
                ss << std::hex ;
                for (;pos!=val.end();++pos)
                {
@@ -417,6 +421,8 @@ namespace mapnik  {
                   }
                }
 	       return "\'" + ss.str() + "\'";
+               */
+               return "TODO";
 	    } 
             
             template <typename T>
@@ -496,7 +502,7 @@ namespace mapnik  {
 	    return boost::apply_visitor(impl::to_string(),base_);
 	 }
          
-         std::wstring to_unicode() const
+         UnicodeString to_unicode() const
          {
             return boost::apply_visitor(impl::to_unicode(),base_);
          }

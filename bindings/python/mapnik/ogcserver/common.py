@@ -283,11 +283,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         m = self._buildMap(params)
         im = Image(params['width'], params['height'])
         render(m, im)
-        im = fromstring('RGBA', (params['width'], params['height']), rawdata(im))
-        fh = StringIO()
-        im.save(fh, PIL_TYPE_MAPPING[params['format']], quality=100)
-        fh.seek(0)
-        return Response(params['format'], fh.read())
+        return Response(params['format'], im.tostring(params['format'])
 
     def GetFeatureInfo(self, params, querymethodname='query_point'):
         m = self._buildMap(params)
