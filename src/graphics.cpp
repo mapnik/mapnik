@@ -23,13 +23,7 @@
 
 // mapnik
 #include <mapnik/graphics.hpp>
-
 #include <mapnik/image_util.hpp>
-// stl
-#include <cassert>
-#include <string.h>
-#include <stack>
-#include <iostream>
 
 namespace mapnik
 {
@@ -41,7 +35,7 @@ namespace mapnik
     Image32::Image32(const Image32& rhs)
         :width_(rhs.width_),
          height_(rhs.height_),
-         data_(rhs.data_) {}
+         data_(rhs.data_)  {}
 
     Image32::~Image32() {}
 
