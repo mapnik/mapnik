@@ -82,6 +82,11 @@ namespace mapnik {
         p = pj_fwd(p,proj_);
         x = p.u;
         y = p.v;
+        if (pj_is_latlong(proj_))
+        {
+           x *=RAD_TO_DEG;
+           y *=RAD_TO_DEG;
+        }           
     }
     
     void projection::inverse(double & x,double & y) const
@@ -89,12 +94,17 @@ namespace mapnik {
 #ifdef MAPNIK_THREADSAFE
        mutex::scoped_lock lock(mutex_);
 #endif
-        projUV p;
-        p.u = x;
-        p.v = y;
-        p = pj_inv(p,proj_);
-        x = RAD_TO_DEG * p.u;
-        y = RAD_TO_DEG * p.v;
+       if (pj_is_latlong(proj_))
+       {
+          x *=DEG_TO_RAD;
+          y *=DEG_TO_RAD;
+       }  
+       projUV p;
+       p.u = x;
+       p.v = y;
+       p = pj_inv(p,proj_);
+       x = RAD_TO_DEG * p.u;
+       y = RAD_TO_DEG * p.v;
     }
     
     projection::~projection() 
