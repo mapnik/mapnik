@@ -210,7 +210,7 @@ int main (int argc,char** argv)
         } else {
             tree.trim();
             std::clog<<" number nodes="<<tree.count()<<std::endl;
-            file.exceptions(ios::failbit | ios::badbit);
+            file.exceptions(std::ios::failbit | std::ios::badbit);
             tree.write(file);
             file.flush();
             file.close();
