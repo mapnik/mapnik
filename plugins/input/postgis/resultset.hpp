@@ -121,6 +121,11 @@ public:
 	    return PQftype(res_,col);
 	return 0;
     }
+
+    bool isNull(int index) const
+    {
+	return PQgetisnull(res_,pos_,index);
+    }
     
     const char* getValue(int index) const
     {
