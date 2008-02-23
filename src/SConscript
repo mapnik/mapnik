@@ -43,6 +43,7 @@ else: # Linux and others
 source = Split(
     """
     agg_renderer.cpp
+    cairo_renderer.cpp
     datasource_cache.cpp
     envelope.cpp
     filter_factory.cpp

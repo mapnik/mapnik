@@ -61,6 +61,8 @@ namespace mapnik
     class font_face : boost::noncopyable
     {
     public:
+        typedef std::pair<unsigned,unsigned> dimension_t;
+
     	font_face(FT_Face face)
             : face_(face) {}
 	
@@ -101,7 +103,118 @@ namespace mapnik
             
             return false;
         }
+              
+        dimension_t character_dimensions(const unsigned c)
+        {
+            FT_Matrix matrix;
+            FT_Vector pen;
+            FT_Error  error;
+            
+            FT_GlyphSlot slot = face_->glyph;
+            
+            pen.x = 0;
+            pen.y = 0;
+            
+            FT_BBox glyph_bbox; 
+            FT_Glyph image;
+            
+            matrix.xx = (FT_Fixed)( 1 * 0x10000L ); 
+            matrix.xy = (FT_Fixed)( 0 * 0x10000L ); 
+            matrix.yx = (FT_Fixed)( 0 * 0x10000L ); 
+            matrix.yy = (FT_Fixed)( 1 * 0x10000L );
+                    
+            FT_Set_Transform (face_,&matrix,&pen);
+            
+            FT_UInt glyph_index = FT_Get_Char_Index( face_, c);
+            
+            error = FT_Load_Glyph (face_,glyph_index,FT_LOAD_NO_HINTING); 
+            if ( error )
+                return dimension_t(0, 0);
+            
+            error = FT_Get_Glyph( face_->glyph, &image);
+            if ( error )
+                return dimension_t(0, 0);
+            
+            FT_Glyph_Get_CBox(image,ft_glyph_bbox_pixels, &glyph_bbox); 
+            FT_Done_Glyph(image); 
+            return dimension_t(slot->advance.x >> 6, glyph_bbox.yMax - glyph_bbox.yMin);
+        }
         
+        void get_string_info(string_info & info)
+        {
+            unsigned width = 0;
+            unsigned height = 0;
+            UErrorCode err = U_ZERO_ERROR;
+            UnicodeString const& ustr = info.get_string();
+            const UChar * text = ustr.getBuffer();
+            UBiDi * bidi = ubidi_openSized(ustr.length(),0,&err);
+             
+            if (U_SUCCESS(err))
+            {
+               ubidi_setPara(bidi,text,ustr.length(), UBIDI_DEFAULT_LTR,0,&err);
+                
+               if (U_SUCCESS(err))
+               {
+                  int32_t count = ubidi_countRuns(bidi,&err);
+                  int32_t logicalStart;
+                  int32_t length;
+                   
+                  for (int32_t i=0; i< count;++i)
+                  {
+                     if (UBIDI_LTR == ubidi_getVisualRun(bidi,i,&logicalStart,&length))
+                     {
+                        do {
+                           UChar ch = text[logicalStart++];
+                           dimension_t char_dim = character_dimensions(ch);
+                           info.add_info(ch, char_dim.first, char_dim.second);
+                           width += char_dim.first;
+                           height = char_dim.second > height ? char_dim.second : height;
+                            
+                        } while (--length > 0);
+                     }
+                     else
+                     {
+                        logicalStart += length;
+                         
+                        int32_t j=0,i=length;
+                        UnicodeString arabic;
+                        UChar * buf = arabic.getBuffer(length);
+                        do {
+                           UChar ch = text[--logicalStart];
+                           buf[j++] = ch;
+                        } while (--i > 0);
+                         
+                        arabic.releaseBuffer(length);
+                        if ( *arabic.getBuffer() >= 0x0600 && *arabic.getBuffer() <= 0x06ff)
+                        {
+                            
+                           UnicodeString shaped;
+                           u_shapeArabic(arabic.getBuffer(),arabic.length(),shaped.getBuffer(arabic.length()),arabic.length(),
+                                         U_SHAPE_LETTERS_SHAPE|U_SHAPE_LENGTH_FIXED_SPACES_NEAR|
+                                         U_SHAPE_TEXT_DIRECTION_VISUAL_LTR
+                                         ,&err);
+                           
+                           shaped.releaseBuffer(arabic.length());
+                           
+                           if (U_SUCCESS(err))
+                           {                  
+                              for (int j=0;j<shaped.length();++j)
+                              {
+                                 dimension_t char_dim = character_dimensions(shaped[j]);
+                                 info.add_info(shaped[j], char_dim.first, char_dim.second);
+                                 width += char_dim.first;
+                                 height = char_dim.second > height ? char_dim.second : height;
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+               ubidi_close(bidi);
+            }
+             
+            info.set_dimensions(width, height);
+        }
 	
     	~font_face()
     	{
@@ -176,7 +289,6 @@ namespace mapnik
         };
 	
         typedef boost::ptr_vector<glyph_t> glyphs_t;
-        typedef std::pair<unsigned,unsigned> dimension_t;
         typedef T pixmap_type;
 	
         text_renderer (pixmap_type & pixmap, face_ptr face)
@@ -278,120 +390,7 @@ namespace mapnik
 	    
             return Envelope<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
         }
-      
-        dimension_t character_dimensions(const unsigned c)
-        {
-            FT_Matrix matrix;
-            FT_Vector pen;
-            FT_Error  error;
-            
-            FT_Face face = face_->get_face();
-            FT_GlyphSlot slot = face->glyph;
-            
-            pen.x = 0;
-            pen.y = 0;
-            
-            FT_BBox glyph_bbox; 
-            FT_Glyph image;
-            
-            matrix.xx = (FT_Fixed)( 1 * 0x10000L ); 
-            matrix.xy = (FT_Fixed)( 0 * 0x10000L ); 
-            matrix.yx = (FT_Fixed)( 0 * 0x10000L ); 
-            matrix.yy = (FT_Fixed)( 1 * 0x10000L );
-                    
-            FT_Set_Transform (face,&matrix,&pen);
-            
-            FT_UInt glyph_index = FT_Get_Char_Index( face, c);
-            
-            error = FT_Load_Glyph (face,glyph_index,FT_LOAD_NO_HINTING); 
-            if ( error )
-                return dimension_t(0, 0);
-            
-            error = FT_Get_Glyph( face->glyph, &image);
-            if ( error )
-                return dimension_t(0, 0);
-            
-            FT_Glyph_Get_CBox(image,ft_glyph_bbox_pixels, &glyph_bbox); 
-            FT_Done_Glyph(image); 
-            return dimension_t(slot->advance.x >> 6, glyph_bbox.yMax - glyph_bbox.yMin);
-        }
         
-          void get_string_info(string_info & info)
-          {
-             unsigned width = 0;
-             unsigned height = 0;
-             UErrorCode err = U_ZERO_ERROR;
-             UnicodeString const& ustr = info.get_string();
-             const UChar * text = ustr.getBuffer();
-             UBiDi * bidi = ubidi_openSized(ustr.length(),0,&err);
-             
-             if (U_SUCCESS(err))
-             {
-                ubidi_setPara(bidi,text,ustr.length(), UBIDI_DEFAULT_LTR,0,&err);
-                
-                if (U_SUCCESS(err))
-                {
-                   int32_t count = ubidi_countRuns(bidi,&err);
-                   int32_t logicalStart;
-                   int32_t length;
-                   
-                   for (int32_t i=0; i< count;++i)
-                   {
-                      if (UBIDI_LTR == ubidi_getVisualRun(bidi,i,&logicalStart,&length))
-                      {
-                         do {
-                            UChar ch = text[logicalStart++];
-                            dimension_t char_dim = character_dimensions(ch);
-                            info.add_info(ch, char_dim.first, char_dim.second);
-                            width += char_dim.first;
-                            height = char_dim.second > height ? char_dim.second : height;
-                            
-                         } while (--length > 0);
-                      }
-                      else
-                      {
-                         logicalStart += length;
-                         
-                         int32_t j=0,i=length;
-                         UnicodeString arabic;
-                         UChar * buf = arabic.getBuffer(length);
-                         do {
-                            UChar ch = text[--logicalStart];
-                            buf[j++] = ch;
-                         } while (--i > 0);
-                         
-                         arabic.releaseBuffer(length);
-                         if ( *arabic.getBuffer() >= 0x0600 && *arabic.getBuffer() <= 0x06ff)
-                         {
-                            
-                            UnicodeString shaped;
-                            u_shapeArabic(arabic.getBuffer(),arabic.length(),shaped.getBuffer(arabic.length()),arabic.length(),
-                                          U_SHAPE_LETTERS_SHAPE|U_SHAPE_LENGTH_FIXED_SPACES_NEAR|
-                                          U_SHAPE_TEXT_DIRECTION_VISUAL_LTR
-                                          ,&err);
-                            
-                            shaped.releaseBuffer(arabic.length());
-                            
-                            if (U_SUCCESS(err))
-                            {                  
-                               for (int j=0;j<shaped.length();++j)
-                               {
-                                  dimension_t char_dim = character_dimensions(shaped[j]);
-                                  info.add_info(shaped[j], char_dim.first, char_dim.second);
-                                  width += char_dim.first;
-                                  height = char_dim.second > height ? char_dim.second : height;
-                               }
-                            }
-                         }
-                      }
-                   }
-                }
-                ubidi_close(bidi);
-             }
-             
-             info.set_dimensions(width, height);
-          }
-          
         void render(double x0, double y0)
         {
             FT_Error  error;
