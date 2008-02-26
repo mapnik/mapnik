@@ -104,7 +104,7 @@ namespace mapnik
    struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
    
    template <typename T>
-   agg_renderer<T>::agg_renderer(Map const& m, Image32 & pixmap, unsigned offset_x, unsigned offset_y)
+   agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, unsigned offset_x, unsigned offset_y)
       : feature_style_processor<agg_renderer>(m),
         pixmap_(pixmap),
         width_(pixmap_.width()),

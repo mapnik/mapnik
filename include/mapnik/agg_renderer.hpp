@@ -47,7 +47,7 @@ namespace mapnik {
    {
      
      public:
-      agg_renderer(Map const& m, Image32 & pixmap, unsigned offset_x=0, unsigned offset_y=0);
+      agg_renderer(Map const& m, T & pixmap, unsigned offset_x=0, unsigned offset_y=0);
       ~agg_renderer();
       void start_map_processing(Map const& map);
       void end_map_processing(Map const& map);
@@ -84,7 +84,7 @@ namespace mapnik {
                    Feature const& feature,
                    proj_transform const& prj_trans);
      private:
-      Image32 & pixmap_;
+      T & pixmap_;
       unsigned width_;
       unsigned height_;
       CoordTransform t_;
