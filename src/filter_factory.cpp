@@ -25,9 +25,15 @@
 
 namespace mapnik
 {
-    filter_ptr create_filter (std::string const& wkt)
-    {
-        filter_factory<Feature> factory;
-        return factory.compile(wkt);
-    }
+   filter_ptr create_filter (std::string const& wkt,std::string const& encoding)
+   {
+      filter_factory<Feature> factory;
+      transcoder tr(encoding);
+      return factory.compile(wkt,tr);
+   }
+   
+   filter_ptr create_filter (std::string const& wkt)
+   {
+      return create_filter(wkt,"utf8");
+   }
 }

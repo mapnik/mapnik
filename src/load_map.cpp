@@ -344,9 +344,10 @@ namespace mapnik
                 get_opt_child<string>( r, "Filter");
             if (filter_expr)
             {
-                rule.set_filter(create_filter(*filter_expr));
+               // can we use encoding defined for XML document for filter expressions?
+               rule.set_filter(create_filter(*filter_expr,"utf8"));
             }
-
+            
             optional<std::string> else_filter = 
                 get_opt_child<string>(r, "ElseFilter");
             if (else_filter)
