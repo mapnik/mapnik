@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/unicode.hpp>
+#include <mapnik/config_error.hpp>
 // boost
 #include <boost/variant.hpp>
 // stl
@@ -38,7 +39,7 @@
 
 namespace mapnik  {
    
-   typedef boost::variant<int,double,UnicodeString> value_base;
+   typedef boost::variant<bool,int,double,UnicodeString> value_base;
    
    namespace impl {
       struct equals
@@ -328,7 +329,22 @@ namespace mapnik  {
 	       return lhs / rhs;
 	    }
       };
-    
+        
+      struct to_bool : public boost::static_visitor<bool>
+      {
+                
+            template <typename T>
+            bool operator() (T val) const
+	    {
+               throw config_error("Boolean value expected");
+	    }
+
+            bool operator() (bool val) const
+            {
+	       return val;
+            }
+      };
+
       struct to_string : public boost::static_visitor<std::string>
       {
                 
@@ -490,6 +506,11 @@ namespace mapnik  {
 	 value_base const& base() const
 	 {
 	    return base_;
+	 }
+
+	 bool to_bool() const
+	 {
+	    return boost::apply_visitor(impl::to_bool(),base_);
 	 }
 
 	 std::string to_expression_string() const

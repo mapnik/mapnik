@@ -111,7 +111,11 @@ feature_ptr postgis_featureset::next()
               const char* buf=rs_->getValue(pos);
               int oid = rs_->getTypeOID(pos);
            
-              if (oid==23) //int4
+              if (oid==16) //bool
+              {
+                 boost::put(*feature,name,buf[0] != 0);
+              }
+              else if (oid==23) //int4
               {
                  int val = int4net(buf);
                  boost::put(*feature,name,val);

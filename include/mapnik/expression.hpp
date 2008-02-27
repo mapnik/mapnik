@@ -45,6 +45,9 @@ namespace mapnik {
     class literal : public expression<FeatureT>
     {
     public:
+        literal(bool val)
+            : expression<FeatureT>(),
+              value_(val) {}
         literal(int val)
             : expression<FeatureT>(),
               value_(val) {}

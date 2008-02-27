@@ -33,6 +33,7 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/filter.hpp>
 #include <mapnik/regex_filter.hpp>
+#include <mapnik/boolean_filter.hpp>
 #include <mapnik/logical.hpp>
 
 // boost
@@ -59,6 +60,24 @@ namespace mapnik
    using std::string;
    using std::clog;
    using std::stack;
+
+    template <typename FeatureT>
+    struct push_boolean
+    {
+        push_boolean(stack<shared_ptr<expression<FeatureT> > >& exprs)
+            : exprs_(exprs) {}
+	
+        void operator() (std::string const& val) const
+        {
+            if (val == "true")
+                exprs_.push(shared_ptr<expression<FeatureT> >
+                            ( new literal<FeatureT>(true)));
+            else if (val == "false")
+                exprs_.push(shared_ptr<expression<FeatureT> >
+                            ( new literal<FeatureT>(false)));
+        }
+        stack<shared_ptr<expression<FeatureT> > >& exprs_;
+    };
 
    template <typename FeatureT>
    struct push_integer
@@ -203,7 +222,31 @@ namespace mapnik
          stack<shared_ptr<filter<FeatureT> > >& filters_;
          stack<shared_ptr<expression<FeatureT> > >& exprs_;
    };
-    
+      
+   template <typename FeatureT>
+   struct compose_boolean_filter
+   {
+         compose_boolean_filter(stack<shared_ptr<filter<FeatureT> > >& filters,
+                                stack<shared_ptr<expression<FeatureT> > >& exprs)
+            : filters_(filters),exprs_(exprs) {}
+
+         template <typename Iter>
+         void operator() (Iter,Iter) const
+         {
+            if (exprs_.size()>=1)
+            {
+               shared_ptr<expression<FeatureT> > exp = exprs_.top();
+               exprs_.pop();
+               if (exp)
+               {
+                  filters_.push(shared_ptr<filter<FeatureT> >(new boolean_filter<FeatureT>(*exp)));
+               }
+            }
+         }
+         stack<shared_ptr<filter<FeatureT> > >& filters_;
+         stack<shared_ptr<expression<FeatureT> > >& exprs_;
+   };
+
    template <typename FeatureT>
    struct compose_and_filter
    {
@@ -297,7 +340,8 @@ namespace mapnik
                   func2_op = "min","max";
                   spatial_op = "Equals","Disjoint","Touches","Within","Overlaps",
                      "Crosses","Intersects","Contains","DWithin","Beyond","BBOX";
-                  
+                  boolean_const = "true","false";
+
                   chset_t BaseChar (L"\x41-\x5A\x61-\x7A\xC0-\xD6\xD8-\xF6\xF8-\xFF\x100-\x131\x134-\x13E"
                                     L"\x141-\x148\x14A-\x17E\x180-\x1C3\x1CD-\x1F0\x1F4-\x1F5\x1FA-\x217"
                                     L"\x250-\x2A8\x2BB-\x2C1\x386\x388-\x38A\x38C\x38E-\x3A1\x3A3-\x3CE"
@@ -368,18 +412,20 @@ namespace mapnik
                      | L':'
                      | CombiningChar 
                      | Extender;
-				
+			
+                  boolean = boolean_const [push_boolean<FeatureT>(self.exprs)];
+	
                   number = strict_real_p [push_real<FeatureT>(self.exprs)] 
                      | int_p [push_integer<FeatureT>(self.exprs)];
 		
                   string_ = confix_p(L'\'',(*lex_escape_ch_p)
                                      [push_string<FeatureT>(self.exprs,self.tr)],
                                      L'\'');
-		
+
                   property = L'[' >> ( (Letter | L'_' | L':') 
                                        >> *NameChar )[push_property<FeatureT>(self.exprs)] >> L']';
 		
-                  literal = number | string_ | property;
+                  literal = boolean | number | string_ | property;
 		
                   function = literal | ( func1_op >> L'('>> literal >> L')') | 
                      (func2_op >> L'(' >> literal >> L','>> literal >> L')');
@@ -415,7 +461,9 @@ namespace mapnik
                                             | ( L"<>" >> relation)
                                             [compose_filter<FeatureT,not_equals<value> >(self.filters,self.exprs)]);
 
-                  not_expr = equation | *(str_p(L"not") >> equation)[compose_not_filter<FeatureT>(self.filters)];
+                  cond_expr = equation | (expression)[compose_boolean_filter<FeatureT>(self.filters,self.exprs)];
+
+                  not_expr = cond_expr | *(str_p(L"not") >> cond_expr)[compose_not_filter<FeatureT>(self.filters)];
 
                   and_expr = not_expr >> *(L"and" >> not_expr)[compose_and_filter<FeatureT>(self.filters)];
 
@@ -429,12 +477,14 @@ namespace mapnik
                   BOOST_SPIRIT_DEBUG_RULE( expression );
                   BOOST_SPIRIT_DEBUG_RULE( relation );
                   BOOST_SPIRIT_DEBUG_RULE( equation );
+                  BOOST_SPIRIT_DEBUG_RULE( cond_expr );
                   BOOST_SPIRIT_DEBUG_RULE( not_expr );
                   BOOST_SPIRIT_DEBUG_RULE( and_expr );
                   BOOST_SPIRIT_DEBUG_RULE( or_expr );
 
                   BOOST_SPIRIT_DEBUG_RULE( filter_statement );   
                   BOOST_SPIRIT_DEBUG_RULE( literal );
+                  BOOST_SPIRIT_DEBUG_RULE( boolean );
                   BOOST_SPIRIT_DEBUG_RULE( number );
                   BOOST_SPIRIT_DEBUG_RULE( string_ );
                   BOOST_SPIRIT_DEBUG_RULE( property );
@@ -453,12 +503,14 @@ namespace mapnik
                boost::spirit::rule<ScannerT> expression;
                boost::spirit::rule<ScannerT> relation;
                boost::spirit::rule<ScannerT> equation;
+               boost::spirit::rule<ScannerT> cond_expr;
                boost::spirit::rule<ScannerT> not_expr;
                boost::spirit::rule<ScannerT> and_expr;
                boost::spirit::rule<ScannerT> or_expr;
               
                boost::spirit::rule<ScannerT> filter_statement;   
                boost::spirit::rule<ScannerT> literal;
+               boost::spirit::rule<ScannerT> boolean;
                boost::spirit::rule<ScannerT> number;
                boost::spirit::rule<ScannerT> string_;
                boost::spirit::rule<ScannerT> property;
@@ -467,6 +519,7 @@ namespace mapnik
                symbols<string> func1_op;
                symbols<string> func2_op;
                symbols<string> spatial_op;
+               symbols<string> boolean_const;
 
 
          };
