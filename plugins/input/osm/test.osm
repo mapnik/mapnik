@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version='0.5' generator='JOSM'>
+  <bound box='0.0,0.0,0.0,0.0' origin='http://www.openstreetmap.org/api/0.5' />
+  <bound box='50.9,-1.45,51.0,-1.35' origin='http://www.openstreetmap.org/api/0.5' />
+  <node id='28418532' timestamp='2007-05-24T10:51:06+01:00' visible='true' lat='50.9664497' lon='-1.3641324'>
+    <tag k='created_by' v='JOSM' />
+  </node>
+  <node id='91109765' timestamp='2007-10-29T07:53:27+00:00' user='nickw' visible='true' lat='50.9300913' lon='-1.4308423'>
+    <tag k='created_by' v='JOSM' />
+  </node>
+  <way id='4698470' timestamp='2007-06-02T19:44:15+01:00' visible='true'>
+    <nd ref='29874141' />
+    <nd ref='29874142' />
+    <tag k='highway' v='residential' />
+    <tag k='maxspeed' v='48' />
+    <tag k='name' v='Arnold Road' />
+    <tag k='created_by' v='JOSM' />
+  </way>
+  <way id='3910609' timestamp='2006-10-28T01:56:05+01:00' user='Dean Earley' visible='true'>
+    <nd ref='20102965' />
+    <nd ref='20133094' />
+    <nd ref='20133102' />
+    <nd ref='20133106' />
+    <nd ref='20133109' />
+    <nd ref='20133112' />
+    <nd ref='20133120' />
+    <nd ref='20133121' />
+    <nd ref='20133126' />
+    <nd ref='20133127' />
+    <nd ref='20133128' />
+    <tag k='highway' v='residential' />
+    <tag k='name' v='Paulet Close' />
+    <tag k='created_by' v='JOSM' />
+  </way>
+</osm>
