@@ -25,7 +25,7 @@ int main()
 	Map m (800,800);
 	load_map(m,"test.xml");
 
-	Envelope<double> bbox (-1.42,50.93,-1.38,50.97);
+	Envelope<double> bbox (-1.45,50.90,-1.35,51.00);
 										
 	m.zoomToBox(bbox);
 

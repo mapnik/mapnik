@@ -1,6 +1,5 @@
 #include "osm.h"
-#include "LibxmlParser.h"
-#include "ExpatParser.h"
+#include "osmparser.h"
 #include <libxml/parser.h>
 #include <iostream>
 #include <fstream>
@@ -13,36 +12,9 @@ using namespace std;
 
 bool osm_dataset::load(const char* filename,const std::string& parser)
 {
-	if(parser=="libxml2")
+	if (parser=="libxml2")
 	{
-		cerr<<"osm::dataset::load";
-		xmlSAXHandler my_handler;
-
-		cerr<<"memset"<<endl;
-		memset(&my_handler,0, sizeof(my_handler));
-		cerr<<"setting up my_handler"<<endl;
-		my_handler.startElement = startElement;
-		my_handler.endElement = endElement;
-		my_handler.characters=characters;
-
-		read_state my_state;
-		my_state.in_node = my_state.in_way = false;
-		my_state.osm_items = this; 
-
-		cerr<<"parsing file`"<<endl;
-		if (xmlSAXUserParseFile(&my_handler, &my_state, filename)<0)
-		{
-			std::cerr<<"Error";
-	    	return false;
-		}
-		return true;
-	}
-	else if (parser=="expat")
-	{
-		std::ifstream in(filename);
-		if(!in.good())
-			return false;
-		return ExpatParser::parse(this,in);
+		return osmparser::parse(this,filename);
 	}
 	return false;	
 }

@@ -21,7 +21,7 @@ struct bounds
 
 struct osm_item
 {
-	int id;
+	long id;
 	std::map<std::string,std::string> keyvals;	
 	virtual std::string to_string();
 };

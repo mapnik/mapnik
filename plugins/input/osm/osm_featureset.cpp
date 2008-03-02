@@ -81,9 +81,6 @@ feature_ptr osm_featureset<filterT>::next()
 				
 			if(cur_item != NULL)
 			{
-				std::cout << "Way " << cur_item->id << 
-				"(" << b.w<<" "<<b.s<<" "<<b.e<<" "<<b.n<<") passes" 
-					<< std::endl;
 				if(static_cast<osm_way*>(cur_item)->nodes.size())
 				{
 					feature=feature_ptr(new Feature(count_++));

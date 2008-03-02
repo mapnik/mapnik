@@ -48,7 +48,7 @@ osm_datasource::osm_datasource(const parameters &params)
 {
 	osm_data_ = new osm_dataset;
 	std::string osm_filename= *params.get<std::string>("file","");
-	std::string parser = *params.get<std::string>("parser","expat");
+	std::string parser = *params.get<std::string>("parser","libxml2");
 	// load the data
 	if (osm_data_->load(osm_filename.c_str(),parser)==false)
 	{
@@ -86,9 +86,6 @@ featureset_ptr osm_datasource::features(const query& q) const
 {
    filter_in_box filter(q.get_bbox());
 	// so we need to filter osm features by bbox here...
-    std::cout << "Box details" << filter.box_.minx()
-		<< " " << filter.box_.miny() << " " 
-	<< filter.box_.maxx() <<" " << filter.box_.maxy() << std::endl;
 	
 	return featureset_ptr
          (new osm_featureset<filter_in_box>(filter,

@@ -1,0 +1,131 @@
+// much of this is based on osm2pgsql
+
+#include "osmparser.h"
+#include "osm.h"
+#include <string>
+#include <cassert>
+
+using std::cerr;
+using std::endl;
+
+
+ osm_item* osmparser::cur_item=NULL;
+ long osmparser::curID=0;
+ bool osmparser::in_node=false, osmparser::in_way=false;
+ osm_dataset* osmparser::components=NULL;
+ std::string osmparser::error="";
+ std::map<long,osm_node*> osmparser::tmp_node_store=std::map<long,osm_node*>();
+
+void osmparser::processNode(xmlTextReaderPtr reader)
+{
+	xmlChar *name = xmlTextReaderName(reader);
+	if(name==NULL)
+		name=xmlStrdup(BAD_CAST "--");
+
+	switch(xmlTextReaderNodeType(reader))
+	{
+		case XML_READER_TYPE_ELEMENT:
+			startElement(reader,name);
+			break;
+
+		case XML_READER_TYPE_END_ELEMENT:
+			endElement(name);
+	}
+	xmlFree(name);
+}
+
+void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
+{
+	double lat, lon;
+	int from, to;
+	std::string tags; 
+	xmlChar *xid, *xlat, *xlon, *xk, *xv;
+
+		if(xmlStrEqual(name,BAD_CAST "node"))
+		{
+			curID = 0;
+			in_node = true;
+			int count=0;
+			osm_node *node=new osm_node;
+			xlat=xmlTextReaderGetAttribute(reader,BAD_CAST "lat");
+			xlon=xmlTextReaderGetAttribute(reader,BAD_CAST "lon");
+			xid=xmlTextReaderGetAttribute(reader,BAD_CAST "id");
+			assert(xlat);
+			assert(xlon);
+			assert(xid);
+			node->lat=atof((char*)xlat);	
+			node->lon=atof((char*)xlon);	
+			node->id = atol((char*)xid);
+			cur_item = node;	
+			tmp_node_store[node->id] = node;
+			xmlFree(xid);
+			xmlFree(xlon);
+			xmlFree(xlat);
+		}
+		else if (xmlStrEqual(name,BAD_CAST "way")) 
+		{
+			curID=0;
+			in_way = true;
+			osm_way *way=new osm_way;
+			xid=xmlTextReaderGetAttribute(reader,BAD_CAST "id");
+			assert(xid);
+			way->id = atol((char*)xid); 
+			cur_item  =  way; 
+			xmlFree(xid);
+		}
+		else if (xmlStrEqual(name,BAD_CAST "nd"))
+		{
+			xid=xmlTextReaderGetAttribute(reader,BAD_CAST "ref");
+			assert(xid);
+			long ndid = atol((char*)xid); 
+			if(tmp_node_store.find(ndid)!=tmp_node_store.end())
+			{
+				(static_cast<osm_way*>(cur_item))->nodes.push_back
+						(tmp_node_store[ndid]);
+			}
+			xmlFree(xid);
+		}
+		else if (xmlStrEqual(name,BAD_CAST "tag"))
+		{
+			std::string key="", value="";
+			xk = xmlTextReaderGetAttribute(reader,BAD_CAST "k");
+			xv = xmlTextReaderGetAttribute(reader,BAD_CAST "v");
+			assert(xk);
+			assert(xv);
+			cur_item->keyvals[(char*)xk] = (char*)xv; 
+			xmlFree(xk);
+			xmlFree(xv);
+		}
+}
+
+void osmparser::endElement(const xmlChar* name)
+{
+	if(xmlStrEqual(name,BAD_CAST "node"))
+	{
+		in_node = false;
+		components->add_node(static_cast<osm_node*>(cur_item));
+	}
+	else if(xmlStrEqual(name,BAD_CAST "way"))
+	{
+		in_way = false;
+		components->add_way(static_cast<osm_way*>(cur_item));
+	}
+}
+
+bool osmparser::parse(osm_dataset *ds, const char* filename)
+{
+	components=ds;
+	xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename);
+	int ret=-1;
+	if(reader!=NULL)
+	{
+		ret = xmlTextReaderRead(reader);
+		while(ret==1)
+		{
+			processNode(reader);
+			ret=xmlTextReaderRead(reader);
+		}
+		xmlFreeTextReader(reader);
+	}
+	return (ret==0) ?  true:false;
+}
