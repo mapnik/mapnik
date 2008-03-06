@@ -118,7 +118,7 @@ feature_ptr osm_featureset<filterT>::next()
 			{	
 				//only add if in the specified set of attribute names
 				if(attribute_names_.find(i->first) != attribute_names_.end())
-					(*feature)[i->first] = tr_->transcode(i->second);
+					(*feature)[i->first] = tr_->transcode(i->second.c_str());
 				i++;
 			}
 			return feature;

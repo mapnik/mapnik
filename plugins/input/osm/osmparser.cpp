@@ -71,6 +71,8 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
 			assert(xid);
 			way->id = atol((char*)xid); 
 			cur_item  =  way; 
+			// Prevent ways with no name being assigned a name of "0"
+			cur_item->keyvals["name"] = ""; 
 			xmlFree(xid);
 		}
 		else if (xmlStrEqual(name,BAD_CAST "nd"))

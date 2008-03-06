@@ -27,6 +27,7 @@
 #include <mapnik/query.hpp>
 #include "osm_datasource.hpp"
 #include "osm_featureset.hpp"
+#include "osmtagtypes.h"
 #include <set>
 
 DATASOURCE_PLUGIN(osm_datasource)
@@ -52,8 +53,13 @@ osm_datasource::osm_datasource(const parameters &params)
 	// load the data
 	if (osm_data_->load(osm_filename.c_str(),parser)==false)
 	{
-		throw datasource_exception("Error loading OSM data");
+		//throw datasource_exception("Error loading OSM data");
+		return ;
 	}	
+
+	osm_tag_types tagtypes;
+	tagtypes.add_type("maxspeed",mapnik::Integer);
+	tagtypes.add_type("z_order",mapnik::Integer);
 
 	osm_data_->rewind();
 	// Need code to get the attributes of all the data
@@ -62,7 +68,7 @@ osm_datasource::osm_datasource(const parameters &params)
 	// Add the attributes to the datasource descriptor - assume they're
 	// all of type String
 	for(std::set<std::string>::iterator i=keys.begin(); i!=keys.end(); i++)
-		desc_.add_descriptor(attribute_descriptor(*i,String));
+		desc_.add_descriptor(attribute_descriptor(*i,tagtypes.get_type(*i)));
 
 	// Get the bounds of the data and set extent_ accordingly
 	bounds b = osm_data_->get_bounds();
