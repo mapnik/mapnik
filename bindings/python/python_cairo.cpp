@@ -21,6 +21,8 @@
  *****************************************************************************/
 //$Id$
 
+#ifdef HAVE_PYCAIRO
+
 #include <boost/python/type_id.hpp>
 #include <boost/python/converter/registry.hpp>
 
@@ -46,3 +48,11 @@ void register_cairo()
 
    boost::python::converter::registry::insert(&extract_surface, boost::python::type_id<PycairoSurface>());
 }
+
+#else
+
+void register_cairo()
+{
+}
+
+#endif

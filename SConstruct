@@ -124,7 +124,9 @@ for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PGSQL', 'PROJ', 'GDAL',):
     
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
    
-env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
+if env.Execute('pkg-config --exists cairomm-1.0') == 0:
+    env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
+    env.Append(CXXFLAGS = '-DHAVE_CAIRO');
 
 if env['XMLPARSER'] == 'tinyxml':
     env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')

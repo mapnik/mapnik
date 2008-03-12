@@ -24,8 +24,10 @@ import re
 import os
 
 Import('env')
-   
-env.ParseConfig('pkg-config --cflags pycairo')
+
+if env.Execute('pkg-config --exists pycairo') == 0:   
+    env.ParseConfig('pkg-config --cflags pycairo')
+    env.Append(CXXFLAGS = '-DHAVE_PYCAIRO');
 
 prefix = env['PYTHON_PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
 install_prefix = env['DESTDIR'] + '/' + prefix

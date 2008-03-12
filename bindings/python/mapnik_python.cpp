@@ -58,14 +58,18 @@ void export_projection();
 
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
+#ifdef HAVE_CAIRO
 #include <mapnik/cairo_renderer.hpp>
+#endif
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/save_map.hpp>
 
+#ifdef HAVE_PYCAIRO
 #include <pycairo.h>
+#endif
 
 void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0, unsigned offset_y = 0)
 {
@@ -78,6 +82,8 @@ void render2(const mapnik::Map& map,mapnik::Image32& image)
     mapnik::agg_renderer<mapnik::Image32> ren(map,image);
     ren.apply();
 }
+
+#ifdef HAVE_PYCAIRO
 
 void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
 {
@@ -92,6 +98,8 @@ void render4(const mapnik::Map& map,PycairoSurface* surface)
     mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
     ren.apply();
 }
+
+#endif
 
 void render_tile_to_file(const mapnik::Map& map, 
                          unsigned offset_x, unsigned offset_y,
@@ -176,8 +184,10 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("render_tile_to_file",&render_tile_to_file);
     def("render",&render); 
     def("render",&render2);
+#ifdef HAVE_PYCAIRO
     def("render",&render3);
     def("render",&render4);
+#endif
     def("scale_denominator", &scale_denominator);
     
     def("load_map", & load_map, load_map_overloads());
