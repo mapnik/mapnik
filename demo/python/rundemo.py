@@ -308,13 +308,27 @@ im = Image(m.width,m.height)
 render(m, im)
 
 # Save image to files
+images = []
 im.save('demo.png', 'png') # true-colour RGBA
+images.append('demo.png')
 im.save('demo256.png', 'png256') # save to palette based (max 256 colours) png 
+images.append('demo256.png')
 im.save('demo.jpg', 'jpeg')
+images.append('demo.jpg')
 
-print """\n\nThree maps have been rendered in the current directory:
-- demo.jpg
-- demo.png
-- demo256.png
+# Render cairo examples
+try:
+    import cairo
+    surface = cairo.SVGSurface('demo.svg', m.width,m.height)
+    render(m, surface)
+    images.append('demo.svg')
+    surface = cairo.PDFSurface('demo.pdf', m.width,m.height)
+    render(m, surface)
+    images.append('demo.pdf')
+except:
+    print '\n\nSkipping cairo examples as Pycairo not available'
 
-Have a look!\n\n"""
+print "\n\n", len(images), "maps have been rendered in the current directory:"
+for image in images:
+    print "-", image
+print "\n\nHave a look!\n\n"

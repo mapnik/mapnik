@@ -24,6 +24,8 @@ import re
 import os
 
 Import('env')
+   
+env.ParseConfig('pkg-config --cflags pycairo')
 
 prefix = env['PYTHON_PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
 install_prefix = env['DESTDIR'] + '/' + prefix

@@ -26,6 +26,7 @@
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/exception_translator.hpp>
 
+void register_cairo();
 void export_color();
 void export_coord();
 void export_layer();
@@ -57,12 +58,14 @@ void export_projection();
 
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/cairo_renderer.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/save_map.hpp>
 
+#include <pycairo.h>
 
 void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0, unsigned offset_y = 0)
 {
@@ -73,6 +76,20 @@ void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0
 void render2(const mapnik::Map& map,mapnik::Image32& image)
 {
     mapnik::agg_renderer<mapnik::Image32> ren(map,image);
+    ren.apply();
+}
+
+void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
+{
+    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
+    ren.apply();
+}
+
+void render4(const mapnik::Map& map,PycairoSurface* surface)
+{
+    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+    mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
     ren.apply();
 }
 
@@ -125,6 +142,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     using mapnik::save_map;
 
     register_exception_translator<mapnik::config_error>(translator);
+    register_cairo();
     export_query();    
     export_feature();
     export_featureset();
@@ -152,12 +170,14 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_projection();
     export_coord();
     export_map();
-    
+
     def("render_to_file",&render_to_file1);
     def("render_to_file",&render_to_file2);
     def("render_tile_to_file",&render_tile_to_file);
     def("render",&render); 
     def("render",&render2);
+    def("render",&render3);
+    def("render",&render4);
     def("scale_denominator", &scale_denominator);
     
     def("load_map", & load_map, load_map_overloads());
