@@ -51,10 +51,10 @@ if env['PLATFORM'] == 'Darwin':
         libraries.append('boost_regex%s%s' % (env['BOOST_APPEND'],thread_suffix))
     else :
         libraries.append('boost_regex%s' % env['BOOST_APPEND'])
-    
     if env['THREADING'] == 'multi':
         libraries.append('boost_thread%s%s' % (env['BOOST_APPEND'],thread_suffix))
-
+    if '-DHAVE_PYCAIRO' in env['CXXFLAGS']:
+        libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
     linkflags = '-F/ -framework Python'
 
 headers = [env['PYTHON_PREFIX'] + '/include/python' + env['PYTHON_VERSION']] + env['CPPPATH']
