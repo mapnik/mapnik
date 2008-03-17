@@ -81,37 +81,24 @@ namespace mapnik
          {
             delete [] data_;
          }
+         
+         void set_matrix(Cairo::Matrix const& matrix)
+         {
+            pattern_->set_matrix(matrix);
+         }
 
          void set_origin(double x, double y)
          {
             Cairo::Matrix matrix;
-
+            
             pattern_->get_matrix(matrix);
-
+     
             matrix.x0 = -x;
             matrix.y0 = -y;
-
+            
             pattern_->set_matrix(matrix);
          }
-
-         void set_angle(double angle)
-         {
-            Cairo::Matrix matrix;
-
-            pattern_->get_matrix(matrix);
-
-            cairo_matrix_invert(&matrix);
-
-            matrix.xx = cos(angle);
-            matrix.xy = sin(angle);
-            matrix.yx = -sin(angle);
-            matrix.yy = cos(angle);
-
-            cairo_matrix_invert(&matrix);
-
-            pattern_->set_matrix(matrix);
-         }
-
+         
          void set_extend(Cairo::Extend extend)
          {
             pattern_->set_extend(extend);
@@ -813,7 +800,7 @@ namespace mapnik
                                     Feature const& feature,
                                     proj_transform const& prj_trans)
    {
-#ifdef CAIRO_LINE_PATTERN
+//#ifdef CAIRO_LINE_PATTERN
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
       boost::shared_ptr<ImageData32> const& image = sym.get_image();
@@ -846,15 +833,22 @@ namespace mapnik
                }
                else if (cm == SEG_LINETO)
                {
-                  double angle = atan2(y0 - y, x - x0);
+                  double dx = x - x0;
+                  double dy = y - y0;
+                  double angle = atan2(dy, dx);
                   double offset = fmod(length, width);
-                  double xoff = height / 2.0 * sin(angle) - offset * cos(angle);
-                  double yoff = height / 2.0 * cos(angle) + offset * sin(angle);
+                  
+                  Cairo::Matrix matrix;
+                  cairo_matrix_init_identity(&matrix);
+                  cairo_matrix_translate(&matrix,x0,y0);
+                  cairo_matrix_rotate(&matrix,angle);
+                  cairo_matrix_translate(&matrix,-offset,0.5*height);
+                  cairo_matrix_invert(&matrix);
 
-                  pattern.set_origin(x0 + xoff, y0 - yoff);
-                  pattern.set_angle(angle);
+                  pattern.set_matrix(matrix);
+     
                   context.set_pattern(pattern);
-
+                  
                   context.move_to(x0, y0);
                   context.line_to(x, y);
                   context.stroke();
@@ -867,7 +861,7 @@ namespace mapnik
             }
          }
       }
-#endif
+//#endif
    }
 
    template <typename T>
