@@ -37,6 +37,7 @@
 #include <boost/tuple/tuple.hpp>
 // stl
 #include <vector>
+#include <cstring>
 
 namespace mapnik
 {

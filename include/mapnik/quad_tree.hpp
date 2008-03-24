@@ -30,6 +30,7 @@
 #include <boost/noncopyable.hpp>
 // stl
 #include <vector>
+#include <cstring>
 
 namespace mapnik
 {

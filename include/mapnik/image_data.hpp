@@ -27,6 +27,7 @@
 
 #include <mapnik/octree.hpp>
 #include <cassert>
+#include <cstring>
 
 // When using Sun's C++ compiler, use the `std` namespace to get memcpy, memset routines.
 #ifdef __SUNPRO_CC
