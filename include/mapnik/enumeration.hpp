@@ -28,6 +28,7 @@
 #include <vector>
 #include <bitset>
 #include <iostream>
+#include <cstdlib>
 
 namespace mapnik {
 

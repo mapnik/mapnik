@@ -17,6 +17,7 @@
 #include <stdexcept>
 #include <functional>               // for std::less
 #include <memory>                   // for std::auto_ptr
+#include <typeinfo>
 #include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>

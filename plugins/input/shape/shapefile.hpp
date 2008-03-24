@@ -32,6 +32,8 @@
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 
+#include <cstring>
+
 using mapnik::Envelope;
 
 struct shape_record
