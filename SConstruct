@@ -24,6 +24,8 @@ import os, sys, platform
 
 if platform.uname()[4] == 'x86_64':
     LIBDIR_SCHEMA='lib64' 
+elif platform.uname()[4] == 'ppc64':
+    LIBDIR_SCHEMA='lib64'
 else:
     LIBDIR_SCHEMA='lib'
 
