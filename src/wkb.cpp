@@ -145,7 +145,10 @@ namespace mapnik
             else 
             {
                const char* b=wkb_+pos_;
-               n = b[3]&0xff | (b[2]&0xff)<<8 | (b[1]&0xff)<<16 | (b[0]&0xff)<<24;
+               n = (((b[3]&0xff) | 
+		     (b[2]&0xff)) << 8 | 
+		    ((b[1]&0xff) << 16 | 
+		     (b[0]&0xff)) << 24);
             }
             pos_+=4;
 
@@ -166,14 +169,14 @@ namespace mapnik
                // but not in C++ yet
                // this is not quite portable
                const char* b= wkb_+pos_;
-               long long n = (long long)b[7]&0xff | 
-                  ((long long)b[6]&0xff)<<8 | 
-                  ((long long)b[5]&0xff)<<16 | 
-                  ((long long)b[4]&0xff)<<24 |
-                  ((long long)b[3]&0xff)<<32 |
-                  ((long long)b[2]&0xff)<<40 |
-                  ((long long)b[1]&0xff)<<48 |
-                  ((long long)b[0]&0xff)<<56;
+               long long n = (((long long)b[7]&0xff) | 
+			      ((long long)b[6]&0xff)<<8 | 
+			      ((long long)b[5]&0xff)<<16 | 
+			      ((long long)b[4]&0xff)<<24 |
+			      ((long long)b[3]&0xff)<<32 |
+			      ((long long)b[2]&0xff)<<40 |
+			      ((long long)b[1]&0xff)<<48 |
+			      ((long long)b[0]&0xff)<<56);
                memcpy(&d,&n,8);
             }
             pos_+=8;

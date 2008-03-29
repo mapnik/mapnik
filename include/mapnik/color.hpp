@@ -40,10 +40,10 @@ namespace mapnik {
             :abgr_(0xffffffff) {}
 
         Color(int red,int green,int blue,int alpha=0xff)
-            : abgr_((alpha&0xff) << 24 | 
-                    (blue&0xff) << 16  | 
-                    (green&0xff) << 8  | 
-                    red&0xff) {}
+	    : abgr_(((alpha&0xff) << 24 | 
+		     (blue&0xff)) << 16 | 
+		     ((green&0xff) << 8 | 
+		     (red&0xff))) {}
         
         explicit Color(int rgba)
             : abgr_(rgba) {}
@@ -88,7 +88,7 @@ namespace mapnik {
         }
         inline void set_alpha(unsigned int a)
         {
-            abgr_ = (abgr_ & 0x00ffffff | (a&0xff) << 24);
+	    abgr_ = (abgr_ & 0x00ffffff) | ((a&0xff) << 24);
         }
 
         inline unsigned int rgba() const
