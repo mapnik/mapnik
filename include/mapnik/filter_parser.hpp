@@ -454,7 +454,7 @@ namespace mapnik
                           [compose_filter<FeatureT,mapnik::less_than<value> >(self.filters,self.exprs)]
                           | (L"<=" >> expression)
                           [compose_filter<FeatureT,less_than_or_equal<value> >(self.filters,self.exprs)]
-                          /*  | regex */);
+                          | regex );
 
                   equation = relation >> *( ( L'=' >> relation)
                                             [compose_filter<FeatureT,mapnik::equals<value> >(self.filters,self.exprs)]
