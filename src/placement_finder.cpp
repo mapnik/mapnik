@@ -561,6 +561,10 @@ namespace mapnik
       double dy = new_y - old_y;
       
       double segment_length = path_distances[index];
+      if (segment_length == 0) {
+          // Not allowed to place across on 0 length segments or discontinuities
+          return std::auto_ptr<placement_element>(NULL);
+      }
       
       current_placement->starting_x = old_x + dx*distance/segment_length;
       current_placement->starting_y = old_y + dy*distance/segment_length;
@@ -584,6 +588,10 @@ namespace mapnik
          c = ci.character;
 
          //Coordinates this character will start at
+        if (segment_length == 0) {
+            // Not allowed to place across on 0 length segments or discontinuities
+            return std::auto_ptr<placement_element>(NULL);
+        }
          double start_x = old_x + dx*distance/segment_length;
          double start_y = old_y + dy*distance/segment_length;
          //Coordinates this character ends at, calculated below
