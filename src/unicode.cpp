@@ -165,11 +165,15 @@ namespace mapnik {
 #ifdef MAPNIK_DEBUG
       std::cerr << "ENCODING = " << encoding << "\n"; 
 #endif
-      
+
+#ifdef _WIN32
+      desc_ = iconv_open("UTF-16LE",encoding.c_str());
+#else
 #ifndef WORDS_BIGENDIAN
       desc_ = iconv_open("UCS-4LE",encoding.c_str());
 #else
       desc_ = iconv_open("UCS-4BE",encoding.c_str());
+#endif
 #endif
    }
    
@@ -179,7 +183,7 @@ namespace mapnik {
       size_t inleft = input.size();
       std::wstring output(inleft,0);
       size_t outleft = inleft * sizeof(wchar_t);
-#if (!defined(OSX_LEOPARD) && defined(DARWIN)) || defined(SUNOS) || defined(FREEBSD)
+#if (!defined(OSX_LEOPARD) && defined(DARWIN)) || defined(SUNOS) || defined(FREEBSD) || defined(_WIN32)
       const char * in = input.c_str();
 #else
       char * in = const_cast<char*>(input.data());
