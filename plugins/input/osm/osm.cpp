@@ -10,6 +10,8 @@
 #include <iostream>
 using namespace std;
 
+polygon_types osm_way::ptypes;
+
 bool osm_dataset::load(const char* filename,const std::string& parser)
 {
 	if (parser=="libxml2")
@@ -173,4 +175,17 @@ bounds osm_way::get_bounds()
 			b.n=nodes[count]->lat;
 	}
 	return b;
+}
+
+bool osm_way::is_polygon()
+{
+	for(int count=0; count<ptypes.ptypes.size(); count++)
+	{
+		if(keyvals.find(ptypes.ptypes[count].first) != keyvals.end() &&
+		   keyvals[ptypes.ptypes[count].first] == ptypes.ptypes[count].second)
+		{
+			return true;
+		}
+	}
+	return false;
 }

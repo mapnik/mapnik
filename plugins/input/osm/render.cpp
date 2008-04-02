@@ -19,7 +19,7 @@ int main(int argc,char *argv[])
 {
 	if(argc < 6)
 	{
-		std::cerr<<"Usage: render XMLfile w s e n OSMfile" << std::endl;
+		std::cerr<<"Usage: render XMLfile w s e n [OSMfile]" << std::endl;
 		exit(0);
 	}
 
@@ -31,14 +31,17 @@ int main(int argc,char *argv[])
 	Map m (800,800);
 	load_map(m,argv[1]);
 	
-	parameters p;
-	p["type"] = "osm";
-	p["file"] = argv[6];
-	for(int count=0; count<m.layerCount(); count++)
+	if(argc>6)
 	{
-		parameters q = m.getLayer(count).datasource()->params();
-		m.getLayer(count).set_datasource(datasource_cache::instance()->
-		create(p));
+		parameters p;
+		p["type"] = "osm";
+		p["file"] = argv[6];
+		for(int count=0; count<m.layerCount(); count++)
+		{
+			parameters q = m.getLayer(count).datasource()->params();
+			m.getLayer(count).set_datasource(datasource_cache::instance()->
+				create(p));
+		}
 	}
 
 	Envelope<double> bbox (atof(argv[2]),atof(argv[3]),

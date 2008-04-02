@@ -30,6 +30,10 @@ using mapnik::feature_ptr;
 using mapnik::geometry2d;
 using mapnik::point_impl;
 using mapnik::line_string_impl;
+using mapnik::polygon_impl;
+
+using std::cerr;
+using std::endl;
 
 template <typename filterT>
 osm_featureset<filterT>::osm_featureset(const filterT& filter, 
@@ -84,10 +88,15 @@ feature_ptr osm_featureset<filterT>::next()
 				if(static_cast<osm_way*>(cur_item)->nodes.size())
 				{
 					feature=feature_ptr(new Feature(count_++));
-					geometry2d *line = new line_string_impl;
-					line->set_capacity(static_cast<osm_way*>(cur_item)->
+					geometry2d *geom;
+					if(static_cast<osm_way*>(cur_item)->is_polygon())
+						geom=new polygon_impl;
+					else
+						geom=new line_string_impl;
+
+					geom->set_capacity(static_cast<osm_way*>(cur_item)->
 									nodes.size());
-					line->move_to(static_cast<osm_way*>(cur_item)->
+					geom->move_to(static_cast<osm_way*>(cur_item)->
 										nodes[0]->lon,
 								static_cast<osm_way*>(cur_item)->
 										nodes[0]->lat);
@@ -95,12 +104,12 @@ feature_ptr osm_featureset<filterT>::next()
 					for(int count=1; count<static_cast<osm_way*>(cur_item)
 								->nodes.size(); count++)
 					{
-						line->line_to(static_cast<osm_way*>(cur_item)
+						geom->line_to(static_cast<osm_way*>(cur_item)
 									->nodes[count]->lon,
 								static_cast<osm_way*>(cur_item)
 									->nodes[count]->lat);
 					}
-					feature->add_geometry(line);
+					feature->add_geometry(geom);
 					success=true;
 				}
 			}
