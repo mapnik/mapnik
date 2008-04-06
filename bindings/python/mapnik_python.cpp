@@ -55,6 +55,12 @@ void export_text_symbolizer();
 void export_shield_symbolizer();
 void export_font_engine();
 void export_projection();
+void export_pdf_point_symbolizer();
+void export_pdf_line_pattern_symbolizer();
+void export_pdf_polygon_pattern_symbolizer();
+void export_pdf_shield_symbolizer();
+void export_pdf_renderer_layout();
+void export_pdf_renderer();
 
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -178,6 +184,13 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_projection();
     export_coord();
     export_map();
+    export_pdf_point_symbolizer();
+    export_pdf_line_pattern_symbolizer();
+    export_pdf_polygon_pattern_symbolizer();
+    export_pdf_shield_symbolizer();
+    export_pdf_renderer_layout();
+    export_pdf_renderer();
+
 
     def("render_to_file",&render_to_file1);
     def("render_to_file",&render_to_file2);

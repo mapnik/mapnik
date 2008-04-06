@@ -24,6 +24,7 @@
 #ifndef _OCTREE_HPP_
 #define _OCTREE_HPP_
 
+#include <boost/cstdint.hpp>
 #include <boost/format.hpp>
 #include <boost/utility.hpp>
 #include <vector>
@@ -32,7 +33,7 @@
 
 namespace mapnik {
 	
-   typedef uint8_t byte ;
+   typedef boost::uint8_t byte;
    struct rgb	
    {
          byte r;
@@ -82,7 +83,7 @@ namespace mapnik {
                unsigned greens;
                unsigned blues;
                unsigned count;	
-               uint8_t  index;					
+               boost::uint8_t  index;					
          };
          struct node_cmp
          {
@@ -214,9 +215,9 @@ namespace mapnik {
             if (itr->count != 0)
             {
                unsigned count = itr->count;
-               palette.push_back(rgb(uint8_t(itr->reds/float(count)),
-                                     uint8_t(itr->greens/float(count)),
-                                     uint8_t(itr->blues/float(count))));
+               palette.push_back(rgb(boost::uint8_t(itr->reds/float(count)),
+                                     boost::uint8_t(itr->greens/float(count)),
+                                     boost::uint8_t(itr->blues/float(count))));
                itr->index = palette.size() - 1;			
             }
             for (unsigned i=0; i < 8 ;++i)

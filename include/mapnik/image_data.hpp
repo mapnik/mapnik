@@ -142,7 +142,7 @@ namespace mapnik
     };
 
    typedef ImageData<unsigned> ImageData32;
-   typedef ImageData<uint8_t>  ImageData8;
+   typedef ImageData<boost::uint8_t>  ImageData8;
 }
 
 #endif //IMAGE_DATA_HPP

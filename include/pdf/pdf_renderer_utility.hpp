@@ -1,8 +1,8 @@
 /*****************************************************************************
  * 
- * This file is part of Mapnik (c++ mapping toolkit)
+ * This file is part of the wxPdfDoc modifications for mapnik
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2007 Ben Moores
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,28 +20,31 @@
  *
  *****************************************************************************/
 
-//$Id$
-#ifndef UNICODE_HPP
-#define UNICODE_HPP
+//! \file pdf_renderer_utility.hpp
+//! \brief PDF renderer utilities
+//! 
 
-#include <unicode/unistr.h>
-#include <unicode/ucnv.h>
-
-#include <boost/utility.hpp>
-
-#include <string>
+#ifndef PDF_RENDERER_UTILITY_H
+#define PDF_RENDERER_UTILITY_H
 
 namespace mapnik {
-   class transcoder : private boost::noncopyable
-   {
-      public:
-         explicit transcoder (std::string const& encoding);
-         UnicodeString transcode(const char* data) const;  
-         ~transcoder(); 
-      private:
-         bool ok_;
-         UConverter * conv_;
-   };
-}
 
-#endif // UNICODE_HPP
+#include <mapnik/config.hpp>
+
+//class prototypes
+class Map;
+class pdf_renderer_layout;
+
+
+//! \brief Render a map to pdf using a layout
+//!
+//! \param[in] map The map to render
+//! \param[in] layout The page layouit
+//! \param[in] filename The output file name
+//! \param[in] compress Enable/Disable pdf compression
+MAPNIK_DECL void render_to_pdf(const mapnik::Map& map, const mapnik::pdf_renderer_layout &layout, const std::string& filename, const bool compress = true);
+
+
+} //namespace mapnik
+
+#endif //PDF_RENDERER_UTILITY_H

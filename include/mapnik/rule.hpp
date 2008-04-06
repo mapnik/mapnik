@@ -32,6 +32,12 @@
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/markers_symbolizer.hpp>
+#ifdef ENABLE_PDF
+  #include "pdf/pdf_point_symbolizer.hpp"
+  #include "pdf/pdf_polygon_pattern_symbolizer.hpp"
+  #include "pdf/pdf_line_pattern_symbolizer.hpp"
+  #include "pdf/pdf_shield_symbolizer.hpp"
+#endif
 #include <mapnik/filter.hpp>
 #include <mapnik/filter_visitor.hpp>
 
@@ -110,7 +116,14 @@ namespace mapnik
                           shield_symbolizer,
                           text_symbolizer,
                           building_symbolizer,
-                          markers_symbolizer> symbolizer;
+                          markers_symbolizer
+#ifdef ENABLE_PDF
+                          ,pdf_point_symbolizer,
+                          pdf_polygon_pattern_symbolizer,
+                          pdf_line_pattern_symbolizer,
+                          pdf_shield_symbolizer
+#endif
+                          > symbolizer;
     
         
    typedef std::vector<symbolizer> symbolizers;

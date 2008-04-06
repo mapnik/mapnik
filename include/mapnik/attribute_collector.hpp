@@ -47,6 +47,12 @@ namespace mapnik {
         {
             names_.insert(sym.get_name());
         }
+#if ENABLE_PDF
+        void operator () (pdf_shield_symbolizer const &sym)
+        {
+            names_.insert(sym.get_name());
+        }
+#endif //ENABLE_PDF
 	void operator () (shield_symbolizer const& sym)
 	{
 	    names_.insert(sym.get_name());

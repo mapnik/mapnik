@@ -1,0 +1,1023 @@
+? components/wxpdfdoc/build/msvc6prjd_lib
+? components/wxpdfdoc/build/msvc6prjud_lib
+? components/wxpdfdoc/build/wxpdfdoc.sln
+? components/wxpdfdoc/build/wxpdfdoc_makefont.vcproj
+? components/wxpdfdoc/build/wxpdfdoc_makefont.vcproj.BOMB.Ben.user
+? components/wxpdfdoc/build/wxpdfdoc_minimal.vcproj
+? components/wxpdfdoc/build/wxpdfdoc_minimal.vcproj.BOMB.Ben.user
+? components/wxpdfdoc/build/wxpdfdoc_wxpdfdoc.vcproj
+? components/wxpdfdoc/build/wxpdfdoc_wxpdfdoc.vcproj.BOMB.Ben.user
+? components/wxpdfdoc/docs/html
+? components/wxpdfdoc/include/wx/pdfoc.h
+? components/wxpdfdoc/lib/wxpdfdocud.idb
+? components/wxpdfdoc/makefont/makefont.idb
+? components/wxpdfdoc/samples/barcodes.pdf
+? components/wxpdfdoc/samples/bookmark.pdf
+? components/wxpdfdoc/samples/charting.pdf
+? components/wxpdfdoc/samples/cjktest.pdf
+? components/wxpdfdoc/samples/clipping.pdf
+? components/wxpdfdoc/samples/drawing.pdf
+? components/wxpdfdoc/samples/form.pdf
+? components/wxpdfdoc/samples/gradients.pdf
+? components/wxpdfdoc/samples/javascript.pdf
+? components/wxpdfdoc/samples/labels.pdf
+? components/wxpdfdoc/samples/minimal.idb
+? components/wxpdfdoc/samples/protection1.pdf
+? components/wxpdfdoc/samples/protection2.pdf
+? components/wxpdfdoc/samples/rotation.pdf
+? components/wxpdfdoc/samples/templates1.pdf
+? components/wxpdfdoc/samples/templates2.pdf
+? components/wxpdfdoc/samples/transformation.pdf
+? components/wxpdfdoc/samples/transparency.pdf
+? components/wxpdfdoc/samples/tutorial1.pdf
+? components/wxpdfdoc/samples/tutorial2.pdf
+? components/wxpdfdoc/samples/tutorial3.pdf
+? components/wxpdfdoc/samples/tutorial4.pdf
+? components/wxpdfdoc/samples/tutorial5.pdf
+? components/wxpdfdoc/samples/tutorial6.pdf
+? components/wxpdfdoc/samples/tutorial7.pdf
+? components/wxpdfdoc/samples/wmf.pdf
+? components/wxpdfdoc/samples/xmlwrite.pdf
+? components/wxpdfdoc/src/pdfoc.cpp
+Index: components/wxpdfdoc/include/wx/pdfdoc.h
+===================================================================
+RCS file: /cvsroot/wxcode/wxCode/components/wxpdfdoc/include/wx/pdfdoc.h,v
+retrieving revision 1.7
+diff -u -r1.7 pdfdoc.h
+--- components/wxpdfdoc/include/wx/pdfdoc.h	15 Dec 2006 20:47:08 -0000	1.7
++++ components/wxpdfdoc/include/wx/pdfdoc.h	30 Dec 2007 20:21:16 -0000
+@@ -21,6 +21,7 @@
+ #include "wx/pdffont.h"
+ #include "wx/pdfimage.h"
+ #include "wx/pdfproperties.h"
++#include "wx/pdfoc.h"
+ 
+ #define wxPDF_PRODUCER       _T("wxPdfDocument 0.8.0")
+ 
+@@ -92,6 +93,9 @@
+ /// Hash map class for spot colors
+ WX_DECLARE_STRING_HASH_MAP(wxPdfSpotColour*, wxPdfSpotColourMap);
+ 
++/// Hash map class for patterns
++WX_DECLARE_STRING_HASH_MAP(wxPdfPattern*, wxPdfPatternMap);
++
+ /// Hash map class for spot colors
+ WX_DECLARE_STRING_HASH_MAP(wxPdfIndirectObject*, wxPdfRadioGroupMap);
+ 
+@@ -118,7 +122,27 @@
+   wxPdfDocument(int orientation = wxPORTRAIT, 
+                 const wxString& unit = wxString(_T("mm")), 
+                 wxPaperSize format = wxPAPER_A4);
+-// TODO: Constructor with explicit papersize
++
++  /// Constructor
++  /**
++  * \param orientation Defines the default page orientation. Possible values are:
++  *   \li wxPORTRAIT portrait layout (default)
++  *   \li wxLANDSCAPE landscape layout
++  *
++  * \param unit Defines the user units. Possible values are:
++  *   \li "mm" millimeter (1 mm = 0.0394 in = 2.833 pt = 0.1 cm) (default)
++  *   \li "cm" centimeter (1 cm = 0.394 in = 28.33 pt = 10 mm)
++  *   \li "pt" points (1 pt = 1/72 in = 0.0353 cm = 0.353 mm)
++  *   \li "in" inch   (1 in = 72 pt = 2.54 cm = 25.4 mm)
++  *
++  * \param paperWidth Defines the width of the paper in user units.
++  * \param paperHeight Defines the height of the paper in user units.
++  */
++  wxPdfDocument(const double paperWidth,
++                const double paperHeight,
++                int orientation = wxPORTRAIT, 
++                const wxString& unit = wxString(_T("mm")));
++
+ 
+   virtual ~wxPdfDocument();
+ 
+@@ -444,6 +468,21 @@
+   */
+   virtual void AddSpotColor(const wxString& name, double cyan, double magenta, double yellow, double black);
+ 
++
++  /// Defines the colorspace for drawing operations
++  /**
++  * \param space 0 = normal, 1 = pattern
++  */
++  virtual void SetDrawColorSpace(const int space);
++
++
++  /// Defines the colorspace for fill operations
++  /**
++  * \param space 0 = normal, 1 = pattern
++  */
++  virtual void SetFillColorSpace(const int space);
++
++
+   /// Defines the color used for all drawing operations.
+   /**
+   * Affected drawing operations are: lines, rectangles and cell borders. It can be expressed in RGB
+@@ -510,6 +549,14 @@
+   */
+   virtual void SetDrawColor(const wxString& name, double tint = 100);
+ 
++  /// Defines the <b>pattern</b> used for all drawing operations.
++  /**
++  * <b>N.B.</b> You muse be in the pattern color space before calling, see SetDrawColorSpace.
++  *
++  * \param name is the name of the pattern
++  */
++  virtual void SetDrawPattern(const wxString& name);
++
+   /// Gets the color used for all drawing operations.
+   /**
+   * \see SetDrawColor()
+@@ -582,6 +629,16 @@
+   */
+   virtual void SetFillColor(const wxString& name, double tint = 100);
+ 
++
++  /// Defines the <b>pattern</b> used for all drawing operations.
++  /**
++  * <b>N.B.</b> You must be in the pattern color space before calling, see SetFillColorSpace.
++  *
++  * \param name is the name of the pattern
++  */
++  virtual void SetFillPattern(const wxString& name);
++
++
+   /// Gets the color used for all filling operations.
+   /**
+   * \see SetFillColor()
+@@ -864,8 +921,10 @@
+   *   \li wxPDF_STYLE_FILL: fill
+   *   \li wxPDF_STYLE_FILLDRAW: draw and fill
+   *   \li wxPDF_STYLE_DRAWCLOSE: close path and draw (can be combined with wxPDF_STYLE_FILL
++  * \param alternativeFillRule: If this is true, the even-odd rule will be used when filling,
++  * otherwise the default nonzero winding method will be used.
+   */
+-  virtual void Shape(const wxPdfShape& shape, int style = wxPDF_STYLE_DRAW);
++  virtual void Shape(const wxPdfShape& shape, int style = wxPDF_STYLE_DRAW, bool alternativeFillRule = false);
+ 
+   /// Performs a rotation around a given center.
+   /**
+@@ -1089,18 +1148,20 @@
+   * \param x Abscissa of the origin
+   * \param y Ordinate of the origin
+   * \param txt String to print
++  * \param mode The rendering mode (0=normal, 1 = stroked, 2 = filled then stroked)
+   * \see SetFont(), SetTextColor(), Cell(), MultiCell(), Write()
+   */
+-  virtual void Text(double x, double y, const wxString& txt);
++  virtual void Text(double x, double y, const wxString& txt, const int mode = 0);
+ 
+   /// Prints a rotated text string
+   /**
+   * \param x: abscissa of the rotation center.
+   * \param y: ordinate of the rotation center.
+   * \param txt String to print
++  * \param mode The rendering mode (0=normal, 1 = stroked, 2 = filled then stroked)
+   * \param angle: angle in degrees.
+   */
+-  virtual void RotatedText(double x, double y, const wxString& txt, double angle);
++  virtual void RotatedText(double x, double y, const wxString& txt, double angle, const int mode = 0);
+ 
+   /// Whenever a page break condition is met,
+   /**
+@@ -1748,6 +1809,19 @@
+   */
+   virtual void SetAlphaState(int alphaState);
+ 
++
++  /// Defines an image pattern
++  /**
++  * Add a pattern which can be reference in fill pattern methods
++  * \param name the name of the pattern (case sensitive)
++  * \param image the image to use for the pattern
++  * \param imagename the name of the image (case sensitive)
++  * \param width the display width
++  * \param height the display height
++  */
++  virtual void AddPattern(const wxString& name, const wxImage& image, const wxString& imageName, const double width, const double height);
++
++
+   /// Defines a linear gradient shading
+   /**
+   * \param col1 first color (RGB or CMYK).
+@@ -1757,6 +1831,7 @@
+   virtual int LinearGradient(const wxPdfColour& col1, const wxPdfColour& col2,
+                              wxPdfLinearGradientType gradientType = wxPDF_LINEAR_GRADIENT_HORIZONTAL);
+ 
++
+   /// Defines a axial gradient shading
+   /**
+   * \param col1 first color (RGB or CMYK).
+@@ -1823,6 +1898,29 @@
+   */
+   virtual void SetFillGradient(double x, double y, double w, double h, int gradient);
+ 
++  /// Add an optional content group
++  /**
++  * The OCG will be managed by this class after its added, so you dont need to destroy it yourself. 
++  *  <b>This means the OCG must have been created dynamically, not statically.</b>
++  * \param[in] ocg The OCG to add
++  */
++  virtual void AddOcg(wxPdfOcg *ocg) { m_pdfOc.AddOcg(ocg); };
++
++  /// Start marking content as optional
++  /**
++  * This starts marking content as belonging to the specified ocg. Call
++  *  ExitOcg to stop marking content.
++  * \param[in] ocg The OCG to mark content as belonging to
++  */
++  virtual void EnterOcg(const wxPdfOcg *ocg);
++
++  /// Stop marking content as optional
++  /**
++  * This stops marking content as belonging to the previously entered ocg.
++  */
++  virtual void ExitOcg(void);
++
++
+   /// Draws a graphical marker symbol
+   /**
+   * \param x abscissa of the marker's center 
+@@ -2259,6 +2357,12 @@
+   /// Add spot colors
+   virtual void PutSpotColors();
+ 
++  /// Add Patterns
++  virtual void PutPatterns();
++
++  /// Add OC
++  virtual void PutOc();
++
+   /// Add Javascript (document level)
+   virtual void PutJavaScript();
+ 
+@@ -2375,6 +2479,13 @@
+   void InitializeCoreFonts();
+ 
+ private:
++  /// Set the page format
++  void SetPageFormat(const int orientation, const wxPaperSize format);
++
++  /// Set the page format
++  void SetPageFormat(const int orientation, const double paperWidth, const double paperHeight);
++
++private:
+   int                  m_page;                ///< current page number
+   int                  m_n;                   ///< current object number
+   int                  m_firstPageId;         ///< object id of the first page
+@@ -2430,6 +2541,7 @@
+ 
+   wxPdfGradientMap*    m_gradients;           ///< array of gradients
+   wxPdfSpotColourMap*  m_spotColors;          ///< array of spot colors
++  wxPdfPatternMap*     m_patterns;            ///< array of patterns
+ 
+   wxPdfAnnotationsMap* m_annotations;         ///< array of text annotations
+   
+@@ -2508,6 +2620,9 @@
+   static int           ms_s1;                 ///< Random number generator seed 1
+   static int           ms_s2;                 ///< Random number generator seed 2
+ 
++  wxPdfOc              m_pdfOc;              ///< Optional content manager
++
++
+   friend class wxPdfImage;
+   friend class wxPdfTable;
+ };
+Index: components/wxpdfdoc/include/wx/pdfproperties.h
+===================================================================
+RCS file: /cvsroot/wxcode/wxCode/components/wxpdfdoc/include/wx/pdfproperties.h,v
+retrieving revision 1.2
+diff -u -r1.2 pdfproperties.h
+--- components/wxpdfdoc/include/wx/pdfproperties.h	15 Dec 2006 20:47:08 -0000	1.2
++++ components/wxpdfdoc/include/wx/pdfproperties.h	8 Dec 2007 22:41:11 -0000
+@@ -462,6 +462,53 @@
+   double m_black;      ///< black level
+ };
+ 
++
++/// Class representing patterns.
++// Implementation in pdfcolor.cpp
++class WXDLLIMPEXP_PDFDOC wxPdfPattern
++{
++public:
++  /// Constructor for pattern
++  /**
++  * \param index The pattern index
++  * \param width The image width
++  * \param height The image height
++  */
++  wxPdfPattern(const int index, const double width, const double height);
++
++  /// Copy constructor
++  wxPdfPattern(const wxPdfPattern& pattern);
++
++  /// Set object index
++  void SetObjIndex(int index) { m_objIndex = index; };
++
++  /// Get object index
++  int GetObjIndex() const { return m_objIndex; };
++
++  /// Get pattern index
++  int GetIndex() const { return m_index; };
++
++  /// Set image
++  void SetImage(wxPdfImage *image) { m_image = image; };
++
++  /// Get image
++  wxPdfImage *GetImage() const {return m_image; };
++
++  /// Get image width
++  int GetImageWidth() const {return m_imageWidth; };
++
++  /// Get image height
++  int GetImageHeight() const {return m_imageHeight; };
++
++private:
++  int    m_objIndex;   ///< object index
++  int    m_index;      ///< pattern index
++  wxPdfImage *m_image; ///< image
++  double m_imageWidth; ///< image width
++  double m_imageHeight;///< image height
++};
++
++
+ /// Class representing wxPdfDocument colors.
+ class WXDLLIMPEXP_PDFDOC wxPdfColour
+ {
+@@ -683,6 +730,13 @@
+   /// Get the line color
+   const wxPdfColour& GetColour() const { return m_color; };
+ 
++  /// Set the miter limit (0 for none)
++  void SetMiterLimit(const double miterLimit) { m_miterLimit = miterLimit; };
++
++  /// Get the miter limit
++  double GetMiterLimit() const { return m_miterLimit; };
++
++
+ private:
+   bool             m_isSet;   ///< Flag whether the style is initialized
+   double           m_width;   ///< Line width
+@@ -691,6 +745,7 @@
+   wxPdfArrayDouble m_dash;    ///< Dash pattern
+   double           m_phase;   ///< Dash pattern phase
+   wxPdfColour      m_color;   ///< Line color
++  double           m_miterLimit;  ///< Miter limit (0 for none)
+ };
+ 
+ /// Class representing a coons patch mesh.
+Index: components/wxpdfdoc/src/pdfcolor.cpp
+===================================================================
+RCS file: /cvsroot/wxcode/wxCode/components/wxpdfdoc/src/pdfcolor.cpp,v
+retrieving revision 1.3
+diff -u -r1.3 pdfcolor.cpp
+--- components/wxpdfdoc/src/pdfcolor.cpp	15 Dec 2006 20:47:08 -0000	1.3
++++ components/wxpdfdoc/src/pdfcolor.cpp	9 Dec 2007 01:11:37 -0000
+@@ -239,9 +239,64 @@
+   m_black    = color.m_black;
+ }
+ 
++wxPdfPattern::wxPdfPattern(const int index, const double width, const double height)
++  : m_objIndex(0), m_index(index), m_imageWidth(width), m_imageHeight(height)
++{
++}
++
++wxPdfPattern::wxPdfPattern(const wxPdfPattern& pattern)
++{
++  m_objIndex    = pattern.m_objIndex;
++  m_index       = pattern.m_index; 
++  m_imageWidth  = pattern.m_imageWidth;
++  m_imageHeight = pattern.m_imageHeight;
++  m_image       = pattern.m_image;
++}
++
+ // ---
+ 
+ void
++wxPdfDocument::AddPattern(const wxString& name, const wxImage& image, const wxString& imageName, const double width, const double height)
++{
++  wxPdfPatternMap::iterator pattern = (*m_patterns).find(name);
++  wxPdfPattern *newPattern;
++  if (pattern == (*m_patterns).end())
++  {
++    int i = (*m_patterns).size() + 1;
++    newPattern = new wxPdfPattern(i, width, height);
++    (*m_patterns)[name] = newPattern;
++
++
++    //store the image
++    wxImage tempImage = image.Copy();
++    wxPdfImage* currentImage = NULL;
++    wxPdfImageHashMap::iterator imageIter = (*m_images).find(imageName);
++    int maskImage;
++    if (imageIter == (*m_images).end())
++    {
++      if (tempImage.HasAlpha())
++      {
++        maskImage = ImageMask(imageName+wxString(_T(".mask")), tempImage);
++        tempImage.ConvertAlphaToMask(0);
++
++      }
++      // First use of image, get info
++      tempImage.SetMask(false);
++      int i = (*m_images).size() + 1;
++      currentImage = new wxPdfImage(this, i, imageName, tempImage);
++      currentImage->Parse();
++      currentImage->SetMaskImage(maskImage);
++      (*m_images)[imageName] = currentImage;
++    }
++
++    imageIter = (*m_images).find(imageName);
++    newPattern->SetImage( (*imageIter).second );
++
++  }
++}
++
++
++void
+ wxPdfDocument::AddSpotColor(const wxString& name, double cyan, double magenta, double yellow, double black)
+ {
+   wxPdfSpotColourMap::iterator spotColor = (*m_spotColors).find(name);
+@@ -253,6 +308,34 @@
+ }
+  
+ void
++wxPdfDocument::SetDrawColorSpace(const int space)
++{
++  switch(space) {
++  case 1:
++    OutAscii(_T("/Pattern CS"));
++    break;
++  case 0:
++  default:
++    OutAscii(_T("/DeviceRGB CS"));
++    break;
++  }
++}
++
++void
++wxPdfDocument::SetFillColorSpace(const int space)
++{
++  switch(space) {
++  case 1:
++    OutAscii(_T("/Pattern cs"));
++    break;
++  case 0:
++  default:
++    OutAscii(_T("/DeviceRGB cs"));
++    break;
++  }
++}
++
++void
+ wxPdfDocument::SetDrawColor(const wxColour& color)
+ {
+   wxPdfColour tempColor(color);
+@@ -315,6 +398,20 @@
+   }
+ }
+ 
++void
++wxPdfDocument::SetDrawPattern(const wxString& name) {
++  wxPdfPatternMap::iterator patternIter = (*m_patterns).find(name);
++  wxPdfPattern *pattern;
++  if( patternIter != (*m_patterns).end()) 
++  {
++    pattern = patternIter->second;
++    OutAscii(wxString::Format(_T("/P%d SCN"), pattern->GetIndex()));
++  }
++  else {
++    wxLogError(_("SetFillPattern: Undefined pattern: ") + name);
++  }
++}
++
+ const wxPdfColour
+ wxPdfDocument::GetDrawColor()
+ {
+@@ -388,6 +485,21 @@
+   }
+ }
+ 
++void
++wxPdfDocument::SetFillPattern(const wxString& name) {
++  wxPdfPatternMap::iterator patternIter = (*m_patterns).find(name);
++  wxPdfPattern *pattern;
++  if( patternIter != (*m_patterns).end()) 
++  {
++    pattern = patternIter->second;
++    OutAscii(wxString::Format(_T("/P%d scn"), pattern->GetIndex()));
++  }
++  else {
++    wxLogError(_("SetFillPattern: Undefined pattern: ") + name);
++  }
++}
++
++
+ const wxPdfColour
+ wxPdfDocument::GetFillColor()
+ {
+Index: components/wxpdfdoc/src/pdfdoc.cpp
+===================================================================
+RCS file: /cvsroot/wxcode/wxCode/components/wxpdfdoc/src/pdfdoc.cpp,v
+retrieving revision 1.9
+diff -u -r1.9 pdfdoc.cpp
+--- components/wxpdfdoc/src/pdfdoc.cpp	15 Dec 2006 20:47:08 -0000	1.9
++++ components/wxpdfdoc/src/pdfdoc.cpp	31 Dec 2007 02:34:47 -0000
+@@ -35,6 +35,47 @@
+ 
+ wxPdfDocument::wxPdfDocument(int orientation, const wxString& unit, wxPaperSize format)
+ {
++  double w, h;
++  double unitscale;
++
++  // Scale factor
++  if (unit == _T("pt"))
++  {
++    unitscale = 1.;
++  }
++  else if (unit == _T("in"))
++  {
++    unitscale = 72.;
++  }
++  else if (unit == _T("cm"))
++  {
++    unitscale = 72. / 2.54;
++  }
++  else // if (unit == "mm") or unknown
++  {
++    unitscale = 72. / 25.4;
++  }
++
++
++  // get the page width/height and pass to other constructor
++
++  wxPrintPaperDatabase* printPaperDatabase = new wxPrintPaperDatabase;
++  printPaperDatabase->CreateDatabase();
++  wxPrintPaperType* paperType = printPaperDatabase->FindPaperType(format);
++  if (paperType == NULL)
++  {
++    paperType = printPaperDatabase->FindPaperType(wxPAPER_A4);
++  }
++  wxSize paperSize = paperType->GetSize();
++  //get the width and height in user units. papersize is in tenths of a mm, convert to inches, then points, then to user units
++  w = (paperSize.GetWidth() / 254.0) * 72.0 * unitscale;
++  h = (paperSize.GetHeight() / 254.0) * 72.0 * unitscale;
++  delete printPaperDatabase;
++
++  wxPdfDocument(w, h, orientation, unit);
++}
++
++wxPdfDocument::wxPdfDocument(const double paperWidth, const double paperHeight, int orientation, const wxString& unit) {
+   // Allocate arrays
+   m_currentFont = NULL;
+ 
+@@ -65,6 +106,7 @@
+   m_templates   = new wxPdfTemplatesMap();
+   m_parsers     = new wxPdfParserMap();
+   m_spotColors  = new wxPdfSpotColourMap();
++  m_patterns    = new wxPdfPatternMap();
+ 
+   m_outlineRoot     = -1;
+   m_maxOutlineLevel = 0;
+@@ -105,7 +147,13 @@
+   m_imgscale = 1.;
+ 
+   // Page format
+-  wxPrintPaperDatabase* printPaperDatabase = new wxPrintPaperDatabase;
++  m_fw = paperWidth;
++  m_fh = paperHeight;
++  m_fwPt = m_fw * m_k;
++  m_fhPt = m_fh * m_k;
++
++
++  /*wxPrintPaperDatabase* printPaperDatabase = new wxPrintPaperDatabase;
+   printPaperDatabase->CreateDatabase();
+   wxPrintPaperType* paperType = printPaperDatabase->FindPaperType(format);
+   if (paperType == NULL)
+@@ -119,6 +167,7 @@
+ 
+   m_fw = m_fwPt / m_k;
+   m_fh = m_fhPt / m_k;
++*/
+ 
+   // Page orientation
+   if (orientation == wxLANDSCAPE)
+@@ -184,6 +233,8 @@
+   m_zapfdingbats = m_currentFont->GetIndex();
+ }
+ 
++
++
+ wxPdfDocument::~wxPdfDocument()
+ {
+   delete m_coreFonts;
+@@ -349,6 +400,16 @@
+   }
+   delete m_spotColors;
+ 
++  wxPdfPatternMap::iterator pattern = m_patterns->begin();
++  for(pattern = m_patterns->begin(); pattern != m_patterns->end(); pattern++) 
++  {
++    if(pattern->second != NULL)
++    {
++      delete pattern->second;
++    }
++  }
++  delete m_patterns;
++
+   delete m_orientationChanges;
+ 
+   delete m_offsets;
+@@ -633,7 +694,9 @@
+   // Open font metrics XML file
+   wxFileName fontFileName(fileName);
+   fontFileName.MakeAbsolute(GetFontPath());
+-  wxFileSystem fs;
++  //BM: wxFileSystem doesnt appear to have default handler for local files?, just let 
++  // the wxXmlDocument load the file itself rather than generating a stream.
++/*  wxFileSystem fs;
+   wxFSFile* xmlFontMetrics = fs.OpenFile(fontFileName.GetFullPath());
+   if (!xmlFontMetrics)
+   {
+@@ -641,11 +704,12 @@
+     wxLogDebug(_T("wxPdfDocument::AddFont: Font metrics file '%s' not found."), fileName.c_str());
+     return false;
+   }
+-
++*/
+   // Load the XML file
+   wxXmlDocument fontMetrics;
+-  bool loaded = fontMetrics.Load(*xmlFontMetrics->GetStream());
+-  delete xmlFontMetrics;
++//  bool loaded = fontMetrics.Load(*xmlFontMetrics->GetStream());
++//  delete xmlFontMetrics;
++  bool loaded = fontMetrics.Load(fontFileName.GetFullPath());
+   if (!loaded)
+   {
+     // Font metrics file loading failed
+@@ -856,7 +920,7 @@
+ }
+ 
+ void
+-wxPdfDocument::Text(double x, double y, const wxString& txt)
++wxPdfDocument::Text(double x, double y, const wxString& txt, const int mode)
+ {
+   // Output a string
+   if (m_colorFlag)
+@@ -867,7 +931,13 @@
+   }
+   OutAscii(wxString(_T("BT ")) +
+            Double2String(x*m_k,2) + wxString(_T(" ")) +
+-           Double2String((m_h-y)*m_k,2) + wxString(_T(" Td (")), false);
++           Double2String((m_h-y)*m_k,2) + wxString(_T(" Td ")), false);
++  if(mode<3)
++  {
++    OutAscii(Double2String(mode) + wxString(_T(" Tr")), false);
++  }
++
++  OutAscii(wxString(_T(" (")), false);
+   TextEscape(txt,false);
+   Out(") Tj ET", false);
+ 
+@@ -885,12 +955,12 @@
+ }
+ 
+ void
+-wxPdfDocument::RotatedText(double x, double y, const wxString& txt, double angle)
++wxPdfDocument::RotatedText(double x, double y, const wxString& txt, double angle, const int mode)
+ {
+   // Text rotated around its origin
+   StartTransform();
+   Rotate(angle, x, y);
+-  Text(x, y, txt);
++  Text(x, y, txt, mode);
+   StopTransform();
+ }
+ 
+@@ -2223,4 +2293,14 @@
+   return value;
+ }
+ 
++void
++wxPdfDocument::EnterOcg(const wxPdfOcg *ocg)
++{
++  OutAscii(wxString::Format(_T("/OC /OC%d BDC"), ocg->GetOcgIndex()));
++}
+ 
++void
++wxPdfDocument::ExitOcg(void)
++{
++  OutAscii(_T("EMC"));
++}
+Index: components/wxpdfdoc/src/pdfgraphics.cpp
+===================================================================
+RCS file: /cvsroot/wxcode/wxCode/components/wxpdfdoc/src/pdfgraphics.cpp,v
+retrieving revision 1.3
+diff -u -r1.3 pdfgraphics.cpp
+--- components/wxpdfdoc/src/pdfgraphics.cpp	15 Dec 2006 20:47:08 -0000	1.3
++++ components/wxpdfdoc/src/pdfgraphics.cpp	4 Jan 2008 03:41:51 -0000
+@@ -97,6 +97,7 @@
+   m_dash  = dash;
+   m_phase = phase;
+   m_color = color;
++  m_miterLimit = 0;
+ }
+ 
+ wxPdfLineStyle::~wxPdfLineStyle()
+@@ -113,6 +114,7 @@
+   m_dash  = lineStyle.m_dash;
+   m_phase = lineStyle.m_phase;
+   m_color = lineStyle.m_color;
++  m_miterLimit = lineStyle.m_miterLimit;
+ }
+ 
+ wxPdfLineStyle&
+@@ -125,6 +127,7 @@
+   m_dash  = lineStyle.m_dash;
+   m_phase = lineStyle.m_phase;
+   m_color = lineStyle.m_color;
++  m_miterLimit = lineStyle.m_miterLimit;
+   return *this;
+ }
+ 
+@@ -1339,7 +1342,7 @@
+ }
+ 
+ void
+-wxPdfDocument::Shape(const wxPdfShape& shape, int style)
++wxPdfDocument::Shape(const wxPdfShape& shape, int style, bool alternativeFillRule)
+ {
+   wxString op;
+   if ((style & wxPDF_STYLE_MASK) == wxPDF_STYLE_FILL)
+@@ -1366,6 +1369,15 @@
+     }
+   }
+ 
++  //if alternative fill rule requested, add the modifier to the command if its f, b or B
++  if (alternativeFillRule)
++  {
++    if(op == _T("f") || op == _T("b") || op == _T("B")) 
++    {
++      op += _T("*");
++    }
++  }
++
+   Out("q");
+ 
+   double scratch[6];
+@@ -1607,6 +1619,11 @@
+       break;
+   }
+ 
++  if ( (linestyle.GetLineJoin() == wxPDF_LINEJOIN_MITER) && (linestyle.GetMiterLimit() != 0.0) )
++  {
++    OutAscii(wxString::Format(_T("%f M"), linestyle.GetMiterLimit()));
++  }
++
+   const wxPdfArrayDouble& dash = linestyle.GetDash();
+   if (&dash != NULL)
+   {
+@@ -1830,6 +1847,11 @@
+   {
+     m_inTransform--;
+     Out("Q");
++
++    //hack to make next font change work, see https://sourceforge.net/tracker/?func=detail&atid=462816&aid=1861202&group_id=51305
++    m_fontFamily = wxEmptyString;
++    //hack to make colour change work, related to same bug as above
++    m_fillColor = wxPdfColour(1,2,3);
+   }
+ }
+ 
+Index: components/wxpdfdoc/src/pdfimage.cpp
+===================================================================
+RCS file: /cvsroot/wxcode/wxCode/components/wxpdfdoc/src/pdfimage.cpp,v
+retrieving revision 1.9
+diff -u -r1.9 pdfimage.cpp
+--- components/wxpdfdoc/src/pdfimage.cpp	15 Dec 2006 20:47:08 -0000	1.9
++++ components/wxpdfdoc/src/pdfimage.cpp	1 Jan 2008 04:12:50 -0000
+@@ -38,6 +38,8 @@
+   if (ms_fileSystem == NULL)
+   {
+     static wxFileSystem fileSystem;
++    //I dont know why this needs to be added manually, all the documents indicate that nothing needs to be done for local files.
++    fileSystem.AddHandler(new wxLocalFSHandler());
+     ms_fileSystem = &fileSystem;
+   }
+   return ms_fileSystem;
+Index: components/wxpdfdoc/src/pdfkernel.cpp
+===================================================================
+RCS file: /cvsroot/wxcode/wxCode/components/wxpdfdoc/src/pdfkernel.cpp,v
+retrieving revision 1.5
+diff -u -r1.5 pdfkernel.cpp
+--- components/wxpdfdoc/src/pdfkernel.cpp	15 Dec 2006 20:47:08 -0000	1.5
++++ components/wxpdfdoc/src/pdfkernel.cpp	31 Dec 2007 23:16:28 -0000
+@@ -350,6 +350,45 @@
+ {
+   Out("/Type /Catalog");
+   Out("/Pages 1 0 R");
++
++  Out("/OCProperties <<");
++  wxPdfOcgHashMap &ocgHashMap = m_pdfOc.GetOcgMap();
++  wxPdfOcgHashMap::iterator ocgIter = ocgHashMap.begin();
++  Out(" /OCGs [");
++  for( ocgIter = ocgHashMap.begin(); ocgIter != ocgHashMap.end(); ocgIter++) {
++    wxPdfOcg* ocg = ocgIter->second;
++    OutAscii(wxString::Format(_T("%d 0 R"), ocg->GetObjectIndex()));
++  }  
++  Out("]");
++  Out(" /D <<");
++  Out(" /BaseState /ON ");
++  Out(" /Intent /View ");
++  Out(" /ON [");
++  for( ocgIter = ocgHashMap.begin(); ocgIter != ocgHashMap.end(); ocgIter++) {
++    wxPdfOcg* ocg = ocgIter->second;
++    if( ocg->GetDefaultVisibilityState() == true) {
++      OutAscii(wxString::Format(_T("%d 0 R"), ocg->GetObjectIndex()));
++    }
++  }
++  Out(" ]");
++  Out(" /OFF [");
++  for( ocgIter = ocgHashMap.begin(); ocgIter != ocgHashMap.end(); ocgIter++) {
++    wxPdfOcg* ocg = ocgIter->second;
++    if( ocg->GetDefaultVisibilityState() == false) {
++      OutAscii(wxString::Format(_T("%d 0 R"), ocg->GetObjectIndex()));
++    }
++  }
++  Out(" ]");
++  Out(" /Order [");
++  for( ocgIter = ocgHashMap.begin(); ocgIter != ocgHashMap.end(); ocgIter++) {
++    wxPdfOcg* ocg = ocgIter->second;
++    OutAscii(wxString::Format(_T("%d 0 R"), ocg->GetObjectIndex()));
++  }
++  Out("]");
++
++  Out(">>");
++  Out(">>");
++
+   if (m_zoomMode == wxPDF_ZOOM_FULLPAGE)
+   {
+     OutAscii(wxString::Format(_T("/OpenAction [%d 0 R /Fit]"), m_firstPageId));
+@@ -967,11 +1006,12 @@
+       wxString strFontFileName = font->GetFontFile();
+       wxFileName fontFileName(strFontFileName);
+       fontFileName.MakeAbsolute(font->GetFilePath());
+-      wxFileSystem fs;
+-      wxFSFile* fontFile = fs.OpenFile(fontFileName.GetFullPath());
+-      if (fontFile)
++
++//      wxFileSystem fs;
++//      wxFSFile* fontFile = fs.OpenFile(fontFileName.GetFullPath());
++      if (fontFileName.FileExists())
+       {
+-        wxInputStream* fontStream = fontFile->GetStream();
++        wxFileInputStream* fontStream = new wxFileInputStream(fontFileName.GetFullPath());
+         int fontLen   = fontStream->GetSize();
+         int fontSize1 = font->GetSize1();
+         wxMemoryOutputStream* p = new wxMemoryOutputStream();
+@@ -1040,7 +1080,8 @@
+         Out("endobj");
+ 
+         delete p;
+-        delete fontFile;
++//        delete fontFile;
++        delete fontStream;
+       }
+     }
+   }
+@@ -1235,12 +1276,13 @@
+       wxString strCtgFileName = font->GetCtgFile();
+       wxFileName ctgFileName(strCtgFileName);
+       ctgFileName.MakeAbsolute(font->GetFilePath());
+-       wxFileSystem fs;
+-      wxFSFile* ctgFile = fs.OpenFile(ctgFileName.GetFullPath());
+-      if (ctgFile)
++
++//      wxFileSystem fs;
++//      wxFSFile* ctgFile = fs.OpenFile(ctgFileName.GetFullPath());
++      if (ctgFileName.FileExists())
+       {
+         wxMemoryOutputStream* p = new wxMemoryOutputStream();
+-        wxInputStream* ctgStream = ctgFile->GetStream();
++        wxFileInputStream* ctgStream = new wxFileInputStream(ctgFileName.GetFullPath());
+         int ctgLen = CalculateStreamLength(ctgStream->GetSize());
+         OutAscii(wxString::Format(_T("<</Length %d"), ctgLen));
+         // check file extension
+@@ -1255,7 +1297,8 @@
+         p->Write(*ctgStream);
+         PutStream(*p);
+         delete p;
+-        delete ctgFile;
++//        delete ctgFile;
++        delete ctgStream;
+       }
+       else
+       {
+@@ -1634,6 +1677,21 @@
+     OutAscii(wxString::Format(_T("/CS%d %d 0 R"), spotColor->second->GetIndex(), spotColor->second->GetObjIndex()));
+   }
+   Out(">>");
++  Out("/Pattern <<");
++  wxPdfPatternMap::iterator pattern;
++  for (pattern = m_patterns->begin(); pattern != m_patterns->end(); pattern++)
++  {
++    OutAscii(wxString::Format(_T("/P%d %d 0 R"), pattern->second->GetIndex(), pattern->second->GetObjIndex()));
++  }
++  Out(">>");
++  wxPdfOcgHashMap &ocgHashMap = m_pdfOc.GetOcgMap();
++  wxPdfOcgHashMap::iterator ocgIter = ocgHashMap.begin();
++  Out("/Properties <<");
++  for( ocgIter = ocgHashMap.begin(); ocgIter != ocgHashMap.end(); ocgIter++) {
++    wxPdfOcg* ocg = ocgIter->second;
++    OutAscii(wxString::Format(_T("/OC%d %d 0 R"), ocg->GetOcgIndex(), ocg->GetObjectIndex()));
++  }  
++  Out(">>");
+ }
+ 
+ void
+@@ -1787,6 +1845,56 @@
+ }
+  
+ void
++wxPdfDocument::PutPatterns()
++{
++  wxPdfPatternMap::iterator patternIter = (*m_patterns).begin();
++  for (patternIter = (*m_patterns).begin(); patternIter != (*m_patterns).end(); patternIter++)
++  {
++    wxPdfPattern* pattern = patternIter->second;
++    NewObj();
++    pattern->SetObjIndex(m_n);
++    Out("<<");
++    Out("/Type /Pattern");
++    Out("/PatternType 1");
++    Out("/PaintType 1");
++    Out("/TilingType 1");
++    OutAscii(wxString::Format(_T("/BBox [0 0 %d %d]"), pattern->GetImageWidth(), pattern->GetImageHeight()));
++    OutAscii(wxString::Format(_T("/XStep %d"), pattern->GetImageWidth()));
++    OutAscii(wxString::Format(_T("/YStep %d"), pattern->GetImageHeight()));
++    wxPdfImage *image = pattern->GetImage();
++    OutAscii(wxString::Format(_T("/Resources << /XObject << /I%d %d 0 R >> >>"), image->GetIndex(), image->GetObjIndex()));
++    Out("/Matrix [ 1 0 0 1 0 0 ]");
++
++    wxString sdata = wxString::Format(_T("q %d 0 0 %d 0 0 cm /I%d Do Q"), pattern->GetImageWidth(), pattern->GetImageHeight(), image->GetIndex());
++    wxMemoryOutputStream *p = new wxMemoryOutputStream;
++    p->Write(sdata.ToAscii(), sdata.Length());
++    OutAscii(wxString(_T("/Length ")) + wxString::Format(_T("%ld"), CalculateStreamLength(p->TellO())) );
++    Out(">>");
++    PutStream(*p);
++    delete p;
++    Out("endobj");
++  }
++}
++
++void
++wxPdfDocument::PutOc()
++{
++  wxPdfOcgHashMap &ocgHashMap = m_pdfOc.GetOcgMap();
++  wxPdfOcgHashMap::iterator ocgIter = ocgHashMap.begin();
++  for( ocgIter = ocgHashMap.begin(); ocgIter != ocgHashMap.end(); ocgIter++) {
++    wxPdfOcg* ocg = ocgIter->second;
++    NewObj();
++    ocg->SetObjectIndex(m_n);
++    Out("<<");
++    Out("/Type /OCG");
++    OutAscii(wxString::Format(_T("/Name (%s)"), ocg->GetName()));
++    OutAscii(_T("/Intent ") + ocg->GetIntentString());
++    Out(">>");
++    Out("endobj");
++  }
++}
++
++void
+ wxPdfDocument::PutJavaScript()
+ {
+   if (m_javascript.Length() > 0)
+@@ -1819,7 +1927,9 @@
+   PutImages();
+   PutTemplates();
+   PutImportedObjects();
+-  PutSpotColors(); 
++  PutSpotColors();
++  PutPatterns();
++  PutOc();
+ 
+   // Resource dictionary
+   (*m_offsets)[2-1] = m_buffer.TellO();
+Index: components/wxpdfdoc/src/pdfparser.cpp
+===================================================================
+RCS file: /cvsroot/wxcode/wxCode/components/wxpdfdoc/src/pdfparser.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 pdfparser.cpp
+--- components/wxpdfdoc/src/pdfparser.cpp	15 Dec 2006 20:53:04 -0000	1.1
++++ components/wxpdfdoc/src/pdfparser.cpp	1 Jan 2008 01:28:11 -0000
+@@ -63,6 +63,8 @@
+   if (ms_fileSystem == NULL)
+   {
+     static wxFileSystem fileSystem;
++    //I dont know why this needs to be added manually, all the documents indicate that nothing needs to be done for local files.
++    fileSystem.AddHandler(new wxLocalFSHandler());
+     ms_fileSystem = &fileSystem;
+   }
+   return ms_fileSystem;
