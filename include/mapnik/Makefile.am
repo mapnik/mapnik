@@ -3,7 +3,12 @@ libmapnikdir = $(pkgincludedir)
 
 if HAVE_LIBXML2
 libxml2_inc = \
-  libxml2_loader.hpp
+	libxml2_loader.hpp
+endif
+
+if HAVE_CAIRO
+cairo_inc = \
+	cairo_renderer.hpp
 endif
 
 libmapnik_HEADERS = \
@@ -12,6 +17,7 @@ libmapnik_HEADERS = \
 	attribute.hpp \
 	attribute_collector.hpp \
 	attribute_descriptor.hpp \
+	${cairo_inc} \
 	color.hpp \
 	color_factory.hpp \
 	comparison.hpp \

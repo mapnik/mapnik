@@ -3,6 +3,7 @@ SUBDIRS = \
 	postgis\
 	gdal \
 	raster \
-	shape
+	shape \
+	osm
 
 ## File created by the gnome-build tools

@@ -75,7 +75,7 @@ fi
 
 AX_LIB_POSTGRESQL
 if test "$found_postgresql" = "yes"; then
-  AM_CONDITIONAL(BUILD_POSTGRESQL, test "x$found_postgresql" = "xyes")
+  AM_CONDITIONAL(HAVE_POSTGRESQL, test "x$found_postgresql" = "xyes")
 fi
 
 AX_CHECK_TIFF
@@ -129,9 +129,9 @@ fi
 
 
 dnl Check for option to enable libxml2
-AC_MSG_CHECKING(whether to enable included libxml2 building)
+AC_MSG_CHECKING(whether to enable libxml2 support)
 AC_ARG_ENABLE(libxml2,
-        [  --enable-libxml2=[no/yes]        enables included libxml2 build (default=no)],,
+        [  --enable-libxml2=[no/yes]        enables libxml2 support (default=no)],,
                  enable_libxml2=no)
 
 AM_CONDITIONAL(HAVE_LIBXML2, test "x$enable_libxml2" = "xyes")
@@ -144,6 +144,23 @@ else
   AC_MSG_RESULT(no)
 fi
 
+dnl Check for option to enable cairo
+AC_MSG_CHECKING(whether to enable cairo support)
+AC_ARG_ENABLE(cairo,
+        [  --enable-cairo=[no/yes]        enables cairo support (default=yes)],,
+                 enable_cairo=yes)
+
+AM_CONDITIONAL(HAVE_CAIRO, test "x$enable_cairo" = "xyes")
+
+if [ test "x$enable_cairo" = "xyes"]; then
+  AC_MSG_RESULT(yes)
+  PKG_CHECK_MODULES(CAIRO, cairomm-1.0 >= 1.4.4)
+  dnl AC_DEFINE(HAVE_CAIRO, 1,"")
+else
+  AC_MSG_RESULT(no)
+fi
+
+
 AC_OUTPUT([
 Makefile
 include/Makefile
@@ -154,6 +171,7 @@ plugins/input/gdal/Makefile
 plugins/input/postgis/Makefile
 plugins/input/raster/Makefile
 plugins/input/shape/Makefile
+plugins/input/osm/Makefile
 src/Makefile
 mapnik.pc
 mapnik-uninstalled.pc

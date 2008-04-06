@@ -2,26 +2,29 @@
 
 ## Created by Anjuta
 
-INCLUDES = \
-	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
-	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
-	-DPACKAGE_DATA_DIR=\""$(datadir)"\"
+INCLUDES = 
 
 AM_CXXFLAGS =\
-	 -Wall \
-   -g
+	 -Wall 
 
 lib_LTLIBRARIES = \
 	libmapnik.la
 
 if HAVE_LIBXML2
 libxml2_src = \
-  libxml2_loader.cpp
+	libxml2_loader.cpp
 endif
+
+if HAVE_CAIRO
+cairo_src = \
+	cairo_renderer.cpp 
+endif
+
 
 libmapnik_la_SOURCES = \
 	agg_renderer.cpp \
 	arrow.cpp \
+	${cairo_src} \
 	datasource_cache.cpp \
 	distance.cpp \
 	envelope.cpp \
@@ -68,7 +71,8 @@ libmapnik_la_LIBADD = \
   	${TIFF_LIBS} \
   	${PROJ_LIBS} \
   	${LTDL_LIBS} \
-  	${LIBXML2_LIBS}
+  	${LIBXML2_LIBS} \
+	${CAIRO_LIBS}
 
 libmapnik_la_CXXFLAGS = \
   	-I../include        \
@@ -80,7 +84,8 @@ libmapnik_la_CXXFLAGS = \
   	${PROJ_CFLAGS} \
   	${LTDL_CFLAGS} \
   	${BOOST_CPPFLAGS} \
-  	${LIBXML2_CFLAGS}
+  	${LIBXML2_CFLAGS} \
+	${CAIRO_CFLAGS}
 	
 	
 

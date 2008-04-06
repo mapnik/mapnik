@@ -1,5 +1,5 @@
 
-if BUILD_POSTGRESQL
+if HAVE_POSTGRESQL
 
 pkglib_LTLIBRARIES = \
 	postgis.la
