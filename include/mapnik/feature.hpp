@@ -120,6 +120,11 @@ namespace mapnik {
             return props_.end();
          }
           
+         bool exists(const std::string &k) const
+         {
+            return props_.find(k) != props_.end();
+         }
+
          std::string to_string() const
          {
             std::stringstream ss;

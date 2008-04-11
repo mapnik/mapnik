@@ -750,44 +750,47 @@ namespace mapnik
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
-      UnicodeString text = feature[sym.get_name()].to_unicode();
-      boost::shared_ptr<ImageData32> const& data = sym.get_image();
-
-      if (text.length() > 0 && data)
+      if (feature.exists(sym.get_name()))
       {
-         cairo_face_ptr face = face_manager_.get_face(sym.get_face_name());
+         UnicodeString text = feature[sym.get_name()].to_unicode();
+         boost::shared_ptr<ImageData32> const& data = sym.get_image();
 
-         if (face)
+         if (text.length() > 0 && data)
          {
-            cairo_context context(context_);
+            cairo_face_ptr face = face_manager_.get_face(sym.get_face_name());
 
-            context.set_font_face(face);
-
-            string_info info(text);
-
-            face->get_string_info(sym.get_text_size(), info);
-
-            placement_finder<label_collision_detector4> finder(detector_);
-
-            for (unsigned i = 0; i < feature.num_geometries(); ++i)
+            if (face)
             {
-               geometry2d const& geom = feature.get_geometry(i);
+               cairo_context context(context_);
 
-               if (geom.num_points() > 0) // don't bother with empty geometries
+               context.set_font_face(face);
+
+               string_info info(text);
+
+               face->get_string_info(sym.get_text_size(), info);
+
+               placement_finder<label_collision_detector4> finder(detector_);
+
+               for (unsigned i = 0; i < feature.num_geometries(); ++i)
                {
-                  path_type path(t_, geom, prj_trans);
-                  placement text_placement(info, sym);
+                  geometry2d const& geom = feature.get_geometry(i);
 
-                  text_placement.avoid_edges = sym.get_avoid_edges();
-                  finder.find_point_placements<path_type>(text_placement, path);
-
-                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                  if (geom.num_points() > 0) // don't bother with empty geometries
                   {
-                     double shield_x = text_placement.placements[ii].starting_x - data->width() / 2;
-                     double shield_y = text_placement.placements[ii].starting_y - data->height() / 2;
+                     path_type path(t_, geom, prj_trans);
+                     placement text_placement(info, sym);
 
-                     context.add_image(shield_x, shield_y, *data);
-                     context.add_text(sym, text_placement.placements[ii], face);
+                     text_placement.avoid_edges = sym.get_avoid_edges();
+                     finder.find_point_placements<path_type>(text_placement, path);
+
+                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                     {
+                        double shield_x = text_placement.placements[ii].starting_x - data->width() / 2;
+                        double shield_y = text_placement.placements[ii].starting_y - data->height() / 2;
+
+                        context.add_image(shield_x, shield_y, *data);
+                        context.add_text(sym, text_placement.placements[ii], face);
+                     }
                   }
                }
             }
@@ -924,57 +927,60 @@ namespace mapnik
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
-      UnicodeString text = feature[sym.get_name()].to_unicode();
-
-      if (text.length() > 0)
+      if (feature.exists(sym.get_name()))
       {
-         cairo_face_ptr face = face_manager_.get_face(sym.get_face_name());
+         UnicodeString text = feature[sym.get_name()].to_unicode();
 
-         if (face)
+         if (text.length() > 0)
          {
-            cairo_context context(context_);
+            cairo_face_ptr face = face_manager_.get_face(sym.get_face_name());
 
-            context.set_font_face(face);
-
-            string_info info(text);
-
-            face->get_string_info(sym.get_text_size(), info);
-
-            placement_finder<label_collision_detector4> finder(detector_);
-
-            for (unsigned i = 0; i < feature.num_geometries(); ++i)
+            if (face)
             {
-               geometry2d const& geom = feature.get_geometry(i);
+               cairo_context context(context_);
 
-               if (geom.num_points() > 0) // don't bother with empty geometries
+               context.set_font_face(face);
+
+               string_info info(text);
+
+               face->get_string_info(sym.get_text_size(), info);
+
+               placement_finder<label_collision_detector4> finder(detector_);
+
+               for (unsigned i = 0; i < feature.num_geometries(); ++i)
                {
-                  path_type path(t_, geom, prj_trans);
-                  placement text_placement(info, sym);
+                  geometry2d const& geom = feature.get_geometry(i);
 
-                  if (sym.get_label_placement() == POINT_PLACEMENT)
+                  if (geom.num_points() > 0) // don't bother with empty geometries
                   {
-                     double label_x, label_y, z = 0.0;
+                     path_type path(t_, geom, prj_trans);
+                     placement text_placement(info, sym);
 
-                     geom.label_position(&label_x, &label_y);
-                     prj_trans.backward(label_x, label_y, z);
-                     t_.forward(&label_x, &label_y);
-                     finder.find_point_placement(text_placement, label_x, label_y);
-                  }
-                  else //LINE_PLACEMENT
-                  {
-                     finder.find_line_placements<path_type>(text_placement, path);
-                  }
+                     if (sym.get_label_placement() == POINT_PLACEMENT)
+                     {
+                        double label_x, label_y, z = 0.0;
 
-                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
-                  {
-                     context.add_text(sym, text_placement.placements[ii], face);
+                        geom.label_position(&label_x, &label_y);
+                        prj_trans.backward(label_x, label_y, z);
+                        t_.forward(&label_x, &label_y);
+                        finder.find_point_placement(text_placement, label_x, label_y);
+                     }
+                     else //LINE_PLACEMENT
+                     {
+                        finder.find_line_placements<path_type>(text_placement, path);
+                     }
+
+                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
+                     {
+                        context.add_text(sym, text_placement.placements[ii], face);
+                     }
                   }
                }
             }
-         }
-         else
-         {
-            throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
+            else
+            {
+               throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
+            }
          }
       }
    }
