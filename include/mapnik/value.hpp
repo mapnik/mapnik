@@ -39,14 +39,18 @@
 
 namespace mapnik  {
    
-   typedef boost::variant<bool,int,double,UnicodeString> value_base;
+   struct value_null
+   {
+   };
+   
+   typedef boost::variant<value_null,bool,int,double,UnicodeString> value_base;
    
    namespace impl {
       struct equals
 	 : public boost::static_visitor<bool>
       {
             template <typename T, typename U>
-	    bool operator() (const T &, const U & ) const
+	    bool operator() (const T &, const U &) const
 	    {
 	       return false;
 	    }
@@ -72,19 +76,73 @@ namespace mapnik  {
 	    {
 	       return  lhs == rhs;
 	    }
+
+            bool operator() (value_null, value_null) const
+	    {
+	       return false;
+	    }
       };
       
+      struct not_equals
+	 : public boost::static_visitor<bool>
+      {
+            template <typename T, typename U>
+	    bool operator() (const T &, const U &) const
+	    {
+	       return true;
+	    }
+	
+            template <typename T>
+            bool operator() (T lhs, T rhs) const
+	    {
+	       return lhs != rhs;
+	    }
+            
+            bool operator() (int lhs, double rhs) const
+	    {
+	       return  lhs != rhs;
+	    }
+	
+            bool operator() (double lhs, int rhs) const
+	    {
+	       return  lhs != rhs;
+	    }
+	
+            bool operator() (UnicodeString const& lhs, 
+                             UnicodeString const& rhs) const
+	    {
+	       return  lhs != rhs;
+	    }
+
+            bool operator() (value_null, value_null) const
+	    {
+	       return false;
+	    }
+
+            template <typename T>
+            bool operator() (value_null, const T &) const
+	    {
+	       return false;
+	    }
+
+            template <typename T>
+            bool operator() (const T &, value_null) const
+	    {
+	       return false;
+	    }
+      };
+
       struct greater_than
 	 : public boost::static_visitor<bool>
       {
             template <typename T, typename U>
-            bool operator()( const T &, const U & ) const
+            bool operator()(const T &, const U &) const
 	    {
 	       return false;
 	    }
 	
             template <typename T>
-            bool operator()( T lhs, T rhs ) const
+            bool operator()(T lhs, T rhs) const
 	    {
 	       return lhs > rhs;
 	    }
@@ -103,13 +161,18 @@ namespace mapnik  {
 	    {
 	       return  lhs > rhs;
 	    }
+
+            bool operator() (value_null, value_null) const
+	    {
+	       return false;
+	    }
       };
     
       struct greater_or_equal
 	 : public boost::static_visitor<bool>
       {	
             template <typename T, typename U>
-            bool operator()( const T &, const U & ) const
+            bool operator()(const T &, const U &) const
 	    {
 	       return false;
 	    }
@@ -130,9 +193,14 @@ namespace mapnik  {
 	       return  lhs >= rhs;
 	    }
 	
-            bool operator() (UnicodeString const& lhs, UnicodeString const& rhs ) const
+            bool operator() (UnicodeString const& lhs, UnicodeString const& rhs) const
 	    {
 	       return lhs >= rhs;
+	    }
+
+            bool operator() (value_null, value_null) const
+	    {
+	       return false;
 	    }
       };
     
@@ -140,13 +208,13 @@ namespace mapnik  {
 	 : public boost::static_visitor<bool>
       {	
             template <typename T, typename U>
-            bool operator()( const T &, const U & ) const
+            bool operator()(const T &, const U &) const
 	    {
 	       return false;
 	    }
 	
             template <typename T>
-            bool operator()( T  lhs,T  rhs) const
+            bool operator()(T lhs, T rhs) const
 	    {
 	       return lhs < rhs;
 	    }
@@ -161,10 +229,15 @@ namespace mapnik  {
 	       return  lhs < rhs;
 	    }
 	
-            bool operator()( UnicodeString const& lhs, 
-                             UnicodeString const& rhs ) const
+            bool operator()(UnicodeString const& lhs, 
+                            UnicodeString const& rhs ) const
 	    {
 	       return lhs < rhs;
+	    }
+
+            bool operator() (value_null, value_null) const
+	    {
+	       return false;
 	    }
       };
 
@@ -172,13 +245,13 @@ namespace mapnik  {
 	 : public boost::static_visitor<bool>
       {	
             template <typename T, typename U>
-            bool operator()( const T &, const U & ) const
+            bool operator()(const T &, const U &) const
 	    {
 	       return false;
 	    }
 	
             template <typename T>
-            bool operator()(T lhs, T rhs ) const
+            bool operator()(T lhs, T rhs) const
 	    {
 	       return lhs <= rhs;
 	    }
@@ -194,10 +267,15 @@ namespace mapnik  {
 	    }
 	
             template <typename T>
-            bool operator()( UnicodeString const& lhs, 
-                             UnicodeString const& rhs ) const
+            bool operator()(UnicodeString const& lhs, 
+                            UnicodeString const& rhs ) const
 	    {
 	       return lhs <= rhs;
+	    }
+
+            bool operator() (value_null, value_null) const
+	    {
+	       return false;
 	    }
       };
     
@@ -386,7 +464,12 @@ namespace mapnik  {
 	       ss << std::setprecision(16) << val;
 	       return ss.str();
             }
-      };
+            
+            std::string operator() (value_null const& val) const
+            {
+	       return "";
+            }
+       };
 
       struct to_unicode : public boost::static_visitor<UnicodeString>
       {
@@ -410,6 +493,11 @@ namespace mapnik  {
                std::basic_ostringstream<char> out;
 	       out << std::setprecision(16) << val;
                return UnicodeString(out.str().c_str());
+            }
+            
+            UnicodeString operator() (value_null const& val) const
+            {
+	       return UnicodeString("");
             }
       };
       
@@ -455,9 +543,14 @@ namespace mapnik  {
 	       ss << std::setprecision(16) << val;
 	       return ss.str();
             }
+
+            std::string operator() (value_null const& val) const
+	    {
+               return "null";
+            }
       };
    }
-    
+
    class value
    {
 	 value_base base_;
@@ -468,7 +561,7 @@ namespace mapnik  {
         
       public:
 	 value ()
-            : base_(0) {}
+            : base_(value_null()) {}
 	
 	 template <typename T> value(T _val_)
             : base_(_val_) {}
@@ -480,7 +573,7 @@ namespace mapnik  {
 
 	 bool operator!=(value const& other) const
 	 {
-	    return !(boost::apply_visitor(impl::equals(),base_,other.base_));
+	    return boost::apply_visitor(impl::not_equals(),base_,other.base_);
 	 }
 	
 	 bool operator>(value const& other) const

@@ -47,6 +47,11 @@ namespace boost { namespace python {
             {
                return ::PyUnicode_FromWideChar((wchar_t*)s.getBuffer(),implicit_cast<ssize_t>(s.length()));
             }
+            
+            PyObject * operator() (mapnik::value_null const& s) const
+            {
+               return NULL;
+            }
       };
       
       struct mapnik_value_to_python

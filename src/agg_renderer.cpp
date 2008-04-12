@@ -456,52 +456,49 @@ namespace mapnik
                                   proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-      if (feature.exists(sym.get_name()))
+      UnicodeString text = feature[sym.get_name()].to_unicode();
+      boost::shared_ptr<ImageData32> const& data = sym.get_image();
+      if (text.length() > 0 && data)
       {
-         UnicodeString text = feature[sym.get_name()].to_unicode();
-         boost::shared_ptr<ImageData32> const& data = sym.get_image();
-         if (text.length() > 0 && data)
+         face_ptr face = font_manager_.get_face(sym.get_face_name());
+         if (face)
          {
-            face_ptr face = font_manager_.get_face(sym.get_face_name());
-            if (face)
+            text_renderer<mapnik::Image32> ren(pixmap_,face);
+            ren.set_pixel_size(sym.get_text_size());
+            ren.set_fill(sym.get_fill());
+            
+            string_info info(text);
+            face->get_string_info(info);
+            
+            placement_finder<label_collision_detector4> finder(detector_);
+            
+            unsigned num_geom = feature.num_geometries();
+            for (unsigned i=0;i<num_geom;++i)
             {
-               text_renderer<mapnik::Image32> ren(pixmap_,face);
-               ren.set_pixel_size(sym.get_text_size());
-               ren.set_fill(sym.get_fill());
-            
-               string_info info(text);
-               face->get_string_info(info);
-            
-               placement_finder<label_collision_detector4> finder(detector_);
-            
-               unsigned num_geom = feature.num_geometries();
-               for (unsigned i=0;i<num_geom;++i)
-               {
-                  geometry2d const& geom = feature.get_geometry(i);
-                  if (geom.num_points() > 0) // don't bother with empty geometries
-                  {
-                     path_type path(t_,geom,prj_trans);
-                     placement text_placement(info, sym);
-                     text_placement.avoid_edges = sym.get_avoid_edges();
-                     finder.find_point_placements<path_type>(text_placement,path);
+               geometry2d const& geom = feature.get_geometry(i);
+               if (geom.num_points() > 0) // don't bother with empty geometries 
+               {    
+                  path_type path(t_,geom,prj_trans);
+                  placement text_placement(info, sym);
+                  text_placement.avoid_edges = sym.get_avoid_edges();
+                  finder.find_point_placements<path_type>(text_placement,path);
                   
-                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
-                     {
-                        int w = data->width();
-                        int h = data->height();
+                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                  { 
+                     int w = data->width();
+                     int h = data->height();
                      
-                        double x = text_placement.placements[ii].starting_x;
-                        double y = text_placement.placements[ii].starting_y;
+                     double x = text_placement.placements[ii].starting_x;
+                     double y = text_placement.placements[ii].starting_y;
                      
-                        int px=int(x - (w/2));
-                        int py=int(y - (h/2));
+                     int px=int(x - (w/2));
+                     int py=int(y - (h/2));
                      
-                        pixmap_.set_rectangle_alpha(px,py,*data);
+                     pixmap_.set_rectangle_alpha(px,py,*data);
                      
-                        Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
+                     Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
                         
-                        ren.render(x,y);
-                     }
+                     ren.render(x,y);
                   }
                }
             }
@@ -668,61 +665,58 @@ namespace mapnik
                                  proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-
-      if (feature.exists(sym.get_name()))
+      
+      UnicodeString text = feature[sym.get_name()].to_unicode();
+      if ( text.length() > 0 )
       {
-         UnicodeString text = feature[sym.get_name()].to_unicode();
-         if ( text.length() > 0 )
+         Color const& fill  = sym.get_fill();
+         face_ptr face = font_manager_.get_face(sym.get_face_name());
+         if (face)
          {
-            Color const& fill  = sym.get_fill();
-            face_ptr face = font_manager_.get_face(sym.get_face_name());
-            if (face)
+            text_renderer<mapnik::Image32> ren(pixmap_,face);
+            ren.set_pixel_size(sym.get_text_size());
+            ren.set_fill(fill);
+            ren.set_halo_fill(sym.get_halo_fill());
+            ren.set_halo_radius(sym.get_halo_radius());
+           
+            placement_finder<label_collision_detector4> finder(detector_);
+           
+            string_info info(text);
+            face->get_string_info(info);
+            unsigned num_geom = feature.num_geometries();
+            for (unsigned i=0;i<num_geom;++i)
             {
-               text_renderer<mapnik::Image32> ren(pixmap_,face);
-               ren.set_pixel_size(sym.get_text_size());
-               ren.set_fill(fill);
-               ren.set_halo_fill(sym.get_halo_fill());
-               ren.set_halo_radius(sym.get_halo_radius());
-           
-               placement_finder<label_collision_detector4> finder(detector_);
-           
-               string_info info(text);
-               face->get_string_info(info);
-               unsigned num_geom = feature.num_geometries();
-               for (unsigned i=0;i<num_geom;++i)
+               geometry2d const& geom = feature.get_geometry(i);
+               if (geom.num_points() > 0) // don't bother with empty geometries 
                {
-                  geometry2d const& geom = feature.get_geometry(i);
-                  if (geom.num_points() > 0) // don't bother with empty geometries
+                  path_type path(t_,geom,prj_trans);
+                  placement text_placement(info,sym);  
+                  if (sym.get_label_placement() == POINT_PLACEMENT) 
                   {
-                     path_type path(t_,geom,prj_trans);
-                     placement text_placement(info,sym);
-                     if (sym.get_label_placement() == POINT_PLACEMENT)
-                     {
-                        double label_x, label_y, z=0.0;
-                        geom.label_position(&label_x, &label_y);
-                        prj_trans.backward(label_x,label_y, z);
-                        t_.forward(&label_x,&label_y);
-                        finder.find_point_placement(text_placement,label_x,label_y);
-                     }
-                     else //LINE_PLACEMENT
-                     {
-                        finder.find_line_placements<path_type>(text_placement,path);
-                     }
+                     double label_x, label_y, z=0.0;
+                     geom.label_position(&label_x, &label_y);
+                     prj_trans.backward(label_x,label_y, z);
+                     t_.forward(&label_x,&label_y);
+                     finder.find_point_placement(text_placement,label_x,label_y);
+                  }
+                  else //LINE_PLACEMENT
+                  {
+                     finder.find_line_placements<path_type>(text_placement,path);
+                  }
                   
-                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
-                     {
-                        double x = text_placement.placements[ii].starting_x;
-                        double y = text_placement.placements[ii].starting_y;
-                        Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
-                        ren.render(x,y);
-                     }
+                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
+                  {
+                     double x = text_placement.placements[ii].starting_x;
+                     double y = text_placement.placements[ii].starting_y;
+                     Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
+                     ren.render(x,y);
                   }
                }
-            }
-            else
-            {
-               throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
-            }
+            }  
+         }
+         else
+         {
+            throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
          }
       }
    }
