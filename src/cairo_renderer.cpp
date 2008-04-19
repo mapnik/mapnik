@@ -482,11 +482,13 @@ namespace mapnik
       std::clog << "start map processing bbox="
                 << map.getCurrentExtent() << "\n";
 #endif
-#ifdef CAIRO_CLIP
-      Envelope<double> bounds = t_.forward(t_.extent());
-      context_->rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
-      context_->clip();
-#endif
+
+      if (cairo_version() >= CAIRO_VERSION_ENCODE(1, 6, 0))
+      {
+         Envelope<double> bounds = t_.forward(t_.extent());
+         context_->rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
+         context_->clip();
+      }
 
       boost::optional<Color> bg = m_.background();
       if (bg)
