@@ -279,10 +279,12 @@ namespace mapnik
 
          void move_to(double x, double y)
          {
+#if CAIRO_VERSION < CAIRO_VERSION_ENCODE(1, 6, 0)
             if (x < -32767.0) x = -32767.0;
             else if (x > 32767.0) x = 32767.0;
             if (y < -32767.0) y = -32767.0;
             else if (y > 32767.0) y = 32767.0;
+#endif
 
             context_->move_to(x, y);
          }
@@ -290,10 +292,12 @@ namespace mapnik
 
          void line_to(double x, double y)
          {
+#if CAIRO_VERSION < CAIRO_VERSION_ENCODE(1, 6, 0)
             if (x < -32767.0) x = -32767.0;
             else if (x > 32767.0) x = 32767.0;
             if (y < -32767.0) y = -32767.0;
             else if (y > 32767.0) y = 32767.0;
+#endif
 
             context_->line_to(x, y);
          }
@@ -483,12 +487,11 @@ namespace mapnik
                 << map.getCurrentExtent() << "\n";
 #endif
 
-      if (cairo_version() >= CAIRO_VERSION_ENCODE(1, 6, 0))
-      {
-         Envelope<double> bounds = t_.forward(t_.extent());
-         context_->rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
-         context_->clip();
-      }
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
+      Envelope<double> bounds = t_.forward(t_.extent());
+      context_->rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
+      context_->clip();
+#endif
 
       boost::optional<Color> bg = m_.background();
       if (bg)
