@@ -802,7 +802,6 @@ namespace mapnik
                                     Feature const& feature,
                                     proj_transform const& prj_trans)
    {
-//#ifdef CAIRO_LINE_PATTERN
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
       boost::shared_ptr<ImageData32> const& image = sym.get_image();
@@ -863,7 +862,6 @@ namespace mapnik
             }
          }
       }
-//#endif
    }
 
    template <typename T>
