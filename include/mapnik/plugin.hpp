@@ -28,8 +28,9 @@
 #include <boost/utility.hpp>
 // stl
 #include <string>
+// ltdl
+#include <ltdl.h>
 
-typedef struct lt_dlhandle_struct * lt_dlhandle;
 namespace mapnik
 {
    class PluginInfo : boost::noncopyable
