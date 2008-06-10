@@ -73,10 +73,37 @@ if test "x$ax_cv_boost_serialization" = "xno"; then
   exit
 fi
 
-AX_LIB_POSTGRESQL
-if test "$found_postgresql" = "yes"; then
-  AM_CONDITIONAL(HAVE_POSTGRESQL, test "x$found_postgresql" = "xyes")
+AX_BOOST_IOSTREAMS
+if test "x$ax_cv_boost_iostreams" = "xno"; then
+  echo
+  echo "Error: You need to install the boost iostreams library!"
+  echo
+  exit
 fi
+
+
+AX_LIB_POSTGRESQL
+if test "x$found_postgresql" = "xyes"; then
+  echo "checking whether to enable postgresql... yes"
+else
+  echo "checking whether to enable postgresql... no"
+fi
+AM_CONDITIONAL(HAVE_POSTGRESQL, test "x$found_postgresql" = "xyes")
+
+AC_ARG_WITH(gdal-config,
+[  --with-gdal-config=GDAL_CONFIG    use gdal-config specified ],
+[
+  GDAL_CONFIG=$withval;
+  echo "using "$GDAL_CONFIG" for gdal-config";
+],[
+  PROG="gdal-config";
+  AC_PATH_PROG(GDAL_CONFIG, $PROG, "", $PATH)
+])
+GDAL_CFLAGS=`$GDAL_CONFIG --cflags`
+GDAL_LIBS=`$GDAL_CONFIG --libs`
+AC_SUBST(GDAL_CFLAGS)
+AC_SUBST(GDAL_LIBS)
+
 
 AX_CHECK_TIFF
 if test "x$link_tiff" = "xno"; then
