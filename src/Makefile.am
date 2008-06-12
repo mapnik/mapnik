@@ -67,6 +67,7 @@ libmapnik_la_LIBADD = \
 	${BOOST_THREAD_LIB} \
 	${BOOST_REGEX_LIB} \
 	${BOOST_FILESYSTEM_LIB} \
+	${BOOST_IOSTREAMS_LIB} \
   	${JPEG_LIBS} \
   	${TIFF_LIBS} \
   	${PROJ_LIBS} \
