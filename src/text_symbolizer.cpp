@@ -35,13 +35,35 @@ static const char * label_placement_strings[] = {
     ""
 };
 
+
 IMPLEMENT_ENUM( mapnik::label_placement_e, label_placement_strings );
 
 namespace mapnik
 {
-    text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size,Color const& fill)
+    text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size, Color const& fill)
         : name_(name),
           face_name_(face_name),
+          //fontset_(default_fontset),
+          size_(size),
+          text_ratio_(0),
+          wrap_width_(0),
+          label_spacing_(0),
+          label_position_tolerance_(0),
+          force_odd_labels_(false),
+          max_char_angle_delta_(0),
+          fill_(fill),
+          halo_fill_(Color(255,255,255)),
+          halo_radius_(0),
+          label_p_(POINT_PLACEMENT),
+          anchor_(0.0,0.5),
+          displacement_(0.0,0.0),
+          avoid_edges_(false),
+          minimum_distance_(0.0),
+          overlap_(false) {}
+    text_symbolizer::text_symbolizer(std::string const& name, unsigned size, Color const& fill)
+        : name_(name),
+          //face_name_(""),
+          //fontset_(default_fontset),
           size_(size),
           text_ratio_(0),
           wrap_width_(0),
@@ -61,6 +83,7 @@ namespace mapnik
     text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
         : name_(rhs.name_),
           face_name_(rhs.face_name_),
+          fontset_(rhs.fontset_),
           size_(rhs.size_),
           text_ratio_(rhs.text_ratio_),
           wrap_width_(rhs.wrap_width_),
@@ -84,6 +107,7 @@ namespace mapnik
             return *this;
         name_ = other.name_;
         face_name_ = other.face_name_;
+        fontset_ = other.fontset_;
         size_ = other.size_;
         text_ratio_ = other.text_ratio_;
         wrap_width_ = other.wrap_width_;
@@ -113,10 +137,25 @@ namespace mapnik
     {
         return face_name_;
     }
-    
+   
+    void text_symbolizer::set_face_name(std::string face_name)
+    {
+        face_name_ = face_name;
+    }
+
+    void text_symbolizer::set_fontset(FontSet fontset)
+    {
+        fontset_ = fontset;
+    }
+
+    FontSet const& text_symbolizer::get_fontset() const
+    {
+        return fontset_;
+    }
+
     unsigned  text_symbolizer::get_text_ratio() const
     {
-    return text_ratio_;
+        return text_ratio_;
     }
 
     void  text_symbolizer::set_text_ratio(unsigned ratio) 
@@ -126,7 +165,7 @@ namespace mapnik
 
     unsigned  text_symbolizer::get_wrap_width() const
     {
-    return wrap_width_;
+        return wrap_width_;
     }
 
     void  text_symbolizer::set_wrap_width(unsigned width) 

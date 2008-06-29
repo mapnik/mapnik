@@ -21,27 +21,34 @@
  *****************************************************************************/
 
 //$Id$
-#ifndef UNICODE_HPP
-#define UNICODE_HPP
 
-#include <unicode/unistr.h>
-#include <unicode/ucnv.h>
-
+#ifndef FONT_SET_HPP
+#define FONT_SET_HPP
+// mapnik
 #include <mapnik/config.hpp>
-#include <boost/utility.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
+// stl
 #include <string>
+#include <vector>
 
-namespace mapnik {
-   class MAPNIK_DECL transcoder : private boost::noncopyable
-   {
-      public:
-         explicit transcoder (std::string const& encoding);
-         UnicodeString transcode(const char* data) const;  
-         ~transcoder(); 
-      private:
-         bool ok_;
-         UConverter * conv_;
-   };
+namespace mapnik
+{
+    class MAPNIK_DECL FontSet
+    {
+        public:
+            FontSet(); 
+            FontSet(std::string const& name); 
+            FontSet(FontSet const& rhs);
+            FontSet& operator=(FontSet const& rhs);
+            std::string const& get_name() const;
+            void add_face_name(std::string);
+            std::vector<std::string> const& get_face_names() const;
+            ~FontSet();
+        private:
+            std::string name_;
+            std::vector<std::string> face_names_;
+    };
 }
 
-#endif // UNICODE_HPP
+#endif //FONT_SET_HPP

@@ -24,6 +24,7 @@
 #ifndef _OCTREE_HPP_
 #define _OCTREE_HPP_
 
+#include <mapnik/global.hpp>
 #include <boost/format.hpp>
 #include <boost/utility.hpp>
 #include <vector>

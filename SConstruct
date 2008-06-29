@@ -45,18 +45,18 @@ opts.Add(PathOption('ICU_INCLUDES', 'Search path for ICU include files', '/usr/i
 opts.Add(PathOption('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include'))
 opts.Add(PathOption('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA))
-opts.Add(PathOption('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include'))
-opts.Add(PathOption('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA))
+opts.Add(PathOption('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/local/include'))
+opts.Add(PathOption('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/local/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include'))
 opts.Add(PathOption('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include'))
 opts.Add(PathOption('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA))
-opts.Add(PathOption('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include'))
-opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA))
+opts.Add(PathOption('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/opt/proj4/include'))
+opts.Add(PathOption('PROJ_LIBS', 'Search path for PROJ.4 library files', '/opt/proj4/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/include'))
 opts.Add(PathOption('GDAL_LIBS', 'Search path for GDAL library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathOption('PYTHON','Python executable', sys.executable))
-opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal']))
+opts.Add(ListOption('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal','osm']))
 opts.Add(ListOption('BINDINGS','Language bindings to build','all',['python']))
 opts.Add(BoolOption('DEBUG', 'Compile a debug version of mapnik', 'False'))
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
@@ -154,7 +154,7 @@ CXX_LIBSHEADERS = [
 ]
 
 BOOST_LIBSHEADERS = [
-    # ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
+    ['system', 'boost/system/system_error.hpp', True], # uncomment this on Darwin + boost_1_35
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
     ['iostreams','boost/iostreams/device/mapped_file.hpp',True],
@@ -178,10 +178,11 @@ if len(env['BOOST_TOOLKIT']):
     env['BOOST_APPEND'] = '-%s' % env['BOOST_TOOLKIT']
 else:
     env['BOOST_APPEND']=''
+
     
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
     if  env['THREADING'] == 'multi' :
-        if not conf.CheckLibWithHeader('boost_%s%s%s' % (libinfo[0],env['BOOST_APPEND'],thread_suffix), libinfo[1], 'C++') and libinfo[2] :
+        if not conf.CheckLibWithHeader('boost_%s%s%s' % (libinfo[0],thread_suffix,env['BOOST_APPEND']), libinfo[1], 'C++') and libinfo[2] :
             color_print(1,'Could not find header or shared library for boost %s, exiting!' % libinfo[0])
             Exit(1)
     elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :
@@ -203,11 +204,13 @@ SConscript('agg/SConscript')
 SConscript('src/SConscript')
 
 # Build shapeindex and remove its dependency from the LIBS
-if 'boost_program_options%s%s' % (env['BOOST_APPEND'],thread_suffix) in env['LIBS']:
+# if 'boost_program_options%s%s-1_35' % (env['BOOST_APPEND'],thread_suffix) in env['LIBS']:
+if 'boost_program_options-mt-1_35' in env['LIBS']:
     SConscript('utils/shapeindex/SConscript')
-    env['LIBS'].remove('boost_program_options%s%s' % (env['BOOST_APPEND'],thread_suffix))
+    env['LIBS'].remove('boost_program_options-mt-1_35')
 
 # Build the input plug-ins
+
 if 'postgis' in inputplugins and 'pq' in env['LIBS']:
     SConscript('plugins/input/postgis/SConscript')
     env['LIBS'].remove('pq')
@@ -221,8 +224,8 @@ if 'raster' in inputplugins:
 if 'gdal' in inputplugins and 'gdal' in env['LIBS']:
     SConscript('plugins/input/gdal/SConscript')
 
-if 'gigabase' in inputplugins and 'gigabase_r' in env['LIBS']:
-    SConscript('plugins/input/gigabase/SConscript')
+if 'osm' in inputplugins :
+    SConscript('plugins/input/osm/SConscript')
 
 # Build the Python bindings.
 if 'python' in env['BINDINGS']:

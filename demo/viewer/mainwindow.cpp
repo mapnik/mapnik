@@ -92,7 +92,7 @@ MainWindow::MainWindow()
    // slider 
    connect(slider_,SIGNAL(valueChanged(int)),mapWidget_,SLOT(zoomToLevel(int)));
    // 
-   connect(layerTab_,SIGNAL(update_mapwidget()),mapWidget_,SLOT(updateMap()));
+   connect(layerTab_,SIGNAL(update_mapwidget()),mapWidget_,SLOT(renderMap()));
    connect(layerTab_,SIGNAL(layerSelected(int)), 
            mapWidget_,SLOT(layerSelected(int)));
 }

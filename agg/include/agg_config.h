@@ -33,7 +33,7 @@
 // Provides faster access for massive pixel operations, 
 // such as blur, image filtering:
 
-#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
+//#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 // 
 // Provides cheaper creation and destruction (no mem allocs):
 // #define AGG_RENDERING_BUFFER row_accessor<int8u>

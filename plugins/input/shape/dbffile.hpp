@@ -36,7 +36,6 @@
 
 using mapnik::transcoder;
 using mapnik::Feature;
-class mapnik::transcoder;
 
 struct field_descriptor
 {

@@ -35,10 +35,11 @@ libraries = ['pq']
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
-    libraries.append('icuuc')
-    libraries.append('icudata')
-    if env['THREADING'] == 'multi':
-        libraries.append('boost_thread%s-mt' % env['BOOST_APPEND'])
+    #libraries.append('icuuc')
+    #libraries.append('icudata')
+    libraries.append(env['LIBS'])
+    #if env['THREADING'] == 'multi':
+    #    libraries.append('boost_thread%s-mt' % env['BOOST_APPEND'])
 
 postgis_inputdriver = env.SharedLibrary('postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 

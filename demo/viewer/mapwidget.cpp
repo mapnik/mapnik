@@ -29,6 +29,7 @@
 #include <mapnik/memory_datasource.hpp>
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
+#include <unicode/unistr.h>
 
 using mapnik::Image32;
 using mapnik::Map;
@@ -79,6 +80,8 @@ MapWidget::MapWidget(QWidget *parent)
    pen_.setWidth(3);
    pen_.setCapStyle(Qt::RoundCap);
    pen_.setJoinStyle(Qt::RoundJoin);
+   connect(&thread_, SIGNAL(renderedMap(const QImage &)),
+                this, SLOT(updateMap(const QImage &)));
 }
 
 void MapWidget::setTool(eTool tool)
@@ -121,7 +124,7 @@ void MapWidget::resizeEvent(QResizeEvent * ev)
    if (map_)
    {
       map_->resize(ev->size().width(),ev->size().height());
-      updateMap();
+      renderMap();
    }
 }
    
@@ -171,8 +174,9 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                      {
                         if (itr->second.to_string().length() > 0)
                         {
+                           UnicodeString unicode = itr->second.to_unicode();
                            info.push_back(QPair<QString,QString>(QString(itr->first.c_str()),
-                                                                 itr->second.to_string().c_str()));
+                                                                 QString((QChar*)unicode.getBuffer(),unicode.length())));
                         }
                      }
                      typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry2d> path_type;
@@ -223,7 +227,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
    }
    else if (e->button()==Qt::RightButton) 
    {	
-      //updateMap();
+      //renderMap();
    }
 }
     
@@ -251,7 +255,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
             CoordTransform t(map_->getWidth(),map_->getHeight(),map_->getCurrentExtent());	
             Envelope<double> box = t.backward(Envelope<double>(start_x_,start_y_,end_x_,end_y_));
             map_->zoomToBox(box);
-            updateMap();
+            renderMap();
          }
       }
       else if (cur_tool_==Pan)
@@ -264,7 +268,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
             int dx = end_x_ - start_x_;
             int dy = end_y_ - start_y_;
             map_->pan(cx - dx ,cy - dy); 
-            updateMap();
+            renderMap();
          }
       }
    }
@@ -333,7 +337,7 @@ void MapWidget::zoomToBox(mapnik::Envelope<double> const& bbox)
    if (map_)
    {
       map_->zoomToBox(bbox);
-      updateMap();
+      renderMap();
    }
 }
 
@@ -343,7 +347,7 @@ void MapWidget::defaultView()
    {
       map_->resize(width(),height());
       map_->zoom_all();
-      updateMap();
+      renderMap();
    }
 }
 
@@ -352,7 +356,7 @@ void MapWidget::zoomIn()
    if (map_)
    {
       map_->zoom(0.5);
-      updateMap();
+      renderMap();
    }
 }
 
@@ -361,7 +365,7 @@ void MapWidget::zoomOut()
    if (map_)
    {
       map_->zoom(2.0);
-      updateMap();
+      renderMap();
    }
 }
 
@@ -372,7 +376,7 @@ void MapWidget::panUp()
       double cx = 0.5*map_->getWidth();
       double cy = 0.5*map_->getHeight();
       map_->pan(int(cx),int(cy - cy*0.25));
-      updateMap();
+      renderMap();
    }
 }
 
@@ -383,7 +387,7 @@ void MapWidget::panDown()
       double cx = 0.5*map_->getWidth();
       double cy = 0.5*map_->getHeight();
       map_->pan(int(cx),int(cy + cy*0.25));
-      updateMap();
+      renderMap();
    }
 }
 
@@ -394,7 +398,7 @@ void MapWidget::panLeft()
       double cx = 0.5*map_->getWidth();
       double cy = 0.5*map_->getHeight();
       map_->pan(int(cx - cx * 0.25),int(cy));
-      updateMap();
+      renderMap();
    }
 }
 
@@ -405,7 +409,7 @@ void MapWidget::panRight()
       double cx = 0.5*map_->getWidth();
       double cy = 0.5*map_->getHeight();
       map_->pan(int(cx + cx * 0.25),int(cy)); 
-      updateMap();
+      renderMap();
    }
 }
 
@@ -428,7 +432,7 @@ void MapWidget::zoomToLevel(int level)
                                    pt.x + 0.5 * width * res,
                                    pt.y + 0.5 * height*res);
       map_->zoomToBox(box);
-      updateMap();
+      renderMap();
    }
 }
 
@@ -441,24 +445,19 @@ void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::strin
 }
        
 
-void MapWidget::updateMap() 
-{   
-   if (map_)
-   {
-      unsigned width=map_->getWidth();
-      unsigned height=map_->getHeight();
-      
-      Image32 buf(width,height);
-      mapnik::agg_renderer<Image32> ren(*map_,buf);
-      ren.apply();
-      
-      QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
-      pix_=QPixmap::fromImage(image.rgbSwapped());
-      update();
-      // emit signal to interested widgets
-      emit mapViewChanged();
-      std::cout << map_->getCurrentExtent() << "\n";
-   }
+void MapWidget::renderMap()
+{
+   thread_.render(map_);
+}
+
+void MapWidget::updateMap(QImage const& image) 
+{  
+   std::cout << "updateMap called \n";
+   pix_ = QPixmap::fromImage(image);
+   update();
+   // emit signal to interested widgets
+   emit mapViewChanged();
+   std::cout << map_->getCurrentExtent() << "\n";
 }
 
 boost::shared_ptr<Map> MapWidget::getMap()

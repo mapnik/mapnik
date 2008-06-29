@@ -35,8 +35,9 @@ raster_src = Split(
 libraries = []
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
-    libraries.append('icuuc')
-    libraries.append('icudata')
+    #libraries.append('icuuc')
+    #libraries.append('icudata')
+    libraries.append(env['LIBS'])
 
 raster_inputdriver = env.SharedLibrary('raster', source=raster_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
