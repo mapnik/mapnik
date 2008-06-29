@@ -80,7 +80,6 @@ namespace mapnik {
          {
             return width_;
          }
-         
          inline unsigned height() const
          {
             return height_;
@@ -90,17 +89,15 @@ namespace mapnik {
          {
             return data_.getRow(row + y_) + x_;
          }
-         
          inline T& data()
          {
             return data_;
          }
-      
          inline T const& data() const
          {
             return data_;
          }
-         
+          
       private:
          unsigned x_;
          unsigned y_;

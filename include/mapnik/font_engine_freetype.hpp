@@ -30,7 +30,6 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_path.hpp>
-#include <mapnik/font_set.hpp>
 
 // freetype2
 extern "C"
@@ -62,7 +61,9 @@ namespace mapnik
     class font_face : boost::noncopyable
     {
     public:
-        font_face(FT_Face face)
+        typedef std::pair<unsigned,unsigned> dimension_t;
+
+    	font_face(FT_Face face)
             : face_(face) {}
 	
     	std::string  family_name() const
@@ -103,11 +104,122 @@ namespace mapnik
             return false;
         }
               
+        dimension_t character_dimensions(const unsigned c)
+        {
+            FT_Matrix matrix;
+            FT_Vector pen;
+            FT_Error  error;
+            
+            FT_GlyphSlot slot = face_->glyph;
+            
+            pen.x = 0;
+            pen.y = 0;
+            
+            FT_BBox glyph_bbox; 
+            FT_Glyph image;
+            
+            matrix.xx = (FT_Fixed)( 1 * 0x10000L ); 
+            matrix.xy = (FT_Fixed)( 0 * 0x10000L ); 
+            matrix.yx = (FT_Fixed)( 0 * 0x10000L ); 
+            matrix.yy = (FT_Fixed)( 1 * 0x10000L );
+                    
+            FT_Set_Transform (face_,&matrix,&pen);
+            
+            FT_UInt glyph_index = FT_Get_Char_Index( face_, c);
+            
+            error = FT_Load_Glyph (face_,glyph_index,FT_LOAD_NO_HINTING); 
+            if ( error )
+                return dimension_t(0, 0);
+            
+            error = FT_Get_Glyph( face_->glyph, &image);
+            if ( error )
+                return dimension_t(0, 0);
+            
+            FT_Glyph_Get_CBox(image,ft_glyph_bbox_pixels, &glyph_bbox); 
+            FT_Done_Glyph(image); 
+            return dimension_t(slot->advance.x >> 6, glyph_bbox.yMax - glyph_bbox.yMin);
+        }
+        
+        void get_string_info(string_info & info)
+        {
+            unsigned width = 0;
+            unsigned height = 0;
+            UErrorCode err = U_ZERO_ERROR;
+            UnicodeString const& ustr = info.get_string();
+            const UChar * text = ustr.getBuffer();
+            UBiDi * bidi = ubidi_openSized(ustr.length(),0,&err);
+             
+            if (U_SUCCESS(err))
+            {
+               ubidi_setPara(bidi,text,ustr.length(), UBIDI_DEFAULT_LTR,0,&err);
+                
+               if (U_SUCCESS(err))
+               {
+                  int32_t count = ubidi_countRuns(bidi,&err);
+                  int32_t logicalStart;
+                  int32_t length;
+                   
+                  for (int32_t i=0; i< count;++i)
+                  {
+                     if (UBIDI_LTR == ubidi_getVisualRun(bidi,i,&logicalStart,&length))
+                     {
+                        do {
+                           UChar ch = text[logicalStart++];
+                           dimension_t char_dim = character_dimensions(ch);
+                           info.add_info(ch, char_dim.first, char_dim.second);
+                           width += char_dim.first;
+                           height = char_dim.second > height ? char_dim.second : height;
+                            
+                        } while (--length > 0);
+                     }
+                     else
+                     {
+                        logicalStart += length;
+                         
+                        int32_t j=0,i=length;
+                        UnicodeString arabic;
+                        UChar * buf = arabic.getBuffer(length);
+                        do {
+                           UChar ch = text[--logicalStart];
+                           buf[j++] = ch;
+                        } while (--i > 0);
+                         
+                        arabic.releaseBuffer(length);
+                        if ( *arabic.getBuffer() >= 0x0600 && *arabic.getBuffer() <= 0x06ff)
+                        {
+                            
+                           UnicodeString shaped;
+                           u_shapeArabic(arabic.getBuffer(),arabic.length(),shaped.getBuffer(arabic.length()),arabic.length(),
+                                         U_SHAPE_LETTERS_SHAPE|U_SHAPE_LENGTH_FIXED_SPACES_NEAR|
+                                         U_SHAPE_TEXT_DIRECTION_VISUAL_LTR
+                                         ,&err);
+                           
+                           shaped.releaseBuffer(arabic.length());
+                           
+                           if (U_SUCCESS(err))
+                           {                  
+                              for (int j=0;j<shaped.length();++j)
+                              {
+                                 dimension_t char_dim = character_dimensions(shaped[j]);
+                                 info.add_info(shaped[j], char_dim.first, char_dim.second);
+                                 width += char_dim.first;
+                                 height = char_dim.second > height ? char_dim.second : height;
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+               ubidi_close(bidi);
+            }
+             
+            info.set_dimensions(width, height);
+        }
+	
     	~font_face()
     	{
 #ifdef MAPNIK_DEBUG
-    	    std::clog << "~font_face: Clean up face \"" << family_name()
-                << " " << style_name() << "\"" << std::endl;
+    	    std::clog << "clean up face:" << family_name()<<":" << style_name() << std::endl;
 #endif
     	    FT_Done_Face(face_);
     	}
@@ -116,9 +228,8 @@ namespace mapnik
     	FT_Face face_;
     };
     
-    typedef boost::shared_ptr<font_face> face_ptr;
-   
-    class MAPNIK_DECL freetype_engine  // : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
+   typedef boost::shared_ptr<font_face> face_ptr;
+   class MAPNIK_DECL freetype_engine  // : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
          // private boost::noncopyable
     {
        // friend class mapnik::CreateStatic<freetype_engine>;
@@ -170,8 +281,6 @@ namespace mapnik
     template <typename T>
     struct text_renderer : private boost::noncopyable
     {
-        typedef std::pair<unsigned,unsigned> dimension_t;
-        
         struct glyph_t : boost::noncopyable
         {
             FT_Glyph image;
@@ -182,159 +291,16 @@ namespace mapnik
         typedef boost::ptr_vector<glyph_t> glyphs_t;
         typedef T pixmap_type;
 	
-        text_renderer (pixmap_type & pixmap, std::vector<face_ptr> faces)
+        text_renderer (pixmap_type & pixmap, face_ptr face)
             : pixmap_(pixmap),
-              faces_(faces),
+              face_(face),
               fill_(0,0,0), 
               halo_fill_(255,255,255),
               halo_radius_(0) {}
-
-        dimension_t character_dimensions(const unsigned c)
-        {
-            FT_Matrix matrix;
-            FT_Vector pen;
-            FT_Error  error;
-            
-            pen.x = 0;
-            pen.y = 0;
-            
-            FT_BBox glyph_bbox; 
-            FT_Glyph image;
-                    
-            FT_Face face = (*faces_.begin())->get_face();
-            
-            FT_UInt glyph_index = FT_Get_Char_Index(face, c);
-                 
-            // If there's no glyph_index we loop through the remaining fonts
-            // in the fontset looking for one.
-            if (!glyph_index) {
-                std::vector<face_ptr>::iterator itr = faces_.begin();
-                std::vector<face_ptr>::iterator end = faces_.end();
-                
-                ++itr; // Skip the first one, we already tried it.
-                
-                for (; itr != end; ++itr)
-                {
-                    FT_Face f = (*itr)->get_face();
-                    
-                    glyph_index = FT_Get_Char_Index(f, c);
-
-                    if (glyph_index) {
-                        face = f;
-                        break;
-                    }
-                }
-            }
-
-            matrix.xx = (FT_Fixed)( 1 * 0x10000L ); 
-            matrix.xy = (FT_Fixed)( 0 * 0x10000L ); 
-            matrix.yx = (FT_Fixed)( 0 * 0x10000L ); 
-            matrix.yy = (FT_Fixed)( 1 * 0x10000L );
-            
-            FT_Set_Transform(face, &matrix, &pen);
-
-            error = FT_Load_Glyph (face, glyph_index, FT_LOAD_NO_HINTING); 
-            if ( error )
-                return dimension_t(0, 0);
-            
-            error = FT_Get_Glyph(face->glyph, &image);
-            if ( error )
-                return dimension_t(0, 0);
-
-            FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &glyph_bbox); 
-            FT_Done_Glyph(image);
-
-            unsigned tempx = face->glyph->advance.x >> 6;
-            unsigned tempy = glyph_bbox.yMax - glyph_bbox.yMin;
-
-            //std::clog << "glyph: " << glyph_index << " x: " << tempx << " y: " << tempy << std::endl;
-
-            return dimension_t(tempx, tempy);
-        }
-        
-        void get_string_info(string_info & info)
-        {
-            unsigned width = 0;
-            unsigned height = 0;
-            UErrorCode err = U_ZERO_ERROR;
-            UnicodeString const& ustr = info.get_string();
-            const UChar * text = ustr.getBuffer();
-            UBiDi * bidi = ubidi_openSized(ustr.length(),0,&err);
-             
-            if (U_SUCCESS(err))
-            {
-               ubidi_setPara(bidi,text,ustr.length(), UBIDI_DEFAULT_LTR,0,&err);
-                
-               if (U_SUCCESS(err))
-               {
-                  int32_t count = ubidi_countRuns(bidi,&err);
-                  int32_t logicalStart;
-                  int32_t length;
-                   
-                  for (int32_t i=0; i< count;++i)
-                  {
-                     if (UBIDI_LTR == ubidi_getVisualRun(bidi,i,&logicalStart,&length))
-                     {
-                        do {
-                           UChar ch = text[logicalStart++];
-                           dimension_t char_dim = character_dimensions(ch);
-                           info.add_info(ch, char_dim.first, char_dim.second);
-                           width += char_dim.first;
-                           height = char_dim.second > height ? char_dim.second : height;
-                            
-                        } while (--length > 0);
-                     }
-                     else
-                     {
-                        logicalStart += length;
-                         
-                        int32_t j=0,i=length;
-                        UnicodeString arabic;
-                        UChar * buf = arabic.getBuffer(length);
-                        do {
-                           UChar ch = text[--logicalStart];
-                           buf[j++] = ch;
-                        } while (--i > 0);
-                         
-                        arabic.releaseBuffer(length);
-                        if ( *arabic.getBuffer() >= 0x0600 && *arabic.getBuffer() <= 0x06ff)
-                        {
-                           UnicodeString shaped;
-                           u_shapeArabic(arabic.getBuffer(),arabic.length(),shaped.getBuffer(arabic.length()),arabic.length(),
-                                         U_SHAPE_LETTERS_SHAPE|U_SHAPE_LENGTH_FIXED_SPACES_NEAR|
-                                         U_SHAPE_TEXT_DIRECTION_VISUAL_LTR
-                                         ,&err);
-                           
-                           shaped.releaseBuffer(arabic.length());
-                           
-                           if (U_SUCCESS(err))
-                           {                  
-                              for (int j=0;j<shaped.length();++j)
-                              {
-                                 dimension_t char_dim = character_dimensions(shaped[j]);
-                                 info.add_info(shaped[j], char_dim.first, char_dim.second);
-                                 width += char_dim.first;
-                                 height = char_dim.second > height ? char_dim.second : height;
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
-               ubidi_close(bidi);
-            }
-             
-            info.set_dimensions(width, height);
-        }
-
+    
         void set_pixel_size(unsigned size)
         {
-            std::vector<face_ptr>::iterator itr = faces_.begin();
-            std::vector<face_ptr>::iterator end = faces_.end();
-            for (; itr != end; ++itr)
-            {
-                (*itr)->set_pixel_sizes(size);
-            }
+            face_->set_pixel_sizes(size);
         }
     
         void set_fill(mapnik::Color const& fill)
@@ -360,25 +326,22 @@ namespace mapnik
             FT_Matrix matrix;
             FT_Vector pen;
             FT_Error  error;
-
-            FT_BBox bbox;   
-            bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
-            bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
 	    
-            std::vector<face_ptr>::iterator end = faces_.end();
-            
+            FT_Face face = face_->get_face();
+            //            FT_GlyphSlot slot = face->glyph;
+	    
+            FT_BBox bbox;   
+            bbox.xMin = bbox.yMin = 32000; 
+            bbox.xMax = bbox.yMax = -32000; //hmm?? 
+	    
             for (int i = 0; i < path->num_nodes(); i++) 
             {
                 int c;
                 double x, y, angle;
-
+                
                 path->vertex(&c, &x, &y, &angle);
+//                std::clog << "   prepare_glyph: " << (unsigned char)c << "," << x << "," << y << "," << angle << std::endl;
 
-#ifdef MAPNIK_DEBUG
-                // TODO Enable when we have support for setting verbosity
-                //std::clog << "prepare_glyphs: " << c << "," << x << 
-                //    "," << y << "," << angle << std::endl;
-#endif
 
                 FT_BBox glyph_bbox; 
                 FT_Glyph image;
@@ -386,59 +349,23 @@ namespace mapnik
                 pen.x = int(x * 64);
                 pen.y = int(y * 64);
 	        	
-                FT_Face face = (*faces_.begin())->get_face();
-
-                FT_UInt glyph_index = FT_Get_Char_Index(face, unsigned(c));
-                     
-                // If there's no glyph_index we loop through the remaining fonts
-                // in the fontset looking for one.
-                if (!glyph_index) {
-                    std::vector<face_ptr>::iterator itr = faces_.begin();
-                    ++itr; // Skip the first one, we already tried it.
-                    
-                    for (; itr != end; ++itr)
-                    {
-#ifdef MAPNIK_DEBUG
-                        // TODO Enable when we have support for setting verbosity
-                        //std::clog << "prepare_glyphs: Falling back to font named \""
-                        //    << (*itr)->family_name() << " " << (*itr)->style_name()
-                        //    << "\"" << std::endl;
-#endif
-
-                        FT_Face f = (*itr)->get_face();
-                        
-                        glyph_index = FT_Get_Char_Index(f, unsigned(c));
-
-                        if (glyph_index) {
-                            face = f;
-                            break;
-                        }
-                    }
-
-#ifdef MAPNIK_DEBUG
-                    // TODO Enable when we have support for setting verbosity
-                    //if (!glyph_index) {
-                    //    std::clog << "prepare_glyphs: Failed to fall back, glyph "
-                    //        << c << " not found in any font." << std::endl;
-                    //}
-#endif
-                }
-
                 matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L ); 
                 matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L ); 
                 matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L ); 
                 matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
-
-                FT_Set_Transform(face, &matrix, &pen);
-
-                error = FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_HINTING); 
+		
+                FT_Set_Transform (face,&matrix,&pen);
+		
+                FT_UInt glyph_index = FT_Get_Char_Index( face, unsigned(c));
+		
+                error = FT_Load_Glyph (face,glyph_index, FT_LOAD_NO_HINTING); 
                 if ( error )
                     continue;
-
-                error = FT_Get_Glyph(face->glyph, &image);
+		
+                error = FT_Get_Glyph( face->glyph, &image);
                 if ( error )
                     continue;
-
+		
                 FT_Glyph_Get_CBox(image,ft_glyph_bbox_pixels, &glyph_bbox); 
                 if (glyph_bbox.xMin < bbox.xMin) 
                     bbox.xMin = glyph_bbox.xMin; 
@@ -448,8 +375,7 @@ namespace mapnik
                     bbox.xMax = glyph_bbox.xMax; 
                 if (glyph_bbox.yMax > bbox.yMax) 
                     bbox.yMax = glyph_bbox.yMax;
-	
-                // Check if we properly grew the bbox
+		
                 if ( bbox.xMin > bbox.xMax )
                 {
                     bbox.xMin = 0; 
@@ -558,7 +484,7 @@ namespace mapnik
         }
     
         pixmap_type & pixmap_;
-        std::vector<face_ptr> faces_;
+        face_ptr face_;
         mapnik::Color fill_;
         mapnik::Color halo_fill_;
         int halo_radius_;
@@ -567,5 +493,6 @@ namespace mapnik
         glyphs_t glyphs_;
     }; 
 }
+
 
 #endif // FONT_ENGINE_FREETYPE_HPP

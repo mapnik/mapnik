@@ -27,8 +27,7 @@
 // mapnik
 #include <mapnik/enumeration.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/font_set.hpp>
-#include <mapnik/graphics.hpp>
+#include <mapnik/graphics.hpp> 
 // boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
@@ -50,7 +49,6 @@ namespace mapnik
    {		
          text_symbolizer(std::string const& name,std::string const& face_name, 
                          unsigned size, Color const& fill);	
-         text_symbolizer(std::string const& name, unsigned size, Color const& fill);	
          text_symbolizer(text_symbolizer const& rhs);
          text_symbolizer& operator=(text_symbolizer const& rhs);
          std::string const& get_name() const;
@@ -68,9 +66,6 @@ namespace mapnik
          void set_max_char_angle_delta(double angle);
          unsigned get_text_size() const;
          std::string const& get_face_name() const;
-         void set_face_name(std::string face_name);
-         FontSet const& get_fontset() const;
-         void set_fontset(FontSet fontset);
          Color const& get_fill() const;
          void set_halo_fill(Color const& fill);
          Color const& get_halo_fill() const;
@@ -91,7 +86,6 @@ namespace mapnik
       private:
          std::string name_;
          std::string face_name_;
-         FontSet fontset_;
          unsigned size_;
          unsigned text_ratio_;
          unsigned wrap_width_;

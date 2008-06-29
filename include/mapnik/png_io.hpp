@@ -80,12 +80,11 @@ namespace mapnik {
                    PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                    PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
       png_write_info(png_ptr, info_ptr);
-      
       for (unsigned i=0;i<image.height();i++)
       {
-        png_write_row(png_ptr,(png_bytep)image.getRow(i));
+         png_write_row(png_ptr,(png_bytep)image.getRow(i));
       }
-      
+
       png_write_end(png_ptr, info_ptr);
       png_destroy_write_struct(&png_ptr, &info_ptr);
    }
