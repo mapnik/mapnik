@@ -68,9 +68,9 @@ namespace mapnik
         std::map<std::string,feature_type_style> styles_;
         std::map<std::string,FontSet> fontsets_;
         std::vector<Layer> layers_;
-        Envelope<double> currentExtent_;
         aspect_fix_mode aspectFixMode_;
-        
+        Envelope<double> currentExtent_;
+
     public:
 
         typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
