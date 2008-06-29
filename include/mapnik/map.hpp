@@ -37,6 +37,28 @@ namespace mapnik
 {
     class MAPNIK_DECL Map
     {	
+    public:
+
+        enum aspect_fix_mode 
+        {
+            /* grow the width or height of the specified geo bbox to fill the map size. default behaviour. */
+            GROW_BBOX,
+            /* grow the width or height of the map to accomodate the specified geo bbox. */
+            GROW_CANVAS,
+            /* shrink the width or height of the specified geo bbox to fill the map size. */
+            SHRINK_BBOX,
+            /* shrink the width or height of the map to accomodate the specified geo bbox. */
+            SHRINK_CANVAS,
+            /* adjust the width of the specified geo bbox, leave height and map size unchanged */
+            ADJUST_BBOX_WIDTH,
+            /* adjust the height of the specified geo bbox, leave width and map size unchanged */
+            ADJUST_BBOX_HEIGHT,
+            /* adjust the width of the map, leave height and geo bbox unchanged */
+            ADJUST_CANVAS_WIDTH,
+            /* adjust the height of the map, leave width and geo bbox unchanged */
+            ADJUST_CANVAS_HEIGHT
+        };
+    private:
         static const unsigned MIN_MAPSIZE=16;
         static const unsigned MAX_MAPSIZE=MIN_MAPSIZE<<10;
         unsigned width_;
@@ -47,8 +69,10 @@ namespace mapnik
         std::map<std::string,FontSet> fontsets_;
         std::vector<Layer> layers_;
         Envelope<double> currentExtent_;
+        aspect_fix_mode aspectFixMode_;
         
     public:
+
         typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
         typedef std::map<std::string,feature_type_style>::iterator style_iterator;
         
@@ -258,6 +282,10 @@ namespace mapnik
 
         featureset_ptr query_map_point(unsigned index, double x, double y) const;
         ~Map();
+
+        void setAspectFixMode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
+        bool getAspectFixMode() { return aspectFixMode_; }
+
     private:
         void fixAspectRatio();
     };

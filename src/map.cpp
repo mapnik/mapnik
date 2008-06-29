@@ -34,12 +34,14 @@ namespace mapnik
     Map::Map()
         : width_(400),
           height_(400),
-          srs_("+proj=latlong +datum=WGS84") {}
+          srs_("+proj=latlong +datum=WGS84"),
+          aspectFixMode_(GROW_BBOX) {}
     
     Map::Map(int width,int height, std::string const& srs)
         : width_(width),
           height_(height),
-          srs_(srs) {}
+          srs_(srs),
+          aspectFixMode_(GROW_BBOX) {}
    
     Map::Map(const Map& rhs)
         : width_(rhs.width_),
@@ -48,6 +50,7 @@ namespace mapnik
           background_(rhs.background_),
           styles_(rhs.styles_),
           layers_(rhs.layers_),
+          aspectFixMode_(rhs.aspectFixMode_),
           currentExtent_(rhs.currentExtent_) {}
     
     Map& Map::operator=(const Map& rhs)
@@ -59,6 +62,7 @@ namespace mapnik
         background_=rhs.background_;
         styles_=rhs.styles_;
         layers_=rhs.layers_;
+        aspectFixMode_=rhs.aspectFixMode_;
         return *this;
     }
    
@@ -295,15 +299,47 @@ namespace mapnik
     {
         double ratio1 = (double) width_ / (double) height_;
         double ratio2 = currentExtent_.width() / currentExtent_.height();
-         
-        if (ratio2 > ratio1)
+        if (ratio1 == ratio2) return;
+
+        switch(aspectFixMode_) 
         {
-            currentExtent_.height(currentExtent_.width() / ratio1);
+            case ADJUST_BBOX_HEIGHT:
+                currentExtent_.height(currentExtent_.width() / ratio1);
+                break;
+            case ADJUST_BBOX_WIDTH:
+                currentExtent_.width(currentExtent_.height() * ratio1);
+                break;
+            case ADJUST_CANVAS_HEIGHT:
+                height_ = int (width_ / ratio2 + 0.5); 
+                break;
+            case ADJUST_CANVAS_WIDTH:
+                width_ = int (height_ * ratio2 + 0.5); 
+                break;
+            case GROW_BBOX:
+                if (ratio2 > ratio1)
+                   currentExtent_.height(currentExtent_.width() / ratio1);
+                else 
+                   currentExtent_.width(currentExtent_.height() * ratio1);
+                break;  
+            case SHRINK_BBOX:
+                if (ratio2 < ratio1)
+                   currentExtent_.height(currentExtent_.width() / ratio1);
+                else 
+                   currentExtent_.width(currentExtent_.height() * ratio1);
+                break;  
+            case GROW_CANVAS:
+                if (ratio2 > ratio1)
+                    width_ = (int) (height_ * ratio2 + 0.5);
+                else
+                    height_ = int (width_ / ratio2 + 0.5); 
+                break;
+            case SHRINK_CANVAS:
+                if (ratio2 > ratio1)
+                    height_ = int (width_ / ratio2 + 0.5); 
+                else
+                    width_ = (int) (height_ * ratio2 + 0.5);
+                break;
         }
-        else if (ratio2 < ratio1)
-        {
-            currentExtent_.width(currentExtent_.height() * ratio1);
-        }       
     }
 
     const Envelope<double>& Map::getCurrentExtent() const
