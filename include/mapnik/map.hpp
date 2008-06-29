@@ -44,6 +44,7 @@ namespace mapnik
         std::string  srs_;
         boost::optional<Color> background_;
         std::map<std::string,feature_type_style> styles_;
+        std::map<std::string,FontSet> fontsets_;
         std::vector<Layer> layers_;
         Envelope<double> currentExtent_;
         
@@ -128,6 +129,20 @@ namespace mapnik
          *  @return The style if found. If not found return the default map style.
          */
         feature_type_style const& find_style(std::string const& name) const;
+
+        /*! \brief Insert a fontset into the map.
+         *  @param name The name of the fontset.
+         *  @param style The fontset to insert.
+         *  @return true If success.
+         *  @return false If failure.
+         */
+        bool insert_fontset(std::string const& name, FontSet const& fontset);
+       
+        /*! \brief Find a fontset.
+         *  @param name The name of the fontset.
+         *  @return The fontset if found. If not found return the default map fontset.
+         */
+        FontSet const& find_fontset(std::string const& name) const;
 
         /*! \brief Get number of all layers.
          */

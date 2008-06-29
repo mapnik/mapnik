@@ -101,7 +101,21 @@ namespace mapnik
     {
         styles_.erase(name);
     }
-    
+   
+    bool Map::insert_fontset(std::string const& name, FontSet const& fontset) 
+    {
+        return fontsets_.insert(make_pair(name, fontset)).second;
+    }
+	 
+    FontSet const& Map::find_fontset(std::string const& name) const
+    {
+        std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(name);
+        if (itr!=fontsets_.end())
+            return itr->second;
+        static FontSet default_fontset;
+        return default_fontset;
+    }
+
     feature_type_style const& Map::find_style(std::string const& name) const
     {
         std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
