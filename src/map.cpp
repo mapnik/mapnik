@@ -34,14 +34,12 @@ namespace mapnik
     Map::Map()
         : width_(400),
           height_(400),
-          srs_("+proj=latlong +datum=WGS84"),
-          aspectFixMode_(GROW_BBOX) {}
+          srs_("+proj=latlong +datum=WGS84") {}
     
     Map::Map(int width,int height, std::string const& srs)
         : width_(width),
           height_(height),
-          srs_(srs),
-          aspectFixMode_(GROW_BBOX) {}
+          srs_(srs) {}
    
     Map::Map(const Map& rhs)
         : width_(rhs.width_),
@@ -50,7 +48,6 @@ namespace mapnik
           background_(rhs.background_),
           styles_(rhs.styles_),
           layers_(rhs.layers_),
-          aspectFixMode_(rhs.aspectFixMode_),
           currentExtent_(rhs.currentExtent_) {}
     
     Map& Map::operator=(const Map& rhs)
@@ -62,7 +59,6 @@ namespace mapnik
         background_=rhs.background_;
         styles_=rhs.styles_;
         layers_=rhs.layers_;
-        aspectFixMode_=rhs.aspectFixMode_;
         return *this;
     }
    
@@ -105,21 +101,7 @@ namespace mapnik
     {
         styles_.erase(name);
     }
-   
-    bool Map::insert_fontset(std::string const& name, FontSet const& fontset) 
-    {
-        return fontsets_.insert(make_pair(name, fontset)).second;
-    }
-	 
-    FontSet const& Map::find_fontset(std::string const& name) const
-    {
-        std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(name);
-        if (itr!=fontsets_.end())
-            return itr->second;
-        static FontSet default_fontset;
-        return default_fontset;
-    }
-
+    
     feature_type_style const& Map::find_style(std::string const& name) const
     {
         std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
@@ -299,47 +281,15 @@ namespace mapnik
     {
         double ratio1 = (double) width_ / (double) height_;
         double ratio2 = currentExtent_.width() / currentExtent_.height();
-        if (ratio1 == ratio2) return;
-
-        switch(aspectFixMode_) 
+         
+        if (ratio2 > ratio1)
         {
-            case ADJUST_BBOX_HEIGHT:
-                currentExtent_.height(currentExtent_.width() / ratio1);
-                break;
-            case ADJUST_BBOX_WIDTH:
-                currentExtent_.width(currentExtent_.height() * ratio1);
-                break;
-            case ADJUST_CANVAS_HEIGHT:
-                height_ = int (width_ / ratio2 + 0.5); 
-                break;
-            case ADJUST_CANVAS_WIDTH:
-                width_ = int (height_ * ratio2 + 0.5); 
-                break;
-            case GROW_BBOX:
-                if (ratio2 > ratio1)
-                   currentExtent_.height(currentExtent_.width() / ratio1);
-                else 
-                   currentExtent_.width(currentExtent_.height() * ratio1);
-                break;  
-            case SHRINK_BBOX:
-                if (ratio2 < ratio1)
-                   currentExtent_.height(currentExtent_.width() / ratio1);
-                else 
-                   currentExtent_.width(currentExtent_.height() * ratio1);
-                break;  
-            case GROW_CANVAS:
-                if (ratio2 > ratio1)
-                    width_ = (int) (height_ * ratio2 + 0.5);
-                else
-                    height_ = int (width_ / ratio2 + 0.5); 
-                break;
-            case SHRINK_CANVAS:
-                if (ratio2 > ratio1)
-                    height_ = int (width_ / ratio2 + 0.5); 
-                else
-                    width_ = (int) (height_ * ratio2 + 0.5);
-                break;
+            currentExtent_.height(currentExtent_.width() / ratio1);
         }
+        else if (ratio2 < ratio1)
+        {
+            currentExtent_.width(currentExtent_.height() * ratio1);
+        }       
     }
 
     const Envelope<double>& Map::getCurrentExtent() const

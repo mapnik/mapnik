@@ -316,8 +316,6 @@ images.append('demo256.png')
 im.save('demo.jpg', 'jpeg')
 images.append('demo.jpg')
 
-save_map(m,'map.xml')
-
 # Render cairo examples
 try:
     import cairo

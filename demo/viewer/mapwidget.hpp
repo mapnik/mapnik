@@ -31,7 +31,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <mapnik/map.hpp>
-#include "renderthread.hpp"
 
 class MapWidget : public QWidget 
 {
@@ -59,7 +58,6 @@ class MapWidget : public QWidget
       bool first_;
       QPen pen_;
       int selectedLayer_;
-      RenderThread thread_;
    public:
       MapWidget(QWidget *parent=0);
       void setTool(eTool tool);
@@ -74,10 +72,9 @@ class MapWidget : public QWidget
       void panRight();
       void panUp();
       void panDown();
-      void renderMap();
  public slots:
       void zoomToLevel(int level);
-      void updateMap(QImage const&);
+      void updateMap();
       void layerSelected(int);
    signals:
       void mapViewChanged();

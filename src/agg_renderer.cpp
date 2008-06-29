@@ -29,12 +29,9 @@
 #include <mapnik/markers_converter.hpp>
 #include <mapnik/arrow.hpp>
 #include <mapnik/config_error.hpp>
-#include <mapnik/font_set.hpp>
 
 // agg
-#define AGG_RENDERING_BUFFER row_accessor<int8u> 
-
-//row_ptr_cache<int8u>
+#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
@@ -172,7 +169,7 @@ namespace mapnik
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
-      typedef  coord_transform4<CoordTransform,geometry2d> path_type;
+      typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	    
@@ -283,6 +280,7 @@ namespace mapnik
                
                frame->move_to(itr->get<0>(),itr->get<1>());
                frame->line_to(itr->get<0>(),itr->get<1>()+height);   
+               
             }
             
             geom.rewind(0);
@@ -312,6 +310,7 @@ namespace mapnik
             ras_ptr->add_path(roof_path);
             ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
+            
          }
       }
    }
@@ -322,7 +321,7 @@ namespace mapnik
                               proj_transform const& prj_trans)
    {   
       typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base; 
-      typedef coord_transform4<CoordTransform,geometry2d> path_type;
+      typedef coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
       typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
@@ -461,20 +460,15 @@ namespace mapnik
       boost::shared_ptr<ImageData32> const& data = sym.get_image();
       if (text.length() > 0 && data)
       {
-         std::vector<face_ptr> faces;
-			
-         faces.push_back(font_manager_.get_face(sym.get_face_name()));
-         
-         if (faces.size() > 0)
+         face_ptr face = font_manager_.get_face(sym.get_face_name());
+         if (face)
          {
-            text_renderer<mapnik::Image32> ren(pixmap_, faces);
-            
+            text_renderer<mapnik::Image32> ren(pixmap_,face);
             ren.set_pixel_size(sym.get_text_size());
             ren.set_fill(sym.get_fill());
             
             string_info info(text);
-
-            ren.get_string_info(info);
+            face->get_string_info(info);
             
             placement_finder<label_collision_detector4> finder(detector_);
             
@@ -675,31 +669,11 @@ namespace mapnik
       UnicodeString text = feature[sym.get_name()].to_unicode();
       if ( text.length() > 0 )
       {
-         Color const& fill = sym.get_fill();
-
-         std::vector<face_ptr> faces;
-    
-         FontSet fontset = sym.get_fontset();
-         std::vector<std::string> face_names = fontset.get_face_names();
-    
-         if (face_names.size() > 0)
+         Color const& fill  = sym.get_fill();
+         face_ptr face = font_manager_.get_face(sym.get_face_name());
+         if (face)
          {
-            std::vector<std::string>::iterator itr = face_names.begin();
-            std::vector<std::string>::iterator end = face_names.end();
-
-            for (; itr != end; ++itr)
-            {
-               faces.push_back(font_manager_.get_face(*itr));
-            }
-         }
-         else 
-         {
-            faces.push_back(font_manager_.get_face(sym.get_face_name()));
-         }
-     
-         if (faces.size() > 0)
-         {
-            text_renderer<mapnik::Image32> ren(pixmap_, faces);
+            text_renderer<mapnik::Image32> ren(pixmap_,face);
             ren.set_pixel_size(sym.get_text_size());
             ren.set_fill(fill);
             ren.set_halo_fill(sym.get_halo_fill());
@@ -708,8 +682,7 @@ namespace mapnik
             placement_finder<label_collision_detector4> finder(detector_);
            
             string_info info(text);
-            
-            ren.get_string_info(info);
+            face->get_string_info(info);
             unsigned num_geom = feature.num_geometries();
             for (unsigned i=0;i<num_geom;++i)
             {

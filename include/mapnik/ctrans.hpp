@@ -85,64 +85,6 @@ namespace mapnik {
       proj_transform const& prj_trans_;
    };
     
-
-   template <typename Transform,typename Geometry>
-   struct MAPNIK_DECL coord_transform4
-   {
-      coord_transform4(Transform const& t, 
-                       Geometry const& geom, 
-                       proj_transform const& prj_trans)
-         : t_(t), 
-         geom_(geom), 
-         prj_trans_(prj_trans),
-         prev_x_(0),
-         prev_y_(0) {}
-        
-      unsigned  vertex(double * x , double * y) const
-      {
-         unsigned command = geom_.vertex(x,y);
-         double z=0;
-         prj_trans_.backward(*x,*y,z);
-         t_.forward(x,y);
-         if (command == 1)
-         {
-            prev_x_ = *x;
-            prev_y_ = *y;
-         }
-         else
-         {
-            double dx = *x-prev_x_;
-            double dy = *y-prev_y_;
-            double d = dx*dx + dy*dy;
-            while ( d < 1)
-            {     
-               command = geom_.vertex(x,y);
-               prj_trans_.backward(*x,*y,z);
-               t_.forward(x,y);
-               if (command == 1) break;
-               dx = *x-prev_x_;
-               dy = *y-prev_y_;
-               d = dx*dx+dy*dy;
-            }
-            prev_x_ = *x;
-            prev_y_ = *y;
-         }
-         return command;
-      }
-        
-      void rewind (unsigned pos)
-      {
-         geom_.rewind(pos);
-      }
-        
-     private:
-      Transform const& t_;
-      Geometry const& geom_;
-      proj_transform const& prj_trans_;
-      mutable double prev_x_;
-      mutable double prev_y_;
-   };
-    
    template <typename Transform,typename Geometry>
    struct MAPNIK_DECL coord_transform3
    {

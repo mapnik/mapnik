@@ -27,12 +27,10 @@
 #include <unicode/unistr.h>
 #include <unicode/ucnv.h>
 
-#include <mapnik/config.hpp>
 #include <boost/utility.hpp>
-#include <string>
 
 namespace mapnik {
-   class MAPNIK_DECL transcoder : private boost::noncopyable
+   class transcoder : private boost::noncopyable
    {
       public:
          explicit transcoder (std::string const& encoding);

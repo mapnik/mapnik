@@ -35,11 +35,8 @@ int main( int argc, char **argv )
    freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf");
    freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-Bold.ttf");
    freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono.ttf");
-   freetype_engine::register_font("/System/Library/Fonts/Monaco.dfont");
-   freetype_engine::register_font("/Users/artem/Desktop/japanese.otf");
-   freetype_engine::register_font("/Users/artem/Desktop/IPAfont00201/ipagp.ttf");
-   freetype_engine::register_font("/Users/artem/Desktop/IPAfont00201/ipag.ttf");
-   
+    
+        
    QApplication app( argc, argv ); 
    MainWindow window;
    window.show();

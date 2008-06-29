@@ -29,7 +29,6 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/font_set.hpp>
 
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/libxml2_loader.hpp>
@@ -67,10 +66,7 @@ namespace mapnik
       private:
          void parse_style( Map & map, ptree const & sty);
          void parse_layer( Map & map, ptree const & lay);
-        
-         void parse_fontset(Map & map, ptree const & fset);
-         void parse_font(FontSet & fset, ptree const & f);
-     
+         
          void parse_rule( feature_type_style & style, ptree const & r);
          
          void parse_point_symbolizer( rule_type & rule, ptree const & sym);
@@ -83,14 +79,13 @@ namespace mapnik
          void parse_building_symbolizer( rule_type & rule, ptree const & sym );
          void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
          
-         void ensure_font_face( const std::string & face_name );
+         void ensure_font_face( const text_symbolizer & text_symbol );
          
          bool strict_;
          std::map<std::string,parameters> datasource_templates_;
          freetype_engine font_engine_;
          face_manager<freetype_engine> font_manager_;
          std::map<std::string,std::string> file_sources_;
-         std::map<std::string,FontSet> fontsets_;
     };
 
     void load_map(Map & map, std::string const& filename, bool strict)
@@ -147,11 +142,8 @@ namespace mapnik
                 }
                 else if (v.first == "Layer")
                 {
+
                     parse_layer(map, v.second );
-                }
-                else if (v.first == "FontSet")
-                {
-                    parse_fontset(map, v.second);
                 }
                 else if (v.first == "FileSource")
                 {
@@ -234,71 +226,6 @@ namespace mapnik
             throw;
         }
     }
-
-    void map_parser::parse_fontset( Map & map, ptree const & fset )
-    {
-        string name("<missing name>");
-        try
-        {
-            name = get_attr<string>(fset, "name");
-            FontSet fontset(name);
-
-            ptree::const_iterator itr = fset.begin();
-            ptree::const_iterator end = fset.end();
-
-            for (; itr != end; ++itr)    
-            {
-                ptree::value_type const& font_tag = *itr;
-
-                if (font_tag.first == "Font")
-                {
-                    parse_font(fontset, font_tag.second);
-                }
-                else if (font_tag.first != "<xmlcomment>" &&
-                    font_tag.first != "<xmlattr>" )
-                {
-                    throw config_error(std::string("Unknown child node in 'FontSet'.") +
-                        "Expected 'Font' but got '" + font_tag.first + "'");
-                }
-            }
-
-            map.insert_fontset(name, fontset);
-				
-            // XXX Hack because map object isn't accessible by text_symbolizer 
-            // when it's parsed
-            fontsets_.insert(pair<std::string, FontSet>(name, fontset));
-        } catch (const config_error & ex) {
-            if ( ! name.empty() ) {
-                ex.append_context(string("in FontSet '") + name + "'");
-            }
-            throw;
-        }
-    }
-
-    void map_parser::parse_font(FontSet & fset, ptree const & f)
-	{
-        std::string face_name;
-
-        try
-        {
-            face_name = get_attr(f, "face_name", string());
-        
-            if ( strict_ )
-            {
-                ensure_font_face( face_name );
-            }
-        }
-        catch (const config_error & ex)
-        {
-            if (!face_name.empty())
-            {
-                ex.append_context(string("in Font '") + face_name + "'");
-            }
-            throw;
-        }
-
-        fset.add_face_name(face_name);
-	 }
 
     void map_parser::parse_layer( Map & map, ptree const & lay )
     {
@@ -676,39 +603,12 @@ namespace mapnik
         try
         {
             std::string name = get_attr<string>(sym, "name"); 
-
-            optional<std::string> face_name =
-                 get_opt_attr<std::string>(sym, "face_name");
-            
-            optional<std::string> fontset_name =
-                 get_opt_attr<std::string>(sym, "fontset_name");
-
-            unsigned size = get_attr(sym, "size", 10U);
+            std::string face_name =  get_attr<string>(sym, "face_name");
+            unsigned size = get_attr(sym, "size", 10U );
 
             Color c = get_attr(sym, "fill", Color(0,0,0));
-            
-            text_symbolizer text_symbol = text_symbolizer(name, size, c);                
-            
-            if (fontset_name && face_name)
-            {
-                throw config_error(std::string("Can't have both face_name and fontset_name"));
-            }
-            else if (fontset_name)
-            {
-                std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(*fontset_name);
-                if (itr != fontsets_.end())
-                {
-                    text_symbol.set_fontset(itr->second);                
-                }
-            }
-            else if (face_name)
-            {
-                text_symbol.set_face_name(*face_name);                
-            }
-            else
-            {
-                throw config_error(std::string("Must have face_name or fontset_name"));
-            }
+
+            text_symbolizer text_symbol(name, face_name, size, c);
 
             int dx = get_attr(sym, "dx", 0);
             int dy = get_attr(sym, "dy", 0);
@@ -783,7 +683,7 @@ namespace mapnik
                
             if ( strict_ )
             {
-                ensure_font_face( text_symbol.get_face_name() );
+                ensure_font_face( text_symbol );
             }
 
             rule.append(text_symbol);
@@ -1013,12 +913,12 @@ namespace mapnik
         }
     } 
 
-    void map_parser::ensure_font_face( const std::string & face_name )
+    void map_parser::ensure_font_face( const text_symbolizer & text_symbol )
     {
-        if ( ! font_manager_.get_face( face_name ) )
+        if ( ! font_manager_.get_face( text_symbol.get_face_name() ) )
         {
             throw config_error("Failed to find font face '" +
-                    face_name + "'");
+                    text_symbol.get_face_name() + "'");
         }
     }
 } // end of namespace mapnik

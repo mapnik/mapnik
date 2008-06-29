@@ -39,16 +39,15 @@ thread_suffix = '-mt'
 if env['PLATFORM'] == 'FreeBSD':
     thread_suffix = ''
     
-#if env['THREADING'] == 'multi':
-#    libraries = ['boost_iostreams%s%s' % (env['BOOST_APPEND'],thread_suffix) ]
-#else:
-#    libraries = ['boost_iostreams%s' % (env['BOOST_APPEND']) ]
-libraries = []   
+if env['THREADING'] == 'multi':
+    libraries = ['boost_iostreams%s%s' % (env['BOOST_APPEND'],thread_suffix) ]
+else:
+    libraries = ['boost_iostreams%s' % (env['BOOST_APPEND']) ]
+    
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('icuuc')
     libraries.append('icudata')
-    libraries.append(env['LIBS'])
 
 shape_inputdriver = env.SharedLibrary('shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries)
 
