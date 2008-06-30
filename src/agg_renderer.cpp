@@ -113,7 +113,7 @@ namespace mapnik
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
         font_engine_(),
         font_manager_(font_engine_),
-        detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64)),
+        detector_(Envelope<double>(-64, -64, m.getWidth() + 64 ,m.getHeight() + 64)),
         ras_ptr(new rasterizer)
    {
       boost::optional<Color> bg = m.background();
@@ -716,6 +716,7 @@ namespace mapnik
                {
                   path_type path(t_,geom,prj_trans);
                   placement text_placement(info,sym);  
+                  text_placement.avoid_edges = sym.get_avoid_edges();
                   if (sym.get_label_placement() == POINT_PLACEMENT) 
                   {
                      double label_x, label_y, z=0.0;
