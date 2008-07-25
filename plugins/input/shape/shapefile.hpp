@@ -124,16 +124,16 @@ class shape_file : boost::noncopyable
       {
          char b[4];
          file_.read(b, 4);
-         return b[3] & 0xffu | (b[2] & 0xffu) << 8 |
-            (b[1] & 0xffu) << 16 | (b[0] & 0xffu) << 24;
+         return (b[3] & 0xffu) | ((b[2] & 0xffu) << 8) |
+            ((b[1] & 0xffu) << 16) | ((b[0] & 0xffu) << 24);
       }
       
       inline int read_ndr_integer()
       {
          char b[4];
          file_.read(b,4);
-         return b[0]&0xffu | (b[1]&0xffu) << 8 | 
-            (b[2]&0xffu) << 16 | (b[3]&0xffu) << 24;
+         return (b[0]&0xffu) | ((b[1]&0xffu) << 8) | 
+            ((b[2]&0xffu) << 16) | ((b[3]&0xffu) << 24);
       }
       
       inline double read_double()
