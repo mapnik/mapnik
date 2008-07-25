@@ -52,6 +52,11 @@ namespace mapnik
 
     FontSet::~FontSet() {}
     
+    unsigned FontSet::size() const
+    {
+        return face_names_.size();
+    }
+
     void FontSet::add_face_name(std::string face_name)
     {
         face_names_.push_back(face_name);

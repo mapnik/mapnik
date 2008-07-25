@@ -59,6 +59,28 @@ extern "C"
 
 namespace mapnik
 {
+    class MAPNIK_DECL font_glyph : private boost::noncopyable
+    {
+    public:
+        font_glyph(FT_Face face, unsigned index)
+            : face_(face), index_(index) {}
+
+        FT_Face get_face() const
+        {
+            return face_;
+        }
+
+        unsigned get_index() const
+        {
+            return index_;
+        }
+    private:
+        FT_Face face_;
+        unsigned index_;
+    };
+
+    typedef boost::shared_ptr<font_glyph> glyph_ptr;
+
     class font_face : boost::noncopyable
     {
     public:
@@ -75,11 +97,6 @@ namespace mapnik
     	    return std::string(face_->style_name);
     	}
 	
-        unsigned num_glyphs() const
-        {
-            return face_->num_glyphs;
-        }
-
         FT_GlyphSlot glyph() const
         {
             return face_->glyph;
@@ -117,77 +134,37 @@ namespace mapnik
     };
     
     typedef boost::shared_ptr<font_face> face_ptr;
-   
-    class MAPNIK_DECL freetype_engine  // : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
-         // private boost::noncopyable
+
+    class MAPNIK_DECL font_face_set : private boost::noncopyable
     {
-       // friend class mapnik::CreateStatic<freetype_engine>;
-      public:
-        static bool register_font(std::string const& file_name);
-        static std::vector<std::string> face_names ();
-        face_ptr create_face(std::string const& family_name);
-        virtual ~freetype_engine();
-        freetype_engine();
-      private:
-        FT_Library library_;
-        static boost::mutex mutex_;
-        static std::map<std::string,std::string> name2file_;
-    }; 
-    
-    template <typename T>
-    class MAPNIK_DECL face_manager : private boost::noncopyable
-    {
-        typedef T font_engine_type;
-        typedef std::map<std::string,face_ptr> faces;
-        
     public:
-        face_manager(T & engine)
-           : engine_(engine) {}
-        
-        face_ptr get_face(std::string const& name)
-        {
-            typename faces::iterator itr;
-            itr = faces_.find(name);
-            if (itr != faces_.end())
-            {
-                return itr->second;
-            }
-            else
-            {
-                face_ptr face = engine_.create_face(name);
-                if (face)
-                {
-                    faces_.insert(make_pair(name,face));
-                }
-                return face;	
-            }
-        }
-    private:
-        faces faces_;
-        font_engine_type & engine_;
-    };
-        
-    template <typename T>
-    struct text_renderer : private boost::noncopyable
-    {
         typedef std::pair<unsigned,unsigned> dimension_t;
-        
-        struct glyph_t : boost::noncopyable
+
+        font_face_set(void)
+           : faces_() {}
+
+        void add(face_ptr face)
         {
-            FT_Glyph image;
-            glyph_t(FT_Glyph image_) : image(image_) {}
-            ~glyph_t ()	{ FT_Done_Glyph(image);}
-        };
-	
-        typedef boost::ptr_vector<glyph_t> glyphs_t;
-        typedef T pixmap_type;
-	
-        text_renderer (pixmap_type & pixmap, std::vector<face_ptr> faces)
-            : pixmap_(pixmap),
-              faces_(faces),
-              fill_(0,0,0), 
-              halo_fill_(255,255,255),
-              halo_radius_(0) {}
+            faces_.push_back(face);
+        }
+
+        unsigned size() const
+        {
+            return faces_.size();
+        }
+
+        glyph_ptr get_glyph(unsigned c) const
+        {
+            for (std::vector<face_ptr>::const_iterator face = faces_.begin(); face != faces_.end(); ++face)
+            {
+               FT_Face f = (*face)->get_face();
+               FT_UInt g = (*face)->get_char(c);
+
+               if (g) return glyph_ptr(new font_glyph(f, g));
+            }
+
+            return glyph_ptr();
+        }
 
         dimension_t character_dimensions(const unsigned c)
         {
@@ -200,31 +177,9 @@ namespace mapnik
             
             FT_BBox glyph_bbox; 
             FT_Glyph image;
-                    
-            FT_Face face = (*faces_.begin())->get_face();
-            
-            FT_UInt glyph_index = FT_Get_Char_Index(face, c);
-                 
-            // If there's no glyph_index we loop through the remaining fonts
-            // in the fontset looking for one.
-            if (!glyph_index) {
-                std::vector<face_ptr>::iterator itr = faces_.begin();
-                std::vector<face_ptr>::iterator end = faces_.end();
-                
-                ++itr; // Skip the first one, we already tried it.
-                
-                for (; itr != end; ++itr)
-                {
-                    FT_Face f = (*itr)->get_face();
-                    
-                    glyph_index = FT_Get_Char_Index(f, c);
 
-                    if (glyph_index) {
-                        face = f;
-                        break;
-                    }
-                }
-            }
+            glyph_ptr glyph = get_glyph(c);
+            FT_Face face = glyph->get_face();
 
             matrix.xx = (FT_Fixed)( 1 * 0x10000L ); 
             matrix.xy = (FT_Fixed)( 0 * 0x10000L ); 
@@ -233,7 +188,7 @@ namespace mapnik
             
             FT_Set_Transform(face, &matrix, &pen);
 
-            error = FT_Load_Glyph (face, glyph_index, FT_LOAD_NO_HINTING); 
+            error = FT_Load_Glyph (face, glyph->get_index(), FT_LOAD_NO_HINTING); 
             if ( error )
                 return dimension_t(0, 0);
             
@@ -327,14 +282,115 @@ namespace mapnik
             info.set_dimensions(width, height);
         }
 
+        void set_pixel_sizes(unsigned size)
+        {
+            for (std::vector<face_ptr>::iterator face = faces_.begin(); face != faces_.end(); ++face)
+            {
+                (*face)->set_pixel_sizes(size);
+            }
+        }
+    private:
+        std::vector<face_ptr> faces_;
+    };
+    
+    typedef boost::shared_ptr<font_face_set> face_set_ptr;
+
+    class MAPNIK_DECL freetype_engine  // : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
+         // private boost::noncopyable
+    {
+       // friend class mapnik::CreateStatic<freetype_engine>;
+      public:
+        static bool register_font(std::string const& file_name);
+        static std::vector<std::string> face_names ();
+        face_ptr create_face(std::string const& family_name);
+        virtual ~freetype_engine();
+        freetype_engine();
+      private:
+        FT_Library library_;
+        static boost::mutex mutex_;
+        static std::map<std::string,std::string> name2file_;
+    }; 
+    
+    template <typename T>
+    class MAPNIK_DECL face_manager : private boost::noncopyable
+    {
+        typedef T font_engine_type;
+        typedef std::map<std::string,face_ptr> faces;
+        
+    public:
+        face_manager(T & engine)
+           : engine_(engine) {}
+        
+        face_ptr get_face(std::string const& name)
+        {
+            typename faces::iterator itr;
+            itr = faces_.find(name);
+            if (itr != faces_.end())
+            {
+                return itr->second;
+            }
+            else
+            {
+                face_ptr face = engine_.create_face(name);
+                if (face)
+                {
+                    faces_.insert(make_pair(name,face));
+                }
+                return face;	
+            }
+        }
+
+        face_set_ptr get_face_set(std::string const& name)
+        {
+            face_set_ptr face_set(new font_face_set);
+            if (face_ptr face = get_face(name))
+            {
+                face_set->add(face);
+            }
+            return face_set;
+        }
+
+        face_set_ptr get_face_set(FontSet const& fontset)
+        {
+            std::vector<std::string> const& names = fontset.get_face_names();
+            face_set_ptr face_set(new font_face_set);
+            for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
+            {
+                if (face_ptr face = get_face(*name))
+                {
+                    face_set->add(face);
+                }
+            }
+            return face_set;
+        }
+    private:
+        faces faces_;
+        font_engine_type & engine_;
+    };
+
+    template <typename T>
+    struct text_renderer : private boost::noncopyable
+    {
+        struct glyph_t : boost::noncopyable
+        {
+            FT_Glyph image;
+            glyph_t(FT_Glyph image_) : image(image_) {}
+            ~glyph_t ()	{ FT_Done_Glyph(image);}
+        };
+	
+        typedef boost::ptr_vector<glyph_t> glyphs_t;
+        typedef T pixmap_type;
+	
+        text_renderer (pixmap_type & pixmap, face_set_ptr faces)
+            : pixmap_(pixmap),
+              faces_(faces),
+              fill_(0,0,0), 
+              halo_fill_(255,255,255),
+              halo_radius_(0) {}
+
         void set_pixel_size(unsigned size)
         {
-            std::vector<face_ptr>::iterator itr = faces_.begin();
-            std::vector<face_ptr>::iterator end = faces_.end();
-            for (; itr != end; ++itr)
-            {
-                (*itr)->set_pixel_sizes(size);
-            }
+            faces_->set_pixel_sizes(size);
         }
     
         void set_fill(mapnik::Color const& fill)
@@ -365,8 +421,6 @@ namespace mapnik
             bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
             bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
 	    
-            std::vector<face_ptr>::iterator end = faces_.end();
-            
             for (int i = 0; i < path->num_nodes(); i++) 
             {
                 int c;
@@ -385,44 +439,9 @@ namespace mapnik
 		
                 pen.x = int(x * 64);
                 pen.y = int(y * 64);
-	        	
-                FT_Face face = (*faces_.begin())->get_face();
-
-                FT_UInt glyph_index = FT_Get_Char_Index(face, unsigned(c));
-                     
-                // If there's no glyph_index we loop through the remaining fonts
-                // in the fontset looking for one.
-                if (!glyph_index) {
-                    std::vector<face_ptr>::iterator itr = faces_.begin();
-                    ++itr; // Skip the first one, we already tried it.
-                    
-                    for (; itr != end; ++itr)
-                    {
-#ifdef MAPNIK_DEBUG
-                        // TODO Enable when we have support for setting verbosity
-                        //std::clog << "prepare_glyphs: Falling back to font named \""
-                        //    << (*itr)->family_name() << " " << (*itr)->style_name()
-                        //    << "\"" << std::endl;
-#endif
-
-                        FT_Face f = (*itr)->get_face();
-                        
-                        glyph_index = FT_Get_Char_Index(f, unsigned(c));
-
-                        if (glyph_index) {
-                            face = f;
-                            break;
-                        }
-                    }
-
-#ifdef MAPNIK_DEBUG
-                    // TODO Enable when we have support for setting verbosity
-                    //if (!glyph_index) {
-                    //    std::clog << "prepare_glyphs: Failed to fall back, glyph "
-                    //        << c << " not found in any font." << std::endl;
-                    //}
-#endif
-                }
+	        
+                glyph_ptr glyph = faces_->get_glyph(unsigned(c));
+                FT_Face face = glyph->get_face();
 
                 matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L ); 
                 matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L ); 
@@ -431,7 +450,7 @@ namespace mapnik
 
                 FT_Set_Transform(face, &matrix, &pen);
 
-                error = FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_HINTING); 
+                error = FT_Load_Glyph(face, glyph->get_index(), FT_LOAD_NO_HINTING); 
                 if ( error )
                     continue;
 
@@ -558,7 +577,7 @@ namespace mapnik
         }
     
         pixmap_type & pixmap_;
-        std::vector<face_ptr> faces_;
+        face_set_ptr faces_;
         mapnik::Color fill_;
         mapnik::Color halo_fill_;
         int halo_radius_;

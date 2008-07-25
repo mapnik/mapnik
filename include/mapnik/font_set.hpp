@@ -41,6 +41,7 @@ namespace mapnik
             FontSet(std::string const& name); 
             FontSet(FontSet const& rhs);
             FontSet& operator=(FontSet const& rhs);
+            unsigned size() const;
             std::string const& get_name() const;
             void add_face_name(std::string);
             std::vector<std::string> const& get_face_names() const;

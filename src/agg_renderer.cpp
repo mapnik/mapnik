@@ -459,11 +459,18 @@ namespace mapnik
       boost::shared_ptr<ImageData32> const& data = sym.get_image();
       if (text.length() > 0 && data)
       {
-         std::vector<face_ptr> faces;
-			
-         faces.push_back(font_manager_.get_face(sym.get_face_name()));
-         
-         if (faces.size() > 0)
+         face_set_ptr faces;
+
+         if (sym.get_fontset().size() > 0)
+         {
+            faces = font_manager_.get_face_set(sym.get_fontset());
+         }
+         else 
+         {
+            faces = font_manager_.get_face_set(sym.get_face_name());
+         }
+
+         if (faces->size() > 0)
          {
             text_renderer<mapnik::Image32> ren(pixmap_, faces);
             
@@ -472,7 +479,7 @@ namespace mapnik
             
             string_info info(text);
 
-            ren.get_string_info(info);
+            faces->get_string_info(info);
             
             placement_finder<label_collision_detector4> finder(detector_);
             
@@ -675,27 +682,18 @@ namespace mapnik
       {
          Color const& fill = sym.get_fill();
 
-         std::vector<face_ptr> faces;
-    
-         FontSet fontset = sym.get_fontset();
-         std::vector<std::string> face_names = fontset.get_face_names();
-    
-         if (face_names.size() > 0)
-         {
-            std::vector<std::string>::iterator itr = face_names.begin();
-            std::vector<std::string>::iterator end = face_names.end();
+         face_set_ptr faces;
 
-            for (; itr != end; ++itr)
-            {
-               faces.push_back(font_manager_.get_face(*itr));
-            }
+         if (sym.get_fontset().size() > 0)
+         {
+            faces = font_manager_.get_face_set(sym.get_fontset());
          }
          else 
          {
-            faces.push_back(font_manager_.get_face(sym.get_face_name()));
+            faces = font_manager_.get_face_set(sym.get_face_name());
          }
-     
-         if (faces.size() > 0)
+
+         if (faces->size() > 0)
          {
             text_renderer<mapnik::Image32> ren(pixmap_, faces);
             ren.set_pixel_size(sym.get_text_size());
@@ -707,7 +705,7 @@ namespace mapnik
            
             string_info info(text);
             
-            ren.get_string_info(info);
+            faces->get_string_info(info);
             unsigned num_geom = feature.num_geometries();
             for (unsigned i=0;i<num_geom;++i)
             {
