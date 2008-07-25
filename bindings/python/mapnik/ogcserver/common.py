@@ -20,7 +20,7 @@
 # $Id$
 
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Map, Color, Envelope, render, rawdata, Image, Projection as MapnikProjection, render_to_file, Coord
+from mapnik import Map, Color, Envelope, render, Image, Projection as MapnikProjection, render_to_file, Coord
 from PIL.Image import fromstring, new
 from PIL.ImageDraw import Draw
 from StringIO import StringIO
@@ -37,7 +37,7 @@ import sys
 #                                    'http://www.w3.org/2001/XMLSchema-instance': 'xsi'
 #                                    })
 
-PIL_TYPE_MAPPING = {'image/jpeg': 'JPEG', 'image/png': 'PNG'}
+PIL_TYPE_MAPPING = {'image/jpeg': 'jpeg', 'image/png': 'png'}
 
 class ParameterDefinition:
 
@@ -283,7 +283,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         m = self._buildMap(params)
         im = Image(params['width'], params['height'])
         render(m, im)
-        return Response(params['format'], im.tostring(params['format'])
+        return Response(params['format'], im.tostring(PIL_TYPE_MAPPING[params['format']]))
 
     def GetFeatureInfo(self, params, querymethodname='query_point'):
         m = self._buildMap(params)
