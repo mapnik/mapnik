@@ -50,13 +50,14 @@ namespace mapnik {
    class cairo_face_manager : private boost::noncopyable
    {
      public:
-      cairo_face_manager(void);
-      cairo_face_ptr get_face(std::string const& name);
+      cairo_face_manager(boost::shared_ptr<freetype_engine> engine,
+                         face_manager<freetype_engine> & manager);
+      cairo_face_ptr get_face(face_ptr face);
 
      private:
-      typedef std::map<std::string,cairo_face_ptr> cairo_face_cache;
+      typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
       boost::shared_ptr<freetype_engine> font_engine_;
-      face_manager<freetype_engine> font_manager_;
+      face_manager<freetype_engine> & font_manager_;
       cairo_face_cache cache_;
    };
 
@@ -107,6 +108,8 @@ namespace mapnik {
       Cairo::RefPtr<Cairo::Surface> surface_;
       Cairo::RefPtr<Cairo::Context> context_;
       CoordTransform t_;
+      boost::shared_ptr<freetype_engine> font_engine_;
+      face_manager<freetype_engine> font_manager_;
       cairo_face_manager face_manager_;
       label_collision_detector4 detector_;
    };

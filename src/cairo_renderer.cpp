@@ -140,17 +140,6 @@ namespace mapnik
             return cairo_face_;
          }
 
-         void get_string_info(unsigned size, string_info & info)
-         {
-            face_->set_pixel_sizes(size);
-            face_->get_string_info(info);
-         }
-
-         unsigned get_char(unsigned c) const
-         {
-            return face_->get_char(c);
-         }
-
       private:
          class handle
          {
@@ -175,15 +164,16 @@ namespace mapnik
          Cairo::RefPtr<Cairo::FontFace> cairo_face_;
    };
 
-   cairo_face_manager::cairo_face_manager(void)
-      : font_engine_(new freetype_engine()),
-        font_manager_(*font_engine_)
+   cairo_face_manager::cairo_face_manager(boost::shared_ptr<freetype_engine> engine,
+                                          face_manager<freetype_engine> & manager)
+      : font_engine_(engine),
+        font_manager_(manager)
    {
    }
 
-   cairo_face_ptr cairo_face_manager::get_face(std::string const& name)
+   cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
    {
-      cairo_face_cache::iterator itr = cache_.find(name);
+      cairo_face_cache::iterator itr = cache_.find(face);
       cairo_face_ptr entry;
 
       if (itr != cache_.end())
@@ -192,14 +182,9 @@ namespace mapnik
       }
       else
       {
-         face_ptr face = font_manager_.get_face(name);
+         entry = cairo_face_ptr(new cairo_face(font_engine_, face));
 
-         if (face)
-         {
-            entry = cairo_face_ptr(new cairo_face(font_engine_, face));
-
-            cache_.insert(std::make_pair(name, entry));
-         }
+         cache_.insert(std::make_pair(face, entry));
       }
 
       return entry;
@@ -359,9 +344,9 @@ namespace mapnik
             context_->restore();
          }
 
-         void set_font_face(cairo_face_ptr const& face)
+         void set_font_face(cairo_face_manager & manager, face_ptr face)
          {
-            context_->set_font_face(face->face());
+            context_->set_font_face(manager.get_face(face)->face());
          }
 
          void set_font_matrix(Cairo::Matrix const& matrix)
@@ -399,7 +384,9 @@ namespace mapnik
             context_->glyph_path(glyphs);
          }
 
-         void add_text(text_symbolizer const& sym, text_path & path, cairo_face_ptr const& face)
+         void add_text(text_symbolizer const& sym, text_path & path,
+                       cairo_face_manager & manager,
+                       face_set_ptr const& faces)
          {
             unsigned text_size = sym.get_text_size();
             double sx = path.starting_x;
@@ -414,17 +401,25 @@ namespace mapnik
 
                path.vertex(&c, &x, &y, &angle);
 
-               Cairo::Matrix matrix;
+               glyph_ptr glyph = faces->get_glyph(c);
+ 
+               if (glyph)
+               {
+                  Cairo::Matrix matrix;
 
-               matrix.xx = text_size * cos(angle);
-               matrix.xy = text_size * sin(angle);
-               matrix.yx = text_size * -sin(angle);
-               matrix.yy = text_size * cos(angle);
-               matrix.x0 = 0;
-               matrix.y0 = 0;
+                  matrix.xx = text_size * cos(angle);
+                  matrix.xy = text_size * sin(angle);
+                  matrix.yx = text_size * -sin(angle);
+                  matrix.yy = text_size * cos(angle);
+                  matrix.x0 = 0;
+                  matrix.y0 = 0;
 
-               set_font_matrix(matrix);
-               glyph_path(face->get_char(c), sx + x, sy - y);
+                  set_font_matrix(matrix);
+
+                  set_font_face(manager, glyph->get_face());
+
+                  glyph_path(glyph->get_index(), sx + x, sy - y);
+               }
             }
 
             set_line_width(sym.get_halo_radius());
@@ -443,17 +438,25 @@ namespace mapnik
 
                path.vertex(&c, &x, &y, &angle);
 
-               Cairo::Matrix matrix;
+               glyph_ptr glyph = faces->get_glyph(c);
+ 
+               if (glyph)
+               {
+                  Cairo::Matrix matrix;
 
-               matrix.xx = text_size * cos(angle);
-               matrix.xy = text_size * sin(angle);
-               matrix.yx = text_size * -sin(angle);
-               matrix.yy = text_size * cos(angle);
-               matrix.x0 = 0;
-               matrix.y0 = 0;
+                  matrix.xx = text_size * cos(angle);
+                  matrix.xy = text_size * sin(angle);
+                  matrix.yx = text_size * -sin(angle);
+                  matrix.yy = text_size * cos(angle);
+                  matrix.x0 = 0;
+                  matrix.y0 = 0;
 
-               set_font_matrix(matrix);
-               show_glyph(face->get_char(c), sx + x, sy - y);
+                  set_font_matrix(matrix);
+
+                  set_font_face(manager, glyph->get_face());
+
+                  show_glyph(glyph->get_index(), sx + x, sy - y);
+               }
             }
          }
 
@@ -469,6 +472,9 @@ namespace mapnik
         surface_(surface),
         context_(Cairo::Context::create(surface)),
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
+        font_engine_(new freetype_engine()),
+        font_manager_(*font_engine_),
+        face_manager_(font_engine_,font_manager_),
         detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
    {
 #ifdef MAPNIK_DEBUG
@@ -760,17 +766,24 @@ namespace mapnik
 
       if (text.length() > 0 && data)
       {
-         cairo_face_ptr face = face_manager_.get_face(sym.get_face_name());
+         face_set_ptr faces;
 
-         if (face)
+         if (sym.get_fontset().size() > 0)
+         {
+            faces = font_manager_.get_face_set(sym.get_fontset());
+         }
+         else 
+         {
+            faces = font_manager_.get_face_set(sym.get_face_name());
+         }
+
+         if (faces->size() > 0)
          {
             cairo_context context(context_);
-
-            context.set_font_face(face);
-
             string_info info(text);
 
-            face->get_string_info(sym.get_text_size(), info);
+            faces->set_pixel_sizes(sym.get_text_size());
+            faces->get_string_info(info);
 
             placement_finder<label_collision_detector4> finder(detector_);
 
@@ -792,7 +805,7 @@ namespace mapnik
                      double shield_y = text_placement.placements[ii].starting_y - data->height() / 2;
 
                      context.add_image(shield_x, shield_y, *data);
-                     context.add_text(sym, text_placement.placements[ii], face);
+                     context.add_text(sym, text_placement.placements[ii], face_manager_, faces);
                   }
                }
             }
@@ -931,17 +944,24 @@ namespace mapnik
 
       if (text.length() > 0)
       {
-         cairo_face_ptr face = face_manager_.get_face(sym.get_face_name());
+         face_set_ptr faces;
 
-         if (face)
+         if (sym.get_fontset().size() > 0)
+         {
+            faces = font_manager_.get_face_set(sym.get_fontset());
+         }
+         else 
+         {
+            faces = font_manager_.get_face_set(sym.get_face_name());
+         }
+
+         if (faces->size() > 0)
          {
             cairo_context context(context_);
-
-            context.set_font_face(face);
-
             string_info info(text);
 
-            face->get_string_info(sym.get_text_size(), info);
+            faces->set_pixel_sizes(sym.get_text_size());
+            faces->get_string_info(info);
 
             placement_finder<label_collision_detector4> finder(detector_);
 
@@ -970,7 +990,7 @@ namespace mapnik
 
                   for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
                   {
-                     context.add_text(sym, text_placement.placements[ii], face);
+                     context.add_text(sym, text_placement.placements[ii], face_manager_, faces);
                   }
                }
             }

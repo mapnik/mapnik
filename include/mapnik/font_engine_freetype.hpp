@@ -59,13 +59,17 @@ extern "C"
 
 namespace mapnik
 {
+    class font_face;
+       
+    typedef boost::shared_ptr<font_face> face_ptr;
+
     class MAPNIK_DECL font_glyph : private boost::noncopyable
     {
     public:
-        font_glyph(FT_Face face, unsigned index)
-            : face_(face), index_(index) {}
+        font_glyph(face_ptr face, unsigned index)
+           : face_(face), index_(index) {}
 
-        FT_Face get_face() const
+        face_ptr get_face() const
         {
             return face_;
         }
@@ -75,7 +79,7 @@ namespace mapnik
             return index_;
         }
     private:
-        FT_Face face_;
+        face_ptr face_;
         unsigned index_;
     };
 
@@ -85,7 +89,7 @@ namespace mapnik
     {
     public:
         font_face(FT_Face face)
-            : face_(face) {}
+           : face_(face) {}
 	
     	std::string  family_name() const
     	{
@@ -132,8 +136,6 @@ namespace mapnik
     private:
     	FT_Face face_;
     };
-    
-    typedef boost::shared_ptr<font_face> face_ptr;
 
     class MAPNIK_DECL font_face_set : private boost::noncopyable
     {
@@ -157,10 +159,9 @@ namespace mapnik
         {
             for (std::vector<face_ptr>::const_iterator face = faces_.begin(); face != faces_.end(); ++face)
             {
-               FT_Face f = (*face)->get_face();
                FT_UInt g = (*face)->get_char(c);
 
-               if (g) return glyph_ptr(new font_glyph(f, g));
+               if (g) return glyph_ptr(new font_glyph(*face, g));
             }
 
             return glyph_ptr();
@@ -179,7 +180,7 @@ namespace mapnik
             FT_Glyph image;
 
             glyph_ptr glyph = get_glyph(c);
-            FT_Face face = glyph->get_face();
+            FT_Face face = glyph->get_face()->get_face();
 
             matrix.xx = (FT_Fixed)( 1 * 0x10000L ); 
             matrix.xy = (FT_Fixed)( 0 * 0x10000L ); 
@@ -441,7 +442,7 @@ namespace mapnik
                 pen.y = int(y * 64);
 	        
                 glyph_ptr glyph = faces_->get_glyph(unsigned(c));
-                FT_Face face = glyph->get_face();
+                FT_Face face = glyph->get_face()->get_face();
 
                 matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L ); 
                 matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L ); 
