@@ -275,7 +275,9 @@ namespace mapnik
             }
          }
          line_width += word_width;
+         line_height = line_height > word_height ? line_height : word_height;
          string_width = string_width > line_width ? string_width : line_width;
+         string_height += line_height;
          line_breaks.push_back(p.info.num_characters() + 1);
          line_widths.push_back(line_width);
       }
