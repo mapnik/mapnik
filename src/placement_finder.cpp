@@ -232,6 +232,7 @@ namespace mapnik
       // work out where our line breaks need to be
       std::vector<int> line_breaks;
       std::vector<double> line_widths;
+      std::vector<double> line_heights;
       if (wrap_at < string_width && p.info.num_characters() > 0)
       {
          int last_space = 0;
@@ -260,10 +261,13 @@ namespace mapnik
             }
             if (line_width > 0 && line_width > wrap_at)
             {
+               // Remove width of breaking space character since it is not rendered
+               line_width -= ci.width;
                string_width = string_width > line_width ? string_width : line_width;
                string_height += line_height;
                line_breaks.push_back(last_space);
                line_widths.push_back(line_width);
+               line_heights.push_back(line_height);
                ii = last_space;
                line_width = 0;
                line_height = 0;
@@ -277,11 +281,13 @@ namespace mapnik
          string_height += line_height;
          line_breaks.push_back(p.info.num_characters() + 1);
          line_widths.push_back(line_width);
+         line_heights.push_back(line_height);
       }
       if (line_breaks.size() == 0)
       {
          line_breaks.push_back(p.info.num_characters() + 1);
          line_widths.push_back(string_width);
+         line_heights.push_back(string_height);
       }
         
       p.info.set_dimensions(string_width, string_height);
@@ -293,13 +299,13 @@ namespace mapnik
       current_placement->starting_x += boost::tuples::get<0>(p.displacement_);
       current_placement->starting_y += boost::tuples::get<1>(p.displacement_); 
       
-      double line_height = 0;
       unsigned int line_number = 0;
       unsigned int index_to_wrap_at = line_breaks[line_number];
       double line_width = line_widths[line_number];
+      double line_height = line_heights[line_number];
     
-      x = -line_width/2.0 - 1.0;
-      y = -string_height/2.0 + 1.0;
+      x = -line_width/2.0;
+      y = -line_height/2.0;
     
       for (unsigned i = 0; i < p.info.num_characters(); i++)
       {
@@ -311,9 +317,9 @@ namespace mapnik
          {
             index_to_wrap_at = line_breaks[++line_number];
             line_width = line_widths[line_number];
+            line_height = line_heights[line_number];
             y -= line_height;
             x = -line_width/2.0;
-            line_height = 0;
             continue;
          }
          else
@@ -347,7 +353,6 @@ namespace mapnik
             p.envelopes.push(e);
          }
          x += ci.width;
-         line_height = line_height > ci.height ? line_height : ci.height;
       }
       p.placements.push_back(current_placement.release());
       update_detector(p);
