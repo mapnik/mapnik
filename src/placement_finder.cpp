@@ -234,7 +234,6 @@ namespace mapnik
       std::vector<double> line_widths;
       if (wrap_at < string_width && p.info.num_characters() > 0)
       {
-         int line_count=0; 
          int last_space = 0;
          string_width = 0;
          string_height = 0;
@@ -250,7 +249,6 @@ namespace mapnik
             unsigned c = ci.character;
             word_width += ci.width;
             word_height = word_height > ci.height ? word_height : ci.height;
-            ++line_count;
         
             if (c == ' ')
             {
@@ -267,7 +265,6 @@ namespace mapnik
                line_breaks.push_back(last_space);
                line_widths.push_back(line_width);
                ii = last_space;
-               line_count = 0;
                line_width = 0;
                line_height = 0;
                word_width = 0;
