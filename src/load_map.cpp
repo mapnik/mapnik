@@ -800,7 +800,13 @@ namespace mapnik
         try
         {
             std::string name =  get_attr<string>(sym, "name");
-            std::string face_name =  get_attr<string>(sym, "face_name");
+
+            optional<std::string> face_name =
+                 get_opt_attr<std::string>(sym, "face_name");
+
+            optional<std::string> fontset_name =
+                 get_opt_attr<std::string>(sym, "fontset_name");
+
             unsigned size = get_attr(sym, "size", 10U);
             Color fill = get_attr(sym, "fill", Color(0,0,0));
 
@@ -820,9 +826,30 @@ namespace mapnik
                        image_file = itr->second + "/" + image_file;
                     }
                 }
-                shield_symbolizer shield_symbol(name,face_name,size,fill,
+                shield_symbolizer shield_symbol(name,size,fill,
                                                 image_file,type,width,height);
-                
+
+                if (fontset_name && face_name)
+                {
+                    throw config_error(std::string("Can't have both face_name and fontset_name"));
+                }
+                else if (fontset_name)
+                {
+                    std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(*fontset_name);
+                    if (itr != fontsets_.end())
+                    {
+                        shield_symbol.set_fontset(itr->second);                
+                    }
+                }
+                else if (face_name)
+                {
+                    shield_symbol.set_face_name(*face_name);                
+                }
+                else
+                {
+                    throw config_error(std::string("Must have face_name or fontset_name"));
+                }
+
                 // minimum distance between labels
                 optional<unsigned> min_distance = 
                     get_opt_attr<unsigned>(sym, "min_distance");

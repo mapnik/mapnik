@@ -46,5 +46,17 @@ namespace mapnik
           symbolizer_with_image( file, type, width, height )
     {
     }
+
+    shield_symbolizer::shield_symbolizer(
+                          std::string const& name,
+                          unsigned size,
+                          Color const& fill, 
+                          std::string const& file,
+                          std::string const& type,
+                          unsigned width,unsigned height)
+        : text_symbolizer(name, size, fill),
+          symbolizer_with_image( file, type, width, height )
+    {
+    }
 }
 
