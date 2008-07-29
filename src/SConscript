@@ -30,7 +30,10 @@ ABI_VERSION=[0,5,0]
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
-libraries = ['agg'] + env['LIBS']
+libraries = env['LIBS']
+
+if env['INTERNAL_LIBAGG']:
+    libraries.insert(0, 'agg')
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append('iconv')

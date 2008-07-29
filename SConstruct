@@ -62,6 +62,7 @@ opts.Add(BoolOption('DEBUG', 'Compile a debug version of mapnik', 'False'))
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
 opts.Add(EnumOption('THREADING','Set threading support','multi', ['multi','single']))
 opts.Add(EnumOption('XMLPARSER','Set xml parser ','tinyxml', ['tinyxml','spirit','libxml2']))
+opts.Add(BoolOption('INTERNAL_LIBAGG', 'Use provided libagg', 'True'))
 
 env = Environment(ENV=os.environ, options=opts)
 
@@ -92,8 +93,8 @@ def uniq_add(env, key, val):
     if not val in env[key]: env[key].append(val)
 
 # Libraries and headers dependency checks
-env['CPPPATH'] = ['#agg/include', '#tinyxml', '#include', '#']
-env['LIBPATH'] = ['#agg', '#src']
+env['CPPPATH'] = ['#tinyxml', '#include', '#']
+env['LIBPATH'] = ['#src']
 
 # Solaris & Sun Studio settings (the `SUNCC` flag will only be
 # set if the `CXX` option begins with `CC`)
@@ -115,6 +116,13 @@ if SUNCC:
     env['CXX'] = 'CC -library=stlport4'
     if env['THREADING'] == 'multi':
         env['CXXFLAGS'] = ['-mt']
+
+# Decide which libagg to use
+if env['INTERNAL_LIBAGG']:
+    env.Prepend(CPPPATH = '#agg/include');
+    env.Prepend(LIBPATH = '#agg');
+else:
+    env.ParseConfig('pkg-config --libs --cflags libagg')
 
 # Adding the prerequisite library directories to the include path for
 # compiling and the library path for linking, respectively.
@@ -197,7 +205,8 @@ bindings = [ binding.strip() for binding in Split(env['BINDINGS'])]
 #### Build instructions & settings ####
 
 # Build agg first, doesn't need anything special
-SConscript('agg/SConscript')
+if env['INTERNAL_LIBAGG']:
+    SConscript('agg/SConscript')
 
 # Build the core library
 SConscript('src/SConscript')
