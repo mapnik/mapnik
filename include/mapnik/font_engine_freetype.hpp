@@ -164,7 +164,8 @@ namespace mapnik
                if (g) return glyph_ptr(new font_glyph(*face, g));
             }
 
-            return glyph_ptr();
+            // Final fallback to empty square if nothing better in any font
+            return glyph_ptr(new font_glyph(*faces_.begin(), 0));
         }
 
         dimension_t character_dimensions(const unsigned c)
