@@ -67,7 +67,7 @@ void export_projection();
 #include <mapnik/config_error.hpp>
 #include <mapnik/save_map.hpp>
 
-#ifdef HAVE_PYCAIRO
+#if defined(CAIRO) && defined(PYCAIRO)
 #include <pycairo.h>
 #endif
 
@@ -83,7 +83,7 @@ void render2(const mapnik::Map& map,mapnik::Image32& image)
     ren.apply();
 }
 
-#ifdef HAVE_PYCAIRO
+#if defined(CAIRO) && defined(PYCAIRO)
 
 void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
 {
@@ -184,7 +184,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("render_tile_to_file",&render_tile_to_file);
     def("render",&render); 
     def("render",&render2);
-#ifdef HAVE_PYCAIRO
+#if defined(CAIRO) && defined(PYCAIRO)
     def("render",&render3);
     def("render",&render4);
 #endif
