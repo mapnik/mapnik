@@ -40,17 +40,22 @@ using mapnik::save_to_file;
 // output 'raw' pixels
 PyObject* view_tostring1(image_view<ImageData32> const& view)
 {
-    int size = view.width() * view.height() * 4;
-    return ::PyString_FromStringAndSize((const char*)view.data().getBytes(),size);
+   std::ostringstream ss(std::ios::out|std::ios::binary);
+   for (unsigned i=0;i<view.height();i++)
+   {
+      ss.write(reinterpret_cast<const char*>(view.getRow(i)), 
+               view.width() * sizeof(image_view<ImageData32>::pixel_type));
+   }
+   return ::PyString_FromStringAndSize((const char*)ss.str().c_str(),ss.str().size());
 }
 
 // encode (png,jpeg)
 PyObject* view_tostring2(image_view<ImageData32> const & view, std::string const& format)
 {
    std::ostringstream ss(std::ios::out|std::ios::binary);
-   if (format == "png") save_as_png(ss,view.data());
-   else if (format == "png256") save_as_png256(ss,view.data());
-   else if (format == "jpeg") save_as_jpeg(ss,85,view.data());
+   if (format == "png") save_as_png(ss,view);
+   else if (format == "png256") save_as_png256(ss,view);
+   else if (format == "jpeg") save_as_jpeg(ss,85,view);
    else throw mapnik::ImageWriterException("unknown format: " + format);
    return ::PyString_FromStringAndSize((const char*)ss.str().c_str(),ss.str().size());
 }
