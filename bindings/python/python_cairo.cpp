@@ -21,7 +21,7 @@
  *****************************************************************************/
 //$Id$
 
-#if defined(CAIRO) && defined(PYCAIRO)
+#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
 #include <boost/python/type_id.hpp>
 #include <boost/python/converter/registry.hpp>
