@@ -30,6 +30,7 @@ libmapnik_la_SOURCES = \
 	envelope.cpp \
 	filter_factory.cpp \
 	font_engine_freetype.cpp \
+	font_set.cpp \
 	graphics.cpp \
 	image_reader.cpp \
 	image_util.cpp \

@@ -49,6 +49,7 @@ libmapnik_HEADERS = \
 	filter_parser_ast.hpp \
 	filter_visitor.hpp \
 	font_engine_freetype.hpp \
+	font_set.hpp \
 	gamma.hpp \
 	geometry.hpp \
 	geom_util.hpp \

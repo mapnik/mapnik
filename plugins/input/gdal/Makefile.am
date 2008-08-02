@@ -1,3 +1,4 @@
+if HAVE_GDAL
 
 pkglib_LTLIBRARIES = \
 	gdal.la
@@ -17,5 +18,7 @@ gdal_la_LDFLAGS = \
 	-module \
 	-avoid-version \
 	-shrext .input
+
+endif
 
 ## File created by the gnome-build tools
