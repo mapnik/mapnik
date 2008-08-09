@@ -22,6 +22,7 @@
 
 //$Id$
 
+#include <cstdlib>
 #include <mapnik/unicode.hpp>
 
 #ifdef USE_FRIBIDI
