@@ -24,7 +24,7 @@ Traceback (most recent call last):
 ImportError: No module named mapnik
 >>>
 
-If you get an error ensure mapnik in is your PYTHONPATH.
+If you get this error ensure mapnik in is your PYTHONPATH. If you experience other errors see http://trac.mapnik.org/wiki/InstallationTroubleshooting.
 
 If not then visit https://trac.mapnik.org/wiki/GettingStarted for a basic tutorial.
 
