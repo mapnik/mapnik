@@ -30,8 +30,9 @@ void export_shield_symbolizer()
     using namespace boost::python;
     using mapnik::shield_symbolizer;
     using mapnik::text_symbolizer;
+    using mapnik::symbolizer_with_image;
 
-    class_< shield_symbolizer, bases<text_symbolizer> >("ShieldSymbolizer",
+    class_< shield_symbolizer, bases<text_symbolizer,symbolizer_with_image> >("ShieldSymbolizer",
                              init< std::string const&, std::string const&, unsigned, mapnik::Color const&,
                                                         std::string const&, std::string const&,unsigned,unsigned>("TODO"))
         ;
