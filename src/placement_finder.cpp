@@ -62,7 +62,7 @@ namespace mapnik
         max_char_angle_delta(sym.get_max_char_angle_delta()),
         minimum_distance(sym.get_minimum_distance()),
         avoid_edges(sym.get_avoid_edges()),
-        has_dimensions(true), 
+        has_dimensions(false), 
         dimensions(std::make_pair(sym.get_image()->width(),
                                   sym.get_image()->height()))
    {
@@ -309,7 +309,7 @@ namespace mapnik
     
       for (unsigned i = 0; i < p.info.num_characters(); i++)
       {
-         character_info ci;;
+         character_info ci;
          ci = p.info.at(i);
             
          unsigned c = ci.character;
@@ -325,7 +325,7 @@ namespace mapnik
          else
          {
             current_placement->add_node(c, x, y, 0.0);
-    
+            
             Envelope<double> e;
             if (p.has_dimensions)
             {
@@ -355,7 +355,7 @@ namespace mapnik
          x += ci.width;
       }
       p.placements.push_back(current_placement.release());
-      update_detector(p);
+      //update_detector(p);
    }
    
    

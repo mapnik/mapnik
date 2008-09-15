@@ -849,7 +849,29 @@ namespace mapnik
                 {
                     throw config_error(std::string("Must have face_name or fontset_name"));
                 }
+                // text displacement
+                int dx = get_attr(sym, "dx", 0);
+                int dy = get_attr(sym, "dy", 0);
+                shield_symbol.set_displacement(dx,dy);
+                
+                label_placement_e placement =
+                   get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
+                shield_symbol.set_label_placement( placement );
 
+
+                // halo fill and radius
+                optional<Color> halo_fill = get_opt_attr<Color>(sym, "halo_fill");
+                if (halo_fill)
+                {
+                   shield_symbol.set_halo_fill( * halo_fill );
+                }
+                optional<unsigned> halo_radius = 
+                   get_opt_attr<unsigned>(sym, "halo_radius");
+                if (halo_radius)
+                {
+                   shield_symbol.set_halo_radius(*halo_radius);
+                }
+                
                 // minimum distance between labels
                 optional<unsigned> min_distance = 
                     get_opt_attr<unsigned>(sym, "min_distance");
