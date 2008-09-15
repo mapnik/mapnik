@@ -98,6 +98,8 @@ namespace mapnik
          template <typename T>
          void find_line_placements(placement & p, T & path);
          
+         void update_detector(placement & p);
+         
          void clear();
          
       private:
@@ -130,7 +132,7 @@ namespace mapnik
          
          ///General Internals
          
-         void update_detector(placement & p);
+         
          
          DetectorT & detector_;
          Envelope<double> const& dimensions_;
