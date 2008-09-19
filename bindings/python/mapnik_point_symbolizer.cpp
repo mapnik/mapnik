@@ -36,5 +36,8 @@ void export_point_symbolizer()
         .add_property("allow_overlap",
               &point_symbolizer::get_allow_overlap,
               &point_symbolizer::set_allow_overlap)
+        .add_property("opacity",
+              &point_symbolizer::get_opacity,
+              &point_symbolizer::set_opacity)
         ;
 }

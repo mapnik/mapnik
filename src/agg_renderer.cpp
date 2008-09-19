@@ -442,7 +442,7 @@ namespace mapnik
             if (sym.get_allow_overlap() || 
                 detector_.has_placement(label_ext))
             {    
-               pixmap_.set_rectangle_alpha(px,py,*data);
+               pixmap_.set_rectangle_alpha2(*data,px,py,sym.get_opacity());
                detector_.insert(label_ext);
             }
          }

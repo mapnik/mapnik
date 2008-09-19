@@ -524,6 +524,8 @@ namespace mapnik
             optional<std::string> type =  get_opt_attr<string>(sym, "type"); 
             optional<boolean> allow_overlap = 
                 get_opt_attr<boolean>(sym, "allow_overlap");
+            optional<float> opacity = 
+                get_opt_attr<float>(sym, "opacity");
 
             optional<unsigned> width = get_opt_attr<unsigned>(sym, "width"); 
             optional<unsigned> height = get_opt_attr<unsigned>(sym, "height"); 
@@ -545,6 +547,10 @@ namespace mapnik
                    {
                       symbol.set_allow_overlap( * allow_overlap );
                    }
+                   if (opacity)
+                   {
+                      symbol.set_opacity( * opacity );
+                   }			
                    rule.append(symbol);
                 }
                 catch (ImageReaderException const & ex )
