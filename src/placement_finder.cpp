@@ -50,7 +50,7 @@
 namespace mapnik
 {
    placement::placement(string_info & info_, 
-                        shield_symbolizer const& sym)
+       shield_symbolizer const& sym, bool has_dimensions_)
       : info(info_), 
         displacement_(sym.get_displacement()),
         label_placement(sym.get_label_placement()), 
@@ -62,7 +62,7 @@ namespace mapnik
         max_char_angle_delta(sym.get_max_char_angle_delta()),
         minimum_distance(sym.get_minimum_distance()),
         avoid_edges(sym.get_avoid_edges()),
-        has_dimensions(false), 
+        has_dimensions(has_dimensions_), 
         dimensions(std::make_pair(sym.get_image()->width(),
                                   sym.get_image()->height()))
    {

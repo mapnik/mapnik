@@ -496,13 +496,14 @@ namespace mapnik
                if (geom.num_points() > 0 ) 
                {    
                   path_type path(t_,geom,prj_trans);
-                  placement text_placement(info, sym);
-                  text_placement.avoid_edges = sym.get_avoid_edges();
+                  
                   if (sym.get_label_placement() == POINT_PLACEMENT) 
                   {
                      double label_x;
                      double label_y;
                      double z=0.0;
+                     placement text_placement(info, sym, false);
+                     text_placement.avoid_edges = sym.get_avoid_edges();
                      geom.label_position(&label_x, &label_y);
                      prj_trans.backward(label_x,label_y, z);
                      t_.forward(&label_x,&label_y);
@@ -533,6 +534,8 @@ namespace mapnik
                   
                   else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT) 
                   {
+                     placement text_placement(info, sym, true);
+                     text_placement.avoid_edges = sym.get_avoid_edges();
                      finder.find_point_placements<path_type>(text_placement,path);
                      
                      for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)

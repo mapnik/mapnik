@@ -41,23 +41,13 @@ namespace mapnik
    
    struct placement : boost::noncopyable
    { 
-         placement(string_info & info_, 
-                   //path_type & shape_path_,
-                   shield_symbolizer const& sym);
+         placement(string_info & info_, shield_symbolizer const& sym, bool has_dimensions_= false);
          
-         placement(string_info & info_, 
-                   //path_type & shape_path_,
-                   text_symbolizer const& sym);
+         placement(string_info & info_, text_symbolizer const& sym);
          
          ~placement();
-        
-         //helpers
-         //std::pair<double, double> get_position_at_distance(double target_distance);
-         //double get_total_distance();
-
+  
          string_info & info;
-         //path_type & shape_path;
-         //double total_distance_; //cache for distance
     
          position displacement_;
          label_placement_e label_placement;
