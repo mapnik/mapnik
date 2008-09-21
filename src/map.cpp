@@ -35,18 +35,21 @@ namespace mapnik
         : width_(400),
           height_(400),
           srs_("+proj=latlong +datum=WGS84"),
+          buffer_size_(0),
           aspectFixMode_(GROW_BBOX) {}
     
     Map::Map(int width,int height, std::string const& srs)
         : width_(width),
           height_(height),
           srs_(srs),
+          buffer_size_(0),
           aspectFixMode_(GROW_BBOX) {}
    
     Map::Map(const Map& rhs)
         : width_(rhs.width_),
           height_(rhs.height_),
           srs_(rhs.srs_),
+          buffer_size_(rhs.buffer_size_),
           background_(rhs.background_),
           styles_(rhs.styles_),
           layers_(rhs.layers_),
@@ -59,6 +62,7 @@ namespace mapnik
         width_=rhs.width_;
         height_=rhs.height_;
         srs_=rhs.srs_;
+        buffer_size_ = rhs.buffer_size_;
         background_=rhs.background_;
         styles_=rhs.styles_;
         layers_=rhs.layers_;
@@ -213,11 +217,21 @@ namespace mapnik
         return srs_;
     }
     
-    void Map::set_srs(std::string const& srs)
-    {
-        srs_ = srs;
-    }
-  
+   void Map::set_srs(std::string const& srs)
+   {
+      srs_ = srs;
+   }
+   
+   void Map::set_buffer_size( int buffer_size)
+   {
+      buffer_size_ = buffer_size;
+   }
+
+   int Map::buffer_size() const
+   {
+      return buffer_size_;
+   }
+   
    boost::optional<Color> const& Map::background() const
    {
       return background_;

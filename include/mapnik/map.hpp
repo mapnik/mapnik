@@ -41,22 +41,22 @@ namespace mapnik
 
         enum aspect_fix_mode 
         {
-            /* grow the width or height of the specified geo bbox to fill the map size. default behaviour. */
-            GROW_BBOX,
-            /* grow the width or height of the map to accomodate the specified geo bbox. */
-            GROW_CANVAS,
-            /* shrink the width or height of the specified geo bbox to fill the map size. */
-            SHRINK_BBOX,
-            /* shrink the width or height of the map to accomodate the specified geo bbox. */
+           // grow the width or height of the specified geo bbox to fill the map size. default behaviour.
+           GROW_BBOX,
+           // grow the width or height of the map to accomodate the specified geo bbox.
+           GROW_CANVAS,
+           // shrink the width or height of the specified geo bbox to fill the map size. 
+           SHRINK_BBOX,
+           // shrink the width or height of the map to accomodate the specified geo bbox.
             SHRINK_CANVAS,
-            /* adjust the width of the specified geo bbox, leave height and map size unchanged */
-            ADJUST_BBOX_WIDTH,
-            /* adjust the height of the specified geo bbox, leave width and map size unchanged */
+           // adjust the width of the specified geo bbox, leave height and map size unchanged
+           ADJUST_BBOX_WIDTH,
+           // adjust the height of the specified geo bbox, leave width and map size unchanged
             ADJUST_BBOX_HEIGHT,
-            /* adjust the width of the map, leave height and geo bbox unchanged */
-            ADJUST_CANVAS_WIDTH,
-            /* adjust the height of the map, leave width and geo bbox unchanged */
-            ADJUST_CANVAS_HEIGHT
+           // adjust the width of the map, leave height and geo bbox unchanged
+           ADJUST_CANVAS_WIDTH,
+           //adjust the height of the map, leave width and geo bbox unchanged 
+           ADJUST_CANVAS_HEIGHT
         };
     private:
         static const unsigned MIN_MAPSIZE=16;
@@ -64,13 +64,14 @@ namespace mapnik
         unsigned width_;
         unsigned height_;
         std::string  srs_;
+        int buffer_size_;
         boost::optional<Color> background_;
         std::map<std::string,feature_type_style> styles_;
         std::map<std::string,FontSet> fontsets_;
         std::vector<Layer> layers_;
         aspect_fix_mode aspectFixMode_;
         Envelope<double> currentExtent_;
-
+        
     public:
 
         typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
@@ -249,6 +250,17 @@ namespace mapnik
          */
         boost::optional<Color> const& background() const;
 
+        /*! \brief Set buffer size 
+         *  @param buffer_size Buffer size in pixels.
+         */
+        
+        void set_buffer_size(int buffer_size);
+        
+       /*! \brief Get the map buffer size 
+         *  @return Buffer size as int
+         */
+        int buffer_size() const;
+        
         /*! \brief Zoom the map at the current position.
          *  @param factor The factor how much the map is zoomed in or out.
          */

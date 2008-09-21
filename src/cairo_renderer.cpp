@@ -475,7 +475,7 @@ namespace mapnik
         font_engine_(new freetype_engine()),
         font_manager_(*font_engine_),
         face_manager_(font_engine_,font_manager_),
-        detector_(Envelope<double>(-64 ,-64, m.getWidth() + 64 ,m.getHeight() + 64))
+        detector_(Envelope<double>(-m.buffer_size() ,-m.buffer_size() , m.getWidth() + m.buffer_size() ,m.getHeight() + m.buffer_size()))
    {
 #ifdef MAPNIK_DEBUG
       std::clog << "scale=" << m.scale() << "\n";

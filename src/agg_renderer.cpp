@@ -113,7 +113,7 @@ namespace mapnik
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
         font_engine_(),
         font_manager_(font_engine_),
-        detector_(Envelope<double>(-64, -64, m.getWidth() + 64 ,m.getHeight() + 64)),
+        detector_(Envelope<double>(-m.buffer_size(), -m.buffer_size(), m.getWidth() + m.buffer_size() ,m.getHeight() + m.buffer_size())),
         ras_ptr(new rasterizer)
    {
       boost::optional<Color> bg = m.background();

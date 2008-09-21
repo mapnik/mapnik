@@ -96,6 +96,7 @@ void export_map()
       .add_property("height",&Map::getHeight, &Map::setHeight, "The height of the map.")
       .add_property("srs",make_function(&Map::srs,return_value_policy<copy_const_reference>()),
                     &Map::set_srs,"Spatial reference in proj4 format e.g. \"+proj=latlong +datum=WGS84\"")
+      .add_property("buffer_size", &Map::buffer_size,&Map::set_buffer_size,"The size of buffer around map in pixels")
       .add_property("background",make_function
                     (&Map::background,return_value_policy<copy_const_reference>()),
                     &Map::set_background, "The background color of the map.")

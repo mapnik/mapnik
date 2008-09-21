@@ -127,6 +127,12 @@ namespace mapnik
                 }
 
                 map.set_srs( get_attr(map_node, "srs", map.srs() ));
+
+                optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer_size");
+                if (buffer_size)
+                {
+                   map.set_buffer_size(*buffer_size);
+                }
             }
             catch (const config_error & ex)
             {
@@ -864,7 +870,14 @@ namespace mapnik
                    get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
                 shield_symbol.set_label_placement( placement );
 
-
+               // don't render shields around edges
+                optional<boolean> avoid_edges =
+                   get_opt_attr<boolean>(sym, "avoid_edges");
+                if (avoid_edges)
+                {
+                   shield_symbol.set_avoid_edges( *avoid_edges);
+                }
+                
                 // halo fill and radius
                 optional<Color> halo_fill = get_opt_attr<Color>(sym, "halo_fill");
                 if (halo_fill)
