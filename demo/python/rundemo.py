@@ -289,6 +289,7 @@ popplaces_text_symbolizer = TextSymbolizer('GEONAME',
 popplaces_text_symbolizer.set_label_placement=label_placement.POINT_PLACEMENT
 popplaces_text_symbolizer.halo_fill = Color('white')
 popplaces_text_symbolizer.halo_radius = 1
+popplaces_text_symbolizer.avoid_edges = True
 popplaces_rule.symbols.append(popplaces_text_symbolizer)
 
 popplaces_style.rules.append(popplaces_rule)
