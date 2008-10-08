@@ -40,7 +40,7 @@ if env['PLATFORM'] == 'FreeBSD':
     thread_suffix = ''
     
 if env['THREADING'] == 'multi':
-    libraries = ['boost_iostreams%s%s' % (thread_suffix,env['BOOST_APPEND']) ]
+    libraries = ['boost_iostreams%s%s' % (env['BOOST_APPEND'],thread_suffix) ]
 else:
     libraries = ['boost_iostreams%s' % (env['BOOST_APPEND']) ]
     

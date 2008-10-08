@@ -189,7 +189,7 @@ else:
     
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
     if  env['THREADING'] == 'multi' :
-        if not conf.CheckLibWithHeader('boost_%s%s%s' % (libinfo[0],thread_suffix,env['BOOST_APPEND']), libinfo[1], 'C++') and libinfo[2] :
+        if not conf.CheckLibWithHeader('boost_%s%s%s' % (libinfo[0],env['BOOST_APPEND'],thread_suffix), libinfo[1], 'C++') and libinfo[2] :
             color_print(1,'Could not find header or shared library for boost %s, exiting!' % libinfo[0])
             Exit(1)
     elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :

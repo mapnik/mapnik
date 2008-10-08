@@ -125,7 +125,7 @@ namespace mapnik
       {
          for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
          {
-            if (!is_directory( *itr )  && is_input_plugin(itr->leaf()))
+	   if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
             {
                try 
                {
