@@ -32,11 +32,28 @@ int main( int argc, char **argv )
   
    datasource_cache::instance()->register_datasources("/opt/mapnik/lib/mapnik/input");
    
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf");
    freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-Bold.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-BoldOblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-ExtraLight.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-Oblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansCondensed-Bold.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansCondensed-BoldOblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansCondensed-Oblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansCondensed.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono-Bold.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono-BoldOblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono-Oblique.ttf");
    freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono.ttf");
-    
-        
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerif-Bold.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerif-BoldOblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerif-Oblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerif.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerifCondensed-Bold.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerifCondensed-BoldOblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerifCondensed-Oblique.ttf");
+   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerifCondensed.ttf");
+   
    QApplication app( argc, argv ); 
    MainWindow window;
    window.show();

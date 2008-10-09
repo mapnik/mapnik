@@ -274,6 +274,15 @@ namespace mapnik
                                  height = char_dim.second > height ? char_dim.second : height;
                               }
                            }
+                        } else {
+                           // Non-Arabic RTL
+                           for (int j=0;j<arabic.length();++j)
+                           {
+                              dimension_t char_dim = character_dimensions(arabic[j]);
+                              info.add_info(arabic[j], char_dim.first, char_dim.second);
+                              width += char_dim.first;
+                              height = char_dim.second > height ? char_dim.second : height;
+                           }
                         }
                      }
                   }
