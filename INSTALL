@@ -50,6 +50,7 @@ First, here is a quick list of the software dependencies:
 - libtiff
 - libz
 - libfreetype2
+- pkg-config - Used for checking for cairo support
 - (Optional) tinyxml, spirit, or libxml2 - XML Parsing libraries 
 - (Optional) PostgreSQL libraries (For PostGIS support)
 - (Optional) PROJ.4 (More on this below)
