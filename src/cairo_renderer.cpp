@@ -787,6 +787,9 @@ namespace mapnik
 
             placement_finder<label_collision_detector4> finder(detector_);
 
+            int w = data->width();
+            int h = data->height();
+
             for (unsigned i = 0; i < feature.num_geometries(); ++i)
             {
                geometry2d const& geom = feature.get_geometry(i);
@@ -794,18 +797,62 @@ namespace mapnik
                if (geom.num_points() > 0) // don't bother with empty geometries
                {
                   path_type path(t_, geom, prj_trans);
-                  placement text_placement(info, sym);
 
-                  text_placement.avoid_edges = sym.get_avoid_edges();
-                  finder.find_point_placements<path_type>(text_placement, path);
-
-                  for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                  if (sym.get_label_placement() == POINT_PLACEMENT) 
                   {
-                     double shield_x = text_placement.placements[ii].starting_x - data->width() / 2;
-                     double shield_y = text_placement.placements[ii].starting_y - data->height() / 2;
+                     double label_x;
+                     double label_y;
+                     double z = 0.0;
+                     placement text_placement(info, sym, false);
 
-                     context.add_image(shield_x, shield_y, *data);
-                     context.add_text(sym, text_placement.placements[ii], face_manager_, faces);
+                     text_placement.avoid_edges = sym.get_avoid_edges();
+                     geom.label_position(&label_x, &label_y);
+                     prj_trans.backward(label_x, label_y, z);
+                     t_.forward(&label_x, &label_y);
+                     finder.find_point_placement(text_placement, label_x, label_y);
+
+                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                     { 
+                        double x = text_placement.placements[ii].starting_x;
+                        double y = text_placement.placements[ii].starting_y;
+                        // remove displacement from image label
+                        position pos = sym.get_displacement();
+                        double lx = x - boost::get<0>(pos);
+                        double ly = y - boost::get<1>(pos);
+                        int px = int(lx - (0.5 * w)) ;
+                        int py = int(ly - (0.5 * h)) ;
+                        Envelope<double> label_ext (floor(lx - 0.5 * w), floor(ly - 0.5 * h), ceil (lx + 0.5 * w), ceil (ly + 0.5 * h));
+
+                        if (detector_.has_placement(label_ext))
+                        {    
+                           context.add_image(px, py, *data);
+                           context.add_text(sym, text_placement.placements[ii], face_manager_, faces);
+
+                           detector_.insert(label_ext);
+                        }
+                     }
+
+                     finder.update_detector(text_placement);
+                  }
+                  else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT) 
+                  {
+                     placement text_placement(info, sym, true);
+
+                     text_placement.avoid_edges = sym.get_avoid_edges();
+                     finder.find_point_placements<path_type>(text_placement, path);
+
+                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                     {
+                        double x = text_placement.placements[ii].starting_x;
+                        double y = text_placement.placements[ii].starting_y;
+                        int px = int(x - (w/2));
+                        int py = int(y - (h/2));
+
+                        context.add_image(px, py, *data);
+                        context.add_text(sym, text_placement.placements[ii], face_manager_, faces);
+                     }
+
+                     finder.update_detector(text_placement);
                   }
                }
             }
@@ -982,6 +1029,7 @@ namespace mapnik
                      prj_trans.backward(label_x, label_y, z);
                      t_.forward(&label_x, &label_y);
                      finder.find_point_placement(text_placement, label_x, label_y);
+                     finder.update_detector(text_placement);
                   }
                   else //LINE_PLACEMENT
                   {
