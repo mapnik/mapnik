@@ -332,7 +332,7 @@ namespace mapnik
             context_->set_source(pattern.pattern());
          }
 
-         void add_image(double x, double y, ImageData32 & data)
+         void add_image(double x, double y, ImageData32 & data, double opacity = 1.0)
          {
             cairo_pattern pattern(data);
 
@@ -340,7 +340,7 @@ namespace mapnik
 
             context_->save();
             context_->set_source(pattern.pattern());
-            context_->paint();
+            context_->paint_with_alpha(opacity);
             context_->restore();
          }
 
@@ -747,7 +747,7 @@ namespace mapnik
                int px = int(floor(x - 0.5 * w));
                int py = int(floor(y - 0.5 * h));
 
-               context.add_image(px, py, *data);
+               context.add_image(px, py, *data, sym.get_opacity());
                detector_.insert(label_ext);
             }
          }
