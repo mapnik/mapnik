@@ -6,23 +6,26 @@ INSTALLATION INSTRUCTIONS
 Quick Start
 -----------
 
-Install needed dependencies
-$ sudo aptitude install libboost-filesystem-dev postgresql libgdal ...
-$ cd ~/src/mapnik
+Install needed dependencies::
 
-Build source code
-$ python scons/scons.py 
+  $ sudo aptitude install libboost-filesystem-dev postgresql libgdal ...
+  $ cd ~/src/mapnik
 
-Install mapnik libs and python bindings
-$ sudo python scons/scons.py install
+Build source code::
 
-Run python interpreter and check installation
-$ python
->>> from mapnik import *
-Traceback (most recent call last):
-File "<stdin>", line 1, in <module>
-ImportError: No module named mapnik
->>>
+  $ python scons/scons.py 
+
+Install mapnik libs and python bindings::
+
+  $ sudo python scons/scons.py install
+
+Run python interpreter and check installation::
+
+  >>> from mapnik import *
+  Traceback (most recent call last):
+   File "<stdin>", line 1, in <module>
+  ImportError: No module named mapnik
+  >>>
 
 If you get this error ensure that Mapnik in is your PYTHONPATH.
 
@@ -73,10 +76,10 @@ Also, a minimum of 256MB of RAM is recommended for the build process.
 Building
 --------
 
-Once you've installed the required software packages, the simplest way to build mapnik is to run "scons" (The software builder) without any options:
+Once you've installed the required software packages, the simplest way to build mapnik is to run "scons" (The software builder) without any options::
 
-$ cd /path/to/mapnik-sourcecode
-$ /path/to/python scons/scons.py
+  $ cd /path/to/mapnik-sourcecode
+  $ /path/to/python scons/scons.py
 
 This should compile and link the mapnik library, the input plugins and the python language binding (if possible).  If any mandatory dependencies are not found the build will fail, and you will need to specify custom paths to your libraries and include files (see below).
 
@@ -84,154 +87,154 @@ Note that the python used to run "scons" does NOT have to be the same as the one
 
 "scons" accepts a variety of options to customize your build.  This allows you to specify which components are compiled, where to find dependencies, where to install mapnik, and so on.
 
-To see the list of available options, from the root of the source distribution, run:
+To see the list of available options, from the root of the source distribution, run::
 
-$ /path/to/python scons/scons.py -h
+  $ /path/to/python scons/scons.py -h
 
-You will get:
+You will get::
 
-CXX: The C++ compiler to use (defaults to g++).
-    default: g++
-    actual: g++
-
-PREFIX: The install path "prefix"
-    default: /usr/local
-    actual: /usr/local
-
-BOOST_INCLUDES: Search path for boost include files ( /path/to/BOOST_INCLUDES )
-    default: /usr/include
-    actual: /usr/include
-
-BOOST_LIBS: Search path for boost library files ( /path/to/BOOST_LIBS )
-    default: /usr/lib
-    actual: /usr/lib
-
-BOOST_TOOLKIT: Specify boost toolkit e.g. gcc41.
-    default: 
-    actual: 
-
-FREETYPE_CONFIG: The path to the freetype-config executable.
-    default: freetype-config
-    actual: freetype-config
-
-XML2_CONFIG: The path to the xml2-config executable.
-    default: xml2-config
-    actual: xml2-config
-
-ICU_INCLUDES: Search path for ICU include files ( /path/to/ICU_INCLUDES )
-    default: /usr/include
-    actual: /usr/include
-
-ICU_LIBS: Search path for ICU include files ( /path/to/ICU_LIBS )
-    default: /usr/lib
-    actual: /usr/lib
-
-PNG_INCLUDES: Search path for libpng include files ( /path/to/PNG_INCLUDES )
-    default: /usr/include
-    actual: /usr/include
-
-PNG_LIBS: Search path for libpng include files ( /path/to/PNG_LIBS )
-    default: /usr/lib
-    actual: /usr/lib
-
-JPEG_INCLUDES: Search path for libjpeg include files ( /path/to/JPEG_INCLUDES )
-    default: /usr/include
-    actual: /usr/include
-
-JPEG_LIBS: Search path for libjpeg library files ( /path/to/JPEG_LIBS )
-    default: /usr/lib
-    actual: /usr/lib
-
-TIFF_INCLUDES: Search path for libtiff include files ( /path/to/TIFF_INCLUDES )
-    default: /usr/include
-    actual: /usr/include
-
-TIFF_LIBS: Search path for libtiff library files ( /path/to/TIFF_LIBS )
-    default: /usr/lib
-    actual: /usr/lib
-
-PGSQL_INCLUDES: Search path for PostgreSQL include files ( /path/to/PGSQL_INCLUDES )
-    default: /usr/include
-    actual: /usr/include
-
-PGSQL_LIBS: Search path for PostgreSQL library files ( /path/to/PGSQL_LIBS )
-    default: /usr/lib
-    actual: /usr/lib
-
-PROJ_INCLUDES: Search path for PROJ.4 include files ( /path/to/PROJ_INCLUDES )
-    default: /usr/local/include
-    actual: /usr/local/include
-
-PROJ_LIBS: Search path for PROJ.4 library files ( /path/to/PROJ_LIBS )
-    default: /usr/local/lib
-    actual: /usr/local/lib
-
-GDAL_INCLUDES: Search path for GDAL include files ( /path/to/GDAL_INCLUDES )
-    default: /usr/include
-    actual: /usr/include
-
-GDAL_LIBS: Search path for GDAL library files ( /path/to/GDAL_LIBS )
-    default: /usr/lib
-    actual: /usr/lib
-
-PYTHON: Python executable ( /path/to/PYTHON )
-    default: /usr/bin/python
-    actual: /usr/bin/python
-
-INPUT_PLUGINS: Input drivers to include
-    (all|none|comma-separated list of names)
-    allowed names: postgis shape raster gdal
-    default: all
-    actual: postgis shape raster gdal
-
-BINDINGS: Language bindings to build
-    (all|none|comma-separated list of names)
-    allowed names: python
-    default: all
-    actual: python
-
-DEBUG: Compile a debug version of mapnik (yes|no)
-    default: False
-    actual: False
-
-DESTDIR: The root directory to install into. Useful mainly for binary package building
-    default: /
-    actual: /
-
-THREADING: Set threading support (multi|single)
-    default: multi
-    actual: multi
-
-XMLPARSER: Set xml parser  (tinyxml|spirit|libxml2)
-    default: tinyxml
-    actual: tinyxml
+  CXX: The C++ compiler to use (defaults to g++).
+      default: g++
+      actual: g++
+  
+  PREFIX: The install path "prefix"
+      default: /usr/local
+      actual: /usr/local
+  
+  BOOST_INCLUDES: Search path for boost include files ( /path/to/BOOST_INCLUDES )
+      default: /usr/include
+      actual: /usr/include
+  
+  BOOST_LIBS: Search path for boost library files ( /path/to/BOOST_LIBS )
+      default: /usr/lib
+      actual: /usr/lib
+  
+  BOOST_TOOLKIT: Specify boost toolkit e.g. gcc41.
+      default: 
+      actual: 
+  
+  FREETYPE_CONFIG: The path to the freetype-config executable.
+      default: freetype-config
+      actual: freetype-config
+  
+  XML2_CONFIG: The path to the xml2-config executable.
+      default: xml2-config
+      actual: xml2-config
+  
+  ICU_INCLUDES: Search path for ICU include files ( /path/to/ICU_INCLUDES )
+      default: /usr/include
+      actual: /usr/include
+  
+  ICU_LIBS: Search path for ICU include files ( /path/to/ICU_LIBS )
+      default: /usr/lib
+      actual: /usr/lib
+  
+  PNG_INCLUDES: Search path for libpng include files ( /path/to/PNG_INCLUDES )
+      default: /usr/include
+      actual: /usr/include
+  
+  PNG_LIBS: Search path for libpng include files ( /path/to/PNG_LIBS )
+      default: /usr/lib
+      actual: /usr/lib
+  
+  JPEG_INCLUDES: Search path for libjpeg include files ( /path/to/JPEG_INCLUDES )
+      default: /usr/include
+      actual: /usr/include
+  
+  JPEG_LIBS: Search path for libjpeg library files ( /path/to/JPEG_LIBS )
+      default: /usr/lib
+      actual: /usr/lib
+  
+  TIFF_INCLUDES: Search path for libtiff include files ( /path/to/TIFF_INCLUDES )
+      default: /usr/include
+      actual: /usr/include
+  
+  TIFF_LIBS: Search path for libtiff library files ( /path/to/TIFF_LIBS )
+      default: /usr/lib
+      actual: /usr/lib
+  
+  PGSQL_INCLUDES: Search path for PostgreSQL include files ( /path/to/PGSQL_INCLUDES )
+      default: /usr/include
+      actual: /usr/include
+  
+  PGSQL_LIBS: Search path for PostgreSQL library files ( /path/to/PGSQL_LIBS )
+      default: /usr/lib
+      actual: /usr/lib
+  
+  PROJ_INCLUDES: Search path for PROJ.4 include files ( /path/to/PROJ_INCLUDES )
+      default: /usr/local/include
+      actual: /usr/local/include
+  
+  PROJ_LIBS: Search path for PROJ.4 library files ( /path/to/PROJ_LIBS )
+      default: /usr/local/lib
+      actual: /usr/local/lib
+  
+  GDAL_INCLUDES: Search path for GDAL include files ( /path/to/GDAL_INCLUDES )
+      default: /usr/include
+      actual: /usr/include
+  
+  GDAL_LIBS: Search path for GDAL library files ( /path/to/GDAL_LIBS )
+      default: /usr/lib
+      actual: /usr/lib
+  
+  PYTHON: Python executable ( /path/to/PYTHON )
+      default: /usr/bin/python
+      actual: /usr/bin/python
+  
+  INPUT_PLUGINS: Input drivers to include
+      (all|none|comma-separated list of names)
+      allowed names: postgis shape raster gdal
+      default: all
+      actual: postgis shape raster gdal
+  
+  BINDINGS: Language bindings to build
+      (all|none|comma-separated list of names)
+      allowed names: python
+      default: all
+      actual: python
+  
+  DEBUG: Compile a debug version of mapnik (yes|no)
+      default: False
+      actual: False
+  
+  DESTDIR: The root directory to install into. Useful mainly for binary package building
+      default: /
+      actual: /
+  
+  THREADING: Set threading support (multi|single)
+      default: multi
+      actual: multi
+  
+  XMLPARSER: Set xml parser  (tinyxml|spirit|libxml2)
+      default: tinyxml
+      actual: tinyxml
 
 
 This help should be self-explanatory!
 
-For example, if you compiled your own set of Boost libraries, you might use:
+For example, if you compiled your own set of Boost libraries, you might use::
 
-$ /path/to/python scons/scons.py BOOST_INCLUDES=/usr/local/include/boost-1_33_1 BOOST_LIBS=/usr/local/lib
+  $ /path/to/python scons/scons.py BOOST_INCLUDES=/usr/local/include/boost-1_33_1 BOOST_LIBS=/usr/local/lib
 
-Or if you installed Postgres and Gdal from source and you'd like to build mapnik in Debug mode with the ability for XML parsing, you might use:
+Or if you installed Postgres and Gdal from source and you'd like to build mapnik in Debug mode with the ability for XML parsing, you might use::
 
-$ /path/to/python scons/scons.py DEBUG=y PGSQL_INCLUDES=/usr/local/pgsql/include PGSQL_LIBS=/usr/local/pgsql/lib XMLPARSER=libxml2
+  $ /path/to/python scons/scons.py DEBUG=y PGSQL_INCLUDES=/usr/local/pgsql/include PGSQL_LIBS=/usr/local/pgsql/lib XMLPARSER=libxml2
 
 
 Installation
 ------------
 
-Once the build has successfully completed, you can install the various files on your system by executing:
+Once the build has successfully completed, you can install the various files on your system by executing::
 
-$ /path/to/python scons/scons.py install
+  $ /path/to/python scons/scons.py install
 
-By default, everything will be installed under the PREFIX '/usr/local' as such:
+By default, everything will be installed under the PREFIX '/usr/local' as such::
 
-$PREFIX/lib: libmapnik.so
-$PREFIX/lib/mapnik/input: input plug-ins
-$PREFIX/include: mapnik include files
-$PREFIX/bin: shapeindex utility
-$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages/mapnik: Python bindings
+  $PREFIX/lib: libmapnik.so
+  $PREFIX/lib/mapnik/input: input plug-ins
+  $PREFIX/include: mapnik include files
+  $PREFIX/bin: shapeindex utility
+  $PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages/mapnik: Python bindings
 
 If you're using the default PREFIX, you will most likely need to be root to perform the install.
 
@@ -241,14 +244,14 @@ Testing Installation
 
 There currently is no easy way to test your setup, other than write some code to generate a map.
 
-One simple thing you can do is try to load the Python module in a python interpreter, and make sure it does so without errors:
+One simple thing you can do is try to load the Python module in a python interpreter, and make sure it does so without errors::
 
-$ /path/to/python
-Python 2.4.2 (#1, Jan 11 2006, 10:59:28)
-[GCC 3.4.4 20050721 (Red Hat 3.4.4-2)] on linux2
-Type "help", "copyright", "credits" or "license" for more information.
->>> from mapnik import *
->>>
+  $ /path/to/python
+  Python 2.4.2 (#1, Jan 11 2006, 10:59:28)
+  [GCC 3.4.4 20050721 (Red Hat 3.4.4-2)] on linux2
+  Type "help", "copyright", "credits" or "license" for more information.
+  >>> from mapnik import *
+  >>>
 
 
 Learning Mapnik
@@ -265,14 +268,14 @@ A note on projection support
 Mapnik's core C++ library and map rendering engine support on-the-fly cartographic
 reprojections.
 
-Here is an example on how to use it:
+Here is an example on how to use it::
 
->>> from mapnik import Projection, Coord
->>> p = Projection('+init=epsg:27700') # British National Grid
->>> p.forward(Coord(-1.125,51.75))
-Coord(460396.920899,206113.214203) # reprojected coordinate x, y pair
->>> p.forward(Envelope(Coord(-1.125,51.75),Coord(-1.0,50.75)))
-Envelope(461721.365661,94917.0749406,469024.861457,206224.090767) # reprojected extent
+  >>> from mapnik import Projection, Coord
+  >>> p = Projection('+init=epsg:27700') # British National Grid
+  >>> p.forward(Coord(-1.125,51.75))
+  Coord(460396.920899,206113.214203) # reprojected coordinate x, y pair
+  >>> p.forward(Envelope(Coord(-1.125,51.75),Coord(-1.0,50.75)))
+  Envelope(461721.365661,94917.0749406,469024.861457,206224.090767) # reprojected extent
 
 
 The Projection() instance provides inverse() and forward() methods.  For details on the possible parameters,
