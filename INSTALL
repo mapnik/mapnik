@@ -20,14 +20,15 @@ Run python interpreter and check installation
 $ python
 >>> from mapnik import *
 Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
+File "<stdin>", line 1, in <module>
 ImportError: No module named mapnik
 >>>
 
-If you get this error ensure mapnik in is your PYTHONPATH. If you experience other errors see http://trac.mapnik.org/wiki/InstallationTroubleshooting.
+If you get this error ensure that Mapnik in is your PYTHONPATH.
 
-If not then visit https://trac.mapnik.org/wiki/GettingStarted for a basic tutorial.
+Otherwise your setup is ready. You can now visit http://trac.mapnik.org/wiki/GettingStarted for a basic tutorial.
 
+For troubleshooting other errors see: http://trac.mapnik.org/wiki/InstallationTroubleshooting.
 
 Prerequisites
 -------------
