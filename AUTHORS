@@ -1,50 +1,50 @@
 # $Id: AUTHORS 746 2008-09-24 dane $
 
 Committers
-=================
+==========
 
-Artem Pavlenko <pavlenko -at- users.berlios.de>
-Jean-Francois Doyon <jfdoyon -at- gmail.com>
-Tom Hughes
-David Siegel
-Andreas
-Dominic Hargreaves
-David Leaver
-Vince Spader
-Nick Whitelegg
-Ben Moores
-Dane Springmeyer <dane.springmeyer -at- gmail.com>
+  - Artem Pavlenko <pavlenko -at- users.berlios.de>
+  - Jean-Francois Doyon <jfdoyon -at- gmail.com>
+  - Tom Hughes
+  - David Siegel
+  - Andreas
+  - Dominic Hargreaves
+  - David Leaver
+  - Vince Spader
+  - Nick Whitelegg
+  - Ben Moores
+  - Dane Springmeyer <dane.springmeyer -at- gmail.com>
 
 Patches
-=================
+=======
 
-Andy Allen
-Justin Bronn
-Christopher Brown
-Jon Burgess
-Toby Collet
-Robert Coup
-Krzysztof Godlewski
-Beau Gunderson
-John Hague
-Martijn van Oosterhout
-Cameron Patrick
-Reid Priedhorsky
-Brian Quinion
-Christopher Schmidt
-Vincent Schut
-Ehud Shabtai
-Paul Smith
-Dave Stubbs
-Shaun Walbridge
-Leslie Wu
+  - Andy Allen
+  - Justin Bronn
+  - Christopher Brown
+  - Jon Burgess
+  - Toby Collet
+  - Robert Coup
+  - Krzysztof Godlewski
+  - Beau Gunderson
+  - John Hague
+  - Martijn van Oosterhout
+  - Cameron Patrick
+  - Reid Priedhorsky
+  - Brian Quinion
+  - Christopher Schmidt
+  - Vincent Schut
+  - Ehud Shabtai
+  - Paul Smith
+  - Dave Stubbs
+  - Shaun Walbridge
+  - Leslie Wu
 
 
 Resources
-=================
+=========
 
 View Mapnik On Ohloh:
-https://www.ohloh.net/projects/mapnik/contributors
+  - https://www.ohloh.net/projects/mapnik/contributors
 
 See Recent Mapnik Changesets:
-http://trac.mapnik.org/log/trunk?action=stop_on_copy&mode=stop_on_copy&rev=746&stop_rev=&limit=200&verbose=on
+  - http://trac.mapnik.org/log/trunk?action=stop_on_copy&mode=stop_on_copy&stop_rev=&limit=200&verbose=on

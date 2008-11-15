@@ -255,7 +255,7 @@ One simple thing you can do is try to load the Python module in a python interpr
 
 
 Learning Mapnik
-_______________
+---------------
 
 Visit https://trac.mapnik.org/wiki/GettingStarted for a basic tutorial on making maps with Mapnik using the Python bindings
 
