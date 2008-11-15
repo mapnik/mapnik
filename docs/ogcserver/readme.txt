@@ -7,7 +7,7 @@ Mapnik OGC Server
 Introduction
 ------------
 
-	Mapnik provides a server package to allow the publishing of maps
+Mapnik provides a server package to allow the publishing of maps
 through the open and standard WMS interface published by the Open Geospatial
 Consortium (OGC).  It is in implemented in Python, around the core C++
 library.
@@ -71,30 +71,30 @@ Configuring the server
 Defining layers and styles for use by the ogcserver
 ---------------------------------------------------
 
-	The ogcserver obviously needs layers to publish.  For now, with Mapnik, this
+The ogcserver obviously needs layers to publish.  For now, with Mapnik, this
 can only be done by writing code. In this case, a Python script will need to be
 written to describe the layers and respective styles.  For information on the Python
 API, look in demo/python, or in docs/epydocs.
 
-The server needs a python module, with code that looks like this:
+The server needs a python module, with code that looks like this::
 
-from mapnik.ogcserver.WMS import BaseWMSFactory
-from mapnik import Layer, Style
-
-class WMSFactory(BaseWMSFactory):
-
-	def __init__(self):
-		BaseWMSFactory.__init__(self)
-		sty = Style()
-		...
-		self.register_style('stylename', sty)
-		
-		lyr = Layer('layername', '+init=epsg:4326')
-		lyr.title = 'Layer title'
-		lyr.abstract = 'Layer abstract'
-		...
-		self.register_layer(lyr, 'stylename')
-		self.finalize()
+  from mapnik.ogcserver.WMS import BaseWMSFactory
+  from mapnik import Layer, Style
+  
+  class WMSFactory(BaseWMSFactory):
+  
+  	def __init__(self):
+  		BaseWMSFactory.__init__(self)
+  		sty = Style()
+  		...
+  		self.register_style('stylename', sty)
+  		
+  		lyr = Layer('layername', '+init=epsg:4326')
+  		lyr.title = 'Layer title'
+  		lyr.abstract = 'Layer abstract'
+  		...
+  		self.register_layer(lyr, 'stylename')
+  		self.finalize()
 		
 The rules for writing this class are:
 
@@ -110,17 +110,17 @@ The rules for writing this class are:
 - For human readable info, set the title and abstract properties on the layer
   object.
 - DO NOT register styles using layer.styles.append(), instead, provide style
-  information to the register_layer() call:
+  information to the register_layer() call::
   
-  register_layer(layerobject, defaultstylename, tuple of alternative style names)
+    register_layer(layerobject, defaultstylename, tuple of alternative style names)
 
 - No Map() object is used or needed here.
 - Be sure to call self.finalize() once you've registered everything! This will
   validate everything and let you know if there's problems.
 - For a layer to be queryable via GetFeatureInfo, simply set the 'queryable'
-  property to True:
+  property to True::
   
-  lyr.queryable = True
+    lyr.queryable = True
 
 
 To Do
@@ -137,7 +137,7 @@ To Do
 Conclusion
 ----------
 
-	This is the very first implementation of a WMS for Mapnik.  Although inital
+This is the very first implementation of a WMS for Mapnik.  Although inital
 testing seems to suggest it works well, there may be bugs, and it lacks some
 useful features.  Comments, contributions, and requests for help should all be
 directed to the Mapnik mailing list.
