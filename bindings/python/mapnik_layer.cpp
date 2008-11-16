@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+ * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon, Dane Springmeyer
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,57 +39,184 @@ void export_layer()
     	.def(vector_indexing_suite<std::vector<std::string>,true >())
     	;
     
-    class_<Layer>("Layer", "A map layer.", init<std::string const&,optional<std::string const&> >())
-        .add_property("name", 
-                      make_function(&Layer::name, return_value_policy<copy_const_reference>()),
-                      &Layer::set_name,
-                      "Get/Set the name of the layer.")
-        
-        .add_property("title",
-                      make_function(&Layer::title, return_value_policy<copy_const_reference>()),
-                      &Layer::set_title,
-                      "Get/Set the title of the layer.")
- 
-        .add_property("abstract", 
-                      make_function(&Layer::abstract,return_value_policy<copy_const_reference>()),
-                      &Layer::set_abstract,
-                      "Get/Set the abstract of the layer.")
-        
-        .add_property("srs", 
-                      make_function(&Layer::srs,return_value_policy<copy_const_reference>()),
-                      &Layer::set_srs,
-                      "Get/Set the SRS of the layer.")
-        
-        .add_property("minzoom",
-                      &Layer::getMinZoom,
-                      &Layer::setMinZoom)
-        
-        .add_property("maxzoom",
-                      &Layer::getMaxZoom,
-                      &Layer::setMaxZoom)
-        
-        .add_property("styles",
-                      make_function(_styles_,
-                                    return_value_policy<reference_existing_object>()))
+    class_<Layer>("Layer", "A Mapnik map layer.", init<std::string const&,optional<std::string const&> >(
+                "Create a Layer with a named string and, optionally, an srs string either with\n"
+                "a Proj.4 epsg code ('+init=epsg:<code>') or with a Proj.4 literal ('+proj=<literal>').\n"
+                "If no srs is specified it will default to '+proj=latlong +datum=WGS84'\n"
+                "\n"
+                "Usage:\n"
+                ">>> from mapnik import Layer\n"
+                ">>> lyr = Layer('My Layer','+proj=latlong +datum=WGS84')\n"
+                ">>> lyr\n"
+                "<mapnik._mapnik.Layer object at 0x6a270>"
+                ))
 
-        .add_property("datasource",
-                      &Layer::datasource,
-                      &Layer::set_datasource,
-                      "The datasource attached to this layer")
+        .def("envelope",&Layer::envelope, 
+                "Return the geographic envelope/bounding box "
+                "of the data in the layer.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.envelope()\n"
+                "Envelope(-1.0,-1.0,0.0,0.0) # default until a datasource is loaded\n"
+                )
+        
+        .def("visible", &Layer::isVisible,
+                "Return True if this layer's data is active and visible at a given scale.\n"
+                "Otherwise returns False.\n"
+                "Accepts a scale value as an integer or float input.\n"
+                "Will return False if:\n"
+                "\tscale >= minzoom - 1e-6\n"
+                "\tor:\n"
+                "\tscale < maxzoom + 1e-6\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.visible(1.0/1000000)\n"
+                "True\n"
+                ">>> lyr.active = False\n"
+                ">>> lyr.visible(1.0/1000000)\n"
+                "False\n"
+                )
+                
+        .add_property("abstract", 
+                make_function(&Layer::abstract,return_value_policy<copy_const_reference>()),
+                &Layer::set_abstract,
+                "Get/Set the abstract of the layer.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.abstract\n"
+                "'' # default is en empty string\n"
+                ">>> lyr.abstract = 'My Shapefile rendered with Mapnik'\n"
+                ">>> lyr.abstract\n"
+                "'My Shapefile rendered with Mapnik'\n"
+                )
 
         .add_property("active",
-                      &Layer::isActive,
-                      &Layer::setActive)
+                &Layer::isActive,
+                &Layer::setActive,
+                "Get/Set whether this layer is active and will be rendered.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.active\n"
+                "True # Active by default\n"
+                ">>> lyr.active = False # set False to disable layer rendering\n"
+                ">>> lyr.active\n"
+                "False\n"
+                )
+                
+        .add_property("clear_label_cache",
+                &Layer::clear_label_cache,
+                &Layer::set_clear_label_cache,
+                "Get/Set whether this layer's labels are cached."
+                "\n"
+                "Usage:\n"
+                "TODO"  
+                )
+        
+        .add_property("datasource",
+                &Layer::datasource,
+                &Layer::set_datasource,
+                "The datasource attached to this layer.\n"
+                "\n"
+                "Usage:\n"
+                ">>> from mapnik import Datasource\n"
+                ">>> lyr.datasource = Datasource(type='shape',file='world_borders')\n"
+                ">>> lyr.datasource\n"
+                "<mapnik.Datasource object at 0x65470>\n"
+                )
+
+        .add_property("maxzoom",
+                &Layer::getMaxZoom,
+                &Layer::setMaxZoom,
+                "Get/Set the maximum zoom lever of the layer.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.maxzoom\n"
+                "1.7976931348623157e+308 # default is the numerical maximum\n"
+                ">>> lyr.maxzoom = 1.0/1000000\n"
+                ">>> lyr.maxzoom\n"
+                "9.9999999999999995e-07\n"
+                )
+        
+        .add_property("minzoom",
+                &Layer::getMinZoom,
+                &Layer::setMinZoom,
+                "Get/Set the minimum zoom lever of the layer.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.minzoom # default is 0\n"
+                "0.0\n"
+                ">>> lyr.minzoom = 1.0/1000000\n"
+                ">>> lyr.minzoom\n"
+                "9.9999999999999995e-07\n"
+                )     
+
+        .add_property("name", 
+                make_function(&Layer::name, return_value_policy<copy_const_reference>()),
+                &Layer::set_name,
+                "Get/Set the name of the layer.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.name\n"
+                "'My Layer'\n"
+                ">>> lyr.name = 'New Name'\n"
+                ">>> lyr.name\n"
+                "'New Name'\n"
+                )
+
         .add_property("queryable",
-		      &Layer::isQueryable,
-		      &Layer::setQueryable)
-       .def("visible", &Layer::isVisible)
-       .add_property("clear_label_cache",
-            &Layer::clear_label_cache,
-            &Layer::set_clear_label_cache)
-       
-       .def("envelope",&Layer::envelope, 
-            "Return the geographic envelope/bounding box "
-            "of the data in the layer.")
+                &Layer::isQueryable,
+                &Layer::setQueryable,
+                "Get/Set whether this layer is queryable.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.queryable\n"
+                "False # Not queryable by default\n"
+                ">>> lyr.queryable = True\n"
+                ">>> lyr.queryable\n"
+                "True\n"
+                )
+
+        .add_property("srs", 
+                make_function(&Layer::srs,return_value_policy<copy_const_reference>()),
+                &Layer::set_srs,
+                "Get/Set the SRS of the layer."
+                "\n"
+                "Usage:\n"
+                ">>> lyr.srs\n"
+                "'+proj=latlong +datum=WGS84' # The default srs if not initialized with custom srs\n"
+                ">>> # set to google mercator with Proj.4 literal\n"
+                "... \n"
+                ">>> lyr.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'\n"
+                )
+
+        .add_property("styles",
+                make_function(_styles_,return_value_policy<reference_existing_object>()),
+                "The styles list attached to this layer.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.styles\n"
+                "<mapnik._mapnik.Names object at 0x6d3e8>\n"
+                ">>> len(lyr.styles)\n"
+                "0\n # no styles until you append them"
+                "lyr.styles.append('My Style') # mapnik uses named styles for flexibility\n"
+                ">>> len(lyr.styles)\n"
+                "1\n"
+                ">>> lyr.styles[0]\n"
+                "'My Style'\n"
+                )
+                                                            
+        .add_property("title",
+                make_function(&Layer::title, return_value_policy<copy_const_reference>()),
+                &Layer::set_title,
+                "Get/Set the title of the layer.\n"
+                "\n"
+                "Usage:\n"
+                ">>> lyr.title\n"
+                "''\n"
+                ">>> lyr.title = 'My first layer'\n"
+                ">>> lyr.title\n"
+                "'My first layer'\n"
+                )
+ 
         ;
 }
