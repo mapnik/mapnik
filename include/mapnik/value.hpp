@@ -29,6 +29,7 @@
 #include <mapnik/config_error.hpp>
 // boost
 #include <boost/variant.hpp>
+#include <boost/scoped_array.hpp>
 // stl
 #include <iostream>
 #include <string>
@@ -36,8 +37,33 @@
 #include <iomanip>
 // uci
 #include <unicode/unistr.h>
+#include <unicode/ustring.h>
+
 
 namespace mapnik  {
+
+   inline void to_utf8(UnicodeString const& input, std::string & target)
+   {
+      if (input.length() == 0) return;
+      
+      const int BUF_SIZE = 256;
+      char  buf [BUF_SIZE];
+      int len;
+      
+      UErrorCode err = U_ZERO_ERROR;
+      u_strToUTF8(buf, BUF_SIZE, &len, input.getBuffer(), input.length(), &err);
+      if (err == U_BUFFER_OVERFLOW_ERROR || err == U_STRING_NOT_TERMINATED_WARNING ) 
+      {
+         boost::scoped_array<char> buf_ptr(new char [len+1]);
+         err = U_ZERO_ERROR;
+         u_strToUTF8(buf_ptr.get() , len + 1, &len, input.getBuffer(), input.length(), &err);
+         target.assign(buf_ptr.get() , len);
+      }
+      else
+      {
+         target.assign(buf, len);
+      }
+   }
    
    struct value_null
    {
@@ -505,28 +531,9 @@ namespace mapnik  {
       {
             std::string operator() (UnicodeString const& val) const
 	    {
-               /*
-               std::stringstream ss;
-               UnicodeString::const_iterator pos = val.begin();
-               ss << std::hex ;
-               for (;pos!=val.end();++pos)
-               {
-                  wchar_t c = *pos;
-                  if (c < 0x80) 
-                  {
-                     ss << char(c);
-                  }
-                  else
-                  {
-                     ss << "\\x";
-                     unsigned c0 = (c >> 8) & 0xff;
-                     if (c0) ss << c0;
-                     ss << (c & 0xff);
-                  }
-               }
-	       return "\'" + ss.str() + "\'";
-               */
-               return "TODO";
+               std::string utf8;
+               to_utf8(val,utf8);
+               return "'" + utf8 + "'";
 	    } 
             
             template <typename T>
