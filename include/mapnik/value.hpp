@@ -462,26 +462,9 @@ namespace mapnik  {
             // specializations 
             std::string operator() (UnicodeString const& val) const
 	    {
-               //std::stringstream ss;
-               //std::wstring::const_iterator pos = val.begin();
-               //ss << std::hex ;
-               //for (;pos!=val.end();++pos)
-               //{
-               //  wchar_t c = *pos;
-               //  if (c < 0x80) 
-               //  {
-               //     ss << char(c);
-               //  }
-               //  else
-               //  {
-               //     ss << "\\x";
-               //     unsigned c0 = (c >> 8) & 0xff;
-               //     if (c0) ss << c0;
-               //     ss << (c & 0xff);
-               //  }
-               //}
-	       //return ss.str();
-               return "TODO";
+               std::string utf8;
+               to_utf8(val,utf8);
+               return utf8;
 	    }
             
             std::string operator() (double val) const
