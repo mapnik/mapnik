@@ -136,27 +136,15 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
             }
             if ( fields_[col].dec_>0 )
             {   
-               try 
-               {
-                  double d = boost::lexical_cast<double>(str);
-                  boost::put(f,name,d);
-               }
-               catch (boost::bad_lexical_cast &)
-               {
-                  boost::put(f,name,0.0);
-               }
+               double d = 0.0; 
+               std::istringstream(str) >> d; 
+               boost::put(f,name,d); 
             }
             else
             {
-               try 
-               {
-                  int i =  boost::lexical_cast<int>(str); 
-                  boost::put(f,name,i);
-               }
-               catch (boost::bad_lexical_cast &)
-               {
-                  boost::put(f,name,0);
-               }
+                int i = 0; 
+                std::istringstream(str) >> i; 
+                boost::put(f,name,i); 
             }
             break;
          }
