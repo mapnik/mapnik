@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
 # $Id$
 #
 # This file is part of Mapnik (c++ mapping toolkit)
@@ -96,7 +99,7 @@ provpoly_rule_on.symbols.append(PolygonSymbolizer(Color(250, 190, 183)))
 provpoly_style.rules.append(provpoly_rule_on)
 
 provpoly_rule_qc = Rule()
-provpoly_rule_qc.filter = Filter("[NAME_EN] = 'Quebec'")
+provpoly_rule_qc.filter = Filter("[NOM_FR] = 'Québec'")
 provpoly_rule_qc.symbols.append(PolygonSymbolizer(Color(217, 235, 203)))
 provpoly_style.rules.append(provpoly_rule_qc)
 
@@ -306,10 +309,8 @@ m.layers.append(popplaces_lyr)
 
 # Draw map
 
-# Set the initial extent of the map.
-print m.envelope()
-m.zoom_all()
-#m.zoom_to_box(Envelope(1405120.04127408,-247003.813399447,1706357.31328276,-25098.593149577))
+# Set the initial extent of the map in 'master' spherical Mercator projection
+m.zoom_to_box(Envelope(-8024477.28459,5445190.38849,-7381388.20071,5662941.44855)) 
 
 # Render two maps, two PNGs, one JPEG.
 im = Image(m.width,m.height)
