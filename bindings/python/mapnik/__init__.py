@@ -44,13 +44,21 @@ class _injector(object):
             return type.__init__(self, name, bases, dict)
 
 class _Coord(Coord,_injector):
-    def __repr__(self):
-        return 'Coord(%s,%s)' % (self.x, self.y)
+  def __repr__(self):
+    return 'Coord(%s,%s)' % (self.x, self.y)
+  def forward(self,obj):
+    return forward_(self,obj)
+  def inverse(self,obj):
+    return inverse_(self,obj)
 
 class _Envelope(Envelope,_injector):
-  def __repr__(self):
-    return 'Envelope(%s,%s,%s,%s)' % \
-           (self.minx,self.miny,self.maxx,self.maxy)
+ def __repr__(self):
+   return 'Envelope(%s,%s,%s,%s)' % \
+          (self.minx,self.miny,self.maxx,self.maxy)
+ def forward(self,obj):
+   return forward_(self,obj)
+ def inverse(self,obj):
+   return inverse_(self,obj)
 
 class _Projection(Projection,_injector):
   def forward(self,obj):
