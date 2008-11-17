@@ -59,7 +59,7 @@ First, here is a quick list of the software dependencies:
 - (Optional) PostgreSQL libraries (For PostGIS support)
 - (Optional) PROJ.4 (More on this below)
 - (Optional) GDAL 
-- Python 1.5.2 or greater to build Mapnik
+- Python 2.2 or greater to build Mapnik
 - (Optional) Python 2.4 or greater for the Python language bindings
 
 Some of these will come pre-installed on modern Linux/UNIX systems, including Mac OS X. The Boost libraries are an exception, but can be installed using aptitude/apt-get on debian systems or macports/fink on OS X.
