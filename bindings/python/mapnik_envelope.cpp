@@ -64,7 +64,7 @@ void export_envelope()
 {
     using namespace boost::python;
     class_<Envelope<double> >("Envelope",
-                              "A spacial envelope (i.e. bounding box) " 
+                              "A spatial envelope (i.e. bounding box) " 
                               "which also defines some basic operators." ,
                               init<double,double,double,double>())
         .def(init<>())
