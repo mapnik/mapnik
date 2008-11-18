@@ -153,8 +153,8 @@ namespace mapnik
          *  @param name The name of the style.
          *  @return The style if found. If not found return the default map style.
          */
-        feature_type_style const& find_style(std::string const& name) const;
-
+        boost::optional<feature_type_style const&> find_style(std::string const& name) const;
+        
         /*! \brief Insert a fontset into the map.
          *  @param name The name of the fontset.
          *  @param style The fontset to insert.

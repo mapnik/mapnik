@@ -124,13 +124,13 @@ namespace mapnik
         return default_fontset;
     }
 
-    feature_type_style const& Map::find_style(std::string const& name) const
-    {
-        std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
-        if (itr!=styles_.end()) 
-            return itr->second;
-        static feature_type_style default_style;
-        return default_style;
+   boost::optional<feature_type_style const&> Map::find_style(std::string const& name) const
+   {
+      std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
+      if (itr!=styles_.end()) 
+         return boost::optional<feature_type_style const&>(itr->second);
+      else
+         return boost::optional<feature_type_style const&>() ;
     }
     
     size_t Map::layerCount() const

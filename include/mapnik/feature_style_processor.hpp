@@ -146,8 +146,11 @@ namespace mapnik
                   std::vector<rule_type*> else_rules;
                     
                   bool active_rules=false;
-                  feature_type_style const& style=m_.find_style(*stylesIter);
-                  const std::vector<rule_type>& rules=style.get_rules();
+                  
+                  boost::optional<feature_type_style const&> style=m_.find_style(*stylesIter);
+                  if (!style) continue;
+                  
+                  const std::vector<rule_type>& rules=(*style).get_rules();
                   std::vector<rule_type>::const_iterator ruleIter=rules.begin();
                   std::vector<rule_type>::const_iterator ruleEnd=rules.end();
                                         
