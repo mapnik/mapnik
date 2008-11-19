@@ -57,6 +57,8 @@ namespace mapnik {
         ~projection();
         
         projection& operator=(projection const& rhs);
+        bool operator==(const projection& other) const;
+        bool operator!=(const projection& other) const;
         bool is_initialized() const;
         bool is_geographic() const;
         std::string const& params() const;

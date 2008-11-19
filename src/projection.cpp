@@ -52,7 +52,17 @@ namespace mapnik {
         swap(tmp);
         return *this;
     }
-        
+    
+    bool projection::operator==(const projection& other) const 
+    {
+        return (params_ == other.params_);
+    }
+    
+    bool projection::operator!=(const projection& other) const 
+    {
+        return !(*this == other);
+    }
+    
     bool projection::is_initialized() const
     {
         return proj_ ? true : false;
