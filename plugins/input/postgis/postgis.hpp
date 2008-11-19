@@ -55,6 +55,7 @@ class postgis_datasource : public datasource
       const std::string username_;
       const std::string password_;
       const std::string table_;
+      const std::string geometry_field_;
       std::string geometryColumn_;
       int type_;
       int srid_;

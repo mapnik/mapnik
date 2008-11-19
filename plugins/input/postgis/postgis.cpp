@@ -57,6 +57,7 @@ using mapnik::attribute_descriptor;
 postgis_datasource::postgis_datasource(parameters const& params)
    : datasource (params),
      table_(*params.get<std::string>("table","")),
+     geometry_field_(*params.get<std::string>("geometry_field","")),
      type_(datasource::Vector),
      extent_initialized_(false),
      desc_(*params.get<std::string>("type"),"utf-8"),
@@ -124,6 +125,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
          std::ostringstream s;
          s << "select f_geometry_column,srid,type from ";
          s << GEOMETRY_COLUMNS <<" where f_table_name='" << table_name<<"'";
+         if (geometry_field_.length() > 0)
+            s << " and f_geometry_column = '" << geometry_field_ << "'";
             
          shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
          if (rs->next())
