@@ -26,6 +26,7 @@
 #define LABEL_COLLISION_DETECTOR
 // mapnik
 #include <mapnik/quad_tree.hpp>
+#include <mapnik/value.hpp>
 // stl
 #include <vector>
 #include <unicode/unistr.h>
@@ -175,13 +176,12 @@ namespace mapnik
         bool has_placement(Envelope<double> const& box, UnicodeString const& text, double distance)
         {
             Envelope<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
-	    
             tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
             tree_t::query_iterator end = tree_.query_end();
-          
+        
             for ( ;itr != end; ++itr)
             {
-                if (itr->box.intersects(box) || (text == itr->text && itr->box.intersects(bigger_box)))
+               if (itr->box.intersects(box) || (text == itr->text && itr->box.intersects(bigger_box)))
                 {
                     return false;
                 }
@@ -190,9 +190,25 @@ namespace mapnik
             return true;
         }	
 
-
-         void insert(Envelope<double> const& box)
+      bool has_point_placement(Envelope<double> const& box, UnicodeString const& text, double distance)
+      {
+         Envelope<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
+         tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
+         tree_t::query_iterator end = tree_.query_end();
+         
+         for ( ;itr != end; ++itr)
          {
+            if (itr->box.intersects(bigger_box))
+            {
+               return false;
+            }
+         }
+	 
+         return true;
+      }	
+      
+      void insert(Envelope<double> const& box)
+      {
             tree_.insert(label(box), box);
          }
          

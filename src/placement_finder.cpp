@@ -341,9 +341,9 @@ namespace mapnik
                       current_placement->starting_x + x + ci.width, 
                       current_placement->starting_y - y - ci.height);
             }
-                
+ 
             if (!dimensions_.intersects(e) || 
-                !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
+                !detector_.has_point_placement(e, p.info.get_string(), p.minimum_distance))
             {
                return;
             }
