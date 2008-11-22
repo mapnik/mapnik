@@ -27,6 +27,7 @@ Patches
   - Krzysztof Godlewski
   - Beau Gunderson
   - John Hague
+  - Dražen Odobašić
   - Martijn van Oosterhout
   - Cameron Patrick
   - Reid Priedhorsky
@@ -44,7 +45,7 @@ Resources
 =========
 
 View Mapnik On Ohloh:
-  - https://www.ohloh.net/projects/mapnik/contributors
+  - http://www.ohloh.net/projects/mapnik/contributors
 
 See Recent Mapnik Changesets:
   - http://trac.mapnik.org/log/trunk?action=stop_on_copy&mode=stop_on_copy&stop_rev=&limit=200&verbose=on
