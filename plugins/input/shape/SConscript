@@ -35,15 +35,9 @@ shape_src = Split(
         shape_io.cpp
 	"""
         )
-thread_suffix = '-mt'
-if env['PLATFORM'] == 'FreeBSD':
-    thread_suffix = ''
-    
-if env['THREADING'] == 'multi':
-    libraries = ['boost_iostreams%s%s' % (env['BOOST_APPEND'],thread_suffix) ]
-else:
-    libraries = ['boost_iostreams%s' % (env['BOOST_APPEND']) ]
-    
+
+libraries = ['boost_iostreams%s' % env['BOOST_APPEND']]    
+
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('icuuc')

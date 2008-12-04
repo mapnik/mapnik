@@ -38,7 +38,9 @@ opts.Add('CXX', 'The C++ compiler to use (defaults to g++).', 'g++')
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add(PathOption('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include'))
 opts.Add(PathOption('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA))
-opts.Add('BOOST_TOOLKIT','Specify boost toolkit e.g. gcc41.','',False)
+opts.Add('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False)
+opts.Add('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False)
+opts.Add('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False)
 opts.Add(('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'))
 opts.Add(('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'))
 opts.Add(PathOption('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include'))
@@ -78,8 +80,7 @@ env['PLATFORM'] = platform.uname()[0]
 color_print (4,"Building on %s ..." % env['PLATFORM'])
 Help(opts.GenerateHelpText(env))
 
-thread_suffix = '-mt'
-
+thread_suffix = 'mt'
 if env['PLATFORM'] == 'FreeBSD':
     thread_suffix = ''
     env.Append(LIBS = 'pthread')
@@ -119,8 +120,8 @@ if SUNCC:
 
 # Decide which libagg to use
 if env['INTERNAL_LIBAGG']:
-    env.Prepend(CPPPATH = '#agg/include');
-    env.Prepend(LIBPATH = '#agg');
+    env.Prepend(CPPPATH = '#agg/include')
+    env.Prepend(LIBPATH = '#agg')
 else:
     env.ParseConfig('pkg-config --libs --cflags libagg')
 
@@ -136,14 +137,14 @@ env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
    
 if env.Execute('pkg-config --exists cairomm-1.0') == 0:
     env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
-    env.Append(CXXFLAGS = '-DHAVE_CAIRO');
+    env.Append(CXXFLAGS = '-DHAVE_CAIRO')
 
 if env['XMLPARSER'] == 'tinyxml':
     env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
 elif env['XMLPARSER'] == 'libxml2':
     env.ParseConfig(env['XML2_CONFIG'] + ' --libs --cflags')
-    env.Append(CXXFLAGS = '-DHAVE_LIBXML2');
-    
+    env.Append(CXXFLAGS = '-DHAVE_LIBXML2')
+
 C_LIBSHEADERS = [
     ['m', 'math.h', True],
     ['ltdl', 'ltdl.h', True],
@@ -161,8 +162,20 @@ CXX_LIBSHEADERS = [
     ['gdal', 'gdal_priv.h',False]
 ]
 
+
+# Test function for a particular Boost Version.
+def test_boost_ver(ver):
+    return ver in env['BOOST_INCLUDES'] or ver in env['BOOST_VERSION']
+
+if ((test_boost_ver('1_35') or test_boost_ver('1_36')) and 
+    env['PLATFORM'] == 'Darwin'):
+    boost_system_required = True
+else:
+    boost_system_required = False
+
+# The other required boost headers.
 BOOST_LIBSHEADERS = [
-    ['system', 'boost/system/system_error.hpp', False],
+    ['system', 'boost/system/system_error.hpp', boost_system_required],
     ['filesystem', 'boost/filesystem/operations.hpp', True],
     ['regex', 'boost/regex.hpp', True],
     ['iostreams','boost/iostreams/device/mapped_file.hpp',True],
@@ -171,7 +184,10 @@ BOOST_LIBSHEADERS = [
 
 if env['THREADING'] == 'multi':
     BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
-    
+    thread_flag = thread_suffix
+else:
+    thread_flag = ''
+
 for libinfo in C_LIBSHEADERS:
     if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C') and libinfo[2]:
         color_print (1,'Could not find header or shared library for %s, exiting!' % libinfo[0])
@@ -182,14 +198,25 @@ for libinfo in CXX_LIBSHEADERS:
         color_print(1,'Could not find header or shared library for %s, exiting!' % libinfo[0])
         Exit(1)
 
-if len(env['BOOST_TOOLKIT']):
-    env['BOOST_APPEND'] = '-%s' % env['BOOST_TOOLKIT']
-else:
-    env['BOOST_APPEND']=''
+# Creating BOOST_APPEND according to the Boost library naming order,
+# which goes <toolset>-<threading>-<abi>-<version>. See:
+#  http://www.boost.org/doc/libs/1_35_0/more/getting_started/unix-variants.html#library-naming
+append_params = ['']
+if env['BOOST_TOOLKIT']: append_params.append(env['BOOST_TOOLKIT'])
+if thread_flag: append_params.append(thread_flag)
+if env['BOOST_ABI']: append_params.append(env['BOOST_ABI'])
+if env['BOOST_VERSION']: append_params.append(env['BOOST_VERSION'])
     
+# Constructing the BOOST_APPEND setting that will be used to find the
+# Boost libraries.
+if len(append_params) > 1: 
+    env['BOOST_APPEND'] = '-'.join(append_params)
+else: 
+    env['BOOST_APPEND'] = ''
+
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
-    if  env['THREADING'] == 'multi' :
-        if not conf.CheckLibWithHeader('boost_%s%s%s' % (libinfo[0],env['BOOST_APPEND'],thread_suffix), libinfo[1], 'C++') and libinfo[2] :
+    if thread_flag:
+        if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++') and libinfo[2]:
             color_print(1,'Could not find header or shared library for boost %s, exiting!' % libinfo[0])
             Exit(1)
     elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :
@@ -212,9 +239,9 @@ if env['INTERNAL_LIBAGG']:
 SConscript('src/SConscript')
 
 # Build shapeindex and remove its dependency from the LIBS
-if 'boost_program_options%s%s' % (env['BOOST_APPEND'],thread_suffix) in env['LIBS']:
+if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
     SConscript('utils/shapeindex/SConscript')
-    env['LIBS'].remove('boost_program_options%s%s' % (env['BOOST_APPEND'],thread_suffix))
+    env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
 
 # Build the input plug-ins
 if 'postgis' in inputplugins and 'pq' in env['LIBS']:
