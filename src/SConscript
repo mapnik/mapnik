@@ -36,7 +36,6 @@ if env['INTERNAL_LIBAGG']:
     libraries.insert(0, 'agg')
 
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('iconv')
     linkflags = '-Wl,-install_name,libmapnik.dylib'
 elif env['PLATFORM'] == 'SunOS' and env['CXX'].startswith('CC'):
     linkflags = '-R. -h libmapnik.so'
