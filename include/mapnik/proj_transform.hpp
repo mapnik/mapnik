@@ -46,6 +46,7 @@ namespace mapnik {
         projection const& dest_;
         bool is_source_latlong_;
         bool is_dest_latlong_;
+        bool is_source_equal_dest;
     };
 }
 
