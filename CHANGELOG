@@ -1,0 +1,17 @@
+# $Id: CHANGELOG 765 2008-11-17 01:30:27Z dane $
+
+----------------
+Mapnik Changelog
+----------------
+ 
+A simple log of core changes affecting Mapnik usage.
+
+Developers: Please commit along with changes.
+
+For a complete change history, see the SVN log.
+
+
+Current Version (0.5.2-dev, SVN trunk):
+---------------------------------------
+
+- file.cpp: change (r#)
