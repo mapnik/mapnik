@@ -2,7 +2,7 @@
 #
 # SCons - a Software Constructor
 #
-# Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007 The SCons Foundation
+# Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -24,17 +24,17 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-__revision__ = "src/script/sconsign.py 2523 2007/12/12 09:37:41 knight"
+__revision__ = "src/script/sconsign.py 3842 2008/12/20 22:59:52 scons"
 
-__version__ = "0.97.0d20071212"
+__version__ = "1.2.0"
 
-__build__ = "r2523"
+__build__ = "r3842"
 
-__buildsys__ = "bangkok"
+__buildsys__ = "scons-dev"
 
-__date__ = "2007/12/12 09:37:41"
+__date__ = "2008/12/20 22:59:52"
 
-__developer__ = "knight"
+__developer__ = "scons"
 
 import os
 import os.path
@@ -67,9 +67,12 @@ libs = []
 if os.environ.has_key("SCONS_LIB_DIR"):
     libs.append(os.environ["SCONS_LIB_DIR"])
 
-local = 'scons-local-' + __version__
+local_version = 'scons-local-' + __version__
+local = 'scons-local'
 if script_dir:
+    local_version = os.path.join(script_dir, local_version)
     local = os.path.join(script_dir, local)
+libs.append(os.path.abspath(local_version))
 libs.append(os.path.abspath(local))
 
 scons_version = 'scons-%s' % __version__
@@ -138,14 +141,12 @@ else:
     except AttributeError:
         pass
     else:
-        while libpath:
-            libpath, tail = os.path.split(libpath)
-            if tail[:6] == "python":
-                break
-        if libpath:
-            # Python library is in /usr/libfoo/python*;
-            # check /usr/libfoo/scons*.
-            prefs.append(libpath)
+        # Split /usr/libfoo/python*/os.py to /usr/libfoo/python*.
+        libpath, tail = os.path.split(libpath)
+        # Split /usr/libfoo/python* to /usr/libfoo
+        libpath, tail = os.path.split(libpath)
+        # Check /usr/libfoo/scons*.
+        prefs.append(libpath)
 
 # Look first for 'scons-__version__' in all of our preference libs,
 # then for 'scons'.
@@ -274,6 +275,8 @@ def nodeinfo_raw(name, ninfo, prefix=""):
     l = []
     for k in keys:
         l.append('%s: %s' % (repr(k), repr(d.get(k))))
+    if '\n' in name:
+        name = repr(name)
     return name + ': {' + string.join(l, ', ') + '}'
 
 def nodeinfo_cooked(name, ninfo, prefix=""):
@@ -282,6 +285,8 @@ def nodeinfo_cooked(name, ninfo, prefix=""):
     except AttributeError:
         field_list = []
     f = lambda x, ni=ninfo, v=Verbose: field(x, ni, v)
+    if '\n' in name:
+        name = repr(name)
     outlist = [name+':'] + filter(None, map(f, field_list))
     if Verbose:
         sep = '\n    ' + prefix

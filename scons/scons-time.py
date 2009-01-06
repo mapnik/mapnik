@@ -9,7 +9,7 @@
 #
 
 #
-# Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007 The SCons Foundation
+# Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -33,11 +33,12 @@
 
 from __future__ import nested_scopes
 
-__revision__ = "src/script/scons-time.py 2523 2007/12/12 09:37:41 knight"
+__revision__ = "src/script/scons-time.py 3842 2008/12/20 22:59:52 scons"
 
 import getopt
 import glob
 import os
+import os.path
 import re
 import shutil
 import string
@@ -62,6 +63,11 @@ except NameError:
 def make_temp_file(**kw):
     try:
         result = tempfile.mktemp(**kw)
+        try:
+            result = os.path.realpath(result)
+        except AttributeError:
+            # Python 2.1 has no os.path.realpath() method.
+            pass
     except TypeError:
         try:
             save_template = tempfile.template
@@ -122,7 +128,12 @@ class Line:
         if self.comment:
             print '# %s' % self.comment
         for x, y in self.points:
-            print fmt % (x, y)
+            # If y is None, it usually represents some kind of break
+            # in the line's index number.  We might want to represent
+            # this some way rather than just drawing the line straight
+            # between the two points on either side.
+            if not y is None:
+                print fmt % (x, y)
         print 'e'
 
     def get_x_values(self):
@@ -148,47 +159,59 @@ class Gnuplotter(Plotter):
 
     def vertical_bar(self, x, type, label, comment):
         if self.get_min_x() <= x and x <= self.get_max_x():
-            points = [(x, 0), (x, self.get_max_x())]
+            points = [(x, 0), (x, self.max_graph_value(self.get_max_y()))]
             self.line(points, type, label, comment)
 
     def get_all_x_values(self):
         result = []
         for line in self.lines:
             result.extend(line.get_x_values())
-        return result
+        return filter(lambda r: not r is None, result)
 
     def get_all_y_values(self):
         result = []
         for line in self.lines:
             result.extend(line.get_y_values())
-        return result
+        return filter(lambda r: not r is None, result)
 
     def get_min_x(self):
         try:
             return self.min_x
         except AttributeError:
-            self.min_x = min(self.get_all_x_values())
+            try:
+                self.min_x = min(self.get_all_x_values())
+            except ValueError:
+                self.min_x = 0
             return self.min_x
 
     def get_max_x(self):
         try:
             return self.max_x
         except AttributeError:
-            self.max_x = max(self.get_all_x_values())
+            try:
+                self.max_x = max(self.get_all_x_values())
+            except ValueError:
+                self.max_x = 0
             return self.max_x
 
     def get_min_y(self):
         try:
             return self.min_y
         except AttributeError:
-            self.min_y = min(self.get_all_y_values())
+            try:
+                self.min_y = min(self.get_all_y_values())
+            except ValueError:
+                self.min_y = 0
             return self.min_y
 
     def get_max_y(self):
         try:
             return self.max_y
         except AttributeError:
-            self.max_y = max(self.get_all_y_values())
+            try:
+                self.max_y = max(self.get_all_y_values())
+            except ValueError:
+                self.max_y = 0
             return self.max_y
 
     def draw(self):
@@ -200,10 +223,17 @@ class Gnuplotter(Plotter):
             print 'set title "%s"' % self.title
         print 'set key %s' % self.key_location
 
+        min_y = self.get_min_y()
+        max_y = self.max_graph_value(self.get_max_y())
+        range = max_y - min_y
+        incr = range / 10.0
+        start = min_y + (max_y / 2.0) + (2.0 * incr)
+        position = [ start - (i * incr) for i in xrange(5) ]
+
         inx = 1
-        max_y = self.max_graph_value(self.get_max_y())/2
         for line in self.lines:
-            line.print_label(inx, line.points[0][0]-1, max_y)
+            line.print_label(inx, line.points[0][0]-1,
+                             position[(inx-1) % len(position)])
             inx += 1
 
         plot_strings = [ self.plot_string(l) for l in self.lines ]
@@ -485,6 +515,8 @@ class SConsTimer:
 
         for file in files:
             t = line_function(file, *args, **kw)
+            if t is None:
+                t = []
             diff = len(columns) - len(t)
             if diff > 0:
                 t += [''] * diff
@@ -564,7 +596,7 @@ class SConsTimer:
             except ValueError:
                 x, type, label = bar_tuple
                 comment = label
-            gp.vertical_bar(x, type, None, label, comment)
+            gp.vertical_bar(x, type, label, comment)
 
         gp.draw()
 
@@ -613,10 +645,17 @@ class SConsTimer:
         else:
             search_string = time_string
         contents = open(file).read()
+        if not contents:
+            sys.stderr.write('file %s has no contents!\n' % repr(file))
+            return None
         result = re.findall(r'%s: ([\d\.]*)' % search_string, contents)[-4:]
         result = [ float(r) for r in result ]
         if not time_string is None:
-            result = result[0]
+            try:
+                result = result[0]
+            except IndexError:
+                sys.stderr.write('file %s has no results!\n' % repr(file))
+                return None
         return result
 
     def get_function_profile(self, file, function):
@@ -1294,7 +1333,12 @@ class SConsTimer:
                 commands.append((shutil.copytree, 'cp -r %%s %%s', archive, dest))
             else:
                 suffix = self.archive_splitext(archive)[1]
-                commands.append(self.unpack_map[suffix] + (archive,))
+                unpack_command = self.unpack_map.get(suffix)
+                if not unpack_command:
+                    dest = os.path.split(archive)[1]
+                    commands.append((shutil.copyfile, 'cp %%s %%s', archive, dest))
+                else:
+                    commands.append(unpack_command + (archive,))
 
         commands.extend([
             (os.chdir, 'cd %%s', self.subdir),
