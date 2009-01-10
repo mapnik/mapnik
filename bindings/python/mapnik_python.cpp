@@ -91,16 +91,20 @@ void render2(const mapnik::Map& map,mapnik::Image32& image)
 
 void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
 {
+    Py_BEGIN_ALLOW_THREADS
     Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
     mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
     ren.apply();
+    Py_END_ALLOW_THREADS
 }
 
 void render4(const mapnik::Map& map,PycairoSurface* surface)
 {
+    Py_BEGIN_ALLOW_THREADS
     Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
     mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
     ren.apply();
+    Py_END_ALLOW_THREADS
 }
 
 #endif
