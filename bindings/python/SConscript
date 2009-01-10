@@ -24,8 +24,9 @@ import re
 import os
 
 Import('env')
+Import('conf')
 
-if env.Execute('pkg-config --exists pycairo') == 0:   
+if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
     env.ParseConfig('pkg-config --cflags pycairo')
     env.Append(CXXFLAGS = '-DHAVE_PYCAIRO');
 

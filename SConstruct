@@ -85,7 +85,20 @@ if env['PLATFORM'] == 'FreeBSD':
     thread_suffix = ''
     env.Append(LIBS = 'pthread')
 
-conf = Configure(env)
+def CheckPKGConfig(context, version):
+   context.Message( 'Checking for pkg-config... ' )
+   ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
+   context.Result( ret )
+   return ret
+
+def CheckPKG(context, name):
+    context.Message( 'Checking for %s... ' % name )
+    ret = context.TryAction('pkg-config --exists \'%s\'' % name)[0]
+    context.Result( ret )
+    return ret
+
+conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
+                                       'CheckPKG' : CheckPKG })
 
 #### Libraries and headers dependency checks ####
 
@@ -134,8 +147,8 @@ for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PGSQL', 'PROJ', 'GDAL',):
     uniq_add(env, 'LIBPATH', lib_path)
     
 env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
-   
-if env.Execute('pkg-config --exists cairomm-1.0') == 0:
+ 
+if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
     env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
     env.Append(CXXFLAGS = '-DHAVE_CAIRO')
 
@@ -224,6 +237,7 @@ for count, libinfo in enumerate(BOOST_LIBSHEADERS):
         Exit(1)    
   
 Export('env')
+Export('conf')
 
 inputplugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
