@@ -73,14 +73,18 @@ void export_projection();
 
 void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0, unsigned offset_y = 0)
 {
+    Py_BEGIN_ALLOW_THREADS
     mapnik::agg_renderer<mapnik::Image32> ren(map,image,offset_x, offset_y);
     ren.apply();
+    Py_END_ALLOW_THREADS
 }
 
 void render2(const mapnik::Map& map,mapnik::Image32& image)
 {
+    Py_BEGIN_ALLOW_THREADS
     mapnik::agg_renderer<mapnik::Image32> ren(map,image);
     ren.apply();
+    Py_END_ALLOW_THREADS
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
