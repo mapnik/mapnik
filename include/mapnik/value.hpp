@@ -30,6 +30,7 @@
 // boost
 #include <boost/variant.hpp>
 #include <boost/scoped_array.hpp>
+#include <boost/concept_check.hpp>
 // stl
 #include <iostream>
 #include <string>
@@ -440,6 +441,7 @@ namespace mapnik  {
             template <typename T>
             bool operator() (T val) const
 	    {
+               boost::ignore_unused_variable_warning(val);
                throw config_error("Boolean value expected");
 	    }
 
@@ -476,6 +478,7 @@ namespace mapnik  {
             
             std::string operator() (value_null const& val) const
             {
+               boost::ignore_unused_variable_warning(val);
 	       return "";
             }
        };
@@ -506,6 +509,7 @@ namespace mapnik  {
             
             UnicodeString operator() (value_null const& val) const
             {
+               boost::ignore_unused_variable_warning(val);
 	       return UnicodeString("");
             }
       };
@@ -536,6 +540,7 @@ namespace mapnik  {
 
             std::string operator() (value_null const& val) const
 	    {
+               boost::ignore_unused_variable_warning(val);
                return "null";
             }
       };
