@@ -370,13 +370,40 @@ namespace mapnik
         {
             set_attr( layer_node, "name", layer.name() );
         }
+
+        if ( layer.abstract() != "" )
+        {
+            set_attr( layer_node, "abstract", layer.abstract() );
+        }
+
+        if ( layer.title() != "" )
+        {
+            set_attr( layer_node, "title", layer.title() );
+        }
+
         if ( layer.srs() != "" )
         {
             set_attr( layer_node, "srs", layer.srs() );
         }
+        
         set_attr/*<bool>*/( layer_node, "status", layer.isActive() );
         set_attr/*<bool>*/( layer_node, "clear_label_cache", layer.clear_label_cache() );
 
+        if ( layer.getMinZoom() )
+        {
+            set_attr( layer_node, "minzoom", layer.getMinZoom() );
+        }
+
+        if ( layer.getMaxZoom() )
+        {
+            set_attr( layer_node, "maxzoom", layer.getMaxZoom() );
+        }
+
+        if ( layer.isQueryable() )
+        {
+            set_attr( layer_node, "queryable", layer.isQueryable() );
+        }
+        
         std::vector<std::string> const& style_names = layer.styles();
         for (unsigned i = 0; i < style_names.size(); ++i)
         {

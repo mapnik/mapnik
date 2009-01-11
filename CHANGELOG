@@ -14,4 +14,4 @@ For a complete change history, see the SVN log.
 Current Version (0.5.2-dev, SVN trunk):
 ---------------------------------------
 
-- file.cpp: change (r#)
+- load_map.cpp and save_map.cpp: Added xml serialization for abstract, title, minzoom, maxzoom, and queryable attributes (r787)

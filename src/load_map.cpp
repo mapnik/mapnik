@@ -312,6 +312,7 @@ namespace mapnik
         try
         {
             name = get_attr(lay, "name", string("Unnamed"));
+            
             // XXX if no projection is given inherit from map? [DS]
             std::string srs = get_attr(lay, "srs", map.srs());
 
@@ -323,6 +324,36 @@ namespace mapnik
                 lyr.setActive( * status );
             }
 
+            optional<std::string> title =  get_opt_attr<string>(lay, "title");
+            if (title)
+            {
+                lyr.set_title( * title );
+            }
+
+            optional<std::string> abstract =  get_opt_attr<string>(lay, "abstract");
+            if (abstract)
+            {
+                lyr.set_abstract( * abstract );
+            }
+
+            optional<double> minZoom = get_opt_attr<double>(lay, "minzoom");
+            if (minZoom)
+            {
+                lyr.setMinZoom( * minZoom );
+            }
+
+            optional<double> maxZoom = get_opt_attr<double>(lay, "maxzoom");
+            if (maxZoom)
+            {
+                lyr.setMaxZoom( * maxZoom );
+            }
+
+            optional<boolean> queryable = get_opt_attr<boolean>(lay, "queryable");
+            if (queryable)
+            {
+                lyr.setQueryable( * queryable );
+            }
+                                    
             optional<boolean> clear_cache =
                 get_opt_attr<boolean>(lay, "clear_label_cache");
             if (clear_cache)
