@@ -394,7 +394,7 @@ namespace mapnik
             set_attr( layer_node, "minzoom", layer.getMinZoom() );
         }
 
-        if ( layer.getMaxZoom() )
+        if ( layer.getMaxZoom() != std::numeric_limits<double>::max() )
         {
             set_attr( layer_node, "maxzoom", layer.getMaxZoom() );
         }
