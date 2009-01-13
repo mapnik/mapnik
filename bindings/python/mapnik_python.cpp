@@ -56,6 +56,7 @@ void export_text_symbolizer();
 void export_shield_symbolizer();
 void export_font_engine();
 void export_projection();
+void export_proj_transform();
 
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -186,6 +187,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_shield_symbolizer();
     export_font_engine();
     export_projection();
+    export_proj_transform();
     export_coord();
     export_map();
 
