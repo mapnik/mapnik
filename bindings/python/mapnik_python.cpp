@@ -33,6 +33,7 @@ void export_layer();
 void export_parameters();
 void export_envelope();
 void export_query();
+void export_geometry();
 void export_image();
 void export_image_view();
 void export_map();
@@ -159,7 +160,8 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     register_exception_translator<mapnik::config_error>(translator);
     register_cairo();
-    export_query();    
+    export_query();
+    export_geometry();
     export_feature();
     export_featureset();
     export_datasource();

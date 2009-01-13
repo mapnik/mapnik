@@ -2,8 +2,6 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
- *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,36 +21,20 @@
 
 // boost
 #include <boost/python.hpp>
+#include <boost/python/def.hpp>
+
 // mapnik
-#include <mapnik/feature.hpp>
-#include <mapnik/datasource.hpp>
+#include <mapnik/geometry.hpp>
 
-namespace {
-    using namespace boost::python;
-    inline object pass_through(object const& o) { return o; }
-    
-    inline mapnik::feature_ptr next(mapnik::featureset_ptr const& itr)
-    {
-        if (!itr)
-        {
-            PyErr_SetString(PyExc_StopIteration, "No more features.");
-            boost::python::throw_error_already_set();
-        }
-
-        return itr->next();
-    }    
-}
-
-void export_featureset()
+void export_geometry()
 {
-    using namespace boost::python;
-    using mapnik::Feature;
-    using mapnik::Featureset;
-    
-    class_<Featureset,boost::shared_ptr<Featureset>,
-        boost::noncopyable>("Featureset",no_init)
-        .def("next",next)
-        .def("__iter__",pass_through)
-        ;
+   using namespace boost::python;
+   using mapnik::geometry2d;
+   
+   class_<geometry2d, boost::noncopyable>("Geometry2d",no_init)
+      .def("envelope",&geometry2d::envelope)
+       // .def("__str__",&geometry2d::to_string)
+       .def("type",&geometry2d::type)
+       // TODO add other geometry2d methods
+      ;
 }
-

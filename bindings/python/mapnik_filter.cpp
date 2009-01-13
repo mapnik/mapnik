@@ -47,6 +47,7 @@ void export_filter()
     class_<filter<Feature>,boost::noncopyable>("Filter",
                                                "An expression which allows "
                                                "to select features.",no_init)
+       .def("passes", &filter<Feature>::pass) // note: "pass" is a reserved word in Python
        .def("__str__",&filter<Feature>::to_string);
     ;
     

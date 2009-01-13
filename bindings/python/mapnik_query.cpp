@@ -23,11 +23,23 @@
 
 #include <boost/python.hpp>
 #include <mapnik/query.hpp>
+#include <mapnik/envelope.hpp>
 
 void export_query()
 {
+    using namespace boost::python;
+
     using mapnik::query;
-    //class_<query>("Query",init<
+    using mapnik::Envelope;
+
+    class_<query>("Query", "a spatial query data object", 
+		  init<Envelope<double>,double>() )
+        .add_property("resolution", &query::resolution)
+        .add_property("bbox", make_function(&query::get_bbox,
+                                            return_value_policy<copy_const_reference>()) )
+        .add_property("property_names", make_function(&query::property_names,
+                                                      return_value_policy<copy_const_reference>()) )
+        .def("add_property_name", &query::add_property_name);
 }
 
 

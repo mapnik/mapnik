@@ -41,17 +41,18 @@ namespace mapnik {
         
         feature_ptr next()
         {
-           /*
             while (pos_ != end_)
             {
-                geometry_ptr geom = (*pos_)->get_geometry();
-                if (geom && bbox_.intersects(geom->envelope()))
-                {
-                    return *pos_++;
+                for  (unsigned i=0; i<(*pos_)->num_geometries();++i) {
+                    geometry2d & geom = (*pos_)->get_geometry(i);
+                    if (bbox_.intersects(geom.envelope()))
+                    {
+                        return *pos_++;
+                    }
                 }
                 ++pos_;
             }
-           */
+           
             return feature_ptr();
         }
         

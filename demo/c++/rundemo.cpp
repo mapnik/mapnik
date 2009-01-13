@@ -48,8 +48,8 @@ int main ( int argc , char** argv)
     try {
         std::cout << " running demo ... \n";
         std::string mapnik_dir(argv[1]);
-        datasource_cache::instance()->register_datasources(mapnik_dir + "/lib/mapnik/input/"); 
-        freetype_engine::register_font(mapnik_dir + "/lib/mapnik/fonts/DejaVuSans.ttf");
+        datasource_cache::instance()->register_datasources(mapnik_dir + "/plugins/input/shape"); 
+        freetype_engine::register_font(mapnik_dir + "/fonts/dejavu-ttf-2.14/DejaVuSans.ttf");
         
         Map m(800,600);
         m.set_background(color_factory::from_string("white"));

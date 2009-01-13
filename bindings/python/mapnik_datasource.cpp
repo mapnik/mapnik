@@ -30,6 +30,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/memory_datasource.hpp>
 
 namespace  
 {
@@ -83,6 +84,7 @@ void export_datasource()
 {
     using namespace boost::python;
     using mapnik::datasource;
+    using mapnik::point_datasource;
         
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
@@ -97,4 +99,8 @@ void export_datasource()
     
     def("Describe",&describe);
     def("CreateDatasource",&create_datasource);
+
+    class_<point_datasource, bases<datasource>, boost::noncopyable>("PointDatasource", init<>())
+        .def("add_point",&point_datasource::add_point)
+        ;
 }

@@ -30,6 +30,8 @@
 // mapnik
 #include <mapnik/feature.hpp>
 
+mapnik::geometry2d & (mapnik::Feature::*get_geom1)(unsigned) = &mapnik::Feature::get_geometry;
+
 namespace boost { namespace python {
       struct value_converter : public boost::static_visitor<PyObject*>
       {
@@ -206,6 +208,9 @@ void export_feature()
       .def("__str__",&Feature::to_string)
       .add_property("properties", 
                     make_function(&Feature::props,return_value_policy<reference_existing_object>()))
+//      .def("add_geometry", // TODO define more mapnik::Feature methods
+      .def("num_geometries",&Feature::num_geometries)
+      .def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
       ;
 
    class_<std::map<std::string, mapnik::value> >("Properties")
