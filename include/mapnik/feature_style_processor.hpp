@@ -125,6 +125,13 @@ namespace mapnik
                   // back project layers extent into main map projection
                   prj_trans.backward(lx0,ly0,lz0);
                   prj_trans.backward(lx1,ly1,lz1);
+
+                  // if no intersection then nothing to do for layer
+                  if ( lx0 > ext.maxx() || lx1 < ext.minx() || ly0 > ext.maxy() || ly1 < ext.miny() )
+                  {
+                     return;
+                  }
+                  
                   // clip query bbox
                   lx0 = std::max(ext.minx(),lx0);
                   ly0 = std::max(ext.miny(),ly0);

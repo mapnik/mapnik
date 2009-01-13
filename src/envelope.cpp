@@ -239,14 +239,17 @@ namespace mapnik
 #endif
     Envelope<T> Envelope<T>::intersect(const EnvelopeType& other) const
     {
+        if (intersects(other)) {
+            T x0=std::max(minx_,other.minx_);
+            T y0=std::max(miny_,other.miny_);
 
-        T x0=std::max(minx_,other.minx_);
-        T y0=std::max(miny_,other.miny_);
+            T x1=std::min(maxx_,other.maxx_);
+            T y1=std::min(maxy_,other.maxy_);
 
-        T x1=std::min(maxx_,other.maxx_);
-        T y1=std::min(maxy_,other.maxy_);
-
-        return Envelope<T>(x0,y0,x1,y1);
+            return Envelope<T>(x0,y0,x1,y1);
+        } else {
+            return Envelope<T>();
+        }
     }
 
     template <typename T>
