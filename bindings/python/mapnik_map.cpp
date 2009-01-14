@@ -132,7 +132,7 @@ void export_map()
            ">>> m.append_style('Style Name', sty)\n"
            "False # you can only append styles with unique names\n"
          )
-        
+
       .def("envelope",
            make_function(&Map::getCurrentExtent,
                          return_value_policy<copy_const_reference>()),
@@ -218,12 +218,26 @@ void export_map()
            ">>> feat.next()\n"
            ">>> <mapnik._mapnik.Feature object at 0x5fe1b0>\n"
          )
+
+      .def("remove_all",&Map::remove_all,
+           "Remove all Mapnik Styles and Layers from the Map.\n"
+           "\n"
+           "Usage:\n"
+           ">>> m.remove_all()\n"
+         )
         
       .def("remove_style",&Map::remove_style,
            "Remove a Mapnik Style from the map.\n"
            "\n"
            "Usage:\n"
            ">>> m.remove_style('Style Name')\n"
+         )
+
+      .def("resize",&Map::resize,
+           "Resize a Mapnik Map.\n"
+           "\n"
+           "Usage:\n"
+           ">>> m.resize(64,64)\n"
          )
         
       .def("scale", &Map::scale,
@@ -279,6 +293,15 @@ void export_map()
                     "2\n"
          )
         
+
+      .add_property("view_transform",make_function(&Map::getCurrentExtent,
+                         return_value_policy<copy_const_reference>()),
+                   "View the Map CoordinateTransform Envelope.\n"
+                   "\n"
+                   "Usage:\n"
+                   ">>> m.view_transform\n"         
+         )
+         
       .add_property("height",
                     &Map::getHeight,
                     &Map::setHeight,
