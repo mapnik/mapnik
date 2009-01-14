@@ -343,7 +343,7 @@ namespace mapnik
             }
  
             if (!dimensions_.intersects(e) || 
-                !detector_.has_point_placement(e, p.info.get_string(), p.minimum_distance))
+                !detector_.has_point_placement(e, p.minimum_distance))
             {
                return;
             }

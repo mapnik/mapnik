@@ -190,7 +190,7 @@ namespace mapnik
          return true;
       }	
 
-      bool has_point_placement(Envelope<double> const& box, UnicodeString const& text, double distance)
+      bool has_point_placement(Envelope<double> const& box, double distance)
       {
          Envelope<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
          tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
