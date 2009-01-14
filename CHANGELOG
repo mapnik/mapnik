@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Current Version (0.6.0-dev, SVN trunk):
 ---------------------------------------
 
+- python/mapnik_map.cpp, map.hpp, and map.cpp: Made available the scale_denominator property from the map in c++ and python (r793)
+
 - python/mapnik_map.cpp: Added ability to resize map and clear all layers and styles from python (r792)
 
 - load_map.cpp and save_map.cpp: Added xml serialization for abstract, title, minzoom, maxzoom, and queryable attributes (r787)
