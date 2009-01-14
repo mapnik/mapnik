@@ -28,6 +28,7 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/filter_featureset.hpp>
 #include <mapnik/hit_test_filter.hpp>
+#include <mapnik/scale_denominator.hpp>
 
 namespace mapnik
 {
@@ -384,6 +385,12 @@ namespace mapnik
         if (width_>0)
             return currentExtent_.width()/width_;
         return currentExtent_.width();
+    }
+
+    double Map::scale_denominator() const 
+    {
+        projection map_proj(srs_);
+        return mapnik::scale_denominator( *this, map_proj.is_geographic());    
     }
 
     CoordTransform Map::view_transform() const

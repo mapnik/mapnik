@@ -287,6 +287,8 @@ namespace mapnik
         const Envelope<double>& getCurrentExtent() const;
 
         double scale() const;
+        
+        double scale_denominator() const;
 
         CoordTransform view_transform() const;
 

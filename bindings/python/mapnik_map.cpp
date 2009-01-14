@@ -326,7 +326,14 @@ void export_map()
                     ">>> m.layers[0]\n"
                     "<mapnik._mapnik.Layer object at 0x5fe130>\n"
          )
-        
+
+      .add_property("scale_denominator", &Map::scale_denominator,
+                    "Return the Map Scale Denominator.\n"
+                    "Usage:\n"
+                    "\n"
+                    ">>> m.scale_denominator\n"
+         )
+
       .add_property("srs",
                     make_function(&Map::srs,return_value_policy<copy_const_reference>()),
                     &Map::set_srs,
