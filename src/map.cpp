@@ -233,12 +233,12 @@ namespace mapnik
       return buffer_size_;
    }
    
-   boost::optional<Color> const& Map::background() const
+   boost::optional<color> const& Map::background() const
    {
       return background_;
    }
    
-   void Map::set_background(const Color& c)
+   void Map::set_background(const color& c)
    {
       background_ = c;
    }

@@ -28,11 +28,11 @@ void export_polygon_symbolizer()
 {
     using namespace boost::python;
     using mapnik::polygon_symbolizer;
-    using mapnik::Color;
+    using mapnik::color;
     
     class_<polygon_symbolizer>("PolygonSymbolizer",
 				    init<>("Default PolygonSymbolizer - solid fill grey"))
-        .def(init<Color const&>("TODO"))
+        .def(init<color const&>("TODO"))
         .add_property("fill",make_function
                       (&polygon_symbolizer::get_fill,
                        return_value_policy<copy_const_reference>()),

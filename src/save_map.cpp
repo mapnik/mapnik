@@ -224,7 +224,7 @@ namespace mapnik
                 // repeating the default values here.
                 // maybe add a real, explicit default-ctor?
                 text_symbolizer dfl("<no default>", "<no default>",
-                                    0, Color(0,0,0) );
+                                    0, color(0,0,0) );
 
                 position displacement = sym.get_displacement();
                 if ( displacement.get<0>() != dfl.get_displacement().get<0>() )
@@ -244,7 +244,7 @@ namespace mapnik
                 {
                     set_attr( node, "halo_radius", sym.get_halo_radius() );    
                 }
-                const Color & c = sym.get_halo_fill();
+                const color & c = sym.get_halo_fill();
                 if ( c != dfl.get_halo_fill() )
                 {
                     set_attr( node, "halo_fill", c );    
@@ -428,7 +428,7 @@ namespace mapnik
 
         set_attr( map_node, "srs", map.srs() );
         
-        optional<Color> c = map.background();
+        optional<color> c = map.background();
         if ( c )
         {
             set_attr( map_node, "bgcolor", * c );    

@@ -404,12 +404,12 @@ namespace mapnik
             faces_->set_pixel_sizes(size);
         }
     
-        void set_fill(mapnik::Color const& fill)
+        void set_fill(mapnik::color const& fill)
         {
             fill_=fill;
         }
     
-        void set_halo_fill(mapnik::Color const& halo)
+        void set_halo_fill(mapnik::color const& halo)
         {
             halo_fill_=halo;
         }
@@ -589,8 +589,8 @@ namespace mapnik
     
         pixmap_type & pixmap_;
         face_set_ptr faces_;
-        mapnik::Color fill_;
-        mapnik::Color halo_fill_;
+        mapnik::color fill_;
+        mapnik::color halo_fill_;
         int halo_radius_;
         unsigned text_ratio_;
         unsigned wrap_width_;

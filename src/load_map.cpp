@@ -121,7 +121,7 @@ namespace mapnik
 
             try
             {
-                optional<Color> bgcolor = get_opt_attr<Color>(map_node, "bgcolor");
+                optional<color> bgcolor = get_opt_attr<color>(map_node, "bgcolor");
                 if (bgcolor) {
                     map.set_background( * bgcolor );
                 }
@@ -728,7 +728,7 @@ namespace mapnik
 
             unsigned size = get_attr(sym, "size", 10U);
 
-            Color c = get_attr(sym, "fill", Color(0,0,0));
+            color c = get_attr(sym, "fill", color(0,0,0));
             
             text_symbolizer text_symbol = text_symbolizer(name, size, c);                
             
@@ -762,7 +762,7 @@ namespace mapnik
             text_symbol.set_label_placement( placement );
 
             // halo fill and radius
-            optional<Color> halo_fill = get_opt_attr<Color>(sym, "halo_fill");
+            optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
             if (halo_fill)
             {
                 text_symbol.set_halo_fill( * halo_fill );
@@ -851,7 +851,7 @@ namespace mapnik
                  get_opt_attr<std::string>(sym, "fontset_name");
 
             unsigned size = get_attr(sym, "size", 10U);
-            Color fill = get_attr(sym, "fill", Color(0,0,0));
+            color fill = get_attr(sym, "fill", color(0,0,0));
 
             std::string image_file = get_attr<string>(sym, "file");
             optional<std::string> base = get_opt_attr<string>(sym, "base");
@@ -910,7 +910,7 @@ namespace mapnik
                 }
                 
                 // halo fill and radius
-                optional<Color> halo_fill = get_opt_attr<Color>(sym, "halo_fill");
+                optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
                 if (halo_fill)
                 {
                    shield_symbol.set_halo_fill( * halo_fill );
@@ -967,7 +967,7 @@ namespace mapnik
                 std::string css_name  = get_attr<string>(css, "name");
                 if (css_name == "stroke")
                 {
-                    Color c = get_css<Color>(css, css_name);
+                    color c = get_css<color>(css, css_name);
                     strk.set_color(c);
                 }
                 else if (css_name == "stroke-width")
@@ -1053,7 +1053,7 @@ namespace mapnik
                 std::string css_name  = get_attr<string>(css, "name");
                 if (css_name == "fill")
                 {
-                    Color c = get_css<Color>(css, css_name);
+                    color c = get_css<color>(css, css_name);
                     poly_sym.set_fill(c);
                 }
                 else if (css_name == "fill-opacity")
@@ -1089,7 +1089,7 @@ namespace mapnik
                 std::string data = css.data();
                 if (css_name == "fill")
                 {
-                    Color c = get_css<Color>(css, css_name);
+                    color c = get_css<color>(css, css_name);
                     building_sym.set_fill(c);
                 }
                 else if (css_name == "fill-opacity")

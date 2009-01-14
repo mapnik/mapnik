@@ -57,7 +57,7 @@ namespace mapnik
         line_join_(MITER_JOIN),
         dash_() {}
 
-    stroke::stroke(Color const& c, float width)
+    stroke::stroke(color const& c, float width)
         : c_(c),
         width_(width),
         opacity_(1.0),
@@ -80,12 +80,12 @@ namespace mapnik
         return *this;
     }
 
-    void stroke::set_color(const Color& c) 
+    void stroke::set_color(const color& c) 
     {
         c_=c;
     }
 
-    Color const& stroke::get_color() const
+    color const& stroke::get_color() const
     {
         return c_;
     }

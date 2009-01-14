@@ -80,10 +80,10 @@ namespace mapnik {
         return get_own<T>( node, std::string("CSS parameter '") + name + "'");
     }
 
-    /** Stream input operator for Color values */
+    /** Stream input operator for color values */
     template <typename charT, typename traits>
     std::basic_istream<charT, traits> &
-    operator >> ( std::basic_istream<charT, traits> & s, mapnik::Color & c )
+    operator >> ( std::basic_istream<charT, traits> & s, mapnik::color & c )
     {
         std::string word;
         s >> word;
@@ -103,7 +103,7 @@ namespace mapnik {
 
     template <typename charT, typename traits>
     std::basic_ostream<charT, traits> &
-    operator << ( std::basic_ostream<charT, traits> & s, const mapnik::Color & c )
+    operator << ( std::basic_ostream<charT, traits> & s, const mapnik::color & c )
     {
         std::string hex_string( c.to_hex_string() );
         s << hex_string;
@@ -226,7 +226,7 @@ namespace mapnik {
     DEFINE_NAME_TRAIT( boolean );
     DEFINE_NAME_TRAIT_WITH_NAME( int, "integer" );
     DEFINE_NAME_TRAIT_WITH_NAME( std::string, "string" );
-    DEFINE_NAME_TRAIT_WITH_NAME( Color, "color" );
+    DEFINE_NAME_TRAIT_WITH_NAME( color, "color" );
 
     template <typename ENUM, int MAX>
     struct name_trait< mapnik::enumeration<ENUM, MAX> >

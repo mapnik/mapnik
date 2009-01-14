@@ -33,7 +33,7 @@ void export_shield_symbolizer()
     using mapnik::symbolizer_with_image;
     
     class_< shield_symbolizer, bases<text_symbolizer> >("ShieldSymbolizer",
-                             init< std::string const&, std::string const&, unsigned, mapnik::Color const&,
+                                                        init< std::string const&, std::string const&, unsigned, mapnik::color const&,
                                                         std::string const&, std::string const&,unsigned,unsigned>("TODO"))
         ;
     

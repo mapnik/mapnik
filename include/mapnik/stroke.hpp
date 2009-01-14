@@ -62,7 +62,7 @@ namespace mapnik
     
   class MAPNIK_DECL stroke
   {	
-        Color c_;
+        color c_;
         float width_;
         float opacity_; // 0.0 - 1.0
         line_cap_e  line_cap_;
@@ -70,13 +70,13 @@ namespace mapnik
         dash_array dash_;	
     public:
         explicit stroke();
-        stroke(Color const& c, float width=1.0);
+        stroke(color const& c, float width=1.0);
         stroke(stroke const& other);
         stroke& operator=(const stroke& rhs);
 
-        void set_color(const Color& c);
+        void set_color(const color& c);
 	
-        Color const& get_color() const;
+        color const& get_color() const;
 	
         float get_width() const;
         void set_width(float w);

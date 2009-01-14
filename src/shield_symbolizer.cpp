@@ -38,7 +38,7 @@ namespace mapnik
                           std::string const& name,
                           std::string const& face_name,
                           unsigned size,
-                          Color const& fill, 
+                          color const& fill, 
                           std::string const& file,
                           std::string const& type,
                           unsigned width,unsigned height)
@@ -50,7 +50,7 @@ namespace mapnik
     shield_symbolizer::shield_symbolizer(
                           std::string const& name,
                           unsigned size,
-                          Color const& fill, 
+                          color const& fill, 
                           std::string const& file,
                           std::string const& type,
                           unsigned width,unsigned height)

@@ -25,33 +25,38 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
+// mapnik
 #include <mapnik/config.hpp>
+//boost
 #include <boost/format.hpp>
+// stl
 #include <sstream>
 
 namespace mapnik {
-
-    class MAPNIK_DECL Color
+     
+    class MAPNIK_DECL color
     {
     private:
         unsigned int abgr_;
     public:
-        Color()
+        color()
             :abgr_(0xffffffff) {}
 
-        Color(int red,int green,int blue,int alpha=0xff)
+        color(int red,int green,int blue,int alpha=0xff)
             : abgr_(((alpha&0xff) << 24) | 
                     ((blue&0xff) << 16)  | 
                     ((green&0xff) << 8)  | 
                      (red&0xff)) {}
         
-        explicit Color(int rgba)
+        color( std::string const& css_string);
+        
+        explicit color(int rgba)
             : abgr_(rgba) {}
 
-        Color(const Color& rhs)
+        color(const color& rhs)
             : abgr_(rhs.abgr_) {}
 
-        Color& operator=(const Color& rhs)
+        color& operator=(const color& rhs)
         {
             if (this==&rhs) return *this;
             abgr_=rhs.abgr_;
@@ -72,8 +77,7 @@ namespace mapnik {
         inline unsigned int alpha() const
         {
             return (abgr_>>24)&0xff;
-        }
-	
+        }	
         inline void set_red(unsigned int r)
         {
             abgr_ = (abgr_ & 0xffffff00) | (r&0xff);
@@ -99,34 +103,19 @@ namespace mapnik {
         {
             abgr_ = (abgr_ & 0xff000000) | (bgr & 0xffffff);
         }
-        inline bool operator==(Color const& other) const
+        inline bool operator==(color const& other) const
         {
             return abgr_ == other.abgr_;
         }
         
-        inline bool operator!=(Color const& other) const
+        inline bool operator!=(color const& other) const
         {
             return abgr_ != other.abgr_;
         }
         
-        inline std::string to_string() const
-        {
-            std::stringstream ss;
-            ss << "rgb (" 
-               << red()   << ","  
-               << green() << ","  
-               << blue()  << ","
-               << alpha() << ")";
-            return ss.str();
-        }
+        std::string to_string() const;
         
-        inline std::string to_hex_string() const
-        {
-	  return (boost::format("#%1$02x%2$02x%3$02x") 
-		  % red() 
-		  % green() 
-		  % blue() ).str();
-        }
+        std::string to_hex_string() const;
     };    
 }
 

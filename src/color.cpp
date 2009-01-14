@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2009 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,39 +19,41 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: graphics.cpp 17 2005-03-08 23:58:43Z pavlenko $
+
+//$Id$
 
 // mapnik
-#include <mapnik/graphics.hpp>
-#include <mapnik/image_util.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/color_factory.hpp>
+// boost
+#include <boost/format.hpp>
+// stl
+#include <sstream>
 
-namespace mapnik
-{
-    Image32::Image32(int width,int height)
-        :width_(width),
-         height_(height),
-         data_(width,height) {}
+namespace mapnik {
 
-    Image32::Image32(const Image32& rhs)
-        :width_(rhs.width_),
-         height_(rhs.height_),
-         data_(rhs.data_)  {}
+   color::color( std::string const& css_string)
+   {
+      color_factory::init_from_string(*this,css_string.c_str());   
+   }
 
-    Image32::~Image32() {}
-
-    const ImageData32& Image32::data() const
-    {
-        return data_;
-    }
-
-    void Image32::setBackground(const color& background)
-    {
-        background_=background;
-        data_.set(background_.rgba());
-    }
-
-    const color& Image32::getBackground() const
-    {
-        return background_;
-    }
+   std::string color::to_string() const
+   {
+      std::stringstream ss;
+      ss << "rgb (" 
+         << red()   << ","  
+         << green() << ","  
+         << blue()  << ","
+         << alpha() << ")";
+      return ss.str();
+   }
+   
+   std::string color::to_hex_string() const
+   {
+      return (boost::format("#%1$02x%2$02x%3$02x") 
+              % red() 
+              % green() 
+              % blue() ).str();
+   }
 }
+

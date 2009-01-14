@@ -21,54 +21,37 @@
  *****************************************************************************/
 //$Id$
 
-
-#include <boost/python.hpp>
+//mapnik
 #include <mapnik/color.hpp>
-#include <mapnik/color_factory.hpp>
+// boost
+#include <boost/python.hpp>
 
-using mapnik::Color;
-using mapnik::color_factory;
+using mapnik::color;
 
 struct color_pickle_suite : boost::python::pickle_suite
 {
     static boost::python::tuple
-    getinitargs(const Color& c)
+    getinitargs(const color& c)
     {
         using namespace boost::python;
-        return boost::python::make_tuple(c.red(),c.green(),c.blue());
+        return boost::python::make_tuple(c.red(),c.green(),c.blue(),c.alpha());
     }
 };
-
-Color create_from_string(const char* str)
-{
-    return color_factory::from_string(str);
-}
-
-Color create_from_rgb(unsigned r, unsigned g,unsigned b)
-{
-    return Color(r,g,b);
-}
-
-Color create_from_rgba(unsigned r, unsigned g,unsigned b,unsigned a)
-{
-    return Color(r,g,b,a);
-}
 
 void export_color () 
 {
     using namespace boost::python;
-    class_<Color>("Color",init<>())
-        .add_property("r",&Color::red,&Color::set_red)
-        .add_property("g",&Color::green,&Color::set_green)
-        .add_property("b",&Color::blue,&Color::set_blue)
-        .add_property("a",&Color::alpha,&Color::set_alpha)
-        .def(self == self)
-        .def_pickle(color_pickle_suite())
-        .def("__str__",&Color::to_string)
-        ;
-    
-    def("Color",&create_from_string);
-    def("Color",&create_from_rgba);
-    def("Color",&create_from_rgb);
+    class_<color>("Color",init<int,int,int,int>())
+       .def(init<int,int,int>())
+       .def(init<std::string>())
+       .add_property("r",&color::red,&color::set_red)
+       .add_property("g",&color::green,&color::set_green)
+       .add_property("b",&color::blue,&color::set_blue)
+       .add_property("a",&color::alpha,&color::set_alpha)
+       .def(self == self)
+       .def_pickle(color_pickle_suite())
+       .def("__str__",&color::to_string)
+       .def("to_hex_string",&color::to_hex_string)
+       ;
 }
 

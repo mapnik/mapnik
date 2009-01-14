@@ -40,7 +40,7 @@ IMPLEMENT_ENUM( mapnik::label_placement_e, label_placement_strings );
 
 namespace mapnik
 {
-    text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size, Color const& fill)
+    text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size, color const& fill)
         : name_(name),
           face_name_(face_name),
           //fontset_(default_fontset),
@@ -52,7 +52,7 @@ namespace mapnik
           force_odd_labels_(false),
           max_char_angle_delta_(0),
           fill_(fill),
-          halo_fill_(Color(255,255,255)),
+          halo_fill_(color(255,255,255)),
           halo_radius_(0),
           label_p_(POINT_PLACEMENT),
           anchor_(0.0,0.5),
@@ -60,7 +60,7 @@ namespace mapnik
           avoid_edges_(false),
           minimum_distance_(0.0),
           overlap_(false) {}
-    text_symbolizer::text_symbolizer(std::string const& name, unsigned size, Color const& fill)
+    text_symbolizer::text_symbolizer(std::string const& name, unsigned size, color const& fill)
         : name_(name),
           //face_name_(""),
           //fontset_(default_fontset),
@@ -72,7 +72,7 @@ namespace mapnik
           force_odd_labels_(false),
           max_char_angle_delta_(0),
           fill_(fill),
-          halo_fill_(Color(255,255,255)),
+          halo_fill_(color(255,255,255)),
           halo_radius_(0),
           label_p_(POINT_PLACEMENT),
           anchor_(0.0,0.5),
@@ -218,17 +218,17 @@ namespace mapnik
         return size_;
     }
 	
-    Color const&  text_symbolizer::get_fill() const
+    color const&  text_symbolizer::get_fill() const
     {
         return fill_;
     }
 	
-    void  text_symbolizer::set_halo_fill(Color const& fill)
+    void  text_symbolizer::set_halo_fill(color const& fill)
     {
         halo_fill_ = fill;
     }
 
-    Color const&  text_symbolizer::get_halo_fill() const
+    color const&  text_symbolizer::get_halo_fill() const
     {
         return halo_fill_;
     }

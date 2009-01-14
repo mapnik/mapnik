@@ -31,7 +31,7 @@
 
 #include "python_optional.hpp"
 
-using mapnik::Color;
+using mapnik::color;
 using mapnik::coord;
 using mapnik::Envelope;
 using mapnik::Layer;
@@ -69,7 +69,7 @@ struct map_pickle_suite : boost::python::pickle_suite
          throw_error_already_set();
       }
       Envelope<double> ext = extract<Envelope<double> >(state[0]);
-      Color bg = extract<Color>(state[1]);
+      color bg = extract<color>(state[1]);
       m.zoomToBox(ext);
       m.set_background(bg);
       boost::python::list l=extract<boost::python::list>(state[2]);
@@ -98,7 +98,7 @@ mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& 
 void export_map() 
 {
    using namespace boost::python;
-   python_optional<mapnik::Color> ();
+   python_optional<mapnik::color> ();
    class_<std::vector<Layer> >("Layers")
       .def(vector_indexing_suite<std::vector<Layer> >())
       ;

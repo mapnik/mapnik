@@ -25,28 +25,38 @@
 #ifndef COLOR_FACTORY_HPP
 #define COLOR_FACTORY_HPP
 
+// mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/css_color_parser.hpp>
 #include <mapnik/config_error.hpp>
 
 using namespace boost::spirit;
 
 namespace mapnik {    
+   
     class MAPNIK_DECL color_factory
     {
     public:
-        static Color from_string(char const* css_color)
+       
+        static void init_from_string(color & c, char const* css_color)
         {   
-            Color color;
-            actions<Color> a(color);
-            css_color_grammar<actions<Color> > grammar(a);
+            actions<color> a(c);
+            css_color_grammar<actions<color> > grammar(a);
             parse_info<> info = parse(css_color, grammar, space_p);
             if ( ! info.full) {
                 throw config_error(std::string("Failed to parse color value: ") +
                         "Expected a color, but got '" + css_color + "'");
             }
-            return color;
         }    
+        
+        static color from_string(char const* css_color)
+        {   
+            color c;
+            init_from_string(c,css_color);
+            return c;
+        }
+
     private:
         color_factory();
         color_factory(color_factory const&);

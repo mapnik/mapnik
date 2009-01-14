@@ -46,6 +46,7 @@ source = Split(
     """
     agg_renderer.cpp
     datasource_cache.cpp
+    color.cpp
     envelope.cpp
     filter_factory.cpp
     font_engine_freetype.cpp

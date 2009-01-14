@@ -32,7 +32,7 @@ void export_text_symbolizer()
    using namespace mapnik;
 
    using mapnik::text_symbolizer;
-   using mapnik::Color;
+   using mapnik::color;
  
    enumeration_<label_placement_e>("label_placement")
       .value("LINE_PLACEMENT",LINE_PLACEMENT)
@@ -40,7 +40,7 @@ void export_text_symbolizer()
       ;
     
    class_<text_symbolizer>("TextSymbolizer",
-                           init<std::string const&,std::string const&, unsigned,Color const&>())
+                           init<std::string const&,std::string const&, unsigned,color const&>())
       .add_property("halo_fill",make_function(
                        &text_symbolizer::get_halo_fill,
                        return_value_policy<copy_const_reference>()),

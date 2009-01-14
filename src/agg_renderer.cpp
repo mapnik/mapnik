@@ -116,7 +116,7 @@ namespace mapnik
         detector_(Envelope<double>(-m.buffer_size(), -m.buffer_size(), m.getWidth() + m.buffer_size() ,m.getHeight() + m.buffer_size())),
         ras_ptr(new rasterizer)
    {
-      boost::optional<Color> bg = m.background();
+      boost::optional<color> bg = m.background();
       if (bg) pixmap_.setBackground(*bg);
 #ifdef MAPNIK_DEBUG
       std::clog << "scale=" << m.scale() << "\n";
@@ -174,7 +174,7 @@ namespace mapnik
       typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 	    
-      Color const& fill_ = sym.get_fill();
+      color const& fill_ = sym.get_fill();
       agg::scanline_u8 sl;
       
       agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
@@ -223,7 +223,7 @@ namespace mapnik
       agg::pixfmt_rgba32_plain pixf(buf);
       ren_base renb(pixf);
       
-      Color const& fill_  = sym.get_fill();
+      color const& fill_  = sym.get_fill();
       unsigned r=fill_.red();
       unsigned g=fill_.green();
       unsigned b=fill_.blue();
@@ -330,7 +330,7 @@ namespace mapnik
 
       ren_base renb(pixf);	          
       mapnik::stroke const&  stroke_ = sym.get_stroke();
-      Color const& col = stroke_.get_color();
+      color const& col = stroke_.get_color();
       unsigned r=col.red();
       unsigned g=col.green();
       unsigned b=col.blue();
@@ -724,7 +724,7 @@ namespace mapnik
       UnicodeString text = feature[sym.get_name()].to_unicode();
       if ( text.length() > 0 )
       {
-         Color const& fill = sym.get_fill();
+         color const& fill = sym.get_fill();
 
          face_set_ptr faces;
 

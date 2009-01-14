@@ -36,19 +36,21 @@ namespace mapnik
         line_symbolizer(stroke const& stroke)
             : stroke_(stroke) {}
 	
-        line_symbolizer(const Color& pen,float width=1.0)
+        line_symbolizer(color const& pen,float width=1.0)
             : stroke_(pen,width) {}
+        
         stroke const& get_stroke() const
         {
             return stroke_;
         }
+        
         void set_stroke(stroke const& stroke)
         {
             stroke_ = stroke;
         }
 
     private:
-		stroke stroke_;
+        stroke stroke_;
     };
 }
 

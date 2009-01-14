@@ -42,6 +42,7 @@ namespace mapnik
       LINE_PLACEMENT,
       label_placement_enum_MAX
    };
+   
    DEFINE_ENUM( label_placement_e, label_placement_enum );
         
    typedef boost::tuple<double,double> position;
@@ -49,8 +50,8 @@ namespace mapnik
    struct MAPNIK_DECL text_symbolizer
    {		
          text_symbolizer(std::string const& name,std::string const& face_name, 
-                         unsigned size, Color const& fill);	
-         text_symbolizer(std::string const& name, unsigned size, Color const& fill);	
+                         unsigned size, color const& fill);	
+         text_symbolizer(std::string const& name, unsigned size, color const& fill);	
          text_symbolizer(text_symbolizer const& rhs);
          text_symbolizer& operator=(text_symbolizer const& rhs);
          std::string const& get_name() const;
@@ -71,9 +72,9 @@ namespace mapnik
          void set_face_name(std::string face_name);
          FontSet const& get_fontset() const;
          void set_fontset(FontSet fontset);
-         Color const& get_fill() const;
-         void set_halo_fill(Color const& fill);
-         Color const& get_halo_fill() const;
+         color const& get_fill() const;
+         void set_halo_fill(color const& fill);
+         color const& get_halo_fill() const;
          void set_halo_radius(unsigned radius);
          unsigned get_halo_radius() const;
          void set_label_placement(label_placement_e label_p);
@@ -99,8 +100,8 @@ namespace mapnik
          unsigned label_position_tolerance_;
          bool force_odd_labels_;
          double max_char_angle_delta_;
-         Color fill_;
-         Color halo_fill_;
+         color fill_;
+         color halo_fill_;
          unsigned halo_radius_;
          label_placement_e label_p_;
          position anchor_;

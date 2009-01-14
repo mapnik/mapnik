@@ -65,7 +65,7 @@ namespace mapnik
         unsigned height_;
         std::string  srs_;
         int buffer_size_;
-        boost::optional<Color> background_;
+        boost::optional<color> background_;
         std::map<std::string,feature_type_style> styles_;
         std::map<std::string,FontSet> fontsets_;
         std::vector<Layer> layers_;
@@ -242,13 +242,13 @@ namespace mapnik
         /*! \brief Set the map background color.
          *  @param c Background color.
          */
-        void set_background(const Color& c);
+        void set_background(const color& c);
 
         /*! \brief Get the map background color 
          *  @return Background color as boost::optional
          *  object
          */
-        boost::optional<Color> const& background() const;
+        boost::optional<color> const& background() const;
 
         /*! \brief Set buffer size 
          *  @param buffer_size Buffer size in pixels.

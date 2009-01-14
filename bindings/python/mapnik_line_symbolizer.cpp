@@ -26,7 +26,7 @@
 
 using mapnik::line_symbolizer;
 using mapnik::stroke;
-using mapnik::Color;
+using mapnik::color;
 
 void export_line_symbolizer()
 {
@@ -35,7 +35,7 @@ void export_line_symbolizer()
     class_<line_symbolizer>("LineSymbolizer",
                             init<>("Default LineSymbolizer - 1px solid black"))
         .def(init<stroke const&>("TODO"))
-        .def(init<Color const& ,float>())
+        .def(init<color const& ,float>())
         .add_property("stroke",make_function
                       (&line_symbolizer::get_stroke,
                        return_value_policy<copy_const_reference>()),

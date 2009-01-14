@@ -204,7 +204,7 @@ namespace mapnik
             context_->restore();
          }
 
-         void set_color(Color const &color, double opacity = 1.0)
+         void set_color(color const &color, double opacity = 1.0)
          {
             set_color(color.red(), color.green(), color.blue(), opacity);
          }
@@ -499,7 +499,7 @@ namespace mapnik
       context_->clip();
 #endif
 
-      boost::optional<Color> bg = m_.background();
+      boost::optional<color> bg = m_.background();
       if (bg)
       {
          cairo_context context(context_);
@@ -582,7 +582,7 @@ namespace mapnik
 
       cairo_context context(context_);
 
-      Color const& fill = sym.get_fill();
+      color const& fill = sym.get_fill();
       double height = 0.7071 * sym.height(); // height in meters
 
       for (unsigned i = 0; i < feature.num_geometries(); ++i)

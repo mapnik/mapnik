@@ -42,14 +42,14 @@ namespace mapnik
     private:
         unsigned width_;
         unsigned height_;
-        Color background_;
+        color background_;
         ImageData32 data_;
     public:
         Image32(int width,int height);
         Image32(Image32 const& rhs);
         ~Image32();
-        void setBackground(Color const& background);
-        const Color& getBackground() const;     
+        void setBackground(color const& background);
+        const color& getBackground() const;     
         const ImageData32& data() const;
         
         inline ImageData32& data() 
