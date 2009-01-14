@@ -19,8 +19,12 @@
 //$Id$
 
 #include "styles_model.hpp"
+
+// boost
+#include <boost/concept_check.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/utility.hpp>
+// qt
 #include <QList>
 #include <QIcon>
 #include <QPainter>
@@ -117,36 +121,43 @@ struct symbolizer_info : public boost::static_visitor<QString>
 {
       QString operator() (mapnik::point_symbolizer const& sym) const
       {
+         boost::ignore_unused_variable_warning(sym);
          return QString("PointSymbolizer");
       }
       
       QString operator() (mapnik::line_symbolizer const& sym) const
       {
+         boost::ignore_unused_variable_warning(sym);
          return QString("LineSymbolizer");
       }
 
       QString operator() (mapnik::line_pattern_symbolizer const& sym) const
       {
+         boost::ignore_unused_variable_warning(sym);
          return QString("LinePatternSymbolizer");
       }
 
       QString operator() (mapnik::polygon_symbolizer const& sym) const
       {
+         boost::ignore_unused_variable_warning(sym);
          return QString("PolygonSymbolizer");
       }
 
       QString operator() (mapnik::polygon_pattern_symbolizer const& sym) const
       {
+         boost::ignore_unused_variable_warning(sym);
          return QString("PolygonSymbolizer");
       }
             
       QString operator() (mapnik::text_symbolizer const& sym) const
       {
+         boost::ignore_unused_variable_warning(sym);
          return QString("TextSymbolizer");
       }
       
       QString operator() (mapnik::shield_symbolizer const& sym) const
       {
+         boost::ignore_unused_variable_warning(sym);
          return QString("ShieldSymbolizer");
       }
       
@@ -163,7 +174,7 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
       {
          QPixmap pix(16,16);
          QPainter painter(&pix);
-         mapnik::Color const& fill = sym.get_fill();
+         mapnik::color const& fill = sym.get_fill();
          QBrush brush(QColor(fill.red(),fill.green(),fill.blue(),fill.alpha()));
          painter.fillRect(0, 0, 16, 16, brush);
          return QIcon(pix);
@@ -186,7 +197,7 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
          pix.fill();
          QPainter painter(&pix);
          mapnik::stroke const&  strk = sym.get_stroke();	
-         mapnik::Color const& col = strk.get_color();
+         mapnik::color const& col = strk.get_color();
          QPen pen(QColor(col.red(),col.green(),col.blue(),col.alpha()));
          pen.setWidth(strk.get_width());
          painter.setPen(pen);
