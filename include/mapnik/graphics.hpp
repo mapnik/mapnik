@@ -35,6 +35,11 @@
 #include <string>
 #include <cassert>
 
+// cairo
+#ifdef HAVE_CAIRO
+#include <cairomm/surface.h>
+#endif
+
 namespace mapnik
 {
     class MAPNIK_DECL Image32
@@ -47,6 +52,9 @@ namespace mapnik
     public:
         Image32(int width,int height);
         Image32(Image32 const& rhs);
+#ifdef CAIRO_HAS_IMAGE_SURFACE
+        Image32(Cairo::RefPtr<Cairo::ImageSurface> rhs);
+#endif
         ~Image32();
         void setBackground(color const& background);
         const color& getBackground() const;     
