@@ -33,6 +33,10 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/config_error.hpp>
 
+// cairo
+#include <mapnik/cairo_renderer.hpp>
+#include <cairomm/surface.h>
+
 #include <iostream>
 
 
@@ -247,11 +251,39 @@ int main ( int argc , char** argv)
         save_to_file<ImageData32>(buf.data(),"demo.jpg","jpeg");
         save_to_file<ImageData32>(buf.data(),"demo.png","png");
         save_to_file<ImageData32>(buf.data(),"demo256.png","png256");
-        std::cout << "Three maps have been rendered in the current directory:\n"
+        std::cout << "Three maps have been rendered using AGG in the current directory:\n"
            "- demo.jpg\n"
            "- demo.png\n"
            "- demo256.png\n"
            "Have a look!\n";
+
+
+        Cairo::RefPtr<Cairo::ImageSurface> image_surface;
+
+        image_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, m.getWidth(),m.getHeight());
+        cairo_renderer<Cairo::Surface> png_render(m, image_surface);
+        png_render.apply();
+        image_surface->write_to_png("cairo-demo.png");
+
+        Image32 im(image_surface);
+        save_to_file(im, "cairo-demo256.png","png256");
+
+        Cairo::RefPtr<Cairo::Surface> surface;
+        surface = Cairo::PdfSurface::create("cairo-demo.pdf", m.getWidth(),m.getHeight());
+        cairo_renderer<Cairo::Surface> pdf_render(m, surface);
+        pdf_render.apply();
+
+        surface = Cairo::SvgSurface::create("cairo-demo.svg", m.getWidth(),m.getHeight());
+        cairo_renderer<Cairo::Surface> svg_render(m, surface);
+        svg_render.apply();
+
+        std::cout << "Three maps have been rendered using Cairo in the current directory:\n"
+           "- cairo-demo.png\n"
+           "- cairo-demo256.png\n"
+           "- cairo-demo.pdf\n"
+           "- cairo-demo.svg\n"
+           "Have a look!\n";
+
     }
     catch ( const mapnik::config_error & ex )
     {

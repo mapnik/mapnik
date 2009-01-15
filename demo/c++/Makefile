@@ -1,7 +1,7 @@
 CXX = g++
 
-INCLUDE = `pkg-config --cflags mapnik freetype2`
-LIBDIR  = `pkg-config --libs mapnik freetype2`
+INCLUDE = `pkg-config --cflags mapnik freetype2 cairomm-1.0`
+LIBDIR  = `pkg-config --libs mapnik freetype2 cairomm-1.0`
 
 DEFINES = 
 

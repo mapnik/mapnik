@@ -10,7 +10,7 @@ INCLUDEPATH += /usr/X11/include/
 INCLUDEPATH += .
 
 QMAKE_CXXFLAGS +=' -DDARWIN'
-unix:LIBS =  -L/opt/mapnik/lib -L/usr/X11/lib -lmapnik -lfreetype
+unix:LIBS =  -L/opt/mapnik/lib -L/usr/X11/lib -lmapnik -lfreetype -L/usr/local/lib -licuuc
 
 # Input
 
