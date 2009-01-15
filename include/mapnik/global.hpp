@@ -27,29 +27,20 @@
 
 #include <boost/cstdint.hpp>
 
-#ifdef __SUNPRO_CC
-// Foo
-#else
-using boost::int32_t;
-using boost::uint32_t;
-using boost::int16_t;
-using boost::uint16_t;
-using boost::uint8_t;
-#endif
 
 namespace mapnik
 {
  
-#define int2net(A)  (int16_t) (((uint16_t) ((uint8_t) (A)[1]))      |   \
-                               (((uint16_t) ((uint8_t) (A)[0])) << 8))
+#define int2net(A)  (int16_t) (((boost::uint16_t) ((boost::uint8_t) (A)[1]))      | \
+                               (((boost::uint16_t) ((boost::uint8_t) (A)[0])) << 8))
 
-#define int4net(A)  (int32_t) (((uint32_t) ((uint8_t) (A)[3]))      |   \
-                               (((uint32_t) ((uint8_t) (A)[2])) << 8)  | \
-                               (((uint32_t) ((uint8_t) (A)[1])) << 16) | \
-                               (((uint32_t) ((uint8_t) (A)[0])) << 24))
+#define int4net(A)  (int32_t) (((boost::uint32_t) ((boost::uint8_t) (A)[3]))      | \
+                               (((boost::uint32_t) ((boost::uint8_t) (A)[2])) << 8)  | \
+                               (((boost::uint32_t) ((boost::uint8_t) (A)[1])) << 16) | \
+                               (((boost::uint32_t) ((boost::uint8_t) (A)[0])) << 24))
 
 
-  typedef uint8_t byte;
+   typedef boost::uint8_t byte;
 #define float8net(V,M)   do { double def_temp;  \
     ((byte*) &def_temp)[0]=(M)[7];		\
     ((byte*) &def_temp)[1]=(M)[6];		\
