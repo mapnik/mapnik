@@ -121,7 +121,7 @@ namespace mapnik
         inline void setRow(unsigned row,const T* buf,unsigned size)
         {
             assert(row<height_);
-            assert(size<=(width_*sizeof(T)));
+            assert(size<=width_);
             memcpy(pData_+row*width_,buf,size*sizeof(T));
         }
         inline void setRow(unsigned row,unsigned x0,unsigned x1,const T* buf)
