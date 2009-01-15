@@ -32,12 +32,6 @@
 // stl
 #include <cmath>
 
-// When using Sun's C++ compiler, use the `std` namespace to get the math routines.
-#ifdef __SUNPRO_CC
-using std::fabs;
-using std::sqrt;
-#endif
-
 namespace mapnik
 {
     template <typename T>
@@ -145,7 +139,7 @@ namespace mapnik
     
     inline double distance(double x0,double y0, double x1,double y1)
     {
-        return sqrt(distance2(x0,y0,x1,y1));
+       return std::sqrt(distance2(x0,y0,x1,y1));
     }
     
     inline double point_to_segment_distance(double x, double y, 
@@ -169,7 +163,7 @@ namespace mapnik
             return distance(x,y,bx,by);
         }
         double s = ((ay - y)*(bx - ax) - (ax - x)*(by - ay))/len2;
-        return fabs(s) * sqrt(len2);
+        return std::fabs(s) * std::sqrt(len2);
     }
         
     template <typename Iter> 

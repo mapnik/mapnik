@@ -27,11 +27,6 @@
 
 #include <cmath>
 
-// When using Sun's C++ compiler, use the `std` namespace to get the math routines.
-#ifdef __SUNPRO_CC
-using std::pow;
-#endif
-
 namespace mapnik 
 {
     struct MAPNIK_DECL gamma
@@ -43,13 +38,13 @@ namespace mapnik
             int result;
             for (int i=0;i< 256;i++)
             {
-                result=(int)(pow(i/255.0,gamma) * 255.0 + 0.5);
-                g2l[i]=(unsigned char)result;
+               result=(int)(std::pow(i/255.0,gamma) * 255.0 + 0.5);
+               g2l[i]=(unsigned char)result;
             }
             for (int i = 0; i < 256; i++)
             {
-                result = (int)(pow(i/255.0, 1/gamma) * 255.0 + 0.5);
-                l2g[i] = (unsigned char)result;
+               result = (int)(std::pow(i/255.0, 1/gamma) * 255.0 + 0.5);
+               l2g[i] = (unsigned char)result;
             }
         }
     };

@@ -29,12 +29,6 @@
 #include <cassert>
 #include <cstring>
 
-// When using Sun's C++ compiler, use the `std` namespace to get memcpy, memset routines.
-#ifdef __SUNPRO_CC
-using std::memcpy;
-using std::memset;
-#endif
-
 namespace mapnik 
 {
     template <class T> class ImageData
@@ -47,7 +41,7 @@ namespace mapnik
               height_(height),
               pData_((width!=0 && height!=0)? static_cast<T*>(::operator new(sizeof(T)*width*height)):0)
         {
-           if (pData_) memset(pData_,0,sizeof(T)*width_*height_);
+           if (pData_) std::memset(pData_,0,sizeof(T)*width_*height_);
         }
           
         ImageData(const ImageData<T>& rhs)
@@ -56,7 +50,7 @@ namespace mapnik
              pData_((rhs.width_!=0 && rhs.height_!=0)? 
                     static_cast<T*>(::operator new(sizeof(T)*rhs.width_*rhs.height_)) :0)
         {
-            if (pData_) memcpy(pData_,rhs.pData_,sizeof(T)*rhs.width_* rhs.height_);
+           if (pData_) std::memcpy(pData_,rhs.pData_,sizeof(T)*rhs.width_* rhs.height_);
         }
         inline T& operator() (unsigned i,unsigned j)
         {
@@ -122,11 +116,11 @@ namespace mapnik
         {
             assert(row<height_);
             assert(size<=width_);
-            memcpy(pData_+row*width_,buf,size*sizeof(T));
+            std::memcpy(pData_+row*width_,buf,size*sizeof(T));
         }
         inline void setRow(unsigned row,unsigned x0,unsigned x1,const T* buf)
         {
-            memcpy(pData_+row*width_+x0,buf,(x1-x0)*sizeof(T));
+           std::memcpy(pData_+row*width_+x0,buf,(x1-x0)*sizeof(T));
         }
 
         inline ~ImageData()
