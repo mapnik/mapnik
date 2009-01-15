@@ -37,23 +37,29 @@
 using boost::property_tree::ptree;
 using namespace std;
 
+#define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD)
+
 namespace mapnik 
 {
     class libxml2_loader : boost::noncopyable
     {
         public:
-            libxml2_loader() :
-                ctx_( 0 )
+            libxml2_loader(const char *encoding = NULL, int options = DEFAULT_OPTIONS, const char *url = NULL) :
+                ctx_( 0 ),
+                encoding_( encoding ),
+                options_( options ),
+                url_( url )
             {
                 LIBXML_TEST_VERSION;
+                ctx_ = xmlNewParserCtxt();
+                if ( ! ctx_ )
+                {
+                    throw std::runtime_error("Failed to create parser context.");
+                }
             }
 
             ~libxml2_loader()
             {
-                if (ctx_ && ctx_->myDoc)
-                {
-                    xmlFreeDoc( ctx_->myDoc );
-                }
                 if (ctx_)
                 {
                     xmlFreeParserCtxt(ctx_);    
@@ -67,20 +73,10 @@ namespace mapnik
                     throw config_error(string("Could not load map file '") +
                             filename + "': File does not exist");
                 }
-                ctx_ = xmlCreateFileParserCtxt( filename.c_str() );
 
-                if ( ! ctx_ ) 
-                {
-                    throw std::runtime_error("Failed to create parser context.");
-                }
+                xmlDocPtr doc = xmlCtxtReadFile(ctx_, filename.c_str(), encoding_, options_);
 
-                ctx_->replaceEntities = true;
-                ctx_->keepBlanks = false;
-                xmlCtxtUseOptions( ctx_, XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS |
-                                         XML_PARSE_DTDLOAD);
-                xmlParseDocument( ctx_ );
-
-                if ( ! ctx_->wellFormed ) 
+                if ( !doc )
                 {
                     xmlError * error = xmlCtxtGetLastError( ctx_ );
                     std::ostringstream os;
@@ -109,15 +105,41 @@ namespace mapnik
                    << std::endl;
                    }
                  */
+                load(doc, pt);
+            }
 
-                xmlNode * root( 0 );
-                root = xmlDocGetRootElement( ctx_->myDoc );
+            void load( const int fd, ptree & pt )
+            {
+                xmlDocPtr doc = xmlCtxtReadFd(ctx_, fd, url_, encoding_, options_);
+                load(doc, pt);
+            }
+
+            void load_string( const std::string & buffer, ptree & pt )
+            {
+                xmlDocPtr doc = xmlCtxtReadMemory(ctx_, buffer.data(), buffer.length(), url_, encoding_, options_);
+                load(doc, pt);
+            }
+
+            void load( const xmlDocPtr doc, ptree & pt )
+            {
+                if ( !doc )
+                {
+                    xmlError * error = xmlCtxtGetLastError( ctx_ );
+                    std::ostringstream os;
+                    os << "XML document not well formed";
+                    if (error)
+                    {
+                        os << ": " << std::endl << error->message;
+                    }
+                    throw config_error(os.str());
+                }
+
+                xmlNode * root = xmlDocGetRootElement( doc );
                 if ( ! root ) {
                     throw config_error("XML document is empty.");
                 }
 
                 populate_tree( root, pt );
-
             }
 
         private:
@@ -171,12 +193,20 @@ namespace mapnik
             }
 
             xmlParserCtxtPtr ctx_;
+            const char *encoding_;
+            int options_;
+            const char *url_;
     };
 
     void read_xml2( std::string const & filename, boost::property_tree::ptree & pt)
     {
         libxml2_loader loader;
         loader.load( filename, pt );
+    }
+    void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt)
+    {
+        libxml2_loader loader;
+        loader.load_string( str, pt );
     }
 
 } // end of namespace mapnik

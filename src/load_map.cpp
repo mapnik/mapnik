@@ -108,6 +108,18 @@ namespace mapnik
             throw config_error( ex.what() );
         }
 #endif
+        map_parser parser( strict );
+        parser.parse_map(map, pt);
+    }
+
+    void load_map_string(Map & map, std::string const& str, bool strict)
+    {
+        ptree pt;
+#ifdef HAVE_LIBXML2
+        read_xml2_string(str, pt);
+#else
+        throw config_error( "load_map_string() only supported with libxml2 parser" );
+#endif
 
         map_parser parser( strict );
         parser.parse_map(map, pt);

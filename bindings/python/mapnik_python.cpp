@@ -150,6 +150,7 @@ void translator(mapnik::config_error const & ex) {
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 3);
 
 BOOST_PYTHON_MODULE(_mapnik)
 {
@@ -157,6 +158,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     using namespace boost::python;
 
     using mapnik::load_map;
+    using mapnik::load_map_string;
     using mapnik::save_map;
 
     register_exception_translator<mapnik::config_error>(translator);
@@ -203,6 +205,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("scale_denominator", &scale_denominator);
     
     def("load_map", & load_map, load_map_overloads());
+    def("load_map_from_string", & load_map_string, load_map_string_overloads());
     def("save_map", & save_map, "save Map object to XML");
     
     using mapnik::symbolizer;
