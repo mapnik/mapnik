@@ -76,16 +76,32 @@ void export_proj_transform();
 void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0, unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-    mapnik::agg_renderer<mapnik::Image32> ren(map,image,offset_x, offset_y);
-    ren.apply();
+    try
+    {
+        mapnik::agg_renderer<mapnik::Image32> ren(map,image,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
 }
 
 void render2(const mapnik::Map& map,mapnik::Image32& image)
 {
     Py_BEGIN_ALLOW_THREADS
-    mapnik::agg_renderer<mapnik::Image32> ren(map,image);
-    ren.apply();
+    try
+    {
+        mapnik::agg_renderer<mapnik::Image32> ren(map,image);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
 }
 
@@ -94,18 +110,34 @@ void render2(const mapnik::Map& map,mapnik::Image32& image)
 void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
-    ren.apply();
+    try
+    {
+        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+        mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
 }
 
 void render4(const mapnik::Map& map,PycairoSurface* surface)
 {
     Py_BEGIN_ALLOW_THREADS
-    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-    mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
-    ren.apply();
+    try
+    {
+        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+        mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
 }
 
