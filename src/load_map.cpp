@@ -295,24 +295,11 @@ namespace mapnik
 
     void map_parser::parse_font(FontSet & fset, ptree const & f)
 	{
-        std::string face_name;
+        std::string face_name = get_attr(f, "face_name", string());
 
-        try
+        if ( strict_ )
         {
-            face_name = get_attr(f, "face_name", string());
-        
-            if ( strict_ )
-            {
-                ensure_font_face( face_name );
-            }
-        }
-        catch (const config_error & ex)
-        {
-            if (!face_name.empty())
-            {
-                ex.append_context(string("in Font '") + face_name + "'");
-            }
-            throw;
+            ensure_font_face( face_name );
         }
 
         fset.add_face_name(face_name);
@@ -755,10 +742,18 @@ namespace mapnik
                 {
                     text_symbol.set_fontset(itr->second);                
                 }
+                else
+                {
+                    throw config_error("Unable to find any fontset named '" + *fontset_name + "'");
+                }
             }
             else if (face_name)
             {
-                text_symbol.set_face_name(*face_name);                
+                if ( strict_ )
+                {
+                    ensure_font_face(*face_name);
+                }
+                text_symbol.set_face_name(*face_name);
             }
             else
             {
@@ -836,11 +831,6 @@ namespace mapnik
                text_symbol.set_max_char_angle_delta( * max_char_angle_delta);
             }
                
-            if ( strict_ )
-            {
-                ensure_font_face( text_symbol.get_face_name() );
-            }
-
             rule.append(text_symbol);
         }
         catch (const config_error & ex) 
@@ -895,10 +885,18 @@ namespace mapnik
                     {
                         shield_symbol.set_fontset(itr->second);                
                     }
+                    else
+                    {
+                        throw config_error("Unable to find any fontset named '" + *fontset_name + "'");
+                    }
                 }
                 else if (face_name)
                 {
-                    shield_symbol.set_face_name(*face_name);                
+                    if ( strict_ )
+                    {
+                        ensure_font_face(*face_name);
+                    }
+                    shield_symbol.set_face_name(*face_name);
                 }
                 else
                 {
