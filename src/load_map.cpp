@@ -194,7 +194,8 @@ namespace mapnik
                                     "datasource parameter");
                             params[name] = value; 
                         }
-                        else if( paramIter->first != "<xmlattr>" )
+                        else if( paramIter->first != "<xmlattr>" &&
+                            paramIter->first != "<xmlcomment>" )
                         {
                             throw config_error(std::string("Unknown child node in ") +
                                     "'Datasource'. Expected 'Parameter' but got '" +
@@ -238,7 +239,7 @@ namespace mapnik
                 else if (rule_tag.first != "<xmlcomment>" &&
                         rule_tag.first != "<xmlattr>" )
                 {
-                    throw config_error(std::string("Unknown child node in 'Style'.") +
+                    throw config_error(std::string("Unknown child node in 'Style'. ") +
                             "Expected 'Rule' but got '" + rule_tag.first + "'");
                 }
             }
@@ -275,7 +276,7 @@ namespace mapnik
                 else if (font_tag.first != "<xmlcomment>" &&
                     font_tag.first != "<xmlattr>" )
                 {
-                    throw config_error(std::string("Unknown child node in 'FontSet'.") +
+                    throw config_error(std::string("Unknown child node in 'FontSet'. ") +
                         "Expected 'Font' but got '" + font_tag.first + "'");
                 }
             }
@@ -397,7 +398,8 @@ namespace mapnik
                                     "datasource parameter");
                             params[name] = value; 
                         }
-                        else if( paramIter->first != "<xmlattr>" )
+                        else if( paramIter->first != "<xmlattr>"  &&
+                            paramIter->first != "<xmlcomment>" )
                         {
                             throw config_error(std::string("Unknown child node in ") +
                                     "'Datasource'. Expected 'Parameter' but got '" +
@@ -973,69 +975,85 @@ namespace mapnik
 
             for(; cssIter != endCss; ++cssIter)
             {
+                ptree::value_type const& css_tag = *cssIter;
                 ptree const & css = cssIter->second;
-                std::string css_name  = get_attr<string>(css, "name");
-                if (css_name == "stroke")
+
+                if (css_tag.first == "CssParameter")
                 {
-                    color c = get_css<color>(css, css_name);
-                    strk.set_color(c);
-                }
-                else if (css_name == "stroke-width")
-                {
-                    float width = get_css<float>(css, css_name);
-                    strk.set_width(width);
-                }
-                else if (css_name == "stroke-opacity")
-                {
-                    float opacity = get_css<float>(css, css_name);
-                    strk.set_opacity(opacity);
-                }
-                else if (css_name == "stroke-linejoin")
-                {
-                    line_join_e line_join = get_css<line_join_e>(css, css_name);
-                    strk.set_line_join( line_join );
-                }
-                else if (css_name == "stroke-linecap")
-                {
-                    line_cap_e line_cap = get_css<line_cap_e>(css, css_name);
-                    strk.set_line_cap( line_cap );
-                }
-                else if (css_name == "stroke-dasharray")
-                {
-                    tokenizer<> tok ( css.data() );
-                    std::vector<float> dash_array;
-                    tokenizer<>::iterator itr = tok.begin();
-                    for (; itr != tok.end(); ++itr)
+                    std::string css_name  = get_attr<string>(css, "name");
+                    if (css_name == "stroke")
                     {
-                        try 
-                        {
-                            float f = boost::lexical_cast<float>(*itr);
-                            dash_array.push_back(f);
-                        }
-                        catch ( boost::bad_lexical_cast &)
-                        {
-                            throw config_error(std::string("Failed to parse CSS ") +
-                                    "parameter '" + css_name + "'. Expected a " +
-                                    "list of floats but got '" + css.data() + "'");
-                        }
+                        color c = get_css<color>(css, css_name);
+                        strk.set_color(c);
                     }
-                    if (dash_array.size())
+                    else if (css_name == "stroke-width")
                     {
-                        size_t size = dash_array.size();
-                        if ( size % 2) 
-                        { 
-                            for (size_t i=0; i < size ;++i)
+                        float width = get_css<float>(css, css_name);
+                        strk.set_width(width);
+                    }
+                    else if (css_name == "stroke-opacity")
+                    {
+                        float opacity = get_css<float>(css, css_name);
+                        strk.set_opacity(opacity);
+                    }
+                    else if (css_name == "stroke-linejoin")
+                    {
+                        line_join_e line_join = get_css<line_join_e>(css, css_name);
+                        strk.set_line_join( line_join );
+                    }
+                    else if (css_name == "stroke-linecap")
+                    {
+                        line_cap_e line_cap = get_css<line_cap_e>(css, css_name);
+                        strk.set_line_cap( line_cap );
+                    }
+                    else if (css_name == "stroke-dasharray")
+                    {
+                        tokenizer<> tok ( css.data() );
+                        std::vector<float> dash_array;
+                        tokenizer<>::iterator itr = tok.begin();
+                        for (; itr != tok.end(); ++itr)
+                        {
+                            try
                             {
-                                dash_array.push_back(dash_array[i]);
+                                float f = boost::lexical_cast<float>(*itr);
+                                dash_array.push_back(f);
+                            }
+                            catch ( boost::bad_lexical_cast &)
+                            {
+                                throw config_error(std::string("Failed to parse CSS ") +
+                                        "parameter '" + css_name + "'. Expected a " +
+                                        "list of floats but got '" + css.data() + "'");
                             }
                         }
-                        std::vector<float>::const_iterator pos = dash_array.begin();
-                        while (pos != dash_array.end())
+                        if (dash_array.size())
                         {
-                            strk.add_dash(*pos,*(pos + 1));
-                            pos +=2;
+                            size_t size = dash_array.size();
+                            if ( size % 2)
+                            {
+                                for (size_t i=0; i < size ;++i)
+                                {
+                                    dash_array.push_back(dash_array[i]);
+                                }
+                            }
+                            std::vector<float>::const_iterator pos = dash_array.begin();
+                            while (pos != dash_array.end())
+                            {
+                                strk.add_dash(*pos,*(pos + 1));
+                                pos +=2;
+                            }
                         }
                     }
+                    else
+                    {
+                        throw config_error(std::string("Failed to parse unknown CSS ") +
+                                "parameter '" + css_name + "'");
+                    }
+                }
+                else if (css_tag.first != "<xmlcomment>" &&
+                        css_tag.first != "<xmlattr>" )
+                {
+                    throw config_error(std::string("Unknown child node. ") +
+                            "Expected 'CssParameter' but got '" + css_tag.first + "'");
                 }
             }
             rule.append(line_symbolizer(strk));
@@ -1059,17 +1077,33 @@ namespace mapnik
 
             for(; cssIter != endCss; ++cssIter)
             {
+                ptree::value_type const& css_tag = *cssIter;
                 ptree const & css = cssIter->second;
-                std::string css_name  = get_attr<string>(css, "name");
-                if (css_name == "fill")
+
+                if (css_tag.first == "CssParameter")
                 {
-                    color c = get_css<color>(css, css_name);
-                    poly_sym.set_fill(c);
+                    std::string css_name  = get_attr<string>(css, "name");
+                    if (css_name == "fill")
+                    {
+                        color c = get_css<color>(css, css_name);
+                        poly_sym.set_fill(c);
+                    }
+                    else if (css_name == "fill-opacity")
+                    {
+                        float opacity = get_css<float>(css, css_name);
+                        poly_sym.set_opacity(opacity);
+                    }
+                    else
+                    {
+                        throw config_error(std::string("Failed to parse unknown CSS ") +
+                                "parameter '" + css_name + "'");
+                    }
                 }
-                else if (css_name == "fill-opacity")
+                else if (css_tag.first != "<xmlcomment>" &&
+                        css_tag.first != "<xmlattr>" )
                 {
-                    float opacity = get_css<float>(css, css_name);
-                    poly_sym.set_opacity(opacity);
+                    throw config_error(std::string("Unknown child node. ") +
+                            "Expected 'CssParameter' but got '" + css_tag.first + "'");
                 }
             }
             rule.append(poly_sym);
@@ -1093,24 +1127,39 @@ namespace mapnik
 
             for(; cssIter != endCss; ++cssIter)
             {
-                ptree const& css = cssIter->second;
+                ptree::value_type const& css_tag = *cssIter;
+                ptree const & css = cssIter->second;
 
-                std::string css_name  = get_attr<string>(css, "name");
-                std::string data = css.data();
-                if (css_name == "fill")
+                if (css_tag.first == "CssParameter")
                 {
-                    color c = get_css<color>(css, css_name);
-                    building_sym.set_fill(c);
+                    std::string css_name  = get_attr<string>(css, "name");
+                    std::string data = css.data();
+                    if (css_name == "fill")
+                    {
+                        color c = get_css<color>(css, css_name);
+                        building_sym.set_fill(c);
+                    }
+                    else if (css_name == "fill-opacity")
+                    {
+                        float opacity = get_css<float>(css, css_name);
+                        building_sym.set_opacity(opacity);
+                    }
+                    else if (css_name == "height")
+                    {
+                       float height = get_css<float>(css,css_name);
+                       building_sym.set_height(height);
+                    }
+                    else
+                    {
+                        throw config_error(std::string("Failed to parse unknown CSS ") +
+                                "parameter '" + css_name + "'");
+                    }
                 }
-                else if (css_name == "fill-opacity")
+                else if (css_tag.first != "<xmlcomment>" &&
+                        css_tag.first != "<xmlattr>" )
                 {
-                    float opacity = get_css<float>(css, css_name);
-                    building_sym.set_opacity(opacity);
-                }
-                else if (css_name == "height")
-                {
-                   float height = get_css<float>(css,css_name);
-                   building_sym.set_height(height);
+                    throw config_error(std::string("Unknown child node. ") +
+                            "Expected 'CssParameter' but got '" + css_tag.first + "'");
                 }
             }
             rule.append(building_sym);
