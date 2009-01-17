@@ -31,7 +31,7 @@
 namespace mapnik
 {
     FontSet::FontSet()
-        : name_("default") {}
+        : name_("") {}
 
     FontSet::FontSet(std::string const& name)
         : name_(name) {}

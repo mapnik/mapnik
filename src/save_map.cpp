@@ -215,7 +215,11 @@ namespace mapnik
                 if ( ! face_name.empty() ) {
                     set_attr( node, "face_name", face_name );    
                 }
-                
+                const std::string & fontset_name = sym.get_fontset().get_name();
+                if ( ! fontset_name.empty() ) {
+                    set_attr( node, "fontset_name", fontset_name );
+                }
+
                 set_attr( node, "size", sym.get_text_size() );    
                 set_attr( node, "fill", sym.get_fill() );    
 
@@ -344,6 +348,27 @@ namespace mapnik
 
     }
 
+    void serialize_fontset( ptree & map_node, Map::const_fontset_iterator fontset_it )
+    {
+        const FontSet & fontset = fontset_it->second;
+        const std::string & name = fontset_it->first;
+
+        ptree & fontset_node = map_node.push_back(
+                ptree::value_type("FontSet", ptree()))->second;
+
+        set_attr(fontset_node, "name", name);
+
+        std::vector<std::string>::const_iterator it = fontset.get_face_names().begin();
+        std::vector<std::string>::const_iterator end = fontset.get_face_names().end();
+        for (; it != end; ++it)
+        {
+            ptree & font_node = fontset_node.push_back(
+                    ptree::value_type("Font", ptree()))->second;
+            set_attr(font_node, "face_name", *it);
+        }
+
+    }
+
     void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
     {
         ptree & datasource_node = layer_node.push_back(
@@ -432,6 +457,15 @@ namespace mapnik
         if ( c )
         {
             set_attr( map_node, "bgcolor", * c );    
+        }
+
+        {
+            Map::const_fontset_iterator it = map.fontsets().begin();
+            Map::const_fontset_iterator end = map.fontsets().end();
+            for (; it != end; ++it)
+            {
+                serialize_fontset( map_node, it);
+            }
         }
 
         Map::const_style_iterator it = map.styles().begin();

@@ -76,6 +76,8 @@ namespace mapnik
 
         typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
         typedef std::map<std::string,feature_type_style>::iterator style_iterator;
+        typedef std::map<std::string,FontSet>::const_iterator const_fontset_iterator;
+        typedef std::map<std::string,FontSet>::iterator fontset_iterator;
         
         /*! \brief Default constructor.
          *
@@ -168,6 +170,16 @@ namespace mapnik
          *  @return The fontset if found. If not found return the default map fontset.
          */
         FontSet const& find_fontset(std::string const& name) const;
+
+        /*! \brief Get all fontsets
+         * @return Const reference to fontsets
+         */
+        std::map<std::string,FontSet> const& fontsets() const;
+
+        /*! \brief Get all fontsets
+         * @return Non-constant reference to fontsets
+         */
+        std::map<std::string,FontSet> & fontsets();
 
         /*! \brief Get number of all layers.
          */

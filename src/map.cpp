@@ -125,6 +125,16 @@ namespace mapnik
         return default_fontset;
     }
 
+   std::map<std::string,FontSet> const& Map::fontsets() const
+   {
+      return fontsets_;
+   }
+
+   std::map<std::string,FontSet> & Map::fontsets()
+   {
+      return fontsets_;
+   }
+
    boost::optional<feature_type_style const&> Map::find_style(std::string const& name) const
    {
       std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
