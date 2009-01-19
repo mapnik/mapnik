@@ -27,6 +27,7 @@
 #include <mapnik/config_error.hpp>
 
 // boost
+#include <boost/version.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -121,11 +122,19 @@ namespace mapnik
 #endif
       filesystem::path path(str);
       filesystem::directory_iterator end_itr;
+ 
+
       if (exists(path) && is_directory(path))
       {
          for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
          {
-	   if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
+
+#if BOOST_VERSION < 103400 
+            if (!is_directory( *itr )  && is_input_plugin(itr->leaf()))      
+#else
+            if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))   
+#endif
+
             {
                try 
                {
