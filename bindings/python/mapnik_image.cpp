@@ -60,12 +60,8 @@ PyObject* tostring1( Image32 const& im)
 // encode (png,jpeg)
 PyObject* tostring2(Image32 const & im, std::string const& format)
 {
-   std::ostringstream ss(std::ios::out|std::ios::binary);
-   if (format == "png") save_as_png(ss,im.data());
-   else if (format == "png256") save_as_png256(ss,im.data());
-   else if (format == "jpeg") save_as_jpeg(ss,85,im.data());
-   else throw mapnik::ImageWriterException("unknown format: " + format);
-   return ::PyString_FromStringAndSize((const char*)ss.str().c_str(),ss.str().size());
+   std::string s = save_to_string(im, format);
+   return ::PyString_FromStringAndSize(s.data(),s.size());
 }
 
 void (*save_to_file1)( mapnik::Image32 const&, std::string const&,std::string const&) = mapnik::save_to_file;

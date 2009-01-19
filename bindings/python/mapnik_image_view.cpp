@@ -52,12 +52,8 @@ PyObject* view_tostring1(image_view<ImageData32> const& view)
 // encode (png,jpeg)
 PyObject* view_tostring2(image_view<ImageData32> const & view, std::string const& format)
 {
-   std::ostringstream ss(std::ios::out|std::ios::binary);
-   if (format == "png") save_as_png(ss,view);
-   else if (format == "png256") save_as_png256(ss,view);
-   else if (format == "jpeg") save_as_jpeg(ss,85,view);
-   else throw mapnik::ImageWriterException("unknown format: " + format);
-   return ::PyString_FromStringAndSize((const char*)ss.str().c_str(),ss.str().size());
+   std::string s = save_to_string(view, format);
+   return ::PyString_FromStringAndSize(s.data(),s.size());
 }
 
 void (*save_view1)(image_view<ImageData32> const&, std::string const&,std::string const&) = mapnik::save_to_file;

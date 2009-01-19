@@ -63,6 +63,10 @@ namespace mapnik {
                                  std::string const& filename);
    
    template <typename T>
+   MAPNIK_DECL std::string save_to_string(T const& image,
+                                 std::string const& type);
+
+   template <typename T>
    void save_as_png(T const& image,
                     std::string const& filename);
    
@@ -280,12 +284,20 @@ namespace mapnik {
    {
       save_to_file<ImageData32>(image.data(),file);
    }
+
+   inline MAPNIK_DECL std::string save_to_string(Image32 const& image,
+                                        std::string const& type)
+   {
+      return save_to_string<ImageData32>(image.data(),type);
+   }
    
 #ifdef _MSC_VER
    template MAPNIK_DECL void save_to_file<ImageData32>(ImageData32 const&,
                                                        std::string const&,
                                                        std::string const&);
    template MAPNIK_DECL void save_to_file<ImageData32>(ImageData32 const&,
+                                                       std::string const&);
+   template MAPNIK_DECL std::string save_to_string<ImageData32>(ImageData32 const&,
                                                        std::string const&);
    
    template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
@@ -295,6 +307,8 @@ namespace mapnik {
    template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
                                                                      std::string const&);
    
+   template MAPNIK_DECL std:string save_to_string<image_view<ImageData32> > (image_view<ImageData32> const&,
+                                                                     std::string const&);
 #endif
 
 }

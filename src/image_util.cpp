@@ -38,6 +38,19 @@
 namespace mapnik
 {    
    template <typename T>
+   std::string save_to_string(T const& image,
+                     std::string const& type)
+   {
+      std::ostringstream ss(std::ios::out|std::ios::binary);
+     //all this should go into image_writer factory
+     if (type=="png")  save_as_png(ss,image);
+     else if (type == "png256") save_as_png256(ss,image);
+     else if (type=="jpeg") save_as_jpeg(ss,85,image);
+     else throw ImageWriterException("unknown file type: " + type);
+     return ss.str();
+   }
+
+   template <typename T>
    void save_to_file(T const& image,
                      std::string const& filename,
                      std::string const& type)
@@ -68,6 +81,9 @@ namespace mapnik
    template void save_to_file<ImageData32>(ImageData32 const&,
                                            std::string const&);
 
+   template std::string save_to_string<ImageData32>(ImageData32 const&,
+                                           std::string const&);
+
    template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
                                                          std::string const&,
                                                          std::string const&);
@@ -75,4 +91,7 @@ namespace mapnik
    template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
                                                          std::string const&);
    
+   template std::string save_to_string<image_view<ImageData32> > (image_view<ImageData32> const&,
+                                                         std::string const&);
+
 }
