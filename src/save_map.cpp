@@ -122,7 +122,7 @@ namespace mapnik
                 }
                 if ( sym.get_opacity() != dfl.get_opacity() )
                 {
-                    set_css( sym_node, "opacity", sym.get_opacity() );    
+                    set_css( sym_node, "fill-opacity", sym.get_opacity() );    
                 }
             }
 
