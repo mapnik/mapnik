@@ -39,13 +39,20 @@ namespace mapnik {
 
    std::string color::to_string() const
    {
-      std::stringstream ss;
-      ss << "rgb (" 
-         << red()   << ","  
-         << green() << ","  
-         << blue()  << ","
-         << alpha() << ")";
-      return ss.str();
+       std::stringstream ss;
+       if (alpha() == 255) {
+           ss << "rgb("
+           << red()   << ","
+           << green() << ","
+           << blue()  << ")";
+       } else {
+           ss << "rgba("
+           << red()   << ","
+           << green() << ","
+           << blue()  << ","
+           << alpha()/255.0 << ")";
+       }
+       return ss.str();
    }
    
    std::string color::to_hex_string() const
