@@ -936,6 +936,7 @@ namespace mapnik
 
       cairo_context context(context_);
       cairo_pattern pattern(*sym.get_image());
+      pattern.set_extend(Cairo::EXTEND_REPEAT);
 
       context.set_pattern(pattern);
 
