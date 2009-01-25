@@ -28,7 +28,7 @@
 
 namespace  {
 
-   mapnik::coord2d forward_transform(mapnik::proj_transform& t, mapnik::coord2d const& c)
+   mapnik::coord2d forward_transform_c(mapnik::proj_transform& t, mapnik::coord2d const& c)
    {
       double x = c.x;
       double y = c.y;
@@ -37,7 +37,7 @@ namespace  {
       return mapnik::coord2d(x,y);
    }
    
-   mapnik::coord2d backward_transform(mapnik::proj_transform& t, mapnik::coord2d const& c)
+   mapnik::coord2d backward_transform_c(mapnik::proj_transform& t, mapnik::coord2d const& c)
    {
       double x = c.x;
       double y = c.y;
@@ -45,6 +45,30 @@ namespace  {
       t.backward(x,y,z);
       return mapnik::coord2d(x,y);
    }
+
+   mapnik::Envelope<double> forward_transform_env(mapnik::proj_transform& t, mapnik::Envelope<double> const & box)
+   {
+      double minx = box.minx();
+      double miny = box.miny();
+      double maxx = box.maxx();
+      double maxy = box.maxy();
+      double z = 0.0;
+      t.forward(minx,miny,z);
+      t.forward(maxx,maxy,z);
+      return mapnik::Envelope<double>(minx,miny,maxx,maxy);
+   }
+
+   mapnik::Envelope<double> backward_transform_env(mapnik::proj_transform& t, mapnik::Envelope<double> const & box)
+   {
+      double minx = box.minx();
+      double miny = box.miny();
+      double maxx = box.maxx();
+      double maxy = box.maxy();
+      double z = 0.0;
+      t.backward(minx,miny,z);
+      t.backward(maxx,maxy,z);
+      return mapnik::Envelope<double>(minx,miny,maxx,maxy);
+   }   
 }
 
 void export_proj_transform ()
@@ -53,8 +77,10 @@ void export_proj_transform ()
     using mapnik::proj_transform;
     using mapnik::projection;
     class_<proj_transform, boost::noncopyable>("ProjTransform", init< projection const&, projection const& >())
-       .def("forward", forward_transform)
-       .def("backward",backward_transform)
+       .def("forward", forward_transform_c)
+       .def("backward",backward_transform_c)
+       .def("forward", forward_transform_env)
+       .def("backward",backward_transform_env)
        ;
     
 }
