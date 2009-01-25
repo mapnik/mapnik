@@ -18,6 +18,6 @@ Current Version (0.6.0-dev, SVN trunk):
 
 - Python: Added ability to resize map and clear all layers and styles from python (r793)
 
-- Python: Exposed Proj to/from transformation for projected coordinate systems (r792,r821) (#117)
+- Python: Exposed Proj to/from transformation for projected coordinate systems (r792,r822) (#117)
 
 - XML: Added xml serialization for abstract, title, minzoom, maxzoom, and queryable attributes (r787)
