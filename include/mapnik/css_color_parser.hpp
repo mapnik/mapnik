@@ -339,8 +339,9 @@ namespace mapnik {
 
         void operator () (float a) const
         {
-            c_.set_alpha(a * 255.0 + 0.5);
+           c_.set_alpha(unsigned(a * 255.0 + 0.5));
         }
+       
         ColorT& c_;
     };
 
