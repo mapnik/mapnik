@@ -4,16 +4,16 @@ Committers
 ==========
 
   - Artem Pavlenko <pavlenko -at- users.berlios.de>
-  - Jean-Francois Doyon <jfdoyon -at- gmail.com>
-  - Tom Hughes
-  - David Siegel
-  - Andreas
-  - Dominic Hargreaves
-  - David Leaver
-  - Vince Spader
-  - Nick Whitelegg
-  - Ben Moores
-  - Dane Springmeyer <dane.springmeyer -at- gmail.com>
+  - Jean-Francois Doyon (Python API) <jfdoyon -at- gmail.com>
+  - Tom Hughes (Cairo)
+  - David Siegel (XML)
+  - Andreas Volz (Autotools)
+  - Dominic Hargreaves (Stable releases)
+  - David Leaver (TextSymbolizer)
+  - Vince Spader (TextSymbolizer)
+  - Nick Whitelegg (OSM plugin)
+  - Ben Moores (PDF branch)
+  - Dane Springmeyer (Python API) <dane.springmeyer -at- gmail.com>
 
 Patches
 =======
@@ -30,9 +30,11 @@ Patches
   - Dražen Odobašić
   - Martijn van Oosterhout
   - Cameron Patrick
+  - Randomjunk
   - Reid Priedhorsky
   - Brian Quinion
   - Christopher Schmidt
+  - Andreas Schneider
   - Vincent Schut
   - Ehud Shabtai
   - Paul Smith
