@@ -391,7 +391,7 @@ namespace mapnik {
 	
         void operator () (double b) const
         {
-           c_.set_blue(clip_int<0,255>(((255.0 * b)/100.0 + 0.5)));
+           c_.set_blue(clip_int<0,255>(int((255.0 * b)/100.0 + 0.5)));
         }
        ColorT& c_;
     };
