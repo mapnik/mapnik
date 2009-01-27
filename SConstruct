@@ -364,6 +364,7 @@ for count, libinfo in enumerate(BOOST_LIBSHEADERS):
 if env['MISSING_DEPS']:
     # if required dependencies are missing, print warnings and then let SCons finish without building or saving local config
     color_print(1,'\nExiting... the following required dependencies were not found:\n   - %s' % '\n   - '.join(env['MISSING_DEPS']))
+    color_print(1,"\nSee the 'config.log' for details on possible problems.")
    
     if env['SKIPPED_DEPS']:
         color_print(4,'\nAlso the these optional dependencies were skipped:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
