@@ -53,7 +53,7 @@ opts = Variables()
 opts.Add('CXX', 'The C++ compiler to use (defaults to g++).', 'g++')
 opts.Add(EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3']))
 # Note: setting DEBUG=True will override any custom OPTIMIZATION level
-opts.Add(BoolVariable('DEBUG', 'Compile a debug version of mapnik', 'False'))
+opts.Add(BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'))
 
 # Install Variables
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
@@ -61,7 +61,7 @@ opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binar
 
 
 # SCons build behavior options
-opts.Add('CONFIG', 'The file and path of a SCons user config .py file', SCONS_LOCAL_CONFIG)
+opts.Add('CONFIG', "The file and path of a SCons user '%s' file" % SCONS_LOCAL_CONFIG, SCONS_LOCAL_CONFIG)
 opts.Add(BoolVariable('SCONS_CACHE', 'Use SCons dependency caching to speed build process', 'False'))
 opts.Add(BoolVariable('USE_USER_ENV', 'Allow the SCons build env to inherit from the current user environment', 'True'))
 
@@ -86,12 +86,12 @@ opts.Add(PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/us
 opts.Add(PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include'))
 opts.Add(PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA))
 
-# Variables affecting rendering backends
+# Variables affecting rendering back-ends
 opts.Add(BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'))
 
 
 # Variables for optional dependencies
-# Note: Cairo, Cairomm, and PyCairo all optional but configured automatically through pkg-config
+# Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
 # Therefore, we use a single boolean for whether to attempt to build cairo support.
 opts.Add(BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'))
 opts.Add(ListVariable('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal']))
@@ -109,9 +109,9 @@ opts.Add(EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spiri
 # Construct the SCons build environment as a union of the users environment and the `opts`
 
 
-# Build up base environment, then reinitate based on user constomizations.
+# Build up base environment, then reinitiate based on user customizations.
 
-# This method seems unpythonic and a bit dodgy, but it works.
+# This method seems un-pythonic and a bit dodgy, but it works.
 # It seems that creating an alternative environment that loads user options
 # and then updating the main env using those options is the more logical route
 # But my testing indicate that something like:
@@ -136,7 +136,7 @@ else:
 user_conf = env['CONFIG']
 if not user_conf == '' and not user_conf == 'n' and user_conf:
     if not user_conf.endswith('.py'):
-        color_print(1,'SCONS_USER_CONFIG file specified is not a python file, will not be read...')
+        color_print(1,'SCons CONFIG file specified is not a python file, will not be read...')
     else:
         # Accept more than one file as comma-delimited list
         user_confs = user_conf.split(',')
@@ -144,15 +144,15 @@ if not user_conf == '' and not user_conf == 'n' and user_conf:
         for conf in user_confs:
             if os.path.exists(conf):
                 opts.files.append(conf)
-                color_print(4,"SCons CONFIG found: '%s', settings with be included..." % conf)
+                color_print(4,"SCons CONFIG found: '%s', variables will be inherited..." % conf)
             elif not conf == SCONS_LOCAL_CONFIG:
                 # if default missing, no worries
-                # but if default is overriden and file not found, give warning
-                color_print(1,"SCONS_USER_CONFIG file: '%s' could not be found..." % conf)
+                # but if the default is overridden and the file is not found, give warning
+                color_print(1,"SCons CONFIG not found: '%s'" % conf)
         # Recreate the base environment using modified `opts`
         env = Environment(ENV=os.environ,options=opts)
 else:
-    color_print(4,'SCONS_USER_CONFIG specified as false, will not inherit variables python config file')
+    color_print(4,'SCons CONFIG specified as false, will not inherit variables python config file')
 
 #Progress(['/\r', '|\r', '\\\r', '-\r'], interval=5, file=open('/dev/tty', 'w'))
 
@@ -174,7 +174,7 @@ if env['SCONS_CACHE']:
     pass # caching is 'auto' by default in SCons
 else:
     # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
-    # This allows for a 'user_config.py', if present, to be used as the primary means of storing paths to succesful build depedencies
+    # This allows for a SCONS_LOCAL_CONFIG, if present, to be used as the primary means of storing paths to successful build dependencies
     from SCons.SConf import SetCacheMode
     SetCacheMode('force')
 
@@ -368,7 +368,7 @@ if env['MISSING_DEPS']:
     if env['SKIPPED_DEPS']:
         color_print(4,'\nAlso the these optional dependencies were skipped:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
     
-    color_print(4,"\n\nSet custom paths to these libraries and header files on the commandline or in a file called '%s'\n\nTo view available path variables:\n    $ python scons/scons.py --help or -h" % SCONS_LOCAL_CONFIG)
+    color_print(4,"\n\nSet custom paths to these libraries and header files on the command-line or in a file called '%s'\n\nTo view available path variables:\n    $ python scons/scons.py --help or -h" % SCONS_LOCAL_CONFIG)
     
     color_print(4,'\n\nTo see overall SCons help options:\n    $ python scons/scons.py --help-options or -H\n')
     
@@ -379,7 +379,7 @@ if env['MISSING_DEPS']:
     env = conf.Finish()
     #Exit()
 else:
-    # Save the custom variables in a config.py that will be reloaded to allow for `install` without re-specifying custom variables
+    # Save the custom variables in a SCONS_LOCAL_CONFIG that will be reloaded to allow for `install` without re-specifying custom variables
     color_print(4,"All Required dependencies found!")
     if OVERWRITE_CONFIG:
       color_print(4,"Saving '%s' file to hold successful path variables." % SCONS_LOCAL_CONFIG)
