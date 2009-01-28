@@ -84,7 +84,7 @@ void blend (Image32 & im, unsigned x, unsigned y, Image32 const& im2, float opac
    im.set_rectangle_alpha2(im2.data(),x,y,opacity);
 }
 
-#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO) && defined(CAIRO_HAS_IMAGE_SURFACE)
+#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 boost::shared_ptr<Image32> from_cairo(PycairoSurface* surface)
 {
     Cairo::RefPtr<Cairo::ImageSurface> s(new Cairo::ImageSurface(surface->surface));
@@ -110,7 +110,7 @@ void export_image()
        .def("save", save_to_file2)
        .def("open",open_from_file)
        .staticmethod("open")
-#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO) && defined(CAIRO_HAS_IMAGE_SURFACE)
+#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
        .def("from_cairo",&from_cairo)
        .staticmethod("from_cairo")
 #endif

@@ -52,7 +52,7 @@ namespace mapnik
     public:
         Image32(int width,int height);
         Image32(Image32 const& rhs);
-#ifdef CAIRO_HAS_IMAGE_SURFACE
+#ifdef HAVE_CAIRO
         Image32(Cairo::RefPtr<Cairo::ImageSurface> rhs);
 #endif
         ~Image32();

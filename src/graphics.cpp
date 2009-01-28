@@ -42,7 +42,7 @@ namespace mapnik
          height_(rhs.height_),
          data_(rhs.data_)  {}
 
-#ifdef CAIRO_HAS_IMAGE_SURFACE
+#ifdef HAVE_CAIRO
     Image32::Image32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
         :width_(rhs->get_width()),
          height_(rhs->get_height()),
