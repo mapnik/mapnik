@@ -87,8 +87,12 @@ def Raster(**keywords):
   keywords['type'] = 'raster'
   return CreateDatasource(keywords)
 
-def Gdal (**keywords):
+def Gdal(**keywords):
   keywords['type'] = 'gdal'
+  return CreateDatasource(keywords)
+
+def Ogr(**keywords):
+  keywords['type'] = 'ogr'
   return CreateDatasource(keywords)
 
 #register datasources

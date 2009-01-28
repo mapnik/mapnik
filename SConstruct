@@ -94,11 +94,13 @@ opts.Add(BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'))
 # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
 # Therefore, we use a single boolean for whether to attempt to build cairo support.
 opts.Add(BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'))
-opts.Add(ListVariable('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal']))
+opts.Add(ListVariable('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal','ogr']))
 opts.Add(PathVariable('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include/postgresql', PathVariable.PathAccept))
 opts.Add(PathVariable('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA))
-opts.Add(PathVariable('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/include/gdal', PathVariable.PathAccept))
-opts.Add(PathVariable('GDAL_LIBS', 'Search path for GDAL library files', '/usr/' + LIBDIR_SCHEMA))
+opts.Add(PathVariable('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/local/include', PathVariable.PathAccept))
+opts.Add(PathVariable('GDAL_LIBS', 'Search path for GDAL library files', '/usr/local/' + LIBDIR_SCHEMA))
+opts.Add(PathVariable('OGR_INCLUDES', 'Search path for OGR include files', '/usr/local/include', PathVariable.PathAccept))
+opts.Add(PathVariable('OGR_LIBS', 'Search path for OGR library files', '/usr/local/' + LIBDIR_SCHEMA))
 
 # Other variables
 opts.Add(PathVariable('PYTHON','Python executable', sys.executable))
@@ -237,7 +239,7 @@ else:
 
 # Adding the prerequisite library directories to the include path for
 # compiling and the library path for linking, respectively.
-for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PGSQL', 'PROJ', 'GDAL',):
+for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PGSQL', 'PROJ', 'GDAL', 'OGR',):
     inc_path = env['%s_INCLUDES' % prereq]
     lib_path = env['%s_LIBS' % prereq]
     uniq_add(env, 'CPPPATH', inc_path)
@@ -277,7 +279,7 @@ else:
 CXX_LIBSHEADERS = [
     ['icuuc','unicode/unistr.h',True],
     ['icudata','unicode/utypes.h' , True],
-    ['gdal', 'gdal_priv.h',False]
+    ['gdal', ['gdal_priv.h', 'ogrsf_frmts.h'],False]
 ]
 
 
@@ -425,6 +427,9 @@ else:
     
     if 'gdal' in inputplugins and 'gdal' in env['LIBS']:
         SConscript('plugins/input/gdal/SConscript')
+
+    if 'ogr' in inputplugins and 'gdal' in env['LIBS']:
+        SConscript('plugins/input/ogr/SConscript')
     
     if 'gigabase' in inputplugins and 'gigabase_r' in env['LIBS']:
         SConscript('plugins/input/gigabase/SConscript')

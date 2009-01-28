@@ -1,6 +1,7 @@
 
 SUBDIRS = \
 	postgis\
+    ogr \
 	gdal \
 	raster \
 	shape \
