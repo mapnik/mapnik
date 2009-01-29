@@ -56,10 +56,18 @@ ogr_datasource::ogr_datasource(parameters const& params)
    boost::optional<std::string> layer = params.get<std::string>("layer");
    if (!layer) throw datasource_exception("missing <layer> paramater");
 
+   layerName_ = *layer;
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
 
    dataset_ = OGRSFDriverRegistrar::Open ((*file).c_str(), FALSE);
    if (!dataset_) throw datasource_exception(CPLGetLastErrorMsg());
+
+   layer_ = dataset_->GetLayerByName (layerName_.c_str());
+   if (! layer_) throw datasource_exception("cannot find <layer> in dataset");
+   
+   OGREnvelope envelope;
+   layer_->GetExtent (&envelope);
+   extent_.init (envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
 
 #if 0
    double x0 = -std::numeric_limits<float>::max(),
@@ -80,17 +88,11 @@ ogr_datasource::ogr_datasource(parameters const& params)
    }
 #endif
 
-   layer_ = dataset_->GetLayerByName ((*layer).c_str());
-   if (! layer_) throw datasource_exception("cannot find <layer> in dataset");
-   
-   OGREnvelope envelope;
-   layer_->GetExtent (&envelope);
-   extent_.init (envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
-
    OGRFeatureDefn* def = layer_->GetLayerDefn ();
    if (def != 0)
    {
-       for (int i = 0; i < def->GetFieldCount (); i++)
+       int fld_count = def->GetFieldCount ();
+       for (int i = 0; i < fld_count; i++)
        {
            OGRFieldDefn* fld = def->GetFieldDefn (i);
 
@@ -100,42 +102,43 @@ ogr_datasource::ogr_datasource(parameters const& params)
            switch (type_oid)
            {
            case OFTInteger:
-           // case OFTIntegerList:
                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
                break;
 
            case OFTReal:
-           //case OFTRealList:
                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
                break;
                    
            case OFTString:
-           //case OFTStringList:
+           case OFTWideString: // deprecated
                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
                break;
               
            case OFTBinary:
                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
                break;
-               
+
+           case OFTIntegerList:
+           case OFTRealList:
+           case OFTStringList:
+           case OFTWideStringList: // deprecated !
+#ifdef MAPNIK_DEBUG
+               clog << "unhandled type_oid=" << type_oid << endl;
+#endif
+               break;
+
            case OFTDate:
            case OFTTime:
            case OFTDateTime: // unhandled !
 #ifdef MAPNIK_DEBUG
-               clog << "unhandled type_oid="<<type_oid<<endl;
+               clog << "unhandled type_oid=" << type_oid << endl;
 #endif
-               break;
-
-           case OFTWideString:
-           case OFTWideStringList: // deprecated !
-#ifdef MAPNIK_DEBUG
-               clog << "deprecated type_oid="<<type_oid<<endl;
-#endif
+               desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
                break;
 
            default: // unknown
 #ifdef MAPNIK_DEBUG
-               clog << "unknown type_oid="<<type_oid<<endl;
+               clog << "unknown type_oid=" << type_oid << endl;
 #endif
                break;
            }
@@ -181,10 +184,13 @@ featureset_ptr ogr_datasource::features(query const& q) const
 	    ring.addPoint (query_extent.maxx(), query_extent.miny());
 	    ring.addPoint (query_extent.maxx(), query_extent.maxy());
 	    ring.addPoint (query_extent.minx(), query_extent.maxy());
+	    ring.closeRings ();
 
         OGRPolygon* boxPoly = new OGRPolygon();
 	    boxPoly->addRing (&ring);
 	    boxPoly->closeRings();
+
+        layer_->SetSpatialFilter (boxPoly);
 
 #if 0
         std::ostringstream s;
@@ -198,23 +204,32 @@ featureset_ptr ogr_datasource::features(query const& q) const
            s <<",\""<<*pos<<"\"";
            ++pos;
         }	 
-        s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
-        s << std::setprecision(16);
-        s << box.minx() << " " << box.miny() << ",";
-        s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
+        s << " from " << layerName_ ;
 
-        OGRLayer * dataset_->ExecuteSQL(const char *pszSQLCommand,
-                                      OGRGeometry *poSpatialFilter,
-                                      const char *pszDialect );
+        // execute existing SQL
+        OGRLayer* layer = dataset_->ExecuteSQL (s.str(), poly);
+
+        // layer must be freed
+        dataset_->ReleaseResultSet (layer);
 #endif
 
-        return featureset_ptr(new ogr_featureset(*dataset_, *layer_, boxPoly, multiple_geometries_));
+        return featureset_ptr(new ogr_featureset(*dataset_, *layer_, desc_.get_encoding(), multiple_geometries_));
    }
    return featureset_ptr();
 }
 
 featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
 {
+   if (dataset_ && layer_)
+   {
+        OGRPoint* point = new OGRPoint;
+	    point->setX (pt.x);
+	    point->setY (pt.y);
+
+        layer_->SetSpatialFilter (point);
+
+        return featureset_ptr(new ogr_featureset(*dataset_, *layer_, desc_.get_encoding(), multiple_geometries_));
+   }
    return featureset_ptr();
 }
 

@@ -52,6 +52,7 @@ class ogr_datasource : public mapnik::datasource
       int type_;
       OGRDataSource* dataset_;
       OGRLayer* layer_;
+      std::string layerName_;
       mapnik::layer_descriptor desc_;
       bool multiple_geometries_;
 };

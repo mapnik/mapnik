@@ -49,18 +49,18 @@ using mapnik::line_string_impl;
 using mapnik::polygon_impl;
 using mapnik::geometry2d;
 using mapnik::geometry_utils;
+using mapnik::transcoder;
 
 ogr_featureset::ogr_featureset(OGRDataSource & dataset,
                                OGRLayer & layer,
-                               OGRPolygon * extent,
+                               std::string const& encoding,
                                bool multiple_geometries)
    : dataset_(dataset),
      layer_(layer),
-     extent_(extent),
+     tr_(new transcoder(encoding)),
      fidcolumn_(layer_.GetFIDColumn ()),
      multiple_geometries_(multiple_geometries)
 {
-    layer_.SetSpatialFilter (extent_);
     layer_.ResetReading ();
 }
 
@@ -79,7 +79,8 @@ feature_ptr ogr_featureset::next()
           convert_geometry (geom, feature);
 
           OGRFeatureDefn* def = layer_.GetLayerDefn();
-          for (int i = 0; i < def->GetFieldCount(); i++)
+          int fld_count = def->GetFieldCount();
+          for (int i = 0; i < fld_count; i++)
           {
               OGRFieldDefn* fld = def->GetFieldDefn (i);
               OGRFieldType type_oid = fld->GetType ();
@@ -88,59 +89,65 @@ feature_ptr ogr_featureset::next()
               switch (type_oid)
               {
                case OFTInteger:
-               // case OFTIntegerList: // TODO
-#ifdef MAPNIK_DEBUG
-                   clog << name << " " << feat->GetFieldAsInteger (i) << endl;
-#endif
+               {
                    boost::put(*feature,name,feat->GetFieldAsInteger (i));
                    break;
+               }
 
                case OFTReal:
-               //case OFTRealList: // TODO
-#ifdef MAPNIK_DEBUG
-                   clog << name << " " << feat->GetFieldAsDouble (i) << endl;
-#endif
+               {
                    boost::put(*feature,name,feat->GetFieldAsDouble (i));
                    break;
+               }
                        
                case OFTString:
-               //case OFTStringList: // TODO
-#ifdef MAPNIK_DEBUG
-                   clog << name << " " << feat->GetFieldAsString (i) << endl;
-#endif
-                   boost::put(*feature,name,feat->GetFieldAsString (i));
+               case OFTWideString:     // deprecated !
+               case OFTWideStringList: // deprecated !
+               {
+                   UnicodeString ustr = tr_->transcode(feat->GetFieldAsString (i));
+                   boost::put(*feature,name,ustr);
                    break;
-                  
-               case OFTBinary:
-#if 0
-                   boost::put(*feature,name,feat->GetFieldAsBinary (i, size));
-#endif
-                   break;
-                   
-               case OFTDate:
-               case OFTTime:
-               case OFTDateTime: // unhandled !
+               }
+
+               case OFTIntegerList:
+               case OFTRealList:
+               case OFTStringList:
+               {
 #ifdef MAPNIK_DEBUG
                    clog << "unhandled type_oid=" << type_oid << endl;
 #endif
                    break;
+               }
 
-               case OFTWideString:
-               case OFTWideStringList: // deprecated !
+               case OFTBinary:
+               {
 #ifdef MAPNIK_DEBUG
-                   //boost::put(*feature,name,tr_->transcode(feat->GetFieldAsString (i)));
-                   clog << "deprecated type_oid=" << type_oid << endl;
+                   clog << "unhandled type_oid=" << type_oid << endl;
+#endif
+                   //boost::put(*feature,name,feat->GetFieldAsBinary (i, size));
+                   break;
+               }
+                   
+               case OFTDate:
+               case OFTTime:
+               case OFTDateTime:       // unhandled !
+               {
+#ifdef MAPNIK_DEBUG
+                   clog << "unhandled type_oid=" << type_oid << endl;
 #endif
                    break;
+               }
 
                default: // unknown
+               {
 #ifdef MAPNIK_DEBUG
                    clog << "unknown type_oid=" << type_oid << endl;
 #endif
                    break;
+               }
               }
           }
-          
+
           OGRFeature::DestroyFeature (feat);
       
           return feature;

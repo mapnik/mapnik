@@ -24,16 +24,22 @@
 #ifndef OGR_FEATURESET_HPP
 #define OGR_FEATURESET_HPP
 
+// mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/unicode.hpp> 
 
+// boost
+#include <boost/scoped_ptr.hpp>
+
+// ogr
 #include <ogrsf_frmts.h>
-
+  
 class ogr_featureset : public mapnik::Featureset
 {
    public:
       ogr_featureset(OGRDataSource & dataset,
                      OGRLayer & layer,
-                     OGRPolygon * extent,
+                     std::string const& encoding,
                      bool multiple_geometries);
       virtual ~ogr_featureset();
       mapnik::feature_ptr next();
@@ -52,7 +58,7 @@ class ogr_featureset : public mapnik::Featureset
       void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature);
       OGRDataSource & dataset_;
       OGRLayer & layer_;
-      OGRPolygon * extent_;
+      boost::scoped_ptr<mapnik::transcoder> tr_;
       const char* fidcolumn_;
       bool multiple_geometries_;
 };
