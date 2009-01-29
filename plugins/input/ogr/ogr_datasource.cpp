@@ -23,6 +23,7 @@
 
 #include "ogr_datasource.hpp"
 #include "ogr_featureset.hpp"
+#include <mapnik/ptree_helpers.hpp>
 
 using std::clog;
 using std::endl;
@@ -44,6 +45,7 @@ using mapnik::datasource_exception;
 ogr_datasource::ogr_datasource(parameters const& params)
    : datasource(params),
      extent_(),
+     type_(datasource::Vector),
      desc_(*params.get<std::string>("type"),"utf-8")
 {
    OGRRegisterAll();
@@ -53,6 +55,8 @@ ogr_datasource::ogr_datasource(parameters const& params)
 
    boost::optional<std::string> layer = params.get<std::string>("layer");
    if (!layer) throw datasource_exception("missing <layer> paramater");
+
+   multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
 
    dataset_ = OGRSFDriverRegistrar::Open ((*file).c_str(), FALSE);
    if (!dataset_) throw datasource_exception(CPLGetLastErrorMsg());
@@ -153,7 +157,7 @@ std::string ogr_datasource::name()
 
 int ogr_datasource::type() const
 {
-   return datasource::Raster;
+   return type_;
 }
 
 Envelope<double> ogr_datasource::envelope() const
@@ -204,7 +208,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
                                       const char *pszDialect );
 #endif
 
-        return featureset_ptr(new ogr_featureset(*dataset_, *layer_, boxPoly, false));
+        return featureset_ptr(new ogr_featureset(*dataset_, *layer_, boxPoly, multiple_geometries_));
    }
    return featureset_ptr();
 }

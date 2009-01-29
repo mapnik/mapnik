@@ -26,9 +26,7 @@
 
 #include <mapnik/datasource.hpp>
 
-class OGRDataSource;
-class OGRLayer;
-class OGRPolygon;
+#include <ogrsf_frmts.h>
 
 class ogr_featureset : public mapnik::Featureset
 {
@@ -41,6 +39,17 @@ class ogr_featureset : public mapnik::Featureset
       mapnik::feature_ptr next();
    private:
       int endian();
+      void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature);
+      void convert_point (OGRPoint* geom, mapnik::feature_ptr feature);
+      void convert_linestring (OGRLineString* geom, mapnik::feature_ptr feature);
+      void convert_polygon (OGRPolygon* geom, mapnik::feature_ptr feature);
+      void convert_multipoint (OGRMultiPoint* geom, mapnik::feature_ptr feature);
+      void convert_multipoint_2 (OGRMultiPoint* geom, mapnik::feature_ptr feature);
+      void convert_multilinestring (OGRMultiLineString* geom, mapnik::feature_ptr feature);
+      void convert_multilinestring_2 (OGRMultiLineString* geom, mapnik::feature_ptr feature);
+      void convert_multipolygon (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
+      void convert_multipolygon_2 (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
+      void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature);
       OGRDataSource & dataset_;
       OGRLayer & layer_;
       OGRPolygon * extent_;
