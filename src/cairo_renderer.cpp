@@ -503,8 +503,7 @@ namespace mapnik
       if (bg)
       {
          cairo_context context(context_);
-
-         context.set_color(*bg);
+         context.set_color(*bg, bg->alpha()/255.0);
          context.paint();
       }
    }
