@@ -41,8 +41,6 @@ else:
 
 #### SCons build options and initial setup ####
 
-OVERWRITE_CONFIG = False
-
 SCONS_LOCAL_CONFIG = 'config.py'
 
 # All of the following options may be modified at the command-line, for example:
@@ -62,6 +60,7 @@ opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binar
 
 # SCons build behavior options
 opts.Add('CONFIG', "The file and path of a SCons user '%s' file" % SCONS_LOCAL_CONFIG, SCONS_LOCAL_CONFIG)
+opts.Add(BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'))
 opts.Add(BoolVariable('SCONS_CACHE', 'Use SCons dependency caching to speed build process', 'False'))
 opts.Add(BoolVariable('USE_USER_ENV', 'Allow the SCons build env to inherit from the current user environment', 'True'))
 
@@ -136,7 +135,8 @@ else:
 # Unless USE_USER_ENV=False, recreate the base environment
 # using all variables (for example) in the shell users .profile or /etc/profile
 user_conf = env['CONFIG']
-if not user_conf == '' and not user_conf == 'n' and user_conf:
+
+if env['USE_CONFIG']:
     if not user_conf.endswith('.py'):
         color_print(1,'SCons CONFIG file specified is not a python file, will not be read...')
     else:
@@ -153,10 +153,9 @@ if not user_conf == '' and not user_conf == 'n' and user_conf:
                 color_print(1,"SCons CONFIG not found: '%s'" % conf)
         # Recreate the base environment using modified `opts`
         env = Environment(ENV=os.environ,options=opts)
+        env['USE_CONFIG'] = True
 else:
-    color_print(4,'SCons CONFIG specified as false, will not inherit variables python config file')
-
-#Progress(['/\r', '|\r', '\\\r', '-\r'], interval=5, file=open('/dev/tty', 'w'))
+    color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')
 
 env['MISSING_DEPS'] = []
 env['SKIPPED_DEPS'] = []
@@ -369,11 +368,19 @@ if env['MISSING_DEPS']:
     color_print(1,"\nSee the 'config.log' for details on possible problems.")
    
     if env['SKIPPED_DEPS']:
-        color_print(4,'\nAlso the these optional dependencies were skipped:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
+        color_print(4,'\nAlso, these optional dependencies were not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
     
-    color_print(4,"\n\nSet custom paths to these libraries and header files on the command-line or in a file called '%s'\n\nTo view available path variables:\n    $ python scons/scons.py --help or -h" % SCONS_LOCAL_CONFIG)
+    color_print(4,"\nSet custom paths to these libraries and header files on the command-line or in a file called '%s'" % SCONS_LOCAL_CONFIG)
     
-    color_print(4,'\n\nTo see overall SCons help options:\n    $ python scons/scons.py --help-options or -H\n')
+    color_print(4,"    ie. $ python scons/scons.py BOOST_INCLUDES=/usr/local/include/boost-1_37 BOOST_LIBS=/usr/local/lib")
+    
+    color_print(4, "\nOnce all required dependencies are found a local '%s' will be saved and then install:" % SCONS_LOCAL_CONFIG)
+
+    color_print(4,"    $ sudo python scons/scons.py install")
+    
+    color_print(4,"\nTo view available path variables:\n    $ python scons/scons.py --help or -h")
+    
+    color_print(4,'\nTo view overall SCons help options:\n    $ python scons/scons.py --help-options or -H\n')
     
     color_print(4,'More info: http://trac.mapnik.org/wiki/MapnikInstallation')
     
@@ -384,12 +391,17 @@ if env['MISSING_DEPS']:
 else:
     # Save the custom variables in a SCONS_LOCAL_CONFIG that will be reloaded to allow for `install` without re-specifying custom variables
     color_print(4,"All Required dependencies found!")
-    if OVERWRITE_CONFIG:
-      color_print(4,"Saving '%s' file to hold successful path variables." % SCONS_LOCAL_CONFIG)
-      if os.path.exists(SCONS_LOCAL_CONFIG):
-        os.unlink(SCONS_LOCAL_CONFIG)
-    # Serialize all user customizations into local config file
-    opts.Save(SCONS_LOCAL_CONFIG,env)
+    if env['USE_CONFIG']:
+        if os.path.exists(SCONS_LOCAL_CONFIG):
+          action = 'Overwriting and re-saving'
+          os.unlink(SCONS_LOCAL_CONFIG)    
+        # Serialize all user customizations into local config file
+        else:
+          action = 'Saving new'
+        color_print(4,"%s file '%s', to hold successful path variables from commandline and python config file(s)..." % (action,SCONS_LOCAL_CONFIG))
+        opts.Save(SCONS_LOCAL_CONFIG,env)
+    else:
+      color_print(4,"Did not use user config file(s), therefore no local configurations will be saved...")
 
     Export('env')
     Export('conf')
