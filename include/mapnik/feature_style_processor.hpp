@@ -110,38 +110,36 @@ namespace mapnik
             if (ds)
             {
                Envelope<double> const& ext=m_.getCurrentExtent();
-               Envelope<double> bbox(ext);
                projection proj1(lay.srs());
                proj_transform prj_trans(proj0,proj1);
                
-               if (proj0 != proj1) {
-                  Envelope<double> layer_ext = lay.envelope();
-                  double lx0 = layer_ext.minx();
-                  double ly0 = layer_ext.miny();
-                  double lz0 = 0.0;
-                  double lx1 = layer_ext.maxx();
-                  double ly1 = layer_ext.maxy();
-                  double lz1 = 0.0;
-                  // back project layers extent into main map projection
-                  prj_trans.backward(lx0,ly0,lz0);
-                  prj_trans.backward(lx1,ly1,lz1);
-
-                  // if no intersection then nothing to do for layer
-                  if ( lx0 > ext.maxx() || lx1 < ext.minx() || ly0 > ext.maxy() || ly1 < ext.miny() )
-                  {
-                     return;
-                  }
-                  
-                  // clip query bbox
-                  lx0 = std::max(ext.minx(),lx0);
-                  ly0 = std::max(ext.miny(),ly0);
-                  lx1 = std::min(ext.maxx(),lx1);
-                  ly1 = std::min(ext.maxy(),ly1);
-
-                  prj_trans.forward(lx0,ly0,lz0);
-                  prj_trans.forward(lx1,ly1,lz1);
-                  bbox = Envelope<double>(lx0,ly0,lx1,ly1);
+               Envelope<double> layer_ext = lay.envelope();
+               double lx0 = layer_ext.minx();
+               double ly0 = layer_ext.miny();
+               double lz0 = 0.0;
+               double lx1 = layer_ext.maxx();
+               double ly1 = layer_ext.maxy();
+               double lz1 = 0.0;
+               // back project layers extent into main map projection
+               prj_trans.backward(lx0,ly0,lz0);
+               prj_trans.backward(lx1,ly1,lz1);
+               
+               // if no intersection then nothing to do for layer
+               if ( lx0 > ext.maxx() || lx1 < ext.minx() || ly0 > ext.maxy() || ly1 < ext.miny() )
+               {
+                  return;
                }
+               
+               // clip query bbox
+               lx0 = std::max(ext.minx(),lx0);
+               ly0 = std::max(ext.miny(),ly0);
+               lx1 = std::min(ext.maxx(),lx1);
+               ly1 = std::min(ext.maxy(),ly1);
+               
+               prj_trans.forward(lx0,ly0,lz0);
+               prj_trans.forward(lx1,ly1,lz1);
+               Envelope<double> bbox(lx0,ly0,lx1,ly1);
+               
                double resolution = m_.getWidth()/bbox.width();
                query q(bbox,resolution); //BBOX query
                
