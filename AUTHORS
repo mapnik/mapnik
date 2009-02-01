@@ -4,6 +4,7 @@ Committers
 ==========
 
   - Artem Pavlenko <pavlenko -at- users.berlios.de>
+  - Jon Burgess
   - Jean-Francois Doyon (Python API) <jfdoyon -at- gmail.com>
   - Tom Hughes (Cairo)
   - David Siegel (XML)
@@ -22,7 +23,6 @@ Patches
   - Lucio Asnaghi
   - Justin Bronn
   - Christopher Brown
-  - Jon Burgess
   - Berteun Damman
   - Toby Collet
   - Robert Coup
