@@ -307,21 +307,27 @@ namespace mapnik
     template <typename T>    
     Envelope<T>& Envelope<T>::operator*=(T t)
     {
-        minx_ *= t;
-        miny_ *= t;
-        maxx_ *= t;
-        maxy_ *= t;
-        return *this;
+       coord<T,2> c = center();
+       T sx = 0.5 * width() * t;
+       T sy = 0.5 * height() * t;
+       minx_ = static_cast<T>(c.x - sx);
+       maxx_ = static_cast<T>(c.x + sx);
+       miny_ = static_cast<T>(c.y - sy);
+       maxy_ = static_cast<T>(c.y + sy);
+       return *this;
     }
-
+   
     template <typename T>    
     Envelope<T>& Envelope<T>::operator/=(T t)
     {
-        minx_ /= t;
-        miny_ /= t;
-        maxx_ /= t;
-        maxy_ /= t;
-        return *this;
+       coord<T,2> c = center();
+       T sx = 0.5 * width() / t;
+       T sy = 0.5 * height() / t;
+       minx_ = static_cast<T>(c.x - sx);
+       maxx_ = static_cast<T>(c.x + sx);
+       miny_ = static_cast<T>(c.y - sy);
+       maxy_ = static_cast<T>(c.y + sy);
+       return *this;
     }
     
     template class Envelope<int>;
