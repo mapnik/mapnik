@@ -14,6 +14,9 @@ For a complete change history, see the SVN log.
 Current Version (0.6.0-dev, SVN trunk):
 ---------------------------------------
 
+- Filter parsing: Allow numbers in the filter field name.
+  This allows for shapefiles with columns like '1970'.
+
 - Plugins: Added OGR driver for reading all OGR supported formats (kunitoki) (r836) (#170)
 
 - Python: Made available the scale_denominator property from the map in c++ and python (r793)

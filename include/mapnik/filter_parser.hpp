@@ -422,7 +422,7 @@ namespace mapnik
                                      [push_string<FeatureT>(self.exprs,self.tr)],
                                      L'\'');
 
-                  property = L'[' >> ( (Letter | L'_' | L':') 
+                  property = L'[' >> ( (Letter | Digit | L'_' | L':') 
                                        >> *NameChar )[push_property<FeatureT>(self.exprs)] >> L']';
 		
                   literal = boolean | number | string_ | property;
