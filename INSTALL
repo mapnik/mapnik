@@ -8,20 +8,20 @@ Quick Start
 
 Install needed dependencies::
 
-  $ sudo aptitude install libboost-filesystem-dev postgresql libgdal ...
+  $ sudo apt-get install libboost* libicu* libfreetype* proj # see below for full list
   $ cd ~/src/mapnik
 
-Build source code::
+Build Mapnik source code::
 
-  $ python scons/scons.py 
+  $ python scons/scons.py
 
-Install mapnik libs and python bindings::
+Install Mapnik library and python bindings::
 
   $ sudo python scons/scons.py install
 
 Run python interpreter and check installation::
 
-  >>> from mapnik import *
+  >>> import mapnik
   Traceback (most recent call last):
    File "<stdin>", line 1, in <module>
   ImportError: No module named mapnik
@@ -33,42 +33,48 @@ Otherwise your setup is ready. You can now visit http://trac.mapnik.org/wiki/Get
 
 For troubleshooting other errors see: http://trac.mapnik.org/wiki/InstallationTroubleshooting.
 
+
 Prerequisites
 -------------
 
-First, here is a quick list of the software dependencies:
+First, here is a quick list of the required software dependencies:
 
 - Linux/UNIX with g++ compiler
-
+- Python 2.2 or greater to build Mapnik
+    - Python 2.4 for python bindings (see below)
 - libboost 1.33.0 or greater with the following libraries included:
+    - system (boost >= 1.35 only)
 	- thread
-        - system (boost >= 1.35 only)
 	- filesystem
 	- regex
-        - iostreams
-	- (Optional) program_options
-	- (Optional) python
+    - iostreams
+    - python - required only for python bindings (see below)
 - libicu - International Components for Unicode
-- libpng
-- libjpeg
-- libtiff
-- libz
-- libfreetype2
-- pkg-config - Used for checking for cairo support
-- (Optional) tinyxml, spirit, or libxml2 - XML Parsing libraries 
-- (Optional) PostgreSQL libraries (For PostGIS support)
-- (Optional) PROJ.4 (More on this below)
-- (Optional) GDAL 
-- Python 2.2 or greater to build Mapnik
-- (Optional) Python 2.4 or greater for the Python language bindings
+- libpng - PNG Graphics
+- libjpeg - JPEG Graphics
+- libtiff - TIFF Graphics 
+- libz - Compression
+- libfreetype2 - Font support (Install requires freetype-config)
+- libxml2 - XML parsing (Install requires xml2-config)
+- proj - PROJ.4 Projection library
 
-Some of these will come pre-installed on modern Linux/UNIX systems, including Mac OS X. The Boost libraries are an exception, but can be installed using aptitude/apt-get on debian systems or macports/fink on OS X.
+Second, here are the optional software dependencies:
 
-If your system does NOT have one of these installed, you will need to install the mandatory ones at the very least before proceeding further.  Instructions on how to do this will come with each individual package.
+- Python 2.4 or greater for Python language bindings
+- Boost 'python', required for binding Python language bindings
+- Boost 'program_options' for shapeindex executable support
+- Cairo - Graphics library for PDF, PS, and SVG formats
+    - pkg-config - Required for building with cairo support
+	- cairomm - C++ bindings for cairo
+	- pycairo - Python bindings for cairo
+- libpq - PostgreSQL libraries (For PostGIS plugin support)
+- libgdal - GDAL/OGR input (For gdal and ogr plugin support)
 
-An an example on Ubuntu the aptitude package manager can be used to install the latest versions of all mapnik dependencies in one fell swoop:
+On Linux and Mac OS, package management systems (such as apt for debian or macports for darwin) can be used to install all required and optional dependencies, but source installs may be preferrable.
 
-$ aptitude install libboost-thread-dev libboost-filesystem-dev libboost-regex-dev libboost-program-options-dev libboost-python-dev libboost-serialization-dev libpng12-dev libjpeg62-dev libtiff4-dev zlib1g-dev libfreetype6-dev libltdl3-dev libfribidi-dev debhelper libboost-iostreams-dev libcairo libcairo-dev python-cairo libcairomm-1.0-1 libcairomm-1.0-dev libicu-dev postgresql libgdal-dev postgis proj
+Instructions for installing many of these dependencies on various platforms can be found at the Mapnik Community Wiki (http://trac.mapnik.org/wiki/MapnikInstallation).
+
+If your system does NOT have one of these installed, you will need to install the mandatory ones at the very least before proceeding further.
 
 Also, a minimum of 256MB of RAM is recommended for the build process.
 
@@ -76,149 +82,28 @@ Also, a minimum of 256MB of RAM is recommended for the build process.
 Building
 --------
 
-Once you've installed the required software packages, the simplest way to build mapnik is to run "scons" (The software builder) without any options::
+Once you've installed the required software packages, the simplest way to build mapnik is to run SCons (The software builder) without any options::
 
-  $ cd /path/to/mapnik-sourcecode
-  $ /path/to/python scons/scons.py
+  $ cd ~/src/mapnik
+  $ python scons/scons.py
 
-This should compile and link the mapnik library, the input plugins and the python language binding (if possible).  If any mandatory dependencies are not found the build will fail, and you will need to specify custom paths to your libraries and include files (see below).
+This should compile and link the mapnik library as well as the input plugins and the python language binding (if possible).  If any mandatory dependencies are not found the build will fail, and you will need to specify custom paths to your libraries and include files.
 
-Note that the python used to run "scons" does NOT have to be the same as the one used for the python bindings.
-
-"scons" accepts a variety of options to customize your build.  This allows you to specify which components are compiled, where to find dependencies, where to install mapnik, and so on.
+SCons accepts a variety of options to customize your build.  This allows you to specify which components are compiled, where to find dependencies, where to install mapnik, and so on.
 
 To see the list of available options, from the root of the source distribution, run::
 
-  $ /path/to/python scons/scons.py -h
+  $ python scons/scons.py -h
 
-You will get::
-
-  CXX: The C++ compiler to use (defaults to g++).
-      default: g++
-      actual: g++
-  
-  PREFIX: The install path "prefix"
-      default: /usr/local
-      actual: /usr/local
-  
-  BOOST_INCLUDES: Search path for boost include files ( /path/to/BOOST_INCLUDES )
-      default: /usr/include
-      actual: /usr/include
-  
-  BOOST_LIBS: Search path for boost library files ( /path/to/BOOST_LIBS )
-      default: /usr/lib
-      actual: /usr/lib
-  
-  BOOST_TOOLKIT: Specify boost toolkit e.g. gcc41.
-      default: 
-      actual: 
-  
-  FREETYPE_CONFIG: The path to the freetype-config executable.
-      default: freetype-config
-      actual: freetype-config
-  
-  XML2_CONFIG: The path to the xml2-config executable.
-      default: xml2-config
-      actual: xml2-config
-  
-  ICU_INCLUDES: Search path for ICU include files ( /path/to/ICU_INCLUDES )
-      default: /usr/include
-      actual: /usr/include
-  
-  ICU_LIBS: Search path for ICU include files ( /path/to/ICU_LIBS )
-      default: /usr/lib
-      actual: /usr/lib
-  
-  PNG_INCLUDES: Search path for libpng include files ( /path/to/PNG_INCLUDES )
-      default: /usr/include
-      actual: /usr/include
-  
-  PNG_LIBS: Search path for libpng include files ( /path/to/PNG_LIBS )
-      default: /usr/lib
-      actual: /usr/lib
-  
-  JPEG_INCLUDES: Search path for libjpeg include files ( /path/to/JPEG_INCLUDES )
-      default: /usr/include
-      actual: /usr/include
-  
-  JPEG_LIBS: Search path for libjpeg library files ( /path/to/JPEG_LIBS )
-      default: /usr/lib
-      actual: /usr/lib
-  
-  TIFF_INCLUDES: Search path for libtiff include files ( /path/to/TIFF_INCLUDES )
-      default: /usr/include
-      actual: /usr/include
-  
-  TIFF_LIBS: Search path for libtiff library files ( /path/to/TIFF_LIBS )
-      default: /usr/lib
-      actual: /usr/lib
-  
-  PGSQL_INCLUDES: Search path for PostgreSQL include files ( /path/to/PGSQL_INCLUDES )
-      default: /usr/include
-      actual: /usr/include
-  
-  PGSQL_LIBS: Search path for PostgreSQL library files ( /path/to/PGSQL_LIBS )
-      default: /usr/lib
-      actual: /usr/lib
-  
-  PROJ_INCLUDES: Search path for PROJ.4 include files ( /path/to/PROJ_INCLUDES )
-      default: /usr/local/include
-      actual: /usr/local/include
-  
-  PROJ_LIBS: Search path for PROJ.4 library files ( /path/to/PROJ_LIBS )
-      default: /usr/local/lib
-      actual: /usr/local/lib
-  
-  GDAL_INCLUDES: Search path for GDAL include files ( /path/to/GDAL_INCLUDES )
-      default: /usr/include
-      actual: /usr/include
-  
-  GDAL_LIBS: Search path for GDAL library files ( /path/to/GDAL_LIBS )
-      default: /usr/lib
-      actual: /usr/lib
-  
-  PYTHON: Python executable ( /path/to/PYTHON )
-      default: /usr/bin/python
-      actual: /usr/bin/python
-  
-  INPUT_PLUGINS: Input drivers to include
-      (all|none|comma-separated list of names)
-      allowed names: postgis shape raster gdal
-      default: all
-      actual: postgis shape raster gdal
-  
-  BINDINGS: Language bindings to build
-      (all|none|comma-separated list of names)
-      allowed names: python
-      default: all
-      actual: python
-  
-  DEBUG: Compile a debug version of mapnik (yes|no)
-      default: False
-      actual: False
-  
-  DESTDIR: The root directory to install into. Useful mainly for binary package building
-      default: /
-      actual: /
-  
-  THREADING: Set threading support (multi|single)
-      default: multi
-      actual: multi
-  
-  XMLPARSER: Set xml parser  (tinyxml|spirit|libxml2)
-      default: tinyxml
-      actual: tinyxml
-
-
-This help should be self-explanatory!
+Note that the python used to run SCons does NOT have to be the same as the one used for the python bindings.
 
 For example, if you compiled your own set of Boost libraries, you might use::
 
-  $ /path/to/python scons/scons.py BOOST_INCLUDES=/usr/local/include/boost-1_33_1 BOOST_LIBS=/usr/local/lib
+  $ python scons/scons.py BOOST_TOOLKIT=gcc43 BOOST_INCLUDES=/usr/local/include/boost-1_35 BOOST_LIBS=/usr/local/lib
 
-Or if you installed Postgres and Gdal from source and you'd like to build mapnik in Debug mode with the ability for XML parsing, you might use::
+Or if you installed Postgres and Gdal from source and you'd like to build mapnik in Debug mode you might use::
 
-  $ /path/to/python scons/scons.py DEBUG=y PGSQL_INCLUDES=/usr/local/pgsql/include PGSQL_LIBS=/usr/local/pgsql/lib XMLPARSER=libxml2
+  $ python scons/scons.py DEBUG=True PGSQL_INCLUDES=/usr/local/pgsql/include PGSQL_LIBS=/usr/local/pgsql/lib GDAL_INCLUDES=/usr/local/include GDAL_LIBS=/usr/local/lib
 
 
 Installation
@@ -226,7 +111,7 @@ Installation
 
 Once the build has successfully completed, you can install the various files on your system by executing::
 
-  $ /path/to/python scons/scons.py install
+  $ python scons/scons.py install
 
 By default, everything will be installed under the PREFIX '/usr/local' as such::
 
@@ -242,24 +127,47 @@ If you're using the default PREFIX, you will most likely need to be root to perf
 Testing Installation
 --------------------
 
-There currently is no easy way to test your setup, other than write some code to generate a map.
+First, try importing the Mapnik python module in a python interpreter, and make sure it does so without errors::
 
-One simple thing you can do is try to load the Python module in a python interpreter, and make sure it does so without errors::
-
-  $ /path/to/python
-  Python 2.4.2 (#1, Jan 11 2006, 10:59:28)
-  [GCC 3.4.4 20050721 (Red Hat 3.4.4-2)] on linux2
+  $ python
+  Python 2.5.1 (r251:54863, Jan 17 2008, 19:35:17) 
+  [GCC 4.0.1 (Apple Inc. build 5465)] on darwin
   Type "help", "copyright", "credits" or "license" for more information.
-  >>> from mapnik import *
-  >>>
+  >>> import mapnik
+  >>> 
+
+Then, try rendering the demo map, included in the Mapnik source code::
+
+  $ cd demo/python
+  $ python rundemo.py 
+
+If the resulting maps look good, this indicates the core components of Mapnik are installed properly, as well as the Shapefile plugin, Unicode text support (ICU), and re-projection support using Proj.
+
+For further tests see the `tests` folder within the Mapnik source code.
 
 
 Learning Mapnik
 ---------------
 
-Visit https://trac.mapnik.org/wiki/GettingStarted for a basic tutorial on making maps with Mapnik using the Python bindings
+For Users:
+  - Visit http://trac.mapnik.org/wiki/GettingStarted for basic tutorials on making maps with Mapnik using the Python bindings.
 
-Try running the demo scripts in mapnik/demo/python
+For Developers:
+  - Visit http://trac.mapnik.org/#DevelopersCorner for resources for getting involved with Mapnik development
+
+
+Mapnik Community
+----------------
+
+Mapnik has an active community of talented users and developers making amazing maps.
+
+If you are looking for further help on installation or usage and you can't find what you are looking for from searching the users list archives (http://lists.berlios.de/pipermail/mapnik-users/) or the trac wiki (http://trac.mapnik.org/), feel free to join the Mapnik community and introduce yourself.
+
+You can get involved by:
+  - Subscribing to the mapnik-users list: http://lists.berlios.de/mailman/listinfo/mapnik-users
+  - Subscribing to the mapnik-developers list: http://lists.berlios.de/mailman/listinfo/mapnik-devel
+  - Joining the #mapnik channel on irc.freenode.net
+  - Signing up as a user or contributer at http://www.ohloh.net/p/mapnik/  
 
 
 A note on projection support
