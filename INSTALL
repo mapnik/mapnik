@@ -44,9 +44,9 @@ First, here is a quick list of the required software dependencies:
     - Python 2.4 for python bindings (see below)
 - libboost 1.33.0 or greater with the following libraries included:
     - system (boost >= 1.35 only)
-	- thread
-	- filesystem
-	- regex
+    - thread
+    - filesystem
+    - regex
     - iostreams
     - python - required only for python bindings (see below)
 - libicu - International Components for Unicode
@@ -65,8 +65,8 @@ Second, here are the optional software dependencies:
 - Boost 'program_options' for shapeindex executable support
 - Cairo - Graphics library for PDF, PS, and SVG formats
     - pkg-config - Required for building with cairo support
-	- cairomm - C++ bindings for cairo
-	- pycairo - Python bindings for cairo
+    - cairomm - C++ bindings for cairo
+    - pycairo - Python bindings for cairo
 - libpq - PostgreSQL libraries (For PostGIS plugin support)
 - libgdal - GDAL/OGR input (For gdal and ogr plugin support)
 
@@ -153,7 +153,7 @@ For Users:
   - Visit http://trac.mapnik.org/wiki/GettingStarted for basic tutorials on making maps with Mapnik using the Python bindings.
 
 For Developers:
-  - Visit http://trac.mapnik.org/#DevelopersCorner for resources for getting involved with Mapnik development
+  - Visit http://trac.mapnik.org/#DevelopersCorner for resources for getting involved with Mapnik development.
 
 
 Mapnik Community
@@ -166,7 +166,7 @@ If you are looking for further help on installation or usage and you can't find 
 You can get involved by:
   - Subscribing to the mapnik-users list: http://lists.berlios.de/mailman/listinfo/mapnik-users
   - Subscribing to the mapnik-developers list: http://lists.berlios.de/mailman/listinfo/mapnik-devel
-  - Joining the #mapnik channel on irc.freenode.net
+  - Joining the #mapnik channel on irc://irc.freenode.net/mapnik
   - Signing up as a user or contributer at http://www.ohloh.net/p/mapnik/  
 
 
