@@ -109,7 +109,7 @@ namespace mapnik
             boost::shared_ptr<datasource> ds=lay.datasource();
             if (ds)
             {
-               Envelope<double> const& ext=m_.getCurrentExtent();
+               Envelope<double> ext = m_.get_buffered_extent();
                projection proj1(lay.srs());
                proj_transform prj_trans(proj0,proj1);
                
