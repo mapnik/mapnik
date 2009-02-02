@@ -63,6 +63,7 @@ namespace mapnik
         minimum_distance(sym.get_minimum_distance()),
         avoid_edges(sym.get_avoid_edges()),
         has_dimensions(has_dimensions_), 
+        allow_overlap(false),
         dimensions(std::make_pair(sym.get_image()->width(),
                                   sym.get_image()->height()))
    {
@@ -82,6 +83,7 @@ namespace mapnik
         minimum_distance(sym.get_minimum_distance()),
         avoid_edges(sym.get_avoid_edges()),
         has_dimensions(false),
+        allow_overlap(sym.get_allow_overlap()),
         dimensions()
    {
    }
@@ -343,7 +345,8 @@ namespace mapnik
             }
  
             if (!dimensions_.intersects(e) || 
-                !detector_.has_point_placement(e, p.minimum_distance))
+                (!p.allow_overlap && !detector_.has_point_placement(e, 
+p.minimum_distance)))
             {
                return;
             }

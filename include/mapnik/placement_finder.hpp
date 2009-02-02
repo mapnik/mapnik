@@ -67,6 +67,7 @@ namespace mapnik
          double max_char_angle_delta;
          double minimum_distance;
          bool avoid_edges;
+         bool allow_overlap;
          bool has_dimensions;
          std::pair<double, double> dimensions;
    };
