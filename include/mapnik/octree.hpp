@@ -64,6 +64,7 @@ namespace mapnik {
                      greens(0),
                      blues(0),
                      count(0),
+                     count2(0),
                      index(0)
                {
                   memset(&children_[0],0,sizeof(children_));
@@ -82,20 +83,14 @@ namespace mapnik {
                unsigned greens;
                unsigned blues;
                unsigned count;	
+               unsigned count2;	
                uint8_t  index;					
          };
          struct node_cmp
          {
                bool operator() ( const node * lhs,const node* rhs) const
                {
-                  unsigned left_total=0;
-                  unsigned right_total=0;
-                  for (unsigned i=0; i<8;++i)
-                  {
-                     if (lhs->children_[i]) left_total+=lhs->children_[i]->count;
-                     if (rhs->children_[i]) right_total+=rhs->children_[i]->count;
-                  }
-                  return left_total < right_total;
+                  return lhs->count2 < rhs->count2;
                }
          };
 
@@ -119,6 +114,7 @@ namespace mapnik {
             unsigned level = 0;
             node * cur_node = root_;
             while (true) {
+               cur_node->count2++;
                              
                if ( cur_node->count > 0 || level == leaf_level_) 
                {    
