@@ -148,7 +148,12 @@ void export_map()
            "...'height', 'intersect', 'intersects', 'inverse', 'maxx',\n"
            "...'maxy', 'minx', 'miny', 'width'\n"
          )
-        
+
+      .def("buffered_envelope",
+           &Map::get_buffered_extent,
+           "TODO\n"
+         )
+
       .def("find_style",
            find_style,
              
@@ -294,12 +299,11 @@ void export_map()
          )
         
 
-      .add_property("view_transform",make_function(&Map::getCurrentExtent,
-                         return_value_policy<copy_const_reference>()),
-                   "View the Map CoordinateTransform Envelope.\n"
+      .def("view_transform",&Map::view_transform,
+                   "Map CoordinateTransform object.\n"
                    "\n"
                    "Usage:\n"
-                   ">>> m.view_transform\n"         
+                   ">>> m.view_transform()\n"         
          )
          
       .add_property("height",
