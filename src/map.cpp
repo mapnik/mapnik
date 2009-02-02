@@ -372,6 +372,15 @@ namespace mapnik
         return currentExtent_;
     }
 
+   Envelope<double> Map::get_buffered_extent() const
+   {
+      double extra = 2.0 * scale() * buffer_size_;
+      Envelope<double> ext(currentExtent_);
+      ext.width(currentExtent_.width() + extra);
+      ext.height(currentExtent_.height() + extra);
+      return ext;
+   }
+   
     void Map::pan(int x,int y)
     {
         int dx = x - int(0.5 * width_);

@@ -298,6 +298,11 @@ namespace mapnik
          */
         const Envelope<double>& getCurrentExtent() const;
 
+        /*! \brief Get current buffered bounding box.
+         *  @return The current buffered bounding box.
+         */
+        Envelope<double> get_buffered_extent() const;
+        
         double scale() const;
         
         double scale_denominator() const;
