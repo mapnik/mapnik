@@ -449,9 +449,6 @@ else:
     if 'ogr' in inputplugins and 'gdal' in env['LIBS']:
         SConscript('plugins/input/ogr/SConscript')
     
-    if 'gigabase' in inputplugins and 'gigabase_r' in env['LIBS']:
-        SConscript('plugins/input/gigabase/SConscript')
-    
     # Build the Python bindings.
     if 'python' in env['BINDINGS']:
         if not os.access(env['PYTHON'], os.X_OK):
