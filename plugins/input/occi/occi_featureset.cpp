@@ -64,7 +64,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool * pool,
                                  std::string const& encoding,
                                  bool multiple_geometries,
                                  unsigned num_attrs)
-   : pool_(pool),
+   : conn_(pool),
      tr_(new transcoder(encoding)),
      multiple_geometries_(multiple_geometries),
      num_attrs_(num_attrs),
@@ -72,9 +72,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool * pool,
 {
     try
     {
-        conn_ = pool_->getConnection();
-        stmt_ = conn_->createStatement (sqlstring);
-        rs_ = stmt_->executeQuery();
+        rs_ = conn_.execute_query (sqlstring);
     }
     catch (SQLException &ex)
     {
@@ -84,22 +82,18 @@ occi_featureset::occi_featureset(StatelessConnectionPool * pool,
 
 occi_featureset::~occi_featureset()
 {
-    stmt_->closeResultSet (rs_);
-    conn_->terminateStatement (stmt_);
-    pool_->releaseConnection (conn_);
 }
 
 feature_ptr occi_featureset::next()
 {
-    if (rs_->next())
+    if (rs_ && rs_->next())
     {
         feature_ptr feature(new Feature(count_));
 
-        SDOGeometry* geom = (SDOGeometry*) rs_->getObject(1);
-        if (geom)
+        boost::shared_ptr<SDOGeometry> geom (dynamic_cast<SDOGeometry*> (rs_->getObject(1)));
+        if (geom.get())
         {
-            convert_geometry (geom, feature);
-            delete geom;
+            convert_geometry (geom.get(), feature);
         }
 
         vector<MetaData> listOfColumns = rs_->getColumnListMetaData();

@@ -133,7 +133,7 @@ occi_datasource::occi_datasource(parameters const& params)
 
    // get SRID from geometry metadata
    {
-       Connection* conn = pool_->getConnection ();
+       occi_connection_ptr conn (pool_);
 
        std::ostringstream s;
        s << "select srid from " << SDO_GEOMETRY_METADATA_TABLE << " where";
@@ -142,28 +142,21 @@ occi_datasource::occi_datasource(parameters const& params)
 
        try
        {
-           Statement* stmt = conn->createStatement (s.str());
-           ResultSet* rs = stmt->executeQuery();
-           
-           if (rs->next ())
+           ResultSet* rs = conn.execute_query (s.str());
+           if (rs && rs->next ())
            {
                srid_ = rs->getInt(1);
            }
-           
-           stmt->closeResultSet (rs);
-           conn->terminateStatement (stmt);
        }
        catch (SQLException &ex)
        {
            throw datasource_exception(ex.getMessage());
        }
-       
-       pool_->releaseConnection (conn);
    }
 
    // get table metadata
-   Connection* conn = pool_->getConnection ();
-   MetaData metadata = conn->getMetaData(table_.c_str(), MetaData::PTYPE_TABLE);
+   occi_connection_ptr conn (pool_);
+   MetaData metadata = (*conn)->getMetaData(table_.c_str(), MetaData::PTYPE_TABLE);
    vector<MetaData> listOfColumns = metadata.getVector(MetaData::ATTR_LIST_COLUMNS);
 
    for (unsigned int i=0;i<listOfColumns.size();++i)
@@ -228,8 +221,6 @@ occi_datasource::occi_datasource(parameters const& params)
           break;
        }	  
    }
-
-   pool_->releaseConnection (conn);
 }
 
 occi_datasource::~occi_datasource()

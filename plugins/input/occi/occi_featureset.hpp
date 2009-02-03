@@ -30,6 +30,7 @@
 
 // boost
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 // oci
 #include "occi_types.hpp"
@@ -50,20 +51,18 @@ class occi_featureset : public mapnik::Featureset
       void convert_linestring (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       void convert_polygon (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       void convert_multipoint (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-//      void convert_multipoint_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
+      //void convert_multipoint_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       void convert_multilinestring (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-//      void convert_multilinestring_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
+      //void convert_multilinestring_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       void convert_multipolygon (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-//      void convert_multipolygon_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-//      void convert_collection (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
+      //void convert_multipolygon_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
+      //void convert_collection (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       void fill_geometry2d (mapnik::geometry2d * geom,
                              const int dimensions,
                              const std::vector<oracle::occi::Number>& elem_info,
                              const std::vector<oracle::occi::Number>& ordinates,
                              const bool is_point_geom);
-      oracle::occi::StatelessConnectionPool* pool_;
-      oracle::occi::Connection* conn_;
-      oracle::occi::Statement* stmt_;
+      occi_connection_ptr conn_;
       oracle::occi::ResultSet* rs_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
       const char* fidcolumn_;

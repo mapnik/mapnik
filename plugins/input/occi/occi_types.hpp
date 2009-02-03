@@ -75,4 +75,68 @@ enum
     SDO_INTERPRETATION_CIRCULAR         = 2
 };
 
+
+class occi_connection_ptr
+{
+public:
+    occi_connection_ptr (oracle::occi::StatelessConnectionPool* pool)
+        : pool_ (pool),
+          conn_ (pool->getConnection ()),
+          stmt_ (0),
+          rs_ (0)
+    {
+    }
+    
+    ~occi_connection_ptr ()
+    {
+        close_query (true);
+    }
+
+    oracle::occi::ResultSet* execute_query (const std::string& s)
+    {
+        close_query (false);
+
+        stmt_ = conn_->createStatement (s);
+        rs_ = stmt_->executeQuery ();
+        
+        return rs_;
+    }
+
+    oracle::occi::Connection* operator*()
+    {
+        return conn_;
+    }
+
+private:
+
+    void close_query (const bool release_connection)
+    {
+        if (conn_)
+        {
+            if (stmt_)
+            {
+                if (rs_)
+                { 
+                    stmt_->closeResultSet (rs_);
+                    rs_ = 0;
+                }
+
+                conn_->terminateStatement (stmt_);
+                stmt_ = 0;
+            }
+            
+            if (release_connection)
+            {
+                pool_->releaseConnection (conn_);
+                conn_ = 0;
+            }
+        }
+    }
+
+    oracle::occi::StatelessConnectionPool* pool_;
+    oracle::occi::Connection* conn_;
+    oracle::occi::Statement* stmt_;
+    oracle::occi::ResultSet* rs_;
+};
+
 #endif // OCCI_TYPES_HPP
