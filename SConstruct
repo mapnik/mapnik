@@ -20,6 +20,7 @@
 
 
 import os, sys, platform
+from subprocess import Popen, PIPE
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -31,6 +32,13 @@ def color_print(color,text,newline=True):
         print text,
     else:
         print text
+
+def call(cmd):
+    stdin, stderr = Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE).communicate()
+    if not stderr:
+      return stdin.strip()
+    else:
+      color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org')
 
 # Helper function for uniquely appending paths to a SCons path listing.
 def uniq_add(env, key, val):
@@ -93,6 +101,7 @@ opts.Add(BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'))
 
 # Install Variables
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
+opts.Add('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)','')
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
 
 
@@ -126,7 +135,6 @@ opts.Add(PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr
 # Variables affecting rendering back-ends
 opts.Add(BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'))
 
-
 # Variables for optional dependencies
 # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
 # Therefore, we use a single boolean for whether to attempt to build cairo support.
@@ -142,7 +150,7 @@ opts.Add(PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/u
 opts.Add(PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept))
 
 # Other variables
-opts.Add(PathVariable('PYTHON','Python executable', sys.executable))
+opts.Add(PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable))
 opts.Add(ListVariable('BINDINGS','Language bindings to build','all',['python']))
 opts.Add(EnumVariable('THREADING','Set threading support','multi', ['multi','single']))
 opts.Add(EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spirit','libxml2']))
@@ -512,18 +520,49 @@ else:
             color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
             Exit(1)
     
-        env['PYTHON_PREFIX'] = os.popen("%s -c 'import sys; print sys.prefix'" % env['PYTHON']).read().strip()
-        env['PYTHON_VERSION'] = os.popen("%s -c 'import sys; print sys.version'" % env['PYTHON']).read()[0:3]
-    
-        color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
-    
+        sys_prefix = "%s -c 'import sys; print sys.prefix'" % env['PYTHON']
+        env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
+        
+        site_packages = "%s -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()'" % env['PYTHON']
+        env['PYTHON_SITE_PACKAGES'] = call(site_packages)
+        
+        sys_version = "%s -c 'import sys; print sys.version'" % env['PYTHON']
+        env['PYTHON_VERSION'] = call(sys_version)[0:3]
+        
+        py_includes = "%s -c 'from distutils.sysconfig import get_python_inc; print get_python_inc()'" % env['PYTHON']
+        env['PYTHON_INCLUDES'] =  call(py_includes)
+
+        # if user-requested custom prefix fall back to manual concatenation for building subdirectories
+        py_relative_install = env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'        
+        if env['PYTHON_PREFIX']:
+            env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_PREFIX'] + '/' +  py_relative_install
+        
+        # TODO...
+        # When the env['PREFIX'] is changed should that
+        # also affect/override where to install python?
+        # Perhaps env['PREFIX'] should be None by default
+        # while 'usr/local' would be overridden in the code if
+        # env['PREFIX'] is set?
+        # This way we could more easily check for a 'custom' PREFIX
+        
+        # code here but disabled...
+        #elif not env['PREFIX'] == '/usr/local':
+        #    env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PREFIX'] + '/' +  py_relative_install        
+        
+        else:
+            env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_SITE_PACKAGES']
+           
         majver, minver = env['PYTHON_VERSION'].split('.')
     
         if (int(majver), int(minver)) < (2, 2):
             color_print(1,"Python version 2.2 or greater required")
             Exit(1)
     
-        color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_PREFIX']))
+        color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
+
+        color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
+        
+        color_print(4,'Python bindings will install in... %s' % os.path.abspath(env['PYTHON_INSTALL_LOCATION']))
     
         SConscript('bindings/python/SConscript')
         
