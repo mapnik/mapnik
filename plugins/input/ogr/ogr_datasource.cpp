@@ -179,18 +179,10 @@ featureset_ptr ogr_datasource::features(query const& q) const
    {
         mapnik::Envelope<double> const& query_extent = q.get_bbox();
 
-        OGRLinearRing ring;
-	    ring.addPoint (query_extent.minx(), query_extent.miny());
-	    ring.addPoint (query_extent.maxx(), query_extent.miny());
-	    ring.addPoint (query_extent.maxx(), query_extent.maxy());
-	    ring.addPoint (query_extent.minx(), query_extent.maxy());
-	    ring.closeRings ();
-
-        OGRPolygon* boxPoly = new OGRPolygon();
-	    boxPoly->addRing (&ring);
-	    boxPoly->closeRings();
-
-        layer_->SetSpatialFilter (boxPoly);
+        layer_->SetSpatialFilterRect (query_extent.minx(),
+                                      query_extent.miny(),
+                                      query_extent.maxx(),
+                                      query_extent.maxy());
 
 #if 0
         std::ostringstream s;
@@ -222,11 +214,11 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
 {
    if (dataset_ && layer_)
    {
-        OGRPoint* point = new OGRPoint;
-	    point->setX (pt.x);
-	    point->setY (pt.y);
+        OGRPoint point;
+	    point.setX (pt.x);
+	    point.setY (pt.y);
 
-        layer_->SetSpatialFilter (point);
+        layer_->SetSpatialFilter (&point);
 
         return featureset_ptr(new ogr_featureset(*dataset_, *layer_, desc_.get_encoding(), multiple_geometries_));
    }

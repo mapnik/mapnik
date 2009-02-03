@@ -33,9 +33,6 @@
 // ogr
 #include "ogr_featureset.hpp"
 
-//#define MAPNIK_OGR_USE_WKB_CONVERSION
-
-
 using std::clog;
 using std::endl;
 
@@ -50,6 +47,31 @@ using mapnik::polygon_impl;
 using mapnik::geometry2d;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
+
+
+class ogr_feature_ptr
+{
+public:
+    ogr_feature_ptr (OGRFeature* const feat)
+        : feat_ (feat)
+    {
+    }
+    
+    ~ogr_feature_ptr ()
+    {
+        if (feat_ != NULL)
+            OGRFeature::DestroyFeature (feat_);
+    }
+
+    OGRFeature* operator*()
+    {
+        return feat_;
+    }
+
+private:
+    OGRFeature* feat_;
+};
+
 
 ogr_featureset::ogr_featureset(OGRDataSource & dataset,
                                OGRLayer & layer,
@@ -68,13 +90,13 @@ ogr_featureset::~ogr_featureset() {}
 
 feature_ptr ogr_featureset::next()
 {
-   OGRFeature* feat = layer_.GetNextFeature();
-   if (feat != NULL)
+   ogr_feature_ptr feat (layer_.GetNextFeature());
+   if ((*feat) != NULL)
    {
-      OGRGeometry* geom=feat->GetGeometryRef();
+      OGRGeometry* geom=(*feat)->GetGeometryRef();
       if (geom != NULL)
       {
-          feature_ptr feature(new Feature(feat->GetFID()));
+          feature_ptr feature(new Feature((*feat)->GetFID()));
 
           convert_geometry (geom, feature);
 
@@ -90,13 +112,13 @@ feature_ptr ogr_featureset::next()
               {
                case OFTInteger:
                {
-                   boost::put(*feature,name,feat->GetFieldAsInteger (i));
+                   boost::put(*feature,name,(*feat)->GetFieldAsInteger (i));
                    break;
                }
 
                case OFTReal:
                {
-                   boost::put(*feature,name,feat->GetFieldAsDouble (i));
+                   boost::put(*feature,name,(*feat)->GetFieldAsDouble (i));
                    break;
                }
                        
@@ -104,7 +126,7 @@ feature_ptr ogr_featureset::next()
                case OFTWideString:     // deprecated !
                case OFTWideStringList: // deprecated !
                {
-                   UnicodeString ustr = tr_->transcode(feat->GetFieldAsString (i));
+                   UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString (i));
                    boost::put(*feature,name,ustr);
                    break;
                }
@@ -147,13 +169,9 @@ feature_ptr ogr_featureset::next()
                }
               }
           }
-
-          OGRFeature::DestroyFeature (feat);
       
           return feature;
       }
-
-      OGRFeature::DestroyFeature (feat);
    }
 
    return feature_ptr();
