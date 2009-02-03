@@ -33,7 +33,7 @@ occi_src = Split(
 	"""
         )
 
-libraries = [ 'occi' ]
+libraries = [ 'occi','ociei' ]
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('icuuc')

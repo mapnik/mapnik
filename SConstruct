@@ -21,16 +21,36 @@
 
 import os, sys, platform
 
-def color_print(color,text):
+def color_print(color,text,newline=True):
     # 1 - red
     # 2 - green
     # 3 - yellow
     # 4 - blue
-    print "\033[9%sm%s\033[0m" % (color,text)
+    text = "\033[9%sm%s\033[0m" % (color,text)
+    if not newline:
+        print text,
+    else:
+        print text
 
 # Helper function for uniquely appending paths to a SCons path listing.
 def uniq_add(env, key, val):
     if not val in env[key]: env[key].append(val)
+
+# Helper function for removing paths from a lib, if it is an optional plugin
+def remove_plugin_path(plugin):
+    plugin = PLUGINS.get(libinfo[0])
+    if plugin:
+        libpath = '%s_LIBS' % plugin['path']
+        incpath = '%s_INCLUDES' % plugin['path']
+        env['CPPPATH'].remove(env[incpath])
+        env['LIBPATH'].remove(env[libpath])
+
+# Helper function for building up paths to add for a lib (plugin or required)
+def add_paths(prereq):
+    inc_path = env['%s_INCLUDES' % prereq]
+    lib_path = env['%s_LIBS' % prereq]
+    uniq_add(env, 'CPPPATH', inc_path)
+    uniq_add(env, 'LIBPATH', lib_path)
 
 if platform.uname()[4] == 'x86_64':
     LIBDIR_SCHEMA='lib64' 
@@ -42,6 +62,24 @@ else:
 #### SCons build options and initial setup ####
 
 SCONS_LOCAL_CONFIG = 'config.py'
+
+# Core plugin build configuration
+# opts.Add still hardcoded however...
+PLUGINS = { # plugins with external dependencies
+            'postgis': {'default':True,'path':'PGSQL','inc':'libpq-fe.h','lib':'pq','cxx':False},
+            'gdal':    {'default':False,'path':'GDAL','inc':'gdal_priv.h','lib':'gdal','cxx':True},
+            'ogr':     {'default':False,'path':'OGR','inc':'ogrsf_frmts.h','lib':'gdal','cxx':True},
+            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','cxx':True},
+            
+            # plugins without external dependencies
+            'shape':   {'default':True,'path':None,'inc':None,'lib':None,'cxx':True},
+            'raster':  {'default':True,'path':None,'inc':None,'lib':None,'cxx':True},
+            }
+
+DEFAULT_PLUGINS = []
+for k,v in PLUGINS.items():
+   if v['default']:
+     DEFAULT_PLUGINS.append(k)
 
 # All of the following options may be modified at the command-line, for example:
 # `python scons/scons.py PREFIX=/opt`
@@ -93,7 +131,7 @@ opts.Add(BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'))
 # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
 # Therefore, we use a single boolean for whether to attempt to build cairo support.
 opts.Add(BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'))
-opts.Add(ListVariable('INPUT_PLUGINS','Input drivers to include','all',['postgis','shape','raster','gdal','ogr','occi']))
+opts.Add(ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()))
 opts.Add(PathVariable('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include/postgresql', PathVariable.PathAccept))
 opts.Add(PathVariable('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA))
 opts.Add(PathVariable('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/local/include', PathVariable.PathAccept))
@@ -235,16 +273,20 @@ if env['INTERNAL_LIBAGG']:
     env.Prepend(LIBPATH = '#agg')
 else:
     env.ParseConfig('pkg-config --libs --cflags libagg')
-
-        
-
-# Adding the prerequisite library directories to the include path for
+         
+# Adding the required prerequisite library directories to the include path for
 # compiling and the library path for linking, respectively.
-for prereq in ('BOOST', 'PNG', 'JPEG', 'TIFF', 'PGSQL', 'PROJ', 'GDAL', 'OGR', 'OCCI'):
-    inc_path = env['%s_INCLUDES' % prereq]
-    lib_path = env['%s_LIBS' % prereq]
-    uniq_add(env, 'CPPPATH', inc_path)
-    uniq_add(env, 'LIBPATH', lib_path)
+for required in ('BOOST', 'PNG', 'JPEG', 'TIFF','PROJ'):
+    add_paths(required)
+
+requested_plugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
+
+# Adding the required prerequisite library directories for the plugins...
+for plugin in requested_plugins:
+    extra_paths = PLUGINS[plugin]['path']
+    if extra_paths:
+      # Note, these are now removed below if the CheckLibWithHeader fails...
+      add_paths(extra_paths)
 
 try:
     env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
@@ -268,7 +310,6 @@ C_LIBSHEADERS = [
     ['z', 'zlib.h', True],
     ['jpeg', ['stdio.h', 'jpeglib.h'], True],
     ['proj', 'proj_api.h', True],
-    ['pq', 'libpq-fe.h', False]
 ]
 
 if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
@@ -280,10 +321,17 @@ else:
 CXX_LIBSHEADERS = [
     ['icuuc','unicode/unistr.h',True],
     ['icudata','unicode/utypes.h' , True],
-    ['gdal', ['gdal_priv.h', 'ogrsf_frmts.h'], False],
-    ['occi', ['occi.h'], False]
 ]
 
+# append plugin details to the 'LIBSHEADERS' lists
+for plugin in requested_plugins:
+    details = PLUGINS[plugin]
+    if details['lib'] and details['inc']:
+      check = [details['lib'],details['inc'],False]
+      if details['cxx']:
+        CXX_LIBSHEADERS.append(check)
+      else:
+        C_LIBSHEADERS.append(check)
 
 # Test function for a particular Boost Version.
 def test_boost_ver(ver):
@@ -312,26 +360,41 @@ else:
 
 for libinfo in C_LIBSHEADERS:
     if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C'):
+    
+        # if we cannot build a plugin remove its paths
+        remove_plugin_path(libinfo[0])
+
+        if libinfo[0] == 'pq':
+            libinfo[0] = 'pq (postgres/postgis)'
         if libinfo[2]:
             color_print (1,'Could not find required header or shared library for %s' % libinfo[0])
             env['MISSING_DEPS'].append(libinfo[0])
         else:
             color_print(4,'Could not find optional header or shared library for %s' % libinfo[0])
-            if libinfo[0] == 'pq':
-                # Make `pq` lib more understandable
-                env['SKIPPED_DEPS'].append('pq (postgres/postgis)')
-            else:
-                env['SKIPPED_DEPS'].append(libinfo[0])
-        
+            env['SKIPPED_DEPS'].append(libinfo[0])
 
 for libinfo in CXX_LIBSHEADERS:
     if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C++'):
+        
+        # if we cannot build a plugin remove its paths
+        remove_plugin_path(libinfo[0])
+            
+        if libinfo[0] == 'gdal' and libinfo[1] == 'ogrsf_frmts.h':
+            libinfo[0] = 'ogr'
         if libinfo[2]:
             color_print(1,'Could not find required header or shared library for %s' % libinfo[0])
             env['MISSING_DEPS'].append(libinfo[0])
         else:
             color_print(4,'Could not find optional header or shared library for %s' % libinfo[0])
             env['SKIPPED_DEPS'].append(libinfo[0])
+    
+    # touch up the user output so they can see whether both gdal and ogr support was enabled 
+    elif libinfo[0] == 'gdal':
+        if libinfo[1] == 'ogrsf_frmts.h':
+            print 'ogr vector support... enabled'
+        else:
+            print 'gdal raster support... enabled'
+        
 
 # Creating BOOST_APPEND according to the Boost library naming order,
 # which goes <toolset>-<threading>-<abi>-<version>. See:
@@ -409,8 +472,6 @@ else:
     Export('env')
     Export('conf')
     
-    inputplugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
-    
     bindings = [ binding.strip() for binding in Split(env['BINDINGS'])]
     
     #### Build instructions & settings ####
@@ -428,27 +489,23 @@ else:
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
         color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
-    
-    # Build the input plug-ins
-    if 'postgis' in inputplugins and 'pq' in env['LIBS']:
-        SConscript('plugins/input/postgis/SConscript')
-        env['LIBS'].remove('pq')
-    
-    if 'shape' in inputplugins:
-        SConscript('plugins/input/shape/SConscript')
-    
-    if 'raster' in inputplugins:
-        SConscript('plugins/input/raster/SConscript')
-    
-    if 'gdal' in inputplugins and 'gdal' in env['LIBS']:
-        SConscript('plugins/input/gdal/SConscript')
 
-    if 'occi' in inputplugins and 'occi' in env['LIBS']:
-        SConscript('plugins/input/occi/SConscript')
-
-    if 'ogr' in inputplugins and 'gdal' in env['LIBS']:
-        SConscript('plugins/input/ogr/SConscript')
-    
+    # Build the requested and able-to-be-compiled input plug-ins
+    if requested_plugins:
+        color_print(4,'Requested plugins to be built...',newline=False)
+    for plugin in requested_plugins:
+        details = PLUGINS[plugin]
+        if details['lib'] in env['LIBS']:
+            SConscript('plugins/input/%s/SConscript' % plugin)
+            env['LIBS'].remove(details['lib'])
+            color_print(4,'%s' % plugin,newline=False)
+        elif not details['lib']:
+            # build internal shape and raster plugins
+            SConscript('plugins/input/%s/SConscript' % plugin)
+            color_print(4,'%s' % plugin,newline=False)
+    if requested_plugins:
+        print
+        
     # Build the Python bindings.
     if 'python' in env['BINDINGS']:
         if not os.access(env['PYTHON'], os.X_OK):
