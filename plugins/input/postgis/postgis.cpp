@@ -214,15 +214,23 @@ layer_descriptor postgis_datasource::get_descriptor() const
 
 std::string postgis_datasource::table_from_sql(const std::string& sql)
 {
-   std::string table_name(sql);
-   std::transform(table_name.begin(),table_name.end(),table_name.begin(),tolower);
-   std::string::size_type idx=table_name.rfind("from");
+   std::string table_name = boost::algorithm::to_lower_copy(sql);
+   boost::algorithm::replace_all(table_name,"\n"," ");
+   
+   std::string::size_type idx = table_name.rfind("from");
    if (idx!=std::string::npos)
    {
+      
       idx=table_name.find_first_not_of(" ",idx+4);
-      table_name=table_name.substr(idx);
+      if (idx != std::string::npos)
+      {
+         table_name=table_name.substr(idx);
+      }
       idx=table_name.find_first_of(" )");
-      return table_name.substr(0,idx);
+      if (idx != std::string::npos)
+      {
+         table_name = table_name.substr(0,idx);
+      }
    }
    return table_name;
 }
