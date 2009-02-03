@@ -36,9 +36,9 @@ def color_print(color,text,newline=True):
 def uniq_add(env, key, val):
     if not val in env[key]: env[key].append(val)
 
-# Helper function for removing paths from a lib, if it is an optional plugin
+# Helper function for removing paths for a plugin lib
 def remove_plugin_path(plugin):
-    plugin = PLUGINS.get(libinfo[0])
+    plugin = PLUGINS.get(plugin)
     if plugin:
         libpath = '%s_LIBS' % plugin['path']
         incpath = '%s_INCLUDES' % plugin['path']
