@@ -1,0 +1,8 @@
+#
+# To regenerate C++ class declarations & implementations for the Spatial
+# object types of your database you should execute OTT
+#
+ott userid=scott/tiger attraccess=private intype=spatial_types.typ code=cpp \
+     cppfile=spatial_classeso.cpp hfile=spatial_classesh.h mapfile=spatial_classesm.cpp \
+     mapfunc=RegisterClasses
+
