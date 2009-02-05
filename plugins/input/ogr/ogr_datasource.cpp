@@ -69,25 +69,6 @@ ogr_datasource::ogr_datasource(parameters const& params)
    layer_->GetExtent (&envelope);
    extent_.init (envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
 
-#if 0
-   double x0 = -std::numeric_limits<float>::max(),
-           y0 = -std::numeric_limits<float>::max(),
-           x1 = std::numeric_limits<float>::max(),
-           y1 = std::numeric_limits<float>::max();
-
-   for (int i = 0; i < dataset_->GetLayerCount (); i++)
-   {
-       OGRLayer* layer = dataset_->GetLayer (i);
-       
-       layer->GetExtent (&envelope);
-       
-       x0 = std::min (envelope.MinX, x0);
-       y0 = std::min (envelope.MinY, y0);
-       x1 = std::max (envelope.MaxX, x1);
-       y1 = std::max (envelope.MaxY, y1);
-   }
-#endif
-
    OGRFeatureDefn* def = layer_->GetLayerDefn ();
    if (def != 0)
    {

@@ -44,7 +44,6 @@ class ogr_featureset : public mapnik::Featureset
       virtual ~ogr_featureset();
       mapnik::feature_ptr next();
    private:
-      int endian();
       void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature);
       void convert_point (OGRPoint* geom, mapnik::feature_ptr feature);
       void convert_linestring (OGRLineString* geom, mapnik::feature_ptr feature);
@@ -58,6 +57,7 @@ class ogr_featureset : public mapnik::Featureset
       void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature);
       OGRDataSource & dataset_;
       OGRLayer & layer_;
+      OGRFeatureDefn * layerdef_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
       const char* fidcolumn_;
       bool multiple_geometries_;

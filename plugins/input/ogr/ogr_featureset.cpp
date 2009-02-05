@@ -79,6 +79,7 @@ ogr_featureset::ogr_featureset(OGRDataSource & dataset,
                                bool multiple_geometries)
    : dataset_(dataset),
      layer_(layer),
+     layerdef_(layer.GetLayerDefn()),
      tr_(new transcoder(encoding)),
      fidcolumn_(layer_.GetFIDColumn ()),
      multiple_geometries_(multiple_geometries)
@@ -100,40 +101,39 @@ feature_ptr ogr_featureset::next()
 
           convert_geometry (geom, feature);
 
-          OGRFeatureDefn* def = layer_.GetLayerDefn();
-          int fld_count = def->GetFieldCount();
+          int fld_count = layerdef_->GetFieldCount();
           for (int i = 0; i < fld_count; i++)
           {
-              OGRFieldDefn* fld = def->GetFieldDefn (i);
+              OGRFieldDefn* fld = layerdef_->GetFieldDefn (i);
               OGRFieldType type_oid = fld->GetType ();
-              std_string name = fld->GetNameRef ();
+              std_string fld_name = fld->GetNameRef ();
 
               switch (type_oid)
               {
                case OFTInteger:
                {
-                   boost::put(*feature,name,(*feat)->GetFieldAsInteger (i));
+                   boost::put(*feature,fld_name,(*feat)->GetFieldAsInteger (i));
                    break;
                }
 
                case OFTReal:
                {
-                   boost::put(*feature,name,(*feat)->GetFieldAsDouble (i));
+                   boost::put(*feature,fld_name,(*feat)->GetFieldAsDouble (i));
                    break;
                }
                        
                case OFTString:
                case OFTWideString:     // deprecated !
-               case OFTWideStringList: // deprecated !
                {
                    UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString (i));
-                   boost::put(*feature,name,ustr);
+                   boost::put(*feature,fld_name,ustr);
                    break;
                }
 
                case OFTIntegerList:
                case OFTRealList:
                case OFTStringList:
+               case OFTWideStringList: // deprecated !
                {
 #ifdef MAPNIK_DEBUG
                    clog << "unhandled type_oid=" << type_oid << endl;
@@ -175,12 +175,6 @@ feature_ptr ogr_featureset::next()
    }
 
    return feature_ptr();
-}
-
-int ogr_featureset::endian()
-{
-    const int t = 1;
-    return (*(char*)&t == 0) ? wkbXDR : wkbNDR;
 }
 
 void ogr_featureset::convert_geometry (OGRGeometry* geom, feature_ptr feature)
@@ -408,12 +402,4 @@ void ogr_featureset::convert_collection (OGRGeometryCollection* geom, feature_pt
         }
     }
 }
-
-
-/*
-  int size=geom->WkbSize ();
-  char data[size];
-  geom->exportToWkb ((OGRwkbByteOrder) endian(), reinterpret_cast<unsigned char*>(&data[0]));
-  geometry_utils::from_wkb (*feature, &data[0], size, multiple_geometries_);
-*/
 
