@@ -46,7 +46,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
    : datasource(params),
      extent_(),
      type_(datasource::Vector),
-     desc_(*params.get<std::string>("type"),"utf-8")
+     desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
    OGRRegisterAll();
 
