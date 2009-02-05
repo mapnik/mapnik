@@ -466,7 +466,7 @@ namespace mapnik
    };
 
    template <typename T>
-   cairo_renderer<T>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, unsigned offset_x, unsigned offset_y)
+   cairo_renderer<T>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, unsigned offset_x, unsigned offset_y, bool show_page)
       : feature_style_processor<cairo_renderer>(m),
         m_(m),
         surface_(surface),
@@ -480,6 +480,7 @@ namespace mapnik
 #ifdef MAPNIK_DEBUG
       std::clog << "scale=" << m.scale() << "\n";
 #endif
+        this->show_page = show_page;
    }
 
    template <typename T>
@@ -514,7 +515,8 @@ namespace mapnik
 #ifdef MAPNIK_DEBUG
       std::clog << "end map processing\n";
 #endif
-      context_->show_page();
+      if (show_page)
+         context_->show_page();
    }
 
    template <typename T>

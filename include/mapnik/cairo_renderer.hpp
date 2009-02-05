@@ -67,7 +67,7 @@ namespace mapnik {
    {
 
      public:
-      cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, unsigned offset_x=0, unsigned offset_y=0);
+      cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, unsigned offset_x=0, unsigned offset_y=0, bool show_page=true);
       ~cairo_renderer();
       void start_map_processing(Map const& map);
       void end_map_processing(Map const& map);
@@ -112,6 +112,7 @@ namespace mapnik {
       face_manager<freetype_engine> font_manager_;
       cairo_face_manager face_manager_;
       label_collision_detector4 detector_;
+      bool show_page;
    };
 }
 

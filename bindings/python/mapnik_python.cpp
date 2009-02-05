@@ -107,7 +107,7 @@ void render2(const mapnik::Map& map,mapnik::Image32& image)
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
-void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
+void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0, bool show_page=true)
 {
     Py_BEGIN_ALLOW_THREADS
     try
@@ -124,13 +124,18 @@ void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x =
     Py_END_ALLOW_THREADS
 }
 
-void render4(const mapnik::Map& map,PycairoSurface* surface)
+void render4(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0) {
+   render3(map, surface, offset_x, offset_y);
+}
+
+
+void render5(const mapnik::Map& map,PycairoSurface* surface, bool show_page=true)
 {
     Py_BEGIN_ALLOW_THREADS
     try
     {
         Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-        mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
+        mapnik::cairo_renderer<Cairo::Surface> ren(map,s,0,0,show_page);
         ren.apply();
     }
     catch (...)
@@ -139,6 +144,10 @@ void render4(const mapnik::Map& map,PycairoSurface* surface)
         throw;
     }
     Py_END_ALLOW_THREADS
+}
+
+void render6(const mapnik::Map& map,PycairoSurface* surface) {
+   render5(map, surface);
 }
 
 #endif
@@ -233,6 +242,8 @@ BOOST_PYTHON_MODULE(_mapnik)
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
     def("render",&render3);
     def("render",&render4);
+    def("render",&render5);
+    def("render",&render6);
 #endif
     def("scale_denominator", &scale_denominator);
     
