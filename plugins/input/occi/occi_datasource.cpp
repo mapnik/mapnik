@@ -42,6 +42,9 @@ using std::clog;
 using std::endl;
 using std::vector;
 
+using boost::lexical_cast;
+using boost::bad_lexical_cast;
+
 using mapnik::datasource;
 using mapnik::parameters;
 using mapnik::query;
@@ -70,7 +73,8 @@ occi_datasource::occi_datasource(parameters const& params)
      geometry_field_(*params.get<std::string>("geometry_field","")),
      type_(datasource::Vector),
      extent_initialized_(false),
-     desc_(*params.get<std::string>("type"),"utf-8")
+     desc_(*params.get<std::string>("type"),"utf-8"),
+     pool_(0)
 {
    boost::optional<int> initial_size = params_.get<int>("inital_size",1);
    boost::optional<int> max_size = params_.get<int>("max_size",10);
@@ -114,10 +118,9 @@ occi_datasource::occi_datasource(parameters const& params)
    // connect to environment
    try
    {
-        env_ = Environment::createEnvironment ((Environment::Mode) Environment::OBJECT); // Environment::THREADED_MUTEXED
-        RegisterClasses (env_);
+        Environment* env = occi_environment::get_environment();
 
-        pool_ = env_->createStatelessConnectionPool(
+        pool_ = env->createStatelessConnectionPool(
                     *params.get<std::string>("user"),
                     *params.get<std::string>("password"),
                     *params.get<std::string>("host"),
@@ -225,38 +228,69 @@ occi_datasource::occi_datasource(parameters const& params)
 
 occi_datasource::~occi_datasource()
 {
-    if (env_)
-    {
-        env_->terminateStatelessConnectionPool (pool_);
-        Environment::terminateEnvironment (env_);
-    }
+    Environment* env = occi_environment::get_environment();
+    env->terminateStatelessConnectionPool (pool_);
 }
 
 std::string const occi_datasource::name_="occi";
 
 std::string occi_datasource::name()
 {
-   return name_;
+    return name_;
 }
 
 int occi_datasource::type() const
 {
-   return type_;
+    return type_;
 }
 
 Envelope<double> occi_datasource::envelope() const
 {
-   return extent_;
+    if (extent_initialized_) return extent_;
+
+    occi_connection_ptr conn (pool_);
+
+    std::ostringstream s;
+    s << "select min(c.x), min(c.y), max(c.x), max(c.y) from ";
+    s << " (select sdo_aggr_mbr(" << geometry_field_ << ") shape from " << table_ << ") a, ";
+    s << " table (sdo_util.getvertices(a.shape)) c";
+
+    try
+    {
+        ResultSet* rs = conn.execute_query (s.str());
+        if (rs && rs->next ())
+        {
+            try 
+            {
+                double lox = lexical_cast<double>(rs->getDouble(1));
+                double loy = lexical_cast<double>(rs->getDouble(2));
+                double hix = lexical_cast<double>(rs->getDouble(3));
+                double hiy = lexical_cast<double>(rs->getDouble(4));		    
+                extent_.init (lox,loy,hix,hiy);
+                extent_initialized_ = true;
+            }
+            catch (bad_lexical_cast &ex)
+            {
+                clog << ex.what() << endl;
+            }
+        }
+    }
+    catch (SQLException &ex)
+    {
+        throw datasource_exception(ex.getMessage());
+    }
+
+    return extent_;
 }
 
 layer_descriptor occi_datasource::get_descriptor() const
 {
-   return desc_;
+    return desc_;
 }
 
 featureset_ptr occi_datasource::features(query const& q) const
 {
-    if (env_ && pool_)
+    if (pool_)
     {
         Envelope<double> const& box=q.get_bbox();
     
@@ -290,6 +324,40 @@ featureset_ptr occi_datasource::features(query const& q) const
 
 featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 {
-   return featureset_ptr();
+    if (pool_)
+    {
+        std::ostringstream s;
+        s << "select " << geometry_field_ << " as geom";
+
+        std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
+        std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
+        unsigned size=0;
+        while (itr != end)
+        {
+           s <<",\""<< itr->get_name() << "\"";
+           ++itr;
+           ++size;
+        }
+        s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
+        s << std::setprecision(16);
+        s << pt.x << " " << pt.y << ",";
+        s << pt.x << " " << pt.y << ")'::box3d,"<<srid_<<")";
+
+
+        s << " from " << table_ << " where sdo_filter(" << geometry_field_ << ",";
+        s << " mdsys.sdo_geometry(" << SDO_GTYPE_2DPOINT << "," << srid_ << ",NULL,";
+        s << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POINT << "," << SDO_INTERPRETATION_POINT << "),";
+        s << " mdsys.sdo_ordinate_array(";
+        s << std::setprecision(16);
+        s << pt.x << "," << pt.y << ")), 'querytype=WINDOW') = 'TRUE'";      
+
+#ifdef MAPNIK_DEBUG
+        clog << s.str() << endl;
+#endif
+        
+        return featureset_ptr(new occi_featureset(pool_,s.str(),desc_.get_encoding(),multiple_geometries_,size));
+    }
+
+    return featureset_ptr();
 }
 

@@ -24,20 +24,26 @@
 #ifndef OCCI_TYPES_HPP
 #define OCCI_TYPES_HPP
 
-// main OCCI include
+// mapnik
+#include <mapnik/utils.hpp>
+
+// occi
 #include <occi.h>
 
-// OTT generated SDOGeometry classes
+// ott generated SDOGeometry classes
 #include "spatial_classesh.h"
 #include "spatial_classesm.h"
 
+// check for oracle support
 #if OCCI_MAJOR_VERSION == 10 && OCCI_MINOR_VERSION >= 1
-  //     Support ORACLE 10g (>= 10.2.0.X)
+  //     Only ORACLE 10g (>= 10.2.0.X) is supported !
 #else
-  #error    Only ORACLE 10g (>= 10.2.0.X) is supported !
+  #error Only ORACLE 10g (>= 10.2.0.X) is supported !
 #endif
 
+
 #define SDO_GEOMETRY_METADATA_TABLE     "ALL_SDO_GEOM_METADATA"
+
 
 enum
 {
@@ -73,6 +79,53 @@ enum
     SDO_INTERPRETATION_CIRCLE           = 4,
     SDO_INTERPRETATION_STRAIGHT         = 1,
     SDO_INTERPRETATION_CIRCULAR         = 2
+};
+
+
+class occi_environment : public mapnik::singleton<occi_environment,mapnik::CreateStatic>
+{
+    friend class mapnik::CreateStatic<occi_environment>;
+
+public:
+
+    static oracle::occi::Environment* get_environment ()
+    {
+        if (env_ == 0)
+        {
+#ifdef MAPNIK_DEBUG
+            std::clog << "occi_environment constructor" << std::endl;
+#endif
+
+            int mode = oracle::occi::Environment::OBJECT
+                     | oracle::occi::Environment::THREADED_MUTEXED;
+
+            env_ = oracle::occi::Environment::createEnvironment ((oracle::occi::Environment::Mode) mode);
+            RegisterClasses (env_);
+        }
+
+        return env_;
+    }
+
+private:
+
+    occi_environment()
+    {
+    }
+
+    ~occi_environment()
+    {
+        if (env_)
+        {
+#ifdef MAPNIK_DEBUG
+            std::clog << "occi_environment destructor" << std::endl;
+#endif
+
+            oracle::occi::Environment::terminateEnvironment (env_);
+            env_ = 0;
+        }
+    }
+
+    static oracle::occi::Environment* env_;
 };
 
 

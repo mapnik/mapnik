@@ -59,7 +59,6 @@ class occi_datasource : public mapnik::datasource
       mutable bool extent_initialized_;
       mutable mapnik::Envelope<double> extent_;
       mapnik::layer_descriptor desc_;
-      oracle::occi::Environment* env_;
       oracle::occi::StatelessConnectionPool* pool_;
       bool multiple_geometries_;
       static const std::string name_;

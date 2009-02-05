@@ -58,9 +58,15 @@ class occi_featureset : public mapnik::Featureset
       //void convert_multipolygon_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       //void convert_collection (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       void fill_geometry2d (mapnik::geometry2d * geom,
-                             const int dimensions,
                              const std::vector<oracle::occi::Number>& elem_info,
                              const std::vector<oracle::occi::Number>& ordinates,
+                             const int dimensions,
+                             const bool is_point_geom);
+      void fill_geometry2d (mapnik::geometry2d * geom,
+                             const int real_offset,
+                             const int next_offset,
+                             const std::vector<oracle::occi::Number>& ordinates,
+                             const int dimensions,
                              const bool is_point_geom);
       occi_connection_ptr conn_;
       oracle::occi::ResultSet* rs_;

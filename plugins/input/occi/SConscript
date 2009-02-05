@@ -26,6 +26,7 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 
 occi_src = Split(
 	"""
+	occi_types.cpp
 	occi_datasource.cpp
 	occi_featureset.cpp      
 	spatial_classesm.cpp      
@@ -33,7 +34,7 @@ occi_src = Split(
 	"""
         )
 
-libraries = [ 'occi','ociei' ]
+libraries = [ 'occi', 'ociei' ]
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('icuuc')

@@ -35,7 +35,6 @@
 
 using std::clog;
 using std::endl;
-using std::vector;
 
 using mapnik::query;
 using mapnik::Envelope;
@@ -90,13 +89,13 @@ feature_ptr occi_featureset::next()
     {
         feature_ptr feature(new Feature(count_));
 
-        boost::shared_ptr<SDOGeometry> geom (dynamic_cast<SDOGeometry*> (rs_->getObject(1)));
+        boost::scoped_ptr<SDOGeometry> geom (dynamic_cast<SDOGeometry*> (rs_->getObject(1)));
         if (geom.get())
         {
             convert_geometry (geom.get(), feature);
         }
 
-        vector<MetaData> listOfColumns = rs_->getColumnListMetaData();
+        std::vector<MetaData> listOfColumns = rs_->getColumnListMetaData();
 
         for (unsigned int i=1;i<listOfColumns.size();++i)
         {
@@ -253,8 +252,8 @@ void occi_featureset::convert_point (SDOGeometry* geom, feature_ptr feature, int
 
 void occi_featureset::convert_linestring (SDOGeometry* geom, feature_ptr feature, int dimensions)
 {
-    const vector<Number>& elem_info = geom->getSdo_elem_info();
-    const vector<Number>& ordinates = geom->getSdo_ordinates();
+    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
+    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
     int ord_size = ordinates.size();
 
     if (ord_size >= dimensions)
@@ -262,7 +261,7 @@ void occi_featureset::convert_linestring (SDOGeometry* geom, feature_ptr feature
         geometry2d * line = new line_string_impl;
         line->set_capacity (ord_size);
 
-        fill_geometry2d (line, dimensions, elem_info, ordinates, false);
+        fill_geometry2d (line, elem_info, ordinates, dimensions, false);
         
         feature->add_geometry (line);
     }
@@ -270,8 +269,8 @@ void occi_featureset::convert_linestring (SDOGeometry* geom, feature_ptr feature
 
 void occi_featureset::convert_polygon (SDOGeometry* geom, feature_ptr feature, int dimensions)
 {
-    const vector<Number>& elem_info = geom->getSdo_elem_info();
-    const vector<Number>& ordinates = geom->getSdo_ordinates();
+    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
+    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
     int ord_size = ordinates.size();
 
     if (ord_size >= dimensions)
@@ -279,7 +278,7 @@ void occi_featureset::convert_polygon (SDOGeometry* geom, feature_ptr feature, i
         geometry2d * poly = new polygon_impl;
         poly->set_capacity (ord_size);
 
-        fill_geometry2d (poly, dimensions, elem_info, ordinates, false);
+        fill_geometry2d (poly, elem_info, ordinates, dimensions, false);
 
         feature->add_geometry (poly);
     }
@@ -287,15 +286,15 @@ void occi_featureset::convert_polygon (SDOGeometry* geom, feature_ptr feature, i
 
 void occi_featureset::convert_multipoint (SDOGeometry* geom, feature_ptr feature, int dimensions)
 {
-    const vector<Number>& elem_info = geom->getSdo_elem_info();
-    const vector<Number>& ordinates = geom->getSdo_ordinates();
+    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
+    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
     int ord_size = ordinates.size();
 
     if (ord_size >= dimensions)
     {
         geometry2d * point = new point_impl;
 
-        fill_geometry2d (point, dimensions, elem_info, ordinates, true);
+        fill_geometry2d (point, elem_info, ordinates, dimensions, true);
 
         feature->add_geometry (point);
     }
@@ -314,8 +313,8 @@ void occi_featureset::convert_multipoint_2 (SDOGeometry* geom, feature_ptr featu
 
 void occi_featureset::convert_multilinestring (SDOGeometry* geom, feature_ptr feature, int dimensions)
 {
-    const vector<Number>& elem_info = geom->getSdo_elem_info();
-    const vector<Number>& ordinates = geom->getSdo_ordinates();
+    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
+    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
     int ord_size = ordinates.size();
 
     if (ord_size >= dimensions)
@@ -323,7 +322,7 @@ void occi_featureset::convert_multilinestring (SDOGeometry* geom, feature_ptr fe
         geometry2d * line = new line_string_impl;
         line->set_capacity (ord_size);
 
-        fill_geometry2d (line, dimensions, elem_info, ordinates, false);
+        fill_geometry2d (line, elem_info, ordinates, dimensions, false);
         
         feature->add_geometry (line);
     }
@@ -342,8 +341,8 @@ void occi_featureset::convert_multilinestring_2 (SDOGeometry* geom, feature_ptr 
 
 void occi_featureset::convert_multipolygon (SDOGeometry* geom, feature_ptr feature, int dimensions)
 {
-    const vector<Number>& elem_info = geom->getSdo_elem_info();
-    const vector<Number>& ordinates = geom->getSdo_ordinates();
+    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
+    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
     int ord_size = ordinates.size();
 
     if (ord_size >= dimensions)
@@ -351,7 +350,7 @@ void occi_featureset::convert_multipolygon (SDOGeometry* geom, feature_ptr featu
         geometry2d * poly = new polygon_impl;
         poly->set_capacity (ord_size);
 
-        fill_geometry2d (poly, dimensions, elem_info, ordinates, false);
+        fill_geometry2d (poly, elem_info, ordinates, dimensions, false);
 
         feature->add_geometry (poly);
     }
@@ -384,9 +383,9 @@ void occi_featureset::convert_collection (SDOGeometry* geom, feature_ptr feature
 */
 
 void occi_featureset::fill_geometry2d (geometry2d * geom,
+                                        const std::vector<Number>& elem_info,
+                                        const std::vector<Number>& ordinates,
                                         const int dimensions,
-                                        const vector<Number>& elem_info,
-                                        const vector<Number>& ordinates,
                                         const bool is_point_geom)
 {
     int elem_size = elem_info.size();
@@ -447,14 +446,12 @@ void occi_featureset::fill_geometry2d (geometry2d * geom,
 
                 if (is_linear_element)
                 {
-                    geom->move_to ((double) ordinates[offset - 1], (double) ordinates[offset]);
-
-                    if (is_point_geom)
-                        for (int p = offset + 1; p < next_offset; p += dimensions)
-                            geom->move_to ((double) ordinates[p], (double) ordinates[p + 1]);
-                    else
-                        for (int p = offset + 1; p < next_offset; p += dimensions)
-                            geom->line_to ((double) ordinates[p], (double) ordinates[p + 1]);
+                    fill_geometry2d (geom,
+                                     offset - 1,
+                                     next_offset - 1,
+                                     ordinates,
+                                     dimensions,
+                                     is_point_geom);
                 }
 
                 offset = next_offset;
@@ -464,16 +461,30 @@ void occi_featureset::fill_geometry2d (geometry2d * geom,
         }
         else
         {
-            geom->move_to ((double) ordinates[offset - 1], (double) ordinates[offset]);
-
-            if (is_point_geom)
-                for (int p = dimensions; p < ord_size; p += dimensions)
-                    geom->move_to ((double) ordinates[p], (double) ordinates[p + 1]);
-            else
-                for (int p = dimensions; p < ord_size; p += dimensions)
-                    geom->line_to ((double) ordinates[p], (double) ordinates[p + 1]);
+            fill_geometry2d (geom,
+                             offset - 1,
+                             ord_size,
+                             ordinates,
+                             dimensions,
+                             is_point_geom);
         }
     }
 }
 
+void occi_featureset::fill_geometry2d (geometry2d * geom,
+                                        const int real_offset,
+                                        const int next_offset,
+                                        const std::vector<Number>& ordinates,
+                                        const int dimensions,
+                                        const bool is_point_geom)
+{
+    geom->move_to ((double) ordinates[real_offset], (double) ordinates[real_offset + 1]);
 
+    if (is_point_geom)
+        for (int p = real_offset + dimensions; p < next_offset; p += dimensions)
+            geom->move_to ((double) ordinates[p], (double) ordinates[p + 1]);
+    else
+        for (int p = real_offset + dimensions; p < next_offset; p += dimensions)
+            geom->line_to ((double) ordinates[p], (double) ordinates[p + 1]);
+
+}
