@@ -55,6 +55,7 @@ namespace mapnik
          text_symbolizer(text_symbolizer const& rhs);
          text_symbolizer& operator=(text_symbolizer const& rhs);
          std::string const& get_name() const;
+         void set_name(std::string name);
          unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
          void set_text_ratio(unsigned ratio);
          unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
@@ -68,11 +69,13 @@ namespace mapnik
          double get_max_char_angle_delta() const; // maximum change in angle between adjacent characters
          void set_max_char_angle_delta(double angle);
          unsigned get_text_size() const;
+         void set_text_size(unsigned size);
          std::string const& get_face_name() const;
          void set_face_name(std::string face_name);
          FontSet const& get_fontset() const;
          void set_fontset(FontSet fontset);
          color const& get_fill() const;
+         void set_fill(color const& fill);
          void set_halo_fill(color const& fill);
          color const& get_halo_fill() const;
          void set_halo_radius(unsigned radius);

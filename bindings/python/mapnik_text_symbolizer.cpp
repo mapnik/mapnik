@@ -63,6 +63,26 @@ void export_text_symbolizer()
       .add_property("force_odd_labels",
                     &text_symbolizer::get_force_odd_labels,
                     &text_symbolizer::set_force_odd_labels)
+
+      .add_property("fontset",
+                    make_function(&text_symbolizer::get_fontset,return_value_policy<copy_const_reference>()),
+                    &text_symbolizer::set_fontset)
+
+      .add_property("fill",              
+                    make_function(&text_symbolizer::get_fill,return_value_policy<copy_const_reference>()),
+                    &text_symbolizer::set_fill)
+      .add_property("name",
+                    make_function(&text_symbolizer::get_name,return_value_policy<copy_const_reference>()),
+                    &text_symbolizer::set_name)
+
+      .add_property("text_size",
+                    &text_symbolizer::get_text_size,
+                    &text_symbolizer::set_text_size)
+
+      .add_property("face_name",
+                    make_function(&text_symbolizer::get_face_name,return_value_policy<copy_const_reference>()),
+                    &text_symbolizer::set_face_name)
+                    
       .add_property("max_char_angle_delta",
                     &text_symbolizer::get_max_char_angle_delta,
                     &text_symbolizer::set_max_char_angle_delta)
@@ -73,6 +93,7 @@ void export_text_symbolizer()
                     &text_symbolizer::get_minimum_distance,
                     &text_symbolizer::set_minimum_distance)
       .def("displacement",&text_symbolizer::set_displacement)
+      .def("anchor",&text_symbolizer::set_anchor)
       .add_property("label_placement",
                     &text_symbolizer::get_label_placement,
                     &text_symbolizer::set_label_placement,

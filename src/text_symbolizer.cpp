@@ -133,6 +133,11 @@ namespace mapnik
         return name_;
     }
     
+    void text_symbolizer::set_name(std::string name)
+    {
+        name_ = name;
+    }
+    
     std::string const&  text_symbolizer::get_face_name() const
     {
         return face_name_;
@@ -213,9 +218,19 @@ namespace mapnik
         max_char_angle_delta_ = angle;
     }
 
+    void text_symbolizer::set_text_size(unsigned size)
+    {
+        size_ = size;
+    }
+
     unsigned  text_symbolizer::get_text_size() const
     {
         return size_;
+    }
+
+    void text_symbolizer::set_fill(color const& fill)
+    {
+        fill_ = fill;
     }
 	
     color const&  text_symbolizer::get_fill() const
