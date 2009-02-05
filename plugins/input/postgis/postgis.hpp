@@ -35,6 +35,8 @@
 #include <set>
 
 #include "connection_manager.hpp"
+#include "resultset.hpp"
+#include "cursorresultset.hpp"
 
 using mapnik::transcoder;
 using mapnik::datasource;
@@ -56,6 +58,8 @@ class postgis_datasource : public datasource
       const std::string password_;
       const std::string table_;
       const std::string geometry_field_;
+      const int cursor_fetch_size_;
+      const int row_limit_;
       std::string geometryColumn_;
       int type_;
       int srid_;
@@ -76,6 +80,7 @@ class postgis_datasource : public datasource
       ~postgis_datasource();
    private:
       static std::string table_from_sql(const std::string& sql);
+      boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const;
       postgis_datasource(const postgis_datasource&);
       postgis_datasource& operator=(const postgis_datasource&);
 };
@@ -83,14 +88,14 @@ class postgis_datasource : public datasource
 class postgis_featureset : public mapnik::Featureset
 {
    private:
-      boost::shared_ptr<ResultSet> rs_;
+      boost::shared_ptr<IResultSet> rs_;
       bool multiple_geometries_;
       unsigned num_attrs_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
       mutable int totalGeomSize_;
       mutable int count_;
    public:
-      postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
+      postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                          std::string const& encoding,
                          bool multiple_geometries,
                          unsigned num_attrs);

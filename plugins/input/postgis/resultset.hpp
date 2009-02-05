@@ -28,7 +28,25 @@
 
 #include "connection.hpp"
 
-class ResultSet
+class IResultSet
+{
+public:
+    //virtual IResultSet& operator=(const IResultSet& rhs) = 0;
+    virtual ~IResultSet() {}
+    virtual void close() = 0;
+    virtual int getNumFields() const = 0;
+    virtual bool next() = 0;
+    virtual const char* getFieldName(int index) const = 0;
+    virtual int getFieldLength(int index) const = 0;
+    virtual int getFieldLength(const char* name) const = 0;
+    virtual int getTypeOID(int index) const = 0;
+    virtual int getTypeOID(const char* name) const = 0;
+    virtual bool isNull(int index) const = 0;
+    virtual const char* getValue(int index) const = 0;
+    virtual const char* getValue(const char* name) const = 0;
+};
+
+class ResultSet : public IResultSet
 {
 private:
     PGresult* res_;
@@ -67,12 +85,12 @@ public:
 	return *this;
     }
 
-    void close()
+    virtual void close()
     {
 	PQclear(res_),res_=0;
     }
 
-    ~ResultSet()
+    virtual ~ResultSet()
     {
 	if (--(*refCount_)==0)
 	{
@@ -81,27 +99,37 @@ public:
 	}
     }
 
-    int getNumFields() const
+    virtual int getNumFields() const
     {
 	return PQnfields(res_);
     }
 
-    bool next()
+    int pos() const
+    {
+        return pos_;
+    }
+
+    int size() const
+    {
+        return numTuples_;
+    }
+
+    virtual bool next()
     {
 	return (++pos_<numTuples_);
     }
 
-    const char* getFieldName(int index) const
+    virtual const char* getFieldName(int index) const
     {
 	return PQfname(res_,index);
     }
 
-    int getFieldLength(int index) const
+    virtual int getFieldLength(int index) const
     {
 	return PQgetlength(res_,pos_,index);
     }
 
-    int getFieldLength(const char* name) const
+    virtual int getFieldLength(const char* name) const
     {
 	int col=PQfnumber(res_,name);
 	if (col>=0)
@@ -109,30 +137,30 @@ public:
 	return 0;
     }
 
-    int getTypeOID(int index) const
+    virtual int getTypeOID(int index) const
     {
 	return PQftype(res_,index);
     }
 
-    int getTypeOID(const char* name) const
+    virtual int getTypeOID(const char* name) const
     {
 	int col=PQfnumber(res_,name);
 	if (col>=0)
 	    return PQftype(res_,col);
 	return 0;
     }
-
-    bool isNull(int index) const
+    
+    virtual bool isNull(int index) const
     {
-	return PQgetisnull(res_,pos_,index);
+        return PQgetisnull(res_,pos_,index);
     }
     
-    const char* getValue(int index) const
+    virtual const char* getValue(int index) const
     {
 	return PQgetvalue(res_,pos_,index);
     }
 
-    const char* getValue(const char* name) const
+    virtual const char* getValue(const char* name) const
     {
 	int col=PQfnumber(res_,name);
 	if (col>=0)

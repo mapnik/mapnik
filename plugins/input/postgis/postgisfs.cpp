@@ -81,7 +81,7 @@ std::string numeric2string(const char* buf)
    return ss.str();
 }
 
-postgis_featureset::postgis_featureset(boost::shared_ptr<ResultSet> const& rs,
+postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                                        std::string const& encoding,
                                        bool multiple_geometries,
                                        unsigned num_attrs=0)

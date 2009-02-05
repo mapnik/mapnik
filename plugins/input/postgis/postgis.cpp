@@ -59,6 +59,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
    : datasource (params),
      table_(*params.get<std::string>("table","")),
      geometry_field_(*params.get<std::string>("geometry_field","")),
+     cursor_fetch_size_(*params_.get<int>("cursor_size",0)),
+     row_limit_(*params_.get<int>("row_limit",0)),
      type_(datasource::Vector),
      extent_initialized_(false),
      desc_(*params.get<std::string>("type"),"utf-8"),
@@ -236,6 +238,32 @@ std::string postgis_datasource::table_from_sql(const std::string& sql)
    return table_name;
 }
 
+boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const
+{
+     if (cursor_fetch_size_ > 0) {
+         // cursor
+         std::ostringstream csql;
+         std::string cursor_name = conn->new_cursor_name();
+
+         csql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << sql << " FOR READ ONLY";
+
+#ifdef MAPNIK_DEBUG
+         std::clog << csql.str() << "\n";
+#endif
+         if (!conn->execute(csql.str())) {
+            throw mapnik::datasource_exception( "PSQL Error: Creating cursor for data select." );
+         }
+         return shared_ptr<CursorResultSet>(new CursorResultSet(conn, cursor_name, cursor_fetch_size_));
+
+     } else {
+         // no cursor
+#ifdef MAPNIK_DEBUG
+         std::clog << sql << "\n";
+#endif
+         return conn->executeQuery(sql,1);
+     }
+}
+
 featureset_ptr postgis_datasource::features(const query& q) const
 {
    Envelope<double> const& box=q.get_bbox();
@@ -249,7 +277,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
          PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
          std::ostringstream s;
             
-         s << "select asbinary("<<geometryColumn_<<") as geom";
+         s << "SELECT AsBinary(\""<<geometryColumn_<<"\") AS geom";
          std::set<std::string> const& props=q.property_names();
          std::set<std::string>::const_iterator pos=props.begin();
          std::set<std::string>::const_iterator end=props.end();
@@ -258,15 +286,16 @@ featureset_ptr postgis_datasource::features(const query& q) const
             s <<",\""<<*pos<<"\"";
             ++pos;
          }	 
-         s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
+         s << " from " << table_ << " WHERE \""<<geometryColumn_<<"\" && SetSRID('BOX3D(";
          s << std::setprecision(16);
          s << box.minx() << " " << box.miny() << ",";
          s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
-            
-#ifdef MAPNIK_DEBUG
-         std::clog << s.str() << "\n";
-#endif           
-         shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
+         
+         if (row_limit_ > 0) {
+             s << " LIMIT " << row_limit_;
+         }
+         
+         boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
          return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),multiple_geometries_,props.size()));
       }
    }
@@ -285,7 +314,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
          PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
          std::ostringstream s;
             
-         s << "select asbinary(" << geometryColumn_ << ") as geom";
+         s << "SELECT AsBinary(\"" << geometryColumn_ << "\") AS geom";
             
          std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
          std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
@@ -297,15 +326,16 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             ++size;
          }
             
-         s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
+         s << " FROM " << table_ << " WHERE \""<<geometryColumn_<<"\" && SetSRID('BOX3D(";
          s << std::setprecision(16);
          s << pt.x << " " << pt.y << ",";
          s << pt.x << " " << pt.y << ")'::box3d,"<<srid_<<")";
-            
-#ifdef MAPNIK_DEBUG
-         std::clog << s.str() << "\n";
-#endif           
-         shared_ptr<ResultSet> rs=conn->executeQuery(s.str(),1);
+         
+         if (row_limit_ > 0) {
+             s << " LIMIT " << row_limit_;
+         }
+         
+         boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
          return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),multiple_geometries_, size));
       }
    }

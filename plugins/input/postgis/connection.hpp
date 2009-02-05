@@ -39,8 +39,10 @@ class Connection
 {
    private:
       PGconn *conn_;
+      int cursorId;
    public:
       Connection(std::string const& connection_str)
+      :cursorId(0)
       {
          conn_=PQconnectdb(connection_str.c_str());
          if (PQstatus(conn_) != CONNECTION_OK)
@@ -90,6 +92,13 @@ class Connection
       void close()
       {
          PQfinish(conn_);
+      }
+      
+      std::string new_cursor_name()
+      {
+          std::ostringstream s;
+          s << "mapnik_" << (cursorId++);
+          return s.str();
       }
       
       ~Connection()
