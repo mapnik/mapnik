@@ -107,7 +107,7 @@ void render2(const mapnik::Map& map,mapnik::Image32& image)
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
-void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0, bool show_page=true)
+void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
     try
@@ -124,18 +124,13 @@ void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x =
     Py_END_ALLOW_THREADS
 }
 
-void render4(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0) {
-   render3(map, surface, offset_x, offset_y);
-}
-
-
-void render5(const mapnik::Map& map,PycairoSurface* surface, bool show_page=true)
+void render4(const mapnik::Map& map,PycairoSurface* surface)
 {
     Py_BEGIN_ALLOW_THREADS
     try
     {
         Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-        mapnik::cairo_renderer<Cairo::Surface> ren(map,s,0,0,show_page);
+        mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
         ren.apply();
     }
     catch (...)
@@ -146,8 +141,38 @@ void render5(const mapnik::Map& map,PycairoSurface* surface, bool show_page=true
     Py_END_ALLOW_THREADS
 }
 
-void render6(const mapnik::Map& map,PycairoSurface* surface) {
-   render5(map, surface);
+void render5(const mapnik::Map& map,PycairoContext* context, unsigned offset_x = 0, unsigned offset_y = 0)
+{
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+        mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
+    Py_END_ALLOW_THREADS
+}
+
+void render6(const mapnik::Map& map,PycairoContext* context)
+{
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+        mapnik::cairo_renderer<Cairo::Context> ren(map,c);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
+    Py_END_ALLOW_THREADS
 }
 
 #endif

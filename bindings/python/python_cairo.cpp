@@ -42,11 +42,24 @@ static void *extract_surface(PyObject* op)
    }
 }
 
+static void *extract_context(PyObject* op)
+{
+   if (PyObject_TypeCheck(op, const_cast<PyTypeObject*>(Pycairo_CAPI->Context_Type)))
+   {
+      return op;
+   }
+   else
+   {
+      return 0;
+   }
+}
+
 void register_cairo()
 {
    Pycairo_IMPORT;
 
    boost::python::converter::registry::insert(&extract_surface, boost::python::type_id<PycairoSurface>());
+   boost::python::converter::registry::insert(&extract_context, boost::python::type_id<PycairoContext>());
 }
 
 #else

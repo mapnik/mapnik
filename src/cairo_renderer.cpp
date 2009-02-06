@@ -465,12 +465,9 @@ namespace mapnik
          Cairo::RefPtr<Cairo::Context> context_;
    };
 
-   template <typename T>
-   cairo_renderer<T>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, unsigned offset_x, unsigned offset_y, bool show_page)
-      : feature_style_processor<cairo_renderer>(m),
-        m_(m),
-        surface_(surface),
-        context_(Cairo::Context::create(surface)),
+   cairo_renderer_base::cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x, unsigned offset_y)
+      : m_(m),
+        context_(context),
         t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
         font_engine_(new freetype_engine()),
         font_manager_(*font_engine_),
@@ -480,14 +477,25 @@ namespace mapnik
 #ifdef MAPNIK_DEBUG
       std::clog << "scale=" << m.scale() << "\n";
 #endif
-        this->show_page = show_page;
    }
 
-   template <typename T>
-   cairo_renderer<T>::~cairo_renderer() {}
+   template <>
+   cairo_renderer<Cairo::Context>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x, unsigned offset_y)
+      : feature_style_processor<cairo_renderer>(m),
+        cairo_renderer_base(m,context,offset_x,offset_y)
+   {
+   }
 
-   template <typename T>
-   void cairo_renderer<T>::start_map_processing(Map const& map)
+   template <>
+   cairo_renderer<Cairo::Surface>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, unsigned offset_x, unsigned offset_y)
+      : feature_style_processor<cairo_renderer>(m),
+        cairo_renderer_base(m,Cairo::Context::create(surface),offset_x,offset_y)
+   {
+   }
+
+   cairo_renderer_base::~cairo_renderer_base() {}
+
+   void cairo_renderer_base::start_map_processing(Map const& map)
    {
 #ifdef MAPNIK_DEBUG
       std::clog << "start map processing bbox="
@@ -509,18 +517,24 @@ namespace mapnik
       }
    }
 
-   template <typename T>
-   void cairo_renderer<T>::end_map_processing(Map const& )
+   template <>
+   void cairo_renderer<Cairo::Context>::end_map_processing(Map const& )
    {
 #ifdef MAPNIK_DEBUG
       std::clog << "end map processing\n";
 #endif
-      if (show_page)
-         context_->show_page();
    }
 
-   template <typename T>
-   void cairo_renderer<T>::start_layer_processing(Layer const& lay)
+   template <>
+   void cairo_renderer<Cairo::Surface>::end_map_processing(Map const& )
+   {
+#ifdef MAPNIK_DEBUG
+      std::clog << "end map processing\n";
+#endif
+      context_->show_page();
+   }
+
+   void cairo_renderer_base::start_layer_processing(Layer const& lay)
    {
 #ifdef MAPNIK_DEBUG
       std::clog << "start layer processing : " << lay.name()  << "\n";
@@ -532,18 +546,16 @@ namespace mapnik
       }
    }
 
-   template <typename T>
-   void cairo_renderer<T>::end_layer_processing(Layer const&)
+   void cairo_renderer_base::end_layer_processing(Layer const&)
    {
 #ifdef MAPNIK_DEBUG
       std::clog << "end layer processing\n";
 #endif
    }
 
-   template <typename T>
-   void cairo_renderer<T>::process(polygon_symbolizer const& sym,
-                                   Feature const& feature,
-                                   proj_transform const& prj_trans)
+   void cairo_renderer_base::process(polygon_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
@@ -573,10 +585,9 @@ namespace mapnik
       return miny0 > miny1;
    }
 
-   template <typename T>
-   void cairo_renderer<T>::process(building_symbolizer const& sym,
-                                   Feature const& feature,
-                                   proj_transform const& prj_trans)
+   void cairo_renderer_base::process(building_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
       typedef coord_transform3<CoordTransform,geometry2d> path_type_roof;
@@ -677,10 +688,9 @@ namespace mapnik
       }
     }
 
-   template <typename T>
-   void cairo_renderer<T>::process(line_symbolizer const& sym,
-                                   Feature const& feature,
-                                   proj_transform const& prj_trans)
+   void cairo_renderer_base::process(line_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
@@ -713,10 +723,9 @@ namespace mapnik
       }
    }
 
-   template <typename T>
-   void cairo_renderer<T>::process(point_symbolizer const& sym,
-                                   Feature const& feature,
-                                   proj_transform const& prj_trans)
+   void cairo_renderer_base::process(point_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       boost::shared_ptr<ImageData32> const& data = sym.get_image();
 
@@ -755,10 +764,9 @@ namespace mapnik
       }
    }
 
-   template <typename T>
-   void  cairo_renderer<T>::process(shield_symbolizer const& sym,
-                                    Feature const& feature,
-                                    proj_transform const& prj_trans)
+   void cairo_renderer_base::process(shield_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
@@ -861,10 +869,9 @@ namespace mapnik
       }
    }
 
-   template <typename T>
-   void  cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
-                                    Feature const& feature,
-                                    proj_transform const& prj_trans)
+   void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
@@ -928,10 +935,9 @@ namespace mapnik
       }
    }
 
-   template <typename T>
-   void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
-                                   Feature const& feature,
-                                   proj_transform const& prj_trans)
+   void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
@@ -955,10 +961,9 @@ namespace mapnik
       }
    }
 
-   template <typename T>
-   void cairo_renderer<T>::process(raster_symbolizer const&,
-                                   Feature const& feature,
-                                   proj_transform const& prj_trans)
+   void cairo_renderer_base::process(raster_symbolizer const&,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       // TODO -- at the moment raster_symbolizer is an empty class
       // used for type dispatching, but we can have some fancy raster
@@ -975,17 +980,15 @@ namespace mapnik
       }
    }
 
-   template <typename T>
-   void cairo_renderer<T>::process(markers_symbolizer const& sym,
-                                   Feature const& feature,
-                                   proj_transform const& prj_trans)
+   void cairo_renderer_base::process(markers_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
    }
 
-   template <typename T>
-   void cairo_renderer<T>::process(text_symbolizer const& sym,
-                                   Feature const& feature,
-                                   proj_transform const& prj_trans)
+   void cairo_renderer_base::process(text_symbolizer const& sym,
+                                     Feature const& feature,
+                                     proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
@@ -1051,5 +1054,7 @@ namespace mapnik
          }
       }
    }
+
    template class cairo_renderer<Cairo::Surface>;
+   template class cairo_renderer<Cairo::Context>;
 }

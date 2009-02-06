@@ -61,16 +61,13 @@ namespace mapnik {
       cairo_face_cache cache_;
    };
 
-   template <typename T>
-   class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T> >,
-                                      private boost::noncopyable
+   class MAPNIK_DECL cairo_renderer_base : private boost::noncopyable
    {
-
+     protected:
+      cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x=0, unsigned offset_y=0);
      public:
-      cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, unsigned offset_x=0, unsigned offset_y=0, bool show_page=true);
-      ~cairo_renderer();
+      ~cairo_renderer_base();
       void start_map_processing(Map const& map);
-      void end_map_processing(Map const& map);
       void start_layer_processing(Layer const& lay);
       void end_layer_processing(Layer const& lay);
       void process(point_symbolizer const& sym,
@@ -103,16 +100,23 @@ namespace mapnik {
       void process(markers_symbolizer const& sym,
                    Feature const& feature,
                    proj_transform const& prj_trans);
-     private:
+     protected:
       Map const& m_;
-      Cairo::RefPtr<Cairo::Surface> surface_;
       Cairo::RefPtr<Cairo::Context> context_;
       CoordTransform t_;
       boost::shared_ptr<freetype_engine> font_engine_;
       face_manager<freetype_engine> font_manager_;
       cairo_face_manager face_manager_;
       label_collision_detector4 detector_;
-      bool show_page;
+   };
+
+   template <typename T>
+   class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T> >,
+                                      public cairo_renderer_base
+   {
+     public:
+      cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, unsigned offset_x=0, unsigned offset_y=0);
+      void end_map_processing(Map const& map);
    };
 }
 
