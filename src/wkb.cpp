@@ -297,7 +297,6 @@ namespace mapnik
                {
                   poly->line_to(ar[j].x,ar[j].y);
                }
-               poly->line_to(ar[0].x,ar[0].y);
             }
             feature.add_geometry(poly);
          }
