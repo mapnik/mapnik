@@ -44,14 +44,17 @@ def call(cmd):
 def uniq_add(env, key, val):
     if not val in env[key]: env[key].append(val)
 
+def remove_path(env, key, val):
+    if val in env[key]: env[key].remove(val)
+
 # Helper function for removing paths for a plugin lib
 def remove_plugin_path(plugin):
     plugin = PLUGINS.get(plugin)
     if plugin:
         libpath = '%s_LIBS' % plugin['path']
         incpath = '%s_INCLUDES' % plugin['path']
-        env['CPPPATH'].remove(env[incpath])
-        env['LIBPATH'].remove(env[libpath])
+        remove_path(env, 'CPPPATH', env[incpath])
+        remove_path(env, 'LIBPATH', env[libpath])
 
 # Helper function for building up paths to add for a lib (plugin or required)
 def add_paths(prereq):
