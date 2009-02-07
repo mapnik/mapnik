@@ -206,7 +206,7 @@ namespace mapnik
 
          void set_color(color const &color, double opacity = 1.0)
          {
-            set_color(color.red(), color.green(), color.blue(), opacity);
+            set_color(color.red(), color.green(), color.blue(), color.alpha() * opacity / 255.0);
          }
 
          void set_color(int r, int g, int b, double opacity = 1.0)
@@ -512,7 +512,7 @@ namespace mapnik
       if (bg)
       {
          cairo_context context(context_);
-         context.set_color(*bg, bg->alpha()/255.0);
+         context.set_color(*bg);
          context.paint();
       }
    }
@@ -647,7 +647,7 @@ namespace mapnik
 
                path_type faces_path(t_, *faces, prj_trans);
                context.set_color(int(fill.red() * 0.8), int(fill.green() * 0.8),
-                                 int(fill.blue() * 0.8), sym.get_opacity());
+                                 int(fill.blue() * 0.8), fill.alpha() * sym.get_opacity() / 255.0);
                context.add_path(faces_path);
                context.fill();
 

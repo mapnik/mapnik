@@ -184,6 +184,7 @@ namespace mapnik
       unsigned r=fill_.red();
       unsigned g=fill_.green();
       unsigned b=fill_.blue();
+      unsigned a=fill_.alpha();
       renderer ren(renb);
       
       ras_ptr->reset();
@@ -197,7 +198,7 @@ namespace mapnik
             ras_ptr->add_path(path);
          }
       }
-      ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
+      ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
       agg::render_scanlines(*ras_ptr, sl, ren);
    }
    
@@ -227,6 +228,7 @@ namespace mapnik
       unsigned r=fill_.red();
       unsigned g=fill_.green();
       unsigned b=fill_.blue();
+      unsigned a=fill_.alpha();
       renderer ren(renb);         
       agg::scanline_u8 sl;
      
@@ -275,7 +277,7 @@ namespace mapnik
                
                path_type faces_path (t_,*faces,prj_trans);
                ras_ptr->add_path(faces_path);
-               ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(255 * sym.get_opacity())));
+               ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
                agg::render_scanlines(*ras_ptr, sl, ren);
                ras_ptr->reset();
                
@@ -308,7 +310,7 @@ namespace mapnik
             
             path_type roof_path (t_,*roof,prj_trans);
             ras_ptr->add_path(roof_path);
-            ren.color(agg::rgba8(r, g, b, int(255 * sym.get_opacity())));
+            ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
          }
       }
@@ -334,6 +336,7 @@ namespace mapnik
       unsigned r=col.red();
       unsigned g=col.green();
       unsigned b=col.blue();
+      unsigned a=col.alpha();
       renderer ren(renb);
       ras_ptr->reset();
       agg::scanline_p8 sl;
@@ -409,7 +412,7 @@ namespace mapnik
             }
          }
       }
-      ren.color(agg::rgba8(r, g, b, int(255*stroke_.get_opacity())));
+      ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
       agg::render_scanlines(*ras_ptr, sl, ren);
    }
    
@@ -693,6 +696,7 @@ namespace mapnik
       unsigned r = 0;// fill_.red();
       unsigned g = 0; //fill_.green();
       unsigned b = 255; //fill_.blue();
+      unsigned a = 255; //fill_.alpha();
       renderer ren(renb); 
       for (unsigned i=0;i<feature.num_geometries();++i)
       {
@@ -710,7 +714,7 @@ namespace mapnik
             ras_ptr->add_path(marker);
          }
       }
-      ren.color(agg::rgba8(r, g, b, 255));
+      ren.color(agg::rgba8(r, g, b, a));
       agg::render_scanlines(*ras_ptr, sl, ren);
    }
    
