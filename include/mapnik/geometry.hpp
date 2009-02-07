@@ -174,12 +174,22 @@ namespace mapnik {
             double y0 =0;
             double x1 =0;
             double y1 =0;
+            double ox =0;
+            double oy =0;
 	    
-            unsigned i,j;
-            for (i = size-1,j = 0; j < size; i = j, ++j)
+            unsigned i;
+
+            // Use first point as origin to improve numerical accuracy
+            cont_.get_vertex(0,&ox,&oy);
+
+            for (i = 0; i < size-1; i++)
             {
                cont_.get_vertex(i,&x0,&y0);
-               cont_.get_vertex(j,&x1,&y1);
+               cont_.get_vertex(i+1,&x1,&y1);
+
+               x0 -= ox; y0 -= oy;
+               x1 -= ox; y1 -= oy;
+
                ai = x0 * y1 - x1 * y0;
                atmp += ai;
                xtmp += (x1 + x0) * ai;
@@ -187,8 +197,8 @@ namespace mapnik {
             }	  
             if (atmp != 0)
             {
-               *x = xtmp/(3*atmp);
-               *y = ytmp /(3*atmp);
+               *x = (xtmp/(3*atmp)) + ox;
+               *y = (ytmp/(3*atmp)) + oy;
                return;
             }
             *x=x0;
