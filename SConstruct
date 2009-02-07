@@ -526,11 +526,12 @@ else:
         sys_prefix = "%s -c 'import sys; print sys.prefix'" % env['PYTHON']
         env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
         
-        site_packages = "%s -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()'" % env['PYTHON']
+        # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
+        site_packages = "%s -c 'from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)'" % env['PYTHON']
         env['PYTHON_SITE_PACKAGES'] = call(site_packages)
         
-        sys_version = "%s -c 'import sys; print sys.version'" % env['PYTHON']
-        env['PYTHON_VERSION'] = call(sys_version)[0:3]
+        sys_version = "%s -c 'from distutils.sysconfig import get_python_version; print get_python_version()'" % env['PYTHON']
+        env['PYTHON_VERSION'] = call(sys_version)
         
         py_includes = "%s -c 'from distutils.sysconfig import get_python_inc; print get_python_inc()'" % env['PYTHON']
         env['PYTHON_INCLUDES'] =  call(py_includes)
@@ -565,7 +566,7 @@ else:
 
         color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
         
-        color_print(4,'Python bindings will install in... %s' % os.path.abspath(env['PYTHON_INSTALL_LOCATION']))
+        color_print(4,'Python bindings will install in... %s' % os.path.normpath(env['PYTHON_INSTALL_LOCATION']))
     
         SConscript('bindings/python/SConscript')
         
