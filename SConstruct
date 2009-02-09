@@ -610,8 +610,8 @@ else:
     
         if env['DEBUG']:
             env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
-        else:
-            env.Append(CXXFLAGS = gcc_cxx_flags + '-fast -finline-functions -Wno-inline %s' % (ndebug_flags))
-    
+        else: 
+	    env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -finline-functions -Wno-inline %s' % (env['OPTIMIZATION'],ndebug_flags))
+
     
     SConscript('fonts/SConscript')
