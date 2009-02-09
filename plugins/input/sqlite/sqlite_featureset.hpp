@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2007 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,30 +19,36 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+//$Id$
 
-//$Id: wkb.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef SQLITE_FEATURESET_HPP
+#define SQLITE_FEATURESET_HPP
 
-#ifndef WKB_HPP
-#define WKB_HPP
+// mapnik
+#include <mapnik/datasource.hpp>
+#include <mapnik/unicode.hpp> 
 
-#include <mapnik/geometry.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/feature.hpp>
-namespace mapnik
+// boost
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+
+// sqlite
+#include "sqlite_types.hpp"
+  
+  
+class sqlite_featureset : public mapnik::Featureset
 {
-    class MAPNIK_DECL geometry_utils 
-    {
-    public:
+   public:
+      sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
+                        std::string const& encoding,
+                        bool multiple_geometries);
+      virtual ~sqlite_featureset();
+      mapnik::feature_ptr next();
+   private:
+      boost::shared_ptr<sqlite_resultset> rs_;
+      boost::scoped_ptr<mapnik::transcoder> tr_;
+      bool multiple_geometries_;
+      mutable int count_;
+};
 
-       static void from_wkb (Feature & feature,
-                             const char* wkb,
-                             unsigned size,
-                             bool multiple_geometries = false,
-                             bool sqlite_format = false);
-    private:
-       geometry_utils();
-       geometry_utils(geometry_utils const&);
-       geometry_utils& operator=(const geometry_utils&);
-    };
-}
-#endif //WKB_HPP
+#endif // SQLITE_FEATURESET_HPP

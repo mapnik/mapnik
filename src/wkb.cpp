@@ -41,6 +41,8 @@ namespace mapnik
          unsigned pos_;
          wkbByteOrder byteOrder_;
          bool needSwap_;
+         bool sqliteFormat_;
+
       public:
 	
          enum wkbGeometryType {
@@ -53,14 +55,23 @@ namespace mapnik
             wkbGeometryCollection=7
          };
 	
-         wkb_reader(const char* wkb,unsigned size)
+         wkb_reader(const char* wkb,unsigned size,bool sqliteFormat = false)
             : wkb_(wkb),
               size_(size),
               pos_(0),
-              byteOrder_((wkbByteOrder)wkb_[0])
+              sqliteFormat_(sqliteFormat)
          {
-            ++pos_;
-	    
+            if (sqliteFormat)
+            {
+              byteOrder_ = (wkbByteOrder) wkb_[1];
+              pos_ = 39;
+            }
+            else
+            {
+              byteOrder_ = (wkbByteOrder) wkb_[0];
+              ++pos_;
+            }
+
 #ifndef WORDS_BIGENDIAN
             needSwap_=byteOrder_?wkbXDR:wkbNDR;
 #else
@@ -340,9 +351,9 @@ namespace mapnik
          }
    };
    
-   void geometry_utils::from_wkb(Feature & feature,const char* wkb, unsigned size, bool multiple_geometries) 
+   void geometry_utils::from_wkb(Feature & feature,const char* wkb, unsigned size, bool multiple_geometries, bool sqlite_format) 
    {
-      wkb_reader reader(wkb,size);
+      wkb_reader reader(wkb,size,sqlite_format);
       if (multiple_geometries)
          return reader.read_multi(feature);
       else

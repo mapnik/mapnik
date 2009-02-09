@@ -81,6 +81,7 @@ PLUGINS = { # plugins with external dependencies
             'gdal':    {'default':False,'path':'GDAL','inc':'gdal_priv.h','lib':'gdal','cxx':True},
             'ogr':     {'default':False,'path':'OGR','inc':'ogrsf_frmts.h','lib':'gdal','cxx':True},
             'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','cxx':True},
+            'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','cxx':False},
             
             # plugins without external dependencies
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'cxx':True},
@@ -151,6 +152,8 @@ opts.Add(PathVariable('OGR_INCLUDES', 'Search path for OGR include files', '/usr
 opts.Add(PathVariable('OGR_LIBS', 'Search path for OGR library files', '/usr/local/' + LIBDIR_SCHEMA))
 opts.Add(PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include/', PathVariable.PathAccept))
 opts.Add(PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept))
+opts.Add(PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept))
+opts.Add(PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
 
 # Other variables
 opts.Add(PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable))
@@ -608,7 +611,7 @@ else:
         if env['DEBUG']:
             env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
         else:
-            env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -finline-functions -Wno-inline %s' % (env['OPTIMIZATION'],ndebug_flags))
+            env.Append(CXXFLAGS = gcc_cxx_flags + '-fast -finline-functions -Wno-inline %s' % (ndebug_flags))
     
     
     SConscript('fonts/SConscript')

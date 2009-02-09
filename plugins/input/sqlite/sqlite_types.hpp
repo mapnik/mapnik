@@ -1,0 +1,251 @@
+/*****************************************************************************
+ * 
+ * This file is part of Mapnik (c++ mapping toolkit)
+ *
+ * Copyright (C) 2007 Artem Pavlenko
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *****************************************************************************/
+//$Id$
+
+#ifndef SQLITE_TYPES_HPP
+#define SQLITE_TYPES_HPP
+
+// mapnik
+#include <mapnik/datasource.hpp>
+
+// boost
+#include <boost/shared_ptr.hpp>
+
+// sqlite
+extern "C" {
+  #include <sqlite3.h>
+}
+
+
+class sqlite_resultset
+{
+public:
+
+    sqlite_resultset (sqlite3_stmt* stmt)
+        : stmt_(stmt)
+    {
+    }
+
+    ~sqlite_resultset ()
+    {
+        if (stmt_)
+            sqlite3_finalize (stmt_);
+    }
+
+    bool is_valid ()
+    {
+        return stmt_ != 0;
+    }
+
+    bool step_next ()
+    {
+        return (sqlite3_step (stmt_) == SQLITE_ROW);
+    }
+
+    int column_count ()
+    {
+        return sqlite3_column_count (stmt_);
+    }
+
+    int column_type (int col)
+    {
+        return sqlite3_column_type (stmt_, col);
+    }
+    
+    const char* column_name (int col)
+    {
+        return sqlite3_column_name (stmt_, col);
+    }
+
+    bool column_isnull (int col)
+    {
+        return sqlite3_column_type (stmt_, col) == SQLITE_NULL;
+    }
+
+    int column_integer (int col)
+    {
+        return sqlite3_column_int (stmt_, col);
+    }
+
+    double column_double (int col)
+    {
+        return sqlite3_column_double (stmt_, col);
+    }
+
+    const char* column_text (int col)
+    {
+        return (const char*) sqlite3_column_text (stmt_, col);
+    }
+
+    const void* column_blob (int col, int& bytes)
+    {
+        bytes = sqlite3_column_bytes (stmt_, col);
+    
+        return sqlite3_column_blob (stmt_, col);
+    }
+
+    sqlite3_stmt* get_statement()
+    {
+        return stmt_;
+    }
+
+private:
+
+    sqlite3_stmt* stmt_;
+};
+
+
+
+class sqlite_connection
+{
+public:
+
+    typedef int (*sqlite_query_callback) (void*, int, char**, char**);
+
+    sqlite_connection (const std::string& file)
+        : db_(0)
+    {
+        if (sqlite3_open (file.c_str(), &db_))
+            throw mapnik::datasource_exception (sqlite3_errmsg (db_));
+    }
+
+    ~sqlite_connection ()
+    {
+        if (db_)
+            sqlite3_close (db_);
+    }
+
+    int execute_query_callback (const std::string& sql, sqlite_query_callback callback)
+    {
+        char* error_message = 0;
+
+        int rc = sqlite3_exec (db_, sql.c_str(), callback, 0, &error_message);
+        if (rc != SQLITE_OK)
+        {
+            sqlite3_free (error_message);
+        }
+
+        return rc;
+    }
+
+    boost::shared_ptr<sqlite_resultset> execute_query (const std::string& sql)
+    {
+        sqlite3_stmt* stmt = 0;
+
+        int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
+        if (rc != SQLITE_OK)
+        {
+        }
+
+        return boost::shared_ptr<sqlite_resultset> (new sqlite_resultset (stmt));
+	}
+
+#if 0
+    std::vector<std::string> get_table_columns (const std::string& sql)
+    {
+        char** result;
+        char* error_message = 0;
+        int nrow, ncol;
+        std::vector<std::string> head;
+    
+        int rc = sqlite3_exec (db_, sql.c_str(), &result, &nrow, &ncol, &error_message);
+        if (rc == SQLITE_OK)
+        {
+            for (int i = 0; i < ncol; ++i)
+    	        head.push_back (result[i]);
+//            for (int i = 0; i < ncol * nrow; ++i)
+//            	vdata.push_back(result[ncol+i]);
+        }
+        
+        sqlite3_free_table(result);
+        
+        return head;
+    }
+#endif
+
+    sqlite3* operator*()
+    {
+        return db_;
+    }
+
+private:
+
+    sqlite3* db_;
+};
+
+
+
+#if 0
+
+static int callback (void *not_used, int argc, char **argv, char** column_name)
+{
+    not_used = 0;
+    for (int i = 0; i < argc; i++)
+    {
+        std::cout << column_name[i] << " = " << (argv[i] ? argv[i] : "NULL") << std::endl;
+    }
+    return 0;
+}
+
+static int print_col (sqlite_resultset& rs, int col)
+{
+	switch (rs.column_type (col))
+	{
+	case SQLITE_INTEGER:
+		std::cout << "INTEGER: " << rs.column_integer (col) << std::endl;
+		break;
+	case SQLITE_FLOAT:
+		std::cout << "FLOAT:   " << rs.column_double (col) << std::endl;
+		break;
+	case SQLITE_TEXT:
+		std::cout << "TEXT:    " << rs.column_text (col) << std::endl;
+		break;
+	case SQLITE_BLOB:
+	{
+	    std::cout << "BLOB:    ";
+	    
+	    int size;
+	    const char * data = (const char *) rs.column_blob (col, size);
+	    
+	    for (int i = 0; i < size; i++)
+	    {
+	        std::cout << data [i] << " ";
+	    }
+	    
+	    std::cout << std::endl;
+	    
+		break;
+    }
+	case SQLITE_NULL:
+		std::cout << "Null " << std::endl;
+		break;
+	default:
+		std::cout << " *Cannot determine SQLITE TYPE* col=" << col << std::endl;
+	}
+
+	return 0;
+}
+
+#endif
+
+#endif //SQLITE_TYPES_HPP
+
