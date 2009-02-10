@@ -436,7 +436,8 @@ namespace mapnik
                      ;
                   term = factor
                      >> *((L'*' >> factor) [compose_expression<FeatureT,mapnik::mult<value> >(self.exprs)] 
-                          | (L'/' >> factor) [compose_expression<FeatureT,mapnik::div<value> >(self.exprs)]);
+                          | (L'/' >> factor) [compose_expression<FeatureT,mapnik::div<value> >(self.exprs)]
+                          | (L'%' >> factor) [compose_expression<FeatureT,mapnik::mod<value> >(self.exprs)]);
 		
                   expression = term >> *((L'+' >> term) [compose_expression<FeatureT,mapnik::add<value> >(self.exprs)] 
                                          | (L'-' >> term) [compose_expression<FeatureT,mapnik::sub<value> >(self.exprs)]);

@@ -80,6 +80,19 @@ namespace mapnik
         } 
     };
     
+    template <typename T>
+    struct mod
+    {
+        T operator () (T const& left, T const& right)
+        {
+            return left % right;
+        }
+        static std::string to_string()
+        {
+            return "%";
+        } 
+    };
+
     template <typename FeatureT,typename Op>
     struct math_expr_b : public expression<FeatureT>
     {

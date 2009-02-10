@@ -36,6 +36,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 // uci
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
@@ -434,6 +435,44 @@ namespace mapnik  {
 	       return lhs / rhs;
 	    }
       };
+
+      template <typename V>
+      struct mod: public boost::static_visitor<V>
+      { 
+            typedef V value_type;
+            template <typename T1, typename T2>
+            value_type operator() (T1 const& lhs, T2 const&) const
+	    {
+	       return lhs;
+	    }
+	    
+            template <typename T>
+            value_type operator() (T lhs, T rhs) const
+	    {
+	       return lhs % rhs;
+	    }
+	
+            value_type operator() (UnicodeString const& lhs,
+                                   UnicodeString const&) const
+	    {
+	       return lhs;
+	    }
+	
+            value_type operator() (double lhs, int rhs) const
+	    {
+	       return fmod(lhs, rhs);
+	    }
+	
+            value_type operator() (int lhs, double rhs) const
+	    {
+	       return fmod(lhs, rhs);
+	    }
+	
+            value_type operator() (double lhs, double rhs) const
+	    {
+	       return fmod(lhs, rhs);
+	    }
+      };
         
       struct to_bool : public boost::static_visitor<bool>
       {
@@ -553,6 +592,7 @@ namespace mapnik  {
 	 friend const value operator-(value const&,value const&);
 	 friend const value operator*(value const&,value const&);
 	 friend const value operator/(value const&,value const&);
+	 friend const value operator%(value const&,value const&);
         
       public:
 	 value ()
@@ -639,6 +679,12 @@ namespace mapnik  {
    {
 
       return value(boost::apply_visitor(impl::div<value>(),p1.base_, p2.base_));
+   }
+
+   inline const value operator%(value const& p1,value const& p2)
+   {
+
+      return value(boost::apply_visitor(impl::mod<value>(),p1.base_, p2.base_));
    }
 
   template <typename charT, typename traits>
