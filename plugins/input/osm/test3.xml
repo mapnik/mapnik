@@ -494,7 +494,6 @@
     <StyleName>cycleway</StyleName>
     <StyleName>bridleway</StyleName>
     <StyleName>byway</StyleName>
-    <StyleName>railway</StyleName>
     <StyleName>residential</StyleName>
     <StyleName>unclassified</StyleName>
     <StyleName>tertiary</StyleName>

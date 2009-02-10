@@ -12,9 +12,9 @@
 
   <Style name="coast-line">
      <Rule>
-	 	<PolygonSymbolizer>
+	 	<LineSymbolizer>
 			<CssParameter name="stroke">skyblue</CssParameter>
-		</PolygonSymbolizer>
+		</LineSymbolizer>
 	</Rule>
   </Style>
 
