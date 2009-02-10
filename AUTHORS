@@ -4,23 +4,22 @@ Committers
 ==========
 
   - Artem Pavlenko <pavlenko -at- users.berlios.de>
+  - Lucio Asnaghi (OGR,Oracle,SQLite plugins)
   - Jon Burgess
-  - Jean-Francois Doyon (Python API) <jfdoyon -at- gmail.com>
-  - Tom Hughes (Cairo)
-  - David Siegel (XML)
-  - Andreas Volz (Autotools)
+  - Jean-Francois Doyon (Python API, OGCServer) <jfdoyon -at- gmail.com>
   - Dominic Hargreaves (Stable releases)
-  - David Leaver (TextSymbolizer)
-  - Vince Spader (TextSymbolizer)
-  - Nick Whitelegg (OSM plugin)
+  - Tom Hughes (Cairo)
   - Ben Moores (PDF branch)
+  - David Siegel (XML)
+  - Vince Spader (TextSymbolizer)
   - Dane Springmeyer (Python API) <dane.springmeyer -at- gmail.com>
+  - Andreas Volz (Autotools)
+  - Nick Whitelegg (OSM plugin)
 
 Patches
 =======
 
   - Andy Allen
-  - Lucio Asnaghi
   - Justin Bronn
   - Christopher Brown
   - Berteun Damman
