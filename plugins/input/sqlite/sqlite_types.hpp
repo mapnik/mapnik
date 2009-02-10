@@ -141,46 +141,25 @@ public:
         int rc = sqlite3_exec (db_, sql.c_str(), callback, 0, &error_message);
         if (rc != SQLITE_OK)
         {
+            std::clog << error_message << std::endl;
             sqlite3_free (error_message);
         }
 
         return rc;
     }
 
-    boost::shared_ptr<sqlite_resultset> execute_query (const std::string& sql)
+    sqlite_resultset* execute_query (const std::string& sql)
     {
         sqlite3_stmt* stmt = 0;
 
         int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
         if (rc != SQLITE_OK)
         {
+            std::clog << sqlite3_errmsg(db_) << std::endl;
         }
 
-        return boost::shared_ptr<sqlite_resultset> (new sqlite_resultset (stmt));
+        return new sqlite_resultset (stmt);
 	}
-
-#if 0
-    std::vector<std::string> get_table_columns (const std::string& sql)
-    {
-        char** result;
-        char* error_message = 0;
-        int nrow, ncol;
-        std::vector<std::string> head;
-    
-        int rc = sqlite3_exec (db_, sql.c_str(), &result, &nrow, &ncol, &error_message);
-        if (rc == SQLITE_OK)
-        {
-            for (int i = 0; i < ncol; ++i)
-    	        head.push_back (result[i]);
-//            for (int i = 0; i < ncol * nrow; ++i)
-//            	vdata.push_back(result[ncol+i]);
-        }
-        
-        sqlite3_free_table(result);
-        
-        return head;
-    }
-#endif
 
     sqlite3* operator*()
     {
@@ -191,61 +170,6 @@ private:
 
     sqlite3* db_;
 };
-
-
-
-#if 0
-
-static int callback (void *not_used, int argc, char **argv, char** column_name)
-{
-    not_used = 0;
-    for (int i = 0; i < argc; i++)
-    {
-        std::cout << column_name[i] << " = " << (argv[i] ? argv[i] : "NULL") << std::endl;
-    }
-    return 0;
-}
-
-static int print_col (sqlite_resultset& rs, int col)
-{
-	switch (rs.column_type (col))
-	{
-	case SQLITE_INTEGER:
-		std::cout << "INTEGER: " << rs.column_integer (col) << std::endl;
-		break;
-	case SQLITE_FLOAT:
-		std::cout << "FLOAT:   " << rs.column_double (col) << std::endl;
-		break;
-	case SQLITE_TEXT:
-		std::cout << "TEXT:    " << rs.column_text (col) << std::endl;
-		break;
-	case SQLITE_BLOB:
-	{
-	    std::cout << "BLOB:    ";
-	    
-	    int size;
-	    const char * data = (const char *) rs.column_blob (col, size);
-	    
-	    for (int i = 0; i < size; i++)
-	    {
-	        std::cout << data [i] << " ";
-	    }
-	    
-	    std::cout << std::endl;
-	    
-		break;
-    }
-	case SQLITE_NULL:
-		std::cout << "Null " << std::endl;
-		break;
-	default:
-		std::cout << " *Cannot determine SQLITE TYPE* col=" << col << std::endl;
-	}
-
-	return 0;
-}
-
-#endif
 
 #endif //SQLITE_TYPES_HPP
 

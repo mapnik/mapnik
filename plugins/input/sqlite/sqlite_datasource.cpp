@@ -58,14 +58,16 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
      extent_initialized_(false),
      type_(datasource::Vector),
      table_(*params.get<std::string>("table","")),
+     metadata_(*params.get<std::string>("metadata","")),
      geometry_field_(*params.get<std::string>("geometry_field","geom")),
-     geocatalog_(*params.get<std::string>("geometry_catalog","geocatalog")),
+     key_field_(*params.get<std::string>("key_field","PK_UID")),
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("missing <file> paramater");
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
+    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
 
     dataset_ = new sqlite_connection (*file);
 
@@ -104,36 +106,53 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         }
     } 
 
-#if 0
+    if (metadata_ != "" && ! extent_initialized_)
     {
         std::ostringstream s;
-        s << "select minx, miny, maxx, maxy from " << geocatalog_;
-        s << " where lower(table_name) = lower('" << table_ << "')";
-        boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query (s.str());
+        s << "select xmin, ymin, xmax, ymax from " << metadata_;
+        s << " where lower(f_table_name) = lower('" << table_ << "')";
+        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
-            double minx = rs->column_double (0);
-            double miny = rs->column_double (1);
-            double maxx = rs->column_double (2);
-            double maxy = rs->column_double (3);
+            double xmin = rs->column_double (0);
+            double ymin = rs->column_double (1);
+            double xmax = rs->column_double (2);
+            double ymax = rs->column_double (3);
             
-            extent_.init (minx,miny,maxx,maxy);
+            extent_.init (xmin,ymin,xmax,ymax);
+            extent_initialized_ = true;
         }
     }
-#endif
 
+    if (use_spatial_index_)
     {
         std::ostringstream s;
-        s << "select * from " << table_ << " limit 1";
-        boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query (s.str());
+        s << "select count (*) sqlite_master";
+        s << " where name = 'idx_" << table_ << "_" << geometry_field_ << "'";
+        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
-            /*
-                XXX - This is problematic, if we don't have at least a row,
-                      we cannot determine the right columns types and names 
-                      as all column_type are SQLITE_NULL
-            */
-    
+            if (rs->column_integer (0) == 0)
+            {
+#ifdef MAPNIK_DEBUG
+                clog << "cannot use the spatial index " << endl;
+#endif
+                use_spatial_index_ = false;
+            }
+        }
+    }
+
+    {
+        /*
+            XXX - This is problematic, if we don't have at least a row,
+                  we cannot determine the right columns types and names 
+                  as all column_type are SQLITE_NULL
+        */
+        std::ostringstream s;
+        s << "select * from " << table_ << " limit 1";
+        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+        if (rs->is_valid () && rs->step_next())
+        {
             for (int i = 0; i < rs->column_count (); ++i)
             {
                const int type_oid = rs->column_type (i);
@@ -141,23 +160,14 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
                switch (type_oid)
                {
                   case SQLITE_INTEGER:
-#ifdef MAPNIK_DEBUG
-                     clog << fld_name << " integer" << endl;
-#endif
                      desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
                      break;
                      
                   case SQLITE_FLOAT:
-#ifdef MAPNIK_DEBUG
-                     clog << fld_name << " double" << endl;
-#endif
                      desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
                      break;
                      
                   case SQLITE_TEXT:
-#ifdef MAPNIK_DEBUG
-                     clog << fld_name << " text" << endl;
-#endif
                      desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
                      break;
                      
@@ -207,17 +217,10 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 {
    if (dataset_)
    {
-
         mapnik::Envelope<double> const& e = q.get_bbox();
-#if 0
-        layer_->SetSpatialFilterRect (query_extent.minx(),
-                                      query_extent.miny(),
-                                      query_extent.maxx(),
-                                      query_extent.maxy());
-#endif
 
         std::ostringstream s;
-        s << "select " << geometry_field_ << ",PK_UID";
+        s << "select " << geometry_field_ << "," << key_field_;
         std::set<std::string> const& props = q.property_names();
         std::set<std::string>::const_iterator pos = props.begin();
         std::set<std::string>::const_iterator end = props.end();
@@ -226,13 +229,21 @@ featureset_ptr sqlite_datasource::features(query const& q) const
            s << "," << *pos << "";
            ++pos;
         }	 
-        s << " from " << table_ << "," <<  "idx_" << table_ << "_" <<  geometry_field_;
-        s << " where " << table_<<".PK_UID="<<  "idx_" << table_ << "_" << geometry_field_ << ".pkid" ;
-        s << " and xmax>=" << e.minx() << " and xmin<=" << e.maxx() ;
-        s << " and ymax>=" << e.miny() << " and ymin<=" << e.maxy() ;
-        
-        std::cerr << s.str() << "\n";
-        boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query (s.str());
+        s << " from " << table_;
+
+        if (use_spatial_index_)
+        {
+            s << std::setprecision(16);
+            s << " where rowid in (select pkid from idx_" << table_ << "_" << geometry_field_;
+            s << " where xmax>=" << e.minx() << " and xmin<=" << e.maxx() ;
+            s << " and ymax>=" << e.miny() << " and ymin<=" << e.maxy() << ")";
+        }
+
+#ifdef MAPNIK_DEBUG
+        std::cerr << "executing sql: " << s.str() << "\n";
+#endif
+
+        boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
 
         return featureset_ptr (new sqlite_featureset(rs, desc_.get_encoding(), multiple_geometries_));
    }

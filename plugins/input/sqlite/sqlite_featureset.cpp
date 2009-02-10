@@ -53,8 +53,7 @@ sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                                      bool multiple_geometries)
    : rs_(rs),
      tr_(new transcoder(encoding)),
-     multiple_geometries_(multiple_geometries),
-     count_(0)
+     multiple_geometries_(multiple_geometries)
 {
 }
 
@@ -64,17 +63,18 @@ feature_ptr sqlite_featureset::next()
 {
     if (rs_->is_valid () && rs_->step_next ())
     {
-        feature_ptr feature(new Feature(count_));
-
-#ifdef MAPNIK_DEBUG
-	    clog << "feature_oid=" << count_ << endl;
-#endif
-
         int size;
         const char* data = (const char *) rs_->column_blob (0, size);
-        geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,true);
+        int feature_id = rs_->column_integer (1);   
 
-        for (int i = 1; i < rs_->column_count (); ++i)
+#ifdef MAPNIK_DEBUG
+        // clog << "feature_oid=" << feature_id << endl;
+#endif
+
+        feature_ptr feature(new Feature(feature_id));
+        geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,mapnik::wkbSQLite);
+
+        for (int i = 2; i < rs_->column_count (); ++i)
         {
            const int type_oid = rs_->column_type (i);
            const char* fld_name = rs_->column_name (i);
@@ -111,8 +111,6 @@ feature_ptr sqlite_featureset::next()
                  break;
            }
         }
-        
-        count_++;
 
         return feature;
     }

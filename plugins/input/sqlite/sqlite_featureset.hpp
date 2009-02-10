@@ -48,7 +48,6 @@ class sqlite_featureset : public mapnik::Featureset
       boost::shared_ptr<sqlite_resultset> rs_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
       bool multiple_geometries_;
-      mutable int count_;
 };
 
 #endif // SQLITE_FEATURESET_HPP

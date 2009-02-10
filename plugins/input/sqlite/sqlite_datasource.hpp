@@ -53,9 +53,10 @@ class sqlite_datasource : public mapnik::datasource
       mutable bool extent_initialized_;
       int type_;
       sqlite_connection* dataset_;
-      std::string table_, geometry_field_, geocatalog_;
+      std::string table_, metadata_, geometry_field_, key_field_;
       mapnik::layer_descriptor desc_;
       bool multiple_geometries_;
+      bool use_spatial_index_;
 };
 
 

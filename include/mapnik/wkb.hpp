@@ -30,6 +30,13 @@
 #include <mapnik/feature.hpp>
 namespace mapnik
 {
+    enum wkbFormat
+    {
+        wkbGeneric=1,
+        wkbAutodetect=2,
+        wkbSQLite=3
+    };
+
     class MAPNIK_DECL geometry_utils 
     {
     public:
@@ -38,7 +45,7 @@ namespace mapnik
                              const char* wkb,
                              unsigned size,
                              bool multiple_geometries = false,
-                             bool sqlite_format = false);
+                             wkbFormat format = wkbGeneric);
     private:
        geometry_utils();
        geometry_utils(geometry_utils const&);
