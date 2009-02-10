@@ -226,12 +226,16 @@ color_print (4,"Building on %s in *%s*..." % (env['PLATFORM'],mode))
 Help(opts.GenerateHelpText(env))
 
 if env['SCONS_CACHE']:
-    pass # caching is 'auto' by default in SCons
+    # caching is 'auto' by default in SCons
+    # But let's also cache implicit deps...
+    SetOption('implicit_cache', 1)
+    
 else:
     # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
     # This allows for a SCONS_LOCAL_CONFIG, if present, to be used as the primary means of storing paths to successful build dependencies
     from SCons.SConf import SetCacheMode
     SetCacheMode('force')
+    
 
 thread_suffix = 'mt'
 if env['PLATFORM'] == 'FreeBSD':
