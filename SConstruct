@@ -83,7 +83,9 @@ PLUGINS = { # plugins with external dependencies
             'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','cxx':True},
             'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','cxx':False},
             
-            # plugins without external dependencies
+            # plugins without external dependencies requiring CheckLibWithHeader...
+            # note: osm plugin does depend on libxml2
+            'osm':     {'default':False,'path':None,'inc':None,'lib':None,'cxx':True},
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'cxx':True},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'cxx':True},
             }
