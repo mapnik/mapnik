@@ -24,10 +24,13 @@
 #ifndef UNICODE_HPP
 #define UNICODE_HPP
 
+// icu
 #include <unicode/unistr.h>
 #include <unicode/ucnv.h>
-
+// boost
 #include <boost/utility.hpp>
+// stl
+#include <string>
 
 namespace mapnik {
    class transcoder : private boost::noncopyable
