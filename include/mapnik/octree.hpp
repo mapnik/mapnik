@@ -88,7 +88,7 @@ namespace mapnik {
                unsigned blues;
                unsigned count;	
                unsigned count2;	
-               uint8_t  index;					
+               byte  index;					
          };
          struct node_cmp
          {
@@ -214,9 +214,9 @@ namespace mapnik {
             if (itr->count != 0)
             {
                unsigned count = itr->count;
-               palette.push_back(rgb(uint8_t(itr->reds/float(count)),
-                                     uint8_t(itr->greens/float(count)),
-                                     uint8_t(itr->blues/float(count))));
+               palette.push_back(rgb(byte(itr->reds/float(count)),
+                                     byte(itr->greens/float(count)),
+                                     byte(itr->blues/float(count))));
                itr->index = palette.size() - 1;			
             }
             for (unsigned i=0; i < 8 ;++i)
