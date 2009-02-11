@@ -24,8 +24,12 @@
 #ifndef _OCTREE_HPP_
 #define _OCTREE_HPP_
 
+// boost
+#include <boost/cstdint.hpp>
 #include <boost/format.hpp>
 #include <boost/utility.hpp>
+
+// stl
 #include <vector>
 #include <iostream>
 #include <deque>
