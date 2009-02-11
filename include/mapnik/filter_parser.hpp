@@ -37,16 +37,28 @@
 #include <mapnik/logical.hpp>
 
 // boost
+
 #ifdef MAPNIK_DEBUG
 #define BOOST_SPIRIT_DEBUG
 #endif
 
+#include <boost/version.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/spirit/core.hpp>
-#include <boost/spirit/symbols.hpp>
-#include <boost/spirit/utility/confix.hpp>
-#include <boost/spirit/utility/escape_char.hpp>
-#include <boost/spirit/utility/chset.hpp> 
+
+#if BOOST_VERSION < 103800
+  #include <boost/spirit/core.hpp>
+  #include <boost/spirit/symbols.hpp>
+  #include <boost/spirit/utility/confix.hpp>
+  #include <boost/spirit/utility/escape_char.hpp>
+  #include <boost/spirit/utility/chset.hpp> 
+#else
+  #define BOOST_SPIRIT_USE_OLD_NAMESPACE
+  #include <boost/spirit/include/classic_core.hpp>
+  #include <boost/spirit/include/classic_symbols.hpp>
+  #include <boost/spirit/include/classic_confix.hpp>
+  #include <boost/spirit/include/classic_escape_char.hpp>
+  #include <boost/spirit/include/classic_chset.hpp> 
+#endif
 
 // stl
 #include <stack>

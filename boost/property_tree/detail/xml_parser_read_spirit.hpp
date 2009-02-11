@@ -14,13 +14,21 @@
 #define BOOST_PROPERTY_TREE_DETAIL_XML_PARSER_READ_SPIRIT_HPP_INCLUDED
 
 //#define BOOST_SPIRIT_DEBUG
-
+#include <boost/version.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/detail/xml_parser_error.hpp>
 #include <boost/property_tree/detail/xml_parser_flags.hpp>
 #include <boost/property_tree/detail/xml_parser_utils.hpp>
+
+#if BOOST_VERSION < 103800
 #include <boost/spirit.hpp>
 #include <boost/spirit/iterator/position_iterator.hpp>
+#else
+#define BOOST_SPIRIT_USE_OLD_NAMESPACE
+#include <boost/spirit/include/classic.hpp>
+#include <boost/spirit/include/classic_position_iterator.hpp>
+#endif
+
 #include <string>
 #include <locale>
 #include <istream>

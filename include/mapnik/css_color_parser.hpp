@@ -25,8 +25,17 @@
 #ifndef CSS_COLOR_PARSER_HPP
 #define CSS_COLOR_PARSER_HPP
 
-#include <boost/spirit/core.hpp>
-#include <boost/spirit/symbols.hpp>
+// boost
+#include <boost/version.hpp>
+
+#if BOOST_VERSION < 103800
+  #include <boost/spirit/core.hpp>
+  #include <boost/spirit/symbols.hpp>
+#else
+  #define BOOST_SPIRIT_USE_OLD_NAMESPACE
+  #include <boost/spirit/include/classic_core.hpp>
+  #include <boost/spirit/include/classic_symbols.hpp>
+#endif
 
 using namespace boost::spirit;
 
