@@ -36,7 +36,7 @@
 
 namespace mapnik {
 	
-   typedef uint8_t byte ;
+   typedef boost::uint8_t byte ;
    struct rgb	
    {
          byte r;
