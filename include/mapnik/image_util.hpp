@@ -307,7 +307,7 @@ namespace mapnik {
    template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
                                                                      std::string const&);
    
-   template MAPNIK_DECL std:string save_to_string<image_view<ImageData32> > (image_view<ImageData32> const&,
+   template MAPNIK_DECL std::string save_to_string<image_view<ImageData32> > (image_view<ImageData32> const&,
                                                                      std::string const&);
 #endif
 
