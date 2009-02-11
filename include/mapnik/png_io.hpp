@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 //$Id$
-
+#include <mapnik/global.hpp>
 #include <mapnik/octree.hpp>
 extern "C"
 {
@@ -102,7 +102,7 @@ namespace mapnik {
          {
             unsigned val = row[x];
             mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
-            uint8_t index = tree.quantize(c);
+            byte index = tree.quantize(c);
             row_out[x] = index;
          }
       }
@@ -123,7 +123,7 @@ namespace mapnik {
          {
             unsigned val = row[x];
             mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
-            uint8_t index = tree.quantize(c);
+            byte index = tree.quantize(c);
             if (x%2 >  0) index = index<<4;
             row_out[x>>1] |= index;  
          }

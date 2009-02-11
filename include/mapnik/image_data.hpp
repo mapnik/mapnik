@@ -25,6 +25,7 @@
 #ifndef IMAGE_DATA_HPP
 #define IMAGE_DATA_HPP
 
+#include <mapnik/global.hpp>
 #include <mapnik/octree.hpp>
 #include <cassert>
 #include <cstring>
@@ -136,7 +137,7 @@ namespace mapnik
     };
 
    typedef ImageData<unsigned> ImageData32;
-   typedef ImageData<uint8_t>  ImageData8;
+   typedef ImageData<byte>  ImageData8;
 }
 
 #endif //IMAGE_DATA_HPP
