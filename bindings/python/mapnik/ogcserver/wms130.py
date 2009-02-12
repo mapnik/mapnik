@@ -235,6 +235,7 @@ class ExceptionHandler(BaseExceptionHandler):
 
     handlers = {'XML': BaseExceptionHandler.xmlhandler,
                 'INIMAGE': BaseExceptionHandler.inimagehandler,
-                'BLANK': BaseExceptionHandler.blankhandler}
+                'BLANK': BaseExceptionHandler.blankhandler,
+                'text/html': BaseExceptionHandler.htmlhandler}
 
     defaulthandler = 'XML'

@@ -224,6 +224,7 @@ class ExceptionHandler(BaseExceptionHandler):
 
     handlers = {'application/vnd.ogc.se_xml': BaseExceptionHandler.xmlhandler,
                 'application/vnd.ogc.se_inimage': BaseExceptionHandler.inimagehandler,
-                'application/vnd.ogc.se_blank': BaseExceptionHandler.blankhandler}
+                'application/vnd.ogc.se_blank': BaseExceptionHandler.blankhandler,
+                'text/html': BaseExceptionHandler.htmlhandler}
 
     defaulthandler = 'application/vnd.ogc.se_xml'

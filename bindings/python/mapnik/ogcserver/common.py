@@ -356,6 +356,13 @@ class BaseExceptionHandler:
     def getresponse(self, params):
         code = ''
         message = '\n'
+        if not params:
+            message = '''
+            <h2>Welcome to the Mapnik OGCServer.</h2>
+            <h3>Ready to accept map requests...</h5>
+            <h4>For more info see: <a href="http://trac.mapnik.org/wiki/OgcServer">trac.mapnik.org</a></h4>
+            '''
+            return self.htmlhandler('', message)
         excinfo = exc_info()
         if self.debug:
             messagelist = format_exception(excinfo[0], excinfo[1], excinfo[2])
@@ -365,9 +372,18 @@ class BaseExceptionHandler:
         if isinstance(excinfo[1], OGCException) and len(excinfo[1].args) > 1:
             code = excinfo[1].args[1]
         exceptions = params.get('exceptions', None)
+        if self.debug:
+            return self.htmlhandler(code, message)
         if not exceptions or not self.handlers.has_key(exceptions):
             exceptions = self.defaulthandler
         return self.handlers[exceptions](self, code, message, params)
+
+    def htmlhandler(self,code,message):
+        if code:
+           resp_text = '<h2>OGCServer Error:</h2><pre>%s</pre>\n<h3>Traceback:</h3><pre>%s</pre>\n' %  (message, code)
+        else:
+           resp_text = message
+        return Response('text/html', resp_text)
 
     def xmlhandler(self, code, message, params):
         ogcexcetree = deepcopy(self.xmltemplate)

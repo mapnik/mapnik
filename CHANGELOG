@@ -13,6 +13,7 @@ For a complete change history, see the SVN log.
 
 Current Version (0.6.0-dev, SVN trunk):
 ---------------------------------------
+- OGCServer: Enabled friendly html output when in debug mode (debug=1 in ogcserver.conf) (r899)
 
 - Filter parsing: Allow numbers in the filter field name.
   This allows for shapefiles with columns like '1970'.
