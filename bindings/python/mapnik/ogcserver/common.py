@@ -20,8 +20,8 @@
 # $Id$
 
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Map, Color, Envelope, render, Image, Projection as MapnikProjection, render_to_file, Coord
-from PIL.Image import fromstring, new
+from mapnik import Map, Color, Envelope, render, Image, Layer, Style, Projection as MapnikProjection, render_to_file, Coord
+from PIL.Image import new
 from PIL.ImageDraw import Draw
 from StringIO import StringIO
 from copy import deepcopy
@@ -277,6 +277,30 @@ class CRSFactory:
         else:
             raise OGCException('Invalid CRS Namespace: %s' % crsparts[0], 'InvalidCRS')
 
+def copy(obj):
+    if isinstance(obj,Layer):
+      lyr = Layer(obj.name)
+      lyr.abstract = obj.abstract
+      lyr.active = obj.active
+      lyr.clear_label_cache = obj.clear_label_cache
+      lyr.datasource = obj.datasource
+      #lyr.maxzoom = obj.maxzoom
+      #lyr.minzoom = obj.minzoom
+      lyr.queryable = obj.queryable
+      lyr.srs = obj.srs
+      lyr.title = obj.title
+      if hasattr(obj,'wmsdefaultstyle'):
+          lyr.wmsdefaultstyle = obj.wmsdefaultstyle
+      if hasattr(obj,'wmsextrastyles'):
+          lyr.wmsextrastyles = obj.wmsextrastyles
+      return lyr
+      
+    elif isinstance(obj,Style):
+      sty = Style()
+      for rule in obj.rules:
+         sty.rules.append(rule)
+      return sty
+      
 class WMSBaseServiceHandler(BaseServiceHandler):
 
     def GetMap(self, params):
@@ -324,12 +348,19 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         maplayers = self.mapfactory.layers
         mapstyles = self.mapfactory.styles
         mapaggregatestyles = self.mapfactory.aggregatestyles
-        for layerindex, layername in enumerate(params['layers']):
+        if params['layers'] and params['layers'][0] == 'default':
+            layer_group = enumerate(maplayers)
+        else:
+            layer_group = enumerate(params['layers'])
+        for layerindex, layername in layer_group:
             try:
-                layer = maplayers[layername]
+                layer = copy(maplayers[layername])
             except KeyError:
                 raise OGCException('Layer "%s" not defined.' % layername, 'LayerNotDefined')
-            reqstyle = params['styles'][layerindex]
+            try:
+                reqstyle = params['styles'][layerindex]
+            except IndexError:
+                reqstyle = ''
             if reqstyle and reqstyle not in layer.wmsextrastyles:
                 raise OGCException('Invalid style "%s" requested for layer "%s".' % (reqstyle, layername), 'StyleNotDefined')
             if not reqstyle:
