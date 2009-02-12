@@ -44,17 +44,31 @@ def call(cmd):
 def uniq_add(env, key, val):
     if not val in env[key]: env[key].append(val)
 
+# Helper function for removing paths, if they exist, from the SCons path listing.
 def remove_path(env, key, val):
     if val in env[key]: env[key].remove(val)
 
 # Helper function for removing paths for a plugin lib
-def remove_plugin_path(plugin):
-    plugin = PLUGINS.get(plugin)
+# We don't currently have control over whether the plugin
+# path we remove is also shared by another plugin or 
+# required lib/header, so this may need improvement
+def remove_plugin_path(plugin_lib):
+    plugin = {}
+    # find the plugin details by 'lib' name
+    for k,v in PLUGINS.items():
+        if v['lib'] == plugin_lib and plugin_lib == 'gdal':
+            if v['path'] == 'OGR':
+                plugin = PLUGINS['ogr']
+            elif v['path'] == 'GDAL':
+                plugin = PLUGINS['gdal']
+        elif v['lib'] == plugin_lib:
+            plugin = PLUGINS[k]
+    # if the plugin details are found remove its paths
     if plugin:
-        libpath = '%s_LIBS' % plugin['path']
-        incpath = '%s_INCLUDES' % plugin['path']
-        remove_path(env, 'CPPPATH', env[incpath])
-        remove_path(env, 'LIBPATH', env[libpath])
+        lib_path = '%s_LIBS' % plugin['path']
+        inc_path = '%s_INCLUDES' % plugin['path']
+        remove_path(env, 'CPPPATH', env[inc_path])
+        remove_path(env, 'LIBPATH', env[lib_path])
 
 # Helper function for building up paths to add for a lib (plugin or required)
 def add_paths(prereq):
@@ -152,7 +166,7 @@ opts.Add(PathVariable('GDAL_INCLUDES', 'Search path for GDAL include files', '/u
 opts.Add(PathVariable('GDAL_LIBS', 'Search path for GDAL library files', '/usr/local/' + LIBDIR_SCHEMA))
 opts.Add(PathVariable('OGR_INCLUDES', 'Search path for OGR include files', '/usr/local/include', PathVariable.PathAccept))
 opts.Add(PathVariable('OGR_LIBS', 'Search path for OGR library files', '/usr/local/' + LIBDIR_SCHEMA))
-opts.Add(PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include/', PathVariable.PathAccept))
+opts.Add(PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept))
 opts.Add(PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept))
 opts.Add(PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept))
 opts.Add(PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
@@ -263,7 +277,7 @@ conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
 #### Libraries and headers dependency checks ####
 
 # Libraries and headers dependency checks
-env['CPPPATH'] = ['#tinyxml', '#include', '#']
+env['CPPPATH'] = ['#include', '#']
 env['LIBPATH'] = ['#src']
 
 # Solaris & Sun Studio settings (the `SUNCC` flag will only be
@@ -314,6 +328,7 @@ except OSError:
     env['MISSING_DEPS'].append(env['FREETYPE_CONFIG'])
 
 if env['XMLPARSER'] == 'tinyxml':
+    env['CPPPATH'].append('#tinyxml')
     env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
 elif env['XMLPARSER'] == 'libxml2':
     try:
