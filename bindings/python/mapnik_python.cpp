@@ -58,6 +58,7 @@ void export_font_engine();
 void export_projection();
 void export_proj_transform();
 
+#include <mapnik/version.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
 #ifdef HAVE_CAIRO
@@ -215,6 +216,11 @@ void translator(mapnik::config_error const & ex) {
     PyErr_SetString(PyExc_UserWarning, ex.what());
 }
 
+unsigned mapnik_version()
+{
+   return MAPNIK_VERSION;
+}
+
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 3);
 
@@ -275,6 +281,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("load_map", & load_map, load_map_overloads());
     def("load_map_from_string", & load_map_string, load_map_string_overloads());
     def("save_map", & save_map, "save Map object to XML");
+    def("mapnik_version", &mapnik_version);
     
     using mapnik::symbolizer;
     class_<symbolizer>("Symbolizer",no_init)

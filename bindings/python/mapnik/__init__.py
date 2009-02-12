@@ -95,6 +95,17 @@ def Ogr(**keywords):
   keywords['type'] = 'ogr'
   return CreateDatasource(keywords)
 
+def SQLite(**keywords):
+  keywords['type'] = 'sqlite'
+  return CreateDatasource(keywords)
+
+def mapnik_version_string():
+  version = mapnik_version()
+  patch_level = version % 100
+  minor_version = version / 100 % 1000
+  major_version = version / 100000
+  return '%s.%s.%s' % ( major_version, minor_version,patch_level)
+
 #register datasources
 from mapnik import DatasourceCache
 DatasourceCache.instance().register_datasources('%s' % inputpluginspath)
