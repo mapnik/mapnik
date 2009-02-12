@@ -24,6 +24,8 @@
 #ifndef UNICODE_HPP
 #define UNICODE_HPP
 
+//mapnik
+#include <mapnik/config.hpp>
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ucnv.h>
@@ -33,7 +35,7 @@
 #include <string>
 
 namespace mapnik {
-   class transcoder : private boost::noncopyable
+   class MAPNIK_DECL transcoder : private boost::noncopyable
    {
       public:
          explicit transcoder (std::string const& encoding);

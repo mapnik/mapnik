@@ -31,7 +31,7 @@
 
 namespace mapnik {
     
-   class memory_datasource : public datasource
+   class MAPNIK_DECL memory_datasource : public datasource
    {
       friend class memory_featureset;
    public:
@@ -52,7 +52,7 @@ namespace mapnik {
    // TODO -- possible redesign, move into separate file
    //
    
-   class point_datasource : public mapnik::memory_datasource {
+   class MAPNIK_DECL point_datasource : public mapnik::memory_datasource {
    public:
       point_datasource() : feat_id(0) {}
       void add_point(double x, double y, const char* key, const char* value) {
