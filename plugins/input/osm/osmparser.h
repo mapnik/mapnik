@@ -17,10 +17,13 @@ private:
     static std::string error;
     static std::map<long,osm_node*> tmp_node_store;
 
+	static int do_parse(xmlTextReaderPtr);
+
 public:
     static void processNode(xmlTextReaderPtr reader);
     static void startElement(xmlTextReaderPtr reader, const xmlChar *name);
     static void endElement(const xmlChar* name);
     static bool parse(osm_dataset *ds, const char* filename);
+    static bool parse(osm_dataset *ds, char* data,int nbytes);
 };
 

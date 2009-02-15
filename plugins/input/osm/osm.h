@@ -31,6 +31,8 @@ public:
         ptypes.push_back(std::pair<std::string,std::string>("natural","water"));
         ptypes.push_back(std::pair<std::string,std::string>("natural","heath"));
         ptypes.push_back(std::pair<std::string,std::string>("natural","marsh"));
+        ptypes.push_back(std::pair<std::string,std::string>("military",
+				"danger_area"));
         ptypes.push_back(std::pair<std::string,std::string>
                 ("landuse","forest"));
         ptypes.push_back(std::pair<std::string,std::string>
@@ -43,6 +45,7 @@ struct osm_item
     long id;
     std::map<std::string,std::string> keyvals;    
     virtual std::string to_string();
+	virtual ~osm_item() { }
 };
 
 
@@ -78,6 +81,8 @@ public:
         { node_i=nodes.begin(); way_i=ways.begin();
          next_item_mode=Node; load(name); }
     bool load(const char* name,const std::string& parser="libxml2");
+    bool load_from_url(const std::string&,const std::string&,
+                const std::string& parser="libxml2");
     ~osm_dataset();
     void add_node(osm_node* n) { nodes.push_back(n); }
     void add_way(osm_way* w) { ways.push_back(w); }

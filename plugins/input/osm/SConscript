@@ -30,10 +30,13 @@ osm_src = Split(
 	osm.cpp
 	osm_datasource.cpp
 	osm_featureset.cpp 
+	dataset_deliverer.cpp
+	basiccurl.cpp
 	"""
         )
 
 libraries = [ 'xml2' ]
+libraries.append('curl')
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('icuuc')

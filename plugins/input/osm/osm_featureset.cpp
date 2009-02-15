@@ -45,8 +45,8 @@ osm_featureset<filterT>::osm_featureset(const filterT& filter,
      query_ext_(),
      tr_(new transcoder(encoding)),
      count_(0),
-	attribute_names_ (attribute_names),
-	dataset_ (dataset)
+	dataset_ (dataset),
+	attribute_names_ (attribute_names)
 {
 	dataset_->rewind();
 }
@@ -101,7 +101,7 @@ feature_ptr osm_featureset<filterT>::next()
 								static_cast<osm_way*>(cur_item)->
 										nodes[0]->lat);
 				
-					for(int count=1; count<static_cast<osm_way*>(cur_item)
+					for(unsigned int count=1; count<static_cast<osm_way*>(cur_item)
 								->nodes.size(); count++)
 					{
 						geom->line_to(static_cast<osm_way*>(cur_item)

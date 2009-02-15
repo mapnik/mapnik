@@ -36,8 +36,6 @@ void osmparser::processNode(xmlTextReaderPtr reader)
 
 void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
 {
-	double lat, lon;
-	int from, to;
 	std::string tags; 
 	xmlChar *xid, *xlat, *xlon, *xk, *xv;
 
@@ -45,7 +43,6 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
 		{
 			curID = 0;
 			in_node = true;
-			int count=0;
 			osm_node *node=new osm_node;
 			xlat=xmlTextReaderGetAttribute(reader,BAD_CAST "lat");
 			xlon=xmlTextReaderGetAttribute(reader,BAD_CAST "lon");
@@ -118,6 +115,26 @@ bool osmparser::parse(osm_dataset *ds, const char* filename)
 {
 	components=ds;
 	xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename);
+	int ret=do_parse(reader);
+	xmlFreeTextReader(reader);
+	return (ret==0) ?  true:false;
+}
+
+bool osmparser::parse(osm_dataset *ds,char* data, int nbytes)
+{
+	// from cocoasamurai.blogspot.com/2008/10/getting-some-xml-love-with-
+	// libxml2.html, converted from Objective-C to straight C
+
+	components=ds;
+	xmlTextReaderPtr reader = xmlReaderForMemory(data,nbytes,NULL,NULL,0);
+	int ret=do_parse(reader);
+	xmlFreeTextReader(reader);
+	return (ret==0) ? true:false;
+}
+
+	
+int osmparser::do_parse(xmlTextReaderPtr reader)
+{
 	int ret=-1;
 	if(reader!=NULL)
 	{
@@ -127,7 +144,6 @@ bool osmparser::parse(osm_dataset *ds, const char* filename)
 			processNode(reader);
 			ret=xmlTextReaderRead(reader);
 		}
-		xmlFreeTextReader(reader);
 	}
-	return (ret==0) ?  true:false;
+	return ret;
 }

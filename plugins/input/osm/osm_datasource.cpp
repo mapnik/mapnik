@@ -27,7 +27,9 @@
 #include <mapnik/query.hpp>
 #include "osm_datasource.hpp"
 #include "osm_featureset.hpp"
+#include "dataset_deliverer.h"
 #include "osmtagtypes.h"
+#include "osmparser.h"
 #include <set>
 
 DATASOURCE_PLUGIN(osm_datasource)
@@ -45,37 +47,65 @@ const std::string osm_datasource::name_ = "osm";
 osm_datasource::osm_datasource(const parameters &params)
    : datasource (params),
      type_(datasource::Vector),
-	 desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")) 
+     desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")) 
 {
-	osm_data_ = new osm_dataset;
-	std::string osm_filename= *params.get<std::string>("file","");
-	std::string parser = *params.get<std::string>("parser","libxml2");
-	// load the data
-	if (osm_data_->load(osm_filename.c_str(),parser)==false)
-	{
-		//throw datasource_exception("Error loading OSM data");
-		return ;
-	}	
+    osm_data_ = NULL;
+    std::string osm_filename= *params.get<std::string>("file","");
+    std::string parser = *params.get<std::string>("parser","libxml2");
+    std::string url = *params.get<std::string>("url","");
+    std::string bbox = *params.get<std::string>("bbox","");
 
-	osm_tag_types tagtypes;
-	tagtypes.add_type("maxspeed",mapnik::Integer);
-	tagtypes.add_type("z_order",mapnik::Integer);
+    bool do_process=false;
 
-	osm_data_->rewind();
-	// Need code to get the attributes of all the data
-	std::set<std::string> keys= osm_data_->get_keys();
+    // load the data
+    // if we supplied a filename, load from file
+    if (url!="" && bbox!="")
+    {
+        // otherwise if we supplied a url and a bounding box, load from the url
+        if((osm_data_=dataset_deliverer::load_from_url
+            (url,bbox,parser))==NULL)    
+        {
+            throw datasource_exception("Error loading from URL");
+        }
+        do_process=true;
+    }
+    else if(osm_filename!="")
+    {
+        if ((osm_data_=
+            dataset_deliverer::load_from_file(osm_filename,parser))==NULL)
+        {
+            throw datasource_exception("Error loading from file");
+        }    
+        do_process=true;
+    }
 
-	// Add the attributes to the datasource descriptor - assume they're
-	// all of type String
-	for(std::set<std::string>::iterator i=keys.begin(); i!=keys.end(); i++)
-		desc_.add_descriptor(attribute_descriptor(*i,tagtypes.get_type(*i)));
+    if(do_process==true)
+    {
+        osm_tag_types tagtypes;
+        tagtypes.add_type("maxspeed",mapnik::Integer);
+        tagtypes.add_type("z_order",mapnik::Integer);
 
-	// Get the bounds of the data and set extent_ accordingly
-	bounds b = osm_data_->get_bounds();
-	extent_ =  Envelope<double>(b.w,b.s,b.e,b.n);
+        osm_data_->rewind();
+        // Need code to get the attributes of all the data
+        std::set<std::string> keys= osm_data_->get_keys();
+
+        // Add the attributes to the datasource descriptor - assume they're
+        // all of type String
+        for(std::set<std::string>::iterator i=keys.begin(); i!=keys.end(); i++)
+          desc_.add_descriptor(attribute_descriptor(*i,tagtypes.get_type(*i)));
+
+        // Get the bounds of the data and set extent_ accordingly
+        bounds b = osm_data_->get_bounds();
+        extent_ =  Envelope<double>(b.w,b.s,b.e,b.n);
+    }
 }
 
-osm_datasource::~osm_datasource() { delete osm_data_; }
+
+osm_datasource::~osm_datasource() 
+{ 
+    // Do not do as is now static variable and cleaned up atexit
+    //delete osm_data_; 
+}
 
 
 int osm_datasource::type() const
@@ -91,9 +121,9 @@ layer_descriptor osm_datasource::get_descriptor() const
 featureset_ptr osm_datasource::features(const query& q) const
 {
    filter_in_box filter(q.get_bbox());
-	// so we need to filter osm features by bbox here...
-	
-	return featureset_ptr
+    // so we need to filter osm features by bbox here...
+    
+    return featureset_ptr
          (new osm_featureset<filter_in_box>(filter,
                                               osm_data_,
                                               q.property_names(),
@@ -105,7 +135,7 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
    filter_at_point filter(pt);
    // collect all attribute names
    std::vector<attribute_descriptor> const& desc_vector = 
-		desc_.get_descriptors();
+        desc_.get_descriptors();
    std::vector<attribute_descriptor>::const_iterator itr = desc_vector.begin();
    std::vector<attribute_descriptor>::const_iterator end = desc_vector.end();
    std::set<std::string> names;
@@ -116,7 +146,7 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
       ++itr;
    }
     
-	return featureset_ptr
+    return featureset_ptr
          (new osm_featureset<filter_at_point>(filter,
                                                 osm_data_,
                                                 names,
