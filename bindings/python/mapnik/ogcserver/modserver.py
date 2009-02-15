@@ -20,9 +20,7 @@
 # $Id: modserver.py 283 2006-07-22 18:54:53Z jdoyon $
 
 import sys
-import traceback
 from mod_python import apache, util
-from mod_python.util import parse_qsl
 from exceptions import OGCException, ServerConfigurationError
 from wms111 import ExceptionHandler as ExceptionHandler111
 from wms130 import ExceptionHandler as ExceptionHandler130
@@ -51,64 +49,59 @@ class ModHandler(object):
             self.debug = 0
 
     def __call__(self, apacheReq):
-        #if not apacheReq:
         try:
-            # This doesn't use the obvious way because the port is incorrect
-            # on Apache 2.0
-            
-            print util.FieldStorage(apacheReq)
-            apacheReqparams = lowerparams(apacheReq.args)
-            #TODO: CGI SCRIPT_NAME not supported on mod_python
-            port = apacheReq.connection.local_addr[1]
-            onlineresource = 'http://%s:%s/%s?' % (apacheReq.hostname, port, 'wms.py') 
-            if not apacheReqparams.has_key('apacheRequest'):
-                raise OGCException('Missing apacheRequest parameter.')
-            apacheRequest = apacheReqparams['apacheRequest']
-            del apacheReqparams['apacheRequest']
-            if apacheRequest == 'GetCapabilities' and not apacheReqparams.has_key('service'):
-                raise OGCException('Missing service parameter.')
-            if apacheRequest in ['GetMap', 'GetFeatureInfo']:
-                service = 'WMS'
+            reqparams = util.FieldStorage(apacheReq,keep_blank_values=1)
+            if not reqparams:
+                eh = ExceptionHandler130(self.debug)
+                response = eh.getresponse(reqparams)
+                apacheReq.content_type = response.content_type
             else:
-                service = apacheReqparams['service']
-            if apacheReqparams.has_key('service'):
-                del apacheReqparams['service']
-            try:
-                mapnikmodule = __import__('mapnik.ogcserver.' + service)
-            except:
-                raise OGCException('Unsupported service "%s".' % service)
-            ServiceHandlerFactory = getattr(mapnikmodule.ogcserver, service).ServiceHandlerFactory
-            servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, apacheReqparams.get('version', None))
-            if apacheReqparams.has_key('version'):
-                del apacheReqparams['version']
-            if apacheRequest not in servicehandler.SERVICE_PARAMS.keys():
-                raise OGCException('Operation "%s" not supported.' % apacheRequest, 'OperationNotSupported')
-    
-            # Get parameters and pass to WMSFactory in custom "setup" method
-            ogcparams = servicehandler.processParameters(apacheRequest, apacheReqparams)
-            try:
-                apacheRequesthandler = getattr(servicehandler, apacheRequest)
-            except:
-                raise OGCException('Operation "%s" not supported.' % apacheRequest, 'OperationNotSupported')
-            response = apacheRequesthandler(ogcparams)
-            apacheReq.content_type = response.content_type
-            apacheReq.status = apache.HTTP_OK
-            apacheReq.send_http_header()
-            apacheReq.write(response.content)
+                reqparams = lowerparams(reqparams)
+                port = apacheReq.connection.local_addr[1]
+                onlineresource = 'http://%s:%s/%s?' % (apacheReq.hostname, port, 'wms.py')             
+                if not reqparams.has_key('request'):
+                    raise OGCException('Missing Request parameter.')
+                request = reqparams['request']
+                del reqparams['request']
+                if request == 'GetCapabilities' and not reqparams.has_key('service'):
+                    raise OGCException('Missing service parameter.')
+                if request in ['GetMap', 'GetFeatureInfo']:
+                    service = 'WMS'
+                else:
+                    service = reqparams['service']
+                if reqparams.has_key('service'):
+                    del reqparams['service']
+                try:
+                    mapnikmodule = __import__('mapnik.ogcserver.' + service)
+                except:
+                    raise OGCException('Unsupported service "%s".' % service)
+                ServiceHandlerFactory = getattr(mapnikmodule.ogcserver, service).ServiceHandlerFactory
+                servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
+                if reqparams.has_key('version'):
+                    del reqparams['version']
+                if request not in servicehandler.SERVICE_PARAMS.keys():
+                    raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
+        
+                # Get parameters and pass to WMSFactory in custom "setup" method
+                ogcparams = servicehandler.processParameters(request, reqparams)
+                try:
+                    requesthandler = getattr(servicehandler, request)
+                except:
+                    raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
+                
+                response = requesthandler(ogcparams)
+                apacheReq.content_type = response.content_type
+                apacheReq.status = apache.HTTP_OK
         except Exception, E:
-            #self.traceback(apacheReq)
-            apacheReq.content_type = "text/plain"
-            apacheReq.status = apache.HTTP_NOT_FOUND
-            apacheReq.send_http_header()
-            apacheReq.write("An error occurred: %s\n%s\n" % (
-                str(E), 
-                "".join(traceback.format_tb(sys.exc_traceback))))
+            return self.traceback(apacheReq,E)
+
+        apacheReq.send_http_header()
+        apacheReq.write(response.content)
         return apache.OK
 
-    def traceback(self, apacheReq):
-        print >>sys.stderr, util.FieldStorage(apacheReq)
-        apacheReqparams = lowerparams(parse_qsl(apacheReq.args))
-        version = apacheReqparams.get('version', None)
+    def traceback(self, apacheReq,E):
+        reqparams = lowerparams(util.FieldStorage(apacheReq))
+        version = reqparams.get('version', None)
         if not version:
             version = Version('1.3.0')
         else:
@@ -117,14 +110,16 @@ class ModHandler(object):
             eh = ExceptionHandler130(self.debug)
         else:
             eh = ExceptionHandler111(self.debug)
-        response = eh.getresponse(apacheReqparams)
+        response = eh.getresponse(reqparams)
         apacheReq.content_type = response.content_type
-        apacheReq.status = apache.HTTP_INTERNAL_SERVER_ERROR
+        #apacheReq.status = apache.HTTP_NOT_FOUND
+        #apacheReq.status = apache.HTTP_INTERNAL_SERVER_ERROR
         apacheReq.send_http_header()
         apacheReq.write(response.content)
+        return apache.OK
 
 def lowerparams(params):
-    apacheReqparams = {}
-    for key, value in params:
-        apacheReqparams[key.lower()] = value
-    return apacheReqparams
+    reqparams = {}
+    for key, value in params.items():
+        reqparams[key.lower()] = value
+    return reqparams
