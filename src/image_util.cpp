@@ -22,6 +22,11 @@
 
 //$Id: image_util.cpp 36 2005-04-05 14:32:18Z pavlenko $
 
+extern "C"
+{
+#include <png.h>
+}
+
 // mapnik
 #include <mapnik/image_util.hpp>
 #include <mapnik/png_io.hpp>
