@@ -342,7 +342,8 @@ class WMSBaseServiceHandler(BaseServiceHandler):
             raise OGCException('STYLES length does not match LAYERS length.')
         m = Map(params['width'], params['height'], '+init=%s' % params['crs'])
         if params.has_key('transparent') and params['transparent'] == 'FALSE':
-            m.background = params['bgcolor']
+            if params['bgcolor']:
+                m.background = params['bgcolor']
         else:
             m.background = Color(0, 0, 0, 0)
         maplayers = self.mapfactory.layers
