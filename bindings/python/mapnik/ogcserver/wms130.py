@@ -43,7 +43,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             'format': ParameterDefinition(True, str, allowedvalues=('image/png', 'image/jpeg')),
             'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
-            'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE', 'BLANK')),
+            'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE', 'BLANK','HTML')),
         },
         'GetFeatureInfo': {
             'layers': ParameterDefinition(True, ListFactory(str)),
@@ -55,7 +55,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             'format': ParameterDefinition(False, str, allowedvalues=('image/png', 'image/jpeg')),
             'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
-            'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE', 'BLANK')),
+            'exceptions': ParameterDefinition(False, str, 'XML', ('XML', 'INIMAGE', 'BLANK','HTML')),
             'query_layers': ParameterDefinition(True, ListFactory(str)),
             'info_format': ParameterDefinition(True, str, allowedvalues=('text/plain', 'text/xml')),
             'feature_count': ParameterDefinition(False, int, 1),
@@ -236,6 +236,6 @@ class ExceptionHandler(BaseExceptionHandler):
     handlers = {'XML': BaseExceptionHandler.xmlhandler,
                 'INIMAGE': BaseExceptionHandler.inimagehandler,
                 'BLANK': BaseExceptionHandler.blankhandler,
-                'text/html': BaseExceptionHandler.htmlhandler}
+                'HTML': BaseExceptionHandler.htmlhandler}
 
     defaulthandler = 'XML'

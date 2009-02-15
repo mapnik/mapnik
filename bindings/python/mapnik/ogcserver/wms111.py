@@ -42,7 +42,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             'format': ParameterDefinition(True, str, allowedvalues=('image/png', 'image/jpeg')),
             'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
-            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage', 'application/vnd.ogc.se_blank'))
+            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage', 'application/vnd.ogc.se_blank','text/html'))
         },
         'GetFeatureInfo': {
             'layers': ParameterDefinition(True, ListFactory(str)),
@@ -54,7 +54,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             'format': ParameterDefinition(False, str, allowedvalues=('image/png', 'image/jpeg')),
             'transparent': ParameterDefinition(False, str, 'FALSE', ('TRUE', 'FALSE')),
             'bgcolor': ParameterDefinition(False, ColorFactory, ColorFactory('0xFFFFFF')),
-            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage', 'application/vnd.ogc.se_blank')),
+            'exceptions': ParameterDefinition(False, str, 'application/vnd.ogc.se_xml', ('application/vnd.ogc.se_xml', 'application/vnd.ogc.se_inimage', 'application/vnd.ogc.se_blank','text/html')),
             'query_layers': ParameterDefinition(True, ListFactory(str)),
             'info_format': ParameterDefinition(True, str, allowedvalues=('text/plain', 'text/xml')),
             'feature_count': ParameterDefinition(False, int, 1),
