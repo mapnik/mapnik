@@ -941,6 +941,14 @@ namespace mapnik
                 {
                     shield_symbol.set_minimum_distance(*min_distance);
                 }
+            
+                // spacing between repeated labels on lines
+                optional<unsigned> spacing = get_opt_attr<unsigned>(sym, "spacing");
+                if (spacing)
+                {
+                    shield_symbol.set_label_spacing(*spacing);
+                }
+                
                 rule.append(shield_symbol);
             }
             catch (ImageReaderException const & ex )
