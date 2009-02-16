@@ -84,6 +84,7 @@ public:
     bool load_from_url(const std::string&,const std::string&,
                 const std::string& parser="libxml2");
     ~osm_dataset();
+    void clear();
     void add_node(osm_node* n) { nodes.push_back(n); }
     void add_way(osm_way* w) { ways.push_back(w); }
     std::string to_string();

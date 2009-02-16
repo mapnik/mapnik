@@ -62,6 +62,7 @@ osm_datasource::osm_datasource(const parameters &params)
     if (url!="" && bbox!="")
     {
         // otherwise if we supplied a url and a bounding box, load from the url
+		cerr<<"loading_from_rul: url="<<url << " bbox="<<bbox<<endl;
         if((osm_data_=dataset_deliverer::load_from_url
             (url,bbox,parser))==NULL)    
         {

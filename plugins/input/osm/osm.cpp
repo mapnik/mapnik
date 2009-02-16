@@ -53,10 +53,28 @@ bool osm_dataset::load_from_url(const std::string& url,
 
 osm_dataset::~osm_dataset()
 {
+	clear();
+}
+
+void osm_dataset::clear()
+{
+	cerr<<"osm_dataset::clear()"<<endl;
+	cerr<<"deleting ways"<<endl;
 	for(unsigned int count=0; count<ways.size(); count++)
+	{
 		delete ways[count];
+		ways[count]=NULL;
+	}
+	cerr<<"deleting nodes"<<endl;
 	for(unsigned int count=0; count<nodes.size(); count++)
+	{
 		delete nodes[count];
+		nodes[count]=NULL;
+	}
+	cerr<<"Clearing ways/nodes"<<endl;
+	ways.clear();
+	nodes.clear();
+	cerr<<"Done"<<endl;
 }
 
 std::string osm_dataset::to_string()
