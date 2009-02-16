@@ -294,11 +294,10 @@ namespace mapnik  {
 	       return  lhs <= rhs;
 	    }
 	
-            template <typename T>
             bool operator()(UnicodeString const& lhs, 
                             UnicodeString const& rhs ) const
 	    {
-	       return lhs <= rhs;
+	      return lhs <= rhs;
 	    }
 
             bool operator() (value_null, value_null) const
@@ -419,6 +418,11 @@ namespace mapnik  {
 	       return lhs / rhs;
 	    }
 	
+	    value_type operator() (bool lhs, bool rhs ) const
+	    {
+	       return false;
+	    }
+   
             value_type operator() (UnicodeString const& lhs,
                                    UnicodeString const&) const
 	    {
@@ -456,6 +460,12 @@ namespace mapnik  {
                                    UnicodeString const&) const
 	    {
 	       return lhs;
+	    }
+	
+	    value_type operator() (bool lhs,
+                                   bool rhs) const
+	    {
+	       return false;
 	    }
 	
             value_type operator() (double lhs, int rhs) const
