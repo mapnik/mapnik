@@ -32,6 +32,20 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/memory_datasource.hpp>
 
+
+using mapnik::datasource;
+using mapnik::point_datasource;
+
+struct ds_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const datasource& ds)
+   {
+      mapnik::parameters params = ds.params();
+      return boost::python::make_tuple(params);
+   }
+};
+
 namespace  
 {
     //user-friendly wrapper that uses Python dictionary
@@ -83,11 +97,11 @@ namespace
 void export_datasource()
 {
     using namespace boost::python;
-    using mapnik::datasource;
-    using mapnik::point_datasource;
-        
+    
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
+        .def_pickle(ds_pickle_suite()
+                )
         .def("envelope",&datasource::envelope)
         .def("descriptor",&datasource::get_descriptor) //todo
         .def("features",&datasource::features)

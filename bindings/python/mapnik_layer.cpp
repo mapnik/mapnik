@@ -22,13 +22,96 @@
 //$Id: mapnik_layer.cc 17 2005-03-08 23:58:43Z pavlenko $
 
 
+// boost
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+
+// mapnik
 #include <mapnik/layer.hpp>
+#include <mapnik/datasource.hpp>
 
 using mapnik::Layer;
 using mapnik::parameters;
+using mapnik::datasource;
+
+
+struct layer_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const Layer& l)
+   {
+      return boost::python::make_tuple(l.name(),l.srs());
+   }
+
+   static  boost::python::tuple
+   getstate(const Layer& l)
+   {
+        boost::python::list s;
+        std::vector<std::string> const& style_names = l.styles();
+        for (unsigned i = 0; i < style_names.size(); ++i)
+        {
+            s.append(style_names[i]);
+        }      
+        return boost::python::make_tuple(l.abstract(),l.title(),l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource(),s);
+   }
+
+   static void
+   setstate (Layer& l, boost::python::tuple state)
+   {
+        using namespace boost::python;
+        if (len(state) != 8)
+        {
+         PyErr_SetObject(PyExc_ValueError,
+                         ("expected 8-item tuple in call to __setstate__; got %s"
+                          % state).ptr()
+            );
+         throw_error_already_set();
+        }
+
+        if (state[0])
+        {
+            l.set_abstract(extract<std::string>(state[0]));
+        }
+
+        if (state[1])
+        {
+            l.set_title(extract<std::string>(state[1]));
+        }
+
+        if (state[2])
+        {
+            l.set_clear_label_cache(extract<bool>(state[2]));
+        }
+
+        if (state[3])
+        {
+            l.setMinZoom(extract<double>(state[3]));
+        }
+
+        if (state[4])
+        {
+            l.setMaxZoom(extract<double>(state[4]));
+        }
+
+        if (state[5])
+        {
+            l.setQueryable(extract<bool>(state[5]));
+        }
+
+        if (state[6])
+        {
+            boost::shared_ptr<datasource> ds = extract<boost::shared_ptr<datasource> >(state[6]);
+            l.set_datasource(ds);
+        }
+        
+        boost::python::list s = extract<boost::python::list>(state[7]);
+        for (int i=0;i<len(s);++i)
+        {
+           l.add_style(extract<std::string>(s[i]));
+        }
+   }
+};
 
 std::vector<std::string> & (mapnik::Layer::*_styles_)() = &mapnik::Layer::styles;
 
@@ -51,6 +134,9 @@ void export_layer()
                 "<mapnik._mapnik.Layer object at 0x6a270>"
                 ))
 
+        .def_pickle(layer_pickle_suite()
+                )
+         
         .def("envelope",&Layer::envelope, 
                 "Return the geographic envelope/bounding box "
                 "of the data in the layer.\n"
