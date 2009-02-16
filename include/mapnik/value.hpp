@@ -420,6 +420,8 @@ namespace mapnik  {
 	
 	    value_type operator() (bool lhs, bool rhs ) const
 	    {
+               boost::ignore_unused_variable_warning(lhs);
+               boost::ignore_unused_variable_warning(rhs);
 	       return false;
 	    }
    
@@ -464,7 +466,9 @@ namespace mapnik  {
 	
 	    value_type operator() (bool lhs,
                                    bool rhs) const
-	    {
+           {
+               boost::ignore_unused_variable_warning(lhs);
+               boost::ignore_unused_variable_warning(rhs);
 	       return false;
 	    }
 	
