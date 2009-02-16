@@ -1,0 +1,9 @@
+easymapnik: a command line tool for generating Mapnik maps from OSM data 
+bypassing the need to set up a PostGIS database or to deal with large 
+planet files. easymapnik is aimed at the user who wishes to create a 
+custom Mapnik OSM "slippy map" of their own local area (e.g. a county or city)
+easily. 
+
+Sample command line for compiling (Mac OS X 10.5):
+
+g++ -I/usr/local/include/mapnik -I/opt/local/include -I/usr/X11/include -I/usr/X11/include/freetype2 -I../../agg/include -L/usr/local/lib -L/opt/local/lib -lmapnik easymapnik.cpp MapSource.cpp -o easymapnik -lboost_thread-mt
