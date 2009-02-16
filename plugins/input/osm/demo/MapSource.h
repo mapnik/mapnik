@@ -35,6 +35,7 @@ private:
     double w,s,e,n;
     bool useBbox, tiled, multirqst;
     int zoom_start,zoom_end;
+    bool srtm;
 
     static void setOSMLayers(Map& m, const parameters &p);
     static void addSRTMLayers(Map& m,double w,double s,double e,double n);
@@ -56,6 +57,7 @@ public:
         multirqst=false;
         //url="http://xapi.openstreetmap.org/api/0.5/map";
         url="http://osmxapi.hypercube.telascience.org/api/0.5/map";
+        srtm=false;
     }
 
 

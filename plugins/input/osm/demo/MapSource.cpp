@@ -77,6 +77,11 @@ void MapSource::process_cmd_line_args(int argc,char *argv[])
                             argv+=2;
                             argc-=2;
                             break;
+
+                case 'r':   srtm=true;
+                            argv++;
+                            argc--;
+                            break;
             }
         }
         else
@@ -150,7 +155,8 @@ void MapSource::generateMaps()
                 p["type"] ="osm";
                 load_map(m,xmlfile);
                 setOSMLayers(m,p);
-                addSRTMLayers(m,curlon,curlat,nextlon,nextlat);
+                if(srtm)
+                    addSRTMLayers(m,curlon,curlat,nextlon,nextlat);
                 // lonToX() and latToY() give *pixel* coordinates
                 GoogleProjection proj;
 
