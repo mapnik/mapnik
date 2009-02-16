@@ -127,7 +127,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     if (use_spatial_index_)
     {
         std::ostringstream s;
-        s << "select count (*) sqlite_master";
+        s << "select count (*) from sqlite_master";
         s << " where name = 'idx_" << table_ << "_" << geometry_field_ << "'";
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
