@@ -304,6 +304,7 @@ def GetBoostLibVersion(context):
     int main() 
     {
         std::cout << BOOST_LIB_VERSION << std::endl;
+        return 0;
     }
     """, '.cpp')
     # hack to avoid printed output
@@ -319,16 +320,19 @@ def GetMapnikLibVersion(context):
     int main() 
     {
         std::cout << MAPNIK_VERSION << std::endl;
+        return 0;
     }
     """, '.cpp')
     # hack to avoid printed output
     context.did_show_result=1
     context.Result(ret[0])
-    version = int(ret[1].strip())
+    if not ret[1]:
+        return []
+    version = int(ret[1].strip())    
     patch_level = version % 100
     minor_version = version / 100 % 1000
     major_version = version / 100000
-    return [major_version, minor_version,patch_level]
+    return [major_version,minor_version,patch_level]
   
 conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
                                        'CheckPKG' : CheckPKG,
@@ -339,8 +343,14 @@ conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
 
 # fetch the mapnik version header in order to set the
 # ABI version used to build libmapnik.so on linux in src/SConscript
-env['ABI_VERSION'] = conf.GetMapnikLibVersion()
-
+abi = conf.GetMapnikLibVersion()
+abi_fallback = [0,6,0]
+if not abi:
+    color_print(1,'Problem encountered parsing mapnik version (please post bug report to trac.mapnik.org), falling back to %s')
+    env['ABI_VERSION'] = abi_fallback
+else:
+    env['ABI_VERSION'] = abi
+    
 #### Libraries and headers dependency checks ####
 
 # Libraries and headers dependency checks
@@ -438,6 +448,7 @@ for plugin in requested_plugins:
 
 # get boost version from boost headers rather than previous approach
 # of fetching from the user provided INCLUDE path
+boost_system_required = False
 boost_lib_version_from_header = conf.GetBoostLibVersion()
 if boost_lib_version_from_header:
     boost_version_from_header = int(boost_lib_version_from_header.split('_')[1])
