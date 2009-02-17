@@ -26,18 +26,39 @@
 
 #include <mapnik/feature_type_style.hpp>
 
+using mapnik::feature_type_style;
+using mapnik::rules;
+
+struct style_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const feature_type_style& s)
+   {
+        boost::python::list r;
+
+        rules::const_iterator it = s.get_rules().begin();
+        rules::const_iterator end = s.get_rules().end();
+        for (; it != end; ++it)
+        {
+            r.append( *it );    
+        }
+
+      return boost::python::make_tuple(r);
+   }
+};
+
 void export_style()
 {
     using namespace boost::python;
-
-    
-    using mapnik::feature_type_style;
-    using mapnik::rules;
 
     class_<rules>("Rules",init<>("default ctor"))
         .def(vector_indexing_suite<rules>())
         ;
     class_<feature_type_style>("Style",init<>("default style constructor"))
+
+        .def_pickle(style_pickle_suite()
+           )
+
         .add_property("rules",make_function
                       (&feature_type_style::get_rules,
                        return_value_policy<reference_existing_object>()))

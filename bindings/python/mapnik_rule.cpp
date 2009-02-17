@@ -26,27 +26,93 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include <mapnik/rule.hpp>
+#include <mapnik/filter.hpp>
+#include <mapnik/filter_factory.hpp>
+
+using namespace boost::python;
+using mapnik::rule_type;
+using mapnik::filter;
+using mapnik::filter_ptr;
+using mapnik::filter_factory;
+using mapnik::Feature;
+using mapnik::point_symbolizer;
+using mapnik::line_symbolizer;
+using mapnik::line_pattern_symbolizer;
+using mapnik::polygon_symbolizer;
+using mapnik::polygon_pattern_symbolizer;
+using mapnik::raster_symbolizer;
+using mapnik::shield_symbolizer;
+using mapnik::text_symbolizer;
+using mapnik::building_symbolizer;
+using mapnik::symbolizer;
+using mapnik::symbolizers;
+
+struct rule_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const rule_type& r)
+   {
+      return boost::python::make_tuple(r.get_name(),r.get_title(),r.get_min_scale(),r.get_max_scale());
+   }
+
+   static  boost::python::tuple
+   getstate(const rule_type& r)
+   {
+        boost::python::list syms;
+        symbolizers::const_iterator it = r.begin();
+        symbolizers::const_iterator end = r.end();
+        for (; it != end; ++it)
+        {
+            syms.append( *it );    
+        }
+        
+        // Here the filter string is used rather than the actual Filter object
+        // Need to look into how to get the Filter object
+        std::string filter_expr = r.get_filter()->to_string();
+        return boost::python::make_tuple(r.get_abstract(),filter_expr,r.has_else_filter(),syms);
+   }
+
+   static void
+   setstate (rule_type& r, boost::python::tuple state)
+   {
+        using namespace boost::python;
+        if (len(state) != 4)
+        {
+            PyErr_SetObject(PyExc_ValueError,
+                         ("expected 4-item tuple in call to __setstate__; got %s"
+                          % state).ptr()
+            );
+            throw_error_already_set();
+        }
+                
+        if (state[0])
+        {
+            r.set_title(extract<std::string>(state[0]));
+        }    
+
+        if (state[1])
+        {
+            std::string filter_expr=extract<std::string>(state[1]);
+            r.set_filter(mapnik::create_filter(filter_expr,"utf8"));
+        }    
+
+        if (state[2])
+        {
+            r.set_else(true);
+        }    
+        
+        boost::python::list syms=extract<boost::python::list>(state[3]);
+        for (int i=0;i<len(syms);++i)
+        {
+            r.append(extract<symbolizer>(syms[i]));
+        }
+        
+   }
+
+};
 
 void export_rule()
 {
-    using namespace boost::python;
-
-    using mapnik::rule_type;
-    using mapnik::filter;
-    using mapnik::filter_ptr;
-    using mapnik::Feature;
-    using mapnik::point_symbolizer;
-    using mapnik::line_symbolizer;
-    using mapnik::line_pattern_symbolizer;
-    using mapnik::polygon_symbolizer;
-    using mapnik::polygon_pattern_symbolizer;
-    using mapnik::raster_symbolizer;
-    using mapnik::shield_symbolizer;
-    using mapnik::text_symbolizer;
-    using mapnik::building_symbolizer;
-    using mapnik::symbolizer;
-    using mapnik::symbolizers;
-    
     
     implicitly_convertible<point_symbolizer,symbolizer>();
     implicitly_convertible<line_symbolizer,symbolizer>();
@@ -65,6 +131,8 @@ void export_rule()
     class_<rule_type>("Rule",init<>("default constructor"))
         .def(init<std::string const&,
              boost::python::optional<std::string const&,double,double> >())
+        .def_pickle(rule_pickle_suite()
+           )
         .add_property("name",make_function
                       (&rule_type::get_name,
                        return_value_policy<copy_const_reference>()),
