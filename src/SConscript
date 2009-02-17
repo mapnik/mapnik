@@ -25,7 +25,7 @@ import os
 
 Import('env')
 
-ABI_VERSION=[0,5,0]
+ABI_VERSION = env['ABI_VERSION']
 
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
