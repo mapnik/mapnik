@@ -340,16 +340,6 @@ conf = Configure(env, custom_tests = { 'CheckPKGConfig' : CheckPKGConfig,
                                        'GetBoostLibVersion' : GetBoostLibVersion,
                                        'GetMapnikLibVersion' : GetMapnikLibVersion })
 
-
-# fetch the mapnik version header in order to set the
-# ABI version used to build libmapnik.so on linux in src/SConscript
-abi = conf.GetMapnikLibVersion()
-abi_fallback = [0,6,0]
-if not abi:
-    color_print(1,'Problem encountered parsing mapnik version (please post bug report to trac.mapnik.org), falling back to %s')
-    env['ABI_VERSION'] = abi_fallback
-else:
-    env['ABI_VERSION'] = abi
     
 #### Libraries and headers dependency checks ####
 
@@ -389,6 +379,17 @@ else:
 # compiling and the library path for linking, respectively.
 for required in ('BOOST', 'PNG', 'JPEG', 'TIFF','PROJ'):
     add_paths(required)
+
+
+# fetch the mapnik version header in order to set the
+# ABI version used to build libmapnik.so on linux in src/SConscript
+abi = conf.GetMapnikLibVersion()
+abi_fallback = [0,6,0]
+if not abi:
+    color_print(1,'Problem encountered parsing mapnik version (please post bug report to trac.mapnik.org), falling back to %s' % abi_fallback)
+    env['ABI_VERSION'] = abi_fallback
+else:
+    env['ABI_VERSION'] = abi
 
 requested_plugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
