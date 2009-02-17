@@ -26,7 +26,6 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include <mapnik/rule.hpp>
-#include <mapnik/filter.hpp>
 #include <mapnik/filter_factory.hpp>
 
 using namespace boost::python;
