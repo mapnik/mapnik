@@ -73,7 +73,7 @@ namespace mapnik {
 #ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(mutex_);
 #endif
-        return pj_is_latlong(proj_);  
+        return pj_is_latlong(proj_) ? true : false;  
     }
     
     std::string const& projection::params() const

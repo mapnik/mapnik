@@ -96,13 +96,13 @@ namespace mapnik  {
 	
             bool operator() (double lhs, int rhs) const
 	    {
-	       return  lhs == rhs;
+	      return  (lhs == rhs)? true : false ;
 	    }
 	
             bool operator() (UnicodeString const& lhs, 
                              UnicodeString const& rhs) const
 	    {
-	       return  lhs == rhs;
+	       return  (lhs == rhs) ? true: false;
 	    }
 
             bool operator() (value_null, value_null) const
@@ -139,7 +139,7 @@ namespace mapnik  {
             bool operator() (UnicodeString const& lhs, 
                              UnicodeString const& rhs) const
 	    {
-	       return  lhs != rhs;
+	       return  (lhs != rhs)? true : false;
 	    }
 
             bool operator() (value_null, value_null) const
@@ -187,7 +187,7 @@ namespace mapnik  {
 	
             bool operator() (UnicodeString const& lhs, UnicodeString const& rhs) const
 	    {
-	       return  lhs > rhs;
+	      return  (lhs > rhs) ? true : false ;
 	    }
 
             bool operator() (value_null, value_null) const
@@ -223,7 +223,7 @@ namespace mapnik  {
 	
             bool operator() (UnicodeString const& lhs, UnicodeString const& rhs) const
 	    {
-	       return lhs >= rhs;
+	       return ( lhs >= rhs ) ? true : false ;
 	    }
 
             bool operator() (value_null, value_null) const
@@ -260,7 +260,7 @@ namespace mapnik  {
             bool operator()(UnicodeString const& lhs, 
                             UnicodeString const& rhs ) const
 	    {
-	       return lhs < rhs;
+	      return (lhs < rhs) ? true : false ;
 	    }
 
             bool operator() (value_null, value_null) const
@@ -297,7 +297,7 @@ namespace mapnik  {
             bool operator()(UnicodeString const& lhs, 
                             UnicodeString const& rhs ) const
 	    {
-	      return lhs <= rhs;
+	      return (lhs <= rhs) ? true : false ;
 	    }
 
             bool operator() (value_null, value_null) const

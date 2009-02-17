@@ -314,8 +314,8 @@ namespace mapnik
         featureset_ptr query_map_point(unsigned index, double x, double y) const;
         ~Map();
 
-        void setAspectFixMode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
-        bool getAspectFixMode() { return aspectFixMode_; }
+        inline void setAspectFixMode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
+        inline int getAspectFixMode() { return aspectFixMode_; }
 
     private:
         void fixAspectRatio();

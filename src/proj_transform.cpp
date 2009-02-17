@@ -38,8 +38,8 @@ namespace mapnik {
 #ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(projection::mutex_);
 #endif
-        is_source_latlong_ = pj_is_latlong(source_.proj_);
-        is_dest_latlong_ = pj_is_latlong(dest_.proj_);
+        is_source_latlong_ = pj_is_latlong(source_.proj_) ? true : false;
+        is_dest_latlong_ = pj_is_latlong(dest_.proj_) ? true : false ;
         is_source_equal_dest = (source_ == dest_);
     }
     

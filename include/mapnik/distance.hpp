@@ -29,7 +29,7 @@
 
 namespace mapnik
 {
-    class ellipsoid;
+    struct ellipsoid;
     
     // great-circle distance 
     

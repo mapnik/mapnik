@@ -308,12 +308,12 @@ namespace mapnik
     Envelope<T>& Envelope<T>::operator*=(T t)
     {
        coord<T,2> c = center();
-       T sx = 0.5 * width() * t;
-       T sy = 0.5 * height() * t;
-       minx_ = static_cast<T>(c.x - sx);
-       maxx_ = static_cast<T>(c.x + sx);
-       miny_ = static_cast<T>(c.y - sy);
-       maxy_ = static_cast<T>(c.y + sy);
+       T sx = static_cast<T>(0.5 * width()  * t);
+       T sy = static_cast<T>(0.5 * height() * t);
+       minx_ = c.x - sx;
+       maxx_ = c.x + sx;
+       miny_ = c.y - sy;
+       maxy_ = c.y + sy;
        return *this;
     }
    
@@ -321,12 +321,12 @@ namespace mapnik
     Envelope<T>& Envelope<T>::operator/=(T t)
     {
        coord<T,2> c = center();
-       T sx = 0.5 * width() / t;
-       T sy = 0.5 * height() / t;
-       minx_ = static_cast<T>(c.x - sx);
-       maxx_ = static_cast<T>(c.x + sx);
-       miny_ = static_cast<T>(c.y - sy);
-       maxy_ = static_cast<T>(c.y + sy);
+       T sx = static_cast<T>(0.5 * width() / t);
+       T sy = static_cast<T>(0.5 * height() / t);
+       minx_ = c.x - sx;
+       maxx_ = c.x + sx;
+       miny_ = c.y - sy;
+       maxy_ = c.y + sy;
        return *this;
     }
     
