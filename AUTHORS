@@ -3,53 +3,48 @@
 Committers
 ==========
 
-  - Artem Pavlenko <pavlenko -at- users.berlios.de>
-  - Lucio Asnaghi (OGR,Oracle,SQLite plugins)
-  - Jon Burgess
-  - Jean-Francois Doyon (Python API, OGCServer) <jfdoyon -at- gmail.com>
-  - Dominic Hargreaves (Stable releases)
-  - Tom Hughes (Cairo)
-  - Ben Moores (PDF branch)
-  - David Siegel (XML)
-  - Vince Spader (TextSymbolizer)
-  - Dane Springmeyer (Python API) <dane.springmeyer -at- gmail.com>
-  - Andreas Volz (Autotools)
-  - Nick Whitelegg (OSM plugin)
+ - Artem Pavlenko <pavlenko -at- users.berlios.de>
+ - Lucio Asnaghi (OGR, Oracle, SQLite plugins)
+ - Jon Burgess (Core)
+ - Jean-Francois Doyon (Python API, OGCServer) <jfdoyon -at- gmail.com>
+ - Dominic Hargreaves (Stable releases)
+ - Tom Hughes (Cairo)
+ - Ben Moores (PDF branch)
+ - David Siegel (XML)
+ - Vince Spader (TextSymbolizer)
+ - Dane Springmeyer (Python API) <dane.springmeyer -at- gmail.com>
+ - Andreas Volz (Autotools)
+ - Nick Whitelegg (OSM plugin)
 
 Patches
 =======
 
-  - Andy Allen
-  - Justin Bronn
-  - Christopher Brown
-  - Berteun Damman
-  - Toby Collet
-  - Robert Coup
-  - Krzysztof Godlewski
-  - Beau Gunderson
-  - John Hague
-  - Tom MacWright
-  - Dražen Odobašić
-  - Martijn van Oosterhout
-  - Cameron Patrick
-  - Marcin Rudowski
-  - Reid Priedhorsky
-  - Brian Quinion
-  - Christopher Schmidt
-  - Andreas Schneider
-  - Vincent Schut
-  - Ehud Shabtai
-  - Paul Smith
-  - Dave Stubbs
-  - Shaun Walbridge
-  - Leslie Wu
+ - Andy Allen
+ - Justin Bronn
+ - Christopher Brown
+ - Berteun Damman
+ - Toby Collet
+ - Robert Coup
+ - Krzysztof Godlewski
+ - Beau Gunderson
+ - John Hague
+ - Tom MacWright
+ - Dražen Odobašić
+ - Martijn van Oosterhout
+ - Cameron Patrick
+ - Marcin Rudowski
+ - Reid Priedhorsky
+ - Brian Quinion
+ - Christopher Schmidt
+ - Andreas Schneider
+ - Vincent Schut
+ - Ehud Shabtai
+ - Paul Smith
+ - Dave Stubbs
+ - Shaun Walbridge
+ - Leslie Wu
+  
+Community Wiki
+==============
 
-
-Resources
-=========
-
-View Mapnik On Ohloh:
-  - http://www.ohloh.net/projects/mapnik/contributors
-
-See Recent Mapnik Changesets:
-  - http://trac.mapnik.org/log/trunk?action=stop_on_copy&mode=stop_on_copy&stop_rev=&limit=200&verbose=on
+ - http://trac.mapnik.org/stractistics
