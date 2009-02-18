@@ -147,9 +147,7 @@ fi
 
 ## test for optional sqlite3 support
 AX_LIB_SQLITE3
-if test "x$success" = "xyes"; then
-  AM_CONDITIONAL(HAVE_SQLITE3, 1)
-fi
+AM_CONDITIONAL(HAVE_SQLITE3, test "x$success" = "xyes")
 
 PKG_CHECK_MODULES(PNG, libpng)
 AC_SUBST(PNG_CFLAGS)

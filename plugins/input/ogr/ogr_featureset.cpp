@@ -106,7 +106,7 @@ feature_ptr ogr_featureset::next()
           {
               OGRFieldDefn* fld = layerdef_->GetFieldDefn (i);
               OGRFieldType type_oid = fld->GetType ();
-              std_string fld_name = fld->GetNameRef ();
+              std::string fld_name = fld->GetNameRef ();
 
               switch (type_oid)
               {

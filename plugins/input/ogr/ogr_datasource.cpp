@@ -77,7 +77,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
        {
            OGRFieldDefn* fld = def->GetFieldDefn (i);
 
-           std_string fld_name = fld->GetNameRef ();
+           std::string fld_name = fld->GetNameRef ();
            OGRFieldType type_oid = fld->GetType ();
 
            switch (type_oid)
