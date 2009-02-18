@@ -51,7 +51,7 @@ namespace mapnik {
     public:
         geometry () {}	
 	
-        Envelope<double> envelope()
+        Envelope<double> envelope() const
         {
             Envelope<double> result;		
             double x,y;
