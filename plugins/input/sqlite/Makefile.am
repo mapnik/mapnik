@@ -1,4 +1,4 @@
-if HAVE_SQLITE
+if HAVE_SQLITE3
 
 pkglib_LTLIBRARIES = \
 	sqlite.la
@@ -8,10 +8,10 @@ sqlite_la_SOURCES = \
 	sqlite_featureset.cpp
 
 sqlite_la_LIBADD = \
-        ${SQLITE_LDFLAGS}
+        ${SQLITE3_LDFLAGS}
 
 sqlite_la_CXXFLAGS = \
-        ${SQLITE_CFLAGS} \
+        ${SQLITE3_CFLAGS} \
         -I../../../include
 
 sqlite_la_LDFLAGS = \

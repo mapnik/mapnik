@@ -1,10 +1,11 @@
 
 SUBDIRS = \
 	postgis\
-    ogr \
+	ogr \
 	gdal \
 	raster \
 	shape \
-	osm
+	osm \
+	sqlite
 
 ## File created by the gnome-build tools

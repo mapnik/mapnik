@@ -1,4 +1,4 @@
-if HAVE_OGR
+if HAVE_GDAL
 
 pkglib_LTLIBRARIES = \
 	ogr.la
@@ -8,10 +8,10 @@ ogr_la_SOURCES = \
 	ogr_featureset.cpp
 
 ogr_la_LIBADD = \
-        ${OGR_LDFLAGS}
+        ${GDAL_LDFLAGS}
 
 ogr_la_CXXFLAGS = \
-        ${OGR_CFLAGS} \
+        ${GDAL_CFLAGS} \
         -I../../../include
 
 ogr_la_LDFLAGS = \

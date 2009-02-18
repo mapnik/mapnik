@@ -130,6 +130,12 @@ if test "x$link_ltdl" = "xno"; then
   exit
 fi
 
+## test for optional sqlite3 support
+AX_LIB_SQLITE3
+if test "x$success" = "xyes"; then
+  AM_CONDITIONAL(HAVE_SQLITE3, 1)
+fi
+
 PKG_CHECK_MODULES(PNG, libpng)
 AC_SUBST(PNG_CFLAGS)
 AC_SUBST(PNG_LIBS)
@@ -203,6 +209,8 @@ plugins/input/postgis/Makefile
 plugins/input/raster/Makefile
 plugins/input/shape/Makefile
 plugins/input/osm/Makefile
+plugins/input/ogr/Makefile
+plugins/input/sqlite/Makefile
 src/Makefile
 mapnik.pc
 mapnik-uninstalled.pc

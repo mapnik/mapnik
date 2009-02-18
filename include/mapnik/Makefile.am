@@ -46,7 +46,6 @@ libmapnik_HEADERS = \
 	filter_factory.hpp \
 	filter_featureset.hpp \
 	filter_parser.hpp \
-	filter_parser_ast.hpp \
 	filter_visitor.hpp \
 	font_engine_freetype.hpp \
 	font_set.hpp \
