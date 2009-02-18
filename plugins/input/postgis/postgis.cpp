@@ -141,8 +141,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
          s << "select f_geometry_column,srid,type from ";
          s << GEOMETRY_COLUMNS <<" where f_table_name='" << table_name<<"'";
          
-		 if (schema_name.length() > 0)
-		    	s <<" and f_table_schema='"<< schema_name <<"'";
+         if (schema_name.length() > 0)
+            s <<" and f_table_schema='"<< schema_name <<"'";
 
          if (geometry_field_.length() > 0)
             s << " and f_geometry_column = '" << geometry_field_ << "'";

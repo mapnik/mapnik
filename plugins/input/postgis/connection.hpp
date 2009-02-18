@@ -42,7 +42,7 @@ class Connection
       int cursorId;
    public:
       Connection(std::string const& connection_str)
-      :cursorId(0)
+         :cursorId(0)
       {
          conn_=PQconnectdb(connection_str.c_str());
          if (PQstatus(conn_) != CONNECTION_OK)
