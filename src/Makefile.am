@@ -25,6 +25,7 @@ libmapnik_la_SOURCES = \
 	agg_renderer.cpp \
 	arrow.cpp \
 	${cairo_src} \
+	color.cpp \
 	datasource_cache.cpp \
 	distance.cpp \
 	envelope.cpp \
