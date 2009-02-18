@@ -24,11 +24,26 @@ AC_ARG_ENABLE(debug,
         [  --enable-debug=[no/yes]        enables debug build (default=no)],,
                  enable_debug=no)
 
-dnl Checks for libraries
 if [ ! test "x$enable_debug" != "xyes"]; then
   AC_DEFINE(DEBUG, 1, [Define to enable debug build])
-  CXXFLAGS="${CXXFLAGS} -g -DDEBUG -DMAPNIK_DEBUG"
+  CXXFLAGS="-ggdb -O0 -DDEBUG -DMAPNIK_DEBUG"
   AC_MSG_RESULT(yes)
+else
+  CXXFLAGS="-O3"
+  AC_MSG_RESULT(no)
+fi
+
+
+dnl Check for option to enable profiling
+AC_MSG_CHECKING(whether to enable profiling)
+AC_ARG_ENABLE(profiling,
+        [  --enable-profiling=[no/yes]        enables profiling build (default=no)],,
+                 enable_profiling=no)
+
+if [ ! test "x$enable_profiling" != "xyes"]; then
+  AC_DEFINE(PROFILING, 1, [Define to enable profiling build])
+  #PKG_CHECK_MODULES(PROFILING, StopClock >= 0.1)
+  PROFILING_CFLAGS="$PROFILING_CFLAGS -pg"
 else
   AC_MSG_RESULT(no)
 fi
