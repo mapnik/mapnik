@@ -118,7 +118,15 @@ namespace mapnik
 #ifdef HAVE_LIBXML2
         read_xml2_string(str, pt);
 #else
-        throw config_error( "load_map_string() only supported with libxml2 parser" );
+        try 
+        {
+           std::istringstream s(str);
+           read_xml(s,pt);
+        }
+        catch (const boost::property_tree::xml_parser_error & ex)
+        {
+           throw config_error( ex.what() ) ;
+        }
 #endif
 
         map_parser parser( strict );
