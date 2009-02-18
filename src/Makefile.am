@@ -78,6 +78,7 @@ libmapnik_la_LIBADD = \
 
 libmapnik_la_CXXFLAGS = \
   	-I../include        \
+	${PROFILING_CFLAGS} \
 	${PNG_CFLAGS} \
   	${FREETYPE2_CFLAGS} \
   	${AGG_CFLAGS} \
