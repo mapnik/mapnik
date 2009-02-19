@@ -347,36 +347,48 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         else:
             m.background = Color(0, 0, 0, 0)
         maplayers = self.mapfactory.layers
+        orderedmaplayers = self.mapfactory.ordered_layers
         mapstyles = self.mapfactory.styles
         mapaggregatestyles = self.mapfactory.aggregatestyles
-        if params['layers'] and params['layers'][0] == 'default':
-            layer_group = enumerate(maplayers)
-        else:
-            layer_group = enumerate(params['layers'])
-        for layerindex, layername in layer_group:
-            try:
-                layer = copy(maplayers[layername])
-            except KeyError:
-                raise OGCException('Layer "%s" not defined.' % layername, 'LayerNotDefined')
-            try:
-                reqstyle = params['styles'][layerindex]
-            except IndexError:
-                reqstyle = ''
-            if reqstyle and reqstyle not in layer.wmsextrastyles:
-                raise OGCException('Invalid style "%s" requested for layer "%s".' % (reqstyle, layername), 'StyleNotDefined')
-            if not reqstyle:
+        # a non WMS spec way of requesting all layers
+        if params['layers'] and params['layers'][0] == '__all__':
+            for layername in orderedmaplayers:
+                layer = copy(layername)
                 reqstyle = layer.wmsdefaultstyle
-            if reqstyle in mapaggregatestyles.keys():
-                for stylename in mapaggregatestyles[reqstyle]:
-                    layer.styles.append(stylename)
-            else:
-                layer.styles.append(reqstyle)
-            for stylename in layer.styles:
-                if stylename in mapstyles.keys():
-                    m.append_style(stylename, mapstyles[stylename])
+                if reqstyle in mapaggregatestyles.keys():
+                    for stylename in mapaggregatestyles[reqstyle]:
+                        layer.styles.append(stylename)
                 else:
-                    raise ServerConfigurationError('Layer "%s" refers to non-existent style "%s".' % (layername, stylename))
-            m.layers.append(layer)
+                    layer.styles.append(reqstyle)
+                for stylename in layer.styles:
+                    if stylename in mapstyles.keys():
+                        m.append_style(stylename, mapstyles[stylename])
+                m.layers.append(layer)
+        else:
+            for layerindex, layername in enumerate(params['layers']):
+                try:
+                    layer = copy(maplayers[layername])
+                except KeyError:
+                    raise OGCException('Layer "%s" not defined.' % layername, 'LayerNotDefined')
+                try:
+                    reqstyle = params['styles'][layerindex]
+                except IndexError:
+                    reqstyle = ''
+                if reqstyle and reqstyle not in layer.wmsextrastyles:
+                    raise OGCException('Invalid style "%s" requested for layer "%s".' % (reqstyle, layername), 'StyleNotDefined')
+                if not reqstyle:
+                    reqstyle = layer.wmsdefaultstyle
+                if reqstyle in mapaggregatestyles.keys():
+                    for stylename in mapaggregatestyles[reqstyle]:
+                        layer.styles.append(stylename)
+                else:
+                    layer.styles.append(reqstyle)
+                for stylename in layer.styles:
+                    if stylename in mapstyles.keys():
+                        m.append_style(stylename, mapstyles[stylename])
+                    else:
+                        raise ServerConfigurationError('Layer "%s" refers to non-existent style "%s".' % (layername, stylename))
+                m.layers.append(layer)
         m.zoom_to_box(Envelope(params['bbox'][0], params['bbox'][1], params['bbox'][2], params['bbox'][3]))
         return m
 
