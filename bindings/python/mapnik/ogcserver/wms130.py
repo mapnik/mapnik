@@ -158,7 +158,7 @@ class ServiceHandler(WMSBaseServiceHandler):
                 rootlayercrs.text = epsgcode.upper()
                 rootlayerelem.append(rootlayercrs)
     
-            for layer in self.mapfactory.layers.values():
+            for layer in self.mapfactory.ordered_layers:
                 layerproj = Projection(layer.srs)
                 layername = ElementTree.Element('Name')
                 layername.text = layer.name

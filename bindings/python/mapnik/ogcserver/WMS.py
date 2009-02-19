@@ -40,6 +40,7 @@ def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
 class BaseWMSFactory:
     def __init__(self):
         self.layers = {}
+        self.ordered_layers = []
         self.styles = {}
         self.aggregatestyles = {}
 
@@ -85,6 +86,7 @@ class BaseWMSFactory:
             layer.wmsextrastyles = extrastyles
         else:
             raise ServerConfigurationError('Layer "%s" was passed an invalid list of extra styles.  List must be a tuple of strings.' % layername)
+        self.ordered_layers.append(layer)    
         self.layers[layername] = layer
 
     def register_style(self, name, style):
