@@ -40,62 +40,6 @@
 #include <iostream>
 #include <fstream>
 
-      /*
- osm_id             | integer  | 
- access             | text     | 
- addr:flats         | text     | 
- addr:housenumber   | text     | 
- addr:interpolation | text     | 
- admin_level        | text     | 
- aerialway          | text     | 
- aeroway            | text     | 
- amenity            | text     | 
- area               | text     | 
- barrier            | text     | 
- bicycle            | text     | 
- bridge             | text     | 
- boundary           | text     | 
- building           | text     | 
- cutting            | text     | 
- disused            | text     | 
- embankment         | text     | 
- foot               | text     | 
- highway            | text     | 
- historic           | text     | 
- horse              | text     | 
- junction           | text     | 
- landuse            | text     | 
- layer              | text     | 
- learning           | text     | 
- leisure            | text     | 
- lock               | text     | 
- man_made           | text     | 
- military           | text     | 
- motorcar           | text     | 
- name               | text     | 
- natural            | text     | 
- oneway             | text     | 
- power              | text     | 
- power_source       | text     | 
- place              | text     | 
- railway            | text     | 
- ref                | text     | 
- religion           | text     | 
- residence          | text     | 
- route              | text     | 
- sport              | text     | 
- tourism            | text     | 
- tracktype          | text     | 
- tunnel             | text     | 
- waterway           | text     | 
- width              | text     | 
- wood               | text     | 
- z_order            | integer  | 
- way_area           | real     | 
- way                | geometry | 
-      */
-      
-
 struct blob_to_hex
 {
    std::string operator() (const char* blob, unsigned size)
@@ -114,6 +58,11 @@ struct blob_to_hex
       return s.str();
    }
 };
+
+bool valid_envelope(mapnik::Envelope<double> const& e)
+{
+   return (e.minx() < e.maxx() && e.miny() < e.maxy()) ;
+}
 
 template <typename Connection, typename OUT>
 void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out, unsigned tolerance)
@@ -173,7 +122,7 @@ void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out, uns
    }
    
    std::cout << select_sql_str << "\n";
-   //std::string select_sql = "select asBinary(way) as way,name,highway,osm_id from " + table_name;
+   
    std::ostringstream cursor_sql;
    std::string cursor_name("my_cursor");
    
@@ -227,6 +176,8 @@ void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out, uns
       
       std::ostringstream insert_sql;
       insert_sql << "insert into " <<  table_name << " values(" << pkid;
+
+      bool empty_geom = true;
       
       for (unsigned pos=0 ; pos < num_fields; ++pos)
       {
@@ -261,9 +212,13 @@ void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out, uns
                      {
                         geometry2d const& geom=feat.get_geometry(0);
                         Envelope<double> bbox = geom.envelope();
-                        out << "insert into idx_" << table_name << "_" << geom_col << " values (" ;
-                        out << pkid << "," << bbox.minx() << "," << bbox.maxx();
-                        out << "," << bbox.miny() << "," << bbox.maxy() << ");\n";
+                        if (valid_envelope(bbox))
+                        {
+                           out << "insert into idx_" << table_name << "_" << geom_col << " values (" ;
+                           out << pkid << "," << bbox.minx() << "," << bbox.maxx();
+                           out << "," << bbox.miny() << "," << bbox.maxy() << ");\n";
+                           empty_geom = false;
+                        }
                      }
                      
                      insert_sql << "X'" << hex(buf,size) << "'";
@@ -284,7 +239,8 @@ void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out, uns
       }
       insert_sql << ");";
       
-      out << insert_sql.str() << "\n";
+      if (!empty_geom) out << insert_sql.str() << "\n";
+      
       if (pkid % 1000 == 0)
       {
          std::cout << "\r processing " << pkid << " features";
