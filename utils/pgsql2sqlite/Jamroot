@@ -1,0 +1,18 @@
+#
+
+lib program_options : : <name>boost_program_options-xgcc40-mt <search>/usr/local/lib ;
+lib pq : : <name>pq <search>/opt/postgresql/lib ;
+
+exe pgsql2sqlite :
+    main.cpp
+    ../../src/wkb.cpp
+    ../../src/envelope.cpp
+    .//program_options
+    .//pq
+    :
+    <include>/usr/local/include/boost-1_38
+    <include>/opt/mapnik/include
+    <include>../../plugins/input/postgis
+    <include>/opt/postgresql/include
+    #<define>MAPNIK_DEBUG
+    ;
