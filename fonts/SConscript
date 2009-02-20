@@ -24,5 +24,9 @@ Import('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
-includes = glob.glob('*/*.ttf')
-env.Alias(target='install', source=env.Install(install_prefix+'/' + env['LIBDIR_SCHEMA'] + '/mapnik/fonts', includes))
+includes = glob.glob('*/*/*.ttf')
+
+fontscollectionpath = install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/fonts'
+
+if not env['SYSTEM_FONTS']:
+    env.Alias(target='install', source=env.Install(fontscollectionpath, includes))
