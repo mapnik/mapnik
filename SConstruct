@@ -88,6 +88,12 @@ else:
 
 SCONS_LOCAL_CONFIG = 'config.py'
 
+# Warn user of current set of build options.
+if os.path.exists(SCONS_LOCAL_CONFIG):
+    optfile = file(SCONS_LOCAL_CONFIG)
+    print "Saved options:", optfile.read().replace("\n", ", ")[:-2]
+    optfile.close()
+
 # Core plugin build configuration
 # opts.Add still hardcoded however...
 PLUGINS = { # plugins with external dependencies
@@ -118,18 +124,18 @@ opts.Add('CXX', 'The C++ compiler to use (defaults to g++).', 'g++')
 opts.Add(EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3']))
 # Note: setting DEBUG=True will override any custom OPTIMIZATION level
 opts.Add(BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'))
+opts.Add(ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()))
+
+# SCons build behavior options
+opts.Add('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG)
+opts.Add(BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'))
+opts.Add(BoolVariable('SCONS_CACHE', 'Use SCons dependency caching to speed build process', 'False'))
+opts.Add(BoolVariable('USE_USER_ENV', 'Allow the SCons build environment to inherit from the current user environment', 'True'))
 
 # Install Variables
 opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
 opts.Add('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)','')
 opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
-
-
-# SCons build behavior options
-opts.Add('CONFIG', "The file and path of a SCons user '%s' file" % SCONS_LOCAL_CONFIG, SCONS_LOCAL_CONFIG)
-opts.Add(BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'))
-opts.Add(BoolVariable('SCONS_CACHE', 'Use SCons dependency caching to speed build process', 'False'))
-opts.Add(BoolVariable('USE_USER_ENV', 'Allow the SCons build env to inherit from the current user environment', 'True'))
 
 # Boost variables
 opts.Add(PathVariable('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include', PathVariable.PathAccept))
@@ -159,7 +165,6 @@ opts.Add(BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'))
 # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
 # Therefore, we use a single boolean for whether to attempt to build cairo support.
 opts.Add(BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'))
-opts.Add(ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()))
 opts.Add(PathVariable('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include/postgresql', PathVariable.PathAccept))
 opts.Add(PathVariable('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
 opts.Add(PathVariable('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/local/include', PathVariable.PathAccept))
@@ -172,6 +177,7 @@ opts.Add(PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files',
 opts.Add(PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
 
 # Other variables
+opts.Add('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)','')
 opts.Add(PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable))
 opts.Add(ListVariable('BINDINGS','Language bindings to build','all',['python']))
 opts.Add(EnumVariable('THREADING','Set threading support','multi', ['multi','single']))
@@ -227,6 +233,7 @@ if env['USE_CONFIG']:
 else:
     color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')
 
+
 env['MISSING_DEPS'] = []
 env['SKIPPED_DEPS'] = []
 
@@ -245,6 +252,9 @@ if env['SCONS_CACHE']:
     # caching is 'auto' by default in SCons
     # But let's also cache implicit deps...
     SetOption('implicit_cache', 1)
+    # uncomment for more speed improvements
+    #env.Decider('MD5-timestamp')
+    #SetOption('max_drift', 1)
     
 else:
     # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
@@ -379,17 +389,6 @@ else:
 # compiling and the library path for linking, respectively.
 for required in ('BOOST', 'PNG', 'JPEG', 'TIFF','PROJ'):
     add_paths(required)
-
-
-# fetch the mapnik version header in order to set the
-# ABI version used to build libmapnik.so on linux in src/SConscript
-abi = conf.GetMapnikLibVersion()
-abi_fallback = [0,6,0]
-if not abi:
-    color_print(1,'Problem encountered parsing mapnik version (please post bug report to trac.mapnik.org), falling back to %s' % abi_fallback)
-    env['ABI_VERSION'] = abi_fallback
-else:
-    env['ABI_VERSION'] = abi
 
 requested_plugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
@@ -556,6 +555,16 @@ if 'python' in env['BINDINGS']:
     if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
         color_print(1,'Could not find required header files for boost python')
         env['MISSING_DEPS'].append('boost python')
+
+# fetch the mapnik version header in order to set the
+# ABI version used to build libmapnik.so on linux in src/SConscript
+abi = conf.GetMapnikLibVersion()
+abi_fallback = [0,6,0]
+if not abi:
+    color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
+    env['ABI_VERSION'] = abi_fallback
+else:
+    env['ABI_VERSION'] = abi
          
 #### End Config Stage ####
 

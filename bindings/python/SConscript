@@ -26,6 +26,9 @@ import os
 Import('env')
 Import('conf')
 
+prefix = env['PREFIX']
+install_prefix = env['DESTDIR'] + '/' + prefix
+
 if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
     env.ParseConfig('pkg-config --cflags pycairo')
     env.Append(CXXFLAGS = '-DHAVE_PYCAIRO');
@@ -48,15 +51,23 @@ headers = [env['PYTHON_INCLUDES']] + env['CPPPATH']
 
 paths = """
 mapniklibpath = '%s'
-inputpluginspath = mapniklibpath + '/input'
-fontscollectionpath = mapniklibpath + '/fonts'
 """
 
+paths += "inputpluginspath = mapniklibpath + '/input'\n"
+
+if env['SYSTEM_FONTS']:
+    paths += "fontscollectionpath = '%s'" % env['SYSTEM_FONTS']
+else:
+    paths += "fontscollectionpath = mapniklibpath + '/fonts'"
+
+
 # write out the location of the 'mapniklibpath' into a python file
-# so that the python module can located it at runtime
+# so that the python module can locate it at runtime
 exp =  r"%s{2,}" % os.sep
-mapnik_plugins_dir  = re.sub(exp,os.sep, env['PREFIX'] + '/'+env['LIBDIR_SCHEMA']+'/mapnik')
-file('mapnik/paths.py','w').write(paths % (mapnik_plugins_dir,))
+# Note: we use prefix here not install_prefix since install_prefix is for package building
+# and we intend for python to look to the standard prefix location to find the fonts and plugins
+mapnik_lib_path  = re.sub(exp,os.sep, prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik')
+file('mapnik/paths.py','w').write(paths % (mapnik_lib_path))
 
 # install the core mapnik python files, including '__init__.py' and 'paths.py'
 init_files = glob.glob('mapnik/*.py')
