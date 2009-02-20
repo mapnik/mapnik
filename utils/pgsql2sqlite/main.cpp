@@ -21,11 +21,14 @@
  *****************************************************************************/
 //$Id$
 
+#include "pgsql2sqlite.hpp"
+#include "sqlite.hpp"
+
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 
 #include "connection_manager.hpp"
-#include "cursorresultset.hpp"
+//#include "cursorresultset.hpp"
 // boost
 #include <boost/cstdint.hpp>
 #include <boost/optional.hpp>
@@ -33,236 +36,33 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
-#include <boost/algorithm/string/replace.hpp>
+//#include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options.hpp>
 
 //stl
 #include <iostream>
 #include <fstream>
 
-struct blob_to_hex
-{
-   std::string operator() (const char* blob, unsigned size)
-   {
-      std::string buf;
-      buf.reserve(size*2);
-      std::ostringstream s(buf);
-      s.seekp(0);
-      char hex[3];
-      std::memset(hex,0,3);
-      for ( unsigned pos=0; pos < size; ++pos)
-      {  
-         std::sprintf (hex, "%02X", int(blob[pos]) & 0xff);
-         s << hex;
-      }
-      return s.str();
-   }
-};
-
-bool valid_envelope(mapnik::Envelope<double> const& e)
-{
-   return (e.minx() < e.maxx() && e.miny() < e.maxy()) ;
-}
-
-template <typename Connection, typename OUT>
-void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out, unsigned tolerance)
-{
-   using namespace mapnik;
-   
-   boost::shared_ptr<ResultSet> rs = conn->executeQuery("select * from " + table_name + " limit 0;");
-   int count = rs->getNumFields();
-
-   std::ostringstream select_sql;
-   
-   select_sql << "select ";
-   
-   for (int i=0; i<count; ++i)
-   {
-      if (i!=0) select_sql << ",";
-      select_sql << "\"" <<  rs->getFieldName(i) << "\"";
-   }
-   
-   select_sql << " from " << table_name ;
-   
-   std::ostringstream geom_col_sql;
-   geom_col_sql << "select f_geometry_column,srid,type from geometry_columns ";
-   geom_col_sql << "where f_table_name='" << table_name << "'";
-   
-   rs = conn->executeQuery(geom_col_sql.str());
-   
-   int srid = -1;
-   std::string geom_col = "UNKNOWN";
-   std::string geom_type = "UNKNOWN";
-   
-   if ( rs->next())
-   {
-      try 
-      {
-         srid = boost::lexical_cast<int>(rs->getValue("srid"));
-      }
-      catch (boost::bad_lexical_cast &ex)
-      {
-         std::clog << ex.what() << std::endl;
-      }
-      geom_col = rs->getValue("f_geometry_column");
-      geom_type = rs->getValue("type");
-   }
-   
-   // add AsBinary(<geometry_column>) modifier
-   std::string select_sql_str = select_sql.str();
-   if (tolerance > 0)
-   {
-      std::string from =  "\"" + geom_col + "\"";
-      std::string to   = (boost::format("AsBinary(Simplify(%1%,%2%)) as %1%") % geom_col % tolerance).str();
-      boost::algorithm::replace_all(select_sql_str,from ,to);
-   }
-   else
-   {
-      boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","AsBinary(" + geom_col+") as " + geom_col);
-   }
-   
-   std::cout << select_sql_str << "\n";
-   
-   std::ostringstream cursor_sql;
-   std::string cursor_name("my_cursor");
-   
-   cursor_sql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << select_sql_str << " FOR READ ONLY";
-   conn->execute(cursor_sql.str());
-   
-   boost::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
-   
-   unsigned num_fields = cursor->getNumFields();
-   
-   std::ostringstream create_sql;
-   create_sql << "create table " << table_name << "(PK_UID INTEGER PRIMARY KEY AUTOINCREMENT,";
-   
-   int geometry_oid = -1;
-   
-   for ( unsigned pos = 0; pos < num_fields ; ++pos)
-   {
-      if (pos > 0) create_sql << ",";
-      if (geom_col == cursor->getFieldName(pos))
-      {
-         geometry_oid = cursor->getTypeOID(pos);
-         create_sql << "'" << cursor->getFieldName(pos) << "' BLOB";
-      }
-      else
-      {
-         create_sql << "'" << cursor->getFieldName(pos) << "' TEXT";
-      }
-   }
-   
-   create_sql << ");";
-   
-   
-   std::cout << "client_encoding=" << conn->client_encoding() << "\n";
-   std::cout << "geometry_column=" << geom_col << "(" << geom_type 
-             <<  ") srid=" << srid << " oid=" << geometry_oid << "\n";
-   
-   
-   // begin
-   out << "begin;\n";
-   
-   out << create_sql.str() << "\n";
-   
-   // spatial index sql
-   out << "create virtual table idx_"<< table_name << "_" << geom_col << " using rtree(pkid, xmin, xmax, ymin, ymax);\n";
-   
-   blob_to_hex hex;
-   int pkid = 0;
-   while (cursor->next())
-   {
-      ++pkid;
-      
-      std::ostringstream insert_sql;
-      insert_sql << "insert into " <<  table_name << " values(" << pkid;
-
-      bool empty_geom = true;
-      
-      for (unsigned pos=0 ; pos < num_fields; ++pos)
-      {
-         insert_sql << ",";
-         if (! cursor->isNull(pos))
-         {
-            int size=cursor->getFieldLength(pos);
-            int oid = cursor->getTypeOID(pos);
-            const char* buf=cursor->getValue(pos);
-            
-            switch (oid)
-            {
-               case 25:
-               case 1042:
-               case 1043:
-               {
-                  std::string text(buf);
-                  boost::algorithm::replace_all(text,"'","''");
-                  insert_sql << "'"<< text << "'"; 
-                  break;
-               }
-               case 23:
-                  insert_sql << int4net(buf);
-                  break;
-               default:  
-               {
-                  if (oid == geometry_oid)
-                  {
-                     mapnik::Feature feat(pkid);
-                     geometry_utils::from_wkb(feat,buf,size,false,wkbGeneric);
-                     if (feat.num_geometries() > 0)
-                     {
-                        geometry2d const& geom=feat.get_geometry(0);
-                        Envelope<double> bbox = geom.envelope();
-                        if (valid_envelope(bbox))
-                        {
-                           out << "insert into idx_" << table_name << "_" << geom_col << " values (" ;
-                           out << pkid << "," << bbox.minx() << "," << bbox.maxx();
-                           out << "," << bbox.miny() << "," << bbox.maxy() << ");\n";
-                           empty_geom = false;
-                        }
-                     }
-                     
-                     insert_sql << "X'" << hex(buf,size) << "'";
-                     
-                  }
-                  else 
-                  {
-                     insert_sql << "NULL";
-                  }
-                  break;
-               }
-            }    
-         }
-         else 
-         {
-            insert_sql << "NULL";
-         } 
-      }
-      insert_sql << ");";
-      
-      if (!empty_geom) out << insert_sql.str() << "\n";
-      
-      if (pkid % 1000 == 0)
-      {
-         std::cout << "\r processing " << pkid << " features";
-         std::cout.flush();
-      }
-      if (pkid % 100000 == 0)
-      {
-         out << "commit;\n";
-         out << "begin;\n";
-      }
-   }
-   // commit
-   out << "commit;\n";
-   std::cout << "\r processed " << pkid << " features";
-   std::cout << "\n Done!" << std::endl;
-}
-
-
 int main ( int argc, char** argv)
 {
+
+   namespace sqlite = mapnik::sqlite;
+   
+   sqlite::database db("/tmp/testing.sqlite");
+   
+   db.execute("create table test(id integer, name text)");
+   
+   sqlite::prepared_statement stmt(db,"insert into test values(?,?)");
+   for (unsigned i=0;i<1000;++i)
+   {
+      sqlite::record_type rec;
+      rec.push_back(sqlite::value_type(int(i)));
+      rec.push_back(sqlite::value_type("testing ...."));
+      stmt.insert_record(rec);
+   }
+   
    namespace po = boost::program_options;
-     
+   
    po::options_description desc("Postgresql/PostGIS to SQLite3 converter\n Options");
    
    desc.add_options()
@@ -322,10 +122,12 @@ int main ( int argc, char** argv)
       std::string output_file = vm["file"].as<std::string>();
       
       std::ofstream file(output_file.c_str());
+      
       if (file)
       {
-         pgsql2sqlite(conn,table_name,file,tolerance);
+         mapnik::pgsql2sqlite(conn,table_name,file,tolerance);
       }
+      
       file.close();
    }
    catch (mapnik::datasource_exception & ex)
