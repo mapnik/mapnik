@@ -116,7 +116,7 @@ struct blob_to_hex
 };
 
 template <typename Connection, typename OUT>
-void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out)
+void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out, unsigned tolerance)
 {
    using namespace mapnik;
    
@@ -161,7 +161,16 @@ void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out)
    
    // add AsBinary(<geometry_column>) modifier
    std::string select_sql_str = select_sql.str();
-   boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","AsBinary(" + geom_col+") as " + geom_col);
+   if (tolerance > 0)
+   {
+      std::string from =  "\"" + geom_col + "\"";
+      std::string to   = (boost::format("AsBinary(Simplify(%1%,%2%)) as %1%") % geom_col % tolerance).str();
+      boost::algorithm::replace_all(select_sql_str,from ,to);
+   }
+   else
+   {
+      boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","AsBinary(" + geom_col+") as " + geom_col);
+   }
    
    std::cout << select_sql_str << "\n";
    //std::string select_sql = "select asBinary(way) as way,name,highway,osm_id from " + table_name;
@@ -195,6 +204,8 @@ void pgsql2sqlite(Connection conn, std::string const& table_name, OUT & out)
    }
    
    create_sql << ");";
+   
+   
    std::cout << "client_encoding=" << conn->client_encoding() << "\n";
    std::cout << "geometry_column=" << geom_col << "(" << geom_type 
              <<  ") srid=" << srid << " oid=" << geometry_oid << "\n";
@@ -299,14 +310,15 @@ int main ( int argc, char** argv)
    po::options_description desc("Postgresql/PostGIS to SQLite3 converter\n Options");
    
    desc.add_options()
-      ("help,h","print this message")
-      ("host,h",po::value<std::string>(),"postgresql host")
-      ("port,p",po::value<std::string>(),"postgresql port")
-      ("user,u",po::value<std::string>(),"postgresql user name")
+      ("help,?","Display this help screen.")
+      ("host,h",po::value<std::string>(),"Allows you to specify connection to a database on a machine other than the default.")
+      ("port,p",po::value<std::string>(),"Allows you to specify a database port other than the default.")
+      ("user,u",po::value<std::string>(),"Connect to the database as the specified user.")
       ("dbname,d",po::value<std::string>(),"postgresql database name")
-      ("password,c",po::value<std::string>(),"postgresql password")
-      ("table,t",po::value<std::string>(),"table to export")
-      ("output,o",po::value<std::string>(),"path to output file")
+      ("password,P",po::value<std::string>(),"Connect to the database with the specified password.")
+      ("table,t",po::value<std::string>(),"Name of the table to export")
+      ("simplify,s",po::value<unsigned>(),"Use this option to reduce the complexity\nand weight of a geometry using the Douglas-Peucker algorithm.")
+      ("file,f",po::value<std::string>(),"Use this option to specify the name of the file to create.")
       ;
    
    po::positional_options_description p;
@@ -319,7 +331,7 @@ int main ( int argc, char** argv)
       po::store(po::command_line_parser(argc,argv).options(desc).positional(p).run(),vm);
       po::notify(vm);
       
-      if (vm.count("help") || !vm.count("output") || !vm.count("table"))
+      if (vm.count("help") || !vm.count("file") || !vm.count("table"))
       {
          std::cout << desc << "\n";
          return EXIT_SUCCESS;
@@ -342,6 +354,8 @@ int main ( int argc, char** argv)
    if (vm.count("dbname")) dbname = vm["dbname"].as<std::string>();
    if (vm.count("user")) user = vm["user"].as<std::string>();
    if (vm.count("password")) password = vm["password"].as<std::string>();
+   unsigned tolerance = 0;
+   if (vm.count("simplify")) tolerance = vm["simplify"].as<unsigned>();
    
    ConnectionCreator<Connection> creator(host,port,dbname,user,password);
    try 
@@ -349,12 +363,12 @@ int main ( int argc, char** argv)
       boost::shared_ptr<Connection> conn(creator());
       
       std::string table_name = vm["table"].as<std::string>();
-      std::string output_file = vm["output"].as<std::string>();
+      std::string output_file = vm["file"].as<std::string>();
       
       std::ofstream file(output_file.c_str());
       if (file)
       {
-         pgsql2sqlite(conn,table_name,file);
+         pgsql2sqlite(conn,table_name,file,tolerance);
       }
       file.close();
    }
