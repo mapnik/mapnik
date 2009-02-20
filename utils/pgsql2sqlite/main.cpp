@@ -22,7 +22,7 @@
 //$Id$
 
 #include "pgsql2sqlite.hpp"
-#include "sqlite.hpp"
+
 
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
@@ -45,21 +45,6 @@
 
 int main ( int argc, char** argv)
 {
-
-   namespace sqlite = mapnik::sqlite;
-   
-   sqlite::database db("/tmp/testing.sqlite");
-   
-   db.execute("create table test(id integer, name text)");
-   
-   sqlite::prepared_statement stmt(db,"insert into test values(?,?)");
-   for (unsigned i=0;i<1000;++i)
-   {
-      sqlite::record_type rec;
-      rec.push_back(sqlite::value_type(int(i)));
-      rec.push_back(sqlite::value_type("testing ...."));
-      stmt.insert_record(rec);
-   }
    
    namespace po = boost::program_options;
    
@@ -121,14 +106,16 @@ int main ( int argc, char** argv)
       std::string table_name = vm["table"].as<std::string>();
       std::string output_file = vm["file"].as<std::string>();
       
+      /*
       std::ofstream file(output_file.c_str());
-      
       if (file)
       {
          mapnik::pgsql2sqlite(conn,table_name,file,tolerance);
       }
       
       file.close();
+      */
+      mapnik::pgsql2sqlite(conn,table_name,output_file,tolerance);
    }
    catch (mapnik::datasource_exception & ex)
    {

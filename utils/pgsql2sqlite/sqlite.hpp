@@ -110,7 +110,7 @@ namespace mapnik {  namespace sqlite {
             : db_(db.db_.get()), stmt_(0)
          {
             const char * tail;
-            char * err_msg;
+            //char * err_msg;
             int res = sqlite3_prepare_v2(db_, sql.c_str(),-1, &stmt_,&tail);
             if (res != SQLITE_OK)
             {
@@ -119,27 +119,26 @@ namespace mapnik {  namespace sqlite {
             }
             
             // begin transaction
-            res = sqlite3_exec(db_,"BEGIN;",0,0,&err_msg);
-            if (res != SQLITE_OK)
-            {
-               std::cerr << "ERR:" << err_msg << "\n";     
-               sqlite3_free(err_msg);       
-            }
+            //res = sqlite3_exec(db_,"BEGIN;",0,0,&err_msg);
+            //if (res != SQLITE_OK)
+            //{
+            //   std::cerr << "ERR:" << err_msg << "\n";     
+            //  sqlite3_free(err_msg);       
+            //}
          }
          
          ~prepared_statement()
          {
-            char * err_msg;
+//            char * err_msg;
             //commit transaction
-#ifdef MAPNIK_DEBUG
-            std::cerr << "COMMIT\n";
-#endif
-            sqlite3_exec(db_,"COMMIT;",0,0,&err_msg);            
+//#ifdef MAPNIK_DEBUG
+//            std::cerr << "COMMIT\n";
+//#endif
+//            sqlite3_exec(db_,"COMMIT;",0,0,&err_msg);            
             int res = sqlite3_finalize(stmt_);
             if (res != SQLITE_OK)
             {
-               std::cerr << "ERR:" << err_msg << "\n";     
-               sqlite3_free(err_msg);       
+               std::cerr << "ERR:" << res << "\n";     
             }
          }
          
@@ -151,9 +150,12 @@ namespace mapnik {  namespace sqlite {
             for (; itr!=end;++itr)
             {
                binder op(stmt_,count++);
-               boost::apply_visitor(op,*itr);
+               if (!boost::apply_visitor(op,*itr))
+               {
+                  return false;
+               }
             }
-
+            
             sqlite3_step(stmt_);
             sqlite3_reset(stmt_);
 
