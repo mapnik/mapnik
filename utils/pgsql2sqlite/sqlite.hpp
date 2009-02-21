@@ -29,9 +29,9 @@
 #include <sqlite3.h>
 
 //stl
-#ifdef MAPNIK_DEBUG
+//#ifdef MAPNIK_DEBUG
 #include <iostream>         
-#endif
+//#endif
 #include <string>
 #include <vector>
 
@@ -61,8 +61,8 @@ namespace mapnik {  namespace sqlite {
          bool execute(std::string const& sql);
       };
 
-      
-      typedef boost::variant<int,double,std::string> value_type;
+      struct null_type {};
+    typedef boost::variant<int,double,std::string,null_type> value_type;
       typedef std::vector<value_type> record_type;
       
       class prepared_statement : boost::noncopyable 
@@ -71,7 +71,17 @@ namespace mapnik {  namespace sqlite {
          {
             binder(sqlite3_stmt * stmt, unsigned index)
                : stmt_(stmt), index_(index) {}
-            
+  
+	    bool operator() (null_type )
+	    {
+	       if (sqlite3_bind_null(stmt_, index_) != SQLITE_OK)
+               {
+                  std::cerr << "cannot bind NULL\n";
+                  return false;
+               }
+               return true;
+	    }
+	    
             bool operator() (int val)
             {
                if (sqlite3_bind_int(stmt_, index_ , val ) != SQLITE_OK)
@@ -94,7 +104,7 @@ namespace mapnik {  namespace sqlite {
             
             bool operator() (std::string const& val)
             {
-               if (sqlite3_bind_text(stmt_, index_, val.c_str(), val.length(), 0) != SQLITE_OK)
+               if (sqlite3_bind_text(stmt_, index_, val.c_str(), val.length(), SQLITE_STATIC) != SQLITE_OK)
                {
                  std::cerr << "cannot bind " << val << "\n";
                  return false;
@@ -117,25 +127,11 @@ namespace mapnik {  namespace sqlite {
                std::cerr << "ERR:"<< res << "\n";   
                throw;
             }
-            
-            // begin transaction
-            //res = sqlite3_exec(db_,"BEGIN;",0,0,&err_msg);
-            //if (res != SQLITE_OK)
-            //{
-            //   std::cerr << "ERR:" << err_msg << "\n";     
-            //  sqlite3_free(err_msg);       
-            //}
          }
          
          ~prepared_statement()
          {
-//            char * err_msg;
-            //commit transaction
-//#ifdef MAPNIK_DEBUG
-//            std::cerr << "COMMIT\n";
-//#endif
-//            sqlite3_exec(db_,"COMMIT;",0,0,&err_msg);            
-            int res = sqlite3_finalize(stmt_);
+	    int res = sqlite3_finalize(stmt_);
             if (res != SQLITE_OK)
             {
                std::cerr << "ERR:" << res << "\n";     
@@ -144,6 +140,9 @@ namespace mapnik {  namespace sqlite {
          
          bool insert_record(record_type const& rec) const
          {  
+#ifdef MAPNIK_DEBUG
+	   assert( sqlite3_bind_parameter_count(stmt_) == rec.size());
+#endif
             record_type::const_iterator itr = rec.begin();
             record_type::const_iterator end = rec.end();
             int count = 1;
@@ -166,8 +165,6 @@ namespace mapnik {  namespace sqlite {
          sqlite3 * db_;
          sqlite3_stmt * stmt_;
       };
-      
-      //
    }
 }
 
