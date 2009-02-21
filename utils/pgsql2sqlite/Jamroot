@@ -17,5 +17,5 @@ exe pgsql2sqlite :
     <include>/opt/mapnik/include
     <include>../../plugins/input/postgis
     <include>/opt/postgresql/include
-    <define>MAPNIK_DEBUG
+    #<define>MAPNIK_DEBUG
     ;

@@ -263,8 +263,7 @@ namespace mapnik {
 
    template <typename Connection>
    void pgsql2sqlite(Connection conn, std::string const& table_name, std::string const& output_filename , unsigned tolerance)
-   {
-      
+   {   
       namespace sqlite = mapnik::sqlite;
       sqlite::database db(output_filename);
       
@@ -376,7 +375,7 @@ namespace mapnik {
       
       db.execute(spatial_index_sql);
       
-      blob_to_hex hex;
+      //blob_to_hex hex;
       int pkid = 0;
 
       std::string spatial_index_insert_sql = "insert into idx_" + table_name +  "_"  +  geom_col + " values (?,?,?,?,?)" ;
@@ -387,22 +386,18 @@ namespace mapnik {
       while (cursor->next())
       {
          ++pkid;
-      
-         //std::ostringstream insert_sql;
-         //insert_sql << "insert into " <<  table_name << " values(" << pkid;
+         
 	 sqlite::record_type output_rec;
-
          output_rec.push_back(sqlite::value_type(pkid));
          bool empty_geom = true;
-         
+         const char * buf = 0;
          for (unsigned pos=0 ; pos < num_fields; ++pos)
          {
-	   //insert_sql << ",";
             if (! cursor->isNull(pos))
             {
                int size=cursor->getFieldLength(pos);
                int oid = cursor->getTypeOID(pos);
-               const char* buf=cursor->getValue(pos);
+               buf=cursor->getValue(pos);
             
                switch (oid)
                {
@@ -412,7 +407,6 @@ namespace mapnik {
                   {
                      std::string text(buf);
                      boost::algorithm::replace_all(text,"'","''");
-                     //insert_sql << "'"<< text << "'";
 		     output_rec.push_back(sqlite::value_type(text));
                      break;
                   }
@@ -443,8 +437,9 @@ namespace mapnik {
 			     empty_geom = false;
                            }
                         }
-			output_rec.push_back(sqlite::value_type("X'" + hex(buf,size) + "'"));
-			
+                        
+			//output_rec.push_back(sqlite::value_type("X'" + hex(buf,size) + "'"));
+                        output_rec.push_back(sqlite::blob(buf,size));
                      }
                      else 
 		     {
@@ -457,12 +452,9 @@ namespace mapnik {
             else 
             {
 	      output_rec.push_back(sqlite::null_type());
-	      //insert_sql << "NULL";
             } 
          }
-         //insert_sql << ");";
-      
-         //if (!empty_geom) out << insert_sql.str() << "\n";
+   
 	 if (!empty_geom) output_table.insert_record(output_rec);
 	 
          if (pkid % 1000 == 0)
@@ -473,19 +465,12 @@ namespace mapnik {
          
 	 if (pkid % 100000 == 0)
          {
-	   //out << "commit;\n";
-	   //out << "begin;\n";
-	   db.execute("commit;begin;");
-	   
+	   db.execute("commit;begin;");	   
          }
       }
       // commit
-      //out << "commit;\n";
       db.execute("commit;");
-      
       std::cout << "\r processed " << pkid << " features";
       std::cout << "\n Done!" << std::endl;
-      
    }
-   
 }

@@ -62,7 +62,16 @@ namespace mapnik {  namespace sqlite {
       };
 
       struct null_type {};
-    typedef boost::variant<int,double,std::string,null_type> value_type;
+      struct blob 
+      {
+         blob(const char* buf, unsigned size)
+            : buf_(buf), size_(size) {}
+         
+         const char * buf_;
+         unsigned size_;
+      };
+
+      typedef boost::variant<int,double,std::string, blob,null_type> value_type;
       typedef std::vector<value_type> record_type;
       
       class prepared_statement : boost::noncopyable 
@@ -112,6 +121,16 @@ namespace mapnik {  namespace sqlite {
                return true;
             }
             
+            bool operator() (blob const& val)
+            {
+               if (sqlite3_bind_blob(stmt_, index_, val.buf_, val.size_, SQLITE_STATIC) != SQLITE_OK)
+               {
+                 std::cerr << "cannot bind BLOB\n";
+                 return false;
+               }
+               return true;
+            }
+            
             sqlite3_stmt * stmt_;
             unsigned index_;
          };
@@ -141,7 +160,7 @@ namespace mapnik {  namespace sqlite {
          bool insert_record(record_type const& rec) const
          {  
 #ifdef MAPNIK_DEBUG
-	   assert( sqlite3_bind_parameter_count(stmt_) == rec.size());
+            assert( unsigned(sqlite3_bind_parameter_count(stmt_)) == rec.size());
 #endif
             record_type::const_iterator itr = rec.begin();
             record_type::const_iterator end = rec.end();
