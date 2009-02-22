@@ -55,8 +55,8 @@ public:
         zoom_start=zoom_end=-1;
         tiled=false;
         multirqst=false;
-        //url="http://xapi.openstreetmap.org/api/0.5/map";
-        url="http://osmxapi.hypercube.telascience.org/api/0.5/map";
+        url="http://xapi.openstreetmap.org/api/0.5/map";
+        //url="http://osmxapi.hypercube.telascience.org/api/0.5/map";
         srtm=false;
     }
 
@@ -75,8 +75,6 @@ public:
         if(src=="api" || src=="osm")
         {
             source=src;
-            if(src=="api")
-                width=height=256;
         }
     }
 

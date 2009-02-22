@@ -1,4 +1,5 @@
 #include "MapSource.h"
+#include <gd.h>
 
 
 void MapSource::process_cmd_line_args(int argc,char *argv[])
@@ -114,51 +115,101 @@ void MapSource::process_cmd_line_args(int argc,char *argv[])
 
     if(zoom_end == -1)
         zoom_end = zoom_start;
+    if(tiled)
+        width=height=256+(32*2);
 }
 
 void MapSource::generateMaps()
 {
+    GoogleProjection proj;
     if(tiled)
     {
+        ScreenPos topLeft = (proj.fromLLToPixel(w,n,zoom_start)) ,
+                  bottomRight = (proj.fromLLToPixel(e,s,zoom_start)) ;
 
-        // code to convert a bbox to a series of tiles (see FreemapMobile?)
-        // iterate through each tile and convert back to bboxes, zooming
-        // for each (can use old 'render' code for this)
+        topLeft.x /= 256;
+        topLeft.y /= 256;
+        bottomRight.x /= 256;
+        bottomRight.y /= 256;
 
-        // break the input into a series of 0.1 x 0.1 requests to osmxapi
-        double curlon, curlat,nextlon,nextlat;
-        curlon= (getSource()=="api" && multirqst)? 0.1*((int)(w*10)):w; 
-        while(curlon<e)
+		int x_fetch_freq, y_fetch_freq, x_fetches, y_fetches;
+
+		if(multirqst)
+		{
+        	// Gives a value approx equal to 0.1 lat/lon in southern UK
+        	x_fetch_freq = (int)(pow(2.0,zoom_start-11));
+        	y_fetch_freq = (int)(pow(2.0,zoom_start-11));
+        	x_fetches = ((bottomRight.x-topLeft.x) / x_fetch_freq)+1, 
+            y_fetches = ((bottomRight.y-topLeft.y) / y_fetch_freq)+1; 
+		}
+		else
+		{
+			x_fetch_freq = bottomRight.x - topLeft.x;
+			y_fetch_freq = bottomRight.y - topLeft.y;
+			x_fetches = 1;
+			y_fetches = 1;
+		}
+
+        fprintf(stderr,"topLeft: %d %d\n",topLeft.x,topLeft.y);
+        fprintf(stderr,"bottomRight: %d %d\n",bottomRight.x,bottomRight.y);
+        fprintf(stderr,"xfetches yfetches: %d %d\n",x_fetches, y_fetches);
+
+        for(int xfetch=0; xfetch<x_fetches; xfetch++)
         {
-            nextlon=(getSource()=="api" && multirqst) ? curlon+0.1 : e;
-            curlat=(getSource()=="api" && multirqst) 
-                    ? 0.1*((int)(s*10)) : s;
-            while(curlat<n)
+               for (int yfetch=0; yfetch<y_fetches; yfetch++) 
             {
-                nextlat=(getSource()=="api" && multirqst)?curlat+0.1 : n;
+                cerr<<"XFETCH="<<xfetch<<" YFETCH="<<yfetch<<endl;
+                EarthPoint bottomL_LL =
+                    proj.fromPixelToLL( (topLeft.x+xfetch*x_fetch_freq)*256,
+                                    ((topLeft.y+yfetch*y_fetch_freq)
+                                    +y_fetch_freq)*256, zoom_start),
+                           topR_LL = 
+                    proj.fromPixelToLL( (
+                (topLeft.x+xfetch*x_fetch_freq)+x_fetch_freq)*256,
+                                        (topLeft.y+yfetch*y_fetch_freq)
+                                                *256, zoom_start),
+                 bottomR_LL =
+                    proj.fromPixelToLL( ((topLeft.x+xfetch*x_fetch_freq)+
+							x_fetch_freq)*256,
+                                    ((topLeft.y+yfetch*y_fetch_freq)
+                                    +y_fetch_freq)*256, zoom_start),
+                           topL_LL = 
+                    proj.fromPixelToLL( 
+                (topLeft.x+xfetch*x_fetch_freq)*256,
+                                        (topLeft.y+yfetch*y_fetch_freq)
+                                                *256, zoom_start);
+
+				double w1 = min(bottomL_LL.x-0.01,topL_LL.x-0.01),
+					   s1 = min(bottomL_LL.y-0.01,bottomR_LL.y-0.01),
+					   e1 = max(bottomR_LL.x+0.01,topR_LL.x+0.01),
+					   n1 = max(topL_LL.y+0.01,topR_LL.y+0.01);
+
                 parameters p;
                 if(getSource()=="api")
                 {
                     std::ostringstream str;
-                    str<<curlon<<","<<curlat<<","<<nextlon<<","<<nextlat;
+                    str<<w1<<","<<s1<<"," <<e1<<","<<n1;
 
                     p["url"] = url;
                     p["file"] = "";
                     p["bbox"] = str.str();
+                    cerr<<"URL="<<str.str()<<endl;
                 }
                 else if (getSource()=="osm")
                 {
                     p["file"] = osmfile;
                 }
-
+                
                 Map m (width, height);
                 p["type"] ="osm";
                 load_map(m,xmlfile);
                 setOSMLayers(m,p);
                 if(srtm)
-                    addSRTMLayers(m,curlon,curlat,nextlon,nextlat);
+                {
+                    addSRTMLayers(m,w1,s1,e1,n1);
+                }
+
                 // lonToX() and latToY() give *pixel* coordinates
-                GoogleProjection proj;
 
                    // See email Chris Schmidt 12/02/09
                 double metres_per_pixel = (20037508.34/pow(2.0,
@@ -166,18 +217,26 @@ void MapSource::generateMaps()
 
                 for(int z=zoom_start; z<=zoom_end; z++)
                 {
-                    ScreenPos pxStart = 
-                        proj.fromLLToPixel(curlon,nextlat,z),
-                    pxEnd=proj.fromLLToPixel(nextlon,curlat,z);
                     EarthPoint bl,tr;
-                    Image32 buf(m.getWidth(),m.getHeight());
-
-                    for(int tileX=pxStart.x/256; tileX <=pxEnd.x/256; tileX++)
+            
+                    int ZOOM_FCTR = (int)(pow(2.0,z-zoom_start));
+                    for(int tileX=
+                            (topLeft.x+xfetch*x_fetch_freq)*ZOOM_FCTR;
+                        tileX<
+                            (topLeft.x+xfetch*x_fetch_freq+x_fetch_freq)
+                            *ZOOM_FCTR;
+                        tileX++)
                     {
-                        for(int tileY=pxStart.y/256; 
-                            tileY<=pxEnd.y/256; tileY++)
+                        for(int tileY=(topLeft.y+yfetch*y_fetch_freq)
+                                    *ZOOM_FCTR;
+                            tileY<(topLeft.y+yfetch*y_fetch_freq+y_fetch_freq)
+                                    *ZOOM_FCTR;
+                            tileY++)
                         {
+                            cerr<<"x: " << tileX << " y: " << tileY
+                                <<" z: " << z << endl;
 
+                           Image32 buf(m.getWidth(),m.getHeight());
                            double metres_w =( (tileX*256.0) *
                             metres_per_pixel ) -
                                 20037814.088;
@@ -192,6 +251,7 @@ void MapSource::generateMaps()
                              metres_s-32*metres_per_pixel,
                              metres_e+32*metres_per_pixel,
                              metres_n+32*metres_per_pixel); 
+
                            m.zoomToBox(bb);
                            agg_renderer<Image32> r(m,buf);
                            r.apply();
@@ -199,15 +259,25 @@ void MapSource::generateMaps()
                            string filename="";
                            std::ostringstream str;
                            str<< z<< "."<<tileX<<"." << tileY << ".png";
-                           save_to_file<ImageData32>
-                            (buf.data(),str.str(),"png");
+                           save_to_file<ImageData32>(buf.data(),
+                            "tmp.png","png");
+                            FILE *in=fopen("tmp.png","r");
+                            FILE *out=fopen(str.str().c_str(),"w");
+
+                            gdImagePtr image, image2;
+                            image=gdImageCreateTrueColor(256,256);
+                            image2=gdImageCreateFromPng(in);
+                            gdImageCopy(image,image2,0,0,32,32,256,256);
+                            gdImagePng(image,out);
+                            gdImageDestroy(image2);
+                            gdImageDestroy(image);
+                            fclose(out);
+                            fclose(in);
                         }
                     }
                     metres_per_pixel /= 2;
                 }
-                curlat = nextlat; 
             }
-            curlon = nextlon; 
         }
     }
     else
@@ -225,13 +295,13 @@ void MapSource::generateMaps()
             Envelope<double>(w,s,e,n):
             m.getLayer(0).envelope();
         
-        EarthPoint bottomLeft = 
+        EarthPoint bottomL_LL = 
             GoogleProjection::fromLLToGoog(latlon.minx(),latlon.miny()),
-                   topRight =
+                   topR_LL =
             GoogleProjection::fromLLToGoog(latlon.maxx(),latlon.maxy());
         Envelope<double> bb =
-                Envelope<double>(bottomLeft.x,bottomLeft.y,
-                                topRight.x,topRight.y);    
+                Envelope<double>(bottomL_LL.x,bottomL_LL.y,
+                                topR_LL.x,topR_LL.y);    
         m.zoomToBox(bb);
         Image32 buf (m.getWidth(), m.getHeight());
         agg_renderer<Image32> r(m,buf);
@@ -288,7 +358,7 @@ void MapSource::addSRTMLayers(Map& m,double w,double s,double e,double n)
     // do we have more than one srtm layer?
     if(floor(w) != floor(e) || floor(s) != floor(n))
     {
-        // remove all layers from the SRTM layer onwards. This is because there
+        // remove all layers after the SRTM layer. This is because there
         // are multiple SRTM layers (if the current tile spans a lat/lon square
         // boundary)
         for(int j=i+1; j<layers.size(); j++)
@@ -300,7 +370,7 @@ void MapSource::addSRTMLayers(Map& m,double w,double s,double e,double n)
             {
                 // if this isn't the bottom left lat/lon square, add another
                 // SRTM layer for it
-                if(lon!=floor(w) && lat!=floor(s))
+                if(lon!=floor(w) || lat!=floor(s))
                 {
                     parameters p;    
                     p["type"] = "shape";
