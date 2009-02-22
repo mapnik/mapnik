@@ -61,6 +61,8 @@ class _Envelope(Envelope,_injector):
    return inverse_(self,obj)
 
 class _Projection(Projection,_injector):
+  def __str__(self):
+    return "Projection('%s')" % self.params()
   def forward(self,obj):
     return forward_(obj,self)
   def inverse(self,obj):
