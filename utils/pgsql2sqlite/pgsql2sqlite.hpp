@@ -82,7 +82,7 @@ namespace mapnik {
          {
             table_name=table_name.substr(idx);
          }
-         idx=table_name.find_first_of(" )");
+         idx=table_name.find_first_of(" ),");
          if (idx != std::string::npos)
          {
             table_name = table_name.substr(0,idx);
@@ -96,8 +96,7 @@ namespace mapnik {
    void pgsql2sqlite(Connection conn, 
                      std::string const& query, 
                      std::string const& output_table_name, 
-                     std::string const& output_filename , 
-                     unsigned tolerance)
+                     std::string const& output_filename)
    {   
       namespace sqlite = mapnik::sqlite;
       sqlite::database db(output_filename);
@@ -145,21 +144,12 @@ namespace mapnik {
    
       // add AsBinary(<geometry_column>) modifier
       std::string select_sql_str = select_sql.str();
-      if (tolerance > 0)
-      {
-         std::string from =  "\"" + geom_col + "\"";
-         std::string to   = (boost::format("AsBinary(Simplify(%1%,%2%)) as %1%") % geom_col % tolerance).str();
-         boost::algorithm::replace_all(select_sql_str,from ,to);
-      }
-      else
-      {
-         boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","AsBinary(" + geom_col+") as " + geom_col);
-      }
+      boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","AsBinary(" + geom_col+") as " + geom_col);
 
 #ifdef MAPNIK_DEBUG
       std::cout << select_sql_str << "\n";
 #endif
-
+      
       std::ostringstream cursor_sql;
       std::string cursor_name("my_cursor");
    

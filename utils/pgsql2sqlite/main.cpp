@@ -59,7 +59,6 @@ int main ( int argc, char** argv)
       ("password,P",po::value<std::string>(),"Connect to the database with the specified password.")
       ("query,q",po::value<std::string>(),"Name of the table/or query to pass to postmaster")
       ("table,t",po::value<std::string>(),"Name of the table to create")
-      ("simplify,s",po::value<unsigned>(),"Use this option to reduce the complexity\nand weight of a geometry using the Douglas-Peucker algorithm.")
       ("file,f",po::value<std::string>(),"Use this option to specify the name of the file to create.")
       
       ;
@@ -97,8 +96,6 @@ int main ( int argc, char** argv)
    if (vm.count("dbname")) dbname = vm["dbname"].as<std::string>();
    if (vm.count("user")) user = vm["user"].as<std::string>();
    if (vm.count("password")) password = vm["password"].as<std::string>();
-   unsigned tolerance = 0;
-   if (vm.count("simplify")) tolerance = vm["simplify"].as<unsigned>();
    
    ConnectionCreator<Connection> creator(host,port,dbname,user,password);
    try 
@@ -109,7 +106,9 @@ int main ( int argc, char** argv)
       std::string output_table_name = vm.count("table") ? vm["table"].as<std::string>() : mapnik::table_from_sql(query);
       std::string output_file = vm["file"].as<std::string>();
       
-      mapnik::pgsql2sqlite(conn,query,output_table_name,output_file,tolerance);
+      std::cout << "output_table : " << output_table_name << "\n";
+      
+      mapnik::pgsql2sqlite(conn,query,output_table_name,output_file);
    }
    catch (mapnik::datasource_exception & ex)
    {
