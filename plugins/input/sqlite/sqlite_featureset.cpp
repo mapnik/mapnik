@@ -72,8 +72,8 @@ feature_ptr sqlite_featureset::next()
 #endif
 
         feature_ptr feature(new Feature(feature_id));
-        geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,mapnik::wkbSQLite);
-
+        geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,mapnik::wkbGeneric);
+        
         for (int i = 2; i < rs_->column_count (); ++i)
         {
            const int type_oid = rs_->column_type (i);
