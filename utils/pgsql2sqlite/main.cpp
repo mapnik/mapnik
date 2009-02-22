@@ -21,22 +21,15 @@
  *****************************************************************************/
 //$Id$
 
+// mapnik
 #include "pgsql2sqlite.hpp"
-
-
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
-
 #include "connection_manager.hpp"
-//#include "cursorresultset.hpp"
+
 // boost
-#include <boost/cstdint.hpp>
 #include <boost/optional.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
-//#include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options.hpp>
 
 //stl
