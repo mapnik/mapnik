@@ -57,9 +57,11 @@ int main ( int argc, char** argv)
       ("user,u",po::value<std::string>(),"Connect to the database as the specified user.")
       ("dbname,d",po::value<std::string>(),"postgresql database name")
       ("password,P",po::value<std::string>(),"Connect to the database with the specified password.")
-      ("table,t",po::value<std::string>(),"Name of the table to export")
+      ("query,q",po::value<std::string>(),"Name of the table/or query to pass to postmaster")
+      ("table,t",po::value<std::string>(),"Name of the table to create")
       ("simplify,s",po::value<unsigned>(),"Use this option to reduce the complexity\nand weight of a geometry using the Douglas-Peucker algorithm.")
       ("file,f",po::value<std::string>(),"Use this option to specify the name of the file to create.")
+      
       ;
    
    po::positional_options_description p;
@@ -72,7 +74,7 @@ int main ( int argc, char** argv)
       po::store(po::command_line_parser(argc,argv).options(desc).positional(p).run(),vm);
       po::notify(vm);
       
-      if (vm.count("help") || !vm.count("file") || !vm.count("table"))
+      if (vm.count("help") || !vm.count("file") || !vm.count("query"))
       {
          std::cout << desc << "\n";
          return EXIT_SUCCESS;
@@ -102,20 +104,12 @@ int main ( int argc, char** argv)
    try 
    {
       boost::shared_ptr<Connection> conn(creator());
-      
-      std::string table_name = vm["table"].as<std::string>();
+
+      std::string query = vm["query"].as<std::string>();      
+      std::string output_table_name = vm.count("table") ? vm["table"].as<std::string>() : mapnik::table_from_sql(query);
       std::string output_file = vm["file"].as<std::string>();
       
-      /*
-      std::ofstream file(output_file.c_str());
-      if (file)
-      {
-         mapnik::pgsql2sqlite(conn,table_name,file,tolerance);
-      }
-      
-      file.close();
-      */
-      mapnik::pgsql2sqlite(conn,table_name,output_file,tolerance);
+      mapnik::pgsql2sqlite(conn,query,output_table_name,output_file,tolerance);
    }
    catch (mapnik::datasource_exception & ex)
    {
