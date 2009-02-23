@@ -59,7 +59,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
      type_(datasource::Vector),
      table_(*params.get<std::string>("table","")),
      metadata_(*params.get<std::string>("metadata","")),
-     geometry_field_(*params.get<std::string>("geometry_field","geom")),
+     geometry_field_(*params.get<std::string>("geometry_field","the_geom")),
      key_field_(*params.get<std::string>("key_field","PK_UID")),
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
@@ -239,9 +239,9 @@ featureset_ptr sqlite_datasource::features(query const& q) const
             s << " and ymax>=" << e.miny() << " and ymin<=" << e.maxy() << ")";
         }
 
-#ifdef MAPNIK_DEBUG
+//#ifdef MAPNIK_DEBUG
         std::cerr << "executing sql: " << s.str() << "\n";
-#endif
+//#endif
 
         boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
 
