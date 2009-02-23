@@ -161,7 +161,7 @@ namespace mapnik {
       unsigned num_fields = cursor->getNumFields();
    
       std::ostringstream create_sql;
-      create_sql << "create table " << output_table_name << "(PK_UID INTEGER PRIMARY KEY AUTOINCREMENT,";
+      create_sql << "create table if not exists" << output_table_name << "(OGC_FID INTEGER PRIMARY KEY AUTOINCREMENT,";
    
       int geometry_oid = -1;
 
