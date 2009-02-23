@@ -182,8 +182,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
                   we cannot determine the right columns types and names 
                   as all column_type are SQLITE_NULL
         */
+
+        std::string::size_type idx = table_.find(table_name);
         std::ostringstream s;
-        s << "select * from " << table_ << " limit 0";
+        s << "select * from (" <<  table_.substr(0,idx + table_name.length()) << ") limit 1";
+        
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
