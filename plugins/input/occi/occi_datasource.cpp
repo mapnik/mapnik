@@ -70,7 +70,7 @@ DATASOURCE_PLUGIN(occi_datasource)
 occi_datasource::occi_datasource(parameters const& params)
    : datasource (params),
      table_(*params.get<std::string>("table","")),
-     geometry_field_(*params.get<std::string>("geometry_field","")),
+     geometry_field_(*params.get<std::string>("geometry_field","GEOLOC")),
      type_(datasource::Vector),
      extent_initialized_(false),
      desc_(*params.get<std::string>("type"),"utf-8"),
@@ -248,36 +248,104 @@ Envelope<double> occi_datasource::envelope() const
 {
     if (extent_initialized_) return extent_;
 
+    double lox, loy, hix, hiy;
     occi_connection_ptr conn (pool_);
 
-    std::ostringstream s;
-    s << "select min(c.x), min(c.y), max(c.x), max(c.y) from ";
-    s << " (select sdo_aggr_mbr(" << geometry_field_ << ") shape from " << table_ << ") a, ";
-    s << " table (sdo_util.getvertices(a.shape)) c";
-
-    try
+    boost::optional<std::string> estimate_extent = params_.get<std::string>("estimate_extent");
+         
+    if (estimate_extent && *estimate_extent == "true")
     {
-        ResultSet* rs = conn.execute_query (s.str());
-        if (rs && rs->next ())
+        std::ostringstream s;
+        s << "select min(c.x), min(c.y), max(c.x), max(c.y) from ";
+        s << " (select sdo_aggr_mbr(" << geometry_field_ << ") shape from " << table_ << ") a, ";
+        s << " table (sdo_util.getvertices(a.shape)) c";
+
+        try
         {
-            try 
+            ResultSet* rs = conn.execute_query (s.str());
+            if (rs && rs->next ())
             {
-                double lox = lexical_cast<double>(rs->getDouble(1));
-                double loy = lexical_cast<double>(rs->getDouble(2));
-                double hix = lexical_cast<double>(rs->getDouble(3));
-                double hiy = lexical_cast<double>(rs->getDouble(4));		    
-                extent_.init (lox,loy,hix,hiy);
-                extent_initialized_ = true;
-            }
-            catch (bad_lexical_cast &ex)
-            {
-                clog << ex.what() << endl;
+                try 
+                {
+                    lox = lexical_cast<double>(rs->getDouble(1));
+                    loy = lexical_cast<double>(rs->getDouble(2));
+                    hix = lexical_cast<double>(rs->getDouble(3));
+                    hiy = lexical_cast<double>(rs->getDouble(4));		    
+                    extent_.init (lox,loy,hix,hiy);
+                    extent_initialized_ = true;
+                }
+                catch (bad_lexical_cast &ex)
+                {
+                    clog << ex.what() << endl;
+                }
             }
         }
+        catch (SQLException &ex)
+        {
+            throw datasource_exception(ex.getMessage());
+        }
     }
-    catch (SQLException &ex)
+    else 
     {
-        throw datasource_exception(ex.getMessage());
+
+        {
+            std::ostringstream s;
+            s << "select dim.sdo_lb as lx, dim.sdo_ub as ux from ";
+            s << SDO_GEOMETRY_METADATA_TABLE << " m, table(m.diminfo) dim ";
+            s << " where lower(m.table_name) = '" << table_ << "' and dim.sdo_dimname = 'X'";
+        
+            try
+            {
+                ResultSet* rs = conn.execute_query (s.str());
+                if (rs && rs->next ())
+                {
+                    try 
+                    {
+                        lox = lexical_cast<double>(rs->getDouble(1));
+                        hix = lexical_cast<double>(rs->getDouble(2));
+                    }
+                    catch (bad_lexical_cast &ex)
+                    {
+                        clog << ex.what() << endl;
+                    }
+                }
+            }
+            catch (SQLException &ex)
+            {
+                throw datasource_exception(ex.getMessage());
+            }
+        }
+
+        {
+            std::ostringstream s;
+            s << "select dim.sdo_lb as ly, dim.sdo_ub as uy from ";
+            s << SDO_GEOMETRY_METADATA_TABLE << " m, table(m.diminfo) dim ";
+            s << " where lower(m.table_name) = '" << table_ << "' and dim.sdo_dimname = 'Y'";
+        
+            try
+            {
+                ResultSet* rs = conn.execute_query (s.str());
+                if (rs && rs->next ())
+                {
+                    try 
+                    {
+                        loy = lexical_cast<double>(rs->getDouble(1));
+                        hiy = lexical_cast<double>(rs->getDouble(2));
+                    }
+                    catch (bad_lexical_cast &ex)
+                    {
+                        clog << ex.what() << endl;
+                    }
+                }
+            }
+            catch (SQLException &ex)
+            {
+                throw datasource_exception(ex.getMessage());
+            }
+        }
+
+        extent_.init (lox,loy,hix,hiy);
+        extent_initialized_ = true;
     }
 
     return extent_;

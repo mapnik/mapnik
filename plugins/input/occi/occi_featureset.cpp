@@ -189,7 +189,7 @@ void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature)
    int lrsvalue = (gtype - dimensions * 1000) / 100;
    int geomtype = (gtype - dimensions * 1000 - lrsvalue * 100); 
 
-#ifdef MAPNIK_DEBUG
+#if 0
    clog << "-----------Geometry Object ------------" << endl;
    clog << "SDO GTYPE = " << gtype << endl;
    clog << "SDO DIMENSIONS = " << dimensions << endl;

@@ -150,6 +150,10 @@ public:
         close_query (false);
 
         stmt_ = conn_->createStatement (s);
+
+        stmt_->setPrefetchRowCount (100);
+        stmt_->setPrefetchMemorySize (0);
+
         rs_ = stmt_->executeQuery ();
         
         return rs_;
