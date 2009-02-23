@@ -60,7 +60,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
      table_(*params.get<std::string>("table","")),
      metadata_(*params.get<std::string>("metadata","")),
      geometry_field_(*params.get<std::string>("geometry_field","the_geom")),
-     key_field_(*params.get<std::string>("key_field","PK_UID")),
+     key_field_(*params.get<std::string>("key_field","OGC_FID")),
      row_offset_(*params_.get<int>("row_offset",0)),
      row_limit_(*params_.get<int>("row_limit",0)),
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
@@ -134,30 +134,15 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         }
     }
 
-#if 0
     if (use_spatial_index_)
     {
+        std::ostringstream s;
+        s << "select count (*) from sqlite_master";
+        s << " where lower(name) = lower('idx_" << table_ << "_" << geometry_field_ << "')";
+        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+        if (rs->is_valid () && rs->step_next())
         {
-            std::ostringstream s;
-            s << "select spatial_index_enabled from geometry_columns";
-            s << " where lower(f_table_name) = lower('" << table_ << "')";
-            boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-            if (rs->is_valid () && rs->step_next())
-            {
-                use_spatial_index_ = rs->column_integer (0) == 1;
-            }
-        }
-
-        if (use_spatial_index_)
-        {
-            std::ostringstream s;
-            s << "select count (*) from sqlite_master";
-            s << " where lower(name) = lower('idx_" << table_ << "_" << geometry_field_ << "')";
-            boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-            if (rs->is_valid () && rs->step_next())
-            {
-                use_spatial_index_ = rs->column_integer (0) == 1;
-            }
+            use_spatial_index_ = rs->column_integer (0) == 1;
         }
 
 #ifdef MAPNIK_DEBUG
@@ -165,7 +150,6 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
             clog << "cannot use the spatial index " << endl;
 #endif
     }
-#endif
 
     {
         /*
