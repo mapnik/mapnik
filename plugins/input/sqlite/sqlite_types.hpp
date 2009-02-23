@@ -119,33 +119,19 @@ class sqlite_connection
 {
 public:
 
-    typedef int (*sqlite_query_callback) (void*, int, char**, char**);
-
     sqlite_connection (const std::string& file)
         : db_(0)
     {
         if (sqlite3_open (file.c_str(), &db_))
             throw mapnik::datasource_exception (sqlite3_errmsg (db_));
+
+        //sqlite3_enable_load_extension(db_, 1);
     }
 
     ~sqlite_connection ()
     {
         if (db_)
             sqlite3_close (db_);
-    }
-
-    int execute_query_callback (const std::string& sql, sqlite_query_callback callback)
-    {
-        char* error_message = 0;
-
-        int rc = sqlite3_exec (db_, sql.c_str(), callback, 0, &error_message);
-        if (rc != SQLITE_OK)
-        {
-            std::clog << error_message << std::endl;
-            sqlite3_free (error_message);
-        }
-
-        return rc;
     }
 
     sqlite_resultset* execute_query (const std::string& sql)

@@ -28,13 +28,13 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature.hpp>
+
 namespace mapnik
 {
     enum wkbFormat
     {
         wkbGeneric=1,
-        wkbAutodetect=2,
-        wkbSQLite=3
+        wkbSpatiaLite=2
     };
 
     class MAPNIK_DECL geometry_utils 
@@ -52,4 +52,5 @@ namespace mapnik
        geometry_utils& operator=(const geometry_utils&);
     };
 }
+
 #endif //WKB_HPP

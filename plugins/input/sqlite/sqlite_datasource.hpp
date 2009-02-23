@@ -28,6 +28,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/wkb.hpp> 
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -53,8 +54,14 @@ class sqlite_datasource : public mapnik::datasource
       mutable bool extent_initialized_;
       int type_;
       sqlite_connection* dataset_;
-      std::string table_, metadata_, geometry_field_, key_field_;
+      std::string table_;
+      std::string metadata_;
+      std::string geometry_field_;
+      std::string key_field_;
+      const int row_offset_;
+      const int row_limit_;
       mapnik::layer_descriptor desc_;
+      mapnik::wkbFormat format_;
       bool multiple_geometries_;
       bool use_spatial_index_;
 };

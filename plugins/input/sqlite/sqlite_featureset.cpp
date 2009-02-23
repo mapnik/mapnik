@@ -50,9 +50,11 @@ using mapnik::transcoder;
 
 sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                                      std::string const& encoding,
+                                     mapnik::wkbFormat format,
                                      bool multiple_geometries)
    : rs_(rs),
      tr_(new transcoder(encoding)),
+     format_(format),
      multiple_geometries_(multiple_geometries)
 {
 }
@@ -72,7 +74,7 @@ feature_ptr sqlite_featureset::next()
 #endif
 
         feature_ptr feature(new Feature(feature_id));
-        geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,mapnik::wkbGeneric);
+        geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,format_);
         
         for (int i = 2; i < rs_->column_count (); ++i)
         {

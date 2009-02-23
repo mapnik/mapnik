@@ -27,6 +27,7 @@
 // mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/unicode.hpp> 
+#include <mapnik/wkb.hpp> 
 
 // boost
 #include <boost/scoped_ptr.hpp>
@@ -41,12 +42,14 @@ class sqlite_featureset : public mapnik::Featureset
    public:
       sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                         std::string const& encoding,
+                        mapnik::wkbFormat format,
                         bool multiple_geometries);
       virtual ~sqlite_featureset();
       mapnik::feature_ptr next();
    private:
       boost::shared_ptr<sqlite_resultset> rs_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
+      mapnik::wkbFormat format_;
       bool multiple_geometries_;
 };
 

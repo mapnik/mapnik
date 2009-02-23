@@ -61,14 +61,9 @@ namespace mapnik
               pos_(0),
               format_(format)
          {
-            if (format_ == wkbAutodetect)
-            {
-                // XXX - todo
-            }
-
             switch (format_)
             {
-               case wkbSQLite:
+               case wkbSpatiaLite:
                   byteOrder_ = (wkbByteOrder) wkb_[1];
                   pos_ = 39;
                   break;
