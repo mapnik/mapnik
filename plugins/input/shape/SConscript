@@ -45,5 +45,5 @@ if env['PLATFORM'] == 'Darwin':
 
 shape_inputdriver = env.SharedLibrary('shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries)
 
-env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', shape_inputdriver)
-env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')
+env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', shape_inputdriver)
+env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')

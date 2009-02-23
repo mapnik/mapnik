@@ -66,7 +66,7 @@ else:
 exp =  r"%s{2,}" % os.sep
 # Note: we use prefix here not install_prefix since install_prefix is for package building
 # and we intend for python to look to the standard prefix location to find the fonts and plugins
-mapnik_lib_path  = re.sub(exp,os.sep, prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik')
+mapnik_lib_path  = re.sub(exp,os.sep, prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
 file('mapnik/paths.py','w').write(paths % (mapnik_lib_path))
 
 # install the core mapnik python files, including '__init__.py' and 'paths.py'
@@ -84,5 +84,3 @@ env.Alias(target='install', source=ogcserver_module)
 _mapnik = env.LoadableModule('_mapnik', glob.glob('*.cpp'), LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
 pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik',_mapnik)
 env.Alias(target='install',source=pymapniklib)
-
-#import pdb;pdb.set_trace()

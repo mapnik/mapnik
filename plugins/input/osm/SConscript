@@ -44,5 +44,5 @@ if env['PLATFORM'] == 'Darwin':
 
 osm_inputdriver = env.SharedLibrary('osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
-env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', osm_inputdriver)
-env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')
+env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', osm_inputdriver)
+env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')

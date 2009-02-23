@@ -39,5 +39,5 @@ if env['PLATFORM'] == 'Darwin':
 
 ogr_inputdriver = env.SharedLibrary('ogr', source=ogr_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
-env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', ogr_inputdriver)
-env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')
+env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', ogr_inputdriver)
+env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')

@@ -39,5 +39,5 @@ if env['PLATFORM'] == 'Darwin':
 
 gdal_inputdriver = env.SharedLibrary('gdal', source=gdal_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
-env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input', gdal_inputdriver)
-env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + '/mapnik/input')
+env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', gdal_inputdriver)
+env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')
