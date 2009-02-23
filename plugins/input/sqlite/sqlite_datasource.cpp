@@ -163,7 +163,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     {
         std::ostringstream s;
         s << "select count (*) from sqlite_master";
-        s << " where lower(name) = lower('idx_" << table_ << "_" << geometry_field_ << "')";
+        s << " where lower(name) = lower('idx_" << table_name << "_" << geometry_field_ << "')";
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
