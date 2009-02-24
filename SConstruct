@@ -296,13 +296,15 @@ def CheckBoost(context, version, silent=False):
     if not silent:
         context.Message('Checking for Boost version >= %s... ' % (version))
     ret = context.TryRun("""
-    #include <boost/version.hpp>
 
-    int main() 
-    {
-        return BOOST_VERSION >= %d ? 0 : 1;
-    }
-    """ % version_n, '.cpp')[0]
+#include <boost/version.hpp>
+
+int main() 
+{
+    return BOOST_VERSION >= %d ? 0 : 1;
+}
+
+""" % version_n, '.cpp')[0]
     if silent:
         context.did_show_result=1
     context.Result(ret)
@@ -310,15 +312,18 @@ def CheckBoost(context, version, silent=False):
 
 def GetBoostLibVersion(context):
     ret = context.TryRun("""
-    #include <boost/version.hpp>
-    #include <iostream>
-    
-    int main() 
-    {
-        std::cout << BOOST_LIB_VERSION << std::endl;
-        return 0;
-    }
-    """, '.cpp')
+
+#include <boost/version.hpp>
+#include <iostream>
+
+int main() 
+{
+
+std::cout << BOOST_LIB_VERSION << std::endl;
+return 0;
+}
+
+""", '.cpp')
     # hack to avoid printed output
     context.did_show_result=1
     context.Result(ret[0])
@@ -326,15 +331,17 @@ def GetBoostLibVersion(context):
 
 def GetMapnikLibVersion(context):
     ret = context.TryRun("""
-    #include <mapnik/version.hpp>
-    #include <iostream>
-    
-    int main() 
-    {
-        std::cout << MAPNIK_VERSION << std::endl;
-        return 0;
-    }
-    """, '.cpp')
+
+#include <mapnik/version.hpp>
+#include <iostream>
+
+int main() 
+{
+    std::cout << MAPNIK_VERSION << std::endl;
+    return 0;
+}
+
+""", '.cpp')
     # hack to avoid printed output
     context.did_show_result=1
     context.Result(ret[0])
