@@ -185,7 +185,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
 
         std::string::size_type idx = table_.find(table_name);
         std::ostringstream s;
-        s << "select * from (" <<  table_.substr(0,idx + table_name.length()) << ") limit 1";
+        s << "select * from (" << table_.substr(0,idx + table_name.length()) << ") limit 1";
         
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
@@ -291,7 +291,6 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         }
         
         s << query ;
-        
         
         if (row_limit_ > 0) {
             s << " limit " << row_limit_;

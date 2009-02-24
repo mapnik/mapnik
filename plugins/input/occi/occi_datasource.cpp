@@ -28,6 +28,7 @@
 #include <mapnik/ptree_helpers.hpp>
 
 // boost
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -64,8 +65,31 @@ using oracle::occi::SQLException;
 using oracle::occi::Type;
 using oracle::occi::StatelessConnectionPool;
 
-
 DATASOURCE_PLUGIN(occi_datasource)
+
+
+std::string table_from_sql(std::string const& sql)
+{
+   std::string table_name = boost::algorithm::to_lower_copy(sql);
+   boost::algorithm::replace_all(table_name,"\n"," ");
+   
+   std::string::size_type idx = table_name.rfind("from");
+   if (idx!=std::string::npos)
+   {
+      
+      idx=table_name.find_first_not_of(" ",idx+4);
+      if (idx != std::string::npos)
+      {
+         table_name=table_name.substr(idx);
+      }
+      idx=table_name.find_first_of(" ),");
+      if (idx != std::string::npos)
+      {
+         table_name = table_name.substr(0,idx);
+      }
+   }
+   return table_name;
+}
 
 occi_datasource::occi_datasource(parameters const& params)
    : datasource (params),
@@ -80,8 +104,9 @@ occi_datasource::occi_datasource(parameters const& params)
    boost::optional<int> max_size = params_.get<int>("max_size",10);
 
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
+   use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
 
-   boost::optional<std::string> ext  = params_.get<std::string>("extent");
+   boost::optional<std::string> ext = params_.get<std::string>("extent");
    if (ext)
    {
       boost::char_separator<char> sep(",");
@@ -134,13 +159,15 @@ occi_datasource::occi_datasource(parameters const& params)
        throw datasource_exception(ex.getMessage());
    }
 
+   std::string table_name = table_from_sql(table_);
+
    // get SRID from geometry metadata
    {
        occi_connection_ptr conn (pool_);
 
        std::ostringstream s;
        s << "select srid from " << SDO_GEOMETRY_METADATA_TABLE << " where";
-       s << " lower(table_name) = lower('" << table_ << "') and";
+       s << " lower(table_name) = lower('" << table_name << "') and";
        s << " lower(column_name) = lower('" << geometry_field_ << "')";
 
        try
@@ -157,73 +184,90 @@ occi_datasource::occi_datasource(parameters const& params)
        }
    }
 
-   // get table metadata
-   occi_connection_ptr conn (pool_);
-   MetaData metadata = (*conn)->getMetaData(table_.c_str(), MetaData::PTYPE_TABLE);
-   vector<MetaData> listOfColumns = metadata.getVector(MetaData::ATTR_LIST_COLUMNS);
-
-   for (unsigned int i=0;i<listOfColumns.size();++i)
+   // get columns description
    {
-       MetaData columnObj = listOfColumns[i];
+       std::string::size_type idx = table_.find(table_name);
+       std::ostringstream s;
+       s << "select * from (" << table_.substr(0,idx + table_name.length()) << ") where rownum < 1";
 
-       std::string fld_name = columnObj.getString(MetaData::ATTR_NAME);
-       int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
+       occi_connection_ptr conn (pool_);
+
+       try
+       {
+           ResultSet* rs = conn.execute_query (s.str());
+           if (rs)
+           {
+               std::vector<MetaData> listOfColumns = rs->getColumnListMetaData();
+
+               for (unsigned int i=0;i<listOfColumns.size();++i)
+               {
+                   MetaData columnObj = listOfColumns[i];
+
+                   std::string fld_name = columnObj.getString(MetaData::ATTR_NAME);
+                   int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
 
 #if 0
-       int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
-       if (type_code == OCCI_TYPECODE_OBJECT)
-       {
-           desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
-           continue;
-       }
+                   int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
+                   if (type_code == OCCI_TYPECODE_OBJECT)
+                   {
+                       desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
+                       continue;
+                   }
 #endif
 
-       switch (type_oid)
+                   switch (type_oid)
+                   {
+                   case oracle::occi::OCCIINT:
+                   case oracle::occi::OCCIUNSIGNED_INT:
+                      desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+                      break;
+                   case oracle::occi::OCCIFLOAT:
+                   case oracle::occi::OCCIBFLOAT:
+                   case oracle::occi::OCCIDOUBLE:
+                   case oracle::occi::OCCIBDOUBLE:
+                   case oracle::occi::OCCINUMBER:
+                   case oracle::occi::OCCI_SQLT_NUM:
+                      desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                      break;
+                   case oracle::occi::OCCICHAR:
+                   case oracle::occi::OCCISTRING:
+                   case oracle::occi::OCCI_SQLT_AFC:
+                   case oracle::occi::OCCI_SQLT_AVC:
+                   case oracle::occi::OCCI_SQLT_CHR:
+                   case oracle::occi::OCCI_SQLT_LVC:
+                   case oracle::occi::OCCI_SQLT_STR:
+                   case oracle::occi::OCCI_SQLT_VCS:
+                   case oracle::occi::OCCI_SQLT_VNU:
+                   case oracle::occi::OCCI_SQLT_VBI:
+                   case oracle::occi::OCCI_SQLT_VST:
+                   case oracle::occi::OCCI_SQLT_RDD:
+                      desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                      break;
+                   case oracle::occi::OCCIDATE:
+                   case oracle::occi::OCCITIMESTAMP:
+                   case oracle::occi::OCCI_SQLT_DAT:
+                   case oracle::occi::OCCI_SQLT_TIMESTAMP:
+                   case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
+                   case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
+                   case oracle::occi::OCCIPOBJECT:
+#ifdef MAPNIK_DEBUG
+                      clog << "unsupported type_oid="<<type_oid<<endl;
+#endif
+                      break;
+                   default: // shouldn't get here
+#ifdef MAPNIK_DEBUG
+                      clog << "unknown type_oid="<<type_oid<<endl;
+#endif
+                      break;
+                   }	  
+               }
+           }
+       }
+       catch (SQLException &ex)
        {
-       case oracle::occi::OCCIINT:
-       case oracle::occi::OCCIUNSIGNED_INT:
-          desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
-          break;
-       case oracle::occi::OCCIFLOAT:
-       case oracle::occi::OCCIBFLOAT:
-       case oracle::occi::OCCIDOUBLE:
-       case oracle::occi::OCCIBDOUBLE:
-       case oracle::occi::OCCINUMBER:
-       case oracle::occi::OCCI_SQLT_NUM:
-          desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-          break;
-       case oracle::occi::OCCICHAR:
-       case oracle::occi::OCCISTRING:
-       case oracle::occi::OCCI_SQLT_AFC:
-       case oracle::occi::OCCI_SQLT_AVC:
-       case oracle::occi::OCCI_SQLT_CHR:
-       case oracle::occi::OCCI_SQLT_LVC:
-       case oracle::occi::OCCI_SQLT_STR:
-       case oracle::occi::OCCI_SQLT_VCS:
-       case oracle::occi::OCCI_SQLT_VNU:
-       case oracle::occi::OCCI_SQLT_VBI:
-       case oracle::occi::OCCI_SQLT_VST:
-       case oracle::occi::OCCI_SQLT_RDD:
-          desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-          break;
-       case oracle::occi::OCCIDATE:
-       case oracle::occi::OCCITIMESTAMP:
-       case oracle::occi::OCCI_SQLT_DAT:
-       case oracle::occi::OCCI_SQLT_TIMESTAMP:
-       case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
-       case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
-       case oracle::occi::OCCIPOBJECT:
-#ifdef MAPNIK_DEBUG
-          clog << "unsupported type_oid="<<type_oid<<endl;
-#endif
-          break;
-       default: // shouldn't get here
-#ifdef MAPNIK_DEBUG
-          clog << "unknown type_oid="<<type_oid<<endl;
-#endif
-          break;
-       }	  
-   }
+           throw datasource_exception(ex.getMessage());
+       }
+   }        
 }
 
 occi_datasource::~occi_datasource()
@@ -285,14 +329,15 @@ Envelope<double> occi_datasource::envelope() const
             throw datasource_exception(ex.getMessage());
         }
     }
-    else 
+    else if (use_spatial_index_)
     {
+        std::string table_name = table_from_sql(table_);
 
         {
             std::ostringstream s;
             s << "select dim.sdo_lb as lx, dim.sdo_ub as ux from ";
             s << SDO_GEOMETRY_METADATA_TABLE << " m, table(m.diminfo) dim ";
-            s << " where lower(m.table_name) = '" << table_ << "' and dim.sdo_dimname = 'X'";
+            s << " where lower(m.table_name) = '" << table_name << "' and dim.sdo_dimname = 'X'";
         
             try
             {
@@ -320,7 +365,7 @@ Envelope<double> occi_datasource::envelope() const
             std::ostringstream s;
             s << "select dim.sdo_lb as ly, dim.sdo_ub as uy from ";
             s << SDO_GEOMETRY_METADATA_TABLE << " m, table(m.diminfo) dim ";
-            s << " where lower(m.table_name) = '" << table_ << "' and dim.sdo_dimname = 'Y'";
+            s << " where lower(m.table_name) = '" << table_name << "' and dim.sdo_dimname = 'Y'";
         
             try
             {
@@ -372,13 +417,34 @@ featureset_ptr occi_datasource::features(query const& q) const
            s <<",\""<<*pos<<"\"";
            ++pos;
         }	 
-        s << " from " << table_ << " where sdo_filter(" << geometry_field_ << ",";
-        s << " mdsys.sdo_geometry(" << SDO_GTYPE_2DPOLYGON << "," << srid_ << ",NULL,";
-        s << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POLYGON << "," << SDO_INTERPRETATION_RECTANGLE << "),";
-        s << " mdsys.sdo_ordinate_array(";
-        s << std::setprecision(16);
-        s << box.minx() << "," << box.miny() << ", ";
-        s << box.maxx() << "," << box.maxy() << ")), 'querytype=WINDOW') = 'TRUE'";      
+
+        s << " from ";
+
+        std::string query (table_); 
+        
+        if (use_spatial_index_)
+        {
+           std::string table_name = table_from_sql(query);
+           std::ostringstream spatial_sql;
+           spatial_sql << std::setprecision(16);
+           spatial_sql << " where sdo_filter(" << geometry_field_ << ",";
+           spatial_sql << " mdsys.sdo_geometry(" << SDO_GTYPE_2DPOLYGON << "," << srid_ << ",NULL,";
+           spatial_sql << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POLYGON << "," << SDO_INTERPRETATION_RECTANGLE << "),";
+           spatial_sql << " mdsys.sdo_ordinate_array(";
+           spatial_sql << box.minx() << "," << box.miny() << ", ";
+           spatial_sql << box.maxx() << "," << box.maxy() << ")), 'querytype=WINDOW') = 'TRUE'";      
+
+           if (boost::algorithm::ifind_first(query,"where"))
+           {
+              boost::algorithm::ireplace_first(query, "where", spatial_sql.str() + " and");
+           }
+           else if (boost::algorithm::find_first(query,table_name))  
+           {
+              boost::algorithm::ireplace_first(query, table_name , table_name + " " + spatial_sql.str());
+           }
+        }
+        
+        s << query;
 
 #ifdef MAPNIK_DEBUG
         clog << s.str() << endl;
@@ -396,7 +462,6 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     {
         std::ostringstream s;
         s << "select " << geometry_field_ << " as geom";
-
         std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
         unsigned size=0;
@@ -406,18 +471,30 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
            ++itr;
            ++size;
         }
-        s << " from " << table_<<" where "<<geometryColumn_<<" && setSRID('BOX3D(";
-        s << std::setprecision(16);
-        s << pt.x << " " << pt.y << ",";
-        s << pt.x << " " << pt.y << ")'::box3d,"<<srid_<<")";
 
+        s << " from ";
 
-        s << " from " << table_ << " where sdo_filter(" << geometry_field_ << ",";
-        s << " mdsys.sdo_geometry(" << SDO_GTYPE_2DPOINT << "," << srid_ << ",NULL,";
-        s << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POINT << "," << SDO_INTERPRETATION_POINT << "),";
-        s << " mdsys.sdo_ordinate_array(";
-        s << std::setprecision(16);
-        s << pt.x << "," << pt.y << ")), 'querytype=WINDOW') = 'TRUE'";      
+        std::string query (table_); 
+        std::string table_name = table_from_sql(query);
+
+        std::ostringstream spatial_sql;
+        spatial_sql << std::setprecision(16);
+        spatial_sql << " where sdo_filter(" << geometry_field_ << ",";
+        spatial_sql << " mdsys.sdo_geometry(" << SDO_GTYPE_2DPOINT << "," << srid_ << ",NULL,";
+        spatial_sql << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POINT << "," << SDO_INTERPRETATION_POINT << "),";
+        spatial_sql << " mdsys.sdo_ordinate_array(";
+        spatial_sql << pt.x << "," << pt.y << ")), 'querytype=WINDOW') = 'TRUE'";      
+
+        if (boost::algorithm::ifind_first(query,"where"))
+        {
+           boost::algorithm::ireplace_first(query, "where", spatial_sql.str() + " and");
+        }
+        else if (boost::algorithm::find_first(query,table_name))  
+        {
+           boost::algorithm::ireplace_first(query, table_name , table_name + " " + spatial_sql.str());
+        }
+        
+        s << query;
 
 #ifdef MAPNIK_DEBUG
         clog << s.str() << endl;
