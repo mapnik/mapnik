@@ -36,9 +36,9 @@ def color_print(color,text,newline=True):
 def call(cmd):
     stdin, stderr = Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE).communicate()
     if not stderr:
-      return stdin.strip()
+        return stdin.strip()
     else:
-      color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org')
+        color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org')
 
 # Helper function for uniquely appending paths to a SCons path listing.
 def uniq_add(env, key, val):
@@ -69,95 +69,101 @@ if os.path.exists(SCONS_LOCAL_CONFIG):
     optfile.close()
 
 # Core plugin build configuration
-# opts.Add still hardcoded however...
+# opts.AddVariables still hardcoded however...
 PLUGINS = { # plugins with external dependencies
-            'postgis': {'default':True,'path':'PGSQL','inc':'libpq-fe.h','lib':'pq','cxx':False},
-            'gdal':    {'default':False,'path':'GDAL','inc':'gdal_priv.h','lib':'gdal','cxx':True},
-            'ogr':     {'default':False,'path':'OGR','inc':'ogrsf_frmts.h','lib':'gdal','cxx':True},
-            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','cxx':True},
-            'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','cxx':False},
+            'postgis': {'default':True,'path':'PGSQL','inc':'libpq-fe.h','lib':'pq','lang':'C'},
+            'gdal':    {'default':False,'path':'GDAL','inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
+            'ogr':     {'default':False,'path':'OGR','inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
+            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
+            'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             
             # plugins without external dependencies requiring CheckLibWithHeader...
             # note: osm plugin does depend on libxml2
-            'osm':     {'default':False,'path':None,'inc':None,'lib':None,'cxx':True},
-            'shape':   {'default':True,'path':None,'inc':None,'lib':None,'cxx':True},
-            'raster':  {'default':True,'path':None,'inc':None,'lib':None,'cxx':True},
+            'osm':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             }
 
 DEFAULT_PLUGINS = []
 for k,v in PLUGINS.items():
    if v['default']:
-     DEFAULT_PLUGINS.append(k)
+       DEFAULT_PLUGINS.append(k)
 
 # All of the following options may be modified at the command-line, for example:
 # `python scons/scons.py PREFIX=/opt`
 opts = Variables()
-        
-# Compiler options
-opts.Add('CXX', 'The C++ compiler to use (defaults to g++).', 'g++')
-opts.Add(EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3']))
-# Note: setting DEBUG=True will override any custom OPTIMIZATION level
-opts.Add(BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'))
-opts.Add(ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()))
 
-# SCons build behavior options
-opts.Add('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG)
-opts.Add(BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'))
-opts.Add(BoolVariable('SCONS_CACHE', 'Use SCons dependency caching to speed build process', 'False'))
-opts.Add(BoolVariable('USE_USER_ENV', 'Allow the SCons build environment to inherit from the current user environment', 'True'))
+def OptionalPath(key, val, env):
+    if val:
+        PathOption.PathIsDir(key, val, env)
 
-# Install Variables
-opts.Add('PREFIX', 'The install path "prefix"', '/usr/local')
-opts.Add('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)','')
-opts.Add('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/')
-
-# Boost variables
-opts.Add(PathVariable('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include', PathVariable.PathAccept))
-opts.Add(PathVariable('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False)
-opts.Add('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False)
-opts.Add('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False)
-
-# Variables for required dependencies
-opts.Add(('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'))
-opts.Add(('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'))
-opts.Add(PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept))
-opts.Add(PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add(PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept))
-opts.Add(PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add(PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept))
-opts.Add(PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add(PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include', PathVariable.PathAccept))
-opts.Add(PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add(PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include', PathVariable.PathAccept))
-opts.Add(PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-
-# Variables affecting rendering back-ends
-opts.Add(BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'))
-
-# Variables for optional dependencies
-# Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
-# Therefore, we use a single boolean for whether to attempt to build cairo support.
-opts.Add(BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'))
-opts.Add(PathVariable('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include/postgresql', PathVariable.PathAccept))
-opts.Add(PathVariable('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add(PathVariable('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/local/include', PathVariable.PathAccept))
-opts.Add(PathVariable('GDAL_LIBS', 'Search path for GDAL library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add(PathVariable('OGR_INCLUDES', 'Search path for OGR include files', '/usr/local/include', PathVariable.PathAccept))
-opts.Add(PathVariable('OGR_LIBS', 'Search path for OGR library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add(PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept))
-opts.Add(PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept))
-opts.Add(PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept))
-opts.Add(PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept))
-
-# Other variables
-opts.Add('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)','')
-opts.Add('LIB_DIR_NAME','Name to use for lib folder where fonts and plugins are installed', '/mapnik/', PathVariable.PathAccept)
-opts.Add(PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable))
-opts.Add(BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OSX', 'True'))
-opts.Add(ListVariable('BINDINGS','Language bindings to build','all',['python']))
-opts.Add(EnumVariable('THREADING','Set threading support','multi', ['multi','single']))
-opts.Add(EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spirit','libxml2']))
+opts.AddVariables(
+    # Compiler options
+    ('CXX', 'The C++ compiler to use (defaults to g++).', 'g++'),
+    EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3']),
+    # Note: setting DEBUG=True will override any custom OPTIMIZATION level
+    BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
+    ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
+    
+    # SCons build behavior options
+    ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
+    BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
+    BoolVariable('SCONS_CACHE', 'Use SCons dependency caching to speed build process', 'False'),
+    BoolVariable('USE_USER_ENV', 'Allow the SCons build environment to inherit from the current user environment', 'True'),
+    
+    # Install Variables
+    ('PREFIX', 'The install path "prefix"', '/usr/local'),
+    ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
+    ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
+    
+    # Boost variables
+    PathVariable('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    ('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False),
+    ('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False),
+    ('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False),
+    
+    # Variables for required dependencies
+    ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
+    ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
+    PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include', PathVariable.PathAccept),
+    PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    
+    # Variables affecting rendering back-ends
+    BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
+    
+    # Variables for optional dependencies
+    # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
+    # Therefore, we use a single boolean for whether to attempt to build cairo support.
+    BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'),
+    PathVariable('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include/postgresql', PathVariable.PathAccept),
+    PathVariable('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/local/include', PathVariable.PathAccept),
+    PathVariable('GDAL_LIBS', 'Search path for GDAL library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('OGR_INCLUDES', 'Search path for OGR include files', '/usr/local/include', PathVariable.PathAccept),
+    PathVariable('OGR_LIBS', 'Search path for OGR library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept),
+    PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept),
+    PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    
+    # Other variables
+    ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
+    ('LIB_DIR_NAME','Name to use for lib folder where fonts and plugins are installed','/mapnik/'),
+    PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
+    BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OSX', 'True'),
+    ListVariable('BINDINGS','Language bindings to build','all',['python']),
+    EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
+    EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spirit','libxml2']),
+    )
 
 # Construct the SCons build environment as a union of the users environment and the `opts`
 
@@ -217,9 +223,9 @@ env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
 env['PLATFORM'] = platform.uname()[0]
 
 if env['DEBUG']:
-  mode = 'debug mode'
+    mode = 'debug mode'
 else:
-  mode = 'release mode'
+    mode = 'release mode'
 
 color_print (4,"Building on %s in *%s*..." % (env['PLATFORM'],mode))
 Help(opts.GenerateHelpText(env))
@@ -245,10 +251,10 @@ if env['PLATFORM'] == 'FreeBSD':
     env.Append(LIBS = 'pthread')
 
 def CheckPKGConfig(context, version):
-   context.Message( 'Checking for pkg-config... ' )
-   ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
-   context.Result( ret )
-   return ret
+    context.Message( 'Checking for pkg-config... ' )
+    ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
+    context.Result( ret )
+    return ret
 
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
@@ -392,10 +398,10 @@ C_LIBSHEADERS = [
 ]
 
 if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
-        env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
-        env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
+    env.Append(CXXFLAGS = '-DHAVE_CAIRO')
 else:
-   env['SKIPPED_DEPS'].extend(['cairo','cairomm','pycairo'])
+    env['SKIPPED_DEPS'].extend(['cairo','cairomm','pycairo'])
         
 CXX_LIBSHEADERS = [
     ['icuuc','unicode/unistr.h',True],
@@ -489,11 +495,11 @@ for count, libinfo in enumerate(BOOST_LIBSHEADERS):
     if thread_flag:
         if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
             if libinfo[2]:
-              color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
-              env['MISSING_DEPS'].append('boost ' + libinfo[0])
+                color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
+                env['MISSING_DEPS'].append('boost ' + libinfo[0])
             else:
-              color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
-              env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
+                color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
+                env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
               
     elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :
         color_print(1,'Could not find header or shared library for boost %s' % libinfo[0])
@@ -510,11 +516,7 @@ for plugin in requested_plugins:
         # to the beginning of the path list even if they already exist
         env.PrependUnique(CPPPATH = env['%s_INCLUDES' % details['path']],delete_existing=True)
         env.PrependUnique(LIBPATH = env['%s_LIBS' % details['path']],delete_existing=True)
-        if details['cxx']:
-            lang = 'C++'
-        else:
-            lang = 'C'
-        if not conf.CheckLibWithHeader(details['lib'], details['inc'], lang):
+        if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
             env.Replace(**backup)
             env['SKIPPED_DEPS'].append(details['lib'])
 
@@ -582,11 +584,11 @@ else:
     color_print(4,"All Required dependencies found!")
     if env['USE_CONFIG']:
         if os.path.exists(SCONS_LOCAL_CONFIG):
-          action = 'Overwriting and re-saving'
-          os.unlink(SCONS_LOCAL_CONFIG)    
+            action = 'Overwriting and re-saving'
+            os.unlink(SCONS_LOCAL_CONFIG)    
         # Serialize all user customizations into local config file
         else:
-          action = 'Saving new'
+            action = 'Saving new'
         color_print(4,"%s file '%s', to hold successful path variables from commandline and python config file(s)..." % (action,SCONS_LOCAL_CONFIG))
         opts.Save(SCONS_LOCAL_CONFIG,env)
     else:
