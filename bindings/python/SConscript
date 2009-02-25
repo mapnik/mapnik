@@ -45,7 +45,10 @@ if env['PLATFORM'] == 'Darwin':
         libraries.append('boost_thread%s' % env['BOOST_APPEND'])
     if '-DHAVE_PYCAIRO' in env['CXXFLAGS']:
         libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
-    linkflags = '-F/ -framework Python'
+    if env['FRAMEWORK_PYTHON']:
+        linkflags = '-F/ -framework Python'
+    else:
+        linkflags = '-lpython%s' % env['PYTHON_VERSION']
 
 headers = [env['PYTHON_INCLUDES']] + env['CPPPATH']
 

@@ -181,6 +181,7 @@ opts.Add(PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/u
 opts.Add('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)','')
 opts.Add('LIB_DIR_NAME','Name to use for lib folder where fonts and plugins are installed', '/mapnik/', PathVariable.PathAccept)
 opts.Add(PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable))
+opts.Add(BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OSX', 'True'))
 opts.Add(ListVariable('BINDINGS','Language bindings to build','all',['python']))
 opts.Add(EnumVariable('THREADING','Set threading support','multi', ['multi','single']))
 opts.Add(EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spirit','libxml2']))
