@@ -492,18 +492,13 @@ else:
     env['BOOST_APPEND'] = ''
 
 for count, libinfo in enumerate(BOOST_LIBSHEADERS):
-    if thread_flag:
-        if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
-            if libinfo[2]:
-                color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
-                env['MISSING_DEPS'].append('boost ' + libinfo[0])
-            else:
-                color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
-                env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
-              
-    elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :
-        color_print(1,'Could not find header or shared library for boost %s' % libinfo[0])
-        env['MISSING_DEPS'].append('boost ' + libinfo[0])
+    if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
+        if libinfo[2]:
+            color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
+            env['MISSING_DEPS'].append('boost ' + libinfo[0])
+        else:
+            color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
+            env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
 
 requested_plugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
