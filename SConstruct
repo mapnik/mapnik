@@ -44,33 +44,6 @@ def call(cmd):
 def uniq_add(env, key, val):
     if not val in env[key]: env[key].append(val)
 
-# Helper function for removing paths, if they exist, from the SCons path listing.
-def remove_path(env, key, val):
-    if val in env[key]: env[key].remove(val)
-
-        
-# Helper function for removing paths for a plugin lib
-# We don't currently have control over whether the plugin
-# path we remove is also shared by another plugin or 
-# required lib/header, so this may need improvement
-def remove_plugin_path(plugin_lib):
-    plugin = {}
-    # find the plugin details by 'lib' name
-    for k,v in PLUGINS.items():
-        if v['lib'] == plugin_lib and plugin_lib == 'gdal':
-            if v['path'] == 'OGR':
-                plugin = PLUGINS['ogr']
-            elif v['path'] == 'GDAL':
-                plugin = PLUGINS['gdal']
-        elif v['lib'] == plugin_lib:
-            plugin = PLUGINS[k]
-    # if the plugin details are found remove its paths
-    if plugin:
-        lib_path = '%s_LIBS' % plugin['path']
-        inc_path = '%s_INCLUDES' % plugin['path']
-        remove_path(env, 'CPPPATH', env[inc_path])
-        remove_path(env, 'LIBPATH', env[lib_path])
-
 # Helper function for building up paths to add for a lib (plugin or required)
 def add_paths(prereq):
     inc_path = env['%s_INCLUDES' % prereq]
@@ -119,7 +92,7 @@ for k,v in PLUGINS.items():
 # All of the following options may be modified at the command-line, for example:
 # `python scons/scons.py PREFIX=/opt`
 opts = Variables()
-
+        
 # Compiler options
 opts.Add('CXX', 'The C++ compiler to use (defaults to g++).', 'g++')
 opts.Add(EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3']))
@@ -388,26 +361,10 @@ if SUNCC:
     if env['THREADING'] == 'multi':
         env['CXXFLAGS'] = ['-mt']
 
-# Decide which libagg to use
-if env['INTERNAL_LIBAGG']:
-    env.Prepend(CPPPATH = '#agg/include')
-    env.Prepend(LIBPATH = '#agg')
-else:
-    env.ParseConfig('pkg-config --libs --cflags libagg')
-         
 # Adding the required prerequisite library directories to the include path for
 # compiling and the library path for linking, respectively.
 for required in ('BOOST', 'PNG', 'JPEG', 'TIFF','PROJ'):
     add_paths(required)
-
-requested_plugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
-
-# Adding the required prerequisite library directories for the plugins...
-for plugin in requested_plugins:
-    extra_paths = PLUGINS[plugin]['path']
-    if extra_paths:
-      # Note, these are now removed below if the CheckLibWithHeader fails...
-      add_paths(extra_paths)
 
 try:
     env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
@@ -445,17 +402,6 @@ CXX_LIBSHEADERS = [
     ['icudata','unicode/utypes.h' , True],
 ]
 
-# append plugin details to the 'LIBSHEADERS' lists
-for plugin in requested_plugins:
-    details = PLUGINS[plugin]
-    if details['lib'] and details['inc']:
-      check = [details['lib'],details['inc'],False]
-      if details['cxx']:
-        CXX_LIBSHEADERS.append(check)
-      else:
-        C_LIBSHEADERS.append(check)
-
-
 # get boost version from boost headers rather than previous approach
 # of fetching from the user provided INCLUDE path
 boost_system_required = False
@@ -485,9 +431,6 @@ else:
 for libinfo in C_LIBSHEADERS:
     if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C'):
     
-        # if we cannot build a plugin remove its paths
-        remove_plugin_path(libinfo[0])
-
         if libinfo[0] == 'pq':
             libinfo[0] = 'pq (postgres/postgis)'
         if libinfo[2]:
@@ -499,10 +442,7 @@ for libinfo in C_LIBSHEADERS:
 
 for libinfo in CXX_LIBSHEADERS:
     if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], 'C++'):
-        
-        # if we cannot build a plugin remove its paths
-        remove_plugin_path(libinfo[0])
-            
+                    
         if libinfo[0] == 'gdal' and libinfo[1] == 'ogrsf_frmts.h':
             libinfo[0] = 'ogr'
         if libinfo[2]:
@@ -558,6 +498,39 @@ for count, libinfo in enumerate(BOOST_LIBSHEADERS):
     elif not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0], env['BOOST_APPEND']), libinfo[1], 'C++') :
         color_print(1,'Could not find header or shared library for boost %s' % libinfo[0])
         env['MISSING_DEPS'].append('boost ' + libinfo[0])
+
+requested_plugins = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
+
+color_print(4,'Checking for requested plugins dependencies...')
+for plugin in requested_plugins:
+    details = PLUGINS[plugin]
+    if details['path'] and details['lib'] and details['inc']:
+        backup = env.Clone().Dictionary()
+        # Note, the 'delete_existing' keyword makes sure that these paths are prepended
+        # to the beginning of the path list even if they already exist
+        env.PrependUnique(CPPPATH = env['%s_INCLUDES' % details['path']],delete_existing=True)
+        env.PrependUnique(LIBPATH = env['%s_LIBS' % details['path']],delete_existing=True)
+        if details['cxx']:
+            lang = 'C++'
+        else:
+            lang = 'C'
+        if not conf.CheckLibWithHeader(details['lib'], details['inc'], lang):
+            env.Replace(**backup)
+            env['SKIPPED_DEPS'].append(details['lib'])
+
+# re-append the local paths for mapnik sources to the beginning of the list
+# to make sure they come before any plugins that were 'prepended'
+env.PrependUnique(CPPPATH = ['#include', '#'],delete_existing=True)
+env.PrependUnique(LIBPATH = '#src',delete_existing=True)
+
+# Decide which libagg to use
+# if we are using internal agg, then prepend to make sure
+# we link locally
+if env['INTERNAL_LIBAGG']:
+    env.Prepend(CPPPATH = '#agg/include')
+    env.Prepend(LIBPATH = '#agg')
+else:
+    env.ParseConfig('pkg-config --libs --cflags libagg')
 
 if 'python' in env['BINDINGS']:
     # checklibwithheader does not work for boost_python since we can't feed it
