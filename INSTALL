@@ -11,7 +11,7 @@ Install needed dependencies::
   $ sudo apt-get install libboost* libicu* libfreetype* proj # see below for full list
   $ cd ~/src/mapnik
 
-Build Mapnik source code::
+Configure the build setup::
 
   $ python scons/scons.py configure
 
