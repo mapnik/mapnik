@@ -13,6 +13,10 @@ Install needed dependencies::
 
 Build Mapnik source code::
 
+  $ python scons/scons.py configure
+
+Build Mapnik source code::
+
   $ python scons/scons.py
 
 Install Mapnik library and python bindings::
@@ -31,7 +35,9 @@ If you get this error ensure that Mapnik in is your PYTHONPATH.
 
 Otherwise your setup is ready. You can now visit http://trac.mapnik.org/wiki/GettingStarted for a basic tutorial.
 
-For troubleshooting other errors see: http://trac.mapnik.org/wiki/InstallationTroubleshooting.
+For help with using SCons see: trac.mapnik.org/wiki/UsingScons
+
+For troubleshooting errors see: http://trac.mapnik.org/wiki/InstallationTroubleshooting.
 
 
 Prerequisites
@@ -69,6 +75,7 @@ Second, here are the optional software dependencies:
     - pycairo - Python bindings for cairo
 - libpq - PostgreSQL libraries (For PostGIS plugin support)
 - libgdal - GDAL/OGR input (For gdal and ogr plugin support)
+- libsqlite3 - SQLite input (needs RTree support) (sqlite plugin support)
 
 On Linux and Mac OS, package management systems (such as apt for debian or macports for darwin) can be used to install all required and optional dependencies, but source installs may be preferrable.
 
@@ -82,7 +89,7 @@ Also, a minimum of 256MB of RAM is recommended for the build process.
 Building
 --------
 
-Once you've installed the required software packages, the simplest way to build mapnik is to run SCons (The software builder) without any options::
+Once you've installed the required software packages, the simplest way to build Mapnik is to run SCons (The software builder) without any options::
 
   $ cd ~/src/mapnik
   $ python scons/scons.py
@@ -99,11 +106,11 @@ Note that the python used to run SCons does NOT have to be the same as the one u
 
 For example, if you compiled your own set of Boost libraries, you might use::
 
-  $ python scons/scons.py BOOST_TOOLKIT=gcc43 BOOST_INCLUDES=/usr/local/include/boost-1_35 BOOST_LIBS=/usr/local/lib
+  $ python scons/scons.py configure BOOST_TOOLKIT=gcc43 BOOST_INCLUDES=/usr/local/include/boost-1_35 BOOST_LIBS=/usr/local/lib
 
-Or if you installed Postgres and Gdal from source and you'd like to build mapnik in Debug mode you might use::
+Or if you installed Postgres and Gdal from source and you'd like to build Mapnik in Debug mode you might use::
 
-  $ python scons/scons.py DEBUG=True PGSQL_INCLUDES=/usr/local/pgsql/include PGSQL_LIBS=/usr/local/pgsql/lib GDAL_INCLUDES=/usr/local/include GDAL_LIBS=/usr/local/lib
+  $ python scons/scons.py configure DEBUG=True PGSQL_INCLUDES=/usr/local/pgsql/include PGSQL_LIBS=/usr/local/pgsql/lib GDAL_INCLUDES=/usr/local/include GDAL_LIBS=/usr/local/lib
 
 
 Installation
