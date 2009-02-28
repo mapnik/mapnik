@@ -21,6 +21,7 @@
 
 import os
 import sys
+import re
 import platform
 from glob import glob
 from subprocess import Popen, PIPE
@@ -254,6 +255,20 @@ def parse_config(context, config, checks='--libs --cflags'):
     context.Result( ret )
     return ret
 
+def get_pkg_lib(context, config, lib):
+    libpattern = r'-l([^\s]*)'
+    libname = None
+    env = context.env
+    context.Message( 'Checking for name of %s library... ' % lib)
+    cmd = '%s --libs' % env[config]
+    ret = context.TryAction(cmd)[0]
+    if ret:
+        libnames = re.findall(libpattern,call(cmd))
+        if libnames:
+          libname = libnames[0]
+    context.Result( libname )
+    return ret
+
 def parse_pg_config(context, config):
     env = context.env
     tool = config.lower()
@@ -357,6 +372,7 @@ conf_tests = { 'CheckPKGConfig' : CheckPKGConfig,
                'parse_config' : parse_config,
                'parse_pg_config' : parse_pg_config,
                'ogr_enabled':ogr_enabled,
+               'get_pkg_lib':get_pkg_lib,
                }
 
 
@@ -567,11 +583,9 @@ if not env.GetOption('clean'):
             if plugin == 'gdal':
                 if conf.parse_config('GDAL_CONFIG',checks='--libs'):
                     conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                    lib_result = call('gdal-config --libs')
-                    if lib_result:
-                        details['lib'] = lib_result.split(' ')[1].lstrip('-l')
-                    else:
-                        color_print(1,'Problem encountered parsing gdal lib name')
+                    libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
+                    if libname:
+                        details['lib'] = libname
             elif plugin == 'postgis':
                 conf.parse_pg_config('PG_CONFIG')
             elif plugin == 'ogr':
@@ -579,12 +593,10 @@ if not env.GetOption('clean'):
                     if not 'gdal' in env['REQUESTED_PLUGINS']:
                         conf.parse_config('GDAL_CONFIG',checks='--libs')
                         conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                    lib_result = call('gdal-config --libs')
-                    if lib_result:
-                        details['lib'] = lib_result.split(' ')[1].lstrip('-l')
-                    else:
-                        color_print(1,'Problem encountered parsing gdal lib name')
-
+                    libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
+                    if libname:
+                        details['lib'] = libname
+                    
             elif details['path'] and details['lib'] and details['inc']:
                 backup = env.Clone().Dictionary()
                 # Note, the 'delete_existing' keyword makes sure that these paths are prepended
