@@ -31,7 +31,7 @@ gdal_src = Split(
 	"""
         )
 
-libraries = ['gdal' ]
+libraries = [env['PLUGINS']['gdal']['lib']]
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('icuuc')

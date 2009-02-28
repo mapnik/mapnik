@@ -1,6 +1,6 @@
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+# Copyright (C) 2009 Artem Pavlenko, Jean-Francois Doyon, Dane Springmeyer
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -63,8 +63,8 @@ SCONF_TEMP_DIR = '.sconf_temp'
 # opts.AddVariables still hardcoded however...
 PLUGINS = { # plugins with external dependencies
             'postgis': {'default':True,'path':'PGSQL','inc':'libpq-fe.h','lib':'pq','lang':'C'},
-            'gdal':    {'default':False,'path':'GDAL','inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
-            'ogr':     {'default':False,'path':'OGR','inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
+            'gdal':    {'default':False,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
+            'ogr':     {'default':False,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
             'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
             'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             
@@ -134,12 +134,8 @@ opts.AddVariables(
     # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
     # Therefore, we use a single boolean for whether to attempt to build cairo support.
     BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'),
-    PathVariable('PGSQL_INCLUDES', 'Search path for PostgreSQL include files', '/usr/include/postgresql', PathVariable.PathAccept),
-    PathVariable('PGSQL_LIBS', 'Search path for PostgreSQL library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
-    PathVariable('GDAL_INCLUDES', 'Search path for GDAL include files', '/usr/local/include', PathVariable.PathAccept),
-    PathVariable('GDAL_LIBS', 'Search path for GDAL library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
-    PathVariable('OGR_INCLUDES', 'Search path for OGR include files', '/usr/local/include', PathVariable.PathAccept),
-    PathVariable('OGR_LIBS', 'Search path for OGR library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    ('GDAL_CONFIG', 'The path to the gdal-config executable for finding gdal and ogr details.', 'gdal-config'),
+    ('PG_CONFIG', 'The path to the pg_config executable.', 'pg_config'),
     PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept),
     PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept),
@@ -171,6 +167,7 @@ pickle_store = [# Scons internal variables
         'LIBS',
         'LINKFLAGS',
         # Mapnik's SConstruct build variables
+        'PLUGINS',
         'ABI_VERSION',
         'PLATFORM',
         'BOOST_ABI',
@@ -207,7 +204,6 @@ if not force_configure:
             pickled_environment = open(SCONS_CONFIGURE_CACHE, 'r')
             pickled_values = pickle.load(pickled_environment)
             for key, value in pickled_values.items():
-                #if key == 'BINDINGS': import pdb;pdb.set_trace()
                 env[key] = value
             preconfigured = True
             if ('-h' not in command_line_args) and ('--help' not in command_line_args):
@@ -242,6 +238,43 @@ def CheckPKGConfig(context, version):
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
     ret = context.TryAction('pkg-config --exists \'%s\'' % name)[0]
+    context.Result( ret )
+    return ret
+
+def parse_config(context, config, checks='--libs --cflags'):
+    env = context.env
+    tool = config.lower().replace('_','-')
+    context.Message( 'Checking for %s... ' % tool)
+    cmd = '%s %s' % (env[config],checks)
+    ret = context.TryAction(cmd)[0]
+    if ret:
+        env.ParseConfig(cmd)
+    else:
+        env['MISSING_DEPS'].append(tool)
+    context.Result( ret )
+    return ret
+
+def parse_pg_config(context, config):
+    env = context.env
+    tool = config.lower()
+    context.Message( 'Checking for %s... ' % tool)
+    ret = context.TryAction(env[config])[0]
+    if ret:
+        lib_path = call('%s --libdir' % env[config])
+        inc_path = call('%s --includedir' % env[config])
+        env.AppendUnique(CPPPATH = inc_path)
+        env.AppendUnique(LIBPATH = lib_path)
+    else:
+        env['MISSING_DEPS'].append(tool)
+    context.Result( ret )
+    return ret
+
+def ogr_enabled(context):
+    env = context.env
+    context.Message( 'Checking if gdal is ogr enabled... ')
+    ret = context.TryAction('gdal-config --ogr-enabled')[0]
+    if not ret:
+        env['SKIPPED_DEPS'].append('ogr')
     context.Result( ret )
     return ret
 
@@ -320,7 +353,10 @@ conf_tests = { 'CheckPKGConfig' : CheckPKGConfig,
                'CheckPKG' : CheckPKG,
                'CheckBoost' : CheckBoost,
                'GetBoostLibVersion' : GetBoostLibVersion,
-               'GetMapnikLibVersion' : GetMapnikLibVersion
+               'GetMapnikLibVersion' : GetMapnikLibVersion,
+               'parse_config' : parse_config,
+               'parse_pg_config' : parse_pg_config,
+               'ogr_enabled':ogr_enabled,
                }
 
 
@@ -360,13 +396,15 @@ if not env.GetOption('clean'):
             mode = 'debug mode'
         else:
             mode = 'release mode'
+            
+        env['PLATFORM'] = platform.uname()[0]
         color_print (4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
 
         env['MISSING_DEPS'] = []
         env['SKIPPED_DEPS'] = []
         
         env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
-        env['PLATFORM'] = platform.uname()[0]
+        env['PLUGINS'] = PLUGINS
         
         if env['FAST']:
             # caching is 'auto' by default in SCons
@@ -425,20 +463,14 @@ if not env.GetOption('clean'):
             env.AppendUnique(CPPPATH = inc_path)
             env.AppendUnique(LIBPATH = lib_path)
 
-        try:
-            env.ParseConfig(env['FREETYPE_CONFIG'] + ' --libs --cflags')
-        except OSError:
-            env['MISSING_DEPS'].append(env['FREETYPE_CONFIG'])
-        
+        conf.parse_config('FREETYPE_CONFIG')
+
         if env['XMLPARSER'] == 'tinyxml':
             env['CPPPATH'].append('#tinyxml')
             env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
         elif env['XMLPARSER'] == 'libxml2':
-            try:
-                env.ParseConfig(env['XML2_CONFIG'] + ' --libs --cflags')
+            if conf.parse_config('XML2_CONFIG'):
                 env.Append(CXXFLAGS = '-DHAVE_LIBXML2')
-            except OSError:
-                env['MISSING_DEPS'].append(env['XML2_CONFIG'])
                 
         if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
             env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
@@ -486,23 +518,12 @@ if not env.GetOption('clean'):
         
         for libinfo in LIBSHEADERS:
             if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):
-                if libinfo[0] == 'pq':
-                    libinfo[0] = 'pq (postgres/postgis)'
-                if libinfo[0] == 'gdal' and libinfo[1] == 'ogrsf_frmts.h':
-                    libinfo[0] = 'ogr'
                 if libinfo[2]:
                     color_print (1,'Could not find required header or shared library for %s' % libinfo[0])
                     env['MISSING_DEPS'].append(libinfo[0])
                 else:
                     color_print(4,'Could not find optional header or shared library for %s' % libinfo[0])
-                    env['SKIPPED_DEPS'].append(libinfo[0])
-
-            # touch up the user output so they can see whether both gdal and ogr support was enabled 
-            elif libinfo[0] == 'gdal':
-                if libinfo[1] == 'ogrsf_frmts.h':
-                    print 'ogr vector support... enabled'
-                else:
-                    print 'gdal raster support... enabled'            
+                    env['SKIPPED_DEPS'].append(libinfo[0])            
         
         # Creating BOOST_APPEND according to the Boost library naming order,
         # which goes <toolset>-<threading>-<abi>-<version>. See:
@@ -542,8 +563,27 @@ if not env.GetOption('clean'):
         
         color_print(4,'Checking for requested plugins dependencies...')
         for plugin in env['REQUESTED_PLUGINS']:
-            details = PLUGINS[plugin]
-            if details['path'] and details['lib'] and details['inc']:
+            details = env['PLUGINS'][plugin]
+            if plugin == 'gdal':
+                if conf.parse_config('GDAL_CONFIG'):
+                    lib_result = call('gdal-config --libs')
+                    if lib_result:
+                        details['lib'] = lib_result.split(' ')[1].lstrip('-l')
+                    else:
+                        color_print(1,'Problem encountered parsing gdal lib name')
+            elif plugin == 'postgis':
+                conf.parse_pg_config('PG_CONFIG')
+            elif plugin == 'ogr':
+                if conf.ogr_enabled():
+                    if not 'gdal' in env['REQUESTED_PLUGINS']:
+                        conf.parse_config('GDAL_CONFIG')
+                    lib_result = call('gdal-config --libs')
+                    if lib_result:
+                        details['lib'] = lib_result.split(' ')[1].lstrip('-l')
+                    else:
+                        color_print(1,'Problem encountered parsing gdal lib name')
+
+            elif details['path'] and details['lib'] and details['inc']:
                 backup = env.Clone().Dictionary()
                 # Note, the 'delete_existing' keyword makes sure that these paths are prepended
                 # to the beginning of the path list even if they already exist
@@ -552,7 +592,7 @@ if not env.GetOption('clean'):
                 if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
                     env.Replace(**backup)
                     env['SKIPPED_DEPS'].append(details['lib'])
-        
+
         # re-append the local paths for mapnik sources to the beginning of the list
         # to make sure they come before any plugins that were 'prepended'
         env.PrependUnique(CPPPATH = ['#include', '#'], delete_existing=True)
@@ -736,12 +776,20 @@ if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
 else :
     color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
 
+GDAL_BUILT = False
+OGR_BUILT = False
 # Build the requested and able-to-be-compiled input plug-ins
 for plugin in env['REQUESTED_PLUGINS']:
-    details = PLUGINS[plugin]
+    details = env['PLUGINS'][plugin]
     if details['lib'] in env['LIBS']:
         SConscript('plugins/input/%s/SConscript' % plugin)
-        env['LIBS'].remove(details['lib'])
+        if plugin == 'ogr': OGR_BUILT = True
+        if plugin == 'gdal': GDAL_BUILT = True
+        if plugin == 'ogr' or plugin == 'gdal':
+            if GDAL_BUILT and OGR_BUILT:
+                env['LIBS'].remove(details['lib'])
+        else:
+            env['LIBS'].remove(details['lib'])
     elif not details['lib']:
         # build internal shape and raster plugins
         SConscript('plugins/input/%s/SConscript' % plugin)
