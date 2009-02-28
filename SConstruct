@@ -565,7 +565,8 @@ if not env.GetOption('clean'):
         for plugin in env['REQUESTED_PLUGINS']:
             details = env['PLUGINS'][plugin]
             if plugin == 'gdal':
-                if conf.parse_config('GDAL_CONFIG'):
+                if conf.parse_config('GDAL_CONFIG',checks='--libs'):
+                    conf.parse_config('GDAL_CONFIG',checks='--cflags')
                     lib_result = call('gdal-config --libs')
                     if lib_result:
                         details['lib'] = lib_result.split(' ')[1].lstrip('-l')
@@ -576,7 +577,8 @@ if not env.GetOption('clean'):
             elif plugin == 'ogr':
                 if conf.ogr_enabled():
                     if not 'gdal' in env['REQUESTED_PLUGINS']:
-                        conf.parse_config('GDAL_CONFIG')
+                        conf.parse_config('GDAL_CONFIG',checks='--libs')
+                        conf.parse_config('GDAL_CONFIG',checks='--cflags')
                     lib_result = call('gdal-config --libs')
                     if lib_result:
                         details['lib'] = lib_result.split(' ')[1].lstrip('-l')
