@@ -303,15 +303,41 @@ namespace mapnik
          */
         Envelope<double> get_buffered_extent() const;
         
+        /*!
+         * @return The Map Scale.
+         */
         double scale() const;
         
         double scale_denominator() const;
 
         CoordTransform view_transform() const;
-
+        
+        /*!
+         * @brief Query a Map Layer (by layer index) for features
+         *
+         * Intersecting the given x,y location in the coordinates
+         * of map projection.
+         *
+         * @param index The index of the layer to query from.
+         * @param x The x coordinate where to query.
+         * @param y The y coordinate where to query.
+         * @return A Mapnik Featureset if successful otherwise will return NULL.
+         */
         featureset_ptr query_point(unsigned index, double x, double y) const;
 
+        /*!
+         * @brief Query a Map Layer (by layer index) for features
+         *
+         * Intersecting the given x,y location in the coordinates
+         * of the pixmap or map surface.
+         *
+         * @param index The index of the layer to query from.
+         * @param x The x coordinate where to query.
+         * @param y The y coordinate where to query.
+         * @return A Mapnik Featureset if successful otherwise will return NULL.
+         */
         featureset_ptr query_map_point(unsigned index, double x, double y) const;
+        
         ~Map();
 
         inline void setAspectFixMode(aspect_fix_mode afm) { aspectFixMode_ = afm; }

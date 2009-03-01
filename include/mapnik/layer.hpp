@@ -33,6 +33,14 @@
 
 namespace mapnik
 {
+    /*!
+     * @brief A Mapnik map layer.
+     *
+     * Create a Layer with a named string and, optionally, an srs string either 
+     * with a Proj.4 epsg code ('+init=epsg:<code>') or with a Proj.4 literal 
+     * ('+proj=<literal>'). If no srs is specified it will default to 
+     * '+proj=latlong +datum=WGS84'
+     */
     class MAPNIK_DECL Layer
     {
     public:
@@ -40,31 +48,146 @@ namespace mapnik
         Layer(Layer const& l);
         Layer& operator=(Layer const& l);
         bool operator==(Layer const& other) const;
+        
+        /*!
+         * @brief Set the name of the layer.
+         */
         void set_name(std::string const& name);
+        
+        /*!
+         * @return the name of the layer.
+         */
         const std::string& name() const;
+        
+        /*!
+         * @brief Set the title of the layer.
+         */
         void set_title(std::string const& title);
+        
+        /*!
+         * @return the title of the layer.
+         */
         const std::string& title() const;
+        
+        /*!
+         * @brief Set the abstract of the Layer.
+         */
         void set_abstract(std::string const& abstract);
+        
+        /*!
+         * @return the abstract of the Layer.
+         */
         const std::string& abstract() const;
+        
+        /*!
+         * @brief Set the SRS of the layer.
+         */
         void set_srs(std::string const& srs);
+        
+        /*!
+         * @return the SRS of the layer.
+         */
         std::string const& srs() const;
+        
+        /*!
+         * @brief Add a new style to this layer.
+         *
+         * @param stylename The name of the style to add.
+         */
         void add_style(std::string const& stylename);
+        
+        /*!
+         * @return the styles list attached to this layer.
+         */
         std::vector<std::string> const& styles() const;
+        
+        /*!
+         * @return the styles list attached to this layer
+         *         (const version).
+         */
         std::vector<std::string>& styles();
+        
+        /*!
+         * @param maxZoom The minimum zoom level to set
+         */
         void setMinZoom(double minZoom);
+        
+        /*!
+         * @param maxZoom The maximum zoom level to set
+         */
         void setMaxZoom(double maxZoom);
+        
+        /*!
+         * @return the minimum zoom level of the layer.
+         */
         double getMinZoom() const;
+        
+        /*!
+         * @return the maximum zoom level of the layer.
+         */
         double getMaxZoom() const;
+        
+        /*!
+         * @brief Set whether this layer is active and will be rendered.
+         */
         void setActive(bool active);
+        
+       /*!
+         * @return whether this layer is active and will be rendered.
+         */
         bool isActive() const;
+        
+        /*!
+         * @brief Set whether this layer is queryable.
+         */
         void setQueryable(bool queryable);
+        
+        /*!
+         * @return whether this layer is queryable or not.
+         */
         bool isQueryable() const;
+        
+        /*!
+         * @brief Get the visability for a specific scale.
+         *
+         * @param scale Accepts an integer or float input.
+         *
+         * @return true if this layer's data is active and visible at a given scale.
+         *         Otherwise returns False.
+         * @return false if:
+         *         scale >= minzoom - 1e-6
+         *         or
+         *         scale < maxzoom + 1e-6
+         */
         bool isVisible(double scale) const;
+        
+        /*!
+         * @param clear_cache Set whether this layer's labels are cached.
+         */
         void set_clear_label_cache(bool clear_cache);
+        
+        /*!
+         * @return whether this layer's labels are cached.
+         */
         bool clear_label_cache() const; 
+        
+        /*!
+         * @brief Attach a datasource for this Layer.
+         *
+         * @param ds The datasource to attach.
+         */
         void set_datasource(datasource_ptr const& ds);
+        
+        /*!
+         * @return the datasource attached to this layer.
+         */
         datasource_ptr datasource() const;
+        
+        /*!
+         * @return the geographic envelope/bounding box of the data in the layer.
+         */
         Envelope<double> envelope() const;
+        
         ~Layer();
     private:
         void swap(const Layer& other);

@@ -75,12 +75,24 @@ namespace mapnik {
         datasource (parameters const& params)
             : params_(params) {}
 
+        /*!
+         * @brief Get the configuration parameters of the data source.
+         *
+         * These vary depending on the type of data source.
+         *
+         * @return The configuration parameters of the data source.
+         */
         parameters const& params() const
         {
             return params_;
         }
         
+        /*!
+         * @brief Get the type of the datasource
+         * @return The type of the datasource (Vector or Raster)
+         */
         virtual int type() const=0;
+        
         virtual featureset_ptr features(const query& q) const=0;
         virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
         virtual Envelope<double> envelope() const=0;

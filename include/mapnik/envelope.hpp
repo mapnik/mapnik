@@ -34,6 +34,10 @@
 #include <iomanip>
 
 namespace mapnik {
+  
+   /*!
+    * A spatial envelope (i.e. bounding box) which also defines some basic operators.
+    */
    template <typename T> class MAPNIK_DECL Envelope 
     : boost::addable<Envelope<T>, 
       boost::subtractable<Envelope<T>, 
