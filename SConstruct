@@ -253,7 +253,10 @@ def parse_config(context, config, checks='--libs --cflags'):
     if ret:
         env.ParseConfig(cmd)
     else:
-        env['MISSING_DEPS'].append(tool)
+        if config == 'GDAL_CONFIG':
+            env['SKIPPED_DEPS'].append(tool)
+        else:
+            env['MISSING_DEPS'].append(tool)        
     context.Result( ret )
     return ret
 
@@ -282,14 +285,14 @@ def parse_pg_config(context, config):
         env.AppendUnique(CPPPATH = inc_path)
         env.AppendUnique(LIBPATH = lib_path)
     else:
-        env['MISSING_DEPS'].append(tool)
+        env['SKIPPED_DEPS'].append(tool)
     context.Result( ret )
     return ret
 
 def ogr_enabled(context):
     env = context.env
     context.Message( 'Checking if gdal is ogr enabled... ')
-    ret = context.TryAction('gdal-config --ogr-enabled')[0]
+    ret = context.TryAction('%s --ogr-enabled' % env['GDAL_CONFIG'])[0]
     if not ret:
         env['SKIPPED_DEPS'].append('ogr')
     context.Result( ret )
@@ -668,6 +671,10 @@ if not env.GetOption('clean'):
             else:
               color_print(4,"Did not use user config file, no custom path variables will be saved...")
 
+            if env['SKIPPED_DEPS']:
+                color_print(1,'\nHowever, these optional dependencies were not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
+                print
+
             # fetch the mapnik version header in order to set the
             # ABI version used to build libmapnik.so on linux in src/SConscript
             abi = conf.GetMapnikLibVersion()
@@ -770,6 +777,7 @@ if not env.GetOption('clean'):
                         os.unlink(test)
                 except: pass
             if 'configure' in command_line_args:
+                color_print(4,'\n*Configure complete*\nNow run "python scons/scons.py" to build or "python scons/scons.py install" to install')
                 Exit(0)
 
 
