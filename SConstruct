@@ -245,6 +245,8 @@ def CheckPKG(context, name):
 def parse_config(context, config, checks='--libs --cflags'):
     env = context.env
     tool = config.lower().replace('_','-')
+    if config == 'GDAL_CONFIG':
+        tool += ' %s' % checks
     context.Message( 'Checking for %s... ' % tool)
     cmd = '%s %s' % (env[config],checks)
     ret = context.TryAction(cmd)[0]
@@ -593,7 +595,7 @@ if not env.GetOption('clean'):
                     if not 'gdal' in env['REQUESTED_PLUGINS']:
                         conf.parse_config('GDAL_CONFIG',checks='--libs')
                         conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                    libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
+                    libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
                     if libname:
                         details['lib'] = libname
                     
