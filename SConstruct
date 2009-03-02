@@ -448,7 +448,9 @@ if not env.GetOption('clean'):
             thread_suffix = ''
             env.Append(LIBS = 'pthread')
         
-        
+        if env['SYSTEM_FONTS']:
+            if not os.path.isdir(env['SYSTEM_FONTS']):
+                color_print(1,'Warning: Directory specified for SYSTEM_FONTS does not exist!')
         #### Libraries and headers dependency checks ####
         
         # Set up for libraries and headers dependency checks
