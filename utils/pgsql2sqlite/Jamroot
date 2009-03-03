@@ -1,7 +1,7 @@
 #
 
-lib program_options : : <name>boost_program_options-xgcc40-mt <search>/usr/local/lib ;
-lib pq : : <name>pq <search>/opt/postgresql/lib ;
+lib program_options : : <name>boost_program_options-mt <search>/opt/local/lib ;
+lib pq : : <name>pq <search>/usr/local/pgsql/lib ;
 lib sqlite : : <name>sqlite3 <search>/usr/local/lib ;
 
 exe pgsql2sqlite :
@@ -13,9 +13,10 @@ exe pgsql2sqlite :
     .//pq
     .//sqlite
     :
-    <include>/usr/local/include/boost-1_38
-    <include>/opt/mapnik/include
+    <include>/usr/local/include/mapnik
+    <include>/opt/local/include
+    <include>/usr/local/pgsql/include/
+    <include>/opt/local/include/boost-1_35
     <include>../../plugins/input/postgis
-    <include>/opt/postgresql/include
     #<define>MAPNIK_DEBUG
     ;

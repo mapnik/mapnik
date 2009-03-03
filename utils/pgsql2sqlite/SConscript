@@ -36,10 +36,9 @@ headers = ['#plugins/input/postgis'] + env['CPPPATH']
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 boost_thread  = 'boost_thread%s' % env['BOOST_APPEND']
 
-libraries =  [boost_program_options,boost_thread,'sqlite3','pq']
+libraries =  [boost_program_options,boost_thread,'sqlite3','pq','mapnik']
 
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik')
     libraries.append('icuuc')
     libraries.append('icudata')
    

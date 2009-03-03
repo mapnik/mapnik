@@ -34,13 +34,12 @@ headers = env['CPPPATH']
 
 boost_thread  = 'boost_thread%s' % env['BOOST_APPEND']
 
-libraries =  [boost_thread]
+libraries =  [boost_thread,'mapnik']
 
 if env['CAIRO']:
     libraries.append('cairo')
 
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik')
     libraries.append('icuuc')
     libraries.append('icudata')
    
