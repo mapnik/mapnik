@@ -46,6 +46,10 @@ class WSGIApp:
             self.debug = int(conf.get('server', 'debug'))
         else:
             self.debug = 0
+        if self.conf.has_option_with_value('server', 'maxage'):
+            self.max_age = 'max-age=%d' % self.conf.get('server', 'maxage')
+        else:
+            self.max_age = None
 
     def __call__(self, environ, start_response):
         reqparams = {}
@@ -92,6 +96,9 @@ class WSGIApp:
             else:
                 eh = ExceptionHandler111(self.debug)
             response = eh.getresponse(reqparams)
-        start_response('200 OK', [('Content-Type', response.content_type)])
+        response_headers = [('Content-Type', response.content_type),('Content-Length', str(len(response.content)))]
+        if self.max_age:
+            response_headers.append(('Cache-Control', max_age))
+        start_response('200 OK', response_headers)
         yield response.content
             

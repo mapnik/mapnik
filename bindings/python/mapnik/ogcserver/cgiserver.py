@@ -84,6 +84,7 @@ class Handler(cgi.DebugHandler):
             raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
         response = requesthandler(ogcparams)
         req.set_header('Content-Type', response.content_type)
+        req.set_header('Content-Length', str(len(response.content))
         req.write(response.content)
 
     def traceback(self, req):
@@ -99,6 +100,7 @@ class Handler(cgi.DebugHandler):
             eh = ExceptionHandler111(self.debug)
         response = eh.getresponse(reqparams)
         req.set_header('Content-Type', response.content_type)
+        req.set_header('Content-Length', str(len(response.content))
         req.write(response.content)
 
 def lowerparams(params):

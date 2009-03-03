@@ -47,6 +47,10 @@ class ModHandler(object):
             self.debug = int(conf.get('server', 'debug'))
         else:
             self.debug = 0
+        if self.conf.has_option_with_value('server', 'maxage'):
+            self.max_age = 'max-age=%d' % self.conf.get('server', 'maxage')
+        else:
+            self.max_age = None
 
     def __call__(self, apacheReq):
         try:
@@ -95,6 +99,9 @@ class ModHandler(object):
         except Exception, E:
             return self.traceback(apacheReq,E)
 
+        if self.max_age:
+            apacheReq.headers_out.add('Cache-Control', max_age)
+        apacheReq.headers_out.add('Content-Length', str(len(response.content)))
         apacheReq.send_http_header()
         apacheReq.write(response.content)
         return apache.OK
@@ -112,8 +119,7 @@ class ModHandler(object):
             eh = ExceptionHandler111(self.debug)
         response = eh.getresponse(reqparams)
         apacheReq.content_type = response.content_type
-        #apacheReq.status = apache.HTTP_NOT_FOUND
-        #apacheReq.status = apache.HTTP_INTERNAL_SERVER_ERROR
+        apacheReq.headers_out.add('Content-Length', str(len(response.content)))
         apacheReq.send_http_header()
         apacheReq.write(response.content)
         return apache.OK
