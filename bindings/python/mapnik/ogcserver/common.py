@@ -20,7 +20,7 @@
 # $Id$
 
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Map, Color, Envelope, render, Image, Layer, Style, Projection as MapnikProjection, render_to_file, Coord
+from mapnik import Map, Color, Envelope, render, Image, Layer, Style, Projection as MapnikProjection, Coord
 from PIL.Image import new
 from PIL.ImageDraw import Draw
 from StringIO import StringIO
