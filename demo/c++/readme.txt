@@ -1,13 +1,18 @@
-This directory contains a simple c++ program demonstrating Mapnik API. It mimics python example with couple exceptions.
+This directory contains a simple c++ program demonstrating the Mapnik C++ API. It mimics the python 'rundemo.py' example with a couple exceptions.
 
-To build (using GCC/G++ toolkit):
+To build it re-configure SCons with DEMO=True then rebuild::
 
-g++ -O3 -I/usr/local/include/mapnik -I/opt/boost/include/boost-1_33_1 -I/usr/include/freetype2 -I../../agg/include -L/usr/local/lib -lmapnik rundemo.cpp -o rundemo
+    $ python scons/scons.py configure DEMO=True
+    $ python scons/scons.py
 
 
-To run:
+The sample program will be compiled (but not installed).
 
-./rundemo
+
+To run::
+
+    $ cd demo/c++
+    $ ./rundemo /usr/local/lib/mapnik
 
 For more detailed comments have a look in demo/python/rundemo.py
 

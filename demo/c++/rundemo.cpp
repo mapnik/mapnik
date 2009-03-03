@@ -21,9 +21,6 @@
  *****************************************************************************/
 // $Id$
 
-// define before any includes
-#define BOOST_SPIRIT_THREADSAFE
-
 #include <mapnik/map.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -33,9 +30,11 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/config_error.hpp>
 
+#if defined(HAVE_CAIRO)
 // cairo
 #include <mapnik/cairo_renderer.hpp>
 #include <cairomm/surface.h>
+#endif
 
 #include <iostream>
 
@@ -44,7 +43,8 @@ int main ( int argc , char** argv)
 {    
     if (argc != 2)
     {
-        std::cout << "usage: ./rundemo <mapnik_install_dir>\n";
+        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local/lib/mapnik\n";
+        std::cout << "Warning: ./rundemo looks for data in ../data/,\nTherefore must be run from within the demo/c++ folder.\n";
         return EXIT_SUCCESS;
     }
     
@@ -52,8 +52,10 @@ int main ( int argc , char** argv)
     try {
         std::cout << " running demo ... \n";
         std::string mapnik_dir(argv[1]);
-        datasource_cache::instance()->register_datasources(mapnik_dir + "/plugins/input/shape"); 
-        freetype_engine::register_font(mapnik_dir + "/fonts/dejavu-ttf-2.14/DejaVuSans.ttf");
+        std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "/input/" << "\n";
+        datasource_cache::instance()->register_datasources(mapnik_dir + "/input/"); 
+        std::cout << " looking for DejaVuSans font in... " << mapnik_dir << "/fonts/DejaVuSans.ttf" << "\n";
+        freetype_engine::register_font(mapnik_dir + "/fonts/DejaVuSans.ttf");
         
         Map m(800,600);
         m.set_background(color_factory::from_string("white"));
@@ -69,7 +71,7 @@ int main ( int argc , char** argv)
         provpoly_style.add_rule(provpoly_rule_on);
         
         rule_type provpoly_rule_qc;
-        provpoly_rule_qc.set_filter(create_filter("[NAME_EN] = 'Quebec'"));
+        provpoly_rule_qc.set_filter(create_filter("[NOM_FR] = 'Québec'"));
         provpoly_rule_qc.append(polygon_symbolizer(color(217, 235, 203)));
         provpoly_style.add_rule(provpoly_rule_qc);
         
@@ -257,7 +259,7 @@ int main ( int argc , char** argv)
            "- demo256.png\n"
            "Have a look!\n";
 
-
+        #if defined(HAVE_CAIRO)
         Cairo::RefPtr<Cairo::ImageSurface> image_surface;
 
         image_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, m.getWidth(),m.getHeight());
@@ -283,16 +285,17 @@ int main ( int argc , char** argv)
            "- cairo-demo.pdf\n"
            "- cairo-demo.svg\n"
            "Have a look!\n";
+        #endif
 
     }
     catch ( const mapnik::config_error & ex )
     {
-        std::cerr << "### Configuration error: " << ex.what();
+        std::cerr << "### Configuration error: " << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
     catch ( const std::exception & ex )
     {
-        std::cerr << "### std::exception: " << ex.what();
+        std::cerr << "### std::exception: " << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
     catch ( ... )
