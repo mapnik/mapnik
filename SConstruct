@@ -151,8 +151,9 @@ opts.AddVariables(
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spirit','libxml2']),
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
+    BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
+    BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     )
-
 # variables to pickle after successful configure step
 # these include all scons core variables as well as custom
 # env variables needed in Sconscript files
@@ -794,6 +795,14 @@ if env['INTERNAL_LIBAGG']:
 
 # Build the core library
 SConscript('src/SConscript')
+
+# Build the c++ rundemo app if requested
+if env['DEMO']:
+    SConscript('demo/c++/SConscript')
+
+# Build the pgsql2psqlite app if requested
+if env['PGSQL2SQLITE']:
+    SConscript('utils/pgsql2sqlite/SConscript')
 
 # Build shapeindex and remove its dependency from the LIBS
 if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
