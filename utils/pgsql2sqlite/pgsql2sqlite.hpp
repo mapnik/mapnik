@@ -65,7 +65,7 @@ namespace mapnik {
 
    bool valid_envelope(mapnik::Envelope<double> const& e)
    {
-      return (e.minx() < e.maxx() && e.miny() < e.maxy()) ;
+      return (e.minx() <= e.maxx() && e.miny() <= e.maxy()) ;
    }
    
    std::string table_from_sql(std::string const& sql)
