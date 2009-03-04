@@ -741,7 +741,7 @@ if not env.GetOption('clean'):
                 env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
                 
                 if HAS_DISTUTILS:                        
-                    sys_version = "%s -c 'from distutils.sysconfig import get_python_version; print get_python_version_()'" % env['PYTHON']
+                    sys_version = "%s -c 'from distutils.sysconfig import get_python_version; print get_python_version()'" % env['PYTHON']
                     env['PYTHON_VERSION'] = call(sys_version)
                     py_includes = "%s -c 'from distutils.sysconfig import get_python_inc; print get_python_inc()'" % env['PYTHON']
                     env['PYTHON_INCLUDES'] = call(py_includes)
