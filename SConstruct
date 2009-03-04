@@ -27,6 +27,12 @@ from glob import glob
 from subprocess import Popen, PIPE
 from SCons.SConf import SetCacheMode
 import pickle
+
+try:
+    import distutils.sysconfig
+    HAS_DISTUTILS = True
+except:
+    HAS_DISTUTILS = False
                   
 def color_print(color,text,newline=True):
     # 1 - red
@@ -44,7 +50,7 @@ def call(cmd):
     if not stderr:
         return stdin.strip()
     else:
-        color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org')
+        color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
 
 if platform.uname()[4] == 'x86_64':
     LIBDIR_SCHEMA='lib64' 
@@ -734,19 +740,23 @@ if not env.GetOption('clean'):
                 sys_prefix = "%s -c 'import sys; print sys.prefix'" % env['PYTHON']
                 env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
                 
-                # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
-                site_packages = "%s -c 'from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)'" % env['PYTHON']
-                env['PYTHON_SITE_PACKAGES'] = call(site_packages)
-                
-                sys_version = "%s -c 'from distutils.sysconfig import get_python_version; print get_python_version()'" % env['PYTHON']
-                env['PYTHON_VERSION'] = call(sys_version)
-                
-                py_includes = "%s -c 'from distutils.sysconfig import get_python_inc; print get_python_inc()'" % env['PYTHON']
-                env['PYTHON_INCLUDES'] =  call(py_includes)
+                if HAS_DISTUTILS:                        
+                    sys_version = "%s -c 'from distutils.sysconfig import get_python_version; print get_python_version_()'" % env['PYTHON']
+                    env['PYTHON_VERSION'] = call(sys_version)
+                    py_includes = "%s -c 'from distutils.sysconfig import get_python_inc; print get_python_inc()'" % env['PYTHON']
+                    env['PYTHON_INCLUDES'] = call(py_includes)
+                    # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
+                    site_packages = "%s -c 'from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)'" % env['PYTHON']
+                    env['PYTHON_SITE_PACKAGES'] = call(site_packages)
+                else:
+                    env['PYTHON_SYS_PREFIX'] = os.popen("%s -c 'import sys; print sys.prefix'" % env['PYTHON']).read().strip()
+                    env['PYTHON_VERSION'] = os.popen("%s -c 'import sys; print sys.version'" % env['PYTHON']).read()[0:3]
+                    env['PYTHON_INCLUDES'] = env['PYTHON_SYS_PREFIX'] + '/include/python' + env['PYTHON_VERSION']
+                    env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + '/' + env['PYTHON_SYS_PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
             
-                # if user-requested custom prefix fall back to manual concatenation for building subdirectories
-                py_relative_install = env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'        
+                # if user-requested custom prefix fall back to manual concatenation for building subdirectories       
                 if env['PYTHON_PREFIX']:
+                    py_relative_install = env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/' 
                     env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_PREFIX'] + '/' +  py_relative_install            
                 else:
                     env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_SITE_PACKAGES']
