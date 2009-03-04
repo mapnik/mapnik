@@ -481,7 +481,7 @@ if not env.GetOption('clean'):
         
         # Adding the required prerequisite library directories to the include path for
         # compiling and the library path for linking, respectively.
-        for required in ('BOOST', 'PNG', 'JPEG', 'TIFF','PROJ'):
+        for required in ('BOOST', 'PNG', 'JPEG', 'TIFF','PROJ','ICU'):
             inc_path = env['%s_INCLUDES' % required]
             lib_path = env['%s_LIBS' % required]
             env.AppendUnique(CPPPATH = inc_path)
