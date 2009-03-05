@@ -23,6 +23,8 @@ Current Version (0.6.0-dev, SVN trunk):
 
 - Plugins: Added OGR driver for reading all OGR supported formats (kunitoki) (r836) (#170)
 
+- C++: renamed mapnik::Color to mapnik::color (r796)
+
 - Python: Made available the scale_denominator property from the map in c++ and python (r793)
 
 - Python: Added ability to resize map and clear all layers and styles from python (r793)
