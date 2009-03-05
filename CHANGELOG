@@ -14,14 +14,26 @@ For a complete change history, see the SVN log.
 Current Version (0.6.0-dev, SVN trunk):
 ---------------------------------------
 
+- Python: Added further pickling/copy support to Map, Layers, Datasources, Styles,and Rules (r907,r913,r921)
+
 - OGCServer: Added support for load_map(), allowing reading of XML styles and layers (r901)
 
 - OGCServer: Enabled friendly html output when in debug mode (debug=1 in ogcserver.conf) (r899)
+
+- Plugins: Added Sqlite driver for reading sqlite databases (r881)
+
+- Python: Exposed a number of properties for the Text Symbolizer (r869)
+
+- Plugins: PostGIS plugin now accepts multi-line queries (r862)
 
 - Filter parsing: Allow numbers in the filter field name.
   This allows for shapefiles with columns like '1970'.
 
 - Plugins: Added OGR driver for reading all OGR supported formats (kunitoki) (r836) (#170)
+
+- XML: Added serialization of Fontsets (r807)
+
+- XML: Added support for reading xml from a string (r806)
 
 - C++: renamed mapnik::Color to mapnik::color (r796)
 
@@ -31,4 +43,28 @@ Current Version (0.6.0-dev, SVN trunk):
 
 - Python: Exposed Proj to/from transformation for projected coordinate systems (r792,r822) (#117)
 
+- Memory Datasource: Added support for dynamically adding Points to map using Point Datasource (r790)
+
 - XML: Added xml serialization for abstract, title, minzoom, maxzoom, and queryable attributes (r787)
+
+- Core: Transformation is now skipped if srs values match exactly (r777)
+
+- Symbolizers: 'min_distance' now honored for POINT placement using Text Symbolizer (r771)
+
+- Plugins: PostGIS plugin now accepts a geometry_field,record_limit, cursor_size options (r769,r872)
+
+- Python: Added ability to transform as a method on Coord and Envelope objects (r764)
+
+- Python: Added docstrings to the Layer object (r763)
+
+- Plugins: Loosened the type checking in Shapefile Plugin dbf reader (r762)
+
+- Fonts: Added support for Right-to-left Hebrew text (r749)
+
+- Core: Added a Map buffer parameter - helps to avoid cut labels at tile edges (r744)
+
+- Symbolizers: Added opacity support to Point Symbolizer (r743)
+
+- Symbolizers: Added support of using Points with Shield Symbolizer (r741)
+
+- Plugins: PostGIS plugin now accepts alternate schemas (r733)
