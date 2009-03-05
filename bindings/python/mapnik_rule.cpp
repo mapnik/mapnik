@@ -28,7 +28,6 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/filter_factory.hpp>
 
-using namespace boost::python;
 using mapnik::rule_type;
 using mapnik::filter;
 using mapnik::filter_ptr;
@@ -112,7 +111,7 @@ struct rule_pickle_suite : boost::python::pickle_suite
 
 void export_rule()
 {
-    
+    using namespace boost::python;
     implicitly_convertible<point_symbolizer,symbolizer>();
     implicitly_convertible<line_symbolizer,symbolizer>();
     implicitly_convertible<line_pattern_symbolizer,symbolizer>();
