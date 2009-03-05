@@ -68,3 +68,23 @@ Current Version (0.6.0-dev, SVN trunk):
 - Symbolizers: Added support of using Points with Shield Symbolizer (r741)
 
 - Plugins: PostGIS plugin now accepts alternate schemas (r733)
+
+- Fonts: Added support for fallback fonts (r704)
+
+- Cairo: Cairo support exposed in Python (r666)
+
+- Plugins: Added OSM plugin for reading directly from OSM data (r663)
+
+- Filters: Added support for boolean expressions (r660)
+
+- Python: Added ability to open Image32 files (r652)
+
+- Cairo: Cairo rendering support added (r656)
+
+- Core: Added unicode support based on ICU (r650)
+
+- Core: Added support for single and multi threaded variants of Mapnik (r632,r634)
+
+- Plugins: Use memory mapped files for reading shape file (r628)
+
+- Core: Use streams to write images (i/o refactor) (r628) (#15)
