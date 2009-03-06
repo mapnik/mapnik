@@ -292,7 +292,6 @@ def parse_pg_config(context, config):
         env.AppendUnique(CPPPATH = inc_path)
         env.AppendUnique(LIBPATH = lib_path)
         lpq = env['PLUGINS']['postgis']['lib']
-        import pdb;pdb.set_trace()
         env.Append(LIBS = lpq)
     else:
         env['SKIPPED_DEPS'].append(tool)
