@@ -671,7 +671,7 @@ if not preconfigured:
         color_print(4,"\nTo view available path variables:\n    $ python scons/scons.py --help or -h")
         color_print(4,'\nTo view overall SCons help options:\n    $ python scons/scons.py --help-options or -H\n')
         color_print(4,'More info: http://trac.mapnik.org/wiki/MapnikInstallation')
-        Exit(0)
+        Exit(1)
     else:
         # Save the custom variables in a SCONS_LOCAL_CONFIG
         # that will be reloaded to allow for `install` without re-specifying custom variables
