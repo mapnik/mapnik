@@ -279,7 +279,7 @@ def get_pkg_lib(context, config, lib):
         if libnames:
           libname = libnames[0]
     context.Result( libname )
-    return ret
+    return libname
 
 def parse_pg_config(context, config):
     env = context.env
