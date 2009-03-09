@@ -214,23 +214,20 @@ if not force_configure:
             for key, value in pickled_values.items():
                 env[key] = value
             preconfigured = True
-            if ('-h' not in command_line_args) and ('--help' not in command_line_args):
-                color_print(4,'Using previous successful configuration...')
-                color_print(4,'Re-configure by running "python scons/scons.py configure".')
         except:
             # unpickling failed, so reconfigure as fallback
             preconfigured = False
     else:
         preconfigured = False
 
-       
-if preconfigured:
-    if opts.args:
-        color_print(1,'Arguments ignored, please run "configure" with arguments to customize build')
-        Exit(0)
-else:
-    # if we are not preconfigured update the environment based on commandline options 
-    opts.Update(env)
+if opts.args:
+    preconfigured = False
+elif preconfigured:
+    if ('-h' not in command_line_args) and ('--help' not in command_line_args):
+        color_print(4,'Using previous successful configuration...')
+        color_print(4,'Re-configure by running "python scons/scons.py configure".')
+
+opts.Update(env)
 
 Help(opts.GenerateHelpText(env))
 
@@ -262,6 +259,7 @@ def parse_config(context, config, checks='--libs --cflags'):
     else:
         if config == 'GDAL_CONFIG':
             env['SKIPPED_DEPS'].append(tool)
+            conf.rollback_option('GDAL_CONFIG')
         else:
             env['MISSING_DEPS'].append(tool)        
     context.Result( ret )
@@ -295,6 +293,7 @@ def parse_pg_config(context, config):
         env.Append(LIBS = lpq)
     else:
         env['SKIPPED_DEPS'].append(tool)
+        conf.rollback_option(config)
     context.Result( ret )
     return ret
 
@@ -306,6 +305,13 @@ def ogr_enabled(context):
         env['SKIPPED_DEPS'].append('ogr')
     context.Result( ret )
     return ret
+
+def rollback_option(context,variable):
+    global opts
+    env = context.env
+    for item in opts.options:
+        if item.key == variable:
+            env[variable] = item.default
 
 def CheckBoost(context, version, silent=False):
     # Boost versions are in format major.minor.subminor
@@ -385,8 +391,9 @@ conf_tests = { 'CheckPKGConfig' : CheckPKGConfig,
                'GetMapnikLibVersion' : GetMapnikLibVersion,
                'parse_config' : parse_config,
                'parse_pg_config' : parse_pg_config,
-               'ogr_enabled':ogr_enabled,
-               'get_pkg_lib':get_pkg_lib,
+               'ogr_enabled': ogr_enabled,
+               'get_pkg_lib': get_pkg_lib,
+               'rollback_option': rollback_option
                }
 
 
