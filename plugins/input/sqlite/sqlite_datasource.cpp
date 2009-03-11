@@ -31,6 +31,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/filesystem/operations.hpp>
 
 using std::clog;
 using std::endl;
@@ -102,6 +103,8 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
 
+    if (!boost::filesystem::exists(*file)) throw datasource_exception(*file + " don't exists");
+    
     dataset_ = new sqlite_connection (*file);
 
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
