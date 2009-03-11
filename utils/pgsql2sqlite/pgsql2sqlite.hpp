@@ -44,6 +44,46 @@
 
 namespace mapnik {
 
+   std::string numeric2string(const char* buf)
+   {
+      int16_t ndigits = int2net(buf);
+      int16_t weight  = int2net(buf+2);
+      int16_t sign    = int2net(buf+4);
+      int16_t dscale  = int2net(buf+6);
+      
+      boost::scoped_array<int16_t> digits(new int16_t[ndigits]); 
+      for (int n=0; n < ndigits ;++n)
+      {
+         digits[n] = int2net(buf+8+n*2);
+      }
+      
+      std::ostringstream ss;
+      
+      if (sign == 0x4000) ss << "-";
+      
+      int i = std::max(weight,int16_t(0));
+      int d = 0;
+      while ( i >= 0)
+      {
+         if (i <= weight && d < ndigits)
+            ss <<  digits[d++];
+         else
+            ss <<  '0';
+         i--;
+      }
+      if (dscale > 0)
+      {
+         ss << '.';
+         while ( i >= -dscale)
+         {
+            if (i <= weight && d < ndigits)
+               ss <<  digits[d++];
+            i--;
+         }
+      }
+      return ss.str();
+   }
+   
    struct blob_to_hex
    {
       std::string operator() (const char* blob, unsigned size)
@@ -118,10 +158,26 @@ namespace mapnik {
    
       std::string table_name = table_from_sql(query);
       
+      std::string schema_name="";
+      std::string::size_type idx=table_name.find_last_of('.');
+      if (idx!=std::string::npos)
+      {
+         schema_name=table_name.substr(0,idx);
+         table_name=table_name.substr(idx+1);
+      }
+      else
+      {
+         table_name=table_name.substr(0);
+      }
+      
       std::ostringstream geom_col_sql;
       geom_col_sql << "select f_geometry_column,srid,type from geometry_columns ";
       geom_col_sql << "where f_table_name='" << table_name << "'";
-   
+      if (schema_name.length() > 0)
+      {
+         geom_col_sql <<" and f_table_schema='"<< schema_name <<"'";
+      }
+      
       rs = conn->executeQuery(geom_col_sql.str());
    
       int srid = -1;
@@ -159,9 +215,11 @@ namespace mapnik {
       boost::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
    
       unsigned num_fields = cursor->getNumFields();
+
+      std::string feature_id =  "fid";
    
       std::ostringstream create_sql;
-      create_sql << "create table if not exists " << output_table_name << " (OGC_FID INTEGER PRIMARY KEY AUTOINCREMENT,";
+      create_sql << "create table if not exists " << output_table_name << " (" << feature_id << " INTEGER PRIMARY KEY AUTOINCREMENT,";
       
       int geometry_oid = -1;
 
@@ -174,18 +232,29 @@ namespace mapnik {
 	  create_sql << ",";
 	}
 	output_table_insert_sql +=",?";
-	
+	int oid = cursor->getTypeOID(pos);
 	if (geom_col == cursor->getFieldName(pos))
 	{
-            geometry_oid = cursor->getTypeOID(pos);
-            create_sql << "'" << cursor->getFieldName(pos) << "' BLOB";
+           geometry_oid = oid;
+           create_sql << "'" << cursor->getFieldName(pos) << "' BLOB";
 	}
         else
         {
-            create_sql << "'" << cursor->getFieldName(pos) << "' TEXT";
+           create_sql << "'" << cursor->getFieldName(pos);
+           switch (oid)
+           {
+              case 700:
+              case 701:
+                 create_sql << "' REAL";
+                 break;
+              default:
+                 create_sql << "' TEXT";
+                 break;
+           }  
+            
         }
       }
-   
+      
       create_sql << ");";
       output_table_insert_sql +=")";
       
@@ -246,8 +315,40 @@ namespace mapnik {
                      break;
                   }
                   case 23:
-		    output_rec.push_back(sqlite::value_type(int4net(buf)));
-		    break;
+                     output_rec.push_back(sqlite::value_type(int4net(buf)));
+                     break;
+                  case 21:
+                     output_rec.push_back(sqlite::value_type(int2net(buf)));
+                     break;
+                  case 700:
+                  {
+                     float val;
+                     float4net(val,buf);
+                     output_rec.push_back(sqlite::value_type(val));
+                     break;
+                  }
+                  case 701:
+                  {
+                     double val;
+                     float8net(val,buf);
+                     output_rec.push_back(sqlite::value_type(val));
+                     break;
+                  }
+                  case 1700:
+                  {
+                     std::string str = numeric2string(buf);
+                     try 
+                     {
+                        double val = boost::lexical_cast<double>(str);
+                        output_rec.push_back(sqlite::value_type(val));
+                     }
+                     catch (boost::bad_lexical_cast & ex)
+                     {
+                        std::clog << ex.what() << "\n"; 
+                     }
+                     break;
+                  }
+                  
                   default:  
                   {
                      if (oid == geometry_oid)
