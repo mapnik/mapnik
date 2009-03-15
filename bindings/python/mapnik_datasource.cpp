@@ -100,8 +100,7 @@ void export_datasource()
     
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
-        .def_pickle(ds_pickle_suite()
-                )
+        .def_pickle(ds_pickle_suite())
         .def("envelope",&datasource::envelope)
         .def("descriptor",&datasource::get_descriptor) //todo
         .def("features",&datasource::features)
