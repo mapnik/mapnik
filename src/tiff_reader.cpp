@@ -94,6 +94,7 @@ namespace mapnik
     void TiffReader::init()
     {
         // TODO: error handling
+        TIFFSetWarningHandler(0);
         TIFF* tif = load_if_exists(file_name_);
         if (!tif) return;
 	
