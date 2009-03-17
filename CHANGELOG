@@ -37,7 +37,7 @@ Current Version (0.6.0-dev, SVN trunk):
 
 - C++: renamed mapnik::Color to mapnik::color (r796)
 
-- Python: Made available the scale_denominator property from the map in c++ and python (r793)
+- Python: Made available the scale_denominator property from the map in c++ and python (r794)
 
 - Python: Added ability to resize map and clear all layers and styles from python (r793)
 
