@@ -32,6 +32,21 @@
 
 namespace mapnik
 {
+
+   static const char * aspect_fix_mode_strings[] = {
+        "GROW_BBOX",
+        "GROW_CANVAS",
+        "SHRINK_BBOX",
+        "SHRINK_CANVAS",
+        "ADJUST_BBOX_WIDTH",
+        "ADJUST_BBOX_HEIGHT",
+        "ADJUST_CANVAS_WIDTH",
+        "ADJUST_CANVAS_HEIGHT",
+        ""
+    };
+   
+   IMPLEMENT_ENUM( mapnik::aspect_fix_mode_e, aspect_fix_mode_strings );
+
     Map::Map()
         : width_(400),
           height_(400),
@@ -364,9 +379,15 @@ namespace mapnik
                 else
                     width_ = (int) (height_ * ratio2 + 0.5);
                 break;
+           default:
+              if (ratio2 > ratio1)
+                 currentExtent_.height(currentExtent_.width() / ratio1);
+              else 
+                 currentExtent_.width(currentExtent_.height() * ratio1);
+              break;  
         }
     }
-
+   
     const Envelope<double>& Map::getCurrentExtent() const
     {
         return currentExtent_;
@@ -505,4 +526,6 @@ namespace mapnik
     }
 
     Map::~Map() {}
+
+   
 }

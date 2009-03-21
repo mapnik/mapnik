@@ -67,7 +67,7 @@ class enumeration_ :
             for (unsigned i = 0; i < EnumWrapper::MAX; ++i)
             {
                 // Register the strings allready defined for this enum.
-                value( EnumWrapper::get_string( i ), native_type( i ) );
+               base_type::value( EnumWrapper::get_string( i ), native_type( i ) );
             }
         }
 

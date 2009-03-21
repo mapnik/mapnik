@@ -129,7 +129,7 @@ void export_map()
    using namespace boost::python;
    
    // aspect ratio fix modes
-   enum_<mapnik::Map::aspect_fix_mode>("aspect_fix_mode")
+   mapnik::enumeration_<mapnik::aspect_fix_mode_e>("aspect_fix_mode")
       .value("GROW_BBOX", mapnik::Map::GROW_BBOX)
       .value("GROW_CANVAS",mapnik::Map::GROW_CANVAS)
       .value("SHRINK_BBOX",mapnik::Map::SHRINK_BBOX)
@@ -294,11 +294,13 @@ void export_map()
            ">>> m.scale()\n"
          )
       
-      .def("set_aspect_fix_mode",&Map::setAspectFixMode,
-           "Set aspect fix mode.\n"
-           "Usage:\n"
-           "\n"
-           ">>> m.set_aspect_fix_mode(...)\n"
+      .add_property("aspect_fix_mode",
+                    &Map::getAspectFixMode,
+                    &Map::setAspectFixMode,
+                    "Get/Set aspect fix mode.\n"
+                    "Usage:\n"
+                    "\n"
+                    ">>> m.aspect_fix_mode = aspect_fix_mode.GROW_BBOX\n"
          )
 
       .def("get_aspect_fix_mode",&Map::getAspectFixMode,

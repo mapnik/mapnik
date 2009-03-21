@@ -28,9 +28,13 @@
   #include <config.h>
 #endif
 
+// mapnik
+#include <mapnik/enumeration.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
+
+// boost
 #include <boost/optional/optional.hpp>
 
 namespace mapnik
@@ -52,12 +56,15 @@ namespace mapnik
            // adjust the width of the specified geo bbox, leave height and map size unchanged
            ADJUST_BBOX_WIDTH,
            // adjust the height of the specified geo bbox, leave width and map size unchanged
-            ADJUST_BBOX_HEIGHT,
+           ADJUST_BBOX_HEIGHT,
            // adjust the width of the map, leave height and geo bbox unchanged
            ADJUST_CANVAS_WIDTH,
            //adjust the height of the map, leave width and geo bbox unchanged 
-           ADJUST_CANVAS_HEIGHT
+           ADJUST_CANVAS_HEIGHT,
+           // 
+           aspect_fix_mode_MAX
         };
+        
     private:
         static const unsigned MIN_MAPSIZE=16;
         static const unsigned MAX_MAPSIZE=MIN_MAPSIZE<<10;
@@ -341,11 +348,13 @@ namespace mapnik
         ~Map();
 
         inline void setAspectFixMode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
-        inline int getAspectFixMode() { return aspectFixMode_; }
+        inline aspect_fix_mode getAspectFixMode() { return aspectFixMode_; }
 
     private:
         void fixAspectRatio();
     };
+   
+   DEFINE_ENUM(aspect_fix_mode_e,Map::aspect_fix_mode);
 }
 
 #endif //MAP_HPP
