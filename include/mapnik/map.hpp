@@ -48,7 +48,7 @@ namespace mapnik
            // shrink the width or height of the specified geo bbox to fill the map size. 
            SHRINK_BBOX,
            // shrink the width or height of the map to accomodate the specified geo bbox.
-            SHRINK_CANVAS,
+           SHRINK_CANVAS,
            // adjust the width of the specified geo bbox, leave height and map size unchanged
            ADJUST_BBOX_WIDTH,
            // adjust the height of the specified geo bbox, leave width and map size unchanged

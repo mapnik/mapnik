@@ -13,6 +13,7 @@ For a complete change history, see the SVN log.
 
 Current Version (0.6.0-dev, SVN trunk):
 ---------------------------------------
+- Python: Added support for aspect_fix_mode (r1013)
 
 - Python: Added further pickling/copy support to Map, Layers, Datasources, Styles,and Rules (r907,r913,r921)
 
