@@ -21,15 +21,17 @@
  *****************************************************************************/
 //$Id: mapnik_map.cc 17 2005-03-08 23:58:43Z pavlenko $
 
-
+// boost
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
+// mapnik
 #include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/feature_type_style.hpp>
 
+#include "mapnik_enumeration.hpp"
 #include "python_optional.hpp"
 
 using mapnik::color;
@@ -125,6 +127,19 @@ mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& 
 void export_map() 
 {
    using namespace boost::python;
+   
+   // aspect ratio fix modes
+   enum_<mapnik::Map::aspect_fix_mode>("aspect_fix_mode")
+      .value("GROW_BBOX", mapnik::Map::GROW_BBOX)
+      .value("GROW_CANVAS",mapnik::Map::GROW_CANVAS)
+      .value("SHRINK_BBOX",mapnik::Map::SHRINK_BBOX)
+      .value("SHRINK_CANVAS",mapnik::Map::SHRINK_CANVAS)
+      .value("ADJUST_BBOX_WIDTH",mapnik::Map::ADJUST_BBOX_WIDTH)
+      .value("ADJUST_BBOX_HEIGHT",mapnik::Map::ADJUST_BBOX_HEIGHT)
+      .value("ADJUST_CANVAS_WIDTH",mapnik::Map::ADJUST_CANVAS_WIDTH)
+      .value("ADJUST_CANVAS_HEIGHT", mapnik::Map::ADJUST_CANVAS_HEIGHT)
+      ;
+   
    python_optional<mapnik::color> ();
    class_<std::vector<Layer> >("Layers")
       .def(vector_indexing_suite<std::vector<Layer> >())
@@ -278,7 +293,21 @@ void export_map()
            "\n"
            ">>> m.scale()\n"
          )
-        
+      
+      .def("set_aspect_fix_mode",&Map::setAspectFixMode,
+           "Set aspect fix mode.\n"
+           "Usage:\n"
+           "\n"
+           ">>> m.set_aspect_fix_mode(...)\n"
+         )
+
+      .def("get_aspect_fix_mode",&Map::getAspectFixMode,
+           "Get aspect fix mode.\n"
+           "Usage:\n"
+           "\n"
+           ">>> m.get_aspect_fix_mode()\n"
+         )
+      
       .def("zoom",&Map::zoom,
            "Zoom in by a given factor.\n"
            "Usage:\n"
