@@ -5,16 +5,25 @@ pkglib_LTLIBRARIES = \
 
 occi_la_SOURCES = \
 	occi_datasource.cpp\
+	occi_datasource.hpp\
 	occi_featureset.cpp\
+	occi_featureset.hpp\
 	spatial_classesm.cpp\
-	spatial_classeso.cpp
+	spatial_classesm.h\
+	spatial_classeso.cpp\
+	spatial_classesh.h\
+	occi_types.cpp\
+	occi_types.hpp
 
 occi_la_LIBADD = \
-        ${OCCI_LDFLAGS}
+  ${OCCI_LDFLAGS}
 
 occi_la_CXXFLAGS = \
-        ${OCCI_CFLAGS} \
-        -I../../../include
+  -Wall \
+  ${PROFILING_CFLAGS} \
+  ${TRACING_CFLAGS} \
+  ${OCCI_CFLAGS} \
+  -I../../../include
 
 occi_la_LDFLAGS = \
 	-module \

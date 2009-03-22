@@ -5,14 +5,20 @@ pkglib_LTLIBRARIES = \
 
 ogr_la_SOURCES = \
 	ogr_datasource.cpp\
-	ogr_featureset.cpp
+	ogr_datasource.hpp\
+	ogr_featureset.cpp\
+	ogr_featureset.hpp
+
 
 ogr_la_LIBADD = \
-        ${GDAL_LDFLAGS}
+  ${GDAL_LDFLAGS}
 
 ogr_la_CXXFLAGS = \
-        ${GDAL_CFLAGS} \
-        -I../../../include
+  -Wall \
+  ${PROFILING_CFLAGS} \
+  ${TRACING_CFLAGS} \
+  ${GDAL_CFLAGS} \
+  -I../../../include
 
 ogr_la_LDFLAGS = \
 	-module \

@@ -5,13 +5,22 @@ pkglib_LTLIBRARIES = \
 	postgis.la
 
 postgis_la_SOURCES = \
-	postgis.cpp          \
-	postgisfs.cpp
+	connection.hpp\
+	connection_manager.hpp\
+	corsorresultset.hpp\
+	postgis.cpp\
+	postgis.hpp\
+	postgisfs.cpp\
+	property_index.hpp\
+	resultset.hpp
 
 postgis_la_LIBADD = \
 	${POSTGRESQL_LDFLAGS}
 
 postgis_la_CXXFLAGS = \
+  -Wall \
+  ${PROFILING_CFLAGS} \
+  ${TRACING_CFLAGS} \
 	${POSTGRESQL_CFLAGS} \
 	-I../../../include
 

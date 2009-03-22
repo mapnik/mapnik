@@ -6,6 +6,7 @@ SUBDIRS = \
 	raster \
 	shape \
 	osm \
-	sqlite
+	sqlite \
+	kismet
 
 ## File created by the gnome-build tools

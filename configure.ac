@@ -26,7 +26,7 @@ AC_ARG_ENABLE(debug,
 
 if [ ! test "x$enable_debug" != "xyes"]; then
   AC_DEFINE(DEBUG, 1, [Define to enable debug build])
-  CXXFLAGS="-ggdb -O0 -DDEBUG -DMAPNIK_DEBUG"
+  CXXFLAGS="-ggdb -O0 -DDEBUG"
   AC_MSG_RESULT(yes)
 else
   CXXFLAGS="-O3"
@@ -42,12 +42,25 @@ AC_ARG_ENABLE(profiling,
 
 if [ ! test "x$enable_profiling" != "xyes"]; then
   AC_DEFINE(PROFILING, 1, [Define to enable profiling build])
-  #PKG_CHECK_MODULES(PROFILING, StopClock >= 0.1)
   PROFILING_CFLAGS="$PROFILING_CFLAGS -pg"
+  AC_SUBST(PROFILING_CFLAGS)
 else
   AC_MSG_RESULT(no)
 fi
 
+dnl Check for option to enable tracing
+AC_MSG_CHECKING(whether to enable tracing)
+AC_ARG_ENABLE(tracing,
+        [  --enable-tracing=[no/yes]        enables tracing build (default=no)],,
+                 enable_tracing=no)
+
+if [ ! test "x$enable_tracing" != "xyes"]; then
+  TRACING_CFLAGS="-DMAPNIK_DEBUG"
+  AC_SUBST(TRACING_CFLAGS)
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
 
 dnl Check for boost
 AX_BOOST_BASE
@@ -224,6 +237,7 @@ plugins/input/shape/Makefile
 plugins/input/osm/Makefile
 plugins/input/ogr/Makefile
 plugins/input/sqlite/Makefile
+plugins/input/kismet/Makefile
 src/Makefile
 mapnik.pc
 mapnik-uninstalled.pc

@@ -5,12 +5,25 @@ pkglib_LTLIBRARIES = \
 	osm.la
 
 osm_la_SOURCES = \
+	basiccurl.cpp\
+	basiccurl.h\
+	dataset_deliverer.cpp\
+	dataset_deliverer.h\
 	osm.cpp \
+	osm.h\
 	osm_datasource.cpp \
+	osm_datasource.hpp \
 	osm_featureset.cpp \
-	osmparser.cpp	
+	osm_featureset.hpp \
+	osmparser.cpp\
+	osmparser.h\
+	osmtagtypes.h\
+	renderer.cpp
 
 osm_la_CXXFLAGS = \
+  -Wall \
+  ${PROFILING_CFLAGS} \
+  ${TRACING_CFLAGS} \
 	-I../../../include \
 	${LIBXML2_CFLAGS}
 

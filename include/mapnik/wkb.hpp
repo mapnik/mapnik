@@ -31,6 +31,18 @@
 
 namespace mapnik
 {
+
+    /*!
+     * From wikipedia.com:
+     *
+     * Well-known text (WKT) is a text markup language for representing vector 
+     * geometry objects on a map, spatial reference systems of spatial objects 
+     * and transformations between spatial reference systems. A binary equivalent,
+     * known as well-known binary (WKB) is used to transfer and store the same 
+     * information on databases, such as PostGIS. The formats are regulated by 
+     * the Open Geospatial Consortium (OGC) and described in their Simple Feature 
+     * Access and Coordinate Transformation Service specifications.
+     */
     enum wkbFormat
     {
         wkbGeneric=1,
