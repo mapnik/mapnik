@@ -61,13 +61,9 @@ feature_ptr kismet_featureset::next()
       feature_ptr feature(new Feature(feature_id));
       string key = "internet_access";
       string value = "wlan";
-      double outMercLongitude = 0;
-      double outMercLatitude = 0;
-      
-      wgs84ToMercator (knd.bestlon_, knd.bestlat_, outMercLongitude, outMercLatitude);
-     
+
       mapnik::geometry2d * pt = new mapnik::point_impl;
-      pt->move_to(outMercLongitude, outMercLatitude);
+      pt->move_to(knd.bestlon_, knd.bestlat_);
       feature->add_geometry(pt);
       (*feature)[key] = tr_->transcode(value.c_str ());
       
@@ -79,17 +75,4 @@ feature_ptr kismet_featureset::next()
     
     // returns empty object to mark end
     return feature_ptr();
-}
-
-void kismet_featureset::wgs84ToMercator (double inWGS84Longitude, double inWGS84Latitude, 
-                                         double &outMercLongitude, double &outMercLatitude)
-{
-  projection dest ("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over"); // initialize to your Map projection
-  proj_transform proj_tr (source_, dest);
-
-  double z = 0.0;
-  proj_tr.forward (inWGS84Longitude, inWGS84Latitude, z);
-
-  outMercLongitude = inWGS84Longitude;
-  outMercLatitude = inWGS84Latitude;
 }

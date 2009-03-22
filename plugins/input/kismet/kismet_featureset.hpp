@@ -48,8 +48,6 @@ class kismet_featureset : public mapnik::Featureset
       mapnik::feature_ptr next();
     
    private:
-      void wgs84ToMercator (double inWGS84Longitude, double inWGS84Latitude, 
-                            double &outMercLongitude, double &outMercLatitude);
       const std::list<kismet_network_data> &knd_list_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
       mapnik::wkbFormat format_;
