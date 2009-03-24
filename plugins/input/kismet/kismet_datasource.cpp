@@ -226,7 +226,7 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
     cerr << "Error while connecting" << endl;
   }
 
-  command = "!1 ENABLE NETWORK ssid,bssid,bestlat,bestlon\n";
+  command = "!1 ENABLE NETWORK ssid,bssid,wep,bestlat,bestlon\n";
 
   if (write(sockfd, command.c_str (), command.length ()) != (signed) command.length ())
   {
@@ -239,6 +239,7 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
   char bssid[MAX_KISMET_LINE] = {};
   double bestlat = 0;
   double bestlon = 0;
+  int crypt = crypt_none;
   
   while ( (n = read(sockfd, buffer, sizeof(buffer))) > 0)
   {
@@ -261,14 +262,14 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
         
         //cout << "Line: " << kismet_line << "[ENDL]" << endl;
         
-        int param_number = 4; // the number of parameters to parse
+        int param_number = 5; // the number of parameters to parse
         
         // Attention: string length specified to the constant!
-        if (sscanf (kismet_line.c_str (), "*NETWORK: \001%1024[^\001]\001 %1024s %lf %lf", ssid, bssid, &bestlat, &bestlon) == param_number)
+        if (sscanf (kismet_line.c_str (), "*NETWORK: \001%1024[^\001]\001 %1024s %d %lf %lf", ssid, bssid, &crypt, &bestlat, &bestlon) == param_number)
         {
-          //printf ("ssid=%s, bssid=%s, bestlat=%f, bestlon=%f\n", ssid, bssid, bestlat, bestlon);
+          //printf ("ssid=%s, bssid=%s, crypt=%d, bestlat=%f, bestlon=%f\n", ssid, bssid, crypt, bestlat, bestlon);
 
-          kismet_network_data knd (ssid, bssid, bestlat, bestlon);
+          kismet_network_data knd (ssid, bssid, bestlat, bestlon, crypt);
           
           boost::mutex::scoped_lock lock(knd_list_mutex);
                       

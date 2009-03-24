@@ -60,7 +60,20 @@ feature_ptr kismet_featureset::next()
       
       feature_ptr feature(new Feature(feature_id));
       string key = "internet_access";
-      string value = "wlan";
+      string value;
+      
+      if (knd.crypt_ == crypt_none)
+      {
+        value = "wlan_uncrypted";
+      }
+      else if (knd.crypt_ == crypt_wep)
+      {
+        value = "wlan_wep";
+      }
+      else
+      {
+        value = "wlan_crypted";
+      }      
 
       mapnik::geometry2d * pt = new mapnik::point_impl;
       pt->move_to(knd.bestlon_, knd.bestlat_);
