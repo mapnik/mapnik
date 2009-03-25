@@ -112,6 +112,8 @@ fi
 dnl check to build python bindings
 AX_BOOST_PYTHON
 
+AM_PATH_PYTHON([2.4])
+
 AX_LIB_POSTGRESQL
 if test "x$found_postgresql" = "xyes"; then
   echo "checking whether to enable postgresql... yes"
@@ -248,4 +250,6 @@ agg/src/Makefile
 agg/include/Makefile
 bindings/Makefile
 bindings/python/Makefile
+bindings/python/mapnik/Makefile
+bindings/python/mapnik/ogcserver/Makefile
 ])

@@ -1,3 +1,4 @@
+pkglibdir = $(libdir)/mapnik/input
 
 if HAVE_POSTGRESQL
 

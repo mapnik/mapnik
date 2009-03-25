@@ -1,3 +1,5 @@
+pkglibdir = $(libdir)/mapnik/input
+
 if HAVE_OCCI
 
 pkglib_LTLIBRARIES = \

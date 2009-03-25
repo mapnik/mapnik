@@ -1,3 +1,4 @@
+pkglibdir = $(libdir)/mapnik/input
 
 pkglib_LTLIBRARIES = \
 	raster.la

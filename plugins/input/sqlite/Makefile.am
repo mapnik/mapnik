@@ -1,3 +1,5 @@
+pkglibdir = $(libdir)/mapnik/input
+
 if HAVE_SQLITE3
 
 pkglib_LTLIBRARIES = \

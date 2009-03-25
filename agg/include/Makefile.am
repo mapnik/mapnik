@@ -1,9 +1,7 @@
 
 if BUILD_AGG
 
-libaggdir = $(pkgincludedir)/agg
-
-libagg_HEADERS = \
+noinst_HEADERS = \
 	agg_alpha_mask_u8.h\
 	agg_arc.h \
 	agg_array.h \
@@ -127,9 +125,6 @@ libagg_HEADERS = \
 	agg_vpgen_clip_polygon.h \
 	agg_vpgen_clip_polyline.h \
 	agg_vpgen_segmentator.h
-
-EXTRA_DIST = \
-	$(libagg_HEADERS)
 
 endif
 

@@ -1,3 +1,4 @@
+pkglibdir = $(libdir)/@PYTHON_LIB@/site-packages/mapnik
 
 pkglib_LTLIBRARIES = \
 	_mapnik.la
@@ -51,3 +52,6 @@ _mapnik_la_CXXFLAGS = \
 
 _mapnik_la_LDFLAGS = \
 	-module
+
+SUBDIRS = \
+	mapnik
