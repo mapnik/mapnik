@@ -109,6 +109,8 @@ if test "x$ax_cv_boost_iostreams" = "xno"; then
   exit
 fi
 
+dnl check to build python bindings
+AX_BOOST_PYTHON
 
 AX_LIB_POSTGRESQL
 if test "x$found_postgresql" = "xyes"; then
@@ -244,4 +246,6 @@ mapnik-uninstalled.pc
 agg/Makefile
 agg/src/Makefile
 agg/include/Makefile
+bindings/Makefile
+bindings/python/Makefile
 ])
