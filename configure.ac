@@ -109,6 +109,9 @@ if test "x$ax_cv_boost_iostreams" = "xno"; then
   exit
 fi
 
+AX_BOOST_PROGRAM_OPTIONS
+AM_CONDITIONAL(HAVE_BOOST_PROGRAM_OPTIONS, test "x$ax_cv_boost_program_options" = "xyes")
+
 dnl check to build python bindings
 AX_BOOST_PYTHON
 
@@ -137,6 +140,9 @@ if test "x$GDAL_CONFIG" != "x"; then
   GDAL_LIBS=`$GDAL_CONFIG --libs`
   AC_SUBST(GDAL_CFLAGS)
   AC_SUBST(GDAL_LIBS)
+  found_gdal="yes"
+else
+  found_gdal="no"
 fi
 AM_CONDITIONAL(HAVE_GDAL, test "x$GDAL_CONFIG" != "x")
 
@@ -164,6 +170,9 @@ fi
 
 ## test for optional sqlite3 support
 AX_LIB_SQLITE3
+if [ test "x$success" = "xyes"]; then
+  found_sqlite3="yes"
+fi
 AM_CONDITIONAL(HAVE_SQLITE3, test "x$success" = "xyes")
 
 PKG_CHECK_MODULES(PNG, libpng)
@@ -227,11 +236,74 @@ else
   AC_MSG_RESULT(no)
 fi
 
+#dnl Set PACKAGE SOURCE DIR in config.h.
+packagesrcdir=`cd $srcdir && pwd`
+
+#dnl Set PACKAGE PREFIX
+if test "x${prefix}" = "xNONE"; then
+  packageprefix=${ac_default_prefix}
+else
+  packageprefix=${prefix}
+fi
+
+#dnl Set PACKAGE DIRS in config.h
+packagedatadir=share/${PACKAGE}
+packagedocdir=doc/${PACKAGE}
+packagepixmapsdir=share/pixmaps/${PACKAGE}
+packagelibdir=lib/${PACKAGE}
+systemfontsdir=share/fonts
+
+#dnl Subst PACKAGE_DATA_DIR.
+NO_PREFIX_PACKAGE_DATA_DIR="${packagedatadir}"
+AC_SUBST(NO_PREFIX_PACKAGE_DATA_DIR)
+PACKAGE_DATA_DIR="${packageprefix}/${packagedatadir}"
+AC_SUBST(PACKAGE_DATA_DIR)
+
+dnl Subst PACKAGE_DOC_DIR.
+NO_PREFIX_PACKAGE_DOC_DIR="${packagedocdir}"
+AC_SUBST(NO_PREFIX_PACKAGE_DOC_DIR)
+PACKAGE_DOC_DIR="${packageprefix}/${packagedocdir}"
+AC_SUBST(PACKAGE_DOC_DIR)
+
+dnl Subst PACKAGE_PIXMAPS_DIR.
+NO_PREFIX_PACKAGE_PIXMAPS_DIR="${packagepixmapsdir}"
+AC_SUBST(NO_PREFIX_PACKAGE_PIXMAPS_DIR)
+PACKAGE_PIXMAPS_DIR="${packageprefix}/${packagepixmapsdir}"
+AC_SUBST(PACKAGE_PIXMAPS_DIR)
+
+dnl Subst PACKAGE_LIB_DIR
+NO_PREFIX_PACKAGE_LIB_DIR="${packagelibmapsdir}"
+AC_SUBST(NO_PREFIX_PACKAGE_LIB_DIR)
+PACKAGE_LIB_DIR="${packageprefix}/${packagelibdir}"
+AC_SUBST(PACKAGE_LIB_DIR)
+
+dnl Subst SYSTEM_FONTS_DIR
+NO_PREFIX_SYSTEM_FONTS_DIR="${systemfontsdir}"
+AC_SUBST(NO_PREFIX_SYSTEM_FONTS_DIR)
+SYSTEM_FONTS_DIR="${packageprefix}/${systemfontsdir}"
+AC_SUBST(SYSTEM_FONTS_DIR)
+
+AC_DEFINE_UNQUOTED(SYSTEM_FONTS_DIR, "${packageprefix}/${systemfontsdir}","")
+AC_DEFINE_UNQUOTED(PACKAGE_LIB_DIR, "${packageprefix}/${packagelibdir}","")
+AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${packageprefix}/${packagedatadir}","")
+AC_DEFINE_UNQUOTED(SYSTEM_DATA_DIR, "${packageprefix}/${systemdatadir}","")
+AC_DEFINE_UNQUOTED(PACKAGE_DOC_DIR, "${packageprefix}/${packagedocdir}","")
+AC_DEFINE_UNQUOTED(PACKAGE_PIXMAPS_DIR, "${packageprefix}/${packagepixmapsdir}","")
+AC_DEFINE_UNQUOTED(SYSTEM_PIXMAPS_DIR, "${packageprefix}/${systempixmapsdir}","")
+AC_DEFINE_UNQUOTED(PACKAGE_SOURCE_DIR, "${packagesrcdir}","")
 
 AC_OUTPUT([
 Makefile
 include/Makefile
 include/mapnik/Makefile
+agg/Makefile
+agg/src/Makefile
+agg/include/Makefile
+bindings/Makefile
+bindings/python/Makefile
+bindings/python/mapnik/Makefile
+bindings/python/mapnik/ogcserver/Makefile
+bindings/python/mapnik/paths.py
 plugins/Makefile
 plugins/input/Makefile
 plugins/input/gdal/Makefile
@@ -245,11 +317,29 @@ plugins/input/kismet/Makefile
 src/Makefile
 mapnik.pc
 mapnik-uninstalled.pc
-agg/Makefile
-agg/src/Makefile
-agg/include/Makefile
-bindings/Makefile
-bindings/python/Makefile
-bindings/python/mapnik/Makefile
-bindings/python/mapnik/ogcserver/Makefile
 ])
+
+echo
+echo "Build configuration:"
+echo "--------------------"
+echo
+echo "Library support:"
+echo "cairo ......................... $enable_cairo" 
+echo "build included agg library..... $enable_included_agg"
+echo "libxml2 loader ................ $enable_libxml2"
+echo
+echo "Plugin support:"
+echo "build plugin (input/postgis)... $found_postgresql" 
+echo "build plugin (input/gdal)...... $found_gdal" 
+echo "build plugin (input/ogr)....... $found_gdal" 
+echo "build plugin (input/osm)....... $enable_libxml2" 
+echo "build plugin (input/sqlite).... $found_sqlite3" 
+echo
+echo "Debugging support:"
+echo "debugger (gdb)................. $enable_debug" 
+echo "profiling (gprof).............. $enable_profiling"
+echo "tracing (log output)........... $enable_tracing"
+
+dnl echo "build shapeindex application... $ax_cv_boost_program_options" 
+
+echo

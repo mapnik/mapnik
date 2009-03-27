@@ -5,7 +5,7 @@ SUBDIRS = src \
 	agg\
 	plugins\
 	include \
-	bindings
+	bindings 
 
 
 mapnikdocdir = ${prefix}/doc/mapnik
