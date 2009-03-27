@@ -43,16 +43,14 @@ kismet_featureset::kismet_featureset(const std::list<kismet_network_data> &knd_l
      knd_list_it(knd_list_.begin ()),
      source_("+proj=latlong +datum=WGS84")
 {
-    cout << "kismet_featureset::kismet_featureset()" << endl;
+    //cout << "kismet_featureset::kismet_featureset()" << endl;
 }
 
 kismet_featureset::~kismet_featureset() {}
 
 feature_ptr kismet_featureset::next()
 {
-    cout << "kismet_featureset::next()" << endl;
-    
-    cout << "create wlan feature: " << knd_list_.size () << endl;
+    //cout << "kismet_featureset::next()" << endl;
   
     if (knd_list_it != knd_list_.end ())
     {
@@ -89,3 +87,4 @@ feature_ptr kismet_featureset::next()
     // returns empty object to mark end
     return feature_ptr();
 }
+

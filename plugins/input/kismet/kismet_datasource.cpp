@@ -78,7 +78,7 @@ kismet_datasource::kismet_datasource(parameters const& params)
      desc_(*params.get<std::string>("type"), 
      *params.get<std::string>("encoding","utf-8"))
 {
-    cout << "kismet_datasource::kismet_datasource()" << endl;
+    //cout << "kismet_datasource::kismet_datasource()" << endl;
   
     boost::optional<std::string> host = params.get<std::string>("host");
     if (!host) throw datasource_exception("missing <host> paramater");
@@ -142,7 +142,7 @@ int kismet_datasource::type() const
 
 Envelope<double> kismet_datasource::envelope() const
 {
-   cout << "kismet_datasource::envelope()" << endl;
+   //cout << "kismet_datasource::envelope()" << endl;
    return extent_;
 }
 
@@ -153,7 +153,7 @@ layer_descriptor kismet_datasource::get_descriptor() const
 
 featureset_ptr kismet_datasource::features(query const& q) const
 {
-    cout << "kismet_datasource::features()" << endl;
+    //cout << "kismet_datasource::features()" << endl;
     
     // TODO: use Envelope to filter bbox before adding to featureset_ptr
     mapnik::Envelope<double> const& e = q.get_bbox();
@@ -167,7 +167,7 @@ featureset_ptr kismet_datasource::features(query const& q) const
 
 featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
 {
-    cout << "kismet_datasource::features_at_point()" << endl;
+    //cout << "kismet_datasource::features_at_point()" << endl;
 
 #if 0
    if (dataset_ && layer_)
@@ -187,7 +187,7 @@ featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
 
 void kismet_datasource::run (const std::string &ip_host, const unsigned int port)
 {
-  cout << "+run" << endl;
+  //cout << "+run" << endl;
   
   int                 sockfd, n;
   struct sockaddr_in  sock_addr;
@@ -207,7 +207,7 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
 
   if (host == NULL)
   {
-    herror ("Error while searching host");
+    herror ("plugins/input/kismet: Error while searching host");
     exit (1);
   }
 
@@ -218,19 +218,19 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
 
   if ( (sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
   {
-    cerr << "Error while creating socket" << endl;
+    cerr << "plugins/input/kismet: Error while creating socket" << endl;
   }
 
   if (connect(sockfd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)))
   {
-    cerr << "Error while connecting" << endl;
+    cerr << "plugins/input/kismet: Error while connecting" << endl;
   }
 
   command = "!1 ENABLE NETWORK ssid,bssid,wep,bestlat,bestlon\n";
 
   if (write(sockfd, command.c_str (), command.length ()) != (signed) command.length ())
   {
-    cerr << "Error sending command to " << ip_host << endl;
+    cerr << "plugins/input/kismet: Error sending command to " << ip_host << endl;
     close(sockfd);
     // TODO: what to do now?
   }
@@ -241,6 +241,8 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
   double bestlon = 0;
   int crypt = crypt_none;
   
+  // BUG: if kismet_server is active sending after mapnik was killed and then restarted the 
+  // assert is called. Needs to be analyzed!
   while ( (n = read(sockfd, buffer, sizeof(buffer))) > 0)
   {
     assert (n < MAX_TCP_BUFFER);
@@ -294,10 +296,10 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
 
   if (n < 0)
   {
-    cerr << "Error while reading from socket" << endl;
+    cerr << "plugins/input/kismet: Error while reading from socket" << endl;
   }
 
   close(sockfd);
   
-  cout << "-run" << endl;
+  //cout << "-run" << endl;
 }
