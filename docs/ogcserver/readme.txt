@@ -9,23 +9,28 @@ Introduction
 
 Mapnik provides a server package to allow the publishing of maps
 through the open and standard WMS interface published by the Open Geospatial
-Consortium (OGC).  It is in implemented in Python, around the core C++
+Consortium (OGC).  It is in implemented in Python, around the core Mapnik C++
 library.
 
 
-Features/Caveats
-----------------
+Features
+--------
 
 - WMS 1.1.1 and 1.3.0
-- CGI/FastCGI
+- CGI/FastCGI, WSGI, mod_python 
 - Supports all 3 requests: GetCapabilities, GetMap and GetFeatureInfo
-- GetFeatureInfo supports text/plain output only
 - JPEG/PNG output
 - XML/INIMAGE/BLANK error handling
 - Multiple named styles support
 - Reprojection support
 - Supported layer metadata: title, abstract
-- Needs to be able to write to tempfile.gettempdir() (most likely "/tmp")
+
+
+Features/Caveats
+----------------
+- GetFeatureInfo supports text/plain output only
+- PNG256(8-bit PNG not yet supported)
+- CGI/FastCGI interface needs to be able to write to tempfile.gettempdir() (most likely "/tmp")
 
 
 Dependencies
@@ -33,21 +38,32 @@ Dependencies
 
 Please properly install the following before proceeding further:
 
-- jonpy (http://jonpy.sourceforge.net/)
+- Mapnik python bindings (which will also install the `ogcserver` module code)
 - lxml (http://codespeak.net/lxml/)
 - PIL (http://www.pythonware.com/products/pil)
-- PROJ.4 (http://proj.maptools.org/)
+
+For the CGI/FastCGI interface also install:
+
+- jonpy (http://jonpy.sourceforge.net/)
 
 
 Installation
 ------------
 
-- Make sure Mapnik was compiled and linked with PROJ.4 support.  If this isn't
-  the case, recompile Mapnik and make sure it is.
+- The OGCServer uses Mapnik's interface to the Proj.4 library for projection support
+  and depends on using integer EPSG codes. Confirm that you have installed Proj.4 with
+  all necessary data files (http://trac.osgeo.org/proj/wiki/FAQ) and have added any custom
+  projections you need to the 'epsg' file usually located at '/usr/local/share/proj/epsg'.
 
-- The executable "ogcserver" in utils/ogcserver will work for both CGI and
-  FastCGI operations.  Where to place it will depend on your server's
-  configuration and is beyond this documentation.  For information on FastCGI
+- Test that the server code is available and installed properly by importing it within a
+  python interpreter::
+  
+  >>> from mapnik import ogcserver
+  >>> # no error means proper installation
+
+- There is a sample python script called "ogcserver" in the utils/ogcserver folder of the
+  Mapnik source code that will work for both CGI and FastCGI operations. Where to place it
+  will depend on your server's configuration and is beyond this documentation.  For information on FastCGI
   go to http://www.fastcgi.com/.
 
 
@@ -58,7 +74,7 @@ Configuring the server
   Python text script.
   
   1) Edit the path to the interpreter in the first line.
-  2) Edit the path to the config file if you don't like the default.
+  2) Edit the path to the config file if you do not like the default.
   
 - Copy the sample configuration "ogcserver.conf" file in utils/ogcserver to
   the location you specified in the previous step.
@@ -100,7 +116,7 @@ The rules for writing this class are:
 
 - It MUST be called 'WMSFactory'.
 - It MUST sub-class mapnik.ogcserver.WMS.BaseWMSFactory.
-- The __init__ MUST call the base class'.
+- The __init__ MUST call the base class.
 - Layers MUST be named with the first parameter to the constructor.
 - Layers MUST define an EPSG projection in the second parameter to the
   constructor.  This implies that the underlying data must be in an EPSG
