@@ -763,7 +763,7 @@ namespace mapnik
                   path_type path(t_,geom,prj_trans);
                   placement text_placement(info,sym);  
                   text_placement.avoid_edges = sym.get_avoid_edges();
-                  if (sym.get_label_placement() == POINT_PLACEMENT || geom.num_points() == 1) 
+                  if (sym.get_label_placement() == POINT_PLACEMENT) 
                   {
                      double label_x, label_y, z=0.0;
                      geom.label_position(&label_x, &label_y);
@@ -772,7 +772,7 @@ namespace mapnik
                      finder.find_point_placement(text_placement,label_x,label_y);
                      finder.update_detector(text_placement);
                   }
-                  else //LINE_PLACEMENT
+                  else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                   {
                      finder.find_line_placements<path_type>(text_placement,path);
                   }
