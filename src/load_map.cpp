@@ -81,6 +81,7 @@ namespace mapnik
          void parse_line_symbolizer( rule_type & rule, ptree const & sym);
          void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
          void parse_building_symbolizer( rule_type & rule, ptree const & sym );
+         void parse_raster_symbolizer( rule_type & rule, ptree const & sym );
          void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
          
          void ensure_font_face( const std::string & face_name );
@@ -529,7 +530,7 @@ namespace mapnik
                 } 
                 else if ( sym.first == "RasterSymbolizer")
                 {
-                    rule.append(raster_symbolizer());
+                    parse_raster_symbolizer( rule, sym.second );
                 } 
                 else if ( sym.first == "MarkersSymbolizer")
                 {
@@ -1186,6 +1187,59 @@ namespace mapnik
             throw;
         }
     } 
+
+    void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
+    {
+        try
+        {
+            raster_symbolizer raster_sym;
+
+            ptree::const_iterator cssIter = sym.begin();
+            ptree::const_iterator endCss = sym.end();
+
+            for(; cssIter != endCss; ++cssIter)
+            {
+                ptree::value_type const& css_tag = *cssIter;
+                ptree const & css = cssIter->second;
+
+                if (css_tag.first == "CssParameter")
+                {
+                    std::string css_name  = get_attr<string>(css, "name");
+                    if (css_name == "mode")
+                    {
+                        raster_sym.set_mode(get_css<string>(css, css_name));
+                    }
+                    else if (css_name == "scaling")
+                    {
+                        raster_sym.set_scaling(get_css<string>(css, css_name));
+                    }
+                    else if (css_name == "opacity")
+                    {
+                        float opacity = get_css<float>(css, css_name);
+                        raster_sym.set_opacity(opacity);
+                    }
+                    else
+                    {
+                        throw config_error(std::string("Failed to parse unknown CSS ") +
+                                "parameter '" + css_name + "'");
+                    }
+                }
+                else if (css_tag.first != "<xmlcomment>" &&
+                        css_tag.first != "<xmlattr>" )
+                {
+                    throw config_error(std::string("Unknown child node. ") +
+                            "Expected 'CssParameter' but got '" + css_tag.first + "'");
+                }
+            }
+            rule.append(raster_sym);
+        }
+        catch (const config_error & ex)
+        {
+            ex.append_context("in RasterSymbolizer");
+            throw;
+        }
+    }
+
 
     void map_parser::ensure_font_face( const std::string & face_name )
     {

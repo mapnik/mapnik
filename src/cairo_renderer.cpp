@@ -961,7 +961,7 @@ namespace mapnik
       }
    }
 
-   void cairo_renderer_base::process(raster_symbolizer const&,
+   void cairo_renderer_base::process(raster_symbolizer const& sym,
                                      Feature const& feature,
                                      proj_transform const& prj_trans)
    {
@@ -973,10 +973,21 @@ namespace mapnik
       {
          Envelope<double> ext = t_.forward(raster->ext_);
          ImageData32 target(int(ext.width() + 0.5), int(ext.height() + 0.5));
+         //TODO -- use cairo matrix transformation for scaling
+         if (sym.get_scaling() == "fast"){
          scale_image<ImageData32>(target, raster->data_);
+         } else if (sym.get_scaling() == "bilinear"){
+            scale_image_bilinear<ImageData32>(target,raster->data_);
+         } else if (sym.get_scaling() == "bilinear8"){
+            scale_image_bilinear8<ImageData32>(target,raster->data_);
+         } else {
+            scale_image<ImageData32>(target,raster->data_);
+         }
+
          cairo_context context(context_);
 
-         context.add_image(int(ext.minx()), int(ext.miny()), target);
+         //TODO -- support for advanced image merging
+         context.add_image(int(ext.minx()), int(ext.miny()), target, sym.get_opacity());
       }
    }
 

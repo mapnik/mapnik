@@ -137,8 +137,22 @@ namespace mapnik
 
             void operator () ( const raster_symbolizer & sym )
             {
-                rule_.push_back(
-                        ptree::value_type("RasterSymbolizer", ptree()));
+                ptree & sym_node = rule_.push_back(
+                        ptree::value_type("RasterSymbolizer", ptree()))->second;
+                raster_symbolizer dfl;
+
+                if ( sym.get_mode() != dfl.get_mode() )
+                {
+                    set_css( sym_node, "mode", sym.get_mode() );
+                }
+                if ( sym.get_scaling() != dfl.get_scaling() )
+                {
+                    set_css( sym_node, "scaling", sym.get_scaling() );
+                }
+                if ( sym.get_opacity() != dfl.get_opacity() )
+                {
+                    set_css( sym_node, "opacity", sym.get_opacity() );
+                }
             }
 
             void operator () ( const shield_symbolizer & sym )

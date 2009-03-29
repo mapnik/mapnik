@@ -165,9 +165,6 @@ namespace mapnik {
       : ok_(false),
         conv_(0)
    {
-#ifdef MAPNIK_DEBUG
-      std::cerr << "ENCODING = " << encoding << "\n"; 
-#endif
       
 //#ifndef WORDS_BIGENDIAN
          //     desc_ = iconv_open("UCS-4LE",encoding.c_str());

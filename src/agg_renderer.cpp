@@ -660,20 +660,56 @@ namespace mapnik
    }
 
    template <typename T>
-   void agg_renderer<T>::process(raster_symbolizer const&,
+   void agg_renderer<T>::process(raster_symbolizer const& sym,
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
-      // TODO -- at the moment raster_symbolizer is an empty class 
-      // used for type dispatching, but we can have some fancy raster
-      // processing in a future (filters??). Just copy raster into pixmap for now.
       raster_ptr const& raster=feature.get_raster();
       if (raster)
       {
          Envelope<double> ext=t_.forward(raster->ext_);
          ImageData32 target(int(ext.width() + 0.5),int(ext.height() + 0.5));
+
+         if (sym.get_scaling() == "fast"){
+            scale_image<ImageData32>(target,raster->data_);
+         } else if (sym.get_scaling() == "bilinear"){
+            scale_image_bilinear<ImageData32>(target,raster->data_);
+         } else if (sym.get_scaling() == "bilinear8"){
+            scale_image_bilinear8<ImageData32>(target,raster->data_);
+         } else {
          scale_image<ImageData32>(target,raster->data_);
+         }
+
+         if (sym.get_mode() == "normal"){
+             if (sym.get_opacity() == 1.0){
          pixmap_.set_rectangle(int(ext.minx()),int(ext.miny()),target);
+             } else {
+                pixmap_.set_rectangle_alpha2(target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+             }
+         } else if (sym.get_mode() == "grain_merge"){
+            pixmap_.template merge_rectangle<Image32::MergeGrain> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+         } else if (sym.get_mode() == "grain_merge2"){
+            pixmap_.template merge_rectangle<Image32::MergeGrain2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+         } else if (sym.get_mode() == "multiply"){
+            pixmap_.template merge_rectangle<Image32::Multiply> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+         } else if (sym.get_mode() == "multiply2"){
+            pixmap_.template merge_rectangle<Image32::Multiply2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+         } else if (sym.get_mode() == "divide"){
+            pixmap_.template merge_rectangle<Image32::Divide> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+         } else if (sym.get_mode() == "divide2"){
+            pixmap_.template merge_rectangle<Image32::Divide2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+         } else if (sym.get_mode() == "screen"){
+            pixmap_.template merge_rectangle<Image32::Screen> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+         } else if (sym.get_mode() == "hard_light"){
+            pixmap_.template merge_rectangle<Image32::HardLight> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+         } else {
+             if (sym.get_opacity() == 1.0){
+                 pixmap_.set_rectangle(int(ext.minx()),int(ext.miny()),target);
+             } else {
+                pixmap_.set_rectangle_alpha2(target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+             }
+         }
+         // TODO: other modes? (add,diff,sub,...)
       }
    }
     

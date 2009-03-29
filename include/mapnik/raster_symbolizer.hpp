@@ -28,7 +28,41 @@
 
 namespace mapnik
 {
-    struct MAPNIK_DECL raster_symbolizer { /* TODO */};
+    struct MAPNIK_DECL raster_symbolizer {
+        explicit raster_symbolizer()
+            : mode_("normal"),
+              scaling_("fast"),
+              opacity_(1.0) {}
+
+        std::string const& get_mode() const
+        {
+            return mode_;
+        }
+        void set_mode(std::string const& mode)
+        {
+            mode_ = mode;
+        }
+        std::string const& get_scaling() const
+        {
+            return scaling_;
+        }
+        void set_scaling(std::string const& scaling)
+        {
+            scaling_ = scaling;
+        }
+        void set_opacity(float opacity)
+        {
+            opacity_ = opacity;
+        }
+        float get_opacity() const
+        {
+            return opacity_;
+        }
+    private:
+        std::string mode_;
+        std::string scaling_;
+        float opacity_;
+    };
 }
 
 #endif //RASTER_SYMBOLIZER_HPP
