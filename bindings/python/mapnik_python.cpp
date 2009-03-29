@@ -57,6 +57,7 @@ void export_shield_symbolizer();
 void export_font_engine();
 void export_projection();
 void export_proj_transform();
+void export_view_transform();
 
 #include <mapnik/version.hpp>
 #include <mapnik/map.hpp>
@@ -262,6 +263,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_font_engine();
     export_projection();
     export_proj_transform();
+    export_view_transform();
     export_coord();
     export_map();
 
