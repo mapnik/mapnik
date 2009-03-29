@@ -763,7 +763,7 @@ namespace mapnik
                   path_type path(t_,geom,prj_trans);
                   placement text_placement(info,sym);  
                   text_placement.avoid_edges = sym.get_avoid_edges();
-                  if (sym.get_label_placement() == POINT_PLACEMENT) 
+                  if (sym.get_label_placement() == POINT_PLACEMENT || geom.num_points() == 1) 
                   {
                      double label_x, label_y, z=0.0;
                      geom.label_position(&label_x, &label_y);
