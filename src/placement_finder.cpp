@@ -212,7 +212,9 @@ namespace mapnik
    
    template <typename DetectorT>
    void placement_finder<DetectorT>::find_point_placement(placement & p, 
-                                                          double label_x, double label_y)
+                                                          double label_x, 
+                                                          double label_y,
+                                                          vertical_alignment_e valign)
    {
       double x, y;
       std::auto_ptr<placement_element> current_placement(new placement_element);
@@ -293,22 +295,32 @@ namespace mapnik
       }
         
       p.info.set_dimensions(string_width, string_height);
-      
-       
-      current_placement->starting_x = label_x;
-      current_placement->starting_y = label_y;
-      
-      current_placement->starting_x += boost::tuples::get<0>(p.displacement_);
-      current_placement->starting_y += boost::tuples::get<1>(p.displacement_); 
-      
+        
       unsigned int line_number = 0;
       unsigned int index_to_wrap_at = line_breaks[line_number];
       double line_width = line_widths[line_number];
       double line_height = line_heights[line_number];
     
+      current_placement->starting_x = label_x;
+      if (valign == BOTTOM)
+      {
+         current_placement->starting_y = label_y;
+      }
+      else if (valign == MIDDLE)
+      {
+         current_placement->starting_y = label_y - 0.5 * (line_heights.size() - 1) * line_height ;
+      }
+      else // TOP
+      {
+         current_placement->starting_y = label_y - line_heights.size() * line_height;
+      }
+      
+      current_placement->starting_x += boost::tuples::get<0>(p.displacement_);
+      current_placement->starting_y += boost::tuples::get<1>(p.displacement_); 
+
       x = -line_width/2.0;
       y = -line_height/2.0;
-    
+      
       for (unsigned i = 0; i < p.info.num_characters(); i++)
       {
          character_info ci;

@@ -258,6 +258,12 @@ namespace mapnik
                 {
                     set_attr( node, "placement", sym.get_label_placement() );    
                 }
+                
+                if (sym.get_vertical_alignment() != dfl.get_vertical_alignment() )
+                {
+                    set_attr( node, "vertical_alignment", sym.get_vertical_alignment() );    
+                }
+                
                 if (sym.get_halo_radius() != dfl.get_halo_radius())
                 {
                     set_attr( node, "halo_radius", sym.get_halo_radius() );    

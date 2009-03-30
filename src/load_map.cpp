@@ -778,7 +778,10 @@ namespace mapnik
             label_placement_e placement =
                     get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
             text_symbol.set_label_placement( placement );
+            // vertical alignment 
+            vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", BOTTOM);
 
+            text_symbol.set_vertical_alignment(valign);  
             // halo fill and radius
             optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
             if (halo_fill)

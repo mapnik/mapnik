@@ -28,6 +28,8 @@ Import('env')
 ABI_VERSION = env['ABI_VERSION']
 
 prefix = env['PREFIX']
+print "PREFIX=%s" % prefix
+
 install_prefix = env['DESTDIR'] + '/' + prefix
 
 libraries = env['LIBS']

@@ -805,7 +805,7 @@ namespace mapnik
                      geom.label_position(&label_x, &label_y);
                      prj_trans.backward(label_x,label_y, z);
                      t_.forward(&label_x,&label_y);
-                     finder.find_point_placement(text_placement,label_x,label_y);
+                     finder.find_point_placement(text_placement,label_x,label_y,sym.get_vertical_alignment());
                      finder.update_detector(text_placement);
                   }
                   else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)

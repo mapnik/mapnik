@@ -38,7 +38,12 @@ void export_text_symbolizer()
       .value("LINE_PLACEMENT",LINE_PLACEMENT)
       .value("POINT_PLACEMENT",POINT_PLACEMENT)
       ;
-    
+   enumeration_<vertical_alignment_e>("vertical_alignment")
+      .value("TOP",TOP)
+      .value("MIDDLE",MIDDLE)
+      .value("BOTTOM",BOTTOM)
+      ;
+   
    class_<text_symbolizer>("TextSymbolizer",
                            init<std::string const&,std::string const&, unsigned,color const&>())
       .add_property("halo_fill",make_function(
@@ -98,6 +103,12 @@ void export_text_symbolizer()
                     &text_symbolizer::get_label_placement,
                     &text_symbolizer::set_label_placement,
                     "Set/get the placement of the label")
+
+      .add_property("vertical_alignment",
+                    &text_symbolizer::get_vertical_alignment,
+                    &text_symbolizer::set_vertical_alignment,
+                    "Set/get the vertical alignment of the label")
+      
       .add_property("allow_overlap",
                     &text_symbolizer::get_allow_overlap,
                     &text_symbolizer::set_allow_overlap,

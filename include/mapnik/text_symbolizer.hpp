@@ -44,7 +44,17 @@ namespace mapnik
    };
    
    DEFINE_ENUM( label_placement_e, label_placement_enum );
-        
+   
+   enum vertical_alignment
+   {
+      TOP = 0,
+      MIDDLE,
+      BOTTOM,
+      vertical_alignment_MAX
+   };
+
+   DEFINE_ENUM( vertical_alignment_e, vertical_alignment );
+
    typedef boost::tuple<double,double> position;
     
    struct MAPNIK_DECL text_symbolizer
@@ -82,6 +92,8 @@ namespace mapnik
          unsigned get_halo_radius() const;
          void set_label_placement(label_placement_e label_p);
          label_placement_e get_label_placement() const;
+         void set_vertical_alignment(vertical_alignment_e valign);
+         vertical_alignment get_vertical_alignment() const;
          void set_anchor(double x, double y);	
          position const& get_anchor() const;	
          void set_displacement(double x, double y);
@@ -107,6 +119,7 @@ namespace mapnik
          color halo_fill_;
          unsigned halo_radius_;
          label_placement_e label_p_;
+         vertical_alignment_e valign_;
          position anchor_;
          position displacement_;
          bool avoid_edges_;

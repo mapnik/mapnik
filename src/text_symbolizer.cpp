@@ -38,6 +38,16 @@ static const char * label_placement_strings[] = {
 
 IMPLEMENT_ENUM( mapnik::label_placement_e, label_placement_strings );
 
+static const char * vertical_alignment_strings[] = {
+    "top",
+    "middle",
+    "bottom",
+    ""
+};
+
+
+IMPLEMENT_ENUM( mapnik::vertical_alignment_e, vertical_alignment_strings );
+
 namespace mapnik
 {
     text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size, color const& fill)
@@ -55,6 +65,7 @@ namespace mapnik
           halo_fill_(color(255,255,255)),
           halo_radius_(0),
           label_p_(POINT_PLACEMENT),
+          valign_(BOTTOM),
           anchor_(0.0,0.5),
           displacement_(0.0,0.0),
           avoid_edges_(false),
@@ -75,6 +86,7 @@ namespace mapnik
           halo_fill_(color(255,255,255)),
           halo_radius_(0),
           label_p_(POINT_PLACEMENT),
+          valign_(BOTTOM),
           anchor_(0.0,0.5),
           displacement_(0.0,0.0),
           avoid_edges_(false),
@@ -95,6 +107,7 @@ namespace mapnik
           halo_fill_(rhs.halo_fill_),
           halo_radius_(rhs.halo_radius_),
           label_p_(rhs.label_p_),
+          valign_(rhs.valign_),
           anchor_(rhs.anchor_),
           displacement_(rhs.displacement_),
           avoid_edges_(rhs.avoid_edges_),
@@ -119,15 +132,15 @@ namespace mapnik
         halo_fill_ = other.halo_fill_;
         halo_radius_ = other.halo_radius_;
         label_p_ = other.label_p_;
+        valign_ = other.valign_;
         anchor_ = other.anchor_;
         displacement_ = other.displacement_; 
         avoid_edges_ = other.avoid_edges_;
         minimum_distance_ = other.minimum_distance_;
         overlap_ = other.overlap_;
-
         return *this;
     } 
-
+   
     std::string const&  text_symbolizer::get_name() const
     {
         return name_;
@@ -268,6 +281,16 @@ namespace mapnik
         return label_p_;
     }
 
+    void text_symbolizer::set_vertical_alignment(vertical_alignment_e valign)
+    {
+       valign_ = valign;
+    }
+   
+    vertical_alignment text_symbolizer::get_vertical_alignment() const
+    {
+       return  valign_;
+    }
+    
     void  text_symbolizer::set_anchor(double x, double y)
     {
         anchor_ = boost::make_tuple(x,y);
