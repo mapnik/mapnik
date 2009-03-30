@@ -19,6 +19,8 @@
 #
 # $Id$
 
+"""Core OGCServer classes and functions."""
+
 from exceptions import OGCException, ServerConfigurationError
 from mapnik import Map, Color, Envelope, render, Image, Layer, Style, Projection as MapnikProjection, Coord
 from PIL.Image import new
@@ -277,29 +279,28 @@ class CRSFactory:
         else:
             raise OGCException('Invalid CRS Namespace: %s' % crsparts[0], 'InvalidCRS')
 
-def copy(obj):
-    if isinstance(obj,Layer):
-      lyr = Layer(obj.name)
-      lyr.abstract = obj.abstract
-      lyr.active = obj.active
-      lyr.clear_label_cache = obj.clear_label_cache
-      lyr.datasource = obj.datasource
-      #lyr.maxzoom = obj.maxzoom
-      #lyr.minzoom = obj.minzoom
-      lyr.queryable = obj.queryable
-      lyr.srs = obj.srs
-      lyr.title = obj.title
-      if hasattr(obj,'wmsdefaultstyle'):
-          lyr.wmsdefaultstyle = obj.wmsdefaultstyle
-      if hasattr(obj,'wmsextrastyles'):
-          lyr.wmsextrastyles = obj.wmsextrastyles
-      return lyr
-      
-    elif isinstance(obj,Style):
-      sty = Style()
-      for rule in obj.rules:
-         sty.rules.append(rule)
-      return sty
+def copy_layer(obj):
+    lyr = Layer(obj.name)
+    lyr.abstract = obj.abstract
+    lyr.active = obj.active
+    lyr.clear_label_cache = obj.clear_label_cache
+    lyr.datasource = obj.datasource
+    #lyr.maxzoom = obj.maxzoom
+    #lyr.minzoom = obj.minzoom
+    lyr.queryable = obj.queryable
+    lyr.srs = obj.srs
+    lyr.title = obj.title
+    if hasattr(obj,'wmsdefaultstyle'):
+        lyr.wmsdefaultstyle = obj.wmsdefaultstyle
+    if hasattr(obj,'wmsextrastyles'):
+        lyr.wmsextrastyles = obj.wmsextrastyles
+    return lyr
+
+def copy_style(obj):      
+    sty = Style()
+    for rule in obj.rules:
+       sty.rules.append(rule)
+    return sty
       
 class WMSBaseServiceHandler(BaseServiceHandler):
 
@@ -353,7 +354,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         # a non WMS spec way of requesting all layers
         if params['layers'] and params['layers'][0] == '__all__':
             for layername in orderedmaplayers:
-                layer = copy(layername)
+                layer = copy_layer(layername)
                 reqstyle = layer.wmsdefaultstyle
                 if reqstyle in mapaggregatestyles.keys():
                     for stylename in mapaggregatestyles[reqstyle]:
@@ -367,7 +368,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         else:
             for layerindex, layername in enumerate(params['layers']):
                 try:
-                    layer = copy(maplayers[layername])
+                    layer = copy_layer(maplayers[layername])
                 except KeyError:
                     raise OGCException('Layer "%s" not defined.' % layername, 'LayerNotDefined')
                 try:

@@ -19,12 +19,15 @@
 #
 # $Id$
 
-from common import Version, copy
+"""Interface for registering map styles and layers for availability in WMS Requests."""
+
+from common import Version, copy_style, copy_layer
 from exceptions import OGCException, ServerConfigurationError
 from wms111 import ServiceHandler as ServiceHandler111
 from wms130 import ServiceHandler as ServiceHandler130
 from mapnik import Style, Map, load_map 
 import re
+import sys
 
 def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
 
@@ -53,19 +56,21 @@ class BaseWMSFactory:
                 raise ServerConfigurationError("Cannot register Layer '%s' without a style" % lyr.name)
             elif style_count == 1:
                 style_obj = tmp_map.find_style(lyr.styles[0])
+                style_obj = copy_style(style_obj)
                 style_name = lyr.styles[0]
                 if style_name not in self.aggregatestyles.keys() and style_name not in self.styles.keys():
-                    self.register_style(style_name, copy(style_obj))
-                self.register_layer(copy(lyr), style_name, extrastyles=(style_name,))
+                    self.register_style(style_name, style_obj)
+                self.register_layer(copy_layer(lyr), style_name, extrastyles=(style_name,))
             elif style_count > 1:
                 for style_name in lyr.styles:
                     style_obj = tmp_map.find_style(style_name)
-                    self.register_style(style_name, copy(style_obj))
-                    del style_obj
+                    style_obj = copy_style(style_obj)
+                    if style_name not in self.aggregatestyles.keys() and style_name not in self.styles.keys():
+                        self.register_style(style_name, style_obj)
                 aggregates = tuple([sty for sty in lyr.styles])
                 aggregates_name = '%s_aggregates' % lyr.name
                 self.register_aggregate_style(aggregates_name,aggregates)
-                self.register_layer(copy(lyr), aggregates_name, extrastyles=aggregates)
+                self.register_layer(copy_layer(lyr), aggregates_name, extrastyles=aggregates)
 
     def register_layer(self, layer, defaultstyle, extrastyles=()):
         layername = layer.name
