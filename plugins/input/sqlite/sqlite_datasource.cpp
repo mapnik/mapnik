@@ -91,7 +91,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
      format_(mapnik::wkbGeneric)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file) throw datasource_exception("missing <file> paramater");
+    if (!file) throw datasource_exception("missing <file> parameter");
 
     boost::optional<std::string> wkb = params.get<std::string>("wkb_format");
     if (wkb)
@@ -103,9 +103,15 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
 
-    if (!boost::filesystem::exists(*file)) throw datasource_exception(*file + " don't exists");
-    
-    dataset_ = new sqlite_connection (*file);
+    boost::optional<std::string> base = params.get<std::string>("base");
+    if (base)
+        dataset_name_ = *base + "/" + *file;
+    else
+        dataset_name_ = *file;
+
+    if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
+          
+    dataset_ = new sqlite_connection (dataset_name_);
 
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
     if (ext)
@@ -181,7 +187,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     
     {
         /*
-            XXX - This is problematic, if we don't have at least a row,
+            XXX - This is problematic, if we do not have at least a row,
                   we cannot determine the right columns types and names 
                   as all column_type are SQLITE_NULL
         */

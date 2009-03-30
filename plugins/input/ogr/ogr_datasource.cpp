@@ -25,6 +25,9 @@
 #include "ogr_featureset.hpp"
 #include <mapnik/ptree_helpers.hpp>
 
+// boost
+#include <boost/filesystem/operations.hpp>
+
 using std::clog;
 using std::endl;
 
@@ -51,15 +54,23 @@ ogr_datasource::ogr_datasource(parameters const& params)
    OGRRegisterAll();
 
    boost::optional<std::string> file = params.get<std::string>("file");
-   if (!file) throw datasource_exception("missing <file> paramater");
+   if (!file) throw datasource_exception("missing <file> parameter");
 
    boost::optional<std::string> layer = params.get<std::string>("layer");
-   if (!layer) throw datasource_exception("missing <layer> paramater");
+   if (!layer) throw datasource_exception("missing <layer> parameter");
 
    layerName_ = *layer;
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
 
-   dataset_ = OGRSFDriverRegistrar::Open ((*file).c_str(), FALSE);
+   boost::optional<std::string> base = params.get<std::string>("base");
+   if (base)
+      dataset_name_ = *base + "/" + *file;
+   else
+      dataset_name_ = *file;
+
+   if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
+   
+   dataset_ = OGRSFDriverRegistrar::Open ((dataset_name_).c_str(), FALSE);
    if (!dataset_) throw datasource_exception(CPLGetLastErrorMsg());
 
    layer_ = dataset_->GetLayerByName (layerName_.c_str());

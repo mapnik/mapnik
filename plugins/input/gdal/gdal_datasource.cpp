@@ -43,9 +43,15 @@ gdal_datasource::gdal_datasource( parameters const& params)
 {
    GDALAllRegister();
    boost::optional<std::string> file = params.get<std::string>("file");
-   if (!file) throw datasource_exception("missing <file> paramater");
+   if (!file) throw datasource_exception("missing <file> parameter");
 
-   dataset_ = boost::shared_ptr<GDALDataset>(reinterpret_cast<GDALDataset*>(GDALOpen((*file).c_str(),GA_ReadOnly)));
+   boost::optional<std::string> base = params.get<std::string>("base");
+   if (base)
+      dataset_name_ = *base + "/" + *file;
+   else
+      dataset_name_ = *file;
+
+   dataset_ = boost::shared_ptr<GDALDataset>(reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(),GA_ReadOnly)));
    if (!dataset_) throw datasource_exception("failed to create GDALDataset");
    double tr[6];
    dataset_->GetGeoTransform(tr);

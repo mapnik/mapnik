@@ -50,6 +50,7 @@ class ogr_datasource : public mapnik::datasource
       static const std::string name_;
       mapnik::Envelope<double> extent_;
       int type_;
+      std::string dataset_name_;
       OGRDataSource* dataset_;
       OGRLayer* layer_;
       std::string layerName_;

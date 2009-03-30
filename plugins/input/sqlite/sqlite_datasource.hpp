@@ -53,6 +53,7 @@ class sqlite_datasource : public mapnik::datasource
       mapnik::Envelope<double> extent_;
       mutable bool extent_initialized_;
       int type_;
+      std::string dataset_name_;
       sqlite_connection* dataset_;
       std::string table_;
       std::string metadata_;

@@ -36,6 +36,8 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('icuuc')
     libraries.append('icudata')
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 ogr_inputdriver = env.SharedLibrary('ogr', source=ogr_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
