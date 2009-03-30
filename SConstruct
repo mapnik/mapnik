@@ -195,7 +195,7 @@ for opt in opts.options:
     if opt.key not in pickle_store:
         pickle_store.append(opt.key)
 
-# Method of adding configure behavoir to Scons adapted from:
+# Method of adding configure behavior to Scons adapted from:
 # http://freeorion.svn.sourceforge.net/svnroot/freeorion/trunk/FreeOrion/SConstruct
 preconfigured = False
 force_configure = False
@@ -206,6 +206,10 @@ if 'configure' in command_line_args:
 elif ('-h' in command_line_args) or ('--help' in command_line_args):
     preconfigured = True # this is just to ensure config gets skipped when help is requested
 
+# initially populate environment with defaults and any possible custom arguments
+opts.Update(env)
+
+# if we are not configuring overwrite environment with pickled settings
 if not force_configure:
     if os.path.exists(SCONS_CONFIGURE_CACHE):
         try:
@@ -220,16 +224,28 @@ if not force_configure:
     else:
         preconfigured = False
 
+# if custom arguments are supplied make sure to accept them
 if opts.args:
+    # since we have custom arguments update environment with all opts to 
+    # make sure to absorb the custom ones
+    opts.Update(env)
+    # now since we've got custom arguments we'll disregard any 
+    # pickled environment and force another configuration
     preconfigured = False
+    if env['FAST']:
+        # because we are clearing the 'sconf_temp' files each configure when FAST=False
+        # we now need to flush the dblite otherwise SCons will skip checks
+        # during the first 'FAST' configure
+        try:
+            os.unlink('.sconsign.dblite')
+        except: pass
+
 elif preconfigured:
     if ('-h' not in command_line_args) and ('--help' not in command_line_args):
         color_print(4,'Using previous successful configuration...')
         color_print(4,'Re-configure by running "python scons/scons.py configure".')
 
-opts.Update(env)
 
-Help(opts.GenerateHelpText(env))
 
 
 #### Custom Configure Checks ###
@@ -787,10 +803,17 @@ if not preconfigured:
             pickle_dict[i] = env.get(i)
         pickle.dump(pickle_dict,env_cache)
         env_cache.close()
-        # fix up permissions on pickled options
+        # fix up permissions on configure outputs
         try:
             os.chmod(SCONS_CONFIGURE_CACHE,0666)
         except: pass
+        try:
+            os.chmod(SCONS_LOCAL_CONFIG,0666)
+        except: pass
+        try:
+            os.chmod('.sconsign.dblite',0666)
+        except: pass
+
         # clean up test build targets
         if not env['FAST']:
             try:
@@ -801,6 +824,8 @@ if not preconfigured:
             color_print(4,'\n*Configure complete*\nNow run "python scons/scons.py" to build or "python scons/scons.py install" to install')
             Exit(0)
 
+# autogenerate help on default/current SCons options
+Help(opts.GenerateHelpText(env))
 
 #### Builds ####
 
