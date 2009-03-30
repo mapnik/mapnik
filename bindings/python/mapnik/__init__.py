@@ -95,7 +95,29 @@ class _Datasource(Datasource,_injector):
     def describe(self):
         return Describe(self)
 
+#class _Filter(Filter,_injector):
+#    """Mapnik Filter expression.
+#    
+#    Usage:
+#    >>> from mapnik import Filter
+#    >>> Filter("[waterway]='canal' and not ([tunnel] = 'yes' or [tunnel] ='true')")
+#    
+#    """
+
 def Datasource(**keywords):
+    """Wrapper around CreateDatasource.
+
+    Create a Mapnik Datasource using a dictionary of parameters.
+
+    Keywords must include:
+    
+      type='plugin_name' # e.g. type='gdal'
+    
+    See the convenience factory methods of each input plugin for
+    details on additional required keyword arguments.
+    
+    """
+
     return CreateDatasource(keywords)
 
 # convenience factory methods
