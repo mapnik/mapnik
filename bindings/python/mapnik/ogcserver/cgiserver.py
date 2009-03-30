@@ -19,6 +19,12 @@
 #
 # $Id$
 
+"""CGI/FastCGI handler for Mapnik OGC WMS Server.
+
+Requires 'jon' module.
+
+"""
+
 from os import environ
 from tempfile import gettempdir
 environ['PYTHON_EGG_CACHE'] = gettempdir()

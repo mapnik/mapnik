@@ -19,6 +19,8 @@
 #
 # $Id$
 
+"""WMS 1.1.1 compliant GetCapabilities, GetMap, GetFeatureInfo, and Exceptions interface."""
+
 from common import ParameterDefinition, Response, Version, ListFactory, \
                    ColorFactory, CRSFactory, WMSBaseServiceHandler, CRS, \
                    BaseExceptionHandler, Projection

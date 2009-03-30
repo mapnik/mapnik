@@ -19,6 +19,8 @@
 #
 # $Id: modserver.py 283 2006-07-22 18:54:53Z jdoyon $
 
+"""Mod_python handler for Mapnik OGC WMS Server."""
+
 import sys
 from mod_python import apache, util
 from exceptions import OGCException, ServerConfigurationError

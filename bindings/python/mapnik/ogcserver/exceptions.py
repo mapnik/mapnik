@@ -19,6 +19,8 @@
 #
 # $Id$
 
+"""Custom OGCServer Exceptions"""
+
 class OGCException(Exception):
     pass
 

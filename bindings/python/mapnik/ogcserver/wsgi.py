@@ -19,6 +19,8 @@
 #
 # $Id$
 
+"""WSGI application wrapper for Mapnik OGC WMS Server."""
+
 from exceptions import OGCException, ServerConfigurationError
 from configparser import SafeConfigParser
 from cgi import parse_qs
