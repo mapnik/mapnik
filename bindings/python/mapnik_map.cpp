@@ -175,6 +175,11 @@ void export_map()
            "False # you can only append styles with unique names\n"
          )
 
+      .def("buffered_envelope",
+           &Map::get_buffered_extent,
+           "TODO\n"
+         )
+
       .def("envelope",
            make_function(&Map::getCurrentExtent,
                          return_value_policy<copy_const_reference>()),
@@ -191,14 +196,8 @@ void export_map()
            "...'maxy', 'minx', 'miny', 'width'\n"
          )
 
-      .def("buffered_envelope",
-           &Map::get_buffered_extent,
-           "TODO\n"
-         )
-
       .def("find_style",
-           find_style,
-             
+           find_style,             
            "Query the Map for a style by name and return\n"
            "a style object if found or raise KeyError\n"
            "style if not found.\n"
@@ -208,6 +207,13 @@ void export_map()
            "<mapnik._mapnik.Style object at 0x654f0>\n"
          )
         
+      .def("get_aspect_fix_mode",&Map::getAspectFixMode,
+           "Get aspect fix mode.\n"
+           "Usage:\n"
+           "\n"
+           ">>> m.get_aspect_fix_mode()\n"
+         )
+
       .def("pan",&Map::pan,
            "Set the Map center at a given x,y location\n"
            "as integers in the coordinates of the pixmap or map surface.\n"
@@ -293,21 +299,19 @@ void export_map()
            "\n"
            ">>> m.scale()\n"
          )
-      
-      .add_property("aspect_fix_mode",
-                    &Map::getAspectFixMode,
-                    &Map::setAspectFixMode,
-                    "Get/Set aspect fix mode.\n"
-                    "Usage:\n"
-                    "\n"
-                    ">>> m.aspect_fix_mode = aspect_fix_mode.GROW_BBOX\n"
-         )
 
-      .def("get_aspect_fix_mode",&Map::getAspectFixMode,
-           "Get aspect fix mode.\n"
+      .def("scale_denominator", &Map::scale_denominator,
+           "Return the Map Scale Denominator.\n"
            "Usage:\n"
            "\n"
-           ">>> m.get_aspect_fix_mode()\n"
+           ">>> m.scale_denominator\n"
+         )
+      
+      .def("view_transform",&Map::view_transform,
+                   "Map CoordinateTransform object.\n"
+                   "\n"
+                   "Usage:\n"
+                   ">>> m.view_transform()\n"         
          )
       
       .def("zoom",&Map::zoom,
@@ -333,6 +337,15 @@ void export_map()
            ">>> extext = Envelope(-180.0, -90.0, 180.0, 90.0)\n"
            ">>> m.zoom_to_box(extent)\n"
          )   
+
+      .add_property("aspect_fix_mode",
+                    &Map::getAspectFixMode,
+                    &Map::setAspectFixMode,
+                    "Get/Set aspect fix mode.\n"
+                    "Usage:\n"
+                    "\n"
+                    ">>> m.aspect_fix_mode = aspect_fix_mode.GROW_BBOX\n"
+         )      
         
       .add_property("background",make_function
                     (&Map::background,return_value_policy<copy_const_reference>()),
@@ -354,14 +367,6 @@ void export_map()
                     ">>> m.buffer_size = 2\n"
                     ">>> m.buffer_size\n"
                     "2\n"
-         )
-        
-
-      .def("view_transform",&Map::view_transform,
-                   "Map CoordinateTransform object.\n"
-                   "\n"
-                   "Usage:\n"
-                   ">>> m.view_transform()\n"         
          )
          
       .add_property("height",
@@ -387,13 +392,6 @@ void export_map()
                     "<mapnik._mapnik.Layers object at 0x6d458>"
                     ">>> m.layers[0]\n"
                     "<mapnik._mapnik.Layer object at 0x5fe130>\n"
-         )
-
-      .add_property("scale_denominator", &Map::scale_denominator,
-                    "Return the Map Scale Denominator.\n"
-                    "Usage:\n"
-                    "\n"
-                    ">>> m.scale_denominator\n"
          )
 
       .add_property("srs",
