@@ -42,6 +42,8 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
     libraries.append('icuuc')
     libraries.append('icudata')
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 shape_inputdriver = env.SharedLibrary('shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries)
 

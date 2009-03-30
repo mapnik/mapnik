@@ -24,6 +24,11 @@
 #include <fstream>
 #include <stdexcept>
 #include <mapnik/geom_util.hpp>
+
+// boost
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
+
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
 #include "shape.hpp"
@@ -45,11 +50,19 @@ shape_datasource::shape_datasource(const parameters &params)
      indexed_(false),
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
+   boost::optional<std::string> file = params.get<std::string>("file");
+   if (!file) throw datasource_exception("missing <file> parameter");
+      
    boost::optional<std::string> base = params.get<std::string>("base");
    if (base)
-      shape_name_ = *base + "/" + *params_.get<std::string>("file","");
+      shape_name_ = *base + "/" + *file;
    else
-      shape_name_ = *params_.get<std::string>("file","");
+      shape_name_ = *file;
+
+   boost::algorithm::ireplace_last(shape_name_,".shp","");
+
+   if (!boost::filesystem::exists(shape_name_ + ".shp")) throw datasource_exception(shape_name_ + " does not exist");
+
    try
    {  
       shape_io shape(shape_name_);
