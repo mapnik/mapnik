@@ -24,6 +24,9 @@
 #include "gdal_datasource.hpp"
 #include "gdal_featureset.hpp"
 
+// boost
+#include <boost/filesystem/operations.hpp>
+
 using mapnik::datasource;
 using mapnik::parameters;
 
@@ -50,6 +53,8 @@ gdal_datasource::gdal_datasource( parameters const& params)
       dataset_name_ = *base + "/" + *file;
    else
       dataset_name_ = *file;
+
+   if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
 
    dataset_ = boost::shared_ptr<GDALDataset>(reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(),GA_ReadOnly)));
    if (!dataset_) throw datasource_exception("failed to create GDALDataset");

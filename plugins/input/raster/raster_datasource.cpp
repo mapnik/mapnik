@@ -22,6 +22,8 @@
 //$Id: raster_datasource.cc 44 2005-04-22 18:53:54Z pavlenko $
 // boost
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem/operations.hpp>
+
 // mapnik
 #include <mapnik/image_reader.hpp>
 
@@ -57,6 +59,9 @@ raster_datasource::raster_datasource(const parameters& params)
       filename_ = *base + "/" + *file;
    else
       filename_ = *file;
+
+   if (!boost::filesystem::exists(filename_)) throw datasource_exception(filename_ + " does not exist");
+   
    format_=*params.get<std::string>("format","tiff");
    boost::optional<double> lox = params.get<double>("lox");
    boost::optional<double> loy = params.get<double>("loy");
