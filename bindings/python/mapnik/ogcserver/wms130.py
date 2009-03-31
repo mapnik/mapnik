@@ -23,7 +23,7 @@
 
 from common import ParameterDefinition, Response, Version, ListFactory, \
                    ColorFactory, CRSFactory, CRS, WMSBaseServiceHandler, \
-                   BaseExceptionHandler, Projection
+                   BaseExceptionHandler, Projection, Envelope
 from exceptions import OGCException, ServerConfigurationError
 from lxml import etree as ElementTree
 from mapnik import Coord
@@ -219,6 +219,21 @@ class ServiceHandler(WMSBaseServiceHandler):
         if params['width'] > int(self.conf.get('service', 'maxwidth')) or params['height'] > int(self.conf.get('service', 'maxheight')):
             raise OGCException('Requested map size exceeds limits set by this server.')
         return WMSBaseServiceHandler.GetMap(self, params)
+    
+    def _buildMap(self, params):
+        """ Override _buildMap method to handle reverse axis ordering in WMS 1.3.0.
+        
+        More info: http://mapserver.org/development/rfc/ms-rfc-30.html
+        
+        'when using epsg code >=4000 and <5000 will be assumed to have a reversed axes.'
+        
+        """
+        # Call superclass method
+        m = WMSBaseServiceHandler._buildMap(self, params)
+        # for range of epsg codes reverse axis
+        if params['crs'].code >= 4000 and params['crs'].code < 5000:
+            m.zoom_to_box(Envelope(params['bbox'][1], params['bbox'][0], params['bbox'][3], params['bbox'][2]))
+        return m    
 
 class ExceptionHandler(BaseExceptionHandler):
 
