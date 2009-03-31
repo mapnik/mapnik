@@ -27,6 +27,7 @@
 #include <boost/python/call_method.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python.hpp>
+#include <boost/scoped_array.hpp>
 // mapnik
 #include <mapnik/feature.hpp>
 
@@ -47,7 +48,16 @@ namespace boost { namespace python {
             
             PyObject * operator() (UnicodeString const& s) const
             {
-               return ::PyUnicode_FromWideChar((wchar_t*)s.getBuffer(),implicit_cast<ssize_t>(s.length()));
+               int32_t len = s.length();
+               boost::scoped_array<wchar_t> buf(new wchar_t(len));
+               UErrorCode err = U_ZERO_ERROR;
+               u_strToWCS(buf.get(),len,0,s.getBuffer(),len,&err);
+               PyObject *obj = Py_None;
+               if (U_SUCCESS(err))
+               {
+                  obj = ::PyUnicode_FromWideChar(buf.get(),implicit_cast<ssize_t>(len));
+               }
+               return obj;
             }
             
             PyObject * operator() (mapnik::value_null const& s) const
