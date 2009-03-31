@@ -687,21 +687,21 @@ namespace mapnik
                 pixmap_.set_rectangle_alpha2(target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
              }
          } else if (sym.get_mode() == "grain_merge"){
-            pixmap_.template merge_rectangle<Image32::MergeGrain> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+            pixmap_.template merge_rectangle<MergeGrain> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
          } else if (sym.get_mode() == "grain_merge2"){
-            pixmap_.template merge_rectangle<Image32::MergeGrain2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+            pixmap_.template merge_rectangle<MergeGrain2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
          } else if (sym.get_mode() == "multiply"){
-            pixmap_.template merge_rectangle<Image32::Multiply> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+            pixmap_.template merge_rectangle<Multiply> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
          } else if (sym.get_mode() == "multiply2"){
-            pixmap_.template merge_rectangle<Image32::Multiply2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+            pixmap_.template merge_rectangle<Multiply2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
          } else if (sym.get_mode() == "divide"){
-            pixmap_.template merge_rectangle<Image32::Divide> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+            pixmap_.template merge_rectangle<Divide> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
          } else if (sym.get_mode() == "divide2"){
-            pixmap_.template merge_rectangle<Image32::Divide2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+            pixmap_.template merge_rectangle<Divide2> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
          } else if (sym.get_mode() == "screen"){
-            pixmap_.template merge_rectangle<Image32::Screen> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+            pixmap_.template merge_rectangle<Screen> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
          } else if (sym.get_mode() == "hard_light"){
-            pixmap_.template merge_rectangle<Image32::HardLight> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
+            pixmap_.template merge_rectangle<HardLight> (target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
          } else {
              if (sym.get_opacity() == 1.0){
                  pixmap_.set_rectangle(int(ext.minx()),int(ext.miny()),target);
