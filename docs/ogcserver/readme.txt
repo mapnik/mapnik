@@ -12,6 +12,11 @@ through the open and standard WMS interface published by the Open Geospatial
 Consortium (OGC).  It is in implemented in Python, around the core Mapnik C++
 library.
 
+This is the very first implementation of a WMS for Mapnik.  Although inital
+testing seems to suggest it works well, there may be bugs, and it lacks some
+useful features.  Comments, contributions, and requests for help should all be
+directed to the Mapnik mailing list.
+
 
 Features
 --------
@@ -24,13 +29,15 @@ Features
 - Multiple named styles support
 - Reprojection support
 - Supported layer metadata: title, abstract
+- Ability to request all layers with LAYERS=__all__
 
 
-Features/Caveats
+Caveats
 ----------------
 - GetFeatureInfo supports text/plain output only
 - PNG256(8-bit PNG not yet supported)
 - CGI/FastCGI interface needs to be able to write to tempfile.gettempdir() (most likely "/tmp")
+- Need to be further evaluated for thread safety
 
 
 Dependencies
@@ -50,8 +57,8 @@ For the CGI/FastCGI interface also install:
 Installation
 ------------
 
-- The OGCServer uses Mapnik's interface to the Proj.4 library for projection support
-  and depends on using integer EPSG codes. Confirm that you have installed Proj.4 with
+- The OGCServer uses the Mapnik interface to the Proj.4 library for projection support
+  and depends on integer EPSG codes. Confirm that you have installed Proj.4 with
   all necessary data files (http://trac.osgeo.org/proj/wiki/FAQ) and have added any custom
   projections you need to the 'epsg' file usually located at '/usr/local/share/proj/epsg'.
 
@@ -61,64 +68,92 @@ Installation
   >>> from mapnik import ogcserver
   >>> # no error means proper installation
 
-- There is a sample python script called "ogcserver" in the utils/ogcserver folder of the
+- There is a sample python script called "wms.py" in the utils/ogcserver folder of the
   Mapnik source code that will work for both CGI and FastCGI operations. Where to place it
-  will depend on your server's configuration and is beyond this documentation.  For information on FastCGI
-  go to http://www.fastcgi.com/.
+  will depend on your server choice and configuration and is beyond this documentation.
+  For information on FastCGI go to http://www.fastcgi.com/.
 
 
 Configuring the server
 ----------------------
 
-- You will need to edit the ogcserver executable for now.  It is a simple
-  Python text script.
+- You will need to create two simple python scripts::
+
+  1) The web-accessible python script ('wms.py') which will import the 
+     ogcserver module code and associate itself with the 'ogcserver.conf'
+     configuration file. The code of this script will depend upon whether
+     you deploy the server as cgi/fastcgi/wsgi/mod_python. See the Mapnik
+     Community Wiki for examples: http://trac.mapnik.org/wiki/OgcServer and
+     see the cgi sample in the /utils/ogcserver folder.
+     
+  2) A 'map_factory' script which loads your layers and styles. Samples of this
+     script can be found below.
+
   
-  1) Edit the path to the interpreter in the first line.
-  2) Edit the path to the config file if you do not like the default.
+- Next you need to edit the ogcserver.conf file to::
   
-- Copy the sample configuration "ogcserver.conf" file in utils/ogcserver to
-  the location you specified in the previous step.
-  
-- Edit the configuration file to your liking, the comments within the file will
+  1) Point to the 'map_factory' script by using the "module" parameter
+
+  2) Fill out further settings for the server.
+    
+  Edit the configuration file to your liking, the comments within the file will
   help you further.  Be sure to at the very minimum edit the "module"
   parameter, the server will not work without you setting it properly first.
   
 
-Defining layers and styles for use by the ogcserver
----------------------------------------------------
+Defining Layers and Styles
+--------------------------
 
-The ogcserver obviously needs layers to publish.  For now, with Mapnik, this
-can only be done by writing code. In this case, a Python script will need to be
-written to describe the layers and respective styles.  For information on the Python
-API, look in demo/python, or in docs/epydocs.
+The ogcserver obviously needs layers to publish and styles for how to display those layers.
 
-The server needs a python module, with code that looks like this::
+You create you layers and styles in the 'map_factory' script.
+
+For now this can be done by either loading an XML mapfile inside that script using the 
+'loadXML()' function or by writing your layers and styles in python code, or both.
+
+The 'map_factory' module must look, at a bare minimum like if you load layers and styles
+using an existing XML mapfile::
 
   from mapnik.ogcserver.WMS import BaseWMSFactory
-  from mapnik import Layer, Style
   
   class WMSFactory(BaseWMSFactory):
+    def __init__(self):
+      BaseWMSFactory.__init__(self)
+      self.loadXMl('/full/path/to/mapfile.xml')
+      self.finalize()
+
+Or if you want to define your layers and styles in pure python dynamically you might
+have a 'map_factory' more like::
+
+  from mapnik.ogcserver.WMS import BaseWMSFactory
+  from mapnik import *
+
+  SHAPEFILE = '/path/to/world_borders.shp'
+  PROJ4_STRING = '+init=epsg:4326'  
   
-  	def __init__(self):
-  		BaseWMSFactory.__init__(self)
-  		sty = Style()
-  		...
-  		self.register_style('stylename', sty)
-  		
-  		lyr = Layer('layername', '+init=epsg:4326')
-  		lyr.title = 'Layer title'
-  		lyr.abstract = 'Layer abstract'
-  		...
-  		self.register_layer(lyr, 'stylename')
-  		self.finalize()
-		
+  class WMSFactory(BaseWMSFactory):
+    def __init__(self):
+      BaseWMSFactory.__init__(self)
+      sty,rl = Style(),Rule()
+      poly = PolygonSymbolizer(Color('#f2eff9'))
+      line = LineSymbolizer(Color('steelblue'),.1)
+      rl.symbols.extend([poly,line])
+      sty.rules.append(rl)
+      self.register_style('world_style',sty)
+      lyr = Layer('world',PROJ4_STRING)
+      lyr.datasource = Shapefile(file=SHAPEFILE)
+      lyr.title = 'World Borders'
+      lyr.abstract = 'Country Borders of the World'
+      self.register_layer(lyr,'world_style',('world_style',))
+      self.finalize()
+    
 The rules for writing this class are:
 
 - It MUST be called 'WMSFactory'.
 - It MUST sub-class mapnik.ogcserver.WMS.BaseWMSFactory.
 - The __init__ MUST call the base class.
 - Layers MUST be named with the first parameter to the constructor.
-- Layers MUST define an EPSG projection in the second parameter to the
+- Layers MUST define an EPSG projection in the second parameter of the
   constructor.  This implies that the underlying data must be in an EPSG
   projection already.
 - style and layer names are meant for machine readability, not human.  Keep
@@ -128,11 +163,11 @@ The rules for writing this class are:
 - DO NOT register styles using layer.styles.append(), instead, provide style
   information to the register_layer() call::
   
-    register_layer(layerobject, defaultstylename, tuple of alternative style names)
+    register_layer(layerobject, defaultstylename, (tuple of alternative style names,))
 
 - No Map() object is used or needed here.
-- Be sure to call self.finalize() once you've registered everything! This will
-  validate everything and let you know if there's problems.
+- Be sure to call self.finalize() once you have registered everything! This will
+  validate everything and let you know if there are any problems.
 - For a layer to be queryable via GetFeatureInfo, simply set the 'queryable'
   property to True::
   
@@ -147,16 +182,3 @@ To Do
 - Switch to using C/C++ libs for image generation, instead of PIL (also
   requires core changes). PIL requirement will remain for INIMAGE/BLANK
   error handling.
-- Implement other connectors than CGI/FastCGI (Such as WSGI, SCGI, etc ...)
-
-
-Conclusion
-----------
-
-This is the very first implementation of a WMS for Mapnik.  Although inital
-testing seems to suggest it works well, there may be bugs, and it lacks some
-useful features.  Comments, contributions, and requests for help should all be
-directed to the Mapnik mailing list.
-
-Enjoy!
-J.F.

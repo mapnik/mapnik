@@ -24,6 +24,6 @@ from mapnik.ogcserver.cgiserver import Handler
 from jon import fcgi
 
 class OGCServerHandler(Handler):
-    configpath = '/etc/ogcserver.conf'
+    configpath = '/path/to/ogcserver.conf'
 
 fcgi.Server({fcgi.FCGI_RESPONDER: OGCServerHandler}).run()
