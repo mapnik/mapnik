@@ -97,7 +97,7 @@ occi_datasource::occi_datasource(parameters const& params)
      geometry_field_(*params.get<std::string>("geometry_field","GEOLOC")),
      type_(datasource::Vector),
      extent_initialized_(false),
-     desc_(*params.get<std::string>("type"),"utf-8"),
+     desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
      pool_(0)
 {
    boost::optional<int> initial_size = params_.get<int>("inital_size",1);

@@ -218,6 +218,36 @@ def Gdal(**keywords):
     keywords['type'] = 'gdal'
     return CreateDatasource(keywords)
 
+def Occi(**keywords):
+    """Create a Oracle Spatial (10g) Vector Datasource.
+  
+    Required keyword arguments:
+      user -- database user to connect as
+      password -- password for database user
+      host -- oracle host to connect to (does not refer to SID in tsnames.ora)
+      table -- table name or subselect query
+
+    Optional keyword arguments:
+      initial_size -- integer size of connection pool (default 1)
+      max_size -- integer max of connection pool (default 10)
+      extent -- manually specified data extent (comma delimited string, default None)
+      estimate_extent -- boolean, direct Oracle to use the faster, less accurate estimate_extent() over extent() (default False)
+      encoding -- file encoding (default 'utf-8')
+      geometry_field -- specify geometry field (default 'GEOLOC')
+      use_spatial_index -- boolean, force the use of the spatial index (default True)
+      multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
+    
+    >>> from mapnik import Occi, Layer
+    >>> params = dict(host='myoracle',user='scott',password='tiger',table='test')
+    >>> params['estimate_extent'] = False
+    >>> params['extent'] = '-20037508,-19929239,20037508,19929239'
+    >>> oracle = Occi(**params)
+    >>> lyr = Layer('Oracle Spatial Layer')
+    >>> lyr.datasource = oracle
+    """
+    keywords['type'] = 'occi'
+    return CreateDatasource(keywords)
+
 def Ogr(**keywords):
     """Create a OGR Vector Datasource.
   
