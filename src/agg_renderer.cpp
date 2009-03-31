@@ -475,7 +475,7 @@ namespace mapnik
 
          if (faces->size() > 0)
          {
-            text_renderer<mapnik::Image32> ren(pixmap_, faces);
+            text_renderer<T> ren(pixmap_, faces);
             
             ren.set_pixel_size(sym.get_text_size());
             ren.set_fill(sym.get_fill());
@@ -677,12 +677,12 @@ namespace mapnik
          } else if (sym.get_scaling() == "bilinear8"){
             scale_image_bilinear8<ImageData32>(target,raster->data_);
          } else {
-         scale_image<ImageData32>(target,raster->data_);
+            scale_image<ImageData32>(target,raster->data_);
          }
 
          if (sym.get_mode() == "normal"){
-             if (sym.get_opacity() == 1.0){
-         pixmap_.set_rectangle(int(ext.minx()),int(ext.miny()),target);
+             if (sym.get_opacity() == 1.0) {
+                pixmap_.set_rectangle(int(ext.minx()),int(ext.miny()),target);
              } else {
                 pixmap_.set_rectangle_alpha2(target,int(ext.minx()),int(ext.miny()), sym.get_opacity());
              }
@@ -779,7 +779,7 @@ namespace mapnik
 
          if (faces->size() > 0)
          {
-            text_renderer<mapnik::Image32> ren(pixmap_, faces);
+            text_renderer<T> ren(pixmap_, faces);
             ren.set_pixel_size(sym.get_text_size());
             ren.set_fill(fill);
             ren.set_halo_fill(sym.get_halo_fill());
