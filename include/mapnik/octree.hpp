@@ -92,7 +92,7 @@ namespace mapnik {
                unsigned blues;
                unsigned count;	
                unsigned count2;	
-               uint8_t  children_count;
+               byte  children_count;
                byte  index;					
          };
          struct node_cmp
