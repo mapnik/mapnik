@@ -57,7 +57,7 @@ class WSGIApp:
         reqparams = {}
         for key, value in parse_qs(environ['QUERY_STRING'], True).items():
             reqparams[key.lower()] = value[0]
-        onlineresource = 'http://%s:%s%s?' % (environ['SERVER_NAME'], environ['SERVER_PORT'], environ['SCRIPT_NAME'])
+        onlineresource = 'http://%s:%s%s?' % (environ['SERVER_NAME'], environ['SERVER_PORT'], environ['PATH_INFO'])
         try:
             if not reqparams.has_key('request'):
                 raise OGCException('Missing request parameter.')
