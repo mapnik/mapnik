@@ -323,6 +323,12 @@ namespace agg
         {
             int cx = (x1 + x2) >> 1;
             int cy = (y1 + y2) >> 1;
+
+            // Bail if values are so large they are likely to wrap
+            if ((abs(x1) >= INT_MAX/2) || (abs(y1) >= INT_MAX/2) ||
+                (abs(x2) >= INT_MAX/2) || (abs(y2) >= INT_MAX/2))
+                    return;
+
             line(x1, y1, cx, cy);
             line(cx, cy, x2, y2);
         }
