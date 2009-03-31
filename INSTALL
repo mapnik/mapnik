@@ -6,6 +6,10 @@ INSTALLATION INSTRUCTIONS
 Quick Start
 -----------
 
+For platform specific install guides see:
+
+  http://trac.mapnik.org/wiki/MapnikInstallation
+
 Install needed dependencies::
 
   $ sudo apt-get install libboost* libicu* libfreetype* proj # see below for full list
@@ -35,7 +39,7 @@ If you get this error ensure that Mapnik in is your PYTHONPATH.
 
 Otherwise your setup is ready. You can now visit http://trac.mapnik.org/wiki/GettingStarted for a basic tutorial.
 
-For help with using SCons see: trac.mapnik.org/wiki/UsingScons
+For help with using SCons see: http://trac.mapnik.org/wiki/UsingScons
 
 For troubleshooting errors see: http://trac.mapnik.org/wiki/InstallationTroubleshooting.
 
@@ -76,14 +80,16 @@ Second, here are the optional software dependencies:
 - libpq - PostgreSQL libraries (For PostGIS plugin support)
 - libgdal - GDAL/OGR input (For gdal and ogr plugin support)
 - libsqlite3 - SQLite input (needs RTree support) (sqlite plugin support)
-
-On Linux and Mac OS, package management systems (such as apt for debian or macports for darwin) can be used to install all required and optional dependencies, but source installs may be preferrable.
-
-Instructions for installing many of these dependencies on various platforms can be found at the Mapnik Community Wiki (http://trac.mapnik.org/wiki/MapnikInstallation).
+- libocci - Oracle input plugin support
+- libcurl - OSM input plugin support
 
 If your system does NOT have one of these installed, you will need to install the mandatory ones at the very least before proceeding further.
 
-Also, a minimum of 256MB of RAM is recommended for the build process.
+Instructions for installing many of these dependencies on various platforms can be found at the Mapnik Community Wiki (http://trac.mapnik.org/wiki/MapnikInstallation).
+
+On Linux and Mac OS, package management systems (such as apt for debian or macports for darwin) can be used to install most or all dependencies, but source installs may be preferrable. This is particularly true for libraries that a required for the Python bindings, where source installs may be the best way to ensure that the same python version us linked to Boost, Cairo, and Mapnik.
+
+Note: a minimum of 256MB of RAM is recommended for the build process.
 
 
 Building
@@ -92,7 +98,8 @@ Building
 Once you've installed the required software packages, the simplest way to build Mapnik is to run SCons (The software builder) without any options::
 
   $ cd ~/src/mapnik
-  $ python scons/scons.py
+  $ python scons/scons.py configure
+  $ python scons/scons.py # will build sources
 
 This should compile and link the mapnik library as well as the input plugins and the python language binding (if possible).  If any mandatory dependencies are not found the build will fail, and you will need to specify custom paths to your libraries and include files.
 
@@ -102,15 +109,17 @@ To see the list of available options, from the root of the source distribution, 
 
   $ python scons/scons.py -h
 
-Note that the python used to run SCons does NOT have to be the same as the one used for the python bindings.
-
 For example, if you compiled your own set of Boost libraries, you might use::
 
-  $ python scons/scons.py configure BOOST_TOOLKIT=gcc43 BOOST_INCLUDES=/usr/local/include/boost-1_35 BOOST_LIBS=/usr/local/lib
+  $ python scons/scons.py configure BOOST_TOOLKIT=gcc43 BOOST_INCLUDES=/usr/local/include/boost-1_38 BOOST_LIBS=/usr/local/lib
 
-Or if you installed Postgres and Gdal from source and you'd like to build Mapnik in Debug mode you might use::
+Or if you installed ICU from source and you'd like to build Mapnik in Debug mode you might use::
 
-  $ python scons/scons.py configure DEBUG=True PGSQL_INCLUDES=/usr/local/pgsql/include PGSQL_LIBS=/usr/local/pgsql/lib GDAL_INCLUDES=/usr/local/include GDAL_LIBS=/usr/local/lib
+  $ python scons/scons.py configure DEBUG=True ICU_INCLUDES=/usr/local/include ICU_LIBS=/usr/local/lib
+
+For more details on all the options see: http://trac.mapnik.org/wiki/UsingScons
+
+Note: the Python used to run SCons does NOT have to be the same as the one used for the python bindings.
 
 
 Installation
@@ -122,7 +131,7 @@ Once the build has successfully completed, you can install the various files on 
 
 By default, everything will be installed under the PREFIX '/usr/local' as such::
 
-  $PREFIX/lib: libmapnik.so
+  $PREFIX/lib: libmapnik.so (.dylib on mac os)
   $PREFIX/lib/mapnik/input: input plug-ins
   $PREFIX/include: mapnik include files
   $PREFIX/bin: shapeindex utility
@@ -189,7 +198,7 @@ Here is an example on how to use it::
   >>> p = Projection('+init=epsg:27700') # British National Grid
   >>> p.forward(Coord(-1.125,51.75))
   Coord(460396.920899,206113.214203) # reprojected coordinate x, y pair
-  >>> p.forward(Envelope(Coord(-1.125,51.75),Coord(-1.0,50.75)))
+  >>> p.forward(Envelope(-1.125,51.75,-1.0,50.75))
   Envelope(461721.365661,94917.0749406,469024.861457,206224.090767) # reprojected extent
 
 
