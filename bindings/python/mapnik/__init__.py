@@ -298,6 +298,28 @@ def SQLite(**keywords):
     keywords['type'] = 'sqlite'
     return CreateDatasource(keywords)
 
+def Osm(**keywords):
+    """Create a Osm Datasource.
+  
+    Required keyword arguments:
+      file -- path to OSM file
+
+    Optional keyword arguments:
+      encoding -- file encoding (default 'utf-8')
+      url -- url to fetch data (default None)
+      bbox -- data bounding box for fetching data (default None)
+    
+    >>> from mapnik import Osm, Layer
+    >>> datasource = Osm(file='test.osm') 
+    >>> lyr = Layer('Osm Layer')
+    >>> lyr.datasource = datasource
+    
+    """
+    # note: parser only supports libxml2 so not exposing option
+    # parser -- xml parser to use (default libxml2)
+    keywords['type'] = 'osm'
+    return CreateDatasource(keywords)
+
 def mapnik_version_string():
     """Return the Mapnik version as a string."""
     version = mapnik_version()

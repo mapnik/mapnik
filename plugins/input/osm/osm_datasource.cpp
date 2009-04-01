@@ -90,7 +90,7 @@ osm_datasource::osm_datasource(const parameters &params)
         // Need code to get the attributes of all the data
         std::set<std::string> keys= osm_data_->get_keys();
 
-        // Add the attributes to the datasource descriptor - assume they're
+        // Add the attributes to the datasource descriptor - assume they are
         // all of type String
         for(std::set<std::string>::iterator i=keys.begin(); i!=keys.end(); i++)
           desc_.add_descriptor(attribute_descriptor(*i,tagtypes.get_type(*i)));
@@ -104,7 +104,7 @@ osm_datasource::osm_datasource(const parameters &params)
 
 osm_datasource::~osm_datasource() 
 { 
-    // Do not do as is now static variable and cleaned up atexit
+    // Do not do as is now static variable and cleaned up at exit
     //delete osm_data_; 
 }
 
