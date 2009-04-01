@@ -9,7 +9,7 @@ mapnik.fonts	mapnik-module.html#fonts
 mapnik.PostGIS	mapnik-module.html#PostGIS
 mapnik.Ogr	mapnik-module.html#Ogr
 mapnik.Shapefile	mapnik-module.html#Shapefile
-mapnik.flags	mapnik-module.html#flags
+mapnik.Occi	mapnik-module.html#Occi
 mapnik.inverse_	mapnik-module.html#inverse_
 mapnik.Gdal	mapnik-module.html#Gdal
 mapnik.Filter	mapnik-module.html#Filter
@@ -17,10 +17,12 @@ mapnik.save_map	mapnik-module.html#save_map
 mapnik.render	mapnik-module.html#render
 mapnik.RTLD_GLOBAL	mapnik-module.html#RTLD_GLOBAL
 mapnik.Datasource	mapnik-module.html#Datasource
+mapnik.flags	mapnik-module.html#flags
 mapnik.render_tile_to_file	mapnik-module.html#render_tile_to_file
 mapnik.Describe	mapnik-module.html#Describe
 mapnik.load_map	mapnik-module.html#load_map
 mapnik.mapnik_version	mapnik-module.html#mapnik_version
+mapnik.Osm	mapnik-module.html#Osm
 mapnik.render_to_file	mapnik-module.html#render_to_file
 mapnik.forward_	mapnik-module.html#forward_
 mapnik.mapnik_version_string	mapnik-module.html#mapnik_version_string
@@ -159,7 +161,6 @@ mapnik._mapnik.Geometry2d.__init__	mapnik._mapnik.Geometry2d-class.html#__init__
 mapnik._mapnik.Image	mapnik._mapnik.Image-class.html
 mapnik._mapnik.Image.blend	mapnik._mapnik.Image-class.html#blend
 mapnik._mapnik.Image.__instance_size__	mapnik._mapnik.Image-class.html#__instance_size__
-mapnik._mapnik.Image.from_cairo	mapnik._mapnik.Image-class.html#from_cairo
 mapnik._mapnik.Image.__reduce__	mapnik._mapnik.Image-class.html#__reduce__
 mapnik._mapnik.Image.height	mapnik._mapnik.Image-class.html#height
 mapnik._mapnik.Image.width	mapnik._mapnik.Image-class.html#width
@@ -378,6 +379,7 @@ mapnik._mapnik.TextSymbolizer.avoid_edges	mapnik._mapnik.TextSymbolizer-class.ht
 mapnik._mapnik.ShieldSymbolizer.__instance_size__	mapnik._mapnik.ShieldSymbolizer-class.html#__instance_size__
 mapnik._mapnik.TextSymbolizer.allow_overlap	mapnik._mapnik.TextSymbolizer-class.html#allow_overlap
 mapnik._mapnik.TextSymbolizer.anchor	mapnik._mapnik.TextSymbolizer-class.html#anchor
+mapnik._mapnik.TextSymbolizer.vertical_alignment	mapnik._mapnik.TextSymbolizer-class.html#vertical_alignment
 mapnik._mapnik.Singleton	mapnik._mapnik.Singleton-class.html
 mapnik._mapnik.Singleton.__reduce__	mapnik._mapnik.Singleton-class.html#__reduce__
 mapnik._mapnik.Singleton.instance	mapnik._mapnik.Singleton-class.html#instance
@@ -434,9 +436,10 @@ mapnik._mapnik.TextSymbolizer.force_odd_labels	mapnik._mapnik.TextSymbolizer-cla
 mapnik._mapnik.TextSymbolizer.label_position_tolerance	mapnik._mapnik.TextSymbolizer-class.html#label_position_tolerance
 mapnik._mapnik.TextSymbolizer.name	mapnik._mapnik.TextSymbolizer-class.html#name
 mapnik._mapnik.TextSymbolizer.avoid_edges	mapnik._mapnik.TextSymbolizer-class.html#avoid_edges
-mapnik._mapnik.TextSymbolizer.__instance_size__	mapnik._mapnik.TextSymbolizer-class.html#__instance_size__
+mapnik._mapnik.TextSymbolizer.vertical_alignment	mapnik._mapnik.TextSymbolizer-class.html#vertical_alignment
 mapnik._mapnik.TextSymbolizer.allow_overlap	mapnik._mapnik.TextSymbolizer-class.html#allow_overlap
 mapnik._mapnik.TextSymbolizer.anchor	mapnik._mapnik.TextSymbolizer-class.html#anchor
+mapnik._mapnik.TextSymbolizer.__instance_size__	mapnik._mapnik.TextSymbolizer-class.html#__instance_size__
 mapnik._mapnik.ViewTransform	mapnik._mapnik.ViewTransform-class.html
 mapnik._mapnik.ViewTransform.scale	mapnik._mapnik.ViewTransform-class.html#scale
 mapnik._mapnik.ViewTransform.__instance_size__	mapnik._mapnik.ViewTransform-class.html#__instance_size__
@@ -478,6 +481,14 @@ mapnik._mapnik.line_join.MITER_REVERT_JOIN	mapnik._mapnik.line_join-class.html#M
 mapnik._mapnik.line_join.miter_revert	mapnik._mapnik.line_join-class.html#miter_revert
 mapnik._mapnik.line_join.values	mapnik._mapnik.line_join-class.html#values
 mapnik._mapnik.line_join.round	mapnik._mapnik.line_join-class.html#round
+mapnik._mapnik.vertical_alignment	mapnik._mapnik.vertical_alignment-class.html
+mapnik._mapnik.vertical_alignment.middle	mapnik._mapnik.vertical_alignment-class.html#middle
+mapnik._mapnik.vertical_alignment.BOTTOM	mapnik._mapnik.vertical_alignment-class.html#BOTTOM
+mapnik._mapnik.vertical_alignment.top	mapnik._mapnik.vertical_alignment-class.html#top
+mapnik._mapnik.vertical_alignment.TOP	mapnik._mapnik.vertical_alignment-class.html#TOP
+mapnik._mapnik.vertical_alignment.MIDDLE	mapnik._mapnik.vertical_alignment-class.html#MIDDLE
+mapnik._mapnik.vertical_alignment.bottom	mapnik._mapnik.vertical_alignment-class.html#bottom
+mapnik._mapnik.vertical_alignment.values	mapnik._mapnik.vertical_alignment-class.html#values
 mapnik.ogcserver.WMS.BaseWMSFactory	mapnik.ogcserver.WMS.BaseWMSFactory-class.html
 mapnik.ogcserver.WMS.BaseWMSFactory.finalize	mapnik.ogcserver.WMS.BaseWMSFactory-class.html#finalize
 mapnik.ogcserver.WMS.BaseWMSFactory.register_aggregate_style	mapnik.ogcserver.WMS.BaseWMSFactory-class.html#register_aggregate_style
@@ -602,7 +613,7 @@ mapnik.ogcserver.wms130.ExceptionHandler.defaulthandler	mapnik.ogcserver.wms130.
 mapnik.ogcserver.wms130.ExceptionHandler.xmltemplate	mapnik.ogcserver.wms130.ExceptionHandler-class.html#xmltemplate
 mapnik.ogcserver.common.BaseExceptionHandler.xmlhandler	mapnik.ogcserver.common.BaseExceptionHandler-class.html#xmlhandler
 mapnik.ogcserver.wms130.ServiceHandler	mapnik.ogcserver.wms130.ServiceHandler-class.html
-mapnik.ogcserver.common.WMSBaseServiceHandler._buildMap	mapnik.ogcserver.common.WMSBaseServiceHandler-class.html#_buildMap
+mapnik.ogcserver.wms130.ServiceHandler._buildMap	mapnik.ogcserver.wms130.ServiceHandler-class.html#_buildMap
 mapnik.ogcserver.wms130.ServiceHandler.GetCapabilities	mapnik.ogcserver.wms130.ServiceHandler-class.html#GetCapabilities
 mapnik.ogcserver.common.BaseServiceHandler.CONF_CONTACT	mapnik.ogcserver.common.BaseServiceHandler-class.html#CONF_CONTACT
 mapnik.ogcserver.wms130.ServiceHandler.capabilitiesxmltemplate	mapnik.ogcserver.wms130.ServiceHandler-class.html#capabilitiesxmltemplate

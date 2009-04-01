@@ -243,6 +243,23 @@ are only accessible by various documentation viewers via the 'mapnik._mapnik' mo
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a href="mapnik-module.html#Occi" class="summary-sig-name">Occi</a>(<span class="summary-sig-arg">**keywords</span>)</span><br />
+      Create a Oracle Spatial (10g) Vector Datasource.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a href="mapnik-module.html#Ogr" class="summary-sig-name">Ogr</a>(<span class="summary-sig-arg">**keywords</span>)</span><br />
       Create a OGR Vector Datasource.</td>
           <td align="right" valign="top">
@@ -262,6 +279,23 @@ are only accessible by various documentation viewers via the 'mapnik._mapnik' mo
         <tr>
           <td><span class="summary-sig"><a href="mapnik-module.html#SQLite" class="summary-sig-name">SQLite</a>(<span class="summary-sig-arg">**keywords</span>)</span><br />
       Create a SQLite Datasource.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="mapnik-module.html#Osm" class="summary-sig-name">Osm</a>(<span class="summary-sig-arg">**keywords</span>)</span><br />
+      Create a Osm Datasource.</td>
           <td align="right" valign="top">
             
             
@@ -751,6 +785,52 @@ Optional keyword arguments:
   </dl>
 </td></tr></table>
 </div>
+<a name="Occi"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">Occi</span>(<span class="sig-arg">**keywords</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+Create a Oracle Spatial (10g) Vector Datasource.
+
+Required keyword arguments:
+  user -- database user to connect as
+  password -- password for database user
+  host -- oracle host to connect to (does not refer to SID in tsnames.ora)
+  table -- table name or subselect query
+
+Optional keyword arguments:
+  initial_size -- integer size of connection pool (default 1)
+  max_size -- integer max of connection pool (default 10)
+  extent -- manually specified data extent (comma delimited string, default None)
+  estimate_extent -- boolean, direct Oracle to use the faster, less accurate estimate_extent() over extent() (default False)
+  encoding -- file encoding (default 'utf-8')
+  geometry_field -- specify geometry field (default 'GEOLOC')
+  use_spatial_index -- boolean, force the use of the spatial index (default True)
+  multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
+
+&gt;&gt;&gt; from mapnik import Occi, Layer
+&gt;&gt;&gt; params = dict(host='myoracle',user='scott',password='tiger',table='test')
+&gt;&gt;&gt; params['estimate_extent'] = False
+&gt;&gt;&gt; params['extent'] = '-20037508,-19929239,20037508,19929239'
+&gt;&gt;&gt; oracle = Occi(**params)
+&gt;&gt;&gt; lyr = Layer('Oracle Spatial Layer')
+&gt;&gt;&gt; lyr.datasource = oracle
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <a name="Ogr"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -825,6 +905,41 @@ Optional keyword arguments:
 &gt;&gt;&gt; sqlite = SQLite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239') 
 &gt;&gt;&gt; lyr = Layer('SQLite Layer')
 &gt;&gt;&gt; lyr.datasource = sqlite
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="Osm"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">Osm</span>(<span class="sig-arg">**keywords</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+Create a Osm Datasource.
+
+Required keyword arguments:
+  file -- path to OSM file
+
+Optional keyword arguments:
+  encoding -- file encoding (default 'utf-8')
+  url -- url to fetch data (default None)
+  bbox -- data bounding box for fetching data (default None)
+
+&gt;&gt;&gt; from mapnik import Osm
+&gt;&gt;&gt; datasource = Osm(file='test.osm') 
+&gt;&gt;&gt; lyr = Layer('Osm Layer')
+&gt;&gt;&gt; lyr.datasource = datasource
 
 </pre>
   <dl class="fields">
@@ -1097,74 +1212,6 @@ render( (Map)arg1, (Image)arg2) -&gt; None :
     C++ signature :
         void render(mapnik::Map,mapnik::Image32 {lvalue})
 
-render( (Map)arg1, (object)arg2, (int)arg3, (int)arg4) -&gt; None :
-    
-    Render Map to Cairo Surface using offsets
-    
-    Usage:
-    &gt;&gt;&gt; from mapnik import Map, render, load_map
-    &gt;&gt;&gt; from cairo import SVGSurface
-    &gt;&gt;&gt; m = Map(256,256)
-    &gt;&gt;&gt; load_map(m,'mapfile.xml')
-    &gt;&gt;&gt; surface = SVGSurface('image.svg', m.width, m.height)
-    &gt;&gt;&gt; render(m,surface,1,1)
-    
-    
-
-    C++ signature :
-        void render(mapnik::Map,PycairoSurface*,unsigned int,unsigned int)
-
-render( (Map)arg1, (object)arg2) -&gt; None :
-    
-    Render Map to Cairo Surface
-    
-    Usage:
-    &gt;&gt;&gt; from mapnik import Map, render, load_map
-    &gt;&gt;&gt; from cairo import SVGSurface
-    &gt;&gt;&gt; m = Map(256,256)
-    &gt;&gt;&gt; load_map(m,'mapfile.xml')
-    &gt;&gt;&gt; surface = SVGSurface('image.svg', m.width, m.height)
-    &gt;&gt;&gt; render(m,surface)
-    
-    
-
-    C++ signature :
-        void render(mapnik::Map,PycairoSurface*)
-
-render( (Map)arg1, (object)arg2, (int)arg3, (int)arg4) -&gt; None :
-    
-    Render Map to Cairo Context using offsets
-    
-    Usage:
-    &gt;&gt;&gt; from mapnik import Map, render, load_map
-    &gt;&gt;&gt; from cairo import SVGSurface, Context
-    &gt;&gt;&gt; surface = SVGSurface('image.svg', m.width, m.height)
-    &gt;&gt;&gt; ctx = Context(surface)
-    &gt;&gt;&gt; load_map(m,'mapfile.xml')
-    &gt;&gt;&gt; render(m,context,1,1)
-    
-    
-
-    C++ signature :
-        void render(mapnik::Map,PycairoContext*,unsigned int,unsigned int)
-
-render( (Map)arg1, (object)arg2) -&gt; None :
-    
-    Render Map to Cairo Context
-    
-    Usage:
-    &gt;&gt;&gt; from mapnik import Map, render, load_map
-    &gt;&gt;&gt; from cairo import SVGSurface, Context
-    &gt;&gt;&gt; surface = SVGSurface('image.svg', m.width, m.height)
-    &gt;&gt;&gt; ctx = Context(surface)
-    &gt;&gt;&gt; load_map(m,'mapfile.xml')
-    &gt;&gt;&gt; render(m,context)
-    
-    
-
-    C++ signature :
-        void render(mapnik::Map,PycairoContext*)
-
 </pre>
   <dl class="fields">
   </dl>
@@ -1396,7 +1443,7 @@ scale_denominator( (Map)arg1, (bool)arg2) -&gt; float :
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sun Mar 29 22:17:14 2009
+    Generated by Epydoc 3.0.1 on Tue Mar 31 17:46:46 2009
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
