@@ -233,10 +233,11 @@ if opts.args:
     # now since we've got custom arguments we'll disregard any 
     # pickled environment and force another configuration
     preconfigured = False
-    if env['FAST']:
+    if opts.args.get('FAST'):
         # because we are clearing the 'sconf_temp' files each configure when FAST=False
         # we now need to flush the dblite otherwise SCons will skip checks
-        # during the first 'FAST' configure
+        # of fail because .sconsign.dblite could be out of sync with cacheing from using
+        # or moving to using FAST=True
         try:
             os.unlink('.sconsign.dblite')
         except: pass
