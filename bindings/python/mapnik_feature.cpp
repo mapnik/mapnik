@@ -49,7 +49,7 @@ namespace boost { namespace python {
             PyObject * operator() (UnicodeString const& s) const
             {
                int32_t len = s.length();
-               boost::scoped_array<wchar_t> buf(new wchar_t(len));
+               boost::scoped_array<wchar_t> buf(new wchar_t[len]);
                UErrorCode err = U_ZERO_ERROR;
                u_strToWCS(buf.get(),len,0,s.getBuffer(),len,&err);
                PyObject *obj = Py_None;
