@@ -38,6 +38,7 @@
 
 // boost
 
+// XML Debugging output
 #ifdef MAPNIK_XML_DEBUG
 #define BOOST_SPIRIT_DEBUG
 #endif

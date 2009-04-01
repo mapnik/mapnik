@@ -101,6 +101,7 @@ opts.AddVariables(
     EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
+    BoolVariable('XML_DEBUG', 'Compile a XML verbose debug version of mapnik', 'False'),
     ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
     
     # SCons build behavior options
@@ -448,6 +449,9 @@ if not preconfigured:
         mode = 'debug mode'
     else:
         mode = 'release mode'
+
+    if env['XML_DEBUG']:
+        mode += ' (with XML debug on)'
         
     env['PLATFORM'] = platform.uname()[0]
     color_print (4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
@@ -738,6 +742,9 @@ if not preconfigured:
         # Common debugging flags.
         debug_flags  = '-g -DDEBUG -DMAPNIK_DEBUG'
         ndebug_flags = '-DNDEBUG'
+        
+        if env['XML_DEBUG']: 
+            common_cxx_flags += '-DMAPNIK_XML_DEBUG '
         
         # Customizing the C++ compiler flags depending on: 
         #  (1) the C++ compiler used; and
