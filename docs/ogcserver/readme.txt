@@ -77,7 +77,7 @@ Installation
 Configuring the server
 ----------------------
 
-- You will need to create two simple python scripts::
+- You will need to create two simple python scripts:
 
   1) The web-accessible python script ('wms.py') which will import the 
      ogcserver module code and associate itself with the 'ogcserver.conf'
@@ -90,7 +90,7 @@ Configuring the server
      script can be found below.
 
   
-- Next you need to edit the ogcserver.conf file to::
+- Next you need to edit the ogcserver.conf file to:
   
   1) Point to the 'map_factory' script by using the "module" parameter
 
