@@ -348,7 +348,7 @@ namespace mapnik
         ~Map();
 
         inline void setAspectFixMode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
-        inline aspect_fix_mode getAspectFixMode() { return aspectFixMode_; }
+        inline aspect_fix_mode getAspectFixMode() const { return aspectFixMode_; }
 
     private:
         void fixAspectRatio();
