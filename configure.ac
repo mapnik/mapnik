@@ -200,7 +200,6 @@ AC_ARG_ENABLE(libxml2,
 AM_CONDITIONAL(HAVE_LIBXML2, test "x$enable_libxml2" = "xyes")
 
 if [ test "x$enable_libxml2" = "xyes"]; then
-  AC_MSG_RESULT(yes)
   PKG_CHECK_MODULES(LIBXML2, libxml-2.0)
   AC_DEFINE(HAVE_LIBXML2, 1,"")
 else
@@ -216,7 +215,6 @@ AC_ARG_ENABLE(cairo,
 AM_CONDITIONAL(HAVE_CAIRO, test "x$enable_cairo" = "xyes")
 
 if [ test "x$enable_cairo" = "xyes"]; then
-  AC_MSG_RESULT(yes)
   PKG_CHECK_MODULES(CAIRO, cairomm-1.0 >= 1.4.4)
   dnl AC_DEFINE(HAVE_CAIRO, 1,"")
 else
@@ -337,6 +335,17 @@ echo "build plugin (input/gdal)...... $found_gdal"
 echo "build plugin (input/ogr)....... $found_gdal" 
 echo "build plugin (input/osm)....... $enable_libxml2" 
 echo "build plugin (input/sqlite).... $found_sqlite3" 
+echo
+echo "Utility support:"
+echo "build shapeindex............... $ax_cv_boost_program_options"
+echo -n "build pgsql2sqlite............. "
+if [ test "x$ax_cv_boost_program_options" = "xyes"] && \
+   [ test "x$found_postgresql" = "xyes"] && \
+   [ test "x$found_sqlite3" = "xyes"] ; then
+  echo "yes"
+else
+  echo "no"
+fi
 echo
 echo "Debugging support:"
 echo "debugger (gdb)................. $enable_debug" 
