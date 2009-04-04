@@ -183,26 +183,13 @@ PKG_CHECK_MODULES(FREETYPE2, freetype2)
 AC_SUBST(FREETYPE2_CFLAGS)
 AC_SUBST(FREETYPE2_LIBS)
 
-dnl Check for option to enable included-agg
+dnl Check for option to enable included-agg (second part see more below...)
 AC_MSG_CHECKING(whether to enable included libagg building)
 AC_ARG_ENABLE(included_agg,
         [  --enable-included-agg=[no/yes]        enables included libagg build (default=yes)],,
                  enable_included_agg=yes)
 
 AM_CONDITIONAL(BUILD_AGG, test "x$enable_included_agg" = "xyes")
-
-if [ test "x$enable_included_agg" = "xyes"]; then
-  AGG_LIBS=-L../agg/src
-  AGG_CFLAGS=-I../agg/include
-  AC_SUBST(AGG_LIBS)
-  AC_SUBST(AGG_CFLAGS)
-  
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-  PKG_CHECK_MODULES(AGG, libagg)
-fi
-
 
 dnl Check for option to enable libxml2
 AC_MSG_CHECKING(whether to enable libxml2 support)
@@ -238,6 +225,19 @@ fi
 
 #dnl Set PACKAGE SOURCE DIR in config.h.
 packagesrcdir=`cd $srcdir && pwd`
+
+## second part of agg needs to be here because of packagesrcdir
+if [ test "x$enable_included_agg" = "xyes"]; then
+  AGG_LIBS="-L${packagesrcdir}/agg/src -lagg"
+  AGG_CFLAGS="-I${packagesrcdir}/agg/include"
+  AC_SUBST(AGG_LIBS)
+  AC_SUBST(AGG_CFLAGS)
+
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+  PKG_CHECK_MODULES(AGG, libagg)
+fi
 
 #dnl Set PACKAGE PREFIX
 if test "x${prefix}" = "xNONE"; then
@@ -314,6 +314,9 @@ plugins/input/osm/Makefile
 plugins/input/ogr/Makefile
 plugins/input/sqlite/Makefile
 plugins/input/kismet/Makefile
+utils/Makefile
+utils/pgsql2sqlite/Makefile
+utils/shapeindex/Makefile
 src/Makefile
 mapnik.pc
 mapnik-uninstalled.pc

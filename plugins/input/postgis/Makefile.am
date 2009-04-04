@@ -19,9 +19,9 @@ postgis_la_LIBADD = \
 	${POSTGRESQL_LDFLAGS}
 
 postgis_la_CXXFLAGS = \
-  -Wall \
-  ${PROFILING_CFLAGS} \
-  ${TRACING_CFLAGS} \
+	-Wall \
+	${PROFILING_CFLAGS} \
+	${TRACING_CFLAGS} \
 	${POSTGRESQL_CFLAGS} \
 	-I../../../include
 

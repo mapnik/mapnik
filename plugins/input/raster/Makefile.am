@@ -12,9 +12,9 @@ raster_la_SOURCES = \
 	raster_info.hpp
 
 raster_la_CXXFLAGS = \
-  -Wall \
-  ${PROFILING_CFLAGS} \
-  ${TRACING_CFLAGS} \
+	-Wall \
+	${PROFILING_CFLAGS} \
+	${TRACING_CFLAGS} \
 	-I../../../include
 
 raster_la_LDFLAGS = \
