@@ -35,6 +35,7 @@ _mapnik_la_SOURCES = \
 	mapnik_stroke.cpp \
 	mapnik_style.cpp \
 	mapnik_text_symbolizer.cpp \
+	mapnik_view_transform.cpp \
 	python_cairo.cpp \
 	python_optional.hpp
 
