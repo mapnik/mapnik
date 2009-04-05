@@ -226,7 +226,7 @@ packagesrcdir=`cd $srcdir && pwd`
 
 ## second part of agg needs to be here because of packagesrcdir
 if [ test "x$enable_included_agg" = "xyes"]; then
-  AGG_LIBS="-L${packagesrcdir}/agg/src -lagg"
+  AGG_LIBS="${packagesrcdir}/agg/src/libagg.la"
   AGG_CFLAGS="-I${packagesrcdir}/agg/include"
   AC_SUBST(AGG_LIBS)
   AC_SUBST(AGG_CFLAGS)
