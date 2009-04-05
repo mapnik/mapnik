@@ -8,7 +8,7 @@ pkglib_LTLIBRARIES = \
 postgis_la_SOURCES = \
 	connection.hpp\
 	connection_manager.hpp\
-	corsorresultset.hpp\
+	cursorresultset.hpp\
 	postgis.cpp\
 	postgis.hpp\
 	postgisfs.cpp\

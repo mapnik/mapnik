@@ -19,7 +19,7 @@ osm_la_SOURCES = \
 	osmparser.cpp\
 	osmparser.h\
 	osmtagtypes.h\
-	renderer.cpp
+	render.cpp
 
 osm_la_CXXFLAGS = \
   -Wall \
