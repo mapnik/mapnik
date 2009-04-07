@@ -145,7 +145,7 @@ void export_map()
       .def(vector_indexing_suite<std::vector<Layer> >())
       ;
     
-   class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(args("Map","width","height","srs"),
+   class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(args("self","width","height","srs"),
                   "Create a Map with a width and height as integers and, optionally,\n"
                   "an srs string either with a Proj.4 epsg code ('+init=epsg:<code>')\n"
                   "or with a Proj.4 literal ('+proj=<literal>').\n"
