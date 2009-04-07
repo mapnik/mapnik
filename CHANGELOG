@@ -11,6 +11,14 @@ Developers: Please commit along with changes.
 For a complete change history, see the SVN log.
 
 
+0.6.1 SVN
+---------
+
+- AGG Renderer: Added option to control output JPEG quality (r1078) (#198)
+
+- Plugins: Fixed segfault in OGC Plugin with empty geometries (r1074) (#292)
+
+
 
 Mapnik 0.6.0 Release
 --------------------
