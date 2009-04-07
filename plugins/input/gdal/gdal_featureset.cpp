@@ -125,10 +125,10 @@ feature_ptr gdal_featureset::next()
       Envelope<double> intersection = raster_extent.intersect(query_extent_);
       Envelope<double> box = t.forward(intersection);
       
-      int start_x = int(box.minx());
-      int start_y = int(box.miny());
-      int width = int(box.width());
-      int height = int(box.height());
+      int start_x = int(box.minx()+0.5);
+      int start_y = int(box.miny()+0.5);
+      int width = int(box.width()+0.5);
+      int height = int(box.height()+0.5);
       
       if (width > 0 && height > 0)
       {

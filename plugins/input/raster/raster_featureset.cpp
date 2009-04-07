@@ -68,8 +68,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                Envelope<double> intersect=extent_.intersect(curIter_->envelope());
                Envelope<double> ext=t.forward(intersect);
                     
-               ImageData32 image((int)ext.width(),(int)ext.height());
-               reader->read((int)ext.minx(),(int)ext.miny(),image);
+               ImageData32 image((int)(ext.width()+0.5),(int)(ext.height()+0.5));
+               reader->read((int)(ext.minx()+0.5),(int)(ext.miny()+0.5),image);
                feature->set_raster(mapnik::raster_ptr(new raster(intersect,image)));
             }
          }

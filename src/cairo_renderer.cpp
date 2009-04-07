@@ -987,7 +987,7 @@ namespace mapnik
          cairo_context context(context_);
 
          //TODO -- support for advanced image merging
-         context.add_image(int(ext.minx()), int(ext.miny()), target, sym.get_opacity());
+         context.add_image(int(ext.minx()+0.5), int(ext.miny()+0.5), target, sym.get_opacity());
       }
    }
 
