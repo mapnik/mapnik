@@ -148,7 +148,7 @@ void export_map()
     
    class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(
                   
-#if BOOST_VERSION >= 103400 
+#if BOOST_VERSION >= 103500 
                   args("self","width","height","srs"),      
 #endif
                   
