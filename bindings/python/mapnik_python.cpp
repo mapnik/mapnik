@@ -275,9 +275,16 @@ BOOST_PYTHON_MODULE(_mapnik)
         ">>> from mapnik import Map, render_to_file, load_map\n"
         ">>> m = Map(256,256)\n"
         ">>> load_map(m,'mapfile.xml')\n"
-        ">>> render_to_file(m,'image8bit.png','png256')\n"
         ">>> render_to_file(m,'image32bit.png','png')\n"
         "\n"
+        "Format Options:\n"
+        "\n"
+        "8 bit (paletted) PNG can be requested with 'png256':\n"
+        ">>> render_to_file(m,'image8bit.png','png256')\n"
+        "JPEG quality can be controlled by adding a suffix to\n"
+        "'jpeg' between 0 and 100 (default is 85):\n"
+        ">>> render_to_file(m,'top_quality.jpeg','jpeg100')\n"
+        ">>> render_to_file(m,'medium_quality.jpeg','jpeg50')\n"
         );
 
     def("render_to_file",&render_to_file2,
