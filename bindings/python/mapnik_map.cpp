@@ -23,6 +23,7 @@
 
 // boost
 #include <boost/python.hpp>
+#include <boost/version.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -145,7 +146,12 @@ void export_map()
       .def(vector_indexing_suite<std::vector<Layer> >())
       ;
     
-   class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(args("self","width","height","srs"),
+   class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(
+                  
+#if BOOST_VERSION >= 103400 
+                  args("self","width","height","srs"),      
+#endif
+                  
                   "Create a Map with a width and height as integers and, optionally,\n"
                   "an srs string either with a Proj.4 epsg code ('+init=epsg:<code>')\n"
                   "or with a Proj.4 literal ('+proj=<literal>').\n"
@@ -177,7 +183,18 @@ void export_map()
 
       .def("buffered_envelope",
            &Map::get_buffered_extent,
-           "TODO\n"
+           "Get the Envelope() of the Map given\n"
+           "the Map.buffer_size.\n"
+           "\n"
+           "Usage:\n"
+           ">>> m = Map(600,400)\n"
+           ">>> m.envelope()\n"
+           "Envelope(-1.0,-1.0,0.0,0.0)\n"
+           ">>> m.buffered_envelope()\n"
+           "Envelope(-1.0,-1.0,0.0,0.0)\n"
+           ">>> m.buffer_size = 1\n"
+           ">>> m.buffered_envelope()\n"
+           "Envelope(-1.02222222222,-1.02222222222,0.0222222222222,0.0222222222222)\n"
          )
 
       .def("envelope",
