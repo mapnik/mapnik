@@ -14,7 +14,7 @@ For a complete change history, see the SVN log.
 0.6.1 SVN
 ---------
 
-- OGCServer: Made lxml dependency optional (r986) (#303)
+- OGCServer: Made lxml dependency optional (r1085) (#303)
 
 - Rasters: Handle rounding to allow better alignment of raster layers (r1079) (#295)
 
