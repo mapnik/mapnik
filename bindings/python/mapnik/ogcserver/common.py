@@ -29,9 +29,16 @@ from StringIO import StringIO
 from copy import deepcopy
 from traceback import format_exception, format_exception_only
 from sys import exc_info
-from lxml import etree as ElementTree
 import re
 import sys
+
+try:
+    from lxml import etree as ElementTree
+except ImportError:
+    import xml.etree.ElementTree as ElementTree
+except ImportError:
+    import elementtree.ElementTree as ElementTree
+
 # from elementtree import ElementTree
 # ElementTree._namespace_map.update({'http://www.opengis.net/wms': 'wms',
 #                                    'http://www.opengis.net/ogc': 'ogc',
@@ -316,22 +323,34 @@ class WMSBaseServiceHandler(BaseServiceHandler):
             writer = TextFeatureInfo()
         elif params['info_format'] == 'text/xml':
             writer = XMLFeatureInfo()
-        for layerindex, layername in enumerate(params['query_layers']):
-            if layername in params['layers']:
-                if m.layers[layerindex].queryable:
-                    featureset = getattr(m, querymethodname)(layerindex, params['i'], params['j'])
-                    if featureset:
-                        writer.addlayer(m.layers[layerindex].name)
+        if params['query_layers'] and params['query_layers'][0] == '__all__':
+            for layerindex, layer in enumerate(m.layers):
+                featureset = getattr(m, querymethodname)(layerindex, params['i'], params['j'])
+                if featureset:
+                    writer.addlayer(layer.name)
                     feat = featureset.next()
                     while feat:
                         writer.addfeature()
                         for prop in feat.properties:
                             writer.addattribute(prop[0], prop[1])
                         feat = featureset.next()
+        else:
+            for layerindex, layername in enumerate(params['query_layers']):
+                if layername in params['layers']:
+                    if m.layers[layerindex].queryable:
+                        featureset = getattr(m, querymethodname)(layerindex, params['i'], params['j'])
+                        if featureset:
+                            writer.addlayer(m.layers[layerindex].name)
+                            feat = featureset.next()
+                            while feat:
+                                writer.addfeature()
+                                for prop in feat.properties:
+                                    writer.addattribute(prop[0], prop[1])
+                                feat = featureset.next()
+                    else:
+                        raise OGCException('Requested query layer "%s" is not marked queryable.' % layername, 'LayerNotQueryable')
                 else:
-                    raise OGCException('Requested query layer "%s" is not marked queryable.' % layername, 'LayerNotQueryable')
-            else:
-                raise OGCException('Requested query layer "%s" not in the LAYERS parameter.' % layername)
+                    raise OGCException('Requested query layer "%s" not in the LAYERS parameter.' % layername)
         return Response(params['info_format'], str(writer))
 
     def _buildMap(self, params):
@@ -476,10 +495,10 @@ class TextFeatureInfo:
         self.buffer = ''
 
     def addlayer(self, name):
-        self.buffer += '[%s]\n' % name
+        self.buffer += '\n[%s]\n' % name
 
     def addfeature(self):
-        self.buffer += '\n'
+        pass#self.buffer += '\n'
 
     def addattribute(self, name, value):
         self.buffer += '%s=%s\n' % (name, str(value))
@@ -513,7 +532,7 @@ class XMLFeatureInfo:
         attname = ElementTree.Element('name')
         attname.text = name
         attvalue = ElementTree.Element('value')
-        attvalue.text = value.unicode()
+        attvalue.text = unicode(value)
         attribute.append(attname)
         attribute.append(attvalue)
         self.currentfeature.append(attribute)

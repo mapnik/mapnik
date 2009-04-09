@@ -25,8 +25,14 @@ from common import ParameterDefinition, Response, Version, ListFactory, \
                    ColorFactory, CRSFactory, CRS, WMSBaseServiceHandler, \
                    BaseExceptionHandler, Projection, Envelope
 from exceptions import OGCException, ServerConfigurationError
-from lxml import etree as ElementTree
 from mapnik import Coord
+
+try:
+    from lxml import etree as ElementTree
+except ImportError:
+    import xml.etree.ElementTree as ElementTree
+except ImportError:
+    import elementtree.ElementTree as ElementTree
 
 class ServiceHandler(WMSBaseServiceHandler):
 
