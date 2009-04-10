@@ -31,7 +31,7 @@ namespace mapnik {
     {
         Envelope<double> ext_;
         ImageData32 data_;
-        raster(Envelope<double> const ext,ImageData32& data)
+        raster(Envelope<double> const& ext,ImageData32& data)
             : ext_(ext),
               data_(data) {}
     };
