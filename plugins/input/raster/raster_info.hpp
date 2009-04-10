@@ -21,8 +21,8 @@
  *****************************************************************************/
 //$Id: raster_info.hh 17 2005-03-08 23:58:43Z pavlenko $
 
-#ifndef RASTER_INFO
-#define RASTER_INFO
+#ifndef RASTER_INFO_HPP
+#define RASTER_INFO_HPP
 
 #include "raster_datasource.hpp"
 #include <string>
@@ -31,19 +31,23 @@ using mapnik::Envelope;
 
 class raster_info
 {
-    std::string file_;
-    std::string format_;
-    Envelope<double> extent_;
-    int srid_;
-    public:
-    raster_info(const std::string& file,const std::string& format,const Envelope<double>& extent,int srid=-1);
-    raster_info(const raster_info& rhs);
-    raster_info& operator=(const raster_info& rhs);
-    const Envelope<double>& envelope() const;
-    const std::string& file() const;
-    const std::string& format() const;
-    const int srid() const;
+   std::string file_;
+   std::string format_;
+   Envelope<double> extent_;
+   unsigned width_;
+   unsigned height_;
+public:
+   raster_info(const std::string& file,const std::string& format, const Envelope<double>& extent, unsigned width, unsigned height);
+   raster_info(const raster_info& rhs);
+   raster_info& operator=(const raster_info& rhs);
+   inline Envelope<double> const& envelope() const {return extent_;}
+   inline std::string const& file() const { return file_;}
+   inline std::string const& format() const {return format_;}
+   inline unsigned width() const { return width_;}
+   inline unsigned height() const { return height_;}
+   
 private:
-    void swap(raster_info& other) throw();
+   void swap(raster_info& other) throw();
 };
-#endif                                            //RASTER_INFO
+
+#endif  //RASTER_INFO_HPP

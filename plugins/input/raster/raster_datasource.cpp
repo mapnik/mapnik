@@ -29,11 +29,11 @@
 
 #include "raster_featureset.hpp"
 #include "raster_info.hpp"
-
 #include "raster_datasource.hpp"
 
 using mapnik::datasource;
 using mapnik::parameters;
+using mapnik::ImageReader;
 
 DATASOURCE_PLUGIN(raster_datasource)
 
@@ -73,6 +73,21 @@ raster_datasource::raster_datasource(const parameters& params)
       extent_.init(*lox,*loy,*hix,*hiy);
    }
    else throw datasource_exception("<lox> <loy> <hix> <hiy> are required");
+
+   try
+   {         
+      std::auto_ptr<ImageReader> reader(mapnik::get_image_reader(filename_, format_));
+      if (reader.get())
+      {
+         width_ = reader->width();
+         height_ = reader->height();
+         std::cout << "RASTER SIZE("<<width_ << "," << height_ << ")\n"; 
+      }
+   }
+   catch (...)
+   {
+      std::cerr << "Exception caught\n";
+   }
 }
 
 raster_datasource::~raster_datasource() {}
@@ -100,11 +115,27 @@ layer_descriptor raster_datasource::get_descriptor() const
 
 featureset_ptr raster_datasource::features(query const& q) const
 {
-    raster_info info(filename_,format_,extent_);
-    single_file_policy policy(info); //todo: handle different policies!
-    return featureset_ptr(new raster_featureset<single_file_policy>(policy,q));
+   mapnik::CoordTransform t(width_,height_,extent_,0,0);
+   mapnik::Envelope<double> intersect=extent_.intersect(q.get_bbox());
+   mapnik::Envelope<double> ext=t.forward(intersect);
+   
+   unsigned width = int(ext.width()+0.5);
+   unsigned height = int(ext.height() + 0.5);
+   std::cout << width << " " << height << "\n";
+   if (width * height > 1024*1024)
+   {
+      std::cout << "TILED policy\n";
+      tiled_file_policy policy(filename_,format_, 1024, extent_,q.get_bbox(), width_,height_);
+      return featureset_ptr(new raster_featureset<tiled_file_policy>(policy,extent_,q));
+   }
+   else
+   {
+      std::cout << "SINGLE FILE\n";
+      raster_info info(filename_,format_,extent_,width_,height_);
+      single_file_policy policy(info);
+      return featureset_ptr(new raster_featureset<single_file_policy>(policy,extent_,q));
+   }
 }
-
 
 featureset_ptr raster_datasource::features_at_point(coord2d const&) const
 {

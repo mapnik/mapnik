@@ -19,13 +19,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef RASTER_FEATURESET_HH
-#define RASTER_FEATURESET_HH
+#ifndef RASTER_FEATURESET_HPP
+#define RASTER_FEATURESET_HPP
 
 #include <vector>
 
 #include "raster_datasource.hpp"
 #include "raster_info.hpp"
+
+#include <boost/utility.hpp>
 
 class single_file_policy
 {
@@ -93,19 +95,79 @@ public:
     }
 };
 
+class tiled_file_policy
+{
+public:
+   
+   typedef std::vector<raster_info>::const_iterator const_iterator;
+   
+   tiled_file_policy(std::string const& file, std::string const& format, unsigned tile_size, 
+                     Envelope<double> extent, Envelope<double> bbox,unsigned width, unsigned height)
+   {     
+      
+      double lox = extent.minx();
+      double loy = extent.miny();
+   
+      int max_x = int(ceil(double(width)/double(tile_size)));
+      int max_y = int(ceil(double(height)/double(tile_size)));
+
+      double pixel_x = extent.width()/double(width);
+      double pixel_y = extent.height()/double(height);
+      std::cout << "PIXEL SIZE("<< pixel_x << "," << pixel_y << ")\n";
+      
+      Envelope<double> e = bbox.intersect(extent);
+      
+      for (int x = 0 ; x < max_x ; ++x)
+      {
+         for (int y = 0 ; y < max_y ; ++y)
+         {
+            double x0 = lox + x*tile_size*pixel_x;
+            double y0 = loy + y*tile_size*pixel_y;
+            double x1 = x0 + tile_size*pixel_x;
+            double y1 = y0 + tile_size*pixel_y;
+            
+            if (e.intersects(Envelope<double>(x0,y0,x1,y1)))
+            {
+               Envelope<double> tile_box = e.intersect(Envelope<double>(x0,y0,x1,y1));            
+               raster_info info(file,format,tile_box,tile_size,tile_size);
+               infos_.push_back(info);
+            }
+         }
+      }
+      std::cout << "INFO SIZE=" << infos_.size() << " " << file << "\n";
+      
+   }
+   
+   const_iterator begin()
+   {
+      return infos_.begin();
+   }
+      
+   const_iterator end()
+   {
+      return infos_.end();
+   }
+   
+private:
+
+   std::vector<raster_info> infos_;
+};
+
+
 template <typename LookupPolicy>
 class raster_featureset : public mapnik::Featureset
 {
-      typedef typename LookupPolicy::const_iterator iterator_type;
-      LookupPolicy policy_;
-      size_t id_;
-      mapnik::Envelope<double> extent_;
-      iterator_type curIter_;
-      iterator_type endIter_;
+   typedef typename LookupPolicy::const_iterator iterator_type;
+   LookupPolicy policy_;
+   size_t id_;
+   mapnik::Envelope<double> extent_;
+   mapnik::Envelope<double> bbox_;
+   iterator_type curIter_;
+   iterator_type endIter_;
 public:
-      raster_featureset(LookupPolicy const& policy,mapnik::query const& q);
-      virtual ~raster_featureset();
-      mapnik::feature_ptr next();
+   raster_featureset(LookupPolicy const& policy,Envelope<double> const& exttent, mapnik::query const& q);
+   virtual ~raster_featureset();
+   mapnik::feature_ptr next();
 };
 
-#endif //RASTER_FEATURESET_HH
+#endif //RASTER_FEATURESET_HPP

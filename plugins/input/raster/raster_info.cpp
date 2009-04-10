@@ -23,24 +23,28 @@
 
 #include "raster_info.hpp"
 
-raster_info::raster_info(const std::string& file,const std::string& format,const mapnik::Envelope<double>& extent,int srid)
+raster_info::raster_info(std::string const& file, std::string const& format,
+                         mapnik::Envelope<double> const& extent, unsigned width, unsigned height)
     :file_(file),
      format_(format),
      extent_(extent),
-     srid_(srid) {}
+     width_(width),
+     height_(height) {}
 
 raster_info::raster_info(const raster_info& rhs)
     :file_(rhs.file_),
      format_(rhs.format_),
      extent_(rhs.extent_),
-     srid_(rhs.srid_) {}
+     width_(rhs.width_),
+     height_(rhs.height_) {}
 
 void raster_info::swap(raster_info& other) throw()
 {
     file_=other.file_;
     format_=other.format_;
     extent_=other.extent_;
-    srid_=other.srid_;
+    width_=other.width_;
+    height_=other.height_;
 }
 
 
@@ -52,23 +56,4 @@ raster_info& raster_info::operator=(const raster_info& rhs)
 }
 
 
-const Envelope<double>& raster_info::envelope() const
-{
-    return extent_;
-}
 
-
-const std::string& raster_info::file() const
-{
-    return file_;
-}
-
-const std::string& raster_info::format() const
-{
-    return format_;
-}
-
-const int raster_info::srid() const
-{
-    return srid_;
-}

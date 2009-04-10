@@ -35,11 +35,13 @@ using mapnik::raster;
 
 template <typename LookupPolicy>
 raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
+                                                   Envelope<double> const& extent,
                                                    query const& q)
    : policy_(policy),
      id_(1),
-     extent_(q.get_bbox()),
-     curIter_(policy_.query(extent_)),
+     extent_(extent),
+     bbox_(q.get_bbox()),
+     curIter_(policy_.begin()),
      endIter_(policy_.end()) 
 {}
 
@@ -55,8 +57,11 @@ feature_ptr raster_featureset<LookupPolicy>::next()
       try
       {         
          std::auto_ptr<ImageReader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
-         
-         std::cout << "READER = " << curIter_->format() << " " << curIter_->file() << "\n";
+
+#ifdef MAPNIK_DEBUG         
+         std::cout << "READER = " << curIter_->format() << " " << curIter_->file() 
+                   << " size(" << curIter_->width() << "," << curIter_->height() << ")\n";
+#endif
          if (reader.get())
          {
             int image_width=reader->width();
@@ -64,19 +69,20 @@ feature_ptr raster_featureset<LookupPolicy>::next()
             
             if (image_width>0 && image_height>0)
             {
-               CoordTransform t(image_width,image_height,curIter_->envelope(),0,0);
-               Envelope<double> intersect=extent_.intersect(curIter_->envelope());
+               CoordTransform t(image_width,image_height,extent_,0,0);
+               Envelope<double> intersect=bbox_.intersect(curIter_->envelope());
                Envelope<double> ext=t.forward(intersect);
-                    
-               ImageData32 image((int)(ext.width()+0.5),(int)(ext.height()+0.5));
-               reader->read((int)(ext.minx()+0.5),(int)(ext.miny()+0.5),image);
+               ImageData32 image(int(ext.width()+0.5),int(ext.height()+0.5));
+               reader->read(int(ext.minx()+0.5),int(ext.miny()+0.5),image);
                feature->set_raster(mapnik::raster_ptr(new raster(intersect,image)));
             }
          }
       }
       catch (...)
       {
+         std::cerr << "Exception caught\n";
       }
+      
       ++curIter_;
       return feature;
    }
@@ -84,3 +90,4 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 }
 
 template class raster_featureset<single_file_policy>;
+template class raster_featureset<tiled_file_policy>;
