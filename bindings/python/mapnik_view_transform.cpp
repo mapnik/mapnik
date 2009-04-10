@@ -67,6 +67,7 @@ void export_view_transform()
       .def("backward",backward_point)
       .def("forward", forward_envelope)
       .def("backward",backward_envelope)
-      .def("scale",&CoordTransform::scale)
+      .def("scale_x",&CoordTransform::scale_x)
+      .def("scale_y",&CoordTransform::scale_y)
       ;
 }

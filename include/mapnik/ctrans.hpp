@@ -126,7 +126,8 @@ namespace mapnik {
       private:
          int width;
          int height;
-         double scale_;
+         double sx_;
+         double sy_;
          Envelope<double> extent_;
          double offset_x_;
          double offset_y_;
@@ -135,26 +136,30 @@ namespace mapnik {
                         double offset_x = 0, double offset_y = 0)
             :width(width),height(height),extent_(extent),offset_x_(offset_x),offset_y_(offset_y)
          {
-            double sx=((double)width)/extent_.width();
-            double sy=((double)height)/extent_.height();
-            scale_=std::min(sx,sy);
+            sx_ = ((double)width)/extent_.width();
+            sy_ = ((double)height)/extent_.height();
          }
 	
-         inline double scale() const
+         inline double scale_x() const
          {
-            return scale_;
+            return sx_;
+         }
+      
+         inline double scale_y() const
+         {
+            return sy_;
          }
          
          inline void forward(double * x, double * y) const
          {
-            *x = (*x - extent_.minx()) * scale_ - offset_x_;
-            *y = (extent_.maxy() - *y) * scale_ - offset_y_;
+            *x = (*x - extent_.minx()) * sx_ - offset_x_;
+            *y = (extent_.maxy() - *y) * sy_ - offset_y_;
          }
         
          inline void backward(double * x, double * y) const
          {
-            *x = extent_.minx() + (*x + offset_x_)/scale_;
-            *y = extent_.maxy() - (*y + offset_y_)/scale_;
+            *x = extent_.minx() + (*x + offset_x_)/sx_;
+            *y = extent_.maxy() - (*y + offset_y_)/sy_;
          }
          
          inline coord2d& forward(coord2d& c) const
