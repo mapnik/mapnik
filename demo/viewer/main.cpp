@@ -29,30 +29,33 @@ int main( int argc, char **argv )
 {
    using mapnik::datasource_cache;
    using mapnik::freetype_engine;
-  
-   datasource_cache::instance()->register_datasources("/opt/mapnik/lib/mapnik/input");
    
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-Bold.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-BoldOblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-ExtraLight.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans-Oblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSans.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansCondensed-Bold.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansCondensed-BoldOblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansCondensed-Oblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansCondensed.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono-Bold.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono-BoldOblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono-Oblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSansMono.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerif-Bold.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerif-BoldOblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerif-Oblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerif.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerifCondensed-Bold.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerifCondensed-BoldOblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerifCondensed-Oblique.ttf");
-   freetype_engine::register_font("/opt/mapnik/lib/mapnik/fonts/DejaVuSerifCondensed.ttf");
+   // modify this prefix based on your install location
+   std::string mapniklib = "/usr/local/lib/mapnik/";
+   
+   datasource_cache::instance()->register_datasources(mapniklib + "input");
+   
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSans-Bold.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSans-BoldOblique.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSans-ExtraLight.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSans-Oblique.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSans.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSansCondensed-Bold.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSansCondensed-BoldOblique.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSansCondensed-Oblique.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSansCondensed.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSansMono-Bold.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSansMono-BoldOblique.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSansMono-Oblique.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSansMono.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSerif-Bold.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSerif-BoldItalic.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSerif-Italic.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSerif.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSerifCondensed-Bold.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSerifCondensed-BoldItalic.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSerifCondensed-Italic.ttf");
+   freetype_engine::register_font(mapniklib + "fonts/DejaVuSerifCondensed.ttf");
    
    QApplication app( argc, argv ); 
    MainWindow window;
@@ -68,7 +71,7 @@ int main( int argc, char **argv )
          double y0 = list[1].toDouble(&ok);
          double x1 = list[2].toDouble(&ok);
          double y1 = list[3].toDouble(&ok);
-         if (ok) window.set_default_extent(x0,y0,x1,y1); 
+         if (ok) window.set_default_extent(x0,y0,x1,y1);
       }
    }
    
