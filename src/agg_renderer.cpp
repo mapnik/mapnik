@@ -668,11 +668,11 @@ namespace mapnik
       if (raster)
       {
          Envelope<double> ext=t_.forward(raster->ext_);
-         ImageData32 target(int(ext.width() + 0.5),int(ext.height() + 0.5));
+         ImageData32 target(int(ceil(ext.width())),int(ceil(ext.height())));
          int start_x = int(ext.minx()+0.5);
          int start_y = int(ext.miny()+0.5);
-
-         if (sym.get_scaling() == "fast"){
+         
+         if (sym.get_scaling() == "fast") {
             scale_image<ImageData32>(target,raster->data_);
          } else if (sym.get_scaling() == "bilinear"){
             scale_image_bilinear<ImageData32>(target,raster->data_);
