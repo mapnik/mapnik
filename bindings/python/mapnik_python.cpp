@@ -269,7 +269,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("render_to_file",&render_to_file1,
         "\n"
-        "Render Map to file using explicit image type\n"
+        "Render Map to file using explicit image type.\n"
         "\n"
         "Usage:\n"
         ">>> from mapnik import Map, render_to_file, load_map\n"
@@ -277,10 +277,9 @@ BOOST_PYTHON_MODULE(_mapnik)
         ">>> load_map(m,'mapfile.xml')\n"
         ">>> render_to_file(m,'image32bit.png','png')\n"
         "\n"
-        "Format Options:\n"
-        "\n"
         "8 bit (paletted) PNG can be requested with 'png256':\n"
-        ">>> render_to_file(m,'image8bit.png','png256')\n"
+        ">>> render_to_file(m,'8bit_image.png','png256')\n"
+        "\n"
         "JPEG quality can be controlled by adding a suffix to\n"
         "'jpeg' between 0 and 100 (default is 85):\n"
         ">>> render_to_file(m,'top_quality.jpeg','jpeg100')\n"
