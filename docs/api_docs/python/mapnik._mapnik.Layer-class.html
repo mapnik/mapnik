@@ -117,8 +117,7 @@
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Layer-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">...</span>)</span><br />
       __init__( (object)arg1, (str)arg2 [, (str)arg3]) -&gt; None :
-    Create a Layer with a named string and, optionally, an srs string either with
-    a Proj.4 epsg code ('+init=epsg:&lt;code&gt;') or with a Proj.4 literal ('+proj=&lt;literal&gt;').</td>
+    Create a Layer with a named string and, optionally, an srs string.</td>
           <td align="right" valign="top">
             
             
@@ -170,7 +169,7 @@
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Layer-class.html#envelope" class="summary-sig-name">envelope</a>(<span class="summary-sig-arg">...</span>)</span><br />
       envelope( (Layer)arg1) -&gt; Envelope :
-    Return the geographic envelope/bounding box of the data in the layer.</td>
+    Return the geographic envelope/bounding box.</td>
           <td align="right" valign="top">
             
             
@@ -421,8 +420,10 @@ __getstate__( (Layer)arg1) -&gt; tuple :
   <pre class="literalblock">
 
 __init__( (object)arg1, (str)arg2 [, (str)arg3]) -&gt; None :
-    Create a Layer with a named string and, optionally, an srs string either with
-    a Proj.4 epsg code ('+init=epsg:&lt;code&gt;') or with a Proj.4 literal ('+proj=&lt;literal&gt;').
+    Create a Layer with a named string and, optionally, an srs string.
+    
+    The srs can be either a Proj.4 epsg code ('+init=epsg:&lt;code&gt;') or
+    of a Proj.4 literal ('+proj=&lt;literal&gt;').
     If no srs is specified it will default to '+proj=latlong +datum=WGS84'
     
     Usage:
@@ -430,6 +431,7 @@ __init__( (object)arg1, (str)arg2 [, (str)arg3]) -&gt; None :
     &gt;&gt;&gt; lyr = Layer('My Layer','+proj=latlong +datum=WGS84')
     &gt;&gt;&gt; lyr
     &lt;mapnik._mapnik.Layer object at 0x6a270&gt;
+    
 
     C++ signature :
         void __init__(_object*,std::string [,std::string])
@@ -508,7 +510,8 @@ __setstate__( (Layer)arg1, (tuple)arg2) -&gt; None :
   <pre class="literalblock">
 
 envelope( (Layer)arg1) -&gt; Envelope :
-    Return the geographic envelope/bounding box of the data in the layer.
+    Return the geographic envelope/bounding box.
+    Determined based on the layer datasource.
     
     Usage:
     &gt;&gt;&gt; from mapnik import Layer
@@ -543,6 +546,7 @@ envelope( (Layer)arg1) -&gt; Envelope :
 
 visible( (Layer)arg1, (float)arg2) -&gt; bool :
     Return True if this layer's data is active and visible at a given scale.
+    
     Otherwise returns False.
     Accepts a scale value as an integer or float input.
     Will return False if:
@@ -627,7 +631,8 @@ visible( (Layer)arg1, (float)arg2) -&gt; bool :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">clear_label_cache</h3>
-  <p>Get/Set whether this layer's labels are cached. Usage: TODO</p>
+  <p>Get/Set whether this layer's labels are cached.</p>
+  <p>Usage: TODO</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -751,13 +756,14 @@ visible( (Layer)arg1, (float)arg2) -&gt; bool :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">srs</h3>
-  <p>Get/Set the SRS of the layer. Usage: &gt;&gt;&gt; from mapnik import 
-  Layer &gt;&gt;&gt; lyr = Layer('My Layer','+proj=latlong +datum=WGS84') 
-  &gt;&gt;&gt; lyr.srs '+proj=latlong +datum=WGS84' # The default srs if 
-  not initialized with custom srs &gt;&gt;&gt; # set to google mercator 
-  with Proj.4 literal ... &gt;&gt;&gt; lyr.srs = '+proj=merc +a=6378137 
-  +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m 
-  +nadgrids=@null +no_defs +over'</p>
+  <p>Get/Set the SRS of the layer.</p>
+  <p>Usage: &gt;&gt;&gt; from mapnik import Layer &gt;&gt;&gt; lyr = 
+  Layer('My Layer','+proj=latlong +datum=WGS84') &gt;&gt;&gt; lyr.srs 
+  '+proj=latlong +datum=WGS84' # The default srs if not initialized with 
+  custom srs &gt;&gt;&gt; # set to google mercator with Proj.4 literal ... 
+  &gt;&gt;&gt; lyr.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 
+  +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs 
+  +over'</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -784,7 +790,8 @@ Usage:
 &lt;mapnik._mapnik.Names object at 0x6d3e8&gt;
 &gt;&gt;&gt; len(lyr.styles)
 0
- # no styles until you append themlyr.styles.append('My Style') # mapnik uses named styles for flexibility
+ # no styles until you append them
+lyr.styles.append('My Style') # mapnik uses named styles for flexibility
 &gt;&gt;&gt; len(lyr.styles)
 1
 &gt;&gt;&gt; lyr.styles[0]
@@ -851,7 +858,7 @@ Usage:
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Tue Mar 31 17:46:46 2009
+    Generated by Epydoc 3.0.1 on Sun Apr 12 14:37:26 2009
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

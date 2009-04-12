@@ -441,10 +441,11 @@ mapnik._mapnik.TextSymbolizer.allow_overlap	mapnik._mapnik.TextSymbolizer-class.
 mapnik._mapnik.TextSymbolizer.anchor	mapnik._mapnik.TextSymbolizer-class.html#anchor
 mapnik._mapnik.TextSymbolizer.__instance_size__	mapnik._mapnik.TextSymbolizer-class.html#__instance_size__
 mapnik._mapnik.ViewTransform	mapnik._mapnik.ViewTransform-class.html
-mapnik._mapnik.ViewTransform.scale	mapnik._mapnik.ViewTransform-class.html#scale
 mapnik._mapnik.ViewTransform.__instance_size__	mapnik._mapnik.ViewTransform-class.html#__instance_size__
 mapnik._mapnik.ViewTransform.__reduce__	mapnik._mapnik.ViewTransform-class.html#__reduce__
 mapnik._mapnik.ViewTransform.forward	mapnik._mapnik.ViewTransform-class.html#forward
+mapnik._mapnik.ViewTransform.scale_x	mapnik._mapnik.ViewTransform-class.html#scale_x
+mapnik._mapnik.ViewTransform.scale_y	mapnik._mapnik.ViewTransform-class.html#scale_y
 mapnik._mapnik.ViewTransform.backward	mapnik._mapnik.ViewTransform-class.html#backward
 mapnik._mapnik.ViewTransform.__init__	mapnik._mapnik.ViewTransform-class.html#__init__
 mapnik._mapnik.aspect_fix_mode	mapnik._mapnik.aspect_fix_mode-class.html
