@@ -123,23 +123,25 @@ void export_layer()
     	;
     
     class_<Layer>("Layer", "A Mapnik map layer.", init<std::string const&,optional<std::string const&> >(
-                "Create a Layer with a named string and, optionally, an srs string either with\n"
-                "a Proj.4 epsg code ('+init=epsg:<code>') or with a Proj.4 literal ('+proj=<literal>').\n"
+                "Create a Layer with a named string and, optionally, an srs string.\n"
+                "\n"
+                "The srs can be either a Proj.4 epsg code ('+init=epsg:<code>') or\n"
+                "of a Proj.4 literal ('+proj=<literal>').\n"
                 "If no srs is specified it will default to '+proj=latlong +datum=WGS84'\n"
                 "\n"
                 "Usage:\n"
                 ">>> from mapnik import Layer\n"
                 ">>> lyr = Layer('My Layer','+proj=latlong +datum=WGS84')\n"
                 ">>> lyr\n"
-                "<mapnik._mapnik.Layer object at 0x6a270>"
+                "<mapnik._mapnik.Layer object at 0x6a270>\n"
                 ))
 
-        .def_pickle(layer_pickle_suite()
-                )
+        .def_pickle(layer_pickle_suite())
          
         .def("envelope",&Layer::envelope, 
-                "Return the geographic envelope/bounding box "
-                "of the data in the layer.\n"
+                "Return the geographic envelope/bounding box."
+                "\n"
+                "Determined based on the layer datasource.\n"
                 "\n"
                 "Usage:\n"
                 ">>> from mapnik import Layer\n"
@@ -150,6 +152,7 @@ void export_layer()
         
         .def("visible", &Layer::isVisible,
                 "Return True if this layer's data is active and visible at a given scale.\n"
+                "\n"
                 "Otherwise returns False.\n"
                 "Accepts a scale value as an integer or float input.\n"
                 "Will return False if:\n"
@@ -200,10 +203,10 @@ void export_layer()
         .add_property("clear_label_cache",
                 &Layer::clear_label_cache,
                 &Layer::set_clear_label_cache,
-                "Get/Set whether this layer's labels are cached."
+                "Get/Set whether this layer's labels are cached.\n"
                 "\n"
                 "Usage:\n"
-                "TODO"  
+                "TODO\n" 
                 )
         
         .add_property("datasource",
@@ -282,7 +285,7 @@ void export_layer()
         .add_property("srs", 
                 make_function(&Layer::srs,return_value_policy<copy_const_reference>()),
                 &Layer::set_srs,
-                "Get/Set the SRS of the layer."
+                "Get/Set the SRS of the layer.\n"
                 "\n"
                 "Usage:\n"
                 ">>> from mapnik import Layer\n"
@@ -304,7 +307,7 @@ void export_layer()
                 ">>> lyr.styles\n"
                 "<mapnik._mapnik.Names object at 0x6d3e8>\n"
                 ">>> len(lyr.styles)\n"
-                "0\n # no styles until you append them"
+                "0\n # no styles until you append them\n"
                 "lyr.styles.append('My Style') # mapnik uses named styles for flexibility\n"
                 ">>> len(lyr.styles)\n"
                 "1\n"
