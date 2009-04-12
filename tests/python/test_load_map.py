@@ -1,91 +1,49 @@
 #!/usr/bin/python
 
-from mapnik import *
-import sys
-import glob
+from nose.tools import *
+from mapnik import Map, load_map
+from utilities import execution_path
 
-def testGood( file ) :
-    print "Testing good file '" + file + "' ... ",
-    
+import os, sys, glob
+
+def setup():
+    # All of the paths used are relative, if we run the tests
+    # from another directory we need to chdir()
+    os.chdir(execution_path('.'))
+
+# We expect these files to not raise any
+# exceptions at all
+def assert_loads_successfully(file):
     m = Map(512, 512)
-    try:
-        load_map(m, file, True)
-    except RuntimeError, what:
-        print "FAILED"
-        print what
-        return False
-    except:
-        print "FAILED"
-        return False
-    else:
-        print "OK"
-        return True
 
+    print "Loading %s" % (file)
 
-def testBroken( file ) :
-    print "Testing broken file '" + file + "' ... ",
+    strict = True
+    load_map(m, file, strict)
 
+# We expect these files to raise a UserWarning
+# and fail if there isn't one (or a different type
+# of exception)
+@raises(UserWarning)
+def assert_raises_userwarning(file):
     m = Map(512, 512)
-    try:
-        strict = True
-        load_map(m, file, strict)
-    except UserWarning, what:
-        print "OK"
-        print "=== Error Message ============="
-        print what
-        print 
-        return True
-    except RuntimeError, what:
-        print "FAILED (not a UserWarning)"
-        print "=== Error Message ============="
-        print what
-        print 
-    else:
-        print "FAILED"
 
-    return False
+    print "Loading %s" % (file)
 
+    strict = True
+    load_map(m, file, strict)
 
-def test():
-    success = 0
-    failed = 0
-    failed_tests = []
-
+def test_broken_files():
     broken_files = glob.glob("../data/broken_maps/*.xml")
-    # eh, can't glob this ... :-)
-    broken_files.append( "../data/broken/does_not_exist.xml" ) 
+
+    # Add a filename that doesn't exist 
+    broken_files.append("../data/broken/does_not_exist.xml")
+
     for file in broken_files:
-        if testBroken( file ):
-            success += 1
-        else:
-            failed += 1
-            failed_tests.append( file )
+        yield assert_raises_userwarning, file
 
+def test_good_files():
     good_files = glob.glob("../data/good_maps/*.xml")
+
     for file in good_files:
-        if testGood( file ):
-            success += 1
-        else:
-            failed += 1
-            failed_tests.append( file )
-
-    print "======================================================="
-    print "Status:",
-    if failed:
-        print "FAILED"
-        print "Errors in: ", failed_tests
-    else:
-        print "SUCCESS"
-    print "Success:", success, "Failed:", failed, "Total:", success + failed
-    print "======================================================="
-    if failed:
-        return False
-    else:
-        return True
-
-
-if __name__ == "__main__":
-    if test():
-        sys.exit( 0 )
-    else:
-        sys.exit( 1 )
+        yield assert_loads_successfully, file
