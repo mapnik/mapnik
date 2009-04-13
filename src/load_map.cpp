@@ -415,17 +415,26 @@ namespace mapnik
                                     paramIter->first + "'");
                         }
                     }
-                    //now we're ready to create datasource 
+                    //now we are ready to create datasource 
                     try 
                     {
                         boost::shared_ptr<datasource> ds =
                             datasource_cache::instance()->create(params);
                         lyr.set_datasource(ds);
                     }
+                    
+                    // catch problem at datasource registration
+                    catch (const mapnik::config_error & ex )
+                    {
+                        throw config_error( ex.what() );
+                    }
+                    
+                    // catch problem at the datasource creation
                     catch (const mapnik::datasource_exception & ex )
                     {
                         throw config_error( ex.what() );
                     }
+                    
                     catch (...)
                     {
                        //throw config_error("exception...");
