@@ -33,13 +33,22 @@ try:
     HAS_DISTUTILS = True
 except:
     HAS_DISTUTILS = False
-                  
+
+#### SCons build options and initial setup ####
+env = Environment(ENV=os.environ)
+
 def color_print(color,text,newline=True):
     # 1 - red
     # 2 - green
     # 3 - yellow
     # 4 - blue
     text = "\033[9%sm%s\033[0m" % (color,text)
+    if not newline:
+        print text,
+    else:
+        print text
+
+def regular_print(color,text,newline=True):
     if not newline:
         print text,
     else:
@@ -86,10 +95,6 @@ DEFAULT_PLUGINS = []
 for k,v in PLUGINS.items():
    if v['default']:
        DEFAULT_PLUGINS.append(k)
-
-#### SCons build options and initial setup ####
-color_print(4,'\nWelcome to Mapnik...\n')
-env = Environment(ENV=os.environ)
 
 # All of the following options may be modified at the command-line, for example:
 # `python scons/scons.py PREFIX=/opt`
@@ -160,6 +165,7 @@ opts.AddVariables(
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
     BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
+    BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     )
 # variables to pickle after successful configure step
 # these include all scons core variables as well as custom
@@ -187,6 +193,7 @@ pickle_store = [# Scons internal variables
         'PYTHON_VERSION',
         'PYTHON_INCLUDES',
         'PYTHON_INSTALL_LOCATION',
+        'COLOR_PRINT',
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -209,6 +216,11 @@ elif ('-h' in command_line_args) or ('--help' in command_line_args):
 
 # initially populate environment with defaults and any possible custom arguments
 opts.Update(env)
+
+if env.has_key('COLOR_PRINT') and env['COLOR_PRINT'] == False:
+    color_print = regular_print
+
+color_print(4,'\nWelcome to Mapnik...\n')
 
 # if we are not configuring overwrite environment with pickled settings
 if not force_configure:
