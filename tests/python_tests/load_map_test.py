@@ -1,10 +1,9 @@
 #!/usr/bin/python
 
 from nose.tools import *
-from mapnik import Map, load_map
 from utilities import execution_path
 
-import os, sys, glob
+import os, sys, glob, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -14,24 +13,24 @@ def setup():
 # We expect these files to not raise any
 # exceptions at all
 def assert_loads_successfully(file):
-    m = Map(512, 512)
+    m = mapnik.Map(512, 512)
 
     print "Loading %s" % (file)
 
     strict = True
-    load_map(m, file, strict)
+    mapnik.load_map(m, file, strict)
 
 # We expect these files to raise a UserWarning
 # and fail if there isn't one (or a different type
 # of exception)
 @raises(UserWarning)
 def assert_raises_userwarning(file):
-    m = Map(512, 512)
+    m = mapnik.Map(512, 512)
 
     print "Loading %s" % (file)
 
     strict = True
-    load_map(m, file, strict)
+    mapnik.load_map(m, file, strict)
 
 def test_broken_files():
     broken_files = glob.glob("../data/broken_maps/*.xml")
