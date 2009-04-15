@@ -28,7 +28,7 @@ def main():
         elif o in ("-p", "--prefix"):
             prefix = a
         else:
-            assert False, "unhandled option"
+            assert False, "Unhandled option"
    
     if quiet and verbose:
         usage()
@@ -55,6 +55,7 @@ def main():
         argv.append('-v')
 
     if verbose:
+        # 3 * '-v' gets us debugging information from nose
         argv.append('-v')
         argv.append('-v')
 
