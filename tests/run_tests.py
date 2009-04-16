@@ -62,7 +62,10 @@ def main():
         argv.append('-v')
         argv.append('-v')
 
-    nose.run(argv=argv, plugins=[TodoPlugin()])
+    if not nose.run(argv=argv, plugins=[TodoPlugin()]):
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()
