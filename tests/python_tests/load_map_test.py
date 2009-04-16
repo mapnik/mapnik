@@ -15,8 +15,6 @@ def setup():
 def assert_loads_successfully(file):
     m = mapnik.Map(512, 512)
 
-    print "Loading %s" % (file)
-
     strict = True
     mapnik.load_map(m, file, strict)
 
@@ -26,8 +24,6 @@ def assert_loads_successfully(file):
 @raises(UserWarning)
 def assert_raises_userwarning(file):
     m = mapnik.Map(512, 512)
-
-    print "Loading %s" % (file)
 
     strict = True
     mapnik.load_map(m, file, strict)

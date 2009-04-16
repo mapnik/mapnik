@@ -19,22 +19,15 @@ def test():
     map = mapnik.Map(256, 256)
     in_map = "../data/good_maps/osm-styles.xml"
 
-    print "Loading map '%s' ... " % in_map
-
     mapnik.load_map(map, in_map)
     test_map = "test_map.xml"
-
-    print "Saving map '%s' ... " % test_map
 
     mapnik.save_map(map, test_map)
     new_map = mapnik.Map(256, 256)
 
-    print "Reloading map '%s' ... " % test_map
-
     mapnik.load_map(new_map, test_map)
 
     if os.path.exists(test_map):
-        print "Removing '%s'" % test_map
         os.remove(test_map)
     else:
         # Fail, the map wasn't written

@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+from python_tests.utilities import TodoPlugin
+
 import nose, sys, os, getopt
 
 def usage():
@@ -49,7 +52,7 @@ def main():
         print "- Running nosetests:"
         print
 
-    argv = [__file__, '--exe']
+    argv = [__file__, '--exe', '--with-todo']
 
     if not quiet:
         argv.append('-v')
@@ -59,7 +62,7 @@ def main():
         argv.append('-v')
         argv.append('-v')
 
-    nose.run(argv=argv)
+    nose.run(argv=argv, plugins=[TodoPlugin()])
 
 if __name__ == "__main__":
     main()
