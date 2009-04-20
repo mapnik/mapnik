@@ -64,7 +64,7 @@ class ModHandler(object):
             else:
                 reqparams = lowerparams(reqparams)
                 port = apacheReq.connection.local_addr[1]
-                onlineresource = 'http://%s:%s/%s?' % (apacheReq.hostname, port, 'wms.py')             
+                onlineresource = 'http://%s:%s%s?' % (apacheReq.hostname, port, apacheReq.subprocess_env['SCRIPT_NAME'])             
                 if not reqparams.has_key('request'):
                     raise OGCException('Missing Request parameter.')
                 request = reqparams['request']
