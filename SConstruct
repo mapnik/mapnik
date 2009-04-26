@@ -156,9 +156,10 @@ opts.AddVariables(
     
     # Other variables
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
-    ('LIB_DIR_NAME','Name to use for lib folder where fonts and plugins are installed','/mapnik/'),
+    ('LIB_DIR_NAME','Name to use for the "lib" folder where fonts and plugins are installed','/mapnik/'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
-    BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OSX', 'True'),
+    BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OS X', 'True'),
+    BoolVariable('FULL_LIB_PATH', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'False'),
     ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spirit','libxml2']),

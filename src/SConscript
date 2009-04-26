@@ -29,6 +29,8 @@ ABI_VERSION = env['ABI_VERSION']
 
 prefix = env['PREFIX']
 
+lib_dir = os.path.normpath(prefix + '/' + env['LIBDIR_SCHEMA'])
+
 install_prefix = env['DESTDIR'] + '/' + prefix
 
 libraries = env['LIBS']
@@ -37,11 +39,15 @@ if env['INTERNAL_LIBAGG']:
     libraries.insert(0, 'agg')
 
 if env['PLATFORM'] == 'Darwin':
-    linkflags = '-Wl,-install_name,libmapnik.dylib'
+    if env['FULL_LIB_PATH']:
+        lib_path = '%s/libmapnik.dylib' % lib_dir
+    else:
+        lib_path = 'libmapnik.dylib'
+    linkflags = '-Wl,-install_name,%s' % lib_path
 elif env['PLATFORM'] == 'SunOS' and env['CXX'].startswith('CC'):
     linkflags = '-R. -h libmapnik.so'
 else: # Linux and others
-    linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1])) 
+    linkflags = '-Wl,-rpath-link,. -Wl,-soname,libmapnik.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1]))
 
 source = Split(
     """
