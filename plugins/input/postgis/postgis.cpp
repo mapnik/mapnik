@@ -89,11 +89,11 @@ postgis_datasource::postgis_datasource(parameters const& params)
       {
          try 
          {
-             d[i] = boost::lexical_cast<double>(*beg);
+            d[i] = boost::lexical_cast<double>(boost::trim_copy(*beg));
          }
          catch (boost::bad_lexical_cast & ex)
          {
-            std::clog << ex.what() << "\n";
+            std::clog << *beg << " : " << ex.what() << "\n";
             break;
          }
          if (i==3) 
@@ -156,7 +156,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
             }
             catch (bad_lexical_cast &ex)
             {
-               clog << ex.what() << endl;
+               clog << rs->getValue("srid") << ":" << ex.what() << endl;
             }
             geometryColumn_=rs->getValue("f_geometry_column");
             std::string postgisType=rs->getValue("type");
