@@ -145,14 +145,17 @@ public:
         close_query (true);
     }
 
-    oracle::occi::ResultSet* execute_query (const std::string& s)
+    oracle::occi::ResultSet* execute_query (const std::string& s, const unsigned prefetch = 0)
     {
         close_query (false);
 
         stmt_ = conn_->createStatement (s);
 
-        stmt_->setPrefetchRowCount (100);
-        stmt_->setPrefetchMemorySize (0);
+        if (prefetch > 0)
+        {
+            stmt_->setPrefetchMemorySize (0);
+            stmt_->setPrefetchRowCount (prefetch);
+        }
 
         rs_ = stmt_->executeQuery ();
         

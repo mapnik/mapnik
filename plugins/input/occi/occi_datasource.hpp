@@ -58,6 +58,8 @@ class occi_datasource : public mapnik::datasource
       int srid_;
       mutable bool extent_initialized_;
       mutable mapnik::Envelope<double> extent_;
+      const int row_limit_;
+      const int row_prefetch_;
       mapnik::layer_descriptor desc_;
       oracle::occi::StatelessConnectionPool* pool_;
       bool multiple_geometries_;

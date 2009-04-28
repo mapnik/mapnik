@@ -42,6 +42,7 @@ class occi_featureset : public mapnik::Featureset
                       std::string const& sqlstring,
                       std::string const& encoding,
                       bool multiple_geometries,
+                      unsigned prefetch_rows,
                       unsigned num_attrs);
       virtual ~occi_featureset();
       mapnik::feature_ptr next();

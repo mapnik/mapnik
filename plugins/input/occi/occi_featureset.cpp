@@ -62,6 +62,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool * pool,
                                  std::string const& sqlstring,
                                  std::string const& encoding,
                                  bool multiple_geometries,
+                                 unsigned prefetch_rows,
                                  unsigned num_attrs)
    : conn_(pool),
      tr_(new transcoder(encoding)),
@@ -71,7 +72,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool * pool,
 {
     try
     {
-        rs_ = conn_.execute_query (sqlstring);
+        rs_ = conn_.execute_query (sqlstring, prefetch_rows);
     }
     catch (SQLException &ex)
     {

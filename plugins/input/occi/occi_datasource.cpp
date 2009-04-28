@@ -97,6 +97,8 @@ occi_datasource::occi_datasource(parameters const& params)
      geometry_field_(*params.get<std::string>("geometry_field","GEOLOC")),
      type_(datasource::Vector),
      extent_initialized_(false),
+     row_limit_(*params_.get<int>("row_limit",0)),
+     row_prefetch_(*params_.get<int>("row_prefetch",100)),
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
      pool_(0)
 {
@@ -421,10 +423,10 @@ featureset_ptr occi_datasource::features(query const& q) const
         s << " from ";
 
         std::string query (table_); 
-        
+        std::string table_name = table_from_sql(query);
+
         if (use_spatial_index_)
         {
-           std::string table_name = table_from_sql(query);
            std::ostringstream spatial_sql;
            spatial_sql << std::setprecision(16);
            spatial_sql << " where sdo_filter(" << geometry_field_ << ",";
@@ -444,13 +446,32 @@ featureset_ptr occi_datasource::features(query const& q) const
            }
         }
         
+        if (row_limit_ > 0)
+        {
+           std::string row_limit_string = "rownum < " + row_limit_;
+
+           if (boost::algorithm::ifind_first(query,"where"))
+           {
+              boost::algorithm::ireplace_first(query, "where", row_limit_string + " and");
+           }
+           else if (boost::algorithm::find_first(query,table_name))  
+           {
+              boost::algorithm::ireplace_first(query, table_name , table_name + " " + row_limit_string);
+           }
+        }
+        
         s << query;
 
 #ifdef MAPNIK_DEBUG
         clog << s.str() << endl;
 #endif
         
-        return featureset_ptr(new occi_featureset(pool_,s.str(),desc_.get_encoding(),multiple_geometries_,props.size()));
+        return featureset_ptr (new occi_featureset (pool_,
+                                                    s.str(),
+                                                    desc_.get_encoding(),
+                                                    multiple_geometries_,
+                                                    row_prefetch_,
+                                                    props.size()));
     }
     
     return featureset_ptr();
@@ -493,6 +514,20 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         {
            boost::algorithm::ireplace_first(query, table_name , table_name + " " + spatial_sql.str());
         }
+
+        if (row_limit_ > 0)
+        {
+           std::string row_limit_string = "rownum < " + row_limit_;
+
+           if (boost::algorithm::ifind_first(query,"where"))
+           {
+              boost::algorithm::ireplace_first(query, "where", row_limit_string + " and");
+           }
+           else if (boost::algorithm::find_first(query,table_name))  
+           {
+              boost::algorithm::ireplace_first(query, table_name , table_name + " " + row_limit_string);
+           }
+        }
         
         s << query;
 
@@ -500,7 +535,12 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         clog << s.str() << endl;
 #endif
         
-        return featureset_ptr(new occi_featureset(pool_,s.str(),desc_.get_encoding(),multiple_geometries_,size));
+        return featureset_ptr (new occi_featureset (pool_,
+                                                    s.str(),
+                                                    desc_.get_encoding(),
+                                                    multiple_geometries_,
+                                                    row_prefetch_,
+                                                    size));
     }
 
     return featureset_ptr();
