@@ -26,9 +26,9 @@
 #include <vector>
 #include <string>
 
-
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 #include "quadtree.hpp"
 #include "shapefile.hpp"
@@ -47,6 +47,7 @@ int main (int argc,char** argv)
     using std::string;
     using std::vector;
     using std::clog;
+    using std::endl;
     
     bool verbose=false;
     unsigned int depth=DEFAULT_DEPTH;
@@ -79,7 +80,7 @@ int main (int argc,char** argv)
 
         if (vm.count("help")) 
         {
-            clog << desc << "\n";
+            clog << desc << endl;
             return 1;
         }
         if (vm.count("depth"))
@@ -98,33 +99,41 @@ int main (int argc,char** argv)
     }
     catch (...)
     {
-        clog << "Exception of unknown type!"<<std::endl;
+        clog << "Exception of unknown type!" << endl;
         return -1;
     }
     
-    std::clog<<"max tree depth:"<<depth<<std::endl;
-    std::clog<<"split ratio:"<<ratio<<std::endl;
+    clog << "max tree depth:" << depth << endl;
+    clog << "split ratio:" << ratio << endl;
   
-    vector<string>::const_iterator itr=shape_files.begin();
-    if (itr==shape_files.end())
+    vector<string>::const_iterator itr = shape_files.begin();
+    if (itr == shape_files.end())
     {
-        std::clog << "no shape files to index"<<std::endl;
+        clog << "no shape files to index" << endl;
         return 0;
     }
     while (itr != shape_files.end())
     {
-        std::clog<<"processing "<<*itr << std::endl;
+        clog << "processing " << *itr << endl;
         //shape_file shp;
-        std::string shapename(*itr++);
-        shape_file shp(shapename+".shp");
+        std::string shapename (*itr++);
+        std::string shapename_full (shapename+".shp");
 
-        if (!shp.is_open()) {
-            std::clog<<"error : cannot open "<< (shapename+".shp") <<"\n";
+        if (! boost::filesystem::exists (shapename_full))
+        {
+            clog << "error : file " << shapename_full << " doesn't exists" << endl;
+            continue;
+        }
+
+        shape_file shp (shapename_full);
+
+        if (! shp.is_open()) {
+            clog << "error : cannot open " << shapename_full << endl;
             continue;
         }
         
         int code = shp.read_xdr_integer(); //file_code == 9994
-        std::clog << code << "\n";
+        clog << code << endl;
         shp.skip(5*4); 
 	
         int file_length=shp.read_xdr_integer();
@@ -134,10 +143,10 @@ int main (int argc,char** argv)
         shp.read_envelope(extent);
 	
 	
-        std::clog<<"length="<<file_length<<std::endl;
-        std::clog<<"version="<<version<<std::endl;
-        std::clog<<"type="<<shape_type<<std::endl;
-        std::clog<<"extent:"<<extent<<std::endl;
+        clog << "length=" << file_length << endl;
+        clog << "version=" << version << endl;
+        clog << "type=" << shape_type << endl;
+        clog << "extent:" << extent << endl;
 	  
         int pos=50;
         shp.seek(pos*2);  
@@ -188,7 +197,7 @@ int main (int argc,char** argv)
             
             tree.insert(offset,item_ext);
             if (verbose) {
-                std::clog<<"record number "<<record_number<<" box="<<item_ext<<std::endl;
+                clog << "record number " << record_number << " box=" << item_ext << endl;
             }
 
             pos+=4+content_length;
@@ -200,13 +209,13 @@ int main (int argc,char** argv)
         } 
         shp.close();
   
-        std::clog<<" number shapes="<<count<<std::endl;  
+        clog << " number shapes=" << count << endl;  
     
         std::fstream file((shapename+".index").c_str(),
                           std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
         if (!file) {
-            std::clog << "cannot open index file for writing file \""
-                      <<(shapename+".index")<<"\""<<std::endl;
+            clog << "cannot open index file for writing file \"" 
+                 << (shapename+".index") << "\"" << endl;
         } else {
             tree.trim();
             std::clog<<" number nodes="<<tree.count()<<std::endl;
@@ -216,6 +225,8 @@ int main (int argc,char** argv)
             file.close();
         }
     }
-    std::clog<<"done!"<<std::endl;
+    
+    clog << "done!" << endl;
     return 0;
 }
+
