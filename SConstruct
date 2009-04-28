@@ -89,6 +89,7 @@ PLUGINS = { # plugins with external dependencies
             'osm':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'kismet':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             }
 
 DEFAULT_PLUGINS = []
