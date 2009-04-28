@@ -34,7 +34,10 @@ osm_dataset* dataset_deliverer::load_from_url
 	}
 	else if (bbox != last_bbox)
 	{
+#ifdef MAPNIK_DEBUG
 		cerr<<"BBOXES ARE DIFFERENT: " << last_bbox<<","<<bbox<<endl;
+#endif
+
 		// Reload the dataset	
 		dataset->clear();
 		if(dataset->load_from_url(url.c_str(),bbox,parser)==false)
