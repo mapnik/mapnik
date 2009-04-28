@@ -286,9 +286,9 @@ namespace mapnik
        valign_ = valign;
     }
    
-    vertical_alignment text_symbolizer::get_vertical_alignment() const
+    vertical_alignment_e text_symbolizer::get_vertical_alignment() const
     {
-       return  valign_;
+       return valign_;
     }
     
     void  text_symbolizer::set_anchor(double x, double y)

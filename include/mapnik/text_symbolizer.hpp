@@ -93,7 +93,7 @@ namespace mapnik
          void set_label_placement(label_placement_e label_p);
          label_placement_e get_label_placement() const;
          void set_vertical_alignment(vertical_alignment_e valign);
-         vertical_alignment get_vertical_alignment() const;
+         vertical_alignment_e get_vertical_alignment() const;
          void set_anchor(double x, double y);	
          position const& get_anchor() const;	
          void set_displacement(double x, double y);
