@@ -224,6 +224,7 @@ unsigned mapnik_version()
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3);
 
 BOOST_PYTHON_MODULE(_mapnik)
 {
@@ -406,7 +407,8 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("load_map_from_string", & load_map_string, load_map_string_overloads());
 
-    def("save_map", & save_map,
+    def("save_map", & save_map, save_map_overloads());
+/*
         "\n"
         "Save Map object to XML file\n"
         "\n"
@@ -420,6 +422,7 @@ BOOST_PYTHON_MODULE(_mapnik)
         ">>> save_map(m,'mapfile_mercator.xml')\n"
         "\n"
         );
+*/
 
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
     
