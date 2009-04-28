@@ -103,53 +103,56 @@ namespace mapnik {
             unsigned val = row[x];
             mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
             byte index = tree.quantize(c);
+            if (!((val>>24)&0x80)) index = 0;//alfa
             row_out[x] = index;
          }
       }
    }
-         
+
    template <typename T>
    void reduce_4 (T const& in, ImageData8 & out, octree<rgb> & tree)
    {
       unsigned width = in.width();
       unsigned height = in.height();
-      
+
       for (unsigned y = 0; y < height; ++y)
       {
          mapnik::ImageData32::pixel_type const * row = in.getRow(y);
          mapnik::ImageData8::pixel_type  * row_out = out.getRow(y);
-         
+
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
             mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
             byte index = tree.quantize(c);
             if (x%2 >  0) index = index<<4;
-            row_out[x>>1] |= index;  
+            if ((val>>24)^0x80) index = 0;//alfa
+            row_out[x>>1] |= index;
          }
       }
    }
-   
+
    // 1-bit but only one color.
    template <typename T>
    void reduce_1(T const&, ImageData8 & out, octree<rgb> &)
    {
       out.set(0); // only one color!!!
-   }  
-   
+   }
+
    template <typename T>
-   void save_as_png(T & file, std::vector<mapnik::rgb> & palette, 
-                    mapnik::ImageData8 const& image, 
+   void save_as_png(T & file, std::vector<mapnik::rgb> & palette,
+                    mapnik::ImageData8 const& image,
                     unsigned width,
                     unsigned height,
-                    unsigned color_depth)
-   {        
+                    unsigned color_depth,
+                    bool hasAlfa)
+   {
       png_voidp error_ptr=0;
       png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                   error_ptr,0, 0);
-      
+
       if (!png_ptr) return;
-   
+
       // switch on optimization only if supported
 #if defined(PNG_LIBPNG_VER) && (PNG_LIBPNG_VER >= 10200) && defined(PNG_MMX_CODE_SUPPORTED)
       png_uint_32 mask, flags;
@@ -170,23 +173,31 @@ namespace mapnik {
          return;
       }
       png_set_write_fn (png_ptr, &file, &write_data<T>, &flush_data<T>);
-          
+
       png_set_IHDR(png_ptr, info_ptr,width,height,color_depth,
                    PNG_COLOR_TYPE_PALETTE,PNG_INTERLACE_NONE,
                    PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
 
       png_set_PLTE(png_ptr,info_ptr,reinterpret_cast<png_color*>(&palette[0]),palette.size());
-      
+
+      // make transparent lowest indexes, so tRNS is small
+      if (hasAlfa)
+      {
+         byte trans[] = {0,0,0,0};
+         png_color_16p unused;
+         png_set_tRNS(png_ptr, info_ptr, (png_bytep)trans, 1, NULL);
+      }
+
       png_write_info(png_ptr, info_ptr);
       for (unsigned i=0;i<height;i++)
       {
          png_write_row(png_ptr,(png_bytep)image.getRow(i));
       }
-   
+
       png_write_end(png_ptr, info_ptr);
       png_destroy_write_struct(&png_ptr, &info_ptr);
    }
-   
+
    template <typename T1,typename T2>
    void save_as_png256(T1 & file, T2 const& image)
    {
@@ -199,38 +210,45 @@ namespace mapnik {
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
-            tree.insert(mapnik::rgb((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff));
+            if ((val>>24)&0x80)
+            {
+               tree.insert(mapnik::rgb((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff));
+            }
+            else
+            {
+               tree.hasAlfa(true);
+            }
          }
       }
-      
+
       std::vector<rgb> palette;
       tree.create_palette(palette);
       assert(palette.size() <= 256);
-      
+
       if (palette.size() > 16 )
       {
          // >16 && <=256 colors -> write 8-bit color depth
-         ImageData8 reduced_image(width,height);   
+         ImageData8 reduced_image(width,height);
          reduce_8(image,reduced_image,tree);
-         save_as_png(file,palette,reduced_image,width,height,8);         
+         save_as_png(file,palette,reduced_image,width,height,8,tree.hasAlfa());
       }
-      else if (palette.size() == 1) 
+      else if (palette.size() == 1)
       {
          // 1 color image ->  write 1-bit color depth PNG
          unsigned image_width  = (int(0.125*width) + 7)&~7;
          unsigned image_height = height;
          ImageData8 reduced_image(image_width,image_height);
-         reduce_1(image,reduced_image,tree); 
-         save_as_png(file,palette,reduced_image,width,height,1);
+         reduce_1(image,reduced_image,tree);
+         save_as_png(file,palette,reduced_image,width,height,1,tree.hasAlfa());
       }
-      else 
+      else
       {
          // <=16 colors -> write 4-bit color depth PNG
          unsigned image_width  = (int(0.5*width) + 3)&~3;
          unsigned image_height = height;
          ImageData8 reduced_image(image_width,image_height);
          reduce_4(image,reduced_image,tree);
-         save_as_png(file,palette,reduced_image,width,height,4);
-      }      
+         save_as_png(file,palette,reduced_image,width,height,4,tree.hasAlfa());
+      }
    }
 }

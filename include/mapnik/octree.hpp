@@ -77,23 +77,23 @@ namespace mapnik {
                {
                   memset(&children_[0],0,sizeof(children_));
                }
-      
-               ~node () 
+
+               ~node ()
                {
                   for (unsigned i = 0;i < 8; ++i) {
                      if (children_[i] != 0) delete children_[i],children_[i]=0;
                   }
-               }	
+               }
 
-               bool is_leaf() const { return count == 0; }	
-               node * children_[8];	
+               bool is_leaf() const { return count == 0; }
+               node * children_[8];
                unsigned reds;
                unsigned greens;
                unsigned blues;
-               unsigned count;	
-               unsigned count2;	
+               unsigned count;
+               unsigned count2;
                byte  children_count;
-               byte  index;					
+               byte  index;
          };
          struct node_cmp
          {
@@ -106,52 +106,64 @@ namespace mapnik {
          std::deque<node*> reducible_[InsertPolicy::MAX_LEVELS];
          unsigned max_colors_;
          unsigned colors_;
-         unsigned leaf_level_; 
-    
+         unsigned leaf_level_;
+         bool has_alfa_;
+
       public:
-         explicit octree(unsigned max_colors=256) 
+         explicit octree(unsigned max_colors=256)
             : max_colors_(max_colors),
               colors_(0),
               leaf_level_(InsertPolicy::MAX_LEVELS),
-              root_(new node())
+              root_(new node()),
+              has_alfa_(false)
          {}
-         
+
          ~octree() { delete root_;}
-	
-         void insert(T const& data) 
-         {       
+
+         void hasAlfa(bool v)
+         {
+            has_alfa_=v;
+         }
+
+         bool hasAlfa()
+         {
+            return has_alfa_;
+         }
+
+         void insert(T const& data)
+         {
             unsigned level = 0;
             node * cur_node = root_;
             while (true) {
                cur_node->count2++;
-                             
-               if ( cur_node->count > 0 || level == leaf_level_) 
-               {    
+
+               if ( cur_node->count > 0 || level == leaf_level_)
+               {
                   cur_node->reds   += data.r;
                   cur_node->greens += data.g;
                   cur_node->blues  += data.b;
                   cur_node->count  += 1;
                   if (cur_node->count == 1) ++colors_;
                   //if (colors_ >= max_colors_ - 1)
-                  //reduce();   
+                  //reduce();
                   break;
                }
-               
+
                unsigned idx = InsertPolicy::index_from_level(level,data);
                if (cur_node->children_[idx] == 0) {
                   cur_node->children_count++;
                   cur_node->children_[idx] = new node();
-                  if (level < leaf_level_-1) 
+                  if (level < leaf_level_-1)
                   {
                      reducible_[level+1].push_back(cur_node->children_[idx]);
                   }
                }
                cur_node = cur_node->children_[idx];
-               ++level; 
+               ++level;
             }
-         }  
-         
-         int quantize(rgb const& c) const 
+         }
+
+         int quantize(rgb const& c) const
          {
             unsigned level = 0;
             node * cur_node = root_;
@@ -161,36 +173,41 @@ namespace mapnik {
                unsigned idx = InsertPolicy::index_from_level(level,c);
                cur_node = cur_node->children_[idx];
                ++level;
-            } 
+            }
             return -1;
          }
-	
+
          void create_palette(std::vector<rgb> & palette)
          {
+            if (has_alfa_)
+            {
+               max_colors_--;
+               palette.push_back(rgb(0,0,0));
+            }
             reduce();
             palette.reserve(colors_);
             create_palette(palette, root_);
          }
-         
+
          void reduce()
-         {	
-            // sort reducible 
+         {
+            // sort reducible
             for (unsigned i=0;i<InsertPolicy::MAX_LEVELS;++i)
             {
                std::sort(reducible_[i].begin(), reducible_[i].end(),node_cmp());
             }
-            
+
             while ( colors_ >= max_colors_ - 1)
-            {                 
-               while (leaf_level_ >0  && reducible_[leaf_level_-1].size() == 0) 
+            {
+               while (leaf_level_ >0  && reducible_[leaf_level_-1].size() == 0)
                {
                   --leaf_level_;
                }
-               
+
                if (leaf_level_ < 1) continue;
-               
+
                if ( reducible_[leaf_level_-1].size() == 0) return;
-               
+
                // select best of all reducible:
                unsigned red_idx = leaf_level_-1;
                unsigned bestv = (*reducible_[red_idx].begin())->count2;
@@ -214,7 +231,7 @@ namespace mapnik {
                {
                   if (cur_node->children_[idx] != 0)
                   {
-                     cur_node->children_count++;
+                     cur_node->children_count--;
                      ++num_children;
                      cur_node->reds   += cur_node->children_[idx]->reds;
                      cur_node->greens += cur_node->children_[idx]->greens;
