@@ -196,6 +196,7 @@ pickle_store = [# Scons internal variables
         'PYTHON_INCLUDES',
         'PYTHON_INSTALL_LOCATION',
         'COLOR_PRINT',
+        'BOOST_SYSTEM_REQUIRED',
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -571,8 +572,10 @@ if not preconfigured:
         boost_version_from_header = int(boost_lib_version_from_header.split('_')[1])
         if boost_version_from_header >= 35 and env['PLATFORM'] == 'Darwin':
             boost_system_required = True
+            env['BOOST_SYSTEM_REQUIRED'] = True
         else:
             boost_system_required = False
+            env['BOOST_SYSTEM_REQUIRED'] = False
     
     # The other required boost headers.
     BOOST_LIBSHEADERS = [
