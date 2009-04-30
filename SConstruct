@@ -727,7 +727,7 @@ if not preconfigured:
           color_print(4,"Did not use user config file, no custom path variables will be saved...")
 
         if env['SKIPPED_DEPS']:
-            color_print(1,'\nHowever, these optional dependencies were not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
+            color_print(3,'\nNote: will build without these optional dependencies:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
             print
 
         # fetch the mapnik version header in order to set the
