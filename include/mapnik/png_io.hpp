@@ -184,7 +184,7 @@ namespace mapnik {
       if (hasAlfa)
       {
          byte trans[] = {0,0,0,0};
-         png_color_16p unused;
+         //png_color_16p unused;
          png_set_tRNS(png_ptr, info_ptr, (png_bytep)trans, 1, NULL);
       }
 

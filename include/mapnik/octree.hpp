@@ -114,8 +114,8 @@ namespace mapnik {
             : max_colors_(max_colors),
               colors_(0),
               leaf_level_(InsertPolicy::MAX_LEVELS),
-              root_(new node()),
-              has_alfa_(false)
+              has_alfa_(false),
+              root_(new node())
          {}
 
          ~octree() { delete root_;}
