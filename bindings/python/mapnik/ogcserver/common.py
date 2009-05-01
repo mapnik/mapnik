@@ -326,27 +326,25 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         if params['query_layers'] and params['query_layers'][0] == '__all__':
             for layerindex, layer in enumerate(m.layers):
                 featureset = getattr(m, querymethodname)(layerindex, params['i'], params['j'])
-                if featureset:
+                features = featureset.features
+                if features:
                     writer.addlayer(layer.name)
-                    feat = featureset.next()
-                    while feat:
+                    for feat in features:
                         writer.addfeature()
                         for prop in feat.properties:
                             writer.addattribute(prop[0], prop[1])
-                        feat = featureset.next()
         else:
             for layerindex, layername in enumerate(params['query_layers']):
                 if layername in params['layers']:
                     if m.layers[layerindex].queryable:
                         featureset = getattr(m, querymethodname)(layerindex, params['i'], params['j'])
-                        if featureset:
+                        features = featureset.features
+                        if features:
                             writer.addlayer(m.layers[layerindex].name)
-                            feat = featureset.next()
-                            while feat:
+                            for feat in features:
                                 writer.addfeature()
                                 for prop in feat.properties:
                                     writer.addattribute(prop[0], prop[1])
-                                feat = featureset.next()
                     else:
                         raise OGCException('Requested query layer "%s" is not marked queryable.' % layername, 'LayerNotQueryable')
                 else:
