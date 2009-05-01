@@ -1,0 +1,11 @@
+<Map paths_from_xml="true"><!-- default is true -->
+
+  <Layer name="lay">
+    <Datasource base="shp">
+      <Parameter name="file">../shp/poly.shp</Parameter>
+      <Parameter name="layer">poly</Parameter>
+      <Parameter name="type">ogr</Parameter>
+    </Datasource>
+  </Layer>
+  
+</Map>

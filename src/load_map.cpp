@@ -42,6 +42,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/filesystem/operations.hpp>
+
 // stl
 #include <iostream>
 
@@ -59,8 +61,9 @@ namespace mapnik
 
    class map_parser : boost::noncopyable {
       public:
-         map_parser( bool strict ) : 
+         map_parser( bool strict, std::string const& filename = "" ) : 
             strict_( strict ),
+            filename_( filename ),
             font_manager_(font_engine_) {}
          
          void parse_map( Map & map, ptree const & sty);
@@ -86,7 +89,11 @@ namespace mapnik
          
          void ensure_font_face( const std::string & face_name );
          
+         std::string ensure_relative_to_xml( boost::optional<std::string> opt_path );
+         
          bool strict_;
+         std::string filename_;
+         bool relative_to_xml_;
          std::map<std::string,parameters> datasource_templates_;
          freetype_engine font_engine_;
          face_manager<freetype_engine> font_manager_;
@@ -109,7 +116,7 @@ namespace mapnik
             throw config_error( ex.what() );
         }
 #endif
-        map_parser parser( strict );
+        map_parser parser( strict, filename);
         parser.parse_map(map, pt);
     }
 
@@ -154,6 +161,15 @@ namespace mapnik
                 {
                    map.set_buffer_size(*buffer_size);
                 }
+
+                // Check if relative paths should be interpreted as relative to/from XML location
+                // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
+                optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
+                if (paths_from_xml)
+                {
+                    relative_to_xml_ = *paths_from_xml;
+                }
+
             }
             catch (const config_error & ex)
             {
@@ -415,6 +431,25 @@ namespace mapnik
                                     paramIter->first + "'");
                         }
                     }
+                                                                          
+                    if ( relative_to_xml_ ) {
+                        boost::optional<std::string> base_param = params.get<std::string>("base");
+                        boost::optional<std::string> file_param = params.get<std::string>("file");
+                        
+                        if (base_param){
+                            params["base"] = ensure_relative_to_xml(base_param);
+                        }
+                        
+                        else if (file_param){
+                            params["file"] = ensure_relative_to_xml(file_param);
+                        }
+                    }
+                    #ifdef MAPNIK_DEBUG
+                    else {
+                      std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
+                    }
+                    #endif
+                    
                     //now we are ready to create datasource 
                     try 
                     {
@@ -598,6 +633,17 @@ namespace mapnik
                          *file = itr->second + "/" + *file;
                       }
                    }
+                  
+                   if ( relative_to_xml_ )
+                   {    
+                      *file = ensure_relative_to_xml(file);
+                   }
+                   #ifdef MAPNIK_DEBUG
+                   else {
+                     std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
+                   }
+                   #endif
+                
                    point_symbolizer symbol(*file,*type,*width,*height);
                    if (allow_overlap)
                    {
@@ -666,7 +712,19 @@ namespace mapnik
                       file = itr->second + "/" + file;
                    }
                }
-               rule.append(line_pattern_symbolizer(file,type,width,height));
+               if ( relative_to_xml_ )
+               {    
+                  file = ensure_relative_to_xml(file);
+               }
+               #ifdef MAPNIK_DEBUG
+               else {
+                 std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
+               }
+               #endif
+                
+
+               line_pattern_symbolizer symbol(file,type,width,height);
+               rule.append(symbol);
             }
             catch (ImageReaderException const & ex )
             {
@@ -710,7 +768,18 @@ namespace mapnik
                       file = itr->second + "/" + file;
                    }
                 }
-                rule.append(polygon_pattern_symbolizer(file,type,width,height)); 
+                if ( relative_to_xml_ )
+                {    
+                   file = ensure_relative_to_xml(file);
+                }
+                #ifdef MAPNIK_DEBUG
+                else {
+                  std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
+                }
+                #endif
+
+                polygon_pattern_symbolizer symbol(file,type,width,height);
+                rule.append(symbol);
             }
             catch (ImageReaderException const & ex )
             {
@@ -830,7 +899,7 @@ namespace mapnik
                 text_symbol.set_minimum_distance(*min_distance);
             }
 
-            // don't render labels around edges
+            // do not render labels around edges
             optional<boolean> avoid_edges =
                 get_opt_attr<boolean>(sym, "avoid_edges");
             if (avoid_edges)
@@ -894,6 +963,17 @@ namespace mapnik
                        image_file = itr->second + "/" + image_file;
                     }
                 }
+                
+                if ( relative_to_xml_ )
+                {    
+                   image_file = ensure_relative_to_xml(image_file);
+                }
+                #ifdef MAPNIK_DEBUG
+                else {
+                  std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
+                }
+                #endif
+                
                 shield_symbolizer shield_symbol(name,size,fill,
                                                 image_file,type,width,height);
 
@@ -1252,7 +1332,6 @@ namespace mapnik
         }
     }
 
-
     void map_parser::ensure_font_face( const std::string & face_name )
     {
         if ( ! font_manager_.get_face( face_name ) )
@@ -1261,4 +1340,21 @@ namespace mapnik
                     face_name + "'");
         }
     }
+    
+    std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt_path )
+    {
+        boost::filesystem::path xml_path = filename_;
+        boost::filesystem::path rel_path = *opt_path;
+        if ( !rel_path.has_root_path() ) {
+            boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
+            #ifdef MAPNIK_DEBUG
+              std::clog << "\nModifying relative paths to be relative to xml...\n";
+              std::clog << "original base path: " << *opt_path << "\n";
+              std::clog << "relative base path: " << full.string() << "\n";
+            #endif
+            return full.string();
+        }
+        return *opt_path;
+    }
+
 } // end of namespace mapnik
