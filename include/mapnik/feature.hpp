@@ -94,7 +94,26 @@ namespace mapnik {
          {
             return geom_cont_[index];
          }
-         
+
+         Envelope<double> envelope() const
+         {
+             Envelope<double> result;
+             for (unsigned i=0;i<num_geometries();++i)
+             {
+                geometry2d const& geom = get_geometry(i);
+                if (i==0)
+                {
+                    Envelope<double> box = geom.envelope();
+                    result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
+                }
+                else
+                {
+                    result.expand_to_include(geom.envelope());
+                }
+             }
+             return result;
+         }
+
          const raster_type& get_raster() const
          {
             return raster_;

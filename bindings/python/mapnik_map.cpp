@@ -267,11 +267,11 @@ void export_map()
            "otherwise will return None.\n"
            "\n"
            "Usage:\n"
-           ">>> feat = m.query_map_point(0,200,200)\n"
-           ">>> feat\n"
-           ">>> <mapnik._mapnik.Featureset object at 0x5fe1f0>\n"
-           ">>> feat.next()\n"
-           ">>> <mapnik._mapnik.Feature object at 0x5fe230>\n" 
+           ">>> featureset = m.query_map_point(0,200,200)\n"
+           ">>> featureset\n"
+           "<mapnik._mapnik.Featureset object at 0x23b0b0>\n"
+           ">>> featureset.features\n"
+           ">>> [<mapnik.Feature object at 0x3995630>]\n"
          )
         
       .def("query_point",&Map::query_point,
@@ -282,11 +282,11 @@ void export_map()
            "otherwise will return None.\n"
            "\n"
            "Usage:\n"
-           ">>> feat = m.query_point(0,-122,48)\n"
-           ">>> feat\n"
-           ">>> <mapnik._mapnik.Featureset object at 0x5fe130>\n"
-           ">>> feat.next()\n"
-           ">>> <mapnik._mapnik.Feature object at 0x5fe1b0>\n"
+           ">>> featureset = m.query_point(0,-122,48)\n"
+           ">>> featureset\n"
+           "<mapnik._mapnik.Featureset object at 0x23b0b0>\n"
+           ">>> featureset.features\n"
+           ">>> [<mapnik.Feature object at 0x3995630>]\n"
          )
 
       .def("remove_all",&Map::remove_all,

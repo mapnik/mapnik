@@ -25,6 +25,8 @@
 #include <boost/python/detail/api_placeholder.hpp>
 // stl
 #include <sstream>
+#include <vector>
+
 // mapnik
 #include <mapnik/envelope.hpp>
 #include <mapnik/datasource.hpp>
@@ -35,6 +37,8 @@
 
 using mapnik::datasource;
 using mapnik::point_datasource;
+using mapnik::layer_descriptor;
+using mapnik::attribute_descriptor;
 
 struct ds_pickle_suite : boost::python::pickle_suite
 {
@@ -92,7 +96,52 @@ namespace
         }
         return ss.str();
     }
-}
+    
+    std::string encoding(boost::shared_ptr<mapnik::datasource> const& ds)
+    {
+            layer_descriptor ld = ds->get_descriptor();
+            return ld.get_encoding();
+    }
+
+    std::string name(boost::shared_ptr<mapnik::datasource> const& ds)
+    {
+            layer_descriptor ld = ds->get_descriptor();
+            return ld.get_name();
+    }
+
+    boost::python::list fields(boost::shared_ptr<mapnik::datasource> const& ds)
+    {
+        boost::python::list flds;
+        if (ds)
+        {
+            layer_descriptor ld = ds->get_descriptor();
+            std::vector<attribute_descriptor> const& desc_ar = ld.get_descriptors();
+            std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
+            std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
+            for (; it != end; ++it)
+            {
+               flds.append(it->get_name());
+            }
+        }
+        return flds;
+    }
+    boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
+    {
+        boost::python::list fld_types;
+        if (ds)
+        {
+            layer_descriptor ld = ds->get_descriptor();
+            std::vector<attribute_descriptor> const& desc_ar = ld.get_descriptors();
+            std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
+            std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
+            for (; it != end; ++it)
+            {  
+               unsigned type = it->get_type();
+               fld_types.append(type);
+            }
+        }
+        return fld_types;
+    }}
 
 void export_datasource()
 {
@@ -104,6 +153,10 @@ void export_datasource()
         .def("envelope",&datasource::envelope)
         .def("descriptor",&datasource::get_descriptor) //todo
         .def("features",&datasource::features)
+        .def("fields",&fields)
+        .def("_field_types",&field_types)
+        .def("encoding",&encoding) //todo expose as property
+        .def("name",&name)
         .def("features_at_point",&datasource::features_at_point)
         .def("params",&datasource::params,return_value_policy<copy_const_reference>(), 
              "The configuration parameters of the data source. "  

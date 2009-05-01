@@ -29,18 +29,21 @@
 
 namespace {
     using namespace boost::python;
-    inline object pass_through(object const& o) { return o; }
-    
-    inline mapnik::feature_ptr next(mapnik::featureset_ptr const& itr)
-    {
-        if (!itr)
-        {
-            PyErr_SetString(PyExc_StopIteration, "No more features.");
-            boost::python::throw_error_already_set();
-        }
 
-        return itr->next();
-    }    
+    list features(mapnik::featureset_ptr const& itr)
+    {
+        list l;
+        while (true)
+        {
+            mapnik::feature_ptr fp = itr->next();
+            if (!fp)
+            {
+                break;
+            }
+            l.append(fp);
+        }
+        return l;
+    }
 }
 
 void export_featureset()
@@ -51,8 +54,6 @@ void export_featureset()
     
     class_<Featureset,boost::shared_ptr<Featureset>,
         boost::noncopyable>("Featureset",no_init)
-        .def("next",next)
-        .def("__iter__",pass_through)
+        .add_property("features",features)
         ;
 }
-

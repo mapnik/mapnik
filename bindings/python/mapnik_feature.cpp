@@ -221,6 +221,7 @@ void export_feature()
 //      .def("add_geometry", // TODO define more mapnik::Feature methods
       .def("num_geometries",&Feature::num_geometries)
       .def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
+      .def("envelope", &Feature::envelope)
       ;
 
    class_<std::map<std::string, mapnik::value> >("Properties")

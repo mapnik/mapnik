@@ -130,7 +130,7 @@ def test_shapefile_init():
 # Shapefile properties
 def test_shapefile_properties():
     s = mapnik.Shapefile(file='../../demo/data/boundaries')
-    f = s.features_at_point(s.envelope().center()).next()
+    f = s.features_at_point(s.envelope().center()).features[0]
 
     eq_(f.properties['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
     eq_(f.properties['COUNTRY'], u'CAN')

@@ -90,10 +90,39 @@ class _Projection(Projection,_injector):
         return forward_(obj,self)
     def inverse(self,obj):
         return inverse_(obj,self)
-  
+
+def get_types(num):
+    if num == 1:
+        return int
+    elif num == 2:
+        return float
+    elif num == 3:
+        return float
+    elif num == 4:
+        return str
+    elif num == 5:
+        return Geometry2d
+    elif num == 6:
+        return object
+
 class _Datasource(Datasource,_injector):
     def describe(self):
         return Describe(self)
+    def field_types(self):
+        return map(get_types,self._field_types())        
+    def all_features(self):
+        query = Query(self.envelope(),1.0)
+        for fld in self.fields():
+            query.add_property_name(fld)
+        return self.features(query).features
+
+class _Feature(Feature,_injector):
+    @property
+    def attributes(self):
+        attr = {}
+        for prop in self.properties:
+            attr[prop[0]] = prop[1]
+        return attr
 
 #class _Filter(Filter,_injector):
 #    """Mapnik Filter expression.
