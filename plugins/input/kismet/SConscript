@@ -32,6 +32,11 @@ kismet_src = Split(
         )
 
 libraries = []
+if env['PLATFORM'] == 'Darwin':
+    libraries.append('mapnik')
+    libraries.append('icuuc')
+    libraries.append('icudata')
+    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
 kismet_inputdriver = env.SharedLibrary('kismet', source=kismet_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
