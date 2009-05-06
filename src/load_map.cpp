@@ -64,6 +64,7 @@ namespace mapnik
          map_parser( bool strict, std::string const& filename = "" ) : 
             strict_( strict ),
             filename_( filename ),
+            relative_to_xml_(true),
             font_manager_(font_engine_) {}
          
          void parse_map( Map & map, ptree const & sty);
