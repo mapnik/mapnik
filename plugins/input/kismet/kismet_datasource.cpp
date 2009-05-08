@@ -156,7 +156,7 @@ featureset_ptr kismet_datasource::features(query const& q) const
     //cout << "kismet_datasource::features()" << endl;
     
     // TODO: use Envelope to filter bbox before adding to featureset_ptr
-    mapnik::Envelope<double> const& e = q.get_bbox();
+    //mapnik::Envelope<double> const& e = q.get_bbox();
 
     boost::mutex::scoped_lock lock(knd_list_mutex);
     return featureset_ptr (new kismet_featureset(knd_list, desc_.get_encoding()));
