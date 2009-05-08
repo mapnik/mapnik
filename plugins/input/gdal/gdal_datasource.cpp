@@ -43,6 +43,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
      desc_(*params.get<std::string>("type"),"utf-8")
 {
    GDALAllRegister();
+
    boost::optional<std::string> file = params.get<std::string>("file");
    if (!file) throw datasource_exception("missing <file> parameter");
 
@@ -64,7 +65,11 @@ gdal_datasource::gdal_datasource(parameters const& params)
    extent_.init(x0,y0,x1,y1);
 }
 
-gdal_datasource::~gdal_datasource() {}
+gdal_datasource::~gdal_datasource()
+{
+    GDALDereferenceDataset (dataset_.get());
+    dataset_.reset(); // prevent delete of dataset
+}
 
 int gdal_datasource::type() const
 {
