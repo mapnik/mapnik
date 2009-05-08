@@ -56,10 +56,6 @@ ogr_datasource::ogr_datasource(parameters const& params)
    boost::optional<std::string> file = params.get<std::string>("file");
    if (!file) throw datasource_exception("missing <file> parameter");
 
-   boost::optional<std::string> layer = params.get<std::string>("layer");
-   if (!layer) throw datasource_exception("missing <layer> parameter");
-
-   layerName_ = *layer;
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
 
    boost::optional<std::string> base = params.get<std::string>("base");
@@ -67,12 +63,40 @@ ogr_datasource::ogr_datasource(parameters const& params)
       dataset_name_ = *base + "/" + *file;
    else
       dataset_name_ = *file;
-
-   if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
    
    dataset_ = OGRSFDriverRegistrar::Open ((dataset_name_).c_str(), FALSE);
-   if (!dataset_) throw datasource_exception(CPLGetLastErrorMsg());
+   if (!dataset_) 
+   {
+      std::string err = CPLGetLastErrorMsg();
+      if( err.size() == 0 )
+      {
+         throw datasource_exception("Connection failed: " + dataset_name_ + " was not found or is not a supported format");
+      } else {
+         throw datasource_exception(err);
+      }
+   } 
 
+   boost::optional<std::string> layer = params.get<std::string>("layer");
+   if (!layer) 
+   {
+      std::string s ("missing <layer> parameter, available layers are: ");
+      unsigned num_layers = dataset_->GetLayerCount();
+      for (unsigned i = 0; i < num_layers; ++i )
+      {
+         OGRLayer  *ogr_layer = dataset_->GetLayer(i);
+         OGRFeatureDefn* def = ogr_layer->GetLayerDefn();
+         if (def != 0) { 
+            s += " '";
+            s += def->GetName();
+            s += "' ";
+         } else {
+            s += "No layers found!";
+         }
+      }
+      throw datasource_exception(s);
+   }
+   
+   layerName_ = *layer;  
    layer_ = dataset_->GetLayerByName (layerName_.c_str());
    if (! layer_) throw datasource_exception("cannot find <layer> in dataset");
    
@@ -143,11 +167,9 @@ ogr_datasource::~ogr_datasource()
     OGRDataSource::DestroyDataSource (dataset_);
 }
 
-std::string const ogr_datasource::name_="ogr";
-
 std::string ogr_datasource::name()
 {
-   return name_;
+   return "ogr";
 }
 
 int ogr_datasource::type() const

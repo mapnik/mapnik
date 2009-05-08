@@ -47,7 +47,6 @@ class ogr_datasource : public mapnik::datasource
       mapnik::Envelope<double> envelope() const;
       mapnik::layer_descriptor get_descriptor() const;
    private:
-      static const std::string name_;
       mapnik::Envelope<double> extent_;
       int type_;
       std::string dataset_name_;
