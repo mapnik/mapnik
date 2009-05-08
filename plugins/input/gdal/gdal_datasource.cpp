@@ -37,7 +37,7 @@ using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
 using mapnik::datasource_exception;
 
-gdal_datasource::gdal_datasource( parameters const& params)
+gdal_datasource::gdal_datasource(parameters const& params)
    : datasource(params),
      extent_(),
      desc_(*params.get<std::string>("type"),"utf-8")
@@ -52,8 +52,9 @@ gdal_datasource::gdal_datasource( parameters const& params)
    else
       dataset_name_ = *file;
 
-   dataset_ = boost::shared_ptr<GDALDataset>(reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(),GA_ReadOnly)));
+   dataset_ = boost::shared_ptr<GDALDataset>(reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(),GA_ReadOnly)));
    if (!dataset_) throw datasource_exception(CPLGetLastErrorMsg());
+
    double tr[6];
    dataset_->GetGeoTransform(tr);
    double x0 = tr[0];
