@@ -26,8 +26,10 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 
 ogr_src = Split(
 	"""
+	ogr_converter.cpp
 	ogr_datasource.cpp
 	ogr_featureset.cpp      
+	ogr_index_featureset.cpp
 	"""
         )
 

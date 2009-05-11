@@ -32,6 +32,8 @@
 
 // ogr
 #include "ogr_featureset.hpp"
+#include "ogr_converter.hpp"
+#include "ogr_feature_ptr.hpp"
 
 using std::clog;
 using std::endl;
@@ -41,50 +43,43 @@ using mapnik::Envelope;
 using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
-using mapnik::point_impl;
-using mapnik::line_string_impl;
-using mapnik::polygon_impl;
-using mapnik::geometry2d;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 
 
-class ogr_feature_ptr
-{
-public:
-    ogr_feature_ptr (OGRFeature* const feat)
-        : feat_ (feat)
-    {
-    }
-    
-    ~ogr_feature_ptr ()
-    {
-        if (feat_ != NULL)
-            OGRFeature::DestroyFeature (feat_);
-    }
-
-    OGRFeature* operator*()
-    {
-        return feat_;
-    }
-
-private:
-    OGRFeature* feat_;
-};
-
-
 ogr_featureset::ogr_featureset(OGRDataSource & dataset,
                                OGRLayer & layer,
-                               std::string const& encoding,
-                               bool multiple_geometries)
+                               OGRGeometry & extent,
+                               const std::string& encoding,
+                               const bool multiple_geometries)
    : dataset_(dataset),
      layer_(layer),
      layerdef_(layer.GetLayerDefn()),
      tr_(new transcoder(encoding)),
      fidcolumn_(layer_.GetFIDColumn ()),
-     multiple_geometries_(multiple_geometries)
+     multiple_geometries_(multiple_geometries),
+     count_(0)
 {
-    layer_.ResetReading ();
+    layer_.SetSpatialFilter (&extent);
+}
+
+ogr_featureset::ogr_featureset(OGRDataSource & dataset,
+                               OGRLayer & layer,
+                               const mapnik::Envelope<double> & extent,
+                               const std::string& encoding,
+                               const bool multiple_geometries)
+   : dataset_(dataset),
+     layer_(layer),
+     layerdef_(layer.GetLayerDefn()),
+     tr_(new transcoder(encoding)),
+     fidcolumn_(layer_.GetFIDColumn ()),
+     multiple_geometries_(multiple_geometries),
+     count_(0)
+{
+    layer_.SetSpatialFilterRect (extent.minx(),
+                                 extent.miny(),
+                                 extent.maxx(),
+                                 extent.maxy());
 }
 
 ogr_featureset::~ogr_featureset() {}
@@ -99,7 +94,8 @@ feature_ptr ogr_featureset::next()
       {
           feature_ptr feature(new Feature((*feat)->GetFID()));
 
-          convert_geometry (geom, feature);
+          ogr_converter::convert_geometry (geom, feature, multiple_geometries_);
+          ++count_;
 
           int fld_count = layerdef_->GetFieldCount();
           for (int i = 0; i < fld_count; i++)
@@ -174,232 +170,9 @@ feature_ptr ogr_featureset::next()
       }
    }
 
-   return feature_ptr();
-}
-
-void ogr_featureset::convert_geometry (OGRGeometry* geom, feature_ptr feature)
-{
-  switch (wkbFlatten (geom->getGeometryType()))
-  {
-  case wkbPoint:
-      convert_point (static_cast<OGRPoint*>(geom), feature);
-      break;
-  case wkbLineString:
-      convert_linestring (static_cast<OGRLineString*>(geom), feature);
-      break;
-  case wkbPolygon:
-      convert_polygon (static_cast<OGRPolygon*>(geom), feature);
-      break;
-  case wkbMultiPoint:
-      if (multiple_geometries_)
-          convert_multipoint_2 (static_cast<OGRMultiPoint*>(geom), feature);
-      else
-          convert_multipoint (static_cast<OGRMultiPoint*>(geom), feature);
-      break;
-  case wkbMultiLineString:
-      if (multiple_geometries_)
-          convert_multilinestring_2 (static_cast<OGRMultiLineString*>(geom), feature);
-      else
-          convert_multilinestring (static_cast<OGRMultiLineString*>(geom), feature);
-
-      break;
-  case wkbMultiPolygon:
-      if (multiple_geometries_)
-          convert_multipolygon_2 (static_cast<OGRMultiPolygon*>(geom), feature);
-      else
-          convert_multipolygon (static_cast<OGRMultiPolygon*>(geom), feature);
-      break;
-  case wkbGeometryCollection:
-      convert_collection (static_cast<OGRGeometryCollection*>(geom), feature);
-      break;
-  case wkbLinearRing:
-      convert_linestring (static_cast<OGRLinearRing*>(geom), feature);
-      break;
-  case wkbNone:
-  case wkbUnknown:
-  default:
 #ifdef MAPNIK_DEBUG
-      clog << "unknown <ogr> geometry_type=" << wkbFlatten (geom->getGeometryType()) << endl;
+   clog << count_ << " features" << endl;
 #endif
-      break;
-  }  
-}
-
-void ogr_featureset::convert_point (OGRPoint* geom, feature_ptr feature)
-{
-    geometry2d* point = new point_impl;
-    point->move_to (geom->getX(), geom->getY());
-    feature->add_geometry (point);
-}
-
-void ogr_featureset::convert_linestring (OGRLineString* geom, feature_ptr feature)
-{
-    int num_points = geom->getNumPoints ();
-    geometry2d * line = new line_string_impl;
-    line->set_capacity (num_points);
-    line->move_to (geom->getX (0), geom->getY (0));
-    for (int i=1;i<num_points;++i)
-    {
-        line->line_to (geom->getX (i), geom->getY (i));
-    }
-    feature->add_geometry (line);
-}
-
-void ogr_featureset::convert_polygon (OGRPolygon* geom, feature_ptr feature)
-{
-    OGRLinearRing* exterior = geom->getExteriorRing ();
-    int num_points = exterior->getNumPoints ();
-    int num_interior = geom->getNumInteriorRings ();
-    int capacity = 0;
-    for (int r=0;r<num_interior;r++)
-    {
-        OGRLinearRing* interior = geom->getInteriorRing (r);
-        capacity += interior->getNumPoints ();
-    }    
-    
-    geometry2d * poly = new polygon_impl;
-    poly->set_capacity (num_points + capacity);
-    poly->move_to (exterior->getX (0), exterior->getY (0));
-    for (int i=1;i<num_points;++i)
-    {
-        poly->line_to (exterior->getX (i), exterior->getY (i));
-    }
-    for (int r=0;r<num_interior;r++)
-    {
-        OGRLinearRing* interior = geom->getInteriorRing (r);
-        num_points = interior->getNumPoints ();
-        poly->move_to(interior->getX (0), interior->getY (0));
-        for (int i=1;i<num_points;++i)
-        {
-            poly->line_to(interior->getX (i), interior->getY (i));
-        }
-    }
-    feature->add_geometry (poly);
-}
-
-void ogr_featureset::convert_multipoint (OGRMultiPoint* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries ();
-    geometry2d* point = new point_impl;
-
-    for (int i=0;i<num_geometries;i++)
-    {
-        OGRPoint* ogrpoint = static_cast<OGRPoint*>(geom->getGeometryRef (i));
-        point->move_to (ogrpoint->getX(), ogrpoint->getY());
-    }
-}
-
-void ogr_featureset::convert_multipoint_2 (OGRMultiPoint* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries ();
-    for (int i=0;i<num_geometries;i++)
-    {
-        convert_point (static_cast<OGRPoint*>(geom->getGeometryRef (i)), feature);
-    }
-}
-
-void ogr_featureset::convert_multilinestring (OGRMultiLineString* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries ();
-
-    int num_points = 0;
-    for (int i=0;i<num_geometries;i++)
-    {
-        OGRLineString* ls = static_cast<OGRLineString*>(geom->getGeometryRef (i));
-        num_points += ls->getNumPoints ();
-    }
-
-    geometry2d * line = new line_string_impl;
-    line->set_capacity (num_points);
-
-    for (int i=0;i<num_geometries;i++)
-    {
-        OGRLineString* ls = static_cast<OGRLineString*>(geom->getGeometryRef (i));
-        num_points = ls->getNumPoints ();
-        line->move_to (ls->getX (0), ls->getY (0));
-        for (int i=1;i<num_points;++i)
-        {
-            line->line_to (ls->getX (i), ls->getY (i));
-        }
-    }
-
-    feature->add_geometry (line);
-}
-
-void ogr_featureset::convert_multilinestring_2 (OGRMultiLineString* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries ();
-    for (int i=0;i<num_geometries;i++)
-    {
-        convert_linestring (static_cast<OGRLineString*>(geom->getGeometryRef (i)), feature);
-    }
-}
-
-void ogr_featureset::convert_multipolygon (OGRMultiPolygon* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries ();
-
-    int capacity = 0;
-    for (int i=0;i<num_geometries;i++)
-    {
-        OGRPolygon* p = static_cast<OGRPolygon*>(geom->getGeometryRef (i));
-        OGRLinearRing* exterior = p->getExteriorRing ();
-        capacity += exterior->getNumPoints ();
-        for (int r=0;r<p->getNumInteriorRings ();r++)
-        {
-            OGRLinearRing* interior = p->getInteriorRing (r);
-            capacity += interior->getNumPoints ();
-        }    
-    }
-
-    geometry2d * poly = new polygon_impl;
-    poly->set_capacity (capacity);
-
-    for (int i=0;i<num_geometries;i++)
-    {
-        OGRPolygon* p = static_cast<OGRPolygon*>(geom->getGeometryRef (i));
-        OGRLinearRing* exterior = p->getExteriorRing ();
-        int num_points = exterior->getNumPoints ();
-        int num_interior = p->getNumInteriorRings ();
-        poly->move_to (exterior->getX (0), exterior->getY (0));
-        for (int i=1;i<num_points;++i)
-        {
-            poly->line_to (exterior->getX (i), exterior->getY (i));
-        }
-        for (int r=0;r<num_interior;r++)
-        {
-            OGRLinearRing* interior = p->getInteriorRing (r);
-            num_points = interior->getNumPoints ();
-            poly->move_to(interior->getX (0), interior->getY (0));
-            for (int i=1;i<num_points;++i)
-            {
-                poly->line_to(interior->getX (i), interior->getY (i));
-            }
-        }
-    }
-
-    feature->add_geometry (poly);
-}
-
-void ogr_featureset::convert_multipolygon_2 (OGRMultiPolygon* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries ();
-    for (int i=0;i<num_geometries;i++)
-    {
-        convert_polygon (static_cast<OGRPolygon*>(geom->getGeometryRef (i)), feature);
-    }
-}
-
-void ogr_featureset::convert_collection (OGRGeometryCollection* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries ();
-    for (int i=0;i<num_geometries;i++)
-    {
-        OGRGeometry* g = geom->getGeometryRef (i);
-        if (g != NULL)
-        {
-            convert_geometry (g, feature);
-        }
-    }
+   return feature_ptr();
 }
 

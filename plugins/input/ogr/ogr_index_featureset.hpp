@@ -21,46 +21,41 @@
  *****************************************************************************/
 //$Id$
 
-#ifndef OGR_FEATURESET_HPP
-#define OGR_FEATURESET_HPP
+#ifndef OGR_INDEX_FEATURESET_HPP
+#define OGR_INDEX_FEATURESET_HPP
 
-// mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp> 
-#include <mapnik/geom_util.hpp>
-
-// boost
+#include <set>
+#include <vector>
 #include <boost/scoped_ptr.hpp>
+#include "ogr_featureset.hpp"
 
-// ogr
-#include <ogrsf_frmts.h>
-  
-class ogr_featureset : public mapnik::Featureset
+template <typename filterT>
+class ogr_index_featureset : public mapnik::Featureset
 {
       OGRDataSource & dataset_;
       OGRLayer & layer_;
       OGRFeatureDefn * layerdef_;
+      filterT filter_;
+      std::vector<int> ids_;
+      std::vector<int>::iterator itr_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
       const char* fidcolumn_;
       bool multiple_geometries_;
       mutable int count_;
-   public:
-      ogr_featureset(OGRDataSource & dataset,
-                     OGRLayer & layer,
-                     OGRGeometry & extent,
-                     const std::string& encoding,
-                     const bool multiple_geometries);
 
-      ogr_featureset(OGRDataSource & dataset,
-                     OGRLayer & layer,
-                     const mapnik::Envelope<double> & extent,
-                     const std::string& encoding,
-                     const bool multiple_geometries);
-      virtual ~ogr_featureset();
+   public:
+      ogr_index_featureset(OGRDataSource & dataset,
+                           OGRLayer & layer,
+                           const filterT& filter,
+                           const std::string& index_file,
+                           const std::string& encoding,
+                           const bool multiple_geometries);
+      virtual ~ogr_index_featureset();
       mapnik::feature_ptr next();
    private:
-      ogr_featureset(const ogr_featureset&);
-      const ogr_featureset& operator=(const ogr_featureset&);
+      //no copying
+      ogr_index_featureset(const ogr_index_featureset&);
+      ogr_index_featureset& operator=(const ogr_index_featureset&);
 };
 
 #endif // OGR_FEATURESET_HPP

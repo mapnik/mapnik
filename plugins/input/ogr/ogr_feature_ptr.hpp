@@ -21,43 +21,34 @@
  *****************************************************************************/
 //$Id$
 
-#ifndef OGR_DATASOURCE_HPP
-#define OGR_DATASOURCE_HPP
-
-// mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/feature_layer_desc.hpp>
-
-// boost
-#include <boost/shared_ptr.hpp>
+#ifndef OGR_FEATURE_PTR_HPP
+#define OGR_FEATURE_PTR_HPP
 
 // ogr
 #include <ogrsf_frmts.h>
-
-class ogr_datasource : public mapnik::datasource 
+  
+class ogr_feature_ptr
 {
-   public:
-      ogr_datasource(mapnik::parameters const& params);
-      virtual ~ogr_datasource ();
-      int type() const;
-      static std::string name();
-      mapnik::featureset_ptr features(mapnik::query const& q) const;
-      mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
-      mapnik::Envelope<double> envelope() const;
-      mapnik::layer_descriptor get_descriptor() const;
-   private:
-      mapnik::Envelope<double> extent_;
-      int type_;
-      std::string dataset_name_;
-      std::string index_name_;
-      OGRDataSource* dataset_;
-      OGRLayer* layer_;
-      std::string layerName_;
-      mapnik::layer_descriptor desc_;
-      bool multiple_geometries_;
-      bool indexed_;
+public:
+    ogr_feature_ptr (OGRFeature* const feat)
+        : feat_ (feat)
+    {
+    }
+    
+    ~ogr_feature_ptr ()
+    {
+        if (feat_ != NULL)
+            OGRFeature::DestroyFeature (feat_);
+    }
+
+    OGRFeature* operator*()
+    {
+        return feat_;
+    }
+
+private:
+    OGRFeature* feat_;
 };
 
+#endif // OGR_FEATURE_PTR_HPP
 
-#endif // OGR_DATASOURCE_HPP
