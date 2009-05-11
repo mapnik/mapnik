@@ -81,7 +81,7 @@ int main (int argc,char** argv)
 	
         if (vm.count("version"))
         {
-            std::clog<<"version 0.3.0" <<std::endl;
+            std::clog<<"version 0.1.0" <<std::endl;
             return 1;
         }
         if (vm.count("help")) 
