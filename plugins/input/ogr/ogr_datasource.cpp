@@ -120,7 +120,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
    extent_.init (envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
 
    // scan for index file
-   int breakpoint = dataset_name_.find_last_of (".");
+   unsigned breakpoint = dataset_name_.find_last_of (".");
    if (breakpoint == std::string::npos) breakpoint = dataset_name_.length();
    index_name_ = dataset_name_.substr(0, breakpoint) + ".index";
    std::ifstream index_file (index_name_.c_str(), std::ios::in | std::ios::binary);

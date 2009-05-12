@@ -129,7 +129,7 @@ int main (int argc,char** argv)
             continue;
         }
 
-        int breakpoint = ogrname.find_last_of (".");
+        unsigned breakpoint = ogrname.find_last_of (".");
         if (breakpoint == string::npos) breakpoint = ogrname.length();
         std::string ogrlayername (ogrname.substr(0, breakpoint));
 
