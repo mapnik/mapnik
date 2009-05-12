@@ -35,7 +35,6 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 
 using std::clog;
 using std::endl;
