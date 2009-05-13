@@ -28,8 +28,49 @@ void export_raster_symbolizer()
 {
     using namespace boost::python;
     using mapnik::raster_symbolizer;
-    
+
     class_<raster_symbolizer>("RasterSymbolizer",
 				    init<>("Default ctor"))
+    
+    .add_property("mode",
+            make_function(&raster_symbolizer::get_mode,return_value_policy<copy_const_reference>()),
+            &raster_symbolizer::set_mode,
+            "Get/Set merging mode.\n"
+            "Possible values are:\n"
+            "normal, grain_merge, grain_merge2, multiply,\n"
+            "multiply2, divide, divide2, screen, and hard_light\n"
+            "\n"
+            "Usage:\n"
+            "\n"
+            ">>> from mapnik import RasterSymbolizer\n"
+            ">>> r = RasterSymbolizer()\n"
+            ">>> r.mode = 'grain_merge2'\n"
+            )
+            
+    .add_property("scaling",
+            make_function(&raster_symbolizer::get_scaling,return_value_policy<copy_const_reference>()),
+            &raster_symbolizer::set_scaling,
+            "Get/Set scaling algorithm.\n"
+            "Possible values are:\n"
+            "fast, bilinear, and bilinear8\n"
+            "\n"
+            "Usage:\n"
+            "\n"
+            ">>> from mapnik import RasterSymbolizer\n"
+            ">>> r = RasterSymbolizer()\n"
+            ">>> r.scaling = 'bilinear8'\n"
+            )
+            
+    .add_property("opacity",
+            &raster_symbolizer::get_opacity,
+            &raster_symbolizer::set_opacity,
+            "Get/Set opacity.\n"
+            "\n"
+            "Usage:\n"
+            "\n"
+            ">>> from mapnik import RasterSymbolizer\n"
+            ">>> r = RasterSymbolizer()\n"
+            ">>> r.opacity = .5\n"
+            )
 	;    
 }
