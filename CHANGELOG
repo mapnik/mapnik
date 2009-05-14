@@ -96,7 +96,7 @@ Mapnik 0.6.0 Release
 
 - Symbolizers: Added support of using Points with Shield Symbolizer (r741)
 
-- Plugins: PostGIS plugin now accepts alternate schemas (r733)
+- Plugins: PostGIS plugin now accepts alternate schemas (r773)
 
 - Fonts: Added support for fallback fonts (r704)
 
