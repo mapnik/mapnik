@@ -59,7 +59,12 @@ namespace mapnik {
    {
       return image_filename_;
    }
-   
+
+   void symbolizer_with_image::set_filename(std::string const& image_filename) 
+   {
+      image_filename_ = image_filename;
+   }
+      
 } // end of namespace mapnik
 
 
