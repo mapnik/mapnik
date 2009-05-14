@@ -47,10 +47,10 @@ namespace mapnik {
         {
             names_.insert(sym.get_name());
         }
-	void operator () (shield_symbolizer const& sym)
-	{
-	    names_.insert(sym.get_name());
-	}
+      	void operator () (shield_symbolizer const& sym)
+      	{
+      	    names_.insert(sym.get_name());
+      	}
     private:
         std::set<std::string>& names_;
     };
