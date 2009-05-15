@@ -24,6 +24,10 @@
 #include "gdal_datasource.hpp"
 #include "gdal_featureset.hpp"
 
+// mapnik
+#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/geom_util.hpp>
+
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -40,6 +44,7 @@ using mapnik::datasource_exception;
 gdal_datasource::gdal_datasource(parameters const& params)
    : datasource(params),
      extent_(),
+     dataset_(0),
      desc_(*params.get<std::string>("type"),"utf-8")
 {
    GDALAllRegister();
@@ -53,8 +58,16 @@ gdal_datasource::gdal_datasource(parameters const& params)
    else
       dataset_name_ = *file;
 
-   dataset_ = boost::shared_ptr<GDALDataset>(reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(),GA_ReadOnly)));
-   if (!dataset_) throw datasource_exception(CPLGetLastErrorMsg());
+   shared_dataset_ = *params_.get<mapnik::boolean>("shared",false);
+
+#if GDAL_VERSION_NUM >= 1600
+   if (shared_dataset_)
+       dataset_ = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(),GA_ReadOnly));
+   else
+#endif
+       dataset_ = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(),GA_ReadOnly));
+
+   if (! dataset_) throw datasource_exception(CPLGetLastErrorMsg());
 
    double tr[6];
    dataset_->GetGeoTransform(tr);
@@ -67,8 +80,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
 gdal_datasource::~gdal_datasource()
 {
-    GDALDereferenceDataset (dataset_.get());
-    dataset_.reset(); // prevent delete of dataset
+    GDALClose (dataset_);
 }
 
 int gdal_datasource::type() const
