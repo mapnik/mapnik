@@ -22,7 +22,7 @@
 // $Id$
 // mapnik
 #include <mapnik/save_map.hpp>
-
+#include <mapnik/image_util.hpp>
 #include <mapnik/ptree_helpers.hpp>
 
 // boost
