@@ -41,14 +41,6 @@ namespace mapnik
     using boost::property_tree::ptree;
     using boost::optional;
 
-    std::string guess_type( const std::string & filename )
-    {
-        std::string::size_type idx = filename.find_last_of(".");
-        if ( idx != std::string::npos ) {
-            return filename.substr( idx + 1 );
-        }
-        return "<unknown>";
-    }
     class serialize_symbolizer : public boost::static_visitor<>
     {
         public:
