@@ -28,23 +28,45 @@
 
 using mapnik::feature_type_style;
 using mapnik::rules;
+using mapnik::rule_type;
 
 struct style_pickle_suite : boost::python::pickle_suite
 {
    static boost::python::tuple
-   getinitargs(const feature_type_style& s)
+   getstate(const feature_type_style& s)
    {
-        boost::python::list r;
+        boost::python::list rule_list;
 
         rules::const_iterator it = s.get_rules().begin();
         rules::const_iterator end = s.get_rules().end();
         for (; it != end; ++it)
         {
-            r.append( *it );    
+            rule_list.append( *it );    
         }
 
-      return boost::python::make_tuple(r);
+      return boost::python::make_tuple(rule_list);
    }
+
+   static void
+   setstate (feature_type_style& s, boost::python::tuple state)
+   {
+        using namespace boost::python;
+        if (len(state) != 1)
+        {
+            PyErr_SetObject(PyExc_ValueError,
+                         ("expected 1-item tuple in call to __setstate__; got %s"
+                          % state).ptr()
+            );
+            throw_error_already_set();
+        }
+        
+        boost::python::list rules = extract<boost::python::list>(state[0]);
+        for (int i=0; i<len(rules); ++i)
+        {
+            s.add_rule(extract<rule_type>(rules[i]));
+        }
+   }
+   
 };
 
 void export_style()
