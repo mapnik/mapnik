@@ -24,11 +24,23 @@
 #include <boost/python.hpp>
 #include <mapnik/coord.hpp>
 
+using mapnik::coord;
+
+struct coord_pickle_suite : boost::python::pickle_suite
+{
+    static boost::python::tuple
+    getinitargs(const coord<double,2>& c)
+    {
+        using namespace boost::python;
+        return boost::python::make_tuple(c.x,c.y);
+    }
+};
+
 void export_coord()
 {
     using namespace boost::python;
-    using mapnik::coord;
     class_<coord<double,2> >("Coord",init<double,double>())
+        .def_pickle(coord_pickle_suite())
         .def_readwrite("x", &coord<double,2>::x)
         .def_readwrite("y", &coord<double,2>::y)
         .def(self == self) // __eq__
