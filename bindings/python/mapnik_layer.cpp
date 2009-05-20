@@ -30,10 +30,11 @@
 // mapnik
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/datasource_cache.hpp>
 
 using mapnik::Layer;
 using mapnik::parameters;
-using mapnik::datasource;
+using mapnik::datasource_cache;
 
 
 struct layer_pickle_suite : boost::python::pickle_suite
@@ -53,7 +54,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
         {
             s.append(style_names[i]);
         }      
-        return boost::python::make_tuple(l.abstract(),l.title(),l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource(),s);
+        return boost::python::make_tuple(l.abstract(),l.title(),l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource()->params(),s);
    }
 
    static void
@@ -101,8 +102,8 @@ struct layer_pickle_suite : boost::python::pickle_suite
 
         if (state[6])
         {
-            boost::shared_ptr<datasource> ds = extract<boost::shared_ptr<datasource> >(state[6]);
-            l.set_datasource(ds);
+            mapnik::parameters params = extract<parameters>(state[6]);
+            l.set_datasource(datasource_cache::instance()->create(params));
         }
         
         boost::python::list s = extract<boost::python::list>(state[7]);
