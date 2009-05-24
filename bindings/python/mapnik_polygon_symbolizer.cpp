@@ -24,15 +24,49 @@
 #include <boost/python.hpp>
 #include <mapnik/polygon_symbolizer.hpp>
 
+using mapnik::polygon_symbolizer;
+using mapnik::color;
+
+struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const polygon_symbolizer& p)
+   {
+      return boost::python::make_tuple(p.get_fill());  
+   }
+
+   static  boost::python::tuple
+   getstate(const polygon_symbolizer& p)
+   {
+        return boost::python::make_tuple(p.get_opacity());
+   }
+
+   static void
+   setstate (polygon_symbolizer& p, boost::python::tuple state)
+   {
+        using namespace boost::python;
+        if (len(state) != 1)
+        {
+            PyErr_SetObject(PyExc_ValueError,
+                         ("expected 1-item tuple in call to __setstate__; got %s"
+                          % state).ptr()
+            );
+            throw_error_already_set();
+        }
+                
+        p.set_opacity(extract<float>(state[0]));
+   }
+
+};
+
 void export_polygon_symbolizer()
 {
     using namespace boost::python;
-    using mapnik::polygon_symbolizer;
-    using mapnik::color;
-    
+        
     class_<polygon_symbolizer>("PolygonSymbolizer",
 				    init<>("Default PolygonSymbolizer - solid fill grey"))
         .def(init<color const&>("TODO"))
+        .def_pickle(polygon_symbolizer_pickle_suite())
         .add_property("fill",make_function
                       (&polygon_symbolizer::get_fill,
                        return_value_policy<copy_const_reference>()),
