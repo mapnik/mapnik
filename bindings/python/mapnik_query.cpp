@@ -24,16 +24,25 @@
 #include <boost/python.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/envelope.hpp>
+using mapnik::query;
+using mapnik::Envelope;
+
+struct query_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const query& q)
+   {
+      return boost::python::make_tuple(q.get_bbox(),q.resolution());  
+   }
+};
 
 void export_query()
 {
     using namespace boost::python;
 
-    using mapnik::query;
-    using mapnik::Envelope;
-
     class_<query>("Query", "a spatial query data object", 
 		  init<Envelope<double>,double>() )
+        .def_pickle(query_pickle_suite())
         .add_property("resolution", &query::resolution)
         .add_property("bbox", make_function(&query::get_bbox,
                                             return_value_policy<copy_const_reference>()) )
