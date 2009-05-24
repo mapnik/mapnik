@@ -25,6 +25,18 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/projection.hpp>
 
+using mapnik::projection;
+
+struct projection_pickle_suite : boost::python::pickle_suite
+{
+    static boost::python::tuple
+    getinitargs(const projection& p)
+    {
+        using namespace boost::python;
+        return boost::python::make_tuple(p.params());
+    }
+};
+
 namespace {
     mapnik::coord2d forward_pt(mapnik::coord2d const& pt, 
                             mapnik::projection const& prj)
@@ -73,9 +85,9 @@ namespace {
 void export_projection ()
 {
     using namespace boost::python; 
-    using mapnik::projection;
-    
+
     class_<projection>("Projection", init<optional<std::string const&> >())
+        .def_pickle(projection_pickle_suite())
         .def ("params", make_function(&projection::params,
                                       return_value_policy<copy_const_reference>()))
         .add_property ("geographic",&projection::is_geographic)
