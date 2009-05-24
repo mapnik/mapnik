@@ -14,7 +14,7 @@ For a complete change history, see the SVN log.
 0.6.1 SVN
 ---------
 
-- Python: Exposed dash_array get method (#317)
+- Python: Exposed dash_array get method (r1151) (#317)
 
 - OGCServer: Made lxml dependency optional (r1085) (#303)
 
