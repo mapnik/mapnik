@@ -1,6 +1,6 @@
 /*****************************************************************************
  * 
- * This file is part of Mapnik (c++ mapping toolkit)
+ * This file is part of Mapnik (c+mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
  *
@@ -48,6 +48,43 @@ namespace {
   }
 }
 
+struct stroke_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const stroke& s)
+   {
+
+      return boost::python::make_tuple(s.get_color(),s.get_width());
+      
+   }
+
+   static  boost::python::tuple
+   getstate(const stroke& s)
+   {
+        return boost::python::make_tuple(s.get_opacity());
+   }
+
+   // TODO add support for dash array pair, line cap and line join
+   static void
+   setstate (stroke& s, boost::python::tuple state)
+   {
+        using namespace boost::python;
+        if (len(state) != 1)
+        {
+            PyErr_SetObject(PyExc_ValueError,
+                         ("expected 1-item tuple in call to __setstate__; got %s"
+                          % state).ptr()
+            );
+            throw_error_already_set();
+        }
+                
+        s.set_opacity(extract<float>(state[0]));
+        
+   }
+
+};
+
+
 void export_stroke ()
 {
     using namespace boost::python;
@@ -66,6 +103,7 @@ void export_stroke ()
 
     class_<stroke>("Stroke",init<>())
         .def(init<color,float>())
+        .def_pickle(stroke_pickle_suite())
         .add_property("color",make_function
                       (&stroke::get_color,return_value_policy<copy_const_reference>()),
                       &stroke::set_color)
