@@ -22,16 +22,29 @@
 //$Id$
 
 #include <boost/python.hpp>
+#include <mapnik/image_util.hpp>
 #include <mapnik/polygon_pattern_symbolizer.hpp>
+
+using mapnik::polygon_pattern_symbolizer;
+
+struct polygon_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const polygon_pattern_symbolizer& p)
+   {
+      boost::shared_ptr<mapnik::ImageData32> img = p.get_image();
+      const std::string & filename = p.get_filename();
+      return boost::python::make_tuple(filename,mapnik::guess_type(filename),img->width(),img->height());
+   }
+};
 
 void export_polygon_pattern_symbolizer()
 {
     using namespace boost::python;
-    using mapnik::polygon_pattern_symbolizer;
     
     class_<polygon_pattern_symbolizer>("PolygonPatternSymbolizer",
 				       init<std::string const&,
 				       std::string const&,
 				       unsigned,unsigned>("TODO"))
-	;    
+        .def_pickle(polygon_pattern_symbolizer_pickle_suite())	;    
 }

@@ -22,9 +22,21 @@
 //$Id$
 
 #include <boost/python.hpp>
+#include <mapnik/image_util.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
 
 using mapnik::line_pattern_symbolizer;
+
+struct line_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const line_pattern_symbolizer& l)
+   {
+      boost::shared_ptr<mapnik::ImageData32> img = l.get_image();
+      const std::string & filename = l.get_filename();
+      return boost::python::make_tuple(filename,mapnik::guess_type(filename),img->width(),img->height());
+   }
+};
 
 void export_line_pattern_symbolizer()
 {
@@ -33,5 +45,6 @@ void export_line_pattern_symbolizer()
     class_<line_pattern_symbolizer>("LinePatternSymbolizer",
 				    init<std::string const&,
 				    std::string const&,unsigned,unsigned>("TODO"))
+        .def_pickle(line_pattern_symbolizer_pickle_suite())
 	;    
 }
