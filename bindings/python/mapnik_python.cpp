@@ -222,6 +222,15 @@ unsigned mapnik_version()
     return MAPNIK_VERSION;
 }
 
+bool has_cairo()
+{
+#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
+  return true;
+#else
+  return false;
+#endif
+}
+
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3);
@@ -425,6 +434,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 */
 
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
+    def("has_cairo", &has_cairo, "Get cairo library status");
     
     using mapnik::symbolizer;
     class_<symbolizer>("Symbolizer",no_init)
