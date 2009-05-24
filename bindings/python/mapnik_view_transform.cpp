@@ -27,6 +27,18 @@
 // mapnik
 #include <mapnik/ctrans.hpp>
 
+using mapnik::CoordTransform;
+
+struct view_transform_pickle_suite : boost::python::pickle_suite
+{
+    static boost::python::tuple
+    getinitargs(const CoordTransform& c)
+    {
+        using namespace boost::python;
+        return boost::python::make_tuple(c.width(),c.height(),c.extent());
+    }
+};
+
 namespace {
 
    mapnik::coord2d forward_point(mapnik::CoordTransform const& t, mapnik::coord2d const& in)
@@ -58,11 +70,11 @@ void export_view_transform()
 {
    using namespace boost::python;
    using mapnik::Envelope;
-   using mapnik::CoordTransform;
    using mapnik::coord2d;
    
    class_<CoordTransform>("ViewTransform",init<int,int,Envelope<double> const& > (
       "Create a ViewTransform with a width and height as integers and extent"))
+      .def_pickle(view_transform_pickle_suite())
       .def("forward", forward_point)
       .def("backward",backward_point)
       .def("forward", forward_envelope)

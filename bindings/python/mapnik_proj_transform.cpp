@@ -25,6 +25,19 @@
 #include <mapnik/proj_transform.hpp>
 // boost
 #include <boost/python.hpp>
+ 
+using mapnik::proj_transform;
+using mapnik::projection;
+
+struct proj_transform_pickle_suite : boost::python::pickle_suite
+{
+    static boost::python::tuple
+    getinitargs(const proj_transform& p)
+    {
+        using namespace boost::python;
+        return boost::python::make_tuple(p.source(),p.dest());
+    }
+};
 
 namespace  {
 
@@ -73,10 +86,10 @@ namespace  {
 
 void export_proj_transform ()
 {
-    using namespace boost::python; 
-    using mapnik::proj_transform;
-    using mapnik::projection;
+    using namespace boost::python;
+    
     class_<proj_transform, boost::noncopyable>("ProjTransform", init< projection const&, projection const& >())
+       .def_pickle(proj_transform_pickle_suite())
        .def("forward", forward_transform_c)
        .def("backward",backward_transform_c)
        .def("forward", forward_transform_env)

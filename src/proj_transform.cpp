@@ -99,5 +99,15 @@ namespace mapnik {
         }
         
         return true;
-    } 
+    }
+
+    mapnik::projection const& proj_transform::source() const
+    {
+        return source_;
+    }
+    mapnik::projection const& proj_transform::dest() const
+    {
+        return dest_;
+    }
+ 
 }
