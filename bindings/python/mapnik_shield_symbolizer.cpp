@@ -24,17 +24,60 @@
 
 #include <boost/python.hpp>
 #include <mapnik/shield_symbolizer.hpp>
+#include <mapnik/image_util.hpp>
+
+using mapnik::color;
+using mapnik::shield_symbolizer;
+using mapnik::text_symbolizer;
+using mapnik::symbolizer_with_image;
+
+struct shield_symbolizer_pickle_suite : boost::python::pickle_suite
+{
+   static boost::python::tuple
+   getinitargs(const shield_symbolizer& s)
+   {
+
+      boost::shared_ptr<mapnik::ImageData32> img = s.get_image();
+      const std::string & filename = s.get_filename();
+      //(name, font name, font size, font color, image file, image type, width, height)
+      return boost::python::make_tuple(s.get_name(),s.get_face_name(),s.get_text_size(),s.get_fill(),filename,mapnik::guess_type(filename),img->width(),img->height());
+      
+   }
+
+   static  boost::python::tuple
+   getstate(const shield_symbolizer& s)
+   {
+        return boost::python::make_tuple(s.get_halo_fill(),s.get_halo_radius());
+   }
+
+   // TODO add lots more...
+   static void
+   setstate (shield_symbolizer& s, boost::python::tuple state)
+   {
+        using namespace boost::python;
+        /*if (len(state) != 1)
+        {
+            PyErr_SetObject(PyExc_ValueError,
+                         ("expected 1-item tuple in call to __setstate__; got %s"
+                          % state).ptr()
+            );
+            throw_error_already_set();
+        }*/
+                
+        s.set_halo_fill(extract<color>(state[0]));
+        s.set_halo_radius(extract<float>(state[1]));
+        
+   }
+
+};
 
 void export_shield_symbolizer()
 {
     using namespace boost::python;
-    using mapnik::shield_symbolizer;
-    using mapnik::text_symbolizer;
-    using mapnik::symbolizer_with_image;
-    
     class_< shield_symbolizer, bases<text_symbolizer> >("ShieldSymbolizer",
                                                         init< std::string const&, std::string const&, unsigned, mapnik::color const&,
                                                         std::string const&, std::string const&,unsigned,unsigned>("TODO"))
+      .def_pickle(shield_symbolizer_pickle_suite())
         ;
     
 }
