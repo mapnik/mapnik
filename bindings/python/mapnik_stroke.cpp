@@ -26,9 +26,30 @@
 #include <mapnik/stroke.hpp>
 #include "mapnik_enumeration.hpp"
 
+using namespace mapnik;
+
+namespace {
+  using namespace boost::python;
+
+  list get_dashes(mapnik::stroke &stroke)
+  {
+    list l;
+
+    if (stroke.has_dash()) {
+      mapnik::dash_array const& dash = stroke.get_dash_array();
+      mapnik::dash_array::const_iterator iter = dash.begin();
+      mapnik::dash_array::const_iterator end = dash.end();
+      for (; iter != end; ++iter) {
+        	l.append(make_tuple(iter->first, iter->second));
+      }
+    }
+
+    return l;
+  }
+}
+
 void export_stroke ()
 {
-    using namespace mapnik;
     using namespace boost::python;
 
     enumeration_<line_cap_e>("line_cap")
@@ -52,6 +73,8 @@ void export_stroke ()
         .add_property("opacity",&stroke::get_opacity,&stroke::set_opacity)
         .add_property("line_cap",&stroke::get_line_cap,&stroke::set_line_cap)
         .add_property("line_join",&stroke::get_line_join,&stroke::set_line_join)
+        // todo combine into single get/set property
         .def("add_dash",&stroke::add_dash)
+        .def("get_dashes", get_dashes)
         ;
 }

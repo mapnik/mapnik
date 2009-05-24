@@ -46,7 +46,7 @@ def test_pointsymbolizer_missing_image():
 # PointSymbolizer pickling
 def test_pointsymbolizer_pickle():
     raise Todo("PointSymbolizer does not support pickling yet.")
-
+    
 # PolygonSymbolizer initialization
 def test_polygonsymbolizer_init():
     p = mapnik.PolygonSymbolizer()
@@ -80,6 +80,15 @@ def test_stroke_init():
     eq_(s.color, mapnik.Color('blue'))
     eq_(s.line_cap, mapnik.line_cap.BUTT_CAP)
     eq_(s.line_join, mapnik.line_join.MITER_JOIN)
+
+# Stroke dashes
+def test_stroke_dash_arrays():
+    s = mapnik.Stroke()
+    s.add_dash(1,2)
+    s.add_dash(3,4)
+    s.add_dash(5,6)
+
+    eq_(s.get_dashes(), [(1,2),(3,4),(5,6)])
 
 # Stroke pickling
 def test_stroke_pickle():
