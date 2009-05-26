@@ -46,7 +46,10 @@ def test_pointsymbolizer_missing_image():
 # PointSymbolizer pickling
 def test_pointsymbolizer_pickle():
     raise Todo("PointSymbolizer does not support pickling yet.")
-    
+    #p = mapnik.PointSymbolizer()
+    #p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
+    #eq_(p2, p)    
+
 # PolygonSymbolizer initialization
 def test_polygonsymbolizer_init():
     p = mapnik.PolygonSymbolizer()
@@ -92,8 +95,22 @@ def test_stroke_dash_arrays():
 
 # Stroke pickling
 def test_stroke_pickle():
-    raise Todo("Stroke does not support pickling yet.")
+    s = mapnik.Stroke(mapnik.Color('black'),4.5)
 
+    eq_(s.width, 4.5)
+    eq_(s.color, mapnik.Color('black'))
+
+    s.add_dash(1,2)
+    s.add_dash(3,4)
+    s.add_dash(5,6)
+
+    s2 = pickle.loads(pickle.dumps(s,pickle.HIGHEST_PROTOCOL))
+    eq_(s.width, s2.width)
+    eq_(s.get_dashes(), s2.get_dashes())
+    eq_(s.line_cap, s2.line_cap)
+    eq_(s.line_join, s2.line_join)
+    eq_(s.opacity, s2.opacity)
+    
 # LineSymbolizer initialization
 def test_linesymbolizer_init():
     l = mapnik.LineSymbolizer()
@@ -157,6 +174,36 @@ def test_textsymbolizer_init():
     eq_(ts.face_name, 'Font Name')
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik.Color('black'))
+
+# TextSymbolizer pickling
+def test_textsymbolizer_pickle():
+    ts = mapnik.TextSymbolizer('Field Name', 'Font Name', 8, mapnik.Color('black'))
+
+    eq_(ts.name, 'Field Name')
+    eq_(ts.face_name, 'Font Name')
+    eq_(ts.text_size, 8)
+    eq_(ts.fill, mapnik.Color('black'))
+
+    ts2 = pickle.loads(pickle.dumps(ts,pickle.HIGHEST_PROTOCOL))
+    eq_(ts.name, ts2.name)
+    eq_(ts.face_name, ts2.face_name)
+    eq_(ts.allow_overlap, ts2.allow_overlap)
+    eq_(ts.get_displacement(), ts2.get_displacement())
+    eq_(ts.get_anchor(), ts2.get_anchor())
+    eq_(ts.fill, ts2.fill)
+    eq_(ts.force_odd_labels, ts2.force_odd_labels)
+    eq_(ts.halo_fill, ts2.halo_fill)
+    eq_(ts.halo_radius, ts2.halo_radius)
+    eq_(ts.label_placement, ts2.label_placement)
+    eq_(ts.minimum_distance, ts2.minimum_distance)
+    eq_(ts.text_ratio, ts2.text_ratio)
+    eq_(ts.text_size, ts2.text_size)
+    eq_(ts.wrap_width, ts2.wrap_width)
+    eq_(ts.vertical_alignment, ts2.vertical_alignment)
+    eq_(ts.label_spacing, ts2.label_spacing)
+    eq_(ts.label_position_tolerance, ts2.label_position_tolerance)
+    eq_(ts.fontset, ts2.fontset)
+
 
 # Map initialization
 def test_map_init():

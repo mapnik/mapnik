@@ -60,7 +60,7 @@ namespace mapnik
           label_spacing_(0),
           label_position_tolerance_(0),
           force_odd_labels_(false),
-          max_char_angle_delta_(0),
+          max_char_angle_delta_(0.0),
           fill_(fill),
           halo_fill_(color(255,255,255)),
           halo_radius_(0),
@@ -81,7 +81,7 @@ namespace mapnik
           label_spacing_(0),
           label_position_tolerance_(0),
           force_odd_labels_(false),
-          max_char_angle_delta_(0),
+          max_char_angle_delta_(0.0),
           fill_(fill),
           halo_fill_(color(255,255,255)),
           halo_radius_(0),
@@ -296,10 +296,11 @@ namespace mapnik
         anchor_ = boost::make_tuple(x,y);
     }
     
-    position const& text_symbolizer::get_anchor () const
+    position const& text_symbolizer::get_anchor() const
     {
         return anchor_;
     }
+    
     void  text_symbolizer::set_displacement(double x, double y)
     {
         displacement_ = boost::make_tuple(x,y);
