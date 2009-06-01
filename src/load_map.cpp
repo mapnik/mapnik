@@ -850,8 +850,8 @@ namespace mapnik
                 throw config_error(std::string("Must have face_name or fontset_name"));
             }
 
-            int dx = get_attr(sym, "dx", 0);
-            int dy = get_attr(sym, "dy", 0);
+            int dx = get_attr(sym, "dx", 0.0);
+            int dy = get_attr(sym, "dy", 0.0);
             text_symbol.set_displacement(dx,dy);
 
             label_placement_e placement =
