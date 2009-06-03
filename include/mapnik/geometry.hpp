@@ -292,7 +292,7 @@ namespace mapnik {
                   cont_.get_vertex(pos,&x1,&y1);
                   double dx = x1 - x0;
                   double dy = y1 - y0;
-                  len += sqrt(dx * dx + dy * dy);
+                  len += std::sqrt(dx * dx + dy * dy);
                }
                double midlen = 0.5 * len;
                double dist = 0.0;
@@ -302,7 +302,7 @@ namespace mapnik {
                   cont_.get_vertex(pos,&x1,&y1);
                   double dx = x1 - x0;
                   double dy = y1 - y0; 
-                  double seg_len = sqrt(dx * dx + dy * dy);
+                  double seg_len = std::sqrt(dx * dx + dy * dy);
                   if (( dist + seg_len) >= midlen)
                   {
                      double r = (midlen - dist)/seg_len;

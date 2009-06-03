@@ -115,7 +115,7 @@ namespace mapnik
             double dx = x2-x1;
             double dy = y2-y1;
             
-            double segment_length = ::sqrt(dx*dx + dy*dy);
+            double segment_length = std::sqrt(dx*dx + dy*dy);
             distance +=segment_length;
             
             if (distance > target_distance)
@@ -189,7 +189,7 @@ namespace mapnik
          else 
          {
             //Add the length of this segment to the total we have saved up
-            double segment_length = sqrt(pow(old_x-new_x,2) + pow(old_y-new_y,2)); //Pythagoras
+            double segment_length = std::sqrt(std::pow(old_x-new_x,2) + std::pow(old_y-new_y,2)); //Pythagoras
             distance += segment_length;
             
             //While we have enough distance to place text in
@@ -400,7 +400,7 @@ p.minimum_distance)))
          {
             double dx = old_x - new_x;
             double dy = old_y - new_y;
-            double distance = sqrt(dx*dx + dy*dy);
+            double distance = std::sqrt(dx*dx + dy*dy);
             total_distance += distance;
             path_distances.push_back(distance);
          }
@@ -646,7 +646,7 @@ p.minimum_distance)))
                
                segment_length = path_distances[index];
             }
-            while (sqrt(pow(start_x - new_x, 2) + pow(start_y - new_y, 2)) < ci.width); //Distance from start_ to new_
+            while (std::sqrt(std::pow(start_x - new_x, 2) + std::pow(start_y - new_y, 2)) < ci.width); //Distance from start_ to new_
             
             //Calculate the position to place the end of the character on
             find_line_circle_intersection(
@@ -655,7 +655,7 @@ p.minimum_distance)))
                end_x, end_y); //results are stored in end_x, end_y
 
             //Need to calculate distance on the new segment
-            distance = sqrt(pow(old_x - end_x, 2) + pow(old_y - end_y, 2));
+            distance = std::sqrt(std::pow(old_x - end_x, 2) + std::pow(old_y - end_y, 2));
          }
          
          //Calculate angle from the start of the character to the end based on start_/end_ position
@@ -829,11 +829,11 @@ p.minimum_distance)))
          
          //Always use the 1st one
          //We only really have one solution here, as we know the line segment will start in the circle and end outside
-         double t = (-B + sqrt(det)) / (2 * A);
+         double t = (-B + std::sqrt(det)) / (2 * A);
          ix = x1 + t * dx;
          iy = y1 + t * dy;
          
-         //t = (-B - sqrt(det)) / (2 * A);
+         //t = (-B - std::sqrt(det)) / (2 * A);
          //ix = x1 + t * dx;
          //iy = y1 + t * dy;
          

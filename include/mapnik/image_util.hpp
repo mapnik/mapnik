@@ -114,7 +114,7 @@ namespace mapnik {
    {
       double dx = x1-x0;
       double dy = y1-y0;
-      return sqrt(dx * dx + dy * dy);
+      return std::sqrt(dx * dx + dy * dy);
    }
    
    template <typename Image>

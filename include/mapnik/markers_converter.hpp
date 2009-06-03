@@ -114,7 +114,7 @@ namespace mapnik {
                ++num_markers_;
                double dx = x2 - x1;
                double dy = y2 - y1;
-               double d = ::sqrt(dx * dx + dy * dy);
+               double d = std::sqrt(dx * dx + dy * dy);
                Envelope<double> ext = shape_.extent();
                if (d > ext.width())
                {
