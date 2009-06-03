@@ -78,7 +78,7 @@ namespace mapnik
             try
             {
                projection proj(m_.srs()); // map projection
-               double scale_denom = scale_denominator(m_,proj.is_geographic());
+               double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
 #ifdef MAPNIK_DEBUG
                std::clog << "scale denominator = " << scale_denom << "\n";
 #endif

@@ -25,6 +25,8 @@
 #ifndef CTRANS_HPP
 #define CTRANS_HPP
 
+#include <algorithm>
+
 #include <mapnik/envelope.hpp>
 #include <mapnik/coord_array.hpp>
 #include <mapnik/proj_transform.hpp>

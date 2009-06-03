@@ -474,17 +474,17 @@ namespace mapnik  {
 	
             value_type operator() (double lhs, int rhs) const
 	    {
-	       return fmod(lhs, rhs);
+	       return std::fmod(lhs, rhs);
 	    }
 	
             value_type operator() (int lhs, double rhs) const
 	    {
-	       return fmod(lhs, rhs);
+	       return std::fmod(lhs, rhs);
 	    }
 	
             value_type operator() (double lhs, double rhs) const
 	    {
-	       return fmod(lhs, rhs);
+	       return std::fmod(lhs, rhs);
 	    }
       };
         
