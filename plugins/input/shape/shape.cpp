@@ -59,9 +59,11 @@ shape_datasource::shape_datasource(const parameters &params)
    else
       shape_name_ = *file;
 
-   boost::algorithm::ireplace_last(shape_name_,".shp","");
+   boost::filesystem::path path(shape_name_);
+   path.replace_extension("");
+   shape_name_ = path.string();
 
-   if (!boost::filesystem::exists(shape_name_ + ".shp")) throw datasource_exception(shape_name_ + " does not exist");
+   if (!boost::filesystem::exists(shape_name_ + ".shp")) throw datasource_exception(shape_name_ + ".shp does not exist");
 
    try
    {  
