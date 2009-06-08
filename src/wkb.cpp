@@ -27,6 +27,8 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
 
+#include <boost/detail/endian.hpp>
+
 namespace mapnik
 {
    struct wkb_reader
@@ -75,7 +77,7 @@ namespace mapnik
                   break;
             }
 
-#ifndef WORDS_BIGENDIAN
+#ifndef BOOST_BIG_ENDIAN
             needSwap_=byteOrder_?wkbXDR:wkbNDR;
 #else
             needSwap_=byteOrder_?wkbNDR:wkbXDR;	

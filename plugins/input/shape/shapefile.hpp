@@ -28,6 +28,7 @@
 #include <mapnik/envelope.hpp>
 // boost
 #include <boost/utility.hpp>
+#include <boost/detail/endian.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -78,7 +79,7 @@ struct shape_record
       double read_double()
       {
          double val;		
-#ifndef WORDS_BIGENDIAN
+#ifndef BOOST_BIG_ENDIAN
          std::memcpy(&val,&data[pos],8);	
 #else
          long long bits = ((long long)data[pos] & 0xff) | 
