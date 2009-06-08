@@ -22,8 +22,12 @@
 
 //$Id$
 
+#if defined(HAVE_CAIRO)
+
 #ifndef CAIRO_RENDERER_HPP
 #define CAIRO_RENDERER_HPP
+
+
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -119,5 +123,7 @@ namespace mapnik {
       void end_map_processing(Map const& map);
    };
 }
+
+#endif
 
 #endif //CAIRO_RENDERER_HPP

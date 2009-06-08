@@ -21,6 +21,8 @@
  *****************************************************************************/
 //$Id$
 
+#if defined(HAVE_CAIRO)
+
 // mapnik
 #include <mapnik/cairo_renderer.hpp>
 #include <mapnik/image_util.hpp>
@@ -1069,3 +1071,5 @@ namespace mapnik
    template class cairo_renderer<Cairo::Surface>;
    template class cairo_renderer<Cairo::Context>;
 }
+
+#endif
