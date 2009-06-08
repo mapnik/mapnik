@@ -167,6 +167,7 @@ opts.AddVariables(
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
     BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
+    BoolVariable('OGRINDEX', 'Compile and install a utility to index ogr datasources', 'False'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     )
 # variables to pickle after successful configure step
@@ -560,8 +561,8 @@ if not preconfigured:
         ['z', 'zlib.h', True,'C'],
         ['jpeg', ['stdio.h', 'jpeglib.h'], True,'C'],
         ['proj', 'proj_api.h', True,'C'],
-        ['icuuc','unicode/unistr.h',True,'C++'],
-        ['icudata','unicode/utypes.h' , True,'C++'],
+        ['sicuuc','unicode/unistr.h',True,'C++'],
+        ['sicudata','unicode/utypes.h' , True,'C++'],
     ]
     
     # get boost version from boost headers rather than previous approach
@@ -611,11 +612,11 @@ if not preconfigured:
     if env['BOOST_VERSION']: append_params.append(env['BOOST_VERSION'])
     
     # if the user is not setting custom boost configuration
-    # enforce boost version greater than or equal to 1.33
-    if not conf.CheckBoost('1.33'):
-        color_print (1,'Boost version 1.33 or greater is requred') 
+    # enforce boost version greater than or equal to 1.34
+    if not conf.CheckBoost('1.34'):
+        color_print (1,'Boost version 1.34 or greater is requred') 
         if not env['BOOST_VERSION']:
-            env['MISSING_DEPS'].append('boost version >=1.33')
+            env['MISSING_DEPS'].append('boost version >=1.34')
     else:
         color_print (4,'Found boost lib version... %s' % boost_lib_version_from_header )
     
@@ -872,6 +873,10 @@ if env['DEMO']:
 if env['PGSQL2SQLITE']:
     SConscript('utils/pgsql2sqlite/SConscript')
 
+# Build the ogrindex app if requested
+if env['OGRINDEX']:
+    SConscript('utils/ogrindex/SConscript')
+    
 # Build shapeindex and remove its dependency from the LIBS
 if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
     SConscript('utils/shapeindex/SConscript')
@@ -900,6 +905,7 @@ for plugin in env['REQUESTED_PLUGINS']:
 # Build the Python bindings
 if 'python' in env['BINDINGS']:
     SConscript('bindings/python/SConscript')
+    SConscript('utils/mapnik-config/SConscript')
 
 # Configure fonts and if requested install the bundled DejaVu fonts
 SConscript('fonts/SConscript')
