@@ -315,6 +315,7 @@ plugins/input/kismet/Makefile
 utils/Makefile
 utils/pgsql2sqlite/Makefile
 utils/shapeindex/Makefile
+utils/ogrindex/Makefile
 src/Makefile
 mapnik.pc
 mapnik-uninstalled.pc

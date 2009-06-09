@@ -1,10 +1,10 @@
 if HAVE_BOOST_PROGRAM_OPTIONS
+if HAVE_GDAL
 
 bin_PROGRAMS = \
 	ogrindex
 
 ogrindex_SOURCES = \
-	quadtree.hpp\
 	ogrindex.cpp
 
 ogrindex_LDFLAGS = \
@@ -22,6 +22,7 @@ ogrindex_CXXFLAGS = \
 	-I../../plugins/input/ogr \
 	${AGG_CFLAGS}
 
+endif
 endif
 
 ## File created by the gnome-build tools

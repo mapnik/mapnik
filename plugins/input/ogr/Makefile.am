@@ -9,8 +9,12 @@ ogr_la_SOURCES = \
 	ogr_datasource.cpp\
 	ogr_datasource.hpp\
 	ogr_featureset.cpp\
-	ogr_featureset.hpp
-
+	ogr_featureset.hpp\
+	ogr_converter.cpp\
+	ogr_converter.hpp\
+	ogr_index.hpp\
+	ogr_index_featureset.hpp\
+	ogr_feature_ptr.hpp
 
 ogr_la_LIBADD = \
   ${GDAL_LDFLAGS}
