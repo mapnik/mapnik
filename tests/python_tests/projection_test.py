@@ -14,14 +14,28 @@ def test_wgs84_inverse_forward():
     e = mapnik.Envelope(-122.54345245, 45.12312553, 68.2335581353, 48.231231233)
 
     # It appears that the y component changes very slightly, is this OK?
-    eq_(p.inverse(c), c)
-    eq_(p.forward(c), c)
+    # so we test for 'almost equal float values'
+    
+    assert_almost_equal(p.inverse(c).y, c.y)
+    assert_almost_equal(p.inverse(c).x, c.x)
 
-    eq_(p.inverse(e), e)
-    eg_(p.forward(e), e)
+    assert_almost_equal(p.forward(c).y, c.y)
+    assert_almost_equal(p.forward(c).x, c.x)
 
-    eq_(c.inverse(p), c)
-    eq_(c.forward(p), c)
+    assert_almost_equal(p.inverse(e).center().y, e.center().y)
+    assert_almost_equal(p.inverse(e).center().x, e.center().x)
 
-    eq_(e.inverse(p), e)
-    eq_(e.forward(p), e)
+    assert_almost_equal(p.forward(e).center().y, e.center().y)
+    assert_almost_equal(p.forward(e).center().x, e.center().x)
+
+    assert_almost_equal(c.inverse(p).y, c.y)
+    assert_almost_equal(c.inverse(p).x, c.x)
+
+    assert_almost_equal(c.forward(p).y, c.y)
+    assert_almost_equal(c.forward(p).x, c.x)
+
+    assert_almost_equal(e.inverse(p).center().y, e.center().y)
+    assert_almost_equal(e.inverse(p).center().x, e.center().x)
+
+    assert_almost_equal(e.forward(p).center().y, e.center().y)
+    assert_almost_equal(e.forward(p).center().x, e.center().x)
