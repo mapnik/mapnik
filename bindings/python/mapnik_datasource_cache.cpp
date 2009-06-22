@@ -43,5 +43,7 @@ void export_datasource_cache()
         .staticmethod("create")
         .def("register_datasources",&datasource_cache::register_datasources)
         .staticmethod("register_datasources")
+        .def("plugin_names",&datasource_cache::plugin_names)
+        .staticmethod("plugin_names")        
         ;
 }
