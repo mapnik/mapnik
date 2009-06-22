@@ -164,7 +164,7 @@ namespace mapnik
                   }
                   else
                   {
-                     std::clog << "plugin" << ds_name() << ": " << lt_dlerror() << "\n" << std::endl;
+                     std::clog << "plugin" << itr->string().c_str() << ": " << lt_dlerror() << "\n" << std::endl;
                   }
                }
                catch (...) {}
