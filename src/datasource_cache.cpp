@@ -109,11 +109,22 @@ namespace mapnik
    }
 
    bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
-   {	      
+   {
       return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>
                                        (new PluginInfo(type,module)))).second;     
    }
 
+   std::vector<std::string> datasource_cache::plugin_names ()
+   {
+      std::vector<std::string> names;
+      std::map<std::string,boost::shared_ptr<PluginInfo> >::const_iterator itr;
+      for (itr = plugins_.begin();itr!=plugins_.end();++itr)
+      {
+         names.push_back(itr->first);
+      }
+      return names;
+   }
+   
    void datasource_cache::register_datasources(const std::string& str)
    {	
 #ifdef MAPNIK_THREADSAFE
@@ -146,14 +157,14 @@ namespace mapnik
                      if (ds_name && insert(ds_name(),module))
                      {            
 #ifdef MAPNIK_DEBUG
-                        std::clog<<"registered datasource : "<<ds_name()<<std::endl;
+                        std::clog << "registered datasource : " << ds_name() << std::endl;
 #endif 
                         registered_=true;
                      }
                   }
                   else
                   {
-                     std::clog << lt_dlerror() << "\n";
+                     std::clog << "plugin" << ds_name() << ": " << lt_dlerror() << "\n" << std::endl;
                   }
                }
                catch (...) {}

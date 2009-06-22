@@ -49,6 +49,7 @@ namespace mapnik {
         static bool registered_;
         static bool insert(const std::string&  name,const lt_dlhandle module);
     public:
+        static std::vector<std::string> plugin_names ();
         static void register_datasources(const std::string& path);
         static boost::shared_ptr<datasource> create(parameters const& params);
     };
