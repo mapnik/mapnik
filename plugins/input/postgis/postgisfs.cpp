@@ -33,7 +33,7 @@
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
-using boost::trim;
+using boost::trim_copy;
 using std::string;
 using mapnik::Feature;
 using mapnik::geometry2d;
@@ -137,12 +137,14 @@ feature_ptr postgis_featureset::next()
                  float8net(val,buf);
                  boost::put(*feature,name,val);
               }
-              else if (oid==25 || oid==1042 || oid==1043) // text or bpchar or varchar
+              else if (oid==25 || oid==1043) // text or varchar
               {
-                 //std::string str(buf);
-                 //trim(str);
-                 //std::wstring wstr = tr_->transcode(str);
                  UnicodeString ustr = tr_->transcode(buf);
+                 boost::put(*feature,name,ustr);
+              }
+              else if (oid==1042)
+              {
+                 UnicodeString ustr = tr_->transcode(trim_copy(string(buf)).c_str()); // bpchar
                  boost::put(*feature,name,ustr);
               }
               else if (oid == 1700) // numeric
