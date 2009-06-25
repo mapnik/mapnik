@@ -287,6 +287,10 @@ namespace mapnik
                 {
                     set_attr( node, "allow_overlap", sym.get_allow_overlap() );    
                 }
+                if (sym.get_avoid_edges() != dfl.get_avoid_edges() || explicit_defaults_ )
+                {
+                    set_attr( node, "avoid_edges", sym.get_avoid_edges() );    
+                }
             }
             ptree & rule_;
             bool explicit_defaults_;
