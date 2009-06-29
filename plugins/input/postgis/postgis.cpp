@@ -277,7 +277,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
          PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
          std::ostringstream s;
             
-         s << "SELECT AsBinary(\""<<geometryColumn_<<"\") AS geom";
+         s << "SELECT AsBinary(\""<<geometryColumn_<<"\",'ndr') AS geom";
          std::set<std::string> const& props=q.property_names();
          std::set<std::string>::const_iterator pos=props.begin();
          std::set<std::string>::const_iterator end=props.end();
@@ -313,8 +313,8 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
       {       
          PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
          std::ostringstream s;
-            
-         s << "SELECT AsBinary(\"" << geometryColumn_ << "\") AS geom";
+           
+         s << "SELECT AsBinary(\"" << geometryColumn_ << "\",'ndr') AS geom";
             
          std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
          std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
