@@ -23,10 +23,10 @@
 //$Id: wkb.cpp 19 2005-03-22 13:53:27Z pavlenko $
 
 #include <mapnik/wkb.hpp>
-
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
-
+// boost
+#include <boost/cstdint.hpp>
 #include <boost/detail/endian.hpp>
 
 namespace mapnik
@@ -178,18 +178,15 @@ namespace mapnik
             }
             else 
             {
-               // we rely on the fact that "long long" is in C standard,
-               // but not in C++ yet
-               // this is not quite portable
                const char* b= wkb_+pos_;
-               long long n = ((long long)b[7]&0xff) | 
-                             (((long long)b[6]&0xff)<<8) | 
-                             (((long long)b[5]&0xff)<<16) | 
-                             (((long long)b[4]&0xff)<<24) |
-                             (((long long)b[3]&0xff)<<32) |
-                             (((long long)b[2]&0xff)<<40) |
-                             (((long long)b[1]&0xff)<<48) |
-                             (((long long)b[0]&0xff)<<56);
+               boost::int64_t n = ((boost::int64_t)b[7]&0xff) | 
+                             (((boost::int64_t)b[6]&0xff)<<8) | 
+                             (((boost::int64_t)b[5]&0xff)<<16) | 
+                             (((boost::int64_t)b[4]&0xff)<<24) |
+                             (((boost::int64_t)b[3]&0xff)<<32) |
+                             (((boost::int64_t)b[2]&0xff)<<40) |
+                             (((boost::int64_t)b[1]&0xff)<<48) |
+                             (((boost::int64_t)b[0]&0xff)<<56);
                memcpy(&d,&n,8);
             }
             pos_+=8;
