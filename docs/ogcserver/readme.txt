@@ -57,10 +57,10 @@ For the CGI/FastCGI interface also install:
 Installation
 ------------
 
-- The OGCServer uses the Mapnik interface to the Proj.4 library for projection support
+- The OGC Server uses the Mapnik interface to the Proj.4 library for projection support
   and depends on integer EPSG codes. Confirm that you have installed Proj.4 with
   all necessary data files (http://trac.osgeo.org/proj/wiki/FAQ) and have added any custom
-  projections you need to the 'epsg' file usually located at '/usr/local/share/proj/epsg'.
+  projections to the 'epsg' file usually located at '/usr/local/share/proj/epsg'.
 
 - Test that the server code is available and installed properly by importing it within a
   python interpreter::
@@ -97,8 +97,8 @@ Configuring the server
   2) Fill out further settings for the server.
     
   Edit the configuration file to your liking, the comments within the file will
-  help you further.  Be sure to at the very minimum edit the "module"
-  parameter, the server will not work without you setting it properly first.
+  help you further.  Be sure to, at the very minimum, edit the "module"
+  parameter. The server will not work without setting it properly first.
   
 
 Defining Layers and Styles
@@ -106,23 +106,23 @@ Defining Layers and Styles
 
 The ogcserver obviously needs layers to publish and styles for how to display those layers.
 
-You create you layers and styles in the 'map_factory' script.
+You create your layers and styles in the 'map_factory' script.
 
 For now this can be done by either loading an XML mapfile inside that script using the 
 'loadXML()' function or by writing your layers and styles in python code, or both.
 
-The 'map_factory' module must look, at a bare minimum like if you load layers and styles
-using an existing XML mapfile::
+If you load your layers and styles using an existing XML mapfile the 'map_factory' module
+should look like::
 
   from mapnik.ogcserver.WMS import BaseWMSFactory
   
   class WMSFactory(BaseWMSFactory):
     def __init__(self):
       BaseWMSFactory.__init__(self)
-      self.loadXMl('/full/path/to/mapfile.xml')
+      self.loadXML('/full/path/to/mapfile.xml')
       self.finalize()
 
-Or if you want to define your layers and styles in pure python dynamically you might
+Or if you want to define your layers and styles in pure python you might
 have a 'map_factory' more like::
 
   from mapnik.ogcserver.WMS import BaseWMSFactory
@@ -156,7 +156,7 @@ The rules for writing this class are:
 - Layers MUST define an EPSG projection in the second parameter of the
   constructor.  This implies that the underlying data must be in an EPSG
   projection already.
-- style and layer names are meant for machine readability, not human.  Keep
+- Style and layer names are meant for machine readability, not human.  Keep
   them short and simple, without spaces or special characters.
 - For human readable info, set the title and abstract properties on the layer
   object.
