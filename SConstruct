@@ -862,6 +862,24 @@ Export('env')
 if env['INTERNAL_LIBAGG']:
     SConscript('agg/SConscript')
 
+# Build the requested and able-to-be-compiled input plug-ins
+GDAL_BUILT = False
+OGR_BUILT = False
+for plugin in env['REQUESTED_PLUGINS']:
+    details = env['PLUGINS'][plugin]
+    if details['lib'] in env['LIBS']:
+        SConscript('plugins/input/%s/SConscript' % plugin)
+        if plugin == 'ogr': OGR_BUILT = True
+        if plugin == 'gdal': GDAL_BUILT = True
+        if plugin == 'ogr' or plugin == 'gdal':
+            if GDAL_BUILT and OGR_BUILT:
+                env['LIBS'].remove(details['lib'])
+        else:
+            env['LIBS'].remove(details['lib'])
+    elif not details['lib']:
+        # build internal shape and raster plugins
+        SConscript('plugins/input/%s/SConscript' % plugin)
+
 # Build the core library
 SConscript('src/SConscript')
 
@@ -879,24 +897,6 @@ if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
     env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
 else :
     color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
-
-GDAL_BUILT = False
-OGR_BUILT = False
-# Build the requested and able-to-be-compiled input plug-ins
-for plugin in env['REQUESTED_PLUGINS']:
-    details = env['PLUGINS'][plugin]
-    if details['lib'] in env['LIBS']:
-        SConscript('plugins/input/%s/SConscript' % plugin)
-        if plugin == 'ogr': OGR_BUILT = True
-        if plugin == 'gdal': GDAL_BUILT = True
-        if plugin == 'ogr' or plugin == 'gdal':
-            if GDAL_BUILT and OGR_BUILT:
-                env['LIBS'].remove(details['lib'])
-        else:
-            env['LIBS'].remove(details['lib'])
-    elif not details['lib']:
-        # build internal shape and raster plugins
-        SConscript('plugins/input/%s/SConscript' % plugin)
     
 # Build the Python bindings
 if 'python' in env['BINDINGS']:
