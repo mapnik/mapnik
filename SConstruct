@@ -35,7 +35,7 @@ except:
     HAS_DISTUTILS = False
 
 #### SCons build options and initial setup ####
-env = Environment(ENV=os.environ)
+env = Environment()
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -160,6 +160,7 @@ opts.AddVariables(
     ('LIB_DIR_NAME','Name to use for the "lib" folder where fonts and plugins are installed','/mapnik/'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
     BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OS X', 'True'),
+    PathVariable('FRAMEWORK_SEARCH_PATH','Top framework search path on Mac OS X', '/'),
     BoolVariable('FULL_LIB_PATH', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'False'),
     ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
