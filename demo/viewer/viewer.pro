@@ -5,12 +5,14 @@ CC = g++
 TEMPLATE = app
 
 INCLUDEPATH += /opt/mapnik/include
-INCLUDEPATH += /usr/local/include/boost-1_35
+INCLUDEPATH += /opt/boost/include/boost-1_39
 INCLUDEPATH += /usr/X11/include/
+INCLUDEPATH += /usr/X11/include/freetype2
 INCLUDEPATH += .
 
-QMAKE_CXXFLAGS +=' -DDARWIN'
+#QMAKE_CXXFLAGS +=' -DDARWIN'
 unix:LIBS =  -L/opt/mapnik/lib -L/usr/X11/lib -lmapnik -lfreetype -L/usr/local/lib -licuuc
+unix:LIBS += -lboost_system-xgcc40-mt -lboost_filesystem-xgcc40-mt -L/opt/boost/lib
 
 # Input
 
