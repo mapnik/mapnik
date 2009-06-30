@@ -33,8 +33,26 @@ lib_dir = os.path.normpath(prefix + '/' + env['LIBDIR_SCHEMA'])
 
 install_prefix = env['DESTDIR'] + '/' + prefix
 
-libraries = env['LIBS']
+filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
+regex = 'boost_regex%s' % env['BOOST_APPEND']
 
+libraries = ['freetype','ltdl','png','tiff','z','jpeg','proj','icuuc',filesystem,regex]
+
+if env['CAIRO']:
+    libraries.append('cairo')
+    libraries.append('cairomm-1.0')
+
+if env['XMLPARSER'] == 'libxml2':
+    libraries.append('xml2')
+
+if env['THREADING'] == 'multi':
+    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+        
+if env['PLATFORM'] == 'Darwin':
+    #libraries.append('icudata')
+    if env['BOOST_SYSTEM_REQUIRED']:
+        libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    
 if env['INTERNAL_LIBAGG']:
     libraries.insert(0, 'agg')
 
