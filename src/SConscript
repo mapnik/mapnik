@@ -38,9 +38,9 @@ regex = 'boost_regex%s' % env['BOOST_APPEND']
 
 libraries = ['freetype','ltdl','png','tiff','z','jpeg','proj','icuuc',filesystem,regex]
 
-if env['CAIRO']:
-    libraries.append('cairo')
-    libraries.append('cairomm-1.0')
+if '-DHAVE_CAIRO' in env['CXXFLAGS']:
+    # add cairo and cairomm-1.0 to libs
+    libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
 
 if env['XMLPARSER'] == 'libxml2':
     libraries.append('xml2')
