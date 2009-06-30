@@ -104,7 +104,7 @@ opts = Variables()
 opts.AddVariables(
     # Compiler options
     ('CXX', 'The C++ compiler to use (defaults to g++).', 'g++'),
-    EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3']),
+    EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3','4']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
     BoolVariable('XML_DEBUG', 'Compile a XML verbose debug version of mapnik', 'False'),
@@ -862,6 +862,11 @@ Export('env')
 if env['INTERNAL_LIBAGG']:
     SConscript('agg/SConscript')
 
+
+
+# Build the core library
+SConscript('src/SConscript')
+
 # Build the requested and able-to-be-compiled input plug-ins
 GDAL_BUILT = False
 OGR_BUILT = False
@@ -879,9 +884,6 @@ for plugin in env['REQUESTED_PLUGINS']:
     elif not details['lib']:
         # build internal shape and raster plugins
         SConscript('plugins/input/%s/SConscript' % plugin)
-
-# Build the core library
-SConscript('src/SConscript')
 
 # Build the c++ rundemo app if requested
 if env['DEMO']:
