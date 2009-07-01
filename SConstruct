@@ -74,6 +74,9 @@ SCONS_LOCAL_CONFIG = 'config.py'
 SCONS_CONFIGURE_CACHE = 'config.cache'
 # directory SCons uses to stash build tests
 SCONF_TEMP_DIR = '.sconf_temp'
+# auto-search directories for boost libs/headers
+BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
+
 
 # Core plugin build configuration
 # opts.AddVariables still hardcoded however...
@@ -121,8 +124,10 @@ opts.AddVariables(
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
     
     # Boost variables
-    PathVariable('BOOST_INCLUDES', 'Search path for boost include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('BOOST_LIBS', 'Search path for boost library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    # default is '/usr/include', see FindBoost method below
+    ('BOOST_INCLUDES', 'Search path for boost include files', '',False),
+    # default is '/usr/' + LIBDIR_SCHEMA, see FindBoost method below
+    ('BOOST_LIBS', 'Search path for boost library files', '',False),
     ('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False),
     ('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False),
     ('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False),
@@ -347,6 +352,80 @@ def rollback_option(context,variable):
         if item.key == variable:
             env[variable] = item.default
 
+def FindBoost(context, prefixes):
+    """Routine to auto-find boost header dir, lib dir, and library naming structure.
+    
+    """
+    context.Message( 'Searching for boost libs and headers... ' )
+    env = context.env
+     
+    BOOST_LIB_DIR = None
+    BOOST_INCLUDE_DIR = None
+    BOOST_APPEND = None
+    env['BOOST_APPEND'] = str()
+
+    for searchDir in prefixes:
+        libItems = glob(os.path.join(searchDir, LIBDIR_SCHEMA, 'libboost_filesystem*-*.*'))
+        if not libItems:
+            libItems = glob(os.path.join(searchDir, 'lib/libboost_filesystem*-*.*'))
+        incItems = glob(os.path.join(searchDir, 'include/boost*/'))
+        if len(libItems) >= 1 and len(incItems) >= 1:
+            BOOST_LIB_DIR = os.path.dirname(libItems[0])
+            BOOST_INCLUDE_DIR = incItems[0].rstrip('boost/')
+            match = re.search(r'libboost_filesystem-(.*)\..*', libItems[0])
+            if hasattr(match,'groups'):
+                BOOST_APPEND = match.groups()[0]
+            break
+    
+    msg = str()
+    
+    if not env['BOOST_LIBS']:
+        if BOOST_LIB_DIR:
+            msg += '\n  *libs found: %s' % BOOST_LIB_DIR
+            env['BOOST_LIBS'] = BOOST_LIB_DIR
+        else:
+            env['BOOST_LIBS'] = '/usr' + LIBDIR_SCHEMA
+    else:
+        msg += '\n  *using boost lib dir: %s' % env['BOOST_LIBS']
+           
+    if not env['BOOST_INCLUDES']:
+        if BOOST_INCLUDE_DIR:
+            msg += '\n  *headers found: %s' % BOOST_INCLUDE_DIR
+            env['BOOST_INCLUDES'] = BOOST_INCLUDE_DIR
+        else:
+            env['BOOST_INCLUDES'] = '/usr/include'
+    else:
+        msg += '\n  *using boost include dir: %s' % env['BOOST_INCLUDES']    
+               
+    if not env['BOOST_TOOLKIT'] and not env['BOOST_ABI'] and not env['BOOST_VERSION']:
+        if BOOST_APPEND:
+            msg += '\n  *lib naming extension found: %s' % BOOST_APPEND
+            env['BOOST_APPEND'] = '-' + BOOST_APPEND
+        else:
+            msg += '\n  *no lib naming extension found'
+    else:
+        # Creating BOOST_APPEND according to the Boost library naming order,
+        # which goes <toolset>-<threading>-<abi>-<version>. See:
+        #  http://www.boost.org/doc/libs/1_35_0/more/getting_started/unix-variants.html#library-naming
+        append_params = ['']
+        if env['BOOST_TOOLKIT']: append_params.append(env['BOOST_TOOLKIT'])
+        if thread_flag: append_params.append(thread_flag)
+        if env['BOOST_ABI']: append_params.append(env['BOOST_ABI'])
+        if env['BOOST_VERSION']: append_params.append(env['BOOST_VERSION'])
+
+        # Constructing the BOOST_APPEND setting that will be used to find the
+        # Boost libraries.
+        if len(append_params) > 1: 
+            env['BOOST_APPEND'] = '-'.join(append_params)
+        msg += '\n  *using boost lib naming: %s' % env['BOOST_APPEND']
+
+    env.AppendUnique(CPPPATH = env['BOOST_INCLUDES'])
+    env.AppendUnique(LIBPATH = env['BOOST_LIBS'])    
+    if env['COLOR_PRINT']:
+        msg = "\033[94m%s\033[0m" % (msg)
+    ret = context.Result(msg)
+    return ret
+
 def CheckBoost(context, version, silent=False):
     # Boost versions are in format major.minor.subminor
     v_arr = version.split(".")
@@ -420,6 +499,7 @@ int main()
 
 conf_tests = { 'CheckPKGConfig' : CheckPKGConfig,
                'CheckPKG' : CheckPKG,
+               'FindBoost' : FindBoost,
                'CheckBoost' : CheckBoost,
                'GetBoostLibVersion' : GetBoostLibVersion,
                'GetMapnikLibVersion' : GetMapnikLibVersion,
@@ -529,10 +609,10 @@ if not preconfigured:
         env['CXX'] = 'CC -library=stlport4'
         if env['THREADING'] == 'multi':
             env['CXXFLAGS'] = ['-mt']
-    
+        
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('BOOST', 'PNG', 'JPEG', 'TIFF','PROJ','ICU'):
+    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = inc_path)
@@ -565,6 +645,23 @@ if not preconfigured:
         ['icudata','unicode/utypes.h' , True,'C++'],
     ]
     
+    
+    for libinfo in LIBSHEADERS:
+        if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):
+            if libinfo[2]:
+                color_print (1,'Could not find required header or shared library for %s' % libinfo[0])
+                env['MISSING_DEPS'].append(libinfo[0])
+            else:
+                color_print(4,'Could not find optional header or shared library for %s' % libinfo[0])
+                env['SKIPPED_DEPS'].append(libinfo[0])            
+
+    if env['THREADING'] == 'multi':
+        thread_flag = thread_suffix
+    else:
+        thread_flag = ''
+        
+    conf.FindBoost(BOOST_SEARCH_PREFIXES)
+    
     # get boost version from boost headers rather than previous approach
     # of fetching from the user provided INCLUDE path
     boost_system_required = False
@@ -589,28 +686,7 @@ if not preconfigured:
         
     if env['THREADING'] == 'multi':
         BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
-        thread_flag = thread_suffix
-    else:
-        thread_flag = ''
-    
-    for libinfo in LIBSHEADERS:
-        if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):
-            if libinfo[2]:
-                color_print (1,'Could not find required header or shared library for %s' % libinfo[0])
-                env['MISSING_DEPS'].append(libinfo[0])
-            else:
-                color_print(4,'Could not find optional header or shared library for %s' % libinfo[0])
-                env['SKIPPED_DEPS'].append(libinfo[0])            
-    
-    # Creating BOOST_APPEND according to the Boost library naming order,
-    # which goes <toolset>-<threading>-<abi>-<version>. See:
-    #  http://www.boost.org/doc/libs/1_35_0/more/getting_started/unix-variants.html#library-naming
-    append_params = ['']
-    if env['BOOST_TOOLKIT']: append_params.append(env['BOOST_TOOLKIT'])
-    if thread_flag: append_params.append(thread_flag)
-    if env['BOOST_ABI']: append_params.append(env['BOOST_ABI'])
-    if env['BOOST_VERSION']: append_params.append(env['BOOST_VERSION'])
-    
+                
     # if the user is not setting custom boost configuration
     # enforce boost version greater than or equal to 1.34
     if not conf.CheckBoost('1.34'):
@@ -619,13 +695,6 @@ if not preconfigured:
             env['MISSING_DEPS'].append('boost version >=1.34')
     else:
         color_print (4,'Found boost lib version... %s' % boost_lib_version_from_header )
-    
-    # Constructing the BOOST_APPEND setting that will be used to find the
-    # Boost libraries.
-    if len(append_params) > 1: 
-        env['BOOST_APPEND'] = '-'.join(append_params)
-    else: 
-        env['BOOST_APPEND'] = ''
     
     for count, libinfo in enumerate(BOOST_LIBSHEADERS):
         if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
@@ -861,8 +930,6 @@ Export('env')
 # Build agg first, doesn't need anything special
 if env['INTERNAL_LIBAGG']:
     SConscript('agg/SConscript')
-
-
 
 # Build the core library
 SConscript('src/SConscript')
