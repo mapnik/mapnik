@@ -36,12 +36,13 @@ boost_thread  = 'boost_thread%s' % env['BOOST_APPEND']
 
 libraries =  [boost_thread,'mapnik']
 
-if env['CAIRO']:
-    libraries.append('cairo')
+if '-DHAVE_CAIRO' in env['CXXFLAGS']:
+    # add cairo and cairomm-1.0 to libs
+    libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append('icuuc')
-    libraries.append('icudata')
+    #libraries.append('icudata')
    
 rundemo = env.Program('rundemo', source, CPPPATH=headers, LIBS=libraries)
 
