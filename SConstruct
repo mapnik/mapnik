@@ -145,6 +145,7 @@ opts.AddVariables(
     PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include', PathVariable.PathAccept),
     PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    ('PKG_CONFIG_PATH', 'Use this path to point pkg-config to .pc files instead of the PKG_CONFIG_PATH environment setting',''),
     
     # Variables affecting rendering back-ends
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
@@ -535,7 +536,7 @@ if not preconfigured:
                     # but if the default is overridden and the file is not found, give warning
                     color_print(1,"SCons CONFIG not found: '%s'" % conf)
             # Recreate the base environment using modified `opts`
-            env = Environment(ENV=os.environ,options=opts)
+            env = Environment(options=opts)
             env['USE_CONFIG'] = True
     else:
         color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')        
@@ -575,6 +576,10 @@ if not preconfigured:
     if env['JOBS'] > 1:
         SetOption("num_jobs", env['JOBS'])  
     
+    if env['PKG_CONFIG_PATH']:
+        env['ENV']['PKG_CONFIG_PATH'] = env['PKG_CONFIG_PATH']
+        # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
+
     thread_suffix = 'mt'
     if env['PLATFORM'] == 'FreeBSD':
         thread_suffix = ''
