@@ -29,11 +29,16 @@ extern "C"
 #include <png.h>
 }
 
+#include <boost/scoped_array.hpp>
+#include <boost/utility.hpp>
+
+#ifdef MAPNIK_DEBUG
 #include <iostream>
+#endif
 
 namespace mapnik
 {
-    class PngReader : public ImageReader 
+    class PngReader : public ImageReader, boost::noncopyable
     {
     private:
         std::string fileName_;
@@ -48,11 +53,9 @@ namespace mapnik
         unsigned height() const;
         void read(unsigned x,unsigned y,ImageData32& image);	
     private:
-        PngReader(const PngReader&);	
-        PngReader& operator=(const PngReader&);
         void init();
     };
-
+  
     namespace 
     {
         ImageReader* createPngReader(const std::string& file)
@@ -191,21 +194,19 @@ namespace mapnik
         png_read_update_info(png_ptr, info_ptr);
 
         //START read image rows
-        unsigned w=std::min((unsigned)image.width(),width_);
-        unsigned h=std::min((unsigned)image.height(),height_);
-
+        unsigned w=std::min(unsigned(image.width()),width_);
+        unsigned h=std::min(unsigned(image.height()),height_);
         unsigned rowbytes=png_get_rowbytes(png_ptr, info_ptr);
-        unsigned char* row= new unsigned char[rowbytes];
-        for (unsigned i=0;i<height_;++i)
+        boost::scoped_array<png_byte> row(new png_byte[rowbytes]);
+	for (unsigned i=0;i<height_;++i)
         {
-            png_read_row(png_ptr,row,0);
+            png_read_row(png_ptr,row.get(),0);
             if (i>=y0 && i<h) 
             {
-                image.setRow(i-y0,(unsigned*) &row[x0],w);
+                image.setRow(i-y0,reinterpret_cast<unsigned*>(&row[x0]),w);
             } 
         }
         //END
-        delete [] row;
         png_read_end(png_ptr,0);
         png_destroy_read_struct(&png_ptr, &info_ptr,0);
         fclose(fp);
