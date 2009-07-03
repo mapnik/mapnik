@@ -20,16 +20,19 @@
  *
  *****************************************************************************/
 
-#ifndef SHAPE_IO_HH
-#define SHAPE_IO_HH
+#ifndef SHAPE_IO_HPP
+#define SHAPE_IO_HPP
 
+// mapnik
 #include "dbffile.hpp"
 #include "shapefile.hpp"
 #include "shp_index.hpp"
+// boost
+#include <boost/utility.hpp>
 
 using mapnik::geometry2d;
 
-struct shape_io
+struct shape_io : boost::noncopyable
 {
       static const std::string SHP;
       static const std::string SHX;
@@ -76,10 +79,6 @@ struct shape_io
       geometry2d * read_polygon();
       geometry2d * read_polygonm();
       geometry2d * read_polygonz();
-   private:
-      //void read_record(const shape_record& record);
-      // no copying
-      shape_io(const shape_io&);
-      shape_io& operator=(const shape_io&);
 };
-#endif                                            //SHAPE_IO_HH
+
+#endif //SHAPE_IO_HPP
