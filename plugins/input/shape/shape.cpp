@@ -27,6 +27,7 @@
 
 // boost
 #include <boost/version.hpp>
+#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
@@ -133,17 +134,20 @@ void  shape_datasource::init(shape_io& shape)
    int file_code=shape.shp().read_xdr_integer();
    if (file_code!=9994)
    {
-      //invalid
-      throw datasource_exception("wrong file code");
+       //invalid file code
+       throw datasource_exception((boost::format("wrong file code : %d") % file_code).str());
    }
+   
    shape.shp().skip(5*4);
    file_length_=shape.shp().read_xdr_integer();
    int version=shape.shp().read_ndr_integer();
+   
    if (version!=1000)
    {
       //invalid version number
-      throw datasource_exception("invalid version number");
+       throw datasource_exception((boost::format("invalid version number: %d") % version).str());
    }
+   
 #ifdef MAPNIK_DEBUG
    int shape_type = shape.shp().read_ndr_integer();
 #else
