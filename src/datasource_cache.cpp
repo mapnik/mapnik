@@ -164,7 +164,7 @@ namespace mapnik
                   }
                   else
                   {
-                     std::clog << "plugin" << itr->string().c_str() << ": " << lt_dlerror() << "\n" << std::endl;
+                     std::clog << "Problem loading plugin library: " << itr->string().c_str() << " (libtool error: " << lt_dlerror() << ")" << std::endl;
                   }
                }
                catch (...) {}
