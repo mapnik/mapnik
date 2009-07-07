@@ -68,10 +68,10 @@ namespace mapnik
 #ifndef BOOST_BIG_ENDIAN
         memcpy(&val,data,4);
 #else
-        val = (data[3]&0xff)     | 
-            ((data[2]&0xff)<<8)  | 
-            ((data[1]&0xff)<<16) | 
-            ((data[0]&0xff)<<24);
+        val = (data[0]&0xff)     | 
+            ((data[1]&0xff)<<8)  | 
+            ((data[2]&0xff)<<16) | 
+            ((data[3]&0xff)<<24);
 #endif
         return val;
     }
@@ -82,14 +82,14 @@ namespace mapnik
 #ifndef BOOST_BIG_ENDIAN
         std::memcpy(&val,&data[0],8);
 #else
-        boost::int64_t bits = ((boost::int64_t)data[7] & 0xff) | 
-            ((boost::int64_t)data[6] & 0xff) << 8   |
-            ((boost::int64_t)data[5] & 0xff) << 16  |
-            ((boost::int64_t)data[4] & 0xff) << 24  |
-            ((boost::int64_t)data[3] & 0xff) << 32  |
-            ((boost::int64_t)data[2] & 0xff) << 40  |
-            ((boost::int64_t)data[1] & 0xff) << 48  |
-            ((boost::int64_t)data[0] & 0xff) << 56  ;
+        boost::int64_t bits = ((boost::int64_t)data[0] & 0xff) | 
+            ((boost::int64_t)data[1] & 0xff) << 8   |
+            ((boost::int64_t)data[2] & 0xff) << 16  |
+            ((boost::int64_t)data[3] & 0xff) << 24  |
+            ((boost::int64_t)data[4] & 0xff) << 32  |
+            ((boost::int64_t)data[5] & 0xff) << 40  |
+            ((boost::int64_t)data[6] & 0xff) << 48  |
+            ((boost::int64_t)data[7] & 0xff) << 56  ;
         std::memcpy(&val,&bits,8);
 #endif
         return val;
