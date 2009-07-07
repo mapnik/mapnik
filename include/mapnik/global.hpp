@@ -82,14 +82,14 @@ namespace mapnik
 #ifndef BOOST_BIG_ENDIAN
         std::memcpy(&val,&data[0],8);
 #else
-        boost::int64_t bits = ((boost::int64_t)data[0] & 0xff) | 
-            ((boost::int64_t)data[1] & 0xff) << 8   |
-            ((boost::int64_t)data[2] & 0xff) << 16  |
-            ((boost::int64_t)data[3] & 0xff) << 24  |
-            ((boost::int64_t)data[4] & 0xff) << 32  |
-            ((boost::int64_t)data[5] & 0xff) << 40  |
-            ((boost::int64_t)data[6] & 0xff) << 48  |
-            ((boost::int64_t)data[7] & 0xff) << 56  ;
+        boost::int64_t bits = ((boost::int64_t)data[7] & 0xff) | 
+            ((boost::int64_t)data[6] & 0xff) << 8   |
+            ((boost::int64_t)data[5] & 0xff) << 16  |
+            ((boost::int64_t)data[4] & 0xff) << 24  |
+            ((boost::int64_t)data[3] & 0xff) << 32  |
+            ((boost::int64_t)data[2] & 0xff) << 40  |
+            ((boost::int64_t)data[1] & 0xff) << 48  |
+            ((boost::int64_t)data[0] & 0xff) << 56  ;
         std::memcpy(&val,&bits,8);
 #endif
         return val;
@@ -110,14 +110,14 @@ namespace mapnik
     inline double& read_double_xdr(const char* data, double & val)
     {
 #ifndef BOOST_BIG_ENDIAN
-        boost::int64_t bits = ((boost::int64_t)data[0] & 0xff) | 
-            ((boost::int64_t)data[1] & 0xff) << 8   |
-            ((boost::int64_t)data[2] & 0xff) << 16  |
-            ((boost::int64_t)data[3] & 0xff) << 24  |
-            ((boost::int64_t)data[4] & 0xff) << 32  |
-            ((boost::int64_t)data[5] & 0xff) << 40  |
-            ((boost::int64_t)data[6] & 0xff) << 48  |
-            ((boost::int64_t)data[7] & 0xff) << 56  ;
+        boost::int64_t bits = ((boost::int64_t)data[7] & 0xff) | 
+            ((boost::int64_t)data[6] & 0xff) << 8   |
+            ((boost::int64_t)data[5] & 0xff) << 16  |
+            ((boost::int64_t)data[4] & 0xff) << 24  |
+            ((boost::int64_t)data[3] & 0xff) << 32  |
+            ((boost::int64_t)data[2] & 0xff) << 40  |
+            ((boost::int64_t)data[1] & 0xff) << 48  |
+            ((boost::int64_t)data[0] & 0xff) << 56  ;
         std::memcpy(&val,&bits,8);
 #else
         std::memcpy(&val,&data[0],8);
