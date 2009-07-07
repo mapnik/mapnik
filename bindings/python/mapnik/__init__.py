@@ -31,7 +31,7 @@ Several things happen when you do:
  2) The paths to the input plugins and font directories are imported from the 'paths.py'
     file which was constructed and installed during SCons installation.
 
- 3) All available input plugins and and TrueType fonts are automatically registered.
+ 3) All available input plugins and TrueType fonts are automatically registered.
 
  4) Boost Python metaclass injectors are used in the '__init__.py' to wrap/extend several
     objects adding extra convenience when accessed via Python.
