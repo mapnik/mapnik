@@ -194,8 +194,8 @@ namespace mapnik
             {
                 for (unsigned i=0;i<ar.size();++i)
                 {
-                    read_double_ndr(wkb_ + pos_,ar[i].x);
-                    read_double_ndr(wkb_ + pos_ + 8,ar[i].y);
+                    read_double_xdr(wkb_ + pos_,ar[i].x);
+                    read_double_xdr(wkb_ + pos_ + 8,ar[i].y);
                     pos_ += 16;
                 }
             }
