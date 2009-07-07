@@ -79,7 +79,7 @@ namespace mapnik
                 break;
             }
 
-#ifndef BOOST_BIG_ENDIAN
+#ifndef MAPNIK_BIG_ENDIAN
             needSwap_=byteOrder_?wkbXDR:wkbNDR;
 #else
             needSwap_=byteOrder_?wkbNDR:wkbXDR;	
@@ -155,11 +155,11 @@ namespace mapnik
             int n;
             if (needSwap_)
             {
-                read_int_xdr(wkb_+pos_,n);
+                read_int32_xdr(wkb_+pos_,n);
             } 
             else 
             {
-                read_int_ndr(wkb_+pos_,n);
+                read_int32_ndr(wkb_+pos_,n);
             }
             pos_+=4;
             

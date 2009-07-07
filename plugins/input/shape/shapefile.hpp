@@ -34,31 +34,59 @@
 
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
-//#include <boost/iostreams/device/file_descriptor.hpp>
 
 #include <cstring>
 
 using mapnik::Envelope;
-using mapnik::read_int_ndr;
-using mapnik::read_int_xdr;
+using mapnik::read_int32_ndr;
+using mapnik::read_int32_xdr;
 using mapnik::read_double_ndr;
 using mapnik::read_double_xdr;
 
+
+struct RecordTag
+{
+    typedef char* data_type;
+    static data_type alloc(unsigned size)
+    {
+        return static_cast<data_type>(::operator new(sizeof(char)*size));
+    }
+    
+    static void dealloc(data_type data)
+    {
+        ::operator delete(data);
+    }
+};
+
+struct MappedRecordTag
+{
+    typedef const char* data_type;
+    static data_type alloc(unsigned) { return 0;}
+    static void dealloc(data_type ) {}
+};
+
+template <typename Tag>
 struct shape_record
 {
-    const char* data;
+    typename Tag::data_type data;
     size_t size;
     mutable size_t pos;
     explicit shape_record(size_t size)
-	: //data(static_cast<char*>(::operator new(sizeof(char)*size))),
+	: 
+        data(Tag::alloc(size)),
         size(size),
         pos(0) {} 
       
-    void set_data(const char * data_)
+    void set_data(typename Tag::data_type data_)
     {
         data = data_;
     }
-  
+
+    typename Tag::data_type get_data() 
+    {
+        return data; 
+    }
+    
     void skip(unsigned n)
     {
         pos+=n;
@@ -67,7 +95,7 @@ struct shape_record
     int read_ndr_integer()
     {
         int val;
-        read_int_ndr(&data[pos],val);
+        read_int32_ndr(&data[pos],val);
         pos+=4;
         return val;
     }
@@ -75,7 +103,7 @@ struct shape_record
     int read_xdr_integer()
     {
         int val;
-        read_int_xdr(&data[pos],val);
+        read_int32_xdr(&data[pos],val);
         pos+=4;
         return val;
     }
@@ -94,7 +122,7 @@ struct shape_record
   
     ~shape_record() 
     {
-        //::operator delete(data);
+        Tag::dealloc(data);
     }
  
 };
@@ -103,19 +131,46 @@ using namespace boost::iostreams;
 
 class shape_file : boost::noncopyable
 {  
+#ifdef SHAPE_MEMORY_MAPPED_FILE
     stream<mapped_file_source> file_;
-    //stream<file_source> file_;
+#else
+    stream<file_source> file_;
+#endif
+    
 public:
-    shape_file();
-    shape_file(std::string const& file_name);
-    ~shape_file();
-    bool is_open();
-    void close();
-      
-    inline void read_record(shape_record& rec)
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+    typedef shape_record<MappedRecordTag> record_type;
+#else
+    typedef shape_record<RecordTag> record_type;
+#endif
+    
+    shape_file() {}
+
+    shape_file(std::string  const& file_name)
+        : file_(file_name) {}
+
+    ~shape_file() {}
+
+    inline bool is_open()
     {
+        return file_.is_open();
+    }
+
+
+    inline void close()
+    {
+        if (file_ && file_.is_open())
+            file_.close();
+    }
+    
+    inline void read_record(record_type& rec)
+    {
+#ifdef SHAPE_MEMORY_MAPPED_FILE
 	rec.set_data(file_->data() + file_.tellg());
 	file_.seekg(rec.size,std::ios::cur);
+#else
+        file_.read(rec.get_data(),rec.size);
+#endif
     }
     
     inline int read_xdr_integer()
@@ -123,7 +178,7 @@ public:
         char b[4];
         file_.read(b, 4);
         int val;
-        read_int_xdr(b,val);
+        read_int32_xdr(b,val);
         return val;
     }
       
@@ -132,14 +187,14 @@ public:
         char b[4];
         file_.read(b,4);
         int val;
-        read_int_ndr(b,val);
+        read_int32_ndr(b,val);
         return val;
     }
       
     inline double read_double()
     {
         double val;
-#ifndef WORDS_BIGENDIAN
+#ifndef MAPNIK_BIG_ENDIAN
         file_.read(reinterpret_cast<char*>(&val),8);
 #else
         char b[8];
@@ -151,16 +206,16 @@ public:
     
     inline void read_envelope(Envelope<double>& envelope)
     {
-#ifndef WORDS_BIGENDIAN
+#ifndef MAPNIK_BIG_ENDIAN
         file_.read(reinterpret_cast<char*>(&envelope),sizeof(envelope));
 #else
         char data[4*8];
         file_.read(data,4*8);
         double minx,miny,maxx,maxy;
-        read_double_ndr(data,minx);
-        read_double_ndr(data,miny);
-        read_double_ndr(data,maxx);
-        read_double_ndr(data,maxy);
+        read_double_ndr(data + 0*8,minx);
+        read_double_ndr(data + 1*8,miny);
+        read_double_ndr(data + 2*8,maxx);
+        read_double_ndr(data + 3*8,maxy);
         envelope.init(minx,miny,maxx,maxy);
 #endif  
     }

@@ -51,12 +51,16 @@ using namespace boost::iostreams;
 
 class dbf_file
 {
-   private:
-      int num_records_;
-      int num_fields_;
-      int record_length_;
-      std::vector<field_descriptor> fields_;
-      stream<mapped_file_source> file_;
+private:
+    int num_records_;
+    int num_fields_;
+    int record_length_;
+    std::vector<field_descriptor> fields_;
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+    stream<mapped_file_source> file_;
+#else
+    stream<file_source> file_;
+#endif
       char* record_;
 public:
       dbf_file();

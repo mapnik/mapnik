@@ -23,15 +23,15 @@
 //$Id: postgis.cc 44 2005-04-22 18:53:54Z pavlenko $
 
 // mapnik
+#include <mapnik/global.hpp>
+#include <mapnik/ptree_helpers.hpp>
 #include "connection_manager.hpp"
 #include "postgis.hpp"
-#include <mapnik/ptree_helpers.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/detail/endian.hpp>
 
 // stl
 #include <string>
@@ -40,7 +40,7 @@
 #include <sstream>
 #include <iomanip>
 
-#ifndef BOOST_BIG_ENDIAN
+#ifndef MAPNIK_BIG_ENDIAN
 #define WKB_ENCODING "NDR"
 #else
 #define WKB_ENCODING "XDR"

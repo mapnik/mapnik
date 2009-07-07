@@ -19,15 +19,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// stl
-#include <string>
-// boost
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 // mapnik
+#include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/unicode.hpp>
 #include "dbffile.hpp"
+// boost
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
+// stl
+#include <string>
+
 
 dbf_file::dbf_file()
    : num_records_(0),
@@ -197,7 +200,9 @@ int dbf_file::read_short()
 {
    char b[2];
    file_.read(b,2);
-   return (b[0] & 0xff) | (b[1] & 0xff) << 8;   
+   boost::int16_t val;
+   mapnik::read_int16_ndr(b,val);
+   return val;
 }
 
 
@@ -205,10 +210,10 @@ int dbf_file::read_int()
 {    
    char b[4];
    file_.read(b,4);
-   return (b[0] & 0xff) | (b[1] & 0xff) << 8 |
-      (b[2] & 0xff) << 16 | (b[3] & 0xff) <<24;
+   boost::int32_t val;
+   mapnik::read_int32_ndr(b,val);
+   return val;
 }
-
 
 void dbf_file::skip(int bytes)
 {

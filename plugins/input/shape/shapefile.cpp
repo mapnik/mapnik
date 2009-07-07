@@ -22,24 +22,3 @@
 
 #include "shapefile.hpp"
 
-shape_file::shape_file() {}
-
-shape_file::shape_file(const std::string& file_name)
-   : file_(file_name) {}
-
-shape_file::~shape_file() {}
-
-bool shape_file::is_open()
-{
-    return file_.is_open();
-}
-
-
-void shape_file::close()
-{
-    if (file_ && file_.is_open())
-        file_.close();
-}
-
-
-

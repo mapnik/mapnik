@@ -98,7 +98,7 @@ dbf_file& shape_io::dbf()
 geometry2d * shape_io::read_polyline()
 {    
    using mapnik::line_string_impl;
-   shape_record record(reclength_*2-36);
+   shape_file::record_type record(reclength_*2-36);
    shp_.read_record(record);
    int num_parts=record.read_ndr_integer();
    int num_points=record.read_ndr_integer();
@@ -153,7 +153,7 @@ geometry2d * shape_io::read_polyline()
 geometry2d * shape_io::read_polylinem()
 {    
    using mapnik::line_string_impl;
-   shape_record record(reclength_*2-36);
+   shape_file::record_type record(reclength_*2-36);
    shp_.read_record(record);
    int num_parts=record.read_ndr_integer();
    int num_points=record.read_ndr_integer();
@@ -216,7 +216,7 @@ geometry2d * shape_io::read_polylinem()
 geometry2d * shape_io::read_polylinez()
 {
    using mapnik::line_string_impl;
-   shape_record record(reclength_*2-36);
+   shape_file::record_type record(reclength_*2-36);
    shp_.read_record(record);
    int num_parts=record.read_ndr_integer();
    int num_points=record.read_ndr_integer();
@@ -286,7 +286,7 @@ geometry2d * shape_io::read_polylinez()
 geometry2d * shape_io::read_polygon()
 {
    using mapnik::polygon_impl;
-   shape_record record(reclength_*2-36);
+   shape_file::record_type record(reclength_*2-36);
    shp_.read_record(record);
    int num_parts=record.read_ndr_integer();
    int num_points=record.read_ndr_integer();
@@ -327,7 +327,7 @@ geometry2d * shape_io::read_polygon()
 geometry2d * shape_io::read_polygonm()
 {
    using mapnik::polygon_impl;
-   shape_record record(reclength_*2-36);
+   shape_file::record_type record(reclength_*2-36);
    shp_.read_record(record);
    int num_parts=record.read_ndr_integer();
    int num_points=record.read_ndr_integer();
@@ -376,7 +376,7 @@ geometry2d * shape_io::read_polygonm()
 geometry2d * shape_io::read_polygonz()
 {
    using mapnik::polygon_impl;
-   shape_record record(reclength_*2-36);
+   shape_file::record_type record(reclength_*2-36);
    shp_.read_record(record);
    int num_parts=record.read_ndr_integer();
    int num_points=record.read_ndr_integer();

@@ -34,6 +34,10 @@
 namespace mapnik
 {
  
+#ifdef BOOST_BIG_ENDIAN
+#define MAPNUK_BIG_ENDIAN
+#endif
+
 #define int2net(A)  (int16_t) (((boost::uint16_t) ((boost::uint8_t) (A)[1]))      | \
                                (((boost::uint16_t) ((boost::uint8_t) (A)[0])) << 8))
 
@@ -62,10 +66,22 @@ namespace mapnik
     (V)=def_temp; } while(0)
 
     
-    // read int NDR (little endian)
-    inline int& read_int_ndr(const char* data, int & val)
+    // read int16_t NDR (little endian)
+    inline boost::int16_t& read_int16_ndr(const char* data, boost::int16_t & val)
     {
-#ifndef BOOST_BIG_ENDIAN
+#ifndef MAPNIK_BIG_ENDIAN
+        memcpy(&val,data,2);
+#else
+        val = (data[0]&0xff) | 
+            ((data[1]&0xff)<<8);
+#endif
+        return val;
+    }
+    
+    // read int32_t NDR (little endian)
+    inline boost::int32_t& read_int32_ndr(const char* data, boost::int32_t & val)
+    {
+#ifndef MAPNIK_BIG_ENDIAN
         memcpy(&val,data,4);
 #else
         val = (data[0]&0xff)     | 
@@ -79,7 +95,7 @@ namespace mapnik
     // read double NDR (little endian)
     inline double& read_double_ndr(const char* data, double & val)
     {
-#ifndef BOOST_BIG_ENDIAN
+#ifndef MAPNIK_BIG_ENDIAN
         std::memcpy(&val,&data[0],8);
 #else
         boost::int64_t bits = ((boost::int64_t)data[0] & 0xff) | 
@@ -95,10 +111,21 @@ namespace mapnik
         return val;
     } 
     
-    // read int XDR (big endian)
-    inline int& read_int_xdr(const char* data, int & val)
+    // read int16_t XDR (big endian)
+    inline boost::int16_t& read_int16_xdr(const char* data, boost::int16_t & val)
     {
-#ifndef BOOST_BIG_ENDIAN
+#ifndef MAPNIK_BIG_ENDIAN
+        val = (data[3]&0xff) | ((data[2]&0xff)<<8);
+#else
+        memcpy(&val,data,2);
+#endif
+        return val;
+    }
+    
+    // read int32_t XDR (big endian)
+    inline boost::int32_t& read_int32_xdr(const char* data, boost::int32_t & val)
+    {
+#ifndef MAPNIK_BIG_ENDIAN
         val = (data[3]&0xff) | ((data[2]&0xff)<<8) | ((data[1]&0xff)<<16) | ((data[0]&0xff)<<24);
 #else
         memcpy(&val,data,4);
@@ -109,7 +136,7 @@ namespace mapnik
     // read double XDR (big endian)
     inline double& read_double_xdr(const char* data, double & val)
     {
-#ifndef BOOST_BIG_ENDIAN
+#ifndef MAPNIK_BIG_ENDIAN
         boost::int64_t bits = ((boost::int64_t)data[7] & 0xff) | 
             ((boost::int64_t)data[6] & 0xff) << 8   |
             ((boost::int64_t)data[5] & 0xff) << 16  |
