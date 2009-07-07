@@ -91,10 +91,9 @@ namespace mapnik {
       }
       catch (...)
       {
-         throw config_error(string("Failed to parse ") +
-                            
-                            name + "'. Expected CSS color"  +
-                            " but got '" + str + "'");
+          throw config_error(std::string("Failed to parse ") +
+                             name + "'. Expected CSS color"  +
+                             " but got '" + str + "'");
       }
    }
    
@@ -266,7 +265,7 @@ namespace mapnik {
             }
             catch (const boost::bad_lexical_cast & )
             {
-                throw config_error(string("Failed to parse ") +
+                throw config_error(std::string("Failed to parse ") +
                         (is_attribute ? "attribute" : "child node") + " '" +
                         name + "'. Expected " + name_trait<T>::name() +
                         " but got '" + *str + "'");
@@ -298,10 +297,10 @@ namespace mapnik {
          }
          catch (...)
          {
-            throw config_error(string("Failed to parse ") +
-                               (is_attribute ? "attribute" : "child node") + " '" +
-                               name + "'. Expected " + name_trait<color>::name() +
-                               " but got '" + *str + "'");
+             throw config_error(std::string("Failed to parse ") +
+                                (is_attribute ? "attribute" : "child node") + " '" +
+                                name + "'. Expected " + name_trait<color>::name() +
+                                " but got '" + *str + "'");
          }
       } 
       else 
@@ -324,7 +323,7 @@ namespace mapnik {
         }
 
         if ( ! str ) {
-            throw config_error(string("Required ") +
+            throw config_error(std::string("Required ") +
                     (is_attribute ? "attribute " : "child node ") +
                     "'" + name + "' is missing");
         }
@@ -334,7 +333,7 @@ namespace mapnik {
         }
         catch (const boost::bad_lexical_cast & )
         {
-            throw config_error(string("Failed to parse ") +
+            throw config_error(std::string("Failed to parse ") +
                     (is_attribute ? "attribute" : "child node") + " '" +
                     name + "'. Expected " + name_trait<T>::name() +
                     " but got '" + *str + "'");
@@ -350,7 +349,7 @@ namespace mapnik {
         }
         catch (...)
         {
-            throw config_error(string("Failed to parse ") +
+            throw config_error(std::string("Failed to parse ") +
                     name + ". Expected " + name_trait<T>::name() +
                     " but got '" + node.data() + "'");
         }
@@ -379,7 +378,7 @@ namespace mapnik {
            }
            catch (const boost::bad_lexical_cast &)
            {
-              throw config_error(string("Failed to parse ") +
+               throw config_error(std::string("Failed to parse ") +
                                  (is_attribute ? "attribute" : "child node") + " '" +
                                  name + "'. Expected " + name_trait<T>::name() +
                                  " but got '" + *str + "'");
@@ -414,10 +413,10 @@ namespace mapnik {
            }
            catch (...)
            {
-              throw config_error(string("Failed to parse ") +
-                                 (is_attribute ? "attribute" : "child node") + " '" +
-                                 name + "'. Expected " + name_trait<color>::name() +
-                                 " but got '" + *str + "'");
+               throw config_error(std::string("Failed to parse ") +
+                                  (is_attribute ? "attribute" : "child node") + " '" +
+                                  name + "'. Expected " + name_trait<color>::name() +
+                                  " but got '" + *str + "'");
            }  
         }
         
