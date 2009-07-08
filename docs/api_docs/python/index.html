@@ -69,7 +69,7 @@ Several things happen when you do:
  2) The paths to the input plugins and font directories are imported from the 'paths.py'
     file which was constructed and installed during SCons installation.
 
- 3) All available input plugins and and TrueType fonts are automatically registered.
+ 3) All available input plugins and TrueType fonts are automatically registered.
 
  4) Boost Python metaclass injectors are used in the '__init__.py' to wrap/extend several
     objects adding extra convenience when accessed via Python.
@@ -140,6 +140,13 @@ are only accessible by various documentation viewers via the 'mapnik._mapnik' mo
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a href="mapnik.Feature-class.html" class="summary-name">Feature</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a href="mapnik.Projection-class.html" class="summary-name">Projection</a>
     </td>
   </tr>
@@ -152,6 +159,22 @@ are only accessible by various documentation viewers via the 'mapnik._mapnik' mo
   <td align="left" colspan="2" class="table-header">
     <span class="table-header">Functions</span></td>
 </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="get_types"></a><span class="summary-sig-name">get_types</span>(<span class="summary-sig-arg">num</span>)</span></td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
@@ -311,6 +334,23 @@ are only accessible by various documentation viewers via the 'mapnik._mapnik' mo
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a href="mapnik-module.html#Kismet" class="summary-sig-name">Kismet</a>(<span class="summary-sig-arg">**keywords</span>)</span><br />
+      Create a Kismet Datasource.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="mapnik_version_string"></a><span class="summary-sig-name">mapnik_version_string</span>()</span><br />
       Return the Mapnik version as a string.</td>
           <td align="right" valign="top">
@@ -381,6 +421,23 @@ are only accessible by various documentation viewers via the 'mapnik._mapnik' mo
         <tr>
           <td><span class="summary-sig"><a href="mapnik-module.html#forward_" class="summary-sig-name">forward_</a>(<span class="summary-sig-arg">...</span>)</span><br />
       forward_( (Coord)arg1, (Projection)arg2) -&gt; Coord :</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">bool :</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="mapnik-module.html#has_cairo" class="summary-sig-name">has_cairo</a>()</span><br />
+      Get cairo library status</td>
           <td align="right" valign="top">
             
             
@@ -516,7 +573,7 @@ are only accessible by various documentation viewers via the 'mapnik._mapnik' mo
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik-module.html#save_map" class="summary-sig-name">save_map</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      save_map( (Map)arg1, (str)arg2) -&gt; None :</td>
+      save_map( (Map)arg1, (str)arg2 [, (bool)arg3]) -&gt; None :</td>
           <td align="right" valign="top">
             
             
@@ -946,6 +1003,41 @@ Optional keyword arguments:
   </dl>
 </td></tr></table>
 </div>
+<a name="Kismet"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">Kismet</span>(<span class="sig-arg">**keywords</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+Create a Kismet Datasource.
+
+Required keyword arguments:
+  host -- kismet hostname
+  port -- kismet port
+
+Optional keyword arguments:
+  encoding -- file encoding (default 'utf-8')
+  extent -- manually specified data extent (comma delimited string, default None)
+
+&gt;&gt;&gt; from mapnik import Kismet, Layer
+&gt;&gt;&gt; datasource = Kismet(host='localhost',port=2501,extent='-179,-85,179,85') 
+&gt;&gt;&gt; lyr = Layer('Kismet Server Layer')
+&gt;&gt;&gt; lyr.datasource = datasource
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <a name="CreateDatasource"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -1052,6 +1144,32 @@ forward_( (Envelope)arg1, (Projection)arg2) -&gt; Envelope :
 
 </pre>
   <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="has_cairo"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">has_cairo</span>()</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+    Get cairo library status
+
+    C++ signature :
+        bool has_cairo()
+
+</pre>
+  <dl class="fields">
+    <dt>Returns: bool :</dt>
   </dl>
 </td></tr></table>
 </div>
@@ -1273,13 +1391,11 @@ render_to_file( (Map)arg1, (str)arg2, (str)arg3) -&gt; None :
     &gt;&gt;&gt; load_map(m,'mapfile.xml')
     &gt;&gt;&gt; render_to_file(m,'image32bit.png','png')
     
-    PNG format option:
-      8 bit (paletted) PNG can be requested with 'png256':
+    8 bit (paletted) PNG can be requested with 'png256':
     &gt;&gt;&gt; render_to_file(m,'8bit_image.png','png256')
     
-    JPEG format option:
-      JPEG quality can be controlled by adding a suffix to
-      'jpeg' between 0 and 100 (default is 85):
+    JPEG quality can be controlled by adding a suffix to
+    'jpeg' between 0 and 100 (default is 85):
     &gt;&gt;&gt; render_to_file(m,'top_quality.jpeg','jpeg100')
     &gt;&gt;&gt; render_to_file(m,'medium_quality.jpeg','jpeg50')
     
@@ -1322,23 +1438,10 @@ render_to_file( (Map)arg1, (str)arg2) -&gt; None :
   
   <pre class="literalblock">
 
-save_map( (Map)arg1, (str)arg2) -&gt; None :
-    
-    Save Map object to XML file
-    
-    Usage:
-    &gt;&gt;&gt; from mapnik import Map, load_map, save_map
-    &gt;&gt;&gt; m = Map(256,256)
-    &gt;&gt;&gt; load_map(m,'mapfile_wgs84.xml')
-    &gt;&gt;&gt; m.srs
-    '+proj=latlong +datum=WGS84'
-    &gt;&gt;&gt; m.srs = '+init=espg:3395'
-    &gt;&gt;&gt; save_map(m,'mapfile_mercator.xml')
-    
-    
+save_map( (Map)arg1, (str)arg2 [, (bool)arg3]) -&gt; None :
 
     C++ signature :
-        void save_map(mapnik::Map,std::string)
+        void save_map(mapnik::Map,std::string [,bool])
 
 </pre>
   <dl class="fields">
@@ -1451,7 +1554,7 @@ scale_denominator( (Map)arg1, (bool)arg2) -&gt; float :
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sun Apr 12 14:37:25 2009
+    Generated by Epydoc 3.0.1 on Wed Jul  8 15:33:03 2009
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
