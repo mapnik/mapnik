@@ -16,7 +16,17 @@ Mapnik 0.6.1 Release
 
 (Packaged from r___)
 
-- Improved support for PPC (Big endian) archetectures (r1198 -> r1213)
+- XML: Fixed serialization and parsing bugs related to handling of integers and Enums (#328,\#353)
+
+- SCons: Added the ability to set the PKG_CONFIG_PATH env setting (#217)
+
+- SCons: Improved linking to only required libraries for libmapnik (#371)
+
+- Shape Plugin: Added compile time flag to allow disabling the use of memory mapped files (r1213) (#342)
+
+- Core: Improved support for PPC (Big endian) architectures (r1198 -> r1213)
+
+- Scons: Improved auto-detection of boost libs/headers (r1200) (#297)
 
 - Plugins: Exposed list of available/registered plugins (r1180) (#246)
 
@@ -51,6 +61,8 @@ Mapnik 0.6.1 Release
 - GDAL Plugin: Added an experimental option to open files in 'shared mode' (r1143)
 
 - Python: Exposed RasterSymbolizer options in Python (r1139)
+
+- Plugins: Fixed support for non-file based sources in GDAL and OGR plugins (#336,#337)
 
 - Plugins: Formal inclusion of new plugin for Kismet server (r1127) (#293)
 
@@ -87,9 +99,9 @@ Mapnik 0.6.0 Release
 
 - Python: Added support for aspect_fix_mode (r1013)
 
-- Fixed axis-ordering for WMS 1.3.0 request (r1051) (#241)
+- OGCServer Fixed axis-ordering for WMS 1.3.0 request (r1051) (#241)
 
-- Added option to all plugins to support using a 'base' path argument (r1042)
+- Plugins: Added option to all plugins to support using a 'base' path argument (r1042)
 
 - Symbolizers: RasterSymbolizer now support composing modes for hillshading (r1027)
 
