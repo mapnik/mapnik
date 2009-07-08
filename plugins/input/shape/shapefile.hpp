@@ -147,7 +147,7 @@ public:
     shape_file() {}
 
     shape_file(std::string  const& file_name)
-        : file_(file_name,std::ios::binary) {}
+        : file_(file_name,std::ios::in | std::ios::binary) {}
 
     ~shape_file() {}
 
