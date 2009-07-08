@@ -216,6 +216,8 @@ namespace mapnik {
    
       unsigned num_fields = cursor->getNumFields();
 
+      if (num_fields == 0) return;
+      
       std::string feature_id =  "fid";
    
       std::ostringstream create_sql;
