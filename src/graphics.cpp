@@ -30,6 +30,8 @@
 #include <cairomm/surface.h>
 #endif
 
+#include <iostream>
+
 namespace mapnik
 {
     Image32::Image32(int width,int height)
