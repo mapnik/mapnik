@@ -29,7 +29,6 @@
 
 // boost
 #include <boost/utility.hpp>
-#include <boost/detail/endian.hpp>
 
 namespace mapnik
 {
