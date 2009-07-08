@@ -16,6 +16,41 @@ Mapnik 0.6.1 Release
 
 (Packaged from r___)
 
+- Improved support for PPC (Big endian) archetectures (r1198 -> r1213)
+
+- Plugins: Exposed list of available/registered plugins (r1180) (#246)
+
+- SCons: Improve build support for SunCC (patches from River Tarnell) (r1168, r1169)
+
+- Python: Pickling support for text_symbolizer (r1164) (#345)
+
+- Python: Pickling support for proj_transform and view/coord_transform (r1163) (#345)
+
+- Python: Pickling support for parameters (r1162) (#345)
+
+- Python: Pickling support for stroke objects (r1161) (#345)
+
+- Python: Pickling support for line_symbolizer (r1160) (#345)
+
+- Python: Pickling support for projection objects (r1159) (#345)
+
+- Python: Pickling support for shield_symbolizer (r1158) (#345)
+
+- Python: Pickling support for polygon_symbolizer (r1157) (#345)
+
+- Python: Pickling support for query objects (r1156) (#345)
+
+- Python: Pickling support for pattern symbolizers (r1155) (#345)
+
+- Python: Pickling support for raster_symbolizer (r1154) (#345)
+
+- Python: Exposed dash_array get method (r1151) (#317)
+
+- Python: Pickling support for Coord objects (#345)
+
+- GDAL Plugin: Added an experimental option to open files in 'shared mode' (r1143)
+
+- Python: Exposed RasterSymbolizer options in Python (r1139)
 
 - Plugins: Formal inclusion of new plugin for Kismet server (r1127) (#293)
 
@@ -34,8 +69,6 @@ Mapnik 0.6.1 Release
 - Tests: Added testing framework in Python using nose (r1101-r1105)
 
 - Raster Plugin: Added a tile/bbox-based read policy for large (rasters width * height > 1024*1024 will be loaded in chunks) (r1089)
-
-- Python: Exposed dash_array get method (r1151) (#317)
 
 - OGCServer: Made lxml dependency optional (r1085) (#303)
 
