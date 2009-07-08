@@ -42,7 +42,11 @@ dbf_file::dbf_file(std::string const& file_name)
    :num_records_(0),
     num_fields_(0),
     record_length_(0),
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+    file_(file_name),
+#else
     file_(file_name,std::ios::in | std::ios::binary),
+#endif
     record_(0)
 {
    if (file_.is_open())

@@ -147,8 +147,14 @@ public:
     shape_file() {}
 
     shape_file(std::string  const& file_name)
-        : file_(file_name,std::ios::in | std::ios::binary) {}
-
+        : 
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+        file_(file_name)
+#else
+        file_(file_name,std::ios::in | std::ios::binary)
+#endif
+    {}
+    
     ~shape_file() {}
 
     inline bool is_open()
