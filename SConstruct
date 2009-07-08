@@ -35,7 +35,7 @@ except:
     HAS_DISTUTILS = False
 
 #### SCons build options and initial setup ####
-env = Environment()
+env = Environment(ENV=os.environ)
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -537,7 +537,7 @@ if not preconfigured:
                     # but if the default is overridden and the file is not found, give warning
                     color_print(1,"SCons CONFIG not found: '%s'" % conf)
             # Recreate the base environment using modified `opts`
-            env = Environment(options=opts)
+            env = Environment(ENV=os.environ,options=opts)
             env['USE_CONFIG'] = True
     else:
         color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')        
