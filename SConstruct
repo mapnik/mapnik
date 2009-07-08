@@ -162,6 +162,7 @@ opts.AddVariables(
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     
     # Other variables
+    BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
     ('LIB_DIR_NAME','Name to use for the "lib" folder where fonts and plugins are installed','/mapnik/'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
