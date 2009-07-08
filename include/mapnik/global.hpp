@@ -35,7 +35,7 @@ namespace mapnik
 {
  
 #ifdef BOOST_BIG_ENDIAN
-#define MAPNUK_BIG_ENDIAN
+#define MAPNIK_BIG_ENDIAN
 #endif
 
 #define int2net(A)  (int16_t) (((boost::uint16_t) ((boost::uint8_t) (A)[1]))      | \
