@@ -152,7 +152,7 @@ namespace mapnik
         
         int read_integer() 
         {
-            int n;
+	    boost::int32_t n;
             if (needSwap_)
             {
                 read_int32_xdr(wkb_+pos_,n);

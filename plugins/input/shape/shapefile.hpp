@@ -94,7 +94,7 @@ struct shape_record
       
     int read_ndr_integer()
     {
-        int val;
+	boost::int32_t val;
         read_int32_ndr(&data[pos],val);
         pos+=4;
         return val;
@@ -102,7 +102,7 @@ struct shape_record
       
     int read_xdr_integer()
     {
-        int val;
+	boost::int32_t val;
         read_int32_xdr(&data[pos],val);
         pos+=4;
         return val;
@@ -147,7 +147,7 @@ public:
     shape_file() {}
 
     shape_file(std::string  const& file_name)
-        : file_(file_name) {}
+        : file_(file_name,std::ios::binary) {}
 
     ~shape_file() {}
 
@@ -177,7 +177,7 @@ public:
     {
         char b[4];
         file_.read(b, 4);
-        int val;
+	boost::int32_t val;
         read_int32_xdr(b,val);
         return val;
     }
@@ -186,7 +186,7 @@ public:
     {
         char b[4];
         file_.read(b,4);
-        int val;
+	boost::int32_t val;
         read_int32_ndr(b,val);
         return val;
     }
