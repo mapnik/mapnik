@@ -11,8 +11,29 @@ Developers: Please commit along with changes.
 For a complete change history, see the SVN log.
 
 
-0.6.1 SVN
----------
+Mapnik 0.6.1 Release
+--------------------
+
+(Packaged from r___)
+
+
+- Plugins: Formal inclusion of new plugin for Kismet server (r1127) (#293)
+
+- Python: Made access to features and featuresets more Pythonic (r1121) (#171,#280,#283)
+
+- XML: Ensured relative paths in XML are interpreted relative to XML file location (r1124) (#326)
+
+- XML: Added ability to serialize all default symbolizer values by passing third argument to save_map(m,'file.xml',True)(r1117) (#327)
+
+- Core: Added support for alpha transparency when writing to png256 (patch from Marcin Rudowski) (#202)
+
+- SCons: Ensured ABI compatibility information is embedded in libmapnik.dylib on Mac OS X (#322)
+
+- SCons: Ensured that the full 'install_name' path would be added to libmapnik.dylib on Mac OS X (#374)
+
+- Tests: Added testing framework in Python using nose (r1101-r1105)
+
+- Raster Plugin: Added a tile/bbox-based read policy for large (rasters width * height > 1024*1024 will be loaded in chunks) (r1089)
 
 - Python: Exposed dash_array get method (r1151) (#317)
 
@@ -28,6 +49,8 @@ For a complete change history, see the SVN log.
 
 Mapnik 0.6.0 Release
 --------------------
+
+(Packaged from r1066)
 
 - Python: Added support for aspect_fix_mode (r1013)
 
