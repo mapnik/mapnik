@@ -26,7 +26,6 @@
 #define IMAGE_DATA_HPP
 
 #include <mapnik/global.hpp>
-#include <mapnik/octree.hpp>
 #include <cassert>
 #include <cstring>
 
