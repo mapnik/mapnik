@@ -61,6 +61,13 @@ def call(cmd):
     else:
         color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
 
+def shortest_name(libs):
+    name = '-'*200
+    for lib in libs:
+        if len(name) > len(lib):
+            name = lib
+    return name
+
 if platform.uname()[4] == 'x86_64':
     LIBDIR_SCHEMA='lib64' 
 elif platform.uname()[4] == 'ppc64':
@@ -374,7 +381,8 @@ def FindBoost(context, prefixes):
         if len(libItems) >= 1 and len(incItems) >= 1:
             BOOST_LIB_DIR = os.path.dirname(libItems[0])
             BOOST_INCLUDE_DIR = incItems[0].rstrip('boost/')
-            match = re.search(r'libboost_filesystem-(.*)\..*', libItems[0])
+            shortest_lib_name = shortest_name(libItems)
+            match = re.search(r'libboost_filesystem-(.*)\..*', shortest_lib_name)
             if hasattr(match,'groups'):
                 BOOST_APPEND = match.groups()[0]
             break
