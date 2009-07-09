@@ -14,9 +14,9 @@ For a complete change history, see the SVN log.
 Mapnik 0.6.1 Release
 --------------------
 
-(Packaged from r___)
+(Packaged from r1232)
 
-- XML: Fixed serialization and parsing bugs related to handling of integers and Enums (#328,\#353)
+- XML: Fixed serialization and parsing bugs related to handling of integers and Enums (#328,#353)
 
 - SCons: Added the ability to set the PKG_CONFIG_PATH env setting (#217)
 
