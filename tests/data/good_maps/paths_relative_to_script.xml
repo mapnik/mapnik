@@ -3,8 +3,7 @@
   <Layer name="lay">
     <Datasource base="shp">
       <Parameter name="file">../data/shp/poly.shp</Parameter>
-      <Parameter name="layer">poly</Parameter>
-      <Parameter name="type">ogr</Parameter>
+      <Parameter name="type">shape</Parameter>
     </Datasource>
   </Layer>
   
