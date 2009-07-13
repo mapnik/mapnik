@@ -48,16 +48,11 @@ namespace boost { namespace python {
             
             PyObject * operator() (UnicodeString const& s) const
             {
-               int32_t len = s.length();
-               boost::scoped_array<wchar_t> buf(new wchar_t[len]);
-               UErrorCode err = U_ZERO_ERROR;
-               u_strToWCS(buf.get(),len,0,s.getBuffer(),len,&err);
-               PyObject *obj = Py_None;
-               if (U_SUCCESS(err))
-               {
-                  obj = ::PyUnicode_FromWideChar(buf.get(),implicit_cast<ssize_t>(len));
-               }
-               return obj;
+                std::string buffer;
+                mapnik::to_utf8(s,buffer);
+                PyObject *obj = Py_None;
+                obj = ::PyUnicode_DecodeUTF8(buffer.c_str(),implicit_cast<ssize_t>(buffer.length()),0);                
+                return obj;
             }
             
             PyObject * operator() (mapnik::value_null const& s) const

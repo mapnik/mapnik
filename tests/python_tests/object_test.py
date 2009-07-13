@@ -155,14 +155,14 @@ def test_shapefile_init():
 
 # Shapefile properties
 def test_shapefile_properties():
-    s = mapnik.Shapefile(file='../../demo/data/boundaries')
+    s = mapnik.Shapefile(file='../../demo/data/boundaries', encoding='latin1')
     f = s.features_at_point(s.envelope().center()).features[0]
 
     eq_(f.properties['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
     eq_(f.properties['COUNTRY'], u'CAN')
     eq_(f.properties['F_CODE'], u'FA001')
     eq_(f.properties['NAME_EN'], u'Quebec')
-    eq_(f.properties['NOM_FR'], u'Qu\x1abec')
+    eq_(f.properties['NOM_FR'], u'Qu\xe9bec')
     eq_(f.properties['Shape_Area'], 1512185733150.0)
     eq_(f.properties['Shape_Leng'], 19218883.724300001)
 
@@ -184,6 +184,7 @@ def test_textsymbolizer_pickle():
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik.Color('black'))
 
+    raise Todo("FontSet pickling support needed: http://trac.mapnik.org/ticket/348")
     ts2 = pickle.loads(pickle.dumps(ts,pickle.HIGHEST_PROTOCOL))
     eq_(ts.name, ts2.name)
     eq_(ts.face_name, ts2.face_name)

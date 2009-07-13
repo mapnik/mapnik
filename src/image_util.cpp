@@ -43,95 +43,95 @@ extern "C"
 
 namespace mapnik
 {    
-   template <typename T>
-   std::string save_to_string(T const& image,
-                     std::string const& type)
-   {
-      std::ostringstream ss(std::ios::out|std::ios::binary);
-     //all this should go into image_writer factory
-     if (type=="png")  save_as_png(ss,image);
-     else if (type == "png256") save_as_png256(ss,image);
-     else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
-	 {
-	   int quality = 85;
-	   try 
-	   {
-		  if(type.substr(4).length() != 0)
-		  {
-		     quality = boost::lexical_cast<int>(type.substr(4));
-			 if(quality<1 || quality>100)
-				  throw ImageWriterException("invalid jpeg quality: " + type.substr(4));
-		  }
-	      save_as_jpeg(ss,quality,image); 
-	   } 
-	   catch(boost::bad_lexical_cast &)
-       {
-          throw ImageWriterException("invalid jpeg quality: " + type.substr(4));
-       }
-   }
-     else throw ImageWriterException("unknown file type: " + type);
-     return ss.str();
-   }
+    template <typename T>
+    std::string save_to_string(T const& image,
+                               std::string const& type)
+    {
+        std::ostringstream ss(std::ios::out|std::ios::binary);
+        //all this should go into image_writer factory
+        if (type=="png")  save_as_png(ss,image);
+        else if (type == "png256") save_as_png256(ss,image);
+        else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
+        {
+            int quality = 85;
+            try 
+            {
+                if(type.substr(4).length() != 0)
+                {
+                    quality = boost::lexical_cast<int>(type.substr(4));
+                    if(quality<1 || quality>100)
+                        throw ImageWriterException("invalid jpeg quality: " + type.substr(4));
+                }
+                save_as_jpeg(ss,quality,image); 
+            } 
+            catch(boost::bad_lexical_cast &)
+            {
+                throw ImageWriterException("invalid jpeg quality: " + type.substr(4));
+            }
+        }
+        else throw ImageWriterException("unknown file type: " + type);
+        return ss.str();
+    }
 
-   template <typename T>
-   void save_to_file(T const& image,
-                     std::string const& filename,
-                     std::string const& type)
-   {
-      std::ofstream file (filename.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
-      if (file)
-      {
-         //all this should go into image_writer factory
-         if (type=="png")  save_as_png(file,image);
-         else if (type == "png256") save_as_png256(file,image);
-		  else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
-		  {
-			  int quality = 85;
-			  try 
-			  {
-				  if(type.substr(4).length() != 0)
-				  {
-					  quality = boost::lexical_cast<int>(type.substr(4));
-					  if(quality<0 || quality>100)
-						  throw ImageWriterException("invalid jpeg quality: " + type.substr(4) + " out of bounds");
-				  }
-				  save_as_jpeg(file,quality,image); 
-			  } 
-			  catch(boost::bad_lexical_cast &)
-			  {
-				  throw ImageWriterException("invalid jpeg quality: " + type.substr(4) + " not a number");
-			  }
-		  }
-		  else throw ImageWriterException("unknown file type: " + type);
-	  } 
-   }
+    template <typename T>
+    void save_to_file(T const& image,
+                      std::string const& filename,
+                      std::string const& type)
+    {
+        std::ofstream file (filename.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
+        if (file)
+        {
+            //all this should go into image_writer factory
+            if (type=="png")  save_as_png(file,image);
+            else if (type == "png256") save_as_png256(file,image);
+            else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
+            {
+                int quality = 85;
+                try 
+                {
+                    if(type.substr(4).length() != 0)
+                    {
+                        quality = boost::lexical_cast<int>(type.substr(4));
+                        if(quality<0 || quality>100)
+                            throw ImageWriterException("invalid jpeg quality: " + type.substr(4) + " out of bounds");
+                    }
+                    save_as_jpeg(file,quality,image); 
+                } 
+                catch(boost::bad_lexical_cast &)
+                {
+                    throw ImageWriterException("invalid jpeg quality: " + type.substr(4) + " not a number");
+                }
+            }
+            else throw ImageWriterException("unknown file type: " + type);
+        } 
+    }
 	
-   template <typename T>
-   void save_to_file(T const& image,std::string const& filename)
-   {
-      std::string type = type_from_filename(filename);
-      save_to_file<T>(image,filename,type);
-   }
+    template <typename T>
+    void save_to_file(T const& image,std::string const& filename)
+    {
+        std::string type = type_from_filename(filename);
+        save_to_file<T>(image,filename,type);
+    }
      
 
-   template void save_to_file<ImageData32>(ImageData32 const&,
-                                           std::string const&,
-                                           std::string const&);
+    template void save_to_file<ImageData32>(ImageData32 const&,
+                                            std::string const&,
+                                            std::string const&);
 
-   template void save_to_file<ImageData32>(ImageData32 const&,
-                                           std::string const&);
+    template void save_to_file<ImageData32>(ImageData32 const&,
+                                            std::string const&);
 
-   template std::string save_to_string<ImageData32>(ImageData32 const&,
-                                           std::string const&);
+    template std::string save_to_string<ImageData32>(ImageData32 const&,
+                                                     std::string const&);
 
-   template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
-                                                         std::string const&,
-                                                         std::string const&);
+    template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
+                                                          std::string const&,
+                                                          std::string const&);
    
-   template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
-                                                         std::string const&);
+    template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
+                                                          std::string const&);
    
-   template std::string save_to_string<image_view<ImageData32> > (image_view<ImageData32> const&,
-                                                         std::string const&);
+    template std::string save_to_string<image_view<ImageData32> > (image_view<ImageData32> const&,
+                                                                   std::string const&);
 
 }
