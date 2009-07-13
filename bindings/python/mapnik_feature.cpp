@@ -48,16 +48,30 @@ namespace boost { namespace python {
             
             PyObject * operator() (UnicodeString const& s) const
             {
-               int32_t len = s.length();
-               boost::scoped_array<wchar_t> buf(new wchar_t[len]);
-               UErrorCode err = U_ZERO_ERROR;
-               u_strToWCS(buf.get(),len,0,s.getBuffer(),len,&err);
-               PyObject *obj = Py_None;
-               if (U_SUCCESS(err))
-               {
-                  obj = ::PyUnicode_FromWideChar(buf.get(),implicit_cast<ssize_t>(len));
-               }
-               return obj;
+                const int32_t BUF_SIZE = 2;
+                wchar_t buf[BUF_SIZE];
+                int32_t len = s.length();
+                int32_t dest_len=0;
+
+                UErrorCode err = U_ZERO_ERROR;
+                u_strToWCS(buf,BUF_SIZE,&dest_len,s.getBuffer(),len,&err);
+                
+                PyObject *obj = Py_None;
+                if (err == U_BUFFER_OVERFLOW_ERROR || err == U_STRING_NOT_TERMINATED_WARNING)
+                {
+                    err = U_ZERO_ERROR;
+                    boost::scoped_array<wchar_t> buf_ptr(new wchar_t [dest_len+1]);
+                    u_strToWCS(buf_ptr.get(),dest_len+1,0,s.getBuffer(),len,&err);
+                    if (U_SUCCESS(err))
+                    {
+                        obj = ::PyUnicode_FromWideChar(buf_ptr.get(),implicit_cast<ssize_t>(dest_len));   
+                    }
+                }
+                else if (U_SUCCESS(err))
+                {
+                    obj = ::PyUnicode_FromWideChar(buf,implicit_cast<ssize_t>(dest_len));
+                }
+                return obj;
             }
             
             PyObject * operator() (mapnik::value_null const& s) const
