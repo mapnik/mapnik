@@ -32,6 +32,8 @@ Mapnik 0.6.1 Release
 
 - SCons: Improve build support for SunCC (patches from River Tarnell) (r1168, r1169)
 
+- Python: Fixed icu::UnicodeString to PyObject converter (r1240) 
+
 - Python: Pickling support for text_symbolizer (r1164) (#345)
 
 - Python: Pickling support for proj_transform and view/coord_transform (r1163) (#345)
