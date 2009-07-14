@@ -14,7 +14,7 @@ For a complete change history, see the SVN log.
 Mapnik 0.6.1 Release
 --------------------
 
-(Packaged from r1232)
+(Packaged from r1247)
 
 - XML: Fixed serialization and parsing bugs related to handling of integers and Enums (#328,#353)
 
