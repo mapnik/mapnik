@@ -125,6 +125,11 @@ feature_ptr postgis_featureset::next()
                  int val = int2net(buf);
                  boost::put(*feature,name,val);
               }
+              else if (oid==20) //int8/BigInt
+              {
+                 int val = int8net(buf);
+                 boost::put(*feature,name,val);
+              }
               else if (oid == 700) // float4
               {
                  float val;

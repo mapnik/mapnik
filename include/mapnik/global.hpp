@@ -46,6 +46,14 @@ namespace mapnik
                                (((boost::uint32_t) ((boost::uint8_t) (A)[1])) << 16) | \
                                (((boost::uint32_t) ((boost::uint8_t) (A)[0])) << 24))
 
+#define int8net(A)  (int64_t)  (((boost::uint64_t) ((boost::uint8_t) (A)[7]))        | \
+                               (((boost::uint64_t) ((boost::uint8_t) (A)[6])) << 8)  | \
+                               (((boost::uint64_t) ((boost::uint8_t) (A)[5])) << 16) | \
+                               (((boost::uint64_t) ((boost::uint8_t) (A)[4])) << 24) | \
+                               (((boost::uint64_t) ((boost::uint8_t) (A)[3])) << 32) | \
+                               (((boost::uint64_t) ((boost::uint8_t) (A)[2])) << 40) | \
+                               (((boost::uint64_t) ((boost::uint8_t) (A)[1])) << 48) | \
+                               (((boost::uint64_t) ((boost::uint8_t) (A)[0])) << 56))
 
    typedef boost::uint8_t byte;
 #define float8net(V,M)   do { double def_temp;  \
