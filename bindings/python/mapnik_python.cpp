@@ -222,6 +222,15 @@ unsigned mapnik_version()
     return MAPNIK_VERSION;
 }
 
+unsigned mapnik_svn_revision()
+{
+#if defined(SVN_REVISION)
+  return SVN_REVISION;
+#else
+  return 0;
+#endif
+}
+
 bool has_cairo()
 {
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -434,6 +443,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 */
 
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
+    def("mapnik_svn_revision", &mapnik_svn_revision,"Get the Mapnik svn revision");
     def("has_cairo", &has_cairo, "Get cairo library status");
     
     using mapnik::symbolizer;

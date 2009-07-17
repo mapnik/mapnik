@@ -824,11 +824,21 @@ if not preconfigured:
         else:
             env['ABI_VERSION'] = abi
 
+
         # Common C++ flags.
         if env['THREADING'] == 'multi' :
             common_cxx_flags = '-D%s -DBOOST_SPIRIT_THREADSAFE -DMAPNIK_THREADSAFE ' % env['PLATFORM'].upper()
         else :
             common_cxx_flags = '-D%s ' % env['PLATFORM'].upper()
+
+        
+        svn_version = call('svnversion')
+        if svn_version == 'exported':
+            pattern = r'(\d+)(.*)'
+            try:
+                rev = re.match(pattern,svn_version).groups()[0]
+                common_cxx_flags += '-DSVN_REVISION=%s ' % rev
+            except: pass
             
         # Mac OSX (Darwin) special settings
         if env['PLATFORM'] == 'Darwin':
