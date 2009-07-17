@@ -833,7 +833,7 @@ if not preconfigured:
 
         
         svn_version = call('svnversion')
-        if svn_version == 'exported':
+        if not svn_version == 'exported':
             pattern = r'(\d+)(.*)'
             try:
                 rev = re.match(pattern,svn_version).groups()[0]
