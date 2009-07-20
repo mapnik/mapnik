@@ -48,6 +48,17 @@ static const char * vertical_alignment_strings[] = {
 
 IMPLEMENT_ENUM( mapnik::vertical_alignment_e, vertical_alignment_strings );
 
+static const char * text_convert_strings[] = {
+    "none",
+    "toupper",
+    "tolower",
+    ""
+};
+
+
+IMPLEMENT_ENUM( mapnik::text_convert_e, text_convert_strings );
+
+
 namespace mapnik
 {
     text_symbolizer::text_symbolizer(std::string const& name, std::string const& face_name, unsigned size, color const& fill)
@@ -57,6 +68,10 @@ namespace mapnik
           size_(size),
           text_ratio_(0),
           wrap_width_(0),
+          wrap_char_(' '),
+          text_convert_(NONE),
+          line_spacing_(0),
+          character_spacing_(0),
           label_spacing_(0),
           label_position_tolerance_(0),
           force_odd_labels_(false),
@@ -78,6 +93,10 @@ namespace mapnik
           size_(size),
           text_ratio_(0),
           wrap_width_(0),
+          wrap_char_(' '),
+          text_convert_(NONE),
+          line_spacing_(0),
+          character_spacing_(0),
           label_spacing_(0),
           label_position_tolerance_(0),
           force_odd_labels_(false),
@@ -99,6 +118,10 @@ namespace mapnik
           size_(rhs.size_),
           text_ratio_(rhs.text_ratio_),
           wrap_width_(rhs.wrap_width_),
+          wrap_char_(rhs.wrap_char_),
+          text_convert_(rhs.text_convert_),
+          line_spacing_(rhs.line_spacing_),
+          character_spacing_(rhs.character_spacing_),
           label_spacing_(rhs.label_spacing_),
           label_position_tolerance_(rhs.label_position_tolerance_),
           force_odd_labels_(rhs.force_odd_labels_),
@@ -124,6 +147,10 @@ namespace mapnik
         size_ = other.size_;
         text_ratio_ = other.text_ratio_;
         wrap_width_ = other.wrap_width_;
+        wrap_char_ = other.wrap_char_;
+        text_convert_ = other.text_convert_;
+        line_spacing_ = other.line_spacing_;
+        character_spacing_ = other.character_spacing_;
         label_spacing_ = other.label_spacing_;
         label_position_tolerance_ = other.label_position_tolerance_;
         force_odd_labels_ = other.force_odd_labels_;
@@ -190,6 +217,46 @@ namespace mapnik
     {
         wrap_width_ = width;
     }    
+
+    unsigned char text_symbolizer::get_wrap_char() const
+    {
+        return wrap_char_;
+    }
+
+    void  text_symbolizer::set_wrap_char(unsigned char character) 
+    {
+        wrap_char_ = character;
+    }    
+
+    text_convert_e  text_symbolizer::get_text_convert() const
+    {
+        return text_convert_;
+    }
+
+    void  text_symbolizer::set_text_convert(text_convert_e convert)
+    {
+        text_convert_ = convert;
+    }
+
+    unsigned  text_symbolizer::get_line_spacing() const
+    {
+        return line_spacing_;
+    }
+
+    void  text_symbolizer::set_line_spacing(unsigned spacing) 
+    {
+        line_spacing_ = spacing;
+    }
+
+    unsigned  text_symbolizer::get_character_spacing() const
+    {
+        return character_spacing_;
+    }
+
+    void  text_symbolizer::set_character_spacing(unsigned spacing) 
+    {
+        character_spacing_ = spacing;
+    }
 
     unsigned  text_symbolizer::get_label_spacing() const
     {

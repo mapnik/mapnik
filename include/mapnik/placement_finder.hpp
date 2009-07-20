@@ -58,6 +58,7 @@ namespace mapnik
          boost::ptr_vector<placement_element> placements;
          
          int wrap_width;
+         unsigned char wrap_char;
          int text_ratio;
 
          int label_spacing; // distance between repeated labels on a single geometry
@@ -81,7 +82,7 @@ namespace mapnik
       placement_finder(DetectorT & detector);
          
       //Try place a single label at the given point
-      void find_point_placement(placement & p, double pos_x, double pos_y, vertical_alignment_e = MIDDLE);
+      void find_point_placement(placement & p, double pos_x, double pos_y, vertical_alignment_e = MIDDLE, unsigned line_spacing=0, unsigned character_spacing=0);
          
       //Iterate over the given path, placing point labels with respect to label_spacing
       template <typename T>

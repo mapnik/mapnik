@@ -75,6 +75,7 @@ namespace mapnik
         displacement_(sym.get_displacement()),
         label_placement(sym.get_label_placement()), 
         wrap_width(sym.get_wrap_width()), 
+        wrap_char(sym.get_wrap_char()),
         text_ratio(sym.get_text_ratio()), 
         label_spacing(sym.get_label_spacing()), 
         label_position_tolerance(sym.get_label_position_tolerance()), 
@@ -214,7 +215,9 @@ namespace mapnik
    void placement_finder<DetectorT>::find_point_placement(placement & p, 
                                                           double label_x, 
                                                           double label_y,
-                                                          vertical_alignment_e valign)
+                                                          vertical_alignment_e valign,
+                                                          unsigned line_spacing,
+                                                          unsigned character_spacing)
    {
       double x, y;
       std::auto_ptr<placement_element> current_placement(new placement_element);
@@ -239,7 +242,7 @@ namespace mapnik
       std::vector<double> line_heights;
       if (wrap_at < string_width && p.info.num_characters() > 0)
       {
-         int last_space = 0;
+         int last_wrap_char = 0;
          string_width = 0;
          string_height = 0;
          double line_width = 0;
@@ -250,14 +253,16 @@ namespace mapnik
          {
             character_info ci;
             ci = p.info.at(ii);
+
+            unsigned cwidth = ci.width + character_spacing;
                 
             unsigned c = ci.character;
-            word_width += ci.width;
-            word_height = word_height > ci.height ? word_height : ci.height;
+            word_width += cwidth;
+            word_height = word_height > (ci.height + line_spacing) ? word_height : (ci.height + line_spacing);
         
-            if (c == ' ')
+            if (c == p.wrap_char)
             {
-               last_space = ii;
+               last_wrap_char = ii;
                line_width += word_width;
                line_height = line_height > word_height ? line_height : word_height;
                word_width = 0;
@@ -266,13 +271,13 @@ namespace mapnik
             if (line_width > 0 && line_width > wrap_at)
             {
                // Remove width of breaking space character since it is not rendered
-               line_width -= ci.width;
+               line_width -= cwidth;
                string_width = string_width > line_width ? string_width : line_width;
                string_height += line_height;
-               line_breaks.push_back(last_space);
+               line_breaks.push_back(last_wrap_char);
                line_widths.push_back(line_width);
                line_heights.push_back(line_height);
-               ii = last_space;
+               ii = last_wrap_char;
                line_width = 0;
                line_height = 0;
                word_width = 0;
@@ -326,6 +331,8 @@ namespace mapnik
          character_info ci;
          ci = p.info.at(i);
             
+         unsigned cwidth = ci.width + character_spacing;
+
          unsigned c = ci.character;
          if (i == index_to_wrap_at)
          {
@@ -367,7 +374,7 @@ p.minimum_distance)))
             
             p.envelopes.push(e);
          }
-         x += ci.width;
+         x += cwidth;
       }
       p.placements.push_back(current_placement.release());
       //update_detector(p);

@@ -55,6 +55,16 @@ namespace mapnik
 
    DEFINE_ENUM( vertical_alignment_e, vertical_alignment );
 
+   enum text_convert
+   {
+      NONE = 0,
+      TOUPPER,
+      TOLOWER,
+      text_convert_MAX
+   };
+
+   DEFINE_ENUM( text_convert_e, text_convert );
+
    typedef boost::tuple<double,double> position;
     
    struct MAPNIK_DECL text_symbolizer
@@ -70,6 +80,14 @@ namespace mapnik
          void set_text_ratio(unsigned ratio);
          unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
          void set_wrap_width(unsigned ratio);
+         unsigned char get_wrap_char() const; // character used to wrap lines
+         void set_wrap_char(unsigned char character);
+         text_convert_e get_text_convert() const; // text conversion on strings before display
+         void set_text_convert(text_convert_e convert);
+         unsigned get_line_spacing() const; // spacing between lines of text
+         void set_line_spacing(unsigned spacing);
+         unsigned get_character_spacing() const; // spacing between characters in text
+         void set_character_spacing(unsigned spacing);
          unsigned get_label_spacing() const; // spacing between repeated labels on lines
          void set_label_spacing(unsigned spacing);
          unsigned get_label_position_tolerance() const; //distance the label can be moved on the line to fit, if 0 the default is used
@@ -111,6 +129,10 @@ namespace mapnik
          unsigned size_;
          unsigned text_ratio_;
          unsigned wrap_width_;
+         unsigned char wrap_char_;
+         text_convert_e text_convert_;
+         unsigned line_spacing_;
+         unsigned character_spacing_;
          unsigned label_spacing_;
          unsigned label_position_tolerance_;
          bool force_odd_labels_;

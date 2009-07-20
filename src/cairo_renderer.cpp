@@ -1006,6 +1006,14 @@ namespace mapnik
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
 
       UnicodeString text = feature[sym.get_name()].to_unicode();
+      if ( sym.get_text_convert() == TOUPPER)
+      {
+         text = text.toUpper();
+      }
+      else if ( sym.get_text_convert() == TOLOWER)
+      {
+         text = text.toLower();
+      }
 
       if (text.length() > 0)
       {

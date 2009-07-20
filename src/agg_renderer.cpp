@@ -764,6 +764,15 @@ namespace mapnik
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       
       UnicodeString text = feature[sym.get_name()].to_unicode();
+      if ( sym.get_text_convert() == TOUPPER)
+      {
+         text = text.toUpper();
+      }
+      else if ( sym.get_text_convert() == TOLOWER)
+      {
+         text = text.toLower();
+      }
+
       if ( text.length() > 0 )
       {
          color const& fill = sym.get_fill();
@@ -807,7 +816,7 @@ namespace mapnik
                      geom.label_position(&label_x, &label_y);
                      prj_trans.backward(label_x,label_y, z);
                      t_.forward(&label_x,&label_y);
-                     finder.find_point_placement(text_placement,label_x,label_y,sym.get_vertical_alignment());
+                     finder.find_point_placement(text_placement,label_x,label_y,sym.get_vertical_alignment(),sym.get_line_spacing(),sym.get_character_spacing());
                      finder.update_detector(text_placement);
                   }
                   else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)

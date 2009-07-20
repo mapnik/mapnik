@@ -275,6 +275,22 @@ namespace mapnik
                 {
                     set_attr( node, "wrap_width", sym.get_wrap_width() );    
                 }
+                if (sym.get_wrap_char() != dfl.get_wrap_char() || explicit_defaults_ )
+                {
+                    set_attr( node, "wrap_character", std::string(1, sym.get_wrap_char()) );
+                }
+                if (sym.get_text_convert() != dfl.get_text_convert() || explicit_defaults_ )
+                {
+                    set_attr( node, "text_convert", sym.get_text_convert() );
+                }
+                if (sym.get_line_spacing() != dfl.get_line_spacing() || explicit_defaults_ )
+                {
+                    set_attr( node, "line_spacing", sym.get_line_spacing() );    
+                }
+                if (sym.get_character_spacing() != dfl.get_character_spacing() || explicit_defaults_ )
+                {
+                    set_attr( node, "character_spacing", sym.get_character_spacing() );    
+                }
                 if (sym.get_label_spacing() != dfl.get_label_spacing() || explicit_defaults_ )
                 {
                     set_attr( node, "spacing", sym.get_label_spacing() );    

@@ -885,6 +885,33 @@ namespace mapnik
                 text_symbol.set_wrap_width(*wrap_width);
             }
 
+            // character used to break long strings
+            optional<std::string> wrap_char = 
+                get_opt_attr<std::string>(sym, "wrap_character");
+            if (wrap_char && (*wrap_char).size() > 0)
+            {
+                text_symbol.set_wrap_char((*wrap_char)[0]);
+            }
+
+            // text conversion before rendering
+            text_convert_e tconvert =
+                get_attr<text_convert_e>(sym, "text_convert", NONE);
+            text_symbol.set_text_convert(tconvert);
+
+            // spacing between text lines
+            optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing");
+            if (line_spacing)
+            {
+                text_symbol.set_line_spacing(*line_spacing);
+            }
+
+            // spacing between characters in text
+            optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing");
+            if (character_spacing)
+            {
+                text_symbol.set_character_spacing(*character_spacing);
+            }
+
             // spacing between repeated labels on lines
             optional<unsigned> spacing = get_opt_attr<unsigned>(sym, "spacing");
             if (spacing)
