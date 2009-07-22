@@ -372,7 +372,9 @@ def FindBoost(context, prefixes):
     BOOST_INCLUDE_DIR = None
     BOOST_APPEND = None
     env['BOOST_APPEND'] = str()
-
+    
+    prefixes.insert(0,os.path.dirname(env['BOOST_INCLUDES']))
+    prefixes.insert(0,os.path.dirname(env['BOOST_LIBS']))
     for searchDir in prefixes:
         libItems = glob(os.path.join(searchDir, LIBDIR_SCHEMA, 'libboost_filesystem*-*.*'))
         if not libItems:
@@ -389,22 +391,18 @@ def FindBoost(context, prefixes):
     
     msg = str()
     
-    if not env['BOOST_LIBS']:
-        if BOOST_LIB_DIR:
-            msg += '\n  *libs found: %s' % BOOST_LIB_DIR
-            env['BOOST_LIBS'] = BOOST_LIB_DIR
-        else:
-            env['BOOST_LIBS'] = '/usr' + LIBDIR_SCHEMA
+    if BOOST_LIB_DIR:
+        msg += '\n  *libs found: %s' % BOOST_LIB_DIR
+        env['BOOST_LIBS'] = BOOST_LIB_DIR
     else:
+        env['BOOST_LIBS'] = '/usr' + LIBDIR_SCHEMA
         msg += '\n  *using boost lib dir: %s' % env['BOOST_LIBS']
            
-    if not env['BOOST_INCLUDES']:
-        if BOOST_INCLUDE_DIR:
-            msg += '\n  *headers found: %s' % BOOST_INCLUDE_DIR
-            env['BOOST_INCLUDES'] = BOOST_INCLUDE_DIR
-        else:
-            env['BOOST_INCLUDES'] = '/usr/include'
+    if BOOST_INCLUDE_DIR:
+        msg += '\n  *headers found: %s' % BOOST_INCLUDE_DIR
+        env['BOOST_INCLUDES'] = BOOST_INCLUDE_DIR
     else:
+        env['BOOST_INCLUDES'] = '/usr/include'
         msg += '\n  *using boost include dir: %s' % env['BOOST_INCLUDES']    
                
     if not env['BOOST_TOOLKIT'] and not env['BOOST_ABI'] and not env['BOOST_VERSION']:
