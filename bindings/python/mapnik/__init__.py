@@ -93,18 +93,13 @@ class _Projection(Projection,_injector):
         return inverse_(obj,self)
 
 def get_types(num):
-    if num == 1:
-        return int
-    elif num == 2:
-        return float
-    elif num == 3:
-        return float
-    elif num == 4:
-        return str
-    elif num == 5:
-        return Geometry2d
-    elif num == 6:
-        return object
+    dispatch = {1: int,
+                2: float,
+                3: float,
+                4: str,
+                5: Geometry2d,
+                6: object}
+    return dispatch.get(num)
 
 class _Datasource(Datasource,_injector):
     def describe(self):

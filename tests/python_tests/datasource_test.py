@@ -41,7 +41,6 @@ def test_feature_attributes():
     feat = features[0]
     attrs = {'PRFEDEA': u'35043411', 'EAS_ID': 168, 'AREA': 215229.266}
     eq_(feat.attributes, attrs)
-    fld_name = 'AREA'
-    fld_idx = lyr.datasource.fields().index(fld_name)
-    eq_(lyr.datasource.field_types()[fld_idx],type(feat.attributes[fld_name]))
+    eq_(lyr.datasource.fields(),['AREA', 'EAS_ID', 'PRFEDEA'])
+    eq_(lyr.datasource.field_types(),[float,int,str])
     
