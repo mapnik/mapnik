@@ -41,7 +41,8 @@ are only accessible by various documentation viewers via the 'mapnik._mapnik' mo
 
 """
 
-from sys import getdlopenflags,setdlopenflags
+import os
+from sys import getdlopenflags, setdlopenflags
 try:
     from dl import RTLD_NOW, RTLD_GLOBAL
 except ImportError:
@@ -377,17 +378,20 @@ def mapnik_version_string():
     major_version = version / 100000
     return '%s.%s.%s' % ( major_version, minor_version,patch_level)
 
-#register datasources
-from mapnik import DatasourceCache
-DatasourceCache.instance().register_datasources('%s' % inputpluginspath)
-#register some fonts
-from mapnik import FontEngine
-from glob import glob
-fonts = glob('%s/*.ttf' % fontscollectionpath)
-if len( fonts ) == 0:
-    print "### WARNING: No ttf files found in '%s'." % fontscollectionpath
-else:
-    map(FontEngine.instance().register_font, fonts)
+def register_plugins(path=inputpluginspath):
+    """Register plugins located by specified path"""
+    DatasourceCache.instance().register_datasources(path)
+
+def register_fonts(path=fontscollectionpath):
+    """Recursively register fonts using path argument as base directory"""
+    for dirpath, _, filenames in os.walk(path):
+        for filename in filenames:
+            if os.path.splitext(filename)[1] == '.ttf':
+                FontEngine.instance().register_font(os.path.join(dirpath, filename))
+
+# auto-register known plugins and fonts
+register_plugins()
+register_fonts()
 
 #set dlopen flags back to the original
 setdlopenflags(flags)
