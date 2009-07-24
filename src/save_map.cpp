@@ -484,9 +484,8 @@ namespace mapnik
         }
     }
 
-    void save_map(Map const & map, std::string const& filename, bool explicit_defaults)
+    void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     {
-        ptree pt;
 
         ptree & map_node = pt.push_back(ptree::value_type("Map", ptree() ))->second;
 
@@ -518,10 +517,23 @@ namespace mapnik
         for (unsigned i = 0; i < layers.size(); ++i )
         {
             serialize_layer( map_node, layers[i] );
-        }
-
-        
+        }    
+    }
+    
+    void save_map(Map const & map, std::string const& filename, bool explicit_defaults)
+    {
+        ptree pt;
+        serialize_map(pt,map,explicit_defaults);
         write_xml(filename,pt);
+    }
+
+    std::string save_map_string(Map const & map, bool explicit_defaults)
+    {
+        ptree pt;
+        serialize_map(pt,map,explicit_defaults);
+        std::ostringstream ss;
+        write_xml(ss,pt);
+        return ss.str();
     }
 
 }
