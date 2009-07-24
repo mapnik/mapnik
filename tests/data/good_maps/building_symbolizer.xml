@@ -1,0 +1,21 @@
+<Map bgcolor="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+
+  <Style name="test">
+    <Rule>
+      <BuildingSymbolizer>
+        <CssParameter name="fill">yellow</CssParameter>
+        <CssParameter name="fill-opacity">.7</CssParameter>
+        <CssParameter name="height">30</CssParameter>
+      </BuildingSymbolizer>
+    </Rule>  
+  </Style>
+
+  <Layer name="lay" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+    <StyleName>test</StyleName>
+    <Datasource base="shp">
+      <Parameter name="type">shape</Parameter>
+      <Parameter name="file">../../data/shp/poly.shp</Parameter>
+    </Datasource>
+  </Layer>
+  
+</Map>
