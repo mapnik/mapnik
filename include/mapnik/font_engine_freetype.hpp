@@ -90,27 +90,27 @@ namespace mapnik
     public:
         font_face(FT_Face face)
            : face_(face) {}
-	
-    	std::string  family_name() const
-    	{
-    	    return std::string(face_->family_name);
-    	}
+
+        std::string  family_name() const
+        {
+            return std::string(face_->family_name);
+        }
 
         std::string  style_name() const
-    	{
-    	    return std::string(face_->style_name);
-    	}
-	
+        {
+            return std::string(face_->style_name);
+        }
+
         FT_GlyphSlot glyph() const
         {
             return face_->glyph;
         }
-	
+
         FT_Face get_face() const
         {
             return face_;
         }
-		
+
         unsigned get_char(unsigned c) const
         {
             return FT_Get_Char_Index(face_, c);
@@ -124,17 +124,17 @@ namespace mapnik
             return false;
         }
               
-    	~font_face()
-    	{
+        ~font_face()
+        {
 #ifdef MAPNIK_DEBUG
-    	    std::clog << "~font_face: Clean up face \"" << family_name()
-                << " " << style_name() << "\"" << std::endl;
+        std::clog << "~font_face: Clean up face \"" << family_name()
+            << " " << style_name() << "\"" << std::endl;
 #endif
-    	    FT_Done_Face(face_);
-    	}
-	
+        FT_Done_Face(face_);
+        }
+
     private:
-    	FT_Face face_;
+    FT_Face face_;
     };
 
     class MAPNIK_DECL font_face_set : private boost::noncopyable
@@ -347,7 +347,7 @@ namespace mapnik
                 {
                     faces_.insert(make_pair(name,face));
                 }
-                return face;	
+                return face;
             }
         }
 
@@ -386,12 +386,12 @@ namespace mapnik
         {
             FT_Glyph image;
             glyph_t(FT_Glyph image_) : image(image_) {}
-            ~glyph_t ()	{ FT_Done_Glyph(image);}
+            ~glyph_t () { FT_Done_Glyph(image);}
         };
-	
+
         typedef boost::ptr_vector<glyph_t> glyphs_t;
         typedef T pixmap_type;
-	
+
         text_renderer (pixmap_type & pixmap, face_set_ptr faces)
             : pixmap_(pixmap),
               faces_(faces),
@@ -423,7 +423,7 @@ namespace mapnik
         {
             //clear glyphs
             glyphs_.clear();
-	    
+    
             FT_Matrix matrix;
             FT_Vector pen;
             FT_Error  error;
@@ -431,7 +431,7 @@ namespace mapnik
             FT_BBox bbox;   
             bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
             bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
-	    
+    
             for (int i = 0; i < path->num_nodes(); i++) 
             {
                 int c;
@@ -447,10 +447,10 @@ namespace mapnik
 
                 FT_BBox glyph_bbox; 
                 FT_Glyph image;
-		
+
                 pen.x = int(x * 64);
                 pen.y = int(y * 64);
-	        
+        
                 glyph_ptr glyph = faces_->get_glyph(unsigned(c));
                 FT_Face face = glyph->get_face()->get_face();
 
@@ -478,7 +478,7 @@ namespace mapnik
                     bbox.xMax = glyph_bbox.xMax; 
                 if (glyph_bbox.yMax > bbox.yMax) 
                     bbox.yMax = glyph_bbox.yMax;
-	
+
                 // Check if we properly grew the bbox
                 if ( bbox.xMin > bbox.xMax )
                 {
@@ -487,11 +487,11 @@ namespace mapnik
                     bbox.xMax = 0; 
                     bbox.yMax = 0; 
                 }
-		
+
                 // take ownership of the glyph
                 glyphs_.push_back(new glyph_t(image));
             }
-	    
+
             return Envelope<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
         }
         
@@ -500,10 +500,10 @@ namespace mapnik
             FT_Error  error;
             FT_Vector start;
             unsigned height = pixmap_.height();
-	    
+
             start.x =  static_cast<FT_Pos>(x0 * (1 << 6)); 
             start.y =  static_cast<FT_Pos>((height - y0) * (1 << 6));
-	    
+
             // now render transformed glyphs
             typename glyphs_t::iterator pos;
             
@@ -513,13 +513,12 @@ namespace mapnik
                 //render halo 
                 for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
                 {
-	    
                     FT_Glyph_Transform(pos->image,0,&start);
-	    
+
                     error = FT_Glyph_To_Bitmap( &(pos->image),FT_RENDER_MODE_NORMAL,0,1);
                     if ( ! error )
                     {
-			
+
                         FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
                         render_halo(&bit->bitmap, halo_fill_.rgba(), 
                                     bit->left,
@@ -530,13 +529,13 @@ namespace mapnik
             //render actual text
             for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
             {
-	    
+
                 FT_Glyph_Transform(pos->image,0,&start);
-	    
+
                 error = FT_Glyph_To_Bitmap( &(pos->image),FT_RENDER_MODE_NORMAL,0,1);
                 if ( ! error )
                 {
-		   
+
                     FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
                     render_bitmap(&bit->bitmap, fill_.rgba(), 
                                   bit->left,
@@ -544,7 +543,7 @@ namespace mapnik
                 }
             }  
         }
-   	
+
     private:
     
         void render_halo(FT_Bitmap *bitmap,unsigned rgba,int x,int y,int radius)
@@ -552,7 +551,7 @@ namespace mapnik
             int x_max=x+bitmap->width;
             int y_max=y+bitmap->rows;
             int i,p,j,q;
-	
+
             for (i=x,p=0;i<x_max;++i,++p)
             {
                 for (j=y,q=0;j<y_max;++j,++q)
@@ -562,18 +561,18 @@ namespace mapnik
                     {
                         for (int n=-halo_radius_; n <=halo_radius_; ++n)
                             for (int m=-halo_radius_;m <= halo_radius_; ++m)
-                                pixmap_.blendPixel(i+m,j+n,rgba,gray);		        
+                                pixmap_.blendPixel(i+m,j+n,rgba,gray);
                     }
                 }
             }
         }
-    
+
         void render_bitmap(FT_Bitmap *bitmap,unsigned rgba,int x,int y)
         {
             int x_max=x+bitmap->width;
             int y_max=y+bitmap->rows;
             int i,p,j,q;
-	
+
             for (i=x,p=0;i<x_max;++i,++p)
             {
                 for (j=y,q=0;j<y_max;++j,++q)
