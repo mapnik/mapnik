@@ -64,7 +64,7 @@ namespace mapnik
     {
        explicit building_symbolizer() 
           : fill_(color(128,128,128)),
-          height_(0),
+          height_(0.0),
           opacity_(1.0)
           {}
 

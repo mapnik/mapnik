@@ -42,3 +42,26 @@ def test_render_image_to_file():
         os.remove('test.png')
     else:
         return False
+
+def get_paired_images(w,h,mapfile):
+    tmp_map = 'tmp_map.xml'
+    m = mapnik.Map(w,h)
+    mapnik.load_map(m,mapfile)
+    i = mapnik.Image(w,h)
+    m.zoom_all()
+    mapnik.render(m,i)
+    mapnik.save_map(m,tmp_map)
+    m2 = mapnik.Map(w,h)
+    mapnik.load_map(m2,tmp_map)
+    i2 = mapnik.Image(w,h)
+    m2.zoom_all()
+    mapnik.render(m2,i2)
+    os.remove(tmp_map)
+    return i,i2    
+
+def test_render_from_serialization():
+    i,i2 = get_paired_images(100,100,'../data/good_maps/building_symbolizer.xml')
+    eq_(i.tostring(),i2.tostring())
+
+    i,i2 = get_paired_images(100,100,'../data/good_maps/polygon_symbolizer.xml')
+    eq_(i.tostring(),i2.tostring())

@@ -183,6 +183,10 @@ namespace mapnik
                 {
                     set_css( sym_node, "fill-opacity", sym.get_opacity() );    
                 }
+                if ( sym.height() != dfl.height() || explicit_defaults_ )
+                {
+                    set_css( sym_node, "height", sym.height() );    
+                }
             }
 
           void operator () ( markers_symbolizer const& )
