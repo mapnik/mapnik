@@ -263,14 +263,6 @@ if opts.args:
     # now since we've got custom arguments we'll disregard any 
     # pickled environment and force another configuration
     preconfigured = False
-    if opts.args.get('FAST'):
-        # because we are clearing the 'sconf_temp' files each configure when FAST=False
-        # we now need to flush the dblite otherwise SCons will skip checks
-        # of fail because .sconsign.dblite could be out of sync with cacheing from using
-        # or moving to using FAST=True
-        try:
-            os.unlink('.sconsign.dblite')
-        except: pass
 
 elif preconfigured:
     if ('-h' not in command_line_args) and ('--help' not in command_line_args):
@@ -921,6 +913,9 @@ if not preconfigured:
         pickle.dump(pickle_dict,env_cache)
         env_cache.close()
         # fix up permissions on configure outputs
+        # this is hackish but avoids potential problems
+        # with a non-root configure following a root install
+        # that also triggered a re-configure
         try:
             os.chmod(SCONS_CONFIGURE_CACHE,0666)
         except: pass
@@ -928,15 +923,12 @@ if not preconfigured:
             os.chmod(SCONS_LOCAL_CONFIG,0666)
         except: pass
         try:
-            os.chmod('.sconsign.dblite',0666)
+            os.chmod('.sconsign.dblite',0777)
+        except: pass
+        try:
+            os.chmod(SCONF_TEMP_DIR,0777)
         except: pass
 
-        # clean up test build targets
-        if not env['FAST']:
-            try:
-                for test in glob('%s/*' % SCONF_TEMP_DIR):
-                    os.unlink(test)
-            except: pass
         if 'configure' in command_line_args:
             color_print(4,'\n*Configure complete*\nNow run "python scons/scons.py" to build or "python scons/scons.py install" to install')
             Exit(0)
