@@ -208,7 +208,7 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
   if (host == NULL)
   {
     herror ("plugins/input/kismet: Error while searching host");
-    exit (1);
+    return;
   }
 
   sock_addr.sin_family = AF_INET;
@@ -219,11 +219,13 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
   if ( (sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
   {
     cerr << "plugins/input/kismet: Error while creating socket" << endl;
+    return;
   }
 
   if (connect(sockfd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)))
   {
     cerr << "plugins/input/kismet: Error while connecting" << endl;
+    return;
   }
 
   command = "!1 ENABLE NETWORK ssid,bssid,wep,bestlat,bestlon\n";
@@ -232,7 +234,7 @@ void kismet_datasource::run (const std::string &ip_host, const unsigned int port
   {
     cerr << "plugins/input/kismet: Error sending command to " << ip_host << endl;
     close(sockfd);
-    // TODO: what to do now?
+    return;
   }
 
   char ssid[MAX_KISMET_LINE] = {};
