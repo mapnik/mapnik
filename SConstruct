@@ -387,15 +387,15 @@ def FindBoost(context, prefixes):
         msg += '\n  *libs found: %s' % BOOST_LIB_DIR
         env['BOOST_LIBS'] = BOOST_LIB_DIR
     else:
-        env['BOOST_LIBS'] = '/usr' + LIBDIR_SCHEMA
-        msg += '\n  *using boost lib dir: %s' % env['BOOST_LIBS']
+        env['BOOST_LIBS'] = '/usr/' + LIBDIR_SCHEMA
+        msg += '\n  *using default boost lib dir: %s' % env['BOOST_LIBS']
            
     if BOOST_INCLUDE_DIR:
         msg += '\n  *headers found: %s' % BOOST_INCLUDE_DIR
         env['BOOST_INCLUDES'] = BOOST_INCLUDE_DIR
     else:
         env['BOOST_INCLUDES'] = '/usr/include'
-        msg += '\n  *using boost include dir: %s' % env['BOOST_INCLUDES']    
+        msg += '\n  *using default boost include dir: %s' % env['BOOST_INCLUDES']    
                
     if not env['BOOST_TOOLKIT'] and not env['BOOST_ABI'] and not env['BOOST_VERSION']:
         if BOOST_APPEND:
@@ -923,10 +923,11 @@ if not preconfigured:
             os.chmod(SCONS_LOCAL_CONFIG,0666)
         except: pass
         try:
-            os.chmod('.sconsign.dblite',0777)
+            os.chmod('.sconsign.dblite',0666)
         except: pass
         try:
-            os.chmod(SCONF_TEMP_DIR,0777)
+            for item in glob('%s/*' % SCONF_TEMP_DIR):
+                os.chmod(item,0666)
         except: pass
 
         if 'configure' in command_line_args:
