@@ -24,9 +24,4 @@ Import('env')
 if env['PLATFORM'] == 'SunOS':
     env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O -KPIC -DNDEBUG')
 else:
-    link_flags = ''
-    cxx_flags = '-O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
-    if env['PLATFORM'] == 'Darwin':
-        cxx_flags += ' -arch ppc -arch i386 -arch ppc64 -arch x86_64 '
-        link_flags = ' -Wl,-syslibroot,/Developer/SDKs/MacOSX10.5.sdk '
-    env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS=cxx_flags,LINKFLAGS=link_flags)
+    env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O%s -fPIC -DNDEBUG' % env['OPTIMIZATION'])

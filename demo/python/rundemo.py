@@ -1,4 +1,4 @@
-##!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # $Id$
@@ -313,26 +313,21 @@ m.layers.append(popplaces_lyr)
 m.zoom_to_box(Envelope(-8024477.28459,5445190.38849,-7381388.20071,5662941.44855)) 
 
 # Render two maps, two PNGs, one JPEG.
-#im = Image(m.width,m.height)
-#render(m, im)
+im = Image(m.width,m.height)
+render(m, im)
 
 # Save image to files
 images = []
-#im.save('demo.png', 'png') # true-colour RGBA
-#images.append('demo.png')
-#im.save('demo256.png', 'png256') # save to palette based (max 256 colours) png 
-#images.append('demo256.png')
-#im.save('demo.jpg', 'jpeg')
-#images.append('demo.jpg')
-
-render_to_file(m,'test_c.pdf','pdf')
-render_to_file(m,'test_c.svg','svg')
-render_to_file(m,'test_32.png','ARGB32')
-render_to_file(m,'test_24.png','RGB24')
+im.save('demo.png', 'png') # true-colour RGBA
+images.append('demo.png')
+im.save('demo256.png', 'png256') # save to palette based (max 256 colours) png 
+images.append('demo256.png')
+im.save('demo.jpg', 'jpeg')
+images.append('demo.jpg')
 
 # Render cairo examples
 try:
-    import cairo_
+    import cairo
     surface = cairo.SVGSurface('demo.svg', m.width,m.height)
     render(m, surface)
     images.append('demo.svg')

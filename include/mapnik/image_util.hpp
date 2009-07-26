@@ -27,7 +27,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/map.hpp>
 #include <mapnik/graphics.hpp>
 
 // boost
@@ -53,10 +52,6 @@ namespace mapnik {
             return message_.c_str();
         }
     };
-
-   MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
-                                        std::string const& filename,
-                                        std::string const& type);
 
    template <typename T>
    MAPNIK_DECL void save_to_file(T const& image,
@@ -96,30 +91,12 @@ namespace mapnik {
       return boost::algorithm::iends_with(filename,std::string(".tif")) ||
          boost::algorithm::iends_with(filename,std::string(".tiff"));
    }
-
-   inline bool is_pdf (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".pdf"));
-   }
-
-   inline bool is_svg (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".svg"));
-   }
-
-   inline bool is_ps (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".ps"));
-   }
-      
+   
    inline std::string type_from_filename(std::string const& filename)
    {
       if (is_png(filename)) return "png";
       if (is_jpeg(filename)) return "jpeg";
       if (is_tiff(filename)) return "tiff";
-      if (is_pdf(filename)) return "pdf";
-      if (is_svg(filename)) return "svg";
-      if (is_ps(filename)) return "ps";
       return "unknown";
    }
 
