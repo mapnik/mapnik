@@ -73,6 +73,7 @@ void export_view_transform();
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <pycairo.h>
+static Pycairo_CAPI_t *Pycairo_CAPI;
 #endif
 
 void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0, unsigned offset_y = 0)
@@ -231,14 +232,34 @@ unsigned mapnik_svn_revision()
 #endif
 }
 
+// indicator for cairo rendering support inside libmapnik
 bool has_cairo()
 {
-#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
+#if defined(HAVE_CAIRO)
   return true;
 #else
   return false;
 #endif
 }
+
+// indicator for pycairo support in the python bindings
+bool has_pycairo()
+{
+#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
+   Pycairo_IMPORT;
+   /*!
+   Case where pycairo support has been compiled into
+   mapnik but at runtime the cairo python module 
+   is unable to be imported and therefore Pycairo surfaces 
+   and contexts cannot be passed to mapnik.render() 
+   */ 
+   if (Pycairo_CAPI == NULL) return false;
+   return true;
+#else
+   return false;
+#endif
+}
+
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 3);
@@ -448,7 +469,8 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
     def("mapnik_svn_revision", &mapnik_svn_revision,"Get the Mapnik svn revision");
     def("has_cairo", &has_cairo, "Get cairo library status");
-    
+    def("has_pycairo", &has_pycairo, "Get pycairo module status");
+        
     using mapnik::symbolizer;
     class_<symbolizer>("Symbolizer",no_init)
        ;
