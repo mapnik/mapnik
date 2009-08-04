@@ -365,18 +365,23 @@ def FindBoost(context, prefixes):
     BOOST_APPEND = None
     env['BOOST_APPEND'] = str()
     
+    if env['THREADING'] == 'multi':
+        search_lib = 'libboost_thread'        
+    else:
+        search_lib = 'libboost_filesystem'
+    
     prefixes.insert(0,os.path.dirname(env['BOOST_INCLUDES']))
     prefixes.insert(0,os.path.dirname(env['BOOST_LIBS']))
     for searchDir in prefixes:
-        libItems = glob(os.path.join(searchDir, LIBDIR_SCHEMA, 'libboost_filesystem*-*.*'))
+        libItems = glob(os.path.join(searchDir, LIBDIR_SCHEMA, '%s*.*' % search_lib))
         if not libItems:
-            libItems = glob(os.path.join(searchDir, 'lib/libboost_filesystem*-*.*'))
+            libItems = glob(os.path.join(searchDir, 'lib/%s*.*' % search_lib))
         incItems = glob(os.path.join(searchDir, 'include/boost*/'))
         if len(libItems) >= 1 and len(incItems) >= 1:
             BOOST_LIB_DIR = os.path.dirname(libItems[0])
             BOOST_INCLUDE_DIR = incItems[0].rstrip('boost/')
             shortest_lib_name = shortest_name(libItems)
-            match = re.search(r'libboost_filesystem-(.*)\..*', shortest_lib_name)
+            match = re.search(r'%s(.*)\..*' % search_lib, shortest_lib_name)
             if hasattr(match,'groups'):
                 BOOST_APPEND = match.groups()[0]
             break
@@ -400,7 +405,7 @@ def FindBoost(context, prefixes):
     if not env['BOOST_TOOLKIT'] and not env['BOOST_ABI'] and not env['BOOST_VERSION']:
         if BOOST_APPEND:
             msg += '\n  *lib naming extension found: %s' % BOOST_APPEND
-            env['BOOST_APPEND'] = '-' + BOOST_APPEND
+            env['BOOST_APPEND'] = BOOST_APPEND
         else:
             msg += '\n  *no lib naming extension found'
     else:
