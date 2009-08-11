@@ -37,9 +37,9 @@
 
 namespace mapnik {
     enum GeomType {
-    	Point = 1,
-    	LineString = 2,
-    	Polygon = 3
+      Point = 1,
+      LineString = 2,
+      Polygon = 3
     };
     
     template <typename T>
@@ -49,13 +49,13 @@ namespace mapnik {
         typedef T vertex_type;
         typedef typename vertex_type::type value_type;
     public:
-        geometry () {}	
-	
+        geometry () {}  
+  
         Envelope<double> envelope() const
         {
-            Envelope<double> result;		
+            Envelope<double> result;    
             double x,y;
-	    rewind(0);
+            rewind(0);
             for (unsigned i=0;i<num_points();++i)
             {
                 vertex(&x,&y);
@@ -72,7 +72,7 @@ namespace mapnik {
         }
         
         virtual int type() const=0;
-        virtual bool hit_test(value_type x,value_type y, double tol) const=0;	
+        virtual bool hit_test(value_type x,value_type y, double tol) const=0;  
         virtual void label_position(double *x, double *y) const=0;
         virtual void move_to(value_type x,value_type y)=0;
         virtual void line_to(value_type x,value_type y)=0;
@@ -176,7 +176,7 @@ namespace mapnik {
             double y1 =0;
             double ox =0;
             double oy =0;
-	    
+      
             unsigned i;
 
             // Use first point as origin to improve numerical accuracy
@@ -194,7 +194,7 @@ namespace mapnik {
                atmp += ai;
                xtmp += (x1 + x0) * ai;
                ytmp += (y1 + y0) * ai;
-            }	  
+            }    
             if (atmp != 0)
             {
                *x = (xtmp/(3*atmp)) + ox;
@@ -202,7 +202,7 @@ namespace mapnik {
                return;
             }
             *x=x0;
-            *y=y0;	    	    
+            *y=y0;            
          }
          
          void line_to(value_type x,value_type y)
@@ -231,7 +231,7 @@ namespace mapnik {
          }
          
          bool hit_test(value_type x,value_type y, double) const
-         {	    
+         {      
             return point_inside_path(x,y,cont_.begin(),cont_.end());
          } 
          
@@ -269,7 +269,7 @@ namespace mapnik {
             double y0=0;
             double x1=0;
             double y1=0;
-	    
+      
             unsigned size = cont_.size();
             if (size == 1)
             {
@@ -277,11 +277,10 @@ namespace mapnik {
             }
             else if (size == 2)
             {
-
                cont_.get_vertex(0,&x0,&y0);
                cont_.get_vertex(1,&x1,&y1);
                *x = 0.5 * (x1 + x0);
-               *y = 0.5 * (y1 + y0);		
+               *y = 0.5 * (y1 + y0);    
             }
             else
             {
@@ -340,7 +339,7 @@ namespace mapnik {
          }
          
          bool hit_test(value_type x,value_type y, double tol) const
-         {	    
+         {      
             return point_on_path(x,y,cont_.begin(),cont_.end(),tol);
          } 
          
