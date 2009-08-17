@@ -203,6 +203,12 @@ def test_textsymbolizer_pickle():
     eq_(ts.vertical_alignment, ts2.vertical_alignment)
     eq_(ts.label_spacing, ts2.label_spacing)
     eq_(ts.label_position_tolerance, ts2.label_position_tolerance)
+    
+    eq_(ts.wrap_character, ts2.wrap_character)
+    eq_(ts.text_convert, ts2.text_convert)
+    eq_(ts.line_spacing, ts2.line_spacing)
+    eq_(ts.character_spacing, ts2.character_spacing)
+    
     eq_(ts.fontset, ts2.fontset)
 
 

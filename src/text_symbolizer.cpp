@@ -223,11 +223,21 @@ namespace mapnik
         return wrap_char_;
     }
 
+    std::string const&  text_symbolizer::get_wrap_char_string() const
+    {
+        return std::string(1, wrap_char_);
+    }
+
     void  text_symbolizer::set_wrap_char(unsigned char character) 
     {
         wrap_char_ = character;
     }    
 
+    void  text_symbolizer::set_wrap_char_from_string(std::string character) 
+    {
+        wrap_char_ = (character)[0];
+    }
+    
     text_convert_e  text_symbolizer::get_text_convert() const
     {
         return text_convert_;

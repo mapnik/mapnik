@@ -81,7 +81,9 @@ namespace mapnik
          unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
          void set_wrap_width(unsigned ratio);
          unsigned char get_wrap_char() const; // character used to wrap lines
+         std::string const& get_wrap_char_string() const; // character used to wrap lines as std::string
          void set_wrap_char(unsigned char character);
+         void set_wrap_char_from_string(std::string character);
          text_convert_e get_text_convert() const; // text conversion on strings before display
          void set_text_convert(text_convert_e convert);
          unsigned get_line_spacing() const; // spacing between lines of text
