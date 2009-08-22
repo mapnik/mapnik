@@ -281,8 +281,8 @@ featureset_ptr postgis_datasource::features(const query& q) const
       if (conn && conn->isOK())
       {       
          PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
+
          std::ostringstream s;
-            
          s << "SELECT AsBinary(\""<<geometryColumn_<<"\",'"<< WKB_ENCODING << "') AS geom";
          std::set<std::string> const& props=q.property_names();
          std::set<std::string>::const_iterator pos=props.begin();
@@ -292,11 +292,26 @@ featureset_ptr postgis_datasource::features(const query& q) const
             s <<",\""<<*pos<<"\"";
             ++pos;
          }	 
-         s << " from " << table_ << " WHERE \""<<geometryColumn_<<"\" && SetSRID('BOX3D(";
-         s << std::setprecision(16);
-         s << box.minx() << " " << box.miny() << ",";
-         s << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";
+
+         std::ostringstream b; 
+         b << "SetSRID('BOX3D(";
+         b << std::setprecision(16);
+         b << box.minx() << " " << box.miny() << ",";
+         b << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";        
          
+         std::string find = "!bbox!";
+         if (boost::algorithm::icontains(table_,find)) // if token used place bbox there
+         {
+             std::string table_m = boost::algorithm::to_lower_copy(table_);
+             std::string replace = b.str();
+             boost::algorithm::replace_all(table_m,find,replace);
+             s << " from " << table_m;     
+         }
+         else // otherwise append bbox query
+         {
+             s << " from " << table_ << " WHERE \"" << geometryColumn_ << "\" && "<< b.str();
+         }
+
          if (row_limit_ > 0) {
              s << " LIMIT " << row_limit_;
          }
