@@ -100,7 +100,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
          }
          catch (boost::bad_lexical_cast & ex)
          {
-            std::clog << *beg << " : " << ex.what() << "\n";
+            std::clog << *beg << " : " << ex.what() << "\nAre your coordinates each separated by commas?\n";
             break;
          }
          if (i==3) 
