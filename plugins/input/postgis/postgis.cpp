@@ -74,7 +74,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
               params.get<std::string>("port"),
               params.get<std::string>("dbname"),
               params.get<std::string>("user"),
-              params.get<std::string>("password"))    
+              params.get<std::string>("password")),
+     bbox_token_("!bbox!")
 {   
 
    boost::optional<int> initial_size = params_.get<int>("inital_size",1);
@@ -171,7 +172,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
             
          // collect attribute desc
          s.str("");
-         s << "select * from " << table_ << " limit 0";
+         std::string table_with_bbox = populate_sql_bbox(table_,extent_);
+         s << "select * from " << table_with_bbox << " limit 0";
          rs=conn->executeQuery(s.str());
          int count = rs->getNumFields();
          for (int i=0;i<count;++i)
@@ -219,6 +221,27 @@ int postgis_datasource::type() const
 layer_descriptor postgis_datasource::get_descriptor() const
 {
    return desc_;
+}
+
+std::string postgis_datasource::populate_sql_bbox(const std::string& sql, Envelope<double> const& box) const
+{
+    std::string sql_with_bbox = boost::algorithm::to_lower_copy(sql);
+    std::ostringstream b;
+    b << "SetSRID('BOX3D(";
+    b << std::setprecision(16);
+    b << box.minx() << " " << box.miny() << ",";
+    b << box.maxx() << " " << box.maxy() << ")'::box3d," << srid_ << ")";
+    if ( boost::algorithm::icontains(sql,bbox_token_) )
+    {
+        boost::algorithm::replace_all(sql_with_bbox,bbox_token_,b.str());
+        return sql_with_bbox;
+    }
+    else
+    {
+        std::ostringstream s;
+        s << " WHERE \"" << geometryColumn_ << "\" && " << b.str();
+        return sql_with_bbox + s.str();    
+    }
 }
 
 std::string postgis_datasource::table_from_sql(const std::string& sql)
@@ -293,24 +316,9 @@ featureset_ptr postgis_datasource::features(const query& q) const
             ++pos;
          }	 
 
-         std::ostringstream b; 
-         b << "SetSRID('BOX3D(";
-         b << std::setprecision(16);
-         b << box.minx() << " " << box.miny() << ",";
-         b << box.maxx() << " " << box.maxy() << ")'::box3d,"<<srid_<<")";        
-         
-         std::string find = "!bbox!";
-         if (boost::algorithm::icontains(table_,find)) // if token used place bbox there
-         {
-             std::string table_m = boost::algorithm::to_lower_copy(table_);
-             std::string replace = b.str();
-             boost::algorithm::replace_all(table_m,find,replace);
-             s << " from " << table_m;     
-         }
-         else // otherwise append bbox query
-         {
-             s << " from " << table_ << " WHERE \"" << geometryColumn_ << "\" && "<< b.str();
-         }
+         std::string table_with_bbox = populate_sql_bbox(table_,box);
+
+         s << " from " << table_with_bbox;
 
          if (row_limit_ > 0) {
              s << " LIMIT " << row_limit_;
@@ -346,11 +354,11 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             ++itr;
             ++size;
          }
-            
-         s << " FROM " << table_ << " WHERE \""<<geometryColumn_<<"\" && SetSRID('BOX3D(";
-         s << std::setprecision(16);
-         s << pt.x << " " << pt.y << ",";
-         s << pt.x << " " << pt.y << ")'::box3d,"<<srid_<<")";
+
+         Envelope<double> box(pt.x,pt.y,pt.x,pt.y);
+         std::string table_with_bbox = populate_sql_bbox(table_,box);
+
+         s << " from " << table_with_bbox;
          
          if (row_limit_ > 0) {
              s << " LIMIT " << row_limit_;

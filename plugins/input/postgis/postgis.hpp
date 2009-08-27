@@ -69,6 +69,7 @@ class postgis_datasource : public datasource
       ConnectionCreator<Connection> creator_;
       bool multiple_geometries_;
       static const std::string name_;
+      const std::string bbox_token_;
    public:
       static std::string name();
       int type() const;
@@ -79,6 +80,7 @@ class postgis_datasource : public datasource
       postgis_datasource(const parameters &params);
       ~postgis_datasource();
    private:
+      std::string populate_sql_bbox(const std::string& sql, Envelope<double> const& box) const;
       static std::string table_from_sql(const std::string& sql);
       boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const;
       postgis_datasource(const postgis_datasource&);
