@@ -31,9 +31,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#if BOOST_VERSION < 103600
-#include <boost/filesystem/convenience.hpp>
-#endif
 
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
@@ -65,15 +62,12 @@ shape_datasource::shape_datasource(const parameters &params)
    else
       shape_name_ = *file;
 
-   boost::filesystem::path path(shape_name_);
-#if BOOST_VERSION >= 103600
-   path.replace_extension("");
-#else
-   path = boost::filesystem::change_extension(path,"");
-#endif
-   shape_name_ = path.string();
-
-   if (!boost::filesystem::exists(shape_name_ + ".shp")) throw datasource_exception(shape_name_ + ".shp does not exist");
+   boost::algorithm::ireplace_last(shape_name_,".shp","");
+   
+   if (!boost::filesystem::exists(shape_name_ + ".shp"))
+   {
+       throw datasource_exception(shape_name_ + " does not exist");
+   }
 
    try
    {  
