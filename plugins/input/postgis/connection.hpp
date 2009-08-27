@@ -72,10 +72,26 @@ class Connection
          PGresult *result=0;
          if (type==1)
          {
-            result=PQexecParams(conn_,sql.c_str(),0,0,0,0,0,1);
-            return boost::shared_ptr<ResultSet>(new ResultSet(result));
+             result=PQexecParams(conn_,sql.c_str(),0,0,0,0,0,1);
          }
-         result=PQexec(conn_,sql.c_str());
+         else
+         {
+             result=PQexec(conn_,sql.c_str());
+         }
+         if(!result || PQresultStatus(result) != PGRES_TUPLES_OK)
+         {
+             std::string s("PSQL error");
+             if (conn_ )
+             {
+                 std::string msg = PQerrorMessage( conn_ );
+                 if ( ! msg.empty() )
+                 {
+                     s += ":\n" + msg.substr( 0, msg.size() - 1 );
+                 }
+             } 
+             throw mapnik::datasource_exception( s );
+         }
+
          return boost::shared_ptr<ResultSet>(new ResultSet(result));
       }
       

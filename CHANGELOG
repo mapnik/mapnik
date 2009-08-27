@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik 0.6.2 Release
 --------------------
 
+- PostGIS Plugin: Throw and report errors if SQL execution fails (r1291) (#363)
+
 - PostGIS Plugin: Added missing support for BigInt(int8) postgres datatypes (r1250) (#384)
 
 
