@@ -186,7 +186,6 @@ def test_textsymbolizer_pickle():
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik.Color('black'))
 
-    raise Todo("FontSet pickling support needed: http://trac.mapnik.org/ticket/348")
     ts2 = pickle.loads(pickle.dumps(ts,pickle.HIGHEST_PROTOCOL))
     eq_(ts.name, ts2.name)
     eq_(ts.face_name, ts2.face_name)
@@ -211,6 +210,7 @@ def test_textsymbolizer_pickle():
     eq_(ts.line_spacing, ts2.line_spacing)
     eq_(ts.character_spacing, ts2.character_spacing)
     
+    raise Todo("FontSet pickling support needed: http://trac.mapnik.org/ticket/348")
     eq_(ts.fontset, ts2.fontset)
 
 

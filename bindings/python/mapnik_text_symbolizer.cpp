@@ -75,12 +75,12 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         // so we do not exceed max args accepted by make_tuple,
         // lets put the increasing list of parameters in a list
         boost::python::list extras;
-        extras.append(t.get_wrap_char());
+        extras.append(t.get_wrap_char_string());
         extras.append(t.get_line_spacing());
         extras.append(t.get_character_spacing());
         extras.append(t.get_text_convert());
                 
-        return boost::python::make_tuple(disp,t.get_fontset().get_name(),t.get_label_placement(),
+        return boost::python::make_tuple(disp,t.get_label_placement(),
         t.get_vertical_alignment(),t.get_halo_radius(),t.get_halo_fill(),t.get_text_ratio(),
         t.get_wrap_width(),t.get_label_spacing(),t.get_minimum_distance(),t.get_allow_overlap(),
         anchor,t.get_force_odd_labels(),t.get_max_char_angle_delta(),extras
@@ -92,7 +92,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
    {
         using namespace boost::python;
         
-        if (len(state) != 15)
+        if (len(state) != 14)
         {
             PyErr_SetObject(PyExc_ValueError,
                          ("expected 15-item tuple in call to __setstate__; got %s"
@@ -105,41 +105,35 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         double dx = extract<double>(disp[0]);
         double dy = extract<double>(disp[1]);
         t.set_displacement(dx,dy);
-
-        if (state[1])
-        {
-            std::string fontset = extract<std::string>(state[1]);
-            t.set_fontset(fontset);
-        }
         
-        t.set_label_placement(extract<label_placement_e>(state[2]));
+        t.set_label_placement(extract<label_placement_e>(state[1]));
 
-        t.set_vertical_alignment(extract<vertical_alignment_e>(state[3]));
+        t.set_vertical_alignment(extract<vertical_alignment_e>(state[2]));
         
-        t.set_halo_radius(extract<unsigned>(state[4]));
+        t.set_halo_radius(extract<unsigned>(state[3]));
 
-        t.set_halo_fill(extract<color>(state[5]));
+        t.set_halo_fill(extract<color>(state[4]));
 
-        t.set_text_ratio(extract<unsigned>(state[6]));
+        t.set_text_ratio(extract<unsigned>(state[5]));
 
-        t.set_wrap_width(extract<unsigned>(state[7]));
+        t.set_wrap_width(extract<unsigned>(state[6]));
 
-        t.set_label_spacing(extract<unsigned>(state[8]));
+        t.set_label_spacing(extract<unsigned>(state[7]));
 
-        t.set_minimum_distance(extract<double>(state[9]));
+        t.set_minimum_distance(extract<double>(state[8]));
 
-        t.set_allow_overlap(extract<bool>(state[10]));
+        t.set_allow_overlap(extract<bool>(state[9]));
         
-        list anch = extract<list>(state[11]);
+        list anch = extract<list>(state[10]);
         double x = extract<double>(anch[0]);
         double y = extract<double>(anch[1]);
         t.set_anchor(x,y);
         
-        t.set_force_odd_labels(extract<bool>(state[12]));
+        t.set_force_odd_labels(extract<bool>(state[11]));
         
-        t.set_max_char_angle_delta(extract<double>(state[13]));
+        t.set_max_char_angle_delta(extract<double>(state[12]));
         
-        list extras = extract<list>(state[14]);
+        list extras = extract<list>(state[13]);
         t.set_wrap_char_from_string(extract<std::string>(extras[0]));
         t.set_line_spacing(extract<unsigned>(extras[1]));
         t.set_character_spacing(extract<unsigned>(extras[2]));
