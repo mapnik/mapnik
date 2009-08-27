@@ -45,10 +45,12 @@ def test_pointsymbolizer_missing_image():
 
 # PointSymbolizer pickling
 def test_pointsymbolizer_pickle():
-    raise Todo("PointSymbolizer does not support pickling yet.")
-    #p = mapnik.PointSymbolizer()
-    #p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
-    #eq_(p2, p)    
+    p = mapnik.PointSymbolizer("../data/images/dummy.png", "png", 16, 16)
+    p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
+    # image type, width, and height only used in contructor...
+    eq_(p.filename, p2.filename)
+    eq_(p.allow_overlap, p2.allow_overlap)
+    eq_(p.opacity, p2.opacity)
 
 # PolygonSymbolizer initialization
 def test_polygonsymbolizer_init():
