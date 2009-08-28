@@ -68,6 +68,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
      cursor_fetch_size_(*params_.get<int>("cursor_size",0)),
      row_limit_(*params_.get<int>("row_limit",0)),
      type_(datasource::Vector),
+     srid_(*params_.get<int>("srid",0)),
      extent_initialized_(false),
      desc_(*params.get<std::string>("type"),"utf-8"),
      creator_(params.get<std::string>("host"),
@@ -78,6 +79,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
      bbox_token_("!bbox!")
 {   
 
+   if (table_.empty()) throw mapnik::datasource_exception("missing <table> parameter");
+   
    boost::optional<int> initial_size = params_.get<int>("inital_size",1);
    boost::optional<int> max_size = params_.get<int>("max_size",10);
 
@@ -100,7 +103,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
          }
          catch (boost::bad_lexical_cast & ex)
          {
-            std::clog << *beg << " : " << ex.what() << "\nAre your coordinates each separated by commas?\n";
+            clog << *beg << " : " << ex.what() << "\nAre your coordinates each separated by commas?\n";
             break;
          }
          if (i==3) 
@@ -144,37 +147,96 @@ postgis_datasource::postgis_datasource(parameters const& params)
             table_name=table_name.substr(0);
          }
 
-         std::ostringstream s;
-         s << "select f_geometry_column,srid,type from ";
-         s << GEOMETRY_COLUMNS <<" where f_table_name='" << table_name<<"'";
-         
-         if (schema_name.length() > 0)
-            s <<" and f_table_schema='"<< schema_name <<"'";
-
-         if (geometry_field_.length() > 0)
-            s << " and f_geometry_column = '" << geometry_field_ << "'";
-            
-         shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
-         if (rs->next())
+         geometryColumn_ = geometry_field_;
+         if (!geometryColumn_.length() > 0 || srid_ == 0)
          {
-            try 
-            {
-               srid_ = lexical_cast<int>(rs->getValue("srid"));
-            }
-            catch (bad_lexical_cast &ex)
-            {
-               clog << rs->getValue("srid") << ":" << ex.what() << endl;
-            }
-            geometryColumn_=rs->getValue("f_geometry_column");
-            std::string postgisType=rs->getValue("type");
-         }
-         rs->close();
+             std::ostringstream s;
+             s << "SELECT f_geometry_column, srid FROM ";
+             s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << table_name<<"'";
+             
+             if (schema_name.length() > 0) 
+                s << " AND f_table_schema='" << schema_name << "'";
             
-         // collect attribute desc
-         s.str("");
+             if (geometry_field_.length() > 0)
+                s << " AND f_geometry_column='" << geometry_field_ << "'";
+
+#ifdef MAPNIK_DEBUG
+             clog << s.str() << endl;
+#endif
+             shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
+             if (rs->next())
+             {
+                geometryColumn_ = rs->getValue("f_geometry_column");
+#ifdef MAPNIK_DEBUG
+                clog << "setting geometry field to=" << geometryColumn_ << "\n";
+#endif
+                if (srid_ == 0)
+                {
+                    try 
+                    {
+                        srid_ = lexical_cast<int>(rs->getValue("srid"));
+#ifdef MAPNIK_DEBUG
+                        clog << "setting SRID to=" << srid_ << "\n";
+#endif
+                    }
+                    catch (bad_lexical_cast &ex)
+                    {
+                       clog << "SRID: " << rs->getValue("srid") << ":" << ex.what() << endl;
+                    }
+                }
+             }
+             rs->close();
+             
+             if (geometryColumn_.length() == 0)
+                throw mapnik::datasource_exception( "PostGIS Driver Error: Geometry column not specified or found in " + GEOMETRY_COLUMNS + " table: '" + table_name + "'. Try setting the 'geometry_field' parameter or adding a proper " + GEOMETRY_COLUMNS + " record");
+
+             if (srid_ <= 0)
+             {
+                s.str("");
+                s << "SELECT SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
+                if (schema_name.length() > 0)
+                    s << schema_name << ".";
+                s << table_name << " WHERE \"" << geometryColumn_ << "\" IS NOT NULL LIMIT 1;";
+
+#ifdef MAPNIK_DEBUG
+                clog << s.str() << endl;
+#endif
+                shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
+                if (rs->next())
+                {
+                    try
+                    {
+                        srid_ = lexical_cast<int>(rs->getValue("srid"));
+#ifdef MAPNIK_DEBUG
+                        clog << "setting SRID to=" << srid_ << endl;
+#endif
+                    }
+                    catch (bad_lexical_cast &ex)
+                    {
+                        clog << "SRID: " << rs->getValue("srid") << ":" << ex.what() << endl;
+                    }
+                }
+                rs->close();
+            }
+         }
+         
+         if (srid_ == 0)
+         {
+            srid_ = -1;
+            clog << "SRID: warning, using srid=-1" << endl;
+         }
+         
+#ifdef MAPNIK_DEBUG
+         clog << "using srid=" << srid_ << endl;
+         clog << "using geometry_column=" << geometryColumn_ << endl;
+#endif
+
+         // collect attribute desc         
+         std::ostringstream s;
          std::string table_with_bbox = populate_sql_bbox(table_,extent_);
          s << "select * from " << table_with_bbox << " limit 0";
-         rs=conn->executeQuery(s.str());
+
+         shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
          int count = rs->getNumFields();
          for (int i=0;i<count;++i)
          {
@@ -225,12 +287,16 @@ layer_descriptor postgis_datasource::get_descriptor() const
 
 std::string postgis_datasource::populate_sql_bbox(const std::string& sql, Envelope<double> const& box) const
 {
-    std::string sql_with_bbox = boost::algorithm::to_lower_copy(sql);
+    std::string sql_with_bbox = sql;
     std::ostringstream b;
-    b << "SetSRID('BOX3D(";
+    if (srid_ > 0)
+        b << "SetSRID(";
+    b << "'BOX3D(";
     b << std::setprecision(16);
     b << box.minx() << " " << box.miny() << ",";
-    b << box.maxx() << " " << box.maxy() << ")'::box3d," << srid_ << ")";
+    b << box.maxx() << " " << box.maxy() << ")'::box3d";
+    if (srid_ > 0)
+        b << ", " << srid_ << ")";
     if ( boost::algorithm::icontains(sql,bbox_token_) )
     {
         boost::algorithm::replace_all(sql_with_bbox,bbox_token_,b.str());
@@ -277,7 +343,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
          csql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << sql << " FOR READ ONLY";
 
 #ifdef MAPNIK_DEBUG
-         std::clog << csql.str() << "\n";
+         clog << csql.str() << "\n";
 #endif
          if (!conn->execute(csql.str())) {
             throw mapnik::datasource_exception( "PSQL Error: Creating cursor for data select." );
@@ -287,7 +353,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
      } else {
          // no cursor
 #ifdef MAPNIK_DEBUG
-         std::clog << sql << "\n";
+         clog << sql << "\n";
 #endif
          return conn->executeQuery(sql,1);
      }
