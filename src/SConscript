@@ -56,7 +56,7 @@ if env['PLATFORM'] == 'Darwin':
 if env['INTERNAL_LIBAGG']:
     libraries.insert(0, 'agg')
 else:
-    libraries.append('agg')
+    libraries.append([lib for lib in env['LIBS'] if lib.startswith('agg')])
     
 
 if env['PLATFORM'] == 'Darwin':
