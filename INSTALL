@@ -194,11 +194,11 @@ reprojections.
 
 Here is an example on how to use it::
 
-  >>> from mapnik import Projection, Coord
-  >>> p = Projection('+init=epsg:27700') # British National Grid
-  >>> p.forward(Coord(-1.125,51.75))
+  >>> import mapnik
+  >>> p = mapnik.Projection('+init=epsg:27700') # British National Grid
+  >>> p.forward(mapnik.Coord(-1.125,51.75))
   Coord(460396.920899,206113.214203) # reprojected coordinate x, y pair
-  >>> p.forward(Envelope(-1.125,51.75,-1.0,50.75))
+  >>> p.forward(mapnik.Envelope(-1.125,51.75,-1.0,50.75))
   Envelope(461721.365661,94917.0749406,469024.861457,206224.090767) # reprojected extent
 
 
