@@ -60,21 +60,57 @@ std::string numeric2string(const char* buf)
    
    int i = std::max(weight,int16_t(0));
    int d = 0;
+
+   // Each numeric "digit" is actually a value between 0000 and 9999 stored in a 16 bit field.
+   // For example, the number 1234567809990001 is stored as four digits: [1234] [5678] [999] [1].
+   // Note that the last two digits show that the leading 0's are lost when the number is split.
+   // We must be careful to re-insert these 0's when building the string.
+
    while ( i >= 0)
    {
-      if (i <= weight && d < ndigits)
+      if (i <= weight && d < ndigits) {
+         // All digits after the first must be padded to make the field 4 characters long
+         if (d != 0) {
+            switch(digits[d]) {
+            case 0 ... 9:
+               ss << "000"; // 0000 - 0009
+               break;
+            case 10 ... 99:
+               ss << "00";  // 0010 - 0099
+               break;
+            case 100 ... 999:
+               ss << "0";   // 0100 - 0999
+               break;
+            }
+         }
          ss <<  digits[d++];
-      else
-         ss <<  '0';
-      i--;
+     } else
+        if (d == 0)
+           ss <<  "0";
+        else
+           ss <<  "0000";
+       i--;
    }
    if (dscale > 0)
    {
       ss << '.';
       while ( i >= -dscale)
       {
-         if (i <= weight && d < ndigits)
+         if (i <= weight && d < ndigits) {
+            // All the digits following the decimal point must be padded 
+            switch(digits[d]) {
+            case 0 ... 9:
+               ss << "000"; 
+               break;
+            case 10 ... 99:
+               ss << "00";
+               break;
+            case 100 ... 999:
+               ss << "0";
+               break;
+            }
             ss <<  digits[d++];
+         }
          i--;
       }
    }
