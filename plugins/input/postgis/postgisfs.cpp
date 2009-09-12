@@ -84,33 +84,47 @@ std::string numeric2string(const char* buf)
             }
          }
          ss <<  digits[d++];
-     } else
-        if (d == 0)
-           ss <<  "0";
-        else
-           ss <<  "0000";
-       i--;
+      } else {
+         if (d == 0)
+            ss <<  "0";
+         else
+            ss <<  "0000";
+      }
+      i--;
    }
    if (dscale > 0)
    {
       ss << '.';
-      while ( i >= -dscale)
+      // dscale counts the number of decimal digits following the point, not the numeric digits
+      while (dscale > 0)
       {
-         if (i <= weight && d < ndigits) {
-            // All the digits following the decimal point must be padded 
-            switch(digits[d]) {
-            case 0 ... 9:
-               ss << "000"; 
-               break;
-            case 10 ... 99:
-               ss << "00";
-               break;
-            case 100 ... 999:
-               ss << "0";
-               break;
-            }
-            ss <<  digits[d++];
+         int value;
+         if (i <= weight && d < ndigits)
+            value = digits[d++];
+         else
+            value = 0;
+
+         // Output up to 4 decimal digits for this value
+         if (dscale > 0) {
+            ss << (value / 1000);
+            value %= 1000;
+            dscale--;
          }
+         if (dscale > 0) {
+            ss << (value / 100);
+            value %= 100;
+            dscale--;
+         }
+         if (dscale > 0) {
+            ss << (value / 10);
+            value %= 10;
+            dscale--;
+         }
+         if (dscale > 0) {
+            ss << value;
+            dscale--;
+         }
+
          i--;
       }
    }
