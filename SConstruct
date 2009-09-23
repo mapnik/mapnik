@@ -238,6 +238,9 @@ opts.Update(env)
 if env.has_key('COLOR_PRINT') and env['COLOR_PRINT'] == False:
     color_print = regular_print
 
+if sys.platform == "win32":
+    color_print = regular_print
+
 color_print(4,'\nWelcome to Mapnik...\n')
 
 # if we are not configuring overwrite environment with pickled settings
@@ -875,20 +878,20 @@ if not preconfigured:
                 color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
                 Exit(1)
         
-            sys_prefix = "%s -c 'import sys; print sys.prefix'" % env['PYTHON']
+            sys_prefix = '''%s -c "import sys; print sys.prefix"''' % env['PYTHON']
             env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
             
             if HAS_DISTUTILS:                        
-                sys_version = "%s -c 'from distutils.sysconfig import get_python_version; print get_python_version()'" % env['PYTHON']
+                sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print get_python_version()"''' % env['PYTHON']
                 env['PYTHON_VERSION'] = call(sys_version)
-                py_includes = "%s -c 'from distutils.sysconfig import get_python_inc; print get_python_inc()'" % env['PYTHON']
+                py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc()"''' % env['PYTHON']
                 env['PYTHON_INCLUDES'] = call(py_includes)
                 # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
-                site_packages = "%s -c 'from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)'" % env['PYTHON']
+                site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)"''' % env['PYTHON']
                 env['PYTHON_SITE_PACKAGES'] = call(site_packages)
             else:
-                env['PYTHON_SYS_PREFIX'] = os.popen("%s -c 'import sys; print sys.prefix'" % env['PYTHON']).read().strip()
-                env['PYTHON_VERSION'] = os.popen("%s -c 'import sys; print sys.version'" % env['PYTHON']).read()[0:3]
+                env['PYTHON_SYS_PREFIX'] = os.popen('''%s -c "import sys; print sys.prefix"''' % env['PYTHON']).read().strip()
+                env['PYTHON_VERSION'] = os.popen('''%s -c "import sys; print sys.version"''' % env['PYTHON']).read()[0:3]
                 env['PYTHON_INCLUDES'] = env['PYTHON_SYS_PREFIX'] + '/include/python' + env['PYTHON_VERSION']
                 env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + '/' + env['PYTHON_SYS_PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
         
