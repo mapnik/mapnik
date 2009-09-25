@@ -21,10 +21,13 @@
  *****************************************************************************/
 //$Id$
 
-//mapnik
-#include <mapnik/color.hpp>
 // boost
 #include <boost/python.hpp>
+#include <boost/version.hpp>
+
+//mapnik
+#include <mapnik/color.hpp>
+
 
 using mapnik::color;
 
