@@ -147,11 +147,9 @@ void export_map()
       ;
     
    class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(
-                  
-#if BOOST_VERSION >= 103500 
-                  args("self","width","height","srs"),      
+#if BOOST_VERSION >= 103500
+                  args("self","width","height","srs"),
 #endif
-                  
                   "Create a Map with a width and height as integers and, optionally,\n"
                   "an srs string either with a Proj.4 epsg code ('+init=epsg:<code>')\n"
                   "or with a Proj.4 literal ('+proj=<literal>').\n"
