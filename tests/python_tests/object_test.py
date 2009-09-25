@@ -66,7 +66,14 @@ def test_polygonsymbolizer_init():
 
 # PolygonSymbolizer pickling
 def test_polygonsymbolizer_pickle():
-    raise Todo("PolygonSymbolizer does not support pickling yet.")
+    p = mapnik.PolygonSymbolizer(mapnik.Color('black'))
+    p.fill_opacity = .5
+    # does not work for some reason...
+    #eq_(pickle.loads(pickle.dumps(p)), p)
+    p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
+    eq_(p.fill, p2.fill)
+    eq_(p.fill_opacity, p2.fill_opacity)
+
 
 # Stroke initialization
 def test_stroke_init():
@@ -107,11 +114,13 @@ def test_stroke_pickle():
     s.add_dash(5,6)
 
     s2 = pickle.loads(pickle.dumps(s,pickle.HIGHEST_PROTOCOL))
+    eq_(s.color, s2.color)
     eq_(s.width, s2.width)
+    eq_(s.opacity, s2.opacity)
     eq_(s.get_dashes(), s2.get_dashes())
     eq_(s.line_cap, s2.line_cap)
     eq_(s.line_join, s2.line_join)
-    eq_(s.opacity, s2.opacity)
+
     
 # LineSymbolizer initialization
 def test_linesymbolizer_init():
@@ -142,7 +151,16 @@ def test_linesymbolizer_init():
 
 # LineSymbolizer pickling
 def test_linesymbolizer_pickle():
-    raise Todo("LinesSymbolizer does not support pickling yet.")
+    p = mapnik.LineSymbolizer()
+    p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
+    # line and stroke eq fails, so we compare attributes for now..
+    s,s2 = p.stroke, p2.stroke
+    eq_(s.color, s2.color)
+    eq_(s.opacity, s2.opacity)
+    eq_(s.width, s2.width)
+    eq_(s.get_dashes(), s2.get_dashes())
+    eq_(s.line_cap, s2.line_cap)
+    eq_(s.line_join, s2.line_join)
 
 # Shapefile initialization
 def test_shapefile_init():
@@ -261,7 +279,7 @@ def test_map_init_from_string():
 # Map pickling
 def test_map_pickle():
     # Fails due to scale() not matching, possibly other things
-    raise(Todo("Map does not support pickling yet (Tickets #167, #233)."))
+    raise(Todo("Map does not support pickling yet (Tickets #345)."))
 
     m = mapnik.Map(256, 256)
 
