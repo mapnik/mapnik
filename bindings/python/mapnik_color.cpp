@@ -41,17 +41,62 @@ struct color_pickle_suite : boost::python::pickle_suite
 void export_color () 
 {
     using namespace boost::python;
-    class_<color>("Color",init<int,int,int,int>())
-       .def(init<int,int,int>())
-       .def(init<std::string>())
-       .add_property("r",&color::red,&color::set_red)
-       .add_property("g",&color::green,&color::set_green)
-       .add_property("b",&color::blue,&color::set_blue)
-       .add_property("a",&color::alpha,&color::set_alpha)
-       .def(self == self)
-       .def_pickle(color_pickle_suite())
-       .def("__str__",&color::to_string)
-       .def("to_hex_string",&color::to_hex_string)
-       ;
+    class_<color>("Color", init<int,int,int,int>(
+#if BOOST_VERSION >= 103500
+        args("self", "r", "g", "b", "a"),
+#endif 
+        "Creates a new color from its RGB components\n"
+        "and an alpha value.\n"
+        "All values between 0 and 255.\n")
+        )
+  .def(init<int,int,int>(
+#if BOOST_VERSION >= 103500
+        args("self", "r", "g", "b"),
+#endif 
+        "Creates a new color from its RGB components.\n"
+        "All values between 0 and 255.\n")
+        )
+  .def(init<std::string>(
+#if BOOST_VERSION >= 103500
+        args("self", "color_string"),
+#endif
+        "Creates a new color from its CSS string representation.\n"
+        "The string may be a CSS color name (e.g. 'blue')\n"
+        "or a hex color string (e.g. '#0000ff').\n")
+        )
+  .add_property("r",
+        &color::red,
+        &color::set_red,
+        "Gets or sets the red component.\n"
+        "The value is between 0 and 255.\n")
+  .add_property("g",
+        &color::green,
+        &color::set_green,
+        "Gets or sets the green component.\n"
+        "The value is between 0 and 255.\n")
+  .add_property("b",
+        &color::blue,
+        &color::set_blue,
+        "Gets or sets the green component.\n"
+        "The value is between 0 and 255.\n")
+  .add_property("a",
+        &color::alpha,
+        &color::set_alpha,
+        "Gets or sets the green component.\n"
+        "The value is between 0 and 255.\n")
+  .def(self == self)
+  .def_pickle(color_pickle_suite())
+  .def("__str__",&color::to_string)
+  .def("to_hex_string",&color::to_hex_string,
+#if BOOST_VERSION >= 103500
+        args("self"),
+#endif
+        "Returns the hexadecimal representation of this color.\n"
+        "\n"
+        "Example:\n"
+        ">>> c = Color('blue')\n"
+        ">>> c.to_hex_string()\n"
+        "'#0000ff'\n")
+  ;
 }
 
