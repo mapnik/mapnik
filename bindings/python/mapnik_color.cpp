@@ -77,12 +77,12 @@ void export_color ()
   .add_property("b",
         &color::blue,
         &color::set_blue,
-        "Gets or sets the green component.\n"
+        "Gets or sets the blue component.\n"
         "The value is between 0 and 255.\n")
   .add_property("a",
         &color::alpha,
         &color::set_alpha,
-        "Gets or sets the green component.\n"
+        "Gets or sets the alpha component.\n"
         "The value is between 0 and 255.\n")
   .def(self == self)
   .def_pickle(color_pickle_suite())
