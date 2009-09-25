@@ -241,7 +241,7 @@ class_<text_symbolizer>("TextSymbolizer",init<std::string const&,std::string con
                   &text_symbolizer::get_wrap_width,
                   &text_symbolizer::set_wrap_width)
     .add_property("wrap_character",
-                  make_function(&text_symbolizer::get_wrap_char_string,return_value_policy<copy_const_reference>()),
+                  &text_symbolizer::get_wrap_char_string,
                   &text_symbolizer::set_wrap_char_from_string)
     ;
 }

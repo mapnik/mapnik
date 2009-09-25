@@ -223,7 +223,7 @@ namespace mapnik
         return wrap_char_;
     }
 
-    std::string const&  text_symbolizer::get_wrap_char_string() const
+    std::string text_symbolizer::get_wrap_char_string() const
     {
         return std::string(1, wrap_char_);
     }
