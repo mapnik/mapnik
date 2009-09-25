@@ -21,8 +21,11 @@
  *****************************************************************************/
 //$Id$
 
+// boost
 #include <boost/python.hpp>
+#include <boost/version.hpp>
 
+// mapnik
 #include <mapnik/stroke.hpp>
 #include "mapnik_enumeration.hpp"
 
@@ -40,7 +43,7 @@ namespace {
       mapnik::dash_array::const_iterator iter = dash.begin();
       mapnik::dash_array::const_iterator end = dash.end();
       for (; iter != end; ++iter) {
-        	l.append(make_tuple(iter->first, iter->second));
+          l.append(make_tuple(iter->first, iter->second));
       }
     }
 
@@ -77,9 +80,9 @@ struct stroke_pickle_suite : boost::python::pickle_suite
             );
             throw_error_already_set();
         }
-        
+
         s.set_opacity(extract<float>(state[0]));
-        
+
         if (state[1])
         {
           list dashes = extract<list>(state[1]);
@@ -104,29 +107,73 @@ void export_stroke ()
     using namespace boost::python;
 
     enumeration_<line_cap_e>("line_cap")
+
+/*
+    enumeration_<line_cap_e>("line_cap",
+        "The possible values for a line cap used when drawing\n"
+        "with a stroke.\n")
+*/
         .value("BUTT_CAP",BUTT_CAP)
         .value("SQUARE_CAP",SQUARE_CAP)
         .value("ROUND_CAP",ROUND_CAP)
         ;
     enumeration_<line_join_e>("line_join")
+
+/*
+    enumeration_<line_join_e>("line_join",
+        "The possible values for the line joining mode\n"
+        "when drawing with a stroke.\n")
+*/
         .value("MITER_JOIN",MITER_JOIN)
         .value("MITER_REVERT_JOIN",MITER_REVERT_JOIN)
         .value("ROUND_JOIN",ROUND_JOIN)
         .value("BEVEL_JOIN",BEVEL_JOIN)
         ;
 
-    class_<stroke>("Stroke",init<>())
-        .def(init<color,float>())
+    class_<stroke>("Stroke",init<>(
+#if BOOST_VERSION >= 103400
+        ( arg("self") ),
+#endif
+        "Creates a new default black stroke with the width of 1.\n"))
+        .def(init<color,float>(
+#if BOOST_VERSION >= 103400
+              ( arg("self"), arg("color"), arg("width") ),
+#endif
+              "Creates a new stroke object with a specified color and width.\n")
+        )
         .def_pickle(stroke_pickle_suite())
         .add_property("color",make_function
-                      (&stroke::get_color,return_value_policy<copy_const_reference>()),
-                      &stroke::set_color)
-        .add_property("width",&stroke::get_width,&stroke::set_width) 
-        .add_property("opacity",&stroke::get_opacity,&stroke::set_opacity)
-        .add_property("line_cap",&stroke::get_line_cap,&stroke::set_line_cap)
-        .add_property("line_join",&stroke::get_line_join,&stroke::set_line_join)
-        // todo combine into single get/set property
-        .def("add_dash",&stroke::add_dash)
-        .def("get_dashes", get_dashes_list)
+              (&stroke::get_color,return_value_policy<copy_const_reference>()),
+              &stroke::set_color,
+              "Gets or sets the stroke color.\n"
+              "Returns a new Color object on retrieval.\n")
+        .add_property("width",
+              &stroke::get_width,
+              &stroke::set_width,
+              "Gets or sets the stroke width in pixels.\n") 
+        .add_property("opacity",
+              &stroke::get_opacity,
+              &stroke::set_opacity, 
+              "Gets or sets the opacity of this stroke.\n"
+              "The value is a float between 0 and 1.\n")
+        .add_property("line_cap",
+              &stroke::get_line_cap,
+              &stroke::set_line_cap,
+              "Gets or sets the line cap of this stroke.\n")
+        .add_property("line_join",
+              &stroke::get_line_join,
+              &stroke::set_line_join,
+              "Returns the line join mode of this stroke.\n")
+        // todo consider providing a single get/set property
+        .def("add_dash",&stroke::add_dash,
+#if BOOST_VERSION >= 103400
+              ( arg("self"), arg("length"), arg("gap") ),
+#endif
+              "Adds a dash segment to the dash patterns of this stroke.\n")
+        .def("get_dashes", get_dashes_list,
+#if BOOST_VERSION >= 103400
+              ( arg("self") ),
+#endif
+              "Returns the list of dash segments for this stroke.\n")
         ;
 }

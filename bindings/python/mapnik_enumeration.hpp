@@ -42,6 +42,11 @@ class enumeration_ :
         {
             init();
         }
+        enumeration_(const char * python_alias, const char * doc) :
+            base_type( python_alias, doc )
+        {
+            init();
+        }
 
     private:
         struct converter

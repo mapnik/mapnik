@@ -46,7 +46,7 @@ void export_color ()
     using namespace boost::python;
     class_<color>("Color", init<int,int,int,int>(
 #if BOOST_VERSION >= 103500
-        args("self", "r", "g", "b", "a"),
+        ( arg("self"), arg("r"), arg("g"), arg("b"), arg("a") ),
 #endif 
         "Creates a new color from its RGB components\n"
         "and an alpha value.\n"
@@ -54,14 +54,14 @@ void export_color ()
         )
   .def(init<int,int,int>(
 #if BOOST_VERSION >= 103500
-        args("self", "r", "g", "b"),
+        ( arg("self"), arg("r"), arg("g"), arg("b") ),
 #endif 
         "Creates a new color from its RGB components.\n"
         "All values between 0 and 255.\n")
         )
   .def(init<std::string>(
 #if BOOST_VERSION >= 103500
-        args("self", "color_string"),
+        ( arg("self"), arg("color_string") ),
 #endif
         "Creates a new color from its CSS string representation.\n"
         "The string may be a CSS color name (e.g. 'blue')\n"
@@ -92,7 +92,7 @@ void export_color ()
   .def("__str__",&color::to_string)
   .def("to_hex_string",&color::to_hex_string,
 #if BOOST_VERSION >= 103500
-        args("self"),
+        ( arg("self") ),
 #endif
         "Returns the hexadecimal representation of this color.\n"
         "\n"
