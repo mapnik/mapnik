@@ -1,0 +1,134 @@
+html { background: #4b4d4d; margin: 0;
+  padding: 1em 1em 3em;
+}
+body { background: #fff;
+  border: 1px solid #000; color: #000; margin: 1em 0; padding: 0 1em 1em;
+}
+body { font: normal small 'Lucida Grande', Verdana, Geneva, Arial, Helvetica, sans-serif; background: #ffffff; color: #2e2e2e; }
+/*
+body, th, td {
+  font: normal small Verdana,Arial,'Bitstream Vera Sans',Helvetica,sans-serif;
+}*/
+h1, h2, h3, h4 {
+  font-family: Arial,Verdana,'Bitstream Vera Sans',Helvetica,sans-serif;
+  font-weight: bold; letter-spacing: -0.018em;
+}
+h1 { font-size: 19px; margin: 2em 0 .5em; }
+h2 { font-size: 16px; margin: 1.5em 0 .5em; }
+h3 { font-size: 14px; margin: 1.2em 0 .5em; }
+hr { border: none;  border-top: 1px solid #ccb; margin: 2em 0; }
+p { margin: 0 0 1em; }
+:link, :visited { text-decoration: none; border-bottom: 1px dotted #bbb;
+  color: #b00;
+}
+:link:hover, :visited:hover { background-color: #eee; color: #555; }
+
+table { border: none; border-collapse: collapse; }
+
+table.navbar { background: #5182b5; color: #fff; margin: 2em 0 .33em; }
+table.navbar th { border: 1px solid #5c95ce; font-weight: bold; padding: 1px; }
+table.navbar :link, table.navbar :visited { border: none; color: #fff; }
+table.navbar :link:hover, table.navbar :visited:hover { background: none;
+  text-decoration: underline overline;
+}
+table.navbar th.navbar-select { background: #fff; color: #000; }
+span.breadcrumbs { color: #666; font-size: 95%; }
+h1.epydoc { border: none; color: #666;
+  font-size: x-large; margin: 1em 0 0; padding: 0;
+}
+
+pre { border-right-width: 0px; border-left-width: 0px; border-bottom-width: 2px; border-top-width: 2px; font-family: "DejaVu Sans", "Lucida Grande", "Verdana", Courier, mono; line-height: 16px; border-color: #f7931e; border-style: solid; font-size: 11px; margin-bottom: 10px; margin-top: 10px; overflow: auto; padding: 10px; background: #f8f8f9; -moz-border-radius: 2px; -webkit-border-radius: 2px;}
+
+pre.base-tree { color: #666; margin: 0; padding: 0; }
+pre.base-tree :link, pre.base-tree :visited { border: none; }
+pre.py-doctest, pre.variable, pre.rst-literal-block { background: #eee;
+  border: 1px solid #e6e6e6; color: #000; margin: 1em; padding: .25em;
+  overflow: auto;
+}
+pre.variable { margin: 0; }
+
+/* Summary tables */
+
+table.summary { margin: .5em 0; }
+table.summary tr.table-header { background: #f7f7f0; }
+table.summary td.table-header { color: #666; font-weight: bold; }
+table.summary th, table.summary td { border: 1px solid #d7d7d7; }
+table.summary th th, table.summary td td { border: none; }
+table.summary td.summary table td { color: #666; font-size: 90%; }
+table.summary td.summary table br { display: none; }
+p.indent-wrapped-lines { color: #999; font-size: 85%; margin: 0;
+  padding: 0 0 0 7em; text-indent: -7em;
+}
+p.indent-wrapped-lines code { color: #999; font-size: 115%; }
+p.indent-wrapped-lines :link, p.indent-wrapped-lines :visited { border: none; }
+.summary-sig { display: block; font-size: 120%;
+  margin-bottom: .5em;
+}
+.summary-sig-name { font-weight: bold; }
+.summary-sig-arg { color: #333; }
+.summary-sig :link, .summary-sig :visited { border: none; }
+.summary-name {font-weight: bold; }
+
+/* Details tables */
+
+table.details { margin: 2em 0 0; }
+div table.details { margin-top: 0; }
+table.details tr.table-header { background: transparent; }
+table.details td.table-header { border-bottom: 1px solid #ccc; padding: 2em 0 0; }
+table.details span.table-header {
+  font: bold 140% Arial,Verdana,'Bitstream Vera Sans',Helvetica,sans-serif;
+  letter-spacing: -0.018em;
+}
+table.details th, table.details td { border: none; }
+table.details th th, table.details td td { border: none; }
+table.details td { padding-left: 2em; }
+table.details td td { padding-left: 0; }
+table.details h3.epydoc { margin-left: -2em; }
+table.details h3.epydoc .sig { color: #999; font-family: monospace; }
+table.details h3.epydoc .sig-name { color: #000; }
+table.details h3.epydoc .sig-arg { color: #666; }
+table.details h3.epydoc .sig-default { font-size: 95%; font-weight: normal; }
+table.details h3.epydoc .sig-default code { font-weight: normal; }
+table.details h3.epydoc .fname { color: #999; font-size: 90%;
+  font-style: italic; font-weight: normal; line-height: 1.6em;
+}
+
+dl dt { color: #666; margin-top: 1em; }
+dl dd { margin: 0; padding-left: 2em; }
+dl.fields { margin: 1em 0; padding: 0; }
+dl.fields dt { color: #666; margin-top: 1em; }
+dl.fields dd ul { margin: 0; padding: 0; }
+div.fields { font-size: 90%; margin: 0 0 2em 2em; }
+div.fields p { margin-bottom: 0.5em; }
+
+table td.footer { color: #999; font-size: 85%; margin-top: 3em;
+  padding: 0 3em 1em; position: absolute; width: 80%; }
+table td.footer :link, table td.footer :visited { border: none; color: #999; }
+table td.footer :link:hover, table td.footer :visited:hover {
+  background: transparent; text-decoration: underline;
+}
+
+/* Syntax highlighting */
+
+.py-prompt, .py-more, .variable-ellipsis, .variable-op { color: #999; }
+.variable-group { color: #666; font-weight: bold; }
+.py-string, .variable-string, .variable-quote { color: #093; }
+.py-comment { color: #06f; font-style: italic; }
+.py-keyword { color: #00f; }
+.py-output { background: #f6f6f0; color: #666; font-weight: bold; }
+
+/* Index */
+
+table.link-index { background: #f6f6f0; border: none; margin-top: 1em; }
+table.link-index td.link-index { border: none; font-family: monospace;
+  font-weight: bold; padding: .5em 1em;
+}
+table.link-index td table, table.link-index td td { border: none; }
+table.link-index .index-where { color: #999;
+  font-family: Verdana,Arial,'Bitstream Vera Sans',Helvetica,sans-serif;
+  font-size: 90%; font-weight: normal; line-height: 1.6em;
+}
+table.link-index .index-where :link, table.link-index .index-where :visited {
+  border: none; color: #666;
+}
+h2.epydoc { color: #999; font-size: 200%; line-height: 10px; }
