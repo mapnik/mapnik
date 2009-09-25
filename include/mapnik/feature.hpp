@@ -28,8 +28,15 @@
 #include <mapnik/value.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/raster.hpp>
+
 // boost
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 104000
+#include <boost/property_map/property_map.hpp>
+#else
 #include <boost/property_map.hpp>
+#endif
+
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 // stl
