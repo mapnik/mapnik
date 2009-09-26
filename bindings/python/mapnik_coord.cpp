@@ -21,7 +21,11 @@
  *****************************************************************************/
 //$Id$
 
+// boost
+#include <boost/version.hpp>
 #include <boost/python.hpp>
+
+// mapnik
 #include <mapnik/coord.hpp>
 
 using mapnik::coord;
@@ -39,10 +43,19 @@ struct coord_pickle_suite : boost::python::pickle_suite
 void export_coord()
 {
     using namespace boost::python;
-    class_<coord<double,2> >("Coord",init<double,double>())
+    class_<coord<double,2> >
+        ("Coord", 
+         // class docstring is in mapnik/__init__.py, class _Coord
+         init<double, double>(
+#if BOOST_VERSION >= 103500
+                              (arg("self"), arg("x"), arg("y")),
+#endif
+                              "Constructs a new point with the given coordinates."))
         .def_pickle(coord_pickle_suite())
-        .def_readwrite("x", &coord<double,2>::x)
-        .def_readwrite("y", &coord<double,2>::y)
+        .def_readwrite("x", &coord<double,2>::x,
+                       "Gets or sets the x/lon coordinate of the point.")
+        .def_readwrite("y", &coord<double,2>::y,
+                       "Gets or sets the y/lat coordinate of the point.")
         .def(self == self) // __eq__
         .def(self + self) // __add__
         .def(self + float())
@@ -53,5 +66,4 @@ void export_coord()
         .def(float() * self) 
         .def(self / float()) // __div__
         ;
-    
 }

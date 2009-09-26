@@ -68,28 +68,149 @@ class _injector(object):
             return type.__init__(self, name, bases, dict)
 
 class _Coord(Coord,_injector):
+    """
+    Represents a point with two coordinates (either lon/lat or x/y).
+
+    Following operators are defined for Coord:
+
+    Addition and subtraction of Coord objects:
+
+    >>> Coord(10, 10) + Coord(20, 20)
+    Coord(30.0, 30.0)
+    >>> Coord(10, 10) - Coord(20, 20)
+    Coord(-10.0, -10.0)
+
+    Addition, subtraction, multiplication and division between
+    a Coord and a float:
+
+    >>> Coord(10, 10) + 1
+    Coord(11.0, 11.0)
+    >>> Coord(10, 10) - 1
+    Coord(-9.0, -9.0)
+    >>> Coord(10, 10) * 2
+    Coord(20.0, 20.0)
+    >>> Coord(10, 10) / 2
+    Coord(5.0, 5.0)
+
+    Equality of coords (as pairwise equality of components):
+    >>> Coord(10, 10) is Coord(10, 10)
+    False
+    >>> Coord(10, 10) == Coord(10, 10)
+    True
+    """
     def __repr__(self):
         return 'Coord(%s,%s)' % (self.x, self.y)
-    def forward(self,obj):
-        return forward_(self,obj)
-    def inverse(self,obj):
-        return inverse_(self,obj)
+    def forward(self, projection):
+        """
+        Projects the point from the geographic coordinate 
+        space  into the cartesian space. The x component is 
+        considered to be longitude, the y component the 
+        latitude.
+
+        Returns the easting (x) and northing (y) as a 
+        coordinate pair.
+        
+        Example: Project the geographic coordinates of the 
+                 city center of Stuttgart into the local
+                 map projection (GK Zone 3/DHDN, EPSG 31467)  
+        >>> p = Projection('+init=epsg:31467') 
+        >>> Coord(9.1, 48.7).forward(p)
+        Coord(3507360.12813,5395719.2749)
+        """
+        return forward_(self, projection)
+    def inverse(self, projection):
+        """
+        Projects the point from the cartesian space 
+        into the geographic space. The x component is 
+        considered to be the easting, the y component 
+        to be the northing.
+        
+        Returns the longitude (x) and latitude (y) as a 
+        coordinate pair.
+
+        Example: Project the cartesian coordinates of the 
+                 city center of Stuttgart in the local
+                 map projection (GK Zone 3/DHDN, EPSG 31467)
+                 into geographic coordinates:
+        >>> p = Projection('+init=epsg:31467') 
+        >>> Coord(3507360.12813,5395719.2749).inverse(p)
+        Coord(9.1, 48.7)
+        """
+        return inverse_(self, projection)
 
 class _Envelope(Envelope,_injector):
+    """
+    Represents a spatial envelope (i.e. bounding box). 
+    
+    
+    Following operators are defined for Envelope:
+
+    Addition:
+    e1 + e2 is equvalent to e1.expand_to_include(e2) but yields 
+    a new envelope instead of modifying e1
+
+    Subtraction:
+    Currently e1 - e2 returns e1.
+
+    Multiplication and division with floats:
+    Multiplication and division change the width and height of the envelope
+    by the given factor without modifying its center..
+
+    That is, e1 * x is equivalent to: 
+           e1.width(x * e1.width())
+           e1.height(x * e1.height()),
+    except that a new envelope is created instead of modifying e1.
+
+    e1 / x is equivalent to e1 * (1.0/x).
+    
+    Equality: two envelopes are equal if their corner points are equal.
+    """
     def __repr__(self):
         return 'Envelope(%s,%s,%s,%s)' % \
             (self.minx,self.miny,self.maxx,self.maxy)
-    def forward(self,obj):
-        return forward_(self,obj)
-    def inverse(self,obj):
-        return inverse_(self,obj)
+    def forward(self, projection):
+        """
+        Projects the envelope from the geographic space 
+        into the cartesian space by projecting its corner 
+        points.
+
+        See also:
+           Coord.forward(self, projection)
+        """
+        return forward_(self, projection)
+    def inverse(self, projection):
+        """
+        Projects the envelope from the cartesian space 
+        into the geographic space by projecting its corner 
+        points.
+
+        See also:
+          Coord.inverse(self, projection).
+        """
+        return inverse_(self, projection)
 
 class _Projection(Projection,_injector):
     def __repr__(self):
         return "Projection('%s')" % self.params()
     def forward(self,obj):
+        """
+        Projects the given object (Envelope or Coord) 
+        from the geographic space into the cartesian space.
+
+        See also:
+          Envelope.forward(self, projection),
+          Coord.forward(self, projection).
+        """
         return forward_(obj,self)
     def inverse(self,obj):
+        """
+        Projects the given object (Envelope or Coord) 
+        from the cartesian space into the geographic space.
+
+        See also:
+          Envelope.inverse(self, projection),
+          Coord.inverse(self, projection).
+        """
         return inverse_(obj,self)
 
 def get_types(num):
