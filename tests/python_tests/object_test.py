@@ -18,25 +18,15 @@ def test_shieldsymbolizer_missing_image():
 
 # PointSymbolizer initialization
 def test_pointsymbolizer_init():
-    p = mapnik.PointSymbolizer()
-
+    p = mapnik.PointSymbolizer() 
     eq_(p.allow_overlap, False)
-    eq_(p.opacity, 1)
-    # XXX: Waiting on Trac Ticket #114
-    #eq_(p.width, )
-    #eq_(p.height, )
-    #eq_(p.file, )
-    #eq_(p.type, )
+    eq_(p.opacity,1)
+    eq_(p.filename,'')
 
     p = mapnik.PointSymbolizer("../data/images/dummy.png", "png", 16, 16)
-
     eq_(p.allow_overlap, False)
     eq_(p.opacity, 1)
-    # XXX: Waiting on Trac Ticket #114
-    #eq_(p.width, )
-    #eq_(p.height, )
-    #eq_(p.file, )
-    #eq_(p.type, )
+    eq_(p.filename,'../data/images/dummy.png')
 
 # PointSymbolizer missing image file
 @raises(RuntimeError)
@@ -247,7 +237,6 @@ def test_map_init():
     eq_(m.srs, '+proj=latlong')
 
 # Map initialization from string
-# Trac Ticket #99
 def test_map_init_from_string():
     map_string = '''<Map bgcolor="steelblue" srs="+proj=latlong +datum=WGS84">
      <Style name="My Style">
@@ -272,9 +261,9 @@ def test_map_init_from_string():
 
     m = mapnik.Map(600, 300)
     
-    # TODO: Test some properties here    
     mapnik.load_map_from_string(m, map_string)
     mapnik.load_map_from_string(m, map_string, True)
+    raise(Todo("Need to write more map property tests in 'object_test.py'..."))
 
 # Map pickling
 def test_map_pickle():
