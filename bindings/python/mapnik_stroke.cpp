@@ -105,24 +105,16 @@ void export_stroke ()
 {
     using namespace boost::python;
 
-    enumeration_<line_cap_e>("line_cap")
-
-/*
     enumeration_<line_cap_e>("line_cap",
         "The possible values for a line cap used when drawing\n"
         "with a stroke.\n")
-*/
         .value("BUTT_CAP",BUTT_CAP)
         .value("SQUARE_CAP",SQUARE_CAP)
         .value("ROUND_CAP",ROUND_CAP)
         ;
-    enumeration_<line_join_e>("line_join")
-
-/*
     enumeration_<line_join_e>("line_join",
         "The possible values for the line joining mode\n"
         "when drawing with a stroke.\n")
-*/
         .value("MITER_JOIN",MITER_JOIN)
         .value("MITER_REVERT_JOIN",MITER_REVERT_JOIN)
         .value("ROUND_JOIN",ROUND_JOIN)

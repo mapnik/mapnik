@@ -43,7 +43,13 @@ class enumeration_ :
             init();
         }
         enumeration_(const char * python_alias, const char * doc) :
+#if BOOST_VERSION >= 103500
             base_type( python_alias, doc )
+#else
+            // Boost.Python < 1.35.0 doesn't support
+            // docstrings for enums so we ignore it.
+            base_type( python_alias )
+#endif
         {
             init();
         }
