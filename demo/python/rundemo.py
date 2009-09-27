@@ -295,7 +295,7 @@ popplaces_text_symbolizer = mapnik.TextSymbolizer('GEONAME',
 
 # We set a "halo" around the text, which looks like an outline if thin enough,
 # or an outright background if large enough.
-popplaces_text_symbolizer.set_label_placement= mapnik.label_placement.POINT_PLACEMENT
+popplaces_text_symbolizer.label_placement= mapnik.label_placement.POINT_PLACEMENT
 popplaces_text_symbolizer.halo_fill = mapnik.Color('white')
 popplaces_text_symbolizer.halo_radius = 1
 popplaces_text_symbolizer.avoid_edges = True
