@@ -25,57 +25,126 @@
 #include <gdal_priv.h>
 
 using mapnik::query;
+using mapnik::coord2d;
 using mapnik::Envelope;
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::CoordTransform;
+using mapnik::point_impl;
+using mapnik::geometry2d;
 
-gdal_featureset::gdal_featureset(GDALDataset & dataset, query const& q)
+gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q)
    : dataset_(dataset),
-     query_extent_(q.get_bbox()),
+     band_(band),
+     gquery_(q),
      first_(true) {}
 
-gdal_featureset::~gdal_featureset() {}
+gdal_featureset::~gdal_featureset()
+{
+#ifdef MAPNIK_DEBUG
+      std::clog << "closing dataset = " << &dataset_ << "\n";
+#endif
+   GDALClose(&dataset_);
+}
 
 feature_ptr gdal_featureset::next()
 {
    if (first_)
    {
       first_ = false;
-      feature_ptr feature(new Feature(1));
-
-      GDALRasterBand * red = 0;
-      GDALRasterBand * green = 0;
-      GDALRasterBand * blue = 0;
-      GDALRasterBand * alpha = 0;
-      GDALRasterBand * grey = 0; 
-
-      unsigned raster_xsize = dataset_.GetRasterXSize();
-      unsigned raster_ysize = dataset_.GetRasterYSize();
-      int nbands = dataset_.GetRasterCount();
-
-      double tr[6];
-      dataset_.GetGeoTransform(tr);
-      double x0 = tr[0];
-      double y0 = tr[3];
-      double x1 = tr[0] + raster_xsize * tr[1] + raster_ysize * tr[2];
-      double y1 = tr[3] + raster_xsize * tr[4] + raster_ysize * tr[5];
-      Envelope<double> raster_extent(x0,y0,x1,y1);
-      CoordTransform t (raster_xsize,raster_ysize,raster_extent,0,0);
-      Envelope<double> intersection = raster_extent.intersect(query_extent_);
-      Envelope<double> box = t.forward(intersection);
-      
-      int start_x = int(box.minx()+0.5);
-      int start_y = int(box.miny()+0.5);
-      int width = int(box.width()+0.5);
-      int height = int(box.height()+0.5);
-
-#ifdef MAPNIK_DEBUG         
-      std::cout << boost::format("RasterWidth=%d RasterHeight=%d \n") % raster_xsize % raster_ysize;
-      std::cout << boost::format("StartX=%d StartY=%d Width=%d Height=%d \n") % start_x % start_y % width % height;
+#ifdef MAPNIK_DEBUG
+      std::clog << "featureset, dataset = " << &dataset_ << "\n";
 #endif
 
-      if (width > 0 && height > 0)
+      query *q = boost::get<query>(&gquery_);
+      if(q) {
+          return get_feature(*q);
+      } else {
+          coord2d *p = boost::get<coord2d>(&gquery_);
+          if(p) {
+              return get_feature_at_point(*p);
+          }
+      }
+      // should never reach here
+   }
+   return feature_ptr();
+}
+
+       
+feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
+{
+   feature_ptr feature(new Feature(1));
+
+   GDALRasterBand * red = 0;
+   GDALRasterBand * green = 0;
+   GDALRasterBand * blue = 0;
+   GDALRasterBand * alpha = 0;
+   GDALRasterBand * grey = 0; 
+
+   unsigned raster_xsize = dataset_.GetRasterXSize();
+   unsigned raster_ysize = dataset_.GetRasterYSize();
+   int nbands = dataset_.GetRasterCount();
+
+   double tr[6];
+   dataset_.GetGeoTransform(tr);
+   double dx = tr[1];
+   double dy = tr[5];
+   double x0 = tr[0];
+   double y0 = tr[3];
+   double x1 = tr[0] + raster_xsize * dx + raster_ysize * tr[2];
+   double y1 = tr[3] + raster_xsize * tr[4] + raster_ysize * dy;
+   Envelope<double> raster_extent(x0,y0,x1,y1);
+   CoordTransform t (raster_xsize,raster_ysize,raster_extent,0,0);
+   Envelope<double> intersection = raster_extent.intersect(q.get_bbox());
+   Envelope<double> box = t.forward(intersection);
+
+   int start_x, start_y;
+   if (dx>0)
+       start_x = int(std::floor(intersection.minx()-raster_extent.minx())/dx);
+   else
+       // west-left raster
+       start_x = -int(std::floor(raster_extent.maxx()-intersection.maxx())/dx);
+   if(dy>0)
+       start_y = int(std::floor(intersection.miny()-raster_extent.miny())/dy);
+   else
+       // north-up raster
+       start_y = -int(std::floor(raster_extent.maxy()-intersection.maxy())/dy);
+
+   int width = int(box.width()+0.5);
+   int height = int(box.height()+0.5);
+
+#ifdef MAPNIK_DEBUG         
+   std::cout << "raster_extent="<<raster_extent<<"\n";
+   std::cout << "intersection="<<intersection<<"\n";
+   std::cout << boost::format("RasterWidth=%d RasterHeight=%d \n") % raster_xsize % raster_ysize;
+   std::cout << boost::format("StartX=%d StartY=%d Width=%d Height=%d \n") % start_x % start_y % width % height;
+#endif
+
+   if (width > 0 && height > 0)
+   {
+      int im_width = q.resolution()*intersection.width();
+      int im_height = q.resolution()*intersection.height();
+
+      mapnik::ImageData32 image(im_width, im_height);
+      image.set(0xffffffff);
+         
+#ifdef MAPNIK_DEBUG         
+      std::cout << "band="<<band_<<"\n";
+      std::cout << "im_size=(" << im_width << "," << im_height << ")\n";
+      std::cout << "box_size=(" << width << "," << height << ")\n";
+#endif
+      if(band_>0)
+      {
+         float *imageData = (float*)image.getBytes();
+         GDALRasterBand * band = dataset_.GetRasterBand(band_);
+         band->RasterIO(GF_Read, start_x, start_y, width, height,
+                        imageData, image.width(), image.height(),
+                        GDT_Float32, 0, 0);
+
+         feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersection,image)));
+
+      }
+      else
       {
          // Some GDAL drivers operate more efficiently if they know in advance 
          // what set of upcoming read requests will be made. The AdviseRead() 
@@ -152,7 +221,7 @@ feature_ptr gdal_featureset::next()
                {	
                   grey = band;
                   GDALColorTable *color_table = band->GetColorTable();
-				
+            
                   if ( color_table)
                   {
                      int count = color_table->GetColorEntryCount();
@@ -177,35 +246,77 @@ feature_ptr gdal_featureset::next()
                   break;
             }
          }
-      
-         mapnik::ImageData32 image(width,height);
-         image.set(0xffffffff);
-         
+
          if (red && green && blue)
          {
             //red->AdviseRead  (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
             //green->AdviseRead(start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
             //blue->AdviseRead (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
-            red->RasterIO  (GF_Read,start_x,start_y,width,height, image.getBytes() + 0, width,height, GDT_Byte,4,4*width);
-            green->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 1, width,height, GDT_Byte,4,4*width);
-            blue->RasterIO (GF_Read,start_x,start_y,width,height, image.getBytes() + 2, width,height, GDT_Byte,4,4*width);
+            red->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 0, image.width(),image.height(), GDT_Byte,4,4*image.width());
+            green->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 1, image.width(),image.height(), GDT_Byte,4,4*image.width());
+            blue->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 2, image.width(),image.height(), GDT_Byte,4,4*image.width());
          }
          else if (grey)
          {
             // grey->AdviseRead (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
-            grey->RasterIO(GF_Read,start_x,start_y,width,height,image.getBytes() + 0, width, height,GDT_Byte,4,4*width);
-            grey->RasterIO(GF_Read,start_x,start_y,width,height,image.getBytes() + 1, width, height,GDT_Byte,4,4*width);
-            grey->RasterIO(GF_Read,start_x,start_y,width,height,image.getBytes() + 2, width, height,GDT_Byte,4,4*width);
+            grey->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 0, image.width(),image.height(), GDT_Byte,4,4*image.width());
+            grey->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 1, image.width(),image.height(), GDT_Byte,4,4*image.width());
+            grey->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 2, image.width(),image.height(), GDT_Byte,4,4*image.width());
          }
 
          if (alpha)
          {
             //alpha->AdviseRead (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
-            alpha->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 3, width,height, GDT_Byte,4,4*width);
+            alpha->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 3, image.width(),image.height(), GDT_Byte,4,4*image.width());
          }
 
          feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersection,image)));
-         return feature;
+      }
+      return feature;
+   }
+   return feature_ptr();
+}
+
+
+
+feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
+{
+   if (band_>0) {
+
+      unsigned raster_xsize = dataset_.GetRasterXSize();
+      unsigned raster_ysize = dataset_.GetRasterYSize();
+
+      double gt[6];
+      dataset_.GetGeoTransform(gt);
+
+      double det = gt[1]*gt[5] - gt[2]*gt[4];
+      // subtract half a pixel width & height because gdal coord reference
+      // is the top-left corner of a pixel, not the center.
+      double X = pt.x - gt[0] - gt[1]/2;
+      double Y = pt.y - gt[3] - gt[5]/2;
+      double det1 = gt[1]*Y + gt[4]*X;
+      double det2 = gt[2]*Y + gt[5]*X;
+      int x = det2/det, y = det1/det;
+
+      if(0<=x && x<raster_xsize && 0<=y && y<raster_ysize) {
+#ifdef MAPNIK_DEBUG         
+         std::cout << boost::format("pt.x=%f pt.y=%f\n") % pt.x % pt.y;
+         std::cout << boost::format("x=%f y=%f\n") % x % y;
+#endif
+         GDALRasterBand * band = dataset_.GetRasterBand(band_);
+         int hasNoData;
+         double nodata = band->GetNoDataValue(&hasNoData);
+         double value;
+         band->RasterIO(GF_Read, x, y, 1, 1, &value, 1, 1, GDT_Float64, 0, 0);
+         if(!hasNoData || value!=nodata) {
+            // construct feature
+            feature_ptr feature(new Feature(1));
+            geometry2d * point = new point_impl;
+            point->move_to(pt.x, pt.y);
+            feature->add_geometry(point);
+            (*feature)["value"] = value;
+            return feature;
+         }
       }
    }
    return feature_ptr();

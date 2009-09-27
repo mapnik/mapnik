@@ -11,8 +11,11 @@ Developers: Please commit along with changes.
 For a complete change history, see the SVN log.
 
 
+
 Mapnik 0.6.2 Release
 --------------------
+
+- Gdal Plugin: Add support for Gdal overviews, enabling fast loading of > 1GB rasters (r1321) (#54)
 
 - PostGIS Plugin: Add bbox substitution ability in sql query string (r1292) (#415)
 
