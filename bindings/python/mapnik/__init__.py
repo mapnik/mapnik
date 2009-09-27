@@ -511,3 +511,56 @@ register_fonts()
 
 #set dlopen flags back to the original
 setdlopenflags(flags)
+
+# Explicitly export API members to avoid namespace pollution
+# and ensure correct documentation processing
+__all__ = [
+    # classes
+    'Color', 'Coord', 
+    'DatasourceCache',
+    'Envelope',
+    'Feature', 'Featureset', 'FontEngine',
+    'Geometry2d',
+    'Image', 'ImageView',
+    'Layer', 'Layers',
+    'LinePatternSymbolizer', 'LineSymbolizer',
+    'Map',
+    'Names',
+    'Parameter', 'Parameters',
+    'PointDatasource', 'PointSymbolizer',
+    'PolygonPatternSymbolizer', 'PolygonSymbolizer',
+    'ProjTransform',
+    'Projection',
+    'Properties',
+    'Query',
+    'RasterSymbolizer',
+    'Rule', 'Rules',
+    'ShieldSymbolizer',
+    'Singleton',
+    'Stroke', 'Style',
+    'Symbolizer', 'Symbolizers',
+    'TextSymbolizer',
+    'ViewTransform',
+    # enums
+    'aspect_fix_mode', 'label_placement',
+    'line_cap', 'line_join',
+    'text_convert', 'vertical_alignment',
+    # functions
+    #   datasources
+    'Datasource', 'CreateDatasource',
+    'Shapefile', 'PostGIS', 'Raster', 'Gdal',
+    'Occi', 'Ogr', 'SQLite',
+    'Osm', 'Kismet',
+    'Describe',
+    #   version and environment
+    'mapnik_version_string', 'mapnik_version', 'mapnik_svn_revision',
+    'has_cairo', 'has_pycairo',
+    #   factory methods
+    'Filter',
+    #   load/save/render
+    'load_map', 'load_map_from_string', 'save_map', 'save_map_string',
+    'render', 'render_tile_to_file', 'render_to_file',
+    #   other
+    'register_plugins', 'register_fonts',
+    'scale_denominator',
+    ]
