@@ -23,7 +23,6 @@
 
 // boost
 #include <boost/python.hpp>
-#include <boost/version.hpp>
 
 //mapnik
 #include <mapnik/color.hpp>
@@ -45,24 +44,18 @@ void export_color ()
 {
     using namespace boost::python;
     class_<color>("Color", init<int,int,int,int>(
-#if BOOST_VERSION >= 103500
-        ( arg("self"), arg("r"), arg("g"), arg("b"), arg("a") ),
-#endif 
+        ( arg("r"), arg("g"), arg("b"), arg("a") ),
         "Creates a new color from its RGB components\n"
         "and an alpha value.\n"
         "All values between 0 and 255.\n")
         )
   .def(init<int,int,int>(
-#if BOOST_VERSION >= 103500
-        ( arg("self"), arg("r"), arg("g"), arg("b") ),
-#endif 
+        ( arg("r"), arg("g"), arg("b") ),
         "Creates a new color from its RGB components.\n"
         "All values between 0 and 255.\n")
         )
   .def(init<std::string>(
-#if BOOST_VERSION >= 103500
-        ( arg("self"), arg("color_string") ),
-#endif
+        ( arg("color_string") ),
         "Creates a new color from its CSS string representation.\n"
         "The string may be a CSS color name (e.g. 'blue')\n"
         "or a hex color string (e.g. '#0000ff').\n")
@@ -91,9 +84,6 @@ void export_color ()
   .def_pickle(color_pickle_suite())
   .def("__str__",&color::to_string)
   .def("to_hex_string",&color::to_hex_string,
-#if BOOST_VERSION >= 103500
-        ( arg("self") ),
-#endif
         "Returns the hexadecimal representation of this color.\n"
         "\n"
         "Example:\n"
@@ -102,4 +92,3 @@ void export_color ()
         "'#0000ff'\n")
   ;
 }
-

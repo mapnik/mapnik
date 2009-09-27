@@ -23,7 +23,6 @@
 
 // boost
 #include <boost/python.hpp>
-#include <boost/version.hpp>
 
 // mapnik
 #include <mapnik/stroke.hpp>
@@ -131,14 +130,9 @@ void export_stroke ()
         ;
 
     class_<stroke>("Stroke",init<>(
-#if BOOST_VERSION >= 103500
-        ( arg("self") ),
-#endif
         "Creates a new default black stroke with the width of 1.\n"))
         .def(init<color,float>(
-#if BOOST_VERSION >= 103500
-              ( arg("self"), arg("color"), arg("width") ),
-#endif
+              (arg("color"),arg("width")),
               "Creates a new stroke object with a specified color and width.\n")
         )
         .def_pickle(stroke_pickle_suite())
@@ -166,14 +160,9 @@ void export_stroke ()
               "Returns the line join mode of this stroke.\n")
         // todo consider providing a single get/set property
         .def("add_dash",&stroke::add_dash,
-#if BOOST_VERSION >= 103500
-              ( arg("self"), arg("length"), arg("gap") ),
-#endif
+              (arg("length"),arg("gap")),
               "Adds a dash segment to the dash patterns of this stroke.\n")
         .def("get_dashes", get_dashes_list,
-#if BOOST_VERSION >= 103500
-              ( arg("self") ),
-#endif
               "Returns the list of dash segments for this stroke.\n")
         ;
 }

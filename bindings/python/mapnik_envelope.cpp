@@ -22,7 +22,6 @@
 //$Id: mapnik_envelope.cc 27 2005-03-30 21:45:40Z pavlenko $
 
 // boost
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 
 // mapnik
@@ -69,25 +68,14 @@ void export_envelope()
     using namespace boost::python;
     class_<Envelope<double> >("Envelope",
                               // class docstring is in mapnik/__init__.py, class _Coord
-                              init<double,double,double,double>
-                              (
-#if BOOST_VERSION >= 103500
-                               (arg("self"), arg("minx"), arg("miny"), arg("maxx"), arg("maxy")),
-#endif
+                              init<double,double,double,double>(
+                               (arg("minx"),arg("miny"),arg("maxx"),arg("maxy")),
                                "Constructs a new envelope from the coordinates\n"
-                               "of its lower left and upper right corner points."))
-        .def(init<>
-             (
-#if BOOST_VERSION >= 103500
-              (arg("self")), 
-#endif
-              "Equivalent to Envelope(0, 0, -1, -1)."))
-        .def(init<const coord<double,2>&, const coord<double,2>&>
-             (
-#if BOOST_VERSION >= 103500
-              (arg("self"), arg("ll"), arg("ur")),
-#endif
-              "Equivalent to Envelope(ll.x, ll.y, ur.x, ur.y)."))
+                               "of its lower left and upper right corner points.\n"))
+        .def(init<>("Equivalent to Envelope(0, 0, -1, -1).\n"))
+        .def(init<const coord<double,2>&, const coord<double,2>&>(
+              (arg("ll"),arg("ur")),
+              "Equivalent to Envelope(ll.x, ll.y, ur.x, ur.y).\n"))
         .add_property("minx", &Envelope<double>::minx, 
                       "X coordinate for the lower left corner")
         .add_property("miny", &Envelope<double>::miny, 
@@ -97,19 +85,14 @@ void export_envelope()
         .add_property("maxy", &Envelope<double>::maxy, 
                       "Y coordinate for the upper right corner")
         .def("center", &Envelope<double>::center,
-#if BOOST_VERSION >= 103500
-             (arg("self")),
-#endif
              "Returns the coordinates of the center of the bounding box.\n"
              "\n"
              "Example:\n"
              ">>> e = Envelope(0, 0, 100, 100)\n"
              ">>> e.center()\n"
-             "Coord(50, 50)")
+             "Coord(50, 50)\n")
         .def("center", &Envelope<double>::re_center,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("x"), arg("y")),
-#endif
+             (arg("x"), arg("y")),
              "Moves the envelope so that the given coordinates become its new center.\n"
              "The width and the height are preserved.\n"
              "\n "
@@ -121,12 +104,10 @@ void export_envelope()
              ">>> (e.width(), e.height())\n"
              "(100.0, 100.0)\n"
              ">>> e\n"
-             "Envelope(10.0, 10.0, 110.0, 110.0)"
+             "Envelope(10.0, 10.0, 110.0, 110.0)\n"
              )
         .def("width", width_p1,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("new_width")),
-#endif
+             (arg("new_width")),
              "Sets the width to new_width of the envelope preserving its center.\n"
              "\n "
              "Example:\n"
@@ -135,18 +116,13 @@ void export_envelope()
              ">>> e.center()\n"
              "Coord(50.0,50.0)\n"
              ">>> e\n"
-             "Envelope(-10.0, 0.0, 110.0, 100.0)"
+             "Envelope(-10.0, 0.0, 110.0, 100.0)\n"
              )
         .def("width", width_p2,
-#if BOOST_VERSION >= 103500
-             (arg("self")),
-#endif
-             "Returns the width of this envelope."
+             "Returns the width of this envelope.\n"
              )
         .def("height", height_p1,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("new_height")),
-#endif
+             (arg("new_height")),
              "Sets the height to new_height of the envelope preserving its center.\n"
              "\n "
              "Example:\n"
@@ -155,80 +131,59 @@ void export_envelope()
              ">>> e.center()\n"
              "Coord(50.0,50.0)\n"
              ">>> e\n"
-             "Envelope(0.0, -10.0, 100.0, 110.0)"
+             "Envelope(0.0, -10.0, 100.0, 110.0)\n"
              )
         .def("height", height_p2,
-#if BOOST_VERSION >= 103500
-             (arg("self")),
-#endif
-             "Returns the height of this envelope."
+             "Returns the height of this envelope.\n"
              )
         .def("expand_to_include",expand_to_include_p1,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("x"), arg("y")),
-#endif
+             (arg("x"),arg("y")),
              "Expands this envelope to include the point given by x and y.\n"
              "\n"
              "Example:\n",
              ">>> e = Envelope(0, 0, 100, 100)\n"
              ">>> e.expand_to_include(110, 110)\n"
              ">>> e\n"
-             "Envelope(0.0, 00.0, 110.0, 110.0)"
+             "Envelope(0.0, 00.0, 110.0, 110.0)\n"
              )
         .def("expand_to_include",expand_to_include_p2,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("p")),
-#endif
-             "Equivalent to expand_to_include(p.x, p.y)"
+             (arg("p")),
+             "Equivalent to expand_to_include(p.x, p.y)\n"
              )
         .def("expand_to_include",expand_to_include_p3,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("other")),
-#endif
+             (arg("other")),
              "Equivalent to:\n"
              "  expand_to_include(other.minx, other.miny)\n"
-             "  expand_to_include(other.maxx, other.maxy)"
+             "  expand_to_include(other.maxx, other.maxy)\n"
              )
         .def("contains",contains_p1,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("x"), arg("y")),
-#endif
+             (arg("x"),arg("y")),
              "Returns True iff this envelope contains the point\n"
-             "given by x and y."
+             "given by x and y.\n"
              )
         .def("contains",contains_p2,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("p")),
-#endif
-             "Equivalent to contains(p.x, p.y)"
+             (arg("p")),
+             "Equivalent to contains(p.x, p.y)\n"
              )
         .def("contains",contains_p3,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("other")),
-#endif
+             (arg("other")),
              "Equivalent to:\n"
-             "  contains(other.minx, other.miny) and contains(other.maxx, other.maxy)"
+             "  contains(other.minx, other.miny) and contains(other.maxx, other.maxy)\n"
              )
         .def("intersects",intersects_p1,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("x"), arg("y")),
-#endif
+             (arg("x"),arg("y")),
              "Returns True iff this envelope intersects the point\n"
              "given by x and y.\n"
              "\n"
              "Note: For points, intersection is equivalent\n"
              "to containment, i.e. the following holds:\n"
-             "   e.contains(x, y) == e.intersects(x, y)"
+             "   e.contains(x, y) == e.intersects(x, y)\n"
              )
         .def("intersects",intersects_p2,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("p")),
-#endif
-             "Equivalent to contains(p.x, p.y)")
+             (arg("p")),
+             "Equivalent to contains(p.x, p.y)\n")
         .def("intersects",intersects_p3,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("other")),
-#endif
+             (arg("other")),
              "Returns True iff this envelope intersects the other envelope,\n"
              "This relationship is symmetric."
              "\n"
@@ -238,12 +193,10 @@ void export_envelope()
              ">>> e1.intersects(e2)\n"
              "True\n"
              ">>> e1.contains(e2)\n"
-             "False"
+             "False\n"
              )
         .def("intersect",intersect,
-#if BOOST_VERSION >= 103500
-             (arg("self"), arg("other")),
-#endif
+             (arg("other")),
              "Returns the overlap of this envelope and the other envelope\n"
              "as a new envelope.\n"
              "\n"
@@ -251,7 +204,7 @@ void export_envelope()
              ">>> e1 = Envelope(0, 0, 100, 100)\n"
              ">>> e2 = Envelope(50, 50, 150, 150)\n"
              ">>> e1.intersect(e2)\n"
-             "Envelope(50.0, 50.0, 100.0, 100.0)"     
+             "Envelope(50.0, 50.0, 100.0, 100.0)\n"     
              )
         .def(self == self) // __eq__
         .def(self + self)  // __add__

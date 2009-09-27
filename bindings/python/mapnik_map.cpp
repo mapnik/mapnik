@@ -23,7 +23,6 @@
 
 // boost
 #include <boost/python.hpp>
-#include <boost/version.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -147,9 +146,7 @@ void export_map()
       ;
     
    class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(
-#if BOOST_VERSION >= 103500
-                  ( arg("self"),arg("width"),arg("height"),arg("srs") ),
-#endif
+                  ( arg("width"),arg("height"),arg("srs") ),
                   "Create a Map with a width and height as integers and, optionally,\n"
                   "an srs string either with a Proj.4 epsg code ('+init=epsg:<code>')\n"
                   "or with a Proj.4 literal ('+proj=<literal>').\n"
