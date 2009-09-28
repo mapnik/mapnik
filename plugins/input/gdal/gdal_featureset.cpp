@@ -33,6 +33,8 @@ using mapnik::CoordTransform;
 using mapnik::point_impl;
 using mapnik::geometry2d;
 
+#define MAPNIK_DEBUG
+
 gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q)
    : dataset_(dataset),
      band_(band),
@@ -114,8 +116,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
    int height = int(box.height()+0.5);
 
 #ifdef MAPNIK_DEBUG         
-   std::cout << "raster_extent="<<raster_extent<<"\n";
-   std::cout << "intersection="<<intersection<<"\n";
+   std::cout << "raster_extent=" << raster_extent << "\n";
+   std::cout << "intersection=" << intersection << "\n";
    std::cout << boost::format("RasterWidth=%d RasterHeight=%d \n") % raster_xsize % raster_ysize;
    std::cout << boost::format("StartX=%d StartY=%d Width=%d Height=%d \n") % start_x % start_y % width % height;
 #endif
@@ -129,11 +131,12 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
       image.set(0xffffffff);
          
 #ifdef MAPNIK_DEBUG         
-      std::cout << "band="<<band_<<"\n";
+      std::cout << "band=" << band_ << "\n";
       std::cout << "im_size=(" << im_width << "," << im_height << ")\n";
       std::cout << "box_size=(" << width << "," << height << ")\n";
 #endif
-      if(band_>0)
+
+      if(band_>0)      // we are querying a single band
       {
          float *imageData = (float*)image.getBytes();
          GDALRasterBand * band = dataset_.GetRasterBand(band_);
@@ -142,54 +145,29 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         GDT_Float32, 0, 0);
 
          feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersection,image)));
-
       }
-      else
+      
+      else             // working with all bands
       {
-         // Some GDAL drivers operate more efficiently if they know in advance 
-         // what set of upcoming read requests will be made. The AdviseRead() 
-         // method allows an application to notify the driver of the region and
-         // bands of interest, and at what resolution the region will be read.
-         //
-         // dataset_.AdviseRead (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL, NULL);
-
          for (int i = 0; i < nbands; ++i)
          {
             GDALRasterBand * band = dataset_.GetRasterBand(i+1);
-            int band_overviews = band->GetOverviewCount();
          
+#ifdef MAPNIK_DEBUG
+            int band_overviews = band->GetOverviewCount();
+            // Note: overviews are picked automatically during GdalDataset::RasterIO below
+            // when nXSize > nPixelSpace and nYSize > nLineSpace 
+            
             if (band_overviews > 0)
             {
-#ifdef MAPNIK_DEBUG
                 for (int b = 0; b < band_overviews; b++)
                 {
                     GDALRasterBand * overview = band->GetOverview (b);
                     std::cout << boost::format("Overview=%d Width=%d Height=%d \n")
                                            % b % overview->GetXSize() % overview->GetYSize();
                 }
-#endif
-
-#if 0
-                for (int b = band_overviews; --b >= 0;)
-                {
-                    GDALRasterBand * overview = band->GetOverview (b);
-                    if ((start_x + width) <= overview->GetXSize()
-                         && (start_y + height) <= overview->GetYSize())
-                    {
-#ifdef MAPNIK_DEBUG
-                        std::cout << boost::format("Picked Overview=%d \n") %b;
-#endif
-                        band = overview;
-                        break;
-                    }
-                }
-
-                // band = band->GetRasterSampleOverview (width / height);
-                // band = band->GetOverview (band->GetOverviewCount() - 1);
-#endif
             }
-         
-#ifdef MAPNIK_DEBUG     
+
             int bsx,bsy;
             double scale;
             band->GetBlockSize(&bsx,&bsy);
@@ -218,7 +196,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                   grey = band;
                   break;
                case GCI_PaletteIndex:
-               {	
+               {
                   grey = band;
                   GDALColorTable *color_table = band->GetColorTable();
             
@@ -236,12 +214,12 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         std::cout << "color entry RGB (" << ce->c1 <<"," <<ce->c2 << "," << ce->c3 << ")\n"; 
 #endif
                      }
-                  }	
+                  }
                   break;
                }
                case GCI_Undefined:
                   grey = band;
-                  break;	
+                  break;
                default:
                   break;
             }
@@ -249,16 +227,12 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
          if (red && green && blue)
          {
-            //red->AdviseRead  (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
-            //green->AdviseRead(start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
-            //blue->AdviseRead (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
             red->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 0, image.width(),image.height(), GDT_Byte,4,4*image.width());
             green->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 1, image.width(),image.height(), GDT_Byte,4,4*image.width());
             blue->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 2, image.width(),image.height(), GDT_Byte,4,4*image.width());
          }
          else if (grey)
          {
-            // grey->AdviseRead (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
             grey->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 0, image.width(),image.height(), GDT_Byte,4,4*image.width());
             grey->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 1, image.width(),image.height(), GDT_Byte,4,4*image.width());
             grey->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 2, image.width(),image.height(), GDT_Byte,4,4*image.width());
@@ -266,7 +240,6 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
          if (alpha)
          {
-            //alpha->AdviseRead (start_x, start_y, width, height, width, height, GDT_Byte, nbands, NULL);
             alpha->RasterIO(GF_Read,start_x,start_y,width,height, image.getBytes() + 3, image.width(),image.height(), GDT_Byte,4,4*image.width());
          }
 
@@ -296,7 +269,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
       double Y = pt.y - gt[3] - gt[5]/2;
       double det1 = gt[1]*Y + gt[4]*X;
       double det2 = gt[2]*Y + gt[5]*X;
-      int x = det2/det, y = det1/det;
+      unsigned x = det2/det, y = det1/det;
 
       if(0<=x && x<raster_xsize && 0<=y && y<raster_ysize) {
 #ifdef MAPNIK_DEBUG         
