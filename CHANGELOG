@@ -15,11 +15,15 @@ For a complete change history, see the SVN log.
 Mapnik 0.6.2 Release
 --------------------
 
+- Filters: Add support for '!=' as an alias to '<>' for not-equals filters (avoids &lt;&gt;) (r1326) (#427)  
+
 - Gdal Plugin: Add support for Gdal overviews, enabling fast loading of > 1GB rasters (r1321) (#54)
 
 - PostGIS Plugin: Add bbox substitution ability in sql query string (r1292) (#415)
 
 - PostGIS Plugin: Throw and report errors if SQL execution fails (r1291) (#363)
+
+- Python: Added 'mapnik.has_pycairo()' function to test for pycairo support (r1278) (#284)
 
 - PostGIS Plugin: Added missing support for BigInt(int8) postgres datatypes (r1250) (#384)
 
@@ -67,6 +71,8 @@ Mapnik 0.6.1 Release
 - Python: Pickling support for pattern symbolizers (r1155) (#345)
 
 - Python: Pickling support for raster_symbolizer (r1154) (#345)
+
+- Python: Added 'mapnik.has_cairo()' function to test for cairo support (r1152) (#284)
 
 - Python: Exposed dash_array get method (r1151) (#317)
 

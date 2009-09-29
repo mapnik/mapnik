@@ -473,6 +473,8 @@ namespace mapnik
                   equation = relation >> *( ( L'=' >> relation)
                                             [compose_filter<FeatureT,mapnik::equals<value> >(self.filters,self.exprs)]
                                             | ( L"<>" >> relation)
+                                            [compose_filter<FeatureT,not_equals<value> >(self.filters,self.exprs)]
+                                            | ( L"!=" >> relation)
                                             [compose_filter<FeatureT,not_equals<value> >(self.filters,self.exprs)]);
 
                   cond_expr = equation | (expression)[compose_boolean_filter<FeatureT>(self.filters,self.exprs)];
