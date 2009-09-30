@@ -13,6 +13,7 @@ Committers
  - David Siegel (XML)
  - Vince Spader (TextSymbolizer)
  - Dane Springmeyer (Python API, SCons) <dane.springmeyer -at- gmail.com>
+ - David Leaver (Label Placement)
  - Andreas Volz (Autotools)
  - Nick Whitelegg (OSM plugin)
 
