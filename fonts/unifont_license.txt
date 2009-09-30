@@ -1,0 +1,15 @@
+Unifoundry.com exists to help get Unicode fonts and utilities into the hands of those who need them.
+
+My first endeavor was to create several utilities for the free GNU Unifont bitmap font of Roman Czyborra. As of 20 June 2008 (by coincidence the Summer Solstice), the GNU Unifont has a glyph for every printable code point in the Unicode Basic Multilingual Plane (BMP). The BMP is the first Unicode "plane" of 65,536 code points, and includes character encoding for most of the world's modern scripts. Roman Czyborra began this effort 10 years ago.
+
+The "unifont" font has undergone further refinement and correction since then. Please replace all previous versions with the 2008-08-20 release.
+
+Two utilities convert any 256-code point block of Unifont glyphs to and from Windows Bitmap and Wireless Bitmap files, with code points displayed in a labeled 16 by 16 grid. These blocks aren't restricted to the BMP, though the GNU Unifont only supports the BMP. The software was developed using the cygwin package in a Microsoft Windows XP environment, but should compile on just about any platform that has a C compiler, especially on Unix/Linux systems.
+
+By converting GNU Unifont's .hex encoding into bitmaps, these utilities allow glyphs to be viewed and edited in their correct aspect ratio with a graphics editor. Hopefully this will make adding new glyphs to the GNU Unifont easier.
+
+My software and is released under the terms of the GNU General Public License (GNU GPL) version 2.0, or (at your option) a later version. The precompiled fonts are released under the terms of the GNU GPL version 2, with the exception that embedding the font in a document does not in itself bind that document to the terms of the GPL.
+
+If you have any questions, please email unifoundry at this domain name (not spelled out because of spammers).
+
+— Paul Hardy, GPG Key ID E6E6E390

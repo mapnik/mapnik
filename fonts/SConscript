@@ -24,7 +24,11 @@ Import('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+# grab all the deja vu fonts
 includes = glob.glob('*/*/*.ttf')
+
+# grab single unifont ttf (available at http://unifoundry.com/unifont.html)
+includes.extend(glob.glob('unifont*.ttf')
 
 fontscollectionpath = install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/fonts'
 
