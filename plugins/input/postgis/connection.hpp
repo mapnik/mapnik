@@ -88,6 +88,8 @@ class Connection
                  {
                      s += ":\n" + msg.substr( 0, msg.size() - 1 );
                  }
+                 
+                 s += "\nFull sql was: '" + sql + "'\n";
              } 
              throw mapnik::datasource_exception( s );
          }
