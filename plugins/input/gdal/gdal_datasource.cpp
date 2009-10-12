@@ -28,7 +28,6 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/geom_util.hpp>
 
-
 using mapnik::datasource;
 using mapnik::parameters;
 
@@ -65,9 +64,13 @@ inline GDALDataset *gdal_datasource::open_dataset() const
 
 gdal_datasource::gdal_datasource(parameters const& params)
    : datasource(params),
-     extent_(),
      desc_(*params.get<std::string>("type"),"utf-8")
 {
+
+#ifdef MAPNIK_DEBUG
+   std::cout << "\nGDAL Plugin: Initializing...\n";
+#endif
+
    GDALAllRegister();
 
    boost::optional<std::string> file = params.get<std::string>("file");
@@ -83,15 +86,26 @@ gdal_datasource::gdal_datasource(parameters const& params)
    band_ = *params_.get<int>("band", -1);
 
    GDALDataset *dataset = open_dataset();
+   
+   // TODO: Make more class attributes from geotransform...
+   width_ = dataset->GetRasterXSize();
+   height_ = dataset->GetRasterYSize();
 
    double tr[6];
    dataset->GetGeoTransform(tr);
+   double dx = tr[1];
+   double dy = tr[5];
    double x0 = tr[0];
    double y0 = tr[3];
-   double x1 = tr[0] + dataset->GetRasterXSize()*tr[1] + dataset->GetRasterYSize()*tr[2];
-   double y1 = tr[3] + dataset->GetRasterXSize()*tr[4] + dataset->GetRasterYSize()*tr[5];
+   double x1 = tr[0] + width_ * dx + height_ *tr[2];
+   double y1 = tr[3] + width_ *tr[4] + height_ * dy;
    extent_.init(x0,y0,x1,y1);
    GDALClose(dataset);
+   
+#ifdef MAPNIK_DEBUG
+         std::cout << "GDAL Plugin: RASTER SIZE("<< width_ << "," << height_ << ")\n";
+#endif
+
 }
 
 gdal_datasource::~gdal_datasource() {}

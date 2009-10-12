@@ -44,6 +44,8 @@ class gdal_datasource : public mapnik::datasource
       std::string dataset_name_;
       int band_;
       mapnik::layer_descriptor desc_;
+      unsigned width_;
+      unsigned height_;
       bool shared_dataset_;
       inline GDALDataset *open_dataset() const;
 };
