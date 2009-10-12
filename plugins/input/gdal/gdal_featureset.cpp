@@ -33,7 +33,6 @@ using mapnik::CoordTransform;
 using mapnik::point_impl;
 using mapnik::geometry2d;
 
-#define MAPNIK_DEBUG
 
 gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q)
    : dataset_(dataset),
