@@ -31,6 +31,7 @@
 #include "raster_info.hpp"
 #include "raster_datasource.hpp"
 
+
 using mapnik::datasource;
 using mapnik::parameters;
 using mapnik::ImageReader;
@@ -48,13 +49,18 @@ using mapnik::coord2d;
 using mapnik::datasource_exception;
 
 raster_datasource::raster_datasource(const parameters& params)
-    : datasource (params),
+    : datasource(params),
       desc_(*params.get<std::string>("type"),"utf-8")
 {
  
+#ifdef MAPNIK_DEBUG
+   std::cout << "\nRaster Plugin: Initializing...\n";
+#endif
+
    boost::optional<std::string> file=params.get<std::string>("file");
-   boost::optional<std::string> base=params.get<std::string>("base");
    if (!file) throw datasource_exception("missing <file> parameter ");
+   
+   boost::optional<std::string> base=params.get<std::string>("base");
    if (base)
       filename_ = *base + "/" + *file;
    else
@@ -81,7 +87,9 @@ raster_datasource::raster_datasource(const parameters& params)
       {
          width_ = reader->width();
          height_ = reader->height();
-         std::cout << "RASTER SIZE("<<width_ << "," << height_ << ")\n"; 
+#ifdef MAPNIK_DEBUG
+         std::cout << "Raster Plugin: RASTER SIZE(" << width_ << "," << height_ << ")\n";
+#endif
       }
    }
    catch (...)
@@ -119,18 +127,24 @@ featureset_ptr raster_datasource::features(query const& q) const
    mapnik::Envelope<double> intersect=extent_.intersect(q.get_bbox());
    mapnik::Envelope<double> ext=t.forward(intersect);
    
-   unsigned width = int(ext.width()+0.5);
+   unsigned width = int(ext.width() + 0.5);
    unsigned height = int(ext.height() + 0.5);
-   std::cout << width << " " << height << "\n";
+#ifdef MAPNIK_DEBUG
+   std::cout << "Raster Plugin: BOX SIZE(" << width << " " << height << ")\n";
+#endif
    if (width * height > 1024*1024)
    {
-      std::cout << "TILED policy\n";
+#ifdef MAPNIK_DEBUG
+      std::cout << "Raster Plugin: TILED policy\n";
+#endif
       tiled_file_policy policy(filename_,format_, 1024, extent_,q.get_bbox(), width_,height_);
       return featureset_ptr(new raster_featureset<tiled_file_policy>(policy,extent_,q));
    }
    else
    {
-      std::cout << "SINGLE FILE\n";
+#ifdef MAPNIK_DEBUG
+      std::cout << "Raster Plugin: SINGLE FILE\n";
+#endif
       raster_info info(filename_,format_,extent_,width_,height_);
       single_file_policy policy(info);
       return featureset_ptr(new raster_featureset<single_file_policy>(policy,extent_,q));
