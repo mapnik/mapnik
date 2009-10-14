@@ -72,7 +72,7 @@ struct shape_record
     size_t size;
     mutable size_t pos;
     explicit shape_record(size_t size)
-	: 
+        : 
         data(Tag::alloc(size)),
         size(size),
         pos(0) {} 
@@ -94,7 +94,7 @@ struct shape_record
       
     int read_ndr_integer()
     {
-	boost::int32_t val;
+    boost::int32_t val;
         read_int32_ndr(&data[pos],val);
         pos+=4;
         return val;
@@ -102,7 +102,7 @@ struct shape_record
       
     int read_xdr_integer()
     {
-	boost::int32_t val;
+    boost::int32_t val;
         read_int32_xdr(&data[pos],val);
         pos+=4;
         return val;
@@ -110,7 +110,7 @@ struct shape_record
       
     double read_double()
     {
-        double val;		
+        double val;        
         read_double_ndr(&data[pos],val);
         pos+=8;
         return val;
@@ -172,8 +172,8 @@ public:
     inline void read_record(record_type& rec)
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-	rec.set_data(file_->data() + file_.tellg());
-	file_.seekg(rec.size,std::ios::cur);
+        rec.set_data(file_->data() + file_.tellg());
+        file_.seekg(rec.size,std::ios::cur);
 #else
         file_.read(rec.get_data(),rec.size);
 #endif
@@ -183,7 +183,7 @@ public:
     {
         char b[4];
         file_.read(b, 4);
-	boost::int32_t val;
+        boost::int32_t val;
         read_int32_xdr(b,val);
         return val;
     }
@@ -192,7 +192,7 @@ public:
     {
         char b[4];
         file_.read(b,4);
-	boost::int32_t val;
+        boost::int32_t val;
         read_int32_ndr(b,val);
         return val;
     }
