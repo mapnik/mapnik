@@ -269,13 +269,25 @@ postgis_datasource::postgis_datasource(parameters const& params)
                case 25:    // text
                   desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
                   break;
-               default: // shouldn not get here
+               default: // should not get here
 #ifdef MAPNIK_DEBUG
-                  clog << "unknown type_oid="<<type_oid<<endl;
+                  std::ostringstream s_oid;
+                  s_oid << "select oid, typname from pg_type where oid = " << type_oid;
+                  shared_ptr<ResultSet> rs_oid=conn->executeQuery(s_oid.str());
+                  if (rs_oid->next())
+                  {
+                      clog << "PostGIS: unknown type = " << rs_oid->getValue("typname") << " (oid:" << rs_oid->getValue("oid") << ")\n";
+                  }
+                  else
+                  {
+                      clog << "PostGIS: unknown oid type =" << type_oid << endl;              
+                  }
+                  rs_oid->close();
 #endif
                   break;
-            }	  
+            }
          }
+         rs->close();
       }
    }
 }
