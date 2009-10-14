@@ -70,6 +70,7 @@ class postgis_datasource : public datasource
       bool multiple_geometries_;
       static const std::string name_;
       const std::string bbox_token_;
+      bool persist_connection_;
    public:
       static std::string name();
       int type() const;

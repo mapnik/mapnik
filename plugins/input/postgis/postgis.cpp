@@ -76,11 +76,23 @@ postgis_datasource::postgis_datasource(parameters const& params)
               params.get<std::string>("dbname"),
               params.get<std::string>("user"),
               params.get<std::string>("password")),
-     bbox_token_("!bbox!")
+     bbox_token_("!bbox!"),
+     persist_connection_(*params_.get<mapnik::boolean>("persist_connection",true))
 {   
 
-   if (table_.empty()) throw mapnik::datasource_exception("missing <table> parameter");
-   
+   if (table_.empty()) throw mapnik::datasource_exception("PostGIS: missing <table> parameter");
+
+#ifdef MAPNIK_DEBUG
+   if (persist_connection_)
+   {
+       clog << "PostGIS: persisting connection pool..." << endl;
+   }
+   else
+   {
+       clog << "PostGIS: not persisting connection..." << endl;   
+   }
+#endif
+
    boost::optional<int> initial_size = params_.get<int>("inital_size",1);
    boost::optional<int> max_size = params_.get<int>("max_size",10);
 
@@ -257,7 +269,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                case 25:    // text
                   desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
                   break;
-               default: // shouldn't get here
+               default: // shouldn not get here
 #ifdef MAPNIK_DEBUG
                   clog << "unknown type_oid="<<type_oid<<endl;
 #endif
@@ -490,4 +502,19 @@ Envelope<double> postgis_datasource::envelope() const
    return extent_;
 }
 
-postgis_datasource::~postgis_datasource() {}
+postgis_datasource::~postgis_datasource() 
+{
+    if (!persist_connection_)
+    {
+        ConnectionManager *mgr=ConnectionManager::instance();
+        shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
+        if (pool)
+        {
+            shared_ptr<Connection> conn = pool->borrowObject();
+            if (conn)
+            {
+                conn->close();
+            }
+        }
+    }
+}
