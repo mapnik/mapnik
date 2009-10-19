@@ -43,8 +43,132 @@ using mapnik::raster_symbolizer;
 using mapnik::shield_symbolizer;
 using mapnik::text_symbolizer;
 using mapnik::building_symbolizer;
+using mapnik::markers_symbolizer;
 using mapnik::symbolizer;
 using mapnik::symbolizers;
+
+struct pickle_symbolizer : public boost::static_visitor<>
+{
+    public:
+        pickle_symbolizer( boost::python::list syms): 
+        syms_(syms) {}
+        
+        void operator () ( const  point_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( const line_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( const line_pattern_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( const polygon_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( const polygon_pattern_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( const raster_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( const shield_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( const text_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( const building_symbolizer & sym )
+        {
+            syms_.append(sym);
+        }
+    
+        void operator () ( markers_symbolizer const& )
+        {
+            //TODO
+        }
+
+    private:
+        boost::python::list syms_;
+
+};
+
+struct extract_symbolizer : public boost::static_visitor<>
+{
+    public:
+        extract_symbolizer( rule_type& r): 
+        r_(r) {}
+        
+        void operator () ( const  point_symbolizer & sym )
+        {
+            
+            r_.append(sym);
+        }
+    
+        void operator () ( const line_symbolizer & sym )
+        {
+            r_.append(sym);
+        }
+    
+        void operator () ( const line_pattern_symbolizer & sym )
+        {
+            r_.append(sym);
+        }
+    
+        void operator () ( const polygon_symbolizer & sym )
+        {
+            r_.append(sym);
+        }
+    
+        void operator () ( const polygon_pattern_symbolizer & sym )
+        {
+            r_.append(sym);
+        }
+    
+        void operator () ( const raster_symbolizer & sym )
+        {
+            r_.append(sym);
+        }
+    
+        void operator () ( const shield_symbolizer & sym )
+        {
+            r_.append(sym);
+        }
+    
+        void operator () ( const text_symbolizer & sym )
+        {
+            r_.append(sym);
+        }
+    
+        void operator () ( const building_symbolizer & sym )
+        {
+            r_.append(sym);
+        }
+    
+        void operator () ( markers_symbolizer const& )
+        {
+            //TODO
+        }
+
+    private:
+        rule_type& r_;
+
+};
 
 struct rule_pickle_suite : boost::python::pickle_suite
 {
@@ -58,12 +182,11 @@ struct rule_pickle_suite : boost::python::pickle_suite
    getstate(const rule_type& r)
    {
         boost::python::list syms;
-        symbolizers::const_iterator it = r.begin();
-        symbolizers::const_iterator end = r.end();
-        for (; it != end; ++it)
-        {
-            syms.append( *it );    
-        }
+        
+        symbolizers::const_iterator begin = r.get_symbolizers().begin();
+        symbolizers::const_iterator end = r.get_symbolizers().end();        
+        pickle_symbolizer serializer( syms );
+        std::for_each( begin, end , boost::apply_visitor( serializer ));
         
         // Here the filter string is used rather than the actual Filter object
         // Need to look into how to get the Filter object
@@ -91,8 +214,13 @@ struct rule_pickle_suite : boost::python::pickle_suite
 
         if (state[1])
         {
-            std::string filter_expr=extract<std::string>(state[1]);
-            r.set_filter(mapnik::create_filter(filter_expr,"utf8"));
+            rule_type dfl;
+            std::string filter = extract<std::string>(state[1]);
+            std::string default_filter = dfl.get_filter()->to_string();
+            if ( filter != default_filter)
+            {
+                r.set_filter(mapnik::create_filter(filter,"utf8"));
+            }
         }    
 
         if (state[2])
@@ -101,11 +229,12 @@ struct rule_pickle_suite : boost::python::pickle_suite
         }    
         
         boost::python::list syms=extract<boost::python::list>(state[3]);
+        extract_symbolizer serializer( r );
         for (int i=0;i<len(syms);++i)
         {
-            r.append(extract<symbolizer>(syms[i]));
-        }
-        
+            symbolizer symbol = extract<symbolizer>(syms[i]);
+            boost::apply_visitor( serializer, symbol );
+        }        
    }
 
 };
@@ -130,8 +259,7 @@ void export_rule()
     class_<rule_type>("Rule",init<>("default constructor"))
         .def(init<std::string const&,
              boost::python::optional<std::string const&,double,double> >())
-        .def_pickle(rule_pickle_suite()
-           )
+        .def_pickle(rule_pickle_suite())
         .add_property("name",make_function
                       (&rule_type::get_name,
                        return_value_policy<copy_const_reference>()),

@@ -241,6 +241,10 @@ class _Feature(Feature,_injector):
             attr[prop[0]] = prop[1]
         return attr
 
+class _Symbolizer(Symbolizer,_injector):
+    def symbol(self):
+        return getattr(self,self.type())()
+
 #class _Filter(Filter,_injector):
 #    """Mapnik Filter expression.
 #    

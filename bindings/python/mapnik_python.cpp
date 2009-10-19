@@ -46,6 +46,7 @@ void export_feature();
 void export_featureset();
 void export_datasource();
 void export_datasource_cache();
+void export_symbolizer();
 void export_point_symbolizer();
 void export_line_symbolizer();
 void export_line_pattern_symbolizer();
@@ -294,6 +295,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_layer();
     export_stroke();
     export_datasource_cache();
+    export_symbolizer();
     export_point_symbolizer();
     export_line_symbolizer();
     export_line_pattern_symbolizer();
@@ -470,10 +472,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("mapnik_svn_revision", &mapnik_svn_revision,"Get the Mapnik svn revision");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
-        
-    using mapnik::symbolizer;
-    class_<symbolizer>("Symbolizer",no_init)
-       ;
-    
+
     register_ptr_to_python<mapnik::filter_ptr>();
 }
