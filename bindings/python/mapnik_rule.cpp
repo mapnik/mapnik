@@ -49,138 +49,48 @@ using mapnik::symbolizers;
 
 struct pickle_symbolizer : public boost::static_visitor<>
 {
-    public:
-        pickle_symbolizer( boost::python::list syms): 
+public:
+    pickle_symbolizer( boost::python::list syms): 
         syms_(syms) {}
-        
-        void operator () ( const  point_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( const line_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( const line_pattern_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( const polygon_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( const polygon_pattern_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( const raster_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( const shield_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( const text_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( const building_symbolizer & sym )
-        {
-            syms_.append(sym);
-        }
-    
-        void operator () ( markers_symbolizer const& )
-        {
-            //TODO
-        }
 
-    private:
-        boost::python::list syms_;
-
+    template <typename T>
+    void operator () ( T const& sym )
+    {
+	syms_.append(sym);
+    }
+    
+private:
+    boost::python::list syms_;
 };
+
 
 struct extract_symbolizer : public boost::static_visitor<>
 {
-    public:
-        extract_symbolizer( rule_type& r): 
+public:
+    extract_symbolizer( rule_type& r): 
         r_(r) {}
         
-        void operator () ( const  point_symbolizer & sym )
-        {
-            
-            r_.append(sym);
-        }
+    template <typename T>
+    void operator () ( T const& sym )
+    {
+	r_.append(sym);
+    }
+private:
+    rule_type& r_;
     
-        void operator () ( const line_symbolizer & sym )
-        {
-            r_.append(sym);
-        }
-    
-        void operator () ( const line_pattern_symbolizer & sym )
-        {
-            r_.append(sym);
-        }
-    
-        void operator () ( const polygon_symbolizer & sym )
-        {
-            r_.append(sym);
-        }
-    
-        void operator () ( const polygon_pattern_symbolizer & sym )
-        {
-            r_.append(sym);
-        }
-    
-        void operator () ( const raster_symbolizer & sym )
-        {
-            r_.append(sym);
-        }
-    
-        void operator () ( const shield_symbolizer & sym )
-        {
-            r_.append(sym);
-        }
-    
-        void operator () ( const text_symbolizer & sym )
-        {
-            r_.append(sym);
-        }
-    
-        void operator () ( const building_symbolizer & sym )
-        {
-            r_.append(sym);
-        }
-    
-        void operator () ( markers_symbolizer const& )
-        {
-            //TODO
-        }
-
-    private:
-        rule_type& r_;
-
 };
 
 struct rule_pickle_suite : boost::python::pickle_suite
 {
-   static boost::python::tuple
-   getinitargs(const rule_type& r)
-   {
-      return boost::python::make_tuple(r.get_name(),r.get_title(),r.get_min_scale(),r.get_max_scale());
-   }
+    static boost::python::tuple
+    getinitargs(const rule_type& r)
+    {
+	return boost::python::make_tuple(r.get_name(),r.get_title(),r.get_min_scale(),r.get_max_scale());
+    }
 
-   static  boost::python::tuple
-   getstate(const rule_type& r)
-   {
+    static  boost::python::tuple
+    getstate(const rule_type& r)
+    {
         boost::python::list syms;
         
         symbolizers::const_iterator begin = r.get_symbolizers().begin();
@@ -192,18 +102,18 @@ struct rule_pickle_suite : boost::python::pickle_suite
         // Need to look into how to get the Filter object
         std::string filter_expr = r.get_filter()->to_string();
         return boost::python::make_tuple(r.get_abstract(),filter_expr,r.has_else_filter(),syms);
-   }
+    }
 
-   static void
-   setstate (rule_type& r, boost::python::tuple state)
-   {
+    static void
+    setstate (rule_type& r, boost::python::tuple state)
+    {
         using namespace boost::python;
         if (len(state) != 4)
         {
             PyErr_SetObject(PyExc_ValueError,
-                         ("expected 4-item tuple in call to __setstate__; got %s"
-                          % state).ptr()
-            );
+			    ("expected 4-item tuple in call to __setstate__; got %s"
+			     % state).ptr()
+		);
             throw_error_already_set();
         }
                 
@@ -235,7 +145,7 @@ struct rule_pickle_suite : boost::python::pickle_suite
             symbolizer symbol = extract<symbolizer>(syms[i]);
             boost::apply_visitor( serializer, symbol );
         }        
-   }
+    }
 
 };
 
