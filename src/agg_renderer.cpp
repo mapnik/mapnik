@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko
@@ -74,14 +74,14 @@
 #include <iostream>
 #endif
 
-namespace mapnik 
+namespace mapnik
 {
    class pattern_source : private boost::noncopyable
    {
       public:
          pattern_source(ImageData32 const& pattern)
             : pattern_(pattern) {}
-	
+
          unsigned int width() const
          {
             return pattern_.width();
@@ -93,17 +93,17 @@ namespace mapnik
          agg::rgba8 pixel(int x, int y) const
          {
             unsigned c = pattern_(x,y);
-            return agg::rgba8(c & 0xff, 
-                              (c >> 8) & 0xff, 
+            return agg::rgba8(c & 0xff,
+                              (c >> 8) & 0xff,
                               (c >> 16) & 0xff,
                               (c >> 24) & 0xff);
          }
       private:
          ImageData32 const& pattern_;
    };
-   
+
    struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
-   
+
    template <typename T>
    agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, unsigned offset_x, unsigned offset_y)
       : feature_style_processor<agg_renderer>(m),
@@ -122,7 +122,7 @@ namespace mapnik
       std::clog << "scale=" << m.scale() << "\n";
 #endif
    }
-   
+
    template <typename T>
    agg_renderer<T>::~agg_renderer() {}
 
@@ -130,7 +130,7 @@ namespace mapnik
    void agg_renderer<T>::start_map_processing(Map const& map)
    {
 #ifdef MAPNIK_DEBUG
-      std::clog << "start map processing bbox=" 
+      std::clog << "start map processing bbox="
                 << map.getCurrentExtent() << "\n";
 #endif
       ras_ptr->clip_box(0,0,width_,height_);
@@ -143,20 +143,20 @@ namespace mapnik
       std::clog << "end map processing\n";
 #endif
    }
-    
+
    template <typename T>
    void agg_renderer<T>::start_layer_processing(Layer const& lay)
    {
 #ifdef MAPNIK_DEBUG
       std::clog << "start layer processing : " << lay.name()  << "\n";
       std::clog << "datasource = " << lay.datasource().get() << "\n";
-#endif 
+#endif
       if (lay.clear_label_cache())
       {
          detector_.clear();
       }
    }
-   
+
    template <typename T>
    void agg_renderer<T>::end_layer_processing(Layer const&)
    {
@@ -164,35 +164,35 @@ namespace mapnik
       std::clog << "end layer processing\n";
 #endif
    }
-    
-   template <typename T>	
+
+   template <typename T>
    void agg_renderer<T>::process(polygon_symbolizer const& sym,
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-	    
+
       color const& fill_ = sym.get_fill();
       agg::scanline_u8 sl;
-      
+
       agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
       agg::pixfmt_rgba32_plain pixf(buf);
-      
-      ren_base renb(pixf);  
+
+      ren_base renb(pixf);
       unsigned r=fill_.red();
       unsigned g=fill_.green();
       unsigned b=fill_.blue();
       unsigned a=fill_.alpha();
       renderer ren(renb);
-      
+
       ras_ptr->reset();
-      
+
       for (unsigned i=0;i<feature.num_geometries();++i)
       {
          geometry2d const& geom=feature.get_geometry(i);
-         if (geom.num_points() > 2) 
+         if (geom.num_points() > 2)
          {
             path_type path(t_,geom,prj_trans);
             ras_ptr->add_path(path);
@@ -201,45 +201,45 @@ namespace mapnik
       ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
       agg::render_scanlines(*ras_ptr, sl, ren);
    }
-   
+
    typedef boost::tuple<double,double,double,double> segment_t;
    bool y_order(segment_t const& first,segment_t const& second)
    {
       double miny0 = std::min(first.get<1>(),first.get<3>());
-      double miny1 = std::min(second.get<1>(),second.get<3>());  
+      double miny1 = std::min(second.get<1>(),second.get<3>());
       return  miny0 > miny1;
    }
-      
-   template <typename T>	
+
+   template <typename T>
    void agg_renderer<T>::process(building_symbolizer const& sym,
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
       typedef  coord_transform3<CoordTransform,geometry2d> path_type_roof;
-      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-      
+
       agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
       agg::pixfmt_rgba32_plain pixf(buf);
       ren_base renb(pixf);
-      
+
       color const& fill_  = sym.get_fill();
       unsigned r=fill_.red();
       unsigned g=fill_.green();
       unsigned b=fill_.blue();
       unsigned a=fill_.alpha();
-      renderer ren(renb);         
+      renderer ren(renb);
       agg::scanline_u8 sl;
-     
+
       ras_ptr->reset();
       double height = 0.7071 * sym.height(); // height in meters
-      
+
       for (unsigned i=0;i<feature.num_geometries();++i)
       {
          geometry2d const& geom = feature.get_geometry(i);
-         if (geom.num_points() > 2) 
-         {  
+         if (geom.num_points() > 2)
+         {
             boost::scoped_ptr<geometry2d> frame(new line_string_impl);
             boost::scoped_ptr<geometry2d> roof(new polygon_impl);
             std::deque<segment_t> face_segments;
@@ -262,7 +262,7 @@ namespace mapnik
                {
                   face_segments.push_back(segment_t(x0,y0,x,y));
                }
-               x0 = x; 
+               x0 = x;
                y0 = y;
             }
             std::sort(face_segments.begin(),face_segments.end(), y_order);
@@ -274,17 +274,17 @@ namespace mapnik
                faces->line_to(itr->get<2>(),itr->get<3>());
                faces->line_to(itr->get<2>(),itr->get<3>() + height);
                faces->line_to(itr->get<0>(),itr->get<1>() + height);
-               
+
                path_type faces_path (t_,*faces,prj_trans);
                ras_ptr->add_path(faces_path);
                ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
                agg::render_scanlines(*ras_ptr, sl, ren);
                ras_ptr->reset();
-               
+
                frame->move_to(itr->get<0>(),itr->get<1>());
-               frame->line_to(itr->get<0>(),itr->get<1>()+height);   
+               frame->line_to(itr->get<0>(),itr->get<1>()+height);
             }
-            
+
             geom.rewind(0);
             for (unsigned j=0;j<geom.num_points();++j)
             {
@@ -300,14 +300,14 @@ namespace mapnik
                   frame->line_to(x,y+height);
                   roof->line_to(x,y+height);
                }
-            }           
-            path_type path(t_,*frame,prj_trans); 
+            }
+            path_type path(t_,*frame,prj_trans);
             agg::conv_stroke<path_type>  stroke(path);
             ras_ptr->add_path(stroke);
             ren.color(agg::rgba8(128, 128, 128, int(255 * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
-            
+
             path_type roof_path (t_,*roof,prj_trans);
             ras_ptr->add_path(roof_path);
             ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
@@ -320,17 +320,17 @@ namespace mapnik
    void agg_renderer<T>::process(line_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
-   {   
-      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base; 
+   {
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
       typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
       typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-      
-      agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-      agg::pixfmt_rgba32_plain pixf(buf); 
 
-      ren_base renb(pixf);	          
+      agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+      agg::pixfmt_rgba32_plain pixf(buf);
+
+      ren_base renb(pixf);
       mapnik::stroke const&  stroke_ = sym.get_stroke();
       color const& col = stroke_.get_color();
       unsigned r=col.red();
@@ -340,72 +340,72 @@ namespace mapnik
       renderer ren(renb);
       ras_ptr->reset();
       agg::scanline_p8 sl;
- 
+
       for (unsigned i=0;i<feature.num_geometries();++i)
       {
          geometry2d const& geom = feature.get_geometry(i);
          if (geom.num_points() > 1)
          {
             path_type path(t_,geom,prj_trans);
-            
+
             if (stroke_.has_dash())
-            {              
+            {
                agg::conv_dash<path_type> dash(path);
                dash_array const& d = stroke_.get_dash_array();
                dash_array::const_iterator itr = d.begin();
                dash_array::const_iterator end = d.end();
                for (;itr != end;++itr)
                {
-                  dash.add_dash(itr->first, itr->second); 
+                  dash.add_dash(itr->first, itr->second);
                }
-               
+
                agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
-               
+
                line_join_e join=stroke_.get_line_join();
                if ( join == MITER_JOIN)
                   stroke.generator().line_join(agg::miter_join);
-               else if( join == MITER_REVERT_JOIN) 
+               else if( join == MITER_REVERT_JOIN)
                   stroke.generator().line_join(agg::miter_join);
-               else if( join == ROUND_JOIN) 
+               else if( join == ROUND_JOIN)
                   stroke.generator().line_join(agg::round_join);
                else
                   stroke.generator().line_join(agg::bevel_join);
-               
+
                line_cap_e cap=stroke_.get_line_cap();
-               if (cap == BUTT_CAP)    
+               if (cap == BUTT_CAP)
                   stroke.generator().line_cap(agg::butt_cap);
                else if (cap == SQUARE_CAP)
                   stroke.generator().line_cap(agg::square_cap);
-               else 
+               else
                   stroke.generator().line_cap(agg::round_cap);
-               
+
                stroke.generator().miter_limit(4.0);
                stroke.generator().width(stroke_.get_width());
-               
+
                ras_ptr->add_path(stroke);
-               
+
             }
-            else 
+            else
             {
                agg::conv_stroke<path_type>  stroke(path);
                line_join_e join=stroke_.get_line_join();
                if ( join == MITER_JOIN)
                   stroke.generator().line_join(agg::miter_join);
-               else if( join == MITER_REVERT_JOIN) 
+               else if( join == MITER_REVERT_JOIN)
                   stroke.generator().line_join(agg::miter_join);
-               else if( join == ROUND_JOIN) 
+               else if( join == ROUND_JOIN)
                   stroke.generator().line_join(agg::round_join);
                else
                   stroke.generator().line_join(agg::bevel_join);
-               
+
                line_cap_e cap=stroke_.get_line_cap();
-               if (cap == BUTT_CAP)    
+               if (cap == BUTT_CAP)
                   stroke.generator().line_cap(agg::butt_cap);
                else if (cap == SQUARE_CAP)
                   stroke.generator().line_cap(agg::square_cap);
-               else 
+               else
                   stroke.generator().line_cap(agg::round_cap);
-               
+
                stroke.generator().miter_limit(4.0);
                stroke.generator().width(stroke_.get_width());
                ras_ptr->add_path(stroke);
@@ -415,7 +415,7 @@ namespace mapnik
       ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
       agg::render_scanlines(*ras_ptr, sl, ren);
    }
-   
+
    template <typename T>
    void agg_renderer<T>::process(point_symbolizer const& sym,
                               Feature const& feature,
@@ -430,7 +430,7 @@ namespace mapnik
          for (unsigned i=0;i<feature.num_geometries();++i)
          {
             geometry2d const& geom = feature.get_geometry(i);
-            
+
             geom.label_position(&x,&y);
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
@@ -442,23 +442,37 @@ namespace mapnik
                                         floor(y - 0.5 * h),
                                         ceil (x + 0.5 * w),
                                         ceil (y + 0.5 * h));
-            if (sym.get_allow_overlap() || 
+            if (sym.get_allow_overlap() ||
                 detector_.has_placement(label_ext))
-            {    
+            {
                pixmap_.set_rectangle_alpha2(*data,px,py,sym.get_opacity());
                detector_.insert(label_ext);
             }
          }
       }
    }
-    
+
    template <typename T>
    void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-      UnicodeString text = feature[sym.get_name()].to_unicode();
+
+      UnicodeString text;
+      if( sym.get_no_text() )
+            text = UnicodeString( " " );  // use 'space' as the text to render
+      else
+            text = feature[sym.get_name()].to_unicode();  // use text from feature to render
+
+      if ( sym.get_text_convert() == TOUPPER)
+      {
+         text = text.toUpper();
+      }
+      else if ( sym.get_text_convert() == TOLOWER)
+      {
+         text = text.toLower();
+      }
       boost::shared_ptr<ImageData32> const& data = sym.get_image();
       if (text.length() > 0 && data)
       {
@@ -468,7 +482,7 @@ namespace mapnik
          {
             faces = font_manager_.get_face_set(sym.get_fontset());
          }
-         else 
+         else
          {
             faces = font_manager_.get_face_set(sym.get_face_name());
          }
@@ -476,83 +490,110 @@ namespace mapnik
          if (faces->size() > 0)
          {
             text_renderer<T> ren(pixmap_, faces);
-            
+
             ren.set_pixel_size(sym.get_text_size());
             ren.set_fill(sym.get_fill());
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
 
             placement_finder<label_collision_detector4> finder(detector_);
-            
+
             string_info info(text);
-            
+
             faces->get_string_info(info);
-           
+
 
             int w = data->width();
             int h = data->height();
-            
+
             unsigned num_geom = feature.num_geometries();
             for (unsigned i=0;i<num_geom;++i)
             {
-               geometry2d const& geom = feature.get_geometry(i); 
-               if (geom.num_points() > 0 ) 
-               {    
+               geometry2d const& geom = feature.get_geometry(i);
+               if (geom.num_points() > 0 )
+               {
                   path_type path(t_,geom,prj_trans);
-                  
-                  if (sym.get_label_placement() == POINT_PLACEMENT) 
-                  {
-                     double label_x;
-                     double label_y;
-                     double z=0.0;
-                     placement text_placement(info, sym, false);
-                     text_placement.avoid_edges = sym.get_avoid_edges();
-                     geom.label_position(&label_x, &label_y);
-                     prj_trans.backward(label_x,label_y, z);
-                     t_.forward(&label_x,&label_y);
-                     finder.find_point_placement(text_placement,label_x,label_y);
 
-                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
-                     { 
-                        double x = text_placement.placements[ii].starting_x;
-                        double y = text_placement.placements[ii].starting_y;
-                        // remove displacement from image label
-                        position pos = sym.get_displacement();
-                        double lx = x - boost::get<0>(pos);
-                        double ly = y - boost::get<1>(pos);
-                        int px=int(lx - (0.5 * w)) ;
-                        int py=int(ly - (0.5 * h)) ;
-                        Envelope<double> label_ext (floor(lx - 0.5 * w), floor(ly - 0.5 * h), ceil (lx + 0.5 * w), ceil (ly + 0.5 * h));
-                        
-                        if ( detector_.has_placement(label_ext))
-                        {    
-                           pixmap_.set_rectangle_alpha(px,py,*data);
-                           Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
-                           ren.render(x,y);
-                           detector_.insert(label_ext);
+                  label_placement_enum how_placed = sym.get_label_placement();
+                  if (how_placed == POINT_PLACEMENT || how_placed == VERTEX_PLACEMENT)
+                  {
+                     // for every vertex, try and place a shield/text
+                     geom.rewind(0);
+                     for( unsigned jj = 0; jj < geom.num_points(); jj++ )
+                     {
+                        double label_x;
+                        double label_y;
+                        double z=0.0;
+                        placement text_placement(info, sym, false);
+                        text_placement.avoid_edges = sym.get_avoid_edges();
+                        text_placement.allow_overlap = sym.get_allow_overlap();
+                        if( how_placed == VERTEX_PLACEMENT )
+                            geom.vertex(&label_x,&label_y);  // by vertex
+                        else
+                            geom.label_position(&label_x, &label_y);  // by middle of line or by point
+                        prj_trans.backward(label_x,label_y, z);
+                        t_.forward(&label_x,&label_y);
+
+                        finder.find_point_placement( text_placement,label_x,label_y,sym.get_vertical_alignment(),sym.get_line_spacing(),
+                                                    sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment() );
+
+                        // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
+                        if( text_placement.placements.size() > 0)
+                        {
+                            double x = text_placement.placements[0].starting_x;
+                            double y = text_placement.placements[0].starting_y;
+                            int px;
+                            int py;
+                            Envelope<double> label_ext;
+
+                            if( !sym.get_unlock_image() )
+                            {  // center image at text center position
+                                // remove displacement from image label
+                                position pos = sym.get_displacement();
+                                double lx = x - boost::get<0>(pos);
+                                double ly = y - boost::get<1>(pos);
+                                px=int(floor(lx - (0.5 * w))) ;
+                                py=int(floor(ly - (0.5 * h))) ;
+                                label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
+                            }
+                            else
+                            {  // center image at reference location
+                                px=int(floor(label_x - 0.5 * w));
+                                py=int(floor(label_y - 0.5 * h));
+                                label_ext.init( floor(label_x - 0.5 * w), floor(label_y - 0.5 * h), ceil (label_x + 0.5 * w), ceil (label_y + 0.5 * h));
+                            }
+
+                            if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
+                            {
+                                //pixmap_.set_rectangle_alpha(px,py,*data);
+                                pixmap_.set_rectangle_alpha2(*data,px,py,sym.get_opacity());
+                                Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
+                                ren.render(x,y);
+                                detector_.insert(label_ext);
+                                finder.update_detector(text_placement);
+                            }
                         }
                      }
-                     finder.update_detector(text_placement);
                   }
-                  
-                  else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT) 
+
+                  else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                   {
                      placement text_placement(info, sym, true);
                      text_placement.avoid_edges = sym.get_avoid_edges();
                      finder.find_point_placements<path_type>(text_placement,path);
-                     
+
                      for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                      {
                         int w = data->width();
-                        int h = data->height();	                     
+                        int h = data->height();
                         double x = text_placement.placements[ii].starting_x;
                         double y = text_placement.placements[ii].starting_y;
-                        
+
                         int px=int(x - (w/2));
                         int py=int(y - (h/2));
-                        
+
                         pixmap_.set_rectangle_alpha(px,py,*data);
-                        
+
                         Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
                         ren.render(x,y);
                      }
@@ -563,7 +604,7 @@ namespace mapnik
          }
       }
    }
-   
+
    template <typename T>
    void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
                                Feature const& feature,
@@ -574,68 +615,68 @@ namespace mapnik
       typedef agg::renderer_base<agg::pixfmt_rgba32_plain> renderer_base;
       typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
       typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
-      
+
       agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
       agg::pixfmt_rgba32_plain pixf(buf);
-      
+
       ImageData32 pat =  * sym.get_image();
-      renderer_base ren_base(pixf);  
-      agg::pattern_filter_bilinear_rgba8 filter; 
+      renderer_base ren_base(pixf);
+      agg::pattern_filter_bilinear_rgba8 filter;
       pattern_source source(pat);
       pattern_type pattern (filter,source);
       renderer_type ren(ren_base, pattern);
       ren.clip_box(0,0,width_,height_);
       rasterizer_type ras(ren);
-      
+
       for (unsigned i=0;i<feature.num_geometries();++i)
       {
          geometry2d const& geom = feature.get_geometry(i);
          if (geom.num_points() > 1)
          {
             path_type path(t_,geom,prj_trans);
-            ras.add_path(path);    
-         } 
+            ras.add_path(path);
+         }
       }
    }
-    
+
    template <typename T>
    void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
       typedef coord_transform2<CoordTransform,geometry2d> path_type;
-      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base; 
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
       typedef agg::wrap_mode_repeat wrap_x_type;
       typedef agg::wrap_mode_repeat wrap_y_type;
       typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
          agg::row_accessor<agg::int8u>, agg::pixel32_type> rendering_buffer;
-      typedef agg::image_accessor_wrap<rendering_buffer, 
+      typedef agg::image_accessor_wrap<rendering_buffer,
          wrap_x_type,
          wrap_y_type> img_source_type;
-	
+
       typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
-	
-      typedef agg::renderer_scanline_aa<ren_base, 
+
+      typedef agg::renderer_scanline_aa<ren_base,
          agg::span_allocator<agg::rgba8>,
-         span_gen_type> renderer_type;  
-      
-      
+         span_gen_type> renderer_type;
+
+
       agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
       agg::pixfmt_rgba32_plain pixf(buf);
       ren_base renb(pixf);
-      
+
       agg::scanline_u8 sl;
       ras_ptr->reset();
-      
+
       ImageData32 const& pattern =  * sym.get_image();
       unsigned w=pattern.width();
       unsigned h=pattern.height();
-      agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)pattern.getBytes(),w,h,w*4);  
+      agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)pattern.getBytes(),w,h,w*4);
       agg::span_allocator<agg::rgba8> sa;
       agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
          agg::row_accessor<agg::int8u>, agg::pixel32_type> pixf_pattern(pattern_rbuf);
       img_source_type img_src(pixf_pattern);
-      
+
       double x0=0,y0=0;
       unsigned num_geometries = feature.num_geometries();
       if (num_geometries>0)
@@ -645,18 +686,18 @@ namespace mapnik
       }
       unsigned offset_x = unsigned(width_-x0);
       unsigned offset_y = unsigned(height_-y0);
-      span_gen_type sg(img_src, offset_x, offset_y);      
+      span_gen_type sg(img_src, offset_x, offset_y);
       renderer_type rp(renb,sa, sg);
       for (unsigned i=0;i<num_geometries;++i)
       {
          geometry2d const& geom = feature.get_geometry(i);
          if (geom.num_points() > 2)
-         {     
-            path_type path(t_,geom,prj_trans);            
-            ras_ptr->add_path(path); 
+         {
+            path_type path(t_,geom,prj_trans);
+            ras_ptr->add_path(path);
          }
       }
-      agg::render_scanlines(*ras_ptr, sl, rp);   
+      agg::render_scanlines(*ras_ptr, sl, rp);
    }
 
    template <typename T>
@@ -671,7 +712,7 @@ namespace mapnik
          ImageData32 target(int(ceil(ext.width())),int(ceil(ext.height())));
          int start_x = int(ext.minx()+0.5);
          int start_y = int(ext.miny()+0.5);
-         
+
          if (sym.get_scaling() == "fast") {
             scale_image<ImageData32>(target,raster->data_);
          } else if (sym.get_scaling() == "bilinear"){
@@ -714,39 +755,39 @@ namespace mapnik
          // TODO: other modes? (add,diff,sub,...)
       }
    }
-    
+
    template <typename T>
    void agg_renderer<T>::process(markers_symbolizer const& sym,
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;    
+      typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
       arrow arrow_;
       ras_ptr->reset();
-   
+
       agg::scanline_u8 sl;
       agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
       agg::pixfmt_rgba32_plain pixf(buf);
-      ren_base renb(pixf);  
-      
+      ren_base renb(pixf);
+
       unsigned r = 0;// fill_.red();
       unsigned g = 0; //fill_.green();
       unsigned b = 255; //fill_.blue();
       unsigned a = 255; //fill_.alpha();
-      renderer ren(renb); 
+      renderer ren(renb);
       for (unsigned i=0;i<feature.num_geometries();++i)
       {
          geometry2d const& geom=feature.get_geometry(i);
-         if (geom.num_points() > 1) 
+         if (geom.num_points() > 1)
          {
             path_type path(t_,geom,prj_trans);
-            
+
             agg::conv_dash <path_type> dash(path);
             dash.add_dash(20.0,200.0);
-            markers_converter<agg::conv_dash<path_type>, 
-               arrow, 
+            markers_converter<agg::conv_dash<path_type>,
+               arrow,
                label_collision_detector4>
                marker(dash, arrow_, detector_);
             ras_ptr->add_path(marker);
@@ -755,14 +796,14 @@ namespace mapnik
       ren.color(agg::rgba8(r, g, b, a));
       agg::render_scanlines(*ras_ptr, sl, ren);
    }
-   
+
    template <typename T>
    void agg_renderer<T>::process(text_symbolizer const& sym,
                                  Feature const& feature,
                                  proj_transform const& prj_trans)
    {
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-      
+
       UnicodeString text = feature[sym.get_name()].to_unicode();
       if ( sym.get_text_convert() == TOUPPER)
       {
@@ -783,7 +824,7 @@ namespace mapnik
          {
             faces = font_manager_.get_face_set(sym.get_fontset());
          }
-         else 
+         else
          {
             faces = font_manager_.get_face_set(sym.get_face_name());
          }
@@ -795,35 +836,37 @@ namespace mapnik
             ren.set_fill(fill);
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
-           
+            ren.set_opacity(sym.get_opacity());
+
             placement_finder<label_collision_detector4> finder(detector_);
-           
+
             string_info info(text);
-            
+
             faces->get_string_info(info);
             unsigned num_geom = feature.num_geometries();
             for (unsigned i=0;i<num_geom;++i)
             {
                geometry2d const& geom = feature.get_geometry(i);
-               if (geom.num_points() > 0) // don't bother with empty geometries 
+               if (geom.num_points() > 0) // don't bother with empty geometries
                {
                   path_type path(t_,geom,prj_trans);
-                  placement text_placement(info,sym);  
+                  placement text_placement(info,sym);
                   text_placement.avoid_edges = sym.get_avoid_edges();
-                  if (sym.get_label_placement() == POINT_PLACEMENT) 
+                  if (sym.get_label_placement() == POINT_PLACEMENT)
                   {
                      double label_x, label_y, z=0.0;
                      geom.label_position(&label_x, &label_y);
                      prj_trans.backward(label_x,label_y, z);
                      t_.forward(&label_x,&label_y);
-                     finder.find_point_placement(text_placement,label_x,label_y,sym.get_vertical_alignment(),sym.get_line_spacing(),sym.get_character_spacing());
+                     finder.find_point_placement(text_placement,label_x,label_y,sym.get_vertical_alignment(),sym.get_line_spacing(),
+                                                 sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment());
                      finder.update_detector(text_placement);
                   }
                   else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                   {
                      finder.find_line_placements<path_type>(text_placement,path);
                   }
-                  
+
                   for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
                   {
                      double x = text_placement.placements[ii].starting_x;
@@ -832,7 +875,7 @@ namespace mapnik
                      ren.render(x,y);
                   }
                }
-            }  
+            }
          }
          else
          {

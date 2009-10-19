@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko
@@ -32,6 +32,7 @@
 static const char * label_placement_strings[] = {
     "point",
     "line",
+    "vertex",
     ""
 };
 
@@ -47,6 +48,26 @@ static const char * vertical_alignment_strings[] = {
 
 
 IMPLEMENT_ENUM( mapnik::vertical_alignment_e, vertical_alignment_strings );
+
+static const char * horizontal_alignment_strings[] = {
+    "left",
+    "middle",
+    "right",
+    ""
+};
+
+
+IMPLEMENT_ENUM( mapnik::horizontal_alignment_e, horizontal_alignment_strings );
+
+static const char * justify_alignment_strings[] = {
+    "left",
+    "middle",
+    "right",
+    ""
+};
+
+
+IMPLEMENT_ENUM( mapnik::justify_alignment_e, justify_alignment_strings );
 
 static const char * text_convert_strings[] = {
     "none",
@@ -85,7 +106,12 @@ namespace mapnik
           displacement_(0.0,0.0),
           avoid_edges_(false),
           minimum_distance_(0.0),
-          overlap_(false) {}
+          overlap_(false),
+          opacity_(1.0),
+          wrap_before_(false),
+          halign_(H_MIDDLE),
+          jalign_(J_MIDDLE) {}
+
     text_symbolizer::text_symbolizer(std::string const& name, unsigned size, color const& fill)
         : name_(name),
           //face_name_(""),
@@ -110,7 +136,12 @@ namespace mapnik
           displacement_(0.0,0.0),
           avoid_edges_(false),
           minimum_distance_(0.0),
-          overlap_(false) {}
+          overlap_(false),
+          opacity_(1.0),
+          wrap_before_(false),
+          halign_(H_MIDDLE),
+          jalign_(J_MIDDLE) {}
+
     text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
         : name_(rhs.name_),
           face_name_(rhs.face_name_),
@@ -135,8 +166,12 @@ namespace mapnik
           displacement_(rhs.displacement_),
           avoid_edges_(rhs.avoid_edges_),
           minimum_distance_(rhs.minimum_distance_),
-          overlap_(rhs.overlap_) {}
-   
+          overlap_(rhs.overlap_),
+          opacity_(rhs.opacity_),
+          wrap_before_(rhs.wrap_before_),
+          halign_(rhs.halign_),
+          jalign_(rhs.jalign_) {}
+
     text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     {
         if (this == &other)
@@ -161,28 +196,32 @@ namespace mapnik
         label_p_ = other.label_p_;
         valign_ = other.valign_;
         anchor_ = other.anchor_;
-        displacement_ = other.displacement_; 
+        displacement_ = other.displacement_;
         avoid_edges_ = other.avoid_edges_;
         minimum_distance_ = other.minimum_distance_;
         overlap_ = other.overlap_;
+        opacity_ = other.opacity_;
+        wrap_before_ = other.wrap_before_;
+        halign_ = other.halign_;
+        jalign_ = other.jalign_;
         return *this;
-    } 
-   
+    }
+
     std::string const&  text_symbolizer::get_name() const
     {
         return name_;
     }
-    
+
     void text_symbolizer::set_name(std::string name)
     {
         name_ = name;
     }
-    
+
     std::string const&  text_symbolizer::get_face_name() const
     {
         return face_name_;
     }
-   
+
     void text_symbolizer::set_face_name(std::string face_name)
     {
         face_name_ = face_name;
@@ -203,7 +242,7 @@ namespace mapnik
         return text_ratio_;
     }
 
-    void  text_symbolizer::set_text_ratio(unsigned ratio) 
+    void  text_symbolizer::set_text_ratio(unsigned ratio)
     {
         text_ratio_ = ratio;
     }
@@ -213,10 +252,20 @@ namespace mapnik
         return wrap_width_;
     }
 
-    void  text_symbolizer::set_wrap_width(unsigned width) 
+    void  text_symbolizer::set_wrap_width(unsigned width)
     {
         wrap_width_ = width;
-    }    
+    }
+
+    bool  text_symbolizer::get_wrap_before() const
+    {
+        return wrap_before_;
+    }
+
+    void  text_symbolizer::set_wrap_before(bool wrap_before)
+    {
+        wrap_before_ = wrap_before;
+    }
 
     unsigned char text_symbolizer::get_wrap_char() const
     {
@@ -228,16 +277,16 @@ namespace mapnik
         return std::string(1, wrap_char_);
     }
 
-    void  text_symbolizer::set_wrap_char(unsigned char character) 
+    void  text_symbolizer::set_wrap_char(unsigned char character)
     {
         wrap_char_ = character;
-    }    
+    }
 
-    void  text_symbolizer::set_wrap_char_from_string(std::string character) 
+    void  text_symbolizer::set_wrap_char_from_string(std::string character)
     {
         wrap_char_ = (character)[0];
     }
-    
+
     text_convert_e  text_symbolizer::get_text_convert() const
     {
         return text_convert_;
@@ -253,7 +302,7 @@ namespace mapnik
         return line_spacing_;
     }
 
-    void  text_symbolizer::set_line_spacing(unsigned spacing) 
+    void  text_symbolizer::set_line_spacing(unsigned spacing)
     {
         line_spacing_ = spacing;
     }
@@ -263,7 +312,7 @@ namespace mapnik
         return character_spacing_;
     }
 
-    void  text_symbolizer::set_character_spacing(unsigned spacing) 
+    void  text_symbolizer::set_character_spacing(unsigned spacing)
     {
         character_spacing_ = spacing;
     }
@@ -273,7 +322,7 @@ namespace mapnik
         return label_spacing_;
     }
 
-    void  text_symbolizer::set_label_spacing(unsigned spacing) 
+    void  text_symbolizer::set_label_spacing(unsigned spacing)
     {
         label_spacing_ = spacing;
     }
@@ -293,7 +342,7 @@ namespace mapnik
         return force_odd_labels_;
     }
 
-    void  text_symbolizer::set_force_odd_labels(bool force) 
+    void  text_symbolizer::set_force_odd_labels(bool force)
     {
         force_odd_labels_ = force;
     }
@@ -303,7 +352,7 @@ namespace mapnik
         return max_char_angle_delta_;
     }
 
-    void text_symbolizer::set_max_char_angle_delta(double angle) 
+    void text_symbolizer::set_max_char_angle_delta(double angle)
     {
         max_char_angle_delta_ = angle;
     }
@@ -322,12 +371,12 @@ namespace mapnik
     {
         fill_ = fill;
     }
-	
+
     color const&  text_symbolizer::get_fill() const
     {
         return fill_;
     }
-	
+
     void  text_symbolizer::set_halo_fill(color const& fill)
     {
         halo_fill_ = fill;
@@ -337,22 +386,22 @@ namespace mapnik
     {
         return halo_fill_;
     }
-	
+
     void  text_symbolizer::set_halo_radius(unsigned radius)
     {
         halo_radius_ = radius;
     }
-	
+
     unsigned  text_symbolizer::get_halo_radius() const
     {
         return halo_radius_;
     }
-	
+
     void  text_symbolizer::set_label_placement(label_placement_e label_p)
     {
         label_p_ = label_p;
     }
-	
+
     label_placement_e  text_symbolizer::get_label_placement() const
     {
         return label_p_;
@@ -362,37 +411,37 @@ namespace mapnik
     {
        valign_ = valign;
     }
-   
+
     vertical_alignment_e text_symbolizer::get_vertical_alignment() const
     {
        return valign_;
     }
-    
+
     void  text_symbolizer::set_anchor(double x, double y)
     {
         anchor_ = boost::make_tuple(x,y);
     }
-    
+
     position const& text_symbolizer::get_anchor() const
     {
         return anchor_;
     }
-    
+
     void  text_symbolizer::set_displacement(double x, double y)
     {
         displacement_ = boost::make_tuple(x,y);
     }
-    
+
     position const& text_symbolizer::get_displacement() const
     {
         return displacement_;
     }
-    
+
     bool text_symbolizer::get_avoid_edges() const
     {
         return avoid_edges_;
     }
-    
+
     void text_symbolizer::set_avoid_edges(bool avoid)
     {
         avoid_edges_ = avoid;
@@ -402,7 +451,7 @@ namespace mapnik
     {
         return minimum_distance_;
     }
-    
+
     void text_symbolizer::set_minimum_distance(double distance)
     {
         minimum_distance_ = distance;
@@ -412,9 +461,39 @@ namespace mapnik
     {
        overlap_ = overlap;
     }
-   
+
     bool text_symbolizer::get_allow_overlap() const
     {
       return overlap_;
+    }
+
+    void text_symbolizer::set_opacity(double opacity)
+    {
+       opacity_ = opacity;
+    }
+
+    double text_symbolizer::get_opacity() const
+    {
+      return opacity_;
+    }
+
+    void text_symbolizer::set_horizontal_alignment(horizontal_alignment_e halign)
+    {
+       halign_ = halign;
+    }
+
+    horizontal_alignment_e text_symbolizer::get_horizontal_alignment() const
+    {
+       return halign_;
+    }
+
+    void text_symbolizer::set_justify_alignment(justify_alignment_e jalign)
+    {
+       jalign_ = jalign;
+    }
+
+    justify_alignment_e text_symbolizer::get_justify_alignment() const
+    {
+       return jalign_;
     }
 }

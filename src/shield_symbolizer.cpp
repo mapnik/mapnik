@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko
@@ -38,25 +38,49 @@ namespace mapnik
                           std::string const& name,
                           std::string const& face_name,
                           unsigned size,
-                          color const& fill, 
+                          color const& fill,
                           std::string const& file,
                           std::string const& type,
                           unsigned width,unsigned height)
         : text_symbolizer(name, face_name, size, fill),
-          symbolizer_with_image( file, type, width, height )
+          symbolizer_with_image( file, type, width, height ),
+          unlock_image_(false),
+          no_text_(false)
     {
     }
 
     shield_symbolizer::shield_symbolizer(
                           std::string const& name,
                           unsigned size,
-                          color const& fill, 
+                          color const& fill,
                           std::string const& file,
                           std::string const& type,
                           unsigned width,unsigned height)
         : text_symbolizer(name, size, fill),
-          symbolizer_with_image( file, type, width, height )
+          symbolizer_with_image( file, type, width, height ),
+          unlock_image_(false),
+          no_text_(false)
     {
+    }
+
+    void shield_symbolizer::set_unlock_image(bool unlock_image)
+    {
+       unlock_image_ = unlock_image;
+    }
+
+    bool shield_symbolizer::get_unlock_image() const
+    {
+      return unlock_image_;
+    }
+
+    void shield_symbolizer::set_no_text(bool no_text)
+    {
+       no_text_ = no_text;
+    }
+
+    bool shield_symbolizer::get_no_text() const
+    {
+      return no_text_;
     }
 }
 

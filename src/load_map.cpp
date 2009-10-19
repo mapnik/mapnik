@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko
@@ -55,28 +55,28 @@ using boost::property_tree::ptree;
 using std::cerr;
 using std::endl;
 
-namespace mapnik 
+namespace mapnik
 {
    using boost::optional;
 
    class map_parser : boost::noncopyable {
       public:
-         map_parser( bool strict, std::string const& filename = "" ) : 
+         map_parser( bool strict, std::string const& filename = "" ) :
             strict_( strict ),
             filename_( filename ),
             relative_to_xml_(true),
             font_manager_(font_engine_) {}
-         
+
          void parse_map( Map & map, ptree const & sty);
       private:
          void parse_style( Map & map, ptree const & sty);
          void parse_layer( Map & map, ptree const & lay);
-        
+
          void parse_fontset(Map & map, ptree const & fset);
          void parse_font(FontSet & fset, ptree const & f);
-     
+
          void parse_rule( feature_type_style & style, ptree const & r);
-         
+
          void parse_point_symbolizer( rule_type & rule, ptree const & sym);
          void parse_line_pattern_symbolizer( rule_type & rule, ptree const & sym);
          void parse_polygon_pattern_symbolizer( rule_type & rule, ptree const & sym);
@@ -87,11 +87,11 @@ namespace mapnik
          void parse_building_symbolizer( rule_type & rule, ptree const & sym );
          void parse_raster_symbolizer( rule_type & rule, ptree const & sym );
          void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
-         
+
          void ensure_font_face( const std::string & face_name );
-         
+
          std::string ensure_relative_to_xml( boost::optional<std::string> opt_path );
-         
+
          bool strict_;
          std::string filename_;
          bool relative_to_xml_;
@@ -127,7 +127,7 @@ namespace mapnik
 #ifdef HAVE_LIBXML2
         read_xml2_string(str, pt);
 #else
-        try 
+        try
         {
            std::istringstream s(str);
            read_xml(s,pt);
@@ -218,7 +218,7 @@ namespace mapnik
                             std::string name = get_attr<string>(param, "name");
                             std::string value = get_own<string>( param,
                                     "datasource parameter");
-                            params[name] = value; 
+                            params[name] = value;
                         }
                         else if( paramIter->first != "<xmlattr>" &&
                             paramIter->first != "<xmlcomment>" )
@@ -255,7 +255,7 @@ namespace mapnik
             ptree::const_iterator ruleIter = sty.begin();
             ptree::const_iterator endRule = sty.end();
 
-            for (; ruleIter!=endRule; ++ruleIter)    
+            for (; ruleIter!=endRule; ++ruleIter)
             {
                 ptree::value_type const& rule_tag = *ruleIter;
                 if (rule_tag.first == "Rule")
@@ -291,7 +291,7 @@ namespace mapnik
             ptree::const_iterator itr = fset.begin();
             ptree::const_iterator end = fset.end();
 
-            for (; itr != end; ++itr)    
+            for (; itr != end; ++itr)
             {
                 ptree::value_type const& font_tag = *itr;
 
@@ -308,8 +308,8 @@ namespace mapnik
             }
 
             map.insert_fontset(name, fontset);
-				
-            // XXX Hack because map object isn't accessible by text_symbolizer 
+
+            // XXX Hack because map object isn't accessible by text_symbolizer
             // when it's parsed
             fontsets_.insert(pair<std::string, FontSet>(name, fontset));
         } catch (const config_error & ex) {
@@ -338,7 +338,7 @@ namespace mapnik
         try
         {
             name = get_attr(lay, "name", string("Unnamed"));
-            
+
             // XXX if no projection is given inherit from map? [DS]
             std::string srs = get_attr(lay, "srs", map.srs());
 
@@ -379,7 +379,7 @@ namespace mapnik
             {
                 lyr.setQueryable( * queryable );
             }
-                                    
+
             optional<boolean> clear_cache =
                 get_opt_attr<boolean>(lay, "clear_label_cache");
             if (clear_cache)
@@ -409,8 +409,8 @@ namespace mapnik
                        std::map<std::string,parameters>::const_iterator base_itr = datasource_templates_.find(*base);
                        if (base_itr!=datasource_templates_.end())
                           params = base_itr->second;
-                    }   
-                    
+                    }
+
                     ptree::const_iterator paramIter = child.second.begin();
                     ptree::const_iterator endParam = child.second.end();
                     for (; paramIter != endParam; ++paramIter)
@@ -422,7 +422,7 @@ namespace mapnik
                             std::string name = get_attr<string>(param, "name");
                             std::string value = get_own<string>( param,
                                     "datasource parameter");
-                            params[name] = value; 
+                            params[name] = value;
                         }
                         else if( paramIter->first != "<xmlattr>"  &&
                             paramIter->first != "<xmlcomment>" )
@@ -432,15 +432,15 @@ namespace mapnik
                                     paramIter->first + "'");
                         }
                     }
-                                                                          
+
                     if ( relative_to_xml_ ) {
                         boost::optional<std::string> base_param = params.get<std::string>("base");
                         boost::optional<std::string> file_param = params.get<std::string>("file");
-                        
+
                         if (base_param){
                             params["base"] = ensure_relative_to_xml(base_param);
                         }
-                        
+
                         else if (file_param){
                             params["file"] = ensure_relative_to_xml(file_param);
                         }
@@ -450,27 +450,27 @@ namespace mapnik
                       std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
                     }
                     #endif
-                    
-                    //now we are ready to create datasource 
-                    try 
+
+                    //now we are ready to create datasource
+                    try
                     {
                         boost::shared_ptr<datasource> ds =
                             datasource_cache::instance()->create(params);
                         lyr.set_datasource(ds);
                     }
-                    
+
                     // catch problem at datasource registration
                     catch (const mapnik::config_error & ex )
                     {
                         throw config_error( ex.what() );
                     }
-                    
+
                     // catch problem at the datasource creation
                     catch (const mapnik::datasource_exception & ex )
                     {
                         throw config_error( ex.what() );
                     }
-                    
+
                     catch (...)
                     {
                        //throw config_error("exception...");
@@ -512,27 +512,27 @@ namespace mapnik
                // can we use encoding defined for XML document for filter expressions?
                rule.set_filter(create_filter(*filter_expr,"utf8"));
             }
-            
-            optional<std::string> else_filter = 
+
+            optional<std::string> else_filter =
                 get_opt_child<string>(r, "ElseFilter");
             if (else_filter)
             {
                 rule.set_else(true);
             }
 
-            optional<double> min_scale = 
+            optional<double> min_scale =
                 get_opt_child<double>(r, "MinScaleDenominator");
             if (min_scale)
             {
                 rule.set_min_scale(*min_scale);
             }
 
-            optional<double> max_scale = 
+            optional<double> max_scale =
                 get_opt_child<double>(r, "MaxScaleDenominator");
-            if (max_scale) 
+            if (max_scale)
             {
-                rule.set_max_scale(*max_scale);   
-            }    
+                rule.set_max_scale(*max_scale);
+            }
 
             ptree::const_iterator symIter = r.begin();
             ptree::const_iterator endSym = r.end();
@@ -544,7 +544,7 @@ namespace mapnik
                 if ( sym.first == "PointSymbolizer")
                 {
                     parse_point_symbolizer( rule, sym.second );
-                } 
+                }
                 else if ( sym.first == "LinePatternSymbolizer")
                 {
                     parse_line_pattern_symbolizer( rule, sym.second );
@@ -564,24 +564,24 @@ namespace mapnik
                 else if ( sym.first == "LineSymbolizer")
                 {
                     parse_line_symbolizer( rule, sym.second );
-                } 
+                }
                 else if ( sym.first == "PolygonSymbolizer")
                 {
                     parse_polygon_symbolizer( rule, sym.second );
-                } 
+                }
                 else if ( sym.first == "BuildingSymbolizer")
                 {
                     parse_building_symbolizer( rule, sym.second );
-                } 
+                }
                 else if ( sym.first == "RasterSymbolizer")
                 {
                     parse_raster_symbolizer( rule, sym.second );
-                } 
+                }
                 else if ( sym.first == "MarkersSymbolizer")
                 {
                     rule.append(markers_symbolizer());
-                } 
-                
+                }
+
                 else if ( sym.first != "MinScaleDenominator" &&
                         sym.first != "MaxScaleDenominator" &&
                         sym.first != "Filter" &&
@@ -592,7 +592,7 @@ namespace mapnik
                     throw config_error(std::string("Unknown symbolizer '") +
                             sym.first + "'");
                 }
-            } 
+            }
 
             style.add_rule(rule);
 
@@ -609,18 +609,18 @@ namespace mapnik
 
     void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
     {
-        try 
+        try
         {
             optional<std::string> file =  get_opt_attr<string>(sym, "file");
             optional<std::string> base =  get_opt_attr<string>(sym, "base");
-            optional<std::string> type =  get_opt_attr<string>(sym, "type"); 
-            optional<boolean> allow_overlap = 
+            optional<std::string> type =  get_opt_attr<string>(sym, "type");
+            optional<boolean> allow_overlap =
                 get_opt_attr<boolean>(sym, "allow_overlap");
-            optional<float> opacity = 
+            optional<float> opacity =
                 get_opt_attr<float>(sym, "opacity");
 
-            optional<unsigned> width = get_opt_attr<unsigned>(sym, "width"); 
-            optional<unsigned> height = get_opt_attr<unsigned>(sym, "height"); 
+            optional<unsigned> width = get_opt_attr<unsigned>(sym, "width");
+            optional<unsigned> height = get_opt_attr<unsigned>(sym, "height");
 
             if (file && type && width && height)
             {
@@ -634,9 +634,9 @@ namespace mapnik
                          *file = itr->second + "/" + *file;
                       }
                    }
-                  
+
                    if ( relative_to_xml_ )
-                   {    
+                   {
                       *file = ensure_relative_to_xml(file);
                    }
                    #ifdef MAPNIK_DEBUG
@@ -644,7 +644,7 @@ namespace mapnik
                      std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
                    }
                    #endif
-                
+
                    point_symbolizer symbol(*file,*type,*width,*height);
                    if (allow_overlap)
                    {
@@ -653,7 +653,7 @@ namespace mapnik
                    if (opacity)
                    {
                       symbol.set_opacity( * opacity );
-                   }			
+                   }
                    rule.append(symbol);
                 }
                 catch (ImageReaderException const & ex )
@@ -681,12 +681,12 @@ namespace mapnik
                 if ( ! height ) os << "height ";
                 throw config_error( os.str() );
             }
-            else 
+            else
             {
                 rule.append(point_symbolizer());
             }
         }
-        catch (const config_error & ex) 
+        catch (const config_error & ex)
         {
             ex.append_context("in PointSymbolizer");
             throw;
@@ -695,11 +695,11 @@ namespace mapnik
 
     void map_parser::parse_line_pattern_symbolizer( rule_type & rule, ptree const & sym )
     {
-        try 
+        try
         {
             std::string file = get_attr<string>(sym, "file");
             optional<std::string> base = get_opt_attr<string>(sym, "base");
-            std::string type = get_attr<string>(sym, "type"); 
+            std::string type = get_attr<string>(sym, "type");
             unsigned width = get_attr<unsigned>(sym, "width");
             unsigned height = get_attr<unsigned>(sym, "height");
 
@@ -714,7 +714,7 @@ namespace mapnik
                    }
                }
                if ( relative_to_xml_ )
-               {    
+               {
                   file = ensure_relative_to_xml(file);
                }
                #ifdef MAPNIK_DEBUG
@@ -722,7 +722,7 @@ namespace mapnik
                  std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
                }
                #endif
-                
+
 
                line_pattern_symbolizer symbol(file,type,width,height);
                rule.append(symbol);
@@ -741,7 +741,7 @@ namespace mapnik
                 }
             }
         }
-        catch (const config_error & ex) 
+        catch (const config_error & ex)
         {
             ex.append_context("in LinePatternSymbolizer");
             throw;
@@ -751,11 +751,11 @@ namespace mapnik
     void map_parser::parse_polygon_pattern_symbolizer( rule_type & rule,
                 ptree const & sym )
     {
-        try 
+        try
         {
             std::string file = get_attr<string>(sym, "file");
             optional<std::string> base = get_opt_attr<string>(sym, "base");
-            std::string type = get_attr<string>(sym, "type"); 
+            std::string type = get_attr<string>(sym, "type");
             unsigned width = get_attr<unsigned>(sym, "width");
             unsigned height = get_attr<unsigned>(sym, "height");
 
@@ -770,7 +770,7 @@ namespace mapnik
                    }
                 }
                 if ( relative_to_xml_ )
-                {    
+                {
                    file = ensure_relative_to_xml(file);
                 }
                 #ifdef MAPNIK_DEBUG
@@ -796,7 +796,7 @@ namespace mapnik
                 }
             }
         }
-        catch (const config_error & ex) 
+        catch (const config_error & ex)
         {
             ex.append_context("in PolygonPatternSymbolizer");
             throw;
@@ -807,20 +807,20 @@ namespace mapnik
     {
         try
         {
-            std::string name = get_attr<string>(sym, "name"); 
+            std::string name = get_attr<string>(sym, "name");
 
             optional<std::string> face_name =
                  get_opt_attr<std::string>(sym, "face_name");
-            
+
             optional<std::string> fontset_name =
                  get_opt_attr<std::string>(sym, "fontset_name");
 
             unsigned size = get_attr(sym, "size", 10U);
 
             color c = get_attr(sym, "fill", color(0,0,0));
-            
-            text_symbolizer text_symbol = text_symbolizer(name, size, c);                
-            
+
+            text_symbolizer text_symbol = text_symbolizer(name, size, c);
+
             if (fontset_name && face_name)
             {
                 throw config_error(std::string("Can't have both face_name and fontset_name"));
@@ -830,7 +830,7 @@ namespace mapnik
                 std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(*fontset_name);
                 if (itr != fontsets_.end())
                 {
-                    text_symbol.set_fontset(itr->second);                
+                    text_symbol.set_fontset(itr->second);
                 }
                 else
                 {
@@ -857,17 +857,17 @@ namespace mapnik
             label_placement_e placement =
                     get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
             text_symbol.set_label_placement( placement );
-            // vertical alignment 
+            // vertical alignment
             vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", BOTTOM);
+            text_symbol.set_vertical_alignment(valign);
 
-            text_symbol.set_vertical_alignment(valign);  
             // halo fill and radius
             optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
             if (halo_fill)
             {
                 text_symbol.set_halo_fill( * halo_fill );
             }
-            optional<unsigned> halo_radius = 
+            optional<unsigned> halo_radius =
                 get_opt_attr<unsigned>(sym, "halo_radius");
             if (halo_radius)
             {
@@ -875,18 +875,29 @@ namespace mapnik
             }
 
             // text ratio and wrap width
-            optional<unsigned> text_ratio = 
+            optional<unsigned> text_ratio =
                 get_opt_attr<unsigned>(sym, "text_ratio");
+            if (text_ratio)
+            {
+                text_symbol.set_text_ratio(*text_ratio);
+            }
 
-            optional<unsigned> wrap_width = 
+            optional<unsigned> wrap_width =
                 get_opt_attr<unsigned>(sym, "wrap_width");
             if (wrap_width)
             {
                 text_symbol.set_wrap_width(*wrap_width);
             }
 
+            optional<boolean> wrap_before =
+                get_opt_attr<boolean>(sym, "wrap_before");
+            if (wrap_before)
+            {
+                text_symbol.set_wrap_before(*wrap_before);
+            }
+
             // character used to break long strings
-            optional<std::string> wrap_char = 
+            optional<std::string> wrap_char =
                 get_opt_attr<std::string>(sym, "wrap_character");
             if (wrap_char && (*wrap_char).size() > 0)
             {
@@ -935,25 +946,41 @@ namespace mapnik
                 text_symbol.set_avoid_edges( * avoid_edges);
             }
 
-            // allow_overlap 
-            optional<boolean> allow_overlap = 
+            // allow_overlap
+            optional<boolean> allow_overlap =
                 get_opt_attr<boolean>(sym, "allow_overlap");
             if (allow_overlap)
             {
                 text_symbol.set_allow_overlap( * allow_overlap );
             }
-            
+
+            // opacity
+            optional<double> opacity =
+                get_opt_attr<double>(sym, "opacity");
+            if (opacity)
+            {
+                text_symbol.set_opacity( * opacity );
+            }
+
             // max_char_angle_delta
-            optional<double> max_char_angle_delta = 
+            optional<double> max_char_angle_delta =
                get_opt_attr<double>(sym, "max_char_angle_delta");
             if (max_char_angle_delta)
             {
                text_symbol.set_max_char_angle_delta( * max_char_angle_delta);
             }
-               
+
+            // horizontal alignment
+            horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal_alignment", H_MIDDLE);
+            text_symbol.set_horizontal_alignment(halign);
+
+            // justify alignment
+            justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify_alignment", J_MIDDLE);
+            text_symbol.set_justify_alignment(jalign);
+
             rule.append(text_symbol);
         }
-        catch (const config_error & ex) 
+        catch (const config_error & ex)
         {
             ex.append_context("in TextSymbolizer");
             throw;
@@ -991,9 +1018,9 @@ namespace mapnik
                        image_file = itr->second + "/" + image_file;
                     }
                 }
-                
+
                 if ( relative_to_xml_ )
-                {    
+                {
                    image_file = ensure_relative_to_xml(image_file);
                 }
                 #ifdef MAPNIK_DEBUG
@@ -1001,7 +1028,7 @@ namespace mapnik
                   std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
                 }
                 #endif
-                
+
                 shield_symbolizer shield_symbol(name,size,fill,
                                                 image_file,type,width,height);
 
@@ -1014,7 +1041,7 @@ namespace mapnik
                     std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(*fontset_name);
                     if (itr != fontsets_.end())
                     {
-                        shield_symbol.set_fontset(itr->second);                
+                        shield_symbol.set_fontset(itr->second);
                     }
                     else
                     {
@@ -1037,7 +1064,7 @@ namespace mapnik
                 double dx = get_attr(sym, "dx", 0.0);
                 double dy = get_attr(sym, "dy", 0.0);
                 shield_symbol.set_displacement(dx,dy);
-                
+
                 label_placement_e placement =
                    get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
                 shield_symbol.set_label_placement( placement );
@@ -1049,35 +1076,120 @@ namespace mapnik
                 {
                    shield_symbol.set_avoid_edges( *avoid_edges);
                 }
-                
+
                 // halo fill and radius
                 optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
                 if (halo_fill)
                 {
                    shield_symbol.set_halo_fill( * halo_fill );
                 }
-                optional<unsigned> halo_radius = 
+                optional<unsigned> halo_radius =
                    get_opt_attr<unsigned>(sym, "halo_radius");
                 if (halo_radius)
                 {
                    shield_symbol.set_halo_radius(*halo_radius);
                 }
-                
+
                 // minimum distance between labels
-                optional<unsigned> min_distance = 
+                optional<unsigned> min_distance =
                     get_opt_attr<unsigned>(sym, "min_distance");
                 if (min_distance)
                 {
                     shield_symbol.set_minimum_distance(*min_distance);
                 }
-            
+
                 // spacing between repeated labels on lines
                 optional<unsigned> spacing = get_opt_attr<unsigned>(sym, "spacing");
                 if (spacing)
                 {
                     shield_symbol.set_label_spacing(*spacing);
                 }
-                
+
+                // allow_overlap
+                optional<boolean> allow_overlap =
+                    get_opt_attr<boolean>(sym, "allow_overlap");
+                if (allow_overlap)
+                {
+                    shield_symbol.set_allow_overlap( * allow_overlap );
+                }
+
+                // vertical alignment
+                vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", BOTTOM);
+                shield_symbol.set_vertical_alignment(valign);
+
+                // horizontal alignment
+                horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal_alignment", H_MIDDLE);
+                shield_symbol.set_horizontal_alignment(halign);
+
+                // justify alignment
+                justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify_alignment", J_MIDDLE);
+                shield_symbol.set_justify_alignment(jalign);
+
+                optional<unsigned> wrap_width =
+                    get_opt_attr<unsigned>(sym, "wrap_width");
+                if (wrap_width)
+                {
+                    shield_symbol.set_wrap_width(*wrap_width);
+                }
+
+                optional<boolean> wrap_before =
+                    get_opt_attr<boolean>(sym, "wrap_before");
+                if (wrap_before)
+                {
+                    shield_symbol.set_wrap_before(*wrap_before);
+                }
+
+                // character used to break long strings
+                optional<std::string> wrap_char =
+                    get_opt_attr<std::string>(sym, "wrap_character");
+                if (wrap_char && (*wrap_char).size() > 0)
+                {
+                    shield_symbol.set_wrap_char((*wrap_char)[0]);
+                }
+
+                // text conversion before rendering
+                text_convert_e tconvert =
+                    get_attr<text_convert_e>(sym, "text_convert", NONE);
+                shield_symbol.set_text_convert(tconvert);
+
+                // spacing between text lines
+                optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing");
+                if (line_spacing)
+                {
+                    shield_symbol.set_line_spacing(*line_spacing);
+                }
+
+                // spacing between characters in text
+                optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing");
+                if (character_spacing)
+                {
+                    shield_symbol.set_character_spacing(*character_spacing);
+                }
+
+                // opacity
+                optional<double> opacity =
+                    get_opt_attr<double>(sym, "opacity");
+                if (opacity)
+                {
+                    shield_symbol.set_opacity( * opacity );
+                }
+
+                // unlock_image
+                optional<boolean> unlock_image =
+                    get_opt_attr<boolean>(sym, "unlock_image");
+                if (unlock_image)
+                {
+                    shield_symbol.set_unlock_image( * unlock_image );
+                }
+
+                // no text
+                optional<boolean> no_text =
+                    get_opt_attr<boolean>(sym, "no_text");
+                if (no_text)
+                {
+                    shield_symbol.set_no_text( * no_text );
+                }
+
                 rule.append(shield_symbol);
             }
             catch (ImageReaderException const & ex )
@@ -1093,9 +1205,9 @@ namespace mapnik
                   clog << "### WARNING: " << msg << endl;
                }
             }
-            
+
         }
-        catch (const config_error & ex) 
+        catch (const config_error & ex)
         {
             ex.append_context("in ShieldSymbolizer");
             throw;
@@ -1195,7 +1307,7 @@ namespace mapnik
             }
             rule.append(line_symbolizer(strk));
         }
-        catch (const config_error & ex) 
+        catch (const config_error & ex)
         {
             ex.append_context("in LineSymbolizer");
             throw;
@@ -1246,7 +1358,7 @@ namespace mapnik
             rule.append(poly_sym);
 
         }
-        catch (const config_error & ex) 
+        catch (const config_error & ex)
         {
             ex.append_context("in PolygonSymbolizer");
             throw;
@@ -1301,12 +1413,12 @@ namespace mapnik
             }
             rule.append(building_sym);
         }
-        catch (const config_error & ex) 
+        catch (const config_error & ex)
         {
             ex.append_context("in BuildingSymbolizer");
             throw;
         }
-    } 
+    }
 
     void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
     {
@@ -1368,7 +1480,7 @@ namespace mapnik
                     face_name + "'");
         }
     }
-    
+
     std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt_path )
     {
         boost::filesystem::path xml_path = filename_;

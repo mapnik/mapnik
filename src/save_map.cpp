@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko
@@ -36,7 +36,7 @@
 // stl
 #include <iostream>
 
-namespace mapnik 
+namespace mapnik
 {
     using boost::property_tree::ptree;
     using boost::optional;
@@ -44,7 +44,7 @@ namespace mapnik
     class serialize_symbolizer : public boost::static_visitor<>
     {
         public:
-            serialize_symbolizer( ptree & r , bool explicit_defaults): 
+            serialize_symbolizer( ptree & r , bool explicit_defaults):
             rule_(r),
             explicit_defaults_(explicit_defaults) {}
 
@@ -65,23 +65,23 @@ namespace mapnik
 
                 if ( strk.get_color() != dfl.get_color() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "stroke", strk.get_color() );    
+                    set_css( sym_node, "stroke", strk.get_color() );
                 }
                 if ( strk.get_width() != dfl.get_width() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "stroke-width", strk.get_width() );    
+                    set_css( sym_node, "stroke-width", strk.get_width() );
                 }
                 if ( strk.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "stroke-opacity", strk.get_opacity() );    
+                    set_css( sym_node, "stroke-opacity", strk.get_opacity() );
                 }
                 if ( strk.get_line_join() != dfl.get_line_join() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "stroke-linejoin", strk.get_line_join() );    
+                    set_css( sym_node, "stroke-linejoin", strk.get_line_join() );
                 }
                 if ( strk.get_line_cap() != dfl.get_line_cap() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "stroke-linecap", strk.get_line_cap() );    
+                    set_css( sym_node, "stroke-linecap", strk.get_line_cap() );
                 }
                 if ( ! strk.get_dash_array().empty() )
                 {
@@ -91,7 +91,7 @@ namespace mapnik
                         os << dashes[i].first << ", " << dashes[i].second;
                         if ( i + 1 < dashes.size() ) os << ", ";
                     }
-                    set_css( sym_node, "stroke-dasharray", os.str() );    
+                    set_css( sym_node, "stroke-dasharray", os.str() );
                 }
             }
 
@@ -112,11 +112,11 @@ namespace mapnik
 
                 if ( sym.get_fill() != dfl.get_fill() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "fill", sym.get_fill() );    
+                    set_css( sym_node, "fill", sym.get_fill() );
                 }
                 if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "fill-opacity", sym.get_opacity() );    
+                    set_css( sym_node, "fill-opacity", sym.get_opacity() );
                 }
             }
 
@@ -157,6 +157,20 @@ namespace mapnik
 
                 add_font_attributes( sym_node, sym);
                 add_image_attributes( sym_node, sym);
+
+                // pseudo-default-construct a shield_symbolizer. It is used
+                // to avoid printing of attributes with default values without
+                // repeating the default values here.
+                // maybe add a real, explicit default-ctor?
+                shield_symbolizer sym_dfl("<no default>", "<no default>", 0, color(0,0,0), "<no default>", "<no default>", 0, 0 );
+                if (sym.get_unlock_image() != sym_dfl.get_unlock_image() || explicit_defaults_ )
+                {
+                    set_attr( sym_node, "unlock_image", sym.get_unlock_image() );
+                }
+                if (sym.get_no_text() != sym_dfl.get_no_text() || explicit_defaults_ )
+                {
+                    set_attr( sym_node, "no_text", sym.get_no_text() );
+                }
             }
 
             void operator () ( const text_symbolizer & sym )
@@ -177,15 +191,15 @@ namespace mapnik
 
                 if ( sym.get_fill() != dfl.get_fill() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "fill", sym.get_fill() );    
+                    set_css( sym_node, "fill", sym.get_fill() );
                 }
                 if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "fill-opacity", sym.get_opacity() );    
+                    set_css( sym_node, "fill-opacity", sym.get_opacity() );
                 }
                 if ( sym.height() != dfl.height() || explicit_defaults_ )
                 {
-                    set_css( sym_node, "height", sym.height() );    
+                    set_css( sym_node, "height", sym.height() );
                 }
             }
 
@@ -221,22 +235,22 @@ namespace mapnik
             {
                 const std::string & name = sym.get_name();
                 if ( ! name.empty() ) {
-                    set_attr( node, "name", name );    
+                    set_attr( node, "name", name );
                 }
                 const std::string & face_name = sym.get_face_name();
                 if ( ! face_name.empty() ) {
-                    set_attr( node, "face_name", face_name );    
+                    set_attr( node, "face_name", face_name );
                 }
                 const std::string & fontset_name = sym.get_fontset().get_name();
                 if ( ! fontset_name.empty() ) {
                     set_attr( node, "fontset_name", fontset_name );
                 }
 
-                set_attr( node, "size", sym.get_text_size() );    
-                set_attr( node, "fill", sym.get_fill() );    
+                set_attr( node, "size", sym.get_text_size() );
+                set_attr( node, "fill", sym.get_fill() );
 
                 // pseudo-default-construct a text_symbolizer. It is used
-                // to avoid printing ofattributes with default values without 
+                // to avoid printing ofattributes with default values without
                 // repeating the default values here.
                 // maybe add a real, explicit default-ctor?
                 text_symbolizer dfl("<no default>", "<no default>",
@@ -245,39 +259,43 @@ namespace mapnik
                 position displacement = sym.get_displacement();
                 if ( displacement.get<0>() != dfl.get_displacement().get<0>() || explicit_defaults_ )
                 {
-                    set_attr( node, "dx", displacement.get<0>() );    
+                    set_attr( node, "dx", displacement.get<0>() );
                 }
                 if ( displacement.get<1>() != dfl.get_displacement().get<1>() || explicit_defaults_ )
                 {
-                    set_attr( node, "dy", displacement.get<1>() );    
+                    set_attr( node, "dy", displacement.get<1>() );
                 }
 
                 if (sym.get_label_placement() != dfl.get_label_placement() || explicit_defaults_ )
                 {
-                    set_attr( node, "placement", sym.get_label_placement() );    
+                    set_attr( node, "placement", sym.get_label_placement() );
                 }
-                
+
                 if (sym.get_vertical_alignment() != dfl.get_vertical_alignment() || explicit_defaults_ )
                 {
-                    set_attr( node, "vertical_alignment", sym.get_vertical_alignment() );    
+                    set_attr( node, "vertical_alignment", sym.get_vertical_alignment() );
                 }
-                
+
                 if (sym.get_halo_radius() != dfl.get_halo_radius() || explicit_defaults_ )
                 {
-                    set_attr( node, "halo_radius", sym.get_halo_radius() );    
+                    set_attr( node, "halo_radius", sym.get_halo_radius() );
                 }
                 const color & c = sym.get_halo_fill();
                 if ( c != dfl.get_halo_fill() || explicit_defaults_ )
                 {
-                    set_attr( node, "halo_fill", c );    
+                    set_attr( node, "halo_fill", c );
                 }
                 if (sym.get_text_ratio() != dfl.get_text_ratio() || explicit_defaults_ )
                 {
-                    set_attr( node, "text_ratio", sym.get_text_ratio() );    
+                    set_attr( node, "text_ratio", sym.get_text_ratio() );
                 }
                 if (sym.get_wrap_width() != dfl.get_wrap_width() || explicit_defaults_ )
                 {
-                    set_attr( node, "wrap_width", sym.get_wrap_width() );    
+                    set_attr( node, "wrap_width", sym.get_wrap_width() );
+                }
+                if (sym.get_wrap_before() != dfl.get_wrap_before() || explicit_defaults_ )
+                {
+                    set_attr( node, "wrap_before", sym.get_wrap_before() );
                 }
                 if (sym.get_wrap_char() != dfl.get_wrap_char() || explicit_defaults_ )
                 {
@@ -289,27 +307,39 @@ namespace mapnik
                 }
                 if (sym.get_line_spacing() != dfl.get_line_spacing() || explicit_defaults_ )
                 {
-                    set_attr( node, "line_spacing", sym.get_line_spacing() );    
+                    set_attr( node, "line_spacing", sym.get_line_spacing() );
                 }
                 if (sym.get_character_spacing() != dfl.get_character_spacing() || explicit_defaults_ )
                 {
-                    set_attr( node, "character_spacing", sym.get_character_spacing() );    
+                    set_attr( node, "character_spacing", sym.get_character_spacing() );
                 }
                 if (sym.get_label_spacing() != dfl.get_label_spacing() || explicit_defaults_ )
                 {
-                    set_attr( node, "spacing", sym.get_label_spacing() );    
+                    set_attr( node, "spacing", sym.get_label_spacing() );
                 }
                 if (sym.get_minimum_distance() != dfl.get_minimum_distance() || explicit_defaults_ )
                 {
-                    set_attr( node, "min_distance", sym.get_minimum_distance() );    
+                    set_attr( node, "min_distance", sym.get_minimum_distance() );
                 }
                 if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
                 {
-                    set_attr( node, "allow_overlap", sym.get_allow_overlap() );    
+                    set_attr( node, "allow_overlap", sym.get_allow_overlap() );
                 }
                 if (sym.get_avoid_edges() != dfl.get_avoid_edges() || explicit_defaults_ )
                 {
-                    set_attr( node, "avoid_edges", sym.get_avoid_edges() );    
+                    set_attr( node, "avoid_edges", sym.get_avoid_edges() );
+                }
+                if (sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
+                {
+                    set_attr( node, "opacity", sym.get_opacity() );
+                }
+                if (sym.get_horizontal_alignment() != dfl.get_horizontal_alignment() || explicit_defaults_ )
+                {
+                    set_attr( node, "horizontal_alignment", sym.get_horizontal_alignment() );
+                }
+                if (sym.get_justify_alignment() != dfl.get_justify_alignment() || explicit_defaults_ )
+                {
+                    set_attr( node, "justify_alignment", sym.get_justify_alignment() );
                 }
             }
             ptree & rule_;
@@ -320,7 +350,7 @@ namespace mapnik
     {
         ptree & rule_node = style_node.push_back(
                 ptree::value_type("Rule", ptree() ))->second;
-        
+
         rule_type dfl;
         if ( rule.get_name() != dfl.get_name() )
         {
@@ -372,7 +402,7 @@ namespace mapnik
     {
         const feature_type_style & style = style_it->second;
         const std::string & name = style_it->first;
-        
+
         ptree & style_node = map_node.push_back(
                 ptree::value_type("Style", ptree()))->second;
 
@@ -382,7 +412,7 @@ namespace mapnik
         rules::const_iterator end = style.get_rules().end();
         for (; it != end; ++it)
         {
-            serialize_rule( style_node, * it , explicit_defaults);    
+            serialize_rule( style_node, * it , explicit_defaults);
         }
 
     }
@@ -418,15 +448,15 @@ namespace mapnik
         for (; it != end; ++it)
         {
             boost::property_tree::ptree & param_node = datasource_node.push_back(
-                    boost::property_tree::ptree::value_type("Parameter", 
+                    boost::property_tree::ptree::value_type("Parameter",
                     boost::property_tree::ptree()))->second;
             param_node.put("<xmlattr>.name", it->first );
             param_node.put_own( it->second );
-                
+
         }
     }
 
-    void serialize_layer( ptree & map_node, const Layer & layer ) 
+    void serialize_layer( ptree & map_node, const Layer & layer )
     {
         ptree & layer_node = map_node.push_back(
                 ptree::value_type("Layer", ptree()))->second;
@@ -449,7 +479,7 @@ namespace mapnik
         {
             set_attr( layer_node, "srs", layer.srs() );
         }
-        
+
         set_attr/*<bool>*/( layer_node, "status", layer.isActive() );
         set_attr/*<bool>*/( layer_node, "clear_label_cache", layer.clear_label_cache() );
 
@@ -467,7 +497,7 @@ namespace mapnik
         {
             set_attr( layer_node, "queryable", layer.isQueryable() );
         }
-        
+
         std::vector<std::string> const& style_names = layer.styles();
         for (unsigned i = 0; i < style_names.size(); ++i)
         {
@@ -490,11 +520,11 @@ namespace mapnik
         ptree & map_node = pt.push_back(ptree::value_type("Map", ptree() ))->second;
 
         set_attr( map_node, "srs", map.srs() );
-        
+
         optional<color> c = map.background();
         if ( c )
         {
-            set_attr( map_node, "bgcolor", * c );    
+            set_attr( map_node, "bgcolor", * c );
         }
 
         {
@@ -517,9 +547,9 @@ namespace mapnik
         for (unsigned i = 0; i < layers.size(); ++i )
         {
             serialize_layer( map_node, layers[i] );
-        }    
+        }
     }
-    
+
     void save_map(Map const & map, std::string const& filename, bool explicit_defaults)
     {
         ptree pt;
