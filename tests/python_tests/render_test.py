@@ -65,3 +65,52 @@ def test_render_from_serialization():
 
     i,i2 = get_paired_images(100,100,'../data/good_maps/polygon_symbolizer.xml')
     eq_(i.tostring(),i2.tostring())
+
+def test_render_points():
+	# Test for effectivenes of ticket #402 (borderline points get lost on reprojection)
+	if not mapnik.has_pycairo(): return
+
+	# create and populate point datasource (WGS84 lat-lon coordinates)
+	places_ds = mapnik.PointDatasource()
+	places_ds.add_point(142.48,-38.38,'Name','Westernmost Point') # westernmost
+	places_ds.add_point(143.10,-38.60,'Name','Southernmost Point') # southernmost
+	# create layer/rule/style
+	s = mapnik.Style()
+	r = mapnik.Rule()
+	symb = mapnik.PointSymbolizer()
+	symb.allow_overlap = True
+	r.symbols.append(symb)
+	s.rules.append(r)
+	lyr = mapnik.Layer('Places','+proj=latlon +datum=WGS84')
+	lyr.datasource = places_ds
+	lyr.styles.append('places_labels')
+	# latlon bounding box corners
+	ul_lonlat = mapnik.Coord(142.30,-38.20)
+	lr_lonlat = mapnik.Coord(143.40,-38.80)
+	# render for different projections 
+	projs = { 
+		'latlon': '+proj=latlon +datum=WGS84',
+		'merc': '+proj=merc +datum=WGS84 +k=1.0 +units=m +over +no_defs',
+		'google': '+proj=merc +ellps=sphere +R=6378137 +a=6378137 +units=m',
+		'utm': '+proj=utm +zone=54 +datum=WGS84'
+		}
+	from cairo import SVGSurface
+	for projdescr in projs.iterkeys():
+		m = mapnik.Map(1000, 500, projs[projdescr])
+		m.append_style('places_labels',s)
+		m.layers.append(lyr)
+		p = mapnik.Projection(projs[projdescr])
+		m.zoom_to_box(p.forward(mapnik.Envelope(ul_lonlat,lr_lonlat)))
+		# Render to SVG so that it can be checked how many points are there with string comparison
+		import StringIO
+		svg_memory_file = StringIO.StringIO()
+		surface = SVGSurface(svg_memory_file, m.width, m.height)
+		mapnik.render(m, surface)
+		surface.flush()
+		surface.finish()
+		svg = svg_memory_file.getvalue()
+		svg_memory_file.close()
+		num_points_present = len(places_ds.all_features())
+		num_points_rendered = svg.count('<image ')
+		eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr)) 
+
