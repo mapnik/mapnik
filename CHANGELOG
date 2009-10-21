@@ -15,6 +15,8 @@ For a complete change history, see the SVN log.
 Mapnik 0.6.2 Release
 --------------------
 
+- PointDatasource: fixed problem with missing geometries (#402)
+
 - PostGIS: Add a 'persist_connection' option (default true), that when false will release 
   the idle psql connection after datasource goes out of scope (r1337) (#433,#434)
 
