@@ -261,6 +261,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
             int type_oid = rs->getTypeOID(i);
             switch (type_oid)
             {
+               case 20:    // int8
                case 21:    // int2
                case 23:    // int4
                   desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
