@@ -23,6 +23,8 @@
 //$Id$
 #include <mapnik/global.hpp>
 #include <mapnik/octree.hpp>
+#include <mapnik/global.hpp>
+
 extern "C"
 {
 #include <png.h>
@@ -101,9 +103,15 @@ namespace mapnik {
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
+#ifdef MAPNIK_BIG_ENDIAN
+            mapnik::rgb c((val>>24)&0xff, (val>>16)&0xff, (val>>8) & 0xff);            
+            byte index = tree.quantize(c);
+            if (!(val&0x80)) index = 0;//alfa
+#else
             mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
             byte index = tree.quantize(c);
             if (!((val>>24)&0x80)) index = 0;//alfa
+#endif
             row_out[x] = index;
          }
       }
@@ -123,10 +131,17 @@ namespace mapnik {
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
+#ifdef MAPNIK_BIG_ENDIAN
+            mapnik::rgb c((val>>24)&0xff, (val>>16)&0xff, (val>>8) & 0xff);            
+            byte index = tree.quantize(c);
+            if (x%2 >  0) index = index<<4;
+            if (!(val&0x80)) index = 0;//alfa
+#else
             mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
             byte index = tree.quantize(c);
             if (x%2 >  0) index = index<<4;
             if (!((val>>24)&0x80)) index = 0;//alfa
+#endif
             row_out[x>>1] |= index;
          }
       }
@@ -210,10 +225,17 @@ namespace mapnik {
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
+#ifdef MAPNIK_BIG_ENDIAN
+            if (val&0x80)
+            {
+               tree.insert(mapnik::rgb((val>>24)&0xff, (val>>16)&0xff, (val>>8) & 0xff));
+            }
+#else
             if ((val>>24)&0x80)
             {
                tree.insert(mapnik::rgb((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff));
             }
+#endif
             else
             {
                tree.hasAlfa(true);
