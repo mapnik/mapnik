@@ -267,10 +267,14 @@ namespace mapnik
 
                   for (int x = box.minx(); x < box.maxx(); ++x)
                   {
+#ifdef MAPNIK_BIG_ENDIAN
+                     row_to[x] = row_from[x-x0];
+#else
                      if (row_from[x-x0] & 0xff000000)
                      {
                         row_to[x] = row_from[x-x0];
                      }
+#endif
                   }
                }
             }
