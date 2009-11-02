@@ -293,6 +293,26 @@ namespace mapnik
                       unsigned rgba0 = row_to[x];
                       unsigned rgba1 = row_from[x-x0];
 
+#ifdef MAPNIK_BIG_ENDIAN
+                      unsigned a1 = rgba1 & 0xff;
+                      if (a1 == 0) continue;
+                      unsigned r1 = (rgba1 >> 24) & 0xff;
+                      unsigned g1 = (rgba1 >> 16 ) & 0xff;
+                      unsigned b1 = (rgba1 >> 8) & 0xff;
+
+                      unsigned a0 = rgba0 & 0xff;
+                      unsigned r0 = ((rgba0 >> 24) & 0xff) * a0;
+                      unsigned g0 = ((rgba0 >> 16 ) & 0xff) * a0;
+                      unsigned b0 = ((rgba0 >> 8) & 0xff) * a0;
+
+                      a0 = ((a1 + a0) << 8) - a0*a1;
+
+                      r0 = ((((r1 << 8) - r0) * a1 + (r0 << 8)) / a0);
+                      g0 = ((((g1 << 8) - g0) * a1 + (g0 << 8)) / a0);
+                      b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
+                      a0 = a0 >> 8;
+                      row_to[x] = (a0) | (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
+#else
                       unsigned a1 = (rgba1 >> 24) & 0xff;
                       if (a1 == 0) continue;
                       unsigned r1 = rgba1 & 0xff;
@@ -311,6 +331,7 @@ namespace mapnik
                       b0 = ((((b1 << 8) - b0) * a1 + (b0 << 8)) / a0);
                       a0 = a0 >> 8;
                       row_to[x] = (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
+#endif
                    }
                 }
             }
@@ -332,6 +353,26 @@ namespace mapnik
                    {
                       unsigned rgba0 = row_to[x];
                       unsigned rgba1 = row_from[x-x0];
+#ifdef MAPNIK_BIG_ENDIAN
+                      unsigned a1 = int( (rgba1 & 0xff) * opacity );
+                      if (a1 == 0) continue;
+                      unsigned r1 = (rgba1 >> 24) & 0xff;
+                      unsigned g1 = (rgba1 >> 16 ) & 0xff;
+                      unsigned b1 = (rgba1 >> 8) & 0xff;
+
+                      unsigned a0 = rgba0 & 0xff;
+                      unsigned r0 = (rgba0 >> 24) & 0xff ;
+                      unsigned g0 = (rgba0 >> 16 ) & 0xff;
+                      unsigned b0 = (rgba0 >> 8) & 0xff;
+
+                      unsigned a = (a1 * 255 + (255 - a1) * a0 + 127)/255;
+
+                      r0 = (r1*a1 + (((255 - a1) * a0 + 127)/255) * r0 + 127)/a;
+                      g0 = (g1*a1 + (((255 - a1) * a0 + 127)/255) * g0 + 127)/a;
+                      b0 = (b1*a1 + (((255 - a1) * a0 + 127)/255) * b0 + 127)/a;
+
+                      row_to[x] = (a)| (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
+#else
                       unsigned a1 = int( ((rgba1 >> 24) & 0xff) * opacity );
                       if (a1 == 0) continue;
                       unsigned r1 = rgba1 & 0xff;
@@ -350,6 +391,7 @@ namespace mapnik
                       b0 = (b1*a1 + (((255 - a1) * a0 + 127)/255) * b0 + 127)/a;
 
                       row_to[x] = (a << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
+#endif
                     }
                 }
             }
@@ -372,6 +414,28 @@ namespace mapnik
                    {
                       unsigned rgba0 = row_to[x];
                       unsigned rgba1 = row_from[x-x0];
+#ifdef MAPNIK_BIG_ENDIAN
+                      unsigned a1 = int( (rgba1 & 0xff) * opacity );
+                      if (a1 == 0) continue;
+                      unsigned r1 = (rgba1 >> 24)& 0xff;
+                      unsigned g1 = (rgba1 >> 16 ) & 0xff;
+                      unsigned b1 = (rgba1 >> 8) & 0xff;
+
+                      unsigned a0 = rgba0 & 0xff;
+                      unsigned r0 = (rgba0 >> 24) & 0xff ;
+                      unsigned g0 = (rgba0 >> 16 ) & 0xff;
+                      unsigned b0 = (rgba0 >> 8) & 0xff;
+
+                      unsigned a = (a1 * 255 + (255 - a1) * a0 + 127)/255;
+
+                      MergeMethod::mergeRGB(r0,g0,b0,r1,g1,b1);
+
+                      r0 = (r1*a1 + (((255 - a1) * a0 + 127)/255) * r0 + 127)/a;
+                      g0 = (g1*a1 + (((255 - a1) * a0 + 127)/255) * g0 + 127)/a;
+                      b0 = (b1*a1 + (((255 - a1) * a0 + 127)/255) * b0 + 127)/a;
+
+                      row_to[x] = (a)| (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
+#else
                       unsigned a1 = int( ((rgba1 >> 24) & 0xff) * opacity );
                       if (a1 == 0) continue;
                       unsigned r1 = rgba1 & 0xff;
@@ -392,6 +456,7 @@ namespace mapnik
                       b0 = (b1*a1 + (((255 - a1) * a0 + 127)/255) * b0 + 127)/a;
 
                       row_to[x] = (a << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
+#endif
                     }
                 }
             }
