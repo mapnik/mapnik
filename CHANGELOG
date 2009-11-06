@@ -15,6 +15,8 @@ For a complete change history, see the SVN log.
 Mapnik 0.6.2 Release
 --------------------
 
+- XML: added missing serialization of PointSymbolizer 'opacity' and 'allow_overlap' attributes (r1358)
+
 - PointDatasource: fixed problem with missing geometries (#402)
 
 - PostGIS: Add a 'persist_connection' option (default true), that when false will release 

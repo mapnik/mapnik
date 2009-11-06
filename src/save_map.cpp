@@ -54,6 +54,16 @@ namespace mapnik
                         ptree::value_type("PointSymbolizer", ptree()))->second;
 
                 add_image_attributes( sym_node, sym );
+
+                point_symbolizer dfl;
+                if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
+                {
+                    set_attr( sym_node, "allow_overlap", sym.get_allow_overlap() );
+                }
+                if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
+                {
+                    set_attr( sym_node, "opacity", sym.get_opacity() );
+                }
             }
 
             void operator () ( const line_symbolizer & sym )
