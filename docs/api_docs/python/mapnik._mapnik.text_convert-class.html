@@ -3,7 +3,7 @@
           "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>mapnik.ogcserver.wms111.ExceptionHandler</title>
+  <title>mapnik._mapnik.text_convert</title>
   <link rel="stylesheet" href="epydoc.css" type="text/css" />
   <script type="text/javascript" src="epydoc.js"></script>
 </head>
@@ -43,9 +43,8 @@
     <td width="100%">
       <span class="breadcrumbs">
         <a href="mapnik-module.html">Package&nbsp;mapnik</a> ::
-        <a href="mapnik.ogcserver-module.html">Package&nbsp;ogcserver</a> ::
-        <a href="mapnik.ogcserver.wms111-module.html">Module&nbsp;wms111</a> ::
-        Class&nbsp;ExceptionHandler
+        <a href="mapnik._mapnik-module.html" onclick="show_private();">Module&nbsp;_mapnik</a> ::
+        Class&nbsp;text_convert
       </span>
     </td>
     <td>
@@ -56,11 +55,15 @@
   </tr>
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
-<h1 class="epydoc">Class ExceptionHandler</h1><p class="nomargin-top"></p>
+<h1 class="epydoc">Class text_convert</h1><p class="nomargin-top"></p>
 <pre class="base-tree">
-<a href="mapnik.ogcserver.common.BaseExceptionHandler-class.html">common.BaseExceptionHandler</a> --+
-                              |
-                             <strong class="uidshort">ExceptionHandler</strong>
+object --+        
+         |        
+       int --+    
+             |    
+       ??.enum --+
+                 |
+                <strong class="uidshort">text_convert</strong>
 </pre>
 
 <hr />
@@ -74,13 +77,63 @@
 </tr>
   <tr>
     <td colspan="2" class="summary">
-    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="mapnik.ogcserver.common.BaseExceptionHandler-class.html">common.BaseExceptionHandler</a></code></b>:
-      <code><a href="mapnik.ogcserver.common.BaseExceptionHandler-class.html#__init__">__init__</a></code>,
-      <code><a href="mapnik.ogcserver.common.BaseExceptionHandler-class.html#blankhandler">blankhandler</a></code>,
-      <code><a href="mapnik.ogcserver.common.BaseExceptionHandler-class.html#getresponse">getresponse</a></code>,
-      <code><a href="mapnik.ogcserver.common.BaseExceptionHandler-class.html#htmlhandler">htmlhandler</a></code>,
-      <code><a href="mapnik.ogcserver.common.BaseExceptionHandler-class.html#inimagehandler">inimagehandler</a></code>,
-      <code><a href="mapnik.ogcserver.common.BaseExceptionHandler-class.html#xmlhandler">xmlhandler</a></code>
+    <p class="indent-wrapped-lines"><b>Inherited from <code><i>unreachable</i>.enum</code></b>:
+      <code>__repr__</code>,
+      <code>__str__</code>
+      </p>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>int</code></b>:
+      <code>__abs__</code>,
+      <code>__add__</code>,
+      <code>__and__</code>,
+      <code>__cmp__</code>,
+      <code>__coerce__</code>,
+      <code>__div__</code>,
+      <code>__divmod__</code>,
+      <code>__float__</code>,
+      <code>__floordiv__</code>,
+      <code>__getattribute__</code>,
+      <code>__getnewargs__</code>,
+      <code>__hash__</code>,
+      <code>__hex__</code>,
+      <code>__index__</code>,
+      <code>__int__</code>,
+      <code>__invert__</code>,
+      <code>__long__</code>,
+      <code>__lshift__</code>,
+      <code>__mod__</code>,
+      <code>__mul__</code>,
+      <code>__neg__</code>,
+      <code>__new__</code>,
+      <code>__nonzero__</code>,
+      <code>__oct__</code>,
+      <code>__or__</code>,
+      <code>__pos__</code>,
+      <code>__pow__</code>,
+      <code>__radd__</code>,
+      <code>__rand__</code>,
+      <code>__rdiv__</code>,
+      <code>__rdivmod__</code>,
+      <code>__rfloordiv__</code>,
+      <code>__rlshift__</code>,
+      <code>__rmod__</code>,
+      <code>__rmul__</code>,
+      <code>__ror__</code>,
+      <code>__rpow__</code>,
+      <code>__rrshift__</code>,
+      <code>__rshift__</code>,
+      <code>__rsub__</code>,
+      <code>__rtruediv__</code>,
+      <code>__rxor__</code>,
+      <code>__sub__</code>,
+      <code>__truediv__</code>,
+      <code>__xor__</code>
+      </p>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__init__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__setattr__</code>
       </p>
     </td>
   </tr>
@@ -97,41 +150,70 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="xmlmimetype"></a><span class="summary-name">xmlmimetype</span> = <code title="'application/vnd.ogc.se_xml'"><code class="variable-quote">'</code><code class="variable-string">application/vnd.ogc.se_xml</code><code class="variable-quote">'</code></code>
+        <a name="NONE"></a><span class="summary-name">NONE</span> = <code title="mapnik._mapnik.text_convert.NONE">mapnik._mapnik.text_convert.NONE</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="xmltemplate"></a><span class="summary-name">xmltemplate</span> = <code title="&lt;Element ServiceExceptionReport at 44b9a50&gt;">&lt;Element ServiceExceptionReport at 44b9a50&gt;</code>
+        <a name="TOLOWER"></a><span class="summary-name">TOLOWER</span> = <code title="mapnik._mapnik.text_convert.TOLOWER">mapnik._mapnik.text_convert.TOLOWER</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="xpath"></a><span class="summary-name">xpath</span> = <code title="'ServiceException'"><code class="variable-quote">'</code><code class="variable-string">ServiceException</code><code class="variable-quote">'</code></code>
+        <a name="TOUPPER"></a><span class="summary-name">TOUPPER</span> = <code title="mapnik._mapnik.text_convert.TOUPPER">mapnik._mapnik.text_convert.TOUPPER</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik.ogcserver.wms111.ExceptionHandler-class.html#handlers" class="summary-name">handlers</a> = <code title="{'application/vnd.ogc.se_blank': &lt;unbound method BaseExceptionHandler.\
-blankhandler&gt;,
- 'application/vnd.ogc.se_inimage': &lt;unbound method BaseExceptionHandle\
-r.inimagehandler&gt;,
- 'application/vnd.ogc.se_xml': &lt;unbound method BaseExceptionHandler.xm\
-lhandler&gt;,
- 'text/html': &lt;unbound method BaseExceptionHandler.htmlhandler&gt;}"><code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">application/vnd.ogc.se_blank</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;unbound method Ba<code class="variable-ellipsis">...</code></code>
+        <a name="none"></a><span class="summary-name">none</span> = <code title="mapnik._mapnik.text_convert.none">mapnik._mapnik.text_convert.none</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="defaulthandler"></a><span class="summary-name">defaulthandler</span> = <code title="'application/vnd.ogc.se_xml'"><code class="variable-quote">'</code><code class="variable-string">application/vnd.ogc.se_xml</code><code class="variable-quote">'</code></code>
+        <a name="tolower"></a><span class="summary-name">tolower</span> = <code title="mapnik._mapnik.text_convert.tolower">mapnik._mapnik.text_convert.tolower</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="toupper"></a><span class="summary-name">toupper</span> = <code title="mapnik._mapnik.text_convert.toupper">mapnik._mapnik.text_convert.toupper</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="mapnik._mapnik.text_convert-class.html#values" class="summary-name">values</a> = <code title="{0: mapnik._mapnik.text_convert.NONE,
+ 1: mapnik._mapnik.text_convert.TOUPPER,
+ 2: mapnik._mapnik.text_convert.TOLOWER}"><code class="variable-group">{</code>0<code class="variable-op">: </code>mapnik._mapnik.text_convert.NONE<code class="variable-op">, </code>1<code class="variable-op">: </code>mapnik._mapn<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Properties</span></td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code><i>unreachable</i>.enum</code></b>:
+      <code>name</code>
+      </p>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
     </td>
   </tr>
 </table>
@@ -144,25 +226,21 @@ lhandler&gt;,
     <span class="table-header">Class Variable Details</span></td>
 </tr>
 </table>
-<a name="handlers"></a>
+<a name="values"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
-  <h3 class="epydoc">handlers</h3>
+  <h3 class="epydoc">values</h3>
   
   <dl class="fields">
   </dl>
   <dl class="fields">
     <dt>Value:</dt>
       <dd><table><tr><td><pre class="variable">
-<code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">application/vnd.ogc.se_blank</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;unbound method BaseExceptionHandler.<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
-blankhandler&gt;<code class="variable-op">,</code>
- <code class="variable-quote">'</code><code class="variable-string">application/vnd.ogc.se_inimage</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;unbound method BaseExceptionHandle<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
-r.inimagehandler&gt;<code class="variable-op">,</code>
- <code class="variable-quote">'</code><code class="variable-string">application/vnd.ogc.se_xml</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;unbound method BaseExceptionHandler.xm<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
-lhandler&gt;<code class="variable-op">,</code>
- <code class="variable-quote">'</code><code class="variable-string">text/html</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;unbound method BaseExceptionHandler.htmlhandler&gt;<code class="variable-group">}</code>
+<code class="variable-group">{</code>0<code class="variable-op">: </code>mapnik._mapnik.text_convert.NONE<code class="variable-op">,</code>
+ 1<code class="variable-op">: </code>mapnik._mapnik.text_convert.TOUPPER<code class="variable-op">,</code>
+ 2<code class="variable-op">: </code>mapnik._mapnik.text_convert.TOLOWER<code class="variable-group">}</code>
 </pre></td></tr></table>
 </dd>
   </dl>

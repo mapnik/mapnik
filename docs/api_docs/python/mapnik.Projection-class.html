@@ -70,6 +70,8 @@
 </dd></dl>
 
 <hr />
+<p>Represents a map projection.</p>
+
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -102,7 +104,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Projection-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      __init__( (object)arg1 [, (str)arg2]) -&gt; None :</td>
+      __init__( (object)arg1 [, (str)proj4_string]) -&gt; None :
+    Constructs a new projection from its PROJ.4 string representation.</td>
           <td align="right" valign="top">
             
             
@@ -152,8 +155,10 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="forward"></a><span class="summary-sig-name">forward</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">obj</span>)</span></td>
+          <td><span class="summary-sig"><a href="mapnik.Projection-class.html#forward" class="summary-sig-name">forward</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">obj</span>)</span><br />
+      Projects the given object (Envelope or Coord) 
+from the geographic space into the cartesian space.</td>
           <td align="right" valign="top">
             
             
@@ -169,8 +174,10 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="inverse"></a><span class="summary-sig-name">inverse</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">obj</span>)</span></td>
+          <td><span class="summary-sig"><a href="mapnik.Projection-class.html#inverse" class="summary-sig-name">inverse</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">obj</span>)</span><br />
+      Projects the given object (Envelope or Coord) 
+from the cartesian space into the geographic space.</td>
           <td align="right" valign="top">
             
             
@@ -187,7 +194,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Projection-class.html#params" class="summary-sig-name">params</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      params( (Projection)arg1) -&gt; str :</td>
+      params( (Projection)arg1) -&gt; str :
+    Returns the PROJ.4 string for this projection.</td>
           <td align="right" valign="top">
             
             
@@ -248,7 +256,9 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik.Projection-class.html#geographic" class="summary-name">geographic</a>
+        <a href="mapnik.Projection-class.html#geographic" class="summary-name">geographic</a><br />
+      This property is True if the projection is a geographic projection 
+      (i.e.
     </td>
   </tr>
   <tr>
@@ -311,7 +321,15 @@ __getinitargs__( (Projection)arg1) -&gt; tuple :
   
   <pre class="literalblock">
 
-__init__( (object)arg1 [, (str)arg2]) -&gt; None :
+__init__( (object)arg1 [, (str)proj4_string]) -&gt; None :
+    Constructs a new projection from its PROJ.4 string representation.
+    
+    The parameterless version of this constructor is equivalent to
+       Projection('+proj=latlong +ellps=WGS84')
+    
+    The constructor will throw a RuntimeError in case the projection
+    cannot be initialized.
+    
 
     C++ signature :
         void __init__(_object* [,std::string])
@@ -371,6 +389,64 @@ __init__( (object)arg1 [, (str)arg2]) -&gt; None :
   </dl>
 </td></tr></table>
 </div>
+<a name="forward"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">forward</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">obj</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Projects the given object (Envelope or Coord) 
+from the geographic space into the cartesian space.
+
+See also:
+  Envelope.forward(self, projection),
+  Coord.forward(self, projection).
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="inverse"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">inverse</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">obj</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Projects the given object (Envelope or Coord) 
+from the cartesian space into the geographic space.
+
+See also:
+  Envelope.inverse(self, projection),
+  Coord.inverse(self, projection).
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <a name="params"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -388,6 +464,8 @@ __init__( (object)arg1 [, (str)arg2]) -&gt; None :
   <pre class="literalblock">
 
 params( (Projection)arg1) -&gt; str :
+    Returns the PROJ.4 string for this projection.
+    
 
     C++ signature :
         std::string params(mapnik::projection {lvalue})
@@ -413,7 +491,8 @@ params( (Projection)arg1) -&gt; str :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">geographic</h3>
-  
+  <p>This property is True if the projection is a geographic projection 
+  (i.e. it uses lon/lat coordinates)</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -453,7 +532,7 @@ params( (Projection)arg1) -&gt; str :
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Jul  8 15:33:03 2009
+    Generated by Epydoc 3.0.1 on Sun Nov  8 09:00:49 2009
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

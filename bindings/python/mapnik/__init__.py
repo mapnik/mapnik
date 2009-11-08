@@ -22,22 +22,19 @@
 Boost Python bindings to the Mapnik C++ shared library.
 
 Several things happen when you do:
- 
+
     >>> import mapnik
 
  1) Mapnik C++ objects are imported via the '__init__.py' from the '_mapnik.so' shared object
     which references libmapnik.so (linux), libmapnik.dylib (mac), or libmapnik.dll (win).
-    
+
  2) The paths to the input plugins and font directories are imported from the 'paths.py'
     file which was constructed and installed during SCons installation.
 
  3) All available input plugins and TrueType fonts are automatically registered.
 
- 4) Boost Python metaclass injectors are used in the '__init__.py' to wrap/extend several
+ 4) Boost Python metaclass injectors are used in the '__init__.py' to extend several
     objects adding extra convenience when accessed via Python.
-
-Note: besides those objects modified by boost metaclass injection all class objects
-are only accessible by various documentation viewers via the 'mapnik._mapnik' module.
 
 """
 
@@ -100,6 +97,7 @@ class _Coord(Coord,_injector):
     """
     def __repr__(self):
         return 'Coord(%s,%s)' % (self.x, self.y)
+
     def forward(self, projection):
         """
         Projects the point from the geographic coordinate 
@@ -118,6 +116,7 @@ class _Coord(Coord,_injector):
         Coord(3507360.12813,5395719.2749)
         """
         return forward_(self, projection)
+
     def inverse(self, projection):
         """
         Projects the point from the cartesian space 
@@ -162,7 +161,7 @@ class _Envelope(Envelope,_injector):
     except that a new envelope is created instead of modifying e1.
 
     e1 / x is equivalent to e1 * (1.0/x).
-    
+
     Equality: two envelopes are equal if their corner points are equal.
     """
     def __repr__(self):
@@ -226,7 +225,7 @@ class _Datasource(Datasource,_injector):
     def describe(self):
         return Describe(self)
     def field_types(self):
-        return map(get_types,self._field_types())        
+        return map(get_types,self._field_types())
     def all_features(self):
         query = Query(self.envelope(),1.0)
         for fld in self.fields():
@@ -274,26 +273,26 @@ def Datasource(**keywords):
 
 def Shapefile(**keywords):
     """Create a Shapefile Datasource.
-  
+
     Required keyword arguments:
       file -- path to shapefile without extension
 
     Optional keyword arguments:
       base -- path prefix (default None)
       encoding -- file encoding (default 'utf-8')
-    
+
     >>> from mapnik import Shapefile, Layer
     >>> shp = Shapefile(base='/home/mapnik/data',file='world_borders') 
     >>> lyr = Layer('Shapefile Layer')
     >>> lyr.datasource = shp
-    
+
     """
     keywords['type'] = 'shape'
     return CreateDatasource(keywords)
 
 def PostGIS(**keywords):
     """Create a PostGIS Datasource.
-  
+
     Required keyword arguments:
       dbname -- database name to connect to
       table -- table name or subselect query
@@ -305,7 +304,7 @@ def PostGIS(**keywords):
       port -- postgres port (default: see postgres docs)
       initial_size -- integer size of connection pool (default 1)
       max_size -- integer max of connection pool (default 10)
-    
+
     Optional table-level keyword arguments:
       extent -- manually specified data extent (comma delimited string, default None)
       estimate_extent -- boolean, direct PostGIS to use the faster, less accurate estimate_extent() over extent() (default False)
@@ -313,7 +312,7 @@ def PostGIS(**keywords):
       cursor_size -- integer size of cursor to fetch (default 0)
       geometry_field -- specify geometry field (default first entry in geometry_columns)
       multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
-    
+
     >>> from mapnik import PostGIS, Layer
     >>> params = dict(dbname='mapnik',table='osm',user='postgres',password='gis')
     >>> params['estimate_extent'] = False
@@ -321,56 +320,56 @@ def PostGIS(**keywords):
     >>> postgis = PostGIS(**params)
     >>> lyr = Layer('PostGIS Layer')
     >>> lyr.datasource = postgis
-    
+
     """
     keywords['type'] = 'postgis'
     return CreateDatasource(keywords)
 
 def Raster(**keywords):
     """Create a Raster (Tiff) Datasource.
-  
+
     Required keyword arguments:
       file -- path to stripped or tiled tiff
       lox -- lowest (min) x/longitude of tiff extent
       loy -- lowest (min) y/latitude of tiff extent
       hix -- highest (max) x/longitude of tiff extent
       hiy -- highest (max) y/latitude of tiff extent
-    
+
     Hint: lox,loy,hix,hiy make a Mapnik Envelope
 
     Optional keyword arguments:
       base -- path prefix (default None)
-    
+
     >>> from mapnik import Raster, Layer
     >>> raster = Raster(base='/home/mapnik/data',file='elevation.tif',lox=-122.8,loy=48.5,hix=-122.7,hiy=48.6) 
     >>> lyr = Layer('Tiff Layer')
     >>> lyr.datasource = raster
-    
+
     """
     keywords['type'] = 'raster'
     return CreateDatasource(keywords)
 
 def Gdal(**keywords):
     """Create a GDAL Raster Datasource.
-  
+
     Required keyword arguments:
       file -- path to GDAL supported dataset
 
     Optional keyword arguments:
       base -- path prefix (default None)
-    
+
     >>> from mapnik import Gdal, Layer
-    >>> dataset = Gdal(base='/home/mapnik/data',file='elevation.tif') 
+    >>> dataset = Gdal(base='/home/mapnik/data',file='elevation.tif')
     >>> lyr = Layer('GDAL Layer from TIFF file')
     >>> lyr.datasource = dataset
-    
+
     """
     keywords['type'] = 'gdal'
     return CreateDatasource(keywords)
 
 def Occi(**keywords):
     """Create a Oracle Spatial (10g) Vector Datasource.
-  
+
     Required keyword arguments:
       user -- database user to connect as
       password -- password for database user
@@ -386,7 +385,7 @@ def Occi(**keywords):
       geometry_field -- specify geometry field (default 'GEOLOC')
       use_spatial_index -- boolean, force the use of the spatial index (default True)
       multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
-    
+
     >>> from mapnik import Occi, Layer
     >>> params = dict(host='myoracle',user='scott',password='tiger',table='test')
     >>> params['estimate_extent'] = False
@@ -400,7 +399,7 @@ def Occi(**keywords):
 
 def Ogr(**keywords):
     """Create a OGR Vector Datasource.
-  
+
     Required keyword arguments:
       file -- path to OGR supported dataset
       layer -- layer to use within datasource
@@ -409,19 +408,19 @@ def Ogr(**keywords):
       base -- path prefix (default None)
       encoding -- file encoding (default 'utf-8')
       multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
-    
+
     >>> from mapnik import Ogr, Layer
     >>> datasource = Ogr(base='/home/mapnik/data',file='rivers.geojson',layer='OGRGeoJSON') 
     >>> lyr = Layer('OGR Layer from GeoJSON file')
     >>> lyr.datasource = datasource
-    
+
     """
     keywords['type'] = 'ogr'
     return CreateDatasource(keywords)
 
 def SQLite(**keywords):
     """Create a SQLite Datasource.
-  
+
     Required keyword arguments:
       file -- path to SQLite database file
       table -- table name or subselect query
@@ -443,14 +442,14 @@ def SQLite(**keywords):
     >>> sqlite = SQLite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239') 
     >>> lyr = Layer('SQLite Layer')
     >>> lyr.datasource = sqlite
-    
+
     """
     keywords['type'] = 'sqlite'
     return CreateDatasource(keywords)
 
 def Osm(**keywords):
     """Create a Osm Datasource.
-  
+
     Required keyword arguments:
       file -- path to OSM file
 
@@ -458,12 +457,12 @@ def Osm(**keywords):
       encoding -- file encoding (default 'utf-8')
       url -- url to fetch data (default None)
       bbox -- data bounding box for fetching data (default None)
-    
+
     >>> from mapnik import Osm, Layer
     >>> datasource = Osm(file='test.osm') 
     >>> lyr = Layer('Osm Layer')
     >>> lyr.datasource = datasource
-    
+
     """
     # note: parser only supports libxml2 so not exposing option
     # parser -- xml parser to use (default libxml2)
@@ -472,7 +471,7 @@ def Osm(**keywords):
 
 def Kismet(**keywords):
     """Create a Kismet Datasource.
-  
+
     Required keyword arguments:
       host -- kismet hostname
       port -- kismet port
@@ -480,16 +479,16 @@ def Kismet(**keywords):
     Optional keyword arguments:
       encoding -- file encoding (default 'utf-8')
       extent -- manually specified data extent (comma delimited string, default None)
-    
+
     >>> from mapnik import Kismet, Layer
     >>> datasource = Kismet(host='localhost',port=2501,extent='-179,-85,179,85') 
     >>> lyr = Layer('Kismet Server Layer')
     >>> lyr.datasource = datasource
-    
+
     """
     keywords['type'] = 'kismet'
     return CreateDatasource(keywords)
-    
+
 def mapnik_version_string():
     """Return the Mapnik version as a string."""
     version = mapnik_version()
@@ -550,7 +549,7 @@ __all__ = [
     'line_cap', 'line_join',
     'text_convert', 'vertical_alignment',
     # functions
-    #   datasources
+    # datasources
     'Datasource', 'CreateDatasource',
     'Shapefile', 'PostGIS', 'Raster', 'Gdal',
     'Occi', 'Ogr', 'SQLite',

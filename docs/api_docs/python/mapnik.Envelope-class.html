@@ -70,8 +70,34 @@
 </dd></dl>
 
 <hr />
-<p>A spatial envelope (i.e. bounding box) which also defines some basic 
-  operators.</p>
+<pre class="literalblock">
+
+Represents a spatial envelope (i.e. bounding box). 
+
+
+Following operators are defined for Envelope:
+
+Addition:
+e1 + e2 is equvalent to e1.expand_to_include(e2) but yields 
+a new envelope instead of modifying e1
+
+Subtraction:
+Currently e1 - e2 returns e1.
+
+Multiplication and division with floats:
+Multiplication and division change the width and height of the envelope
+by the given factor without modifying its center..
+
+That is, e1 * x is equivalent to: 
+       e1.width(x * e1.width())
+       e1.height(x * e1.height()),
+except that a new envelope is created instead of modifying e1.
+
+e1 / x is equivalent to e1 * (1.0/x).
+
+Equality: two envelopes are equal if their corner points are equal.
+
+</pre>
 
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
@@ -156,7 +182,9 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      __init__( (object)arg1, (float)arg2, (float)arg3, (float)arg4, (float)arg5) -&gt; None :</td>
+      __init__( (object)arg1, (float)minx, (float)miny, (float)maxx, (float)maxy) -&gt; None :
+    Constructs a new envelope from the coordinates
+    of its lower left and upper right corner points.</td>
           <td align="right" valign="top">
             
             
@@ -258,7 +286,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#center" class="summary-sig-name">center</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      center( (Envelope)arg1) -&gt; Coord :</td>
+      center( (Envelope)arg1) -&gt; Coord :
+    Returns the coordinates of the center of the bounding box.</td>
           <td align="right" valign="top">
             
             
@@ -275,7 +304,9 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#contains" class="summary-sig-name">contains</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      contains( (Envelope)arg1, (float)arg2, (float)arg3) -&gt; bool :</td>
+      contains( (Envelope)arg1, (float)x, (float)y) -&gt; bool :
+    Returns True iff this envelope contains the point
+    given by x and y.</td>
           <td align="right" valign="top">
             
             
@@ -292,7 +323,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#expand_to_include" class="summary-sig-name">expand_to_include</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      expand_to_include( (Envelope)arg1, (float)arg2, (float)arg3) -&gt; None :</td>
+      expand_to_include( (Envelope)arg1, (float)x, (float)y) -&gt; None :
+    Expands this envelope to include the point given by x and y.</td>
           <td align="right" valign="top">
             
             
@@ -308,8 +340,11 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="forward"></a><span class="summary-sig-name">forward</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">obj</span>)</span></td>
+          <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#forward" class="summary-sig-name">forward</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">projection</span>)</span><br />
+      Projects the envelope from the geographic space 
+into the cartesian space by projecting its corner 
+points.</td>
           <td align="right" valign="top">
             
             
@@ -326,7 +361,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#height" class="summary-sig-name">height</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      height( (Envelope)arg1, (float)arg2) -&gt; None :</td>
+      height( (Envelope)arg1, (float)new_height) -&gt; None :
+    Sets the height to new_height of the envelope preserving its center.</td>
           <td align="right" valign="top">
             
             
@@ -343,7 +379,9 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#intersect" class="summary-sig-name">intersect</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      intersect( (Envelope)arg1, (Envelope)arg2) -&gt; Envelope :</td>
+      intersect( (Envelope)arg1, (Envelope)other) -&gt; Envelope :
+    Returns the overlap of this envelope and the other envelope
+    as a new envelope.</td>
           <td align="right" valign="top">
             
             
@@ -360,7 +398,9 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#intersects" class="summary-sig-name">intersects</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      intersects( (Envelope)arg1, (float)arg2, (float)arg3) -&gt; bool :</td>
+      intersects( (Envelope)arg1, (float)x, (float)y) -&gt; bool :
+    Returns True iff this envelope intersects the point
+    given by x and y.</td>
           <td align="right" valign="top">
             
             
@@ -376,8 +416,11 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="inverse"></a><span class="summary-sig-name">inverse</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">obj</span>)</span></td>
+          <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#inverse" class="summary-sig-name">inverse</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">projection</span>)</span><br />
+      Projects the envelope from the cartesian space 
+into the geographic space by projecting its corner 
+points.</td>
           <td align="right" valign="top">
             
             
@@ -394,7 +437,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik.Envelope-class.html#width" class="summary-sig-name">width</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      width( (Envelope)arg1, (float)arg2) -&gt; None :</td>
+      width( (Envelope)arg1, (float)new_width) -&gt; None :
+    Sets the width to new_width of the envelope preserving its center.</td>
           <td align="right" valign="top">
             
             
@@ -623,17 +667,24 @@ __getinitargs__( (Envelope)arg1) -&gt; tuple :
   
   <pre class="literalblock">
 
-__init__( (object)arg1, (float)arg2, (float)arg3, (float)arg4, (float)arg5) -&gt; None :
+__init__( (object)arg1, (float)minx, (float)miny, (float)maxx, (float)maxy) -&gt; None :
+    Constructs a new envelope from the coordinates
+    of its lower left and upper right corner points.
+    
 
     C++ signature :
         void __init__(_object*,double,double,double,double)
 
 __init__( (object)arg1) -&gt; None :
+    Equivalent to Envelope(0, 0, -1, -1).
+    
 
     C++ signature :
         void __init__(_object*)
 
-__init__( (object)arg1, (Coord)arg2, (Coord)arg3) -&gt; None :
+__init__( (object)arg1, (Coord)ll, (Coord)ur) -&gt; None :
+    Equivalent to Envelope(ll.x, ll.y, ur.x, ur.y).
+    
 
     C++ signature :
         void __init__(_object*,mapnik::coord&lt;double, 2&gt;,mapnik::coord&lt;double, 2&gt;)
@@ -789,11 +840,31 @@ __sub__( (Envelope)arg1, (Envelope)arg2) -&gt; object :
   <pre class="literalblock">
 
 center( (Envelope)arg1) -&gt; Coord :
+    Returns the coordinates of the center of the bounding box.
+    
+    Example:
+    &gt;&gt;&gt; e = Envelope(0, 0, 100, 100)
+    &gt;&gt;&gt; e.center()
+    Coord(50, 50)
+    
 
     C++ signature :
         mapnik::coord&lt;double, 2&gt; center(mapnik::Envelope&lt;double&gt; {lvalue})
 
-center( (Envelope)arg1, (float)arg2, (float)arg3) -&gt; None :
+center( (Envelope)arg1, (float)x, (float)y) -&gt; None :
+    Moves the envelope so that the given coordinates become its new center.
+    The width and the height are preserved.
+    
+     Example:
+    &gt;&gt;&gt; e = Envelope(0, 0, 100, 100)
+    &gt;&gt;&gt; e.center(60, 60)
+    &gt;&gt;&gt; e.center()
+    Coord(60.0,60.0)
+    &gt;&gt;&gt; (e.width(), e.height())
+    (100.0, 100.0)
+    &gt;&gt;&gt; e
+    Envelope(10.0, 10.0, 110.0, 110.0)
+    
 
     C++ signature :
         void center(mapnik::Envelope&lt;double&gt; {lvalue},double,double)
@@ -819,17 +890,25 @@ center( (Envelope)arg1, (float)arg2, (float)arg3) -&gt; None :
   
   <pre class="literalblock">
 
-contains( (Envelope)arg1, (float)arg2, (float)arg3) -&gt; bool :
+contains( (Envelope)arg1, (float)x, (float)y) -&gt; bool :
+    Returns True iff this envelope contains the point
+    given by x and y.
+    
 
     C++ signature :
         bool contains(mapnik::Envelope&lt;double&gt; {lvalue},double,double)
 
-contains( (Envelope)arg1, (Coord)arg2) -&gt; bool :
+contains( (Envelope)arg1, (Coord)p) -&gt; bool :
+    Equivalent to contains(p.x, p.y)
+    
 
     C++ signature :
         bool contains(mapnik::Envelope&lt;double&gt; {lvalue},mapnik::coord&lt;double, 2&gt;)
 
-contains( (Envelope)arg1, (Envelope)arg2) -&gt; bool :
+contains( (Envelope)arg1, (Envelope)other) -&gt; bool :
+    Equivalent to:
+      contains(other.minx, other.miny) and contains(other.maxx, other.maxy)
+    
 
     C++ signature :
         bool contains(mapnik::Envelope&lt;double&gt; {lvalue},mapnik::Envelope&lt;double&gt;)
@@ -855,20 +934,59 @@ contains( (Envelope)arg1, (Envelope)arg2) -&gt; bool :
   
   <pre class="literalblock">
 
-expand_to_include( (Envelope)arg1, (float)arg2, (float)arg3) -&gt; None :
+expand_to_include( (Envelope)arg1, (float)x, (float)y) -&gt; None :
+    Expands this envelope to include the point given by x and y.
+    
+    Example:
+    
 
     C++ signature :
         void expand_to_include(mapnik::Envelope&lt;double&gt; {lvalue},double,double)
 
-expand_to_include( (Envelope)arg1, (Coord)arg2) -&gt; None :
+expand_to_include( (Envelope)arg1, (Coord)p) -&gt; None :
+    Equivalent to expand_to_include(p.x, p.y)
+    
 
     C++ signature :
         void expand_to_include(mapnik::Envelope&lt;double&gt; {lvalue},mapnik::coord&lt;double, 2&gt;)
 
-expand_to_include( (Envelope)arg1, (Envelope)arg2) -&gt; None :
+expand_to_include( (Envelope)arg1, (Envelope)other) -&gt; None :
+    Equivalent to:
+      expand_to_include(other.minx, other.miny)
+      expand_to_include(other.maxx, other.maxy)
+    
 
     C++ signature :
         void expand_to_include(mapnik::Envelope&lt;double&gt; {lvalue},mapnik::Envelope&lt;double&gt;)
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="forward"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">forward</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">projection</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Projects the envelope from the geographic space 
+into the cartesian space by projecting its corner 
+points.
+
+See also:
+   Coord.forward(self, projection)
 
 </pre>
   <dl class="fields">
@@ -891,12 +1009,24 @@ expand_to_include( (Envelope)arg1, (Envelope)arg2) -&gt; None :
   
   <pre class="literalblock">
 
-height( (Envelope)arg1, (float)arg2) -&gt; None :
+height( (Envelope)arg1, (float)new_height) -&gt; None :
+    Sets the height to new_height of the envelope preserving its center.
+    
+     Example:
+    &gt;&gt;&gt; e = Envelope(0, 0, 100, 100)
+    &gt;&gt;&gt; e.height(120)
+    &gt;&gt;&gt; e.center()
+    Coord(50.0,50.0)
+    &gt;&gt;&gt; e
+    Envelope(0.0, -10.0, 100.0, 110.0)
+    
 
     C++ signature :
         void height(mapnik::Envelope&lt;double&gt; {lvalue},double)
 
 height( (Envelope)arg1) -&gt; float :
+    Returns the height of this envelope.
+    
 
     C++ signature :
         double height(mapnik::Envelope&lt;double&gt; {lvalue})
@@ -922,7 +1052,16 @@ height( (Envelope)arg1) -&gt; float :
   
   <pre class="literalblock">
 
-intersect( (Envelope)arg1, (Envelope)arg2) -&gt; Envelope :
+intersect( (Envelope)arg1, (Envelope)other) -&gt; Envelope :
+    Returns the overlap of this envelope and the other envelope
+    as a new envelope.
+    
+    Example:
+    &gt;&gt;&gt; e1 = Envelope(0, 0, 100, 100)
+    &gt;&gt;&gt; e2 = Envelope(50, 50, 150, 150)
+    &gt;&gt;&gt; e1.intersect(e2)
+    Envelope(50.0, 50.0, 100.0, 100.0)
+    
 
     C++ signature :
         mapnik::Envelope&lt;double&gt; intersect(mapnik::Envelope&lt;double&gt; {lvalue},mapnik::Envelope&lt;double&gt;)
@@ -948,20 +1087,68 @@ intersect( (Envelope)arg1, (Envelope)arg2) -&gt; Envelope :
   
   <pre class="literalblock">
 
-intersects( (Envelope)arg1, (float)arg2, (float)arg3) -&gt; bool :
+intersects( (Envelope)arg1, (float)x, (float)y) -&gt; bool :
+    Returns True iff this envelope intersects the point
+    given by x and y.
+    
+    Note: For points, intersection is equivalent
+    to containment, i.e. the following holds:
+       e.contains(x, y) == e.intersects(x, y)
+    
 
     C++ signature :
         bool intersects(mapnik::Envelope&lt;double&gt; {lvalue},double,double)
 
-intersects( (Envelope)arg1, (Coord)arg2) -&gt; bool :
+intersects( (Envelope)arg1, (Coord)p) -&gt; bool :
+    Equivalent to contains(p.x, p.y)
+    
 
     C++ signature :
         bool intersects(mapnik::Envelope&lt;double&gt; {lvalue},mapnik::coord&lt;double, 2&gt;)
 
-intersects( (Envelope)arg1, (Envelope)arg2) -&gt; bool :
+intersects( (Envelope)arg1, (Envelope)other) -&gt; bool :
+    Returns True iff this envelope intersects the other envelope,
+    This relationship is symmetric.
+    Example:
+    &gt;&gt;&gt; e1 = Envelope(0, 0, 100, 100)
+    &gt;&gt;&gt; e2 = Envelope(50, 50, 150, 150)
+    &gt;&gt;&gt; e1.intersects(e2)
+    True
+    &gt;&gt;&gt; e1.contains(e2)
+    False
+    
 
     C++ signature :
         bool intersects(mapnik::Envelope&lt;double&gt; {lvalue},mapnik::Envelope&lt;double&gt;)
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="inverse"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">inverse</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">projection</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Projects the envelope from the cartesian space 
+into the geographic space by projecting its corner 
+points.
+
+See also:
+  Coord.inverse(self, projection).
 
 </pre>
   <dl class="fields">
@@ -984,12 +1171,24 @@ intersects( (Envelope)arg1, (Envelope)arg2) -&gt; bool :
   
   <pre class="literalblock">
 
-width( (Envelope)arg1, (float)arg2) -&gt; None :
+width( (Envelope)arg1, (float)new_width) -&gt; None :
+    Sets the width to new_width of the envelope preserving its center.
+    
+     Example:
+    &gt;&gt;&gt; e = Envelope(0, 0, 100, 100)
+    &gt;&gt;&gt; e.width(120)
+    &gt;&gt;&gt; e.center()
+    Coord(50.0,50.0)
+    &gt;&gt;&gt; e
+    Envelope(-10.0, 0.0, 110.0, 100.0)
+    
 
     C++ signature :
         void width(mapnik::Envelope&lt;double&gt; {lvalue},double)
 
 width( (Envelope)arg1) -&gt; float :
+    Returns the width of this envelope.
+    
 
     C++ signature :
         double width(mapnik::Envelope&lt;double&gt; {lvalue})
@@ -1097,7 +1296,7 @@ width( (Envelope)arg1) -&gt; float :
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Jul  8 15:33:03 2009
+    Generated by Epydoc 3.0.1 on Sun Nov  8 09:00:49 2009
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

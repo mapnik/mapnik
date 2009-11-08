@@ -114,7 +114,9 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Color-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      __init__( (object)arg1, (int)arg2, (int)arg3, (int)arg4 [, (int)arg5]) -&gt; None :</td>
+      __init__( (object)arg1, (int)r, (int)g, (int)b, (int)a) -&gt; None :
+    Creates a new color from its RGB components
+    and an alpha value.</td>
           <td align="right" valign="top">
             
             
@@ -165,7 +167,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Color-class.html#to_hex_string" class="summary-sig-name">to_hex_string</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      to_hex_string( (Color)arg1) -&gt; str :</td>
+      to_hex_string( (Color)arg1) -&gt; str :
+    Returns the hexadecimal representation of this color.</td>
           <td align="right" valign="top">
             
             
@@ -226,28 +229,32 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Color-class.html#a" class="summary-name">a</a>
+        <a href="mapnik._mapnik.Color-class.html#a" class="summary-name">a</a><br />
+      Gets or sets the alpha component.
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Color-class.html#b" class="summary-name">b</a>
+        <a href="mapnik._mapnik.Color-class.html#b" class="summary-name">b</a><br />
+      Gets or sets the blue component.
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Color-class.html#g" class="summary-name">g</a>
+        <a href="mapnik._mapnik.Color-class.html#g" class="summary-name">g</a><br />
+      Gets or sets the green component.
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Color-class.html#r" class="summary-name">r</a>
+        <a href="mapnik._mapnik.Color-class.html#r" class="summary-name">r</a><br />
+      Gets or sets the red component.
     </td>
   </tr>
   <tr>
@@ -337,12 +344,28 @@ __getinitargs__( (Color)arg1) -&gt; tuple :
   
   <pre class="literalblock">
 
-__init__( (object)arg1, (int)arg2, (int)arg3, (int)arg4 [, (int)arg5]) -&gt; None :
+__init__( (object)arg1, (int)r, (int)g, (int)b, (int)a) -&gt; None :
+    Creates a new color from its RGB components
+    and an alpha value.
+    All values between 0 and 255.
+    
 
     C++ signature :
-        void __init__(_object*,int,int,int [,int])
+        void __init__(_object*,int,int,int,int)
 
-__init__( (object)arg1, (str)arg2) -&gt; None :
+__init__( (object)arg1, (int)r, (int)g, (int)b) -&gt; None :
+    Creates a new color from its RGB components.
+    All values between 0 and 255.
+    
+
+    C++ signature :
+        void __init__(_object*,int,int,int)
+
+__init__( (object)arg1, (str)color_string) -&gt; None :
+    Creates a new color from its CSS string representation.
+    The string may be a CSS color name (e.g. 'blue')
+    or a hex color string (e.g. '#0000ff').
+    
 
     C++ signature :
         void __init__(_object*,std::string)
@@ -425,6 +448,13 @@ __str__( (Color)arg1) -&gt; str :
   <pre class="literalblock">
 
 to_hex_string( (Color)arg1) -&gt; str :
+    Returns the hexadecimal representation of this color.
+    
+    Example:
+    &gt;&gt;&gt; c = Color('blue')
+    &gt;&gt;&gt; c.to_hex_string()
+    '#0000ff'
+    
 
     C++ signature :
         std::string to_hex_string(mapnik::color {lvalue})
@@ -450,7 +480,7 @@ to_hex_string( (Color)arg1) -&gt; str :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">a</h3>
-  
+  <p>Gets or sets the alpha component. The value is between 0 and 255.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -467,7 +497,7 @@ to_hex_string( (Color)arg1) -&gt; str :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">b</h3>
-  
+  <p>Gets or sets the blue component. The value is between 0 and 255.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -484,7 +514,7 @@ to_hex_string( (Color)arg1) -&gt; str :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">g</h3>
-  
+  <p>Gets or sets the green component. The value is between 0 and 255.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -501,7 +531,7 @@ to_hex_string( (Color)arg1) -&gt; str :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">r</h3>
-  
+  <p>Gets or sets the red component. The value is between 0 and 255.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -544,7 +574,7 @@ to_hex_string( (Color)arg1) -&gt; str :
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Jul  8 15:33:03 2009
+    Generated by Epydoc 3.0.1 on Sun Nov  8 09:00:49 2009
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

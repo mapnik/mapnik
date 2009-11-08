@@ -114,7 +114,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Stroke-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      __init__( (object)arg1) -&gt; None :</td>
+      __init__( (object)arg1) -&gt; None :
+    Creates a new default black stroke with the width of 1.</td>
           <td align="right" valign="top">
             
             
@@ -165,7 +166,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Stroke-class.html#add_dash" class="summary-sig-name">add_dash</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      add_dash( (Stroke)arg1, (float)arg2, (float)arg3) -&gt; None :</td>
+      add_dash( (Stroke)arg1, (float)length, (float)gap) -&gt; None :
+    Adds a dash segment to the dash patterns of this stroke.</td>
           <td align="right" valign="top">
             
             
@@ -182,7 +184,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Stroke-class.html#get_dashes" class="summary-sig-name">get_dashes</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      get_dashes( (Stroke)arg1) -&gt; list :</td>
+      get_dashes( (Stroke)arg1) -&gt; list :
+    Returns the list of dash segments for this stroke.</td>
           <td align="right" valign="top">
             
             
@@ -244,35 +247,40 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Stroke-class.html#color" class="summary-name">color</a>
+        <a href="mapnik._mapnik.Stroke-class.html#color" class="summary-name">color</a><br />
+      Gets or sets the stroke color.
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Stroke-class.html#line_cap" class="summary-name">line_cap</a>
+        <a href="mapnik._mapnik.Stroke-class.html#line_cap" class="summary-name">line_cap</a><br />
+      Gets or sets the line cap of this stroke.
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Stroke-class.html#line_join" class="summary-name">line_join</a>
+        <a href="mapnik._mapnik.Stroke-class.html#line_join" class="summary-name">line_join</a><br />
+      Returns the line join mode of this stroke.
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Stroke-class.html#opacity" class="summary-name">opacity</a>
+        <a href="mapnik._mapnik.Stroke-class.html#opacity" class="summary-name">opacity</a><br />
+      Gets or sets the opacity of this stroke.
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Stroke-class.html#width" class="summary-name">width</a>
+        <a href="mapnik._mapnik.Stroke-class.html#width" class="summary-name">width</a><br />
+      Gets or sets the stroke width in pixels.
     </td>
   </tr>
   <tr>
@@ -362,11 +370,15 @@ __getstate__( (Stroke)arg1) -&gt; tuple :
   <pre class="literalblock">
 
 __init__( (object)arg1) -&gt; None :
+    Creates a new default black stroke with the width of 1.
+    
 
     C++ signature :
         void __init__(_object*)
 
-__init__( (object)arg1, (Color)arg2, (float)arg3) -&gt; None :
+__init__( (object)arg1, (Color)color, (float)width) -&gt; None :
+    Creates a new stroke object with a specified color and width.
+    
 
     C++ signature :
         void __init__(_object*,mapnik::color,float)
@@ -444,7 +456,9 @@ __setstate__( (Stroke)arg1, (tuple)arg2) -&gt; None :
   
   <pre class="literalblock">
 
-add_dash( (Stroke)arg1, (float)arg2, (float)arg3) -&gt; None :
+add_dash( (Stroke)arg1, (float)length, (float)gap) -&gt; None :
+    Adds a dash segment to the dash patterns of this stroke.
+    
 
     C++ signature :
         void add_dash(mapnik::stroke {lvalue},float,float)
@@ -471,6 +485,8 @@ add_dash( (Stroke)arg1, (float)arg2, (float)arg3) -&gt; None :
   <pre class="literalblock">
 
 get_dashes( (Stroke)arg1) -&gt; list :
+    Returns the list of dash segments for this stroke.
+    
 
     C++ signature :
         boost::python::list get_dashes(mapnik::stroke)
@@ -496,7 +512,8 @@ get_dashes( (Stroke)arg1) -&gt; list :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">color</h3>
-  
+  <p>Gets or sets the stroke color. Returns a new Color object on 
+  retrieval.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -513,7 +530,7 @@ get_dashes( (Stroke)arg1) -&gt; list :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">line_cap</h3>
-  
+  <p>Gets or sets the line cap of this stroke.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -530,7 +547,7 @@ get_dashes( (Stroke)arg1) -&gt; list :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">line_join</h3>
-  
+  <p>Returns the line join mode of this stroke.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -547,7 +564,8 @@ get_dashes( (Stroke)arg1) -&gt; list :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">opacity</h3>
-  
+  <p>Gets or sets the opacity of this stroke. The value is a float between 
+  0 and 1.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -564,7 +582,7 @@ get_dashes( (Stroke)arg1) -&gt; list :
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <h3 class="epydoc">width</h3>
-  
+  <p>Gets or sets the stroke width in pixels.</p>
   <dl class="fields">
     <dt>Get Method:</dt>
     <dd class="value"><span class="summary-sig"><i>unreachable</i>(<span class="summary-sig-arg">...</span>)</span>
@@ -607,7 +625,7 @@ get_dashes( (Stroke)arg1) -&gt; list :
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Jul  8 15:33:04 2009
+    Generated by Epydoc 3.0.1 on Sun Nov  8 09:00:50 2009
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
