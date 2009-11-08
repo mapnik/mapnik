@@ -81,14 +81,16 @@ namespace mapnik
         name_=rhs.name_;
         title_=rhs.title_;
         abstract_=rhs.abstract_;
+	srs_ = rhs.srs_;
         minZoom_=rhs.minZoom_;
         maxZoom_=rhs.maxZoom_;
         active_=rhs.active_;
         queryable_=rhs.queryable_;
+	clear_label_cache_ = rhs.clear_label_cache_;
         styles_=rhs.styles_;
         ds_=rhs.ds_;
     }
-    
+
     Layer::~Layer() {}
     
     void Layer::set_name( std::string const& name)
