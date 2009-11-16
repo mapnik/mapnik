@@ -466,7 +466,7 @@ namespace mapnik
         }
     }
 
-    void serialize_layer( ptree & map_node, const Layer & layer )
+    void serialize_layer( ptree & map_node, const Layer & layer, bool explicit_defaults )
     {
         ptree & layer_node = map_node.push_back(
                 ptree::value_type("Layer", ptree()))->second;
@@ -490,8 +490,15 @@ namespace mapnik
             set_attr( layer_node, "srs", layer.srs() );
         }
 
-        set_attr/*<bool>*/( layer_node, "status", layer.isActive() );
-        set_attr/*<bool>*/( layer_node, "clear_label_cache", layer.clear_label_cache() );
+        if ( !layer.isActive() || explicit_defaults )
+        {
+            set_attr/*<bool>*/( layer_node, "status", layer.isActive() );
+        }
+        
+        if ( layer.clear_label_cache() || explicit_defaults )
+        {        
+            set_attr/*<bool>*/( layer_node, "clear_label_cache", layer.clear_label_cache() );
+        }
 
         if ( layer.getMinZoom() )
         {
@@ -503,7 +510,7 @@ namespace mapnik
             set_attr( layer_node, "maxzoom", layer.getMaxZoom() );
         }
 
-        if ( layer.isQueryable() )
+        if ( layer.isQueryable() || explicit_defaults )
         {
             set_attr( layer_node, "queryable", layer.isQueryable() );
         }
@@ -556,7 +563,7 @@ namespace mapnik
         std::vector<Layer> const & layers = map.layers();
         for (unsigned i = 0; i < layers.size(); ++i )
         {
-            serialize_layer( map_node, layers[i] );
+            serialize_layer( map_node, layers[i], explicit_defaults );
         }
     }
 
