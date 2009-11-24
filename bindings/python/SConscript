@@ -33,8 +33,7 @@ libraries = ['mapnik','png','jpeg']
 libraries.append('boost_python%s' % env['BOOST_APPEND'])
 
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('icuuc')
-    libraries.append('icudata')
+    libraries.append(env['ICU_LIB_NAME'])
     libraries.append('boost_regex%s' % env['BOOST_APPEND'])
     if env['THREADING'] == 'multi':
         libraries.append('boost_thread%s' % env['BOOST_APPEND'])

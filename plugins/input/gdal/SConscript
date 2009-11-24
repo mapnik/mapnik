@@ -34,8 +34,7 @@ gdal_src = Split(
 libraries = [env['PLUGINS']['gdal']['lib']]
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
-    libraries.append('icuuc')
-    libraries.append('icudata')
+    libraries.append(env['ICU_LIB_NAME'])
 
 gdal_inputdriver = env.SharedLibrary('gdal', source=gdal_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 

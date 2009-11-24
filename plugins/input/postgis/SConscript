@@ -35,8 +35,7 @@ libraries = ['pq']
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik')
-    libraries.append('icuuc')
-    libraries.append('icudata')
+    libraries.append(env['ICU_LIB_NAME'])
     if env['THREADING'] == 'multi':
         libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 

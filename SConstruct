@@ -144,6 +144,7 @@ opts.AddVariables(
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
@@ -653,10 +654,18 @@ if not preconfigured:
         ['z', 'zlib.h', True,'C'],
         ['jpeg', ['stdio.h', 'jpeglib.h'], True,'C'],
         ['proj', 'proj_api.h', True,'C'],
-        ['icuuc','unicode/unistr.h',True,'C++'],
-        ['icudata','unicode/utypes.h' , True,'C++'],
+        [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
     ]
-    
+
+    # allow for mac osx /usr/lib/libicucore.dylib compatibility
+    # requires custom supplied headers since Apple does not include them
+    # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
+    # To use system lib download and make && make install one of these:
+    http://www.opensource.apple.com/tarballs/ICU/
+    # then copy the headers to a location that mapnik will find
+    if env['ICU_LIB_NAME'] == 'icucore':
+        env.Append(CXXFLAGS = '-DU_HIDE_DRAFT_API')
+        env.Append(CXXFLAGS = '-DUDISABLE_RENAMING')
     
     for libinfo in LIBSHEADERS:
         if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):

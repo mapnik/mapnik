@@ -39,8 +39,7 @@ boost_thread  = 'boost_thread%s' % env['BOOST_APPEND']
 libraries =  [boost_program_options,boost_thread,'sqlite3','pq','mapnik']
 
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('icuuc')
-    libraries.append('icudata')
+    libraries.append(env['ICU_LIB_NAME'])
    
 pgsql2sqlite = env.Program('pgsql2sqlite', source, CPPPATH=headers, LIBS=libraries)
 

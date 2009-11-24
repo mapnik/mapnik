@@ -41,8 +41,7 @@ if '-DHAVE_CAIRO' in env['CXXFLAGS']:
     libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
 
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('icuuc')
-    #libraries.append('icudata')
+    libraries.append(env['ICU_LIB_NAME'])
    
 rundemo = env.Program('rundemo', source, CPPPATH=headers, LIBS=libraries)
 

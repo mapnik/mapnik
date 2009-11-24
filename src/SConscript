@@ -36,7 +36,7 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 
-libraries = ['freetype','ltdl','png','tiff','z','jpeg','proj','icuuc',filesystem,regex]
+libraries = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,regex]
 
 if '-DHAVE_CAIRO' in env['CXXFLAGS']:
     # add cairo and cairomm-1.0 to libs
@@ -49,7 +49,6 @@ if env['THREADING'] == 'multi':
     libraries.append('boost_thread%s' % env['BOOST_APPEND'])
         
 if env['PLATFORM'] == 'Darwin':
-    #libraries.append('icudata')
     if env['BOOST_SYSTEM_REQUIRED']:
         libraries.append('boost_system%s' % env['BOOST_APPEND'])
     
