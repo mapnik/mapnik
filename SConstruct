@@ -661,7 +661,7 @@ if not preconfigured:
     # requires custom supplied headers since Apple does not include them
     # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
     # To use system lib download and make && make install one of these:
-    http://www.opensource.apple.com/tarballs/ICU/
+    # http://www.opensource.apple.com/tarballs/ICU/
     # then copy the headers to a location that mapnik will find
     if env['ICU_LIB_NAME'] == 'icucore':
         env.Append(CXXFLAGS = '-DU_HIDE_DRAFT_API')
