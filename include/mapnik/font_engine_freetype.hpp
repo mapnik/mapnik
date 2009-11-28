@@ -45,7 +45,6 @@ extern "C"
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/thread/mutex.hpp>
 
 // stl
 #include <string>
