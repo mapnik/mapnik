@@ -302,15 +302,17 @@ def PostGIS(**keywords):
       password -- password for database user (default: see postgres docs)
       host -- portgres hostname (default: see postgres docs)
       port -- postgres port (default: see postgres docs)
-      initial_size -- integer size of connection pool (default 1)
-      max_size -- integer max of connection pool (default 10)
+      initial_size -- integer size of connection pool (default: 1)
+      max_size -- integer max of connection pool (default: 10)
+      persist_connection -- keep connection open (default: True)
 
     Optional table-level keyword arguments:
-      extent -- manually specified data extent (comma delimited string, default None)
-      estimate_extent -- boolean, direct PostGIS to use the faster, less accurate estimate_extent() over extent() (default False)
-      row_limit -- integer limit of rows to return (default 0)
-      cursor_size -- integer size of cursor to fetch (default 0)
-      geometry_field -- specify geometry field (default first entry in geometry_columns)
+      extent -- manually specified data extent (comma delimited string, default: None)
+      estimate_extent -- boolean, direct PostGIS to use the faster, less accurate estimate_extent() over extent() (default: False)
+      row_limit -- integer limit of rows to return (default: 0)
+      cursor_size -- integer size of binary cursor to use (default: 0, no cursor used)
+      geometry_field -- specify geometry field (default: first entry in geometry_columns)
+      srid -- spatial reference id # (default: auto-detected from geometry_field)
       multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
 
     >>> from mapnik import PostGIS, Layer
