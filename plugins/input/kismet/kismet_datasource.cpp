@@ -33,6 +33,7 @@
 #include  <sys/stat.h>
 #include  <fcntl.h>
 #include  <unistd.h>
+#include  <stdio.h>
 
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
