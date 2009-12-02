@@ -568,22 +568,6 @@ if not preconfigured:
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
     
-    if env['FAST']:
-        # caching is 'auto' by default in SCons
-        # But let's also cache implicit deps...
-        EnsureSConsVersion(0,98)
-        SetOption('implicit_cache', 1)
-        env.Decider('MD5-timestamp')
-        SetOption('max_drift', 1)
-        
-    else:
-        # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
-        # This allows for a SCONS_LOCAL_CONFIG, if present, to be used as the primary means of storing paths to successful build dependencies
-        SetCacheMode('force')
-    
-    if env['JOBS'] > 1:
-        SetOption("num_jobs", env['JOBS'])  
-    
     if env['PKG_CONFIG_PATH']:
         env['ENV']['PKG_CONFIG_PATH'] = env['PKG_CONFIG_PATH']
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
@@ -959,6 +943,23 @@ Help(opts.GenerateHelpText(env))
 # export env so it is available in Sconscript files
 Export('env')
 
+
+if env['FAST']:
+    # caching is 'auto' by default in SCons
+    # But let's also cache implicit deps...
+    EnsureSConsVersion(0,98)
+    SetOption('implicit_cache', 1)
+    env.Decider('MD5-timestamp')
+    SetOption('max_drift', 1)
+    
+else:
+    # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
+    # This allows for a SCONS_LOCAL_CONFIG, if present, to be used as the primary means of storing paths to successful build dependencies
+    SetCacheMode('force')
+
+if env['JOBS'] > 1:
+    SetOption("num_jobs", env['JOBS'])  
+    
 # Build agg first, doesn't need anything special
 if env['INTERNAL_LIBAGG']:
     SConscript('agg/SConscript')
