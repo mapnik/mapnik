@@ -524,6 +524,9 @@ if not preconfigured:
 
     color_print(4,'Configuring build environment...')
 
+    if not env['FAST']:
+        SetCacheMode('force')
+    
     if env['USE_CONFIG']:
         if not env['CONFIG'].endswith('.py'):
             color_print(1,'SCons CONFIG file specified is not a python file, will not be read...')
@@ -567,7 +570,7 @@ if not preconfigured:
     
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
-    
+        
     if env['PKG_CONFIG_PATH']:
         env['ENV']['PKG_CONFIG_PATH'] = env['PKG_CONFIG_PATH']
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
