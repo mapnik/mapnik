@@ -110,8 +110,8 @@ public:
       double lox = extent.minx();
       double loy = extent.miny();
    
-      int max_x = int(ceil(double(width)/double(tile_size)));
-      int max_y = int(ceil(double(height)/double(tile_size)));
+      int max_x = int(std::ceil(double(width)/double(tile_size)));
+      int max_y = int(std::ceil(double(height)/double(tile_size)));
 
       double pixel_x = extent.width()/double(width);
       double pixel_y = extent.height()/double(height);
