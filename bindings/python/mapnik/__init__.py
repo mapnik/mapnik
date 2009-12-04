@@ -359,6 +359,7 @@ def Gdal(**keywords):
 
     Optional keyword arguments:
       base -- path prefix (default None)
+      shared -- boolean, open GdalDataset in shared mode (default: False)
 
     >>> from mapnik import Gdal, Layer
     >>> dataset = Gdal(base='/home/mapnik/data',file='elevation.tif')
