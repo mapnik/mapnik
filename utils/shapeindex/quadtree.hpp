@@ -24,8 +24,10 @@
 #ifndef QUADTREE_HPP
 #define QUADTREE_HPP
 // stl
+#include <cstring> 
 #include <vector>
 #include <fstream>
+#include <iostream>
 // mapnik
 #include <mapnik/envelope.hpp>
 
