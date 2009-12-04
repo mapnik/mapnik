@@ -314,7 +314,7 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
  * @relates mapnik::enumeration
  */
 #define DEFINE_ENUM( name, e) \
-    typedef mapnik::enumeration<e, e ## _MAX> name; 
+    typedef mapnik::enumeration<e, e ## _MAX> name
 
 /** Helper macro. Runs the verify() method during static initialization.
  * @relates mapnik::enumeration
