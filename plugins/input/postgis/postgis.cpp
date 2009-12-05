@@ -169,13 +169,13 @@ postgis_datasource::postgis_datasource(parameters const& params)
          {
              std::ostringstream s;
              s << "SELECT f_geometry_column, srid FROM ";
-             s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << table_name<<"'";
+             s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << unquote(table_name) <<"'";
              
              if (schema_name.length() > 0) 
-                s << " AND f_table_schema='" << schema_name << "'";
+                s << " AND f_table_schema='" << unquote(schema_name) << "'";
             
              if (geometry_field_.length() > 0)
-                s << " AND f_geometry_column='" << geometry_field_ << "'";
+                s << " AND f_geometry_column='" << unquote(geometry_field_) << "'";
 
 #ifdef MAPNIK_DEBUG
              clog << s.str() << endl;
@@ -338,6 +338,13 @@ std::string postgis_datasource::populate_sql_bbox(const std::string& sql, Envelo
         s << " WHERE \"" << geometryColumn_ << "\" && " << b.str();
         return sql_with_bbox + s.str();    
     }
+}
+
+std::string postgis_datasource::unquote(const std::string& sql)
+{
+    std::string table_name = boost::algorithm::to_lower_copy(sql);  
+    boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\""));
+    return table_name;
 }
 
 std::string postgis_datasource::table_from_sql(const std::string& sql)

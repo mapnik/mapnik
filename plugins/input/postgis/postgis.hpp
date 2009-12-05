@@ -82,6 +82,7 @@ class postgis_datasource : public datasource
       ~postgis_datasource();
    private:
       std::string populate_sql_bbox(const std::string& sql, Envelope<double> const& box) const;
+      static std::string unquote(const std::string& sql);
       static std::string table_from_sql(const std::string& sql);
       boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const;
       postgis_datasource(const postgis_datasource&);
