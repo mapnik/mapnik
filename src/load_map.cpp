@@ -22,6 +22,7 @@
 // mapnik
 #include <mapnik/load_map.hpp>
 
+#include <mapnik/version.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
@@ -171,10 +172,47 @@ namespace mapnik
                     relative_to_xml_ = *paths_from_xml;
                 }
 
+                optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum_version");
+                if (min_version_string)
+                {
+                    boost::char_separator<char> sep(".");
+                    boost::tokenizer<boost::char_separator<char> > tokens(*min_version_string,sep);
+                    unsigned i = 0;
+                    bool success = false;
+                    int n[3];
+                    for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tokens.begin(); 
+                         beg!=tokens.end();++beg)
+                    {
+                       try 
+                       {
+                          n[i] = boost::lexical_cast<int>(boost::trim_copy(*beg));
+                       }
+                       catch (boost::bad_lexical_cast & ex)
+                       {
+                          std::clog << *beg << " : " << ex.what() << "\n";
+                          break;
+                       }
+                       if (i==2) 
+                       {
+                          success = true;
+                          break;
+                       }
+                       ++i;
+                    }
+                    if (success)
+                    {
+                       int min_version = (n[0] * 100000) + (n[1] * 100) + (n[2]);
+                       if (min_version > MAPNIK_VERSION)
+                       {
+                          throw config_error(std::string("This map uses features only present in Mapnik version ") + *min_version_string + " and newer");
+                       }
+                    }
+                
+                }
             }
             catch (const config_error & ex)
             {
-                ex.append_context("in node Map");
+                ex.append_context("(in node Map)");
                 throw;
             }
 
