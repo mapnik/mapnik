@@ -69,10 +69,10 @@ if env['PLATFORM'] == 'Darwin':
             # or
             # /Library/Frameworks/Python.framework/Python/Versions/
             # See: http://trac.mapnik.org/ticket/380
-            prefix = env['PYTHON_SYS_PREFIX']
-            if '.framework' in prefix:
-                linkflags = '-F%s -framework Python -Z' % os.path.dirname(prefix.split('.')[0])
-            elif '/System' in prefix:
+            link_prefix = env['PYTHON_SYS_PREFIX']
+            if '.framework' in link_prefix:
+                linkflags = '-F%s -framework Python -Z' % os.path.dirname(link_prefix.split('.')[0])
+            elif '/System' in link_prefix:
                 linkflags = '-F/System/Library/Frameworks/ -framework Python -Z'
             else:
                 # should we fall back to -lpython here?
