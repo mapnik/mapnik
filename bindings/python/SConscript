@@ -39,8 +39,46 @@ if env['PLATFORM'] == 'Darwin':
         libraries.append('boost_thread%s' % env['BOOST_APPEND'])
     if '-DHAVE_CAIRO' in env['CXXFLAGS']:
         libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
+
+    ##### Python linking on OS X is tricky ### 
+    # Confounding problems are:
+    # 1) likelyhood of multiple python installs of the same major.minor version
+    #  because apple supplies python built-in and many users may have installed 
+    #  further versions using macports
+    # 2) boost python directly links to a python version
+    # 3) the below will directly link _mapnik.so to a python version
+    # 4) _mapnik.so must link to the same python lib as boost_python.dylib otherwise
+    # python will Abort with a Verion Mismatch error.
+    # See http://trac.mapnik.org/ticket/453 for the seeds of a better approach
+    # for now we offer control over method of direct linking...
+    # The default below is to link against the python dylib in the form of
+    #/path/to/Python.framework/Python instead of -lpython
+    
+    # http://developer.apple.com/mac/library/DOCUMENTATION/Darwin/Reference/ManPages/man1/ld.1.html
+    
     if env['FRAMEWORK_PYTHON']:
-        linkflags = '-F%s -framework Python' % env['FRAMEWORK_SEARCH_PATH']
+        if env['FRAMEWORK_SEARCH_PATH']:
+            # if the user has supplied a custom root path to search for 
+            # a given Python framework, then use that to direct the linker
+            linkflags = '-F%s -framework Python -Z' % env['FRAMEWORK_SEARCH_PATH']
+        else:
+            # otherwise be as explicit as possible for linking to the same Framework
+            # as the executable we are building with (or is pointed to by the PYTHON variable)
+            # otherwise we may accidentally link against either:
+            # /System/Library/Frameworks/Python.framework/Python/Versions/
+            # or
+            # /Library/Frameworks/Python.framework/Python/Versions/
+            # See: http://trac.mapnik.org/ticket/380
+            prefix = env['PYTHON_SYS_PREFIX']
+            if '.framework' in prefix:
+                linkflags = '-F%s -framework Python -Z' % os.path.dirname(prefix.split('.')[0])
+            elif '/System' in prefix:
+                linkflags = '-F/System/Library/Frameworks/ -framework Python -Z'
+            else:
+                # should we fall back to -lpython here?
+                linkflags = '-F/ -framework Python'
+            
+    # if we are not linking to a framework then use the *nix standard approach
     else:
         linkflags = '-lpython%s' % env['PYTHON_VERSION']
 
