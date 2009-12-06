@@ -262,7 +262,8 @@ def test_map_init_from_string():
     m = mapnik.Map(600, 300)
     
     mapnik.load_map_from_string(m, map_string)
-    mapnik.load_map_from_string(m, map_string, True)
+    mapnik.load_map_from_string(m, map_string, False, "")
+    mapnik.load_map_from_string(m, map_string, True, "")
     raise(Todo("Need to write more map property tests in 'object_test.py'..."))
 
 # Map pickling

@@ -37,6 +37,7 @@
 using boost::property_tree::ptree;
 using namespace std;
 
+//#define DEFAULT_OPTIONS (XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 #define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 
 namespace mapnik 
@@ -69,7 +70,7 @@ namespace mapnik
             void load( const std::string & filename, ptree & pt )
             {
                 boost::filesystem::path path(filename);
-                if ( ! boost::filesystem::exists( path ) ) {
+                if ( !boost::filesystem::exists( path ) ) {
                     throw config_error(string("Could not load map file '") +
                             filename + "': File does not exist");
                 }
@@ -114,9 +115,19 @@ namespace mapnik
                 load(doc, pt);
             }
 
-            void load_string( const std::string & buffer, ptree & pt )
+            void load_string( const std::string & buffer, ptree & pt, std::string const & base_url )
             {
-                xmlDocPtr doc = xmlCtxtReadMemory(ctx_, buffer.data(), buffer.length(), url_, encoding_, options_);
+                if (!base_url.empty())
+                {
+                    boost::filesystem::path path(base_url);
+                    if ( ! boost::filesystem::exists( path ) ) {
+                        throw config_error(string("Could not locate base_url '") +
+                                base_url + "': file or directory does not exist");
+                    }                    
+                }
+
+                xmlDocPtr doc = xmlCtxtReadMemory(ctx_, buffer.data(), buffer.length(), base_url.c_str(), encoding_, options_);
+
                 load(doc, pt);
             }
 
@@ -203,10 +214,10 @@ namespace mapnik
         libxml2_loader loader;
         loader.load( filename, pt );
     }
-    void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt)
+    void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_url)
     {
         libxml2_loader loader;
-        loader.load_string( str, pt );
+        loader.load_string( str, pt, base_url );
     }
 
 } // end of namespace mapnik

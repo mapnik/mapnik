@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map [
+<!ENTITY % entities SYSTEM "../inc/entities.xml.inc">
+%entities;
+]>
+<Map bgcolor="#b5d0d0" srs="&srs900913;">
+  &fontset-settings;
+<Style name="turning_circle">
+    <Rule>
+      &maxscale_zoom15;
+      &minscale_zoom16;
+      <PointSymbolizer file="&symbols;/dummy.png" type="png" width="15" height="15" />
+    </Rule>
+    <Rule>
+      &maxscale_zoom17;
+      <PointSymbolizer file="&symbols;/dummy.png" type="png" width="19" height="19" />
+    </Rule>
+</Style>
+<Layer name="area-text" status="on" srs="&srs900913;">
+    <StyleName>turning_circle</StyleName>
+</Layer>
+</Map>

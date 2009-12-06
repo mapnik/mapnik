@@ -17,6 +17,12 @@ def assert_loads_successfully(file):
 
     strict = True
     mapnik.load_map(m, file, strict)
+    
+    # libxml2 is not smart about paths, and clips the last directory off
+    # of a path if it does not end in a trailing slash
+    base_path = os.path.dirname(file) + '/'
+    mapnik.load_map_from_string(m,open(file,'rb').read(),strict,base_path)
+    
 
 # We expect these files to raise a UserWarning
 # and fail if there isn't one (or a different type

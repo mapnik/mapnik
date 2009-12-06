@@ -122,11 +122,11 @@ namespace mapnik
         parser.parse_map(map, pt);
     }
 
-    void load_map_string(Map & map, std::string const& str, bool strict)
+    void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_url)
     {
         ptree pt;
 #ifdef HAVE_LIBXML2
-        read_xml2_string(str, pt);
+        read_xml2_string(str, pt, base_url);
 #else
         try
         {
@@ -139,7 +139,7 @@ namespace mapnik
         }
 #endif
 
-        map_parser parser( strict );
+        map_parser parser( strict, base_url);
         parser.parse_map(map, pt);
     }
 
