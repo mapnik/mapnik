@@ -66,7 +66,10 @@ void ogr_converter::convert_geometry (OGRGeometry* geom, feature_ptr feature, bo
       if (multiple_geometries)
           convert_multipoint_2 (static_cast<OGRMultiPoint*>(geom), feature);
       else
-          convert_multipoint (static_cast<OGRMultiPoint*>(geom), feature);
+          // Todo - using convert_multipoint_2 until we have proper multipoint handling in convert_multipoint
+          // http://trac.mapnik.org/ticket/458
+          //convert_multipoint (static_cast<OGRMultiPoint*>(geom), feature);
+          convert_multipoint_2 (static_cast<OGRMultiPoint*>(geom), feature);
       break;
   case wkbMultiLineString:
       if (multiple_geometries)
@@ -158,7 +161,11 @@ void ogr_converter::convert_multipoint (OGRMultiPoint* geom, feature_ptr feature
     {
         OGRPoint* ogrpoint = static_cast<OGRPoint*>(geom->getGeometryRef (i));
         point->move_to (ogrpoint->getX(), ogrpoint->getY());
+        //Todo - need to accept multiple points per point_impl
     }
+    
+    // Todo - this only gets last point
+    feature->add_geometry (point);
 }
 
 void ogr_converter::convert_multipoint_2 (OGRMultiPoint* geom, feature_ptr feature)
