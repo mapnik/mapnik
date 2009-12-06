@@ -27,7 +27,7 @@ def test():
 
     mapnik.load_map(new_map, test_map)
 
-    eq_(open(test_map).read(),mapnik.save_map_string(new_map))
+    eq_(open(test_map).read(),mapnik.save_map_to_string(new_map))
 
     if os.path.exists(test_map):
         os.remove(test_map)

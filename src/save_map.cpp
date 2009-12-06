@@ -574,7 +574,7 @@ namespace mapnik
         write_xml(filename,pt);
     }
 
-    std::string save_map_string(Map const & map, bool explicit_defaults)
+    std::string save_map_to_string(Map const & map, bool explicit_defaults)
     {
         ptree pt;
         serialize_map(pt,map,explicit_defaults);

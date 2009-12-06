@@ -265,7 +265,7 @@ bool has_pycairo()
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 4);
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3);
-BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_string_overloads, save_map_string, 1, 2);
+BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string, 1, 2);
 
 BOOST_PYTHON_MODULE(_mapnik)
 {
@@ -275,7 +275,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     using mapnik::load_map;
     using mapnik::load_map_string;
     using mapnik::save_map;
-    using mapnik::save_map_string;
+    using mapnik::save_map_to_string;
 
     register_exception_translator<mapnik::config_error>(translator);
     register_cairo();
@@ -467,7 +467,7 @@ BOOST_PYTHON_MODULE(_mapnik)
         );
 */
     
-    def("save_map_string", & save_map_string, save_map_string_overloads());
+    def("save_map_to_string", & save_map_to_string, save_map_to_string_overloads());
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
     def("mapnik_svn_revision", &mapnik_svn_revision,"Get the Mapnik svn revision");
     def("has_cairo", &has_cairo, "Get cairo library status");

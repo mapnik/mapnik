@@ -564,7 +564,7 @@ __all__ = [
     #   factory methods
     'Filter',
     #   load/save/render
-    'load_map', 'load_map_from_string', 'save_map', 'save_map_string',
+    'load_map', 'load_map_from_string', 'save_map', 'save_map_to_string',
     'render', 'render_tile_to_file', 'render_to_file',
     #   other
     'register_plugins', 'register_fonts',
