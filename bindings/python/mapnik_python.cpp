@@ -216,7 +216,7 @@ double scale_denominator(mapnik::Map const &map, bool geographic)
 }
 
 void translator(mapnik::config_error const & ex) {
-    PyErr_SetString(PyExc_UserWarning, ex.what());
+    PyErr_SetString(PyExc_RuntimeError, ex.what());
 }
 
 unsigned mapnik_version()
