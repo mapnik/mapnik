@@ -841,8 +841,10 @@ if not preconfigured:
             # Getting the macintosh version number, sticking as a compiler macro
             # for Leopard -- needed because different workarounds are needed than
             # for Tiger.
-            if platform.mac_ver()[0].startswith('10.5'):
-                common_cxx_flags += '-DOSX_LEOPARD '
+            # this was used for fribidi - not longer needed
+            # but will retain logic for future use
+            #if platform.mac_ver()[0].startswith('10.5'):
+            #    common_cxx_flags += '-DOSX_LEOPARD '
         else:
             pthread = '-pthread'
         
