@@ -24,6 +24,9 @@
 #include "gdal_featureset.hpp"
 #include <gdal_priv.h>
 
+// boost
+#include <boost/format.hpp>
+
 using mapnik::query;
 using mapnik::coord2d;
 using mapnik::Envelope;
