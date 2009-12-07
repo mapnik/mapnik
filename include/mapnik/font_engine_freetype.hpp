@@ -305,10 +305,8 @@ namespace mapnik
 
     typedef boost::shared_ptr<font_face_set> face_set_ptr;
 
-    class MAPNIK_DECL freetype_engine  // : public mapnik::singleton<freetype_engine,mapnik::CreateStatic>,
-         // private boost::noncopyable
+    class MAPNIK_DECL freetype_engine
     {
-       // friend class mapnik::CreateStatic<freetype_engine>;
       public:
         static bool register_font(std::string const& file_name);
         static std::vector<std::string> face_names ();

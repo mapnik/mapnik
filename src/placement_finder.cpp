@@ -91,11 +91,9 @@ namespace mapnik
         allow_overlap(sym.get_allow_overlap()),
         dimensions(),
         text_size(sym.get_text_size())
-   {
-   }
-   placement::~placement()
-   {
-   }
+   {}
+   
+   placement::~placement() {}
 
    template<typename T>
    std::pair<double, double> get_position_at_distance(double target_distance, T & shape_path)

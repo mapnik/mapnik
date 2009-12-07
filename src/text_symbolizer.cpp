@@ -26,8 +26,6 @@
 #include <mapnik/text_symbolizer.hpp>
 // boost
 #include <boost/scoped_ptr.hpp>
-//stl
-#include <iostream>
 
 static const char * label_placement_strings[] = {
     "point",
@@ -227,7 +225,7 @@ namespace mapnik
         face_name_ = face_name;
     }
 
-    void text_symbolizer::set_fontset(FontSet fontset)
+    void text_symbolizer::set_fontset(FontSet const& fontset)
     {
         fontset_ = fontset;
     }
@@ -282,7 +280,7 @@ namespace mapnik
         wrap_char_ = character;
     }
 
-    void  text_symbolizer::set_wrap_char_from_string(std::string character)
+    void  text_symbolizer::set_wrap_char_from_string(std::string const& character)
     {
         wrap_char_ = (character)[0];
     }

@@ -104,7 +104,7 @@ namespace mapnik
          unsigned char get_wrap_char() const; // character used to wrap lines
          std::string get_wrap_char_string() const; // character used to wrap lines as std::string
          void set_wrap_char(unsigned char character);
-         void set_wrap_char_from_string(std::string character);
+         void set_wrap_char_from_string(std::string const& character);
          text_convert_e get_text_convert() const; // text conversion on strings before display
          void set_text_convert(text_convert_e convert);
          unsigned get_line_spacing() const; // spacing between lines of text
@@ -124,7 +124,7 @@ namespace mapnik
          std::string const& get_face_name() const;
          void set_face_name(std::string face_name);
          FontSet const& get_fontset() const;
-         void set_fontset(FontSet fontset);
+         void set_fontset(FontSet const& fontset);
          color const& get_fill() const;
          void set_fill(color const& fill);
          void set_halo_fill(color const& fill);

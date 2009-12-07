@@ -71,10 +71,10 @@ namespace mapnik
                    unsigned int g = (in >> 8) & 0xff;
                    unsigned int b = (in >> 0) & 0xff;
 
-    #define DE_ALPHA(x) do { \
-                       if (a == 0) x = 0; \
-                       else x = x * 255 / a; \
-                       if (x > 255) x = 255; \
+#define DE_ALPHA(x) do {                      \
+                       if (a == 0) x = 0;     \
+                       else x = x * 255 / a;  \
+                       if (x > 255) x = 255;  \
                    } while(0)
 
                    DE_ALPHA(r);
