@@ -33,39 +33,50 @@
 
 namespace mapnik
 {
-    point_symbolizer::point_symbolizer()
-        : symbolizer_with_image(boost::shared_ptr<ImageData32>(new ImageData32(4,4))),
-          opacity_(1.0),
-          overlap_(false)
+point_symbolizer::point_symbolizer()
+    : symbolizer_with_image(boost::shared_ptr<ImageData32>(new ImageData32(4,4))),
+      opacity_(1.0),
+      overlap_(false)
           
-    {
-        //default point symbol is black 4x4px square
-        image_->set(0xff000000);
-    }
+{
+    //default point symbol is black 4x4px square
+    image_->set(0xff000000);
+}
     
-    point_symbolizer::point_symbolizer(std::string const& file,
-                                       std::string const& type,
-                                       unsigned width,unsigned height) 
-        : symbolizer_with_image(file, type, width, height),
-          opacity_(1.0),      
-          overlap_(false)
+point_symbolizer::point_symbolizer(std::string const& file,
+				   std::string const& type,
+				   unsigned width,unsigned height) 
+    : symbolizer_with_image(file, type, width, height),
+      opacity_(1.0),      
+      overlap_(false)
           
-    { }
+{ }
     
-    point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
-        : symbolizer_with_image(rhs),
-          opacity_(rhs.opacity_),
-          overlap_(rhs.overlap_)
-    {}
+point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
+    : symbolizer_with_image(rhs),
+      opacity_(rhs.opacity_),
+      overlap_(rhs.overlap_)
+{}
     
-    void point_symbolizer::set_allow_overlap(bool overlap)
-    {
-        overlap_ = overlap;
-    }
+void point_symbolizer::set_allow_overlap(bool overlap)
+{
+    overlap_ = overlap;
+}
     
-    bool point_symbolizer::get_allow_overlap() const
-    {
-        return overlap_;
-    }
+bool point_symbolizer::get_allow_overlap() const
+{
+    return overlap_;
+}
+
+void point_symbolizer::set_opacity(float opacity)
+{
+    opacity_ = opacity;
+}
+
+float point_symbolizer::get_opacity() const
+{
+    return opacity_;
+}
+
 }
 

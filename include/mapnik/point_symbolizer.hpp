@@ -40,15 +40,8 @@ namespace mapnik
         point_symbolizer(point_symbolizer const& rhs);
         void set_allow_overlap(bool overlap);
         bool get_allow_overlap() const;
-        void set_opacity(float opacity)
-        {
-            opacity_ = opacity;
-        }
-        float get_opacity() const
-        {
-            return opacity_;
-        }
-        
+        void set_opacity(float opacity);
+        float get_opacity() const;
     private:
         float opacity_;
         bool overlap_;
