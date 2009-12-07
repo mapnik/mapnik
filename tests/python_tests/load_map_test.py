@@ -24,11 +24,11 @@ def assert_loads_successfully(file):
     mapnik.load_map_from_string(m,open(file,'rb').read(),strict,base_path)
     
 
-# We expect these files to raise a UserWarning
+# We expect these files to raise a RuntimeError
 # and fail if there isn't one (or a different type
 # of exception)
-@raises(UserWarning)
-def assert_raises_userwarning(file):
+@raises(RuntimeError)
+def assert_raises_runtime_error(file):
     m = mapnik.Map(512, 512)
 
     strict = True
@@ -41,7 +41,7 @@ def test_broken_files():
     broken_files.append("../data/broken/does_not_exist.xml")
 
     for file in broken_files:
-        yield assert_raises_userwarning, file
+        yield assert_raises_runtime_error, file
 
 def test_good_files():
     good_files = glob.glob("../data/good_maps/*.xml")
