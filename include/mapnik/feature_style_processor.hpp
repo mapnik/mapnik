@@ -144,7 +144,7 @@ namespace mapnik
                Envelope<double> bbox(mx0,my0,mx1,my1);
                
                double resolution = m_.getWidth()/bbox.width();
-               query q(bbox,resolution); //BBOX query
+               query q(bbox,resolution,scale_denom); //BBOX query
                
                std::vector<std::string> const& style_names = lay.styles();
                std::vector<std::string>::const_iterator stylesIter = style_names.begin();
