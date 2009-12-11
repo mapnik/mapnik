@@ -57,10 +57,11 @@ class postgis_datasource : public datasource
       const std::string username_;
       const std::string password_;
       const std::string table_;
+      mutable std::string geometry_table_;
       const std::string geometry_field_;
       const int cursor_fetch_size_;
       const int row_limit_;
-      std::string geometryColumn_;
+      mutable std::string geometryColumn_;
       int type_;
       int srid_;
       mutable bool extent_initialized_;
@@ -70,7 +71,10 @@ class postgis_datasource : public datasource
       bool multiple_geometries_;
       static const std::string name_;
       const std::string bbox_token_;
+      const std::string scale_denom_token_;
       bool persist_connection_;
+      bool extent_from_subquery_;
+      //bool show_queries_;
    public:
       static std::string name();
       int type() const;
@@ -81,7 +85,9 @@ class postgis_datasource : public datasource
       postgis_datasource(const parameters &params);
       ~postgis_datasource();
    private:
-      std::string populate_sql_bbox(const std::string& sql, Envelope<double> const& box) const;
+      std::string sql_bbox(Envelope<double> const& env) const;
+      std::string populate_tokens(const std::string& sql, double const& scale_denom, Envelope<double> const& env) const;
+      std::string populate_tokens(const std::string& sql) const;
       static std::string unquote(const std::string& sql);
       static std::string table_from_sql(const std::string& sql);
       boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const;

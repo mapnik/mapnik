@@ -12,29 +12,57 @@ For a complete change history, see the SVN log.
 
 
 
-Mapnik 0.6.2 Release
+Mapnik 0.7.0 Release
 --------------------
 
-- XML: added support for using CDATA with libxml2 parser (r1364)
+- Gdal Plugin: Add support for Gdal overviews, enabling fast loading of > 1GB rasters (#54)
 
-- XML: added missing serialization of PointSymbolizer 'opacity' and 'allow_overlap' attributes (r1358)
+- PostGIS: Added an optional 'geometry_table' parameter. This is used by Mapnik to look up metadata in the
+  geometry_columns and calculate extents (when the 'geometry_field' and 'srid' parameters are not supplied).
+  If 'geometry_table' is not specified Mapnik will attempt to determine the name of the table to query based
+  on parsing the 'table' parameter, which may fail for complex queries with more than one 'from' keyword.
+  Using this parameter should allow for existing metadata and table indexes to be used while opening the door
+  to much more complicated subqueries being passed within the 'table' parameter without failing (#260, #426).
 
-- PointDatasource: fixed problem with missing geometries (#402)
+- PostGIS Plugin: Added optional 'geometry_field' and 'srid' parameters. If specified these will allow
+  Mapnik to skip several queries to try to determine these values dynamically, and can be helpful to avoid
+  possible query failures during metadata lookup with complex subqueries as discussed in #260 and #436, but
+  also solvable by specifying the 'geometry_table' parameter.
+
+- PostGIS: Added an optional 'extent_from_subquery' parameter that when true (and the 'extent' parameter is
+  not provided and 'estimate_extent' is false), directly Mapnik to calculate the extent upon the exact table
+  or sql provided in the 'table' parameter. If a sub-select is used for the table parameter then this will
+  in many cases provide a faster and more accurate layer extent, but will have no effect if the 'table' 
+  parameter is simply an existing table. This parameter is false by default.
+
+- PostGIS Plugin: Added 'bbox' substitution ability in sql query string. This opens the door for various
+  complex queries that may aggregate geometries to be kept fast by allowing proper placement of the bbox
+  query to be used by indexes. (r1292) (#415)
+
+- PostGIS Plugin: Added 'scale_denominator' substitution ability in sql query string (#415/#465)
+
+- PostGIS Plugin: Added support for quoted table names to allow for tables with characters that postgres
+  requires quoting for like dashes (r1454) (#393)
 
 - PostGIS: Add a 'persist_connection' option (default true), that when false will release 
   the idle psql connection after datasource goes out of scope (r1337) (#433,#434)
 
+- PostGIS: Added support for BigInt (int8) postgres type (384)
+
+- PostGIS Plugin: Throw and report errors if SQL execution fails (r1291) (#363, #242)
+
+- PostGIS Plugin: Added missing support for BigInt(int8) postgres datatypes (r1250) (#384)
+
+- XML: Added support for using CDATA with libxml2 parser (r1364)
+
+- XML: Added missing serialization of PointSymbolizer 'opacity' and 'allow_overlap' attributes (r1358)
+
+- PointDatasource: Fixed problem with missing geometries (#402)
+
 - Filters: Add support for '!=' as an alias to '<>' for not-equals filters (avoids &lt;&gt;) (r1326) (#427)  
-
-- Gdal Plugin: Add support for Gdal overviews, enabling fast loading of > 1GB rasters (r1321) (#54)
-
-- PostGIS Plugin: Add bbox substitution ability in sql query string (r1292) (#415)
-
-- PostGIS Plugin: Throw and report errors if SQL execution fails (r1291) (#363)
 
 - Python: Added 'mapnik.has_pycairo()' function to test for pycairo support (r1278) (#284)
 
-- PostGIS Plugin: Added missing support for BigInt(int8) postgres datatypes (r1250) (#384)
 
 
 
