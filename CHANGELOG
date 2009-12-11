@@ -30,10 +30,10 @@ Mapnik 0.7.0 Release
   also solvable by specifying the 'geometry_table' parameter.
 
 - PostGIS: Added an optional 'extent_from_subquery' parameter that when true (and the 'extent' parameter is
-  not provided and 'estimate_extent' is false), directly Mapnik to calculate the extent upon the exact table
-  or sql provided in the 'table' parameter. If a sub-select is used for the table parameter then this will
-  in many cases provide a faster and more accurate layer extent, but will have no effect if the 'table' 
-  parameter is simply an existing table. This parameter is false by default.
+  not provided and 'estimate_extent' is false) will direct Mapnik to calculate the extent upon the exact table
+  or sql provided in the 'table' parameter. If a sub-select is used for the table parameter then this will,
+  in cases where the subquery limits results, provide a faster and more accurate layer extent. It will have
+  no effect if the 'table' parameter is simply an existing table. This parameter is false by default.
 
 - PostGIS Plugin: Added 'bbox' substitution ability in sql query string. This opens the door for various
   complex queries that may aggregate geometries to be kept fast by allowing proper placement of the bbox
