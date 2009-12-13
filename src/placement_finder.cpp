@@ -92,7 +92,7 @@ namespace mapnik
         dimensions(),
         text_size(sym.get_text_size())
    {}
-   
+
    placement::~placement() {}
 
    template<typename T>
@@ -353,6 +353,8 @@ namespace mapnik
          x = (string_width / 2.0) - line_width;
 
       // save each character rendering position and build envelope as go thru loop
+      std::queue< Envelope<double> > c_envelopes;
+
       for (unsigned i = 0; i < p.info.num_characters(); i++)
       {
          character_info ci;
@@ -397,20 +399,26 @@ namespace mapnik
                       current_placement->starting_y - y - max_character_height);
             }
 
-            if (!dimensions_.intersects(e) ||
-                (!p.allow_overlap && !detector_.has_point_placement(e,p.minimum_distance)))
-            {
+            // if there is an overlap with existing envelopes, then exit - no placement
+            if (!dimensions_.intersects(e) || (!p.allow_overlap && !detector_.has_point_placement(e,p.minimum_distance)))
                return;
-            }
 
-            if (p.avoid_edges && !dimensions_.contains(e)) return;
+            if (p.avoid_edges && !dimensions_.contains(e))
+               return;
 
-            p.envelopes.push(e);
+            c_envelopes.push(e);  // add character's envelope to temp storage
          }
          x += cwidth;  // move position to next character
       }
+
+      // since there was no early exit, add the character envelopes to the placements' envelopes
+      while( !c_envelopes.empty() )
+      {
+        p.envelopes.push( c_envelopes.front() );
+        c_envelopes.pop();
+      }
+
       p.placements.push_back(current_placement.release());
-      //update_detector(p);
    }
 
 
