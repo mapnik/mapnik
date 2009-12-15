@@ -26,9 +26,11 @@
 #include <mapnik/global.hpp>
 #include <mapnik/ptree_helpers.hpp>
 
+/*
 #ifdef MAPNIK_DEBUG
 #include <mapnik/wall_clock_timer.hpp>
 #endif
+*/
 
 #include "connection_manager.hpp"
 #include "postgis.hpp"
@@ -450,9 +452,12 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
 
 featureset_ptr postgis_datasource::features(const query& q) const
 {
+
+/*
 #ifdef MAPNIK_DEBUG
     mapnik::wall_clock_progress_timer timer(clog, "end feature query: ");
 #endif
+*/
 
    Envelope<double> const& box = q.get_bbox();
    double scale_denom = q.scale_denominator();
