@@ -138,6 +138,7 @@ opts.AddVariables(
     ('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False),
     ('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False),
     ('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False),
+    ('BOOST_PYTHON_LIB','Specify library name or full path to boost_python lib (e.g. "boost_python-py26" or "/usr/lib/libboost_python.dylib")',''),
     
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
@@ -358,7 +359,7 @@ def rollback_option(context,variable):
         if item.key == variable:
             env[variable] = item.default
 
-def FindBoost(context, prefixes):
+def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
     
     """
@@ -669,7 +670,7 @@ if not preconfigured:
     else:
         thread_flag = ''
         
-    conf.FindBoost(BOOST_SEARCH_PREFIXES)
+    conf.FindBoost(BOOST_SEARCH_PREFIXES,thread_flag)
     
     # get boost version from boost headers rather than previous approach
     # of fetching from the user provided INCLUDE path
