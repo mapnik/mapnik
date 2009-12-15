@@ -34,9 +34,13 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
+
+/*
 #ifdef MAPNIK_DEBUG
 #include <mapnik/wall_clock_timer.hpp>
 #endif
+*/
+
 //stl
 #include <vector>
 
@@ -70,9 +74,11 @@ namespace mapnik
 	 
          void apply()
          {
+/*
 #ifdef MAPNIK_DEBUG           
             mapnik::wall_clock_progress_timer t(std::clog, "map rendering took: ");
 #endif          
+*/
             Processor & p = static_cast<Processor&>(*this);
             p.start_map_processing(m_);
                        
@@ -106,9 +112,11 @@ namespace mapnik
          void apply_to_layer(Layer const& lay, Processor & p, 
                              projection const& proj0,double scale_denom)
          {
+/*
 #ifdef MAPNIK_DEBUG
-   wall_clock_progress_timer timer(clog, "end layer rendering: ");
+            wall_clock_progress_timer timer(clog, "end layer rendering: ");
 #endif
+*/
             p.start_layer_processing(lay);
             boost::shared_ptr<datasource> ds=lay.datasource();
             if (ds)
