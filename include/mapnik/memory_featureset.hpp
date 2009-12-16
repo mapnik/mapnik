@@ -32,7 +32,7 @@ namespace mapnik {
     class memory_featureset : public Featureset, private boost::noncopyable
     {
     public:
-        memory_featureset(Envelope<double> const& bbox, memory_datasource const& ds)
+        memory_featureset(box2d<double> const& bbox, memory_datasource const& ds)
             : bbox_(bbox),
               pos_(ds.features_.begin()),
               end_(ds.features_.end())
@@ -57,7 +57,7 @@ namespace mapnik {
         }
         
     private:
-        Envelope<double> const& bbox_;
+        box2d<double> const& bbox_;
         std::vector<feature_ptr>::const_iterator pos_;
         std::vector<feature_ptr>::const_iterator end_; 
     };

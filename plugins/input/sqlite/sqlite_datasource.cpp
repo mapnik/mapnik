@@ -44,7 +44,7 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(sqlite_datasource)
 
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::query;
 using mapnik::featureset_ptr;
@@ -249,7 +249,7 @@ int sqlite_datasource::type() const
    return type_;
 }
 
-Envelope<double> sqlite_datasource::envelope() const
+box2d<double> sqlite_datasource::envelope() const
 {
    return extent_;
 }
@@ -263,7 +263,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 {
    if (dataset_)
    {
-        mapnik::Envelope<double> const& e = q.get_bbox();
+        mapnik::box2d<double> const& e = q.get_bbox();
 
         std::ostringstream s;
         

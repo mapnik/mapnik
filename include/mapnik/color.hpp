@@ -30,7 +30,6 @@
 #include <mapnik/global.hpp>
 
 //boost
-#include <boost/format.hpp>
 #include <boost/cstdint.hpp>
 
 // stl

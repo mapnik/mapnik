@@ -79,7 +79,7 @@ void LayerTab::layerInfo2(QModelIndex const& index)
    QVector<QPair<QString,QString> > params;
    unsigned i = index.row();
    LayerListModel * model = static_cast<LayerListModel*>(this->model());
-   boost::optional<mapnik::Layer&> layer = model->map_layer(i);
+   boost::optional<mapnik::layer&> layer = model->map_layer(i);
    
    if (layer)
    {

@@ -29,18 +29,18 @@
 #include <fstream>
 #include <iostream>
 // mapnik
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::coord2d;
 
 template <typename T>
 struct quadtree_node
 {
-      Envelope<double> ext_;
+      box2d<double> ext_;
       std::vector<T> data_;
       quadtree_node<T>* children_[4];
-      quadtree_node(const Envelope<double>& ext)
+      quadtree_node(const box2d<double>& ext)
          : ext_(ext),data_()
       {
          memset(children_,0,sizeof(quadtree_node<T>*)*4);
@@ -79,7 +79,7 @@ private:
     const int maxdepth_;
     const double ratio_;
 public:
-    quadtree(const Envelope<double>& extent,int maxdepth,double ratio)
+    quadtree(const box2d<double>& extent,int maxdepth,double ratio)
         : root_(new quadtree_node<T>(extent)),
           maxdepth_(maxdepth),
           ratio_(ratio) {}
@@ -89,7 +89,7 @@ public:
         if (root_) delete root_;
     }
     
-    void insert(const T& data,const Envelope<double>& item_ext)
+    void insert(const T& data,const box2d<double>& item_ext)
     {
         insert(data,item_ext,root_,maxdepth_);
     }
@@ -191,7 +191,7 @@ private:
         {
             if (node->children_[i])
             {
-                offset +=sizeof(Envelope<double>)+(node->children_[i]->data_.size()*sizeof(T))+3*sizeof(int);
+                offset +=sizeof(box2d<double>)+(node->children_[i]->data_.size()*sizeof(T))+3*sizeof(int);
                 offset +=subnode_offset(node->children_[i]);
             }
         }
@@ -204,11 +204,11 @@ private:
         {
             int offset=subnode_offset(node);
             int shape_count=node->data_.size();
-            int recsize=sizeof(Envelope<double>) + 3 * sizeof(int) + shape_count * sizeof(T);
+            int recsize=sizeof(box2d<double>) + 3 * sizeof(int) + shape_count * sizeof(T);
             char* node_record=new char[recsize];
             memset(node_record,0,recsize);
             memcpy(node_record,&offset,4);
-            memcpy(node_record+4,&node->ext_,sizeof(Envelope<double>));
+            memcpy(node_record+4,&node->ext_,sizeof(box2d<double>));
             memcpy(node_record+36,&shape_count,4);
             for (int i=0;i<shape_count;++i)
             {
@@ -258,7 +258,7 @@ private:
         }
     }
 
-    void insert(const T& data,const Envelope<double>& item_ext,quadtree_node<T>*  node,int maxdepth)
+    void insert(const T& data,const box2d<double>& item_ext,quadtree_node<T>*  node,int maxdepth)
     {
         if (node && node->ext_.contains(item_ext))
         {
@@ -272,11 +272,11 @@ private:
             double hix=node->ext_.maxx();
             double hiy=node->ext_.maxy();
 
-            Envelope<double> ext[4];
-            ext[0]=Envelope<double>(lox,loy,lox + width * ratio_,loy + height * ratio_);
-            ext[1]=Envelope<double>(hix - width * ratio_,loy,hix,loy + height * ratio_);
-            ext[2]=Envelope<double>(lox,hiy - height*ratio_,lox + width * ratio_,hiy);
-            ext[3]=Envelope<double>(hix - width * ratio_,hiy - height*ratio_,hix,hiy);
+            box2d<double> ext[4];
+            ext[0]=box2d<double>(lox,loy,lox + width * ratio_,loy + height * ratio_);
+            ext[1]=box2d<double>(hix - width * ratio_,loy,hix,loy + height * ratio_);
+            ext[2]=box2d<double>(lox,hiy - height*ratio_,lox + width * ratio_,hiy);
+            ext[3]=box2d<double>(hix - width * ratio_,hiy - height*ratio_,hix,hiy);
 
             if (maxdepth > 1)
             {

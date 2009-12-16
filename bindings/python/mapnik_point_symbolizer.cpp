@@ -25,25 +25,19 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/point_symbolizer.hpp>
-
+#include <mapnik/path_expression_grammar.hpp>
 
 using mapnik::point_symbolizer;
 using mapnik::symbolizer_with_image;
+using mapnik::path_processor_type;
 
 struct point_symbolizer_pickle_suite : boost::python::pickle_suite
 {
    static boost::python::tuple
    getinitargs(const point_symbolizer& p)
    {
-      boost::shared_ptr<mapnik::ImageData32> img = p.get_image();
-      const std::string & filename = p.get_filename();
-      
-      if ( ! filename.empty() ) {
-          return boost::python::make_tuple(filename,mapnik::guess_type(filename),img->width(),img->height());
-      } else {
-          return boost::python::make_tuple();
-      }
-      
+      std::string filename = path_processor_type::to_string(*p.get_filename());
+      return boost::python::make_tuple(filename,mapnik::guess_type(filename));
    }
 
    static  boost::python::tuple
@@ -74,12 +68,12 @@ struct point_symbolizer_pickle_suite : boost::python::pickle_suite
 
 namespace  
 { 
-    using namespace boost::python;
+using namespace boost::python;
+const std::string get_filename(mapnik::point_symbolizer& symbolizer) 
+{ 
+    return path_processor_type::to_string(*symbolizer.get_filename()); 
+} 
 
-	  const char *get_filename(mapnik::point_symbolizer& symbolizer) 
-	  { 
-	      return symbolizer.get_filename().c_str(); 
-	  } 
 }
 
 void export_point_symbolizer()
@@ -88,9 +82,8 @@ void export_point_symbolizer()
     
     class_<point_symbolizer>("PointSymbolizer",
                              init<>("Default Point Symbolizer - 4x4 black square"))
-        .def (init<std::string const&,
-              std::string const&,unsigned,unsigned>("TODO"))
-        .def_pickle(point_symbolizer_pickle_suite())
+        .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
+        //.def_pickle(point_symbolizer_pickle_suite())
         .add_property("filename",
             // DS - Using workaround as the normal make_function does not work for unknown reasons...
             //make_function(&point_symbolizer::get_filename,return_value_policy<copy_const_reference>()),

@@ -24,7 +24,7 @@
 #ifndef RASTER_DATASOURCE_HPP
 #define RASTER_DATASOURCE_HPP
 
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 
@@ -33,7 +33,7 @@ class raster_datasource : public mapnik::datasource
 private:
    std::string                  filename_;
    std::string                  format_;
-   mapnik::Envelope<double>     extent_;
+   mapnik::box2d<double>     extent_;
    mapnik::layer_descriptor     desc_;
    unsigned                     width_;
    unsigned                     height_;
@@ -45,7 +45,7 @@ public:
    static std::string name();
    mapnik::featureset_ptr features(const mapnik::query& q) const;
    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
-   mapnik::Envelope<double> envelope() const;
+   mapnik::box2d<double> envelope() const;
    mapnik::layer_descriptor get_descriptor() const;
 private:
    //no copying

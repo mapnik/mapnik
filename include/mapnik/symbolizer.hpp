@@ -21,35 +21,28 @@
  *****************************************************************************/
 //$Id: symbolizer.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef SYMBOLIZER_HPP
-#define SYMBOLIZER_HPP
+#ifndef MAPNIK_SYMBOLIZER_HPP
+#define MAPNIK_SYMBOLIZER_HPP
 
-#include <mapnik/graphics.hpp> 
-#include <boost/shared_ptr.hpp>
+// mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/path_expression_grammar.hpp>
+
+// stl
+#include <string>
 
 namespace mapnik 
 {
 
-    class MAPNIK_DECL symbolizer_with_image {
-        public:
-            boost::shared_ptr<ImageData32> get_image() const;
-            const std::string & get_filename() const;
-            void set_filename(std::string const& image_filename);
-            void set_image( boost::shared_ptr<ImageData32> symbol);
-
-            virtual ~symbolizer_with_image() {};
-        protected:
-            symbolizer_with_image(boost::shared_ptr<ImageData32> img);
-            symbolizer_with_image(std::string const& file,
-                                   std::string const& type,
-                                   unsigned width,unsigned height);
-        
-            symbolizer_with_image(symbolizer_with_image const& rhs);
-        
-            boost::shared_ptr<ImageData32> image_;
-            std::string image_filename_;
-
-    };
+class MAPNIK_DECL symbolizer_with_image {
+public:
+    path_expression_ptr get_filename() const;
+    void set_filename(path_expression_ptr filename);
+protected:
+    symbolizer_with_image(path_expression_ptr filename);
+    symbolizer_with_image(symbolizer_with_image const& rhs);
+    path_expression_ptr image_filename_;	
+};
 }
 
-#endif //SYMBOLIZER_HPP
+#endif //MAPNIK_SYMBOLIZER_HPP

@@ -74,12 +74,14 @@ source = Split(
     """
     agg_renderer.cpp
     datasource_cache.cpp
+    box2d.cpp
     color.cpp
-    envelope.cpp
+    expression_string.cpp
     filter_factory.cpp
     font_engine_freetype.cpp
     font_set.cpp
     graphics.cpp
+    image_cache.cpp
     image_reader.cpp
     image_util.cpp
     layer.cpp

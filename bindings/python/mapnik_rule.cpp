@@ -28,11 +28,11 @@
 
 #include <mapnik/rule.hpp>
 #include <mapnik/filter_factory.hpp>
+#include <mapnik/expression_string.hpp>
 
 using mapnik::rule_type;
-using mapnik::filter;
-using mapnik::filter_ptr;
-using mapnik::filter_factory;
+using mapnik::expr_node;
+using mapnik::expression_ptr;
 using mapnik::Feature;
 using mapnik::point_symbolizer;
 using mapnik::line_symbolizer;
@@ -45,7 +45,7 @@ using mapnik::text_symbolizer;
 using mapnik::building_symbolizer;
 using mapnik::markers_symbolizer;
 using mapnik::symbolizer;
-using mapnik::symbolizers;
+using mapnik::to_expression_string;
 
 struct pickle_symbolizer : public boost::static_visitor<>
 {
@@ -93,14 +93,14 @@ struct rule_pickle_suite : boost::python::pickle_suite
     {
         boost::python::list syms;
         
-        symbolizers::const_iterator begin = r.get_symbolizers().begin();
-        symbolizers::const_iterator end = r.get_symbolizers().end();        
+	rule_type::symbolizers::const_iterator begin = r.get_symbolizers().begin();
+	rule_type::symbolizers::const_iterator end = r.get_symbolizers().end();        
         pickle_symbolizer serializer( syms );
         std::for_each( begin, end , boost::apply_visitor( serializer ));
         
-        // Here the filter string is used rather than the actual Filter object
-        // Need to look into how to get the Filter object
-        std::string filter_expr = r.get_filter()->to_string();
+	// We serialize filter expressions AST as strings
+        std::string filter_expr = to_expression_string(*r.get_filter());
+	
         return boost::python::make_tuple(r.get_abstract(),filter_expr,r.has_else_filter(),syms);
     }
 
@@ -126,10 +126,10 @@ struct rule_pickle_suite : boost::python::pickle_suite
         {
             rule_type dfl;
             std::string filter = extract<std::string>(state[1]);
-            std::string default_filter = dfl.get_filter()->to_string();
+            std::string default_filter = "<TODO>";//dfl.get_filter()->to_string();
             if ( filter != default_filter)
             {
-                r.set_filter(mapnik::create_filter(filter,"utf8"));
+                r.set_filter(mapnik::parse_expression(filter,"utf8"));
             }
         }    
 
@@ -162,8 +162,8 @@ void export_rule()
     implicitly_convertible<shield_symbolizer,symbolizer>();
     implicitly_convertible<text_symbolizer,symbolizer>();
     
-    class_<symbolizers>("Symbolizers",init<>("TODO"))
-    	.def(vector_indexing_suite<symbolizers>())
+    class_<rule_type::symbolizers>("Symbolizers",init<>("TODO"))
+    	.def(vector_indexing_suite<rule_type::symbolizers>())
     	;
     
     class_<rule_type>("Rule",init<>("default constructor"))

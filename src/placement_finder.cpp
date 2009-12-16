@@ -49,28 +49,25 @@
 
 namespace mapnik
 {
-   placement::placement(string_info & info_,
-       shield_symbolizer const& sym, bool has_dimensions_)
-      : info(info_),
-        displacement_(sym.get_displacement()),
-        label_placement(sym.get_label_placement()),
-        wrap_width(sym.get_wrap_width()),
-        wrap_before(sym.get_wrap_before()),
-        wrap_char(sym.get_wrap_char()),
-        text_ratio(sym.get_text_ratio()),
-        label_spacing(sym.get_label_spacing()),
-        label_position_tolerance(sym.get_label_position_tolerance()),
-        force_odd_labels(sym.get_force_odd_labels()),
-        max_char_angle_delta(sym.get_max_char_angle_delta()),
-        minimum_distance(sym.get_minimum_distance()),
-        avoid_edges(sym.get_avoid_edges()),
-        has_dimensions(has_dimensions_),
-        allow_overlap(false),
-        dimensions(std::make_pair(sym.get_image()->width(),
-                                  sym.get_image()->height())),
-        text_size(sym.get_text_size())
-   {
-   }
+placement::placement(string_info & info_, shield_symbolizer const& sym, 
+		     unsigned w, unsigned h, bool has_dimensions_)
+    : info(info_),
+      displacement_(sym.get_displacement()),
+      label_placement(sym.get_label_placement()),
+      wrap_width(sym.get_wrap_width()),
+      wrap_before(sym.get_wrap_before()),
+      wrap_char(sym.get_wrap_char()),
+      text_ratio(sym.get_text_ratio()),
+      label_spacing(sym.get_label_spacing()),
+      label_position_tolerance(sym.get_label_position_tolerance()),
+      force_odd_labels(sym.get_force_odd_labels()),
+      max_char_angle_delta(sym.get_max_char_angle_delta()),
+      minimum_distance(sym.get_minimum_distance()),
+      avoid_edges(sym.get_avoid_edges()),
+      has_dimensions(has_dimensions_),
+      allow_overlap(false),
+      dimensions(std::make_pair(w,h)),
+      text_size(sym.get_text_size()) {}
 
    placement::placement(string_info & info_,
                         text_symbolizer const& sym)
@@ -93,7 +90,8 @@ namespace mapnik
         text_size(sym.get_text_size())
    {}
 
-   placement::~placement() {}
+
+placement::~placement() {}
 
    template<typename T>
    std::pair<double, double> get_position_at_distance(double target_distance, T & shape_path)
@@ -353,7 +351,7 @@ namespace mapnik
          x = (string_width / 2.0) - line_width;
 
       // save each character rendering position and build envelope as go thru loop
-      std::queue< Envelope<double> > c_envelopes;
+      std::queue< box2d<double> > c_envelopes;
 
       for (unsigned i = 0; i < p.info.num_characters(); i++)
       {
@@ -381,7 +379,7 @@ namespace mapnik
 
             // compute the Bounding Box for each character and test for:
             // overlap, minimum distance or edge avoidance - exit if condition occurs
-            Envelope<double> e;
+            box2d<double> e;
             if (p.has_dimensions)
             {
                e.init(current_placement->starting_x - (p.dimensions.first/2.0),     // Top Left
@@ -801,7 +799,7 @@ namespace mapnik
             angle += M_PI;
          }
 
-         Envelope<double> e;
+         box2d<double> e;
          if (p.has_dimensions)
          {
             e.init(x, y, x + p.dimensions.first, y + p.dimensions.second);
@@ -893,7 +891,7 @@ namespace mapnik
    {
       while (!p.envelopes.empty())
       {
-         Envelope<double> e = p.envelopes.front();
+         box2d<double> e = p.envelopes.front();
          detector_.insert(e, p.info.get_string());
          p.envelopes.pop();
       }

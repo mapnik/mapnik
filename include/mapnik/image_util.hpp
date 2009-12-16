@@ -32,6 +32,8 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
+
 // stl
 #include <string>
 
@@ -92,16 +94,17 @@ namespace mapnik {
          boost::algorithm::iends_with(filename,std::string(".tiff"));
    }
    
-   inline std::string type_from_filename(std::string const& filename)
-   {
-      if (is_png(filename)) return "png";
-      if (is_jpeg(filename)) return "jpeg";
-      if (is_tiff(filename)) return "tiff";
-      return "unknown";
-   }
+inline boost::optional<std::string> type_from_filename(std::string const& filename)
+{
+    typedef boost::optional<std::string> result_type;
+    if (is_png(filename)) return result_type("png");
+    if (is_jpeg(filename)) return result_type("jpeg");
+    if (is_tiff(filename)) return result_type("tiff");
+    return result_type();
+}
 
-   inline std::string guess_type( const std::string & filename )
-   {
+inline std::string guess_type( const std::string & filename )
+{
       std::string::size_type idx = filename.find_last_of(".");
       if ( idx != std::string::npos ) {
           return filename.substr( idx + 1 );
@@ -413,42 +416,42 @@ namespace mapnik {
      }
    }
 
-   inline MAPNIK_DECL void save_to_file (Image32 const& image,
+   inline MAPNIK_DECL void save_to_file (image_32 const& image,
                                          std::string const& file,
                                          std::string const& type) 
    {
-      save_to_file<ImageData32>(image.data(),file,type);
+      save_to_file<image_data_32>(image.data(),file,type);
    }
    
-   inline MAPNIK_DECL void save_to_file(Image32 const& image,
+   inline MAPNIK_DECL void save_to_file(image_32 const& image,
                                         std::string const& file) 
    {
-      save_to_file<ImageData32>(image.data(),file);
+      save_to_file<image_data_32>(image.data(),file);
    }
 
-   inline MAPNIK_DECL std::string save_to_string(Image32 const& image,
+   inline MAPNIK_DECL std::string save_to_string(image_32 const& image,
                                         std::string const& type)
    {
-      return save_to_string<ImageData32>(image.data(),type);
+      return save_to_string<image_data_32>(image.data(),type);
    }
    
 #ifdef _MSC_VER
-   template MAPNIK_DECL void save_to_file<ImageData32>(ImageData32 const&,
+   template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
                                                        std::string const&,
                                                        std::string const&);
-   template MAPNIK_DECL void save_to_file<ImageData32>(ImageData32 const&,
+   template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
                                                        std::string const&);
-   template MAPNIK_DECL std::string save_to_string<ImageData32>(ImageData32 const&,
+   template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
                                                        std::string const&);
    
-   template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
+   template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                      std::string const&,
                                                                      std::string const&);
  
-   template MAPNIK_DECL void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
+   template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                      std::string const&);
    
-   template MAPNIK_DECL std::string save_to_string<image_view<ImageData32> > (image_view<ImageData32> const&,
+   template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                      std::string const&);
 #endif
 

@@ -27,7 +27,7 @@
 
 #include <algorithm>
 
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/coord_array.hpp>
 #include <mapnik/proj_transform.hpp>
 
@@ -130,11 +130,11 @@ namespace mapnik {
          int height_;
          double sx_;
          double sy_;
-         Envelope<double> extent_;
+         box2d<double> extent_;
          double offset_x_;
          double offset_y_;
       public:
-         CoordTransform(int width,int height,const Envelope<double>& extent,
+         CoordTransform(int width,int height,const box2d<double>& extent,
                         double offset_x = 0, double offset_y = 0)
             :width_(width),height_(height),extent_(extent),offset_x_(offset_x),offset_y_(offset_y)
          {
@@ -186,7 +186,7 @@ namespace mapnik {
             return c;
          }
 
-         inline Envelope<double> forward(const Envelope<double>& e) const
+         inline box2d<double> forward(const box2d<double>& e) const
          {
             double x0 = e.minx();
             double y0 = e.miny();
@@ -194,10 +194,10 @@ namespace mapnik {
             double y1 = e.maxy();
             forward(&x0,&y0);
             forward(&x1,&y1);
-            return Envelope<double>(x0,y0,x1,y1);
+            return box2d<double>(x0,y0,x1,y1);
          }
 
-         inline Envelope<double> backward(const Envelope<double>& e) const
+         inline box2d<double> backward(const box2d<double>& e) const
          {
             double x0 = e.minx();
             double y0 = e.miny();
@@ -205,7 +205,7 @@ namespace mapnik {
             double y1 = e.maxy();
             backward(&x0,&y0);
             backward(&x1,&y1);
-            return Envelope<double>(x0,y0,x1,y1);
+            return box2d<double>(x0,y0,x1,y1);
          }
 
          inline CoordinateArray& forward(CoordinateArray& coords) const
@@ -225,7 +225,7 @@ namespace mapnik {
             }
             return coords;
          }
-         inline Envelope<double> const& extent() const
+         inline box2d<double> const& extent() const
          {
             return extent_;
          }

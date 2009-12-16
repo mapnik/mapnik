@@ -27,23 +27,28 @@
 
 namespace mapnik
 {  
-    typedef factory<ImageReader,std::string, 
-                    ImageReader* (*)(const std::string&)>  ImageReaderFactory;
+typedef factory<image_reader,std::string, 
+		image_reader* (*)(const std::string&)>  ImageReaderFactory;
     
     
-    bool register_image_reader(const std::string& type,ImageReader* (* fun)(const std::string&))
-    {
-        return ImageReaderFactory::instance()->register_product(type,fun);
-    }
+bool register_image_reader(const std::string& type,image_reader* (* fun)(const std::string&))
+{
+    return ImageReaderFactory::instance()->register_product(type,fun);
+}
     
-    ImageReader* get_image_reader(const std::string& filename,const std::string& type) 
-    {
-        return ImageReaderFactory::instance()->create_object(type,filename);
-    }
+image_reader* get_image_reader(const std::string& filename,const std::string& type) 
+{
+    return ImageReaderFactory::instance()->create_object(type,filename);
+}
 
-   ImageReader* get_image_reader(const std::string& filename) 
-   {
-      std::string type = type_from_filename(filename);
-      return ImageReaderFactory::instance()->create_object(filename,type);
-   }
+image_reader* get_image_reader(const std::string& filename) 
+{
+    boost::optional<std::string> type = type_from_filename(filename);
+    if (type)
+    {
+	return ImageReaderFactory::instance()->create_object(*type,filename);
+    }
+    return 0;
+}
+
 }

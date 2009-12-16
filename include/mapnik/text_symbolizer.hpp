@@ -22,13 +22,16 @@
 
 //$Id$
 
-#ifndef TEXT_SYMBOLIZER_HPP
-#define TEXT_SYMBOLIZER_HPP
+#ifndef MAPNIK_TEXT_SYMBOLIZER_HPP
+#define MAPNIK_TEXT_SYMBOLIZER_HPP
+
 // mapnik
 #include <mapnik/enumeration.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/expression_node.hpp>
+
 // boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
@@ -90,13 +93,17 @@ namespace mapnik
 
    struct MAPNIK_DECL text_symbolizer
    {
-         text_symbolizer(std::string const& name,std::string const& face_name,
+         text_symbolizer(expression_ptr name, std::string const& face_name,
                          unsigned size, color const& fill);
-         text_symbolizer(std::string const& name, unsigned size, color const& fill);
+         text_symbolizer(expression_ptr name, unsigned size, color const& fill);
          text_symbolizer(text_symbolizer const& rhs);
          text_symbolizer& operator=(text_symbolizer const& rhs);
-         std::string const& get_name() const;
-         void set_name(std::string name);
+         
+         //
+	 expression_ptr get_name() const;
+	 void set_name(expression_ptr expr);
+	 //
+	 
          unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
          void set_text_ratio(unsigned ratio);
          unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
@@ -123,8 +130,8 @@ namespace mapnik
          void set_text_size(unsigned size);
          std::string const& get_face_name() const;
          void set_face_name(std::string face_name);
-         FontSet const& get_fontset() const;
-         void set_fontset(FontSet const& fontset);
+         font_set const& get_fontset() const;
+         void set_fontset(font_set const& fset);
          color const& get_fill() const;
          void set_fill(color const& fill);
          void set_halo_fill(color const& fill);
@@ -155,9 +162,9 @@ namespace mapnik
          justify_alignment_e get_justify_alignment() const;
 
       private:
-         std::string name_;
+	 expression_ptr name_;
          std::string face_name_;
-         FontSet fontset_;
+         font_set fontset_;
          unsigned size_;
          unsigned text_ratio_;
          unsigned wrap_width_;
@@ -186,4 +193,4 @@ namespace mapnik
    };
 }
 
-#endif //TEXT_SYMBOLIZER_HPP
+#endif //MAPNIK_TEXT_SYMBOLIZER_HPP

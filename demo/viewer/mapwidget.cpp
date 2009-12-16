@@ -30,10 +30,10 @@
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
-using mapnik::Image32;
+using mapnik::image_32;
 using mapnik::Map;
-using mapnik::Layer;
-using mapnik::Envelope;
+using mapnik::layer;
+using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::feature_ptr;
 using mapnik::geometry_ptr;
@@ -149,7 +149,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
             {
                if (int(index) != selectedLayer_) continue;
                
-               Layer & layer = map_->layers()[index];
+               layer & layer = map_->layers()[index];
                if (!layer.isVisible(scale_denom)) continue;
                std::string name = layer.name();
                double x = e->x();
@@ -187,7 +187,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                            double x,y;
                            path.vertex(&x,&y);
                            qpath.moveTo(x,y);
-                           for (int j=1; j < geom.num_points(); ++j)
+                           for (unsigned j = 1; j < geom.num_points(); ++j)
                            {
                               path.vertex(&x,&y);
                               qpath.lineTo(x,y);
@@ -216,7 +216,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
             // remove annotation layer
             map_->layers().erase(remove_if(map_->layers().begin(),
                                            map_->layers().end(),
-                                           bind(&Layer::name,_1) == "*annotations*")
+                                           bind(&layer::name,_1) == "*annotations*")
                                  , map_->layers().end());
          }
       } 
@@ -249,7 +249,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
          if (map_)
          {
             CoordTransform t(map_->getWidth(),map_->getHeight(),map_->getCurrentExtent());	
-            Envelope<double> box = t.backward(Envelope<double>(start_x_,start_y_,end_x_,end_y_));
+            box2d<double> box = t.backward(box2d<double>(start_x_,start_y_,end_x_,end_y_));
             map_->zoomToBox(box);
             updateMap();
          }
@@ -273,7 +273,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
 
 void MapWidget::keyPressEvent(QKeyEvent *e) 
 {
-   std::cout << "key pressed:"<<e->key()<<"\n";
+   std::cout << "key pressed:"<< e->key()<<"\n";
    switch (e->key()) { 
       case Qt::Key_Minus:
          zoomOut();
@@ -324,11 +324,14 @@ void MapWidget::keyPressEvent(QKeyEvent *e)
       case 57:
          zoomToLevel(18);
          break;   
+   default:
+       QWidget::keyPressEvent(e);
    }
-   QWidget::keyPressEvent(e);
+   
+   
 }
 
-void MapWidget::zoomToBox(mapnik::Envelope<double> const& bbox)
+void MapWidget::zoomToBox(mapnik::box2d<double> const& bbox)
 {
    if (map_)
    {
@@ -416,14 +419,14 @@ void MapWidget::zoomToLevel(int level)
    {
       double scale_denom  = scales[level];
       std::cerr << "scale denominator = " << scale_denom << "\n";
-      mapnik::Envelope<double> ext = map_->getCurrentExtent();
+      mapnik::box2d<double> ext = map_->getCurrentExtent();
       double width = static_cast<double>(map_->getWidth());
       double height= static_cast<double>(map_->getHeight()); 
       mapnik::coord2d pt = ext.center();
 
       double res = scale_denom * 0.00028;
       
-      mapnik::Envelope<double> box(pt.x - 0.5 * width * res,
+      mapnik::box2d<double> box(pt.x - 0.5 * width * res,
                                    pt.y - 0.5 * height*res,
                                    pt.x + 0.5 * width * res,
                                    pt.y + 0.5 * height*res);
@@ -434,7 +437,7 @@ void MapWidget::zoomToLevel(int level)
 
 void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::string const&) 
 {
-   //Image32 image(width,height);
+   //image_32 image(width,height);
    //agg_renderer renderer(map,image);
    //renderer.apply();
    //image.saveToFile(filename,type);
@@ -448,8 +451,8 @@ void MapWidget::updateMap()
       unsigned width=map_->getWidth();
       unsigned height=map_->getHeight();
       
-      Image32 buf(width,height);
-      mapnik::agg_renderer<Image32> ren(*map_,buf);
+      image_32 buf(width,height);
+      mapnik::agg_renderer<image_32> ren(*map_,buf);
       ren.apply();
       
       QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);

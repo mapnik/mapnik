@@ -100,7 +100,7 @@ def test_render_points():
 		m.append_style('places_labels',s)
 		m.layers.append(lyr)
 		p = mapnik.Projection(projs[projdescr])
-		m.zoom_to_box(p.forward(mapnik.Envelope(ul_lonlat,lr_lonlat)))
+		m.zoom_to_box(p.forward(mapnik.Box2d(ul_lonlat,lr_lonlat)))
 		# Render to SVG so that it can be checked how many points are there with string comparison
 		import StringIO
 		svg_memory_file = StringIO.StringIO()

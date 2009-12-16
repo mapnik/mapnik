@@ -109,29 +109,32 @@ namespace mapnik
     template <typename T>
     void save_to_file(T const& image,std::string const& filename)
     {
-        std::string type = type_from_filename(filename);
-        save_to_file<T>(image,filename,type);
+	boost::optional<std::string> type = type_from_filename(filename);
+	if (type)
+	{
+	    save_to_file<T>(image,filename,*type);
+	}
     }
      
 
-    template void save_to_file<ImageData32>(ImageData32 const&,
+    template void save_to_file<image_data_32>(image_data_32 const&,
                                             std::string const&,
                                             std::string const&);
 
-    template void save_to_file<ImageData32>(ImageData32 const&,
+    template void save_to_file<image_data_32>(image_data_32 const&,
                                             std::string const&);
 
-    template std::string save_to_string<ImageData32>(ImageData32 const&,
+    template std::string save_to_string<image_data_32>(image_data_32 const&,
                                                      std::string const&);
 
-    template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
+    template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                           std::string const&,
                                                           std::string const&);
    
-    template void save_to_file<image_view<ImageData32> > (image_view<ImageData32> const&,
+    template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                           std::string const&);
    
-    template std::string save_to_string<image_view<ImageData32> > (image_view<ImageData32> const&,
+    template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                    std::string const&);
 
 }

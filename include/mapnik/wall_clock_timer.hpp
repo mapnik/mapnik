@@ -20,12 +20,11 @@
  *
  *****************************************************************************/
 
-
 #ifndef MAPNIK_WALL_CLOCK_TIMER_INCLUDED
 #define MAPNIK_WALL_CLOCK_TIMER_INCLUDED
 
-/*
-#include <sys/time.h>
+#include <cstdlib>
+#include <sys/time.h> 
 
 namespace mapnik {
 
@@ -90,6 +89,4 @@ namespace mapnik {
     };
     
 };
-
-*/
 #endif // MAPNIK_WALL_CLOCK_TIMER_INCLUDED

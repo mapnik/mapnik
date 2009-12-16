@@ -26,7 +26,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 
@@ -45,7 +45,7 @@ class occi_datasource : public mapnik::datasource
       static std::string name();
       mapnik::featureset_ptr features(mapnik::query const& q) const;
       mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
-      mapnik::Envelope<double> envelope() const;
+      mapnik::box2d<double> envelope() const;
       mapnik::layer_descriptor get_descriptor() const;
    private:
       const std::string uri_;
@@ -57,7 +57,7 @@ class occi_datasource : public mapnik::datasource
       int type_;
       int srid_;
       mutable bool extent_initialized_;
-      mutable mapnik::Envelope<double> extent_;
+      mutable mapnik::box2d<double> extent_;
       const int row_limit_;
       const int row_prefetch_;
       mapnik::layer_descriptor desc_;

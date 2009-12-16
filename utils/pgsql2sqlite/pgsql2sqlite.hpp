@@ -103,7 +103,7 @@ namespace mapnik {
       }
    };
 
-   bool valid_envelope(mapnik::Envelope<double> const& e)
+   bool valid_envelope(mapnik::box2d<double> const& e)
    {
       return (e.minx() <= e.maxx() && e.miny() <= e.maxy()) ;
    }
@@ -360,7 +360,7 @@ namespace mapnik {
                         if (feat.num_geometries() > 0)
                         {
                            geometry2d const& geom=feat.get_geometry(0);
-                           Envelope<double> bbox = geom.envelope();
+                           box2d<double> bbox = geom.envelope();
                            if (valid_envelope(bbox))
                            {
 			     sqlite::record_type rec;

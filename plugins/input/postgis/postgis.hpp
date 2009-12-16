@@ -27,7 +27,7 @@
 
 
 #include <mapnik/datasource.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <boost/lexical_cast.hpp>
@@ -40,7 +40,7 @@
 
 using mapnik::transcoder;
 using mapnik::datasource;
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::layer_descriptor;
 using mapnik::featureset_ptr;
 using mapnik::feature_ptr;
@@ -65,7 +65,7 @@ class postgis_datasource : public datasource
       int type_;
       int srid_;
       mutable bool extent_initialized_;
-      mutable mapnik::Envelope<double> extent_;
+      mutable mapnik::box2d<double> extent_;
       layer_descriptor desc_;
       ConnectionCreator<Connection> creator_;
       bool multiple_geometries_;
@@ -80,13 +80,13 @@ class postgis_datasource : public datasource
       int type() const;
       featureset_ptr features(const query& q) const;
       featureset_ptr features_at_point(coord2d const& pt) const;
-      mapnik::Envelope<double> envelope() const;
+      mapnik::box2d<double> envelope() const;
       layer_descriptor get_descriptor() const;
       postgis_datasource(const parameters &params);
       ~postgis_datasource();
    private:
-      std::string sql_bbox(Envelope<double> const& env) const;
-      std::string populate_tokens(const std::string& sql, double const& scale_denom, Envelope<double> const& env) const;
+      std::string sql_bbox(box2d<double> const& env) const;
+      std::string populate_tokens(const std::string& sql, double const& scale_denom, box2d<double> const& env) const;
       std::string populate_tokens(const std::string& sql) const;
       static std::string unquote(const std::string& sql);
       static std::string table_from_sql(const std::string& sql);

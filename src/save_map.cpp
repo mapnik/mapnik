@@ -20,10 +20,12 @@
  *
  *****************************************************************************/
 // $Id$
+
 // mapnik
 #include <mapnik/save_map.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/expression_string.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -172,7 +174,10 @@ namespace mapnik
                 // to avoid printing of attributes with default values without
                 // repeating the default values here.
                 // maybe add a real, explicit default-ctor?
-                shield_symbolizer sym_dfl("<no default>", "<no default>", 0, color(0,0,0), "<no default>", "<no default>", 0, 0 );
+
+		//FIXME pls
+		/*
+                shield_symbolizer sym_dfl("<no default>", "<no default>", 0, color(0,0,0), "<no default>", "<no default>");
                 if (sym.get_unlock_image() != sym_dfl.get_unlock_image() || explicit_defaults_ )
                 {
                     set_attr( sym_node, "unlock_image", sym.get_unlock_image() );
@@ -181,6 +186,7 @@ namespace mapnik
                 {
                     set_attr( sym_node, "no_text", sym.get_no_text() );
                 }
+		*/
             }
 
             void operator () ( const text_symbolizer & sym )
@@ -221,29 +227,18 @@ namespace mapnik
             serialize_symbolizer();
             void add_image_attributes(ptree & node, const symbolizer_with_image & sym)
             {
-                const std::string & filename = sym.get_filename();
-                if ( ! filename.empty() ) {
-                    set_attr( node, "file", filename );
-                    set_attr( node, "type", guess_type( filename ) );
-
-                    boost::shared_ptr<ImageData32> img = sym.get_image();
-                    if ( img )
-                    {
-                        if ( img->width() > 0)
-                        {
-                            set_attr( node, "width", img->width() );
-                        }
-                        if ( img->height() > 0)
-                        {
-                            set_attr( node, "height", img->height() );
-                        }
-                    }
-
-                }
+		std::string filename = path_processor_type::to_string( *sym.get_filename());
+// FIXME pls
+		//if ( ! filename.empty() ) {
+		set_attr( node, "file", filename );
+                    //set_attr( node, "type", guess_type( filename ) );
+                //}
             }
             void add_font_attributes(ptree & node, const text_symbolizer & sym)
             {
-                const std::string & name = sym.get_name();
+		std::string name = to_expression_string(sym.get_name());
+		
+                //const std::string & name = sym.get_name();
                 if ( ! name.empty() ) {
                     set_attr( node, "name", name );
                 }
@@ -263,7 +258,8 @@ namespace mapnik
                 // to avoid printing ofattributes with default values without
                 // repeating the default values here.
                 // maybe add a real, explicit default-ctor?
-                text_symbolizer dfl("<no default>", "<no default>",
+		// FIXME
+                text_symbolizer dfl(expression_ptr(), "<no default>",
                                     0, color(0,0,0) );
 
                 position displacement = sym.get_displacement();
@@ -379,31 +375,34 @@ namespace mapnik
         else
         {
             // filters are not comparable, so compare strings for now
-            std::string filter = rule.get_filter()->to_string();
+	    // TODO !!!!!
+/*
+	    std::string filter = rule.get_filter()->to_string();
             std::string default_filter = dfl.get_filter()->to_string();
             if ( filter != default_filter)
             {
                 rule_node.push_back( ptree::value_type(
-                            "Filter", ptree()))->second.put_own( filter );
+                            "Filter", ptree()))->second.put_value( filter );
             }
+	    */
         }
 
         if (rule.get_min_scale() != dfl.get_min_scale() )
         {
             ptree & min_scale = rule_node.push_back( ptree::value_type(
                     "MinScaleDenominator", ptree()))->second;
-            min_scale.put_own( rule.get_min_scale() );
+            min_scale.put_value( rule.get_min_scale() );
         }
 
         if (rule.get_max_scale() != dfl.get_max_scale() )
         {
             ptree & max_scale = rule_node.push_back( ptree::value_type(
                     "MaxScaleDenominator", ptree()))->second;
-            max_scale.put_own( rule.get_max_scale() );
+            max_scale.put_value( rule.get_max_scale() );
         }
 
-        symbolizers::const_iterator begin = rule.get_symbolizers().begin();
-        symbolizers::const_iterator end = rule.get_symbolizers().end();
+	rule_type::symbolizers::const_iterator begin = rule.get_symbolizers().begin();
+	rule_type::symbolizers::const_iterator end = rule.get_symbolizers().end();
         serialize_symbolizer serializer( rule_node, explicit_defaults);
         std::for_each( begin, end , boost::apply_visitor( serializer ));
     }
@@ -429,11 +428,11 @@ namespace mapnik
 
     void serialize_fontset( ptree & map_node, Map::const_fontset_iterator fontset_it )
     {
-        const FontSet & fontset = fontset_it->second;
+        const font_set & fontset = fontset_it->second;
         const std::string & name = fontset_it->first;
 
         ptree & fontset_node = map_node.push_back(
-                ptree::value_type("FontSet", ptree()))->second;
+                ptree::value_type("font_set", ptree()))->second;
 
         set_attr(fontset_node, "name", name);
 
@@ -461,12 +460,12 @@ namespace mapnik
                     boost::property_tree::ptree::value_type("Parameter",
                     boost::property_tree::ptree()))->second;
             param_node.put("<xmlattr>.name", it->first );
-            param_node.put_own( it->second );
+            param_node.put_value( it->second );
 
         }
     }
 
-    void serialize_layer( ptree & map_node, const Layer & layer, bool explicit_defaults )
+    void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defaults )
     {
         ptree & layer_node = map_node.push_back(
                 ptree::value_type("Layer", ptree()))->second;
@@ -521,7 +520,7 @@ namespace mapnik
             boost::property_tree::ptree & style_node = layer_node.push_back(
                     boost::property_tree::ptree::value_type("StyleName",
                     boost::property_tree::ptree()))->second;
-            style_node.put_own( style_names[i] );
+            style_node.put_value( style_names[i] );
         }
 
         datasource_ptr datasource = layer.datasource();
@@ -560,7 +559,7 @@ namespace mapnik
             serialize_style( map_node, it, explicit_defaults);
         }
 
-        std::vector<Layer> const & layers = map.layers();
+        std::vector<layer> const & layers = map.layers();
         for (unsigned i = 0; i < layers.size(); ++i )
         {
             serialize_layer( map_node, layers[i], explicit_defaults );

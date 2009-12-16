@@ -34,53 +34,51 @@
 
 namespace mapnik
 {
-    shield_symbolizer::shield_symbolizer(
-                          std::string const& name,
-                          std::string const& face_name,
-                          unsigned size,
-                          color const& fill,
-                          std::string const& file,
-                          std::string const& type,
-                          unsigned width,unsigned height)
-        : text_symbolizer(name, face_name, size, fill),
-          symbolizer_with_image( file, type, width, height ),
-          unlock_image_(false),
-          no_text_(false)
-    {
-    }
 
-    shield_symbolizer::shield_symbolizer(
-                          std::string const& name,
-                          unsigned size,
-                          color const& fill,
-                          std::string const& file,
-                          std::string const& type,
-                          unsigned width,unsigned height)
-        : text_symbolizer(name, size, fill),
-          symbolizer_with_image( file, type, width, height ),
-          unlock_image_(false),
-          no_text_(false)
-    {
-    }
+shield_symbolizer::shield_symbolizer(
+    expression_ptr name,
+    std::string const& face_name,
+    unsigned size,
+    color const& fill,
+    path_expression_ptr file)
+    : text_symbolizer(name, face_name, size, fill),
+      symbolizer_with_image(file),
+      unlock_image_(false),
+      no_text_(false)
+{
+}
 
-    void shield_symbolizer::set_unlock_image(bool unlock_image)
-    {
-       unlock_image_ = unlock_image;
-    }
+shield_symbolizer::shield_symbolizer(
+    expression_ptr name,
+    unsigned size,
+    color const& fill,
+    path_expression_ptr file)
+    : text_symbolizer(name, size, fill),
+      symbolizer_with_image(file),
+      unlock_image_(false),
+      no_text_(false)
+{
+}
 
-    bool shield_symbolizer::get_unlock_image() const
-    {
-      return unlock_image_;
-    }
+void shield_symbolizer::set_unlock_image(bool unlock_image)
+{
+    unlock_image_ = unlock_image;
+}
 
-    void shield_symbolizer::set_no_text(bool no_text)
-    {
-       no_text_ = no_text;
-    }
+bool shield_symbolizer::get_unlock_image() const
+{
+    return unlock_image_;
+}
 
-    bool shield_symbolizer::get_no_text() const
-    {
-      return no_text_;
-    }
+void shield_symbolizer::set_no_text(bool no_text)
+{
+    no_text_ = no_text;
+}
+
+bool shield_symbolizer::get_no_text() const
+{
+    return no_text_;
+}
+
 }
 

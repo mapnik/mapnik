@@ -55,12 +55,12 @@ namespace {
       return out;
    }
    
-   mapnik::Envelope<double> forward_envelope(mapnik::CoordTransform const& t, mapnik::Envelope<double> const& in)
+   mapnik::box2d<double> forward_envelope(mapnik::CoordTransform const& t, mapnik::box2d<double> const& in)
    {
       return t.forward(in);
    }
    
-   mapnik::Envelope<double> backward_envelope(mapnik::CoordTransform const& t, mapnik::Envelope<double> const& in)
+   mapnik::box2d<double> backward_envelope(mapnik::CoordTransform const& t, mapnik::box2d<double> const& in)
    {
       return t.backward(in);
    }
@@ -69,10 +69,10 @@ namespace {
 void export_view_transform() 
 {
    using namespace boost::python;
-   using mapnik::Envelope;
+   using mapnik::box2d;
    using mapnik::coord2d;
    
-   class_<CoordTransform>("ViewTransform",init<int,int,Envelope<double> const& > (
+   class_<CoordTransform>("ViewTransform",init<int,int,box2d<double> const& > (
       "Create a ViewTransform with a width and height as integers and extent"))
       .def_pickle(view_transform_pickle_suite())
       .def("forward", forward_point)

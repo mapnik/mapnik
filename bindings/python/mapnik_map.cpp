@@ -36,8 +36,8 @@
 
 using mapnik::color;
 using mapnik::coord;
-using mapnik::Envelope;
-using mapnik::Layer;
+using mapnik::box2d;
+using mapnik::layer;
 using mapnik::Map;
 
 struct map_pickle_suite : boost::python::pickle_suite
@@ -84,7 +84,7 @@ struct map_pickle_suite : boost::python::pickle_suite
             throw_error_already_set();
         }
 
-        Envelope<double> ext = extract<Envelope<double> >(state[0]);
+        box2d<double> ext = extract<box2d<double> >(state[0]);
         m.zoomToBox(ext);
         if (state[1])
         {
@@ -95,7 +95,7 @@ struct map_pickle_suite : boost::python::pickle_suite
         boost::python::list l=extract<boost::python::list>(state[2]);
         for (int i=0;i<len(l);++i)
         {
-            m.addLayer(extract<Layer>(l[i]));
+            m.addLayer(extract<layer>(l[i]));
         }
         
         boost::python::list s=extract<boost::python::list>(state[3]);
@@ -109,8 +109,8 @@ struct map_pickle_suite : boost::python::pickle_suite
    }
 };
 
-std::vector<Layer>& (Map::*layers_nonconst)() =  &Map::layers;
-std::vector<Layer> const& (Map::*layers_const)() const =  &Map::layers;
+std::vector<layer>& (Map::*layers_nonconst)() =  &Map::layers;
+std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
 
 
 mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& name)
@@ -141,8 +141,8 @@ void export_map()
       ;
    
    python_optional<mapnik::color> ();
-   class_<std::vector<Layer> >("Layers")
-      .def(vector_indexing_suite<std::vector<Layer> >())
+   class_<std::vector<layer> >("Layers")
+      .def(vector_indexing_suite<std::vector<layer> >())
       ;
     
    class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(
@@ -178,30 +178,30 @@ void export_map()
 
       .def("buffered_envelope",
            &Map::get_buffered_extent,
-           "Get the Envelope() of the Map given\n"
+           "Get the box2d() of the Map given\n"
            "the Map.buffer_size.\n"
            "\n"
            "Usage:\n"
            ">>> m = Map(600,400)\n"
            ">>> m.envelope()\n"
-           "Envelope(-1.0,-1.0,0.0,0.0)\n"
+           "box2d(-1.0,-1.0,0.0,0.0)\n"
            ">>> m.buffered_envelope()\n"
-           "Envelope(-1.0,-1.0,0.0,0.0)\n"
+           "box2d(-1.0,-1.0,0.0,0.0)\n"
            ">>> m.buffer_size = 1\n"
            ">>> m.buffered_envelope()\n"
-           "Envelope(-1.02222222222,-1.02222222222,0.0222222222222,0.0222222222222)\n"
+           "box2d(-1.02222222222,-1.02222222222,0.0222222222222,0.0222222222222)\n"
          )
 
       .def("envelope",
            make_function(&Map::getCurrentExtent,
                          return_value_policy<copy_const_reference>()),
-           "Return the Map Envelope object\n"
+           "Return the Map box2d object\n"
            "and print the string representation\n"
            "of the current extent of the map.\n"
            "\n"
            "Usage:\n"
            ">>> m.envelope()\n"
-           "Envelope(-0.185833333333,-0.96,0.189166666667,-0.71)\n"
+           "box2d(-0.185833333333,-0.96,0.189166666667,-0.71)\n"
            ">>> dir(m.envelope())\n"
            "...'center', 'contains', 'expand_to_include', 'forward',\n"
            "...'height', 'intersect', 'intersects', 'inverse', 'maxx',\n"
@@ -285,7 +285,7 @@ void export_map()
          )
 
       .def("remove_all",&Map::remove_all,
-           "Remove all Mapnik Styles and Layers from the Map.\n"
+           "Remove all Mapnik Styles and layers from the Map.\n"
            "\n"
            "Usage:\n"
            ">>> m.remove_all()\n"
@@ -343,10 +343,10 @@ void export_map()
         
       .def("zoom_to_box",&Map::zoomToBox,
            "Set the geographical extent of the map\n"
-           "by specifying a Mapnik Envelope.\n"
+           "by specifying a Mapnik box2d.\n"
            "\n"
            "Usage:\n"
-           ">>> extext = Envelope(-180.0, -90.0, 180.0, 90.0)\n"
+           ">>> extext = box2d(-180.0, -90.0, 180.0, 90.0)\n"
            ">>> m.zoom_to_box(extent)\n"
          )   
 
@@ -401,9 +401,9 @@ void export_map()
                     "\n"
                     "Usage:\n"
                     ">>> m.layers\n"
-                    "<mapnik._mapnik.Layers object at 0x6d458>"
+                    "<mapnik._mapnik.layers object at 0x6d458>"
                     ">>> m.layers[0]\n"
-                    "<mapnik._mapnik.Layer object at 0x5fe130>\n"
+                    "<mapnik._mapnik.layer object at 0x5fe130>\n"
          )
 
       .add_property("srs",

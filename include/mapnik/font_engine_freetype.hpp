@@ -358,9 +358,9 @@ namespace mapnik
             return face_set;
         }
 
-        face_set_ptr get_face_set(FontSet const& fontset)
+        face_set_ptr get_face_set(font_set const& fset)
         {
-            std::vector<std::string> const& names = fontset.get_face_names();
+            std::vector<std::string> const& names = fset.get_face_names();
             face_set_ptr face_set(new font_face_set);
             for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
             {
@@ -422,7 +422,7 @@ namespace mapnik
             opacity_=opacity;
         }
 
-        Envelope<double> prepare_glyphs(text_path *path)
+        box2d<double> prepare_glyphs(text_path *path)
         {
             //clear glyphs
             glyphs_.clear();
@@ -495,7 +495,7 @@ namespace mapnik
                 glyphs_.push_back(new glyph_t(image));
             }
 
-            return Envelope<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
+            return box2d<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
         }
 
         void render(double x0, double y0)

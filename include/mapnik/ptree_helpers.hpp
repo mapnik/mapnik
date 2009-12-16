@@ -42,7 +42,7 @@ namespace mapnik {
     template <typename T>
     T get(const boost::property_tree::ptree & node, const std::string & name, bool is_attribute);
     template <typename T>
-    T get_own(const boost::property_tree::ptree & node, const std::string & name);
+    T get_value(const boost::property_tree::ptree & node, const std::string & name);
     template <typename T>
     boost::optional<T> get_optional(const boost::property_tree::ptree & node, const std::string & name,
                                     bool is_attribute);
@@ -77,14 +77,14 @@ namespace mapnik {
     template <typename T>
     T get_css( const boost::property_tree::ptree & node, const std::string & name )
     {
-        return get_own<T>( node, std::string("CSS parameter '") + name + "'");
+        return get_value<T>( node, std::string("CSS parameter '") + name + "'");
     }
 
    // specialization for color type
    template <>
    inline color get_css (boost::property_tree::ptree const& node, std::string const& name)
    {
-      std::string str = get_own<std::string>( node, std::string("CSS parameter '") + name + "'"); ;
+      std::string str = get_value<std::string>( node, std::string("CSS parameter '") + name + "'"); ;
       try
       {
          return mapnik::color_factory::from_string(str.c_str());
@@ -190,7 +190,7 @@ namespace mapnik {
             boost::property_tree::ptree::value_type("CssParameter", 
             boost::property_tree::ptree()))->second;
         css_node.put("<xmlattr>.name", name );
-        css_node.put_own( v );
+        css_node.put_value( v );
     }
 
     template <typename T>
@@ -341,11 +341,11 @@ namespace mapnik {
     }
 
     template <typename T>
-    T get_own(const boost::property_tree::ptree & node, const std::string & name)
+    T get_value(const boost::property_tree::ptree & node, const std::string & name)
     {
         try
         {
-            return node.get_own<T>();
+            return node.get_value<T>();
         }
         catch (...)
         {

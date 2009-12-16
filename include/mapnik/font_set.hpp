@@ -34,18 +34,18 @@
 
 namespace mapnik
 {
-    class MAPNIK_DECL FontSet
+    class MAPNIK_DECL font_set
     {
         public:
-            FontSet(); 
-            FontSet(std::string const& name); 
-            FontSet(FontSet const& rhs);
-            FontSet& operator=(FontSet const& rhs);
+            font_set(); 
+            font_set(std::string const& name); 
+            font_set(font_set const& rhs);
+            font_set& operator=(font_set const& rhs);
             unsigned size() const;
             std::string const& get_name() const;
             void add_face_name(std::string);
             std::vector<std::string> const& get_face_names() const;
-            ~FontSet();
+            ~font_set();
         private:
             std::string name_;
             std::vector<std::string> face_names_;

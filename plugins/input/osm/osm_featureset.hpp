@@ -33,7 +33,7 @@
 #include <set>
 
 using mapnik::Featureset;
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::feature_ptr;
 using mapnik::transcoder;
 
@@ -41,10 +41,10 @@ template <typename filterT>
 class osm_featureset : public Featureset
 {
       filterT filter_;
-      Envelope<double> query_ext_;
+      box2d<double> query_ext_;
       boost::scoped_ptr<transcoder> tr_;
       std::vector<int> attr_ids_;
-      mutable Envelope<double> feature_ext_;
+      mutable box2d<double> feature_ext_;
       mutable int total_geom_size;
       mutable int count_;
 	  osm_dataset *dataset_;

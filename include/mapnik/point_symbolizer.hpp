@@ -21,31 +21,28 @@
  *****************************************************************************/
 //$Id: image_symbolizer.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef POINT_SYMBOLIZER_HPP
-#define POINT_SYMBOLIZER_HPP
+#ifndef MAPNIK_POINT_SYMBOLIZER_HPP
+#define MAPNIK_POINT_SYMBOLIZER_HPP
 
-#include <mapnik/graphics.hpp> 
+// mapnik
 #include <mapnik/symbolizer.hpp> 
-#include <boost/shared_ptr.hpp>
 
 namespace mapnik 
 {   
-    struct MAPNIK_DECL point_symbolizer : 
+struct MAPNIK_DECL point_symbolizer : 
         public symbolizer_with_image
-    {	
-        explicit point_symbolizer();
-        point_symbolizer(std::string const& file,
-                         std::string const& type,
-                         unsigned width,unsigned height);
-        point_symbolizer(point_symbolizer const& rhs);
-        void set_allow_overlap(bool overlap);
-        bool get_allow_overlap() const;
-        void set_opacity(float opacity);
-        float get_opacity() const;
-    private:
-        float opacity_;
-        bool overlap_;
-    };
+{	
+    explicit point_symbolizer();
+    point_symbolizer(path_expression_ptr file);
+    point_symbolizer(point_symbolizer const& rhs);
+    void set_allow_overlap(bool overlap);
+    bool get_allow_overlap() const;
+    void set_opacity(float opacity);
+    float get_opacity() const;
+private:
+    float opacity_;
+    bool overlap_;
+};
 }
 
-#endif // POINT_SYMBOLIZER_HPP
+#endif // MAPNIK_POINT_SYMBOLIZER_HPP

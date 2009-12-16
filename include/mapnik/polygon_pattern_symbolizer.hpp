@@ -22,24 +22,20 @@
 //$Id$
 
 #ifndef POLYGON_PATTERN_SYMBOLIZER_HPP
-#define POLYGON_PATTERN_SYMBOLIZER_HPP
+#define MAPNIK_POLYGON_PATTERN_SYMBOLIZER_HPP
 
-#include <mapnik/graphics.hpp> 
+// mapnik 
 #include <mapnik/symbolizer.hpp> 
-#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
-    struct MAPNIK_DECL polygon_pattern_symbolizer :
-            public symbolizer_with_image
-    {
+struct MAPNIK_DECL polygon_pattern_symbolizer :
+	public symbolizer_with_image
+{
 	
-        polygon_pattern_symbolizer(std::string const& file,
-                                   std::string const& type,
-                                   unsigned width,unsigned height);
-        
-        polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs);
-    };
+    polygon_pattern_symbolizer(path_expression_ptr file);
+    polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs);
+};
 }
 
-#endif //POLYGON_PATTERN_SYMBOLIZER_HPP
+#endif //MAPNIK_POLYGON_PATTERN_SYMBOLIZER_HPP

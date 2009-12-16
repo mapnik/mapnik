@@ -26,7 +26,7 @@
 #define PROJECTION_HPP
 
 // mapnik
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 
 // boost
 #ifdef MAPNIK_THREADSAFE

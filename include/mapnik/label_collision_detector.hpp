@@ -38,9 +38,9 @@ namespace mapnik
 
    struct label_collision_detector
    {
-      typedef std::vector<Envelope<double> > label_placements;
+      typedef std::vector<box2d<double> > label_placements;
 
-      bool has_plasement(Envelope<double> const& box)
+      bool has_plasement(box2d<double> const& box)
       {
          label_placements::const_iterator itr=labels_.begin();
          for( ; itr !=labels_.end();++itr)
@@ -66,14 +66,14 @@ namespace mapnik
    // quad_tree based label collision detector
    class label_collision_detector2 : boost::noncopyable
    {
-      typedef quad_tree<Envelope<double> > tree_t;
+      typedef quad_tree<box2d<double> > tree_t;
       tree_t tree_;
    public:
          
-      explicit label_collision_detector2(Envelope<double> const& extent)
+      explicit label_collision_detector2(box2d<double> const& extent)
          : tree_(extent) {}
 	
-      bool has_placement(Envelope<double> const& box)
+      bool has_placement(box2d<double> const& box)
       {
          tree_t::query_iterator itr = tree_.query_in_box(box);
          tree_t::query_iterator end = tree_.query_end();
@@ -100,14 +100,14 @@ namespace mapnik
    // quad_tree based label collision detector with seperate check/insert
    class label_collision_detector3 : boost::noncopyable
    {
-      typedef quad_tree< Envelope<double> > tree_t;
+      typedef quad_tree< box2d<double> > tree_t;
       tree_t tree_;
    public:
 	
-      explicit label_collision_detector3(Envelope<double> const& extent)
+      explicit label_collision_detector3(box2d<double> const& extent)
          : tree_(extent) {}
 	
-      bool has_placement(Envelope<double> const& box)
+      bool has_placement(box2d<double> const& box)
       {
          tree_t::query_iterator itr = tree_.query_in_box(box);
          tree_t::query_iterator end = tree_.query_end();
@@ -123,7 +123,7 @@ namespace mapnik
          return true;
       }
 
-      void insert(Envelope<double> const& box)
+      void insert(box2d<double> const& box)
       {
          tree_.insert(box, box);
       }
@@ -140,24 +140,24 @@ namespace mapnik
    {
       struct label
       {
-         label(Envelope<double> const& b) : box(b) {}
-         label(Envelope<double> const& b, UnicodeString const& t) : box(b), text(t) {}
+         label(box2d<double> const& b) : box(b) {}
+         label(box2d<double> const& b, UnicodeString const& t) : box(b), text(t) {}
                
-         Envelope<double> box;
+         box2d<double> box;
          UnicodeString text;
       };
          
       typedef quad_tree< label > tree_t;
-      Envelope<double> extent_;
+      box2d<double> extent_;
       tree_t tree_;
          
    public:
 	
-      explicit label_collision_detector4(Envelope<double> const& extent)
+      explicit label_collision_detector4(box2d<double> const& extent)
          : extent_(extent),
            tree_(extent) {}
 	
-      bool has_placement(Envelope<double> const& box)
+      bool has_placement(box2d<double> const& box)
       {
          tree_t::query_iterator itr = tree_.query_in_box(box);
          tree_t::query_iterator end = tree_.query_end();
@@ -173,9 +173,9 @@ namespace mapnik
          return true;
       }	
 
-      bool has_placement(Envelope<double> const& box, UnicodeString const& text, double distance)
+      bool has_placement(box2d<double> const& box, UnicodeString const& text, double distance)
       {
-         Envelope<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
+         box2d<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
          tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
          tree_t::query_iterator end = tree_.query_end();
         
@@ -190,9 +190,9 @@ namespace mapnik
          return true;
       }	
 
-      bool has_point_placement(Envelope<double> const& box, double distance)
+      bool has_point_placement(box2d<double> const& box, double distance)
       {
-         Envelope<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
+         box2d<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
          tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
          tree_t::query_iterator end = tree_.query_end();
          
@@ -207,12 +207,12 @@ namespace mapnik
          return true;
       }	
       
-      void insert(Envelope<double> const& box)
+      void insert(box2d<double> const& box)
       {
          tree_.insert(label(box), box);
       }
          
-      void insert(Envelope<double> const& box, UnicodeString const& text)
+      void insert(box2d<double> const& box, UnicodeString const& text)
       {
          tree_.insert(label(box, text), box);
       }
@@ -222,7 +222,7 @@ namespace mapnik
          tree_.clear();
       }
       
-      Envelope<double> const& extent() const
+      box2d<double> const& extent() const
       {
          return extent_;
       }

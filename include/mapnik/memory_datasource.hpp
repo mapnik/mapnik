@@ -41,7 +41,7 @@ namespace mapnik {
       int type() const;
       featureset_ptr features(const query& q) const;
       featureset_ptr features_at_point(coord2d const& pt) const;
-      Envelope<double> envelope() const;
+      box2d<double> envelope() const;
       layer_descriptor get_descriptor() const;
       size_t size() const;
    private:

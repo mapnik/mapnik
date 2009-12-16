@@ -48,7 +48,7 @@ class MapWidget : public QWidget
       boost::shared_ptr<mapnik::Map> map_;
       int selected_;
       QPixmap pix_;
-      mapnik::Envelope<double> extent_;
+      mapnik::box2d<double> extent_;
       eTool cur_tool_;
       int start_x_;
       int start_y_;
@@ -65,7 +65,7 @@ class MapWidget : public QWidget
       inline QPixmap const& pixmap() const { return pix_;}
       void setMap(boost::shared_ptr<mapnik::Map> map);    
       void defaultView();
-      void zoomToBox(mapnik::Envelope<double> const& box);
+      void zoomToBox(mapnik::box2d<double> const& box);
       void zoomIn();
       void zoomOut();
       void panLeft();

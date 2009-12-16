@@ -308,11 +308,7 @@ template <typename V>
 struct add : public boost::static_visitor<V>
 { 
     typedef V value_type;
-    template <typename T1, typename T2>
-    value_type operator() (T1 const& lhs, T2 const&) const
-    {
-	return lhs;
-    }
+    
     template <typename T>
     value_type operator() (T lhs, T rhs) const
     {
@@ -333,6 +329,28 @@ struct add : public boost::static_visitor<V>
     value_type operator() (int lhs, double rhs) const
     {
 	return lhs + rhs;
+    }
+
+    template <typename R>
+    value_type operator() (UnicodeString const& lhs, R const& rhs) const
+    {
+	std::basic_ostringstream<char> out;
+	out << rhs;
+	return lhs + UnicodeString(out.str().c_str());
+    }
+
+    template <typename L>
+    value_type operator() (L const& lhs , UnicodeString const& rhs) const
+    {
+	std::basic_ostringstream<char> out;
+	out << lhs;
+	return UnicodeString(out.str().c_str()) + rhs;
+    }
+     
+    template <typename T1, typename T2>
+    value_type operator() (T1 const& lhs, T2 const&) const
+    {
+	return lhs;
     }
 };
 
@@ -489,17 +507,27 @@ struct mod: public boost::static_visitor<V>
         
 struct to_bool : public boost::static_visitor<bool>
 {
-                
-    template <typename T>
-    bool operator() (T val) const
-    {
-	boost::ignore_unused_variable_warning(val);
-	throw config_error("Boolean value expected");
-    }
-
     bool operator() (bool val) const
     {
 	return val;
+    }
+ 
+    bool operator() (UnicodeString const& ustr) const
+    {
+	boost::ignore_unused_variable_warning(ustr);
+	return true;
+    }
+    
+    bool operator() (value_null const& val) const
+    {
+	boost::ignore_unused_variable_warning(val);
+	return false;
+    }
+
+    template <typename T>
+    bool operator() (T val) const
+    {
+	return bool(val);
     }
 };
 

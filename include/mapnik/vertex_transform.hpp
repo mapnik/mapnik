@@ -25,7 +25,7 @@
 #define VERTEX_TRANSFORM_HPP
 
 // mapnik
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 
 namespace mapnik
@@ -84,7 +84,7 @@ namespace mapnik
     };
 
     template <typename Trans>
-    struct view_transform<Envelope<double>,Envelope<double>,Trans>
+    struct view_transform<box2d<double>,box2d<double>,Trans>
     {
 	
     };

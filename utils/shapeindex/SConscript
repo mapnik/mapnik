@@ -29,7 +29,7 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 source = Split(
     """
     shapeindex.cpp
-    #src/envelope.cpp
+    #src/box2d.cpp
     #plugins/input/shape/shapefile.cpp
     """
     )

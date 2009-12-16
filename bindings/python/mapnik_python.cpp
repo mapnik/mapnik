@@ -38,7 +38,7 @@ void export_image();
 void export_image_view();
 void export_map();
 void export_python();
-void export_filter();
+void export_expression();
 void export_rule();
 void export_style();
 void export_stroke();
@@ -77,12 +77,12 @@ void export_view_transform();
 static Pycairo_CAPI_t *Pycairo_CAPI;
 #endif
 
-void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0, unsigned offset_y = 0)
+void render(const mapnik::Map& map,mapnik::image_32& image, unsigned offset_x = 0, unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
     try
     {
-        mapnik::agg_renderer<mapnik::Image32> ren(map,image,offset_x, offset_y);
+        mapnik::agg_renderer<mapnik::image_32> ren(map,image,offset_x, offset_y);
         ren.apply();
     }
     catch (...)
@@ -93,12 +93,12 @@ void render(const mapnik::Map& map,mapnik::Image32& image, unsigned offset_x = 0
     Py_END_ALLOW_THREADS
 }
 
-void render2(const mapnik::Map& map,mapnik::Image32& image)
+void render2(const mapnik::Map& map,mapnik::image_32& image)
 {
     Py_BEGIN_ALLOW_THREADS
     try
     {
-        mapnik::agg_renderer<mapnik::Image32> ren(map,image);
+        mapnik::agg_renderer<mapnik::image_32> ren(map,image);
         ren.apply();
     }
     catch (...)
@@ -187,7 +187,7 @@ void render_tile_to_file(const mapnik::Map& map,
                          const std::string& file,
                          const std::string& format)
 {
-    mapnik::Image32 image(width,height);
+    mapnik::image_32 image(width,height);
     render(map,image,offset_x, offset_y);
     mapnik::save_to_file(image.data(),file,format);
 }
@@ -196,7 +196,7 @@ void render_to_file1(const mapnik::Map& map,
                     const std::string& filename,
                     const std::string& format)
 {
-    mapnik::Image32 image(map.getWidth(),map.getHeight());
+    mapnik::image_32 image(map.getWidth(),map.getHeight());
     render(map,image,0,0);
     mapnik::save_to_file(image,filename,format); 
 }
@@ -204,7 +204,7 @@ void render_to_file1(const mapnik::Map& map,
 void render_to_file2(const mapnik::Map& map,
                     const std::string& filename)
 {
-    mapnik::Image32 image(map.getWidth(),map.getHeight());
+    mapnik::image_32 image(map.getWidth(),map.getHeight());
     render(map,image,0,0);
     mapnik::save_to_file(image,filename); 
 }
@@ -289,7 +289,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_envelope();   
     export_image();
     export_image_view();
-    export_filter();
+    export_expression();
     export_rule();
     export_style();    
     export_layer();
@@ -350,7 +350,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     
     def("render",&render,
         "\n"
-        "Render Map to an AGG Image32 using offsets\n"
+        "Render Map to an AGG image_32 using offsets\n"
         "\n"
         "Usage:\n"
         ">>> from mapnik import Map, Image, render, load_map\n"
@@ -363,7 +363,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     def("render",&render2,
         "\n"
-        "Render Map to an AGG Image32\n"
+        "Render Map to an AGG image_32\n"
         "\n"
         "Usage:\n"
         ">>> from mapnik import Map, Image, render, load_map\n"
@@ -473,5 +473,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
 
-    register_ptr_to_python<mapnik::filter_ptr>();
+    register_ptr_to_python<mapnik::expression_ptr>();
+    register_ptr_to_python<mapnik::path_expression_ptr>();
 }

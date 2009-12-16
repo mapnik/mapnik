@@ -165,7 +165,7 @@ namespace mapnik
                     {
                         ptree::iterator it = attr_list.push_back(
                                 ptree::value_type( (char*)cur_attr->name, ptree() ));
-                        it->second.put_own( (char*) cur_attr->children->content );
+                        it->second.put_value( (char*) cur_attr->children->content );
                     }
                 }
             }
@@ -187,13 +187,13 @@ namespace mapnik
                             }
                             break;
                         case XML_TEXT_NODE:
-                            pt.put_own( (char*) cur_node->content );
+                            pt.put_value( (char*) cur_node->content );
                             break;
                         case XML_COMMENT_NODE:
                             {
                                 ptree::iterator it = pt.push_back(
                                         ptree::value_type( "<xmlcomment>", ptree() ));
-                                it->second.put_own( (char*) cur_node->content );
+                                it->second.put_value( (char*) cur_node->content );
                             }
                             break;
                         default:

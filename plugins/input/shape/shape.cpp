@@ -138,7 +138,7 @@ void  shape_datasource::init(shape_io& shape)
    
    if (version!=1000)
    {
-      //invalid version number
+       //invalid version number
        throw datasource_exception((boost::format("invalid version number: %d") % version).str());
    }
    
@@ -239,7 +239,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
    }
 }
 
-Envelope<double> shape_datasource::envelope() const
+box2d<double> shape_datasource::envelope() const
 {
    return extent_;
 }

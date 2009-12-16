@@ -90,7 +90,7 @@ bool LayerListModel::setData(const QModelIndex &index,
    if (index.isValid() && role == Qt::CheckStateRole)
    {
       int status = value.toInt(); 
-      std::vector<mapnik::Layer> & layers = const_cast<std::vector<mapnik::Layer>& >(map_->layers());
+      std::vector<mapnik::layer> & layers = const_cast<std::vector<mapnik::layer>& >(map_->layers());
       layers.at(index.row()).setActive(status);
       emit dataChanged(index, index);
       return true;
@@ -107,15 +107,15 @@ Qt::ItemFlags LayerListModel::flags(QModelIndex const& index) const
     return flags;
 }
 
-boost::optional<mapnik::Layer&> LayerListModel::map_layer(int i)
+boost::optional<mapnik::layer&> LayerListModel::map_layer(int i)
 {
    if (map_)
    {
-      std::vector<mapnik::Layer> & layers = const_cast<std::vector<mapnik::Layer>& >(map_->layers());
+      std::vector<mapnik::layer> & layers = const_cast<std::vector<mapnik::layer>& >(map_->layers());
       if (i < layers.size())
-         return boost::optional<mapnik::Layer&>(layers[i]);
+         return boost::optional<mapnik::layer&>(layers[i]);
    }
-   return boost::optional<mapnik::Layer&>();
+   return boost::optional<mapnik::layer&>();
 }
 
 

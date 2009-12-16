@@ -32,7 +32,7 @@
 #include <boost/program_options.hpp>
 
 #include <mapnik/datasource.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 
@@ -146,7 +146,7 @@ int main (int argc,char** argv)
         
         ogr_datasource ogr (params);
 
-        Envelope<double> extent = ogr.envelope();
+        box2d<double> extent = ogr.envelope();
         quadtree<int> tree (extent, depth, ratio);
         int count=0;
 
@@ -165,7 +165,7 @@ int main (int argc,char** argv)
                 break;
             }
             
-            Envelope<double> item_ext = fp->envelope();
+            box2d<double> item_ext = fp->envelope();
 
             tree.insert (count, item_ext);
             if (verbose) {

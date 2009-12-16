@@ -1,6 +1,6 @@
 #include <mapnik/map.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
@@ -44,16 +44,16 @@ int main(int argc,char *argv[])
 		}
 	}
 
-	Envelope<double> bbox (atof(argv[2]),atof(argv[3]),
+	box2d<double> bbox (atof(argv[2]),atof(argv[3]),
 							atof(argv[4]),atof(argv[5]));
 										
 	m.zoomToBox(bbox);
 
-	Image32 buf (m.getWidth(), m.getHeight());
-	agg_renderer<Image32> r(m,buf);
+	image_32 buf (m.getWidth(), m.getHeight());
+	agg_renderer<image_32> r(m,buf);
 	r.apply();
 
-	save_to_file<ImageData32>(buf.data(),"blah.png","png");
+	save_to_file<image_data_32>(buf.data(),"blah.png","png");
 
 	return 0;
 }

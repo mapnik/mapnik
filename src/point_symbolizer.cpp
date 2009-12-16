@@ -34,19 +34,13 @@
 namespace mapnik
 {
 point_symbolizer::point_symbolizer()
-    : symbolizer_with_image(boost::shared_ptr<ImageData32>(new ImageData32(4,4))),
+    : symbolizer_with_image(path_expression_ptr(new path_expression)), // FIXME
       opacity_(1.0),
-      overlap_(false)
-          
-{
-    //default point symbol is black 4x4px square
-    image_->set(0xff000000);
-}
+      overlap_(false)         
+{}
     
-point_symbolizer::point_symbolizer(std::string const& file,
-				   std::string const& type,
-				   unsigned width,unsigned height) 
-    : symbolizer_with_image(file, type, width, height),
+point_symbolizer::point_symbolizer(path_expression_ptr file) 
+    : symbolizer_with_image(file),
       opacity_(1.0),      
       overlap_(false)
           
@@ -57,7 +51,7 @@ point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
       opacity_(rhs.opacity_),
       overlap_(rhs.overlap_)
 {}
-    
+
 void point_symbolizer::set_allow_overlap(bool overlap)
 {
     overlap_ = overlap;

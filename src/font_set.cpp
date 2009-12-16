@@ -30,17 +30,17 @@
 
 namespace mapnik
 {
-    FontSet::FontSet()
+    font_set::font_set()
         : name_("") {}
 
-    FontSet::FontSet(std::string const& name)
+    font_set::font_set(std::string const& name)
         : name_(name) {}
 
-    FontSet::FontSet(FontSet const& rhs)
+    font_set::font_set(font_set const& rhs)
         : name_(rhs.name_),
           face_names_(rhs.face_names_) {}
    
-    FontSet& FontSet::operator=(FontSet const& other)
+    font_set& font_set::operator=(font_set const& other)
     {
         if (this == &other)
             return *this;
@@ -50,24 +50,24 @@ namespace mapnik
         return *this;
     } 
 
-    FontSet::~FontSet() {}
+    font_set::~font_set() {}
     
-    unsigned FontSet::size() const
+    unsigned font_set::size() const
     {
         return face_names_.size();
     }
 
-    void FontSet::add_face_name(std::string face_name)
+    void font_set::add_face_name(std::string face_name)
     {
         face_names_.push_back(face_name);
     }
 
-    std::string const& FontSet::get_name() const
+    std::string const& font_set::get_name() const
     {
         return name_;
     }
     
-    std::vector<std::string> const& FontSet::get_face_names() const
+    std::vector<std::string> const& font_set::get_face_names() const
     {
         return face_names_;
     }

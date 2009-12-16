@@ -95,7 +95,7 @@ namespace mapnik {
         
         virtual featureset_ptr features(const query& q) const=0;
         virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
-        virtual Envelope<double> envelope() const=0;
+        virtual box2d<double> envelope() const=0;
         virtual layer_descriptor get_descriptor() const=0;
         virtual ~datasource() {};
     protected:

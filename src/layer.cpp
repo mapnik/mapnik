@@ -39,7 +39,7 @@ using boost::shared_ptr;
 
 namespace mapnik
 {   
-    Layer::Layer(std::string const& name, std::string const& srs)
+    layer::layer(std::string const& name, std::string const& srs)
         : name_(name),
           title_(""),
           abstract_(""),
@@ -51,7 +51,7 @@ namespace mapnik
           clear_label_cache_(false),
           ds_() {}
     
-    Layer::Layer(const Layer& rhs)
+    layer::layer(const layer& rhs)
         : name_(rhs.name_),
           title_(rhs.title_),
           abstract_(rhs.abstract_),
@@ -64,19 +64,19 @@ namespace mapnik
           styles_(rhs.styles_),
           ds_(rhs.ds_) {}
     
-    Layer& Layer::operator=(const Layer& rhs)
+    layer& layer::operator=(const layer& rhs)
     {
-        Layer tmp(rhs);
+        layer tmp(rhs);
         swap(tmp);
         return *this;
     }
 
-    bool Layer::operator==(Layer const& other) const
+    bool layer::operator==(layer const& other) const
     {
         return (this == &other);
     }
     
-    void Layer::swap(const Layer& rhs)
+    void layer::swap(const layer& rhs)
     {
         name_=rhs.name_;
         title_=rhs.title_;
@@ -91,130 +91,130 @@ namespace mapnik
         ds_=rhs.ds_;
     }
 
-    Layer::~Layer() {}
+    layer::~layer() {}
     
-    void Layer::set_name( std::string const& name)
+    void layer::set_name( std::string const& name)
     {
         name_ = name;
     }
  
-    string const& Layer::name() const
+    string const& layer::name() const
     {
         return name_;
     }
 
-    void Layer::set_title( std::string const& title)
+    void layer::set_title( std::string const& title)
     {
         title_ = title;
     }
  
-    string const& Layer::title() const
+    string const& layer::title() const
     {
         return title_;
     }
     
-    void Layer::set_abstract( std::string const& abstract)
+    void layer::set_abstract( std::string const& abstract)
     {
         abstract_ = abstract;
     }
  
-    string const& Layer::abstract() const
+    string const& layer::abstract() const
     {
         return abstract_;
     }
 
-    void Layer::set_srs(std::string const& srs)
+    void layer::set_srs(std::string const& srs)
     {
         srs_ = srs;
     }
     
-    std::string const& Layer::srs() const
+    std::string const& layer::srs() const
     {
         return srs_;
     }
     
-    void Layer::add_style(std::string const& stylename)
+    void layer::add_style(std::string const& stylename)
     {
         styles_.push_back(stylename);
     }
     
-    std::vector<std::string> const& Layer::styles() const
+    std::vector<std::string> const& layer::styles() const
     {
         return styles_;
     }
     
-    std::vector<std::string> & Layer::styles()
+    std::vector<std::string> & layer::styles()
     {
         return styles_;
     }
 
-    void Layer::setMinZoom(double minZoom)
+    void layer::setMinZoom(double minZoom)
     {
         minZoom_=minZoom;
     }
 
-    void Layer::setMaxZoom(double maxZoom)
+    void layer::setMaxZoom(double maxZoom)
     {
         maxZoom_=maxZoom;
     }
 
-    double Layer::getMinZoom() const
+    double layer::getMinZoom() const
     {
         return minZoom_;
     }
 
-    double Layer::getMaxZoom() const
+    double layer::getMaxZoom() const
     {
         return maxZoom_;
     }
 
-    void Layer::setActive(bool active)
+    void layer::setActive(bool active)
     {
         active_=active;
     }
 
-    bool Layer::isActive() const
+    bool layer::isActive() const
     {
         return active_;
     }
 
-    bool Layer::isVisible(double scale) const
+    bool layer::isVisible(double scale) const
     {
         return isActive() && scale >= minZoom_ - 1e-6 && scale < maxZoom_ + 1e-6;
     }
 
-    void Layer::setQueryable(bool queryable)
+    void layer::setQueryable(bool queryable)
     {
         queryable_=queryable;
     }
 
-    bool Layer::isQueryable() const
+    bool layer::isQueryable() const
     {
         return queryable_;
     }
 
-    datasource_ptr Layer::datasource() const
+    datasource_ptr layer::datasource() const
     {
         return ds_;
     }
     
-    void Layer::set_datasource(datasource_ptr const& ds)
+    void layer::set_datasource(datasource_ptr const& ds)
     {
         ds_ = ds;
     }
     
-    Envelope<double> Layer::envelope() const
+    box2d<double> layer::envelope() const
     {
         if (ds_) return ds_->envelope();
-    	return Envelope<double>();
+    	return box2d<double>();
     }
     
-   void Layer::set_clear_label_cache(bool clear)
+   void layer::set_clear_label_cache(bool clear)
    {
       clear_label_cache_ = clear;
    }
    
-   bool Layer::clear_label_cache() const
+   bool layer::clear_label_cache() const
    {
       return clear_label_cache_;
    }

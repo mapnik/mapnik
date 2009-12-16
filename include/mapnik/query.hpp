@@ -24,9 +24,9 @@
 
 #ifndef QUERY_HPP
 #define QUERY_HPP
+
 //mapnik
-#include <mapnik/filter.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
 // stl
 #include <set>
@@ -36,19 +36,19 @@ namespace mapnik {
    class query 
    {
       private:
-         Envelope<double> bbox_;
+         box2d<double> bbox_;
          double resolution_;
          double scale_denominator_;
          std::set<std::string> names_;
       public:
          
-         explicit query(const Envelope<double>& bbox, double resolution, double scale_denominator)
+         explicit query(const box2d<double>& bbox, double resolution, double scale_denominator)
             : bbox_(bbox),
               resolution_(resolution),
               scale_denominator_(scale_denominator)
          {}
 
-         explicit query(const Envelope<double>& bbox, double resolution)
+         explicit query(const box2d<double>& bbox, double resolution)
             : bbox_(bbox),
               resolution_(resolution),
               scale_denominator_(0.0)
@@ -81,7 +81,7 @@ namespace mapnik {
             return scale_denominator_;
          }
          
-         const Envelope<double>& get_bbox() const
+         const box2d<double>& get_bbox() const
          {
             return bbox_;
          }

@@ -24,7 +24,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/datasource.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
@@ -46,7 +46,7 @@ using std::clog;
 using std::endl;
 
 using mapnik::query;
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;

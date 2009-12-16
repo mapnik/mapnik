@@ -76,7 +76,7 @@ feature_ptr osm_featureset<filterT>::next()
 		
 			// Loop until we find a feature which passes the filter
 			while(cur_item != NULL &&
-					!filter_.pass(Envelope<double>(b.w,b.s,b.e,b.n)))
+					!filter_.pass(box2d<double>(b.w,b.s,b.e,b.n)))
 			{
 				cur_item = dataset_->next_item();
 				if(cur_item!=NULL)

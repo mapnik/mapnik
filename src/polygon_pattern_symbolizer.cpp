@@ -20,23 +20,20 @@
  *
  *****************************************************************************/
 //$Id$
+
 // mapnik
 #include <mapnik/polygon_pattern_symbolizer.hpp>
 
-#include <mapnik/image_reader.hpp>
-// stl
-#include <iostream>
-
 namespace mapnik
 {
-    polygon_pattern_symbolizer::polygon_pattern_symbolizer(std::string const& file,
-                                                           std::string const& type,
-                                                           unsigned width,unsigned height) 
-        : symbolizer_with_image( file, type, width, height )
-    {
-    }
-    polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)
-        : symbolizer_with_image(rhs) {}
-    
+
+polygon_pattern_symbolizer::polygon_pattern_symbolizer(path_expression_ptr file)                                                         
+    : symbolizer_with_image(file)
+{
+}
+
+polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)
+    : symbolizer_with_image(rhs) {}
+
 }
 

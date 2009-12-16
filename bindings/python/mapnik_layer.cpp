@@ -32,7 +32,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 
-using mapnik::Layer;
+using mapnik::layer;
 using mapnik::parameters;
 using mapnik::datasource_cache;
 
@@ -40,13 +40,13 @@ using mapnik::datasource_cache;
 struct layer_pickle_suite : boost::python::pickle_suite
 {
    static boost::python::tuple
-   getinitargs(const Layer& l)
+   getinitargs(const layer& l)
    {
       return boost::python::make_tuple(l.name(),l.srs());
    }
 
    static  boost::python::tuple
-   getstate(const Layer& l)
+   getstate(const layer& l)
    {
         boost::python::list s;
         std::vector<std::string> const& style_names = l.styles();
@@ -58,7 +58,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
    }
 
    static void
-   setstate (Layer& l, boost::python::tuple state)
+   setstate (layer& l, boost::python::tuple state)
    {
         using namespace boost::python;
         if (len(state) != 8)
@@ -114,7 +114,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
    }
 };
 
-std::vector<std::string> & (mapnik::Layer::*_styles_)() = &mapnik::Layer::styles;
+std::vector<std::string> & (mapnik::layer::*_styles_)() = &mapnik::layer::styles;
 
 void export_layer()
 {
@@ -123,7 +123,7 @@ void export_layer()
     	.def(vector_indexing_suite<std::vector<std::string>,true >())
     	;
     
-    class_<Layer>("Layer", "A Mapnik map layer.", init<std::string const&,optional<std::string const&> >(
+    class_<layer>("Layer", "A Mapnik map layer.", init<std::string const&,optional<std::string const&> >(
                 "Create a Layer with a named string and, optionally, an srs string.\n"
                 "\n"
                 "The srs can be either a Proj.4 epsg code ('+init=epsg:<code>') or\n"
@@ -139,7 +139,7 @@ void export_layer()
 
         .def_pickle(layer_pickle_suite())
          
-        .def("envelope",&Layer::envelope, 
+        .def("envelope",&layer::envelope, 
                 "Return the geographic envelope/bounding box."
                 "\n"
                 "Determined based on the layer datasource.\n"
@@ -148,10 +148,10 @@ void export_layer()
                 ">>> from mapnik import Layer\n"
                 ">>> lyr = Layer('My Layer','+proj=latlong +datum=WGS84')\n"
                 ">>> lyr.envelope()\n"
-                "Envelope(-1.0,-1.0,0.0,0.0) # default until a datasource is loaded\n"
+                "box2d(-1.0,-1.0,0.0,0.0) # default until a datasource is loaded\n"
                 )
         
-        .def("visible", &Layer::isVisible,
+        .def("visible", &layer::isVisible,
                 "Return True if this layer's data is active and visible at a given scale.\n"
                 "\n"
                 "Otherwise returns False.\n"
@@ -172,8 +172,8 @@ void export_layer()
                 )
                 
         .add_property("abstract", 
-                make_function(&Layer::abstract,return_value_policy<copy_const_reference>()),
-                &Layer::set_abstract,
+                make_function(&layer::abstract,return_value_policy<copy_const_reference>()),
+                &layer::set_abstract,
                 "Get/Set the abstract of the layer.\n"
                 "\n"
                 "Usage:\n"
@@ -187,8 +187,8 @@ void export_layer()
                 )
 
         .add_property("active",
-                &Layer::isActive,
-                &Layer::setActive,
+                &layer::isActive,
+                &layer::setActive,
                 "Get/Set whether this layer is active and will be rendered.\n"
                 "\n"
                 "Usage:\n"
@@ -202,8 +202,8 @@ void export_layer()
                 )
                 
         .add_property("clear_label_cache",
-                &Layer::clear_label_cache,
-                &Layer::set_clear_label_cache,
+                &layer::clear_label_cache,
+                &layer::set_clear_label_cache,
                 "Get/Set whether this layer's labels are cached.\n"
                 "\n"
                 "Usage:\n"
@@ -211,8 +211,8 @@ void export_layer()
                 )
         
         .add_property("datasource",
-                &Layer::datasource,
-                &Layer::set_datasource,
+                &layer::datasource,
+                &layer::set_datasource,
                 "The datasource attached to this layer.\n"
                 "\n"
                 "Usage:\n"
@@ -224,8 +224,8 @@ void export_layer()
                 )
 
         .add_property("maxzoom",
-                &Layer::getMaxZoom,
-                &Layer::setMaxZoom,
+                &layer::getMaxZoom,
+                &layer::setMaxZoom,
                 "Get/Set the maximum zoom lever of the layer.\n"
                 "\n"
                 "Usage:\n"
@@ -239,8 +239,8 @@ void export_layer()
                 )
         
         .add_property("minzoom",
-                &Layer::getMinZoom,
-                &Layer::setMinZoom,
+                &layer::getMinZoom,
+                &layer::setMinZoom,
                 "Get/Set the minimum zoom lever of the layer.\n"
                 "\n"
                 "Usage:\n"
@@ -254,8 +254,8 @@ void export_layer()
                 )     
 
         .add_property("name", 
-                make_function(&Layer::name, return_value_policy<copy_const_reference>()),
-                &Layer::set_name,
+                make_function(&layer::name, return_value_policy<copy_const_reference>()),
+                &layer::set_name,
                 "Get/Set the name of the layer.\n"
                 "\n"
                 "Usage:\n"
@@ -269,13 +269,13 @@ void export_layer()
                 )
 
         .add_property("queryable",
-                &Layer::isQueryable,
-                &Layer::setQueryable,
+                &layer::isQueryable,
+                &layer::setQueryable,
                 "Get/Set whether this layer is queryable.\n"
                 "\n"
                 "Usage:\n"
-                ">>> from mapnik import Layer\n"
-                ">>> lyr = Layer('My Layer','+proj=latlong +datum=WGS84')\n"
+                ">>> from mapnik import layer\n"
+                ">>> lyr = layer('My layer','+proj=latlong +datum=WGS84')\n"
                 ">>> lyr.queryable\n"
                 "False # Not queryable by default\n"
                 ">>> lyr.queryable = True\n"
@@ -284,13 +284,13 @@ void export_layer()
                 )
 
         .add_property("srs", 
-                make_function(&Layer::srs,return_value_policy<copy_const_reference>()),
-                &Layer::set_srs,
+                make_function(&layer::srs,return_value_policy<copy_const_reference>()),
+                &layer::set_srs,
                 "Get/Set the SRS of the layer.\n"
                 "\n"
                 "Usage:\n"
-                ">>> from mapnik import Layer\n"
-                ">>> lyr = Layer('My Layer','+proj=latlong +datum=WGS84')\n"
+                ">>> from mapnik import layer\n"
+                ">>> lyr = layer('My layer','+proj=latlong +datum=WGS84')\n"
                 ">>> lyr.srs\n"
                 "'+proj=latlong +datum=WGS84' # The default srs if not initialized with custom srs\n"
                 ">>> # set to google mercator with Proj.4 literal\n"
@@ -303,8 +303,8 @@ void export_layer()
                 "The styles list attached to this layer.\n"
                 "\n"
                 "Usage:\n"
-                ">>> from mapnik import Layer\n"
-                ">>> lyr = Layer('My Layer','+proj=latlong +datum=WGS84')\n"
+                ">>> from mapnik import layer\n"
+                ">>> lyr = layer('My layer','+proj=latlong +datum=WGS84')\n"
                 ">>> lyr.styles\n"
                 "<mapnik._mapnik.Names object at 0x6d3e8>\n"
                 ">>> len(lyr.styles)\n"
@@ -317,13 +317,13 @@ void export_layer()
                 )
                                                             
         .add_property("title",
-                make_function(&Layer::title, return_value_policy<copy_const_reference>()),
-                &Layer::set_title,
+                make_function(&layer::title, return_value_policy<copy_const_reference>()),
+                &layer::set_title,
                 "Get/Set the title of the layer.\n"
                 "\n"
                 "Usage:\n"
-                ">>> from mapnik import Layer\n"
-                ">>> lyr = Layer('My Layer','+proj=latlong +datum=WGS84')\n"
+                ">>> from mapnik import layer\n"
+                ">>> lyr = layer('My layer','+proj=latlong +datum=WGS84')\n"
                 ">>> lyr.title\n"
                 "''\n"
                 ">>> lyr.title = 'My first layer'\n"

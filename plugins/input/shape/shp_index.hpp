@@ -27,10 +27,10 @@
 #include <fstream>
 #include <vector>
 // mapnik
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/query.hpp>
 
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::query;
 
 template <typename filterT, typename IStream = std::ifstream>
@@ -44,7 +44,7 @@ private:
     shp_index(const shp_index&);
     shp_index& operator=(const shp_index&);
     static int read_ndr_integer(IStream & in);
-    static void read_envelope(IStream & in,Envelope<double> &envelope);
+    static void read_envelope(IStream & in,box2d<double> &envelope);
     static void query_node(const filterT& filter,IStream & in,std::vector<int>& pos);
 };
 
@@ -60,7 +60,7 @@ void shp_index<filterT,IStream>::query_node(const filterT& filter,IStream &  fil
 {
     int offset=read_ndr_integer(file);
 
-    Envelope<double> node_ext;
+    box2d<double> node_ext;
     read_envelope(file,node_ext);
 
     int num_shapes=read_ndr_integer(file);
@@ -96,7 +96,7 @@ int shp_index<filterT,IStream>::read_ndr_integer(IStream & file)
 
 
 template <typename filterT,typename IStream>
-void shp_index<filterT,IStream>::read_envelope(IStream & file,Envelope<double>& envelope)
+void shp_index<filterT,IStream>::read_envelope(IStream & file,box2d<double>& envelope)
 {
     file.read(reinterpret_cast<char*>(&envelope),sizeof(envelope));
 }

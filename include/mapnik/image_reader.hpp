@@ -33,33 +33,33 @@
 
 namespace mapnik 
 {
-    class ImageReaderException : public std::exception
+class image_reader_exception : public std::exception
+{
+private:
+    std::string message_;
+public:
+    image_reader_exception(const std::string& message) 
+	: message_(message) {}
+
+    ~image_reader_exception() throw() {}
+
+    virtual const char* what() const throw()
     {
-    private:
-        std::string message_;
-    public:
-        ImageReaderException(const std::string& message) 
-            : message_(message) {}
+	return message_.c_str();
+    }
+};
 
-        ~ImageReaderException() throw() {}
+struct MAPNIK_DECL image_reader
+{
+    virtual unsigned width() const=0;
+    virtual unsigned height() const=0;
+    virtual void read(unsigned x,unsigned y,image_data_32& image)=0;
+    virtual ~image_reader() {}
+};
 
-        virtual const char* what() const throw()
-        {
-            return message_.c_str();
-        }
-    };
-
-    struct MAPNIK_DECL ImageReader
-    {
-        virtual unsigned width() const=0;
-        virtual unsigned height() const=0;
-        virtual void read(unsigned x,unsigned y,ImageData32& image)=0;
-        virtual ~ImageReader() {}
-    };
-
-   bool register_image_reader(const std::string& type,ImageReader* (*)(const std::string&));
-   MAPNIK_DECL ImageReader* get_image_reader(const std::string& file,const std::string& type);
-   MAPNIK_DECL ImageReader* get_image_reader(const std::string& file);
+bool register_image_reader(const std::string& type,image_reader* (*)(const std::string&));
+MAPNIK_DECL image_reader* get_image_reader(const std::string& file,const std::string& type);
+MAPNIK_DECL image_reader* get_image_reader(const std::string& file);
    
 }
 

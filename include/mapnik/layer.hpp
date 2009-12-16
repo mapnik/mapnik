@@ -36,18 +36,18 @@ namespace mapnik
     /*!
      * @brief A Mapnik map layer.
      *
-     * Create a Layer with a named string and, optionally, an srs string either 
+     * Create a layer with a named string and, optionally, an srs string either 
      * with a Proj.4 epsg code ('+init=epsg:<code>') or with a Proj.4 literal 
      * ('+proj=<literal>'). If no srs is specified it will default to 
      * '+proj=latlong +datum=WGS84'
      */
-    class MAPNIK_DECL Layer
+    class MAPNIK_DECL layer
     {
     public:
-        explicit Layer(std::string const& name, std::string const& srs="+proj=latlong +datum=WGS84");
-        Layer(Layer const& l);
-        Layer& operator=(Layer const& l);
-        bool operator==(Layer const& other) const;
+        explicit layer(std::string const& name, std::string const& srs="+proj=latlong +datum=WGS84");
+        layer(layer const& l);
+        layer& operator=(layer const& l);
+        bool operator==(layer const& other) const;
         
         /*!
          * @brief Set the name of the layer.
@@ -70,12 +70,12 @@ namespace mapnik
         const std::string& title() const;
         
         /*!
-         * @brief Set the abstract of the Layer.
+         * @brief Set the abstract of the layer.
          */
         void set_abstract(std::string const& abstract);
         
         /*!
-         * @return the abstract of the Layer.
+         * @return the abstract of the layer.
          */
         const std::string& abstract() const;
         
@@ -172,7 +172,7 @@ namespace mapnik
         bool clear_label_cache() const; 
         
         /*!
-         * @brief Attach a datasource for this Layer.
+         * @brief Attach a datasource for this layer.
          *
          * @param ds The datasource to attach.
          */
@@ -186,11 +186,11 @@ namespace mapnik
         /*!
          * @return the geographic envelope/bounding box of the data in the layer.
          */
-        Envelope<double> envelope() const;
+        box2d<double> envelope() const;
         
-        ~Layer();
+        ~layer();
     private:
-        void swap(const Layer& other);
+        void swap(const layer& other);
 
         std::string name_;
         std::string title_;

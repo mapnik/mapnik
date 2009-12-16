@@ -105,7 +105,7 @@ public slots:
       QStatusBar *status;
       QSlider * slider_;
 
-      mapnik::Envelope<double> default_extent_;
+      mapnik::box2d<double> default_extent_;
 };
 
 

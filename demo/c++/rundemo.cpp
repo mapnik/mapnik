@@ -66,12 +66,12 @@ int main ( int argc , char** argv)
         feature_type_style provpoly_style;
        
         rule_type provpoly_rule_on;
-        provpoly_rule_on.set_filter(create_filter("[NAME_EN] = 'Ontario'"));
+        provpoly_rule_on.set_filter(parse_expression("[NAME_EN] = 'Ontario'"));
         provpoly_rule_on.append(polygon_symbolizer(color(250, 190, 183)));
         provpoly_style.add_rule(provpoly_rule_on);
         
         rule_type provpoly_rule_qc;
-        provpoly_rule_qc.set_filter(create_filter("[NOM_FR] = 'Québec'"));
+        provpoly_rule_qc.set_filter(parse_expression("[NOM_FR] = 'Québec'"));
         provpoly_rule_qc.append(polygon_symbolizer(color(217, 235, 203)));
         provpoly_style.add_rule(provpoly_rule_qc);
         
@@ -95,7 +95,7 @@ int main ( int argc , char** argv)
         feature_type_style qcdrain_style;
         
         rule_type qcdrain_rule;
-        qcdrain_rule.set_filter(create_filter("[HYC] = 8"));
+        qcdrain_rule.set_filter(parse_expression("[HYC] = 8"));
         qcdrain_rule.append(polygon_symbolizer(color(153, 204, 255)));
         qcdrain_style.add_rule(qcdrain_rule);
         
@@ -104,7 +104,7 @@ int main ( int argc , char** argv)
         // Roads 3 and 4 (The "grey" roads)
         feature_type_style roads34_style;    
         rule_type roads34_rule;
-        roads34_rule.set_filter(create_filter("[CLASS] = 3 or [CLASS] = 4"));
+        roads34_rule.set_filter(parse_expression("[CLASS] = 3 or [CLASS] = 4"));
         stroke roads34_rule_stk(color(171,158,137),2.0);
         roads34_rule_stk.set_line_cap(ROUND_CAP);
         roads34_rule_stk.set_line_join(ROUND_JOIN);
@@ -117,7 +117,7 @@ int main ( int argc , char** argv)
         // Roads 2 (The thin yellow ones)
         feature_type_style roads2_style_1;
         rule_type roads2_rule_1;
-        roads2_rule_1.set_filter(create_filter("[CLASS] = 2"));
+        roads2_rule_1.set_filter(parse_expression("[CLASS] = 2"));
         stroke roads2_rule_stk_1(color(171,158,137),4.0);
         roads2_rule_stk_1.set_line_cap(ROUND_CAP);
         roads2_rule_stk_1.set_line_join(ROUND_JOIN);
@@ -128,7 +128,7 @@ int main ( int argc , char** argv)
         
         feature_type_style roads2_style_2;
         rule_type roads2_rule_2;
-        roads2_rule_2.set_filter(create_filter("[CLASS] = 2"));
+        roads2_rule_2.set_filter(parse_expression("[CLASS] = 2"));
         stroke roads2_rule_stk_2(color(255,250,115),2.0);
         roads2_rule_stk_2.set_line_cap(ROUND_CAP);
         roads2_rule_stk_2.set_line_join(ROUND_JOIN);
@@ -140,7 +140,7 @@ int main ( int argc , char** argv)
         // Roads 1 (The big orange ones, the highways)
         feature_type_style roads1_style_1;
         rule_type roads1_rule_1;
-        roads1_rule_1.set_filter(create_filter("[CLASS] = 1"));
+        roads1_rule_1.set_filter(parse_expression("[CLASS] = 1"));
         stroke roads1_rule_stk_1(color(188,149,28),7.0);
         roads1_rule_stk_1.set_line_cap(ROUND_CAP);
         roads1_rule_stk_1.set_line_join(ROUND_JOIN);
@@ -150,7 +150,7 @@ int main ( int argc , char** argv)
         
         feature_type_style roads1_style_2;
         rule_type roads1_rule_2;
-        roads1_rule_2.set_filter(create_filter("[CLASS] = 1"));
+        roads1_rule_2.set_filter(parse_expression("[CLASS] = 1"));
         stroke roads1_rule_stk_2(color(242,191,36),5.0);
         roads1_rule_stk_2.set_line_cap(ROUND_CAP);
         roads1_rule_stk_2.set_line_join(ROUND_JOIN);
@@ -170,14 +170,14 @@ int main ( int argc , char** argv)
         
         m.insert_style("popplaces",popplaces_style );
         
-        // Layers
+        // layers
         // Provincial  polygons
         {
             parameters p;
             p["type"]="shape";
             p["file"]="../data/boundaries";
             
-            Layer lyr("Provinces"); 
+            layer lyr("Provinces"); 
             lyr.set_datasource(datasource_cache::instance()->create(p));
             lyr.add_style("provinces");    
             m.addLayer(lyr);
@@ -188,7 +188,7 @@ int main ( int argc , char** argv)
             parameters p;
             p["type"]="shape";
             p["file"]="../data/qcdrainage";
-            Layer lyr("Quebec Hydrography");
+            layer lyr("Quebec Hydrography");
             lyr.set_datasource(datasource_cache::instance()->create(p));
             lyr.add_style("drainage");    
             m.addLayer(lyr);
@@ -199,7 +199,7 @@ int main ( int argc , char** argv)
             p["type"]="shape";
             p["file"]="../data/ontdrainage";
             
-            Layer lyr("Ontario Hydrography"); 
+            layer lyr("Ontario Hydrography"); 
             lyr.set_datasource(datasource_cache::instance()->create(p));
             lyr.add_style("drainage");    
             m.addLayer(lyr);
@@ -210,7 +210,7 @@ int main ( int argc , char** argv)
             parameters p;
             p["type"]="shape";
             p["file"]="../data/boundaries_l";
-            Layer lyr("Provincial borders"); 
+            layer lyr("Provincial borders"); 
             lyr.set_datasource(datasource_cache::instance()->create(p));
             lyr.add_style("provlines");    
             m.addLayer(lyr);
@@ -221,7 +221,7 @@ int main ( int argc , char** argv)
             parameters p;
             p["type"]="shape";
             p["file"]="../data/roads";        
-            Layer lyr("Roads"); 
+            layer lyr("Roads"); 
             lyr.set_datasource(datasource_cache::instance()->create(p));
             lyr.add_style("smallroads");
             lyr.add_style("road-border");
@@ -237,22 +237,22 @@ int main ( int argc , char** argv)
             p["type"]="shape";
             p["file"]="../data/popplaces";
             p["encoding"] = "latin1";
-            Layer lyr("Populated Places");
+            layer lyr("Populated Places");
             lyr.set_datasource(datasource_cache::instance()->create(p));
             lyr.add_style("popplaces");    
             m.addLayer(lyr);
         }
         
-        m.zoomToBox(Envelope<double>(1405120.04127408,-247003.813399447,
+        m.zoomToBox(box2d<double>(1405120.04127408,-247003.813399447,
                                      1706357.31328276,-25098.593149577));
         
-        Image32 buf(m.getWidth(),m.getHeight());
-        agg_renderer<Image32> ren(m,buf);
+        image_32 buf(m.getWidth(),m.getHeight());
+        agg_renderer<image_32> ren(m,buf);
         ren.apply();
         
-        save_to_file<ImageData32>(buf.data(),"demo.jpg","jpeg");
-        save_to_file<ImageData32>(buf.data(),"demo.png","png");
-        save_to_file<ImageData32>(buf.data(),"demo256.png","png256");
+        save_to_file<image_data_32>(buf.data(),"demo.jpg","jpeg");
+        save_to_file<image_data_32>(buf.data(),"demo.png","png");
+        save_to_file<image_data_32>(buf.data(),"demo256.png","png256");
         std::cout << "Three maps have been rendered using AGG in the current directory:\n"
            "- demo.jpg\n"
            "- demo.png\n"
@@ -267,7 +267,7 @@ int main ( int argc , char** argv)
         png_render.apply();
         image_surface->write_to_png("cairo-demo.png");
 
-        Image32 im(image_surface);
+        image_32 im(image_surface);
         save_to_file(im, "cairo-demo256.png","png256");
 
         Cairo::RefPtr<Cairo::Surface> surface;

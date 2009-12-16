@@ -74,17 +74,17 @@ namespace mapnik
         int buffer_size_;
         boost::optional<color> background_;
         std::map<std::string,feature_type_style> styles_;
-        std::map<std::string,FontSet> fontsets_;
-        std::vector<Layer> layers_;
+        std::map<std::string,font_set> fontsets_;
+        std::vector<layer> layers_;
         aspect_fix_mode aspectFixMode_;
-        Envelope<double> currentExtent_;
+        box2d<double> currentExtent_;
         
     public:
 
         typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
         typedef std::map<std::string,feature_type_style>::iterator style_iterator;
-        typedef std::map<std::string,FontSet>::const_iterator const_fontset_iterator;
-        typedef std::map<std::string,FontSet>::iterator fontset_iterator;
+        typedef std::map<std::string,font_set>::const_iterator const_fontset_iterator;
+        typedef std::map<std::string,font_set>::iterator fontset_iterator;
         
         /*! \brief Default constructor.
          *
@@ -170,23 +170,23 @@ namespace mapnik
          *  @return true If success.
          *  @return false If failure.
          */
-        bool insert_fontset(std::string const& name, FontSet const& fontset);
+        bool insert_fontset(std::string const& name, font_set const& fontset);
        
         /*! \brief Find a fontset.
          *  @param name The name of the fontset.
          *  @return The fontset if found. If not found return the default map fontset.
          */
-        FontSet const& find_fontset(std::string const& name) const;
+        font_set const& find_fontset(std::string const& name) const;
 
         /*! \brief Get all fontsets
          * @return Const reference to fontsets
          */
-        std::map<std::string,FontSet> const& fontsets() const;
+        std::map<std::string,font_set> const& fontsets() const;
 
         /*! \brief Get all fontsets
          * @return Non-constant reference to fontsets
          */
-        std::map<std::string,FontSet> & fontsets();
+        std::map<std::string,font_set> & fontsets();
 
         /*! \brief Get number of all layers.
          */
@@ -195,34 +195,34 @@ namespace mapnik
         /*! \brief Add a layer to the map.
          *  @param l The layer to add.
          */
-        void addLayer(const Layer& l);
+        void addLayer(const layer& l);
 
         /*! \brief Get a layer.
-         *  @param index Layer number.
+         *  @param index layer number.
          *  @return Constant layer.
          */
-        const Layer& getLayer(size_t index) const;
+        const layer& getLayer(size_t index) const;
 
         /*! \brief Get a layer.
-         *  @param index Layer number.
+         *  @param index layer number.
          *  @return Non-constant layer.
          */
-        Layer& getLayer(size_t index);
+        layer& getLayer(size_t index);
         
         /*! \brief Remove a layer.
-         *  @param index Layer number.
+         *  @param index layer number.
          */
         void removeLayer(size_t index);
 
         /*! \brief Get all layers.
          *  @return Constant layers.
          */
-        std::vector<Layer> const& layers() const;
+        std::vector<layer> const& layers() const;
 
         /*! \brief Get all layers.
          *  @return Non-constant layers.
          */
-        std::vector<Layer> & layers();
+        std::vector<layer> & layers();
 
         /*! \brief Remove all layers and styles from the map.
          */
@@ -290,7 +290,7 @@ namespace mapnik
          *  Aspect is handled automatic if not fitting to width/height.
          *  @param box The bounding box where to zoom.
          */
-        void zoomToBox(const Envelope<double>& box);
+        void zoomToBox(const box2d<double>& box);
 
         /*! \brief Zoom the map to show all data.
          */
@@ -303,12 +303,12 @@ namespace mapnik
         /*! \brief Get current bounding box.
          *  @return The current bounding box.
          */
-        const Envelope<double>& getCurrentExtent() const;
+        const box2d<double>& getCurrentExtent() const;
 
         /*! \brief Get current buffered bounding box.
          *  @return The current buffered bounding box.
          */
-        Envelope<double> get_buffered_extent() const;
+        box2d<double> get_buffered_extent() const;
         
         /*!
          * @return The Map Scale.
@@ -320,7 +320,7 @@ namespace mapnik
         CoordTransform view_transform() const;
         
         /*!
-         * @brief Query a Map Layer (by layer index) for features
+         * @brief Query a Map layer (by layer index) for features
          *
          * Intersecting the given x,y location in the coordinates
          * of map projection.
@@ -333,7 +333,7 @@ namespace mapnik
         featureset_ptr query_point(unsigned index, double x, double y) const;
 
         /*!
-         * @brief Query a Map Layer (by layer index) for features
+         * @brief Query a Map layer (by layer index) for features
          *
          * Intersecting the given x,y location in the coordinates
          * of the pixmap or map surface.

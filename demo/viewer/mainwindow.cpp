@@ -140,7 +140,7 @@ void MainWindow::reload()
 {
    if (!filename_.isEmpty())
    {
-      mapnik::Envelope<double> bbox = mapWidget_->getMap()->getCurrentExtent();
+      mapnik::box2d<double> bbox = mapWidget_->getMap()->getCurrentExtent();
       load_map_file(filename_);
       mapWidget_->zoomToBox(bbox);
       setWindowTitle(tr("%1 - *Reloaded*").arg(filename_));
@@ -382,7 +382,7 @@ void MainWindow::set_default_extent(double x0,double y0, double x1, double y1)
           mapnik::projection prj(map_ptr->srs());
           prj.forward(x0,y0);
           prj.forward(x1,y1);
-          default_extent_=mapnik::Envelope<double>(x0,y0,x1,y1);
+          default_extent_=mapnik::box2d<double>(x0,y0,x1,y1);
           mapWidget_->zoomToBox(default_extent_);
           std::cout << "SET DEFAULT EXT\n";
        }

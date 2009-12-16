@@ -62,8 +62,9 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
    getinitargs(const text_symbolizer& t)
    {
 
-      return boost::python::make_tuple(t.get_name(),t.get_face_name(),t.get_text_size(),t.get_fill());
-      
+       return boost::python::make_tuple("TODO",//t.get_name(),
+					t.get_face_name(),t.get_text_size(),t.get_fill());
+       
    }
 
    static  boost::python::tuple
@@ -164,8 +165,8 @@ using namespace boost::python;
         .value("TOLOWER",TOLOWER)
         ;
 
-class_<text_symbolizer>("TextSymbolizer",init<std::string const&,std::string const&, unsigned,color const&>())
-    .def_pickle(text_symbolizer_pickle_suite())
+class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
+    //.def_pickle(text_symbolizer_pickle_suite())
     .def("anchor",&text_symbolizer::set_anchor)
     .def("displacement",&text_symbolizer::set_displacement)
     .def("get_anchor",get_anchor_list)
@@ -220,9 +221,9 @@ class_<text_symbolizer>("TextSymbolizer",init<std::string const&,std::string con
     .add_property("minimum_distance",
                   &text_symbolizer::get_minimum_distance,
                   &text_symbolizer::set_minimum_distance)
-    .add_property("name",
-                  make_function(&text_symbolizer::get_name,return_value_policy<copy_const_reference>()),
-                  &text_symbolizer::set_name)
+    //.add_property("name",
+    //             make_function(&text_symbolizer::get_name,return_value_policy<copy_const_reference>()),
+    //             &text_symbolizer::set_name)
     .add_property("text_convert",
                   &text_symbolizer::get_text_convert,
                   &text_symbolizer::set_text_convert,

@@ -23,9 +23,9 @@
 
 #include <boost/python.hpp>
 #include <mapnik/query.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 using mapnik::query;
-using mapnik::Envelope;
+using mapnik::box2d;
 
 struct query_pickle_suite : boost::python::pickle_suite
 {
@@ -41,7 +41,7 @@ void export_query()
     using namespace boost::python;
 
     class_<query>("Query", "a spatial query data object", 
-		  init<Envelope<double>,double>() )
+		  init<box2d<double>,double>() )
         .def_pickle(query_pickle_suite())
         .add_property("resolution", &query::resolution)
         .add_property("bbox", make_function(&query::get_bbox,

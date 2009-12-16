@@ -72,8 +72,8 @@ namespace mapnik {
      public:
       ~cairo_renderer_base();
       void start_map_processing(Map const& map);
-      void start_layer_processing(Layer const& lay);
-      void end_layer_processing(Layer const& lay);
+      void start_layer_processing(layer const& lay);
+      void end_layer_processing(layer const& lay);
       void process(point_symbolizer const& sym,
                    Feature const& feature,
                    proj_transform const& prj_trans);

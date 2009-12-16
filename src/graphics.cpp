@@ -34,18 +34,18 @@
 
 namespace mapnik
 {
-    Image32::Image32(int width,int height)
+    image_32::image_32(int width,int height)
         :width_(width),
          height_(height),
          data_(width,height) {}
 
-    Image32::Image32(const Image32& rhs)
+    image_32::image_32(const image_32& rhs)
         :width_(rhs.width_),
          height_(rhs.height_),
          data_(rhs.data_)  {}
 
 #ifdef HAVE_CAIRO
-    Image32::Image32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
+    image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
         :width_(rhs->get_width()),
          height_(rhs->get_height()),
          data_(rhs->get_width(),rhs->get_height())
@@ -71,12 +71,12 @@ namespace mapnik
                    unsigned int g = (in >> 8) & 0xff;
                    unsigned int b = (in >> 0) & 0xff;
 
-#define DE_ALPHA(x) do {                      \
-                       if (a == 0) x = 0;     \
-                       else x = x * 255 / a;  \
-                       if (x > 255) x = 255;  \
+#define DE_ALPHA(x) do {		  \
+                       if (a == 0) x = 0;    \
+                       else x = x * 255 / a; \
+                       if (x > 255) x = 255; \
                    } while(0)
-
+		   
                    DE_ALPHA(r);
                    DE_ALPHA(g);
                    DE_ALPHA(b);
@@ -88,20 +88,20 @@ namespace mapnik
         }
 #endif
 
-    Image32::~Image32() {}
+    image_32::~image_32() {}
 
-    const ImageData32& Image32::data() const
+    const image_data_32& image_32::data() const
     {
         return data_;
     }
 
-    void Image32::setBackground(const color& background)
+    void image_32::set_background(const color& background)
     {
         background_=background;
         data_.set(background_.rgba());
     }
 
-    const color& Image32::getBackground() const
+    const color& image_32::get_background() const
     {
         return background_;
     }

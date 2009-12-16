@@ -26,7 +26,7 @@
 #define SHAPEFILE_HPP
 
 #include <mapnik/global.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 // boost
 #include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
@@ -37,7 +37,7 @@
 
 #include <cstring>
 
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::read_int32_ndr;
 using mapnik::read_int32_xdr;
 using mapnik::read_double_ndr;
@@ -210,7 +210,7 @@ public:
         return val;
     }
     
-    inline void read_envelope(Envelope<double>& envelope)
+    inline void read_envelope(box2d<double>& envelope)
     {
 #ifndef MAPNIK_BIG_ENDIAN
         file_.read(reinterpret_cast<char*>(&envelope),sizeof(envelope));

@@ -24,7 +24,7 @@
 #include "raster_info.hpp"
 
 raster_info::raster_info(std::string const& file, std::string const& format,
-                         mapnik::Envelope<double> const& extent, unsigned width, unsigned height)
+                         mapnik::box2d<double> const& extent, unsigned width, unsigned height)
     :file_(file),
      format_(format),
      extent_(extent),

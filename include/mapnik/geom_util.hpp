@@ -25,7 +25,7 @@
 #ifndef GEOM_UTIL_HPP
 #define GEOM_UTIL_HPP
 // mapnik
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -55,7 +55,7 @@ namespace mapnik
     }
     
     template <typename T,typename Image>
-    bool clip_line(T& x0,T& y0,T& x1,T& y1,Envelope<T> const& box)
+    bool clip_line(T& x0,T& y0,T& x1,T& y1,box2d<T> const& box)
     {
         double tmin=0.0;
         double tmax=1.0;
@@ -195,11 +195,11 @@ namespace mapnik
     // filters
     struct filter_in_box
     {
-        Envelope<double> box_;
-        explicit filter_in_box(const Envelope<double>& box)
+        box2d<double> box_;
+        explicit filter_in_box(const box2d<double>& box)
             : box_(box) {}
 
-        bool pass(const Envelope<double>& extent) const
+        bool pass(const box2d<double>& extent) const
         {
             return extent.intersects(box_);
         }
@@ -210,7 +210,7 @@ namespace mapnik
         coord2d pt_;
         explicit filter_at_point(const coord2d& pt)
             : pt_(pt) {}
-        bool pass(const Envelope<double>& extent) const
+        bool pass(const box2d<double>& extent) const
         {
             return extent.contains(pt_);
         }

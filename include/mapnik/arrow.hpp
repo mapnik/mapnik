@@ -25,7 +25,7 @@
 #ifndef ARROW_HPP
 #define ARROW_HPP
 
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 
 namespace mapnik {
 
@@ -35,7 +35,7 @@ namespace mapnik {
          arrow();
          void rewind(unsigned path_id);
          unsigned vertex(double* x, double* y);
-         Envelope<double> extent() const;   
+         box2d<double> extent() const;   
       private:
          unsigned pos_;
          double x_[7];

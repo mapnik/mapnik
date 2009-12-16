@@ -22,46 +22,60 @@
 
 //$Id$
 
-#ifndef COLOR_FACTORY_HPP
-#define COLOR_FACTORY_HPP
+#ifndef MAPNIK_COLOR_FACTORY_HPP
+#define MAPNIK_COLOR_FACTORY_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/css_color_parser.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/css_color_grammar.hpp>
 
-using namespace boost::spirit;
+// boost
+#include <boost/utility.hpp>
 
 namespace mapnik {    
    
-    class MAPNIK_DECL color_factory
-    {
-    public:
-       
-        static void init_from_string(color & c, char const* css_color)
-        {   
-            actions<color> a(c);
-            css_color_grammar<actions<color> > grammar(a);
-            parse_info<> info = parse(css_color, grammar, space_p);
-            if ( ! info.full) {
-                throw config_error(std::string("Failed to parse color value: ") +
-                        "Expected a color, but got '" + css_color + "'");
-            }
-        }    
-        
-        static color from_string(char const* css_color)
-        {   
-            color c;
-            init_from_string(c,css_color);
-            return c;
-        }
-
-    private:
-        color_factory();
-        color_factory(color_factory const&);
-        color_factory& operator=(color_factory const&);
-    };
+class MAPNIK_DECL color_factory : boost::noncopyable
+{
+public:
+    
+    static void init_from_string(color & c, char const* css_color)
+    {   
+	
+	typedef std::string::const_iterator iterator_type;
+	typedef mapnik::css_color_grammar<iterator_type> css_color_grammar; 
+	std::string str(css_color);
+	
+	css_color_grammar g;
+	iterator_type first = str.begin();
+	iterator_type last =  str.end();
+	mapnik::css css_;
+	bool result =
+	    boost::spirit::qi::phrase_parse(first,
+					    last,
+					    g,
+					    boost::spirit::ascii::space,
+					    css_);
+	if (!result) 
+	{
+	    throw config_error(std::string("Failed to parse color value: ") +
+			       "Expected a color, but got '" + css_color + "'");
+	}
+	// TODO: adapt mapnik::color into boost::fusion sequence
+	c.set_red(css_.r);
+	c.set_green(css_.g);
+	c.set_blue(css_.b);
+	c.set_alpha(css_.a);
+    }    
+    
+    static color from_string(char const* css_color)
+    {   
+	color c;
+	init_from_string(c,css_color);
+	return c;
+    }
+};
 }
 
-#endif //COLOR_FACTORY_HPP
+#endif //MAPNIK_COLOR_FACTORY_HPP

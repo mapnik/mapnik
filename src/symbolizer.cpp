@@ -21,49 +21,27 @@
  *****************************************************************************/
 //$Id$
 
+//mapnik
 #include <mapnik/symbolizer.hpp>
-
-#include <mapnik/image_reader.hpp>
-
-#include <iostream>
 
 namespace mapnik {
 
-   symbolizer_with_image::symbolizer_with_image(boost::shared_ptr<ImageData32> img) :
-      image_( img ) {}
+symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
+    : image_filename_( file ) {}
 
-   symbolizer_with_image::symbolizer_with_image(std::string const& file,
-                                                std::string const& type, unsigned width,unsigned height)
-      : image_(new ImageData32(width,height)),
-        image_filename_( file )
-   {
-      std::auto_ptr<ImageReader> reader(get_image_reader(file,type));
-      if (reader.get())
-         reader->read(0,0,*image_);		
-   }
+symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
+    : image_filename_(rhs.image_filename_) {}
    
-   symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
-      : image_(rhs.image_), image_filename_(rhs.image_filename_) {}
-   
-   
-   boost::shared_ptr<ImageData32> symbolizer_with_image::get_image() const
-   {
-      return image_;
-   }
-   void symbolizer_with_image::set_image(boost::shared_ptr<ImageData32> image) 
-   {
-      image_ = image;
-   }
-   
-   std::string const& symbolizer_with_image::get_filename() const
-   {
-      return image_filename_;
-   }
 
-   void symbolizer_with_image::set_filename(std::string const& image_filename) 
-   {
-      image_filename_ = image_filename;
-   }
+path_expression_ptr symbolizer_with_image::get_filename() const
+{
+    return image_filename_;
+}
+
+void symbolizer_with_image::set_filename(path_expression_ptr image_filename) 
+{
+    image_filename_ = image_filename;
+}
       
 } // end of namespace mapnik
 

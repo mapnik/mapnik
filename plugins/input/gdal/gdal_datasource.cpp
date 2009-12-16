@@ -33,7 +33,7 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(gdal_datasource)
 
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::query;
 using mapnik::featureset_ptr;
@@ -68,7 +68,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
 {
 
 #ifdef MAPNIK_DEBUG
-   std::cout << "\nGDAL Plugin: Initializing...\n";
+   std::clog << "\nGDAL Plugin: Initializing...\n";
 #endif
 
    GDALAllRegister();
@@ -103,7 +103,8 @@ gdal_datasource::gdal_datasource(parameters const& params)
    GDALClose(dataset);
    
 #ifdef MAPNIK_DEBUG
-         std::cout << "GDAL Plugin: RASTER SIZE("<< width_ << "," << height_ << ")\n";
+   std::clog << "GDAL Plugin: Raster Size=" << width_ << "," << height_ << "\n";
+   std::clog << "GDAL Plugin: Raster Extent=" << extent_ << "\n";
 #endif
 
 }
@@ -120,7 +121,7 @@ std::string gdal_datasource::name()
    return "gdal";
 }
 
-Envelope<double> gdal_datasource::envelope() const
+box2d<double> gdal_datasource::envelope() const
 {
    return extent_;
 }

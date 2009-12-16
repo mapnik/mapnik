@@ -69,7 +69,7 @@ m.layers.append(road_layer)
 # Draw map
 
 # Set the initial extent of the map.
-m.zoom_to_box(Envelope(0,0,14,-14))
+m.zoom_to_box(Box2d(0,0,14,-14))
 
 
 # Render

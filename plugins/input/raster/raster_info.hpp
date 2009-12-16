@@ -27,20 +27,20 @@
 #include "raster_datasource.hpp"
 #include <string>
 
-using mapnik::Envelope;
+using mapnik::box2d;
 
 class raster_info
 {
    std::string file_;
    std::string format_;
-   Envelope<double> extent_;
+   box2d<double> extent_;
    unsigned width_;
    unsigned height_;
 public:
-   raster_info(const std::string& file,const std::string& format, const Envelope<double>& extent, unsigned width, unsigned height);
+   raster_info(const std::string& file,const std::string& format, const box2d<double>& extent, unsigned width, unsigned height);
    raster_info(const raster_info& rhs);
    raster_info& operator=(const raster_info& rhs);
-   inline Envelope<double> const& envelope() const {return extent_;}
+   inline box2d<double> const& envelope() const {return extent_;}
    inline std::string const& file() const { return file_;}
    inline std::string const& format() const {return format_;}
    inline unsigned width() const { return width_;}

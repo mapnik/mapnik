@@ -74,7 +74,7 @@ int shape_io::type() const
    return type_;
 }
 
-const Envelope<double>& shape_io::current_extent() const
+const box2d<double>& shape_io::current_extent() const
 {
    return cur_extent_;
 }

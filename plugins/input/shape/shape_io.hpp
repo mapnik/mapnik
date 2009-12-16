@@ -44,7 +44,7 @@ struct shape_io : boost::noncopyable
       
       unsigned reclength_;
       unsigned id_;
-      Envelope<double> cur_extent_;
+      box2d<double> cur_extent_;
 
    public:
       enum shapeType
@@ -72,7 +72,7 @@ struct shape_io : boost::noncopyable
       dbf_file& dbf();
       void move_to(int id);
       int type() const;
-      const Envelope<double>& current_extent() const;
+      const box2d<double>& current_extent() const;
       geometry2d * read_polyline();
       geometry2d * read_polylinem();
       geometry2d * read_polylinez();

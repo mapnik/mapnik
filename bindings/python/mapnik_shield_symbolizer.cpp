@@ -25,22 +25,26 @@
 #include <boost/python.hpp>
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/path_expression_grammar.hpp>
 
 using mapnik::color;
 using mapnik::shield_symbolizer;
 using mapnik::text_symbolizer;
 using mapnik::symbolizer_with_image;
+using mapnik::path_processor_type;
+using mapnik::path_expression_ptr;
+using mapnik::guess_type;
+using mapnik::expression_ptr;
 
 struct shield_symbolizer_pickle_suite : boost::python::pickle_suite
 {
    static boost::python::tuple
    getinitargs(const shield_symbolizer& s)
    {
-
-      boost::shared_ptr<mapnik::ImageData32> img = s.get_image();
-      const std::string & filename = s.get_filename();
-      //(name, font name, font size, font color, image file, image type, width, height)
-      return boost::python::make_tuple(s.get_name(),s.get_face_name(),s.get_text_size(),s.get_fill(),filename,mapnik::guess_type(filename),img->width(),img->height());
+       std::string filename = path_processor_type::to_string(*s.get_filename());
+       //(name, font name, font size, font color, image file, image type, width, height)
+       return boost::python::make_tuple( "TODO",//s.get_name(),
+					s.get_face_name(),s.get_text_size(),s.get_fill(),filename,guess_type(filename));
       
    }
 
@@ -75,9 +79,9 @@ void export_shield_symbolizer()
 {
     using namespace boost::python;
     class_< shield_symbolizer, bases<text_symbolizer> >("ShieldSymbolizer",
-                                                        init< std::string const&, std::string const&, unsigned, mapnik::color const&,
-                                                        std::string const&, std::string const&,unsigned,unsigned>("TODO"))
-      .def_pickle(shield_symbolizer_pickle_suite())
+                                                        init<expression_ptr, std::string const&, unsigned, mapnik::color const&,
+                                                        path_expression_ptr>("TODO"))
+	//.def_pickle(shield_symbolizer_pickle_suite())
         ;
     
 }

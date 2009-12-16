@@ -441,9 +441,9 @@ def test_coord_multiplication():
     eq_(c.x, 200)
     eq_(c.y, 200)
 
-# Envelope initialization
+# Box2d initialization
 def test_envelope_init():
-    e = mapnik.Envelope(100, 100, 200, 200)
+    e = mapnik.Box2d(100, 100, 200, 200)
 
     assert_true(e.contains(100, 100))
     assert_true(e.contains(100, 200))
@@ -471,15 +471,15 @@ def test_envelope_init():
     eq_(c.x, 150)
     eq_(c.y, 150)
 
-# Envelope pickling
+# Box2d pickling
 def test_envelope_pickle():
-    e = mapnik.Envelope(100, 100, 200, 200)
+    e = mapnik.Box2d(100, 100, 200, 200)
 
     eq_(pickle.loads(pickle.dumps(e)), e)
 
-# Envelope multiplication
+# Box2d multiplication
 def test_envelope_multiplication():
-    e = mapnik.Envelope(100, 100, 200, 200)
+    e = mapnik.Box2d(100, 100, 200, 200)
     e *= 2
     
     assert_true(e.contains(50, 50))

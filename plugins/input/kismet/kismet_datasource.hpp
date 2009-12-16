@@ -50,14 +50,14 @@ class kismet_datasource : public mapnik::datasource
       static std::string name();
       mapnik::featureset_ptr features(mapnik::query const& q) const;
       mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
-      mapnik::Envelope<double> envelope() const;
+      mapnik::box2d<double> envelope() const;
       mapnik::layer_descriptor get_descriptor() const;
     
    private:
       void run (const std::string &host, const unsigned int port);
   
       static const std::string name_;
-      mapnik::Envelope<double> extent_;
+      mapnik::box2d<double> extent_;
       mutable bool extent_initialized_;
       int type_;
       mapnik::layer_descriptor desc_;

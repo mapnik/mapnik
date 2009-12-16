@@ -182,13 +182,17 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
 
       QIcon operator() (mapnik::point_symbolizer const& sym) const
       {
-         boost::shared_ptr<mapnik::ImageData32> symbol = sym.get_image();
-         if (symbol)
-         {
-            QImage image(symbol->getBytes(),symbol->width(),symbol->height(),QImage::Format_ARGB32);
+	  // FIXME!
+	  /*
+	    boost::shared_ptr<mapnik::image_data_32> symbol = sym.get_image();
+	    if (symbol)
+	    {
+            QImage image(symbol->getBytes(),
+	    symbol->width(),symbol->height(),QImage::Format_ARGB32);
             QPixmap pix = QPixmap::fromImage(image.rgbSwapped());
             return QIcon(pix);
          }
+	  */
          return QIcon();
       }
       QIcon operator() (mapnik::line_symbolizer const& sym) const
@@ -243,9 +247,9 @@ class rule_node
       ~rule_node() {}
       QString name() const
       {
-         mapnik::filter_ptr filter = rule_.get_filter();
+         mapnik::expression_ptr filter = rule_.get_filter();
          
-         return QString(filter->to_string().c_str());
+         return QString("TODO!");//filter->to_string().c_str());
       } 
       
       QIcon icon() const
@@ -319,7 +323,7 @@ StyleModel::StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent)
       for ( ; itr2 != rules.end();++itr2)
       {
          node* rule_n = style_n->add_child(new node(rule_node(QString("Rule"),*itr2),style_n));
-         mapnik::symbolizers::const_iterator itr3 = (*itr2).begin();
+         mapnik::rule_type::symbolizers::const_iterator itr3 = (*itr2).begin();
          for ( ; itr3 !=itr2->end();++itr3)
          {
             rule_n->add_child(new node(symbolizer_node(*itr3),rule_n));

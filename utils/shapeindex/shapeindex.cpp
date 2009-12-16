@@ -139,7 +139,7 @@ int main (int argc,char** argv)
         int file_length=shp.read_xdr_integer();
         int version=shp.read_ndr_integer();
         int shape_type=shp.read_ndr_integer();
-        Envelope<double> extent;
+        box2d<double> extent;
         shp.read_envelope(extent);
 	
 	
@@ -164,12 +164,12 @@ int main (int argc,char** argv)
             shp.skip(4);
             //std::clog << "offset= "<< offset << std::endl;
 	        
-            Envelope<double> item_ext;
+            box2d<double> item_ext;
             if (shape_type==shape_io::shape_point)
             {
                 double x=shp.read_double();
                 double y=shp.read_double();
-                item_ext=Envelope<double>(x,y,x,y);
+                item_ext=box2d<double>(x,y,x,y);
 	
             }
             else if (shape_type==shape_io::shape_pointm)
@@ -177,7 +177,7 @@ int main (int argc,char** argv)
                 double x=shp.read_double();
                 double y=shp.read_double();
                 shp.read_double();
-                item_ext=Envelope<double>(x,y,x,y);
+                item_ext=box2d<double>(x,y,x,y);
 	
             }
             else if (shape_type==shape_io::shape_pointz)
@@ -186,7 +186,7 @@ int main (int argc,char** argv)
                 double y=shp.read_double();
                 shp.read_double();
                 shp.read_double();
-                item_ext=Envelope<double>(x,y,x,y);
+                item_ext=box2d<double>(x,y,x,y);
             }
 	
             else 

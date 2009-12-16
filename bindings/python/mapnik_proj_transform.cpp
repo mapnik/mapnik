@@ -59,7 +59,7 @@ namespace  {
       return mapnik::coord2d(x,y);
    }
 
-   mapnik::Envelope<double> forward_transform_env(mapnik::proj_transform& t, mapnik::Envelope<double> const & box)
+   mapnik::box2d<double> forward_transform_env(mapnik::proj_transform& t, mapnik::box2d<double> const & box)
    {
       double minx = box.minx();
       double miny = box.miny();
@@ -68,10 +68,10 @@ namespace  {
       double z = 0.0;
       t.forward(minx,miny,z);
       t.forward(maxx,maxy,z);
-      return mapnik::Envelope<double>(minx,miny,maxx,maxy);
+      return mapnik::box2d<double>(minx,miny,maxx,maxy);
    }
 
-   mapnik::Envelope<double> backward_transform_env(mapnik::proj_transform& t, mapnik::Envelope<double> const & box)
+   mapnik::box2d<double> backward_transform_env(mapnik::proj_transform& t, mapnik::box2d<double> const & box)
    {
       double minx = box.minx();
       double miny = box.miny();
@@ -80,7 +80,7 @@ namespace  {
       double z = 0.0;
       t.backward(minx,miny,z);
       t.backward(maxx,maxy,z);
-      return mapnik::Envelope<double>(minx,miny,maxx,maxy);
+      return mapnik::box2d<double>(minx,miny,maxx,maxy);
    }   
 }
 

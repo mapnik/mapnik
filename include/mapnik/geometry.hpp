@@ -51,9 +51,9 @@ namespace mapnik {
     public:
         geometry () {}  
   
-        Envelope<double> envelope() const
+        box2d<double> envelope() const
         {
-            Envelope<double> result;    
+            box2d<double> result;    
             double x,y;
             rewind(0);
             for (unsigned i=0;i<num_points();++i)

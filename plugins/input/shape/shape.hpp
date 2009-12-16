@@ -26,7 +26,7 @@
 #define SHAPE_HPP
 
 #include <mapnik/datasource.hpp>
-#include <mapnik/envelope.hpp>
+#include <mapnik/box2d.hpp>
 
 #include "shape_io.hpp"
 
@@ -47,7 +47,7 @@ class shape_datasource : public datasource
       static std::string name();
       featureset_ptr features(const query& q) const;
       featureset_ptr features_at_point(coord2d const& pt) const;
-      Envelope<double> envelope() const;
+      box2d<double> envelope() const;
       layer_descriptor get_descriptor() const;   
    private:
       shape_datasource(const shape_datasource&);
@@ -57,7 +57,7 @@ class shape_datasource : public datasource
       int type_;
       std::string shape_name_;
       long file_length_;
-      Envelope<double> extent_;
+      box2d<double> extent_;
       bool indexed_;
       layer_descriptor desc_;
       static const std::string name_;

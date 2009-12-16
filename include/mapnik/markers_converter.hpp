@@ -115,7 +115,7 @@ namespace mapnik {
                double dx = x2 - x1;
                double dy = y2 - y1;
                double d = std::sqrt(dx * dx + dy * dy);
-               Envelope<double> ext = shape_.extent();
+               box2d<double> ext = shape_.extent();
                if (d > ext.width())
                {
                   mtx_ = transform_;
@@ -132,7 +132,7 @@ namespace mapnik {
                   mtx_.transform(&minx,&miny);
                   mtx_.transform(&maxx,&maxy);
                      
-                  Envelope<double> e0(minx,miny,maxx,maxy);
+                  box2d<double> e0(minx,miny,maxx,maxy);
                      
                   if (detector_.has_placement(e0))
                   {

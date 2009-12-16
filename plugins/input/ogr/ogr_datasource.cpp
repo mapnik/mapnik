@@ -44,7 +44,7 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(ogr_datasource)
 
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::query;
 using mapnik::featureset_ptr;
@@ -203,7 +203,7 @@ int ogr_datasource::type() const
    return type_;
 }
 
-Envelope<double> ogr_datasource::envelope() const
+box2d<double> ogr_datasource::envelope() const
 {
    return extent_;
 }

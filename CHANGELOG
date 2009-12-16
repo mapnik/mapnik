@@ -17,6 +17,8 @@ Mapnik 0.7.0 Release
 
 - Gdal Plugin: Add support for Gdal overviews, enabling fast loading of > 1GB rasters (#54)
 
+- Rasterlite Plugin: Experimental support for Rasterlite, to practically use sqlite database with wavelet compressed rasters
+
 - PostGIS: Added an optional 'geometry_table' parameter. This is used by Mapnik to look up metadata in the
   geometry_columns and calculate extents (when the 'geometry_field' and 'srid' parameters are not supplied).
   If 'geometry_table' is not specified Mapnik will attempt to determine the name of the table to query based

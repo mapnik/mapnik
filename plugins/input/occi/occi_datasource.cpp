@@ -53,7 +53,7 @@ using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
 using mapnik::attribute_descriptor;
 using mapnik::datasource_exception;
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::coord2d;
 
 using oracle::occi::Environment;
@@ -290,7 +290,7 @@ int occi_datasource::type() const
     return type_;
 }
 
-Envelope<double> occi_datasource::envelope() const
+box2d<double> occi_datasource::envelope() const
 {
     if (extent_initialized_) return extent_;
 
@@ -407,7 +407,7 @@ featureset_ptr occi_datasource::features(query const& q) const
 {
     if (pool_)
     {
-        Envelope<double> const& box=q.get_bbox();
+        box2d<double> const& box=q.get_bbox();
     
         std::ostringstream s;
         s << "select " << geometry_field_ << " as geom";

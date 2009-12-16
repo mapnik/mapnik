@@ -137,12 +137,12 @@ class _Coord(Coord,_injector):
         """
         return inverse_(self, projection)
 
-class _Envelope(Envelope,_injector):
+class _Box2d(Box2d,_injector):
     """
     Represents a spatial envelope (i.e. bounding box). 
     
     
-    Following operators are defined for Envelope:
+    Following operators are defined for Box2d:
 
     Addition:
     e1 + e2 is equvalent to e1.expand_to_include(e2) but yields 
@@ -165,7 +165,7 @@ class _Envelope(Envelope,_injector):
     Equality: two envelopes are equal if their corner points are equal.
     """
     def __repr__(self):
-        return 'Envelope(%s,%s,%s,%s)' % \
+        return 'Box2d(%s,%s,%s,%s)' % \
             (self.minx,self.miny,self.maxx,self.maxy)
     def forward(self, projection):
         """
@@ -193,21 +193,21 @@ class _Projection(Projection,_injector):
         return "Projection('%s')" % self.params()
     def forward(self,obj):
         """
-        Projects the given object (Envelope or Coord) 
+        Projects the given object (Box2d or Coord) 
         from the geographic space into the cartesian space.
 
         See also:
-          Envelope.forward(self, projection),
+          Box2d.forward(self, projection),
           Coord.forward(self, projection).
         """
         return forward_(obj,self)
     def inverse(self,obj):
         """
-        Projects the given object (Envelope or Coord) 
+        Projects the given object (Box2d or Coord) 
         from the cartesian space into the geographic space.
 
         See also:
-          Envelope.inverse(self, projection),
+          Box2d.inverse(self, projection),
           Coord.inverse(self, projection).
         """
         return inverse_(obj,self)
@@ -337,7 +337,7 @@ def Raster(**keywords):
       hix -- highest (max) x/longitude of tiff extent
       hiy -- highest (max) y/latitude of tiff extent
 
-    Hint: lox,loy,hix,hiy make a Mapnik Envelope
+    Hint: lox,loy,hix,hiy make a Mapnik Box2d
 
     Optional keyword arguments:
       base -- path prefix (default None)
@@ -450,6 +450,26 @@ def SQLite(**keywords):
     keywords['type'] = 'sqlite'
     return CreateDatasource(keywords)
 
+def Rasterlite(**keywords):
+    """Create a Rasterlite Datasource.
+
+    Required keyword arguments:
+      file -- path to Rasterlite database file
+      table -- table name or subselect query
+
+    Optional keyword arguments:
+      base -- path prefix (default None)
+      extent -- manually specified data extent (comma delimited string, default None)
+
+    >>> from mapnik import Rasterlite, Layer
+    >>> rasterlite = Rasterlite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239') 
+    >>> lyr = Layer('Rasterlite Layer')
+    >>> lyr.datasource = rasterlite
+
+    """
+    keywords['type'] = 'rasterlite'
+    return CreateDatasource(keywords)
+
 def Osm(**keywords):
     """Create a Osm Datasource.
 
@@ -524,7 +544,7 @@ __all__ = [
     # classes
     'Color', 'Coord', 
     'DatasourceCache',
-    'Envelope',
+    'Box2d',
     'Feature', 'Featureset', 'FontEngine',
     'Geometry2d',
     'Image', 'ImageView',
@@ -537,7 +557,6 @@ __all__ = [
     'PolygonPatternSymbolizer', 'PolygonSymbolizer',
     'ProjTransform',
     'Projection',
-    'Properties',
     'Query',
     'RasterSymbolizer',
     'Rule', 'Rules',
@@ -562,7 +581,8 @@ __all__ = [
     'mapnik_version_string', 'mapnik_version', 'mapnik_svn_revision',
     'has_cairo', 'has_pycairo',
     #   factory methods
-    'Filter',
+    'Expression',
+    'PathExpression',
     #   load/save/render
     'load_map', 'load_map_from_string', 'save_map', 'save_map_to_string',
     'render', 'render_tile_to_file', 'render_to_file',

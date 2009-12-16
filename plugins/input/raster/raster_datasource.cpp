@@ -34,7 +34,7 @@
 
 using mapnik::datasource;
 using mapnik::parameters;
-using mapnik::ImageReader;
+using mapnik::image_reader;
 
 DATASOURCE_PLUGIN(raster_datasource)
 
@@ -82,7 +82,7 @@ raster_datasource::raster_datasource(const parameters& params)
 
    try
    {         
-      std::auto_ptr<ImageReader> reader(mapnik::get_image_reader(filename_, format_));
+      std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
       if (reader.get())
       {
          width_ = reader->width();
@@ -111,7 +111,7 @@ std::string raster_datasource::name()
     return name_;
 }
 
-mapnik::Envelope<double> raster_datasource::envelope() const
+mapnik::box2d<double> raster_datasource::envelope() const
 {
     return extent_;
 }
@@ -124,8 +124,8 @@ layer_descriptor raster_datasource::get_descriptor() const
 featureset_ptr raster_datasource::features(query const& q) const
 {
    mapnik::CoordTransform t(width_,height_,extent_,0,0);
-   mapnik::Envelope<double> intersect=extent_.intersect(q.get_bbox());
-   mapnik::Envelope<double> ext=t.forward(intersect);
+   mapnik::box2d<double> intersect=extent_.intersect(q.get_bbox());
+   mapnik::box2d<double> ext=t.forward(intersect);
    
    unsigned width = int(ext.width() + 0.5);
    unsigned height = int(ext.height() + 0.5);

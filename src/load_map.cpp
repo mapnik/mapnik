@@ -26,7 +26,7 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
-#include <mapnik/filter_factory.hpp>
+
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -34,6 +34,9 @@
 
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/libxml2_loader.hpp>
+
+#include <mapnik/filter_factory.hpp>
+#include <mapnik/path_expression_grammar.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -65,7 +68,7 @@ namespace mapnik
          map_parser( bool strict, std::string const& filename = "" ) :
             strict_( strict ),
             filename_( filename ),
-            relative_to_xml_(true),
+            relative_to_xml_(false),
             font_manager_(font_engine_) {}
 
          void parse_map( Map & map, ptree const & sty);
@@ -74,7 +77,7 @@ namespace mapnik
          void parse_layer( Map & map, ptree const & lay);
 
          void parse_fontset(Map & map, ptree const & fset);
-         void parse_font(FontSet & fset, ptree const & f);
+         void parse_font(font_set & fset, ptree const & f);
 
          void parse_rule( feature_type_style & style, ptree const & r);
 
@@ -100,7 +103,7 @@ namespace mapnik
          freetype_engine font_engine_;
          face_manager<freetype_engine> font_manager_;
          std::map<std::string,std::string> file_sources_;
-         std::map<std::string,FontSet> fontsets_;
+         std::map<std::string,font_set> fontsets_;
     };
 
     void load_map(Map & map, std::string const& filename, bool strict)
@@ -238,7 +241,7 @@ namespace mapnik
                 else if (v.first == "FileSource")
                 {
                   std::string name = get_attr<string>( v.second, "name");
-                  std::string value = get_own<string>( v.second, "");
+                  std::string value = get_value<string>( v.second, "");
                   file_sources_[name] = value;
                 }
                 else if (v.first == "Datasource")
@@ -254,7 +257,7 @@ namespace mapnik
                         if (paramIter->first == "Parameter")
                         {
                             std::string name = get_attr<string>(param, "name");
-                            std::string value = get_own<string>( param,
+                            std::string value = get_value<string>( param,
                                     "datasource parameter");
                             params[name] = value;
                         }
@@ -324,7 +327,7 @@ namespace mapnik
         try
         {
             name = get_attr<string>(fset, "name");
-            FontSet fontset(name);
+            font_set fontset(name);
 
             ptree::const_iterator itr = fset.begin();
             ptree::const_iterator end = fset.end();
@@ -349,7 +352,7 @@ namespace mapnik
 
             // XXX Hack because map object isn't accessible by text_symbolizer
             // when it's parsed
-            fontsets_.insert(pair<std::string, FontSet>(name, fontset));
+            fontsets_.insert(pair<std::string, font_set>(name, fontset));
         } catch (const config_error & ex) {
             if ( ! name.empty() ) {
                 ex.append_context(string("in FontSet '") + name + "'");
@@ -358,7 +361,7 @@ namespace mapnik
         }
     }
 
-    void map_parser::parse_font(FontSet & fset, ptree const & f)
+    void map_parser::parse_font(font_set & fset, ptree const & f)
 	{
         std::string face_name = get_attr(f, "face_name", string());
 
@@ -380,7 +383,7 @@ namespace mapnik
             // XXX if no projection is given inherit from map? [DS]
             std::string srs = get_attr(lay, "srs", map.srs());
 
-            Layer lyr(name, srs);
+            layer lyr(name, srs);
 
             optional<boolean> status = get_opt_attr<boolean>(lay, "status");
             if (status)
@@ -458,7 +461,7 @@ namespace mapnik
                         if (paramIter->first == "Parameter")
                         {
                             std::string name = get_attr<string>(param, "name");
-                            std::string value = get_own<string>( param,
+                            std::string value = get_value<string>( param,
                                     "datasource parameter");
                             params[name] = value;
                         }
@@ -548,7 +551,7 @@ namespace mapnik
             if (filter_expr)
             {
                // can we use encoding defined for XML document for filter expressions?
-               rule.set_filter(create_filter(*filter_expr,"utf8"));
+               rule.set_filter(parse_expression(*filter_expr,"utf8"));
             }
 
             optional<std::string> else_filter =
@@ -656,11 +659,8 @@ namespace mapnik
                 get_opt_attr<boolean>(sym, "allow_overlap");
             optional<float> opacity =
                 get_opt_attr<float>(sym, "opacity");
-
-            optional<unsigned> width = get_opt_attr<unsigned>(sym, "width");
-            optional<unsigned> height = get_opt_attr<unsigned>(sym, "height");
-
-            if (file && type && width && height)
+	    
+            if (file && type)
             {
                 try
                 {
@@ -682,8 +682,9 @@ namespace mapnik
                      std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
                    }
                    #endif
-
-                   point_symbolizer symbol(*file,*type,*width,*height);
+		   
+                   point_symbolizer symbol(parse_path(*file));
+		   
                    if (allow_overlap)
                    {
                       symbol.set_allow_overlap( * allow_overlap );
@@ -694,7 +695,7 @@ namespace mapnik
                    }
                    rule.append(symbol);
                 }
-                catch (ImageReaderException const & ex )
+                catch (image_reader_exception const & ex )
                 {
                     string msg("Failed to load image file '" + * file +
                             "': " + ex.what());
@@ -709,14 +710,12 @@ namespace mapnik
                 }
 
             }
-            else if (file || type || width || height)
+            else if (file || type)
             {
                 std::ostringstream os;
                 os << "Missing required attributes: ";
                 if ( ! file ) os << "file ";
                 if ( ! type ) os << "type ";
-                if ( ! width ) os << "width ";
-                if ( ! height ) os << "height ";
                 throw config_error( os.str() );
             }
             else
@@ -738,10 +737,8 @@ namespace mapnik
             std::string file = get_attr<string>(sym, "file");
             optional<std::string> base = get_opt_attr<string>(sym, "base");
             std::string type = get_attr<string>(sym, "type");
-            unsigned width = get_attr<unsigned>(sym, "width");
-            unsigned height = get_attr<unsigned>(sym, "height");
-
-            try
+            
+	    try
             {
                if( base )
                {
@@ -762,10 +759,10 @@ namespace mapnik
                #endif
 
 
-               line_pattern_symbolizer symbol(file,type,width,height);
+               line_pattern_symbolizer symbol(parse_path(file));
                rule.append(symbol);
             }
-            catch (ImageReaderException const & ex )
+            catch (image_reader_exception const & ex )
             {
                 string msg("Failed to load image file '" + file +
                         "': " + ex.what());
@@ -794,9 +791,7 @@ namespace mapnik
             std::string file = get_attr<string>(sym, "file");
             optional<std::string> base = get_opt_attr<string>(sym, "base");
             std::string type = get_attr<string>(sym, "type");
-            unsigned width = get_attr<unsigned>(sym, "width");
-            unsigned height = get_attr<unsigned>(sym, "height");
-
+	    
             try
             {
                 if( base )
@@ -816,11 +811,11 @@ namespace mapnik
                   std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
                 }
                 #endif
-
-                polygon_pattern_symbolizer symbol(file,type,width,height);
+		
+                polygon_pattern_symbolizer symbol(parse_path(file));
                 rule.append(symbol);
             }
-            catch (ImageReaderException const & ex )
+            catch (image_reader_exception const & ex )
             {
                 string msg("Failed to load image file '" + file +
                         "': " + ex.what());
@@ -846,7 +841,7 @@ namespace mapnik
         try
         {
             std::string name = get_attr<string>(sym, "name");
-
+	    
             optional<std::string> face_name =
                  get_opt_attr<std::string>(sym, "face_name");
 
@@ -857,15 +852,15 @@ namespace mapnik
 
             color c = get_attr(sym, "fill", color(0,0,0));
 
-            text_symbolizer text_symbol = text_symbolizer(name, size, c);
-
+            text_symbolizer text_symbol = text_symbolizer(parse_expression(name, "utf8"), size, c);
+	    	    
             if (fontset_name && face_name)
             {
                 throw config_error(std::string("Can't have both face_name and fontset_name"));
             }
             else if (fontset_name)
             {
-                std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(*fontset_name);
+                std::map<std::string,font_set>::const_iterator itr = fontsets_.find(*fontset_name);
                 if (itr != fontsets_.end())
                 {
                     text_symbol.set_fontset(itr->second);
@@ -1042,10 +1037,7 @@ namespace mapnik
 
             std::string image_file = get_attr<string>(sym, "file");
             optional<std::string> base = get_opt_attr<string>(sym, "base");
-            std::string type = get_attr<string>(sym, "type");
-            unsigned width =  get_attr<unsigned>(sym, "width");
-            unsigned height =  get_attr<unsigned>(sym, "height");
-
+	    
             try
             {
                 if( base )
@@ -1067,16 +1059,15 @@ namespace mapnik
                 }
                 #endif
 
-                shield_symbolizer shield_symbol(name,size,fill,
-                                                image_file,type,width,height);
-
-                if (fontset_name && face_name)
+                shield_symbolizer shield_symbol(parse_expression(name, "utf8"),size,fill,parse_path(image_file));
+                
+		if (fontset_name && face_name)
                 {
                     throw config_error(std::string("Can't have both face_name and fontset_name"));
                 }
                 else if (fontset_name)
                 {
-                    std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(*fontset_name);
+                    std::map<std::string,font_set>::const_iterator itr = fontsets_.find(*fontset_name);
                     if (itr != fontsets_.end())
                     {
                         shield_symbol.set_fontset(itr->second);
@@ -1230,7 +1221,7 @@ namespace mapnik
 
                 rule.append(shield_symbol);
             }
-            catch (ImageReaderException const & ex )
+            catch (image_reader_exception const & ex )
             {
                string msg("Failed to load image file '" + image_file +
                             "': " + ex.what());

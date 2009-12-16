@@ -53,7 +53,7 @@ class ogr_featureset : public mapnik::Featureset
 
       ogr_featureset(OGRDataSource & dataset,
                      OGRLayer & layer,
-                     const mapnik::Envelope<double> & extent,
+                     const mapnik::box2d<double> & extent,
                      const std::string& encoding,
                      const bool multiple_geometries);
       virtual ~ogr_featureset();

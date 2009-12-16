@@ -33,38 +33,38 @@ extern "C"
 #include <mapnik/png_io.hpp>
 #include <sstream>
 
-using mapnik::ImageData32;
+using mapnik::image_data_32;
 using mapnik::image_view;
 using mapnik::save_to_file;
 
 // output 'raw' pixels
-PyObject* view_tostring1(image_view<ImageData32> const& view)
+PyObject* view_tostring1(image_view<image_data_32> const& view)
 {
    std::ostringstream ss(std::ios::out|std::ios::binary);
    for (unsigned i=0;i<view.height();i++)
    {
       ss.write(reinterpret_cast<const char*>(view.getRow(i)), 
-               view.width() * sizeof(image_view<ImageData32>::pixel_type));
+               view.width() * sizeof(image_view<image_data_32>::pixel_type));
    }
    return ::PyString_FromStringAndSize((const char*)ss.str().c_str(),ss.str().size());
 }
 
 // encode (png,jpeg)
-PyObject* view_tostring2(image_view<ImageData32> const & view, std::string const& format)
+PyObject* view_tostring2(image_view<image_data_32> const & view, std::string const& format)
 {
    std::string s = save_to_string(view, format);
    return ::PyString_FromStringAndSize(s.data(),s.size());
 }
 
-void (*save_view1)(image_view<ImageData32> const&, std::string const&,std::string const&) = mapnik::save_to_file;
-void (*save_view2)(image_view<ImageData32> const&, std::string const&) = mapnik::save_to_file;
+void (*save_view1)(image_view<image_data_32> const&, std::string const&,std::string const&) = mapnik::save_to_file;
+void (*save_view2)(image_view<image_data_32> const&, std::string const&) = mapnik::save_to_file;
 
 void export_image_view()
 {
     using namespace boost::python;
-    class_<image_view<ImageData32> >("ImageView","A view into an image.",no_init)
-       .def("width",&image_view<ImageData32>::width)
-       .def("height",&image_view<ImageData32>::height)
+    class_<image_view<image_data_32> >("ImageView","A view into an image.",no_init)
+       .def("width",&image_view<image_data_32>::width)
+       .def("height",&image_view<image_data_32>::height)
        .def("tostring",&view_tostring1)
        .def("tostring",&view_tostring2)
        .def("save",save_view1)

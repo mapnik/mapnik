@@ -40,7 +40,7 @@ class LayerListModel : public QAbstractListModel
       bool setData(const QModelIndex &index, const QVariant &value,
                    int role = Qt::EditRole);
       Qt::ItemFlags flags(QModelIndex const& index) const; 
-      boost::optional<mapnik::Layer&> map_layer(int i);
+      boost::optional<mapnik::layer&> map_layer(int i);
 
    private:
       boost::shared_ptr<mapnik::Map> map_;

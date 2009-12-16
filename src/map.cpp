@@ -126,26 +126,26 @@ namespace mapnik
         styles_.erase(name);
     }
    
-    bool Map::insert_fontset(std::string const& name, FontSet const& fontset) 
+    bool Map::insert_fontset(std::string const& name, font_set const& fontset) 
     {
         return fontsets_.insert(make_pair(name, fontset)).second;
     }
 	 
-    FontSet const& Map::find_fontset(std::string const& name) const
+    font_set const& Map::find_fontset(std::string const& name) const
     {
-        std::map<std::string,FontSet>::const_iterator itr = fontsets_.find(name);
+        std::map<std::string,font_set>::const_iterator itr = fontsets_.find(name);
         if (itr!=fontsets_.end())
             return itr->second;
-        static FontSet default_fontset;
+        static font_set default_fontset;
         return default_fontset;
     }
 
-   std::map<std::string,FontSet> const& Map::fontsets() const
+   std::map<std::string,font_set> const& Map::fontsets() const
    {
       return fontsets_;
    }
 
-   std::map<std::string,FontSet> & Map::fontsets()
+   std::map<std::string,font_set> & Map::fontsets()
    {
       return fontsets_;
    }
@@ -164,7 +164,7 @@ namespace mapnik
         return layers_.size();
     }
     
-    void Map::addLayer(const Layer& l)
+    void Map::addLayer(const layer& l)
     {
         layers_.push_back(l);
     }
@@ -179,22 +179,22 @@ namespace mapnik
         styles_.clear();
     }
     
-    const Layer& Map::getLayer(size_t index) const
+    const layer& Map::getLayer(size_t index) const
     {
         return layers_[index];
     }
 
-    Layer& Map::getLayer(size_t index)
+    layer& Map::getLayer(size_t index)
     {
         return layers_[index];
     }
 
-    std::vector<Layer> const& Map::layers() const
+    std::vector<layer> const& Map::layers() const
     {
         return layers_;
     }
 
-    std::vector<Layer> & Map::layers()
+    std::vector<layer> & Map::layers()
     {
         return layers_;
     }
@@ -273,7 +273,7 @@ namespace mapnik
         coord2d center = currentExtent_.center();
         double w = factor * currentExtent_.width();
         double h = factor * currentExtent_.height();
-        currentExtent_ = Envelope<double>(center.x - 0.5 * w, 
+        currentExtent_ = box2d<double>(center.x - 0.5 * w, 
                                           center.y - 0.5 * h,
                                           center.x + 0.5 * w, 
                                           center.y + 0.5 * h);
@@ -285,17 +285,17 @@ namespace mapnik
         try 
         {
             projection proj0(srs_);
-            Envelope<double> ext;
+            box2d<double> ext;
             bool first = true;
-            std::vector<Layer>::const_iterator itr = layers_.begin();
-            std::vector<Layer>::const_iterator end = layers_.end();
+            std::vector<layer>::const_iterator itr = layers_.begin();
+            std::vector<layer>::const_iterator end = layers_.end();
             while (itr != end)
             {
                 std::string const& layer_srs = itr->srs();
                 projection proj1(layer_srs);
                 proj_transform prj_trans(proj0,proj1);
                 
-                Envelope<double> layerExt = itr->envelope();
+                box2d<double> layerExt = itr->envelope();
                 double x0 = layerExt.minx();
                 double y0 = layerExt.miny();
                 double z0 = 0.0;
@@ -305,7 +305,7 @@ namespace mapnik
                 prj_trans.backward(x0,y0,z0);
                 prj_trans.backward(x1,y1,z1);
                 
-                Envelope<double> layerExt2(x0,y0,x1,y1);
+                box2d<double> layerExt2(x0,y0,x1,y1);
 #ifdef MAPNIK_DEBUG
                 std::clog << " layer1 - > " << layerExt << "\n";
                 std::clog << " layer2 - > " << layerExt2 << "\n";
@@ -329,7 +329,7 @@ namespace mapnik
         }
     }
 
-    void Map::zoomToBox(const Envelope<double> &box)
+    void Map::zoomToBox(const box2d<double> &box)
     {
         currentExtent_=box;
         fixAspectRatio();
@@ -388,15 +388,15 @@ namespace mapnik
         }
     }
    
-    const Envelope<double>& Map::getCurrentExtent() const
+    const box2d<double>& Map::getCurrentExtent() const
     {
         return currentExtent_;
     }
 
-   Envelope<double> Map::get_buffered_extent() const
+   box2d<double> Map::get_buffered_extent() const
    {
       double extra = 2.0 * scale() * buffer_size_;
-      Envelope<double> ext(currentExtent_);
+      box2d<double> ext(currentExtent_);
       ext.width(currentExtent_.width() + extra);
       ext.height(currentExtent_.height() + extra);
       return ext;
@@ -442,7 +442,7 @@ namespace mapnik
     {
         if ( index< layers_.size())
         {
-            mapnik::Layer const& layer = layers_[index];    
+            mapnik::layer const& layer = layers_[index];    
             try
             {
                 double z = 0;
@@ -484,7 +484,7 @@ namespace mapnik
     {
         if ( index< layers_.size())
         {
-            mapnik::Layer const& layer = layers_[index];
+            mapnik::layer const& layer = layers_[index];
             CoordTransform tr = view_transform();
             tr.backward(&x,&y);
 	    

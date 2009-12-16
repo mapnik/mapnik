@@ -28,15 +28,15 @@
 
 using mapnik::query;
 using mapnik::CoordTransform;
-using mapnik::ImageReader;
+using mapnik::image_reader;
 using mapnik::Feature;
 using mapnik::feature_ptr;
-using mapnik::ImageData32;
+using mapnik::image_data_32;
 using mapnik::raster;
 
 template <typename LookupPolicy>
 raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
-                                                   Envelope<double> const& extent,
+                                                   box2d<double> const& extent,
                                                    query const& q)
    : policy_(policy),
      id_(1),
@@ -57,7 +57,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
       feature_ptr feature(new Feature(++id_));
       try
       {         
-         std::auto_ptr<ImageReader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
+         std::auto_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
 
 #ifdef MAPNIK_DEBUG         
          std::cout << "Raster Plugin: READER = " << curIter_->format() << " " << curIter_->file() 
@@ -71,9 +71,9 @@ feature_ptr raster_featureset<LookupPolicy>::next()
             if (image_width>0 && image_height>0)
             {
                CoordTransform t(image_width,image_height,extent_,0,0);
-               Envelope<double> intersect=bbox_.intersect(curIter_->envelope());
-               Envelope<double> ext=t.forward(intersect);
-               ImageData32 image(int(ext.width()+0.5),int(ext.height()+0.5));
+               box2d<double> intersect=bbox_.intersect(curIter_->envelope());
+               box2d<double> ext=t.forward(intersect);
+               image_data_32 image(int(ext.width()+0.5),int(ext.height()+0.5));
                reader->read(int(ext.minx()+0.5),int(ext.miny()+0.5),image);
                feature->set_raster(mapnik::raster_ptr(new raster(intersect,image)));
             }

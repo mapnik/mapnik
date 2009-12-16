@@ -28,7 +28,7 @@
 #include "shape.hpp"
 
 using mapnik::Featureset;
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::feature_ptr;
 
 template <typename filterT>
@@ -37,11 +37,11 @@ class shape_featureset : public Featureset
       filterT filter_;
       int shape_type_;
       shape_io shape_;
-      Envelope<double> query_ext_;
+      box2d<double> query_ext_;
       boost::scoped_ptr<transcoder> tr_;
       long file_length_;
       std::vector<int> attr_ids_;
-      mutable Envelope<double> feature_ext_;
+      mutable box2d<double> feature_ext_;
       mutable int total_geom_size;
       mutable int count_;
    public:

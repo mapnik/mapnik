@@ -38,7 +38,7 @@ extern "C"
 
 namespace mapnik
 {
-    class PngReader : public ImageReader, boost::noncopyable
+    class png_reader : public image_reader, boost::noncopyable
     {
     private:
         std::string fileName_;
@@ -47,25 +47,25 @@ namespace mapnik
         int bit_depth_;
         int color_type_;
     public:
-        explicit PngReader(const std::string& fileName);
-        ~PngReader();
+        explicit png_reader(const std::string& fileName);
+        ~png_reader();
         unsigned width() const;
         unsigned height() const;
-        void read(unsigned x,unsigned y,ImageData32& image);	
+        void read(unsigned x,unsigned y,image_data_32& image);	
     private:
         void init();
     };
   
     namespace 
     {
-        ImageReader* createPngReader(const std::string& file)
+        image_reader* create_png_reader(const std::string& file)
         {
-            return new PngReader(file);
+            return new png_reader(file);
         }
-        const bool registered = register_image_reader("png",createPngReader);
+        const bool registered = register_image_reader("png",create_png_reader);
     }
 
-    PngReader::PngReader(const std::string& fileName) 
+    png_reader::png_reader(const std::string& fileName) 
         : fileName_(fileName),
           width_(0),
           height_(0),
@@ -75,7 +75,7 @@ namespace mapnik
         init();
     }
 
-    PngReader::~PngReader() {}
+    png_reader::~png_reader() {}
 
     static void
     png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
@@ -91,10 +91,10 @@ namespace mapnik
     }
   
 
-    void PngReader::init()
+    void png_reader::init()
     {
         FILE *fp=fopen(fileName_.c_str(),"rb");
-        if (!fp) throw ImageReaderException("cannot open image file "+fileName_);
+        if (!fp) throw image_reader_exception("cannot open image file "+fileName_);
         png_byte header[8];
         memset(header,0,8);
         fread(header,1,8,fp);
@@ -102,7 +102,7 @@ namespace mapnik
         if (!is_png)
         {
             fclose(fp);
-            throw ImageReaderException(fileName_ + " is not a png file");
+            throw image_reader_exception(fileName_ + " is not a png file");
         }
         png_structp png_ptr = png_create_read_struct
             (PNG_LIBPNG_VER_STRING,0,0,0);
@@ -110,14 +110,14 @@ namespace mapnik
         if (!png_ptr) 
         {
             fclose(fp);
-            throw ImageReaderException("failed to allocate png_ptr");
+            throw image_reader_exception("failed to allocate png_ptr");
         }
         png_infop info_ptr = png_create_info_struct(png_ptr);
         if (!info_ptr)
         {
             png_destroy_read_struct(&png_ptr,0,0);
             fclose(fp);
-            throw ImageReaderException("failed to create info_ptr");
+            throw image_reader_exception("failed to create info_ptr");
         }
 
         png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
@@ -137,20 +137,20 @@ namespace mapnik
         fclose(fp);
     }
 
-    unsigned PngReader::width() const 
+    unsigned png_reader::width() const 
     {
         return width_;
     }
 
-    unsigned PngReader::height() const 
+    unsigned png_reader::height() const 
     {
         return height_;
     }
     
-    void PngReader::read(unsigned x0, unsigned y0,ImageData32& image) 
+    void png_reader::read(unsigned x0, unsigned y0,image_data_32& image) 
     {
         FILE *fp=fopen(fileName_.c_str(),"rb");
-        if (!fp) throw ImageReaderException("cannot open image file "+fileName_);
+        if (!fp) throw image_reader_exception("cannot open image file "+fileName_);
 
         png_structp png_ptr = png_create_read_struct
             (PNG_LIBPNG_VER_STRING,0,0,0);
@@ -158,7 +158,7 @@ namespace mapnik
         if (!png_ptr) 
         {
             fclose(fp);
-            throw ImageReaderException("failed to allocate png_ptr");
+            throw image_reader_exception("failed to allocate png_ptr");
         }
 
         png_infop info_ptr = png_create_info_struct(png_ptr);
@@ -166,7 +166,7 @@ namespace mapnik
         {
             png_destroy_read_struct(&png_ptr,0,0);
             fclose(fp);
-            throw ImageReaderException("failed to create info_ptr");
+            throw image_reader_exception("failed to create info_ptr");
         }
 
         png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);

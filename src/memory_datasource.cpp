@@ -30,7 +30,7 @@ namespace mapnik {
     
     struct accumulate_extent
     {
-        accumulate_extent(Envelope<double> & ext)
+        accumulate_extent(box2d<double> & ext)
             : ext_(ext),first_(true) {}
         
         void operator() (feature_ptr feat)
@@ -50,7 +50,7 @@ namespace mapnik {
            }
         }
         
-        Envelope<double> & ext_;
+        box2d<double> & ext_;
         bool first_;
     };
     
@@ -79,9 +79,9 @@ namespace mapnik {
         return featureset_ptr();
     }
     
-    Envelope<double> memory_datasource::envelope() const
+    box2d<double> memory_datasource::envelope() const
     {
-        Envelope<double> ext;
+        box2d<double> ext;
         accumulate_extent func(ext);
         std::for_each(features_.begin(),features_.end(),func);
         return ext;      

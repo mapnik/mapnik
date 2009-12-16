@@ -58,9 +58,9 @@ namespace mapnik {
       return agg::path_cmd_stop;
    }
    
-   Envelope<double> arrow::extent() const
+   box2d<double> arrow::extent() const
    {
-      return Envelope<double>(-7,-3,7,3);
+      return box2d<double>(-7,-3,7,3);
    }
 }
 

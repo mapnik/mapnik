@@ -82,7 +82,7 @@ public:
         return const_iterator(this);
     }
 
-    const_iterator query(const Envelope<double>& box)
+    const_iterator query(const box2d<double>& box)
     {
         if (box.intersects(info_.envelope()))
         {
@@ -104,7 +104,7 @@ public:
    typedef std::vector<raster_info>::const_iterator const_iterator;
    
    tiled_file_policy(std::string const& file, std::string const& format, unsigned tile_size, 
-                     Envelope<double> extent, Envelope<double> bbox,unsigned width, unsigned height)
+                     box2d<double> extent, box2d<double> bbox,unsigned width, unsigned height)
    {     
       
       double lox = extent.minx();
@@ -120,7 +120,7 @@ public:
       std::cout << "Raster Plugin: PIXEL SIZE("<< pixel_x << "," << pixel_y << ")\n";
 #endif
 
-      Envelope<double> e = bbox.intersect(extent);
+      box2d<double> e = bbox.intersect(extent);
       
       for (int x = 0 ; x < max_x ; ++x)
       {
@@ -131,9 +131,9 @@ public:
             double x1 = x0 + tile_size*pixel_x;
             double y1 = y0 + tile_size*pixel_y;
             
-            if (e.intersects(Envelope<double>(x0,y0,x1,y1)))
+            if (e.intersects(box2d<double>(x0,y0,x1,y1)))
             {
-               Envelope<double> tile_box = e.intersect(Envelope<double>(x0,y0,x1,y1));            
+               box2d<double> tile_box = e.intersect(box2d<double>(x0,y0,x1,y1));            
                raster_info info(file,format,tile_box,tile_size,tile_size);
                infos_.push_back(info);
             }
@@ -166,12 +166,12 @@ class raster_featureset : public mapnik::Featureset
    typedef typename LookupPolicy::const_iterator iterator_type;
    LookupPolicy policy_;
    size_t id_;
-   mapnik::Envelope<double> extent_;
-   mapnik::Envelope<double> bbox_;
+   mapnik::box2d<double> extent_;
+   mapnik::box2d<double> bbox_;
    iterator_type curIter_;
    iterator_type endIter_;
 public:
-   raster_featureset(LookupPolicy const& policy,Envelope<double> const& exttent, mapnik::query const& q);
+   raster_featureset(LookupPolicy const& policy,box2d<double> const& exttent, mapnik::query const& q);
    virtual ~raster_featureset();
    mapnik::feature_ptr next();
 };

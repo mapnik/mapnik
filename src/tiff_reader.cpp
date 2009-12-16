@@ -23,7 +23,8 @@
 //$Id: tiff_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 // mapnik
 #include <mapnik/image_reader.hpp>
-#include "boost/filesystem/operations.hpp"
+#include <boost/filesystem/operations.hpp>
+
 extern "C" 
 {
    #include <tiffio.h>    
@@ -37,7 +38,7 @@ namespace mapnik
     using std::min;
     using std::max;
 
-    class TiffReader : public ImageReader
+    class tiff_reader : public image_reader
     {
     private:
         std::string file_name_;
@@ -53,32 +54,32 @@ namespace mapnik
             stripped,
             tiled
         };
-        explicit TiffReader(const std::string& file_name);
-        virtual ~TiffReader();
+        explicit tiff_reader(const std::string& file_name);
+        virtual ~tiff_reader();
         unsigned width() const;
         unsigned height() const;
-        void read(unsigned x,unsigned y,ImageData32& image);
+        void read(unsigned x,unsigned y,image_data_32& image);
     private:
-        TiffReader(const TiffReader&);
-        TiffReader& operator=(const TiffReader&);
+        tiff_reader(const tiff_reader&);
+        tiff_reader& operator=(const tiff_reader&);
         void init();
-        void read_generic(unsigned x,unsigned y,ImageData32& image);
-        void read_stripped(unsigned x,unsigned y,ImageData32& image);
-        void read_tiled(unsigned x,unsigned y,ImageData32& image);
+        void read_generic(unsigned x,unsigned y,image_data_32& image);
+        void read_stripped(unsigned x,unsigned y,image_data_32& image);
+        void read_tiled(unsigned x,unsigned y,image_data_32& image);
         TIFF* load_if_exists(const std::string& filename);
     };
 
     namespace
     {
-        ImageReader* createTiffReader(const std::string& file)
+        image_reader* create_tiff_reader(const std::string& file)
         {
-            return new TiffReader(file);
+            return new tiff_reader(file);
         }
-
-        const bool registered = register_image_reader("tiff",createTiffReader);
+    
+        const bool registered = register_image_reader("tiff",create_tiff_reader);
     }
 
-    TiffReader::TiffReader(const std::string& file_name)
+    tiff_reader::tiff_reader(const std::string& file_name)
         : file_name_(file_name),
           read_method_(generic),
           width_(0),
@@ -91,7 +92,7 @@ namespace mapnik
     }
 
 
-    void TiffReader::init()
+    void tiff_reader::init()
     {
         // TODO: error handling
         TIFFSetWarningHandler(0);
@@ -119,30 +120,30 @@ namespace mapnik
         else
         {
             TIFFClose(tif);
-            throw ImageReaderException(msg);
+            throw image_reader_exception(msg);
         }
     }
 
 
-    TiffReader::~TiffReader()
+    tiff_reader::~tiff_reader()
     {
         //
     }
 
 
-    unsigned TiffReader::width() const
+    unsigned tiff_reader::width() const
     {
         return width_;
     }
 
 
-    unsigned TiffReader::height() const
+    unsigned tiff_reader::height() const
     {
         return height_;
     }
 
 
-    void TiffReader::read(unsigned x,unsigned y,ImageData32& image)
+    void tiff_reader::read(unsigned x,unsigned y,image_data_32& image)
     {    
         if (read_method_==stripped)
         {
@@ -159,18 +160,18 @@ namespace mapnik
     }
 
 
-    void TiffReader::read_generic(unsigned x,unsigned y,ImageData32& image)
+    void tiff_reader::read_generic(unsigned x,unsigned y,image_data_32& image)
     {
 	TIFF* tif = load_if_exists(file_name_);
         if (tif)
         {
-            std::clog<<"TODO:tiff is not stripped or tiled\n";
+            std::clog << "TODO:tiff is not stripped or tiled\n";
             TIFFClose(tif);
         }
     }
 
 
-    void TiffReader::read_tiled(unsigned x0,unsigned y0,ImageData32& image)
+    void tiff_reader::read_tiled(unsigned x0,unsigned y0,image_data_32& image)
     {
 	TIFF* tif = load_if_exists(file_name_);
         if (tif)
@@ -215,7 +216,7 @@ namespace mapnik
     }
 
 
-    void TiffReader::read_stripped(unsigned x0,unsigned y0,ImageData32& image)
+    void tiff_reader::read_stripped(unsigned x0,unsigned y0,image_data_32& image)
     {
 	TIFF* tif = load_if_exists(file_name_);
         if (tif)
@@ -255,7 +256,7 @@ namespace mapnik
         }
     }
     
-    TIFF* TiffReader::load_if_exists(std::string const& filename)
+    TIFF* tiff_reader::load_if_exists(std::string const& filename)
     {
         TIFF * tif = 0;
         boost::filesystem::path path(file_name_);

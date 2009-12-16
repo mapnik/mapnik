@@ -41,8 +41,8 @@ int main( int argc, char **argv )
 	// modify this prefix based on your install location
 	std::string mapnik_dir = "/opt/mapnik";
 	
-	datasource_cache::instance()->register_datasources(mapnik_dir + "/lib/mapnik/input");
-	boost::filesystem::path path(mapnik_dir + "/lib/mapnik/fonts");
+	datasource_cache::instance()->register_datasources(mapnik_dir + "/lib64/mapnik/input");
+	boost::filesystem::path path(mapnik_dir + "/lib64/mapnik/fonts");
 	boost::filesystem::directory_iterator end_itr;	
     
     

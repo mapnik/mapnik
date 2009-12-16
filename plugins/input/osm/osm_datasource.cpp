@@ -99,7 +99,7 @@ osm_datasource::osm_datasource(const parameters &params)
 
         // Get the bounds of the data and set extent_ accordingly
         bounds b = osm_data_->get_bounds();
-        extent_ =  Envelope<double>(b.w,b.s,b.e,b.n);
+        extent_ =  box2d<double>(b.w,b.s,b.e,b.n);
     }
 }
 
@@ -156,7 +156,7 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
                                                 desc_.get_encoding()));
 }
 
-Envelope<double> osm_datasource::envelope() const
+box2d<double> osm_datasource::envelope() const
 {
    return extent_;
 }

@@ -93,6 +93,7 @@ PLUGINS = { # plugins with external dependencies
             'ogr':     {'default':False,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
             'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
             'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
+            'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
             
             # plugins without external dependencies requiring CheckLibWithHeader...
             # note: osm plugin does depend on libxml2
@@ -169,6 +170,8 @@ opts.AddVariables(
     PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
+    PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -375,7 +378,7 @@ def FindBoost(context, prefixes, thread_flag):
         search_lib = 'libboost_thread'        
     else:
         search_lib = 'libboost_filesystem'
-    
+	
     prefixes.insert(0,os.path.dirname(env['BOOST_INCLUDES']))
     prefixes.insert(0,os.path.dirname(env['BOOST_LIBS']))
     for searchDir in prefixes:
@@ -698,11 +701,11 @@ if not preconfigured:
         BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
                 
     # if the user is not setting custom boost configuration
-    # enforce boost version greater than or equal to 1.34
-    if not conf.CheckBoost('1.34'):
-        color_print (1,'Boost version 1.34 or greater is requred') 
+    # enforce boost version greater than or equal to 1.41
+    if not conf.CheckBoost('1.41'):
+        color_print (1,'Boost version 1.41 or greater is requred') 
         if not env['BOOST_VERSION']:
-            env['MISSING_DEPS'].append('boost version >=1.34')
+            env['MISSING_DEPS'].append('boost version >=1.41')
     else:
         color_print (4,'Found boost lib version... %s' % boost_lib_version_from_header )
     
@@ -783,7 +786,7 @@ if not preconfigured:
         if env['SKIPPED_DEPS']:
             color_print(4,'\nAlso, these optional dependencies were not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
         color_print(4,"\nSet custom paths to these libraries and header files on the command-line or in a file called '%s'" % SCONS_LOCAL_CONFIG)
-        color_print(4,"    ie. $ python scons/scons.py BOOST_INCLUDES=/usr/local/include/boost-1_37 BOOST_LIBS=/usr/local/lib")
+        color_print(4,"    ie. $ python scons/scons.py BOOST_INCLUDES=/usr/local/include BOOST_LIBS=/usr/local/lib")
         color_print(4, "\nOnce all required dependencies are found a local '%s' will be saved and then install:" % SCONS_LOCAL_CONFIG)
         color_print(4,"    $ sudo python scons/scons.py install")
         color_print(4,"\nTo view available path variables:\n    $ python scons/scons.py --help or -h")
@@ -866,7 +869,7 @@ if not preconfigured:
                 env.Append(CXXFLAGS = common_cxx_flags + '-O %s' % ndebug_flags)
         else:
             # Common flags for GCC.
-            gcc_cxx_flags = '-ansi -Wall %s -ftemplate-depth-100 %s' % (pthread, common_cxx_flags)
+            gcc_cxx_flags = '-ansi -Wall %s -ftemplate-depth-200 %s' % (pthread, common_cxx_flags)
         
             if env['DEBUG']:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)

@@ -26,11 +26,9 @@
 #include <mapnik/global.hpp>
 #include <mapnik/ptree_helpers.hpp>
 
-/*
 #ifdef MAPNIK_DEBUG
-#include <mapnik/wall_clock_timer.hpp>
+//#include <mapnik/wall_clock_timer.hpp>
 #endif
-*/
 
 #include "connection_manager.hpp"
 #include "postgis.hpp"
@@ -330,7 +328,7 @@ layer_descriptor postgis_datasource::get_descriptor() const
 }
 
 
-std::string postgis_datasource::sql_bbox(Envelope<double> const& env) const
+std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;
     if (srid_ > 0)
@@ -350,7 +348,7 @@ std::string postgis_datasource::populate_tokens(const std::string& sql) const
     
     if ( boost::algorithm::icontains(sql,bbox_token_) )
     {
-        Envelope<double> max_env(-1 * FMAX,-1 * FMAX,FMAX,FMAX);
+        box2d<double> max_env(-1 * FMAX,-1 * FMAX,FMAX,FMAX);
         std::string max_box = sql_bbox(max_env);
         boost::algorithm::replace_all(populated_sql,bbox_token_,max_box);
     } 
@@ -362,7 +360,7 @@ std::string postgis_datasource::populate_tokens(const std::string& sql) const
     return populated_sql;
 }
 
-std::string postgis_datasource::populate_tokens(const std::string& sql, double const& scale_denom, Envelope<double> const& env) const
+std::string postgis_datasource::populate_tokens(const std::string& sql, double const& scale_denom, box2d<double> const& env) const
 {
     std::string populated_sql = sql;
     std::string box = sql_bbox(env);
@@ -452,14 +450,11 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
 
 featureset_ptr postgis_datasource::features(const query& q) const
 {
-
-/*
 #ifdef MAPNIK_DEBUG
-    mapnik::wall_clock_progress_timer timer(clog, "end feature query: ");
+    //mapnik::wall_clock_progress_timer timer(clog, "end feature query: ");
 #endif
-*/
 
-   Envelope<double> const& box = q.get_bbox();
+   box2d<double> const& box = q.get_bbox();
    double scale_denom = q.scale_denominator();
    ConnectionManager *mgr=ConnectionManager::instance();
    shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
@@ -538,7 +533,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             ++size;
          }
 
-         Envelope<double> box(pt.x,pt.y,pt.x,pt.y);
+         box2d<double> box(pt.x,pt.y,pt.x,pt.y);
          std::string table_with_bbox = populate_tokens(table_,FMAX,box);
 
          s << " from " << table_with_bbox;
@@ -554,7 +549,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
    return featureset_ptr();
 }
 
-Envelope<double> postgis_datasource::envelope() const
+box2d<double> postgis_datasource::envelope() const
 {
    if (extent_initialized_) return extent_;
     

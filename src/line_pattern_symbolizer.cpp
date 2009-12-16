@@ -21,23 +21,17 @@
  *****************************************************************************/
 
 //$Id$
+
 // mapnik
 #include <mapnik/line_pattern_symbolizer.hpp>
-
-#include <mapnik/image_reader.hpp>
-// stl
-#include <iostream>
 
 namespace mapnik
 {
     
-    line_pattern_symbolizer::line_pattern_symbolizer(std::string const& file,
-                                                     std::string const& type,
-                                                     unsigned width,unsigned height) 
-        : symbolizer_with_image( file, type, width, height )
-    { }
+line_pattern_symbolizer::line_pattern_symbolizer(path_expression_ptr file) 
+    : symbolizer_with_image(file) {}
 
-    line_pattern_symbolizer::line_pattern_symbolizer(line_pattern_symbolizer const& rhs)
-        : symbolizer_with_image(rhs) {}
+line_pattern_symbolizer::line_pattern_symbolizer(line_pattern_symbolizer const& rhs)
+    : symbolizer_with_image(rhs) {}
 
 }

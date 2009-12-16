@@ -57,7 +57,7 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(kismet_datasource)
 
-using mapnik::Envelope;
+using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::query;
 using mapnik::featureset_ptr;
@@ -141,7 +141,7 @@ int kismet_datasource::type() const
    return type_;
 }
 
-Envelope<double> kismet_datasource::envelope() const
+box2d<double> kismet_datasource::envelope() const
 {
    //cout << "kismet_datasource::envelope()" << endl;
    return extent_;
@@ -156,8 +156,8 @@ featureset_ptr kismet_datasource::features(query const& q) const
 {
     //cout << "kismet_datasource::features()" << endl;
     
-    // TODO: use Envelope to filter bbox before adding to featureset_ptr
-    //mapnik::Envelope<double> const& e = q.get_bbox();
+    // TODO: use box2d to filter bbox before adding to featureset_ptr
+    //mapnik::box2d<double> const& e = q.get_bbox();
 
     boost::mutex::scoped_lock lock(knd_list_mutex);
     return featureset_ptr (new kismet_featureset(knd_list, desc_.get_encoding()));

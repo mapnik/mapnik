@@ -22,44 +22,40 @@
  *****************************************************************************/
 //$Id$
 
-#ifndef SHIELD_SYMBOLIZER_HPP
-#define SHIELD_SYMBOLIZER_HPP
+#ifndef MAPNIK_SHIELD_SYMBOLIZER_HPP
+#define MAPNIK_SHIELD_SYMBOLIZER_HPP
 
-#include <mapnik/graphics.hpp>
-#include <mapnik/text_symbolizer.hpp>
+// mapnik
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/text_symbolizer.hpp>
 
+// boost
 #include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
-  struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
-                                         public symbolizer_with_image
-  {
-    shield_symbolizer(std::string const& name,
+struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
+				       public symbolizer_with_image
+{
+    shield_symbolizer(expression_ptr name,
                       std::string const& face_name,
                       unsigned size,
                       color const& fill,
-                      std::string const& file,
-                      std::string const& type,
-                      unsigned width,unsigned height);
-    shield_symbolizer(std::string const& name,
+                      path_expression_ptr file);
+    shield_symbolizer(expression_ptr name,
                       unsigned size,
                       color const& fill,
-                      std::string const& file,
-                      std::string const& type,
-                      unsigned width,unsigned height);
-
-                      bool get_unlock_image() const;              // image is not locked to the text placement
-                      void set_unlock_image(bool unlock_image);
-                      bool get_no_text() const;                   // do no render text
-                      void set_no_text(bool unlock_image);
-
-    private:
-
-        bool unlock_image_;
-        bool no_text_;
-  };
+                      path_expression_ptr file);
+    
+    bool get_unlock_image() const;              // image is not locked to the text placement
+    void set_unlock_image(bool unlock_image);
+    bool get_no_text() const;                   // do no render text
+    void set_no_text(bool unlock_image);
+    
+private:
+    bool unlock_image_;
+    bool no_text_;
+};
 }
 
 #endif // SHIELD_SYMBOLIZER_HPP

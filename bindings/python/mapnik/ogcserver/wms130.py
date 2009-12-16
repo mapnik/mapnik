@@ -23,7 +23,7 @@
 
 from common import ParameterDefinition, Response, Version, ListFactory, \
                    ColorFactory, CRSFactory, CRS, WMSBaseServiceHandler, \
-                   BaseExceptionHandler, Projection, Envelope
+                   BaseExceptionHandler, Projection, Box2d
 from exceptions import OGCException, ServerConfigurationError
 from mapnik import Coord
 
@@ -238,7 +238,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         m = WMSBaseServiceHandler._buildMap(self, params)
         # for range of epsg codes reverse axis
         if params['crs'].code >= 4000 and params['crs'].code < 5000:
-            m.zoom_to_box(Envelope(params['bbox'][1], params['bbox'][0], params['bbox'][3], params['bbox'][2]))
+            m.zoom_to_box(Box2d(params['bbox'][1], params['bbox'][0], params['bbox'][3], params['bbox'][2]))
         return m    
 
 class ExceptionHandler(BaseExceptionHandler):

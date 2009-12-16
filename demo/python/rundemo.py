@@ -77,11 +77,11 @@ provpoly_style = mapnik.Style()
 
 provpoly_rule_on = mapnik.Rule()
 
-# A Filter() allows the selection of features to which the symbology will
+# A Expression() allows the selection of features to which the symbology will
 # be applied.  More on Mapnik expressions can be found in Tutorial #2.
 # A given feature can only match one filter per rule per style.
 
-provpoly_rule_on.filter = mapnik.Filter("[NAME_EN] = 'Ontario'")
+provpoly_rule_on.filter = mapnik.Expression("[NAME_EN] = 'Ontario'")
 
 # Here a symbolizer is defined.  Available are:
 #     - LineSymbolizer(Color(),<width>)
@@ -99,7 +99,7 @@ provpoly_rule_on.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color(250, 190, 
 provpoly_style.rules.append(provpoly_rule_on)
 
 provpoly_rule_qc = mapnik.Rule()
-provpoly_rule_qc.filter = mapnik.Filter("[NOM_FR] = 'Québec'")
+provpoly_rule_qc.filter = mapnik.Expression("[NOM_FR] = 'Québec'")
 provpoly_rule_qc.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color(217, 235, 203)))
 provpoly_style.rules.append(provpoly_rule_qc)
 
@@ -129,7 +129,7 @@ qcdrain_lyr.datasource = mapnik.Shapefile(file='../data/qcdrainage')
 
 qcdrain_style = mapnik.Style()
 qcdrain_rule = mapnik.Rule()
-qcdrain_rule.filter = mapnik.Filter('[HYC] = 8')
+qcdrain_rule.filter = mapnik.Expression('[HYC] = 8')
 qcdrain_rule.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color(153, 204, 255)))
 qcdrain_style.rules.append(qcdrain_rule)
 
@@ -182,7 +182,7 @@ roads34_lyr.datasource = mapnik.Shapefile(file='../data/roads')
 
 roads34_style = mapnik.Style()
 roads34_rule = mapnik.Rule()
-roads34_rule.filter = mapnik.Filter('[CLASS] = 3 or [CLASS] = 4')
+roads34_rule.filter = mapnik.Expression('([CLASS] = 3) or ([CLASS] = 4)')
 
 # With lines of a certain width, you can control how the ends
 # are closed off using line_cap as below.
@@ -215,7 +215,7 @@ roads2_lyr.datasource = roads34_lyr.datasource
 
 roads2_style_1 = mapnik.Style()
 roads2_rule_1 = mapnik.Rule()
-roads2_rule_1.filter = mapnik.Filter('[CLASS] = 2')
+roads2_rule_1.filter = mapnik.Expression('[CLASS] = 2')
 roads2_rule_stk_1 = mapnik.Stroke()
 roads2_rule_stk_1.color = mapnik.Color(171,158,137)
 roads2_rule_stk_1.line_cap = mapnik.line_cap.ROUND_CAP
@@ -227,7 +227,7 @@ m.append_style('road-border', roads2_style_1)
 
 roads2_style_2 = mapnik.Style()
 roads2_rule_2 = mapnik.Rule()
-roads2_rule_2.filter = mapnik.Filter('[CLASS] = 2')
+roads2_rule_2.filter = mapnik.Expression('[CLASS] = 2')
 roads2_rule_stk_2 = mapnik.Stroke()
 roads2_rule_stk_2.color = mapnik.Color(255,250,115)
 roads2_rule_stk_2.line_cap = mapnik.line_cap.ROUND_CAP
@@ -250,7 +250,7 @@ roads1_lyr.datasource = roads34_lyr.datasource
 
 roads1_style_1 = mapnik.Style()
 roads1_rule_1 = mapnik.Rule()
-roads1_rule_1.filter = mapnik.Filter('[CLASS] = 1')
+roads1_rule_1.filter = mapnik.Expression('[CLASS] = 1')
 roads1_rule_stk_1 = mapnik.Stroke()
 roads1_rule_stk_1.color = mapnik.Color(188,149,28)
 roads1_rule_stk_1.line_cap = mapnik.line_cap.ROUND_CAP
@@ -261,7 +261,7 @@ m.append_style('highway-border', roads1_style_1)
 
 roads1_style_2 = mapnik.Style()
 roads1_rule_2 = mapnik.Rule()
-roads1_rule_2.filter = mapnik.Filter('[CLASS] = 1')
+roads1_rule_2.filter = mapnik.Expression('[CLASS] = 1')
 roads1_rule_stk_2 = mapnik.Stroke()
 roads1_rule_stk_2.color = mapnik.Color(242,191,36)
 roads1_rule_stk_2.line_cap = mapnik.line_cap.ROUND_CAP
@@ -289,7 +289,7 @@ popplaces_rule = mapnik.Rule()
 # The first parameter is the name of the attribute to use as the source of the
 # text to label with.  Then there is font size in points (I think?), and colour.
 
-popplaces_text_symbolizer = mapnik.TextSymbolizer('GEONAME',
+popplaces_text_symbolizer = mapnik.TextSymbolizer(mapnik.Expression("[GEONAME]"),
                                            'DejaVu Sans Book',
                                            10, mapnik.Color('black'))
 
@@ -310,7 +310,7 @@ m.layers.append(popplaces_lyr)
 # Draw map
 
 # Set the initial extent of the map in 'master' spherical Mercator projection
-m.zoom_to_box(mapnik.Envelope(-8024477.28459,5445190.38849,-7381388.20071,5662941.44855)) 
+m.zoom_to_box(mapnik.Box2d(-8024477.28459,5445190.38849,-7381388.20071,5662941.44855)) 
 
 # Render two maps, two PNGs, one JPEG.
 im = mapnik.Image(m.width,m.height)
