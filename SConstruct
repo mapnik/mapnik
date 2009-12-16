@@ -68,7 +68,7 @@ def shortest_name(libs):
             name = lib
     return name
 
-if platform.uname()[4] == 'x86_64':
+if platform.uname()[4] == 'x86_64' and platform.system() == 'Linux':
     LIBDIR_SCHEMA='lib64' 
 elif platform.uname()[4] == 'ppc64':
     LIBDIR_SCHEMA='lib64'
