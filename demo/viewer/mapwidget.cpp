@@ -452,15 +452,27 @@ void MapWidget::updateMap()
       unsigned height=map_->getHeight();
       
       image_32 buf(width,height);
-      mapnik::agg_renderer<image_32> ren(*map_,buf);
-      ren.apply();
-      
-      QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
-      pix_=QPixmap::fromImage(image.rgbSwapped());
-      update();
-      // emit signal to interested widgets
-      emit mapViewChanged();
-      std::cout << map_->getCurrentExtent() << "\n";
+
+      try 
+      {
+	  mapnik::agg_renderer<image_32> ren(*map_,buf);
+	  ren.apply();
+	  
+	  QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
+	  pix_=QPixmap::fromImage(image.rgbSwapped());
+	  update();
+	  // emit signal to interested widgets
+	  emit mapViewChanged();
+	  std::cout << map_->getCurrentExtent() << "\n";
+      }
+      catch (mapnik::config_error & ex)
+      {
+	  std::cerr << ex.what() << std::endl;
+      }
+      catch (...)
+      {
+	  std::cerr << "Unknown exception caught!\n";
+      }
    }
 }
 
