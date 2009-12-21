@@ -41,7 +41,7 @@ QVariant LayerListModel::data(QModelIndex const& index,int role) const
 {
     if (!index.isValid() || !map_)
 	return QVariant();
-    if (index.row() < 0 || index.row() >= map_->layers().size())
+    if (index.row() < 0 || index.row() >= int(map_->layers().size()))
 	return QVariant();
     if (role == Qt::DisplayRole)
 	return QString(map_->layers().at(index.row()).name().c_str());
@@ -112,8 +112,8 @@ boost::optional<mapnik::layer&> LayerListModel::map_layer(int i)
    if (map_)
    {
       std::vector<mapnik::layer> & layers = const_cast<std::vector<mapnik::layer>& >(map_->layers());
-      if (i < layers.size())
-         return boost::optional<mapnik::layer&>(layers[i]);
+      if (i < int(layers.size()))
+	  return boost::optional<mapnik::layer&>(layers[i]);
    }
    return boost::optional<mapnik::layer&>();
 }
