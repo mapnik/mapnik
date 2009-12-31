@@ -39,9 +39,10 @@ Several things happen when you do:
 """
 
 import os
+
 from sys import getdlopenflags, setdlopenflags
 try:
-    from dl import RTLD_NOW, RTLD_GLOBAL
+    from ctypes import RTLD_NOW, RTLD_GLOBAL
 except ImportError:
     RTLD_NOW = 2
     RTLD_GLOBAL = 256
