@@ -134,12 +134,12 @@ namespace mapnik {
 #ifdef MAPNIK_BIG_ENDIAN
             mapnik::rgb c((val>>24)&0xff, (val>>16)&0xff, (val>>8) & 0xff);            
             byte index = tree.quantize(c);
-            if (x%2 >  0) index = index<<4;
+            if (x%2 == 0) index = index<<4;
             if (!(val&0x80)) index = 0;//alfa
 #else
             mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
             byte index = tree.quantize(c);
-            if (x%2 >  0) index = index<<4;
+            if (x%2 == 0) index = index<<4;
             if (!((val>>24)&0x80)) index = 0;//alfa
 #endif
             row_out[x>>1] |= index;
