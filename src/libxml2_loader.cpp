@@ -151,6 +151,7 @@ namespace mapnik
                 }
 
                 populate_tree( root, pt );
+                xmlFreeDoc(doc);
             }
 
         private:
