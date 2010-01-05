@@ -54,11 +54,11 @@ def regular_print(color,text,newline=True):
     else:
         print text
 
-def call(cmd):
+def call(cmd, silent=False):
     stdin, stderr = Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE).communicate()
     if not stderr:
         return stdin.strip()
-    else:
+    elif not silent:
         color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
 
 def shortest_name(libs):
@@ -74,6 +74,39 @@ elif platform.uname()[4] == 'ppc64':
     LIBDIR_SCHEMA='lib64'
 else:
     LIBDIR_SCHEMA='lib'
+
+pretty_dep_names = {
+    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: http://trac.mapnik.org/wiki/OCCI',
+    'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/GDAL',
+    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/OGR',
+    'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
+    'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
+    'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
+    'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
+    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: http://trac.mapnik.org/wiki/PostGIS',
+    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: http://trac.mapnik.org/wiki/SQLite',
+    'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
+    'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
+    'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
+    'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
+    'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
+    'ltdl':'GNU Libtool | more info: http://www.gnu.org/software/libtool',
+    'z':'Z compression library | more info: http://www.zlib.net/',
+    'm':'Basic math library, part of C++ stlib',
+    'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
+    'pg_config':'pg_config program | try setting PG_CONFIG SCons option',
+    'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option',
+    'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
+    'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
+    }
+    
+def pretty_dep(dep):
+    pretty = pretty_dep_names.get(dep)
+    if pretty:
+        return '%s (%s)' % (dep,pretty)
+    elif 'boost' in dep:
+        return '%s (%s)' % (dep,'more info see: http://trac.mapnik.org/wiki/MapnikInstallation & http://www.boost.org')
+    return dep
 
 # local file to hold custom user configuration variables
 SCONS_LOCAL_CONFIG = 'config.py'
@@ -95,9 +128,10 @@ PLUGINS = { # plugins with external dependencies
             'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
             
-            # plugins without external dependencies requiring CheckLibWithHeader...
-            # note: osm plugin does depend on libxml2
+            # todo: osm plugin does depend on libxml2 and libcurl
             'osm':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
+
+            # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'kismet':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
@@ -233,9 +267,15 @@ preconfigured = False
 force_configure = False
 command_line_args = sys.argv[1:]
 
+HELP_REQUESTED = False
+
+if ('-h' in command_line_args) or ('--help' in command_line_args):
+    HELP_REQUESTED = True
+    
+
 if 'configure' in command_line_args:
     force_configure = True
-elif ('-h' in command_line_args) or ('--help' in command_line_args):
+elif HELP_REQUESTED:
     preconfigured = True # this is just to ensure config gets skipped when help is requested
 
 # initially populate environment with defaults and any possible custom arguments
@@ -274,7 +314,7 @@ if opts.args:
     preconfigured = False
 
 elif preconfigured:
-    if ('-h' not in command_line_args) and ('--help' not in command_line_args):
+    if not HELP_REQUESTED:
         color_print(4,'Using previous successful configuration...')
         color_print(4,'Re-configure by running "python scons/scons.py configure".')
 
@@ -298,14 +338,21 @@ def CheckPKG(context, name):
 def parse_config(context, config, checks='--libs --cflags'):
     env = context.env
     tool = config.lower().replace('_','-')
+    toolname = tool
     if config == 'GDAL_CONFIG':
-        tool += ' %s' % checks
-    context.Message( 'Checking for %s... ' % tool)
+        toolname += ' %s' % checks
+    context.Message( 'Checking for %s... ' % toolname)
     cmd = '%s %s' % (env[config],checks)
     ret = context.TryAction(cmd)[0]
+    parsed = False
     if ret:
-        env.ParseConfig(cmd)
-    else:
+        try:
+            env.ParseConfig(cmd)
+            parsed = True
+        except OSError, e:
+            ret = False
+            print ' (xml2-config not found!)'
+    if not parsed:
         if config == 'GDAL_CONFIG':
             env['SKIPPED_DEPS'].append(tool)
             conf.rollback_option('GDAL_CONFIG')
@@ -321,10 +368,16 @@ def get_pkg_lib(context, config, lib):
     context.Message( 'Checking for name of %s library... ' % lib)
     cmd = '%s --libs' % env[config]
     ret = context.TryAction(cmd)[0]
+    parsed = False
     if ret:
-        libnames = re.findall(libpattern,call(cmd))
-        if libnames:
-          libname = libnames[0]
+        try:
+            libnames = re.findall(libpattern,call(cmd,silent=True))
+            if libnames:
+              libname = libnames[0]
+        except Exception, e:
+            ret = False
+            print ' unable to determine library name:'# %s' % str(e)
+            return None
     context.Result( libname )
     return libname
 
@@ -744,7 +797,8 @@ if not preconfigured:
             backup = env.Clone().Dictionary()
             # Note, the 'delete_existing' keyword makes sure that these paths are prepended
             # to the beginning of the path list even if they already exist
-            env.PrependUnique(CPPPATH = env['%s_INCLUDES' % details['path']],delete_existing=True)
+            incpath = env['%s_INCLUDES' % details['path']]
+            env.PrependUnique(CPPPATH = incpath,delete_existing=True)
             env.PrependUnique(LIBPATH = env['%s_LIBS' % details['path']],delete_existing=True)
             if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
                 env.Replace(**backup)
@@ -781,10 +835,10 @@ if not preconfigured:
     
     if env['MISSING_DEPS']:
         # if required dependencies are missing, print warnings and then let SCons finish without building or saving local config
-        color_print(1,'\nExiting... the following required dependencies were not found:\n   - %s' % '\n   - '.join(env['MISSING_DEPS']))
+        color_print(1,'\nExiting... the following required dependencies were not found:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['MISSING_DEPS']]))
         color_print(1,"\nSee the 'config.log' for details on possible problems.")
         if env['SKIPPED_DEPS']:
-            color_print(4,'\nAlso, these optional dependencies were not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
+            color_print(4,'\nAlso, these OPTIONAL dependencies were not found:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['SKIPPED_DEPS']]))
         color_print(4,"\nSet custom paths to these libraries and header files on the command-line or in a file called '%s'" % SCONS_LOCAL_CONFIG)
         color_print(4,"    ie. $ python scons/scons.py BOOST_INCLUDES=/usr/local/include BOOST_LIBS=/usr/local/lib")
         color_print(4, "\nOnce all required dependencies are found a local '%s' will be saved and then install:" % SCONS_LOCAL_CONFIG)
@@ -792,7 +846,8 @@ if not preconfigured:
         color_print(4,"\nTo view available path variables:\n    $ python scons/scons.py --help or -h")
         color_print(4,'\nTo view overall SCons help options:\n    $ python scons/scons.py --help-options or -H\n')
         color_print(4,'More info: http://trac.mapnik.org/wiki/MapnikInstallation')
-        Exit(1)
+        if not HELP_REQUESTED:
+            Exit(1)
     else:
         # Save the custom variables in a SCONS_LOCAL_CONFIG
         # that will be reloaded to allow for `install` without re-specifying custom variables
@@ -810,7 +865,7 @@ if not preconfigured:
           color_print(4,"Did not use user config file, no custom path variables will be saved...")
 
         if env['SKIPPED_DEPS']:
-            color_print(3,'\nNote: will build without these optional dependencies:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
+            color_print(3,'\nNote: will build without these OPTIONAL dependencies:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['SKIPPED_DEPS']]))
             print
 
         # fetch the mapnik version header in order to set the
@@ -943,76 +998,77 @@ if not preconfigured:
 
         if 'configure' in command_line_args:
             color_print(4,'\n*Configure complete*\nNow run "python scons/scons.py" to build or "python scons/scons.py install" to install')
-            Exit(0)
+            if not HELP_REQUESTED:
+                Exit(0)
 
 # autogenerate help on default/current SCons options
 Help(opts.GenerateHelpText(env))
 
 #### Builds ####
-
-# export env so it is available in Sconscript files
-Export('env')
-
-
-if env['FAST']:
-    # caching is 'auto' by default in SCons
-    # But let's also cache implicit deps...
-    EnsureSConsVersion(0,98)
-    SetOption('implicit_cache', 1)
-    env.Decider('MD5-timestamp')
-    SetOption('max_drift', 1)
+if not HELP_REQUESTED:
+    # export env so it is available in Sconscript files
+    Export('env')
     
-else:
-    # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
-    # This allows for a SCONS_LOCAL_CONFIG, if present, to be used as the primary means of storing paths to successful build dependencies
-    SetCacheMode('force')
-
-if env['JOBS'] > 1:
-    SetOption("num_jobs", env['JOBS'])  
     
-# Build agg first, doesn't need anything special
-if env['INTERNAL_LIBAGG']:
-    SConscript('agg/SConscript')
-
-# Build the core library
-SConscript('src/SConscript')
-
-# Build the requested and able-to-be-compiled input plug-ins
-GDAL_BUILT = False
-OGR_BUILT = False
-for plugin in env['REQUESTED_PLUGINS']:
-    details = env['PLUGINS'][plugin]
-    if details['lib'] in env['LIBS']:
-        SConscript('plugins/input/%s/SConscript' % plugin)
-        if plugin == 'ogr': OGR_BUILT = True
-        if plugin == 'gdal': GDAL_BUILT = True
-        if plugin == 'ogr' or plugin == 'gdal':
-            if GDAL_BUILT and OGR_BUILT:
+    if env['FAST']:
+        # caching is 'auto' by default in SCons
+        # But let's also cache implicit deps...
+        EnsureSConsVersion(0,98)
+        SetOption('implicit_cache', 1)
+        env.Decider('MD5-timestamp')
+        SetOption('max_drift', 1)
+        
+    else:
+        # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
+        # This allows for a SCONS_LOCAL_CONFIG, if present, to be used as the primary means of storing paths to successful build dependencies
+        SetCacheMode('force')
+    
+    if env['JOBS'] > 1:
+        SetOption("num_jobs", env['JOBS'])  
+        
+    # Build agg first, doesn't need anything special
+    if env['INTERNAL_LIBAGG']:
+        SConscript('agg/SConscript')
+    
+    # Build the core library
+    SConscript('src/SConscript')
+    
+    # Build the requested and able-to-be-compiled input plug-ins
+    GDAL_BUILT = False
+    OGR_BUILT = False
+    for plugin in env['REQUESTED_PLUGINS']:
+        details = env['PLUGINS'][plugin]
+        if details['lib'] in env['LIBS']:
+            SConscript('plugins/input/%s/SConscript' % plugin)
+            if plugin == 'ogr': OGR_BUILT = True
+            if plugin == 'gdal': GDAL_BUILT = True
+            if plugin == 'ogr' or plugin == 'gdal':
+                if GDAL_BUILT and OGR_BUILT:
+                    env['LIBS'].remove(details['lib'])
+            else:
                 env['LIBS'].remove(details['lib'])
-        else:
-            env['LIBS'].remove(details['lib'])
-    elif not details['lib']:
-        # build internal shape and raster plugins
-        SConscript('plugins/input/%s/SConscript' % plugin)
-
-# Build the c++ rundemo app if requested
-if env['DEMO']:
-    SConscript('demo/c++/SConscript')
-
-# Build the pgsql2psqlite app if requested
-if env['PGSQL2SQLITE']:
-    SConscript('utils/pgsql2sqlite/SConscript')
+        elif not details['lib']:
+            # build internal shape and raster plugins
+            SConscript('plugins/input/%s/SConscript' % plugin)
     
-# Build shapeindex and remove its dependency from the LIBS
-if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
-    SConscript('utils/shapeindex/SConscript')
-    env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
-else :
-    color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
+    # Build the c++ rundemo app if requested
+    if env['DEMO']:
+        SConscript('demo/c++/SConscript')
     
-# Build the Python bindings
-if 'python' in env['BINDINGS']:
-    SConscript('bindings/python/SConscript')
-
-# Configure fonts and if requested install the bundled DejaVu fonts
-SConscript('fonts/SConscript')
+    # Build the pgsql2psqlite app if requested
+    if env['PGSQL2SQLITE']:
+        SConscript('utils/pgsql2sqlite/SConscript')
+        
+    # Build shapeindex and remove its dependency from the LIBS
+    if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
+        SConscript('utils/shapeindex/SConscript')
+        env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
+    else :
+        color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
+        
+    # Build the Python bindings
+    if 'python' in env['BINDINGS']:
+        SConscript('bindings/python/SConscript')
+    
+    # Configure fonts and if requested install the bundled DejaVu fonts
+    SConscript('fonts/SConscript')
