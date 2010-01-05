@@ -30,6 +30,23 @@ extern "C"
 #include <png.h>
 }
 
+// TODO - consider exposing this option to user
+// static number of alpha ranges in png256 format
+// 2 results in smallest image, 3 is minimum for semitransparency, 4 is recommended, anything else is worse
+#define TRANSPARENCY_LEVELS 4
+
+#ifdef MAPNIK_BIG_ENDIAN
+  #define U2RED(x) (((x)>>24)&0xff)
+  #define U2GREEN(x) (((x)>>16)&0xff)
+  #define U2BLUE(x) (((x)>>8)&0xff)
+  #define U2ALPHA(x) ((x)&0xff)
+#else
+  #define U2RED(x) ((x)&0xff)
+  #define U2GREEN(x) (((x)>>8)&0xff)
+  #define U2BLUE(x) (((x)>>16)&0xff)
+  #define U2ALPHA(x) (((x)>>24)&0xff)
+#endif
+
 namespace mapnik {
    
    template <typename T>
@@ -92,10 +109,18 @@ namespace mapnik {
    }
 
    template <typename T>
-   void reduce_8  (T const& in, ImageData8 & out, octree<rgb> & tree)
+   void reduce_8  (T const& in, ImageData8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
    {
       unsigned width = in.width();
       unsigned height = in.height();
+
+      unsigned alphaCount[alpha.size()];
+      for(unsigned i=0; i<alpha.size(); i++)
+      {
+         alpha[i] = 0;
+         alphaCount[i] = 0;
+      }
+
       for (unsigned y = 0; y < height; ++y)
       {
          mapnik::ImageData32::pixel_type const * row = in.getRow(y);
@@ -103,25 +128,42 @@ namespace mapnik {
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
-#ifdef MAPNIK_BIG_ENDIAN
-            mapnik::rgb c((val>>24)&0xff, (val>>16)&0xff, (val>>8) & 0xff);            
-            byte index = tree.quantize(c);
-            if (!(val&0x80)) index = 0;//alfa
-#else
-            mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
-            byte index = tree.quantize(c);
-            if (!((val>>24)&0x80)) index = 0;//alfa
-#endif
+            mapnik::rgb c(U2RED(val), U2GREEN(val), U2BLUE(val));
+            byte index = 0;
+            int idx = -1;
+            for(int j=TRANSPARENCY_LEVELS-1; j>0; j--){
+               if (U2ALPHA(val)>=limits[j]) {
+                  index = idx = trees[j].quantize(c);
+                  break;
+               }
+            }
+            if (idx>=0 && idx<(int)alpha.size())
+            {
+               alpha[idx]+=U2ALPHA(val);
+               alphaCount[idx]++;
+            }
             row_out[x] = index;
          }
+      }
+      for(unsigned i=0; i<alpha.size(); i++) 
+      {
+         if (alphaCount[i]!=0)
+            alpha[i] /= alphaCount[i];
       }
    }
 
    template <typename T>
-   void reduce_4 (T const& in, ImageData8 & out, octree<rgb> & tree)
+   void reduce_4 (T const& in, ImageData8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
    {
       unsigned width = in.width();
       unsigned height = in.height();
+
+      unsigned alphaCount[alpha.size()];
+      for(unsigned i=0; i<alpha.size(); i++)
+      {
+         alpha[i] = 0;
+         alphaCount[i] = 0;
+      }
 
       for (unsigned y = 0; y < height; ++y)
       {
@@ -131,25 +173,34 @@ namespace mapnik {
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
-#ifdef MAPNIK_BIG_ENDIAN
-            mapnik::rgb c((val>>24)&0xff, (val>>16)&0xff, (val>>8) & 0xff);            
-            byte index = tree.quantize(c);
+            mapnik::rgb c(U2RED(val), U2GREEN(val), U2BLUE(val));
+            byte index = 0;
+            int idx=-1;
+            for(int j=TRANSPARENCY_LEVELS-1; j>0; j--){
+               if (U2ALPHA(val)>=limits[j]) {
+                  index = idx = trees[j].quantize(c);
+                  break;
+               }
+            }
+            if (idx>=0 && idx<(int)alpha.size())
+            {
+               alpha[idx]+=U2ALPHA(val);
+               alphaCount[idx]++;
+            }
             if (x%2 == 0) index = index<<4;
-            if (!(val&0x80)) index = 0;//alfa
-#else
-            mapnik::rgb c((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff);
-            byte index = tree.quantize(c);
-            if (x%2 == 0) index = index<<4;
-            if (!((val>>24)&0x80)) index = 0;//alfa
-#endif
             row_out[x>>1] |= index;
          }
+      }
+      for(unsigned i=0; i<alpha.size(); i++) 
+      {
+         if (alphaCount[i]!=0)
+            alpha[i] /= alphaCount[i];
       }
    }
 
    // 1-bit but only one color.
    template <typename T>
-   void reduce_1(T const&, ImageData8 & out, octree<rgb> &)
+   void reduce_1(T const&, ImageData8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
    {
       out.set(0); // only one color!!!
    }
@@ -160,7 +211,7 @@ namespace mapnik {
                     unsigned width,
                     unsigned height,
                     unsigned color_depth,
-                    bool hasAlfa)
+                    std::vector<unsigned> &alpha)
    {
       png_voidp error_ptr=0;
       png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
@@ -196,11 +247,17 @@ namespace mapnik {
       png_set_PLTE(png_ptr,info_ptr,reinterpret_cast<png_color*>(&palette[0]),palette.size());
 
       // make transparent lowest indexes, so tRNS is small
-      if (hasAlfa)
+      if (alpha.size()>0)
       {
-         byte trans[] = {0,0,0,0};
-         //png_color_16p unused;
-         png_set_tRNS(png_ptr, info_ptr, (png_bytep)trans, 1, NULL);
+         png_byte trans[alpha.size()];
+         unsigned alphaSize=0;//truncate to nonopaque values
+         for(unsigned i=0; i<alpha.size(); i++){
+            trans[i]=alpha[i];
+            if (alpha[i]<255)
+               alphaSize = i+1;
+         }
+         if (alphaSize>0)
+            png_set_tRNS(png_ptr, info_ptr, (png_bytep)trans, alphaSize, NULL);
       }
 
       png_write_info(png_ptr, info_ptr);
@@ -216,43 +273,130 @@ namespace mapnik {
    template <typename T1,typename T2>
    void save_as_png256(T1 & file, T2 const& image)
    {
-      octree<rgb> tree(256);
       unsigned width = image.width();
       unsigned height = image.height();
+      unsigned alphaHist[256];//transparency histogram
+      unsigned semiCount = 0;//sum of semitransparent pixels
+      unsigned meanAlpha = 0;
+      for(int i=0; i<256; i++){
+        alphaHist[i] = 0;
+      }
+      for (unsigned y = 0; y < height; ++y){
+         for (unsigned x = 0; x < width; ++x){
+            unsigned val = U2ALPHA((unsigned)image.getRow(y)[x]);
+            alphaHist[val]++;
+            meanAlpha += val;
+            if (val>0 && val<255)
+                semiCount++;
+         }
+      }
+      meanAlpha /= width*height;
+
+      // transparency ranges division points
+      unsigned limits[TRANSPARENCY_LEVELS+1];
+      limits[0] = 0;
+      limits[1] = (alphaHist[0]>0)?1:0;
+      limits[TRANSPARENCY_LEVELS] = 256;
+      unsigned alphaHistSum = 0;
+      for(int j=1; j<TRANSPARENCY_LEVELS; j++)
+         limits[j] = limits[1];
+      for(int i=1; i<256; i++){
+          alphaHistSum += alphaHist[i];
+          for(int j=1; j<TRANSPARENCY_LEVELS; j++){
+              if (alphaHistSum<semiCount*(j)/4)
+                limits[j] = i;
+          }
+      }
+      // avoid too wide full transparent range
+      if (limits[1]>256/(TRANSPARENCY_LEVELS-1))
+         limits[1]=256/(TRANSPARENCY_LEVELS-1);
+      // avoid too wide full opaque range
+      if (limits[TRANSPARENCY_LEVELS-1]<212)
+         limits[TRANSPARENCY_LEVELS-1]=212;
+      if (TRANSPARENCY_LEVELS==2) {
+         limits[1]=127;
+      }
+      // estimated number of colors from palette assigned to chosen ranges
+      unsigned cols[TRANSPARENCY_LEVELS];
+      // count colors
+      for(int j=1; j<=TRANSPARENCY_LEVELS; j++) {
+         cols[j-1] = 0;
+         for(unsigned i=limits[j-1]; i<limits[j]; i++){
+            cols[j-1] += alphaHist[i];
+         }
+      }
+
+      unsigned divCoef = width*height-cols[0];
+      if (divCoef==0) divCoef = 1;
+      cols[0] = cols[0]>0?1:0; // fully transparent color (one or not at all)
+      unsigned usedColors = cols[0];
+      for(int j=1; j<TRANSPARENCY_LEVELS-1; j++){
+         unsigned oldCols = cols[j];
+         cols[j] = cols[j]*(256-cols[0])/divCoef;
+         if (oldCols>12 && cols[j]<12)
+            cols[j] = 12; // reserve at least 12 colors to have any effect
+         usedColors += cols[j];
+      }
+      // use rest for most opaque group of pixels
+      cols[TRANSPARENCY_LEVELS-1] = 256-usedColors;
+
+      // octree table for separate alpha range with 1-based index (0 is fully transparent: no color)
+      octree<rgb> trees[TRANSPARENCY_LEVELS];
+      for(int j=1; j<TRANSPARENCY_LEVELS; j++)
+         trees[j].setMaxColors(cols[j]);
       for (unsigned y = 0; y < height; ++y)
       {
          typename T2::pixel_type const * row = image.getRow(y);
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
-#ifdef MAPNIK_BIG_ENDIAN
-            if (val&0x80)
-            {
-               tree.insert(mapnik::rgb((val>>24)&0xff, (val>>16)&0xff, (val>>8) & 0xff));
-            }
-#else
-            if ((val>>24)&0x80)
-            {
-               tree.insert(mapnik::rgb((val)&0xff, (val>>8)&0xff, (val>>16) & 0xff));
-            }
-#endif
-            else
-            {
-               tree.hasAlfa(true);
+            
+            // insert to proper tree based on alpha range
+            for(int j=TRANSPARENCY_LEVELS-1; j>0; j--){
+               if (cols[j]>0 && U2ALPHA(val)>=limits[j]) {
+                  trees[j].insert(mapnik::rgb(U2RED(val), U2GREEN(val), U2BLUE(val)));
+                  break;
+               }
             }
          }
       }
-
+      unsigned leftovers = 0;
       std::vector<rgb> palette;
-      tree.create_palette(palette);
-      assert(palette.size() <= 256);
+      palette.reserve(256);
+      if (cols[0])
+         palette.push_back(rgb(0,0,0));
+
+      for(int j=1; j<TRANSPARENCY_LEVELS; j++) {
+         if (cols[j]>0) {
+            if (leftovers>0) {
+               cols[j] += leftovers;
+               trees[j].setMaxColors(cols[j]);
+               leftovers = 0;
+            }
+            std::vector<rgb> pal;
+            trees[j].setOffset(palette.size());
+            trees[j].create_palette(pal);
+            assert(pal.size() <= 256);
+            leftovers = cols[j]-pal.size();
+            cols[j] = pal.size();
+            for(unsigned i=0; i<pal.size(); i++){
+               palette.push_back(pal[i]);
+            }
+            assert(palette.size() <= 256);
+         }
+      }
+
+      //transparency values per palette index
+      std::vector<unsigned> alphaTable;
+      //alphaTable.resize(palette.size());//allow semitransparency also in almost opaque range
+      alphaTable.resize(palette.size()-cols[TRANSPARENCY_LEVELS-1]);
 
       if (palette.size() > 16 )
       {
          // >16 && <=256 colors -> write 8-bit color depth
          ImageData8 reduced_image(width,height);
-         reduce_8(image,reduced_image,tree);
-         save_as_png(file,palette,reduced_image,width,height,8,tree.hasAlfa());
+         reduce_8(image,reduced_image,trees, limits, alphaTable);
+         save_as_png(file,palette,reduced_image,width,height,8,alphaTable);
       }
       else if (palette.size() == 1)
       {
@@ -260,8 +404,12 @@ namespace mapnik {
          unsigned image_width  = (int(0.125*width) + 7)&~7;
          unsigned image_height = height;
          ImageData8 reduced_image(image_width,image_height);
-         reduce_1(image,reduced_image,tree);
-         save_as_png(file,palette,reduced_image,width,height,1,tree.hasAlfa());
+         reduce_1(image,reduced_image,trees, limits, alphaTable);
+         if (meanAlpha<255 && cols[0]==0) {
+            alphaTable.resize(1);
+            alphaTable[0] = meanAlpha;
+         }
+         save_as_png(file,palette,reduced_image,width,height,1,alphaTable);
       }
       else
       {
@@ -269,8 +417,8 @@ namespace mapnik {
          unsigned image_width  = (int(0.5*width) + 3)&~3;
          unsigned image_height = height;
          ImageData8 reduced_image(image_width,image_height);
-         reduce_4(image,reduced_image,tree);
-         save_as_png(file,palette,reduced_image,width,height,4,tree.hasAlfa());
+         reduce_4(image,reduced_image,trees, limits, alphaTable);
+         save_as_png(file,palette,reduced_image,width,height,4,alphaTable);
       }
    }
 }
