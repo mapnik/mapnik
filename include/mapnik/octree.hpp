@@ -105,6 +105,7 @@ namespace mapnik {
          std::deque<node*> reducible_[InsertPolicy::MAX_LEVELS];
          unsigned max_colors_;
          unsigned colors_;
+         unsigned offset_;
          unsigned leaf_level_;
          bool has_alfa_;
 
@@ -112,12 +113,28 @@ namespace mapnik {
          explicit octree(unsigned max_colors=256)
             : max_colors_(max_colors),
               colors_(0),
+              offset_(0),
               leaf_level_(InsertPolicy::MAX_LEVELS),
               has_alfa_(false),
               root_(new node())
          {}
 
          ~octree() { delete root_;}
+
+         void setMaxColors(unsigned max_colors)
+         {
+            max_colors_ = max_colors;
+         }
+
+         void setOffset(unsigned offset)
+         {
+            offset_ = offset;
+         }
+
+         unsigned getOffset()
+         {
+            return offset_;
+         }
 
          void hasAlfa(bool v)
          {
@@ -168,7 +185,7 @@ namespace mapnik {
             node * cur_node = root_;
             while (cur_node)
             {
-               if (cur_node->count != 0) return cur_node->index;
+               if (cur_node->count != 0) return cur_node->index + offset_;
                unsigned idx = InsertPolicy::index_from_level(level,c);
                cur_node = cur_node->children_[idx];
                ++level;
@@ -190,22 +207,22 @@ namespace mapnik {
 
          void reduce()
          {
+            reducible_[0].push_back(root_);
+            
             // sort reducible
             for (unsigned i=0;i<InsertPolicy::MAX_LEVELS;++i)
             {
                std::sort(reducible_[i].begin(), reducible_[i].end(),node_cmp());
             }
 
-            while ( colors_ >= max_colors_ - 1)
+            while ( colors_ > max_colors_ && colors_ > 1)
             {
                while (leaf_level_ >0  && reducible_[leaf_level_-1].size() == 0)
                {
                   --leaf_level_;
                }
 
-               if (leaf_level_ < 1) continue;
-
-               if ( reducible_[leaf_level_-1].size() == 0) return;
+               if (leaf_level_ <= 0) return;
 
                // select best of all reducible:
                unsigned red_idx = leaf_level_-1;
