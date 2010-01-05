@@ -109,7 +109,7 @@ namespace mapnik {
    }
 
    template <typename T>
-   void reduce_8  (T const& in, ImageData8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
+   void reduce_8  (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
    {
       unsigned width = in.width();
       unsigned height = in.height();
@@ -123,8 +123,8 @@ namespace mapnik {
 
       for (unsigned y = 0; y < height; ++y)
       {
-         mapnik::ImageData32::pixel_type const * row = in.getRow(y);
-         mapnik::ImageData8::pixel_type  * row_out = out.getRow(y);
+         mapnik::image_data_32::pixel_type const * row = in.getRow(y);
+         mapnik::image_data_8::pixel_type  * row_out = out.getRow(y);
          for (unsigned x = 0; x < width; ++x)
          {
             unsigned val = row[x];
@@ -153,7 +153,7 @@ namespace mapnik {
    }
 
    template <typename T>
-   void reduce_4 (T const& in, ImageData8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
+   void reduce_4 (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
    {
       unsigned width = in.width();
       unsigned height = in.height();
@@ -167,8 +167,8 @@ namespace mapnik {
 
       for (unsigned y = 0; y < height; ++y)
       {
-         mapnik::ImageData32::pixel_type const * row = in.getRow(y);
-         mapnik::ImageData8::pixel_type  * row_out = out.getRow(y);
+         mapnik::image_data_32::pixel_type const * row = in.getRow(y);
+         mapnik::image_data_8::pixel_type  * row_out = out.getRow(y);
 
          for (unsigned x = 0; x < width; ++x)
          {
@@ -200,14 +200,14 @@ namespace mapnik {
 
    // 1-bit but only one color.
    template <typename T>
-   void reduce_1(T const&, ImageData8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
+   void reduce_1(T const&, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
    {
       out.set(0); // only one color!!!
    }
 
    template <typename T>
    void save_as_png(T & file, std::vector<mapnik::rgb> & palette,
-                    mapnik::ImageData8 const& image,
+                    mapnik::image_data_8 const& image,
                     unsigned width,
                     unsigned height,
                     unsigned color_depth,
@@ -394,7 +394,7 @@ namespace mapnik {
       if (palette.size() > 16 )
       {
          // >16 && <=256 colors -> write 8-bit color depth
-         ImageData8 reduced_image(width,height);
+         image_data_8 reduced_image(width,height);
          reduce_8(image,reduced_image,trees, limits, alphaTable);
          save_as_png(file,palette,reduced_image,width,height,8,alphaTable);
       }
@@ -403,7 +403,7 @@ namespace mapnik {
          // 1 color image ->  write 1-bit color depth PNG
          unsigned image_width  = (int(0.125*width) + 7)&~7;
          unsigned image_height = height;
-         ImageData8 reduced_image(image_width,image_height);
+         image_data_8 reduced_image(image_width,image_height);
          reduce_1(image,reduced_image,trees, limits, alphaTable);
          if (meanAlpha<255 && cols[0]==0) {
             alphaTable.resize(1);
@@ -416,7 +416,7 @@ namespace mapnik {
          // <=16 colors -> write 4-bit color depth PNG
          unsigned image_width  = (int(0.5*width) + 3)&~3;
          unsigned image_height = height;
-         ImageData8 reduced_image(image_width,image_height);
+         image_data_8 reduced_image(image_width,image_height);
          reduce_4(image,reduced_image,trees, limits, alphaTable);
          save_as_png(file,palette,reduced_image,width,height,4,alphaTable);
       }
