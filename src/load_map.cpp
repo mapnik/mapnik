@@ -896,7 +896,7 @@ namespace mapnik
                     get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
             text_symbol.set_label_placement( placement );
             // vertical alignment
-            vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", BOTTOM);
+            vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", MIDDLE);
             text_symbol.set_vertical_alignment(valign);
 
             // halo fill and radius
@@ -1152,7 +1152,7 @@ namespace mapnik
                 }
 
                 // vertical alignment
-                vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", BOTTOM);
+                vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", MIDDLE);
                 shield_symbol.set_vertical_alignment(valign);
 
                 // horizontal alignment
