@@ -621,7 +621,7 @@ if not preconfigured:
         mode += ' (with XML debug on)'
         
     env['PLATFORM'] = platform.uname()[0]
-    color_print (4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
+    color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
@@ -715,7 +715,7 @@ if not preconfigured:
     for libinfo in LIBSHEADERS:
         if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):
             if libinfo[2]:
-                color_print (1,'Could not find required header or shared library for %s' % libinfo[0])
+                color_print(1,'Could not find required header or shared library for %s' % libinfo[0])
                 env['MISSING_DEPS'].append(libinfo[0])
             else:
                 color_print(4,'Could not find optional header or shared library for %s' % libinfo[0])
@@ -756,11 +756,11 @@ if not preconfigured:
     # if the user is not setting custom boost configuration
     # enforce boost version greater than or equal to 1.41
     if not conf.CheckBoost('1.41'):
-        color_print (1,'Boost version 1.41 or greater is requred') 
+        color_print(1,'Boost version 1.41 or greater is requred') 
         if not env['BOOST_VERSION']:
             env['MISSING_DEPS'].append('boost version >=1.41')
     else:
-        color_print (4,'Found boost lib version... %s' % boost_lib_version_from_header )
+        color_print(4,'Found boost lib version... %s' % boost_lib_version_from_header )
     
     for count, libinfo in enumerate(BOOST_LIBSHEADERS):
         if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
@@ -935,17 +935,38 @@ if not preconfigured:
             if not os.access(env['PYTHON'], os.X_OK):
                 color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
                 Exit(1)
-        
-            sys_prefix = '''%s -c "import sys; print sys.prefix"''' % env['PYTHON']
+            
+            res = os.popen('''%s -c "print 1"''' % env['PYTHON'])
+            if res.read() == '1':
+                py3 = False
+            else:
+                py3 = True
+            #sys.version_info.major == 3
+
+            if py3:
+                sys_prefix = '''%s -c "import sys; print(sys.prefix)"''' % env['PYTHON']
+            else:
+                sys_prefix = '''%s -c "import sys; print sys.prefix"''' % env['PYTHON']                
             env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
             
             if HAS_DISTUTILS:                        
-                sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print get_python_version()"''' % env['PYTHON']
+                if py3:
+                    sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print(get_python_version())"''' % env['PYTHON']
+                else:
+                    sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print get_python_version()"''' % env['PYTHON']                    
                 env['PYTHON_VERSION'] = call(sys_version)
-                py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc()"''' % env['PYTHON']
+                
+                if py3:
+                    py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())"''' % env['PYTHON']                
+                else:
+                    py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc()"''' % env['PYTHON']
                 env['PYTHON_INCLUDES'] = call(py_includes)
+                
                 # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
-                site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)"''' % env['PYTHON']
+                if py3:
+                    site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True))"''' % env['PYTHON']
+                else:
+                    site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)"''' % env['PYTHON']                    
                 env['PYTHON_SITE_PACKAGES'] = call(site_packages)
             else:
                 env['PYTHON_SYS_PREFIX'] = os.popen('''%s -c "import sys; print sys.prefix"''' % env['PYTHON']).read().strip()
