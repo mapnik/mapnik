@@ -1,0 +1,29 @@
+<!-- see: http://trac.mapnik.org/changeset/574 -->
+<Map bgcolor="transparent" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+
+  <FileSource name="foo">../images/</FileSource>
+  
+  <Style name="test">
+    <Rule>
+      <PolygonSymbolizer />
+      <LineSymbolizer />
+    </Rule>  
+  </Style>
+
+  <Style name="labels">
+    <Rule>
+      <TextSymbolizer name="PRFEDEA" face_name="DejaVu Sans Oblique" size="16" color="white"/>
+    </Rule>  
+  </Style>
+
+  <Layer name="lay" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs ">
+    <StyleName>test</StyleName>
+    <StyleName>labels</StyleName>
+    <Datasource>
+      <Parameter name="type">shape</Parameter>
+      <Parameter name="base">../../data/shp/</Parameter>
+      <Parameter name="file">poly.shp</Parameter>
+    </Datasource>
+  </Layer>
+  
+</Map>
