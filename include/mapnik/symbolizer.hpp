@@ -36,14 +36,13 @@ namespace mapnik
             const std::string & get_filename() const;
             void set_filename(std::string const& image_filename);
             void set_image( boost::shared_ptr<ImageData32> symbol);
-
-            virtual ~symbolizer_with_image() {};
+            
         protected:
             symbolizer_with_image(boost::shared_ptr<ImageData32> img);
             symbolizer_with_image(std::string const& file,
-                                   std::string const& type,
-                                   unsigned width,unsigned height);
-        
+                                  std::string const& type,
+                                  unsigned width,unsigned height);
+            
             symbolizer_with_image(symbolizer_with_image const& rhs);
         
             boost::shared_ptr<ImageData32> image_;
