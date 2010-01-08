@@ -187,7 +187,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                            double x,y;
                            path.vertex(&x,&y);
                            qpath.moveTo(x,y);
-                           for (int j=1; j < geom.num_points(); ++j)
+                           for (unsigned j=1; j < geom.num_points(); ++j)
                            {
                               path.vertex(&x,&y);
                               qpath.lineTo(x,y);
@@ -448,11 +448,11 @@ void MapWidget::updateMap()
       unsigned width=map_->getWidth();
       unsigned height=map_->getHeight();
       
-      image_32 buf(width,height);
+      Image32 buf(width,height);
 
       try 
       {
-	  mapnik::agg_renderer<image_32> ren(*map_,buf);
+	  mapnik::agg_renderer<Image32> ren(*map_,buf);
 	  ren.apply();
 	  
 	  QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
