@@ -113,7 +113,7 @@ boost::optional<mapnik::Layer&> LayerListModel::map_layer(int i)
    {
       std::vector<mapnik::Layer> & layers = const_cast<std::vector<mapnik::Layer>& >(map_->layers());
       if (i < int(layers.size()))
-	  return boost::optional<mapnik::layer&>(layers[i]);
+	  return boost::optional<mapnik::Layer&>(layers[i]);
    }
    return boost::optional<mapnik::Layer&>();
 }
