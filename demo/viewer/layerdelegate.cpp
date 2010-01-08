@@ -27,7 +27,7 @@ LayerDelegate::LayerDelegate(QObject *parent)
 }
 
 void LayerDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-                          const QModelIndex &index) const
+                          const QModelIndex &/*index*/) const
 {
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(QColor(255,0,0),1));
