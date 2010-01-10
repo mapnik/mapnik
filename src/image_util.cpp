@@ -35,6 +35,10 @@ extern "C"
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
 
+#ifdef HAVE_CAIRO
+#include <mapnik/cairo_renderer.hpp>
+#endif
+
 // stl
 #include <string>
 #include <iostream>
@@ -103,8 +107,10 @@ namespace mapnik
                 }
             }
             else throw ImageWriterException("unknown file type: " + type);
-        } 
+        }
+        else throw ImageWriterException("Could not write file to " + filename );
     }
+
 	
     template <typename T>
     void save_to_file(T const& image,std::string const& filename)
@@ -112,12 +118,66 @@ namespace mapnik
         std::string type = type_from_filename(filename);
         save_to_file<T>(image,filename,type);
     }
-     
+
+
+#if defined(HAVE_CAIRO)
+    // TODO - move to separate cairo_io.hpp
+    void save_to_cairo_file(mapnik::Map const& map, std::string const& filename)
+    {
+        std::string type = type_from_filename(filename);
+        save_to_cairo_file(map,filename,type);
+    }
+
+    void save_to_cairo_file(mapnik::Map const& map,
+                      std::string const& filename,
+                      std::string const& type)
+    {
+        std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
+        if (file)
+        {
+          Cairo::RefPtr<Cairo::Surface> surface;
+          unsigned width = map.getWidth();
+          unsigned height = map.getHeight();
+          if (type == "pdf")
+              surface = Cairo::PdfSurface::create(filename,width,height);
+          else if (type == "svg")
+              surface = Cairo::SvgSurface::create(filename,width,height);
+          else if (type == "ps")
+              surface = Cairo::PsSurface::create(filename,width,height);
+          else if (type == "ARGB32")
+              surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,width,height);
+          else if (type == "RGB24")
+              surface = Cairo::ImageSurface::create(Cairo::FORMAT_RGB24,width,height);
+          else 
+              throw ImageWriterException("unknown file type: " + type);    
+          Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create(surface);
+    
+          // TODO - expose as user option
+          /*
+          if (type == "ARGB32" | type == "RGB24") 
+          { 
+              context->set_antialias(Cairo::ANTIALIAS_NONE); 
+          }
+          */
+          
+    
+          mapnik::cairo_renderer<Cairo::Context> ren(map, context);
+          ren.apply();
+    
+          if (type == "ARGB32" | type == "RGB24") 
+          { 
+              surface->write_to_png(filename);
+          }
+          surface->finish();
+        }
+    }
+
+#endif
 
     template void save_to_file<ImageData32>(ImageData32 const&,
                                             std::string const&,
                                             std::string const&);
-
+                                            
     template void save_to_file<ImageData32>(ImageData32 const&,
                                             std::string const&);
 
