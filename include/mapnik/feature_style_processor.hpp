@@ -124,32 +124,33 @@ namespace mapnik
                Envelope<double> ext = m_.get_buffered_extent();
                projection proj1(lay.srs());
                proj_transform prj_trans(proj0,proj1);
-               
-               double mx0 = ext.minx();
-               double my0 = ext.miny();
-               double mz0 = 0.0;
-               double mx1 = ext.maxx();
-               double my1 = ext.maxy();
-               double mz1 = 0.0;
-               
-               // project main map projection into layers extent
-               prj_trans.forward(mx0,my0,mz0);
-               prj_trans.forward(mx1,my1,mz1);
 
-               // if no intersection then nothing to do for layer
                Envelope<double> layer_ext = lay.envelope();
-               if ( mx0 > layer_ext.maxx() || mx1 < layer_ext.minx() || my0 > layer_ext.maxy() || my1 < layer_ext.miny() )
+               double lx0 = layer_ext.minx();
+               double ly0 = layer_ext.miny();
+               double lz0 = 0.0;
+               double lx1 = layer_ext.maxx();
+               double ly1 = layer_ext.maxy();
+               double lz1 = 0.0;
+               // back project layers extent into main map projection
+               prj_trans.backward(lx0,ly0,lz0);
+               prj_trans.backward(lx1,ly1,lz1);
+               
+               // if no intersection then nothing to do for layer
+               if ( lx0 > ext.maxx() || lx1 < ext.minx() || ly0 > ext.maxy() || ly1 < ext.miny() )
                {
                   return;
                }
                
                // clip query bbox
-               mx0 = std::max(layer_ext.minx(),mx0);
-               my0 = std::max(layer_ext.miny(),my0);
-               mx1 = std::min(layer_ext.maxx(),mx1);
-               my1 = std::min(layer_ext.maxy(),my1);
+               lx0 = std::max(ext.minx(),lx0);
+               ly0 = std::max(ext.miny(),ly0);
+               lx1 = std::min(ext.maxx(),lx1);
+               ly1 = std::min(ext.maxy(),ly1);
                
-               Envelope<double> bbox(mx0,my0,mx1,my1);
+               prj_trans.forward(lx0,ly0,lz0);
+               prj_trans.forward(lx1,ly1,lz1);
+               Envelope<double> bbox(lx0,ly0,lx1,ly1);
                
                double resolution = m_.getWidth()/bbox.width();
                query q(bbox,resolution,scale_denom); //BBOX query
