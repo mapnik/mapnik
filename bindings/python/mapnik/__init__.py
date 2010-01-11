@@ -297,6 +297,10 @@ def PostGIS(**keywords):
     Required keyword arguments:
       dbname -- database name to connect to
       table -- table name or subselect query
+      
+      *Note: if using subselects for the 'table' value consider also 
+       passing the 'geometry_field' and 'srid' and 'extent_from_subquery'
+       options and/or specifying the 'geometry_table' option.
 
     Optional db connection keyword arguments:
       user -- database user to connect as (default: see postgres docs)
@@ -309,11 +313,13 @@ def PostGIS(**keywords):
 
     Optional table-level keyword arguments:
       extent -- manually specified data extent (comma delimited string, default: None)
-      estimate_extent -- boolean, direct PostGIS to use the faster, less accurate estimate_extent() over extent() (default: False)
+      estimate_extent -- boolean, direct PostGIS to use the faster, less accurate `estimate_extent` over `extent` (default: False)
+      extent_from_subquery -- boolean, direct Mapnik to query Postgis for the extent of the raw 'table' value (default: uses 'geometry_table')
+      geometry_table -- specify geometry table to use to look up metadata (default: automatically parsed from 'table' value)
+      geometry_field -- specify geometry field to use (default: first entry in geometry_columns)
+      srid -- specify srid to use (default: auto-detected from geometry_field)
       row_limit -- integer limit of rows to return (default: 0)
-      cursor_size -- integer size of binary cursor to use (default: 0, no cursor used)
-      geometry_field -- specify geometry field (default: first entry in geometry_columns)
-      srid -- spatial reference id # (default: auto-detected from geometry_field)
+      cursor_size -- integer size of binary cursor to use (default: 0, no binary cursor is used)
       multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
 
     >>> from mapnik import PostGIS, Layer
