@@ -868,7 +868,7 @@ if not preconfigured:
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/SConscript
         abi = conf.GetMapnikLibVersion()
-        abi_fallback = [0,6,1]
+        abi_fallback = [0,7,0]
         if not abi:
             color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
             env['ABI_VERSION'] = abi_fallback

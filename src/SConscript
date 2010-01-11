@@ -64,7 +64,7 @@ if env['PLATFORM'] == 'Darwin':
     else:
         lib_path = 'libmapnik.dylib'
     linkflags = '-Wl,-install_name,%s' % lib_path
-    linkflags += ' -current_version 0.6.1 -compatibility_version 0.6.1'
+    linkflags += ' -current_version 0.7.0 -compatibility_version 0.7.0'
 elif env['PLATFORM'] == 'SunOS' and env['CXX'].startswith('CC'):
     linkflags = '-R. -h libmapnik.so'
 else: # Linux and others
