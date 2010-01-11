@@ -218,6 +218,12 @@ def test_textsymbolizer_pickle():
     eq_(ts.line_spacing, ts2.line_spacing)
     eq_(ts.character_spacing, ts2.character_spacing)
     
+    # r1341
+    eq_(ts.wrap_before, ts2.wrap_before)
+    eq_(ts.horizontal_alignment, ts2.horizontal_alignment)
+    eq_(ts.justify_alignment, ts2.justify_alignment)
+    eq_(ts.opacity, ts2.opacity)
+        
     raise Todo("FontSet pickling support needed: http://trac.mapnik.org/ticket/348")
     eq_(ts.fontset, ts2.fontset)
 
