@@ -52,7 +52,8 @@ def test_introspect_symbolizers():
         
     ## but we need to be able to do:
     p2 = syms[0] # get the actual symbolizer, not the variant object
-    # this will throw for now...
+    # this will throw ...
+    raise Todo('need to expose symbolizer instances')
     assert isinstance(p2,mapnik.PointSymbolizer)
     
     eq_(p2.allow_overlap, True)
