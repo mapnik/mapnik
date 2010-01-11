@@ -109,18 +109,19 @@ namespace mapnik {
    }
 
    template <typename T>
-   void reduce_8  (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
+   void reduce_8  (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> & alpha)
    {
       unsigned width = in.width();
       unsigned height = in.height();
 
-      unsigned alphaCount[alpha.size()];
+      //unsigned alphaCount[alpha.size()];
+      std::vector<unsigned> alphaCount(alpha.size());
       for(unsigned i=0; i<alpha.size(); i++)
       {
          alpha[i] = 0;
          alphaCount[i] = 0;
       }
-
+      
       for (unsigned y = 0; y < height; ++y)
       {
          mapnik::image_data_32::pixel_type const * row = in.getRow(y);
@@ -153,12 +154,13 @@ namespace mapnik {
    }
 
    template <typename T>
-   void reduce_4 (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
+   void reduce_4 (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> & alpha)
    {
       unsigned width = in.width();
       unsigned height = in.height();
 
-      unsigned alphaCount[alpha.size()];
+      //unsigned alphaCount[alpha.size()];
+      std::vector<unsigned> alphaCount(alpha.size());
       for(unsigned i=0; i<alpha.size(); i++)
       {
          alpha[i] = 0;
@@ -200,7 +202,7 @@ namespace mapnik {
 
    // 1-bit but only one color.
    template <typename T>
-   void reduce_1(T const&, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> &alpha)
+   void reduce_1(T const&, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> & alpha)
    {
       out.set(0); // only one color!!!
    }
@@ -249,15 +251,16 @@ namespace mapnik {
       // make transparent lowest indexes, so tRNS is small
       if (alpha.size()>0)
       {
-         png_byte trans[alpha.size()];
-         unsigned alphaSize=0;//truncate to nonopaque values
-         for(unsigned i=0; i<alpha.size(); i++){
-            trans[i]=alpha[i];
-            if (alpha[i]<255)
-               alphaSize = i+1;
-         }
-         if (alphaSize>0)
-            png_set_tRNS(png_ptr, info_ptr, (png_bytep)trans, alphaSize, NULL);
+	  std::vector<png_byte> trans(alpha.size());
+	  unsigned alphaSize=0;//truncate to nonopaque values
+	  for(unsigned i=0; i < alpha.size(); i++) 
+	  {
+	      trans[i]=alpha[i];
+	      if (alpha[i]<255)
+		  alphaSize = i+1;
+	  }
+	  if (alphaSize>0)
+	      png_set_tRNS(png_ptr, info_ptr, (png_bytep)&trans[0], alphaSize, 0);
       }
 
       png_write_info(png_ptr, info_ptr);
@@ -389,8 +392,8 @@ namespace mapnik {
       //transparency values per palette index
       std::vector<unsigned> alphaTable;
       //alphaTable.resize(palette.size());//allow semitransparency also in almost opaque range
-      alphaTable.resize(palette.size()-cols[TRANSPARENCY_LEVELS-1]);
-
+      alphaTable.resize(palette.size() - cols[TRANSPARENCY_LEVELS-1]);
+      
       if (palette.size() > 16 )
       {
          // >16 && <=256 colors -> write 8-bit color depth

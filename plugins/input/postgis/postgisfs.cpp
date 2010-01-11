@@ -71,17 +71,33 @@ std::string numeric2string(const char* buf)
       if (i <= weight && d < ndigits) {
          // All digits after the first must be padded to make the field 4 characters long
          if (d != 0) {
-            switch(digits[d]) {
-            case 0 ... 9:
-               ss << "000"; // 0000 - 0009
-               break;
-            case 10 ... 99:
-               ss << "00";  // 0010 - 0099
-               break;
-            case 100 ... 999:
-               ss << "0";   // 0100 - 0999
-               break;
-            }
+#ifdef _WINDOWS
+	     int dig = digits[d];
+	     if (dig < 10)
+	     {
+		 ss << "000"; // 0000 - 0009
+	     }
+	     else if (dig < 100)
+	     {
+		 ss << "00";  // 0010 - 0099
+	     }
+	     else
+	     {
+		 ss << "0";   // 0100 - 0999;
+	     }
+#else
+	     switch(digits[d]) {
+	     case 0 ... 9:
+		 ss << "000"; // 0000 - 0009
+		 break;
+	     case 10 ... 99:
+		 ss << "00";  // 0010 - 0099
+		 break;
+	     case 100 ... 999:
+		 ss << "0";   // 0100 - 0999
+		 break;
+	     }
+#endif
          }
          ss <<  digits[d++];
       } else {

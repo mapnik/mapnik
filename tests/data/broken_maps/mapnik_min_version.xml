@@ -1,0 +1,3 @@
+<Map bgcolor="steelblue" minimum_version="50.0.0">
+<!-- arbitrarily large version number that should throw error -->
+</Map>
