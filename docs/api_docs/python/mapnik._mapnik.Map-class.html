@@ -188,8 +188,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Map-class.html#buffered_envelope" class="summary-sig-name">buffered_envelope</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      buffered_envelope( (Map)arg1) -&gt; Envelope :
-    Get the Envelope() of the Map given
+      buffered_envelope( (Map)arg1) -&gt; Box2d :
+    Get the box2d() of the Map given
     the Map.buffer_size.</td>
           <td align="right" valign="top">
             
@@ -207,8 +207,8 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Map-class.html#envelope" class="summary-sig-name">envelope</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      envelope( (Map)arg1) -&gt; Envelope :
-    Return the Map Envelope object
+      envelope( (Map)arg1) -&gt; Box2d :
+    Return the Map box2d object
     and print the string representation
     of the current extent of the map.</td>
           <td align="right" valign="top">
@@ -344,7 +344,7 @@
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Map-class.html#remove_all" class="summary-sig-name">remove_all</a>(<span class="summary-sig-arg">...</span>)</span><br />
       remove_all( (Map)arg1) -&gt; None :
-    Remove all Mapnik Styles and Layers from the Map.</td>
+    Remove all Mapnik Styles and layers from the Map.</td>
           <td align="right" valign="top">
             
             
@@ -488,9 +488,9 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik.Map-class.html#zoom_to_box" class="summary-sig-name">zoom_to_box</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      zoom_to_box( (Map)arg1, (Envelope)arg2) -&gt; None :
+      zoom_to_box( (Map)arg1, (Box2d)arg2) -&gt; None :
     Set the geographical extent of the map
-    by specifying a Mapnik Envelope.</td>
+    by specifying a Mapnik box2d.</td>
           <td align="right" valign="top">
             
             
@@ -817,23 +817,23 @@ append_style( (Map)arg1, (str)arg2, (Style)arg3) -&gt; bool :
   
   <pre class="literalblock">
 
-buffered_envelope( (Map)arg1) -&gt; Envelope :
-    Get the Envelope() of the Map given
+buffered_envelope( (Map)arg1) -&gt; Box2d :
+    Get the box2d() of the Map given
     the Map.buffer_size.
     
     Usage:
     &gt;&gt;&gt; m = Map(600,400)
     &gt;&gt;&gt; m.envelope()
-    Envelope(-1.0,-1.0,0.0,0.0)
+    box2d(-1.0,-1.0,0.0,0.0)
     &gt;&gt;&gt; m.buffered_envelope()
-    Envelope(-1.0,-1.0,0.0,0.0)
+    box2d(-1.0,-1.0,0.0,0.0)
     &gt;&gt;&gt; m.buffer_size = 1
     &gt;&gt;&gt; m.buffered_envelope()
-    Envelope(-1.02222222222,-1.02222222222,0.0222222222222,0.0222222222222)
+    box2d(-1.02222222222,-1.02222222222,0.0222222222222,0.0222222222222)
     
 
     C++ signature :
-        mapnik::Envelope&lt;double&gt; buffered_envelope(mapnik::Map {lvalue})
+        mapnik::box2d&lt;double&gt; buffered_envelope(mapnik::Map {lvalue})
 
 </pre>
   <dl class="fields">
@@ -856,14 +856,14 @@ buffered_envelope( (Map)arg1) -&gt; Envelope :
   
   <pre class="literalblock">
 
-envelope( (Map)arg1) -&gt; Envelope :
-    Return the Map Envelope object
+envelope( (Map)arg1) -&gt; Box2d :
+    Return the Map box2d object
     and print the string representation
     of the current extent of the map.
     
     Usage:
     &gt;&gt;&gt; m.envelope()
-    Envelope(-0.185833333333,-0.96,0.189166666667,-0.71)
+    box2d(-0.185833333333,-0.96,0.189166666667,-0.71)
     &gt;&gt;&gt; dir(m.envelope())
     ...'center', 'contains', 'expand_to_include', 'forward',
     ...'height', 'intersect', 'intersects', 'inverse', 'maxx',
@@ -871,7 +871,7 @@ envelope( (Map)arg1) -&gt; Envelope :
     
 
     C++ signature :
-        mapnik::Envelope&lt;double&gt; envelope(mapnik::Map {lvalue})
+        mapnik::box2d&lt;double&gt; envelope(mapnik::Map {lvalue})
 
 </pre>
   <dl class="fields">
@@ -1114,7 +1114,7 @@ query_point( (Map)arg1, (int)arg2, (float)arg3, (float)arg4) -&gt; Featureset :
   <pre class="literalblock">
 
 remove_all( (Map)arg1) -&gt; None :
-    Remove all Mapnik Styles and Layers from the Map.
+    Remove all Mapnik Styles and layers from the Map.
     
     Usage:
     &gt;&gt;&gt; m.remove_all()
@@ -1362,17 +1362,17 @@ zoom_all( (Map)arg1) -&gt; None :
   
   <pre class="literalblock">
 
-zoom_to_box( (Map)arg1, (Envelope)arg2) -&gt; None :
+zoom_to_box( (Map)arg1, (Box2d)arg2) -&gt; None :
     Set the geographical extent of the map
-    by specifying a Mapnik Envelope.
+    by specifying a Mapnik box2d.
     
     Usage:
-    &gt;&gt;&gt; extext = Envelope(-180.0, -90.0, 180.0, 90.0)
+    &gt;&gt;&gt; extext = box2d(-180.0, -90.0, 180.0, 90.0)
     &gt;&gt;&gt; m.zoom_to_box(extent)
     
 
     C++ signature :
-        void zoom_to_box(mapnik::Map {lvalue},mapnik::Envelope&lt;double&gt;)
+        void zoom_to_box(mapnik::Map {lvalue},mapnik::box2d&lt;double&gt;)
 
 </pre>
   <dl class="fields">
@@ -1472,8 +1472,8 @@ zoom_to_box( (Map)arg1, (Envelope)arg2) -&gt; None :
 <tr><td>
   <h3 class="epydoc">layers</h3>
   <p>The list of map layers.</p>
-  <p>Usage: &gt;&gt;&gt; m.layers &lt;mapnik._mapnik.Layers object at 
-  0x6d458&gt;&gt;&gt;&gt; m.layers[0] &lt;mapnik._mapnik.Layer object at 
+  <p>Usage: &gt;&gt;&gt; m.layers &lt;mapnik._mapnik.layers object at 
+  0x6d458&gt;&gt;&gt;&gt; m.layers[0] &lt;mapnik._mapnik.layer object at 
   0x5fe130&gt;</p>
   <dl class="fields">
     <dt>Get Method:</dt>
@@ -1569,7 +1569,7 @@ Usage:
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sun Nov  8 09:00:50 2009
+    Generated by Epydoc 3.0.1 on Mon Jan 11 11:02:16 2010
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

@@ -211,13 +211,6 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="mapnik._mapnik.Properties-class.html" class="summary-name">Properties</a>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
         <a href="mapnik._mapnik.Query-class.html" class="summary-name">Query</a><br />
       a spatial query data object
     </td>
@@ -297,6 +290,20 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a href="mapnik._mapnik.aspect_fix_mode-class.html" class="summary-name">aspect_fix_mode</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="mapnik._mapnik.horizontal_alignment-class.html" class="summary-name">horizontal_alignment</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="mapnik._mapnik.justify_alignment-class.html" class="summary-name">justify_alignment</a>
     </td>
   </tr>
 <tr>
@@ -383,8 +390,25 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="mapnik._mapnik-module.html#Filter" class="summary-sig-name">Filter</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      Filter( (str)arg1) -&gt; Filter :</td>
+          <td><span class="summary-sig"><a href="mapnik._mapnik-module.html#Expression" class="summary-sig-name">Expression</a>(<span class="summary-sig-arg">...</span>)</span><br />
+      Expression( (str)arg1) -&gt; Expression :</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="mapnik._mapnik-module.html#PathExpression" class="summary-sig-name">PathExpression</a>(<span class="summary-sig-arg">...</span>)</span><br />
+      PathExpression( (str)arg1) -&gt; PathExpression :</td>
           <td align="right" valign="top">
             
             
@@ -486,7 +510,7 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="mapnik._mapnik-module.html#load_map_from_string" class="summary-sig-name">load_map_from_string</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      load_map_from_string( (Map)arg1, (str)arg2 [, (bool)arg3]) -&gt; None :</td>
+      load_map_from_string( (Map)arg1, (str)arg2 [, (bool)arg3 [, (str)arg4]]) -&gt; None :</td>
           <td align="right" valign="top">
             
             
@@ -604,8 +628,8 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="mapnik._mapnik-module.html#save_map_string" class="summary-sig-name">save_map_string</a>(<span class="summary-sig-arg">...</span>)</span><br />
-      save_map_string( (Map)arg1 [, (bool)arg2]) -&gt; str :</td>
+          <td><span class="summary-sig"><a href="mapnik._mapnik-module.html#save_map_to_string" class="summary-sig-name">save_map_to_string</a>(<span class="summary-sig-arg">...</span>)</span><br />
+      save_map_to_string( (Map)arg1 [, (bool)arg2]) -&gt; str :</td>
           <td align="right" valign="top">
             
             
@@ -694,14 +718,14 @@ Describe( (Datasource)arg1) -&gt; str :
   </dl>
 </td></tr></table>
 </div>
-<a name="Filter"></a>
+<a name="Expression"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">Filter</span>(<span class="sig-arg">...</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">Expression</span>(<span class="sig-arg">...</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     >&nbsp;
@@ -710,10 +734,36 @@ Describe( (Datasource)arg1) -&gt; str :
   
   <pre class="literalblock">
 
-Filter( (str)arg1) -&gt; Filter :
+Expression( (str)arg1) -&gt; Expression :
 
     C++ signature :
-        boost::shared_ptr&lt;mapnik::filter&lt;mapnik::feature&lt;mapnik::geometry&lt;mapnik::vertex&lt;double, 2&gt; &gt;, boost::shared_ptr&lt;mapnik::raster&gt; &gt; &gt; &gt; Filter(std::string)
+        boost::shared_ptr&lt;boost::variant&lt;mapnik::value, mapnik::attribute, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::plus&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::minus&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::mult&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::div&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::mod&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::less&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::less_equal&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::greater&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::greater_equal&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::equal_to&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::not_equal_to&gt; &gt;, boost::recursive_wrapper&lt;mapnik::unary_node&lt;mapnik::tags::logical_not&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::logical_and&gt; &gt;, boost::recursive_wrapper&lt;mapnik::binary_node&lt;mapnik::tags::logical_or&gt; &gt;, boost::recursive_wrapper&lt;mapnik::regex_match_node&gt;, boost::recursive_wrapper&lt;mapnik::regex_replace_node&gt;, boost::detail::variant::void_, boost::detail::variant::void_&gt; &gt; Expression(std::string)
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="PathExpression"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">PathExpression</span>(<span class="sig-arg">...</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+PathExpression( (str)arg1) -&gt; PathExpression :
+
+    C++ signature :
+        boost::shared_ptr&lt;std::vector&lt;boost::variant&lt;std::string, mapnik::attribute, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_&gt;, std::allocator&lt;boost::variant&lt;std::string, mapnik::attribute, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_, boost::detail::variant::void_&gt; &gt; &gt; &gt; PathExpression(std::string)
 
 </pre>
   <dl class="fields">
@@ -741,10 +791,10 @@ forward_( (Coord)arg1, (Projection)arg2) -&gt; Coord :
     C++ signature :
         mapnik::coord&lt;double, 2&gt; forward_(mapnik::coord&lt;double, 2&gt;,mapnik::projection)
 
-forward_( (Envelope)arg1, (Projection)arg2) -&gt; Envelope :
+forward_( (Box2d)arg1, (Projection)arg2) -&gt; Box2d :
 
     C++ signature :
-        mapnik::Envelope&lt;double&gt; forward_(mapnik::Envelope&lt;double&gt;,mapnik::projection)
+        mapnik::box2d&lt;double&gt; forward_(mapnik::box2d&lt;double&gt;,mapnik::projection)
 
 </pre>
   <dl class="fields">
@@ -824,10 +874,10 @@ inverse_( (Coord)arg1, (Projection)arg2) -&gt; Coord :
     C++ signature :
         mapnik::coord&lt;double, 2&gt; inverse_(mapnik::coord&lt;double, 2&gt;,mapnik::projection)
 
-inverse_( (Envelope)arg1, (Projection)arg2) -&gt; Envelope :
+inverse_( (Box2d)arg1, (Projection)arg2) -&gt; Box2d :
 
     C++ signature :
-        mapnik::Envelope&lt;double&gt; inverse_(mapnik::Envelope&lt;double&gt;,mapnik::projection)
+        mapnik::box2d&lt;double&gt; inverse_(mapnik::box2d&lt;double&gt;,mapnik::projection)
 
 </pre>
   <dl class="fields">
@@ -876,10 +926,10 @@ load_map( (Map)arg1, (str)arg2 [, (bool)arg3]) -&gt; None :
   
   <pre class="literalblock">
 
-load_map_from_string( (Map)arg1, (str)arg2 [, (bool)arg3]) -&gt; None :
+load_map_from_string( (Map)arg1, (str)arg2 [, (bool)arg3 [, (str)arg4]]) -&gt; None :
 
     C++ signature :
-        void load_map_from_string(mapnik::Map {lvalue},std::string [,bool])
+        void load_map_from_string(mapnik::Map {lvalue},std::string [,bool [,std::string]])
 
 </pre>
   <dl class="fields">
@@ -956,7 +1006,7 @@ load_map_from_string( (Map)arg1, (str)arg2 [, (bool)arg3]) -&gt; None :
 
 render( (Map)arg1, (Image)arg2, (int)arg3, (int)arg4) -&gt; None :
     
-    Render Map to an AGG Image32 using offsets
+    Render Map to an AGG image_32 using offsets
     
     Usage:
     &gt;&gt;&gt; from mapnik import Map, Image, render, load_map
@@ -968,11 +1018,11 @@ render( (Map)arg1, (Image)arg2, (int)arg3, (int)arg4) -&gt; None :
     
 
     C++ signature :
-        void render(mapnik::Map,mapnik::Image32 {lvalue},unsigned int,unsigned int)
+        void render(mapnik::Map,mapnik::image_32 {lvalue},unsigned int,unsigned int)
 
 render( (Map)arg1, (Image)arg2) -&gt; None :
     
-    Render Map to an AGG Image32
+    Render Map to an AGG image_32
     
     Usage:
     &gt;&gt;&gt; from mapnik import Map, Image, render, load_map
@@ -984,7 +1034,7 @@ render( (Map)arg1, (Image)arg2) -&gt; None :
     
 
     C++ signature :
-        void render(mapnik::Map,mapnik::Image32 {lvalue})
+        void render(mapnik::Map,mapnik::image_32 {lvalue})
 
 render( (Map)arg1, (object)arg2, (int)arg3, (int)arg4) -&gt; None :
     
@@ -1172,14 +1222,14 @@ save_map( (Map)arg1, (str)arg2 [, (bool)arg3]) -&gt; None :
   </dl>
 </td></tr></table>
 </div>
-<a name="save_map_string"></a>
+<a name="save_map_to_string"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">save_map_string</span>(<span class="sig-arg">...</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">save_map_to_string</span>(<span class="sig-arg">...</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     >&nbsp;
@@ -1188,10 +1238,10 @@ save_map( (Map)arg1, (str)arg2 [, (bool)arg3]) -&gt; None :
   
   <pre class="literalblock">
 
-save_map_string( (Map)arg1 [, (bool)arg2]) -&gt; str :
+save_map_to_string( (Map)arg1 [, (bool)arg2]) -&gt; str :
 
     C++ signature :
-        std::string save_map_string(mapnik::Map [,bool])
+        std::string save_map_to_string(mapnik::Map [,bool])
 
 </pre>
   <dl class="fields">
@@ -1268,7 +1318,7 @@ scale_denominator( (Map)arg1, (bool)arg2) -&gt; float :
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sun Nov  8 09:00:49 2009
+    Generated by Epydoc 3.0.1 on Mon Jan 11 11:02:15 2010
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
