@@ -80,6 +80,10 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         extras.append(t.get_line_spacing());
         extras.append(t.get_character_spacing());
         extras.append(t.get_text_convert());
+        extras.append(t.get_wrap_before());
+        extras.append(t.get_horizontal_alignment());
+        extras.append(t.get_justify_alignment());
+        extras.append(t.get_opacity());
                 
         return boost::python::make_tuple(disp,t.get_label_placement(),
         t.get_vertical_alignment(),t.get_halo_radius(),t.get_halo_fill(),t.get_text_ratio(),
@@ -139,9 +143,11 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         t.set_line_spacing(extract<unsigned>(extras[1]));
         t.set_character_spacing(extract<unsigned>(extras[2]));
         t.set_text_convert(extract<text_convert_e>(extras[3]));
-
+        t.set_wrap_before(extract<bool>(extras[4]));
+        t.set_horizontal_alignment(extract<horizontal_alignment_e>(extras[5]));
+        t.set_justify_alignment(extract<justify_alignment_e>(extras[6]));
+        t.set_opacity(extract<double>(extras[7]));
    }
-
 };
 
 
@@ -152,13 +158,26 @@ using namespace boost::python;
     enumeration_<label_placement_e>("label_placement")
         .value("LINE_PLACEMENT",LINE_PLACEMENT)
         .value("POINT_PLACEMENT",POINT_PLACEMENT)
+        .value("VERTEX_PLACEMENT",VERTEX_PLACEMENT)
         ;
     enumeration_<vertical_alignment_e>("vertical_alignment")
         .value("TOP",TOP)
         .value("MIDDLE",MIDDLE)
         .value("BOTTOM",BOTTOM)
         ;
-    
+
+    enumeration_<horizontal_alignment_e>("horizontal_alignment")
+        .value("LEFT",H_LEFT)
+        .value("MIDDLE",H_MIDDLE)
+        .value("RIGHT",H_RIGHT)
+        ;
+
+    enumeration_<justify_alignment_e>("justify_alignment")
+        .value("LEFT",J_LEFT)
+        .value("MIDDLE",J_MIDDLE)
+        .value("RIGHT",J_RIGHT)
+        ;
+                
     enumeration_<text_convert_e>("text_convert")
         .value("NONE",NONE)
         .value("TOUPPER",TOUPPER)
@@ -202,6 +221,14 @@ class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&,
     .add_property("halo_radius",
                   &text_symbolizer::get_halo_radius, 
                   &text_symbolizer::set_halo_radius)
+    .add_property("horizontal_alignment",
+                  &text_symbolizer::get_horizontal_alignment,
+                  &text_symbolizer::set_horizontal_alignment,
+                  "Set/get the horizontal alignment of the label")
+    .add_property("justify_alignment",
+                  &text_symbolizer::get_justify_alignment,
+                  &text_symbolizer::set_justify_alignment,
+                  "Set/get the text justification")
     .add_property("label_placement",
                   &text_symbolizer::get_label_placement,
                   &text_symbolizer::set_label_placement,
@@ -224,6 +251,10 @@ class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&,
     //.add_property("name",
     //             make_function(&text_symbolizer::get_name,return_value_policy<copy_const_reference>()),
     //             &text_symbolizer::set_name)
+    .add_property("opacity",
+                  &text_symbolizer::get_opacity,
+                  &text_symbolizer::set_opacity,
+                  "Set/get the text opacity")
     .add_property("text_convert",
                   &text_symbolizer::get_text_convert,
                   &text_symbolizer::set_text_convert,
@@ -244,5 +275,8 @@ class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&,
     .add_property("wrap_character",
                   &text_symbolizer::get_wrap_char_string,
                   &text_symbolizer::set_wrap_char_from_string)
+    .add_property("wrap_before",
+                  &text_symbolizer::get_wrap_before,
+                  &text_symbolizer::set_wrap_before)
     ;
 }

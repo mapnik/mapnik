@@ -3,6 +3,7 @@
 from nose.tools import *
 
 import os, mapnik
+from utilities import Todo
 
 def test_simplest_render():
     m = mapnik.Map(256, 256)
@@ -68,6 +69,8 @@ def test_render_from_serialization():
 
 def test_render_points():
 	# Test for effectivenes of ticket #402 (borderline points get lost on reprojection)
+	raise Todo("See: http://trac.mapnik.org/ticket/402")
+	
 	if not mapnik.has_pycairo(): return
 
 	# create and populate point datasource (WGS84 lat-lon coordinates)
