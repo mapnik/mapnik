@@ -24,11 +24,11 @@ mapnik.inverse_	mapnik-module.html#inverse_
 mapnik.Raster	mapnik-module.html#Raster
 mapnik.Filter	mapnik-module.html#Filter
 mapnik.RTLD_GLOBAL	mapnik-module.html#RTLD_GLOBAL
+mapnik.save_map_to_string	mapnik-module.html#save_map_to_string
 mapnik.Shapefile	mapnik-module.html#Shapefile
 mapnik.render_tile_to_file	mapnik-module.html#render_tile_to_file
 mapnik.scale_denominator	mapnik-module.html#scale_denominator
 mapnik.SQLite	mapnik-module.html#SQLite
-mapnik.save_map_string	mapnik-module.html#save_map_string
 mapnik.Osm	mapnik-module.html#Osm
 mapnik.Describe	mapnik-module.html#Describe
 mapnik.load_map	mapnik-module.html#load_map
@@ -40,8 +40,8 @@ mapnik._mapnik.render_tile_to_file	mapnik._mapnik-module.html#render_tile_to_fil
 mapnik._mapnik.scale_denominator	mapnik._mapnik-module.html#scale_denominator
 mapnik._mapnik.load_map_from_string	mapnik._mapnik-module.html#load_map_from_string
 mapnik._mapnik.render	mapnik._mapnik-module.html#render
-mapnik._mapnik.save_map_string	mapnik._mapnik-module.html#save_map_string
 mapnik._mapnik.inverse_	mapnik._mapnik-module.html#inverse_
+mapnik._mapnik.save_map_to_string	mapnik._mapnik-module.html#save_map_to_string
 mapnik._mapnik.has_cairo	mapnik._mapnik-module.html#has_cairo
 mapnik._mapnik.has_pycairo	mapnik._mapnik-module.html#has_pycairo
 mapnik._mapnik.mapnik_svn_revision	mapnik._mapnik-module.html#mapnik_svn_revision
@@ -537,6 +537,7 @@ mapnik._mapnik.ViewTransform.backward	mapnik._mapnik.ViewTransform-class.html#ba
 mapnik._mapnik.ViewTransform.__getinitargs__	mapnik._mapnik.ViewTransform-class.html#__getinitargs__
 mapnik._mapnik.aspect_fix_mode	mapnik._mapnik.aspect_fix_mode-class.html
 mapnik._mapnik.aspect_fix_mode.ADJUST_CANVAS_HEIGHT	mapnik._mapnik.aspect_fix_mode-class.html#ADJUST_CANVAS_HEIGHT
+mapnik._mapnik.aspect_fix_mode.names	mapnik._mapnik.aspect_fix_mode-class.html#names
 mapnik._mapnik.aspect_fix_mode.ADJUST_CANVAS_WIDTH	mapnik._mapnik.aspect_fix_mode-class.html#ADJUST_CANVAS_WIDTH
 mapnik._mapnik.aspect_fix_mode.GROW_BBOX	mapnik._mapnik.aspect_fix_mode-class.html#GROW_BBOX
 mapnik._mapnik.aspect_fix_mode.ADJUST_BBOX_HEIGHT	mapnik._mapnik.aspect_fix_mode-class.html#ADJUST_BBOX_HEIGHT
@@ -548,12 +549,14 @@ mapnik._mapnik.aspect_fix_mode.values	mapnik._mapnik.aspect_fix_mode-class.html#
 mapnik._mapnik.label_placement	mapnik._mapnik.label_placement-class.html
 mapnik._mapnik.label_placement.LINE_PLACEMENT	mapnik._mapnik.label_placement-class.html#LINE_PLACEMENT
 mapnik._mapnik.label_placement.point	mapnik._mapnik.label_placement-class.html#point
+mapnik._mapnik.label_placement.names	mapnik._mapnik.label_placement-class.html#names
 mapnik._mapnik.label_placement.vertex	mapnik._mapnik.label_placement-class.html#vertex
 mapnik._mapnik.label_placement.line	mapnik._mapnik.label_placement-class.html#line
 mapnik._mapnik.label_placement.POINT_PLACEMENT	mapnik._mapnik.label_placement-class.html#POINT_PLACEMENT
 mapnik._mapnik.label_placement.values	mapnik._mapnik.label_placement-class.html#values
 mapnik._mapnik.line_cap	mapnik._mapnik.line_cap-class.html
 mapnik._mapnik.line_cap.square	mapnik._mapnik.line_cap-class.html#square
+mapnik._mapnik.line_cap.names	mapnik._mapnik.line_cap-class.html#names
 mapnik._mapnik.line_cap.ROUND_CAP	mapnik._mapnik.line_cap-class.html#ROUND_CAP
 mapnik._mapnik.line_cap.butt	mapnik._mapnik.line_cap-class.html#butt
 mapnik._mapnik.line_cap.SQUARE_CAP	mapnik._mapnik.line_cap-class.html#SQUARE_CAP
@@ -561,6 +564,7 @@ mapnik._mapnik.line_cap.BUTT_CAP	mapnik._mapnik.line_cap-class.html#BUTT_CAP
 mapnik._mapnik.line_cap.values	mapnik._mapnik.line_cap-class.html#values
 mapnik._mapnik.line_cap.round	mapnik._mapnik.line_cap-class.html#round
 mapnik._mapnik.line_join	mapnik._mapnik.line_join-class.html
+mapnik._mapnik.line_join.names	mapnik._mapnik.line_join-class.html#names
 mapnik._mapnik.line_join.BEVEL_JOIN	mapnik._mapnik.line_join-class.html#BEVEL_JOIN
 mapnik._mapnik.line_join.miter	mapnik._mapnik.line_join-class.html#miter
 mapnik._mapnik.line_join.ROUND_JOIN	mapnik._mapnik.line_join-class.html#ROUND_JOIN
@@ -571,6 +575,7 @@ mapnik._mapnik.line_join.miter_revert	mapnik._mapnik.line_join-class.html#miter_
 mapnik._mapnik.line_join.values	mapnik._mapnik.line_join-class.html#values
 mapnik._mapnik.line_join.round	mapnik._mapnik.line_join-class.html#round
 mapnik._mapnik.text_convert	mapnik._mapnik.text_convert-class.html
+mapnik._mapnik.text_convert.names	mapnik._mapnik.text_convert-class.html#names
 mapnik._mapnik.text_convert.toupper	mapnik._mapnik.text_convert-class.html#toupper
 mapnik._mapnik.text_convert.NONE	mapnik._mapnik.text_convert-class.html#NONE
 mapnik._mapnik.text_convert.TOLOWER	mapnik._mapnik.text_convert-class.html#TOLOWER
@@ -580,6 +585,7 @@ mapnik._mapnik.text_convert.none	mapnik._mapnik.text_convert-class.html#none
 mapnik._mapnik.text_convert.values	mapnik._mapnik.text_convert-class.html#values
 mapnik._mapnik.vertical_alignment	mapnik._mapnik.vertical_alignment-class.html
 mapnik._mapnik.vertical_alignment.middle	mapnik._mapnik.vertical_alignment-class.html#middle
+mapnik._mapnik.vertical_alignment.names	mapnik._mapnik.vertical_alignment-class.html#names
 mapnik._mapnik.vertical_alignment.BOTTOM	mapnik._mapnik.vertical_alignment-class.html#BOTTOM
 mapnik._mapnik.vertical_alignment.top	mapnik._mapnik.vertical_alignment-class.html#top
 mapnik._mapnik.vertical_alignment.TOP	mapnik._mapnik.vertical_alignment-class.html#TOP
