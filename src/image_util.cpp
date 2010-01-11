@@ -154,7 +154,7 @@ namespace mapnik
     
           // TODO - expose as user option
           /*
-          if (type == "ARGB32" | type == "RGB24") 
+          if (type == "ARGB32" || type == "RGB24") 
           { 
               context->set_antialias(Cairo::ANTIALIAS_NONE); 
           }
@@ -164,7 +164,7 @@ namespace mapnik
           mapnik::cairo_renderer<Cairo::Context> ren(map, context);
           ren.apply();
     
-          if (type == "ARGB32" | type == "RGB24") 
+          if (type == "ARGB32" || type == "RGB24") 
           { 
               surface->write_to_png(filename);
           }

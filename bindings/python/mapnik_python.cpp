@@ -196,7 +196,7 @@ void render_to_file1(const mapnik::Map& map,
                     const std::string& filename,
                     const std::string& format)
 {
-    if (format == "pdf" | format == "svg" | format =="ps" | format == "ARGB32" | format == "RGB24")
+    if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
 #if defined(HAVE_CAIRO)
         mapnik::save_to_cairo_file(map,filename,format);
@@ -215,7 +215,7 @@ void render_to_file1(const mapnik::Map& map,
 void render_to_file2(const mapnik::Map& map,const std::string& filename)
 {
     std::string format = mapnik::guess_type(filename);
-    if (format == "pdf" | format == "svg" | format =="ps")
+    if (format == "pdf" || format == "svg" || format =="ps")
     {
 #if defined(HAVE_CAIRO)
         mapnik::save_to_cairo_file(map,filename,format);
