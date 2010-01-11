@@ -27,6 +27,10 @@ Install Mapnik library and python bindings::
 
   $ sudo python scons/scons.py install
 
+If on Linux then run:
+
+  $ sudo ldconfig
+
 Run python interpreter and check installation::
 
   >>> import mapnik
@@ -52,14 +56,14 @@ First, here is a quick list of the required software dependencies:
 - Linux/UNIX with g++ compiler
 - Python 2.2 or greater to build Mapnik
     - Python 2.4 for python bindings (see below)
-- libboost 1.34.0 or greater with the following libraries included:
-    - system (boost >= 1.35 only)
+- libboost >= 1.41.0 or greater with the following libraries included:
+    - system
     - thread
     - filesystem
     - regex
     - iostreams
     - python - required only for python bindings (see below)
-- libicu - International Components for Unicode
+- libicu >= 1.4- International Components for Unicode
 - libpng - PNG Graphics
 - libjpeg - JPEG Graphics
 - libtiff - TIFF Graphics 
@@ -111,7 +115,7 @@ To see the list of available options, from the root of the source distribution, 
 
 For example, if you compiled your own set of Boost libraries, you might use::
 
-  $ python scons/scons.py configure BOOST_TOOLKIT=gcc43 BOOST_INCLUDES=/usr/local/include/boost-1_38 BOOST_LIBS=/usr/local/lib
+  $ python scons/scons.py configure BOOST_INCLUDES=/usr/local/include/ BOOST_LIBS=/usr/local/lib
 
 Or if you installed ICU from source and you'd like to build Mapnik in Debug mode you might use::
 
@@ -127,7 +131,7 @@ Installation
 
 Once the build has successfully completed, you can install the various files on your system by executing::
 
-  $ python scons/scons.py install
+  $ sudo python scons/scons.py install
 
 By default, everything will be installed under the PREFIX '/usr/local' as such::
 
@@ -166,7 +170,7 @@ Learning Mapnik
 ---------------
 
 For Users:
-  - Visit http://trac.mapnik.org/wiki/GettingStarted for basic tutorials on making maps with Mapnik using the Python bindings.
+  - Visit http://trac.mapnik.org/wiki/LearningMapnik for basic tutorials on making maps with Mapnik using the Python bindings.
 
 For Developers:
   - Visit http://trac.mapnik.org/#DevelopersCorner for resources for getting involved with Mapnik development.
