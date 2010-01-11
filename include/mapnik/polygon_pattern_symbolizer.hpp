@@ -22,7 +22,7 @@
 //$Id$
 
 #ifndef POLYGON_PATTERN_SYMBOLIZER_HPP
-#define MAPNIK_POLYGON_PATTERN_SYMBOLIZER_HPP
+#define POLYGON_PATTERN_SYMBOLIZER_HPP
 
 // mapnik 
 #include <mapnik/symbolizer.hpp> 
@@ -38,4 +38,4 @@ struct MAPNIK_DECL polygon_pattern_symbolizer :
 };
 }
 
-#endif //MAPNIK_POLYGON_PATTERN_SYMBOLIZER_HPP
+#endif //POLYGON_PATTERN_SYMBOLIZER_HPP
