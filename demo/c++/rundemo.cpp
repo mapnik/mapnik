@@ -71,7 +71,7 @@ int main ( int argc , char** argv)
         provpoly_style.add_rule(provpoly_rule_on);
         
         rule_type provpoly_rule_qc;
-        provpoly_rule_qc.set_filter(create_filter("[NOM_FR] = 'Québec'"));
+        provpoly_rule_qc.set_filter(create_filter("[NOM_FR] = 'Qu\xe9""bec'"));
         provpoly_rule_qc.append(polygon_symbolizer(color(217, 235, 203)));
         provpoly_style.add_rule(provpoly_rule_qc);
         
