@@ -1,5 +1,19 @@
-epydoc --no-private --no-frames --no-sourcecode --name mapnik --url http://mapnik.org --css mapnik_epydoc.css mapnik -o ../api_docs/python
-svn add ../api_docs/python/*
-svn propset svn:mime-type text/html ../api_docs/python/*.html
-svn propset svn:mime-type text/css ../api_docs/python/*.css
-svn propset svn:mime-type image/png ../api_docs/python/*.png
+#!/bin/sh
+
+API_DOCS_DIR="../api_docs/python"
+
+if [ ! -d $API_DOCS_DIR ]
+    then 
+        echo "creating $API_DOCS_DIR"
+	mkdir -p $API_DOCS_DIR
+fi
+
+epydoc --no-private \
+    --no-frames \
+    --no-sourcecode \
+    --name mapnik \
+    --url http://mapnik.org \
+    --css mapnik_epydoc.css mapnik \
+    -o $API_DOCS_DIR
+
+exit $?
