@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" bgcolor="steelblue">
+    <Style name="world_merc20090930161252883_style">
+        
+        <!-- Asia - default dark color behind light polygon 
+        leads to "ghost lines" show-through
+        -->
+        
+        <Rule>
+            <Filter>([REGION]=142)</Filter>
+            <PolygonSymbolizer>
+                <CssParameter name="fill">yellow</CssParameter>
+            </PolygonSymbolizer>
+        </Rule>
+
+        <!-- Europe, using Opacity avoids "ghost lines" 
+        -->
+        <Rule>
+            <Filter>([REGION]=150)</Filter>
+            <PolygonSymbolizer>
+                <CssParameter name="fill">rgb(176,151,238)</CssParameter>
+                <CssParameter name="fill-opacity">.3</CssParameter>
+            </PolygonSymbolizer>
+        </Rule>
+        
+        <!-- Americas, using gamma of .65 to remove blue lines works as well..
+        -->
+        <Rule>
+            <Filter>([REGION]=19)</Filter>
+            <PolygonSymbolizer>
+                <CssParameter name="fill">rgb(136,172,2)</CssParameter>
+                <CssParameter name="gamma">.6</CssParameter>
+            </PolygonSymbolizer>
+        </Rule>
+
+        <!-- Africa, using gamma of .65 to remove blue lines works as well..
+        -->
+        <Rule>
+            <Filter>([REGION]=2)</Filter>
+            <PolygonSymbolizer>
+                <CssParameter name="fill">rgb(239,98,133)</CssParameter>
+                <CssParameter name="gamma">.65</CssParameter>
+            </PolygonSymbolizer>
+        </Rule>
+
+        <!-- Oceana, all disjunct polygons so it does not matter -->
+        <Rule>
+            <Filter>([REGION]=9)</Filter>
+            <PolygonSymbolizer>
+                <CssParameter name="fill">rgb(212,9,14)</CssParameter>
+            </PolygonSymbolizer>
+        </Rule>
+    </Style>
+    <Layer name="world_merc20090930161252883" srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" status="1" clear_label_cache="0" queryable="1">
+        <StyleName>world_merc20090930161252883_style</StyleName>
+        <Datasource>
+            <Parameter name="file">../../data/shp/world_merc</Parameter>
+            <Parameter name="type">shape</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

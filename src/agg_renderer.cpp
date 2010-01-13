@@ -190,6 +190,8 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     renderer ren(renb);
 
     ras_ptr->reset();
+            
+    ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
 
     for (unsigned i=0;i<feature.num_geometries();++i)
     {

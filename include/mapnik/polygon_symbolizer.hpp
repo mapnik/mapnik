@@ -33,11 +33,13 @@ namespace mapnik
     {
         explicit polygon_symbolizer() 
             : fill_(color(128,128,128)),
-              opacity_(1.0) {}
+              opacity_(1.0),
+              gamma_(1.0) {}
 
         polygon_symbolizer(color const& fill)
             : fill_(fill),
-              opacity_(1.0) {}
+              opacity_(1.0),
+              gamma_(1.0) {}
         
         color const& get_fill() const
         {
@@ -55,9 +57,19 @@ namespace mapnik
         {
             return opacity_;
         }
+        void set_gamma(float gamma)
+        {
+            gamma_ = gamma;
+        }
+        float get_gamma() const
+        {
+            return gamma_;
+        }
+
     private:
         color fill_;
         float opacity_;
+        float gamma_;
     }; 
    
    struct MAPNIK_DECL building_symbolizer
