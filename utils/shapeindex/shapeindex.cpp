@@ -142,7 +142,6 @@ int main (int argc,char** argv)
         Envelope<double> extent;
         shp.read_envelope(extent);
 	
-	
         clog << "length=" << file_length << endl;
         clog << "version=" << version << endl;
         clog << "type=" << shape_type << endl;
@@ -157,13 +156,12 @@ int main (int argc,char** argv)
             long offset=shp.pos();
             int record_number=shp.read_xdr_integer();
             int content_length=shp.read_xdr_integer();
-            
-            //std::clog << "rec number = "<< record_number << "\n";
-            //std::clog << "content length = "<< content_length << "\n";
-           
-            shp.skip(4);
-            //std::clog << "offset= "<< offset << std::endl;
-	        
+#ifdef MAPNIK_DEBUG            
+            std::clog << "rec number = "<< record_number << "\n";
+            std::clog << "content length = "<< content_length << "\n";
+	    std::clog << "offset= "<< offset << std::endl;
+#endif
+            shp.skip(4);	        
             Envelope<double> item_ext;
             if (shape_type==shape_io::shape_point)
             {
