@@ -128,6 +128,10 @@ namespace mapnik
                 {
                     set_css( sym_node, "fill-opacity", sym.get_opacity() );
                 }
+                if ( sym.get_gamma() != dfl.get_gamma() || explicit_defaults_ )
+                {
+                    set_css( sym_node, "gamma", sym.get_gamma() );
+                }
             }
 
             void operator () ( const polygon_pattern_symbolizer & sym )

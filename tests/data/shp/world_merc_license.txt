@@ -1,0 +1,85 @@
+world_merc
+==========
+
+'world_merc.shp' is a version of TM_WORLD_BORDERS_SIMPL-0.3.shp
+downloaded from http://thematicmapping.org/downloads/world_borders.php.
+
+Coodinates near 180 degress longitude were clipped to faciliate reprojection
+to Google mercator (EPSG:900913).
+
+Details from original readme are below:
+
+-------------
+
+TM_WORLD_BORDERS-0.1.ZIP 
+
+Provided by Bjorn Sandvik, thematicmapping.org
+
+Use this dataset with care, as several of the borders are disputed.
+
+The original shapefile (world_borders.zip, 3.2 MB) was downloaded from the Mapping Hacks website:
+http://www.mappinghacks.com/data/
+
+The dataset was derived by Schuyler Erle from public domain sources.
+Sean Gilles did some clean up and made some enhancements.
+
+
+COLUMN		TYPE			DESCRIPTION
+
+Shape		Polygon			Country/area border as polygon(s)
+FIPS		String(2)		FIPS 10-4 Country Code
+ISO2		String(2)		ISO 3166-1 Alpha-2 Country Code
+ISO3		String(3)		ISO 3166-1 Alpha-3 Country Code
+UN		Short Integer(3)	ISO 3166-1 Numeric-3 Country Code 
+NAME		String(50)		Name of country/area
+AREA		Long Integer(7)		Land area, FAO Statistics (2002) 
+POP2005		Double(10,0)	 	Population, World Polulation Prospects (2005)
+REGION		Short Integer(3) 	Macro geographical (continental region), UN Statistics
+SUBREGION	Short Integer(3)	Geogrpahical sub-region, UN Statistics
+LON		FLOAT (7,3)		Longitude
+LAT		FLOAT (6,3)		Latitude
+
+
+CHANGELOG VERSION 0.3 - 30 July 2008
+
+- Corrected spelling mistake (United Arab Emirates)
+- Corrected population number for Japan
+- Adjusted long/lat values for India, Italy and United Kingdom
+
+
+CHANGELOG VERSION 0.2 - 1 April 2008
+
+- Made new ZIP archieves. No change in dataset.
+
+
+CHANGELOG VERSION 0.1 - 13 March 2008
+
+- Polygons representing each country were merged into one feature
+- ≈land Islands was extracted from Finland
+- Hong Kong was extracted from China
+- Holy See (Vatican City) was added
+- Gaza Strip and West Bank was merged into "Occupied Palestinean Territory"
+- Saint-Barthelemy was extracted from Netherlands Antilles
+- Saint-Martin (Frensh part) was extracted from Guadeloupe
+- Svalbard and Jan Mayen was merged into "Svalbard and Jan Mayen Islands"
+- Timor-Leste was extracted from Indonesia
+- Juan De Nova Island was merged with "French Southern & Antarctic Land"
+- Baker Island, Howland Island, Jarvis Island, Johnston Atoll, Midway Islands
+  and Wake Island was merged into "United States Minor Outlying Islands"
+- Glorioso Islands, Parcel Islands, Spartly Islands was removed 
+  (almost uninhabited and missing ISO-3611-1 code)
+
+- Added ISO-3166-1 codes (alpha-2, alpha-3, numeric-3). Source:
+  https://www.cia.gov/library/publications/the-world-factbook/appendix/appendix-d.html
+  http://unstats.un.org/unsd/methods/m49/m49alpha.htm
+  http://www.fysh.org/~katie/development/geography.txt
+- AREA column has been replaced with data from UNdata:
+  Land area, 1000 hectares, 2002, FAO Statistics
+- POPULATION column (POP2005) has been replaced with data from UNdata:
+  Population, 2005, Medium variant, World Population Prospects: The 2006 Revision
+- Added region and sub-region codes from UN Statistics Division. Source:
+  http://unstats.un.org/unsd/methods/m49/m49regin.htm
+- Added LAT, LONG values for each country
+
+
+

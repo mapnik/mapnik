@@ -81,6 +81,10 @@ Mapnik 0.7.0 Release
 
 - PNG: Added support for semitransparency in png256 outpuy (#477,#202)
 
+- PolygonSymbolizer: Added 'gamma' attribute to allow for dilation of polygon edges - a solution
+  to gap artifacts or "ghost lines" between adjacent polygons and allows for slight sharpening of
+  the edges of non overlapping polygons. Accepts any values but 0-1 is the recommended range.
+   
 - TextSymbolizer: Large set of new attributes: 'text_convert', 'line_spacing', 'character_spacing', 
   'wrap_character', 'wrap_before', 'horizontal_alignment', 'justify_alignment', and 'opacity'.
 

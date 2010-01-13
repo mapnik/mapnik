@@ -38,23 +38,24 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
    static  boost::python::tuple
    getstate(const polygon_symbolizer& p)
    {
-        return boost::python::make_tuple(p.get_opacity());
+        return boost::python::make_tuple(p.get_opacity(),p.get_gamma());
    }
 
    static void
    setstate (polygon_symbolizer& p, boost::python::tuple state)
    {
         using namespace boost::python;
-        if (len(state) != 1)
+        if (len(state) != 2)
         {
             PyErr_SetObject(PyExc_ValueError,
-                         ("expected 1-item tuple in call to __setstate__; got %s"
+                         ("expected 2-item tuple in call to __setstate__; got %s"
                           % state).ptr()
             );
             throw_error_already_set();
         }
                 
         p.set_opacity(extract<float>(state[0]));
+        p.set_gamma(extract<float>(state[1]));
    }
 
 };
@@ -74,6 +75,9 @@ void export_polygon_symbolizer()
         .add_property("fill_opacity",
                       &polygon_symbolizer::get_opacity,
                       &polygon_symbolizer::set_opacity)
+        .add_property("gamma",
+                      &polygon_symbolizer::get_gamma,
+                      &polygon_symbolizer::set_gamma)
         ;    
 
 }

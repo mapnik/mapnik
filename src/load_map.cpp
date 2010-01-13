@@ -1487,6 +1487,11 @@ namespace mapnik
                   float opacity = get_css<float>(css, css_name);
                   poly_sym.set_opacity(opacity);
                }
+               else if (css_name == "gamma")
+               {
+                   float gamma = get_css<float>(css, css_name);
+                   poly_sym.set_gamma(gamma);
+               }
                else
                {
                   throw config_error(std::string("Failed to parse unknown CSS ") +
