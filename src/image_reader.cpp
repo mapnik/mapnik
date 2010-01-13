@@ -44,6 +44,6 @@ namespace mapnik
    ImageReader* get_image_reader(const std::string& filename) 
    {
       std::string type = type_from_filename(filename);
-      return ImageReaderFactory::instance()->create_object(filename,type);
+      return ImageReaderFactory::instance()->create_object(type,filename);
    }
 }
