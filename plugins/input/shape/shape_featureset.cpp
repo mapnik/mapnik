@@ -104,7 +104,7 @@ feature_ptr shape_featureset<filterT>::next()
 		if (!shape_.shp().is_eof())
 		{
 		    long pos = shape_.shp().pos();
-		    std::cerr << pos << " " << reclen << std::endl;
+		    //std::cerr << pos << " " << reclen << std::endl;
 		    shape_.move_to(pos + 2 * reclen - 36);
 		}
 		else
