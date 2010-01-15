@@ -661,16 +661,15 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
             
 	optional<unsigned> width = get_opt_attr<unsigned>(sym, "width");
 	optional<unsigned> height = get_opt_attr<unsigned>(sym, "height");
-         
 	//   
 	if (file)
-	{
-            if (!type)
-            {
-		type = type_from_filename(*file);
-            }         
+	{              
             try
             {
+		if (!type)
+		{
+		    type = type_from_filename(*file);
+		}       
 		if( base )
 		{
 		    std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
@@ -692,29 +691,22 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 #endif      
 		if (!width || !height)
 		{
-		    try 
+		    std::auto_ptr<ImageReader> reader(get_image_reader(*file,*type));
+		    if (reader.get())
 		    {
-			std::auto_ptr<ImageReader> reader(get_image_reader(*file,*type));
-			if (reader.get())
-			{
-			    if (!width) width = reader->width();
-			    if (!height) height = reader->height();
-			    BOOST_ASSERT(*width > 0 && *height > 0);
-			}
-		    }
-		    catch (...)
-		    {
-			std::cerr << "Exception caught while loading image:" << *file << std::endl;
-		    }   
+			if (!width) width = reader->width();
+			if (!height) height = reader->height();
+		    } 
+		    if (!width || !height) throw ImageReaderException(" type:" + *type);
 		}
 		point_symbolizer symbol(*file,*type,*width,*height);
 		if (allow_overlap)
 		{
-		    symbol.set_allow_overlap( * allow_overlap );
+		    symbol.set_allow_overlap( *allow_overlap );
 		}
 		if (opacity)
 		{
-		    symbol.set_opacity( * opacity );
+		    symbol.set_opacity( *opacity );
 		}
 		rule.append(symbol);
             }
@@ -731,7 +723,6 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 		    clog << "### WARNING: " << msg << endl;
 		}
             }
-
 	}
 	//else if (file || type || width || height)
 	//{
@@ -764,14 +755,14 @@ void map_parser::parse_line_pattern_symbolizer( rule_type & rule, ptree const & 
 	optional<std::string> type = get_attr<string>(sym, "type");
 	optional<unsigned> width = get_attr<unsigned>(sym, "width");
 	optional<unsigned> height = get_attr<unsigned>(sym, "height");
-         
-	if (!type)
-	{
-            type = type_from_filename(file);
-	}     
-         
+
 	try
 	{
+	    if (!type)
+	    {
+		type = type_from_filename(file);
+	    }     
+	    
             if( base )
             {
 		std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
@@ -791,20 +782,13 @@ void map_parser::parse_line_pattern_symbolizer( rule_type & rule, ptree const & 
 #endif
 	    if (!width || !height)
 	    {
-		try 
+		std::auto_ptr<ImageReader> reader(get_image_reader(file,*type));
+		if (reader.get())
 		{
-		    std::auto_ptr<ImageReader> reader(get_image_reader(file,*type));
-		    if (reader.get())
-		    {
-			if (!width) width = reader->width();
-			if (!height) height = reader->height();
-			BOOST_ASSERT(*width > 0 && *height > 0);
-		    }
-		}
-		catch (...)
-		{
-		    std::cerr << "Exception caught while loading image:" << file << std::endl;
-		}   
+		    if (!width) width = reader->width();
+		    if (!height) height = reader->height();
+		}  
+		if (!width || !height) throw ImageReaderException(" type:" + *type);
 	    }
 	    
             line_pattern_symbolizer symbol(file,*type,*width,*height);
@@ -841,14 +825,14 @@ void map_parser::parse_polygon_pattern_symbolizer( rule_type & rule,
 	optional<std::string> type = get_attr<string>(sym, "type");
 	optional<unsigned> width = get_attr<unsigned>(sym, "width");
 	optional<unsigned> height = get_attr<unsigned>(sym, "height");
-         
-	if (!type)
-	{
-            type = type_from_filename(file);
-	}     
-         
+          
 	try
 	{
+	    if (!type)
+	    {
+		type = type_from_filename(file);
+	    }
+	    
             if( base )
             {
 		std::map<std::string,std::string>::iterator itr = file_sources_.find(*base);
@@ -868,20 +852,14 @@ void map_parser::parse_polygon_pattern_symbolizer( rule_type & rule,
 #endif
 	    if (!width || !height)
 	    {
-		try 
+		std::auto_ptr<ImageReader> reader(get_image_reader(file,*type));
+		if (reader.get())
 		{
-		    std::auto_ptr<ImageReader> reader(get_image_reader(file,*type));
-		    if (reader.get())
-		    {
-			if (!width) width = reader->width();
-			if (!height) height = reader->height();
-			BOOST_ASSERT(*width > 0 && *height > 0);
-		    }
-		}
-		catch (...)
-		{
-		    std::cerr << "Exception caught while loading image:" << file << std::endl;
+		    if (!width) width = reader->width();
+		    if (!height) height = reader->height();
+		    
 		}   
+		if (!width || !height)  throw ImageReaderException(" type:" + *type);
 	    }
             polygon_pattern_symbolizer symbol(file,*type,*width,*height);
             rule.append(symbol);
@@ -1122,14 +1100,14 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 	optional<std::string> type = get_opt_attr<string>(sym, "type");
 	optional<unsigned> width =  get_opt_attr<unsigned>(sym, "width");
 	optional<unsigned> height =  get_opt_attr<unsigned>(sym, "height");
-         
-	if (!type)
-	{
-            type = type_from_filename(image_file);
-	}     
-         
+	
 	try
 	{   
+	    if (!type)
+	    {
+		type = type_from_filename(image_file);
+	    }     
+	    
             if( base )
             {
 		std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
@@ -1150,20 +1128,14 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 #endif
 	    if (!width || !height)
 	    {
-		try 
+		
+		std::auto_ptr<ImageReader> reader(get_image_reader(image_file,*type));
+		if (reader.get())
 		{
-		    std::auto_ptr<ImageReader> reader(get_image_reader(image_file,*type));
-		    if (reader.get())
-		    {
-			if (!width) width = reader->width();
-			if (!height) height = reader->height();
-			BOOST_ASSERT(*width > 0 && *height > 0);
-		    }
+		    if (!width) width = reader->width();
+		    if (!height) height = reader->height();
 		}
-		catch (...)
-		{
-		    std::cerr << "Exception caught while loading image:" << image_file << std::endl;
-		}   
+		if (!width || !height) throw  ImageReaderException(" type:" + *type);
 	    }
 	    
             shield_symbolizer shield_symbol(name,size,fill,
