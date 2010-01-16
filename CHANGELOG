@@ -15,7 +15,7 @@ For a complete change history, see the SVN log.
 Mapnik 0.7.0 Release
 --------------------
 
-(Packaged from r____)
+(Packaged from r1574)
 
 - Core: Fixed linking to external libagg (r1297,r1299)
 
