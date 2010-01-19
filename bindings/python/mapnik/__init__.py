@@ -26,7 +26,8 @@ Several things happen when you do:
     >>> import mapnik
 
  1) Mapnik C++ objects are imported via the '__init__.py' from the '_mapnik.so' shared object
-    which references libmapnik.so (linux), libmapnik.dylib (mac), or libmapnik.dll (win).
+    (_mapnik.pyd on win) which references libmapnik.so (linux), libmapnik.dylib (mac), or
+    mapnik.dll (win).
 
  2) The paths to the input plugins and font directories are imported from the 'paths.py'
     file which was constructed and installed during SCons installation.
