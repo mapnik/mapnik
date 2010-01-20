@@ -169,8 +169,11 @@ void MainWindow::load_map_file(QString const& filename)
       unsigned height = mapWidget_->height();
       boost::shared_ptr<mapnik::Map> map(new mapnik::Map(width,height)); 
       mapnik::load_map(*map,filename.toStdString());
+      
       mapWidget_->setMap(map);
-      mapWidget_->zoomToBox(default_extent_);
+      map->zoom_all();
+      mapnik::box2d<double> const& ext = map->getCurrentExtent();
+      mapWidget_->zoomToBox(ext);
       layerTab_->setModel(new LayerListModel(map,this));
       styleTab_->setModel(new StyleModel(map,this));
    }

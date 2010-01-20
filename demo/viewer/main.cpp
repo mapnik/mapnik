@@ -48,16 +48,16 @@ int main( int argc, char **argv )
     
 	if (boost::filesystem::exists(path) && boost::filesystem::is_directory(path))
 	{
-		for (boost::filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
+	    for (boost::filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
+	    {
+		if (!boost::filesystem::is_directory(*itr) && is_font_file(itr->path().leaf())) 
 		{
-			if (!boost::filesystem::is_directory(*itr) && is_font_file(itr->path().leaf())) 
-			{
-				std::cout << "register font " << itr->string() << "\n";
-				freetype_engine::register_font(itr->string());
-			}
+		    std::cout << "register font " << itr->string() << "\n";
+		    freetype_engine::register_font(itr->string());
 		}
-    }
-		
+	    }
+	}
+	
 	QApplication app( argc, argv ); 
 	MainWindow window;
 	window.show();
