@@ -59,10 +59,9 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
 template <typename filterT>
 feature_ptr shape_featureset<filterT>::next()
 {
-   
     using mapnik::point_impl;
     std::streampos pos=shape_.shp().pos();
-   
+    
     if (pos < std::streampos(file_length_ * 2))
     {
 	shape_.move_to(pos);
@@ -81,7 +80,7 @@ feature_ptr shape_featureset<filterT>::next()
 	{
 	    double x=shape_.shp().read_double();
 	    double y=shape_.shp().read_double();
-	    shape_.shp().read_double();//m
+	    shape_.shp().skip(8); //m
 	    geometry2d * point = new point_impl;
 	    point->move_to(x,y);
 	    feature->add_geometry(point);
@@ -91,8 +90,7 @@ feature_ptr shape_featureset<filterT>::next()
 	{
 	    double x=shape_.shp().read_double();
 	    double y=shape_.shp().read_double();
-	    shape_.shp().read_double();//z
-	    shape_.shp().read_double();//m
+	    shape_.shp().skip(8*2); // m, z
 	    geometry2d * point=new point_impl;
 	    point->move_to(x,y);
 	    feature->add_geometry(point);
@@ -101,25 +99,23 @@ feature_ptr shape_featureset<filterT>::next()
 	else
 	{
 	    while (!filter_.pass(shape_.current_extent()))
-	    {	
-		unsigned reclen=shape_.reclength_;
+	    {		
+		int reclen=shape_.reclength_;
 		if (!shape_.shp().is_eof())
 		{
 		    long pos = shape_.shp().pos();
+		    std::cerr << pos << " " << reclen << std::endl;
 		    shape_.move_to(pos + 2 * reclen - 36);
 		}
 		else
 		{
 		    return feature_ptr();
-
 		}
 	    }
 	    
 	    switch (type)
 	    {
 	    case shape_io::shape_multipoint:
-	    case shape_io::shape_multipointm:
-	    case shape_io::shape_multipointz:
 	    {
 		int num_points = shape_.shp().read_ndr_integer();
 		for (int i=0; i< num_points;++i)
@@ -130,8 +126,46 @@ feature_ptr shape_featureset<filterT>::next()
 		    point->move_to(x,y);
 		    feature->add_geometry(point);
 		}
-		// ignore m and z for now 
 		++count_;
+		break;
+	    }
+	    case shape_io::shape_multipointm:
+	    {
+		int num_points = shape_.shp().read_ndr_integer();
+		for (int i=0; i< num_points;++i)
+		{ 
+		    double x=shape_.shp().read_double();
+		    double y=shape_.shp().read_double();
+		    geometry2d * point = new point_impl;
+		    point->move_to(x,y);
+		    feature->add_geometry(point);
+		}
+		// skip m 
+		shape_.shp().skip(2*8 + 8*num_points);
+		++count_;
+		break;
+	    }
+	    case shape_io::shape_multipointz:
+	    {
+		unsigned num_points = shape_.shp().read_ndr_integer();
+		for (unsigned i=0; i< num_points;++i)
+		{ 
+		    double x=shape_.shp().read_double();
+		    double y=shape_.shp().read_double();
+		    geometry2d * point = new point_impl;
+		    point->move_to(x,y);
+		    feature->add_geometry(point);
+		}
+		// skip z
+		shape_.shp().skip(2*8 + 8*num_points);
+		
+		// check if we have measure data 
+		if ( shape_.reclength_ == num_points * 16 + 36)   
+		{
+                    // skip m 
+		    shape_.shp().skip(2*8 + 8*num_points);
+		}	
+                ++count_;
 		break;
 	    }
 	    case shape_io::shape_polyline:
@@ -208,7 +242,6 @@ feature_ptr shape_featureset<filterT>::next()
 	return feature_ptr();
     }
 }
-
 
 template <typename filterT>
 shape_featureset<filterT>::~shape_featureset() {}
