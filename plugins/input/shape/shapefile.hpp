@@ -94,7 +94,7 @@ struct shape_record
       
     int read_ndr_integer()
     {
-    boost::int32_t val;
+	boost::int32_t val;
         read_int32_ndr(&data[pos],val);
         pos+=4;
         return val;
@@ -102,7 +102,7 @@ struct shape_record
       
     int read_xdr_integer()
     {
-    boost::int32_t val;
+	boost::int32_t val;
         read_int32_xdr(&data[pos],val);
         pos+=4;
         return val;
