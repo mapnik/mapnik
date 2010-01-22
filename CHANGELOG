@@ -23,7 +23,7 @@ Mapnik 0.7.0 Release
 
 - Gdal Plugin: Added support for Gdal overviews, enabling fast loading of > 1GB rasters (#54)
 
-    * Use the gdal_addo tools to add overviews to existing GDAL datasets
+    * Use the gdaladdo utility to add overviews to existing GDAL datasets
 
 - PostGIS: Added an optional 'geometry_table' parameter. The 'geometry_table' used by Mapnik to look up 
   metadata in the geometry_columns and calculate extents (when the 'geometry_field' and 'srid' parameters
@@ -79,7 +79,7 @@ Mapnik 0.7.0 Release
 
 - PNG: Fixed problem with garbled/striped png256 output along sharpe edges(#416,#445,#447,#202)
 
-- PNG: Added support for semitransparency in png256 outpuy (#477,#202)
+- PNG: Added support for semitransparency in png256 output (#477,#202)
 
 - PolygonSymbolizer: Added 'gamma' attribute to allow for dilation of polygon edges - a solution
   to gap artifacts or "ghost lines" between adjacent polygons and allows for slight sharpening of
@@ -88,14 +88,14 @@ Mapnik 0.7.0 Release
 - TextSymbolizer: Large set of new attributes: 'text_convert', 'line_spacing', 'character_spacing', 
   'wrap_character', 'wrap_before', 'horizontal_alignment', 'justify_alignment', and 'opacity'.
 
-    * More details at changsets: r1254 and r1341
+    * More details at changesets: r1254 and r1341
 
 - SheildSymbolizer: Added special new attributes: 'unlock_image', 'VERTEX' placement, 'no_text' and many
   attributes previously only supported in the TextSymbolizer: 'allow_overlap', 'vertical_alignment', 
   'horizontal_alignment', 'justify_alignment', 'wrap_width', 'wrap_character', 'wrap_before', 'text_convert',
   'line_spacing', 'character_spacing', and 'opacity'.
 
-    * More details at changset r1341
+    * More details at changeset r1341
 
 - XML: Added support for using CDATA with libxml2 parser (r1364)
 
@@ -142,7 +142,7 @@ Mapnik 0.7.0 Release
 
 - SCons: Improved reliability of python linking on OSX (#380)
 
-- Fonts: Added unifont to auto-installed fonts (r1328)
+- Fonts: Added unifont to auto-installed fonts, which is used by the OSM styles as a fallback font (r1328)
 
 
 
