@@ -530,7 +530,7 @@ namespace mapnik
 
         } catch (const config_error & ex) {
             if ( ! name.empty() ) {
-                ex.append_context(string("(encountered during parsing of layer '") + name + "')");
+                ex.append_context(std::string("(encountered during parsing of layer '") + name + "' in map" + filename_ + ")");
             }
             throw;
         }
