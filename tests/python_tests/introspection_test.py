@@ -7,7 +7,7 @@ import mapnik
 
 def test_introspect_symbolizers():
     # create a symbolizer
-    p = mapnik.PointSymbolizer("../data/images/dummy.png", "png", 16, 16)
+    p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/dummy.png"))
     p.allow_overlap = True
     p.opacity = 0.5
     

@@ -9,12 +9,12 @@ import mapnik, pickle
 
 # ShieldSymbolizer initialization
 def test_shieldsymbolizer_init():
-    s = mapnik.ShieldSymbolizer('Field Name', 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), '../data/images/dummy.png', 'png', 16, 16)
+    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
 
 # ShieldSymbolizer missing image file
 @raises(RuntimeError)
 def test_shieldsymbolizer_missing_image():
-    s = mapnik.ShieldSymbolizer('Field Name', 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), '../data/images/broken.png', 'png', 16, 16)
+    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/broken.png'))
 
 # PointSymbolizer initialization
 def test_pointsymbolizer_init():
@@ -23,7 +23,7 @@ def test_pointsymbolizer_init():
     eq_(p.opacity,1)
     eq_(p.filename,'')
 
-    p = mapnik.PointSymbolizer("../data/images/dummy.png", "png", 16, 16)
+    p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/dummy.png"))
     eq_(p.allow_overlap, False)
     eq_(p.opacity, 1)
     eq_(p.filename,'../data/images/dummy.png')
@@ -31,11 +31,11 @@ def test_pointsymbolizer_init():
 # PointSymbolizer missing image file
 @raises(RuntimeError)
 def test_pointsymbolizer_missing_image():
-    p = mapnik.PointSymbolizer("../data/images/broken.png", "png", 16, 16)
+    p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/broken.png"))
 
 # PointSymbolizer pickling
 def test_pointsymbolizer_pickle():
-    p = mapnik.PointSymbolizer("../data/images/dummy.png", "png", 16, 16)
+    p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/dummy.png"))
     p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
     # image type, width, and height only used in contructor...
     eq_(p.filename, p2.filename)
@@ -178,7 +178,7 @@ def test_shapefile_properties():
 
 # TextSymbolizer initialization
 def test_textsymbolizer_init():
-    ts = mapnik.TextSymbolizer('Field Name', 'Font Name', 8, mapnik.Color('black'))
+    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field Name]'), 'Font Name', 8, mapnik.Color('black'))
 
     eq_(ts.name, 'Field Name')
     eq_(ts.face_name, 'Font Name')
@@ -187,7 +187,7 @@ def test_textsymbolizer_init():
 
 # TextSymbolizer pickling
 def test_textsymbolizer_pickle():
-    ts = mapnik.TextSymbolizer('Field Name', 'Font Name', 8, mapnik.Color('black'))
+    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field Name]'), 'Font Name', 8, mapnik.Color('black'))
 
     eq_(ts.name, 'Field Name')
     eq_(ts.face_name, 'Font Name')

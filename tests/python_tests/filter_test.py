@@ -5,6 +5,9 @@ from utilities import Todo
 
 import mapnik
 
+if hasattr(mapnik,'Expression'):
+    mapnik.Filter = mapnik.Expression
+
 map_ = '''<Map>
     <Style name="s">
         <Rule>
