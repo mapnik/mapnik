@@ -66,7 +66,7 @@ shape_datasource::shape_datasource(const parameters &params)
    
    if (!boost::filesystem::exists(shape_name_ + ".shp"))
    {
-       throw datasource_exception(shape_name_ + " does not exist");
+       throw datasource_exception("shapefile '" + shape_name_ + ".shp' does not exist");
    }
 
    try
