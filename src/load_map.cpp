@@ -68,7 +68,7 @@ namespace mapnik
          map_parser( bool strict, std::string const& filename = "" ) :
             strict_( strict ),
             filename_( filename ),
-            relative_to_xml_(false),
+            relative_to_xml_(true),
             font_manager_(font_engine_) {}
 
          void parse_map( Map & map, ptree const & sty);
@@ -176,6 +176,7 @@ namespace mapnik
                 }
 
                 optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum_version");
+                
                 if (min_version_string)
                 {
                     boost::char_separator<char> sep(".");
@@ -209,6 +210,7 @@ namespace mapnik
                        {
                           throw config_error(std::string("This map uses features only present in Mapnik version ") + *min_version_string + " and newer");
                        }
+                       
                     }
                 
                 }
@@ -315,7 +317,7 @@ namespace mapnik
 
         } catch (const config_error & ex) {
             if ( ! name.empty() ) {
-                ex.append_context(string("in style '") + name + "'");
+                ex.append_context(string("in style '") + name + "' in map '" + filename_ + "')");
             }
             throw;
         }
@@ -355,7 +357,7 @@ namespace mapnik
             fontsets_.insert(pair<std::string, font_set>(name, fontset));
         } catch (const config_error & ex) {
             if ( ! name.empty() ) {
-                ex.append_context(string("in FontSet '") + name + "'");
+                ex.append_context(string("in FontSet '") + name + "' in map '" + filename_ + "')");
             }
             throw;
         }
@@ -530,7 +532,7 @@ namespace mapnik
 
         } catch (const config_error & ex) {
             if ( ! name.empty() ) {
-                ex.append_context(std::string("(encountered during parsing of layer '") + name + "' in map" + filename_ + ")");
+                ex.append_context(std::string("(encountered during parsing of layer '") + name + "' in map '" + filename_ + "')");
             }
             throw;
         }
@@ -550,7 +552,7 @@ namespace mapnik
                 get_opt_child<string>( r, "Filter");
             if (filter_expr)
             {
-               // can we use encoding defined for XML document for filter expressions?
+               // TODO - can we use encoding defined for XML document for filter expressions?
                rule.set_filter(parse_expression(*filter_expr,"utf8"));
             }
 
@@ -642,7 +644,7 @@ namespace mapnik
         {
             if ( ! name.empty() )
             {
-                ex.append_context(string("in rule '") + name + "'");
+                ex.append_context(string("in rule '") + name + "' in map '" + filename_ + "')");
             }
             throw;
         }
@@ -660,7 +662,7 @@ namespace mapnik
             optional<float> opacity =
                 get_opt_attr<float>(sym, "opacity");
 	    
-            if (file && type)
+            if (file)
             {
                 try
                 {
@@ -709,14 +711,6 @@ namespace mapnik
                     }
                 }
 
-            }
-            else if (file || type)
-            {
-                std::ostringstream os;
-                os << "Missing required attributes: ";
-                if ( ! file ) os << "file ";
-                if ( ! type ) os << "type ";
-                throw config_error( os.str() );
             }
             else
             {
