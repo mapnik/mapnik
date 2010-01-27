@@ -10,10 +10,13 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the SVN log.
 
+
 Mapnik Trunk
 ------------
 
-- Rasterlite Plugin: Experimental support for Rasterlite, to practically use sqlite database with wavelet compressed rasters
+- Added ability to read pre 0.8.0 stylesheets, but prints a warning for deprecated syntax (r1592, #501)
+
+- Rasterlite Plugin: Experimental support for Rasterlite, to practically use sqlite database with wavelet compressed rasters (#469)
 
 
 Mapnik 0.7.0 Release
