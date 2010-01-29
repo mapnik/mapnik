@@ -24,6 +24,9 @@
 
 #include <mapnik/expression_string.hpp>
 #include <boost/variant.hpp>
+#include <unicode/uvernum.h>
+
+
 
 namespace mapnik
 {
@@ -73,6 +76,8 @@ struct expression_string : boost::static_visitor<void>
     
     void operator() (regex_match_node const & x) const
     {
+// TODO - replace with pre ICU 4.2 compatible fromUTF32()
+#if (U_ICU_VERSION_MAJOR_NUM >= 4) && (U_ICU_VERSION_MINOR_NUM >=2)
 	boost::apply_visitor(expression_string(str_),x.expr);
 	str_ +=".match(";
 	std::string utf8;
@@ -80,10 +85,13 @@ struct expression_string : boost::static_visitor<void>
 	to_utf8(ustr,utf8);
 	str_ += utf8;
 	str_ +=")";
+#endif
     }
     
     void operator() (regex_replace_node const & x) const
     {
+// TODO - replace with pre ICU 4.2 compatible fromUTF32()
+#if (U_ICU_VERSION_MAJOR_NUM >= 4) && (U_ICU_VERSION_MINOR_NUM >=2)
 	boost::apply_visitor(expression_string(str_),x.expr);
 	str_ +=".replace(";
 	std::string utf8;
@@ -95,6 +103,7 @@ struct expression_string : boost::static_visitor<void>
 	to_utf8(x.format ,utf8);
 	str_ += utf8;
 	str_ +="')";
+#endif
     }
 
 private:
