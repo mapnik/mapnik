@@ -24,7 +24,7 @@
 
 #include <mapnik/expression_string.hpp>
 #include <boost/variant.hpp>
-#include <unicode/uvernum.h>
+#include <unicode/uversion.h>
 
 
 
