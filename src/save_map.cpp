@@ -379,7 +379,6 @@ namespace mapnik
             // filters were not comparable, perhaps should now compare expressions?
             expression_ptr const& expr = rule.get_filter();
 	    std::string filter = mapnik::to_expression_string(*expr);
-            std::clog << "filter=" << filter << "\n";
             std::string default_filter = mapnik::to_expression_string(*dfl.get_filter());
             
             if ( filter != default_filter)
@@ -572,7 +571,7 @@ namespace mapnik
     {
         ptree pt;
         serialize_map(pt,map,explicit_defaults);
-        write_xml(filename,pt);
+        write_xml(filename,pt,std::locale(),boost::property_tree::xml_writer_make_settings(' ',4));
     }
 
     std::string save_map_to_string(Map const & map, bool explicit_defaults)
@@ -580,7 +579,7 @@ namespace mapnik
         ptree pt;
         serialize_map(pt,map,explicit_defaults);
         std::ostringstream ss;
-        write_xml(ss,pt);
+        write_xml(ss,pt,boost::property_tree::xml_writer_make_settings(' ',4));
         return ss.str();
     }
 
