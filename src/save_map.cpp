@@ -179,8 +179,8 @@ namespace mapnik
                 // repeating the default values here.
                 // maybe add a real, explicit default-ctor?
 
-		//FIXME pls
-		/*
+                //FIXME pls
+                /*
                 shield_symbolizer sym_dfl("<no default>", "<no default>", 0, color(0,0,0), "<no default>", "<no default>");
                 if (sym.get_unlock_image() != sym_dfl.get_unlock_image() || explicit_defaults_ )
                 {
@@ -190,7 +190,7 @@ namespace mapnik
                 {
                     set_attr( sym_node, "no_text", sym.get_no_text() );
                 }
-		*/
+                */
             }
 
             void operator () ( const text_symbolizer & sym )
@@ -231,18 +231,16 @@ namespace mapnik
             serialize_symbolizer();
             void add_image_attributes(ptree & node, const symbolizer_with_image & sym)
             {
-		std::string filename = path_processor_type::to_string( *sym.get_filename());
-// FIXME pls
-		//if ( ! filename.empty() ) {
-		set_attr( node, "file", filename );
-                    //set_attr( node, "type", guess_type( filename ) );
-                //}
+                const std::string & filename = path_processor_type::to_string( *sym.get_filename());
+                if ( ! filename.empty() ) {
+                    set_attr( node, "file", filename );
+                }
             }
             void add_font_attributes(ptree & node, const text_symbolizer & sym)
             {
-		std::string name = to_expression_string(sym.get_name());
+                expression_ptr const& expr = sym.get_name();
+                const std::string & name = to_expression_string(*expr);
 		
-                //const std::string & name = sym.get_name();
                 if ( ! name.empty() ) {
                     set_attr( node, "name", name );
                 }
@@ -262,7 +260,7 @@ namespace mapnik
                 // to avoid printing ofattributes with default values without
                 // repeating the default values here.
                 // maybe add a real, explicit default-ctor?
-		// FIXME
+                // FIXME
                 text_symbolizer dfl(expression_ptr(), "<no default>",
                                     0, color(0,0,0) );
 
@@ -378,17 +376,17 @@ namespace mapnik
         }
         else
         {
-            // filters are not comparable, so compare strings for now
-	    // TODO !!!!!
-/*
-	    std::string filter = rule.get_filter()->to_string();
-            std::string default_filter = dfl.get_filter()->to_string();
+            // filters were not comparable, perhaps should now compare expressions?
+            expression_ptr const& expr = rule.get_filter();
+	    std::string filter = mapnik::to_expression_string(*expr);
+            std::clog << "filter=" << filter << "\n";
+            std::string default_filter = mapnik::to_expression_string(*dfl.get_filter());
+            
             if ( filter != default_filter)
             {
                 rule_node.push_back( ptree::value_type(
                             "Filter", ptree()))->second.put_value( filter );
             }
-	    */
         }
 
         if (rule.get_min_scale() != dfl.get_min_scale() )
@@ -405,8 +403,8 @@ namespace mapnik
             max_scale.put_value( rule.get_max_scale() );
         }
 
-	rule_type::symbolizers::const_iterator begin = rule.get_symbolizers().begin();
-	rule_type::symbolizers::const_iterator end = rule.get_symbolizers().end();
+        rule_type::symbolizers::const_iterator begin = rule.get_symbolizers().begin();
+        rule_type::symbolizers::const_iterator end = rule.get_symbolizers().end();
         serialize_symbolizer serializer( rule_node, explicit_defaults);
         std::for_each( begin, end , boost::apply_visitor( serializer ));
     }
