@@ -691,6 +691,18 @@ if not preconfigured:
     else:
         env['SKIPPED_DEPS'].extend(['cairo','cairomm'])
 
+    # allow for mac osx /usr/lib/libicucore.dylib compatibility
+    # requires custom supplied headers since Apple does not include them
+    # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
+    # To use system lib download and make && make install one of these:
+    # http://www.opensource.apple.com/tarballs/ICU/
+    # then copy the headers to a location that mapnik will find
+    if 'core' in env['ICU_LIB_NAME']:
+        env.Append(CXXFLAGS = '-DU_HIDE_DRAFT_API')
+        env.Append(CXXFLAGS = '-DUDISABLE_RENAMING')
+        if os.path.exists(env['ICU_LIB_NAME']):
+            env['ICU_LIB_NAME'] = os.path.basename(env['ICU_LIB_NAME']).replace('.dylib','').replace('lib','')
+
     LIBSHEADERS = [
         ['m', 'math.h', True,'C'],
         ['ltdl', 'ltdl.h', True,'C'],
@@ -702,15 +714,6 @@ if not preconfigured:
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
     ]
 
-    # allow for mac osx /usr/lib/libicucore.dylib compatibility
-    # requires custom supplied headers since Apple does not include them
-    # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
-    # To use system lib download and make && make install one of these:
-    # http://www.opensource.apple.com/tarballs/ICU/
-    # then copy the headers to a location that mapnik will find
-    if env['ICU_LIB_NAME'] == 'icucore':
-        env.Append(CXXFLAGS = '-DU_HIDE_DRAFT_API')
-        env.Append(CXXFLAGS = '-DUDISABLE_RENAMING')
     
     for libinfo in LIBSHEADERS:
         if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):
@@ -1024,6 +1027,9 @@ if not preconfigured:
 
 # autogenerate help on default/current SCons options
 Help(opts.GenerateHelpText(env))
+
+#env.Prepend(CPPPATH = '/usr/local/include')
+#env.Prepend(LIBPATH = '/usr/local/lib')
 
 #### Builds ####
 if not HELP_REQUESTED:
