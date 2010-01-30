@@ -25,10 +25,14 @@
 
 #include <mapnik/text_symbolizer.hpp>
 #include "mapnik_enumeration.hpp"
+#include <mapnik/expression_string.hpp>
 
 using namespace mapnik;
 using mapnik::color;
 using mapnik::text_symbolizer;
+using mapnik::expr_node;
+using mapnik::expression_ptr;
+using mapnik::to_expression_string;
 
 namespace {
   using namespace boost::python;
@@ -248,9 +252,9 @@ class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&,
     .add_property("minimum_distance",
                   &text_symbolizer::get_minimum_distance,
                   &text_symbolizer::set_minimum_distance)
-    //.add_property("name",
-    //             make_function(&text_symbolizer::get_name,return_value_policy<copy_const_reference>()),
-    //             &text_symbolizer::set_name)
+    .add_property("name",make_function
+                 (&text_symbolizer::get_name,return_value_policy<copy_const_reference>()),
+                 &text_symbolizer::set_name)
     .add_property("opacity",
                   &text_symbolizer::get_opacity,
                   &text_symbolizer::set_opacity,

@@ -205,12 +205,12 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     return *this;
 }
 
-expression_ptr text_symbolizer::get_name() const
+expression_ptr const& text_symbolizer::get_name() const
 {
     return name_;
 }
 
-void text_symbolizer::set_name(expression_ptr name)
+void text_symbolizer::set_name(const expression_ptr& name)
 {
     name_ = name;
 }

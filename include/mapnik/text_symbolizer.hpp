@@ -100,8 +100,8 @@ namespace mapnik
          text_symbolizer& operator=(text_symbolizer const& rhs);
          
          //
-	 expression_ptr get_name() const;
-	 void set_name(expression_ptr expr);
+	 expression_ptr const& get_name() const;
+	 void set_name(const expression_ptr& expr);
 	 //
 	 
          unsigned get_text_ratio() const; // target ratio for text bounding box in pixels

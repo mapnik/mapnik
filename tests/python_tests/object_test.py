@@ -178,18 +178,18 @@ def test_shapefile_properties():
 
 # TextSymbolizer initialization
 def test_textsymbolizer_init():
-    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field Name]'), 'Font Name', 8, mapnik.Color('black'))
+    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
 
-    eq_(ts.name, 'Field Name')
+    eq_(str(ts.name), str(mapnik.Expression('Field_Name')))
     eq_(ts.face_name, 'Font Name')
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik.Color('black'))
 
 # TextSymbolizer pickling
 def test_textsymbolizer_pickle():
-    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field Name]'), 'Font Name', 8, mapnik.Color('black'))
+    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
 
-    eq_(ts.name, 'Field Name')
+    eq_(str(ts.name), str(mapnik.Expression('Field_Name')))
     eq_(ts.face_name, 'Font Name')
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik.Color('black'))
