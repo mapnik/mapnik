@@ -131,173 +131,173 @@ private:
     bool else_filter_;
 public:
     rule()
-	: name_(),
-	  title_(),
-	  abstract_(),
-	  min_scale_(0),
-	  max_scale_(std::numeric_limits<double>::infinity()),
-	  syms_(),
-	  filter_(new mapnik::expr_node(true)),
-	  else_filter_(false) {}
+        : name_(),
+          title_(),
+          abstract_(),
+          min_scale_(0),
+          max_scale_(std::numeric_limits<double>::infinity()),
+          syms_(),
+          filter_(new mapnik::expr_node(true)),
+          else_filter_(false) {}
     
     rule(const std::string& name,
-	 const std::string& title="",
-	 double min_scale_denominator=0,
-	 double max_scale_denominator=std::numeric_limits<double>::infinity())
-	: name_(name),
-	  title_(title),
-	  min_scale_(min_scale_denominator),
-	  max_scale_(max_scale_denominator),
-	  syms_(),
-	  filter_(new mapnik::expr_node(true)),
-	  else_filter_(false) {}
+         const std::string& title="",
+         double min_scale_denominator=0,
+         double max_scale_denominator=std::numeric_limits<double>::infinity())
+        : name_(name),
+          title_(title),
+          min_scale_(min_scale_denominator),
+          max_scale_(max_scale_denominator),
+          syms_(),
+          filter_(new mapnik::expr_node(true)),
+          else_filter_(false) {}
     
     rule(const rule& rhs)    
-	: name_(rhs.name_),
-	  title_(rhs.title_),
-	  abstract_(rhs.abstract_),
-	  min_scale_(rhs.min_scale_),
-	  max_scale_(rhs.max_scale_),
-	  syms_(rhs.syms_),
-	  filter_(rhs.filter_),
-	  else_filter_(rhs.else_filter_) {}
+        : name_(rhs.name_),
+          title_(rhs.title_),
+          abstract_(rhs.abstract_),
+          min_scale_(rhs.min_scale_),
+          max_scale_(rhs.max_scale_),
+          syms_(rhs.syms_),
+          filter_(rhs.filter_),
+          else_filter_(rhs.else_filter_) {}
     
     rule& operator=(rule const& rhs) 
     {
-	rule tmp(rhs);
-	swap(tmp);
-	return *this;
+        rule tmp(rhs);
+        swap(tmp);
+        return *this;
     }
     bool operator==(rule const& other)
     {
-	return  (this == &other); 
+        return  (this == &other); 
     }
     
     void set_max_scale(double scale)
     {
-	max_scale_=scale;
+        max_scale_=scale;
     }
     
     double get_max_scale() const
     {
-	return max_scale_;
+        return max_scale_;
     }
     
     void set_min_scale(double scale)
     {
-	min_scale_=scale;
+        min_scale_=scale;
     }
     
     double get_min_scale() const
     {
-	return min_scale_;
+        return min_scale_;
     }
     
     void set_name(std::string const& name)
     {
-	name_=name;
+        name_=name;
     }
     
     std::string const& get_name() const
     {
-	return name_;
+        return name_;
     }
     
     std::string const& get_title() const
     {
-	return  title_;
+        return  title_;
     }
     
     void set_title(std::string const& title)
     {
-	title_=title;
+        title_=title;
     }
     
     void set_abstract(std::string const& abstract)
     {
-	abstract_=abstract;
+        abstract_=abstract;
     }
     
     std::string const& get_abstract() const
     {
-	return abstract_;
+        return abstract_;
     }
     
     void append(const symbolizer& sym)
     {
-	syms_.push_back(sym);
+        syms_.push_back(sym);
     }
     
     void remove_at(size_t index)
     {
-	if (index < syms_.size())
-	{
-	    syms_.erase(syms_.begin()+index);
-	}
+        if (index < syms_.size())
+        {
+            syms_.erase(syms_.begin()+index);
+        }
     }
     
     const symbolizers& get_symbolizers() const
     {
-	return syms_;
+        return syms_;
     }
     
     symbolizers::const_iterator begin() const
     {
-	return syms_.begin();
+        return syms_.begin();
     }
     
     symbolizers::const_iterator end() const
     {
-	return syms_.end();
+        return syms_.end();
     }
     
     symbolizers::iterator begin()
     {
-	return syms_.begin();
+        return syms_.begin();
     }
     
     symbolizers::iterator end()
     {
-	return syms_.end();
+        return syms_.end();
     }
     
     void set_filter(const expression_ptr& filter)
     {
-	filter_=filter;
+        filter_=filter;
     }
     
     expression_ptr const& get_filter() const
     {
-	return filter_;
+        return filter_;
     }
     
     void set_else(bool else_filter)
     {
-	else_filter_=else_filter;
+        else_filter_=else_filter;
     }
     
     bool has_else_filter() const
     {
-	return else_filter_;
+        return else_filter_;
     }
     
     bool active(double scale) const
     {
-	return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6);
+        return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6);
     }
     
 private:
     
     void swap(rule& rhs) throw()
     {
-	name_=rhs.name_;
-	title_=rhs.title_;
-	abstract_=rhs.abstract_;
-	min_scale_=rhs.min_scale_;
-	max_scale_=rhs.max_scale_;
-	syms_=rhs.syms_;
-	filter_=rhs.filter_;
-	else_filter_=rhs.else_filter_;
+        name_=rhs.name_;
+        title_=rhs.title_;
+        abstract_=rhs.abstract_;
+        min_scale_=rhs.min_scale_;
+        max_scale_=rhs.max_scale_;
+        syms_=rhs.syms_;
+        filter_=rhs.filter_;
+        else_filter_=rhs.else_filter_;
     }
 };
 
