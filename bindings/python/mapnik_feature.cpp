@@ -201,6 +201,7 @@ struct std_pair_to_python_converter
 }
 }
 
+/*
 mapnik::feature_ptr create_feature_(int id)
 {
     return mapnik::feature_ptr(new mapnik::Feature(id));
@@ -235,6 +236,7 @@ struct UnicodeString_from_python_str
 	data->convertible = storage;
     }
 };
+*/
 
 void export_feature()
 {
@@ -243,12 +245,12 @@ void export_feature()
       
     implicitly_convertible<int,mapnik::value>();
     implicitly_convertible<double,mapnik::value>();
-    implicitly_convertible<UnicodeString,mapnik::value>();
+    //implicitly_convertible<UnicodeString,mapnik::value>();
     implicitly_convertible<bool,mapnik::value>();
 
     std_pair_to_python_converter<std::string const,mapnik::value>();
     to_python_converter<mapnik::value,mapnik_value_to_python>();
-    UnicodeString_from_python_str();
+    //UnicodeString_from_python_str();
    
     class_<Feature,boost::shared_ptr<Feature>,
 	boost::noncopyable>("Feature",no_init)
@@ -260,8 +262,8 @@ void export_feature()
 	.def("num_geometries",&Feature::num_geometries)
 	.def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
 	.def("envelope", &Feature::envelope)
-	.def("create",create_feature_)
-	.staticmethod("create")
+	//.def("create",create_feature_)
+	//.staticmethod("create")
 	.def(map_indexing_suite2<Feature, true >())
 	.def("iteritems",iterator<Feature> ())
 	;
