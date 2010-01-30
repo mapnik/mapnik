@@ -34,18 +34,18 @@ namespace mapnik
 struct expression_string : boost::static_visitor<void>
 {
     explicit expression_string(std::string & str)
-	: str_(str) {}
+        : str_(str) {}
     
     void operator() (value_type const& x) const
     { 
-	str_ += x.to_expression_string() ; 
+        str_ += x.to_expression_string() ; 
     }
     
     void operator() (attribute const& attr) const
     {
         str_ += "[";
-	str_ += attr.name();
-	str_ += "]";
+        str_ += attr.name();
+        str_ += "]";
     }
     
     template <typename Tag> 
@@ -68,23 +68,23 @@ struct expression_string : boost::static_visitor<void>
     template <typename Tag>
     void operator() (unary_node<Tag> const& x) const
     {
-	str_ += Tag::str();
-	str_ += "(";
-	boost::apply_visitor(expression_string(str_),x.expr);	
-	str_ += ")";
+        str_ += Tag::str();
+        str_ += "(";
+        boost::apply_visitor(expression_string(str_),x.expr);        
+        str_ += ")";
     }
     
     void operator() (regex_match_node const & x) const
     {
 // TODO - replace with pre ICU 4.2 compatible fromUTF32()
 #if (U_ICU_VERSION_MAJOR_NUM >= 4) && (U_ICU_VERSION_MINOR_NUM >=2)
-	boost::apply_visitor(expression_string(str_),x.expr);
-	str_ +=".match(";
-	std::string utf8;
-	UnicodeString ustr = UnicodeString::fromUTF32( &x.pattern.str()[0] ,x.pattern.str().length());
-	to_utf8(ustr,utf8);
-	str_ += utf8;
-	str_ +=")";
+        boost::apply_visitor(expression_string(str_),x.expr);
+        str_ +=".match(";
+        std::string utf8;
+        UnicodeString ustr = UnicodeString::fromUTF32( &x.pattern.str()[0] ,x.pattern.str().length());
+        to_utf8(ustr,utf8);
+        str_ += utf8;
+        str_ +=")";
 #endif
     }
     
@@ -92,17 +92,17 @@ struct expression_string : boost::static_visitor<void>
     {
 // TODO - replace with pre ICU 4.2 compatible fromUTF32()
 #if (U_ICU_VERSION_MAJOR_NUM >= 4) && (U_ICU_VERSION_MINOR_NUM >=2)
-	boost::apply_visitor(expression_string(str_),x.expr);
-	str_ +=".replace(";
-	std::string utf8;
-	UnicodeString ustr = UnicodeString::fromUTF32( &x.pattern.str()[0] ,x.pattern.str().length());
-	to_utf8(ustr,utf8);
-	str_ += "'";
-	str_ += utf8;
-	str_ +="','";
-	to_utf8(x.format ,utf8);
-	str_ += utf8;
-	str_ +="')";
+        boost::apply_visitor(expression_string(str_),x.expr);
+        str_ +=".replace(";
+        std::string utf8;
+        UnicodeString ustr = UnicodeString::fromUTF32( &x.pattern.str()[0] ,x.pattern.str().length());
+        to_utf8(ustr,utf8);
+        str_ += "'";
+        str_ += utf8;
+        str_ +="','";
+        to_utf8(x.format ,utf8);
+        str_ += utf8;
+        str_ +="')";
 #endif
     }
 
