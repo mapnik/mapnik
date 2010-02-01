@@ -433,7 +433,7 @@ namespace mapnik
         const std::string & name = fontset_it->first;
 
         ptree & fontset_node = map_node.push_back(
-                ptree::value_type("font_set", ptree()))->second;
+                ptree::value_type("FontSet", ptree()))->second;
 
         set_attr(fontset_node, "name", name);
 
