@@ -656,7 +656,6 @@ namespace mapnik
         {
             optional<std::string> file =  get_opt_attr<string>(sym, "file");
             optional<std::string> base =  get_opt_attr<string>(sym, "base");
-            optional<std::string> type =  get_opt_attr<string>(sym, "type");
             optional<boolean> allow_overlap =
                 get_opt_attr<boolean>(sym, "allow_overlap");
             optional<float> opacity =
@@ -730,7 +729,6 @@ namespace mapnik
         {
             std::string file = get_attr<string>(sym, "file");
             optional<std::string> base = get_opt_attr<string>(sym, "base");
-            std::string type = get_attr<string>(sym, "type");
             
 	    try
             {
@@ -784,7 +782,6 @@ namespace mapnik
         {
             std::string file = get_attr<string>(sym, "file");
             optional<std::string> base = get_opt_attr<string>(sym, "base");
-            std::string type = get_attr<string>(sym, "type");
 	    
             try
             {
