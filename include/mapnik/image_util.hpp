@@ -40,293 +40,202 @@
 
 namespace mapnik {
     
-    class ImageWriterException : public std::exception
+class ImageWriterException : public std::exception
+{
+private:
+    std::string message_;
+public:
+    ImageWriterException(const std::string& message) 
+	: message_(message) {}
+
+    ~ImageWriterException() throw() {}
+
+    virtual const char* what() const throw()
     {
-    private:
-        std::string message_;
-    public:
-        ImageWriterException(const std::string& message) 
-            : message_(message) {}
+	return message_.c_str();
+    }
+};
 
-        ~ImageWriterException() throw() {}
+MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
+				    std::string const& filename,
+				    std::string const& type);
 
-        virtual const char* what() const throw()
-        {
-            return message_.c_str();
-        }
-    };
-
-   MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
-                                        std::string const& filename,
-                                        std::string const& type);
-
-   template <typename T>
-   MAPNIK_DECL void save_to_file(T const& image,
-                                 std::string const& filename,
-                                 std::string const& type);
-   // guess type from file extension
-   template <typename T>
-   MAPNIK_DECL void save_to_file(T const& image,
-                                 std::string const& filename);
+template <typename T>
+MAPNIK_DECL void save_to_file(T const& image,
+			      std::string const& filename,
+			      std::string const& type);
+// guess type from file extension
+template <typename T>
+MAPNIK_DECL void save_to_file(T const& image,
+			      std::string const& filename);
    
-   template <typename T>
-   MAPNIK_DECL std::string save_to_string(T const& image,
-                                 std::string const& type);
+template <typename T>
+MAPNIK_DECL std::string save_to_string(T const& image,
+				       std::string const& type);
 
-   template <typename T>
-   void save_as_png(T const& image,
-                    std::string const& filename);
+template <typename T>
+void save_as_png(T const& image,
+		 std::string const& filename);
    
-   template <typename T>
-   void save_as_jpeg(std::string const& filename,
-                     int quality,
-                     T const& image);
+template <typename T>
+void save_as_jpeg(std::string const& filename,
+		  int quality,
+		  T const& image);
    
-   inline bool is_png (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".png"));
-   }
+inline bool is_png (std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename,std::string(".png"));
+}
    
-   inline bool is_jpeg (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".jpg")) ||
-         boost::algorithm::iends_with(filename,std::string(".jpeg"));
-   }
+inline bool is_jpeg (std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename,std::string(".jpg")) ||
+	boost::algorithm::iends_with(filename,std::string(".jpeg"));
+}
    
-   inline bool is_tiff (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".tif")) ||
-         boost::algorithm::iends_with(filename,std::string(".tiff"));
-   }
+inline bool is_tiff (std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename,std::string(".tif")) ||
+	boost::algorithm::iends_with(filename,std::string(".tiff"));
+}
 
-   inline bool is_pdf (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".pdf"));
-   }
+inline bool is_pdf (std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename,std::string(".pdf"));
+}
 
-   inline bool is_svg (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".svg"));
-   }
+inline bool is_svg (std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename,std::string(".svg"));
+}
 
-   inline bool is_ps (std::string const& filename)
-   {
-      return boost::algorithm::iends_with(filename,std::string(".ps"));
-   }
+inline bool is_ps (std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename,std::string(".ps"));
+}
    
-   inline boost::optional<std::string> type_from_filename(std::string const& filename)
+inline boost::optional<std::string> type_from_filename(std::string const& filename)
 
-   {
-      typedef boost::optional<std::string> result_type;
-      if (is_png(filename)) return result_type("png");
-      if (is_jpeg(filename)) return result_type("jpeg");
-      if (is_tiff(filename)) return result_type("tiff");
-      if (is_pdf(filename)) return result_type("pdf");
-      if (is_svg(filename)) return result_type("svg");
-      if (is_ps(filename)) return result_type("ps");
-      return result_type();
-   }
+{
+    typedef boost::optional<std::string> result_type;
+    if (is_png(filename)) return result_type("png");
+    if (is_jpeg(filename)) return result_type("jpeg");
+    if (is_tiff(filename)) return result_type("tiff");
+    if (is_pdf(filename)) return result_type("pdf");
+    if (is_svg(filename)) return result_type("svg");
+    if (is_ps(filename)) return result_type("ps");
+    return result_type();
+}
 
-  inline std::string guess_type( const std::string & filename )
-  {
-      std::string::size_type idx = filename.find_last_of(".");
-      if ( idx != std::string::npos ) {
-          return filename.substr( idx + 1 );
-      }
-      return "<unknown>";
-   }
-       
-   template <typename T>
-   double distance(T x0,T y0,T x1,T y1)
-   {
-      double dx = x1-x0;
-      double dy = y1-y0;
-      return std::sqrt(dx * dx + dy * dy);
-   }
-   
-   template <typename Image>
-   inline void scale_down2(Image& target,const Image& source)
-   {
-      int source_width=source.width();
-      int source_height=source.height();
-      
-      int target_width=target.width();
-      int target_height=target.height();
-      if (target_width<source_width/2 || target_height<source_height/2)
-         return;
-      int y1,x1;
-      for (int y=0;y<target_height;++y)
-      {
-         y1=2*y;
-         for(int x=0;x<target_width;++x)
-         {
-            x1=2*x;
-            //todo calculate average???
-            target(x,y)=source(x1,y1);
-         }
-      }
-   }
-   
-   template <typename Image,int scale>
-   struct image_op
-   {
-         static void scale_up(Image& target,const Image& source)
-         {
-            if (scale<3) return;
-            int source_width=source.width();
-            int source_height=source.height();
-            
-            int target_width=target.width();
-            int target_height=target.height();
-            if (target_width<scale*source_width || target_height<scale*source_height)
-               return;
-            for (int y=0;y<source_height;++y)
-            {
-               for(int x=0;x<source_width;++x)
-               {
-                  unsigned p=source(x,y);
-                  for (int i=0;i<scale;++i)
-                     for (int j=0;j<scale;++j)
-                        target(scale*x+i,scale*y+j)=p;
-               }
-            }
-         }
-   };
+inline std::string guess_type( const std::string & filename )
+{
+    std::string::size_type idx = filename.find_last_of(".");
+    if ( idx != std::string::npos ) {
+	return filename.substr( idx + 1 );
+    }
+    return "<unknown>";
+}
 
-   template <typename Image>
-   struct image_op<Image,2>
-   {
-         static void scale_up(Image& target,const Image& source)
-         {
-            int source_width=source.width();
-            int source_height=source.height();
-            
-            int target_width=target.width();
-            int target_height=target.height();
-            if (target_width<2*source_width || target_height<2*source_height)
-               return;
-            for (int y=0;y<source_height;++y)
-            {
-               for(int x=0;x<source_width;++x)
-               {
-                  target(2*x,2*y)=source(x,y);
-                  target(2*x+1,2*y)=source(x,y);
-                  target(2*x+1,2*y+1)=source(x,y);
-                  target(2*x,2*y+1)=source(x,y);
-               }
-            }
-         }
-   };
-   
-   namespace
-   {
-      template <typename Image>
-      inline void scale_up(Image& target,const Image& source,unsigned scale)
-      {
-         int source_width=source.width();
-         int source_height=source.height();
+template <typename T>
+double distance(T x0,T y0,T x1,T y1)
+{
+    double dx = x1-x0;
+    double dy = y1-y0;
+    return std::sqrt(dx * dx + dy * dy);
+}
 
-         int target_width=target.width();
-         int target_height=target.height();
-         if (target_width<scale*source_width || target_height<scale*source_height)
-            return;
-         for (int y=0;y<source_height;++y)
-         {
-            for(int x=0;x<source_width;++x)
-            {
-               unsigned p=source(x,y);
-               for (int i=0;i<scale;++i)
-                  for (int j=0;j<scale;++j)
-                     target(scale*x+i,scale*y+j)=p;
-            }
-         }
-      }
-   }
-    
-   template <typename Image>
-   void scale_image(Image& target,const Image& source,unsigned scale)
-   {
-      if (scale==2)
-      {
-         image_op<Image,2>::scale_up(target,source);
-      }
-      else
-      {
-         scale_up<Image>(target,source,scale);
-      }
-   }
 
-   template <typename Image>
-   inline void scale_image (Image& target,const Image& source)
-   {
+// add 1-px border around image - useful for debugging alignment issues
+template <typename T>
+void add_border(T & image)
+{
+    for (unsigned  x = 0; x < image.width();++x)
+    {
+	image(x,0) = 0xff0000ff; // red
+	image(x,image.height()-1) = 0xff00ff00; //green
+    }
+    for (unsigned y = 0; y < image.height();++y)
+    {
+	image(0,y) = 0xff00ffff; //yellow 
+	image(image.width()-1,y) = 0xffff0000; // blue
+    }
+}
 
-      int source_width=source.width();
-      int source_height=source.height();
+template <typename Image>
+inline void scale_image (Image& target,const Image& source)
+{
 
-      int target_width=target.width();
-      int target_height=target.height();
+    int source_width=source.width();
+    int source_height=source.height();
 
-      if (source_width<1 || source_height<1 ||
-          target_width<1 || target_height<1) return;
-      int int_part_y=source_height/target_height;
-      int fract_part_y=source_height%target_height;
-      int err_y=0;
-      int int_part_x=source_width/target_width;
-      int fract_part_x=source_width%target_width;
-      int err_x=0;
-      int x=0,y=0,xs=0,ys=0;
-      int prev_y=-1;
-      for (y=0;y<target_height;++y)
-      {
-         if (ys==prev_y)
-         {
+    int target_width=target.width();
+    int target_height=target.height();
+
+    if (source_width<1 || source_height<1 ||
+	target_width<1 || target_height<1) return;
+    int int_part_y=source_height/target_height;
+    int fract_part_y=source_height%target_height;
+    int err_y=0;
+    int int_part_x=source_width/target_width;
+    int fract_part_x=source_width%target_width;
+    int err_x=0;
+    int x=0,y=0,xs=0,ys=0;
+    int prev_y=-1;
+    for (y=0;y<target_height;++y)
+    {
+	if (ys==prev_y)
+	{
             target.setRow(y,target.getRow(y-1),target_width);
-         }
-         else
-         {
+	}
+	else
+	{
             xs=0;
             for (x=0;x<target_width;++x)
             {
-               target(x,y)=source(xs,ys);
-               xs+=int_part_x;
-               err_x+=fract_part_x;
-               if (err_x>=target_width)
-               {
-                  err_x-=target_width;
-                  ++xs;
-               }
+		target(x,y)=source(xs,ys);
+		xs+=int_part_x;
+		err_x+=fract_part_x;
+		if (err_x>=target_width)
+		{
+		    err_x-=target_width;
+		    ++xs;
+		}
             }
             prev_y=ys;
-         }
-         ys+=int_part_y;
-         err_y+=fract_part_y;
-         if (err_y>=target_height)
-         {
+	}
+	ys+=int_part_y;
+	err_y+=fract_part_y;
+	if (err_y>=target_height)
+	{
             err_y-=target_height;
             ++ys;
-         }
-      }
-   }
-   
-   template <typename Image>
-   inline void scale_image_bilinear (Image& target,const Image& source)
-   {
+	}
+    }
 
-      int source_width=source.width();
-      int source_height=source.height();
+#ifdef MAPNIK_DEBUG
+    add_border(target);
+#endif
+}
 
-      int target_width=target.width();
-      int target_height=target.height();
+template <typename Image>
+inline void scale_image_bilinear (Image& target,const Image& source)
+{
 
-      if (source_width<1 || source_height<1 ||
-          target_width<1 || target_height<1) return;
-      int x=0,y=0,xs=0,ys=0;
-      int tw2 = target_width/2;
-      int th2 = target_height/2;
+    int source_width=source.width();
+    int source_height=source.height();
+
+    int target_width=target.width();
+    int target_height=target.height();
+
+    if (source_width<1 || source_height<1 ||
+	target_width<1 || target_height<1) return;
+    int x=0,y=0,xs=0,ys=0;
+    int tw2 = target_width/2;
+    int th2 = target_height/2;
 
 
-      for (y=0;y<target_height;++y)
-      {
+    for (y=0;y<target_height;++y)
+    {
         ys = y*source_height/target_height;
         int ys1 = ys+1;
         if (ys1>=source_height)
@@ -377,28 +286,28 @@ namespace mapnik {
             }
             target(x,y)=out;
         }
-     }
-   }
+    }
+}
 
-   template <typename Image>
-   inline void scale_image_bilinear8 (Image& target,const Image& source)
-   {
+template <typename Image>
+inline void scale_image_bilinear8 (Image& target,const Image& source)
+{
 
-      int source_width=source.width();
-      int source_height=source.height();
+    int source_width=source.width();
+    int source_height=source.height();
 
-      int target_width=target.width();
-      int target_height=target.height();
+    int target_width=target.width();
+    int target_height=target.height();
 
-      if (source_width<1 || source_height<1 ||
-          target_width<1 || target_height<1) return;
-      int x=0,y=0,xs=0,ys=0;
-      int tw2 = target_width/2;
-      int th2 = target_height/2;
+    if (source_width<1 || source_height<1 ||
+	target_width<1 || target_height<1) return;
+    int x=0,y=0,xs=0,ys=0;
+    int tw2 = target_width/2;
+    int th2 = target_height/2;
 
 
-      for (y=0;y<target_height;++y)
-      {
+    for (y=0;y<target_height;++y)
+    {
         ys = y*source_height/target_height;
         int ys1 = ys+1;
         if (ys1>=source_height)
@@ -437,46 +346,46 @@ namespace mapnik {
                 r = (s*yprt+r*yprt1+th2)/target_height;
             target(x,y)=(0xff<<24) | (r<<16) | (r<<8) | r;
         }
-     }
-   }
+    }
+}
 
-   inline MAPNIK_DECL void save_to_file (image_32 const& image,
-                                         std::string const& file,
-                                         std::string const& type) 
-   {
-      save_to_file<image_data_32>(image.data(),file,type);
-   }
+inline MAPNIK_DECL void save_to_file (image_32 const& image,
+				      std::string const& file,
+				      std::string const& type) 
+{
+    save_to_file<image_data_32>(image.data(),file,type);
+}
    
-   inline MAPNIK_DECL void save_to_file(image_32 const& image,
-                                        std::string const& file) 
-   {
-      save_to_file<image_data_32>(image.data(),file);
-   }
+inline MAPNIK_DECL void save_to_file(image_32 const& image,
+				     std::string const& file) 
+{
+    save_to_file<image_data_32>(image.data(),file);
+}
 
-   inline MAPNIK_DECL std::string save_to_string(image_32 const& image,
-                                        std::string const& type)
-   {
-      return save_to_string<image_data_32>(image.data(),type);
-   }
+inline MAPNIK_DECL std::string save_to_string(image_32 const& image,
+					      std::string const& type)
+{
+    return save_to_string<image_data_32>(image.data(),type);
+}
    
 #ifdef _MSC_VER
-   template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
-                                                       std::string const&,
-                                                       std::string const&);
-   template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
-                                                       std::string const&);
-   template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
-                                                       std::string const&);
+template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
+						      std::string const&,
+						      std::string const&);
+template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
+						      std::string const&);
+template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
+							       std::string const&);
    
-   template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
-                                                                     std::string const&,
-                                                                     std::string const&);
+template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+								    std::string const&,
+								    std::string const&);
  
-   template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
-                                                                     std::string const&);
+template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+								    std::string const&);
    
-   template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
-                                                                     std::string const&);
+template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+									     std::string const&);
 #endif
 
 }
