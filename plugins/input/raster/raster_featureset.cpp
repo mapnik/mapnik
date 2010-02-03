@@ -73,10 +73,21 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                CoordTransform t(image_width,image_height,extent_,0,0);
                box2d<double> intersect=bbox_.intersect(curIter_->envelope());
                box2d<double> ext=t.forward(intersect);
-               image_data_32 image(int(ext.width()+0.5),int(ext.height()+0.5));
-               reader->read(int(ext.minx()+0.5),int(ext.miny()+0.5),image);
-               feature->set_raster(mapnik::raster_ptr(new raster(intersect,image)));
-            }
+               
+	       int start_x = int(ext.minx() + 0.5);
+	       int start_y = int(ext.miny() + 0.5);
+	       int end_x = int(ext.maxx() + 0.5);
+	       int end_y = int(ext.maxy() + 0.5);
+	       
+	       unsigned w = end_x - start_x;
+	       unsigned h = end_y - start_y;
+	       if ( w > 0 && h > 0)
+	       {
+		   image_data_32 image(w,h);
+		   reader->read(start_x,start_y,image);
+		   feature->set_raster(mapnik::raster_ptr(new raster(intersect,image)));
+	       }
+	    }
          }
       }
       catch (...)
