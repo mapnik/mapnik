@@ -133,10 +133,10 @@ private:
                
       // if no intersection then nothing to do for layer
       if ( lx0 > ext.maxx() || lx1 < ext.minx() || ly0 > ext.maxy() || ly1 < ext.miny() )
-	    {
+      {
           return;
-	    }
-               
+      }
+      
       // clip query bbox
       lx0 = std::max(ext.minx(),lx0);
       ly0 = std::max(ext.miny(),ly0);
