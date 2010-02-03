@@ -98,12 +98,8 @@ namespace mapnik
          text_symbolizer(expression_ptr name, unsigned size, color const& fill);
          text_symbolizer(text_symbolizer const& rhs);
          text_symbolizer& operator=(text_symbolizer const& rhs);
-         
-         //
-	 expression_ptr const& get_name() const;
-	 void set_name(const expression_ptr& expr);
-	 //
-	 
+         expression_ptr get_name() const;
+         void set_name(expression_ptr expr);
          unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
          void set_text_ratio(unsigned ratio);
          unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio

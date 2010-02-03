@@ -252,8 +252,7 @@ class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&,
     .add_property("minimum_distance",
                   &text_symbolizer::get_minimum_distance,
                   &text_symbolizer::set_minimum_distance)
-    .add_property("name",make_function
-                 (&text_symbolizer::get_name,return_value_policy<copy_const_reference>()),
+    .add_property("name",&text_symbolizer::get_name,
                  &text_symbolizer::set_name)
     .add_property("opacity",
                   &text_symbolizer::get_opacity,
