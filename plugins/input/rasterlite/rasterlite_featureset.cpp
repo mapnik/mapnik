@@ -91,8 +91,8 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
    box2d<double> raster_extent(x0,y0,x1,y1); 
    box2d<double> intersect = raster_extent.intersect(q.get_bbox());
 
-   int width = static_cast<int>(q.resolution() * intersect.width() + 0.5);
-   int height = static_cast<int>(q.resolution() * intersect.height() + 0.5);
+   int width = static_cast<int>(boost::get<0>(q.resolution()) * intersect.width() + 0.5);
+   int height = static_cast<int>(boost::get<0>(q.resolution()) * intersect.height() + 0.5);
 
    double pixel_size = (intersect.width() >= intersect.height()) ?
        (intersect.width() / (double) width) : (intersect.height() / (double) height);
@@ -101,7 +101,8 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
    std::clog << "Rasterlite Plugin: Raster extent=" << raster_extent << "\n";
    std::clog << "Rasterlite Plugin: View extent=" << q.get_bbox() << "\n";
    std::clog << "Rasterlite Plugin: Intersect extent=" << intersect << "\n";
-   std::clog << "Rasterlite Plugin: Query resolution=" << q.resolution() << "\n";
+   std::clog << "Rasterlite Plugin: Query resolution=" << boost::get<0>(q.resolution()) 
+	     << "," << boost::get<1>(q.resolution())  << "\n";
    std::clog << "Rasterlite Plugin: Size=" << width << " " << height << "\n";
    std::clog << "Rasterlite Plugin: Pixel Size=" << pixel_size << "\n";
 #endif

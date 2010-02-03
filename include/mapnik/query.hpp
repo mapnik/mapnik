@@ -28,74 +28,81 @@
 //mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
+
+// boost
+#include <boost/tuple/tuple.hpp>
+
 // stl
 #include <set>
 #include <limits>
 
 namespace mapnik {
-   class query 
-   {
-      private:
-         box2d<double> bbox_;
-         double resolution_;
-         double scale_denominator_;
-         std::set<std::string> names_;
-      public:
-         
-         explicit query(const box2d<double>& bbox, double resolution, double scale_denominator)
-            : bbox_(bbox),
-              resolution_(resolution),
-              scale_denominator_(scale_denominator)
-         {}
 
-         explicit query(const box2d<double>& bbox, double resolution)
-            : bbox_(bbox),
-              resolution_(resolution),
-              scale_denominator_(0.0)
-         {}         
+class query 
+{
+public:
+    typedef boost::tuple<double,double> resolution_type;
+private:
+    box2d<double> bbox_;
+    resolution_type resolution_;
+    double scale_denominator_;
+    std::set<std::string> names_;
+public:
+         
+    explicit query(box2d<double> const& bbox, resolution_type const& resolution, double scale_denominator)
+	: bbox_(bbox),
+	  resolution_(resolution),
+	  scale_denominator_(scale_denominator)
+    {}
+
+    explicit query(box2d<double> const& bbox, resolution_type const& resolution)
+	: bbox_(bbox),
+	  resolution_(resolution),
+	  scale_denominator_(0.0)
+    {}         
         
-         query(const query& other)
-            : bbox_(other.bbox_),
-              resolution_(other.resolution_),
-              scale_denominator_(other.scale_denominator_),
-              names_(other.names_)
-         {}
+    query(query const& other)
+	: bbox_(other.bbox_),
+	  resolution_(other.resolution_),
+	  scale_denominator_(other.scale_denominator_),
+	  names_(other.names_)
+    {}
          
-         query& operator=(const query& other)
-         {
-            if (this == &other) return *this;
-            bbox_=other.bbox_;
-            resolution_=other.resolution_;
-            scale_denominator_=other.scale_denominator_;
-            names_=other.names_;
-            return *this;
-         }
+    query& operator=(query const& other)
+    {
+	if (this == &other) return *this;
+	bbox_=other.bbox_;
+	resolution_=other.resolution_;
+	scale_denominator_=other.scale_denominator_;
+	names_=other.names_;
+	return *this;
+    }
          
-         double resolution() const
-         {
-            return resolution_;
-         }
-
-         double scale_denominator() const
-         {
-            return scale_denominator_;
-         }
+    query::resolution_type const& resolution() const
+    {
+	return resolution_;
+    }
+    
+    double scale_denominator() const
+    {
+	return scale_denominator_;
+    }
          
-         const box2d<double>& get_bbox() const
-         {
-            return bbox_;
-         }
+    box2d<double> const& get_bbox() const
+    {
+	return bbox_;
+    }
          
-         void add_property_name(const std::string& name)
-         {
-            names_.insert(name);
-         } 
+    void add_property_name(std::string const& name)
+    {
+	names_.insert(name);
+    } 
          
-         const std::set<std::string>& property_names() const
-         {
-            return names_;
-         }
-   };
+    std::set<std::string> const& property_names() const
+    {
+	return names_;
+    }
+};
 }
 
 

@@ -121,34 +121,34 @@ private:
 
 	    box2d<double> layer_ext = lay.envelope();
                
-      double lx0 = layer_ext.minx();
-      double ly0 = layer_ext.miny();
-      double lz0 = 0.0;
-      double lx1 = layer_ext.maxx();
-      double ly1 = layer_ext.maxy();
-      double lz1 = 0.0;
-      // back project layers extent into main map projection
-      prj_trans.backward(lx0,ly0,lz0);
-      prj_trans.backward(lx1,ly1,lz1);
+	    double lx0 = layer_ext.minx();
+	    double ly0 = layer_ext.miny();
+	    double lz0 = 0.0;
+	    double lx1 = layer_ext.maxx();
+	    double ly1 = layer_ext.maxy();
+	    double lz1 = 0.0;
+	    // back project layers extent into main map projection
+	    prj_trans.backward(lx0,ly0,lz0);
+	    prj_trans.backward(lx1,ly1,lz1);
                
-      // if no intersection then nothing to do for layer
-      if ( lx0 > ext.maxx() || lx1 < ext.minx() || ly0 > ext.maxy() || ly1 < ext.miny() )
-      {
-          return;
-      }
+	    // if no intersection then nothing to do for layer
+	    if ( lx0 > ext.maxx() || lx1 < ext.minx() || ly0 > ext.maxy() || ly1 < ext.miny() )
+	    {
+		return;
+	    }
       
-      // clip query bbox
-      lx0 = std::max(ext.minx(),lx0);
-      ly0 = std::max(ext.miny(),ly0);
-      lx1 = std::min(ext.maxx(),lx1);
-      ly1 = std::min(ext.maxy(),ly1);
+	    // clip query bbox
+	    lx0 = std::max(ext.minx(),lx0);
+	    ly0 = std::max(ext.miny(),ly0);
+	    lx1 = std::min(ext.maxx(),lx1);
+	    ly1 = std::min(ext.maxy(),ly1);
                
-      prj_trans.forward(lx0,ly0,lz0);
-      prj_trans.forward(lx1,ly1,lz1);
-      box2d<double> bbox(lx0,ly0,lx1,ly1);
-               
-      double resolution = m_.getWidth()/bbox.width();
-      query q(bbox,resolution,scale_denom); //BBOX query
+	    prj_trans.forward(lx0,ly0,lz0);
+	    prj_trans.forward(lx1,ly1,lz1);
+	    box2d<double> bbox(lx0,ly0,lx1,ly1);
+      
+	    query::resolution_type res(m_.getWidth()/bbox.width(),m_.getHeight()/bbox.height());
+	    query q(bbox,res,scale_denom); //BBOX query
                
 	    std::vector<std::string> const& style_names = lay.styles();
 	    std::vector<std::string>::const_iterator stylesIter = style_names.begin();
