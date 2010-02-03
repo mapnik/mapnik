@@ -122,6 +122,8 @@ Mapnik 0.7.0 Release
 
 - XML: Added missing serialization of PointSymbolizer 'opacity' and 'allow_overlap' attributes (r1358)
 
+- XML: Default text vertical_alignment now dependent on dy (#485, r1527)
+
 - Python: Exposed ability to write to Cairo formats using 'mapnik.render_to_file()' and without pycairo (#381)
 
 - Python: Fixed potential crash if pycairo support is enabled but python-cairo module is missing (#392)
@@ -157,6 +159,8 @@ Mapnik 0.6.1 Release
 --------------------
 
 (Packaged from r1247)
+
+- Plugins: expose list of registered plugins as a 'plugin_names()' method of DatasourceCache (r1180) 
 
 - XML: Fixed serialization and parsing bugs related to handling of integers and Enums (#328,#353)
 
