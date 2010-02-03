@@ -118,12 +118,12 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
        y_off_f = 0;
    }
     
-   int x_off = static_cast<int>(x_off_f);
-   int y_off = static_cast<int>(y_off_f);
-
-   int width = int(box.width() + 0.5);
-   int height = int(box.height() + 0.5);
-    
+   int x_off = static_cast<int>(x_off_f + 0.5);
+   int y_off = static_cast<int>(y_off_f + 0.5);
+   
+   int width = int(box.maxx() + 0.5) - int(box.minx() + 0.5);
+   int height = int(box.maxy() + 0.5) - int(box.miny() + 0.5);
+   
 #ifdef MAPNIK_DEBUG         
    std::clog << "GDAL Plugin: Raster extent=" << raster_extent << "\n";
    std::clog << "GDAL Plugin: View extent=" << intersect << "\n";

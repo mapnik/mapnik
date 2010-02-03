@@ -127,17 +127,17 @@ featureset_ptr raster_datasource::features(query const& q) const
    mapnik::box2d<double> intersect=extent_.intersect(q.get_bbox());
    mapnik::box2d<double> ext=t.forward(intersect);
    
-   unsigned width = int(ext.width() + 0.5);
-   unsigned height = int(ext.height() + 0.5);
+   int width  = int(ext.maxx() + 0.5) - int(ext.minx() + 0.5);
+   int height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
 #ifdef MAPNIK_DEBUG
    std::cout << "Raster Plugin: BOX SIZE(" << width << " " << height << ")\n";
 #endif
-   if (width * height > 1024*1024)
+   if (width * height > 512*512)
    {
 #ifdef MAPNIK_DEBUG
       std::cout << "Raster Plugin: TILED policy\n";
 #endif
-      tiled_file_policy policy(filename_,format_, 1024, extent_,q.get_bbox(), width_,height_);
+      tiled_file_policy policy(filename_,format_, 256 , extent_,q.get_bbox(), width_,height_);
       return featureset_ptr(new raster_featureset<tiled_file_policy>(policy,extent_,q));
    }
    else
