@@ -731,51 +731,61 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
     raster_ptr const& raster=feature.get_raster();
     if (raster)
     {
+	
 	box2d<double> ext=t_.forward(raster->ext_);
-	image_data_32 target(int(ceil(ext.width())),int(ceil(ext.height())));
-	int start_x = int(ext.minx()+0.5);
-	int start_y = int(ext.miny()+0.5);
 	
-	if (sym.get_scaling() == "fast") {
-	    scale_image<image_data_32>(target,raster->data_);
-	} else if (sym.get_scaling() == "bilinear"){
-	    scale_image_bilinear<image_data_32>(target,raster->data_);
-	} else if (sym.get_scaling() == "bilinear8"){
-	    scale_image_bilinear8<image_data_32>(target,raster->data_);
-	} else {
-	    scale_image<image_data_32>(target,raster->data_);
-	}
+	int start_x = int(ext.minx() + 0.5);
+	int start_y = int(ext.miny() + 0.5);
+	int end_x = int(ext.maxx() + 0.5);
+	int end_y = int(ext.maxy() + 0.5);
+	int raster_width = end_x - start_x;
+	int raster_height = end_y - start_y;
 	
-	if (sym.get_mode() == "normal"){
-	    if (sym.get_opacity() == 1.0) {
-		pixmap_.set_rectangle(start_x,start_y,target);
+	if ( raster_width > 0 && raster_height > 0)
+	{
+	    image_data_32 target(raster_width,raster_height);
+	  
+	    if (sym.get_scaling() == "fast") {
+		scale_image<image_data_32>(target,raster->data_);
+	    } else if (sym.get_scaling() == "bilinear"){
+		scale_image_bilinear<image_data_32>(target,raster->data_);
+	    } else if (sym.get_scaling() == "bilinear8"){
+		scale_image_bilinear8<image_data_32>(target,raster->data_);
 	    } else {
-		pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
+		scale_image<image_data_32>(target,raster->data_);
 	    }
-	} else if (sym.get_mode() == "grain_merge"){
-	    pixmap_.template merge_rectangle<MergeGrain> (target,start_x,start_y, sym.get_opacity());
-	} else if (sym.get_mode() == "grain_merge2"){
-	    pixmap_.template merge_rectangle<MergeGrain2> (target,start_x,start_y, sym.get_opacity());
-	} else if (sym.get_mode() == "multiply"){
-	    pixmap_.template merge_rectangle<Multiply> (target,start_x,start_y, sym.get_opacity());
-	} else if (sym.get_mode() == "multiply2"){
-	    pixmap_.template merge_rectangle<Multiply2> (target,start_x,start_y, sym.get_opacity());
-	} else if (sym.get_mode() == "divide"){
-	    pixmap_.template merge_rectangle<Divide> (target,start_x,start_y, sym.get_opacity());
-	} else if (sym.get_mode() == "divide2"){
-	    pixmap_.template merge_rectangle<Divide2> (target,start_x,start_y, sym.get_opacity());
-	} else if (sym.get_mode() == "screen"){
-	    pixmap_.template merge_rectangle<Screen> (target,start_x,start_y, sym.get_opacity());
-	} else if (sym.get_mode() == "hard_light"){
-	    pixmap_.template merge_rectangle<HardLight> (target,start_x,start_y, sym.get_opacity());
-	} else {
-	    if (sym.get_opacity() == 1.0){
-		pixmap_.set_rectangle(start_x,start_y,target);
+	    
+	    if (sym.get_mode() == "normal"){
+		if (sym.get_opacity() == 1.0) {
+		    pixmap_.set_rectangle(start_x,start_y,target);
+		} else {
+		    pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
+		}
+	    } else if (sym.get_mode() == "grain_merge"){
+		pixmap_.template merge_rectangle<MergeGrain> (target,start_x,start_y, sym.get_opacity());
+	    } else if (sym.get_mode() == "grain_merge2"){
+		pixmap_.template merge_rectangle<MergeGrain2> (target,start_x,start_y, sym.get_opacity());
+	    } else if (sym.get_mode() == "multiply"){
+		pixmap_.template merge_rectangle<Multiply> (target,start_x,start_y, sym.get_opacity());
+	    } else if (sym.get_mode() == "multiply2"){
+		pixmap_.template merge_rectangle<Multiply2> (target,start_x,start_y, sym.get_opacity());
+	    } else if (sym.get_mode() == "divide"){
+		pixmap_.template merge_rectangle<Divide> (target,start_x,start_y, sym.get_opacity());
+	    } else if (sym.get_mode() == "divide2"){
+		pixmap_.template merge_rectangle<Divide2> (target,start_x,start_y, sym.get_opacity());
+	    } else if (sym.get_mode() == "screen"){
+		pixmap_.template merge_rectangle<Screen> (target,start_x,start_y, sym.get_opacity());
+	    } else if (sym.get_mode() == "hard_light"){
+		pixmap_.template merge_rectangle<HardLight> (target,start_x,start_y, sym.get_opacity());
 	    } else {
-		pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
+		if (sym.get_opacity() == 1.0){
+		    pixmap_.set_rectangle(start_x,start_y,target);
+		} else {
+		    pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
+		}
 	    }
+	    // TODO: other modes? (add,diff,sub,...)
 	}
-	// TODO: other modes? (add,diff,sub,...)
     }
 }
 
