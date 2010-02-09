@@ -190,7 +190,6 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     renderer ren(renb);
 
     ras_ptr->reset();
-            
     ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
 
     for (unsigned i=0;i<feature.num_geometries();++i)
@@ -237,6 +236,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
     agg::scanline_u8 sl;
 
     ras_ptr->reset();
+    ras_ptr->gamma(agg::gamma_linear());
+    
     double height = 0.7071 * sym.height(); // height in meters
 
     for (unsigned i=0;i<feature.num_geometries();++i)
@@ -343,6 +344,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     unsigned a=col.alpha();
     renderer ren(renb);
     ras_ptr->reset();
+    ras_ptr->gamma(agg::gamma_linear());
+
     agg::scanline_p8 sl;
 
     for (unsigned i=0;i<feature.num_geometries();++i)
@@ -686,6 +689,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     
     agg::scanline_u8 sl;
     ras_ptr->reset();
+    ras_ptr->gamma(agg::gamma_linear());
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
     boost::optional<mapnik::image_ptr> pat = mapnik::image_cache::instance()->find(filename,true);
@@ -799,6 +803,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
     arrow arrow_;
     ras_ptr->reset();
+    ras_ptr->gamma(agg::gamma_linear());
+
 
     agg::scanline_u8 sl;
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
