@@ -34,7 +34,9 @@
 // mapnik
 #include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
+#include <mapnik/save_map.hpp>
 
+// qt
 #include "mainwindow.hpp"
 #include "layerlistmodel.hpp"
 #include "styles_model.hpp"
@@ -157,6 +159,7 @@ void MainWindow::save()
    if (!filename.isEmpty()) 
    {
       std::cout<<"saving "<< filename.toStdString() << std::endl;
+      mapnik::save_map(*mapWidget_->getMap(),filename.toStdString());
    }
 }
 
