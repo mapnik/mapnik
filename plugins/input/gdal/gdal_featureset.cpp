@@ -92,14 +92,18 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     // TODO - pull from class attributes...
     double tr[6];
     dataset_.GetGeoTransform(tr);
+    
     double dx = tr[1];
     double dy = tr[5];
-    double x0 = tr[0]; // minx
-    double y0 = tr[3]; // miny
-    double x1 = tr[0] + raster_width * dx + raster_height * tr[2]; // maxx
-    double y1 = tr[3] + raster_width * tr[4] + raster_height * dy; // maxy
+    
+    double x0 = tr[0] + (raster_height) * tr[2]; // minx
+    double y0 = tr[3] + (raster_height) * tr[5]; // miny
+    
+    double x1 = tr[0] + (raster_width) * tr[1]; // maxx
+    double y1 = tr[3] + (raster_width) * tr[4]; // maxy
+    
     box2d<double> raster_extent(x0,y0,x1,y1); 
-   
+    
     CoordTransform t(raster_width,raster_height,raster_extent,0,0);
     box2d<double> intersect = raster_extent.intersect(q.get_bbox());
     box2d<double> box = t.forward(intersect);
@@ -123,7 +127,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
    
     int width = int(box.maxx() + 0.5) - int(box.minx() + 0.5);
     int height = int(box.maxy() + 0.5) - int(box.miny() + 0.5);
-   
+    
 #ifdef MAPNIK_DEBUG         
     std::clog << "GDAL Plugin: Raster extent=" << raster_extent << "\n";
     std::clog << "GDAL Plugin: View extent=" << intersect << "\n";
