@@ -74,6 +74,7 @@ using mapnik::attribute_descriptor;
 postgis_datasource::postgis_datasource(parameters const& params)
    : datasource(params),
      table_(*params_.get<std::string>("table","")),
+     schema_(""),
      geometry_table_(*params_.get<std::string>("geometry_table","")),
      geometry_field_(*params_.get<std::string>("geometry_field","")),
      cursor_fetch_size_(*params_.get<int>("cursor_size",0)),
@@ -154,11 +155,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
          {
              geometry_table_ = table_from_sql(table_);
          }
-         std::string schema_name="";
          std::string::size_type idx = geometry_table_.find_last_of('.');
          if (idx!=std::string::npos)
          {
-            schema_name = geometry_table_.substr(0,idx);
+            schema_ = geometry_table_.substr(0,idx);
             geometry_table_ = geometry_table_.substr(idx+1);
          }
          else
@@ -179,8 +179,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
              s << "SELECT f_geometry_column, srid FROM ";
              s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << unquote(geometry_table_) <<"'";
              
-             if (schema_name.length() > 0) 
-                s << " AND f_table_schema='" << unquote(schema_name) << "'";
+             if (schema_.length() > 0) 
+                s << " AND f_table_schema='" << unquote(schema_) << "'";
             
              if (geometry_field_.length() > 0)
                 s << " AND f_geometry_column='" << unquote(geometry_field_) << "'";
@@ -473,9 +473,9 @@ featureset_ptr postgis_datasource::features(const query& q) const
          if (!geometryColumn_.length() > 0)
          {
              std::ostringstream s_error;
-             s_error << "PostGIS: geometry name lookup failed for table '" << geometry_table_
+             s_error << "PostGIS: geometry name lookup failed for table '" << schema_ << "." << geometry_table_
              << "'. Please manually provide the 'geometry_field' parameter or add an entry "
-             << "in the geometry_columns for '" << geometry_table_ << "'.";
+             << "in the geometry_columns for '" << schema_ << "." << geometry_table_ << "'.";
              throw mapnik::datasource_exception(s_error.str());
          }
 
@@ -520,9 +520,9 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
          if (!geometryColumn_.length() > 0)
          {
              std::ostringstream s_error;
-             s_error << "PostGIS: geometry name lookup failed for table '" << geometry_table_
+             s_error << "PostGIS: geometry name lookup failed for table '" << schema_ << "." << geometry_table_
              << "'. Please manually provide the 'geometry_field' parameter or add an entry "
-             << "in the geometry_columns for '" << geometry_table_ << "'.";
+             << "in the geometry_columns for '" << schema_ << "." << geometry_table_ << "'.";
              throw mapnik::datasource_exception(s_error.str());
          }
                     
@@ -573,32 +573,47 @@ Envelope<double> postgis_datasource::envelope() const
          {
              std::ostringstream s_error;
              s_error << "PostGIS: unable to query the layer extent of table '"
-             << geometry_table_ << "' because we cannot determine the geometry field name."
+             << schema_ << "." << geometry_table_ << "' because we cannot determine the geometry field name."
              << "\nPlease provide either 1) an 'extent' parameter to skip this query, "
              << "2) a 'geometry_field' and/or 'geometry_table' parameter, or 3) add a "
              << "record to the 'geometry_columns' for your table.";
              throw mapnik::datasource_exception(s_error.str());
          }
-         // TODO - do we need to respect schema here?
+
          if (estimate_extent && *estimate_extent == "true")
          {
-            s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
-              << " from (select estimated_extent('" 
-              << geometry_table_ << "','" 
-              << geometryColumn_ << "') as ext) as tmp";
+             s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
+               << " from (select estimated_extent(";
+
+             if (schema_.length() > 0)
+             {
+                 s << schema_ << ".";
+             }
+
+             s << geometry_table_ << ","
+               << geometryColumn_ << ") as ext) as tmp";
          }
-         else 
+         else
          {
             s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
               << " from (select extent(" <<geometryColumn_<< ") as ext from ";
               if (extent_from_subquery_)
-                  // if a subselect limits records then calculating the extent upon the 
+              {
+                  // if a subselect limits records then calculating the extent upon the
                   // subquery will be faster and the bounds will be more accurate
                   s << populate_tokens(table_) << ") as tmp";
+              }
               else
+              {
+                  if (schema_.length() > 0)
+                  {
+                      s << schema_ << ".";
+                  }
+
                   // but if the subquery does not limit records then querying the
                   // actual table will be faster as indexes can be used
                   s << geometry_table_ << ") as tmp";
+              }
          }
 
          /*if (show_queries_)

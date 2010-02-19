@@ -15,6 +15,8 @@ For a complete change history, see the SVN log.
 Mapnik 0.7.1 Release
 --------------------
 
+- PostGIS: Added better support for alterative schemas (#500)
+
 - AGG Renderer - Enforced default gamma function on all symbolizers to ensure proper antialiasing
   even when gamma is modified on the PolygonSymbolizer. (#512)
 
