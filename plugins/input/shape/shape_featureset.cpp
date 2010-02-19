@@ -90,7 +90,14 @@ feature_ptr shape_featureset<filterT>::next()
 	{
 	    double x=shape_.shp().read_double();
 	    double y=shape_.shp().read_double();
-	    shape_.shp().skip(8*2); // m, z
+	    // skip z
+	    shape_.shp().skip(8);
+	
+	    //skip m if exists
+	    if ( shape_.reclength_ == 8 + 36) 
+	    {
+	        shape_.shp().skip(8);
+	    }
 	    geometry2d * point=new point_impl;
 	    point->move_to(x,y);
 	    feature->add_geometry(point);

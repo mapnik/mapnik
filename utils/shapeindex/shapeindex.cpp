@@ -174,6 +174,7 @@ int main (int argc,char** argv)
             {
                 double x=shp.read_double();
                 double y=shp.read_double();
+                // skip m
                 shp.read_double();
                 item_ext=Envelope<double>(x,y,x,y);
 	
@@ -182,8 +183,13 @@ int main (int argc,char** argv)
             {
                 double x=shp.read_double();
                 double y=shp.read_double();
+                // skip z
                 shp.read_double();
-                shp.read_double();
+                //skip m if exists
+                if ( content_length == 8 + 36) 
+                {
+                    shp.read_double();
+                }
                 item_ext=Envelope<double>(x,y,x,y);
             }
 	

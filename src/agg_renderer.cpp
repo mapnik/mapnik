@@ -188,7 +188,6 @@ namespace mapnik
       renderer ren(renb);
 
       ras_ptr->reset();
-            
       ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
 
       for (unsigned i=0;i<feature.num_geometries();++i)
@@ -234,7 +233,9 @@ namespace mapnik
       renderer ren(renb);
       agg::scanline_u8 sl;
 
-      ras_ptr->reset();
+      ras_ptr->reset();      
+      ras_ptr->gamma(agg::gamma_linear());
+      
       double height = 0.7071 * sym.height(); // height in meters
 
       for (unsigned i=0;i<feature.num_geometries();++i)
@@ -341,6 +342,7 @@ namespace mapnik
       unsigned a=col.alpha();
       renderer ren(renb);
       ras_ptr->reset();
+      ras_ptr->gamma(agg::gamma_linear());
       agg::scanline_p8 sl;
 
       for (unsigned i=0;i<feature.num_geometries();++i)
@@ -669,6 +671,7 @@ namespace mapnik
 
       agg::scanline_u8 sl;
       ras_ptr->reset();
+      ras_ptr->gamma(agg::gamma_linear());
 
       ImageData32 const& pattern =  * sym.get_image();
       unsigned w=pattern.width();
@@ -768,6 +771,7 @@ namespace mapnik
       typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
       arrow arrow_;
       ras_ptr->reset();
+      ras_ptr->gamma(agg::gamma_linear());
 
       agg::scanline_u8 sl;
       agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
