@@ -16,6 +16,8 @@ Mapnik Trunk
 
 - Fixed reading of PostGIS data on Big Endian systems (#515)
 
+- PostGIS: Added better support for alterative schemas (#500)
+
 - AGG Renderer - Enforced default gamma function on all symbolizers to ensure proper antialiasing
   even when gamma is modified on the PolygonSymbolizer. (#512)
 
