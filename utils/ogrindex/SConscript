@@ -39,10 +39,12 @@ boost_iostreams  = 'boost_iostreams%s' % env['BOOST_APPEND']
 boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 libraries =  [boost_program_options,boost_iostreams,boost_filesystem,env['PLUGINS']['ogr']['lib'],'mapnik']
 
+boost_system = 'boost_system%s' % env['BOOST_APPEND']
+
+if env['HAS_BOOST_SYSTEM']:
+    libraries.append(boost_system)
+    
 if env['PLATFORM'] == 'Darwin':
-    if env['HAS_BOOST_SYSTEM']:
-        boost_system = 'boost_system%s' % env['BOOST_APPEND']
-        libraries.append(boost_system)
     libraries.append(env['ICU_LIB_NAME'])
 
 
