@@ -49,7 +49,7 @@ if env['THREADING'] == 'multi':
     libraries.append('boost_thread%s' % env['BOOST_APPEND'])
         
 if env['PLATFORM'] == 'Darwin':
-    if env['BOOST_SYSTEM_REQUIRED']:
+    if env['HAS_BOOST_SYSTEM']:
         libraries.append('boost_system%s' % env['BOOST_APPEND'])
     
 if env['INTERNAL_LIBAGG']:

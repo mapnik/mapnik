@@ -43,10 +43,7 @@ libraries =  [boost_program_options,boost_iostreams,boost_filesystem]
 
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
 
-if env['SUNCC']:
-    libraries.append(boost_system)
-
-if env['PLATFORM'] == 'Darwin' and env['BOOST_SYSTEM_REQUIRED']:
+if env['HAS_BOOST_SYSTEM']:
     libraries.append(boost_system)
 
 
