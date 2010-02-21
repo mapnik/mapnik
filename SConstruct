@@ -307,7 +307,6 @@ if not force_configure:
 for opt in pickle_store:
     if not opt in env:
         preconfigured = False
-        print opt
 
 # if custom arguments are supplied make sure to accept them
 if opts.args:
