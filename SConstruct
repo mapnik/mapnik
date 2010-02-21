@@ -251,7 +251,7 @@ pickle_store = [# Scons internal variables
         'PYTHON_INSTALL_LOCATION',
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
-        'BOOST_SYSTEM_REQUIRED',
+        'HAS_BOOST_SYSTEM',
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -302,6 +302,13 @@ if not force_configure:
             # unpickling failed, so reconfigure as fallback
             preconfigured = False
     else:
+        preconfigured = False
+
+# check for missing keys in pickled settings
+# which can occur when keys are added or changed between
+# rebuilds, e.g. for folks following trunk
+for opt in pickle_store:
+    if not opt in env:
         preconfigured = False
 
 # if custom arguments are supplied make sure to accept them
@@ -731,22 +738,21 @@ if not preconfigured:
         
     conf.FindBoost(BOOST_SEARCH_PREFIXES,thread_flag)
     
-    # get boost version from boost headers rather than previous approach
-    # of fetching from the user provided INCLUDE path
-    boost_system_required = False
+    # boost system is used in boost 1.35 and greater
+    has_boost_system = False
     boost_lib_version_from_header = conf.GetBoostLibVersion()
     if boost_lib_version_from_header:
         boost_version_from_header = int(boost_lib_version_from_header.split('_')[1])
-        if boost_version_from_header >= 35 and env['PLATFORM'] == 'Darwin':
-            boost_system_required = True
-            env['BOOST_SYSTEM_REQUIRED'] = True
+        if boost_version_from_header >= 35:
+            has_boost_system = True
+            env['HAS_BOOST_SYSTEM'] = True
         else:
-            boost_system_required = False
-            env['BOOST_SYSTEM_REQUIRED'] = False
+            has_boost_system = False
+            env['HAS_BOOST_SYSTEM'] = False
     
     # The other required boost headers.
     BOOST_LIBSHEADERS = [
-        ['system', 'boost/system/system_error.hpp', boost_system_required],
+        ['system', 'boost/system/system_error.hpp', has_boost_system],
         ['filesystem', 'boost/filesystem/operations.hpp', True],
         ['regex', 'boost/regex.hpp', True],
         ['iostreams','boost/iostreams/device/mapped_file.hpp',True],

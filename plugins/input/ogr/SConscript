@@ -36,7 +36,7 @@ ogr_src = Split(
 libraries = [env['PLUGINS']['ogr']['lib']]
 
 if env['PLATFORM'] == 'Darwin':
-    if env['BOOST_SYSTEM_REQUIRED']:
+    if env['HAS_BOOST_SYSTEM']:
         boost_system = 'boost_system%s' % env['BOOST_APPEND']
         libraries.append(boost_system)
     libraries.append('mapnik')
