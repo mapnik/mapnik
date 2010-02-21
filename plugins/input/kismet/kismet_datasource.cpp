@@ -82,10 +82,10 @@ kismet_datasource::kismet_datasource(parameters const& params)
     //cout << "kismet_datasource::kismet_datasource()" << endl;
   
     boost::optional<std::string> host = params.get<std::string>("host");
-    if (!host) throw datasource_exception("missing <host> paramater");
+    if (!host) throw datasource_exception("missing <host> parameter");
   
     boost::optional<std::string> port = params.get<std::string>("port");
-    if (!port) throw datasource_exception("missing <port> paramater");
+    if (!port) throw datasource_exception("missing <port> parameter");
   
     unsigned int portnr = atoi ((*port).c_str () );
     kismet_thread.reset (new boost::thread (boost::bind (&kismet_datasource::run, this, *host, portnr)));
