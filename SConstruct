@@ -814,7 +814,8 @@ if not preconfigured:
 
     # re-append the local paths for mapnik sources to the beginning of the list
     # to make sure they come before any plugins that were 'prepended'
-    env.PrependUnique(CPPPATH = ['#include', '#'], delete_existing=True)
+    env.PrependUnique(CPPPATH = '#include', delete_existing=True)
+    env.PrependUnique(CPPPATH = '#', delete_existing=True)
     env.PrependUnique(LIBPATH = '#src', delete_existing=True)
     
     # Decide which libagg to use
