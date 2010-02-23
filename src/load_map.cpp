@@ -661,7 +661,7 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
             
 	optional<unsigned> width = get_opt_attr<unsigned>(sym, "width");
 	optional<unsigned> height = get_opt_attr<unsigned>(sym, "height");
-	//   
+	   
 	if (file)
 	{              
             try
@@ -724,16 +724,6 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 		}
             }
 	}
-	//else if (file || type || width || height)
-	//{
-	//   std::ostringstream os;
-	//  os << "Missing required attributes: ";
-	//  if ( ! file ) os << "file ";
-	//  if ( ! type ) os << "type ";
-	//  if ( ! width ) os << "width ";
-	//  if ( ! height ) os << "height ";
-	//  throw config_error( os.str() );
-	//}
 	else
 	{
             rule.append(point_symbolizer());
@@ -752,9 +742,9 @@ void map_parser::parse_line_pattern_symbolizer( rule_type & rule, ptree const & 
     {
 	std::string file = get_attr<string>(sym, "file");
 	optional<std::string> base = get_opt_attr<string>(sym, "base");
-	optional<std::string> type = get_attr<string>(sym, "type");
-	optional<unsigned> width = get_attr<unsigned>(sym, "width");
-	optional<unsigned> height = get_attr<unsigned>(sym, "height");
+	optional<std::string> type = get_opt_attr<string>(sym, "type");
+	optional<unsigned> width = get_opt_attr<unsigned>(sym, "width");
+	optional<unsigned> height = get_opt_attr<unsigned>(sym, "height");
 
 	try
 	{
@@ -822,9 +812,9 @@ void map_parser::parse_polygon_pattern_symbolizer( rule_type & rule,
     {
 	std::string file = get_attr<string>(sym, "file");
 	optional<std::string> base = get_opt_attr<string>(sym, "base");
-	optional<std::string> type = get_attr<string>(sym, "type");
-	optional<unsigned> width = get_attr<unsigned>(sym, "width");
-	optional<unsigned> height = get_attr<unsigned>(sym, "height");
+	optional<std::string> type = get_opt_attr<string>(sym, "type");
+	optional<unsigned> width = get_opt_attr<unsigned>(sym, "width");
+	optional<unsigned> height = get_opt_attr<unsigned>(sym, "height");
           
 	try
 	{

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map bgcolor="#b5d0d0" min_version="0.7.1">
+    <Style name="test">
+        <Rule title="asia">
+            <Filter>([REGION]=142)</Filter>
+            <PointSymbolizer file="../images/dummy.png" allow_overlap="true"/>
+        </Rule>
+        <Rule title="europe">
+            <Filter>([REGION]=150)</Filter>
+            <!-- requires at least Mapnik 0.7.1 to work due to http://trac.mapnik.org/ticket/508 -->
+            <PolygonPatternSymbolizer file="../images/dummy.png" />
+        </Rule>
+        <Rule title="americas">
+            <Filter>([REGION]=19)</Filter>
+            <!-- requires at least Mapnik 0.7.1 to work due to http://trac.mapnik.org/ticket/508 -->
+            <LinePatternSymbolizer file="../images/dummy.png" />
+        </Rule>
+        <Rule title="Africa">
+            <Filter>([REGION]=2)</Filter>
+            <ShieldSymbolizer name="NAME" placement="vertex" face_name="DejaVu Sans Bold" size="10" fill="#000000" file="../images/dummy.png" />
+        </Rule>
+
+        <Rule title="rest">
+            <ElseFilter />
+            <LineSymbolizer>
+                    <CssParameter name="stroke-width">.1</CssParameter>
+            </LineSymbolizer>
+        </Rule>
+    </Style>
+
+    <Layer name="world_merc">
+        <StyleName>test</StyleName>
+        <Datasource>
+            <Parameter name="file">../../data/shp/world_merc</Parameter>
+            <Parameter name="type">shape</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

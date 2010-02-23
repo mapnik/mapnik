@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map  >
-<Map bgcolor="#b5d0d0" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs" paths_from_xml="false">
+<Map bgcolor="#b5d0d0" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs" min_version="0.7.1">
     <Style name="test 1">
         <Rule name="rule t1">
             <Filter>[landuse] = 'meadow' or [landuse] = 'wood' or [landuse] = 'forest'</Filter>
@@ -12,7 +12,22 @@
         <Rule title="foo">
             <ElseFilter/>
             <MaxScaleDenominator>1000000</MaxScaleDenominator>
-            <PointSymbolizer file="../data/images/dummy.png" type="png" width="16" height="16"/>
+            <PointSymbolizer file="../images/dummy.png" type="png" width="16" height="16"/>
+        </Rule>
+    </Style>
+    <Style name="test 3">
+        <Rule title="foo">
+            <PointSymbolizer file="../images/dummy.png" type="png"/>
+        </Rule>
+    </Style>
+    <Style name="test 4">
+        <Rule title="foo">
+            <PointSymbolizer file="../images/dummy.png" width="16" height="16"/>
+        </Rule>
+    </Style>
+    <Style name="test 5">
+        <Rule title="foo">
+            <PointSymbolizer file="../images/dummy.png"/>
         </Rule>
     </Style>
 </Map>

@@ -15,6 +15,10 @@ For a complete change history, see the SVN log.
 Mapnik 0.7.1 Release
 --------------------
 
+- XML: Fixed behavior of PolygonPatternSymbolizer and LinePatternSymbolizer whereby width, height,
+  and type of images is actually allowed to be optionally ommitted (#508). This was added in r1543 but
+  only worked correctly for PointSymbolizer and ShieldSymbolizer. 
+
 - Fixed reading of PostGIS data on Big Endian systems (#515)
 
 - PostGIS: Added better support for alterative schemas (#500)
