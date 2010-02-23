@@ -33,6 +33,7 @@ source = Split(
 headers = env['CPPPATH'] 
 
 boost_thread  = 'boost_thread%s' % env['BOOST_APPEND']
+boost_regex  = 'boost_regex%s' % env['BOOST_APPEND']
 
 libraries =  [boost_thread,'mapnik']
 
@@ -41,6 +42,7 @@ if '-DHAVE_CAIRO' in env['CXXFLAGS']:
     libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
 
 if env['PLATFORM'] == 'Darwin':
+    libraries.append(boost_regex)
     libraries.append(env['ICU_LIB_NAME'])
    
 rundemo = env.Program('rundemo', source, CPPPATH=headers, LIBS=libraries)
