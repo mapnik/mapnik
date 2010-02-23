@@ -68,6 +68,72 @@ def shortest_name(libs):
             name = lib
     return name
 
+DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
+
+def sort_paths(items,priority):
+    """Sort paths such that compiling and linking will globally prefer custom or local libs
+    over system libraries by fixing up the order libs are passed to gcc and the linker.
+    
+    Ideally preference could be by-target instead of global, but our SCons implementation
+    is not currently utilizing different SCons build env()'s as we should.
+    
+    Overally the current approach within these scripts is to prepend paths of preference
+    and append all others, but this does not give enough control (particularly due to the
+    approach of assuming /usr/LIBSCHEMA and letting paths be parsed and added by pkg-config).
+    
+    In effect /usr/lib is likely to come before /usr/local/lib which makes linking against
+    custom built icu or boost impossible when those libraries are available in both places.
+    
+    Sorting using a priority list allows this to be controlled, and fine tuned.
+    """
+    
+    new = []
+    path_types = {'internal':[],'other':[],'frameworks':[],'user':[],'system':[]}
+    # parse types of paths into logical/meaningful groups
+    # based on commonly encountered lib directories on linux and osx
+    for i in items:
+        # internal paths for code kept inside
+        # the mapnik sources
+        if i.startswith('#'):
+            path_types['internal'].append(i)
+        # Mac OS X user installed frameworks
+        elif '/Library/Frameworks' in i:
+            path_types['frameworks'].append(i)
+        # various 'local' installs like /usr/local or /opt/local
+        elif 'local' in i or '/sw' in i:
+            path_types['user'].append(i)
+        # key system libs (likely others will fall into 'other')
+        elif '/usr/' in i or '/System' in i or '/lib' in i:
+            path_types['system'].append(i)
+        # anything not yet matched...
+        # likely a combo of rare system lib paths and
+        # very custom user paths that should ideally be
+        # in 'user'
+        else:
+            path_types['other'].append(i)
+    # build up new list based on priority list
+    for path in priority:
+        if path_types.has_key(path):
+            dirs = path_types[path]
+            new.extend(dirs)
+            path_types.pop(path)
+        else:
+            color_print(1,'\nSorry, "%s" is NOT a valid value for option "LINK_PRIORITY": values include: %s' % (path,','.join(path_types.keys())))
+            color_print(1,'\tinternal: the local directory of the Mapnik sources (prefix #) (eg. used to link internal agg)')
+            color_print(1,'\tframeworks: on osx the /Library/Frameworks directory')
+            color_print(1,'\tuser: any path with "local" or "/sw" inside it')
+            color_print(1,'\tsystem: any path not yet matched with "/usr/","/lib", or "/System" (osx) inside it')
+            color_print(1,'\tother: any paths you specified not matched by criteria used to parse the others')
+            color_print(1,'\tother: any paths you specified not matched by criteria used to parse the others')
+            color_print(1,'The Default priority is: %s' % ','.join(DEFAULT_LINK_PRIORITY))
+            color_print(1,'Any priority groups not listed will be appended to the list at the end')
+            Exit(1)
+    # append remaining paths potentially not requested
+    # by any custom priority list defined by user
+    for k,v in path_types.items():
+        new.extend(v)
+    return new
+
 if platform.dist()[0] in ('Ubuntu','debian'):
     LIBDIR_SCHEMA='lib'
 elif platform.uname()[4] == 'x86_64' and platform.system() == 'Linux':
@@ -112,6 +178,8 @@ def pretty_dep(dep):
 
 # local file to hold custom user configuration variables
 SCONS_LOCAL_CONFIG = 'config.py'
+# build log
+SCONS_LOCAL_LOG = 'config.log'
 # local pickled file to cache configured environment
 SCONS_CONFIGURE_CACHE = 'config.cache'
 # directory SCons uses to stash build tests
@@ -161,6 +229,8 @@ opts.AddVariables(
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     BoolVariable('FAST', "Make scons faster at the cost of less precise dependency tracking", 'False'),
+    BoolVariable('PRIORITIZE_LINKING', 'Sort list of lib and inc directories to ensure preferencial compiling and linking (useful when duplicate libs)', 'True'),
+    ('LINK_PRIORITY','Priority list in which to sort library and include paths (default order is internal, other, frameworks, user, then system - see source of `sort_paths` function for more detail)',','.join(DEFAULT_LINK_PRIORITY)),    
     
     # Install Variables
     ('PREFIX', 'The install path "prefix"', '/usr/local'),
@@ -225,6 +295,7 @@ opts.AddVariables(
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     )
+    
 # variables to pickle after successful configure step
 # these include all scons core variables as well as custom
 # env variables needed in Sconscript files
@@ -331,6 +402,15 @@ elif preconfigured:
 
 
 #### Custom Configure Checks ###
+
+def prioritize_paths(context):    
+    env = context.env
+    prefs = env['LINK_PRIORITY'].split(',')
+    context.Message( 'Sorting lib and inc compiler paths by priority... %s' % ','.join(prefs) )
+    env['LIBPATH'] = sort_paths(env['LIBPATH'],prefs)
+    env['CPPPATH'] = sort_paths(env['CPPPATH'],prefs)
+    ret = context.Result( True )
+    return ret
 
 def CheckPKGConfig(context, version):
     context.Message( 'Checking for pkg-config... ' )
@@ -573,7 +653,8 @@ int main()
     major_version = version / 100000
     return [major_version,minor_version,patch_level]
 
-conf_tests = { 'CheckPKGConfig' : CheckPKGConfig,
+conf_tests = { 'prioritize_paths' : prioritize_paths,
+               'CheckPKGConfig' : CheckPKGConfig,
                'CheckPKG' : CheckPKG,
                'FindBoost' : FindBoost,
                'CheckBoost' : CheckBoost,
@@ -723,6 +804,10 @@ if not preconfigured:
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
     ]
 
+
+    # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
+    if env['PRIORITIZE_LINKING']:
+        conf.prioritize_paths()    
     
     for libinfo in LIBSHEADERS:
         if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):
@@ -820,7 +905,7 @@ if not preconfigured:
     env.PrependUnique(CPPPATH = '#include', delete_existing=True)
     env.PrependUnique(CPPPATH = '#', delete_existing=True)
     env.PrependUnique(LIBPATH = '#src', delete_existing=True)
-    
+
     # Decide which libagg to use
     # if we are using internal agg, then prepend to make sure
     # we link locally
@@ -1003,6 +1088,11 @@ if not preconfigured:
             color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
             color_print(4,'Python bindings will install in... %s' % os.path.normpath(env['PYTHON_INSTALL_LOCATION']))
 
+
+        # if requested, sort LIBPATH and CPPPATH one last time before saving...
+        if env['PRIORITIZE_LINKING']:
+            conf.prioritize_paths()
+        
         # finish config stage and pickle results
         env = conf.Finish()
         env_cache = open(SCONS_CONFIGURE_CACHE, 'w')
@@ -1023,6 +1113,9 @@ if not preconfigured:
         except: pass
         try:
             os.chmod('.sconsign.dblite',0666)
+        except: pass
+        try:
+            os.chmod(SCONS_LOCAL_LOG,0666)
         except: pass
         try:
             for item in glob('%s/*' % SCONF_TEMP_DIR):
