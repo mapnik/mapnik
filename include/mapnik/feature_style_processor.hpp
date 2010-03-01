@@ -152,7 +152,7 @@ namespace mapnik
                prj_trans.forward(lx1,ly1,lz1);
                Envelope<double> bbox(lx0,ly0,lx1,ly1);
                
-               double resolution = m_.getWidth()/bbox.width();
+               double resolution = m_.getWidth()/m_.getCurrentExtent().width();
                query q(bbox,resolution,scale_denom); //BBOX query
                
                std::vector<std::string> const& style_names = lay.styles();
