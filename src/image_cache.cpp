@@ -85,6 +85,10 @@ boost::optional<image_ptr> image_cache::find(std::string const& uri, bool update
 	    std::cerr << "Exception caught while loading image: " << uri << std::endl;
 	}
     }
+    else
+    {
+        std::cerr << "### WARNING image does not exist: " << uri << std::endl;
+    }
     return result;
 }
 
