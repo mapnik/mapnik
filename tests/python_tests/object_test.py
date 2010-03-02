@@ -12,9 +12,11 @@ def test_shieldsymbolizer_init():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
 
 # ShieldSymbolizer missing image file
-@raises(RuntimeError)
-def test_shieldsymbolizer_missing_image():
-    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/broken.png'))
+# images paths are now PathExpressions are evaluated at runtime
+# so it does not make sense to throw...
+#@raises(RuntimeError)
+#def test_shieldsymbolizer_missing_image():
+#    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../#data/images/broken.png'))
 
 # PointSymbolizer initialization
 def test_pointsymbolizer_init():
@@ -29,9 +31,11 @@ def test_pointsymbolizer_init():
     eq_(p.filename,'../data/images/dummy.png')
 
 # PointSymbolizer missing image file
-@raises(RuntimeError)
-def test_pointsymbolizer_missing_image():
-    p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/broken.png"))
+# images paths are now PathExpressions are evaluated at runtime
+# so it does not make sense to throw...
+#@raises(RuntimeError)
+#def test_pointsymbolizer_missing_image():
+ #   p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/broken.png"))
 
 # PointSymbolizer pickling
 def test_pointsymbolizer_pickle():
