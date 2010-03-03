@@ -305,7 +305,7 @@ namespace mapnik {
    }
    
    template <typename Image>
-   inline void scale_image_bilinear (Image& target,const Image& source)
+   inline void scale_image_bilinear (Image& target,const Image& source, double x_off_f=0, double y_off_f=0)
    {
 
       int source_width=source.width();
@@ -319,28 +319,43 @@ namespace mapnik {
       int x=0,y=0,xs=0,ys=0;
       int tw2 = target_width/2;
       int th2 = target_height/2;
+      int offs_x = int(round((source_width-target_width-x_off_f*2*source_width)/2));
+      int offs_y = int(round((source_height-target_height-y_off_f*2*source_height)/2));
+      unsigned yprt, yprt1, xprt, xprt1;
 
+      //no scaling or subpixel offset
+      if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
+         for (y=0;y<target_height;++y)
+            target.setRow(y,source.getRow(y),target_width);
+         return;
+      }
 
       for (y=0;y<target_height;++y)
       {
-        ys = y*source_height/target_height;
+        ys = (y*source_height+offs_y)/target_height;
         int ys1 = ys+1;
         if (ys1>=source_height)
             ys1--;
-        unsigned yprt = y*source_height%target_height;
-        unsigned yprt1 = target_height-yprt;
+        if (ys<0)
+            ys=ys1=0;
+        if (source_height/2<target_height)
+           yprt = (y*source_height+offs_y)%target_height;
+        else
+           yprt = th2;
+        yprt1 = target_height-yprt;
         for (x=0;x<target_width;++x)
         {
-            xs = x*source_width/target_width;
-            if (source_width>=target_width || source_height>=target_height){
-                target(x,y)=source(xs,ys);
-                continue;
-            }
-            unsigned xprt = x*source_width%target_width;
-            unsigned xprt1 = target_width-xprt;
+            xs = (x*source_width+offs_x)/target_width;
+            if (source_width/2<target_width)
+               xprt = (x*source_width+offs_x)%target_width;
+            else
+               xprt = tw2;
+            xprt1 = target_width-xprt;
             int xs1 = xs+1;
             if (xs1>=source_width)
                 xs1--;
+            if (xs<0)
+                xs=xs1=0;
 
             unsigned a = source(xs,ys);
             unsigned b = source(xs1,ys);
@@ -377,7 +392,7 @@ namespace mapnik {
    }
 
    template <typename Image>
-   inline void scale_image_bilinear8 (Image& target,const Image& source)
+   inline void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f=0, double y_off_f=0)
    {
 
       int source_width=source.width();
@@ -391,28 +406,43 @@ namespace mapnik {
       int x=0,y=0,xs=0,ys=0;
       int tw2 = target_width/2;
       int th2 = target_height/2;
+      int offs_x = int(round((source_width-target_width-x_off_f*2*source_width)/2));
+      int offs_y = int(round((source_height-target_height-y_off_f*2*source_height)/2));
+      unsigned yprt, yprt1, xprt, xprt1;
 
+      //no scaling or subpixel offset
+      if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
+         for (y=0;y<target_height;++y)
+            target.setRow(y,source.getRow(y),target_width);
+         return;
+      }
 
       for (y=0;y<target_height;++y)
       {
-        ys = y*source_height/target_height;
+        ys = (y*source_height+offs_y)/target_height;
         int ys1 = ys+1;
         if (ys1>=source_height)
             ys1--;
-        unsigned yprt = y*source_height%target_height;
-        unsigned yprt1 = target_height-yprt;
+        if (ys<0)
+            ys=ys1=0;
+        if (source_height/2<target_height)
+           yprt = (y*source_height+offs_y)%target_height;
+        else
+           yprt = th2;
+        yprt1 = target_height-yprt;
         for (x=0;x<target_width;++x)
         {
-            xs = x*source_width/target_width;
-            if (source_width>=target_width || source_height>=target_height){
-                target(x,y)=source(xs,ys);
-                continue;
-            }
-            unsigned xprt = x*source_width%target_width;
-            unsigned xprt1 = target_width-xprt;
+            xs = (x*source_width+offs_x)/target_width;
+            if (source_width/2<target_width)
+               xprt = (x*source_width+offs_x)%target_width;
+            else
+               xprt = tw2;
+            xprt1 = target_width-xprt;
             int xs1 = xs+1;
             if (xs1>=source_width)
                 xs1--;
+            if (xs<0)
+                xs=xs1=0;
 
             unsigned a = source(xs,ys);
             unsigned b = source(xs1,ys);

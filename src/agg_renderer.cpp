@@ -714,50 +714,60 @@ namespace mapnik
       if (raster)
       {
          Envelope<double> ext=t_.forward(raster->ext_);
-         ImageData32 target(int(ceil(ext.width())),int(ceil(ext.height())));
-         int start_x = int(ext.minx()+0.5);
-         int start_y = int(ext.miny()+0.5);
+         int start_x = int(round(ext.minx()));
+         int start_y = int(round(ext.miny()));
+         int raster_width = int(round(ext.width()));
+         int raster_height = int(round(ext.height()));
+         int end_x = start_x + raster_width;
+         int end_y = start_y + raster_height;
+         double err_offs_x = (ext.minx()-start_x + ext.maxx()-end_x)/2;
+         double err_offs_y = (ext.miny()-start_y + ext.maxy()-end_y)/2;
+         
+         if (raster_width > 0 && raster_height > 0)
+         {
+            ImageData32 target(raster_width,raster_height);
 
-         if (sym.get_scaling() == "fast") {
-            scale_image<ImageData32>(target,raster->data_);
-         } else if (sym.get_scaling() == "bilinear"){
-            scale_image_bilinear<ImageData32>(target,raster->data_);
-         } else if (sym.get_scaling() == "bilinear8"){
-            scale_image_bilinear8<ImageData32>(target,raster->data_);
-         } else {
-            scale_image<ImageData32>(target,raster->data_);
-         }
+            if (sym.get_scaling() == "fast") {
+               scale_image<ImageData32>(target,raster->data_);
+            } else if (sym.get_scaling() == "bilinear"){
+               scale_image_bilinear<ImageData32>(target,raster->data_, err_offs_x, err_offs_y);
+            } else if (sym.get_scaling() == "bilinear8"){
+               scale_image_bilinear8<ImageData32>(target,raster->data_, err_offs_x, err_offs_y);
+            } else {
+               scale_image<ImageData32>(target,raster->data_);
+            }
 
-         if (sym.get_mode() == "normal"){
-             if (sym.get_opacity() == 1.0) {
-                pixmap_.set_rectangle(start_x,start_y,target);
-             } else {
-                pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
-             }
-         } else if (sym.get_mode() == "grain_merge"){
-            pixmap_.template merge_rectangle<MergeGrain> (target,start_x,start_y, sym.get_opacity());
-         } else if (sym.get_mode() == "grain_merge2"){
-            pixmap_.template merge_rectangle<MergeGrain2> (target,start_x,start_y, sym.get_opacity());
-         } else if (sym.get_mode() == "multiply"){
-            pixmap_.template merge_rectangle<Multiply> (target,start_x,start_y, sym.get_opacity());
-         } else if (sym.get_mode() == "multiply2"){
-            pixmap_.template merge_rectangle<Multiply2> (target,start_x,start_y, sym.get_opacity());
-         } else if (sym.get_mode() == "divide"){
-            pixmap_.template merge_rectangle<Divide> (target,start_x,start_y, sym.get_opacity());
-         } else if (sym.get_mode() == "divide2"){
-            pixmap_.template merge_rectangle<Divide2> (target,start_x,start_y, sym.get_opacity());
-         } else if (sym.get_mode() == "screen"){
-            pixmap_.template merge_rectangle<Screen> (target,start_x,start_y, sym.get_opacity());
-         } else if (sym.get_mode() == "hard_light"){
-            pixmap_.template merge_rectangle<HardLight> (target,start_x,start_y, sym.get_opacity());
-         } else {
-             if (sym.get_opacity() == 1.0){
-                 pixmap_.set_rectangle(start_x,start_y,target);
-             } else {
-                pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
-             }
+            if (sym.get_mode() == "normal"){
+                if (sym.get_opacity() == 1.0) {
+                   pixmap_.set_rectangle(start_x,start_y,target);
+                } else {
+                   pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
+                }
+            } else if (sym.get_mode() == "grain_merge"){
+               pixmap_.template merge_rectangle<MergeGrain> (target,start_x,start_y, sym.get_opacity());
+            } else if (sym.get_mode() == "grain_merge2"){
+               pixmap_.template merge_rectangle<MergeGrain2> (target,start_x,start_y, sym.get_opacity());
+            } else if (sym.get_mode() == "multiply"){
+               pixmap_.template merge_rectangle<Multiply> (target,start_x,start_y, sym.get_opacity());
+            } else if (sym.get_mode() == "multiply2"){
+               pixmap_.template merge_rectangle<Multiply2> (target,start_x,start_y, sym.get_opacity());
+            } else if (sym.get_mode() == "divide"){
+               pixmap_.template merge_rectangle<Divide> (target,start_x,start_y, sym.get_opacity());
+            } else if (sym.get_mode() == "divide2"){
+               pixmap_.template merge_rectangle<Divide2> (target,start_x,start_y, sym.get_opacity());
+            } else if (sym.get_mode() == "screen"){
+               pixmap_.template merge_rectangle<Screen> (target,start_x,start_y, sym.get_opacity());
+            } else if (sym.get_mode() == "hard_light"){
+               pixmap_.template merge_rectangle<HardLight> (target,start_x,start_y, sym.get_opacity());
+            } else {
+                if (sym.get_opacity() == 1.0){
+                    pixmap_.set_rectangle(start_x,start_y,target);
+                } else {
+                   pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
+                }
+            }
+            // TODO: other modes? (add,diff,sub,...)
          }
-         // TODO: other modes? (add,diff,sub,...)
       }
    }
 

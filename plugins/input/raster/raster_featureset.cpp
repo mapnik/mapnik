@@ -73,9 +73,33 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                CoordTransform t(image_width,image_height,extent_,0,0);
                Envelope<double> intersect=bbox_.intersect(curIter_->envelope());
                Envelope<double> ext=t.forward(intersect);
-               ImageData32 image(int(ext.width()+0.5),int(ext.height()+0.5));
-               reader->read(int(ext.minx()+0.5),int(ext.miny()+0.5),image);
-               feature->set_raster(mapnik::raster_ptr(new raster(intersect,image)));
+               if ( ext.width()>0.5 && ext.height()>0.5 )
+               {
+                  //select minimum raster containing whole ext
+                  int x_off = static_cast<int>(floor(ext.minx()));
+                  int y_off = static_cast<int>(floor(ext.miny()));
+                  int end_x = static_cast<int>(ceil(ext.maxx()));
+                  int end_y = static_cast<int>(ceil(ext.maxy()));
+                  //clip to available data
+                  if (x_off < 0)
+                     x_off = 0;
+                  if (y_off < 0)
+                     y_off = 0;
+                  if (end_x > image_width)
+                     end_x = image_width;
+                  if (end_y > image_height)
+                     end_y = image_height;
+                  int width = end_x - x_off;
+                  int height = end_y - y_off;
+                  //calculate actual envelope of returned raster
+                  Envelope<double> feature_raster_extent(x_off, y_off, x_off+width, y_off+height); 
+                  intersect = t.backward(feature_raster_extent);
+
+                  ImageData32 image(width,height);
+                  reader->read(x_off,y_off,image);
+
+                  feature->set_raster(mapnik::raster_ptr(new raster(intersect,image)));
+               }
             }
          }
       }
