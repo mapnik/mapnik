@@ -989,23 +989,33 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
     raster_ptr const& raster = feature.get_raster();
     if (raster)
     {
-	box2d<double> ext = t_.forward(raster->ext_);
-	image_data_32 target(int(ext.width() + 0.5), int(ext.height() + 0.5));
-	//TODO -- use cairo matrix transformation for scaling
-	if (sym.get_scaling() == "fast"){
-	    scale_image<image_data_32>(target, raster->data_);
-	} else if (sym.get_scaling() == "bilinear"){
-            scale_image_bilinear<image_data_32>(target,raster->data_);
-	} else if (sym.get_scaling() == "bilinear8"){
-            scale_image_bilinear8<image_data_32>(target,raster->data_);
-	} else {
-            scale_image<image_data_32>(target,raster->data_);
-	}
+        box2d<double> ext = t_.forward(raster->ext_);
+        int start_x = int(round(ext.minx()));
+        int start_y = int(round(ext.miny()));
+        int raster_width = int(round(ext.width()));
+        int raster_height = int(round(ext.height()));
+        int end_x = start_x + raster_width;
+        int end_y = start_y + raster_height;
+        double err_offs_x = (ext.minx()-start_x + ext.maxx()-end_x)/2;
+        double err_offs_y = (ext.miny()-start_y + ext.maxy()-end_y)/2;
 
-	cairo_context context(context_);
-
-	//TODO -- support for advanced image merging
-	context.add_image(int(ext.minx()+0.5), int(ext.miny()+0.5), target, sym.get_opacity());
+        if (raster_width > 0 && raster_height > 0)
+        {
+            image_data_32 target(raster_width, raster_height);
+            //TODO -- use cairo matrix transformation for scaling
+            if (sym.get_scaling() == "fast"){
+                scale_image<image_data_32>(target, raster->data_);
+            } else if (sym.get_scaling() == "bilinear"){
+                scale_image_bilinear<image_data_32>(target,raster->data_, err_offs_x, err_offs_y);
+            } else if (sym.get_scaling() == "bilinear8"){
+                scale_image_bilinear8<image_data_32>(target,raster->data_, err_offs_x, err_offs_y);
+            } else {
+                scale_image<image_data_32>(target,raster->data_);
+            }
+            cairo_context context(context_);
+            //TODO -- support for advanced image merging
+            context.add_image(start_x, start_y, target, sym.get_opacity());
+        }
     }
 }
 

@@ -738,12 +738,14 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
 	
 	box2d<double> ext=t_.forward(raster->ext_);
 	
-	int start_x = int(ext.minx() + 0.5);
-	int start_y = int(ext.miny() + 0.5);
-	int end_x = int(ext.maxx() + 0.5);
-	int end_y = int(ext.maxy() + 0.5);
-	int raster_width = end_x - start_x;
-	int raster_height = end_y - start_y;
+	int start_x = int(round(ext.minx()));
+	int start_y = int(round(ext.miny()));
+	int raster_width = int(round(ext.width()));
+	int raster_height = int(round(ext.height()));
+	int end_x = start_x + raster_width;
+	int end_y = start_y + raster_height;
+	double err_offs_x = (ext.minx()-start_x + ext.maxx()-end_x)/2;
+	double err_offs_y = (ext.miny()-start_y + ext.maxy()-end_y)/2;
 	
 	if ( raster_width > 0 && raster_height > 0)
 	{
@@ -752,9 +754,9 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
 	    if (sym.get_scaling() == "fast") {
 		scale_image<image_data_32>(target,raster->data_);
 	    } else if (sym.get_scaling() == "bilinear"){
-		scale_image_bilinear<image_data_32>(target,raster->data_);
+		scale_image_bilinear<image_data_32>(target,raster->data_, err_offs_x, err_offs_y);
 	    } else if (sym.get_scaling() == "bilinear8"){
-		scale_image_bilinear8<image_data_32>(target,raster->data_);
+		scale_image_bilinear8<image_data_32>(target,raster->data_, err_offs_x, err_offs_y);
 	    } else {
 		scale_image<image_data_32>(target,raster->data_);
 	    }

@@ -108,25 +108,30 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     box2d<double> intersect = raster_extent.intersect(q.get_bbox());
     box2d<double> box = t.forward(intersect);
 
-    // TODO: error check this further...
-    float x_off_f = (intersect.minx()-raster_extent.minx()) / fabs(dx);
-    float y_off_f = (raster_extent.maxy()-intersect.maxy()) / fabs(dy);
-    
-    if (x_off_f < 0)
-    {
-	x_off_f = 0;
-    }
-    
-    if (y_off_f < 0)
-    {
-	y_off_f = 0;
-    }
-    
-    int x_off = static_cast<int>(x_off_f + 0.5);
-    int y_off = static_cast<int>(y_off_f + 0.5);
-   
-    int width = int(box.maxx() + 0.5) - int(box.minx() + 0.5);
-    int height = int(box.maxy() + 0.5) - int(box.miny() + 0.5);
+    //select minimum raster containing whole box
+    int x_off = static_cast<int>(floor(box.minx()));
+    int y_off = static_cast<int>(floor(box.miny()));
+    int end_x = static_cast<int>(ceil(box.maxx()));
+    int end_y = static_cast<int>(ceil(box.maxy()));
+    //clip to available data
+    if (x_off < 0)
+        x_off = 0;
+    if (y_off < 0)
+        y_off = 0;
+    if (end_x > raster_width)
+        end_x = raster_width;
+    if (end_y > raster_height)
+        end_y = raster_height;
+    int width = end_x - x_off;
+    int height = end_y - y_off;
+    // don't process almost invisible data
+    if (box.width() < 0.5)
+        width = 0;
+    if (box.height() < 0.5)
+        height = 0;
+    //calculate actual box2d of returned raster
+    box2d<double> feature_raster_extent(x_off, y_off, x_off+width, y_off+height); 
+    intersect = t.backward(feature_raster_extent);
     
 #ifdef MAPNIK_DEBUG         
     std::clog << "GDAL Plugin: Raster extent=" << raster_extent << "\n";
