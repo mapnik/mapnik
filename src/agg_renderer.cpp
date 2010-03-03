@@ -433,8 +433,19 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     double z=0;
     
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<mapnik::image_ptr> data = mapnik::image_cache::instance()->find(filename,true);
+    boost::optional<mapnik::image_ptr> data;
     
+    if ( filename.empty() )
+    {
+        // default OGC 4x4 black pixel
+        data = boost::optional<mapnik::image_ptr>(new image_data_32(4,4));
+        (*data)->set(0xff000000);
+    }
+    else
+    {
+        data = mapnik::image_cache::instance()->find(filename,true);
+    }
+
     if ( data )
     {
 	for (unsigned i=0;i<feature.num_geometries();++i)
