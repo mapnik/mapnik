@@ -211,26 +211,22 @@ namespace mapnik {
          {
             r->reduce_cost = 0;
             if (r->children_count==0)
-                return;
+               return;
 
-            double sum[] = {0,0,0};
+            double mean_r = r->reds   / r->count_cum;
+            double mean_g = r->greens / r->count_cum;
+            double mean_b = r->blues  / r->count_cum;
             for (unsigned idx=0; idx < 8; ++idx) if (r->children_[idx] != 0)
             {
-                computeCost(r->children_[idx]);
-                sum[0] += r->children_[idx]->reds;
-                sum[1] += r->children_[idx]->greens;
-                sum[2] += r->children_[idx]->blues;
-            }
+               double dr,dg,db;
+               computeCost(r->children_[idx]);
 
-            for (unsigned idx=0; idx < 8; ++idx) if (r->children_[idx] != 0)
-            {
-                r->reduce_cost += r->children_[idx]->reduce_cost;
-                r->reduce_cost += fabs(r->children_[idx]->reds
-                        - sum[0] * r->children_[idx]->count_cum / r->count_cum);
-                r->reduce_cost += fabs(r->children_[idx]->greens
-                        - sum[1] * r->children_[idx]->count_cum / r->count_cum);
-                r->reduce_cost += fabs(r->children_[idx]->blues
-                        - sum[2] * r->children_[idx]->count_cum / r->count_cum);
+               dr = r->children_[idx]->reds   / r->children_[idx]->count_cum - mean_r;
+               dg = r->children_[idx]->greens / r->children_[idx]->count_cum - mean_g;
+               db = r->children_[idx]->blues  / r->children_[idx]->count_cum - mean_b;
+                
+               r->reduce_cost += r->children_[idx]->reduce_cost;
+               r->reduce_cost += (dr*dr + dg*dg + db*db) * r->children_[idx]->count_cum;
             }
          }
 
@@ -255,7 +251,7 @@ namespace mapnik {
 
                // select best of all reducible:
                unsigned red_idx = leaf_level_-1;
-               unsigned bestv = (*reducible_[red_idx].begin())->count_cum;
+               unsigned bestv = (*reducible_[red_idx].begin())->reduce_cost;
                for(unsigned i=red_idx; i>=InsertPolicy::MIN_LEVELS; i--) if (!reducible_[i].empty()){
                    node *nd = *reducible_[i].begin();
                    unsigned gch = 0;
@@ -263,8 +259,8 @@ namespace mapnik {
                        if (nd->children_[idx])
                            gch += nd->children_[idx]->children_count;
                    }
-                   if (gch==0 && nd->count_cum<bestv){
-                       bestv = nd->count_cum;
+                   if (gch==0 && nd->reduce_cost < bestv){
+                       bestv = nd->reduce_cost;
                        red_idx = i;
                    }
                }
