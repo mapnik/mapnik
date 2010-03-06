@@ -332,12 +332,16 @@ namespace mapnik {
       unsigned divCoef = width*height-cols[0];
       if (divCoef==0) divCoef = 1;
       cols[0] = cols[0]>0?1:0; // fully transparent color (one or not at all)
+
+      // give chance less populated but not empty cols to have at least few colors(12)
+      unsigned minCols = (12+1)*divCoef/(256-cols[0]);
+      for(int j=1; j<TRANSPARENCY_LEVELS; j++) if (cols[j]>12 && cols[j]<minCols) {
+         divCoef += minCols-cols[j];
+         cols[j] = minCols;
+      }
       unsigned usedColors = cols[0];
       for(int j=1; j<TRANSPARENCY_LEVELS-1; j++){
-         unsigned oldCols = cols[j];
          cols[j] = cols[j]*(256-cols[0])/divCoef;
-         if (oldCols>12 && cols[j]<12)
-            cols[j] = 12; // reserve at least 12 colors to have any effect
          usedColors += cols[j];
       }
       // use rest for most opaque group of pixels

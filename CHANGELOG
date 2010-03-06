@@ -25,6 +25,8 @@ Mapnik Trunk
 
 - Rasterlite Plugin: Experimental support for Rasterlite, to practically use sqlite database with wavelet compressed rasters (#469)
 
+- PNG: fixed png256 for large images and some improvements to reduce color corruptions (#522)
+
 
 Mapnik 0.7.0 Release
 --------------------
