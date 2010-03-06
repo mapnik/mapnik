@@ -118,9 +118,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         x_off = 0;
     if (y_off < 0)
         y_off = 0;
-    if (end_x > raster_width)
+    if (end_x > (int)raster_width)
         end_x = raster_width;
-    if (end_y > raster_height)
+    if (end_y > (int)raster_height)
         end_y = raster_height;
     int width = end_x - x_off;
     int height = end_y - y_off;
