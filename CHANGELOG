@@ -34,6 +34,8 @@ Mapnik 0.7.1 Release
 - AGG Renderer - Enforced default gamma function on all symbolizers to ensure proper antialiasing
   even when gamma is modified on the PolygonSymbolizer. (#512)
 
+- PNG: fixed png256 for large images and some improvements to reduce color corruptions (#522)
+
 
 Mapnik 0.7.0 Release
 --------------------

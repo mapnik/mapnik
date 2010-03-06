@@ -50,7 +50,7 @@ namespace mapnik {
    struct RGBPolicy
    {
          const static unsigned MAX_LEVELS = 6;
-         const static unsigned MIN_LEVELS = 3;
+         const static unsigned MIN_LEVELS = 2;
          inline static unsigned index_from_level(unsigned level, rgb const& c)
          {
             unsigned shift = 7 - level;
@@ -70,7 +70,7 @@ namespace mapnik {
                      greens(0),
                      blues(0),
                      count(0),
-                     count2(0),
+                     count_cum(0),
                      children_count(0),
                      index(0)
                {
@@ -86,11 +86,12 @@ namespace mapnik {
 
                bool is_leaf() const { return count == 0; }
                node * children_[8];
-               unsigned reds;
-               unsigned greens;
-               unsigned blues;
+               boost::uint64_t reds;
+               boost::uint64_t greens;
+               boost::uint64_t blues;
                unsigned count;
-               unsigned count2;
+               double reduce_cost;
+               unsigned count_cum;
                byte  children_count;
                byte  index;
          };
@@ -98,7 +99,7 @@ namespace mapnik {
          {
                bool operator() ( const node * lhs,const node* rhs) const
                {
-                  return lhs->count2 < rhs->count2;
+                  return lhs->reduce_cost < rhs->reduce_cost;
                }
          };
 
@@ -151,13 +152,13 @@ namespace mapnik {
             unsigned level = 0;
             node * cur_node = root_;
             while (true) {
-               cur_node->count2++;
+               cur_node->count_cum++;
+               cur_node->reds   += data.r;
+               cur_node->greens += data.g;
+               cur_node->blues  += data.b;
 
                if ( cur_node->count > 0 || level == leaf_level_)
                {
-                  cur_node->reds   += data.r;
-                  cur_node->greens += data.g;
-                  cur_node->blues  += data.b;
                   cur_node->count  += 1;
                   if (cur_node->count == 1) ++colors_;
                   //if (colors_ >= max_colors_ - 1)
@@ -185,7 +186,8 @@ namespace mapnik {
             node * cur_node = root_;
             while (cur_node)
             {
-               if (cur_node->count != 0) return cur_node->index + offset_;
+               if (cur_node->children_count == 0) 
+                    return cur_node->index + offset_;
                unsigned idx = InsertPolicy::index_from_level(level,c);
                cur_node = cur_node->children_[idx];
                ++level;
@@ -204,17 +206,44 @@ namespace mapnik {
             palette.reserve(colors_);
             create_palette(palette, root_);
          }
+         
+         void computeCost(node *r)
+         {
+            r->reduce_cost = 0;
+            if (r->children_count==0)
+                return;
+
+            double sum[] = {0,0,0};
+            for (unsigned idx=0; idx < 8; ++idx) if (r->children_[idx] != 0)
+            {
+                computeCost(r->children_[idx]);
+                sum[0] += r->children_[idx]->reds;
+                sum[1] += r->children_[idx]->greens;
+                sum[2] += r->children_[idx]->blues;
+            }
+
+            for (unsigned idx=0; idx < 8; ++idx) if (r->children_[idx] != 0)
+            {
+                r->reduce_cost += r->children_[idx]->reduce_cost;
+                r->reduce_cost += fabs(r->children_[idx]->reds
+                        - sum[0] * r->children_[idx]->count_cum / r->count_cum);
+                r->reduce_cost += fabs(r->children_[idx]->greens
+                        - sum[1] * r->children_[idx]->count_cum / r->count_cum);
+                r->reduce_cost += fabs(r->children_[idx]->blues
+                        - sum[2] * r->children_[idx]->count_cum / r->count_cum);
+            }
+         }
 
          void reduce()
          {
+            computeCost(root_);
             reducible_[0].push_back(root_);
             
-            // sort reducible
+            // sort reducible by reduce_cost
             for (unsigned i=0;i<InsertPolicy::MAX_LEVELS;++i)
             {
                std::sort(reducible_[i].begin(), reducible_[i].end(),node_cmp());
             }
-
             while ( colors_ > max_colors_ && colors_ > 1)
             {
                while (leaf_level_ >0  && reducible_[leaf_level_-1].size() == 0)
@@ -226,7 +255,7 @@ namespace mapnik {
 
                // select best of all reducible:
                unsigned red_idx = leaf_level_-1;
-               unsigned bestv = (*reducible_[red_idx].begin())->count2;
+               unsigned bestv = (*reducible_[red_idx].begin())->count_cum;
                for(unsigned i=red_idx; i>=InsertPolicy::MIN_LEVELS; i--) if (!reducible_[i].empty()){
                    node *nd = *reducible_[i].begin();
                    unsigned gch = 0;
@@ -234,8 +263,8 @@ namespace mapnik {
                        if (nd->children_[idx])
                            gch += nd->children_[idx]->children_count;
                    }
-                   if (gch==0 && nd->count2<bestv){
-                       bestv = nd->count2;
+                   if (gch==0 && nd->count_cum<bestv){
+                       bestv = nd->count_cum;
                        red_idx = i;
                    }
                }
@@ -249,10 +278,8 @@ namespace mapnik {
                   {
                      cur_node->children_count--;
                      ++num_children;
-                     cur_node->reds   += cur_node->children_[idx]->reds;
-                     cur_node->greens += cur_node->children_[idx]->greens;
-                     cur_node->blues  += cur_node->children_[idx]->blues;
                      cur_node->count  += cur_node->children_[idx]->count;
+                     //todo: case of nonleaf children, if someday sorting by reduce_cost doesn't handle it
                      delete cur_node->children_[idx], cur_node->children_[idx]=0;
                   }
                }
@@ -273,7 +300,7 @@ namespace mapnik {
                palette.push_back(rgb(byte(itr->reds/float(count)),
                                      byte(itr->greens/float(count)),
                                      byte(itr->blues/float(count))));
-               itr->index = palette.size() - 1;			
+               itr->index = palette.size() - 1;
             }
             for (unsigned i=0; i < 8 ;++i)
             {
