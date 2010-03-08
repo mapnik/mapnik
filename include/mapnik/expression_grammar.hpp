@@ -30,7 +30,6 @@
 #include <mapnik/expression_node.hpp>
 
 // boost
-
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/concept_check.hpp>
@@ -239,6 +238,6 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::rule<Iterator, std::string() > ustring;
 };
 
-};
+} // namespace
 
 #endif  // MAPNIK_EXPRESSIONS_GRAMMAR_HPP
