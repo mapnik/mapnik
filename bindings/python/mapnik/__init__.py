@@ -51,7 +51,7 @@ except ImportError:
 flags = getdlopenflags()
 setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
 
-from _mapnik import *
+from _mapnik2 import *
 from paths import inputpluginspath, fontscollectionpath
 
 # The base Boost.Python class

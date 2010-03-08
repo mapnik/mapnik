@@ -125,16 +125,16 @@ except: pass
 
 # install the core mapnik python files, including '__init__.py' and 'paths.py'
 init_files = glob.glob('mapnik/*.py')
-init_module = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik', init_files)
+init_module = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik2', init_files)
 env.Alias(target='install', source=init_module)
 
 # install the ogcserver module code
 ogcserver_files = glob.glob('mapnik/ogcserver/*.py')
-ogcserver_module = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik/ogcserver', ogcserver_files)
+ogcserver_module = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik2/ogcserver', ogcserver_files)
 env.Alias(target='install', source=ogcserver_module)
 
 
 # install the shared object beside the module directory
-_mapnik = env.LoadableModule('_mapnik', glob.glob('*.cpp'), LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
-pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik',_mapnik)
+_mapnik = env.LoadableModule('_mapnik2', glob.glob('*.cpp'), LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
+pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik2',_mapnik)
 env.Alias(target='install',source=pymapniklib)
