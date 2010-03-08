@@ -78,8 +78,11 @@ namespace mapnik
                 break;
             }
 
-            // 0 if true (NDR): 1 if false (XDR)
-            needSwap_ = byteOrder_?wkbXDR:wkbNDR;
+#ifndef MAPNIK_BIG_ENDIAN
+            needSwap_=byteOrder_?wkbXDR:wkbNDR;
+#else
+            needSwap_=byteOrder_?wkbNDR:wkbXDR;	
+#endif	    
         }
 
         ~wkb_reader() {}
