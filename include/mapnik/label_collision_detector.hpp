@@ -22,11 +22,11 @@
 
 //$Id$
 
-#if !defined LABEL_COLLISION_DETECTOR
-#define LABEL_COLLISION_DETECTOR
+#ifndef LABEL_COLLISION_DETECTOR_HPP
+#define LABEL_COLLISION_DETECTOR_HPP
+
 // mapnik
 #include <mapnik/quad_tree.hpp>
-#include <mapnik/value.hpp>
 // stl
 #include <vector>
 #include <unicode/unistr.h>
@@ -229,4 +229,4 @@ namespace mapnik
    };
 }
 
-#endif 
+#endif // LABEL_COLLISION_DETECTOR_HPP
