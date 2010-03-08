@@ -48,12 +48,6 @@
 #include <sstream>
 #include <iomanip>
 
-#ifndef MAPNIK_BIG_ENDIAN
-#define WKB_ENCODING "NDR"
-#else
-#define WKB_ENCODING "XDR"
-#endif
-
 #define FMAX std::numeric_limits<double>::max()
 
 DATASOURCE_PLUGIN(postgis_datasource)
@@ -480,7 +474,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
          }
 
          std::ostringstream s;
-         s << "SELECT AsBinary(\"" << geometryColumn_ << "\",'" << WKB_ENCODING << "') AS geom";
+         s << "SELECT AsBinary(\"" << geometryColumn_ << "\") AS geom";
          std::set<std::string> const& props=q.property_names();
          std::set<std::string>::const_iterator pos=props.begin();
          std::set<std::string>::const_iterator end=props.end();
@@ -526,7 +520,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
              throw mapnik::datasource_exception(s_error.str());
          }
                     
-         s << "SELECT AsBinary(\"" << geometryColumn_ << "\",'" << WKB_ENCODING << "') AS geom";
+         s << "SELECT AsBinary(\"" << geometryColumn_ << "\") AS geom";
             
          std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
          std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
