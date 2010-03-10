@@ -77,46 +77,15 @@ void LayerTab::layerInfo2(QModelIndex const& index)
 {
    qDebug("LayerInfo id = %d",index.row());
    QVector<QPair<QString,QString> > params;
+   QVector<QString> style_names;
    unsigned i = index.row();
    LayerListModel * model = static_cast<LayerListModel*>(this->model());
    boost::optional<mapnik::layer&> layer = model->map_layer(i);
    
    if (layer)
    {
-      mapnik::datasource_ptr ds = (*layer).datasource();
-      if (ds)
-      {
-         mapnik::parameters ps = ds->params();
-
-         //mapnik::parameters::extract_iterator_type itr = ps.extract_begin();
-         //mapnik::parameters::extract_iterator_type end = ps.extract_end();
-         
-         //for (;itr != end;++itr)
-         //{
-            //if (itr->second)
-         //   {
-         ///     params.push_back(QPair<QString,QString>(itr->first.c_str(),itr->first.c_str()));
-         //   }
-         //}
-
-         
-         mapnik::parameters::const_iterator pos;
-         
-         for (pos = ps.begin();pos != ps.end();++pos)
-         {
-            boost::optional<std::string> result;
-            boost::apply_visitor(mapnik::value_extractor_visitor<std::string>(result),pos->second);
-            if (result)
-            {
-               params.push_back(QPair<QString,QString>(pos->first.c_str(),(*result).c_str()));
-            }
-         }   
-      }
-      layer_info_dialog dlg(params,this);
-      dlg.getUI().layerNameEdit->setText(QString((*layer).name().c_str()));
-
-      
-      dlg.exec();
+       layer_info_dialog dlg(*layer,this);
+       dlg.exec();
    }
 }
 

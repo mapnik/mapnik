@@ -25,12 +25,17 @@
 #include "ui_layer_info.h"
 #include <QDialog>
 
+namespace mapnik
+{
+struct layer;
+}
+
 class layer_info_dialog : public QDialog
 {
   Q_OBJECT
   public:
-      layer_info_dialog(QVector<QPair<QString,QString> > const& params,QWidget * parent = 0);
-      Ui::LayerInfoDialog& getUI();
+    layer_info_dialog(mapnik::layer& l, QWidget * parent = 0);
+    Ui::LayerInfoDialog& getUI();
    private:
       Ui::LayerInfoDialog ui;
 };
