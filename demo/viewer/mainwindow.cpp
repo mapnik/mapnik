@@ -140,13 +140,14 @@ void MainWindow::open(QString const& path)
 
 void MainWindow::reload() 
 {
-   if (!filename_.isEmpty())
-   {
-      mapnik::box2d<double> bbox = mapWidget_->getMap()->getCurrentExtent();
-      load_map_file(filename_);
-      mapWidget_->zoomToBox(bbox);
-      setWindowTitle(tr("%1 - *Reloaded*").arg(filename_));
-   }
+    if (!filename_.isEmpty())
+    {
+	
+	mapnik::box2d<double> bbox = mapWidget_->getMap()->getCurrentExtent();
+	load_map_file(filename_);
+	mapWidget_->zoomToBox(bbox);
+	setWindowTitle(tr("%1 - *Reloaded*").arg(filename_));
+    }
 }
 
 void MainWindow::save()
@@ -166,24 +167,23 @@ void MainWindow::save()
 void MainWindow::load_map_file(QString const& filename)
 {
    std::cout<<"loading "<< filename.toStdString() << std::endl;    
+   unsigned width = mapWidget_->width();
+   unsigned height = mapWidget_->height();
+   boost::shared_ptr<mapnik::Map> map(new mapnik::Map(width,height)); 
+   mapWidget_->setMap(map);
    try 
    {  
-      unsigned width = mapWidget_->width();
-      unsigned height = mapWidget_->height();
-      boost::shared_ptr<mapnik::Map> map(new mapnik::Map(width,height)); 
       mapnik::load_map(*map,filename.toStdString());
-      
-      mapWidget_->setMap(map);
-      map->zoom_all();
-      mapnik::box2d<double> const& ext = map->getCurrentExtent();
-      mapWidget_->zoomToBox(ext);
-      layerTab_->setModel(new LayerListModel(map,this));
-      styleTab_->setModel(new StyleModel(map,this));
    }
    catch (mapnik::config_error & ex) 
    {
       std::cout << ex.what() << "\n";
    }
+   map->zoom_all();
+   mapnik::box2d<double> const& ext = map->getCurrentExtent();
+   mapWidget_->zoomToBox(ext);
+   layerTab_->setModel(new LayerListModel(map,this));
+   styleTab_->setModel(new StyleModel(map,this));
 }
 
 void MainWindow::zoom_all()
