@@ -544,6 +544,12 @@ namespace mapnik
             set_attr( map_node, "bgcolor", * c );
         }
 
+        unsigned buffer_size = map.buffer_size();
+        if ( buffer_size || explicit_defaults)
+        {
+            set_attr( map_node, "buffer_size", buffer_size ); 
+        }
+
         {
             Map::const_fontset_iterator it = map.fontsets().begin();
             Map::const_fontset_iterator end = map.fontsets().end();
