@@ -159,6 +159,15 @@ namespace mapnik
 #endif
         return val;
     }
+
+#ifdef _WINDOWS
+// msvc doesn't have rint in <cmath>
+inline int rint( double val)
+{
+    return int(floor(val + 0.5));
+}
+#endif
+
 }
 
 #endif //GLOBAL_HPP

@@ -369,10 +369,10 @@ namespace mapnik
                       unsigned g0 = (rgba0 >> 16 ) & 0xff;
                       unsigned b0 = (rgba0 >> 8) & 0xff;
 
-                      r0 = uint8_t(((r1 - r0) * a1 + (r0 << 8)) >> 8);
-                      g0 = uint8_t(((g1 - g0) * a1 + (g0 << 8)) >> 8);
-                      b0 = uint8_t(((b1 - b0) * a1 + (b0 << 8)) >> 8);
-                      a0 = uint8_t((a1 + a0) - ((a1 * a0 + 255) >> 8));
+                      r0 = byte(((r1 - r0) * a1 + (r0 << 8)) >> 8);
+                      g0 = byte(((g1 - g0) * a1 + (g0 << 8)) >> 8);
+                      b0 = byte(((b1 - b0) * a1 + (b0 << 8)) >> 8);
+                      a0 = byte((a1 + a0) - ((a1 * a0 + 255) >> 8));
 
                       row_to[x] = (a0)| (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
 #else
@@ -387,10 +387,10 @@ namespace mapnik
                       unsigned g0 = (rgba0 >> 8 ) & 0xff;
                       unsigned b0 = (rgba0 >> 16) & 0xff;
 
-                      r0 = uint8_t(((r1 - r0) * a1 + (r0 << 8)) >> 8);
-                      g0 = uint8_t(((g1 - g0) * a1 + (g0 << 8)) >> 8);
-                      b0 = uint8_t(((b1 - b0) * a1 + (b0 << 8)) >> 8);
-                      a0 = uint8_t((a1 + a0) - ((a1 * a0 + 255) >> 8));
+                      r0 = byte(((r1 - r0) * a1 + (r0 << 8)) >> 8);
+                      g0 = byte(((g1 - g0) * a1 + (g0 << 8)) >> 8);
+                      b0 = byte(((b1 - b0) * a1 + (b0 << 8)) >> 8);
+                      a0 = byte((a1 + a0) - ((a1 * a0 + 255) >> 8));
                       
                       row_to[x] = (a0 << 24)| (b0 << 16) |  (g0 << 8) | (r0) ;
 #endif

@@ -74,6 +74,8 @@
 #include <iostream>
 #endif
 
+#include <cmath>
+
 namespace mapnik
 {
    class pattern_source : private boost::noncopyable
@@ -570,7 +572,7 @@ namespace mapnik
                             if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                             {
                                 //pixmap_.set_rectangle_alpha(px,py,*data);
-                                pixmap_.set_rectangle_alpha2(*data,px,py,sym.get_opacity());
+                                pixmap_.set_rectangle_alpha2(*data,px,py,float(sym.get_opacity()));
                                 Envelope<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
                                 ren.render(x,y);
                                 detector_.insert(label_ext);
@@ -714,10 +716,10 @@ namespace mapnik
       if (raster)
       {
          Envelope<double> ext=t_.forward(raster->ext_);
-         int start_x = int(round(ext.minx()));
-         int start_y = int(round(ext.miny()));
-         int raster_width = int(round(ext.width()));
-         int raster_height = int(round(ext.height()));
+         int start_x = rint(ext.minx());
+         int start_y = rint(ext.miny());
+         int raster_width = rint(ext.width());
+         int raster_height = rint(ext.height());
          int end_x = start_x + raster_width;
          int end_y = start_y + raster_height;
          double err_offs_x = (ext.minx()-start_x + ext.maxx()-end_x)/2;
