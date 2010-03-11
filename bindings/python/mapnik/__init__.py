@@ -234,13 +234,30 @@ class _Datasource(Datasource,_injector):
             query.add_property_name(fld)
         return self.features(query).features
 
+class _DeprecatedFeatureProperties(object):
+    def __init__(self, feature):
+        self._feature = feature
+
+    def __getitem__(self, name):
+        from warnings import warn
+        warn("indexing feature.properties is deprecated, index the "
+             "feature object itself for the same effect", DeprecationWarning, 2)
+        return self._feature[name]
+
+    def __iter__(self):
+        from warnings import warn
+        warn("iterating feature.properties is deprecated, iterate the "
+             "feature object itself for the same effect", DeprecationWarning, 2)
+        return iter(self._feature)
+
 class _Feature(Feature,_injector):
     @property
+    def properties(self):
+        return _DeprecatedFeatureProperties(self)
+
+    @property
     def attributes(self):
-        attr = {}
-        for prop in self.properties:
-            attr[prop[0]] = prop[1]
-        return attr
+        return dict(self)
 
 class _Symbolizer(Symbolizer,_injector):
     def symbol(self):
