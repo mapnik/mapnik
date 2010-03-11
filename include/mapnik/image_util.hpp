@@ -232,8 +232,8 @@ inline void scale_image_bilinear (Image& target,const Image& source, double x_of
     int x=0,y=0,xs=0,ys=0;
     int tw2 = target_width/2;
     int th2 = target_height/2;
-    int offs_x = int(round((source_width-target_width-x_off_f*2*source_width)/2));
-    int offs_y = int(round((source_height-target_height-y_off_f*2*source_height)/2));
+    int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
+    int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
     unsigned yprt, yprt1, xprt, xprt1;
 
     //no scaling or subpixel offset
@@ -319,8 +319,8 @@ inline void scale_image_bilinear8 (Image& target,const Image& source, double x_o
     int x=0,y=0,xs=0,ys=0;
     int tw2 = target_width/2;
     int th2 = target_height/2;
-    int offs_x = int(round((source_width-target_width-x_off_f*2*source_width)/2));
-    int offs_y = int(round((source_height-target_height-y_off_f*2*source_height)/2));
+    int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
+    int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
     unsigned yprt, yprt1, xprt, xprt1;
 
     //no scaling or subpixel offset
