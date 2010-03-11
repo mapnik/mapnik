@@ -39,6 +39,9 @@ extern "C"
 #include <mapnik/cairo_renderer.hpp>
 #endif
 
+#include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
+
 // stl
 #include <string>
 #include <iostream>
@@ -52,28 +55,7 @@ namespace mapnik
                                std::string const& type)
     {
         std::ostringstream ss(std::ios::out|std::ios::binary);
-        //all this should go into image_writer factory
-        if (type=="png")  save_as_png(ss,image);
-        else if (type == "png256") save_as_png256(ss,image);
-        else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
-        {
-            int quality = 85;
-            try 
-            {
-                if(type.substr(4).length() != 0)
-                {
-                    quality = boost::lexical_cast<int>(type.substr(4));
-                    if(quality<1 || quality>100)
-                        throw ImageWriterException("invalid jpeg quality: " + type.substr(4));
-                }
-                save_as_jpeg(ss,quality,image); 
-            } 
-            catch(boost::bad_lexical_cast &)
-            {
-                throw ImageWriterException("invalid jpeg quality: " + type.substr(4));
-            }
-        }
-        else throw ImageWriterException("unknown file type: " + type);
+        save_to_stream(image, ss, type);
         return ss.str();
     }
 
@@ -85,9 +67,88 @@ namespace mapnik
         std::ofstream file (filename.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
         if (file)
         {
+            save_to_stream(image, file, type);
+        }
+        else throw ImageWriterException("Could not write file to " + filename );
+    }
+
+    template <typename T>
+    void save_to_stream(T const& image,
+                      std::ostream & stream,
+                      std::string const& type)
+    {
+        if (stream)
+        {
             //all this should go into image_writer factory
-            if (type=="png")  save_as_png(file,image);
-            else if (type == "png256") save_as_png256(file,image);
+            if (type == "png")  save_as_png(stream, image);
+            else if (boost::algorithm::istarts_with(type, std::string("png256")) ||
+                     boost::algorithm::istarts_with(type, std::string("png:"))
+                     ) 
+            {
+                int colors  = 256;
+                int trans_mode = -1;
+                double gamma = -1;
+                bool use_octree = true;
+                if (type.length() > 6){
+                    boost::char_separator<char> sep(":");
+                    boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+                    BOOST_FOREACH(string t, tokens)
+                    {
+                        if (t == "m=h")
+                        {
+                            use_octree = false;
+                        }
+                        if (t == "m=o")
+                        {
+                            use_octree = true;
+                        }
+                        if (boost::algorithm::istarts_with(t,std::string("c=")))
+                        {
+                            try 
+                            {
+                                colors = boost::lexical_cast<int>(t.substr(2));
+                                if (colors < 0 || colors > 256)
+                                    throw ImageWriterException("invalid color parameter: " + t.substr(2) + " out of bounds");
+                            }
+                            catch(boost::bad_lexical_cast &)
+                            {
+                                throw ImageWriterException("invalid color parameter: " + t.substr(2));
+                            }
+                        }
+                        if (boost::algorithm::istarts_with(t, std::string("t=")))
+                        {
+                            try 
+                            {
+                                trans_mode= boost::lexical_cast<int>(t.substr(2));
+                                if (trans_mode < 0 || trans_mode > 2)
+                                    throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2) + " out of bounds");
+                            }
+                            catch(boost::bad_lexical_cast &)
+                            {
+                                throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
+                            }
+                        }
+                        if (boost::algorithm::istarts_with(t, std::string("g=")))
+                        {
+                            try 
+                            {
+                                gamma= boost::lexical_cast<double>(t.substr(2));
+                                if (gamma < 0)
+                                    throw ImageWriterException("invalid gamma parameter: " + t.substr(2) + " out of bounds");
+                            }
+                            catch(boost::bad_lexical_cast &)
+                            {
+                                throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
+                            }
+                        }
+                    }
+
+                }
+                if (use_octree)
+                    save_as_png256(stream, image, colors);
+                else
+                    save_as_png256_hex(stream, image, colors, trans_mode, gamma);
+            }
             else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
             {
                 int quality = 85;
@@ -99,7 +160,7 @@ namespace mapnik
                         if(quality<0 || quality>100)
                             throw ImageWriterException("invalid jpeg quality: " + type.substr(4) + " out of bounds");
                     }
-                    save_as_jpeg(file,quality,image); 
+                    save_as_jpeg(stream, quality, image); 
                 } 
                 catch(boost::bad_lexical_cast &)
                 {
@@ -108,7 +169,7 @@ namespace mapnik
             }
             else throw ImageWriterException("unknown file type: " + type);
         }
-        else throw ImageWriterException("Could not write file to " + filename );
+        else throw ImageWriterException("Could not write to empty stream" );
     }
 
 	

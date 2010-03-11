@@ -43,7 +43,7 @@ namespace mapnik {
          byte r;
          byte g;
          byte b;
-         rgb(byte r_, byte b_, byte g_)
+         rgb(byte r_, byte g_, byte b_)
             : r(r_), g(g_), b(b_) {}
    };
 
