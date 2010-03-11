@@ -41,13 +41,13 @@ def main():
         # Allow python to find libraries for testing on the buildbot
         sys.path.insert(0, os.path.join(prefix, "lib/python%s/site-packages" % sys.version[:3]))
 
-    import mapnik
+    import mapnik2
 
     if not quiet:
-        print "- mapnik path: %s" % mapnik.__file__
-        print "- _mapnik.so path: %s" % mapnik._mapnik.__file__
-        print "- Input plugins path: %s" % mapnik.inputpluginspath
-        print "- Font path: %s" % mapnik.fontscollectionpath
+        print "- mapnik2 path: %s" % mapnik2.__file__
+        print "- _mapnik2.so path: %s" % mapnik2._mapnik2.__file__
+        print "- Input plugins path: %s" % mapnik2.inputpluginspath
+        print "- Font path: %s" % mapnik2.fontscollectionpath
         print
         print "- Running nosetests:"
         print

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-import mapnik
+import mapnik2
 from nose.tools import *
 from utilities import execution_path,Todo
 
@@ -11,13 +11,13 @@ def setup():
     os.chdir(execution_path('.'))
 
 def _pycairo_surface(type,sym):
-    if mapnik.has_pycairo():
+    if mapnik2.has_pycairo():
         import cairo
         test_cairo_file = 'test.%s' % type
-        m = mapnik.Map(256,256)
-        mapnik.load_map(m,'../data/good_maps/%s_symbolizer.xml' % sym)
+        m = mapnik2.Map(256,256)
+        mapnik2.load_map(m,'../data/good_maps/%s_symbolizer.xml' % sym)
         surface = getattr(cairo,'%sSurface' % type.upper())(test_cairo_file, m.width,m.height)
-        mapnik.render(m, surface)
+        mapnik2.render(m, surface)
         surface.finish()        
         
         if os.path.exists(test_cairo_file):

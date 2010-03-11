@@ -2,16 +2,16 @@
 
 from nose.tools import *
 
-import mapnik, pickle
+import mapnik2, pickle
 
 # Tests that exercise map projections.
 
 # Trac Ticket #128
 def test_wgs84_inverse_forward():
-    p = mapnik.Projection('+init=epsg:4326')
+    p = mapnik2.Projection('+init=epsg:4326')
 
-    c = mapnik.Coord(3.01331418311, 43.3333092669)
-    e = mapnik.Box2d(-122.54345245, 45.12312553, 68.2335581353, 48.231231233)
+    c = mapnik2.Coord(3.01331418311, 43.3333092669)
+    e = mapnik2.Box2d(-122.54345245, 45.12312553, 68.2335581353, 48.231231233)
 
     # It appears that the y component changes very slightly, is this OK?
     # so we test for 'almost equal float values'

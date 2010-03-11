@@ -3,7 +3,7 @@
 from nose.tools import *
 from utilities import execution_path
 
-import os, sys, glob, mapnik
+import os, sys, glob, mapnik2
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -16,18 +16,18 @@ def test():
     # 2. Save map as XML
     # 3. Load map to a second object
     # 4. Compare both map objects
-    map = mapnik.Map(256, 256)
+    map = mapnik2.Map(256, 256)
     in_map = "../data/good_maps/osm-styles.xml"
 
-    mapnik.load_map(map, in_map)
+    mapnik2.load_map(map, in_map)
     test_map = "test_map.xml"
 
-    mapnik.save_map(map, test_map)
-    new_map = mapnik.Map(256, 256)
+    mapnik2.save_map(map, test_map)
+    new_map = mapnik2.Map(256, 256)
 
-    mapnik.load_map(new_map, test_map)
+    mapnik2.load_map(new_map, test_map)
 
-    eq_(open(test_map).read(),mapnik.save_map_to_string(new_map))
+    eq_(open(test_map).read(),mapnik2.save_map_to_string(new_map))
 
     if os.path.exists(test_map):
         os.remove(test_map)

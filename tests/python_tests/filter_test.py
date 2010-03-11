@@ -3,10 +3,10 @@
 from nose.tools import *
 from utilities import Todo
 
-import mapnik
+import mapnik2
 
-if hasattr(mapnik,'Expression'):
-    mapnik.Filter = mapnik.Expression
+if hasattr(mapnik2,'Expression'):
+    mapnik2.Filter = mapnik2.Expression
 
 map_ = '''<Map>
     <Style name="s">
@@ -45,25 +45,25 @@ map_ = '''<Map>
 </Map>'''
 
 def test_filter_init():    
-    m = mapnik.Map(1,1)
-    mapnik.load_map_from_string(m,map_)
+    m = mapnik2.Map(1,1)
+    mapnik2.load_map_from_string(m,map_)
     filters = []
-    filters.append(mapnik.Filter("([region]>=0) and ([region]<=50)"))
-    filters.append(mapnik.Filter("(([region]>=0) and ([region]<=50))"))
-    filters.append(mapnik.Filter("((([region]>=0) and ([region]<=50)))"))
-    filters.append(mapnik.Filter('((([region]>=0) and ([region]<=50)))'))
-    filters.append(mapnik.Filter('''((([region]>=0) and ([region]<=50)))'''))
-    filters.append(mapnik.Filter('''
+    filters.append(mapnik2.Filter("([region]>=0) and ([region]<=50)"))
+    filters.append(mapnik2.Filter("(([region]>=0) and ([region]<=50))"))
+    filters.append(mapnik2.Filter("((([region]>=0) and ([region]<=50)))"))
+    filters.append(mapnik2.Filter('((([region]>=0) and ([region]<=50)))'))
+    filters.append(mapnik2.Filter('''((([region]>=0) and ([region]<=50)))'''))
+    filters.append(mapnik2.Filter('''
     ((([region]>=0)
     and
     ([region]<=50)))
     '''))
-    filters.append(mapnik.Filter('''
+    filters.append(mapnik2.Filter('''
     ([region]>=0)
     and
     ([region]<=50)
     '''))
-    filters.append(mapnik.Filter('''
+    filters.append(mapnik2.Filter('''
     ([region]
     >=
     0)
