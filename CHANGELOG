@@ -15,6 +15,10 @@ For a complete change history, see the SVN log.
 Mapnik 0.7.1 Release
 --------------------
 
+- Rasters: Various fixes and improvements to 8bit png output (#522,#475)
+
+- XML: Save map buffer_size when serializing map.
+
 - SCons: Added new build options 'PRIORITIZE_LINKING' and 'LINK_PRIORITY'. The first is a boolean (default True)
   of whether to use the new sorting implementation that gives explcit preference to custom or local paths
   during compile and linking that will affect builds when duplicate libraries and include directories are on the
