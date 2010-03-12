@@ -25,6 +25,9 @@
 #define RASTER_SYMBOLIZER_HPP
 
 #include <mapnik/config.hpp>
+#include <mapnik/raster_colorizer.hpp>
+
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
@@ -32,7 +35,14 @@ namespace mapnik
         explicit raster_symbolizer()
             : mode_("normal"),
               scaling_("fast"),
-              opacity_(1.0) {}
+              opacity_(1.0),
+              colorizer_() {}
+
+        raster_symbolizer(const raster_symbolizer &rs)
+            : mode_(rs.get_mode()),
+              scaling_(rs.get_scaling()),
+              opacity_(rs.get_opacity()),
+              colorizer_(rs.colorizer_) {}
 
         std::string const& get_mode() const
         {
@@ -58,10 +68,19 @@ namespace mapnik
         {
             return opacity_;
         }
+        raster_colorizer_ptr get_colorizer() const
+        {
+           return colorizer_;
+        }
+        void set_colorizer(raster_colorizer_ptr const& colorizer)
+        {
+            colorizer_ = colorizer;
+        }
     private:
         std::string mode_;
         std::string scaling_;
         float opacity_;
+        raster_colorizer_ptr colorizer_;
     };
 }
 

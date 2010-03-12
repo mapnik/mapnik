@@ -263,6 +263,11 @@ class _Symbolizer(Symbolizer,_injector):
     def symbol(self):
         return getattr(self,self.type())()
 
+class _Color(Color,_injector):
+    def __repr__(self):
+        return "Color(%r)" % self.to_hex_string()
+
+
 #class _Filter(Filter,_injector):
 #    """Mapnik Filter expression.
 #    

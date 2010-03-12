@@ -59,6 +59,7 @@ void export_font_engine();
 void export_projection();
 void export_proj_transform();
 void export_view_transform();
+void export_raster_colorizer();
 
 #include <mapnik/version.hpp>
 #include <mapnik/map.hpp>
@@ -331,6 +332,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_view_transform();
     export_coord();
     export_map();
+    export_raster_colorizer();
 
     def("render_to_file",&render_to_file1,
         "\n"

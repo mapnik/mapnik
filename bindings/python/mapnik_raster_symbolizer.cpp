@@ -111,5 +111,22 @@ void export_raster_symbolizer()
             ">>> r = RasterSymbolizer()\n"
             ">>> r.opacity = .5\n"
             )
+    .add_property("colorizer",
+                  &raster_symbolizer::get_colorizer,
+                  &raster_symbolizer::set_colorizer,
+                  "Get/Set the RasterColorizer used to color data rasters.\n"
+                  "\n"
+                  "Usage:\n"
+                  "\n"
+                  ">>> from mapnik import RasterSymbolizer, RasterColorizer\n"
+                  ">>> r = RasterSymbolizer()\n"
+                  ">>> r.colorizer = RasterColorizer()\n"
+                  ">>> for value, color in [\n"
+                  "...     (0, \"#000000\"),\n"
+                  "...     (10, \"#ff0000\"),\n"
+                  "...     (40, \"#00ff00\"),\n"
+                  "... ]:\n"
+                  "...      r.colorizer.append_band(value, color)\n"
+                  )
 	;    
 }
