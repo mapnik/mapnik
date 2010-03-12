@@ -172,12 +172,16 @@ def test_shapefile_properties():
     s = mapnik2.Shapefile(file='../../demo/data/boundaries', encoding='latin1')
     f = s.features_at_point(s.envelope().center()).features[0]
 
-    eq_(f.properties['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
-    eq_(f.properties['COUNTRY'], u'CAN')
-    eq_(f.properties['F_CODE'], u'FA001')
-    eq_(f.properties['NAME_EN'], u'Quebec')
-    eq_(f.properties['NOM_FR'], u'Qu\xe9bec')
-    eq_(f.properties['Shape_Area'], 1512185733150.0)
+    eq_(f['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
+    eq_(f['COUNTRY'], u'CAN')
+    eq_(f['F_CODE'], u'FA001')
+    eq_(f['NAME_EN'], u'Quebec')
+    eq_(f['NOM_FR'], u'Qu\xe9bec')
+    eq_(f['Shape_Area'], 1512185733150.0)
+    eq_(f['Shape_Leng'], 19218883.724300001)
+
+    # Check that the deprecated interface still works,
+    # remove me once the deprecated code is cleaned up
     eq_(f.properties['Shape_Leng'], 19218883.724300001)
 
 # TextSymbolizer initialization
