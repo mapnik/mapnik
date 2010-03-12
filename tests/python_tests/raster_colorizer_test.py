@@ -18,8 +18,7 @@ class test_raster_colorizer():
         ( 70, "#cc00cc"),
         ( 80, "#990099"),
         ( 90, "#660066"),
-        ( 200, "#00000"), # last band denotes upper limit, values above it will
-                          # not return the color
+        ( 200, "#ffffff"),
         ]]
     for value, color in bands:
         colorizer.append_band(value, color)
@@ -28,5 +27,7 @@ class test_raster_colorizer():
     eq_(colorizer.get_color(0), bands[0][1])
     eq_(colorizer.get_color(5), bands[0][1])
     eq_(colorizer.get_color(10), bands[1][1])
-    eq_(colorizer.get_color(200), mapnik2.Color("transparent"))
+    # last value is used if it matches exactly
+    eq_(colorizer.get_color(200), bands[-1][1])
+    #  values greater than the last value are mapped to "transparent"
     eq_(colorizer.get_color(201), mapnik2.Color("transparent"))

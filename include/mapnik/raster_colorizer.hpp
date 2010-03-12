@@ -153,9 +153,11 @@ namespace mapnik
          *   if cs[pos].value <= value < cs[pos+1].value: cs[pos].color
          *   otherwise: transparent
          *     where 0 <= pos < length(bands)-1
+         *   Last band is special, its value represents the upper bound and its
+         *   color will only be used if the value matches its value exactly.
          */
          color get_color(float value) const {
-            int pos=-1, lo=0, hi=colors_.size()-1;
+            int pos=-1, last=(int)colors_.size()-1, lo=0, hi=last;
             while (lo<=hi) {
                 pos = (lo+hi)/2;
                 if (colors_[pos].value_<value) {
@@ -168,9 +170,11 @@ namespace mapnik
                 }
             }
             lo--;
-            return (0 <= lo && lo < (int)colors_.size()-1)?
-                colors_[lo].color_:
-                color(0,0,0,0);
+            if ((0 <= lo && lo < last) ||
+                (lo==last && colors_[last].value_==value))
+                return colors_[lo].color_;
+            else
+                return color(0,0,0,0);
          }
 
          void colorize(mapnik::raster_ptr const& raster) const {
