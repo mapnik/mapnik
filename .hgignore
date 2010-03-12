@@ -1,0 +1,17 @@
+syntax: glob
+
+.sconf_temp
+.sconsign.dblite
+*.input
+*.pyc
+*.sw[p,o]
+*.orig
+*.o
+*.os
+*.so
+agg/libagg.a
+config.*
+utils/shapeindex
+bindings/python/mapnik/paths.py
+demo/python/demo*
+demo/python/map.xml
