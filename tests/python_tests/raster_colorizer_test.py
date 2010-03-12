@@ -1,8 +1,7 @@
-
 import mapnik2
 from nose.tools import *
 
-class test_raster_colorizer():
+def test_get_color():
     colorizer = mapnik2.RasterColorizer()
     # Setup the color bands. band[N].color will apply to all
     # values 'v' if band[N].value <= v < band[N+1].color

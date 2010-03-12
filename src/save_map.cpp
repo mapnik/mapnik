@@ -26,6 +26,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
+#include <mapnik/raster_colorizer.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -42,6 +43,29 @@ namespace mapnik
 {
     using boost::property_tree::ptree;
     using boost::optional;
+
+    void serialize_raster_colorizer(ptree & sym_node,
+                                    raster_colorizer_ptr const& colorizer,
+                                    bool explicit_defaults)
+    {
+        ptree & col_node = sym_node.push_back(
+                ptree::value_type("RasterColorizer", ptree() ))->second;
+
+        unsigned i;
+        color_bands const &cb = colorizer->get_color_bands();
+        for (i=0; i<cb.size(); i++) {
+           if (!cb[i].is_interpolated()) {
+               ptree & band_node = col_node.push_back(
+                    ptree::value_type("ColorBand", ptree())
+                  )->second;
+               set_attr(band_node, "value", cb[i].get_value());    
+               set_attr(band_node, "midpoints", cb[i].get_midpoints());    
+               optional<color> c = cb[i].get_color();
+               if (c) set_attr(band_node, "color", * c);    
+           }
+        }
+
+    }
 
     class serialize_symbolizer : public boost::static_visitor<>
     {
@@ -163,6 +187,11 @@ namespace mapnik
                 {
                     set_css( sym_node, "opacity", sym.get_opacity() );
                 }
+                if (sym.get_colorizer()) {
+                   serialize_raster_colorizer(sym_node, sym.get_colorizer(),
+                                              explicit_defaults_);
+                }
+                    
             }
 
             void operator () ( const shield_symbolizer & sym )

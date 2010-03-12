@@ -88,3 +88,13 @@ def test_dataraster_query_point():
     # point inside raster extent with nodata
     features = _map.query_point(0,126850,4596050).features
     assert len(features) == 0
+
+def test_load_save_map():
+    map = mapnik2.Map(256,256)
+    in_map = "../data/good_maps/raster_symbolizer.xml"
+    mapnik2.load_map(map, in_map)
+
+    out_map = mapnik2.save_map_to_string(map)
+    assert 'RasterSymbolizer' in out_map
+    assert 'RasterColorizer' in out_map
+    assert 'ColorBand' in out_map
