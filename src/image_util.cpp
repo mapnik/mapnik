@@ -82,6 +82,7 @@ namespace mapnik
             //all this should go into image_writer factory
             if (type == "png")  save_as_png(stream, image);
             else if (boost::algorithm::istarts_with(type, std::string("png256")) ||
+                     boost::algorithm::istarts_with(type, std::string("png8")) ||
                      boost::algorithm::istarts_with(type, std::string("png:"))
                      ) 
             {
