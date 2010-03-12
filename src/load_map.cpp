@@ -37,6 +37,7 @@
 
 #include <mapnik/filter_factory.hpp>
 #include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/raster_colorizer.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -90,6 +91,7 @@ namespace mapnik
          void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
          void parse_building_symbolizer( rule_type & rule, ptree const & sym );
          void parse_raster_symbolizer( rule_type & rule, ptree const & sym );
+         void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
          void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
 
          void ensure_font_face( const std::string & face_name );
@@ -1492,6 +1494,12 @@ namespace mapnik
                                 "parameter '" + css_name + "'");
                     }
                 }
+                else if (css_tag.first == "RasterColorizer")
+                {
+                   raster_colorizer_ptr colorizer(new raster_colorizer());
+                   raster_sym.set_colorizer(colorizer);
+                   parse_raster_colorizer(colorizer, css_tag.second);
+                }
                 else if (css_tag.first != "<xmlcomment>" &&
                         css_tag.first != "<xmlattr>" )
                 {
@@ -1504,6 +1512,45 @@ namespace mapnik
         catch (const config_error & ex)
         {
             ex.append_context("in RasterSymbolizer");
+            throw;
+        }
+    }
+    void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
+                                            ptree const& node )
+    {
+        try
+        {
+            ptree::const_iterator cbIter = node.begin();
+            ptree::const_iterator endCb = node.end();
+
+            for(; cbIter != endCb; ++cbIter)
+            {
+                ptree::value_type const& cb_tag = *cbIter;
+                ptree const & cb = cbIter->second;
+
+                if (cb_tag.first == "ColorBand")
+                {
+                    std::string value_s  = get_attr<string>(cb, "value");
+                    float value;
+                    std::stringstream(value_s) >> value;
+                    optional<color> c = get_opt_attr<color>(cb, "color");
+                    if (!c) {
+                       throw config_error("missing color");
+                    }
+                    unsigned midpoints = get_attr(cb, "midpoints", 0);
+                    rc->append_band(value, *c, midpoints);
+                }
+                else if (cb_tag.first != "<xmlcomment>" &&
+                         cb_tag.first != "<xmlattr>" )
+                {
+                    throw config_error(std::string("Unknown child node. ") +
+                            "Expected 'ColorBand' but got '" + cb_tag.first + "'");
+                }
+            }
+        }
+        catch (const config_error & ex)
+        {
+            ex.append_context("in RasterColorizer");
             throw;
         }
     }
