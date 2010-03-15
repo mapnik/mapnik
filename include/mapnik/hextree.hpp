@@ -29,7 +29,13 @@
 
 // boost
 #include <boost/utility.hpp>
-#include <boost/unordered_map.hpp>
+
+// map vs hashmap 
+#if BOOST_VERSION < 103600
+    #include <map>
+#else
+    #include <boost/unordered_map.hpp>
+#endif
 
 // stl
 #include <vector>
@@ -51,6 +57,16 @@ namespace mapnik {
         bool operator==(const rgba& y) const
         {
             return r==y.r && g==y.g && b==y.b && a==y.a;
+        }
+        int operator<(const rgba& y) const
+        {
+            if (r!=y.r)
+                return r<y.r;
+            if (g!=y.g)
+                return g<y.g;
+            if (b!=y.b)
+                return b<y.b;
+            return a<y.a;
         }
     };
 
@@ -157,7 +173,11 @@ namespace mapnik {
         // index remaping of sorted_pal_ indexes to indexes of returned image palette
         std::vector<unsigned> pal_remap_;
         // rgba hashtable for quantization
+#if BOOST_VERSION < 103600
+        typedef std::map<rgba, int> rgba_hash_table;
+#else
         typedef boost::unordered_map<rgba, int, rgba_hash_func> rgba_hash_table;
+#endif
         rgba_hash_table color_hashmap_;
         // gamma correction to prioritize dark colors (>1.0)
         double gamma_;
