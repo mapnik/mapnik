@@ -33,7 +33,7 @@
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/expression_grammar.hpp>
+#include <mapnik/filter_factory.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>

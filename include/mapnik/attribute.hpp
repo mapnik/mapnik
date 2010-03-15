@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006-2009 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,23 +22,24 @@
 
 //$Id$
 
-#ifndef MAPNIK_FILTER_FACTORY_HPP
-#define MAPNIK_FILTER_FACTORY_HPP
+#ifndef MAPNIK_ATTRIBUTE_HPP
+#define MAPNIK_ATTRIBUTE_HPP
 
-// mapnik
-#include <mapnik/config.hpp>
-#include <mapnik/expression_node.hpp>
-// stl
-#include <string>
+namespace mapnik {
 
-namespace mapnik
+struct attribute
 {
-
-typedef boost::shared_ptr<expr_node> expression_ptr;
-
-MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding);
-MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt);
-   
+    std::string name_;
+    explicit attribute(std::string const& name)
+        : name_(name) {}
+    
+    template <typename V ,typename F>
+    V value(F const& f) const
+    {
+        return f[name_];
+    }
+    std::string const& name() const { return name_;}
+};
 }
 
-#endif //MAPNIK_FILTER_FACTORY_HPP
+#endif // MAPNIK_ATTRIBUTE_HPP

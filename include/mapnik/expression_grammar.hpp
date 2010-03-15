@@ -195,10 +195,10 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 	
         multiplicative_expr = primary_expr [_val = _1]
             >> *(     '*' >> primary_expr [_val *= _1]
-		    | '/' >> primary_expr [_val /= _1]
-		    | '%' >> primary_expr [_val %= _1]
-		    |  regex_match_expr[_val = regex_match_(_val, _1)]
-		    |  regex_replace_expr(_val) [_val = _1]
+		      | '/' >> primary_expr [_val /= _1]
+		      | '%' >> primary_expr [_val %= _1]
+		      |  regex_match_expr[_val = regex_match_(_val, _1)]
+		      |  regex_replace_expr(_val) [_val = _1]
                 )
             ;
         

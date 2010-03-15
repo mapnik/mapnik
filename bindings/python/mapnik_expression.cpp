@@ -23,10 +23,11 @@
 
 #include <boost/python.hpp>
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/filter_factory.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/path_expr_parser.hpp>
 
 #include <boost/variant.hpp>
 
@@ -34,6 +35,7 @@ using mapnik::expression_ptr;
 using mapnik::parse_expression;
 using mapnik::to_expression_string;
 using mapnik::path_expression_ptr;
+using mapnik::path_processor_type;
 
 // expression
 expression_ptr parse_expression_(std::string const& wkt)
@@ -50,17 +52,17 @@ std::string expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature 
 // path expression
 path_expression_ptr parse_path_(std::string const& path)
 {
-    return mapnik::parse_path(path);
+    return parse_path(path);
 }
 
 std::string path_to_string_(mapnik::path_expression const& expr)
 {
-    return mapnik::path_processor_type::to_string(expr);
+    return path_processor_type::to_string(expr);
 }
 
 std::string path_evaluate_(mapnik::path_expression const& expr, mapnik::Feature const& f)
 {
-    return mapnik::path_processor_type::evaluate(expr, f);
+    return path_processor_type::evaluate(expr, f);
 }
 
 void export_expression()
