@@ -22,7 +22,6 @@
 //$Id$
 
 #include <mapnik/filter_factory.hpp>
-#include <mapnik/expression_grammar.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/unicode.hpp>
 

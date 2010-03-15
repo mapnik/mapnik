@@ -90,7 +90,6 @@ source = Split(
     load_map.cpp
     memory.cpp
     params.cpp
-    path_expr_parser.cpp
     placement_finder.cpp
     plugin.cpp
     png_reader.cpp

@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/value.hpp>
-#include <mapnik/attribute.hpp>
 // boost
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
@@ -35,6 +34,21 @@
 
 namespace mapnik
 {
+
+struct attribute
+{
+    std::string name_;
+    explicit attribute(std::string const& name)
+        : name_(name) {}
+    
+    template <typename V ,typename F>
+    V value(F const& f) const
+    {
+        return f[name_];
+    }
+    std::string const& name() const { return name_;}
+};
+
 
 namespace tags  { 
 struct plus
@@ -180,6 +194,8 @@ boost::recursive_wrapper<binary_node<tags::logical_or> >,
 boost::recursive_wrapper<regex_match_node>,
 boost::recursive_wrapper<regex_replace_node>
 > expr_node;
+
+typedef boost::shared_ptr<expr_node> expression_ptr;
 
 template <typename Tag> struct make_op;
 template <> struct make_op<tags::plus> { typedef std::plus<value_type> type;};

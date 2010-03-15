@@ -25,16 +25,11 @@
 #ifndef MAPNIK_FILTER_FACTORY_HPP
 #define MAPNIK_FILTER_FACTORY_HPP
 
-// mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/expression_node.hpp>
-// stl
-#include <string>
+#include <mapnik/expression_grammar.hpp>
 
 namespace mapnik
 {
-
-typedef boost::shared_ptr<expr_node> expression_ptr;
 
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding);
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt);
