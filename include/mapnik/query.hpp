@@ -49,18 +49,12 @@ private:
     std::set<std::string> names_;
 public:
          
-    explicit query(box2d<double> const& bbox, resolution_type const& resolution, double scale_denominator)
+    query(box2d<double> const& bbox, resolution_type const& resolution, double scale_denominator = 1.0)
 	: bbox_(bbox),
 	  resolution_(resolution),
 	  scale_denominator_(scale_denominator)
     {}
-
-    explicit query(box2d<double> const& bbox, resolution_type const& resolution)
-	: bbox_(bbox),
-	  resolution_(resolution),
-	  scale_denominator_(0.0)
-    {}         
-        
+    
     query(query const& other)
 	: bbox_(other.bbox_),
 	  resolution_(other.resolution_),
