@@ -577,15 +577,15 @@ Envelope<double> postgis_datasource::envelope() const
          if (estimate_extent && *estimate_extent == "true")
          {
              s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
-               << " from (select estimated_extent(";
+               << " from (select estimated_extent('";
 
              if (schema_.length() > 0)
              {
-                 s << schema_ << ".";
+                 s << schema_ << "','";
              }
 
-             s << geometry_table_ << ","
-               << geometryColumn_ << ") as ext) as tmp";
+             s << geometry_table_ << "','"
+               << geometryColumn_ << "') as ext) as tmp";
          }
          else
          {
