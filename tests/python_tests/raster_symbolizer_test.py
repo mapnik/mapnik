@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, save_data
 
 import os, mapnik2
 
@@ -49,16 +49,12 @@ def test_dataraster_coloring():
 
     im = mapnik2.Image(_map.width,_map.height)
     mapnik2.render(_map, im)
+    # save a png somewhere so we can see it
+    save_data('test_dataraster_coloring.png', im.tostring('png'))
     imdata = im.tostring()
     assert len(imdata) > 0
     # we have some values in the [20,30) interval so check that they're colored
     assert '\xff\xff\xff\x00' in imdata
-
-    # save a png somewhere so we can see it
-    if 'MAPNIK_TEST_IMAGE_PATH' in os.environ:
-        f = open(os.environ['MAPNIK_TEST_IMAGE_PATH'],'wb')
-        f.write(im.tostring('png'))
-        f.close()
 
 def test_dataraster_query_point():
     srs = '+init=epsg:32630'
