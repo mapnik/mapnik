@@ -42,6 +42,7 @@
 #include <iostream>
 #include <set>
 #include <algorithm>
+#include <cmath>
 
 namespace mapnik {
 
@@ -393,18 +394,18 @@ namespace mapnik {
                     printf("\t");
                 if (r->count>0)
                     printf("%d: (+%d/%d/%.5f) (%d %d %d %d)\n",
-                           id, (int)r->count, (int)r->pixel_count, r->reduce_cost,
-                           (int)round(gamma(r->reds / r->count, gamma_)),
-                           (int)round(gamma(r->greens / r->count, gamma_)), 
-                           (int)round(gamma(r->blues / r->count, gamma_)),
-                           (int)(r->alphas / r->count));
+                           id, int(r->count), int(r->pixel_count), int(r->reduce_cost),
+                           rint(gamma(r->reds / r->count, gamma_)),
+                           rint(gamma(r->greens / r->count, gamma_)), 
+                           rint(gamma(r->blues / r->count, gamma_)),
+                           rint(r->alphas / r->count));
                 else
                     printf("%d: (%d/%d/%.5f) (%d %d %d %d)\n", id, 
-                           (int)r->count, (int)r->pixel_count, r->reduce_cost,
-                           (int)round(gamma(r->reds / r->pixel_count, gamma_)),
-                           (int)round(gamma(r->greens / r->pixel_count, gamma_)),
-                           (int)round(gamma(r->blues / r->pixel_count, gamma_)),
-                           (int)(r->alphas / r->pixel_count));
+                           int(r->count), int(r->pixel_count), int(r->reduce_cost),
+                           rint(gamma(r->reds / r->pixel_count, gamma_)),
+                           rint(gamma(r->greens / r->pixel_count, gamma_)),
+                           rint(gamma(r->blues / r->pixel_count, gamma_)),
+			   int(r->alphas / r->pixel_count));
                 for (unsigned idx=0; idx < 16; ++idx) if (r->children_[idx] != 0)
                 {
                     print_tree(r->children_[idx], d+1, idx);
@@ -422,9 +423,9 @@ namespace mapnik {
                     byte a = byte(itr->alphas/float(count));
                     if (a > InsertPolicy::MAX_ALPHA) a = 255;
                     if (a < InsertPolicy::MIN_ALPHA) a = 0;
-                    palette.push_back(rgba((byte)round(gamma(itr->reds   / count, gamma_)),
-                                           (byte)round(gamma(itr->greens / count, gamma_)),
-                                           (byte)round(gamma(itr->blues  / count, gamma_)), a));
+                    palette.push_back(rgba((byte)rint(gamma(itr->reds   / count, gamma_)),
+                                           (byte)rint(gamma(itr->greens / count, gamma_)),
+                                           (byte)rint(gamma(itr->blues  / count, gamma_)), a));
                 }
                 for (unsigned idx=0; idx < 16; ++idx) if (itr->children_[idx] != 0)
                 {
@@ -488,7 +489,7 @@ namespace mapnik {
                     }
                     tries=0;
                     // ignore leaves and also nodes with small mean error and not excessive number of pixels
-                    if (cur_node->reduce_cost / cur_node->pixel_count * log(cur_node->pixel_count) > 20
+                    if (cur_node->reduce_cost / cur_node->pixel_count * std::log(double(cur_node->pixel_count)) > 20
                             && cur_node->children_count > 0)
                     {
                         colors_--;
