@@ -39,7 +39,7 @@ if env['PLATFORM'] == 'Darwin':
     if env['HAS_BOOST_SYSTEM']:
         boost_system = 'boost_system%s' % env['BOOST_APPEND']
         libraries.append(boost_system)
-    libraries.append('mapnik')
+    libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
     libraries.append('boost_iostreams%s' % env['BOOST_APPEND'])
 

@@ -29,7 +29,7 @@ prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
 linkflags = ''
-libraries = ['mapnik','png','jpeg']
+libraries = ['mapnik2','png','jpeg']
 headers = [env['PYTHON_INCLUDES']] + env['CPPPATH']
 
 if env['BOOST_PYTHON_LIB']:

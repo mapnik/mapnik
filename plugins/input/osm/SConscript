@@ -38,7 +38,7 @@ osm_src = Split(
 libraries = [ 'xml2' ]
 libraries.append('curl')
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik')
+    libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
 
 osm_inputdriver = env.SharedLibrary('osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)

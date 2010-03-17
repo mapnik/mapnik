@@ -33,7 +33,7 @@ kismet_src = Split(
 
 libraries = []
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik')
+    libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
     libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 

@@ -36,7 +36,7 @@ occi_src = Split(
 
 libraries = [ 'occi', 'ociei' ]
 if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik')
+    libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
 
 occi_inputdriver = env.SharedLibrary('occi', source=occi_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
