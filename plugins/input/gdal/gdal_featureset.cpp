@@ -109,8 +109,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     box2d<double> box = t.forward(intersect);
 
     //size of resized output pixel in source image domain
-    double margin_x = 1.0/(fabs(dx)*q.resolution());
-    double margin_y = 1.0/(fabs(dy)*q.resolution());
+    double margin_x = 1.0/(fabs(dx)*boost::get<0>(q.resolution()));
+    double margin_y = 1.0/(fabs(dy)*boost::get<1>(q.resolution()));
     if (margin_x < 1)
         margin_x = 1.0;
     if (margin_y < 1)
