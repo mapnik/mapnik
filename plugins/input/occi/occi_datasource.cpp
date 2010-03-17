@@ -297,9 +297,9 @@ box2d<double> occi_datasource::envelope() const
     double lox, loy, hix, hiy;
     occi_connection_ptr conn (pool_);
 
-    boost::optional<std::string> estimate_extent = params_.get<std::string>("estimate_extent");
+    boost::optional<mapnik::boolean> estimate_extent = params_.get<mapnik::boolean>("estimate_extent",false);
          
-    if (estimate_extent && *estimate_extent == "true")
+    if (estimate_extent && *estimate_extent)
     {
         std::ostringstream s;
         s << "select min(c.x), min(c.y), max(c.x), max(c.y) from ";
