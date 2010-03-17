@@ -742,12 +742,6 @@ if not preconfigured:
     SOLARIS = env['PLATFORM'] == 'SunOS'
     env['SUNCC'] = SOLARIS and env['CXX'].startswith('CC')
     
-    # For Solaris include paths (e.g., for freetype2, ltdl, etc.).
-    if SOLARIS:
-        blastwave_dir = '/opt/csw/%s'
-        env.AppendUnique(CPPPATH = blastwave_dir % 'include')
-        env.AppendUnique(LIBPATH = blastwave_dir % LIBDIR_SCHEMA)
-    
     # If the Sun Studio C++ compiler (`CC`) is used instead of GCC.
     if env['SUNCC']:
         env['CC'] = 'cc'
