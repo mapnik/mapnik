@@ -469,7 +469,7 @@ namespace mapnik {
       //transparency values per palette index
       std::vector<mapnik::rgba> pal;
       tree.create_palette(pal);
-      assert(pal.size() <= colors);
+      assert(int(pal.size()) <= colors);
 
       std::vector<mapnik::rgb> palette;
       std::vector<unsigned> alphaTable;
