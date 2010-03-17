@@ -29,6 +29,7 @@ using mapnik::raster_colorizer;
 using mapnik::raster_colorizer_ptr;
 using mapnik::color_band;
 using mapnik::color_bands;
+using mapnik::color;
 
 namespace {
    void append_band1(raster_colorizer_ptr & rc, color_band b)
