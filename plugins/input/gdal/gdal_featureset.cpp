@@ -26,7 +26,7 @@
 
 // boost
 #include <boost/format.hpp>
-#define MAPNIK_DEBUG
+
 using mapnik::query;
 using mapnik::coord2d;
 using mapnik::Envelope;
