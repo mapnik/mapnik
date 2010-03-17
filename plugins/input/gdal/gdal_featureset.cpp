@@ -108,11 +108,18 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     box2d<double> intersect = raster_extent.intersect(q.get_bbox());
     box2d<double> box = t.forward(intersect);
 
+    //size of resized output pixel in source image domain
+    double margin_x = 1.0/(fabs(dx)*q.resolution());
+    double margin_y = 1.0/(fabs(dy)*q.resolution());
+    if (margin_x < 1)
+        margin_x = 1.0;
+    if (margin_y < 1)
+        margin_y = 1.0;
     //select minimum raster containing whole box
-    int x_off = static_cast<int>(floor(box.minx()));
-    int y_off = static_cast<int>(floor(box.miny()));
-    int end_x = static_cast<int>(ceil(box.maxx()));
-    int end_y = static_cast<int>(ceil(box.maxy()));
+    int x_off = rint(box.minx() - margin_x);
+    int y_off = rint(box.miny() - margin_y);
+    int end_x = rint(box.maxx() + margin_x);
+    int end_y = rint(box.maxy() + margin_y);
     //clip to available data
     if (x_off < 0)
         x_off = 0;
