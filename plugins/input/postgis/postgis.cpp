@@ -561,7 +561,7 @@ Envelope<double> postgis_datasource::envelope() const
       {
          PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
          std::ostringstream s;
-         boost::optional<std::string> estimate_extent = params_.get<std::string>("estimate_extent");
+         boost::optional<mapnik::boolean> estimate_extent = params_.get<mapnik::boolean>("estimate_extent",false);
 
          if (!geometryColumn_.length() > 0)
          {
@@ -574,18 +574,18 @@ Envelope<double> postgis_datasource::envelope() const
              throw mapnik::datasource_exception(s_error.str());
          }
 
-         if (estimate_extent && *estimate_extent == "true")
+         if (estimate_extent && *estimate_extent)
          {
              s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
                << " from (select estimated_extent('";
 
              if (schema_.length() > 0)
              {
-                 s << schema_ << "','";
+                 s << unquote(schema_) << "','";
              }
 
-             s << geometry_table_ << "','"
-               << geometryColumn_ << "') as ext) as tmp";
+             s << unquote(geometry_table_) << "','"
+               << unquote(geometryColumn_) << "') as ext) as tmp";
          }
          else
          {
@@ -614,7 +614,7 @@ Envelope<double> postgis_datasource::envelope() const
          {
              clog << boost::format("PostGIS: sending query: %s\n") % s.str();
          }*/
-                     
+            
          shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
          if (rs->next())
          {
