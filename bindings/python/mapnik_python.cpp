@@ -60,6 +60,7 @@ void export_projection();
 void export_proj_transform();
 void export_view_transform();
 void export_raster_colorizer();
+void export_glyph_symbolizer();
 
 #include <mapnik/version.hpp>
 #include <mapnik/map.hpp>
@@ -333,6 +334,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_coord();
     export_map();
     export_raster_colorizer();
+    export_glyph_symbolizer();
 
     def("render_to_file",&render_to_file1,
         "\n"

@@ -1041,6 +1041,12 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 {
 }
 
+void cairo_renderer_base::process(glyph_symbolizer const& sym,
+				  Feature const& feature,
+				  proj_transform const& prj_trans)
+{
+}
+
 void cairo_renderer_base::process(text_symbolizer const& sym,
 				  Feature const& feature,
 				  proj_transform const& prj_trans)

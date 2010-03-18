@@ -624,6 +624,37 @@ struct to_expression_string : public boost::static_visitor<std::string>
 	return ss.str();
     }
 };
+
+struct to_double : public boost::static_visitor<double>
+{
+    double operator() (double val) const
+    {
+        return val;
+    }
+
+    double operator() (std::string const& val) const
+    {
+        std::istringstream stream(val);
+        double t;
+        stream >> t;
+        return t;
+    } 
+    double operator() (UnicodeString const& val) const
+    {
+        std::string utf8;
+        to_utf8(val,utf8);
+        std::istringstream stream(utf8);
+        double t;
+        stream >> t;
+        return t;
+    } 
+            
+    double operator() (value_null const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return 0.0;
+    }
+};
 }
 
 class value
@@ -696,6 +727,12 @@ public:
     {
 	return boost::apply_visitor(impl::to_unicode(),base_);
     }
+
+    double to_double() const
+    {
+	return boost::apply_visitor(impl::to_double(),base_);
+    }
+
 };
    
 inline const value operator+(value const& p1,value const& p2)

@@ -27,6 +27,7 @@
 #define __TEXT_PATH_H__
 
 #include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
 #include <unicode/unistr.h>
 
 namespace mapnik
@@ -164,6 +165,8 @@ namespace mapnik
             nodes_.clear();
          }
    };
+
+   typedef boost::shared_ptr<text_path> text_path_ptr;
 }
 
 #endif

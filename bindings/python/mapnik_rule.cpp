@@ -44,6 +44,7 @@ using mapnik::shield_symbolizer;
 using mapnik::text_symbolizer;
 using mapnik::building_symbolizer;
 using mapnik::markers_symbolizer;
+using mapnik::glyph_symbolizer;
 using mapnik::symbolizer;
 using mapnik::to_expression_string;
 
@@ -161,6 +162,7 @@ void export_rule()
     implicitly_convertible<raster_symbolizer,symbolizer>();
     implicitly_convertible<shield_symbolizer,symbolizer>();
     implicitly_convertible<text_symbolizer,symbolizer>();
+    implicitly_convertible<glyph_symbolizer,symbolizer>();
     
     class_<rule_type::symbolizers>("Symbolizers",init<>("TODO"))
     	.def(vector_indexing_suite<rule_type::symbolizers>())

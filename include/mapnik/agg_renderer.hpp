@@ -83,6 +83,9 @@ namespace mapnik {
       void process(markers_symbolizer const& sym,
                    Feature const& feature,
                    proj_transform const& prj_trans);
+      void process(glyph_symbolizer const& sym,
+                   Feature const& feature,
+                   proj_transform const& prj_trans);
      private:
       T & pixmap_;
       unsigned width_;

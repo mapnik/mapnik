@@ -252,10 +252,15 @@ namespace mapnik
                 }
             }
 
-          void operator () ( markers_symbolizer const& )
-          {
-             // FIXME!!!!!
-          }
+            void operator () ( markers_symbolizer const& )
+            {
+               // FIXME!!!!!
+            }
+
+            void operator () ( glyph_symbolizer const& )
+            {
+               // FIXME!!!!!
+            }
         private:
             serialize_symbolizer();
             void add_image_attributes(ptree & node, const symbolizer_with_image & sym)

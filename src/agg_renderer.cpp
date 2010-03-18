@@ -945,5 +945,13 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 	}
     }
 }
+
+template <typename T>
+void agg_renderer<T>::process(glyph_symbolizer const& sym,
+			      Feature const& feature,
+			      proj_transform const& prj_trans)
+{
+}
+
 template class agg_renderer<image_32>;
 }
