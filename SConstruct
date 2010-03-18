@@ -820,20 +820,17 @@ if not preconfigured:
     conf.FindBoost(BOOST_SEARCH_PREFIXES,thread_flag)
     
     # boost system is used in boost 1.35 and greater
-    has_boost_system = False
+    env['HAS_BOOST_SYSTEM'] = False
     boost_lib_version_from_header = conf.GetBoostLibVersion()
     if boost_lib_version_from_header:
         boost_version_from_header = int(boost_lib_version_from_header.split('_')[1])
         if boost_version_from_header >= 35:
-            has_boost_system = True
             env['HAS_BOOST_SYSTEM'] = True
-        else:
-            has_boost_system = False
-            env['HAS_BOOST_SYSTEM'] = False
+            
     
     # The other required boost headers.
     BOOST_LIBSHEADERS = [
-        ['system', 'boost/system/system_error.hpp', has_boost_system],
+        ['system', 'boost/system/system_error.hpp', env['HAS_BOOST_SYSTEM']],
         ['filesystem', 'boost/filesystem/operations.hpp', True],
         ['regex', 'boost/regex.hpp', True],
         ['iostreams','boost/iostreams/device/mapped_file.hpp',True],
