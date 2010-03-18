@@ -31,6 +31,7 @@
 #include <boost/variant.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp>
+#include <boost/lexical_cast.hpp>
 // stl
 #include <iostream>
 #include <string>
@@ -627,6 +628,11 @@ struct to_expression_string : public boost::static_visitor<std::string>
 
 struct to_double : public boost::static_visitor<double>
 {
+    double operator() (int val) const
+    {
+        return static_cast<double>(val);
+    }
+
     double operator() (double val) const
     {
         return val;
@@ -634,19 +640,13 @@ struct to_double : public boost::static_visitor<double>
 
     double operator() (std::string const& val) const
     {
-        std::istringstream stream(val);
-        double t;
-        stream >> t;
-        return t;
+        return boost::lexical_cast<double>(val);
     } 
     double operator() (UnicodeString const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
-        std::istringstream stream(utf8);
-        double t;
-        stream >> t;
-        return t;
+        return boost::lexical_cast<double>(utf8);
     } 
             
     double operator() (value_null const& val) const
@@ -655,6 +655,37 @@ struct to_double : public boost::static_visitor<double>
         return 0.0;
     }
 };
+
+struct to_int : public boost::static_visitor<double>
+{
+    int operator() (int val) const
+    {
+        return val;
+    }
+
+    int operator() (double val) const
+    {
+        return rint(val);
+    }
+
+    int operator() (std::string const& val) const
+    {
+        return boost::lexical_cast<int>(val);
+    } 
+    int operator() (UnicodeString const& val) const
+    {
+        std::string utf8;
+        to_utf8(val,utf8);
+        return boost::lexical_cast<int>(utf8);
+    } 
+            
+    int operator() (value_null const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return 0;
+    }
+};
+
 }
 
 class value
@@ -731,6 +762,11 @@ public:
     double to_double() const
     {
 	return boost::apply_visitor(impl::to_double(),base_);
+    }
+
+    double to_int() const
+    {
+	return boost::apply_visitor(impl::to_int(),base_);
     }
 
 };

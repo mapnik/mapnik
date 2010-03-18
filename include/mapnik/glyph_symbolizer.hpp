@@ -1,11 +1,14 @@
-#ifndef ARROW_SYMBOLIZER_HPP
-#define ARROW_SYMBOLIZER_HPP
+#ifndef GLYPH_SYMBOLIZER_HPP
+#define GLYPH_SYMBOLIZER_HPP
 
 // mapnik
 #include  <mapnik/raster_colorizer.hpp>
 #include <mapnik/expression_node.hpp>
 #include  <mapnik/text_path.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/unicode.hpp>
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -143,6 +146,10 @@ struct MAPNIK_DECL glyph_symbolizer
 
     text_path_ptr get_text_path(face_set_ptr const& faces,
                                 Feature const& feature) const;
+    UnicodeString eval_char(Feature const& feature) const;
+    double eval_angle(Feature const& feature) const;
+    unsigned eval_size(Feature const& feature) const;
+    color eval_color(Feature const& feature) const;
 
 
 private:

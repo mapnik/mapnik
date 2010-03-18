@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from python_tests.utilities import TodoPlugin
+from nose.plugins.doctests import Doctest
 
 import nose, sys, os, getopt
 
@@ -52,7 +53,7 @@ def main():
         print "- Running nosetests:"
         print
 
-    argv = [__file__, '--exe', '--with-todo']
+    argv = [__file__, '--exe', '--with-todo', '--with-doctest', '--doctest-tests']
 
     if not quiet:
         argv.append('-v')
@@ -62,7 +63,7 @@ def main():
         argv.append('-v')
         argv.append('-v')
 
-    if not nose.run(argv=argv, plugins=[TodoPlugin()]):
+    if not nose.run(argv=argv, plugins=[TodoPlugin(), Doctest()]):
         sys.exit(1)
     else:
         sys.exit(0)

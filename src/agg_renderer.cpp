@@ -951,6 +951,59 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
 			      Feature const& feature,
 			      proj_transform const& prj_trans)
 {
+    typedef  coord_transform2<CoordTransform,geometry2d> path_type;
+
+    face_set_ptr faces = font_manager_.get_face_set(sym.get_face_name());
+    if (faces->size() > 0)
+    {
+        // Get x and y from geometry and translate to pixmap coords.
+        double x, y, z=0.0;
+        feature.get_geometry(0).label_position(&x, &y);
+        prj_trans.backward(x,y,z);
+        t_.forward(&x, &y);
+
+        // configure text renderer
+        //
+        text_renderer<T> ren(pixmap_, faces);
+        ren.set_pixel_size(sym.eval_size(feature));
+        color fill = sym.eval_color(feature);
+        ren.set_fill(fill);
+        if (fill != color("transparent")) {
+            ren.set_halo_fill(sym.get_halo_fill());
+            ren.set_halo_radius(sym.get_halo_radius());
+        }
+
+        // Get and render text path
+        //
+        text_path_ptr path = sym.get_text_path(faces, feature);
+        // apply displacement
+        position pos = sym.get_displacement();
+        double dx = boost::get<0>(pos);
+        double dy = boost::get<1>(pos);
+        path->starting_x = x = x+dx;
+        path->starting_y = y = y+dy;
+
+        // Prepare glyphs to set internal state and calculate the marker's
+        // final box so we can check for a valid placement
+        box2d<double> dim = ren.prepare_glyphs(path.get());
+        double bsize = (dim.width()>dim.height()?dim.width():dim.height())/2;
+        box2d<double> ext(
+            floor(x-bsize), floor(y-bsize), ceil(x+bsize), ceil(y+bsize)
+            );
+        if ((sym.get_allow_overlap() || detector_.has_placement(ext)) &&
+            (!sym.get_avoid_edges() || detector_.extent().contains(ext)))
+        {    
+           // Placement is valid, render glyph and update detector.
+           ren.render(x, y);
+           detector_.insert(ext);
+        }
+    }
+    else
+    {
+        throw config_error(
+            "Unable to find specified font face in GlyphSymbolizer"
+            );
+    }
 }
 
 template class agg_renderer<image_32>;

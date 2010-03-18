@@ -28,3 +28,24 @@ def save_data(filename, data, key='MAPNIK_TEST_DATA_DIR'):
             f.write(data)
         finally:
             f.close()
+
+def contains_word(word, bytestring_):
+    """
+    Checks that a bytestring contains a given word. len(bytestring) should be
+    a multiple of len(word).
+
+    >>> contains_word("abcd", "abcd"*5)
+    True
+
+    >>> contains_word("ab", "ba"*5)
+    False
+
+    >>> contains_word("ab", "ab"*5+"a")
+    Traceback (most recent call last):
+    ...
+    AssertionError: len(bytestring_) not multiple of len(word)
+    """
+    n = len(word)
+    assert len(bytestring_)%n == 0, "len(bytestring_) not multiple of len(word)"
+    chunks = [bytestring_[i:i+n] for i in xrange(0, len(bytestring_), n)]
+    return word in chunks

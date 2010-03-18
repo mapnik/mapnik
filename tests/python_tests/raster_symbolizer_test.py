@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, save_data
+from utilities import execution_path, save_data, contains_word
 
 import os, mapnik2
 
@@ -52,9 +52,8 @@ def test_dataraster_coloring():
     # save a png somewhere so we can see it
     save_data('test_dataraster_coloring.png', im.tostring('png'))
     imdata = im.tostring()
-    bytes = [imdata[i:i+4] for i in xrange(0, len(imdata), 4)]
     # we have some values in the [20,30) interval so check that they're colored
-    assert '\xff\xff\x00\xff' in bytes
+    assert contains_word('\xff\xff\x00\xff', imdata)
 
 def test_dataraster_query_point():
     srs = '+init=epsg:32630'
