@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, save_data
+from utilities import execution_path, save_data, Todo
 
 import os, mapnik2
 
@@ -11,7 +11,7 @@ def setup():
     os.chdir(execution_path('.'))
     
 
-def test_arrows_symbolizer():
+def test_glyph_symbolizer():
     srs = '+init=epsg:32630'
     lyr = mapnik2.Layer('arrows')
     lyr.datasource = mapnik2.Shapefile(
@@ -21,16 +21,11 @@ def test_arrows_symbolizer():
     _map = mapnik2.Map(256,256, srs)
     style = mapnik2.Style()
     rule = mapnik2.Rule()
-    rule.filter = mapnik2.Expression("[value] > 0 and [azimuth]>-1") #XXX Need to mention an attribute in the expression
-    sym = mapnik2.GlyphSymbolizer("DejaVu Sans Condensed", "A")
-    sym.angle_offset = -90
-    sym.min_value = 1
-    sym.max_value = 100
-    sym.min_size = 1
-    sym.max_size = 100
+    sym = mapnik2.GlyphSymbolizer("DejaVu Sans Condensed", mapnik2.Expression("'A'"))
     sym.allow_overlap = True
-    # Assigning a colorizer to the RasterSymbolizer tells the later
-    # that it should use it to colorize the raw data raster
+    sym.angle = mapnik2.Expression("[azimuth]-90")
+    sym.value = mapnik2.Expression("[value]")
+    sym.size = mapnik2.Expression("[value]")
     sym.colorizer = mapnik2.RasterColorizer()
     for value, color in [
         (  0, "#0044cc"),
@@ -49,9 +44,24 @@ def test_arrows_symbolizer():
 
     im = mapnik2.Image(_map.width,_map.height)
     mapnik2.render(_map, im)
-    save_data('test_arrows_symbolizer.png', im.tostring('png'))
+    save_data('test_glyph_symbolizer.png', im.tostring('png'))
     imdata = im.tostring()
     assert len(imdata) > 0
+
+    raise Todo("Implement the process methods of the agg/cairo renderers for GlyphSymbolizer")
+
     # we have features with 20 as a value so check that they're colored
     assert '\xff\xff\xff\x00' in imdata
 
+def test_load_save_map():
+    raise Todo("Implement XML de/serialization for GlyphSymbolizer")
+
+    map = mapnik2.Map(256,256)
+    in_map = "../data/good_maps/glyph_symbolizer.xml"
+    mapnik2.load_map(map, in_map)
+
+    out_map = mapnik2.save_map_to_string(map)
+    assert 'GlyphSymbolizer' in out_map
+    assert 'RasterSymbolizer' in out_map
+    assert 'RasterColorizer' in out_map
+    assert 'ColorBand' in out_map
