@@ -144,6 +144,44 @@ struct symbolizer_attributes : public boost::static_visitor<>
 	}
     }
 
+    void operator () (glyph_symbolizer const& sym)
+    {
+        expression_ptr const& char_expr = sym.get_char();
+        if (char_expr)
+        {
+            expression_attributes f_attr(names_);
+            boost::apply_visitor(f_attr,*char_expr);
+        }
+
+        expression_ptr const& angle_expr = sym.get_angle();
+        if (angle_expr)
+        {
+            expression_attributes f_attr(names_);
+            boost::apply_visitor(f_attr,*angle_expr);
+        }
+
+        expression_ptr const& value_expr = sym.get_value();
+        if (value_expr)
+        {
+            expression_attributes f_attr(names_);
+            boost::apply_visitor(f_attr,*value_expr);
+        }
+
+        expression_ptr const& size_expr = sym.get_size();
+        if (size_expr)
+        {
+            expression_attributes f_attr(names_);
+            boost::apply_visitor(f_attr,*size_expr);
+        }
+
+        expression_ptr const& color_expr = sym.get_color();
+        if (color_expr)
+        {
+            expression_attributes f_attr(names_);
+            boost::apply_visitor(f_attr,*color_expr);
+        }
+
+    }
     // TODO - support remaining syms
     
 private:

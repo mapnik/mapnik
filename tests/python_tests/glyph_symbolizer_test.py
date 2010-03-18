@@ -50,12 +50,9 @@ def create_map_and_append_symbolyzer(sym):
     _map = mapnik2.Map(256,256, srs)
     style = mapnik2.Style()
     rule = mapnik2.Rule()
-    #TODO Investigate why I need to add a filter which refers to the
-    #     feature property that the symbolizer needs so they don't reach
-    #     to it as nulls.
-    rule.filter = mapnik2.Filter('[azimuth]>=0 and [value]>=0') #XXX
     rule.symbols.append(sym)
 
+    # put a test symbolizer to see what is the azimuth being read
     ts = mapnik2.TextSymbolizer(mapnik2.Expression('[azimuth]'),
                                "DejaVu Sans Book",
                                10,
