@@ -49,6 +49,8 @@ def test_load_save_load_map():
     mapnik2.load_map_from_string(map, out_map.encode('utf8'))
     assert 'GlyphSymbolizer' in out_map
     assert 'RasterColorizer' in out_map
+    # make sure non-ascii characters are well supported since most interesting
+    # glyphs for symbology are usually in that range
     assert u'í' in out_map, out_map
 
 #

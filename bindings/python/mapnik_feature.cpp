@@ -31,8 +31,21 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/wkb.hpp>
 
 mapnik::geometry2d & (mapnik::Feature::*get_geom1)(unsigned) = &mapnik::Feature::get_geometry;
+
+namespace {
+
+using mapnik::Feature;
+using mapnik::geometry_utils;
+
+void feature_add_wkb_geometry(Feature &feature, std::string wkb)
+{
+    geometry_utils::from_wkb(feature, wkb.c_str(), wkb.size(), true);
+}
+
+} // end anonymous namespace
 
 namespace boost { namespace python {
 struct value_converter : public boost::static_visitor<PyObject*>
@@ -253,12 +266,12 @@ void export_feature()
     //UnicodeString_from_python_str();
    
     class_<Feature,boost::shared_ptr<Feature>,
-	boost::noncopyable>("Feature",no_init)
+	boost::noncopyable>("Feature",init<int>("Default ctor."))
 	.def("id",&Feature::id)
 	.def("__str__",&Feature::to_string)
 //	.add_property("properties", 
 //		      make_function(&Feature::props,return_value_policy<reference_existing_object>()))
-    //      .def("add_geometry", // TODO define more mapnik::Feature methods
+    .def("add_geometry", &feature_add_wkb_geometry)
 	.def("num_geometries",&Feature::num_geometries)
 	.def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
 	.def("envelope", &Feature::envelope)
@@ -266,6 +279,8 @@ void export_feature()
 	//.staticmethod("create")
 	.def(map_indexing_suite2<Feature, true >())
 	.def("iteritems",iterator<Feature> ())
+
+    // TODO define more mapnik::Feature methods
 	;
    
 //def("Feature", &create_feature_);
