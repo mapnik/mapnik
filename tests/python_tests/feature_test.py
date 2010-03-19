@@ -23,12 +23,7 @@ class FeatureTest(unittest.TestCase):
             except TypeError:
                 self.fail("%r (%s)"%(expected, type(expected)))
             self.failUnlessEqual(f[key], expected)
-        for v in (1, True, 1.4):
-            test_val(v)
-
-        raise Todo("Support setting unicode and string properties")
-
-        for v in ("foo", u"foó"):
+        for v in (1, True, 1.4, "foo", u"avión"):
             test_val(v)
 
     def test_add_wkb_geometry_(self):

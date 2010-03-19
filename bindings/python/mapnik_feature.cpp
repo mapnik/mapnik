@@ -219,37 +219,47 @@ mapnik::feature_ptr create_feature_(int id)
 {
     return mapnik::feature_ptr(new mapnik::Feature(id));
 }
+*/
 
 struct UnicodeString_from_python_str
 {
     UnicodeString_from_python_str()
     {
-	boost::python::converter::registry::push_back(
-	    &convertible,
-	    &construct,
-	    boost::python::type_id<UnicodeString>());
+        boost::python::converter::registry::push_back(
+            &convertible,
+            &construct,
+            boost::python::type_id<UnicodeString>());
     }
 
     static void* convertible(PyObject* obj_ptr)
     {
-	if (!PyString_Check(obj_ptr)) return 0;
-	return obj_ptr;
+        if (!(PyString_Check(obj_ptr) || PyUnicode_Check(obj_ptr)))
+            return 0;
+        return obj_ptr;
     }
 
     static void construct(
-	PyObject* obj_ptr,
-	boost::python::converter::rvalue_from_python_stage1_data* data)
+        PyObject* obj_ptr,
+        boost::python::converter::rvalue_from_python_stage1_data* data)
     {
-	const char* value = PyString_AsString(obj_ptr);
-	if (value == 0) boost::python::throw_error_already_set();
-	void* storage = (
-	    (boost::python::converter::rvalue_from_python_storage<UnicodeString>*)
-	    data)->storage.bytes;
-	new (storage) UnicodeString(value);
-	data->convertible = storage;
+        char * value=0;
+        if (PyUnicode_Check(obj_ptr)) {
+            PyObject *encoded = PyUnicode_AsEncodedString(obj_ptr, "utf8", "replace");
+            if (encoded) {
+                value = PyString_AsString(encoded);
+                Py_DecRef(encoded);
+            }
+        } else {
+            value = PyString_AsString(obj_ptr);
+        }
+        if (value == 0) boost::python::throw_error_already_set();
+        void* storage = (
+            (boost::python::converter::rvalue_from_python_storage<UnicodeString>*)
+            data)->storage.bytes;
+        new (storage) UnicodeString(value);
+        data->convertible = storage;
     }
 };
-*/
 
 void export_feature()
 {
@@ -258,12 +268,12 @@ void export_feature()
       
     implicitly_convertible<int,mapnik::value>();
     implicitly_convertible<double,mapnik::value>();
-    //implicitly_convertible<UnicodeString,mapnik::value>();
+    implicitly_convertible<UnicodeString,mapnik::value>();
     implicitly_convertible<bool,mapnik::value>();
 
     std_pair_to_python_converter<std::string const,mapnik::value>();
     to_python_converter<mapnik::value,mapnik_value_to_python>();
-    //UnicodeString_from_python_str();
+    UnicodeString_from_python_str();
    
     class_<Feature,boost::shared_ptr<Feature>,
 	boost::noncopyable>("Feature",init<int>("Default ctor."))
