@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, save_data, Todo, contains_word
+from utilities import execution_path, save_data, contains_word
 
 import os, mapnik2
 
@@ -39,16 +39,17 @@ def test_renders_with_cairo():
     save_data('cairo_glyph_symbolizer.png', im.tostring('png'))
     assert contains_word('\xff\x00\x00\xff', im.tostring())
 
-def test_load_save_map():
-    raise Todo("Implement XML de/serialization for GlyphSymbolizer")
-
+def test_load_save_load_map():
     map = mapnik2.Map(256,256)
     in_map = "../data/good_maps/glyph_symbolizer.xml"
     mapnik2.load_map(map, in_map)
 
-    out_map = mapnik2.save_map_to_string(map)
+    out_map = mapnik2.save_map_to_string(map).decode('utf8')
+    map = mapnik2.Map(256,256)
+    mapnik2.load_map_from_string(map, out_map.encode('utf8'))
     assert 'GlyphSymbolizer' in out_map
     assert 'RasterColorizer' in out_map
+    assert u'í' in out_map, out_map
 
 #
 # Utilities and setup code

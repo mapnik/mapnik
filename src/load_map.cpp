@@ -91,8 +91,10 @@ namespace mapnik
          void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
          void parse_building_symbolizer( rule_type & rule, ptree const & sym );
          void parse_raster_symbolizer( rule_type & rule, ptree const & sym );
-         void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
          void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
+         void parse_glyph_symbolizer( rule_type & rule, ptree const & sym );
+
+         void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
 
          void ensure_font_face( const std::string & face_name );
 
@@ -625,6 +627,10 @@ namespace mapnik
                 else if ( sym.first == "MarkersSymbolizer")
                 {
                     rule.append(markers_symbolizer());
+                }
+                else if ( sym.first == "GlyphSymbolizer")
+                {
+                    parse_glyph_symbolizer( rule, sym.second );
                 }
 
                 else if ( sym.first != "MinScaleDenominator" &&
@@ -1515,6 +1521,114 @@ namespace mapnik
             throw;
         }
     }
+
+    void map_parser::parse_glyph_symbolizer(rule_type & rule, ptree const &sym)
+    {
+        try
+        {
+            // Parse required constructor args
+            std::string face_name = get_attr<std::string>(sym, "face_name");
+            std::string _char = get_attr<std::string>(sym, "char");
+
+            glyph_symbolizer glyph_sym = glyph_symbolizer(
+                face_name,
+                parse_expression(_char, "utf8")
+                );
+
+            //
+            // parse and set optional attrs.
+            //
+
+            // angle
+            optional<std::string> angle =
+                 get_opt_attr<std::string>(sym, "angle");
+            if (angle)
+                glyph_sym.set_angle(parse_expression(*angle, "utf8"));
+	    	    
+            // value
+            optional<std::string> value =
+                 get_opt_attr<std::string>(sym, "value");
+            if (value)
+                glyph_sym.set_value(parse_expression(*value, "utf8"));
+
+            // size
+            optional<std::string> size =
+                 get_opt_attr<std::string>(sym, "size");
+            if (size)
+                glyph_sym.set_size(parse_expression(*size, "utf8"));
+
+            // color
+            optional<std::string> _color =
+                 get_opt_attr<std::string>(sym, "color");
+            if (_color)
+                glyph_sym.set_color(parse_expression(*_color, "utf8"));
+
+            // halo_fill
+            optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
+            if (halo_fill)
+                glyph_sym.set_halo_fill(*halo_fill);
+
+            // halo_radius
+            optional<unsigned> halo_radius = get_opt_attr<unsigned>(
+                sym,
+                "halo_radius");
+            if (halo_radius)
+                glyph_sym.set_halo_radius(*halo_radius);
+
+            // allow_overlap
+            optional<boolean> allow_overlap = get_opt_attr<boolean>(
+                sym,
+                "allow_overlap"
+                );
+            if (allow_overlap)
+                glyph_sym.set_allow_overlap(*allow_overlap);
+
+            // avoid_edges
+            optional<boolean> avoid_edges = get_opt_attr<boolean>(
+                sym,
+                "avoid_edges"
+                );
+            if (avoid_edges)
+                glyph_sym.set_avoid_edges(*avoid_edges);
+
+            // displacement
+            optional<double> dx = get_opt_attr<double>(sym, "dx");
+            optional<double> dy = get_opt_attr<double>(sym, "dy");
+            if (dx && dy)
+                glyph_sym.set_displacement(*dx, *dy);
+
+            // colorizer
+            ptree::const_iterator childIter = sym.begin();
+            ptree::const_iterator endChild = sym.end();
+
+            for (; childIter != endChild; ++childIter)
+            {
+                ptree::value_type const& tag = *childIter;
+
+                if (tag.first == "RasterColorizer")
+                {
+                   raster_colorizer_ptr colorizer(new raster_colorizer());
+                   glyph_sym.set_colorizer(colorizer);
+                   parse_raster_colorizer(colorizer, tag.second);
+                }
+                else if (tag.first!="<xmlcomment>" && tag.first!="<xmlattr>" )
+                {
+                    throw config_error(std::string("Unknown child node. ") +
+                                       "Expected 'RasterColorizer' but got '" +
+                                       tag.first + "'");
+                }
+            }
+
+
+            rule.append(glyph_sym);
+        }
+        catch (const config_error & ex)
+        {
+            ex.append_context("in GlyphSymbolizer");
+            throw;
+        }
+    }
+
     void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
                                             ptree const& node )
     {

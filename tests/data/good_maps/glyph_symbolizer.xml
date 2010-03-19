@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map>
+    <Style name="arrows">
+    <Rule>
+      <GlyphSymbolizer
+        face_name="DejaVu Sans Condensed"
+        char="'í'"
+        allow_overlap="1"
+        avoid_edges="0"
+        halo_fill="rgba(0%,0%,0%,0.4%)"
+        halo_radius="1"
+        value="[value]"
+        angle="[azumuth]+90"
+      >
+        <RasterColorizer>
+          <ColorBand value="0" color="#0044cc"/>
+          <ColorBand value="10" color="#00cc00"/>
+          <ColorBand value="20" color="#ffff00"/>
+        </RasterColorizer>
+      </GlyphSymbolizer>
+    </Rule>
+  </Style>
+</Map>

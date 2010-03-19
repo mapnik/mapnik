@@ -257,10 +257,72 @@ namespace mapnik
                // FIXME!!!!!
             }
 
-            void operator () ( glyph_symbolizer const& )
+            void operator () ( glyph_symbolizer const& sym)
             {
-               // FIXME!!!!!
+                ptree &node = rule_.push_back(
+                    ptree::value_type("GlyphSymbolizer", ptree())
+                    )->second;
+
+                // face_name
+                set_attr( node, "face_name", sym.get_face_name() );    
+
+                // char
+                if (sym.get_char()) {
+                    const std::string &str =
+                        to_expression_string(sym.get_char());
+                    set_attr( node, "char", str );
+                }
+
+                // angle
+                if (sym.get_angle()) {
+                    const std::string &str =
+                        to_expression_string(sym.get_angle());
+                    set_attr( node, "angle", str );
+                }
+
+                // value
+                if (sym.get_value()) {
+                    const std::string &str =
+                        to_expression_string(sym.get_value());
+                    set_attr( node, "value", str );
+                }
+
+                // size
+                if (sym.get_size()) {
+                    const std::string &str =
+                        to_expression_string(sym.get_size());
+                    set_attr( node, "size", str );
+                }
+
+                // color
+                if (sym.get_color()) {
+                    const std::string &str =
+                        to_expression_string(sym.get_color());
+                    set_attr( node, "color", str );
+                }
+
+                // colorizer
+                if (sym.get_colorizer()) {
+                   serialize_raster_colorizer(node, sym.get_colorizer(),
+                                              explicit_defaults_);
+                }
+
+                // allow_overlap
+                set_attr( node, "allow_overlap", sym.get_allow_overlap() );    
+
+                // avoid_edges
+                set_attr( node, "avoid_edges", sym.get_avoid_edges() );    
+
+                // displacement
+                position displacement = sym.get_displacement();
+                set_attr( node, "dx", displacement.get<0>() );    
+                set_attr( node, "dy", displacement.get<1>() );    
+
+                // halo fill & radius
+                set_attr( node, "halo_fill", sym.get_halo_fill() );    
+                set_attr( node, "halo_radius", sym.get_halo_radius() );    
             }
+
         private:
             serialize_symbolizer();
             void add_image_attributes(ptree & node, const symbolizer_with_image & sym)
