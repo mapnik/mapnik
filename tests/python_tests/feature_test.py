@@ -30,3 +30,20 @@ class FeatureTest(unittest.TestCase):
 
         for v in ("foo", u"foó"):
             test_val(v)
+
+    def test_add_wkb_geometry_(self):
+        try:
+            from shapely.geometry import Point
+        except ImportError:
+            raise Todo("Make this test not dependant on shapely")
+
+        f = self.makeOne(1)
+        self.failUnlessEqual(f.num_geometries(), 0)
+        f.add_geometry(Point(3,6).wkb)
+        self.failUnlessEqual(f.num_geometries(), 1)
+        geom = f.get_geometry(0)
+        env = geom.envelope()
+        self.failUnlessEqual(env.minx, 3)
+        self.failUnlessEqual(env.minx, env.maxx)
+        self.failUnlessEqual(env.miny, 6)
+        self.failUnlessEqual(env.miny, env.maxy)
