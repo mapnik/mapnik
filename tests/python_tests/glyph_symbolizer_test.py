@@ -36,7 +36,7 @@ def test_renders_with_cairo():
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 256, 256)
     mapnik2.render(_map, surface)
     im = mapnik2.Image.from_cairo(surface)
-    save_data('agg_glyph_symbolizer.png', im.tostring('png'))
+    save_data('cairo_glyph_symbolizer.png', im.tostring('png'))
     assert contains_word('\xff\x00\x00\xff', im.tostring())
 
 def test_load_save_map():
