@@ -76,7 +76,11 @@ namespace mapnik {
 
     featureset_ptr memory_datasource::features_at_point(coord2d const& pt) const
     {
-        return featureset_ptr();
+        box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
+#ifdef MAPNIK_DEBUG
+    std::clog << "box=" << box << ", pt x=" << pt.x << ", y=" << pt.y << "\n";
+#endif
+        return featureset_ptr(new memory_featureset(box,*this));
     }
     
     box2d<double> memory_datasource::envelope() const

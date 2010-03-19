@@ -45,6 +45,9 @@ namespace mapnik {
             {
                 for  (unsigned i=0; i<(*pos_)->num_geometries();++i) {
                     geometry2d & geom = (*pos_)->get_geometry(i);
+#ifdef MAPNIK_DEBUG
+    std::clog << "bbox_=" << bbox_ << ", geom.envelope=" << geom.envelope() << "\n";
+#endif
                     if (bbox_.intersects(geom.envelope()))
                     {
                         return *pos_++;
@@ -57,7 +60,7 @@ namespace mapnik {
         }
         
     private:
-        box2d<double> const& bbox_;
+        box2d<double> bbox_;
         std::vector<feature_ptr>::const_iterator pos_;
         std::vector<feature_ptr>::const_iterator end_; 
     };
