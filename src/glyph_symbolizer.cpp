@@ -11,10 +11,12 @@ text_path_ptr glyph_symbolizer::get_text_path(face_set_ptr const& faces,
     UnicodeString char_ = eval_char(feature);
     double angle = eval_angle(feature);
 
-    // calculate displacement so glyph is rotated along center (default is
+    // calculate displacement so glyph is rotated along center (default pivot is
     // lowerbottom corner)
     string_info info(char_);
     faces->get_string_info(info);
+
+    // XXX: Perhaps this limitation can be overcomed?
     if (info.num_characters() != 1)
     {
         throw config_error("'char' length must be exactly 1");
@@ -38,8 +40,12 @@ text_path_ptr glyph_symbolizer::get_text_path(face_set_ptr const& faces,
 UnicodeString glyph_symbolizer::eval_char(Feature const& feature) const
 {
     expression_ptr expr = get_char();
-    if (!expr) throw config_error("No 'char' expression");
-    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*expr);
+    if (!expr)
+        throw config_error("No 'char' expression");
+    value_type result = boost::apply_visitor(
+        evaluate<Feature,value_type>(feature),
+        *expr
+        );
     return result.to_unicode();
 }
 
@@ -62,7 +68,6 @@ double glyph_symbolizer::eval_angle(Feature const& feature) const
         }
         if (angle<0)
             angle += 2*M_PI;
-
     }
     return angle;
 }
