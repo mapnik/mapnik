@@ -50,7 +50,7 @@ namespace mapnik {
            << red()   << ","
            << green() << ","
            << blue()  << ","
-           << alpha()/255.0 << ")";
+           << alpha() << ")";
        }
        return ss.str();
    }
