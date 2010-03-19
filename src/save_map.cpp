@@ -269,35 +269,35 @@ namespace mapnik
                 // char
                 if (sym.get_char()) {
                     const std::string &str =
-                        to_expression_string(sym.get_char());
+                        to_expression_string(*sym.get_char());
                     set_attr( node, "char", str );
                 }
 
                 // angle
                 if (sym.get_angle()) {
                     const std::string &str =
-                        to_expression_string(sym.get_angle());
+                        to_expression_string(*sym.get_angle());
                     set_attr( node, "angle", str );
                 }
 
                 // value
                 if (sym.get_value()) {
                     const std::string &str =
-                        to_expression_string(sym.get_value());
+                        to_expression_string(*sym.get_value());
                     set_attr( node, "value", str );
                 }
 
                 // size
                 if (sym.get_size()) {
                     const std::string &str =
-                        to_expression_string(sym.get_size());
+                        to_expression_string(*sym.get_size());
                     set_attr( node, "size", str );
                 }
 
                 // color
                 if (sym.get_color()) {
                     const std::string &str =
-                        to_expression_string(sym.get_color());
+                        to_expression_string(*sym.get_color());
                     set_attr( node, "color", str );
                 }
 
