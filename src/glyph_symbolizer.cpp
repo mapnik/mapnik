@@ -24,8 +24,8 @@ text_path_ptr glyph_symbolizer::get_text_path(face_set_ptr const& faces,
 
     character_info ci = info.at(0);
     std::pair<unsigned,unsigned> cdim = faces->character_dimensions(ci.character);
-    double cwidth = (static_cast<double>(cdim.first))/2.0;
-    double cheight = (static_cast<double>(cdim.second))/2.0;
+    double cwidth = static_cast<double>(cdim.first)/2.0;
+    double cheight = static_cast<double>(cdim.second)/2.0;
     double xoff = cwidth*cos(angle) - cheight*sin(angle);
     double yoff = cwidth*sin(angle) + cheight*cos(angle);
     
