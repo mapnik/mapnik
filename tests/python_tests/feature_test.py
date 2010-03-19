@@ -13,6 +13,18 @@ class FeatureTest(unittest.TestCase):
         f = self.makeOne(1)
         self.failUnless(f is not None)
 
+    def test_python_extended_constructor(self):
+        try:
+            from shapely.geometry import Point
+        except ImportError:
+            raise Todo("Make this test not dependant on shapely")
+
+        f = self.makeOne(1, Point(3,6), foo="bar")
+        self.failUnlessEqual(f['foo'], 'bar')
+        env = f.geometry.envelope()
+        self.failUnlessEqual(env.minx, 3)
+        self.failUnlessEqual(env.miny, 6)
+
     def test_set_get_properties(self):
         f = self.makeOne(1)
         counter = itertools.count(0)
@@ -26,19 +38,24 @@ class FeatureTest(unittest.TestCase):
         for v in (1, True, 1.4, "foo", u"avión"):
             test_val(v)
 
-    def test_add_wkb_geometry_(self):
+
+    def test_add_wkb_geometry(self):
         try:
             from shapely.geometry import Point
         except ImportError:
             raise Todo("Make this test not dependant on shapely")
 
-        f = self.makeOne(1)
-        self.failUnlessEqual(f.num_geometries(), 0)
-        f.add_geometry(Point(3,6).wkb)
-        self.failUnlessEqual(f.num_geometries(), 1)
-        geom = f.get_geometry(0)
-        env = geom.envelope()
-        self.failUnlessEqual(env.minx, 3)
-        self.failUnlessEqual(env.minx, env.maxx)
-        self.failUnlessEqual(env.miny, 6)
-        self.failUnlessEqual(env.miny, env.maxy)
+        def add_it(geometry):
+            f = self.makeOne(1)
+            self.failUnlessEqual(len(f.geometries), 0)
+            f.add_geometry(geometry)
+            self.failUnlessEqual(len(f.geometries), 1)
+            env = f.geometry.envelope()
+            self.failUnlessEqual(env.minx, 3)
+            self.failUnlessEqual(env.minx, env.maxx)
+            self.failUnlessEqual(env.miny, 6)
+            self.failUnlessEqual(env.miny, env.maxy)
+
+        geometries = (Point(3,6), 'POINT(3 6)', Point(3,6).wkb)
+        for geom in geometries:
+            add_it(geom)

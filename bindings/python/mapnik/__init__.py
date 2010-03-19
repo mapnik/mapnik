@@ -63,6 +63,8 @@ class _injector(object):
             for b in bases:
                 if type(b) not in (self, type):
                     for k,v in dict.items():
+                        if hasattr(b, k):
+                            setattr(b, '_c_'+k, getattr(b, k))
                         setattr(b,k,v)
             return type.__init__(self, name, bases, dict)
 
@@ -250,14 +252,55 @@ class _DeprecatedFeatureProperties(object):
              "feature object itself for the same effect", DeprecationWarning, 2)
         return iter(self._feature)
 
-class _Feature(Feature,_injector):
+class _Feature(Feature, _injector):
+    """
+    A Feature.
+
+    TODO: docs
+    """
     @property
     def properties(self):
         return _DeprecatedFeatureProperties(self)
 
     @property
     def attributes(self):
+        #XXX Returns a copy! changes to it won't affect feat.'s attrs.
+        #    maybe deprecate?
         return dict(self)
+
+    @property
+    def geometry(self):
+        if self.num_geometries() > 0:
+            return self.get_geometry(0)
+
+    @property
+    def geometries(self):
+        return [self.get_geometry(i) for i in xrange(self.num_geometries())]
+
+    def __init__(self, id, geometry=None, **properties):
+        Feature._c___init__(self, id)
+        if geometry is not None:
+            self.add_geometry(geometry)
+        for k, v in properties.iteritems():
+            self[k] = v
+
+    def add_geometry(self, geometry):
+        geometry = self._as_wkb(geometry)
+        Feature._c_add_geometry(self, geometry)
+
+    def _as_wkb(self, geometry):
+        if hasattr(geometry, 'wkb'):
+            # a shapely.geometry.Geometry
+            geometry = geometry.wkb
+        if isinstance(geometry, str):
+            # ignoring unicode un purpose
+            for type_ in ('POINT', 'POLYGON', 'LINE'):
+                if type_ in geometry:
+                    # A WKT encoded string 
+                    from shapely import wkt
+                    geometry = wkt.loads(geometry).wkb
+            return geometry
+        raise TypeError("%r (%s) not supported" % (geometry, type(geometry)))
 
 class _Symbolizer(Symbolizer,_injector):
     def symbol(self):
