@@ -387,11 +387,14 @@ public:
 	context_->glyph_path(glyphs);
     }
 
-    void add_text(text_symbolizer const& sym, text_path & path,
-		  cairo_face_manager & manager,
-		  face_set_ptr const& faces)
+    void add_text(text_path & path,
+		          cairo_face_manager & manager,
+		          face_set_ptr const& faces,
+                  unsigned text_size,
+                  color const& fill,
+                  unsigned halo_radius,
+                  color const& halo_fill)
     {
-	unsigned text_size = sym.get_text_size();
 	double sx = path.starting_x;
 	double sy = path.starting_y;
 
@@ -425,12 +428,12 @@ public:
 	    }
 	}
 
-	set_line_width(sym.get_halo_radius());
+	set_line_width(halo_radius);
 	set_line_join(ROUND_JOIN);
-	set_color(sym.get_halo_fill());
+	set_color(halo_fill);
 	stroke();
 
-	set_color(sym.get_fill());
+	set_color(fill);
 
 	path.rewind();
 
@@ -855,8 +858,14 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 			    if (detector_.has_placement(label_ext))
 			    {    
 				context.add_image(px, py, *(*data));
-				context.add_text(sym, text_placement.placements[ii], face_manager_, faces);
-
+				context.add_text(text_placement.placements[ii],
+                                 face_manager_,
+                                 faces,
+                                 sym.get_text_size(),
+                                 sym.get_fill(),
+                                 sym.get_halo_radius(),
+                                 sym.get_halo_fill()
+                                 );
 				detector_.insert(label_ext);
 			    }
 			}
@@ -878,7 +887,14 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 			    int py = int(y - (h/2));
 
 			    context.add_image(px, py, *(*data));
-			    context.add_text(sym, text_placement.placements[ii], face_manager_, faces);
+			    context.add_text(text_placement.placements[ii],
+                                 face_manager_,
+                                 faces,
+                                 sym.get_text_size(),
+                                 sym.get_fill(),
+                                 sym.get_halo_radius(),
+                                 sym.get_halo_fill()
+                                 );
 			}
 
 			finder.update_detector(text_placement);
@@ -1045,6 +1061,62 @@ void cairo_renderer_base::process(glyph_symbolizer const& sym,
 				  Feature const& feature,
 				  proj_transform const& prj_trans)
 {
+    face_set_ptr faces = font_manager_.get_face_set(sym.get_face_name());
+    if (faces->size() > 0)
+    {
+        // Get x and y from geometry and translate to pixmap coords.
+        double x, y, z=0.0;
+        feature.get_geometry(0).label_position(&x, &y);
+        prj_trans.backward(x,y,z);
+        t_.forward(&x, &y);
+
+        // set font size
+        unsigned size = sym.eval_size(feature);
+        faces->set_pixel_sizes(size);
+
+        // Get and render text path
+        //
+        text_path_ptr path = sym.get_text_path(faces, feature);
+        // apply displacement
+        position pos = sym.get_displacement();
+        double dx = boost::get<0>(pos);
+        double dy = boost::get<1>(pos);
+        path->starting_x = x = x+dx;
+        path->starting_y = y = y+dy;
+
+        // get fill and halo params
+        color fill = sym.eval_color(feature);
+        color halo_fill = sym.get_halo_fill();
+        double halo_radius = sym.get_halo_radius();
+        if (fill==color("transparent"))
+            halo_radius = 0;
+
+        double bsize = size/2 + 1;
+        box2d<double> glyph_ext(
+            floor(x-bsize), floor(y-bsize), ceil(x+bsize), ceil(y+bsize)
+            );
+        if ((sym.get_allow_overlap() || detector_.has_placement(glyph_ext)) &&
+            (!sym.get_avoid_edges() || detector_.extent().contains(glyph_ext)))
+        {    
+            // Placement is valid, render glyph and update detector.
+            cairo_context context(context_);
+            context.add_text(*path,
+                             face_manager_,
+                             faces,
+                             size,
+                             fill,
+                             halo_radius,
+                             halo_fill
+                             );
+            detector_.insert(glyph_ext);
+        }
+    }
+    else
+    {
+        throw config_error(
+            "Unable to find specified font face in GlyphSymbolizer"
+            );
+    }
 }
 
 void cairo_renderer_base::process(text_symbolizer const& sym,
@@ -1115,7 +1187,14 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
 
 		    for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
 		    {
-			context.add_text(sym, text_placement.placements[ii], face_manager_, faces);
+			context.add_text(text_placement.placements[ii],
+                             face_manager_,
+                             faces,
+                             sym.get_text_size(),
+                             sym.get_fill(),
+                             sym.get_halo_radius(),
+                             sym.get_halo_fill()
+                             );
 		    }
 		}
             }

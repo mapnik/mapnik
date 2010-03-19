@@ -6,7 +6,7 @@ from utilities import execution_path, save_data, Todo, contains_word
 
 import os, mapnik2
 
-def test_glyph_symbolizer():
+def test_renders_with_agg():
     sym = mapnik2.GlyphSymbolizer("DejaVu Sans Condensed",
                                   mapnik2.Expression("'í'"))
     sym.allow_overlap = True
@@ -17,7 +17,26 @@ def test_glyph_symbolizer():
     _map = create_map_and_append_symbolyzer(sym)
     im = mapnik2.Image(_map.width,_map.height)
     mapnik2.render(_map, im)
-    save_data('test_glyph_symbolizer.png', im.tostring('png'))
+    save_data('agg_glyph_symbolizer.png', im.tostring('png'))
+    assert contains_word('\xff\x00\x00\xff', im.tostring())
+
+def test_renders_with_cairo():
+    if not mapnik2.has_pycairo():
+        return
+    sym = mapnik2.GlyphSymbolizer("DejaVu Sans Condensed",
+                                  mapnik2.Expression("'í'"))
+    sym.allow_overlap = True
+    sym.angle = mapnik2.Expression("[azimuth]+90") #+90 so the top of the glyph points upwards
+    sym.size = mapnik2.Expression("[value]")
+    sym.color = mapnik2.Expression("'#ff0000'")
+    _map = create_map_and_append_symbolyzer(sym)
+
+    from cStringIO import StringIO
+    import cairo
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 256, 256)
+    mapnik2.render(_map, surface)
+    im = mapnik2.Image.from_cairo(surface)
+    save_data('agg_glyph_symbolizer.png', im.tostring('png'))
     assert contains_word('\xff\x00\x00\xff', im.tostring())
 
 def test_load_save_map():

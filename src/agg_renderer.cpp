@@ -951,8 +951,6 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
 			      Feature const& feature,
 			      proj_transform const& prj_trans)
 {
-    typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-
     face_set_ptr faces = font_manager_.get_face_set(sym.get_face_name());
     if (faces->size() > 0)
     {
@@ -962,16 +960,20 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
         prj_trans.backward(x,y,z);
         t_.forward(&x, &y);
 
-        // configure text renderer
-        //
         text_renderer<T> ren(pixmap_, faces);
-        ren.set_pixel_size(sym.eval_size(feature));
+
+        // set fill and halo colors
         color fill = sym.eval_color(feature);
         ren.set_fill(fill);
         if (fill != color("transparent")) {
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
         }
+
+        // set font size
+        unsigned size = sym.eval_size(feature);
+        ren.set_pixel_size(size);
+        faces->set_pixel_sizes(size);
 
         // Get and render text path
         //
