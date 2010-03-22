@@ -4,6 +4,13 @@
 namespace mapnik
 {
 
+static const char * angle_mode_strings[] = {
+    "azimuth",
+    "trigonometric",
+    ""
+};
+IMPLEMENT_ENUM( mapnik::angle_mode_e, angle_mode_strings );
+
 text_path_ptr glyph_symbolizer::get_text_path(face_set_ptr const& faces,
                                               Feature const& feature) const
 {
@@ -46,6 +53,9 @@ UnicodeString glyph_symbolizer::eval_char(Feature const& feature) const
         evaluate<Feature,value_type>(feature),
         *expr
         );
+#ifdef MAPNIK_DEBUG
+        std::clog << "char_result=" << result.to_string() << "\n";
+#endif
     return result.to_unicode();
 }
 
@@ -58,11 +68,14 @@ double glyph_symbolizer::eval_angle(Feature const& feature) const
             evaluate<Feature,value_type>(feature),
             *expr
             );
+#ifdef MAPNIK_DEBUG
+        std::clog << "angle_result=" << result.to_string() << "\n";
+#endif
         angle = result.to_double();
         // normalize to first rotation in case an expression has made it go past
         angle = std::fmod(angle, 360);
         angle *= (M_PI/180); // convert to radians
-        if (true) {  //TODO: if (get_mode()==AZIMUTH)
+        if (get_angle_mode()==AZIMUTH) {
             // angle is an azimuth, convert into trigonometric angle
             angle = std::atan2(std::cos(angle), std::sin(angle));
         }
@@ -80,7 +93,14 @@ unsigned glyph_symbolizer::eval_size(Feature const& feature) const
         evaluate<Feature,value_type>(feature),
         *expr
         );
-    return static_cast<unsigned>(result.to_int());
+#ifdef MAPNIK_DEBUG
+        std::clog << "size_result=" << result.to_string() << "\n";
+#endif
+    unsigned size = static_cast<unsigned>(result.to_int());
+#ifdef MAPNIK_DEBUG
+        std::clog << "size=" << size << "\n";
+#endif
+    return size;
 }
 
 color glyph_symbolizer::eval_color(Feature const& feature) const
@@ -97,6 +117,9 @@ color glyph_symbolizer::eval_color(Feature const& feature) const
             evaluate<Feature,value_type>(feature),
             *value_expr
             );
+#ifdef MAPNIK_DEBUG
+        std::clog << "value_result=" << value_result.to_string() << "\n";
+#endif
         return colorizer->get_color((float)value_result.to_double());
     } else {
         expression_ptr color_expr = get_color();
@@ -105,6 +128,9 @@ color glyph_symbolizer::eval_color(Feature const& feature) const
                 evaluate<Feature,value_type>(feature),
                 *color_expr
                 );
+#ifdef MAPNIK_DEBUG
+            std::clog << "color_result=" << color_result.to_string() << "\n";
+#endif
             return color(color_result.to_string());
         } else {
             return color("black");

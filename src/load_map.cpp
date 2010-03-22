@@ -1544,6 +1544,10 @@ namespace mapnik
                  get_opt_attr<std::string>(sym, "angle");
             if (angle)
                 glyph_sym.set_angle(parse_expression(*angle, "utf8"));
+
+            angle_mode_e angle_mode =
+                    get_attr<angle_mode_e>(sym, "angle_mode", TRIGONOMETRIC);
+            glyph_sym.set_angle_mode(angle_mode);
 	    	    
             // value
             optional<std::string> value =

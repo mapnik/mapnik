@@ -1,10 +1,15 @@
-#include <mapnik/glyph_symbolizer.hpp>
-
 #include <boost/python.hpp>
+
+#include <mapnik/glyph_symbolizer.hpp>
+#include "mapnik_enumeration.hpp"
 #include <boost/tuple/tuple.hpp>
 
 using mapnik::glyph_symbolizer;
 using mapnik::position;
+using mapnik::enumeration_;
+using mapnik::angle_mode_e;
+using mapnik::AZIMUTH;
+using mapnik::TRIGONOMETRIC;
 using namespace boost::python;
 
 list get_displacement_list(const glyph_symbolizer& t)
@@ -20,6 +25,11 @@ list get_displacement_list(const glyph_symbolizer& t)
 
 void export_glyph_symbolizer()
 {
+    enumeration_<angle_mode_e>("angle_mode")
+        .value("AZIMUTH", AZIMUTH)
+        .value("TRIGONOMETRIC", TRIGONOMETRIC)
+        ;
+
     class_<glyph_symbolizer>("GlyphSymbolizer",
                              init<std::string,mapnik::expression_ptr>())
         .add_property("face_name",
@@ -67,6 +77,13 @@ void export_glyph_symbolizer()
                       &glyph_symbolizer::set_angle,
                       "Get/Set the angle expression used to rotate the glyph "
                       "along its center."
+                      )
+        .add_property("angle_mode",
+                      &glyph_symbolizer::get_angle_mode,
+                      &glyph_symbolizer::set_angle_mode,
+                      "Get/Set the angle_mode property. This controls how the "
+                      "angle is interpreted. Valid values are AZIMUTH and  "
+                      "TRIGONOMETRIC."
                       )
         .add_property("value",
                       &glyph_symbolizer::get_value,

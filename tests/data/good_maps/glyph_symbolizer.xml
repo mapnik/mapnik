@@ -10,7 +10,8 @@
         halo_fill="rgba(0%,0%,0%,4%)"
         halo_radius="1"
         value="[value]"
-        angle="[azumuth]+90"
+        angle="[azimuth]+90"
+        angle_mode="azimuth"
       >
         <RasterColorizer>
           <ColorBand value="0" color="#0044cc"/>

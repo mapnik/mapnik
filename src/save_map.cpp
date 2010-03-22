@@ -321,6 +321,10 @@ namespace mapnik
                 // halo fill & radius
                 set_attr( node, "halo_fill", sym.get_halo_fill() );    
                 set_attr( node, "halo_radius", sym.get_halo_radius() );    
+
+                // angle_mode
+                set_attr( node, "angle_mode", sym.get_angle_mode() );
+
             }
 
         private:

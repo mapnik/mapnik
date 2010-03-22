@@ -2,6 +2,7 @@
 #define GLYPH_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/enumeration.hpp>
 #include  <mapnik/raster_colorizer.hpp>
 #include <mapnik/expression_node.hpp>
 #include  <mapnik/text_path.hpp>
@@ -18,6 +19,14 @@ namespace mapnik
 
 typedef boost::tuple<double,double> position;
 
+enum angle_mode_enum {
+  AZIMUTH,
+  TRIGONOMETRIC,
+  angle_mode_enum_MAX
+};
+
+DEFINE_ENUM(angle_mode_e, angle_mode_enum);
+
 struct MAPNIK_DECL glyph_symbolizer
 {    
     glyph_symbolizer(std::string face_name, expression_ptr c)
@@ -32,7 +41,8 @@ struct MAPNIK_DECL glyph_symbolizer
               avoid_edges_(false),
               displacement_(0.0, 0.0),
               halo_fill_(color(255,255,255)),
-              halo_radius_(0) {}
+              halo_radius_(0),
+              angle_mode_(TRIGONOMETRIC) {}
 
     std::string const& get_face_name() const
     {
@@ -142,6 +152,14 @@ struct MAPNIK_DECL glyph_symbolizer
     {
         colorizer_ = colorizer;
     }
+    void set_angle_mode(angle_mode_e angle_mode)
+    {
+        angle_mode_ = angle_mode;
+    }
+    angle_mode_e get_angle_mode() const
+    {
+        return angle_mode_;
+    }
 
 
     text_path_ptr get_text_path(face_set_ptr const& faces,
@@ -165,6 +183,7 @@ private:
     position displacement_;
     color halo_fill_;
     unsigned halo_radius_;
+    angle_mode_e angle_mode_;
 };
 
 };  // end mapnik namespace

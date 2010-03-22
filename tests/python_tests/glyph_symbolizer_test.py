@@ -43,6 +43,10 @@ def test_load_save_load_map():
     map = mapnik2.Map(256,256)
     in_map = "../data/good_maps/glyph_symbolizer.xml"
     mapnik2.load_map(map, in_map)
+    style = map.find_style('arrows')
+    sym = style.rules[0].symbols[0]
+    assert isinstance(sym, mapnik2.GlyphSymbolizer)
+    assert sym.angle_mode == mapnik2.angle_mode.AZIMUTH
 
     out_map = mapnik2.save_map_to_string(map).decode('utf8')
     map = mapnik2.Map(256,256)

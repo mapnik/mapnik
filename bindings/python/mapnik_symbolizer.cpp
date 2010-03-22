@@ -160,6 +160,11 @@ const markers_symbolizer& markers_( const symbolizer& symbol )
     return boost::get<markers_symbolizer>(symbol);
 }
 
+const glyph_symbolizer& glyph_( const symbolizer& symbol )
+{
+    return boost::get<glyph_symbolizer>(symbol);
+}
+
 void export_symbolizer()
 {
     using namespace boost::python;
@@ -196,6 +201,9 @@ void export_symbolizer()
             return_value_policy<copy_const_reference>())
 
         .def("markers",markers_,
+            return_value_policy<copy_const_reference>())
+
+        .def("glyph",glyph_,
             return_value_policy<copy_const_reference>())
 
     ;
