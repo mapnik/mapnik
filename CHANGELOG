@@ -15,6 +15,8 @@ For a complete change history, see the SVN log.
 Mapnik 0.7.1 Release
 --------------------
 
+(Packaged from r1745)
+
 - Rasters: Various fixes and improvements to 8bit png output (#522,#475)
 
 - XML: Save map buffer_size when serializing map.
