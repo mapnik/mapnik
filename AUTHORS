@@ -14,6 +14,7 @@ Committers
  - Vince Spader (TextSymbolizer)
  - Dane Springmeyer (Python API, SCons) <dane.springmeyer -at- gmail.com>
  - David Leaver (Label Placement)
+ - Alberto Valverde (GlyphSymbolizer, Python API)
  - Andreas Volz (Autotools)
  - Nick Whitelegg (OSM plugin)
 
@@ -52,7 +53,6 @@ Patches
  - Philipp Spitzer
  - Dave Stubbs
  - River Tarnell
- - Alberto Valverde
  - Shaun Walbridge
  - Leslie Wu
   
