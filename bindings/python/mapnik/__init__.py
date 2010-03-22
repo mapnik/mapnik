@@ -302,14 +302,25 @@ class _Feature(Feature, _injector):
             return geometry
         raise TypeError("%r (%s) not supported" % (geometry, type(geometry)))
 
-class _Symbolizer(Symbolizer,_injector):
-    def symbol(self):
-        return getattr(self,self.type())()
-
 class _Color(Color,_injector):
     def __repr__(self):
         return "Color(%r)" % self.to_hex_string()
 
+class _Symbolizers(Symbolizers,_injector):
+    def __getitem__(self, idx):
+        sym = Symbolizers._c___getitem__(self, idx)
+        return sym.symbol()
+
+def _add_symbol_method_to_symbolizers(vars=globals()):
+    def symbol_for_subcls(self):
+        return self
+    def symbol_for_cls(self):
+        return getattr(self,self.type())()
+    for name, obj in vars.items():
+        if name.endswith('Symbolizer') and not name.startswith('_'):
+            symbol = symbol_for_cls if name=='Symbolizer' else symbol_for_subcls
+            type('dummy', (obj,_injector), {'symbol': symbol})
+_add_symbol_method_to_symbolizers()
 
 #class _Filter(Filter,_injector):
 #    """Mapnik Filter expression.
@@ -616,11 +627,11 @@ setdlopenflags(flags)
 # and ensure correct documentation processing
 __all__ = [
     # classes
-    'Color', 'Coord', 
+    'Color', 'Coord', 'ColorBand',
     'DatasourceCache',
     'Box2d',
     'Feature', 'Featureset', 'FontEngine',
-    'Geometry2d',
+    'Geometry2d', 'GlyphSymbolizer',
     'Image', 'ImageView',
     'Layer', 'Layers',
     'LinePatternSymbolizer', 'LineSymbolizer',
@@ -633,6 +644,7 @@ __all__ = [
     'Projection',
     'Query',
     'RasterSymbolizer',
+    'RasterColorizer',
     'Rule', 'Rules',
     'ShieldSymbolizer',
     'Singleton',
