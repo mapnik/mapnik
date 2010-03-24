@@ -283,8 +283,10 @@ namespace mapnik {
             {
                 byte a = preprocessAlpha(c.a);
                 unsigned ind=0;
-                if (a < InsertPolicy::MIN_ALPHA || colors_ <= 1)
+                if (a < InsertPolicy::MIN_ALPHA || colors_ == 0)
                     return 0;
+                if (colors_ == 1)
+                    return pal_remap_[has_holes_?1:0];
 
                 rgba_hash_table::iterator it = color_hashmap_.find(c);
                 if (it == color_hashmap_.end())
@@ -489,7 +491,7 @@ namespace mapnik {
                     }
                     tries=0;
                     // ignore leaves and also nodes with small mean error and not excessive number of pixels
-                    if (cur_node->reduce_cost / cur_node->pixel_count * std::log(double(cur_node->pixel_count)) > 20
+                    if ((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(double(cur_node->pixel_count)) > 15
                             && cur_node->children_count > 0)
                     {
                         colors_--;
