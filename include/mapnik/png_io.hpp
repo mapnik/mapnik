@@ -131,7 +131,7 @@ namespace mapnik {
             byte index = 0;
             int idx = -1;
             for(int j=levels-1; j>0; j--){
-               if (U2ALPHA(val)>=limits[j]) {
+               if (U2ALPHA(val)>=limits[j] && trees[j].colors()>0) {
                   index = idx = trees[j].quantize(c);
                   break;
                }
@@ -177,7 +177,7 @@ namespace mapnik {
             byte index = 0;
             int idx=-1;
             for(int j=levels-1; j>0; j--){
-               if (U2ALPHA(val)>=limits[j]) {
+               if (U2ALPHA(val)>=limits[j] && trees[j].colors()>0) {
                   index = idx = trees[j].quantize(c);
                   break;
                }

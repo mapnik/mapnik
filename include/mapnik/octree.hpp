@@ -122,6 +122,11 @@ namespace mapnik {
 
          ~octree() { delete root_;}
 
+         unsigned colors()
+         {
+            return colors_;
+         }
+
          void setMaxColors(unsigned max_colors)
          {
             max_colors_ = max_colors;
