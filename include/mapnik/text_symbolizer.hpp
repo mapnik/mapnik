@@ -30,8 +30,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/graphics.hpp>
-#include <mapnik/expression_node.hpp>
-
+#include <mapnik/filter_factory.hpp>
 // boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
