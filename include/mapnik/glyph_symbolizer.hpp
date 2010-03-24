@@ -3,9 +3,9 @@
 
 // mapnik
 #include <mapnik/enumeration.hpp>
-#include  <mapnik/raster_colorizer.hpp>
-#include <mapnik/expression_node.hpp>
-#include  <mapnik/text_path.hpp>
+#include <mapnik/raster_colorizer.hpp>
+#include <mapnik/filter_factory.hpp>
+#include <mapnik/text_path.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
