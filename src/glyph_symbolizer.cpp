@@ -54,7 +54,7 @@ UnicodeString glyph_symbolizer::eval_char(Feature const& feature) const
         *expr
         );
 #ifdef MAPNIK_DEBUG
-        std::clog << "char_result=" << result.to_string() << "\n";
+    std::clog << "char_result=" << result.to_string() << "\n";
 #endif
     return result.to_unicode();
 }
@@ -94,11 +94,11 @@ unsigned glyph_symbolizer::eval_size(Feature const& feature) const
         *expr
         );
 #ifdef MAPNIK_DEBUG
-        std::clog << "size_result=" << result.to_string() << "\n";
+    std::clog << "size_result=" << result.to_string() << "\n";
 #endif
     unsigned size = static_cast<unsigned>(result.to_int());
 #ifdef MAPNIK_DEBUG
-        std::clog << "size=" << size << "\n";
+    std::clog << "size=" << size << "\n";
 #endif
     return size;
 }
@@ -106,9 +106,11 @@ unsigned glyph_symbolizer::eval_size(Feature const& feature) const
 color glyph_symbolizer::eval_color(Feature const& feature) const
 {
     raster_colorizer_ptr colorizer = get_colorizer();
-    if (colorizer) {
+    if (colorizer) 
+    {
         expression_ptr value_expr = get_value();
-        if (!value_expr) {
+        if (!value_expr) 
+	{
             throw config_error(
                 "Must define a 'value' expression to use a colorizer"
                 );
@@ -121,9 +123,12 @@ color glyph_symbolizer::eval_color(Feature const& feature) const
         std::clog << "value_result=" << value_result.to_string() << "\n";
 #endif
         return colorizer->get_color((float)value_result.to_double());
-    } else {
+    } 
+    else 
+    {
         expression_ptr color_expr = get_color();
-        if (color_expr) {
+        if (color_expr) 
+	{
             value_type color_result = boost::apply_visitor(
                 evaluate<Feature,value_type>(feature),
                 *color_expr
@@ -132,8 +137,10 @@ color glyph_symbolizer::eval_color(Feature const& feature) const
             std::clog << "color_result=" << color_result.to_string() << "\n";
 #endif
             return color(color_result.to_string());
-        } else {
-            return color("black");
+        } 
+	else 
+	{
+	    return color(0,0,0); // black
         }
     }
 }
