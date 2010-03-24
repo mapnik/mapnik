@@ -266,7 +266,7 @@ public:
 	if (a < InsertPolicy::MIN_ALPHA || colors_ == 0)
 	    return 0;
         if (colors_ == 1)
-            return pal_remap_[has_hole_?1:0];
+            return pal_remap_[has_holes_?1:0];
 
 	rgba_hash_table::iterator it = color_hashmap_.find(c);
 	if (it == color_hashmap_.end())
