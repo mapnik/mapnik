@@ -611,6 +611,11 @@ struct to_expression_string : public boost::static_visitor<std::string>
 	return ss.str();
     }
 
+    std::string operator() (bool val) const
+    {
+	return val ? "true":"false";
+    }
+
     std::string operator() (value_null const& val) const
     {
 	boost::ignore_unused_variable_warning(val);
