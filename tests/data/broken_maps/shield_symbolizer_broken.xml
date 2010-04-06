@@ -3,7 +3,7 @@
 <Map bgcolor="#b5d0d0" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
     <Style name="some_style">
         <Rule>
-            <ShieldSymbolizer name="foo.ttf" face_name="bold" size="10" fill="#444"
+            <ShieldSymbolizer name="[foo.ttf]" face_name="bold" size="10" fill="#444"
                               file="data/images/dummy.png" type="png" width="16"/>
         </Rule>
     </Style>

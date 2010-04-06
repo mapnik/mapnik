@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Map srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" bgcolor="steelblue">
-    <Style name="world_merc20090930161252883_style">
+    <Style name="style">
         
         <!-- Asia - default dark color behind light polygon 
         leads to "ghost lines" show-through
@@ -51,8 +51,8 @@
             </PolygonSymbolizer>
         </Rule>
     </Style>
-    <Layer name="world_merc20090930161252883" srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" status="1" clear_label_cache="0" queryable="1">
-        <StyleName>world_merc20090930161252883_style</StyleName>
+    <Layer name="world" srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs">
+        <StyleName>style</StyleName>
         <Datasource>
             <Parameter name="file">../../data/shp/world_merc</Parameter>
             <Parameter name="type">shape</Parameter>

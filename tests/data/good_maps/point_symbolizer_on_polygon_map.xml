@@ -18,7 +18,7 @@
         </Rule>
         <Rule title="Africa">
             <Filter>([REGION]=2)</Filter>
-            <ShieldSymbolizer name="NAME" placement="vertex" face_name="DejaVu Sans Bold" size="10" fill="#000000" file="../images/dummy.png" />
+            <ShieldSymbolizer name="[NAME]" placement="vertex" face_name="DejaVu Sans Bold" size="10" fill="#000000" file="../images/dummy.png" />
         </Rule>
 
         <Rule title="rest">

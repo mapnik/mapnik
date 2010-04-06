@@ -3,7 +3,7 @@
 <Map bgcolor="#b5d0d0" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
     <Style name="some_style">
         <Rule>
-            <TextSymbolizer name="foo" face_name="foobar" size="12"/>
+            <TextSymbolizer name="[foo]" face_name="foobar" size="12"/>
         </Rule>
     </Style>
 </Map>
