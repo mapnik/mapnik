@@ -318,7 +318,10 @@ def _add_symbol_method_to_symbolizers(vars=globals()):
         return getattr(self,self.type())()
     for name, obj in vars.items():
         if name.endswith('Symbolizer') and not name.startswith('_'):
-            symbol = symbol_for_cls if name=='Symbolizer' else symbol_for_subcls
+            if name == 'Symbolizer':
+                symbol = symbol_for_cls
+            else:
+                symbol = symbol_for_subcls
             type('dummy', (obj,_injector), {'symbol': symbol})
 _add_symbol_method_to_symbolizers()
 
