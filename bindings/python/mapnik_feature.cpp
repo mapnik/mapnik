@@ -211,15 +211,8 @@ struct std_pair_to_python_converter
 	    std_pair_to_tuple<T1, T2> >();
     }
 };
-}
-}
 
-/*
-mapnik::feature_ptr create_feature_(int id)
-{
-    return mapnik::feature_ptr(new mapnik::Feature(id));
-}
-*/
+}}
 
 struct UnicodeString_from_python_str
 {
@@ -279,24 +272,12 @@ void export_feature()
 	boost::noncopyable>("Feature",init<int>("Default ctor."))
 	.def("id",&Feature::id)
 	.def("__str__",&Feature::to_string)
-//	.add_property("properties", 
-//		      make_function(&Feature::props,return_value_policy<reference_existing_object>()))
-    .def("add_geometry", &feature_add_wkb_geometry)
+	.def("add_geometry", &feature_add_wkb_geometry)
 	.def("num_geometries",&Feature::num_geometries)
 	.def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
 	.def("envelope", &Feature::envelope)
-	//.def("create",create_feature_)
-	//.staticmethod("create")
 	.def(map_indexing_suite2<Feature, true >())
 	.def("iteritems",iterator<Feature> ())
-
-    // TODO define more mapnik::Feature methods
+        // TODO define more mapnik::Feature methods
 	;
-   
-//def("Feature", &create_feature_);
-   
-//class_<std::map<std::string, mapnik::value> >("Properties")
-//   .def(map_indexing_suite2<std::map<std::string, mapnik::value>, true >())
-//  .def("iteritems",iterator<std::map<std::string,mapnik::value> > ())
-//     ;
 }
