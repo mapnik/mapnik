@@ -49,27 +49,27 @@ namespace mapnik
         {
             fill_ = fill;
         }
-        void set_opacity(float opacity)
+        void set_opacity(double opacity)
         {
             opacity_ = opacity;
         }
-        float get_opacity() const
+        double get_opacity() const
         {
             return opacity_;
         }
-        void set_gamma(float gamma)
+        void set_gamma(double gamma)
         {
             gamma_ = gamma;
         }
-        float get_gamma() const
+        double get_gamma() const
         {
             return gamma_;
         }
 
     private:
         color fill_;
-        float opacity_;
-        float gamma_;
+        double opacity_;
+        double gamma_;
     }; 
    
    struct MAPNIK_DECL building_symbolizer
@@ -101,18 +101,18 @@ namespace mapnik
         {
            height_=height;
         }
-        void set_opacity(float opacity)
+        void set_opacity(double opacity)
         {
             opacity_ = opacity;
         }
-        float get_opacity() const
+        double get_opacity() const
         {
             return opacity_;
         }
     private:
         color fill_;
         double height_;
-        float opacity_;
+        double opacity_;
     };  
 }
 
