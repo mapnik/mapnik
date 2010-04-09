@@ -39,63 +39,63 @@
    
 namespace mapnik {
    
-   struct rasterizer;
+struct rasterizer;
    
-   template <typename T>
-   class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
-                                    private boost::noncopyable
-   {
+template <typename T>
+class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
+				 private boost::noncopyable
+{
      
-     public:
-      agg_renderer(Map const& m, T & pixmap, unsigned offset_x=0, unsigned offset_y=0);
-      ~agg_renderer();
-      void start_map_processing(Map const& map);
-      void end_map_processing(Map const& map);
-      void start_layer_processing(layer const& lay);
-      void end_layer_processing(layer const& lay);
-      void process(point_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(line_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(line_pattern_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(polygon_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(polygon_pattern_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(raster_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(shield_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(text_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(building_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(markers_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(glyph_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-     private:
-      T & pixmap_;
-      unsigned width_;
-      unsigned height_;
-      CoordTransform t_;
-      freetype_engine font_engine_;
-      face_manager<freetype_engine> font_manager_;
-      label_collision_detector4 detector_;
-      boost::scoped_ptr<rasterizer> ras_ptr;
-   };
+public:
+    agg_renderer(Map const& m, T & pixmap, unsigned offset_x=0, unsigned offset_y=0);
+    ~agg_renderer();
+    void start_map_processing(Map const& map);
+    void end_map_processing(Map const& map);
+    void start_layer_processing(layer const& lay);
+    void end_layer_processing(layer const& lay);
+    void process(point_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(line_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(line_pattern_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(polygon_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(polygon_pattern_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(raster_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(shield_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(text_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(building_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(markers_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+    void process(glyph_symbolizer const& sym,
+		 Feature const& feature,
+		 proj_transform const& prj_trans);
+private:
+    T & pixmap_;
+    unsigned width_;
+    unsigned height_;
+    CoordTransform t_;
+    freetype_engine font_engine_;
+    face_manager<freetype_engine> font_manager_;
+    label_collision_detector4 detector_;
+    boost::scoped_ptr<rasterizer> ras_ptr;
+};
 }
 
 #endif //AGG_RENDERER_HPP
