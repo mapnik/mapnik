@@ -3,12 +3,15 @@ import os
 import sys
 from lxml import etree
 from lxml import objectify
+import re
 
 def name2expr(sym):
     name = sym.attrib['name']
-    expression = '[%s]' % name
-    sym.attrib['name'] = expression    
-
+    if re.match('^\[.*\]$',name) is None:
+        print>>sys.stderr,"Fixing %s" % name
+        expression = '[%s]' % name
+        sym.attrib['name'] = expression    
+    
 def fixup_pointsym(sym):
     if sym.attrib.get('width'):
         sym.attrib.pop('width')
@@ -18,18 +21,20 @@ def fixup_pointsym(sym):
     #    sym.attrib.pop('type')
 
 def fixup_sym_attributes(sym):
+    if not hasattr(sym,'CssParameter'):
+        return
     attrib = {}
     for css in sym.CssParameter:
         key = css.attrib.get('name')
         value = css.text
         attrib[key]=value
-    sym.clear() # remove CssParameter children
-    for k,v in attrib.items(): # insert attributes
+    sym.clear() # remove CssParameter elements
+    for k,v in attrib.items(): # insert attributes instead
         sym.attrib[k] = v
     
 
 if __name__ == "__main__":
-
+    
     if len(sys.argv) != 2:
         print>>sys.stderr,'Usage: %s <map_xml_file>' % sys.argv[0]
         sys.exit(1)
@@ -49,11 +54,12 @@ if __name__ == "__main__":
                 if hasattr(rule,'PointSymbolizer'):
                     for sym in rule.PointSymbolizer:
                         fixup_pointsym(sym)
-                if hasattr(rule,'LineSymbolizer'):
+                if hasattr(rule,'LineSymbolizer') :
                     for sym in rule.LineSymbolizer:
                         fixup_sym_attributes(sym)
+                if hasattr(rule,'PolygonSymbolizer') :
+                    for sym in rule.PolygonSymbolizer:
+                        fixup_sym_attributes(sym)
                         
-                            
-                
     print etree.tostring(tree,pretty_print=True,standalone=True)
     
