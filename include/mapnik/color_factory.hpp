@@ -42,14 +42,12 @@ public:
     
     static void init_from_string(color & c, char const* css_color)
     {   
-	
-	typedef std::string::const_iterator iterator_type;
+	typedef char const* iterator_type;
 	typedef mapnik::css_color_grammar<iterator_type> css_color_grammar; 
-	std::string str(css_color);
-	
+
 	css_color_grammar g;
-	iterator_type first = str.begin();
-	iterator_type last =  str.end();
+	iterator_type first = css_color;
+	iterator_type last =  css_color + std::strlen(css_color);
 	mapnik::css css_;
 	bool result =
 	    boost::spirit::qi::phrase_parse(first,
