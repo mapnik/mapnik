@@ -98,26 +98,26 @@ public:
 	    ptree::value_type("LineSymbolizer", ptree()))->second;
 	const stroke & strk = sym.get_stroke();
 	stroke dfl = stroke();
-
+	
 	if ( strk.get_color() != dfl.get_color() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "stroke", strk.get_color() );
+	    set_attr( sym_node, "stroke", strk.get_color() );
 	}
 	if ( strk.get_width() != dfl.get_width() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "stroke-width", strk.get_width() );
+	    set_attr( sym_node, "stroke-width", strk.get_width() );
 	}
 	if ( strk.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "stroke-opacity", strk.get_opacity() );
+	    set_attr( sym_node, "stroke-opacity", strk.get_opacity() );
 	}
 	if ( strk.get_line_join() != dfl.get_line_join() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "stroke-linejoin", strk.get_line_join() );
+	    set_attr( sym_node, "stroke-linejoin", strk.get_line_join() );
 	}
 	if ( strk.get_line_cap() != dfl.get_line_cap() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "stroke-linecap", strk.get_line_cap() );
+	    set_attr( sym_node, "stroke-linecap", strk.get_line_cap() );
 	}
 	if ( ! strk.get_dash_array().empty() )
 	{
@@ -127,11 +127,11 @@ public:
 		os << dashes[i].first << ", " << dashes[i].second;
 		if ( i + 1 < dashes.size() ) os << ", ";
 	    }
-	    set_css( sym_node, "stroke-dasharray", os.str() );
+	    set_attr( sym_node, "stroke-dasharray", os.str() );
 	}
 	if ( strk.dash_offset() != dfl.dash_offset() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "stroke-dashoffset", strk.dash_offset());
+	    set_attr( sym_node, "stroke-dashoffset", strk.dash_offset());
 	}
     }
 	
