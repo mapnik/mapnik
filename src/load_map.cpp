@@ -1007,12 +1007,12 @@ namespace mapnik
 
             // max_char_angle_delta
             optional<double> max_char_angle_delta =
-               get_opt_attr<double>(sym, "max_char_angle_delta");
+		get_opt_attr<double>(sym, "max_char_angle_delta");
             if (max_char_angle_delta)
             {
                text_symbol.set_max_char_angle_delta( * max_char_angle_delta);
             }
-
+	    
             // horizontal alignment
             horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal_alignment", H_MIDDLE);
             text_symbol.set_horizontal_alignment(halign);
@@ -1258,92 +1258,63 @@ namespace mapnik
         try
         {
             stroke strk;
-            ptree::const_iterator cssIter = sym.begin();
-            ptree::const_iterator endCss = sym.end();
-
-            for(; cssIter != endCss; ++cssIter)
-            {
-                ptree::value_type const& css_tag = *cssIter;
-                ptree const & css = cssIter->second;
-
-                if (css_tag.first == "CssParameter")
-                {
-                    std::string css_name  = get_attr<string>(css, "name");
-                    if (css_name == "stroke")
-                    {
-                        color c = get_css<color>(css, css_name);
-                        strk.set_color(c);
-                    }
-                    else if (css_name == "stroke-width")
-                    {
-                        float width = get_css<float>(css, css_name);
-                        strk.set_width(width);
-                    }
-                    else if (css_name == "stroke-opacity")
-                    {
-                        float opacity = get_css<float>(css, css_name);
-                        strk.set_opacity(opacity);
-                    }
-                    else if (css_name == "stroke-linejoin")
-                    {
-                        line_join_e line_join = get_css<line_join_e>(css, css_name);
-                        strk.set_line_join( line_join );
-                    }
-                    else if (css_name == "stroke-linecap")
-                    {
-                        line_cap_e line_cap = get_css<line_cap_e>(css, css_name);
-                        strk.set_line_cap( line_cap );
-                    }
-                    else if (css_name == "stroke-dasharray")
-                    {
-                        tokenizer<> tok ( css.data() );
-                        std::vector<float> dash_array;
-                        tokenizer<>::iterator itr = tok.begin();
-                        for (; itr != tok.end(); ++itr)
-                        {
-                            try
-                            {
-                                float f = boost::lexical_cast<float>(*itr);
-                                dash_array.push_back(f);
-                            }
-                            catch ( boost::bad_lexical_cast &)
-                            {
-                                throw config_error(std::string("Failed to parse CSS ") +
-                                        "parameter '" + css_name + "'. Expected a " +
-                                        "list of floats but got '" + css.data() + "'");
-                            }
-                        }
-                        if (dash_array.size())
-                        {
-                            size_t size = dash_array.size();
-                            if ( size % 2)
-                            {
-                                for (size_t i=0; i < size ;++i)
-                                {
-                                    dash_array.push_back(dash_array[i]);
-                                }
-                            }
-                            std::vector<float>::const_iterator pos = dash_array.begin();
-                            while (pos != dash_array.end())
-                            {
-                                strk.add_dash(*pos,*(pos + 1));
-                                pos +=2;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw config_error(std::string("Failed to parse unknown CSS ") +
-                                "parameter '" + css_name + "'");
-                    }
-                }
-                else if (css_tag.first != "<xmlcomment>" &&
-                        css_tag.first != "<xmlattr>" )
-                {
-                    throw config_error(std::string("Unknown child node. ") +
-                            "Expected 'CssParameter' but got '" + css_tag.first + "'");
-                }
-            }
+	    // stroke color
+	    optional<color> c=  get_opt_attr<color>(sym, "stroke");
+	    if (c) strk.set_color(*c);
+	    // stroke-width
+	    optional<double> width =  get_opt_attr<double>(sym, "stroke-width");
+	    if (width) strk.set_width(*width);
+	    // stroke-opacity
+	    optional<double> opacity = get_opt_attr<double>(sym, "stroke-opacity");
+	    if (opacity) strk.set_opacity(*opacity);
+	    // stroke-linejoin
+	    optional<line_join_e> line_join = get_opt_attr<line_join_e>(sym, "stroke-linejoin");
+	    if (line_join) strk.set_line_join(*line_join);
+	    // stroke-linecap
+	    optional<line_cap_e> line_cap = get_opt_attr<line_cap_e>(sym, "stroke-linecap");
+	    if (line_cap) strk.set_line_cap(*line_cap);
+	    // stroke-dashaffset
+	    optional<double> offset = get_opt_attr<double>(sym, "stroke-dashoffet");
+	    if (offset) strk.set_dash_offset(*offset);
+	    // stroke-dasharray
+	    optional<string> str = get_opt_attr<string>(sym,"stroke-dasharray");
+	    if (str) 
+	    {
+		tokenizer<> tok (*str);
+		std::vector<double> dash_array;
+		tokenizer<>::iterator itr = tok.begin();
+		for (; itr != tok.end(); ++itr)
+		{
+		    try
+		    {
+			double f = boost::lexical_cast<double>(*itr);
+			dash_array.push_back(f);
+		    }
+		    catch ( boost::bad_lexical_cast &)
+		    {
+			throw config_error(std::string("Failed to parse dasharray ") +
+					   "'. Expected a " +
+					   "list of floats but got '" + (*str) + "'");
+		    }
+		}
+		if (dash_array.size())
+		{
+		    size_t size = dash_array.size();
+		    if ( size % 2)
+		    {
+			for (size_t i=0; i < size ;++i)
+			{
+			    dash_array.push_back(dash_array[i]);
+			}
+		    }
+		    std::vector<double>::const_iterator pos = dash_array.begin();
+		    while (pos != dash_array.end())
+		    {
+			strk.add_dash(*pos,*(pos + 1));
+			pos +=2;
+		    }
+		}
+	    }
             rule.append(line_symbolizer(strk));
         }
         catch (const config_error & ex)
@@ -1353,7 +1324,7 @@ namespace mapnik
         }
     }
 
-
+    
     void map_parser::parse_polygon_symbolizer( rule_type & rule, ptree const & sym )
     {
         try

@@ -347,7 +347,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     renderer ren(renb);
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_linear());
-
+    
     agg::scanline_p8 sl;
 
     for (unsigned i=0;i<feature.num_geometries();++i)
@@ -390,7 +390,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
 		stroke.generator().miter_limit(4.0);
 		stroke.generator().width(stroke_.get_width());
-
+		
 		ras_ptr->add_path(stroke);
 
             }
