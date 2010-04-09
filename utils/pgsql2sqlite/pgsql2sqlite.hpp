@@ -245,15 +245,20 @@ namespace mapnik {
            create_sql << "'" << cursor->getFieldName(pos);
            switch (oid)
            {
-              case 700:
-              case 701:
-                 create_sql << "' REAL";
-                 break;
-              default:
-                 create_sql << "' TEXT";
-                 break;
+	   case 20:
+	   case 21:
+	   case 23:
+	       create_sql << "' INTEGER";
+	       break;
+	   case 700:
+	   case 701:
+	       create_sql << "' REAL";
+	       break;
+	   default:
+	       create_sql << "' TEXT";
+	       break;
            }  
-            
+	   
         }
       }
       
