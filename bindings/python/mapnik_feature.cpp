@@ -95,11 +95,8 @@ class final_map_derived_policies
 				 NoProxy, final_map_derived_policies<Container, NoProxy> > {};
 }
     
-template <
-class Container,
-bool NoProxy = false,
-class DerivedPolicies
-= detail::final_map_derived_policies<Container, NoProxy> >
+template <class Container,bool NoProxy = false,
+class DerivedPolicies = detail::final_map_derived_policies<Container, NoProxy> >
 class map_indexing_suite2
     : public indexing_suite<
 Container
@@ -208,7 +205,7 @@ struct std_pair_to_python_converter
     {
 	boost::python::to_python_converter<
 	std::pair<T1, T2>,
-	    std_pair_to_tuple<T1, T2> >();
+	std_pair_to_tuple<T1, T2> >();
     }
 };
 
@@ -269,7 +266,7 @@ void export_feature()
     UnicodeString_from_python_str();
    
     class_<Feature,boost::shared_ptr<Feature>,
-	boost::noncopyable>("Feature",init<int>("Default ctor."))
+	   boost::noncopyable>("Feature",init<int>("Default ctor."))
 	.def("id",&Feature::id)
 	.def("__str__",&Feature::to_string)
 	.def("add_geometry", &feature_add_wkb_geometry)
@@ -278,6 +275,6 @@ void export_feature()
 	.def("envelope", &Feature::envelope)
 	.def(map_indexing_suite2<Feature, true >())
 	.def("iteritems",iterator<Feature> ())
-        // TODO define more mapnik::Feature methods
+	// TODO define more mapnik::Feature methods
 	;
 }
