@@ -152,15 +152,15 @@ public:
 
 	if ( sym.get_fill() != dfl.get_fill() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "fill", sym.get_fill() );
+	    set_attr( sym_node, "fill", sym.get_fill() );
 	}
 	if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "fill-opacity", sym.get_opacity() );
+	    set_attr( sym_node, "fill-opacity", sym.get_opacity() );
 	}
 	if ( sym.get_gamma() != dfl.get_gamma() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "gamma", sym.get_gamma() );
+	    set_attr( sym_node, "gamma", sym.get_gamma() );
 	}
     }
 
