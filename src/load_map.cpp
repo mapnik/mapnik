@@ -718,11 +718,21 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 		}
 	    }
 
-	}
-	else
-	{
-	    rule.append(point_symbolizer());
-	}
+        }
+        else
+        {
+            point_symbolizer symbol;
+        
+            if (allow_overlap)
+            {
+              symbol.set_allow_overlap( * allow_overlap );
+            }
+            if (opacity)
+            {
+              symbol.set_opacity( * opacity );
+            }
+            rule.append(symbol);
+        }
     }
     catch (const config_error & ex)
     {
