@@ -256,9 +256,16 @@ public:
 	}
     }
 
-    void operator () ( markers_symbolizer const& )
+    void operator () ( markers_symbolizer const& sym)
     {
-	// FIXME!!!!!
+        ptree & sym_node = rule_.push_back(
+                ptree::value_type("MarkersSymbolizer", ptree()))->second;
+        markers_symbolizer dfl;
+        if ( sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "allow_overlap", sym.get_allow_overlap() );
+        }
+
     }
 
     void operator () ( glyph_symbolizer const& sym)
@@ -266,6 +273,8 @@ public:
 	ptree &node = rule_.push_back(
 	    ptree::value_type("GlyphSymbolizer", ptree())
 	    )->second;
+                
+                glyph_symbolizer dfl("<no default>", expression_ptr());
 
 	// face_name
 	set_attr( node, "face_name", sym.get_face_name() );    
@@ -311,23 +320,45 @@ public:
 				       explicit_defaults_);
 	}
 
-	// allow_overlap
-	set_attr( node, "allow_overlap", sym.get_allow_overlap() );    
+        // allow_overlap
+        if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
+        {
+            set_attr( node, "allow_overlap", sym.get_allow_overlap() );
+        }
+        // avoid_edges
+        if (sym.get_avoid_edges() != dfl.get_avoid_edges() || explicit_defaults_ )
+        {
+            set_attr( node, "avoid_edges", sym.get_avoid_edges() );
+        }
 
-	// avoid_edges
-	set_attr( node, "avoid_edges", sym.get_avoid_edges() );    
+        // displacement
+        position displacement = sym.get_displacement();
+        if ( displacement.get<0>() != dfl.get_displacement().get<0>() || explicit_defaults_ )
+        {
+            set_attr( node, "dx", displacement.get<0>() );
+        }
+        if ( displacement.get<1>() != dfl.get_displacement().get<1>() || explicit_defaults_ )
+        {
+            set_attr( node, "dy", displacement.get<1>() );
+        }
 
-	// displacement
-	position displacement = sym.get_displacement();
-	set_attr( node, "dx", displacement.get<0>() );    
-	set_attr( node, "dy", displacement.get<1>() );    
+        // halo fill & radius
+        const color & c = sym.get_halo_fill();
+        if ( c != dfl.get_halo_fill() || explicit_defaults_ )
+        {
+            set_attr( node, "halo_fill", c );
+        }
+        
+        if (sym.get_halo_radius() != dfl.get_halo_radius() || explicit_defaults_ )
+        {
+            set_attr( node, "halo_radius", sym.get_halo_radius() );
+        }
 
-	// halo fill & radius
-	set_attr( node, "halo_fill", sym.get_halo_fill() );    
-	set_attr( node, "halo_radius", sym.get_halo_radius() );    
-
-	// angle_mode
-	set_attr( node, "angle_mode", sym.get_angle_mode() );
+        // angle_mode
+        if (sym.get_angle_mode() != dfl.get_angle_mode() || explicit_defaults_ )
+        {
+            set_attr( node, "angle_mode", sym.get_angle_mode() );
+        }
 
     }
 
