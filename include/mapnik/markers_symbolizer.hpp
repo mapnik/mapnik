@@ -29,10 +29,19 @@ namespace mapnik {
    
    struct MAPNIK_DECL markers_symbolizer
    {
-     public:
+    public:
       markers_symbolizer() 
          : allow_overlap_(false) {}
-     private:
+
+    void set_allow_overlap(bool overlap)
+    {
+        allow_overlap_ = overlap;
+    }
+    float get_allow_overlap() const
+    {
+        return allow_overlap_;
+    }
+    private:
       bool allow_overlap_;
       
    };
