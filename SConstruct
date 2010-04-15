@@ -101,7 +101,10 @@ def sort_paths(items,priority):
             path_types['frameworks'].append(i)
         # various 'local' installs like /usr/local or /opt/local
         elif 'local' in i or '/sw' in i:
-            path_types['user'].append(i)
+            if '/usr/local' in i:
+                path_types['user'].insert(0,i)
+            else:
+                path_types['user'].append(i)
         # key system libs (likely others will fall into 'other')
         elif '/usr/' in i or '/System' in i or '/lib' in i:
             path_types['system'].append(i)
