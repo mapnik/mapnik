@@ -1192,6 +1192,7 @@ if not HELP_REQUESTED:
     # Build the Python bindings
     if 'python' in env['BINDINGS']:
         SConscript('bindings/python/SConscript')
+        SConscript('utils/upgrade_map_xml/SConscript')
     
     # Configure fonts and if requested install the bundled DejaVu fonts
     SConscript('fonts/SConscript')
