@@ -67,7 +67,9 @@ if env['PLATFORM'] == 'Darwin':
     
     # http://developer.apple.com/mac/library/DOCUMENTATION/Darwin/Reference/ManPages/man1/ld.1.html
     
-    if env['FRAMEWORK_PYTHON']:
+    if env['PYTHON_DYNAMIC_LOOKUP']:
+        linkflags = '-undefined dynamic_lookup'
+    elif env['FRAMEWORK_PYTHON']:
         if env['FRAMEWORK_SEARCH_PATH']:
             # if the user has supplied a custom root path to search for 
             # a given Python framework, then use that to direct the linker
