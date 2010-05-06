@@ -59,6 +59,8 @@ void serialize_raster_colorizer(ptree & sym_node,
 		ptree::value_type("ColorBand", ptree())
 		)->second;
 	    set_attr(band_node, "value", cb[i].get_value());    
+        if (cb[i].get_value() != cb[i].get_max_value())
+            set_attr(band_node, "max_value", cb[i].get_max_value());    
 	    set_attr(band_node, "midpoints", cb[i].get_midpoints());    
 	    optional<color> c = cb[i].get_color();
 	    if (c) set_attr(band_node, "color", * c);    

@@ -30,3 +30,17 @@ def test_get_color():
     eq_(colorizer.get_color(200), bands[-1][1])
     #  values greater than the last value are mapped to "transparent"
     eq_(colorizer.get_color(201), mapnik2.Color("transparent"))
+
+def test_get_color_with_max_value():
+    colorizer = mapnik2.RasterColorizer()
+    c1 = mapnik2.Color("#0044cc")
+    colorizer.append_band(0, c1)
+    c2 = mapnik2.Color("#0055dd")
+    colorizer.append_band(1, 2, c2)
+
+    eq_(colorizer.get_color(-1), mapnik2.Color("transparent"))
+    eq_(colorizer.get_color(0), c1)
+    eq_(colorizer.get_color(0.5), c1)
+    eq_(colorizer.get_color(1), c2)
+    eq_(colorizer.get_color(1.5), c2)
+    eq_(colorizer.get_color(2), mapnik2.Color("transparent"))

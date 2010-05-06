@@ -37,11 +37,19 @@ namespace mapnik
 struct MAPNIK_DECL color_band
 {
     float value_;
+    float max_value_;
     color color_;
     unsigned midpoints_;
     bool is_interpolated_;
     color_band(float value, color c)
 	: value_(value),
+	max_value_(value),
+	color_(c),
+	midpoints_(0),
+	is_interpolated_(false) {}
+    color_band(float value, float max_value, color c)
+	: value_(value),
+	max_value_(max_value),
 	color_(c),
 	midpoints_(0),
 	is_interpolated_(false) {}
@@ -57,18 +65,22 @@ struct MAPNIK_DECL color_band
     {
 	return value_;
     }
+    const float get_max_value() const
+    {
+	return max_value_;
+    }
     const color& get_color() const
     {
 	return color_;
     }
     bool operator==(color_band const& other) const
     {
-	return value_ == other.value_ && color_ == other.color_;
+	return value_ == other.value_ && color_ == other.color_ && max_value_ == other.max_value_;
     }
     std::string to_string() const
     {
 	std::stringstream ss;
-	ss << color_.to_string() << " " << value_;
+	ss << color_.to_string() << " " << value_ << " " << max_value_;
 	return ss.str();
     }
 };
@@ -101,6 +113,8 @@ struct MAPNIK_DECL raster_colorizer
 		);
 	}
 	colors_.push_back(band);
+	if (colors_.size() > 0 && colors_.back().value_ == colors_.back().max_value_)
+        colors_.back().max_value_ = band.value_;
     }
     void append_band (color_band band, unsigned midpoints)
     {
@@ -141,10 +155,21 @@ struct MAPNIK_DECL raster_colorizer
 	append_band(color_band(value, c));
     }
 
+    void append_band (float value, float max_value, color c)
+    {
+	append_band(color_band(value, max_value, c));
+    }
+
     void append_band (float value, color c, unsigned midpoints)
     {
 	append_band(color_band(value, c), midpoints);
     }
+
+    void append_band (float value, float max_value, color c, unsigned midpoints)
+    {
+	append_band(color_band(value, max_value, c), midpoints);
+    }
+
 
     /* rgba = 
      *   if cs[pos].value <= value < cs[pos+1].value: cs[pos].color
@@ -168,7 +193,7 @@ struct MAPNIK_DECL raster_colorizer
 	}
 	lo--;
 	if ((0 <= lo && lo < last) ||
-	    (lo==last && colors_[last].value_==value))
+	    (lo==last && (colors_[last].value_==value || value<colors_[last].max_value_)))
 	    return colors_[lo].color_;
 	else
 	    return color(0,0,0,0);

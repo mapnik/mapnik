@@ -1605,7 +1605,12 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
 		    throw config_error("missing color");
 		}
 		unsigned midpoints = get_attr(cb, "midpoints", 0);
-		rc->append_band(value, *c, midpoints);
+		optional<float> max_value = get_opt_attr<float>(cb, "max_value");
+		if (max_value) {
+            rc->append_band(value, *max_value, *c, midpoints);
+		} else {
+            rc->append_band(value, *c, midpoints);
+        }
 	    }
 	    else if (cb_tag.first != "<xmlcomment>" &&
 		     cb_tag.first != "<xmlattr>" )

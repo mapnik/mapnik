@@ -48,6 +48,14 @@ namespace {
    {
       rc->append_band(v, c, m);
    }
+   void append_band5(raster_colorizer_ptr & rc, float v, float vm, color c, unsigned m)
+   {
+      rc->append_band(v, vm, c, m);
+   }
+   void append_band6(raster_colorizer_ptr & rc, float v, float vm, color c)
+   {
+      rc->append_band(v, vm, c);
+   }
    color_bands const& get_color_bands(raster_colorizer_ptr & rc)
    {
       return rc->get_color_bands();
@@ -67,6 +75,8 @@ void export_raster_colorizer()
     .def("append_band", append_band2, "TODO: Write docs")
     .def("append_band", append_band3, "TODO: Write docs")
     .def("append_band", append_band4, "TODO: Write docs")
+    .def("append_band", append_band5, "TODO: Write docs")
+    .def("append_band", append_band6, "TODO: Write docs")
     .def("get_color", &raster_colorizer::get_color, "TODO: Write docs")
 	;    
 
@@ -83,6 +93,7 @@ void export_raster_colorizer()
                   (&color_band::get_color,
                    return_value_policy<reference_existing_object>()))
     .add_property("value", &color_band::get_value)
+    .add_property("max_value", &color_band::get_max_value)
     .def(self == self)
     .def("__str__",&color_band::to_string)
     ;
