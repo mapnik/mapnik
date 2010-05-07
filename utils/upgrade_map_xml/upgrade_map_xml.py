@@ -17,8 +17,8 @@ def fixup_pointsym(sym):
         sym.attrib.pop('width')
     if sym.attrib.get('height'):
         sym.attrib.pop('height')
-    #if sym.attrib.get('type'):
-    #    sym.attrib.pop('type')
+    if sym.attrib.get('type'):
+        sym.attrib.pop('type')
 
 def fixup_sym_attributes(sym):
     if not hasattr(sym,'CssParameter'):
