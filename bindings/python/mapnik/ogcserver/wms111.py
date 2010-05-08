@@ -25,7 +25,7 @@ from common import ParameterDefinition, Response, Version, ListFactory, \
                    ColorFactory, CRSFactory, WMSBaseServiceHandler, CRS, \
                    BaseExceptionHandler, Projection
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Coord
+from mapnik2 import Coord
 
 try:
     from lxml import etree as ElementTree

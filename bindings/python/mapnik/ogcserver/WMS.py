@@ -25,7 +25,7 @@ from common import Version, copy_style, copy_layer
 from exceptions import OGCException, ServerConfigurationError
 from wms111 import ServiceHandler as ServiceHandler111
 from wms130 import ServiceHandler as ServiceHandler130
-from mapnik import Style, Map, load_map 
+from mapnik2 import Style, Map, load_map 
 import re
 import sys
 

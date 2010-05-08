@@ -22,7 +22,7 @@
 """Core OGCServer classes and functions."""
 
 from exceptions import OGCException, ServerConfigurationError
-from mapnik import Map, Color, Box2d, render, Image, Layer, Style, Projection as MapnikProjection, Coord
+from mapnik2 import Map, Color, Box2d, render, Image, Layer, Style, Projection as MapnikProjection, Coord
 from PIL.Image import new
 from PIL.ImageDraw import Draw
 from StringIO import StringIO
