@@ -84,7 +84,7 @@ public:
     placement_finder(DetectorT & detector);
 
     //Try place a single label at the given point
-    void find_point_placement(placement & p, double pos_x, double pos_y, vertical_alignment_e = MIDDLE, unsigned line_spacing=0, unsigned character_spacing=0, horizontal_alignment_e = H_MIDDLE, justify_alignment_e = J_MIDDLE);
+    void find_point_placement(placement & p, double pos_x, double pos_y, double angle=0.0, vertical_alignment_e = MIDDLE, unsigned line_spacing=0, unsigned character_spacing=0, horizontal_alignment_e = H_MIDDLE, justify_alignment_e = J_MIDDLE);
 
     //Iterate over the given path, placing point labels with respect to label_spacing
     template <typename T>
