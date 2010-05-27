@@ -25,6 +25,7 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_cache.hpp>
+#include <mapnik/svg/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/markers_converter.hpp>

@@ -28,7 +28,7 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/image_data.hpp>
+#include <mapnik/svg/agg_svg_path_renderer.h>
 
 // boost
 #include <boost/utility.hpp>
@@ -40,18 +40,18 @@
 namespace mapnik
 {
 
-typedef boost::shared_ptr<image_data_32> path_ptr;
+typedef boost::shared_ptr<agg::svg::path_renderer> path_ptr;
 
-struct MAPNIK_DECL image_cache :
-	public singleton <image_cache, CreateStatic>,
+struct MAPNIK_DECL marker_cache :
+	public singleton <marker_cache, CreateStatic>,
 	private boost::noncopyable
 {
 
-    friend class CreateStatic<image_cache>;
+    friend class CreateStatic<marker_cache>;
     static boost::mutex mutex_;
-    static boost::unordered_map<std::string,image_ptr> cache_;
-    static bool insert(std::string const& key, image_ptr);
-    static boost::optional<image_ptr> find(std::string const& key, bool update_cache = false);
+    static boost::unordered_map<std::string,path_ptr> cache_;
+    static bool insert(std::string const& key, path_ptr);
+    static boost::optional<path_ptr> find(std::string const& key, bool update_cache = false);
 };
 
 }
