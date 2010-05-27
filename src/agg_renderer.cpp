@@ -438,7 +438,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     
     if ( filename.empty() )
     {
-        // default OGC 4x4 black pixel
+        // default OGC 4x4 black square
         data = boost::optional<mapnik::image_ptr>(new image_data_32(4,4));
         (*data)->set(0xff000000);
     }
@@ -446,7 +446,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     {
         data = mapnik::image_cache::instance()->find(filename,true);
     }
-
+    
     if ( data )
     {
 	for (unsigned i=0;i<feature.num_geometries();++i)
