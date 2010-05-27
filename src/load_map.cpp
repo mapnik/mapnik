@@ -66,229 +66,229 @@ using boost::optional;
 
 class map_parser : boost::noncopyable {
 public:
-map_parser( bool strict, std::string const& filename = "" ) :
-    strict_( strict ),
-    filename_( filename ),
-    relative_to_xml_(true),
-    font_manager_(font_engine_) {}
+    map_parser( bool strict, std::string const& filename = "" ) :
+	strict_( strict ),
+	filename_( filename ),
+	relative_to_xml_(true),
+	font_manager_(font_engine_) {}
 
     void parse_map( Map & map, ptree const & sty);
 private:
-void parse_style( Map & map, ptree const & sty);
-void parse_layer( Map & map, ptree const & lay);
+    void parse_style( Map & map, ptree const & sty);
+    void parse_layer( Map & map, ptree const & lay);
 
-void parse_fontset(Map & map, ptree const & fset);
-void parse_font(font_set & fset, ptree const & f);
+    void parse_fontset(Map & map, ptree const & fset);
+    void parse_font(font_set & fset, ptree const & f);
 
-void parse_rule( feature_type_style & style, ptree const & r);
+    void parse_rule( feature_type_style & style, ptree const & r);
 
-void parse_point_symbolizer( rule_type & rule, ptree const & sym);
-void parse_line_pattern_symbolizer( rule_type & rule, ptree const & sym);
-void parse_polygon_pattern_symbolizer( rule_type & rule, ptree const & sym);
-void parse_text_symbolizer( rule_type & rule, ptree const & sym);
-void parse_shield_symbolizer( rule_type & rule, ptree const & sym);
-void parse_line_symbolizer( rule_type & rule, ptree const & sym);
-void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
-void parse_building_symbolizer( rule_type & rule, ptree const & sym );
-void parse_raster_symbolizer( rule_type & rule, ptree const & sym );
-void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
-void parse_glyph_symbolizer( rule_type & rule, ptree const & sym );
+    void parse_point_symbolizer( rule_type & rule, ptree const & sym);
+    void parse_line_pattern_symbolizer( rule_type & rule, ptree const & sym);
+    void parse_polygon_pattern_symbolizer( rule_type & rule, ptree const & sym);
+    void parse_text_symbolizer( rule_type & rule, ptree const & sym);
+    void parse_shield_symbolizer( rule_type & rule, ptree const & sym);
+    void parse_line_symbolizer( rule_type & rule, ptree const & sym);
+    void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
+    void parse_building_symbolizer( rule_type & rule, ptree const & sym );
+    void parse_raster_symbolizer( rule_type & rule, ptree const & sym );
+    void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
+    void parse_glyph_symbolizer( rule_type & rule, ptree const & sym );
 
-void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
+    void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
 
-void ensure_font_face( const std::string & face_name );
+    void ensure_font_face( const std::string & face_name );
 
-std::string ensure_relative_to_xml( boost::optional<std::string> opt_path );
+    std::string ensure_relative_to_xml( boost::optional<std::string> opt_path );
 
-bool strict_;
-std::string filename_;
-bool relative_to_xml_;
-std::map<std::string,parameters> datasource_templates_;
-freetype_engine font_engine_;
-face_manager<freetype_engine> font_manager_;
-std::map<std::string,std::string> file_sources_;
-std::map<std::string,font_set> fontsets_;
+    bool strict_;
+    std::string filename_;
+    bool relative_to_xml_;
+    std::map<std::string,parameters> datasource_templates_;
+    freetype_engine font_engine_;
+    face_manager<freetype_engine> font_manager_;
+    std::map<std::string,std::string> file_sources_;
+    std::map<std::string,font_set> fontsets_;
 };
 
 void load_map(Map & map, std::string const& filename, bool strict)
 {
-ptree pt;
+    ptree pt;
 #ifdef HAVE_LIBXML2
-read_xml2(filename, pt);
+    read_xml2(filename, pt);
 #else
-try
-{
-read_xml(filename, pt);
-}
-catch (const boost::property_tree::xml_parser_error & ex)
-{
-throw config_error( ex.what() );
-}
+    try
+    {
+	read_xml(filename, pt);
+    }
+    catch (const boost::property_tree::xml_parser_error & ex)
+    {
+	throw config_error( ex.what() );
+    }
 #endif
-map_parser parser( strict, filename);
-parser.parse_map(map, pt);
+    map_parser parser( strict, filename);
+    parser.parse_map(map, pt);
 }
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_url)
 {
-ptree pt;
+    ptree pt;
 #ifdef HAVE_LIBXML2
-read_xml2_string(str, pt, base_url);
+    read_xml2_string(str, pt, base_url);
 #else
-try
-{
-std::istringstream s(str);
-read_xml(s,pt);
-}
-catch (const boost::property_tree::xml_parser_error & ex)
-{
-throw config_error( ex.what() ) ;
-}
+    try
+    {
+	std::istringstream s(str);
+	read_xml(s,pt);
+    }
+    catch (const boost::property_tree::xml_parser_error & ex)
+    {
+	throw config_error( ex.what() ) ;
+    }
 #endif
 
-map_parser parser( strict, base_url);
-parser.parse_map(map, pt);
+    map_parser parser( strict, base_url);
+    parser.parse_map(map, pt);
 }
 
 void map_parser::parse_map( Map & map, ptree const & pt )
 {
-try
-{
-ptree const & map_node = pt.get_child("Map");
+    try
+    {
+	ptree const & map_node = pt.get_child("Map");
 
-try
-{
-optional<color> bgcolor = get_opt_attr<color>(map_node, "bgcolor");
-if (bgcolor) {
-map.set_background( * bgcolor );
-}
+	try
+	{
+	    optional<color> bgcolor = get_opt_attr<color>(map_node, "bgcolor");
+	    if (bgcolor) {
+		map.set_background( * bgcolor );
+	    }
 
-map.set_srs( get_attr(map_node, "srs", map.srs() ));
+	    map.set_srs( get_attr(map_node, "srs", map.srs() ));
 
-optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer_size");
-if (buffer_size)
-{
-map.set_buffer_size(*buffer_size);
-}
+	    optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer_size");
+	    if (buffer_size)
+	    {
+		map.set_buffer_size(*buffer_size);
+	    }
 
 // Check if relative paths should be interpreted as relative to/from XML location
 // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
-optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
-if (paths_from_xml)
-{
-    relative_to_xml_ = *paths_from_xml;
-}
+	    optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
+	    if (paths_from_xml)
+	    {
+		relative_to_xml_ = *paths_from_xml;
+	    }
 
-optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum_version");
+	    optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum_version");
                 
-if (min_version_string)
-{
-    boost::char_separator<char> sep(".");
-    boost::tokenizer<boost::char_separator<char> > tokens(*min_version_string,sep);
-    unsigned i = 0;
-    bool success = false;
-    int n[3];
-    for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tokens.begin(); 
-	 beg!=tokens.end();++beg)
-    {
-	try 
-	{
-	    n[i] = boost::lexical_cast<int>(boost::trim_copy(*beg));
-	}
-	catch (boost::bad_lexical_cast & ex)
-	{
-	    std::clog << *beg << " : " << ex.what() << "\n";
-	    break;
-	}
-	if (i==2) 
-	{
-	    success = true;
-	    break;
-	}
-	++i;
-    }
-    if (success)
-    {
-	int min_version = (n[0] * 100000) + (n[1] * 100) + (n[2]);
-	if (min_version > MAPNIK_VERSION)
-	{
-	    throw config_error(std::string("This map uses features only present in Mapnik version ") + *min_version_string + " and newer");
-	}
+	    if (min_version_string)
+	    {
+		boost::char_separator<char> sep(".");
+		boost::tokenizer<boost::char_separator<char> > tokens(*min_version_string,sep);
+		unsigned i = 0;
+		bool success = false;
+		int n[3];
+		for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tokens.begin(); 
+		     beg!=tokens.end();++beg)
+		{
+		    try 
+		    {
+			n[i] = boost::lexical_cast<int>(boost::trim_copy(*beg));
+		    }
+		    catch (boost::bad_lexical_cast & ex)
+		    {
+			std::clog << *beg << " : " << ex.what() << "\n";
+			break;
+		    }
+		    if (i==2) 
+		    {
+			success = true;
+			break;
+		    }
+		    ++i;
+		}
+		if (success)
+		{
+		    int min_version = (n[0] * 100000) + (n[1] * 100) + (n[2]);
+		    if (min_version > MAPNIK_VERSION)
+		    {
+			throw config_error(std::string("This map uses features only present in Mapnik version ") + *min_version_string + " and newer");
+		    }
                        
-    }
+		}
                 
-}
-}
-catch (const config_error & ex)
-{
-    ex.append_context("(in node Map)");
-    throw;
-}
-
-ptree::const_iterator itr = map_node.begin();
-ptree::const_iterator end = map_node.end();
-
-for (; itr != end; ++itr)
-{
-    ptree::value_type const& v = *itr;
-
-    if (v.first == "Style")
-    {
-	parse_style( map, v.second );
-    }
-    else if (v.first == "Layer")
-    {
-	parse_layer(map, v.second );
-    }
-    else if (v.first == "FontSet")
-    {
-	parse_fontset(map, v.second);
-    }
-    else if (v.first == "FileSource")
-    {
-	std::string name = get_attr<string>( v.second, "name");
-	std::string value = get_value<string>( v.second, "");
-	file_sources_[name] = value;
-    }
-    else if (v.first == "Datasource")
-    {
-	std::string name = get_attr(v.second, "name", string("Unnamed"));
-	parameters params;
-	ptree::const_iterator paramIter = v.second.begin();
-	ptree::const_iterator endParam = v.second.end();
-	for (; paramIter != endParam; ++paramIter)
-	{
-	    ptree const& param = paramIter->second;
-
-	    if (paramIter->first == "Parameter")
-	    {
-		std::string name = get_attr<string>(param, "name");
-		std::string value = get_value<string>( param,
-						       "datasource parameter");
-		params[name] = value;
-	    }
-	    else if( paramIter->first != "<xmlattr>" &&
-		     paramIter->first != "<xmlcomment>" )
-	    {
-		throw config_error(std::string("Unknown child node in ") +
-				   "'Datasource'. Expected 'Parameter' but got '" +
-				   paramIter->first + "'");
 	    }
 	}
-	datasource_templates_[name] = params;
+	catch (const config_error & ex)
+	{
+	    ex.append_context("(in node Map)");
+	    throw;
+	}
+
+	ptree::const_iterator itr = map_node.begin();
+	ptree::const_iterator end = map_node.end();
+
+	for (; itr != end; ++itr)
+	{
+	    ptree::value_type const& v = *itr;
+
+	    if (v.first == "Style")
+	    {
+		parse_style( map, v.second );
+	    }
+	    else if (v.first == "Layer")
+	    {
+		parse_layer(map, v.second );
+	    }
+	    else if (v.first == "FontSet")
+	    {
+		parse_fontset(map, v.second);
+	    }
+	    else if (v.first == "FileSource")
+	    {
+		std::string name = get_attr<string>( v.second, "name");
+		std::string value = get_value<string>( v.second, "");
+		file_sources_[name] = value;
+	    }
+	    else if (v.first == "Datasource")
+	    {
+		std::string name = get_attr(v.second, "name", string("Unnamed"));
+		parameters params;
+		ptree::const_iterator paramIter = v.second.begin();
+		ptree::const_iterator endParam = v.second.end();
+		for (; paramIter != endParam; ++paramIter)
+		{
+		    ptree const& param = paramIter->second;
+
+		    if (paramIter->first == "Parameter")
+		    {
+			std::string name = get_attr<string>(param, "name");
+			std::string value = get_value<string>( param,
+							       "datasource parameter");
+			params[name] = value;
+		    }
+		    else if( paramIter->first != "<xmlattr>" &&
+			     paramIter->first != "<xmlcomment>" )
+		    {
+			throw config_error(std::string("Unknown child node in ") +
+					   "'Datasource'. Expected 'Parameter' but got '" +
+					   paramIter->first + "'");
+		    }
+		}
+		datasource_templates_[name] = params;
+	    }
+	    else if (v.first != "<xmlcomment>" &&
+		     v.first != "<xmlattr>")
+	    {
+		throw config_error(std::string("Unknown child node in 'Map'. ") +
+				   "Expected 'Style' or 'Layer' but got '" + v.first + "'");
+	    }
+	}
     }
-    else if (v.first != "<xmlcomment>" &&
-	     v.first != "<xmlattr>")
+    catch (const boost::property_tree::ptree_bad_path &)
     {
-	throw config_error(std::string("Unknown child node in 'Map'. ") +
-			   "Expected 'Style' or 'Layer' but got '" + v.first + "'");
+	throw config_error("Not a map file. Node 'Map' not found.");
     }
-}
-}
-catch (const boost::property_tree::ptree_bad_path &)
-{
-    throw config_error("Not a map file. Node 'Map' not found.");
-}
 }
 
 void map_parser::parse_style( Map & map, ptree const & sty )
@@ -355,7 +355,7 @@ void map_parser::parse_fontset( Map & map, ptree const & fset )
 	}
 
 	map.insert_fontset(name, fontset);
-
+	
 	// XXX Hack because map object isn't accessible by text_symbolizer
 	// when it's parsed
 	fontsets_.insert(pair<std::string, font_set>(name, fontset));
@@ -725,11 +725,11 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
         
             if (allow_overlap)
             {
-              symbol.set_allow_overlap( * allow_overlap );
+		symbol.set_allow_overlap( * allow_overlap );
             }
             if (opacity)
             {
-              symbol.set_opacity( * opacity );
+		symbol.set_opacity( * opacity );
             }
             rule.append(symbol);
         }
@@ -850,7 +850,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
     try
     {
 	std::string name = get_attr<string>(sym, "name");
-	    
+	
 	optional<std::string> face_name =
 	    get_opt_attr<std::string>(sym, "face_name");
 
@@ -862,7 +862,13 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 	color c = get_attr(sym, "fill", color(0,0,0));
 
 	text_symbolizer text_symbol = text_symbolizer(parse_expression(name, "utf8"), size, c);
-	    	    
+
+	optional<std::string> orientation = get_opt_attr<std::string>(sym, "orientation");
+	if (orientation)
+	{
+	    text_symbol.set_orientation(parse_expression(*orientation, "utf8"));
+	}
+	
 	if (fontset_name && face_name)
 	{
 	    throw config_error(std::string("Can't have both face_name and fontset_name"));
