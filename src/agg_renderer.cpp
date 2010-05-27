@@ -32,6 +32,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/text_path.hpp>
 
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
@@ -264,11 +265,9 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
 		else if (cm == SEG_LINETO)
 		{
 		    frame->line_to(x,y);
-		}
-		if (j!=0)
-		{
 		    face_segments.push_back(segment_t(x0,y0,x,y));
 		}
+		
 		x0 = x;
 		y0 = y;
             }
@@ -311,7 +310,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             path_type path(t_,*frame,prj_trans);
             agg::conv_stroke<path_type>  stroke(path);
             ras_ptr->add_path(stroke);
-            ren.color(agg::rgba8(128, 128, 128, int(255 * sym.get_opacity())));
+            ren.color(agg::rgba8(r * 0.8, g * 0.8 , b * 0.8, int(255 * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
 
@@ -565,7 +564,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 			    prj_trans.backward(label_x,label_y, z);
 			    t_.forward(&label_x,&label_y);
 
-			    finder.find_point_placement( text_placement,label_x,label_y,sym.get_vertical_alignment(),sym.get_line_spacing(),
+			    finder.find_point_placement( text_placement,label_x,label_y,0.0,sym.get_vertical_alignment(),sym.get_line_spacing(),
 							 sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment() );
 
 			    // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
@@ -910,8 +909,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             {
 		geometry2d const& geom = feature.get_geometry(i);
 		if (geom.num_points() > 0) // don't bother with empty geometries
-		{
-		    path_type path(t_,geom,prj_trans);
+		{	    
 		    placement text_placement(info,sym);
 		    text_placement.avoid_edges = sym.get_avoid_edges();
 		    if (sym.get_label_placement() == POINT_PLACEMENT)
@@ -920,15 +918,27 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 			geom.label_position(&label_x, &label_y);
 			prj_trans.backward(label_x,label_y, z);
 			t_.forward(&label_x,&label_y);
-			finder.find_point_placement(text_placement,label_x,label_y,sym.get_vertical_alignment(),sym.get_line_spacing(),
+
+			double angle = 0.0;
+			expression_ptr angle_expr = sym.get_orientation();
+			if (angle_expr)
+			{
+			    // apply rotation
+			    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*angle_expr);
+			    angle = result.to_double();
+			}
+			
+			finder.find_point_placement(text_placement,label_x,label_y, angle, sym.get_vertical_alignment(),sym.get_line_spacing(),
 						    sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment());
+				
 			finder.update_detector(text_placement);
 		    }
 		    else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
 		    {
+			path_type path(t_,geom,prj_trans);
 			finder.find_line_placements<path_type>(text_placement,path);
 		    }
-
+		    
 		    for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
 		    {
 			double x = text_placement.placements[ii].starting_x;
