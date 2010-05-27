@@ -99,6 +99,10 @@ namespace mapnik
          text_symbolizer& operator=(text_symbolizer const& rhs);
          expression_ptr get_name() const;
          void set_name(expression_ptr expr);
+
+	 expression_ptr get_orientation() const; // orienation (rotation angle atm)
+         void set_orientation(expression_ptr expr);
+	 
          unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
          void set_text_ratio(unsigned ratio);
          unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
@@ -158,6 +162,7 @@ namespace mapnik
 
       private:
 	 expression_ptr name_;
+	 expression_ptr orientation_;
          std::string face_name_;
          font_set fontset_;
          unsigned size_;

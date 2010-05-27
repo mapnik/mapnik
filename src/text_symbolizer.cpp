@@ -142,6 +142,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
 
 text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
     : name_(rhs.name_),
+      orientation_(rhs.orientation_),
       face_name_(rhs.face_name_),
       fontset_(rhs.fontset_),
       size_(rhs.size_),
@@ -175,6 +176,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     if (this == &other)
 	return *this;
     name_ = other.name_;
+    orientation_ = other.orientation_;
     face_name_ = other.face_name_;
     fontset_ = other.fontset_;
     size_ = other.size_;
@@ -213,6 +215,16 @@ expression_ptr text_symbolizer::get_name() const
 void text_symbolizer::set_name(expression_ptr name)
 {
     name_ = name;
+}
+
+expression_ptr text_symbolizer::get_orientation() const
+{
+    return orientation_;
+}
+
+void text_symbolizer::set_orientation(expression_ptr orientation)
+{
+    orientation_ = orientation;
 }
 
 std::string const&  text_symbolizer::get_face_name() const
