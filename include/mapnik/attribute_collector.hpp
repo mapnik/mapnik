@@ -99,6 +99,14 @@ struct symbolizer_attributes : public boost::static_visitor<>
 	    expression_attributes f_attr(names_);
 	    boost::apply_visitor(f_attr,*name_expr);
 	}
+
+	expression_ptr const& orientation_expr = sym.get_orientation();
+	if (orientation_expr)
+	{
+	    expression_attributes f_attr(names_);
+	    boost::apply_visitor(f_attr,*orientation_expr);
+	}
+	
     }
     
     void operator () (point_symbolizer const& sym)
