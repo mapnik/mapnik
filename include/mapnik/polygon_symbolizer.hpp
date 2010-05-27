@@ -29,91 +29,91 @@
 
 namespace mapnik 
 {
-    struct MAPNIK_DECL polygon_symbolizer
-    {
-        explicit polygon_symbolizer() 
-            : fill_(color(128,128,128)),
-              opacity_(1.0),
-              gamma_(1.0) {}
+struct MAPNIK_DECL polygon_symbolizer
+{
+    explicit polygon_symbolizer() 
+	: fill_(color(128,128,128)),
+	opacity_(1.0),
+	gamma_(1.0) {}
 
-        polygon_symbolizer(color const& fill)
-            : fill_(fill),
-              opacity_(1.0),
-              gamma_(1.0) {}
+    polygon_symbolizer(color const& fill)
+	: fill_(fill),
+	opacity_(1.0),
+	gamma_(1.0) {}
         
-        color const& get_fill() const
-        {
-            return fill_;
-        }
-        void set_fill(color const& fill)
-        {
-            fill_ = fill;
-        }
-        void set_opacity(double opacity)
-        {
-            opacity_ = opacity;
-        }
-        double get_opacity() const
-        {
-            return opacity_;
-        }
-        void set_gamma(double gamma)
-        {
-            gamma_ = gamma;
-        }
-        double get_gamma() const
-        {
-            return gamma_;
-        }
-
-    private:
-        color fill_;
-        double opacity_;
-        double gamma_;
-    }; 
-   
-   struct MAPNIK_DECL building_symbolizer
+    color const& get_fill() const
     {
-       explicit building_symbolizer() 
-          : fill_(color(128,128,128)),
-          height_(0.0),
-          opacity_(1.0)
-          {}
+	return fill_;
+    }
+    void set_fill(color const& fill)
+    {
+	fill_ = fill;
+    }
+    void set_opacity(double opacity)
+    {
+	opacity_ = opacity;
+    }
+    double get_opacity() const
+    {
+	return opacity_;
+    }
+    void set_gamma(double gamma)
+    {
+	gamma_ = gamma;
+    }
+    double get_gamma() const
+    {
+	return gamma_;
+    }
 
-       building_symbolizer(color const& fill,double height)
-          : fill_(fill),
-          height_(height),
-          opacity_(1.0) {}
+private:
+    color fill_;
+    double opacity_;
+    double gamma_;
+}; 
+   
+struct MAPNIK_DECL building_symbolizer
+{
+    explicit building_symbolizer() 
+	: fill_(color(128,128,128)),
+	height_(0.0),
+	opacity_(1.0)
+	{}
        
-        color const& get_fill() const
-        {
-            return fill_;
-        }
-        void set_fill(color const& fill)
-        {
-            fill_ = fill;
-        }
-        double height() const
-        {
-           return height_;
-        }
-        void set_height(double height) 
-        {
-           height_=height;
-        }
-        void set_opacity(double opacity)
-        {
-            opacity_ = opacity;
-        }
-        double get_opacity() const
-        {
-            return opacity_;
-        }
-    private:
-        color fill_;
-        double height_;
-        double opacity_;
-    };  
+    building_symbolizer(color const& fill,double height)
+	: fill_(fill),
+	height_(height),
+	opacity_(1.0) {}
+       
+    color const& get_fill() const
+    {
+	return fill_;
+    }
+    void set_fill(color const& fill)
+    {
+	fill_ = fill;
+    }
+    double height() const
+    {
+	return height_;
+    }
+    void set_height(double height) 
+    {
+	height_=height;
+    }
+    void set_opacity(double opacity)
+    {
+	opacity_ = opacity;
+    }
+    double get_opacity() const
+    {
+	return opacity_;
+    }
+private:
+    color fill_;
+    double height_;
+    double opacity_;
+};  
 }
 
 #endif // POLYGON_SYMBOLIZER_HPP
