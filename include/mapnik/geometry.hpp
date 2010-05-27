@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 //$Id: geometry.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
 #ifndef GEOMETRY_HPP
@@ -81,8 +80,8 @@ namespace mapnik {
         virtual void rewind(unsigned) const=0;
         virtual void set_capacity(size_t size)=0;
         virtual ~geometry() {}
-    };
-    
+   };
+
    template <typename T>
    class point : public geometry<T>
    {
@@ -137,19 +136,19 @@ namespace mapnik {
    };
    
    template <typename T, template <typename> class Container=vertex_vector2>
-   class polygon : public geometry<T>
+   class polygon //: public geometry<T>
    {
-         typedef geometry<T> geometry_base;
-         typedef typename geometry<T>::vertex_type vertex_type;
-         typedef typename geometry_base::value_type value_type;
-         typedef Container<vertex_type> container_type;
+       typedef T vertex_type;
+       typedef typename vertex_type::type value_type;
+       typedef Container<vertex_type> container_type;
+       
       private:
          container_type cont_;
          mutable unsigned itr_;
       public:
          polygon()
-            : geometry_base(),
-              itr_(0)
+	     : //geometry_base(),
+	     itr_(0)
          {}
          
          int type() const 
@@ -157,36 +156,55 @@ namespace mapnik {
             return Polygon;
          }
          
-         void label_position(double *x, double *y) const
-         {
-            unsigned size = cont_.size();
-            if (size < 3) 
+       box2d<double> envelope() const
+        {
+            box2d<double> result;    
+            double x,y;
+            rewind(0);
+            for (unsigned i=0;i<num_points();++i)
             {
+                vertex(&x,&y);
+                if (i==0)
+                {
+                    result.init(x,y,x,y);
+                }
+                else
+                {
+                    result.expand_to_include(x,y);
+                }
+            }
+            return result;
+        }
+       void label_position(double *x, double *y) const
+       {
+	   unsigned size = cont_.size();
+	   if (size < 3) 
+	   {
                cont_.get_vertex(0,x,y);
                return;
-            }
-            
-            double ai;
-            double atmp = 0;
-            double xtmp = 0;
-            double ytmp = 0;
-            double x0 =0;
-            double y0 =0;
-            double x1 =0;
-            double y1 =0;
-            double ox =0;
-            double oy =0;
-      
-            unsigned i;
-
+	   }
+	   
+	   double ai;
+	   double atmp = 0;
+	   double xtmp = 0;
+	   double ytmp = 0;
+	   double x0 =0;
+	   double y0 =0;
+	   double x1 =0;
+	   double y1 =0;
+	   double ox =0;
+	   double oy =0;
+	   
+	   unsigned i;
+	   
             // Use first point as origin to improve numerical accuracy
-            cont_.get_vertex(0,&ox,&oy);
+	   cont_.get_vertex(0,&ox,&oy);
 
-            for (i = 0; i < size-1; i++)
-            {
+	   for (i = 0; i < size-1; i++)
+	   {
                cont_.get_vertex(i,&x0,&y0);
                cont_.get_vertex(i+1,&x1,&y1);
-
+	       
                x0 -= ox; y0 -= oy;
                x1 -= ox; y1 -= oy;
 
@@ -239,7 +257,7 @@ namespace mapnik {
          {
             cont_.set_capacity(size);
          }
-         virtual ~polygon() {}
+       //virtual ~polygon() {}
    };
    
    template <typename T, template <typename> class Container=vertex_vector2>
@@ -350,13 +368,15 @@ namespace mapnik {
          virtual ~line_string() {}
    };
    
-   typedef point<vertex2d> point_impl;
-   typedef line_string<vertex2d,vertex_vector2> line_string_impl;
-   typedef polygon<vertex2d,vertex_vector2> polygon_impl;
+//typedef point<vertex2d> point_impl;
+//typedef line_string<vertex2d,vertex_vector2> line_string_impl;
+typedef polygon<vertex2d,vertex_vector2> point_impl;
+typedef polygon<vertex2d,vertex_vector2> line_string_impl;
+typedef polygon<vertex2d,vertex_vector2> polygon_impl;
    
-   typedef geometry<vertex2d> geometry2d;
-   typedef boost::shared_ptr<geometry2d> geometry_ptr;
-   typedef boost::ptr_vector<geometry2d> geometry_containter;
+typedef polygon_impl geometry2d;
+typedef boost::shared_ptr<geometry2d> geometry_ptr;
+typedef boost::ptr_vector<geometry2d> geometry_containter;
 }
 
 #endif //GEOMETRY_HPP

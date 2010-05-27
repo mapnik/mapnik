@@ -203,7 +203,7 @@ namespace mapnik
 	
         void read_point(Feature & feature)
         {
-            geometry2d * pt = new point<vertex2d>;
+            geometry2d * pt = new geometry2d;//new point<vertex2d>;
             double x = read_double();
             double y = read_double();
             pt->move_to(x,y);
@@ -222,7 +222,7 @@ namespace mapnik
          
         void read_multipoint_2(Feature & feature)
         {
-            geometry2d * pt = new point<vertex2d>;
+            geometry2d * pt = new geometry2d;//point<vertex2d>;
             int num_points = read_integer(); 
             for (int i=0;i<num_points;++i) 
             {
@@ -236,7 +236,7 @@ namespace mapnik
          
         void read_linestring(Feature & feature)
         {
-            geometry2d * line = new line_string<vertex2d>;
+            geometry2d * line = new geometry2d;//line_string<vertex2d>;
             int num_points=read_integer();
             CoordinateArray ar(num_points);
             read_coords(ar);
@@ -261,7 +261,7 @@ namespace mapnik
 
         void read_multilinestring_2(Feature & feature)
         {
-            geometry2d * line = new line_string<vertex2d>;
+            geometry2d * line = new geometry2d;//line_string<vertex2d>;
             int num_lines=read_integer();
             unsigned capacity = 0;
             for (int i=0;i<num_lines;++i)
