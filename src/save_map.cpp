@@ -262,11 +262,13 @@ public:
     {
         ptree & sym_node = rule_.push_back(
                 ptree::value_type("MarkersSymbolizer", ptree()))->second;
-        markers_symbolizer dfl;
-        if ( sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "allow_overlap", sym.get_allow_overlap() );
-        }
+	const std::string & filename = path_processor_type::to_string( *sym.get_filename());
+	// TODO!!!
+//markers_symbolizer dfl
+        //if ( sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
+        //{
+        //    set_attr( sym_node, "allow_overlap", sym.get_allow_overlap() );
+        //}
 
     }
 
@@ -368,7 +370,7 @@ private:
     serialize_symbolizer();
     void add_image_attributes(ptree & node, const symbolizer_with_image & sym)
     {
-	const std::string & filename = path_processor_type::to_string( *sym.get_filename());
+	std::string const& filename = path_processor_type::to_string( *sym.get_filename());
 	if ( ! filename.empty() ) {
 	    set_attr( node, "file", filename );
 	}

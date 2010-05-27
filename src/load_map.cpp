@@ -626,7 +626,7 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
 	    }
 	    else if ( sym.first == "MarkersSymbolizer")
 	    {
-		rule.append(markers_symbolizer());
+		parse_markers_symbolizer(rule, sym.second);
 	    }
 	    else if ( sym.first == "GlyphSymbolizer")
 	    {
@@ -737,6 +737,75 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
     catch (const config_error & ex)
     {
 	ex.append_context("in PointSymbolizer");
+	throw;
+    }
+}
+
+
+void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
+{
+    try
+    {
+	optional<std::string> file =  get_opt_attr<string>(sym, "file");
+	optional<std::string> base =  get_opt_attr<string>(sym, "base");
+	optional<boolean> allow_overlap =
+	    get_opt_attr<boolean>(sym, "allow_overlap");
+	optional<float> opacity =
+	    get_opt_attr<float>(sym, "opacity");
+	
+	if (file)
+	{
+	    try
+	    {
+		if( base )
+		{
+		    std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+		    if (itr!=file_sources_.end())
+		    {
+			*file = itr->second + "/" + *file;
+		    }
+		}
+
+		if ( relative_to_xml_ )
+		{
+		    *file = ensure_relative_to_xml(file);
+		}
+#ifdef MAPNIK_DEBUG
+		else {
+		    std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
+		}
+#endif
+		   
+		markers_symbolizer symbol(parse_path(*file));
+		
+		if (allow_overlap)
+		{
+		    symbol.set_allow_overlap( * allow_overlap );
+		}
+		if (opacity)
+		{
+		    // TODO !!!!!  symbol.set_opacity( *opacity );
+		}
+		rule.append(symbol);
+	    }
+	    catch (...)
+	    {
+		string msg("Failed to load marker file '" + * file);
+		if (strict_)
+		{
+		    throw config_error(msg);
+		}
+		else
+		{
+		    clog << "### WARNING: " << msg << endl;
+		}
+	    }
+
+        }
+    }
+    catch (const config_error & ex)
+    {
+	ex.append_context("in MarkersSymbolizer");
 	throw;
     }
 }

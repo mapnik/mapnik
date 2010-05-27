@@ -816,43 +816,48 @@ template <typename T>
 void agg_renderer<T>::process(markers_symbolizer const& sym,
 			      Feature const& feature,
 			      proj_transform const& prj_trans)
-{
-    typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-    arrow arrow_;
-    ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_linear());
-
-
-    agg::scanline_u8 sl;
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32_plain pixf(buf);
-    ren_base renb(pixf);
-
-    unsigned r = 0;// fill_.red();
-    unsigned g = 0; //fill_.green();
-    unsigned b = 255; //fill_.blue();
-    unsigned a = 255; //fill_.alpha();
-    renderer ren(renb);
-    for (unsigned i=0;i<feature.num_geometries();++i)
+{									
+    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::renderer_base<pixfmt> renderer_base;
+    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
+    
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+    
+    if (!filename.empty())
     {
-	geometry2d const& geom=feature.get_geometry(i);
-	if (geom.num_points() > 1)
+	boost::optional<path_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
+	
+	if (marker && *marker)
 	{
-            path_type path(t_,geom,prj_trans);
-
-            agg::conv_dash <path_type> dash(path);
-            dash.add_dash(20.0,200.0);
-            markers_converter<agg::conv_dash<path_type>,
-		arrow,
-		label_collision_detector4>
-		marker(dash, arrow_, detector_);
-            ras_ptr->add_path(marker);
+	    ras_ptr->reset();
+	    ras_ptr->gamma(agg::gamma_linear());
+	    agg::scanline_u8 sl;
+	    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+	    pixfmt pixf(buf);
+	    renderer_base renb(pixf);
+	    renderer_solid ren(renb);
+	    
+            //mtx *= agg::trans_affine_translation((lox + hix) * -0.5, (loy + hiy) * -0.5);
+	    //mtx *= agg::trans_affine_scaling(0.8 * std::min(im.width()/(hix-lox),im.height()/(hiy-loy)));
+	    //mtx *= agg::trans_affine_translation((lox + hix) * 0.5, (loy + hiy) * 0.5);
+	    //mtx *= agg::trans_affine_translation((im.width() - (lox + hix)) * 0.5, (im.height() - (loy + hiy)) * 0.5);
+	    
+	    for (unsigned i=0;i<feature.num_geometries();++i)
+	    {
+		agg::trans_affine mtx;
+		double x,y,z=0;
+		
+		geometry2d const& geom = feature.get_geometry(i);
+		
+		geom.label_position(&x,&y);
+		prj_trans.backward(x,y,z);
+		t_.forward(&x,&y);
+		mtx *= agg::trans_affine_translation(x,y);
+		(*marker)->render(*ras_ptr, sl, ren, mtx, renb.clip_box(), 1.0);
+	    }
 	}
     }
-    ren.color(agg::rgba8(r, g, b, a));
-    agg::render_scanlines(*ras_ptr, sl, ren);
 }
 
 template <typename T>
