@@ -38,6 +38,10 @@ regex = 'boost_regex%s' % env['BOOST_APPEND']
 
 libraries = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,regex]
 
+### WARNING! temp solution.
+libraries.append('expat')
+###
+
 if '-DHAVE_CAIRO' in env['CXXFLAGS']:
     # add cairo and cairomm-1.0 to libs
     libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
@@ -110,8 +114,20 @@ source = Split(
     arrow.cpp
     unicode.cpp
     glyph_symbolizer.cpp
-    """
+    """   
     )
+
+
+if True :
+    source += Split(
+        """
+    agg_svg_parser.cpp
+    agg_svg_path_renderer.cpp
+    svg_path_parser.cpp
+    svg_points_parser.cpp 
+    svg_transform_parser.cpp
+    """ 
+        )
 
 if 'cairo' in env['LIBS']:
     source += Split(
