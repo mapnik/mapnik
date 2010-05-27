@@ -169,7 +169,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     	std::clog << "GDAL Plugin: Image Size=(" << im_width << "," << im_height << ")\n";
     	std::clog << "GDAL Plugin: Reading band " << band_ << "\n";
     #endif
-    
+	typedef std::vector<int,int> pallete;
+	
     	if (band_>0) // we are querying a single band
     	{
     	    float *imageData = (float*)image.getBytes();
@@ -280,6 +281,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     #ifdef MAPNIK_DEBUG
     		std::clog << "GDAL Plugin: processing gray band..." << "\n";
     #endif
+		// TODO : apply colormap if present
+		
     		grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 0,
     			       image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
     		grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 1,

@@ -81,7 +81,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
       dataset_name_ = *base + "/" + *file;
    else
       dataset_name_ = *file;
-
+   
    shared_dataset_ = *params_.get<mapnik::boolean>("shared",false);
    band_ = *params_.get<int>("band", -1);
 
