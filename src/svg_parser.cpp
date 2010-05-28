@@ -21,10 +21,10 @@
  *****************************************************************************/
 
 #include <mapnik/color_factory.hpp>
+#include <mapnik/svg/svg_parser.hpp>
+#include <mapnik/svg/svg_path_parser.hpp>
 
-#include "svg_parser.hpp"
-#include "svg_path_parser.hpp"
-
+#include "agg_color_rgba.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/foreach.hpp>
