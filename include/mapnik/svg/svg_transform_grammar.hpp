@@ -27,7 +27,7 @@
 
 
 // agg
-#include "agg_trans_affine.h"
+#include <agg_trans_affine.h>
 // spirit
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
@@ -61,7 +61,7 @@ struct process_matrix
     
     void operator () (double a, double b, double c, double d, double e, double f) const
     {
-	tr_ *= agg::trans_affine(a,b,c,d,e,f);	
+	tr_ = agg::trans_affine(a,b,c,d,e,f) * tr_;	
     }
     
     TransformType & tr_;
@@ -84,14 +84,14 @@ struct process_rotate
     {
 	if (cx == 0.0 && cy == 0.0)
 	{
-	    tr_ *= agg::trans_affine_rotation(deg2rad(a));
+	    tr_ = agg::trans_affine_rotation(deg2rad(a)) * tr_;
 	}
 	else
 	{
 	    agg::trans_affine t = agg::trans_affine_translation(-cx,-cy);
             t *= agg::trans_affine_rotation(deg2rad(a));
             t *= agg::trans_affine_translation(cx, cy);
-	    tr_ *= t;
+	    tr_ = t * tr_;
 	}
     }
     
@@ -113,8 +113,8 @@ struct process_translate
     template <typename T0,typename T1>
     void operator () (T0 tx, T1 ty) const
     {
-	if (ty) tr_ *= agg::trans_affine_translation(tx,*ty);
-	else tr_ *= agg::trans_affine_translation(tx,0.0);
+	if (ty) tr_ = agg::trans_affine_translation(tx,*ty) * tr_;
+	else tr_ = agg::trans_affine_translation(tx,0.0) * tr_;
     }
     
     TransformType & tr_;	
@@ -135,8 +135,8 @@ struct process_scale
     template <typename T0,typename T1>
     void operator () (T0 sx, T1 sy) const
     {
-	if (sy) tr_ *= agg::trans_affine_scaling(sx,*sy);
-	else tr_ *= agg::trans_affine_scaling(sx,sx);
+	if (sy) tr_ = agg::trans_affine_scaling(sx,*sy) * tr_;
+	else tr_ = agg::trans_affine_scaling(sx,sx) * tr_;
     }
     
     TransformType & tr_;	
@@ -158,7 +158,7 @@ struct process_skew
     template <typename T0,typename T1>
     void operator () (T0 skew_x, T1 skew_y) const
     {
-	tr_ *= agg::trans_affine_skewing(deg2rad(skew_x),deg2rad(skew_y));
+	tr_ = agg::trans_affine_skewing(deg2rad(skew_x),deg2rad(skew_y)) * tr_;
     }
     
     TransformType & tr_;	
