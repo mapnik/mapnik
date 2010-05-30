@@ -73,7 +73,8 @@ boost::optional<path_ptr> marker_cache::find(std::string const& uri, bool update
 	    if (update_cache)
 	    {
 		cache_.insert(std::make_pair(uri,marker));
-	    }	    
+            }
+            return marker;
 	}
 	catch (...)
 	{
