@@ -847,6 +847,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         geometry2d const& geom = feature.get_geometry(i);
         if (geom.num_points() <= 1) continue;
 
+        svg_marker = false;
+        extent = arrow_.extent();        
+
         std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
 
         if (!filename.empty())
@@ -859,11 +862,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
                 extent.init(x1, y1, x2, y2);
             }
-        }
-        else
-        {
-            svg_marker = false;
-            extent = arrow_.extent();        
         }
 
         path_type path(t_,geom,prj_trans);
