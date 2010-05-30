@@ -48,6 +48,8 @@ class sqlite_datasource : public mapnik::datasource
       mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
       mapnik::box2d<double> envelope() const;
       mapnik::layer_descriptor get_descriptor() const;
+      mutable std::string geometry_table_;
+      bool show_queries_;
    private:
       static const std::string name_;
       mapnik::box2d<double> extent_;

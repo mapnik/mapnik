@@ -30,8 +30,10 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 
-// ogr
+// sqlite
 #include "sqlite_featureset.hpp"
+
+//#define MAPNIK_DEBUG
 
 using std::clog;
 using std::endl;

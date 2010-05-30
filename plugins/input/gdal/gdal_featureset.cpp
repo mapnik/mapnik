@@ -35,30 +35,25 @@ using mapnik::feature_ptr;
 using mapnik::CoordTransform;
 using mapnik::point_impl;
 using mapnik::geometry2d;
+using mapnik::datasource_exception;
 
 
-gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q)
+gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q, const mapnik::box2d<double> & extent, double dx, double dy)
     : dataset_(dataset),
       band_(band),
       gquery_(q),
+      extent_(extent),
+      dx_(dx),
+      dy_(dy),
       first_(true) {}
 
-gdal_featureset::~gdal_featureset()
-{
-#ifdef MAPNIK_DEBUG
-    std::clog << "GDAL Plugin: closing dataset = " << &dataset_ << "\n";
-#endif
-    GDALClose(&dataset_);
-}
+gdal_featureset::~gdal_featureset() {}
 
 feature_ptr gdal_featureset::next()
 {
     if (first_)
     {
 	first_ = false;
-#ifdef MAPNIK_DEBUG
-	std::clog << "GDAL Plugin: featureset, dataset = " << &dataset_ << "\n";
-#endif
 
 	query *q = boost::get<query>(&gquery_);
 	if(q) {
@@ -88,29 +83,14 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
    
     unsigned raster_width = dataset_.GetRasterXSize();
     unsigned raster_height = dataset_.GetRasterYSize();
-   
-    // TODO - pull from class attributes...
-    double tr[6];
-    dataset_.GetGeoTransform(tr);
-    
-    double dx = tr[1];
-    double dy = tr[5];
-    
-    double x0 = tr[0] + (raster_height) * tr[2]; // minx
-    double y0 = tr[3] + (raster_height) * tr[5]; // miny
-    
-    double x1 = tr[0] + (raster_width) * tr[1]; // maxx
-    double y1 = tr[3] + (raster_width) * tr[4]; // maxy
-    
-    box2d<double> raster_extent(x0,y0,x1,y1); 
-    
-    CoordTransform t(raster_width,raster_height,raster_extent,0,0);
-    box2d<double> intersect = raster_extent.intersect(q.get_bbox());
+       
+    CoordTransform t(raster_width,raster_height,extent_,0,0);
+    box2d<double> intersect = extent_.intersect(q.get_bbox());
     box2d<double> box = t.forward(intersect);
 
     //size of resized output pixel in source image domain
-    double margin_x = 1.0/(fabs(dx)*boost::get<0>(q.resolution()));
-    double margin_y = 1.0/(fabs(dy)*boost::get<1>(q.resolution()));
+    double margin_x = 1.0/(fabs(dx_)*boost::get<0>(q.resolution()));
+    double margin_y = 1.0/(fabs(dy_)*boost::get<1>(q.resolution()));
     if (margin_x < 1)
         margin_x = 1.0;
     if (margin_y < 1)
@@ -141,7 +121,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     intersect = t.backward(feature_raster_extent);
     
 #ifdef MAPNIK_DEBUG         
-    std::clog << "GDAL Plugin: Raster extent=" << raster_extent << "\n";
+    std::clog << "GDAL Plugin: Raster extent=" << extent_ << "\n";
     std::clog << "GDAL Plugin: View extent=" << intersect << "\n";
     std::clog << "GDAL Plugin: Query resolution=" << boost::get<0>(q.resolution()) << "," << boost::get<1>(q.resolution()) << "\n";
     std::clog << boost::format("GDAL Plugin: StartX=%d StartY=%d Width=%d Height=%d \n") % x_off % y_off % width % height;
@@ -173,15 +153,26 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 	
     	if (band_>0) // we are querying a single band
     	{
-    	    float *imageData = (float*)image.getBytes();
-    	    GDALRasterBand * band = dataset_.GetRasterBand(band_);
-    	    band->RasterIO(GF_Read, x_off, y_off, width, height,
-    			   imageData, image.width(), image.height(),
-    			   GDT_Float32, 0, 0);
+         if (band_ > nbands)
+         {
+             throw datasource_exception((boost::format("GDAL Plugin: invalid band, dataset only has %d bands\n") % nbands).str());         
+         }
+         else
+         {
+             float *imageData = (float*)image.getBytes();
+             GDALRasterBand * band = dataset_.GetRasterBand(band_);
+             band->RasterIO(GF_Read, x_off, y_off, width, height,
+                            imageData, image.width(), image.height(),
+                            GDT_Float32, 0, 0);
+             
+             feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
+         }
     
-    	    feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
+
+
     	}
           
+      
     	else // working with all bands
     	{
     	    for (int i = 0; i < nbands; ++i)
