@@ -165,7 +165,7 @@ namespace svg
         void curve4(double x2, double y2,                   // S, s
                     double x,  double y, bool rel=false);
 	
-	void arc_to(double rx, double rx,                   // A, a
+	void arc_to(double rx, double ry,                   // A, a
 		    double angle, 
 		    bool large_arc_flag,
 		    bool sweep_flag,
