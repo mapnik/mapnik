@@ -746,67 +746,67 @@ void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
 {
     try
     {
-	optional<std::string> file =  get_opt_attr<string>(sym, "file");
-	optional<std::string> base =  get_opt_attr<string>(sym, "base");
-	optional<boolean> allow_overlap =
-	    get_opt_attr<boolean>(sym, "allow_overlap");
-	optional<float> opacity =
-	    get_opt_attr<float>(sym, "opacity");
-	
-	if (file)
-	{
-	    try
-	    {
-		if( base )
-		{
-		    std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
-		    if (itr!=file_sources_.end())
-		    {
-			*file = itr->second + "/" + *file;
-		    }
-		}
+        std::string filename("");
+        optional<std::string> file =  get_opt_attr<string>(sym, "file");
+        optional<std::string> base =  get_opt_attr<string>(sym, "base");
 
-		if ( relative_to_xml_ )
-		{
-		    *file = ensure_relative_to_xml(file);
-		}
+        if (file)
+        {
+            try
+            {
+                if (base)
+                {
+                    std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+                    if (itr!=file_sources_.end())
+                    {
+                        *file = itr->second + "/" + *file;
+                    }
+                }
+
+                if ( relative_to_xml_ )
+                {
+                    *file = ensure_relative_to_xml(file);
+                }
 #ifdef MAPNIK_DEBUG
-		else {
-		    std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
-		}
+                else {
+                    std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
+                }
 #endif
-		   
-		markers_symbolizer symbol(parse_path(*file));
-		
-		if (allow_overlap)
-		{
-		    symbol.set_allow_overlap( * allow_overlap );
-		}
-		if (opacity)
-		{
-		    // TODO !!!!!  symbol.set_opacity( *opacity );
-		}
-		rule.append(symbol);
-	    }
-	    catch (...)
-	    {
-		string msg("Failed to load marker file '" + * file);
-		if (strict_)
-		{
-		    throw config_error(msg);
-		}
-		else
-		{
-		    clog << "### WARNING: " << msg << endl;
-		}
-	    }
-
+            filename = *file;
+            }
+            catch (...)
+            {
+                string msg("Failed to load marker file '" + *file + "'!");
+                if (strict_)
+                {
+                    throw config_error(msg);
+                }
+                else
+                {
+                    clog << "### WARNING: " << msg << endl;
+                }
+            }
         }
+
+        markers_symbolizer symbol(parse_path(filename));
+        optional<float> opacity = get_opt_attr<float>(sym, "opacity");
+        if (opacity) {
+            // TODO !!!!!  symbol.set_opacity( *opacity );
+        }
+        optional<color> c = get_opt_attr<color>(sym, "fill");
+        if (c) symbol.set_fill(*c);
+        optional<double> spacing = get_opt_attr<double>(sym, "spacing");
+        if (spacing) symbol.set_spacing(*spacing);
+        optional<double> max_error = get_opt_attr<double>(sym, "max_error");
+        if (max_error) symbol.set_max_error(*max_error);
+        optional<boolean> allow_overlap = get_opt_attr<boolean>(sym, "allow_overlap");
+        if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
+        rule.append(symbol);
     }
     catch (const config_error & ex)
     {
-	ex.append_context("in MarkersSymbolizer");
-	throw;
+        ex.append_context("in MarkersSymbolizer");
+        throw;
     }
 }
 

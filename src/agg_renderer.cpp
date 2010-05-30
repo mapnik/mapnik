@@ -28,7 +28,7 @@
 #include <mapnik/svg/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/placement_finder.hpp>
-#include <mapnik/markers_converter.hpp>
+#include <mapnik/markers_placement.hpp>
 #include <mapnik/arrow.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/font_set.hpp>
@@ -816,47 +816,76 @@ template <typename T>
 void agg_renderer<T>::process(markers_symbolizer const& sym,
 			      Feature const& feature,
 			      proj_transform const& prj_trans)
-{									
+{
     typedef coord_transform2<CoordTransform,geometry2d> path_type;
     typedef agg::pixfmt_rgba32 pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
-    
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    
-    if (!filename.empty())
+
+    bool svg_marker;
+    arrow arrow_;
+    box2d<double> extent;
+    boost::optional<path_ptr> marker;
+
+    ras_ptr->reset();
+    ras_ptr->gamma(agg::gamma_linear());
+    agg::scanline_u8 sl;
+    agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+    pixfmt pixf(buf);
+    renderer_base renb(pixf);
+    renderer_solid ren(renb);
+
+    color const& fill_ = sym.get_fill();
+    unsigned r = fill_.red();
+    unsigned g = fill_.green();
+    unsigned b = fill_.blue();
+    unsigned a = fill_.alpha();
+
+
+    for (unsigned i=0; i<feature.num_geometries(); ++i)
     {
-	boost::optional<path_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
-	
-	if (marker && *marker)
-	{
-	    ras_ptr->reset();
-	    ras_ptr->gamma(agg::gamma_linear());
-	    agg::scanline_u8 sl;
-	    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-	    pixfmt pixf(buf);
-	    renderer_base renb(pixf);
-	    renderer_solid ren(renb);
-	    
-            //mtx *= agg::trans_affine_translation((lox + hix) * -0.5, (loy + hiy) * -0.5);
-	    //mtx *= agg::trans_affine_scaling(0.8 * std::min(im.width()/(hix-lox),im.height()/(hiy-loy)));
-	    //mtx *= agg::trans_affine_translation((lox + hix) * 0.5, (loy + hiy) * 0.5);
-	    //mtx *= agg::trans_affine_translation((im.width() - (lox + hix)) * 0.5, (im.height() - (loy + hiy)) * 0.5);
-	    
-	    for (unsigned i=0;i<feature.num_geometries();++i)
-	    {
-		agg::trans_affine mtx;
-		double x,y,z=0;
-		
-		geometry2d const& geom = feature.get_geometry(i);
-		
-		geom.label_position(&x,&y);
-		prj_trans.backward(x,y,z);
-		t_.forward(&x,&y);
-		mtx *= agg::trans_affine_translation(x,y);
-		(*marker)->render(*ras_ptr, sl, ren, mtx, renb.clip_box(), 1.0);
-	    }
-	}
+        geometry2d const& geom = feature.get_geometry(i);
+        if (geom.num_points() <= 1) continue;
+
+        std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
+
+        if (!filename.empty())
+        {
+            marker = mapnik::marker_cache::instance()->find(filename, true);
+            if (marker && *marker)
+            {
+                svg_marker = true;
+                double x1, y1, x2, y2;
+                (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
+                extent.init(x1, y1, x2, y2);
+            }
+        }
+        else
+        {
+            svg_marker = false;
+            extent = arrow_.extent();        
+        }
+
+        path_type path(t_,geom,prj_trans);
+        markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, sym.get_spacing(), sym.get_max_error(), sym.get_allow_overlap());
+
+        double x, y, angle;
+        
+        while (placement.get_point(&x, &y, &angle))
+        {
+            agg::trans_affine matrix = agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
+            if (svg_marker)
+            {
+                (*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), 1.0);
+            }
+            else
+            {
+                agg::conv_transform<arrow, agg::trans_affine> trans(arrow_, matrix);
+                ras_ptr->add_path(trans);
+                ren.color(agg::rgba8(r, g, b, a));
+                agg::render_scanlines(*ras_ptr, sl, ren);
+            }
+        }
     }
 }
 

@@ -27,6 +27,7 @@
 
 //mapnik
 #include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/color.hpp>
 
 namespace mapnik {
    
@@ -34,17 +35,17 @@ struct MAPNIK_DECL markers_symbolizer
 {
 public:
     markers_symbolizer(path_expression_ptr filename, bool allow_overlap=false) 
-	: filename_(filename),
-	allow_overlap_(allow_overlap) {}
+	: filename_(filename), allow_overlap_(allow_overlap),
+	  fill_(color(0,0,255)), spacing_(100.0), max_error_(0.2) {}
     
     path_expression_ptr get_filename() const
     {
-	return filename_;
+        return filename_;
     }
     
     void set_filename(path_expression_ptr filename)
     {
-	filename_ = filename;
+        filename_ = filename;
     }
     
     void set_allow_overlap(bool overlap)
@@ -52,13 +53,47 @@ public:
         allow_overlap_ = overlap;
     }
     
-    float get_allow_overlap() const
+    bool get_allow_overlap() const
     {
         return allow_overlap_;
     }
+
+    void set_spacing(double spacing)
+    {
+        spacing_ = spacing;
+    }
+    
+    float get_spacing() const
+    {
+        return spacing_;
+    }
+
+    void set_max_error(double max_error)
+    {
+        max_error_ = max_error;
+    }
+    
+    float get_max_error() const
+    {
+        return max_error_;
+    }
+
+    void set_fill(color fill)
+    {
+        fill_ = fill;
+    }
+    
+    color const& get_fill() const
+    {
+        return fill_;
+    }
+
 private:
     path_expression_ptr filename_;
     bool allow_overlap_;
+    color fill_;
+    double spacing_;
+    double max_error_;
 };
 }
 

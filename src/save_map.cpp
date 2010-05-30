@@ -262,14 +262,27 @@ public:
     {
         ptree & sym_node = rule_.push_back(
                 ptree::value_type("MarkersSymbolizer", ptree()))->second;
-	const std::string & filename = path_processor_type::to_string( *sym.get_filename());
-	// TODO!!!
-//markers_symbolizer dfl
-        //if ( sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
-        //{
-        //    set_attr( sym_node, "allow_overlap", sym.get_allow_overlap() );
-        //}
-
+        markers_symbolizer dfl(parse_path("")); //TODO: Parameter?
+      	std::string const& filename = path_processor_type::to_string( *sym.get_filename());
+      	if ( ! filename.empty() ) {
+      	    set_attr( sym_node, "file", filename );
+      	}
+        if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_)
+        {
+            set_attr( sym_node, "allow_overlap", sym.get_allow_overlap() );
+        }
+        if (sym.get_spacing() != dfl.get_spacing() || explicit_defaults_)
+        {
+            set_attr( sym_node, "spacing", sym.get_spacing() );
+        }
+        if (sym.get_max_error() != dfl.get_max_error() || explicit_defaults_)
+        {
+            set_attr( sym_node, "max_error", sym.get_max_error() );
+        }
+        if (sym.get_fill() != dfl.get_fill() || explicit_defaults_)
+        {
+            set_attr( sym_node, "fill", sym.get_fill() );
+        }
     }
 
     void operator () ( glyph_symbolizer const& sym)

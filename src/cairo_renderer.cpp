@@ -28,7 +28,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/placement_finder.hpp>
-#include <mapnik/markers_converter.hpp>
+#include <mapnik/markers_placement.hpp>
 #include <mapnik/arrow.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/path_expression_grammar.hpp>
@@ -291,7 +291,7 @@ public:
     }
 
     template <typename T>
-    void add_path(T path)
+    void add_path(T& path)
     {
 	double x, y;
 
@@ -355,6 +355,11 @@ public:
     void set_font_matrix(Cairo::Matrix const& matrix)
     {
 	context_->set_font_matrix(matrix);
+    }
+
+    void set_matrix(Cairo::Matrix const& matrix)
+    {
+    context_->set_matrix(matrix);
     }
 
     void show_glyph(unsigned long index, double x, double y)
@@ -948,7 +953,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
 		    double dy = y - y0;
 		    double angle = atan2(dy, dx);
 		    double offset = fmod(length, width);
-                  
+
 		    Cairo::Matrix matrix;
 		    cairo_matrix_init_identity(&matrix);
 		    cairo_matrix_translate(&matrix,x0,y0);
@@ -1055,6 +1060,32 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 				  Feature const& feature,
 				  proj_transform const& prj_trans)
 {
+    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    arrow arrow_;
+    cairo_context context(context_);
+
+    color const& fill_ = sym.get_fill();
+    context.set_color(fill_.red(), fill_.green(), fill_.blue(), fill_.alpha());
+
+    for (unsigned i = 0; i < feature.num_geometries(); ++i)
+    {
+        geometry2d const& geom = feature.get_geometry(i);
+
+        if (geom.num_points() > 1)
+        {
+            path_type path(t_, geom, prj_trans);
+
+            markers_placement<path_type, label_collision_detector4> placement(path, arrow_.extent(), detector_, sym.get_spacing(), sym.get_max_error(), sym.get_allow_overlap());
+
+            double x, y, angle;
+            while (placement.get_point(&x, &y, &angle)) {
+                Cairo::Matrix matrix = Cairo::rotation_matrix(angle) * Cairo::translation_matrix(x,y) ;
+                context.set_matrix(matrix);
+                context.add_path(arrow_);
+            }
+        }
+        context.fill();
+    }
 }
 
 void cairo_renderer_base::process(glyph_symbolizer const& sym,
