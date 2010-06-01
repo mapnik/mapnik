@@ -39,6 +39,8 @@
 #include <mapnik/path_expression_grammar.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
+#include <mapnik/svg/svg_path_parser.hpp>
+
 // boost
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
@@ -48,6 +50,9 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/filesystem/operations.hpp>
+
+// agg
+#include "agg_trans_affine.h"
 
 // stl
 #include <iostream>
@@ -668,7 +673,9 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 	    get_opt_attr<boolean>(sym, "allow_overlap");
 	optional<float> opacity =
 	    get_opt_attr<float>(sym, "opacity");
-	    
+	
+	optional<std::string> transform_wkt = get_opt_attr<string>(sym, "transform");
+
 	if (file)
 	{
 	    try
@@ -693,7 +700,7 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 #endif
 		   
 		point_symbolizer symbol(parse_path(*file));
-		   
+		  
 		if (allow_overlap)
 		{
 		    symbol.set_allow_overlap( * allow_overlap );
@@ -702,6 +709,15 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 		{
 		    symbol.set_opacity( * opacity );
 		}
+		if (transform_wkt)
+		{
+		    agg::trans_affine tr;
+		    mapnik::svg::parse_transform(*transform_wkt,tr);
+		    boost::array<double,6> matrix;
+		    tr.store_to(&matrix[0]);
+		    symbol.set_transform(matrix);
+		}
+		
 		rule.append(symbol);
 	    }
 	    catch (image_reader_exception const & ex )

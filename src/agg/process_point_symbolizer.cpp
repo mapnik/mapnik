@@ -89,15 +89,24 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 		prj_trans.backward(x,y,z);
 		t_.forward(&x,&y);
 		
+		agg::trans_affine tr;
+		boost::array<double,6> const& m = sym.get_transform();
+		tr.load_from(&m[0]);
 		
-		extent.init(x - 0.5*(x2-x1), y - 0.5*(y2-y1), 
-			    x + 0.5*(x2-x1), y + 0.5*(y2-y1));
+		tr *= agg::trans_affine_translation(x, y);
 		
+		tr.transform(&x1,&y1);
+		tr.transform(&x2,&y2);
+		
+		//extent.init(x - 0.5*(x2-x1), y - 0.5*(y2-y1), 
+		//	    x + 0.5*(x2-x1), y + 0.5*(y2-y1));
+		
+		extent.init(x1,y1,x2,y2);
 		if (sym.get_allow_overlap() ||
 		    detector_.has_placement(extent))
 		{
-		    agg::trans_affine matrix = agg::trans_affine_translation(x, y);
-		    (*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
+		    
+		    (*marker)->render(*ras_ptr, sl, ren, tr, renb.clip_box(), sym.get_opacity());
 		    detector_.insert(extent);
 		}
 	    }	
