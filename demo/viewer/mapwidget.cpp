@@ -98,13 +98,14 @@ void MapWidget::paintEvent(QPaintEvent*)
          unsigned height = end_y_-start_y_;
          painter.drawPixmap(QPoint(0, 0),pix_);
          painter.setPen(pen_);
+	 painter.setBrush(QColor(200,200,255,128));
          painter.drawRect(start_x_,start_y_,width,height);
       }
       else if (cur_tool_ == Pan)
       {
          int dx = end_x_-start_x_;
          int dy = end_y_-start_y_;
-         painter.setBrush(QColor(200,200,255,128));
+         painter.setBrush(QColor(200,200,200,128));
          painter.drawRect(0,0,width(),height());
          painter.drawPixmap(QPoint(dx,dy),pix_);
       }
