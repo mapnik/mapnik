@@ -114,9 +114,12 @@ source = Split(
     )
 
 
-if True :
+if True : # agg backend
     source += Split(
         """
+    agg/process_point_symbolizer.cpp
+    agg/process_shield_symbolizer.cpp
+    agg/process_markers_symbolizer.cpp
     agg_svg_path_renderer.cpp
     svg_parser.cpp
     svg_path_parser.cpp
