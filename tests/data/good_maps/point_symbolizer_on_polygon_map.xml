@@ -23,9 +23,7 @@
 
         <Rule title="rest">
             <ElseFilter />
-            <LineSymbolizer>
-                    <CssParameter name="stroke-width">.1</CssParameter>
-            </LineSymbolizer>
+            <LineSymbolizer stroke-width="1" />
         </Rule>
     </Style>
 

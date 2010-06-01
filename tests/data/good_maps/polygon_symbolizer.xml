@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!-- see: http://trac.mapnik.org/changeset/574 -->
 <Map bgcolor="transparent" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
 
@@ -5,10 +6,7 @@
   
   <Style name="test">
     <Rule>
-      <PolygonSymbolizer>
-        <CssParameter name="fill">lavender</CssParameter>
-        <CssParameter name="fill-opacity">.5</CssParameter>
-      </PolygonSymbolizer>
+      <PolygonSymbolizer fill="lavender" fill-opacity=".5" />
       <PointSymbolizer base="foo" file="dummy.png" width="16" height="16" type="png" />
     </Rule>  
   </Style>

@@ -3,9 +3,7 @@
 <Map>
     <Style name="some_style">
       <Rule>
-        <LineSymbolizer>
-          <CssParameter name="stroke-width">foobar</CssParameter>
-        </LineSymbolizer>
+        <LineSymbolizer stroke-width="foobar" />
       </Rule>
     </Style>
 </Map>

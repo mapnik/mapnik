@@ -183,16 +183,19 @@ public:
 
 	if ( sym.get_mode() != dfl.get_mode() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "mode", sym.get_mode() );
+	    set_attr( sym_node, "mode", sym.get_mode() );
 	}
+
 	if ( sym.get_scaling() != dfl.get_scaling() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "scaling", sym.get_scaling() );
+	    set_attr( sym_node, "scaling", sym.get_scaling() );
 	}
+	
 	if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "opacity", sym.get_opacity() );
+	    set_attr( sym_node, "opacity", sym.get_opacity() );
 	}
+
 	if (sym.get_colorizer()) {
 	    serialize_raster_colorizer(sym_node, sym.get_colorizer(),
 				       explicit_defaults_);
@@ -246,15 +249,15 @@ public:
 
 	if ( sym.get_fill() != dfl.get_fill() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "fill", sym.get_fill() );
+	    set_attr( sym_node, "fill", sym.get_fill() );
 	}
 	if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "fill-opacity", sym.get_opacity() );
+	    set_attr( sym_node, "fill-opacity", sym.get_opacity() );
 	}
 	if ( sym.height() != dfl.height() || explicit_defaults_ )
 	{
-	    set_css( sym_node, "height", sym.height() );
+	    set_attr( sym_node, "height", sym.height() );
 	}
     }
 

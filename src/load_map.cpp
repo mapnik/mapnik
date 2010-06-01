@@ -1455,46 +1455,16 @@ void map_parser::parse_building_symbolizer( rule_type & rule, ptree const & sym 
     try {
 	building_symbolizer building_sym;
 
-	ptree::const_iterator cssIter = sym.begin();
-	ptree::const_iterator endCss = sym.end();
+	// fill
+	optional<color> fill = get_opt_attr<color>(sym, "fill");
+	if (fill) building_sym.set_fill(*fill);
+	// fill-opacity
+	optional<double> opacity = get_opt_attr<double>(sym, "fill-opacity");
+	if (opacity) building_sym.set_opacity(*opacity);
+	// height
+	optional<double> height = get_opt_attr<double>(sym, "height");
+	if (opacity) building_sym.set_height(*height);
 
-	for(; cssIter != endCss; ++cssIter)
-	{
-	    ptree::value_type const& css_tag = *cssIter;
-	    ptree const & css = cssIter->second;
-
-	    if (css_tag.first == "CssParameter")
-	    {
-		std::string css_name  = get_attr<string>(css, "name");
-		std::string data = css.data();
-		if (css_name == "fill")
-		{
-		    color c = get_css<color>(css, css_name);
-		    building_sym.set_fill(c);
-		}
-		else if (css_name == "fill-opacity")
-		{
-		    float opacity = get_css<float>(css, css_name);
-		    building_sym.set_opacity(opacity);
-		}
-		else if (css_name == "height")
-		{
-		    float height = get_css<float>(css,css_name);
-		    building_sym.set_height(height);
-		}
-		else
-		{
-		    throw config_error(std::string("Failed to parse unknown CSS ") +
-				       "parameter '" + css_name + "'");
-		}
-	    }
-	    else if (css_tag.first != "<xmlcomment>" &&
-		     css_tag.first != "<xmlattr>" )
-	    {
-		throw config_error(std::string("Unknown child node. ") +
-				   "Expected 'CssParameter' but got '" + css_tag.first + "'");
-	    }
-	}
 	rule.append(building_sym);
     }
     catch (const config_error & ex)
@@ -1510,37 +1480,26 @@ void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
     {
 	raster_symbolizer raster_sym;
 
+	// mode
+	optional<std::string> mode = get_opt_attr<std::string>(sym, "mode");
+	if (mode) raster_sym.set_mode(*mode);
+
+	// scaling
+	optional<std::string> scaling = get_opt_attr<std::string>(sym, "scaling");
+	if (scaling) raster_sym.set_scaling(*scaling);
+
+	// opacity
+	optional<double> opacity = get_opt_attr<double>(sym, "opacity");
+	if (opacity) raster_sym.set_opacity(*opacity);
+
 	ptree::const_iterator cssIter = sym.begin();
 	ptree::const_iterator endCss = sym.end();
 
 	for(; cssIter != endCss; ++cssIter)
 	{
 	    ptree::value_type const& css_tag = *cssIter;
-	    ptree const & css = cssIter->second;
 
-	    if (css_tag.first == "CssParameter")
-	    {
-		std::string css_name  = get_attr<string>(css, "name");
-		if (css_name == "mode")
-		{
-		    raster_sym.set_mode(get_css<string>(css, css_name));
-		}
-		else if (css_name == "scaling")
-		{
-		    raster_sym.set_scaling(get_css<string>(css, css_name));
-		}
-		else if (css_name == "opacity")
-		{
-		    float opacity = get_css<float>(css, css_name);
-		    raster_sym.set_opacity(opacity);
-		}
-		else
-		{
-		    throw config_error(std::string("Failed to parse unknown CSS ") +
-				       "parameter '" + css_name + "'");
-		}
-	    }
-	    else if (css_tag.first == "RasterColorizer")
+	    if (css_tag.first == "RasterColorizer")
 	    {
 		raster_colorizer_ptr colorizer(new raster_colorizer());
 		raster_sym.set_colorizer(colorizer);
@@ -1550,7 +1509,7 @@ void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
 		     css_tag.first != "<xmlattr>" )
 	    {
 		throw config_error(std::string("Unknown child node. ") +
-				   "Expected 'CssParameter' but got '" + css_tag.first + "'");
+				   "Expected 'RasterColorizer' but got '" + css_tag.first + "'");
 	    }
 	}
 	rule.append(raster_sym);
