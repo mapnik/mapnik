@@ -155,7 +155,6 @@ namespace svg
     void path_renderer::curve4(double x2, double y2,                   // S, s
                                double x,  double y, bool rel)
     {
-        //throw std::runtime_error("curve4(x2, y2, x, y) : NOT IMPLEMENTED YET");
         if(rel) 
         {
             m_storage.curve4_rel(x2, y2, x, y);
