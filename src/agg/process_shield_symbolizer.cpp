@@ -173,14 +173,13 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 			placement text_placement(info, sym, w, h, true);
 			text_placement.avoid_edges = sym.get_avoid_edges();
 			finder.find_point_placements<path_type>(text_placement,path);
-
+			
 			for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
 			{
-			    int w = (*data)->width();
-			    int h = (*data)->height();
+			    
 			    double x = text_placement.placements[ii].starting_x;
 			    double y = text_placement.placements[ii].starting_y;
-			 
+		        
 			    int px=int(x - (w/2));
 			    int py=int(y - (h/2));
 			 
