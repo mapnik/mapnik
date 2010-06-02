@@ -66,36 +66,34 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     unsigned g = fill_.green();
     unsigned b = fill_.blue();
     unsigned a = fill_.alpha();
-
+    
+    svg_marker = false;
+    extent = arrow_.extent();        
+    
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
+    
+    if (!filename.empty())
+    {
+        marker = mapnik::marker_cache::instance()->find(filename, true);
+        if (marker && *marker)
+        {
+            svg_marker = true;
+            double x1, y1, x2, y2;
+            (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
+            extent.init(x1, y1, x2, y2);
+        }
+    }
     
     for (unsigned i=0; i<feature.num_geometries(); ++i)
     {
         geometry2d const& geom = feature.get_geometry(i);
         if (geom.num_points() <= 1) continue;
 
-        svg_marker = false;
-        extent = arrow_.extent();        
-
-        std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
-
-        if (!filename.empty())
-        {
-            marker = mapnik::marker_cache::instance()->find(filename, true);
-            if (marker && *marker)
-            {
-                svg_marker = true;
-                double x1, y1, x2, y2;
-                (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
-                extent.init(x1, y1, x2, y2);
-            }
-        }
-
         path_type path(t_,geom,prj_trans);
         markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
                                                                           sym.get_spacing(), 
                                                                           sym.get_max_error(), 
-                                                                          sym.get_allow_overlap());
-        
+                                                                          sym.get_allow_overlap());        
         double x, y, angle;
         
         while (placement.get_point(&x, &y, &angle))
