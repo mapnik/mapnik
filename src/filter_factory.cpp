@@ -37,49 +37,49 @@ class filter_factory
 public:
     static expression_ptr compile(std::string const& str,transcoder const& tr)
     {
-       expression_ptr expr(new expr_node(true));
+        expression_ptr expr(new expr_node(true));
        
-       std::string::const_iterator itr = str.begin();
-       std::string::const_iterator end = str.end();
-       mapnik::expression_grammar<std::string::const_iterator> g(tr);
+        std::string::const_iterator itr = str.begin();
+        std::string::const_iterator end = str.end();
+        mapnik::expression_grammar<std::string::const_iterator> g(tr);
        
-       bool r = boost::spirit::qi::phrase_parse(itr,end,g, boost::spirit::standard_wide::space,*expr);
-       if (r  && itr==end)
-       {
-           return expr;
-       }
-       else
-       {
-           // Backward compatiblity for version pre 0.8.0
-           // To be removed in 0.9.0...
-           if (!boost::algorithm::icontains(str,"'") 
-               && !boost::algorithm::icontains(str,"[")
-               && !boost::algorithm::icontains(str,"]")
-               && !boost::algorithm::icontains(str," ")
-               && !boost::algorithm::icontains(str,"\""))
-           {
+        bool r = boost::spirit::qi::phrase_parse(itr,end,g, boost::spirit::standard_wide::space,*expr);
+        if (r  && itr==end)
+        {
+            return expr;
+        }
+        else
+        {
+            // Backward compatiblity for version pre 0.8.0
+            // To be removed in 0.9.0...
+            if (!boost::algorithm::icontains(str,"'") 
+                && !boost::algorithm::icontains(str,"[")
+                && !boost::algorithm::icontains(str,"]")
+                && !boost::algorithm::icontains(str," ")
+                && !boost::algorithm::icontains(str,"\""))
+            {
 
-               expression_ptr expr1(new expr_node(true));
-               mapnik::expression_grammar<std::string::const_iterator> g1(tr);
-               std::string str1("[" + str + "]");
-               std::string::const_iterator itr1 = str1.begin();
-               std::string::const_iterator end1 = str1.end();
-               bool r1 = boost::spirit::qi::phrase_parse(itr1,end1,g1, boost::spirit::standard_wide::space,*expr1);
-               if (r1  && itr1==end1)
-               {
-                   std::clog << "Deprecation Warning: symbolizer value now an expression, please wrap properly in brackets like \"" + str1 + "\"\n";
-                   return expr1;
-               }
-               else
-               {
+                expression_ptr expr1(new expr_node(true));
+                mapnik::expression_grammar<std::string::const_iterator> g1(tr);
+                std::string str1("[" + str + "]");
+                std::string::const_iterator itr1 = str1.begin();
+                std::string::const_iterator end1 = str1.end();
+                bool r1 = boost::spirit::qi::phrase_parse(itr1,end1,g1, boost::spirit::standard_wide::space,*expr1);
+                if (r1  && itr1==end1)
+                {
+                    std::clog << "Deprecation Warning: symbolizer value now an expression, please wrap properly in brackets like \"" + str1 + "\"\n";
+                    return expr1;
+                }
+                else
+                {
                     throw config_error( "Failed to parse expression: \"" + str + "\"" );
-               }
-           }
-           else
-           {
-               throw config_error( "Failed to parse expression: \"" + str + "\"" );           
-           }
-       }
+                }
+            }
+            else
+            {
+                throw config_error( "Failed to parse expression: \"" + str + "\"" );           
+            }
+        }
     }
 };
 

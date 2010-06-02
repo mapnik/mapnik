@@ -28,11 +28,11 @@
 #include <string>
 
 namespace mapnik {
-    struct attribute_desc
-    {
-        std::string name;
-        eType type;
-    };
+struct attribute_desc
+{
+    std::string name;
+    eType type;
+};
 }
 
 #endif // ATTRIBUTE_DESCRIPTOR_HPP

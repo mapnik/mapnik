@@ -29,34 +29,34 @@ using mapnik::color;
 
 struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
 {
-   static boost::python::tuple
-   getinitargs(const polygon_symbolizer& p)
-   {
-      return boost::python::make_tuple(p.get_fill());  
-   }
+    static boost::python::tuple
+    getinitargs(const polygon_symbolizer& p)
+    {
+        return boost::python::make_tuple(p.get_fill());  
+    }
 
-   static  boost::python::tuple
-   getstate(const polygon_symbolizer& p)
-   {
+    static  boost::python::tuple
+    getstate(const polygon_symbolizer& p)
+    {
         return boost::python::make_tuple(p.get_opacity(),p.get_gamma());
-   }
+    }
 
-   static void
-   setstate (polygon_symbolizer& p, boost::python::tuple state)
-   {
+    static void
+    setstate (polygon_symbolizer& p, boost::python::tuple state)
+    {
         using namespace boost::python;
         if (len(state) != 2)
         {
             PyErr_SetObject(PyExc_ValueError,
-                         ("expected 2-item tuple in call to __setstate__; got %s"
-                          % state).ptr()
-            );
+                            ("expected 2-item tuple in call to __setstate__; got %s"
+                             % state).ptr()
+                );
             throw_error_already_set();
         }
                 
         p.set_opacity(extract<float>(state[0]));
         p.set_gamma(extract<float>(state[1]));
-   }
+    }
 
 };
 
@@ -65,7 +65,7 @@ void export_polygon_symbolizer()
     using namespace boost::python;
         
     class_<polygon_symbolizer>("PolygonSymbolizer",
-				    init<>("Default PolygonSymbolizer - solid fill grey"))
+                               init<>("Default PolygonSymbolizer - solid fill grey"))
         .def(init<color const&>("TODO"))
         .def_pickle(polygon_symbolizer_pickle_suite())
         .add_property("fill",make_function

@@ -67,15 +67,15 @@ void export_envelope()
 {
     using namespace boost::python;
     class_<box2d<double> >("Box2d",
-			   // class docstring is in mapnik/__init__.py, class _Coord
-			   init<double,double,double,double>(
+                           // class docstring is in mapnik/__init__.py, class _Coord
+                           init<double,double,double,double>(
                                (arg("minx"),arg("miny"),arg("maxx"),arg("maxy")),
                                "Constructs a new envelope from the coordinates\n"
                                "of its lower left and upper right corner points.\n"))
         .def(init<>("Equivalent to box2d(0, 0, -1, -1).\n"))
         .def(init<const coord<double,2>&, const coord<double,2>&>(
-		 (arg("ll"),arg("ur")),
-		 "Equivalent to box2d(ll.x, ll.y, ur.x, ur.y).\n"))
+                 (arg("ll"),arg("ur")),
+                 "Equivalent to box2d(ll.x, ll.y, ur.x, ur.y).\n"))
         .add_property("minx", &box2d<double>::minx, 
                       "X coordinate for the lower left corner")
         .add_property("miny", &box2d<double>::miny, 
@@ -105,7 +105,7 @@ void export_envelope()
              "(100.0, 100.0)\n"
              ">>> e\n"
              "box2d(10.0, 10.0, 110.0, 110.0)\n"
-	    )
+            )
         .def("width", width_p1,
              (arg("new_width")),
              "Sets the width to new_width of the envelope preserving its center.\n"
@@ -117,10 +117,10 @@ void export_envelope()
              "Coord(50.0,50.0)\n"
              ">>> e\n"
              "box2d(-10.0, 0.0, 110.0, 100.0)\n"
-	    )
+            )
         .def("width", width_p2,
              "Returns the width of this envelope.\n"
-	    )
+            )
         .def("height", height_p1,
              (arg("new_height")),
              "Sets the height to new_height of the envelope preserving its center.\n"
@@ -132,10 +132,10 @@ void export_envelope()
              "Coord(50.0,50.0)\n"
              ">>> e\n"
              "box2d(0.0, -10.0, 100.0, 110.0)\n"
-	    )
+            )
         .def("height", height_p2,
              "Returns the height of this envelope.\n"
-	    )
+            )
         .def("expand_to_include",expand_to_include_p1,
              (arg("x"),arg("y")),
              "Expands this envelope to include the point given by x and y.\n"
@@ -145,31 +145,31 @@ void export_envelope()
              ">>> e.expand_to_include(110, 110)\n"
              ">>> e\n"
              "box2d(0.0, 00.0, 110.0, 110.0)\n"
-	    )
+            )
         .def("expand_to_include",expand_to_include_p2,
              (arg("p")),
              "Equivalent to expand_to_include(p.x, p.y)\n"
-	    )
+            )
         .def("expand_to_include",expand_to_include_p3,
              (arg("other")),
              "Equivalent to:\n"
              "  expand_to_include(other.minx, other.miny)\n"
              "  expand_to_include(other.maxx, other.maxy)\n"
-	    )
+            )
         .def("contains",contains_p1,
              (arg("x"),arg("y")),
              "Returns True iff this envelope contains the point\n"
              "given by x and y.\n"
-	    )
+            )
         .def("contains",contains_p2,
              (arg("p")),
              "Equivalent to contains(p.x, p.y)\n"
-	    )
+            )
         .def("contains",contains_p3,
              (arg("other")),
              "Equivalent to:\n"
              "  contains(other.minx, other.miny) and contains(other.maxx, other.maxy)\n"
-	    )
+            )
         .def("intersects",intersects_p1,
              (arg("x"),arg("y")),
              "Returns True iff this envelope intersects the point\n"
@@ -178,7 +178,7 @@ void export_envelope()
              "Note: For points, intersection is equivalent\n"
              "to containment, i.e. the following holds:\n"
              "   e.contains(x, y) == e.intersects(x, y)\n"
-	    )
+            )
         .def("intersects",intersects_p2,
              (arg("p")),
              "Equivalent to contains(p.x, p.y)\n")
@@ -194,7 +194,7 @@ void export_envelope()
              "True\n"
              ">>> e1.contains(e2)\n"
              "False\n"
-	    )
+            )
         .def("intersect",intersect,
              (arg("other")),
              "Returns the overlap of this envelope and the other envelope\n"
@@ -205,7 +205,7 @@ void export_envelope()
              ">>> e2 = box2d(50, 50, 150, 150)\n"
              ">>> e1.intersect(e2)\n"
              "box2d(50.0, 50.0, 100.0, 100.0)\n"     
-	    )
+            )
         .def(self == self) // __eq__
         .def(self + self)  // __add__
         .def(self - self)  // __sub__

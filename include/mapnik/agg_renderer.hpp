@@ -43,7 +43,7 @@ struct rasterizer;
    
 template <typename T>
 class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
-				 private boost::noncopyable
+                                 private boost::noncopyable
 {
      
 public:
@@ -54,38 +54,38 @@ public:
     void start_layer_processing(layer const& lay);
     void end_layer_processing(layer const& lay);
     void process(point_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(line_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(line_pattern_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(polygon_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(polygon_pattern_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(raster_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(shield_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(text_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(building_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(markers_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
     void process(glyph_symbolizer const& sym,
-		 Feature const& feature,
-		 proj_transform const& prj_trans);
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
 private:
     T & pixmap_;
     unsigned width_;

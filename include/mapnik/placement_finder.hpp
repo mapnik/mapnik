@@ -110,9 +110,9 @@ private:
     //             If >= 50% of the characters end up upside down, it will be retried the other way.
     //             RETURN: 1/-1 depending which way up the string ends up being.
     std::auto_ptr<placement_element> get_placement_offset(placement & p,
-							  const std::vector<vertex2d> & path_positions,
-							  const std::vector<double> & path_distances,
-							  int & orientation, unsigned index, double distance);
+                                                          const std::vector<vertex2d> & path_positions,
+                                                          const std::vector<double> & path_distances,
+                                                          int & orientation, unsigned index, double distance);
 
     ///Tests wether the given placement_element be placed without a collision
     // Returns true if it can
@@ -125,9 +125,9 @@ private:
     //                 This means there is exactly one intersect point
     // Result is returned in ix, iy
     void find_line_circle_intersection(
-	const double &cx, const double &cy, const double &radius,
-	const double &x1, const double &y1, const double &x2, const double &y2,
-	double &ix, double &iy);
+        const double &cx, const double &cy, const double &radius,
+        const double &x1, const double &y1, const double &x2, const double &y2,
+        double &ix, double &iy);
 
     ///General Internals
 

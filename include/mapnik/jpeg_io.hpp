@@ -33,79 +33,79 @@ namespace mapnik {
 
 #define BUFFER_SIZE 4096
    
-   typedef struct  
-   {
-         struct jpeg_destination_mgr pub;
-         std::ostream * out;
-         JOCTET * buffer;
-   } dest_mgr;
+typedef struct  
+{
+    struct jpeg_destination_mgr pub;
+    std::ostream * out;
+    JOCTET * buffer;
+} dest_mgr;
    
-   inline void init_destination( j_compress_ptr cinfo)
-   {
-      dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
-      dest->buffer = (JOCTET*) (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-                                                           BUFFER_SIZE * sizeof(JOCTET));
-      dest->pub.next_output_byte = dest->buffer;
-      dest->pub.free_in_buffer = BUFFER_SIZE;
-   }
+inline void init_destination( j_compress_ptr cinfo)
+{
+    dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
+    dest->buffer = (JOCTET*) (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
+                                                         BUFFER_SIZE * sizeof(JOCTET));
+    dest->pub.next_output_byte = dest->buffer;
+    dest->pub.free_in_buffer = BUFFER_SIZE;
+}
 
-   inline boolean empty_output_buffer (j_compress_ptr cinfo)
-   {
-      dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
-      dest->out->write((char*)dest->buffer, BUFFER_SIZE);
-      if (!*(dest->out)) return false;
-      dest->pub.next_output_byte = dest->buffer;
-      dest->pub.free_in_buffer = BUFFER_SIZE;
-      return true;
-   }
+inline boolean empty_output_buffer (j_compress_ptr cinfo)
+{
+    dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
+    dest->out->write((char*)dest->buffer, BUFFER_SIZE);
+    if (!*(dest->out)) return false;
+    dest->pub.next_output_byte = dest->buffer;
+    dest->pub.free_in_buffer = BUFFER_SIZE;
+    return true;
+}
    
-   inline void term_destination( j_compress_ptr cinfo)
-   {
-      dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
-      size_t size  = BUFFER_SIZE - dest->pub.free_in_buffer;
-      if (size > 0) 
-      {
-         dest->out->write((char*)dest->buffer, size);
-      }
-      dest->out->flush();
-   }
+inline void term_destination( j_compress_ptr cinfo)
+{
+    dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
+    size_t size  = BUFFER_SIZE - dest->pub.free_in_buffer;
+    if (size > 0) 
+    {
+        dest->out->write((char*)dest->buffer, size);
+    }
+    dest->out->flush();
+}
    
-   template <typename T1, typename T2>
-   void save_as_jpeg(T1 & file,int quality, T2 const& image)
-   {  
-      struct jpeg_compress_struct cinfo;
-      struct jpeg_error_mgr jerr;
+template <typename T1, typename T2>
+void save_as_jpeg(T1 & file,int quality, T2 const& image)
+{  
+    struct jpeg_compress_struct cinfo;
+    struct jpeg_error_mgr jerr;
 
-      int width=image.width();
-      int height=image.height();
-	
-      cinfo.err = jpeg_std_error(&jerr);
-      jpeg_create_compress(&cinfo);
+    int width=image.width();
+    int height=image.height();
+        
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_compress(&cinfo);
     
-      cinfo.dest = (struct jpeg_destination_mgr *)(*cinfo.mem->alloc_small)
-         ((j_common_ptr) &cinfo, JPOOL_PERMANENT, sizeof(dest_mgr));
-      dest_mgr * dest = (dest_mgr*) cinfo.dest;
-      dest->pub.init_destination = init_destination;
-      dest->pub.empty_output_buffer = empty_output_buffer;
-      dest->pub.term_destination = term_destination;
-      dest->out = &file;
+    cinfo.dest = (struct jpeg_destination_mgr *)(*cinfo.mem->alloc_small)
+        ((j_common_ptr) &cinfo, JPOOL_PERMANENT, sizeof(dest_mgr));
+    dest_mgr * dest = (dest_mgr*) cinfo.dest;
+    dest->pub.init_destination = init_destination;
+    dest->pub.empty_output_buffer = empty_output_buffer;
+    dest->pub.term_destination = term_destination;
+    dest->out = &file;
       
-      //jpeg_stdio_dest(&cinfo, fp);
-      cinfo.image_width = width;
-      cinfo.image_height = height;
-      cinfo.input_components = 3;
-      cinfo.in_color_space = JCS_RGB; 
-      jpeg_set_defaults(&cinfo);
-      jpeg_set_quality(&cinfo, quality,1);
-      jpeg_start_compress(&cinfo, 1);
-      JSAMPROW row_pointer[1];
-      JSAMPLE* row=reinterpret_cast<JSAMPLE*>( ::operator new (sizeof(JSAMPLE) * width*3));
-      while (cinfo.next_scanline < cinfo.image_height) 
-      {
-         const unsigned* imageRow=image.getRow(cinfo.next_scanline);
-         int index=0;
-         for (int i=0;i<width;++i)
-         {
+    //jpeg_stdio_dest(&cinfo, fp);
+    cinfo.image_width = width;
+    cinfo.image_height = height;
+    cinfo.input_components = 3;
+    cinfo.in_color_space = JCS_RGB; 
+    jpeg_set_defaults(&cinfo);
+    jpeg_set_quality(&cinfo, quality,1);
+    jpeg_start_compress(&cinfo, 1);
+    JSAMPROW row_pointer[1];
+    JSAMPLE* row=reinterpret_cast<JSAMPLE*>( ::operator new (sizeof(JSAMPLE) * width*3));
+    while (cinfo.next_scanline < cinfo.image_height) 
+    {
+        const unsigned* imageRow=image.getRow(cinfo.next_scanline);
+        int index=0;
+        for (int i=0;i<width;++i)
+        {
 #ifdef MAPNIK_BIG_ENDIAN
             row[index++]=(imageRow[i]>>24)&0xff;
             row[index++]=(imageRow[i]>>16)&0xff;
@@ -115,13 +115,13 @@ namespace mapnik {
             row[index++]=(imageRow[i]>>8)&0xff;
             row[index++]=(imageRow[i]>>16)&0xff;
 #endif
-         }
-         row_pointer[0] = &row[0];
-         (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
-      }
-      ::operator delete(row);
+        }
+        row_pointer[0] = &row[0];
+        (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+    }
+    ::operator delete(row);
       
-      jpeg_finish_compress(&cinfo);
-      jpeg_destroy_compress(&cinfo);
-   }  
+    jpeg_finish_compress(&cinfo);
+    jpeg_destroy_compress(&cinfo);
+}  
 }

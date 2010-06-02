@@ -174,7 +174,7 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
 text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
 {
     if (this == &other)
-	return *this;
+        return *this;
     name_ = other.name_;
     orientation_ = other.orientation_;
     face_name_ = other.face_name_;

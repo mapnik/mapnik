@@ -41,42 +41,42 @@
 
 namespace mapnik {
     
-    class proj_init_error : public std::runtime_error
-    {
-    public:
-        proj_init_error(std::string const& params)
-            : std::runtime_error("failed to initialize projection with:" + params) {}
-    };
+class proj_init_error : public std::runtime_error
+{
+public:
+    proj_init_error(std::string const& params)
+        : std::runtime_error("failed to initialize projection with:" + params) {}
+};
     
-    class MAPNIK_DECL projection
-    {
-        friend class proj_transform;
-    public:
-        explicit projection(std::string params = "+proj=latlong +ellps=WGS84");
-        projection(projection const& rhs);
-        ~projection();
+class MAPNIK_DECL projection
+{
+    friend class proj_transform;
+public:
+    explicit projection(std::string params = "+proj=latlong +ellps=WGS84");
+    projection(projection const& rhs);
+    ~projection();
         
-        projection& operator=(projection const& rhs);
-        bool operator==(const projection& other) const;
-        bool operator!=(const projection& other) const;
-        bool is_initialized() const;
-        bool is_geographic() const;
-        std::string const& params() const;
+    projection& operator=(projection const& rhs);
+    bool operator==(const projection& other) const;
+    bool operator!=(const projection& other) const;
+    bool is_initialized() const;
+    bool is_geographic() const;
+    std::string const& params() const;
       
-        void forward(double & x, double &y ) const;
-        void inverse(double & x,double & y) const;
+    void forward(double & x, double &y ) const;
+    void inverse(double & x,double & y) const;
         
-    private:
-        void init(); 
-        void swap (projection& rhs);
+private:
+    void init(); 
+    void swap (projection& rhs);
        
-    private:
-        std::string params_;
-        void * proj_;
+private:
+    std::string params_;
+    void * proj_;
 #ifdef MAPNIK_THREADSAFE
-        static boost::mutex mutex_;
+    static boost::mutex mutex_;
 #endif
-    };
+};
 }
 
 #endif //PROJECTION_HPP

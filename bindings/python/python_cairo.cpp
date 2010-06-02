@@ -32,36 +32,36 @@ static Pycairo_CAPI_t *Pycairo_CAPI;
 
 static void *extract_surface(PyObject* op)
 {
-   if (PyObject_TypeCheck(op, const_cast<PyTypeObject*>(Pycairo_CAPI->Surface_Type)))
-   {
-      return op;
-   }
-   else
-   {
-      return 0;
-   }
+    if (PyObject_TypeCheck(op, const_cast<PyTypeObject*>(Pycairo_CAPI->Surface_Type)))
+    {
+        return op;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 static void *extract_context(PyObject* op)
 {
-   if (PyObject_TypeCheck(op, const_cast<PyTypeObject*>(Pycairo_CAPI->Context_Type)))
-   {
-      return op;
-   }
-   else
-   {
-      return 0;
-   }
+    if (PyObject_TypeCheck(op, const_cast<PyTypeObject*>(Pycairo_CAPI->Context_Type)))
+    {
+        return op;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 void register_cairo()
 {
-   Pycairo_IMPORT;
+    Pycairo_IMPORT;
    
-   if (Pycairo_CAPI == NULL) return;
+    if (Pycairo_CAPI == NULL) return;
 
-   boost::python::converter::registry::insert(&extract_surface, boost::python::type_id<PycairoSurface>());
-   boost::python::converter::registry::insert(&extract_context, boost::python::type_id<PycairoContext>());
+    boost::python::converter::registry::insert(&extract_surface, boost::python::type_id<PycairoSurface>());
+    boost::python::converter::registry::insert(&extract_context, boost::python::type_id<PycairoContext>());
 }
 
 #else

@@ -32,37 +32,37 @@
 namespace mapnik
 {
 
-    /*!
-     * From wikipedia.com:
-     *
-     * Well-known text (WKT) is a text markup language for representing vector 
-     * geometry objects on a map, spatial reference systems of spatial objects 
-     * and transformations between spatial reference systems. A binary equivalent,
-     * known as well-known binary (WKB) is used to transfer and store the same 
-     * information on databases, such as PostGIS. The formats are regulated by 
-     * the Open Geospatial Consortium (OGC) and described in their Simple Feature 
-     * Access and Coordinate Transformation Service specifications.
-     */
-    enum wkbFormat
-    {
-        wkbGeneric=1,
-        wkbSpatiaLite=2
-    };
+/*!
+ * From wikipedia.com:
+ *
+ * Well-known text (WKT) is a text markup language for representing vector 
+ * geometry objects on a map, spatial reference systems of spatial objects 
+ * and transformations between spatial reference systems. A binary equivalent,
+ * known as well-known binary (WKB) is used to transfer and store the same 
+ * information on databases, such as PostGIS. The formats are regulated by 
+ * the Open Geospatial Consortium (OGC) and described in their Simple Feature 
+ * Access and Coordinate Transformation Service specifications.
+ */
+enum wkbFormat
+{
+    wkbGeneric=1,
+    wkbSpatiaLite=2
+};
 
-    class MAPNIK_DECL geometry_utils 
-    {
-    public:
+class MAPNIK_DECL geometry_utils 
+{
+public:
 
-       static void from_wkb (Feature & feature,
-                             const char* wkb,
-                             unsigned size,
-                             bool multiple_geometries = false,
-                             wkbFormat format = wkbGeneric);
-    private:
-       geometry_utils();
-       geometry_utils(geometry_utils const&);
-       geometry_utils& operator=(const geometry_utils&);
-    };
+    static void from_wkb (Feature & feature,
+                          const char* wkb,
+                          unsigned size,
+                          bool multiple_geometries = false,
+                          wkbFormat format = wkbGeneric);
+private:
+    geometry_utils();
+    geometry_utils(geometry_utils const&);
+    geometry_utils& operator=(const geometry_utils&);
+};
 }
 
 #endif //WKB_HPP

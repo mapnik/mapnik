@@ -41,47 +41,47 @@ struct projection_pickle_suite : boost::python::pickle_suite
 };
 
 namespace {
-    mapnik::coord2d forward_pt(mapnik::coord2d const& pt, 
-                            mapnik::projection const& prj)
-    {
-        double x = pt.x;
-        double y = pt.y;
-        prj.forward(x,y);
-        return mapnik::coord2d(x,y);
-    }
+mapnik::coord2d forward_pt(mapnik::coord2d const& pt, 
+                           mapnik::projection const& prj)
+{
+    double x = pt.x;
+    double y = pt.y;
+    prj.forward(x,y);
+    return mapnik::coord2d(x,y);
+}
     
-    mapnik::coord2d inverse_pt(mapnik::coord2d const& pt, 
-                            mapnik::projection const& prj)
-    {
-        double x = pt.x;
-        double y = pt.y;
-        prj.inverse(x,y);
-        return mapnik::coord2d(x,y);
-    }
+mapnik::coord2d inverse_pt(mapnik::coord2d const& pt, 
+                           mapnik::projection const& prj)
+{
+    double x = pt.x;
+    double y = pt.y;
+    prj.inverse(x,y);
+    return mapnik::coord2d(x,y);
+}
    
-   mapnik::box2d<double> forward_env(mapnik::box2d<double> const & box,
-                                    mapnik::projection const& prj)
-   {
-      double minx = box.minx();
-      double miny = box.miny();
-      double maxx = box.maxx();
-      double maxy = box.maxy();
-      prj.forward(minx,miny);
-      prj.forward(maxx,maxy);
-      return mapnik::box2d<double>(minx,miny,maxx,maxy);
-   }
+mapnik::box2d<double> forward_env(mapnik::box2d<double> const & box,
+                                  mapnik::projection const& prj)
+{
+    double minx = box.minx();
+    double miny = box.miny();
+    double maxx = box.maxx();
+    double maxy = box.maxy();
+    prj.forward(minx,miny);
+    prj.forward(maxx,maxy);
+    return mapnik::box2d<double>(minx,miny,maxx,maxy);
+}
    
-   mapnik::box2d<double> inverse_env(mapnik::box2d<double> const & box,
-                                    mapnik::projection const& prj)
-   {
-      double minx = box.minx();
-      double miny = box.miny();
-      double maxx = box.maxx();
-      double maxy = box.maxy();
-      prj.inverse(minx,miny);
-      prj.inverse(maxx,maxy);
-      return mapnik::box2d<double>(minx,miny,maxx,maxy);
-   }
+mapnik::box2d<double> inverse_env(mapnik::box2d<double> const & box,
+                                  mapnik::projection const& prj)
+{
+    double minx = box.minx();
+    double miny = box.miny();
+    double maxx = box.maxx();
+    double maxy = box.maxy();
+    prj.inverse(minx,miny);
+    prj.inverse(maxx,maxy);
+    return mapnik::box2d<double>(minx,miny,maxx,maxy);
+}
    
 }
 
@@ -90,23 +90,23 @@ void export_projection ()
     using namespace boost::python; 
 
     class_<projection>("Projection", "Represents a map projection.",init<optional<std::string const&> >(
-              (arg("proj4_string")),
-              "Constructs a new projection from its PROJ.4 string representation.\n"
-              "\n"
-              "The parameterless version of this constructor is equivalent to\n"      
-              "   Projection('+proj=latlong +ellps=WGS84')\n"
-              "\n"
-              "The constructor will throw a RuntimeError in case the projection\n"
-              "cannot be initialized.\n"
-              )
+                           (arg("proj4_string")),
+                           "Constructs a new projection from its PROJ.4 string representation.\n"
+                           "\n"
+                           "The parameterless version of this constructor is equivalent to\n"      
+                           "   Projection('+proj=latlong +ellps=WGS84')\n"
+                           "\n"
+                           "The constructor will throw a RuntimeError in case the projection\n"
+                           "cannot be initialized.\n"
+                           )
         )
         .def_pickle(projection_pickle_suite())
         .def ("params", make_function(&projection::params,
-              return_value_policy<copy_const_reference>()),
+                                      return_value_policy<copy_const_reference>()),
               "Returns the PROJ.4 string for this projection.\n")
         .add_property ("geographic", &projection::is_geographic,
-              "This property is True if the projection is a geographic projection\n"
-              "(i.e. it uses lon/lat coordinates)\n")
+                       "This property is True if the projection is a geographic projection\n"
+                       "(i.e. it uses lon/lat coordinates)\n")
         ;
     
     def("forward_",&forward_pt);

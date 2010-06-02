@@ -25,7 +25,7 @@
 #define MAP_LOADER_HPP
 
 #ifdef HAVE_CONFIG_H
-  #include <config.h>
+#include <config.h>
 #endif
 
 #include <mapnik/map.hpp>
@@ -33,8 +33,8 @@
 
 namespace mapnik
 {
-    MAPNIK_DECL void load_map(Map & map, std::string const& filename, bool strict = false);
-    MAPNIK_DECL void load_map_string(Map & map, std::string const& str, bool strict = false, std::string const& base_url="");
+MAPNIK_DECL void load_map(Map & map, std::string const& filename, bool strict = false);
+MAPNIK_DECL void load_map_string(Map & map, std::string const& str, bool strict = false, std::string const& base_url="");
 }
 
 #endif // LOAD_MAP_HPP

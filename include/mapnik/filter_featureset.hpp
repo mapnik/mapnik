@@ -26,27 +26,27 @@
 
 namespace mapnik {
     
-    template <typename T> 
-    class filter_featureset : public Featureset 
+template <typename T> 
+class filter_featureset : public Featureset 
+{
+    typedef T filter_type;
+        
+public:
+    filter_featureset(featureset_ptr fs, filter_type const& filter)
+        : fs_(fs), filter_(filter) {}
+        
+    feature_ptr next()
     {
-        typedef T filter_type;
-        
-    public:
-        filter_featureset(featureset_ptr fs, filter_type const& filter)
-            : fs_(fs), filter_(filter) {}
-        
-        feature_ptr next()
+        feature_ptr feature = fs_->next();
+        while (feature && !filter_.pass(*feature))
         {
-            feature_ptr feature = fs_->next();
-            while (feature && !filter_.pass(*feature))
-            {
-                feature = fs_->next();
-            }
-            return feature;
+            feature = fs_->next();
         }
+        return feature;
+    }
         
-    private:
-        featureset_ptr fs_;
-        filter_type filter_;
-    };
+private:
+    featureset_ptr fs_;
+    filter_type filter_;
+};
 }

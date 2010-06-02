@@ -43,8 +43,8 @@ namespace mapnik
 typedef boost::shared_ptr<image_data_32> image_ptr;
 
 struct MAPNIK_DECL image_cache :
-	public singleton <image_cache, CreateStatic>,
-	private boost::noncopyable
+        public singleton <image_cache, CreateStatic>,
+        private boost::noncopyable
 {
 
     friend class CreateStatic<image_cache>;

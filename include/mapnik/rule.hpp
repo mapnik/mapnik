@@ -45,80 +45,80 @@
 
 namespace mapnik
 {
-   inline bool operator==(point_symbolizer const& lhs,
-                          point_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
-   inline bool operator==(line_symbolizer const& lhs,
-                          line_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
-   inline bool operator==(line_pattern_symbolizer const& lhs,
-                          line_pattern_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
+inline bool operator==(point_symbolizer const& lhs,
+                       point_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
+inline bool operator==(line_symbolizer const& lhs,
+                       line_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
+inline bool operator==(line_pattern_symbolizer const& lhs,
+                       line_pattern_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
 
-   inline bool operator==(polygon_symbolizer const& lhs,
-                          polygon_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
+inline bool operator==(polygon_symbolizer const& lhs,
+                       polygon_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
     
-   inline bool operator==(polygon_pattern_symbolizer const& lhs,
-                          polygon_pattern_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
+inline bool operator==(polygon_pattern_symbolizer const& lhs,
+                       polygon_pattern_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
     
-   inline bool operator==(raster_symbolizer const& lhs,
-                          raster_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
+inline bool operator==(raster_symbolizer const& lhs,
+                       raster_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
     
-   inline bool operator==(text_symbolizer const& lhs,
-                          text_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
+inline bool operator==(text_symbolizer const& lhs,
+                       text_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
     
-   inline bool operator==(shield_symbolizer const& lhs,
-                          shield_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
+inline bool operator==(shield_symbolizer const& lhs,
+                       shield_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
     
-   inline bool operator==(building_symbolizer const& lhs,
-                          building_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
+inline bool operator==(building_symbolizer const& lhs,
+                       building_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
    
-   inline bool operator==(markers_symbolizer const& lhs,
-                          markers_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
+inline bool operator==(markers_symbolizer const& lhs,
+                       markers_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
 
-   inline bool operator==(glyph_symbolizer const& lhs,
-                          glyph_symbolizer const& rhs)
-   {
-      return (&lhs == &rhs); 
-   }
-   typedef boost::variant<point_symbolizer,
-                          line_symbolizer,
-                          line_pattern_symbolizer,
-                          polygon_symbolizer,
-                          polygon_pattern_symbolizer,
-                          raster_symbolizer,
-                          shield_symbolizer,
-                          text_symbolizer,
-                          building_symbolizer,
-                          markers_symbolizer,
-                          glyph_symbolizer> symbolizer;
+inline bool operator==(glyph_symbolizer const& lhs,
+                       glyph_symbolizer const& rhs)
+{
+    return (&lhs == &rhs); 
+}
+typedef boost::variant<point_symbolizer,
+                       line_symbolizer,
+                       line_pattern_symbolizer,
+                       polygon_symbolizer,
+                       polygon_pattern_symbolizer,
+                       raster_symbolizer,
+                       shield_symbolizer,
+                       text_symbolizer,
+                       building_symbolizer,
+                       markers_symbolizer,
+                       glyph_symbolizer> symbolizer;
     
         
     

@@ -43,8 +43,8 @@ namespace mapnik
 typedef boost::shared_ptr<agg::svg::path_renderer> path_ptr;
 
 struct MAPNIK_DECL marker_cache :
-	public singleton <marker_cache, CreateStatic>,
-	private boost::noncopyable
+        public singleton <marker_cache, CreateStatic>,
+        private boost::noncopyable
 {
 
     friend class CreateStatic<marker_cache>;

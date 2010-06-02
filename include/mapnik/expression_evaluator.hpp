@@ -49,14 +49,14 @@ struct evaluate : boost::static_visitor<T1>
    
     value_type operator() (binary_node<tags::logical_and> const & x) const
     {
-	return (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.left).to_bool())
-	    && (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.right).to_bool());
+        return (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.left).to_bool())
+            && (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.right).to_bool());
     }
     
     value_type operator() (binary_node<tags::logical_or> const & x) const
     {
-	return (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.left).to_bool()) 
-	    || (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.right).to_bool());
+        return (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.left).to_bool()) 
+            || (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.right).to_bool());
     }
 
     template <typename Tag> 
@@ -70,19 +70,19 @@ struct evaluate : boost::static_visitor<T1>
     template <typename Tag>
     value_type operator() (unary_node<Tag> const& x) const
     {
-	return ! (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr).to_bool());	
+        return ! (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr).to_bool());  
     }
     
     value_type operator() (regex_match_node const& x) const
     {
-	value_type v = boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr);
-	return boost::u32regex_match(v.to_unicode(),x.pattern);
+        value_type v = boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr);
+        return boost::u32regex_match(v.to_unicode(),x.pattern);
     }
     
     value_type operator() (regex_replace_node const& x) const
     {
-	value_type v = boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr);
-	return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
+        value_type v = boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr);
+        return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
     }
     
     feature_type const& feature_;

@@ -35,7 +35,7 @@
 namespace mapnik
 {
 struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
-				       public symbolizer_with_image
+                                       public symbolizer_with_image
 {
     shield_symbolizer(expression_ptr name,
                       std::string const& face_name,

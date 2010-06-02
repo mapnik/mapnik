@@ -37,128 +37,128 @@
 
 namespace mapnik {  namespace sqlite {
 
-      class database : private boost::noncopyable
-      {
-         friend class prepared_statement;
+    class database : private boost::noncopyable
+    {
+        friend class prepared_statement;
          
-         struct database_closer
-         {
+        struct database_closer
+        {
             void operator () (sqlite3 * db)
             {
 #ifdef MAPNIK_DEBUG
-               std::cerr << "close database " << db << "\n";
+                std::cerr << "close database " << db << "\n";
 #endif
-               sqlite3_close(db);
+                sqlite3_close(db);
             }
-         };
+        };
          
-         typedef boost::shared_ptr<sqlite3> sqlite_db;    
-         sqlite_db db_;
+        typedef boost::shared_ptr<sqlite3> sqlite_db;    
+        sqlite_db db_;
          
-      public:
-         database(std::string const& name);
-         ~database();
-         bool execute(std::string const& sql);
-      };
+    public:
+        database(std::string const& name);
+        ~database();
+        bool execute(std::string const& sql);
+    };
 
-      struct null_type {};
-      struct blob 
-      {
-         blob(const char* buf, unsigned size)
+    struct null_type {};
+    struct blob 
+    {
+        blob(const char* buf, unsigned size)
             : buf_(buf), size_(size) {}
          
-         const char * buf_;
-         unsigned size_;
-      };
+        const char * buf_;
+        unsigned size_;
+    };
 
-      typedef boost::variant<int,double,std::string, blob,null_type> value_type;
-      typedef std::vector<value_type> record_type;
+    typedef boost::variant<int,double,std::string, blob,null_type> value_type;
+    typedef std::vector<value_type> record_type;
       
-      class prepared_statement : boost::noncopyable 
-      {
-         struct binder : public boost::static_visitor<bool>
-         {
+    class prepared_statement : boost::noncopyable 
+    {
+        struct binder : public boost::static_visitor<bool>
+        {
             binder(sqlite3_stmt * stmt, unsigned index)
-               : stmt_(stmt), index_(index) {}
+                : stmt_(stmt), index_(index) {}
   
-	    bool operator() (null_type )
-	    {
-	       if (sqlite3_bind_null(stmt_, index_) != SQLITE_OK)
-               {
-                  std::cerr << "cannot bind NULL\n";
-                  return false;
-               }
-               return true;
-	    }
-	    
+            bool operator() (null_type )
+            {
+                if (sqlite3_bind_null(stmt_, index_) != SQLITE_OK)
+                {
+                    std::cerr << "cannot bind NULL\n";
+                    return false;
+                }
+                return true;
+            }
+            
             bool operator() (int val)
             {
-               if (sqlite3_bind_int(stmt_, index_ , val ) != SQLITE_OK)
-               {
-                  std::cerr << "cannot bind " << val << "\n";
-                  return false;
-               }
-               return true;
+                if (sqlite3_bind_int(stmt_, index_ , val ) != SQLITE_OK)
+                {
+                    std::cerr << "cannot bind " << val << "\n";
+                    return false;
+                }
+                return true;
             }
             
             bool operator() (double val)
             {
-               if (sqlite3_bind_double(stmt_, index_ , val ) != SQLITE_OK)
-               {
-                  std::cerr << "cannot bind " << val << "\n";
-                  return false;
-               }
-               return true;
+                if (sqlite3_bind_double(stmt_, index_ , val ) != SQLITE_OK)
+                {
+                    std::cerr << "cannot bind " << val << "\n";
+                    return false;
+                }
+                return true;
             }
             
             bool operator() (std::string const& val)
             {
-               if (sqlite3_bind_text(stmt_, index_, val.c_str(), val.length(), SQLITE_STATIC) != SQLITE_OK)
-               {
-                 std::cerr << "cannot bind " << val << "\n";
-                 return false;
-               }
-               return true;
+                if (sqlite3_bind_text(stmt_, index_, val.c_str(), val.length(), SQLITE_STATIC) != SQLITE_OK)
+                {
+                    std::cerr << "cannot bind " << val << "\n";
+                    return false;
+                }
+                return true;
             }
             
             bool operator() (blob const& val)
             {
-               if (sqlite3_bind_blob(stmt_, index_, val.buf_, val.size_, SQLITE_STATIC) != SQLITE_OK)
-               {
-                 std::cerr << "cannot bind BLOB\n";
-                 return false;
-               }
-               return true;
+                if (sqlite3_bind_blob(stmt_, index_, val.buf_, val.size_, SQLITE_STATIC) != SQLITE_OK)
+                {
+                    std::cerr << "cannot bind BLOB\n";
+                    return false;
+                }
+                return true;
             }
             
             sqlite3_stmt * stmt_;
             unsigned index_;
-         };
-      public:
-         prepared_statement(database & db, std::string const& sql)
+        };
+    public:
+        prepared_statement(database & db, std::string const& sql)
             : db_(db.db_.get()), stmt_(0)
-         {
+        {
             const char * tail;
             //char * err_msg;
             int res = sqlite3_prepare_v2(db_, sql.c_str(),-1, &stmt_,&tail);
             if (res != SQLITE_OK)
             {
-               std::cerr << "ERR:"<< res << "\n";   
-               throw;
+                std::cerr << "ERR:"<< res << "\n";   
+                throw;
             }
-         }
+        }
          
-         ~prepared_statement()
-         {
-	    int res = sqlite3_finalize(stmt_);
+        ~prepared_statement()
+        {
+            int res = sqlite3_finalize(stmt_);
             if (res != SQLITE_OK)
             {
-               std::cerr << "ERR:" << res << "\n";     
+                std::cerr << "ERR:" << res << "\n";     
             }
-         }
+        }
          
-         bool insert_record(record_type const& rec) const
-         {  
+        bool insert_record(record_type const& rec) const
+        {  
 #ifdef MAPNIK_DEBUG
             assert( unsigned(sqlite3_bind_parameter_count(stmt_)) == rec.size());
 #endif
@@ -167,23 +167,23 @@ namespace mapnik {  namespace sqlite {
             int count = 1;
             for (; itr!=end;++itr)
             {
-               binder op(stmt_,count++);
-               if (!boost::apply_visitor(op,*itr))
-               {
-                  return false;
-               }
+                binder op(stmt_,count++);
+                if (!boost::apply_visitor(op,*itr))
+                {
+                    return false;
+                }
             }
             
             sqlite3_step(stmt_);
             sqlite3_reset(stmt_);
 
             return true;
-         }
+        }
 
-      private:
-         sqlite3 * db_;
-         sqlite3_stmt * stmt_;
-      };
-   }
+    private:
+        sqlite3 * db_;
+        sqlite3_stmt * stmt_;
+    };
+    }
 }
 

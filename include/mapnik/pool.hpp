@@ -43,116 +43,116 @@
 
 namespace mapnik
 {
-   template <typename T, typename PoolT>
-   class PoolGuard
-   {
-      private:
-         const T& obj_;
-         PoolT& pool_; 
-      public:
-         explicit PoolGuard(const T& ptr,PoolT& pool)
-            : obj_(ptr),
-              pool_(pool) {}
+template <typename T, typename PoolT>
+class PoolGuard
+{
+private:
+    const T& obj_;
+    PoolT& pool_; 
+public:
+    explicit PoolGuard(const T& ptr,PoolT& pool)
+        : obj_(ptr),
+          pool_(pool) {}
 
-         ~PoolGuard() 
-         {
-            pool_->returnObject(obj_);
-         }
+    ~PoolGuard() 
+    {
+        pool_->returnObject(obj_);
+    }
 
-      private:
-         PoolGuard();
-         PoolGuard(const PoolGuard&);
-         PoolGuard& operator=(const PoolGuard&);
-   };
+private:
+    PoolGuard();
+    PoolGuard(const PoolGuard&);
+    PoolGuard& operator=(const PoolGuard&);
+};
 
-   template <typename T,template <typename> class Creator>
-   class Pool : private boost::noncopyable
-   {
-         typedef boost::shared_ptr<T> HolderType;
-         typedef std::deque<HolderType> ContType;	
-	
-         Creator<T> creator_;
-         const unsigned initialSize_; 
-         const unsigned maxSize_;
-         ContType usedPool_;
-         ContType unusedPool_;
+template <typename T,template <typename> class Creator>
+class Pool : private boost::noncopyable
+{
+    typedef boost::shared_ptr<T> HolderType;
+    typedef std::deque<HolderType> ContType;    
+        
+    Creator<T> creator_;
+    const unsigned initialSize_; 
+    const unsigned maxSize_;
+    ContType usedPool_;
+    ContType unusedPool_;
 #ifdef MAPNIK_THREADSAFE
-         mutable boost::mutex mutex_;
+    mutable boost::mutex mutex_;
 #endif
-      public:
+public:
 
-         Pool(const Creator<T>& creator,unsigned initialSize=1, unsigned maxSize=10)
-            :creator_(creator),
-             initialSize_(initialSize),
-             maxSize_(maxSize)
-         {
-            for (unsigned i=0; i < initialSize_; ++i) 
-            {
-               HolderType conn(creator_());
-               if (conn->isOK())
-                  unusedPool_.push_back(conn);
-            }
-         }
+    Pool(const Creator<T>& creator,unsigned initialSize=1, unsigned maxSize=10)
+        :creator_(creator),
+         initialSize_(initialSize),
+         maxSize_(maxSize)
+    {
+        for (unsigned i=0; i < initialSize_; ++i) 
+        {
+            HolderType conn(creator_());
+            if (conn->isOK())
+                unusedPool_.push_back(conn);
+        }
+    }
 
-         HolderType borrowObject()
-         {	
+    HolderType borrowObject()
+    {   
 #ifdef MAPNIK_THREADSAFE    
-            mutex::scoped_lock lock(mutex_);
+        mutex::scoped_lock lock(mutex_);
 #endif
-            typename ContType::iterator itr=unusedPool_.begin();
-            if (itr!=unusedPool_.end())
-            { 
+        typename ContType::iterator itr=unusedPool_.begin();
+        if (itr!=unusedPool_.end())
+        { 
 #ifdef MAPNIK_DEBUG
-               std::clog<<"borrow "<<(*itr).get()<<"\n";
+            std::clog<<"borrow "<<(*itr).get()<<"\n";
 #endif
-               usedPool_.push_back(*itr);
-               itr=unusedPool_.erase(itr);
-               return usedPool_[usedPool_.size()-1];
-            }
-            else if (unusedPool_.size() < maxSize_)
+            usedPool_.push_back(*itr);
+            itr=unusedPool_.erase(itr);
+            return usedPool_[usedPool_.size()-1];
+        }
+        else if (unusedPool_.size() < maxSize_)
+        {
+            HolderType conn(creator_());
+            if (conn->isOK())
             {
-               HolderType conn(creator_());
-               if (conn->isOK())
-               {
-                  usedPool_.push_back(conn);
+                usedPool_.push_back(conn);
 #ifdef MAPNIK_DEBUG
-                  std::clog << "create << " << conn.get() << "\n";
+                std::clog << "create << " << conn.get() << "\n";
 #endif
-                  return conn;
-               }
+                return conn;
             }
-            return HolderType();
-         } 
+        }
+        return HolderType();
+    } 
 
-         void returnObject(HolderType obj)
-         {
+    void returnObject(HolderType obj)
+    {
 #ifdef MAPNIK_THREADSAFE
-            mutex::scoped_lock lock(mutex_);
+        mutex::scoped_lock lock(mutex_);
 #endif
-            typename ContType::iterator itr=usedPool_.begin();
-            while (itr != usedPool_.end())
+        typename ContType::iterator itr=usedPool_.begin();
+        while (itr != usedPool_.end())
+        {
+            if (obj.get()==(*itr).get()) 
             {
-               if (obj.get()==(*itr).get()) 
-               {
 #ifdef MAPNIK_DEBUG
-                  std::clog<<"return "<<(*itr).get()<<"\n";
+                std::clog<<"return "<<(*itr).get()<<"\n";
 #endif
-                  unusedPool_.push_back(*itr);
-                  usedPool_.erase(itr);
-                  return;
-               }
-               ++itr;
+                unusedPool_.push_back(*itr);
+                usedPool_.erase(itr);
+                return;
             }
-         }
+            ++itr;
+        }
+    }
          
-         std::pair<unsigned,unsigned> size() const
-         {
+    std::pair<unsigned,unsigned> size() const
+    {
 #ifdef MAPNIK_THREADSAFE
-            mutex::scoped_lock lock(mutex_);
+        mutex::scoped_lock lock(mutex_);
 #endif
-            std::pair<unsigned,unsigned> size(unusedPool_.size(),usedPool_.size());
-            return size;
-         }
-   };
+        std::pair<unsigned,unsigned> size(unusedPool_.size(),usedPool_.size());
+        return size;
+    }
+};
 }
 #endif //POOL_HPP

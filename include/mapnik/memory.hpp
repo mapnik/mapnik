@@ -29,60 +29,60 @@
 
 namespace mapnik
 {
-    class MemoryUtils
-    {
-    public:
-        static size_t alignPointerSize(size_t ptrSize);
-    private:
-        MemoryUtils();
-        MemoryUtils(const MemoryUtils&);
-        MemoryUtils& operator=(const MemoryUtils&);
-    };
+class MemoryUtils
+{
+public:
+    static size_t alignPointerSize(size_t ptrSize);
+private:
+    MemoryUtils();
+    MemoryUtils(const MemoryUtils&);
+    MemoryUtils& operator=(const MemoryUtils&);
+};
 
-    class MemoryManager
-    {
-    public:
-        virtual void* allocate(size_t size)=0;
-        virtual void deallocate(void* p)=0;
-        virtual ~MemoryManager();
-    protected:
-        MemoryManager();                      // {}
-    private:
-        MemoryManager(const MemoryManager&);
-        MemoryManager& operator=(const MemoryManager&);
-    };
+class MemoryManager
+{
+public:
+    virtual void* allocate(size_t size)=0;
+    virtual void deallocate(void* p)=0;
+    virtual ~MemoryManager();
+protected:
+    MemoryManager();                      // {}
+private:
+    MemoryManager(const MemoryManager&);
+    MemoryManager& operator=(const MemoryManager&);
+};
 
-    class Object
+class Object
+{
+public:
+    void* operator new(size_t size);
+    void* operator new(size_t size, MemoryManager* manager);
+    void operator delete(void* p);
+    void operator delete(void* p, MemoryManager* manager);
+protected:
+    virtual ~Object() {}
+    Object() {}
+    Object(const Object&) {}
+protected:
+    Object& operator=(const Object&)
     {
-    public:
-        void* operator new(size_t size);
-        void* operator new(size_t size, MemoryManager* manager);
-        void operator delete(void* p);
-        void operator delete(void* p, MemoryManager* manager);
-    protected:
-        virtual ~Object() {}
-        Object() {}
-        Object(const Object&) {}
-    protected:
-        Object& operator=(const Object&)
-        {
-            return *this;
-        }
-    };
+        return *this;
+    }
+};
 
-    template <typename Geometry>
-    class geometry_pool
+template <typename Geometry>
+class geometry_pool
+{
+public:
+    void* allocate()
     {
-    public:
-        void* allocate()
-        {
-            return ::operator new(sizeof(Geometry));
-        }
-        void deallocate(void* p)
-        {
-            ::operator delete(p);
-        }
-    };
+        return ::operator new(sizeof(Geometry));
+    }
+    void deallocate(void* p)
+    {
+        ::operator delete(p);
+    }
+};
 
 }
 #endif //MEMORY_HPP

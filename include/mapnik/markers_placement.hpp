@@ -34,36 +34,36 @@ namespace mapnik {
 template <typename Locator, typename Detector>
 class markers_placement : boost::noncopyable
 {
-    public:
-        markers_placement(Locator &locator, box2d<double> size, Detector &detector, double spacing, double max_error, bool allow_overlap);
-        void rewind();
-        bool get_point(double *x, double *y, double *angle, bool add_to_detector = true);
-    private:
-        Locator &locator_;
-        box2d<double> size_;
-        Detector &detector_;
-        double spacing_;
-        bool done_;
-        double last_x, last_y;
-        double next_x, next_y;
-        /** If a marker could not be placed at the exact point where it should
-          * go the next markers distance will be a bit lower. */
-        double error_;
-        double max_error_;
-        unsigned marker_nr_;
-        bool allow_overlap_;
-        box2d<double> perform_transform(double angle, double dx, double dy);
-        double find_optimal_spacing(double s);
+public:
+    markers_placement(Locator &locator, box2d<double> size, Detector &detector, double spacing, double max_error, bool allow_overlap);
+    void rewind();
+    bool get_point(double *x, double *y, double *angle, bool add_to_detector = true);
+private:
+    Locator &locator_;
+    box2d<double> size_;
+    Detector &detector_;
+    double spacing_;
+    bool done_;
+    double last_x, last_y;
+    double next_x, next_y;
+    /** If a marker could not be placed at the exact point where it should
+     * go the next markers distance will be a bit lower. */
+    double error_;
+    double max_error_;
+    unsigned marker_nr_;
+    bool allow_overlap_;
+    box2d<double> perform_transform(double angle, double dx, double dy);
+    double find_optimal_spacing(double s);
 };
 
 /** Constructor for markers_placement object.
-* \param locator  Path along which markers are placed (type: vertex source)
-* \param size     Size of the marker
-* \param detector Collision detection
-* \param spacing  Distance between markers. If the value is negative it is
-*                 converted to a positive value with similar magnitude, but
-*                 choosen to optimize marker placement. 0 = no markers
-*/
+ * \param locator  Path along which markers are placed (type: vertex source)
+ * \param size     Size of the marker
+ * \param detector Collision detection
+ * \param spacing  Distance between markers. If the value is negative it is
+ *                 converted to a positive value with similar magnitude, but
+ *                 choosen to optimize marker placement. 0 = no markers
+ */
 template <typename Locator,  typename Detector> markers_placement<Locator, Detector>::markers_placement(
     Locator &locator, box2d<double> size, Detector &detector, double spacing, double max_error, bool allow_overlap)
     : locator_(locator), size_(size), detector_(detector), max_error_(max_error), allow_overlap_(allow_overlap)
@@ -105,9 +105,9 @@ template <typename Locator, typename Detector> double markers_placement<Locator,
 }
 
 /** Start again at first marker.
-  * \note Returning the same list of markers only works when they were NOT added
-  *       to the detector.
-  */
+ * \note Returning the same list of markers only works when they were NOT added
+ *       to the detector.
+ */
 template <typename Locator, typename Detector> void markers_placement<Locator, Detector>::rewind()
 {
     locator_.rewind(0);
@@ -120,13 +120,13 @@ template <typename Locator, typename Detector> void markers_placement<Locator, D
 }
 
 /** Get a point where the marker should be placed.
-  * Each time this function is called a new point is returned.
-  * \param x     Return value for x position
-  * \param y     Return value for x position
-  * \param angle Return value for rotation angle
-  * \param add_to_detector Add selected position to detector
-  * \return True if a place is found, false if none is found.
-  */
+ * Each time this function is called a new point is returned.
+ * \param x     Return value for x position
+ * \param y     Return value for x position
+ * \param angle Return value for rotation angle
+ * \param add_to_detector Add selected position to detector
+ * \return True if a place is found, false if none is found.
+ */
 template <typename Locator, typename Detector> bool markers_placement<Locator, Detector>::get_point(
     double *x, double *y, double *angle, bool add_to_detector)
 {

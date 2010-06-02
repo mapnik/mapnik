@@ -81,12 +81,12 @@ struct regex_match_impl
     };
     
     explicit regex_match_impl(mapnik::transcoder const& tr)
-	: tr_(tr) {}
+        : tr_(tr) {}
     
     template <typename T0,typename T1>
     expr_node operator() (T0 & node, T1 const& pattern) const
     {
-	return regex_match_node(node,tr_.transcode(pattern.c_str()));
+        return regex_match_node(node,tr_.transcode(pattern.c_str()));
     }
     
     mapnik::transcoder const& tr_;
@@ -101,12 +101,12 @@ struct regex_replace_impl
     };
     
     explicit regex_replace_impl(mapnik::transcoder const& tr)
-	: tr_(tr) {}
+        : tr_(tr) {}
     
     template <typename T0,typename T1,typename T2>
     expr_node operator() (T0 & node, T1 const& pattern, T2 const& format) const
     {
-	return regex_replace_node(node,tr_.transcode(pattern.c_str()),tr_.transcode(format.c_str()));
+        return regex_replace_node(node,tr_.transcode(pattern.c_str()),tr_.transcode(format.c_str()));
     }
     
     mapnik::transcoder const& tr_;
@@ -120,102 +120,102 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     explicit expression_grammar(mapnik::transcoder const& tr)
         : expression_grammar::base_type(expr),
           unicode_(unicode_impl(tr)),
-	  regex_match_(regex_match_impl(tr)),
-	  regex_replace_(regex_replace_impl(tr))
+          regex_match_(regex_match_impl(tr)),
+          regex_replace_(regex_replace_impl(tr))
     {
         using boost::phoenix::construct;
-	using qi::_1;
-	using qi::_a;
-	using qi::_b;
+        using qi::_1;
+        using qi::_a;
+        using qi::_b;
         using qi::_r1;
-	using qi::lexeme;
-	using qi::_val;
-	using qi::lit;
-	using qi::int_;
-	using qi::double_;
-	using standard_wide::char_;
-	
-	expr = logical_expr.alias();
-	
-	logical_expr = not_expr [_val = _1] 
-	    >>
-	    *(  (  ( lit("and") | lit("&&")) >> not_expr [_val && _1] )
-		| (( lit("or") | lit("||")) >> not_expr [_val || _1])
-		)
-	    ;
-	
-	not_expr = 
-	    cond_expr [_val = _1 ]
-	    | ((lit("not") | lit('!')) >> cond_expr [ _val = !_1 ])
-	    ;
-	
-	cond_expr = equality_expr [_val = _1] | additive_expr [_val = _1] 
-	    ;
-
-	equality_expr =
-	    relational_expr [_val = _1]
-	    >> *(  ( (lit("=") | lit("eq")) >> relational_expr [_val == _1])
-		   | (( lit("!=") | lit("<>") | lit("neq") ) >> relational_expr [_val != _1])
-		)
-	    ;
-	
-	regex_match_expr = lit(".match")
-	    >> lit('(') 
-	    >> lit('\'')
-	    >> ustring [_val = _1]
-	    >> lit('\'') 
-	    >> lit(')')
-	    ;
-	
-	regex_replace_expr = 
-	       lit(".replace")
-	    >> lit('(') 
-	    >> lit('\'')
-	    >> ustring           [_a = _1]
-	    >> lit('\'') >> lit(',') 
-	    >> lit('\'') 
-	    >> ustring           [_b = _1]
-	    >> lit('\'')
-	    >> lit(')')          [_val = regex_replace_(_r1,_a,_b)]
-	    ;
-	
- 	relational_expr = additive_expr[_val = _1] 
-	    >> 
-	    *(  (   (lit("<=") | lit("le") ) >> additive_expr [ _val <= _1 ])
-		| ( (lit('<')  | lit("lt") ) >> additive_expr [ _val <  _1 ])
-		| ( (lit(">=") | lit("ge") ) >> additive_expr [ _val >= _1 ])
-		| ( (lit('>')  | lit("gt") ) >> additive_expr [ _val >  _1 ])
-		)
-	    ;
-        additive_expr = multiplicative_expr [_val = _1]
-            >> * (   '+' >> multiplicative_expr[_val += _1]
-		   | '-' >> multiplicative_expr[_val -= _1]
+        using qi::lexeme;
+        using qi::_val;
+        using qi::lit;
+        using qi::int_;
+        using qi::double_;
+        using standard_wide::char_;
+        
+        expr = logical_expr.alias();
+        
+        logical_expr = not_expr [_val = _1] 
+            >>
+            *(  (  ( lit("and") | lit("&&")) >> not_expr [_val && _1] )
+                | (( lit("or") | lit("||")) >> not_expr [_val || _1])
                 )
             ;
-	
+        
+        not_expr = 
+            cond_expr [_val = _1 ]
+            | ((lit("not") | lit('!')) >> cond_expr [ _val = !_1 ])
+            ;
+        
+        cond_expr = equality_expr [_val = _1] | additive_expr [_val = _1] 
+            ;
+
+        equality_expr =
+            relational_expr [_val = _1]
+            >> *(  ( (lit("=") | lit("eq")) >> relational_expr [_val == _1])
+                   | (( lit("!=") | lit("<>") | lit("neq") ) >> relational_expr [_val != _1])
+                )
+            ;
+        
+        regex_match_expr = lit(".match")
+            >> lit('(') 
+            >> lit('\'')
+            >> ustring [_val = _1]
+            >> lit('\'') 
+            >> lit(')')
+            ;
+        
+        regex_replace_expr = 
+            lit(".replace")
+            >> lit('(') 
+            >> lit('\'')
+            >> ustring           [_a = _1]
+            >> lit('\'') >> lit(',') 
+            >> lit('\'') 
+            >> ustring           [_b = _1]
+            >> lit('\'')
+            >> lit(')')          [_val = regex_replace_(_r1,_a,_b)]
+            ;
+        
+        relational_expr = additive_expr[_val = _1] 
+            >> 
+            *(  (   (lit("<=") | lit("le") ) >> additive_expr [ _val <= _1 ])
+                | ( (lit('<')  | lit("lt") ) >> additive_expr [ _val <  _1 ])
+                | ( (lit(">=") | lit("ge") ) >> additive_expr [ _val >= _1 ])
+                | ( (lit('>')  | lit("gt") ) >> additive_expr [ _val >  _1 ])
+                )
+            ;
+        additive_expr = multiplicative_expr [_val = _1]
+            >> * (   '+' >> multiplicative_expr[_val += _1]
+                     | '-' >> multiplicative_expr[_val -= _1]
+                )
+            ;
+        
         multiplicative_expr = primary_expr [_val = _1]
             >> *(     '*' >> primary_expr [_val *= _1]
-		    | '/' >> primary_expr [_val /= _1]
-		    | '%' >> primary_expr [_val %= _1]
-		    |  regex_match_expr[_val = regex_match_(_val, _1)]
-		    |  regex_replace_expr(_val) [_val = _1]
+                      | '/' >> primary_expr [_val /= _1]
+                      | '%' >> primary_expr [_val %= _1]
+                      |  regex_match_expr[_val = regex_match_(_val, _1)]
+                      |  regex_replace_expr(_val) [_val = _1]
                 )
             ;
         
  
         primary_expr = strict_double [_val = _1]
             | int_ [_val = _1]
-	    | lit("true") [_val = true]
-	    | lit("false") [_val = false]
+            | lit("true") [_val = true]
+            | lit("false") [_val = false]
             | '\'' >> ustring [_val = unicode_(_1) ] >> '\''
             | '[' >> attr [_val = construct<attribute>( _1 ) ] >> ']'
             | '(' >> expr [_val = _1 ] >> ')'
             ;
-	
+        
         attr %= +(char_ - ']');
 
         ustring %= lexeme[*(char_-'\'')];
- 	
+        
     }
     
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;

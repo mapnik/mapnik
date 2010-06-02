@@ -35,13 +35,13 @@ using mapnik::guess_type;
 
 struct line_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
 {
-   static boost::python::tuple
-   getinitargs(const line_pattern_symbolizer& l)
-   {
-       std::string filename = path_processor_type::to_string(*l.get_filename());
-       // FIXME : Do we need "type" parameter at all ?  
-       return boost::python::make_tuple(filename, guess_type(filename));
-   }
+    static boost::python::tuple
+    getinitargs(const line_pattern_symbolizer& l)
+    {
+        std::string filename = path_processor_type::to_string(*l.get_filename());
+        // FIXME : Do we need "type" parameter at all ?  
+        return boost::python::make_tuple(filename, guess_type(filename));
+    }
 };
 
 void export_line_pattern_symbolizer()
@@ -49,8 +49,8 @@ void export_line_pattern_symbolizer()
     using namespace boost::python;
     
     class_<line_pattern_symbolizer>("LinePatternSymbolizer",
-				    init<path_expression_ptr>
-				    ("<image file expression>"))
+                                    init<path_expression_ptr>
+                                    ("<image file expression>"))
         //.def_pickle(line_pattern_symbolizer_pickle_suite())
-	;    
+        ;    
 }

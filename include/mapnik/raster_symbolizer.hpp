@@ -31,57 +31,57 @@
 
 namespace mapnik
 {
-    struct MAPNIK_DECL raster_symbolizer {
-        explicit raster_symbolizer()
-            : mode_("normal"),
-              scaling_("fast"),
-              opacity_(1.0),
-              colorizer_() {}
+struct MAPNIK_DECL raster_symbolizer {
+    explicit raster_symbolizer()
+        : mode_("normal"),
+        scaling_("fast"),
+        opacity_(1.0),
+        colorizer_() {}
 
-        raster_symbolizer(const raster_symbolizer &rs)
-            : mode_(rs.get_mode()),
-              scaling_(rs.get_scaling()),
-              opacity_(rs.get_opacity()),
-              colorizer_(rs.colorizer_) {}
+    raster_symbolizer(const raster_symbolizer &rs)
+        : mode_(rs.get_mode()),
+        scaling_(rs.get_scaling()),
+        opacity_(rs.get_opacity()),
+        colorizer_(rs.colorizer_) {}
 
-        std::string const& get_mode() const
-        {
-            return mode_;
-        }
-        void set_mode(std::string const& mode)
-        {
-            mode_ = mode;
-        }
-        std::string const& get_scaling() const
-        {
-            return scaling_;
-        }
-        void set_scaling(std::string const& scaling)
-        {
-            scaling_ = scaling;
-        }
-        void set_opacity(float opacity)
-        {
-            opacity_ = opacity;
-        }
-        float get_opacity() const
-        {
-            return opacity_;
-        }
-        raster_colorizer_ptr get_colorizer() const
-        {
-           return colorizer_;
-        }
-        void set_colorizer(raster_colorizer_ptr const& colorizer)
-        {
-            colorizer_ = colorizer;
-        }
-    private:
-        std::string mode_;
-        std::string scaling_;
-        float opacity_;
-        raster_colorizer_ptr colorizer_;
-    };
+    std::string const& get_mode() const
+    {
+        return mode_;
+    }
+    void set_mode(std::string const& mode)
+    {
+        mode_ = mode;
+    }
+    std::string const& get_scaling() const
+    {
+        return scaling_;
+    }
+    void set_scaling(std::string const& scaling)
+    {
+        scaling_ = scaling;
+    }
+    void set_opacity(float opacity)
+    {
+        opacity_ = opacity;
+    }
+    float get_opacity() const
+    {
+        return opacity_;
+    }
+    raster_colorizer_ptr get_colorizer() const
+    {
+        return colorizer_;
+    }
+    void set_colorizer(raster_colorizer_ptr const& colorizer)
+    {
+        colorizer_ = colorizer;
+    }
+private:
+    std::string mode_;
+    std::string scaling_;
+    float opacity_;
+    raster_colorizer_ptr colorizer_;
+};
 }
 
 #endif //RASTER_SYMBOLIZER_HPP

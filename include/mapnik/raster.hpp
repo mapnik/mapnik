@@ -27,14 +27,14 @@
 #include <mapnik/graphics.hpp>
 
 namespace mapnik {
-    struct raster
-    {
-        box2d<double> ext_;
-        image_data_32 data_;
-        raster(box2d<double> const& ext,image_data_32& data)
-            : ext_(ext),
-              data_(data) {}
-    };
+struct raster
+{
+    box2d<double> ext_;
+    image_data_32 data_;
+    raster(box2d<double> const& ext,image_data_32& data)
+        : ext_(ext),
+          data_(data) {}
+};
 }
 
 #endif //RASTER_HPP

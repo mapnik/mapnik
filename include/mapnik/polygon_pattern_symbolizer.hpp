@@ -30,9 +30,9 @@
 namespace mapnik
 {
 struct MAPNIK_DECL polygon_pattern_symbolizer :
-	public symbolizer_with_image
+        public symbolizer_with_image
 {
-	
+        
     polygon_pattern_symbolizer(path_expression_ptr file);
     polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs);
 };

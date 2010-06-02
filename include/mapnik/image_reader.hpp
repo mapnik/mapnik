@@ -39,13 +39,13 @@ private:
     std::string message_;
 public:
     image_reader_exception(const std::string& message) 
-	: message_(message) {}
+        : message_(message) {}
 
     ~image_reader_exception() throw() {}
 
     virtual const char* what() const throw()
     {
-	return message_.c_str();
+        return message_.c_str();
     }
 };
 

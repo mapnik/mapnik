@@ -33,71 +33,71 @@
 
 namespace mapnik
 {
-   typedef boost::variant<int,double,std::string> value_holder;
-   typedef std::pair<const std::string, value_holder> parameter;
-   typedef std::map<const std::string, value_holder> param_map;
+typedef boost::variant<int,double,std::string> value_holder;
+typedef std::pair<const std::string, value_holder> parameter;
+typedef std::map<const std::string, value_holder> param_map;
    
-   template <typename T>
-   struct value_extractor_visitor : public boost::static_visitor<>
-   {
-         value_extractor_visitor(boost::optional<T> & var)
-            :var_(var) {}
+template <typename T>
+struct value_extractor_visitor : public boost::static_visitor<>
+{
+    value_extractor_visitor(boost::optional<T> & var)
+        :var_(var) {}
          
-         void operator () (T val) const
-         {
-            var_ = val;
-         }
+    void operator () (T val) const
+    {
+        var_ = val;
+    }
          
-         template <typename T1>
-         void operator () (T1 val) const 
-         {
-            try 
-            {
-               var_ = boost::lexical_cast<T>(val);
-            }
-            catch (boost::bad_lexical_cast & ) {}
-         }
+    template <typename T1>
+    void operator () (T1 val) const 
+    {
+        try 
+        {
+            var_ = boost::lexical_cast<T>(val);
+        }
+        catch (boost::bad_lexical_cast & ) {}
+    }
          
-         boost::optional<T> & var_;
-   };
+    boost::optional<T> & var_;
+};
    
   
-   class parameters : public param_map
-   {
-         template <typename T> 
-         struct converter
-         {
-               typedef boost::optional<T> return_type;       
-               static return_type extract(parameters const& params,
-                                          std::string const& name, 
-                                          boost::optional<T> const& default_value)
-               {
-                  boost::optional<T> result(default_value);
-                  parameters::const_iterator itr = params.find(name);
-                  if (itr != params.end())
-                  {
-                     boost::apply_visitor(value_extractor_visitor<T>(result),itr->second);
-                  }
-                  return result;
-               }
-         };
+class parameters : public param_map
+{
+    template <typename T> 
+    struct converter
+    {
+        typedef boost::optional<T> return_type;       
+        static return_type extract(parameters const& params,
+                                   std::string const& name, 
+                                   boost::optional<T> const& default_value)
+        {
+            boost::optional<T> result(default_value);
+            parameters::const_iterator itr = params.find(name);
+            if (itr != params.end())
+            {
+                boost::apply_visitor(value_extractor_visitor<T>(result),itr->second);
+            }
+            return result;
+        }
+    };
          
-      public:
+public:
          
-         parameters() {}
+    parameters() {}
          
-         template <typename T>
-         boost::optional<T> get(std::string const& key) const
-         {
-            return converter<T>::extract(*this,key, boost::none);
-         }
+    template <typename T>
+    boost::optional<T> get(std::string const& key) const
+    {
+        return converter<T>::extract(*this,key, boost::none);
+    }
          
-         template <typename T>
-         boost::optional<T> get(std::string const& key, T const& default_value) const
-         {
-            return converter<T>::extract(*this,key,boost::optional<T>(default_value));
-         }
-   };
+    template <typename T>
+    boost::optional<T> get(std::string const& key, T const& default_value) const
+    {
+        return converter<T>::extract(*this,key,boost::optional<T>(default_value));
+    }
+};
 }
 
 #endif //PARAMS_HPP

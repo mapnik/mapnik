@@ -27,16 +27,16 @@
 
 namespace mapnik { namespace svg {
 
-template <typename PathType>
-bool parse_path(std::string const& wkt, PathType & p);
+    template <typename PathType>
+    bool parse_path(std::string const& wkt, PathType & p);
 
-template <typename PathType>
-bool parse_points(std::string const& wkt, PathType & p);
+    template <typename PathType>
+    bool parse_points(std::string const& wkt, PathType & p);
 
-template <typename TransformType>
-bool parse_transform(std::string const& wkt, TransformType & tr);
+    template <typename TransformType>
+    bool parse_transform(std::string const& wkt, TransformType & tr);
 
-}}
+    }}
 
 
 #endif // SVG_PATH_PARSER_HPP

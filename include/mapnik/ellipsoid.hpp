@@ -23,9 +23,9 @@
 //$Id$
 
 namespace mapnik {
-    struct ellipsoid
-    {
-        double a; // semi mayor axis  
-        double b; // semi minor axis
-    };
+struct ellipsoid
+{
+    double a; // semi mayor axis  
+    double b; // semi minor axis
+};
 }

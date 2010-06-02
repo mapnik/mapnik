@@ -57,7 +57,7 @@ public:
     template <typename T>
     void operator () ( T const& sym )
     {
-	syms_.append(sym);
+        syms_.append(sym);
     }
     
 private:
@@ -74,7 +74,7 @@ public:
     template <typename T>
     void operator () ( T const& sym )
     {
-	r_.append(sym);
+        r_.append(sym);
     }
 private:
     rule_type& r_;
@@ -86,7 +86,7 @@ struct rule_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getinitargs(const rule_type& r)
     {
-	return boost::python::make_tuple(r.get_name(),r.get_title(),r.get_min_scale(),r.get_max_scale());
+        return boost::python::make_tuple(r.get_name(),r.get_title(),r.get_min_scale(),r.get_max_scale());
     }
 
     static  boost::python::tuple
@@ -94,14 +94,14 @@ struct rule_pickle_suite : boost::python::pickle_suite
     {
         boost::python::list syms;
         
-	rule_type::symbolizers::const_iterator begin = r.get_symbolizers().begin();
-	rule_type::symbolizers::const_iterator end = r.get_symbolizers().end();        
+        rule_type::symbolizers::const_iterator begin = r.get_symbolizers().begin();
+        rule_type::symbolizers::const_iterator end = r.get_symbolizers().end();        
         pickle_symbolizer serializer( syms );
         std::for_each( begin, end , boost::apply_visitor( serializer ));
         
-	// We serialize filter expressions AST as strings
+        // We serialize filter expressions AST as strings
         std::string filter_expr = to_expression_string(*r.get_filter());
-	
+        
         return boost::python::make_tuple(r.get_abstract(),filter_expr,r.has_else_filter(),syms);
     }
 
@@ -112,9 +112,9 @@ struct rule_pickle_suite : boost::python::pickle_suite
         if (len(state) != 4)
         {
             PyErr_SetObject(PyExc_ValueError,
-			    ("expected 4-item tuple in call to __setstate__; got %s"
-			     % state).ptr()
-		);
+                            ("expected 4-item tuple in call to __setstate__; got %s"
+                             % state).ptr()
+                );
             throw_error_already_set();
         }
                 
@@ -165,8 +165,8 @@ void export_rule()
     implicitly_convertible<glyph_symbolizer,symbolizer>();
     
     class_<rule_type::symbolizers>("Symbolizers",init<>("TODO"))
-    	.def(vector_indexing_suite<rule_type::symbolizers>())
-    	;
+        .def(vector_indexing_suite<rule_type::symbolizers>())
+        ;
     
     class_<rule_type>("Rule",init<>("default constructor"))
         .def(init<std::string const&,

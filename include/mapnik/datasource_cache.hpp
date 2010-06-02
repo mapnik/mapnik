@@ -36,23 +36,23 @@
 #include <map>
 
 namespace mapnik {
-    class MAPNIK_DECL datasource_cache : 
+class MAPNIK_DECL datasource_cache : 
         public singleton <datasource_cache,CreateStatic>
-    {
-        friend class CreateStatic<datasource_cache>;
-    private:
-        datasource_cache();
-        ~datasource_cache();
-        datasource_cache(const datasource_cache&);
-        datasource_cache& operator=(const datasource_cache&);
-        static std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
-        static bool registered_;
-        static bool insert(const std::string&  name,const lt_dlhandle module);
-    public:
-        static std::vector<std::string> plugin_names ();
-        static void register_datasources(const std::string& path);
-        static boost::shared_ptr<datasource> create(parameters const& params);
-    };
+{
+    friend class CreateStatic<datasource_cache>;
+private:
+    datasource_cache();
+    ~datasource_cache();
+    datasource_cache(const datasource_cache&);
+    datasource_cache& operator=(const datasource_cache&);
+    static std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
+    static bool registered_;
+    static bool insert(const std::string&  name,const lt_dlhandle module);
+public:
+    static std::vector<std::string> plugin_names ();
+    static void register_datasources(const std::string& path);
+    static boost::shared_ptr<datasource> create(parameters const& params);
+};
 }
 
 #endif   //DATASOURCE_CACHE_HPP

@@ -42,130 +42,130 @@
 namespace mapnik
 {
 #ifdef MAPNIK_THREADSAFE
-    using boost::mutex;
+using boost::mutex;
 #endif
    
-    template <typename T>
-    class CreateUsingNew
+template <typename T>
+class CreateUsingNew
+{
+public:
+    static T* create()
     {
-    public:
-        static T* create()
-        {
-            return new T;
-        }
-        static void destroy(T* obj)
-        {
-            delete obj;
-        }
+        return new T;
+    }
+    static void destroy(T* obj)
+    {
+        delete obj;
+    }
+};
+
+template <typename T>
+class CreateStatic
+{
+private:
+    union MaxAlign
+    {
+        char t_[sizeof(T)];
+        short int shortInt_;
+        int int_;
+        long int longInt_;
+        float float_;
+        double double_;
+        long double longDouble_;
+        struct Test;
+        int Test::* pMember_;
+        int (Test::*pMemberFn_)(int);
     };
 
-    template <typename T>
-    class CreateStatic
-    {
-    private:
-        union MaxAlign
-        {
-            char t_[sizeof(T)];
-            short int shortInt_;
-            int int_;
-            long int longInt_;
-            float float_;
-            double double_;
-            long double longDouble_;
-            struct Test;
-            int Test::* pMember_;
-            int (Test::*pMemberFn_)(int);
-        };
-
-    public:
+public:
         
-        static T* create()
-        {
-            static MaxAlign staticMemory;
-            return new(&staticMemory) T;
-        }
+    static T* create()
+    {
+        static MaxAlign staticMemory;
+        return new(&staticMemory) T;
+    }
 #ifdef __SUNPRO_CC        
-        // Sun C++ Compiler doesn't handle `volatile` keyword same as GCC.
-        static void destroy(T* obj)
+    // Sun C++ Compiler doesn't handle `volatile` keyword same as GCC.
+    static void destroy(T* obj)
 #else
         static void destroy(volatile T* obj)
 #endif
-        {
-            obj->~T();
-        }
-    };
+    {
+        obj->~T();
+    }
+};
     
-    template <typename T,
-              template <typename T> class CreatePolicy=CreateStatic> class singleton
-              {
+template <typename T,
+          template <typename T> class CreatePolicy=CreateStatic> class singleton
+{
 #ifdef __SUNPRO_CC
-		/* Sun's C++ compiler will issue the following errors if CreatePolicy<T> is used:
-		   Error: A class template name was expected instead of mapnik::CreatePolicy<mapnik::T>
-		   Error: A "friend" declaration must specify a class or function.
-		 */
-                  friend class CreatePolicy;
+    /* Sun's C++ compiler will issue the following errors if CreatePolicy<T> is used:
+       Error: A class template name was expected instead of mapnik::CreatePolicy<mapnik::T>
+       Error: A "friend" declaration must specify a class or function.
+    */
+    friend class CreatePolicy;
 #else
-		  friend class CreatePolicy<T>;
+    friend class CreatePolicy<T>;
 #endif
-                  static T* pInstance_;
-                  static bool destroyed_;
-                  singleton(const singleton &rhs);
-                  singleton& operator=(const singleton&);
-                  static void onDeadReference()
-                  {
-                      throw std::runtime_error("dead reference!");
-                  }
+    static T* pInstance_;
+    static bool destroyed_;
+    singleton(const singleton &rhs);
+    singleton& operator=(const singleton&);
+    static void onDeadReference()
+    {
+        throw std::runtime_error("dead reference!");
+    }
                   
-                  static void DestroySingleton()
-                  {
-                      CreatePolicy<T>::destroy(pInstance_);
-                      pInstance_ = 0;
-                      destroyed_=true;
+    static void DestroySingleton()
+    {
+        CreatePolicy<T>::destroy(pInstance_);
+        pInstance_ = 0;
+        destroyed_=true;
 #ifdef MAPNIK_DEBUG
-                      std::clog << " destroyed singleton \n";
+        std::clog << " destroyed singleton \n";
 #endif
-                  }
+    }
                   
-                 protected:
+protected:
 #ifdef MAPNIK_THREADSAFE
-                    static mutex mutex_;
+    static mutex mutex_;
 #endif
-                    singleton() {}
-                                  public:
-                  static  T* instance()
-                  {
-                     if (!pInstance_)
-                     {
+    singleton() {}
+public:
+    static  T* instance()
+    {
+        if (!pInstance_)
+        {
 #ifdef MAPNIK_THREADSAFE
-                        mutex::scoped_lock lock(mutex_);
+            mutex::scoped_lock lock(mutex_);
 #endif                        
-                        if (!pInstance_)
-                        {
+            if (!pInstance_)
+            {
                            
-                           if (destroyed_)
-                           {
-                              onDeadReference();
-                           }
-                           else
-                           {
-                                  pInstance_=CreatePolicy<T>::create();
-                                  // register destruction
-                                  std::atexit(&DestroySingleton);
-                           }
-                        }
-                     }
-                     return pInstance_;
-                  }
-              };
+                if (destroyed_)
+                {
+                    onDeadReference();
+                }
+                else
+                {
+                    pInstance_=CreatePolicy<T>::create();
+                    // register destruction
+                    std::atexit(&DestroySingleton);
+                }
+            }
+        }
+        return pInstance_;
+    }
+};
 #ifdef MAPNIK_THREADSAFE
-    template <typename T,
-              template <typename T> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
+template <typename T,
+          template <typename T> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
 #endif
     
-    template <typename T,
-              template <typename T> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
-    template <typename T,
-              template <typename T> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
+template <typename T,
+          template <typename T> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
+template <typename T,
+          template <typename T> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
    
 }
 

@@ -36,7 +36,7 @@ typedef boost::array<double,6> transform_type;
 
 struct MAPNIK_DECL point_symbolizer : 
         public symbolizer_with_image
-{	
+{       
     explicit point_symbolizer();
     point_symbolizer(path_expression_ptr file);
     point_symbolizer(point_symbolizer const& rhs);

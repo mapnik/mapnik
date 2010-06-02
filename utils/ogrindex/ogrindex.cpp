@@ -72,13 +72,13 @@ int main (int argc,char** argv)
             ("ratio,r",    po::value<double>(), "split ratio (default 0.55)")
             ("ogr_files",  po::value<vector<string> >(), "ogr supported files to index: file1 file2 ...fileN")
             ;
-	
+        
         po::positional_options_description p;
         p.add("ogr_files",-1);
         po::variables_map vm;        
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);
-	
+        
         if (vm.count("version"))
         {
             std::clog<<"version 0.1.0" <<std::endl;

@@ -29,27 +29,27 @@
 
 namespace mapnik
 {
-    struct ellipsoid;
+struct ellipsoid;
     
-    // great-circle distance 
+// great-circle distance 
     
-    class great_circle_distance
-    {
-    public:
-        double operator() (coord2d const& pt0, coord2d const& pt1) const;
-    };
+class great_circle_distance
+{
+public:
+    double operator() (coord2d const& pt0, coord2d const& pt1) const;
+};
     
-    // vincenty distance 
-    /*
-    class vincenty_distance : boost::noncopyble
-    {
-    public:
-        vincenty_distance(ellipsoid const& e);
-        double operator() (coord2d const& pt0, coord2d const& pt1) const;
-    private:
-        ellipsoid & e_;
-    };
-    */
+// vincenty distance 
+/*
+  class vincenty_distance : boost::noncopyble
+  {
+  public:
+  vincenty_distance(ellipsoid const& e);
+  double operator() (coord2d const& pt0, coord2d const& pt1) const;
+  private:
+  ellipsoid & e_;
+  };
+*/
 }
 
 #endif // GEO_UTILS_HPP

@@ -26,61 +26,61 @@ namespace mapnik {
 
 template <typename EnumWrapper>
 class enumeration_ :
-    public boost::python::enum_<typename EnumWrapper::native_type> 
+        public boost::python::enum_<typename EnumWrapper::native_type> 
 {
-        // some short cuts
-        typedef boost::python::enum_<typename EnumWrapper::native_type> base_type;
-        typedef typename EnumWrapper::native_type native_type;
-    public:
-        enumeration_() :
-            base_type( EnumWrapper::get_name().c_str() )
-        {
-            init();
-        }
-        enumeration_(const char * python_alias) :
-            base_type( python_alias )
-        {
-            init();
-        }
-        enumeration_(const char * python_alias, const char * doc) :
+    // some short cuts
+    typedef boost::python::enum_<typename EnumWrapper::native_type> base_type;
+    typedef typename EnumWrapper::native_type native_type;
+public:
+    enumeration_() :
+        base_type( EnumWrapper::get_name().c_str() )
+    {
+        init();
+    }
+    enumeration_(const char * python_alias) :
+        base_type( python_alias )
+    {
+        init();
+    }
+    enumeration_(const char * python_alias, const char * doc) :
 #if BOOST_VERSION >= 103500
-            base_type( python_alias, doc )
+        base_type( python_alias, doc )
 #else
-            // Boost.Python < 1.35.0 doesn't support
-            // docstrings for enums so we ignore it.
-            base_type( python_alias )
+        // Boost.Python < 1.35.0 doesn't support
+        // docstrings for enums so we ignore it.
+        base_type( python_alias )
 #endif
+    {
+        init();
+    }
+
+private:
+    struct converter
+    {
+        static PyObject* convert(EnumWrapper const& v)
         {
-            init();
-        }
+            // Redirect conversion to a static method of our base class's
+            // base class. A free template converter will not work because
+            // the base_type::base typedef is protected.
+            // Lets hope MSVC agrees that this is legal C++
+            using namespace boost::python::converter;
+            return base_type::base::to_python(
+                registered<native_type>::converters.m_class_object
+                ,  static_cast<long>( v ));
 
-    private:
-        struct converter
+        }
+    };
+
+    void init() {
+        boost::python::implicitly_convertible<native_type, EnumWrapper>();
+        boost::python::to_python_converter<EnumWrapper, converter >();
+
+        for (unsigned i = 0; i < EnumWrapper::MAX; ++i)
         {
-            static PyObject* convert(EnumWrapper const& v)
-            {
-                // Redirect conversion to a static method of our base class's
-                // base class. A free template converter will not work because
-                // the base_type::base typedef is protected.
-                // Lets hope MSVC agrees that this is legal C++
-                using namespace boost::python::converter;
-                return base_type::base::to_python(
-                        registered<native_type>::converters.m_class_object
-                        ,  static_cast<long>( v ));
-
-            }
-        };
-
-        void init() {
-            boost::python::implicitly_convertible<native_type, EnumWrapper>();
-            boost::python::to_python_converter<EnumWrapper, converter >();
-
-            for (unsigned i = 0; i < EnumWrapper::MAX; ++i)
-            {
-                // Register the strings allready defined for this enum.
-               base_type::value( EnumWrapper::get_string( i ), native_type( i ) );
-            }
+            // Register the strings allready defined for this enum.
+            base_type::value( EnumWrapper::get_string( i ), native_type( i ) );
         }
+    }
 
 };
 

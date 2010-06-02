@@ -65,13 +65,13 @@ int main (int argc,char** argv)
             ("ratio,r",po::value<double>(),"split ratio (default 0.55)")
             ("shape_files",po::value<vector<string> >(),"shape files to index: file1 file2 ...fileN")
             ;
-	
+        
         po::positional_options_description p;
         p.add("shape_files",-1);
         po::variables_map vm;        
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);
-	
+        
         if (vm.count("version"))
         {
             clog<<"version 0.3.0" <<std::endl;
@@ -91,7 +91,7 @@ int main (int argc,char** argv)
         {
             ratio = vm["ratio"].as<double>();
         }
-	
+        
         if (vm.count("shape_files"))
         {
             shape_files=vm["shape_files"].as< vector<string> >();
@@ -135,25 +135,25 @@ int main (int argc,char** argv)
         int code = shp.read_xdr_integer(); //file_code == 9994
         clog << code << endl;
         shp.skip(5*4); 
-	
+        
         int file_length=shp.read_xdr_integer();
         int version=shp.read_ndr_integer();
         int shape_type=shp.read_ndr_integer();
         box2d<double> extent;
         shp.read_envelope(extent);
-	
-	
+        
+        
         clog << "length=" << file_length << endl;
         clog << "version=" << version << endl;
         clog << "type=" << shape_type << endl;
         clog << "extent:" << extent << endl;
-	  
+          
         int pos=50;
         shp.seek(pos*2);  
         quadtree<int> tree(extent,depth,ratio);
         int count=0;
         while (true) {
-	    
+            
             long offset=shp.pos();
             int record_number=shp.read_xdr_integer();
             int content_length=shp.read_xdr_integer();
@@ -163,14 +163,14 @@ int main (int argc,char** argv)
            
             shp.skip(4);
             //std::clog << "offset= "<< offset << std::endl;
-	        
+                
             box2d<double> item_ext;
             if (shape_type==shape_io::shape_point)
             {
                 double x=shp.read_double();
                 double y=shp.read_double();
                 item_ext=box2d<double>(x,y,x,y);
-	
+        
             }
             else if (shape_type==shape_io::shape_pointm)
             {
@@ -179,7 +179,7 @@ int main (int argc,char** argv)
                 // skip m
                 shp.read_double();
                 item_ext=box2d<double>(x,y,x,y);
-	
+        
             }
             else if (shape_type==shape_io::shape_pointz)
             {
@@ -194,7 +194,7 @@ int main (int argc,char** argv)
                 }
                 item_ext=box2d<double>(x,y,x,y);
             }
-	
+        
             else 
             {   
                 shp.read_envelope(item_ext);

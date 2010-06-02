@@ -60,8 +60,8 @@ PyObject* tostring1( image_32 const& im)
 // encode (png,jpeg)
 PyObject* tostring2(image_32 const & im, std::string const& format)
 {
-   std::string s = save_to_string(im, format);
-   return ::PyString_FromStringAndSize(s.data(),s.size());
+    std::string s = save_to_string(im, format);
+    return ::PyString_FromStringAndSize(s.data(),s.size());
 }
 
 void (*save_to_file1)( mapnik::image_32 const&, std::string const&,std::string const&) = mapnik::save_to_file;
@@ -72,21 +72,21 @@ boost::shared_ptr<image_32> open_from_file(std::string const& filename)
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-	std::auto_ptr<image_reader> reader(get_image_reader(filename,*type));
-	if (reader.get())
-	{
-	    boost::shared_ptr<image_32> image_ptr(new image_32(reader->width(),reader->height()));
-	    reader->read(0,0,image_ptr->data());
-	    return image_ptr;
-	}
-	throw mapnik::image_reader_exception("Failed to load: " + filename);  
+        std::auto_ptr<image_reader> reader(get_image_reader(filename,*type));
+        if (reader.get())
+        {
+            boost::shared_ptr<image_32> image_ptr(new image_32(reader->width(),reader->height()));
+            reader->read(0,0,image_ptr->data());
+            return image_ptr;
+        }
+        throw mapnik::image_reader_exception("Failed to load: " + filename);  
     }
     throw mapnik::image_reader_exception("Unsupported image format:" + filename);
 }
     
 void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float opacity)
 {
-   im.set_rectangle_alpha2(im2.data(),x,y,opacity);
+    im.set_rectangle_alpha2(im2.data(),x,y,opacity);
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -102,23 +102,23 @@ void export_image()
 {
     using namespace boost::python;
     class_<image_32,boost::shared_ptr<image_32> >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
-       .def("width",&image_32::width)
-       .def("height",&image_32::height)
-       .def("view",&image_32::get_view)
-       .add_property("background",make_function
-                     (&image_32::get_background,return_value_policy<copy_const_reference>()),
-                     &image_32::set_background, "The background color of the image.")
-       .def("blend",&blend)
-       .def("tostring",&tostring1)
-       .def("tostring",&tostring2)
-       .def("save", save_to_file1)
-       .def("save", save_to_file2)
-       .def("open",open_from_file)
-       .staticmethod("open")
+        .def("width",&image_32::width)
+        .def("height",&image_32::height)
+        .def("view",&image_32::get_view)
+        .add_property("background",make_function
+                      (&image_32::get_background,return_value_policy<copy_const_reference>()),
+                      &image_32::set_background, "The background color of the image.")
+        .def("blend",&blend)
+        .def("tostring",&tostring1)
+        .def("tostring",&tostring2)
+        .def("save", save_to_file1)
+        .def("save", save_to_file2)
+        .def("open",open_from_file)
+        .staticmethod("open")
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-       .def("from_cairo",&from_cairo)
-       .staticmethod("from_cairo")
+        .def("from_cairo",&from_cairo)
+        .staticmethod("from_cairo")
 #endif
-       ;    
+        ;    
     
 }

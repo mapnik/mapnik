@@ -43,96 +43,96 @@ using mapnik::attribute_descriptor;
 
 namespace  
 {
-    //user-friendly wrapper that uses Python dictionary
-    using namespace boost::python;
-    boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
+//user-friendly wrapper that uses Python dictionary
+using namespace boost::python;
+boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
+{
+    mapnik::parameters params;
+    boost::python::list keys=d.keys();
+    for (int i=0; i<len(keys); ++i)
     {
-        mapnik::parameters params;
-        boost::python::list keys=d.keys();
-        for (int i=0; i<len(keys); ++i)
-        {
-            std::string key = extract<std::string>(keys[i]);
-            object obj = d[key];
-            extract<std::string> ex0(obj);
-            extract<int> ex1(obj);
-            extract<double> ex2(obj);
+        std::string key = extract<std::string>(keys[i]);
+        object obj = d[key];
+        extract<std::string> ex0(obj);
+        extract<int> ex1(obj);
+        extract<double> ex2(obj);
             
-            if (ex0.check())
-            {
-               params[key] = ex0();
-            }
-            else if (ex1.check())
-            {
-               params[key] = ex1();
-            }
-            else if (ex2.check())
-            {
-               params[key] = ex2();
-            }
+        if (ex0.check())
+        {
+            params[key] = ex0();
         }
+        else if (ex1.check())
+        {
+            params[key] = ex1();
+        }
+        else if (ex2.check())
+        {
+            params[key] = ex2();
+        }
+    }
         
-        return mapnik::datasource_cache::create(params);
-    }
+    return mapnik::datasource_cache::create(params);
+}
     
-    std::string describe(boost::shared_ptr<mapnik::datasource> const& ds)
+std::string describe(boost::shared_ptr<mapnik::datasource> const& ds)
+{
+    std::stringstream ss;
+    if (ds)
     {
-        std::stringstream ss;
-        if (ds)
-        {
-            ss << ds->get_descriptor() << "\n";
-        }
-        else
-        {
-            ss << "Null\n";
-        }
-        return ss.str();
+        ss << ds->get_descriptor() << "\n";
     }
+    else
+    {
+        ss << "Null\n";
+    }
+    return ss.str();
+}
     
-    std::string encoding(boost::shared_ptr<mapnik::datasource> const& ds)
-    {
-            layer_descriptor ld = ds->get_descriptor();
-            return ld.get_encoding();
-    }
+std::string encoding(boost::shared_ptr<mapnik::datasource> const& ds)
+{
+    layer_descriptor ld = ds->get_descriptor();
+    return ld.get_encoding();
+}
 
-    std::string name(boost::shared_ptr<mapnik::datasource> const& ds)
-    {
-            layer_descriptor ld = ds->get_descriptor();
-            return ld.get_name();
-    }
+std::string name(boost::shared_ptr<mapnik::datasource> const& ds)
+{
+    layer_descriptor ld = ds->get_descriptor();
+    return ld.get_name();
+}
 
-    boost::python::list fields(boost::shared_ptr<mapnik::datasource> const& ds)
+boost::python::list fields(boost::shared_ptr<mapnik::datasource> const& ds)
+{
+    boost::python::list flds;
+    if (ds)
     {
-        boost::python::list flds;
-        if (ds)
+        layer_descriptor ld = ds->get_descriptor();
+        std::vector<attribute_descriptor> const& desc_ar = ld.get_descriptors();
+        std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
+        std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
+        for (; it != end; ++it)
         {
-            layer_descriptor ld = ds->get_descriptor();
-            std::vector<attribute_descriptor> const& desc_ar = ld.get_descriptors();
-            std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
-            std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
-            for (; it != end; ++it)
-            {
-               flds.append(it->get_name());
-            }
+            flds.append(it->get_name());
         }
-        return flds;
     }
-    boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
+    return flds;
+}
+boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
+{
+    boost::python::list fld_types;
+    if (ds)
     {
-        boost::python::list fld_types;
-        if (ds)
-        {
-            layer_descriptor ld = ds->get_descriptor();
-            std::vector<attribute_descriptor> const& desc_ar = ld.get_descriptors();
-            std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
-            std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
-            for (; it != end; ++it)
-            {  
-               unsigned type = it->get_type();
-               fld_types.append(type);
-            }
+        layer_descriptor ld = ds->get_descriptor();
+        std::vector<attribute_descriptor> const& desc_ar = ld.get_descriptors();
+        std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
+        std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
+        for (; it != end; ++it)
+        {  
+            unsigned type = it->get_type();
+            fld_types.append(type);
         }
-        return fld_types;
-    }}
+    }
+    return fld_types;
+}}
 
 void export_datasource()
 {

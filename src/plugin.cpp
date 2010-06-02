@@ -28,25 +28,25 @@
 namespace mapnik
 {
 
-    PluginInfo::PluginInfo (const std::string& name,const lt_dlhandle module)
-        :name_(name),module_(module) {}
+PluginInfo::PluginInfo (const std::string& name,const lt_dlhandle module)
+    :name_(name),module_(module) {}
 
-    PluginInfo::~PluginInfo()
+PluginInfo::~PluginInfo()
+{
+    if (module_)
     {
-        if (module_)
-        {
-            lt_dlclose(module_),module_=0;
-        }
+        lt_dlclose(module_),module_=0;
     }
+}
 
-    const std::string& PluginInfo::name() const
-    {
-        return name_;
-    }
+const std::string& PluginInfo::name() const
+{
+    return name_;
+}
 
-    lt_dlhandle PluginInfo::handle() const
-    {
-        return module_;
-    }
+lt_dlhandle PluginInfo::handle() const
+{
+    return module_;
+}
 
 }

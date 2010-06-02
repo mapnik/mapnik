@@ -29,25 +29,25 @@
 
 namespace mapnik 
 {
-    struct MAPNIK_DECL gamma
+struct MAPNIK_DECL gamma
+{
+    unsigned char g2l[256];
+    unsigned char l2g[256];
+    gamma(double gamma=2.0)
     {
-        unsigned char g2l[256];
-        unsigned char l2g[256];
-        gamma(double gamma=2.0)
+        int result;
+        for (int i=0;i< 256;i++)
         {
-            int result;
-            for (int i=0;i< 256;i++)
-            {
-               result=(int)(std::pow(i/255.0,gamma) * 255.0 + 0.5);
-               g2l[i]=(unsigned char)result;
-            }
-            for (int i = 0; i < 256; i++)
-            {
-               result = (int)(std::pow(i/255.0, 1/gamma) * 255.0 + 0.5);
-               l2g[i] = (unsigned char)result;
-            }
+            result=(int)(std::pow(i/255.0,gamma) * 255.0 + 0.5);
+            g2l[i]=(unsigned char)result;
         }
-    };
+        for (int i = 0; i < 256; i++)
+        {
+            result = (int)(std::pow(i/255.0, 1/gamma) * 255.0 + 0.5);
+            l2g[i] = (unsigned char)result;
+        }
+    }
+};
 }
 
 #endif  //GAMMA_HPP

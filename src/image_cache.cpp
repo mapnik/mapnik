@@ -54,36 +54,36 @@ boost::optional<image_ptr> image_cache::find(std::string const& uri, bool update
     iterator_type itr = cache_.find(uri);
     if (itr != cache_.end())
     {
-	result.reset(itr->second);
-	return result;
+        result.reset(itr->second);
+        return result;
     }
 
     // we can't find image in cache, lets try to load it from filesystem
     boost::filesystem::path path(uri);
     if (exists(path))
     {
-	try 
-	{
-	    std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(uri));
-	    if (reader.get())
-	    {
-		unsigned width = reader->width();
-		unsigned height = reader->height();
-		BOOST_ASSERT(width > 0 && height > 0);
-		mapnik::image_ptr image(new mapnik::image_data_32(width,height));
-		reader->read(0,0,*image);
-		result.reset(image);
-		if (update_cache)
-		{
-		    cache_.insert(std::make_pair(uri,image));
-		}
-	    }
-	}
-	
-	catch (...)
-	{
-	    std::cerr << "Exception caught while loading image: " << uri << std::endl;
-	}
+        try 
+        {
+            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(uri));
+            if (reader.get())
+            {
+                unsigned width = reader->width();
+                unsigned height = reader->height();
+                BOOST_ASSERT(width > 0 && height > 0);
+                mapnik::image_ptr image(new mapnik::image_data_32(width,height));
+                reader->read(0,0,*image);
+                result.reset(image);
+                if (update_cache)
+                {
+                    cache_.insert(std::make_pair(uri,image));
+                }
+            }
+        }
+        
+        catch (...)
+        {
+            std::cerr << "Exception caught while loading image: " << uri << std::endl;
+        }
     }
     else
     {
@@ -93,7 +93,7 @@ boost::optional<image_ptr> image_cache::find(std::string const& uri, bool update
 }
 
 #ifdef MAPNIK_THREADSAFE
-   boost::mutex image_cache::mutex_;
+boost::mutex image_cache::mutex_;
 #endif
 
 }

@@ -32,141 +32,141 @@
 
 namespace mapnik
 {
-   struct character_info
-   { 
-         int character;
-         double width, height;
+struct character_info
+{ 
+    int character;
+    double width, height;
       
-         character_info() : character(0), width(0), height(0) {}
-         character_info(int c_, double width_, double height_) : character(c_), width(width_), height(height_) {}
-         ~character_info() {}
+    character_info() : character(0), width(0), height(0) {}
+    character_info(int c_, double width_, double height_) : character(c_), width(width_), height(height_) {}
+    ~character_info() {}
         
-         character_info(const character_info &ci)
-            : character(ci.character), width(ci.width), height(ci.height)
-         {
-         }
+    character_info(const character_info &ci)
+        : character(ci.character), width(ci.width), height(ci.height)
+    {
+    }
           
-   };
+};
     
-   class string_info : private boost::noncopyable
-   {
-      protected:
-         typedef boost::ptr_vector<character_info> characters_t;
-         characters_t characters_;
-         UnicodeString const& text_;
-         double width_;
-         double height_;
-      public:
-         string_info(UnicodeString const& text)
-            : text_(text),
-              width_(0),
-              height_(0) {}
+class string_info : private boost::noncopyable
+{
+protected:
+    typedef boost::ptr_vector<character_info> characters_t;
+    characters_t characters_;
+    UnicodeString const& text_;
+    double width_;
+    double height_;
+public:
+    string_info(UnicodeString const& text)
+        : text_(text),
+          width_(0),
+          height_(0) {}
 
-         void add_info(int c, double width, double height)
-         {
-            characters_.push_back(new character_info(c, width, height));
-         }
+    void add_info(int c, double width, double height)
+    {
+        characters_.push_back(new character_info(c, width, height));
+    }
       
-         unsigned num_characters() const
-         {
-            return characters_.size();
-         }
+    unsigned num_characters() const
+    {
+        return characters_.size();
+    }
       
-         character_info at(unsigned i) const
-         {
-            return characters_[i];
-         }
+    character_info at(unsigned i) const
+    {
+        return characters_[i];
+    }
       
-         character_info operator[](unsigned i) const
-         {
-            return at(i);
-         }
+    character_info operator[](unsigned i) const
+    {
+        return at(i);
+    }
       
-         void set_dimensions(double width, double height)
-         {
-            width_ = width;
-            height_ = height;
-         }
+    void set_dimensions(double width, double height)
+    {
+        width_ = width;
+        height_ = height;
+    }
       
-         std::pair<double, double> get_dimensions() const
-         {
-            return std::pair<double, double>(width_, height_);
-         }
+    std::pair<double, double> get_dimensions() const
+    {
+        return std::pair<double, double>(width_, height_);
+    }
 
-         UnicodeString const&  get_string() const 
-         {
-           return text_;
-         }
-   };
+    UnicodeString const&  get_string() const 
+    {
+        return text_;
+    }
+};
     
-   struct text_path : boost::noncopyable
-   {
-         struct character_node
-         {
-               int c;
-               double x, y, angle;
+struct text_path : boost::noncopyable
+{
+    struct character_node
+    {
+        int c;
+        double x, y, angle;
                
-               character_node(int c_, double x_, double y_, double angle_) 
-                  : c(c_), x(x_), y(y_), angle(angle_) {}
-               ~character_node() {}
+        character_node(int c_, double x_, double y_, double angle_) 
+            : c(c_), x(x_), y(y_), angle(angle_) {}
+        ~character_node() {}
                
-               void vertex(int *c_, double *x_, double *y_, double *angle_)
-               {
-                  *c_ = c;
-                  *x_ = x;
-                  *y_ = y;
-                  *angle_ = angle;
-               }
-         };
+        void vertex(int *c_, double *x_, double *y_, double *angle_)
+        {
+            *c_ = c;
+            *x_ = x;
+            *y_ = y;
+            *angle_ = angle;
+        }
+    };
          
-         typedef std::vector<character_node> character_nodes_t;
-         double starting_x;
-         double starting_y;
-         character_nodes_t nodes_;
-         int itr_;
+    typedef std::vector<character_node> character_nodes_t;
+    double starting_x;
+    double starting_y;
+    character_nodes_t nodes_;
+    int itr_;
           
-         std::pair<unsigned,unsigned> string_dimensions;
+    std::pair<unsigned,unsigned> string_dimensions;
         
-         text_path() 
-            : starting_x(0),
-              starting_y(0),
-              itr_(0) {} 
+    text_path() 
+        : starting_x(0),
+          starting_y(0),
+          itr_(0) {} 
          
-         //text_path(text_path const& other) : 
-         //  itr_(0),
-         //  nodes_(other.nodes_),
-         //  string_dimensions(other.string_dimensions)
-         //{}
+    //text_path(text_path const& other) : 
+    //  itr_(0),
+    //  nodes_(other.nodes_),
+    //  string_dimensions(other.string_dimensions)
+    //{}
          
-         ~text_path() {}
+    ~text_path() {}
           
-         void add_node(int c, double x, double y, double angle)
-         {
-            nodes_.push_back(character_node(c, x, y, angle));
-         }
+    void add_node(int c, double x, double y, double angle)
+    {
+        nodes_.push_back(character_node(c, x, y, angle));
+    }
         
-         void vertex(int *c, double *x, double *y, double *angle)
-         {
-            nodes_[itr_++].vertex(c, x, y, angle);
-         }
+    void vertex(int *c, double *x, double *y, double *angle)
+    {
+        nodes_[itr_++].vertex(c, x, y, angle);
+    }
          
-         void rewind()
-         {
-            itr_ = 0;
-         }
+    void rewind()
+    {
+        itr_ = 0;
+    }
          
-         int num_nodes() const
-         {
-            return nodes_.size();
-         }
+    int num_nodes() const
+    {
+        return nodes_.size();
+    }
          
-         void clear()
-         {
-            nodes_.clear();
-         }
-   };
+    void clear()
+    {
+        nodes_.clear();
+    }
+};
 
-   typedef boost::shared_ptr<text_path> text_path_ptr;
+typedef boost::shared_ptr<text_path> text_path_ptr;
 }
 
 #endif

@@ -32,34 +32,34 @@ using mapnik::color_bands;
 using mapnik::color;
 
 namespace {
-   void append_band1(raster_colorizer_ptr & rc, color_band b)
-   {
-      rc->append_band(b);
-   }
-   void append_band2(raster_colorizer_ptr & rc, color_band b, unsigned m)
-   {
-      rc->append_band(b, m);
-   }
-   void append_band3(raster_colorizer_ptr & rc, float v, color c)
-   {
-      rc->append_band(v, c);
-   }
-   void append_band4(raster_colorizer_ptr & rc, float v, color c, unsigned m)
-   {
-      rc->append_band(v, c, m);
-   }
-   void append_band5(raster_colorizer_ptr & rc, float v, float vm, color c, unsigned m)
-   {
-      rc->append_band(v, vm, c, m);
-   }
-   void append_band6(raster_colorizer_ptr & rc, float v, float vm, color c)
-   {
-      rc->append_band(v, vm, c);
-   }
-   color_bands const& get_color_bands(raster_colorizer_ptr & rc)
-   {
-      return rc->get_color_bands();
-   }
+void append_band1(raster_colorizer_ptr & rc, color_band b)
+{
+    rc->append_band(b);
+}
+void append_band2(raster_colorizer_ptr & rc, color_band b, unsigned m)
+{
+    rc->append_band(b, m);
+}
+void append_band3(raster_colorizer_ptr & rc, float v, color c)
+{
+    rc->append_band(v, c);
+}
+void append_band4(raster_colorizer_ptr & rc, float v, color c, unsigned m)
+{
+    rc->append_band(v, c, m);
+}
+void append_band5(raster_colorizer_ptr & rc, float v, float vm, color c, unsigned m)
+{
+    rc->append_band(v, vm, c, m);
+}
+void append_band6(raster_colorizer_ptr & rc, float v, float vm, color c)
+{
+    rc->append_band(v, vm, c);
+}
+color_bands const& get_color_bands(raster_colorizer_ptr & rc)
+{
+    return rc->get_color_bands();
+}
 }
 
 void export_raster_colorizer()
@@ -67,34 +67,34 @@ void export_raster_colorizer()
     using namespace boost::python;
 
     class_<raster_colorizer,raster_colorizer_ptr>("RasterColorizer", init<>("Deafult ctor."))
-				    
-    .add_property("bands",make_function
-                  (get_color_bands,
-                  return_value_policy<reference_existing_object>()))
-    .def("append_band", append_band1, "TODO: Write docs")
-    .def("append_band", append_band2, "TODO: Write docs")
-    .def("append_band", append_band3, "TODO: Write docs")
-    .def("append_band", append_band4, "TODO: Write docs")
-    .def("append_band", append_band5, "TODO: Write docs")
-    .def("append_band", append_band6, "TODO: Write docs")
-    .def("get_color", &raster_colorizer::get_color, "TODO: Write docs")
-	;    
+                                    
+        .add_property("bands",make_function
+                      (get_color_bands,
+                       return_value_policy<reference_existing_object>()))
+        .def("append_band", append_band1, "TODO: Write docs")
+        .def("append_band", append_band2, "TODO: Write docs")
+        .def("append_band", append_band3, "TODO: Write docs")
+        .def("append_band", append_band4, "TODO: Write docs")
+        .def("append_band", append_band5, "TODO: Write docs")
+        .def("append_band", append_band6, "TODO: Write docs")
+        .def("get_color", &raster_colorizer::get_color, "TODO: Write docs")
+        ;    
 
 
 
     class_<color_bands>("ColorBands",init<>("Default ctor."))
-    	.def(vector_indexing_suite<color_bands>())
-    	;
+        .def(vector_indexing_suite<color_bands>())
+        ;
 
 
     class_<color_band>("ColorBand",
                        init<float,color const&>("Deafult ctor."))
-    .add_property("color", make_function
-                  (&color_band::get_color,
-                   return_value_policy<reference_existing_object>()))
-    .add_property("value", &color_band::get_value)
-    .add_property("max_value", &color_band::get_max_value)
-    .def(self == self)
-    .def("__str__",&color_band::to_string)
-    ;
+        .add_property("color", make_function
+                      (&color_band::get_color,
+                       return_value_policy<reference_existing_object>()))
+        .add_property("value", &color_band::get_value)
+        .add_property("max_value", &color_band::get_max_value)
+        .def(self == self)
+        .def("__str__",&color_band::to_string)
+        ;
 }

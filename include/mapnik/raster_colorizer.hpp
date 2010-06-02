@@ -42,46 +42,46 @@ struct MAPNIK_DECL color_band
     unsigned midpoints_;
     bool is_interpolated_;
     color_band(float value, color c)
-	: value_(value),
-	max_value_(value),
-	color_(c),
-	midpoints_(0),
-	is_interpolated_(false) {}
+        : value_(value),
+        max_value_(value),
+        color_(c),
+        midpoints_(0),
+        is_interpolated_(false) {}
     color_band(float value, float max_value, color c)
-	: value_(value),
-	max_value_(max_value),
-	color_(c),
-	midpoints_(0),
-	is_interpolated_(false) {}
+        : value_(value),
+        max_value_(max_value),
+        color_(c),
+        midpoints_(0),
+        is_interpolated_(false) {}
     const bool is_interpolated() const
     {
-	return is_interpolated_;
+        return is_interpolated_;
     }
     const unsigned get_midpoints() const
     {
-	return midpoints_;
+        return midpoints_;
     }
     const float get_value() const
     {
-	return value_;
+        return value_;
     }
     const float get_max_value() const
     {
-	return max_value_;
+        return max_value_;
     }
     const color& get_color() const
     {
-	return color_;
+        return color_;
     }
     bool operator==(color_band const& other) const
     {
-	return value_ == other.value_ && color_ == other.color_ && max_value_ == other.max_value_;
+        return value_ == other.value_ && color_ == other.color_ && max_value_ == other.max_value_;
     }
     std::string to_string() const
     {
-	std::stringstream ss;
-	ss << color_.to_string() << " " << value_ << " " << max_value_;
-	return ss.str();
+        std::stringstream ss;
+        ss << color_.to_string() << " " << value_ << " " << max_value_;
+        return ss.str();
     }
 };
 
@@ -90,84 +90,84 @@ typedef std::vector<color_band> color_bands;
 struct MAPNIK_DECL raster_colorizer
 {
     explicit raster_colorizer()
-	: colors_() {}
+        : colors_() {}
 
     raster_colorizer(const raster_colorizer &ps)
-	: colors_(ps.colors_) {}
+        : colors_(ps.colors_) {}
 
     raster_colorizer(color_bands &colors)
-	: colors_(colors) {}
+        : colors_(colors) {}
 
     const color_bands& get_color_bands() const
     {
-	return colors_;
+        return colors_;
     }
     void append_band (color_band band)
     {
-	if (colors_.size() > 0 && colors_.back().value_ > band.value_) {
+        if (colors_.size() > 0 && colors_.back().value_ > band.value_) {
 #ifdef MAPNIK_DEBUG
-	    std::clog << "prev.v=" << colors_.back().value_ << ". band.v=" << band.value_ << "\n";
+            std::clog << "prev.v=" << colors_.back().value_ << ". band.v=" << band.value_ << "\n";
 #endif
-	    throw config_error(
-		"Bands must be appended in ascending value order"
-		);
-	}
-	colors_.push_back(band);
-	if (colors_.size() > 0 && colors_.back().value_ == colors_.back().max_value_)
-        colors_.back().max_value_ = band.value_;
+            throw config_error(
+                "Bands must be appended in ascending value order"
+                );
+        }
+        colors_.push_back(band);
+        if (colors_.size() > 0 && colors_.back().value_ == colors_.back().max_value_)
+            colors_.back().max_value_ = band.value_;
     }
     void append_band (color_band band, unsigned midpoints)
     {
-	band.midpoints_ = midpoints;
-	if (colors_.size() > 0 && midpoints > 0) {
-	    color_band lo = colors_.back();
-	    color_band const &hi = band;
-	    int steps = midpoints+1;
-	    float dv = (hi.value_ - lo.value_)/steps;
-	    float da = (float(hi.color_.alpha()) - lo.color_.alpha())/steps;
-	    float dr = (float(hi.color_.red()) - lo.color_.red())/steps;
-	    float dg = (float(hi.color_.green()) - lo.color_.green())/steps;
-	    float db = (float(hi.color_.blue()) - lo.color_.blue())/steps;
+        band.midpoints_ = midpoints;
+        if (colors_.size() > 0 && midpoints > 0) {
+            color_band lo = colors_.back();
+            color_band const &hi = band;
+            int steps = midpoints+1;
+            float dv = (hi.value_ - lo.value_)/steps;
+            float da = (float(hi.color_.alpha()) - lo.color_.alpha())/steps;
+            float dr = (float(hi.color_.red()) - lo.color_.red())/steps;
+            float dg = (float(hi.color_.green()) - lo.color_.green())/steps;
+            float db = (float(hi.color_.blue()) - lo.color_.blue())/steps;
 
 #ifdef MAPNIK_DEBUG
-	    std::clog << "lo.v=" << lo.value_ << ", hi.v=" << hi.value_ << ", dv="<<dv<<"\n";
+            std::clog << "lo.v=" << lo.value_ << ", hi.v=" << hi.value_ << ", dv="<<dv<<"\n";
 #endif
-	    // interpolate intermediate values and colors
-	    int j;
-	    for (j=1; j<steps; j++) {
-		color_band b(
-		    lo.get_value() + dv*j,
-		    color(int(float(lo.color_.red()) + dr*j),
-			  int(float(lo.color_.green()) + dg*j),
-			  int(float(lo.color_.blue()) + db*j),
-			  int(float(lo.color_.alpha()) + da*j)
-			)
-		    );
-		b.is_interpolated_ = true;
-		append_band(b);
-	    }
-	}
-	append_band(band);
+            // interpolate intermediate values and colors
+            int j;
+            for (j=1; j<steps; j++) {
+                color_band b(
+                    lo.get_value() + dv*j,
+                    color(int(float(lo.color_.red()) + dr*j),
+                          int(float(lo.color_.green()) + dg*j),
+                          int(float(lo.color_.blue()) + db*j),
+                          int(float(lo.color_.alpha()) + da*j)
+                        )
+                    );
+                b.is_interpolated_ = true;
+                append_band(b);
+            }
+        }
+        append_band(band);
     }
 
     void append_band (float value, color c)
     {
-	append_band(color_band(value, c));
+        append_band(color_band(value, c));
     }
 
     void append_band (float value, float max_value, color c)
     {
-	append_band(color_band(value, max_value, c));
+        append_band(color_band(value, max_value, c));
     }
 
     void append_band (float value, color c, unsigned midpoints)
     {
-	append_band(color_band(value, c), midpoints);
+        append_band(color_band(value, c), midpoints);
     }
 
     void append_band (float value, float max_value, color c, unsigned midpoints)
     {
-	append_band(color_band(value, max_value, c), midpoints);
+        append_band(color_band(value, max_value, c), midpoints);
     }
 
 
@@ -179,35 +179,35 @@ struct MAPNIK_DECL raster_colorizer
      *   color will only be used if the value matches its value exactly.
      */
     color get_color(float value) const {
-	int pos=-1, last=(int)colors_.size()-1, lo=0, hi=last;
-	while (lo<=hi) {
-	    pos = (lo+hi)/2;
-	    if (colors_[pos].value_<value) {
-		lo = pos+1;
-	    } else if (colors_[pos].value_>value) {
-		hi = pos-1;
-	    } else {
-		lo = pos+1;
-		break;
-	    }
-	}
-	lo--;
-	if ((0 <= lo && lo < last) ||
-	    (lo==last && (colors_[last].value_==value || value<colors_[last].max_value_)))
-	    return colors_[lo].color_;
-	else
-	    return color(0,0,0,0);
+        int pos=-1, last=(int)colors_.size()-1, lo=0, hi=last;
+        while (lo<=hi) {
+            pos = (lo+hi)/2;
+            if (colors_[pos].value_<value) {
+                lo = pos+1;
+            } else if (colors_[pos].value_>value) {
+                hi = pos-1;
+            } else {
+                lo = pos+1;
+                break;
+            }
+        }
+        lo--;
+        if ((0 <= lo && lo < last) ||
+            (lo==last && (colors_[last].value_==value || value<colors_[last].max_value_)))
+            return colors_[lo].color_;
+        else
+            return color(0,0,0,0);
     }
 
     void colorize(raster_ptr const& raster) const 
     {
-	float *rasterData = reinterpret_cast<float*>(raster->data_.getBytes());
-	unsigned *imageData = raster->data_.getData();
-	unsigned i;
-	for (i=0; i<raster->data_.width()*raster->data_.height(); i++)
-	{
-	    imageData[i] = get_color(rasterData[i]).rgba();
-	}
+        float *rasterData = reinterpret_cast<float*>(raster->data_.getBytes());
+        unsigned *imageData = raster->data_.getData();
+        unsigned i;
+        for (i=0; i<raster->data_.width()*raster->data_.height(); i++)
+        {
+            imageData[i] = get_color(rasterData[i]).rgba();
+        }
     }
       
 private:

@@ -32,9 +32,9 @@ using mapnik::rule_type;
 
 struct style_pickle_suite : boost::python::pickle_suite
 {
-   static boost::python::tuple
-   getstate(const feature_type_style& s)
-   {
+    static boost::python::tuple
+    getstate(const feature_type_style& s)
+    {
         boost::python::list rule_list;
 
         rules::const_iterator it = s.get_rules().begin();
@@ -44,19 +44,19 @@ struct style_pickle_suite : boost::python::pickle_suite
             rule_list.append( *it );    
         }
 
-      return boost::python::make_tuple(rule_list);
-   }
+        return boost::python::make_tuple(rule_list);
+    }
 
-   static void
-   setstate (feature_type_style& s, boost::python::tuple state)
-   {
+    static void
+    setstate (feature_type_style& s, boost::python::tuple state)
+    {
         using namespace boost::python;
         if (len(state) != 1)
         {
             PyErr_SetObject(PyExc_ValueError,
-                         ("expected 1-item tuple in call to __setstate__; got %s"
-                          % state).ptr()
-            );
+                            ("expected 1-item tuple in call to __setstate__; got %s"
+                             % state).ptr()
+                );
             throw_error_already_set();
         }
         
@@ -65,7 +65,7 @@ struct style_pickle_suite : boost::python::pickle_suite
         {
             s.add_rule(extract<rule_type>(rules[i]));
         }
-   }
+    }
    
 };
 
@@ -79,7 +79,7 @@ void export_style()
     class_<feature_type_style>("Style",init<>("default style constructor"))
 
         .def_pickle(style_pickle_suite()
-           )
+            )
 
         .add_property("rules",make_function
                       (&feature_type_style::get_rules,

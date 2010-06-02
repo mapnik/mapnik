@@ -26,35 +26,35 @@
 
 namespace mapnik
 {
-    void* Object::operator new(size_t size)
-    {
-        void* block=::operator new (size);
-        return (char*) block;
-    }
+void* Object::operator new(size_t size)
+{
+    void* block=::operator new (size);
+    return (char*) block;
+}
 
-    void* Object::operator new(size_t size,MemoryManager* manager)
-    {
-        assert(manager);
-        size_t headerSize=MemoryUtils::alignPointerSize(sizeof(MemoryManager*));
-        void* const block=manager->allocate(headerSize+size);
-        *(MemoryManager**)block=manager;
-        return (char*)block+headerSize;
-    }
+void* Object::operator new(size_t size,MemoryManager* manager)
+{
+    assert(manager);
+    size_t headerSize=MemoryUtils::alignPointerSize(sizeof(MemoryManager*));
+    void* const block=manager->allocate(headerSize+size);
+    *(MemoryManager**)block=manager;
+    return (char*)block+headerSize;
+}
 
-    void Object::operator delete(void* p)
-    {
-        ::operator delete(p);
-    }
+void Object::operator delete(void* p)
+{
+    ::operator delete(p);
+}
 
-    void Object::operator delete(void* , MemoryManager* )
-    {
-        //std::clog <<"operator delete with Manager "<<std::hex<<p<<" "<<manager<<std::endl;
-    }
+void Object::operator delete(void* , MemoryManager* )
+{
+    //std::clog <<"operator delete with Manager "<<std::hex<<p<<" "<<manager<<std::endl;
+}
 
-    inline size_t MemoryUtils::alignPointerSize(size_t ptrSize)
-    {
-        size_t alignment=(sizeof(void*) >= sizeof(double)) ? sizeof(void*) : sizeof(double);
-        size_t current=ptrSize % alignment;
-        return (current==0)?ptrSize:(ptrSize+alignment-current);
-    }
+inline size_t MemoryUtils::alignPointerSize(size_t ptrSize)
+{
+    size_t alignment=(sizeof(void*) >= sizeof(double)) ? sizeof(void*) : sizeof(double);
+    size_t current=ptrSize % alignment;
+    return (current==0)?ptrSize:(ptrSize+alignment-current);
+}
 }

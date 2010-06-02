@@ -61,7 +61,7 @@ enum line_join_enum
 DEFINE_ENUM( line_join_e, line_join_enum );
     
 class MAPNIK_DECL stroke
-{	
+{       
     color c_;
     double width_;
     double opacity_; // 0.0 - 1.0
@@ -76,28 +76,28 @@ public:
     stroke& operator=(const stroke& rhs);
 
     void set_color(const color& c);
-	
+        
     color const& get_color() const;
-	
+        
     double get_width() const;
     void set_width(double w);
     void set_opacity(double opacity);
 
     double get_opacity() const;
-	
+        
     void set_line_cap(line_cap_e line_cap);
     line_cap_e get_line_cap() const;
-	
+        
     void set_line_join(line_join_e line_join);
     line_join_e get_line_join() const;
-	
+        
     void add_dash(double dash,double gap);
     bool has_dash() const;
     void set_dash_offset(double offset);
     double dash_offset() const;
     
     dash_array const& get_dash_array() const;
-	
+        
 private:
     void swap(const stroke& other) throw();
 };

@@ -29,32 +29,32 @@
 
 namespace  mapnik { namespace svg {
 
-class svg_parser : private boost::noncopyable
-{
-public:
-    explicit svg_parser(agg::svg::path_renderer & path);
-    ~svg_parser();
+    class svg_parser : private boost::noncopyable
+    {
+    public:
+        explicit svg_parser(agg::svg::path_renderer & path);
+        ~svg_parser();
  
-    void parse(std::string const& filename);
-private:
-    void process_node(xmlTextReaderPtr reader);
-    void start_element(xmlTextReaderPtr reader);
-    void end_element(xmlTextReaderPtr reader);
-    void parse_path(xmlTextReaderPtr reader);
-    void parse_polygon(xmlTextReaderPtr reader);
-    void parse_polyline(xmlTextReaderPtr reader);
-    void parse_line(xmlTextReaderPtr reader);
-    void parse_rect(xmlTextReaderPtr reader);
-    void parse_circle(xmlTextReaderPtr reader);
-    void parse_ellipse(xmlTextReaderPtr reader);
-    void parse_attr(xmlTextReaderPtr reader);
-    void parse_attr(const xmlChar * name, const xmlChar * value );
+        void parse(std::string const& filename);
+    private:
+        void process_node(xmlTextReaderPtr reader);
+        void start_element(xmlTextReaderPtr reader);
+        void end_element(xmlTextReaderPtr reader);
+        void parse_path(xmlTextReaderPtr reader);
+        void parse_polygon(xmlTextReaderPtr reader);
+        void parse_polyline(xmlTextReaderPtr reader);
+        void parse_line(xmlTextReaderPtr reader);
+        void parse_rect(xmlTextReaderPtr reader);
+        void parse_circle(xmlTextReaderPtr reader);
+        void parse_ellipse(xmlTextReaderPtr reader);
+        void parse_attr(xmlTextReaderPtr reader);
+        void parse_attr(const xmlChar * name, const xmlChar * value );
 
-private:
-    agg::svg::path_renderer & path_;
-};
+    private:
+        agg::svg::path_renderer & path_;
+    };
 
-}}
+    }}
 
 
 #endif // MAPNIK_SVG_PARSER_HPP

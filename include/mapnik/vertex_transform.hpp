@@ -30,64 +30,64 @@
 
 namespace mapnik
 {
-    template <typename T0 ,typename T1,int shift=8>
-    struct Shift
+template <typename T0 ,typename T1,int shift=8>
+struct Shift
+{
+    typedef T0 value_type;
+    typedef T1 return_type;
+    static return_type apply(value_type val)
     {
-        typedef T0 value_type;
-        typedef T1 return_type;
-        static return_type apply(value_type val)
-        {
-            return static_cast<return_type>(val*(1<<shift));
-        }
-    };
+        return static_cast<return_type>(val*(1<<shift));
+    }
+};
 
-    template <typename T0,typename T1>
-    struct Shift<T0,T1,0> 
+template <typename T0,typename T1>
+struct Shift<T0,T1,0> 
+{
+    typedef T0 value_type;
+    typedef T1 return_type;
+    static return_type apply(value_type val)
     {
-        typedef T0 value_type;
-        typedef T1 return_type;
-        static return_type apply(value_type val)
-        {
-            return static_cast<return_type>(val);
-        }
-    };
+        return static_cast<return_type>(val);
+    }
+};
 
-    template <typename T>
-    struct Shift<T,T,0>
+template <typename T>
+struct Shift<T,T,0>
+{
+    typedef T value_type;
+    typedef T return_type;
+    static T& apply(T& val)
     {
-        typedef T value_type;
-        typedef T return_type;
-        static T& apply(T& val)
-        {
-            return val;
-        }
-    };
+        return val;
+    }
+};
 
-    typedef Shift<double,double,0> NO_SHIFT;
-    typedef Shift<double,int,0> SHIFT0;
-    typedef Shift<double,int,8> SHIFT8;
+typedef Shift<double,double,0> NO_SHIFT;
+typedef Shift<double,int,0> SHIFT0;
+typedef Shift<double,int,8> SHIFT8;
     
     
-    template <typename T0,typename T1,typename Trans>
-    struct view_transform;
+template <typename T0,typename T1,typename Trans>
+struct view_transform;
     
-    template <typename Trans>
-    struct view_transform <vertex2d,vertex2d,Trans>   
-    {
-	
-    };
+template <typename Trans>
+struct view_transform <vertex2d,vertex2d,Trans>   
+{
+        
+};
     
-    template <typename Trans>
-    struct view_transform <vertex2d,vertex2i,Trans>   
-    {
-	
-    };
+template <typename Trans>
+struct view_transform <vertex2d,vertex2i,Trans>   
+{
+        
+};
 
-    template <typename Trans>
-    struct view_transform<box2d<double>,box2d<double>,Trans>
-    {
-	
-    };
+template <typename Trans>
+struct view_transform<box2d<double>,box2d<double>,Trans>
+{
+        
+};
 }
 
 #endif //VERTEX_TRANSFORM_HPP

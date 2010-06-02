@@ -29,19 +29,19 @@
 
 namespace mapnik {
 
-   class arrow
-   {
-      public:
-         arrow();
-         void rewind(unsigned path_id);
-         unsigned vertex(double* x, double* y);
-         box2d<double> extent() const;   
-      private:
-         unsigned pos_;
-         double x_[7];
-         double y_[7];
-         unsigned cmd_[9];
-   };   
+class arrow
+{
+public:
+    arrow();
+    void rewind(unsigned path_id);
+    unsigned vertex(double* x, double* y);
+    box2d<double> extent() const;   
+private:
+    unsigned pos_;
+    double x_[7];
+    double y_[7];
+    unsigned cmd_[9];
+};   
 }
 
 #endif // ARROW_HPP

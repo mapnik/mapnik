@@ -35,16 +35,16 @@
 #include <string>
 
 namespace mapnik {
-   class MAPNIK_DECL transcoder : private boost::noncopyable
-   {
-      public:
-         explicit transcoder (std::string const& encoding);
-         UnicodeString transcode(const char* data) const;  
-         ~transcoder(); 
-      private:
-         bool ok_;
-         UConverter * conv_;
-   };
+class MAPNIK_DECL transcoder : private boost::noncopyable
+{
+public:
+    explicit transcoder (std::string const& encoding);
+    UnicodeString transcode(const char* data) const;  
+    ~transcoder(); 
+private:
+    bool ok_;
+    UConverter * conv_;
+};
 }
 
 #endif // UNICODE_HPP

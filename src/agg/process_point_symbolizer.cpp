@@ -65,87 +65,87 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     }
     else if (is_svg(filename))
     {
-	// SVG	
-	boost::optional<path_ptr> marker;
-	ras_ptr->reset();
-	ras_ptr->gamma(agg::gamma_linear());
-	agg::scanline_u8 sl;
-	agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
-	pixfmt pixf(buf);
-	renderer_base renb(pixf);
-	renderer_solid ren(renb);
-	box2d<double> extent;
-	
-	marker = mapnik::marker_cache::instance()->find(filename, true);
-	if (marker && *marker)
-	{
-	    double x1, y1, x2, y2;
-	    (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
-	    
-	    for (unsigned i=0; i<feature.num_geometries(); ++i)
-	    {
-		geometry2d const& geom = feature.get_geometry(i);  
-		geom.label_position(&x,&y);
-		prj_trans.backward(x,y,z);
-		t_.forward(&x,&y);
-		
-		agg::trans_affine tr;
-		boost::array<double,6> const& m = sym.get_transform();
-		tr.load_from(&m[0]);
-		
-		tr *= agg::trans_affine_translation(x, y);
-		
-		tr.transform(&x1,&y1);
-		tr.transform(&x2,&y2);
-		
-		//extent.init(x - 0.5*(x2-x1), y - 0.5*(y2-y1), 
-		//	    x + 0.5*(x2-x1), y + 0.5*(y2-y1));
-		
-		extent.init(x1,y1,x2,y2);
-		if (sym.get_allow_overlap() ||
-		    detector_.has_placement(extent))
-		{
-		    
-		    (*marker)->render(*ras_ptr, sl, ren, tr, renb.clip_box(), sym.get_opacity());
-		    detector_.insert(extent);
-		}
-	    }	
-	}
+        // SVG  
+        boost::optional<path_ptr> marker;
+        ras_ptr->reset();
+        ras_ptr->gamma(agg::gamma_linear());
+        agg::scanline_u8 sl;
+        agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+        pixfmt pixf(buf);
+        renderer_base renb(pixf);
+        renderer_solid ren(renb);
+        box2d<double> extent;
+        
+        marker = mapnik::marker_cache::instance()->find(filename, true);
+        if (marker && *marker)
+        {
+            double x1, y1, x2, y2;
+            (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
+            
+            for (unsigned i=0; i<feature.num_geometries(); ++i)
+            {
+                geometry2d const& geom = feature.get_geometry(i);  
+                geom.label_position(&x,&y);
+                prj_trans.backward(x,y,z);
+                t_.forward(&x,&y);
+                
+                agg::trans_affine tr;
+                boost::array<double,6> const& m = sym.get_transform();
+                tr.load_from(&m[0]);
+                
+                tr *= agg::trans_affine_translation(x, y);
+                
+                tr.transform(&x1,&y1);
+                tr.transform(&x2,&y2);
+                
+                //extent.init(x - 0.5*(x2-x1), y - 0.5*(y2-y1), 
+                //          x + 0.5*(x2-x1), y + 0.5*(y2-y1));
+                
+                extent.init(x1,y1,x2,y2);
+                if (sym.get_allow_overlap() ||
+                    detector_.has_placement(extent))
+                {
+                    
+                    (*marker)->render(*ras_ptr, sl, ren, tr, renb.clip_box(), sym.get_opacity());
+                    detector_.insert(extent);
+                }
+            }   
+        }
     }
     else
     {
-	data = mapnik::image_cache::instance()->find(filename,true);
-	if ( data )
-	{
-	    for (unsigned i=0;i<feature.num_geometries();++i)
-	    {
-		geometry2d const& geom = feature.get_geometry(i);
-		
-		geom.label_position(&x,&y);
-		prj_trans.backward(x,y,z);
-		t_.forward(&x,&y);
-		int w = (*data)->width();
-		int h = (*data)->height();
-		int px=int(floor(x - 0.5 * w));
-		int py=int(floor(y - 0.5 * h));
-		box2d<double> label_ext (floor(x - 0.5 * w),
-					 floor(y - 0.5 * h),
-					 ceil (x + 0.5 * w),
-					 ceil (y + 0.5 * h));
-		if (sym.get_allow_overlap() ||
-		    detector_.has_placement(label_ext))
-		{
-		    pixmap_.set_rectangle_alpha2(*(*data),px,py,sym.get_opacity());
-		    detector_.insert(label_ext);
-		}
-	    }
-	}
+        data = mapnik::image_cache::instance()->find(filename,true);
+        if ( data )
+        {
+            for (unsigned i=0;i<feature.num_geometries();++i)
+            {
+                geometry2d const& geom = feature.get_geometry(i);
+                
+                geom.label_position(&x,&y);
+                prj_trans.backward(x,y,z);
+                t_.forward(&x,&y);
+                int w = (*data)->width();
+                int h = (*data)->height();
+                int px=int(floor(x - 0.5 * w));
+                int py=int(floor(y - 0.5 * h));
+                box2d<double> label_ext (floor(x - 0.5 * w),
+                                         floor(y - 0.5 * h),
+                                         ceil (x + 0.5 * w),
+                                         ceil (y + 0.5 * h));
+                if (sym.get_allow_overlap() ||
+                    detector_.has_placement(label_ext))
+                {
+                    pixmap_.set_rectangle_alpha2(*(*data),px,py,sym.get_opacity());
+                    detector_.insert(label_ext);
+                }
+            }
+        }
     }
 }
 
 template void agg_renderer<image_32>::process(point_symbolizer const&,
-					      Feature const&,
-					      proj_transform const&);
+                                              Feature const&,
+                                              proj_transform const&);
 
 }
  

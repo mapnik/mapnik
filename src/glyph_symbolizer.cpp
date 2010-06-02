@@ -110,7 +110,7 @@ color glyph_symbolizer::eval_color(Feature const& feature) const
     {
         expression_ptr value_expr = get_value();
         if (!value_expr) 
-	{
+        {
             throw config_error(
                 "Must define a 'value' expression to use a colorizer"
                 );
@@ -128,7 +128,7 @@ color glyph_symbolizer::eval_color(Feature const& feature) const
     {
         expression_ptr color_expr = get_color();
         if (color_expr) 
-	{
+        {
             value_type color_result = boost::apply_visitor(
                 evaluate<Feature,value_type>(feature),
                 *color_expr
@@ -138,9 +138,9 @@ color glyph_symbolizer::eval_color(Feature const& feature) const
 #endif
             return color(color_result.to_string());
         } 
-	else 
-	{
-	    return color(0,0,0); // black
+        else 
+        {
+            return color(0,0,0); // black
         }
     }
 }

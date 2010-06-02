@@ -29,8 +29,8 @@
 
 namespace mapnik 
 {
-    void read_xml2( std::string const & filename, boost::property_tree::ptree & pt);
-    void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_path="");
+void read_xml2( std::string const & filename, boost::property_tree::ptree & pt);
+void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_path="");
 }
 
 #endif // LIBXML2_LOADER_INCLUDED

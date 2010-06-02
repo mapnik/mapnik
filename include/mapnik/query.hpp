@@ -50,51 +50,51 @@ private:
 public:
          
     query(box2d<double> const& bbox, resolution_type const& resolution, double scale_denominator = 1.0)
-	: bbox_(bbox),
-	  resolution_(resolution),
-	  scale_denominator_(scale_denominator)
+        : bbox_(bbox),
+          resolution_(resolution),
+          scale_denominator_(scale_denominator)
     {}
     
     query(query const& other)
-	: bbox_(other.bbox_),
-	  resolution_(other.resolution_),
-	  scale_denominator_(other.scale_denominator_),
-	  names_(other.names_)
+        : bbox_(other.bbox_),
+          resolution_(other.resolution_),
+          scale_denominator_(other.scale_denominator_),
+          names_(other.names_)
     {}
          
     query& operator=(query const& other)
     {
-	if (this == &other) return *this;
-	bbox_=other.bbox_;
-	resolution_=other.resolution_;
-	scale_denominator_=other.scale_denominator_;
-	names_=other.names_;
-	return *this;
+        if (this == &other) return *this;
+        bbox_=other.bbox_;
+        resolution_=other.resolution_;
+        scale_denominator_=other.scale_denominator_;
+        names_=other.names_;
+        return *this;
     }
          
     query::resolution_type const& resolution() const
     {
-	return resolution_;
+        return resolution_;
     }
     
     double scale_denominator() const
     {
-	return scale_denominator_;
+        return scale_denominator_;
     }
          
     box2d<double> const& get_bbox() const
     {
-	return bbox_;
+        return bbox_;
     }
          
     void add_property_name(std::string const& name)
     {
-	names_.insert(name);
+        names_.insert(name);
     } 
          
     std::set<std::string> const& property_names() const
     {
-	return names_;
+        return names_;
     }
 };
 }

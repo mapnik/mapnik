@@ -28,30 +28,30 @@
 #include <mapnik/feature.hpp>
 
 namespace mapnik {
-    class hit_test_filter
+class hit_test_filter
+{
+public:
+    hit_test_filter(double x, double y, double tol)
+        : x_(x),
+          y_(y), 
+          tol_(tol) {}
+        
+    bool pass(Feature const& feature)
     {
-    public:
-        hit_test_filter(double x, double y, double tol)
-            : x_(x),
-              y_(y), 
-              tol_(tol) {}
-        
-        bool pass(Feature const& feature)
+        for (unsigned i=0;i<feature.num_geometries();++i)
         {
-           for (unsigned i=0;i<feature.num_geometries();++i)
-           {
-              geometry2d const& geom = feature.get_geometry(i);
-              if (geom.hit_test(x_,y_,tol_))
-                 return true;
-           }
-           return false;
+            geometry2d const& geom = feature.get_geometry(i);
+            if (geom.hit_test(x_,y_,tol_))
+                return true;
         }
+        return false;
+    }
         
-    private:
-        double x_;
-        double y_;
-        double tol_;
-    };
+private:
+    double x_;
+    double y_;
+    double tol_;
+};
 }
 
 #endif // HIT_TEST_FILTER_HPP

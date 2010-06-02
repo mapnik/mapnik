@@ -28,30 +28,30 @@
 
 namespace mapnik {
 
-    class config_error : public std::exception
+class config_error : public std::exception
+{
+public:
+    config_error() {}
+
+    config_error( const std::string & what ) :
+        what_( what )
     {
-        public:
-            config_error() {}
+    }
+    virtual ~config_error() throw() {};
 
-            config_error( const std::string & what ) :
-                what_( what )
-            {
-            }
-            virtual ~config_error() throw() {};
+    virtual const char * what() const throw()
+    {
+        return what_.c_str();    
+    }
 
-            virtual const char * what() const throw()
-            {
-                return what_.c_str();    
-            }
+    void append_context(const std::string & ctx) const
+    {
+        what_ += " " + ctx;
+    }
 
-            void append_context(const std::string & ctx) const
-            {
-                what_ += " " + ctx;
-            }
-
-        protected:
-            mutable std::string what_;
-    };
+protected:
+    mutable std::string what_;
+};
 }
 
 #endif // MAPNIK_CONFIG_ERROR_INCLUDED

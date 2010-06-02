@@ -51,13 +51,13 @@ UnicodeString transcoder::transcode(const char* data) const
     UnicodeString ustr(data,-1,conv_,err); 
     if (ustr.isBogus())
     {
-	ustr.remove();
+        ustr.remove();
     }
     return ustr;
-   }
+}
 
-   transcoder::~transcoder()
-   {
-       if (conv_) ucnv_close(conv_);
-   }   
+transcoder::~transcoder()
+{
+    if (conv_) ucnv_close(conv_);
+}   
 }

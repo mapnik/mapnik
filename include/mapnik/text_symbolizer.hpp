@@ -39,158 +39,158 @@
 
 namespace mapnik
 {
-   enum label_placement_enum {
-      POINT_PLACEMENT,
-      LINE_PLACEMENT,
-      VERTEX_PLACEMENT,
-      label_placement_enum_MAX
-   };
+enum label_placement_enum {
+    POINT_PLACEMENT,
+    LINE_PLACEMENT,
+    VERTEX_PLACEMENT,
+    label_placement_enum_MAX
+};
 
-   DEFINE_ENUM( label_placement_e, label_placement_enum );
+DEFINE_ENUM( label_placement_e, label_placement_enum );
 
-   enum vertical_alignment
-   {
-      TOP = 0,
-      MIDDLE,
-      BOTTOM,
-      vertical_alignment_MAX
-   };
+enum vertical_alignment
+{
+    TOP = 0,
+    MIDDLE,
+    BOTTOM,
+    vertical_alignment_MAX
+};
 
-   DEFINE_ENUM( vertical_alignment_e, vertical_alignment );
+DEFINE_ENUM( vertical_alignment_e, vertical_alignment );
 
-   enum horizontal_alignment
-   {
-      H_LEFT = 0,
-      H_MIDDLE,
-      H_RIGHT,
-      horizontal_alignment_MAX
-   };
+enum horizontal_alignment
+{
+    H_LEFT = 0,
+    H_MIDDLE,
+    H_RIGHT,
+    horizontal_alignment_MAX
+};
 
-   DEFINE_ENUM( horizontal_alignment_e, horizontal_alignment );
+DEFINE_ENUM( horizontal_alignment_e, horizontal_alignment );
 
-   enum justify_alignment
-   {
-      J_LEFT = 0,
-      J_MIDDLE,
-      J_RIGHT,
-      justify_alignment_MAX
-   };
+enum justify_alignment
+{
+    J_LEFT = 0,
+    J_MIDDLE,
+    J_RIGHT,
+    justify_alignment_MAX
+};
 
-   DEFINE_ENUM( justify_alignment_e, justify_alignment );
+DEFINE_ENUM( justify_alignment_e, justify_alignment );
 
-   enum text_convert
-   {
-      NONE = 0,
-      TOUPPER,
-      TOLOWER,
-      text_convert_MAX
-   };
+enum text_convert
+{
+    NONE = 0,
+    TOUPPER,
+    TOLOWER,
+    text_convert_MAX
+};
 
-   DEFINE_ENUM( text_convert_e, text_convert );
+DEFINE_ENUM( text_convert_e, text_convert );
 
-   typedef boost::tuple<double,double> position;
+typedef boost::tuple<double,double> position;
 
-   struct MAPNIK_DECL text_symbolizer
-   {
-         text_symbolizer(expression_ptr name, std::string const& face_name,
-                         unsigned size, color const& fill);
-         text_symbolizer(expression_ptr name, unsigned size, color const& fill);
-         text_symbolizer(text_symbolizer const& rhs);
-         text_symbolizer& operator=(text_symbolizer const& rhs);
-         expression_ptr get_name() const;
-         void set_name(expression_ptr expr);
+struct MAPNIK_DECL text_symbolizer
+{
+    text_symbolizer(expression_ptr name, std::string const& face_name,
+                    unsigned size, color const& fill);
+    text_symbolizer(expression_ptr name, unsigned size, color const& fill);
+    text_symbolizer(text_symbolizer const& rhs);
+    text_symbolizer& operator=(text_symbolizer const& rhs);
+    expression_ptr get_name() const;
+    void set_name(expression_ptr expr);
 
-	 expression_ptr get_orientation() const; // orienation (rotation angle atm)
-         void set_orientation(expression_ptr expr);
-	 
-         unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
-         void set_text_ratio(unsigned ratio);
-         unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
-         void set_wrap_width(unsigned ratio);
-         unsigned char get_wrap_char() const; // character used to wrap lines
-         std::string get_wrap_char_string() const; // character used to wrap lines as std::string
-         void set_wrap_char(unsigned char character);
-         void set_wrap_char_from_string(std::string const& character);
-         text_convert_e get_text_convert() const; // text conversion on strings before display
-         void set_text_convert(text_convert_e convert);
-         unsigned get_line_spacing() const; // spacing between lines of text
-         void set_line_spacing(unsigned spacing);
-         unsigned get_character_spacing() const; // spacing between characters in text
-         void set_character_spacing(unsigned spacing);
-         unsigned get_label_spacing() const; // spacing between repeated labels on lines
-         void set_label_spacing(unsigned spacing);
-         unsigned get_label_position_tolerance() const; //distance the label can be moved on the line to fit, if 0 the default is used
-         void set_label_position_tolerance(unsigned tolerance);
-         bool get_force_odd_labels() const; // try render an odd amount of labels
-         void set_force_odd_labels(bool force);
-         double get_max_char_angle_delta() const; // maximum change in angle between adjacent characters
-         void set_max_char_angle_delta(double angle);
-         unsigned get_text_size() const;
-         void set_text_size(unsigned size);
-         std::string const& get_face_name() const;
-         void set_face_name(std::string face_name);
-         font_set const& get_fontset() const;
-         void set_fontset(font_set const& fset);
-         color const& get_fill() const;
-         void set_fill(color const& fill);
-         void set_halo_fill(color const& fill);
-         color const& get_halo_fill() const;
-         void set_halo_radius(unsigned radius);
-         unsigned get_halo_radius() const;
-         void set_label_placement(label_placement_e label_p);
-         label_placement_e get_label_placement() const;
-         void set_vertical_alignment(vertical_alignment_e valign);
-         vertical_alignment_e get_vertical_alignment() const;
-         void set_anchor(double x, double y);
-         position const& get_anchor() const;
-         void set_displacement(double x, double y);
-         position const& get_displacement() const;
-         void set_avoid_edges(bool avoid);
-         bool get_avoid_edges() const;
-         void set_minimum_distance(double distance);
-         double get_minimum_distance() const;
-         void set_allow_overlap(bool overlap);
-         bool get_allow_overlap() const;
-         void set_opacity(double opacity);
-         double get_opacity() const;
-         bool get_wrap_before() const; // wrap text at wrap_char immediately before current work
-         void set_wrap_before(bool wrap_before);
-         void set_horizontal_alignment(horizontal_alignment_e valign);
-         horizontal_alignment_e get_horizontal_alignment() const;
-         void set_justify_alignment(justify_alignment_e valign);
-         justify_alignment_e get_justify_alignment() const;
+    expression_ptr get_orientation() const; // orienation (rotation angle atm)
+    void set_orientation(expression_ptr expr);
+         
+    unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
+    void set_text_ratio(unsigned ratio);
+    unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
+    void set_wrap_width(unsigned ratio);
+    unsigned char get_wrap_char() const; // character used to wrap lines
+    std::string get_wrap_char_string() const; // character used to wrap lines as std::string
+    void set_wrap_char(unsigned char character);
+    void set_wrap_char_from_string(std::string const& character);
+    text_convert_e get_text_convert() const; // text conversion on strings before display
+    void set_text_convert(text_convert_e convert);
+    unsigned get_line_spacing() const; // spacing between lines of text
+    void set_line_spacing(unsigned spacing);
+    unsigned get_character_spacing() const; // spacing between characters in text
+    void set_character_spacing(unsigned spacing);
+    unsigned get_label_spacing() const; // spacing between repeated labels on lines
+    void set_label_spacing(unsigned spacing);
+    unsigned get_label_position_tolerance() const; //distance the label can be moved on the line to fit, if 0 the default is used
+    void set_label_position_tolerance(unsigned tolerance);
+    bool get_force_odd_labels() const; // try render an odd amount of labels
+    void set_force_odd_labels(bool force);
+    double get_max_char_angle_delta() const; // maximum change in angle between adjacent characters
+    void set_max_char_angle_delta(double angle);
+    unsigned get_text_size() const;
+    void set_text_size(unsigned size);
+    std::string const& get_face_name() const;
+    void set_face_name(std::string face_name);
+    font_set const& get_fontset() const;
+    void set_fontset(font_set const& fset);
+    color const& get_fill() const;
+    void set_fill(color const& fill);
+    void set_halo_fill(color const& fill);
+    color const& get_halo_fill() const;
+    void set_halo_radius(unsigned radius);
+    unsigned get_halo_radius() const;
+    void set_label_placement(label_placement_e label_p);
+    label_placement_e get_label_placement() const;
+    void set_vertical_alignment(vertical_alignment_e valign);
+    vertical_alignment_e get_vertical_alignment() const;
+    void set_anchor(double x, double y);
+    position const& get_anchor() const;
+    void set_displacement(double x, double y);
+    position const& get_displacement() const;
+    void set_avoid_edges(bool avoid);
+    bool get_avoid_edges() const;
+    void set_minimum_distance(double distance);
+    double get_minimum_distance() const;
+    void set_allow_overlap(bool overlap);
+    bool get_allow_overlap() const;
+    void set_opacity(double opacity);
+    double get_opacity() const;
+    bool get_wrap_before() const; // wrap text at wrap_char immediately before current work
+    void set_wrap_before(bool wrap_before);
+    void set_horizontal_alignment(horizontal_alignment_e valign);
+    horizontal_alignment_e get_horizontal_alignment() const;
+    void set_justify_alignment(justify_alignment_e valign);
+    justify_alignment_e get_justify_alignment() const;
 
-      private:
-	 expression_ptr name_;
-	 expression_ptr orientation_;
-         std::string face_name_;
-         font_set fontset_;
-         unsigned size_;
-         unsigned text_ratio_;
-         unsigned wrap_width_;
-         unsigned char wrap_char_;
-         text_convert_e text_convert_;
-         unsigned line_spacing_;
-         unsigned character_spacing_;
-         unsigned label_spacing_;
-         unsigned label_position_tolerance_;
-         bool force_odd_labels_;
-         double max_char_angle_delta_;
-         color fill_;
-         color halo_fill_;
-         unsigned halo_radius_;
-         label_placement_e label_p_;
-         vertical_alignment_e valign_;
-         position anchor_;
-         position displacement_;
-         bool avoid_edges_;
-         double minimum_distance_;
-         bool overlap_;
-         double opacity_;
-         bool wrap_before_;
-         horizontal_alignment_e halign_;
-         justify_alignment_e jalign_;
-   };
+private:
+    expression_ptr name_;
+    expression_ptr orientation_;
+    std::string face_name_;
+    font_set fontset_;
+    unsigned size_;
+    unsigned text_ratio_;
+    unsigned wrap_width_;
+    unsigned char wrap_char_;
+    text_convert_e text_convert_;
+    unsigned line_spacing_;
+    unsigned character_spacing_;
+    unsigned label_spacing_;
+    unsigned label_position_tolerance_;
+    bool force_odd_labels_;
+    double max_char_angle_delta_;
+    color fill_;
+    color halo_fill_;
+    unsigned halo_radius_;
+    label_placement_e label_p_;
+    vertical_alignment_e valign_;
+    position anchor_;
+    position displacement_;
+    bool avoid_edges_;
+    double minimum_distance_;
+    bool overlap_;
+    double opacity_;
+    bool wrap_before_;
+    horizontal_alignment_e halign_;
+    justify_alignment_e jalign_;
+};
 }
 
 #endif //MAPNIK_TEXT_SYMBOLIZER_HPP

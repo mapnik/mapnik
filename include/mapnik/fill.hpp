@@ -27,10 +27,10 @@
 
 namespace mapnik
 {
-    class fill 
-    {
+class fill 
+{
         
-    };
+};
 }
 
 #endif //FILL_HPP

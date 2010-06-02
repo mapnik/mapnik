@@ -29,41 +29,41 @@
 
 namespace mapnik {
     
-    class memory_featureset : public Featureset, private boost::noncopyable
+class memory_featureset : public Featureset, private boost::noncopyable
+{
+public:
+    memory_featureset(box2d<double> const& bbox, memory_datasource const& ds)
+        : bbox_(bbox),
+          pos_(ds.features_.begin()),
+          end_(ds.features_.end())
+    {}
+    virtual ~memory_featureset() {}
+        
+    feature_ptr next()
     {
-    public:
-        memory_featureset(box2d<double> const& bbox, memory_datasource const& ds)
-            : bbox_(bbox),
-              pos_(ds.features_.begin()),
-              end_(ds.features_.end())
-        {}
-        virtual ~memory_featureset() {}
-        
-        feature_ptr next()
+        while (pos_ != end_)
         {
-            while (pos_ != end_)
-            {
-                for  (unsigned i=0; i<(*pos_)->num_geometries();++i) {
-                    geometry2d & geom = (*pos_)->get_geometry(i);
+            for  (unsigned i=0; i<(*pos_)->num_geometries();++i) {
+                geometry2d & geom = (*pos_)->get_geometry(i);
 #ifdef MAPNIK_DEBUG
-    std::clog << "bbox_=" << bbox_ << ", geom.envelope=" << geom.envelope() << "\n";
+                std::clog << "bbox_=" << bbox_ << ", geom.envelope=" << geom.envelope() << "\n";
 #endif
-                    if (bbox_.intersects(geom.envelope()))
-                    {
-                        return *pos_++;
-                    }
+                if (bbox_.intersects(geom.envelope()))
+                {
+                    return *pos_++;
                 }
-                ++pos_;
             }
-           
-            return feature_ptr();
+            ++pos_;
         }
+           
+        return feature_ptr();
+    }
         
-    private:
-        box2d<double> bbox_;
-        std::vector<feature_ptr>::const_iterator pos_;
-        std::vector<feature_ptr>::const_iterator end_; 
-    };
+private:
+    box2d<double> bbox_;
+    std::vector<feature_ptr>::const_iterator pos_;
+    std::vector<feature_ptr>::const_iterator end_; 
+};
 }
 
 #endif // MEMORY_FEATURESET_HPP

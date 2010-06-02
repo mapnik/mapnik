@@ -35,10 +35,10 @@ using mapnik::expression_ptr;
 using mapnik::to_expression_string;
 
 namespace {
-  using namespace boost::python;
+using namespace boost::python;
 
-  list get_displacement_list(const text_symbolizer& t)
-  {
+list get_displacement_list(const text_symbolizer& t)
+{
     position pos = t.get_displacement();
     double dx = boost::get<0>(pos);
     double dy = boost::get<1>(pos);
@@ -46,10 +46,10 @@ namespace {
     disp.append(dx);
     disp.append(dy);
     return disp;
-  }
+}
   
-  list get_anchor_list(const text_symbolizer& t)
-  {
+list get_anchor_list(const text_symbolizer& t)
+{
     position anch = t.get_anchor();
     double x = boost::get<0>(anch);
     double y = boost::get<1>(anch);
@@ -57,23 +57,23 @@ namespace {
     anchor.append(x);
     anchor.append(y);
     return anchor;
-  }
+}
 }
 
 struct text_symbolizer_pickle_suite : boost::python::pickle_suite
 {
-   static boost::python::tuple
-   getinitargs(const text_symbolizer& t)
-   {
+    static boost::python::tuple
+    getinitargs(const text_symbolizer& t)
+    {
 
-       return boost::python::make_tuple("TODO",//t.get_name(),
-					t.get_face_name(),t.get_text_size(),t.get_fill());
+        return boost::python::make_tuple("TODO",//t.get_name(),
+                                         t.get_face_name(),t.get_text_size(),t.get_fill());
        
-   }
+    }
 
-   static  boost::python::tuple
-   getstate(const text_symbolizer& t)
-   {
+    static  boost::python::tuple
+    getstate(const text_symbolizer& t)
+    {
         boost::python::list disp = get_displacement_list(t);
         boost::python::list anchor = get_anchor_list(t);
         
@@ -90,23 +90,23 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         extras.append(t.get_opacity());
                 
         return boost::python::make_tuple(disp,t.get_label_placement(),
-        t.get_vertical_alignment(),t.get_halo_radius(),t.get_halo_fill(),t.get_text_ratio(),
-        t.get_wrap_width(),t.get_label_spacing(),t.get_minimum_distance(),t.get_allow_overlap(),
-        anchor,t.get_force_odd_labels(),t.get_max_char_angle_delta(),extras
-        );
-   }
+                                         t.get_vertical_alignment(),t.get_halo_radius(),t.get_halo_fill(),t.get_text_ratio(),
+                                         t.get_wrap_width(),t.get_label_spacing(),t.get_minimum_distance(),t.get_allow_overlap(),
+                                         anchor,t.get_force_odd_labels(),t.get_max_char_angle_delta(),extras
+            );
+    }
 
-   static void
-   setstate (text_symbolizer& t, boost::python::tuple state)
-   {
+    static void
+    setstate (text_symbolizer& t, boost::python::tuple state)
+    {
         using namespace boost::python;
         
         if (len(state) != 14)
         {
             PyErr_SetObject(PyExc_ValueError,
-                         ("expected 15-item tuple in call to __setstate__; got %s"
-                          % state).ptr()
-            );
+                            ("expected 15-item tuple in call to __setstate__; got %s"
+                             % state).ptr()
+                );
             throw_error_already_set();
         }
         
@@ -151,13 +151,13 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         t.set_horizontal_alignment(extract<horizontal_alignment_e>(extras[5]));
         t.set_justify_alignment(extract<justify_alignment_e>(extras[6]));
         t.set_opacity(extract<double>(extras[7]));
-   }
+    }
 };
 
 
 void export_text_symbolizer()
 {
-using namespace boost::python;
+    using namespace boost::python;
 
     enumeration_<label_placement_e>("label_placement")
         .value("LINE_PLACEMENT",LINE_PLACEMENT)
@@ -188,98 +188,98 @@ using namespace boost::python;
         .value("TOLOWER",TOLOWER)
         ;
 
-class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
-    //.def_pickle(text_symbolizer_pickle_suite())
-    .def("anchor",&text_symbolizer::set_anchor)
-    .def("displacement",&text_symbolizer::set_displacement)
-    .def("get_anchor",get_anchor_list)
-    .def("get_displacement",get_displacement_list)
-    .add_property("allow_overlap",
-                  &text_symbolizer::get_allow_overlap,
-                  &text_symbolizer::set_allow_overlap,
-                  "Set/get the allow_overlap property of the label")
-    .add_property("avoid_edges",
-                  &text_symbolizer::get_avoid_edges,
-                  &text_symbolizer::set_avoid_edges,
-                  "Set/get the avoid_edge property of the label")
-    .add_property("character_spacing",
-                  &text_symbolizer::get_character_spacing,
-                  &text_symbolizer::set_character_spacing,
-                  "Set/get the character_spacing property of the label")
-    .add_property("face_name",
-                  make_function(&text_symbolizer::get_face_name,return_value_policy<copy_const_reference>()),
-                  &text_symbolizer::set_face_name,
-                  "Set/get the face_name property of the label")
-    .add_property("fill",              
-                  make_function(&text_symbolizer::get_fill,return_value_policy<copy_const_reference>()),
-                  &text_symbolizer::set_fill)
-    .add_property("fontset",
-                  make_function(&text_symbolizer::get_fontset,return_value_policy<copy_const_reference>()),
-                  &text_symbolizer::set_fontset)
-    .add_property("force_odd_labels",
-                  &text_symbolizer::get_force_odd_labels,
-                  &text_symbolizer::set_force_odd_labels)
-    .add_property("halo_fill",
-                  make_function(&text_symbolizer::get_halo_fill,return_value_policy<copy_const_reference>()),
-                  &text_symbolizer::set_halo_fill)
-    .add_property("halo_radius",
-                  &text_symbolizer::get_halo_radius, 
-                  &text_symbolizer::set_halo_radius)
-    .add_property("horizontal_alignment",
-                  &text_symbolizer::get_horizontal_alignment,
-                  &text_symbolizer::set_horizontal_alignment,
-                  "Set/get the horizontal alignment of the label")
-    .add_property("justify_alignment",
-                  &text_symbolizer::get_justify_alignment,
-                  &text_symbolizer::set_justify_alignment,
-                  "Set/get the text justification")
-    .add_property("label_placement",
-                  &text_symbolizer::get_label_placement,
-                  &text_symbolizer::set_label_placement,
-                  "Set/get the placement of the label")
-    .add_property("label_position_tolerance",
-                  &text_symbolizer::get_label_position_tolerance,
-                  &text_symbolizer::set_label_position_tolerance)
-    .add_property("label_spacing",
-                  &text_symbolizer::get_label_spacing,
-                  &text_symbolizer::set_label_spacing)
-    .add_property("line_spacing",
-                  &text_symbolizer::get_line_spacing,
-                  &text_symbolizer::set_line_spacing)
-    .add_property("max_char_angle_delta",
-                  &text_symbolizer::get_max_char_angle_delta,
-                  &text_symbolizer::set_max_char_angle_delta)
-    .add_property("minimum_distance",
-                  &text_symbolizer::get_minimum_distance,
-                  &text_symbolizer::set_minimum_distance)
-    .add_property("name",&text_symbolizer::get_name,
-                 &text_symbolizer::set_name)
-    .add_property("opacity",
-                  &text_symbolizer::get_opacity,
-                  &text_symbolizer::set_opacity,
-                  "Set/get the text opacity")
-    .add_property("text_convert",
-                  &text_symbolizer::get_text_convert,
-                  &text_symbolizer::set_text_convert,
-                  "Set/get the text conversion method")
-    .add_property("text_ratio",
-                  &text_symbolizer::get_text_ratio,
-                  &text_symbolizer::set_text_ratio)
-    .add_property("text_size",
-                  &text_symbolizer::get_text_size,
-                  &text_symbolizer::set_text_size)
-    .add_property("vertical_alignment",
-                  &text_symbolizer::get_vertical_alignment,
-                  &text_symbolizer::set_vertical_alignment,
-                  "Set/get the vertical alignment of the label")
-    .add_property("wrap_width",
-                  &text_symbolizer::get_wrap_width,
-                  &text_symbolizer::set_wrap_width)
-    .add_property("wrap_character",
-                  &text_symbolizer::get_wrap_char_string,
-                  &text_symbolizer::set_wrap_char_from_string)
-    .add_property("wrap_before",
-                  &text_symbolizer::get_wrap_before,
-                  &text_symbolizer::set_wrap_before)
-    ;
+    class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
+        //.def_pickle(text_symbolizer_pickle_suite())
+        .def("anchor",&text_symbolizer::set_anchor)
+        .def("displacement",&text_symbolizer::set_displacement)
+        .def("get_anchor",get_anchor_list)
+        .def("get_displacement",get_displacement_list)
+        .add_property("allow_overlap",
+                      &text_symbolizer::get_allow_overlap,
+                      &text_symbolizer::set_allow_overlap,
+                      "Set/get the allow_overlap property of the label")
+        .add_property("avoid_edges",
+                      &text_symbolizer::get_avoid_edges,
+                      &text_symbolizer::set_avoid_edges,
+                      "Set/get the avoid_edge property of the label")
+        .add_property("character_spacing",
+                      &text_symbolizer::get_character_spacing,
+                      &text_symbolizer::set_character_spacing,
+                      "Set/get the character_spacing property of the label")
+        .add_property("face_name",
+                      make_function(&text_symbolizer::get_face_name,return_value_policy<copy_const_reference>()),
+                      &text_symbolizer::set_face_name,
+                      "Set/get the face_name property of the label")
+        .add_property("fill",              
+                      make_function(&text_symbolizer::get_fill,return_value_policy<copy_const_reference>()),
+                      &text_symbolizer::set_fill)
+        .add_property("fontset",
+                      make_function(&text_symbolizer::get_fontset,return_value_policy<copy_const_reference>()),
+                      &text_symbolizer::set_fontset)
+        .add_property("force_odd_labels",
+                      &text_symbolizer::get_force_odd_labels,
+                      &text_symbolizer::set_force_odd_labels)
+        .add_property("halo_fill",
+                      make_function(&text_symbolizer::get_halo_fill,return_value_policy<copy_const_reference>()),
+                      &text_symbolizer::set_halo_fill)
+        .add_property("halo_radius",
+                      &text_symbolizer::get_halo_radius, 
+                      &text_symbolizer::set_halo_radius)
+        .add_property("horizontal_alignment",
+                      &text_symbolizer::get_horizontal_alignment,
+                      &text_symbolizer::set_horizontal_alignment,
+                      "Set/get the horizontal alignment of the label")
+        .add_property("justify_alignment",
+                      &text_symbolizer::get_justify_alignment,
+                      &text_symbolizer::set_justify_alignment,
+                      "Set/get the text justification")
+        .add_property("label_placement",
+                      &text_symbolizer::get_label_placement,
+                      &text_symbolizer::set_label_placement,
+                      "Set/get the placement of the label")
+        .add_property("label_position_tolerance",
+                      &text_symbolizer::get_label_position_tolerance,
+                      &text_symbolizer::set_label_position_tolerance)
+        .add_property("label_spacing",
+                      &text_symbolizer::get_label_spacing,
+                      &text_symbolizer::set_label_spacing)
+        .add_property("line_spacing",
+                      &text_symbolizer::get_line_spacing,
+                      &text_symbolizer::set_line_spacing)
+        .add_property("max_char_angle_delta",
+                      &text_symbolizer::get_max_char_angle_delta,
+                      &text_symbolizer::set_max_char_angle_delta)
+        .add_property("minimum_distance",
+                      &text_symbolizer::get_minimum_distance,
+                      &text_symbolizer::set_minimum_distance)
+        .add_property("name",&text_symbolizer::get_name,
+                      &text_symbolizer::set_name)
+        .add_property("opacity",
+                      &text_symbolizer::get_opacity,
+                      &text_symbolizer::set_opacity,
+                      "Set/get the text opacity")
+        .add_property("text_convert",
+                      &text_symbolizer::get_text_convert,
+                      &text_symbolizer::set_text_convert,
+                      "Set/get the text conversion method")
+        .add_property("text_ratio",
+                      &text_symbolizer::get_text_ratio,
+                      &text_symbolizer::set_text_ratio)
+        .add_property("text_size",
+                      &text_symbolizer::get_text_size,
+                      &text_symbolizer::set_text_size)
+        .add_property("vertical_alignment",
+                      &text_symbolizer::get_vertical_alignment,
+                      &text_symbolizer::set_vertical_alignment,
+                      "Set/get the vertical alignment of the label")
+        .add_property("wrap_width",
+                      &text_symbolizer::get_wrap_width,
+                      &text_symbolizer::set_wrap_width)
+        .add_property("wrap_character",
+                      &text_symbolizer::get_wrap_char_string,
+                      &text_symbolizer::set_wrap_char_from_string)
+        .add_property("wrap_before",
+                      &text_symbolizer::get_wrap_before,
+                      &text_symbolizer::set_wrap_before)
+        ;
 }

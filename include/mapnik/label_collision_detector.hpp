@@ -33,200 +33,200 @@
 
 namespace mapnik
 {
-   //this needs to be tree structure 
-   //as a proof of a concept _only_ we use sequential scan 
+//this needs to be tree structure 
+//as a proof of a concept _only_ we use sequential scan 
 
-   struct label_collision_detector
-   {
-      typedef std::vector<box2d<double> > label_placements;
+struct label_collision_detector
+{
+    typedef std::vector<box2d<double> > label_placements;
 
-      bool has_plasement(box2d<double> const& box)
-      {
-         label_placements::const_iterator itr=labels_.begin();
-         for( ; itr !=labels_.end();++itr)
-         {
+    bool has_plasement(box2d<double> const& box)
+    {
+        label_placements::const_iterator itr=labels_.begin();
+        for( ; itr !=labels_.end();++itr)
+        {
             if (itr->intersects(box))
             {
-               return false;
+                return false;
             }
-         }
-         labels_.push_back(box);
-         return true;
-      }
-      void clear()
-      {
-         labels_.clear();
-      }
+        }
+        labels_.push_back(box);
+        return true;
+    }
+    void clear()
+    {
+        labels_.clear();
+    }
           
-   private:
+private:
 
-      label_placements labels_;
-   };
+    label_placements labels_;
+};
 
-   // quad_tree based label collision detector
-   class label_collision_detector2 : boost::noncopyable
-   {
-      typedef quad_tree<box2d<double> > tree_t;
-      tree_t tree_;
-   public:
+// quad_tree based label collision detector
+class label_collision_detector2 : boost::noncopyable
+{
+    typedef quad_tree<box2d<double> > tree_t;
+    tree_t tree_;
+public:
          
-      explicit label_collision_detector2(box2d<double> const& extent)
-         : tree_(extent) {}
-	
-      bool has_placement(box2d<double> const& box)
-      {
-         tree_t::query_iterator itr = tree_.query_in_box(box);
-         tree_t::query_iterator end = tree_.query_end();
-	    
-         for ( ;itr != end; ++itr)
-         {
+    explicit label_collision_detector2(box2d<double> const& extent)
+        : tree_(extent) {}
+        
+    bool has_placement(box2d<double> const& box)
+    {
+        tree_t::query_iterator itr = tree_.query_in_box(box);
+        tree_t::query_iterator end = tree_.query_end();
+            
+        for ( ;itr != end; ++itr)
+        {
             if (itr->intersects(box))
             {
-               return false;
+                return false;
             }
-         }
-	    
-         tree_.insert(box,box);
-         return true;
-      }
+        }
+            
+        tree_.insert(box,box);
+        return true;
+    }
          
-      void clear()
-      {
-         tree_.clear();
-      } 
+    void clear()
+    {
+        tree_.clear();
+    } 
          
-   };
+};
     
-   // quad_tree based label collision detector with seperate check/insert
-   class label_collision_detector3 : boost::noncopyable
-   {
-      typedef quad_tree< box2d<double> > tree_t;
-      tree_t tree_;
-   public:
-	
-      explicit label_collision_detector3(box2d<double> const& extent)
-         : tree_(extent) {}
-	
-      bool has_placement(box2d<double> const& box)
-      {
-         tree_t::query_iterator itr = tree_.query_in_box(box);
-         tree_t::query_iterator end = tree_.query_end();
+// quad_tree based label collision detector with seperate check/insert
+class label_collision_detector3 : boost::noncopyable
+{
+    typedef quad_tree< box2d<double> > tree_t;
+    tree_t tree_;
+public:
+        
+    explicit label_collision_detector3(box2d<double> const& extent)
+        : tree_(extent) {}
+        
+    bool has_placement(box2d<double> const& box)
+    {
+        tree_t::query_iterator itr = tree_.query_in_box(box);
+        tree_t::query_iterator end = tree_.query_end();
           
-         for ( ;itr != end; ++itr)
-         {
+        for ( ;itr != end; ++itr)
+        {
             if (itr->intersects(box))
             {
-               return false;
+                return false;
             }
-         }
+        }
           
-         return true;
-      }
+        return true;
+    }
 
-      void insert(box2d<double> const& box)
-      {
-         tree_.insert(box, box);
-      }
+    void insert(box2d<double> const& box)
+    {
+        tree_.insert(box, box);
+    }
          
-      void clear()
-      {
-         tree_.clear();
-      }
-   };
+    void clear()
+    {
+        tree_.clear();
+    }
+};
 
     
-   //quad tree based label collission detector so labels dont appear within a given distance
-   class label_collision_detector4 : boost::noncopyable
-   {
-      struct label
-      {
-         label(box2d<double> const& b) : box(b) {}
-         label(box2d<double> const& b, UnicodeString const& t) : box(b), text(t) {}
+//quad tree based label collission detector so labels dont appear within a given distance
+class label_collision_detector4 : boost::noncopyable
+{
+    struct label
+    {
+        label(box2d<double> const& b) : box(b) {}
+        label(box2d<double> const& b, UnicodeString const& t) : box(b), text(t) {}
                
-         box2d<double> box;
-         UnicodeString text;
-      };
+        box2d<double> box;
+        UnicodeString text;
+    };
          
-      typedef quad_tree< label > tree_t;
-      box2d<double> extent_;
-      tree_t tree_;
+    typedef quad_tree< label > tree_t;
+    box2d<double> extent_;
+    tree_t tree_;
          
-   public:
-	
-      explicit label_collision_detector4(box2d<double> const& extent)
-         : extent_(extent),
-           tree_(extent) {}
-	
-      bool has_placement(box2d<double> const& box)
-      {
-         tree_t::query_iterator itr = tree_.query_in_box(box);
-         tree_t::query_iterator end = tree_.query_end();
+public:
+        
+    explicit label_collision_detector4(box2d<double> const& extent)
+        : extent_(extent),
+          tree_(extent) {}
+        
+    bool has_placement(box2d<double> const& box)
+    {
+        tree_t::query_iterator itr = tree_.query_in_box(box);
+        tree_t::query_iterator end = tree_.query_end();
           
-         for ( ;itr != end; ++itr)
-         {
+        for ( ;itr != end; ++itr)
+        {
             if (itr->box.intersects(box))
             {
-               return false;
+                return false;
             }
-         }
+        }
           
-         return true;
-      }	
+        return true;
+    }   
 
-      bool has_placement(box2d<double> const& box, UnicodeString const& text, double distance)
-      {
-         box2d<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
-         tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
-         tree_t::query_iterator end = tree_.query_end();
+    bool has_placement(box2d<double> const& box, UnicodeString const& text, double distance)
+    {
+        box2d<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
+        tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
+        tree_t::query_iterator end = tree_.query_end();
         
-         for ( ;itr != end; ++itr)
-         {
+        for ( ;itr != end; ++itr)
+        {
             if (itr->box.intersects(box) || (text == itr->text && itr->box.intersects(bigger_box)))
             {
-               return false;
+                return false;
             }
-         }
-	    
-         return true;
-      }	
+        }
+            
+        return true;
+    }   
 
-      bool has_point_placement(box2d<double> const& box, double distance)
-      {
-         box2d<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
-         tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
-         tree_t::query_iterator end = tree_.query_end();
+    bool has_point_placement(box2d<double> const& box, double distance)
+    {
+        box2d<double> bigger_box(box.minx() - distance, box.miny() - distance, box.maxx() + distance, box.maxy() + distance);
+        tree_t::query_iterator itr = tree_.query_in_box(bigger_box);
+        tree_t::query_iterator end = tree_.query_end();
          
-         for ( ;itr != end; ++itr)
-         {
+        for ( ;itr != end; ++itr)
+        {
             if (itr->box.intersects(bigger_box))
             {
-               return false;
+                return false;
             }
-         }
-	 
-         return true;
-      }	
-      
-      void insert(box2d<double> const& box)
-      {
-         tree_.insert(label(box), box);
-      }
+        }
          
-      void insert(box2d<double> const& box, UnicodeString const& text)
-      {
-         tree_.insert(label(box, text), box);
-      }
-         
-      void clear()
-      {
-         tree_.clear();
-      }
+        return true;
+    }   
       
-      box2d<double> const& extent() const
-      {
-         return extent_;
-      }
-   };
+    void insert(box2d<double> const& box)
+    {
+        tree_.insert(label(box), box);
+    }
+         
+    void insert(box2d<double> const& box, UnicodeString const& text)
+    {
+        tree_.insert(label(box, text), box);
+    }
+         
+    void clear()
+    {
+        tree_.clear();
+    }
+      
+    box2d<double> const& extent() const
+    {
+        return extent_;
+    }
+};
 }
 
 #endif // LABEL_COLLISION_DETECTOR_HPP

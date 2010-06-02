@@ -20,9 +20,9 @@ namespace mapnik
 typedef boost::tuple<double,double> position;
 
 enum angle_mode_enum {
-  AZIMUTH,
-  TRIGONOMETRIC,
-  angle_mode_enum_MAX
+    AZIMUTH,
+    TRIGONOMETRIC,
+    angle_mode_enum_MAX
 };
 
 DEFINE_ENUM(angle_mode_e, angle_mode_enum);
@@ -30,19 +30,19 @@ DEFINE_ENUM(angle_mode_e, angle_mode_enum);
 struct MAPNIK_DECL glyph_symbolizer
 {    
     glyph_symbolizer(std::string face_name, expression_ptr c)
-            : face_name_(face_name),
-              char_(c),
-              angle_(),
-              value_(),
-              size_(),
-              color_(),
-              colorizer_(),
-              allow_overlap_(false),
-              avoid_edges_(false),
-              displacement_(0.0, 0.0),
-              halo_fill_(color(255,255,255)),
-              halo_radius_(0),
-              angle_mode_(TRIGONOMETRIC) {}
+        : face_name_(face_name),
+        char_(c),
+        angle_(),
+        value_(),
+        size_(),
+        color_(),
+        colorizer_(),
+        allow_overlap_(false),
+        avoid_edges_(false),
+        displacement_(0.0, 0.0),
+        halo_fill_(color(255,255,255)),
+        halo_radius_(0),
+        angle_mode_(TRIGONOMETRIC) {}
 
     std::string const& get_face_name() const
     {
@@ -146,7 +146,7 @@ struct MAPNIK_DECL glyph_symbolizer
 
     raster_colorizer_ptr get_colorizer() const
     {
-       return colorizer_;
+        return colorizer_;
     }
     void set_colorizer(raster_colorizer_ptr const& colorizer)
     {

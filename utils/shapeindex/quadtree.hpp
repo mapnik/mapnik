@@ -37,38 +37,38 @@ using mapnik::coord2d;
 template <typename T>
 struct quadtree_node
 {
-      box2d<double> ext_;
-      std::vector<T> data_;
-      quadtree_node<T>* children_[4];
-      quadtree_node(const box2d<double>& ext)
-         : ext_(ext),data_()
-      {
-         memset(children_,0,sizeof(quadtree_node<T>*)*4);
-      }
+    box2d<double> ext_;
+    std::vector<T> data_;
+    quadtree_node<T>* children_[4];
+    quadtree_node(const box2d<double>& ext)
+        : ext_(ext),data_()
+    {
+        memset(children_,0,sizeof(quadtree_node<T>*)*4);
+    }
 
-      ~quadtree_node() 
-      {
-         for (int i=0;i<4;++i) 
-         {
+    ~quadtree_node() 
+    {
+        for (int i=0;i<4;++i) 
+        {
             if (children_[i]) 
             {
-               delete children_[i],children_[i]=0;
+                delete children_[i],children_[i]=0;
             }
-         }
-      }
+        }
+    }
 
-      int num_subnodes() const 
-      {
-         int count=0;
-         for (int i=0;i<4;++i) 
-         {
+    int num_subnodes() const 
+    {
+        int count=0;
+        for (int i=0;i<4;++i) 
+        {
             if (children_[i]) 
             {
-               ++count;
+                ++count;
             }
-         }
-         return count;
-      }     
+        }
+        return count;
+    }     
 };
 
 template <typename T>
@@ -137,8 +137,8 @@ private:
         if (node) 
         {
             for (int i=0;i<4;++i)
-            {	
-                trim_tree(node->children_[i]);	
+            {   
+                trim_tree(node->children_[i]);  
             }
 
             if (node->num_subnodes()==1 && node->data_.size()==0)
@@ -148,10 +148,10 @@ private:
                     if (node->children_[i])
                     {   
                         node=node->children_[i];
-                        break;	
+                        break;  
                     }
                 }
-            }	
+            }   
         }
     }
 

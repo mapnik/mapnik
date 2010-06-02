@@ -39,100 +39,100 @@
 #include <string>
 
 namespace mapnik {    
-    typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
+typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
     
-    struct MAPNIK_DECL Featureset
-    {
-        virtual feature_ptr next()=0;
-        virtual ~Featureset() {};
-    };
+struct MAPNIK_DECL Featureset
+{
+    virtual feature_ptr next()=0;
+    virtual ~Featureset() {};
+};
     
-    typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
+typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
     
-    class MAPNIK_DECL datasource_exception : public std::exception
-    {
-    private:
-        std::string message_;
-    public:
-        datasource_exception(const std::string& message=std::string("no reason"))
-            :message_(message) {}
+class MAPNIK_DECL datasource_exception : public std::exception
+{
+private:
+    std::string message_;
+public:
+    datasource_exception(const std::string& message=std::string("no reason"))
+        :message_(message) {}
 
-        ~datasource_exception() throw() {}
-        virtual const char* what() const throw()
-        {
-            return message_.c_str();
-        }
-    };
-    
-    class MAPNIK_DECL datasource : private boost::noncopyable
+    ~datasource_exception() throw() {}
+    virtual const char* what() const throw()
     {
-    public:        
-        enum datasource_t {
-            Vector,
-            Raster
-        };
+        return message_.c_str();
+    }
+};
+    
+class MAPNIK_DECL datasource : private boost::noncopyable
+{
+public:        
+    enum datasource_t {
+        Vector,
+        Raster
+    };
         
-        datasource (parameters const& params)
-            : params_(params) {}
+    datasource (parameters const& params)
+        : params_(params) {}
 
-        /*!
-         * @brief Get the configuration parameters of the data source.
-         *
-         * These vary depending on the type of data source.
-         *
-         * @return The configuration parameters of the data source.
-         */
-        parameters const& params() const
-        {
-            return params_;
-        }
-        
-        /*!
-         * @brief Get the type of the datasource
-         * @return The type of the datasource (Vector or Raster)
-         */
-        virtual int type() const=0;
-        
-        virtual featureset_ptr features(const query& q) const=0;
-        virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
-        virtual box2d<double> envelope() const=0;
-        virtual layer_descriptor get_descriptor() const=0;
-        virtual ~datasource() {};
-    protected:
-        parameters params_;
-    };
-    
-    typedef std::string datasource_name();
-    typedef datasource* create_ds(const parameters& params);
-    typedef void destroy_ds(datasource *ds);
-
-    
-    class datasource_deleter
+    /*!
+     * @brief Get the configuration parameters of the data source.
+     *
+     * These vary depending on the type of data source.
+     *
+     * @return The configuration parameters of the data source.
+     */
+    parameters const& params() const
     {
-    public:
-        void operator() (datasource* ds)
-        {
-            delete ds;
-        }
-    };
+        return params_;
+    }
+        
+    /*!
+     * @brief Get the type of the datasource
+     * @return The type of the datasource (Vector or Raster)
+     */
+    virtual int type() const=0;
+        
+    virtual featureset_ptr features(const query& q) const=0;
+    virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
+    virtual box2d<double> envelope() const=0;
+    virtual layer_descriptor get_descriptor() const=0;
+    virtual ~datasource() {};
+protected:
+    parameters params_;
+};
+    
+typedef std::string datasource_name();
+typedef datasource* create_ds(const parameters& params);
+typedef void destroy_ds(datasource *ds);
 
-    typedef boost::shared_ptr<datasource> datasource_ptr;
+    
+class datasource_deleter
+{
+public:
+    void operator() (datasource* ds)
+    {
+        delete ds;
+    }
+};
+
+typedef boost::shared_ptr<datasource> datasource_ptr;
     
     
-    #define DATASOURCE_PLUGIN(classname)                              \
-        extern "C" MAPNIK_EXP std::string datasource_name()            \
-        {                                                               \
-            return classname::name();                                   \
-        }                                                               \
-        extern "C"  MAPNIK_EXP datasource* create(const parameters &params) \
-        {                                                               \
-            return new classname(params);                               \
-        }                                                               \
-        extern "C" MAPNIK_EXP void destroy(datasource *ds)             \
-        {                                                               \
-            delete ds;                                                  \
-        }                                                               \
-        //
+#define DATASOURCE_PLUGIN(classname)                                    \
+    extern "C" MAPNIK_EXP std::string datasource_name()                 \
+    {                                                                   \
+        return classname::name();                                       \
+    }                                                                   \
+    extern "C"  MAPNIK_EXP datasource* create(const parameters &params) \
+    {                                                                   \
+        return new classname(params);                                   \
+    }                                                                   \
+    extern "C" MAPNIK_EXP void destroy(datasource *ds)                  \
+    {                                                                   \
+        delete ds;                                                      \
+    }                                                                   \
+    //
 }
 
 #endif //DATASOURCE_HPP

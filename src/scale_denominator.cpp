@@ -29,13 +29,13 @@
 
 namespace mapnik {
  
-    static const double pi = 3.14159265359; 
-    static const double meters_per_degree = 6378137 * 2 * pi/ 360;
+static const double pi = 3.14159265359; 
+static const double meters_per_degree = 6378137 * 2 * pi/ 360;
     
-    double scale_denominator(Map const& map, bool geographic)
-    {
-        double denom = map.scale() / 0.00028;
-        if (geographic) denom *= meters_per_degree;
-        return denom; 
-    }
+double scale_denominator(Map const& map, bool geographic)
+{
+    double denom = map.scale() / 0.00028;
+    if (geographic) denom *= meters_per_degree;
+    return denom; 
+}
 }

@@ -30,11 +30,11 @@ using mapnik::color;
 
 struct line_symbolizer_pickle_suite : boost::python::pickle_suite
 {
-   static boost::python::tuple
-   getinitargs(const line_symbolizer& l)
-   {
-      return boost::python::make_tuple(l.get_stroke());
-   }
+    static boost::python::tuple
+    getinitargs(const line_symbolizer& l)
+    {
+        return boost::python::make_tuple(l.get_stroke());
+    }
 
 };
 
@@ -51,5 +51,5 @@ void export_line_symbolizer()
                       (&line_symbolizer::get_stroke,
                        return_value_policy<copy_const_reference>()),
                       &line_symbolizer::set_stroke)
-	;    
+        ;    
 }

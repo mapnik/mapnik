@@ -54,32 +54,32 @@ boost::optional<path_ptr> marker_cache::find(std::string const& uri, bool update
     iterator_type itr = cache_.find(uri);
     if (itr != cache_.end())
     {
-	result.reset(itr->second);
-	return result;
+        result.reset(itr->second);
+        return result;
     }
 
     // we can't find marker in cache, lets try to load it from filesystem
     boost::filesystem::path path(uri);
     if (exists(path))
     {
-	try 
-	{
-	    mapnik::path_ptr marker(new agg::svg::path_renderer);
-	    svg::svg_parser p(*marker);
-	    p.parse(uri);            
-	    marker->arrange_orientations();
-	    double lox,loy,hix,hiy;
-	    marker->bounding_rect(&lox, &loy, &hix, &hiy); //TODO: store bbox!
-	    if (update_cache)
-	    {
-		cache_.insert(std::make_pair(uri,marker));
+        try 
+        {
+            mapnik::path_ptr marker(new agg::svg::path_renderer);
+            svg::svg_parser p(*marker);
+            p.parse(uri);            
+            marker->arrange_orientations();
+            double lox,loy,hix,hiy;
+            marker->bounding_rect(&lox, &loy, &hix, &hiy); //TODO: store bbox!
+            if (update_cache)
+            {
+                cache_.insert(std::make_pair(uri,marker));
             }
             return marker;
-	}
-	catch (...)
-	{
-	    std::cerr << "Exception caught while loading SVG: " << uri << std::endl;
-	}
+        }
+        catch (...)
+        {
+            std::cerr << "Exception caught while loading SVG: " << uri << std::endl;
+        }
     }
     else
     {
@@ -89,7 +89,7 @@ boost::optional<path_ptr> marker_cache::find(std::string const& uri, bool update
 }
 
 #ifdef MAPNIK_THREADSAFE
-   boost::mutex marker_cache::mutex_;
+boost::mutex marker_cache::mutex_;
 #endif
 
 }

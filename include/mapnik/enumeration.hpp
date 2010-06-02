@@ -34,22 +34,22 @@ namespace mapnik {
 
 class illegal_enum_value : public std::exception
 {
-    public:
-        illegal_enum_value() {}
+public:
+    illegal_enum_value() {}
 
-        illegal_enum_value( const std::string & what ) :
-            what_( what )
-        {
-        }
-        virtual ~illegal_enum_value() throw() {};
+    illegal_enum_value( const std::string & what ) :
+        what_( what )
+    {
+    }
+    virtual ~illegal_enum_value() throw() {};
 
-        virtual const char * what() const throw()
-        {
-            return what_.c_str();    
-        }
+    virtual const char * what() const throw()
+    {
+        return what_.c_str();    
+    }
 
-    protected:
-        std::string what_;
+protected:
+    std::string what_;
 };
 
 
@@ -134,156 +134,156 @@ class illegal_enum_value : public std::exception
 
 template <class ENUM, int THE_MAX>
 class MAPNIK_DECL enumeration {
-    public:
-        typedef ENUM native_type;
-        enumeration() {};
-        enumeration( ENUM v ) : value_(v) {} 
-        enumeration( const enumeration & other ) : value_(other.value_) {} 
+public:
+    typedef ENUM native_type;
+    enumeration() {};
+    enumeration( ENUM v ) : value_(v) {} 
+    enumeration( const enumeration & other ) : value_(other.value_) {} 
         
-        /** Assignment operator for native enum values. */
-        void operator=(ENUM v)
+    /** Assignment operator for native enum values. */
+    void operator=(ENUM v)
         {
             value_ = v;
         }
 
-        /** Assignment operator. */
-        void operator=(const enumeration & other)
+    /** Assignment operator. */
+    void operator=(const enumeration & other)
         {
             value_ = other.value_;
         }
 
-        /** Conversion operator for native enum values. */
-        operator ENUM() const
-        {
-            return value_;
-        }
+    /** Conversion operator for native enum values. */
+    operator ENUM() const
+    {
+        return value_;
+    }
 
-        enum Max 
+    enum Max 
+    {
+        MAX = THE_MAX
+    };
+    ENUM max() const
+    {
+        return THE_MAX;
+    }
+    /** Converts @p str to an enum. 
+     * @throw illegal_enum_value @p str is not a legal identifier.
+     * */
+    void from_string(const std::string & str)
+    {
+        for (unsigned i = 0; i < THE_MAX; ++i)
         {
-            MAX = THE_MAX
-        };
-        ENUM max() const
-        {
-            return THE_MAX;
-        }
-        /** Converts @p str to an enum. 
-         * @throw illegal_enum_value @p str is not a legal identifier.
-         * */
-        void from_string(const std::string & str)
-        {
-            for (unsigned i = 0; i < THE_MAX; ++i)
+            if (str == our_strings_[i])
             {
-                if (str == our_strings_[i])
-                {
-                    value_ = static_cast<ENUM>(i);
-                    return;
-                }
+                value_ = static_cast<ENUM>(i);
+                return;
             }
-            throw illegal_enum_value(std::string("Illegal enumeration value '") + 
-                    str + "' for enum " + our_name_);
         }
+        throw illegal_enum_value(std::string("Illegal enumeration value '") + 
+                                 str + "' for enum " + our_name_);
+    }
 
-        /** Parses the input stream @p is for a word consisting of characters and
-         * digits (<i>a-z, A-Z, 0-9</i>) and underscores (<i>_</i>).
-         * The failbit of the stream is set if the word is not a valid identifier.
-         */
-        std::istream & parse(std::istream & is)
+    /** Parses the input stream @p is for a word consisting of characters and
+     * digits (<i>a-z, A-Z, 0-9</i>) and underscores (<i>_</i>).
+     * The failbit of the stream is set if the word is not a valid identifier.
+     */
+    std::istream & parse(std::istream & is)
+    {
+        std::string word;
+        char c;
+
+        while ( is.peek() != std::char_traits< char >::eof())
         {
-            std::string word;
-            char c;
-
-            while ( is.peek() != std::char_traits< char >::eof())
+            is >> c;
+            if ( isspace(c) && word.empty() )
             {
-                is >> c;
-                if ( isspace(c) && word.empty() )
-                {
-                    continue;
-                }
-                if ( isalnum(c) || (c == '_') || c == '-' )
-                {
-                    word += c;
-                }
-                else
-                {
-                    is.unget();
-                    break;
-                }
-            } 
-
-            try
-            {
-                from_string( word );
+                continue;
             }
-            catch (const illegal_enum_value &)
+            if ( isalnum(c) || (c == '_') || c == '-' )
             {
-                is.setstate(std::ios::failbit);
+                word += c;
             }
+            else
+            {
+                is.unget();
+                break;
+            }
+        } 
 
-            return is;
-        }
-
-        /** Returns the current value as a string identifier. */
-        std::string as_string() const
+        try
         {
-            return our_strings_[value_];
+            from_string( word );
+        }
+        catch (const illegal_enum_value &)
+        {
+            is.setstate(std::ios::failbit);
         }
 
-        /** Prints the string identifier to the output stream @p os. */
-        std::ostream & print(std::ostream & os = std::cerr) const 
-        {
-            return os << our_strings_[value_];
-        }
+        return is;
+    }
+
+    /** Returns the current value as a string identifier. */
+    std::string as_string() const
+    {
+        return our_strings_[value_];
+    }
+
+    /** Prints the string identifier to the output stream @p os. */
+    std::ostream & print(std::ostream & os = std::cerr) const 
+    {
+        return os << our_strings_[value_];
+    }
         
-        /** Static helper function to iterate over valid identifiers. */
-        static const char * get_string(unsigned i)
-        {
-            return our_strings_[i];
-        }
+    /** Static helper function to iterate over valid identifiers. */
+    static const char * get_string(unsigned i)
+    {
+        return our_strings_[i];
+    }
 
-        /** Performs some simple checks and quits the application if
-         * any error is detected. Tries to print helpful error messages.
-         */
-        static bool verify(const char * filename, unsigned line_no)
+    /** Performs some simple checks and quits the application if
+     * any error is detected. Tries to print helpful error messages.
+     */
+    static bool verify(const char * filename, unsigned line_no)
+    {
+        for (unsigned i = 0; i < THE_MAX; ++i)
         {
-            for (unsigned i = 0; i < THE_MAX; ++i)
+            if (our_strings_[i] == 0 )
             {
-                if (our_strings_[i] == 0 )
-                {
-                    std::cerr << "### FATAL: Not enough strings for enum "
-                              << our_name_ << " defined in file '" << filename 
-                              << "' at line " << line_no << std::endl;
-		    //std::exit(1);
-                }
+                std::cerr << "### FATAL: Not enough strings for enum "
+                          << our_name_ << " defined in file '" << filename 
+                          << "' at line " << line_no << std::endl;
+                //std::exit(1);
             }
-            if ( std::string("") != our_strings_[THE_MAX])
-            {
-                std::cerr << "### FATAL: The string array for enum " << our_name_ 
-                          << " defined in file '" << filename << "' at line " << line_no
-                          << " has too many items or is not terminated with an "
-                          << "empty string." << std::endl;
-		//std::exit(1);
-            }
-            return true;
         }
-        static const std::string & get_full_qualified_name()
+        if ( std::string("") != our_strings_[THE_MAX])
+        {
+            std::cerr << "### FATAL: The string array for enum " << our_name_ 
+                      << " defined in file '" << filename << "' at line " << line_no
+                      << " has too many items or is not terminated with an "
+                      << "empty string." << std::endl;
+            //std::exit(1);
+        }
+        return true;
+    }
+    static const std::string & get_full_qualified_name()
+    {
+        return our_name_;
+    }
+    static std::string get_name()
+    {
+        std::string::size_type idx = our_name_.find_last_of(":");
+        if ( idx == std::string::npos )
         {
             return our_name_;
+        } else {
+            return our_name_.substr( idx + 1 );
         }
-        static std::string get_name()
-        {
-            std::string::size_type idx = our_name_.find_last_of(":");
-            if ( idx == std::string::npos )
-            {
-                return our_name_;
-            } else {
-                return our_name_.substr( idx + 1 );
-            }
-        }
-    private:
-        ENUM value_;
-        static const char ** our_strings_ ;
-        static std::string our_name_ ;
-        static bool  our_verified_flag_; 
+    }
+private:
+    ENUM value_;
+    static const char ** our_strings_ ;
+    static std::string our_name_ ;
+    static bool  our_verified_flag_; 
 };
 
 /** ostream operator for enumeration 
@@ -313,15 +313,15 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
 /** Helper macro. Creates a typedef.
  * @relates mapnik::enumeration
  */
-#define DEFINE_ENUM( name, e) \
+#define DEFINE_ENUM( name, e)                           \
     typedef mapnik::enumeration<e, e ## _MAX> name
 
 /** Helper macro. Runs the verify() method during static initialization.
  * @relates mapnik::enumeration
  */
-#define IMPLEMENT_ENUM( name, strings ) \
-    template <> const char ** name ::our_strings_ = strings; \
-    template <> std::string name ::our_name_ = #name; \
+#define IMPLEMENT_ENUM( name, strings )                                 \
+    template <> const char ** name ::our_strings_ = strings;            \
+    template <> std::string name ::our_name_ = #name;                   \
     template <> bool name ::our_verified_flag_( name ::verify(__FILE__, __LINE__));
 
 #endif // MAPNIK_ENUMERATION_INCLUDED

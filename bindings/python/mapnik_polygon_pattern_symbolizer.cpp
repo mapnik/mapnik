@@ -33,12 +33,12 @@ using mapnik::guess_type;
 
 struct polygon_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
 {
-   static boost::python::tuple
-   getinitargs(const polygon_pattern_symbolizer& p)
+    static boost::python::tuple
+    getinitargs(const polygon_pattern_symbolizer& p)
     {
-	std::string filename = path_processor_type::to_string(*p.get_filename());
-	return boost::python::make_tuple(filename,guess_type(filename));
-   }
+        std::string filename = path_processor_type::to_string(*p.get_filename());
+        return boost::python::make_tuple(filename,guess_type(filename));
+    }
 };
 
 void export_polygon_pattern_symbolizer()
@@ -46,6 +46,6 @@ void export_polygon_pattern_symbolizer()
     using namespace boost::python;
     
     class_<polygon_pattern_symbolizer>("PolygonPatternSymbolizer",
-				       init<path_expression_ptr>("<path_expression_ptr>"))
-        .def_pickle(polygon_pattern_symbolizer_pickle_suite())	;    
+                                       init<path_expression_ptr>("<path_expression_ptr>"))
+        .def_pickle(polygon_pattern_symbolizer_pickle_suite())  ;    
 }

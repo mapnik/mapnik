@@ -32,27 +32,27 @@ using mapnik::parameters;
 
 struct pickle_value : public boost::static_visitor<>
 {
-    public:
-        pickle_value( boost::python::list vals): 
+public:
+    pickle_value( boost::python::list vals): 
         vals_(vals) {}
             
-        void operator () ( int val )
-        {
-            vals_.append(val);
-        }
+    void operator () ( int val )
+    {
+        vals_.append(val);
+    }
         
-        void operator () ( double val )
-        {
-            vals_.append(val);
-        }
+    void operator () ( double val )
+    {
+        vals_.append(val);
+    }
 
-        void operator () ( std::string val )
-        {
-            vals_.append(val);
-        }
+    void operator () ( std::string val )
+    {
+        vals_.append(val);
+    }
         
-    private:
-        boost::python::list vals_;
+private:
+    boost::python::list vals_;
 
 };
 
@@ -92,9 +92,9 @@ struct parameters_pickle_suite : boost::python::pickle_suite
         if (len(state) != 1)
         {
             PyErr_SetObject(PyExc_ValueError,
-			    ("expected 1-item tuple in call to __setstate__; got %s"
-			     % state).ptr()
-			    );
+                            ("expected 1-item tuple in call to __setstate__; got %s"
+                             % state).ptr()
+                );
             throw_error_already_set();
         }
         
@@ -110,21 +110,21 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             
             if (ex0.check())
             {
-               p[key] = ex0();
+                p[key] = ex0();
             }
             else if (ex1.check())
             {
-               p[key] = ex1();
+                p[key] = ex1();
             }
             else if (ex2.check())
             {
-               p[key] = ex2();
+                p[key] = ex2();
             }           
             
             /*
-            extract_value serializer( p, key );
-            mapnik::value_holder val = extract<mapnik::value_holder>(d[key]);
-            boost::apply_visitor( serializer, val );
+              extract_value serializer( p, key );
+              mapnik::value_holder val = extract<mapnik::value_holder>(d[key]);
+              boost::apply_visitor( serializer, val );
             */
         }        
     }

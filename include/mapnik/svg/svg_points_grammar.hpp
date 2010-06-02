@@ -33,40 +33,40 @@
 
 namespace mapnik { namespace svg {
 
-using namespace boost::spirit;
-using namespace boost::fusion;
-using namespace boost::phoenix;
+    using namespace boost::spirit;
+    using namespace boost::fusion;
+    using namespace boost::phoenix;
 
-template <typename Iterator, typename SkipType, typename PathType>
-struct svg_points_grammar : qi::grammar<Iterator,SkipType>
-{
-    explicit svg_points_grammar(PathType & path)
-	: svg_points_grammar::base_type(start),
-	  move_to_(move_to<PathType>(path)),
-	  line_to_(line_to<PathType>(path)),
-	  close_(close<PathType>(path))
+    template <typename Iterator, typename SkipType, typename PathType>
+    struct svg_points_grammar : qi::grammar<Iterator,SkipType>
     {
-	using qi::_1;
-	using qi::_2;
-	using qi::double_;
-	
-	start = coord[move_to_(_1,false)] // move_to
-	    >> *(-lit(',') >> coord [ line_to_(_1,false) ] ); // *line_to
-	
-	coord = double_ >> -lit(',') >> double_;
-    }
+        explicit svg_points_grammar(PathType & path)
+            : svg_points_grammar::base_type(start),
+              move_to_(move_to<PathType>(path)),
+              line_to_(line_to<PathType>(path)),
+              close_(close<PathType>(path))
+        {
+            using qi::_1;
+            using qi::_2;
+            using qi::double_;
+        
+            start = coord[move_to_(_1,false)] // move_to
+                >> *(-lit(',') >> coord [ line_to_(_1,false) ] ); // *line_to
+        
+            coord = double_ >> -lit(',') >> double_;
+        }
     
-    // rules
-    qi::rule<Iterator,SkipType> start;
-    qi::rule<Iterator,vector2<double,double>(),SkipType> coord;
+        // rules
+        qi::rule<Iterator,SkipType> start;
+        qi::rule<Iterator,vector2<double,double>(),SkipType> coord;
     
-    // commands
-    function<move_to<PathType> > move_to_;
-    function<line_to<PathType> > line_to_;
-    function<close<PathType> > close_;
-};
+        // commands
+        function<move_to<PathType> > move_to_;
+        function<line_to<PathType> > line_to_;
+        function<close<PathType> > close_;
+    };
 
-}}
+    }}
 
 
 #endif // SVG_POINTS_GRAMMAR_HPP

@@ -43,9 +43,9 @@ void export_coord()
 {
     using namespace boost::python;
     class_<coord<double,2> >("Coord",init<double, double>( 
-              // class docstring is in mapnik/__init__.py, class _Coord
-              (arg("x"), arg("y")),
-              "Constructs a new point with the given coordinates.\n")
+                                 // class docstring is in mapnik/__init__.py, class _Coord
+                                 (arg("x"), arg("y")),
+                                 "Constructs a new point with the given coordinates.\n")
         )
         .def_pickle(coord_pickle_suite())
         .def_readwrite("x", &coord<double,2>::x,

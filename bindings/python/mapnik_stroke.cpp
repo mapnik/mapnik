@@ -38,12 +38,12 @@ list get_dashes_list(const stroke& stroke)
     list l;
 
     if (stroke.has_dash()) {
-	mapnik::dash_array const& dash = stroke.get_dash_array();
-	mapnik::dash_array::const_iterator iter = dash.begin();
-	mapnik::dash_array::const_iterator end = dash.end();
-	for (; iter != end; ++iter) {
-	    l.append(make_tuple(iter->first, iter->second));
-	}
+        mapnik::dash_array const& dash = stroke.get_dash_array();
+        mapnik::dash_array::const_iterator iter = dash.begin();
+        mapnik::dash_array::const_iterator end = dash.end();
+        for (; iter != end; ++iter) {
+            l.append(make_tuple(iter->first, iter->second));
+        }
     }
 
     return l;
@@ -56,7 +56,7 @@ struct stroke_pickle_suite : boost::python::pickle_suite
     getinitargs(const stroke& s)
     {
 
-	return boost::python::make_tuple(s.get_color(),s.get_width());
+        return boost::python::make_tuple(s.get_color(),s.get_width());
       
     }
 
@@ -74,9 +74,9 @@ struct stroke_pickle_suite : boost::python::pickle_suite
         if (len(state) != 4)
         {
             PyErr_SetObject(PyExc_ValueError,
-			    ("expected 4-item tuple in call to __setstate__; got %s"
-			     % state).ptr()
-		);
+                            ("expected 4-item tuple in call to __setstate__; got %s"
+                             % state).ptr()
+                );
             throw_error_already_set();
         }
 
@@ -84,12 +84,12 @@ struct stroke_pickle_suite : boost::python::pickle_suite
 
         if (state[1])
         {
-	    list dashes = extract<list>(state[1]);
-	    for(boost::python::ssize_t i=0; i<len(dashes); i++) {
-		double ds1 = extract<double>(dashes[i][0]);
-		double ds2 = extract<double>(dashes[i][1]);
-		s.add_dash(ds1,ds2);
-	    }
+            list dashes = extract<list>(state[1]);
+            for(boost::python::ssize_t i=0; i<len(dashes); i++) {
+                double ds1 = extract<double>(dashes[i][0]);
+                double ds2 = extract<double>(dashes[i][1]);
+                s.add_dash(ds1,ds2);
+            }
         }
 
         s.set_line_cap(extract<line_cap_e>(state[2]));
@@ -106,15 +106,15 @@ void export_stroke ()
     using namespace boost::python;
 
     enumeration_<line_cap_e>("line_cap",
-			     "The possible values for a line cap used when drawing\n"
-			     "with a stroke.\n")
+                             "The possible values for a line cap used when drawing\n"
+                             "with a stroke.\n")
         .value("BUTT_CAP",BUTT_CAP)
         .value("SQUARE_CAP",SQUARE_CAP)
         .value("ROUND_CAP",ROUND_CAP)
         ;
     enumeration_<line_join_e>("line_join",
-			      "The possible values for the line joining mode\n"
-			      "when drawing with a stroke.\n")
+                              "The possible values for the line joining mode\n"
+                              "when drawing with a stroke.\n")
         .value("MITER_JOIN",MITER_JOIN)
         .value("MITER_REVERT_JOIN",MITER_REVERT_JOIN)
         .value("ROUND_JOIN",ROUND_JOIN)
@@ -122,43 +122,43 @@ void export_stroke ()
         ;
 
     class_<stroke>("Stroke",init<>(
-		       "Creates a new default black stroke with the width of 1.\n"))
+                       "Creates a new default black stroke with the width of 1.\n"))
         .def(init<color,float>(
-		 (arg("color"),arg("width")),
-		 "Creates a new stroke object with a specified color and width.\n")
-	    )
+                 (arg("color"),arg("width")),
+                 "Creates a new stroke object with a specified color and width.\n")
+            )
         .def_pickle(stroke_pickle_suite())
         .add_property("color",make_function
-		      (&stroke::get_color,return_value_policy<copy_const_reference>()),
-		      &stroke::set_color,
-		      "Gets or sets the stroke color.\n"
-		      "Returns a new Color object on retrieval.\n")
+                      (&stroke::get_color,return_value_policy<copy_const_reference>()),
+                      &stroke::set_color,
+                      "Gets or sets the stroke color.\n"
+                      "Returns a new Color object on retrieval.\n")
         .add_property("width",
-		      &stroke::get_width,
-		      &stroke::set_width,
-		      "Gets or sets the stroke width in pixels.\n") 
+                      &stroke::get_width,
+                      &stroke::set_width,
+                      "Gets or sets the stroke width in pixels.\n") 
         .add_property("opacity",
-		      &stroke::get_opacity,
-		      &stroke::set_opacity, 
-		      "Gets or sets the opacity of this stroke.\n"
-		      "The value is a float between 0 and 1.\n")
+                      &stroke::get_opacity,
+                      &stroke::set_opacity, 
+                      "Gets or sets the opacity of this stroke.\n"
+                      "The value is a float between 0 and 1.\n")
         .add_property("line_cap",
-		      &stroke::get_line_cap,
-		      &stroke::set_line_cap,
-		      "Gets or sets the line cap of this stroke.\n")
+                      &stroke::get_line_cap,
+                      &stroke::set_line_cap,
+                      "Gets or sets the line cap of this stroke.\n")
         .add_property("line_join",
-		      &stroke::get_line_join,
-		      &stroke::set_line_join,
-		      "Returns the line join mode of this stroke.\n")
+                      &stroke::get_line_join,
+                      &stroke::set_line_join,
+                      "Returns the line join mode of this stroke.\n")
         // todo consider providing a single get/set property
         .def("add_dash",&stroke::add_dash,
-	     (arg("length"),arg("gap")),
-	     "Adds a dash segment to the dash patterns of this stroke.\n")
+             (arg("length"),arg("gap")),
+             "Adds a dash segment to the dash patterns of this stroke.\n")
         .def("get_dashes", get_dashes_list,
-	     "Returns the list of dash segments for this stroke.\n")
-	.add_property("dash_offset",
-		      &stroke::dash_offset,
-		      &stroke::set_dash_offset,
-		      "Gets or sets dash offset of this stroke.\n")
-		      ;
-		      }
+             "Returns the list of dash segments for this stroke.\n")
+        .add_property("dash_offset",
+                      &stroke::dash_offset,
+                      &stroke::set_dash_offset,
+                      "Gets or sets dash offset of this stroke.\n")
+        ;
+}

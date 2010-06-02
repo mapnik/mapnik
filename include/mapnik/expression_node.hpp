@@ -41,7 +41,7 @@ struct plus
 {
     static const char* str()
     {
-	return "+";
+        return "+";
     }
 };
 
@@ -49,7 +49,7 @@ struct minus
 {
     static const char* str()
     {
-	return "-";
+        return "-";
     }
 };
 
@@ -57,7 +57,7 @@ struct mult
 {
     static const char* str()
     {
-	return "*";
+        return "*";
     }
 };
 
@@ -65,7 +65,7 @@ struct div
 {
     static const char* str()
     {
-	return "/";
+        return "/";
     }
 };
 
@@ -74,7 +74,7 @@ struct  mod
 {
     static const char* str()
     {
-	return "%";
+        return "%";
     }
 };
 
@@ -82,7 +82,7 @@ struct less
 {
     static const char* str()
     {
-	return "<";
+        return "<";
     }
 };
 
@@ -90,7 +90,7 @@ struct  less_equal
 {
     static const char* str()
     {
-	return "<=";
+        return "<=";
     }
 };
 
@@ -98,7 +98,7 @@ struct greater
 {
     static const char* str()
     {
-	return ">";
+        return ">";
     }
 };
 
@@ -106,7 +106,7 @@ struct greater_equal
 {
     static const char* str()
     {
-	return ">=";
+        return ">=";
     }
 };
 
@@ -114,7 +114,7 @@ struct equal_to
 {
     static const char* str()
     {
-	return "=";
+        return "=";
     }
 };
 
@@ -122,7 +122,7 @@ struct not_equal_to
 {
     static const char* str()
     {
-	return "!=";
+        return "!=";
     }
 };
 
@@ -130,7 +130,7 @@ struct logical_not
 {
     static const char* str()
     {
-	return "not ";
+        return "not ";
     }
 };
 
@@ -138,7 +138,7 @@ struct logical_and
 {
     static const char* str()
     {
-	return " and ";
+        return " and ";
     }
 };
 
@@ -146,7 +146,7 @@ struct logical_or
 {
     static const char* str()
     {
-	return " or ";
+        return " or ";
     }
 };
 
@@ -201,11 +201,11 @@ template <typename Tag>
 struct unary_node
 {
     unary_node (expr_node const& a)
-	: expr(a) {}
+        : expr(a) {}
 
     static const char* type()
     {
-	return Tag::str();
+        return Tag::str();
     }
     
     expr_node expr;
@@ -228,8 +228,8 @@ struct binary_node
 struct regex_match_node
 {
     regex_match_node (expr_node const& a, UnicodeString const& ustr)
-	: expr(a),
-	  pattern(boost::make_u32regex(ustr)) {}
+        : expr(a),
+          pattern(boost::make_u32regex(ustr)) {}
     
     expr_node expr;
     boost::u32regex pattern;
@@ -238,9 +238,9 @@ struct regex_match_node
 struct regex_replace_node
 {
     regex_replace_node (expr_node const& a, UnicodeString const& ustr, UnicodeString const& f)
-	: expr(a),
-	  pattern(boost::make_u32regex(ustr)),
-	  format(f) {}
+        : expr(a),
+          pattern(boost::make_u32regex(ustr)),
+          format(f) {}
     
     expr_node expr;
     boost::u32regex pattern;
@@ -252,8 +252,8 @@ struct function_call
 {
     template<typename Fun>
     explicit function_call (expr_node const a, Fun f)
-	: expr(a),
-	  call_(f) {}
+        : expr(a),
+          call_(f) {}
 
     expr_node expr;
     boost::function<value_type(value_type)> call_;

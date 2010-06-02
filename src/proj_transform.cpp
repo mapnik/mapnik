@@ -30,84 +30,84 @@
 
 namespace mapnik {
     
-    proj_transform::proj_transform(projection const& source, 
-                                   projection const& dest)
-            : source_(source),
-              dest_(dest) 
-    {
+proj_transform::proj_transform(projection const& source, 
+                               projection const& dest)
+    : source_(source),
+      dest_(dest) 
+{
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(projection::mutex_);
+    mutex::scoped_lock lock(projection::mutex_);
 #endif
-        is_source_latlong_ = pj_is_latlong(source_.proj_) ? true : false;
-        is_dest_latlong_ = pj_is_latlong(dest_.proj_) ? true : false ;
-        is_source_equal_dest = (source_ == dest_);
-    }
+    is_source_latlong_ = pj_is_latlong(source_.proj_) ? true : false;
+    is_dest_latlong_ = pj_is_latlong(dest_.proj_) ? true : false ;
+    is_source_equal_dest = (source_ == dest_);
+}
     
-    bool proj_transform::forward (double & x, double & y , double & z) const
-    {
+bool proj_transform::forward (double & x, double & y , double & z) const
+{
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(projection::mutex_);
+    mutex::scoped_lock lock(projection::mutex_);
 #endif
-        if (is_source_equal_dest)
-            return true;
-
-        if (is_source_latlong_)
-        {
-            x *= DEG_TO_RAD;
-            y *= DEG_TO_RAD;
-        }
-        
-        if (pj_transform( source_.proj_, dest_.proj_, 1, 
-                          0, &x,&y,&z) != 0)
-        {
-            return false;
-        }
-        
-        if (is_dest_latlong_)
-        {
-            x *= RAD_TO_DEG;
-            y *= RAD_TO_DEG;
-        }
-        
+    if (is_source_equal_dest)
         return true;
-    } 
-        
-    bool proj_transform::backward (double & x, double & y , double & z) const
+
+    if (is_source_latlong_)
     {
+        x *= DEG_TO_RAD;
+        y *= DEG_TO_RAD;
+    }
+        
+    if (pj_transform( source_.proj_, dest_.proj_, 1, 
+                      0, &x,&y,&z) != 0)
+    {
+        return false;
+    }
+        
+    if (is_dest_latlong_)
+    {
+        x *= RAD_TO_DEG;
+        y *= RAD_TO_DEG;
+    }
+        
+    return true;
+} 
+        
+bool proj_transform::backward (double & x, double & y , double & z) const
+{
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(projection::mutex_);
+    mutex::scoped_lock lock(projection::mutex_);
 #endif
-        if (is_source_equal_dest)
-            return true;
+    if (is_source_equal_dest)
+        return true;
       
-        if (is_dest_latlong_)
-        {
-            x *= DEG_TO_RAD;
-            y *= DEG_TO_RAD;
-        }
-        
-        if (pj_transform( dest_.proj_, source_.proj_, 1, 
-                          0, &x,&y,&z) != 0)
-        {
-            return false;
-        }
-        
-        if (is_source_latlong_)
-        {
-            x *= RAD_TO_DEG;
-            y *= RAD_TO_DEG;
-        }
-        
-        return true;
+    if (is_dest_latlong_)
+    {
+        x *= DEG_TO_RAD;
+        y *= DEG_TO_RAD;
     }
+        
+    if (pj_transform( dest_.proj_, source_.proj_, 1, 
+                      0, &x,&y,&z) != 0)
+    {
+        return false;
+    }
+        
+    if (is_source_latlong_)
+    {
+        x *= RAD_TO_DEG;
+        y *= RAD_TO_DEG;
+    }
+        
+    return true;
+}
 
-    mapnik::projection const& proj_transform::source() const
-    {
-        return source_;
-    }
-    mapnik::projection const& proj_transform::dest() const
-    {
-        return dest_;
-    }
+mapnik::projection const& proj_transform::source() const
+{
+    return source_;
+}
+mapnik::projection const& proj_transform::dest() const
+{
+    return dest_;
+}
  
 }

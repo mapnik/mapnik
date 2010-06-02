@@ -47,84 +47,84 @@
 
 namespace mapnik {
 
-   class cairo_face;
+class cairo_face;
 
-   typedef boost::shared_ptr<cairo_face> cairo_face_ptr;
+typedef boost::shared_ptr<cairo_face> cairo_face_ptr;
 
-   class cairo_face_manager : private boost::noncopyable
-   {
-     public:
-      cairo_face_manager(boost::shared_ptr<freetype_engine> engine,
-                         face_manager<freetype_engine> & manager);
-      cairo_face_ptr get_face(face_ptr face);
+class cairo_face_manager : private boost::noncopyable
+{
+public:
+    cairo_face_manager(boost::shared_ptr<freetype_engine> engine,
+                       face_manager<freetype_engine> & manager);
+    cairo_face_ptr get_face(face_ptr face);
 
-     private:
-      typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
-      boost::shared_ptr<freetype_engine> font_engine_;
-      face_manager<freetype_engine> & font_manager_;
-      cairo_face_cache cache_;
-   };
+private:
+    typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
+    boost::shared_ptr<freetype_engine> font_engine_;
+    face_manager<freetype_engine> & font_manager_;
+    cairo_face_cache cache_;
+};
 
-   class MAPNIK_DECL cairo_renderer_base : private boost::noncopyable
-   {
-     protected:
-      cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x=0, unsigned offset_y=0);
-     public:
-      ~cairo_renderer_base();
-      void start_map_processing(Map const& map);
-      void start_layer_processing(layer const& lay);
-      void end_layer_processing(layer const& lay);
-      void process(point_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(line_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(line_pattern_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(polygon_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(polygon_pattern_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(raster_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(shield_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(text_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(building_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(markers_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-      void process(glyph_symbolizer const& sym,
-                   Feature const& feature,
-                   proj_transform const& prj_trans);
-     protected:
-      Map const& m_;
-      Cairo::RefPtr<Cairo::Context> context_;
-      CoordTransform t_;
-      boost::shared_ptr<freetype_engine> font_engine_;
-      face_manager<freetype_engine> font_manager_;
-      cairo_face_manager face_manager_;
-      label_collision_detector4 detector_;
-   };
+class MAPNIK_DECL cairo_renderer_base : private boost::noncopyable
+{
+protected:
+    cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x=0, unsigned offset_y=0);
+public:
+    ~cairo_renderer_base();
+    void start_map_processing(Map const& map);
+    void start_layer_processing(layer const& lay);
+    void end_layer_processing(layer const& lay);
+    void process(point_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(line_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(line_pattern_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(polygon_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(polygon_pattern_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(raster_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(shield_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(text_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(building_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(markers_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+    void process(glyph_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
+protected:
+    Map const& m_;
+    Cairo::RefPtr<Cairo::Context> context_;
+    CoordTransform t_;
+    boost::shared_ptr<freetype_engine> font_engine_;
+    face_manager<freetype_engine> font_manager_;
+    cairo_face_manager face_manager_;
+    label_collision_detector4 detector_;
+};
 
-   template <typename T>
-   class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T> >,
-                                      public cairo_renderer_base
-   {
-     public:
-      cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, unsigned offset_x=0, unsigned offset_y=0);
-      void end_map_processing(Map const& map);
-   };
+template <typename T>
+class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T> >,
+                                   public cairo_renderer_base
+{
+public:
+    cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, unsigned offset_x=0, unsigned offset_y=0);
+    void end_map_processing(Map const& map);
+};
 }
 
 #endif

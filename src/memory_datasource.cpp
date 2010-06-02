@@ -28,76 +28,76 @@
 
 namespace mapnik {
     
-    struct accumulate_extent
-    {
-        accumulate_extent(box2d<double> & ext)
-            : ext_(ext),first_(true) {}
+struct accumulate_extent
+{
+    accumulate_extent(box2d<double> & ext)
+        : ext_(ext),first_(true) {}
         
-        void operator() (feature_ptr feat)
+    void operator() (feature_ptr feat)
+    {
+        for (unsigned i=0;i<feat->num_geometries();++i)
         {
-           for (unsigned i=0;i<feat->num_geometries();++i)
-           {
-              geometry2d & geom = feat->get_geometry(i);
-              if ( first_ ) 
-              {
-                 first_ = false;
-                 ext_ = geom.envelope();
-              }
-              else
-              {
-                 ext_.expand_to_include(geom.envelope());
-              }
-           }
+            geometry2d & geom = feat->get_geometry(i);
+            if ( first_ ) 
+            {
+                first_ = false;
+                ext_ = geom.envelope();
+            }
+            else
+            {
+                ext_.expand_to_include(geom.envelope());
+            }
         }
+    }
         
-        box2d<double> & ext_;
-        bool first_;
-    };
+    box2d<double> & ext_;
+    bool first_;
+};
     
-    memory_datasource::memory_datasource()
-        : datasource(parameters()) {}
-    memory_datasource::~memory_datasource() {}
+memory_datasource::memory_datasource()
+    : datasource(parameters()) {}
+memory_datasource::~memory_datasource() {}
     
-    void memory_datasource::push(feature_ptr feature)
-    {
-        features_.push_back(feature);
-    }
+void memory_datasource::push(feature_ptr feature)
+{
+    features_.push_back(feature);
+}
     
-    int memory_datasource::type() const
-    {
-        return datasource::Vector;
-    }
+int memory_datasource::type() const
+{
+    return datasource::Vector;
+}
     
-    featureset_ptr memory_datasource::features(const query& q) const
-    {
-        return featureset_ptr(new memory_featureset(q.get_bbox(),*this));
-    }
+featureset_ptr memory_datasource::features(const query& q) const
+{
+    return featureset_ptr(new memory_featureset(q.get_bbox(),*this));
+}
 
 
-    featureset_ptr memory_datasource::features_at_point(coord2d const& pt) const
-    {
-        box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
+featureset_ptr memory_datasource::features_at_point(coord2d const& pt) const
+{
+    box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
 #ifdef MAPNIK_DEBUG
     std::clog << "box=" << box << ", pt x=" << pt.x << ", y=" << pt.y << "\n";
 #endif
-        return featureset_ptr(new memory_featureset(box,*this));
-    }
+    return featureset_ptr(new memory_featureset(box,*this));
+}
     
-    box2d<double> memory_datasource::envelope() const
-    {
-        box2d<double> ext;
-        accumulate_extent func(ext);
-        std::for_each(features_.begin(),features_.end(),func);
-        return ext;      
-    }
+box2d<double> memory_datasource::envelope() const
+{
+    box2d<double> ext;
+    accumulate_extent func(ext);
+    std::for_each(features_.begin(),features_.end(),func);
+    return ext;      
+}
     
-    layer_descriptor memory_datasource::get_descriptor() const
-    {
-        return layer_descriptor("in-memory datasource","utf-8");
-    }
+layer_descriptor memory_datasource::get_descriptor() const
+{
+    return layer_descriptor("in-memory datasource","utf-8");
+}
     
-    size_t memory_datasource::size() const
-    {
-        return features_.size();
-    }
+size_t memory_datasource::size() const
+{
+    return features_.size();
+}
 }

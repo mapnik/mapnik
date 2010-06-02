@@ -38,7 +38,7 @@ using mapnik::path_expression_ptr;
 // expression
 expression_ptr parse_expression_(std::string const& wkt)
 {
-   return parse_expression(wkt,"utf8");
+    return parse_expression(wkt,"utf8");
 }
 
 std::string expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature const& f)
@@ -67,19 +67,19 @@ void export_expression()
 {
     using namespace boost::python;
     class_<mapnik::expr_node ,boost::noncopyable>("Expression",
-                                               "TODO"
-                                               "",no_init)
-	.def("evaluate", &expression_evaluate_)
-	.def("__str__",&to_expression_string);
+                                                  "TODO"
+                                                  "",no_init)
+        .def("evaluate", &expression_evaluate_)
+        .def("__str__",&to_expression_string);
     ;
     
     def("Expression",&parse_expression_);
 
     class_<mapnik::path_expression ,boost::noncopyable>("PathExpression",
-                                               "TODO"
-                                               "",no_init)
-	.def("evaluate", &path_evaluate_) // note: "pass" is a reserved word in Python
-	.def("__str__",&path_to_string_);
+                                                        "TODO"
+                                                        "",no_init)
+        .def("evaluate", &path_evaluate_) // note: "pass" is a reserved word in Python
+        .def("__str__",&path_to_string_);
     ;
     
     def("PathExpression",&parse_path_);

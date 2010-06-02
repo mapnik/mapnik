@@ -42,36 +42,36 @@ public:
     
     static void init_from_string(color & c, char const* css_color)
     {   
-	typedef char const* iterator_type;
-	typedef mapnik::css_color_grammar<iterator_type> css_color_grammar; 
+        typedef char const* iterator_type;
+        typedef mapnik::css_color_grammar<iterator_type> css_color_grammar; 
 
-	css_color_grammar g;
-	iterator_type first = css_color;
-	iterator_type last =  css_color + std::strlen(css_color);
-	mapnik::css css_;
-	bool result =
-	    boost::spirit::qi::phrase_parse(first,
-					    last,
-					    g,
-					    boost::spirit::ascii::space,
-					    css_);
-	if (!result) 
-	{
-	    throw config_error(std::string("Failed to parse color value: ") +
-			       "Expected a color, but got '" + css_color + "'");
-	}
-	// TODO: adapt mapnik::color into boost::fusion sequence
-	c.set_red(css_.r);
-	c.set_green(css_.g);
-	c.set_blue(css_.b);
-	c.set_alpha(css_.a);
+        css_color_grammar g;
+        iterator_type first = css_color;
+        iterator_type last =  css_color + std::strlen(css_color);
+        mapnik::css css_;
+        bool result =
+            boost::spirit::qi::phrase_parse(first,
+                                            last,
+                                            g,
+                                            boost::spirit::ascii::space,
+                                            css_);
+        if (!result) 
+        {
+            throw config_error(std::string("Failed to parse color value: ") +
+                               "Expected a color, but got '" + css_color + "'");
+        }
+        // TODO: adapt mapnik::color into boost::fusion sequence
+        c.set_red(css_.r);
+        c.set_green(css_.g);
+        c.set_blue(css_.b);
+        c.set_alpha(css_.a);
     }    
     
     static color from_string(char const* css_color)
     {   
-	color c;
-	init_from_string(c,css_color);
-	return c;
+        color c;
+        init_from_string(c,css_color);
+        return c;
     }
 };
 }

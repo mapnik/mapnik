@@ -31,112 +31,112 @@
 namespace mapnik {
 
 #ifdef MAPNIK_THREADSAFE
-    boost::mutex projection::mutex_;
+boost::mutex projection::mutex_;
 #endif
    
-    projection::projection(std::string  params)
-        : params_(params)
-    { 
-        init(); //
-    }
+projection::projection(std::string  params)
+    : params_(params)
+{ 
+    init(); //
+}
     
-    projection::projection(projection const& rhs)
-        : params_(rhs.params_) 
-    {
-        init(); //
-    }
+projection::projection(projection const& rhs)
+    : params_(rhs.params_) 
+{
+    init(); //
+}
         
-    projection& projection::operator=(projection const& rhs) 
-    { 
-        projection tmp(rhs);
-        swap(tmp);
-        return *this;
-    }
+projection& projection::operator=(projection const& rhs) 
+{ 
+    projection tmp(rhs);
+    swap(tmp);
+    return *this;
+}
     
-    bool projection::operator==(const projection& other) const 
-    {
-        return (params_ == other.params_);
-    }
+bool projection::operator==(const projection& other) const 
+{
+    return (params_ == other.params_);
+}
     
-    bool projection::operator!=(const projection& other) const 
-    {
-        return !(*this == other);
-    }
+bool projection::operator!=(const projection& other) const 
+{
+    return !(*this == other);
+}
     
-    bool projection::is_initialized() const
-    {
-        return proj_ ? true : false;
-    }
+bool projection::is_initialized() const
+{
+    return proj_ ? true : false;
+}
     
-    bool projection::is_geographic() const
-    {
+bool projection::is_geographic() const
+{
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
+    mutex::scoped_lock lock(mutex_);
 #endif
-        return pj_is_latlong(proj_) ? true : false;  
-    }
+    return pj_is_latlong(proj_) ? true : false;  
+}
     
-    std::string const& projection::params() const
-    {
-        return params_;
-    }
+std::string const& projection::params() const
+{
+    return params_;
+}
     
-    void projection::forward(double & x, double &y ) const
-    {
+void projection::forward(double & x, double &y ) const
+{
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
+    mutex::scoped_lock lock(mutex_);
 #endif
-        projUV p;
-        p.u = x * DEG_TO_RAD;
-        p.v = y * DEG_TO_RAD;
-        p = pj_fwd(p,proj_);
-        x = p.u;
-        y = p.v;
-        if (pj_is_latlong(proj_))
-        {
-           x *=RAD_TO_DEG;
-           y *=RAD_TO_DEG;
-        }           
-    }
-    
-    void projection::inverse(double & x,double & y) const
+    projUV p;
+    p.u = x * DEG_TO_RAD;
+    p.v = y * DEG_TO_RAD;
+    p = pj_fwd(p,proj_);
+    x = p.u;
+    y = p.v;
+    if (pj_is_latlong(proj_))
     {
+        x *=RAD_TO_DEG;
+        y *=RAD_TO_DEG;
+    }           
+}
+    
+void projection::inverse(double & x,double & y) const
+{
 #ifdef MAPNIK_THREADSAFE
-       mutex::scoped_lock lock(mutex_);
+    mutex::scoped_lock lock(mutex_);
 #endif
-       if (pj_is_latlong(proj_))
-       {
-          x *=DEG_TO_RAD;
-          y *=DEG_TO_RAD;
-       }  
-       projUV p;
-       p.u = x;
-       p.v = y;
-       p = pj_inv(p,proj_);
-       x = RAD_TO_DEG * p.u;
-       y = RAD_TO_DEG * p.v;
-    }
-    
-    projection::~projection() 
+    if (pj_is_latlong(proj_))
     {
+        x *=DEG_TO_RAD;
+        y *=DEG_TO_RAD;
+    }  
+    projUV p;
+    p.u = x;
+    p.v = y;
+    p = pj_inv(p,proj_);
+    x = RAD_TO_DEG * p.u;
+    y = RAD_TO_DEG * p.v;
+}
+    
+projection::~projection() 
+{
 #ifdef MAPNIK_THREADSAFE
-       mutex::scoped_lock lock(mutex_);
+    mutex::scoped_lock lock(mutex_);
 #endif
-       if (proj_) pj_free(proj_);
-    }
+    if (proj_) pj_free(proj_);
+}
     
-    void projection::init()
-    {
+void projection::init()
+{
 #ifdef MAPNIK_THREADSAFE
-       mutex::scoped_lock lock(mutex_);
+    mutex::scoped_lock lock(mutex_);
 #endif
-       proj_=pj_init_plus(params_.c_str());
-       if (!proj_) throw proj_init_error(params_);
-    }
+    proj_=pj_init_plus(params_.c_str());
+    if (!proj_) throw proj_init_error(params_);
+}
     
-    void projection::swap (projection& rhs)
-    {
-        std::swap(params_,rhs.params_);
-        init ();
-    }
+void projection::swap (projection& rhs)
+{
+    std::swap(params_,rhs.params_);
+    init ();
+}
 }

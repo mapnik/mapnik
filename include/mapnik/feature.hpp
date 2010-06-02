@@ -46,11 +46,11 @@ namespace mapnik {
 typedef boost::shared_ptr<raster> raster_ptr;    
 typedef boost::associative_property_map<
 std::map<std::string,value
-	 > > properties;
+         > > properties;
    
 template <typename T1,typename T2>
 struct feature : public properties,
-		 private boost::noncopyable
+                 private boost::noncopyable
 {
 public:
     typedef T1 geometry_type;
@@ -67,96 +67,96 @@ private:
 public:
     typedef std::map<std::string,value>::iterator iterator;
     explicit feature(int id)
-	: properties(props_),
-	  id_(id),
-	  geom_cont_(),
-	  raster_() {}
+        : properties(props_),
+          id_(id),
+          geom_cont_(),
+          raster_() {}
        
     int id() const 
     {
-	return id_;
+        return id_;
     }
        
     void add_geometry(geometry_type * geom)
     {
-	geom_cont_.push_back(geom);
+        geom_cont_.push_back(geom);
     }
        
     unsigned num_geometries() const
     {
-	return geom_cont_.size();
+        return geom_cont_.size();
     }
        
     geometry_type const& get_geometry(unsigned index) const
     {
-	return geom_cont_[index];
+        return geom_cont_[index];
     }
        
     geometry_type& get_geometry(unsigned index)
     {
-	return geom_cont_[index];
+        return geom_cont_[index];
     }
        
     box2d<double> envelope() const
     {
-	box2d<double> result;
-	for (unsigned i=0;i<num_geometries();++i)
-	{
-	    geometry2d const& geom = get_geometry(i);
-	    if (i==0)
-	    {
-		box2d<double> box = geom.envelope();
-		result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
-	    }
-	    else
-	    {
-		result.expand_to_include(geom.envelope());
-	    }
-	}
-	return result;
+        box2d<double> result;
+        for (unsigned i=0;i<num_geometries();++i)
+        {
+            geometry2d const& geom = get_geometry(i);
+            if (i==0)
+            {
+                box2d<double> box = geom.envelope();
+                result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
+            }
+            else
+            {
+                result.expand_to_include(geom.envelope());
+            }
+        }
+        return result;
     }
        
     const raster_type& get_raster() const
     {
-	return raster_;
+        return raster_;
     }
        
     void set_raster(raster_type const& raster)
     {
-	raster_=raster;
+        raster_=raster;
     }
        
     std::map<std::string,value> const& props() const 
     {
-	return props_;
+        return props_;
     }
        
     std::map<std::string,value>& props() 
     {
-	return props_;
+        return props_;
     }
     
     iterator begin()
     {
-	return props_.begin();
+        return props_.begin();
     }
        
     iterator end()
     {
-	return props_.end();
+        return props_.end();
     }
        
     std::string to_string() const
     {
-	std::stringstream ss;
-	ss << "feature (" << std::endl;
-	for (std::map<std::string,value>::const_iterator itr=props_.begin();
-	     itr != props_.end();++itr)
-	{
-	    ss << "  " << itr->first  << ":" <<  itr->second << std::endl;
-	}
-	ss << ")" << std::endl;
-	return ss.str();
+        std::stringstream ss;
+        ss << "feature (" << std::endl;
+        for (std::map<std::string,value>::const_iterator itr=props_.begin();
+             itr != props_.end();++itr)
+        {
+            ss << "  " << itr->first  << ":" <<  itr->second << std::endl;
+        }
+        ss << ")" << std::endl;
+        return ss.str();
     }
 };
    

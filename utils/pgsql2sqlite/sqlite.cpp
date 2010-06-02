@@ -25,35 +25,35 @@
 
 namespace mapnik { namespace sqlite {
 
-      database::database(std::string const& name)
-      {
-         sqlite3 *db;
-         int res = sqlite3_open(name.c_str(), &db);
-         if (res)
-         {
+    database::database(std::string const& name)
+    {
+        sqlite3 *db;
+        int res = sqlite3_open(name.c_str(), &db);
+        if (res)
+        {
             sqlite3_close(db);
             throw;
-         } 
+        } 
          
-         db_ = sqlite_db(db,database_closer());
+        db_ = sqlite_db(db,database_closer());
 #ifdef MAPNIK_DEBUG
-         std::cerr << "Open database " << name << "\n";
+        std::cerr << "Open database " << name << "\n";
 #endif
-      }
+    }
       
-      database::~database() {}
+    database::~database() {}
       
-      bool database::execute(std::string const& sql)   
-      {
-         char * err_msg;
-         int res = sqlite3_exec(db_.get(),sql.c_str(),0,0,&err_msg);
-         if (res != SQLITE_OK)
-         {
+    bool database::execute(std::string const& sql)   
+    {
+        char * err_msg;
+        int res = sqlite3_exec(db_.get(),sql.c_str(),0,0,&err_msg);
+        if (res != SQLITE_OK)
+        {
             std::cerr << "SQL"<< sql << " ERR:" << err_msg << "\n";
             sqlite3_free(err_msg);
             return false;
-         }
-         return true;
-      }
+        }
+        return true;
     }
- }
+    }
+}

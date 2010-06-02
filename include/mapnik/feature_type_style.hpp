@@ -32,36 +32,36 @@
 
 namespace mapnik
 {
-    typedef std::vector<rule_type> rules;
-    class feature_type_style
-    {
-    private:
-        rules  rules_;
-    public:
-        feature_type_style() {}
+typedef std::vector<rule_type> rules;
+class feature_type_style
+{
+private:
+    rules  rules_;
+public:
+    feature_type_style() {}
 
-        feature_type_style(feature_type_style const& rhs)
-            : rules_(rhs.rules_) {}
-	
-        feature_type_style& operator=(feature_type_style const& rhs)
-        {
-            if (this == &rhs) return *this;
-            rules_=rhs.rules_;
-            return *this;
-        }
-	
-        void add_rule(rule_type const& rule)
-        {
-            rules_.push_back(rule);
-        } 
-	
-        rules const& get_rules() const
-        {
-            return rules_;
-        }
+    feature_type_style(feature_type_style const& rhs)
+        : rules_(rhs.rules_) {}
         
-        ~feature_type_style() {}
-    };
+    feature_type_style& operator=(feature_type_style const& rhs)
+    {
+        if (this == &rhs) return *this;
+        rules_=rhs.rules_;
+        return *this;
+    }
+        
+    void add_rule(rule_type const& rule)
+    {
+        rules_.push_back(rule);
+    } 
+        
+    rules const& get_rules() const
+    {
+        return rules_;
+    }
+        
+    ~feature_type_style() {}
+};
 }
 
 #endif //FEATURE_TYPE_STYLE_HPP

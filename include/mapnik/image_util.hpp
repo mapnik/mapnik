@@ -46,41 +46,41 @@ private:
     std::string message_;
 public:
     ImageWriterException(const std::string& message) 
-	: message_(message) {}
+        : message_(message) {}
 
     ~ImageWriterException() throw() {}
 
     virtual const char* what() const throw()
     {
-	return message_.c_str();
+        return message_.c_str();
     }
 };
 
 MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
-				    std::string const& filename,
-				    std::string const& type);
+                                    std::string const& filename,
+                                    std::string const& type);
 
 template <typename T>
 MAPNIK_DECL void save_to_file(T const& image,
-			      std::string const& filename,
-			      std::string const& type);
+                              std::string const& filename,
+                              std::string const& type);
 // guess type from file extension
 template <typename T>
 MAPNIK_DECL void save_to_file(T const& image,
-			      std::string const& filename);
+                              std::string const& filename);
    
 template <typename T>
 MAPNIK_DECL std::string save_to_string(T const& image,
-				       std::string const& type);
+                                       std::string const& type);
 
 template <typename T>
 void save_as_png(T const& image,
-		 std::string const& filename);
+                 std::string const& filename);
    
 template <typename T>
 void save_as_jpeg(std::string const& filename,
-		  int quality,
-		  T const& image);
+                  int quality,
+                  T const& image);
    
 inline bool is_png (std::string const& filename)
 {
@@ -90,13 +90,13 @@ inline bool is_png (std::string const& filename)
 inline bool is_jpeg (std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".jpg")) ||
-	boost::algorithm::iends_with(filename,std::string(".jpeg"));
+        boost::algorithm::iends_with(filename,std::string(".jpeg"));
 }
    
 inline bool is_tiff (std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".tif")) ||
-	boost::algorithm::iends_with(filename,std::string(".tiff"));
+        boost::algorithm::iends_with(filename,std::string(".tiff"));
 }
 
 inline bool is_pdf (std::string const& filename)
@@ -131,7 +131,7 @@ inline std::string guess_type( const std::string & filename )
 {
     std::string::size_type idx = filename.find_last_of(".");
     if ( idx != std::string::npos ) {
-	return filename.substr( idx + 1 );
+        return filename.substr( idx + 1 );
     }
     return "<unknown>";
 }
@@ -151,13 +151,13 @@ void add_border(T & image)
 {
     for (unsigned  x = 0; x < image.width();++x)
     {
-	image(x,0) = 0xff0000ff; // red
-	image(x,image.height()-1) = 0xff00ff00; //green
+        image(x,0) = 0xff0000ff; // red
+        image(x,image.height()-1) = 0xff00ff00; //green
     }
     for (unsigned y = 0; y < image.height();++y)
     {
-	image(0,y) = 0xff00ffff; //yellow 
-	image(image.width()-1,y) = 0xffff0000; // blue
+        image(0,y) = 0xff00ffff; //yellow 
+        image(image.width()-1,y) = 0xffff0000; // blue
     }
 }
 
@@ -172,7 +172,7 @@ inline void scale_image (Image& target,const Image& source)
     int target_height=target.height();
 
     if (source_width<1 || source_height<1 ||
-	target_width<1 || target_height<1) return;
+        target_width<1 || target_height<1) return;
     int int_part_y=source_height/target_height;
     int fract_part_y=source_height%target_height;
     int err_y=0;
@@ -183,33 +183,33 @@ inline void scale_image (Image& target,const Image& source)
     int prev_y=-1;
     for (y=0;y<target_height;++y)
     {
-	if (ys==prev_y)
-	{
+        if (ys==prev_y)
+        {
             target.setRow(y,target.getRow(y-1),target_width);
-	}
-	else
-	{
+        }
+        else
+        {
             xs=0;
             for (x=0;x<target_width;++x)
             {
-		target(x,y)=source(xs,ys);
-		xs+=int_part_x;
-		err_x+=fract_part_x;
-		if (err_x>=target_width)
-		{
-		    err_x-=target_width;
-		    ++xs;
-		}
+                target(x,y)=source(xs,ys);
+                xs+=int_part_x;
+                err_x+=fract_part_x;
+                if (err_x>=target_width)
+                {
+                    err_x-=target_width;
+                    ++xs;
+                }
             }
             prev_y=ys;
-	}
-	ys+=int_part_y;
-	err_y+=fract_part_y;
-	if (err_y>=target_height)
-	{
+        }
+        ys+=int_part_y;
+        err_y+=fract_part_y;
+        if (err_y>=target_height)
+        {
             err_y-=target_height;
             ++ys;
-	}
+        }
     }
 
 #ifdef MAPNIK_DEBUG
@@ -228,7 +228,7 @@ inline void scale_image_bilinear (Image& target,const Image& source, double x_of
     int target_height=target.height();
 
     if (source_width<1 || source_height<1 ||
-	target_width<1 || target_height<1) return;
+        target_width<1 || target_height<1) return;
     int x=0,y=0,xs=0,ys=0;
     int tw2 = target_width/2;
     int th2 = target_height/2;
@@ -315,7 +315,7 @@ inline void scale_image_bilinear8 (Image& target,const Image& source, double x_o
     int target_height=target.height();
 
     if (source_width<1 || source_height<1 ||
-	target_width<1 || target_height<1) return;
+        target_width<1 || target_height<1) return;
     int x=0,y=0,xs=0,ys=0;
     int tw2 = target_width/2;
     int th2 = target_height/2;
@@ -380,42 +380,42 @@ inline void scale_image_bilinear8 (Image& target,const Image& source, double x_o
 }
 
 inline MAPNIK_DECL void save_to_file (image_32 const& image,
-				      std::string const& file,
-				      std::string const& type) 
+                                      std::string const& file,
+                                      std::string const& type) 
 {
     save_to_file<image_data_32>(image.data(),file,type);
 }
    
 inline MAPNIK_DECL void save_to_file(image_32 const& image,
-				     std::string const& file) 
+                                     std::string const& file) 
 {
     save_to_file<image_data_32>(image.data(),file);
 }
 
 inline MAPNIK_DECL std::string save_to_string(image_32 const& image,
-					      std::string const& type)
+                                              std::string const& type)
 {
     return save_to_string<image_data_32>(image.data(),type);
 }
    
 #ifdef _MSC_VER
 template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
-						      std::string const&,
-						      std::string const&);
+                                                      std::string const&,
+                                                      std::string const&);
 template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
-						      std::string const&);
+                                                      std::string const&);
 template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
-							       std::string const&);
+                                                               std::string const&);
    
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
-								    std::string const&,
-								    std::string const&);
+                                                                    std::string const&,
+                                                                    std::string const&);
  
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
-								    std::string const&);
+                                                                    std::string const&);
    
 template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
-									     std::string const&);
+                                                                             std::string const&);
 #endif
 
 }

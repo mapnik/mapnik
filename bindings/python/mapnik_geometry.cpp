@@ -28,13 +28,13 @@
 
 void export_geometry()
 {
-   using namespace boost::python;
-   using mapnik::geometry2d;
+    using namespace boost::python;
+    using mapnik::geometry2d;
    
-   class_<geometry2d, boost::noncopyable>("Geometry2d",no_init)
-      .def("envelope",&geometry2d::envelope)
-       // .def("__str__",&geometry2d::to_string)
-       .def("type",&geometry2d::type)
-       // TODO add other geometry2d methods
-      ;
+    class_<geometry2d, boost::noncopyable>("Geometry2d",no_init)
+        .def("envelope",&geometry2d::envelope)
+        // .def("__str__",&geometry2d::to_string)
+        .def("type",&geometry2d::type)
+        // TODO add other geometry2d methods
+        ;
 }

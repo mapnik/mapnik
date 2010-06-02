@@ -28,9 +28,9 @@
 
 namespace mapnik {
     
-    class style_factory 
-    {
-    };
+class style_factory 
+{
+};
 }
 
 

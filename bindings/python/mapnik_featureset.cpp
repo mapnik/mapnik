@@ -28,22 +28,22 @@
 #include <mapnik/datasource.hpp>
 
 namespace {
-    using namespace boost::python;
+using namespace boost::python;
 
-    list features(mapnik::featureset_ptr const& itr)
+list features(mapnik::featureset_ptr const& itr)
+{
+    list l;
+    while (true)
     {
-        list l;
-        while (true)
+        mapnik::feature_ptr fp = itr->next();
+        if (!fp)
         {
-            mapnik::feature_ptr fp = itr->next();
-            if (!fp)
-            {
-                break;
-            }
-            l.append(fp);
+            break;
         }
-        return l;
+        l.append(fp);
     }
+    return l;
+}
 }
 
 void export_featureset()

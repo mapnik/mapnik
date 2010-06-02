@@ -38,40 +38,40 @@ using mapnik::expression_ptr;
 
 struct shield_symbolizer_pickle_suite : boost::python::pickle_suite
 {
-   static boost::python::tuple
-   getinitargs(const shield_symbolizer& s)
-   {
-       std::string filename = path_processor_type::to_string(*s.get_filename());
-       //(name, font name, font size, font color, image file, image type, width, height)
-       return boost::python::make_tuple( "TODO",//s.get_name(),
-					s.get_face_name(),s.get_text_size(),s.get_fill(),filename,guess_type(filename));
+    static boost::python::tuple
+    getinitargs(const shield_symbolizer& s)
+    {
+        std::string filename = path_processor_type::to_string(*s.get_filename());
+        //(name, font name, font size, font color, image file, image type, width, height)
+        return boost::python::make_tuple( "TODO",//s.get_name(),
+                                          s.get_face_name(),s.get_text_size(),s.get_fill(),filename,guess_type(filename));
       
-   }
+    }
 
-   static  boost::python::tuple
-   getstate(const shield_symbolizer& s)
-   {
+    static  boost::python::tuple
+    getstate(const shield_symbolizer& s)
+    {
         return boost::python::make_tuple(s.get_halo_fill(),s.get_halo_radius());
-   }
+    }
 
-   // TODO add lots more...
-   static void
-   setstate (shield_symbolizer& s, boost::python::tuple state)
-   {
+    // TODO add lots more...
+    static void
+    setstate (shield_symbolizer& s, boost::python::tuple state)
+    {
         using namespace boost::python;
         /*if (len(state) != 1)
-        {
-            PyErr_SetObject(PyExc_ValueError,
-                         ("expected 1-item tuple in call to __setstate__; got %s"
-                          % state).ptr()
-            );
-            throw_error_already_set();
-        }*/
+          {
+          PyErr_SetObject(PyExc_ValueError,
+          ("expected 1-item tuple in call to __setstate__; got %s"
+          % state).ptr()
+          );
+          throw_error_already_set();
+          }*/
                 
         s.set_halo_fill(extract<color>(state[0]));
         s.set_halo_radius(extract<float>(state[1]));
         
-   }
+    }
 
 };
 
@@ -81,7 +81,7 @@ void export_shield_symbolizer()
     class_< shield_symbolizer, bases<text_symbolizer> >("ShieldSymbolizer",
                                                         init<expression_ptr, std::string const&, unsigned, mapnik::color const&,
                                                         path_expression_ptr>("TODO"))
-	//.def_pickle(shield_symbolizer_pickle_suite())
+        //.def_pickle(shield_symbolizer_pickle_suite())
         ;
     
 }

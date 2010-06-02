@@ -33,17 +33,17 @@
 
 namespace mapnik
 {
-   class PluginInfo : boost::noncopyable
-   {         
-    private:
-         std::string name_;
-         lt_dlhandle module_;     
-    public:
-         PluginInfo (const std::string& name,const lt_dlhandle module);
-         ~PluginInfo();
-         const std::string& name() const;
-         lt_dlhandle handle() const;
-   };
+class PluginInfo : boost::noncopyable
+{         
+private:
+    std::string name_;
+    lt_dlhandle module_;     
+public:
+    PluginInfo (const std::string& name,const lt_dlhandle module);
+    ~PluginInfo();
+    const std::string& name() const;
+    lt_dlhandle handle() const;
+};
 }
 
 #endif //PLUGIN_HPP

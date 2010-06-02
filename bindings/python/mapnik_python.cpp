@@ -82,104 +82,104 @@ static Pycairo_CAPI_t *Pycairo_CAPI;
 void render(const mapnik::Map& map,mapnik::image_32& image, unsigned offset_x = 0, unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        mapnik::agg_renderer<mapnik::image_32> ren(map,image,offset_x, offset_y);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            mapnik::agg_renderer<mapnik::image_32> ren(map,image,offset_x, offset_y);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 void render2(const mapnik::Map& map,mapnik::image_32& image)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        mapnik::agg_renderer<mapnik::image_32> ren(map,image);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            mapnik::agg_renderer<mapnik::image_32> ren(map,image);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
 void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-        mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+            mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 void render4(const mapnik::Map& map,PycairoSurface* surface)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-        mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+            mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 void render5(const mapnik::Map& map,PycairoContext* context, unsigned offset_x = 0, unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-        mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+            mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 void render6(const mapnik::Map& map,PycairoContext* context)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-        mapnik::cairo_renderer<Cairo::Context> ren(map,c);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+            mapnik::cairo_renderer<Cairo::Context> ren(map,c);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 #endif
 
@@ -195,8 +195,8 @@ void render_tile_to_file(const mapnik::Map& map,
 }
 
 void render_to_file1(const mapnik::Map& map,
-                    const std::string& filename,
-                    const std::string& format)
+                     const std::string& filename,
+                     const std::string& format)
 {
     if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
@@ -211,7 +211,7 @@ void render_to_file1(const mapnik::Map& map,
         mapnik::image_32 image(map.getWidth(),map.getHeight());
         render(map,image,0,0);
         mapnik::save_to_file(image,filename,format); 
-}
+    }
 }
 
 void render_to_file2(const mapnik::Map& map,const std::string& filename)
@@ -230,7 +230,7 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
         mapnik::image_32 image(map.getWidth(),map.getHeight());
         render(map,image,0,0);
         mapnik::save_to_file(image,filename); 
-}
+    }
 }
 
 double scale_denominator(mapnik::Map const &map, bool geographic)
@@ -250,9 +250,9 @@ unsigned mapnik_version()
 unsigned mapnik_svn_revision()
 {
 #if defined(SVN_REVISION)
-  return SVN_REVISION;
+    return SVN_REVISION;
 #else
-  return 0;
+    return 0;
 #endif
 }
 
@@ -260,9 +260,9 @@ unsigned mapnik_svn_revision()
 bool has_cairo()
 {
 #if defined(HAVE_CAIRO)
-  return true;
+    return true;
 #else
-  return false;
+    return false;
 #endif
 }
 
@@ -270,17 +270,17 @@ bool has_cairo()
 bool has_pycairo()
 {
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-   Pycairo_IMPORT;
-   /*!
-   Case where pycairo support has been compiled into
-   mapnik but at runtime the cairo python module 
-   is unable to be imported and therefore Pycairo surfaces 
-   and contexts cannot be passed to mapnik.render() 
-   */ 
-   if (Pycairo_CAPI == NULL) return false;
-   return true;
+    Pycairo_IMPORT;
+    /*!
+      Case where pycairo support has been compiled into
+      mapnik but at runtime the cairo python module 
+      is unable to be imported and therefore Pycairo surfaces 
+      and contexts cannot be passed to mapnik.render() 
+    */ 
+    if (Pycairo_CAPI == NULL) return false;
+    return true;
 #else
-   return false;
+    return false;
 #endif
 }
 
@@ -477,19 +477,19 @@ BOOST_PYTHON_MODULE(_mapnik2)
 
     def("save_map", & save_map, save_map_overloads());
 /*
-        "\n"
-        "Save Map object to XML file\n"
-        "\n"
-        "Usage:\n"
-        ">>> from mapnik import Map, load_map, save_map\n"
-        ">>> m = Map(256,256)\n"
-        ">>> load_map(m,'mapfile_wgs84.xml')\n"
-        ">>> m.srs\n"
-        "'+proj=latlong +datum=WGS84'\n"
-        ">>> m.srs = '+init=espg:3395'\n"
-        ">>> save_map(m,'mapfile_mercator.xml')\n"
-        "\n"
-        );
+  "\n"
+  "Save Map object to XML file\n"
+  "\n"
+  "Usage:\n"
+  ">>> from mapnik import Map, load_map, save_map\n"
+  ">>> m = Map(256,256)\n"
+  ">>> load_map(m,'mapfile_wgs84.xml')\n"
+  ">>> m.srs\n"
+  "'+proj=latlong +datum=WGS84'\n"
+  ">>> m.srs = '+init=espg:3395'\n"
+  ">>> save_map(m,'mapfile_mercator.xml')\n"
+  "\n"
+  );
 */
     
     def("save_map_to_string", & save_map_to_string, save_map_to_string_overloads());

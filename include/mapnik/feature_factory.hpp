@@ -29,13 +29,13 @@
 
 namespace mapnik
 {
-    struct feature_factory
+struct feature_factory
+{
+    static Feature* create (int fid)
     {
-        static Feature* create (int fid)
-        {
-            return new Feature(fid);
-        }
-    }; 
+        return new Feature(fid);
+    }
+}; 
 }
 
 #endif //FEATURE_FACTORY_HPP

@@ -40,8 +40,8 @@ struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
 
 template <typename T>
 void agg_renderer<T>::process(markers_symbolizer const& sym,
-			      Feature const& feature,
-			      proj_transform const& prj_trans)
+                              Feature const& feature,
+                              proj_transform const& prj_trans)
 {
     typedef coord_transform2<CoordTransform,geometry2d> path_type;
     typedef agg::pixfmt_rgba32 pixfmt;
@@ -92,10 +92,10 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
         path_type path(t_,geom,prj_trans);
         markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
-									  sym.get_spacing(), 
-									  sym.get_max_error(), 
-									  sym.get_allow_overlap());
-	
+                                                                          sym.get_spacing(), 
+                                                                          sym.get_max_error(), 
+                                                                          sym.get_allow_overlap());
+        
         double x, y, angle;
         
         while (placement.get_point(&x, &y, &angle))
@@ -117,6 +117,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(markers_symbolizer const&,
-					      Feature const&,
-					      proj_transform const&);
+                                              Feature const&,
+                                              proj_transform const&);
 }

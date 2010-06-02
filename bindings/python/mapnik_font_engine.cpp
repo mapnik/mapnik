@@ -32,15 +32,15 @@ void export_font_engine()
     using namespace boost::python;
     class_<singleton<freetype_engine,CreateStatic>,boost::noncopyable>("Singleton",no_init)
         .def("instance",&singleton<freetype_engine,CreateStatic>::instance,
-	     return_value_policy<reference_existing_object>())
+             return_value_policy<reference_existing_object>())
         .staticmethod("instance")
         ;
 
-	class_<freetype_engine,bases<singleton<freetype_engine,CreateStatic> >,
-  		boost::noncopyable>("FontEngine",no_init)
-		.def("register_font",&freetype_engine::register_font)
-		.def("face_names",&freetype_engine::face_names)
-		.staticmethod("register_font")
-		.staticmethod("face_names")
+    class_<freetype_engine,bases<singleton<freetype_engine,CreateStatic> >,
+        boost::noncopyable>("FontEngine",no_init)
+        .def("register_font",&freetype_engine::register_font)
+        .def("face_names",&freetype_engine::face_names)
+        .staticmethod("register_font")
+        .staticmethod("face_names")
         ;
 }

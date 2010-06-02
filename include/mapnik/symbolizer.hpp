@@ -41,7 +41,7 @@ public:
 protected:
     symbolizer_with_image(path_expression_ptr filename);
     symbolizer_with_image(symbolizer_with_image const& rhs);
-    path_expression_ptr image_filename_;	
+    path_expression_ptr image_filename_;        
 };
 }
 
