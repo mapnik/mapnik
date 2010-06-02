@@ -27,12 +27,12 @@ def fixup_sym_attributes(sym):
     for css in sym.CssParameter:
         key = css.attrib.get('name')
         value = css.text
-        attrib[key]=value
+        attrib[key] = value
     sym.clear() # remove CssParameter elements
     for k,v in attrib.items(): # insert attributes instead
         sym.attrib[k] = v
     
-
+        
 if __name__ == "__main__":
     
     if len(sys.argv) != 2:
@@ -59,6 +59,12 @@ if __name__ == "__main__":
                         fixup_sym_attributes(sym)
                 if hasattr(rule,'PolygonSymbolizer') :
                     for sym in rule.PolygonSymbolizer:
+                        fixup_sym_attributes(sym)
+                if hasattr(rule,'RasterSymbolizer') :
+                    for sym in rule.RasterSymbolizer:
+                        fixup_sym_attributes(sym)
+                if hasattr(rule,'BuildingSymbolizer') :
+                    for sym in rule.BuildingSymbolizer:
                         fixup_sym_attributes(sym)
                         
     print etree.tostring(tree,pretty_print=True,standalone=True)
