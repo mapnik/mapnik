@@ -70,6 +70,10 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     svg_marker = false;
     extent = arrow_.extent();        
     
+    agg::trans_affine tr;
+    boost::array<double,6> const& m = sym.get_transform();
+    tr.load_from(&m[0]);
+    
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
     
     if (!filename.empty())
@@ -98,7 +102,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         
         while (placement.get_point(&x, &y, &angle))
         {
-            agg::trans_affine matrix = agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
+            agg::trans_affine matrix = tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
             if (svg_marker)
             {
                 (*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), 1.0);
