@@ -98,9 +98,6 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 tr.transform(&x1,&y1);
                 tr.transform(&x2,&y2);
                 
-                //extent.init(x - 0.5*(x2-x1), y - 0.5*(y2-y1), 
-                //          x + 0.5*(x2-x1), y + 0.5*(y2-y1));
-                
                 extent.init(x1,y1,x2,y2);
                 if (sym.get_allow_overlap() ||
                     detector_.has_placement(extent))
