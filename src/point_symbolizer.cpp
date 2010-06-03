@@ -35,35 +35,17 @@ namespace mapnik
 point_symbolizer::point_symbolizer()
     : symbolizer_with_image(path_expression_ptr(new path_expression)), // FIXME
       opacity_(1.0),
-      overlap_(false)
-{
-    matrix_[0] = 1.0;
-    matrix_[1] = 0.0;
-    matrix_[2] = 0.0;
-    matrix_[3] = 1.0;
-    matrix_[4] = 0.0;
-    matrix_[5] = 0.0;
-}
+      overlap_(false) {}
     
 point_symbolizer::point_symbolizer(path_expression_ptr file) 
     : symbolizer_with_image(file),
       opacity_(1.0),      
-      overlap_(false)
-          
-{ 
-    matrix_[0] = 1.0;
-    matrix_[1] = 0.0;
-    matrix_[2] = 0.0;
-    matrix_[3] = 1.0;
-    matrix_[4] = 0.0;
-    matrix_[5] = 0.0;  
-}
+      overlap_(false) {}
 
 point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
     : symbolizer_with_image(rhs),
       opacity_(rhs.opacity_),
-      overlap_(rhs.overlap_),
-      matrix_(rhs.matrix_)
+      overlap_(rhs.overlap_)
 {}
 
 void point_symbolizer::set_allow_overlap(bool overlap)
@@ -85,17 +67,6 @@ float point_symbolizer::get_opacity() const
 {
     return opacity_;
 }
-
-void point_symbolizer::set_transform(transform_type const& matrix)
-{
-    matrix_ = matrix;
-}
-
-transform_type const& point_symbolizer::get_transform() const
-{
-    return matrix_;
-}
-
 
 }
 

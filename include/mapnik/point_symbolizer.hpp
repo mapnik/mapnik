@@ -26,13 +26,9 @@
 
 // mapnik
 #include <mapnik/symbolizer.hpp> 
-// boost
-#include <boost/array.hpp>
 
 namespace mapnik 
 {   
-
-typedef boost::array<double,6> transform_type;
 
 struct MAPNIK_DECL point_symbolizer : 
         public symbolizer_with_image
@@ -44,12 +40,10 @@ struct MAPNIK_DECL point_symbolizer :
     bool get_allow_overlap() const;
     void set_opacity(float opacity);
     float get_opacity() const;
-    void set_transform(transform_type const& );
-    transform_type const& get_transform() const;
+    
 private:
     float opacity_;
     bool overlap_;
-    transform_type matrix_;
 };
 }
 
