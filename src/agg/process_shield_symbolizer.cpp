@@ -42,7 +42,10 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                proj_transform const& prj_trans)
 {
     typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-
+    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::renderer_base<pixfmt> renderer_base;
+    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
+    
     UnicodeString text;
     if( sym.get_no_text() )
         text = UnicodeString( " " );  // TODO: fix->use 'space' as the text to render
@@ -64,131 +67,278 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
     }
     
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<mapnik::image_ptr> data = mapnik::image_cache::instance()->find(filename,true);
     
-    if (text.length() > 0 && data)
+    if (is_svg(filename)) //SVG Label
     {
-        face_set_ptr faces;
-
-        if (sym.get_fontset().size() > 0)
+        boost::optional<path_ptr> marker = marker_cache::instance()->find(filename, true);
+        ras_ptr->reset();
+        ras_ptr->gamma(agg::gamma_linear());
+        agg::scanline_u8 sl;
+        agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+        pixfmt pixf(buf);
+        renderer_base renb(pixf);
+        renderer_solid ren(renb);
+        
+        if (text.length() > 0 && marker && *marker)
         {
-            faces = font_manager_.get_face_set(sym.get_fontset());
-        }
-        else
-        {
-            faces = font_manager_.get_face_set(sym.get_face_name());
-        }
-
-        if (faces->size() > 0)
-        {
-            text_renderer<T> ren(pixmap_, faces);
-
-            ren.set_pixel_size(sym.get_text_size());
-            ren.set_fill(sym.get_fill());
-            ren.set_halo_fill(sym.get_halo_fill());
-            ren.set_halo_radius(sym.get_halo_radius());
-
-            placement_finder<label_collision_detector4> finder(detector_);
-
-            string_info info(text);
-
-            faces->get_string_info(info);
-
-
-            int w = (*data)->width();
-            int h = (*data)->height();
-
-            unsigned num_geom = feature.num_geometries();
-            for (unsigned i=0;i<num_geom;++i)
+            face_set_ptr faces;
+            double x1, y1, x2, y2;
+            (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
+            // TODO : apply transform
+            int w = int(x2 - x1);
+            int h = int(y2 - y1);
+            
+            if (sym.get_fontset().size() > 0)
             {
-                geometry2d const& geom = feature.get_geometry(i);
-                if (geom.num_points() > 0 )
+                faces = font_manager_.get_face_set(sym.get_fontset());
+            }
+            else
+            {
+                faces = font_manager_.get_face_set(sym.get_face_name());
+            }
+            
+            if (faces->size() > 0)
+            {
+                text_renderer<T> text_ren(pixmap_, faces);
+
+                text_ren.set_pixel_size(sym.get_text_size());
+                text_ren.set_fill(sym.get_fill());
+                text_ren.set_halo_fill(sym.get_halo_fill());
+                text_ren.set_halo_radius(sym.get_halo_radius());
+
+                placement_finder<label_collision_detector4> finder(detector_);
+
+                string_info info(text);
+
+                faces->get_string_info(info);
+                
+                unsigned num_geom = feature.num_geometries();
+                
+                for (unsigned i=0;i<num_geom;++i)
                 {
-                    path_type path(t_,geom,prj_trans);
-
-                    label_placement_enum how_placed = sym.get_label_placement();
-                    if (how_placed == POINT_PLACEMENT || how_placed == VERTEX_PLACEMENT)
+                    geometry2d const& geom = feature.get_geometry(i);
+                    if (geom.num_points() > 0 )
                     {
-                        // for every vertex, try and place a shield/text
-                        geom.rewind(0);
-                        for( unsigned jj = 0; jj < geom.num_points(); jj++ )
+                        path_type path(t_,geom,prj_trans);
+                        
+                        label_placement_enum how_placed = sym.get_label_placement();
+                        if (how_placed == POINT_PLACEMENT || how_placed == VERTEX_PLACEMENT)
                         {
-                            double label_x;
-                            double label_y;
-                            double z=0.0;
-                            placement text_placement(info, sym, w, h, false);
-                            text_placement.avoid_edges = sym.get_avoid_edges();
-                            text_placement.allow_overlap = sym.get_allow_overlap();
-                            if( how_placed == VERTEX_PLACEMENT )
-                                geom.vertex(&label_x,&label_y);  // by vertex
-                            else
-                                geom.label_position(&label_x, &label_y);  // by middle of line or by point
-                            prj_trans.backward(label_x,label_y, z);
-                            t_.forward(&label_x,&label_y);
-
-                            finder.find_point_placement( text_placement,label_x,label_y,0.0,sym.get_vertical_alignment(),sym.get_line_spacing(),
-                                                         sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment() );
-
-                            // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
-                            if( text_placement.placements.size() > 0)
+                            // for every vertex, try and place a shield/text
+                            geom.rewind(0);
+                            for( unsigned jj = 0; jj < geom.num_points(); jj++ )
                             {
-                                double x = text_placement.placements[0].starting_x;
-                                double y = text_placement.placements[0].starting_y;
-                                int px;
-                                int py;
-                                box2d<double> label_ext;
-
-                                if( !sym.get_unlock_image() )
-                                {  // center image at text center position
-                                    // remove displacement from image label
-                                    position pos = sym.get_displacement();
-                                    double lx = x - boost::get<0>(pos);
-                                    double ly = y - boost::get<1>(pos);
-                                    px=int(floor(lx - (0.5 * w))) ;
-                                    py=int(floor(ly - (0.5 * h))) ;
-                                    label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
-                                }
+                                double label_x;
+                                double label_y;
+                                double z=0.0;
+                                placement text_placement(info, sym, w, h, false);
+                                text_placement.avoid_edges = sym.get_avoid_edges();
+                                text_placement.allow_overlap = sym.get_allow_overlap();
+                                if( how_placed == VERTEX_PLACEMENT )
+                                    geom.vertex(&label_x,&label_y);  // by vertex
                                 else
-                                {  // center image at reference location
-                                    px=int(floor(label_x - 0.5 * w));
-                                    py=int(floor(label_y - 0.5 * h));
-                                    label_ext.init( floor(label_x - 0.5 * w), floor(label_y - 0.5 * h), ceil (label_x + 0.5 * w), ceil (label_y + 0.5 * h));
-                                }
+                                    geom.label_position(&label_x, &label_y);  // by middle of line or by point
+                                prj_trans.backward(label_x,label_y, z);
+                                t_.forward(&label_x,&label_y);
 
-                                if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
+                                finder.find_point_placement( text_placement,label_x,label_y,0.0,sym.get_vertical_alignment(),sym.get_line_spacing(),
+                                                             sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment() );
+                                
+                                // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
+                                if( text_placement.placements.size() > 0)
                                 {
-                                    //pixmap_.set_rectangle_alpha(px,py,*data);
-                                    pixmap_.set_rectangle_alpha2(*(*data),px,py,float(sym.get_opacity()));
-                                    box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
-                                    ren.render(x,y);
-                                    detector_.insert(label_ext);
-                                    finder.update_detector(text_placement);
+                                    double x = text_placement.placements[0].starting_x;
+                                    double y = text_placement.placements[0].starting_y;
+                                    int px;
+                                    int py;
+                                    box2d<double> label_ext;
+
+                                    if( !sym.get_unlock_image() )
+                                    {  // center image at text center position
+                                        // remove displacement from image label
+                                        position pos = sym.get_displacement();
+                                        double lx = x - boost::get<0>(pos);
+                                        double ly = y - boost::get<1>(pos);
+                                        px=int(floor(lx - (0.5 * w))) ;
+                                        py=int(floor(ly - (0.5 * h))) ;
+                                        label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), 
+                                                        ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
+                                    }
+                                    else
+                                    {  // center image at reference location
+                                        px=int(floor(label_x - 0.5 * w));
+                                        py=int(floor(label_y - 0.5 * h));
+                                        label_ext.init( floor(label_x - 0.5 * w), floor(label_y - 0.5 * h), 
+                                                        ceil (label_x + 0.5 * w), ceil (label_y + 0.5 * h));
+                                    }
+                                    
+                                    if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
+                                    {
+                                        agg::trans_affine matrix = agg::trans_affine_translation(px, py);
+                                        (*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
+                                        box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[0]);
+                                        text_ren.render(x,y);
+                                        detector_.insert(label_ext);
+                                        finder.update_detector(text_placement);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
-                    {
-                        placement text_placement(info, sym, w, h, true);
-                        text_placement.avoid_edges = sym.get_avoid_edges();
-                        finder.find_point_placements<path_type>(text_placement,path);
-                        
-                        for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                        else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                         {
-                            
-                            double x = text_placement.placements[ii].starting_x;
-                            double y = text_placement.placements[ii].starting_y;
+                            placement text_placement(info, sym, w, h, true);
+                            text_placement.avoid_edges = sym.get_avoid_edges();
+                            finder.find_point_placements<path_type>(text_placement,path);
                         
-                            int px=int(x - (w/2));
-                            int py=int(y - (h/2));
-                         
-                            pixmap_.set_rectangle_alpha(px,py,*(*data));
-                         
-                            box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
-                            ren.render(x,y);
+                            for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                            {
+                            
+                                double x = text_placement.placements[ii].starting_x;
+                                double y = text_placement.placements[ii].starting_y;
+                                
+                                int px=int(x - (w/2));
+                                int py=int(y - (h/2));
+                                agg::trans_affine matrix = agg::trans_affine_translation(px, py);
+                                (*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
+                                box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[ii]);
+                                text_ren.render(x,y);
+                            }
+                            finder.update_detector(text_placement);
                         }
-                        finder.update_detector(text_placement);
+                    }
+                }
+            }
+        }    
+    }
+    else
+    {
+        boost::optional<image_ptr> data = image_cache::instance()->find(filename,true);
+    
+        if (text.length() > 0 && data)
+        {
+            face_set_ptr faces;
+
+            if (sym.get_fontset().size() > 0)
+            {
+                faces = font_manager_.get_face_set(sym.get_fontset());
+            }
+            else
+            {
+                faces = font_manager_.get_face_set(sym.get_face_name());
+            }
+
+            if (faces->size() > 0)
+            {
+                text_renderer<T> ren(pixmap_, faces);
+
+                ren.set_pixel_size(sym.get_text_size());
+                ren.set_fill(sym.get_fill());
+                ren.set_halo_fill(sym.get_halo_fill());
+                ren.set_halo_radius(sym.get_halo_radius());
+
+                placement_finder<label_collision_detector4> finder(detector_);
+
+                string_info info(text);
+
+                faces->get_string_info(info);
+
+
+                int w = (*data)->width();
+                int h = (*data)->height();
+
+                unsigned num_geom = feature.num_geometries();
+                for (unsigned i=0;i<num_geom;++i)
+                {
+                    geometry2d const& geom = feature.get_geometry(i);
+                    if (geom.num_points() > 0 )
+                    {
+                        path_type path(t_,geom,prj_trans);
+
+                        label_placement_enum how_placed = sym.get_label_placement();
+                        if (how_placed == POINT_PLACEMENT || how_placed == VERTEX_PLACEMENT)
+                        {
+                            // for every vertex, try and place a shield/text
+                            geom.rewind(0);
+                            for( unsigned jj = 0; jj < geom.num_points(); jj++ )
+                            {
+                                double label_x;
+                                double label_y;
+                                double z=0.0;
+                                placement text_placement(info, sym, w, h, false);
+                                text_placement.avoid_edges = sym.get_avoid_edges();
+                                text_placement.allow_overlap = sym.get_allow_overlap();
+                                if( how_placed == VERTEX_PLACEMENT )
+                                    geom.vertex(&label_x,&label_y);  // by vertex
+                                else
+                                    geom.label_position(&label_x, &label_y);  // by middle of line or by point
+                                prj_trans.backward(label_x,label_y, z);
+                                t_.forward(&label_x,&label_y);
+
+                                finder.find_point_placement( text_placement,label_x,label_y,0.0,sym.get_vertical_alignment(),sym.get_line_spacing(),
+                                                             sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment() );
+
+                                // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
+                                if( text_placement.placements.size() > 0)
+                                {
+                                    double x = text_placement.placements[0].starting_x;
+                                    double y = text_placement.placements[0].starting_y;
+                                    int px;
+                                    int py;
+                                    box2d<double> label_ext;
+
+                                    if( !sym.get_unlock_image() )
+                                    {  // center image at text center position
+                                        // remove displacement from image label
+                                        position pos = sym.get_displacement();
+                                        double lx = x - boost::get<0>(pos);
+                                        double ly = y - boost::get<1>(pos);
+                                        px=int(floor(lx - (0.5 * w))) ;
+                                        py=int(floor(ly - (0.5 * h))) ;
+                                        label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
+                                    }
+                                    else
+                                    {  // center image at reference location
+                                        px=int(floor(label_x - 0.5 * w));
+                                        py=int(floor(label_y - 0.5 * h));
+                                        label_ext.init( floor(label_x - 0.5 * w), floor(label_y - 0.5 * h), ceil (label_x + 0.5 * w), ceil (label_y + 0.5 * h));
+                                    }
+
+                                    if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
+                                    {
+                                        //pixmap_.set_rectangle_alpha(px,py,*data);
+                                        pixmap_.set_rectangle_alpha2(*(*data),px,py,float(sym.get_opacity()));
+                                        box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
+                                        ren.render(x,y);
+                                        detector_.insert(label_ext);
+                                        finder.update_detector(text_placement);
+                                    }
+                                }
+                            }
+                        }
+
+                        else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
+                        {
+                            placement text_placement(info, sym, w, h, true);
+                            text_placement.avoid_edges = sym.get_avoid_edges();
+                            finder.find_point_placements<path_type>(text_placement,path);
+                        
+                            for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
+                            {
+                            
+                                double x = text_placement.placements[ii].starting_x;
+                                double y = text_placement.placements[ii].starting_y;
+                        
+                                int px=int(x - (w/2));
+                                int py=int(y - (h/2));
+                         
+                                pixmap_.set_rectangle_alpha(px,py,*(*data));
+                         
+                                box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
+                                ren.render(x,y);
+                            }
+                            finder.update_detector(text_placement);
+                        }
                     }
                 }
             }
