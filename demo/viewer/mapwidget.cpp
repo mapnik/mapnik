@@ -98,7 +98,7 @@ void MapWidget::paintEvent(QPaintEvent*)
          unsigned height = end_y_-start_y_;
          painter.drawPixmap(QPoint(0, 0),pix_);
          painter.setPen(pen_);
-	 painter.setBrush(QColor(200,200,255,128));
+         painter.setBrush(QColor(200,200,255,128));
          painter.drawRect(start_x_,start_y_,width,height);
       }
       else if (cur_tool_ == Pan)
@@ -160,7 +160,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                mapnik::proj_transform prj_trans(map_proj,layer_proj);
                //std::auto_ptr<mapnik::memory_datasource> data(new mapnik::memory_datasource);
                mapnik::featureset_ptr fs = map_->query_map_point(index,x,y);
-	         	
+                        
                if (fs)
                {
                   feature_ptr feat  = fs->next();
@@ -223,7 +223,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
       } 
    }
    else if (e->button()==Qt::RightButton) 
-   {	
+   {    
       //updateMap();
    }
 }
@@ -249,7 +249,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
          drag_=false;
          if (map_)
          {
-            CoordTransform t(map_->getWidth(),map_->getHeight(),map_->getCurrentExtent());	
+            CoordTransform t(map_->getWidth(),map_->getHeight(),map_->getCurrentExtent());      
             box2d<double> box = t.backward(box2d<double>(start_x_,start_y_,end_x_,end_y_));
             map_->zoomToBox(box);
             updateMap();
@@ -456,23 +456,33 @@ void MapWidget::updateMap()
 
       try 
       {
-	  mapnik::agg_renderer<image_32> ren(*map_,buf);
-	  ren.apply();
-	  
-	  QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
-	  pix_=QPixmap::fromImage(image.rgbSwapped());
-	  update();
-	  // emit signal to interested widgets
-	  emit mapViewChanged();
-	  std::cout << map_->getCurrentExtent() << "\n";
+          mapnik::agg_renderer<image_32> ren(*map_,buf);
+          ren.apply();
+          
+          QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
+          pix_=QPixmap::fromImage(image.rgbSwapped());
+          update();
+          // emit signal to interested widgets
+          emit mapViewChanged();
+          
+          projection prj(map_->srs()); // map projection
+          
+          box2d<double> ext = map_->getCurrentExtent();
+          double x0 = ext.minx();
+          double y0 = ext.miny();
+          double x1 = ext.maxx();
+          double y1 = ext.maxy();
+          prj.inverse(x0,y0);
+          prj.inverse(x1,y1);
+          std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
       }
       catch (mapnik::config_error & ex)
       {
-	  std::cerr << ex.what() << std::endl;
+          std::cerr << ex.what() << std::endl;
       }
       catch (...)
       {
-	  std::cerr << "Unknown exception caught!\n";
+          std::cerr << "Unknown exception caught!\n";
       }
    }
 }
