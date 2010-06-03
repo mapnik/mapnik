@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:4326" bgcolor="rgb(255,255,255)">
+    <Style name="point_style">
+        <Rule>
+            <PointSymbolizer file="../images/point.svg"/>
+            <TextSymbolizer face_name="DejaVu Sans Book" size="12" name="[name]" halo_fill="rgb(255,255,255,100)" halo_radius="1" dy="-5"/>
+        </Rule>
+    </Style>
+    <Style name="world_borders_style">
+        <Rule>
+            <PolygonSymbolizer fill="grey" gamma="0.7"/>
+        </Rule>
+    </Style>
+    <Layer name="world_borders" srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs">
+        <StyleName>world_borders_style</StyleName>
+        <Datasource>
+            <Parameter name="file">../shp/world_merc.shp</Parameter>
+            <Parameter name="type">shape</Parameter>
+        </Datasource>
+    </Layer>
+    <Layer name="point" srs="+init=epsg:4326">
+        <StyleName>point_style</StyleName>
+        <Datasource>
+            <Parameter name="extent">-100.276283619,-23.5207203374,136.782396088,45.7946830856</Parameter>
+            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
+            <Parameter name="geometry_field">geometry</Parameter>
+            <Parameter name="key_field">pkuid</Parameter>
+            <Parameter name="table">point</Parameter>
+            <Parameter name="type">sqlite</Parameter>
+            <Parameter name="use_spatial_index">1</Parameter>
+            <Parameter name="wkb_format">spatialite</Parameter>
+        </Datasource>
+    </Layer>
+</Map>
