@@ -32,10 +32,12 @@ extern "C"
 #include <jpeglib.h>
 }
 
-// mapnik
-
+// boost
 #include <boost/scoped_array.hpp>
 #include <boost/utility.hpp>
+
+// stl
+#include <stdio.h>
 
 #ifdef MAPNIK_DEBUG
 #include <iostream>
