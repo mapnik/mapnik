@@ -28,20 +28,25 @@
 #include <mapnik/config.hpp>
 #include <mapnik/path_expression_grammar.hpp>
 
-// stl
-#include <string>
+// boost
+#include <boost/array.hpp>
 
 namespace mapnik 
 {
+
+typedef boost::array<double,6> transform_type;
 
 class MAPNIK_DECL symbolizer_with_image {
 public:
     path_expression_ptr get_filename() const;
     void set_filename(path_expression_ptr filename);
+    void set_transform(transform_type const& );
+    transform_type const& get_transform() const;
 protected:
     symbolizer_with_image(path_expression_ptr filename);
     symbolizer_with_image(symbolizer_with_image const& rhs);
-    path_expression_ptr image_filename_;        
+    path_expression_ptr image_filename_;   
+    transform_type matrix_;     
 };
 }
 

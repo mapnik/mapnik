@@ -27,10 +27,20 @@
 namespace mapnik {
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
-    : image_filename_( file ) {}
+    : image_filename_( file ) 
+
+{
+    matrix_[0] = 1.0;
+    matrix_[1] = 0.0;
+    matrix_[2] = 0.0;
+    matrix_[3] = 1.0;
+    matrix_[4] = 0.0;
+    matrix_[5] = 0.0;
+}
 
 symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
-    : image_filename_(rhs.image_filename_) {}
+    : image_filename_(rhs.image_filename_),
+      matrix_(rhs.matrix_) {}
    
 
 path_expression_ptr symbolizer_with_image::get_filename() const
@@ -43,6 +53,16 @@ void symbolizer_with_image::set_filename(path_expression_ptr image_filename)
     image_filename_ = image_filename;
 }
       
+void symbolizer_with_image::set_transform(transform_type const& matrix)
+{
+    matrix_ = matrix;
+}
+
+transform_type const& symbolizer_with_image::get_transform() const
+{
+    return matrix_;
+}
+
 } // end of namespace mapnik
 
 
