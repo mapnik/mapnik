@@ -335,7 +335,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     agg::pixfmt_rgba32_plain pixf(buf);
 
     ren_base renb(pixf);
-    mapnik::stroke const&  stroke_ = sym.get_stroke();
+    stroke const&  stroke_ = sym.get_stroke();
     color const& col = stroke_.get_color();
     unsigned r=col.red();
     unsigned g=col.green();
@@ -441,7 +441,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     agg::pixfmt_rgba32_plain pixf(buf);
     
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<mapnik::image_ptr> pat = mapnik::image_cache::instance()->find(filename,true);
+    boost::optional<image_ptr> pat = image_cache::instance()->find(filename,true);
 
     if (!pat) return;
       
@@ -452,7 +452,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     renderer_type ren(ren_base, pattern);
     ren.clip_box(0,0,width_,height_);
     rasterizer_type ras(ren);
-
+    
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
         geometry2d const& geom = feature.get_geometry(i);
@@ -495,7 +495,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     ras_ptr->gamma(agg::gamma_linear());
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<mapnik::image_ptr> pat = mapnik::image_cache::instance()->find(filename,true);
+    boost::optional<image_ptr> pat = image_cache::instance()->find(filename,true);
 
     if (!pat) return;
     
