@@ -765,7 +765,8 @@ void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
         std::string filename("");
         optional<std::string> file =  get_opt_attr<string>(sym, "file");
         optional<std::string> base =  get_opt_attr<string>(sym, "base");
-
+        optional<std::string> transform_wkt = get_opt_attr<string>(sym, "transform");
+        
         if (file)
         {
             try
@@ -806,9 +807,19 @@ void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
 
         markers_symbolizer symbol(parse_path(filename));
         optional<float> opacity = get_opt_attr<float>(sym, "opacity");
-        if (opacity) {
+        if (opacity) 
+        {
             // TODO !!!!!  symbol.set_opacity( *opacity );
         }
+        if (transform_wkt)
+        {
+            agg::trans_affine tr;
+            mapnik::svg::parse_transform(*transform_wkt,tr);
+            boost::array<double,6> matrix;
+            tr.store_to(&matrix[0]);
+            symbol.set_transform(matrix);
+        }
+        
         optional<color> c = get_opt_attr<color>(sym, "fill");
         if (c) symbol.set_fill(*c);
         optional<double> spacing = get_opt_attr<double>(sym, "spacing");
