@@ -254,7 +254,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             unsigned cm = geom.vertex(&x0,&y0);
             for (unsigned j=1;j<geom.num_points();++j)
             {
-                double x,y;
+                double x(0);
+                double y(0);
                 cm = geom.vertex(&x,&y);
                 if (cm == SEG_MOVETO)
                 {
