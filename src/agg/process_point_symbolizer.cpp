@@ -76,7 +76,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
         renderer_solid ren(renb);
         box2d<double> extent;
         
-        marker = mapnik::marker_cache::instance()->find(filename, true);
+        marker = marker_cache::instance()->find(filename, true);
         if (marker && *marker)
         {
             double x1, y1, x2, y2;
