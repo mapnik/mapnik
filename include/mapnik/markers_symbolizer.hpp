@@ -26,27 +26,29 @@
 #define MARKERS_SYMBOLIZER_HPP
 
 //mapnik
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/path_expression_grammar.hpp>
 #include <mapnik/color.hpp>
 
 namespace mapnik {
    
-struct MAPNIK_DECL markers_symbolizer
+struct MAPNIK_DECL markers_symbolizer : 
+        public symbolizer_with_image
 {
 public:
     markers_symbolizer(path_expression_ptr filename, bool allow_overlap=false) 
-        : filename_(filename), allow_overlap_(allow_overlap),
-        fill_(color(0,0,255)), spacing_(100.0), max_error_(0.2) {}
+        : symbolizer_with_image(filename), 
+        allow_overlap_(allow_overlap),
+        fill_(color(0,0,255)), 
+        spacing_(100.0), 
+        max_error_(0.2) {}
     
-    path_expression_ptr get_filename() const
-    {
-        return filename_;
-    }
-    
-    void set_filename(path_expression_ptr filename)
-    {
-        filename_ = filename;
-    }
+    markers_symbolizer(markers_symbolizer const& rhs) 
+        : symbolizer_with_image(rhs), 
+        allow_overlap_(rhs.allow_overlap_),
+        fill_(rhs.fill_), 
+        spacing_(rhs.spacing_), 
+        max_error_(rhs.max_error_) {}
     
     void set_allow_overlap(bool overlap)
     {
@@ -89,7 +91,6 @@ public:
     }
 
 private:
-    path_expression_ptr filename_;
     bool allow_overlap_;
     color fill_;
     double spacing_;
