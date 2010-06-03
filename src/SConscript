@@ -113,7 +113,12 @@ source = Split(
     """   
     )
 
-
+if env['JPEG']:
+    source += Split(
+        """
+        jpeg_reader.cpp
+        """)
+        
 if True : # agg backend
     source += Split(
         """

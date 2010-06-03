@@ -14,11 +14,13 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added support for reading jpeg images (in addition to png/tiff) for image symbolizers (#518)
+
 - Made libjpeg dependency optional at compile time and added mapnik2.has_jpeg() method to check for support in python (#545).
 
 - Fixed reading of PostGIS data on Big Endian systems (#515)
 
-- PostGIS: Added better support for alterative schemas (#500)
+- PostGIS: Added better support for alternative schemas (#500)
 
 - AGG Renderer - Enforced default gamma function on all symbolizers to ensure proper antialiasing
   even when gamma is modified on the PolygonSymbolizer. (#512)
