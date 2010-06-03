@@ -76,23 +76,25 @@ MAPNIK_DECL std::string save_to_string(T const& image,
 template <typename T>
 void save_as_png(T const& image,
                  std::string const& filename);
-   
+
+#if defined(HAVE_JPEG)
 template <typename T>
 void save_as_jpeg(std::string const& filename,
                   int quality,
                   T const& image);
-   
+#endif
+
 inline bool is_png (std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".png"));
 }
-   
+
 inline bool is_jpeg (std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".jpg")) ||
         boost::algorithm::iends_with(filename,std::string(".jpeg"));
 }
-   
+
 inline bool is_tiff (std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".tif")) ||

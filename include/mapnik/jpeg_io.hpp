@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 //$Id$
+#if defined(HAVE_JPEG)
 
 #include <mapnik/global.hpp>
 
@@ -125,3 +126,5 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
     jpeg_destroy_compress(&cinfo);
 }  
 }
+
+#endif

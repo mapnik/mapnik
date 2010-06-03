@@ -258,6 +258,7 @@ opts.AddVariables(
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    BoolVariable('JPEG', 'Build Mapnik with JPEG read and write support', 'True'),    
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include', PathVariable.PathAccept),
@@ -779,6 +780,7 @@ if not preconfigured:
     else:
         env['SKIPPED_DEPS'].extend(['cairo','cairomm'])
 
+
     # allow for mac osx /usr/lib/libicucore.dylib compatibility
     # requires custom supplied headers since Apple does not include them
     # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
@@ -797,10 +799,15 @@ if not preconfigured:
         ['png', 'png.h', True,'C'],
         ['tiff', 'tiff.h', True,'C'],
         ['z', 'zlib.h', True,'C'],
-        ['jpeg', ['stdio.h', 'jpeglib.h'], True,'C'],
         ['proj', 'proj_api.h', True,'C'],
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
     ]
+
+    if env['JPEG']:
+        env.Append(CXXFLAGS = '-DHAVE_JPEG')
+        LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], True,'C'])
+    else:
+        env['SKIPPED_DEPS'].extend(['jpeg'])
 
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests

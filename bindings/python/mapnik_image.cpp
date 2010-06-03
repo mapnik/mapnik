@@ -30,13 +30,19 @@ extern "C"
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
+
 // mapnik
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/jpeg_io.hpp>
 #include <mapnik/png_io.hpp>
 #include <mapnik/image_reader.hpp>
 #include <sstream>
+
+// jpeg
+#if defined(HAVE_JPEG)
+#include <mapnik/jpeg_io.hpp>
+#endif
+
 // cairo
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <cairomm/surface.h>

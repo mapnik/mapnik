@@ -31,7 +31,8 @@ def test_render_image_to_file():
     
     i.background = mapnik2.Color('black')
 
-    i.save('test.jpg')
+    if mapnik2.has_jpeg():
+        i.save('test.jpg')
     i.save('test.png', 'png')
 
     if os.path.exists('test.jpg'):

@@ -30,10 +30,14 @@ extern "C"
 // mapnik
 #include <mapnik/image_util.hpp>
 #include <mapnik/png_io.hpp>
-#include <mapnik/jpeg_io.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
+
+// jpeg
+#if defined(HAVE_JPEG)
+#include <mapnik/jpeg_io.hpp>
+#endif
 
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo_renderer.hpp>
@@ -149,6 +153,7 @@ void save_to_stream(T const& image,
             else
                 save_as_png256_hex(stream, image, colors, trans_mode, gamma);
         }
+#if defined(HAVE_JPEG)
         else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
         {
             int quality = 85;
@@ -167,6 +172,7 @@ void save_to_stream(T const& image,
                 throw ImageWriterException("invalid jpeg quality: " + type.substr(4) + " not a number");
             }
         }
+#endif
         else throw ImageWriterException("unknown file type: " + type);
     } 
     else throw ImageWriterException("Could not write to empty stream" );
