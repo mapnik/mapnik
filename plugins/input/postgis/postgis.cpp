@@ -207,7 +207,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
              if (geometryColumn_.length() && srid_ <= 0)
              {
                 s.str("");
-                s << "SELECT SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
+                s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
                 s << populate_tokens(table_) << " WHERE \"" << geometryColumn_ << "\" IS NOT NULL LIMIT 1;";
 
                 /*if (show_queries_)
@@ -246,7 +246,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
          // collect attribute desc         
          std::ostringstream s;
-         s << "select * from " << populate_tokens(table_) << " limit 0";
+         s << "SELECT * FROM " << populate_tokens(table_) << " LIMIT 0";
 
          /*if (show_queries_)
          {
@@ -278,7 +278,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                default: // should not get here
 #ifdef MAPNIK_DEBUG
                   s.str("");
-                  s << "select oid, typname from pg_type where oid = " << type_oid;
+                  s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
 
                   /*if (show_queries_)
                   {
@@ -469,7 +469,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
          }
 
          std::ostringstream s;
-         s << "SELECT AsBinary(\"" << geometryColumn_ << "\") AS geom";
+         s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
          std::set<std::string> const& props=q.property_names();
          std::set<std::string>::const_iterator pos=props.begin();
          std::set<std::string>::const_iterator end=props.end();
@@ -515,7 +515,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
              throw mapnik::datasource_exception(s_error.str());
          }
                     
-         s << "SELECT AsBinary(\"" << geometryColumn_ << "\") AS geom";
+         s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
             
          std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
          std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
@@ -571,8 +571,8 @@ box2d<double> postgis_datasource::envelope() const
 
          if (estimate_extent && *estimate_extent)
          {
-             s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
-               << " from (select estimated_extent('";
+             s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
+               << " FROM (SELECT ST_Estimated_Extent('";
 
              if (schema_.length() > 0)
              {
@@ -584,8 +584,8 @@ box2d<double> postgis_datasource::envelope() const
          }
          else
          {
-            s << "select xmin(ext),ymin(ext),xmax(ext),ymax(ext)"
-              << " from (select extent(" <<geometryColumn_<< ") as ext from ";
+            s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
+              << " FROM (SELECT ST_Extent(" <<geometryColumn_<< ") as ext from ";
               if (extent_from_subquery_)
               {
                   // if a subselect limits records then calculating the extent upon the
