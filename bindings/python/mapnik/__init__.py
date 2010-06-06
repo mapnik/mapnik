@@ -639,6 +639,7 @@ __all__ = [
     'Layer', 'Layers',
     'LinePatternSymbolizer', 'LineSymbolizer',
     'Map',
+    'MarkersSymbolizer',
     'Names',
     'Parameter', 'Parameters',
     'PointDatasource', 'PointSymbolizer',
