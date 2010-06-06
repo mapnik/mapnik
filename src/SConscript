@@ -110,6 +110,7 @@ source = Split(
     arrow.cpp
     unicode.cpp
     glyph_symbolizer.cpp
+    markers_symbolizer.cpp
     """   
     )
 

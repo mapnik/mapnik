@@ -36,73 +36,24 @@ struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image
 {
 public:
-    markers_symbolizer()
-        : symbolizer_with_image(path_expression_ptr(new path_expression)),
-        allow_overlap_(false),
-        fill_(color(0,0,255)), 
-        spacing_(100.0), 
-        max_error_(0.2) {}
-        
-    markers_symbolizer(path_expression_ptr filename, bool allow_overlap=false) 
-        : symbolizer_with_image(filename), 
-        allow_overlap_(allow_overlap),
-        fill_(color(0,0,255)), 
-        spacing_(100.0), 
-        max_error_(0.2) {}
-    
-    markers_symbolizer(markers_symbolizer const& rhs) 
-        : symbolizer_with_image(rhs), 
-        allow_overlap_(rhs.allow_overlap_),
-        fill_(rhs.fill_), 
-        spacing_(rhs.spacing_), 
-        max_error_(rhs.max_error_) {}
-    
-    void set_allow_overlap(bool overlap)
-    {
-        allow_overlap_ = overlap;
-    }
-    
-    bool get_allow_overlap() const
-    {
-        return allow_overlap_;
-    }
-
-    void set_spacing(double spacing)
-    {
-        spacing_ = spacing;
-    }
-    
-    float get_spacing() const
-    {
-        return spacing_;
-    }
-
-    void set_max_error(double max_error)
-    {
-        max_error_ = max_error;
-    }
-    
-    float get_max_error() const
-    {
-        return max_error_;
-    }
-    
-    void set_fill(color fill)
-    {
-        fill_ = fill;
-    }
-    
-    color const& get_fill() const
-    {
-        return fill_;
-    }
-    
+    markers_symbolizer();
+    markers_symbolizer(path_expression_ptr filename);
+    markers_symbolizer(markers_symbolizer const& rhs);
+    void set_allow_overlap(bool overlap);
+    bool get_allow_overlap() const;
+    void set_spacing(double spacing);
+    float get_spacing() const;
+    void set_max_error(double max_error);
+    float get_max_error() const;
+    void set_fill(color fill);
+    color const& get_fill() const;
 private:
     bool allow_overlap_;
     color fill_;
     double spacing_;
     double max_error_;
 };
+
 }
 
 #endif // MARKERS_SYMBOLIZER_HPP
