@@ -36,6 +36,13 @@ struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image
 {
 public:
+    markers_symbolizer()
+        : symbolizer_with_image(path_expression_ptr(new path_expression)),
+        allow_overlap_(false),
+        fill_(color(0,0,255)), 
+        spacing_(100.0), 
+        max_error_(0.2) {}
+        
     markers_symbolizer(path_expression_ptr filename, bool allow_overlap=false) 
         : symbolizer_with_image(filename), 
         allow_overlap_(allow_overlap),
@@ -79,7 +86,7 @@ public:
     {
         return max_error_;
     }
-
+    
     void set_fill(color fill)
     {
         fill_ = fill;
@@ -89,7 +96,7 @@ public:
     {
         return fill_;
     }
-
+    
 private:
     bool allow_overlap_;
     color fill_;
