@@ -25,6 +25,7 @@
 #ifndef MAPNIK_SVG_STORAGE_HPP
 #define MAPNIK_SVG_STORAGE_HPP
 
+#include <mapnik/box2d.hpp>
 #include <boost/utility.hpp>
 
 namespace mapnik {
@@ -45,9 +46,27 @@ public:
     {
         return attributes_;
     }
+    
+    void set_bounding_box(box2d<double> const& b)
+    {
+        bounding_box_ = b;
+    }
+    
+    void set_bounding_box(double x0, double y0, double x1, double y1)
+    {
+        bounding_box_.init(x0,y0,x1,y1);
+    }
+    
+    box2d<double> const& bounding_box() const
+    {
+        return bounding_box_;
+    }
+    
 private:
+    
     VertexSource source_;
     AttributeSource attributes_;
+    box2d<double> bounding_box_;
 
 };
 

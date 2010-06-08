@@ -84,13 +84,12 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         if (text.length() > 0 && marker && *marker)
         {
             face_set_ptr faces;
-            double x1, y1, x2, y2;
-
-            // FIXME: Cache bounding box /////////////
-            mapnik::svg::svg_converter_type svg_converter((*marker)->source(),
-                                                          (*marker)->attributes());
             
-            svg_converter.bounding_rect(&x1, &y1, &x2, &y2);
+            box2d<double> const& bbox = (*marker)->bounding_box();
+            double x1 = bbox.minx();
+            double y1 = bbox.miny();
+            double x2 = bbox.maxx();
+            double y2 = bbox.maxy();
             /////////////////////
             mapnik::svg::svg_renderer<agg::path_storage, 
                                       agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer((*marker)->source(),

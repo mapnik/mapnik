@@ -74,6 +74,7 @@ boost::optional<path_ptr> marker_cache::find(std::string const& uri, bool update
             svg.arrange_orientations();
             double lox,loy,hix,hiy;
             svg.bounding_rect(&lox, &loy, &hix, &hiy); //TODO: store bbox!
+            marker->set_bounding_box(lox,loy,hix,hiy);
             if (update_cache)
             {
                 cache_.insert(std::make_pair(uri,marker));

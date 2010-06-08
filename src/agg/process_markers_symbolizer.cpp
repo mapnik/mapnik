@@ -83,9 +83,14 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         if (0)//marker && *marker)
         {
             svg_marker = true;
-            double x1, y1, x2, y2;
-//(*marker)->bounding_rect(&x1, &y1, &x2, &y2);
+            box2d<double> const& bbox = (*marker)->bounding_box();
+            double x1 = bbox.minx();
+            double y1 = bbox.miny();
+            double x2 = bbox.maxx();
+            double y2 = bbox.maxy();
+            // FIXME
             extent.init(x1, y1, x2, y2);
+            //
         }
     }
     
