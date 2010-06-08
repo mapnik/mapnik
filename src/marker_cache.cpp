@@ -25,6 +25,8 @@
 // mapnik
 #include <mapnik/svg/marker_cache.hpp>
 #include <mapnik/svg/svg_parser.hpp>
+#include <mapnik/svg/svg_storage.hpp>
+#include <mapnik/svg/svg_converter.hpp>
 
 // boost
 #include <boost/assert.hpp>
@@ -64,12 +66,14 @@ boost::optional<path_ptr> marker_cache::find(std::string const& uri, bool update
     {
         try 
         {
-            mapnik::path_ptr marker(new agg::svg::path_renderer);
-            svg::svg_parser p(*marker);
+            mapnik::path_ptr marker(new svg_storage_type);
+            svg::svg_converter_type svg(marker->source(),marker->attributes());
+
+            svg::svg_parser p(svg);
             p.parse(uri);            
-            marker->arrange_orientations();
+            svg.arrange_orientations();
             double lox,loy,hix,hiy;
-            marker->bounding_rect(&lox, &loy, &hix, &hiy); //TODO: store bbox!
+            svg.bounding_rect(&lox, &loy, &hix, &hiy); //TODO: store bbox!
             if (update_cache)
             {
                 cache_.insert(std::make_pair(uri,marker));

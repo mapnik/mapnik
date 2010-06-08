@@ -21,10 +21,10 @@
  *****************************************************************************/
 
 #include <mapnik/color_factory.hpp>
+
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 
-#include "agg_color_rgba.h"
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/foreach.hpp>
@@ -37,27 +37,27 @@
 namespace mapnik { namespace svg {
 
 
-    namespace qi = boost::spirit::qi;
+namespace qi = boost::spirit::qi;
 
-    typedef std::vector<std::pair<std::string, std::string> > pairs_type;
+typedef std::vector<std::pair<std::string, std::string> > pairs_type;
 
-    template <typename Iterator,typename SkipType>
-    struct key_value_sequence_ordered 
-        : qi::grammar<Iterator, pairs_type(), SkipType>
+template <typename Iterator,typename SkipType>
+struct key_value_sequence_ordered 
+    : qi::grammar<Iterator, pairs_type(), SkipType>
+{
+    key_value_sequence_ordered()
+        : key_value_sequence_ordered::base_type(query)
     {
-        key_value_sequence_ordered()
-            : key_value_sequence_ordered::base_type(query)
-        {
-            query =  pair >> *( qi::lit(';') >> pair);
-            pair  =  key >> -(':' >> value);
-            key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9-");
-            value = +(qi::char_ - qi::lit(';'));
-        }
+        query =  pair >> *( qi::lit(';') >> pair);
+        pair  =  key >> -(':' >> value);
+        key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9-");
+        value = +(qi::char_ - qi::lit(';'));
+    }
     
-        qi::rule<Iterator, pairs_type(), SkipType> query;
-        qi::rule<Iterator, std::pair<std::string, std::string>(), SkipType> pair;
-        qi::rule<Iterator, std::string(), SkipType> key, value;
-    };
+    qi::rule<Iterator, pairs_type(), SkipType> query;
+    qi::rule<Iterator, std::pair<std::string, std::string>(), SkipType> pair;
+    qi::rule<Iterator, std::string(), SkipType> key, value;
+};
 
 agg::rgba8 parse_color(const char* str)
 {
@@ -89,7 +89,7 @@ bool parse_style (const char* str, pairs_type & v)
     return phrase_parse(str, str + strlen(str), kv_parser, skip_type(), v);
 }
 
-svg_parser::svg_parser(agg::svg::path_renderer & path)
+svg_parser::svg_parser(svg_converter<agg::path_storage,agg::pod_bvector<mapnik::svg::path_attributes> > & path)
     : path_(path) {}
    
 svg_parser::~svg_parser() {}

@@ -23,25 +23,24 @@
 // mapnik
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/svg/svg_points_grammar.hpp>
-// agg
-#include <mapnik/svg/agg_svg_path_renderer.h>
+#include <mapnik/svg/svg_converter.hpp>
 // stl
 #include <string>
 
 namespace mapnik { namespace svg { 
 
-    template <typename PathType>
-    bool parse_points(std::string const& wkt, PathType & p)
-    {
-        using namespace boost::spirit;
-        typedef std::string::const_iterator iterator_type;
-        typedef ascii::space_type skip_type;
-        svg_points_grammar<iterator_type,skip_type,PathType> g(p);
-        iterator_type first = wkt.begin();
-        iterator_type last =  wkt.end();
-        return qi::phrase_parse(first, last, g, skip_type());
-    }
+template <typename PathType>
+bool parse_points(std::string const& wkt, PathType & p)
+{
+    using namespace boost::spirit;
+    typedef std::string::const_iterator iterator_type;
+    typedef ascii::space_type skip_type;
+    svg_points_grammar<iterator_type,skip_type,PathType> g(p);
+    iterator_type first = wkt.begin();
+    iterator_type last =  wkt.end();
+    return qi::phrase_parse(first, last, g, skip_type());
+}
 
-    template bool parse_points<agg::svg::path_renderer>(std::string const&, agg::svg::path_renderer&);
+template bool parse_points<svg_converter_type>(std::string const&, svg_converter_type&);
 
-    }}
+}}

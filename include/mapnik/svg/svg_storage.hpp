@@ -20,32 +20,38 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/svg/svg_path_grammar.hpp>
-#include <mapnik/svg/svg_converter.hpp>
-#include <mapnik/svg/svg_renderer.hpp>
-// agg
-#include "agg_path_storage.h"
+// $Id$
 
-// stl
-#include <string>
+#ifndef MAPNIK_SVG_STORAGE_HPP
+#define MAPNIK_SVG_STORAGE_HPP
 
-namespace mapnik { namespace svg { 
+#include <boost/utility.hpp>
 
-template <typename PathType>
-bool parse_path(std::string const& wkt, PathType & p)
+namespace mapnik {
+namespace svg {
+
+template <typename VertexSource ,typename AttributeSource>
+class svg_storage :  boost::noncopyable
 {
-    using namespace boost::spirit;
-    typedef std::string::const_iterator iterator_type;
-    typedef ascii::space_type skip_type;
-    svg_path_grammar<iterator_type,skip_type,PathType> g(p);
-    iterator_type first = wkt.begin();
-    iterator_type last =  wkt.end();
-    return qi::phrase_parse(first, last, g, skip_type());
-}
+public:
+    svg_storage() {}
+    
+    VertexSource & source() // FIXME!! make const
+    {
+        return source_;
+    }
+    
+    AttributeSource & attributes() // FIXME!! make const
+    {
+        return attributes_;
+    }
+private:
+    VertexSource source_;
+    AttributeSource attributes_;
 
-template bool parse_path<svg_converter_type>(std::string const&, svg_converter_type&);
+};
 
 }}
+
+
+#endif // MAPNIK_SVG_STORAGE_HPP

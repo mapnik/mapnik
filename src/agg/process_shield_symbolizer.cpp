@@ -25,6 +25,8 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_cache.hpp>
 #include <mapnik/svg/marker_cache.hpp>
+#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_renderer.hpp>
 
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -83,7 +85,16 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         {
             face_set_ptr faces;
             double x1, y1, x2, y2;
-            (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
+
+            // FIXME: Cache bounding box /////////////
+            mapnik::svg::svg_converter_type svg_converter((*marker)->source(),
+                                                          (*marker)->attributes());
+            
+            svg_converter.bounding_rect(&x1, &y1, &x2, &y2);
+            /////////////////////
+            mapnik::svg::svg_renderer<agg::path_storage, 
+                                      agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer((*marker)->source(),
+                                                                                                    (*marker)->attributes());
             // TODO : apply transform
             int w = int(x2 - x1);
             int h = int(y2 - y1);
@@ -175,7 +186,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                                     {
                                         agg::trans_affine matrix = agg::trans_affine_translation(px, py);
-                                        (*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
+                                        svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
                                         box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[0]);
                                         text_ren.render(x,y);
                                         detector_.insert(label_ext);
@@ -193,14 +204,14 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                         
                             for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                             {
-                            
+                                
                                 double x = text_placement.placements[ii].starting_x;
                                 double y = text_placement.placements[ii].starting_y;
                                 
-                                int px=int(x - (w/2));
-                                int py=int(y - (h/2));
+                                int px=int(floor(x - (w/2)));
+                                int py=int(floor(y - (h/2)));
                                 agg::trans_affine matrix = agg::trans_affine_translation(px, py);
-                                (*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
+                                svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
                                 box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[ii]);
                                 text_ren.render(x,y);
                             }

@@ -26,6 +26,8 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_cache.hpp>
 #include <mapnik/svg/marker_cache.hpp>
+#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_renderer.hpp>
 
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -77,10 +79,19 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
         box2d<double> extent;
         
         marker = marker_cache::instance()->find(filename, true);
+
         if (marker && *marker)
         {
             double x1, y1, x2, y2;
-            (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
+            // FIXME:  Cache bounding box /////////////
+            mapnik::svg::svg_converter_type svg_converter((*marker)->source(),
+                                                          (*marker)->attributes());
+            
+            svg_converter.bounding_rect(&x1, &y1, &x2, &y2);
+            /////////////////////
+            mapnik::svg::svg_renderer<agg::path_storage, 
+                                      agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer((*marker)->source(),
+                                                                                                    (*marker)->attributes());
             
             for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
@@ -103,7 +114,9 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                     detector_.has_placement(extent))
                 {
                     
-                    (*marker)->render(*ras_ptr, sl, ren, tr, renb.clip_box(), sym.get_opacity());
+                    
+                    svg_renderer.render(*ras_ptr, sl, ren, tr, renb.clip_box(), sym.get_opacity());
+                    
                     detector_.insert(extent);
                 }
             }   

@@ -25,6 +25,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_cache.hpp>
 #include <mapnik/svg/marker_cache.hpp>
+#include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/arrow.hpp>
 
@@ -79,11 +80,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     if (!filename.empty())
     {
         marker = mapnik::marker_cache::instance()->find(filename, true);
-        if (marker && *marker)
+        if (0)//marker && *marker)
         {
             svg_marker = true;
             double x1, y1, x2, y2;
-            (*marker)->bounding_rect(&x1, &y1, &x2, &y2);
+//(*marker)->bounding_rect(&x1, &y1, &x2, &y2);
             extent.init(x1, y1, x2, y2);
         }
     }
@@ -105,7 +106,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             agg::trans_affine matrix = tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
             if (svg_marker)
             {
-                (*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), 1.0);
+//(*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), 1.0);
             }
             else
             {

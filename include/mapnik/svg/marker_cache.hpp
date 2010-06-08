@@ -28,8 +28,10 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/svg/agg_svg_path_renderer.h>
-
+#include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/svg/svg_storage.hpp>
+// agg
+#include "agg_path_storage.h"
 // boost
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
@@ -40,7 +42,10 @@
 namespace mapnik
 {
 
-typedef boost::shared_ptr<agg::svg::path_renderer> path_ptr;
+typedef agg::path_storage path_storage;
+typedef agg::pod_bvector<mapnik::svg::path_attributes> attr_storage;
+typedef mapnik::svg::svg_storage<path_storage,attr_storage> svg_storage_type;
+typedef boost::shared_ptr<svg_storage_type> path_ptr;
 
 struct MAPNIK_DECL marker_cache :
         public singleton <marker_cache, CreateStatic>,
