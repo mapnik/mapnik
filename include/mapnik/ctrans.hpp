@@ -186,6 +186,20 @@ public:
         return c;
     }
 
+    inline box2d<double> forward(const box2d<double>& e,proj_transform const& prj_trans) const
+    {
+        double x0 = e.minx();
+        double y0 = e.miny();
+        double x1 = e.maxx();
+        double y1 = e.maxy();
+        double z = 0.0;
+        prj_trans.backward(x0,y0,z);
+        forward(&x0,&y0);
+        prj_trans.backward(x1,y1,z);
+        forward(&x1,&y1);
+        return box2d<double>(x0,y0,x1,y1);
+    }
+
     inline box2d<double> forward(const box2d<double>& e) const
     {
         double x0 = e.minx();
@@ -194,6 +208,20 @@ public:
         double y1 = e.maxy();
         forward(&x0,&y0);
         forward(&x1,&y1);
+        return box2d<double>(x0,y0,x1,y1);
+    }
+
+    inline box2d<double> backward(const box2d<double>& e,proj_transform const& prj_trans) const
+    {
+        double x0 = e.minx();
+        double y0 = e.miny();
+        double x1 = e.maxx();
+        double y1 = e.maxy();
+        double z = 0.0;
+        backward(&x0,&y0);
+        prj_trans.forward(x0,y0,z);
+        backward(&x1,&y1);
+        prj_trans.forward(x1,y1,z);
         return box2d<double>(x0,y0,x1,y1);
     }
 
