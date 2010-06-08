@@ -49,11 +49,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
 
-    bool svg_marker;
-    arrow arrow_;
-    box2d<double> extent;
-    boost::optional<path_ptr> marker;
 
+       
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_linear());
     agg::scanline_u8 sl;
@@ -61,16 +58,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     pixfmt pixf(buf);
     renderer_base renb(pixf);
     renderer_solid ren(renb);
-
-    color const& fill_ = sym.get_fill();
-    unsigned r = fill_.red();
-    unsigned g = fill_.green();
-    unsigned b = fill_.blue();
-    unsigned a = fill_.alpha();
-    
-    svg_marker = false;
-    extent = arrow_.extent();        
-    
     agg::trans_affine tr;
     boost::array<double,6> const& m = sym.get_transform();
     tr.load_from(&m[0]);
@@ -79,42 +66,75 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     
     if (!filename.empty())
     {
-        marker = mapnik::marker_cache::instance()->find(filename, true);
-        if (0)//marker && *marker)
+        boost::optional<path_ptr> marker = mapnik::marker_cache::instance()->find(filename, true);
+        if (marker && *marker)
         {
-            svg_marker = true;
             box2d<double> const& bbox = (*marker)->bounding_box();
             double x1 = bbox.minx();
             double y1 = bbox.miny();
             double x2 = bbox.maxx();
             double y2 = bbox.maxy();
-            // FIXME
-            extent.init(x1, y1, x2, y2);
-            //
+            tr.transform(&x1,&y1);
+            tr.transform(&x2,&y2);
+            box2d<double> extent(x1,y1,x2,y2);
+            
+            mapnik::svg::svg_renderer<agg::path_storage, 
+                                      agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer((*marker)->source(),
+                                                                                                    (*marker)->attributes());
+            
+            for (unsigned i=0; i<feature.num_geometries(); ++i)
+            {
+                geometry2d const& geom = feature.get_geometry(i);
+                if (geom.num_points() <= 1) continue;
+                
+                path_type path(t_,geom,prj_trans);
+                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
+                                                                                  sym.get_spacing(), 
+                                                                                  sym.get_max_error(), 
+                                                                                  sym.get_allow_overlap());        
+                double x, y, angle;
+            
+                while (placement.get_point(&x, &y, &angle))
+                {
+                    agg::trans_affine matrix = tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
+                    svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), 1.0 /*sym.get_opacity()*/);
+                }
+            }
         }
     }
-    
-    for (unsigned i=0; i<feature.num_geometries(); ++i)
+    else // FIXME: should default marker be stored in marker_cache ???
     {
-        geometry2d const& geom = feature.get_geometry(i);
-        if (geom.num_points() <= 1) continue;
-
-        path_type path(t_,geom,prj_trans);
-        markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
-                                                                          sym.get_spacing(), 
-                                                                          sym.get_max_error(), 
-                                                                          sym.get_allow_overlap());        
-        double x, y, angle;
+        arrow arrow_;
+        color const& fill_ = sym.get_fill();
+        unsigned r = fill_.red();
+        unsigned g = fill_.green();
+        unsigned b = fill_.blue();
+        unsigned a = fill_.alpha();
+    
+        box2d<double> extent = arrow_.extent();    
+        double x1 = extent.minx();
+        double y1 = extent.miny();
+        double x2 = extent.maxx();
+        double y2 = extent.maxy();
+        tr.transform(&x1,&y1);
+        tr.transform(&x2,&y2);
+        extent.init(x1,y1,x2,y2);
         
-        while (placement.get_point(&x, &y, &angle))
+        for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            agg::trans_affine matrix = tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
-            if (svg_marker)
+            geometry2d const& geom = feature.get_geometry(i);
+            if (geom.num_points() <= 1) continue;
+            
+            path_type path(t_,geom,prj_trans);
+            markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
+                                                                              sym.get_spacing(), 
+                                                                              sym.get_max_error(), 
+                                                                              sym.get_allow_overlap());        
+            double x, y, angle;
+        
+            while (placement.get_point(&x, &y, &angle))
             {
-//(*marker)->render(*ras_ptr, sl, ren, matrix, renb.clip_box(), 1.0);
-            }
-            else
-            {
+                agg::trans_affine matrix = tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
                 agg::conv_transform<arrow, agg::trans_affine> trans(arrow_, matrix);
                 ras_ptr->add_path(trans);
                 ren.color(agg::rgba8(r, g, b, a));
