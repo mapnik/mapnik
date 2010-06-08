@@ -53,7 +53,8 @@ public:
     box2d<double> envelope() const
     {
         box2d<double> result;    
-        double x,y;
+        double x(0);
+        double y(0);
         rewind(0);
         for (unsigned i=0;i<num_points();++i)
         {
@@ -71,6 +72,7 @@ public:
     }
         
     virtual int type() const=0;
+    virtual double area() const=0;
     virtual bool hit_test(value_type x,value_type y, double tol) const=0;  
     virtual void label_position(double *x, double *y) const=0;
     virtual void move_to(value_type x,value_type y)=0;
@@ -97,7 +99,12 @@ public:
     {
         return Point;
     }
-         
+
+    double area() const 
+    {
+        return 0;
+    }         
+
     void label_position(double *x, double *y) const
     {
         *x = pt_.x;
@@ -155,11 +162,32 @@ public:
     {
         return Polygon;
     }
-         
+
+    double area() const 
+    {
+        unsigned i;
+        double sum = 0.0;
+        double x(0);
+        double y(0);
+        rewind(0);
+        double xs = x;
+        double ys = y;
+        for (unsigned i=0;i<num_points();++i)
+        {
+            double x0,y0;
+            vertex(&x0,&y0);
+            sum += x * y0 - y * x0;
+            x = x0;
+            y = y0;
+        }
+        return (sum + x * ys - y * xs) * 0.5;
+    }
+    
     box2d<double> envelope() const
     {
-        box2d<double> result;    
-        double x,y;
+        box2d<double> result;
+        double x(0);
+        double y(0);
         rewind(0);
         for (unsigned i=0;i<num_points();++i)
         {
@@ -280,6 +308,12 @@ public:
     {
         return LineString;
     }
+
+    double area() const 
+    {
+        return 0;
+    }         
+
     void label_position(double *x, double *y) const
     {
         // calculate mid point on line string
