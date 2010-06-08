@@ -113,10 +113,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 if (sym.get_allow_overlap() ||
                     detector_.has_placement(extent))
                 {
-                    
-                    
                     svg_renderer.render(*ras_ptr, sl, ren, tr, renb.clip_box(), sym.get_opacity());
-                    
                     detector_.insert(extent);
                 }
             }   
