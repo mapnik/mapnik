@@ -591,8 +591,8 @@ private:
 
     pixmap_type & pixmap_;
     face_set_ptr faces_;
-    mapnik::color fill_;
-    mapnik::color halo_fill_;
+    color fill_;
+    color halo_fill_;
     int halo_radius_;
     unsigned text_ratio_;
     unsigned wrap_width_;
