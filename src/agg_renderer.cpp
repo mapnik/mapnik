@@ -108,11 +108,12 @@ private:
 struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
 
 template <typename T>
-agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, unsigned offset_x, unsigned offset_y)
+agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m),
       pixmap_(pixmap),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
+      scale_factor_(scale_factor),
       t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
@@ -363,7 +364,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                 dash_array::const_iterator end = d.end();
                 for (;itr != end;++itr)
                 {
-                    dash.add_dash(itr->first, itr->second);
+                    dash.add_dash(itr->first * scale_factor_, 
+                                  itr->second * scale_factor_);
                 }
 
                 agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
@@ -387,7 +389,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                     stroke.generator().line_cap(agg::round_cap);
 
                 stroke.generator().miter_limit(4.0);
-                stroke.generator().width(stroke_.get_width());
+                stroke.generator().width(stroke_.get_width() * scale_factor_);
                 
                 ras_ptr->add_path(stroke);
 
@@ -414,7 +416,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                     stroke.generator().line_cap(agg::round_cap);
 
                 stroke.generator().miter_limit(4.0);
-                stroke.generator().width(stroke_.get_width());
+                stroke.generator().width(stroke_.get_width() * scale_factor_);
                 ras_ptr->add_path(stroke);
             }
         }
@@ -615,7 +617,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
     if (!name_expr) return;
     value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
     UnicodeString text = result.to_unicode();
-      
+    
     if ( sym.get_text_convert() == TOUPPER)
     {
         text = text.toUpper();
@@ -643,7 +645,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
         if (faces->size() > 0)
         {
             text_renderer<T> ren(pixmap_, faces);
-            ren.set_pixel_size(sym.get_text_size());
+            ren.set_pixel_size(sym.get_text_size() * scale_factor_);
             ren.set_fill(fill);
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
@@ -732,8 +734,8 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
 
         // set font size
         unsigned size = sym.eval_size(feature);
-        ren.set_pixel_size(size);
-        faces->set_pixel_sizes(size);
+        ren.set_pixel_size(size * scale_factor_);
+        faces->set_pixel_sizes(size * scale_factor_);
 
         // Get and render text path
         //
