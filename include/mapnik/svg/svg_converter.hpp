@@ -236,7 +236,12 @@ public:
     {
         cur_attr().stroke_color.opacity(op);
     }
-    
+
+    void opacity(double op)
+    {
+        cur_attr().opacity = op;
+    }
+        
     void line_join(agg::line_join_e join)
     {
         cur_attr().line_join = join;

@@ -38,6 +38,7 @@ struct path_attributes
     unsigned     index;
     agg::rgba8   fill_color;
     agg::rgba8   stroke_color;
+    double       opacity;
     bool         fill_flag;
     bool         stroke_flag;
     bool         even_odd_flag;
@@ -52,6 +53,7 @@ struct path_attributes
         index(0),
         fill_color(agg::rgba(0,0,0)),
         stroke_color(agg::rgba(0,0,0)),
+        opacity(1.0),
         fill_flag(true),
         stroke_flag(false),
         even_odd_flag(false),
@@ -68,6 +70,7 @@ struct path_attributes
         : index(attr.index),
           fill_color(attr.fill_color),
           stroke_color(attr.stroke_color),
+          opacity(attr.opacity),
           fill_flag(attr.fill_flag),
           stroke_flag(attr.stroke_flag),
           even_odd_flag(attr.even_odd_flag),
@@ -82,6 +85,7 @@ struct path_attributes
         : index(idx),
           fill_color(attr.fill_color),
           stroke_color(attr.stroke_color),
+          opacity(attr.opacity),
           fill_flag(attr.fill_flag),
           stroke_flag(attr.stroke_flag),
           even_odd_flag(attr.even_odd_flag),

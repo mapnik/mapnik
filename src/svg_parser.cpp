@@ -262,8 +262,7 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
     else if(xmlStrEqual(name, BAD_CAST "opacity"))
     {
         double opacity = parse_double((const char*)value);
-        path_.stroke_opacity(opacity);
-        path_.fill_opacity(opacity);
+        path_.opacity(opacity);
     }
 }
 

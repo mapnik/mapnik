@@ -102,7 +102,7 @@ public:
                 }
 
                 color = attr.fill_color;
-                color.opacity(color.opacity() * opacity);
+                color.opacity(color.opacity() * attr.opacity * opacity);
                 ren.color(color);
                 render_scanlines(ras, sl, ren);
             }
@@ -128,7 +128,7 @@ public:
                 ras.filling_rule(fill_non_zero);
                 ras.add_path(curved_stroked_trans, attr.index);
                 color = attr.stroke_color;
-                color.opacity(color.opacity() * opacity);
+                color.opacity(color.opacity() * attr.opacity * opacity);
                 ren.color(color);
                 render_scanlines(ras, sl, ren);
             }
