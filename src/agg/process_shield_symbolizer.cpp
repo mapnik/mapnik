@@ -219,9 +219,9 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 double x = text_placement.placements[ii].starting_x;
                                 double y = text_placement.placements[ii].starting_y;
                                 
-                                int px=int(floor(x - (w/2)));
-                                int py=int(floor(y - (h/2)));
-                                agg::trans_affine matrix = tr * agg::trans_affine_scaling(scale_factor_) * agg::trans_affine_translation(px, py);
+                                int px=int(x + 0.5);
+                                int py=int(y + 0.5);
+                                agg::trans_affine matrix = tr * agg::trans_affine_translation(px, py);
                                 
                                 svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
                                 box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[ii]);
