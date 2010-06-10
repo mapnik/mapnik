@@ -194,14 +194,18 @@ public:
     void fill(const agg::rgba8& f)
     {
         path_attributes& attr = cur_attr();
+        double a = attr.fill_color.opacity();
         attr.fill_color = f;
+        attr.fill_color.opacity(a * f.opacity()); 
         attr.fill_flag = true;
     }
     
     void stroke(const agg::rgba8& s)
     {
         path_attributes& attr = cur_attr();
+        double a = attr.stroke_color.opacity();
         attr.stroke_color = s;
+        attr.stroke_color.opacity(a * s.opacity());
         attr.stroke_flag = true;
     }
     
