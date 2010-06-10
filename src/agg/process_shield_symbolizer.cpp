@@ -68,6 +68,11 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         text = text.toLower();
     }
     
+    agg::trans_affine tr;
+    boost::array<double,6> const& m = sym.get_transform();
+    tr.load_from(&m[0]);
+    tr = agg::trans_affine_scaling(scale_factor_) * tr;
+    
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
     
     if (is_svg(filename)) //SVG Label
@@ -90,11 +95,13 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             double y1 = bbox.miny();
             double x2 = bbox.maxx();
             double y2 = bbox.maxy();
-            /////////////////////
+            tr.transform(&x1,&y1);
+            tr.transform(&x2,&y2);
+            
             mapnik::svg::svg_renderer<agg::path_storage, 
                                       agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer((*marker)->source(),
                                                                                                     (*marker)->attributes());
-            // TODO : apply transform
+            
             int w = int(x2 - x1);
             int h = int(y2 - y1);
             
@@ -110,12 +117,12 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             if (faces->size() > 0)
             {
                 text_renderer<T> text_ren(pixmap_, faces);
-
-                text_ren.set_pixel_size(sym.get_text_size());
+                
+                text_ren.set_pixel_size(sym.get_text_size() * scale_factor_);
                 text_ren.set_fill(sym.get_fill());
                 text_ren.set_halo_fill(sym.get_halo_fill());
                 text_ren.set_halo_radius(sym.get_halo_radius());
-
+                
                 placement_finder<label_collision_detector4> finder(detector_);
 
                 string_info info(text);
@@ -151,8 +158,12 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 prj_trans.backward(label_x,label_y, z);
                                 t_.forward(&label_x,&label_y);
 
-                                finder.find_point_placement( text_placement,label_x,label_y,0.0,sym.get_vertical_alignment(),sym.get_line_spacing(),
-                                                             sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment() );
+                                finder.find_point_placement( text_placement,label_x,label_y,0.0,
+                                                             sym.get_vertical_alignment(),
+                                                             sym.get_line_spacing() * scale_factor_,
+                                                             sym.get_character_spacing() * scale_factor_,
+                                                             sym.get_horizontal_alignment(),
+                                                             sym.get_justify_alignment() );
                                 
                                 // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
                                 if( text_placement.placements.size() > 0)
@@ -184,7 +195,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     
                                     if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                                     {
-                                        agg::trans_affine matrix = agg::trans_affine_translation(px, py);
+                                        agg::trans_affine matrix = tr * agg::trans_affine_translation(px, py);
                                         svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
                                         box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[0]);
                                         text_ren.render(x,y);
@@ -209,7 +220,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 
                                 int px=int(floor(x - (w/2)));
                                 int py=int(floor(y - (h/2)));
-                                agg::trans_affine matrix = agg::trans_affine_translation(px, py);
+                                agg::trans_affine matrix = tr * agg::trans_affine_scaling(scale_factor_) * agg::trans_affine_translation(px, py);
+                                
                                 svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
                                 box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[ii]);
                                 text_ren.render(x,y);
