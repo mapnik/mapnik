@@ -80,28 +80,12 @@ void export_glyph_symbolizer();
 static Pycairo_CAPI_t *Pycairo_CAPI;
 #endif
 
-void render(const mapnik::Map& map,mapnik::image_32& image, unsigned offset_x = 0, unsigned offset_y = 0)
+void render(const mapnik::Map& map,mapnik::image_32& image, double scale_factor = 1.0 , unsigned offset_x = 0u , unsigned offset_y = 0u)
 {
     Py_BEGIN_ALLOW_THREADS
         try
         {
-            mapnik::agg_renderer<mapnik::image_32> ren(map,image,offset_x, offset_y);
-            ren.apply();
-        }
-        catch (...)
-        {
-            Py_BLOCK_THREADS
-                throw;
-        }
-    Py_END_ALLOW_THREADS
-        }
-
-void render2(const mapnik::Map& map,mapnik::image_32& image)
-{
-    Py_BEGIN_ALLOW_THREADS
-        try
-        {
-            mapnik::agg_renderer<mapnik::image_32> ren(map,image);
+            mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
             ren.apply();
         }
         catch (...)
@@ -191,7 +175,7 @@ void render_tile_to_file(const mapnik::Map& map,
                          const std::string& format)
 {
     mapnik::image_32 image(width,height);
-    render(map,image,offset_x, offset_y);
+    render(map,image,1.0,offset_x, offset_y);
     mapnik::save_to_file(image.data(),file,format);
 }
 
@@ -300,6 +284,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 4);
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3);
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string, 1, 2);
+BOOST_PYTHON_FUNCTION_OVERLOADS(render_overloads, render, 2, 5);
 
 BOOST_PYTHON_MODULE(_mapnik2)
 {
@@ -385,32 +370,23 @@ BOOST_PYTHON_MODULE(_mapnik2)
         ); 
 
     
-    def("render",&render,
-        "\n"
-        "Render Map to an AGG image_32 using offsets\n"
-        "\n"
-        "Usage:\n"
-        ">>> from mapnik import Map, Image, render, load_map\n"
-        ">>> m = Map(256,256)\n"
-        ">>> load_map(m,'mapfile.xml')\n"
-        ">>> im = Image(m.width,m.height)\n"
-        ">>> render(m,im,1,1)\n"
-        "\n"
-        ); 
-
-    def("render",&render2,
-        "\n"
-        "Render Map to an AGG image_32\n"
-        "\n"
-        "Usage:\n"
-        ">>> from mapnik import Map, Image, render, load_map\n"
-        ">>> m = Map(256,256)\n"
-        ">>> load_map(m,'mapfile.xml')\n"
-        ">>> im = Image(m.width,m.height)\n"
-        ">>> render(m,im)\n"
-        "\n"
-        );
-
+    def("render", &render, render_overloads(
+            "\n" 
+            "Render Map to an AGG image_32 using offsets\n"
+            "\n"
+            "Usage:\n"
+            ">>> from mapnik import Map, Image, render, load_map\n"
+            ">>> m = Map(256,256)\n"
+            ">>> load_map(m,'mapfile.xml')\n"
+            ">>> im = Image(m.width,m.height)\n"
+            ">>> scale_factor=2.0\n"
+            ">>> offset = [100,50]\n"
+            ">>> render(m,im)\n"
+            ">>> render(m,im,scale_factor)\n"
+            ">>> render(m,im,scale_factor,offset[0],offset[1])\n"
+            "\n"
+            )); 
+    
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
     def("render",&render3,
         "\n"
