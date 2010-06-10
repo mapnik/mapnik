@@ -154,7 +154,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 if( how_placed == VERTEX_PLACEMENT )
                                     geom.vertex(&label_x,&label_y);  // by vertex
                                 else
-                                    geom.label_position(&label_x, &label_y);  // by middle of line or by point
+                                    geom.middle_point(&label_x, &label_y);  // by middle of line
+                                
                                 prj_trans.backward(label_x,label_y, z);
                                 t_.forward(&label_x,&label_y);
 

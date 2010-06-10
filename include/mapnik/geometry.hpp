@@ -251,6 +251,58 @@ public:
         *y=y0;            
     }
          
+    void middle_point(double *x, double *y) const
+    {
+        // calculate mid point on path
+        double x0=0;
+        double y0=0;
+        double x1=0;
+        double y1=0;
+      
+        unsigned size = cont_.size();
+        if (size == 1)
+        {
+            cont_.get_vertex(0,x,y); 
+        }
+        else if (size == 2)
+        {
+            cont_.get_vertex(0,&x0,&y0);
+            cont_.get_vertex(1,&x1,&y1);
+            *x = 0.5 * (x1 + x0);
+            *y = 0.5 * (y1 + y0);    
+        }
+        else
+        {
+            double len=0.0;
+            for (unsigned pos = 1; pos < size; ++pos)
+            {
+                cont_.get_vertex(pos-1,&x0,&y0);
+                cont_.get_vertex(pos,&x1,&y1);
+                double dx = x1 - x0;
+                double dy = y1 - y0;
+                len += std::sqrt(dx * dx + dy * dy);
+            }
+            double midlen = 0.5 * len;
+            double dist = 0.0;
+            for (unsigned pos = 1; pos < size;++pos)
+            {
+                cont_.get_vertex(pos-1,&x0,&y0);
+                cont_.get_vertex(pos,&x1,&y1);
+                double dx = x1 - x0;
+                double dy = y1 - y0; 
+                double seg_len = std::sqrt(dx * dx + dy * dy);
+                if (( dist + seg_len) >= midlen)
+                {
+                    double r = (midlen - dist)/seg_len;
+                    *x = x0 + (x1 - x0) * r;
+                    *y = y0 + (y1 - y0) * r;
+                    break;
+                }
+                dist += seg_len;
+            }
+        }  
+    }
+    
     void line_to(value_type x,value_type y)
     {
         cont_.push_back(x,y,SEG_LINETO);
