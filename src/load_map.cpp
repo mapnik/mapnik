@@ -1159,7 +1159,8 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 
         std::string image_file = get_attr<string>(sym, "file");
         optional<std::string> base = get_opt_attr<string>(sym, "base");
-            
+        
+        optional<std::string> transform_wkt = get_opt_attr<string>(sym, "transform");
         try
         {
             if( base )
@@ -1325,6 +1326,15 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
                 shield_symbol.set_opacity( * opacity );
             }
 
+            if (transform_wkt)
+            {
+                agg::trans_affine tr;
+                mapnik::svg::parse_transform(*transform_wkt,tr);
+                boost::array<double,6> matrix;
+                tr.store_to(&matrix[0]);
+                shield_symbol.set_transform(matrix);
+            }
+            
             // unlock_image
             optional<boolean> unlock_image =
                 get_opt_attr<boolean>(sym, "unlock_image");
