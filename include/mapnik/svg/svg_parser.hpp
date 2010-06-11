@@ -58,6 +58,7 @@ private:
     
 private:
     svg_converter<agg::path_storage,agg::pod_bvector<mapnik::svg::path_attributes> > & path_;
+    bool is_defs_;
 };
 
 }}

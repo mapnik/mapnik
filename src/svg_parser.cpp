@@ -90,7 +90,8 @@ bool parse_style (const char* str, pairs_type & v)
 }
 
 svg_parser::svg_parser(svg_converter<agg::path_storage,agg::pod_bvector<mapnik::svg::path_attributes> > & path)
-    : path_(path) {}
+    : path_(path),
+      is_defs_(false) {}
    
 svg_parser::~svg_parser() {}
 
@@ -136,37 +137,41 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     const xmlChar *name;
     name = xmlTextReaderConstName(reader);   
     
-    
-    if (xmlStrEqual(name, BAD_CAST "g"))
+    if (!is_defs_ && xmlStrEqual(name, BAD_CAST "g"))
     {
         path_.push_attr();
         parse_attr(reader);
     }
-    else if (xmlStrEqual(name, BAD_CAST "path"))
+    else if (xmlStrEqual(name, BAD_CAST "defs"))
+    {
+        if (xmlTextReaderIsEmptyElement(reader) == 0)
+            is_defs_ = true;
+    }
+    else if ( !is_defs_ &&  xmlStrEqual(name, BAD_CAST "path"))
     {
         parse_path(reader);
     } 
-    else if (xmlStrEqual(name, BAD_CAST "polygon"))
+    else if (xmlStrEqual(name, BAD_CAST "polygon")  && !is_defs_)
     {
         parse_polygon(reader);
     } 
-    else if (xmlStrEqual(name, BAD_CAST "polyline"))
+    else if (xmlStrEqual(name, BAD_CAST "polyline")  && !is_defs_)
     {
         parse_polyline(reader);
     }
-    else if (xmlStrEqual(name, BAD_CAST "line"))
+    else if (!is_defs_ && xmlStrEqual(name, BAD_CAST "line"))
     {
         parse_line(reader);
     } 
-    else if (xmlStrEqual(name, BAD_CAST "rect"))
+    else if (!is_defs_ && xmlStrEqual(name, BAD_CAST "rect"))
     {
         parse_rect(reader);
     } 
-    else if (xmlStrEqual(name, BAD_CAST "circle"))
+    else if (!is_defs_ && xmlStrEqual(name, BAD_CAST "circle"))
     {
         parse_circle(reader);
     }
-    else if (xmlStrEqual(name, BAD_CAST "ellipse"))
+    else if (!is_defs_ && xmlStrEqual(name, BAD_CAST "ellipse"))
     {
         parse_ellipse(reader);
     }
@@ -179,6 +184,10 @@ void svg_parser::end_element(xmlTextReaderPtr reader)
     if (xmlStrEqual(name, BAD_CAST "g"))
     {
         path_.pop_attr();
+    }
+    else if (xmlStrEqual(name, BAD_CAST "defs"))
+    {
+        is_defs_ = false;
     }
 }
 
@@ -405,7 +414,7 @@ void svg_parser::parse_ellipse(xmlTextReaderPtr reader)
     double cy = 0.0;
     double rx = 0.0;
     double ry = 0.0;
-
+    
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cx");
     if (value) cx = parse_double((const char*)value);
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cy");
