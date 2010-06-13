@@ -23,6 +23,7 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_cache.hpp>
 #include <mapnik/unicode.hpp>
@@ -105,7 +106,6 @@ private:
     image_data_32 const& pattern_;
 };
 
-struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
 
 template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)

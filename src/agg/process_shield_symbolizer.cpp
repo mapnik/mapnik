@@ -22,6 +22,7 @@
 //$Id$
 
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_cache.hpp>
 #include <mapnik/svg/marker_cache.hpp>
@@ -35,8 +36,6 @@
 #include "agg_scanline_u.h"
 
 namespace mapnik {
-
-struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
 
 template <typename T>
 void  agg_renderer<T>::process(shield_symbolizer const& sym,

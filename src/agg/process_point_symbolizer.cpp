@@ -23,6 +23,7 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_cache.hpp>
 #include <mapnik/svg/marker_cache.hpp>
@@ -40,7 +41,7 @@
 
 namespace mapnik {
 
-struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
+
 
 template <typename T>
 void agg_renderer<T>::process(point_symbolizer const& sym,
