@@ -71,8 +71,9 @@ namespace mapnik { namespace svg {
             using qi::no_case;
         
             start = +cmd;
-            cmd = M | L | H | V | C | S | Q | T | A | Z;
-        
+            cmd = M  >> *drawto_cmd;
+            drawto_cmd =  L | H | V | C | S | Q | T | A | Z;
+            
             M = (lit('M')[_a = false] | lit('m')[_a = true] ) 
                 >> coord[move_to_(_1,_a)] // move_to
                 >> *(-lit(',') >> coord [ line_to_(_1,_a) ] ); // *line_to
@@ -127,6 +128,7 @@ namespace mapnik { namespace svg {
         // rules
         qi::rule<Iterator,SkipType> start;
         qi::rule<Iterator,SkipType> cmd;
+        qi::rule<Iterator,SkipType> drawto_cmd;
         qi::rule<Iterator,qi::locals<bool>,SkipType> M; // M,m
         qi::rule<Iterator,qi::locals<bool>,SkipType> L; // L,l
         qi::rule<Iterator,qi::locals<bool>,SkipType> H; // H,h

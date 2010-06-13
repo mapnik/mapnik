@@ -869,7 +869,8 @@ namespace agg
                 *x += x2;
                 *y += y2;
             }
-            else if (is_vertex(m_vertices.prev_vertex(&x2, &y2)))
+            else if (!is_stop(m_vertices.last_command()) && 
+                     is_vertex(m_vertices.prev_vertex(&x2, &y2)))
             {
                 *x += x2;
                 *y += y2;
@@ -1526,7 +1527,7 @@ namespace agg
     };
 
     //-----------------------------------------------------------path_storage
-    typedef path_base<vertex_block_storage<double> > path_storage;
+    //typedef path_base<vertex_block_storage<double> > path_storage;
 
     // Example of declarations path_storage with pod_bvector as a container
     //-----------------------------------------------------------------------
@@ -1538,11 +1539,11 @@ namespace agg
 
 // Example of declarations path_storage with std::vector as a container
 //---------------------------------------------------------------------------
-//#include <vector>
-//namespace agg
-//{
-//    typedef path_base<vertex_stl_storage<std::vector<vertex_d> > > stl_path_storage; 
-//}
+#include <vector>
+namespace agg
+{
+    typedef path_base<vertex_stl_storage<std::vector<vertex_d> > > path_storage; 
+}
 
 
 
