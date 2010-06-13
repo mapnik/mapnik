@@ -275,6 +275,11 @@ public:
        agg::bounding_rect(trans, *this, 0, attributes_.size(), x1, y1, x2, y2);
     }
     
+    VertexSource & storage() 
+    {
+        return source_;
+    }
+    
     agg::trans_affine& transform()
     {
         return cur_attr().transform;

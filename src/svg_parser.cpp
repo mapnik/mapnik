@@ -25,6 +25,9 @@
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 
+#include "agg_ellipse.h"
+#include "agg_rounded_rect.h"
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/foreach.hpp>
@@ -399,9 +402,11 @@ void svg_parser::parse_circle(xmlTextReaderPtr reader)
     if(r != 0.0)
     {
         if(r < 0.0) throw std::runtime_error("parse_circle: Invalid radius");
-        path_.move_to(cx+r,cy);
-        path_.arc_to(r,r,0,1,0,cx-r,cy);
-        path_.arc_to(r,r,0,1,0,cx+r,cy);
+        //path_.move_to(cx+r,cy);
+        //path_.arc_to(r,r,0,1,0,cx-r,cy);
+        //path_.arc_to(r,r,0,1,0,cx+r,cy);
+        agg::ellipse c(cx, cy, r, r);
+        path_.storage().concat_path(c);
     }
     
     path_.end_path();
@@ -431,9 +436,11 @@ void svg_parser::parse_ellipse(xmlTextReaderPtr reader)
     {
         if(rx < 0.0) throw std::runtime_error("parse_ellipse: Invalid rx");
         if(ry < 0.0) throw std::runtime_error("parse_ellipse: Invalid ry");
-        path_.move_to(cx+rx,cy);
-        path_.arc_to(rx,ry,0,1,0,cx-rx,cy);
-        path_.arc_to(rx,ry,0,1,0,cx+rx,cy);
+        //path_.move_to(cx+rx,cy);
+        //path_.arc_to(rx,ry,0,1,0,cx-rx,cy);
+        //path_.arc_to(rx,ry,0,1,0,cx+rx,cy);
+        agg::ellipse c(cx, cy, rx, ry);
+        path_.storage().concat_path(c);
     }
     
     path_.end_path();
@@ -457,11 +464,28 @@ void svg_parser::parse_rect(xmlTextReaderPtr reader)
     if (value) w = parse_double((const char*)value);
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "height");
     if (value) h = parse_double((const char*)value);
+    
+    bool rounded = true;
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "rx");
+    
     if (value) rx = parse_double((const char*)value);
+    else rounded = false;
+    
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "ry");
-    if (value) ry = parse_double((const char*)value);
-
+    if (value)
+    {
+        ry = parse_double((const char*)value);
+        if (!rounded) 
+        {
+            rx = ry;
+            rounded = true;
+        }
+    }
+    else if (rounded) 
+    {
+        ry = rx;
+    }
+    
     if(w != 0.0 && h != 0.0)
     {
         if(w < 0.0) throw std::runtime_error("parse_rect: Invalid width");
@@ -472,17 +496,22 @@ void svg_parser::parse_rect(xmlTextReaderPtr reader)
         path_.begin_path();
         parse_attr(reader);
         
-        if(rx > 0.0 && ry > 0.0)
+        if(rounded)
         {
-            path_.move_to(x + rx,y);
-            path_.line_to(x + w -rx,y);         
-            path_.arc_to (rx,ry,0,0,1,x + w, y + ry);
-            path_.line_to(x + w, y + h - ry);
-            path_.arc_to (rx,ry,0,0,1,x + w - rx, y + h);
-            path_.line_to(x + rx, y + h);
-            path_.arc_to(rx,ry,0,0,1,x,y + h - ry);
-            path_.line_to(x,y+ry);
-            path_.arc_to(rx,ry,0,0,1,x + rx,y);
+            //path_.move_to(x + rx,y);
+            //path_.line_to(x + w - rx,y);         
+            //path_.arc_to (rx,ry,0,0,1,x + w, y + ry);
+            //path_.line_to(x + w, y + h - ry);
+            //path_.arc_to (rx,ry,0,0,1,x + w - rx, y + h);
+            //path_.line_to(x + rx, y + h);
+            //path_.arc_to(rx,ry,0,0,1,x,y + h - ry);
+            //path_.line_to(x,y+ry);
+            //path_.arc_to(rx,ry,0,0,1,x + rx,y);
+            //path_.close_subpath();
+            agg::rounded_rect r;
+            r.rect(x,y,x+w,y+h);
+            r.radius(rx,ry);
+            path_.storage().concat_path(r);
         }
         else
         {
