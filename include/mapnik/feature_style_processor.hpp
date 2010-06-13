@@ -163,8 +163,11 @@ private:
                 bool active_rules=false;
                   
                 boost::optional<feature_type_style const&> style=m_.find_style(*stylesIter);
-                if (!style) continue;
-                  
+                if (!style) {
+                    std::clog << "WARNING: style '" << *stylesIter << "' required for layer '" << lay.name() << "' does not exist.\n";
+                    continue;
+                }
+
                 const std::vector<rule_type>& rules=(*style).get_rules();
                 std::vector<rule_type>::const_iterator ruleIter=rules.begin();
                 std::vector<rule_type>::const_iterator ruleEnd=rules.end();
