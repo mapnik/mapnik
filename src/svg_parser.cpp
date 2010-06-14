@@ -154,11 +154,11 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     {
         parse_path(reader);
     } 
-    else if (xmlStrEqual(name, BAD_CAST "polygon")  && !is_defs_)
+    else if (!is_defs_ && xmlStrEqual(name, BAD_CAST "polygon") )
     {
         parse_polygon(reader);
     } 
-    else if (xmlStrEqual(name, BAD_CAST "polyline")  && !is_defs_)
+    else if (!is_defs_ && xmlStrEqual(name, BAD_CAST "polyline"))
     {
         parse_polyline(reader);
     }
@@ -184,7 +184,7 @@ void svg_parser::end_element(xmlTextReaderPtr reader)
 {
     const xmlChar *name;
     name = xmlTextReaderConstName(reader);   
-    if (xmlStrEqual(name, BAD_CAST "g"))
+    if (!is_defs_ && xmlStrEqual(name, BAD_CAST "g"))
     {
         path_.pop_attr();
     }
