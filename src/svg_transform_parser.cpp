@@ -30,18 +30,31 @@
 
 namespace mapnik { namespace svg { 
 
-    template <typename TransformType>
-    bool parse_transform(std::string const& wkt, TransformType & p)
-    {
-        using namespace boost::spirit;
-        typedef std::string::const_iterator iterator_type;
-        typedef ascii::space_type skip_type;
-        svg_transform_grammar<iterator_type,skip_type,TransformType> g(p);
-        iterator_type first = wkt.begin();
-        iterator_type last =  wkt.end();
-        return qi::phrase_parse(first, last, g, skip_type());
-    }
+template <typename TransformType>
+bool parse_transform(const char * wkt, TransformType & p)
+{
+    using namespace boost::spirit;
+    typedef const char * iterator_type;
+    typedef ascii::space_type skip_type;
+    svg_transform_grammar<iterator_type,skip_type,TransformType> g(p);
+    iterator_type first = wkt;
+    iterator_type last =  wkt + std::strlen(wkt);
+    return qi::phrase_parse(first, last, g, skip_type());
+}
 
-    template bool parse_transform<agg::trans_affine>(std::string const&, agg::trans_affine&);
+template <typename TransformType>
+bool parse_transform(std::string const& wkt, TransformType & p)
+{
+    using namespace boost::spirit;
+    typedef std::string::const_iterator iterator_type;
+    typedef ascii::space_type skip_type;
+    svg_transform_grammar<iterator_type,skip_type,TransformType> g(p);
+    iterator_type first = wkt.begin();
+    iterator_type last =  wkt.end();
+    return qi::phrase_parse(first, last, g, skip_type());
+}
 
-    }}
+template bool parse_transform<agg::trans_affine>(const char*, agg::trans_affine&);
+template bool parse_transform<agg::trans_affine>(std::string const& , agg::trans_affine&);
+
+}}

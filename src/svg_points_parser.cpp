@@ -30,17 +30,17 @@
 namespace mapnik { namespace svg { 
 
 template <typename PathType>
-bool parse_points(std::string const& wkt, PathType & p)
+bool parse_points(const char* wkt, PathType & p)
 {
     using namespace boost::spirit;
-    typedef std::string::const_iterator iterator_type;
+    typedef const char*  iterator_type;
     typedef ascii::space_type skip_type;
     svg_points_grammar<iterator_type,skip_type,PathType> g(p);
-    iterator_type first = wkt.begin();
-    iterator_type last =  wkt.end();
+    iterator_type first = wkt;
+    iterator_type last =  wkt + std::strlen(wkt);
     return qi::phrase_parse(first, last, g, skip_type());
 }
 
-template bool parse_points<svg_converter_type>(std::string const&, svg_converter_type&);
+template bool parse_points<svg_converter_type>(const char*, svg_converter_type&);
 
 }}

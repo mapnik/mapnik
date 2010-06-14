@@ -199,8 +199,7 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
     if (xmlStrEqual(name, BAD_CAST "transform"))
     {
         agg::trans_affine tr;
-        std::string wkt((const char*) value);
-        mapnik::svg::parse_transform(wkt,tr);
+        mapnik::svg::parse_transform((const char*) value,tr);
         path_.transform().premultiply(tr);
     }
     else if (xmlStrEqual(name, BAD_CAST "fill"))
@@ -312,9 +311,8 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
     {
         path_.begin_path();
         parse_attr(reader);
-
-        std::string wkt((const char*) value);
-        if (!mapnik::svg::parse_path(wkt, path_))
+        
+        if (!mapnik::svg::parse_path((const char*) value, path_))
         {
             std::runtime_error("can't parse PATH\n");
         }
