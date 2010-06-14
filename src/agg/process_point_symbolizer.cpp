@@ -29,6 +29,7 @@
 #include <mapnik/svg/marker_cache.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
 
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -69,6 +70,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     else if (is_svg(filename))
     {
         // SVG  
+        using namespace mapnik::svg;
         boost::optional<path_ptr> marker;
         ras_ptr->reset();
         ras_ptr->gamma(agg::gamma_linear());
@@ -90,9 +92,11 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             double x2 = bbox.maxx();
             double y2 = bbox.maxy();
 
-            mapnik::svg::svg_renderer<agg::path_storage, 
-                                      agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer((*marker)->source(),
-                                                                                                    (*marker)->attributes());
+            vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
+            svg_path_adapter svg_path(stl_storage);
+            svg_renderer<svg_path_adapter, 
+                         agg::pod_bvector<path_attributes> > svg_renderer(svg_path,
+                                                                          (*marker)->attributes());
             
             for (unsigned i=0; i<feature.num_geometries(); ++i)
             {

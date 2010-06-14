@@ -26,6 +26,7 @@
 #include <mapnik/svg/marker_cache.hpp>
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_storage.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 
 // boost
@@ -64,16 +65,19 @@ boost::optional<path_ptr> marker_cache::find(std::string const& uri, bool update
     boost::filesystem::path path(uri);
     if (exists(path))
     {
+        using namespace mapnik::svg;
         try 
         {
-            mapnik::path_ptr marker(new svg_storage_type);
-            svg::svg_converter_type svg(marker->source(),marker->attributes());
-
-            svg::svg_parser p(svg);
+            path_ptr marker(new svg_storage_type);
+            vertex_stl_adapter<svg_path_storage> stl_storage(marker->source());
+            svg_path_adapter svg_path(stl_storage);
+            svg_converter_type svg(svg_path, marker->attributes());
+            
+            svg_parser p(svg);
             p.parse(uri);            
             //svg.arrange_orientations();
             double lox,loy,hix,hiy;
-            svg.bounding_rect(&lox, &loy, &hix, &hiy); //TODO: store bbox!
+            svg.bounding_rect(&lox, &loy, &hix, &hiy);
             marker->set_bounding_box(lox,loy,hix,hiy);
             if (update_cache)
             {

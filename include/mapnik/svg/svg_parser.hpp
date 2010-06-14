@@ -26,19 +26,17 @@
 // mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
 // boost
 #include <boost/utility.hpp>
 #include <libxml/xmlreader.h>
-// agg
-#include "agg_path_storage.h"
 
 namespace  mapnik { namespace svg {
 
 class svg_parser : private boost::noncopyable
 {
 public:
-explicit svg_parser(svg_converter<agg::path_storage, 
-                                  agg::pod_bvector<mapnik::svg::path_attributes> > & path);
+explicit svg_parser(svg_converter_type & path);
 ~svg_parser();
  
 void parse(std::string const& filename);
@@ -57,7 +55,7 @@ private:
     void parse_attr(const xmlChar * name, const xmlChar * value );
     
 private:
-    svg_converter<agg::path_storage,agg::pod_bvector<mapnik::svg::path_attributes> > & path_;
+    svg_converter_type & path_;
     bool is_defs_;
 };
 

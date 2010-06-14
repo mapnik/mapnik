@@ -28,6 +28,7 @@
 #include <mapnik/svg/marker_cache.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
 
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -76,6 +77,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
     
     if (is_svg(filename)) //SVG Label
     {
+        using namespace mapnik::svg;
         boost::optional<path_ptr> marker = marker_cache::instance()->find(filename, true);
         ras_ptr->reset();
         ras_ptr->gamma(agg::gamma_linear());
@@ -97,9 +99,11 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             tr.transform(&x1,&y1);
             tr.transform(&x2,&y2);
             
-            mapnik::svg::svg_renderer<agg::path_storage, 
-                                      agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer((*marker)->source(),
-                                                                                                    (*marker)->attributes());
+            vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
+            svg_path_adapter svg_path(stl_storage);
+            svg_renderer<svg_path_adapter,
+                         agg::pod_bvector<path_attributes> > svg_renderer(svg_path,
+                                                                          (*marker)->attributes());
             
             int w = int(x2 - x1);
             int h = int(y2 - y1);

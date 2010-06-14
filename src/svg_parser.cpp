@@ -92,7 +92,8 @@ bool parse_style (const char* str, pairs_type & v)
     return phrase_parse(str, str + strlen(str), kv_parser, skip_type(), v);
 }
 
-svg_parser::svg_parser(svg_converter<agg::path_storage,agg::pod_bvector<mapnik::svg::path_attributes> > & path)
+svg_parser::svg_parser(svg_converter<svg_path_adapter, 
+                                     agg::pod_bvector<mapnik::svg::path_attributes> > & path)
     : path_(path),
       is_defs_(false) {}
    

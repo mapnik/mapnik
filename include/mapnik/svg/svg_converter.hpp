@@ -24,10 +24,12 @@
 
 #ifndef MAPNIK_SVG_CONVERTER_HPP
 #define MAPNIK_SVG_CONVERTER_HPP
-
+// mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
+// boost
 #include <boost/utility.hpp>
-
+// agg
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_stroke.h"
@@ -35,7 +37,7 @@
 #include "agg_conv_curve.h"
 #include "agg_color_rgba.h"
 #include "agg_bounding_rect.h"
-
+// stl
 #include <stdexcept>
 
 namespace mapnik {
@@ -271,8 +273,8 @@ public:
     
     void bounding_rect(double* x1, double* y1, double* x2, double* y2)
     {
-       agg::conv_transform<agg::path_storage> trans(source_, transform_);
-       agg::bounding_rect(trans, *this, 0, attributes_.size(), x1, y1, x2, y2);
+        agg::conv_transform<mapnik::svg::svg_path_adapter> trans(source_, transform_);
+        agg::bounding_rect(trans, *this, 0, attributes_.size(), x1, y1, x2, y2);
     }
     
     VertexSource & storage() 
@@ -303,7 +305,7 @@ private:
 };
 
 
-typedef svg_converter<agg::path_storage,agg::pod_bvector<mapnik::svg::path_attributes> > svg_converter_type;
+typedef svg_converter<svg_path_adapter,agg::pod_bvector<mapnik::svg::path_attributes> > svg_converter_type;
 
 }}
 

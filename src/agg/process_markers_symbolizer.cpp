@@ -27,6 +27,7 @@
 #include <mapnik/image_cache.hpp>
 #include <mapnik/svg/marker_cache.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/arrow.hpp>
 
@@ -47,9 +48,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::pixfmt_rgba32 pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
-
-
-       
+    
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_linear());
     agg::scanline_u8 sl;
@@ -76,11 +75,12 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             tr.transform(&x1,&y1);
             tr.transform(&x2,&y2);
             box2d<double> extent(x1,y1,x2,y2);
-            
-            mapnik::svg::svg_renderer<agg::path_storage, 
-                                      agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer((*marker)->source(),
-                                                                                                    (*marker)->attributes());
-            
+            using namespace mapnik::svg;
+            vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
+            svg_path_adapter svg_path(stl_storage);
+            svg_renderer<svg_path_adapter, 
+                         agg::pod_bvector<path_attributes> > svg_renderer(svg_path,(*marker)->attributes());
+
             for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
                 geometry2d const& geom = feature.get_geometry(i);

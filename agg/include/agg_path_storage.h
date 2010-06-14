@@ -1423,6 +1423,10 @@ namespace agg
         }
     }
 
+////////////////////////////////////////////////////////////////////////////////
+
+
+
     //-----------------------------------------------------vertex_stl_storage
     template<class Container> class vertex_stl_storage
     {
@@ -1539,12 +1543,6 @@ namespace agg
 
 // Example of declarations path_storage with std::vector as a container
 //---------------------------------------------------------------------------
-#include <vector>
-namespace agg
-{
-    typedef path_base<vertex_stl_storage<std::vector<vertex_d> > > path_storage; 
-}
-
 
 
 
