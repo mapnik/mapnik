@@ -67,9 +67,10 @@ class feature_style_processor
         proj_transform const& prj_trans_;
     };
 public:
-    feature_style_processor(Map const& m)
-        : m_(m) {}
-         
+    explicit feature_style_processor(Map const& m, double scale_factor = 1.0)
+        : m_(m),
+          scale_factor_(scale_factor) {}
+    
     void apply()
     {
 #ifdef MAPNIK_DEBUG           
@@ -82,6 +83,7 @@ public:
         {
             projection proj(m_.srs()); // map projection
             double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
+            scale_denom *= scale_factor_;
 #ifdef MAPNIK_DEBUG
             std::clog << "scale denominator = " << scale_denom << "\n";
 #endif
@@ -253,6 +255,7 @@ private:
         p.end_layer_processing(lay);
     }   
     Map const& m_;
+    double scale_factor_;
 };
 }
 

@@ -109,7 +109,7 @@ private:
 
 template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
-    : feature_style_processor<agg_renderer>(m),
+    : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
