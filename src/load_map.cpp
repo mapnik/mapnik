@@ -807,10 +807,8 @@ void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
 
         markers_symbolizer symbol(parse_path(filename));
         optional<float> opacity = get_opt_attr<float>(sym, "opacity");
-        if (opacity) 
-        {
-            // TODO !!!!!  symbol.set_opacity( *opacity );
-        }
+        if (opacity) symbol.set_opacity( *opacity );
+        
         if (transform_wkt)
         {
             agg::trans_affine tr;
@@ -1329,7 +1327,7 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
             // text-opacity
             optional<double> text_opacity =
                 get_opt_attr<double>(sym, "text-opacity");
-            if (opacity)
+            if (text_opacity)
             {
                 shield_symbol.set_text_opacity( * text_opacity );
             }
