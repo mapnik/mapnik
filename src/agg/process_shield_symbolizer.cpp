@@ -125,6 +125,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                 text_ren.set_fill(sym.get_fill());
                 text_ren.set_halo_fill(sym.get_halo_fill());
                 text_ren.set_halo_radius(sym.get_halo_radius());
+                text_ren.set_opacity(sym.get_text_opacity());
                 
                 placement_finder<label_collision_detector4> finder(detector_);
 
@@ -262,7 +263,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                 ren.set_fill(sym.get_fill());
                 ren.set_halo_fill(sym.get_halo_fill());
                 ren.set_halo_radius(sym.get_halo_radius());
-
+                ren.set_opacity(sym.get_text_opacity());
+                
                 placement_finder<label_collision_detector4> finder(detector_);
 
                 string_info info(text);
@@ -333,7 +335,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                                     {
                                         //pixmap_.set_rectangle_alpha(px,py,*data);
-                                        pixmap_.set_rectangle_alpha2(*(*data),px,py,float(sym.get_opacity()));
+                                        pixmap_.set_rectangle_alpha2(*(*data),px,py,sym.get_opacity());
                                         box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
                                         ren.render(x,y);
                                         detector_.insert(label_ext);
