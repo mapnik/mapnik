@@ -42,11 +42,14 @@ public:
     void set_filename(path_expression_ptr filename);
     void set_transform(transform_type const& );
     transform_type const& get_transform() const;
+    void set_opacity(float opacity);
+    float get_opacity() const;
 protected:
     symbolizer_with_image(path_expression_ptr filename);
     symbolizer_with_image(symbolizer_with_image const& rhs);
     path_expression_ptr image_filename_;   
-    transform_type matrix_;     
+    transform_type matrix_;
+    float opacity_;
 };
 }
 

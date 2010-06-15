@@ -105,7 +105,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       avoid_edges_(false),
       minimum_distance_(0.0),
       overlap_(false),
-      opacity_(1.0),
+      text_opacity_(1.0),
       wrap_before_(false),
       halign_(H_MIDDLE),
       jalign_(J_MIDDLE) {}
@@ -135,7 +135,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       avoid_edges_(false),
       minimum_distance_(0.0),
       overlap_(false),
-      opacity_(1.0),
+      text_opacity_(1.0),
       wrap_before_(false),
       halign_(H_MIDDLE),
       jalign_(J_MIDDLE) {}
@@ -166,7 +166,7 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       avoid_edges_(rhs.avoid_edges_),
       minimum_distance_(rhs.minimum_distance_),
       overlap_(rhs.overlap_),
-      opacity_(rhs.opacity_),
+      text_opacity_(rhs.text_opacity_),
       wrap_before_(rhs.wrap_before_),
       halign_(rhs.halign_),
       jalign_(rhs.jalign_) {}
@@ -200,7 +200,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     avoid_edges_ = other.avoid_edges_;
     minimum_distance_ = other.minimum_distance_;
     overlap_ = other.overlap_;
-    opacity_ = other.opacity_;
+    text_opacity_ = other.text_opacity_;
     wrap_before_ = other.wrap_before_;
     halign_ = other.halign_;
     jalign_ = other.jalign_;
@@ -477,14 +477,14 @@ bool text_symbolizer::get_allow_overlap() const
     return overlap_;
 }
 
-void text_symbolizer::set_opacity(double opacity)
+void text_symbolizer::set_text_opacity(double text_opacity)
 {
-    opacity_ = opacity;
+    text_opacity_ = text_opacity;
 }
 
-double text_symbolizer::get_opacity() const
+double text_symbolizer::get_text_opacity() const
 {
-    return opacity_;
+    return text_opacity_;
 }
 
 void text_symbolizer::set_horizontal_alignment(horizontal_alignment_e halign)

@@ -151,8 +151,8 @@ struct MAPNIK_DECL text_symbolizer
     double get_minimum_distance() const;
     void set_allow_overlap(bool overlap);
     bool get_allow_overlap() const;
-    void set_opacity(double opacity);
-    double get_opacity() const;
+    void set_text_opacity(double opacity);
+    double get_text_opacity() const;
     bool get_wrap_before() const; // wrap text at wrap_char immediately before current work
     void set_wrap_before(bool wrap_before);
     void set_horizontal_alignment(horizontal_alignment_e valign);
@@ -186,7 +186,7 @@ private:
     bool avoid_edges_;
     double minimum_distance_;
     bool overlap_;
-    double opacity_;
+    double text_opacity_;
     bool wrap_before_;
     horizontal_alignment_e halign_;
     justify_alignment_e jalign_;
