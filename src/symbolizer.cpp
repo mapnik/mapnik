@@ -27,7 +27,8 @@
 namespace mapnik {
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
-    : image_filename_( file ) 
+    : image_filename_( file ),
+      opacity_(1.0f)
 
 {
     matrix_[0] = 1.0;
