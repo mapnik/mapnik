@@ -63,6 +63,16 @@ transform_type const& symbolizer_with_image::get_transform() const
     return matrix_;
 }
 
+void symbolizer_with_image::set_opacity(float opacity)
+{
+    opacity_ = opacity;
+}
+
+float symbolizer_with_image::get_opacity() const
+{
+    return opacity_;
+}
+
 } // end of namespace mapnik
 
 
