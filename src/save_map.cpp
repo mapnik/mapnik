@@ -390,6 +390,8 @@ private:
         if ( ! filename.empty() ) {
             set_attr( node, "file", filename );
         }
+        
+        // TODO !!! 
     }
     void add_font_attributes(ptree & node, const text_symbolizer & sym)
     {
@@ -492,9 +494,9 @@ private:
         {
             set_attr( node, "avoid_edges", sym.get_avoid_edges() );
         }
-        if (sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
+        if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_ )
         {
-            set_attr( node, "opacity", sym.get_opacity() );
+            set_attr( node, "opacity", sym.get_text_opacity() );
         }
         if (sym.get_horizontal_alignment() != dfl.get_horizontal_alignment() || explicit_defaults_ )
         {

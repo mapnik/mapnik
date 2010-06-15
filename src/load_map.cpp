@@ -1114,9 +1114,9 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
             get_opt_attr<double>(sym, "opacity");
         if (opacity)
         {
-            text_symbol.set_opacity( * opacity );
+            text_symbol.set_text_opacity( * opacity );
         }
-
+        
         // max_char_angle_delta
         optional<double> max_char_angle_delta =
             get_opt_attr<double>(sym, "max_char_angle_delta");
@@ -1324,6 +1324,14 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
             if (opacity)
             {
                 shield_symbol.set_opacity( * opacity );
+            }
+            
+            // text-opacity
+            optional<double> text_opacity =
+                get_opt_attr<double>(sym, "text-opacity");
+            if (opacity)
+            {
+                shield_symbol.set_text_opacity( * text_opacity );
             }
 
             if (transform_wkt)
