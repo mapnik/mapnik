@@ -75,6 +75,9 @@ int main( int argc, char **argv )
             if (ok) window.set_default_extent(x0,y0,x1,y1);
         }
     }
-        
+    else
+    {
+        window.zoom_all();
+    }   
     return app.exec(); 
 }

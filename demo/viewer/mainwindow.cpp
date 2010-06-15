@@ -132,7 +132,6 @@ void MainWindow::open(QString const& path)
     if (!filename_.isEmpty())
     {
         load_map_file(filename_);
-        //zoom_all();
         setWindowTitle(tr("%1 - Mapnik Viewer").arg(filename_));
     }
     
@@ -179,16 +178,8 @@ void MainWindow::load_map_file(QString const& filename)
     {
         std::cout << ex.what() << "\n";
     }
-    //map->zoom_all();
-    //mapnik::box2d<double> const& ext = map->getCurrentExtent();
-    //mapWidget_->zoomToBox(ext);
     layerTab_->setModel(new LayerListModel(map,this));
     styleTab_->setModel(new StyleModel(map,this));
-}
-
-void MainWindow::zoom_all()
-{
-    mapWidget_->defaultView();
 }
 
 void MainWindow::zoom_to_box()
@@ -394,6 +385,15 @@ void MainWindow::set_default_extent(double x0,double y0, double x1, double y1)
         }
     }
     catch (...) {}
-    
-    
+}
+
+void MainWindow::zoom_all()
+{
+    boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
+    if (map_ptr) 
+    {
+        map_ptr->zoom_all();
+        mapnik::box2d<double> const& ext = map_ptr->getCurrentExtent();
+        mapWidget_->zoomToBox(ext);
+    }
 }
