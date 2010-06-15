@@ -40,9 +40,9 @@ symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
 
 symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
     : image_filename_(rhs.image_filename_),
+      opacity_(rhs.opacity_),
       matrix_(rhs.matrix_) {}
    
-
 path_expression_ptr symbolizer_with_image::get_filename() const
 {
     return image_filename_;

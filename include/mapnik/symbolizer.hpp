@@ -48,8 +48,8 @@ protected:
     symbolizer_with_image(path_expression_ptr filename);
     symbolizer_with_image(symbolizer_with_image const& rhs);
     path_expression_ptr image_filename_;   
-    transform_type matrix_;
     float opacity_;
+    transform_type matrix_;
 };
 }
 
