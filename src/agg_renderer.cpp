@@ -649,7 +649,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             ren.set_fill(fill);
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius());
-            ren.set_opacity(sym.get_opacity());
+            ren.set_opacity(sym.get_text_opacity());
 
             placement_finder<label_collision_detector4> finder(detector_);
 
