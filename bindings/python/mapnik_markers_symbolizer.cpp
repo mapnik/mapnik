@@ -103,9 +103,9 @@ void export_markers_symbolizer()
         .add_property("max_error",
                       &markers_symbolizer::get_max_error,
                       &markers_symbolizer::set_max_error)
-        
-        //.add_property("opacity",
-        //              &markers_symbolizer::get_opacity,
-        //              &markers_symbolizer::set_opacity)
+        .add_property("opacity",
+                      &markers_symbolizer::get_opacity,
+                      &markers_symbolizer::set_opacity,
+                      "Set/get the text opacity")
         ;
 }
