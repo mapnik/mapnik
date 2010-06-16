@@ -135,8 +135,8 @@ struct MAPNIK_DECL text_symbolizer
     void set_fill(color const& fill);
     void set_halo_fill(color const& fill);
     color const& get_halo_fill() const;
-    void set_halo_radius(unsigned radius);
-    unsigned get_halo_radius() const;
+    void set_halo_radius(double radius);
+    double get_halo_radius() const;
     void set_label_placement(label_placement_e label_p);
     label_placement_e get_label_placement() const;
     void set_vertical_alignment(vertical_alignment_e valign);
@@ -178,7 +178,7 @@ private:
     double max_char_angle_delta_;
     color fill_;
     color halo_fill_;
-    unsigned halo_radius_;
+    double halo_radius_;
     label_placement_e label_p_;
     vertical_alignment_e valign_;
     position anchor_;

@@ -1020,13 +1020,13 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         {
             text_symbol.set_halo_fill( * halo_fill );
         }
-        optional<unsigned> halo_radius =
-            get_opt_attr<unsigned>(sym, "halo_radius");
+        optional<double> halo_radius =
+            get_opt_attr<double>(sym, "halo_radius");
         if (halo_radius)
         {
             text_symbol.set_halo_radius(*halo_radius);
         }
-
+        
         // text ratio and wrap width
         optional<unsigned> text_ratio =
             get_opt_attr<unsigned>(sym, "text_ratio");
@@ -1233,8 +1233,8 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
             {
                 shield_symbol.set_halo_fill( * halo_fill );
             }
-            optional<unsigned> halo_radius =
-                get_opt_attr<unsigned>(sym, "halo_radius");
+            optional<double> halo_radius =
+                get_opt_attr<double>(sym, "halo_radius");
             if (halo_radius)
             {
                 shield_symbol.set_halo_radius(*halo_radius);
@@ -1599,12 +1599,12 @@ void map_parser::parse_glyph_symbolizer(rule_type & rule, ptree const &sym)
             glyph_sym.set_halo_fill(*halo_fill);
 
         // halo_radius
-        optional<unsigned> halo_radius = get_opt_attr<unsigned>(
+        optional<double> halo_radius = get_opt_attr<double>(
             sym,
             "halo_radius");
         if (halo_radius)
             glyph_sym.set_halo_radius(*halo_radius);
-
+        
         // allow_overlap
         optional<boolean> allow_overlap = get_opt_attr<boolean>(
             sym,

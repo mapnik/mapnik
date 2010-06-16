@@ -88,7 +88,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 
                 path_type path(t_,geom,prj_trans);
                 markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
-                                                                                  sym.get_spacing(), 
+                                                                                  sym.get_spacing() * scale_factor_, 
                                                                                   sym.get_max_error(), 
                                                                                   sym.get_allow_overlap());        
                 double x, y, angle;
@@ -126,7 +126,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             
             path_type path(t_,geom,prj_trans);
             markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
-                                                                              sym.get_spacing(), 
+                                                                              sym.get_spacing() * scale_factor_, 
                                                                               sym.get_max_error(), 
                                                                               sym.get_allow_overlap());        
             double x, y, angle;

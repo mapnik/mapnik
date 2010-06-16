@@ -38,6 +38,7 @@ extern "C"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
+#include FT_STROKER_H
 }
 
 // boost
@@ -303,7 +304,41 @@ private:
     std::vector<face_ptr> faces_;
 };
 
+// FT_Stroker wrapper
+class stroker : boost::noncopyable
+{
+public:
+    explicit stroker(FT_Stroker s)
+        : s_(s) {}
+    
+    void init(double radius)
+    {
+        FT_Stroker_Set(s_,radius * (1<<6), 
+                       FT_STROKER_LINECAP_ROUND, 
+                       FT_STROKER_LINEJOIN_ROUND, 
+                       0);    
+    }
+    
+    FT_Stroker const& get() const
+    {
+        return s_;
+    }
+    
+    ~stroker()
+    {
+#ifdef MAPNIK_DEBUG
+        std::clog << "~stroker: destroy stroker:" << s_ << std::endl;
+#endif        
+        FT_Stroker_Done(s_);
+    }
+private:
+    FT_Stroker s_;
+};
+
+
+
 typedef boost::shared_ptr<font_face_set> face_set_ptr;
+typedef boost::shared_ptr<stroker> stroker_ptr;
 
 class MAPNIK_DECL freetype_engine
 {
@@ -311,6 +346,7 @@ public:
     static bool register_font(std::string const& file_name);
     static std::vector<std::string> face_names ();
     face_ptr create_face(std::string const& family_name);
+    stroker_ptr create_stroker();
     virtual ~freetype_engine();
     freetype_engine();
 private:
@@ -327,7 +363,8 @@ class MAPNIK_DECL face_manager : private boost::noncopyable
 
 public:
     face_manager(T & engine)
-        : engine_(engine) {}
+        : engine_(engine),
+        stroker_(engine_.create_stroker())  {}
 
     face_ptr get_face(std::string const& name)
     {
@@ -371,9 +408,16 @@ public:
         }
         return face_set;
     }
+
+    stroker_ptr get_stroker()
+    {
+        return stroker_;
+    }
+
 private:
     faces faces_;
     font_engine_type & engine_;
+    stroker_ptr stroker_;
 };
 
 template <typename T>
@@ -389,12 +433,13 @@ struct text_renderer : private boost::noncopyable
     typedef boost::ptr_vector<glyph_t> glyphs_t;
     typedef T pixmap_type;
 
-    text_renderer (pixmap_type & pixmap, face_set_ptr faces)
+    text_renderer (pixmap_type & pixmap, face_set_ptr faces, stroker & s)
         : pixmap_(pixmap),
           faces_(faces),
+          stroker_(s),
           fill_(0,0,0),
           halo_fill_(255,255,255),
-          halo_radius_(0),
+          halo_radius_(0.0),
           opacity_(1.0) {}
 
     void set_pixel_size(unsigned size)
@@ -412,7 +457,7 @@ struct text_renderer : private boost::noncopyable
         halo_fill_=halo;
     }
 
-    void set_halo_radius( int radius=1)
+    void set_halo_radius( double radius=1.0)
     {
         halo_radius_=radius;
     }
@@ -511,23 +556,28 @@ struct text_renderer : private boost::noncopyable
         typename glyphs_t::iterator pos;
 
         //make sure we've got reasonable values.
-        if (halo_radius_ > 0 && halo_radius_ < 256)
+        if (halo_radius_ > 0.0 && halo_radius_ < 1024.0)
         {
-            //render halo
+            stroker_.init(halo_radius_);   
             for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
             {
-                FT_Glyph_Transform(pos->image,0,&start);
-
-                error = FT_Glyph_To_Bitmap( &(pos->image),FT_RENDER_MODE_NORMAL,0,1);
-                if ( ! error )
+                FT_Glyph g;
+                error = FT_Glyph_Copy(pos->image, &g);
+                if (!error)
                 {
-
-                    FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
-                    render_halo(&bit->bitmap, halo_fill_.rgba(),
-                                bit->left,
-                                height - bit->top,halo_radius_);
+                    FT_Glyph_Transform(g,0,&start);
+                    FT_Glyph_Stroke(&g,stroker_.get(),0);
+                    error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
+                    if ( ! error )
+                    {
+                        
+                        FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
+                        render_bitmap(&bit->bitmap, halo_fill_.rgba(),
+                                      bit->left,
+                                      height - bit->top);
+                    }
                 }
-            }
+            }    
         }
         //render actual text
         for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
@@ -591,11 +641,10 @@ private:
 
     pixmap_type & pixmap_;
     face_set_ptr faces_;
+    stroker & stroker_;
     color fill_;
     color halo_fill_;
-    int halo_radius_;
-    unsigned text_ratio_;
-    unsigned wrap_width_;
+    double halo_radius_;
     glyphs_t glyphs_;
     double opacity_;
 };

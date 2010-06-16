@@ -642,13 +642,14 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             faces = font_manager_.get_face_set(sym.get_face_name());
         }
 
-        if (faces->size() > 0)
+        stroker_ptr strk = font_manager_.get_stroker();
+        if (faces->size() > 0 && strk)
         {
-            text_renderer<T> ren(pixmap_, faces);
+            text_renderer<T> ren(pixmap_, faces, *strk);
             ren.set_pixel_size(sym.get_text_size() * scale_factor_);
             ren.set_fill(fill);
             ren.set_halo_fill(sym.get_halo_fill());
-            ren.set_halo_radius(sym.get_halo_radius());
+            ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
             ren.set_opacity(sym.get_text_opacity());
 
             placement_finder<label_collision_detector4> finder(detector_);
@@ -714,7 +715,8 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     face_set_ptr faces = font_manager_.get_face_set(sym.get_face_name());
-    if (faces->size() > 0)
+    stroker_ptr strk = font_manager_.get_stroker();
+    if (faces->size() > 0 && strk)
     {
         // Get x and y from geometry and translate to pixmap coords.
         double x, y, z=0.0;
@@ -722,14 +724,14 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
         prj_trans.backward(x,y,z);
         t_.forward(&x, &y);
 
-        text_renderer<T> ren(pixmap_, faces);
+        text_renderer<T> ren(pixmap_, faces, *strk);
 
         // set fill and halo colors
         color fill = sym.eval_color(feature);
         ren.set_fill(fill);
         if (fill != color("transparent")) {
             ren.set_halo_fill(sym.get_halo_fill());
-            ren.set_halo_radius(sym.get_halo_radius());
+            ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
         }
 
         // set font size

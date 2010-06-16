@@ -92,6 +92,18 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
     }
     return face_ptr();
 }
+
+stroker_ptr freetype_engine::create_stroker()
+{
+    FT_Stroker s;
+    FT_Error error = FT_Stroker_New(library_, &s); 
+    if (!error)
+    {
+        return stroker_ptr(new stroker(s));
+    }
+    return stroker_ptr();
+}
+
 #ifdef MAPNIK_THREADSAFE
 boost::mutex freetype_engine::mutex_;
 #endif

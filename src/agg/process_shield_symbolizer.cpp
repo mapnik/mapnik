@@ -117,14 +117,15 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                 faces = font_manager_.get_face_set(sym.get_face_name());
             }
             
-            if (faces->size() > 0)
+            stroker_ptr strk = font_manager_.get_stroker();
+            if (strk && faces->size() > 0)
             {
-                text_renderer<T> text_ren(pixmap_, faces);
+                text_renderer<T> text_ren(pixmap_, faces, *strk);
                 
                 text_ren.set_pixel_size(sym.get_text_size() * scale_factor_);
                 text_ren.set_fill(sym.get_fill());
                 text_ren.set_halo_fill(sym.get_halo_fill());
-                text_ren.set_halo_radius(sym.get_halo_radius());
+                text_ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
                 text_ren.set_opacity(sym.get_text_opacity());
                 
                 placement_finder<label_collision_detector4> finder(detector_);
@@ -255,10 +256,11 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                 faces = font_manager_.get_face_set(sym.get_face_name());
             }
 
-            if (faces->size() > 0)
+            stroker_ptr strk = font_manager_.get_stroker();
+            if (strk && faces->size() > 0)
             {
-                text_renderer<T> ren(pixmap_, faces);
-
+                text_renderer<T> ren(pixmap_, faces, *strk);
+                
                 ren.set_pixel_size(sym.get_text_size());
                 ren.set_fill(sym.get_fill());
                 ren.set_halo_fill(sym.get_halo_fill());
@@ -303,8 +305,12 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 prj_trans.backward(label_x,label_y, z);
                                 t_.forward(&label_x,&label_y);
 
-                                finder.find_point_placement( text_placement,label_x,label_y,0.0,sym.get_vertical_alignment(),sym.get_line_spacing(),
-                                                             sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment() );
+                                finder.find_point_placement( text_placement,label_x,label_y,0.0,
+                                                             sym.get_vertical_alignment(),
+                                                             sym.get_line_spacing(),
+                                                             sym.get_character_spacing(),
+                                                             sym.get_horizontal_alignment(),
+                                                             sym.get_justify_alignment() );
 
                                 // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
                                 if( text_placement.placements.size() > 0)

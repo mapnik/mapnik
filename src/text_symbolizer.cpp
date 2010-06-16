@@ -397,12 +397,12 @@ color const&  text_symbolizer::get_halo_fill() const
     return halo_fill_;
 }
 
-void  text_symbolizer::set_halo_radius(unsigned radius)
+void  text_symbolizer::set_halo_radius(double radius)
 {
     halo_radius_ = radius;
 }
 
-unsigned  text_symbolizer::get_halo_radius() const
+double text_symbolizer::get_halo_radius() const
 {
     return halo_radius_;
 }
