@@ -62,7 +62,7 @@ int main( int argc, char **argv )
     MainWindow window;
     window.show();
     if (argc > 1) window.open(argv[1]);
-    if (argc == 3)
+    if (argc >= 3)
     {
         QStringList list = QString(argv[2]).split(",");
         if (list.size()==4)
@@ -78,6 +78,12 @@ int main( int argc, char **argv )
     else
     {
         window.zoom_all();
-    }   
+    }
+    if (argc == 4)
+    {
+        bool ok;
+        double scaling_factor = QString(argv[3]).toDouble(&ok);
+        if (ok) window.set_scaling_factor(scaling_factor);
+    }
     return app.exec(); 
 }

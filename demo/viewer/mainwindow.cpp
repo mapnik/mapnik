@@ -387,6 +387,11 @@ void MainWindow::set_default_extent(double x0,double y0, double x1, double y1)
     catch (...) {}
 }
 
+void MainWindow::set_scaling_factor(double scaling_factor)
+{
+    mapWidget_->set_scaling_factor(scaling_factor);
+}
+
 void MainWindow::zoom_all()
 {
     boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();

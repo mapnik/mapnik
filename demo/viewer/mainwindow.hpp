@@ -43,6 +43,7 @@ class MainWindow : public QMainWindow
     MainWindow();
     virtual ~MainWindow();
     void set_default_extent(double x0,double y0,double x1, double y1);
+    void set_scaling_factor(double scaling_factor);
 protected:
     void closeEvent(QCloseEvent* event);
 public slots:
@@ -104,7 +105,6 @@ private:
     //status bar
     QStatusBar *status;
     QSlider * slider_;
-
     mapnik::box2d<double> default_extent_;
 };
 

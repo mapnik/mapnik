@@ -74,7 +74,8 @@ MapWidget::MapWidget(QWidget *parent)
      drag_(false),
      first_(true),
      pen_(QColor(0,0,255,96)),
-     selectedLayer_(-1)
+     selectedLayer_(-1),
+     scaling_factor_(1.0)
 {
    pen_.setWidth(3);
    pen_.setCapStyle(Qt::RoundCap);
@@ -444,6 +445,10 @@ void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::strin
    //image.saveToFile(filename,type);
 }
        
+void MapWidget::set_scaling_factor(double scaling_factor)
+{
+    scaling_factor_ = scaling_factor;
+}
 
 void MapWidget::updateMap() 
 {   
@@ -456,7 +461,7 @@ void MapWidget::updateMap()
 
       try 
       {
-          mapnik::agg_renderer<image_32> ren(*map_,buf);
+          mapnik::agg_renderer<image_32> ren(*map_,buf,scaling_factor_);
           ren.apply();
           
           QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
