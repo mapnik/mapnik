@@ -20,7 +20,6 @@ HEADERS += \
     ../include/mapnik/svg/svg_storage.hpp \
     ../include/mapnik/svg/svg_transform_grammar.hpp \
     ../include/mapnik/agg_renderer.hpp \
-
     ../include/mapnik/agg_rasterizer.hpp \
     ../include/mapnik/agg_renderer.hpp \
     ../include/mapnik/arrow.hpp \

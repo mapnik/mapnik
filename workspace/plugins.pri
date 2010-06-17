@@ -82,4 +82,3 @@ SOURCES += \
   $$PWD/../plugins/input/shape/shape_io.cpp \
   $$PWD/../plugins/input/sqlite/sqlite_featureset.cpp \
   $$PWD/../plugins/input/sqlite/sqlite_datasource.cpp
-
