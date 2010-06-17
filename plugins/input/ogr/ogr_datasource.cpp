@@ -80,8 +80,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
    if (!dataset_) 
    {
       std::string err = CPLGetLastErrorMsg();
-      if( err.size() == 0 )
-      {
+      if( err.size() == 0 ) {
          throw datasource_exception("Connection failed: " + dataset_name_ + " was not found or is not a supported format");
       } else {
          throw datasource_exception(err);

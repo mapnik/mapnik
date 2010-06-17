@@ -19,6 +19,7 @@
 #
 # $Id$
 
+
 Import ('env')
 
 prefix = env['PREFIX']
@@ -26,22 +27,21 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 
 ogr_src = Split(
 	"""
-	ogr_converter.cpp
-	ogr_datasource.cpp
-	ogr_featureset.cpp      
-	ogr_index_featureset.cpp
+	    ogr_converter.cpp
+	    ogr_datasource.cpp
+	    ogr_featureset.cpp      
+	    ogr_index_featureset.cpp
 	"""
         )
 
 libraries = [env['PLUGINS']['ogr']['lib']]
+libraries = ['boost_iostreams%s' % env['BOOST_APPEND']]   
 
 if env['PLATFORM'] == 'Darwin':
-    if env['HAS_BOOST_SYSTEM']:
-        boost_system = 'boost_system%s' % env['BOOST_APPEND']
-        libraries.append(boost_system)
     libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
-    libraries.append('boost_iostreams%s' % env['BOOST_APPEND'])
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 ogr_inputdriver = env.SharedLibrary('ogr', source=ogr_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
