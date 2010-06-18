@@ -21,6 +21,7 @@
 // qt
 #include <QApplication>
 #include <QStringList>
+#include <QSettings>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include "mainwindow.hpp"
@@ -30,21 +31,16 @@
 
 bool is_font_file (std::string const& filename)
 {
-    return boost::algorithm::ends_with(filename,std::string(".ttf"));
+    return boost::algorithm::ends_with(filename,std::string(".ttf")) ||
+        boost::algorithm::ends_with(filename,std::string(".dfont")) ||
+        boost::algorithm::ends_with(filename,std::string(".ttc"));
 }
 
-int main( int argc, char **argv )
+void register_fonts(std::string const& dir)
 {
-    using mapnik::datasource_cache;
     using mapnik::freetype_engine;
-        
-    // modify this prefix based on your install location
-    std::string mapnik_dir = "/opt/mapnik";
-        
-    datasource_cache::instance()->register_datasources(mapnik_dir + "/lib/mapnik2/input");
-    boost::filesystem::path path(mapnik_dir + "/lib/mapnik2/fonts");
+    boost::filesystem::path path(dir);
     boost::filesystem::directory_iterator end_itr;      
-    
     
     if (boost::filesystem::exists(path) && boost::filesystem::is_directory(path))
     {
@@ -52,12 +48,38 @@ int main( int argc, char **argv )
         {
             if (!boost::filesystem::is_directory(*itr) && is_font_file(itr->path().leaf())) 
             {
-                std::cout << "register font " << itr->string() << "\n";
+                std::cout << "registering font " << itr->string() << "\n";
                 freetype_engine::register_font(itr->string());
             }
         }
     }
         
+}
+
+int main( int argc, char **argv )
+{
+    using mapnik::datasource_cache;
+       
+    QCoreApplication::setOrganizationName("Mapnik");
+    QCoreApplication::setOrganizationDomain("mapnik.org");
+    QCoreApplication::setApplicationName("Viewer");
+    
+    QSettings settings("viewer.ini",QSettings::IniFormat);
+    
+    // register input plug-ins
+    QString plugins_dir = settings.value("mapnik/plugins_dir",
+                                         QVariant("/opt/mapnik/lib/mapnik2/input/")).toString();
+    datasource_cache::instance()->register_datasources(plugins_dir.toStdString());
+    // register fonts
+    int count = settings.beginReadArray("mapnik/fonts");
+    for (int index=0; index < count; ++index)
+    {
+        settings.setArrayIndex(index);
+        QString font_dir = settings.value("dir").toString();
+        register_fonts(font_dir.toStdString());
+    }
+    settings.endArray();
+    
     QApplication app( argc, argv ); 
     MainWindow window;
     window.show();
