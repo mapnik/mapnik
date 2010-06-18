@@ -454,6 +454,7 @@ namespace agg
     // The scanline container with alpha-masking
     // 
     //------------------------------------------------------------------------
+    /*
     template<class AlphaMask> 
     class scanline32_u8_am : public scanline32_u8
     {
@@ -490,7 +491,7 @@ namespace agg
     private:
         const AlphaMask* m_alpha_mask;
     };
-
+    */
 
 
 }
