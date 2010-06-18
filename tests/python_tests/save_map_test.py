@@ -2,6 +2,7 @@
 
 from nose.tools import *
 from utilities import execution_path
+import tempfile
 
 import os, sys, glob, mapnik2
 
@@ -17,20 +18,36 @@ def test():
     # 3. Load map to a second object
     # 4. Compare both map objects
     map = mapnik2.Map(256, 256)
-    in_map = "../data/good_maps/osm-styles.xml"
 
-    mapnik2.load_map(map, in_map)
-    test_map = "test_map.xml"
+    def compare_map(in_map):
+        mapnik2.load_map(map, in_map)
 
-    mapnik2.save_map(map, test_map)
-    new_map = mapnik2.Map(256, 256)
+        (handle, test_map) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-temp-map1-')
+        os.close(handle)
 
-    mapnik2.load_map(new_map, test_map)
+        (handle, test_map2) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-temp-map2-')
+        os.close(handle)
 
-    eq_(open(test_map).read(),mapnik2.save_map_to_string(new_map))
-
-    if os.path.exists(test_map):
-        os.remove(test_map)
-    else:
-        # Fail, the map wasn't written
-        return False
+        if os.path.exists(test_map):
+            os.remove(test_map)
+    
+        mapnik2.save_map(map, test_map)
+        new_map = mapnik2.Map(256, 256)
+    
+        mapnik2.load_map(new_map, test_map)
+        open(test_map2,'w').write(mapnik2.save_map_to_string(new_map))
+    
+        diff = ' diff %s %s' % (os.path.abspath(test_map),os.path.abspath(test_map2))
+        try:
+            eq_(open(test_map).read(),open(test_map2).read())
+        except AssertionError, e:
+            raise AssertionError('serialized map "%s" not the same after being reloaded, \ncompare with command:\n\n$%s' % (in_map,diff))
+    
+        if os.path.exists(test_map):
+            os.remove(test_map)
+        else:
+            # Fail, the map wasn't written
+            return False
+    
+    for m in glob.glob("../data/good_maps/*.xml"):
+        compare_map(m)
