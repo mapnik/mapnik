@@ -84,7 +84,7 @@ public:
         {
             return (pos->second)(file);
         }
-        return on_unknown_type(key);
+        return factory_error_policy<key_type,product_type>::on_unknown_type(key);
     }
 };
 }
