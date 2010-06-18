@@ -27,6 +27,9 @@
 // boost
 #include <boost/scoped_ptr.hpp>
 
+namespace mapnik
+{
+
 static const char * label_placement_strings[] = {
     "point",
     "line",
@@ -35,7 +38,7 @@ static const char * label_placement_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( mapnik::label_placement_e, label_placement_strings );
+IMPLEMENT_ENUM( label_placement_e, label_placement_strings );
 
 static const char * vertical_alignment_strings[] = {
     "top",
@@ -45,7 +48,7 @@ static const char * vertical_alignment_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( mapnik::vertical_alignment_e, vertical_alignment_strings );
+IMPLEMENT_ENUM( vertical_alignment_e, vertical_alignment_strings );
 
 static const char * horizontal_alignment_strings[] = {
     "left",
@@ -55,7 +58,7 @@ static const char * horizontal_alignment_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( mapnik::horizontal_alignment_e, horizontal_alignment_strings );
+IMPLEMENT_ENUM(horizontal_alignment_e, horizontal_alignment_strings );
 
 static const char * justify_alignment_strings[] = {
     "left",
@@ -65,7 +68,7 @@ static const char * justify_alignment_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( mapnik::justify_alignment_e, justify_alignment_strings );
+IMPLEMENT_ENUM( justify_alignment_e, justify_alignment_strings );
 
 static const char * text_convert_strings[] = {
     "none",
@@ -75,11 +78,10 @@ static const char * text_convert_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( mapnik::text_convert_e, text_convert_strings );
+IMPLEMENT_ENUM( text_convert_e, text_convert_strings );
 
 
-namespace mapnik
-{
+
 text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name, unsigned size, color const& fill)
     : name_(name),
       face_name_(face_name),

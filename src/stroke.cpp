@@ -41,14 +41,10 @@ static const char * line_join_strings[] = {
     ""
 };
 
-}
-
-IMPLEMENT_ENUM( mapnik::line_cap_e, line_cap_strings );
-IMPLEMENT_ENUM( mapnik::line_join_e, line_join_strings );
+IMPLEMENT_ENUM( line_cap_e, line_cap_strings );
+IMPLEMENT_ENUM( line_join_e, line_join_strings );
 
 
-namespace mapnik
-{
 stroke::stroke() 
     : c_(0,0,0),
       width_(1.0),
