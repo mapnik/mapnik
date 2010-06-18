@@ -36,13 +36,7 @@ namespace mapnik { namespace svg {
     using namespace boost::spirit;
     using namespace boost::fusion;
     using namespace boost::phoenix;
-
-    inline double deg2rad(double deg)
-    {
-        return (M_PI * deg)/180.0;
-    }
-
-
+    
     template <typename Iterator, typename SkipType, typename PathType>
     struct svg_path_grammar : qi::grammar<Iterator,SkipType>
     {

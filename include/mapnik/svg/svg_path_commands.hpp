@@ -23,6 +23,7 @@
 #ifndef SVG_COMMANDS_HPP
 #define SVG_COMMANDS_HPP
 
+#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -31,6 +32,11 @@ namespace mapnik { namespace svg {
 
     using namespace boost::fusion;
 
+    inline double deg2rad(double deg)
+    {
+        return (M_PI * deg)/180.0;
+    }
+    
     template <typename PathType>
     struct move_to
     {
