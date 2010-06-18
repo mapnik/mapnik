@@ -165,7 +165,6 @@ public:
 
     double area() const 
     {
-        unsigned i;
         double sum = 0.0;
         double x(0);
         double y(0);
