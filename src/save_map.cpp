@@ -26,6 +26,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
+#include <mapnik/path_expression_grammar.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
 // boost

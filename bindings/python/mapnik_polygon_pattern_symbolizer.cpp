@@ -24,7 +24,7 @@
 #include <boost/python.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/polygon_pattern_symbolizer.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 
 using mapnik::polygon_pattern_symbolizer;
 using mapnik::path_expression_ptr;

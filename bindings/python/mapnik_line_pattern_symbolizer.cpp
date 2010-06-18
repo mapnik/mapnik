@@ -24,7 +24,7 @@
 #include <boost/python.hpp>
 
 #include <mapnik/line_pattern_symbolizer.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 #include <mapnik/image_util.hpp>
 
 using mapnik::line_pattern_symbolizer;

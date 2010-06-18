@@ -26,7 +26,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 
 // boost
 #include <boost/array.hpp>

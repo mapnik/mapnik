@@ -25,7 +25,7 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/point_symbolizer.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 
 using mapnik::point_symbolizer;
 using mapnik::symbolizer_with_image;

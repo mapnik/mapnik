@@ -76,6 +76,7 @@ source = Split(
     datasource_cache.cpp
     box2d.cpp
     color.cpp
+    expression_node.cpp
     expression_string.cpp
     filter_factory.cpp
     font_engine_freetype.cpp
@@ -90,6 +91,7 @@ source = Split(
     load_map.cpp
     memory.cpp
     params.cpp
+    parse_path.cpp
     placement_finder.cpp
     plugin.cpp
     png_reader.cpp

@@ -30,7 +30,7 @@
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/font_set.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 #include <mapnik/text_path.hpp>
 
 // agg

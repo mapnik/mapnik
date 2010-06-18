@@ -27,7 +27,7 @@
 
 //mapnik
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 #include <mapnik/color.hpp>
 
 namespace mapnik {

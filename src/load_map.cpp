@@ -36,7 +36,7 @@
 #include <mapnik/libxml2_loader.hpp>
 
 #include <mapnik/filter_factory.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
 #include <mapnik/svg/svg_path_parser.hpp>

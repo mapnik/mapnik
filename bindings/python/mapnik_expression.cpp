@@ -23,13 +23,15 @@
 
 #include <boost/python.hpp>
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/filter_factory.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 
 #include <boost/variant.hpp>
 
+using mapnik::Feature;
 using mapnik::expression_ptr;
 using mapnik::parse_expression;
 using mapnik::to_expression_string;

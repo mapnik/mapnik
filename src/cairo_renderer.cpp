@@ -31,7 +31,7 @@
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/arrow.hpp>
 #include <mapnik/config_error.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
 #include <mapnik/image_cache.hpp>
 // cairo
 #include <cairomm/context.h>
