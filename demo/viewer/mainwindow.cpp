@@ -131,6 +131,7 @@ void MainWindow::open(QString const& path)
     
     if (!filename_.isEmpty())
     {
+        
         load_map_file(filename_);
         setWindowTitle(tr("%1 - Mapnik Viewer").arg(filename_));
     }
@@ -177,6 +178,10 @@ void MainWindow::load_map_file(QString const& filename)
     catch (mapnik::config_error & ex) 
     {
         std::cout << ex.what() << "\n";
+    }
+    catch (...)
+    {
+        std::cerr << "Exception caught in load_map\n";
     }
     layerTab_->setModel(new LayerListModel(map,this));
     styleTab_->setModel(new StyleModel(map,this));
