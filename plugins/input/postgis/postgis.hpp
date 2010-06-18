@@ -48,7 +48,7 @@ using mapnik::query;
 using mapnik::parameters;
 using mapnik::coord2d;
 
-class transcoder;
+//class transcoder;
 class postgis_datasource : public datasource
 {
       static const std::string GEOMETRY_COLUMNS;
