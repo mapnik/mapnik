@@ -275,7 +275,8 @@ public:
             int dist, newdist;
 
             // find closest match based on mean of r,g,b,a
-            vector<rgba>::iterator pit = std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba_mean_sort_cmp());
+            std::vector<rgba>::iterator pit = 
+                std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba_mean_sort_cmp());
             ind = pit-sorted_pal_.begin();
             if (ind == sorted_pal_.size())
                 ind--;
