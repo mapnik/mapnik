@@ -80,7 +80,7 @@ struct expression_attributes : boost::static_visitor<void>
     }
     
 private:
-    mutable std::set<std::string>& names_;
+    std::set<std::string>& names_;
 };
 
 struct symbolizer_attributes : public boost::static_visitor<>
@@ -216,7 +216,7 @@ public:
         {
             boost::apply_visitor(s_attr,*symIter++);
         }
-            
+        
         expression_ptr const& expr = r.get_filter();
         expression_attributes f_attr(names_);
         boost::apply_visitor(f_attr,*expr);

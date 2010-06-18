@@ -107,7 +107,7 @@ struct expression_string : boost::static_visitor<void>
     }
 
 private:
-    mutable std::string & str_;
+    std::string & str_;
 };
 
 std::string to_expression_string(expr_node const& node)
