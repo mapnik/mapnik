@@ -27,7 +27,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/map.hpp>
 #include <mapnik/graphics.hpp>
 
 // boost
@@ -38,8 +37,11 @@
 // stl
 #include <string>
 
+
+
 namespace mapnik {
-    
+
+class Map;    
 class ImageWriterException : public std::exception
 {
 private:

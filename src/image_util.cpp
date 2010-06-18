@@ -33,6 +33,7 @@ extern "C"
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
+#include <mapnik/map.hpp>
 
 // jpeg
 #if defined(HAVE_JPEG)
