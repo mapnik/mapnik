@@ -58,7 +58,7 @@ static const char * horizontal_alignment_strings[] = {
 };
 
 
-IMPLEMENT_ENUM(horizontal_alignment_e, horizontal_alignment_strings );
+IMPLEMENT_ENUM( horizontal_alignment_e, horizontal_alignment_strings );
 
 static const char * justify_alignment_strings[] = {
     "left",
