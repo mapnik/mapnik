@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added support for choosing OGR layer by index number using 'layer_by_index' parameter (r1904)
+
 - Added support for reading jpeg images (in addition to png/tiff) for image symbolizers (#518)
 
 - Made libjpeg dependency optional at compile time and added mapnik2.has_jpeg() method to check for support in python (#545).
