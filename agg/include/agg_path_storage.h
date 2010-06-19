@@ -1531,7 +1531,7 @@ namespace agg
     };
 
     //-----------------------------------------------------------path_storage
-    //typedef path_base<vertex_block_storage<double> > path_storage;
+    typedef path_base<vertex_block_storage<double> > path_storage;
 
     // Example of declarations path_storage with pod_bvector as a container
     //-----------------------------------------------------------------------
@@ -1544,6 +1544,11 @@ namespace agg
 // Example of declarations path_storage with std::vector as a container
 //---------------------------------------------------------------------------
 
+//#include <vector> 
+//namespace agg 
+//{ 
+//    typedef path_base<vertex_stl_storage<std::vector<vertex_d> > > path_storage;  
+//} 
 
 
 #endif
