@@ -3,6 +3,12 @@
 <Map bgcolor="#b5d0d0" srs="+init=epsg:4326" min_version="0.7.1">
     <Style name="1">
         <Rule title="foo">
+            <Filter>([name]='CHILE')</Filter>
+            <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
+            name="[name] + ' (default OGC pixel)'" text_convert="tolower" wrap_width="10" wrap_character=" " halo_radius="1" dy="5"/>
+            <PointSymbolizer />
+        </Rule>
+        <Rule title="foo">
             <Filter>([name]='Australia')</Filter>
             <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
             name="[name] + ' (png)'"  halo_radius="1" dy="20"/>
@@ -44,7 +50,7 @@
     <Layer name="point" srs="+init=epsg:4326">
         <StyleName>1</StyleName>
         <Datasource>
-            <Parameter name="extent">-180,-60,180,60</Parameter>
+            <Parameter name="extent">-180,-70,180,70</Parameter>
             <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
             <Parameter name="geometry_field">geometry</Parameter>
             <Parameter name="key_field">pkuid</Parameter>
