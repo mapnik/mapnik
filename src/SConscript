@@ -125,7 +125,10 @@ if env['JPEG']:
 if True : # agg backend
     source += Split(
         """
+    agg/process_glyph_symbolizer.cpp
+    agg/process_line_symbolizer.cpp
     agg/process_point_symbolizer.cpp
+    agg/process_polygon_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
     svg_parser.cpp
