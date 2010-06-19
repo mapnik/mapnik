@@ -127,6 +127,7 @@ if True : # agg backend
         """
     agg/process_glyph_symbolizer.cpp
     agg/process_line_symbolizer.cpp
+    agg/process_text_symbolizer.cpp
     agg/process_point_symbolizer.cpp
     agg/process_polygon_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
