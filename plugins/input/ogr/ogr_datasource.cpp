@@ -67,8 +67,6 @@ ogr_datasource::ogr_datasource(parameters const& params)
    boost::optional<std::string> file = params.get<std::string>("file");
    if (!file) throw datasource_exception("missing <file> parameter");
 
-   boost::optional<unsigned> layer_idx = params.get<unsigned>("layer_by_index");
-
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
 
    boost::optional<std::string> base = params.get<std::string>("base");
@@ -92,6 +90,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
    // initialize layer
    
    boost::optional<std::string> layer = params.get<std::string>("layer");
+   boost::optional<unsigned> layer_idx = params.get<unsigned>("layer_by_index");
    
    if (layer_idx && !layer)
    { 
@@ -103,15 +102,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
               layerName_ = def->GetName();
               layer_ = ogr_layer;
            }
-           /*else 
-           {
-              throw datasource_exception("No layers found!");
-           }*/
        }
-       /*else
-       {
-          throw datasource_exception("No layers found!");
-       }*/
    }
    
    if (!layer) 
