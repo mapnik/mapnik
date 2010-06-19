@@ -194,7 +194,7 @@ void render_to_file1(const mapnik::Map& map,
     else 
     {
         mapnik::image_32 image(map.getWidth(),map.getHeight());
-        render(map,image,0,0);
+        render(map,image,1.0,0,0);
         mapnik::save_to_file(image,filename,format); 
     }
 }
@@ -213,7 +213,7 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
     else 
     {
         mapnik::image_32 image(map.getWidth(),map.getHeight());
-        render(map,image,0,0);
+        render(map,image,1.0,0,0);
         mapnik::save_to_file(image,filename); 
     }
 }
