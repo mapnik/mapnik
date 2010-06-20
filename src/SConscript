@@ -130,6 +130,7 @@ if True : # agg backend
     agg/process_text_symbolizer.cpp
     agg/process_point_symbolizer.cpp
     agg/process_polygon_symbolizer.cpp
+    agg/process_polygon_pattern_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
     svg_parser.cpp
