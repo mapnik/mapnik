@@ -46,19 +46,22 @@ private:
     box2d<double> bbox_;
     resolution_type resolution_;
     double scale_denominator_;
+    double filter_factor_;
     std::set<std::string> names_;
 public:
          
     query(box2d<double> const& bbox, resolution_type const& resolution, double scale_denominator = 1.0)
         : bbox_(bbox),
           resolution_(resolution),
-          scale_denominator_(scale_denominator)
+          scale_denominator_(scale_denominator),
+          filter_factor_(1.0)
     {}
     
     query(query const& other)
         : bbox_(other.bbox_),
           resolution_(other.resolution_),
           scale_denominator_(other.scale_denominator_),
+          filter_factor_(other.filter_factor_),
           names_(other.names_)
     {}
          
@@ -68,6 +71,7 @@ public:
         bbox_=other.bbox_;
         resolution_=other.resolution_;
         scale_denominator_=other.scale_denominator_;
+        filter_factor_=other.filter_factor_;
         names_=other.names_;
         return *this;
     }
@@ -86,7 +90,17 @@ public:
     {
         return bbox_;
     }
-         
+
+    double get_filter_factor() const
+    {
+        return filter_factor_;
+    }
+    
+    void filter_factor(double factor)
+    {
+        filter_factor_ = factor;
+    }
+             
     void add_property_name(std::string const& name)
     {
         names_.insert(name);

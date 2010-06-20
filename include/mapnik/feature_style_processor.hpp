@@ -180,7 +180,11 @@ private:
                     {
                         active_rules=true;
                         // collect unique attribute names
-                        collector(*ruleIter);
+                        // TODO - in the future rasters should be able to be filtered...
+                        if (ds->type() == datasource::Vector)
+                        {
+                            collector(*ruleIter);
+                        }
                         if (ruleIter->has_else_filter())
                         {
                             else_rules.push_back(const_cast<rule_type*>(&(*ruleIter)));
@@ -188,6 +192,34 @@ private:
                         else
                         {
                             if_rules.push_back(const_cast<rule_type*>(&(*ruleIter)));               
+                        }
+                        if (ds->type() == datasource::Raster)
+                        {
+                            if (ds->params().get<double>("filter_factor",0.0) == 0.0)
+                            {
+                                const rule_type::symbolizers& symbols = ruleIter->get_symbolizers();
+                                rule_type::symbolizers::const_iterator symIter = symbols.begin();
+                                rule_type::symbolizers::const_iterator symEnd = symbols.end();
+                                for (;symIter != symEnd;++symIter)
+                                {   
+                                    try
+                                    {
+                                        raster_symbolizer sym = boost::get<raster_symbolizer>(*symIter);
+                                        std::string scaling = sym.get_scaling();
+                                        if (scaling == "bilinear" || scaling == "bilinear8" )
+                                        {
+                                            // todo - allow setting custom value in symbolizer property?
+                                            q.filter_factor(2.0);
+                                        }
+                                    }
+                                    catch (const boost::bad_get &v)
+                                    {
+                                        // case where useless symbolizer is attached to raster layer
+                                        //throw config_error("Invalid Symbolizer type supplied, only RasterSymbolizer is supported");
+                                    }
+                                }
+                            }
+                            
                         }
                     }
                 }
