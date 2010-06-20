@@ -64,7 +64,8 @@ inline GDALDataset *gdal_datasource::open_dataset() const
 
 gdal_datasource::gdal_datasource(parameters const& params)
    : datasource(params),
-     desc_(*params.get<std::string>("type"),"utf-8")
+     desc_(*params.get<std::string>("type"),"utf-8"),
+     filter_factor_(*params_.get<double>("filter_factor",0.0))
 {
 
 #ifdef MAPNIK_DEBUG
@@ -134,11 +135,11 @@ layer_descriptor gdal_datasource::get_descriptor() const
 featureset_ptr gdal_datasource::features(query const& q) const
 {
    gdal_query gq = q;
-   return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq));
+   return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, filter_factor_));
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
 {
    gdal_query gq = pt;
-   return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq));
+   return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, filter_factor_));
 }

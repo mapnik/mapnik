@@ -37,10 +37,11 @@ using mapnik::point_impl;
 using mapnik::geometry2d;
 
 
-gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q)
+gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q, double filter_factor)
     : dataset_(dataset),
       band_(band),
       gquery_(q),
+      filter_factor_(filter_factor),
       first_(true) {}
 
 gdal_featureset::~gdal_featureset()
@@ -149,11 +150,27 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
    
     if (width > 0 && height > 0)
     {
-	int im_width = int(boost::get<0>(q.resolution()) * intersect.width() + 0.5);
-	int im_height = int(boost::get<1>(q.resolution()) * intersect.height() + 0.5);
-       
+	double width_res = boost::get<0>(q.resolution());
+	double height_res = boost::get<1>(q.resolution());
+	int im_width = int(width_res * intersect.width() + 0.5);
+	int im_height = int(height_res * intersect.height() + 0.5);
+	
+	// if layer-level filter_factor is set, apply it
+	if (filter_factor_)
+	{
+    	im_width *= filter_factor_;
+    	im_height *= filter_factor_;
+	}
+	// otherwise respect symbolizer level factor applied to query, default of 1.0
+	else
+	{
+      double sym_downsample_factor = q.get_filter_factor();
+      im_width *= sym_downsample_factor;
+      im_height *= sym_downsample_factor;
+	}
+
 	// case where we need to avoid upsampling so that the
-	// image can be later scaled within raster_symbolizer
+	// image can be later scaled within raster_symbolizer 
 	if (im_width >= width || im_height >= height)
 	{
 	    im_width = width;
