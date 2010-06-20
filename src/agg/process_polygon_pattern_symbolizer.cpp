@@ -85,15 +85,24 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         agg::row_accessor<agg::int8u>, agg::pixel32_type> pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
     
-    double x0=0,y0=0;
     unsigned num_geometries = feature.num_geometries();
-    if (num_geometries>0)
+
+    pattern_alignment_e align = sym.get_alignment();
+    unsigned offset_x=0;
+    unsigned offset_y=0;
+    
+    if (align == LOCAL_ALIGNMENT)
     {
-        path_type path(t_,feature.get_geometry(0),prj_trans);
-        path.vertex(&x0,&y0);
+        double x0=0,y0=0;
+        if (num_geometries>0)
+        {
+            path_type path(t_,feature.get_geometry(0),prj_trans);
+            path.vertex(&x0,&y0);
+        }
+        offset_x = unsigned(width_-x0);
+        offset_y = unsigned(height_-y0);    
     }
-    unsigned offset_x = unsigned(width_-x0);
-    unsigned offset_y = unsigned(height_-y0);
+    
     span_gen_type sg(img_src, offset_x, offset_y);
     renderer_type rp(renb,sa, sg);
     for (unsigned i=0;i<num_geometries;++i)

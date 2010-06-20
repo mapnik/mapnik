@@ -26,15 +26,32 @@
 
 // mapnik 
 #include <mapnik/symbolizer.hpp> 
+#include <mapnik/stroke.hpp>
+#include <mapnik/filter_factory.hpp>
 
 namespace mapnik
 {
+
+enum pattern_alignment_enum {
+    LOCAL_ALIGNMENT,
+    GLOBAL_ALIGNMENT,
+    pattern_alignment_enum_MAX
+};
+
+DEFINE_ENUM( pattern_alignment_e, pattern_alignment_enum );
+
 struct MAPNIK_DECL polygon_pattern_symbolizer :
         public symbolizer_with_image
 {
         
     polygon_pattern_symbolizer(path_expression_ptr file);
     polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs);
+    pattern_alignment_e get_alignment() const;
+    void set_alignment(pattern_alignment_e align);
+
+private:
+    pattern_alignment_e alignment_;
+
 };
 }
 

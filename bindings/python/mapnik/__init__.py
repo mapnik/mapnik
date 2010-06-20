@@ -658,9 +658,15 @@ __all__ = [
     'TextSymbolizer',
     'ViewTransform',
     # enums
-    'aspect_fix_mode', 'label_placement',
-    'line_cap', 'line_join',
-    'text_convert', 'vertical_alignment',
+    'aspect_fix_mode',
+    'label_placement',
+    'line_cap',
+    'line_join',
+    'text_convert',
+    'vertical_alignment',
+    'horizontal_alignment',
+    'justify_alignment',
+    'pattern_alignment',
     # functions
     # datasources
     'Datasource', 'CreateDatasource',

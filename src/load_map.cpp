@@ -914,8 +914,13 @@ void map_parser::parse_polygon_pattern_symbolizer( rule_type & rule,
                 std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
             }
 #endif
-                
+
             polygon_pattern_symbolizer symbol(parse_path(file));
+
+            // pattern alignment
+            pattern_alignment_e p_alignment = get_attr<pattern_alignment_e>(sym, "alignment",LOCAL_ALIGNMENT);
+            symbol.set_alignment(p_alignment);
+
             rule.append(symbol);
         }
         catch (image_reader_exception const & ex )

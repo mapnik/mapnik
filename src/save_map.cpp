@@ -172,6 +172,12 @@ public:
         ptree & sym_node = rule_.push_back(
             ptree::value_type("PolygonPatternSymbolizer",
                               ptree()))->second;
+        polygon_pattern_symbolizer dfl(parse_path(""));
+
+        if ( sym.get_alignment() != dfl.get_alignment() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "alignment", sym.get_alignment() );
+        }
 
         add_image_attributes( sym_node, sym );
     }

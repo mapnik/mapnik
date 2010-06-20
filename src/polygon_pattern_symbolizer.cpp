@@ -26,14 +26,32 @@
 
 namespace mapnik
 {
+    
+static const char * pattern_alignment_strings[] = {
+    "local", // feature
+    "global", // map
+    ""
+};
 
+IMPLEMENT_ENUM( pattern_alignment_e, pattern_alignment_strings );
+      
 polygon_pattern_symbolizer::polygon_pattern_symbolizer(path_expression_ptr file)                                                         
-    : symbolizer_with_image(file)
-{
-}
+    : symbolizer_with_image(file),
+      alignment_(LOCAL_ALIGNMENT) {}
 
 polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)
-    : symbolizer_with_image(rhs) {}
+    : symbolizer_with_image(rhs),
+      alignment_(rhs.alignment_) {}
+
+pattern_alignment_e polygon_pattern_symbolizer::get_alignment() const
+{
+    return alignment_;
+}
+
+void polygon_pattern_symbolizer::set_alignment(pattern_alignment_e align)
+{
+    alignment_ = align;
+}
 
 }
 

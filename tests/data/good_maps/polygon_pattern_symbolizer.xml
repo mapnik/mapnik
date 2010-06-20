@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map  srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+
+  <FileSource name="foo">../images/</FileSource>
+  
+  <Style name="1">
+    <Rule>
+        <Filter>([EAS_ID]&lt;=170) and ([EAS_ID] &lt;&gt; 165)</Filter>
+        <!-- alignment="local" is default -->
+        <PolygonPatternSymbolizer 
+         alignment="local"
+         file="../images/checker.jpg"
+         />
+        <LineSymbolizer stroke="green" stroke-width="2"/>
+        <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
+        name="'local'"  halo_radius="1" dy="20"/>
+    </Rule>
+    <Rule>
+        <ElseFilter />
+        <PolygonPatternSymbolizer 
+         alignment="global"
+         file="../images/checker.jpg"
+         />
+        <LineSymbolizer stroke="yellow" stroke-width=".5"/>
+        <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
+        name="'global'"  halo_radius="1" dy="20"/>
+    </Rule>
+  </Style>
+
+  <Layer name="lay" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs ">
+    <StyleName>1</StyleName>
+    <Datasource>
+      <Parameter name="type">shape</Parameter>
+      <Parameter name="base">../../data/shp/</Parameter>
+      <Parameter name="file">poly.shp</Parameter>
+    </Datasource>
+  </Layer>
+  
+</Map>

@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added support for setting global alignment of polygon pattern fills (#203)
+
 - Added support for choosing OGR layer by index number using 'layer_by_index' parameter (r1904)
 
 - Added support for reading jpeg images (in addition to png/tiff) for image symbolizers (#518)
