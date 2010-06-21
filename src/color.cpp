@@ -34,7 +34,18 @@ namespace mapnik {
 
 color::color( std::string const& css_string)
 {
-    color_factory::init_from_string(*this,css_string.c_str());   
+    try
+    {
+        color_factory::init_from_string(*this,css_string.c_str());   
+    }
+    catch (config_error const& err)
+    {
+        std::cerr << err.what() << std::endl;
+        red_ = 0;
+        green_ = 0;
+        blue_ = 0;
+        alpha_ = 255;
+    }
 }
 
 std::string color::to_string() const
