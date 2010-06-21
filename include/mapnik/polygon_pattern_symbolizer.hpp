@@ -25,9 +25,7 @@
 #define POLYGON_PATTERN_SYMBOLIZER_HPP
 
 // mapnik 
-#include <mapnik/symbolizer.hpp> 
-#include <mapnik/stroke.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/symbolizer.hpp>
 
 namespace mapnik
 {
