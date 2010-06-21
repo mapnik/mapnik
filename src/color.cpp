@@ -50,7 +50,7 @@ std::string color::to_string() const
            << red()   << ","
            << green() << ","
            << blue()  << ","
-           << alpha() << ")";
+           << alpha()/255.0 << ")";
     }
     return ss.str();
 }
