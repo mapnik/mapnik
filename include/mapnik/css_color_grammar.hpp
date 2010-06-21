@@ -84,6 +84,7 @@ namespace mapnik
 {
 
 namespace qi = boost::spirit::qi;
+namespace ascii = boost::spirit::ascii;
 namespace phoenix = boost::phoenix;
 
 typedef boost::spirit::ascii::space_type ascii_space_type;
@@ -268,6 +269,21 @@ struct percent_conv_impl
     }
 };
 
+struct alpha_conv_impl
+{
+    template <typename T>
+    struct result
+    {
+        typedef unsigned type;
+    };
+    
+    unsigned operator() (double val) const
+    {
+        return clip_int<0,255>(int((255.0 * val) + 0.5));
+    }
+};
+
+
 template <typename Iterator>
 struct css_color_grammar : qi::grammar<Iterator, mapnik::css(), ascii_space_type>
 {
@@ -280,13 +296,14 @@ struct css_color_grammar : qi::grammar<Iterator, mapnik::css(), ascii_space_type
         using qi::_val;
         using qi::double_;
         using qi::_1;
+        using ascii::no_case;        
         using phoenix::at_c;
         
         css_color %= rgba_color
             | rgba_percent_color 
             | hex_color 
             | hex_color_small 
-            | named;
+            | no_case[named];
         
         hex_color %= lit('#') 
             >> hex2 
@@ -302,11 +319,12 @@ struct css_color_grammar : qi::grammar<Iterator, mapnik::css(), ascii_space_type
             >> -hex1[ at_c<3>(_val) = _1 | _1 << 4 ]
             ;
         
-        rgba_color %= lit("rgb") >> -lit('a')
+        rgba_color = lit("rgb") >> -lit('a')
                                  >> lit('(') 
-                                 >> dec3 >> ','
-                                 >> dec3 >> ','
-                                 >> dec3 >> -(','>> -dec3)
+                                 >> dec3 [at_c<0>(_val) = _1] >> ','
+                                 >> dec3 [at_c<1>(_val) = _1] >> ','
+                                 >> dec3 [at_c<2>(_val) = _1] 
+                                 >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)])
                                  >> lit(')')
             ;
         
@@ -315,7 +333,7 @@ struct css_color_grammar : qi::grammar<Iterator, mapnik::css(), ascii_space_type
                                         >> double_ [at_c<0>(_val) = percent_converter(_1)] >> '%' >> ','
                                         >> double_ [at_c<1>(_val) = percent_converter(_1)] >> '%' >> ','
                                         >> double_ [at_c<2>(_val) = percent_converter(_1)] >> '%' 
-                                        >> -(','>> -double_ [at_c<3>(_val) = percent_converter(_1)] >> '%')
+                                        >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)])
                                         >> lit(')')
             ;
     }
@@ -330,7 +348,7 @@ struct css_color_grammar : qi::grammar<Iterator, mapnik::css(), ascii_space_type
     qi::rule<Iterator, mapnik::css(), ascii_space_type> css_color;
     named_colors_ named;
     phoenix::function<percent_conv_impl> percent_converter;
-    
+    phoenix::function<alpha_conv_impl>   alpha_converter; 
 };
 
 }
