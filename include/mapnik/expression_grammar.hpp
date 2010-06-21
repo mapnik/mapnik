@@ -128,7 +128,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
         using qi::_a;
         using qi::_b;
         using qi::_r1;
-        using qi::lexeme;
+        using qi::no_skip;
         using qi::_val;
         using qi::lit;
         using qi::int_;
@@ -207,15 +207,13 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             | int_ [_val = _1]
             | lit("true") [_val = true]
             | lit("false") [_val = false]
-            | '\'' >> ustring [_val = unicode_(_1) ] >> '\''
-            | '[' >> attr [_val = construct<attribute>( _1 ) ] >> ']'
+            | ustring [_val = unicode_(_1) ]
+            | attr [_val = construct<attribute>( _1 ) ]
             | '(' >> expr [_val = _1 ] >> ')'
             ;
         
-        attr %= +(char_ - ']');
-
-        ustring %= lexeme[*(char_-'\'')];
-        
+        attr %= '[' >> +(char_ - ']') >> ']';
+        ustring %= '\'' >> no_skip[+~char_('\'')] >> '\'';
     }
     
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
