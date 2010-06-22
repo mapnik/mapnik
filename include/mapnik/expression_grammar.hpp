@@ -213,7 +213,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             ;
         
         attr %= '[' >> +(char_ - ']') >> ']';
-        ustring %= '\'' >> no_skip[+~char_('\'')] >> '\'';
+        ustring %= '\'' >> no_skip[*~char_('\'')] >> '\'';
     }
     
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
