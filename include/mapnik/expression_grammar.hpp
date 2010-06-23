@@ -30,6 +30,7 @@
 #include <mapnik/expression_node.hpp>
 
 // boost
+#include <boost/version.hpp>
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/concept_check.hpp>
@@ -128,7 +129,11 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
         using qi::_a;
         using qi::_b;
         using qi::_r1;
+#if BOOST_VERSION > 104200
         using qi::no_skip;
+#else
+        using qi::lexeme;
+#endif
         using qi::_val;
         using qi::lit;
         using qi::int_;
@@ -213,7 +218,11 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             ;
         
         attr %= '[' >> +(char_ - ']') >> ']';
+#if BOOST_VERSION > 104200
         ustring %= '\'' >> no_skip[*~char_('\'')] >> '\'';
+#else
+        ustring %= '\'' >> lexeme[*(char_-'\'')] >> '\'';
+#endif
     }
     
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;

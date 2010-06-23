@@ -189,6 +189,7 @@ SCONS_CONFIGURE_CACHE = 'config.cache'
 SCONF_TEMP_DIR = '.sconf_temp'
 # auto-search directories for boost libs/headers
 BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
+BOOST_MIN_VERSION = '1.41'
 
 
 # Core plugin build configuration
@@ -852,11 +853,11 @@ if not preconfigured:
         BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
                 
     # if the user is not setting custom boost configuration
-    # enforce boost version greater than or equal to 1.43
-    if not conf.CheckBoost('1.43'):
-        color_print(1,'Boost version 1.43 or greater is requred') 
+    # enforce boost version greater than or equal to BOOST_MIN_VERSION
+    if not conf.CheckBoost(BOOST_MIN_VERSION):
+        color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION) 
         if not env['BOOST_VERSION']:
-            env['MISSING_DEPS'].append('boost version >=1.43')
+            env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
     else:
         color_print(4,'Found boost lib version... %s' % boost_lib_version_from_header )
     
