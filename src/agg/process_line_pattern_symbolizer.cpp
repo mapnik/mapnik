@@ -24,63 +24,65 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/agg_pattern_source.hpp>
+#include <mapnik/image_cache.hpp>
 
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
-#include "agg_rasterizer_scanline_aa.h"
+#include "agg_rasterizer_outline.h"
+#include "agg_rasterizer_outline_aa.h"
 #include "agg_scanline_u.h"
-// for polygon_symbolizer
+//
 #include "agg_renderer_scanline.h"
-
-// stl
-#include <string>
+#include "agg_pattern_filters_rgba.h"
+#include "agg_span_allocator.h"
+#include "agg_span_pattern_rgba.h"
+#include "agg_renderer_outline_image.h"
 
 namespace mapnik {
 
 template <typename T>
-void agg_renderer<T>::process(polygon_symbolizer const& sym,
-                              Feature const& feature,
-                              proj_transform const& prj_trans)
+void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
+                               Feature const& feature,
+                               proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-
-    color const& fill_ = sym.get_fill();
-    agg::scanline_u8 sl;
+    typedef  coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
+    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> renderer_base;
+    typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
+    typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
+    
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+    boost::optional<image_ptr> pat = image_cache::instance()->find(filename,true);
 
-    ren_base renb(pixf);
-    unsigned r=fill_.red();
-    unsigned g=fill_.green();
-    unsigned b=fill_.blue();
-    unsigned a=fill_.alpha();
-    renderer ren(renb);
-
-    ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
-
+    if (!pat) return;
+      
+    renderer_base ren_base(pixf);
+    agg::pattern_filter_bilinear_rgba8 filter;
+    pattern_source source(*(*pat));
+    pattern_type pattern (filter,source);
+    renderer_type ren(ren_base, pattern);
+    ren.clip_box(0,0,width_,height_);
+    rasterizer_type ras(ren);
+    
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
-        geometry2d const& geom=feature.get_geometry(i);
-        if (geom.num_points() > 2)
+        geometry2d const& geom = feature.get_geometry(i);
+        if (geom.num_points() > 1)
         {
             path_type path(t_,geom,prj_trans);
-            ras_ptr->add_path(path);
+            ras.add_path(path);
         }
     }
-    ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
-    agg::render_scanlines(*ras_ptr, sl, ren);
 }
 
-
-template void agg_renderer<image_32>::process(polygon_symbolizer const&,
+template void agg_renderer<image_32>::process(line_pattern_symbolizer const&,
                                               Feature const&,
                                               proj_transform const&);
 
 }
- 
