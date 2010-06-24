@@ -74,7 +74,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_linear());
     
-    double height = sym.height(); // height in pixels
+    double height = sym.height() * scale_factor_;
     
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
@@ -142,7 +142,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                 }
             }
             path_type path(t_,*frame,prj_trans);
-            agg::conv_stroke<path_type>  stroke(path);
+            agg::conv_stroke<path_type> stroke(path);
             ras_ptr->add_path(stroke);
             ren.color(agg::rgba8(r * 0.8, g * 0.8 , b * 0.8, int(255 * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
