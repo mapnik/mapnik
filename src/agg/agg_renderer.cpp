@@ -114,10 +114,10 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
-      t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
+      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.getWidth() + m.buffer_size() ,m.getHeight() + m.buffer_size())),
+      detector_(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size())),
       ras_ptr(new rasterizer)
 {
     boost::optional<color> bg = m.background();
@@ -135,7 +135,7 @@ void agg_renderer<T>::start_map_processing(Map const& map)
 {
 #ifdef MAPNIK_DEBUG
     std::clog << "start map processing bbox="
-              << map.getCurrentExtent() << "\n";
+              << map.get_current_extent() << "\n";
 #endif
     ras_ptr->clip_box(0,0,width_,height_);
 }

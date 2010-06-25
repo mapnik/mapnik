@@ -159,7 +159,7 @@ boost::optional<feature_type_style const&> Map::find_style(std::string const& na
         return boost::optional<feature_type_style const&>() ;
 }
     
-size_t Map::layerCount() const
+size_t Map::layer_count() const
 {
     return layers_.size();
 }
@@ -199,17 +199,17 @@ std::vector<layer> & Map::layers()
     return layers_;
 }
 
-unsigned Map::getWidth() const
+unsigned Map::width() const
 {
     return width_;
 }
 
-unsigned Map::getHeight() const
+unsigned Map::height() const
 {
     return height_;
 }
     
-void Map::setWidth(unsigned width)
+void Map::set_width(unsigned width)
 {
     if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE)
     {
@@ -218,7 +218,7 @@ void Map::setWidth(unsigned width)
     }   
 }
 
-void Map::setHeight(unsigned height)
+void Map::set_height(unsigned height)
 {
     if (height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
     {
@@ -321,7 +321,7 @@ void Map::zoom_all()
             }
             ++itr;
         }
-        zoomToBox(ext);
+        zoom_to_box(ext);
     }
     catch (proj_init_error & ex)
     {
@@ -329,7 +329,7 @@ void Map::zoom_all()
     }
 }
 
-void Map::zoomToBox(const box2d<double> &box)
+void Map::zoom_to_box(const box2d<double> &box)
 {
     currentExtent_=box;
     fixAspectRatio();
@@ -388,7 +388,7 @@ void Map::fixAspectRatio()
     }
 }
    
-const box2d<double>& Map::getCurrentExtent() const
+const box2d<double>& Map::get_current_extent() const
 {
     return currentExtent_;
 }

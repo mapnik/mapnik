@@ -236,7 +236,7 @@ void MapSource::generateMaps()
                             cerr<<"x: " << tileX << " y: " << tileY
                                 <<" z: " << z << endl;
 
-                           image_32 buf(m.getWidth(),m.getHeight());
+                           image_32 buf(m.width(),m.height());
                            double metres_w =( (tileX*256.0) *
                             metres_per_pixel ) -
                                 20037814.088;
@@ -252,7 +252,7 @@ void MapSource::generateMaps()
                              metres_e+32*metres_per_pixel,
                              metres_n+32*metres_per_pixel); 
 
-                           m.zoomToBox(bb);
+                           m.zoom_to_box(bb);
                            agg_renderer<image_32> r(m,buf);
                            r.apply();
                 
@@ -302,8 +302,8 @@ void MapSource::generateMaps()
         box2d<double> bb =
                 box2d<double>(bottomL_LL.x,bottomL_LL.y,
                                 topR_LL.x,topR_LL.y);    
-        m.zoomToBox(bb);
-        image_32 buf (m.getWidth(), m.getHeight());
+        m.zoom_to_box(bb);
+        image_32 buf (m.width(), m.height());
         agg_renderer<image_32> r(m,buf);
         r.apply();
 
@@ -314,7 +314,7 @@ void MapSource::generateMaps()
 void MapSource::setOSMLayers(Map& m, const parameters &p)
 {
     parameters q;
-    for(int count=0; count<m.layerCount(); count++)
+    for(int count=0; count<m.layer_count(); count++)
     {
         q = m.getLayer(count).datasource()->params();
         if(boost::get<std::string>(q["type"])=="osm")

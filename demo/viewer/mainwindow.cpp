@@ -143,7 +143,7 @@ void MainWindow::reload()
     if (!filename_.isEmpty())
     {
         
-        mapnik::box2d<double> bbox = mapWidget_->getMap()->getCurrentExtent();
+        mapnik::box2d<double> bbox = mapWidget_->getMap()->get_current_extent();
         load_map_file(filename_);
         mapWidget_->zoomToBox(bbox);
         setWindowTitle(tr("%1 - *Reloaded*").arg(filename_));
@@ -403,7 +403,7 @@ void MainWindow::zoom_all()
     if (map_ptr) 
     {
         map_ptr->zoom_all();
-        mapnik::box2d<double> const& ext = map_ptr->getCurrentExtent();
+        mapnik::box2d<double> const& ext = map_ptr->get_current_extent();
         mapWidget_->zoomToBox(ext);
     }
 }

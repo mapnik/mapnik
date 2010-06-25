@@ -149,7 +149,7 @@ private:
             prj_trans.forward(lx1,ly1,lz1);
             box2d<double> bbox(lx0,ly0,lx1,ly1);
       
-            query::resolution_type res(m_.getWidth()/m_.getCurrentExtent().width(),m_.getHeight()/m_.getCurrentExtent().height());
+            query::resolution_type res(m_.width()/m_.get_current_extent().width(),m_.height()/m_.get_current_extent().height());
             query q(bbox,res,scale_denom); //BBOX query
                
             std::vector<std::string> const& style_names = lay.styles();

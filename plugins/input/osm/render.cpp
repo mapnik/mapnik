@@ -36,7 +36,7 @@ int main(int argc,char *argv[])
 		parameters p;
 		p["type"] = "osm";
 		p["file"] = argv[6];
-		for(int count=0; count<m.layerCount(); count++)
+		for(int count=0; count<m.layer_count(); count++)
 		{
 			parameters q = m.getLayer(count).datasource()->params();
 			m.getLayer(count).set_datasource(datasource_cache::instance()->
@@ -47,9 +47,9 @@ int main(int argc,char *argv[])
 	box2d<double> bbox (atof(argv[2]),atof(argv[3]),
 							atof(argv[4]),atof(argv[5]));
 										
-	m.zoomToBox(bbox);
+	m.zoom_to_box(bbox);
 
-	image_32 buf (m.getWidth(), m.getHeight());
+	image_32 buf (m.width(), m.height());
 	agg_renderer<image_32> r(m,buf);
 	r.apply();
 

@@ -190,7 +190,7 @@ public:
 
     /*! \brief Get number of all layers.
      */
-    size_t layerCount() const;
+    size_t layer_count() const;
 
     /*! \brief Add a layer to the map.
      *  @param l The layer to add.
@@ -230,19 +230,19 @@ public:
 
     /*! \brief Get map width.
      */
-    unsigned getWidth() const;
+    unsigned width() const;
 
     /*! \brief Get map height.
      */
-    unsigned getHeight() const;
+    unsigned height() const;
 
     /*! \brief Set map width.
      */
-    void setWidth(unsigned width);
+    void set_width(unsigned width);
 
     /*! \brief Set map height.
      */
-    void setHeight(unsigned height);
+    void set_height(unsigned height);
 
     /*! \brief Resize the map.
      */
@@ -290,7 +290,7 @@ public:
      *  Aspect is handled automatic if not fitting to width/height.
      *  @param box The bounding box where to zoom.
      */
-    void zoomToBox(const box2d<double>& box);
+    void zoom_to_box(const box2d<double>& box);
 
     /*! \brief Zoom the map to show all data.
      */
@@ -303,7 +303,7 @@ public:
     /*! \brief Get current bounding box.
      *  @return The current bounding box.
      */
-    const box2d<double>& getCurrentExtent() const;
+    const box2d<double>& get_current_extent() const;
 
     /*! \brief Get current buffered bounding box.
      *  @return The current buffered bounding box.
@@ -347,8 +347,8 @@ public:
         
     ~Map();
 
-    inline void setAspectFixMode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
-    inline aspect_fix_mode getAspectFixMode() const { return aspectFixMode_; }
+    inline void set_aspect_fix_mode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
+    inline aspect_fix_mode get_aspect_fix_mode() const { return aspectFixMode_; }
 
 private:
     void fixAspectRatio();

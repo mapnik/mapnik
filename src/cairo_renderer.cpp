@@ -479,11 +479,11 @@ private:
 cairo_renderer_base::cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x, unsigned offset_y)
     : m_(m),
       context_(context),
-      t_(m.getWidth(),m.getHeight(),m.getCurrentExtent(),offset_x,offset_y),
+      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(new freetype_engine()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_,font_manager_),
-      detector_(box2d<double>(-m.buffer_size() ,-m.buffer_size() , m.getWidth() + m.buffer_size() ,m.getHeight() + m.buffer_size()))
+      detector_(box2d<double>(-m.buffer_size() ,-m.buffer_size() , m.width() + m.buffer_size() ,m.height() + m.buffer_size()))
 {
 #ifdef MAPNIK_DEBUG
     std::clog << "scale=" << m.scale() << "\n";
@@ -510,7 +510,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 {
 #ifdef MAPNIK_DEBUG
     std::clog << "start map processing bbox="
-              << map.getCurrentExtent() << "\n";
+              << map.get_current_extent() << "\n";
 #endif
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)

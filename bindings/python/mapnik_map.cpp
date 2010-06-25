@@ -45,14 +45,14 @@ struct map_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getinitargs(const Map& m)
     {
-        return boost::python::make_tuple(m.getWidth(),m.getHeight(),m.srs());
+        return boost::python::make_tuple(m.width(),m.height(),m.srs());
     }
 
     static  boost::python::tuple
     getstate(const Map& m)
     {
         boost::python::list l;
-        for (unsigned i=0;i<m.layerCount();++i)
+        for (unsigned i=0;i<m.layer_count();++i)
         {
             l.append(m.getLayer(i));
         }
@@ -68,7 +68,7 @@ struct map_pickle_suite : boost::python::pickle_suite
             s.append(style_pair);
         }
 
-        return boost::python::make_tuple(m.getCurrentExtent(),m.background(),l,s);
+        return boost::python::make_tuple(m.get_current_extent(),m.background(),l,s);
     }
 
     static void
@@ -85,7 +85,7 @@ struct map_pickle_suite : boost::python::pickle_suite
         }
 
         box2d<double> ext = extract<box2d<double> >(state[0]);
-        m.zoomToBox(ext);
+        m.zoom_to_box(ext);
         if (state[1])
         {
             color bg = extract<color>(state[1]);
@@ -193,7 +193,7 @@ void export_map()
             )
 
         .def("envelope",
-             make_function(&Map::getCurrentExtent,
+             make_function(&Map::get_current_extent,
                            return_value_policy<copy_const_reference>()),
              "Return the Map box2d object\n"
              "and print the string representation\n"
@@ -219,7 +219,7 @@ void export_map()
              "<mapnik._mapnik.Style object at 0x654f0>\n"
             )
         
-        .def("get_aspect_fix_mode",&Map::getAspectFixMode,
+        .def("get_aspect_fix_mode",&Map::get_aspect_fix_mode,
              "Get aspect fix mode.\n"
              "Usage:\n"
              "\n"
@@ -341,7 +341,7 @@ void export_map()
              ">>> m.zoom_all()\n"
             )
         
-        .def("zoom_to_box",&Map::zoomToBox,
+        .def("zoom_to_box",&Map::zoom_to_box,
              "Set the geographical extent of the map\n"
              "by specifying a Mapnik box2d.\n"
              "\n"
@@ -351,8 +351,8 @@ void export_map()
             )   
 
         .add_property("aspect_fix_mode",
-                      &Map::getAspectFixMode,
-                      &Map::setAspectFixMode,
+                      &Map::get_aspect_fix_mode,
+                      &Map::set_aspect_fix_mode,
                       "Get/Set aspect fix mode.\n"
                       "Usage:\n"
                       "\n"
@@ -382,8 +382,8 @@ void export_map()
             )
          
         .add_property("height",
-                      &Map::getHeight,
-                      &Map::setHeight,
+                      &Map::height,
+                      &Map::set_height,
                       "Get/Set the height of the map in pixels.\n"
                       "Minimum settable size is 16 pixels.\n"
                       "\n"
@@ -428,8 +428,8 @@ void export_map()
             )
         
         .add_property("width",
-                      &Map::getWidth,
-                      &Map::setWidth,
+                      &Map::width,
+                      &Map::set_width,
                       "Get/Set the width of the map in pixels.\n"
                       "Minimum settable size is 16 pixels.\n"
                       "\n"

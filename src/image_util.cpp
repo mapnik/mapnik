@@ -209,8 +209,8 @@ void save_to_cairo_file(mapnik::Map const& map,
     if (file)
     {
         Cairo::RefPtr<Cairo::Surface> surface;
-        unsigned width = map.getWidth();
-        unsigned height = map.getHeight();
+        unsigned width = map.width();
+        unsigned height = map.height();
         if (type == "pdf")
             surface = Cairo::PdfSurface::create(filename,width,height);
         else if (type == "svg")

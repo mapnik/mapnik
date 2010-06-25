@@ -145,9 +145,9 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
             
             projection map_proj(map_->srs()); // map projection
             double scale_denom = scale_denominator(*map_,map_proj.is_geographic());
-            CoordTransform t(map_->getWidth(),map_->getHeight(),map_->getCurrentExtent());
+            CoordTransform t(map_->width(),map_->height(),map_->get_current_extent());
             
-            for (unsigned index = 0; index <  map_->layerCount();++index)
+            for (unsigned index = 0; index <  map_->layer_count();++index)
             {
                if (int(index) != selectedLayer_) continue;
                
@@ -250,9 +250,9 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
          drag_=false;
          if (map_)
          {
-            CoordTransform t(map_->getWidth(),map_->getHeight(),map_->getCurrentExtent());      
+            CoordTransform t(map_->width(),map_->height(),map_->get_current_extent());      
             box2d<double> box = t.backward(box2d<double>(start_x_,start_y_,end_x_,end_y_));
-            map_->zoomToBox(box);
+            map_->zoom_to_box(box);
             updateMap();
          }
       }
@@ -261,8 +261,8 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
          drag_=false;
          if (map_)
          {
-            int cx = int(0.5 * map_->getWidth());
-            int cy = int(0.5 * map_->getHeight());
+            int cx = int(0.5 * map_->width());
+            int cy = int(0.5 * map_->height());
             int dx = end_x_ - start_x_;
             int dy = end_y_ - start_y_;
             map_->pan(cx - dx ,cy - dy); 
@@ -337,7 +337,7 @@ void MapWidget::zoomToBox(mapnik::box2d<double> const& bbox)
 {
    if (map_)
    {
-      map_->zoomToBox(bbox);
+      map_->zoom_to_box(bbox);
       updateMap();
    }
 }
@@ -374,8 +374,8 @@ void MapWidget::panUp()
 {
    if (map_)
    {
-      double cx = 0.5*map_->getWidth();
-      double cy = 0.5*map_->getHeight();
+      double cx = 0.5*map_->width();
+      double cy = 0.5*map_->height();
       map_->pan(int(cx),int(cy - cy*0.25));
       updateMap();
    }
@@ -385,8 +385,8 @@ void MapWidget::panDown()
 {
    if (map_)
    {
-      double cx = 0.5*map_->getWidth();
-      double cy = 0.5*map_->getHeight();
+      double cx = 0.5*map_->width();
+      double cy = 0.5*map_->height();
       map_->pan(int(cx),int(cy + cy*0.25));
       updateMap();
    }
@@ -396,8 +396,8 @@ void MapWidget::panLeft()
 {
    if (map_)
    {
-      double cx = 0.5*map_->getWidth();
-      double cy = 0.5*map_->getHeight();
+      double cx = 0.5*map_->width();
+      double cy = 0.5*map_->height();
       map_->pan(int(cx - cx * 0.25),int(cy));
       updateMap();
    }
@@ -407,8 +407,8 @@ void MapWidget::panRight()
 { 
    if (map_)
    {
-      double cx = 0.5*map_->getWidth();
-      double cy = 0.5*map_->getHeight();
+      double cx = 0.5*map_->width();
+      double cy = 0.5*map_->height();
       map_->pan(int(cx + cx * 0.25),int(cy)); 
       updateMap();
    }
@@ -421,9 +421,9 @@ void MapWidget::zoomToLevel(int level)
    {
       double scale_denom  = scales[level];
       std::cerr << "scale denominator = " << scale_denom << "\n";
-      mapnik::box2d<double> ext = map_->getCurrentExtent();
-      double width = static_cast<double>(map_->getWidth());
-      double height= static_cast<double>(map_->getHeight()); 
+      mapnik::box2d<double> ext = map_->get_current_extent();
+      double width = static_cast<double>(map_->width());
+      double height= static_cast<double>(map_->height()); 
       mapnik::coord2d pt = ext.center();
 
       double res = scale_denom * 0.00028;
@@ -432,7 +432,7 @@ void MapWidget::zoomToLevel(int level)
                                    pt.y - 0.5 * height*res,
                                    pt.x + 0.5 * width * res,
                                    pt.y + 0.5 * height*res);
-      map_->zoomToBox(box);
+      map_->zoom_to_box(box);
       updateMap();
    }
 }
@@ -454,8 +454,8 @@ void MapWidget::updateMap()
 {   
    if (map_)
    {
-      unsigned width=map_->getWidth();
-      unsigned height=map_->getHeight();
+      unsigned width=map_->width();
+      unsigned height=map_->height();
       
       image_32 buf(width,height);
 
@@ -472,7 +472,7 @@ void MapWidget::updateMap()
           
           projection prj(map_->srs()); // map projection
           
-          box2d<double> ext = map_->getCurrentExtent();
+          box2d<double> ext = map_->get_current_extent();
           double x0 = ext.minx();
           double y0 = ext.miny();
           double x1 = ext.maxx();

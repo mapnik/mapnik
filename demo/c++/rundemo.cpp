@@ -243,10 +243,10 @@ int main ( int argc , char** argv)
             m.addLayer(lyr);
         }
         
-        m.zoomToBox(box2d<double>(1405120.04127408,-247003.813399447,
+        m.zoom_to_box(box2d<double>(1405120.04127408,-247003.813399447,
                                      1706357.31328276,-25098.593149577));
         
-        image_32 buf(m.getWidth(),m.getHeight());
+        image_32 buf(m.width(),m.height());
         agg_renderer<image_32> ren(m,buf);
         ren.apply();
         
@@ -262,7 +262,7 @@ int main ( int argc , char** argv)
         #if defined(HAVE_CAIRO)
         Cairo::RefPtr<Cairo::ImageSurface> image_surface;
 
-        image_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, m.getWidth(),m.getHeight());
+        image_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, m.width(),m.height());
         cairo_renderer<Cairo::Surface> png_render(m, image_surface);
         png_render.apply();
         image_surface->write_to_png("cairo-demo.png");
@@ -271,11 +271,11 @@ int main ( int argc , char** argv)
         save_to_file(im, "cairo-demo256.png","png256");
 
         Cairo::RefPtr<Cairo::Surface> surface;
-        surface = Cairo::PdfSurface::create("cairo-demo.pdf", m.getWidth(),m.getHeight());
+        surface = Cairo::PdfSurface::create("cairo-demo.pdf", m.width(),m.height());
         cairo_renderer<Cairo::Surface> pdf_render(m, surface);
         pdf_render.apply();
 
-        surface = Cairo::SvgSurface::create("cairo-demo.svg", m.getWidth(),m.getHeight());
+        surface = Cairo::SvgSurface::create("cairo-demo.svg", m.width(),m.height());
         cairo_renderer<Cairo::Surface> svg_render(m, surface);
         svg_render.apply();
 
