@@ -47,45 +47,45 @@ class ConnectionCreator
 {
 
 public:
-      ConnectionCreator(boost::optional<string> const& host,
-                        boost::optional<string> const& port,
-                        boost::optional<string> const& dbname,
-                        boost::optional<string> const& user,
-                        boost::optional<string> const& pass)
-         : host_(host),
-           port_(port),
-           dbname_(dbname),
-           user_(user),
-           pass_(pass) {}
+    ConnectionCreator(boost::optional<string> const& host,
+                      boost::optional<string> const& port,
+                      boost::optional<string> const& dbname,
+                      boost::optional<string> const& user,
+                      boost::optional<string> const& pass)
+        : host_(host),
+          port_(port),
+          dbname_(dbname),
+          user_(user),
+          pass_(pass) {}
       
-      T* operator()() const
-      {
-          return new T(connection_string());
-      }
+    T* operator()() const
+    {
+        return new T(connection_string());
+    }
       
-      inline std::string id() const 
-      {
-         return connection_string();
-      }
+    inline std::string id() const 
+    {
+        return connection_string();
+    }
       
-      inline std::string connection_string() const
-      {
-         std::string connect_str;
-         if (host_   && (*host_).size()) connect_str += "host=" + *host_;
-         if (port_   && (*port_).size()) connect_str += " port=" + *port_;
-         if (dbname_ && (*dbname_).size()) connect_str += " dbname=" + *dbname_;
-         if (user_   && (*user_).size()) connect_str += " user=" + *user_;
-         if (pass_   && (*pass_).size()) connect_str += " password=" + *pass_;
-         connect_str += " connect_timeout=4"; // todo: set by client (param)
-         return connect_str;
-      }
+    inline std::string connection_string() const
+    {
+        std::string connect_str;
+        if (host_   && (*host_).size()) connect_str += "host=" + *host_;
+        if (port_   && (*port_).size()) connect_str += " port=" + *port_;
+        if (dbname_ && (*dbname_).size()) connect_str += " dbname=" + *dbname_;
+        if (user_   && (*user_).size()) connect_str += " user=" + *user_;
+        if (pass_   && (*pass_).size()) connect_str += " password=" + *pass_;
+        connect_str += " connect_timeout=4"; // todo: set by client (param)
+        return connect_str;
+    }
       
 private:
-      boost::optional<string> host_;
-      boost::optional<string> port_;
-      boost::optional<string> dbname_;
-      boost::optional<string> user_;
-      boost::optional<string> pass_;
+    boost::optional<string> host_;
+    boost::optional<string> port_;
+    boost::optional<string> dbname_;
+    boost::optional<string> user_;
+    boost::optional<string> pass_;
 
 };
 
@@ -99,9 +99,9 @@ class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
     ContType pools_;
 
 public:
-	
+        
     bool registerPool(const ConnectionCreator<Connection>& creator,unsigned initialSize,unsigned maxSize) 
-    {	    
+    {       
 #ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(mutex_);
 #endif
@@ -112,7 +112,7 @@ public:
         }
 
         return false;
-	   	     
+                     
     }
     
     boost::shared_ptr<PoolType> getPool(std::string const& key) 
@@ -128,7 +128,7 @@ public:
         static const boost::shared_ptr<PoolType> emptyPool;
         return emptyPool;
     }
-	
+        
     HolderType get(std::string const& key)
     {
 #ifdef MAPNIK_THREADSAFE
