@@ -166,21 +166,16 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
         
         regex_match_expr = lit(".match")
             >> lit('(') 
-            >> lit('\'')
-            >> ustring [_val = _1]
-            >> lit('\'') 
+            >> ustring [_val = _1] 
             >> lit(')')
             ;
         
         regex_replace_expr = 
             lit(".replace")
             >> lit('(') 
-            >> lit('\'')
             >> ustring           [_a = _1]
-            >> lit('\'') >> lit(',') 
-            >> lit('\'') 
+            >> lit(',') 
             >> ustring           [_b = _1]
-            >> lit('\'')
             >> lit(')')          [_val = regex_replace_(_r1,_a,_b)]
             ;
         
