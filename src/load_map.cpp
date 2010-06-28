@@ -1215,11 +1215,15 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
             {
                 throw config_error(std::string("Must have face_name or fontset_name"));
             }
-            // text displacement
+            // text displacement (relative to shield_displacement)
             double dx = get_attr(sym, "dx", 0.0);
             double dy = get_attr(sym, "dy", 0.0);
             shield_symbol.set_displacement(dx,dy);
-
+            // shield displacement
+            double shield_dx = get_attr(sym, "shield_dx", 0.0);
+            double shield_dy = get_attr(sym, "shield_dy", 0.0);
+            shield_symbol.set_shield_displacement(shield_dx,shield_dy);
+            
             label_placement_e placement =
                 get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
             shield_symbol.set_label_placement( placement );

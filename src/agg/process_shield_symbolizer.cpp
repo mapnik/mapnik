@@ -163,7 +163,11 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 
                                 prj_trans.backward(label_x,label_y, z);
                                 t_.forward(&label_x,&label_y);
-
+                                
+                                position const& shield_pos = sym.get_shield_displacement();
+                                label_x += boost::get<0>(shield_pos);
+                                label_y += boost::get<1>(shield_pos);
+                                
                                 finder.find_point_placement( text_placement,label_x,label_y,0.0,
                                                              sym.get_vertical_alignment(),
                                                              sym.get_line_spacing() * scale_factor_,
@@ -183,7 +187,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     if( !sym.get_unlock_image() )
                                     {  // center image at text center position
                                         // remove displacement from image label
-                                        position pos = sym.get_displacement();
+                                        position const& pos = sym.get_displacement();
                                         double lx = x - boost::get<0>(pos);
                                         double ly = y - boost::get<1>(pos);
                                         px=int(floor(lx - (0.5 * w))) ;
@@ -304,7 +308,10 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     geom.label_position(&label_x, &label_y);  // by middle of line or by point
                                 prj_trans.backward(label_x,label_y, z);
                                 t_.forward(&label_x,&label_y);
-
+                                position const& shield_pos = sym.get_shield_displacement();
+                                label_x += boost::get<0>(shield_pos);
+                                label_y += boost::get<1>(shield_pos);
+                                
                                 finder.find_point_placement( text_placement,label_x,label_y,0.0,
                                                              sym.get_vertical_alignment(),
                                                              sym.get_line_spacing(),
