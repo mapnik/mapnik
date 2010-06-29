@@ -35,8 +35,12 @@ def fixup_sym_attributes(sym):
         
 if __name__ == "__main__":
     
-    if len(sys.argv) != 2:
-        print>>sys.stderr,'Usage: %s <map_xml_file>' % sys.argv[0]
+    #required parameters:
+    #   map_xml_file: outdated stylesheet file
+    #   output_file: new stylesheet file
+
+    if len(sys.argv) != 3:
+        print>>sys.stderr,'Usage: %s <map_xml_file> <output_file>' % sys.argv[0]
         sys.exit(1)
         
     xml = sys.argv[1]
@@ -67,5 +71,10 @@ if __name__ == "__main__":
                     for sym in rule.BuildingSymbolizer:
                         fixup_sym_attributes(sym)
                         
-    print etree.tostring(tree,pretty_print=True,standalone=True)
+    updated_xml = etree.tostring(tree,pretty_print=True,standalone=True)
     
+    output_file = open(sys.argv[2], 'w')
+
+    output_file.write(updated_xml)
+
+    output_file.close()
