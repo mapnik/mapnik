@@ -218,6 +218,29 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
     }
 }
 
+void render_to_file3(const mapnik::Map& map,
+                     const std::string& filename,
+                     const std::string& format,
+                     double scale_factor = 1.0
+                     )
+{
+    if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
+    {
+#if defined(HAVE_CAIRO)
+        mapnik::save_to_cairo_file(map,filename,format);
+#else
+        throw mapnik::ImageWriterException("Cairo backend not available, cannot write to format: " + format);
+#endif
+    }
+    else 
+    {
+        mapnik::image_32 image(map.width(),map.height());
+        render(map,image,scale_factor,0,0);
+        mapnik::save_to_file(image,filename,format); 
+    }
+}
+
+
 double scale_denominator(mapnik::Map const &map, bool geographic)
 {
     return mapnik::scale_denominator(map, geographic);
@@ -363,6 +386,18 @@ BOOST_PYTHON_MODULE(_mapnik2)
         "\n"
         );
 
+    def("render_to_file",&render_to_file3,
+        "\n"
+        "Render Map to file using explicit image type and scale factor.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import Map, render_to_file, load_map\n"
+        ">>> m = Map(256,256)\n"
+        ">>> scale_factor = 4\n"
+        ">>> render_to_file(m,'image.jpeg',scale_factor)\n"
+        "\n"
+        );
+        
     def("render_tile_to_file",&render_tile_to_file,
         "\n"
         "TODO\n"
