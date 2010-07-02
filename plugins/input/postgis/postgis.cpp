@@ -79,7 +79,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
                params.get<std::string>("port"),
                params.get<std::string>("dbname"),
                params.get<std::string>("user"),
-               params.get<std::string>("password")),
+               params.get<std::string>("password"),
+               params.get<std::string>("connect_timeout","4")),
       bbox_token_("!bbox!"),
       scale_denom_token_("!scale_denominator!"),
       persist_connection_(*params_.get<mapnik::boolean>("persist_connection",true)),
@@ -489,6 +490,10 @@ featureset_ptr postgis_datasource::features(const query& q) const
          
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
             return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),multiple_geometries_,props.size()));
+        }
+        else 
+        {
+            throw mapnik::datasource_exception("bad connection");
         }
     }
     return featureset_ptr();

@@ -83,14 +83,15 @@ int main ( int argc, char** argv)
     boost::optional<std::string> dbname;
     boost::optional<std::string> user;
     boost::optional<std::string> password;
-   
+    boost::optional<std::string> connect_timeout("4");
+    
     if (vm.count("host")) host = vm["host"].as<std::string>();
     if (vm.count("port")) port = vm["port"].as<std::string>();
     if (vm.count("dbname")) dbname = vm["dbname"].as<std::string>();
     if (vm.count("user")) user = vm["user"].as<std::string>();
     if (vm.count("password")) password = vm["password"].as<std::string>();
-   
-    ConnectionCreator<Connection> creator(host,port,dbname,user,password);
+    
+    ConnectionCreator<Connection> creator(host,port,dbname,user,password,connect_timeout);
     try 
     {
         boost::shared_ptr<Connection> conn(creator());
