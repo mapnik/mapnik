@@ -79,7 +79,7 @@ public:
         if (user_   && (*user_).size()) connect_str += " user=" + *user_;
         if (pass_   && (*pass_).size()) connect_str += " password=" + *pass_;
         if (connect_timeout_ && (*connect_timeout_).size()) 
-            connect_str +="connect_timeout=" + *connect_timeout_;
+            connect_str +=" connect_timeout=" + *connect_timeout_;
         return connect_str;
     }
       
