@@ -631,7 +631,7 @@ setdlopenflags(flags)
 # and ensure correct documentation processing
 __all__ = [
     # classes
-    'Color', 'Coord', 'ColorBand',
+    'Color', 'Coord', 'ColorBand', 'CompositeOp',
     'DatasourceCache',
     'Box2d',
     'Feature', 'Featureset', 'FontEngine',

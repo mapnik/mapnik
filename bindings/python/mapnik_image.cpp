@@ -38,6 +38,13 @@ extern "C"
 #include <mapnik/image_reader.hpp>
 #include <sstream>
 
+// agg
+#include "agg_rendering_buffer.h"
+#include "agg_rasterizer_scanline_aa.h"
+#include "agg_scanline_u.h"
+#include "agg_renderer_scanline.h"
+#include "agg_pixfmt_rgba.h"
+
 // jpeg
 #if defined(HAVE_JPEG)
 #include <mapnik/jpeg_io.hpp>
@@ -95,6 +102,56 @@ void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float op
     im.set_rectangle_alpha2(im2.data(),x,y,opacity);
 }
 
+enum composite_mode_e
+{
+    clear = 1,
+    src,
+    dst,
+    src_over,
+    dst_over,
+    src_in,
+    dst_in,
+    src_out,
+    dst_out,
+    multiply
+};
+
+void composite(image_32 & im, image_32 & im2, composite_mode_e mode)
+{
+    typedef agg::rgba8 color;
+    typedef agg::order_bgra order;
+    typedef agg::pixel32_type pixel_type;
+    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
+    typedef agg::renderer_base<pixfmt_type> renderer_type;
+    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
+    typedef agg::renderer_base<pixfmt_type> renderer_type;
+    
+    
+    agg::rendering_buffer source(im.raw_data(),im.width(),im.height(),im.width() * 4);
+    agg::rendering_buffer mask(im2.raw_data(),im2.width(),im2.height(),im2.width() * 4);
+
+    agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf(source);
+    agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
+    switch(mode)
+    {
+    case dst_out:
+        pixf.comp_op(agg::comp_op_dst_out);
+        break;
+    case src_out:
+        pixf.comp_op(agg::comp_op_src_out);
+        break;
+    case multiply:
+        pixf.comp_op(agg::comp_op_multiply);
+        break;
+    default:
+        break;
+    }
+    renderer_type ren(pixf);
+    agg::renderer_base<pixfmt_type> rb(pixf);
+    rb.blend_from(pixf_mask,0,0,0,255);
+}
+
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 boost::shared_ptr<image_32> from_cairo(PycairoSurface* surface)
 {
@@ -107,6 +164,12 @@ boost::shared_ptr<image_32> from_cairo(PycairoSurface* surface)
 void export_image()
 {
     using namespace boost::python;
+    enum_<composite_mode_e>("CompositeOp")
+        .value("src_out",src_out)
+        .value("dst_out",dst_out)
+        .value("multiply",multiply)
+        ;
+    
     class_<image_32,boost::shared_ptr<image_32> >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
         .def("width",&image_32::width)
         .def("height",&image_32::height)
@@ -115,6 +178,7 @@ void export_image()
                       (&image_32::get_background,return_value_policy<copy_const_reference>()),
                       &image_32::set_background, "The background color of the image.")
         .def("blend",&blend)
+        .def("composite",&composite)
         .def("tostring",&tostring1)
         .def("tostring",&tostring2)
         .def("save", save_to_file1)
