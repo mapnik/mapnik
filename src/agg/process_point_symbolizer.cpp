@@ -26,6 +26,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_cache.hpp>
+#include <mapnik/metawriter.hpp>
 #include <mapnik/svg/marker_cache.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
@@ -49,7 +50,6 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
     typedef agg::pixfmt_rgba32 pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
@@ -58,7 +58,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     double y;
     double z=0;
     
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
     boost::optional<mapnik::image_ptr> data;
     
     if (is_svg(filename))
@@ -114,6 +114,11 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 {
                     svg_renderer.render(*ras_ptr, sl, ren, tr, renb.clip_box(), sym.get_opacity());
                     detector_.insert(extent);
+                    std::pair<metawriter_ptr, expression_ptr> writer = sym.get_metawriter();
+                    if (writer.first)
+                    {
+                        writer.first->add_box(extent, feature, prj_trans, t_, writer.second);
+                    }
                 }
             }   
         }
@@ -133,7 +138,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
         if ( data )
         {
-            for (unsigned i=0;i<feature.num_geometries();++i)
+            for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
                 geometry2d const& geom = feature.get_geometry(i);
                 
@@ -142,17 +147,19 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 t_.forward(&x,&y);
                 int w = (*data)->width();
                 int h = (*data)->height();
-                int px=int(floor(x - 0.5 * w));
-                int py=int(floor(y - 0.5 * h));
-                box2d<double> label_ext (floor(x - 0.5 * w),
-                                         floor(y - 0.5 * h),
-                                         ceil (x + 0.5 * w),
-                                         ceil (y + 0.5 * h));
+                int px = int(floor(x - 0.5 * w));
+                int py = int(floor(y - 0.5 * h));
+                box2d<double> label_ext (px, py, px + w, py + h);
                 if (sym.get_allow_overlap() ||
                     detector_.has_placement(label_ext))
                 {
-                    pixmap_.set_rectangle_alpha2(*(*data),px,py,sym.get_opacity());
+                    pixmap_.set_rectangle_alpha2(*(*data), px, py, sym.get_opacity());
                     detector_.insert(label_ext);
+                    std::pair<metawriter_ptr, expression_ptr> writer = sym.get_metawriter();
+                    if (writer.first)
+                    {
+                        writer.first->add_box(label_ext, feature, prj_trans, t_, writer.second);
+                    }
                 }
             }
         }

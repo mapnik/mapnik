@@ -31,6 +31,8 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/filter_factory.hpp>
+#include <mapnik/symbolizer.hpp>
+
 // boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
@@ -90,7 +92,7 @@ DEFINE_ENUM( text_convert_e, text_convert );
 
 typedef boost::tuple<double,double> position;
 
-struct MAPNIK_DECL text_symbolizer
+struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 {
     text_symbolizer(expression_ptr name, std::string const& face_name,
                     unsigned size, color const& fill);

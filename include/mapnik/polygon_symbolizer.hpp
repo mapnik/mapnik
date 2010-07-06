@@ -25,11 +25,13 @@
 #ifndef POLYGON_SYMBOLIZER_HPP
 #define POLYGON_SYMBOLIZER_HPP
 
+// mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/symbolizer.hpp>
 
 namespace mapnik 
 {
-struct MAPNIK_DECL polygon_symbolizer
+struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
 {
     explicit polygon_symbolizer() 
         : fill_(color(128,128,128)),
@@ -72,7 +74,7 @@ private:
     double gamma_;
 }; 
    
-struct MAPNIK_DECL building_symbolizer
+struct MAPNIK_DECL building_symbolizer : public symbolizer_base
 {
     explicit building_symbolizer() 
         : fill_(color(128,128,128)),

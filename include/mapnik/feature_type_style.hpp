@@ -59,6 +59,11 @@ public:
     {
         return rules_;
     }
+
+    rules &get_rules_nonconst()
+    {
+        return rules_;
+    }
         
     ~feature_type_style() {}
 };

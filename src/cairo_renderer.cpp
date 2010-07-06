@@ -752,7 +752,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
         data = mapnik::image_cache::instance()->find(filename,true);
     }
        
-    if ( data )
+    if (data)
     {
         for (unsigned i = 0; i < feature.num_geometries(); ++i)
         {
@@ -767,21 +767,21 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
                
             int w = (*data)->width();
             int h = (*data)->height();
-               
-            box2d<double> label_ext (floor(x - 0.5 * w),
-                                     floor(y - 0.5 * h),
-                                     ceil (x + 0.5 * w),
-                                     ceil (y + 0.5 * h));
-
+            int px = int(floor(x - 0.5 * w));
+            int py = int(floor(y - 0.5 * h));
+            box2d<double> label_ext (px, py, px + w, py + h);
             if (sym.get_allow_overlap() ||
                 detector_.has_placement(label_ext))
             {
                 cairo_context context(context_);
-                int px = int(floor(x - 0.5 * w));
-                int py = int(floor(y - 0.5 * h));
 
                 context.add_image(px, py, *(*data), sym.get_opacity());
                 detector_.insert(label_ext);
+                std::pair<metawriter_ptr, expression_ptr> writer = sym.get_metawriter();
+                if (writer.first)
+                {
+                    writer.first->add_box(label_ext, feature, prj_trans, t_, writer.second);
+                }
             }
         }
     }

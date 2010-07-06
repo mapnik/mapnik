@@ -31,7 +31,7 @@ namespace mapnik
 {   
 
 struct MAPNIK_DECL point_symbolizer : 
-        public symbolizer_with_image
+        public symbolizer_with_image, public symbolizer_base
 {       
     explicit point_symbolizer();
     point_symbolizer(path_expression_ptr file);

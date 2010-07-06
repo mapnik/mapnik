@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2010 Hermann Kraus
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,40 +19,33 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: line_symbolizer.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef LINE_SYMBOLIZER_HPP
-#define LINE_SYMBOLIZER_HPP
 
-#include <mapnik/stroke.hpp>
-#include <mapnik/symbolizer.hpp>
+#ifndef METAWRITER_HPP
+#define METAWRITER_HPP
 
-namespace mapnik 
+// Mapnik
+#include <mapnik/box2d.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/filter_factory.hpp>
+
+// Boost
+#include <boost/utility.hpp>
+#include <boost/shared_ptr.hpp>
+
+
+namespace mapnik {
+
+/** Abstract baseclass for all metawriter classes. */
+class metawriter
 {
-struct MAPNIK_DECL line_symbolizer : public symbolizer_base
-{
-    explicit line_symbolizer()
-        : stroke_() {}
-        
-    line_symbolizer(stroke const& stroke)
-        : stroke_(stroke) {}
-        
-    line_symbolizer(color const& pen,float width=1.0)
-        : stroke_(pen,width) {}
-        
-    stroke const& get_stroke() const
-    {
-        return stroke_;
-    }
-        
-    void set_stroke(stroke const& stroke)
-    {
-        stroke_ = stroke;
-    }
-
-private:
-    stroke stroke_;
+    public:
+        virtual ~metawriter() {};
+        virtual void add_box(box2d<double> box, Feature const &feature, proj_transform const& prj_trans, CoordTransform const &t, expression_ptr expression)=0;
 };
-}
 
-#endif //LINE_SYMBOLIZER_HPP
+typedef boost::shared_ptr<metawriter> metawriter_ptr;
+
+};
+
+#endif

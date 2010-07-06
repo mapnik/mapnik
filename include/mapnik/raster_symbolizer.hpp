@@ -24,14 +24,17 @@
 #ifndef RASTER_SYMBOLIZER_HPP
 #define RASTER_SYMBOLIZER_HPP
 
+// mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/raster_colorizer.hpp>
+#include <mapnik/symbolizer.hpp>
 
+// boost
 #include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
-struct MAPNIK_DECL raster_symbolizer {
+struct MAPNIK_DECL raster_symbolizer : public symbolizer_base {
     explicit raster_symbolizer()
         : mode_("normal"),
         scaling_("fast"),

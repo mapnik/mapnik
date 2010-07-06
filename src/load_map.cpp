@@ -41,6 +41,8 @@
 
 #include <mapnik/svg/svg_path_parser.hpp>
 
+#include <mapnik/metawriter_json.hpp>
+
 // boost
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
@@ -77,27 +79,29 @@ public:
         relative_to_xml_(true),
         font_manager_(font_engine_) {}
 
-    void parse_map( Map & map, ptree const & sty);
+    void parse_map(Map & map, ptree const & sty);
 private:
-    void parse_style( Map & map, ptree const & sty);
-    void parse_layer( Map & map, ptree const & lay);
+    void parse_style(Map & map, ptree const & sty);
+    void parse_layer(Map & map, ptree const & lay);
+    void parse_metawriter(Map & map, ptree const & lay);
+    void parse_metawriter_in_symbolizer(symbolizer_base &sym, ptree const &pt);
 
     void parse_fontset(Map & map, ptree const & fset);
     void parse_font(font_set & fset, ptree const & f);
 
-    void parse_rule( feature_type_style & style, ptree const & r);
+    void parse_rule(feature_type_style & style, ptree const & r);
 
-    void parse_point_symbolizer( rule_type & rule, ptree const & sym);
-    void parse_line_pattern_symbolizer( rule_type & rule, ptree const & sym);
-    void parse_polygon_pattern_symbolizer( rule_type & rule, ptree const & sym);
-    void parse_text_symbolizer( rule_type & rule, ptree const & sym);
-    void parse_shield_symbolizer( rule_type & rule, ptree const & sym);
-    void parse_line_symbolizer( rule_type & rule, ptree const & sym);
-    void parse_polygon_symbolizer( rule_type & rule, ptree const & sym);
-    void parse_building_symbolizer( rule_type & rule, ptree const & sym );
-    void parse_raster_symbolizer( rule_type & rule, ptree const & sym );
-    void parse_markers_symbolizer( rule_type & rule, ptree const & sym );
-    void parse_glyph_symbolizer( rule_type & rule, ptree const & sym );
+    void parse_point_symbolizer(rule_type & rule, ptree const & sym);
+    void parse_line_pattern_symbolizer(rule_type & rule, ptree const & sym);
+    void parse_polygon_pattern_symbolizer(rule_type & rule, ptree const & sym);
+    void parse_text_symbolizer(rule_type & rule, ptree const & sym);
+    void parse_shield_symbolizer(rule_type & rule, ptree const & sym);
+    void parse_line_symbolizer(rule_type & rule, ptree const & sym);
+    void parse_polygon_symbolizer(rule_type & rule, ptree const & sym);
+    void parse_building_symbolizer(rule_type & rule, ptree const & sym );
+    void parse_raster_symbolizer(rule_type & rule, ptree const & sym );
+    void parse_markers_symbolizer(rule_type & rule, ptree const & sym );
+    void parse_glyph_symbolizer(rule_type & rule, ptree const & sym );
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
 
@@ -113,6 +117,7 @@ private:
     face_manager<freetype_engine> font_manager_;
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
+
 };
 
 void load_map(Map & map, std::string const& filename, bool strict)
@@ -249,6 +254,10 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             {
                 parse_fontset(map, v.second);
             }
+            else if (v.first == "MetaWriter")
+            {
+                parse_metawriter(map, v.second);
+            }
             else if (v.first == "FileSource")
             {
                 std::string name = get_attr<string>( v.second, "name");
@@ -285,8 +294,8 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             else if (v.first != "<xmlcomment>" &&
                      v.first != "<xmlattr>")
             {
-                throw config_error(std::string("Unknown child node in 'Map'. ") +
-                                   "Expected 'Style' or 'Layer' but got '" + v.first + "'");
+                throw config_error(std::string("Unknown child node in 'Map': '") +
+                                   v.first + "'");
             }
         }
     }
@@ -294,6 +303,7 @@ void map_parser::parse_map( Map & map, ptree const & pt )
     {
         throw config_error("Not a map file. Node 'Map' not found.");
     }
+    map.init_metawriters();
 }
 
 void map_parser::parse_style( Map & map, ptree const & sty )
@@ -326,7 +336,34 @@ void map_parser::parse_style( Map & map, ptree const & sty )
 
     } catch (const config_error & ex) {
         if ( ! name.empty() ) {
-            ex.append_context(string("in style '") + name + "' in map '" + filename_ + "')");
+            ex.append_context(string("in style '") + name + "' in map '" + filename_ + "'");
+        } else {
+            ex.append_context(string("in map '") + filename_ + "'");
+        }
+        throw;
+    }
+}
+
+void map_parser::parse_metawriter(Map & map, ptree const & pt)
+{
+    string name("<missing name>");
+    metawriter_ptr writer;
+    try
+    {
+        name = get_attr<string>(pt, "name");
+        string type = get_attr<string>(pt, "type");
+        if (type == "json") {
+            string file = get_attr<string>(pt, "file");
+            writer = metawriter_ptr(new metawriter_json(file));
+        } else {
+            throw config_error(string("Unknown type '") + type + "'");
+        }
+        map.insert_metawriter(name, writer);
+    } catch (const config_error & ex) {
+        if (!name.empty()) {
+            ex.append_context(string("in meta writer '") + name + "' in map '" + filename_ + "'");
+        } else {
+            ex.append_context(string("in map '") + filename_ + "'");
         }
         throw;
     }
@@ -663,6 +700,19 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
     }
 }
 
+void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, ptree const &pt)
+{
+    optional<std::string> writer =  get_opt_attr<string>(pt, "meta-writer");
+    if (!writer) return;
+    optional<std::string> output =  get_opt_attr<string>(pt, "meta-output");
+    expression_ptr expression;
+    if (output) {
+        expression = parse_expression(*output, "utf8");
+    }
+    clog << "adding metawriter " << *writer << "\n";
+    sym.add_metawriter(*writer, expression);
+}
+
 void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 {
     try
@@ -700,6 +750,8 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 #endif
                    
                 point_symbolizer symbol(parse_path(*file));
+
+                parse_metawriter_in_symbolizer(symbol, sym);
                   
                 if (allow_overlap)
                 {
@@ -738,6 +790,8 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
         else
         {
             point_symbolizer symbol;
+
+            parse_metawriter_in_symbolizer(symbol, sym);
         
             if (allow_overlap)
             {

@@ -34,14 +34,15 @@ namespace mapnik
 {
 point_symbolizer::point_symbolizer()
     : symbolizer_with_image(path_expression_ptr(new path_expression)), // FIXME
+      symbolizer_base(),
       overlap_(false) {}
     
 point_symbolizer::point_symbolizer(path_expression_ptr file) 
-    : symbolizer_with_image(file),
+    : symbolizer_with_image(file), symbolizer_base(),
       overlap_(false) {}
 
 point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
-    : symbolizer_with_image(rhs),
+    : symbolizer_with_image(rhs), symbolizer_base(rhs),
       overlap_(rhs.overlap_)
 {}
 

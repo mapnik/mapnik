@@ -112,6 +112,7 @@ source = Split(
     unicode.cpp
     glyph_symbolizer.cpp
     markers_symbolizer.cpp
+    metawriter.cpp
     """   
     )
 

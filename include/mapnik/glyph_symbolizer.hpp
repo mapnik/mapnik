@@ -10,6 +10,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/symbolizer.hpp>
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -27,7 +28,7 @@ enum angle_mode_enum {
 
 DEFINE_ENUM(angle_mode_e, angle_mode_enum);
 
-struct MAPNIK_DECL glyph_symbolizer
+struct MAPNIK_DECL glyph_symbolizer : public symbolizer_base
 {    
     glyph_symbolizer(std::string face_name, expression_ptr c)
         : face_name_(face_name),

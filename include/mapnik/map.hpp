@@ -33,6 +33,7 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
+#include <mapnik/metawriter.hpp>
 
 // boost
 #include <boost/optional/optional.hpp>
@@ -74,6 +75,7 @@ private:
     int buffer_size_;
     boost::optional<color> background_;
     std::map<std::string,feature_type_style> styles_;
+    std::map<std::string,metawriter_ptr> metawriters_;
     std::map<std::string,font_set> fontsets_;
     std::vector<layer> layers_;
     aspect_fix_mode aspectFixMode_;
@@ -163,6 +165,25 @@ public:
      *  @return The style if found. If not found return the default map style.
      */
     boost::optional<feature_type_style const&> find_style(std::string const& name) const;
+
+    /*! \brief Insert a meta-writer in the map.
+     *  @param name The name of the writer.
+     *  @param style A pointer to the writer to insert.
+     *  @return true If success.
+     *  @return false If no success.
+     */
+    bool insert_metawriter(std::string const& name, metawriter_ptr const& writer);
+
+    /*! \brief Remove a meta-writer from the map.
+     *  @param name The name of the writer.
+     */
+    void remove_metawriter(const std::string& name);
+
+    /*! \brief Find a meta-writer.
+     *  @param name The name of the writer.
+     *  @return The writer if found. If not found return 0.
+     */
+    metawriter_ptr find_metawriter(std::string const& name) const;
         
     /*! \brief Insert a fontset into the map.
      *  @param name The name of the fontset.
@@ -344,6 +365,11 @@ public:
      * @return A Mapnik Featureset if successful otherwise will return NULL.
      */
     featureset_ptr query_map_point(unsigned index, double x, double y) const;
+
+    /*!
+     * @brief Resolve names to object references for metawriters.
+     */
+    void init_metawriters();
         
     ~Map();
 

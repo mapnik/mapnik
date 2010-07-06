@@ -40,7 +40,7 @@ enum pattern_alignment_enum {
 DEFINE_ENUM( pattern_alignment_e, pattern_alignment_enum );
 
 struct MAPNIK_DECL polygon_pattern_symbolizer :
-        public symbolizer_with_image
+        public symbolizer_with_image, public symbolizer_base
 {
         
     polygon_pattern_symbolizer(path_expression_ptr file);

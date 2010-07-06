@@ -33,6 +33,19 @@
 namespace mapnik
 {
 
+/** Call cache_metawriters for each symbolizer.*/
+struct metawriter_cache_dispatch : public boost::static_visitor<>
+{
+    metawriter_cache_dispatch (Map const &m) : m_(m) {}
+
+    template <typename T> void operator () (T &sym) const
+    {
+        sym.cache_metawriters(m_);
+    }
+
+    Map const &m_;
+};
+
 static const char * aspect_fix_mode_strings[] = {
     "GROW_BBOX",
     "GROW_CANVAS",
@@ -68,6 +81,7 @@ Map::Map(const Map& rhs)
       buffer_size_(rhs.buffer_size_),
       background_(rhs.background_),
       styles_(rhs.styles_),
+      metawriters_(rhs.metawriters_),
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
       currentExtent_(rhs.currentExtent_) {}
@@ -81,6 +95,7 @@ Map& Map::operator=(const Map& rhs)
     buffer_size_ = rhs.buffer_size_;
     background_=rhs.background_;
     styles_=rhs.styles_;
+    metawriters_ = rhs.metawriters_;
     layers_=rhs.layers_;
     aspectFixMode_=rhs.aspectFixMode_;
     return *this;
@@ -125,7 +140,35 @@ void Map::remove_style(std::string const& name)
 {
     styles_.erase(name);
 }
-   
+
+boost::optional<feature_type_style const&> Map::find_style(std::string const& name) const
+{
+    std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
+    if (itr != styles_.end())
+        return boost::optional<feature_type_style const&>(itr->second);
+    else
+        return boost::optional<feature_type_style const&>() ;
+}
+
+bool Map::insert_metawriter(std::string const& name, metawriter_ptr const& writer)
+{
+    return metawriters_.insert(make_pair(name, writer)).second;
+}
+
+void Map::remove_metawriter(std::string const& name)
+{
+    metawriters_.erase(name);
+}
+
+metawriter_ptr Map::find_metawriter(std::string const& name) const
+{
+    std::map<std::string, metawriter_ptr>::const_iterator itr = metawriters_.find(name);
+    if (itr != metawriters_.end())
+        return itr->second;
+    else
+        return metawriter_ptr();
+}
+
 bool Map::insert_fontset(std::string const& name, font_set const& fontset) 
 {
     return fontsets_.insert(make_pair(name, fontset)).second;
@@ -150,15 +193,6 @@ std::map<std::string,font_set> & Map::fontsets()
     return fontsets_;
 }
 
-boost::optional<feature_type_style const&> Map::find_style(std::string const& name) const
-{
-    std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
-    if (itr!=styles_.end()) 
-        return boost::optional<feature_type_style const&>(itr->second);
-    else
-        return boost::optional<feature_type_style const&>() ;
-}
-    
 size_t Map::layer_count() const
 {
     return layers_.size();
@@ -168,6 +202,7 @@ void Map::addLayer(const layer& l)
 {
     layers_.push_back(l);
 }
+
 void Map::removeLayer(size_t index)
 {
     layers_.erase(layers_.begin()+index);
@@ -177,6 +212,7 @@ void Map::remove_all()
 {
     layers_.clear();
     styles_.clear();
+    metawriters_.clear();
 }
     
 const layer& Map::getLayer(size_t index) const
@@ -527,5 +563,22 @@ featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
 
 Map::~Map() {}
 
-   
+void Map::init_metawriters()
+{
+    metawriter_cache_dispatch d(*this);
+    Map::style_iterator styIter = begin_styles();
+    Map::style_iterator styEnd = end_styles();
+    for (; styIter!=styEnd; ++styIter) {
+        std::vector<rule_type>& rules = styIter->second.get_rules_nonconst();
+        std::vector<rule_type>::iterator ruleIter = rules.begin();
+        std::vector<rule_type>::iterator ruleEnd = rules.end();
+        for (; ruleIter!=ruleEnd; ++ruleIter) {
+            rule_type::symbolizers::iterator symIter = ruleIter->begin();
+            rule_type::symbolizers::iterator symEnd = ruleIter->end();
+            for (; symIter!=symEnd; ++symIter) {
+                boost::apply_visitor(d, *symIter);
+            }
+        }
+    }
+}
 }

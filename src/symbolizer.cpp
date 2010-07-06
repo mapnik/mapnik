@@ -23,8 +23,28 @@
 
 //mapnik
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/map.hpp>
 
 namespace mapnik {
+
+void symbolizer_base::add_metawriter(std::string name, expression_ptr expression)
+{
+    expression_ = expression;
+    writer_name_ = name;
+    std::clog << "adding metawriter" << name << "\n";
+}
+
+void symbolizer_base::cache_metawriters(Map const &m)
+{
+    std::clog << "Caching metawriters\n";
+    writer_ptr_ = m.find_metawriter(writer_name_);
+    std::clog << writer_ptr_ << "name:" << writer_name_ << "\n";
+}
+
+std::pair<metawriter_ptr, expression_ptr> symbolizer_base::get_metawriter() const
+{
+    return std::pair<metawriter_ptr, expression_ptr>(writer_ptr_, expression_);
+}
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
     : image_filename_( file ),

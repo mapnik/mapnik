@@ -27,12 +27,41 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/filter_factory.hpp>
+#include <mapnik/metawriter.hpp>
 
 // boost
 #include <boost/array.hpp>
 
 namespace mapnik 
 {
+
+class Map;
+
+class MAPNIK_DECL symbolizer_base {
+    public:
+        /** Add a metawriter to this symbolizer.
+          *
+          * expression can be empty the default expression of
+          * the writer is used in this case. */
+        void add_metawriter(std::string name, expression_ptr expression);
+        /** Cache metawriter objects to avoid repeated lookups while processing.
+          *
+          * This function has to be called before the symbolizer is used, because
+          * the map object is not available in renderer::apply().
+          */
+        void cache_metawriters(Map const &m);
+        //TODO: Allow more than one meta writer per symbolizer?
+        /** Get the metawriter associated with this symbolizer or a NULL pointer if none exists.
+          *
+          * This functions requires that cache_metawriters() was called first.
+          */
+        std::pair<metawriter_ptr, expression_ptr> get_metawriter() const;
+    private:
+        expression_ptr expression_;
+        std::string writer_name_;
+        metawriter_ptr writer_ptr_;
+};
 
 typedef boost::array<double,6> transform_type;
 

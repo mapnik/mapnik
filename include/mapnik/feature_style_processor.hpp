@@ -47,6 +47,12 @@ namespace mapnik
 template <typename Processor>
 class feature_style_processor 
 {
+    /** Calls the renderer's process function,
+      * \param output     Renderer
+      * \param f          Feature to process
+      * \param prj_trans  Projection
+      * \param sym        Symbolizer object
+      */
     struct symbol_dispatch : public boost::static_visitor<>
     {
         symbol_dispatch (Processor & output,
@@ -108,13 +114,17 @@ public:
     }   
 private:
     void apply_to_layer(layer const& lay, Processor & p, 
-                        projection const& proj0,double scale_denom)
+                        projection const& proj0, double scale_denom)
     {
 #ifdef MAPNIK_DEBUG
         //wall_clock_progress_timer timer(clog, "end layer rendering: ");
 #endif
+        boost::shared_ptr<datasource> ds = lay.datasource();
+        if (!ds) {
+            std::clog << "WARNING: No datasource for layer '" << lay.name() << "'\n";
+            return;
+        }
         p.start_layer_processing(lay);
-        boost::shared_ptr<datasource> ds=lay.datasource();
         if (ds)
         {
             box2d<double> ext = m_.get_buffered_extent();

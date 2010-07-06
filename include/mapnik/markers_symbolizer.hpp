@@ -33,7 +33,7 @@
 namespace mapnik {
    
 struct MAPNIK_DECL markers_symbolizer : 
-        public symbolizer_with_image
+        public symbolizer_with_image, public symbolizer_base
 {
 public:
     markers_symbolizer();
