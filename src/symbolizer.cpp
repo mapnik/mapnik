@@ -31,14 +31,20 @@ void symbolizer_base::add_metawriter(std::string name, expression_ptr expression
 {
     expression_ = expression;
     writer_name_ = name;
+#ifdef MAPNIK_DEBUG
     std::clog << "adding metawriter" << name << "\n";
+#endif
 }
 
 void symbolizer_base::cache_metawriters(Map const &m)
 {
+#ifdef MAPNIK_DEBUG
     std::clog << "Caching metawriters\n";
+#endif
     writer_ptr_ = m.find_metawriter(writer_name_);
+#ifdef MAPNIK_DEBUG
     std::clog << writer_ptr_ << "name:" << writer_name_ << "\n";
+#endif
 }
 
 std::pair<metawriter_ptr, expression_ptr> symbolizer_base::get_metawriter() const
