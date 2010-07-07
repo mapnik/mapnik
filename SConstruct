@@ -1087,7 +1087,13 @@ if not preconfigured:
                 env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_SITE_PACKAGES']
                
             majver, minver = env['PYTHON_VERSION'].split('.')
-        
+ 
+            # TODO - this needs to be moved up...
+            env.AppendUnique(CPPPATH = env['PYTHON_INCLUDES'])
+            if not conf.CheckHeader(header='Python.h',language='C'):
+                color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION'])
+                env['MISSING_DEPS'].append('python %s development headers' % env['PYTHON_VERSION'])
+       
             if (int(majver), int(minver)) < (2, 2):
                 color_print(1,"Python version 2.2 or greater required")
                 Exit(1)
@@ -1195,7 +1201,7 @@ if not HELP_REQUESTED:
     # Build the pgsql2psqlite app if requested
     if env['PGSQL2SQLITE']:
         SConscript('utils/pgsql2sqlite/SConscript')
-        
+    
     # Build shapeindex and remove its dependency from the LIBS
     if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
         SConscript('utils/shapeindex/SConscript')
