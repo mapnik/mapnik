@@ -36,7 +36,7 @@ class gdal_featureset : public mapnik::Featureset
 {
    public:
       
-      gdal_featureset(GDALDataset & dataset, int band, gdal_query q);
+      gdal_featureset(GDALDataset & dataset, int band, gdal_query q, double filter_factor);
       virtual ~gdal_featureset();
       mapnik::feature_ptr next();
    private:
@@ -46,6 +46,7 @@ class gdal_featureset : public mapnik::Featureset
       GDALDataset & dataset_;
       int band_;
       gdal_query gquery_;
+      double filter_factor_;
       bool first_;
 };
 

@@ -189,6 +189,35 @@ namespace mapnik
                         {
                            if_rules.push_back(const_cast<rule_type*>(&(*ruleIter))); 		    
                         }
+                        if (ds->type() == datasource::Raster)
+                        {
+                            if (ds->params().get<double>("filter_factor",0.0) == 0.0)
+                            {
+                                const symbolizers& symbols = ruleIter->get_symbolizers();
+                                symbolizers::const_iterator symIter = symbols.begin();
+                                symbolizers::const_iterator symEnd = symbols.end();
+                                for (;symIter != symEnd;++symIter)
+                                {   
+                                    try
+                                    {
+                                        raster_symbolizer sym = boost::get<raster_symbolizer>(*symIter);
+                                        std::string scaling = sym.get_scaling();
+                                        if (scaling == "bilinear" || scaling == "bilinear8" )
+                                        {
+                                            // todo - allow setting custom value in symbolizer property?
+                                            q.filter_factor(2.0);
+                                        }
+                                    }
+                                    catch (const boost::bad_get &v)
+                                    {
+                                        // case where useless symbolizer is attached to raster layer
+                                        //throw config_error("Invalid Symbolizer type supplied, only RasterSymbolizer is supported");
+                                    }
+                                }
+                            }
+                            
+                        }
+
                      }
                   }
                   std::set<std::string>::const_iterator namesIter=names.begin();

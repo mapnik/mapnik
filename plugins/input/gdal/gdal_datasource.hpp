@@ -47,6 +47,7 @@ class gdal_datasource : public mapnik::datasource
       unsigned width_;
       unsigned height_;
       bool shared_dataset_;
+      double filter_factor_;
       inline GDALDataset *open_dataset() const;
 };
 

@@ -25,7 +25,6 @@
 #ifndef QUERY_HPP
 #define QUERY_HPP
 //mapnik
-#include <mapnik/filter.hpp>
 #include <mapnik/envelope.hpp>
 #include <mapnik/feature.hpp>
 // stl
@@ -39,25 +38,23 @@ namespace mapnik {
          Envelope<double> bbox_;
          double resolution_;
          double scale_denominator_;
+         double filter_factor_;
          std::set<std::string> names_;
       public:
          
-         explicit query(const Envelope<double>& bbox, double resolution, double scale_denominator)
-            : bbox_(bbox),
-              resolution_(resolution),
-              scale_denominator_(scale_denominator)
-         {}
 
-         explicit query(const Envelope<double>& bbox, double resolution)
-            : bbox_(bbox),
-              resolution_(resolution),
-              scale_denominator_(0.0)
-         {}         
+         query(Envelope<double> const& bbox, double resolution, double scale_denominator = 1.0)
+             : bbox_(bbox),
+               resolution_(resolution),
+               scale_denominator_(scale_denominator),
+               filter_factor_(1.0)
+         {}
         
          query(const query& other)
             : bbox_(other.bbox_),
               resolution_(other.resolution_),
               scale_denominator_(other.scale_denominator_),
+              filter_factor_(other.filter_factor_),
               names_(other.names_)
          {}
          
@@ -67,6 +64,7 @@ namespace mapnik {
             bbox_=other.bbox_;
             resolution_=other.resolution_;
             scale_denominator_=other.scale_denominator_;
+            filter_factor_=other.filter_factor_;
             names_=other.names_;
             return *this;
          }
@@ -84,6 +82,16 @@ namespace mapnik {
          const Envelope<double>& get_bbox() const
          {
             return bbox_;
+         }
+
+         double get_filter_factor() const
+         {
+             return filter_factor_;
+         }
+        
+         void filter_factor(double factor)
+         {
+             filter_factor_ = factor;
          }
          
          void add_property_name(const std::string& name)
