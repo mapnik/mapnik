@@ -35,12 +35,17 @@ namespace mapnik {
 class metawriter_json : public metawriter, private boost::noncopyable
 {
     public:
-        metawriter_json(std::string fn, expression_ptr dflt_expr=expression_ptr());
+        metawriter_json(metawriter_properties dflt_properties, std::string fn);
         ~metawriter_json();
-        virtual void add_box(box2d<double> box, Feature const &feature, proj_transform const& prj_trans, CoordTransform const &t, expression_ptr expression);
+        virtual void add_box(box2d<double> box, Feature const &feature,
+                             proj_transform const& prj_trans,
+                             CoordTransform const& t,
+                             metawriter_properties const& properties);
+        virtual void start();
+        virtual void stop();
     private:
         std::fstream f;
-        expression_ptr dflt_expr_;
+        std::string fn_;
         int count;
 };
 

@@ -24,43 +24,66 @@
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
-#include <mapnik/expression_evaluator.hpp>
+
+// Boost
+#include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 
 // STL
 #include <iomanip>
+#include <cstdio>
 
 namespace mapnik {
 
-    metawriter_json::metawriter_json(std::string fn, expression_ptr dflt_expr) : dflt_expr_(dflt_expr), count(0)
+metawriter_json::metawriter_json(metawriter_properties dflt_properties, std::string fn)
+    : metawriter(dflt_properties), fn_(fn), count(0)
 {
-    f.open(fn.c_str(), std::fstream::out | std::fstream::trunc);
-    if (f.fail()) perror((std::string("Failed to open file ") + fn).c_str());
-    f << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
+
 }
 
 metawriter_json::~metawriter_json()
 {
-    if (f.is_open()) {
+    stop();
+}
+
+void metawriter_json::start()
+{
+    if (f.is_open())
+    {
+        std::cerr << "ERROR: GeoJSON metawriter is already active!\n";
+    }
+    f.open(fn_.c_str(), std::fstream::out | std::fstream::trunc);
+    if (f.fail()) perror((std::string("Failed to open file ") + fn_).c_str());
+    f << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
+}
+
+void metawriter_json::stop()
+{
+    if (f.is_open())
+    {
         f << " ] }\n";
         f.close();
     }
-    std::clog << "Destroying metawriter\n";
 }
 
-void metawriter_json::add_box(box2d<double> box, Feature const &feature, proj_transform const& prj_trans, CoordTransform const &t, expression_ptr expression)
+void metawriter_json::add_box(box2d<double> box, Feature const &feature,
+                              proj_transform const& prj_trans, CoordTransform const &t,
+                              const metawriter_properties& properties)
 {
-    expression_ptr e;
-    if (expression) {
-        e = expression;
-    } else {
-        e = dflt_expr_;
+    metawriter_properties props;
+    if (properties.empty())
+    {
+        props = dflt_properties_;
     }
-    if (!e) {
-        std::clog << "WARNING: No expression available for JSON metawriter.\n";
+    else
+    {
+        props = properties;
+    }
+    if (props.empty())
+    {
+        std::cerr << "WARNING: No expression available for GeoJSON metawriter.\n";
         return;
     }
-    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*e);
-    UnicodeString text = result.to_unicode();
 
     /* Coordinate transform in renderer:
        input: layer srs
@@ -86,15 +109,38 @@ void metawriter_json::add_box(box2d<double> box, Feature const &feature, proj_tr
     double maxx = box.maxx();
     double maxy = box.maxy();
 
-    if (count++) {
-        f << ",\n";
-    }
+    if (count++) f << ",\n";
     f << std::fixed << std::setprecision(8) << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"Polygon\",\n    \"coordinates\": [ [ [" <<
             minx << ", " << miny << "], [" <<
             maxx << ", " << miny << "], [" <<
             maxx << ", " << maxy << "], [" <<
             minx << ", " << maxy << "] ] ] }," <<
-            "\n  \"properties\": {" << text << "} }";
+            "\n  \"properties\": {";
+    std::map<std::string, value> fprops = feature.props();
+    int i = 0;
+    BOOST_FOREACH(std::string p, props)
+    {
+        std::map<std::string, value>::const_iterator itr = fprops.find(p);
+        std::string text;
+        if (itr != fprops.end())
+        {
+            //Property found
+            text = boost::replace_all_copy(boost::replace_all_copy(itr->second.to_string(), "\\", "\\\\"), "\"", "\\\"");
+        }
+        if (i++) f << ",";
+        f << "\n    \"" << p << "\":\"" << text << "\"";
+    }
+
+    f << "\n} }";
 }
 
+metawriter_properties metawriter::parse_properties(boost::optional<std::string> str)
+{
+    metawriter_properties properties;
+    if (str) {
+        std::string str_ = boost::algorithm::erase_all_copy(*str, " ");
+        boost::split(properties, str_, boost::is_any_of(","), boost::token_compress_on);
+    }
+    return properties;
+}
 };

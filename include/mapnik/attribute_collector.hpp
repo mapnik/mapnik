@@ -106,7 +106,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
             expression_attributes f_attr(names_);
             boost::apply_visitor(f_attr,*orientation_expr);
         }
-        
+        collect_metawriter(sym);
     }
     
     void operator () (point_symbolizer const& sym)
@@ -116,6 +116,8 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
+        collect_metawriter(sym);
+
     }
 
     void operator () (line_pattern_symbolizer const& sym)
@@ -125,6 +127,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
+        collect_metawriter(sym);
     }
 
     void operator () (polygon_pattern_symbolizer const& sym)
@@ -134,6 +137,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
+        collect_metawriter(sym);
     }
     
     void operator () (shield_symbolizer const& sym)
@@ -150,6 +154,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
+        collect_metawriter(sym);
     }
 
     void operator () (glyph_symbolizer const& sym)
@@ -188,12 +193,17 @@ struct symbolizer_attributes : public boost::static_visitor<>
             expression_attributes f_attr(names_);
             boost::apply_visitor(f_attr,*color_expr);
         }
-
+        collect_metawriter(sym);
     }
     // TODO - support remaining syms
     
 private:
     std::set<std::string>& names_;
+    void collect_metawriter(symbolizer_base const& sym)
+    {
+        metawriter_properties const& properties = sym.get_metawriter_properties();
+        names_.insert(properties.begin(), properties.end());
+    }
 };
 
 

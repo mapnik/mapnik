@@ -27,7 +27,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/parse_path.hpp>
-#include <mapnik/filter_factory.hpp>
 #include <mapnik/metawriter.hpp>
 
 // boost
@@ -44,7 +43,7 @@ class MAPNIK_DECL symbolizer_base {
           *
           * expression can be empty the default expression of
           * the writer is used in this case. */
-        void add_metawriter(std::string name, expression_ptr expression);
+        void add_metawriter(std::string name, metawriter_properties const& properties);
         /** Cache metawriter objects to avoid repeated lookups while processing.
           *
           * This function has to be called before the symbolizer is used, because
@@ -56,9 +55,13 @@ class MAPNIK_DECL symbolizer_base {
           *
           * This functions requires that cache_metawriters() was called first.
           */
-        std::pair<metawriter_ptr, expression_ptr> get_metawriter() const;
+        metawriter_with_properties get_metawriter() const;
+        /** Get properties needed for metawriter.
+          * \note This function is a helperfunction for class attribute_collector.
+          */
+        metawriter_properties const& get_metawriter_properties() const { return properties_;}
     private:
-        expression_ptr expression_;
+        metawriter_properties properties_;
         std::string writer_name_;
         metawriter_ptr writer_ptr_;
 };

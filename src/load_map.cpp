@@ -336,10 +336,9 @@ void map_parser::parse_style( Map & map, ptree const & sty )
 
     } catch (const config_error & ex) {
         if ( ! name.empty() ) {
-            ex.append_context(string("in style '") + name + "' in map '" + filename_ + "'");
-        } else {
-            ex.append_context(string("in map '") + filename_ + "'");
+            ex.append_context(string("in style '") + name + "'");
         }
+        ex.append_context(string("in map '") + filename_ + "'");
         throw;
     }
 }
@@ -354,17 +353,16 @@ void map_parser::parse_metawriter(Map & map, ptree const & pt)
         string type = get_attr<string>(pt, "type");
         if (type == "json") {
             string file = get_attr<string>(pt, "file");
-            writer = metawriter_ptr(new metawriter_json(file));
+            writer = metawriter_ptr(new metawriter_json(metawriter_properties(/*TODO*/), file));
         } else {
             throw config_error(string("Unknown type '") + type + "'");
         }
         map.insert_metawriter(name, writer);
     } catch (const config_error & ex) {
         if (!name.empty()) {
-            ex.append_context(string("in meta writer '") + name + "' in map '" + filename_ + "'");
-        } else {
-            ex.append_context(string("in map '") + filename_ + "'");
+            ex.append_context(string("in meta writer '") + name + "'");
         }
+        ex.append_context(string("in map '") + filename_ + "'");
         throw;
     }
 }
@@ -403,8 +401,9 @@ void map_parser::parse_fontset( Map & map, ptree const & fset )
         fontsets_.insert(pair<std::string, font_set>(name, fontset));
     } catch (const config_error & ex) {
         if ( ! name.empty() ) {
-            ex.append_context(string("in FontSet '") + name + "' in map '" + filename_ + "')");
+            ex.append_context(string("in FontSet '") + name + "'");
         }
+        ex.append_context(string("in map '") + filename_ + "'");
         throw;
     }
 }
@@ -705,12 +704,7 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, ptree cons
     optional<std::string> writer =  get_opt_attr<string>(pt, "meta-writer");
     if (!writer) return;
     optional<std::string> output =  get_opt_attr<string>(pt, "meta-output");
-    expression_ptr expression;
-    if (output) {
-        expression = parse_expression(*output, "utf8");
-    }
-    clog << "adding metawriter " << *writer << "\n";
-    sym.add_metawriter(*writer, expression);
+    sym.add_metawriter(*writer, metawriter::parse_properties(output));
 }
 
 void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )

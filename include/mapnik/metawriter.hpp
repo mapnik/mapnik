@@ -27,24 +27,48 @@
 // Mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/filter_factory.hpp>
 
 // Boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
+
+// STL
+#include <set>
+#include <string>
 
 
 namespace mapnik {
+
+/** All properties to be output by a metawriter. */
+typedef std::set<std::string> metawriter_properties;
 
 /** Abstract baseclass for all metawriter classes. */
 class metawriter
 {
     public:
+        metawriter(metawriter_properties dflt_properties) : dflt_properties_(dflt_properties) {}
         virtual ~metawriter() {};
-        virtual void add_box(box2d<double> box, Feature const &feature, proj_transform const& prj_trans, CoordTransform const &t, expression_ptr expression)=0;
+        /** Output a rectangular area.
+          * \param box Area (in pixel coordinates)
+          * \param feature The feature being processed
+          * \param prj_trans Projection transformation
+          * \param t Cooridnate transformation
+          * \param properties List of properties to output
+          */
+        virtual void add_box(box2d<double> box, Feature const &feature,
+                             proj_transform const& prj_trans,
+                             CoordTransform const &t,
+                             metawriter_properties const& properties = metawriter_properties())=0;
+        virtual void start() {};
+        virtual void stop() {};
+        static metawriter_properties parse_properties(boost::optional<std::string> str);
+    protected:
+        metawriter_properties dflt_properties_;
 };
 
 typedef boost::shared_ptr<metawriter> metawriter_ptr;
+typedef std::pair<metawriter_ptr, metawriter_properties> metawriter_with_properties;
 
 };
 

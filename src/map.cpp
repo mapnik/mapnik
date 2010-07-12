@@ -169,6 +169,21 @@ metawriter_ptr Map::find_metawriter(std::string const& name) const
         return metawriter_ptr();
 }
 
+std::map<std::string,metawriter_ptr> const& Map::metawriters() const
+{
+    return metawriters_;
+}
+
+Map::const_metawriter_iterator Map::begin_metawriters() const
+{
+    return metawriters_.begin();
+}
+
+Map::const_metawriter_iterator Map::end_metawriters() const
+{
+    return metawriters_.end();
+}
+
 bool Map::insert_fontset(std::string const& name, font_set const& fontset) 
 {
     return fontsets_.insert(make_pair(name, fontset)).second;

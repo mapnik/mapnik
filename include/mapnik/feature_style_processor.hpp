@@ -84,6 +84,13 @@ public:
 #endif          
         Processor & p = static_cast<Processor&>(*this);
         p.start_map_processing(m_);
+        Map::const_metawriter_iterator metaItr = m_.begin_metawriters();
+        Map::const_metawriter_iterator metaItrEnd = m_.end_metawriters();
+
+        for (;metaItr!=metaItrEnd; ++metaItr)
+        {
+            metaItr->second->start();
+        }
                        
         try
         {
@@ -109,7 +116,13 @@ public:
         {
             std::clog << "proj_init_error:" << ex.what() << "\n"; 
         }
-            
+
+        metaItr = m_.begin_metawriters();
+        for (;metaItr!=metaItrEnd; ++metaItr)
+        {
+            metaItr->second->stop();
+        }
+
         p.end_map_processing(m_);
     }   
 private:

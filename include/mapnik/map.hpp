@@ -87,6 +87,7 @@ public:
     typedef std::map<std::string,feature_type_style>::iterator style_iterator;
     typedef std::map<std::string,font_set>::const_iterator const_fontset_iterator;
     typedef std::map<std::string,font_set>::iterator fontset_iterator;
+    typedef std::map<std::string,metawriter_ptr>::const_iterator const_metawriter_iterator;
         
     /*! \brief Default constructor.
      *
@@ -166,7 +167,7 @@ public:
      */
     boost::optional<feature_type_style const&> find_style(std::string const& name) const;
 
-    /*! \brief Insert a meta-writer in the map.
+    /*! \brief Insert a metawriter in the map.
      *  @param name The name of the writer.
      *  @param style A pointer to the writer to insert.
      *  @return true If success.
@@ -174,16 +175,31 @@ public:
      */
     bool insert_metawriter(std::string const& name, metawriter_ptr const& writer);
 
-    /*! \brief Remove a meta-writer from the map.
+    /*! \brief Remove a metawriter from the map.
      *  @param name The name of the writer.
      */
     void remove_metawriter(const std::string& name);
 
-    /*! \brief Find a meta-writer.
+    /*! \brief Find a metawriter.
      *  @param name The name of the writer.
      *  @return The writer if found. If not found return 0.
      */
     metawriter_ptr find_metawriter(std::string const& name) const;
+
+    /*! \brief Get all metawriters.
+     *  @return Const reference to metawriters.
+     */
+    std::map<std::string,metawriter_ptr> const& metawriters() const;
+
+    /*! \brief Get first iterator in metawriters.
+     *  @return Constant metawriter iterator.
+     */
+    const_metawriter_iterator begin_metawriters() const;
+
+    /*! \brief Get last iterator in metawriters.
+     *  @return Constant metawriter iterator.
+     */
+    const_metawriter_iterator end_metawriters() const;
         
     /*! \brief Insert a fontset into the map.
      *  @param name The name of the fontset.
