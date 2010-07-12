@@ -35,6 +35,8 @@ Mapnik Trunk
 
 - PNG: fixed png256 for large images and some improvements to reduce color corruptions (#522)
 
+- Implement MarkersSymbolizer in Cairo render and improve the markers placementfinder. (#553)
+
 
 Mapnik 0.7.0 Release
 --------------------
