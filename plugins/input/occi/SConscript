@@ -39,7 +39,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
 
-occi_inputdriver = env.SharedLibrary('occi', source=occi_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+occi_inputdriver = env.SharedLibrary('../occi', source=occi_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', occi_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')

@@ -43,7 +43,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
-ogr_inputdriver = env.SharedLibrary('ogr', source=ogr_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+ogr_inputdriver = env.SharedLibrary('../ogr', source=ogr_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', ogr_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')

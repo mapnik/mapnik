@@ -39,7 +39,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
-raster_inputdriver = env.SharedLibrary('raster', source=raster_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+raster_inputdriver = env.SharedLibrary('../raster', source=raster_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', raster_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')

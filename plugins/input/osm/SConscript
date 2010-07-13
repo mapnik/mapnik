@@ -41,7 +41,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
 
-osm_inputdriver = env.SharedLibrary('osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+osm_inputdriver = env.SharedLibrary('../osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', osm_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')

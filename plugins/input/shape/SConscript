@@ -48,7 +48,7 @@ cxx_flags = env['CXXFLAGS']
 if env['SHAPE_MEMORY_MAPPED_FILE']:
     cxx_flags.append('-DSHAPE_MEMORY_MAPPED_FILE')
 
-shape_inputdriver = env.SharedLibrary('shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, CXXFLAGS=cxx_flags)
+shape_inputdriver = env.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, CXXFLAGS=cxx_flags)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', shape_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')
