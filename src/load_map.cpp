@@ -353,7 +353,8 @@ void map_parser::parse_metawriter(Map & map, ptree const & pt)
         string type = get_attr<string>(pt, "type");
         if (type == "json") {
             string file = get_attr<string>(pt, "file");
-            writer = metawriter_ptr(new metawriter_json(metawriter_properties(/*TODO*/), file));
+            optional<string> properties = get_attr<string>(pt, "default-output");
+            writer = metawriter_ptr(new metawriter_json(metawriter_properties(metawriter::parse_properties(properties)), file));
         } else {
             throw config_error(string("Unknown type '") + type + "'");
         }

@@ -43,7 +43,7 @@ metawriter_json::metawriter_json(metawriter_properties dflt_properties, std::str
 
 metawriter_json::~metawriter_json()
 {
-    stop();
+     stop();
 }
 
 void metawriter_json::start()
