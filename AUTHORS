@@ -10,6 +10,7 @@ Committers
  - Dominic Hargreaves (Stable releases)
  - Tom Hughes (Cairo)
  - Ben Moores (PDF branch)
+ - Marcin Rudowski (graphics)
  - David Siegel (XML)
  - Vince Spader (TextSymbolizer)
  - Dane Springmeyer (Python API, SCons) <dane.springmeyer -at- gmail.com>
@@ -43,7 +44,6 @@ Patches
  - Igor Podolskiy
  - Reid Priedhorsky
  - Brian Quinion
- - Marcin Rudowski
  - Christopher Schmidt
  - Andreas Schneider
  - Vincent Schut
