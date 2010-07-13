@@ -135,6 +135,6 @@ env.Alias(target='install', source=ogcserver_module)
 
 
 # install the shared object beside the module directory
-_mapnik = env.LoadableModule('_mapnik', glob.glob('*.cpp'), LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
+_mapnik = env.LoadableModule('mapnik/_mapnik', glob.glob('*.cpp'), LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
 pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik',_mapnik)
 env.Alias(target='install',source=pymapniklib)
