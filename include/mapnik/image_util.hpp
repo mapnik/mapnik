@@ -54,10 +54,11 @@ namespace mapnik {
         }
     };
 
+#if defined(HAVE_CAIRO)
    MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
                                         std::string const& filename,
                                         std::string const& type);
-
+#endif
    template <typename T>
    MAPNIK_DECL void save_to_file(T const& image,
                                  std::string const& filename,
