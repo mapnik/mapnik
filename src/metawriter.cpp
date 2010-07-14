@@ -70,19 +70,15 @@ void metawriter_json::add_box(box2d<double> box, Feature const &feature,
                               proj_transform const& prj_trans, CoordTransform const &t,
                               const metawriter_properties& properties)
 {
-    metawriter_properties props;
-    if (properties.empty())
+    metawriter_properties props(properties);
+    if (props.empty())
     {
         props = dflt_properties_;
     }
-    else
-    {
-        props = properties;
-    }
+
     if (props.empty())
     {
         std::cerr << "WARNING: No expression available for GeoJSON metawriter.\n";
-        return;
     }
 
     /* Coordinate transform in renderer:
@@ -134,13 +130,10 @@ void metawriter_json::add_box(box2d<double> box, Feature const &feature,
     f << "\n} }";
 }
 
-metawriter_properties metawriter::parse_properties(boost::optional<std::string> str)
+metawriter_properties::metawriter_properties(boost::optional<std::string> str)
 {
-    metawriter_properties properties;
     if (str) {
-        std::string str_ = boost::algorithm::erase_all_copy(*str, " ");
-        boost::split(properties, str_, boost::is_any_of(","), boost::token_compress_on);
+        boost::split(*this, *str, boost::is_any_of(", "), boost::token_compress_on);
     }
-    return properties;
 }
 };

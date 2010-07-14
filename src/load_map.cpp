@@ -354,7 +354,7 @@ void map_parser::parse_metawriter(Map & map, ptree const & pt)
         if (type == "json") {
             string file = get_attr<string>(pt, "file");
             optional<string> properties = get_attr<string>(pt, "default-output");
-            writer = metawriter_ptr(new metawriter_json(metawriter_properties(metawriter::parse_properties(properties)), file));
+            writer = metawriter_ptr(new metawriter_json(properties, file));
         } else {
             throw config_error(string("Unknown type '") + type + "'");
         }
@@ -705,7 +705,7 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, ptree cons
     optional<std::string> writer =  get_opt_attr<string>(pt, "meta-writer");
     if (!writer) return;
     optional<std::string> output =  get_opt_attr<string>(pt, "meta-output");
-    sym.add_metawriter(*writer, metawriter::parse_properties(output));
+    sym.add_metawriter(*writer, output);
 }
 
 void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )

@@ -41,7 +41,14 @@
 namespace mapnik {
 
 /** All properties to be output by a metawriter. */
-typedef std::set<std::string> metawriter_properties;
+class metawriter_properties : public std::set<std::string>
+{
+    public:
+        metawriter_properties(boost::optional<std::string> str);
+        metawriter_properties() {};
+        template <class InputIterator> metawriter_properties(
+                InputIterator first, InputIterator last) : std::set<std::string>(first, last) {};
+};
 
 /** Abstract baseclass for all metawriter classes. */
 class metawriter
@@ -62,7 +69,6 @@ class metawriter
                              metawriter_properties const& properties = metawriter_properties())=0;
         virtual void start() {};
         virtual void stop() {};
-        static metawriter_properties parse_properties(boost::optional<std::string> str);
     protected:
         metawriter_properties dflt_properties_;
 };
