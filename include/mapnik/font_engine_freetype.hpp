@@ -45,7 +45,9 @@ extern "C"
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
+#endif
 
 // stl
 #include <string>
@@ -351,7 +353,9 @@ public:
     freetype_engine();
 private:
     FT_Library library_;
+#ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
+#endif
     static std::map<std::string,std::string> name2file_;
 };
 
