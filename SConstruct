@@ -781,7 +781,6 @@ if not preconfigured:
             env.Append(CXXFLAGS = '-DHAVE_LIBXML2')
             
     if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
-        env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
         env['HAS_CAIRO'] = True
     else:
         env['SKIPPED_DEPS'].extend(['cairo','cairomm'])
@@ -931,7 +930,6 @@ if not preconfigured:
             env['MISSING_DEPS'].append('boost python')
 
         if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
-            env.ParseConfig('pkg-config --cflags pycairo')
             env['HAS_PYCAIRO'] = True
         else:
             env['SKIPPED_DEPS'].extend(['pycairo'])

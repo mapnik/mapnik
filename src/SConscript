@@ -40,7 +40,8 @@ libraries = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'
 
 if env['HAS_CAIRO']:
     # add cairo and cairomm-1.0 to libs
-    libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
+    libraries.append('cairomm-1.0')
+    libraries.append('cairo')
 
 if env['XMLPARSER'] == 'libxml2':
     libraries.append('xml2')
@@ -146,9 +147,10 @@ if True : # agg backend
     """ 
         )
 
-if 'cairo' in env['LIBS']:
+if env['HAS_CAIRO']:
     env2 = env.Clone()
     env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    env2.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
     fixup = ['cairo_renderer.cpp','graphics.cpp','image_util.cpp']
     for cpp in fixup:
         if cpp in source:

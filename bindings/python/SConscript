@@ -49,7 +49,8 @@ if env['PLATFORM'] == 'Darwin':
     if env['THREADING'] == 'multi':
         libraries.append('boost_thread%s' % env['BOOST_APPEND'])
     if env['HAS_CAIRO']:
-        libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
+        libraries.append('cairomm-1.0')
+        libraries.append('cairo')
 
     ##### Python linking on OS X is tricky ### 
     # Confounding problems are:
@@ -144,14 +145,18 @@ if env['SVN_REVISION']:
     sources.remove('mapnik_python.cpp')
     env2 = env.Clone()
     env2.Append(CCFLAGS='-DSVN_REVISION=%s' % env['SVN_REVISION'])
-    if env['HAS_CAIRO']:
-        env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
-    if env['HAS_PYCAIRO']:
-        env2.Append(CXXFLAGS = '-DHAVE_PYCAIRO')    
+    if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
+        if env['HAS_CAIRO']:
+            env2.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
+            env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
+        if env['HAS_PYCAIRO']:
+            env2.ParseConfig('pkg-config --cflags pycairo')
+            env2.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
     sources.insert(0,env2.SharedObject('mapnik_python.cpp'))
 
 if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
     env2 = env.Clone()
+    env2.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
     fixup = ['mapnik_image.cpp','python_cairo.cpp']
     for cpp in fixup:
         if cpp in sources:
