@@ -43,12 +43,12 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
-    
-cxx_flags = env['CXXFLAGS']
-if env['SHAPE_MEMORY_MAPPED_FILE']:
-    cxx_flags.append('-DSHAPE_MEMORY_MAPPED_FILE')
 
-shape_inputdriver = env.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, CXXFLAGS=cxx_flags)
+env2 = env.Clone()    
+if env['SHAPE_MEMORY_MAPPED_FILE']:
+    env2.Append(CXXFLAGS = '-DSHAPE_MEMORY_MAPPED_FILE')
+
+shape_inputdriver = env2.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries)
 
 env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', shape_inputdriver)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')
