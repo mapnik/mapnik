@@ -322,6 +322,7 @@ pickle_store = [# Scons internal variables
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
         'HAS_BOOST_SYSTEM',
+        'SVN_REVISION'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -981,8 +982,7 @@ if not preconfigured:
         if not svn_version == 'exported':
             pattern = r'(\d+)(.*)'
             try:
-                rev = re.match(pattern,svn_version).groups()[0]
-                common_cxx_flags += '-DSVN_REVISION=%s ' % rev
+                env['SVN_REVISION'] = re.match(pattern,svn_version).groups()[0]
             except: pass
             
         # Mac OSX (Darwin) special settings
@@ -1073,7 +1073,13 @@ if not preconfigured:
                 env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_SITE_PACKAGES']
                
             majver, minver = env['PYTHON_VERSION'].split('.')
-        
+
+            # TODO - this needs to be moved up... 
+            env.AppendUnique(CPPPATH = env['PYTHON_INCLUDES']) 
+            if not conf.CheckHeader(header='Python.h',language='C'): 
+                color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION']) 
+                env['MISSING_DEPS'].append('python %s development headers' % env['PYTHON_VERSION'])        
+
             if (int(majver), int(minver)) < (2, 2):
                 color_print(1,"Python version 2.2 or greater required")
                 Exit(1)

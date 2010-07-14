@@ -133,8 +133,16 @@ ogcserver_files = glob.glob('mapnik/ogcserver/*.py')
 ogcserver_module = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik/ogcserver', ogcserver_files)
 env.Alias(target='install', source=ogcserver_module)
 
+# install the shared object beside the module directory
+sources = glob.glob('*.cpp')
+
+if env.get('SVN_REVISION'):
+    sources.remove('mapnik_python.cpp')
+    env2 = env.Clone();
+    env2.Append(CCFLAGS='-DSVN_REVISION=%s' % env['SVN_REVISION'])
+    sources.insert(0,env2.Object('mapnik_python.cpp'))
 
 # install the shared object beside the module directory
-_mapnik = env.LoadableModule('mapnik/_mapnik', glob.glob('*.cpp'), LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
+_mapnik = env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
 pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik',_mapnik)
 env.Alias(target='install',source=pymapniklib)
