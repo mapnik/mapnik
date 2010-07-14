@@ -32,6 +32,7 @@
 
 namespace mapnik
 {
+
 point_symbolizer::point_symbolizer()
     : symbolizer_with_image(path_expression_ptr(new path_expression)), // FIXME
       symbolizer_base(),

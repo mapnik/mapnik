@@ -34,19 +34,23 @@
 
 namespace mapnik
 {
-struct MAPNIK_DECL raster_symbolizer : public symbolizer_base {
-    explicit raster_symbolizer()
-        : mode_("normal"),
+struct MAPNIK_DECL raster_symbolizer : public symbolizer_base 
+{
+    
+    raster_symbolizer()
+        : symbolizer_base(),
+        mode_("normal"),
         scaling_("fast"),
         opacity_(1.0),
         colorizer_() {}
 
-    raster_symbolizer(const raster_symbolizer &rs)
-        : mode_(rs.get_mode()),
-        scaling_(rs.get_scaling()),
-        opacity_(rs.get_opacity()),
-        colorizer_(rs.colorizer_) {}
-
+    raster_symbolizer(const raster_symbolizer &rhs)
+        : symbolizer_base(rhs),
+        mode_(rhs.get_mode()),
+        scaling_(rhs.get_scaling()),
+        opacity_(rhs.get_opacity()),
+        colorizer_(rhs.colorizer_) {}
+    
     std::string const& get_mode() const
     {
         return mode_;
