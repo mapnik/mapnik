@@ -105,12 +105,22 @@ namespace mapnik
 #ifdef MAPNIK_DEBUG
                std::clog<<"borrow "<<(*itr).get()<<"\n";
 #endif
+            if ((*itr)->isOK())
+            {
                usedPool_.push_back(*itr);
-               itr=unusedPool_.erase(itr);
+                unusedPool_.erase(itr);
                return usedPool_[usedPool_.size()-1];
             }
-            else if (unusedPool_.size() < maxSize_)
+            else
             {
+#ifdef MAPNIK_DEBUG
+                std::clog<<"bad connection (erase)" << (*itr).get()<<"\n";
+#endif 
+                unusedPool_.erase(itr);
+            }
+        }
+        if (unusedPool_.size() < maxSize_)
+        {
                HolderType conn(creator_());
                if (conn->isOK())
                {

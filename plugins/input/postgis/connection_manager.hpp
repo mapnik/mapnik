@@ -51,12 +51,14 @@ public:
                         boost::optional<string> const& port,
                         boost::optional<string> const& dbname,
                         boost::optional<string> const& user,
-                        boost::optional<string> const& pass)
+                      boost::optional<string> const& pass,
+                      boost::optional<string> const& connect_timeout)
          : host_(host),
            port_(port),
            dbname_(dbname),
            user_(user),
-           pass_(pass) {}
+          pass_(pass),
+          connect_timeout_(connect_timeout) {}
       
       T* operator()() const
       {
@@ -76,7 +78,8 @@ public:
          if (dbname_ && (*dbname_).size()) connect_str += " dbname=" + *dbname_;
          if (user_   && (*user_).size()) connect_str += " user=" + *user_;
          if (pass_   && (*pass_).size()) connect_str += " password=" + *pass_;
-         connect_str += " connect_timeout=4"; // todo: set by client (param)
+        if (connect_timeout_ && (*connect_timeout_).size()) 
+            connect_str +=" connect_timeout=" + *connect_timeout_;
          return connect_str;
       }
       
@@ -86,7 +89,7 @@ private:
       boost::optional<string> dbname_;
       boost::optional<string> user_;
       boost::optional<string> pass_;
-
+    boost::optional<string> connect_timeout_;
 };
 
 class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
