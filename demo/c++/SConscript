@@ -36,7 +36,7 @@ boost_thread  = 'boost_thread%s' % env['BOOST_APPEND']
 
 libraries =  [boost_thread,'mapnik']
 
-if '-DHAVE_CAIRO' in env['CXXFLAGS']:
+if env['HAS_CAIRO'] in env['CXXFLAGS']:
     # add cairo and cairomm-1.0 to libs
     libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
 
