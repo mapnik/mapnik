@@ -143,7 +143,7 @@ if env.get('SVN_REVISION'):
     sources.remove('mapnik_python.cpp')
     env2 = env.Clone();
     env2.Append(CCFLAGS='-DSVN_REVISION=%s' % env['SVN_REVISION'])
-    sources.insert(0,env2.Object('mapnik_python.cpp'))
+    sources.insert(0,env2.SharedObject('mapnik_python.cpp'))
 
 _mapnik = env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
 pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik2',_mapnik)
