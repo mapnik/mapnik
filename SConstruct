@@ -724,6 +724,8 @@ if not preconfigured:
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
+    env['HAS_CAIRO'] = False
+    env['HAS_PYCAIRO'] = False
     
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
