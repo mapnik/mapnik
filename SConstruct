@@ -331,7 +331,9 @@ pickle_store = [# Scons internal variables
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
         'HAS_BOOST_SYSTEM',
-        'SVN_REVISION'
+        'SVN_REVISION',
+        'HAS_CAIRO',
+        'HAS_PYCAIRO'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -778,7 +780,7 @@ if not preconfigured:
             
     if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
         env.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
-        env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+        env['HAS_CAIRO'] = True
     else:
         env['SKIPPED_DEPS'].extend(['cairo','cairomm'])
 
@@ -928,7 +930,7 @@ if not preconfigured:
 
         if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
             env.ParseConfig('pkg-config --cflags pycairo')
-            env.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
+            env['HAS_PYCAIRO'] = True
         else:
             env['SKIPPED_DEPS'].extend(['pycairo'])
              

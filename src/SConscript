@@ -38,7 +38,7 @@ regex = 'boost_regex%s' % env['BOOST_APPEND']
 
 libraries = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,regex]
 
-if '-DHAVE_CAIRO' in env['CXXFLAGS']:
+if env['HAS_CAIRO']:
     # add cairo and cairomm-1.0 to libs
     libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
 
@@ -72,9 +72,9 @@ else: # Linux and others
 
 source = Split(
     """
+    color.cpp
     datasource_cache.cpp
     box2d.cpp
-    color.cpp
     expression_node.cpp
     expression_string.cpp
     filter_factory.cpp
@@ -116,6 +116,7 @@ source = Split(
     """   
     )
 
+
 if env['JPEG']:
     source += Split(
         """
@@ -146,10 +147,14 @@ if True : # agg backend
         )
 
 if 'cairo' in env['LIBS']:
-    source += Split(
-        """
-        cairo_renderer.cpp
-        """)
+    env2 = env.Clone()
+    env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    fixup = ['cairo_renderer.cpp','graphics.cpp','image_util.cpp']
+    for cpp in fixup:
+        if cpp in source:
+            source.remove(cpp)
+    for cpp in fixup:
+        source.insert(0,env2.SharedObject(cpp))
 
 if env['XMLPARSER'] == 'tinyxml':
     source += Split(
@@ -164,7 +169,6 @@ elif env['XMLPARSER'] == 'libxml2':
         """
         libxml2_loader.cpp
         """)
-
 
 mapnik = env.SharedLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
 if env['PLATFORM'] != 'Darwin':
@@ -193,4 +197,5 @@ else:
     env.Alias(target='install', source=env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'], mapnik))
 
 includes = glob.glob('../include/mapnik/*.hpp')
+        
 env.Alias(target='install', source=env.Install(install_prefix+'/include/mapnik', includes))
