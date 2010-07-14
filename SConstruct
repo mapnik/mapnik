@@ -331,6 +331,7 @@ pickle_store = [# Scons internal variables
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
         'HAS_BOOST_SYSTEM',
+        'SVN_REVISION'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -985,19 +986,12 @@ if not preconfigured:
         else :
             common_cxx_flags = '-D%s ' % env['PLATFORM'].upper()
 
-        
-        
-        if not env['FAST']:
-            # if we are in SCons FAST mode then make to 
-            # to avoid unnessary re-compiles due to changing
-            # CFLAGS when revision number increases 
-            svn_version = call('svnversion')
-            if not svn_version == 'exported':
-                pattern = r'(\d+)(.*)'
-                try:
-                    rev = re.match(pattern,svn_version).groups()[0]
-                    common_cxx_flags += '-DSVN_REVISION=%s ' % rev
-                except: pass
+        svn_version = call('svnversion')
+        if not svn_version == 'exported':
+            pattern = r'(\d+)(.*)'
+            try:
+                env['SVN_REVISION'] = re.match(pattern,svn_version).groups()[0]
+            except: pass
             
         # Mac OSX (Darwin) special settings
         if env['PLATFORM'] == 'Darwin':
