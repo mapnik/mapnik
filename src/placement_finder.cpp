@@ -36,8 +36,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/tuple/tuple.hpp>
+#ifdef MAPNIK_THREADSAFE
+#include <boost/thread/mutex.hpp>
+#endif
 
 //stl
 #include <string>
