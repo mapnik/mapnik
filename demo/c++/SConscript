@@ -38,7 +38,8 @@ libraries =  [boost_thread,'mapnik']
 
 if env['HAS_CAIRO'] in env['CXXFLAGS']:
     # add cairo and cairomm-1.0 to libs
-    libraries.append([lib for lib in env['LIBS'] if lib.startswith('cairo')])
+    libraries.append('cairomm-1.0')
+    libraries.append('cairo')
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])
