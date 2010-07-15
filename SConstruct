@@ -728,6 +728,7 @@ if not preconfigured:
     env['HAS_CAIRO'] = False
     env['HAS_PYCAIRO'] = False
     env['HAS_LIBXML2'] = False
+    env['SVN_REVISION'] = None
     
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS

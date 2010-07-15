@@ -119,6 +119,9 @@ exp =  r"%s{2,}" % os.sep
 # Note: we use prefix rather than install_prefix here since install_prefix is for package building
 # and we intend for python to look to the standard prefix location to find the fonts and plugins
 mapnik_lib_path  = re.sub(exp,os.sep, prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
+
+if not os.path.exists('mapnik'):
+    os.mkdir('mapnik')
 file('mapnik/paths.py','w').write(paths % (mapnik_lib_path))
 
 try:
