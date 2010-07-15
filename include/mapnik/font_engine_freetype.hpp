@@ -310,7 +310,9 @@ namespace mapnik
     class MAPNIK_DECL freetype_engine
     {
       public:
+    static bool is_font_file(std::string const& file_name);
         static bool register_font(std::string const& file_name);
+    static bool register_fonts(std::string const& dir, bool recurse = false);
         static std::vector<std::string> face_names ();
         face_ptr create_face(std::string const& family_name);
         virtual ~freetype_engine();
