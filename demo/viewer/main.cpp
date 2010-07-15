@@ -29,36 +29,11 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
-bool is_font_file (std::string const& filename)
-{
-    return boost::algorithm::ends_with(filename,std::string(".ttf")) ||
-        boost::algorithm::ends_with(filename,std::string(".dfont")) ||
-        boost::algorithm::ends_with(filename,std::string(".ttc"));
-}
-
-void register_fonts(std::string const& dir)
-{
-    using mapnik::freetype_engine;
-    boost::filesystem::path path(dir);
-    boost::filesystem::directory_iterator end_itr;      
-    
-    if (boost::filesystem::exists(path) && boost::filesystem::is_directory(path))
-    {
-        for (boost::filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
-        {
-            if (!boost::filesystem::is_directory(*itr) && is_font_file(itr->path().leaf())) 
-            {
-                std::cout << "registering font " << itr->string() << "\n";
-                freetype_engine::register_font(itr->string());
-            }
-        }
-    }
-        
-}
 
 int main( int argc, char **argv )
 {
     using mapnik::datasource_cache;
+    using mapnik::freetype_engine;
        
     QCoreApplication::setOrganizationName("Mapnik");
     QCoreApplication::setOrganizationDomain("mapnik.org");
@@ -68,7 +43,7 @@ int main( int argc, char **argv )
     
     // register input plug-ins
     QString plugins_dir = settings.value("mapnik/plugins_dir",
-                                         QVariant("/opt/mapnik/lib/mapnik2/input/")).toString();
+                                         QVariant("/usr/local/lib/mapnik2/input/")).toString();
     datasource_cache::instance()->register_datasources(plugins_dir.toStdString());
     // register fonts
     int count = settings.beginReadArray("mapnik/fonts");
@@ -76,7 +51,7 @@ int main( int argc, char **argv )
     {
         settings.setArrayIndex(index);
         QString font_dir = settings.value("dir").toString();
-        register_fonts(font_dir.toStdString());
+        freetype_engine::register_fonts(font_dir.toStdString());
     }
     settings.endArray();
     
