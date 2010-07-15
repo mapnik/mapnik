@@ -1218,3 +1218,6 @@ if not HELP_REQUESTED:
     
     # Configure fonts and if requested install the bundled DejaVu fonts
     SConscript('fonts/SConscript')
+    
+    # build C++ tests
+    SConscript('tests/cpp_tests/SConscript')

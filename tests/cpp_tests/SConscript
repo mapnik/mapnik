@@ -1,0 +1,20 @@
+import os
+import glob
+
+Import ('env')
+
+headers = env['CPPPATH'] 
+
+boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
+boost_system = 'boost_system%s' % env['BOOST_APPEND']
+
+libraries =  [boost_system, boost_filesystem, 'mapnik2']
+
+if env['PLATFORM'] == 'Darwin':
+    libraries.append(env['ICU_LIB_NAME'])
+
+if env['HAS_BOOST_SYSTEM']:
+    libraries.append(boost_system)
+
+for cpp_test in glob.glob('*_test.cpp'):
+    env.Program(cpp_test.replace('.cpp',''), [cpp_test], CPPPATH=headers, LIBS=libraries)
