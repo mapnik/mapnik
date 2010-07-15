@@ -333,7 +333,8 @@ pickle_store = [# Scons internal variables
         'HAS_BOOST_SYSTEM',
         'SVN_REVISION',
         'HAS_CAIRO',
-        'HAS_PYCAIRO'
+        'HAS_PYCAIRO',
+        'HAS_LIBXML2'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -726,6 +727,7 @@ if not preconfigured:
     env['SKIPPED_DEPS'] = []
     env['HAS_CAIRO'] = False
     env['HAS_PYCAIRO'] = False
+    env['HAS_LIBXML2'] = False
     
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
@@ -778,7 +780,7 @@ if not preconfigured:
         env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
     elif env['XMLPARSER'] == 'libxml2':
         if conf.parse_config('XML2_CONFIG'):
-            env.Append(CXXFLAGS = '-DHAVE_LIBXML2')
+            env['HAS_LIBXML2'] = True
             
     if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
         env['HAS_CAIRO'] = True
@@ -1084,11 +1086,18 @@ if not preconfigured:
                
             majver, minver = env['PYTHON_VERSION'].split('.')
  
-            # TODO - this needs to be moved up...
+            # we don't want the includes it in the main environment...
+            # as they are later set in the python SConscript
+            # ugly hack needed until we have env specific conf
+            backup = env.Clone().Dictionary()
             env.AppendUnique(CPPPATH = env['PYTHON_INCLUDES'])
+            
             if not conf.CheckHeader(header='Python.h',language='C'):
                 color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION'])
+                env.Replace(**backup)
                 env['MISSING_DEPS'].append('python %s development headers' % env['PYTHON_VERSION'])
+            else:
+                env.Replace(**backup)
        
             if (int(majver), int(minver)) < (2, 2):
                 color_print(1,"Python version 2.2 or greater required")

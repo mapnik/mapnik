@@ -150,12 +150,11 @@ if True : # agg backend
 if env['HAS_CAIRO']:
     env2 = env.Clone()
     env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
-    env2.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
+    env2.ParseConfig('pkg-config --libs --cflags cairomm-1.0')     
     fixup = ['cairo_renderer.cpp','graphics.cpp','image_util.cpp']
     for cpp in fixup:
         if cpp in source:
             source.remove(cpp)
-    for cpp in fixup:
         source.insert(0,env2.SharedObject(cpp))
 
 if env['XMLPARSER'] == 'tinyxml':
@@ -166,11 +165,18 @@ if env['XMLPARSER'] == 'tinyxml':
         ../tinyxml/tinyxmlerror.cpp
         ../tinyxml/tinyxmlparser.cpp
         """)
-elif env['XMLPARSER'] == 'libxml2':
+elif env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     source += Split(
         """
         libxml2_loader.cpp
         """)
+    env2 = env.Clone()
+    env2.Append(CXXFLAGS = '-DHAVE_LIBXML2')
+    fixup = ['load_map.cpp','libxml2_loader.cpp']
+    for cpp in fixup:
+        if cpp in source:
+            source.remove(cpp)
+        source.insert(0,env2.SharedObject(cpp))
 
 mapnik = env.SharedLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
 if env['PLATFORM'] != 'Darwin':

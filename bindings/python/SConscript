@@ -30,7 +30,6 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 
 linkflags = ''
 libraries = ['mapnik2','png','jpeg']
-headers = [env['PYTHON_INCLUDES']] + env['CPPPATH']
 
 if env['BOOST_PYTHON_LIB']:
     if os.path.sep in env['BOOST_PYTHON_LIB']:
@@ -141,9 +140,12 @@ env.Alias(target='install', source=ogcserver_module)
 sources = glob.glob('*.cpp')
 
 
+py_env = env.Clone()
+py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
+
 if env['SVN_REVISION']:
     sources.remove('mapnik_python.cpp')
-    env2 = env.Clone()
+    env2 = py_env.Clone()
     env2.Append(CCFLAGS='-DSVN_REVISION=%s' % env['SVN_REVISION'])
     if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
         if env['HAS_CAIRO']:
@@ -155,7 +157,7 @@ if env['SVN_REVISION']:
     sources.insert(0,env2.SharedObject('mapnik_python.cpp'))
 
 if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
-    env2 = env.Clone()
+    env2 = py_env.Clone()
     env2.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
     fixup = ['mapnik_image.cpp','python_cairo.cpp']
     for cpp in fixup:
@@ -168,6 +170,8 @@ if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
     for cpp in fixup:
         sources.insert(0,env2.SharedObject(cpp))
 
-_mapnik = env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so', CPPPATH=headers,LINKFLAGS=linkflags)
+
+_mapnik = py_env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
+
 pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik2',_mapnik)
-env.Alias(target='install',source=pymapniklib)
+py_env.Alias(target='install',source=pymapniklib)
