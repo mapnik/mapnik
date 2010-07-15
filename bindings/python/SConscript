@@ -169,6 +169,7 @@ if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
     if env['HAS_CAIRO']:
         env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
     if env['HAS_PYCAIRO']:
+        env2.ParseConfig('pkg-config --cflags pycairo')
         env2.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
     for cpp in fixup:
         sources.insert(0,env2.SharedObject(cpp))
