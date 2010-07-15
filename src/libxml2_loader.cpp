@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#ifdef HAVE_LIBXML2
+
 #include <mapnik/libxml2_loader.hpp>
 
 #include <mapnik/config_error.hpp>
@@ -222,3 +224,5 @@ namespace mapnik
     }
 
 } // end of namespace mapnik
+
+#endif

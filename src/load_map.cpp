@@ -34,7 +34,10 @@
 #include <mapnik/font_set.hpp>
 
 #include <mapnik/ptree_helpers.hpp>
+
+#ifdef HAVE_LIBXML2
 #include <mapnik/libxml2_loader.hpp>
+#endif
 
 // boost
 #include <boost/optional.hpp>
