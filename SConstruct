@@ -1213,3 +1213,5 @@ if not HELP_REQUESTED:
     
     # Configure fonts and if requested install the bundled DejaVu fonts
     SConscript('fonts/SConscript')
+    
+    SConscript('utils/server2/SConscript')
