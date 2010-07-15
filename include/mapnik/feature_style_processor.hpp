@@ -35,6 +35,7 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
+#include <mapnik/memory_datasource.hpp>
 
 #ifdef MAPNIK_DEBUG
 //#include <mapnik/wall_clock_timer.hpp>
@@ -177,7 +178,10 @@ private:
                
             std::vector<std::string> const& style_names = lay.styles();
             std::vector<std::string>::const_iterator stylesIter = style_names.begin();
-            std::vector<std::string>::const_iterator stylesEnd = style_names.end(); 
+            std::vector<std::string>::const_iterator stylesEnd = style_names.end();
+            memory_datasource cache;
+            bool cache_features = style_names.size()>1?true:false;
+            bool first = true;
             for (;stylesIter != stylesEnd; ++stylesIter)
             {
                 std::set<std::string> names;
@@ -256,13 +260,28 @@ private:
                 }
                 if (active_rules)
                 {
-                    featureset_ptr fs=ds->features(q);
+                    featureset_ptr fs;
+                    if (first)
+                    {
+                        first = false;
+                        fs = ds->features(q);
+                    }
+                    else
+                    {
+                        fs = cache.features(q);
+                    }
                     if (fs)
                     {               
                         feature_ptr feature;
                         while ((feature = fs->next()))
                         {                  
                             bool do_else=true;              
+                            
+                            if (cache_features)
+                            {
+                                cache.push(feature);
+                            }
+                            
                             std::vector<rule_type*>::const_iterator itr=if_rules.begin();
                             std::vector<rule_type*>::const_iterator end=if_rules.end();
                             for (;itr != end;++itr)
@@ -303,6 +322,7 @@ private:
                                 }
                             }     
                         }
+                        cache_features = false;
                     }
                 }
             }               
