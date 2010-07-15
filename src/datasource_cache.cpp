@@ -61,6 +61,7 @@ datasource_cache::~datasource_cache()
 
 std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
 bool datasource_cache::registered_=false;
+std::vector<std::string> datasource_cache::plugin_directories_;
     
 datasource_ptr datasource_cache::create(const parameters& params) 
 {
@@ -76,7 +77,7 @@ datasource_ptr datasource_cache::create(const parameters& params)
     if ( itr == plugins_.end() )
     {
         throw config_error(string("Could not create datasource. No plugin ") +
-                           "found for type '" + * type + "'");
+                           "found for type '" + * type + "' (searched in: " + plugin_directories() + ")");
     }
     if ( ! itr->second->handle())
     {
@@ -114,6 +115,11 @@ bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
                                      (new PluginInfo(type,module)))).second;     
 }
 
+std::string datasource_cache::plugin_directories()
+{
+    return boost::algorithm::join(plugin_directories_,", ");
+}
+
 std::vector<std::string> datasource_cache::plugin_names ()
 {
     std::vector<std::string> names;
@@ -132,6 +138,7 @@ void datasource_cache::register_datasources(const std::string& str)
                             mapnik::CreateStatic>::mutex_);
 #endif
     filesystem::path path(str);
+    plugin_directories_.push_back(str);
     filesystem::directory_iterator end_itr;
  
 

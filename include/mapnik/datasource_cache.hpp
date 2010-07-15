@@ -48,8 +48,10 @@ private:
     static std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
     static bool registered_;
     static bool insert(const std::string&  name,const lt_dlhandle module);
+    static std::vector<std::string> plugin_directories_;
 public:
-    static std::vector<std::string> plugin_names ();
+    static std::vector<std::string> plugin_names();
+    static std::string plugin_directories();    
     static void register_datasources(const std::string& path);
     static boost::shared_ptr<datasource> create(parameters const& params);
 };
