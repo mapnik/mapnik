@@ -1150,6 +1150,11 @@ if not HELP_REQUESTED:
     # export env so it is available in Sconscript files
     Export('env')
     
+    # clear the '_CPPDEFFLAGS' variable
+    # for unknown reasons this variable puts -DNone
+    # in the g++ args prompting unnecessary recompiles
+    env['_CPPDEFFLAGS'] = None
+
     
     if env['FAST']:
         # caching is 'auto' by default in SCons
