@@ -613,11 +613,11 @@ def register_plugins(path=inputpluginspath):
     """Register plugins located by specified path"""
     DatasourceCache.instance().register_datasources(path)
 
-def register_fonts(path=fontscollectionpath):
+def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont']):
     """Recursively register fonts using path argument as base directory"""
     for dirpath, _, filenames in os.walk(path):
         for filename in filenames:
-            if os.path.splitext(filename)[1] == '.ttf':
+            if os.path.splitext(filename)[1] in valid_extensions:
                 FontEngine.instance().register_font(os.path.join(dirpath, filename))
 
 # auto-register known plugins and fonts
