@@ -8,7 +8,7 @@ headers = env['CPPPATH']
 boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
 
-libraries =  [boost_system, boost_filesystem, 'mapnik2']
+libraries =  [boost_system, boost_filesystem, 'mapnik']
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])
