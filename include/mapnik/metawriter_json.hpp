@@ -28,7 +28,7 @@
 #include <mapnik/metawriter.hpp>
 
 // STL
-#include <fstream>
+#include <ostream>
 
 namespace mapnik {
 /** JSON writer. */
@@ -36,6 +36,7 @@ class metawriter_json : public metawriter, private boost::noncopyable
 {
     public:
         metawriter_json(metawriter_properties dflt_properties, std::string fn);
+        metawriter_json(metawriter_properties dflt_properties, std::ostream);
         ~metawriter_json();
         virtual void add_box(box2d<double> box, Feature const &feature,
                              proj_transform const& prj_trans,
@@ -44,7 +45,7 @@ class metawriter_json : public metawriter, private boost::noncopyable
         virtual void start();
         virtual void stop();
     private:
-        std::fstream f;
+        std::ostream *f;
         std::string fn_;
         int count;
 };

@@ -32,6 +32,7 @@
 // STL
 #include <iomanip>
 #include <cstdio>
+#include <fstream>
 
 namespace mapnik {
 
@@ -48,21 +49,27 @@ metawriter_json::~metawriter_json()
 
 void metawriter_json::start()
 {
-    if (f.is_open())
+    if (!fn_.empty())
     {
-        std::cerr << "ERROR: GeoJSON metawriter is already active!\n";
+        if (f)
+        {
+            std::cerr << "ERROR: GeoJSON metawriter is already active!\n";
+            return;
+        }
+        f = new std::fstream(fn_.c_str(), std::fstream::out | std::fstream::trunc);
+        if (f->fail()) perror((std::string("Failed to open file ") + fn_).c_str());
     }
-    f.open(fn_.c_str(), std::fstream::out | std::fstream::trunc);
-    if (f.fail()) perror((std::string("Failed to open file ") + fn_).c_str());
-    f << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
+    assert(f);
+    *f << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
 }
 
 void metawriter_json::stop()
 {
-    if (f.is_open())
+    if (f) *f << " ] }\n";
+    if (f && !fn_.empty())
     {
-        f << " ] }\n";
-        f.close();
+        dynamic_cast<std::fstream *>(f)->close();
+        f = 0;
     }
 }
 
@@ -105,8 +112,8 @@ void metawriter_json::add_box(box2d<double> box, Feature const &feature,
     double maxx = box.maxx();
     double maxy = box.maxy();
 
-    if (count++) f << ",\n";
-    f << std::fixed << std::setprecision(8) << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"Polygon\",\n    \"coordinates\": [ [ [" <<
+    if (count++) *f << ",\n";
+    *f << std::fixed << std::setprecision(8) << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"Polygon\",\n    \"coordinates\": [ [ [" <<
             minx << ", " << miny << "], [" <<
             maxx << ", " << miny << "], [" <<
             maxx << ", " << maxy << "], [" <<
@@ -123,11 +130,11 @@ void metawriter_json::add_box(box2d<double> box, Feature const &feature,
             //Property found
             text = boost::replace_all_copy(boost::replace_all_copy(itr->second.to_string(), "\\", "\\\\"), "\"", "\\\"");
         }
-        if (i++) f << ",";
-        f << "\n    \"" << p << "\":\"" << text << "\"";
+        if (i++) *f << ",";
+        *f << "\n    \"" << p << "\":\"" << text << "\"";
     }
 
-    f << "\n} }";
+    *f << "\n} }";
 }
 
 metawriter_properties::metawriter_properties(boost::optional<std::string> str)
