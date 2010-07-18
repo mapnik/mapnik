@@ -61,6 +61,24 @@ def call(cmd, silent=False):
     elif not silent:
         color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
 
+# http://www.scons.org/wiki/InstallTargets
+def create_uninstall_target(env, path, is_glob=False):
+    if is_glob:
+        all_files = Glob(path,strings=True)
+        for filei in all_files:
+            env.Command( "uninstall-"+filei, filei,
+            [
+            Delete("$SOURCE"),
+            ])
+            env.Alias("uninstall", "uninstall-"+filei)
+    else:
+        if os.path.exists(path):
+            env.Command( "uninstall-"+path, path,
+            [
+            Delete("$SOURCE"),
+            ])
+            env.Alias("uninstall", "uninstall-"+path)
+    
 def shortest_name(libs):
     name = '-'*200
     for lib in libs:
@@ -1155,8 +1173,16 @@ Help(opts.GenerateHelpText(env))
 
 #### Builds ####
 if not HELP_REQUESTED:
+
+    if 'uninstall' in COMMAND_LINE_TARGETS:
+        # dummy action in case there is nothing to uninstall, to avoid phony error..
+        env.Alias("uninstall", "")
+    env['create_uninstall_target'] = create_uninstall_target
+    
     # export env so it is available in Sconscript files
     Export('env')
+
+
     
     # clear the '_CPPDEFFLAGS' variable
     # for unknown reasons this variable puts -DNone
@@ -1204,6 +1230,13 @@ if not HELP_REQUESTED:
         elif not details['lib']:
             # build internal shape and raster plugins
             SConscript('plugins/input/%s/SConscript' % plugin)
+    
+    
+    # todo - generalize this path construction, also used in plugin SConscript...
+    plugin_dir = os.path.normpath(env['DESTDIR'] + '/' + env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
+    create_uninstall_target(env, plugin_dir + '/input' , False)
+    create_uninstall_target(env, plugin_dir + '/fonts' , False)
+    create_uninstall_target(env, plugin_dir, False)
     
     # Build the c++ rundemo app if requested
     if env['DEMO']:

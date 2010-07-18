@@ -50,5 +50,6 @@ if env['PLATFORM'] == 'Darwin':
 
 ogrindex = env.Program('ogrindex', source, CPPPATH=headers, LIBS=libraries)
 
-env.Install(install_prefix + '/bin', ogrindex)
-env.Alias('install', install_prefix + '/bin')
+if 'uninstall' not in COMMAND_LINE_TARGETS:
+    env.Install(install_prefix + '/bin', ogrindex)
+    env.Alias('install', install_prefix + '/bin')

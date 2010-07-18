@@ -69,6 +69,11 @@ shape_datasource::shape_datasource(const parameters &params)
        throw datasource_exception("shapefile '" + shape_name_ + ".shp' does not exist");
    }
 
+   if (boost::filesystem::is_directory(shape_name_ + ".shp"))
+   {
+       throw datasource_exception("shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
+   }
+
    try
    {  
       shape_io shape(shape_name_);

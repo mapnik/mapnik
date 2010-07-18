@@ -26,7 +26,7 @@ import os
 Import('env')
 
 prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
+target_path = env['PYTHON_INSTALL_LOCATION'] + '/mapnik2'
 
 linkflags = ''
 libraries = ['mapnik2','png','jpeg']
@@ -130,12 +130,12 @@ except: pass
 
 # install the core mapnik python files, including '__init__.py' and 'paths.py'
 init_files = glob.glob('mapnik/*.py')
-init_module = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik2', init_files)
+init_module = env.Install(target_path, init_files)
 env.Alias(target='install', source=init_module)
 
 # install the ogcserver module code
 ogcserver_files = glob.glob('mapnik/ogcserver/*.py')
-ogcserver_module = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik2/ogcserver', ogcserver_files)
+ogcserver_module = env.Install(target_path + '/ogcserver', ogcserver_files)
 env.Alias(target='install', source=ogcserver_module)
 
 
@@ -177,5 +177,8 @@ if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
 
 _mapnik = py_env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
 
-pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik2',_mapnik)
-py_env.Alias(target='install',source=pymapniklib)
+if 'uninstall' not in COMMAND_LINE_TARGETS:
+    pymapniklib = env.Install(target_path,_mapnik)
+    py_env.Alias(target='install',source=pymapniklib)
+
+env['create_uninstall_target'](env, target_path)
