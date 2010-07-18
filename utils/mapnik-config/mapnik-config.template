@@ -1,0 +1,99 @@
+usage()
+{
+    cat <<EOF
+Usage: mapnik-config [OPTION]
+
+Known values for OPTION are:
+
+  --prefix          display mapnik prefix [default $prefix]
+  --prefix=DIR      change mapnik prefix [default $prefix]
+  --exec-prefix=DIR change mapnik exec prefix [default $exec_prefix]
+  --libs            print library linking information
+  --cflags          print pre-processor and compiler flags
+  --fonts           print default fonts directory
+  --input-plugins   print default plugins directory
+  --help            display this help and exit
+  -v --version         output version information
+EOF
+
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+cflags=false
+libs=false
+
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    
+    --prefix=*)
+      prefix=$optarg
+      includedir=$prefix/include
+      libdir=$prefix/lib
+      ;;
+
+    --prefix)
+      echo $prefix
+      ;;
+
+    --exec-prefix=*)
+      exec_prefix=$optarg
+      libdir=$exec_prefix/lib
+      ;;
+
+    --exec-prefix)
+      echo $exec_prefix
+      ;;
+
+    -v)
+      echo $version
+      exit 0
+      ;;
+
+    --version)
+      echo $version
+      exit 0
+      ;;
+
+    --help)
+      usage 0
+      ;;
+
+    --fonts)
+      echo ${libdir}/mapnik2/fonts 
+      ;;
+
+    --plugins)
+      echo ${libdir}/mapnik2/input 
+      ;;
+      
+    --cflags)
+      echo -I${includedir} ${other_includes}
+      ;;
+
+#
+#    --modules)
+#       	echo 1
+#       	;;
+
+    --libs)
+      echo -L${libdir} -l${mapnik_libname} ${other_libs}
+      ;;
+
+    *)
+  usage
+  exit 1
+  ;;
+    esac
+    shift
+done
+
+exit 0

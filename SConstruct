@@ -1266,3 +1266,6 @@ if not HELP_REQUESTED:
     
     # build C++ tests
     SConscript('tests/cpp_tests/SConscript')
+
+    # install pkg-config script and mapnik-config script
+    SConscript('utils/mapnik-config/SConscript')
