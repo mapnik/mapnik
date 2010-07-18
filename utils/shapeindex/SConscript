@@ -49,5 +49,8 @@ if env['HAS_BOOST_SYSTEM']:
 
 shapeindex = env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries)
 
-env.Install(install_prefix + '/bin', shapeindex)
-env.Alias('install', install_prefix + '/bin')
+if 'uninstall' not in COMMAND_LINE_TARGETS:
+    env.Install(install_prefix + '/bin', shapeindex)
+    env.Alias('install', install_prefix + '/bin')
+
+env['create_uninstall_target'](env, install_prefix + '/bin/' + 'shapeindex')
