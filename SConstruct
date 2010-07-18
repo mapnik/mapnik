@@ -63,21 +63,22 @@ def call(cmd, silent=False):
 
 # http://www.scons.org/wiki/InstallTargets
 def create_uninstall_target(env, path, is_glob=False):
-    if is_glob:
-        all_files = Glob(path,strings=True)
-        for filei in all_files:
-            env.Command( "uninstall-"+filei, filei,
-            [
-            Delete("$SOURCE"),
-            ])
-            env.Alias("uninstall", "uninstall-"+filei)
-    else:
-        if os.path.exists(path):
-            env.Command( "uninstall-"+path, path,
-            [
-            Delete("$SOURCE"),
-            ])
-            env.Alias("uninstall", "uninstall-"+path)
+    if 'uninstall' in COMMAND_LINE_TARGETS:
+        if is_glob:
+            all_files = Glob(path,strings=True)
+            for filei in all_files:
+                env.Command( "uninstall-"+filei, filei,
+                [
+                Delete("$SOURCE"),
+                ])
+                env.Alias("uninstall", "uninstall-"+filei)
+        else:
+            if os.path.exists(path):
+                env.Command( "uninstall-"+path, path,
+                [
+                Delete("$SOURCE"),
+                ])
+                env.Alias("uninstall", "uninstall-"+path)
     
 def shortest_name(libs):
     name = '-'*200
@@ -337,6 +338,7 @@ pickle_store = [# Scons internal variables
         # Mapnik's SConstruct build variables
         'PLUGINS',
         'ABI_VERSION',
+        'MAPNIK_VERSION_STRING',
         'PLATFORM',
         'BOOST_ABI',
         'BOOST_APPEND',
@@ -1001,6 +1003,7 @@ if not preconfigured:
             env['ABI_VERSION'] = abi_fallback
         else:
             env['ABI_VERSION'] = abi
+        env['MAPNIK_VERSION_STRING'] = '.'.join(['%d' % i for i in env['ABI_VERSION']])
 
 
         # Common C++ flags.
