@@ -30,8 +30,9 @@
 
 namespace mapnik 
 {
-    template <typename T>
-    class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<T> >, 
+    // svg_renderer isn't a template class for now, because 
+    // I haven't devised an equivalent of image_32 for svg.
+    class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer>, 
 				     private boost::noncopyable
     {
 
@@ -77,7 +78,7 @@ namespace mapnik
 	void process(glyph_symbolizer const& sym,
 		     Feature const& feature,
 		     proj_transform const& prj_trans);
-    }	
+    };
 }
 
 #endif //SVG_RENDERER_HPP
