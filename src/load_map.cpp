@@ -170,7 +170,7 @@ void map_parser::parse_map( Map & map, ptree const & pt )
 
         try
         {
-            optional<color> bgcolor = get_opt_attr<color>(map_node, "bgcolor");
+            optional<color> bgcolor = get_opt_attr<color>(map_node, "background-color");
             if (bgcolor) 
             {
                 map.set_background( * bgcolor );

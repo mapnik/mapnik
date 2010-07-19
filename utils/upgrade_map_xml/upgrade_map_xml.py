@@ -46,6 +46,12 @@ if __name__ == "__main__":
     xml = sys.argv[1]
     tree = objectify.parse(xml)
     root = tree.getroot()
+    
+    # rename 'bgcolor' to 'background-color'
+    if root.attrib.get('bgcolor'):
+        root.attrib['background-color'] = root.attrib.get('bgcolor')
+        root.attrib.pop('bgcolor')
+    
     for style in root.Style:
         if len(style.Rule):
             for rule in style.Rule:

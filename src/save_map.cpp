@@ -702,7 +702,7 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     optional<color> const& c = map.background();
     if ( c )
     {
-        set_attr( map_node, "bgcolor", * c );
+        set_attr( map_node, "background-color", * c );
     }
 
     optional<std::string> const& image_filename = map.background_image();
