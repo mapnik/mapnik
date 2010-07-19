@@ -133,7 +133,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
             int h = (*bg_image)->height();
             if ( w > 0 && h > 0)
             {
-                // repeat background-image in both x,y
+                // repeat background-image both vertically and horizontally
                 unsigned x_steps = unsigned(std::ceil(width_/double(w)));
                 unsigned y_steps = unsigned(std::ceil(height_/double(h)));
                 for (unsigned x=0;x<x_steps;++x)
