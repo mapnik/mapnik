@@ -23,16 +23,13 @@
 
 // mapnik
 #include <mapnik/save_map.hpp>
-#include <mapnik/image_util.hpp>
+#include <mapnik/map.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
-#include <mapnik/path_expression_grammar.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
