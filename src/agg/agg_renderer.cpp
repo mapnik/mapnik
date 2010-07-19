@@ -120,8 +120,32 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       detector_(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size())),
       ras_ptr(new rasterizer)
 {
-    boost::optional<color> bg = m.background();
+    boost::optional<color> const& bg = m.background();
     if (bg) pixmap_.set_background(*bg);
+    
+    boost::optional<std::string> const& image_filename = m.background_image();
+    if (image_filename)
+    {
+        boost::optional<mapnik::image_ptr> bg_image = mapnik::image_cache::instance()->find(*image_filename,true);
+        if (bg_image)
+        {
+            int w = (*bg_image)->width();
+            int h = (*bg_image)->height();
+            if ( w > 0 && h > 0)
+            {
+                // repeat background-image in both x,y
+                unsigned x_steps = unsigned(std::ceil(width_/double(w)));
+                unsigned y_steps = unsigned(std::ceil(height_/double(h)));
+                for (unsigned x=0;x<x_steps;++x)
+                {
+                    for (unsigned y=0;y<y_steps;++y)
+                    {
+                        pixmap_.set_rectangle_alpha2(*(*bg_image), x*w, y*h, 1.0f);
+                    }
+                }
+            }
+        }
+    }
 #ifdef MAPNIK_DEBUG
     std::clog << "scale=" << m.scale() << "\n";
 #endif

@@ -74,6 +74,7 @@ private:
     std::string  srs_;
     int buffer_size_;
     boost::optional<color> background_;
+    boost::optional<std::string> background_image_;
     std::map<std::string,feature_type_style> styles_;
     std::map<std::string,metawriter_ptr> metawriters_;
     std::map<std::string,font_set> fontsets_;
@@ -299,13 +300,24 @@ public:
      *  @param c Background color.
      */
     void set_background(const color& c);
-
+    
     /*! \brief Get the map background color 
      *  @return Background color as boost::optional
      *  object
      */
     boost::optional<color> const& background() const;
-
+    
+    /*! \brief Set the map background image filename.
+     *  @param c Background image filename.
+     */
+    void set_background_image(std::string const& image_filename);
+    
+    /*! \brief Get the map background image
+     *  @return Background image path as std::string
+     *  object
+     */
+    boost::optional<std::string> const& background_image() const;
+    
     /*! \brief Set buffer size 
      *  @param buffer_size Buffer size in pixels.
      */

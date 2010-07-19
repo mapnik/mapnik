@@ -80,6 +80,7 @@ Map::Map(const Map& rhs)
       srs_(rhs.srs_),
       buffer_size_(rhs.buffer_size_),
       background_(rhs.background_),
+      background_image_(rhs.background_image_),
       styles_(rhs.styles_),
       metawriters_(rhs.metawriters_),
       layers_(rhs.layers_),
@@ -94,6 +95,7 @@ Map& Map::operator=(const Map& rhs)
     srs_=rhs.srs_;
     buffer_size_ = rhs.buffer_size_;
     background_=rhs.background_;
+    background_image_=rhs.background_image_;
     styles_=rhs.styles_;
     metawriters_ = rhs.metawriters_;
     layers_=rhs.layers_;
@@ -319,6 +321,16 @@ void Map::set_background(const color& c)
     background_ = c;
 }
    
+boost::optional<std::string> const& Map::background_image() const
+{
+    return background_image_;
+}
+   
+void Map::set_background_image(std::string const& image_filename)
+{
+    background_image_ = image_filename;
+}
+
 void Map::zoom(double factor)
 {
     coord2d center = currentExtent_.center();

@@ -171,10 +171,17 @@ void map_parser::parse_map( Map & map, ptree const & pt )
         try
         {
             optional<color> bgcolor = get_opt_attr<color>(map_node, "bgcolor");
-            if (bgcolor) {
+            if (bgcolor) 
+            {
                 map.set_background( * bgcolor );
             }
-
+            
+            optional<std::string> image_filename = get_opt_attr<string>(map_node, "background-image");
+            if (image_filename)
+            {                
+                map.set_background_image(*image_filename);
+            }
+            
             map.set_srs( get_attr(map_node, "srs", map.srs() ));
 
             optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer_size");

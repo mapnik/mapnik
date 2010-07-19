@@ -699,12 +699,19 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
 
     set_attr( map_node, "srs", map.srs() );
 
-    optional<color> c = map.background();
+    optional<color> const& c = map.background();
     if ( c )
     {
         set_attr( map_node, "bgcolor", * c );
     }
 
+    optional<std::string> const& image_filename = map.background_image();
+    if ( image_filename )
+    {
+        set_attr( map_node, "background-image", *image_filename );
+    }
+    
+    
     unsigned buffer_size = map.buffer_size();
     if ( buffer_size || explicit_defaults)
     {
