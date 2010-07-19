@@ -32,7 +32,7 @@ mapnik_libname = 'mapnik2'
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 
-private_libs = '-lfreetype -l%s -l%s -l%s' % (env['ICU_LIB_NAME'],filesystem,regex)
+private_libs = ' -lfreetype -l%s -l%s -l%s' % (env['ICU_LIB_NAME'],filesystem,regex)
 
 if env['THREADING'] == 'multi':
     private_libs += ' -lboost_thread%s' % env['BOOST_APPEND']
@@ -41,12 +41,13 @@ if env['HAS_BOOST_SYSTEM']:
     private_libs += ' -lboost_system%s' % env['BOOST_APPEND']
 
 if env['HAS_CAIRO']:
-    private_libs += '-lcairomm-1.0 -lcairo'
+    private_libs += ' -lcairomm-1.0 -lcairo'
 
-other_libs = private_libs + ' '.join(['-L%s' % i for i in env['LIBPATH'] if not i.startswith('#')])
+other_libs = ''.join([' -L%s' % i for i in env['LIBPATH'] if not i.startswith('#')])
+other_libs += private_libs
 
 # todo - refine this list
-other_includes = ' '.join(['-I%s' % i for i in env['CPPPATH'] if not i.startswith('#')])
+other_includes = ''.join([' -I%s' % i for i in env['CPPPATH'] if not i.startswith('#')])
 
 top = '''#!/bin/sh
 
