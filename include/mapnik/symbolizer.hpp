@@ -43,7 +43,7 @@ class MAPNIK_DECL symbolizer_base {
           *
           * expression can be empty the default expression of
           * the writer is used in this case. */
-        void add_metawriter(std::string name, metawriter_properties const& properties);
+        void add_metawriter(std::string const& name, metawriter_properties const& properties);
         /** Cache metawriter objects to avoid repeated lookups while processing.
           *
           * This function has to be called before the symbolizer is used, because

@@ -27,10 +27,10 @@
 
 namespace mapnik {
 
-void symbolizer_base::add_metawriter(std::string name, metawriter_properties const& properties)
+void symbolizer_base::add_metawriter(std::string const& name, metawriter_properties const& properties)
 {
-    properties_ = properties;
     writer_name_ = name;
+    properties_ = properties;
 }
 
 void symbolizer_base::cache_metawriters(Map const &m)
