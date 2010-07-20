@@ -28,20 +28,35 @@
 #ifdef MAPNIK_DEBUG
 #include <iostream>
 #endif
+#include <sstream>
 
 namespace mapnik
 {
-    svg_renderer::svg_renderer(Map const& m) :
-	feature_style_processor<svg_renderer>(m)
+    /*
+     * XML_DECLARATION and SVG_DTD comprise the XML header of the SVG document.
+     * They are required for producing standard compliant XML documents.
+     * They are stored in svg_renderer, but they might move to somewhere else.
+     */
+    template <typename T>
+    const std::string svg_renderer<T>::XML_DECLARATION = "<?xml version=\"1.0\" standalone=\"no\"?>";
+    template <typename T>
+    const std::string svg_renderer<T>::SVG_DTD = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";	
+
+    template <typename T>
+    svg_renderer<T>::svg_renderer(Map const& m, T & output_stream) :
+	feature_style_processor<svg_renderer>(m),
+	output_stream_(output_stream)
     {
 	// nothing yet.
     }
 
-    svg_renderer::~svg_renderer() {}
+    template <typename T>
+    svg_renderer<T>::~svg_renderer() {}
 
     // only empty methods for now.
 
-    void svg_renderer::start_map_processing(Map const& map)
+    template <typename T>
+    void svg_renderer<T>::start_map_processing(Map const& map)
     {
 	// nothing yet.
 
@@ -50,7 +65,8 @@ namespace mapnik
 	#endif
     }
 
-    void svg_renderer::end_map_processing(Map const& map)
+    template <typename T>
+    void svg_renderer<T>::end_map_processing(Map const& map)
     {
 	// nothing yet.
 
@@ -59,7 +75,8 @@ namespace mapnik
 	#endif
     }
 
-    void svg_renderer::start_layer_processing(layer const& lay)
+    template <typename T>
+    void svg_renderer<T>::start_layer_processing(layer const& lay)
     {
 	// nothing yet.
 
@@ -68,7 +85,8 @@ namespace mapnik
 	#endif
     }
     
-    void svg_renderer::end_layer_processing(layer const& lay)
+    template <typename T>
+    void svg_renderer<T>::end_layer_processing(layer const& lay)
     {
 	// nothing yet.
 
@@ -76,4 +94,6 @@ namespace mapnik
 	std::clog << "end layer processing: " << lay.name() << std::endl;
 	#endif
     }
+
+    template class svg_renderer<std::stringstream>;
 }

@@ -28,17 +28,20 @@
 // mapnik
 #include <mapnik/feature_style_processor.hpp>
 
+// stl
+#include <string>
+
 namespace mapnik 
 {
-    // svg_renderer isn't a template class for now, because 
-    // I haven't devised an equivalent of image_32 for svg.
-    class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer>, 
+    // parameterized with the type of ostream it will use for output.
+    template <typename T>
+    class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<T> >, 
 				     private boost::noncopyable
     {
 
     public:
 	// the only parameter I'm sure of is the map.
-	svg_renderer(Map const& m);
+	svg_renderer(Map const& m, T & output_stream);
 	~svg_renderer();
 
 	void start_map_processing(Map const& map);
@@ -78,6 +81,14 @@ namespace mapnik
 	void process(glyph_symbolizer const& sym,
 		     Feature const& feature,
 		     proj_transform const& prj_trans);
+
+	// constant variable that stores the xml declaration.
+	static const std::string XML_DECLARATION;
+	// constant variable that stores the dtd urls.
+	static const std::string SVG_DTD;
+
+    private:
+	T & output_stream_;
     };
 }
 
