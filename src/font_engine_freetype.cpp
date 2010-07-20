@@ -25,6 +25,7 @@
 #include <mapnik/font_engine_freetype.hpp>
 
 // boost
+#include <boost/version.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
@@ -60,7 +61,11 @@ bool freetype_engine::is_font_file(std::string const& file_name)
 
    bool freetype_engine::register_font(std::string const& file_name)
    {
+#if BOOST_VERSION >= 103600
     if (!boost::filesystem::is_regular_file(file_name) || !is_font_file(file_name)) return false;
+#else
+    if (!boost::filesystem::is_regular(file_name) || !is_font_file(file_name)) return false;
+#endif
 #ifdef MAPNIK_THREADSAFE
       mutex::scoped_lock lock(mutex_);
 #endif

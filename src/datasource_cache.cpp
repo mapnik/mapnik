@@ -29,6 +29,10 @@
 // boost
 #include <boost/version.hpp>
 #include <boost/filesystem/operations.hpp>
+
+#if BOOST_VERSION < 103600
+#include <boost/algorithm/string/join.hpp>
+#endif
 #include <boost/algorithm/string.hpp>
 
 // ltdl
