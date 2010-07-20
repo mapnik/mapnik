@@ -6,6 +6,7 @@
 // mapnik
 #include <mapnik/map.hpp>
 #include <mapnik/svg_renderer.hpp>
+#include <mapnik/color_factory.hpp>
 
 // std
 #include <string>
@@ -28,6 +29,7 @@ BOOST_AUTO_TEST_CASE(combined_test_case)
     typedef svg_renderer<std::stringstream> svg_ren;
 
     Map map(800, 600);
+    map.set_background(color_factory::from_string("white"));
 
     std::stringstream output_stream;
     svg_ren renderer(map, output_stream);
@@ -40,7 +42,11 @@ BOOST_AUTO_TEST_CASE(combined_test_case)
 	+ "\n" 
 	+ "<svg width=\"800px\" height=\"600px\" version=\"1.1\" xmlns=\"" 
 	+ svg_ren::SVG_NAMESPACE_URL 
-	+ "\">";
+	+ "\">"
+	+"\n"
+	+"<rect x=\"0\" y=\"0\" width=\"800px\" height=\"600px\" style=\"fill: #ffffff\"/>"
+	+"\n"
+	+"</svg>";
 
     std::string actual_output = renderer.get_output_stream().str();
     BOOST_CHECK_EQUAL(actual_output, expected_output);

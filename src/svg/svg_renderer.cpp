@@ -91,7 +91,7 @@ namespace mapnik
 	// should I move these lines to the constructor?
 
 	// generate XML header.
-	output_stream_ << format(lit(XML_DECLARATION) << eol << lit(SVG_DTD) << eol);
+	output_stream_ << format(string << eol << string << eol, XML_DECLARATION, SVG_DTD);
 
 	// generate SVG root element opening tag.
 	output_stream_
@@ -107,16 +107,43 @@ namespace mapnik
 	    << format(
 		confix(" xmlns=\"", "\">")[string],
 		SVG_NAMESPACE_URL);
+
+	boost::optional<color> const& bgcolor = map.background();
+	if(bgcolor)
+	{
+	    // generate background color as a rectangle that spans the whole image.
+	    output_stream_
+		<< format(
+		    confix("\n<rect x=\"", "\"")[int_],
+		    0)
+		<< format(
+		    confix(" y=\"", "\"")[int_],
+		    0)
+		<< format(
+		    confix(" width=\"", "\"")[int_ << string],
+		    width_, "px")
+		<< format(
+		    confix(" height=\"", "\"")[int_ << string],
+		    height_, "px")
+		<< format(
+		    confix(" style=\"fill: ", "\"/>")[string],
+		    bgcolor->to_hex_string());
+	}
     }
 
     template <typename T>
     void svg_renderer<T>::end_map_processing(Map const& map)
     {
+	using karma::format;
+	using karma::lit;
+
+	// generate SVG root element closing tag.
+	// this doesn't work.
+	output_stream_ << format(lit("\n</svg>"));
+
 	#ifdef MAPNIK_DEBUG
 	std::clog << "end map processing" << std::endl;
 	#endif
-
-	// generate SVG root element closing tag.
     }
 
     template <typename T>
