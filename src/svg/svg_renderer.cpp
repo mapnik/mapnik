@@ -30,6 +30,12 @@
 #endif
 #include <sstream>
 
+// boost.spirit
+#include <boost/spirit/include/karma.hpp>
+#include <boost/spirit/include/karma_string.hpp>
+
+namespace karma = boost::spirit::karma;
+
 namespace mapnik
 {
     /*
@@ -58,11 +64,11 @@ namespace mapnik
     template <typename T>
     void svg_renderer<T>::start_map_processing(Map const& map)
     {
-	// nothing yet.
-
 	#ifdef MAPNIK_DEBUG
 	std::clog << "start map processing" << std::endl;
 	#endif
+
+	output_stream_ << karma::format(karma::lit(XML_DECLARATION) << karma::eol << karma::lit(SVG_DTD), "");	
     }
 
     template <typename T>

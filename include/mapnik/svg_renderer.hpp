@@ -41,7 +41,7 @@ namespace mapnik
 
     public:
 	// the only parameter I'm sure of is the map.
-	svg_renderer(Map const& m, T & output_stream);
+	svg_renderer(Map const& m, T& output_stream);
 	~svg_renderer();
 
 	void start_map_processing(Map const& map);
@@ -81,6 +81,18 @@ namespace mapnik
 	void process(glyph_symbolizer const& sym,
 		     Feature const& feature,
 		     proj_transform const& prj_trans);
+	
+	// should this function be inline?
+	inline T& get_output_stream() 
+	{
+	    return output_stream_;
+	}
+
+	// should this function be inline?
+	inline const T& get_output_stream() const
+	{
+	    return output_stream_;
+	}
 
 	// constant variable that stores the xml declaration.
 	static const std::string XML_DECLARATION;
@@ -88,7 +100,7 @@ namespace mapnik
 	static const std::string SVG_DTD;
 
     private:
-	T & output_stream_;
+	T& output_stream_;
     };
 }
 
