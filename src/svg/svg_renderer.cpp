@@ -32,9 +32,11 @@
 
 // boost.spirit
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/karma_string.hpp>
+#include <boost/spirit/repository/include/karma_confix.hpp>
 
 namespace karma = boost::spirit::karma;
+namespace repository = boost::spirit::repository;
+namespace ascii = karma::ascii;
 
 namespace mapnik
 {
@@ -48,18 +50,27 @@ namespace mapnik
     template <typename T>
     const std::string svg_renderer<T>::SVG_DTD = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";	
 
+    /*
+     * I'm not sure if these values should be stored or directly put inside
+     * a generator expression.
+     */
+    template <typename T>
+    const double svg_renderer<T>::SVG_VERSION = 1.1;
+    template <typename T>
+    const std::string svg_renderer<T>::SVG_NAMESPACE_URL = "http://www.w3.org/2000/svg";
+
     template <typename T>
     svg_renderer<T>::svg_renderer(Map const& m, T & output_stream) :
 	feature_style_processor<svg_renderer>(m),
-	output_stream_(output_stream)
+	output_stream_(output_stream),
+	width_(m.width()),
+	height_(m.height())
     {
 	// nothing yet.
     }
 
     template <typename T>
     svg_renderer<T>::~svg_renderer() {}
-
-    // only empty methods for now.
 
     template <typename T>
     void svg_renderer<T>::start_map_processing(Map const& map)
@@ -68,17 +79,44 @@ namespace mapnik
 	std::clog << "start map processing" << std::endl;
 	#endif
 
-	output_stream_ << karma::format(karma::lit(XML_DECLARATION) << karma::eol << karma::lit(SVG_DTD), "");	
+	using repository::confix;
+	using karma::format;
+	using karma::lit;
+	using karma::eol;
+	using karma::int_;
+	using karma::double_;
+	using ascii::string;
+	using ascii::space;
+
+	// should I move these lines to the constructor?
+
+	// generate XML header.
+	output_stream_ << format(lit(XML_DECLARATION) << eol << lit(SVG_DTD) << eol);
+
+	// generate SVG root element opening tag.
+	output_stream_
+	    << format(
+		confix("<svg width=\"", "\"")[int_ << string],
+		width_, "px")
+	    << format(
+		confix(" height=\"", "\"")[int_ << string],
+		height_, "px")
+	    << format(
+		confix(" version=\"", "\"")[double_],
+		SVG_VERSION)
+	    << format(
+		confix(" xmlns=\"", "\">")[string],
+		SVG_NAMESPACE_URL);
     }
 
     template <typename T>
     void svg_renderer<T>::end_map_processing(Map const& map)
     {
-	// nothing yet.
-
 	#ifdef MAPNIK_DEBUG
 	std::clog << "end map processing" << std::endl;
 	#endif
+
+	// generate SVG root element closing tag.
     }
 
     template <typename T>

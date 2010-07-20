@@ -94,13 +94,19 @@ namespace mapnik
 	    return output_stream_;
 	}
 
-	// constant variable that stores the xml declaration.
+	// XML declaration.
 	static const std::string XML_DECLARATION;
-	// constant variable that stores the dtd urls.
+	// DTD urls.
 	static const std::string SVG_DTD;
+	// SVG version to which the generated document will be compliant.
+	static const double SVG_VERSION;
+	// SVG XML namespace url.
+	static const std::string SVG_NAMESPACE_URL;
 
     private:
 	T& output_stream_;
+	const int width_;
+	const int height_;
     };
 }
 
