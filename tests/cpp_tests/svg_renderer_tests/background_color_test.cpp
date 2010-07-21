@@ -133,3 +133,33 @@ BOOST_FIXTURE_TEST_CASE(bgcolor_stream_confix_complete_test_case, F)
     
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }
+
+/*
+ * This test case uses an iterator to receive the generated
+ * output. The iterator comes from the std::ostringstream that's
+ * been used in the previous test cases, so the output is
+ * actually generated into the stream.
+ *
+ * Using iterators instead of streams has the advantage that
+ * more advanced concepts are implemented in karma for them,
+ * like rules and grammars.
+ */
+BOOST_FIXTURE_TEST_CASE(bgcolor_stream_iterator_test_case, F)
+{
+    using repository::confix;
+    using fusion::tuple;
+
+    std::ostream_iterator<char> actual_output_iterator(actual_output);
+
+    generate(
+	actual_output_iterator,
+	confix("<", "/>")[
+	    "rect x=" << confix('"', '"')[int_]
+	    << " y=" << confix('"', '"')[int_]
+	    << " width=" << confix('"', '"')[int_ << string]
+	    << " height=" << confix('"', '"')[int_ << string]
+	    << " style=" << confix('"', '"')["fill: " << string]],
+	x, y, tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), bgcolor);
+
+    BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
+}

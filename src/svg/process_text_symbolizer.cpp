@@ -34,7 +34,7 @@ namespace mapnik
 	// nothing yet.
     }
 
-    template void svg_renderer<std::stringstream>::process(text_symbolizer const& sym,
-							   Feature const& feature,
-							   proj_transform const& prj_trans);
+    template void svg_renderer<std::ostringstream>::process(text_symbolizer const& sym,
+							    Feature const& feature,
+							    proj_transform const& prj_trans);
 }

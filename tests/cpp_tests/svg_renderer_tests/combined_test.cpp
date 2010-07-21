@@ -26,12 +26,12 @@
 BOOST_AUTO_TEST_CASE(combined_test_case)
 {
     using namespace mapnik;
-    typedef svg_renderer<std::stringstream> svg_ren;
+    typedef svg_renderer<std::ostringstream> svg_ren;
 
     Map map(800, 600);
     map.set_background(color_factory::from_string("white"));
 
-    std::stringstream output_stream;
+    std::ostringstream output_stream;
     svg_ren renderer(map, output_stream);
     renderer.apply();
 

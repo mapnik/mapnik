@@ -29,6 +29,10 @@
 #include <iostream>
 #endif
 #include <sstream>
+#include <fstream>
+
+// boost
+#include <boost/fusion/tuple.hpp>
 
 // boost.spirit
 #include <boost/spirit/include/karma.hpp>
@@ -36,7 +40,7 @@
 
 namespace karma = boost::spirit::karma;
 namespace repository = boost::spirit::repository;
-namespace ascii = karma::ascii;
+namespace fusion = boost::fusion;
 
 namespace mapnik
 {
@@ -79,55 +83,49 @@ namespace mapnik
 	std::clog << "start map processing" << std::endl;
 	#endif
 
-	using repository::confix;
-	using karma::format;
-	using karma::lit;
-	using karma::eol;
-	using karma::int_;
-	using karma::double_;
-	using ascii::string;
-	using ascii::space;
-
 	// should I move these lines to the constructor?
+	// agg_renderer processes the background color of the map in the constructor.
+
+	using namespace karma;
+	using karma::string;
+	using repository::confix;
+	using fusion::tuple;
+
+	std::ostream_iterator<char> output_stream_iterator(output_stream_);
 
 	// generate XML header.
-	output_stream_ << format(string << eol << string << eol, XML_DECLARATION, SVG_DTD);
+	generate(
+	    output_stream_iterator,
+	    string << eol << string << eol, 
+	    XML_DECLARATION, SVG_DTD);
 
 	// generate SVG root element opening tag.
-	output_stream_
-	    << format(
-		confix("<svg width=\"", "\"")[int_ << string],
-		width_, "px")
-	    << format(
-		confix(" height=\"", "\"")[int_ << string],
-		height_, "px")
-	    << format(
-		confix(" version=\"", "\"")[double_],
-		SVG_VERSION)
-	    << format(
-		confix(" xmlns=\"", "\">")[string],
-		SVG_NAMESPACE_URL);
+	// the root element defines the size of the image,
+	// which is taken from the map's dimensions.
+
+	generate(
+	    output_stream_iterator,
+	    confix("<", ">")[
+		"svg width=" << confix('"', '"')[int_ << string]
+		<< " height=" << confix('"', '"')[int_ << string]
+		<< " version=" << confix('"', '"')[float_]
+		<< " xmlns=" << confix('"', '"')[string]]
+	    << eol,
+	    tuple<int, std::string>(width_, "px"), tuple<int, std::string>(height_, "px"), SVG_VERSION, SVG_NAMESPACE_URL);
 
 	boost::optional<color> const& bgcolor = map.background();
 	if(bgcolor)
 	{
 	    // generate background color as a rectangle that spans the whole image.
-	    output_stream_
-		<< format(
-		    confix("\n<rect x=\"", "\"")[int_],
-		    0)
-		<< format(
-		    confix(" y=\"", "\"")[int_],
-		    0)
-		<< format(
-		    confix(" width=\"", "\"")[int_ << string],
-		    width_, "px")
-		<< format(
-		    confix(" height=\"", "\"")[int_ << string],
-		    height_, "px")
-		<< format(
-		    confix(" style=\"fill: ", "\"/>")[string],
-		    bgcolor->to_hex_string());
+	    generate(
+		output_stream_iterator,
+		confix("<", "/>")[
+		    "rect x=" << confix('"', '"')[int_]
+		    << " y=" << confix('"', '"')[int_]
+		    << " width=" << confix('"', '"')[int_ << string]
+		    << " height=" << confix('"', '"')[int_ << string]
+		    << " style=" << confix('"', '"')["fill: " << string]],
+		0, 0, tuple<int, std::string>(width_, "px"), tuple<int, std::string>(height_, "px"), bgcolor->to_hex_string());
 	}
     }
 
@@ -138,7 +136,6 @@ namespace mapnik
 	using karma::lit;
 
 	// generate SVG root element closing tag.
-	// this doesn't work.
 	output_stream_ << format(lit("\n</svg>"));
 
 	#ifdef MAPNIK_DEBUG
@@ -166,5 +163,6 @@ namespace mapnik
 	#endif
     }
 
-    template class svg_renderer<std::stringstream>;
+    template class svg_renderer<std::ostringstream>;
+    template class svg_renderer<std::ofstream>;
 }
