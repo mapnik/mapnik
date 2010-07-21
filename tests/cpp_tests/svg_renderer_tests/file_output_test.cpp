@@ -61,6 +61,6 @@ BOOST_AUTO_TEST_CASE(file_output_test_case)
     }
     else
     {
-	BOOST_FAIL("Could not create create/open file 'file_output_test_case.svg'.");
+	BOOST_FAIL("Could not create create/open file '"+output_filename+"'.");
     }
 }
