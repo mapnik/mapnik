@@ -273,14 +273,21 @@ private:
                 
                 // process features
                 featureset_ptr fs;
-                if (first)
+                if (cache_features)
                 {
-                    first = false;
-                    fs = ds->features(q);
+                    if (first)
+                    {
+                        first = false;
+                        fs = ds->features(q);
+                    }
+                    else
+                    {
+                        fs = cache.features(q);
+                    }
                 }
                 else
                 {
-                    fs = cache.features(q);
+                    fs = ds->features(q);                
                 }
                 
                 if (fs)
