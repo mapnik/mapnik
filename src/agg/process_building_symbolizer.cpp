@@ -144,7 +144,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             path_type path(t_,*frame,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
             ras_ptr->add_path(stroke);
-            ren.color(agg::rgba8(r * 0.8, g * 0.8 , b * 0.8, int(255 * sym.get_opacity())));
+            ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(255 * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
 
