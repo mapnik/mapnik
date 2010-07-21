@@ -73,6 +73,7 @@ private:
 private:
     std::string params_;
     void * proj_;
+    bool is_geographic_;
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif
