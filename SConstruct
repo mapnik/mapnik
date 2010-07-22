@@ -290,6 +290,8 @@ opts.AddVariables(
     # Variables affecting rendering back-ends
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
     
+    BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'True'),
+    
     # Variables for optional dependencies
     # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
     # Therefore, we use a single boolean for whether to attempt to build cairo support.
@@ -1266,7 +1268,9 @@ if not HELP_REQUESTED:
     
     # build C++ tests
     SConscript('tests/cpp_tests/SConscript')
-    SConscript('tests/cpp_tests/svg_renderer_tests/SConscript')
+    
+    if env['SVG_RENDERER']:
+        SConscript('tests/cpp_tests/svg_renderer_tests/SConscript')
 
     # install pkg-config script and mapnik-config script
     SConscript('utils/mapnik-config/SConscript')
