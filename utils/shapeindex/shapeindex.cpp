@@ -114,9 +114,9 @@ int main (int argc,char** argv)
     }
     while (itr != shape_files.end())
     {
+        clog << "processing " << *itr << endl;
         std::string shapename (*itr++);
         boost::algorithm::ireplace_last(shapename,".shp","");
-        clog << "processing " << *itr << endl;
         std::string shapename_full (shapename+".shp");
 
         if (! boost::filesystem::exists (shapename_full))
