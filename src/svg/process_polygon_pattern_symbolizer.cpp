@@ -34,11 +34,7 @@ namespace mapnik
 	// nothing yet.
     }
 
-    template void svg_renderer<std::ostringstream>::process(polygon_pattern_symbolizer const& sym,
-							    Feature const& feature,
-							    proj_transform const& prj_trans);
-
-    template void svg_renderer<std::ofstream>::process(polygon_pattern_symbolizer const& sym,
-						       Feature const& feature,
-						       proj_transform const& prj_trans);
+    template void svg_renderer<std::ostream_iterator<char> >::process(polygon_pattern_symbolizer const& sym,
+								      Feature const& feature,
+								      proj_transform const& prj_trans);
 }

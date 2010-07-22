@@ -33,15 +33,16 @@
 
 namespace mapnik 
 {
-    // parameterized with the type of ostream it will use for output.
+    // parameterized with the type of output iterator it will use for output.
+    // output iterators add more flexibility than streams, because iterators
+    // can target many other output destinations besides streams.
     template <typename T>
     class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<T> >, 
 				     private boost::noncopyable
     {
 
     public:
-	// the only parameter I'm sure of is the map.
-	svg_renderer(Map const& m, T& output_stream);
+	svg_renderer(Map const& m, T& output_iterator);
 	~svg_renderer();
 
 	void start_map_processing(Map const& map);
@@ -83,15 +84,15 @@ namespace mapnik
 		     proj_transform const& prj_trans);
 	
 	// should this function be inline?
-	inline T& get_output_stream() 
+	inline T& get_output_iterator() 
 	{
-	    return output_stream_;
+	    return output_iterator_;
 	}
 
 	// should this function be inline?
-	inline const T& get_output_stream() const
+	inline const T& get_output_iterator() const
 	{
-	    return output_stream_;
+	    return output_iterator_;
 	}
 
 	// XML declaration.
@@ -104,7 +105,7 @@ namespace mapnik
 	static const std::string SVG_NAMESPACE_URL;
 
     private:
-	T& output_stream_;
+	T& output_iterator_;
 	const int width_;
 	const int height_;
     };

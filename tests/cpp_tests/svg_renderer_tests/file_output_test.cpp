@@ -19,6 +19,7 @@
 
 // stl
 #include <fstream>
+#include <iterator>
 
 namespace filesystem = boost::filesystem;
 
@@ -39,7 +40,7 @@ namespace filesystem = boost::filesystem;
 BOOST_AUTO_TEST_CASE(file_output_test_case)
 {
     using namespace mapnik;
-    typedef svg_renderer<std::ofstream> svg_ren;
+    typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
 
     Map map(800, 600);
     map.set_background(color_factory::from_string("blue"));
@@ -49,7 +50,9 @@ BOOST_AUTO_TEST_CASE(file_output_test_case)
 
     if(output_stream)
     {
-	svg_ren renderer(map, output_stream);
+	std::ostream_iterator<char> output_stream_iterator(output_stream);
+
+	svg_ren renderer(map, output_stream_iterator);
 	renderer.apply();
 
 	output_stream.close();

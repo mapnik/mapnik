@@ -28,8 +28,7 @@
 #ifdef MAPNIK_DEBUG
 #include <iostream>
 #endif
-#include <sstream>
-#include <fstream>
+#include <ostream>
 
 // boost
 #include <boost/fusion/tuple.hpp>
@@ -64,9 +63,9 @@ namespace mapnik
     const std::string svg_renderer<T>::SVG_NAMESPACE_URL = "http://www.w3.org/2000/svg";
 
     template <typename T>
-    svg_renderer<T>::svg_renderer(Map const& m, T & output_stream) :
+    svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator) :
 	feature_style_processor<svg_renderer>(m),
-	output_stream_(output_stream),
+	output_iterator_(output_iterator),
 	width_(m.width()),
 	height_(m.height())
     {
@@ -91,11 +90,9 @@ namespace mapnik
 	using repository::confix;
 	using fusion::tuple;
 
-	std::ostream_iterator<char> output_stream_iterator(output_stream_);
-
 	// generate XML header.
 	generate(
-	    output_stream_iterator,
+	    output_iterator_,
 	    string << eol << string << eol, 
 	    XML_DECLARATION, SVG_DTD);
 
@@ -104,7 +101,7 @@ namespace mapnik
 	// which is taken from the map's dimensions.
 
 	generate(
-	    output_stream_iterator,
+	    output_iterator_,
 	    confix("<", ">")[
 		"svg width=" << confix('"', '"')[int_ << string]
 		<< " height=" << confix('"', '"')[int_ << string]
@@ -118,13 +115,14 @@ namespace mapnik
 	{
 	    // generate background color as a rectangle that spans the whole image.
 	    generate(
-		output_stream_iterator,
+		output_iterator_,
 		confix("<", "/>")[
 		    "rect x=" << confix('"', '"')[int_]
 		    << " y=" << confix('"', '"')[int_]
 		    << " width=" << confix('"', '"')[int_ << string]
 		    << " height=" << confix('"', '"')[int_ << string]
-		    << " style=" << confix('"', '"')["fill: " << string]],
+		    << " style=" << confix('"', '"')["fill: " << string]]
+		<< eol,
 		0, 0, tuple<int, std::string>(width_, "px"), tuple<int, std::string>(height_, "px"), bgcolor->to_hex_string());
 	}
     }
@@ -132,11 +130,13 @@ namespace mapnik
     template <typename T>
     void svg_renderer<T>::end_map_processing(Map const& map)
     {
-	using karma::format;
+	using karma::generate;
 	using karma::lit;
 
 	// generate SVG root element closing tag.
-	output_stream_ << format(lit("\n</svg>"));
+	generate(
+	    output_iterator_,
+	    lit("</svg>"));
 
 	#ifdef MAPNIK_DEBUG
 	std::clog << "end map processing" << std::endl;
@@ -163,6 +163,5 @@ namespace mapnik
 	#endif
     }
 
-    template class svg_renderer<std::ostringstream>;
-    template class svg_renderer<std::ofstream>;
+    template class svg_renderer<std::ostream_iterator<char> >;
 }

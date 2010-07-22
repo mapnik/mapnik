@@ -11,6 +11,7 @@
 // std
 #include <string>
 #include <sstream>
+#include <iterator>
 
 /**
  * This test case tests all the generators inside svg_renderer,
@@ -26,13 +27,14 @@
 BOOST_AUTO_TEST_CASE(combined_test_case)
 {
     using namespace mapnik;
-    typedef svg_renderer<std::ostringstream> svg_ren;
+    typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
 
     Map map(800, 600);
     map.set_background(color_factory::from_string("white"));
 
     std::ostringstream output_stream;
-    svg_ren renderer(map, output_stream);
+    std::ostream_iterator<char> output_stream_iterator(output_stream);
+    svg_ren renderer(map, output_stream_iterator);
     renderer.apply();
 
     std::string expected_output = 
@@ -48,7 +50,7 @@ BOOST_AUTO_TEST_CASE(combined_test_case)
 	+"\n"
 	+"</svg>";
 
-    std::string actual_output = renderer.get_output_stream().str();
+    std::string actual_output = output_stream.str();
     BOOST_CHECK_EQUAL(actual_output, expected_output);
 }
 

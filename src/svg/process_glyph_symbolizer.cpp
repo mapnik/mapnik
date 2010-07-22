@@ -28,17 +28,13 @@ namespace mapnik
 {
     template <typename T>
     void svg_renderer<T>::process(glyph_symbolizer const& sym,
-			       Feature const& feature,
-			       proj_transform const& prj_trans)
+				  Feature const& feature,
+				  proj_transform const& prj_trans)
     {
 	// nothing yet.
     }
 
-    template void svg_renderer<std::ostringstream>::process(glyph_symbolizer const& sym,
-							    Feature const& feature,
-							    proj_transform const& prj_trans);
-
-    template void svg_renderer<std::ofstream>::process(glyph_symbolizer const& sym,
-						       Feature const& feature,
-						       proj_transform const& prj_trans);
+    template void svg_renderer<std::ostream_iterator<char> >::process(glyph_symbolizer const& sym,
+								      Feature const& feature,
+								      proj_transform const& prj_trans);
 }
