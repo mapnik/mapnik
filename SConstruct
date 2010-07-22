@@ -1274,3 +1274,6 @@ if not HELP_REQUESTED:
 
     # install pkg-config script and mapnik-config script
     SConscript('utils/mapnik-config/SConscript')
+
+    # write the viewer.ini file
+    SConscript('demo/viewer/SConscript')
