@@ -96,7 +96,7 @@ namespace mapnik
     };
     
     template <typename T,
-              template <typename T> class CreatePolicy=CreateStatic> class singleton
+          template <typename U> class CreatePolicy=CreateStatic> class singleton
               {
 #ifdef __SUNPRO_CC
 		/* Sun's C++ compiler will issue the following errors if CreatePolicy<T> is used:
@@ -159,13 +159,13 @@ namespace mapnik
               };
 #ifdef MAPNIK_THREADSAFE
     template <typename T,
-              template <typename T> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
+          template <typename U> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
 #endif
     
     template <typename T,
-              template <typename T> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
+          template <typename U> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
     template <typename T,
-              template <typename T> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
+          template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
    
 }
 
