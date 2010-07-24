@@ -1239,9 +1239,9 @@ if not HELP_REQUESTED:
     
     # todo - generalize this path construction, also used in plugin SConscript...
     plugin_dir = os.path.normpath(env['DESTDIR'] + '/' + env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
+    create_uninstall_target(env, plugin_dir, False)
     create_uninstall_target(env, plugin_dir + '/input' , False)
     create_uninstall_target(env, plugin_dir + '/fonts' , False)
-    create_uninstall_target(env, plugin_dir, False)
     
     # Build the c++ rundemo app if requested
     if env['DEMO']:
