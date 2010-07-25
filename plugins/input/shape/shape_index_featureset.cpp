@@ -48,8 +48,8 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
     stream<mapped_file_source> file(shape_file + ".index");
     if (file)
     {
-	shp_index<filterT,stream<mapped_file_source> >::query(filter,file,ids_);
-	file.close();
+        shp_index<filterT,stream<mapped_file_source> >::query(filter,file,ids_);
+        file.close();
     }
     std::sort(ids_.begin(),ids_.end());    
     
@@ -85,12 +85,12 @@ feature_ptr shape_index_featureset<filterT>::next()
         int pos=*itr_++;
         shape_.move_to(pos);
         int type=shape_.type();
-	
+        
         feature_ptr feature(feature_factory::create(shape_.id_));
         if (type == shape_io::shape_point)
-	{
+        {
             double x=shape_.shp().read_double();
-            double y=shape_.shp().read_double();	    
+            double y=shape_.shp().read_double();            
             geometry2d * point = new point_impl;
             point->move_to(x,y);
             feature->add_geometry(point);
@@ -123,77 +123,77 @@ feature_ptr shape_index_featureset<filterT>::next()
             point->move_to(x,y);
             feature->add_geometry(point);
             ++count_;
-        }	
+        }       
         else
         {
             while(!filter_.pass(shape_.current_extent()) && 
-		  itr_!=ids_.end())
+                  itr_!=ids_.end())
             {
                 pos=*itr_++;
                 shape_.move_to(pos);
             }
-	    
+            
             switch (type)
             {
-	    case shape_io::shape_multipoint:
-	    case shape_io::shape_multipointm:
-	    case shape_io::shape_multipointz:
-	    {
-		int num_points = shape_.shp().read_ndr_integer();
-		for (int i=0; i< num_points;++i)
-		{ 
-		    double x=shape_.shp().read_double();
-		    double y=shape_.shp().read_double();
-		    geometry2d * point = new point_impl;
-		    point->move_to(x,y);
-		    feature->add_geometry(point);
-		}
-		// ignore m and z for now 
-		++count_;
-		break;
-	    }
-	    case shape_io::shape_polyline:
-	    {
-		geometry2d * line = shape_.read_polyline();
-		feature->add_geometry(line);
-		++count_;
-		break;
-	    }
-	    case shape_io::shape_polylinem:
-	    {
-		geometry2d * line = shape_.read_polylinem();
-		feature->add_geometry(line);
-		++count_;
-		break;
-	    }
-	    case shape_io::shape_polylinez:
-	    {
-		geometry2d * line = shape_.read_polylinez();
-		feature->add_geometry(line);
-		++count_;
-		break;
-	    }
-	    case shape_io::shape_polygon:
-	    { 
-		geometry2d * poly = shape_.read_polygon();
-		feature->add_geometry(poly);
-		++count_;
-		break;
-	    }
-	    case shape_io::shape_polygonm:
-	    { 
-		geometry2d * poly = shape_.read_polygonm();
-		feature->add_geometry(poly);
-		++count_;
-		break;
-	    }
-	    case shape_io::shape_polygonz:
-	    {
-		geometry2d * poly = shape_.read_polygonz();
-		feature->add_geometry(poly);
-		++count_;
-		break;
-	    }
+            case shape_io::shape_multipoint:
+            case shape_io::shape_multipointm:
+            case shape_io::shape_multipointz:
+            {
+                int num_points = shape_.shp().read_ndr_integer();
+                for (int i=0; i< num_points;++i)
+                { 
+                    double x=shape_.shp().read_double();
+                    double y=shape_.shp().read_double();
+                    geometry2d * point = new point_impl;
+                    point->move_to(x,y);
+                    feature->add_geometry(point);
+                }
+                // ignore m and z for now 
+                ++count_;
+                break;
+            }
+            case shape_io::shape_polyline:
+            {
+                geometry2d * line = shape_.read_polyline();
+                feature->add_geometry(line);
+                ++count_;
+                break;
+            }
+            case shape_io::shape_polylinem:
+            {
+                geometry2d * line = shape_.read_polylinem();
+                feature->add_geometry(line);
+                ++count_;
+                break;
+            }
+            case shape_io::shape_polylinez:
+            {
+                geometry2d * line = shape_.read_polylinez();
+                feature->add_geometry(line);
+                ++count_;
+                break;
+            }
+            case shape_io::shape_polygon:
+            { 
+                geometry2d * poly = shape_.read_polygon();
+                feature->add_geometry(poly);
+                ++count_;
+                break;
+            }
+            case shape_io::shape_polygonm:
+            { 
+                geometry2d * poly = shape_.read_polygonm();
+                feature->add_geometry(poly);
+                ++count_;
+                break;
+            }
+            case shape_io::shape_polygonz:
+            {
+                geometry2d * poly = shape_.read_polygonz();
+                feature->add_geometry(poly);
+                ++count_;
+                break;
+            }
             }
         }
         if (attr_ids_.size())
