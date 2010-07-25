@@ -47,8 +47,8 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
         {
             if (shape_.dbf().descriptor(i).name_ == *pos)
             {
-            attr_ids_.push_back(i);
-            break;
+                attr_ids_.push_back(i);
+                break;
             }
         }
         ++pos;
@@ -62,7 +62,7 @@ feature_ptr shape_featureset<filterT>::next()
     using mapnik::point_impl;
     std::streampos pos=shape_.shp().pos();
     
-    if (pos < std::streampos(file_length_ * 2))
+    if (!shape_.shp().is_eof())
     {
         shape_.move_to(pos);
         int type=shape_.type();
@@ -110,9 +110,12 @@ feature_ptr shape_featureset<filterT>::next()
                 int reclen=shape_.reclength_;
                 if (!shape_.shp().is_eof())
                 {
-                    long pos = shape_.shp().pos();
-                    //std::cerr << pos << " " << reclen << std::endl;
-                    shape_.move_to(pos + 2 * reclen - 36);
+                    std::streampos pos = shape_.shp().pos();
+                    if (shape_.type() != shape_io::shape_null)
+                    {
+                       pos += std::streampos(2 * reclen - 36);
+                    }
+                    shape_.move_to(pos);                    
                 }
                 else
                 {
@@ -231,15 +234,15 @@ feature_ptr shape_featureset<filterT>::next()
              
             while (pos!=end)
             {
-            try 
-            {
-                shape_.dbf().add_attribute(*pos,*tr_,*feature);//TODO optimize!!!
-            }
-            catch (...)
-            {
-                std::clog << "error processing attributes " << std::endl;
-            }
-            ++pos;
+                try 
+                {
+                    shape_.dbf().add_attribute(*pos,*tr_,*feature);//TODO optimize!!!
+                }
+                catch (...)
+                {
+                    std::clog << "error processing attributes " << std::endl;
+                }
+                ++pos;
             }
         }
         return feature;
@@ -247,9 +250,9 @@ feature_ptr shape_featureset<filterT>::next()
     else
     {
 #ifdef MAPNIK_DEBUG
-    std::clog<<" total shapes read="<<count_<<"\n";
+        std::clog<<" total shapes read="<<count_<<"\n";
 #endif
-    return feature_ptr();
+        return feature_ptr();
     }
 }
 
