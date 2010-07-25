@@ -107,13 +107,12 @@ feature_ptr shape_featureset<filterT>::next()
         {
             while (!filter_.pass(shape_.current_extent()))
             {        
-                int reclen=shape_.reclength_;
                 if (!shape_.shp().is_eof())
                 {
                     std::streampos pos = shape_.shp().pos();
                     if (shape_.type() != shape_io::shape_null)
                     {
-                       pos += std::streampos(2 * reclen - 36);
+                       pos += std::streampos(2 * shape_.reclength_ - 36);
                     }
                     shape_.move_to(pos);                    
                 }
