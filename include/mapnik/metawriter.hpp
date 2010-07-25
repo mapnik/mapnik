@@ -40,6 +40,18 @@
 
 namespace mapnik {
 
+class metawriter_property_map
+{
+public:
+    metawriter_property_map() {}
+    UnicodeString const& operator[](std::string const& key) const;
+    UnicodeString& operator[](std::string const& key) {return m_[key];}
+private:
+    std::map<std::string, UnicodeString> m_;
+    UnicodeString not_found_;
+};
+
+
 /** All properties to be output by a metawriter. */
 class metawriter_properties : public std::set<std::string>
 {
@@ -67,7 +79,7 @@ class metawriter
                              proj_transform const& prj_trans,
                              CoordTransform const &t,
                              metawriter_properties const& properties = metawriter_properties())=0;
-        virtual void start() {};
+        virtual void start(metawriter_property_map const& properties) {};
         virtual void stop() {};
     protected:
         metawriter_properties dflt_properties_;

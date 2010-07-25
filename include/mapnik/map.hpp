@@ -420,7 +420,7 @@ public:
     /*!
      * @brief Get a metawriter property.
      */
-    std::string get_metawriter_property(std::string name); /*TODO: const */
+    std::string get_metawriter_property(std::string name) const;
 
 private:
     void fixAspectRatio();

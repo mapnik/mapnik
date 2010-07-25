@@ -93,7 +93,7 @@ public:
         
         for (;metaItr!=metaItrEnd; ++metaItr)
         {
-            metaItr->second->start();
+            metaItr->second->start(m_.metawriter_output_properties);
         }
                        
         try

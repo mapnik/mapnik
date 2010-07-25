@@ -26,28 +26,46 @@
 
 // Mapnik
 #include <mapnik/metawriter.hpp>
+#include <mapnik/parse_path.hpp>
 
 // STL
-#include <ostream>
+#include <fstream>
 
 namespace mapnik {
-/** JSON writer. */
-class metawriter_json : public metawriter, private boost::noncopyable
+
+
+/** Write JSON data to a stream object. */
+class metawriter_json_stream : public metawriter, private boost::noncopyable
 {
-    public:
-        metawriter_json(metawriter_properties dflt_properties, std::string fn);
-        metawriter_json(metawriter_properties dflt_properties, std::ostream);
-        ~metawriter_json();
-        virtual void add_box(box2d<double> box, Feature const &feature,
-                             proj_transform const& prj_trans,
-                             CoordTransform const& t,
-                             metawriter_properties const& properties);
-        virtual void start();
-        virtual void stop();
-    private:
-        std::ostream *f;
-        std::string fn_;
-        int count;
+public:
+    metawriter_json_stream(metawriter_properties dflt_properties);
+    virtual void add_box(box2d<double> box, Feature const &feature,
+                         proj_transform const& prj_trans,
+                         CoordTransform const& t,
+                         metawriter_properties const& properties);
+
+    virtual void start(metawriter_property_map const& properties);
+    virtual void stop();
+    void set_stream(std::ostream *f) { f_ = f; }
+
+private:
+    std::ostream *f_;
+    int count;
+};
+
+/** JSON writer. */
+class metawriter_json : public metawriter_json_stream
+{
+public:
+    metawriter_json(metawriter_properties dflt_properties, path_expression_ptr fn);
+    ~metawriter_json();
+
+    virtual void start(metawriter_property_map const& properties);
+    virtual void stop();
+
+private:
+    path_expression_ptr fn_;
+    std::fstream f_;
 };
 
 };

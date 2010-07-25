@@ -32,48 +32,34 @@
 // STL
 #include <iomanip>
 #include <cstdio>
-#include <fstream>
 
 namespace mapnik {
 
-metawriter_json::metawriter_json(metawriter_properties dflt_properties, std::string fn)
-    : metawriter(dflt_properties), fn_(fn), count(0)
+UnicodeString const& metawriter_property_map::operator[](std::string const& key) const
 {
-
+    std::map<std::string, UnicodeString>::const_iterator it;
+    it = m_.find(key);
+    if (it != m_.end()) return not_found_;
+    return (*it).second;
 }
 
-metawriter_json::~metawriter_json()
+void metawriter_json_stream::start(metawriter_property_map const& properties)
 {
-    stop();
+    assert(f_);
+    *f_ << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
 }
 
-void metawriter_json::start()
+void metawriter_json_stream::stop()
 {
-    if (!fn_.empty())
-    {
-        if (f)
-        {
-            std::cerr << "ERROR: GeoJSON metawriter is already active!\n";
-            return;
-        }
-        f = new std::fstream(fn_.c_str(), std::fstream::out | std::fstream::trunc);
-        if (f->fail()) perror((std::string("Failed to open file ") + fn_).c_str());
-    }
-    assert(f);
-    *f << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
-}
-
-void metawriter_json::stop()
-{
-    if (f) *f << " ] }\n";
-    if (f && !fn_.empty())
-    {
-        dynamic_cast<std::fstream *>(f)->close();
-        f = 0;
+    if (f_) {
+        *f_ << " ] }\n";
     }
 }
 
-void metawriter_json::add_box(box2d<double> box, Feature const &feature,
+metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
+    : metawriter(dflt_properties), count(0) {}
+
+void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
                               proj_transform const& prj_trans, CoordTransform const &t,
                               const metawriter_properties& properties)
 {
@@ -85,7 +71,7 @@ void metawriter_json::add_box(box2d<double> box, Feature const &feature,
 
     if (props.empty())
     {
-        std::cerr << "WARNING: No expression available for GeoJSON metawriter.\n";
+        std::cerr << "WARNING: No properties available for GeoJSON metawriter.\n";
     }
 
     /* Coordinate transform in renderer:
@@ -112,8 +98,8 @@ void metawriter_json::add_box(box2d<double> box, Feature const &feature,
     double maxx = box.maxx();
     double maxy = box.maxy();
 
-    if (count++) *f << ",\n";
-    *f << std::fixed << std::setprecision(8) << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"Polygon\",\n    \"coordinates\": [ [ [" <<
+    if (count++) *f_ << ",\n";
+    *f_ << std::fixed << std::setprecision(8) << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"Polygon\",\n    \"coordinates\": [ [ [" <<
             minx << ", " << miny << "], [" <<
             maxx << ", " << miny << "], [" <<
             maxx << ", " << maxy << "], [" <<
@@ -130,12 +116,45 @@ void metawriter_json::add_box(box2d<double> box, Feature const &feature,
             //Property found
             text = boost::replace_all_copy(boost::replace_all_copy(itr->second.to_string(), "\\", "\\\\"), "\"", "\\\"");
         }
-        if (i++) *f << ",";
-        *f << "\n    \"" << p << "\":\"" << text << "\"";
+        if (i++) *f_ << ",";
+        *f_ << "\n    \"" << p << "\":\"" << text << "\"";
     }
 
-    *f << "\n} }";
+    *f_ << "\n} }";
 }
+
+
+/********************************************************************************************/
+
+metawriter_json::metawriter_json(metawriter_properties dflt_properties, path_expression_ptr fn)
+    : metawriter_json_stream(dflt_properties), fn_(fn) {}
+
+
+metawriter_json::~metawriter_json()
+{
+    stop();
+}
+
+void metawriter_json::start(metawriter_property_map const& properties)
+{
+    std::string filename =
+        path_processor<metawriter_property_map>::evaluate(*fn_, properties);
+#ifdef MAPNIK_DEBUG
+    std::clog << "Metawriter JSON: filename=" << filename << "\n";
+#endif
+    f_.open(filename.c_str(), std::fstream::out | std::fstream::trunc);
+    if (f_.fail()) perror((std::string("Metawriter JSON: Failed to open file ") + filename).c_str());
+    set_stream(&f_);
+    metawriter_json_stream::start(properties);
+}
+
+
+void metawriter_json::stop()
+{
+    metawriter_json_stream::stop();
+    if (f_.is_open()) f_.close();
+}
+
 
 metawriter_properties::metawriter_properties(boost::optional<std::string> str)
 {
