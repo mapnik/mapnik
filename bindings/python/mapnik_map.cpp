@@ -348,7 +348,14 @@ void export_map()
              "Usage:\n"
              ">>> extext = box2d(-180.0, -90.0, 180.0, 90.0)\n"
              ">>> m.zoom_to_box(extent)\n"
-            )   
+            )
+        .def("get_metawriter_property", &Map::get_metawriter_property,
+            "TODO (Herm)"
+        )
+        .def("set_metawriter_property", &Map::set_metawriter_property,
+            "TODO (Herm)"
+        )
+        
 
         .add_property("aspect_fix_mode",
                       &Map::get_aspect_fix_mode,
