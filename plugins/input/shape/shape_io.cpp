@@ -56,14 +56,14 @@ void shape_io::move_to (int pos)
    id_ = shp_.read_xdr_integer();
    reclength_ = shp_.read_xdr_integer();
    type_ = shp_.read_ndr_integer();
-
+   
    if (shp_.is_eof()) {
        id_ = 0;
        reclength_ = 0;
        type_ = shape_null;
    }
 
-   if (type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
+   if (type_!= shape_null && type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
    {
       shp_.read_envelope(cur_extent_);
    }
@@ -134,11 +134,11 @@ geometry2d * shape_io::read_polyline()
             end=num_points;
          else
             end=parts[k+1];
-	    
+         
          double x=record.read_double();
          double y=record.read_double();
          line->move_to(x,y);
-	    
+         
          for (int j=start+1;j<end;++j)
          {
             x=record.read_double();
