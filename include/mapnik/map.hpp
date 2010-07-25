@@ -404,6 +404,24 @@ public:
     inline void set_aspect_fix_mode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
     inline aspect_fix_mode get_aspect_fix_mode() const { return aspectFixMode_; }
 
+    /*!
+     * @brief Metawriter properties.
+     *
+     * These properties are defined by the user and are substituted in filenames,
+     * sepcial columns in tables, etc.
+     */
+    metawriter_property_map metawriter_output_properties;
+
+    /*!
+     * @brief Set a metawriter property.
+     */
+    void set_metawriter_property(std::string name, std::string value);
+
+    /*!
+     * @brief Get a metawriter property.
+     */
+    std::string get_metawriter_property(std::string name); /*TODO: const */
+
 private:
     void fixAspectRatio();
 };

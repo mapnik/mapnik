@@ -608,4 +608,17 @@ void Map::init_metawriters()
         }
     }
 }
+
+void Map::set_metawriter_property(std::string name, std::string value)
+{
+    metawriter_output_properties[name] = UnicodeString::fromUTF8(value);
+}
+
+std::string Map::get_metawriter_property(std::string name)
+{
+    std::string result;
+    to_utf8(metawriter_output_properties[name], result);
+    return result;
+}
+
 }
