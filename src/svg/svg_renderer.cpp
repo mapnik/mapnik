@@ -23,6 +23,7 @@
 
 // mapnik
 #include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/svg_generator_path_grammar.hpp>
 
 // stl
 #ifdef MAPNIK_DEBUG
@@ -63,11 +64,12 @@ namespace mapnik
     const std::string svg_renderer<T>::SVG_NAMESPACE_URL = "http://www.w3.org/2000/svg";
 
     template <typename T>
-    svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator) :
+    svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, unsigned offset_x, unsigned offset_y) :
 	feature_style_processor<svg_renderer>(m),
 	output_iterator_(output_iterator),
 	width_(m.width()),
-	height_(m.height())
+	height_(m.height()),
+	t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y)
     {
 	// nothing yet.
     }

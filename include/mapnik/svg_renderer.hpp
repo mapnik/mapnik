@@ -42,7 +42,7 @@ namespace mapnik
     {
 
     public:
-	svg_renderer(Map const& m, T& output_iterator);
+	svg_renderer(Map const& m, T& output_iterator, unsigned offset_x=0, unsigned offset_y=0);
 	~svg_renderer();
 
 	void start_map_processing(Map const& map);
@@ -83,13 +83,11 @@ namespace mapnik
 		     Feature const& feature,
 		     proj_transform const& prj_trans);
 	
-	// should this function be inline?
 	inline T& get_output_iterator() 
 	{
 	    return output_iterator_;
 	}
 
-	// should this function be inline?
 	inline const T& get_output_iterator() const
 	{
 	    return output_iterator_;
@@ -108,6 +106,7 @@ namespace mapnik
 	T& output_iterator_;
 	const int width_;
 	const int height_;
+	CoordTransform t_;
     };
 }
 

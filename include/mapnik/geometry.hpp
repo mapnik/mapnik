@@ -42,7 +42,7 @@ enum GeomType {
 };
     
 template <typename T>
-class geometry : private boost::noncopyable
+class geometry //: private boost::noncopyable
 {   
 public:
     typedef T vertex_type;
@@ -153,6 +153,19 @@ private:
     container_type cont_;
     mutable unsigned itr_;
 public:
+
+    typedef typename container_type::const_iterator iterator;
+
+    iterator begin() const
+    {
+	return cont_.begin();
+    }
+
+    iterator end() const
+    {
+	return cont_.end();
+    }
+
     polygon()
         : //geometry_base(),
         itr_(0)
@@ -320,8 +333,8 @@ public:
     unsigned vertex(double* x, double* y) const
     {
         return cont_.get_vertex(itr_++,x,y);
-    }
-         
+    }         
+
     void rewind(unsigned ) const
     {
         itr_=0;
