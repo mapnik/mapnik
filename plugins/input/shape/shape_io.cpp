@@ -63,7 +63,7 @@ void shape_io::move_to (int pos)
        type_ = shape_null;
    }
 
-   if (type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
+   if (type_!= shape_null && type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
    {
       shp_.read_envelope(cur_extent_);
    }

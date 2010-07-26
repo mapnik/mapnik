@@ -62,7 +62,7 @@ feature_ptr shape_featureset<filterT>::next()
     using mapnik::point_impl;
     std::streampos pos=shape_.shp().pos();
     
-    if (pos < std::streampos(file_length_ * 2))
+    if (!shape_.shp().is_eof())
     {
 	shape_.move_to(pos);
 	int type=shape_.type();
@@ -107,13 +107,15 @@ feature_ptr shape_featureset<filterT>::next()
 	{
 	    while (!filter_.pass(shape_.current_extent()))
 	    {		
-		int reclen=shape_.reclength_;
 		if (!shape_.shp().is_eof())
 		{
-		    long pos = shape_.shp().pos();
-		    //std::cerr << pos << " " << reclen << std::endl;
-		    shape_.move_to(pos + 2 * reclen - 36);
+                    std::streampos pos = shape_.shp().pos();
+                    if (shape_.type() != shape_io::shape_null)
+                    {
+                       pos += std::streampos(2 * shape_.reclength_ - 36);
 		}
+                    shape_.move_to(pos);                    
+                }
 		else
 		{
 		    return feature_ptr();
