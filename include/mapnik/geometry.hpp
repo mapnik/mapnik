@@ -42,7 +42,7 @@ enum GeomType {
 };
     
 template <typename T>
-class geometry //: private boost::noncopyable
+class geometry : private boost::noncopyable
 {   
 public:
     typedef T vertex_type;
