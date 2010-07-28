@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/vertex.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/ctrans.hpp>
 
 // boost
 #include <boost/fusion/include/adapt_class.hpp>
@@ -56,9 +57,9 @@ namespace boost { namespace spirit { namespace traits {
     {
 	static mapnik::geometry2d::iterator 
 	call(mapnik::geometry2d const& g)
-	    {
+	{
 		return g.begin();
-	    }
+	}
     };
 
     template <>
@@ -66,9 +67,9 @@ namespace boost { namespace spirit { namespace traits {
     {
 	static mapnik::geometry2d::iterator 
 	call(mapnik::geometry2d const& g)
-	    {
+	{
 		return g.end();
-	    }
+	}
     };
 }}}
 
@@ -76,17 +77,19 @@ namespace mapnik { namespace svg {
 
     using namespace boost::spirit;
 
-    template <typename OutputIterator>
-    struct svg_generator_path_grammar 
-	: karma::grammar<OutputIterator, mapnik::geometry2d()>
+    template <typename OutputIterator, typename PathType>
+    struct svg_generator_path_grammar : karma::grammar<OutputIterator, mapnik::geometry2d()>
     {
-	explicit svg_generator_path_grammar()
-	    : svg_generator_path_grammar::base_type(svg_path)
-	    {
-		svg_path = *(karma::int_ << karma::lit(' ') <<  karma::double_ << karma::lit(' ') << karma::double_ << karma::eol);
-	    }
+	explicit svg_generator_path_grammar(PathType const& path_type)
+	    : svg_generator_path_grammar::base_type(svg_path),
+	      path_type_(path_type)
+	{
+	    svg_path = *(karma::int_ << karma::lit(' ') <<  karma::double_ << karma::lit(' ') << karma::double_ << karma::eol);
+	}
 
 	karma::rule<OutputIterator, mapnik::geometry2d()> svg_path;
+
+	PathType const& path_type_;
     };
 }}
 

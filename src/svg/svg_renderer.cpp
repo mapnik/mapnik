@@ -47,17 +47,12 @@ namespace mapnik
     /*
      * XML_DECLARATION and SVG_DTD comprise the XML header of the SVG document.
      * They are required for producing standard compliant XML documents.
-     * They are stored in svg_renderer, but they might move to somewhere else.
      */
     template <typename T>
     const std::string svg_renderer<T>::XML_DECLARATION = "<?xml version=\"1.0\" standalone=\"no\"?>";
     template <typename T>
     const std::string svg_renderer<T>::SVG_DTD = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";	
 
-    /*
-     * I'm not sure if these values should be stored or directly put inside
-     * a generator expression.
-     */
     template <typename T>
     const double svg_renderer<T>::SVG_VERSION = 1.1;
     template <typename T>
@@ -69,7 +64,8 @@ namespace mapnik
 	output_iterator_(output_iterator),
 	width_(m.width()),
 	height_(m.height()),
-	t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y)
+	t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
+	generator_(output_iterator)
     {
 	// nothing yet.
     }

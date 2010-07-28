@@ -80,6 +80,11 @@ struct MAPNIK_DECL coord_transform2
     {
         geom_.rewind(pos);
     }
+
+    Geometry const& geom() const
+    {
+	return geom_;
+    }
         
 private:
     Transform const& t_;

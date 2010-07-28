@@ -31,7 +31,17 @@ namespace mapnik
 				  Feature const& feature,
 				  proj_transform const& prj_trans)
     {
-	// nothing yet.
+	typedef coord_transform2<CoordTransform, geometry2d> path_type;
+
+	for(unsigned i=0; i<feature.num_geometries(); ++i)
+	{
+	    geometry2d const& geom = feature.get_geometry(i);
+	    if(geom.num_points() > 2)
+	    {
+		path_type path(t_, geom, prj_trans);
+		generator_.generate_path(path);
+	    }
+	}
     }
 
     template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,

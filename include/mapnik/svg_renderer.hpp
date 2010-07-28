@@ -27,6 +27,7 @@
 
 // mapnik
 #include <mapnik/feature_style_processor.hpp>
+#include <mapnik/svg/svg_generator.hpp>
 
 // stl
 #include <string>
@@ -40,7 +41,6 @@ namespace mapnik
     class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<T> >, 
 				     private boost::noncopyable
     {
-
     public:
 	svg_renderer(Map const& m, T& output_iterator, unsigned offset_x=0, unsigned offset_y=0);
 	~svg_renderer();
@@ -107,6 +107,7 @@ namespace mapnik
 	const int width_;
 	const int height_;
 	CoordTransform t_;
+	svg::svg_generator<T> generator_;
     };
 }
 

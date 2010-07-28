@@ -24,17 +24,20 @@
 #define MAPNIK_SVG_GENERATOR_HPP
 
 // mapnik
+#include <mapnik/ctrans.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/svg/svg_generator_path_grammar.hpp>
 
 // boost
 #include <boost/utility.hpp>
 
-namespace mapnik { //namespace svg {
+namespace mapnik { namespace svg {
 
     template <typename OutputIterator>
     class svg_generator : private boost::noncopyable
     {
-	typedef svg::svg_generator_path_grammar<OutputIterator> path_grammar;
+	typedef coord_transform2<CoordTransform, geometry2d> path_type;
+	typedef svg::svg_generator_path_grammar<OutputIterator, path_type> path_grammar;
 
     public:
 	explicit svg_generator(OutputIterator& output_iterator);
@@ -42,12 +45,11 @@ namespace mapnik { //namespace svg {
 
 	void generate_root();
 	void generate_rect();
-	void generate_path();	
+	void generate_path(path_type const& path);
 	
     private:
 	OutputIterator& output_iterator_;
-	path_grammar path_grammar_;
-    }
+    };
 }}
 
 #endif // MAPNIK_SVG_GENERATOR_HPP

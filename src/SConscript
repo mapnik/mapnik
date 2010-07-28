@@ -201,6 +201,7 @@ if ['SVG_RENDERER']: # svg backend
 	svg/process_raster_symbolizer.cpp
 	svg/process_shield_symbolizer.cpp
 	svg/process_text_symbolizer.cpp	
+	svg/svg_generator.cpp	
 	""")
 
 mapnik = env.SharedLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
