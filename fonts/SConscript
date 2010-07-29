@@ -32,5 +32,5 @@ includes.extend(glob.glob('unifont*.ttf'))
 
 fontscollectionpath = install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/fonts'
 
-if not env['SYSTEM_FONTS']:
+if 'uninstall' not in COMMAND_LINE_TARGETS and not env['SYSTEM_FONTS']:
     env.Alias(target='install', source=env.Install(fontscollectionpath, includes))
