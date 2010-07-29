@@ -39,6 +39,7 @@ class metawriter_json_stream : public metawriter, private boost::noncopyable
 {
 public:
     metawriter_json_stream(metawriter_properties dflt_properties);
+    ~metawriter_json_stream();
     virtual void add_box(box2d<double> box, Feature const &feature,
                          proj_transform const& prj_trans,
                          CoordTransform const& t,
@@ -48,9 +49,10 @@ public:
     virtual void stop();
     void set_stream(std::ostream *f) { f_ = f; }
 
+protected:
+    int count;
 private:
     std::ostream *f_;
-    int count;
 };
 
 /** JSON writer. */
@@ -58,7 +60,6 @@ class metawriter_json : public metawriter_json_stream
 {
 public:
     metawriter_json(metawriter_properties dflt_properties, path_expression_ptr fn);
-    ~metawriter_json();
 
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();

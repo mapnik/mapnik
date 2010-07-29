@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
  
-
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
@@ -39,25 +38,46 @@ UnicodeString const& metawriter_property_map::operator[](std::string const& key)
 {
     std::map<std::string, UnicodeString>::const_iterator it;
     it = m_.find(key);
-    if (it != m_.end()) return not_found_;
+    if (it == m_.end()) return not_found_;
     return (*it).second;
 }
+
+metawriter_properties::metawriter_properties(boost::optional<std::string> str)
+{
+    if (str) {
+        boost::split(*this, *str, boost::is_any_of(", "), boost::token_compress_on);
+    }
+}
+
+/********************************************************************************************/
 
 void metawriter_json_stream::start(metawriter_property_map const& properties)
 {
     assert(f_);
     *f_ << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
+    count = 0;
 }
 
 void metawriter_json_stream::stop()
 {
-    if (f_) {
+    if (count >= 0 && f_) {
         *f_ << " ] }\n";
+    }
+    count = -1;
+}
+
+metawriter_json_stream::~metawriter_json_stream()
+{
+    if (count >= 0) {
+#ifdef MAPNIK_DEBUG
+        std::cerr << "WARNING: GeoJSON metawriter not stopped before destroying it.";
+#endif
+        stop();
     }
 }
 
 metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
-    : metawriter(dflt_properties), count(0) {}
+    : metawriter(dflt_properties), count(-1), f_(0) {}
 
 void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
                               proj_transform const& prj_trans, CoordTransform const &t,
@@ -69,10 +89,17 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
         props = dflt_properties_;
     }
 
+#ifdef MAPNIK_DEBUG
     if (props.empty())
     {
         std::cerr << "WARNING: No properties available for GeoJSON metawriter.\n";
     }
+
+    if (count < 0)
+    {
+        std::cerr << "WARNING: Metawriter not started before using it.\n";
+    }
+#endif
 
     /* Coordinate transform in renderer:
        input: layer srs
@@ -130,11 +157,6 @@ metawriter_json::metawriter_json(metawriter_properties dflt_properties, path_exp
     : metawriter_json_stream(dflt_properties), fn_(fn) {}
 
 
-metawriter_json::~metawriter_json()
-{
-    stop();
-}
-
 void metawriter_json::start(metawriter_property_map const& properties)
 {
     std::string filename =
@@ -152,14 +174,14 @@ void metawriter_json::start(metawriter_property_map const& properties)
 void metawriter_json::stop()
 {
     metawriter_json_stream::stop();
-    if (f_.is_open()) f_.close();
-}
-
-
-metawriter_properties::metawriter_properties(boost::optional<std::string> str)
-{
-    if (str) {
-        boost::split(*this, *str, boost::is_any_of(", "), boost::token_compress_on);
+    if (f_.is_open()) {
+        f_.close();
     }
+#ifdef MAPNIK_DEBUG
+    else {
+        std::clog << "WARNING: File not open in metawriter_json::stop()!\n";
+    }
+#endif
 }
+
 };
