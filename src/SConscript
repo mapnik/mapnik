@@ -186,7 +186,7 @@ elif env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
             source.remove(cpp)
         source.insert(0,env2.SharedObject(cpp))
 
-if ['SVG_RENDERER']: # svg backend
+if env['SVG_RENDERER']: # svg backend
     source += Split(
         """
 	svg/svg_renderer.cpp
