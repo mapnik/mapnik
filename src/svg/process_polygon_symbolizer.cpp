@@ -39,7 +39,7 @@ namespace mapnik
 	    if(geom.num_points() > 2)
 	    {
 		path_type path(t_, geom, prj_trans);
-		generator_.generate_path(path);
+		generator_.generate_path(path, sym.get_fill());
 	    }
 	}
     }

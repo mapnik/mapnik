@@ -36,7 +36,7 @@
 
 BOOST_FUSION_ADAPT_CLASS(
     mapnik::vertex_vector2<mapnik::vertex2d>::vertex_type,
-    (unsigned, unsigned, obj.get<2>(), /**/)
+//    (unsigned, unsigned, obj.get<2>(), /**/)
     (mapnik::vertex_vector2<mapnik::vertex2d>::value_type, mapnik::vertex_vector2<mapnik::vertex2d>::value_type, obj.get<0>(), /**/)
     (mapnik::vertex_vector2<mapnik::vertex2d>::value_type, mapnik::vertex_vector2<mapnik::vertex2d>::value_type, obj.get<1>(), /**/)
     (mapnik::vertex_vector2<mapnik::vertex2d>::value_type, mapnik::vertex_vector2<mapnik::vertex2d>::value_type, obj.get<0>(), /**/)
@@ -131,21 +131,28 @@ namespace mapnik { namespace svg {
 	{
 	    using karma::int_;
 	    using karma::double_;
-	    using karma::eol;
-	    using karma::omit;
 	    using karma::_1;
 	    using karma::_a;
+	    using karma::eol;
+	    using karma::omit;
 
-	    svg_path = *(path_vertex);
-	    path_vertex = int_ 
-		<< omit[path_vertex_component_x] << omit[path_vertex_component_y]
+	    svg_path = 
+		lit('M')
+		<< *(path_vertex << lit(' '))
+		<< lit('Z');
+
+	    path_vertex = 
+		omit[path_vertex_component_x] << omit[path_vertex_component_y]
 		<< path_vertex_transformed_x
-		<< ' '
-		<< path_vertex_transformed_y
-		<< eol;
+		<< lit(' ')
+		<< path_vertex_transformed_y;
+
 	    path_vertex_component_x = double_[_1 = _a][bind(&coordinate_transformer::set_current_x, &ct_, _a)][_a = _val];
+
 	    path_vertex_component_y = double_[_1 = _a][bind(&coordinate_transformer::set_current_y, &ct_, _a)][_a = _val];
+
 	    path_vertex_transformed_x = double_[_1 = _a][bind(&coordinate_transformer::current_x, &ct_, _a)];
+
 	    path_vertex_transformed_y = double_[_1 = _a][bind(&coordinate_transformer::current_y, &ct_, _a)];
 	}
 

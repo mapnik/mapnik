@@ -46,10 +46,13 @@ namespace mapnik { namespace svg {
     void svg_generator<OutputIterator>::generate_rect() {}
 
     template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_path(path_type const& path) 
+    void svg_generator<OutputIterator>::generate_path(path_type const& path, color const& fill) 
     {	
 	path_grammar grammar(path);
+
+	karma::generate(output_iterator_, lit("<path d=\""));
 	karma::generate(output_iterator_, grammar, path.geom());
+	karma::generate(output_iterator_, lit("\" stroke=\"blue\" stroke-width=\"1px\"/>\n"));
     }
 
     template class svg_generator<std::ostream_iterator<char> >;

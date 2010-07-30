@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/ctrans.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/svg/svg_generator_path_grammar.hpp>
 
@@ -45,7 +46,7 @@ namespace mapnik { namespace svg {
 
 	void generate_root();
 	void generate_rect();
-	void generate_path(path_type const& path);
+	void generate_path(path_type const& path, color const& fill);
 	
     private:
 	OutputIterator& output_iterator_;
