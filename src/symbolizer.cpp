@@ -36,11 +36,18 @@ void symbolizer_base::add_metawriter(std::string const& name, metawriter_propert
 void symbolizer_base::cache_metawriters(Map const &m)
 {
     writer_ptr_ = m.find_metawriter(writer_name_);
+    if (writer_ptr_) {
+        properties_complete_ = writer_ptr_->get_default_properties();
+        properties_complete_.insert(properties_.begin(), properties_.end());
+    } else {
+        properties_complete_.clear();
+        std::cerr << "WARNING: Metawriter '" << writer_name_ << "' used but not defined.\n";
+    }
 }
 
 metawriter_with_properties symbolizer_base::get_metawriter() const
 {
-    return metawriter_with_properties(writer_ptr_, properties_);
+    return metawriter_with_properties(writer_ptr_, properties_complete_);
 }
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)

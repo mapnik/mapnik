@@ -59,11 +59,13 @@ class MAPNIK_DECL symbolizer_base {
         /** Get properties needed for metawriter.
           * \note This function is a helperfunction for class attribute_collector.
           */
-        metawriter_properties const& get_metawriter_properties() const { return properties_;}
+        metawriter_properties const& get_metawriter_properties() const {return properties_complete_;};
     private:
         metawriter_properties properties_;
+        metawriter_properties properties_complete_;
         std::string writer_name_;
         metawriter_ptr writer_ptr_;
+
 };
 
 typedef boost::array<double,6> transform_type;

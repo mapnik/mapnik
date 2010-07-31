@@ -83,18 +83,7 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
                               proj_transform const& prj_trans, CoordTransform const &t,
                               const metawriter_properties& properties)
 {
-    metawriter_properties props(properties);
-    if (props.empty())
-    {
-        props = dflt_properties_;
-    }
-
 #ifdef MAPNIK_DEBUG
-    if (props.empty())
-    {
-        std::cerr << "WARNING: No properties available for GeoJSON metawriter.\n";
-    }
-
     if (count < 0)
     {
         std::cerr << "WARNING: Metawriter not started before using it.\n";
@@ -134,7 +123,7 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
             "\n  \"properties\": {";
     std::map<std::string, value> fprops = feature.props();
     int i = 0;
-    BOOST_FOREACH(std::string p, props)
+    BOOST_FOREACH(std::string p, properties)
     {
         std::map<std::string, value>::const_iterator itr = fprops.find(p);
         std::string text;

@@ -81,6 +81,7 @@ class metawriter
                              metawriter_properties const& properties = metawriter_properties())=0;
         virtual void start(metawriter_property_map const& properties) {};
         virtual void stop() {};
+        metawriter_properties const& get_default_properties() const { return dflt_properties_;}
     protected:
         metawriter_properties dflt_properties_;
 };
