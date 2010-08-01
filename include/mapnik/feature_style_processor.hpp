@@ -94,6 +94,7 @@ public:
         for (;metaItr!=metaItrEnd; ++metaItr)
         {
             metaItr->second->start(m_.metawriter_output_properties);
+            metaItr->second->set_size(m_.width(), m_.height());
         }
                        
         try

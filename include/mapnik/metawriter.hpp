@@ -80,10 +80,13 @@ class metawriter
                              CoordTransform const &t,
                              metawriter_properties const& properties = metawriter_properties())=0;
         virtual void start(metawriter_property_map const& properties) {};
+        void set_size(int width, int height) { width_ = width; height_ = height; }
         virtual void stop() {};
         metawriter_properties const& get_default_properties() const { return dflt_properties_;}
     protected:
         metawriter_properties dflt_properties_;
+        int width_;
+        int height_;
 };
 
 typedef boost::shared_ptr<metawriter> metawriter_ptr;

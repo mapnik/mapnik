@@ -105,6 +105,9 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
        output: WGS84
     */
 
+    /* Check if feature is in bounds. */
+    if (box.maxx() < 0 || box.maxy() < 0 || box.minx() > width_ || box.miny() > height_) return;
+
     proj_transform trans(prj_trans.source(), projection("+proj=latlong +datum=WGS84"));
     //t_ coord transform has transform for box2d combined with prj_trans
     box = t.backward(box, trans);
