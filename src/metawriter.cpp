@@ -55,20 +55,20 @@ void metawriter_json_stream::start(metawriter_property_map const& properties)
 {
     assert(f_);
     *f_ << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
-    count = 0;
+    count_ = 0;
 }
 
 void metawriter_json_stream::stop()
 {
-    if (count >= 0 && f_) {
+    if (count_ >= 0 && f_) {
         *f_ << " ] }\n";
     }
-    count = -1;
+    count_ = -1;
 }
 
 metawriter_json_stream::~metawriter_json_stream()
 {
-    if (count >= 0) {
+    if (count_ >= 0) {
 #ifdef MAPNIK_DEBUG
         std::cerr << "WARNING: GeoJSON metawriter not stopped before destroying it.";
 #endif
@@ -77,14 +77,14 @@ metawriter_json_stream::~metawriter_json_stream()
 }
 
 metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
-    : metawriter(dflt_properties), count(-1), f_(0) {}
+    : metawriter(dflt_properties), count_(-1), f_(0) {}
 
 void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
                               proj_transform const& prj_trans, CoordTransform const &t,
                               const metawriter_properties& properties)
 {
 #ifdef MAPNIK_DEBUG
-    if (count < 0)
+    if (count_ < 0)
     {
         std::cerr << "WARNING: Metawriter not started before using it.\n";
     }
@@ -117,7 +117,7 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
     double maxx = box.maxx();
     double maxy = box.maxy();
 
-    if (count++) *f_ << ",\n";
+    if (count_++) *f_ << ",\n";
     *f_ << std::fixed << std::setprecision(8) << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"Polygon\",\n    \"coordinates\": [ [ [" <<
             minx << ", " << miny << "], [" <<
             maxx << ", " << miny << "], [" <<
@@ -175,5 +175,15 @@ void metawriter_json::stop()
     }
 #endif
 }
+
+void metawriter_json::set_filename(path_expression_ptr fn)
+{
+    fn_ = fn;
+}
+
+ path_expression_ptr metawriter_json::get_filename() const
+ {
+     return fn_;
+ }
 
 };

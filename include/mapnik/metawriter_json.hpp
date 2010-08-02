@@ -48,9 +48,13 @@ public:
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();
     void set_stream(std::ostream *f) { f_ = f; }
+    std::ostream *get_stream() const { return f_; }
+    void set_only_nonempty(bool only_nonempty) { only_nonempty_ = only_nonempty; }
+    bool get_only_nonempty() { return only_nonempty_; }
 
 protected:
-    int count;
+    int count_;
+    bool only_nonempty_;
 private:
     std::ostream *f_;
 };
@@ -63,7 +67,8 @@ public:
 
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();
-
+    void set_filename(path_expression_ptr fn);
+    path_expression_ptr get_filename() const;
 private:
     path_expression_ptr fn_;
     std::fstream f_;
