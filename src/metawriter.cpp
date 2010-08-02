@@ -32,6 +32,10 @@
 #include <iomanip>
 #include <cstdio>
 
+#define HEADER_NOT_WRITTEN -1
+#define STOPPED -2
+#define STARTED 0
+
 namespace mapnik {
 
 UnicodeString const& metawriter_property_map::operator[](std::string const& key) const
@@ -53,22 +57,31 @@ metawriter_properties::metawriter_properties(boost::optional<std::string> str)
 
 void metawriter_json_stream::start(metawriter_property_map const& properties)
 {
+    if (!only_nonempty_) {
+        write_header();
+    } else {
+        count_ = HEADER_NOT_WRITTEN;
+    }
+}
+
+void metawriter_json_stream::write_header()
+{
     assert(f_);
     *f_ << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
-    count_ = 0;
+    count_ = STARTED;
 }
 
 void metawriter_json_stream::stop()
 {
-    if (count_ >= 0 && f_) {
+    if (count_ >= STARTED && f_) {
         *f_ << " ] }\n";
     }
-    count_ = -1;
+    count_ = STOPPED;
 }
 
 metawriter_json_stream::~metawriter_json_stream()
 {
-    if (count_ >= 0) {
+    if (count_ >= STARTED) {
 #ifdef MAPNIK_DEBUG
         std::cerr << "WARNING: GeoJSON metawriter not stopped before destroying it.";
 #endif
@@ -77,14 +90,18 @@ metawriter_json_stream::~metawriter_json_stream()
 }
 
 metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
-    : metawriter(dflt_properties), count_(-1), f_(0) {}
+    : metawriter(dflt_properties), count_(-1), only_nonempty_(true), f_(0) {}
 
 void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
                               proj_transform const& prj_trans, CoordTransform const &t,
                               const metawriter_properties& properties)
 {
+    /* Check if feature is in bounds. */
+    if (box.maxx() < 0 || box.maxy() < 0 || box.minx() > width_ || box.miny() > height_) return;
+
+    if (count_ == HEADER_NOT_WRITTEN) write_header();
 #ifdef MAPNIK_DEBUG
-    if (count_ < 0)
+    if (count_ == STOPPED)
     {
         std::cerr << "WARNING: Metawriter not started before using it.\n";
     }
@@ -104,9 +121,6 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
        trans.forward()
        output: WGS84
     */
-
-    /* Check if feature is in bounds. */
-    if (box.maxx() < 0 || box.maxy() < 0 || box.minx() > width_ || box.miny() > height_) return;
 
     proj_transform trans(prj_trans.source(), projection("+proj=latlong +datum=WGS84"));
     //t_ coord transform has transform for box2d combined with prj_trans
@@ -151,15 +165,20 @@ metawriter_json::metawriter_json(metawriter_properties dflt_properties, path_exp
 
 void metawriter_json::start(metawriter_property_map const& properties)
 {
-    std::string filename =
+    filename_ =
         path_processor<metawriter_property_map>::evaluate(*fn_, properties);
 #ifdef MAPNIK_DEBUG
-    std::clog << "Metawriter JSON: filename=" << filename << "\n";
+    std::clog << "Metawriter JSON: filename=" << filename_ << "\n";
 #endif
-    f_.open(filename.c_str(), std::fstream::out | std::fstream::trunc);
-    if (f_.fail()) perror((std::string("Metawriter JSON: Failed to open file ") + filename).c_str());
-    set_stream(&f_);
     metawriter_json_stream::start(properties);
+}
+
+void metawriter_json::write_header()
+{
+    f_.open(filename_.c_str(), std::fstream::out | std::fstream::trunc);
+    if (f_.fail()) perror((std::string("Metawriter JSON: Failed to open file ") + filename_).c_str());
+    set_stream(&f_);
+    metawriter_json_stream::write_header();
 }
 
 

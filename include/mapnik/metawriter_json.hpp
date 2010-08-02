@@ -55,6 +55,7 @@ public:
 protected:
     int count_;
     bool only_nonempty_;
+    virtual void write_header();
 private:
     std::ostream *f_;
 };
@@ -72,6 +73,9 @@ public:
 private:
     path_expression_ptr fn_;
     std::fstream f_;
+    std::string filename_;
+protected:
+    virtual void write_header();
 };
 
 };
