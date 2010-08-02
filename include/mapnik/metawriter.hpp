@@ -76,11 +76,11 @@ class metawriter
           * \param properties List of properties to output
           */
         virtual void add_box(box2d<double> box, Feature const &feature,
-                             proj_transform const& prj_trans,
                              CoordTransform const &t,
                              metawriter_properties const& properties = metawriter_properties())=0;
         virtual void start(metawriter_property_map const& properties) {};
         void set_size(int width, int height) { width_ = width; height_ = height; }
+        virtual void set_map_srs(projection const& proj) = 0;
         virtual void stop() {};
         metawriter_properties const& get_default_properties() const { return dflt_properties_;}
     protected:

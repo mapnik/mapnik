@@ -117,7 +117,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                     metawriter_with_properties writer = sym.get_metawriter();
                     if (writer.first)
                     {
-                        writer.first->add_box(extent, feature, prj_trans, t_, writer.second);
+                        writer.first->add_box(extent, feature, t_, writer.second);
                     }
                 }
             }   
@@ -158,7 +158,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                     metawriter_with_properties writer = sym.get_metawriter();
                     if (writer.first)
                     {
-                        writer.first->add_box(label_ext, feature, prj_trans, t_, writer.second);
+                        writer.first->add_box(label_ext, feature, t_, writer.second);
                     }
                 }
             }

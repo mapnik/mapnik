@@ -88,18 +88,20 @@ public:
 #endif          
         Processor & p = static_cast<Processor&>(*this);
         p.start_map_processing(m_);
-        Map::const_metawriter_iterator metaItr = m_.begin_metawriters();
-        Map::const_metawriter_iterator metaItrEnd = m_.end_metawriters();
-        
-        for (;metaItr!=metaItrEnd; ++metaItr)
-        {
-            metaItr->second->start(m_.metawriter_output_properties);
-            metaItr->second->set_size(m_.width(), m_.height());
-        }
                        
         try
         {
             projection proj(m_.srs()); // map projection
+
+            Map::const_metawriter_iterator metaItr = m_.begin_metawriters();
+            Map::const_metawriter_iterator metaItrEnd = m_.end_metawriters();
+            for (;metaItr!=metaItrEnd; ++metaItr)
+            {
+                metaItr->second->set_size(m_.width(), m_.height());
+                metaItr->second->set_map_srs(proj);
+                metaItr->second->start(m_.metawriter_output_properties);
+            }
+
             double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
             scale_denom *= scale_factor_;
 #ifdef MAPNIK_DEBUG
@@ -112,16 +114,16 @@ public:
                     apply_to_layer(lyr, p, proj, scale_denom);
                 }
             }
+
+            metaItr = m_.begin_metawriters();
+            for (;metaItr!=metaItrEnd; ++metaItr)
+            {
+                metaItr->second->stop();
+            }
         }
         catch (proj_init_error& ex)
         {
             std::clog << "proj_init_error:" << ex.what() << "\n"; 
-        }
-
-        metaItr = m_.begin_metawriters();
-        for (;metaItr!=metaItrEnd; ++metaItr)
-        {
-            metaItr->second->stop();
         }
         
         p.end_map_processing(m_);

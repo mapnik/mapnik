@@ -57,6 +57,7 @@ metawriter_properties::metawriter_properties(boost::optional<std::string> str)
 
 void metawriter_json_stream::start(metawriter_property_map const& properties)
 {
+    assert(trans_);
     if (!only_nonempty_) {
         write_header();
     } else {
@@ -87,14 +88,19 @@ metawriter_json_stream::~metawriter_json_stream()
 #endif
         stop();
     }
+    if (trans_) delete trans_;
 }
 
+
 metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
-    : metawriter(dflt_properties), count_(-1), only_nonempty_(true), f_(0) {}
+    : metawriter(dflt_properties), count_(-1), only_nonempty_(true),
+      trans_(0), output_srs_("+proj=latlong +datum=WGS84"), f_(0)
+{
+}
+
 
 void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
-                              proj_transform const& prj_trans, CoordTransform const &t,
-                              const metawriter_properties& properties)
+                              CoordTransform const &t, const metawriter_properties& properties)
 {
     /* Check if feature is in bounds. */
     if (box.maxx() < 0 || box.maxy() < 0 || box.minx() > width_ || box.miny() > height_) return;
@@ -117,14 +123,13 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
        Our transform:
        input: pixels
        t_.backward()
-       intermediate: map srs (available via prj_trans.source())
-       trans.forward()
+       intermediate: map srs
+       trans_.forward()
        output: WGS84
     */
 
-    proj_transform trans(prj_trans.source(), projection("+proj=latlong +datum=WGS84"));
-    //t_ coord transform has transform for box2d combined with prj_trans
-    box = t.backward(box, trans);
+    //t_ coord transform has transform for box2d combined with proj_transform
+    box = t.backward(box, *trans_);
 
     double minx = box.minx();
     double miny = box.miny();
@@ -154,6 +159,12 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
     }
 
     *f_ << "\n} }";
+}
+
+void metawriter_json_stream::set_map_srs(projection const& input_srs_)
+{
+    if (trans_) delete trans_;
+    trans_ = new proj_transform(input_srs_, output_srs_);
 }
 
 

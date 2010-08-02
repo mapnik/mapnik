@@ -41,7 +41,6 @@ public:
     metawriter_json_stream(metawriter_properties dflt_properties);
     ~metawriter_json_stream();
     virtual void add_box(box2d<double> box, Feature const &feature,
-                         proj_transform const& prj_trans,
                          CoordTransform const& t,
                          metawriter_properties const& properties);
 
@@ -51,10 +50,12 @@ public:
     std::ostream *get_stream() const { return f_; }
     void set_only_nonempty(bool only_nonempty) { only_nonempty_ = only_nonempty; }
     bool get_only_nonempty() { return only_nonempty_; }
-
+    virtual void set_map_srs(projection const& proj);
 protected:
     int count_;
     bool only_nonempty_;
+    proj_transform *trans_;
+    projection output_srs_;
     virtual void write_header();
 private:
     std::ostream *f_;
