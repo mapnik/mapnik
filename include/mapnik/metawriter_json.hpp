@@ -61,6 +61,8 @@ private:
     std::ostream *f_;
 };
 
+typedef boost::shared_ptr<metawriter_json_stream> metawriter_json_stream_ptr;
+
 /** JSON writer. */
 class metawriter_json : public metawriter_json_stream
 {
@@ -78,6 +80,8 @@ private:
 protected:
     virtual void write_header();
 };
+
+typedef boost::shared_ptr<metawriter_json> metawriter_json_ptr;
 
 };
 

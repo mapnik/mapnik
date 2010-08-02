@@ -363,7 +363,12 @@ void map_parser::parse_metawriter(Map & map, ptree const & pt)
         if (type == "json") {
             string file = get_attr<string>(pt, "file");
             optional<string> properties = get_opt_attr<string>(pt, "default-output");
-            writer = metawriter_ptr(new metawriter_json(properties, parse_path(file)));
+            metawriter_json_ptr json = metawriter_json_ptr(new metawriter_json(properties, parse_path(file)));
+            optional<boolean> only_nonempty = get_opt_attr<boolean>(pt, "only-nonempty");
+            if (only_nonempty) {
+                json->set_only_nonempty(*only_nonempty);
+            }
+            writer = json;
         } else {
             throw config_error(string("Unknown type '") + type + "'");
         }
