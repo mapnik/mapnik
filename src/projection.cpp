@@ -34,7 +34,7 @@ namespace mapnik {
 boost::mutex projection::mutex_;
 #endif
    
-projection::projection(std::string  params)
+projection::projection(std::string const& params)
     : params_(params)
 { 
     init(); //
