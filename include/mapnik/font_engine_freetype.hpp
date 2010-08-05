@@ -583,6 +583,7 @@ struct text_renderer : private boost::noncopyable
                                       height - bit->top);
                     }
                 }
+                FT_Done_Glyph(g);
             }    
         }
         //render actual text
