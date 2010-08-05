@@ -572,7 +572,7 @@ struct text_renderer : private boost::noncopyable
                 if (!error)
                 {
                     FT_Glyph_Transform(g,0,&start);
-                    FT_Glyph_Stroke(&g,stroker_.get(),0);
+                    FT_Glyph_Stroke(&g,stroker_.get(),1);
                     error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
                     if ( ! error )
                     {
