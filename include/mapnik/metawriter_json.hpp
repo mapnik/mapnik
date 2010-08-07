@@ -40,7 +40,7 @@ class metawriter_json_stream : public metawriter, private boost::noncopyable
 public:
     metawriter_json_stream(metawriter_properties dflt_properties);
     ~metawriter_json_stream();
-    virtual void add_box(box2d<double> box, Feature const &feature,
+    virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties);
 

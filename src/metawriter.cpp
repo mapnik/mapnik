@@ -99,8 +99,8 @@ metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_proper
 }
 
 
-void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
-                              CoordTransform const &t, const metawriter_properties& properties)
+void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& feature,
+                              CoordTransform const& t, metawriter_properties const& properties)
 {
     /* Check if feature is in bounds. */
     if (box.maxx() < 0 || box.maxy() < 0 || box.minx() > width_ || box.miny() > height_) return;
@@ -129,12 +129,12 @@ void metawriter_json_stream::add_box(box2d<double> box, Feature const &feature,
     */
 
     //t_ coord transform has transform for box2d combined with proj_transform
-    box = t.backward(box, *trans_);
+    box2d<double> transformed = t.backward(box, *trans_);
 
-    double minx = box.minx();
-    double miny = box.miny();
-    double maxx = box.maxx();
-    double maxy = box.maxy();
+    double minx = transformed.minx();
+    double miny = transformed.miny();
+    double maxx = transformed.maxx();
+    double maxy = transformed.maxy();
 
     if (count_++) *f_ << ",\n";
     *f_ << std::fixed << std::setprecision(8) << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"Polygon\",\n    \"coordinates\": [ [ [" <<
