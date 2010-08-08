@@ -40,6 +40,9 @@
 
 namespace mapnik {
 
+class placement;
+
+/** Implementation of std::map that also returns const& for operator[]. */
 class metawriter_property_map
 {
 public:
@@ -78,18 +81,36 @@ class metawriter
         virtual void add_box(box2d<double> const& box, Feature const& feature,
                              CoordTransform const& t,
                              metawriter_properties const& properties = metawriter_properties())=0;
+        /** Start processing.
+          * Write file header, init database connection, ...
+          *
+          * \param properties metawriter_property_map object with userdefined values.
+          *        Useful for setting filename etc.
+          */
         virtual void start(metawriter_property_map const& properties) {};
-        void set_size(int width, int height) { width_ = width; height_ = height; }
-        virtual void set_map_srs(projection const& proj) = 0;
+        /** Stop processing.
+          * Write file footer, close database connection, ...
+          */
         virtual void stop() {};
+        /** Set output size (pixels).
+          * All features that are completely outside this size are discarded.
+          */
+        void set_size(int width, int height) { width_ = width; height_ = height; }
+        /** Set Map object's srs. */
+        virtual void set_map_srs(projection const& proj) = 0;
+        /** Return the list of default properties. */
         metawriter_properties const& get_default_properties() const { return dflt_properties_;}
     protected:
         metawriter_properties dflt_properties_;
+        /** Output width (pixels). */
         int width_;
+        /** Output height (pixels). */
         int height_;
 };
 
+/** Shared pointer to metawriter object. */
 typedef boost::shared_ptr<metawriter> metawriter_ptr;
+/** Metawriter object + properties. */<
 typedef std::pair<metawriter_ptr, metawriter_properties> metawriter_with_properties;
 
 };

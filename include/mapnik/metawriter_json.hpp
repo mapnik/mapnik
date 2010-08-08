@@ -46,14 +46,20 @@ public:
 
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();
+    /** Set output stream. This function has to be called before the first output is made. */
     void set_stream(std::ostream *f) { f_ = f; }
+    /** Get output stream. */
     std::ostream *get_stream() const { return f_; }
+    /** Only write header/footer to file with one or more features. */
     void set_only_nonempty(bool only_nonempty) { only_nonempty_ = only_nonempty; }
+    /** See set_only_nonempty(). */
     bool get_only_nonempty() { return only_nonempty_; }
     virtual void set_map_srs(projection const& proj);
 protected:
+    /** Features written. */
     int count_;
     bool only_nonempty_;
+    /** Transformation from map srs to output srs. */
     proj_transform *trans_;
     projection output_srs_;
     virtual void write_header();
@@ -61,6 +67,7 @@ private:
     std::ostream *f_;
 };
 
+/** Shared pointer to metawriter_json_stream object. */
 typedef boost::shared_ptr<metawriter_json_stream> metawriter_json_stream_ptr;
 
 /** JSON writer. */
@@ -71,7 +78,13 @@ public:
 
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();
+    /** Set filename template.
+      *
+      * This template is processed with values from Map's metawriter properties to
+      * create the actual filename during start() call.
+      */
     void set_filename(path_expression_ptr fn);
+    /** Get filename template. */
     path_expression_ptr get_filename() const;
 private:
     path_expression_ptr fn_;
@@ -81,6 +94,7 @@ protected:
     virtual void write_header();
 };
 
+/** Shared pointer to metawriter_json object. */
 typedef boost::shared_ptr<metawriter_json> metawriter_json_ptr;
 
 };
