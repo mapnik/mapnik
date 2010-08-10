@@ -47,7 +47,7 @@ struct placement : boost::noncopyable
 
     ~placement();
 
-    string_info & info;
+    string_info & info; // should only be used for finding placement. doesn't necessarily match placements.vertex() values
 
     position displacement_;
     label_placement_e label_placement;

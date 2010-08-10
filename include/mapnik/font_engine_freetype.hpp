@@ -142,7 +142,12 @@ private:
 class MAPNIK_DECL font_face_set : private boost::noncopyable
 {
 public:
-    typedef std::pair<unsigned,unsigned> dimension_t;
+    class dimension_t {
+    public:
+        dimension_t(unsigned width_, int ymax_, int ymin_) :  width(width_), height(ymax_-ymin_), ymin(ymin_) {}
+        unsigned width, height;
+        int ymin;
+    };
 
     font_face_set(void)
         : faces_() {}
@@ -194,21 +199,20 @@ public:
 
         error = FT_Load_Glyph (face, glyph->get_index(), FT_LOAD_NO_HINTING);
         if ( error )
-            return dimension_t(0, 0);
+            return dimension_t(0, 0, 0);
 
         error = FT_Get_Glyph(face->glyph, &image);
         if ( error )
-            return dimension_t(0, 0);
+            return dimension_t(0, 0, 0);
 
         FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &glyph_bbox);
         FT_Done_Glyph(image);
 
         unsigned tempx = face->glyph->advance.x >> 6;
-        unsigned tempy = glyph_bbox.yMax - glyph_bbox.yMin;
 
         //std::clog << "glyph: " << glyph_index << " x: " << tempx << " y: " << tempy << std::endl;
 
-        return dimension_t(tempx, tempy);
+        return dimension_t(tempx, glyph_bbox.yMax, glyph_bbox.yMin);
     }
 
     void get_string_info(string_info & info)
@@ -237,9 +241,9 @@ public:
                         do {
                             UChar ch = text[logicalStart++];
                             dimension_t char_dim = character_dimensions(ch);
-                            info.add_info(ch, char_dim.first, char_dim.second);
-                            width += char_dim.first;
-                            height = char_dim.second > height ? char_dim.second : height;
+                            info.add_info(ch, char_dim.width, char_dim.height);
+                            width += char_dim.width;
+                            height = char_dim.height > height ? char_dim.height : height;
 
                         } while (--length > 0);
                     }
@@ -271,9 +275,9 @@ public:
                                 for (int j=0;j<shaped.length();++j)
                                 {
                                     dimension_t char_dim = character_dimensions(shaped[j]);
-                                    info.add_info(shaped[j], char_dim.first, char_dim.second);
-                                    width += char_dim.first;
-                                    height = char_dim.second > height ? char_dim.second : height;
+                                    info.add_info(shaped[j], char_dim.width, char_dim.height);
+                                    width += char_dim.width;
+                                    height = char_dim.height > height ? char_dim.height : height;
                                 }
                             }
                         } else {
@@ -281,9 +285,9 @@ public:
                             for (int j=0;j<arabic.length();++j)
                             {
                                 dimension_t char_dim = character_dimensions(arabic[j]);
-                                info.add_info(arabic[j], char_dim.first, char_dim.second);
-                                width += char_dim.first;
-                                height = char_dim.second > height ? char_dim.second : height;
+                                info.add_info(arabic[j], char_dim.width, char_dim.height);
+                                width += char_dim.width;
+                                height = char_dim.height > height ? char_dim.height : height;
                             }
                         }
                     }
