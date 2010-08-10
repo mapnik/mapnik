@@ -182,7 +182,7 @@ private:
             std::set<std::string> names;
             attribute_collector collector(names);
             
-            std::vector<std::string> const& style_names = lay.styles();          
+            std::vector<std::string> const& style_names = lay.styles();
             // iterate through all named styles collecting active styles and attribute names
             BOOST_FOREACH(std::string const& style_name, style_names)
             {
@@ -193,7 +193,7 @@ private:
                     continue;
                 }
                 
-                const std::vector<rule_type>& rules=(*style).get_rules();    
+                const std::vector<rule_type>& rules=(*style).get_rules();
                 bool active_rules=false;
                 
                 BOOST_FOREACH(rule_type const& rule, rules)
@@ -215,7 +215,7 @@ private:
             }
             
             // push all property names
-            BOOST_FOREACH(std::string const& name, names)    
+            BOOST_FOREACH(std::string const& name, names)
             {
                 q.add_property_name(name);
             }
@@ -224,7 +224,7 @@ private:
             bool cache_features = style_names.size()>1?true:false;
             bool first = true;
             
-            BOOST_FOREACH (feature_type_style * style, active_styles)    
+            BOOST_FOREACH (feature_type_style * style, active_styles)
             {
                 std::vector<rule_type*> if_rules;
                 std::vector<rule_type*> else_rules;
@@ -241,7 +241,7 @@ private:
                         }
                         else
                         {
-                            if_rules.push_back(const_cast<rule_type*>(&rule));               
+                            if_rules.push_back(const_cast<rule_type*>(&rule));
                         }
                         
                         if (ds->type() == datasource::Raster)
@@ -290,7 +290,7 @@ private:
                 }
                 else
                 {
-                    fs = ds->features(q);                
+                    fs = ds->features(q);
                 }
                 
                 if (fs)
@@ -298,7 +298,7 @@ private:
                     feature_ptr feature;
                     while ((feature = fs->next()))
                     {                  
-                        bool do_else=true;              
+                        bool do_else=true;
                         
                         if (cache_features)
                         {
@@ -314,41 +314,43 @@ private:
                                 do_else=false;
                                 rule_type::symbolizers const& symbols = rule->get_symbolizers();
 
-				// if the underlying renderer is not able to process the complete set of symbolizers,
-				// process one by one.
-				if(!p.process(symbols,*feature,prj_trans))
-				{
-				    BOOST_FOREACH (symbolizer const& sym, symbols)
-				    {   
-					boost::apply_visitor
-					    (symbol_dispatch(p,*feature,prj_trans),sym);
-				    }
-				}
-                            }                           
+                                // if the underlying renderer is not able to process the complete set of symbolizers,
+                                // process one by one.
+#ifdef SVG_RENDERER
+                                if(!p.process(symbols,*feature,prj_trans))
+#endif
+                                {
+
+                                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                                    {   
+                                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                                    }
+                                }
+                            }
                         }
                         if (do_else)
                         {
                             BOOST_FOREACH( rule_type * rule, else_rules )
                             {
                                 rule_type::symbolizers const& symbols = rule->get_symbolizers();
-
-				// if the underlying renderer is not able to process the complete set of symbolizers,
-				// process one by one.
-				if(!p.process(symbols,*feature,prj_trans))
-				{
-				    BOOST_FOREACH (symbolizer const& sym, symbols)
-				    {
-					boost::apply_visitor
-					    (symbol_dispatch(p,*feature,prj_trans),sym);
-				    }
-				}
+                                // if the underlying renderer is not able to process the complete set of symbolizers,
+                                // process one by one.
+#ifdef SVG_RENDERER
+                                if(!p.process(symbols,*feature,prj_trans))
+#endif
+                                {
+                                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                                    {
+                                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                                    }
+                                }
                             }
-                        }     
+                        }
                     }
                     cache_features = false;
                 }
             }
-        }               
+        }
         
         p.end_layer_processing(lay);
     } 
