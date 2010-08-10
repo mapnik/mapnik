@@ -52,7 +52,7 @@ class MAPNIK_DECL projection
 {
     friend class proj_transform;
 public:
-    explicit projection(std::string const& params);
+    explicit projection(std::string const& params = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
     projection(projection const& rhs);
     ~projection();
         
