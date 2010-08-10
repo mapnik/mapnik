@@ -140,7 +140,7 @@ private:
 };
 
 template <typename T>
-struct vertex_vector2 : boost::noncopyable
+struct vertex_vector2 //: boost::noncopyable
 {
     typedef typename T::type value_type;
     typedef boost::tuple<value_type,value_type,char> vertex_type;
