@@ -171,9 +171,11 @@ void metawriter_json_stream::add_text(placement const& p,
         bool inside = false;
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
             current_placement.rewind();
+            int cx = current_placement.starting_x;
+            int cy = current_placement.starting_y;
             int c; double x, y, angle;
             current_placement.vertex(&c, &x, &y, &angle);
-            if (x > 0 && x < width_ && y > 0 && y < height_) {
+            if (x+cx >= 0 && x+cx < width_ && y+cy >= 0 && y+cy < height_) {
                 inside = true;
                 break;
             }
@@ -182,26 +184,41 @@ void metawriter_json_stream::add_text(placement const& p,
 
         write_feature_header("MultiPolygon");
         *f_ << "[";
+        current_placement.rewind();
 
+        int c = ' ';
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
-            if (i) {
+            if (c != ' ') {
                 *f_ << ",";
             }
-            int c; double x, y, angle;
+            double x, y, angle;
             current_placement.vertex(&c, &x, &y, &angle);
+            if (c == ' ') continue;
             font_face_set::dimension_t ci = face->character_dimensions(c);
 
             //TODO: Optimize for angle == 0
-            double sina = sin(angle);
-            double cosa = cos(angle);
-            double x0 = current_placement.starting_x + x - sina*ci.ymin;
-            double y0 = current_placement.starting_y - y - cosa*ci.ymin;
-            double x1 = x0 + ci.width * cosa;
-            double y1 = y0 - ci.width * sina;
-            double x2 = x0 + (ci.width * cosa - ci.height * sina);
-            double y2 = y0 - (ci.width * sina + ci.height * cosa);
-            double x3 = x0 - ci.height * sina;
-            double y3 = y0 - ci.height * cosa;
+            double x0, y0, x1, y1, x2, y2, x3, y3;
+            if (abs(angle) > 0.01) {
+                double sina = sin(angle);
+                double cosa = cos(angle);
+                x0 = current_placement.starting_x + x - sina*ci.ymin;
+                y0 = current_placement.starting_y - y - cosa*ci.ymin;
+                x1 = x0 + ci.width * cosa;
+                y1 = y0 - ci.width * sina;
+                x2 = x0 + (ci.width * cosa - ci.height * sina);
+                y2 = y0 - (ci.width * sina + ci.height * cosa);
+                x3 = x0 - ci.height * sina;
+                y3 = y0 - ci.height * cosa;
+            } else {
+                x0 = current_placement.starting_x + x;
+                y0 = current_placement.starting_y - y - ci.ymin;
+                x1 = x0 + ci.width;
+                y1 = y0;
+                x2 = x0 + ci.width;
+                y2 = y0 - ci.height;
+                x3 = x0;
+                y3 = y0 - ci.height;
+            }
 
             *f_ << "\n     [[";
             write_point(t, x0, y0);
