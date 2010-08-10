@@ -86,6 +86,8 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
             // Placement is valid, render glyph and update detector.
             ren.render(x, y);
             detector_.insert(ext);
+            metawriter_with_properties writer = sym.get_metawriter();
+            if (writer.first) writer.first->add_box(ext, feature, t_, writer.second);
         }
     }
     else
