@@ -1680,10 +1680,9 @@ void map_parser::parse_glyph_symbolizer(rule_type & rule, ptree const &sym)
             glyph_sym.set_value(parse_expression(*value, "utf8"));
 
         // size
-        optional<std::string> size =
-            get_opt_attr<std::string>(sym, "size");
-        if (size)
-            glyph_sym.set_size(parse_expression(*size, "utf8"));
+        std::string size =
+            get_attr<std::string>(sym, "size");
+        glyph_sym.set_size(parse_expression(*size, "utf8"));
 
         // color
         optional<std::string> _color =
