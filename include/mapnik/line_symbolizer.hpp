@@ -32,13 +32,13 @@ namespace mapnik
 struct MAPNIK_DECL line_symbolizer : public symbolizer_base
 {
     explicit line_symbolizer()
-        : stroke_() {}
+        : symbolizer_base(), stroke_() {}
         
     line_symbolizer(stroke const& stroke)
-        : stroke_(stroke) {}
+        : symbolizer_base(), stroke_(stroke) {}
         
     line_symbolizer(color const& pen,float width=1.0)
-        : stroke_(pen,width) {}
+        : symbolizer_base(), stroke_(pen,width) {}
         
     stroke const& get_stroke() const
     {

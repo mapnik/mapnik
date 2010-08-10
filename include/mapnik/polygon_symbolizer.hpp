@@ -34,12 +34,14 @@ namespace mapnik
 struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
 {
     explicit polygon_symbolizer() 
-        : fill_(color(128,128,128)),
+        : symbolizer_base(),
+        fill_(color(128,128,128)),
         opacity_(1.0),
         gamma_(1.0) {}
 
     polygon_symbolizer(color const& fill)
-        : fill_(fill),
+        : symbolizer_base(),
+        fill_(fill),
         opacity_(1.0),
         gamma_(1.0) {}
         
@@ -77,13 +79,15 @@ private:
 struct MAPNIK_DECL building_symbolizer : public symbolizer_base
 {
     explicit building_symbolizer() 
-        : fill_(color(128,128,128)),
+        : symbolizer_base(),
+        fill_(color(128,128,128)),
         height_(0.0),
         opacity_(1.0)
         {}
        
     building_symbolizer(color const& fill,double height)
-        : fill_(fill),
+        : symbolizer_base(),
+        fill_(fill),
         height_(height),
         opacity_(1.0) {}
        

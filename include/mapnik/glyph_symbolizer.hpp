@@ -31,7 +31,8 @@ DEFINE_ENUM(angle_mode_e, angle_mode_enum);
 struct MAPNIK_DECL glyph_symbolizer : public symbolizer_base
 {    
     glyph_symbolizer(std::string face_name, expression_ptr c)
-        : face_name_(face_name),
+        : symbolizer_base(),
+        face_name_(face_name),
         char_(c),
         angle_(),
         value_(),
