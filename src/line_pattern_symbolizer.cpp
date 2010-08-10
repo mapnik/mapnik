@@ -29,9 +29,9 @@ namespace mapnik
 {
     
 line_pattern_symbolizer::line_pattern_symbolizer(path_expression_ptr file) 
-    : symbolizer_with_image(file) {}
+    : symbolizer_with_image(file), symbolizer_base() {}
 
 line_pattern_symbolizer::line_pattern_symbolizer(line_pattern_symbolizer const& rhs)
-    : symbolizer_with_image(rhs) {}
+    : symbolizer_with_image(rhs), symbolizer_base(rhs) {}
 
 }
