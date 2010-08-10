@@ -33,6 +33,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/parserInternals.h>
+#include <libxml/xinclude.h>
 
 #include <iostream>
 
@@ -147,8 +148,18 @@ public:
             throw config_error(os.str());
         }
 
+        int iXIncludeReturn = xmlXIncludeProcessFlags( doc, options_ );
+
+        if (iXIncludeReturn < 0)
+        {
+            xmlFreeDoc(doc);
+            throw config_error("XML XInclude error.  One or more files failed to load.");
+        }
+				
+
         xmlNode * root = xmlDocGetRootElement( doc );
         if ( ! root ) {
+            xmlFreeDoc(doc);
             throw config_error("XML document is empty.");
         }
 

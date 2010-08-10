@@ -83,6 +83,7 @@ public:
 
     void parse_map(Map & map, ptree const & sty);
 private:
+    void parse_map_include( Map & map, ptree const & include);
     void parse_style(Map & map, ptree const & sty);
     void parse_layer(Map & map, ptree const & lay);
     void parse_metawriter(Map & map, ptree const & lay);
@@ -190,8 +191,8 @@ void map_parser::parse_map( Map & map, ptree const & pt )
                 map.set_buffer_size(*buffer_size);
             }
 
-// Check if relative paths should be interpreted as relative to/from XML location
-// Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
+            // Check if relative paths should be interpreted as relative to/from XML location
+            // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
             optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
             if (paths_from_xml)
             {
@@ -243,15 +244,29 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             ex.append_context("(in node Map)");
             throw;
         }
-
-        ptree::const_iterator itr = map_node.begin();
-        ptree::const_iterator end = map_node.end();
+	
+        parse_map_include( map, map_node );
+    }
+    catch (const boost::property_tree::ptree_bad_path &)
+    {
+        throw config_error("Not a map file. Node 'Map' not found.");
+    }
+}
+	
+void map_parser::parse_map_include( Map & map, ptree const & include )
+{
+	ptree::const_iterator itr = include.begin();
+	ptree::const_iterator end = include.end();
 
         for (; itr != end; ++itr)
         {
             ptree::value_type const& v = *itr;
 
-            if (v.first == "Style")
+            if (v.first == "Include")
+            {
+                parse_map_include( map, v.second );
+            }
+            else if (v.first == "Style")
             {
                 parse_style( map, v.second );
             }
@@ -307,11 +322,8 @@ void map_parser::parse_map( Map & map, ptree const & pt )
                                    v.first + "'");
             }
         }
-    }
-    catch (const boost::property_tree::ptree_bad_path &)
-    {
-        throw config_error("Not a map file. Node 'Map' not found.");
-    }
+    
+
     map.init_metawriters();
 }
 

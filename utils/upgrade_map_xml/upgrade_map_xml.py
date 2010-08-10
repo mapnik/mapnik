@@ -45,6 +45,7 @@ if __name__ == "__main__":
         
     xml = sys.argv[1]
     tree = objectify.parse(xml)
+    tree.xinclude()
     root = tree.getroot()
     
     # rename 'bgcolor' to 'background-color'
