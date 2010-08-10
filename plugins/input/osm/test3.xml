@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
-<Map bgcolor="#d0d0d0" srs="+proj=latlong +datum=WGS84">
+<Map bgcolor="#d0d0d0" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
   <Style name="amenity">
     <Rule>
       <Filter>[amenity]='pub'</Filter>
@@ -466,14 +466,14 @@
     </Rule>
   </Style>
 
-  <Layer name="leisure" status="on" srs="+proj=latlong +datum=WGS84">
+  <Layer name="leisure" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>leisure</StyleName>
     <Datasource>
       <Parameter name="type">osm</Parameter>
     </Datasource>
   </Layer>
   
-  <Layer name="waterway" status="on" srs="+proj=latlong +datum=WGS84">
+  <Layer name="waterway" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>river</StyleName>
     <StyleName>stream</StyleName>
     <Datasource>
@@ -481,14 +481,14 @@
     </Datasource>
   </Layer>
   
-  <Layer name="lakes" status="on" srs="+proj=latlong +datum=WGS84">
+  <Layer name="lakes" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>lakes</StyleName>
     <Datasource>
       <Parameter name="type">osm</Parameter>
     </Datasource>
   </Layer>
 
-  <Layer name="roads" status="on" srs="+proj=latlong +datum=WGS84">
+  <Layer name="roads" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>roads-casing</StyleName>
     <StyleName>footway</StyleName>
     <StyleName>cycleway</StyleName>
@@ -506,21 +506,21 @@
     </Datasource>
    </Layer>
 
-  <Layer name="amenity" status="on" srs="+proj=latlong +datum=WGS84">
+  <Layer name="amenity" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>amenity</StyleName>
     <Datasource>
       <Parameter name="type">osm</Parameter>
     </Datasource>
   </Layer>
 
-  <Layer name="roadstext" status="on" srs="+proj=latlong +datum=WGS84">
+  <Layer name="roadstext" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
      <StyleName>roads-text</StyleName>
      <Datasource>
       <Parameter name="type">osm</Parameter>
     </Datasource>
    </Layer>
   
-  <Layer name="text" status="on" srs="+proj=latlong +datum=WGS84">
+  <Layer name="text" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>text</StyleName>
     <Datasource>
       <Parameter name="type">osm</Parameter>

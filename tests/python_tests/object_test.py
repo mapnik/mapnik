@@ -245,7 +245,7 @@ def test_map_init():
    
     eq_(m.width, 256)
     eq_(m.height, 256)
-    eq_(m.srs, '+proj=latlong +datum=WGS84')
+    eq_(m.srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
 
     m = mapnik2.Map(256, 256, '+proj=latlong')
     
@@ -255,7 +255,7 @@ def test_map_init():
 
 # Map initialization from string
 def test_map_init_from_string():
-    map_string = '''<Map bgcolor="steelblue" srs="+proj=latlong +datum=WGS84">
+    map_string = '''<Map bgcolor="steelblue" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
      <Style name="My Style">
       <Rule>
        <PolygonSymbolizer>

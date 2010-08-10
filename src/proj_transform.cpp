@@ -35,8 +35,8 @@ proj_transform::proj_transform(projection const& source,
     : source_(source),
       dest_(dest) 
 {
-    is_source_latlong_ = source_.is_geographic();
-    is_dest_latlong_ = dest_.is_geographic();
+    is_source_longlat_ = source_.is_geographic();
+    is_dest_longlat_ = dest_.is_geographic();
     is_source_equal_dest_ = (source_ == dest_);
 }
 
@@ -50,7 +50,7 @@ bool proj_transform::forward (double & x, double & y , double & z) const
     if (is_source_equal_dest_)
         return true;
 
-    if (is_source_latlong_)
+    if (is_source_longlat_)
     {
         x *= DEG_TO_RAD;
         y *= DEG_TO_RAD;
@@ -66,7 +66,7 @@ bool proj_transform::forward (double & x, double & y , double & z) const
         return false;
     }
         
-    if (is_dest_latlong_)
+    if (is_dest_longlat_)
     {
         x *= RAD_TO_DEG;
         y *= RAD_TO_DEG;
@@ -80,7 +80,7 @@ bool proj_transform::backward (double & x, double & y , double & z) const
     if (is_source_equal_dest_)
         return true;
       
-    if (is_dest_latlong_)
+    if (is_dest_longlat_)
     {
         x *= DEG_TO_RAD;
         y *= DEG_TO_RAD;
@@ -96,7 +96,7 @@ bool proj_transform::backward (double & x, double & y , double & z) const
         return false;
     }
         
-    if (is_source_latlong_)
+    if (is_source_longlat_)
     {
         x *= RAD_TO_DEG;
         y *= RAD_TO_DEG;

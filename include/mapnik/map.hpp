@@ -95,7 +95,7 @@ public:
      *  Creates a map with these parameters:
      *  - width = 400
      *  - height = 400
-     *  - projection = "+proj=latlong +datum=WGS84"
+     *  - projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
      */
     Map();
 
@@ -104,7 +104,7 @@ public:
      *  @param height Initial map height.
      *  @param srs Initial map projection.
      */
-    Map(int width, int height, std::string const& srs="+proj=latlong +datum=WGS84");
+    Map(int width, int height, std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
 
     /*! \brief Copy Constructur.
      *

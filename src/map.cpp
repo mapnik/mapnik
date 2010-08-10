@@ -63,7 +63,7 @@ IMPLEMENT_ENUM( aspect_fix_mode_e, aspect_fix_mode_strings );
 Map::Map()
     : width_(400),
       height_(400),
-      srs_("+proj=latlong +datum=WGS84"),
+      srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
       buffer_size_(0),
       aspectFixMode_(GROW_BBOX) {}
     

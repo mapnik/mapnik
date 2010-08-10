@@ -47,8 +47,8 @@ public:
 private:
     projection const& source_;
     projection const& dest_;
-    bool is_source_latlong_;
-    bool is_dest_latlong_;
+    bool is_source_longlat_;
+    bool is_dest_longlat_;
     bool is_source_equal_dest_;
 };
 }

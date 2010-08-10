@@ -39,12 +39,12 @@ namespace mapnik
  * Create a layer with a named string and, optionally, an srs string either 
  * with a Proj.4 epsg code ('+init=epsg:<code>') or with a Proj.4 literal 
  * ('+proj=<literal>'). If no srs is specified it will default to 
- * '+proj=latlong +datum=WGS84'
+ * '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
  */
 class MAPNIK_DECL layer
 {
 public:
-    explicit layer(std::string const& name, std::string const& srs="+proj=latlong +datum=WGS84");
+    explicit layer(std::string const& name, std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
     layer(layer const& l);
     layer& operator=(layer const& l);
     bool operator==(layer const& other) const;

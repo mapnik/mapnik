@@ -150,7 +150,7 @@ void export_map()
                     "Create a Map with a width and height as integers and, optionally,\n"
                     "an srs string either with a Proj.4 epsg code ('+init=epsg:<code>')\n"
                     "or with a Proj.4 literal ('+proj=<literal>').\n"
-                    "If no srs is specified the map will default to '+proj=latlong +datum=WGS84'\n"
+                    "If no srs is specified the map will default to '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'\n"
                     "\n"
                     "Usage:\n"
                     ">>> from mapnik import Map\n"
@@ -158,7 +158,7 @@ void export_map()
                     ">>> m\n"
                     "<mapnik._mapnik.Map object at 0x6a240>\n"
                     ">>> m.srs\n"
-                    "'+proj=latlong +datum=WGS84'\n"
+                    "'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'\n"
                     ))
         
         .def_pickle(map_pickle_suite()
@@ -419,7 +419,7 @@ void export_map()
                       "Spatial reference in Proj.4 format.\n"
                       "Either an epsg code or proj literal.\n"
                       "For example, a proj literal:\n"
-                      "\t'+proj=latlong +datum=WGS84'\n"
+                      "\t'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'\n"
                       "and a proj epsg code:\n"
                       "\t'+init=epsg:4326'\n"
                       "\n"
@@ -428,7 +428,7 @@ void export_map()
                       "\n"
                       "Usage:\n"
                       ">>> m.srs\n"
-                      "'+proj=latlong +datum=WGS84' # The default srs if not initialized with custom srs\n"
+                      "'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' # The default srs if not initialized with custom srs\n"
                       ">>> # set to google mercator with Proj.4 literal\n"
                       "... \n"
                       ">>> m.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'\n"

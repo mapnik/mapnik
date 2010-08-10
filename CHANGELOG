@@ -14,6 +14,11 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Upgraded to the latest proj4 string literal for EPSG:4326 (WGS84) as global default projection (#333)
+
+- Added 'mapnik_version_from_string()' function in python bindings to easily convert string representation
+  of version number to the integer format used in 'mapnik/version.hpp'. e.g. '0.7.1' --> 701.
+
 - Added 'mapnik_version_from_string()' function in python bindings to easily convert string representation
   of version number to the integer format used in 'mapnik/version.hpp'. e.g. '0.7.1' --> 701.
 

@@ -508,7 +508,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
   ">>> m = Map(256,256)\n"
   ">>> load_map(m,'mapfile_wgs84.xml')\n"
   ">>> m.srs\n"
-  "'+proj=latlong +datum=WGS84'\n"
+  "'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'\n"
   ">>> m.srs = '+init=espg:3395'\n"
   ">>> save_map(m,'mapfile_mercator.xml')\n"
   "\n"

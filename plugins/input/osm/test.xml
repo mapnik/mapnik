@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
-<Map bgcolor="#b5d0d0" srs="+proj=latlong +datum=WGS84">
+<Map bgcolor="#b5d0d0" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
  
   <Style name="coast-poly">
      <Rule>
@@ -481,7 +481,7 @@
     </Rule>
   </Style>
 
-  <Layer name="roads" status="on" srs="+proj=latlong +datum=WGS84">
+  <Layer name="roads" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>roads-casing</StyleName>
     <StyleName>footway</StyleName>
     <StyleName>cycleway</StyleName>

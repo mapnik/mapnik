@@ -27,7 +27,7 @@ except:
 installed successfully before running this script.\n\n'
     raise
 
-m = Map(690,690,"+proj=latlong +ellps=WGS84")
+m = Map(690,690,"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 
 m.background = Color(255,100,100,255)
 

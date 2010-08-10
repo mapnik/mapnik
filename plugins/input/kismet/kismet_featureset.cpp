@@ -41,7 +41,7 @@ kismet_featureset::kismet_featureset(const std::list<kismet_network_data> &knd_l
      tr_(new transcoder(encoding)),
      feature_id (0),
      knd_list_it(knd_list_.begin ()),
-     source_("+proj=latlong +datum=WGS84")
+     source_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 {
     //cout << "kismet_featureset::kismet_featureset()" << endl;
 }
