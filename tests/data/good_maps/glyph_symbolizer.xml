@@ -4,6 +4,7 @@
     <Rule>
       <GlyphSymbolizer
         face_name="DejaVu Sans Condensed"
+        size="10"
         char="'í'"
         allow_overlap="1"
         avoid_edges="0"
