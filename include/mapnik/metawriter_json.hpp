@@ -43,6 +43,11 @@ public:
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties);
+    virtual void add_text(placement const& p,
+                          face_set_ptr face,
+                          Feature const& feature,
+                          CoordTransform const& t,
+                          metawriter_properties const& properties = metawriter_properties());
 
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();
@@ -56,6 +61,11 @@ public:
     bool get_only_nonempty() { return only_nonempty_; }
     virtual void set_map_srs(projection const& proj);
 protected:
+    enum {
+    HEADER_NOT_WRITTEN = -1,
+    STOPPED = -2,
+    STARTED = 0,
+    };
     /** Features written. */
     int count_;
     bool only_nonempty_;
@@ -63,6 +73,29 @@ protected:
     proj_transform *trans_;
     projection output_srs_;
     virtual void write_header();
+    inline void write_feature_header(std::string type) {
+        if (count_ == HEADER_NOT_WRITTEN) write_header();
+        if (count_++) *f_ << ",\n";
+    #ifdef MAPNIK_DEBUG
+        if (count_ == STOPPED)
+        {
+            std::cerr << "WARNING: Metawriter not started before using it.\n";
+        }
+    #endif
+        *f_  << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \""<<type<<"\",\n    \"coordinates\":";
+    }
+    void write_properties(Feature const& feature, metawriter_properties const& properties);
+    inline void write_point(CoordTransform const& t, double x, double y, bool last = false)
+    {
+        double z = 0.0;
+        t.backward(&x, &y);
+        trans_->forward(x, y, z);
+        *f_ << "["<<x<<","<<y<<"]";
+        if (!last) {
+            *f_ << ",";
+        }
+    }
+
 private:
     std::ostream *f_;
 };

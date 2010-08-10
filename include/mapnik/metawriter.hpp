@@ -27,6 +27,7 @@
 // Mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 // Boost
 #include <boost/utility.hpp>
@@ -81,6 +82,12 @@ class metawriter
         virtual void add_box(box2d<double> const& box, Feature const& feature,
                              CoordTransform const& t,
                              metawriter_properties const& properties = metawriter_properties())=0;
+        virtual void add_text(placement const& placement,
+                              face_set_ptr face,
+                              Feature const& feature,
+                              CoordTransform const& t,
+                              metawriter_properties const& properties = metawriter_properties())=0;
+
         /** Start processing.
           * Write file header, init database connection, ...
           *

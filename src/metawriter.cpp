@@ -23,6 +23,7 @@
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
+#include <mapnik/placement_finder.hpp>
 
 // Boost
 #include <boost/foreach.hpp>
@@ -31,10 +32,6 @@
 // STL
 #include <iomanip>
 #include <cstdio>
-
-#define HEADER_NOT_WRITTEN -1
-#define STOPPED -2
-#define STARTED 0
 
 namespace mapnik {
 
@@ -68,7 +65,7 @@ void metawriter_json_stream::start(metawriter_property_map const& properties)
 void metawriter_json_stream::write_header()
 {
     assert(f_);
-    *f_ << "{ \"type\": \"FeatureCollection\", \"features\": [\n";
+    *f_ << "{ \"type\": \"FeatureCollection\", \"features\": [\n" << std::fixed << std::setprecision(8);
     count_ = STARTED;
 }
 
@@ -98,50 +95,9 @@ metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_proper
 {
 }
 
-
-void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& feature,
-                              CoordTransform const& t, metawriter_properties const& properties)
+void metawriter_json_stream::write_properties(Feature const& feature, metawriter_properties const& properties)
 {
-    /* Check if feature is in bounds. */
-    if (box.maxx() < 0 || box.maxy() < 0 || box.minx() > width_ || box.miny() > height_) return;
-
-    if (count_ == HEADER_NOT_WRITTEN) write_header();
-#ifdef MAPNIK_DEBUG
-    if (count_ == STOPPED)
-    {
-        std::cerr << "WARNING: Metawriter not started before using it.\n";
-    }
-#endif
-
-    /* Coordinate transform in renderer:
-       input: layer srs
-       prj_trans.backwards()   [prj_trans: map -> layer]
-       intermediate: map srs
-       t_.forward()
-       output: pixels
-
-       Our transform:
-       input: pixels
-       t_.backward()
-       intermediate: map srs
-       trans_.forward()
-       output: WGS84
-    */
-
-    //t_ coord transform has transform for box2d combined with proj_transform
-    box2d<double> transformed = t.backward(box, *trans_);
-
-    double minx = transformed.minx();
-    double miny = transformed.miny();
-    double maxx = transformed.maxx();
-    double maxy = transformed.maxy();
-
-    if (count_++) *f_ << ",\n";
-    *f_ << std::fixed << std::setprecision(8) << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"Polygon\",\n    \"coordinates\": [ [ [" <<
-            minx << ", " << miny << "], [" <<
-            maxx << ", " << miny << "], [" <<
-            maxx << ", " << maxy << "], [" <<
-            minx << ", " << maxy << "] ] ] }," <<
+    *f_ << "}," << //Close coordinates object
             "\n  \"properties\": {";
     std::map<std::string, value> fprops = feature.props();
     int i = 0;
@@ -160,6 +116,113 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
 
     *f_ << "\n} }";
 }
+
+/* Coordinate transform in renderer:
+   input: layer srs
+   prj_trans.backwards()   [prj_trans: map -> layer]
+   intermediate: map srs
+   t_.forward()
+   output: pixels
+
+   Our transform:
+   input: pixels
+   t_.backward()
+   intermediate: map srs
+   trans_.forward()
+   output: WGS84
+*/
+
+
+void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& feature,
+                              CoordTransform const& t, metawriter_properties const& properties)
+{
+    /* Check if feature is in bounds. */
+    if (box.maxx() < 0 || box.maxy() < 0 || box.minx() > width_ || box.miny() > height_) return;
+
+    //t_ coord transform has transform for box2d combined with proj_transform
+    box2d<double> transformed = t.backward(box, *trans_);
+
+    double minx = transformed.minx();
+    double miny = transformed.miny();
+    double maxx = transformed.maxx();
+    double maxy = transformed.maxy();
+
+    write_feature_header("Polygon");
+
+    *f_ << " [ [ [" <<
+            minx << ", " << miny << "], [" <<
+            maxx << ", " << miny << "], [" <<
+            maxx << ", " << maxy << "], [" <<
+            minx << ", " << maxy << "] ] ]";
+
+    write_properties(feature, properties);
+
+}
+
+//TODO: Remove this
+inline void combined_backward(double &x, double &y, CoordTransform const& t, proj_transform const* trans_)
+{
+    double z = 0.0;
+    t.backward(&x, &y);
+    trans_->forward(x, y, z);
+}
+
+void metawriter_json_stream::add_text(placement const& p,
+    face_set_ptr face,
+    Feature const& feature,
+    CoordTransform const& t,
+    metawriter_properties const& properties)
+{
+    for (unsigned n = 0; n < p.placements.size(); n++) {
+        placement_element & current_placement = const_cast<placement_element &>(p.placements[n]);
+
+        bool inside = false;
+        for (int i = 0; i < current_placement.num_nodes(); ++i) {
+            current_placement.rewind();
+            int c; double x, y, angle;
+            current_placement.vertex(&c, &x, &y, &angle);
+            if (x > 0 && x < width_ && y > 0 && y < height_) {
+                inside = true;
+                break;
+            }
+        }
+        if (!inside) continue;
+
+        write_feature_header("MultiPolygon");
+        *f_ << "[";
+
+        for (int i = 0; i < current_placement.num_nodes(); ++i) {
+            if (i) {
+                *f_ << ",";
+            }
+            int c; double x, y, angle;
+            current_placement.vertex(&c, &x, &y, &angle);
+            font_face_set::dimension_t ci = face->character_dimensions(c);
+
+            //TODO: Optimize for angle == 0
+            double sina = sin(angle);
+            double cosa = cos(angle);
+            double x0 = current_placement.starting_x + x - sina*ci.ymin;
+            double y0 = current_placement.starting_y - y - cosa*ci.ymin;
+            double x1 = x0 + ci.width * cosa;
+            double y1 = y0 - ci.width * sina;
+            double x2 = x0 + (ci.width * cosa - ci.height * sina);
+            double y2 = y0 - (ci.width * sina + ci.height * cosa);
+            double x3 = x0 - ci.height * sina;
+            double y3 = y0 - ci.height * cosa;
+
+            *f_ << "\n     [[";
+            write_point(t, x0, y0);
+            write_point(t, x1, y1);
+            write_point(t, x2, y2);
+            write_point(t, x3, y3, true);
+            *f_ << "]]";
+        }
+        *f_ << "]";
+        write_properties(feature, properties);
+    }
+}
+
 
 void metawriter_json_stream::set_map_srs(projection const& input_srs_)
 {

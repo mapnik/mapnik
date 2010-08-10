@@ -83,7 +83,8 @@ IMPLEMENT_ENUM( text_convert_e, text_convert_strings );
 
 
 text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name, unsigned size, color const& fill)
-    : name_(name),
+    : symbolizer_base(),
+      name_(name),
       face_name_(face_name),
       //fontset_(default_fontset),
       size_(size),
@@ -113,7 +114,8 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       jalign_(J_MIDDLE) {}
 
 text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const& fill)
-    : name_(name),
+    : symbolizer_base(),
+      name_(name),
       //face_name_(""),
       //fontset_(default_fontset),
       size_(size),
@@ -143,7 +145,8 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       jalign_(J_MIDDLE) {}
 
 text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
-    : name_(rhs.name_),
+    : symbolizer_base(rhs),
+      name_(rhs.name_),
       orientation_(rhs.orientation_),
       face_name_(rhs.face_name_),
       fontset_(rhs.fontset_),
@@ -206,6 +209,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     wrap_before_ = other.wrap_before_;
     halign_ = other.halign_;
     jalign_ = other.jalign_;
+    std::cout << "TODO: Metawriter (text_symbolizer::operator=)\n";
     return *this;
 }
 

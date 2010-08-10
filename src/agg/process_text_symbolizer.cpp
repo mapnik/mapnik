@@ -120,14 +120,18 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                         path_type path(t_,geom,prj_trans);
                         finder.find_line_placements<path_type>(text_placement,path);
                     }
-                    
+
+
                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
                     {
                         double x = text_placement.placements[ii].starting_x;
                         double y = text_placement.placements[ii].starting_y;
                         box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
-                        ren.render(x,y);
+                        ren.render(x,y);    
                     }
+
+                    metawriter_with_properties writer = sym.get_metawriter();
+                    if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
                 }
             }
         }
