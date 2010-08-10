@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include  xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <Layer name="world_borders" srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs">
+        <StyleName>world_borders_style</StyleName>
+        <StyleName>point_style</StyleName>
+        <Datasource>
+            <Parameter name="file">../../shp/world_merc.shp</Parameter>
+            <Parameter name="type">shape</Parameter>
+        </Datasource>
+    </Layer>
+
+</Include>
