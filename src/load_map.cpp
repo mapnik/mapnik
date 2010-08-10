@@ -772,8 +772,6 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
                    
                 point_symbolizer symbol(parse_path(*file));
 
-                parse_metawriter_in_symbolizer(symbol, sym);
-                  
                 if (allow_overlap)
                 {
                     symbol.set_allow_overlap( * allow_overlap );
@@ -790,7 +788,8 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
                     tr.store_to(&matrix[0]);
                     symbol.set_transform(matrix);
                 }
-                
+
+                parse_metawriter_in_symbolizer(symbol, sym);
                 rule.append(symbol);
             }
             catch (image_reader_exception const & ex )
@@ -812,8 +811,6 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
         {
             point_symbolizer symbol;
 
-            parse_metawriter_in_symbolizer(symbol, sym);
-        
             if (allow_overlap)
             {
                 symbol.set_allow_overlap( * allow_overlap );
@@ -822,6 +819,8 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
             {
                 symbol.set_opacity( * opacity );
             }
+
+            parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
         }
     }
@@ -901,6 +900,8 @@ void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
         if (max_error) symbol.set_max_error(*max_error);
         optional<boolean> allow_overlap = get_opt_attr<boolean>(sym, "allow_overlap");
         if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
+
+        parse_metawriter_in_symbolizer(symbol, sym);
         rule.append(symbol);
     }
     catch (const config_error & ex)
@@ -939,6 +940,8 @@ void map_parser::parse_line_pattern_symbolizer( rule_type & rule, ptree const & 
 
 
             line_pattern_symbolizer symbol(parse_path(file));
+
+            parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
         }
         catch (image_reader_exception const & ex )
@@ -996,6 +999,7 @@ void map_parser::parse_polygon_pattern_symbolizer( rule_type & rule,
             pattern_alignment_e p_alignment = get_attr<pattern_alignment_e>(sym, "alignment",LOCAL_ALIGNMENT);
             symbol.set_alignment(p_alignment);
 
+            parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
         }
         catch (image_reader_exception const & ex )
@@ -1211,6 +1215,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify_alignment", J_MIDDLE);
         text_symbol.set_justify_alignment(jalign);
 
+        parse_metawriter_in_symbolizer(text_symbol, sym);
         rule.append(text_symbol);
     }
     catch (const config_error & ex)
@@ -1441,6 +1446,7 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
                 shield_symbol.set_no_text( * no_text );
             }
 
+            parse_metawriter_in_symbolizer(shield_symbol, sym);
             rule.append(shield_symbol);
         }
         catch (image_reader_exception const & ex )
@@ -1527,7 +1533,10 @@ void map_parser::parse_line_symbolizer( rule_type & rule, ptree const & sym )
                 }
             }
         }
-        rule.append(line_symbolizer(strk));
+        line_symbolizer symbol = line_symbolizer(strk);
+
+        parse_metawriter_in_symbolizer(symbol, sym);
+        rule.append(symbol);
     }
     catch (const config_error & ex)
     {
@@ -1551,6 +1560,8 @@ void map_parser::parse_polygon_symbolizer( rule_type & rule, ptree const & sym )
         // gamma
         optional<double> gamma = get_opt_attr<double>(sym, "gamma");
         if (gamma)  poly_sym.set_gamma(*gamma);
+
+        parse_metawriter_in_symbolizer(poly_sym, sym);
         rule.append(poly_sym);
     }
     catch (const config_error & ex)
@@ -1576,6 +1587,7 @@ void map_parser::parse_building_symbolizer( rule_type & rule, ptree const & sym 
         optional<double> height = get_opt_attr<double>(sym, "height");
         if (opacity) building_sym.set_height(*height);
 
+        parse_metawriter_in_symbolizer(building_sym, sym);
         rule.append(building_sym);
     }
     catch (const config_error & ex)
@@ -1623,6 +1635,8 @@ void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
                                    "Expected 'RasterColorizer' but got '" + css_tag.first + "'");
             }
         }
+
+        parse_metawriter_in_symbolizer(raster_sym, sym);
         rule.append(raster_sym);
     }
     catch (const config_error & ex)
@@ -1733,7 +1747,7 @@ void map_parser::parse_glyph_symbolizer(rule_type & rule, ptree const &sym)
             }
         }
 
-
+        parse_metawriter_in_symbolizer(glyph_sym, sym);
         rule.append(glyph_sym);
     }
     catch (const config_error & ex)
