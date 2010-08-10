@@ -159,14 +159,6 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
 
 }
 
-//TODO: Remove this
-inline void combined_backward(double &x, double &y, CoordTransform const& t, proj_transform const* trans_)
-{
-    double z = 0.0;
-    t.backward(&x, &y);
-    trans_->forward(x, y, z);
-}
-
 void metawriter_json_stream::add_text(placement const& p,
     face_set_ptr face,
     Feature const& feature,
