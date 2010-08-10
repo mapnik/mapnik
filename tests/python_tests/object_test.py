@@ -39,6 +39,7 @@ def test_pointsymbolizer_init():
 
 # PointSymbolizer pickling
 def test_pointsymbolizer_pickle():
+    raise Todo("point_symbolizer pickling currently disabled")
     p = mapnik2.PointSymbolizer(mapnik2.PathExpression("../data/images/dummy.png"))
     p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
     # image type, width, and height only used in contructor...
@@ -201,6 +202,8 @@ def test_textsymbolizer_pickle():
     eq_(ts.face_name, 'Font Name')
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik2.Color('black'))
+    
+    raise Todo("text_symbolizer pickling currently disabled")
 
     ts2 = pickle.loads(pickle.dumps(ts,pickle.HIGHEST_PROTOCOL))
     eq_(ts.name, ts2.name)
