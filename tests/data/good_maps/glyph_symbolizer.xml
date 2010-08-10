@@ -7,7 +7,7 @@
         char="'í'"
         allow_overlap="1"
         avoid_edges="0"
-        halo_fill="rgba(0%,0%,0%,4%)"
+        halo_fill="rgba(0%,0%,0%,.1)"
         halo_radius="1"
         value="[value]"
         angle="[azimuth]+90"
