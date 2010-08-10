@@ -28,6 +28,7 @@
 // mapnik
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/svg/svg_generator.hpp>
+#include <mapnik/svg/svg_output_attributes.hpp>
 
 // stl
 #include <string>
@@ -37,18 +38,22 @@ namespace mapnik
     // parameterized with the type of output iterator it will use for output.
     // output iterators add more flexibility than streams, because iterators
     // can target many other output destinations besides streams.
-    template <typename T>
-    class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<T> >, 
+    template <typename OutputIterator>
+    class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<OutputIterator> >, 
 				     private boost::noncopyable
     {
     public:
-	svg_renderer(Map const& m, T& output_iterator, unsigned offset_x=0, unsigned offset_y=0);
+	svg_renderer(Map const& m, OutputIterator& output_iterator, unsigned offset_x=0, unsigned offset_y=0);
 	~svg_renderer();
 
 	void start_map_processing(Map const& map);
 	void end_map_processing(Map const& map);
 	void start_layer_processing(layer const& lay);
 	void end_layer_processing(layer const& lay);
+
+	/*!
+	 * @brief Overloads that process each kind of symbolizer individually.
+	 */
 	void process(point_symbolizer const& sym,
 		     Feature const& feature,
 		     proj_transform const& prj_trans);
@@ -82,32 +87,59 @@ namespace mapnik
 	void process(glyph_symbolizer const& sym,
 		     Feature const& feature,
 		     proj_transform const& prj_trans);
+
+	/*!
+	 * @brief Overload that process the whole set of symbolizers of a rule.
+	 * @return true, meaning that this renderer can process multiple symbolizers.
+	 */
+	bool process(rule_type::symbolizers const& syms,
+		     Feature const& feature,
+		     proj_transform const& prj_trans);
 	
-	inline T& get_output_iterator() 
+	inline OutputIterator& get_output_iterator() 
 	{
 	    return output_iterator_;
 	}
 
-	inline const T& get_output_iterator() const
+	inline const OutputIterator& get_output_iterator() const
 	{
 	    return output_iterator_;
 	}
-
-	// XML declaration.
-	static const std::string XML_DECLARATION;
-	// DTD urls.
-	static const std::string SVG_DTD;
-	// SVG version to which the generated document will be compliant.
-	static const double SVG_VERSION;
-	// SVG XML namespace url.
-	static const std::string SVG_NAMESPACE_URL;
 
     private:
-	T& output_iterator_;
+	OutputIterator& output_iterator_;
 	const int width_;
 	const int height_;
 	CoordTransform t_;
-	svg::svg_generator<T> generator_;
+	svg::svg_generator<OutputIterator> generator_;
+	svg::path_output_attributes path_attributes_;
+
+	/*!
+	 * @brief Visitor that makes the calls to process each symbolizer when stored in a boost::variant.
+	 * This object follows the model of that found in feature_style_processor. It appears here, because
+	 * the logic that iterates over the set of symbolizer has been moved to an SVG renderer's internal
+	 * method.
+	 */
+	struct symbol_dispatch : public boost::static_visitor<>
+	{
+	    symbol_dispatch(svg_renderer<OutputIterator>& processor,
+			    Feature const& feature, 
+			    proj_transform const& prj_trans)
+		: processor_(processor),
+		  feature_(feature),
+		  prj_trans_(prj_trans)
+	    {}
+
+	    template <typename Symbolizer>
+	    void operator()(Symbolizer const& sym) const
+	    {
+		processor_.process(sym, feature_, prj_trans_);
+	    }
+
+	    svg_renderer<OutputIterator>& processor_;
+	    Feature const& feature_;
+	    proj_transform const& prj_trans_;
+	};
     };
 }
 

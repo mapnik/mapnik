@@ -191,6 +191,8 @@ if env['SVG_RENDERER']: # svg backend
         """
 	svg/svg_renderer.cpp
 	svg/svg_generator.cpp	
+	svg/svg_output_attributes.cpp
+	svg/process_symbolizers.cpp
 	svg/process_building_symbolizer.cpp
 	svg/process_glyph_symbolizer.cpp
 	svg/process_line_pattern_symbolizer.cpp

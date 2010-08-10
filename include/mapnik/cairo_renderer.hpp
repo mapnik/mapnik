@@ -107,6 +107,13 @@ public:
     void process(glyph_symbolizer const& sym,
                  Feature const& feature,
                  proj_transform const& prj_trans);
+    inline bool process(rule_type::symbolizers const& syms,
+			Feature const& feature,
+			proj_transform const& prj_trans)
+    {
+	// cairo renderer doesn't support processing of multiple symbolizers.
+	return false;
+    };
 protected:
     Map const& m_;
     Cairo::RefPtr<Cairo::Context> context_;

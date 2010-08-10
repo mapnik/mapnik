@@ -313,11 +313,17 @@ private:
                             {   
                                 do_else=false;
                                 rule_type::symbolizers const& symbols = rule->get_symbolizers();
-                                BOOST_FOREACH (symbolizer const& sym, symbols)
-                                {   
-                                    boost::apply_visitor
-                                        (symbol_dispatch(p,*feature,prj_trans),sym);
-                                }
+
+				// if the underlying renderer is not able to process the complete set of symbolizers,
+				// process one by one.
+				if(!p.process(symbols,*feature,prj_trans))
+				{
+				    BOOST_FOREACH (symbolizer const& sym, symbols)
+				    {   
+					boost::apply_visitor
+					    (symbol_dispatch(p,*feature,prj_trans),sym);
+				    }
+				}
                             }                           
                         }
                         if (do_else)
@@ -325,11 +331,17 @@ private:
                             BOOST_FOREACH( rule_type * rule, else_rules )
                             {
                                 rule_type::symbolizers const& symbols = rule->get_symbolizers();
-                                BOOST_FOREACH (symbolizer const& sym, symbols)
-                                {
-                                    boost::apply_visitor
-                                        (symbol_dispatch(p,*feature,prj_trans),sym);
-                                }
+
+				// if the underlying renderer is not able to process the complete set of symbolizers,
+				// process one by one.
+				if(!p.process(symbols,*feature,prj_trans))
+				{
+				    BOOST_FOREACH (symbolizer const& sym, symbols)
+				    {
+					boost::apply_visitor
+					    (symbol_dispatch(p,*feature,prj_trans),sym);
+				    }
+				}
                             }
                         }     
                     }

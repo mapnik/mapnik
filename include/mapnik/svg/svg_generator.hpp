@@ -27,26 +27,40 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/svg/svg_generator_path_grammar.hpp>
+#include <mapnik/svg/svg_output_grammars.hpp>
+#include <mapnik/svg/svg_output_attributes.hpp>
 
 // boost
 #include <boost/utility.hpp>
 
 namespace mapnik { namespace svg {
 
+    /*!
+     * @brief Performs the actual generation of output calling the underlying library.
+     * A method to generate each kind of SVG tag is provided. The information needed
+     * needed to generate the attributes of a tag is passed within a *_output_attributes
+     * structure.
+     */
     template <typename OutputIterator>
     class svg_generator : private boost::noncopyable
     {
 	typedef coord_transform2<CoordTransform, geometry2d> path_type;
-	typedef svg::svg_generator_path_grammar<OutputIterator, path_type> path_grammar;
+
+	typedef svg::svg_root_attributes_grammar<OutputIterator> root_attributes_grammar;
+	typedef svg::svg_rect_attributes_grammar<OutputIterator> rect_attributes_grammar;
+	typedef svg::svg_path_data_grammar<OutputIterator, path_type> path_data_grammar;
+	typedef svg::svg_path_attributes_grammar<OutputIterator> path_attributes_grammar;
+	typedef svg::svg_path_dash_array_grammar<OutputIterator> path_dash_array_grammar;
 
     public:
 	explicit svg_generator(OutputIterator& output_iterator);
 	~svg_generator();
 
-	void generate_root();
-	void generate_rect();
-	void generate_path(path_type const& path, color const& fill);
+	void generate_header();
+	void generate_opening_root(root_output_attributes const& root_attributes);
+	void generate_closing_root();
+	void generate_rect(rect_output_attributes const& rect_attributes);
+	void generate_path(path_type const& path, path_output_attributes const& path_attributes);
 	
     private:
 	OutputIterator& output_iterator_;

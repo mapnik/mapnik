@@ -26,22 +26,16 @@
 
 namespace mapnik
 {
+    /*!
+     * @brief Collect presentation attributes found in polygon symbolizer.
+     */
     template <typename T>
     void svg_renderer<T>::process(polygon_symbolizer const& sym,
 				  Feature const& feature,
 				  proj_transform const& prj_trans)
     {
-	typedef coord_transform2<CoordTransform, geometry2d> path_type;
-
-	for(unsigned i=0; i<feature.num_geometries(); ++i)
-	{
-	    geometry2d const& geom = feature.get_geometry(i);
-	    if(geom.num_points() > 2)
-	    {
-		path_type path(t_, geom, prj_trans);
-		generator_.generate_path(path, sym.get_fill());
-	    }
-	}
+	path_attributes_.set_fill_color(sym.get_fill());
+	path_attributes_.set_fill_opacity(sym.get_opacity());
     }
 
     template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,

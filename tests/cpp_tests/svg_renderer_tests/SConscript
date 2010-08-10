@@ -18,5 +18,5 @@ if env['PLATFORM'] == 'Darwin':
 if env['HAS_BOOST_SYSTEM']:
     libraries.append(system)
 
-for cpp_test in glob.glob('*_test.cpp'):
+for cpp_test in glob.glob('path_element_test.cpp'):
     env.Program(cpp_test.replace('.cpp',''), [cpp_test], CPPPATH=headers, LIBS=libraries)

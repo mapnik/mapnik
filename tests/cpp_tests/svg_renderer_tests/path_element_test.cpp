@@ -22,20 +22,14 @@
 #include <iterator>
 
 namespace filesystem = boost::filesystem;
+using namespace mapnik;
 
-BOOST_AUTO_TEST_CASE(path_element_test_case)
-{
-    using namespace mapnik;
-
-    std::string mapnik_dir("../../..");
+void prepare_map(Map& m)
+{      
+    const std::string mapnik_dir("../../..");
     std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "/plugins/input/" << "\n";
     datasource_cache::instance()->register_datasources(mapnik_dir + "/plugins/input/"); 
-    std::cout << " looking for DejaVuSans font in... " << mapnik_dir << "/fonts/DejaVuSans.ttf" << "\n";
-    freetype_engine::register_font(mapnik_dir + "/fonts/DejaVuSans.ttf");
-        
-    Map m(800,600);
-    m.set_background(color_factory::from_string("white"));
-        
+
     // create styles
 
     // Provinces (polygon)
@@ -131,20 +125,8 @@ BOOST_AUTO_TEST_CASE(path_element_test_case)
     roads1_rule_stk_2.set_line_join(ROUND_JOIN);
     roads1_rule_2.append(line_symbolizer(roads1_rule_stk_2));
     roads1_style_2.add_rule(roads1_rule_2);
-    m.insert_style("highway-fill", roads1_style_2);
-        
-    // Populated Places
-        
-    feature_type_style popplaces_style;
-    rule_type popplaces_rule;
-    text_symbolizer popplaces_text_symbolizer(parse_expression("[GEONAME]"),"DejaVu Sans Book",10,color(0,0,0));
-    popplaces_text_symbolizer.set_halo_fill(color(255,255,200));
-    popplaces_text_symbolizer.set_halo_radius(1);
-    popplaces_rule.append(popplaces_text_symbolizer);
-    popplaces_style.add_rule(popplaces_rule);
-        
-    m.insert_style("popplaces",popplaces_style );
-        
+    m.insert_style("highway-fill", roads1_style_2);        
+       
     // layers
     // Provincial  polygons
     {
@@ -206,22 +188,10 @@ BOOST_AUTO_TEST_CASE(path_element_test_case)
 
 	m.addLayer(lyr);        
     }
-    // popplaces
-    {
-	parameters p;
-	p["type"]="shape";
-	p["file"]=mapnik_dir+"/demo/data/popplaces";
-	p["encoding"] = "latin1";
-	layer lyr("Populated Places");
-	lyr.set_datasource(datasource_cache::instance()->create(p));
-	lyr.add_style("popplaces");    
-	m.addLayer(lyr);
-    }
-        
-    m.zoom_to_box(box2d<double>(1405120.04127408,-247003.813399447,
-				1706357.31328276,-25098.593149577));
-        
-    std::string output_filename = "path_element_test_case.svg";
+}
+
+void render_to_file(Map const& m, const std::string output_filename)
+{
     std::ofstream output_stream(output_filename.c_str());
 
     if(output_stream)
@@ -244,4 +214,17 @@ BOOST_AUTO_TEST_CASE(path_element_test_case)
     {
 	BOOST_FAIL("Could not create create/open file '"+output_filename+"'.");
     }
+}
+
+BOOST_AUTO_TEST_CASE(path_element_test_case_1)
+{
+    Map m(800,600);
+    m.set_background(color_factory::from_string("white"));      
+
+    prepare_map(m);
+        
+    m.zoom_to_box(box2d<double>(1405120.04127408, -247003.813399447,
+				1706357.31328276, -25098.593149577));
+        
+    render_to_file(m, "path_element_test_case_1.svg");
 }

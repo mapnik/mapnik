@@ -23,7 +23,6 @@
 
 // mapnik
 #include <mapnik/svg_renderer.hpp>
-#include <mapnik/svg/svg_generator_path_grammar.hpp>
 
 // stl
 #ifdef MAPNIK_DEBUG
@@ -31,33 +30,8 @@
 #endif
 #include <ostream>
 
-// boost
-#include <boost/fusion/tuple.hpp>
-
-// boost.spirit
-#include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/repository/include/karma_confix.hpp>
-
-namespace karma = boost::spirit::karma;
-namespace repository = boost::spirit::repository;
-namespace fusion = boost::fusion;
-
 namespace mapnik
 {
-    /*
-     * XML_DECLARATION and SVG_DTD comprise the XML header of the SVG document.
-     * They are required for producing standard compliant XML documents.
-     */
-    template <typename T>
-    const std::string svg_renderer<T>::XML_DECLARATION = "<?xml version=\"1.0\" standalone=\"no\"?>";
-    template <typename T>
-    const std::string svg_renderer<T>::SVG_DTD = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">";	
-
-    template <typename T>
-    const double svg_renderer<T>::SVG_VERSION = 1.1;
-    template <typename T>
-    const std::string svg_renderer<T>::SVG_NAMESPACE_URL = "http://www.w3.org/2000/svg";
-
     template <typename T>
     svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, unsigned offset_x, unsigned offset_y) :
 	feature_style_processor<svg_renderer>(m),
@@ -66,9 +40,7 @@ namespace mapnik
 	height_(m.height()),
 	t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
 	generator_(output_iterator)
-    {
-	// nothing yet.
-    }
+    {}
 
     template <typename T>
     svg_renderer<T>::~svg_renderer() {}
@@ -80,61 +52,29 @@ namespace mapnik
 	std::clog << "start map processing" << std::endl;
 	#endif
 
-	// should I move these lines to the constructor?
-	// agg_renderer processes the background color of the map in the constructor.
-
-	using namespace karma;
-	using karma::string;
-	using repository::confix;
-	using fusion::tuple;
-
 	// generate XML header.
-	generate(
-	    output_iterator_,
-	    string << eol << string << eol, 
-	    XML_DECLARATION, SVG_DTD);
+	generator_.generate_header();
 
 	// generate SVG root element opening tag.
 	// the root element defines the size of the image,
 	// which is taken from the map's dimensions.
-
-	generate(
-	    output_iterator_,
-	    confix("<", ">")[
-		"svg width=" << confix('"', '"')[int_ << string]
-		<< " height=" << confix('"', '"')[int_ << string]
-		<< " version=" << confix('"', '"')[float_]
-		<< " xmlns=" << confix('"', '"')[string]]
-	    << eol,
-	    tuple<int, std::string>(width_, "px"), tuple<int, std::string>(height_, "px"), SVG_VERSION, SVG_NAMESPACE_URL);
+	svg::root_output_attributes root_attributes(width_, height_);
+	generator_.generate_opening_root(root_attributes);	
 
 	boost::optional<color> const& bgcolor = map.background();
 	if(bgcolor)
 	{
-	    // generate background color as a rectangle that spans the whole image.
-	    generate(
-		output_iterator_,
-		confix("<", "/>")[
-		    "rect x=" << confix('"', '"')[int_]
-		    << " y=" << confix('"', '"')[int_]
-		    << " width=" << confix('"', '"')[int_ << string]
-		    << " height=" << confix('"', '"')[int_ << string]
-		    << " style=" << confix('"', '"')["fill: " << string]]
-		<< eol,
-		0, 0, tuple<int, std::string>(width_, "px"), tuple<int, std::string>(height_, "px"), bgcolor->to_hex_string());
+	    // generate background color as a rectangle that spans the whole image.	    
+	    svg::rect_output_attributes bg_attributes(0, 0, width_, height_, *bgcolor);
+	    generator_.generate_rect(bg_attributes);
 	}
     }
 
     template <typename T>
     void svg_renderer<T>::end_map_processing(Map const& map)
     {
-	using karma::generate;
-	using karma::lit;
-
 	// generate SVG root element closing tag.
-	generate(
-	    output_iterator_,
-	    lit("</svg>"));
+	generator_.generate_closing_root();
 
 	#ifdef MAPNIK_DEBUG
 	std::clog << "end map processing" << std::endl;
@@ -144,8 +84,6 @@ namespace mapnik
     template <typename T>
     void svg_renderer<T>::start_layer_processing(layer const& lay)
     {
-	// nothing yet.
-
 	#ifdef MAPNIK_DEBUG
 	std::clog << "start layer processing: " << lay.name() << std::endl;
 	#endif
@@ -154,8 +92,6 @@ namespace mapnik
     template <typename T>
     void svg_renderer<T>::end_layer_processing(layer const& lay)
     {
-	// nothing yet.
-
 	#ifdef MAPNIK_DEBUG
 	std::clog << "end layer processing: " << lay.name() << std::endl;
 	#endif
