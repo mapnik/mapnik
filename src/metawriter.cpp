@@ -165,60 +165,80 @@ void metawriter_json_stream::add_text(placement const& p,
     CoordTransform const& t,
     metawriter_properties const& properties)
 {
+    /* Note:
+       Map coordinate system (and starting_{x,y}) starts in upper left corner
+         and grows towards lower right corner.
+       Font + placement vertex coordinate system starts in lower left corner
+         and grows towards upper right corner.
+       Therefore y direction is different. Keep this in mind while doing calculations.
+
+       The y value returned by vertex() is always the baseline.
+       Lowest y = baseline of bottom line
+       Hightest y = baseline of top line
+
+      */
+//    if (p.placements.size()) std::cout << p.info.get_string() << "\n";
     for (unsigned n = 0; n < p.placements.size(); n++) {
         placement_element & current_placement = const_cast<placement_element &>(p.placements[n]);
 
         bool inside = false;
+        bool straight = true;
+        int c; double x, y, angle;
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
             current_placement.rewind();
             int cx = current_placement.starting_x;
             int cy = current_placement.starting_y;
-            int c; double x, y, angle;
             current_placement.vertex(&c, &x, &y, &angle);
-            if (x+cx >= 0 && x+cx < width_ && y+cy >= 0 && y+cy < height_) {
-                inside = true;
-                break;
-            }
+            if (x+cx >= 0 && x+cx < width_ && y+cy >= 0 && y+cy < height_) inside = true;
+            if (angle > 0.001 || angle < -0.001) straight = false;
+            if (inside && !straight) break;
         }
         if (!inside) continue;
 
-        write_feature_header("MultiPolygon");
-        *f_ << "[";
         current_placement.rewind();
 
-        int c = ' ';
+        if (straight) {
+            //Reduce number of polygons
+            double minx = INT_MAX, miny = INT_MAX, maxx = INT_MIN, maxy = INT_MIN;
+            for (int i = 0; i < current_placement.num_nodes(); ++i) {
+                current_placement.vertex(&c, &x, &y, &angle);
+                font_face_set::dimension_t ci = face->character_dimensions(c);
+                if (x < minx) minx = x;
+                if (x+ci.width > maxx) maxx = x+ci.width;
+                if (y+ci.height+ci.ymin > maxy) maxy = y+ci.height+ci.ymin;
+                if (y+ci.ymin < miny) miny = y+ci.ymin;
+                //                std::cout << (char) c << " height:" << ci.height << " ymin:" << ci.ymin << " y:" << y << " miny:"<< miny << " maxy:"<< maxy <<"\n";
+
+            }
+            add_box(box2d<double>(current_placement.starting_x+minx,
+                                  current_placement.starting_y-miny,
+                                  current_placement.starting_x+maxx,
+                                  current_placement.starting_y-maxy), feature, t, properties);
+            continue;
+        }
+
+        write_feature_header("MultiPolygon");
+        *f_ << "[";
+        c = ' ';
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
             if (c != ' ') {
                 *f_ << ",";
             }
-            double x, y, angle;
             current_placement.vertex(&c, &x, &y, &angle);
             if (c == ' ') continue;
             font_face_set::dimension_t ci = face->character_dimensions(c);
 
-            //TODO: Optimize for angle == 0
             double x0, y0, x1, y1, x2, y2, x3, y3;
-            if (abs(angle) > 0.01) {
-                double sina = sin(angle);
-                double cosa = cos(angle);
-                x0 = current_placement.starting_x + x - sina*ci.ymin;
-                y0 = current_placement.starting_y - y - cosa*ci.ymin;
-                x1 = x0 + ci.width * cosa;
-                y1 = y0 - ci.width * sina;
-                x2 = x0 + (ci.width * cosa - ci.height * sina);
-                y2 = y0 - (ci.width * sina + ci.height * cosa);
-                x3 = x0 - ci.height * sina;
-                y3 = y0 - ci.height * cosa;
-            } else {
-                x0 = current_placement.starting_x + x;
-                y0 = current_placement.starting_y - y - ci.ymin;
-                x1 = x0 + ci.width;
-                y1 = y0;
-                x2 = x0 + ci.width;
-                y2 = y0 - ci.height;
-                x3 = x0;
-                y3 = y0 - ci.height;
-            }
+            double sina = sin(angle);
+            double cosa = cos(angle);
+            x0 = current_placement.starting_x + x - sina*ci.ymin;
+            y0 = current_placement.starting_y - y - cosa*ci.ymin;
+            x1 = x0 + ci.width * cosa;
+            y1 = y0 - ci.width * sina;
+            x2 = x0 + (ci.width * cosa - ci.height * sina);
+            y2 = y0 - (ci.width * sina + ci.height * cosa);
+            x3 = x0 - ci.height * sina;
+            y3 = y0 - ci.height * cosa;
 
             *f_ << "\n     [[";
             write_point(t, x0, y0);
