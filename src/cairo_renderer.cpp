@@ -827,6 +827,8 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             int w = (*data)->width();
             int h = (*data)->height();
 
+            metawriter_with_properties writer = sym.get_metawriter();
+
             for (unsigned i = 0; i < feature.num_geometries(); ++i)
             {
                 geometry2d const& geom = feature.get_geometry(i);
@@ -871,6 +873,10 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                                                  sym.get_halo_radius(),
                                                  sym.get_halo_fill()
                                     );
+                                if (writer.first) {
+                                    writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
+                                    writer.first->add_text(text_placement, faces, feature, t_, writer.second); //Only 1 placement
+                                }
                                 detector_.insert(label_ext);
                             }
                         }
@@ -900,9 +906,10 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                                              sym.get_halo_radius(),
                                              sym.get_halo_fill()
                                 );
+                            if (writer.first) writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
                         }
-
                         finder.update_detector(text_placement);
+                        if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second); //More than one placement
                     }
                 }
             }
@@ -1140,6 +1147,8 @@ void cairo_renderer_base::process(glyph_symbolizer const& sym,
                              halo_fill
                 );
             detector_.insert(glyph_ext);
+            metawriter_with_properties writer = sym.get_metawriter();
+            if (writer.first) writer.first->add_box(glyph_ext, feature, t_, writer.second);
         }
     }
     else
@@ -1227,6 +1236,9 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                          sym.get_halo_fill()
                             );
                     }
+
+                    metawriter_with_properties writer = sym.get_metawriter();
+                    if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
                 }
             }
         }
