@@ -48,6 +48,9 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
     
+
+    metawriter_with_properties writer = sym.get_metawriter();
+
     UnicodeString text;
     if( sym.get_no_text() )
         text = UnicodeString( " " );  // TODO: fix->use 'space' as the text to render
@@ -211,6 +214,10 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                         text_ren.render(x,y);
                                         detector_.insert(label_ext);
                                         finder.update_detector(text_placement);
+                                        if (writer.first) {
+                                            writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
+                                            writer.first->add_text(text_placement, faces, feature, t_, writer.second);
+                                        }
                                     }
                                 }
                             }
@@ -233,10 +240,12 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 agg::trans_affine matrix = tr * agg::trans_affine_translation(px, py);
                                 
                                 svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
+                                if (writer.first) writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
                                 box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[ii]);
                                 text_ren.render(x,y);
                             }
                             finder.update_detector(text_placement);
+                            if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
                         }
                     }
                 }
@@ -353,6 +362,10 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                         ren.render(x,y);
                                         detector_.insert(label_ext);
                                         finder.update_detector(text_placement);
+                                        if (writer.first) {
+                                            writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
+                                            writer.first->add_text(text_placement, faces, feature, t_, writer.second);
+                                        }
                                     }
                                 }
                             }
@@ -374,11 +387,13 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 int py=int(y - (h/2));
                          
                                 pixmap_.set_rectangle_alpha(px,py,*(*data));
+                                if (writer.first) writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
                          
                                 box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
                                 ren.render(x,y);
                             }
                             finder.update_detector(text_placement);
+                            if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
                         }
                     }
                 }
