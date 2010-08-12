@@ -56,10 +56,17 @@ class MAPNIK_DECL symbolizer_base {
           * This functions requires that cache_metawriters() was called first.
           */
         metawriter_with_properties get_metawriter() const;
-        /** Get properties needed for metawriter.
+        /** Get metawriter properties.
+          * This functions returns the default attributes of the
+          * metawriter + symbolizer specific attributes.
           * \note This function is a helperfunction for class attribute_collector.
           */
-        metawriter_properties const& get_metawriter_properties() const {return properties_complete_;};
+        metawriter_properties const& get_metawriter_properties() const {return properties_complete_;}
+        /** Get metawriter properties which only apply to this symbolizer.
+          */
+        metawriter_properties const& get_metawriter_properties_overrides() const {return properties_;}
+        /** Get metawriter name. */
+        std::string const& get_metawriter_name() const {return writer_name_;}
     private:
         metawriter_properties properties_;
         metawriter_properties properties_complete_;

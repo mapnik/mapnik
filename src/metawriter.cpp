@@ -50,6 +50,11 @@ metawriter_properties::metawriter_properties(boost::optional<std::string> str)
     }
 }
 
+std::string metawriter_properties::to_string() const
+{
+    return boost::algorithm::join(*this, ",");
+}
+
 /********************************************************************************************/
 
 void metawriter_json_stream::start(metawriter_property_map const& properties)

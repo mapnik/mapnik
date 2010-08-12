@@ -27,6 +27,7 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/raster_colorizer.hpp>
+#include <mapnik/metawriter_json.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -90,6 +91,7 @@ public:
         {
             set_attr( sym_node, "opacity", sym.get_opacity() );
         }
+        add_metawriter_attributes(sym_node, sym);
     }
 
     void operator () ( const line_symbolizer & sym )
@@ -133,6 +135,7 @@ public:
         {
             set_attr( sym_node, "stroke-dashoffset", strk.dash_offset());
         }
+        add_metawriter_attributes(sym_node, sym);
     }
         
     void operator () ( const line_pattern_symbolizer & sym )
@@ -142,6 +145,7 @@ public:
                               ptree()))->second;
 
         add_image_attributes( sym_node, sym );
+        add_metawriter_attributes(sym_node, sym);
     }
 
     void operator () ( const polygon_symbolizer & sym )
@@ -162,6 +166,7 @@ public:
         {
             set_attr( sym_node, "gamma", sym.get_gamma() );
         }
+        add_metawriter_attributes(sym_node, sym);
     }
 
     void operator () ( const polygon_pattern_symbolizer & sym )
@@ -177,6 +182,7 @@ public:
         }
 
         add_image_attributes( sym_node, sym );
+        add_metawriter_attributes(sym_node, sym);
     }
 
     void operator () ( const raster_symbolizer & sym )
@@ -204,7 +210,7 @@ public:
             serialize_raster_colorizer(sym_node, sym.get_colorizer(),
                                        explicit_defaults_);
         }
-                    
+        //Note: raster_symbolizer doesn't support metawriters
     }
 
     void operator () ( const shield_symbolizer & sym )
@@ -215,6 +221,7 @@ public:
 
         add_font_attributes( sym_node, sym);
         add_image_attributes( sym_node, sym);
+        add_metawriter_attributes(sym_node, sym);
 
         // pseudo-default-construct a shield_symbolizer. It is used
         // to avoid printing of attributes with default values without
@@ -242,7 +249,7 @@ public:
                               ptree()))->second;
 
         add_font_attributes( sym_node, sym);
-
+        add_metawriter_attributes(sym_node, sym);
     }
 
     void operator () ( const building_symbolizer & sym )
@@ -263,6 +270,7 @@ public:
         {
             set_attr( sym_node, "height", sym.height() );
         }
+        add_metawriter_attributes(sym_node, sym);
     }
 
     void operator () ( markers_symbolizer const& sym)
@@ -290,6 +298,7 @@ public:
         {
             set_attr( sym_node, "fill", sym.get_fill() );
         }
+        add_metawriter_attributes(sym_node, sym);
     }
 
     void operator () ( glyph_symbolizer const& sym)
@@ -383,7 +392,7 @@ public:
         {
             set_attr( node, "angle_mode", sym.get_angle_mode() );
         }
-
+        add_metawriter_attributes(node, sym);
     }
 
 private:
@@ -511,6 +520,17 @@ private:
             set_attr( node, "justify_alignment", sym.get_justify_alignment() );
         }
     }
+
+    void add_metawriter_attributes(ptree &node, symbolizer_base const& sym)
+    {
+        if (!sym.get_metawriter_name().empty() || explicit_defaults_) {
+            set_attr(node, "meta-writer", sym.get_metawriter_name());
+        }
+        if (!sym.get_metawriter_properties_overrides().empty() || explicit_defaults_) {
+            set_attr(node, "meta-output", sym.get_metawriter_properties_overrides().to_string());
+        }
+    }
+
     ptree & rule_;
     bool explicit_defaults_;
 };
@@ -692,6 +712,30 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
     }
 }
 
+void serialize_metawriter(ptree & map_node, Map::const_metawriter_iterator metawriter_it, bool explicit_defaults)
+{
+    std::string const& name = metawriter_it->first;
+    metawriter_ptr const& metawriter = metawriter_it->second;
+
+    ptree & metawriter_node = map_node.push_back(
+        ptree::value_type("MetaWriter", ptree()))->second;
+
+    set_attr(metawriter_node, "name", name);
+
+    metawriter_json *json = dynamic_cast<metawriter_json *>(metawriter.get());
+    if (json) {
+        set_attr(metawriter_node, "type", "json");
+        std::string const& filename = path_processor_type::to_string(*(json->get_filename()));
+        if (!filename.empty() || explicit_defaults) {
+            set_attr(metawriter_node, "file", filename);
+        }
+    }
+    if (!metawriter->get_default_properties().empty() || explicit_defaults) {
+        set_attr(metawriter_node, "default-output", metawriter->get_default_properties().to_string());
+    }
+
+}
+
 void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
 {
 
@@ -738,6 +782,12 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     for (unsigned i = 0; i < layers.size(); ++i )
     {
         serialize_layer( map_node, layers[i], explicit_defaults );
+    }
+
+    Map::const_metawriter_iterator m_it = map.begin_metawriters();
+    Map::const_metawriter_iterator m_end = map.end_metawriters();
+    for (; m_it != m_end; ++m_it) {
+        serialize_metawriter(map_node, m_it, explicit_defaults);
     }
 }
 

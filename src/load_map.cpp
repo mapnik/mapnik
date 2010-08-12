@@ -1635,8 +1635,7 @@ void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
                                    "Expected 'RasterColorizer' but got '" + css_tag.first + "'");
             }
         }
-
-        parse_metawriter_in_symbolizer(raster_sym, sym);
+        //Note: raster_symbolizer doesn't support metawriters
         rule.append(raster_sym);
     }
     catch (const config_error & ex)

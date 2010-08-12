@@ -41,7 +41,7 @@
 
 namespace mapnik {
 
-class placement;
+struct placement;
 
 /** Implementation of std::map that also returns const& for operator[]. */
 class metawriter_property_map
@@ -64,6 +64,7 @@ class metawriter_properties : public std::set<std::string>
         metawriter_properties() {};
         template <class InputIterator> metawriter_properties(
                 InputIterator first, InputIterator last) : std::set<std::string>(first, last) {};
+        std::string to_string() const;
 };
 
 /** Abstract baseclass for all metawriter classes. */
