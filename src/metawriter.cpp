@@ -189,12 +189,12 @@ void metawriter_json_stream::add_text(placement const& p,
         bool inside = false;
         bool straight = true;
         int c; double x, y, angle;
+        current_placement.rewind();
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
-            current_placement.rewind();
             int cx = current_placement.starting_x;
             int cy = current_placement.starting_y;
             current_placement.vertex(&c, &x, &y, &angle);
-            if (x+cx >= 0 && x+cx < width_ && y+cy >= 0 && y+cy < height_) inside = true;
+            if (cx+x >= 0 && cx+x < width_ && cy-y >= 0 && cy-y < height_) inside = true;
             if (angle > 0.001 || angle < -0.001) straight = false;
             if (inside && !straight) break;
         }
