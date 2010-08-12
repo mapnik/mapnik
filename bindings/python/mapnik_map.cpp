@@ -350,10 +350,21 @@ void export_map()
              ">>> m.zoom_to_box(extent)\n"
             )
         .def("get_metawriter_property", &Map::get_metawriter_property,
-            "TODO (Herm)"
+            "Reads a metawriter property.\n"
+            "These properties are completely userdefined and can be used for"
+            "creating filenames, etc."
         )
         .def("set_metawriter_property", &Map::set_metawriter_property,
-            "TODO (Herm)"
+            "Sets a metawriter property.\n"
+            "These properties are completely userdefined and can be used for"
+            "creating filenames, etc.\n"
+            "\n"
+            "Usage:\n"
+            ">>> map.set_metawriter_property(\"x\", str(x))\n"
+            ">>> map.set_metawriter_property(\"y\", str(y))\n"
+            ">>> map.set_metawriter_property(\"z\", str(z))\n"
+            "\n"
+            "Use a path like \"[z]/[x]/[y].json\" to create filenames.\n"
         )
         
 
