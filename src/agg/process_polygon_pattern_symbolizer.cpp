@@ -105,6 +105,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     
     span_gen_type sg(img_src, offset_x, offset_y);
     renderer_type rp(renb,sa, sg);
+    metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<num_geometries;++i)
     {
         geometry2d const& geom = feature.get_geometry(i);
@@ -112,6 +113,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         {
             path_type path(t_,geom,prj_trans);
             ras_ptr->add_path(path);
+            if (writer.first) writer.first->add_polygon(path, feature, t_, writer.second);
         }
     }
     agg::render_scanlines(*ras_ptr, sl, rp);

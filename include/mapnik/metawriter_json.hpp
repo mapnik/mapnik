@@ -47,7 +47,11 @@ public:
                           face_set_ptr face,
                           Feature const& feature,
                           CoordTransform const& t,
-                          metawriter_properties const& properties = metawriter_properties());
+                          metawriter_properties const& properties);
+    virtual void add_polygon(path_type & path,
+                          Feature const& feature,
+                          CoordTransform const& t,
+                          metawriter_properties const& properties);
 
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();
@@ -74,14 +78,15 @@ protected:
     projection output_srs_;
     virtual void write_header();
     inline void write_feature_header(std::string type) {
-        if (count_ == HEADER_NOT_WRITTEN) write_header();
-        if (count_++) *f_ << ",\n";
-    #ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_DEBUG
         if (count_ == STOPPED)
         {
             std::cerr << "WARNING: Metawriter not started before using it.\n";
         }
-    #endif
+#endif
+        if (count_ == HEADER_NOT_WRITTEN) write_header();
+        if (count_++) *f_ << ",\n";
+
         *f_  << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \""<<type<<"\",\n    \"coordinates\":";
     }
     void write_properties(Feature const& feature, metawriter_properties const& properties);

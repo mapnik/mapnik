@@ -156,10 +156,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                     pixmap_.set_rectangle_alpha2(*(*data), px, py, sym.get_opacity());
                     detector_.insert(label_ext);
                     metawriter_with_properties writer = sym.get_metawriter();
-                    if (writer.first)
-                    {
-                        writer.first->add_box(label_ext, feature, t_, writer.second);
-                    }
+                    if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                 }
             }
         }

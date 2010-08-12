@@ -63,7 +63,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
 
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
-
+    metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
         geometry2d const& geom=feature.get_geometry(i);
@@ -71,6 +71,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
         {
             path_type path(t_,geom,prj_trans);
             ras_ptr->add_path(path);
+            if (writer.first) writer.first->add_polygon(path, feature, t_, writer.second);
         }
     }
     ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));

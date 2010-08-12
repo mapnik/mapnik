@@ -71,6 +71,7 @@ class metawriter_properties : public std::set<std::string>
 class metawriter
 {
     public:
+        typedef coord_transform2<CoordTransform,geometry2d> path_type;
         metawriter(metawriter_properties dflt_properties) : dflt_properties_(dflt_properties) {}
         virtual ~metawriter() {};
         /** Output a rectangular area.
@@ -82,12 +83,16 @@ class metawriter
           */
         virtual void add_box(box2d<double> const& box, Feature const& feature,
                              CoordTransform const& t,
-                             metawriter_properties const& properties = metawriter_properties())=0;
+                             metawriter_properties const& properties)=0;
         virtual void add_text(placement const& placement,
                               face_set_ptr face,
                               Feature const& feature,
                               CoordTransform const& t,
-                              metawriter_properties const& properties = metawriter_properties())=0;
+                              metawriter_properties const& properties)=0;
+        virtual void add_polygon(path_type & path,
+                              Feature const& feature,
+                              CoordTransform const& t,
+                              metawriter_properties const& properties)=0;
 
         /** Start processing.
           * Write file header, init database connection, ...

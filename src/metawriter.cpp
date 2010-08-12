@@ -257,6 +257,41 @@ void metawriter_json_stream::add_text(placement const& p,
     }
 }
 
+void metawriter_json_stream::add_polygon(path_type & path,
+    Feature const& feature,
+    CoordTransform const& t,
+    metawriter_properties const& properties)
+{
+    std::cout << count_ << "Polygon\n";
+    write_feature_header("Polygon");
+    std::cout << count_ << "Polygon started\n";
+
+    *f_ << " [";
+    double x, y, last_x=0.0, last_y=0.0;
+    unsigned cmd, last_cmd = SEG_END;
+    path.rewind(0);
+
+    int polygon_count = 0;
+    while ((cmd = path.vertex(&x, &y)) != SEG_END) {
+        if (cmd == SEG_LINETO) {
+            if (last_cmd == SEG_MOVETO) {
+                //Start new polygon
+                if (polygon_count++) *f_ << "], ";
+                *f_ << "[";
+                write_point(t, last_x, last_y, true);
+            }
+            *f_ << ",";
+            write_point(t, x, y, true);
+        }
+        last_x = x;
+        last_y = y;
+        last_cmd = cmd;
+    }
+    *f_ << "]]";
+    write_properties(feature, properties);
+
+}
+
 
 void metawriter_json_stream::set_map_srs(projection const& input_srs_)
 {
@@ -297,7 +332,7 @@ void metawriter_json::stop()
         f_.close();
     }
 #ifdef MAPNIK_DEBUG
-    else {
+    else if (count_ >= STARTED){
         std::clog << "WARNING: File not open in metawriter_json::stop()!\n";
     }
 #endif
