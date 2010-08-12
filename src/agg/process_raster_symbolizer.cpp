@@ -69,7 +69,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
             
             if (sym.get_mode() == "normal"){
                 if (sym.get_opacity() == 1.0) {
-                    pixmap_.set_rectangle(start_x,start_y,target);
+                    pixmap_.set_rectangle_alpha(start_x,start_y,target);
                 } else {
                     pixmap_.set_rectangle_alpha2(target,start_x,start_y, sym.get_opacity());
                 }

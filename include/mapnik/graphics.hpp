@@ -300,6 +300,11 @@ public:
 #ifdef MAPNIK_BIG_ENDIAN
                     unsigned a1 = rgba1 & 0xff;
                     if (a1 == 0) continue;
+                    if (a1 == 0xff)
+                    {
+                        row_to[x] = rgba1;
+                        continue;
+                    }
                     unsigned r1 = (rgba1 >> 24) & 0xff;
                     unsigned g1 = (rgba1 >> 16 ) & 0xff;
                     unsigned b1 = (rgba1 >> 8) & 0xff;
@@ -319,6 +324,11 @@ public:
 #else
                     unsigned a1 = (rgba1 >> 24) & 0xff;
                     if (a1 == 0) continue;
+                    if (a1 == 0xff)
+                    {
+                        row_to[x] = rgba1;
+                        continue;
+                    }
                     unsigned r1 = rgba1 & 0xff;
                     unsigned g1 = (rgba1 >> 8 ) & 0xff;
                     unsigned b1 = (rgba1 >> 16) & 0xff;
@@ -360,6 +370,11 @@ public:
 #ifdef MAPNIK_BIG_ENDIAN
                     unsigned a1 = int( (rgba1 & 0xff) * opacity );
                     if (a1 == 0) continue;
+                    if (a1 == 0xff)
+                    {
+                        row_to[x] = rgba1;
+                        continue;
+                    }
                     unsigned r1 = (rgba1 >> 24) & 0xff;
                     unsigned g1 = (rgba1 >> 16 ) & 0xff;
                     unsigned b1 = (rgba1 >> 8) & 0xff;
@@ -378,6 +393,11 @@ public:
 #else
                     unsigned a1 = int( ((rgba1 >> 24) & 0xff) * opacity );
                     if (a1 == 0) continue;
+                    if (a1 == 0xff)
+                    {
+                        row_to[x] = rgba1;
+                        continue;
+                    }
                     unsigned r1 = rgba1 & 0xff;
                     unsigned g1 = (rgba1 >> 8 ) & 0xff;
                     unsigned b1 = (rgba1 >> 16) & 0xff;
