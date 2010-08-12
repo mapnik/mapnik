@@ -70,7 +70,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     ras_ptr->gamma(agg::gamma_linear());
     
     agg::scanline_p8 sl;
-
+    metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
         geometry2d const& geom = feature.get_geometry(i);
@@ -140,6 +140,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                 stroke.generator().miter_limit(4.0);
                 stroke.generator().width(stroke_.get_width() * scale_factor_);
                 ras_ptr->add_path(stroke);
+                if (writer.first) writer.first->add_line(path, feature, t_, writer.second);
             }
         }
     }

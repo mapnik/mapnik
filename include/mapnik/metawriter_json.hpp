@@ -52,6 +52,10 @@ public:
                           Feature const& feature,
                           CoordTransform const& t,
                           metawriter_properties const& properties);
+    virtual void add_line(path_type & path,
+                          Feature const& feature,
+                          CoordTransform const& t,
+                          metawriter_properties const& properties);
 
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();
@@ -100,6 +104,7 @@ protected:
             *f_ << ",";
         }
     }
+    void write_line_polygon(path_type & path, CoordTransform const& t, bool polygon);
 
 private:
     std::ostream *f_;

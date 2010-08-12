@@ -69,7 +69,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     renderer_type ren(ren_base, pattern);
     ren.clip_box(0,0,width_,height_);
     rasterizer_type ras(ren);
-    
+    metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
         geometry2d const& geom = feature.get_geometry(i);
@@ -77,6 +77,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
         {
             path_type path(t_,geom,prj_trans);
             ras.add_path(path);
+            if (writer.first) writer.first->add_line(path, feature, t_, writer.second);
         }
     }
 }

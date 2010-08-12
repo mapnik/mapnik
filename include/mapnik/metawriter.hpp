@@ -93,6 +93,10 @@ class metawriter
                               Feature const& feature,
                               CoordTransform const& t,
                               metawriter_properties const& properties)=0;
+        virtual void add_line(path_type & path,
+                              Feature const& feature,
+                              CoordTransform const& t,
+                              metawriter_properties const& properties)=0;
 
         /** Start processing.
           * Write file header, init database connection, ...

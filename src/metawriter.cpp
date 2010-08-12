@@ -262,10 +262,22 @@ void metawriter_json_stream::add_polygon(path_type & path,
     CoordTransform const& t,
     metawriter_properties const& properties)
 {
-    std::cout << count_ << "Polygon\n";
     write_feature_header("Polygon");
-    std::cout << count_ << "Polygon started\n";
+    write_line_polygon(path, t, true);
+    write_properties(feature, properties);
+}
 
+void metawriter_json_stream::add_line(path_type & path,
+    Feature const& feature,
+    CoordTransform const& t,
+    metawriter_properties const& properties)
+{
+    write_feature_header("MultiLineString");
+    write_line_polygon(path, t, false);
+    write_properties(feature, properties);
+}
+
+void metawriter_json_stream::write_line_polygon(path_type & path, CoordTransform const& t, bool polygon){
     *f_ << " [";
     double x, y, last_x=0.0, last_y=0.0;
     unsigned cmd, last_cmd = SEG_END;
@@ -275,7 +287,7 @@ void metawriter_json_stream::add_polygon(path_type & path,
     while ((cmd = path.vertex(&x, &y)) != SEG_END) {
         if (cmd == SEG_LINETO) {
             if (last_cmd == SEG_MOVETO) {
-                //Start new polygon
+                //Start new polygon/line
                 if (polygon_count++) *f_ << "], ";
                 *f_ << "[";
                 write_point(t, last_x, last_y, true);
@@ -288,8 +300,6 @@ void metawriter_json_stream::add_polygon(path_type & path,
         last_cmd = cmd;
     }
     *f_ << "]]";
-    write_properties(feature, properties);
-
 }
 
 
