@@ -156,6 +156,11 @@ void map_parser::parse_map( Map & map, ptree const & pt )
 	try
 	{
             optional<color> bgcolor = get_opt_attr<color>(map_node, "bgcolor");
+            // mapnik2 forward compatibility
+            if (!bgcolor)
+            {
+                bgcolor = get_opt_attr<color>(map_node, "background-color");
+            }
             if (bgcolor) {
 		map.set_background( * bgcolor );
             }
@@ -531,7 +536,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
 
     } catch (const config_error & ex) {
 	if ( ! name.empty() ) {
-            ex.append_context(string("(encountered during parsing of layer '") + name + "')");
+            ex.append_context(string("(encountered during parsing of layer '") + name + "' in map '" + filename_ + "')");
 	}
 	throw;
     }
@@ -643,7 +648,7 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
     {
 	if ( ! name.empty() )
 	{
-            ex.append_context(string("in rule '") + name + "'");
+            ex.append_context(string("in rule '") + name + "' in map '" + filename_ + "')");
 	}
 	throw;
     }
@@ -883,6 +888,13 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
     try
     {
 	std::string name = get_attr<string>(sym, "name");
+
+        // mapnik2 forward compatibility
+        if (boost::algorithm::istarts_with(name,"[") && boost::algorithm::iends_with(name,"]"))
+        {
+            boost::algorithm::ireplace_first(name,"[","");
+            boost::algorithm::ireplace_last(name,"]","");
+        }
 
 	optional<std::string> face_name =
             get_opt_attr<std::string>(sym, "face_name");
@@ -1407,6 +1419,69 @@ void map_parser::parse_line_symbolizer( rule_type & rule, ptree const & sym )
 				   "Expected 'CssParameter' but got '" + css_tag.first + "'");
             }
 	}
+        
+        // mapnik2 forward compatibility
+        // stroke color
+        optional<color> c = get_opt_attr<color>(sym, "stroke");
+        if (c) strk.set_color(*c);
+        // stroke-width
+        optional<double> width =  get_opt_attr<double>(sym, "stroke-width");
+        if (width) strk.set_width(*width);
+        // stroke-opacity
+        optional<double> opacity = get_opt_attr<double>(sym, "stroke-opacity");
+        if (opacity) strk.set_opacity(*opacity);
+        // stroke-linejoin
+        optional<line_join_e> line_join = get_opt_attr<line_join_e>(sym, "stroke-linejoin");
+        if (line_join) strk.set_line_join(*line_join);
+        // stroke-linecap
+        optional<line_cap_e> line_cap = get_opt_attr<line_cap_e>(sym, "stroke-linecap");
+        if (line_cap) strk.set_line_cap(*line_cap);
+        // stroke-dashaffset
+        // not supported until mapnik2
+        //optional<double> offset = get_opt_attr<double>(sym, "stroke-dashoffet");
+        //if (offset) strk.set_dash_offset(*offset);
+        // stroke-dasharray
+        optional<string> str = get_opt_attr<string>(sym,"stroke-dasharray");
+        if (str) 
+        {
+            tokenizer<> tok (*str);
+            std::vector<float> dash_array;
+            tokenizer<>::iterator itr = tok.begin();
+            for (; itr != tok.end(); ++itr)
+            {
+                try
+                {
+                    float f = boost::lexical_cast<float>(*itr);
+                    dash_array.push_back(f);
+                }
+                catch ( boost::bad_lexical_cast &)
+                {
+                    throw config_error(std::string("Failed to parse dasharray ") +
+                                       "'. Expected a " +
+                                       "list of floats but got '" + (*str) + "'");
+                }
+            }
+            if (dash_array.size())
+            {
+                size_t size = dash_array.size();
+                if ( size % 2)
+                {
+                    for (size_t i=0; i < size ;++i)
+                    {
+                        dash_array.push_back(dash_array[i]);
+                    }
+                }
+                std::vector<float>::const_iterator pos = dash_array.begin();
+                while (pos != dash_array.end())
+                {
+                    strk.add_dash(*pos,*(pos + 1));
+                    pos +=2;
+                }
+            }
+        }
+
+        
+        
 	rule.append(line_symbolizer(strk));
     }
     catch (const config_error & ex)
@@ -1462,6 +1537,18 @@ void map_parser::parse_polygon_symbolizer( rule_type & rule, ptree const & sym )
 				   "Expected 'CssParameter' but got '" + css_tag.first + "'");
             }
 	}
+
+        // mapnik2 forward compatibility
+        // fill
+        optional<color> fill = get_opt_attr<color>(sym, "fill");
+        if (fill) poly_sym.set_fill(*fill);
+        // fill-opacity
+        optional<double> opacity = get_opt_attr<double>(sym, "fill-opacity");
+        if (opacity) poly_sym.set_opacity(*opacity);
+        // gamma
+        optional<double> gamma = get_opt_attr<double>(sym, "gamma");
+        if (gamma)  poly_sym.set_gamma(*gamma);
+
 	rule.append(poly_sym);
 
     }
@@ -1518,6 +1605,18 @@ void map_parser::parse_building_symbolizer( rule_type & rule, ptree const & sym 
 				   "Expected 'CssParameter' but got '" + css_tag.first + "'");
             }
 	}
+
+        // mapnik2 forward compatibility
+        // fill
+        optional<color> fill = get_opt_attr<color>(sym, "fill");
+        if (fill) building_sym.set_fill(*fill);
+        // fill-opacity
+        optional<double> opacity = get_opt_attr<double>(sym, "fill-opacity");
+        if (opacity) building_sym.set_opacity(*opacity);
+        // height
+        optional<double> height = get_opt_attr<double>(sym, "height");
+        if (opacity) building_sym.set_height(*height);
+
 	rule.append(building_sym);
     }
     catch (const config_error & ex)
@@ -1570,6 +1669,20 @@ void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
 				   "Expected 'CssParameter' but got '" + css_tag.first + "'");
             }
 	}
+        
+        // mapnik2 forward compatibility
+        // mode
+        optional<std::string> mode = get_opt_attr<std::string>(sym, "mode");
+        if (mode) raster_sym.set_mode(*mode);
+
+        // scaling
+        optional<std::string> scaling = get_opt_attr<std::string>(sym, "scaling");
+        if (scaling) raster_sym.set_scaling(*scaling);
+
+        // opacity
+        optional<double> opacity = get_opt_attr<double>(sym, "opacity");
+        if (opacity) raster_sym.set_opacity(*opacity);
+
 	rule.append(raster_sym);
     }
     catch (const config_error & ex)
