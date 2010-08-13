@@ -76,10 +76,7 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
         // Prepare glyphs to set internal state and calculate the marker's
         // final box so we can check for a valid placement
         box2d<double> dim = ren.prepare_glyphs(path.get());
-        double bsize = (dim.width()>dim.height()?dim.width():dim.height())/2;
-        box2d<double> ext(
-            floor(x-bsize), floor(y-bsize), ceil(x+bsize), ceil(y+bsize)
-            );
+        box2d<double> ext(x-dim.width()/2, y-dim.height()/2, x+dim.width()/2, y+dim.height()/2);
         if ((sym.get_allow_overlap() || detector_.has_placement(ext)) &&
             (!sym.get_avoid_edges() || detector_.extent().contains(ext)))
         {    
