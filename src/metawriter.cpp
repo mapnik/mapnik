@@ -114,9 +114,9 @@ void metawriter_json_stream::write_properties(Feature const& feature, metawriter
         {
             //Property found
             text = boost::replace_all_copy(boost::replace_all_copy(itr->second.to_string(), "\\", "\\\\"), "\"", "\\\"");
+            if (i++) *f_ << ",";
+            *f_ << "\n    \"" << p << "\":\"" << text << "\"";
         }
-        if (i++) *f_ << ",";
-        *f_ << "\n    \"" << p << "\":\"" << text << "\"";
     }
 
     *f_ << "\n} }";

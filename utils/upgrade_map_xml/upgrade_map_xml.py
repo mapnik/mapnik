@@ -24,6 +24,13 @@ def fixup_sym_attributes(sym):
     if not hasattr(sym,'CssParameter'):
         return
     attrib = {}
+    metawriter = sym.attrib.get('meta-writer')
+    if metawriter:
+        attrib['meta-writer'] = metawriter
+    metaoutput = sym.attrib.get('meta-output')
+    if metaoutput:
+        attrib['meta-output'] = metaoutput
+    
     for css in sym.CssParameter:
         key = css.attrib.get('name')
         value = css.text

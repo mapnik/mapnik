@@ -120,6 +120,11 @@ struct symbolizer_attributes : public boost::static_visitor<>
 
     }
 
+    void operator () (line_symbolizer const& sym)
+    {
+        collect_metawriter(sym);
+    }
+
     void operator () (line_pattern_symbolizer const& sym)
     {   
         path_expression_ptr const& filename_expr = sym.get_filename();
@@ -127,6 +132,11 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
+        collect_metawriter(sym);
+    }
+
+    void operator () (polygon_symbolizer const& sym)
+    {
         collect_metawriter(sym);
     }
 
@@ -193,6 +203,16 @@ struct symbolizer_attributes : public boost::static_visitor<>
             expression_attributes f_attr(names_);
             boost::apply_visitor(f_attr,*color_expr);
         }
+        collect_metawriter(sym);
+    }
+
+    void operator () (markers_symbolizer const& sym)
+    {
+        collect_metawriter(sym);
+    }
+
+    void operator () (building_symbolizer const& sym)
+    {
         collect_metawriter(sym);
     }
     // TODO - support remaining syms
