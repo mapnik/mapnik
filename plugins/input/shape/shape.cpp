@@ -175,6 +175,10 @@ void  shape_datasource::init(shape_io& shape)
       indexed_=true;
       file.close();
    }
+   else
+   {
+      std::clog << "### Notice: no index found for " + shape_name_ + ".shp, use the 'shapeindex' program to build an index for faster rendering\n";
+   }
  
 #ifdef MAPNIK_DEBUG
    std::clog << extent_ << std::endl;
