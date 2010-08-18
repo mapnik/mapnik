@@ -84,7 +84,11 @@ postgis_datasource::postgis_datasource(parameters const& params)
       bbox_token_("!bbox!"),
       scale_denom_token_("!scale_denominator!"),
       persist_connection_(*params_.get<mapnik::boolean>("persist_connection",true)),
-      extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery",false))
+      extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery",false)),
+      // params below are for testing purposes only (will likely be removed at any time)
+      force2d_(*params_.get<mapnik::boolean>("force_2d",false)),
+      st_(*params_.get<mapnik::boolean>("st_prefix",false)),
+      lowercase_attr_names_(*params_.get<mapnik::boolean>("lowercase_names",false))     
       //show_queries_(*params_.get<mapnik::boolean>("show_queries",false))
      
 {   
@@ -470,7 +474,14 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }
 
             std::ostringstream s;
-            s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
+            s << "SELECT ";
+            if (st_)
+                s << "ST_";
+            if (force2d_)
+                s << "AsBinary(ST_Force_2D(\"" << geometryColumn_ << "\")) AS geom";
+            else
+                s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
+
             std::set<std::string> const& props=q.property_names();
             std::set<std::string>::const_iterator pos=props.begin();
             std::set<std::string>::const_iterator end=props.end();
@@ -520,14 +531,24 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
                 throw mapnik::datasource_exception(s_error.str());
             }
                     
-            s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
+
+            s << "SELECT ";
+            if (st_)
+                s << "ST_";
+            if (force2d_)
+                s << "AsBinary(ST_Force_2D(\"" << geometryColumn_ << "\")) AS geom";
+            else
+                s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
             
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
             unsigned size=0;
             while (itr != end)
             {
-                s << ",\"" << itr->get_name() << "\"";
+                if (lowercase_attr_names_)
+                    s << ",\"" << boost::algorithm::to_lower_copy(itr->get_name()) << "\"";
+                else
+                    s << ",\"" << itr->get_name() << "\"";
                 ++itr;
                 ++size;
             }

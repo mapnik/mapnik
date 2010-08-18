@@ -75,6 +75,10 @@ class postgis_datasource : public datasource
       const std::string scale_denom_token_;
       bool persist_connection_;
       bool extent_from_subquery_;
+      // params below are for testing purposes only (will likely be removed at any time)
+      bool force2d_;
+      bool st_;
+      bool lowercase_attr_names_;
       //bool show_queries_;
    public:
       static std::string name();
