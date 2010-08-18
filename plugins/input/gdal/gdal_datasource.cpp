@@ -48,64 +48,64 @@ using mapnik::datasource_exception;
  */
 inline GDALDataset *gdal_datasource::open_dataset() const
 {
-   GDALDataset *dataset;
+    GDALDataset *dataset;
 #if GDAL_VERSION_NUM >= 1600
-   if (shared_dataset_)
-       dataset = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(),GA_ReadOnly));
-   else
+    if (shared_dataset_)
+        dataset = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(),GA_ReadOnly));
+    else
 #endif
-       dataset = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(),GA_ReadOnly));
+        dataset = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(),GA_ReadOnly));
 
-   if (! dataset) throw datasource_exception(CPLGetLastErrorMsg());
-   return dataset;
+    if (! dataset) throw datasource_exception(CPLGetLastErrorMsg());
+    return dataset;
 }
 
 
 
 gdal_datasource::gdal_datasource(parameters const& params)
-   : datasource(params),
-     desc_(*params.get<std::string>("type"),"utf-8"),
-     filter_factor_(*params_.get<double>("filter_factor",0.0))
+    : datasource(params),
+      desc_(*params.get<std::string>("type"),"utf-8"),
+      filter_factor_(*params_.get<double>("filter_factor",0.0))
 {
 
 #ifdef MAPNIK_DEBUG
-   std::clog << "\nGDAL Plugin: Initializing...\n";
+    std::clog << "\nGDAL Plugin: Initializing...\n";
 #endif
 
-   GDALAllRegister();
+    GDALAllRegister();
 
-   boost::optional<std::string> file = params.get<std::string>("file");
-   if (!file) throw datasource_exception("missing <file> parameter");
+    boost::optional<std::string> file = params.get<std::string>("file");
+    if (!file) throw datasource_exception("missing <file> parameter");
 
-   boost::optional<std::string> base = params.get<std::string>("base");
-   if (base)
-      dataset_name_ = *base + "/" + *file;
-   else
-      dataset_name_ = *file;
+    boost::optional<std::string> base = params.get<std::string>("base");
+    if (base)
+        dataset_name_ = *base + "/" + *file;
+    else
+        dataset_name_ = *file;
    
-   shared_dataset_ = *params_.get<mapnik::boolean>("shared",false);
-   band_ = *params_.get<int>("band", -1);
+    shared_dataset_ = *params_.get<mapnik::boolean>("shared",false);
+    band_ = *params_.get<int>("band", -1);
 
-   GDALDataset *dataset = open_dataset();
+    GDALDataset *dataset = open_dataset();
    
-   // TODO: Make more class attributes from geotransform...
-   width_ = dataset->GetRasterXSize();
-   height_ = dataset->GetRasterYSize();
+    // TODO: Make more class attributes from geotransform...
+    width_ = dataset->GetRasterXSize();
+    height_ = dataset->GetRasterYSize();
 
-   double tr[6];
-   dataset->GetGeoTransform(tr);
-   double dx = tr[1];
-   double dy = tr[5];
-   double x0 = tr[0];
-   double y0 = tr[3];
-   double x1 = tr[0] + width_ * dx + height_ *tr[2];
-   double y1 = tr[3] + width_ *tr[4] + height_ * dy;
-   extent_.init(x0,y0,x1,y1);
-   GDALClose(dataset);
+    double tr[6];
+    dataset->GetGeoTransform(tr);
+    double dx = tr[1];
+    double dy = tr[5];
+    double x0 = tr[0];
+    double y0 = tr[3];
+    double x1 = tr[0] + width_ * dx + height_ *tr[2];
+    double y1 = tr[3] + width_ *tr[4] + height_ * dy;
+    extent_.init(x0,y0,x1,y1);
+    GDALClose(dataset);
    
 #ifdef MAPNIK_DEBUG
-   std::clog << "GDAL Plugin: Raster Size=" << width_ << "," << height_ << "\n";
-   std::clog << "GDAL Plugin: Raster Extent=" << extent_ << "\n";
+    std::clog << "GDAL Plugin: Raster Size=" << width_ << "," << height_ << "\n";
+    std::clog << "GDAL Plugin: Raster Extent=" << extent_ << "\n";
 #endif
 
 }
@@ -114,32 +114,32 @@ gdal_datasource::~gdal_datasource() {}
 
 int gdal_datasource::type() const
 {
-   return datasource::Raster;
+    return datasource::Raster;
 }
 
 std::string gdal_datasource::name()
 {
-   return "gdal";
+    return "gdal";
 }
 
 box2d<double> gdal_datasource::envelope() const
 {
-   return extent_;
+    return extent_;
 }
 
 layer_descriptor gdal_datasource::get_descriptor() const
 {
-   return desc_;
+    return desc_;
 }
 
 featureset_ptr gdal_datasource::features(query const& q) const
 {
-   gdal_query gq = q;
-   return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, filter_factor_));
+    gdal_query gq = q;
+    return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, filter_factor_));
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
 {
-   gdal_query gq = pt;
-   return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, filter_factor_));
+    gdal_query gq = pt;
+    return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, filter_factor_));
 }

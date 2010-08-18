@@ -56,21 +56,21 @@ feature_ptr gdal_featureset::next()
 {
     if (first_)
     {
-	first_ = false;
+        first_ = false;
 #ifdef MAPNIK_DEBUG
-	std::clog << "GDAL Plugin: featureset, dataset = " << &dataset_ << "\n";
+        std::clog << "GDAL Plugin: featureset, dataset = " << &dataset_ << "\n";
 #endif
 
-	query *q = boost::get<query>(&gquery_);
-	if(q) {
-	    return get_feature(*q);
-	} else {
-	    coord2d *p = boost::get<coord2d>(&gquery_);
-	    if(p) {
-		return get_feature_at_point(*p);
-	    }
-	}
-	// should never reach here
+        query *q = boost::get<query>(&gquery_);
+        if(q) {
+            return get_feature(*q);
+        } else {
+            coord2d *p = boost::get<coord2d>(&gquery_);
+            if(p) {
+                return get_feature_at_point(*p);
+            }
+        }
+        // should never reach here
     }
     return feature_ptr();
 }
@@ -150,179 +150,179 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
    
     if (width > 0 && height > 0)
     {
-	double width_res = boost::get<0>(q.resolution());
-	double height_res = boost::get<1>(q.resolution());
-	int im_width = int(width_res * intersect.width() + 0.5);
-	int im_height = int(height_res * intersect.height() + 0.5);
-	
-	// if layer-level filter_factor is set, apply it
-	if (filter_factor_)
-	{
-    	im_width *= filter_factor_;
-    	im_height *= filter_factor_;
-	}
-	// otherwise respect symbolizer level factor applied to query, default of 1.0
-	else
-	{
-      double sym_downsample_factor = q.get_filter_factor();
-      im_width *= sym_downsample_factor;
-      im_height *= sym_downsample_factor;
-	}
+        double width_res = boost::get<0>(q.resolution());
+        double height_res = boost::get<1>(q.resolution());
+        int im_width = int(width_res * intersect.width() + 0.5);
+        int im_height = int(height_res * intersect.height() + 0.5);
+        
+        // if layer-level filter_factor is set, apply it
+        if (filter_factor_)
+        {
+            im_width *= filter_factor_;
+            im_height *= filter_factor_;
+        }
+        // otherwise respect symbolizer level factor applied to query, default of 1.0
+        else
+        {
+            double sym_downsample_factor = q.get_filter_factor();
+            im_width *= sym_downsample_factor;
+            im_height *= sym_downsample_factor;
+        }
 
-	// case where we need to avoid upsampling so that the
-	// image can be later scaled within raster_symbolizer 
-	if (im_width >= width || im_height >= height)
-	{
-	    im_width = width;
-	    im_height = height;
-	}
+        // case where we need to avoid upsampling so that the
+        // image can be later scaled within raster_symbolizer 
+        if (im_width >= width || im_height >= height)
+        {
+            im_width = width;
+            im_height = height;
+        }
 
-	if (im_width > 0 && im_height > 0)
-	{
-    	mapnik::image_data_32 image(im_width, im_height);
-    	image.set(0xffffffff); 
+        if (im_width > 0 && im_height > 0)
+        {
+            mapnik::image_data_32 image(im_width, im_height);
+            image.set(0xffffffff); 
              
-    #ifdef MAPNIK_DEBUG
-    	std::clog << "GDAL Plugin: Image Size=(" << im_width << "," << im_height << ")\n";
-    	std::clog << "GDAL Plugin: Reading band " << band_ << "\n";
-    #endif
-	typedef std::vector<int,int> pallete;
-	
-    	if (band_>0) // we are querying a single band
-    	{
-    	    float *imageData = (float*)image.getBytes();
-    	    GDALRasterBand * band = dataset_.GetRasterBand(band_);
-    	    band->RasterIO(GF_Read, x_off, y_off, width, height,
-    			   imageData, image.width(), image.height(),
-    			   GDT_Float32, 0, 0);
+#ifdef MAPNIK_DEBUG
+            std::clog << "GDAL Plugin: Image Size=(" << im_width << "," << im_height << ")\n";
+            std::clog << "GDAL Plugin: Reading band " << band_ << "\n";
+#endif
+            typedef std::vector<int,int> pallete;
+        
+            if (band_>0) // we are querying a single band
+            {
+                float *imageData = (float*)image.getBytes();
+                GDALRasterBand * band = dataset_.GetRasterBand(band_);
+                band->RasterIO(GF_Read, x_off, y_off, width, height,
+                               imageData, image.width(), image.height(),
+                               GDT_Float32, 0, 0);
     
-    	    feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
-    	}
+                feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
+            }
           
-    	else // working with all bands
-    	{
-    	    for (int i = 0; i < nbands; ++i)
-    	    {
-    		GDALRasterBand * band = dataset_.GetRasterBand(i+1);
+            else // working with all bands
+            {
+                for (int i = 0; i < nbands; ++i)
+                {
+                    GDALRasterBand * band = dataset_.GetRasterBand(i+1);
              
-    #ifdef MAPNIK_DEBUG
-    		get_overview_meta(band);  
-    #endif
+#ifdef MAPNIK_DEBUG
+                    get_overview_meta(band);  
+#endif
     
-    		GDALColorInterp color_interp = band->GetColorInterpretation();
-    		switch (color_interp)
-    		{
-    		case GCI_RedBand:
-    		    red = band;
-    #ifdef MAPNIK_DEBUG
-    		    std::clog << "GDAL Plugin: Found red band" << "\n";
-    #endif
-    		    break;
-    		case GCI_GreenBand:
-    		    green = band;
-    #ifdef MAPNIK_DEBUG
-    		    std::clog << "GDAL Plugin: Found green band" << "\n";
-    #endif
-    		    break;
-    		case GCI_BlueBand:
-    		    blue = band;
-    #ifdef MAPNIK_DEBUG
-    		    std::clog << "GDAL Plugin: Found blue band" << "\n";
-    #endif
-    		    break;
-    		case GCI_AlphaBand:
-    		    alpha = band;
-    #ifdef MAPNIK_DEBUG
-    		    std::clog << "GDAL Plugin: Found alpha band" << "\n";
-    #endif
-    		    break;
-    		case GCI_GrayIndex:
-    		    grey = band;
-    #ifdef MAPNIK_DEBUG
-    		    std::clog << "GDAL Plugin: Found gray band" << "\n";
-    #endif
-    		    break;
-    		case GCI_PaletteIndex:
-    		{
-    		    grey = band;
-    #ifdef MAPNIK_DEBUG
-    		    std::clog << "GDAL Plugin: Found gray band, and colortable..." << "\n";
-    #endif
-    		    GDALColorTable *color_table = band->GetColorTable();
+                    GDALColorInterp color_interp = band->GetColorInterpretation();
+                    switch (color_interp)
+                    {
+                    case GCI_RedBand:
+                        red = band;
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: Found red band" << "\n";
+#endif
+                        break;
+                    case GCI_GreenBand:
+                        green = band;
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: Found green band" << "\n";
+#endif
+                        break;
+                    case GCI_BlueBand:
+                        blue = band;
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: Found blue band" << "\n";
+#endif
+                        break;
+                    case GCI_AlphaBand:
+                        alpha = band;
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: Found alpha band" << "\n";
+#endif
+                        break;
+                    case GCI_GrayIndex:
+                        grey = band;
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: Found gray band" << "\n";
+#endif
+                        break;
+                    case GCI_PaletteIndex:
+                    {
+                        grey = band;
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: Found gray band, and colortable..." << "\n";
+#endif
+                        GDALColorTable *color_table = band->GetColorTable();
                 
-    		    if ( color_table)
-    		    {
-    			int count = color_table->GetColorEntryCount();
-    #ifdef MAPNIK_DEBUG
-    			std::clog << "GDAL Plugin: Color Table count = " << count << "\n";
-    #endif 
-    			for ( int i = 0; i < count; i++ )
-    			{
-    			    const GDALColorEntry *ce = color_table->GetColorEntry ( i );
-    			    if (!ce ) continue;
-    #ifdef MAPNIK_DEBUG
-    			    std::clog << "GDAL Plugin: Color entry RGB (" << ce->c1 << "," <<ce->c2 << "," << ce->c3 << ")\n"; 
-    #endif
-    			}
-    		    }
-    		    break;
-    		}
-    		case GCI_Undefined:
-    #ifdef MAPNIK_DEBUG
-    		    std::clog << "GDAL Plugin: Found undefined band (assumming gray band)" << "\n";
-    #endif
-    		    grey = band;
-    		    break;
-    		default:
-    #ifdef MAPNIK_DEBUG
-    		    std::clog << "GDAL Plugin: band type unknown!" << "\n";
-    #endif
-    		    break;
-    		}
-    	    }
+                        if ( color_table)
+                        {
+                            int count = color_table->GetColorEntryCount();
+#ifdef MAPNIK_DEBUG
+                            std::clog << "GDAL Plugin: Color Table count = " << count << "\n";
+#endif 
+                            for ( int i = 0; i < count; i++ )
+                            {
+                                const GDALColorEntry *ce = color_table->GetColorEntry ( i );
+                                if (!ce ) continue;
+#ifdef MAPNIK_DEBUG
+                                std::clog << "GDAL Plugin: Color entry RGB (" << ce->c1 << "," <<ce->c2 << "," << ce->c3 << ")\n"; 
+#endif
+                            }
+                        }
+                        break;
+                    }
+                    case GCI_Undefined:
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: Found undefined band (assumming gray band)" << "\n";
+#endif
+                        grey = band;
+                        break;
+                    default:
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: band type unknown!" << "\n";
+#endif
+                        break;
+                    }
+                }
     
-    	    if (red && green && blue)
-    	    {
-    #ifdef MAPNIK_DEBUG
-    		std::clog << "GDAL Plugin: processing rgb bands..." << "\n";
-    #endif
-    		red->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 0,
-    			      image.width(),image.height(),GDT_Byte,4,4*image.width());
-    		green->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 1,
-    				image.width(),image.height(),GDT_Byte,4,4*image.width());
-    		blue->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 2,
-    			       image.width(),image.height(),GDT_Byte,4,4*image.width());
-    	    }
-    	    else if (grey)
-    	    {
-    #ifdef MAPNIK_DEBUG
-    		std::clog << "GDAL Plugin: processing gray band..." << "\n";
-    #endif
-		// TODO : apply colormap if present
-		
-    		grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 0,
-    			       image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
-    		grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 1,
-    			       image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
-    		grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 2,
-    			       image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
-    	    }
+                if (red && green && blue)
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "GDAL Plugin: processing rgb bands..." << "\n";
+#endif
+                    red->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 0,
+                                  image.width(),image.height(),GDT_Byte,4,4*image.width());
+                    green->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 1,
+                                    image.width(),image.height(),GDT_Byte,4,4*image.width());
+                    blue->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 2,
+                                   image.width(),image.height(),GDT_Byte,4,4*image.width());
+                }
+                else if (grey)
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "GDAL Plugin: processing gray band..." << "\n";
+#endif
+                    // TODO : apply colormap if present
+                
+                    grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 0,
+                                   image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
+                    grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 1,
+                                   image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
+                    grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 2,
+                                   image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
+                }
     
-    	    if (alpha)
-    	    {
-    #ifdef MAPNIK_DEBUG
-    		std::clog << "GDAL Plugin: processing alpha band..." << "\n";
-    #endif
-    		alpha->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 3,
-    				image.width(),image.height(),GDT_Byte,4,4*image.width());
-    	    }
+                if (alpha)
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "GDAL Plugin: processing alpha band..." << "\n";
+#endif
+                    alpha->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 3,
+                                    image.width(),image.height(),GDT_Byte,4,4*image.width());
+                }
     
-    	    feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
-    	}
-    	return feature;
-	}
-}
-return feature_ptr();
+                feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
+            }
+            return feature;
+        }
+    }
+    return feature_ptr();
 }
 
 
@@ -330,41 +330,41 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
 {
     if (band_>0) {
 
-	unsigned raster_xsize = dataset_.GetRasterXSize();
-	unsigned raster_ysize = dataset_.GetRasterYSize();
+        unsigned raster_xsize = dataset_.GetRasterXSize();
+        unsigned raster_ysize = dataset_.GetRasterYSize();
 
-	double gt[6];
-	dataset_.GetGeoTransform(gt);
+        double gt[6];
+        dataset_.GetGeoTransform(gt);
 
-	double det = gt[1]*gt[5] - gt[2]*gt[4];
-	// subtract half a pixel width & height because gdal coord reference
-	// is the top-left corner of a pixel, not the center.
-	double X = pt.x - gt[0] - gt[1]/2;
-	double Y = pt.y - gt[3] - gt[5]/2;
-	double det1 = gt[1]*Y + gt[4]*X;
-	double det2 = gt[2]*Y + gt[5]*X;
-	unsigned x = det2/det, y = det1/det;
+        double det = gt[1]*gt[5] - gt[2]*gt[4];
+        // subtract half a pixel width & height because gdal coord reference
+        // is the top-left corner of a pixel, not the center.
+        double X = pt.x - gt[0] - gt[1]/2;
+        double Y = pt.y - gt[3] - gt[5]/2;
+        double det1 = gt[1]*Y + gt[4]*X;
+        double det2 = gt[2]*Y + gt[5]*X;
+        unsigned x = det2/det, y = det1/det;
 
-	if(0<=x && x<raster_xsize && 0<=y && y<raster_ysize) {
+        if(0<=x && x<raster_xsize && 0<=y && y<raster_ysize) {
 #ifdef MAPNIK_DEBUG         
-	    std::clog << boost::format("GDAL Plugin: pt.x=%f pt.y=%f\n") % pt.x % pt.y;
-	    std::clog << boost::format("GDAL Plugin: x=%f y=%f\n") % x % y;
+            std::clog << boost::format("GDAL Plugin: pt.x=%f pt.y=%f\n") % pt.x % pt.y;
+            std::clog << boost::format("GDAL Plugin: x=%f y=%f\n") % x % y;
 #endif
-	    GDALRasterBand * band = dataset_.GetRasterBand(band_);
-	    int hasNoData;
-	    double nodata = band->GetNoDataValue(&hasNoData);
-	    double value;
-	    band->RasterIO(GF_Read, x, y, 1, 1, &value, 1, 1, GDT_Float64, 0, 0);
-	    if(!hasNoData || value!=nodata) {
-		// construct feature
-		feature_ptr feature(new Feature(1));
-		geometry2d * point = new point_impl;
-		point->move_to(pt.x, pt.y);
-		feature->add_geometry(point);
-		(*feature)["value"] = value;
-		return feature;
-	    }
-	}
+            GDALRasterBand * band = dataset_.GetRasterBand(band_);
+            int hasNoData;
+            double nodata = band->GetNoDataValue(&hasNoData);
+            double value;
+            band->RasterIO(GF_Read, x, y, 1, 1, &value, 1, 1, GDT_Float64, 0, 0);
+            if(!hasNoData || value!=nodata) {
+                // construct feature
+                feature_ptr feature(new Feature(1));
+                geometry2d * point = new point_impl;
+                point->move_to(pt.x, pt.y);
+                feature->add_geometry(point);
+                (*feature)["value"] = value;
+                return feature;
+            }
+        }
     }
     return feature_ptr();
 }
@@ -379,7 +379,7 @@ void gdal_featureset::get_overview_meta(GDALRasterBand * band)
         {
             GDALRasterBand * overview = band->GetOverview (b);
             std::clog << boost::format("GDAL Plugin: Overview=%d Width=%d Height=%d \n")
-		% b % overview->GetXSize() % overview->GetYSize();
+                % b % overview->GetXSize() % overview->GetYSize();
         }
     }
     else
@@ -392,6 +392,6 @@ void gdal_featureset::get_overview_meta(GDALRasterBand * band)
     band->GetBlockSize(&bsx,&bsy);
     scale = band->GetScale();
     std::clog << boost::format("GDAL Plugin: Block=%dx%d Scale=%f Type=%s Color=%s \n") % bsx % bsy % scale
-	% GDALGetDataTypeName(band->GetRasterDataType())
-	% GDALGetColorInterpretationName(band->GetColorInterpretation()); 
+        % GDALGetDataTypeName(band->GetRasterDataType())
+        % GDALGetColorInterpretationName(band->GetColorInterpretation()); 
 }

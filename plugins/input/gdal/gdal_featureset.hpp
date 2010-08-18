@@ -34,20 +34,20 @@ typedef boost::variant<mapnik::query,mapnik::coord2d> gdal_query;
 
 class gdal_featureset : public mapnik::Featureset
 {
-   public:
+public:
       
-      gdal_featureset(GDALDataset & dataset, int band, gdal_query q, double filter_factor);
-      virtual ~gdal_featureset();
-      mapnik::feature_ptr next();
-   private:
-      mapnik::feature_ptr get_feature(mapnik::query const& q);
-      mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
-      void get_overview_meta(GDALRasterBand * band);
-      GDALDataset & dataset_;
-      int band_;
-      gdal_query gquery_;
-      double filter_factor_;
-      bool first_;
+    gdal_featureset(GDALDataset & dataset, int band, gdal_query q, double filter_factor);
+    virtual ~gdal_featureset();
+    mapnik::feature_ptr next();
+private:
+    mapnik::feature_ptr get_feature(mapnik::query const& q);
+    mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
+    void get_overview_meta(GDALRasterBand * band);
+    GDALDataset & dataset_;
+    int band_;
+    gdal_query gquery_;
+    double filter_factor_;
+    bool first_;
 };
 
 #endif // GDAL_FEATURESET_HPP
