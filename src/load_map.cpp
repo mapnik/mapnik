@@ -107,6 +107,7 @@ private:
     void parse_glyph_symbolizer(rule_type & rule, ptree const & sym );
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
+    void parse_stroke(stroke & strk, ptree const & sym);
 
     void ensure_font_face( const std::string & face_name );
 
@@ -1471,68 +1472,73 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
     }
 }
 
+void map_parser::parse_stroke(stroke & strk, ptree const & sym)
+{
+    // stroke color
+    optional<color> c = get_opt_attr<color>(sym, "stroke");
+    if (c) strk.set_color(*c);
+    // stroke-width
+    optional<double> width =  get_opt_attr<double>(sym, "stroke-width");
+    if (width) strk.set_width(*width);
+    // stroke-opacity
+    optional<double> opacity = get_opt_attr<double>(sym, "stroke-opacity");
+    if (opacity) strk.set_opacity(*opacity);
+    // stroke-linejoin
+    optional<line_join_e> line_join = get_opt_attr<line_join_e>(sym, "stroke-linejoin");
+    if (line_join) strk.set_line_join(*line_join);
+    // stroke-linecap
+    optional<line_cap_e> line_cap = get_opt_attr<line_cap_e>(sym, "stroke-linecap");
+    if (line_cap) strk.set_line_cap(*line_cap);
+    // stroke-dashaffset
+    optional<double> offset = get_opt_attr<double>(sym, "stroke-dashoffet");
+    if (offset) strk.set_dash_offset(*offset);
+    // stroke-dasharray
+    optional<string> str = get_opt_attr<string>(sym,"stroke-dasharray");
+    if (str) 
+    {
+        tokenizer<> tok (*str);
+        std::vector<double> dash_array;
+        tokenizer<>::iterator itr = tok.begin();
+        for (; itr != tok.end(); ++itr)
+        {
+            try
+            {
+                double f = boost::lexical_cast<double>(*itr);
+                dash_array.push_back(f);
+            }
+            catch ( boost::bad_lexical_cast &)
+            {
+                throw config_error(std::string("Failed to parse dasharray ") +
+                                   "'. Expected a " +
+                                   "list of floats but got '" + (*str) + "'");
+            }
+        }
+        if (dash_array.size())
+        {
+            size_t size = dash_array.size();
+            if ( size % 2)
+            {
+                for (size_t i=0; i < size ;++i)
+                {
+                    dash_array.push_back(dash_array[i]);
+                }
+            }
+            std::vector<double>::const_iterator pos = dash_array.begin();
+            while (pos != dash_array.end())
+            {
+                strk.add_dash(*pos,*(pos + 1));
+                pos +=2;
+            }
+        }
+    }
+}
+
 void map_parser::parse_line_symbolizer( rule_type & rule, ptree const & sym )
 {
     try
     {
         stroke strk;
-        // stroke color
-        optional<color> c = get_opt_attr<color>(sym, "stroke");
-        if (c) strk.set_color(*c);
-        // stroke-width
-        optional<double> width =  get_opt_attr<double>(sym, "stroke-width");
-        if (width) strk.set_width(*width);
-        // stroke-opacity
-        optional<double> opacity = get_opt_attr<double>(sym, "stroke-opacity");
-        if (opacity) strk.set_opacity(*opacity);
-        // stroke-linejoin
-        optional<line_join_e> line_join = get_opt_attr<line_join_e>(sym, "stroke-linejoin");
-        if (line_join) strk.set_line_join(*line_join);
-        // stroke-linecap
-        optional<line_cap_e> line_cap = get_opt_attr<line_cap_e>(sym, "stroke-linecap");
-        if (line_cap) strk.set_line_cap(*line_cap);
-        // stroke-dashaffset
-        optional<double> offset = get_opt_attr<double>(sym, "stroke-dashoffet");
-        if (offset) strk.set_dash_offset(*offset);
-        // stroke-dasharray
-        optional<string> str = get_opt_attr<string>(sym,"stroke-dasharray");
-        if (str) 
-        {
-            tokenizer<> tok (*str);
-            std::vector<double> dash_array;
-            tokenizer<>::iterator itr = tok.begin();
-            for (; itr != tok.end(); ++itr)
-            {
-                try
-                {
-                    double f = boost::lexical_cast<double>(*itr);
-                    dash_array.push_back(f);
-                }
-                catch ( boost::bad_lexical_cast &)
-                {
-                    throw config_error(std::string("Failed to parse dasharray ") +
-                                       "'. Expected a " +
-                                       "list of floats but got '" + (*str) + "'");
-                }
-            }
-            if (dash_array.size())
-            {
-                size_t size = dash_array.size();
-                if ( size % 2)
-                {
-                    for (size_t i=0; i < size ;++i)
-                    {
-                        dash_array.push_back(dash_array[i]);
-                    }
-                }
-                std::vector<double>::const_iterator pos = dash_array.begin();
-                while (pos != dash_array.end())
-                {
-                    strk.add_dash(*pos,*(pos + 1));
-                    pos +=2;
-                }
-            }
-        }
+        parse_stroke(strk,sym);
         line_symbolizer symbol = line_symbolizer(strk);
 
         parse_metawriter_in_symbolizer(symbol, sym);
