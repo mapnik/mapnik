@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map background-color="white" srs="+init=epsg:4326" min_version="0.7.1">
+
+    <MetaWriter name="markers" type="json" file="markers.json" output_empty="false"/>
+
+    <Style name="1">
+        <Rule title="foo">
+            <MarkersSymbolizer meta-writer="markers" fill="#cc3344" opacity=".7" width="15" height="10" stroke="#cc3344" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
+        </Rule>
+    </Style>
+
+    <Layer name="point" srs="+init=epsg:4326">
+        <StyleName>1</StyleName>
+        <Datasource>
+            <Parameter name="extent">-180,-70,180,70</Parameter>
+            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
+            <Parameter name="geometry_field">geometry</Parameter>
+            <Parameter name="key_field">pkuid</Parameter>
+            <Parameter name="table">point</Parameter>
+            <Parameter name="type">sqlite</Parameter>
+            <Parameter name="use_spatial_index">1</Parameter>
+            <Parameter name="wkb_format">spatialite</Parameter>
+        </Datasource>
+    </Layer>
+<!--
+  <Style name="meta_point_bboxs">
+    <Rule>
+          <LineSymbolizer stroke="green" stroke-width=".5"/>
+    </Rule>
+  </Style>
+
+  <Layer name="points" status="on" srs="+proj=latlong +datum=WGS84">
+    <StyleName>meta_point_bboxs</StyleName>
+    <Datasource>
+      <Parameter name="type">ogr</Parameter>
+      <Parameter name="layer">OGRGeoJSON</Parameter>
+      <Parameter name="file">../../../markers.json</Parameter>
+    </Datasource>
+  </Layer>  
+-->
+</Map>

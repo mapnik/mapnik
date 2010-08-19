@@ -264,6 +264,10 @@ public:
         {
             set_attr( sym_node, "fill", sym.get_fill() );
         }
+
+        const stroke & strk =  sym.get_stroke();
+        add_stroke_attributes(sym_node, strk);
+
         add_metawriter_attributes(sym_node, sym);
     }
 
