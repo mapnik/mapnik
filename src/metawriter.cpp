@@ -60,7 +60,7 @@ std::string metawriter_properties::to_string() const
 void metawriter_json_stream::start(metawriter_property_map const& properties)
 {
     assert(trans_);
-    if (!only_nonempty_) {
+    if (output_empty_) {
         write_header();
     } else {
         count_ = HEADER_NOT_WRITTEN;
@@ -95,7 +95,7 @@ metawriter_json_stream::~metawriter_json_stream()
 
 
 metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
-    : metawriter(dflt_properties), count_(-1), only_nonempty_(true),
+    : metawriter(dflt_properties), count_(-1), output_empty_(true),
       trans_(0), output_srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"), f_(0)
 {
 }

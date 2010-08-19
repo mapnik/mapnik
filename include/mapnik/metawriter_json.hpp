@@ -64,9 +64,9 @@ public:
     /** Get output stream. */
     std::ostream *get_stream() const { return f_; }
     /** Only write header/footer to file with one or more features. */
-    void set_only_nonempty(bool only_nonempty) { only_nonempty_ = only_nonempty; }
-    /** See set_only_nonempty(). */
-    bool get_only_nonempty() { return only_nonempty_; }
+    void set_output_empty(bool output_empty) { output_empty_ = output_empty; }
+    /** See set_output_empty(). */
+    bool get_output_empty() { return output_empty_; }
     virtual void set_map_srs(projection const& proj);
 protected:
     enum {
@@ -76,7 +76,7 @@ protected:
     };
     /** Features written. */
     int count_;
-    bool only_nonempty_;
+    bool output_empty_;
     /** Transformation from map srs to output srs. */
     proj_transform *trans_;
     projection output_srs_;

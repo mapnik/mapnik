@@ -376,9 +376,9 @@ void map_parser::parse_metawriter(Map & map, ptree const & pt)
             string file = get_attr<string>(pt, "file");
             optional<string> properties = get_opt_attr<string>(pt, "default-output");
             metawriter_json_ptr json = metawriter_json_ptr(new metawriter_json(properties, parse_path(file)));
-            optional<boolean> only_nonempty = get_opt_attr<boolean>(pt, "only-nonempty");
-            if (only_nonempty) {
-                json->set_only_nonempty(*only_nonempty);
+            optional<boolean> output_empty = get_opt_attr<boolean>(pt, "output-empty");
+            if (output_empty) {
+                json->set_output_empty(*output_empty);
             }
             writer = json;
         } else {
