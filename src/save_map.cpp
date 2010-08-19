@@ -98,43 +98,9 @@ public:
     {
         ptree & sym_node = rule_.push_back(
             ptree::value_type("LineSymbolizer", ptree()))->second;
-        const stroke & strk = sym.get_stroke();
-        stroke dfl = stroke();
-        
-        if ( strk.get_color() != dfl.get_color() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "stroke", strk.get_color() );
-        }
-        if ( strk.get_width() != dfl.get_width() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "stroke-width", strk.get_width() );
-        }
-        if ( strk.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "stroke-opacity", strk.get_opacity() );
-        }
-        if ( strk.get_line_join() != dfl.get_line_join() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "stroke-linejoin", strk.get_line_join() );
-        }
-        if ( strk.get_line_cap() != dfl.get_line_cap() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "stroke-linecap", strk.get_line_cap() );
-        }
-        if ( ! strk.get_dash_array().empty() )
-        {
-            std::ostringstream os;
-            const dash_array & dashes = strk.get_dash_array();
-            for (unsigned i = 0; i < dashes.size(); ++i) {
-                os << dashes[i].first << ", " << dashes[i].second;
-                if ( i + 1 < dashes.size() ) os << ", ";
-            }
-            set_attr( sym_node, "stroke-dasharray", os.str() );
-        }
-        if ( strk.dash_offset() != dfl.dash_offset() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "stroke-dashoffset", strk.dash_offset());
-        }
+
+        const stroke & strk =  sym.get_stroke();
+        add_stroke_attributes(sym_node, strk);
         add_metawriter_attributes(sym_node, sym);
     }
         
@@ -521,6 +487,48 @@ private:
         }
     }
 
+
+    void add_stroke_attributes(ptree & node, const stroke & strk)
+    {
+
+        stroke dfl = stroke();
+        
+        if ( strk.get_color() != dfl.get_color() || explicit_defaults_ )
+        {
+            set_attr( node, "stroke", strk.get_color() );
+        }
+        if ( strk.get_width() != dfl.get_width() || explicit_defaults_ )
+        {
+            set_attr( node, "stroke-width", strk.get_width() );
+        }
+        if ( strk.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
+        {
+            set_attr( node, "stroke-opacity", strk.get_opacity() );
+        }
+        if ( strk.get_line_join() != dfl.get_line_join() || explicit_defaults_ )
+        {
+            set_attr( node, "stroke-linejoin", strk.get_line_join() );
+        }
+        if ( strk.get_line_cap() != dfl.get_line_cap() || explicit_defaults_ )
+        {
+            set_attr( node, "stroke-linecap", strk.get_line_cap() );
+        }
+        if ( ! strk.get_dash_array().empty() )
+        {
+            std::ostringstream os;
+            const dash_array & dashes = strk.get_dash_array();
+            for (unsigned i = 0; i < dashes.size(); ++i) {
+                os << dashes[i].first << ", " << dashes[i].second;
+                if ( i + 1 < dashes.size() ) os << ", ";
+            }
+            set_attr( node, "stroke-dasharray", os.str() );
+        }
+        if ( strk.dash_offset() != dfl.dash_offset() || explicit_defaults_ )
+        {
+            set_attr( node, "stroke-dashoffset", strk.dash_offset());
+        }
+                
+    }
     void add_metawriter_attributes(ptree &node, symbolizer_base const& sym)
     {
         if (!sym.get_metawriter_name().empty() || explicit_defaults_) {
