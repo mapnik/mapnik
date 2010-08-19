@@ -77,6 +77,7 @@ public:
     box2d_type intersect(const box2d_type& other) const;
     bool operator==(const box2d_type &other) const;
     void re_center(T cx,T cy);
+    void re_center(const coord<T,2>& c);
     void init(T x0,T y0,T x1,T y1);
         
     // define some operators 

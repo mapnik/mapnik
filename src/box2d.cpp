@@ -270,6 +270,16 @@ template <typename T>
 #if !defined(__SUNPRO_CC)
 inline
 #endif
+void box2d<T>::re_center(const coord<T,2> &c)
+{
+    re_center(c.x,c.y);
+}
+
+
+template <typename T>
+#if !defined(__SUNPRO_CC)
+inline
+#endif
 void box2d<T>::init(T x0,T y0,T x1,T y1)
 {
     if (x0<x1)

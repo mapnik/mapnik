@@ -63,6 +63,10 @@ bool (box2d<double>::*intersects_p3)(box2d<double> const&) const = &box2d<double
 // intersect
 box2d<double> (box2d<double>::*intersect)(box2d<double> const&) const = &box2d<double>::intersect;
 
+// re_center
+void (box2d<double>::*re_center_p1)(double,double) = &box2d<double>::re_center;
+void (box2d<double>::*re_center_p2)(coord<double,2> const& ) = &box2d<double>::re_center;
+
 void export_envelope()
 {
     using namespace boost::python;
@@ -72,10 +76,10 @@ void export_envelope()
                                (arg("minx"),arg("miny"),arg("maxx"),arg("maxy")),
                                "Constructs a new envelope from the coordinates\n"
                                "of its lower left and upper right corner points.\n"))
-        .def(init<>("Equivalent to box2d(0, 0, -1, -1).\n"))
+        .def(init<>("Equivalent to Box2d(0, 0, -1, -1).\n"))
         .def(init<const coord<double,2>&, const coord<double,2>&>(
                  (arg("ll"),arg("ur")),
-                 "Equivalent to box2d(ll.x, ll.y, ur.x, ur.y).\n"))
+                 "Equivalent to Box2d(ll.x, ll.y, ur.x, ur.y).\n"))
         .add_property("minx", &box2d<double>::minx, 
                       "X coordinate for the lower left corner")
         .add_property("miny", &box2d<double>::miny, 
@@ -88,35 +92,50 @@ void export_envelope()
              "Returns the coordinates of the center of the bounding box.\n"
              "\n"
              "Example:\n"
-             ">>> e = box2d(0, 0, 100, 100)\n"
+             ">>> e = Box2d(0, 0, 100, 100)\n"
              ">>> e.center()\n"
              "Coord(50, 50)\n")
-        .def("center", &box2d<double>::re_center,
+        .def("center", re_center_p1,
              (arg("x"), arg("y")),
              "Moves the envelope so that the given coordinates become its new center.\n"
              "The width and the height are preserved.\n"
              "\n "
              "Example:\n"
-             ">>> e = box2d(0, 0, 100, 100)\n"
+             ">>> e = Box2d(0, 0, 100, 100)\n"
              ">>> e.center(60, 60)\n"
              ">>> e.center()\n"
              "Coord(60.0,60.0)\n"
              ">>> (e.width(), e.height())\n"
              "(100.0, 100.0)\n"
              ">>> e\n"
-             "box2d(10.0, 10.0, 110.0, 110.0)\n"
+             "Box2d(10.0, 10.0, 110.0, 110.0)\n"
+            )
+        .def("center", re_center_p2,
+             (arg("Coord")),
+             "Moves the envelope so that the given coordinates become its new center.\n"
+             "The width and the height are preserved.\n"
+             "\n "
+             "Example:\n"
+             ">>> e = Box2d(0, 0, 100, 100)\n"
+             ">>> e.center(Coord60, 60)\n"
+             ">>> e.center()\n"
+             "Coord(60.0,60.0)\n"
+             ">>> (e.width(), e.height())\n"
+             "(100.0, 100.0)\n"
+             ">>> e\n"
+             "Box2d(10.0, 10.0, 110.0, 110.0)\n"
             )
         .def("width", width_p1,
              (arg("new_width")),
              "Sets the width to new_width of the envelope preserving its center.\n"
              "\n "
              "Example:\n"
-             ">>> e = box2d(0, 0, 100, 100)\n"
+             ">>> e = Box2d(0, 0, 100, 100)\n"
              ">>> e.width(120)\n"
              ">>> e.center()\n"
              "Coord(50.0,50.0)\n"
              ">>> e\n"
-             "box2d(-10.0, 0.0, 110.0, 100.0)\n"
+             "Box2d(-10.0, 0.0, 110.0, 100.0)\n"
             )
         .def("width", width_p2,
              "Returns the width of this envelope.\n"
@@ -126,12 +145,12 @@ void export_envelope()
              "Sets the height to new_height of the envelope preserving its center.\n"
              "\n "
              "Example:\n"
-             ">>> e = box2d(0, 0, 100, 100)\n"
+             ">>> e = Box2d(0, 0, 100, 100)\n"
              ">>> e.height(120)\n"
              ">>> e.center()\n"
              "Coord(50.0,50.0)\n"
              ">>> e\n"
-             "box2d(0.0, -10.0, 100.0, 110.0)\n"
+             "Box2d(0.0, -10.0, 100.0, 110.0)\n"
             )
         .def("height", height_p2,
              "Returns the height of this envelope.\n"
@@ -141,10 +160,10 @@ void export_envelope()
              "Expands this envelope to include the point given by x and y.\n"
              "\n"
              "Example:\n",
-             ">>> e = box2d(0, 0, 100, 100)\n"
+             ">>> e = Box2d(0, 0, 100, 100)\n"
              ">>> e.expand_to_include(110, 110)\n"
              ">>> e\n"
-             "box2d(0.0, 00.0, 110.0, 110.0)\n"
+             "Box2d(0.0, 00.0, 110.0, 110.0)\n"
             )
         .def("expand_to_include",expand_to_include_p2,
              (arg("p")),
@@ -188,8 +207,8 @@ void export_envelope()
              "This relationship is symmetric."
              "\n"
              "Example:\n"
-             ">>> e1 = box2d(0, 0, 100, 100)\n"
-             ">>> e2 = box2d(50, 50, 150, 150)\n"
+             ">>> e1 = Box2d(0, 0, 100, 100)\n"
+             ">>> e2 = Box2d(50, 50, 150, 150)\n"
              ">>> e1.intersects(e2)\n"
              "True\n"
              ">>> e1.contains(e2)\n"
@@ -201,10 +220,10 @@ void export_envelope()
              "as a new envelope.\n"
              "\n"
              "Example:\n"
-             ">>> e1 = box2d(0, 0, 100, 100)\n"
-             ">>> e2 = box2d(50, 50, 150, 150)\n"
+             ">>> e1 = Box2d(0, 0, 100, 100)\n"
+             ">>> e2 = Box2d(50, 50, 150, 150)\n"
              ">>> e1.intersect(e2)\n"
-             "box2d(50.0, 50.0, 100.0, 100.0)\n"     
+             "Box2d(50.0, 50.0, 100.0, 100.0)\n"     
             )
         .def(self == self) // __eq__
         .def(self + self)  // __add__
