@@ -2,14 +2,36 @@
 <!DOCTYPE Map  >
 <Map background-color="white" srs="+init=epsg:4326" min_version="0.7.1">
 
-    <MetaWriter name="markers" type="json" file="markers.json" output_empty="false"/>
-
     <Style name="1">
         <Rule title="foo">
-            <MarkersSymbolizer meta-writer="markers" fill="#cc3344" opacity=".7" width="15" height="10" stroke="#cc3344" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
+            <Filter>([name]='CHILE')</Filter>
+             <MarkersSymbolizer fill="darkgreen" opacity=".7" width="15" height="10" stroke="green" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
+        </Rule>
+        <Rule title="foo">
+            <Filter>([name]='Australia')</Filter>
+             <MarkersSymbolizer fill="darkblue" opacity=".7" width="10" height="20" stroke="blue" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
+        </Rule>
+        <Rule title="foo1">
+            <Filter>([name]='Brazil')</Filter>
+             <MarkersSymbolizer fill="darkorange" opacity=".7" width="20" height="10" stroke="orange" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
+        </Rule>
+        <Rule title="foo">
+            <Filter>([name]='Mongolia')</Filter>
+             <MarkersSymbolizer fill="darkgoldenrod" opacity=".7" width="25" height="10" stroke="yellow" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
+        </Rule>
+        <Rule title="foo">
+            <Filter>([name]='Sudan')</Filter>
+             <MarkersSymbolizer fill="darkcyan" opacity=".7" width="15" height="10" stroke="cadetblue" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
+        </Rule>
+        <Rule title="foo">
+            <Filter>([name]='United States')</Filter>
+             <MarkersSymbolizer fill="#cc3344" opacity=".7" width="15" height="10" stroke="#cc3344" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
+        </Rule>
+        <Rule title="foo">
+            <ElseFilter />
+            <PointSymbolizer file="../svg/ellipses.svg"/>
         </Rule>
     </Style>
-
     <Layer name="point" srs="+init=epsg:4326">
         <StyleName>1</StyleName>
         <Datasource>
