@@ -1,10 +1,28 @@
 #!/usr/bin/env python
 import os
 import sys
+import tempfile
 from lxml import etree
 from lxml import objectify
 import re
 
+def indent(elem, level=0):
+    """ http://infix.se/2007/02/06/gentlemen-indent-your-xml
+    """
+    i = "\n" + level*"  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        for e in elem:
+            indent(e, level+1)
+            if not e.tail or not e.tail.strip():
+                e.tail = i + "  "
+        if not e.tail or not e.tail.strip():
+            e.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
+            
 def name2expr(sym):
     name = sym.attrib['name']
     if re.match('^\[.*\]$',name) is None:
@@ -47,7 +65,7 @@ if __name__ == "__main__":
     #   output_file: new stylesheet file
 
     if len(sys.argv) != 3:
-        print>>sys.stderr,'Usage: %s <map_xml_file> <output_file>' % sys.argv[0]
+        sys.stderr.write('Usage: %s <map_xml_file> <output_file>\n' % os.path.basename(sys.argv[0]))
         sys.exit(1)
         
     xml = sys.argv[1]
@@ -60,35 +78,40 @@ if __name__ == "__main__":
         root.attrib['background-color'] = root.attrib.get('bgcolor')
         root.attrib.pop('bgcolor')
     
-    for style in root.Style:
-        if len(style.Rule):
-            for rule in style.Rule:
-                if hasattr(rule,'TextSymbolizer'):
-                    for sym in rule.TextSymbolizer:
-                        name2expr(sym)
-                if hasattr(rule,'ShieldSymbolizer'):
-                    for sym in rule.ShieldSymbolizer:
-                        name2expr(sym) 
-                if hasattr(rule,'PointSymbolizer'):
-                    for sym in rule.PointSymbolizer:
-                        fixup_pointsym(sym)
-                if hasattr(rule,'LineSymbolizer') :
-                    for sym in rule.LineSymbolizer:
-                        fixup_sym_attributes(sym)
-                if hasattr(rule,'PolygonSymbolizer') :
-                    for sym in rule.PolygonSymbolizer:
-                        fixup_sym_attributes(sym)
-                if hasattr(rule,'RasterSymbolizer') :
-                    for sym in rule.RasterSymbolizer:
-                        fixup_sym_attributes(sym)
-                if hasattr(rule,'BuildingSymbolizer') :
-                    for sym in rule.BuildingSymbolizer:
-                        fixup_sym_attributes(sym)
-                        
-    updated_xml = etree.tostring(tree,pretty_print=True,standalone=True)
-    
+    if hasattr(root,'Style'):
+        for style in root.Style:
+            if len(style.Rule):
+                for rule in style.Rule:
+                    if hasattr(rule,'TextSymbolizer'):
+                        for sym in rule.TextSymbolizer:
+                            name2expr(sym)
+                    if hasattr(rule,'ShieldSymbolizer'):
+                        for sym in rule.ShieldSymbolizer:
+                            name2expr(sym) 
+                    if hasattr(rule,'PointSymbolizer'):
+                        for sym in rule.PointSymbolizer:
+                            fixup_pointsym(sym)
+                    if hasattr(rule,'LineSymbolizer') :
+                        for sym in rule.LineSymbolizer:
+                            fixup_sym_attributes(sym)
+                    if hasattr(rule,'PolygonSymbolizer') :
+                        for sym in rule.PolygonSymbolizer:
+                            fixup_sym_attributes(sym)
+                    if hasattr(rule,'RasterSymbolizer') :
+                        for sym in rule.RasterSymbolizer:
+                            fixup_sym_attributes(sym)
+                    if hasattr(rule,'BuildingSymbolizer') :
+                        for sym in rule.BuildingSymbolizer:
+                            fixup_sym_attributes(sym)
+    else:
+        sys.stderr.write('### Warning, no styles encountered and nothing able to be upgraded!\n')
+
+    updated_xml = etree.tostring(tree)
+    (handle, path) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-')
+    os.close(handle)
+    open(path,'w').write(updated_xml)
+    indented = etree.parse(path)
+    indent(indented.getroot())
     output_file = open(sys.argv[2], 'w')
-
-    output_file.write(updated_xml)
-
+    output_file.write(etree.tostring(indented))
     output_file.close()
