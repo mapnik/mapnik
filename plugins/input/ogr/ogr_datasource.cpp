@@ -125,8 +125,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
          OGRFeatureDefn* def = ogr_layer->GetLayerDefn();
          if (def != 0) { 
             found = true;
-            s << " " << i << ":";
-            s << def->GetName();
+            s << " '" << def->GetName() << "' ";
          }
       }
       if (!found) {
