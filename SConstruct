@@ -290,7 +290,7 @@ opts.AddVariables(
     # Variables affecting rendering back-ends
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
     
-    BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'True'),
+    BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
     
     # Variables for optional dependencies
     # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
