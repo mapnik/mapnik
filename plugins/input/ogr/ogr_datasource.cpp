@@ -103,6 +103,16 @@ ogr_datasource::ogr_datasource(parameters const& params)
    }
    else if (layer_by_index)
    { 
+       unsigned num_layers = dataset_->GetLayerCount();
+       if (*layer_by_index >= num_layers)
+       {
+           std::ostringstream s;
+           s << "OGR Plugin: only ";
+           s << num_layers;
+           s << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
+       
+           throw datasource_exception(s.str());
+       }
        OGRLayer  *ogr_layer = dataset_->GetLayer(*layer_by_index);
        if (ogr_layer)
        {
