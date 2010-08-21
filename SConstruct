@@ -404,12 +404,15 @@ elif preconfigured:
 
 #### Custom Configure Checks ###
 
-def prioritize_paths(context):    
+def prioritize_paths(context,silent=True):    
     env = context.env
     prefs = env['LINK_PRIORITY'].split(',')
+    if not silent:
     context.Message( 'Sorting lib and inc compiler paths by priority... %s' % ','.join(prefs) )
     env['LIBPATH'] = sort_paths(env['LIBPATH'],prefs)
     env['CPPPATH'] = sort_paths(env['CPPPATH'],prefs)
+    if silent:
+        context.did_show_result=1
     ret = context.Result( True )
     return ret
 
@@ -811,7 +814,7 @@ if not preconfigured:
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
-        conf.prioritize_paths()    
+        conf.prioritize_paths(silent=False)    
     
     for libinfo in LIBSHEADERS:
         if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):
@@ -849,6 +852,10 @@ if not preconfigured:
         
     if env['THREADING'] == 'multi':
         BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
+                
+    # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
+    if env['PRIORITIZE_LINKING']:
+        conf.prioritize_paths()    
                 
     # if the user is not setting custom boost configuration
     # enforce boost version greater than or equal to 1.34
