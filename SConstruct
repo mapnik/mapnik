@@ -880,6 +880,10 @@ if not preconfigured:
         
     if env['THREADING'] == 'multi':
         BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
+
+    # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
+    if env['PRIORITIZE_LINKING']:
+        conf.prioritize_paths()    
                 
     # if the user is not setting custom boost configuration
     # enforce boost version greater than or equal to BOOST_MIN_VERSION
