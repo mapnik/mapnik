@@ -55,7 +55,7 @@ def regular_print(color,text,newline=True):
         print text
 
 def call(cmd, silent=False):
-    stdin, stderr = Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE).communicate()
+    stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
         return stdin.strip()
     elif not silent:
@@ -555,9 +555,11 @@ def FindBoost(context, prefixes, thread_flag):
         search_lib = 'libboost_thread'        
     else:
         search_lib = 'libboost_filesystem'
-	
-    prefixes.insert(0,os.path.dirname(env['BOOST_INCLUDES']))
-    prefixes.insert(0,os.path.dirname(env['BOOST_LIBS']))
+
+    # note: must call normpath to strip trailing slash otherwise dirname
+    # does not remove 'lib' and 'include'
+    prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_INCLUDES'])))
+    prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_LIBS'])))
     for searchDir in prefixes:
         libItems = glob(os.path.join(searchDir, LIBDIR_SCHEMA, '%s*.*' % search_lib))
         if not libItems:
