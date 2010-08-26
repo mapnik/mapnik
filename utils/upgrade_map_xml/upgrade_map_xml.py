@@ -87,7 +87,8 @@ if __name__ == "__main__":
         
     xml = sys.argv[1]
     tree = etree.parse(xml)
-    tree.xinclude()
+    if hasattr(tree,'xinclude')
+        tree.xinclude()
     root = tree.getroot()
     
     # rename 'bgcolor' to 'background-color'
