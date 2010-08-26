@@ -23,7 +23,9 @@ Import('env')
 
 agg_env = env.Clone()
 
-if env['PLATFORM'] == 'SunOS':
-    agg_env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O -KPIC -DNDEBUG')
+if env['SUNCC']:
+    cxxflags = '-O -KPIC -DNDEBUG'
 else:
-    agg_env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS='-O%s -fPIC -DNDEBUG' % env['OPTIMIZATION'])
+    cxxflags = '-O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
+
+agg_env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS=cxxflags)
