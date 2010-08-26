@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 import os
+import re
 import sys
 import tempfile
-from lxml import etree
-from lxml import objectify
-import re
+
+try:
+    import lxml.etree as etree
+except ImportError:
+    try:
+        import xml.etree.ElementTree as etree
+    except ImportError:
+        import elementtree.ElementTree as etree
 
 def indent(elem, level=0):
     """ http://infix.se/2007/02/06/gentlemen-indent-your-xml
@@ -29,7 +35,18 @@ def name2expr(sym):
         print>>sys.stderr,"Fixing %s" % name
         expression = '[%s]' % name
         sym.attrib['name'] = expression    
-    
+
+def handle_attr_changes(sym):
+    # http://www.w3schools.com/css/pr_text_text-transform.asp
+    # http://code.google.com/p/mapnik-utils/issues/detail?id=32&colspec=ID%20Type%20Status%20Priority%20Component%20Owner%20Summary
+    text_transform = sym.attrib.get('text_convert')
+    # note: css supports text-transform:capitalize but Mapnik does not (yet)
+    t_ = {'tolower':'uppercase','toupper':'lowercase','none':'none'}
+    if text_transform:
+        new = t_.get(text_transform)
+        if new:
+            sym.attrib['text_transform'] = new
+
 def fixup_pointsym(sym):
     if sym.attrib.get('width'):
         sym.attrib.pop('width')
@@ -39,8 +56,8 @@ def fixup_pointsym(sym):
         sym.attrib.pop('type')
 
 def fixup_sym_attributes(sym):
-    if not hasattr(sym,'CssParameter'):
-        return
+    #if not sym.find('CssParameter'):
+    #    return
     attrib = {}
     metawriter = sym.attrib.get('meta-writer')
     if metawriter:
@@ -49,7 +66,7 @@ def fixup_sym_attributes(sym):
     if metaoutput:
         attrib['meta-output'] = metaoutput
     
-    for css in sym.CssParameter:
+    for css in sym.findall('CssParameter'):
         key = css.attrib.get('name')
         value = css.text
         attrib[key] = value
@@ -69,7 +86,7 @@ if __name__ == "__main__":
         sys.exit(1)
         
     xml = sys.argv[1]
-    tree = objectify.parse(xml)
+    tree = etree.parse(xml)
     tree.xinclude()
     root = tree.getroot()
     
@@ -78,33 +95,27 @@ if __name__ == "__main__":
         root.attrib['background-color'] = root.attrib.get('bgcolor')
         root.attrib.pop('bgcolor')
     
-    if hasattr(root,'Style'):
-        for style in root.Style:
-            if len(style.Rule):
-                for rule in style.Rule:
-                    if hasattr(rule,'TextSymbolizer'):
-                        for sym in rule.TextSymbolizer:
-                            name2expr(sym)
-                    if hasattr(rule,'ShieldSymbolizer'):
-                        for sym in rule.ShieldSymbolizer:
-                            name2expr(sym) 
-                    if hasattr(rule,'PointSymbolizer'):
-                        for sym in rule.PointSymbolizer:
-                            fixup_pointsym(sym)
-                    if hasattr(rule,'LineSymbolizer') :
-                        for sym in rule.LineSymbolizer:
-                            fixup_sym_attributes(sym)
-                    if hasattr(rule,'PolygonSymbolizer') :
-                        for sym in rule.PolygonSymbolizer:
-                            fixup_sym_attributes(sym)
-                    if hasattr(rule,'RasterSymbolizer') :
-                        for sym in rule.RasterSymbolizer:
-                            fixup_sym_attributes(sym)
-                    if hasattr(rule,'BuildingSymbolizer') :
-                        for sym in rule.BuildingSymbolizer:
-                            fixup_sym_attributes(sym)
-    else:
+    styles = root.findall('Style')
+    if not len(styles):
         sys.stderr.write('### Warning, no styles encountered and nothing able to be upgraded!\n')
+    else:
+        for style in styles:
+            for rule in style.findall('Rule'):
+                for sym in rule.findall('TextSymbolizer') or []:
+                    name2expr(sym)
+                    #handle_attr_changes(sym)
+                for sym in rule.findall('ShieldSymbolizer') or []:
+                    name2expr(sym) 
+                for sym in rule.findall('PointSymbolizer') or []:
+                    fixup_pointsym(sym)
+                for sym in rule.findall('LineSymbolizer') or []:
+                    fixup_sym_attributes(sym)
+                for sym in rule.findall('PolygonSymbolizer') or []:
+                    fixup_sym_attributes(sym)
+                for sym in rule.findall('RasterSymbolizer') or []:
+                    fixup_sym_attributes(sym)
+                for sym in rule.findall('BuildingSymbolizer') or []:
+                    fixup_sym_attributes(sym)
 
     updated_xml = etree.tostring(tree)
     (handle, path) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-')
