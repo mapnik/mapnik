@@ -32,17 +32,19 @@ source = Split(
 
 headers = env['CPPPATH'] 
 
-boost_thread  = 'boost_thread%s' % env['BOOST_APPEND']
 boost_regex  = 'boost_regex%s' % env['BOOST_APPEND']
 
-libraries =  [boost_thread,'mapnik2']
+libraries =  ['mapnik2']
+
+if env['THREADING'] == 'multi':
+    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
 if env['HAS_CAIRO'] in env['CXXFLAGS']:
     # add cairo and cairomm-1.0 to libs
     libraries.append('cairomm-1.0')
     libraries.append('cairo')
 
-if env['PLATFORM'] == 'Darwin':
+if env['PLATFORM'] in ('Darwin','SunOS'):
     libraries.append(boost_regex)
     libraries.append(env['ICU_LIB_NAME'])
    

@@ -20,10 +20,22 @@
 # $Id$
 
 
-import glob
 import os
+import glob
+from subprocess import Popen, PIPE
 
 Import('env')
+
+def call(cmd, silent=True):
+    stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    if not stderr:
+        return stdin.strip()
+    elif not silent:
+        print stderr
+
+
+def ldconfig(*args,**kwargs):
+    call('ldconfig')
 
 ABI_VERSION = env['ABI_VERSION']
 
@@ -74,8 +86,11 @@ if env['PLATFORM'] == 'Darwin':
     linkflags = '-Wl,-install_name,%s' % lib_path
     _d = {'version':env['MAPNIK_VERSION_STRING']}
     linkflags += ' -current_version %(version)s -compatibility_version %(version)s' % _d
-elif env['PLATFORM'] == 'SunOS' and env['CXX'].startswith('CC'):
-    linkflags = '-R. -h %s' % mapnik_libname
+elif env['PLATFORM'] == 'SunOS':
+    if env['CXX'].startswith('CC'):
+        linkflags = '-R. -h %s' % mapnik_libname
+    else:
+        linkflags = '-Wl,-h,%s' %  mapnik_libname
 else: # Linux and others
     linkflags = '-Wl,-rpath-link,. -Wl,-soname,%s' % mapnik_libname
 
@@ -226,7 +241,11 @@ if env['PLATFORM'] != 'Darwin':
     target = os.path.join(libDir, soFile)
     
     if 'uninstall' not in COMMAND_LINE_TARGETS:
-      env.Alias(target='install', source=env.InstallAs(target=target, source=mapnik))
+      result = env.InstallAs(target=target, source=mapnik)
+      env.Alias(target='install', source=result)
+      if result:
+            env.AddPostAction(result, ldconfig)
+
     
     # Install symlinks
     target1 = os.path.join(libDir, "%s.%d.%d" % (os.path.basename(str(mapnik[0])),major, minor))
@@ -235,7 +254,6 @@ if env['PLATFORM'] != 'Darwin':
         if 'install' in COMMAND_LINE_TARGETS:
             link1 = env.Command(target1, target, symlink)
             env.Alias(target='install', source=link1)
-        if 'install' in COMMAND_LINE_TARGETS:
             link2 = env.Command(target2, target1, symlink)
             env.Alias(target='install', source=link2)
     # delete in reverse order..
@@ -246,7 +264,9 @@ if env['PLATFORM'] != 'Darwin':
 else:
     target_path = os.path.normpath(install_prefix + '/' + env['LIBDIR_SCHEMA'])
     if 'uninstall' not in COMMAND_LINE_TARGETS:
-        env.Alias(target='install', source=env.Install(target_path, mapnik))
+        result = env.Install(target_path, mapnik)
+        env.Alias(target='install', source=result)
+
     env['create_uninstall_target'](env, os.path.join(target_path,mapnik_libname))
 
 includes = glob.glob('../include/mapnik/*.hpp')

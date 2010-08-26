@@ -581,9 +581,9 @@ def tool_list(platform, env):
         ars = ['sgiar']
     elif str(platform) == 'sunos':
         "prefer Forte tools on SunOS"
-        linkers = ['sunlink', 'gnulink']
-        c_compilers = ['suncc', 'gcc', 'cc']
-        cxx_compilers = ['sunc++', 'g++', 'c++']
+        linkers = ['gnulink','sunlink']
+        c_compilers = ['gcc','suncc', 'cc']
+        cxx_compilers = ['g++','sunc++', 'c++']
         assemblers = ['as', 'gas']
         fortran_compilers = ['sunf95', 'sunf90', 'sunf77', 'f95', 'f90', 'f77',
                              'gfortran', 'g77', 'fortran']
