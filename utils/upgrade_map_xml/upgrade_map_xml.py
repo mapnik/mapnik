@@ -4,13 +4,16 @@ import re
 import sys
 import tempfile
 
+HAS_LXML = False
+
 try:
     import lxml.etree as etree
+    HAS_LXML = True
 except ImportError:
     try:
-        import xml.etree.ElementTree as etree
-    except ImportError:
         import elementtree.ElementTree as etree
+    except ImportError:
+        import xml.etree.ElementTree as etree
 
 def indent(elem, level=0):
     """ http://infix.se/2007/02/06/gentlemen-indent-your-xml
@@ -86,8 +89,15 @@ if __name__ == "__main__":
         sys.exit(1)
         
     xml = sys.argv[1]
+    pre_read = open(xml,'r')
+    if '!ENTITY' in pre_read.read() and not HAS_LXML:
+        sys.stderr.write('\nSorry, it appears the xml you are trying to upgrade has entities, which requires lxml (python bindings to libxml2)\n')
+        sys.stderr.write('Install lxml with: "easy_install lxml" or download from http://codespeak.net/lxml/\n')
+
+        sys.exit(1)        
+        
     tree = etree.parse(xml)
-    if hasattr(tree,'xinclude')
+    if hasattr(tree,'xinclude'):
         tree.xinclude()
     root = tree.getroot()
     
@@ -118,12 +128,6 @@ if __name__ == "__main__":
                 for sym in rule.findall('BuildingSymbolizer') or []:
                     fixup_sym_attributes(sym)
 
-    updated_xml = etree.tostring(tree)
-    (handle, path) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-')
-    os.close(handle)
-    open(path,'w').write(updated_xml)
-    indented = etree.parse(path)
-    indent(indented.getroot())
-    output_file = open(sys.argv[2], 'w')
-    output_file.write(etree.tostring(indented))
-    output_file.close()
+    # TODO - make forcing indent an option
+    indent(root)
+    tree.write(sys.argv[2])
