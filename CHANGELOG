@@ -24,7 +24,7 @@ Mapnik Trunk
 
 - Added xinclude (http://www.w3.org/TR/xinclude/) support to libxml2-based xml parser (oldtopos) (#567)
 
-- Optimized rendering speeds by avoiding locking in the projection code (r2063)
+- Optimized rendering speeds by avoiding locking in the projection code (r2063) (r2713)
 
 - Added support for setting global alignment of polygon pattern fills (#203)
 
@@ -47,7 +47,7 @@ Mapnik Trunk
 
 - PNG: fixed png256 for large images and some improvements to reduce color corruptions (#522)
 
-- Implement MarkersSymbolizer in Cairo render and improve the markers placementfinder. (#553)
+- Implement MarkersSymbolizer in Cairo render and improve the markers placement finder. (#553)
 
 
 Mapnik 0.7.0 Release
@@ -115,9 +115,9 @@ Mapnik 0.7.0 Release
 
 - Shape Plugin: Fixed missing compiler flags that causes crashing on newer g++ versions (#436)
 
-- PNG: Fixed problem with garbled/striped png256 output along sharpe edges(#416,#445,#447,#202)
+- PNG: Fixed problem with garbled/striped png256 output along sharp edges(#416,#445,#447,#202)
 
-- PNG: Added support for semitransparency in png256 output (#477,#202)
+- PNG: Added support for semi-transparency in png256 output (#477,#202)
 
 - PolygonSymbolizer: Added 'gamma' attribute to allow for dilation of polygon edges - a solution
   to gap artifacts or "ghost lines" between adjacent polygons and allows for slight sharpening of
