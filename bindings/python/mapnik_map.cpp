@@ -104,7 +104,7 @@ struct map_pickle_suite : boost::python::pickle_suite
             boost::python::tuple style_pair=extract<boost::python::tuple>(s[i]);
             std::string name = extract<std::string>(style_pair[0]);
             mapnik::feature_type_style style = extract<mapnik::feature_type_style>(style_pair[1]);
-            m.insert_style(name, style);          
+            m.insert_style(name, style);
         }
     }
 };
@@ -122,6 +122,28 @@ mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& 
         boost::python::throw_error_already_set();
     }
     return *style;
+}
+
+// TODO - we likely should allow indexing by negative number from python
+// for now, protect against negative values and kindly throw
+mapnik::featureset_ptr query_point(mapnik::Map const& m, int index, double x, double y)
+{
+    if (index < 0){
+        PyErr_SetString(PyExc_IndexError, "Please provide a layer index >= 0");
+        boost::python::throw_error_already_set();    
+    }
+    unsigned idx = index;
+    return m.query_point(idx, x, y);
+}
+
+mapnik::featureset_ptr query_map_point(mapnik::Map const& m, int index, double x, double y)
+{
+    if (index < 0){
+        PyErr_SetString(PyExc_IndexError, "Please provide a layer index >= 0");
+        boost::python::throw_error_already_set();    
+    }
+    unsigned idx = index;
+    return m.query_map_point(idx, x, y);
 }
 
 void export_map() 
@@ -165,6 +187,7 @@ void export_map()
             )
         
         .def("append_style",&Map::insert_style,
+             (arg("style_name"),arg("style_object")),
              "Insert a Mapnik Style onto the map by appending it.\n"
              "\n"
              "Usage:\n"
@@ -178,30 +201,30 @@ void export_map()
 
         .def("buffered_envelope",
              &Map::get_buffered_extent,
-             "Get the box2d() of the Map given\n"
+             "Get the Box2d() of the Map given\n"
              "the Map.buffer_size.\n"
              "\n"
              "Usage:\n"
              ">>> m = Map(600,400)\n"
              ">>> m.envelope()\n"
-             "box2d(-1.0,-1.0,0.0,0.0)\n"
+             "Box2d(-1.0,-1.0,0.0,0.0)\n"
              ">>> m.buffered_envelope()\n"
-             "box2d(-1.0,-1.0,0.0,0.0)\n"
+             "Box2d(-1.0,-1.0,0.0,0.0)\n"
              ">>> m.buffer_size = 1\n"
              ">>> m.buffered_envelope()\n"
-             "box2d(-1.02222222222,-1.02222222222,0.0222222222222,0.0222222222222)\n"
+             "Box2d(-1.02222222222,-1.02222222222,0.0222222222222,0.0222222222222)\n"
             )
 
         .def("envelope",
              make_function(&Map::get_current_extent,
                            return_value_policy<copy_const_reference>()),
-             "Return the Map box2d object\n"
+             "Return the Map Box2d object\n"
              "and print the string representation\n"
              "of the current extent of the map.\n"
              "\n"
              "Usage:\n"
              ">>> m.envelope()\n"
-             "box2d(-0.185833333333,-0.96,0.189166666667,-0.71)\n"
+             "Box2d(-0.185833333333,-0.96,0.189166666667,-0.71)\n"
              ">>> dir(m.envelope())\n"
              "...'center', 'contains', 'expand_to_include', 'forward',\n"
              "...'height', 'intersect', 'intersects', 'inverse', 'maxx',\n"
@@ -209,7 +232,8 @@ void export_map()
             )
 
         .def("find_style",
-             find_style,             
+             find_style,
+             (arg("style_name")),
              "Query the Map for a style by name and return\n"
              "a style object if found or raise KeyError\n"
              "style if not found.\n"
@@ -219,14 +243,8 @@ void export_map()
              "<mapnik._mapnik.Style object at 0x654f0>\n"
             )
         
-        .def("get_aspect_fix_mode",&Map::get_aspect_fix_mode,
-             "Get aspect fix mode.\n"
-             "Usage:\n"
-             "\n"
-             ">>> m.get_aspect_fix_mode()\n"
-            )
-
         .def("pan",&Map::pan,
+             (arg("x"),arg("y")),
              "Set the Map center at a given x,y location\n"
              "as integers in the coordinates of the pixmap or map surface.\n"
              "\n"
@@ -240,6 +258,7 @@ void export_map()
             )
         
         .def("pan_and_zoom",&Map::pan_and_zoom,
+             (arg("x"),arg("y"),arg("factor")),
              "Set the Map center at a given x,y location\n"
              "and zoom factor as a float.\n"
              "\n"
@@ -254,10 +273,12 @@ void export_map()
              "0.00062500000000000001\n"
             )
         
-        .def("query_map_point",&Map::query_map_point,
+        .def("query_map_point",query_map_point,
+             (arg("layer_idx"),arg("pixel_x"),arg("pixel_y")),
              "Query a Map Layer (by layer index) for features \n"
-             "intersecting the given x,y location in the coordinates\n"
-             "of the pixmap or map surface.\n"
+             "intersecting the given x,y location in the pixel\n"
+             "coordinates of the rendered map image.\n"
+             "Layer index starts at 0 (first layer in map).\n"
              "Will return a Mapnik Featureset if successful\n"
              "otherwise will return None.\n"
              "\n"
@@ -269,10 +290,12 @@ void export_map()
              ">>> [<mapnik.Feature object at 0x3995630>]\n"
             )
         
-        .def("query_point",&Map::query_point,
+        .def("query_point",query_point,
+             (arg("layer idx"),arg("x"),arg("y")),
              "Query a Map Layer (by layer index) for features \n"
              "intersecting the given x,y location in the coordinates\n"
              "of map projection.\n"
+             "Layer index starts at 0 (first layer in map).\n"
              "Will return a Mapnik Featureset if successful\n"
              "otherwise will return None.\n"
              "\n"
@@ -292,6 +315,7 @@ void export_map()
             )
         
         .def("remove_style",&Map::remove_style,
+             (arg("style_name")),
              "Remove a Mapnik Style from the map.\n"
              "\n"
              "Usage:\n"
@@ -299,6 +323,7 @@ void export_map()
             )
 
         .def("resize",&Map::resize,
+             (arg("width"),arg("height")),
              "Resize a Mapnik Map.\n"
              "\n"
              "Usage:\n"
@@ -316,18 +341,24 @@ void export_map()
              "Return the Map Scale Denominator.\n"
              "Usage:\n"
              "\n"
-             ">>> m.scale_denominator\n"
+             ">>> m.scale_denominator()\n"
             )
       
         .def("view_transform",&Map::view_transform,
-             "Map CoordinateTransform object.\n"
+             "Return the map ViewTransform object\n"
+             "which is used internally to convert between\n"
+             "geographic coordinates and screen coordinates.\n"
              "\n"
              "Usage:\n"
              ">>> m.view_transform()\n"         
             )
       
         .def("zoom",&Map::zoom,
-             "Zoom in by a given factor.\n"
+             (arg("factor")),
+             "Zoom in or out by a given factor.\n"
+             "Positive number zooms in, negative number\n"
+             "zooms out.\n"
+             "\n"
              "Usage:\n"
              "\n"
              ">>> m.zoom(0.25)\n"
@@ -342,19 +373,22 @@ void export_map()
             )
         
         .def("zoom_to_box",&Map::zoom_to_box,
+             (arg("Boxd2")),
              "Set the geographical extent of the map\n"
-             "by specifying a Mapnik box2d.\n"
+             "by specifying a Mapnik Box2d.\n"
              "\n"
              "Usage:\n"
-             ">>> extext = box2d(-180.0, -90.0, 180.0, 90.0)\n"
+             ">>> extext = Box2d(-180.0, -90.0, 180.0, 90.0)\n"
              ">>> m.zoom_to_box(extent)\n"
             )
         .def("get_metawriter_property", &Map::get_metawriter_property,
+            (arg("name")),
             "Reads a metawriter property.\n"
             "These properties are completely userdefined and can be used for"
             "creating filenames, etc."
         )
         .def("set_metawriter_property", &Map::set_metawriter_property,
+            (arg("name"),arg("value")),
             "Sets a metawriter property.\n"
             "These properties are completely userdefined and can be used for"
             "creating filenames, etc.\n"
@@ -371,6 +405,8 @@ void export_map()
         .add_property("aspect_fix_mode",
                       &Map::get_aspect_fix_mode,
                       &Map::set_aspect_fix_mode,
+                      // TODO - how to add arg info to properties?
+                      //(arg("aspect_fix_mode")),
                       "Get/Set aspect fix mode.\n"
                       "Usage:\n"
                       "\n"
