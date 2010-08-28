@@ -87,15 +87,13 @@ postgis_datasource::postgis_datasource(parameters const& params)
       extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery",false)),
       // params below are for testing purposes only (will likely be removed at any time)
       force2d_(*params_.get<mapnik::boolean>("force_2d",false)),
-      st_(*params_.get<mapnik::boolean>("st_prefix",false)),
-      lowercase_attr_names_(*params_.get<mapnik::boolean>("lowercase_names",false))     
+      st_(*params_.get<mapnik::boolean>("st_prefix",false))
       //show_queries_(*params_.get<mapnik::boolean>("show_queries",false))
-     
 {   
 
     if (table_.empty()) throw mapnik::datasource_exception("PostGIS: missing <table> parameter");
 
-    boost::optional<int> initial_size = params_.get<int>("inital_size",1);
+    boost::optional<int> initial_size = params_.get<int>("initial_size",1);
     boost::optional<int> max_size = params_.get<int>("max_size",10);
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
@@ -487,7 +485,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             std::set<std::string>::const_iterator end=props.end();
             while (pos != end)
             {
-                s <<",\""<<*pos<<"\"";
+                s << ",\"" << *pos << "\"";
                 ++pos;
             }       
 
@@ -545,10 +543,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             unsigned size=0;
             while (itr != end)
             {
-                if (lowercase_attr_names_)
-                    s << ",\"" << boost::algorithm::to_lower_copy(itr->get_name()) << "\"";
-                else
-                    s << ",\"" << itr->get_name() << "\"";
+                s << ",\"" << itr->get_name() << "\"";
                 ++itr;
                 ++size;
             }

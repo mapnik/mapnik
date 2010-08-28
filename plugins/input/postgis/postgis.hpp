@@ -78,7 +78,6 @@ class postgis_datasource : public datasource
       // params below are for testing purposes only (will likely be removed at any time)
       bool force2d_;
       bool st_;
-      bool lowercase_attr_names_;
       //bool show_queries_;
    public:
       static std::string name();
