@@ -408,7 +408,7 @@ def prioritize_paths(context,silent=True):
     env = context.env
     prefs = env['LINK_PRIORITY'].split(',')
     if not silent:
-    context.Message( 'Sorting lib and inc compiler paths by priority... %s' % ','.join(prefs) )
+        context.Message( 'Sorting lib and inc compiler paths by priority... %s' % ','.join(prefs) )
     env['LIBPATH'] = sort_paths(env['LIBPATH'],prefs)
     env['CPPPATH'] = sort_paths(env['CPPPATH'],prefs)
     if silent:
