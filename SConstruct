@@ -394,6 +394,11 @@ if sys.platform == "win32":
 
 color_print(4,'\nWelcome to Mapnik...\n')
 
+color_print(1,'*'*45)
+color_print(1,'You are compiling Mapnik trunk (aka Mapnik2)')
+color_print(1,'See important details at:\nhttp://trac.mapnik.org/wiki/Mapnik2')
+color_print(1,('*'*45)+'\n')
+
 # if we are not configuring overwrite environment with pickled settings
 if not force_configure:
     if os.path.exists(SCONS_CONFIGURE_CACHE):
