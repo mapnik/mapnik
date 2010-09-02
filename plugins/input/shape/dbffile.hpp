@@ -61,26 +61,26 @@ private:
 #else
     stream<file_source> file_;
 #endif
-      char* record_;
+    char* record_;
 public:
-      dbf_file();
-      dbf_file(const std::string& file_name);
-      ~dbf_file();
-      bool is_open();
-      void close();
-      int num_records() const;
-      int num_fields() const;
-      field_descriptor const& descriptor(int col) const;
-      void move_to(int index);
-      std::string string_value(int col) const;
-      void add_attribute(int col, transcoder const& tr, Feature const& f) const throw();
-   private:
-      dbf_file(const dbf_file&);
-      dbf_file& operator=(const dbf_file&);
-      void read_header();
-      int read_short();
-      int read_int();
-      void skip(int bytes);
+    dbf_file();
+    dbf_file(const std::string& file_name);
+    ~dbf_file();
+    bool is_open();
+    void close();
+    int num_records() const;
+    int num_fields() const;
+    field_descriptor const& descriptor(int col) const;
+    void move_to(int index);
+    std::string string_value(int col) const;
+    void add_attribute(int col, transcoder const& tr, Feature const& f) const throw();
+private:
+    dbf_file(const dbf_file&);
+    dbf_file& operator=(const dbf_file&);
+    void read_header();
+    int read_short();
+    int read_int();
+    void skip(int bytes);
 };
 
 #endif //DBFFILE_HPP

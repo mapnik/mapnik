@@ -23,28 +23,35 @@
 #ifndef SHAPE_INDEX_FEATURESET_HPP
 #define SHAPE_INDEX_FEATURESET_HPP
 
+#include <mapnik/geom_util.hpp>
+#include <boost/scoped_ptr.hpp>
+
+#include "shape.hpp"
+#include "shape_io.hpp"
 #include <set>
 #include <vector>
-#include <boost/scoped_ptr.hpp>
-#include "shape_featureset.hpp"
+
+using mapnik::Featureset;
+using mapnik::box2d;
+using mapnik::feature_ptr;
 
 template <typename filterT>
 class shape_index_featureset : public Featureset
 {
       filterT filter_;
-      int shape_type_;
-      shape_io shape_;
+      int shape_type_;      
       boost::scoped_ptr<transcoder> tr_;
       std::vector<int> ids_;
       std::vector<int>::iterator itr_;
       std::set<int> attr_ids_;
+      shape_io & shape_;
       mutable box2d<double> feature_ext_;
       mutable int total_geom_size;
       mutable int count_;
 
    public:
       shape_index_featureset(const filterT& filter,
-                             const std::string& shape_file,
+                             shape_io& shape,
                              const std::set<std::string>& attribute_names,
                              std::string const& encoding);
       virtual ~shape_index_featureset();

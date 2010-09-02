@@ -24,9 +24,7 @@
 
 #include <mapnik/feature_factory.hpp>
 // boost
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
+
 
 #include "shape_index_featureset.hpp"
 
@@ -34,22 +32,21 @@ using namespace boost::iostreams;
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
-                                                        const std::string& shape_file,
+                                                        shape_io& shape,
                                                         const std::set<std::string>& attribute_names,
                                                         std::string const& encoding)
     : filter_(filter),
       shape_type_(0),
-      shape_(shape_file),
+      shape_(shape),
       tr_(new transcoder(encoding)),
       count_(0)
 
 {
     shape_.shp().skip(100);
-    stream<mapped_file_source> file(shape_file + ".index");
+    stream<mapped_file_source> & file = shape_.index();
     if (file)
     {
         shp_index<filterT,stream<mapped_file_source> >::query(filter,file,ids_);
-        file.close();
     }
     std::sort(ids_.begin(),ids_.end());    
     

@@ -27,13 +27,16 @@
 
 
 using mapnik::datasource_exception;
+
 const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";
+const std::string shape_io::INDEX = ".index";
 
 shape_io::shape_io(const std::string& shape_name)
    : type_(shape_null),
      shp_(shape_name + SHP),
      dbf_(shape_name + DBF),
+     index_(shape_name + INDEX),
      reclength_(0),
      id_(0)
 {
@@ -48,6 +51,7 @@ shape_io::~shape_io()
 {
    shp_.close();
    dbf_.close();
+   if (index_) (*index_).close();
 }
 
 void shape_io::move_to (int pos)
@@ -251,11 +255,11 @@ geometry2d * shape_io::read_polylinez()
             end=num_points;
          else
             end=parts[k+1];
-	    
+         
          double x=record.read_double();
          double y=record.read_double();
          line->move_to(x,y);
-	    
+         
          for (int j=start+1;j<end;++j)
          {
             x=record.read_double();

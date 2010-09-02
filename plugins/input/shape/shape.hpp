@@ -28,6 +28,8 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 
+#include <boost/shared_ptr.hpp>
+
 #include "shape_io.hpp"
 
 using mapnik::datasource;
@@ -39,28 +41,29 @@ using mapnik::coord2d;
 
 class shape_datasource : public datasource
 {
-   public:
-      shape_datasource(const parameters &params);
-      virtual ~shape_datasource();
+public:
+    shape_datasource(const parameters &params);
+    virtual ~shape_datasource();
     
-      int type() const;
-      static std::string name();
-      featureset_ptr features(const query& q) const;
-      featureset_ptr features_at_point(coord2d const& pt) const;
-      box2d<double> envelope() const;
-      layer_descriptor get_descriptor() const;   
-   private:
-      shape_datasource(const shape_datasource&);
-      shape_datasource& operator=(const shape_datasource&);
-      void init(shape_io& shape);
-   private:
-      int type_;
-      std::string shape_name_;
-      long file_length_;
-      box2d<double> extent_;
-      bool indexed_;
-      layer_descriptor desc_;
-      static const std::string name_;
+    int type() const;
+    static std::string name();
+    featureset_ptr features(const query& q) const;
+    featureset_ptr features_at_point(coord2d const& pt) const;
+    box2d<double> envelope() const;
+    layer_descriptor get_descriptor() const;   
+private:
+    shape_datasource(const shape_datasource&);
+    shape_datasource& operator=(const shape_datasource&);
+    void init(shape_io& shape);
+private:
+    int type_;
+    std::string shape_name_;
+    boost::shared_ptr<shape_io> shape_;
+    long file_length_;
+    box2d<double> extent_;
+    bool indexed_;
+    layer_descriptor desc_;
+    static const std::string name_;
 };
 
 #endif //SHAPE_HPP
