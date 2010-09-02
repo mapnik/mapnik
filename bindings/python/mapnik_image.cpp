@@ -135,11 +135,17 @@ void composite(image_32 & im, image_32 & im2, composite_mode_e mode)
     agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
     switch(mode)
     {
-    case dst_out:
-        pixf.comp_op(agg::comp_op_dst_out);
+    case src_in:
+        pixf.comp_op(agg::comp_op_src_in);
+        break;
+    case dst_in:
+        pixf.comp_op(agg::comp_op_dst_in);
         break;
     case src_out:
         pixf.comp_op(agg::comp_op_src_out);
+        break;
+    case dst_out:
+        pixf.comp_op(agg::comp_op_dst_out);
         break;
     case multiply:
         pixf.comp_op(agg::comp_op_multiply);
@@ -165,6 +171,8 @@ void export_image()
 {
     using namespace boost::python;
     enum_<composite_mode_e>("CompositeOp")
+        .value("src_in",src_in)
+        .value("dst_in",dst_in)
         .value("src_out",src_out)
         .value("dst_out",dst_out)
         .value("multiply",multiply)
