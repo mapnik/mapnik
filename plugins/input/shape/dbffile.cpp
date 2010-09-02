@@ -130,7 +130,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
         case 'M':
         case 'L':
         {
-            // FIXME!!!
+            // FIXME - avoid constructing std::string in stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
             boost::trim(str); 
             f[name] = tr.transcode(str.c_str()); 
