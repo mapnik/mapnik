@@ -145,10 +145,10 @@ public:
 template <typename T, template <typename> class Container=vertex_vector2>
 class polygon //: public geometry<T>
 {
+public:
     typedef T vertex_type;
     typedef typename vertex_type::type value_type;
-    typedef Container<vertex_type> container_type;
-       
+    typedef Container<vertex_type> container_type;   
 private:
     container_type cont_;
     mutable unsigned itr_;
