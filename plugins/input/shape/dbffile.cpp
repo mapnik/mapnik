@@ -148,15 +148,17 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
             if ( fields_[col].dec_>0 )
             {   
                 double val = 0.0;
-                qi::phrase_parse(record_+fields_[col].offset_,record_+fields_[col].offset_ + fields_[col].length_,
-                                 double_,ascii::space,val);
+                const char *itr = record_+fields_[col].offset_;
+                const char *end = itr + fields_[col].length_;
+                qi::phrase_parse(itr,end,double_,ascii::space,val);
                 boost::put(f,name,val); 
             }
             else
             {
                 int val = 0; 
-                qi::phrase_parse(record_+fields_[col].offset_,record_+fields_[col].offset_ + fields_[col].length_,
-                                 int_,ascii::space,val);
+                const char *itr = record_+fields_[col].offset_;
+                const char *end = itr + fields_[col].length_;
+                qi::phrase_parse(itr,end,int_,ascii::space,val);
                 boost::put(f,name,val); 
             }
             break;
