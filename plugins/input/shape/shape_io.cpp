@@ -36,15 +36,22 @@ shape_io::shape_io(const std::string& shape_name)
    : type_(shape_null),
      shp_(shape_name + SHP),
      dbf_(shape_name + DBF),
-     index_(shape_name + INDEX),
      reclength_(0),
      id_(0)
 {
-   bool ok = (shp_.is_open() && dbf_.is_open());
-   if (!ok)
-   { 
-      throw datasource_exception("cannot read shape file");
-   }
+    bool ok = (shp_.is_open() && dbf_.is_open());
+    if (!ok)
+    { 
+        throw datasource_exception("cannot read shape file");
+    }
+    try 
+    {
+        index_= boost::shared_ptr<shape_file>(new shape_file(shape_name + INDEX));
+    }
+    catch (...)
+    {
+        std::cerr << "FIXME\n";
+    }
 }
 
 shape_io::~shape_io()

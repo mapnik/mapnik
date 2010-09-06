@@ -94,7 +94,7 @@ struct shape_record
       
     int read_ndr_integer()
     {
-	boost::int32_t val;
+        boost::int32_t val;
         read_int32_ndr(&data[pos],val);
         pos+=4;
         return val;
@@ -102,7 +102,7 @@ struct shape_record
       
     int read_xdr_integer()
     {
-	boost::int32_t val;
+        boost::int32_t val;
         read_int32_xdr(&data[pos],val);
         pos+=4;
         return val;
@@ -131,21 +131,19 @@ using namespace boost::iostreams;
 
 class shape_file : boost::noncopyable
 {  
-#ifdef SHAPE_MEMORY_MAPPED_FILE
-    stream<mapped_file_source> file_;
-#else
-    stream<file_source> file_;
-#endif
-    
 public:
+
 #ifdef SHAPE_MEMORY_MAPPED_FILE
+    typedef stream<mapped_file_source> file_source_type;
     typedef shape_record<MappedRecordTag> record_type;
 #else
+    typedef stream<file_source> file_source_type;
     typedef shape_record<RecordTag> record_type;
 #endif
     
+    file_source_type file_;    
     shape_file() {}
-
+    
     shape_file(std::string  const& file_name)
         : 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
@@ -157,12 +155,16 @@ public:
     
     ~shape_file() {}
 
+    inline file_source_type & file()
+    {
+        return file_;
+    }
+    
     inline bool is_open()
     {
         return file_.is_open();
     }
-
-
+ 
     inline void close()
     {
         if (file_ && file_.is_open())

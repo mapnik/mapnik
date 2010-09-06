@@ -43,10 +43,10 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 
 {
     shape_.shp().skip(100);
-    stream<mapped_file_source> & file = shape_.index();
-    if (file)
+    boost::shared_ptr<shape_file> index = shape_.index();
+    if (index)
     {
-        shp_index<filterT,stream<mapped_file_source> >::query(filter,file,ids_);
+        shp_index<filterT,stream<mapped_file_source> >::query(filter,index->file(),ids_);
     }
     std::sort(ids_.begin(),ids_.end());    
     

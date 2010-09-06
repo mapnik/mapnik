@@ -29,7 +29,7 @@
 #include "shp_index.hpp"
 // boost
 #include <boost/utility.hpp>
-#include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/file.hpp>
@@ -47,7 +47,7 @@ struct shape_io : boost::noncopyable
     shape_file shp_;
     shape_file shx_;
     dbf_file   dbf_;
-    boost::optional<boost::iostreams::stream<boost::iostreams::mapped_file_source> > index_;
+    boost::shared_ptr<shape_file>  index_;
     unsigned reclength_;
     unsigned id_;
     box2d<double> cur_extent_;
@@ -77,14 +77,14 @@ public:
     shape_file& shx();
     dbf_file& dbf();
     
-    inline boost::iostreams::stream<boost::iostreams::mapped_file_source> & index()
+    inline boost::shared_ptr<shape_file>& index()
     {
-        return *index_;
+        return index_;
     }
-
+    
     inline bool has_index() const
     {
-        return (index_ && (*index_).is_open());
+        return (index_ && index_->is_open());
     }
     void move_to(int id);
     int type() const;
