@@ -29,14 +29,14 @@ fonts = 1
 ini_template = '''
 [mapnik]
 plugins_dir=%(lib_dir)s/input
-fonts\1\dir=%(lib_dir)s/fonts
+fonts/1/dir=%(lib_dir)s/fonts
 '''
 
 if platform.uname()[0] == 'Darwin':
-    ini_template += 'fonts\2\dir=/Library/Fonts\n'
+    ini_template += 'fonts/2/dir=/Library/Fonts\n'
     fonts += 1
 
-ini_template += 'fonts\size=%d\n' % fonts
+ini_template += 'fonts/size=%d\n' % fonts
 
 ini = ini_template % locals()
 
