@@ -303,14 +303,16 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                         {
                             // for every vertex, try and place a shield/text
                             geom.rewind(0);
+                            placement text_placement(info, sym, w, h, false);
+                            text_placement.avoid_edges = sym.get_avoid_edges();
+                            text_placement.allow_overlap = sym.get_allow_overlap();
+                            
                             for( unsigned jj = 0; jj < geom.num_points(); jj++ )
                             {
                                 double label_x;
                                 double label_y;
                                 double z=0.0;
-                                placement text_placement(info, sym, w, h, false);
-                                text_placement.avoid_edges = sym.get_avoid_edges();
-                                text_placement.allow_overlap = sym.get_allow_overlap();
+                                
                                 if( how_placed == VERTEX_PLACEMENT )
                                     geom.vertex(&label_x,&label_y);  // by vertex
                                 else
@@ -376,13 +378,13 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                             placement text_placement(info, sym, w, h, true);
                             text_placement.avoid_edges = sym.get_avoid_edges();
                             finder.find_point_placements<path_type>(text_placement,path);
-                        
+                            
                             for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                             {
-                            
+                                
                                 double x = text_placement.placements[ii].starting_x;
                                 double y = text_placement.placements[ii].starting_y;
-                        
+                                
                                 int px=int(x - (w/2));
                                 int py=int(y - (h/2));
                          
