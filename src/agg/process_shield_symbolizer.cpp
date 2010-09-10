@@ -306,7 +306,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                             placement text_placement(info, sym, w, h, false);
                             text_placement.avoid_edges = sym.get_avoid_edges();
                             text_placement.allow_overlap = sym.get_allow_overlap();
-                            
+                            position const& pos = sym.get_displacement();
+                            position const& shield_pos = sym.get_shield_displacement();
                             for( unsigned jj = 0; jj < geom.num_points(); jj++ )
                             {
                                 double label_x;
@@ -319,7 +320,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     geom.label_position(&label_x, &label_y);  // by middle of line or by point
                                 prj_trans.backward(label_x,label_y, z);
                                 t_.forward(&label_x,&label_y);
-                                position const& shield_pos = sym.get_shield_displacement();
+                                
                                 label_x += boost::get<0>(shield_pos);
                                 label_y += boost::get<1>(shield_pos);
                                 
@@ -340,13 +341,13 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     box2d<double> label_ext;
 
                                     if( !sym.get_unlock_image() )
-                                    {  // center image at text center position
+                                    {  
+                                        // center image at text center position
                                         // remove displacement from image label
-                                        position pos = sym.get_displacement();
                                         double lx = x - boost::get<0>(pos);
                                         double ly = y - boost::get<1>(pos);
-                                        px=int(floor(lx - (0.5 * w))) ;
-                                        py=int(floor(ly - (0.5 * h))) ;
+                                        px=int(floor(lx - (0.5 * w))) + 1;
+                                        py=int(floor(ly - (0.5 * h))) + 1;
                                         label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
                                     }
                                     else
@@ -378,19 +379,20 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                             placement text_placement(info, sym, w, h, true);
                             text_placement.avoid_edges = sym.get_avoid_edges();
                             finder.find_point_placements<path_type>(text_placement,path);
-                            
+                            position const&  pos = sym.get_displacement();
                             for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
-                            {
+                            {                                
+                                double x = floor(text_placement.placements[ii].starting_x);
+                                double y = floor(text_placement.placements[ii].starting_y);
                                 
-                                double x = text_placement.placements[ii].starting_x;
-                                double y = text_placement.placements[ii].starting_y;
+                                double lx = x - boost::get<0>(pos);
+                                double ly = y - boost::get<1>(pos);
+                                int px=int(floor(lx - (0.5*w))) + 1;
+                                int py=int(floor(ly - (0.5*h))) + 1;
                                 
-                                int px=int(x - (w/2));
-                                int py=int(y - (h/2));
-                         
                                 pixmap_.set_rectangle_alpha(px,py,*(*data));
                                 if (writer.first) writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
-                         
+                                
                                 box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
                                 ren.render(x,y);
                             }
