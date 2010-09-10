@@ -51,7 +51,7 @@ namespace mapnik
 placement::placement(string_info & info_, shield_symbolizer const& sym, 
                      unsigned w, unsigned h, bool has_dimensions_)
     : info(info_),
-      displacement_(sym.get_displacement()),
+      displacement_(sym.get_shield_displacement()),
       label_placement(sym.get_label_placement()),
       wrap_width(sym.get_wrap_width()),
       wrap_before(sym.get_wrap_before()),
