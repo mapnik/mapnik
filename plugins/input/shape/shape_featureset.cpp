@@ -43,13 +43,28 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
     typename std::set<std::string>::const_iterator pos=attribute_names.begin();
     while (pos!=attribute_names.end())
     {
+        bool found_name = false;
         for (int i=0;i<shape_.dbf().num_fields();++i)
         {
             if (shape_.dbf().descriptor(i).name_ == *pos)
             {
                 attr_ids_.push_back(i);
+                found_name = true;
                 break;
             }
+        }
+        if (!found_name)
+        {
+            std::ostringstream s;
+
+            s << "Shapefile Plugin: Error: no attribute by the name of '" << *pos << "'"
+            << ", available attributes are:";
+            for (int i=0;i<shape_.dbf().num_fields();++i)
+            {
+                s << " '" << shape_.dbf().descriptor(i).name_ << "'";
+            }
+            
+            throw mapnik::datasource_exception( s.str() );
         }
         ++pos;
     }
