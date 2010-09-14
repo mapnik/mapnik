@@ -42,7 +42,7 @@ shape_io::shape_io(const std::string& shape_name)
     bool ok = (shp_.is_open() && dbf_.is_open());
     if (!ok)
     { 
-        throw datasource_exception("cannot read shape file");
+        throw datasource_exception("Shape Plugin: cannot read shape file '" + shape_name + "'");
     }
     try 
     {
@@ -50,7 +50,7 @@ shape_io::shape_io(const std::string& shape_name)
     }
     catch (...)
     {
-        std::cerr << "FIXME\n";
+        std::cerr << "Shape Plugin Warning: Could not open index: '" + shape_name + INDEX + "'\n";
     }
 }
 
