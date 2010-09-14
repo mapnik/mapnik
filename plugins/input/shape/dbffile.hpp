@@ -36,6 +36,7 @@
 
 using mapnik::transcoder;
 using mapnik::Feature;
+using namespace boost::iostreams;
 
 struct field_descriptor
 {
@@ -44,17 +45,16 @@ struct field_descriptor
     char type_;
     int length_;
     int dec_;
-    int offset_;
+    stream_offset offset_;
 };
 
-using namespace boost::iostreams;
 
 class dbf_file
 {
 private:
     int num_records_;
     int num_fields_;
-    int record_length_;
+    stream_offset record_length_;
     std::vector<field_descriptor> fields_;
 #ifdef SHAPE_MEMORY_MAPPED_FILE
     stream<mapped_file_source> file_;

@@ -91,7 +91,7 @@ void dbf_file::move_to(int index)
 {
     if (index>0 && index<=num_records_)
     {
-        long pos=(num_fields_<<5)+34+(index-1)*(record_length_+1);
+        stream_offset pos=(num_fields_<<5)+34+(index-1)*(record_length_+1);
         file_.seekg(pos,std::ios::beg);
         file_.read(record_,record_length_);
     }
@@ -179,7 +179,7 @@ void dbf_file::read_header()
         assert(num_fields_>0);
         num_fields_=(num_fields_-33)/32;
         skip(22);
-        int offset=0;
+        stream_offset offset=0;
         char name[11];
         memset(&name,0,11);
         fields_.reserve(num_fields_);
