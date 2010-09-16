@@ -23,6 +23,9 @@
 
 #include <mapnik/box2d.hpp>
 
+// stl
+#include <stdexcept>
+
 namespace mapnik
 {
 template <typename T>
@@ -338,6 +341,32 @@ box2d<T>& box2d<T>::operator/=(T t)
     miny_ = c.y - sy;
     maxy_ = c.y + sy;
     return *this;
+}
+
+template <typename T>    
+T box2d<T>::operator[] (int index) const
+{
+    switch(index)
+    {
+    case 0:
+        return minx_;
+    case 1:
+        return miny_;
+    case 2:
+        return maxx_;
+    case 3:
+        return maxy_;
+    case -4:
+        return minx_;
+    case -3:
+        return miny_;
+    case -2:
+        return maxx_;
+    case -1:
+        return maxy_;
+    default:
+        throw std::out_of_range("index out of range, max value is 3, min value is -4 ");
+    }
 }
     
 template class box2d<int>;

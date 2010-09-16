@@ -482,7 +482,16 @@ def test_envelope_init():
 
     eq_(e.maxx, 200)
     eq_(e.maxy, 200)
-
+    
+    eq_(e[0],100)
+    eq_(e[1],100)
+    eq_(e[2],200)
+    eq_(e[3],200)
+    eq_(e[0],e[-4])
+    eq_(e[1],e[-3])
+    eq_(e[2],e[-2])
+    eq_(e[3],e[-1])
+    
     c = e.center()
 
     eq_(c.x, 150)

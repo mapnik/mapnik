@@ -84,7 +84,8 @@ public:
     box2d_type& operator+=(box2d_type const& other);
     box2d_type& operator-=(box2d_type const& other);
     box2d_type& operator*=(T);
-    box2d_type& operator/=(T);    
+    box2d_type& operator/=(T);
+    T operator[](int index) const;
 };
     
 template <class charT,class traits,class T>
