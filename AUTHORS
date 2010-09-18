@@ -8,7 +8,9 @@ Committers
  - Jon Burgess (Core)
  - Jean-Francois Doyon (Python API, OGCServer) <jfdoyon -at- gmail.com>
  - Dominic Hargreaves (Stable releases)
+ - Hermann Kraus (MetaWriters)
  - Tom Hughes (Cairo)
+ - Carlos López (SVG Renderer)
  - Ben Moores (PDF branch)
  - Marcin Rudowski (graphics)
  - David Siegel (XML)
