@@ -114,7 +114,7 @@ if __name__ == "__main__":
             for rule in style.findall('Rule'):
                 for sym in rule.findall('TextSymbolizer') or []:
                     name2expr(sym)
-                    #handle_attr_changes(sym)
+                    handle_attr_changes(sym)
                 for sym in rule.findall('ShieldSymbolizer') or []:
                     name2expr(sym) 
                 for sym in rule.findall('PointSymbolizer') or []:
