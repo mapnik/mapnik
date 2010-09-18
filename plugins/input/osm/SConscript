@@ -24,6 +24,8 @@ Import ('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+plugin_env = env.Clone()
+
 osm_src = Split(
 	"""
 	osmparser.cpp
@@ -41,7 +43,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
 
-osm_inputdriver = env.SharedLibrary('../osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+osm_inputdriver = plugin_env.SharedLibrary('../osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', osm_inputdriver)

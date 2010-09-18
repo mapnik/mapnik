@@ -26,6 +26,8 @@ from subprocess import Popen, PIPE
 
 Import('env')
 
+lib_env = env.Clone()
+
 def call(cmd, silent=True):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
@@ -33,9 +35,10 @@ def call(cmd, silent=True):
     elif not silent:
         print stderr
 
-
 def ldconfig(*args,**kwargs):
     call('ldconfig')
+
+mapnik_lib_link_flag = ''
 
 ABI_VERSION = env['ABI_VERSION']
 
@@ -83,16 +86,16 @@ if env['PLATFORM'] == 'Darwin':
         lib_path = '%s/%s' % (lib_dir,mapnik_libname)
     else:
         lib_path = mapnik_libname
-    linkflags = '-Wl,-install_name,%s' % lib_path
+    mapnik_lib_link_flag += ' -Wl,-install_name,%s' % lib_path
     _d = {'version':env['MAPNIK_VERSION_STRING']}
-    linkflags += ' -current_version %(version)s -compatibility_version %(version)s' % _d
+    mapnik_lib_link_flag += ' -current_version %(version)s -compatibility_version %(version)s' % _d
 elif env['PLATFORM'] == 'SunOS':
     if env['CXX'].startswith('CC'):
-        linkflags = '-R. -h %s' % mapnik_libname
+        mapnik_lib_link_flag += ' -R. -h %s' % mapnik_libname
     else:
-        linkflags = '-Wl,-h,%s' %  mapnik_libname
+        mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
 else: # Linux and others
-    linkflags = '-Wl,-rpath-link,. -Wl,-soname,%s' % mapnik_libname
+    mapnik_lib_link_flag += ' -Wl,-rpath-link,. -Wl,-soname,%s' % mapnik_libname
 
 source = Split(
     """
@@ -171,7 +174,7 @@ if True : # agg backend
         )
 
 if env['HAS_CAIRO']:
-    env2 = env.Clone()
+    env2 = lib_env.Clone()
     env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
     env2.ParseConfig('pkg-config --libs --cflags cairomm-1.0')     
     fixup = ['cairo_renderer.cpp','graphics.cpp','image_util.cpp']
@@ -193,7 +196,7 @@ elif env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
         """
         libxml2_loader.cpp
         """)
-    env2 = env.Clone()
+    env2 = lib_env.Clone()
     env2.Append(CXXFLAGS = '-DHAVE_LIBXML2')
     fixup = ['load_map.cpp','libxml2_loader.cpp']
     for cpp in fixup:
@@ -220,9 +223,14 @@ if env['SVG_RENDERER']: # svg backend
   	svg/process_shield_symbolizer.cpp
   	svg/process_text_symbolizer.cpp	
   	""")
-    env.Append(CXXFLAGS = '-DSVG_RENDERER')
+    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
 
-mapnik = env.SharedLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
+if env['CUSTOM_LDFLAGS']:
+    linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], mapnik_lib_link_flag)
+else:
+    linkflags = mapnik_lib_link_flag
+
+mapnik = lib_env.SharedLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
 
 if env['PLATFORM'] != 'Darwin':
     # Symlink command, only works if both files are in same directory

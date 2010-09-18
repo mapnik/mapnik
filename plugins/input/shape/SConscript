@@ -25,6 +25,8 @@ Import ('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+plugin_env = env.Clone()
+
 shape_src = Split(
 	"""
         dbffile.cpp
@@ -44,11 +46,10 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
-env2 = env.Clone()    
 if env['SHAPE_MEMORY_MAPPED_FILE']:
-    env2.Append(CXXFLAGS = '-DSHAPE_MEMORY_MAPPED_FILE')
+    plugin_env.Append(CXXFLAGS = '-DSHAPE_MEMORY_MAPPED_FILE')
 
-shape_inputdriver = env2.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries)
+shape_inputdriver = plugin_env.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', shape_inputdriver)

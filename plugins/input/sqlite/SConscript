@@ -24,6 +24,8 @@ Import ('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+plugin_env = env.Clone()
+
 sqlite_src = Split(
 	"""
 	sqlite_datasource.cpp
@@ -38,7 +40,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
     
-sqlite_inputdriver = env.SharedLibrary('../sqlite', source=sqlite_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+sqlite_inputdriver = plugin_env.SharedLibrary('../sqlite', source=sqlite_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', sqlite_inputdriver)

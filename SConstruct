@@ -243,6 +243,8 @@ opts.AddVariables(
     # Compiler options
     ('CXX', 'The C++ compiler to use to compile mapnik (defaults to g++).', 'g++'),
     ('CC', 'The C compiler used for configure checks of C libs (defaults to gcc).', 'gcc'),
+    ('CUSTOM_CXXFLAGS', 'Custom C++ flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir>', ''),
+    ('CUSTOM_LDFLAGS', 'Custom linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>', ''),
     EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3','4']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
@@ -339,6 +341,8 @@ pickle_store = [# Scons internal variables
         'LIBPATH',
         'LIBS',
         'LINKFLAGS',
+        'CUSTOM_LDFLAGS', # user submitted
+        'CUSTOM_CXXFLAGS', # user submitted
         # Mapnik's SConstruct build variables
         'PLUGINS',
         'ABI_VERSION',
@@ -785,10 +789,14 @@ if not preconfigured:
     env['CPPPATH'] = ['#include', '#']
     env['LIBPATH'] = ['#src']
     
+    # set any custom cxxflags to come first
+    env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
+    
     # Solaris & Sun Studio settings (the `SUNCC` flag will only be
     # set if the `CXX` option begins with `CC`)
     SOLARIS = env['PLATFORM'] == 'SunOS'
     env['SUNCC'] = SOLARIS and env['CXX'].startswith('CC')
+    
     
     # If the Sun Studio C++ compiler (`CC`) is used instead of GCC.
     if env['SUNCC']:

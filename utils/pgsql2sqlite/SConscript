@@ -24,6 +24,8 @@ Import ('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+program_env = env.Clone()
+
 source = Split(
     """
     main.cpp
@@ -42,7 +44,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    pgsql2sqlite = env.Program('pgsql2sqlite', source, CPPPATH=headers, LIBS=libraries)
+    pgsql2sqlite = program_env.Program('pgsql2sqlite', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
     env.Install(install_prefix + '/bin', pgsql2sqlite)
     env.Alias('install', install_prefix + '/bin')
 

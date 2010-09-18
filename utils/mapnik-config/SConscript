@@ -43,11 +43,11 @@ if env['HAS_BOOST_SYSTEM']:
 if env['HAS_CAIRO']:
     private_libs += ' -lcairomm-1.0 -lcairo'
 
-other_libs = ''.join([' -L%s' % i for i in env['LIBPATH'] if not i.startswith('#')])
+other_libs = env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in env['LIBPATH'] if not i.startswith('#')])
 other_libs += private_libs
 
 # todo - refine this list
-other_includes = ''.join([' -I%s' % i for i in env['CPPPATH'] if not i.startswith('#')])
+other_includes = env['CUSTOM_CXXFLAGS'] + ''.join([' -I%s' % i for i in env['CPPPATH'] if not i.startswith('#')])
 
 top = '''#!/bin/sh
 

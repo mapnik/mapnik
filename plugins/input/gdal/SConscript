@@ -24,6 +24,8 @@ Import ('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+plugin_env = env.Clone()
+
 gdal_src = Split(
 	"""
 	gdal_datasource.cpp
@@ -36,7 +38,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
 
-gdal_inputdriver = env.SharedLibrary('../gdal', source=gdal_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+gdal_inputdriver = plugin_env.SharedLibrary('../gdal', source=gdal_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', gdal_inputdriver)

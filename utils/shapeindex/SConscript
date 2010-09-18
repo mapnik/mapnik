@@ -26,6 +26,8 @@ Import ('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+program_env = env.Clone()
+
 source = Split(
     """
     shapeindex.cpp
@@ -47,7 +49,7 @@ if env['HAS_BOOST_SYSTEM']:
     libraries.append(boost_system)
 
 
-shapeindex = env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries)
+shapeindex = program_env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/bin', shapeindex)

@@ -24,6 +24,8 @@ Import ('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+plugin_env = env.Clone()
+
 occi_src = Split(
 	"""
 	occi_types.cpp
@@ -39,7 +41,7 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
 
-occi_inputdriver = env.SharedLibrary('../occi', source=occi_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+occi_inputdriver = plugin_env.SharedLibrary('../occi', source=occi_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', occi_inputdriver)
