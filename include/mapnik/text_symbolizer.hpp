@@ -80,15 +80,15 @@ enum justify_alignment
 
 DEFINE_ENUM( justify_alignment_e, justify_alignment );
 
-enum text_convert
+enum text_transform
 {
     NONE = 0,
-    TOUPPER,
-    TOLOWER,
-    text_convert_MAX
+    UPPERCASE,
+    LOWERCASE,
+    text_transform_MAX
 };
 
-DEFINE_ENUM( text_convert_e, text_convert );
+DEFINE_ENUM( text_transform_e, text_transform );
 
 typedef boost::tuple<double,double> position;
 
@@ -113,8 +113,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     std::string get_wrap_char_string() const; // character used to wrap lines as std::string
     void set_wrap_char(unsigned char character);
     void set_wrap_char_from_string(std::string const& character);
-    text_convert_e get_text_convert() const; // text conversion on strings before display
-    void set_text_convert(text_convert_e convert);
+    text_transform_e get_text_transform() const; // text conversion on strings before display
+    void set_text_transform(text_transform_e convert);
     unsigned get_line_spacing() const; // spacing between lines of text
     void set_line_spacing(unsigned spacing);
     unsigned get_character_spacing() const; // spacing between characters in text
@@ -171,7 +171,7 @@ private:
     unsigned text_ratio_;
     unsigned wrap_width_;
     unsigned char wrap_char_;
-    text_convert_e text_convert_;
+    text_transform_e text_transform_;
     unsigned line_spacing_;
     unsigned character_spacing_;
     unsigned label_spacing_;

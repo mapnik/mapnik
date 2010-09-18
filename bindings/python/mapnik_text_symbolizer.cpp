@@ -83,7 +83,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         extras.append(t.get_wrap_char_string());
         extras.append(t.get_line_spacing());
         extras.append(t.get_character_spacing());
-        extras.append(t.get_text_convert());
+        extras.append(t.get_text_transform());
         extras.append(t.get_wrap_before());
         extras.append(t.get_horizontal_alignment());
         extras.append(t.get_justify_alignment());
@@ -146,7 +146,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         t.set_wrap_char_from_string(extract<std::string>(extras[0]));
         t.set_line_spacing(extract<unsigned>(extras[1]));
         t.set_character_spacing(extract<unsigned>(extras[2]));
-        t.set_text_convert(extract<text_convert_e>(extras[3]));
+        t.set_text_transform(extract<text_transform_e>(extras[3]));
         t.set_wrap_before(extract<bool>(extras[4]));
         t.set_horizontal_alignment(extract<horizontal_alignment_e>(extras[5]));
         t.set_justify_alignment(extract<justify_alignment_e>(extras[6]));
@@ -182,10 +182,10 @@ void export_text_symbolizer()
         .value("RIGHT",J_RIGHT)
         ;
                 
-    enumeration_<text_convert_e>("text_convert")
+    enumeration_<text_transform_e>("text_transform")
         .value("NONE",NONE)
-        .value("TOUPPER",TOUPPER)
-        .value("TOLOWER",TOLOWER)
+        .value("UPPERCASE",UPPERCASE)
+        .value("LOWERCASE",LOWERCASE)
         ;
 
     class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
@@ -258,9 +258,9 @@ void export_text_symbolizer()
                       &text_symbolizer::get_text_opacity,
                       &text_symbolizer::set_text_opacity,
                       "Set/get the text opacity")
-        .add_property("text_convert",
-                      &text_symbolizer::get_text_convert,
-                      &text_symbolizer::set_text_convert,
+        .add_property("text_transform",
+                      &text_symbolizer::get_text_transform,
+                      &text_symbolizer::set_text_transform,
                       "Set/get the text conversion method")
         .add_property("text_ratio",
                       &text_symbolizer::get_text_ratio,

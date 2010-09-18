@@ -666,7 +666,7 @@ __all__ = [
     'label_placement',
     'line_cap',
     'line_join',
-    'text_convert',
+    'text_transform',
     'vertical_alignment',
     'horizontal_alignment',
     'justify_alignment',

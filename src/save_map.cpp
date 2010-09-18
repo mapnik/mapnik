@@ -449,9 +449,9 @@ private:
         {
             set_attr( node, "wrap_character", std::string(1, sym.get_wrap_char()) );
         }
-        if (sym.get_text_convert() != dfl.get_text_convert() || explicit_defaults_ )
+        if (sym.get_text_transform() != dfl.get_text_transform() || explicit_defaults_ )
         {
-            set_attr( node, "text_convert", sym.get_text_convert() );
+            set_attr( node, "text_transform", sym.get_text_transform() );
         }
         if (sym.get_line_spacing() != dfl.get_line_spacing() || explicit_defaults_ )
         {

@@ -70,15 +70,15 @@ static const char * justify_alignment_strings[] = {
 
 IMPLEMENT_ENUM( justify_alignment_e, justify_alignment_strings );
 
-static const char * text_convert_strings[] = {
+static const char * text_transform_strings[] = {
     "none",
-    "toupper",
-    "tolower",
+    "uppercase",
+    "lowercase",
     ""
 };
 
 
-IMPLEMENT_ENUM( text_convert_e, text_convert_strings );
+IMPLEMENT_ENUM( text_transform_e, text_transform_strings );
 
 
 
@@ -91,7 +91,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       text_ratio_(0),
       wrap_width_(0),
       wrap_char_(' '),
-      text_convert_(NONE),
+      text_transform_(NONE),
       line_spacing_(0),
       character_spacing_(0),
       label_spacing_(0),
@@ -122,7 +122,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       text_ratio_(0),
       wrap_width_(0),
       wrap_char_(' '),
-      text_convert_(NONE),
+      text_transform_(NONE),
       line_spacing_(0),
       character_spacing_(0),
       label_spacing_(0),
@@ -154,7 +154,7 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       text_ratio_(rhs.text_ratio_),
       wrap_width_(rhs.wrap_width_),
       wrap_char_(rhs.wrap_char_),
-      text_convert_(rhs.text_convert_),
+      text_transform_(rhs.text_transform_),
       line_spacing_(rhs.line_spacing_),
       character_spacing_(rhs.character_spacing_),
       label_spacing_(rhs.label_spacing_),
@@ -188,7 +188,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     text_ratio_ = other.text_ratio_;
     wrap_width_ = other.wrap_width_;
     wrap_char_ = other.wrap_char_;
-    text_convert_ = other.text_convert_;
+    text_transform_ = other.text_transform_;
     line_spacing_ = other.line_spacing_;
     character_spacing_ = other.character_spacing_;
     label_spacing_ = other.label_spacing_;
@@ -303,14 +303,14 @@ void  text_symbolizer::set_wrap_char_from_string(std::string const& character)
     wrap_char_ = (character)[0];
 }
 
-text_convert_e  text_symbolizer::get_text_convert() const
+text_transform_e  text_symbolizer::get_text_transform() const
 {
-    return text_convert_;
+    return text_transform_;
 }
 
-void  text_symbolizer::set_text_convert(text_convert_e convert)
+void  text_symbolizer::set_text_transform(text_transform_e convert)
 {
-    text_convert_ = convert;
+    text_transform_ = convert;
 }
 
 unsigned  text_symbolizer::get_line_spacing() const

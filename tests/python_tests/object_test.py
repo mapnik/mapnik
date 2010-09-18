@@ -225,7 +225,7 @@ def test_textsymbolizer_pickle():
     eq_(ts.label_position_tolerance, ts2.label_position_tolerance)
     
     eq_(ts.wrap_character, ts2.wrap_character)
-    eq_(ts.text_convert, ts2.text_convert)
+    eq_(ts.text_transform, ts2.text_transform)
     eq_(ts.line_spacing, ts2.line_spacing)
     eq_(ts.character_spacing, ts2.character_spacing)
     

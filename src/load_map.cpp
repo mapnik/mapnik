@@ -1104,8 +1104,8 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         label_placement_e placement =
             get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
         text_symbol.set_label_placement( placement );
+
         // vertical alignment
-            
         vertical_alignment_e default_vertical_alignment = MIDDLE;
         if (dy > 0.0 )
         {
@@ -1163,9 +1163,9 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         }
 
         // text conversion before rendering
-        text_convert_e tconvert =
-            get_attr<text_convert_e>(sym, "text_convert", NONE);
-        text_symbol.set_text_convert(tconvert);
+        text_transform_e tconvert =
+            get_attr<text_transform_e>(sym, "text_transform", NONE);
+        text_symbol.set_text_transform(tconvert);
 
         // spacing between text lines
         optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing");
@@ -1408,9 +1408,9 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
             }
 
             // text conversion before rendering
-            text_convert_e tconvert =
-                get_attr<text_convert_e>(sym, "text_convert", NONE);
-            shield_symbol.set_text_convert(tconvert);
+            text_transform_e tconvert =
+                get_attr<text_transform_e>(sym, "text_transform", NONE);
+            shield_symbol.set_text_transform(tconvert);
 
             // spacing between text lines
             optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing");

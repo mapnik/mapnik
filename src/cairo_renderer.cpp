@@ -1169,11 +1169,11 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
     UnicodeString text = result.to_unicode();
     
-    if ( sym.get_text_convert() == TOUPPER)
+    if ( sym.get_text_transform() == UPPERCASE)
     {
         text = text.toUpper();
     }
-    else if ( sym.get_text_convert() == TOLOWER)
+    else if ( sym.get_text_transform() == LOWERCASE)
     {
         text = text.toLower();
     }

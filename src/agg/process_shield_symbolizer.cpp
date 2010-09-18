@@ -62,11 +62,11 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         text = result.to_unicode();
     }
     
-    if ( sym.get_text_convert() == TOUPPER)
+    if ( sym.get_text_transform() == UPPERCASE)
     {
         text = text.toUpper();
     }
-    else if ( sym.get_text_convert() == TOLOWER)
+    else if ( sym.get_text_transform() == LOWERCASE)
     {
         text = text.toLower();
     }
