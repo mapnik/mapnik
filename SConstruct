@@ -241,7 +241,8 @@ opts = Variables()
 
 opts.AddVariables(
     # Compiler options
-    ('CXX', 'The C++ compiler to use (defaults to g++).', 'g++'),
+    ('CXX', 'The C++ compiler to use to compile mapnik (defaults to g++).', 'g++'),
+    ('CC', 'The C compiler used for configure checks of C libs (defaults to gcc).', 'gcc'),
     EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3','4']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
@@ -251,6 +252,7 @@ opts.AddVariables(
     # SCons build behavior options
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
+    # http://www.scons.org/wiki/GoFastButton
     BoolVariable('FAST', "Make scons faster at the cost of less precise dependency tracking", 'False'),
     BoolVariable('PRIORITIZE_LINKING', 'Sort list of lib and inc directories to ensure preferencial compiling and linking (useful when duplicate libs)', 'True'),
     ('LINK_PRIORITY','Priority list in which to sort library and include paths (default order is internal, other, frameworks, user, then system - see source of `sort_paths` function for more detail)',','.join(DEFAULT_LINK_PRIORITY)),    
@@ -327,13 +329,13 @@ opts.AddVariables(
 # these include all scons core variables as well as custom
 # env variables needed in Sconscript files
 pickle_store = [# Scons internal variables
-        'CC',
-        'CXX',
+        'CC', # compiler user to check if c deps compile during configure
+        'CXX', # C++ compiler to compile mapnik
         'CCFLAGS',
         'CPPDEFINES',
-        'CPPFLAGS',
+        'CPPFLAGS', # c preprocessor flags
         'CPPPATH',
-        'CXXFLAGS',
+        'CXXFLAGS', # C++ flags built up during configure
         'LIBPATH',
         'LIBS',
         'LINKFLAGS',
@@ -796,7 +798,7 @@ if not preconfigured:
         # before the `-o` flag).
         env['CXX'] = 'CC -library=stlport4'
         if env['THREADING'] == 'multi':
-            env['CXXFLAGS'] = ['-mt']
+            env.Append(CXXFLAGS = '-mt')
         
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
@@ -1023,7 +1025,7 @@ if not preconfigured:
 
 
         # Common C++ flags.
-        if env['THREADING'] == 'multi' :
+        if env['THREADING'] == 'multi':
             common_cxx_flags = '-D%s -DBOOST_SPIRIT_THREADSAFE -DMAPNIK_THREADSAFE ' % env['PLATFORM'].upper()
         else :
             common_cxx_flags = '-D%s ' % env['PLATFORM'].upper()
