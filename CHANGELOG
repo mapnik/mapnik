@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- TextSymbolizer: Change text_convert to text_transform to better match css naming (r2211)
+
 - Shapefile Plugin: Throw error if attribute name is requested that does not exist (#604)
 
 - Upgraded to the latest proj4 string literal for EPSG:4326 (WGS84) as global default projection (#333)
