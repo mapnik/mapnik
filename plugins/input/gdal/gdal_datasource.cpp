@@ -48,6 +48,11 @@ using mapnik::datasource_exception;
  */
 inline GDALDataset *gdal_datasource::open_dataset() const
 {
+
+#ifdef MAPNIK_DEBUG
+    std::clog << "GDAL Plugin: opening: " << dataset_name_ << "\n";
+#endif
+
     GDALDataset *dataset;
 #if GDAL_VERSION_NUM >= 1600
     if (shared_dataset_)
@@ -88,18 +93,34 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
     GDALDataset *dataset = open_dataset();
    
-    // TODO: Make more class attributes from geotransform...
+    nbands_ = dataset->GetRasterCount();
     width_ = dataset->GetRasterXSize();
     height_ = dataset->GetRasterYSize();
 
+
     double tr[6];
     dataset->GetGeoTransform(tr);
-    double dx = tr[1];
-    double dy = tr[5];
+    if (tr[2] !=0 || tr[4] != 0)
+    {
+        throw datasource_exception("GDAL Plugin: only 'north up' images are supported");
+    }
+
+    dx_ = tr[1];
+    dy_ = tr[5];
+    
     double x0 = tr[0];
     double y0 = tr[3];
-    double x1 = tr[0] + width_ * dx + height_ *tr[2];
-    double y1 = tr[3] + width_ *tr[4] + height_ * dy;
+    double x1 = tr[0] + width_ * dx_ + height_ *tr[2];
+    double y1 = tr[3] + width_ *tr[4] + height_ * dy_;
+     
+    /*
+    double x0 = tr[0] + (height_) * tr[2]; // minx
+    double y0 = tr[3] + (height_) * tr[5]; // miny
+    
+    double x1 = tr[0] + (width_) * tr[1]; // maxx
+    double y1 = tr[3] + (width_) * tr[4]; // maxy
+    */
+    
     extent_.init(x0,y0,x1,y1);
     GDALClose(dataset);
    
@@ -135,11 +156,11 @@ layer_descriptor gdal_datasource::get_descriptor() const
 featureset_ptr gdal_datasource::features(query const& q) const
 {
     gdal_query gq = q;
-    return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, filter_factor_));
+    return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, extent_, width_, height_, nbands_, dx_, dy_, filter_factor_));
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
 {
     gdal_query gq = pt;
-    return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, filter_factor_));
+    return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, extent_, width_, height_, nbands_, dx_, dy_,  filter_factor_));
 }

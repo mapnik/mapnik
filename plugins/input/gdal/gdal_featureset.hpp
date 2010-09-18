@@ -36,7 +36,9 @@ class gdal_featureset : public mapnik::Featureset
 {
 public:
       
-    gdal_featureset(GDALDataset & dataset, int band, gdal_query q, double filter_factor);
+    gdal_featureset(GDALDataset & dataset, int band, gdal_query q, 
+    mapnik::box2d<double> extent, double width, double height, int nbands, 
+    double dx, double dy, double filter_factor);
     virtual ~gdal_featureset();
     mapnik::feature_ptr next();
 private:
@@ -46,6 +48,12 @@ private:
     GDALDataset & dataset_;
     int band_;
     gdal_query gquery_;
+    mapnik::box2d<double> raster_extent_;
+    unsigned raster_width_;
+    unsigned raster_height_;
+    double dx_;
+    double dy_;
+    int nbands_;
     double filter_factor_;
     bool first_;
 };

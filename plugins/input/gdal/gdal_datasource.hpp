@@ -46,6 +46,9 @@ private:
     mapnik::layer_descriptor desc_;
     unsigned width_;
     unsigned height_;
+    double dx_;
+    double dy_;
+    int nbands_;
     bool shared_dataset_;
     double filter_factor_;
     inline GDALDataset *open_dataset() const;

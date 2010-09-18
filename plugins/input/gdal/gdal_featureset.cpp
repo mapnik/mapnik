@@ -37,10 +37,18 @@ using mapnik::point_impl;
 using mapnik::geometry2d;
 
 
-gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q, double filter_factor)
+gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q, 
+      mapnik::box2d<double> extent, double width, double height, int nbands, 
+      double dx, double dy, double filter_factor)
     : dataset_(dataset),
       band_(band),
       gquery_(q),
+      raster_extent_(extent),
+      raster_width_(width),
+      raster_height_(height),
+      dx_(dx),
+      dy_(dy),
+      nbands_(nbands),
       filter_factor_(filter_factor),
       first_(true) {}
 
@@ -84,34 +92,23 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     GDALRasterBand * blue = 0;
     GDALRasterBand * alpha = 0;
     GDALRasterBand * grey = 0; 
-
-    int nbands = dataset_.GetRasterCount();
    
-    unsigned raster_width = dataset_.GetRasterXSize();
-    unsigned raster_height = dataset_.GetRasterYSize();
-   
-    // TODO - pull from class attributes...
+    /*
     double tr[6];
     dataset_.GetGeoTransform(tr);
     
     double dx = tr[1];
     double dy = tr[5];
-    
-    double x0 = tr[0] + (raster_height) * tr[2]; // minx
-    double y0 = tr[3] + (raster_height) * tr[5]; // miny
-    
-    double x1 = tr[0] + (raster_width) * tr[1]; // maxx
-    double y1 = tr[3] + (raster_width) * tr[4]; // maxy
-    
-    box2d<double> raster_extent(x0,y0,x1,y1); 
-    
-    CoordTransform t(raster_width,raster_height,raster_extent,0,0);
-    box2d<double> intersect = raster_extent.intersect(q.get_bbox());
+    std::clog << "dx_: " << dx_ << " dx: " << dx << " dy_: " << dy_ << "dy: " << dy << "\n";
+    */
+          
+    CoordTransform t(raster_width_,raster_height_,raster_extent_,0,0);
+    box2d<double> intersect = raster_extent_.intersect(q.get_bbox());
     box2d<double> box = t.forward(intersect);
 
     //size of resized output pixel in source image domain
-    double margin_x = 1.0/(fabs(dx)*boost::get<0>(q.resolution()));
-    double margin_y = 1.0/(fabs(dy)*boost::get<1>(q.resolution()));
+    double margin_x = 1.0/(fabs(dx_)*boost::get<0>(q.resolution()));
+    double margin_y = 1.0/(fabs(dy_)*boost::get<1>(q.resolution()));
     if (margin_x < 1)
         margin_x = 1.0;
     if (margin_y < 1)
@@ -126,10 +123,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         x_off = 0;
     if (y_off < 0)
         y_off = 0;
-    if (end_x > (int)raster_width)
-        end_x = raster_width;
-    if (end_y > (int)raster_height)
-        end_y = raster_height;
+    if (end_x > (int)raster_width_)
+        end_x = raster_width_;
+    if (end_y > (int)raster_height_)
+        end_y = raster_height_;
     int width = end_x - x_off;
     int height = end_y - y_off;
     // don't process almost invisible data
@@ -142,7 +139,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     intersect = t.backward(feature_raster_extent);
     
 #ifdef MAPNIK_DEBUG         
-    std::clog << "GDAL Plugin: Raster extent=" << raster_extent << "\n";
+    std::clog << "GDAL Plugin: Raster extent=" << raster_extent_ << "\n";
     std::clog << "GDAL Plugin: View extent=" << intersect << "\n";
     std::clog << "GDAL Plugin: Query resolution=" << boost::get<0>(q.resolution()) << "," << boost::get<1>(q.resolution()) << "\n";
     std::clog << boost::format("GDAL Plugin: StartX=%d StartY=%d Width=%d Height=%d \n") % x_off % y_off % width % height;
@@ -201,7 +198,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
           
             else // working with all bands
             {
-                for (int i = 0; i < nbands; ++i)
+                for (int i = 0; i < nbands_; ++i)
                 {
                     GDALRasterBand * band = dataset_.GetRasterBand(i+1);
              
