@@ -825,12 +825,6 @@ if not preconfigured:
         if conf.parse_config('XML2_CONFIG'):
             env['HAS_LIBXML2'] = True
             
-    if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
-        env['HAS_CAIRO'] = True
-    else:
-        env['SKIPPED_DEPS'].extend(['cairo','cairomm'])
-
-
     # allow for mac osx /usr/lib/libicucore.dylib compatibility
     # requires custom supplied headers since Apple does not include them
     # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
@@ -970,6 +964,14 @@ if not preconfigured:
         env.Prepend(LIBPATH = '#agg')
     else:
         env.ParseConfig('pkg-config --libs --cflags libagg')
+
+    if env['CAIRO']:
+        if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
+            env['HAS_CAIRO'] = True
+        else:
+            env['SKIPPED_DEPS'].extend(['cairo','cairomm'])
+    else:
+        color_print(4,'Not building with cairo support, pass CAIRO=True to enable')
     
     if 'python' in env['BINDINGS']:
         # checklibwithheader does not work for boost_python since we can't feed it
@@ -978,10 +980,14 @@ if not preconfigured:
             color_print(1,'Could not find required header files for boost python')
             env['MISSING_DEPS'].append('boost python')
 
-        if env['CAIRO'] and conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
-            env['HAS_PYCAIRO'] = True
+        if env['CAIRO']:
+            if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
+                env['HAS_PYCAIRO'] = True
+            else:
+                env['SKIPPED_DEPS'].extend(['pycairo'])
         else:
-            env['SKIPPED_DEPS'].extend(['pycairo'])
+            color_print(4,'Not building with pycairo support, pass CAIRO=True to enable')
+            
              
     #### End Config Stage for Required Dependencies ####
     
