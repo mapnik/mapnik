@@ -70,10 +70,7 @@ namespace mapnik {
     
     bool projection::is_geographic() const
     {
-#ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
-#endif
-        return pj_is_latlong(proj_) ? true : false;  
+    return is_geographic_;
     }
     
     std::string const& projection::params() const
@@ -92,7 +89,7 @@ namespace mapnik {
         p = pj_fwd(p,proj_);
         x = p.u;
         y = p.v;
-        if (pj_is_latlong(proj_))
+    if (is_geographic_)
         {
            x *=RAD_TO_DEG;
            y *=RAD_TO_DEG;
@@ -104,7 +101,7 @@ namespace mapnik {
 #ifdef MAPNIK_THREADSAFE
        mutex::scoped_lock lock(mutex_);
 #endif
-       if (pj_is_latlong(proj_))
+    if (is_geographic_)
        {
           x *=DEG_TO_RAD;
           y *=DEG_TO_RAD;
@@ -127,11 +124,17 @@ namespace mapnik {
     
     void projection::init()
     {
-#ifdef MAPNIK_THREADSAFE
-       mutex::scoped_lock lock(mutex_);
-#endif
-       proj_=pj_init_plus(params_.c_str());
-       if (!proj_) throw proj_init_error(params_);
+    // Based on http://trac.osgeo.org/proj/wiki/ThreadSafety
+    // you could think pj_init was threadsafe in version 4.7.0
+    // but its certainly not, and must only be in >= 4.7 with
+    // usage of projCtx per thread
+    //#if PJ_VERSION < 470 && MAPNIK_THREADSAFE
+    //    mutex::scoped_lock lock(mutex_);
+    //#endif
+        mutex::scoped_lock lock(mutex_);
+        proj_=pj_init_plus(params_.c_str());
+        if (!proj_) throw proj_init_error(params_);
+        is_geographic_ = pj_is_latlong(proj_) ? true : false;
     }
     
     void projection::swap (projection& rhs)

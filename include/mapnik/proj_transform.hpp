@@ -38,6 +38,7 @@ namespace mapnik {
         proj_transform(projection const& source, 
                        projection const& dest);
         
+    bool equal() const;
         bool forward (double& x, double& y , double& z) const;
         bool backward (double& x, double& y , double& z) const;
         mapnik::projection const& source() const;
@@ -48,7 +49,7 @@ namespace mapnik {
         projection const& dest_;
         bool is_source_latlong_;
         bool is_dest_latlong_;
-        bool is_source_equal_dest;
+        bool is_source_equal_dest_;
     };
 }
 
