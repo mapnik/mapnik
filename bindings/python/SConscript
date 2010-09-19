@@ -94,6 +94,9 @@ if env['PLATFORM'] == 'Darwin':
     else:
         # TODO - do we need to pass -L/?
         python_link_flag = '-lpython%s' % env['PYTHON_VERSION']
+else:
+    # all other platforms we don't directly link python
+    python_link_flag = ''
 
 if env['CUSTOM_LDFLAGS']:
     linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], python_link_flag)
