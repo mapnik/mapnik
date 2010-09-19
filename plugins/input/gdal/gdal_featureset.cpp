@@ -35,6 +35,7 @@ using mapnik::feature_ptr;
 using mapnik::CoordTransform;
 using mapnik::point_impl;
 using mapnik::geometry2d;
+using mapnik::datasource_exception;
 
 
 gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q, 
@@ -187,6 +188,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         
             if (band_>0) // we are querying a single band
             {
+                if (band_ > nbands_)
+                   throw datasource_exception((boost::format("GDAL Plugin: '%d' is an invalid band, dataset only has '%d' bands\n") % band_ % nbands_).str());
                 float *imageData = (float*)image.getBytes();
                 GDALRasterBand * band = dataset_.GetRasterBand(band_);
                 band->RasterIO(GF_Read, x_off, y_off, width, height,
