@@ -136,17 +136,26 @@ private:
         //wall_clock_progress_timer timer(clog, "end layer rendering: ");
 #endif
         boost::shared_ptr<datasource> ds = lay.datasource();
-        if (!ds) {
+        if (!ds) 
+        {
             std::clog << "WARNING: No datasource for layer '" << lay.name() << "'\n";
             return;
         }
+        
         p.start_layer_processing(lay);
+        
         if (ds)
         {
+            
             box2d<double> ext = m_.get_buffered_extent();
             projection proj1(lay.srs());
             proj_transform prj_trans(proj0,proj1);
 
+            // todo: only display raster if src and dest proj are matched
+            // todo: add raster re-projection as an optional feature 
+            if (ds->type() == datasource::Raster && !prj_trans.equal()) return;
+            // 
+            
             box2d<double> layer_ext = lay.envelope();
                
             double lx0 = layer_ext.minx();
@@ -164,7 +173,7 @@ private:
             {
                 return;
             }
-      
+            
             // clip query bbox
             lx0 = std::max(ext.minx(),lx0);
             ly0 = std::max(ext.miny(),ly0);
@@ -244,8 +253,10 @@ private:
                             if_rules.push_back(const_cast<rule_type*>(&rule));
                         }
                         
-                        if (ds->type() == datasource::Raster)
+                        if (ds->type() == datasource::Raster )
                         {
+                            
+                            
                             if (ds->params().get<double>("filter_factor",0.0) == 0.0)
                             {
                                 rule_type::symbolizers const& symbols = rule.get_symbolizers();
