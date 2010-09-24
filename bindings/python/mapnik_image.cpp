@@ -185,6 +185,9 @@ void export_image()
         .add_property("background",make_function
                       (&image_32::get_background,return_value_policy<copy_const_reference>()),
                       &image_32::set_background, "The background color of the image.")
+        .def("set_grayscale_to_alpha",&image_32::set_grayscale_to_alpha, "Set the grayscale values to the alpha channel of the Image")
+        .def("set_color_to_alpha",&image_32::set_color_to_alpha, "Set a given color to the alpha channel of the Image")
+        .def("set_alpha",&image_32::set_alpha, "Set the overall alpha channel of the Image")
         .def("blend",&blend)
         .def("composite",&composite)
         .def("tostring",&tostring1)

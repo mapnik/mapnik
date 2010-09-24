@@ -24,6 +24,7 @@
 // mapnik
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/global.hpp>
 
 // cairo
 #ifdef HAVE_CAIRO
@@ -90,9 +91,19 @@ image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
 
 image_32::~image_32() {}
 
-const image_data_32& image_32::data() const
+void image_32::set_grayscale_to_alpha()
 {
-    return data_;
+
+}
+
+void image_32::set_color_to_alpha(const color& c)
+{
+
+}
+
+void image_32::set_alpha(float opacity)
+{
+
 }
 
 void image_32::set_background(const color& background)

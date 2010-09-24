@@ -149,10 +149,22 @@ public:
     image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs);
 #endif
     ~image_32();
+    
     void set_background(color const& background);
-    const color& get_background() const;
-    const image_data_32& data() const;
 
+    const color& get_background() const;
+
+    void set_grayscale_to_alpha();
+
+    void set_color_to_alpha(color const& c);
+
+    void set_alpha(float opacity);
+    
+    inline const image_data_32& data() const
+    {
+        return data_;
+    }
+    
     inline image_data_32& data()
     {
         return data_;
