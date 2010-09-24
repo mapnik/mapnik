@@ -159,7 +159,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 
         equality_expr =
             relational_expr [_val = _1]
-            >> *(  ( (lit("=") | lit("eq")) >> relational_expr [_val == _1])
+            >> *(  ( (lit("=") | lit("eq") | lit("is")) >> relational_expr [_val == _1])
                    | (( lit("!=") | lit("<>") | lit("neq") ) >> relational_expr [_val != _1])
                 )
             ;
@@ -207,6 +207,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             | int_ [_val = _1]
             | lit("true") [_val = true]
             | lit("false") [_val = false]
+            | lit("null") [_val = value_null() ]
             | ustring [_val = unicode_(_1) ]
             | attr [_val = construct<attribute>( _1 ) ]
             | '(' >> expr [_val = _1 ] >> ')'
