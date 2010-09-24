@@ -723,7 +723,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         while (angle_delta < -M_PI)
             angle_delta += 2*M_PI;
         if (p.max_char_angle_delta > 0 &&
-            fabs(angle_delta) > p.max_char_angle_delta*(M_PI/180))
+            fabs(angle_delta) > p.max_char_angle_delta)
         {
             //std::clog << "FAIL: Too Bendy!" << std::endl;
             return std::auto_ptr<placement_element>(NULL);

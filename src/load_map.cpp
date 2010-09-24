@@ -1225,7 +1225,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
             get_opt_attr<double>(sym, "max_char_angle_delta");
         if (max_char_angle_delta)
         {
-            text_symbol.set_max_char_angle_delta( * max_char_angle_delta);
+            text_symbol.set_max_char_angle_delta( (*max_char_angle_delta)*(M_PI/180));
         }
             
         // horizontal alignment
