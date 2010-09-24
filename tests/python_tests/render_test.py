@@ -26,6 +26,20 @@ def test_render_image_to_string():
 
     s = i.tostring('png')
 
+def test_setting_alpha():
+    w,h = 256,256
+    im1 = mapnik2.Image(w,h)
+    # white, half transparent
+    im1.background = mapnik2.Color('rgba(255,255,255,.5)')
+    
+    # pure white
+    im2 = mapnik2.Image(w,h)
+    im2.background = mapnik2.Color('rgba(255,255,255,1)')
+    im2.set_alpha(.5)
+        
+    eq_(len(im1.tostring()), len(im2.tostring()))
+
+
 def test_render_image_to_file():
     i = mapnik2.Image(256, 256)
     
