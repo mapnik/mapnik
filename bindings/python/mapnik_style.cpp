@@ -83,7 +83,15 @@ void export_style()
 
         .add_property("rules",make_function
                       (&feature_type_style::get_rules,
-                       return_value_policy<reference_existing_object>()))
+                       return_value_policy<reference_existing_object>()),
+                      "List of rules belonging to a style as rule objects.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> for r in m.find_style('style 1').rules:\n"
+                      ">>>    print r\n"
+                      "<mapnik2._mapnik2.Rule object at 0x100549910>\n"
+                      "<mapnik2._mapnik2.Rule object at 0x100549980>\n"
+                   )
         ;
     
 }

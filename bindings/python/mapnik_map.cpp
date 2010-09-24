@@ -384,14 +384,19 @@ void export_map()
         .def("get_metawriter_property", &Map::get_metawriter_property,
             (arg("name")),
             "Reads a metawriter property.\n"
-            "These properties are completely userdefined and can be used for"
-            "creating filenames, etc."
+            "These properties are completely user-defined and can be used to"
+            "create filenames, etc.\n"
+            "\n"
+            "Usage:\n"
+            ">>> map.set_metawriter_property(\"x\", \"10\")\n"
+            ">>> map.get_metawriter_property(\"x\")\n"
+            "10\n"
         )
         .def("set_metawriter_property", &Map::set_metawriter_property,
             (arg("name"),arg("value")),
             "Sets a metawriter property.\n"
-            "These properties are completely userdefined and can be used for"
-            "creating filenames, etc.\n"
+            "These properties are completely user-defined and can be used to"
+            "create filenames, etc.\n"
             "\n"
             "Usage:\n"
             ">>> map.set_metawriter_property(\"x\", str(x))\n"

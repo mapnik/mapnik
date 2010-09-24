@@ -54,6 +54,16 @@ void export_featureset()
     
     class_<Featureset,boost::shared_ptr<Featureset>,
         boost::noncopyable>("Featureset",no_init)
-        .add_property("features",features)
+        .add_property("features",features,
+            "The list of features.\n"
+            "\n"
+            "Usage:\n"
+            ">>> m.query_map_point(0, 10, 10)\n"
+            "<mapnik2._mapnik2.Featureset object at 0x1004d2938>\n"
+            ">>> fs = m.query_map_point(0, 10, 10)\n"
+            ">>> for f in fs.features:\n"
+            ">>>     print f\n"
+            "<mapnik2.Feature object at 0x105e64140>\n"
+            )
         ;
 }

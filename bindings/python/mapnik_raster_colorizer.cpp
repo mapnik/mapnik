@@ -66,7 +66,7 @@ void export_raster_colorizer()
 {
     using namespace boost::python;
 
-    class_<raster_colorizer,raster_colorizer_ptr>("RasterColorizer", init<>("Deafult ctor."))
+    class_<raster_colorizer,raster_colorizer_ptr>("RasterColorizer", init<>("Default ctor."))
                                     
         .add_property("bands",make_function
                       (get_color_bands,
