@@ -56,7 +56,7 @@ bool proj_transform::forward (double & x, double & y , double & z) const
         y *= DEG_TO_RAD;
     }
 
-#ifdef MAPNIK_THREADSAFE
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(projection::mutex_);
 #endif
         
@@ -86,7 +86,7 @@ bool proj_transform::backward (double & x, double & y , double & z) const
         y *= DEG_TO_RAD;
     }
         
-#ifdef MAPNIK_THREADSAFE
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(projection::mutex_);
 #endif
 

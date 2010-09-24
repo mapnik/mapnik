@@ -28,8 +28,11 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 
+// proj4
+#include <proj_api.h>
+
 // boost
-#ifdef MAPNIK_THREADSAFE
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
 #include <boost/thread/mutex.hpp>
 #endif
 
@@ -72,9 +75,11 @@ private:
        
 private:
     std::string params_;
-    void * proj_;
+    projPJ proj_;
     bool is_geographic_;
-#ifdef MAPNIK_THREADSAFE
+#if PJ_VERSION >= 480
+    projCtx proj_ctx_;
+#elif defined(MAPNIK_THREADSAFE)
     static boost::mutex mutex_;
 #endif
 };
