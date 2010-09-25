@@ -85,7 +85,9 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             double y1 = bbox.miny();
             double x2 = bbox.maxx();
             double y2 = bbox.maxy();
-
+        
+            agg::trans_affine recenter = agg::trans_affine_translation(-0.5*(x1+x2),-0.5*(y1+y2));
+            
             vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
             svg_path_adapter svg_path(stl_storage);
             svg_renderer<svg_path_adapter, 
@@ -102,6 +104,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 agg::trans_affine tr;
                 boost::array<double,6> const& m = sym.get_transform();
                 tr.load_from(&m[0]);
+                tr *= recenter;
                 tr *= agg::trans_affine_scaling(scale_factor_);
                 tr *= agg::trans_affine_translation(x, y);
                 

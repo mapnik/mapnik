@@ -81,6 +81,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             double y1 = bbox.miny();
             double x2 = bbox.maxx();
             double y2 = bbox.maxy();
+            
+            agg::trans_affine recenter = agg::trans_affine_translation(-0.5*(x1+x2),-0.5*(y1+y2));
             tr.transform(&x1,&y1);
             tr.transform(&x2,&y2);
             box2d<double> extent(x1,y1,x2,y2);
@@ -108,7 +110,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             
                 while (placement.get_point(&x, &y, &angle))
                 {
-                    agg::trans_affine matrix = tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
+                    agg::trans_affine matrix = recenter * tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
                     svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
                     if (writer.first)
                         //writer.first->add_box(label_ext, feature, t_, writer.second);
@@ -199,7 +201,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     ras_ptr->reset();
                     agg::conv_stroke<agg::path_storage>  outline(marker);
                     outline.generator().width(strk_width * scale_factor_);
-                		ras_ptr->add_path(outline);
+                    ras_ptr->add_path(outline);
 
                     ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
                     agg::render_scanlines(*ras_ptr, sl_line, ren);
@@ -230,11 +232,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         // todo proper bbox - this is buggy
                         agg::ellipse c(x_t, y_t, w, h);
                         marker.concat_path(c);
-                    		agg::trans_affine matrix;
-                    		matrix *= agg::trans_affine_translation(-x_t,-y_t);
-                    		matrix *= agg::trans_affine_rotation(angle);
-                    		matrix *= agg::trans_affine_translation(x_t,y_t);
-                    		marker.transform(matrix);
+                        agg::trans_affine matrix;
+                        matrix *= agg::trans_affine_translation(-x_t,-y_t);
+                        matrix *= agg::trans_affine_rotation(angle);
+                        matrix *= agg::trans_affine_translation(x_t,y_t);
+                        marker.transform(matrix);
 
                     }
                     else
@@ -259,7 +261,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     ras_ptr->reset();
                     agg::conv_stroke<agg::conv_transform<agg::path_storage, agg::trans_affine> >  outline(trans);
                     outline.generator().width(strk_width * scale_factor_);
-                		ras_ptr->add_path(outline);
+                    ras_ptr->add_path(outline);
                     ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
                     agg::render_scanlines(*ras_ptr, sl_line, ren);
                 }
