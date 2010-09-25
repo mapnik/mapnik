@@ -71,13 +71,76 @@ void export_raster_colorizer()
         .add_property("bands",make_function
                       (get_color_bands,
                        return_value_policy<reference_existing_object>()))
-        .def("append_band", append_band1, "TODO: Write docs")
-        .def("append_band", append_band2, "TODO: Write docs")
-        .def("append_band", append_band3, "TODO: Write docs")
-        .def("append_band", append_band4, "TODO: Write docs")
-        .def("append_band", append_band5, "TODO: Write docs")
-        .def("append_band", append_band6, "TODO: Write docs")
-        .def("get_color", &raster_colorizer::get_color, "TODO: Write docs")
+        .def("append_band", append_band1,
+            (arg("color_band")),
+            "Append a color band to the raster colorizer.\n"
+            "\n"
+            "Usage:\n"
+            ">>> colorizer = mapnik.ColorBand()\n"
+            ">>> color = mapnik.Color(\"#0044cc\")\n"
+            ">>> color_band = mapnik.ColorBand(3, color)\n"
+            ">>> colorizer.append_band(color_band)\n"
+            )
+        .def("append_band", append_band2,
+            (arg("color_band"), arg("midpoint")),
+            "Append a color band with a midpoint to the raster colorizer.\n"
+            "\n"
+            "Usage:\n"
+            ">>> colorizer = mapnik.ColorBand()\n"
+            ">>> color = mapnik.Color(\"#0044cc\")\n"
+            ">>> color_band = mapnik.ColorBand(3, color)\n"
+            ">>> colorizer.append_band(color_band, 1)\n"
+            )
+        .def("append_band", append_band3, 
+            (arg("value"), arg("color")),
+            "Append a color for a specific value to the raster colorizer\n"
+            "\n"
+            "Usage:\n"
+            ">>> colorizer = mapnik.RasterColorizer()\n"
+            ">>> color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer.append_band(30, color)\n"
+            )
+        .def("append_band", append_band4, 
+            (arg("value"), arg("color"), arg("midpoints")),
+            "Append a color for a certain value to the raster colorizer,\n"
+            "with a specified midpoint.\n"
+            "\n"
+            "Usage:\n"
+            ">>> colorizer = mapnik.RasterColorizer()\n"
+            ">>> color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer.append_band(30, color, 4)\n"
+            )
+        .def("append_band", append_band5, 
+            (arg("value"), arg("value_max"), arg("color"), arg("midpoints")),
+            "Append a color for a value range from value to value_max\n"
+            "to the raster colorizer, with a specified midpoint.\n"
+            "\n"
+            "Usage:\n"
+            ">>> colorizer = mapnik.RasterColorizer()\n"
+            ">>> color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer.append_band(30, 40, color, 4)\n"
+            )
+        .def("append_band", append_band6, 
+            (arg("value"), arg("value_max"), arg("color")),
+            "Append a color for a value range from value to value_max\n"
+            "to the raster colorizer.\n"
+            "\n"
+            "Usage:\n"
+            ">>> colorizer = mapnik.RasterColorizer()\n"
+            ">>> color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer.append_band(30, 40, color)\n"
+            )
+        .def("get_color", &raster_colorizer::get_color, 
+            "Get the color assigned to a certain value in raster data.\n"
+            "By default, returns Color(\"transparent\")\n"
+            "\n"
+            "Usage:\n"
+            ">>> colorizer = mapnik.RasterColorizer()\n"
+            ">>> color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer.append_band(30, 40, color)\n"
+            ">>> colorizer.get_color(35)\n"
+            "Color('#0044cc')\n"
+            )
         ;    
 
 
@@ -87,8 +150,14 @@ void export_raster_colorizer()
         ;
 
 
-    class_<color_band>("ColorBand",
-                       init<float,color const&>("Deafult ctor."))
+    class_<color_band>("ColorBand",init<float,color const&>(
+                       "A Color Band object.\n"
+                       "Create with a value and color\n"
+                       "\n"
+                       "Usage:"
+                       ">>> color = mapnik.Color(\"#fff000\")\n"
+                       ">>> color_band = mapnik.ColorBand(4, color)\n"
+          ))
         .add_property("color", make_function
                       (&color_band::get_color,
                        return_value_policy<reference_existing_object>()))
