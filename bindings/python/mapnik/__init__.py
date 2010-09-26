@@ -57,16 +57,18 @@ from paths import inputpluginspath, fontscollectionpath
 # The base Boost.Python class
 BoostPythonMetaclass = Coord.__class__
 
-class _injector(object):
-    class __metaclass__(BoostPythonMetaclass):
-        def __init__(self, name, bases, dict):
-            for b in bases:
-                if type(b) not in (self, type):
-                    for k,v in dict.items():
-                        if hasattr(b, k):
-                            setattr(b, '_c_'+k, getattr(b, k))
-                        setattr(b,k,v)
-            return type.__init__(self, name, bases, dict)
+class _MapnikMetaclass(BoostPythonMetaclass):
+    def __init__(self, name, bases, dict):
+        for b in bases:
+            if type(b) not in (self, type):
+                for k,v in list(dict.items()):
+                    if hasattr(b, k):
+                        setattr(b, '_c_'+k, getattr(b, k))
+                    setattr(b,k,v)
+        return type.__init__(self, name, bases, dict)
+
+class _injector(object, metaclass=_MapnikMetaclass):
+    pass
 
 class _Coord(Coord,_injector):
     """

@@ -50,14 +50,26 @@ PyObject* view_tostring1(image_view<image_data_32> const& view)
         ss.write(reinterpret_cast<const char*>(view.getRow(i)), 
                  view.width() * sizeof(image_view<image_data_32>::pixel_type));
     }
-    return ::PyString_FromStringAndSize((const char*)ss.str().c_str(),ss.str().size());
+    return 
+#if PY_VERSION_HEX >= 0x03000000
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+        ((const char*)ss.str().c_str(),ss.str().size());
 }
 
 // encode (png,jpeg)
 PyObject* view_tostring2(image_view<image_data_32> const & view, std::string const& format)
 {
     std::string s = save_to_string(view, format);
-    return ::PyString_FromStringAndSize(s.data(),s.size());
+    return 
+#if PY_VERSION_HEX >= 0x03000000
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+        (s.data(),s.size());
 }
 
 void (*save_view1)(image_view<image_data_32> const&, std::string const&,std::string const&) = mapnik::save_to_file;

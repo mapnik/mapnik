@@ -246,6 +246,7 @@ double scale_denominator(mapnik::Map const &map, bool geographic)
     return mapnik::scale_denominator(map, geographic);
 }
 
+// http://docs.python.org/c-api/exceptions.html#standard-exceptions
 void translator(mapnik::config_error const & ex) {
     PyErr_SetString(PyExc_RuntimeError, ex.what());
 }

@@ -52,7 +52,11 @@ namespace boost { namespace python {
     {
         PyObject * operator() (int val) const
         {
+#if PY_VERSION_HEX >= 0x03000000
+            return ::PyLong_FromLong(val);
+#else
             return ::PyInt_FromLong(val);
+#endif
         }
             
         PyObject * operator() (double val) const
@@ -223,7 +227,13 @@ struct UnicodeString_from_python_str
 
     static void* convertible(PyObject* obj_ptr)
     {
-        if (!(PyString_Check(obj_ptr) || PyUnicode_Check(obj_ptr)))
+        if (!(
+#if PY_VERSION_HEX >= 0x03000000
+                PyBytes_Check(obj_ptr) 
+#else
+                PyString_Check(obj_ptr) 
+#endif
+                || PyUnicode_Check(obj_ptr)))
             return 0;
         return obj_ptr;
     }
@@ -236,11 +246,19 @@ struct UnicodeString_from_python_str
         if (PyUnicode_Check(obj_ptr)) {
             PyObject *encoded = PyUnicode_AsEncodedString(obj_ptr, "utf8", "replace");
             if (encoded) {
+#if PY_VERSION_HEX >= 0x03000000
+                value = PyBytes_AsString(encoded);
+#else
                 value = PyString_AsString(encoded);
+#endif
                 Py_DecRef(encoded);
             }
         } else {
+#if PY_VERSION_HEX >= 0x03000000
+            value = PyBytes_AsString(obj_ptr);
+#else
             value = PyString_AsString(obj_ptr);
+#endif
         }
         if (value == 0) boost::python::throw_error_already_set();
         void* storage = (

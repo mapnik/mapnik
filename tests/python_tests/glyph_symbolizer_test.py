@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, save_data, contains_word
+from utilities import execution_path, save_data, contains_word, b, IS_PY3
 
 import os, mapnik2
 
@@ -18,7 +18,7 @@ def test_renders_with_agg():
     im = mapnik2.Image(_map.width,_map.height)
     mapnik2.render(_map, im)
     save_data('agg_glyph_symbolizer.png', im.tostring('png'))
-    assert contains_word('\xff\x00\x00\xff', im.tostring())
+    assert contains_word(b('\xff\x00\x00\xff'), im.tostring())
 
 def test_renders_with_cairo():
     if not mapnik2.has_pycairo():
@@ -37,7 +37,7 @@ def test_renders_with_cairo():
     mapnik2.render(_map, surface)
     im = mapnik2.Image.from_cairo(surface)
     save_data('cairo_glyph_symbolizer.png', im.tostring('png'))
-    assert contains_word('\xff\x00\x00\xff', im.tostring())
+    assert contains_word(b('\xff\x00\x00\xff'), im.tostring())
 
 def test_load_save_load_map():
     map = mapnik2.Map(256,256)
@@ -48,7 +48,10 @@ def test_load_save_load_map():
     assert isinstance(sym, mapnik2.GlyphSymbolizer)
     assert sym.angle_mode == mapnik2.angle_mode.AZIMUTH
 
-    out_map = mapnik2.save_map_to_string(map).decode('utf8')
+    out_map = mapnik2.save_map_to_string(map)
+    if not IS_PY3:
+        # In py3 decoding is not needed since a unicode str is returned
+        out_map = out_map.decode('utf8')
     map = mapnik2.Map(256,256)
     mapnik2.load_map_from_string(map, out_map.encode('utf8'))
     assert 'GlyphSymbolizer' in out_map

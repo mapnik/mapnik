@@ -67,14 +67,26 @@ using mapnik::save_to_file;
 PyObject* tostring1( image_32 const& im)
 {
     int size = im.width() * im.height() * 4;
-    return ::PyString_FromStringAndSize((const char*)im.raw_data(),size);
+    return
+#if PY_VERSION_HEX >= 0x03000000 
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+        ((const char*)im.raw_data(),size);
 }
 
 // encode (png,jpeg)
 PyObject* tostring2(image_32 const & im, std::string const& format)
 {
     std::string s = save_to_string(im, format);
-    return ::PyString_FromStringAndSize(s.data(),s.size());
+    return
+#if PY_VERSION_HEX >= 0x03000000 
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+    (s.data(),s.size());
 }
 
 void (*save_to_file1)( mapnik::image_32 const&, std::string const&,std::string const&) = mapnik::save_to_file;
@@ -190,6 +202,7 @@ void export_image()
         .def("set_alpha",&image_32::set_alpha, "Set the overall alpha channel of the Image")
         .def("blend",&blend)
         .def("composite",&composite)
+        //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
         .def("tostring",&tostring1)
         .def("tostring",&tostring2)
         .def("save", save_to_file1)
