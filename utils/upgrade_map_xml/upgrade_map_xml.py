@@ -44,7 +44,7 @@ def handle_attr_changes(sym):
     # http://code.google.com/p/mapnik-utils/issues/detail?id=32&colspec=ID%20Type%20Status%20Priority%20Component%20Owner%20Summary
     text_transform = sym.attrib.get('text_convert')
     # note: css supports text-transform:capitalize but Mapnik does not (yet)
-    t_ = {'tolower':'uppercase','toupper':'lowercase','none':'none'}
+    t_ = {'tolower':'lowercase','toupper':'uppercase','none':'none'}
     if text_transform:
         new = t_.get(text_transform)
         if new:
