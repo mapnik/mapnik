@@ -203,7 +203,7 @@ _mapnik = py_env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMO
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     pymapniklib = env.Install(target_path,_mapnik)
     py_env.Alias(target='install',source=pymapniklib)
-    if pymapniklib and 'install' in COMMAND_LINE_TARGETS:
+    if 'install' in COMMAND_LINE_TARGETS:
         if is_py3():
             env.AddPostAction(pymapniklib, run_2to3)
 

@@ -67,8 +67,9 @@ class _MapnikMetaclass(BoostPythonMetaclass):
                     setattr(b,k,v)
         return type.__init__(self, name, bases, dict)
 
-class _injector(object, metaclass=_MapnikMetaclass):
-    pass
+# metaclass injector compatible with both python 2 and 3
+# http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
+_injector = _MapnikMetaclass('_injector', (object, ), {})
 
 class _Coord(Coord,_injector):
     """
