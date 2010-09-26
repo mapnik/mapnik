@@ -3,7 +3,7 @@
 from nose.tools import *
 
 import os, mapnik2
-from utilities import Todo, b
+from utilities import Todo
 
 def test_simplest_render():
     m = mapnik2.Map(256, 256)
@@ -13,7 +13,7 @@ def test_simplest_render():
 
     s = i.tostring()
 
-    eq_(s, 256 * 256 * b('\x00\x00\x00\x00'))
+    eq_(s, 256 * 256 * '\x00\x00\x00\x00')
 
 def test_render_image_to_string():
     i = mapnik2.Image(256, 256)
@@ -22,7 +22,7 @@ def test_render_image_to_string():
     
     s = i.tostring()
 
-    eq_(s, 256 * 256 * b('\x00\x00\x00\xff'))
+    eq_(s, 256 * 256 * '\x00\x00\x00\xff')
 
     s = i.tostring('png')
 
