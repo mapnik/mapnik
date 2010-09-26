@@ -287,21 +287,14 @@ private:
                 
                 // process features
                 featureset_ptr fs;
-                if (cache_features)
+                if (first)
                 {
-                    if (first)
-                    {
-                        first = false;
-                        fs = ds->features(q);
-                    }
-                    else
-                    {
-                        fs = cache.features(q);
-                    }
+                    first = false;
+                    fs = ds->features(q);
                 }
                 else
                 {
-                    fs = ds->features(q);
+                    fs = cache.features(q);
                 }
                 
                 if (fs)
@@ -358,8 +351,8 @@ private:
                             }
                         }
                     }
-                    cache_features = false;
                 }
+                cache_features = false;
             }
         }
         
