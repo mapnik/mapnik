@@ -19,9 +19,7 @@
 #
 # $Id$
 
-import glob
-import re
-import os
+import os, re, sys, glob
 from subprocess import Popen, PIPE
 
 
@@ -36,7 +34,11 @@ def call(cmd, silent=True):
 
 def run_2to3(*args,**kwargs):
     call('2to3 -w %s' % os.path.dirname(kwargs['target'][0].path))
-    
+
+def is_py3():
+    return 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
+
+
 prefix = env['PREFIX']
 target_path = env['PYTHON_INSTALL_LOCATION'] + '/mapnik2'
 
@@ -51,7 +53,10 @@ if env['BOOST_PYTHON_LIB']:
     else:
         libraries.append(env['BOOST_PYTHON_LIB'].replace('lib','',1))
 else:
-    libraries.append('boost_python%s' % env['BOOST_APPEND'])
+    if is_py3():
+        libraries.append('boost_python3%s' % env['BOOST_APPEND'])
+    else:
+        libraries.append('boost_python%s' % env['BOOST_APPEND'])
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])
@@ -199,7 +204,8 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
     pymapniklib = env.Install(target_path,_mapnik)
     py_env.Alias(target='install',source=pymapniklib)
     if pymapniklib and 'install' in COMMAND_LINE_TARGETS:
-        env.AddPostAction(pymapniklib, run_2to3)
+        if is_py3():
+            env.AddPostAction(pymapniklib, run_2to3)
 
 
 env['create_uninstall_target'](env, target_path)

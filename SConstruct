@@ -199,6 +199,7 @@ def pretty_dep(dep):
     return dep
 
 # local file to hold custom user configuration variables
+# Todo check timestamp, reload if changed?
 SCONS_LOCAL_CONFIG = 'config.py'
 # build log
 SCONS_LOCAL_LOG = 'config.log'
@@ -1093,12 +1094,7 @@ if not preconfigured:
                 color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
                 Exit(1)
             
-            res = os.popen('''%s -c "print 1"''' % env['PYTHON'])
-            if res.read() == '1':
-                py3 = False
-            else:
-                py3 = True
-            #sys.version_info.major == 3
+            py3 = 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
 
             if py3:
                 sys_prefix = '''%s -c "import sys; print(sys.prefix)"''' % env['PYTHON']
