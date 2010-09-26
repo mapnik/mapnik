@@ -42,6 +42,7 @@ void export_query()
 
     class_<query>("Query", "a spatial query data object", 
                   init<box2d<double>,query::resolution_type const&,double>() )
+        .def(init<box2d<double> >())
         .def_pickle(query_pickle_suite())
         .add_property("resolution",make_function(&query::resolution,
                                                  return_value_policy<copy_const_reference>()))

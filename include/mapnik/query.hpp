@@ -56,6 +56,13 @@ public:
           scale_denominator_(scale_denominator),
           filter_factor_(1.0)
     {}
+
+    query(box2d<double> const& bbox)
+        : bbox_(bbox),
+          resolution_(resolution_type(1.0,1.0)),
+          scale_denominator_(1.0),
+          filter_factor_(1.0)
+    {}
     
     query(query const& other)
         : bbox_(other.bbox_),

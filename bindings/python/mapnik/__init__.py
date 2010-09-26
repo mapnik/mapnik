@@ -234,7 +234,7 @@ class _Datasource(Datasource,_injector):
     def field_types(self):
         return map(get_types,self._field_types())
     def all_features(self):
-        query = Query(self.envelope(),1.0)
+        query = Query(self.envelope())
         for fld in self.fields():
             query.add_property_name(fld)
         return self.features(query).features
