@@ -1,43 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- see: http://trac.mapnik.org/changeset/574 -->
-
 <Map bgcolor="transparent" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
 
   <FileSource name="foo">../images/</FileSource>
   
-  <Style name="test1">
+  <Style name="test">
     <Rule>
-      <PolygonSymbolizer />
+      <PolygonSymbolizer fill="lavender" fill-opacity=".5" />
+      <PointSymbolizer base="foo" file="dummy.png" width="16" height="16" type="png" />
     </Rule>  
   </Style>
-
-  <Style name="test2">
-    <Rule>
-      <LineSymbolizer stroke="green" stroke-opacity=".5"/>
-    </Rule>  
-  </Style>
-
-  <Style name="test3">
-    <Rule>
-      <PointSymbolizer />
-    </Rule>  
-  </Style>
-
-  <Layer name="lay" status="off" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs ">
-    <StyleName>test2</StyleName>
-    <Datasource>
-      <Parameter name="type">shape</Parameter>
-      <Parameter name="base">../../data/shp/</Parameter>
-      <Parameter name="file">poly.shp</Parameter>
-    </Datasource>
-  </Layer>
 
   <Layer name="lay" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs ">
-    <StyleName>test1</StyleName>
-    <StyleName>test2</StyleName>
-    <StyleName>test3</StyleName>
-    <StyleName>test3</StyleName>
-    <StyleName>test3</StyleName>
+    <StyleName>test</StyleName>
     <Datasource>
       <Parameter name="type">shape</Parameter>
       <Parameter name="base">../../data/shp/</Parameter>
