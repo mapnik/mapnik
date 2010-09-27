@@ -183,8 +183,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
                                 if( text_placement.placements.size() > 0)
                                 {
-                                    double x = text_placement.placements[0].starting_x;
-                                    double y = text_placement.placements[0].starting_y;
+                                    double x = floor(text_placement.placements[0].starting_x);
+                                    double y = floor(text_placement.placements[0].starting_y);
                                     int px;
                                     int py;
                                     box2d<double> label_ext;
@@ -234,8 +234,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                             for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                             {
                                 
-                                double x = text_placement.placements[ii].starting_x;
-                                double y = text_placement.placements[ii].starting_y;
+                                double x = floor(text_placement.placements[ii].starting_x);
+                                double y = floor(text_placement.placements[ii].starting_y);
                                 
                                 int px=int(x + 0.5);
                                 int py=int(y + 0.5);
