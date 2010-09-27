@@ -87,11 +87,11 @@ public:
                  Feature const& feature,
                  proj_transform const& prj_trans);    
     inline bool process(rule_type::symbolizers const& syms,
-			Feature const& feature,
-			proj_transform const& prj_trans)
+                        Feature const& feature,
+                        proj_transform const& prj_trans)
     {
-	// agg renderer doesn't support processing of multiple symbolizers.
-	return false;
+        // agg renderer doesn't support processing of multiple symbolizers.
+        return false;
     };
 
 private:
