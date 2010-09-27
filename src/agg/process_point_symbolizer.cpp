@@ -43,8 +43,6 @@
 
 namespace mapnik {
 
-
-
 template <typename T>
 void agg_renderer<T>::process(point_symbolizer const& sym,
                               Feature const& feature,
@@ -104,7 +102,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 agg::trans_affine tr;
                 boost::array<double,6> const& m = sym.get_transform();
                 tr.load_from(&m[0]);
-                tr *= recenter;
+                tr = recenter * tr;
                 tr *= agg::trans_affine_scaling(scale_factor_);
                 tr *= agg::trans_affine_translation(x, y);
                 
