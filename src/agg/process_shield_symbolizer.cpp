@@ -158,7 +158,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 double label_x;
                                 double label_y;
                                 double z=0.0;
-                                placement text_placement(info, sym, w, h, false);
+                                placement text_placement(info, sym, scale_factor_, w, h, false);
                                 text_placement.avoid_edges = sym.get_avoid_edges();
                                 text_placement.allow_overlap = sym.get_allow_overlap();
                                 if( how_placed == VERTEX_PLACEMENT )
@@ -227,7 +227,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
                         else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                         {
-                            placement text_placement(info, sym, w, h, true);
+                            placement text_placement(info, sym, scale_factor_, w, h, true);
                             text_placement.avoid_edges = sym.get_avoid_edges();
                             finder.find_point_placements<path_type>(text_placement,path);
                         
@@ -305,7 +305,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                         {
                             // for every vertex, try and place a shield/text
                             geom.rewind(0);
-                            placement text_placement(info, sym, w, h, false);
+                            placement text_placement(info, sym, scale_factor_, w, h, false);
                             text_placement.avoid_edges = sym.get_avoid_edges();
                             text_placement.allow_overlap = sym.get_allow_overlap();
                             position const& pos = sym.get_displacement();
@@ -378,7 +378,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
                         else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                         {
-                            placement text_placement(info, sym, w, h, true);
+                            placement text_placement(info, sym, scale_factor_, w, h, true);
                             text_placement.avoid_edges = sym.get_avoid_edges();
                             finder.find_point_placements<path_type>(text_placement,path);
                             position const&  pos = sym.get_displacement();

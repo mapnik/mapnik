@@ -48,10 +48,14 @@
 
 namespace mapnik
 {
-placement::placement(string_info & info_, shield_symbolizer const& sym, 
-                     unsigned w, unsigned h, bool has_dimensions_)
+placement::placement(string_info & info_, 
+                     shield_symbolizer const& sym, 
+                     double scale_factor,
+                     unsigned w, unsigned h, 
+                     bool has_dimensions_)
     : info(info_),
       displacement_(sym.get_shield_displacement()),
+      scale_factor_(scale_factor),
       label_placement(sym.get_label_placement()),
       wrap_width(sym.get_wrap_width()),
       wrap_before(sym.get_wrap_before()),
@@ -69,9 +73,11 @@ placement::placement(string_info & info_, shield_symbolizer const& sym,
       text_size(sym.get_text_size()) {}
 
 placement::placement(string_info & info_,
-                     text_symbolizer const& sym)
+                     text_symbolizer const& sym, 
+                     double scale_factor)
     : info(info_),
       displacement_(sym.get_displacement()),
+      scale_factor_(scale_factor),
       label_placement(sym.get_label_placement()),
       wrap_width(sym.get_wrap_width()),
       wrap_before(sym.get_wrap_before()),
@@ -331,8 +337,8 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
         current_placement->starting_x += 0.5 * string_width;  // move center right by 1/2 the string width
 
     // adjust text envelope position by user's x-y displacement (dx, dy)
-    current_placement->starting_x += boost::tuples::get<0>(p.displacement_);
-    current_placement->starting_y += boost::tuples::get<1>(p.displacement_);
+    current_placement->starting_x += p.scale_factor_ * boost::tuples::get<0>(p.displacement_);
+    current_placement->starting_y += p.scale_factor_ * boost::tuples::get<1>(p.displacement_);
 
     // presets for first line
     unsigned int line_number = 0;
@@ -555,8 +561,8 @@ void placement_finder<DetectorT>::find_line_placements(placement & p, PathT & sh
                             //Offset all the characters by this angle
                             for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
                             {
-                                current_placement->nodes_[i].x += displacement*cos(anglesum+M_PI/2);
-                                current_placement->nodes_[i].y += displacement*sin(anglesum+M_PI/2);
+                                current_placement->nodes_[i].x += p.scale_factor_ * displacement*cos(anglesum+M_PI/2);
+                                current_placement->nodes_[i].y += p.scale_factor_ * displacement*sin(anglesum+M_PI/2);
                             }
                         }
 

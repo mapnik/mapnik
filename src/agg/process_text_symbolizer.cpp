@@ -92,7 +92,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                 geometry2d const& geom = feature.get_geometry(i);
                 if (geom.num_points() > 0) // don't bother with empty geometries
                 {           
-                    placement text_placement(info,sym);
+                    placement text_placement(info,sym,scale_factor_);
                     text_placement.avoid_edges = sym.get_avoid_edges();
                     if (sym.get_label_placement() == POINT_PLACEMENT)
                     {

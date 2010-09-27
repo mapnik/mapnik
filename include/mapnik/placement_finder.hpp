@@ -41,15 +41,16 @@ typedef text_path placement_element;
 
 struct placement : boost::noncopyable
 {
-    placement(string_info & info_, shield_symbolizer const& sym, unsigned w, unsigned h, bool has_dimensions_= false);
+    placement(string_info & info_, shield_symbolizer const& sym, double scale_factor,  unsigned w, unsigned h, bool has_dimensions_= false);
 
-    placement(string_info & info_, text_symbolizer const& sym);
+    placement(string_info & info_, text_symbolizer const& sym, double scale_factor);
 
     ~placement();
 
     string_info & info; // should only be used for finding placement. doesn't necessarily match placements.vertex() values
 
     position displacement_;
+    double scale_factor_;
     label_placement_e label_placement;
 
     std::queue< box2d<double> > envelopes;
