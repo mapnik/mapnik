@@ -842,7 +842,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                         double label_x;
                         double label_y;
                         double z = 0.0;
-                        placement text_placement(info, sym, w, h, false);
+                        placement text_placement(info, sym, 1.0, w, h, false);
 
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         geom.label_position(&label_x, &label_y);
@@ -885,7 +885,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                     }
                     else if (geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT) 
                     {
-                        placement text_placement(info, sym, w, h, true);
+                        placement text_placement(info, sym, 1.0, w, h, true);
 
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         finder.find_point_placements<path_type>(text_placement, path);
@@ -1208,7 +1208,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                 if (geom.num_points() > 0) // don't bother with empty geometries
                 {
                     path_type path(t_, geom, prj_trans);
-                    placement text_placement(info, sym);
+                    placement text_placement(info, sym, 1.0);
 
                     if (sym.get_label_placement() == POINT_PLACEMENT)
                     {
