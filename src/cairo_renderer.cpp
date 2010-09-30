@@ -344,6 +344,7 @@ public:
         context_->save();
         context_->set_source(pattern.pattern());
         context_->paint_with_alpha(opacity);
+        context_->get_target()->mark_dirty();
         context_->restore();
     }
 
