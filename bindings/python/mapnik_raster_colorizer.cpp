@@ -82,8 +82,10 @@ void export_raster_colorizer()
             ">>> colorizer.append_band(color_band)\n"
             )
         .def("append_band", append_band2,
-            (arg("color_band"), arg("midpoint")),
-            "Append a color band with a midpoint to the raster colorizer.\n"
+            (arg("color_band"), arg("midpoints")),
+            "Append a color band to the raster colorizer with midpoints "
+            "lineally interpolated color bands between this one and the "
+            "previous one.\n"
             "\n"
             "Usage:\n"
             ">>> colorizer = mapnik.ColorBand()\n"
@@ -93,8 +95,9 @@ void export_raster_colorizer()
             )
         .def("append_band", append_band3, 
             (arg("value"), arg("color")),
-            "Append a color for a specific value to the raster colorizer\n"
-            "\n"
+            "Create and append a color band to color the range "
+            "[value, next_val) where next_val is the next band's color or "
+            "inifinity if there is no next band.\n"
             "Usage:\n"
             ">>> colorizer = mapnik.RasterColorizer()\n"
             ">>> color = mapnik.Color(\"#0044cc\")\n"
@@ -102,8 +105,12 @@ void export_raster_colorizer()
             )
         .def("append_band", append_band4, 
             (arg("value"), arg("color"), arg("midpoints")),
-            "Append a color for a certain value to the raster colorizer,\n"
-            "with a specified midpoint.\n"
+            "Create and append a color band to the raster colorizer with "
+            "midpoints lineally interpolated color bands between this one and "
+            "the previous one.\n"
+            "color will be applied to all values in the "
+            "range [value, next_val) where next_val is the next band's color "
+            "or infinity if there is no next band\n"
             "\n"
             "Usage:\n"
             ">>> colorizer = mapnik.RasterColorizer()\n"
@@ -112,8 +119,13 @@ void export_raster_colorizer()
             )
         .def("append_band", append_band5, 
             (arg("value"), arg("value_max"), arg("color"), arg("midpoints")),
-            "Append a color for a value range from value to value_max\n"
-            "to the raster colorizer, with a specified midpoint.\n"
+            "Create and append a color band to the raster colorizer with "
+            "midpoints lineally interpolated color bands between this one and "
+            "the previous one.\n"
+            "color will be applied to all values in the "
+            "range [value, next_val) where next_val is the next band's color "
+            "or value_max if there is no next band\n"
+            "\n"
             "\n"
             "Usage:\n"
             ">>> colorizer = mapnik.RasterColorizer()\n"
@@ -122,9 +134,9 @@ void export_raster_colorizer()
             )
         .def("append_band", append_band6, 
             (arg("value"), arg("value_max"), arg("color")),
-            "Append a color for a value range from value to value_max\n"
-            "to the raster colorizer.\n"
-            "\n"
+            "Create and append a color band to color the range "
+            "[value, next_val) where next_val is the next band's color or "
+            "value_max if there is no next band.\n"
             "Usage:\n"
             ">>> colorizer = mapnik.RasterColorizer()\n"
             ">>> color = mapnik.Color(\"#0044cc\")\n"
@@ -145,7 +157,12 @@ void export_raster_colorizer()
 
 
 
-    class_<color_bands>("ColorBands",init<>("Default ctor."))
+    class_<color_bands>("ColorBands",
+        "A RasterColorizer's collection of ordered color bands.\n"
+        "This class is not meant to be instantiated from python. However, "
+        "it can be accessed at a RasterColorizer's \"bands\" attribute for "
+        "introspection purposes",
+        no_init)
         .def(vector_indexing_suite<color_bands>())
         ;
 
