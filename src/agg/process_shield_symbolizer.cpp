@@ -170,8 +170,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 t_.forward(&label_x,&label_y);
                                 
                                 position const& shield_pos = sym.get_shield_displacement();
-                                label_x += boost::get<0>(shield_pos);
-                                label_y += boost::get<1>(shield_pos);
+                                label_x += boost::get<0>(shield_pos) * scale_factor_;
+                                label_y += boost::get<1>(shield_pos) * scale_factor_;
                                 
                                 finder.find_point_placement( text_placement,label_x,label_y,0.0,
                                                              sym.get_vertical_alignment(),
@@ -185,39 +185,34 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 {
                                     double x = floor(text_placement.placements[0].starting_x);
                                     double y = floor(text_placement.placements[0].starting_y);
-                                    int px;
-                                    int py;
+                                    double lx = label_x;
+                                    double ly = label_y;
                                     box2d<double> label_ext;
 
                                     if( !sym.get_unlock_image() )
-                                    {  // center image at text center position
-                                        // remove displacement from image label
+                                    { 
                                         position const& pos = sym.get_displacement();
-                                        double lx = x - boost::get<0>(pos);
-                                        double ly = y - boost::get<1>(pos);
-                                        px=int(floor(lx - (0.5 * w))) ;
-                                        py=int(floor(ly - (0.5 * h))) ;
+                                        lx = x - boost::get<0>(pos) * scale_factor_;
+                                        ly = y - boost::get<1>(pos) * scale_factor_;
                                         label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), 
                                                         ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
                                     }
                                     else
-                                    {  // center image at reference location
-                                        px=int(floor(label_x - 0.5 * w));
-                                        py=int(floor(label_y - 0.5 * h));
+                                    {  
                                         label_ext.init( floor(label_x - 0.5 * w), floor(label_y - 0.5 * h), 
                                                         ceil (label_x + 0.5 * w), ceil (label_y + 0.5 * h));
                                     }
                                     
                                     if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                                     {
-                                        agg::trans_affine matrix = recenter * tr * agg::trans_affine_translation(px, py);
+                                        agg::trans_affine matrix = recenter * tr * agg::trans_affine_translation(lx, ly);
                                         svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
                                         box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[0]);
                                         text_ren.render(x,y);
                                         detector_.insert(label_ext);
                                         finder.update_detector(text_placement);
                                         if (writer.first) {
-                                            writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
+                                            writer.first->add_box(box2d<double>(lx,ly,lx+w,ly+h), feature, t_, writer.second);
                                             writer.first->add_text(text_placement, faces, feature, t_, writer.second);
                                         }
                                     }
@@ -236,13 +231,9 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 
                                 double x = floor(text_placement.placements[ii].starting_x);
                                 double y = floor(text_placement.placements[ii].starting_y);
-                                
-                                int px=int(x + 0.5);
-                                int py=int(y + 0.5);
-                                agg::trans_affine matrix = recenter * tr * agg::trans_affine_translation(px, py);
-                                
+                                agg::trans_affine matrix = recenter * tr * agg::trans_affine_translation(x, y);                                
                                 svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
-                                if (writer.first) writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
+                                if (writer.first) writer.first->add_box(box2d<double>(x,y,x+w,y+h), feature, t_, writer.second);
                                 box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[ii]);
                                 text_ren.render(x,y);
                             }
