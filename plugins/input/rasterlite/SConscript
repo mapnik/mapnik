@@ -34,9 +34,12 @@ rasterlite_src = Split(
         )
 
 libraries = [env['PLUGINS']['rasterlite']['lib']]
+
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik2')
     libraries.append(env['ICU_LIB_NAME'])
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 rasterlite_inputdriver = plugin_env.SharedLibrary('../rasterlite', source=rasterlite_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 

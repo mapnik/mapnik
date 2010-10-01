@@ -67,6 +67,8 @@ feature_ptr sqlite_featureset::next()
     {
         int size;
         const char* data = (const char *) rs_->column_blob (0, size);
+        if (!data)
+            return feature_ptr();
         int feature_id = rs_->column_integer (1);   
 
 #ifdef MAPNIK_DEBUG
