@@ -340,9 +340,18 @@ public:
         itr_=0;
     }
          
-    bool hit_test(value_type x,value_type y, double) const
+    bool hit_test(value_type x,value_type y, double tol) const
     {      
-        return point_inside_path(x,y,cont_.begin(),cont_.end());
+        // FIXME: this is a workaround around the regression metioned in
+        //        http://trac.mapnik.org/ticket/560, not a definitive solution 
+        if (cont_.size() > 1) {
+            return point_inside_path(x,y,cont_.begin(),cont_.end());
+        } else if (cont_.size() == 1) {
+            // Handle points
+            double x0=boost::get<0>(*cont_.begin());
+            double y0=boost::get<1>(*cont_.begin());
+            return distance(x, y, x0, y0) <= abs(tol);
+        }
     } 
          
     void set_capacity(size_t size) 
