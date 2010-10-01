@@ -59,7 +59,9 @@ public:
         const unsigned int *in_end = in_ptr + pixels;
         unsigned int *out_ptr;
 
-        out_ptr = data_ = new unsigned int[pixels];
+        surface_ = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, data.width(), data.height());
+
+        out_ptr = reinterpret_cast<unsigned int *>(surface_->get_data());
 
         while (in_ptr < in_end)
         {
@@ -75,14 +77,13 @@ public:
 
             *out_ptr++ = (a << 24) | (r << 16) | (g << 8) | b;
         }
-
-        surface_ = Cairo::ImageSurface::create(reinterpret_cast<unsigned char *>(data_), Cairo::FORMAT_ARGB32, data.width(), data.height(), data.width() * 4);
+        // mark the surface as dirty as we've modified it behind cairo's back
+        surface_->mark_dirty();
         pattern_ = Cairo::SurfacePattern::create(surface_);
     }
 
     ~cairo_pattern(void)
     {
-        delete [] data_;
     }
          
     void set_matrix(Cairo::Matrix const& matrix)
@@ -118,7 +119,6 @@ public:
     }
 
 private:
-    unsigned int *data_;
     Cairo::RefPtr<Cairo::ImageSurface> surface_;
     Cairo::RefPtr<Cairo::SurfacePattern> pattern_;
 };
@@ -344,7 +344,6 @@ public:
         context_->save();
         context_->set_source(pattern.pattern());
         context_->paint_with_alpha(opacity);
-        context_->get_target()->mark_dirty();
         context_->restore();
     }
 
