@@ -93,14 +93,6 @@ if test "x$ax_cv_boost_regex" = "xno"; then
   exit
 fi
 
-AX_BOOST_SERIALIZATION
-if test "x$ax_cv_boost_serialization" = "xno"; then
-  echo
-  echo "Error: You need to install the boost serialization library!"
-  echo
-  exit
-fi
-
 AX_BOOST_IOSTREAMS
 if test "x$ax_cv_boost_iostreams" = "xno"; then
   echo
