@@ -147,8 +147,9 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                     if (geom.num_points() > 0 )
                     {
                         path_type path(t_,geom,prj_trans);
-                        
+                        position const& shield_pos = sym.get_shield_displacement();
                         label_placement_enum how_placed = sym.get_label_placement();
+                        
                         if (how_placed == POINT_PLACEMENT || how_placed == VERTEX_PLACEMENT)
                         {
                             // for every vertex, try and place a shield/text
@@ -169,10 +170,11 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 prj_trans.backward(label_x,label_y, z);
                                 t_.forward(&label_x,&label_y);
                                 
-                                position const& shield_pos = sym.get_shield_displacement();
-                                label_x += boost::get<0>(shield_pos) * scale_factor_;
-                                label_y += boost::get<1>(shield_pos) * scale_factor_;
-                                
+                                // position SVG label at vertex + shield_displacement
+                                label_x = label_x + boost::get<0>(shield_pos) * scale_factor_;
+                                label_y = label_y + boost::get<1>(shield_pos) * scale_factor_;
+                                // position text relative to label position 
+                                // NOTE: (text) displacement applied in placement_finder.cpp FIXME!
                                 finder.find_point_placement( text_placement,label_x,label_y,0.0,
                                                              sym.get_vertical_alignment(),
                                                              sym.get_line_spacing() * scale_factor_,
@@ -183,36 +185,22 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
                                 if( text_placement.placements.size() > 0)
                                 {
-                                    double x = floor(text_placement.placements[0].starting_x);
-                                    double y = floor(text_placement.placements[0].starting_y);
-                                    double lx = label_x;
-                                    double ly = label_y;
-                                    box2d<double> label_ext;
-
-                                    if( !sym.get_unlock_image() )
-                                    { 
-                                        position const& pos = sym.get_displacement();
-                                        lx = x - boost::get<0>(pos) * scale_factor_;
-                                        ly = y - boost::get<1>(pos) * scale_factor_;
-                                        label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), 
-                                                        ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
-                                    }
-                                    else
-                                    {  
-                                        label_ext.init( floor(label_x - 0.5 * w), floor(label_y - 0.5 * h), 
-                                                        ceil (label_x + 0.5 * w), ceil (label_y + 0.5 * h));
-                                    }
                                     
+                                    double x = text_placement.placements[0].starting_x;
+                                    double y = text_placement.placements[0].starting_y;
+                                    box2d<double> label_ext;
+                                    label_ext.init( floor(label_x - 0.5 * w), floor(label_y - 0.5 * h), 
+                                                    ceil (label_x + 0.5 * w), ceil (label_y + 0.5 * h) );                                    
                                     if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                                     {
-                                        agg::trans_affine matrix = recenter * tr * agg::trans_affine_translation(lx, ly);
+                                        agg::trans_affine matrix = recenter * tr * agg::trans_affine_translation(label_x, label_y);
                                         svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
                                         box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[0]);
                                         text_ren.render(x,y);
                                         detector_.insert(label_ext);
                                         finder.update_detector(text_placement);
                                         if (writer.first) {
-                                            writer.first->add_box(box2d<double>(lx,ly,lx+w,ly+h), feature, t_, writer.second);
+                                            writer.first->add_box(label_ext, feature, t_, writer.second);
                                             writer.first->add_text(text_placement, faces, feature, t_, writer.second);
                                         }
                                     }

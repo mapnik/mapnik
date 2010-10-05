@@ -54,7 +54,7 @@ placement::placement(string_info & info_,
                      unsigned w, unsigned h, 
                      bool has_dimensions_)
     : info(info_),
-      displacement_(sym.get_shield_displacement()),
+      displacement_(sym.get_displacement()),
       scale_factor_(scale_factor),
       label_placement(sym.get_label_placement()),
       wrap_width(sym.get_wrap_width()),
