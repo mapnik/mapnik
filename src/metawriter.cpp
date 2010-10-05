@@ -353,9 +353,9 @@ void metawriter_json::set_filename(path_expression_ptr fn)
     fn_ = fn;
 }
 
- path_expression_ptr metawriter_json::get_filename() const
- {
-     return fn_;
- }
+path_expression_ptr metawriter_json::get_filename() const
+{
+   return fn_;
+}
 
 };
