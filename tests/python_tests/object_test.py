@@ -255,7 +255,7 @@ def test_map_init():
 
 # Map initialization from string
 def test_map_init_from_string():
-    map_string = '''<Map bgcolor="steelblue" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    map_string = '''<Map background-color="steelblue" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
      <Style name="My Style">
       <Rule>
        <PolygonSymbolizer>

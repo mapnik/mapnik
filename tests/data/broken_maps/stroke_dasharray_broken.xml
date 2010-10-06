@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map  >
-<Map bgcolor="red">
+<Map background-color="red">
     <Style name="some_style">
       <Rule name="some_rule">
         <LineSymbolizer stoke="red" stroke-dasharray="1.0, 4.0, foo, 6.0" />

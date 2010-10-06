@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- see: http://trac.mapnik.org/changeset/574 -->
-<Map bgcolor="transparent" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+<Map background-color="transparent" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
 
   <FileSource name="foo">../images/</FileSource>
   

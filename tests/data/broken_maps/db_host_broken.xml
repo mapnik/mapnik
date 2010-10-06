@@ -3,7 +3,7 @@
     <!ENTITY db_name "gis">
     <!ENTITY db_host "/no/socket/here">
 ]>
-<Map bgcolor="red">
+<Map background-color="red">
   <Layer name="some_layer" status="on" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
     <Datasource>
       <Parameter name="type">postgis</Parameter>

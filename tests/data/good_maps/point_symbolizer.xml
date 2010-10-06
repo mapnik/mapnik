@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map  >
-<Map bgcolor="#b5d0d0" srs="+init=epsg:4326" min_version="0.7.1">
+<Map background-color="#b5d0d0" srs="+init=epsg:4326" min_version="0.7.1">
     <Style name="1">
         <Rule title="foo">
             <Filter>([name]='CHILE')</Filter>

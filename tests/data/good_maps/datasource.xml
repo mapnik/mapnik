@@ -1,5 +1,5 @@
 <!-- see: http://trac.mapnik.org/changeset/574 -->
-<Map bgcolor="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+<Map background-color="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
 
     <Style name="test">
       <Rule>
