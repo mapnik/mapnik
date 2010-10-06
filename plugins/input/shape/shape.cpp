@@ -245,6 +245,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
     
     if (indexed_)
     {
+        shape_->shp().seek(0);
         return featureset_ptr
             (new shape_index_featureset<filter_at_point>(filter,
                                                          *shape_,
