@@ -75,7 +75,7 @@ void export_expression()
         .def("__str__",&to_expression_string);
     ;
     
-    def("Expression",&parse_expression_);
+    def("Expression",&parse_expression_,(arg("expr")),"Expression string");
 
     class_<mapnik::path_expression ,boost::noncopyable>("PathExpression",
                                                         "TODO"
@@ -84,5 +84,5 @@ void export_expression()
         .def("__str__",&path_to_string_);
     ;
     
-    def("PathExpression",&parse_path_);
+    def("PathExpression",&parse_path_,(arg("expr")),"PathExpression string");
 }
