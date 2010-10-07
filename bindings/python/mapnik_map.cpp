@@ -406,6 +406,7 @@ void export_map()
             "Use a path like \"[z]/[x]/[y].json\" to create filenames.\n"
         )
         
+        .def("extra_attributes",&Map::get_extra_attributes,return_value_policy<copy_const_reference>(),"TODO")
 
         .add_property("aspect_fix_mode",
                       &Map::get_aspect_fix_mode,

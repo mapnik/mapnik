@@ -34,6 +34,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/metawriter.hpp>
+#include <mapnik/params.hpp>
 
 // boost
 #include <boost/optional/optional.hpp>
@@ -81,6 +82,7 @@ private:
     std::vector<layer> layers_;
     aspect_fix_mode aspectFixMode_;
     box2d<double> currentExtent_;
+    parameters extra_attr_;
         
 public:
 
@@ -421,6 +423,16 @@ public:
      * @brief Get a metawriter property.
      */
     std::string get_metawriter_property(std::string name) const;
+
+    /*!
+     * @brief Get extra properties that can be carried on the Map
+     */
+    parameters const& get_extra_attributes() const;
+
+    /*!
+     * @brief Set extra properties that can be carried on the Map
+     */
+    void set_extra_attributes(parameters& params);
 
 private:
     void fixAspectRatio();

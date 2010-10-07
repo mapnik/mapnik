@@ -85,7 +85,8 @@ Map::Map(const Map& rhs)
       metawriters_(rhs.metawriters_),
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
-      currentExtent_(rhs.currentExtent_) {}
+      currentExtent_(rhs.currentExtent_),
+      extra_attr_(rhs.extra_attr_) {}
     
 Map& Map::operator=(const Map& rhs)
 {
@@ -100,6 +101,7 @@ Map& Map::operator=(const Map& rhs)
     metawriters_ = rhs.metawriters_;
     layers_=rhs.layers_;
     aspectFixMode_=rhs.aspectFixMode_;
+    extra_attr_=rhs.extra_attr_;
     return *this;
 }
    
@@ -619,6 +621,16 @@ std::string Map::get_metawriter_property(std::string name) const
     std::string result;
     to_utf8(metawriter_output_properties[name], result);
     return result;
+}
+
+parameters const& Map::get_extra_attributes() const
+{
+    return extra_attr_;
+}
+
+void Map::set_extra_attributes(parameters& params)
+{
+    extra_attr_ = params;
 }
 
 }

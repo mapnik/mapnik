@@ -172,6 +172,8 @@ void map_parser::parse_map( Map & map, ptree const & pt )
 
         try
         {
+            parameters extra_attr;
+
             optional<color> bgcolor = get_opt_attr<color>(map_node, "background-color");
             if (bgcolor) 
             {
@@ -195,6 +197,7 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             optional<std::string> font_directory = get_opt_attr<std::string>(map_node,"font_directory");
             if (font_directory)
             {
+                extra_attr["font_directory"] = *font_directory;
                 freetype_engine::register_fonts( ensure_relative_to_xml(font_directory), false);
             }
 
@@ -210,6 +213,7 @@ void map_parser::parse_map( Map & map, ptree const & pt )
                 
             if (min_version_string)
             {
+                extra_attr["minimum_version"] = *min_version_string;
                 boost::char_separator<char> sep(".");
                 boost::tokenizer<boost::char_separator<char> > tokens(*min_version_string,sep);
                 unsigned i = 0;
@@ -245,6 +249,7 @@ void map_parser::parse_map( Map & map, ptree const & pt )
                 }
                 
             }
+            map.set_extra_attributes(extra_attr);
         }
         catch (const config_error & ex)
         {
