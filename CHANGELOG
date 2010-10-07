@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added ability to register fonts within XML using Map level 'font_directory' parameter (#168)
+
 - TextSymbolizer: Change text_convert to text_transform to better match css naming (r2211)
 
 - Shapefile Plugin: Throw error if attribute name is requested that does not exist (#604)

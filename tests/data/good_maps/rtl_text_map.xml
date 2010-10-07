@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="#eee">
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" font_directory="../fonts/" background-color="#eee">
 <!-- nik2img.py -b 60 46 80 28 text_styles.xml text_styles.png -->
 
   <Style name="custom_font">

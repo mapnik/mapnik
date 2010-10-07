@@ -192,6 +192,12 @@ void map_parser::parse_map( Map & map, ptree const & pt )
                 map.set_buffer_size(*buffer_size);
             }
 
+            optional<std::string> font_directory = get_opt_attr<std::string>(map_node,"font_directory");
+            if (font_directory)
+            {
+                freetype_engine::register_fonts( ensure_relative_to_xml(font_directory), false);
+            }
+
             // Check if relative paths should be interpreted as relative to/from XML location
             // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
             optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
