@@ -20,7 +20,7 @@ def test():
     # 4. Compare both map objects
     map = mapnik2.Map(256, 256)
 
-    raise Todo("map comparison is currently broken dou to lacking relative paths support (#324,#340")
+    raise Todo("map comparison is currently broken due to lacking relative paths support (#324,#340")
 
     def compare_map(in_map):
         
