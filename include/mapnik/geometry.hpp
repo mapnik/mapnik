@@ -352,6 +352,7 @@ public:
             double y0=boost::get<1>(*cont_.begin());
             return distance(x, y, x0, y0) <= abs(tol);
         }
+        return false;
     } 
          
     void set_capacity(size_t size) 
