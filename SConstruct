@@ -393,19 +393,6 @@ elif HELP_REQUESTED:
 # initially populate environment with defaults and any possible custom arguments
 opts.Update(env)
 
-if env.has_key('COLOR_PRINT') and env['COLOR_PRINT'] == False:
-    color_print = regular_print
-
-if sys.platform == "win32":
-    color_print = regular_print
-
-color_print(4,'\nWelcome to Mapnik...\n')
-
-color_print(1,'*'*45)
-color_print(1,'You are compiling Mapnik trunk (aka Mapnik2)')
-color_print(1,'See important details at:\nhttp://trac.mapnik.org/wiki/Mapnik2')
-color_print(1,('*'*45)+'\n')
-
 # if we are not configuring overwrite environment with pickled settings
 if not force_configure:
     if os.path.exists(SCONS_CONFIGURE_CACHE):
@@ -442,7 +429,18 @@ elif preconfigured:
         color_print(4,'Using previous successful configuration...')
         color_print(4,'Re-configure by running "python scons/scons.py configure".')
 
+if env.has_key('COLOR_PRINT') and env['COLOR_PRINT'] == False:
+    color_print = regular_print
 
+if sys.platform == "win32":
+    color_print = regular_print
+
+color_print(4,'\nWelcome to Mapnik...\n')
+
+color_print(1,'*'*45)
+color_print(1,'You are compiling Mapnik trunk (aka Mapnik2)')
+color_print(1,'See important details at:\nhttp://trac.mapnik.org/wiki/Mapnik2')
+color_print(1,('*'*45)+'\n')
 
 
 #### Custom Configure Checks ###
@@ -1268,6 +1266,16 @@ if not HELP_REQUESTED:
     create_uninstall_target(env, plugin_dir, False)
     create_uninstall_target(env, plugin_dir + '/input' , False)
     create_uninstall_target(env, plugin_dir + '/fonts' , False)
+
+    # before installing plugins, wipe out any previously
+    # installed plugins that we are no longer building
+    if 'install' in COMMAND_LINE_TARGETS:
+        for plugin in PLUGINS.keys():
+            if plugin not in env['REQUESTED_PLUGINS']:
+                plugin_path = os.path.join(plugin_dir,'input','%s.input' % plugin)
+                if os.path.exists(plugin_path):
+                    color_print(1,"Notice: removing out of date plugin: '%s'" % plugin_path)
+                    os.unlink(plugin_path)
     
     # Build the c++ rundemo app if requested
     if env['DEMO']:
