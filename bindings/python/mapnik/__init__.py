@@ -40,6 +40,7 @@ Several things happen when you do:
 """
 
 import os
+import warnings
 
 from sys import getdlopenflags, setdlopenflags
 try:
@@ -70,6 +71,18 @@ class _MapnikMetaclass(BoostPythonMetaclass):
 # metaclass injector compatible with both python 2 and 3
 # http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
 _injector = _MapnikMetaclass('_injector', (object, ), {})
+
+
+def Filter(*args,**kwargs):
+    warnings.warn("'Filter' is deprecated and will be removed in Mapnik 0.8.1, use 'Expression' instead",
+    DeprecationWarning, 2)
+    return Expression(*args, **kwargs)
+
+class Envelope(Box2d):
+    def __init__(self, *args, **kwargs):
+        warnings.warn("'Envelope' is deprecated and will be removed in Mapnik 0.8.1, use 'Box2d' instead",
+        DeprecationWarning, 2)
+        Box2d.__init__(self, *args, **kwargs)
 
 class _Coord(Coord,_injector):
     """
@@ -171,9 +184,11 @@ class _Box2d(Box2d,_injector):
 
     Equality: two envelopes are equal if their corner points are equal.
     """
+
     def __repr__(self):
         return 'Box2d(%s,%s,%s,%s)' % \
             (self.minx,self.miny,self.maxx,self.maxy)
+
     def forward(self, projection):
         """
         Projects the envelope from the geographic space 
@@ -184,6 +199,7 @@ class _Box2d(Box2d,_injector):
            Coord.forward(self, projection)
         """
         return forward_(self, projection)
+
     def inverse(self, projection):
         """
         Projects the envelope from the cartesian space 
@@ -196,8 +212,10 @@ class _Box2d(Box2d,_injector):
         return inverse_(self, projection)
 
 class _Projection(Projection,_injector):
+
     def __repr__(self):
         return "Projection('%s')" % self.params()
+
     def forward(self,obj):
         """
         Projects the given object (Box2d or Coord) 
@@ -208,6 +226,7 @@ class _Projection(Projection,_injector):
           Coord.forward(self, projection).
         """
         return forward_(obj,self)
+
     def inverse(self,obj):
         """
         Projects the given object (Box2d or Coord) 
@@ -229,10 +248,13 @@ def get_types(num):
     return dispatch.get(num)
 
 class _Datasource(Datasource,_injector):
+
     def describe(self):
         return Describe(self)
+
     def field_types(self):
         return map(get_types,self._field_types())
+
     def all_features(self):
         query = Query(self.envelope())
         for fld in self.fields():
@@ -240,18 +262,17 @@ class _Datasource(Datasource,_injector):
         return self.features(query).features
 
 class _DeprecatedFeatureProperties(object):
+
     def __init__(self, feature):
         self._feature = feature
 
     def __getitem__(self, name):
-        from warnings import warn
-        warn("indexing feature.properties is deprecated, index the "
+        warnings.warn("indexing feature.properties is deprecated, index the "
              "feature object itself for the same effect", DeprecationWarning, 2)
         return self._feature[name]
 
     def __iter__(self):
-        from warnings import warn
-        warn("iterating feature.properties is deprecated, iterate the "
+        warnings.warn("iterating feature.properties is deprecated, iterate the "
              "feature object itself for the same effect", DeprecationWarning, 2)
         return iter(self._feature)
 
@@ -306,19 +327,24 @@ class _Feature(Feature, _injector):
         raise TypeError("%r (%s) not supported" % (geometry, type(geometry)))
 
 class _Color(Color,_injector):
+
     def __repr__(self):
         return "Color(%r)" % self.to_hex_string()
 
 class _Symbolizers(Symbolizers,_injector):
+
     def __getitem__(self, idx):
         sym = Symbolizers._c___getitem__(self, idx)
         return sym.symbol()
 
 def _add_symbol_method_to_symbolizers(vars=globals()):
+
     def symbol_for_subcls(self):
         return self
+
     def symbol_for_cls(self):
         return getattr(self,self.type())()
+
     for name, obj in vars.items():
         if name.endswith('Symbolizer') and not name.startswith('_'):
             if name == 'Symbolizer':
@@ -327,15 +353,6 @@ def _add_symbol_method_to_symbolizers(vars=globals()):
                 symbol = symbol_for_subcls
             type('dummy', (obj,_injector), {'symbol': symbol})
 _add_symbol_method_to_symbolizers()
-
-#class _Filter(Filter,_injector):
-#    """Mapnik Filter expression.
-#    
-#    Usage:
-#    >>> from mapnik import Filter
-#    >>> Filter("[waterway]='canal' and not ([tunnel] = 'yes' or [tunnel] ='true')")
-#    
-#    """
 
 def Datasource(**keywords):
     """Wrapper around CreateDatasource.
@@ -638,20 +655,32 @@ setdlopenflags(flags)
 # and ensure correct documentation processing
 __all__ = [
     # classes
-    'Color', 'Coord', 'ColorBand', 'CompositeOp',
+    'Color',
+    'Coord',
+    'ColorBand',
+    'CompositeOp',
     'DatasourceCache',
     'Box2d',
-    'Feature', 'Featureset', 'FontEngine',
-    'Geometry2d', 'GlyphSymbolizer',
-    'Image', 'ImageView',
-    'Layer', 'Layers',
-    'LinePatternSymbolizer', 'LineSymbolizer',
+    'Feature',
+    'Featureset',
+    'FontEngine',
+    'Geometry2d',
+    'GlyphSymbolizer',
+    'Image',
+    'ImageView',
+    'Layer',
+    'Layers',
+    'LinePatternSymbolizer',
+    'LineSymbolizer',
     'Map',
     'MarkersSymbolizer',
     'Names',
-    'Parameter', 'Parameters',
-    'PointDatasource', 'PointSymbolizer',
-    'PolygonPatternSymbolizer', 'PolygonSymbolizer',
+    'Parameter',
+    'Parameters',
+    'PointDatasource',
+    'PointSymbolizer',
+    'PolygonPatternSymbolizer',
+    'PolygonSymbolizer',
     'ProjTransform',
     'Projection',
     'Query',
@@ -660,8 +689,10 @@ __all__ = [
     'Rule', 'Rules',
     'ShieldSymbolizer',
     'Singleton',
-    'Stroke', 'Style',
-    'Symbolizer', 'Symbolizers',
+    'Stroke',
+    'Style',
+    'Symbolizer',
+    'Symbolizers',
     'TextSymbolizer',
     'ViewTransform',
     # enums
@@ -676,21 +707,40 @@ __all__ = [
     'pattern_alignment',
     # functions
     # datasources
-    'Datasource', 'CreateDatasource',
-    'Shapefile', 'PostGIS', 'Raster', 'Gdal',
-    'Occi', 'Ogr', 'SQLite',
-    'Osm', 'Kismet',
+    'Datasource',
+    'CreateDatasource',
+    'Shapefile',
+    'PostGIS',
+    'Raster',
+    'Gdal',
+    'Occi',
+    'Ogr',
+    'SQLite',
+    'Osm',
+    'Kismet',
     'Describe',
     #   version and environment
-    'mapnik_version_string', 'mapnik_version', 'mapnik_svn_revision',
-    'has_cairo', 'has_pycairo',
+    'mapnik_version_string',
+    'mapnik_version',
+    'mapnik_svn_revision',
+    'has_cairo',
+    'has_pycairo',
     #   factory methods
     'Expression',
     'PathExpression',
     #   load/save/render
-    'load_map', 'load_map_from_string', 'save_map', 'save_map_to_string',
-    'render', 'render_tile_to_file', 'render_to_file',
+    'load_map',
+    'load_map_from_string',
+    'save_map',
+    'save_map_to_string',
+    'render',
+    'render_tile_to_file',
+    'render_to_file',
     #   other
-    'register_plugins', 'register_fonts',
+    'register_plugins',
+    'register_fonts',
     'scale_denominator',
+    # deprecated
+    'Filter',
+    'Envelope',
     ]
