@@ -76,8 +76,6 @@ else:
 
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = 'libmapnik2.dylib'
-elif env['PLATFORM'] == 'SunOS' and env['CXX'].startswith('CC'):
-    mapnik_libname = 'libmapnik2.so'
 else:
     mapnik_libname = 'libmapnik2.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1])) 
 
