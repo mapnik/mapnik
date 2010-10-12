@@ -893,6 +893,13 @@ if not preconfigured:
         
     if env['THREADING'] == 'multi':
         BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
+            # on solaris the configure checks for boost_thread
+            # require the -pthreads flag to be able to check for 
+            # threading support, so we add as a global library instead
+            # of attaching to cxxflags after configure
+            if env['PLATFORM'] == 'SunOS':
+                env.Append(LIBS = '-pthreads')        
+
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
@@ -1060,8 +1067,6 @@ if not preconfigured:
             # but will retain logic for future use
             #if platform.mac_ver()[0].startswith('10.5'):
             #    common_cxx_flags += '-DOSX_LEOPARD '
-        elif env['PLATFORM'] == 'SunOS':
-            pthread = '-pthreads'        
         else:
             pthread = '-pthread'
         
