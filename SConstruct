@@ -1009,6 +1009,8 @@ if not preconfigured:
             # but will retain logic for future use
             #if platform.mac_ver()[0].startswith('10.5'):
             #    common_cxx_flags += '-DOSX_LEOPARD '
+        elif env['PLATFORM'] == 'SunOS':
+            pthread = '-pthreads'        
         else:
             pthread = '-pthread'
         
