@@ -893,12 +893,12 @@ if not preconfigured:
         
     if env['THREADING'] == 'multi':
         BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
-            # on solaris the configure checks for boost_thread
-            # require the -pthreads flag to be able to check for 
-            # threading support, so we add as a global library instead
-            # of attaching to cxxflags after configure
-            if env['PLATFORM'] == 'SunOS':
-                env.Append(LIBS = '-pthreads')        
+        # on solaris the configure checks for boost_thread
+        # require the -pthreads flag to be able to check for 
+        # threading support, so we add as a global library instead
+        # of attaching to cxxflags after configure
+        if env['PLATFORM'] == 'SunOS':
+            env.Append(LIBS = '-pthreads')
 
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
