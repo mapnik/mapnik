@@ -898,7 +898,7 @@ if not preconfigured:
         # threading support, so we add as a global library instead
         # of attaching to cxxflags after configure
         if env['PLATFORM'] == 'SunOS':
-            env.Append(LIBS = '-pthreads')
+            env.Append(CXXFLAGS = '-pthreads')
 
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
