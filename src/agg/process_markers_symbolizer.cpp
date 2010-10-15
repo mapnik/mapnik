@@ -198,14 +198,16 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     agg::render_scanlines(*ras_ptr, sl, ren);
                     
                     // outline
-                    ras_ptr->reset();
-                    agg::conv_stroke<agg::path_storage>  outline(marker);
-                    outline.generator().width(strk_width * scale_factor_);
-                    ras_ptr->add_path(outline);
-
-                    ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
-                    agg::render_scanlines(*ras_ptr, sl_line, ren);
-                    
+                    if (strk_width)
+                    {
+                        ras_ptr->reset();
+                        agg::conv_stroke<agg::path_storage>  outline(marker);
+                        outline.generator().width(strk_width * scale_factor_);
+                        ras_ptr->add_path(outline);
+    
+                        ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
+                        agg::render_scanlines(*ras_ptr, sl_line, ren);
+                    }
                     detector_.insert(label_ext);
                     if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                 }
@@ -258,12 +260,15 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     agg::render_scanlines(*ras_ptr, sl, ren);
 
                     // outline
-                    ras_ptr->reset();
-                    agg::conv_stroke<agg::conv_transform<agg::path_storage, agg::trans_affine> >  outline(trans);
-                    outline.generator().width(strk_width * scale_factor_);
-                    ras_ptr->add_path(outline);
-                    ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
-                    agg::render_scanlines(*ras_ptr, sl_line, ren);
+                    if (strk_width)
+                    {
+                        ras_ptr->reset();
+                        agg::conv_stroke<agg::conv_transform<agg::path_storage, agg::trans_affine> >  outline(trans);
+                        outline.generator().width(strk_width * scale_factor_);
+                        ras_ptr->add_path(outline);
+                        ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
+                        agg::render_scanlines(*ras_ptr, sl_line, ren);
+                    }
                 }
             }
 
