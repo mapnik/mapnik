@@ -38,9 +38,12 @@ struct MAPNIK_DECL point_symbolizer :
     point_symbolizer(point_symbolizer const& rhs);
     void set_allow_overlap(bool overlap);
     bool get_allow_overlap() const;
+    void set_ignore_placement(bool ignore_placement);
+    bool get_ignore_placement() const;
         
 private:
     bool overlap_;
+    bool ignore_placement_;
 };
 }
 

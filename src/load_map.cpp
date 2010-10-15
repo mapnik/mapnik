@@ -754,6 +754,8 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
         optional<std::string> base =  get_opt_attr<string>(sym, "base");
         optional<boolean> allow_overlap =
             get_opt_attr<boolean>(sym, "allow_overlap");
+        optional<boolean> ignore_placement =
+            get_opt_attr<boolean>(sym, "ignore_placement");
         optional<float> opacity =
             get_opt_attr<float>(sym, "opacity");
         
@@ -791,6 +793,10 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
                 if (opacity)
                 {
                     symbol.set_opacity( * opacity );
+                }
+                if (ignore_placement)
+                {
+                    symbol.set_ignore_placement( * ignore_placement );            
                 }
                 if (transform_wkt)
                 {
@@ -830,6 +836,10 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
             if (opacity)
             {
                 symbol.set_opacity( * opacity );
+            }
+            if (ignore_placement)
+            {
+                symbol.set_ignore_placement( * ignore_placement );            
             }
 
             parse_metawriter_in_symbolizer(symbol, sym);

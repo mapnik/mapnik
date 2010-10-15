@@ -114,7 +114,8 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                     detector_.has_placement(extent))
                 {
                     svg_renderer.render(*ras_ptr, sl, ren, tr, renb.clip_box(), sym.get_opacity());
-                    detector_.insert(extent);
+                    if (!sym.get_ignore_placement())
+                        detector_.insert(extent);
                     metawriter_with_properties writer = sym.get_metawriter();
                     if (writer.first)
                     {
@@ -155,7 +156,8 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                     detector_.has_placement(label_ext))
                 {
                     pixmap_.set_rectangle_alpha2(*(*data), px, py, sym.get_opacity());
-                    detector_.insert(label_ext);
+                    if (!sym.get_ignore_placement())
+                        detector_.insert(label_ext);
                     metawriter_with_properties writer = sym.get_metawriter();
                     if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                 }
