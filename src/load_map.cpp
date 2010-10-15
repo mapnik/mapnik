@@ -914,9 +914,23 @@ void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
         if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
 
         optional<double> w = get_opt_attr<double>(sym, "width");
-        if (w) symbol.set_width(*w);
         optional<double> h = get_opt_attr<double>(sym, "height");
-        if (h) symbol.set_height(*h);
+        if (w && h)
+        {
+            symbol.set_width(*w);
+            symbol.set_height(*h);
+        }
+        else if (w)
+        {
+            symbol.set_width(*w);
+            symbol.set_height(*w);
+        
+        }
+        else if (h)
+        {
+            symbol.set_width(*h);
+            symbol.set_height(*h);
+        }
         
         stroke strk;
         parse_stroke(strk,sym);
