@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map background-color="#b5d0d0" srs="+init=epsg:4326" min_version="0.7.1">
+    <Style name="1">
+        <Rule title="foo1">
+            <Filter>([name]='Brazil' or [name]='Mongolia' or [name]='Sudan')</Filter>
+            <PointSymbolizer file="../svg/ellipses.svg" allow_overlap="true"/>
+        </Rule>
+        <Rule title="foo">
+            <ElseFilter />
+            <PointSymbolizer ignore_placement="true" file="../svg/ellipses.svg"/>
+            <PointSymbolizer />
+        </Rule>
+    </Style>
+
+    <Layer name="point" srs="+init=epsg:4326">
+        <StyleName>1</StyleName>
+        <Datasource>
+            <Parameter name="extent">-180,-70,180,70</Parameter>
+            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
+            <Parameter name="geometry_field">geometry</Parameter>
+            <Parameter name="key_field">pkuid</Parameter>
+            <Parameter name="table">point</Parameter>
+            <Parameter name="type">sqlite</Parameter>
+            <Parameter name="use_spatial_index">1</Parameter>
+            <Parameter name="wkb_format">spatialite</Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>

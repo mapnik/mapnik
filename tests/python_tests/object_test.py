@@ -61,11 +61,16 @@ def test_pointsymbolizer_init():
     eq_(p.allow_overlap, False)
     eq_(p.opacity,1)
     eq_(p.filename,'')
+    eq_(p.ignore_placement,False)
 
     p = mapnik2.PointSymbolizer(mapnik2.PathExpression("../data/images/dummy.png"))
-    eq_(p.allow_overlap, False)
-    eq_(p.opacity, 1)
+    p.allow_overlap = True
+    p.opacity = 0.5
+    p.ignore_placement = True
+    eq_(p.allow_overlap, True)
+    eq_(p.opacity, 0.5)
     eq_(p.filename,'../data/images/dummy.png')
+    eq_(p.ignore_placement,True)
 
 # PointSymbolizer missing image file
 # images paths are now PathExpressions are evaluated at runtime
@@ -83,6 +88,7 @@ def test_pointsymbolizer_pickle():
     eq_(p.filename, p2.filename)
     eq_(p.allow_overlap, p2.allow_overlap)
     eq_(p.opacity, p2.opacity)
+    eq_(p.ignore_placement, p2.ignore_placement)
 
 # PolygonSymbolizer initialization
 def test_polygonsymbolizer_init():
