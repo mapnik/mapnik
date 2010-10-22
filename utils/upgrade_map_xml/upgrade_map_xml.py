@@ -34,7 +34,8 @@ def indent(elem, level=0):
             
 def name2expr(sym):
     name = sym.attrib['name']
-    if re.match('^\[.*\]$',name) is None:
+    if re.match('^\[.*\]',name) is None:
+        #import pdb;pdb.set_trace()
         print>>sys.stderr,"Fixing %s" % name
         expression = '[%s]' % name
         sym.attrib['name'] = expression    
@@ -81,22 +82,29 @@ def fixup_sym_attributes(sym):
 if __name__ == "__main__":
     
     #required parameters:
-    #   map_xml_file: outdated stylesheet file
+    #   input_xml: outdated stylesheet file
     #   output_file: new stylesheet file
 
     if len(sys.argv) != 3:
-        sys.stderr.write('Usage: %s <map_xml_file> <output_file>\n' % os.path.basename(sys.argv[0]))
+        sys.stderr.write('Usage: %s <input_xml> <output_xml>\n' % os.path.basename(sys.argv[0]))
         sys.exit(1)
-        
-    xml = sys.argv[1]
-    pre_read = open(xml,'r')
+    
+    input_xml = sys.argv[1]
+    output_xml = sys.argv[2]
+    
+    if input_xml == output_xml:
+        sys.stderr.write('Sorry, this upgrade script does not allow you to overwrite the input xml, please provide a different output name than "%s"\n' % output_xml)
+        sys.exit(1)
+    
+
+    pre_read = open(input_xml,'r')
     if '!ENTITY' in pre_read.read() and not HAS_LXML:
         sys.stderr.write('\nSorry, it appears the xml you are trying to upgrade has entities, which requires lxml (python bindings to libxml2)\n')
         sys.stderr.write('Install lxml with: "easy_install lxml" or download from http://codespeak.net/lxml/\n')
 
         sys.exit(1)        
         
-    tree = etree.parse(xml)
+    tree = etree.parse(input_xml)
     if hasattr(tree,'xinclude'):
         tree.xinclude()
     root = tree.getroot()
@@ -130,4 +138,4 @@ if __name__ == "__main__":
 
     # TODO - make forcing indent an option
     indent(root)
-    tree.write(sys.argv[2])
+    tree.write(output_xml)
