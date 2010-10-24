@@ -48,7 +48,7 @@ using mapnik::query;
 using mapnik::coord2d;
 using mapnik::datasource_exception;
 
-raster_datasource::raster_datasource(const parameters& params)
+raster_datasource::raster_datasource(const parameters& params, bool bind)
     : datasource(params),
       desc_(*params.get<std::string>("type"),"utf-8")
 {
@@ -66,19 +66,29 @@ raster_datasource::raster_datasource(const parameters& params)
    else
       filename_ = *file;
 
-   if (!boost::filesystem::exists(filename_)) throw datasource_exception(filename_ + " does not exist");
-   
-   format_=*params.get<std::string>("format","tiff");
-   boost::optional<double> lox = params.get<double>("lox");
-   boost::optional<double> loy = params.get<double>("loy");
-   boost::optional<double> hix = params.get<double>("hix");
-   boost::optional<double> hiy = params.get<double>("hiy");
+   format_=*params_.get<std::string>("format","tiff");
+   boost::optional<double> lox = params_.get<double>("lox");
+   boost::optional<double> loy = params_.get<double>("loy");
+   boost::optional<double> hix = params_.get<double>("hix");
+   boost::optional<double> hiy = params_.get<double>("hiy");
    
    if (lox && loy && hix && hiy)
    {
       extent_.init(*lox,*loy,*hix,*hiy);
    }
    else throw datasource_exception("<lox> <loy> <hix> <hiy> are required");
+
+   if (bind) 
+   {
+      this->bind();
+   }
+}
+
+void raster_datasource::bind() const
+{
+   if (is_bound_) return;
+   
+   if (!boost::filesystem::exists(filename_)) throw datasource_exception(filename_ + " does not exist");
 
    try
    {         
@@ -96,6 +106,8 @@ raster_datasource::raster_datasource(const parameters& params)
    {
       std::cerr << "Exception caught\n";
    }
+   
+   is_bound_ = true;
 }
 
 raster_datasource::~raster_datasource() {}
@@ -123,6 +135,8 @@ layer_descriptor raster_datasource::get_descriptor() const
 
 featureset_ptr raster_datasource::features(query const& q) const
 {
+   if (!is_bound_) bind();
+   
    mapnik::CoordTransform t(width_,height_,extent_,0,0);
    mapnik::Envelope<double> intersect=extent_.intersect(q.get_bbox());
    mapnik::Envelope<double> ext=t.forward(intersect);

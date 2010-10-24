@@ -46,7 +46,7 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 using mapnik::attribute_descriptor;
 
-shape_datasource::shape_datasource(const parameters &params)
+shape_datasource::shape_datasource(const parameters &params, bool bind)
    : datasource (params),
      type_(datasource::Vector),
      file_length_(0),
@@ -63,7 +63,17 @@ shape_datasource::shape_datasource(const parameters &params)
       shape_name_ = *file;
 
    boost::algorithm::ireplace_last(shape_name_,".shp","");
-   
+    
+    if (bind)
+    {
+        this->bind();
+    }
+}
+
+void shape_datasource::bind() const
+{
+    if (is_bound_) return;
+    
    if (!boost::filesystem::exists(shape_name_ + ".shp"))
    {
        throw datasource_exception(shape_name_ + " does not exist");
@@ -72,7 +82,8 @@ shape_datasource::shape_datasource(const parameters &params)
    try
    {  
       shape_io shape(shape_name_);
-      init(shape);
+      // leave ABI alone
+      ((shape_datasource*)this)->init(shape);
       for (int i=0;i<shape.dbf().num_fields();++i)
       {
          field_descriptor const& fd=shape.dbf().descriptor(i);
@@ -116,6 +127,8 @@ shape_datasource::shape_datasource(const parameters &params)
       std::clog << " got exception ... \n";
       throw;
    }
+    
+    is_bound_ = true;
 }
 
 shape_datasource::~shape_datasource() {}
@@ -186,6 +199,7 @@ int shape_datasource::type() const
 
 layer_descriptor shape_datasource::get_descriptor() const
 {
+    if (!is_bound_) bind();
    return desc_;
 }
 
@@ -196,6 +210,8 @@ std::string shape_datasource::name()
 
 featureset_ptr shape_datasource::features(const query& q) const
 {
+    if (!is_bound_) bind();
+    
    filter_in_box filter(q.get_bbox());
    if (indexed_)
    {
@@ -218,6 +234,8 @@ featureset_ptr shape_datasource::features(const query& q) const
 
 featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
 {
+    if (!is_bound_) bind();
+
    filter_at_point filter(pt);
    // collect all attribute names
    std::vector<attribute_descriptor> const& desc_vector = desc_.get_descriptors();
@@ -252,5 +270,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
 
 Envelope<double> shape_datasource::envelope() const
 {
+    if (!is_bound_) bind();
+    
    return extent_;
 }

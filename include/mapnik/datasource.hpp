@@ -71,9 +71,11 @@ namespace mapnik {
             Vector,
             Raster
         };
-        
-        datasource (parameters const& params)
-            : params_(params) {}
+
+    datasource (parameters const& params, bool bind=true)
+        : params_(params),
+          is_bound_(false)
+        {}
 
         /*!
          * @brief Get the configuration parameters of the data source.
@@ -93,6 +95,11 @@ namespace mapnik {
          */
         virtual int type() const=0;
         
+    /*!
+     * @brief Connect to the datasource
+     */
+    virtual void bind() const {};
+    
         virtual featureset_ptr features(const query& q) const=0;
         virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
         virtual Envelope<double> envelope() const=0;
@@ -100,10 +107,11 @@ namespace mapnik {
         virtual ~datasource() {};
     protected:
         parameters params_;
+        mutable bool is_bound_;
     };
     
     typedef std::string datasource_name();
-    typedef datasource* create_ds(const parameters& params);
+    typedef datasource* create_ds(const parameters& params, bool bind);
     typedef void destroy_ds(datasource *ds);
 
     
@@ -124,9 +132,9 @@ namespace mapnik {
         {                                                               \
             return classname::name();                                   \
         }                                                               \
-        extern "C"  MAPNIK_EXP datasource* create(const parameters &params) \
+    extern "C"  MAPNIK_EXP datasource* create(const parameters &params, bool bind) \
         {                                                               \
-            return new classname(params);                               \
+        return new classname(params, bind);                             \
         }                                                               \
         extern "C" MAPNIK_EXP void destroy(datasource *ds)             \
         {                                                               \

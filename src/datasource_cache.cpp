@@ -67,7 +67,7 @@ namespace mapnik
    bool datasource_cache::registered_=false;
 std::vector<std::string> datasource_cache::plugin_directories_;
     
-   datasource_ptr datasource_cache::create(const parameters& params) 
+   datasource_ptr datasource_cache::create(const parameters& params, bool bind) 
    {
        boost::optional<std::string> type = params.get<std::string>("type");
        if ( ! type)
@@ -105,7 +105,7 @@ std::vector<std::string> datasource_cache::plugin_directories_;
           std::clog << i->first << "=" << i->second << "\n";  
        }
 #endif
-       ds=datasource_ptr(create_datasource(params), datasource_deleter());
+    ds=datasource_ptr(create_datasource(params, bind), datasource_deleter());
 
 #ifdef MAPNIK_DEBUG
        std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;

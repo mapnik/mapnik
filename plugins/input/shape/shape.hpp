@@ -40,7 +40,7 @@ using mapnik::coord2d;
 class shape_datasource : public datasource
 {
    public:
-      shape_datasource(const parameters &params);
+      shape_datasource(const parameters &params, bool bind=true);
       virtual ~shape_datasource();
     
       int type() const;
@@ -49,6 +49,7 @@ class shape_datasource : public datasource
       featureset_ptr features_at_point(coord2d const& pt) const;
       Envelope<double> envelope() const;
       layer_descriptor get_descriptor() const;   
+      void bind() const;   
    private:
       shape_datasource(const shape_datasource&);
       shape_datasource& operator=(const shape_datasource&);
@@ -56,10 +57,10 @@ class shape_datasource : public datasource
    private:
       int type_;
       std::string shape_name_;
-      long file_length_;
-      Envelope<double> extent_;
-      bool indexed_;
-      layer_descriptor desc_;
+      mutable long file_length_;
+      mutable Envelope<double> extent_;
+      mutable bool indexed_;
+      mutable layer_descriptor desc_;
       static const std::string name_;
 };
 

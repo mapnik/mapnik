@@ -38,7 +38,7 @@
 class ogr_datasource : public mapnik::datasource 
 {
    public:
-      ogr_datasource(mapnik::parameters const& params);
+      ogr_datasource(mapnik::parameters const& params, bool bind=true);
       virtual ~ogr_datasource ();
       int type() const;
       static std::string name();
@@ -46,17 +46,18 @@ class ogr_datasource : public mapnik::datasource
       mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
       mapnik::Envelope<double> envelope() const;
       mapnik::layer_descriptor get_descriptor() const;
+      void bind() const;
    private:
-      mapnik::Envelope<double> extent_;
+      mutable mapnik::Envelope<double> extent_;
       int type_;
       std::string dataset_name_;
-      std::string index_name_;
-      OGRDataSource* dataset_;
-      OGRLayer* layer_;
-      std::string layerName_;
-      mapnik::layer_descriptor desc_;
+      mutable std::string index_name_;
+      mutable OGRDataSource* dataset_;
+      mutable OGRLayer* layer_;
+      mutable std::string layerName_;
+      mutable mapnik::layer_descriptor desc_;
       bool multiple_geometries_;
-      bool indexed_;
+      mutable bool indexed_;
 };
 
 
