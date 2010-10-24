@@ -31,7 +31,7 @@
 class gdal_datasource : public mapnik::datasource 
 {
 public:
-    gdal_datasource(mapnik::parameters const& params);
+    gdal_datasource(mapnik::parameters const& params, bool bind=true);
     virtual ~gdal_datasource ();
     int type() const;
     static std::string name();
@@ -39,17 +39,18 @@ public:
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
+    void bind() const;
 private:
-    mapnik::box2d<double> extent_;
+    mutable mapnik::box2d<double> extent_;
     std::string dataset_name_;
-    int band_;
+    mutable int band_;
     mapnik::layer_descriptor desc_;
-    unsigned width_;
-    unsigned height_;
-    double dx_;
-    double dy_;
-    int nbands_;
-    bool shared_dataset_;
+    mutable unsigned width_;
+    mutable unsigned height_;
+    mutable double dx_;
+    mutable double dy_;
+    mutable int nbands_;
+    mutable bool shared_dataset_;
     double filter_factor_;
     inline GDALDataset *open_dataset() const;
 };

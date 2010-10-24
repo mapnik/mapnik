@@ -53,7 +53,7 @@ public:
     static std::vector<std::string> plugin_names();
     static std::string plugin_directories();    
     static void register_datasources(const std::string& path);
-    static boost::shared_ptr<datasource> create(parameters const& params);
+    static boost::shared_ptr<datasource> create(parameters const& params, bool bind=true);
 };
 }
 

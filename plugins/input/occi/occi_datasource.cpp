@@ -91,7 +91,7 @@ std::string table_from_sql(std::string const& sql)
    return table_name;
 }
 
-occi_datasource::occi_datasource(parameters const& params)
+occi_datasource::occi_datasource(parameters const& params, bool bind)
    : datasource (params),
      table_(*params.get<std::string>("table","")),
      geometry_field_(*params.get<std::string>("geometry_field","GEOLOC")),
@@ -141,7 +141,17 @@ occi_datasource::occi_datasource(parameters const& params)
          extent_initialized_ = true;
       }
    } 
+   
+   if (bind)
+   {
+      this->bind();
+   }
+}
 
+void occi_datasource::bind()
+{
+   if (is_bound_) return;   
+    
    // connect to environment
    try
    {
@@ -269,13 +279,18 @@ occi_datasource::occi_datasource(parameters const& params)
        {
            throw datasource_exception(ex.getMessage());
        }
-   }        
+   } 
+   
+   is_bound_ = true;
 }
 
 occi_datasource::~occi_datasource()
 {
-    Environment* env = occi_environment::get_environment();
-    env->terminateStatelessConnectionPool (pool_);
+    if (is_bound_)
+    {
+        Environment* env = occi_environment::get_environment();
+        env->terminateStatelessConnectionPool (pool_);
+    }
 }
 
 std::string const occi_datasource::name_="occi";
@@ -293,6 +308,7 @@ int occi_datasource::type() const
 box2d<double> occi_datasource::envelope() const
 {
     if (extent_initialized_) return extent_;
+    if (!is_bound_) bind();
 
     double lox, loy, hix, hiy;
     occi_connection_ptr conn (pool_);
@@ -400,11 +416,14 @@ box2d<double> occi_datasource::envelope() const
 
 layer_descriptor occi_datasource::get_descriptor() const
 {
+    if (!is_bound_) bind();
     return desc_;
 }
 
 featureset_ptr occi_datasource::features(query const& q) const
 {
+    if (!is_bound_) bind();
+    
     if (pool_)
     {
         box2d<double> const& box=q.get_bbox();
@@ -479,6 +498,8 @@ featureset_ptr occi_datasource::features(query const& q) const
 
 featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 {
+    if (!is_bound_) bind();
+
     if (pool_)
     {
         std::ostringstream s;

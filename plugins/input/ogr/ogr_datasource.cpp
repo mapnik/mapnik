@@ -55,7 +55,7 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 
 
-ogr_datasource::ogr_datasource(parameters const& params)
+ogr_datasource::ogr_datasource(parameters const& params, bool bind)
    : datasource(params),
      extent_(),
      type_(datasource::Vector),
@@ -69,12 +69,22 @@ ogr_datasource::ogr_datasource(parameters const& params)
 
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
 
-   boost::optional<std::string> base = params.get<std::string>("base");
+   boost::optional<std::string> base = params_.get<std::string>("base");
    if (base)
       dataset_name_ = *base + "/" + *file;
    else
       dataset_name_ = *file;
+      
+   if (bind)
+   {
+      this->bind();
+   }
+}
 
+void ogr_datasource::bind() const
+{
+   if (is_bound_) return;   
+    
    // open ogr driver   
    dataset_ = OGRSFDriverRegistrar::Open ((dataset_name_).c_str(), FALSE);
    if (!dataset_) 
@@ -89,8 +99,8 @@ ogr_datasource::ogr_datasource(parameters const& params)
 
    // initialize layer
    
-   boost::optional<std::string> layer_by_name = params.get<std::string>("layer");
-   boost::optional<unsigned> layer_by_index = params.get<unsigned>("layer_by_index");
+   boost::optional<std::string> layer_by_name = params_.get<std::string>("layer");
+   boost::optional<unsigned> layer_by_index = params_.get<unsigned>("layer_by_index");
    
    if (layer_by_name && layer_by_index)
        throw datasource_exception("OGR Plugin: you can only select an ogr layer by name ('layer' parameter) or by number ('layer_by_index' parameter), do not supply both parameters" );
@@ -234,11 +244,16 @@ ogr_datasource::ogr_datasource(parameters const& params)
            }
        }
    }
+   
+   is_bound_ = true;
 }
 
 ogr_datasource::~ogr_datasource()
 {
-    OGRDataSource::DestroyDataSource (dataset_);
+    if (is_bound_) 
+    {
+        OGRDataSource::DestroyDataSource (dataset_);
+    }
 }
 
 std::string ogr_datasource::name()
@@ -253,16 +268,20 @@ int ogr_datasource::type() const
 
 box2d<double> ogr_datasource::envelope() const
 {
+   if (!is_bound_) bind();
    return extent_;
 }
 
 layer_descriptor ogr_datasource::get_descriptor() const
 {
+   if (!is_bound_) bind();
    return desc_;
 }
 
 featureset_ptr ogr_datasource::features(query const& q) const
 {
+   if (!is_bound_) bind();
+   
    if (dataset_ && layer_)
    {
 #if 0
@@ -311,6 +330,8 @@ featureset_ptr ogr_datasource::features(query const& q) const
 
 featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
 {
+   if (!is_bound_) bind();
+   
    if (dataset_ && layer_)
    {
         if (indexed_)

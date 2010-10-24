@@ -63,7 +63,7 @@ using boost::shared_ptr;
 using mapnik::PoolGuard;
 using mapnik::attribute_descriptor;
 
-postgis_datasource::postgis_datasource(parameters const& params)
+postgis_datasource::postgis_datasource(parameters const& params, bool bind)
     : datasource(params),
       table_(*params_.get<std::string>("table","")),
       schema_(""),
@@ -92,9 +92,6 @@ postgis_datasource::postgis_datasource(parameters const& params)
 {   
 
     if (table_.empty()) throw mapnik::datasource_exception("PostGIS: missing <table> parameter");
-
-    boost::optional<int> initial_size = params_.get<int>("initial_size",1);
-    boost::optional<int> max_size = params_.get<int>("max_size",10);
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
    
@@ -131,6 +128,19 @@ postgis_datasource::postgis_datasource(parameters const& params)
             extent_initialized_ = true;
         }
     } 
+
+    if (bind)
+    {
+        this->bind();
+    }
+}
+
+void postgis_datasource::bind() const
+{
+    if (is_bound_) return;
+    
+    boost::optional<int> initial_size = params_.get<int>("initial_size",1);
+    boost::optional<int> max_size = params_.get<int>("max_size",10);
 
     ConnectionManager *mgr=ConnectionManager::instance();   
     mgr->registerPool(creator_, *initial_size, *max_size);
@@ -305,6 +315,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
             rs->close();
         }
     }
+    
+    is_bound_ = true;
 }
 
 std::string const postgis_datasource::name_="postgis";
@@ -321,12 +333,13 @@ int postgis_datasource::type() const
 
 layer_descriptor postgis_datasource::get_descriptor() const
 {
+    if (!is_bound_) bind();
     return desc_;
 }
 
 
 std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
-{
+{    
     std::ostringstream b;
     if (srid_ > 0)
         b << "SetSRID(";
@@ -447,6 +460,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
 
 featureset_ptr postgis_datasource::features(const query& q) const
 {
+    if (!is_bound_) bind();
 #ifdef MAPNIK_DEBUG
     //mapnik::wall_clock_progress_timer timer(clog, "end feature query: ");
 #endif
@@ -510,6 +524,8 @@ featureset_ptr postgis_datasource::features(const query& q) const
 
 featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
 {
+    if (!is_bound_) bind();
+    
     ConnectionManager *mgr=ConnectionManager::instance();
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
@@ -567,6 +583,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
 box2d<double> postgis_datasource::envelope() const
 {
     if (extent_initialized_) return extent_;
+    if (!is_bound_) bind();
     
     ConnectionManager *mgr=ConnectionManager::instance();
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
@@ -656,7 +673,7 @@ box2d<double> postgis_datasource::envelope() const
 
 postgis_datasource::~postgis_datasource() 
 {
-    if (!persist_connection_)
+    if (is_bound_ && !persist_connection_)
     {
         ConnectionManager *mgr=ConnectionManager::instance();
         shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());

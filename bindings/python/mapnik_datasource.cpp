@@ -47,12 +47,20 @@ namespace
 using namespace boost::python;
 boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
 {
+    bool bind=true;
     mapnik::parameters params;
     boost::python::list keys=d.keys();
     for (int i=0; i<len(keys); ++i)
     {
         std::string key = extract<std::string>(keys[i]);
         object obj = d[key];
+        
+        if (key == "bind")
+        {
+            bind = extract<bool>(obj)();
+            continue;
+        }
+        
         extract<std::string> ex0(obj);
         extract<int> ex1(obj);
         extract<double> ex2(obj);
@@ -71,7 +79,7 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
         }
     }
         
-    return mapnik::datasource_cache::create(params);
+    return mapnik::datasource_cache::create(params, bind);
 }
     
 std::string describe(boost::shared_ptr<mapnik::datasource> const& ds)
@@ -143,6 +151,7 @@ void export_datasource()
         .def("envelope",&datasource::envelope)
         .def("descriptor",&datasource::get_descriptor) //todo
         .def("features",&datasource::features)
+        .def("bind",&datasource::bind)
         .def("fields",&fields)
         .def("_field_types",&field_types)
         .def("encoding",&encoding) //todo expose as property

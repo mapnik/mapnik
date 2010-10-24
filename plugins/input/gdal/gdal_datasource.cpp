@@ -67,7 +67,7 @@ inline GDALDataset *gdal_datasource::open_dataset() const
 
 
 
-gdal_datasource::gdal_datasource(parameters const& params)
+gdal_datasource::gdal_datasource(parameters const& params, bool bind)
     : datasource(params),
       desc_(*params.get<std::string>("type"),"utf-8"),
       filter_factor_(*params_.get<double>("filter_factor",0.0))
@@ -82,12 +82,22 @@ gdal_datasource::gdal_datasource(parameters const& params)
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("missing <file> parameter");
 
-    boost::optional<std::string> base = params.get<std::string>("base");
+    boost::optional<std::string> base = params_.get<std::string>("base");
     if (base)
         dataset_name_ = *base + "/" + *file;
     else
         dataset_name_ = *file;
    
+    if (bind)
+    {
+        this->bind();
+    }
+}
+
+void gdal_datasource::bind() const
+{
+    if (is_bound_) return;
+    
     shared_dataset_ = *params_.get<mapnik::boolean>("shared",false);
     band_ = *params_.get<int>("band", -1);
 
@@ -129,6 +139,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
     std::clog << "GDAL Plugin: Raster Extent=" << extent_ << "\n";
 #endif
 
+    is_bound_ = true;
 }
 
 gdal_datasource::~gdal_datasource() {}
@@ -145,6 +156,8 @@ std::string gdal_datasource::name()
 
 box2d<double> gdal_datasource::envelope() const
 {
+    if (!is_bound_) bind();
+    
     return extent_;
 }
 
@@ -155,12 +168,16 @@ layer_descriptor gdal_datasource::get_descriptor() const
 
 featureset_ptr gdal_datasource::features(query const& q) const
 {
+    if (!is_bound_) bind();
+
     gdal_query gq = q;
     return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, extent_, width_, height_, nbands_, dx_, dy_, filter_factor_));
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
 {
+    if (!is_bound_) bind();
+
     gdal_query gq = pt;
     return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, extent_, width_, height_, nbands_, dx_, dy_,  filter_factor_));
 }

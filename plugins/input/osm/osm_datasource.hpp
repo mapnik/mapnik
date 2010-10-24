@@ -42,7 +42,7 @@ using mapnik::box2d;
 class osm_datasource : public datasource
 {
    public:
-      osm_datasource(const parameters &params);
+      osm_datasource(const parameters &params, bool bind=true);
       virtual ~osm_datasource();
     
 	  // these must be overridden
@@ -52,15 +52,15 @@ class osm_datasource : public datasource
       box2d<double> envelope() const;
       layer_descriptor get_descriptor() const;   
 	  static std::string name() { return name_; }
-	  
+	  void bind() const;
    private:
       osm_datasource(const osm_datasource&);
       osm_datasource& operator=(const osm_datasource&);
    private:
-      box2d<double> extent_;
-	  osm_dataset * osm_data_;
+      mutable box2d<double> extent_;
+      mutable osm_dataset * osm_data_;
 	  int type_;
-	  layer_descriptor desc_;
+	  mutable layer_descriptor desc_;
 	  static const std::string name_;
 };
 

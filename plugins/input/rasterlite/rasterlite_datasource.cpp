@@ -69,7 +69,7 @@ inline void *rasterlite_datasource::open_dataset() const
 
 
 
-rasterlite_datasource::rasterlite_datasource(parameters const& params)
+rasterlite_datasource::rasterlite_datasource(parameters const& params, bool bind)
    : datasource(params),
      desc_(*params.get<std::string>("type"),"utf-8")
 {
@@ -90,7 +90,17 @@ rasterlite_datasource::rasterlite_datasource(parameters const& params)
       dataset_name_ = *base + "/" + *file;
    else
       dataset_name_ = *file;
-      
+
+   if (bind)
+   {
+      this->bind();
+   }
+}
+
+void rasterlite_datasource::bind() const
+{
+   if (is_bound_) return;   
+    
    if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
 
    void *dataset = open_dataset();
@@ -146,6 +156,8 @@ rasterlite_datasource::rasterlite_datasource(parameters const& params)
 #endif
 
    rasterliteClose(dataset);
+   
+   is_bound_ = true;
 }
 
 rasterlite_datasource::~rasterlite_datasource() {}
@@ -162,6 +174,8 @@ std::string rasterlite_datasource::name()
 
 box2d<double> rasterlite_datasource::envelope() const
 {
+   if (!is_bound_) bind();
+   
    return extent_;
 }
 
@@ -172,12 +186,16 @@ layer_descriptor rasterlite_datasource::get_descriptor() const
 
 featureset_ptr rasterlite_datasource::features(query const& q) const
 {
+   if (!is_bound_) bind();
+
    rasterlite_query gq = q;
    return featureset_ptr(new rasterlite_featureset(open_dataset(), gq));
 }
 
 featureset_ptr rasterlite_datasource::features_at_point(coord2d const& pt) const
 {
+   if (!is_bound_) bind();
+   
    rasterlite_query gq = pt;
    return featureset_ptr(new rasterlite_featureset(open_dataset(), gq));
 }
