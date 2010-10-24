@@ -224,7 +224,7 @@ PLUGINS = { # plugins with external dependencies
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
             
             # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
-            'osm':     {'default':False,'path':None,'inc':'curll.h','lib':'curl','lang':'C'},
+            'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
 
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
