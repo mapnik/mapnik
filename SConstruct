@@ -175,7 +175,6 @@ pretty_dep_names = {
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
     'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: http://trac.mapnik.org/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: http://trac.mapnik.org/wiki/SQLite',
-    'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
@@ -188,6 +187,8 @@ pretty_dep_names = {
     'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option',
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
+    'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
+    'curl':'libcurl is required for the "osm" plugin - more info: http://trac.mapnik.org/wiki/OsmPlugin',
     }
     
 def pretty_dep(dep):
@@ -222,8 +223,8 @@ PLUGINS = { # plugins with external dependencies
             'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
             
-            # todo: osm plugin does depend on libxml2 and libcurl
-            'osm':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
+            'osm':     {'default':False,'path':None,'inc':'curll.h','lib':'curl','lang':'C'},
 
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
@@ -956,6 +957,9 @@ if not preconfigured:
             if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
                 env.Replace(**backup)
                 env['SKIPPED_DEPS'].append(details['lib'])
+        elif details['lib'] and details['inc']:
+            if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
+                env['SKIPPED_DEPS'].append(details['lib'])        
 
     # re-append the local paths for mapnik sources to the beginning of the list
     # to make sure they come before any plugins that were 'prepended'
