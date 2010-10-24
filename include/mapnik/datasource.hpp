@@ -38,7 +38,8 @@
 #include <map>
 #include <string>
 
-namespace mapnik {    
+namespace mapnik {
+   
 typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
     
 struct MAPNIK_DECL Featureset

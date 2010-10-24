@@ -326,6 +326,7 @@ opts.AddVariables(
     BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
+    BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
     )
     
 # variables to pickle after successful configure step
@@ -1318,3 +1319,8 @@ if not HELP_REQUESTED:
 
     # write the viewer.ini file
     SConscript('demo/viewer/SConscript')
+    
+    # if requested, build the sample input plugins
+    if env['SAMPLE_INPUT_PLUGINS']:
+        SConscript('plugins/input/templates/helloworld/build.py')
+        

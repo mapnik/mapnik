@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:4326" background-color="white">
+    <Style name="style">
+        <Rule>
+            <PointSymbolizer />
+            <!-- the hello world sample hardcodes 'key' as the hypothetical field name -->
+            <TextSymbolizer name="[key]" face_name="DejaVu Sans Book" size="10" dx="5" dy="5"/>
+        </Rule>
+    </Style>
+    <!-- this example only works in EPSG:4326 -->
+    <Layer name="test" srs="+init=epsg:4326">
+        <StyleName>style</StyleName>
+        <Datasource>
+            <!-- here we create a 'hello' type datasource which simply
+            displays a point in the middle of the world's boundin box -->
+            <Parameter name="type">hello</Parameter>
+        </Datasource>
+    </Layer>
+</Map>
