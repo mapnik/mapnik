@@ -93,12 +93,13 @@ image_32::~image_32() {}
 
 void image_32::set_grayscale_to_alpha()
 {
-    for (int y = 0; y < height_; ++y)
+    for (unsigned int y = 0; y < height_; ++y)
     {
         unsigned int* row_from = data_.getRow(y);
-        for (int x = 0; x < width_; ++x)
+        for (unsigned int x = 0; x < width_; ++x)
         {
             unsigned rgba = row_from[x];
+            // TODO - big endian support
             unsigned r = rgba & 0xff;
             unsigned g = (rgba >> 8 ) & 0xff;
             unsigned b = (rgba >> 16) & 0xff;
@@ -119,10 +120,10 @@ void image_32::set_color_to_alpha(const color& c)
 void image_32::set_alpha(float opacity)
 {
 {
-    for (int y = 0; y < height_; ++y)
+    for (unsigned int y = 0; y < height_; ++y)
     {
         unsigned int* row_to =  data_.getRow(y);
-        for (int x = 0; x < width_; ++x)
+        for (unsigned int x = 0; x < width_; ++x)
         {
             unsigned rgba = row_to[x];
 
