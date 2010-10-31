@@ -1,22 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Map>
-  <Style name="elevation">
+<Map srs="+init=epsg:32630">
+
+  <Style name="elevation" >
     <Rule>
-      <RasterSymbolizer>
+      <RasterSymbolizer opacity="10%"/ >
+      
+      
         <RasterColorizer>
-          <ColorBand value="-200" color="rgb(0,0,0)" label="&lt;0"></ColorBand>
-          <ColorBand value="0" color="rgb(0,60,20)" midpoints="199"></ColorBand>
-          <ColorBand value="100" color="rgb(0,200,10)" midpoints="199"></ColorBand>
-          <ColorBand value="300" color="rgb(234,234,10)" midpoints="199"></ColorBand>
-          <ColorBand value="500" color="rgb(214,185,10)" midpoints="199"></ColorBand>
-          <ColorBand value="700" color="rgb(195,136,20)" midpoints="199"></ColorBand>
-          <ColorBand value="900" color="rgb(175,88,29)" midpoints="199"></ColorBand>
-          <ColorBand value="1400" color="rgb(133,72,34)" midpoints="499"></ColorBand>
-          <ColorBand value="2500" color="rgb(200,200,200)" midpoints="1099"></ColorBand>
-          <ColorBand value="3400" color="rgb(255,255,255)" midpoints="999"></ColorBand>
-          <ColorBand value="10000" color="rgb(255,255,255)"></ColorBand>
+          <!-- range (interpolated) -->
+          <color max="100" fill="white" />
+          <! -- more like css? start/end-->
+          <gradient start="100" stop="400" start-color="red" stop-color="green"/>
+
+          <gradient min="400" max="500" min_color="green" max_color="yellow"/>
+
+          <gradient>
+            <lower color="white">
+            <break color="red" value="100">
+            <break color="green" value="200">
+            <break color="yelow" value="400">
+            <upper color="transparent" value="500">
+          </gradient>
+
+          <gradient lower="white" upper="pink" method="breaks|steps|equal-interval|...">
+            <break color="red" value="100">
+            <break color="green" value="200">
+            <break color="yelow" value="400">
+          </gradient>
+
+          <!-- binning -->
+          <gradient lower="white" upper="pink" method="breaks|steps|equal-interval|...">
+            <break color="red" value="100">
+            <break color="green" value="200">
+            <break color="yelow" value="400">
+          </gradient>
+
+          <!-- gradient -->
+          <gradient lower="white" upper="pink" method="breaks|steps|equal-interval|...">
+            <break color="red" value="100">
+            <break color="green" value="200">
+            <break color="yelow" value="400">
+          </gradient>
+
+          <color min="520" fill="black" />
+
+          <!-- descrete -->
+          <apply|map|match min="12" max="12" color="red" />
+          <color min="50" max="50" fill="green" />          
+          <color min="500" max="520" fill="blue" />
+          
+          
+          <!-- take 122 -->
+          <discrete color="white" /> <!-- white <100 -->
+          <discrete color="red" value="100" /> <!-- red:green 100-200 -->
+          <gradient color="green" value="200" /> <!-- green:yellow 200-400 -->
+          <gradient color="yellow" value="400" />
+          <discrete color="black" /> <!-- black >=400 -->
+          
+        <RasterColorizer mode="linear" before="blue">
+          <stop color="red" value="100" /> <!-- 100-200 = red>green -->
+          <stop color="green" value="200" /> <!-- 200-400 = green>yellow -->
+          <stop color="yellow" value="400" />
         </RasterColorizer>
+        <style>
+          #layer [band=1] {
+            raster-linear-gradient: blue, red 100, green 200, yellow 400;
+            
+            raster-discrete: transparent, green 100, yellow 200, black 400;
+          }
+        </style>
+          
+        <RasterColorizer mode="discrete" before="transparent"><!-- 0-100=alpha -->
+          <stop color="green" value="100" /> <!-- 100-200=green -->
+          <stop color="yellow" value="200" /> <!-- 200-400=yellow -->
+          <stop color="black" value="400" /> <!-- >=400=black -->
+          <stop value="450" /> <!-- >=450=transparent -->
+        </RasterColorizer>
+        <style>
+          #layer [band=1] {
+            raster-opacity:.5
+            raster-scaling: bilinear 1
+            raster-discrete: transparent, green 100, yellow 200, black 400;
+          }
+        </style>
+        
+        <RasterColorizer mode="exact">
+          <stop color="red" value="12" />
+          <stop color="green" value="122" />
+          <stop color="blue" value="123" />
+          <!-- every other color not drawn -->
+        </RasterColorizer>
+        <style>
+          #layer [value=12] {
+            raster-color: red;
+          }
+          #layer [value=122] {
+            raster-color: green;
+          }
+          #layer [value=123] {
+            raster-color: blue;
+          }
+          
+          /*implement filters for rasters in mapnik */
+          #layer [value<75][value>50] {
+            raster-color: pink;
+            raster-linear-gradient: pink, blue 60, black 90, brown 100;
+          }
+
+          #layer {
+            raster-opacity:.5
+            raster-scaling: bilinear 1
+          }
+
+          #layer {
+            raster-classes: red 12, green 122, blue 123;
+          }
+        </style>
+        
+        
       </RasterSymbolizer>
     </Rule>
   </Style>
+
+  <Layer name="dataraster" srs="+init=epsg:32630">
+      <StyleName>elevation</StyleName>
+      <Datasource>
+          <Parameter name="file">/Users/dane/projects/mapnik-dev/trunk/tests/data/raster/dataraster.tif</Parameter>
+          <Parameter name="type">gdal</Parameter>
+          <Parameter name="band">1</Parameter>
+      </Datasource>
+  </Layer>
+
 </Map>
+
