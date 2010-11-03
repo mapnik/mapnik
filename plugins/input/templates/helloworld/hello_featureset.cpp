@@ -1,4 +1,5 @@
 #include "hello_featureset.hpp"
+#include <mapnik/geometry.hpp>
 
 hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string const& encoding)
   : box_(box),
@@ -23,17 +24,17 @@ mapnik::feature_ptr hello_featureset::next()
         // since we don't actually have any data to pull from...
         mapnik::coord2d center = box_.center();
         
-        // create a new geometry
-        mapnik::geometry_type * point = new mapnik::point_impl;
+        // create a new point geometry
+        mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::Point);
         
         // we use path type geometries in Mapnik to fit nicely with AGG and Cairo
-        // here we stick an x,y pair into the geometry
-        point->move_to(center.x,center.y);
+        // here we stick an x,y pair into the geometry using move_to()
+        pt->move_to(center.x,center.y);
         
         // add the geometry to the feature
-        feature->add_geometry(point);
+        feature->add_geometry(pt);
         
-        // increment to count so that we only return on feature
+        // increment to count so that we only return one feature
         ++count_;
         
         // return the feature!
