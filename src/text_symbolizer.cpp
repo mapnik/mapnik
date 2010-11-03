@@ -107,6 +107,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       displacement_(0.0,0.0),
       avoid_edges_(false),
       minimum_distance_(0.0),
+      minimum_padding_(0.0),
       overlap_(false),
       text_opacity_(1.0),
       wrap_before_(false),
@@ -138,6 +139,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       displacement_(0.0,0.0),
       avoid_edges_(false),
       minimum_distance_(0.0),
+      minimum_padding_(0.0),
       overlap_(false),
       text_opacity_(1.0),
       wrap_before_(false),
@@ -170,6 +172,7 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       displacement_(rhs.displacement_),
       avoid_edges_(rhs.avoid_edges_),
       minimum_distance_(rhs.minimum_distance_),
+      minimum_padding_(rhs.minimum_padding_),
       overlap_(rhs.overlap_),
       text_opacity_(rhs.text_opacity_),
       wrap_before_(rhs.wrap_before_),
@@ -204,6 +207,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     displacement_ = other.displacement_;
     avoid_edges_ = other.avoid_edges_;
     minimum_distance_ = other.minimum_distance_;
+    minimum_padding_ = other.minimum_padding_;
     overlap_ = other.overlap_;
     text_opacity_ = other.text_opacity_;
     wrap_before_ = other.wrap_before_;
@@ -472,6 +476,17 @@ void text_symbolizer::set_minimum_distance(double distance)
 {
     minimum_distance_ = distance;
 }
+
+double text_symbolizer::get_minimum_padding() const
+{
+    return minimum_padding_;
+}
+
+void text_symbolizer::set_minimum_padding(double distance)
+{
+    minimum_padding_ = distance;
+}
+ 
 
 void text_symbolizer::set_allow_overlap(bool overlap)
 {

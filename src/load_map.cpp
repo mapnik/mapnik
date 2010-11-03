@@ -1230,7 +1230,15 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         {
             text_symbol.set_minimum_distance(*min_distance);
         }
-
+        
+        // minimum distance from edge of the map
+        optional<unsigned> min_padding =
+            get_opt_attr<unsigned>(sym, "min_padding");
+        if (min_distance)
+        {
+            text_symbol.set_minimum_padding(*min_padding);
+        }
+        
         // do not render labels around edges
         optional<boolean> avoid_edges =
             get_opt_attr<boolean>(sym, "avoid_edges");
@@ -1393,6 +1401,14 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
                 shield_symbol.set_minimum_distance(*min_distance);
             }
 
+            // minimum distance from edge of the map
+            optional<unsigned> min_padding =
+                get_opt_attr<unsigned>(sym, "min_padding");
+            if (min_distance)
+            {
+                shield_symbol.set_minimum_padding(*min_padding);
+            }
+            
             // spacing between repeated labels on lines
             optional<unsigned> spacing = get_opt_attr<unsigned>(sym, "spacing");
             if (spacing)

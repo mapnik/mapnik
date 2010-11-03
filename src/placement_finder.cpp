@@ -66,6 +66,7 @@ placement::placement(string_info & info_,
       force_odd_labels(sym.get_force_odd_labels()),
       max_char_angle_delta(sym.get_max_char_angle_delta()),
       minimum_distance(scale_factor_ * sym.get_minimum_distance()),
+      minimum_padding(scale_factor_ * sym.get_minimum_padding()),
       avoid_edges(sym.get_avoid_edges()),
       has_dimensions(has_dimensions_),
       allow_overlap(false),
@@ -88,6 +89,7 @@ placement::placement(string_info & info_,
       force_odd_labels(sym.get_force_odd_labels()),
       max_char_angle_delta(sym.get_max_char_angle_delta()),
       minimum_distance(scale_factor_ * sym.get_minimum_distance()),
+      minimum_padding(scale_factor_ * sym.get_minimum_padding()),
       avoid_edges(sym.get_avoid_edges()),
       has_dimensions(false),
       allow_overlap(sym.get_allow_overlap()),
@@ -416,6 +418,19 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
 
             if (p.avoid_edges && !dimensions_.contains(e))
                 return;
+
+            if (p.minimum_padding > 0) 
+            {
+                box2d<double> epad(e.minx()-p.minimum_padding,
+                                      e.miny()-p.minimum_padding,
+                                      e.maxx()+p.minimum_padding,
+                                      e.maxy()+p.minimum_padding);
+                if (!dimensions_.contains(epad)) 
+                {
+                    return;
+                }
+            }
+  
 
             c_envelopes.push(e);  // add character's envelope to temp storage
         }
@@ -843,10 +858,21 @@ bool placement_finder<DetectorT>::test_placement(placement & p, const std::auto_
             status = false;
             break;
         }
-
+        if (p.minimum_padding > 0) 
+        { 
+            box2d<double> epad(e.minx()-p.minimum_padding,
+                               e.miny()-p.minimum_padding,
+                               e.maxx()+p.minimum_padding,
+                               e.maxy()+p.minimum_padding);
+            if (!dimensions_.contains(epad)) 
+            {
+                status = false;
+                break;
+            }
+        }
         p.envelopes.push(e);
     }
-
+    
     current_placement->rewind();
 
     return status;

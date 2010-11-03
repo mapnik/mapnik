@@ -307,6 +307,8 @@ popplaces_text_symbolizer.label_placement= mapnik2.label_placement.POINT_PLACEME
 popplaces_text_symbolizer.halo_fill = mapnik2.Color('white')
 popplaces_text_symbolizer.halo_radius = 1
 popplaces_text_symbolizer.avoid_edges = True
+#popplaces_text_symbolizer.minimum_padding = 30
+
 popplaces_rule.symbols.append(popplaces_text_symbolizer)
 
 popplaces_style.rules.append(popplaces_rule)

@@ -88,6 +88,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         extras.append(t.get_horizontal_alignment());
         extras.append(t.get_justify_alignment());
         extras.append(t.get_text_opacity());
+        extras.append(t.get_minimum_padding());
                 
         return boost::python::make_tuple(disp,t.get_label_placement(),
                                          t.get_vertical_alignment(),t.get_halo_radius(),t.get_halo_fill(),t.get_text_ratio(),
@@ -141,7 +142,6 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         t.set_force_odd_labels(extract<bool>(state[11]));
         
         t.set_max_char_angle_delta(extract<double>(state[12]));
-        
         list extras = extract<list>(state[13]);
         t.set_wrap_char_from_string(extract<std::string>(extras[0]));
         t.set_line_spacing(extract<unsigned>(extras[1]));
@@ -151,6 +151,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         t.set_horizontal_alignment(extract<horizontal_alignment_e>(extras[5]));
         t.set_justify_alignment(extract<justify_alignment_e>(extras[6]));
         t.set_text_opacity(extract<double>(extras[7]));
+        t.set_minimum_padding(extract<double>(extras[8]));
     }
 };
 
@@ -252,6 +253,9 @@ void export_text_symbolizer()
         .add_property("minimum_distance",
                       &text_symbolizer::get_minimum_distance,
                       &text_symbolizer::set_minimum_distance)
+        .add_property("minimum_padding",
+                      &text_symbolizer::get_minimum_padding,
+                      &text_symbolizer::set_minimum_padding)
         .add_property("name",&text_symbolizer::get_name,
                       &text_symbolizer::set_name)
         .add_property("opacity",

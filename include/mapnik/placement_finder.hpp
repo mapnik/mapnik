@@ -71,6 +71,7 @@ struct placement : boost::noncopyable
     double minimum_distance;
     bool avoid_edges;
     bool has_dimensions;
+    double minimum_padding;
     bool allow_overlap;
     std::pair<double, double> dimensions;
     int text_size;
