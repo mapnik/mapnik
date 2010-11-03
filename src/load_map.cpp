@@ -1234,7 +1234,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         // minimum distance from edge of the map
         optional<unsigned> min_padding =
             get_opt_attr<unsigned>(sym, "min_padding");
-        if (min_distance)
+        if (min_padding)
         {
             text_symbol.set_minimum_padding(*min_padding);
         }
@@ -1404,7 +1404,7 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
             // minimum distance from edge of the map
             optional<unsigned> min_padding =
                 get_opt_attr<unsigned>(sym, "min_padding");
-            if (min_distance)
+            if (min_padding)
             {
                 shield_symbol.set_minimum_padding(*min_padding);
             }
