@@ -44,7 +44,7 @@ using mapnik::feature_ptr;
 using mapnik::point_impl;
 using mapnik::line_string_impl;
 using mapnik::polygon_impl;
-using mapnik::geometry2d;
+using mapnik::geometry_type;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::datasource_exception;
@@ -243,7 +243,7 @@ void occi_featureset::convert_point (SDOGeometry* geom, feature_ptr feature, int
     SDOPointType* sdopoint = geom->getSdo_point();
     if (sdopoint && ! sdopoint->isNull())
     {
-        geometry2d* point = new point_impl;
+        geometry_type* point = new geometry_type(mapnik::Point);
 
         point->move_to (sdopoint->getX(), sdopoint->getY());
 
@@ -259,10 +259,10 @@ void occi_featureset::convert_linestring (SDOGeometry* geom, feature_ptr feature
 
     if (ord_size >= dimensions)
     {
-        geometry2d * line = new line_string_impl;
+        geometry_type * line = new geometry_type(mapnik::LineString);
         line->set_capacity (ord_size);
 
-        fill_geometry2d (line, elem_info, ordinates, dimensions, false);
+        fill_geometry_type (line, elem_info, ordinates, dimensions, false);
         
         feature->add_geometry (line);
     }
@@ -276,10 +276,10 @@ void occi_featureset::convert_polygon (SDOGeometry* geom, feature_ptr feature, i
 
     if (ord_size >= dimensions)
     {
-        geometry2d * poly = new polygon_impl;
+        geometry_type * poly = new geometry_type(mapnik::Polygon);
         poly->set_capacity (ord_size);
 
-        fill_geometry2d (poly, elem_info, ordinates, dimensions, false);
+        fill_geometry_type (poly, elem_info, ordinates, dimensions, false);
 
         feature->add_geometry (poly);
     }
@@ -293,9 +293,9 @@ void occi_featureset::convert_multipoint (SDOGeometry* geom, feature_ptr feature
 
     if (ord_size >= dimensions)
     {
-        geometry2d * point = new point_impl;
+        geometry_type * point = new geometry_type(mapnik::Point);
 
-        fill_geometry2d (point, elem_info, ordinates, dimensions, true);
+        fill_geometry_type (point, elem_info, ordinates, dimensions, true);
 
         feature->add_geometry (point);
     }
@@ -320,10 +320,10 @@ void occi_featureset::convert_multilinestring (SDOGeometry* geom, feature_ptr fe
 
     if (ord_size >= dimensions)
     {
-        geometry2d * line = new line_string_impl;
+        geometry_type * line = new geometry_type(mapnik::LineString);
         line->set_capacity (ord_size);
 
-        fill_geometry2d (line, elem_info, ordinates, dimensions, false);
+        fill_geometry_type (line, elem_info, ordinates, dimensions, false);
         
         feature->add_geometry (line);
     }
@@ -348,10 +348,10 @@ void occi_featureset::convert_multipolygon (SDOGeometry* geom, feature_ptr featu
 
     if (ord_size >= dimensions)
     {
-        geometry2d * poly = new polygon_impl;
+        geometry_type * poly = new geometry_type(mapnik::Polygon);
         poly->set_capacity (ord_size);
 
-        fill_geometry2d (poly, elem_info, ordinates, dimensions, false);
+        fill_geometry_type (poly, elem_info, ordinates, dimensions, false);
 
         feature->add_geometry (poly);
     }
@@ -383,7 +383,7 @@ void occi_featureset::convert_collection (SDOGeometry* geom, feature_ptr feature
 }
 */
 
-void occi_featureset::fill_geometry2d (geometry2d * geom,
+void occi_featureset::fill_geometry_type (geometry_type * geom,
                                         const std::vector<Number>& elem_info,
                                         const std::vector<Number>& ordinates,
                                         const int dimensions,
@@ -447,7 +447,7 @@ void occi_featureset::fill_geometry2d (geometry2d * geom,
 
                 if (is_linear_element)
                 {
-                    fill_geometry2d (geom,
+                    fill_geometry_type (geom,
                                      offset - 1,
                                      next_offset - 1,
                                      ordinates,
@@ -462,7 +462,7 @@ void occi_featureset::fill_geometry2d (geometry2d * geom,
         }
         else
         {
-            fill_geometry2d (geom,
+            fill_geometry_type (geom,
                              offset - 1,
                              ord_size,
                              ordinates,
@@ -472,7 +472,7 @@ void occi_featureset::fill_geometry2d (geometry2d * geom,
     }
 }
 
-void occi_featureset::fill_geometry2d (geometry2d * geom,
+void occi_featureset::fill_geometry_type (geometry_type * geom,
                                         const int real_offset,
                                         const int next_offset,
                                         const std::vector<Number>& ordinates,

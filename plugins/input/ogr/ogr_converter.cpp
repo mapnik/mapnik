@@ -37,17 +37,7 @@ using std::endl;
 
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
-using mapnik::geometry2d;
-using mapnik::point_impl;
-using mapnik::line_string_impl;
-using mapnik::polygon_impl;
-
-/*
-using mapnik::query;
-using mapnik::box2d;
-using mapnik::CoordTransform;
-using mapnik::Feature;
-*/
+using mapnik::geometry_type;
 
 void ogr_converter::convert_geometry (OGRGeometry* geom, feature_ptr feature, bool multiple_geometries)
 {
@@ -102,7 +92,7 @@ void ogr_converter::convert_geometry (OGRGeometry* geom, feature_ptr feature, bo
 
 void ogr_converter::convert_point (OGRPoint* geom, feature_ptr feature)
 {
-    geometry2d* point = new point_impl;
+    geometry_type * point = new geometry_type(mapnik::Point);
     point->move_to (geom->getX(), geom->getY());
     feature->add_geometry (point);
 }
@@ -110,7 +100,7 @@ void ogr_converter::convert_point (OGRPoint* geom, feature_ptr feature)
 void ogr_converter::convert_linestring (OGRLineString* geom, feature_ptr feature)
 {
     int num_points = geom->getNumPoints ();
-    geometry2d * line = new line_string_impl;
+    geometry_type * line = new geometry_type(mapnik::LineString);
     line->set_capacity (num_points);
     line->move_to (geom->getX (0), geom->getY (0));
     for (int i=1;i<num_points;++i)
@@ -132,7 +122,7 @@ void ogr_converter::convert_polygon (OGRPolygon* geom, feature_ptr feature)
         capacity += interior->getNumPoints ();
     }    
     
-    geometry2d * poly = new polygon_impl;
+    geometry_type * poly = new geometry_type(mapnik::Polygon);
     poly->set_capacity (num_points + capacity);
     poly->move_to (exterior->getX (0), exterior->getY (0));
     for (int i=1;i<num_points;++i)
@@ -155,8 +145,8 @@ void ogr_converter::convert_polygon (OGRPolygon* geom, feature_ptr feature)
 void ogr_converter::convert_multipoint (OGRMultiPoint* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries ();
-    geometry2d* point = new point_impl;
-
+    geometry_type * point = new geometry_type(mapnik::Point);
+    
     for (int i=0;i<num_geometries;i++)
     {
         OGRPoint* ogrpoint = static_cast<OGRPoint*>(geom->getGeometryRef (i));
@@ -188,9 +178,9 @@ void ogr_converter::convert_multilinestring (OGRMultiLineString* geom, feature_p
         num_points += ls->getNumPoints ();
     }
 
-    geometry2d * line = new line_string_impl;
+    geometry_type * line = new geometry_type(mapnik::LineString);
     line->set_capacity (num_points);
-
+    
     for (int i=0;i<num_geometries;i++)
     {
         OGRLineString* ls = static_cast<OGRLineString*>(geom->getGeometryRef (i));
@@ -231,7 +221,7 @@ void ogr_converter::convert_multipolygon (OGRMultiPolygon* geom, feature_ptr fea
         }    
     }
 
-    geometry2d * poly = new polygon_impl;
+    geometry_type * poly = new geometry_type(mapnik::Polygon);
     poly->set_capacity (capacity);
 
     for (int i=0;i<num_geometries;i++)

@@ -37,7 +37,7 @@ struct accumulate_extent
     {
         for (unsigned i=0;i<feat->num_geometries();++i)
         {
-            geometry2d & geom = feat->get_geometry(i);
+            geometry_type & geom = feat->get_geometry(i);
             if ( first_ ) 
             {
                 first_ = false;
@@ -100,4 +100,17 @@ size_t memory_datasource::size() const
 {
     return features_.size();
 }
+
+// point_datasource
+
+void point_datasource::add_point(double x, double y, const char* key, const char* value)
+{
+        feature_ptr feature(feature_factory::create(feat_id++));
+        geometry_type * pt = new geometry_type(Point);
+        pt->move_to(x,y);
+        feature->add_geometry(pt);
+        transcoder tr("utf-8");
+        (*feature)[key] = tr.transcode(value);
+        this->push(feature);
+    }
 }

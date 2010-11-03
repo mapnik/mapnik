@@ -49,7 +49,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::pixfmt_rgba32 pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
@@ -94,7 +94,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
             for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
-                geometry2d const& geom = feature.get_geometry(i);
+                geometry_type const& geom = feature.get_geometry(i);
                 if (geom.num_points() <= 1)
                 {
                     std::clog << "### Warning svg markers not supported yet for points within markers_symbolizer\n";
@@ -175,7 +175,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
         for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            geometry2d const& geom = feature.get_geometry(i);
+            geometry_type const& geom = feature.get_geometry(i);
             //if (geom.num_points() <= 1) continue;
             if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
             {

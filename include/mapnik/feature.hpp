@@ -102,7 +102,7 @@ public:
         box2d<double> result;
         for (unsigned i=0;i<num_geometries();++i)
         {
-            geometry2d const& geom = get_geometry(i);
+            geometry_type const& geom = get_geometry(i);
             if (i==0)
             {
                 box2d<double> box = geom.envelope();
@@ -160,7 +160,7 @@ public:
     }
 };
    
-typedef feature<geometry2d,raster_ptr> Feature;
+typedef feature<geometry_type,raster_ptr> Feature;
    
 inline std::ostream& operator<< (std::ostream & out,Feature const& f)
 {

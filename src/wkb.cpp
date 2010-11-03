@@ -203,7 +203,7 @@ private:
         
     void read_point(Feature & feature)
     {
-        geometry2d * pt = new geometry2d;//new point<vertex2d>;
+        geometry_type * pt = new geometry_type(Point);
         double x = read_double();
         double y = read_double();
         pt->move_to(x,y);
@@ -222,7 +222,7 @@ private:
          
     void read_multipoint_2(Feature & feature)
     {
-        geometry2d * pt = new geometry2d;//point<vertex2d>;
+        geometry_type * pt = new geometry_type(Point);
         int num_points = read_integer(); 
         for (int i=0;i<num_points;++i) 
         {
@@ -236,7 +236,7 @@ private:
          
     void read_linestring(Feature & feature)
     {
-        geometry2d * line = new geometry2d;//line_string<vertex2d>;
+        geometry_type * line = new geometry_type(LineString);
         int num_points=read_integer();
         CoordinateArray ar(num_points);
         read_coords(ar);
@@ -261,7 +261,7 @@ private:
 
     void read_multilinestring_2(Feature & feature)
     {
-        geometry2d * line = new geometry2d;//line_string<vertex2d>;
+        geometry_type * line = new geometry_type(LineString);
         int num_lines=read_integer();
         unsigned capacity = 0;
         for (int i=0;i<num_lines;++i)
@@ -283,7 +283,7 @@ private:
          
     void read_polygon(Feature & feature) 
     {
-        geometry2d * poly = new polygon<vertex2d>;
+        geometry_type * poly = new geometry_type(Polygon);
         int num_rings=read_integer();
         unsigned capacity = 0;
         for (int i=0;i<num_rings;++i)
@@ -314,7 +314,7 @@ private:
 
     void read_multipolygon_2(Feature & feature)
     {
-        geometry2d * poly = new polygon<vertex2d>;
+        geometry_type * poly = new geometry_type(Polygon);
         int num_polys=read_integer();
         unsigned capacity = 0;
         for (int i=0;i<num_polys;++i)

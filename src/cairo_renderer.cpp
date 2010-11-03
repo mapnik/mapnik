@@ -568,7 +568,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
     cairo_context context(context_);
 
@@ -576,7 +576,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
 
         if (geom.num_points() > 2)
         {
@@ -600,8 +600,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
-    typedef coord_transform3<CoordTransform,geometry2d> path_type_roof;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
+    typedef coord_transform3<CoordTransform,geometry_type> path_type_roof;
 
     cairo_context context(context_);
 
@@ -610,12 +610,12 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
 
         if (geom.num_points() > 2)
         {
-            boost::scoped_ptr<geometry2d> frame(new line_string_impl);
-            boost::scoped_ptr<geometry2d> roof(new polygon_impl);
+            boost::scoped_ptr<geometry_type> frame(new line_string_impl);
+            boost::scoped_ptr<geometry_type> roof(new polygon_impl);
             std::deque<segment_t> face_segments;
             double x0(0);
             double y0(0);
@@ -649,7 +649,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             std::deque<segment_t>::const_iterator itr = face_segments.begin();
             for (; itr != face_segments.end(); ++itr)
             {
-                boost::scoped_ptr<geometry2d> faces(new polygon_impl);
+                boost::scoped_ptr<geometry_type> faces(new polygon_impl);
 
                 faces->move_to(itr->get<0>(), itr->get<1>());
                 faces->line_to(itr->get<2>(), itr->get<3>());
@@ -703,7 +703,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
     cairo_context context(context_);
     mapnik::stroke const& stroke_ = sym.get_stroke();
@@ -712,7 +712,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
 
         if (geom.num_points() > 1)
         {
@@ -756,7 +756,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
     {
         for (unsigned i = 0; i < feature.num_geometries(); ++i)
         {
-            geometry2d const& geom = feature.get_geometry(i);
+            geometry_type const& geom = feature.get_geometry(i);
             double x;
             double y;
             double z = 0;
@@ -791,7 +791,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
     expression_ptr name_expr = sym.get_name();
     if (!name_expr) return;
@@ -831,7 +831,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 
             for (unsigned i = 0; i < feature.num_geometries(); ++i)
             {
-                geometry2d const& geom = feature.get_geometry(i);
+                geometry_type const& geom = feature.get_geometry(i);
 
                 if (geom.num_points() > 0) // don't bother with empty geometries
                 {
@@ -921,7 +921,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
     boost::optional<mapnik::image_ptr> image = mapnik::image_cache::instance()->find(filename,true);
@@ -939,7 +939,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
 
         if (geom.num_points() > 1)
         {
@@ -990,7 +990,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
     cairo_context context(context_);
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
@@ -1006,7 +1006,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
 
         if (geom.num_points() > 2)
         {
@@ -1067,7 +1067,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     arrow arrow_;
     cairo_context context(context_);
 
@@ -1076,7 +1076,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
 
         if (geom.num_points() > 1)
         {
@@ -1163,7 +1163,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     expression_ptr name_expr = sym.get_name();
     if (!name_expr) return;
     value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
@@ -1203,7 +1203,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
 
             for (unsigned i = 0; i < feature.num_geometries(); ++i)
             {
-                geometry2d const& geom = feature.get_geometry(i);
+                geometry_type const& geom = feature.get_geometry(i);
 
                 if (geom.num_points() > 0) // don't bother with empty geometries
                 {

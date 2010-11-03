@@ -40,7 +40,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef  coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef  coord_transform2<CoordTransform,geometry_type> path_type;
 
     expression_ptr name_expr = sym.get_name();
     if (!name_expr) return;
@@ -89,7 +89,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             unsigned num_geom = feature.num_geometries();
             for (unsigned i=0;i<num_geom;++i)
             {
-                geometry2d const& geom = feature.get_geometry(i);
+                geometry_type const& geom = feature.get_geometry(i);
                 if (geom.num_points() > 0) // don't bother with empty geometries
                 {           
                     placement text_placement(info,sym,scale_factor_);

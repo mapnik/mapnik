@@ -54,8 +54,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef  coord_transform2<CoordTransform,geometry2d> path_type;
-    typedef  coord_transform3<CoordTransform,geometry2d> path_type_roof;
+    typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+    typedef  coord_transform3<CoordTransform,geometry_type> path_type_roof;
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 
@@ -78,11 +78,11 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
     
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
         if (geom.num_points() > 2)
         {
-            boost::scoped_ptr<geometry2d> frame(new line_string_impl);
-            boost::scoped_ptr<geometry2d> roof(new polygon_impl);
+            boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
+            boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
             std::deque<segment_t> face_segments;
             double x0(0);
             double y0(0);
@@ -109,7 +109,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             std::deque<segment_t>::const_iterator itr=face_segments.begin();
             for (;itr!=face_segments.end();++itr)
             {
-                boost::scoped_ptr<geometry2d> faces(new polygon_impl);
+                boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
                 faces->move_to(itr->get<0>(),itr->get<1>());
                 faces->line_to(itr->get<2>(),itr->get<3>());
                 faces->line_to(itr->get<2>(),itr->get<3>() + height);

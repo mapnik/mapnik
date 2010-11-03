@@ -48,7 +48,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
                                Feature const& feature,
                                proj_transform const& prj_trans)
 {
-    typedef  coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef  coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> renderer_base;
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
@@ -72,7 +72,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
         if (geom.num_points() > 1)
         {
             path_type path(t_,geom,prj_trans);

@@ -33,8 +33,7 @@ using mapnik::box2d;
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::CoordTransform;
-using mapnik::point_impl;
-using mapnik::geometry2d;
+using mapnik::geometry_type;
 using mapnik::datasource_exception;
 
 
@@ -345,7 +344,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
         double det2 = gt[2]*Y + gt[5]*X;
         unsigned x = det2/det, y = det1/det;
 
-        if(0<=x && x<raster_xsize && 0<=y && y<raster_ysize) {
+        if(x<raster_xsize && y<raster_ysize) {
 #ifdef MAPNIK_DEBUG         
             std::clog << boost::format("GDAL Plugin: pt.x=%f pt.y=%f\n") % pt.x % pt.y;
             std::clog << boost::format("GDAL Plugin: x=%f y=%f\n") % x % y;
@@ -358,7 +357,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             if(!hasNoData || value!=nodata) {
                 // construct feature
                 feature_ptr feature(new Feature(1));
-                geometry2d * point = new point_impl;
+                geometry_type * point = new geometry_type(mapnik::Point);
                 point->move_to(pt.x, pt.y);
                 feature->add_geometry(point);
                 (*feature)["value"] = value;

@@ -177,11 +177,11 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                  itr->second.to_string().c_str()));
                         }
                      }
-                     typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry2d> path_type;
+                     typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry_type> path_type;
                      
                      for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
-                        mapnik::geometry2d & geom = feat->get_geometry(i);                       
+                        mapnik::geometry_type & geom = feat->get_geometry(i);                       
                         path_type path(t,geom,prj_trans);
                         if (geom.num_points() > 0)
                         {

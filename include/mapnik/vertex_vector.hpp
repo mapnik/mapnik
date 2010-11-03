@@ -75,10 +75,10 @@ public:
             value_type** vertexs=vertexs_ + num_blocks_ - 1;
             while ( num_blocks_-- )
             {
-                delete [] *vertexs;
+                ::operator delete(*vertexs);
                 --vertexs;
             }
-            delete [] vertexs_;
+            ::operator delete(vertexs_);
         }
     }
     unsigned size() const 
@@ -121,66 +121,26 @@ private:
     {
         if (block >= max_blocks_)
         {
-            value_type** new_vertexs = new value_type* [(max_blocks_ + grow_by) * 2];
+            value_type** new_vertexs = 
+                static_cast<value_type**>(::operator new (sizeof(value_type*)*((max_blocks_ + grow_by) * 2)));
             unsigned char** new_commands = (unsigned char**)(new_vertexs + max_blocks_ + grow_by);
             if (vertexs_)
             {
                 std::memcpy(new_vertexs,vertexs_,max_blocks_ * sizeof(value_type*));
                 std::memcpy(new_commands,commands_,max_blocks_ * sizeof(unsigned char*));
-                delete [] vertexs_;
+                ::operator delete(vertexs_);
             }
             vertexs_ = new_vertexs;
             commands_ = new_commands;
             max_blocks_ += grow_by;
         }
-        vertexs_[block] = new value_type [block_size * 2 + block_size / (sizeof(value_type))];
+        vertexs_[block] = static_cast<value_type*>(::operator new(sizeof(value_type)*(block_size * 2 + block_size / (sizeof(value_type)))));
+        
         commands_[block] = (unsigned char*)(vertexs_[block] + block_size*2);
         ++num_blocks_;
     }
 };
 
-template <typename T>
-struct vertex_vector2 //: boost::noncopyable
-{
-    typedef typename T::type value_type;
-    typedef boost::tuple<value_type,value_type,char> vertex_type;
-    typedef typename std::vector<vertex_type>::const_iterator const_iterator;
-    vertex_vector2() {}
-    unsigned size() const 
-    {
-        return cont_.size();
-    }
-
-    void push_back (value_type x,value_type y,unsigned command)
-    {
-        cont_.push_back(vertex_type(x,y,command));
-    }
-    unsigned get_vertex(unsigned pos,value_type* x,value_type* y) const
-    {
-        if (pos >= cont_.size()) return SEG_END;
-        vertex_type const& c = cont_[pos];
-        *x = boost::get<0>(c);
-        *y = boost::get<1>(c);
-        return boost::get<2>(c);
-    }
-        
-    const_iterator begin() const
-    {
-        return cont_.begin();
-    }
-        
-    const_iterator end() const
-    {
-        return cont_.end();
-    }
-
-    void set_capacity(size_t size)
-    {
-        cont_.reserve(size);
-    }
-private:
-    std::vector<vertex_type> cont_;
-};
 }
 
 #endif //VERTEX_VECTOR_HPP

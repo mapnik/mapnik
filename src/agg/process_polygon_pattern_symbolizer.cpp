@@ -47,7 +47,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::wrap_mode_repeat wrap_x_type;
     typedef agg::wrap_mode_repeat wrap_y_type;
@@ -108,7 +108,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<num_geometries;++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
         if (geom.num_points() > 2)
         {
             path_type path(t_,geom,prj_trans);

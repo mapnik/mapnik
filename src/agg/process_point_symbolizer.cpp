@@ -94,7 +94,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             
             for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
-                geometry2d const& geom = feature.get_geometry(i);  
+                geometry_type const& geom = feature.get_geometry(i);  
                 geom.label_position(&x,&y);
                 prj_trans.backward(x,y,z);
                 t_.forward(&x,&y);
@@ -142,7 +142,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
         {
             for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
-                geometry2d const& geom = feature.get_geometry(i);
+                geometry_type const& geom = feature.get_geometry(i);
                 
                 geom.label_position(&x,&y);
                 prj_trans.backward(x,y,z);

@@ -41,10 +41,6 @@ using mapnik::box2d;
 using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
-using mapnik::point_impl;
-using mapnik::line_string_impl;
-using mapnik::polygon_impl;
-using mapnik::geometry2d;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 

@@ -72,8 +72,8 @@ feature_ptr kismet_featureset::next()
       {
         value = "wlan_crypted";
       }      
-
-      mapnik::geometry2d * pt = new mapnik::point_impl;
+      
+      mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::Point);
       pt->move_to(knd.bestlon_, knd.bestlat_);
       feature->add_geometry(pt);
       (*feature)[key] = tr_->transcode(value.c_str ());

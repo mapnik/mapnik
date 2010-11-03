@@ -50,7 +50,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
     typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
@@ -73,7 +73,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
-        geometry2d const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature.get_geometry(i);
         if (geom.num_points() > 1)
         {
             path_type path(t_,geom,prj_trans);

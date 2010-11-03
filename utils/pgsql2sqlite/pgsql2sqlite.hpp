@@ -364,7 +364,7 @@ void pgsql2sqlite(Connection conn,
                         geometry_utils::from_wkb(feat,buf,size,false,wkbGeneric);
                         if (feat.num_geometries() > 0)
                         {
-                            geometry2d const& geom=feat.get_geometry(0);
+                            geometry_type const& geom=feat.get_geometry(0);
                             box2d<double> bbox = geom.envelope();
                             if (valid_envelope(bbox))
                             {

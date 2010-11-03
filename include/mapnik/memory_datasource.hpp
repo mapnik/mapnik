@@ -45,27 +45,18 @@ public:
     layer_descriptor get_descriptor() const;
     size_t size() const;
 private:
-    std::vector<mapnik::feature_ptr> features_;
+    std::vector<feature_ptr> features_;
 }; 
    
 // This class implements a simple way of displaying point-based data
 // TODO -- possible redesign, move into separate file
 //
    
-class MAPNIK_DECL point_datasource : public mapnik::memory_datasource {
+class MAPNIK_DECL point_datasource : public memory_datasource {
 public:
     point_datasource() : feat_id(0) {}
-    void add_point(double x, double y, const char* key, const char* value) {
-        mapnik::feature_ptr feature(mapnik::feature_factory::create(feat_id++));
-        mapnik::geometry2d * pt = new mapnik::point_impl;
-        pt->move_to(x,y);
-        feature->add_geometry(pt);
-        mapnik::transcoder tr("utf-8");
-        (*feature)[key] = tr.transcode(value);
-        this->push(feature);
-    }
-      
-    int type() const { return mapnik::datasource::Vector; }
+    void add_point(double x, double y, const char* key, const char* value);  
+    inline int type() const { return datasource::Vector; }
       
 private:
     int feat_id;

@@ -44,7 +44,7 @@ public:
         while (pos_ != end_)
         {
             for  (unsigned i=0; i<(*pos_)->num_geometries();++i) {
-                geometry2d & geom = (*pos_)->get_geometry(i);
+                geometry_type & geom = (*pos_)->get_geometry(i);
 #ifdef MAPNIK_DEBUG
                 std::clog << "bbox_=" << bbox_ << ", geom.envelope=" << geom.envelope() << "\n";
 #endif

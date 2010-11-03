@@ -104,38 +104,38 @@ BOOST_FUSION_ADAPT_CLASS(
 )
 
 /*!
- * mapnik::geometry2d is adapted to conform to the concepts
+ * mapnik::geometry_type is adapted to conform to the concepts
  * required by Karma to be recognized as a container of
  * attributes for output generation.
  */
 namespace boost { namespace spirit { namespace traits {
 
     template <>
-    struct is_container<mapnik::geometry2d const>
+    struct is_container<mapnik::geometry_type const>
 	: mpl::true_
     {};
 
     template <>
-    struct container_iterator<mapnik::geometry2d const>
+    struct container_iterator<mapnik::geometry_type const>
     {
-	typedef mapnik::geometry2d::iterator type;
+	typedef mapnik::geometry_type::iterator type;
     };
 
     template <>
-    struct begin_container<mapnik::geometry2d const>
+    struct begin_container<mapnik::geometry_type const>
     {
-	static mapnik::geometry2d::iterator 
-	call(mapnik::geometry2d const& g)
+	static mapnik::geometry_type::iterator 
+	call(mapnik::geometry_type const& g)
 	{
 	    return g.begin();
 	}
     };
 
     template <>
-    struct end_container<mapnik::geometry2d const>
+    struct end_container<mapnik::geometry_type const>
     {
-	static mapnik::geometry2d::iterator 
-	call(mapnik::geometry2d const& g)
+	static mapnik::geometry_type::iterator 
+	call(mapnik::geometry_type const& g)
 	{
 	    return g.end();
 	}
@@ -191,7 +191,7 @@ namespace mapnik { namespace svg {
     };
 
     template <typename OutputIterator, typename PathType>
-    struct svg_path_data_grammar : karma::grammar<OutputIterator, mapnik::geometry2d()>
+    struct svg_path_data_grammar : karma::grammar<OutputIterator, mapnik::geometry_type()>
     {
 	typedef path_coordinate_transformer<PathType> coordinate_transformer;
 	typedef mapnik::vertex_vector2<mapnik::vertex2d>::vertex_type vertex_type;
@@ -234,7 +234,7 @@ namespace mapnik { namespace svg {
 	    path_vertex_transformed_y = double_[_1 = _a][bind(&coordinate_transformer::current_y, &ct_, _a)];
 	}
 
-	karma::rule<OutputIterator, mapnik::geometry2d()> svg_path;
+	karma::rule<OutputIterator, mapnik::geometry_type()> svg_path;
 	karma::rule<OutputIterator, vertex_type()> path_vertex;
 	karma::rule<OutputIterator, int()> path_vertex_command;
 	karma::rule<OutputIterator, vertex_component_type(), karma::locals<double> > path_vertex_component_x, path_vertex_component_y;

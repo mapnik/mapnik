@@ -33,7 +33,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 
-mapnik::geometry2d & (mapnik::Feature::*get_geom1)(unsigned) = &mapnik::Feature::get_geometry;
+mapnik::geometry_type & (mapnik::Feature::*get_geom1)(unsigned) = &mapnik::Feature::get_geometry;
 
 namespace {
 

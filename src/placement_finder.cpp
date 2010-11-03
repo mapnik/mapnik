@@ -942,7 +942,7 @@ void placement_finder<DetectorT>::clear()
     detector_.clear();
 }
 
-typedef coord_transform2<CoordTransform,geometry2d> PathType;
+typedef coord_transform2<CoordTransform,geometry_type> PathType;
 typedef label_collision_detector4 DetectorType;
 
 template class placement_finder<DetectorType>;

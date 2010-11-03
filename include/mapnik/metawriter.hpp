@@ -71,7 +71,7 @@ public:
 class metawriter
 {
 public:
-    typedef coord_transform2<CoordTransform,geometry2d> path_type;
+    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     metawriter(metawriter_properties dflt_properties) : dflt_properties_(dflt_properties) {}
     virtual ~metawriter() {};
     /** Output a rectangular area.

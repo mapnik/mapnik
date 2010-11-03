@@ -35,8 +35,6 @@
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 
-using mapnik::geometry2d;
-
 struct shape_io : boost::noncopyable
 {
     static const std::string SHP;
@@ -89,12 +87,12 @@ public:
     void move_to(int id);
     int type() const;
     const box2d<double>& current_extent() const;
-    geometry2d * read_polyline();
-    geometry2d * read_polylinem();
-    geometry2d * read_polylinez();
-    geometry2d * read_polygon();
-    geometry2d * read_polygonm();
-    geometry2d * read_polygonz();
+    mapnik::geometry_type * read_polyline();
+    mapnik::geometry_type * read_polylinem();
+    mapnik::geometry_type * read_polylinez();
+    mapnik::geometry_type * read_polygon();
+    mapnik::geometry_type * read_polygonm();
+    mapnik::geometry_type * read_polygonz();
 };
 
 #endif //SHAPE_IO_HPP

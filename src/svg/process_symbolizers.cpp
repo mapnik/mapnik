@@ -26,43 +26,43 @@
 
 namespace mapnik { 
 
-    template <typename OutputIterator>
-    bool svg_renderer<OutputIterator>::process(rule_type::symbolizers const& syms,
-		 Feature const& feature,
-		 proj_transform const& prj_trans)
+template <typename OutputIterator>
+bool svg_renderer<OutputIterator>::process(rule_type::symbolizers const& syms,
+                                           Feature const& feature,
+                                           proj_transform const& prj_trans)
+{
+    // svg renderer supports processing of multiple symbolizers.
+
+    typedef coord_transform2<CoordTransform, geometry_type> path_type;
+
+    // process each symbolizer to collect its (path) information.
+    // path information (attributes from line_ and polygon_ symbolizers)
+    // is collected with the path_attributes_ data member.
+    BOOST_FOREACH(symbolizer const& sym, syms)
     {
-	// svg renderer supports processing of multiple symbolizers.
+        boost::apply_visitor(symbol_dispatch(*this, feature, prj_trans), sym);
+    }
 
-	typedef coord_transform2<CoordTransform, geometry2d> path_type;
+    // generate path output for each geometry of the current feature.
+    for(unsigned i=0; i<feature.num_geometries(); ++i)
+    {
+        geometry_type const& geom = feature.get_geometry(i);
+        if(geom.num_points() > 1)
+        {
+            path_type path(t_, geom, prj_trans);
+            generator_.generate_path(path, path_attributes_);
+        }
+    }
 
-	// process each symbolizer to collect its (path) information.
-	// path information (attributes from line_ and polygon_ symbolizers)
-	// is collected with the path_attributes_ data member.
-	BOOST_FOREACH(symbolizer const& sym, syms)
-	{
-	    boost::apply_visitor(symbol_dispatch(*this, feature, prj_trans), sym);
-	}
+    // set the previously collected values back to their defaults
+    // for the feature that will be processed next.
+    path_attributes_.reset();
 
-	// generate path output for each geometry of the current feature.
-	for(unsigned i=0; i<feature.num_geometries(); ++i)
-	{
-	    geometry2d const& geom = feature.get_geometry(i);
-	    if(geom.num_points() > 1)
-	    {
-		path_type path(t_, geom, prj_trans);
-		generator_.generate_path(path, path_attributes_);
-	    }
-	}
+    return true;
+};
 
-	// set the previously collected values back to their defaults
-	// for the feature that will be processed next.
-	path_attributes_.reset();
-
-	return true;
-    };
-
-    template bool svg_renderer<std::ostream_iterator<char> >::process(rule_type::symbolizers const& syms,
-								      Feature const& feature,
-								      proj_transform const& prj_trans);
+template bool svg_renderer<std::ostream_iterator<char> >::process(rule_type::symbolizers const& syms,
+                                                                  Feature const& feature,
+                                                                  proj_transform const& prj_trans);
 
 }

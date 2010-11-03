@@ -40,7 +40,7 @@ public:
     {
         for (unsigned i=0;i<feature.num_geometries();++i)
         {
-            geometry2d const& geom = feature.get_geometry(i);
+            geometry_type const& geom = feature.get_geometry(i);
             if (geom.hit_test(x_,y_,tol_))
                 return true;
         }

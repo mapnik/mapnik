@@ -36,7 +36,7 @@ using boost::bad_lexical_cast;
 using boost::trim_copy;
 using std::string;
 using mapnik::Feature;
-using mapnik::geometry2d;
+using mapnik::geometry_type;
 using mapnik::byte;
 using mapnik::geometry_utils;
 

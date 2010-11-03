@@ -24,7 +24,7 @@ mapnik::feature_ptr hello_featureset::next()
         mapnik::coord2d center = box_.center();
         
         // create a new geometry
-        mapnik::geometry2d * point = new mapnik::point_impl;
+        mapnik::geometry_type * point = new mapnik::point_impl;
         
         // we use path type geometries in Mapnik to fit nicely with AGG and Cairo
         // here we stick an x,y pair into the geometry
