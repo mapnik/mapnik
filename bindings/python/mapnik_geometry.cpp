@@ -31,7 +31,7 @@ void export_geometry()
     using namespace boost::python;
     using mapnik::geometry_type;
     
-    class_<geometry_type, boost::noncopyable>("GeometryType",no_init)
+    class_<geometry_type, boost::noncopyable>("Geometry2d",no_init)
         .def("envelope",&geometry_type::envelope)
         // .def("__str__",&geometry_type::to_string)
         .def("type",&geometry_type::type)
