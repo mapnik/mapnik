@@ -354,6 +354,8 @@ Mapnik 0.6.0 Release
 
 - Plugins: PostGIS plugin now accepts alternate schemas (r773)
 
+- Core: Added a Map aspect_fix_mode to ensure proper syncing of map dimensions and bbox (r705)
+
 - Fonts: Added support for fallback fonts (r704)
 
 - Cairo: Cairo support exposed in Python (r666)
