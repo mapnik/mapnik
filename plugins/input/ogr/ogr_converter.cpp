@@ -151,7 +151,7 @@ void ogr_converter::convert_multipoint (OGRMultiPoint* geom, feature_ptr feature
     {
         OGRPoint* ogrpoint = static_cast<OGRPoint*>(geom->getGeometryRef (i));
         point->move_to (ogrpoint->getX(), ogrpoint->getY());
-        //Todo - need to accept multiple points per point_impl
+        //Todo - need to accept multiple points per mapnik::Point
     }
     
     // Todo - this only gets last point
