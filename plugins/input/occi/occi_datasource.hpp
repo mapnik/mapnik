@@ -47,7 +47,7 @@ class occi_datasource : public mapnik::datasource
       mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
       mapnik::box2d<double> envelope() const;
       mapnik::layer_descriptor get_descriptor() const;
-      void bind() bind;
+      void bind() const;
    private:
       const std::string uri_;
       const std::string username_;
