@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Map background-color="lightgrey" srs="+init=epsg:4326" min_version="0.8.0">
+<Map background-color="lightgrey" srs="+init=epsg:4326" minimum_version="0.8.0">
 
     <Style name="1">
         <Rule>
