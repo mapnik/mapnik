@@ -93,18 +93,15 @@ std::string table_from_sql(std::string const& sql)
 
 occi_datasource::occi_datasource(parameters const& params, bool bind)
    : datasource (params),
-     table_(*params.get<std::string>("table","")),
-     geometry_field_(*params.get<std::string>("geometry_field","GEOLOC")),
+     table_(*params_.get<std::string>("table","")),
+     geometry_field_(*params_.get<std::string>("geometry_field","GEOLOC")),
      type_(datasource::Vector),
      extent_initialized_(false),
      row_limit_(*params_.get<int>("row_limit",0)),
      row_prefetch_(*params_.get<int>("row_prefetch",100)),
-     desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+     desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
      pool_(0)
 {
-   boost::optional<int> initial_size = params_.get<int>("inital_size",1);
-   boost::optional<int> max_size = params_.get<int>("max_size",10);
-
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
 
@@ -148,9 +145,12 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
    }
 }
 
-void occi_datasource::bind()
+void occi_datasource::bind() const
 {
    if (is_bound_) return;   
+
+   boost::optional<int> initial_size = params_.get<int>("initial_size",1);
+   boost::optional<int> max_size = params_.get<int>("max_size",10);
     
    // connect to environment
    try
@@ -158,9 +158,9 @@ void occi_datasource::bind()
         Environment* env = occi_environment::get_environment();
 
         pool_ = env->createStatelessConnectionPool(
-                    *params.get<std::string>("user"),
-                    *params.get<std::string>("password"),
-                    *params.get<std::string>("host"),
+                    *params_.get<std::string>("user"),
+                    *params_.get<std::string>("password"),
+                    *params_.get<std::string>("host"),
                     *max_size,
                     *initial_size,
                     1,

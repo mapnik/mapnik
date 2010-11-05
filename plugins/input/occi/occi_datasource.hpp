@@ -56,7 +56,7 @@ class occi_datasource : public mapnik::datasource
       const std::string geometry_field_;
       std::string geometryColumn_;
       int type_;
-      int srid_;
+      mutable int srid_;
       mutable bool extent_initialized_;
       mutable mapnik::box2d<double> extent_;
       const int row_limit_;
