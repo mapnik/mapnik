@@ -93,7 +93,7 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
 
    if (table_.empty()) throw mapnik::datasource_exception("PostGIS: missing <table> parameter");
 
-   boost::optional<int> initial_size = params_.get<int>("inital_size",1);
+   boost::optional<int> initial_size = params_.get<int>("initial_size",1);
    boost::optional<int> max_size = params_.get<int>("max_size",10);
 
    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
