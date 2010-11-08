@@ -356,33 +356,36 @@ void Map::zoom_all()
         std::vector<layer>::const_iterator end = layers_.end();
         while (itr != end)
         {
-            std::string const& layer_srs = itr->srs();
-            projection proj1(layer_srs);
-            proj_transform prj_trans(proj0,proj1);
-                
-            box2d<double> layerExt = itr->envelope();
-            double x0 = layerExt.minx();
-            double y0 = layerExt.miny();
-            double z0 = 0.0;
-            double x1 = layerExt.maxx();
-            double y1 = layerExt.maxy();
-            double z1 = 0.0;
-            prj_trans.backward(x0,y0,z0);
-            prj_trans.backward(x1,y1,z1);
-                
-            box2d<double> layerExt2(x0,y0,x1,y1);
-#ifdef MAPNIK_DEBUG
-            std::clog << " layer1 - > " << layerExt << "\n";
-            std::clog << " layer2 - > " << layerExt2 << "\n";
-#endif                
-            if (first)
+            if (itr->isActive())
             {
-                ext = layerExt2;
-                first = false;
-            }
-            else 
-            {
-                ext.expand_to_include(layerExt2);
+                std::string const& layer_srs = itr->srs();
+                projection proj1(layer_srs);
+                proj_transform prj_trans(proj0,proj1);
+                    
+                box2d<double> layerExt = itr->envelope();
+                double x0 = layerExt.minx();
+                double y0 = layerExt.miny();
+                double z0 = 0.0;
+                double x1 = layerExt.maxx();
+                double y1 = layerExt.maxy();
+                double z1 = 0.0;
+                prj_trans.backward(x0,y0,z0);
+                prj_trans.backward(x1,y1,z1);
+                    
+                box2d<double> layerExt2(x0,y0,x1,y1);
+    #ifdef MAPNIK_DEBUG
+                std::clog << " layer1 - > " << layerExt << "\n";
+                std::clog << " layer2 - > " << layerExt2 << "\n";
+    #endif                
+                if (first)
+                {
+                    ext = layerExt2;
+                    first = false;
+                }
+                else 
+                {
+                    ext.expand_to_include(layerExt2);
+                }
             }
             ++itr;
         }
