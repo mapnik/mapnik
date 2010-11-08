@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map  >
-<Map bgcolor="#b5d0d0" min_version="0.7.1">
+<Map bgcolor="#b5d0d0" minimum_version="0.7.1">
     <Style name="test">
         <Rule title="asia">
             <Filter>([REGION]=142)</Filter>
