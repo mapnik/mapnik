@@ -60,16 +60,8 @@ def fixup_pointsym(sym):
         sym.attrib.pop('type')
 
 def fixup_sym_attributes(sym):
-    #if not sym.find('CssParameter'):
-    #    return
-    attrib = {}
-    metawriter = sym.attrib.get('meta-writer')
-    if metawriter:
-        attrib['meta-writer'] = metawriter
-    metaoutput = sym.attrib.get('meta-output')
-    if metaoutput:
-        attrib['meta-output'] = metaoutput
-    
+    # copy, so we don't loose after clear()
+    attrib = dict(sym.attrib)
     for css in sym.findall('CssParameter'):
         key = css.attrib.get('name')
         value = css.text
