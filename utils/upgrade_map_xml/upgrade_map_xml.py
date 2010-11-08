@@ -114,6 +114,9 @@ if __name__ == "__main__":
         root.attrib['background-color'] = root.attrib.get('bgcolor')
         root.attrib.pop('bgcolor')
     
+    # set new minimum_version
+    root.set('minimum_version','0.8.0')
+    
     styles = root.findall('Style')
     if not len(styles):
         sys.stderr.write('### Warning, no styles encountered and nothing able to be upgraded!\n')
