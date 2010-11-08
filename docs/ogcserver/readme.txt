@@ -12,7 +12,7 @@ through the open and standard WMS interface published by the Open Geospatial
 Consortium (OGC).  It is in implemented in Python, around the core Mapnik C++
 library.
 
-This is the very first implementation of a WMS for Mapnik.  Although inital
+This is the very first implementation of a WMS for Mapnik.  Although initial
 testing seems to suggest it works well, there may be bugs, and it lacks some
 useful features.  Comments, contributions, and requests for help should all be
 directed to the Mapnik mailing list.
