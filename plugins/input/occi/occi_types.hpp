@@ -35,7 +35,7 @@
 #include "spatial_classesm.h"
 
 // check for oracle support
-#if OCCI_MAJOR_VERSION == 10 && OCCI_MINOR_VERSION >= 1
+#if OCCI_MAJOR_VERSION >= 10 && OCCI_MINOR_VERSION >= 1
   //     Only ORACLE 10g (>= 10.2.0.X) is supported !
 #else
   #error Only ORACLE 10g (>= 10.2.0.X) is supported !
