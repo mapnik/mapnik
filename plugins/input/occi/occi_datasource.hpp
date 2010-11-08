@@ -47,7 +47,7 @@ class occi_datasource : public mapnik::datasource
       mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
       mapnik::Envelope<double> envelope() const;
       mapnik::layer_descriptor get_descriptor() const;
-      void bind() bind;
+      void bind() const;
    private:
       const std::string uri_;
       const std::string username_;
@@ -55,7 +55,7 @@ class occi_datasource : public mapnik::datasource
       const std::string table_;
       const std::string geometry_field_;
       std::string geometryColumn_;
-      int type_;
+      mutable int type_;
       int srid_;
       mutable bool extent_initialized_;
       mutable mapnik::Envelope<double> extent_;
