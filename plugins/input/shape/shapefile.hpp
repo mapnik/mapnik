@@ -141,7 +141,7 @@ public:
     typedef shape_record<RecordTag> record_type;
 #endif
     
-    file_source_type file_;    
+    file_source_type file_;
     shape_file() {}
     
     shape_file(std::string  const& file_name)
