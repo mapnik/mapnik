@@ -153,7 +153,13 @@ private:
 
             // todo: only display raster if src and dest proj are matched
             // todo: add raster re-projection as an optional feature 
-            if (ds->type() == datasource::Raster && !prj_trans.equal()) return;
+            if (ds->type() == datasource::Raster && !prj_trans.equal())
+            {
+                std::clog << "WARNING: Map srs does not match layer srs, skipping raster layer '" << lay.name() << "' as raster re-projection is not currently supported (http://trac.mapnik.org/ticket/663)\n";
+                std::clog << "map srs: '" << m_.srs() << "'\nlayer srs: '" << lay.srs() << "' \n";       
+                return;
+            }
+            
             // 
             
             box2d<double> layer_ext = lay.envelope();
