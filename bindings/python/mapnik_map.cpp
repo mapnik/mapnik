@@ -124,6 +124,13 @@ mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& 
     return *style;
 }
 
+bool has_metawriter(mapnik::Map const& m)
+{
+    if (m.metawriters().size() >=1)
+        return true;
+    return false;
+}
+
 // TODO - we likely should allow indexing by negative number from python
 // for now, protect against negative values and kindly throw
 mapnik::featureset_ptr query_point(mapnik::Map const& m, int index, double x, double y)
@@ -241,6 +248,15 @@ void export_map()
              "Usage:\n"
              ">>> m.find_style('Style Name')\n"
              "<mapnik._mapnik.Style object at 0x654f0>\n"
+            )
+
+        .def("has_metawriter",
+             has_metawriter,
+             "Check if the Map has any active metawriters\n"
+             "\n"
+             "Usage:\n"
+             ">>> m.has_metawriter()\n"
+             "False\n"
             )
         
         .def("pan",&Map::pan,
