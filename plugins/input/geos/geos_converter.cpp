@@ -226,32 +226,55 @@ void geos_converter::convert_multipoint_2 (const GEOSGeometry* geom, feature_ptr
 
 void geos_converter::convert_multilinestring (const GEOSGeometry* geom, feature_ptr feature)
 {
-/*
-    int num_geometries = geom->getNumGeometries ();
+    double x, y;
+    unsigned int num_points = 0;
 
-    int num_points = 0;
-    for (int i=0;i<num_geometries;i++)
+    unsigned int num_geometries = GEOSGetNumGeometries(geom);
+
+    for (unsigned int i = 0; i < num_geometries; ++i)
     {
-        OGRLineString* ls = static_cast<OGRLineString*>(geom->getGeometryRef (i));
-        num_points += ls->getNumPoints ();
+        const GEOSGeometry* g = GEOSGetGeometryN(geom, i);
+
+        if (g != NULL && GEOSisValid(g))
+        {
+            const GEOSGeometry* gtmp = GEOSGetExteriorRing(g);
+            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(gtmp);
+            
+            unsigned int temp_points;
+            GEOSCoordSeq_getSize(cs, &temp_points);
+            
+            num_points += temp_points;
+        }
     }
+
 
     geometry_type* line = new geometry_type(mapnik::LineString);
     line->set_capacity (num_points);
 
-    for (int i=0;i<num_geometries;i++)
+    for (unsigned int i = 0; i < num_geometries; ++i)
     {
-        OGRLineString* ls = static_cast<OGRLineString*>(geom->getGeometryRef (i));
-        num_points = ls->getNumPoints ();
-        line->move_to (ls->getX (0), ls->getY (0));
-        for (int i=1;i<num_points;++i)
+        const GEOSGeometry* g = GEOSGetGeometryN(geom, i);
+
+        if (g != NULL && GEOSisValid(g))
         {
-            line->line_to (ls->getX (i), ls->getY (i));
+            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(g);
+
+            GEOSCoordSeq_getSize(cs, &num_points);
+            GEOSCoordSeq_getX(cs, 0, &x);
+            GEOSCoordSeq_getY(cs, 0, &y);
+
+            line->move_to (x, y);
+
+            for (unsigned int i = 1; i < num_points; ++i)
+            {
+                GEOSCoordSeq_getX(cs, i, &x);
+                GEOSCoordSeq_getY(cs, i, &y);
+                line->line_to (x, y);
+            }
         }
     }
 
     feature->add_geometry (line);
-*/
 }
 
 void geos_converter::convert_multilinestring_2 (const GEOSGeometry* geom, feature_ptr feature)
@@ -271,50 +294,85 @@ void geos_converter::convert_multilinestring_2 (const GEOSGeometry* geom, featur
 
 void geos_converter::convert_multipolygon (const GEOSGeometry* geom, feature_ptr feature)
 {
-/*
-    int num_geometries = geom->getNumGeometries ();
+    double x, y;
+    unsigned int num_points, num_interior;
+    unsigned int capacity = 0;
+    
+    unsigned int num_geometries = GEOSGetNumGeometries(geom);
 
-    int capacity = 0;
-    for (int i=0;i<num_geometries;i++)
+    for (unsigned int i = 0; i < num_geometries; ++i)
     {
-        OGRPolygon* p = static_cast<OGRPolygon*>(geom->getGeometryRef (i));
-        OGRLinearRing* exterior = p->getExteriorRing ();
-        capacity += exterior->getNumPoints ();
-        for (int r=0;r<p->getNumInteriorRings ();r++)
+        const GEOSGeometry* g = GEOSGetGeometryN(geom, i);
+
+        if (g != NULL && GEOSisValid(g))
         {
-            OGRLinearRing* interior = p->getInteriorRing (r);
-            capacity += interior->getNumPoints ();
-        }    
+            const GEOSGeometry* exterior = GEOSGetExteriorRing(g);
+            const GEOSCoordSequence* es = GEOSGeom_getCoordSeq(exterior);
+            GEOSCoordSeq_getSize(es, &num_points);
+
+            capacity += num_points;
+
+            num_interior = GEOSGetNumInteriorRings(geom);
+            for (unsigned int r = 0; r < num_interior; r++)
+            {
+                const GEOSGeometry* gtmp = GEOSGetInteriorRingN(geom, r);
+                const GEOSCoordSequence* is = GEOSGeom_getCoordSeq(gtmp);
+                
+                unsigned int interior_size;
+                GEOSCoordSeq_getSize(is, &interior_size);
+                
+                capacity += interior_size;
+            }    
+        }
     }
 
     geometry_type* poly = new geometry_type(mapnik::Polygon);
     poly->set_capacity (capacity);
 
-    for (int i=0;i<num_geometries;i++)
+    for (unsigned int i = 0; i < num_geometries; ++i)
     {
-        OGRPolygon* p = static_cast<OGRPolygon*>(geom->getGeometryRef (i));
-        OGRLinearRing* exterior = p->getExteriorRing ();
-        int num_points = exterior->getNumPoints ();
-        int num_interior = p->getNumInteriorRings ();
-        poly->move_to (exterior->getX (0), exterior->getY (0));
-        for (int i=1;i<num_points;++i)
+        const GEOSGeometry* g = GEOSGetGeometryN(geom, i);
+
+        if (g != NULL && GEOSisValid(g))
         {
-            poly->line_to (exterior->getX (i), exterior->getY (i));
-        }
-        for (int r=0;r<num_interior;r++)
-        {
-            OGRLinearRing* interior = p->getInteriorRing (r);
-            num_points = interior->getNumPoints ();
-            poly->move_to(interior->getX (0), interior->getY (0));
-            for (int i=1;i<num_points;++i)
+            const GEOSGeometry* exterior = GEOSGetExteriorRing(g);
+            const GEOSCoordSequence* es = GEOSGeom_getCoordSeq(exterior);
+            GEOSCoordSeq_getSize(es, &num_points);
+            GEOSCoordSeq_getX(es, 0, &x);
+            GEOSCoordSeq_getY(es, 0, &y);
+
+            num_interior = GEOSGetNumInteriorRings(g);
+
+            poly->move_to (x, y);
+            for (unsigned int i = 1; i < num_points; ++i)
             {
-                poly->line_to(interior->getX (i), interior->getY (i));
+                GEOSCoordSeq_getX(es, i, &x);
+                GEOSCoordSeq_getY(es, i, &y);
+                
+                poly->line_to (x, y);
+            }
+            for (unsigned int r = 0; r < num_interior; ++r)
+            {
+                const GEOSGeometry* gtmp = GEOSGetInteriorRingN(g, r);
+                const GEOSCoordSequence* is = GEOSGeom_getCoordSeq(gtmp);
+                
+                GEOSCoordSeq_getSize(is, &num_points);
+                GEOSCoordSeq_getX(is, 0, &x);
+                GEOSCoordSeq_getY(is, 0, &y);
+
+                poly->move_to(x, y);
+                for (unsigned int i = 1; i < num_points; ++i)
+                {
+                    GEOSCoordSeq_getX(is, i, &x);
+                    GEOSCoordSeq_getY(is, i, &y);
+
+                    poly->line_to(x, y);
+                }
             }
         }
     }
 
     feature->add_geometry (poly);
-*/
 }
 
 void geos_converter::convert_multipolygon_2 (const GEOSGeometry* geom, feature_ptr feature)
