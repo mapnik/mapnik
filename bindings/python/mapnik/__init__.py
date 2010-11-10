@@ -621,6 +621,25 @@ def Kismet(**keywords):
     keywords['type'] = 'kismet'
     return CreateDatasource(keywords)
 
+def Geos(**keywords):
+    """Create a GEOS Vector Datasource.
+
+    Required keyword arguments:
+      geometry -- inline WKT text of the geometry
+
+    Optional keyword arguments:
+      multiple_geometries -- boolean, direct the GEOS wkt reader to interpret as multigeometries (default False)
+      extent -- manually specified data extent (comma delimited string, default None)
+
+    >>> from mapnik import Geos, Layer
+    >>> datasource = Geos(wkt='MULTIPOINT(100 100, 50 50, 0 0)') 
+    >>> lyr = Layer('GEOS Layer from WKT string')
+    >>> lyr.datasource = datasource
+
+    """
+    keywords['type'] = 'geos'
+    return CreateDatasource(keywords)
+
 def mapnik_version_string(version=mapnik_version()):
     """Return the Mapnik version as a string."""
     patch_level = version % 100
