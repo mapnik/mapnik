@@ -223,7 +223,7 @@ PLUGINS = { # plugins with external dependencies
             'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
             'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
-            'geos':    {'default':False,'path':'GEOS','inc':'geos_c.h','lib':'geos_c','lang':'C'},
+            'geos':    {'default':False,'path':None,'inc':'geos_c.h','lib':'geos_c','lang':'C'},
             
             # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
             'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
