@@ -169,6 +169,7 @@ pretty_dep_names = {
     'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: http://trac.mapnik.org/wiki/OCCI',
     'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/GDAL',
     'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/OGR',
+    'geos':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: http://trac.mapnik.org/wiki/GEOS',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
@@ -222,6 +223,7 @@ PLUGINS = { # plugins with external dependencies
             'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
             'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
+            'geos':    {'default':False,'path':'GEOS','inc':'geos_c.h','lib':'geos_c','lang':'C'},
             
             # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
             'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
@@ -310,6 +312,8 @@ opts.AddVariables(
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('GEOS_INCLUDES', 'Search path for GEOS include files', '/usr/include/', PathVariable.PathAccept),
+    PathVariable('GEOS_LIBS', 'Search path for GEOS library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
