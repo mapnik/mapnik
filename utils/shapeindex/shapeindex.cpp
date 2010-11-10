@@ -83,6 +83,10 @@ int main (int argc,char** argv)
             clog << desc << endl;
             return 1;
         }
+        if (vm.count("verbose")) 
+        {
+            verbose = true;
+        }
         if (vm.count("depth"))
         {
             depth = vm["depth"].as<unsigned int>();
