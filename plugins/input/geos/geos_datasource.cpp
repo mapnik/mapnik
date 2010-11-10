@@ -35,12 +35,18 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/filesystem/operations.hpp>
 
 // geos
 #include <geos_c.h>
 
 using std::clog;
 using std::endl;
+
+using boost::lexical_cast;
+using boost::bad_lexical_cast;
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -78,25 +84,21 @@ void log_and_exit(const char* fmt, ...)
     vfprintf( stdout, fmt, ap);
     va_end(ap);
     fprintf( stdout, "\n" );
-    
-    //exit(1);
 }
 
 
 geos_datasource::geos_datasource(parameters const& params, bool bind)
    : datasource(params),
      extent_(),
+     extent_initialized_(false),
      type_(datasource::Vector),
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
-    boost::optional<std::string> geometry = params.get<std::string>("geometry");
-    if (!geometry) throw datasource_exception("missing <geometry> parameter");
+    boost::optional<std::string> geometry = params.get<std::string>("wkt");
+    if (!geometry) throw datasource_exception("missing <wkt> parameter");
     geometry_ = *geometry;
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
-
-    // initialize envelope
-    //extent_.init (envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
 
     if (bind)
     {
@@ -114,12 +116,53 @@ geos_datasource::~geos_datasource()
 
 void geos_datasource::bind() const
 {
-   if (is_bound_) return;   
+    if (is_bound_) return;   
 
-   // open ogr driver
-   initGEOS(notice, log_and_exit);
+    // open ogr driver
+    initGEOS(notice, log_and_exit);
+
+    // initialize envelope
+    boost::optional<std::string> ext  = params_.get<std::string>("extent");
+    if (ext)
+    {
+        boost::char_separator<char> sep(",");
+        boost::tokenizer<boost::char_separator<char> > tok(*ext,sep);
+        unsigned i = 0;
+        bool success = false;
+        double d[4];
+        for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tok.begin(); 
+             beg!=tok.end();++beg)
+        {
+            try 
+            {
+                d[i] = boost::lexical_cast<double>(*beg);
+            }
+            catch (boost::bad_lexical_cast & ex)
+            {
+                std::clog << ex.what() << "\n";
+                break;
+            }
+            if (i==3) 
+            {
+                success = true;
+                break;
+            }
+            ++i;
+        }
+
+        if (success)
+        {
+            extent_.init(d[0],d[1],d[2],d[3]);
+            extent_initialized_ = true;
+        }
+    }
+    
+    if (!extent_initialized_)
+    {
+        // TODO - build the geometry here and compute the extent?
+    }
    
-   is_bound_ = true;
+    is_bound_ = true;
 }
 
 std::string geos_datasource::name()

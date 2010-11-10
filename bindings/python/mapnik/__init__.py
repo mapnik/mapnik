@@ -625,7 +625,7 @@ def Geos(**keywords):
     """Create a GEOS Vector Datasource.
 
     Required keyword arguments:
-      geometry -- inline WKT text of the geometry
+      wkt -- inline WKT text of the geometry
 
     Optional keyword arguments:
       multiple_geometries -- boolean, direct the GEOS wkt reader to interpret as multigeometries (default False)

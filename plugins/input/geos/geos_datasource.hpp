@@ -46,6 +46,7 @@ class geos_datasource : public mapnik::datasource
       void bind() const;
 private:
       mutable mapnik::box2d<double> extent_;
+      mutable bool extent_initialized_;
       int type_;
       mutable mapnik::layer_descriptor desc_;
       mutable std::string geometry_;
