@@ -61,19 +61,17 @@ public:
                 Scanline& sl,
                 Renderer& ren, 
                 agg::trans_affine const& mtx, 
-                agg::rect_i const& cb,
                 double opacity=1.0)
     
     {
         using namespace agg;
         
-        ras.clip_box(cb.x1, cb.y1, cb.x2, cb.y2);
         trans_affine transform;
         curved_stroked_trans_type curved_stroked_trans(curved_stroked_,transform);
         curved_trans_type         curved_trans(curved_,transform);
         curved_trans_contour_type curved_trans_contour(curved_trans);
         
-        curved_trans_contour.auto_detect_orientation(false);
+        curved_trans_contour.auto_detect_orientation(true);
         
         for(unsigned i = 0; i < attributes_.size(); ++i)
         {
@@ -81,7 +79,7 @@ public:
             transform = attr.transform;
             transform *= mtx;
             double scl = transform.scale();
-            //m_curved.approximation_method(curve_inc);
+            //curved_.approximation_method(curve_inc);
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
             

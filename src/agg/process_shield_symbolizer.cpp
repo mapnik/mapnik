@@ -194,7 +194,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                                     {
                                         agg::trans_affine matrix = recenter * tr * agg::trans_affine_translation(label_x, label_y);
-                                        svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
+                                        svg_renderer.render(*ras_ptr, sl, ren, matrix, sym.get_opacity());
                                         box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[0]);
                                         text_ren.render(x,y);
                                         detector_.insert(label_ext);
@@ -220,7 +220,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 double x = floor(text_placement.placements[ii].starting_x);
                                 double y = floor(text_placement.placements[ii].starting_y);
                                 agg::trans_affine matrix = recenter * tr * agg::trans_affine_translation(x, y);                                
-                                svg_renderer.render(*ras_ptr, sl, ren, matrix, renb.clip_box(), sym.get_opacity());
+                                svg_renderer.render(*ras_ptr, sl, ren, matrix, sym.get_opacity());
                                 if (writer.first) writer.first->add_box(box2d<double>(x,y,x+w,y+h), feature, t_, writer.second);
                                 box2d<double> dim = text_ren.prepare_glyphs(&text_placement.placements[ii]);
                                 text_ren.render(x,y);
