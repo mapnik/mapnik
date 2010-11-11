@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/sql_utils.hpp>
 
 #ifdef MAPNIK_DEBUG
 //#include <mapnik/wall_clock_timer.hpp>
@@ -158,7 +159,7 @@ void postgis_datasource::bind() const
 
             if(geometry_table_.empty())
             {
-                geometry_table_ = table_from_sql(table_);
+                geometry_table_ = mapnik::table_from_sql(table_);
             }
             std::string::size_type idx = geometry_table_.find_last_of('.');
             if (idx!=std::string::npos)
@@ -399,31 +400,6 @@ std::string postgis_datasource::unquote(const std::string& sql)
 {
     std::string table_name = boost::algorithm::to_lower_copy(sql);  
     boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\""));
-    return table_name;
-}
-
-// TODO - make smarter and potentially move to reusable utilities 
-// available to other SQL-based plugins
-std::string postgis_datasource::table_from_sql(const std::string& sql)
-{
-    std::string table_name = boost::algorithm::to_lower_copy(sql);
-    boost::algorithm::replace_all(table_name,"\n"," ");
-   
-    std::string::size_type idx = table_name.rfind(" from ");
-    if (idx!=std::string::npos)
-    {
-      
-        idx=table_name.find_first_not_of(" ",idx+5);
-        if (idx != std::string::npos)
-        {
-            table_name=table_name.substr(idx);
-        }
-        idx=table_name.find_first_of(" )");
-        if (idx != std::string::npos)
-        {
-            table_name = table_name.substr(0,idx);
-        }
-    }
     return table_name;
 }
 

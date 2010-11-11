@@ -94,7 +94,6 @@ class postgis_datasource : public datasource
       std::string populate_tokens(const std::string& sql, double const& scale_denom, box2d<double> const& env) const;
       std::string populate_tokens(const std::string& sql) const;
       static std::string unquote(const std::string& sql);
-      static std::string table_from_sql(const std::string& sql);
       boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const;
       postgis_datasource(const postgis_datasource&);
       postgis_datasource& operator=(const postgis_datasource&);
