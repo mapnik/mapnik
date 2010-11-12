@@ -279,7 +279,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         
         if (use_spatial_index_)
         {
-           std::string table_name = table_from_sql(query);
+           std::string table_name = mapnik::table_from_sql(query);
            std::ostringstream spatial_sql;
            spatial_sql << std::setprecision(16);
            spatial_sql << " where rowid in (select pkid from idx_" << table_name << "_" << geometry_field_;
