@@ -232,18 +232,36 @@ public:
          
     bool hit_test(value_type x, value_type y, double tol) const
     {      
-        // FIXME !!!!!!!!!
-
-        // FIXME: this is a workaround around the regression metioned in
-        //        http://trac.mapnik.org/ticket/560, not a definitive solution 
-        //if (cont_.size() > 1) {
-        //    return point_inside_path(x,y,cont_.begin(),cont_.end());
-        //} else if (cont_.size() == 1) {
+        if (cont_.size() == 1) {
             // Handle points
-        //   double x0=boost::get<0>(*cont_.begin());
-        //   double y0=boost::get<1>(*cont_.begin());
-        //   return distance(x, y, x0, y0) <= abs(tol);
-        //}
+            double x0, y0;
+            cont_.get_vertex(0, &x0, &y0);
+            return distance(x, y, x0, y0) <= abs(tol);
+        } else if (cont_.size() == 1) {
+            bool inside=false;
+            double x0, y0;
+            rewind(0);
+            vertex(&x0, &y0);
+                
+            unsigned command;
+            double x1,y1;
+            while (SEG_END != (command=vertex(&x1, &y1)))
+            {
+                if (command == SEG_MOVETO)
+                {
+                    x0 = x1;
+                    y0 = y1;
+                    continue;
+                }               
+                if ((((y1 <= y) && (y < y0)) ||
+                     ((y0 <= y) && (y < y1))) &&
+                    ( x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
+                    inside=!inside;
+                x0=x1;
+                y0=y1;
+            }
+            return inside;
+        }
         return false;
     } 
          
