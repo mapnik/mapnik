@@ -35,6 +35,7 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
+#include <boost/limits.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -144,10 +145,6 @@ void geos_datasource::bind() const
     
     if (*geometry_ == NULL || ! GEOSisValid(*geometry_))
     {
-      //char* reason = GEOSisValidReason(*geometry_);
-      //std::string reason_string (reason);
-      //GEOSFree(reason);
-
       throw datasource_exception("invalid <wkt> geometry specified");
     }
 
@@ -193,30 +190,60 @@ void geos_datasource::bind() const
     
     if (!extent_initialized_)
     {
+#ifdef MAPNIK_DEBUG
+        clog << "initializing extent from geometry" << endl;
+#endif
+
         geos_feature_ptr envelope (GEOSEnvelope(*geometry_));
         
-        if (*envelope != NULL)
+        if (*envelope != NULL && GEOSisValid(*envelope))
         {
-            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(*envelope);
-            if (cs != NULL)
+#ifdef MAPNIK_DEBUG
+            char* wkt = GEOSGeomToWKT(*envelope);
+            clog << "getting coord sequence from: " << wkt << endl;
+            GEOSFree(wkt);
+#endif
+
+            const GEOSGeometry* exterior = GEOSGetExteriorRing(*envelope);
+            
+            if (exterior != NULL && GEOSisValid(exterior))
             {
-                double x, y;
-                unsigned int num_points;
-
-                GEOSCoordSeq_getSize(cs, &num_points);
-
-                for (unsigned int i = 0; i < num_points; ++i)
+                const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(exterior);
+                if (cs != NULL)
                 {
-                    GEOSCoordSeq_getX(cs, i, &x);
-                    GEOSCoordSeq_getY(cs, i, &y);
-                    
-                    clog << x << " " << y << endl; 
-                }
+#ifdef MAPNIK_DEBUG
+                    clog << "iterating boundary points" << endl;
+#endif
 
-                extent_initialized_ = true;
+                    double x, y;
+                    double minx = std::numeric_limits<float>::max(),
+                           miny = std::numeric_limits<float>::max(),
+                           maxx = -std::numeric_limits<float>::max(),
+                           maxy = -std::numeric_limits<float>::max();
+                    unsigned int num_points;
+
+                    GEOSCoordSeq_getSize(cs, &num_points);
+
+                    for (unsigned int i = 0; i < num_points; ++i)
+                    {
+                        GEOSCoordSeq_getX(cs, i, &x);
+                        GEOSCoordSeq_getY(cs, i, &y);
+                        
+                        if (x < minx) minx = x;
+                        if (x > maxx) maxx = x;
+                        if (y < miny) miny = y;
+                        if (y > maxy) maxy = y;
+                    }
+
+                    extent_.init(minx,miny,maxx,maxy);
+                    extent_initialized_ = true;
+                }
             }
         }
     }
+
+    if (! extent_initialized_)
+        throw datasource_exception("cannot determine extent for <wkt> geometry");
    
     is_bound_ = true;
 }
@@ -250,13 +277,13 @@ featureset_ptr geos_datasource::features(query const& q) const
     const mapnik::box2d<double> extent = q.get_bbox();
 
     std::ostringstream s;
-    s << "POLYGON("
+    s << "POLYGON(("
       << extent.minx() << " " << extent.miny() << ","
       << extent.maxx() << " " << extent.miny() << ","
       << extent.maxx() << " " << extent.maxy() << ","
       << extent.minx() << " " << extent.maxy() << ","
       << extent.minx() << " " << extent.miny()
-      << ")";
+      << "))";
 
 #ifdef MAPNIK_DEBUG
     clog << "using extent: " << s.str() << endl;

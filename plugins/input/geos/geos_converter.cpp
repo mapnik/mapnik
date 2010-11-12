@@ -211,7 +211,7 @@ void geos_converter::convert_multipoint (const GEOSGeometry* geom, feature_ptr f
 
         if (g != NULL && GEOSisValid(g))
         {
-            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(geom);
+            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(g);
 
             double x, y;
             //GEOSCoordSeq_getSize(cs, &size);
@@ -261,8 +261,7 @@ void geos_converter::convert_multilinestring (const GEOSGeometry* geom, feature_
 
         if (g != NULL && GEOSisValid(g))
         {
-            const GEOSGeometry* gtmp = GEOSGetExteriorRing(g);
-            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(gtmp);
+            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(g);
             
             unsigned int temp_points;
             GEOSCoordSeq_getSize(cs, &temp_points);
@@ -338,17 +337,25 @@ void geos_converter::convert_multipolygon (const GEOSGeometry* geom, feature_ptr
 
         if (g != NULL && GEOSisValid(g))
         {
+#ifdef MAPNIK_DEBUG
+            clog << "convert_multipolygon geometry=" << i << " exterior-ring" << endl;
+#endif
+
             const GEOSGeometry* exterior = GEOSGetExteriorRing(g);
             const GEOSCoordSequence* es = GEOSGeom_getCoordSeq(exterior);
             GEOSCoordSeq_getSize(es, &num_points);
 
             capacity += num_points;
 
-            num_interior = GEOSGetNumInteriorRings(geom);
+            num_interior = GEOSGetNumInteriorRings(g);
             for (unsigned int r = 0; r < num_interior; r++)
             {
-                const GEOSGeometry* gtmp = GEOSGetInteriorRingN(geom, r);
+                const GEOSGeometry* gtmp = GEOSGetInteriorRingN(g, r);
                 const GEOSCoordSequence* is = GEOSGeom_getCoordSeq(gtmp);
+
+#ifdef MAPNIK_DEBUG
+                clog << "convert_multipolygon geometry=" << i << " interior-ring=" << r << endl;
+#endif
                 
                 unsigned int interior_size;
                 GEOSCoordSeq_getSize(is, &interior_size);
