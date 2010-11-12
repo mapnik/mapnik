@@ -337,10 +337,6 @@ void geos_converter::convert_multipolygon (const GEOSGeometry* geom, feature_ptr
 
         if (g != NULL && GEOSisValid(g))
         {
-#ifdef MAPNIK_DEBUG
-            clog << "convert_multipolygon geometry=" << i << " exterior-ring" << endl;
-#endif
-
             const GEOSGeometry* exterior = GEOSGetExteriorRing(g);
             const GEOSCoordSequence* es = GEOSGeom_getCoordSeq(exterior);
             GEOSCoordSeq_getSize(es, &num_points);
@@ -352,10 +348,6 @@ void geos_converter::convert_multipolygon (const GEOSGeometry* geom, feature_ptr
             {
                 const GEOSGeometry* gtmp = GEOSGetInteriorRingN(g, r);
                 const GEOSCoordSequence* is = GEOSGeom_getCoordSeq(gtmp);
-
-#ifdef MAPNIK_DEBUG
-                clog << "convert_multipolygon geometry=" << i << " interior-ring=" << r << endl;
-#endif
                 
                 unsigned int interior_size;
                 GEOSCoordSeq_getSize(is, &interior_size);
