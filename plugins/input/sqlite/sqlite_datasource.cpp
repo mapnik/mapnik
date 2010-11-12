@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/sql_utils.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -52,29 +53,6 @@ using mapnik::layer_descriptor;
 using mapnik::attribute_descriptor;
 using mapnik::datasource_exception;
 
-
-std::string table_from_sql(std::string const& sql)
-{
-   std::string table_name = boost::algorithm::to_lower_copy(sql);
-   boost::algorithm::replace_all(table_name,"\n"," ");
-   
-   std::string::size_type idx = table_name.rfind("from");
-   if (idx!=std::string::npos)
-   {
-      
-      idx=table_name.find_first_not_of(" ",idx+4);
-      if (idx != std::string::npos)
-      {
-         table_name=table_name.substr(idx);
-      }
-      idx=table_name.find_first_of(" ),");
-      if (idx != std::string::npos)
-      {
-         table_name = table_name.substr(0,idx);
-      }
-   }
-   return table_name;
-}
 
 sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
    : datasource(params),
@@ -158,7 +136,7 @@ void sqlite_datasource::bind() const
         }
     } 
     
-    std::string table_name = table_from_sql(table_);
+    std::string table_name = mapnik::table_from_sql(table_);
     
     if (metadata_ != "" && ! extent_initialized_)
     {

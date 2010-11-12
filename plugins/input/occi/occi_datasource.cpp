@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/sql_utils.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -67,29 +68,6 @@ using oracle::occi::StatelessConnectionPool;
 
 DATASOURCE_PLUGIN(occi_datasource)
 
-
-std::string table_from_sql(std::string const& sql)
-{
-   std::string table_name = boost::algorithm::to_lower_copy(sql);
-   boost::algorithm::replace_all(table_name,"\n"," ");
-   
-   std::string::size_type idx = table_name.rfind("from");
-   if (idx!=std::string::npos)
-   {
-      
-      idx=table_name.find_first_not_of(" ",idx+4);
-      if (idx != std::string::npos)
-      {
-         table_name=table_name.substr(idx);
-      }
-      idx=table_name.find_first_of(" ),");
-      if (idx != std::string::npos)
-      {
-         table_name = table_name.substr(0,idx);
-      }
-   }
-   return table_name;
-}
 
 occi_datasource::occi_datasource(parameters const& params, bool bind)
    : datasource (params),
@@ -171,7 +149,7 @@ void occi_datasource::bind() const
        throw datasource_exception(ex.getMessage());
    }
 
-   std::string table_name = table_from_sql(table_);
+   std::string table_name = mapnik::table_from_sql(table_);
 
    // get SRID from geometry metadata
    {
