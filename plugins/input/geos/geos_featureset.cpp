@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -51,14 +51,15 @@ using mapnik::geometry_utils;
 using mapnik::transcoder;
 
 
-geos_featureset::geos_featureset(const std::string& geometry,
-                                 const std::string& extent,
+geos_featureset::geos_featureset(GEOSGeometry* geometry,
+                                 GEOSGeometry* extent,
                                  const std::string& encoding,
                                  const bool multiple_geometries)
    : geometry_(geometry),
      tr_(new transcoder(encoding)),
+     extent_(extent),
      multiple_geometries_(multiple_geometries),
-     extent_(GEOSGeomFromWKT(extent.c_str()))
+     already_rendered_(false)
 {
 }
 
@@ -66,22 +67,23 @@ geos_featureset::~geos_featureset() {}
 
 feature_ptr geos_featureset::next()
 {
-   geos_feature_ptr feat (GEOSGeomFromWKT(geometry_.c_str()));
-   if ((*feat) != NULL)
-   {
-      GEOSGeometry* geom = (*feat);
-      GEOSGeometry* extent = (*extent_);
-      
-      if (GEOSisValid(geom) && GEOSisValid(extent) && GEOSWithin(geom, extent))
-      {
-          feature_ptr feature(new Feature(0));
+    if (! already_rendered_)
+    {
+        already_rendered_ = true;
+        
+        if (GEOSisValid(geometry_) && ! GEOSisEmpty(geometry_))
+        {
+            //if (*extent_ != NULL && GEOSWithin(geometry_, *extent_))
+            {
+                feature_ptr feature(new Feature(0));
 
-          geos_converter::convert_geometry (geom, feature, multiple_geometries_);
-      
-          return feature;
-      }
-   }
+                geos_converter::convert_geometry (geometry_, feature, multiple_geometries_);
+                
+                return feature;
+            }
+        }
+    }
 
-   return feature_ptr();
+    return feature_ptr();
 }
 

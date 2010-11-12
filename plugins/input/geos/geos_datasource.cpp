@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -96,7 +96,7 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
 {
     boost::optional<std::string> geometry = params.get<std::string>("wkt");
     if (!geometry) throw datasource_exception("missing <wkt> parameter");
-    geometry_ = *geometry;
+    geometry_string_ = *geometry;
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
 
@@ -110,7 +110,17 @@ geos_datasource::~geos_datasource()
 {
     if (is_bound_) 
     {
+        geometry_.set_feature(0);
+
+#ifdef MAPNIK_DEBUG
+        clog << "finalizing GEOS...";
+#endif
+    
         finishGEOS();
+
+#ifdef MAPNIK_DEBUG
+        clog << " finalized !" << endl;
+#endif
     }
 }
 
@@ -118,8 +128,32 @@ void geos_datasource::bind() const
 {
     if (is_bound_) return;   
 
+#ifdef MAPNIK_DEBUG
+    clog << "initializing GEOS...";
+#endif
+
     // open ogr driver
     initGEOS(notice, log_and_exit);
+
+#ifdef MAPNIK_DEBUG
+    clog << " initialized !" << endl;
+#endif
+
+    // parse the string into geometry
+    geometry_.set_feature(GEOSGeomFromWKT(geometry_string_.c_str()));
+    
+    if (*geometry_ == NULL || ! GEOSisValid(*geometry_))
+    {
+      //char* reason = GEOSisValidReason(*geometry_);
+      //std::string reason_string (reason);
+      //GEOSFree(reason);
+
+      throw datasource_exception("invalid <wkt> geometry specified");
+    }
+
+#ifdef MAPNIK_DEBUG
+    clog << "geometry correctly parsed" << endl;
+#endif
 
     // initialize envelope
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
@@ -159,7 +193,29 @@ void geos_datasource::bind() const
     
     if (!extent_initialized_)
     {
-        // TODO - build the geometry here and compute the extent?
+        geos_feature_ptr envelope (GEOSEnvelope(*geometry_));
+        
+        if (*envelope != NULL)
+        {
+            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(*envelope);
+            if (cs != NULL)
+            {
+                double x, y;
+                unsigned int num_points;
+
+                GEOSCoordSeq_getSize(cs, &num_points);
+
+                for (unsigned int i = 0; i < num_points; ++i)
+                {
+                    GEOSCoordSeq_getX(cs, i, &x);
+                    GEOSCoordSeq_getY(cs, i, &y);
+                    
+                    clog << x << " " << y << endl; 
+                }
+
+                extent_initialized_ = true;
+            }
+        }
     }
    
     is_bound_ = true;
@@ -196,14 +252,18 @@ featureset_ptr geos_datasource::features(query const& q) const
     std::ostringstream s;
     s << "POLYGON("
       << extent.minx() << " " << extent.miny() << ","
-      << extent.minx() << " " << extent.maxy() << ","
-      << extent.maxx() << " " << extent.maxy() << ","
       << extent.maxx() << " " << extent.miny() << ","
+      << extent.maxx() << " " << extent.maxy() << ","
+      << extent.minx() << " " << extent.maxy() << ","
       << extent.minx() << " " << extent.miny()
       << ")";
 
-    return featureset_ptr(new geos_featureset (geometry_,
-                                               s.str(),
+#ifdef MAPNIK_DEBUG
+    clog << "using extent: " << s.str() << endl;
+#endif
+
+    return featureset_ptr(new geos_featureset (*geometry_,
+                                               GEOSGeomFromWKT(s.str().c_str()),
                                                desc_.get_encoding(),
                                                multiple_geometries_));
 }
@@ -215,8 +275,12 @@ featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
     std::ostringstream s;
     s << "POINT(" << pt.x << " " << pt.y << ")";
 
-    return featureset_ptr(new geos_featureset (geometry_,
-                                               s.str(),
+#ifdef MAPNIK_DEBUG
+    clog << "using point: " << s.str() << endl;
+#endif
+
+    return featureset_ptr(new geos_featureset (*geometry_,
+                                               GEOSGeomFromWKT(s.str().c_str()),
                                                desc_.get_encoding(),
                                                multiple_geometries_));
 }

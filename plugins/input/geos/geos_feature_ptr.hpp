@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,11 @@
 class geos_feature_ptr
 {
 public:
+    geos_feature_ptr ()
+        : feat_ (NULL)
+    {
+    }
+
     explicit geos_feature_ptr (GEOSGeometry* const feat)
         : feat_ (feat)
     {
@@ -39,6 +44,14 @@ public:
     {
         if (feat_ != NULL)
             GEOSGeom_destroy(feat_);
+    }
+
+    void set_feature (GEOSGeometry* const feat)
+    {
+        if (feat_ != NULL)
+            GEOSGeom_destroy(feat_);
+            
+        feat_ = feat;
     }
 
     GEOSGeometry* operator*()

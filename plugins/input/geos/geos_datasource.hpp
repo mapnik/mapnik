@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,8 @@
 // boost
 #include <boost/shared_ptr.hpp>
 
+#include "geos_feature_ptr.hpp"
+
 class geos_datasource : public mapnik::datasource 
 {
    public:
@@ -49,7 +51,8 @@ private:
       mutable bool extent_initialized_;
       int type_;
       mutable mapnik::layer_descriptor desc_;
-      mutable std::string geometry_;
+      mutable geos_feature_ptr geometry_;
+      std::string geometry_string_;
       bool multiple_geometries_;
 };
 

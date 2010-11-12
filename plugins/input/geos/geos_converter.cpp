@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -90,6 +90,10 @@ void geos_converter::convert_geometry (const GEOSGeometry* geom, feature_ptr fea
 
 void geos_converter::convert_point (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_point" << endl;
+#endif
+
     double x, y;
     unsigned int size;
 
@@ -106,6 +110,10 @@ void geos_converter::convert_point (const GEOSGeometry* geom, feature_ptr featur
 
 void geos_converter::convert_linestring (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_linestring" << endl;
+#endif
+
     double x, y;
     unsigned int num_points;
 
@@ -130,6 +138,10 @@ void geos_converter::convert_linestring (const GEOSGeometry* geom, feature_ptr f
 
 void geos_converter::convert_polygon (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_polygon" << endl;
+#endif
+
     double x, y;
     unsigned int num_points, num_interior;
 
@@ -186,6 +198,10 @@ void geos_converter::convert_polygon (const GEOSGeometry* geom, feature_ptr feat
 
 void geos_converter::convert_multipoint (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_multipoint" << endl;
+#endif
+
     unsigned int num_geometries = GEOSGetNumGeometries(geom);
     geometry_type* point = new geometry_type(mapnik::Point);
 
@@ -211,6 +227,10 @@ void geos_converter::convert_multipoint (const GEOSGeometry* geom, feature_ptr f
 
 void geos_converter::convert_multipoint_2 (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_multipoint_2" << endl;
+#endif
+
     unsigned int num_geometries = GEOSGetNumGeometries(geom);
 
     for (unsigned int i = 0; i < num_geometries; ++i)
@@ -226,6 +246,10 @@ void geos_converter::convert_multipoint_2 (const GEOSGeometry* geom, feature_ptr
 
 void geos_converter::convert_multilinestring (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_multilinestring" << endl;
+#endif
+
     double x, y;
     unsigned int num_points = 0;
 
@@ -279,6 +303,10 @@ void geos_converter::convert_multilinestring (const GEOSGeometry* geom, feature_
 
 void geos_converter::convert_multilinestring_2 (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_multilinestring_2" << endl;
+#endif
+
     unsigned int num_geometries = GEOSGetNumGeometries(geom);
 
     for (unsigned int i = 0; i < num_geometries; ++i)
@@ -294,6 +322,10 @@ void geos_converter::convert_multilinestring_2 (const GEOSGeometry* geom, featur
 
 void geos_converter::convert_multipolygon (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_multipolygon" << endl;
+#endif
+
     double x, y;
     unsigned int num_points, num_interior;
     unsigned int capacity = 0;
@@ -377,6 +409,10 @@ void geos_converter::convert_multipolygon (const GEOSGeometry* geom, feature_ptr
 
 void geos_converter::convert_multipolygon_2 (const GEOSGeometry* geom, feature_ptr feature)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_multipolygon_2" << endl;
+#endif
+
     unsigned int num_geometries = GEOSGetNumGeometries(geom);
 
     for (unsigned int i = 0; i < num_geometries; ++i)
@@ -392,6 +428,10 @@ void geos_converter::convert_multipolygon_2 (const GEOSGeometry* geom, feature_p
 
 void geos_converter::convert_collection (const GEOSGeometry* geom, feature_ptr feature, bool multiple_geometries)
 {
+#ifdef MAPNIK_DEBUG
+    clog << "convert_collection" << endl;
+#endif
+
     unsigned int num_geometries = GEOSGetNumGeometries(geom);
 
     for (unsigned int i = 0; i < num_geometries; ++i)

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,19 +40,20 @@
 class geos_featureset : public mapnik::Featureset
 {
 public:
-      geos_featureset(const std::string& geometry,
-                      const std::string& extent,
+      geos_featureset(GEOSGeometry* geometry,
+                      GEOSGeometry* extent,
                       const std::string& encoding,
                       const bool multiple_geometries);
       virtual ~geos_featureset();
       mapnik::feature_ptr next();
 
 private:
-      std::string geometry_;
+      GEOSGeometry* geometry_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
-      bool multiple_geometries_;
-      
       geos_feature_ptr extent_;
+      bool multiple_geometries_;
+      bool already_rendered_;
+
 
       geos_featureset(const geos_featureset&);
       const geos_featureset& operator=(const geos_featureset&);
