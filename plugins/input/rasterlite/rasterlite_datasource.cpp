@@ -199,3 +199,4 @@ featureset_ptr rasterlite_datasource::features_at_point(coord2d const& pt) const
    rasterlite_query gq = pt;
    return featureset_ptr(new rasterlite_featureset(open_dataset(), gq));
 }
+
