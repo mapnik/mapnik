@@ -104,7 +104,6 @@ void ogr_datasource::bind() const
    
    if (layer_by_name && layer_by_index)
        throw datasource_exception("OGR Plugin: you can only select an ogr layer by name ('layer' parameter) or by number ('layer_by_index' parameter), do not supply both parameters" );
-   
 
    if (layer_by_name) 
    {
