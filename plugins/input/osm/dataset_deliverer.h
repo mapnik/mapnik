@@ -9,6 +9,7 @@ class dataset_deliverer
 private:
     static osm_dataset* dataset; 
     static std::string last_bbox;
+    static std::string last_filename;
 
 public:
     static osm_dataset *load_from_file(const string&,const string&);
