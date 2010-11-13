@@ -4,6 +4,7 @@
 
 osm_dataset * dataset_deliverer::dataset=NULL;
 std::string dataset_deliverer::last_bbox = "";
+std::string dataset_deliverer::last_filename = "";
 
 osm_dataset* dataset_deliverer::load_from_file(const string& file,
 												const string& parser)
@@ -15,7 +16,14 @@ osm_dataset* dataset_deliverer::load_from_file(const string& file,
 		if(dataset->load(file.c_str(),parser)==false)
 				return NULL;
 		atexit(dataset_deliverer::release);
-
+		last_filename = file;
+	}
+	else if(file != last_filename)
+	{
+		dataset = new osm_dataset;
+		if(dataset->load(file.c_str(),parser)==false)
+				return NULL;
+		last_filename = file;
 	}
 	return dataset;
 }
