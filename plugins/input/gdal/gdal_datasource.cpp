@@ -41,7 +41,6 @@ using mapnik::layer_descriptor;
 using mapnik::datasource_exception;
 
 
-
 /*
  * Opens a GDALDataset and returns a pointer to it.
  * Caller is responsible for calling GDALClose on it
@@ -72,7 +71,6 @@ gdal_datasource::gdal_datasource(parameters const& params, bool bind)
       desc_(*params.get<std::string>("type"),"utf-8"),
       filter_factor_(*params_.get<double>("filter_factor",0.0))
 {
-
 #ifdef MAPNIK_DEBUG
     std::clog << "\nGDAL Plugin: Initializing...\n";
 #endif
@@ -142,7 +140,9 @@ void gdal_datasource::bind() const
     is_bound_ = true;
 }
 
-gdal_datasource::~gdal_datasource() {}
+gdal_datasource::~gdal_datasource()
+{
+}
 
 int gdal_datasource::type() const
 {

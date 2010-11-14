@@ -50,7 +50,9 @@ gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q,
       dy_(dy),
       nbands_(nbands),
       filter_factor_(filter_factor),
-      first_(true) {}
+      first_(true)
+{
+}
 
 gdal_featureset::~gdal_featureset()
 {
@@ -185,10 +187,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #endif
             typedef std::vector<int,int> pallete;
         
-            if (band_>0) // we are querying a single band
+            if (band_ > 0) // we are querying a single band
             {
                 if (band_ > nbands_)
-                   throw datasource_exception((boost::format("GDAL Plugin: '%d' is an invalid band, dataset only has '%d' bands\n") % band_ % nbands_).str());
+                    throw datasource_exception((boost::format("GDAL Plugin: '%d' is an invalid band, dataset only has '%d' bands\n") % band_ % nbands_).str());
                 float *imageData = (float*)image.getBytes();
                 GDALRasterBand * band = dataset_.GetRasterBand(band_);
                 band->RasterIO(GF_Read, x_off, y_off, width, height,
@@ -255,10 +257,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #ifdef MAPNIK_DEBUG
                             std::clog << "GDAL Plugin: Color Table count = " << count << "\n";
 #endif 
-                            for ( int i = 0; i < count; i++ )
+                            for (int j = 0; j < count; j++)
                             {
-                                const GDALColorEntry *ce = color_table->GetColorEntry ( i );
-                                if (!ce ) continue;
+                                const GDALColorEntry *ce = color_table->GetColorEntry (j);
+                                if (! ce) continue;
 #ifdef MAPNIK_DEBUG
                                 std::clog << "GDAL Plugin: Color entry RGB (" << ce->c1 << "," <<ce->c2 << "," << ce->c3 << ")\n"; 
 #endif
@@ -327,8 +329,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
 feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
 {
-    if (band_>0) {
-
+    if (band_ > 0)
+    {
         unsigned raster_xsize = dataset_.GetRasterXSize();
         unsigned raster_ysize = dataset_.GetRasterYSize();
 
@@ -344,7 +346,8 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
         double det2 = gt[2]*Y + gt[5]*X;
         unsigned x = det2/det, y = det1/det;
 
-        if(x<raster_xsize && y<raster_ysize) {
+        if (x < raster_xsize && y < raster_ysize)
+        {
 #ifdef MAPNIK_DEBUG         
             std::clog << boost::format("GDAL Plugin: pt.x=%f pt.y=%f\n") % pt.x % pt.y;
             std::clog << boost::format("GDAL Plugin: x=%f y=%f\n") % x % y;
@@ -354,7 +357,9 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             double nodata = band->GetNoDataValue(&hasNoData);
             double value;
             band->RasterIO(GF_Read, x, y, 1, 1, &value, 1, 1, GDT_Float64, 0, 0);
-            if(!hasNoData || value!=nodata) {
+
+            if (! hasNoData || value != nodata)
+            {
                 // construct feature
                 feature_ptr feature(new Feature(1));
                 geometry_type * point = new geometry_type(mapnik::Point);
