@@ -28,7 +28,15 @@ def test_total_feature_count_json():
     lyr.datasource = mapnik2.Ogr(file='../data/json/points.json',layer_by_index=0)
     features = lyr.datasource.all_features()
     num_feats = len(features)
-    eq_(num_feats, 3)
+    eq_(num_feats, 5)
+
+def test_reading_json_from_string():
+    json = open('../data/json/points.json','r').read()
+    lyr = mapnik2.Layer('test')
+    lyr.datasource = mapnik2.Ogr(file=json,layer_by_index=0)
+    features = lyr.datasource.all_features()
+    num_feats = len(features)
+    eq_(num_feats, 5)
     
 def test_feature_envelope():
     lyr = mapnik2.Layer('test')
