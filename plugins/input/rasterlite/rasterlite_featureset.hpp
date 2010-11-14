@@ -29,22 +29,20 @@
 
 #include "rasterlite_include.hpp"
 
-
 typedef boost::variant<mapnik::query,mapnik::coord2d> rasterlite_query;
 
 class rasterlite_featureset : public mapnik::Featureset
 {
-   public:
-      
-      rasterlite_featureset(void* dataset, rasterlite_query q);
-      virtual ~rasterlite_featureset();
-      mapnik::feature_ptr next();
-   private:
-      mapnik::feature_ptr get_feature(mapnik::query const& q);
-      mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
-      void* dataset_;
-      rasterlite_query gquery_;
-      bool first_;
+    public:
+        rasterlite_featureset(void* dataset, rasterlite_query q);
+        virtual ~rasterlite_featureset();
+        mapnik::feature_ptr next();
+    private:
+        mapnik::feature_ptr get_feature(mapnik::query const& q);
+        mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
+        void* dataset_;
+        rasterlite_query gquery_;
+        bool first_;
 };
 
 #endif // RASTERLITE_FEATURESET_HPP
