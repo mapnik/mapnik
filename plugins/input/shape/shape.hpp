@@ -64,7 +64,6 @@ private:
     mutable box2d<double> extent_;
     mutable bool indexed_;
     mutable layer_descriptor desc_;
-    static const std::string name_;
 };
 
 #endif //SHAPE_HPP

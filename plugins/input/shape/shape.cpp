@@ -137,8 +137,6 @@ void shape_datasource::bind() const
 
 shape_datasource::~shape_datasource() {}
 
-const std::string shape_datasource::name_="shape";
-
 void  shape_datasource::init(shape_io& shape) const
 {
     //first read header from *.shp
@@ -202,6 +200,11 @@ void  shape_datasource::init(shape_io& shape) const
 
 }
 
+std::string shape_datasource::name()
+{
+    return "shape";
+}
+
 int shape_datasource::type() const
 {
     return type_;
@@ -211,11 +214,6 @@ layer_descriptor shape_datasource::get_descriptor() const
 {
     if (!is_bound_) bind();
     return desc_;
-}
-
-std::string shape_datasource::name()
-{
-    return name_;
 }
 
 featureset_ptr shape_datasource::features(const query& q) const
