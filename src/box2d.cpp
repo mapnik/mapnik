@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,11 @@
 
 // stl
 #include <stdexcept>
+
+// boost
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace mapnik
 {
@@ -278,7 +283,6 @@ void box2d<T>::re_center(const coord<T,2> &c)
     re_center(c.x,c.y);
 }
 
-
 template <typename T>
 #if !defined(__SUNPRO_CC)
 inline
@@ -301,6 +305,48 @@ void box2d<T>::init(T x0,T y0,T x1,T y1)
     {
         miny_=y1;maxy_=y0;
     }
+}
+
+template <typename T>
+#if !defined(__SUNPRO_CC)
+inline
+#endif
+bool box2d<T>::from_string(const std::string& s)
+{
+    bool success = false;
+
+    boost::char_separator<char> sep(", ");
+    boost::tokenizer<boost::char_separator<char> > tok(s, sep);
+
+    unsigned i = 0;
+    double d[4];
+    for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin(); 
+         beg != tok.end(); ++beg)
+    {
+        try 
+        {
+            d[i] = boost::lexical_cast<double>(boost::trim_copy(*beg));
+        }
+        catch (boost::bad_lexical_cast & ex)
+        {
+            break;
+        }
+        
+        if (i == 3) 
+        {
+            success = true;
+            break;
+        }
+        
+        ++i;
+    }
+
+    if (success)
+    {
+        init(d[0], d[1], d[2], d[3]);
+    }
+    
+    return success;
 }
     
 template <typename T>

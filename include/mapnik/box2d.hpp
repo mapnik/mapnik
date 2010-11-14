@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -79,6 +79,7 @@ public:
     void re_center(T cx,T cy);
     void re_center(const coord<T,2>& c);
     void init(T x0,T y0,T x1,T y1);
+    bool from_string(const std::string& s);
         
     // define some operators 
     box2d_type& operator+=(box2d_type const& other);
