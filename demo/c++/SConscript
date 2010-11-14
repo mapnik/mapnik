@@ -30,6 +30,8 @@ source = Split(
     """
     )
 
+demo_env = env.Clone()
+
 headers = env['CPPPATH'] 
 
 boost_regex  = 'boost_regex%s' % env['BOOST_APPEND']
@@ -48,7 +50,7 @@ if env['PLATFORM'] in ('Darwin','SunOS'):
     libraries.append(boost_regex)
     libraries.append(env['ICU_LIB_NAME'])
    
-rundemo = env.Program('rundemo', source, CPPPATH=headers, LIBS=libraries)
+rundemo = demo_env.Program('rundemo', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env["CUSTOM_LDFLAGS"])
 
 # we don't install this app because the datasource paths are relative
 # and we're not going to install the sample data.
