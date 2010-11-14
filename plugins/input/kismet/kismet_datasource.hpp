@@ -55,8 +55,7 @@ class kismet_datasource : public mapnik::datasource
       void bind() const;
    private:
       void run (const std::string &host, const unsigned int port);
-  
-      static const std::string name_;
+
       mutable mapnik::box2d<double> extent_;
       mutable bool extent_initialized_;
       int type_;
