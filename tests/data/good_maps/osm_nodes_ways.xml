@@ -1,0 +1,35 @@
+<!DOCTYPE Map>
+<Map srs="+proj=latlong +datum=WGS84" background-color="steelblue" minimum_version="0.7.2">
+
+  <Style name="red">
+    <Rule>
+      <LineSymbolizer stroke="darkred" stroke-width="1.5"/>
+      <LineSymbolizer stroke="red" stroke-width="1"/>
+      <MarkersSymbolizer fill="yellow" width="5" stroke="green" stroke-width=".5"/>
+    </Rule>
+  </Style>
+
+  <Style name="green">
+    <Rule>
+      <MarkersSymbolizer fill="yellow" width="7" height="5" stroke="green" stroke-width="1.5"/>
+    </Rule>
+  </Style>
+
+  <Layer name="red" status="on" srs="+proj=latlong +datum=WGS84">
+    <StyleName>red</StyleName>
+    <Datasource>
+      <Parameter name="type">osm</Parameter>
+      <Parameter name="file">../osm/ways.osm</Parameter>
+    </Datasource>
+  </Layer>
+
+  <Layer name="green" status="on" srs="+proj=latlong +datum=WGS84">
+    <StyleName>green</StyleName>
+    <Datasource>
+      <Parameter name="type">osm</Parameter>
+      <Parameter name="file">../osm/nodes.osm</Parameter>
+    </Datasource>
+  </Layer>
+
+
+</Map>

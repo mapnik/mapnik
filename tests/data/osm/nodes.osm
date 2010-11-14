@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="mapnik">
+  <node lat="0" lon="2" id="1"/>
+  <node lat="2" lon="0" id="2"/>
+  <node lat="0" lon="-2" id="3"/>
+  <node lat="-2" lon="0" id="4"/>
+  <way id="1">
+    <nd ref="1"/>
+  </way>
+  <way id="2">
+    <nd ref="2"/>
+  </way>
+  <way id="2">
+    <nd ref="3"/>
+  </way>
+  <way id="2">
+    <nd ref="4"/>
+  </way>
+</osm>

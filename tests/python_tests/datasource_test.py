@@ -16,13 +16,20 @@ def test_field_listing():
     fields = lyr.datasource.fields()
     eq_(fields, ['AREA', 'EAS_ID', 'PRFEDEA'])
 
-def test_total_feature_count():
+def test_total_feature_count_shp():
     lyr = mapnik2.Layer('test')
     lyr.datasource = mapnik2.Shapefile(file='../data/shp/poly.shp')
     features = lyr.datasource.all_features()
     num_feats = len(features)
     eq_(num_feats, 10)
 
+def test_total_feature_count_json():
+    lyr = mapnik2.Layer('test')
+    lyr.datasource = mapnik2.Ogr(file='../data/json/points.json',layer_by_index=0)
+    features = lyr.datasource.all_features()
+    num_feats = len(features)
+    eq_(num_feats, 3)
+    
 def test_feature_envelope():
     lyr = mapnik2.Layer('test')
     lyr.datasource = mapnik2.Shapefile(file='../data/shp/poly.shp')
