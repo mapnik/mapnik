@@ -53,19 +53,19 @@ struct MAPNIK_DECL color_band
         color_(c),
         midpoints_(0),
         is_interpolated_(false) {}
-    const bool is_interpolated() const
+    bool is_interpolated() const
     {
         return is_interpolated_;
     }
-    const unsigned get_midpoints() const
+    unsigned get_midpoints() const
     {
         return midpoints_;
     }
-    const float get_value() const
+    float get_value() const
     {
         return value_;
     }
-    const float get_max_value() const
+    float get_max_value() const
     {
         return max_value_;
     }
