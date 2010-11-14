@@ -97,38 +97,7 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
    
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
-    if (ext)
-    {
-        boost::char_separator<char> sep(", ");
-        boost::tokenizer<boost::char_separator<char> > tok(*ext,sep);
-        unsigned i = 0;
-        bool success = false;
-        double d[4];
-        for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tok.begin(); 
-             beg!=tok.end();++beg)
-        {
-            try 
-            {
-                d[i] = boost::lexical_cast<double>(boost::trim_copy(*beg));
-            }
-            catch (boost::bad_lexical_cast & ex)
-            {
-                clog << *beg << " : " << ex.what() << "\nAre your coordinates each separated by commas?\n";
-                break;
-            }
-            if (i==3) 
-            {
-                success = true;
-                break;
-            }
-            ++i;
-        }
-        if (success)
-        {
-            extent_.init(d[0],d[1],d[2],d[3]);
-            extent_initialized_ = true;
-        }
-    } 
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
 
     if (bind)
     {
@@ -320,11 +289,9 @@ void postgis_datasource::bind() const
     is_bound_ = true;
 }
 
-std::string const postgis_datasource::name_="postgis";
-
 std::string postgis_datasource::name()
 {
-    return name_;
+    return "postgis";
 }
 
 int postgis_datasource::type() const
