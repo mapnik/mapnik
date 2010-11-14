@@ -79,8 +79,6 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
      desc_(*params.get<std::string>("type"), 
      *params.get<std::string>("encoding","utf-8"))
 {
-    //cout << "kismet_datasource::kismet_datasource()" << endl;
-
     boost::optional<std::string> host = params_.get<std::string>("host");
     if (!host) throw datasource_exception("missing <host> parameter");
   
@@ -100,40 +98,8 @@ void kismet_datasource::bind() const
 {
     if (is_bound_) return;
     
-
-    boost::optional<std::string> ext  = params_.get<std::string>("extent");
-    if (ext)
-    {
-        boost::char_separator<char> sep(",");
-        boost::tokenizer<boost::char_separator<char> > tok(*ext,sep);
-        unsigned i = 0;
-        bool success = false;
-        double d[4];
-        for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tok.begin(); 
-             beg!=tok.end();++beg)
-        {
-           try 
-           {
-               d[i] = boost::lexical_cast<double>(*beg);
-           }
-           catch (boost::bad_lexical_cast & ex)
-           {
-              std::clog << ex.what() << "\n";
-              break;
-           }
-           if (i==3) 
-           {
-              success = true;
-              break;
-           }
-           ++i;
-        }
-        if (success)
-        {
-           extent_.init(d[0],d[1],d[2],d[3]);
-           extent_initialized_ = true;
-        }
-    }
+    boost::optional<std::string> ext = params_.get<std::string>("extent");
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
     
     is_bound_ = true;
 }
@@ -142,11 +108,9 @@ kismet_datasource::~kismet_datasource()
 {
 }
 
-std::string const kismet_datasource::name_="kismet";
-
 std::string kismet_datasource::name()
 {
-   return name_;
+   return "kismet";
 }
 
 int kismet_datasource::type() const
@@ -157,8 +121,6 @@ int kismet_datasource::type() const
 box2d<double> kismet_datasource::envelope() const
 {
    if (!is_bound_) bind();
-   
-   //cout << "kismet_datasource::envelope()" << endl;
    return extent_;
 }
 
