@@ -32,19 +32,18 @@
   
 class geos_converter
 {
-public:
-
-    static void convert_geometry (const GEOSGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
-    static void convert_collection (const GEOSGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
-    static void convert_point (const GEOSGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_linestring (const GEOSGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_polygon (const GEOSGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_multipoint (const GEOSGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_multipoint_2 (const GEOSGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_multilinestring (const GEOSGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_multilinestring_2 (const GEOSGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_multipolygon (const GEOSGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_multipolygon_2 (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+    public:
+        static void convert_geometry (const GEOSGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
+        static void convert_collection (const GEOSGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
+        static void convert_point (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+        static void convert_linestring (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+        static void convert_polygon (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+        static void convert_multipoint (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+        static void convert_multipoint_2 (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+        static void convert_multilinestring (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+        static void convert_multilinestring_2 (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+        static void convert_multipolygon (const GEOSGeometry* geom, mapnik::feature_ptr feature);
+        static void convert_multipolygon_2 (const GEOSGeometry* geom, mapnik::feature_ptr feature);
 };
 
 #endif // GEOS_FEATURESET_HPP

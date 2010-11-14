@@ -53,17 +53,25 @@ using mapnik::transcoder;
 
 geos_featureset::geos_featureset(GEOSGeometry* geometry,
                                  GEOSGeometry* extent,
+                                 int identifier,
+                                 const std::string& field,
+                                 const std::string& field_name,
                                  const std::string& encoding,
-                                 const bool multiple_geometries)
+                                 bool multiple_geometries)
    : geometry_(geometry),
      tr_(new transcoder(encoding)),
      extent_(extent),
+     identifier_(identifier),
+     field_(field),
+     field_name_(field_name),
      multiple_geometries_(multiple_geometries),
      already_rendered_(false)
 {
 }
 
-geos_featureset::~geos_featureset() {}
+geos_featureset::~geos_featureset() 
+{
+}
 
 feature_ptr geos_featureset::next()
 {
@@ -73,11 +81,47 @@ feature_ptr geos_featureset::next()
         
         if (GEOSisValid(geometry_) && ! GEOSisEmpty(geometry_))
         {
-            //if (*extent_ != NULL && GEOSWithin(geometry_, *extent_))
+            bool render_geometry = true;
+            
+            if (*extent_ != NULL && GEOSisValid(*extent_) && !GEOSisEmpty(*extent_))
             {
-                feature_ptr feature(new Feature(0));
+                const int type = GEOSGeomTypeId(*extent_);
+                render_geometry = false;
+
+                switch ( type )
+                {
+                case GEOS_POINT:
+                    if (GEOSIntersects(*extent_, geometry_))
+                    {
+                        render_geometry = true;
+                    }
+                    break;
+                case GEOS_POLYGON:
+                    if (GEOSContains(*extent_, geometry_)
+                        || GEOSWithin(geometry_, *extent_)
+                        || GEOSEquals(geometry_, *extent_))
+                    {
+                        render_geometry = true;
+                    }
+                    break;
+               default:
+#ifdef MAPNIK_DEBUG
+                    clog << "unknown extent geometry_type=" << type << endl;
+#endif
+                    break;
+               }
+            }
+
+            if (render_geometry)
+            {
+                feature_ptr feature(new Feature(identifier_));
 
                 geos_converter::convert_geometry (geometry_, feature, multiple_geometries_);
+
+                if (field_ != "")
+                {
+                    boost::put(*feature, field_name_, tr_->transcode(field_.c_str()));
+                }
                 
                 return feature;
             }

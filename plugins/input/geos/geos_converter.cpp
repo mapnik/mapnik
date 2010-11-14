@@ -105,6 +105,7 @@ void geos_converter::convert_point (const GEOSGeometry* geom, feature_ptr featur
 
     geometry_type* point = new geometry_type(mapnik::Point);
     point->move_to (x, y);
+    
     feature->add_geometry (point);
 }
 
@@ -133,6 +134,7 @@ void geos_converter::convert_linestring (const GEOSGeometry* geom, feature_ptr f
         GEOSCoordSeq_getY(cs, i, &y);
         line->line_to (x, y);
     }
+    
     feature->add_geometry (line);
 }
 
@@ -193,6 +195,7 @@ void geos_converter::convert_polygon (const GEOSGeometry* geom, feature_ptr feat
             poly->line_to(x, y);
         }
     }
+    
     feature->add_geometry (poly);
 }
 

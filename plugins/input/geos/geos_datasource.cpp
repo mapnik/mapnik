@@ -93,13 +93,30 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
      extent_(),
      extent_initialized_(false),
      type_(datasource::Vector),
-     desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
+     desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+     geometry_id_(0),
+     geometry_data_(""),
+     geometry_data_name_("name")
 {
     boost::optional<std::string> geometry = params.get<std::string>("wkt");
     if (!geometry) throw datasource_exception("missing <wkt> parameter");
     geometry_string_ = *geometry;
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
+
+    boost::optional<std::string> ext = params_.get<std::string>("extent");
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
+
+    boost::optional<int> id = params_.get<int>("gid");
+    if (id) geometry_id_ = *id;
+
+    boost::optional<std::string> gdata = params_.get<std::string>("field_data");
+    if (gdata) geometry_data_ = *gdata;
+
+    boost::optional<std::string> gdata_name = params_.get<std::string>("field_name");
+    if (gdata) geometry_data_name_ = *gdata_name;
+
+    desc_.add_descriptor(attribute_descriptor(geometry_data_name_, mapnik::String));
 
     if (bind)
     {
@@ -145,50 +162,15 @@ void geos_datasource::bind() const
     
     if (*geometry_ == NULL || ! GEOSisValid(*geometry_))
     {
-      throw datasource_exception("invalid <wkt> geometry specified");
+        throw datasource_exception("invalid <wkt> geometry specified");
     }
 
 #ifdef MAPNIK_DEBUG
     clog << "geometry correctly parsed" << endl;
 #endif
-
-    // initialize envelope
-    boost::optional<std::string> ext  = params_.get<std::string>("extent");
-    if (ext)
-    {
-        boost::char_separator<char> sep(",");
-        boost::tokenizer<boost::char_separator<char> > tok(*ext,sep);
-        unsigned i = 0;
-        bool success = false;
-        double d[4];
-        for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tok.begin(); 
-             beg!=tok.end();++beg)
-        {
-            try 
-            {
-                d[i] = boost::lexical_cast<double>(*beg);
-            }
-            catch (boost::bad_lexical_cast & ex)
-            {
-                std::clog << ex.what() << "\n";
-                break;
-            }
-            if (i==3) 
-            {
-                success = true;
-                break;
-            }
-            ++i;
-        }
-
-        if (success)
-        {
-            extent_.init(d[0],d[1],d[2],d[3]);
-            extent_initialized_ = true;
-        }
-    }
     
-    if (!extent_initialized_)
+    // try to obtain the extent from the geometry itself
+    if (! extent_initialized_)
     {
 #ifdef MAPNIK_DEBUG
         clog << "initializing extent from geometry" << endl;
@@ -261,12 +243,14 @@ int geos_datasource::type() const
 box2d<double> geos_datasource::envelope() const
 {
     if (!is_bound_) bind();
+    
     return extent_;
 }
 
 layer_descriptor geos_datasource::get_descriptor() const
 {
     if (!is_bound_) bind();
+    
     return desc_;
 }
 
@@ -291,6 +275,9 @@ featureset_ptr geos_datasource::features(query const& q) const
 
     return featureset_ptr(new geos_featureset (*geometry_,
                                                GEOSGeomFromWKT(s.str().c_str()),
+                                               geometry_id_,
+                                               geometry_data_,
+                                               geometry_data_name_,
                                                desc_.get_encoding(),
                                                multiple_geometries_));
 }
@@ -308,6 +295,9 @@ featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
 
     return featureset_ptr(new geos_featureset (*geometry_,
                                                GEOSGeomFromWKT(s.str().c_str()),
+                                               geometry_id_,
+                                               geometry_data_,
+                                               geometry_data_name_,
                                                desc_.get_encoding(),
                                                multiple_geometries_));
 }
