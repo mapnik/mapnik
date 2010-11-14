@@ -99,7 +99,7 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
     if (ext)
     {
-        boost::char_separator<char> sep(",");
+        boost::char_separator<char> sep(", ");
         boost::tokenizer<boost::char_separator<char> > tok(*ext,sep);
         unsigned i = 0;
         bool success = false;
