@@ -42,8 +42,6 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 using mapnik::attribute_descriptor;
 
-const std::string osm_datasource::name_ = "osm";
-
 osm_datasource::osm_datasource(const parameters &params, bool bind)
    : datasource (params),
      type_(datasource::Vector),
@@ -122,6 +120,10 @@ osm_datasource::~osm_datasource()
     //delete osm_data_; 
 }
 
+std::string osm_datasource::name()
+{
+   return "osm";
+}
 
 int osm_datasource::type() const
 {

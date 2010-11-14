@@ -51,7 +51,7 @@ class osm_datasource : public datasource
       featureset_ptr features_at_point(coord2d const& pt) const;
       box2d<double> envelope() const;
       layer_descriptor get_descriptor() const;   
-	  static std::string name() { return name_; }
+	  static std::string name();
 	  void bind() const;
    private:
       osm_datasource(const osm_datasource&);
@@ -61,7 +61,6 @@ class osm_datasource : public datasource
       mutable osm_dataset * osm_data_;
 	  int type_;
 	  mutable layer_descriptor desc_;
-	  static const std::string name_;
 };
 
 #endif //OSM_DATASOURCE_HPP
