@@ -81,6 +81,9 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
 
+    boost::optional<std::string> ext  = params_.get<std::string>("extent");
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
+
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
         dataset_name_ = *base + "/" + *file;
@@ -101,41 +104,6 @@ void sqlite_datasource::bind() const
           
     dataset_ = new sqlite_connection (dataset_name_);
 
-    boost::optional<std::string> ext  = params_.get<std::string>("extent");
-    if (ext)
-    {
-        boost::char_separator<char> sep(",");
-        boost::tokenizer<boost::char_separator<char> > tok(*ext,sep);
-        unsigned i = 0;
-        bool success = false;
-        double d[4];
-        for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tok.begin(); 
-             beg!=tok.end();++beg)
-        {
-            try 
-            {
-                d[i] = boost::lexical_cast<double>(*beg);
-            }
-            catch (boost::bad_lexical_cast & ex)
-            {
-                std::clog << ex.what() << "\n";
-                break;
-            }
-            if (i==3) 
-            {
-                success = true;
-                break;
-            }
-            ++i;
-        }
-
-        if (success)
-        {
-            extent_.init(d[0],d[1],d[2],d[3]);
-            extent_initialized_ = true;
-        }
-    } 
-    
     std::string table_name = mapnik::table_from_sql(table_);
     
     if (metadata_ != "" && ! extent_initialized_)
@@ -230,11 +198,9 @@ sqlite_datasource::~sqlite_datasource()
     }
 }
 
-std::string const sqlite_datasource::name_="sqlite";
-
 std::string sqlite_datasource::name()
 {
-   return name_;
+   return "sqlite";
 }
 
 int sqlite_datasource::type() const
