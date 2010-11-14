@@ -84,38 +84,7 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
 
    boost::optional<std::string> ext = params_.get<std::string>("extent");
-   if (ext)
-   {
-      boost::char_separator<char> sep(",");
-      boost::tokenizer<boost::char_separator<char> > tok(*ext,sep);
-      unsigned i = 0;
-      bool success = false;
-      double d[4];
-      for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tok.begin(); 
-           beg!=tok.end();++beg)
-      {
-         try 
-         {
-             d[i] = boost::lexical_cast<double>(*beg);
-         }
-         catch (boost::bad_lexical_cast & ex)
-         {
-            std::clog << ex.what() << "\n";
-            break;
-         }
-         if (i==3) 
-         {
-            success = true;
-            break;
-         }
-         ++i;
-      }
-      if (success)
-      {
-         extent_.init(d[0],d[1],d[2],d[3]);
-         extent_initialized_ = true;
-      }
-   } 
+   if (ext) extent_initialized_ = extent_.from_string(*ext);
    
    if (bind)
    {
@@ -271,11 +240,9 @@ occi_datasource::~occi_datasource()
     }
 }
 
-std::string const occi_datasource::name_="occi";
-
 std::string occi_datasource::name()
 {
-    return name_;
+    return "occi";
 }
 
 int occi_datasource::type() const

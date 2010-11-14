@@ -65,7 +65,6 @@ class occi_datasource : public mapnik::datasource
       mutable oracle::occi::StatelessConnectionPool* pool_;
       bool multiple_geometries_;
       bool use_spatial_index_;
-      static const std::string name_;
 };
 
 
