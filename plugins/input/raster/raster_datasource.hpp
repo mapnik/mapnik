@@ -24,35 +24,35 @@
 #ifndef RASTER_DATASOURCE_HPP
 #define RASTER_DATASOURCE_HPP
 
+// mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 
 class raster_datasource : public mapnik::datasource
 {
-private:
-   std::string                  filename_;
-   std::string                  format_;
-   mapnik::box2d<double>        extent_;
-   mapnik::layer_descriptor     desc_;
-   mutable unsigned             width_;
-   mutable unsigned             height_;
-   static std::string           name_;  
-public:
-   raster_datasource(const mapnik::parameters& params, bool bind=true);
-   virtual ~raster_datasource();
-   int type() const;
-   static std::string name();
-   mapnik::featureset_ptr features(const mapnik::query& q) const;
-   mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
-   mapnik::box2d<double> envelope() const;
-   mapnik::layer_descriptor get_descriptor() const;
-   void bind() const;
-private:
-   //no copying
-   raster_datasource(const raster_datasource&);
-   raster_datasource& operator=(const raster_datasource&);
-   //
+    private:
+       std::string                  filename_;
+       std::string                  format_;
+       mapnik::box2d<double>        extent_;
+       bool                         extent_initialized_;
+       mapnik::layer_descriptor     desc_;
+       mutable unsigned             width_;
+       mutable unsigned             height_;
+    public:
+       raster_datasource(const mapnik::parameters& params, bool bind=true);
+       virtual ~raster_datasource();
+       int type() const;
+       static std::string name();
+       mapnik::featureset_ptr features(const mapnik::query& q) const;
+       mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+       mapnik::box2d<double> envelope() const;
+       mapnik::layer_descriptor get_descriptor() const;
+       void bind() const;
+    private:
+       //no copying
+       raster_datasource(const raster_datasource&);
+       raster_datasource& operator=(const raster_datasource&);
 };
 
 #endif //RASTER_DATASOURCE_HPP

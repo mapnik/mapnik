@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 //$Id: raster_datasource.cc 44 2005-04-22 18:53:54Z pavlenko $
+
 // boost
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -30,7 +31,6 @@
 #include "raster_featureset.hpp"
 #include "raster_info.hpp"
 #include "raster_datasource.hpp"
-
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -50,77 +50,88 @@ using mapnik::datasource_exception;
 
 raster_datasource::raster_datasource(const parameters& params, bool bind)
     : datasource(params),
-      desc_(*params.get<std::string>("type"),"utf-8")
+      desc_(*params.get<std::string>("type"),"utf-8"),
+      extent_initialized_(false)
 {
- 
 #ifdef MAPNIK_DEBUG
-   std::cout << "\nRaster Plugin: Initializing...\n";
+    std::cout << "\nRaster Plugin: Initializing...\n";
 #endif
 
-   boost::optional<std::string> file=params.get<std::string>("file");
-   if (!file) throw datasource_exception("missing <file> parameter ");
+    boost::optional<std::string> file = params.get<std::string>("file");
+    if (! file) throw datasource_exception("missing <file> parameter ");
    
-   boost::optional<std::string> base=params.get<std::string>("base");
-   if (base)
-      filename_ = *base + "/" + *file;
-   else
-      filename_ = *file;
+    boost::optional<std::string> base = params.get<std::string>("base");
+    if (base)
+       filename_ = *base + "/" + *file;
+    else
+       filename_ = *file;
 
-   format_=*params_.get<std::string>("format","tiff");
-   boost::optional<double> lox = params_.get<double>("lox");
-   boost::optional<double> loy = params_.get<double>("loy");
-   boost::optional<double> hix = params_.get<double>("hix");
-   boost::optional<double> hiy = params_.get<double>("hiy");
+    format_=*params_.get<std::string>("format","tiff");
    
-   if (lox && loy && hix && hiy)
-   {
-      extent_.init(*lox,*loy,*hix,*hiy);
-   }
-   else throw datasource_exception("<lox> <loy> <hix> <hiy> are required");
+    boost::optional<double> lox = params_.get<double>("lox");
+    boost::optional<double> loy = params_.get<double>("loy");
+    boost::optional<double> hix = params_.get<double>("hix");
+    boost::optional<double> hiy = params_.get<double>("hiy");
+    boost::optional<std::string> ext = params_.get<std::string>("extent");
 
-   if (bind) 
-   {
-      this->bind();
-   }
+    if (lox && loy && hix && hiy)
+    {
+        extent_.init(*lox, *loy, *hix, *hiy);
+        extent_initialized_ = true;
+    }
+    else if (ext)
+    {
+        extent_initialized_ = extent_.from_string(*ext);
+    }
+
+    if (! extent_initialized_)
+        throw datasource_exception("valid <lox> <loy> <hix> <hiy>, or <extent> are required");
+
+    if (bind) 
+    {
+        this->bind();
+    }
 }
 
 void raster_datasource::bind() const
 {
-   if (is_bound_) return;
+    if (is_bound_) return;
    
-   if (!boost::filesystem::exists(filename_)) throw datasource_exception(filename_ + " does not exist");
+    if (! boost::filesystem::exists(filename_))
+        throw datasource_exception(filename_ + " does not exist");
 
-   try
-   {         
-      std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
-      if (reader.get())
-      {
-         width_ = reader->width();
-         height_ = reader->height();
+    try
+    {         
+        std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
+        if (reader.get())
+        {
+            width_ = reader->width();
+            height_ = reader->height();
 #ifdef MAPNIK_DEBUG
-         std::cout << "Raster Plugin: RASTER SIZE(" << width_ << "," << height_ << ")\n";
+            std::cout << "Raster Plugin: RASTER SIZE(" << width_ << "," << height_ << ")\n";
 #endif
-      }
-   }
-   catch (...)
-   {
-      std::cerr << "Exception caught\n";
-   }
+        }
+    }
+    catch (...)
+    {
+        std::cerr << "Exception caught\n";
+    }
    
-   is_bound_ = true;
+    is_bound_ = true;
 }
 
-raster_datasource::~raster_datasource() {}
+raster_datasource::~raster_datasource()
+{
+}
 
 int raster_datasource::type() const
 {
     return datasource::Raster;
 }
 
-std::string raster_datasource::name_="raster";
 std::string raster_datasource::name()
 {
-    return name_;
+    return "raster";
 }
 
 mapnik::box2d<double> raster_datasource::envelope() const
@@ -135,34 +146,38 @@ layer_descriptor raster_datasource::get_descriptor() const
 
 featureset_ptr raster_datasource::features(query const& q) const
 {
-   if (!is_bound_) bind();
+    if (! is_bound_) bind();
    
-   mapnik::CoordTransform t(width_,height_,extent_,0,0);
-   mapnik::box2d<double> intersect=extent_.intersect(q.get_bbox());
-   mapnik::box2d<double> ext=t.forward(intersect);
+    mapnik::CoordTransform t(width_, height_, extent_, 0, 0);
+    mapnik::box2d<double> intersect = extent_.intersect(q.get_bbox());
+    mapnik::box2d<double> ext = t.forward(intersect);
    
-   int width  = int(ext.maxx() + 0.5) - int(ext.minx() + 0.5);
-   int height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
+    const int width  = int(ext.maxx() + 0.5) - int(ext.minx() + 0.5);
+    const int height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
+
 #ifdef MAPNIK_DEBUG
-   std::cout << "Raster Plugin: BOX SIZE(" << width << " " << height << ")\n";
+    std::cout << "Raster Plugin: BOX SIZE(" << width << " " << height << ")\n";
 #endif
-   if (width * height > 512*512)
-   {
+
+    if (width * height > 512*512)
+    {
 #ifdef MAPNIK_DEBUG
-      std::cout << "Raster Plugin: TILED policy\n";
+        std::cout << "Raster Plugin: TILED policy\n";
 #endif
-      tiled_file_policy policy(filename_,format_, 256 , extent_,q.get_bbox(), width_,height_);
-      return featureset_ptr(new raster_featureset<tiled_file_policy>(policy,extent_,q));
-   }
-   else
-   {
+
+        tiled_file_policy policy(filename_, format_, 256, extent_, q.get_bbox(), width_, height_);
+        return featureset_ptr(new raster_featureset<tiled_file_policy>(policy, extent_, q));
+    }
+    else
+    {
 #ifdef MAPNIK_DEBUG
-      std::cout << "Raster Plugin: SINGLE FILE\n";
+        std::cout << "Raster Plugin: SINGLE FILE\n";
 #endif
-      raster_info info(filename_,format_,extent_,width_,height_);
-      single_file_policy policy(info);
-      return featureset_ptr(new raster_featureset<single_file_policy>(policy,extent_,q));
-   }
+
+        raster_info info(filename_, format_, extent_, width_, height_);
+        single_file_policy policy(info);
+        return featureset_ptr(new raster_featureset<single_file_policy>(policy, extent_, q));
+    }
 }
 
 featureset_ptr raster_datasource::features_at_point(coord2d const&) const
