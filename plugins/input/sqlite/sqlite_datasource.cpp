@@ -148,10 +148,9 @@ void sqlite_datasource::bind() const
                   as all column_type are SQLITE_NULL
         */
 
-        std::string::size_type idx = table_.find(table_name);
         std::ostringstream s;
-        s << "select * from (" << table_.substr(0,idx + table_name.length()) << ") limit 1";
-        
+        s << "select * from (" << table_name << ") limit 1";
+
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
