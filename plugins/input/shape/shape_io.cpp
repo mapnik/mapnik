@@ -24,7 +24,7 @@
 
 #include "shape_io.hpp"
 #include "shape.hpp"
-
+#include <boost/filesystem/operations.hpp>
 
 using mapnik::datasource_exception;
 using mapnik::geometry_type;
@@ -47,6 +47,11 @@ shape_io::shape_io(const std::string& shape_name)
     }
     try 
     {
+        if (!boost::filesystem::exists(shape_name + INDEX))
+        {
+            throw datasource_exception("Shape Plugin Warning: Could not open index: '" + shape_name + INDEX + "' does not exist");
+        }
+
         index_= boost::shared_ptr<shape_file>(new shape_file(shape_name + INDEX));
     }
     catch (...)
