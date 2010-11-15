@@ -32,11 +32,11 @@
 class raster_datasource : public mapnik::datasource
 {
     private:
+       mapnik::layer_descriptor     desc_;
        std::string                  filename_;
        std::string                  format_;
        mapnik::box2d<double>        extent_;
        bool                         extent_initialized_;
-       mapnik::layer_descriptor     desc_;
        mutable unsigned             width_;
        mutable unsigned             height_;
     public:
