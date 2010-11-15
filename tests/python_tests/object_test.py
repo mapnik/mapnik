@@ -540,6 +540,49 @@ def test_envelope_init():
     eq_(c.x, 150)
     eq_(c.y, 150)
 
+# Box2d static initialization
+def test_envelope_static_init():
+    e = mapnik2.Box2d.from_string('100 100 200 200')
+    e2 = mapnik2.Box2d.from_string('100,100,200,200')
+    e3 = mapnik2.Box2d.from_string('100 , 100 , 200 , 200')
+    eq_(e,e2)
+    eq_(e,e3)
+
+    assert_true(e.contains(100, 100))
+    assert_true(e.contains(100, 200))
+    assert_true(e.contains(200, 200))
+    assert_true(e.contains(200, 100))
+
+    assert_true(e.contains(e.center()))
+    
+    assert_false(e.contains(99.9, 99.9))
+    assert_false(e.contains(99.9, 200.1))
+    assert_false(e.contains(200.1, 200.1))
+    assert_false(e.contains(200.1, 99.9))
+
+    eq_(e.width(), 100)
+    eq_(e.height(), 100)
+
+    eq_(e.minx, 100)
+    eq_(e.miny, 100)
+
+    eq_(e.maxx, 200)
+    eq_(e.maxy, 200)
+    
+    eq_(e[0],100)
+    eq_(e[1],100)
+    eq_(e[2],200)
+    eq_(e[3],200)
+    eq_(e[0],e[-4])
+    eq_(e[1],e[-3])
+    eq_(e[2],e[-2])
+    eq_(e[3],e[-1])
+    
+    c = e.center()
+
+    eq_(c.x, 150)
+    eq_(c.y, 150)
+
 # Box2d pickling
 def test_envelope_pickle():
     e = mapnik2.Box2d(100, 100, 200, 200)
