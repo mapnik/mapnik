@@ -294,7 +294,7 @@ box2d<double> occi_datasource::envelope() const
     }
     else if (use_spatial_index_)
     {
-        std::string table_name = table_from_sql(table_);
+        std::string table_name = mapnik::table_from_sql(table_);
 
         {
             std::ostringstream s;
