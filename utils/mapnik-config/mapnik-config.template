@@ -11,7 +11,7 @@ Known values for OPTION are:
   --libs            print library linking information
   --cflags          print pre-processor and compiler flags
   --fonts           print default fonts directory
-  --input-plugins   print default plugins directory
+  --input-plugins   print default input plugins directory
   --help            display this help and exit
   -v --version         output version information
 EOF
@@ -71,7 +71,7 @@ while test $# -gt 0; do
       echo ${libdir}/mapnik2/fonts 
       ;;
 
-    --plugins)
+    --input-plugins)
       echo ${libdir}/mapnik2/input 
       ;;
       
