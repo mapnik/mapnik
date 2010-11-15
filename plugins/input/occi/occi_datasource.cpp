@@ -145,9 +145,8 @@ void occi_datasource::bind() const
 
    // get columns description
    {
-       std::string::size_type idx = table_.find(table_name);
        std::ostringstream s;
-       s << "select * from (" << table_.substr(0,idx + table_name.length()) << ") where rownum < 1";
+       s << "select * from (" << table_name << ") where rownum < 1";
 
        occi_connection_ptr conn (pool_);
 
