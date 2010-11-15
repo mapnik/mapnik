@@ -73,6 +73,7 @@ void export_glyph_symbolizer();
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -247,8 +248,12 @@ double scale_denominator(mapnik::Map const &map, bool geographic)
 }
 
 // http://docs.python.org/c-api/exceptions.html#standard-exceptions
-void translator(mapnik::config_error const & ex) {
+void config_error_translator(mapnik::config_error const & ex) {
     PyErr_SetString(PyExc_RuntimeError, ex.what());
+}
+
+void value_error_translator(mapnik::value_error const & ex) {
+    PyErr_SetString(PyExc_ValueError, ex.what());
 }
 
 unsigned mapnik_version()
@@ -320,7 +325,8 @@ BOOST_PYTHON_MODULE(_mapnik2)
     using mapnik::save_map;
     using mapnik::save_map_to_string;
 
-    register_exception_translator<mapnik::config_error>(translator);
+    register_exception_translator<mapnik::config_error>(&config_error_translator);
+    register_exception_translator<mapnik::value_error>(&value_error_translator);
     register_cairo();
     export_query();
     export_geometry();
@@ -495,11 +501,11 @@ BOOST_PYTHON_MODULE(_mapnik2)
         "\n"
         );
    
-    def("load_map", & load_map, load_map_overloads());
+    def("load_map", &load_map, load_map_overloads());
 
-    def("load_map_from_string", & load_map_string, load_map_string_overloads());
+    def("load_map_from_string", &load_map_string, load_map_string_overloads());
 
-    def("save_map", & save_map, save_map_overloads());
+    def("save_map", &save_map, save_map_overloads());
 /*
   "\n"
   "Save Map object to XML file\n"
@@ -516,7 +522,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
   );
 */
     
-    def("save_map_to_string", & save_map_to_string, save_map_to_string_overloads());
+    def("save_map_to_string", &save_map_to_string, save_map_to_string_overloads());
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
     def("mapnik_svn_revision", &mapnik_svn_revision,"Get the Mapnik svn revision");
     def("has_jpeg", &has_jpeg, "Get jpeg read/write support status");
