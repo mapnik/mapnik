@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/value_error.hpp>
 
 using mapnik::coord;
 using mapnik::box2d;
@@ -39,6 +40,22 @@ struct envelope_pickle_suite : boost::python::pickle_suite
         return boost::python::make_tuple(e.minx(),e.miny(),e.maxx(),e.maxy());
     }
 };
+
+box2d<double> from_string(std::string const& s)
+{
+    box2d<double> bbox;
+    bool success = bbox.from_string(s);
+    if (success)
+    {
+        return bbox;
+    }
+    else
+    {
+        std::stringstream ss;
+        ss << "Could not parse bbox from string: '" << s << "'";
+        throw mapnik::value_error(ss.str());
+    }
+}
 
 //define overloads here
 void (box2d<double>::*width_p1)(double) = &box2d<double>::width;
@@ -80,6 +97,8 @@ void export_envelope()
         .def(init<const coord<double,2>&, const coord<double,2>&>(
                  (arg("ll"),arg("ur")),
                  "Equivalent to Box2d(ll.x, ll.y, ur.x, ur.y).\n"))
+        .def("from_string",from_string)
+        .staticmethod("from_string")
         .add_property("minx", &box2d<double>::minx, 
                       "X coordinate for the lower left corner")
         .add_property("miny", &box2d<double>::miny, 
