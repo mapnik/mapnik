@@ -85,7 +85,7 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
 
    boost::optional<std::string> ext = params_.get<std::string>("extent");
    if (ext) extent_initialized_ = extent_.from_string(*ext);
-   
+
    if (bind)
    {
       this->bind();
@@ -94,11 +94,11 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
 
 void occi_datasource::bind() const
 {
-   if (is_bound_) return;   
+   if (is_bound_) return;
 
    boost::optional<int> initial_size = params_.get<int>("initial_size",1);
    boost::optional<int> max_size = params_.get<int>("max_size",10);
-    
+
    // connect to environment
    try
    {
@@ -218,7 +218,7 @@ void occi_datasource::bind() const
                       clog << "unknown type_oid="<<type_oid<<endl;
 #endif
                       break;
-                   }	  
+                   }
                }
            }
        }
@@ -226,8 +226,8 @@ void occi_datasource::bind() const
        {
            throw datasource_exception(ex.getMessage());
        }
-   } 
-   
+   }
+
    is_bound_ = true;
 }
 
@@ -259,7 +259,7 @@ box2d<double> occi_datasource::envelope() const
     occi_connection_ptr conn (pool_);
 
     boost::optional<mapnik::boolean> estimate_extent = params_.get<mapnik::boolean>("estimate_extent",false);
-         
+
     if (estimate_extent && *estimate_extent)
     {
         std::ostringstream s;
@@ -272,12 +272,12 @@ box2d<double> occi_datasource::envelope() const
             ResultSet* rs = conn.execute_query (s.str());
             if (rs && rs->next ())
             {
-                try 
+                try
                 {
                     lox = lexical_cast<double>(rs->getDouble(1));
                     loy = lexical_cast<double>(rs->getDouble(2));
                     hix = lexical_cast<double>(rs->getDouble(3));
-                    hiy = lexical_cast<double>(rs->getDouble(4));		    
+                    hiy = lexical_cast<double>(rs->getDouble(4));
                     extent_.init (lox,loy,hix,hiy);
                     extent_initialized_ = true;
                 }
@@ -301,13 +301,13 @@ box2d<double> occi_datasource::envelope() const
             s << "select dim.sdo_lb as lx, dim.sdo_ub as ux from ";
             s << SDO_GEOMETRY_METADATA_TABLE << " m, table(m.diminfo) dim ";
             s << " where lower(m.table_name) = '" << table_name << "' and dim.sdo_dimname = 'X'";
-        
+
             try
             {
                 ResultSet* rs = conn.execute_query (s.str());
                 if (rs && rs->next ())
                 {
-                    try 
+                    try
                     {
                         lox = lexical_cast<double>(rs->getDouble(1));
                         hix = lexical_cast<double>(rs->getDouble(2));
@@ -329,13 +329,13 @@ box2d<double> occi_datasource::envelope() const
             s << "select dim.sdo_lb as ly, dim.sdo_ub as uy from ";
             s << SDO_GEOMETRY_METADATA_TABLE << " m, table(m.diminfo) dim ";
             s << " where lower(m.table_name) = '" << table_name << "' and dim.sdo_dimname = 'Y'";
-        
+
             try
             {
                 ResultSet* rs = conn.execute_query (s.str());
                 if (rs && rs->next ())
                 {
-                    try 
+                    try
                     {
                         loy = lexical_cast<double>(rs->getDouble(1));
                         hiy = lexical_cast<double>(rs->getDouble(2));
@@ -368,11 +368,11 @@ layer_descriptor occi_datasource::get_descriptor() const
 featureset_ptr occi_datasource::features(query const& q) const
 {
     if (!is_bound_) bind();
-    
+
     if (pool_)
     {
         box2d<double> const& box=q.get_bbox();
-    
+
         std::ostringstream s;
         s << "select " << geometry_field_ << " as geom";
         std::set<std::string> const& props=q.property_names();
@@ -382,12 +382,12 @@ featureset_ptr occi_datasource::features(query const& q) const
         {
            s <<",\""<<*pos<<"\"";
            ++pos;
-        }	 
+        }
 
         s << " from ";
 
-        std::string query (table_); 
-        std::string table_name = table_from_sql(query);
+        std::string query (table_);
+        std::string table_name = mapnik::table_from_sql(query);
 
         if (use_spatial_index_)
         {
@@ -398,18 +398,18 @@ featureset_ptr occi_datasource::features(query const& q) const
            spatial_sql << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POLYGON << "," << SDO_INTERPRETATION_RECTANGLE << "),";
            spatial_sql << " mdsys.sdo_ordinate_array(";
            spatial_sql << box.minx() << "," << box.miny() << ", ";
-           spatial_sql << box.maxx() << "," << box.maxy() << ")), 'querytype=WINDOW') = 'TRUE'";      
+           spatial_sql << box.maxx() << "," << box.maxy() << ")), 'querytype=WINDOW') = 'TRUE'";
 
            if (boost::algorithm::ifind_first(query,"where"))
            {
               boost::algorithm::ireplace_first(query, "where", spatial_sql.str() + " and");
            }
-           else if (boost::algorithm::find_first(query,table_name))  
+           else if (boost::algorithm::find_first(query,table_name))
            {
               boost::algorithm::ireplace_first(query, table_name , table_name + " " + spatial_sql.str());
            }
         }
-        
+
         if (row_limit_ > 0)
         {
            std::string row_limit_string = "rownum < " + row_limit_;
@@ -418,18 +418,18 @@ featureset_ptr occi_datasource::features(query const& q) const
            {
               boost::algorithm::ireplace_first(query, "where", row_limit_string + " and");
            }
-           else if (boost::algorithm::find_first(query,table_name))  
+           else if (boost::algorithm::find_first(query,table_name))
            {
               boost::algorithm::ireplace_first(query, table_name , table_name + " " + row_limit_string);
            }
         }
-        
+
         s << query;
 
 #ifdef MAPNIK_DEBUG
         clog << s.str() << endl;
 #endif
-        
+
         return featureset_ptr (new occi_featureset (pool_,
                                                     s.str(),
                                                     desc_.get_encoding(),
@@ -437,7 +437,7 @@ featureset_ptr occi_datasource::features(query const& q) const
                                                     row_prefetch_,
                                                     props.size()));
     }
-    
+
     return featureset_ptr();
 }
 
@@ -461,8 +461,8 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 
         s << " from ";
 
-        std::string query (table_); 
-        std::string table_name = table_from_sql(query);
+        std::string query (table_);
+        std::string table_name = mapnik::table_from_sql(query);
 
         std::ostringstream spatial_sql;
         spatial_sql << std::setprecision(16);
@@ -470,13 +470,13 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         spatial_sql << " mdsys.sdo_geometry(" << SDO_GTYPE_2DPOINT << "," << srid_ << ",NULL,";
         spatial_sql << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POINT << "," << SDO_INTERPRETATION_POINT << "),";
         spatial_sql << " mdsys.sdo_ordinate_array(";
-        spatial_sql << pt.x << "," << pt.y << ")), 'querytype=WINDOW') = 'TRUE'";      
+        spatial_sql << pt.x << "," << pt.y << ")), 'querytype=WINDOW') = 'TRUE'";
 
         if (boost::algorithm::ifind_first(query,"where"))
         {
            boost::algorithm::ireplace_first(query, "where", spatial_sql.str() + " and");
         }
-        else if (boost::algorithm::find_first(query,table_name))  
+        else if (boost::algorithm::find_first(query,table_name))
         {
            boost::algorithm::ireplace_first(query, table_name , table_name + " " + spatial_sql.str());
         }
@@ -489,18 +489,18 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
            {
               boost::algorithm::ireplace_first(query, "where", row_limit_string + " and");
            }
-           else if (boost::algorithm::find_first(query,table_name))  
+           else if (boost::algorithm::find_first(query,table_name))
            {
               boost::algorithm::ireplace_first(query, table_name , table_name + " " + row_limit_string);
            }
         }
-        
+
         s << query;
 
 #ifdef MAPNIK_DEBUG
         clog << s.str() << endl;
 #endif
-        
+
         return featureset_ptr (new occi_featureset (pool_,
                                                     s.str(),
                                                     desc_.get_encoding(),
@@ -511,4 +511,3 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 
     return featureset_ptr();
 }
-
