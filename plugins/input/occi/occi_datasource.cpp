@@ -71,13 +71,13 @@ DATASOURCE_PLUGIN(occi_datasource)
 
 occi_datasource::occi_datasource(parameters const& params, bool bind)
     : datasource (params),
-      table_(*params_.get<std::string>("table","")),
-      geometry_field_(*params_.get<std::string>("geometry_field","GEOLOC")),
       type_(datasource::Vector),
+      table_(*params_.get<std::string>("table","")),
+      geometry_field_(*params_.get<std::string>("geometry_field","")),
       extent_initialized_(false),
+      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
       row_limit_(*params_.get<int>("row_limit",0)),
       row_prefetch_(*params_.get<int>("row_prefetch",100)),
-      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
       pool_(NULL),
       conn_(NULL)
 {
@@ -164,9 +164,11 @@ void occi_datasource::bind() const
     // get SRID from geometry metadata
     {
         std::ostringstream s;
-        s << "select srid from " << SDO_GEOMETRY_METADATA_TABLE << " where";
-        s << " lower(table_name) = lower('" << table_name << "') and";
-        s << " lower(column_name) = lower('" << geometry_field_ << "')";
+        s << "SELECT srid, column_name FROM " << SDO_GEOMETRY_METADATA_TABLE << " WHERE";
+        s << " LOWER(table_name) = LOWER('" << table_name << "')";
+        
+        if (geometry_field_ != "")
+            s << " AND LOWER(column_name) = LOWER('" << geometry_field_ << "')";
 
         try
         {
@@ -178,6 +180,9 @@ void occi_datasource::bind() const
             if (rs && rs->next ())
             {
                 srid_ = rs->getInt(1);
+                
+                if (geometry_field_ == "")
+                    geometry_field_ = rs->getString(2);
             }
         }
         catch (SQLException &ex)
@@ -189,7 +194,7 @@ void occi_datasource::bind() const
     // get columns description
     {
         std::ostringstream s;
-        s << "select * from (" << table_name << ") where rownum < 1";
+        s << "SELECT * FROM (" << table_name << ") WHERE rownum < 1";
 
         try
         {
@@ -325,9 +330,9 @@ box2d<double> occi_datasource::envelope() const
     if (estimate_extent && *estimate_extent)
     {
         std::ostringstream s;
-        s << "select min(c.x), min(c.y), max(c.x), max(c.y) from ";
-        s << " (select sdo_aggr_mbr(" << geometry_field_ << ") shape from " << table_ << ") a, ";
-        s << " table (sdo_util.getvertices(a.shape)) c";
+        s << "SELECT MIN(c.x), MIN(c.y), MAX(c.x), MAX(c.y) FROM ";
+        s << " (SELECT SDO_AGGR_MBR(" << geometry_field_ << ") shape FROM " << table_ << ") a, ";
+        s << " TABLE(SDO_UTIL.GETVERTICES(a.shape)) c";
 
 #ifdef MAPNIK_DEBUG
         clog << s.str() << endl;
@@ -367,13 +372,13 @@ box2d<double> occi_datasource::envelope() const
         std::string table_name = mapnik::table_from_sql(table_);
 
         std::ostringstream s;
-        s << "select dim.sdo_lb, dim.sdo_ub from ";
-        s << SDO_GEOMETRY_METADATA_TABLE << " m, table(m.diminfo) dim ";
-        s << " where lower(m.table_name) = '" << table_name << "' and dim.sdo_dimname = 'X'";
+        s << "SELECT dim.sdo_lb, dim.sdo_ub FROM ";
+        s << SDO_GEOMETRY_METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
+        s << " WHERE LOWER(m.table_name) = LOWER('" << table_name << "') AND dim.sdo_dimname = 'X'";
         s << " UNION ";
-        s << "select dim.sdo_lb, dim.sdo_ub from ";
-        s << SDO_GEOMETRY_METADATA_TABLE << " m, table(m.diminfo) dim ";
-        s << " where lower(m.table_name) = '" << table_name << "' and dim.sdo_dimname = 'Y'";
+        s << "SELECT dim.sdo_lb, dim.sdo_ub FROM ";
+        s << SDO_GEOMETRY_METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
+        s << " WHERE LOWER(m.table_name) = LOWER('" << table_name << "') AND dim.sdo_dimname = 'Y'";
 
 #ifdef MAPNIK_DEBUG
         clog << s.str() << endl;
@@ -444,7 +449,7 @@ featureset_ptr occi_datasource::features(query const& q) const
     box2d<double> const& box=q.get_bbox();
 
     std::ostringstream s;
-    s << "select " << geometry_field_ << " as geom";
+    s << "SELECT " << geometry_field_ << " AS geom";
     std::set<std::string> const& props = q.property_names();
     std::set<std::string>::const_iterator pos = props.begin();
     std::set<std::string>::const_iterator end = props.end();
@@ -454,7 +459,7 @@ featureset_ptr occi_datasource::features(query const& q) const
         ++pos;
     }
 
-    s << " from ";
+    s << " FROM ";
 
     std::string query (table_);
     std::string table_name = mapnik::table_from_sql(query);
@@ -463,16 +468,16 @@ featureset_ptr occi_datasource::features(query const& q) const
     {
         std::ostringstream spatial_sql;
         spatial_sql << std::setprecision(16);
-        spatial_sql << " where sdo_filter(" << geometry_field_ << ",";
-        spatial_sql << " mdsys.sdo_geometry(" << SDO_GTYPE_2DPOLYGON << "," << srid_ << ",NULL,";
-        spatial_sql << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POLYGON << "," << SDO_INTERPRETATION_RECTANGLE << "),";
-        spatial_sql << " mdsys.sdo_ordinate_array(";
+        spatial_sql << " WHERE SDO_FILTER(" << geometry_field_ << ",";
+        spatial_sql << "  MDSYS.SDO_GEOMETRY(" << SDO_GTYPE_2DPOLYGON << "," << srid_ << ",NULL,";
+        spatial_sql << "  MDSYS.SDO_ELEM_INFO_ARRAY(1," << SDO_ETYPE_POLYGON << "," << SDO_INTERPRETATION_RECTANGLE << "),";
+        spatial_sql << "  MDSYS.SDO_ORDINATE_ARRAY(";
         spatial_sql << box.minx() << "," << box.miny() << ", ";
         spatial_sql << box.maxx() << "," << box.maxy() << ")), 'querytype=WINDOW') = 'TRUE'";
 
-        if (boost::algorithm::ifind_first(query, "where"))
+        if (boost::algorithm::ifind_first(query, "WHERE"))
         {
-            boost::algorithm::ireplace_first(query, "where", spatial_sql.str() + " and");
+            boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
         }
         else if (boost::algorithm::ifind_first(query, table_name))
         {
@@ -490,9 +495,9 @@ featureset_ptr occi_datasource::features(query const& q) const
     {
         std::string row_limit_string = "rownum < " + row_limit_;
 
-        if (boost::algorithm::ifind_first(query,"where"))
+        if (boost::algorithm::ifind_first(query, "WHERE"))
         {
-            boost::algorithm::ireplace_first(query, "where", row_limit_string + " and");
+            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string + " AND ");
         }
         else if (boost::algorithm::ifind_first(query, table_name))
         {
@@ -527,7 +532,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     if (!is_bound_) bind();
 
     std::ostringstream s;
-    s << "select " << geometry_field_ << " as geom";
+    s << "SELECT " << geometry_field_ << " AS geom";
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
     unsigned size=0;
@@ -538,7 +543,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         ++size;
     }
 
-    s << " from ";
+    s << " FROM ";
 
     std::string query (table_);
     std::string table_name = mapnik::table_from_sql(query);
@@ -547,15 +552,15 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     {
         std::ostringstream spatial_sql;
         spatial_sql << std::setprecision(16);
-        spatial_sql << " where sdo_filter(" << geometry_field_ << ",";
-        spatial_sql << " mdsys.sdo_geometry(" << SDO_GTYPE_2DPOINT << "," << srid_ << ",NULL,";
-        spatial_sql << " mdsys.sdo_elem_info_array(1," << SDO_ETYPE_POINT << "," << SDO_INTERPRETATION_POINT << "),";
-        spatial_sql << " mdsys.sdo_ordinate_array(";
+        spatial_sql << " WHERE SDO_FILTER(" << geometry_field_ << ",";
+        spatial_sql << "  MDSYS.SDO_GEOMETRY(" << SDO_GTYPE_2DPOINT << "," << srid_ << ",NULL,";
+        spatial_sql << "  MDSYS.SDO_ELEM_INFO_ARRAY(1," << SDO_ETYPE_POINT << "," << SDO_INTERPRETATION_POINT << "),";
+        spatial_sql << "  MDSYS.SDO_ORDINATE_ARRAY(";
         spatial_sql << pt.x << "," << pt.y << ")), 'querytype=WINDOW') = 'TRUE'";
 
-        if (boost::algorithm::ifind_first(query,"where"))
+        if (boost::algorithm::ifind_first(query, "WHERE"))
         {
-            boost::algorithm::ireplace_first(query, "where", spatial_sql.str() + " and");
+            boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
         }
         else if (boost::algorithm::ifind_first(query,table_name))
         {
@@ -573,9 +578,9 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     {
         std::string row_limit_string = "rownum < " + row_limit_;
 
-        if (boost::algorithm::ifind_first(query,"where"))
+        if (boost::algorithm::ifind_first(query, "WHERE"))
         {
-            boost::algorithm::ireplace_first(query, "where", row_limit_string + " and");
+            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string + " AND ");
         }
         else if (boost::algorithm::ifind_first(query, table_name))
         {

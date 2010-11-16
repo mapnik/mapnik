@@ -49,19 +49,15 @@ class occi_datasource : public mapnik::datasource
       mapnik::layer_descriptor get_descriptor() const;
       void bind() const;
    private:
-      const std::string uri_;
-      const std::string username_;
-      const std::string password_;
-      const std::string table_;
-      const std::string geometry_field_;
-      std::string geometryColumn_;
       int type_;
+      mutable std::string table_;
+      mutable std::string geometry_field_;
       mutable int srid_;
       mutable bool extent_initialized_;
       mutable mapnik::box2d<double> extent_;
-      const int row_limit_;
-      const int row_prefetch_;
       mutable mapnik::layer_descriptor desc_;
+      int row_limit_;
+      int row_prefetch_;
       mutable oracle::occi::StatelessConnectionPool* pool_;
       mutable oracle::occi::Connection* conn_;
       bool use_connection_pool_;
