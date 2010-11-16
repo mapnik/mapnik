@@ -42,14 +42,14 @@ class shape_datasource : public datasource
    public:
       shape_datasource(const parameters &params, bool bind=true);
       virtual ~shape_datasource();
-    
+
       int type() const;
       static std::string name();
       featureset_ptr features(const query& q) const;
       featureset_ptr features_at_point(coord2d const& pt) const;
       Envelope<double> envelope() const;
-      layer_descriptor get_descriptor() const;   
-      void bind() const;   
+      layer_descriptor get_descriptor() const;
+      void bind() const;
    private:
       shape_datasource(const shape_datasource&);
       shape_datasource& operator=(const shape_datasource&);
@@ -61,7 +61,6 @@ class shape_datasource : public datasource
       mutable Envelope<double> extent_;
       mutable bool indexed_;
       mutable layer_descriptor desc_;
-      static const std::string name_;
 };
 
 #endif //SHAPE_HPP
