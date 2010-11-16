@@ -110,17 +110,18 @@ void raster_datasource::bind() const
    is_bound_ = true;
 }
 
-raster_datasource::~raster_datasource() {}
+raster_datasource::~raster_datasource()
+{
+}
 
 int raster_datasource::type() const
 {
     return datasource::Raster;
 }
 
-std::string raster_datasource::name_="raster";
 std::string raster_datasource::name()
 {
-    return name_;
+    return "raster";
 }
 
 mapnik::Envelope<double> raster_datasource::envelope() const

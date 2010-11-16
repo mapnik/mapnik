@@ -37,7 +37,6 @@ private:
    mapnik::layer_descriptor     desc_;
    mutable unsigned                     width_;
    mutable unsigned                     height_;
-   static std::string           name_;  
 public:
    raster_datasource(const mapnik::parameters& params, bool bind=true);
    virtual ~raster_datasource();
