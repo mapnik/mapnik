@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/unicode.hpp> 
 
 // boost
@@ -38,37 +39,39 @@
 class occi_featureset : public mapnik::Featureset
 {
    public:
-      occi_featureset(oracle::occi::StatelessConnectionPool * pool,
+      occi_featureset(oracle::occi::StatelessConnectionPool* pool,
+                      oracle::occi::Connection* conn,
                       std::string const& sqlstring,
                       std::string const& encoding,
                       bool multiple_geometries,
+                      bool use_connection_pool,
                       unsigned prefetch_rows,
                       unsigned num_attrs);
       virtual ~occi_featureset();
       mapnik::feature_ptr next();
    private:
-      void convert_geometry (SDOGeometry* geom, mapnik::feature_ptr feature);
       void convert_point (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       void convert_linestring (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
       void convert_polygon (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      void convert_multipoint (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      //void convert_multipoint_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      void convert_multilinestring (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      //void convert_multilinestring_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      void convert_multipolygon (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      //void convert_multipolygon_2 (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      //void convert_collection (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      void fill_geometry2d (mapnik::geometry2d * geom,
-                             const std::vector<oracle::occi::Number>& elem_info,
-                             const std::vector<oracle::occi::Number>& ordinates,
-                             const int dimensions,
-                             const bool is_point_geom);
-      void fill_geometry2d (mapnik::geometry2d * geom,
-                             const int real_offset,
-                             const int next_offset,
-                             const std::vector<oracle::occi::Number>& ordinates,
-                             const int dimensions,
-                             const bool is_point_geom);
+      void convert_multipoint (SDOGeometry* geom, mapnik::feature_ptr feature, int dims, bool multiple_geometries);
+      void convert_multilinestring (SDOGeometry* geom, mapnik::feature_ptr feature, int dims, bool multiple_geometries);
+      void convert_multipolygon (SDOGeometry* geom, mapnik::feature_ptr feature, int dims, bool multiple_geometries);
+      void convert_collection (SDOGeometry* geom, mapnik::feature_ptr feature, int dims, bool multiple_geometries);
+      void convert_geometry (SDOGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
+      void convert_ordinates (mapnik::feature_ptr feature,
+                              const mapnik::GeomType& geom_type,
+                              const std::vector<oracle::occi::Number>& elem_info,
+                              const std::vector<oracle::occi::Number>& ordinates,
+                              const int dimensions,
+                              const bool is_single_geom,
+                              const bool is_point_geom,
+                              const bool multiple_geometries);
+      void fill_geometry_type (mapnik::geometry2d* geom,
+                               const int real_offset,
+                               const int next_offset,
+                               const std::vector<oracle::occi::Number>& ordinates,
+                               const int dimensions,
+                               const bool is_point_geom);
       occi_connection_ptr conn_;
       oracle::occi::ResultSet* rs_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
