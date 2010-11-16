@@ -28,6 +28,9 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 LIBDIR_SCHEMA = env['LIBDIR_SCHEMA']
 version = env['MAPNIK_VERSION_STRING']
 mapnik_libname = 'mapnik2'
+input_plugins = os.path.normpath(env['DESTDIR'] + '/' + env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
+fonts = os.path.normpath(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/fonts')
+
 
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
@@ -60,9 +63,12 @@ mapnik_libname=%(mapnik_libname)s
 private_libs='%(private_libs)s'
 other_libs='%(other_libs)s'
 other_includes='%(other_includes)s'
+fonts='%(fonts)s'
+input_plugins='%(fonts)s'
 ''' % locals()
 
 
+# TODO - add fonts and input_plugins to pkg-config?
 pkg_config = '''
 Name: libmapnik
 Version: ${version}

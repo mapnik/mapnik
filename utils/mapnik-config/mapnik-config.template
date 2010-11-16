@@ -68,11 +68,11 @@ while test $# -gt 0; do
       ;;
 
     --fonts)
-      echo ${libdir}/mapnik2/fonts 
+      echo ${fonts} 
       ;;
 
     --input-plugins)
-      echo ${libdir}/mapnik2/input 
+      echo ${input_plugins} 
       ;;
       
     --cflags)
