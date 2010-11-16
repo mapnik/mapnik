@@ -62,18 +62,24 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
      indexed_(false)
 {
-   OGRRegisterAll();
-
    boost::optional<std::string> file = params.get<std::string>("file");
-   if (!file) throw datasource_exception("missing <file> parameter");
+   boost::optional<std::string> string = params.get<std::string>("string");
+   if (!file && !string) throw datasource_exception("missing <file> or <string> parameter");
 
-   multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
+   multiple_geometries_ = *params.get<mapnik::boolean>("multiple_geometries",false);
 
-   boost::optional<std::string> base = params_.get<std::string>("base");
-   if (base)
-      dataset_name_ = *base + "/" + *file;
+   if (string)
+   {
+       dataset_name_ = *string;
+   }
    else
-      dataset_name_ = *file;
+   {
+       boost::optional<std::string> base = params.get<std::string>("base");
+       if (base)
+          dataset_name_ = *base + "/" + *file;
+       else
+          dataset_name_ = *file;
+   }
       
    if (bind)
    {
@@ -81,9 +87,20 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
    }
 }
 
+ogr_datasource::~ogr_datasource()
+{
+    if (is_bound_) 
+    {
+        OGRDataSource::DestroyDataSource (dataset_);
+    }
+}
+
 void ogr_datasource::bind() const
 {
    if (is_bound_) return;   
+
+   // initialize ogr formats
+   OGRRegisterAll();
     
    // open ogr driver   
    dataset_ = OGRSFDriverRegistrar::Open ((dataset_name_).c_str(), FALSE);
@@ -245,14 +262,6 @@ void ogr_datasource::bind() const
    }
    
    is_bound_ = true;
-}
-
-ogr_datasource::~ogr_datasource()
-{
-    if (is_bound_) 
-    {
-        OGRDataSource::DestroyDataSource (dataset_);
-    }
 }
 
 std::string ogr_datasource::name()
