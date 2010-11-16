@@ -322,22 +322,20 @@ void postgis_datasource::bind() const
     is_bound_ = true;
 }
 
-std::string const postgis_datasource::name_="postgis";
-
 std::string postgis_datasource::name()
 {
-   return name_;
+    return "postgis";
 }
 
 int postgis_datasource::type() const
 {
-   return type_;
+    return type_;
 }
 
 layer_descriptor postgis_datasource::get_descriptor() const
 {
-   if (!is_bound_) bind();   
-   return desc_;
+    if (!is_bound_) bind();
+    return desc_;
 }
 
 

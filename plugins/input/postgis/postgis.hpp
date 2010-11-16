@@ -70,7 +70,6 @@ class postgis_datasource : public datasource
       mutable layer_descriptor desc_;
       ConnectionCreator<Connection> creator_;
       bool multiple_geometries_;
-      static const std::string name_;
       const std::string bbox_token_;
       const std::string scale_denom_token_;
       bool persist_connection_;
