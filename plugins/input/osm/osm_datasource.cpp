@@ -42,8 +42,6 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 using mapnik::attribute_descriptor;
 
-const std::string osm_datasource::name_ = "osm";
-
 osm_datasource::osm_datasource(const parameters &params, bool bind)
    : datasource (params),
      type_(datasource::Vector),
@@ -76,7 +74,7 @@ void osm_datasource::bind() const
 		cerr<<"loading_from_url: url="<<url << " bbox="<<bbox<<endl;
 #endif
         if((osm_data_=dataset_deliverer::load_from_url
-            (url,bbox,parser))==NULL)    
+            (url,bbox,parser))==NULL)
         {
             throw datasource_exception("Error loading from URL");
         }
@@ -88,7 +86,7 @@ void osm_datasource::bind() const
             dataset_deliverer::load_from_file(osm_filename,parser))==NULL)
         {
             throw datasource_exception("Error loading from file");
-        }    
+        }
         do_process=true;
     }
 
@@ -122,6 +120,10 @@ osm_datasource::~osm_datasource()
     //delete osm_data_; 
 }
 
+std::string osm_datasource::name()
+{
+   return "osm";
+}
 
 int osm_datasource::type() const
 {
