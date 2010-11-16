@@ -67,7 +67,7 @@ private_libs='%(private_libs)s'
 other_libs='%(other_libs)s'
 other_includes='%(other_includes)s'
 fonts='%(fonts)s'
-input_plugins='%(fonts)s'
+input_plugins='%(input_plugins)s'
 ''' % locals()
 
 
