@@ -105,7 +105,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
        if ((*feat) != NULL)
        {
           OGRGeometry* geom=(*feat)->GetGeometryRef();
-          if (!geom->IsEmpty())
+          if (geom && !geom->IsEmpty())
           {
               feature_ptr feature(new Feature((*feat)->GetFID()));
 

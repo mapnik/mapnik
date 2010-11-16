@@ -62,8 +62,6 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
      indexed_(false)
 {
-   OGRRegisterAll();
-
    boost::optional<std::string> file = params.get<std::string>("file");
    if (!file) throw datasource_exception("missing <file> parameter");
 
@@ -81,17 +79,27 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
    }
 }
 
+ogr_datasource::~ogr_datasource()
+{
+    if (is_bound_) 
+    {
+        OGRDataSource::DestroyDataSource (dataset_);
+    }
+}
+
 void ogr_datasource::bind() const
 {
    if (is_bound_) return;   
+
+   // initialize ogr formats
+   OGRRegisterAll();
     
    // open ogr driver   
    dataset_ = OGRSFDriverRegistrar::Open ((dataset_name_).c_str(), FALSE);
    if (!dataset_) 
    {
       std::string err = CPLGetLastErrorMsg();
-      if( err.size() == 0 )
-      {
+      if( err.size() == 0 ) {
          throw datasource_exception("Connection failed: " + dataset_name_ + " was not found or is not a supported format");
       } else {
          throw datasource_exception(err);
@@ -99,29 +107,69 @@ void ogr_datasource::bind() const
    } 
 
    // initialize layer
-   boost::optional<std::string> layer = params_.get<std::string>("layer");
-   if (!layer) 
+   
+   boost::optional<std::string> layer_by_name = params_.get<std::string>("layer");
+   boost::optional<unsigned> layer_by_index = params_.get<unsigned>("layer_by_index");
+   
+   if (layer_by_name && layer_by_index)
+       throw datasource_exception("OGR Plugin: you can only select an ogr layer by name ('layer' parameter) or by number ('layer_by_index' parameter), do not supply both parameters" );
+
+   if (layer_by_name) 
    {
-      std::string s ("missing <layer> parameter, available layers are: ");
+       layerName_ = *layer_by_name;  
+       layer_ = dataset_->GetLayerByName (layerName_.c_str());
+   }
+   else if (layer_by_index)
+   { 
+       unsigned num_layers = dataset_->GetLayerCount();
+       if (*layer_by_index >= num_layers)
+       {
+           std::ostringstream s;
+           s << "OGR Plugin: only ";
+           s << num_layers;
+           s << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
+       
+           throw datasource_exception(s.str());
+       }
+       OGRLayer  *ogr_layer = dataset_->GetLayer(*layer_by_index);
+       if (ogr_layer)
+       {
+           OGRFeatureDefn* def = ogr_layer->GetLayerDefn();
+           if (def != 0) { 
+              layerName_ = def->GetName();
+              layer_ = ogr_layer;
+           }
+       }
+   }
+   else
+   {
+      std::ostringstream s;
+      s << "missing <layer> or <layer_by_index> parameter, available layers are: ";
       unsigned num_layers = dataset_->GetLayerCount();
+      bool found = false;
       for (unsigned i = 0; i < num_layers; ++i )
       {
          OGRLayer  *ogr_layer = dataset_->GetLayer(i);
          OGRFeatureDefn* def = ogr_layer->GetLayerDefn();
          if (def != 0) { 
-            s += " '";
-            s += def->GetName();
-            s += "' ";
-         } else {
-            s += "No layers found!";
+            found = true;
+            s << " '" << def->GetName() << "' ";
          }
       }
-      throw datasource_exception(s);
+      if (!found) {
+          s << "None (no layers were found in dataset)";
+      }
+      throw datasource_exception(s.str());
    }
-   
-   layerName_ = *layer;  
-   layer_ = dataset_->GetLayerByName (layerName_.c_str());
-   if (! layer_) throw datasource_exception("cannot find <layer> in dataset");
+
+   if (!layer_)
+   {
+       std::string s("OGR Plugin: ");
+       if (layer_by_name) s += "cannot find layer by name '" + *layer_by_name;
+       else if (layer_by_index) s += "cannot find layer by index number '" + *layer_by_index;
+       s += "' in dataset '" + dataset_name_ + "'";
+       throw datasource_exception(s);
+   }
    
    // initialize envelope
    OGREnvelope envelope;
@@ -129,9 +177,12 @@ void ogr_datasource::bind() const
    extent_.init (envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
 
    // scan for index file
+   // TODO - layer names don't match dataset name, so this will break for
+   // any layer types of ogr than shapefiles, etc
+   // fix here and in ogrindex
    size_t breakpoint = dataset_name_.find_last_of (".");
    if (breakpoint == std::string::npos) breakpoint = dataset_name_.length();
-   index_name_ = dataset_name_.substr(0, breakpoint) + ".index";
+   index_name_ = dataset_name_.substr(0, breakpoint) + ".ogrindex";
    std::ifstream index_file (index_name_.c_str(), std::ios::in | std::ios::binary);
    if (index_file)
    {
@@ -198,14 +249,6 @@ void ogr_datasource::bind() const
    }
    
    is_bound_ = true;
-}
-
-ogr_datasource::~ogr_datasource()
-{
-    if (is_bound_) 
-    {
-        OGRDataSource::DestroyDataSource (dataset_);
-    }
 }
 
 std::string ogr_datasource::name()
