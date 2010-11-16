@@ -63,6 +63,8 @@ class occi_datasource : public mapnik::datasource
       const int row_prefetch_;
       mutable mapnik::layer_descriptor desc_;
       mutable oracle::occi::StatelessConnectionPool* pool_;
+      mutable oracle::occi::Connection* conn_;
+      bool use_connection_pool_;
       bool multiple_geometries_;
       bool use_spatial_index_;
 };
