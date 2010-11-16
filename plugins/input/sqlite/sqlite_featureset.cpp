@@ -41,10 +41,6 @@ using mapnik::Envelope;
 using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
-using mapnik::point_impl;
-using mapnik::line_string_impl;
-using mapnik::polygon_impl;
-using mapnik::geometry2d;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 
@@ -67,6 +63,8 @@ feature_ptr sqlite_featureset::next()
     {
         int size;
         const char* data = (const char *) rs_->column_blob (0, size);
+        if (!data)
+            return feature_ptr();
         int feature_id = rs_->column_integer (1);   
 
 #ifdef MAPNIK_DEBUG

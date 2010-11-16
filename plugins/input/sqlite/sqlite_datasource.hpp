@@ -50,7 +50,6 @@ class sqlite_datasource : public mapnik::datasource
       mapnik::layer_descriptor get_descriptor() const;
       void bind() const;
    private:
-      static const std::string name_;
       mutable mapnik::Envelope<double> extent_;
       mutable bool extent_initialized_;
       int type_;
