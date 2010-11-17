@@ -33,7 +33,7 @@ if env['SYSTEM_FONTS']:
     fonts = os.path.normpath(env['SYSTEM_FONTS'])
 else:
     fonts = os.path.normpath(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/fonts')
-
+svn_revision = env['SVN_REVISION']
 
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
@@ -68,6 +68,7 @@ other_libs='%(other_libs)s'
 other_includes='%(other_includes)s'
 fonts='%(fonts)s'
 input_plugins='%(input_plugins)s'
+svn_revision='%(svn_revision)s'
 ''' % locals()
 
 

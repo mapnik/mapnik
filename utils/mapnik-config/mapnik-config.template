@@ -13,7 +13,8 @@ Known values for OPTION are:
   --fonts           print default fonts directory
   --input-plugins   print default input plugins directory
   --help            display this help and exit
-  -v --version         output version information
+  -v --version      output version information
+  --svn-revision    output svn revision information
 EOF
 
     exit $1
@@ -60,6 +61,11 @@ while test $# -gt 0; do
 
     --version)
       echo $version
+      exit 0
+      ;;
+
+    --svn-revision)
+      echo ${svn_revision}
       exit 0
       ;;
 
