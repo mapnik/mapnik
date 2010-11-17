@@ -65,8 +65,9 @@ def get_libtool_version():
     cmd = 'libtool'
     if platform.uname()[0] == "Darwin":
         cmd = 'glibtool'
-    version = 2
-    pattern = r'(.*)(\d/.\d/.\d)(.*)'
+    fallback_version = 2
+    version = None
+    pattern = r'(.*[^\S])(\d{1}\.\d+\.\d+)(.*[^\S])'
     ret = os.popen('%s --version' % cmd).read()
     match = re.match(pattern,ret)
     if match:
@@ -74,11 +75,14 @@ def get_libtool_version():
         if len(groups):
             version_string = groups[1]
             if version_string:
-                version = version_string.split('.')[0]
+                version_string = version_string.split('.')[0]
                 try:
-                    version = int(version)
+                    version = int(version_string)
                 except ValueError:
                     pass
+    if not version:
+        color_print(1,'Could not detect libtool --version, assuming major version 2')
+        return fallback_version
     return version
 
 # http://www.scons.org/wiki/InstallTargets
