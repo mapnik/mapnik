@@ -67,7 +67,7 @@ def get_libtool_version():
         cmd = 'glibtool'
     fallback_version = 2
     version = None
-    pattern = r'(.*[^\S])(\d{1}\.\d+\.\d+)(.*[^\S])'
+    pattern = r'(.*[^\S])(\d{1}\.\d+\.?\d?)(.*[^\S])'
     ret = os.popen('%s --version' % cmd).read()
     match = re.match(pattern,ret)
     if match:
