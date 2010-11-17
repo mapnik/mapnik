@@ -61,6 +61,18 @@ def call(cmd, silent=False):
     elif not silent:
         color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
 
+def get_libtool_version():
+    cmd = 'libtool'
+    version = 2
+    if platform.uname()[0] == "Darwin":
+        cmd = 'glibtool'
+    ret = os.popen('%s --version' % cmd).readlines()
+    if len(ret):
+        version_string = ret[0].strip().split(' ')[-1]
+        if version_string:
+            version = version_string.split('.')[0]
+    return version
+
 # http://www.scons.org/wiki/InstallTargets
 def create_uninstall_target(env, path, is_glob=False):
     if 'uninstall' in COMMAND_LINE_TARGETS:
@@ -369,7 +381,8 @@ pickle_store = [# Scons internal variables
         'SVN_REVISION',
         'HAS_CAIRO',
         'HAS_PYCAIRO',
-        'HAS_LIBXML2'
+        'HAS_LIBXML2',
+        'LIBTOOL_MAJOR_VERSION'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -765,6 +778,8 @@ if not preconfigured:
         
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
+    
+    env['LIBTOOL_MAJOR_VERSION'] = get_libtool_version()
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
