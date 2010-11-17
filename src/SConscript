@@ -98,7 +98,6 @@ else: # Linux and others
 source = Split(
     """
     color.cpp
-    datasource_cache.cpp
     box2d.cpp
     expression_node.cpp
     expression_string.cpp
@@ -141,6 +140,11 @@ source = Split(
     """   
     )
 
+
+# add the datasource_cache.cpp with custom LIBTOOL flag
+env3 = lib_env.Clone()
+env3.Append(CXXFLAGS='-DLIBTOOL_MAJOR_VERSION=%s' % env['LIBTOOL_MAJOR_VERSION'])
+source.insert(0,env3.SharedObject('datasource_cache.cpp'))
 
 if env['JPEG']:
     source += Split(

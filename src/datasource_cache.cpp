@@ -81,7 +81,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
     }
     if ( ! itr->second->handle())
     {
-        throw std::runtime_error(string("Cannot load library: ") + 
+        throw std::runtime_error(string("Cannot load library: ") +
                                  lt_dlerror());
     }
 
@@ -90,7 +90,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 
     if ( ! create_datasource)
     {
-        throw std::runtime_error(string("Cannot load symbols: ") + 
+        throw std::runtime_error(string("Cannot load symbols: ") +
                                  lt_dlerror());
     }
 #ifdef MAPNIK_DEBUG
@@ -98,7 +98,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
     parameters::const_iterator i = params.begin();
     for (;i!=params.end();++i)
     {
-        std::clog << i->first << "=" << i->second << "\n";  
+        std::clog << i->first << "=" << i->second << "\n";
     }
 #endif
     ds=datasource_ptr(create_datasource(params, bind), datasource_deleter());
@@ -112,7 +112,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
 {
     return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>
-                                     (new PluginInfo(type,module)))).second;     
+                                     (new PluginInfo(type,module)))).second;
 }
 
 std::string datasource_cache::plugin_directories()
@@ -134,49 +134,61 @@ std::vector<std::string> datasource_cache::plugin_names ()
 void datasource_cache::register_datasources(const std::string& str)
 {       
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache, 
+    mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache,
                             mapnik::CreateStatic>::mutex_);
 #endif
     filesystem::path path(str);
     plugin_directories_.push_back(str);
     filesystem::directory_iterator end_itr;
  
-
     if (exists(path) && is_directory(path))
     {
         for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
         {
 
 #if BOOST_VERSION < 103400 
-            if (!is_directory( *itr )  && is_input_plugin(itr->leaf()))      
+            if (!is_directory( *itr )  && is_input_plugin(itr->leaf()))
 #else
-                if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))   
+            if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
 #endif
-
+            {
+                try 
                 {
-                    try 
+                    // clear errors
+                    lt_dlerror();
+#if LIBTOOL_MAJOR_VERSION >= 2
+                    // with ltdl >=2 we can actually pass RTDL_GLOBAL to dlopen via the
+                    // ltdl advise trick which is required on linux unless plugins are directly
+                    // linked to libmapnik (and deps) at build time. The only other approach is to
+                    // set the dlopen flags in the calling process (like in the python bindings)
+                    lt_dladvise advise;
+                    lt_dladvise_init(&advise);
+                    lt_dladvise_global(&advise);
+                    lt_dlhandle module = lt_dlopenadvise(itr->string().c_str(), advise);
+                    lt_dladvise_destroy(&advise);
+#else
+                    lt_dlhandle module = lt_dlopen(itr->string().c_str());
+#endif
+                    if (module)
                     {
-                        lt_dlhandle module=lt_dlopen(itr->string().c_str());
-                        if (module)
-                        {
-                            datasource_name* ds_name = 
-                                (datasource_name*) lt_dlsym(module, "datasource_name");
-                            if (ds_name && insert(ds_name(),module))
-                            {            
+                        datasource_name* ds_name = 
+                            (datasource_name*) lt_dlsym(module, "datasource_name");
+                        if (ds_name && insert(ds_name(),module))
+                        {            
 #ifdef MAPNIK_DEBUG
-                                std::clog << "registered datasource : " << ds_name() << std::endl;
+                            std::clog << "registered datasource : " << ds_name() << std::endl;
 #endif 
-                                registered_=true;
-                            }
-                        }
-                        else
-                        {
-                            std::clog << "Problem loading plugin library: " << itr->string().c_str() << " (libtool error: " << lt_dlerror() << ")" << std::endl;
+                            registered_=true;
                         }
                     }
-                    catch (...) {}
+                    else
+                    {
+                        std::clog << "Problem loading plugin library: " << itr->string().c_str() << " (dlopen failed - plugin likely has an unsatified dependency or incompatible ABI)" << std::endl;
+                    }
                 }
-        }   
-    }   
+                catch (...) {}
+            }
+        }
+    }
 }
 }
