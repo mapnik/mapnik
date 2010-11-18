@@ -273,9 +273,9 @@ private:
             read_coords(ar);
             line->set_capacity(capacity);
             line->move_to(ar[0].x,ar[0].y); 
-            for (int i=1;i<num_points;++i) 
+            for (int j=1;j<num_points;++j) 
             { 
-                line->line_to(ar[i].x,ar[i].y); 
+                line->line_to(ar[j].x,ar[j].y); 
             } 
         }
         feature.add_geometry(line);
@@ -321,7 +321,7 @@ private:
         {
             pos_+=5;
             int num_rings=read_integer();
-            for (int i=0;i<num_rings;++i)
+            for (int r=0;r<num_rings;++r)
             {
                 int num_points=read_integer();
                 capacity += num_points;
