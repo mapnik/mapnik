@@ -36,7 +36,6 @@
 
 // ogr
 #include "geos_featureset.hpp"
-#include "geos_converter.hpp"
 
 using std::clog;
 using std::endl;
@@ -106,7 +105,7 @@ feature_ptr geos_featureset::next()
                     break;
                default:
 #ifdef MAPNIK_DEBUG
-                    clog << "unknown extent geometry_type=" << type << endl;
+                    clog << "GEOS Plugin: unknown extent geometry_type=" << type << endl;
 #endif
                     break;
                }
@@ -114,16 +113,23 @@ feature_ptr geos_featureset::next()
 
             if (render_geometry)
             {
-                feature_ptr feature(new Feature(identifier_));
-
-                geos_converter::convert_geometry (geometry_, feature, multiple_geometries_);
-
-                if (field_ != "")
+                geos_wkb_ptr wkb(geometry_);
+                if (wkb.is_valid())
                 {
-                    boost::put(*feature, field_name_, tr_->transcode(field_.c_str()));
+                    feature_ptr feature(new Feature(identifier_));
+
+                    geometry_utils::from_wkb(*feature,
+                                             wkb.data(),
+                                             wkb.size(),
+                                             multiple_geometries_);
+
+                    if (field_ != "")
+                    {
+                        boost::put(*feature, field_name_, tr_->transcode(field_.c_str()));
+                    }
+                    
+                    return feature;
                 }
-                
-                return feature;
             }
         }
     }

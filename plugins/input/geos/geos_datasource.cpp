@@ -65,10 +65,10 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 
 
-void notice(const char* fmt, ...)
+void geos_notice(const char* fmt, ...)
 {
     va_list ap;
-    fprintf( stdout, "NOTICE: ");
+    fprintf( stdout, "GEOS Plugin: (GEOS NOTICE) ");
     
     va_start (ap, fmt);
     vfprintf( stdout, fmt, ap);
@@ -76,10 +76,10 @@ void notice(const char* fmt, ...)
     fprintf( stdout, "\n" );
 }
 
-void log_and_exit(const char* fmt, ...)
+void geos_error(const char* fmt, ...)
 {
     va_list ap;
-    fprintf( stdout, "ERROR: ");
+    fprintf( stdout, "GEOS Plugin: (GEOS ERROR) ");
 
     va_start (ap, fmt);
     vfprintf( stdout, fmt, ap);
@@ -114,7 +114,7 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
     if (gdata) geometry_data_ = *gdata;
 
     boost::optional<std::string> gdata_name = params_.get<std::string>("field_name");
-    if (gdata) geometry_data_name_ = *gdata_name;
+    if (gdata_name) geometry_data_name_ = *gdata_name;
 
     desc_.add_descriptor(attribute_descriptor(geometry_data_name_, mapnik::String));
 
@@ -130,15 +130,7 @@ geos_datasource::~geos_datasource()
     {
         geometry_.set_feature(0);
 
-#ifdef MAPNIK_DEBUG
-        clog << "finalizing GEOS...";
-#endif
-    
         finishGEOS();
-
-#ifdef MAPNIK_DEBUG
-        clog << " finalized !" << endl;
-#endif
     }
 }
 
@@ -146,86 +138,88 @@ void geos_datasource::bind() const
 {
     if (is_bound_) return;   
 
-#ifdef MAPNIK_DEBUG
-    clog << "initializing GEOS...";
-#endif
-
-    // open ogr driver
-    initGEOS(notice, log_and_exit);
-
-#ifdef MAPNIK_DEBUG
-    clog << " initialized !" << endl;
-#endif
+    // open geos driver
+    initGEOS(geos_notice, geos_error);
 
     // parse the string into geometry
     geometry_.set_feature(GEOSGeomFromWKT(geometry_string_.c_str()));
-    
     if (*geometry_ == NULL || ! GEOSisValid(*geometry_))
     {
-        throw datasource_exception("invalid <wkt> geometry specified");
+        throw datasource_exception("GEOS Plugin: invalid <wkt> geometry specified");
     }
 
-#ifdef MAPNIK_DEBUG
-    clog << "geometry correctly parsed" << endl;
-#endif
-    
     // try to obtain the extent from the geometry itself
     if (! extent_initialized_)
     {
 #ifdef MAPNIK_DEBUG
-        clog << "initializing extent from geometry" << endl;
+        clog << "GEOS Plugin: initializing extent from geometry" << endl;
 #endif
 
-        geos_feature_ptr envelope (GEOSEnvelope(*geometry_));
-        
-        if (*envelope != NULL && GEOSisValid(*envelope))
+        if (GEOSGeomTypeId(*geometry_) == GEOS_POINT)
         {
-#ifdef MAPNIK_DEBUG
-            char* wkt = GEOSGeomToWKT(*envelope);
-            clog << "getting coord sequence from: " << wkt << endl;
-            GEOSFree(wkt);
-#endif
+            double x, y;
+            unsigned int size;
 
-            const GEOSGeometry* exterior = GEOSGetExteriorRing(*envelope);
-            
-            if (exterior != NULL && GEOSisValid(exterior))
+            const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(*geometry_);
+
+            GEOSCoordSeq_getSize(cs, &size);
+            GEOSCoordSeq_getX(cs, 0, &x);
+            GEOSCoordSeq_getY(cs, 0, &y);
+        
+            extent_.init(x,y,x,y);
+            extent_initialized_ = true;
+        }
+        else
+        {
+            geos_feature_ptr envelope (GEOSEnvelope(*geometry_));
+            if (*envelope != NULL && GEOSisValid(*envelope))
             {
-                const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(exterior);
-                if (cs != NULL)
-                {
 #ifdef MAPNIK_DEBUG
-                    clog << "iterating boundary points" << endl;
+                char* wkt = GEOSGeomToWKT(*envelope);
+                clog << "GEOS Plugin: getting coord sequence from: " << wkt << endl;
+                GEOSFree(wkt);
 #endif
 
-                    double x, y;
-                    double minx = std::numeric_limits<float>::max(),
-                           miny = std::numeric_limits<float>::max(),
-                           maxx = -std::numeric_limits<float>::max(),
-                           maxy = -std::numeric_limits<float>::max();
-                    unsigned int num_points;
-
-                    GEOSCoordSeq_getSize(cs, &num_points);
-
-                    for (unsigned int i = 0; i < num_points; ++i)
+                const GEOSGeometry* exterior = GEOSGetExteriorRing(*envelope);
+                if (exterior != NULL && GEOSisValid(exterior))
+                {
+                    const GEOSCoordSequence* cs = GEOSGeom_getCoordSeq(exterior);
+                    if (cs != NULL)
                     {
-                        GEOSCoordSeq_getX(cs, i, &x);
-                        GEOSCoordSeq_getY(cs, i, &y);
-                        
-                        if (x < minx) minx = x;
-                        if (x > maxx) maxx = x;
-                        if (y < miny) miny = y;
-                        if (y > maxy) maxy = y;
-                    }
+#ifdef MAPNIK_DEBUG
+                        clog << "GEOS Plugin: iterating boundary points" << endl;
+#endif
 
-                    extent_.init(minx,miny,maxx,maxy);
-                    extent_initialized_ = true;
+                        double x, y;
+                        double minx = std::numeric_limits<float>::max(),
+                               miny = std::numeric_limits<float>::max(),
+                               maxx = -std::numeric_limits<float>::max(),
+                               maxy = -std::numeric_limits<float>::max();
+                        unsigned int num_points;
+
+                        GEOSCoordSeq_getSize(cs, &num_points);
+
+                        for (unsigned int i = 0; i < num_points; ++i)
+                        {
+                            GEOSCoordSeq_getX(cs, i, &x);
+                            GEOSCoordSeq_getY(cs, i, &y);
+                            
+                            if (x < minx) minx = x;
+                            if (x > maxx) maxx = x;
+                            if (y < miny) miny = y;
+                            if (y > maxy) maxy = y;
+                        }
+
+                        extent_.init(minx,miny,maxx,maxy);
+                        extent_initialized_ = true;
+                    }
                 }
             }
         }
     }
 
     if (! extent_initialized_)
-        throw datasource_exception("cannot determine extent for <wkt> geometry");
+        throw datasource_exception("GEOS Plugin: cannot determine extent for <wkt> geometry");
    
     is_bound_ = true;
 }
@@ -270,7 +264,7 @@ featureset_ptr geos_datasource::features(query const& q) const
       << "))";
 
 #ifdef MAPNIK_DEBUG
-    clog << "using extent: " << s.str() << endl;
+    clog << "GEOS Plugin: using extent: " << s.str() << endl;
 #endif
 
     return featureset_ptr(new geos_featureset (*geometry_,
@@ -290,7 +284,7 @@ featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
     s << "POINT(" << pt.x << " " << pt.y << ")";
 
 #ifdef MAPNIK_DEBUG
-    clog << "using point: " << s.str() << endl;
+    clog << "GEOS Plugin: using point: " << s.str() << endl;
 #endif
 
     return featureset_ptr(new geos_featureset (*geometry_,

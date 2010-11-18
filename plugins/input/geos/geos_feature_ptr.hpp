@@ -26,7 +26,7 @@
 
 // geos
 #include <geos_c.h>
-  
+
 class geos_feature_ptr
 {
 public:
@@ -62,6 +62,44 @@ public:
 private:
     GEOSGeometry* feat_;
 };
+
+
+class geos_wkb_ptr
+{
+public:
+    geos_wkb_ptr (GEOSGeometry* const geometry)
+        : data_ (NULL),
+          size_ (0)
+    {
+        data_ = GEOSGeomToWKB_buf(geometry, &size_);
+    }
+
+    ~geos_wkb_ptr ()
+    {
+        if (data_ != NULL)
+            GEOSFree(data_);
+    }
+
+    bool is_valid() const
+    {
+        return (data_ != NULL) && (size_ > 0);
+    }
+
+    unsigned int size() const
+    {
+        return (unsigned int) size_;
+    }
+
+    const char* data()
+    {
+        return reinterpret_cast<const char*>(data_);
+    }
+
+private:
+    unsigned char* data_;
+    size_t size_;
+};
+
 
 #endif // GEOS_FEATURE_PTR_HPP
 

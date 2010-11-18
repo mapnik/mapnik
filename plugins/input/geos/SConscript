@@ -27,7 +27,6 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 
 geos_src = Split(
 	"""
-	    geos_converter.cpp
 	    geos_datasource.cpp
 	    geos_featureset.cpp      
 	"""
