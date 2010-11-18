@@ -51,6 +51,7 @@ class occi_datasource : public mapnik::datasource
    private:
       int type_;
       mutable std::string table_;
+      mutable std::string fields_;
       mutable std::string geometry_field_;
       mutable int srid_;
       mutable bool extent_initialized_;

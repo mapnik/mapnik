@@ -73,6 +73,7 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
     : datasource (params),
       type_(datasource::Vector),
       table_(*params_.get<std::string>("table","")),
+      fields_(*params_.get<std::string>("fields","*")),
       geometry_field_(*params_.get<std::string>("geometry_field","")),
       extent_initialized_(false),
       desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
@@ -194,7 +195,7 @@ void occi_datasource::bind() const
     // get columns description
     {
         std::ostringstream s;
-        s << "SELECT * FROM (" << table_name << ") WHERE rownum < 1";
+        s << "SELECT " fields_ << " FROM (" << table_name << ") WHERE rownum < 1";
 
         try
         {
