@@ -75,6 +75,7 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
       table_(*params_.get<std::string>("table","")),
       fields_(*params_.get<std::string>("fields","*")),
       geometry_field_(*params_.get<std::string>("geometry_field","")),
+      srid_initialized_(false),
       extent_initialized_(false),
       desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
       row_limit_(*params_.get<int>("row_limit",0)),
@@ -89,9 +90,16 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
     use_connection_pool_ = *params_.get<mapnik::boolean>("use_connection_pool",true);
-
+    
     boost::optional<std::string> ext = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
+
+    boost::optional<int> srid = params_.get<int>("srid");
+    if (srid)
+    {
+        srid_ = *srid;
+        srid_initialized_ = true;
+    }
 
     if (bind)
     {
@@ -162,7 +170,8 @@ void occi_datasource::bind() const
 
     std::string table_name = mapnik::table_from_sql(table_);
 
-    // get SRID from geometry metadata
+    // get SRID and/or GEOMETRY_FIELD from metadata table only if we need to
+    if (! srid_initialized_ || geometry_field_ == "")
     {
         std::ostringstream s;
         s << "SELECT srid, column_name FROM " << SDO_GEOMETRY_METADATA_TABLE << " WHERE";
@@ -180,10 +189,16 @@ void occi_datasource::bind() const
             ResultSet* rs = conn.execute_query (s.str());
             if (rs && rs->next ())
             {
-                srid_ = rs->getInt(1);
+                if (! srid_initialized_)
+                {
+                    srid_ = rs->getInt(1);
+                    srid_initialized_ = true;
+                }
                 
                 if (geometry_field_ == "")
+                {
                     geometry_field_ = rs->getString(2);
+                }
             }
         }
         catch (SQLException &ex)
@@ -195,7 +210,7 @@ void occi_datasource::bind() const
     // get columns description
     {
         std::ostringstream s;
-        s << "SELECT " fields_ << " FROM (" << table_name << ") WHERE rownum < 1";
+        s << "SELECT " << fields_ << " FROM (" << table_name << ") WHERE rownum < 1";
 
         try
         {
