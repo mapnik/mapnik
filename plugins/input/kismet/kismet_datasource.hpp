@@ -56,8 +56,10 @@ class kismet_datasource : public mapnik::datasource
    private:
       void run (const std::string &host, const unsigned int port);
 
-      mutable mapnik::box2d<double> extent_;
-      mutable bool extent_initialized_;
+      mapnik::box2d<double> extent_;
+      bool extent_initialized_;
+      std::string host_;
+      unsigned int port_;
       int type_;
       mapnik::layer_descriptor desc_;
       boost::shared_ptr<boost::thread> kismet_thread;

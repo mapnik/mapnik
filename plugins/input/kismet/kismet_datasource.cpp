@@ -21,9 +21,6 @@
  *****************************************************************************/
 // $Id$
 
-#include "kismet_datasource.hpp"
-#include "kismet_featureset.hpp"
-
 // network
 #include  <netdb.h>
 #include  <arpa/inet.h>
@@ -44,10 +41,14 @@
 #include <boost/tokenizer.hpp>
 #include <boost/bind.hpp>
 
+#include "kismet_datasource.hpp"
+#include "kismet_featureset.hpp"
+
 #define MAX_TCP_BUFFER 4096 // maximum accepted TCP data block size
 
-// If you change this also change the according sscanf line!
+// If you change this also change the according kismet command length !
 #define MAX_KISMET_LINE 1024 // maximum length of a kismet command (assumed)
+#define KISMET_COMMAND  "*NETWORK: \001%1024[^\001]\001 %1024s %d %lf %lf"
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
@@ -65,28 +66,31 @@ using mapnik::layer_descriptor;
 using mapnik::attribute_descriptor;
 using mapnik::datasource_exception;
 
-using namespace std;
-
 boost::mutex knd_list_mutex;
 std::list<kismet_network_data> knd_list;
 const unsigned int queue_size = 20;
 
 kismet_datasource::kismet_datasource(parameters const& params, bool bind)
-   : datasource(params),
-     extent_(),
-     extent_initialized_(false),
-     type_(datasource::Vector),
-     desc_(*params.get<std::string>("type"), 
-     *params.get<std::string>("encoding","utf-8"))
+    : datasource(params),
+      extent_(),
+      extent_initialized_(false),
+      type_(datasource::Vector),
+      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
     boost::optional<std::string> host = params_.get<std::string>("host");
-    if (!host) throw datasource_exception("missing <host> parameter");
+    if (host) {
+        host_ = *host;
+    } else {
+        throw datasource_exception("Kismet Plugin: missing <host> parameter");
+    }
   
-    boost::optional<std::string> port = params_.get<std::string>("port");
-    if (!port) throw datasource_exception("missing <port> parameter");
+    boost::optional<unsigned int> port = params_.get<unsigned int>("port", 2501);
+    if (port) port_ = *port;
 
-    unsigned int portnr = atoi ((*port).c_str () );
-    kismet_thread.reset (new boost::thread (boost::bind (&kismet_datasource::run, this, *host, portnr)));
+    boost::optional<std::string> ext = params_.get<std::string>("extent");
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
+
+    kismet_thread.reset (new boost::thread (boost::bind (&kismet_datasource::run, this, host_, port_)));
   
     if (bind)
     {
@@ -97,10 +101,7 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
 void kismet_datasource::bind() const
 {
     if (is_bound_) return;
-    
-    boost::optional<std::string> ext = params_.get<std::string>("extent");
-    if (ext) extent_initialized_ = extent_.from_string(*ext);
-    
+       
     is_bound_ = true;
 }
 
@@ -110,23 +111,23 @@ kismet_datasource::~kismet_datasource()
 
 std::string kismet_datasource::name()
 {
-   return "kismet";
+    return "kismet";
 }
 
 int kismet_datasource::type() const
 {
-   return type_;
+    return type_;
 }
 
 box2d<double> kismet_datasource::envelope() const
 {
-   if (!is_bound_) bind();
-   return extent_;
+    if (!is_bound_) bind();
+    return extent_;
 }
 
 layer_descriptor kismet_datasource::get_descriptor() const
 {
-   return desc_;
+    return desc_;
 }
 
 featureset_ptr kismet_datasource::features(query const& q) const
@@ -151,139 +152,143 @@ featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
     
     //cout << "kismet_datasource::features_at_point()" << endl;
 
-#if 0
-   if (dataset_ && layer_)
-   {
-        OGRPoint point;
-        point.setX (pt.x);
-        point.setY (pt.y);
-        
-        layer_->SetSpatialFilter (&point);
-        
-        return featureset_ptr(new ogr_featureset(*dataset_, *layer_, desc_.get_encoding()));
-   }
-#endif
-
-   return featureset_ptr();
+    return featureset_ptr();
 }
 
 void kismet_datasource::run (const std::string &ip_host, const unsigned int port)
 {
-  //cout << "+run" << endl;
+#ifdef MAPNIK_DEBUG
+    std::clog << "Kismet Plugin: enter run" << std::endl;
+#endif
   
-  int                 sockfd, n;
-  struct sockaddr_in  sock_addr;
-  struct in_addr      inadr;
-  struct hostent      *host;
-  char                buffer[MAX_TCP_BUFFER]; // TCP data send from kismet_server
-  string command;
+    int sockfd, n;
+    struct sockaddr_in sock_addr;
+    struct in_addr inadr;
+    struct hostent* host;
+    char buffer[MAX_TCP_BUFFER]; // TCP data send from kismet_server
+    std::string command;
 
-  if (inet_aton(ip_host.c_str (), &inadr))
-  {
-    host = gethostbyaddr((char *) &inadr, sizeof(inadr), AF_INET);
-  }  
-  else
-  {
-    host = gethostbyname(ip_host.c_str ());
-  }
-
-  if (host == NULL)
-  {
-    herror ("plugins/input/kismet: Error while searching host");
-    return;
-  }
-
-  sock_addr.sin_family = AF_INET;
-  sock_addr.sin_port   = htons(port);
-  memcpy(&sock_addr.sin_addr, host->h_addr_list[0],
-         sizeof(sock_addr.sin_addr));
-
-  if ( (sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-  {
-    cerr << "plugins/input/kismet: Error while creating socket" << endl;
-    return;
-  }
-
-  if (connect(sockfd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)))
-  {
-    cerr << "plugins/input/kismet: Error while connecting" << endl;
-    return;
-  }
-
-  command = "!1 ENABLE NETWORK ssid,bssid,wep,bestlat,bestlon\n";
-
-  if (write(sockfd, command.c_str (), command.length ()) != (signed) command.length ())
-  {
-    cerr << "plugins/input/kismet: Error sending command to " << ip_host << endl;
-    close(sockfd);
-    return;
-  }
-
-  char ssid[MAX_KISMET_LINE] = {};
-  char bssid[MAX_KISMET_LINE] = {};
-  double bestlat = 0;
-  double bestlon = 0;
-  int crypt = crypt_none;
-  
-  // BUG: if kismet_server is active sending after mapnik was killed and then restarted the 
-  // assert is called. Needs to be analyzed!
-  while ( (n = read(sockfd, buffer, sizeof(buffer))) > 0)
-  {
-    assert (n < MAX_TCP_BUFFER);
-    
-    buffer[n] = '\0';
-    string bufferObj (buffer); // TCP data send from kismet_server as STL string
-    
-    //cout << "BufferObj: " << endl << bufferObj << "[END]" << endl;
-    
-    string::size_type found = 0;
-    string::size_type search_start = 0;
-    string kismet_line; // contains a line from kismet_server
-    do 
+    if (inet_aton(ip_host.c_str (), &inadr))
     {
-      found = bufferObj.find ('\n', search_start);
-      if (found != string::npos)
-      {
-        kismet_line.assign (bufferObj, search_start, found - search_start);
-        
-        //cout << "Line: " << kismet_line << "[ENDL]" << endl;
-        
-        int param_number = 5; // the number of parameters to parse
-        
-        // Attention: string length specified to the constant!
-        if (sscanf (kismet_line.c_str (), "*NETWORK: \001%1024[^\001]\001 %1024s %d %lf %lf", ssid, bssid, &crypt, &bestlat, &bestlon) == param_number)
-        {
-          //printf ("ssid=%s, bssid=%s, crypt=%d, bestlat=%f, bestlon=%f\n", ssid, bssid, crypt, bestlat, bestlon);
-
-          kismet_network_data knd (ssid, bssid, bestlat, bestlon, crypt);
-          
-          boost::mutex::scoped_lock lock(knd_list_mutex);
-                      
-          // the queue only grows to a max size
-          if (knd_list.size () >= queue_size)
-          {
-            knd_list.pop_front ();
-          }
-          
-          knd_list.push_back (knd);
-        }  
-        else
-        {
-          // do nothing if not matched!
-        }
-        
-        search_start = found + 1;      
-      }
+        host = gethostbyaddr((char *) &inadr, sizeof(inadr), AF_INET);
+    }  
+    else
+    {
+        host = gethostbyname(ip_host.c_str ());
     }
-    while (found != string::npos);
-  }
 
-  if (n < 0)
-  {
-    cerr << "plugins/input/kismet: Error while reading from socket" << endl;
-  }
+    if (host == NULL)
+    {
+        herror ("Kismet Plugin: Error while searching host");
+        return;
+    }
 
-  close(sockfd);
+    sock_addr.sin_family = AF_INET;
+    sock_addr.sin_port = htons(port);
+    memcpy(&sock_addr.sin_addr, host->h_addr_list[0], sizeof(sock_addr.sin_addr));
+
+    if ( (sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        std::cerr << "Kismet Plugin: error while creating socket" << std::endl;
+        return;
+    }
+
+    if (connect(sockfd, (struct sockaddr *) &sock_addr, sizeof(sock_addr)))
+    {
+        std::cerr << "KISMET Plugin: Error while connecting" << std::endl;
+        return;
+    }
+
+    command = "!1 ENABLE NETWORK ssid,bssid,wep,bestlat,bestlon\n";
+
+    if (write(sockfd, command.c_str (), command.length ()) != (signed) command.length ())
+    {
+        std::cerr << "KISMET Plugin: Error sending command to " << ip_host << std::endl;
+        close(sockfd);
+        return;
+    }
+
+    char ssid[MAX_KISMET_LINE] = {};
+    char bssid[MAX_KISMET_LINE] = {};
+    double bestlat = 0;
+    double bestlon = 0;
+    int crypt = crypt_none;
   
-  //cout << "-run" << endl;
+    // BUG: if kismet_server is active sending after mapnik was killed and then restarted the 
+    // assert is called. Needs to be analyzed!
+    while ((n = read(sockfd, buffer, sizeof(buffer))) > 0)
+    {
+        assert (n < MAX_TCP_BUFFER);
+    
+        buffer[n] = '\0';
+        std::string bufferObj (buffer); // TCP data send from kismet_server as STL string
+    
+#ifdef MAPNIK_DEBUG
+        std::clog << "Kismet Plugin: buffer_obj=" << bufferObj << "[END]" << std::endl;
+#endif
+    
+        std::string::size_type found = 0;
+        std::string::size_type search_start = 0;
+        std::string kismet_line; // contains a line from kismet_server
+        do 
+        {
+            found = bufferObj.find ('\n', search_start);
+            if (found != std::string::npos)
+            {
+                kismet_line.assign (bufferObj, search_start, found - search_start);
+
+#ifdef MAPNIK_DEBUG
+                std::clog << "Kismet Plugin: line=" << kismet_line << " [ENDL]" << std::endl;
+#endif
+        
+                int param_number = 5; // the number of parameters to parse
+        
+                // Attention: string length specified to the constant!
+                if (sscanf (kismet_line.c_str (),
+                            KISMET_COMMAND,
+                            ssid,
+                            bssid,
+                            &crypt,
+                            &bestlat,
+                            &bestlon) == param_number)
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "Kismet Plugin: ssid=" << ssid << ", bssid=" << bssid
+                        << ", crypt=" << crypt << ", bestlat=" << bestlat << ", bestlon=" << bestlon << std::endl;
+#endif
+
+                    kismet_network_data knd (ssid, bssid, bestlat, bestlon, crypt);
+          
+                    boost::mutex::scoped_lock lock(knd_list_mutex);
+                      
+                    // the queue only grows to a max size
+                    if (knd_list.size () >= queue_size)
+                    {
+                        knd_list.pop_front ();
+                    }
+          
+                    knd_list.push_back (knd);
+                }  
+                else
+                {
+                    // do nothing if not matched!
+                }
+
+                search_start = found + 1;      
+            }
+        }
+        while (found != std::string::npos);
+    }
+
+    if (n < 0)
+    {
+        std::cerr << "Kismet Plugin: error while reading from socket" << std::endl;
+    }
+
+    close(sockfd);
+
+#ifdef MAPNIK_DEBUG
+    std::clog << "Kismet Plugin: exit run" << std::endl;
+#endif
 }
+

@@ -38,7 +38,6 @@
 
 #include "kismet_types.hpp"
   
-  
 class kismet_featureset : public mapnik::Featureset
 {
    public:
