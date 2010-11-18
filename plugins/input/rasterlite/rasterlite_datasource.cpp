@@ -74,7 +74,7 @@ rasterlite_datasource::rasterlite_datasource(parameters const& params, bool bind
       desc_(*params.get<std::string>("type"),"utf-8")
 {
 #ifdef MAPNIK_DEBUG
-    std::clog << "\nRasterlite Plugin: Initializing...\n";
+    std::clog << "Rasterlite Plugin: Initializing..." << std::endl;
 #endif
 
     boost::optional<std::string> file = params.get<std::string>("file");
@@ -136,21 +136,21 @@ void rasterlite_datasource::bind() const
         throw datasource_exception(error);
     }
 
-    std::clog << "Rasterlite Plugin: Data Source=" << rasterliteGetTablePrefix(dataset) << "\n";
-    std::clog << "Rasterlite Plugin: SRID=" << srid << "\n";
-    std::clog << "Rasterlite Plugin: Authority=" << auth_name << "\n";
-    std::clog << "Rasterlite Plugin: AuthSRID=" << auth_srid << "\n";
-    std::clog << "Rasterlite Plugin: RefSys Name=" << ref_sys_name << "\n";
-    std::clog << "Rasterlite Plugin: Proj4Text=" << proj4text << "\n";
-    std::clog << "Rasterlite Plugin: Extent(" << x0 << "," << y0 << " " << x1 << "," << y1 << ")\n";
-    std::clog << "Rasterlite Plugin: Levels=" << levels << "\n";
+    std::clog << "Rasterlite Plugin: Data Source=" << rasterliteGetTablePrefix(dataset) << std::endl;
+    std::clog << "Rasterlite Plugin: SRID=" << srid << std::endl;
+    std::clog << "Rasterlite Plugin: Authority=" << auth_name << std::endl;
+    std::clog << "Rasterlite Plugin: AuthSRID=" << auth_srid << std::endl;
+    std::clog << "Rasterlite Plugin: RefSys Name=" << ref_sys_name << std::endl;
+    std::clog << "Rasterlite Plugin: Proj4Text=" << proj4text << std::endl;
+    std::clog << "Rasterlite Plugin: Extent(" << x0 << "," << y0 << " " << x1 << "," << y1 << ")" << std::endl;
+    std::clog << "Rasterlite Plugin: Levels=" << levels << std::endl;
    
     for (int i = 0; i < levels; i++)
     {
         if (rasterliteGetResolution(dataset, i, &pixel_x_size, &pixel_y_size, &tile_count) == RASTERLITE_OK)
         {
             std::clog << "Rasterlite Plugin: Level=" << i
-                << " x=" << pixel_x_size << " y=" << pixel_y_size << " tiles=" << tile_count << "\n";
+                << " x=" << pixel_x_size << " y=" << pixel_y_size << " tiles=" << tile_count << std::endl;
         }
     }
 #endif

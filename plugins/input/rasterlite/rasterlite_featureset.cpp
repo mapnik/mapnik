@@ -48,7 +48,7 @@ rasterlite_featureset::rasterlite_featureset(void* dataset, rasterlite_query q)
 rasterlite_featureset::~rasterlite_featureset()
 {
 #ifdef MAPNIK_DEBUG
-    std::clog << "Rasterlite Plugin: closing dataset" << "\n";
+    std::clog << "Rasterlite Plugin: closing dataset" << std::endl;
 #endif
 
     rasterliteClose(dataset_);
@@ -77,7 +77,7 @@ feature_ptr rasterlite_featureset::next()
 feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
 {
 #ifdef MAPNIK_DEBUG
-    std::clog << "Rasterlite Plugin: get_feature" << "\n";
+    std::clog << "Rasterlite Plugin: get_feature" << std::endl;
 #endif
 
     feature_ptr feature(new Feature(1));
@@ -95,19 +95,19 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
         (intersect.width() / (double) width) : (intersect.height() / (double) height);
 
 #ifdef MAPNIK_DEBUG         
-    std::clog << "Rasterlite Plugin: Raster extent=" << raster_extent << "\n";
-    std::clog << "Rasterlite Plugin: View extent=" << q.get_bbox() << "\n";
-    std::clog << "Rasterlite Plugin: Intersect extent=" << intersect << "\n";
+    std::clog << "Rasterlite Plugin: Raster extent=" << raster_extent << std::endl;
+    std::clog << "Rasterlite Plugin: View extent=" << q.get_bbox() << std::endl;
+    std::clog << "Rasterlite Plugin: Intersect extent=" << intersect << std::endl;
     std::clog << "Rasterlite Plugin: Query resolution=" << boost::get<0>(q.resolution()) 
-	      << "," << boost::get<1>(q.resolution())  << "\n";
-    std::clog << "Rasterlite Plugin: Size=" << width << " " << height << "\n";
-    std::clog << "Rasterlite Plugin: Pixel Size=" << pixel_size << "\n";
+	      << "," << boost::get<1>(q.resolution())  << std::endl;
+    std::clog << "Rasterlite Plugin: Size=" << width << " " << height << std::endl;
+    std::clog << "Rasterlite Plugin: Pixel Size=" << pixel_size << std::endl;
 #endif
 
     if (width > 0 && height > 0)
     {
-        int size;
-        void *raster;
+        int size = 0;
+        void *raster = 0;
 
         if (rasterliteGetRawImageByRect(dataset_,
             intersect.minx(), intersect.miny(), intersect.maxx(), intersect.maxy(),
@@ -128,13 +128,13 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
                 free (raster);
 
 #ifdef MAPNIK_DEBUG         
-                std::clog << "Rasterlite Plugin: Done" << "\n";
+                std::clog << "Rasterlite Plugin: done" << std::endl;
 #endif
             }
             else
             {
 #ifdef MAPNIK_DEBUG         
-                std::clog << "Rasterlite Plugin: Error=" << rasterliteGetLastError (dataset_) << "\n";
+                std::clog << "Rasterlite Plugin: error=" << rasterliteGetLastError (dataset_) << std::endl;
 #endif
             }
         }
