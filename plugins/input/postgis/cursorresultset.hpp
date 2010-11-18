@@ -14,29 +14,38 @@ private:
     bool is_closed_;
     int *refCount_;
     
-    void getNextResultSet() {
+    void getNextResultSet()
+    {
         std::ostringstream s;
         s << "FETCH FORWARD " << fetch_size_ << " FROM " << cursorName_;
 #ifdef MAPNIK_DEBUG
-        std::clog << s.str() << "\n";
+        std::clog << "Postgis Plugin: " << s.str() << std::endl;
 #endif
         rs_ = conn_->executeQuery(s.str());
         is_closed_ = false;
 #ifdef MAPNIK_DEBUG
-        std::clog << "FETCH result (" << cursorName_ << "): " << rs_->size() << " rows\n";
+        std::clog << "Postgis Plugin: FETCH result (" << cursorName_ << "): " << rs_->size() << " rows" << std::endl;
 #endif
     }
     
 public:
     CursorResultSet(boost::shared_ptr<Connection> const &conn, std::string cursorName, int fetch_count)
-    :conn_(conn),cursorName_(cursorName),fetch_size_(fetch_count),is_closed_(false),refCount_(new int(1))
+        : conn_(conn),
+          cursorName_(cursorName),
+          fetch_size_(fetch_count),
+          is_closed_(false),
+          refCount_(new int(1))
     {
         getNextResultSet();
     }
 
     CursorResultSet(const CursorResultSet& rhs)
-    :conn_(rhs.conn_),cursorName_(rhs.cursorName_),rs_(rhs.rs_),fetch_size_(rhs.fetch_size_),is_closed_(rhs.is_closed_),
-    refCount_(rhs.refCount_)
+        : conn_(rhs.conn_),
+          cursorName_(rhs.cursorName_),
+          rs_(rhs.rs_),
+          fetch_size_(rhs.fetch_size_),
+          is_closed_(rhs.is_closed_),
+          refCount_(rhs.refCount_)
     {
         (*refCount_)++;
     }
@@ -61,12 +70,13 @@ public:
 
     virtual void close()
     {
-        if (!is_closed_) {
+        if (!is_closed_)
+        {
             rs_.reset();
             std::ostringstream s;
             s << "CLOSE " << cursorName_;
 #ifdef MAPNIK_DEBUG
-            std::clog << s.str() << "\n";
+            std::clog << "Postgis Plugin: " << s.str() << std::endl;
 #endif
             conn_->execute(s.str());
             is_closed_ = true;

@@ -54,9 +54,6 @@ DATASOURCE_PLUGIN(postgis_datasource)
 const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS="spatial_ref_system";
 
-using std::clog;
-using std::endl;
-
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using boost::shared_ptr;
@@ -91,8 +88,7 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
       st_(*params_.get<mapnik::boolean>("st_prefix",false))
       //show_queries_(*params_.get<mapnik::boolean>("show_queries",false))
 {   
-
-    if (table_.empty()) throw mapnik::datasource_exception("PostGIS: missing <table> parameter");
+    if (table_.empty()) throw mapnik::datasource_exception("Postgis Plugin: missing <table> parameter");
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
    
@@ -160,10 +156,12 @@ void postgis_datasource::bind() const
                 if (geometry_field_.length() > 0)
                     s << " AND f_geometry_column='" << unquote(geometry_field_) << "'";
 
-                /*if (show_queries_)
-                  {
-                  clog << boost::format("PostGIS: sending query: %s\n") % s.str();
-                  }*/
+                /*
+                if (show_queries_)
+                {
+                    clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+                }
+                */
                  
                 shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
                 if (rs->next())
@@ -178,7 +176,7 @@ void postgis_datasource::bind() const
                         }
                         catch (bad_lexical_cast &ex)
                         {
-                            clog << "SRID: " << rs->getValue("srid") << ":" << ex.what() << endl;
+                            std::clog << "Postgis Plugin: SRID=" << rs->getValue("srid") << " " << ex.what() << std::endl;
                         }
                     }
                 }
@@ -193,10 +191,12 @@ void postgis_datasource::bind() const
                     s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
                     s << populate_tokens(table_) << " WHERE \"" << geometryColumn_ << "\" IS NOT NULL LIMIT 1;";
 
-                    /*if (show_queries_)
-                      {
-                      clog << boost::format("PostGIS: sending query: %s\n") % s.str();
-                      }*/
+                    /*
+                    if (show_queries_)
+                    {
+                        clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+                    }
+                    */
 
                     shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
                     if (rs->next())
@@ -207,7 +207,7 @@ void postgis_datasource::bind() const
                         }
                         catch (bad_lexical_cast &ex)
                         {
-                            clog << "SRID: " << rs->getValue("srid") << ":" << ex.what() << endl;
+                            std::clog << "Postgis Plugin: SRID=" << rs->getValue("srid") << " " << ex.what() << std::endl;
                         }
                     }
                     rs->close();
@@ -217,24 +217,26 @@ void postgis_datasource::bind() const
             if (srid_ == 0)
             {
                 srid_ = -1;
-                clog << "PostGIS: SRID warning, using srid=-1" << endl;
+                std::clog << "Postgis Plugin: SRID warning, using srid=-1" << std::endl;
             }
 
             // At this point the geometry_field may still not be known
             // but we'll catch that where more useful...         
 #ifdef MAPNIK_DEBUG
-            clog << "PostGIS: using SRID=" << srid_ << endl;
-            clog << "PostGIS: using geometry_column=" << geometryColumn_ << endl;
+            std::clog << "Postgis Plugin: using SRID=" << srid_ << std::endl;
+            std::clog << "Postgis Plugin: using geometry_column=" << geometryColumn_ << std::endl;
 #endif
 
             // collect attribute desc         
             std::ostringstream s;
             s << "SELECT * FROM " << populate_tokens(table_) << " LIMIT 0";
 
-            /*if (show_queries_)
-              {
-              clog << boost::format("PostGIS: sending query: %s\n") % s.str();
-              }*/
+            /*
+            if (show_queries_)
+            {
+                clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+            }
+            */
 
             shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
             int count = rs->getNumFields();
@@ -263,19 +265,22 @@ void postgis_datasource::bind() const
                     s.str("");
                     s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
 
-                    /*if (show_queries_)
-                      {
-                      clog << boost::format("PostGIS: sending query: %s\n") % s.str();
-                      }*/
+                    /*
+                    if (show_queries_)
+                    {
+                        clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+                    }
+                    */
 
                     shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
                     if (rs_oid->next())
                     {
-                        clog << "PostGIS: unknown type = " << rs_oid->getValue("typname") << " (oid:" << rs_oid->getValue("oid") << ")\n";
+                        std::clog << "Postgis Plugin: unknown type = " << rs_oid->getValue("typname")
+                            << " (oid:" << rs_oid->getValue("oid") << ")" << std::endl;
                     }
                     else
                     {
-                        clog << "PostGIS: unknown oid type =" << type_oid << endl;              
+                        std::clog << "Postgis Plugin: unknown oid type =" << type_oid << std::endl;              
                     }
                     rs_oid->close();
 #endif
@@ -372,30 +377,37 @@ std::string postgis_datasource::unquote(const std::string& sql)
 
 boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const
 {
-    if (cursor_fetch_size_ > 0) {
+    if (cursor_fetch_size_ > 0)
+    {
         // cursor
         std::ostringstream csql;
         std::string cursor_name = conn->new_cursor_name();
 
         csql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << sql << " FOR READ ONLY";
 
-        /*if (show_queries_)
-          {
-          clog << boost::format("PostGIS: sending query: %s\n") % csql.str();
-          }*/
-
-        if (!conn->execute(csql.str())) {
-            throw mapnik::datasource_exception( "PSQL Error: Creating cursor for data select." );
+        /*
+        if (show_queries_)
+        {
+            clog << boost::format("PostGIS: sending query: %s\n") % csql.str();
         }
+        */
+
+        if (!conn->execute(csql.str()))
+            throw mapnik::datasource_exception("Postgis Plugin: error creating cursor for data select." );
+
         return shared_ptr<CursorResultSet>(new CursorResultSet(conn, cursor_name, cursor_fetch_size_));
 
-    } else {
+    }
+    else
+    {
         // no cursor
 
-        /*if (show_queries_)
-          {
-          clog << boost::format("PostGIS: sending query: %s\n") % sql;
-          }*/
+        /*
+        if (show_queries_)
+        {
+            clog << boost::format("PostGIS: sending query: %s\n") % sql;
+        }
+        */
 
         return conn->executeQuery(sql,1);
     }
@@ -404,6 +416,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
 featureset_ptr postgis_datasource::features(const query& q) const
 {
     if (!is_bound_) bind();
+    
 #ifdef MAPNIK_DEBUG
     //mapnik::wall_clock_progress_timer timer(clog, "end feature query: ");
 #endif
@@ -425,7 +438,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
                 s_error << "PostGIS: geometry name lookup failed for table '" << schema_ << "." << geometry_table_
                         << "'. Please manually provide the 'geometry_field' parameter or add an entry "
                         << "in the geometry_columns for '" << schema_ << "." << geometry_table_ << "'.";
-                throw mapnik::datasource_exception(s_error.str());
+                throw mapnik::datasource_exception("Postgis Plugin: " + s_error.str());
             }
 
             std::ostringstream s;
@@ -459,7 +472,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
         }
         else 
         {
-            throw mapnik::datasource_exception("bad connection");
+            throw mapnik::datasource_exception("Postgis Plugin: bad connection");
         }
     }
     return featureset_ptr();
@@ -547,7 +560,7 @@ box2d<double> postgis_datasource::envelope() const
                         << "\nPlease provide either 1) an 'extent' parameter to skip this query, "
                         << "2) a 'geometry_field' and/or 'geometry_table' parameter, or 3) add a "
                         << "record to the 'geometry_columns' for your table.";
-                throw mapnik::datasource_exception(s_error.str());
+                throw mapnik::datasource_exception("Postgis Plugin: " + s_error.str());
             }
 
             if (estimate_extent && *estimate_extent)
@@ -586,10 +599,12 @@ box2d<double> postgis_datasource::envelope() const
                 }
             }
 
-            /*if (show_queries_)
-              {
-              clog << boost::format("PostGIS: sending query: %s\n") % s.str();
-              }*/
+            /*
+            if (show_queries_)
+            {
+                clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+            }
+            */
             
             shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
             if (rs->next())
@@ -605,7 +620,7 @@ box2d<double> postgis_datasource::envelope() const
                 }
                 catch (bad_lexical_cast &ex)
                 {
-                    clog << boost::format("PostGIS: warning: could not determine extent from query: %s\nError was: '%s'\n") % s.str() % ex.what();
+                    std::clog << boost::format("Postgis Plugin: warning: could not determine extent from query: %s\nError was: '%s'\n") % s.str() % ex.what() << std::endl;
                 }
             }
             rs->close();

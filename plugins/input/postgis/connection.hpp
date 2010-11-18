@@ -49,13 +49,13 @@ class Connection
          conn_=PQconnectdb(connection_str.c_str());
          if (PQstatus(conn_) != CONNECTION_OK)
          {
-             std::string s("PSQL error");
+             std::string s("Postgis Plugin: PSQL error");
              if (conn_ )
              {
                  std::string msg = PQerrorMessage( conn_ );
                  if ( ! msg.empty() )
                  {
-                     s += ":\n" + msg.substr( 0, msg.size() - 1 );
+                     s << ":" << std::endl << msg.substr( 0, msg.size() - 1 );
                  }
              } 
              throw mapnik::datasource_exception( s );
@@ -83,16 +83,16 @@ class Connection
          }
          if(!result || PQresultStatus(result) != PGRES_TUPLES_OK)
          {
-             std::string s("PSQL error");
+             std::string s("Postgis Plugin: PSQL error");
              if (conn_ )
              {
                  std::string msg = PQerrorMessage( conn_ );
                  if ( ! msg.empty() )
                  {
-                     s += ":\n" + msg.substr( 0, msg.size() - 1 );
+                     s << ":" << std::endl << msg.substr( 0, msg.size() - 1 );
                  }
                  
-                 s += "\nFull sql was: '" + sql + "'\n";
+                 s << std::endl << "Full sql was: '" + sql + "'" << std::endl;
              } 
              throw mapnik::datasource_exception( s );
          }
@@ -116,7 +116,7 @@ class Connection
          {
              PQfinish(conn_);
 #ifdef MAPNIK_DEBUG
-             std::clog << "PostGIS: datasource closed, also closing connection - " << conn_ << "\n";
+             std::clog << "PostGIS: datasource closed, also closing connection - " << conn_ << std::endl;
 #endif
              closed_ = true;
          }
@@ -135,7 +135,7 @@ class Connection
          {
              PQfinish(conn_);
 #ifdef MAPNIK_DEBUG
-             std::clog << "PostGIS: postgresql connection closed - " << conn_ << "\n";
+             std::clog << "PostGIS: postgresql connection closed - " << conn_ << std::endl;
 #endif
              closed_ = true;
          }

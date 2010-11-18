@@ -34,7 +34,6 @@
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using boost::trim_copy;
-using std::string;
 using mapnik::Feature;
 using mapnik::geometry_type;
 using mapnik::byte;
@@ -163,7 +162,7 @@ feature_ptr postgis_featureset::next()
     if (rs_->next())
     { 
         feature_ptr feature(new Feature(count_));
-        int size=rs_->getFieldLength(0);
+        int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
         geometry_utils::from_wkb(*feature,data,size,multiple_geometries_);
         totalGeomSize_+=size;
@@ -234,7 +233,7 @@ feature_ptr postgis_featureset::next()
               else 
               {
 #ifdef MAPNIK_DEBUG
-                 std::clog << "uknown OID = " << oid << " FIXME \n";
+                 std::clog << "Postgis Plugin: uknown OID = " << oid << " FIXME " << std::endl;
 #endif
               }
            }
