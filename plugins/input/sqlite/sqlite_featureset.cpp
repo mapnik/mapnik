@@ -33,9 +33,6 @@
 // ogr
 #include "sqlite_featureset.hpp"
 
-using std::clog;
-using std::endl;
-
 using mapnik::query;
 using mapnik::box2d;
 using mapnik::CoordTransform;
@@ -68,7 +65,7 @@ feature_ptr sqlite_featureset::next()
         int feature_id = rs_->column_integer (1);   
 
 #ifdef MAPNIK_DEBUG
-        // clog << "feature_oid=" << feature_id << endl;
+        // std::clog << "Sqlite Plugin: feature_oid=" << feature_id << std::endl;
 #endif
 
         feature_ptr feature(new Feature(feature_id));
@@ -106,7 +103,7 @@ feature_ptr sqlite_featureset::next()
                  
               default:
 #ifdef MAPNIK_DEBUG
-                 clog << "unhandled type_oid=" << type_oid << endl;
+                 std::clog << "Sqlite Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
                  break;
            }

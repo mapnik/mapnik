@@ -56,6 +56,7 @@ class sqlite_datasource : public mapnik::datasource
       std::string dataset_name_;
       mutable sqlite_connection* dataset_;
       std::string table_;
+      std::string fields_;
       std::string metadata_;
       std::string geometry_field_;
       std::string key_field_;

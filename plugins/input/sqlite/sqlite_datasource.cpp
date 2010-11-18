@@ -34,9 +34,6 @@
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp>
 
-using std::clog;
-using std::endl;
-
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
@@ -60,6 +57,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
      extent_initialized_(false),
      type_(datasource::Vector),
      table_(*params.get<std::string>("table","")),
+     fields_(*params.get<std::string>("fields","*")),
      metadata_(*params.get<std::string>("metadata","")),
      geometry_field_(*params.get<std::string>("geometry_field","the_geom")),
      key_field_(*params.get<std::string>("key_field","OGC_FID")),
@@ -69,7 +67,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
      format_(mapnik::wkbGeneric)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file) throw datasource_exception("missing <file> parameter");
+    if (!file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
 
     boost::optional<std::string> wkb = params.get<std::string>("wkb_format");
     if (wkb)
@@ -100,7 +98,8 @@ void sqlite_datasource::bind() const
 {
     if (is_bound_) return;
     
-    if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
+    if (!boost::filesystem::exists(dataset_name_))
+        throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
           
     dataset_ = new sqlite_connection (dataset_name_);
 
@@ -109,8 +108,8 @@ void sqlite_datasource::bind() const
     if (metadata_ != "" && ! extent_initialized_)
     {
         std::ostringstream s;
-        s << "select xmin, ymin, xmax, ymax from " << metadata_;
-        s << " where lower(f_table_name) = lower('" << table_name << "')";
+        s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata_;
+        s << " WHERE LOWER(f_table_name) = LOWER('" << table_name << "')";
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
@@ -127,8 +126,8 @@ void sqlite_datasource::bind() const
     if (use_spatial_index_)
     {
         std::ostringstream s;
-        s << "select count (*) from sqlite_master";
-        s << " where lower(name) = lower('idx_" << table_name << "_" << geometry_field_ << "')";
+        s << "SELECT COUNT (*) FROM sqlite_master";
+        s << " WHERE LOWER(name) = LOWER('idx_" << table_name << "_" << geometry_field_ << "')";
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
@@ -137,7 +136,7 @@ void sqlite_datasource::bind() const
 
 #ifdef MAPNIK_DEBUG
         if (! use_spatial_index_)
-           clog << "cannot use the spatial index " << endl;
+           std::clog << "Sqlite Plugin: cannot use the spatial index " << std::endl;
 #endif
     }
     
@@ -149,7 +148,7 @@ void sqlite_datasource::bind() const
         */
 
         std::ostringstream s;
-        s << "select * from (" << table_name << ") limit 1";
+        s << "SELECT " << fields_ << " FROM (" << table_name << ") LIMIT 1";
 
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
@@ -178,7 +177,7 @@ void sqlite_datasource::bind() const
                      
                   default:
 #ifdef MAPNIK_DEBUG
-                     clog << "unknown type_oid="<<type_oid<<endl;
+                     std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
 #endif
                      break;
                 }
@@ -228,7 +227,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         std::ostringstream s;
         
-        s << "select " << geometry_field_ << "," << key_field_;
+        s << "SELECT " << geometry_field_ << "," << key_field_;
         std::set<std::string> const& props = q.property_names();
         std::set<std::string>::const_iterator pos = props.begin();
         std::set<std::string>::const_iterator end = props.end();
@@ -238,7 +237,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
            ++pos;
         }
         
-        s << " from "; 
+        s << " FROM "; 
         
         std::string query (table_); 
         
@@ -247,31 +246,31 @@ featureset_ptr sqlite_datasource::features(query const& q) const
            std::string table_name = mapnik::table_from_sql(query);
            std::ostringstream spatial_sql;
            spatial_sql << std::setprecision(16);
-           spatial_sql << " where rowid in (select pkid from idx_" << table_name << "_" << geometry_field_;
-           spatial_sql << " where xmax>=" << e.minx() << " and xmin<=" << e.maxx() ;
-           spatial_sql << " and ymax>=" << e.miny() << " and ymin<=" << e.maxy() << ")";
-           if (boost::algorithm::ifind_first(query,"where"))
+           spatial_sql << " WHERE rowid IN (SELECT pkid FROM idx_" << table_name << "_" << geometry_field_;
+           spatial_sql << "  WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
+           spatial_sql << "    AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
+           if (boost::algorithm::ifind_first(query, "WHERE"))
            {
-              boost::algorithm::ireplace_first(query, "where", spatial_sql.str() + " and");
+              boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
            }
-           else if (boost::algorithm::find_first(query,table_name))  
+           else if (boost::algorithm::ifind_first(query, table_name))  
            {
-              boost::algorithm::ireplace_first(query, table_name , table_name + " " + spatial_sql.str());
+              boost::algorithm::ireplace_first(query, table_name, table_name + " " + spatial_sql.str());
            }
         }
         
         s << query ;
         
         if (row_limit_ > 0) {
-            s << " limit " << row_limit_;
+            s << " LIMIT " << row_limit_;
         }
 
         if (row_offset_ > 0) {
-            s << " offset " << row_offset_;
+            s << " OFFSET " << row_offset_;
         }
 
 #ifdef MAPNIK_DEBUG
-        std::cerr << s.str() << "\n";
+        std::clog << "Sqlite Plugin: " << s.str() << std::endl;
 #endif
 
         boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
@@ -285,18 +284,6 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
 {
    if (!is_bound_) bind();
-#if 0
-   if (dataset_ && layer_)
-   {
-        OGRPoint point;
-        point.setX (pt.x);
-        point.setY (pt.y);
-        
-        layer_->SetSpatialFilter (&point);
-        
-        return featureset_ptr(new ogr_featureset(*dataset_, *layer_, desc_.get_encoding(), multiple_geometries_));
-   }
-#endif
 
    return featureset_ptr();
 }

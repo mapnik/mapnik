@@ -141,7 +141,7 @@ public:
         int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
         if (rc != SQLITE_OK)
         {
-            std::clog << sqlite3_errmsg(db_) << std::endl;
+            std::clog << "Sqlite Plugin: " << sqlite3_errmsg(db_) << std::endl;
         }
 
         return new sqlite_resultset (stmt);
