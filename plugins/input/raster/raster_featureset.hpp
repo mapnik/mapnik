@@ -117,7 +117,7 @@ public:
       double pixel_y = extent.height()/double(height);
 
 #ifdef MAPNIK_DEBUG 
-      std::cout << "Raster Plugin: PIXEL SIZE("<< pixel_x << "," << pixel_y << ")\n";
+      std::clog << "Raster Plugin: PIXEL SIZE("<< pixel_x << "," << pixel_y << ")" << std::endl;
 #endif
 
       box2d<double> e = bbox.intersect(extent);
@@ -140,7 +140,7 @@ public:
          }
       }
 #ifdef MAPNIK_DEBUG 
-      std::cout << "Raster Plugin: INFO SIZE=" << infos_.size() << " " << file << "\n";
+      std::clog << "Raster Plugin: INFO SIZE=" << infos_.size() << " " << file << std::endl;
 #endif
    }
    

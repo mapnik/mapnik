@@ -60,8 +60,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
          std::auto_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
 
 #ifdef MAPNIK_DEBUG         
-         std::cout << "Raster Plugin: READER = " << curIter_->format() << " " << curIter_->file() 
-                   << " size(" << curIter_->width() << "," << curIter_->height() << ")\n";
+         std::clog << "Raster Plugin: READER = " << curIter_->format() << " " << curIter_->file() 
+                   << " size(" << curIter_->width() << "," << curIter_->height() << ")" << std::endl;
 #endif
          if (reader.get())
          {
@@ -104,7 +104,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
       }
       catch (...)
       {
-         std::cerr << "Raster Plugin: Exception caught\n";
+         std::cerr << "Raster Plugin: exception caught" << std::endl;
       }
       
       ++curIter_;

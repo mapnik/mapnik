@@ -38,8 +38,6 @@ using mapnik::image_reader;
 
 DATASOURCE_PLUGIN(raster_datasource)
 
-using std::clog;
-using std::endl;
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using mapnik::layer_descriptor;
@@ -54,11 +52,11 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
       extent_initialized_(false)
 {
 #ifdef MAPNIK_DEBUG
-    std::cout << "\nRaster Plugin: Initializing...\n";
+    std::clog << "Raster Plugin: Initializing..." << std::endl;
 #endif
 
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (! file) throw datasource_exception("missing <file> parameter ");
+    if (! file) throw datasource_exception("Raster Plugin: missing <file> parameter ");
    
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
@@ -85,7 +83,7 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
     }
 
     if (! extent_initialized_)
-        throw datasource_exception("valid <lox> <loy> <hix> <hiy>, or <extent> are required");
+        throw datasource_exception("Raster Plugin: valid <lox> <loy> <hix> <hiy>, or <extent> are required");
 
     if (bind) 
     {
@@ -98,7 +96,7 @@ void raster_datasource::bind() const
     if (is_bound_) return;
    
     if (! boost::filesystem::exists(filename_))
-        throw datasource_exception(filename_ + " does not exist");
+        throw datasource_exception("Raster Plugin: " + filename_ + " does not exist");
 
     try
     {         
@@ -107,14 +105,15 @@ void raster_datasource::bind() const
         {
             width_ = reader->width();
             height_ = reader->height();
+
 #ifdef MAPNIK_DEBUG
-            std::cout << "Raster Plugin: RASTER SIZE(" << width_ << "," << height_ << ")\n";
+            std::clog << "Raster Plugin: RASTER SIZE(" << width_ << "," << height_ << ")" << std::endl;
 #endif
         }
     }
     catch (...)
     {
-        std::cerr << "Exception caught\n";
+        std::cerr << "Raster Plugin: exception caught" << std::endl;
     }
    
     is_bound_ = true;
@@ -156,13 +155,13 @@ featureset_ptr raster_datasource::features(query const& q) const
     const int height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
 
 #ifdef MAPNIK_DEBUG
-    std::cout << "Raster Plugin: BOX SIZE(" << width << " " << height << ")\n";
+    std::clog << "Raster Plugin: BOX SIZE(" << width << " " << height << ")" << std::endl;
 #endif
 
     if (width * height > 512*512)
     {
 #ifdef MAPNIK_DEBUG
-        std::cout << "Raster Plugin: TILED policy\n";
+        std::clog << "Raster Plugin: TILED policy" << std::endl;
 #endif
 
         tiled_file_policy policy(filename_, format_, 256, extent_, q.get_bbox(), width_, height_);
@@ -171,7 +170,7 @@ featureset_ptr raster_datasource::features(query const& q) const
     else
     {
 #ifdef MAPNIK_DEBUG
-        std::cout << "Raster Plugin: SINGLE FILE\n";
+        std::clog << "Raster Plugin: SINGLE FILE" << std::endl;
 #endif
 
         raster_info info(filename_, format_, extent_, width_, height_);
