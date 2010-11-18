@@ -42,9 +42,6 @@
 #include "ogr_index.hpp"
 #include "ogr_feature_ptr.hpp"
 
-using std::clog;
-using std::endl;
-
 using mapnik::query;
 using mapnik::box2d;
 using mapnik::CoordTransform;
@@ -81,7 +78,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
     std::sort(ids_.begin(),ids_.end());    
     
 #ifdef MAPNIK_DEBUG
-    std::clog<< "query size=" << ids_.size() << "\n";
+    std::clog << "OGR Plugin: query size=" << ids_.size() << std::endl;
 #endif
 
     itr_ = ids_.begin();
@@ -147,7 +144,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
                    case OFTWideStringList: // deprecated !
                    {
 #ifdef MAPNIK_DEBUG
-                       clog << "unhandled type_oid=" << type_oid << endl;
+                       std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
                        break;
                    }
@@ -155,7 +152,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
                    case OFTBinary:
                    {
 #ifdef MAPNIK_DEBUG
-                       clog << "unhandled type_oid=" << type_oid << endl;
+                       std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
                        //boost::put(*feature,name,feat->GetFieldAsBinary (i, size));
                        break;
@@ -166,7 +163,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
                    case OFTDateTime:       // unhandled !
                    {
 #ifdef MAPNIK_DEBUG
-                       clog << "unhandled type_oid=" << type_oid << endl;
+                       std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
                        break;
                    }
@@ -174,7 +171,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
                    default: // unknown
                    {
 #ifdef MAPNIK_DEBUG
-                       clog << "unknown type_oid=" << type_oid << endl;
+                       std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
 #endif
                        break;
                    }
@@ -187,8 +184,9 @@ feature_ptr ogr_index_featureset<filterT>::next()
    }
 
 #ifdef MAPNIK_DEBUG
-   clog << count_ << " features" << endl;
+   std::clog << "OGR Plugin: " << count_ << " features" << std::endl;
 #endif
+
    return feature_ptr();
 }
 

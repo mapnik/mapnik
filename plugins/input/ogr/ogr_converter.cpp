@@ -32,9 +32,6 @@
 // ogr
 #include "ogr_converter.hpp"
 
-using std::clog;
-using std::endl;
-
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::geometry_type;
@@ -84,7 +81,7 @@ void ogr_converter::convert_geometry (OGRGeometry* geom, feature_ptr feature, bo
   case wkbUnknown:
   default:
 #ifdef MAPNIK_DEBUG
-      clog << "unknown <ogr> geometry_type=" << wkbFlatten (geom->getGeometryType()) << endl;
+      std::clog << "OGR Plugin: unknown <ogr> geometry_type=" << wkbFlatten (geom->getGeometryType()) << std::endl;
 #endif
       break;
   }  

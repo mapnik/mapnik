@@ -36,9 +36,6 @@
 // boost
 #include <boost/algorithm/string.hpp>
 
-using std::clog;
-using std::endl;
-
 using mapnik::datasource;
 using mapnik::parameters;
 
@@ -108,9 +105,9 @@ void ogr_datasource::bind() const
    {
       std::string err = CPLGetLastErrorMsg();
       if( err.size() == 0 ) {
-         throw datasource_exception("Connection failed: " + dataset_name_ + " was not found or is not a supported format");
+         throw datasource_exception("OGR Plugin: connection failed: " + dataset_name_ + " was not found or is not a supported format");
       } else {
-         throw datasource_exception(err);
+         throw datasource_exception("OGR Plugin: " + err);
       }
    } 
 
@@ -152,7 +149,7 @@ void ogr_datasource::bind() const
    else
    {
       std::ostringstream s;
-      s << "missing <layer> or <layer_by_index> parameter, available layers are: ";
+      s << "OGR Plugin: missing <layer> or <layer_by_index> parameter, available layers are: ";
       unsigned num_layers = dataset_->GetLayerCount();
       bool found = false;
       for (unsigned i = 0; i < num_layers; ++i )
@@ -239,7 +236,7 @@ void ogr_datasource::bind() const
            case OFTStringList:
            case OFTWideStringList: // deprecated !
 #ifdef MAPNIK_DEBUG
-               clog << "unhandled type_oid=" << type_oid << endl;
+               std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
                break;
 
@@ -247,14 +244,14 @@ void ogr_datasource::bind() const
            case OFTTime:
            case OFTDateTime: // unhandled !
 #ifdef MAPNIK_DEBUG
-               clog << "unhandled type_oid=" << type_oid << endl;
+               std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
                break;
 
            default: // unknown
 #ifdef MAPNIK_DEBUG
-               clog << "unknown type_oid=" << type_oid << endl;
+               std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
 #endif
                break;
            }
