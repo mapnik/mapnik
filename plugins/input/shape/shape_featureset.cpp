@@ -57,7 +57,7 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
         {
             std::ostringstream s;
 
-            s << "Shapefile Plugin: Error: no attribute by the name of '" << *pos << "'"
+            s << "Shape Plugin: error no attribute by the name of '" << *pos << "'"
             << ", available attributes are:";
             for (int i=0;i<shape_.dbf().num_fields();++i)
             {
@@ -254,7 +254,7 @@ feature_ptr shape_featureset<filterT>::next()
                 }
                 catch (...)
                 {
-                    std::clog << "error processing attributes " << std::endl;
+                    std::clog << "Shape Plugin: error processing attributes " << std::endl;
                 }
                 ++pos;
             }
@@ -264,7 +264,7 @@ feature_ptr shape_featureset<filterT>::next()
     else
     {
 #ifdef MAPNIK_DEBUG
-        std::clog<<" total shapes read="<<count_<<"\n";
+        std::clog << "Shape Plugin: total shapes read=" << count_ << std::endl;
 #endif
         return feature_ptr();
     }

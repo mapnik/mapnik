@@ -49,14 +49,14 @@ shape_io::shape_io(const std::string& shape_name)
     {
         if (!boost::filesystem::exists(shape_name + INDEX))
         {
-            throw datasource_exception("Shape Plugin Warning: Could not open index: '" + shape_name + INDEX + "' does not exist");
+            throw datasource_exception("Shape Plugin: Warning - Could not open index: '" + shape_name + INDEX + "' does not exist");
         }
 
         index_= boost::shared_ptr<shape_file>(new shape_file(shape_name + INDEX));
     }
     catch (...)
     {
-        std::cerr << "Shape Plugin Warning: Could not open index: '" + shape_name + INDEX + "'\n";
+        std::cerr << "Shape Plugin: Warning - Could not open index: '" + shape_name + INDEX + "'" << std::endl;
     }
 }
 

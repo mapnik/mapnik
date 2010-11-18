@@ -54,7 +54,7 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file) throw datasource_exception("missing <file> parameter");
+    if (!file) throw datasource_exception("Shape Plugin: missing <file> parameter");
       
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
@@ -76,12 +76,12 @@ void shape_datasource::bind() const
     
     if (!boost::filesystem::exists(shape_name_ + ".shp"))
     {
-        throw datasource_exception("shapefile '" + shape_name_ + ".shp' does not exist");
+        throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
     }
 
     if (boost::filesystem::is_directory(shape_name_ + ".shp"))
     {
-        throw datasource_exception("shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
+        throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
     }
 
     try
@@ -115,7 +115,7 @@ void shape_datasource::bind() const
             }
             default:
 #ifdef MAPNIK_DEBUG                
-                std::clog << "unknown type "<<fd.type_<<"\n";
+                std::clog << "Shape Plugin: unknown type " << fd.type_ << std::endl;
 #endif 
                 break;
             }
@@ -128,7 +128,7 @@ void shape_datasource::bind() const
     }
     catch (...)
     {
-        std::clog << " got exception ... \n";
+        std::clog << "Shape Plugin: got exception... " << std::endl;
         throw;
     }
     
@@ -144,7 +144,7 @@ void  shape_datasource::init(shape_io& shape) const
     if (file_code!=9994)
     {
         //invalid file code
-        throw datasource_exception((boost::format("wrong file code : %d") % file_code).str());
+        throw datasource_exception("Shape Plugin: " + (boost::format("wrong file code : %d") % file_code).str());
     }
     
     shape.shp().skip(5*4);
@@ -154,7 +154,7 @@ void  shape_datasource::init(shape_io& shape) const
     if (version!=1000)
     {
         //invalid version number
-        throw datasource_exception((boost::format("invalid version number: %d") % version).str());
+        throw datasource_exception("Shape Plugin: " + (boost::format("invalid version number: %d") % version).str());
     }
    
 #ifdef MAPNIK_DEBUG
@@ -171,8 +171,8 @@ void  shape_datasource::init(shape_io& shape) const
     double mmin = shape.shp().read_double();
     double mmax = shape.shp().read_double();
 
-    std::clog << "Z min/max " << zmin << "," << zmax << "\n";
-    std::clog << "M min/max " << mmin << "," << mmax << "\n";
+    std::clog << "Shape Plugin: Z min/max " << zmin << "," << zmax << std::endl;
+    std::clog << "Shape Plugin: M min/max " << mmin << "," << mmax << "\n";
 #else
     shape.shp().skip(4*8);
 #endif
@@ -193,9 +193,9 @@ void  shape_datasource::init(shape_io& shape) const
     //}
     
 #ifdef MAPNIK_DEBUG
-    std::clog << extent_ << std::endl;
-    std::clog << "file_length=" << file_length_ << std::endl;
-    std::clog << "shape_type=" << shape_type << std::endl;
+    std::clog << "Shape Plugin: extent=" << extent_ << std::endl;
+    std::clog << "Shape Plugin: file_length=" << file_length_ << std::endl;
+    std::clog << "Shape Plugin: shape_type=" << shape_type << std::endl;
 #endif
 
 }

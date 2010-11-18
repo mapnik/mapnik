@@ -55,7 +55,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
     std::sort(ids_.begin(),ids_.end());    
     
 #ifdef MAPNIK_DEBUG
-    std::clog<< "query size=" << ids_.size() << "\n";
+    std::clog << "Shape Plugin: query size=" << ids_.size() << std::endl;
 #endif
 
     itr_ = ids_.begin();
@@ -78,7 +78,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
         {
             std::ostringstream s;
 
-            s << "Shapefile Plugin: Error: no attribute by the name of '" << *pos << "'"
+            s << "Shape Plugin: error no attribute by the name of '" << *pos << "'"
             << ", available attributes are:";
             for (int i=0;i<shape_.dbf().num_fields();++i)
             {
@@ -224,7 +224,7 @@ feature_ptr shape_index_featureset<filterT>::next()
                 }
                 catch (...)
                 {
-                    std::clog<<"exception caught\n";
+                    std::clog << "Shape Plugin: exception caught..." << std::endl;
                 }
                 ++pos;
             }
@@ -235,7 +235,7 @@ feature_ptr shape_index_featureset<filterT>::next()
     {
 
 #ifdef MAPNIK_DEBUG
-        std::clog<<count_<<" features\n";
+        std::clog << "Shape Plugin: " << count_ << " features" << std::endl;
 #endif
         return feature_ptr();
     }
