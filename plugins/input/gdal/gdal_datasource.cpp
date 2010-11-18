@@ -49,7 +49,7 @@ inline GDALDataset *gdal_datasource::open_dataset() const
 {
 
 #ifdef MAPNIK_DEBUG
-    std::clog << "GDAL Plugin: opening: " << dataset_name_ << "\n";
+    std::clog << "GDAL Plugin: opening: " << dataset_name_ << std::endl;
 #endif
 
     GDALDataset *dataset;
@@ -72,7 +72,7 @@ gdal_datasource::gdal_datasource(parameters const& params, bool bind)
       filter_factor_(*params_.get<double>("filter_factor",0.0))
 {
 #ifdef MAPNIK_DEBUG
-    std::clog << "\nGDAL Plugin: Initializing...\n";
+    std::clog << "GDAL Plugin: Initializing..." << std::endl;
 #endif
 
     GDALAllRegister();
@@ -133,8 +133,8 @@ void gdal_datasource::bind() const
     GDALClose(dataset);
    
 #ifdef MAPNIK_DEBUG
-    std::clog << "GDAL Plugin: Raster Size=" << width_ << "," << height_ << "\n";
-    std::clog << "GDAL Plugin: Raster Extent=" << extent_ << "\n";
+    std::clog << "GDAL Plugin: Raster Size=" << width_ << "," << height_ << std::endl;
+    std::clog << "GDAL Plugin: Raster Extent=" << extent_ << std::endl;
 #endif
 
     is_bound_ = true;
@@ -181,3 +181,4 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
     gdal_query gq = pt;
     return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, extent_, width_, height_, nbands_, dx_, dy_,  filter_factor_));
 }
+
