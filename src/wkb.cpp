@@ -111,6 +111,7 @@ public:
             read_multipolygon(feature);
             break;
         case wkbGeometryCollection:
+            read_collection(feature);
             break;
         default:
             break;
@@ -141,6 +142,7 @@ public:
             read_multipolygon_2(feature);
             break;
         case wkbGeometryCollection:
+            read_collection_2(feature);
             break;
         default:
             break;
@@ -329,7 +331,6 @@ private:
                 read_coords(ar);
                 poly->set_capacity(capacity);
                 poly->move_to(ar[0].x,ar[0].y);
-                  
                 for (int j=1;j<num_points;++j)
                 {
                     poly->line_to(ar[j].x,ar[j].y);
@@ -339,8 +340,28 @@ private:
         }
         feature.add_geometry(poly);
     }
-};
+
+    void read_collection(Feature & feature)
+    {
+        int num_geometries=read_integer();
+        for (int i=0;i<num_geometries;++i)
+        {
+            pos_+=1; // skip byte order
+            read(feature);
+        }
+    }
     
+    void read_collection_2(Feature & feature)
+    {
+        int num_geometries=read_integer();
+        for (int i=0;i<num_geometries;++i)
+        {
+            pos_+=1; // skip byte order
+            read_multi(feature);
+        }
+    }
+};
+
 void geometry_utils::from_wkb (Feature & feature,
                                const char* wkb,
                                unsigned size,
