@@ -61,12 +61,16 @@ def call(cmd, silent=False):
     elif not silent:
         color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
 
-def get_libtool_version():
+def get_libtool_major_version():
+    """libtool >= 2.1b support lt_dlopenadvise and the previous
+    release appears to be 1.9f (based on NEWS) so checking for 
+    >= 2 seems adequate.
+    """
     cmd = 'libtool'
     if platform.uname()[0] == "Darwin":
         cmd = 'glibtool'
-    fallback_version = 2
     version = None
+    fallback_version = 2
     pattern = r'(.*[^\S])(\d{1}\.\d+\.?\d?)(.*[^\S])'
     ret = os.popen('%s --version' % cmd).read()
     match = re.match(pattern,ret)
@@ -394,7 +398,7 @@ pickle_store = [# Scons internal variables
         'HAS_CAIRO',
         'HAS_PYCAIRO',
         'HAS_LIBXML2',
-        'LIBTOOL_MAJOR_VERSION'
+        'LIBTOOL_SUPPORTS_ADVISE'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -791,7 +795,7 @@ if not preconfigured:
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
     
-    env['LIBTOOL_MAJOR_VERSION'] = get_libtool_version()
+    env['LIBTOOL_SUPPORTS_ADVISE'] = get_libtool_major_version() >= 2
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []

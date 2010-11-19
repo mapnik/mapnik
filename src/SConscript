@@ -141,10 +141,13 @@ source = Split(
     )
 
 
-# add the datasource_cache.cpp with custom LIBTOOL flag
-env3 = lib_env.Clone()
-env3.Append(CXXFLAGS='-DLIBTOOL_MAJOR_VERSION=%s' % env['LIBTOOL_MAJOR_VERSION'])
-source.insert(0,env3.SharedObject('datasource_cache.cpp'))
+# add the datasource_cache.cpp with custom LIBTOOL flag if needed
+if env['LIBTOOL_SUPPORTS_ADVISE']:
+    env3 = lib_env.Clone()
+    env3.Append(CXXFLAGS='-DLIBTOOL_SUPPORTS_ADVISE')
+    source.insert(0,env3.SharedObject('datasource_cache.cpp'))
+else:
+    source.insert(0,'datasource_cache.cpp')
 
 if env['JPEG']:
     source += Split(

@@ -154,17 +154,35 @@ void datasource_cache::register_datasources(const std::string& str)
             {
                 try 
                 {
-                    // clear errors
-                    lt_dlerror();
-#if LIBTOOL_MAJOR_VERSION >= 2
-                    // with ltdl >=2 we can actually pass RTDL_GLOBAL to dlopen via the
+#ifdef LIBTOOL_SUPPORTS_ADVISE
+                    // with ltdl >=2.2 we can actually pass RTDL_GLOBAL to dlopen via the
                     // ltdl advise trick which is required on linux unless plugins are directly
                     // linked to libmapnik (and deps) at build time. The only other approach is to
                     // set the dlopen flags in the calling process (like in the python bindings)
+
+                    // clear errors
+                    lt_dlerror();
+
+                    lt_dlhandle module = 0;
                     lt_dladvise advise;
-                    lt_dladvise_init(&advise);
-                    lt_dladvise_global(&advise);
-                    lt_dlhandle module = lt_dlopenadvise(itr->string().c_str(), advise);
+                    int ret;
+                
+                    ret = lt_dlinit();
+                    if (ret != 0) {
+                        std::clog << "Datasource loader: could not intialize dynamic loading: " << lt_dlerror() << "\n";
+                    }
+                
+                    ret = lt_dladvise_init(&advise);
+                    if (ret != 0) {
+                        std::clog << "Datasource loader: could not intialize dynamic loading: " << lt_dlerror() << "\n";
+                    }
+                
+                    ret = lt_dladvise_global(&advise);
+                    if (ret != 0) {
+                        std::clog << "Datasource loader: could not intialize dynamic loading of global symbols: " << lt_dlerror() << "\n";
+                    }
+                    
+                    module = lt_dlopenadvise (itr->string().c_str(), advise);
                     lt_dladvise_destroy(&advise);
 #else
                     lt_dlhandle module = lt_dlopen(itr->string().c_str());
@@ -176,7 +194,7 @@ void datasource_cache::register_datasources(const std::string& str)
                         if (ds_name && insert(ds_name(),module))
                         {            
 #ifdef MAPNIK_DEBUG
-                            std::clog << "registered datasource : " << ds_name() << std::endl;
+                            std::clog << "Datasource loader: registered: " << ds_name() << std::endl;
 #endif 
                             registered_=true;
                         }
