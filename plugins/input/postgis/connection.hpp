@@ -49,16 +49,16 @@ class Connection
          conn_=PQconnectdb(connection_str.c_str());
          if (PQstatus(conn_) != CONNECTION_OK)
          {
-             std::string s("Postgis Plugin: PSQL error");
+             std::ostringstream s("Postgis Plugin: PSQL error");
              if (conn_ )
              {
                  std::string msg = PQerrorMessage( conn_ );
                  if ( ! msg.empty() )
                  {
-                     s << ":" << std::endl << msg.substr( 0, msg.size() - 1 );
+                     s << ":\n" << msg.substr( 0, msg.size() - 1 );
                  }
              } 
-             throw mapnik::datasource_exception( s );
+             throw mapnik::datasource_exception( s.str() );
          }
       }
       
@@ -83,7 +83,7 @@ class Connection
          }
          if(!result || PQresultStatus(result) != PGRES_TUPLES_OK)
          {
-             std::string s("Postgis Plugin: PSQL error");
+             std::ostringstream s("Postgis Plugin: PSQL error");
              if (conn_ )
              {
                  std::string msg = PQerrorMessage( conn_ );
@@ -94,7 +94,7 @@ class Connection
                  
                  s << std::endl << "Full sql was: '" + sql + "'" << std::endl;
              } 
-             throw mapnik::datasource_exception( s );
+             throw mapnik::datasource_exception( s.str() );
          }
 
          return boost::shared_ptr<ResultSet>(new ResultSet(result));
