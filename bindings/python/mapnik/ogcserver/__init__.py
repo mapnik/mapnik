@@ -20,3 +20,9 @@
 # $Id$
 
 """Mapnik OGC WMS Server."""
+
+import os
+import warnings
+
+warnings.warn("ogcserver module development has moved to https://github.com/mapnik/OGCServer.\n This code will function fine with this version, but will be removed in Mapnik 0.8.1. Disable this warning by editing this file: %s" % os.path.realpath(__file__), DeprecationWarning, 2)
+
