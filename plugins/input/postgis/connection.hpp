@@ -89,10 +89,10 @@ class Connection
                  std::string msg = PQerrorMessage( conn_ );
                  if ( ! msg.empty() )
                  {
-                     s << ":" << std::endl << msg.substr( 0, msg.size() - 1 );
+                     s << ":\n" <<  msg.substr( 0, msg.size() - 1 );
                  }
                  
-                 s << std::endl << "Full sql was: '" + sql + "'" << std::endl;
+                 s << "\nFull sql was: '" <<  sql << "'\n";
              } 
              throw mapnik::datasource_exception( s.str() );
          }
