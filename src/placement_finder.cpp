@@ -154,6 +154,13 @@ placement_finder<DetectorT>::placement_finder(DetectorT & detector)
 }
 
 template <typename DetectorT>
+placement_finder<DetectorT>::placement_finder(DetectorT & detector, box2d<double> const& extent)
+    : detector_(detector),
+      dimensions_(extent)
+{
+}
+
+template <typename DetectorT>
 template <typename T>
 void placement_finder<DetectorT>::find_point_placements(placement & p, T & shape_path)
 {
@@ -413,12 +420,13 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
             }
             
             // if there is an overlap with existing envelopes, then exit - no placement
-            if (!dimensions_.intersects(e) || (!p.allow_overlap && !detector_.has_point_placement(e,p.minimum_distance)))
+            if (!detector_.extent().intersects(e) || (!p.allow_overlap && !detector_.has_point_placement(e,p.minimum_distance)))
                 return;
 
+            // if avoid_edges test dimensions contains e 
             if (p.avoid_edges && !dimensions_.contains(e))
                 return;
-
+            
             if (p.minimum_padding > 0) 
             {
                 box2d<double> epad(e.minx()-p.minimum_padding,
@@ -843,7 +851,7 @@ bool placement_finder<DetectorT>::test_placement(placement & p, const std::auto_
                                 y - (ci.width*sin(angle) + ci.height*cos(angle)));
         }
 
-        if (!dimensions_.intersects(e) ||
+        if (!detector_.extent().intersects(e) ||
             !detector_.has_placement(e, p.info.get_string(), p.minimum_distance))
         {
             //std::clog << "No Intersects:" << !dimensions_.intersects(e) << ": " << e << " @ " << dimensions_ << std::endl;
@@ -941,6 +949,7 @@ void placement_finder<DetectorT>::clear()
 {
     detector_.clear();
 }
+
 
 typedef coord_transform2<CoordTransform,geometry_type> PathType;
 typedef label_collision_detector4 DetectorType;

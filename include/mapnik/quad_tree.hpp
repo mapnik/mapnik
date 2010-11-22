@@ -123,22 +123,13 @@ public:
     {
         return query_result_.end();
     }
-
-    iterator begin()
-    {
-        return nodes_.begin();
-    }
         
     const_iterator begin() const
     {
         return nodes_.begin();
     }
 
-    iterator end()
-    {
-        return  nodes_.end();
-    }
-        
+    
     const_iterator end() const
     {
         return  nodes_.end();
@@ -151,8 +142,14 @@ public:
         nodes_.push_back(new node(ext));
         root_ = &nodes_[0];
     }
-
+    
+    box2d<double> const& extent() const
+    {
+        return root_->extent_;
+    }
+    
 private:
+    
     void query_node(box2d<double> const& box, result_t & result, node * node_) const
     {
         if (node_)

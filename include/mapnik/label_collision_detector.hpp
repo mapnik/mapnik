@@ -148,14 +148,12 @@ class label_collision_detector4 : boost::noncopyable
     };
          
     typedef quad_tree< label > tree_t;
-    box2d<double> extent_;
     tree_t tree_;
          
 public:
         
     explicit label_collision_detector4(box2d<double> const& extent)
-        : extent_(extent),
-          tree_(extent) {}
+        : tree_(extent) {}
         
     bool has_placement(box2d<double> const& box)
     {
@@ -224,7 +222,7 @@ public:
       
     box2d<double> const& extent() const
     {
-        return extent_;
+        return tree_.extent();
     }
 };
 }

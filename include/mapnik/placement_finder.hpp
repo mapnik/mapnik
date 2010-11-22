@@ -84,7 +84,8 @@ class placement_finder : boost::noncopyable
 {
 public:
     placement_finder(DetectorT & detector);
-
+    placement_finder(DetectorT & detector, box2d<double> const& extent);
+    
     //Try place a single label at the given point
     void find_point_placement(placement & p, double pos_x, double pos_y, double angle=0.0, vertical_alignment_e = MIDDLE, unsigned line_spacing=0, unsigned character_spacing=0, horizontal_alignment_e = H_MIDDLE, justify_alignment_e = J_MIDDLE);
 

@@ -80,9 +80,10 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
             ren.set_opacity(sym.get_text_opacity());
-
-            placement_finder<label_collision_detector4> finder(detector_);
-
+            
+            box2d<double> dims(0,0,width_,height_);
+            placement_finder<label_collision_detector4> finder(detector_,dims);
+            
             string_info info(text);
 
             faces->get_string_info(info);
@@ -110,8 +111,10 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                             angle = result.to_double();
                         }
                         
-                        finder.find_point_placement(text_placement,label_x,label_y, angle, sym.get_vertical_alignment(),sym.get_line_spacing(),
-                                                    sym.get_character_spacing(),sym.get_horizontal_alignment(),sym.get_justify_alignment());
+                        finder.find_point_placement(text_placement,label_x,label_y, 
+                                                    angle, sym.get_vertical_alignment(),sym.get_line_spacing(),
+                                                    sym.get_character_spacing(),sym.get_horizontal_alignment(),
+                                                    sym.get_justify_alignment());
                                 
                         finder.update_detector(text_placement);
                     }
