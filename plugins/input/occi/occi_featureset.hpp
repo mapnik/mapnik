@@ -50,13 +50,6 @@ class occi_featureset : public mapnik::Featureset
       virtual ~occi_featureset();
       mapnik::feature_ptr next();
    private:
-      void convert_point (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      void convert_linestring (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      void convert_polygon (SDOGeometry* geom, mapnik::feature_ptr feature, int dims);
-      void convert_multipoint (SDOGeometry* geom, mapnik::feature_ptr feature, int dims, bool multiple_geometries);
-      void convert_multilinestring (SDOGeometry* geom, mapnik::feature_ptr feature, int dims, bool multiple_geometries);
-      void convert_multipolygon (SDOGeometry* geom, mapnik::feature_ptr feature, int dims, bool multiple_geometries);
-      void convert_collection (SDOGeometry* geom, mapnik::feature_ptr feature, int dims, bool multiple_geometries);
       void convert_geometry (SDOGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
       void convert_ordinates (mapnik::feature_ptr feature,
                               const mapnik::eGeomType& geom_type,

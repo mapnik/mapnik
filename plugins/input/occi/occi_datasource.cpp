@@ -40,10 +40,6 @@
 #include <sstream>
 #include <iomanip>
 
-using std::clog;
-using std::endl;
-using std::vector;
-
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
@@ -66,13 +62,14 @@ using oracle::occi::SQLException;
 using oracle::occi::Type;
 using oracle::occi::StatelessConnectionPool;
 
+const std::string occi_datasource::METADATA_TABLE="USER_SDO_GEOM_METADATA";
+
 DATASOURCE_PLUGIN(occi_datasource)
 
 
 occi_datasource::occi_datasource(parameters const& params, bool bind)
     : datasource (params),
       type_(datasource::Vector),
-      table_(*params_.get<std::string>("table","")),
       fields_(*params_.get<std::string>("fields","*")),
       geometry_field_(*params_.get<std::string>("geometry_field","")),
       srid_initialized_(false),
@@ -80,13 +77,23 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
       desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
       row_limit_(*params_.get<int>("row_limit",0)),
       row_prefetch_(*params_.get<int>("row_prefetch",100)),
-      pool_(NULL),
-      conn_(NULL)
+      pool_(0),
+      conn_(0)
 {
-    if (! params_.get<std::string>("user")) throw datasource_exception("No <user> specified");
-    if (! params_.get<std::string>("password")) throw datasource_exception("No <password> specified");
-    if (! params_.get<std::string>("host")) throw datasource_exception("No <host> string specified");
+    if (! params_.get<std::string>("user")) throw datasource_exception("OCCI Plugin: no <user> specified");
+    if (! params_.get<std::string>("password")) throw datasource_exception("OCCI Plugin: no <password> specified");
+    if (! params_.get<std::string>("host")) throw datasource_exception("OCCI Plugin: no <host> string specified");
 
+    boost::optional<std::string> table = params_.get<std::string>("table");
+    if (!table)
+    {
+        throw datasource_exception("OCCI Plugin: no <table> parameter specified");
+    }
+    else
+    {
+        table_ = *table;
+    }
+    
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
     use_connection_pool_ = *params_.get<mapnik::boolean>("use_connection_pool",true);
@@ -115,12 +122,12 @@ occi_datasource::~occi_datasource()
 
         if (use_connection_pool_)
         {
-            if (pool_ != NULL)
-                env->terminateStatelessConnectionPool (pool_);
+            if (pool_ != 0)
+                env->terminateStatelessConnectionPool (pool_, StatelessConnectionPool::SPD_FORCE);
         }
         else
         {
-            if (conn_ != NULL)
+            if (conn_ != 0)
                 env->terminateConnection(conn_);
         }
     }
@@ -148,7 +155,7 @@ void occi_datasource::bind() const
         }
         catch (SQLException &ex)
         {
-            throw datasource_exception(ex.getMessage());
+            throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
     }
     else
@@ -164,7 +171,7 @@ void occi_datasource::bind() const
         }
         catch (SQLException &ex)
         {
-            throw datasource_exception(ex.getMessage());
+            throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
     }
 
@@ -174,11 +181,15 @@ void occi_datasource::bind() const
     if (! srid_initialized_ || geometry_field_ == "")
     {
         std::ostringstream s;
-        s << "SELECT srid, column_name FROM " << SDO_GEOMETRY_METADATA_TABLE << " WHERE";
+        s << "SELECT srid, column_name FROM " << METADATA_TABLE << " WHERE";
         s << " LOWER(table_name) = LOWER('" << table_name << "')";
         
         if (geometry_field_ != "")
             s << " AND LOWER(column_name) = LOWER('" << geometry_field_ << "')";
+
+#ifdef MAPNIK_DEBUG
+        std::clog << "OCCI Plugin: " << s.str() << std::endl;
+#endif
 
         try
         {
@@ -203,7 +214,7 @@ void occi_datasource::bind() const
         }
         catch (SQLException &ex)
         {
-            throw datasource_exception(ex.getMessage());
+            throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
     }
 
@@ -211,6 +222,10 @@ void occi_datasource::bind() const
     {
         std::ostringstream s;
         s << "SELECT " << fields_ << " FROM (" << table_name << ") WHERE rownum < 1";
+
+#ifdef MAPNIK_DEBUG
+        std::clog << "OCCI Plugin: " << s.str() << std::endl;
+#endif
 
         try
         {
@@ -230,14 +245,14 @@ void occi_datasource::bind() const
                     std::string fld_name = columnObj.getString(MetaData::ATTR_NAME);
                     int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
 
-#if 0
+                    /*
                     int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
                     if (type_code == OCCI_TYPECODE_OBJECT)
                     {
                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
                         continue;
                     }
-#endif
+                    */
 
                     switch (type_oid)
                     {
@@ -301,14 +316,13 @@ void occi_datasource::bind() const
                     case oracle::occi::OCCI_SQLT_BLOB:
                     case oracle::occi::OCCI_SQLT_RSET:
 #ifdef MAPNIK_DEBUG
-                        clog << "unsupported datatype " << occi_enums::resolve_datatype(type_oid)
-                             << " (type_oid=" << type_oid << ")" << endl;
+                        std::clog << "OCCI Plugin: unsupported datatype " << occi_enums::resolve_datatype(type_oid)
+                             << " (type_oid=" << type_oid << ")" << std::endl;
 #endif
                         break;
                     default:
 #ifdef MAPNIK_DEBUG
-                        clog << "unknown datatype " << occi_enums::resolve_datatype(type_oid)
-                             << " (type_oid=" << type_oid << ")" << endl;
+                        std::clog << "OCCI Plugin: unknown datatype (type_oid=" << type_oid << ")" << std::endl;
 #endif
                         break;
                     }
@@ -351,7 +365,7 @@ box2d<double> occi_datasource::envelope() const
         s << " TABLE(SDO_UTIL.GETVERTICES(a.shape)) c";
 
 #ifdef MAPNIK_DEBUG
-        clog << s.str() << endl;
+        std::clog << "OCCI Plugin: " << s.str() << std::endl;
 #endif
 
         try
@@ -374,13 +388,13 @@ box2d<double> occi_datasource::envelope() const
                 }
                 catch (bad_lexical_cast &ex)
                 {
-                    clog << ex.what() << endl;
+                    std::clog << "OCCI Plugin: " << ex.what() << std::endl;
                 }
             }
         }
         catch (SQLException &ex)
         {
-            throw datasource_exception(ex.getMessage());
+            throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
     }
     else if (use_spatial_index_)
@@ -389,15 +403,15 @@ box2d<double> occi_datasource::envelope() const
 
         std::ostringstream s;
         s << "SELECT dim.sdo_lb, dim.sdo_ub FROM ";
-        s << SDO_GEOMETRY_METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
+        s << METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
         s << " WHERE LOWER(m.table_name) = LOWER('" << table_name << "') AND dim.sdo_dimname = 'X'";
         s << " UNION ";
         s << "SELECT dim.sdo_lb, dim.sdo_ub FROM ";
-        s << SDO_GEOMETRY_METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
+        s << METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
         s << " WHERE LOWER(m.table_name) = LOWER('" << table_name << "') AND dim.sdo_dimname = 'Y'";
 
 #ifdef MAPNIK_DEBUG
-        clog << s.str() << endl;
+        std::clog << "OCCI Plugin: " << s.str() << std::endl;
 #endif
 
         try
@@ -418,7 +432,7 @@ box2d<double> occi_datasource::envelope() const
                     }
                     catch (bad_lexical_cast &ex)
                     {
-                        clog << ex.what() << endl;
+                        std::clog << "OCCI Plugin: " << ex.what() << std::endl;
                     }
                 }
                 
@@ -431,7 +445,7 @@ box2d<double> occi_datasource::envelope() const
                     }
                     catch (bad_lexical_cast &ex)
                     {
-                        clog << ex.what() << endl;
+                        std::clog << "OCCI Plugin: " << ex.what() << std::endl;
                     }
                 }
 
@@ -441,12 +455,12 @@ box2d<double> occi_datasource::envelope() const
         }
         catch (SQLException &ex)
         {
-            throw datasource_exception(ex.getMessage());
+            throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
     }
 
     if (! extent_initialized_)
-        throw datasource_exception("Unable to determine the extent of a <occi> table");
+        throw datasource_exception("OCCI Plugin: unable to determine the extent of a <occi> table");
 
     return extent_;
 }
@@ -465,13 +479,13 @@ featureset_ptr occi_datasource::features(query const& q) const
     box2d<double> const& box=q.get_bbox();
 
     std::ostringstream s;
-    s << "SELECT " << geometry_field_ << " AS geom";
+    s << "SELECT " << geometry_field_;
     std::set<std::string> const& props = q.property_names();
     std::set<std::string>::const_iterator pos = props.begin();
     std::set<std::string>::const_iterator end = props.end();
     while (pos != end)
     {
-        s << ",\"" << *pos << "\"";
+        s << ", " << *pos;
         ++pos;
     }
 
@@ -502,7 +516,7 @@ featureset_ptr occi_datasource::features(query const& q) const
         else
         {
 #ifdef MAPNIK_DEBUG
-            clog << "Cannot determine where to add the spatial filter declaration" << endl;
+            std::clog << "OCCI Plugin: cannot determine where to add the spatial filter declaration" << std::endl;
 #endif
         }
     }
@@ -522,7 +536,7 @@ featureset_ptr occi_datasource::features(query const& q) const
         else
         {
 #ifdef MAPNIK_DEBUG
-            clog << "Cannot determine where to add the row limit declaration" << endl;
+            std::clog << "OCCI Plugin: cannot determine where to add the row limit declaration" << std::endl;
 #endif
         }
     }
@@ -530,7 +544,7 @@ featureset_ptr occi_datasource::features(query const& q) const
     s << query;
 
 #ifdef MAPNIK_DEBUG
-    clog << s.str() << endl;
+    std::clog << "OCCI Plugin: " << s.str() << std::endl;
 #endif
 
     return featureset_ptr (new occi_featureset (pool_,
@@ -548,13 +562,13 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     if (!is_bound_) bind();
 
     std::ostringstream s;
-    s << "SELECT " << geometry_field_ << " AS geom";
+    s << "SELECT " << geometry_field_;
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
     unsigned size=0;
     while (itr != end)
     {
-        s << ",\"" << itr->get_name() << "\"";
+        s << ", " << itr->get_name();
         ++itr;
         ++size;
     }
@@ -585,7 +599,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         else
         {
 #ifdef MAPNIK_DEBUG
-            clog << "Cannot determine where to add the spatial filter declaration" << endl;
+            std::clog << "OCCI Plugin: cannot determine where to add the spatial filter declaration" << std::endl;
 #endif
         }
     }
@@ -605,7 +619,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         else
         {
 #ifdef MAPNIK_DEBUG
-            clog << "Cannot determine where to add the row limit declaration" << endl;
+            std::clog << "OCCI Plugin: cannot determine where to add the row limit declaration" << std::endl;
 #endif
         }
     }
@@ -613,7 +627,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     s << query;
 
 #ifdef MAPNIK_DEBUG
-    clog << s.str() << endl;
+    std::clog << "OCCI Plugin: " << s.str() << std::endl;
 #endif
 
     return featureset_ptr (new occi_featureset (pool_,
@@ -625,3 +639,4 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
                                                 row_prefetch_,
                                                 size));
 }
+

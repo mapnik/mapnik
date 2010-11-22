@@ -21,6 +21,7 @@
  *****************************************************************************/
 //$Id$
 
+// mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
@@ -30,11 +31,11 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 
+// boost
+#include <boost/shared_array.hpp>
+
 // ogr
 #include "occi_featureset.hpp"
-
-using std::clog;
-using std::endl;
 
 using mapnik::query;
 using mapnik::box2d;
@@ -54,6 +55,7 @@ using oracle::occi::MetaData;
 using oracle::occi::SQLException;
 using oracle::occi::Type;
 using oracle::occi::Number;
+using oracle::occi::Blob;
 
 occi_featureset::occi_featureset(StatelessConnectionPool* pool,
                                  Connection* conn,
@@ -79,7 +81,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
     }
     catch (SQLException &ex)
     {
-        throw datasource_exception(ex.getMessage());
+        std::clog << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage() << std::endl;
     }
 }
 
@@ -103,107 +105,91 @@ feature_ptr occi_featureset::next()
 
         for (unsigned int i = 1; i < listOfColumns.size(); ++i)
         {
-           MetaData columnObj = listOfColumns[i];
+            MetaData columnObj = listOfColumns[i];
 
-           std::string fld_name = columnObj.getString(MetaData::ATTR_NAME);
-           int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
+            std::string fld_name = columnObj.getString(MetaData::ATTR_NAME);
+            int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
 
-#if 0
-           int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
-           if (type_code == OCCI_TYPECODE_OBJECT)
-           {
-               continue;
-           }
-#endif
+            /*   
+            int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
+            if (type_code == OCCI_TYPECODE_OBJECT)
+            {
+                continue;
+            }
+            */
 
-           switch (type_oid)
-           {
-               case oracle::occi::OCCIBOOL:
-               case oracle::occi::OCCIINT:
-               case oracle::occi::OCCIUNSIGNED_INT:
-               case oracle::occi::OCCIROWID:
-               {
-                  boost::put(*feature,fld_name,rs_->getInt (i + 1));
-                  break;
-               }
-               
-               case oracle::occi::OCCIFLOAT:
-               case oracle::occi::OCCIBFLOAT:
-               case oracle::occi::OCCIDOUBLE:
-               case oracle::occi::OCCIBDOUBLE:
-               case oracle::occi::OCCINUMBER:
-               case oracle::occi::OCCI_SQLT_NUM:
-               {
-                  boost::put(*feature,fld_name,rs_->getDouble (i + 1));
-                  break;
-               }
-
-               case oracle::occi::OCCICHAR:
-               case oracle::occi::OCCISTRING:
-               case oracle::occi::OCCI_SQLT_AFC:
-               case oracle::occi::OCCI_SQLT_AVC:
-               case oracle::occi::OCCI_SQLT_CHR:
-               case oracle::occi::OCCI_SQLT_LVC:
-               case oracle::occi::OCCI_SQLT_RDD:
-               case oracle::occi::OCCI_SQLT_STR:
-               case oracle::occi::OCCI_SQLT_VCS:
-               case oracle::occi::OCCI_SQLT_VNU:
-               case oracle::occi::OCCI_SQLT_VBI:
-               case oracle::occi::OCCI_SQLT_VST:
-               {
-                  UnicodeString ustr = tr_->transcode (rs_->getString (i + 1).c_str());
-                  boost::put(*feature,fld_name,ustr);
-                  break;
-               }
-              
-               case oracle::occi::OCCIDATE:
-               case oracle::occi::OCCITIMESTAMP:
-               case oracle::occi::OCCIINTERVALDS:
-               case oracle::occi::OCCIINTERVALYM:
-               case oracle::occi::OCCI_SQLT_DAT:
-               case oracle::occi::OCCI_SQLT_DATE:
-               case oracle::occi::OCCI_SQLT_TIME:
-               case oracle::occi::OCCI_SQLT_TIME_TZ:
-               case oracle::occi::OCCI_SQLT_TIMESTAMP:
-               case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
-               case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
-               case oracle::occi::OCCI_SQLT_INTERVAL_YM:
-               case oracle::occi::OCCI_SQLT_INTERVAL_DS:
-               case oracle::occi::OCCIANYDATA:
-               case oracle::occi::OCCIBLOB:
-               case oracle::occi::OCCIBFILE:
-               case oracle::occi::OCCIBYTES:
-               case oracle::occi::OCCICLOB:
-               case oracle::occi::OCCIVECTOR:
-               case oracle::occi::OCCIMETADATA:
-               case oracle::occi::OCCIPOBJECT:
-               case oracle::occi::OCCIREF:
-               case oracle::occi::OCCIREFANY:
-               case oracle::occi::OCCISTREAM:
-               case oracle::occi::OCCICURSOR:
-               case oracle::occi::OCCI_SQLT_FILE:
-               case oracle::occi::OCCI_SQLT_CFILE:
-               case oracle::occi::OCCI_SQLT_REF:
-               case oracle::occi::OCCI_SQLT_CLOB:
-               case oracle::occi::OCCI_SQLT_BLOB:
-               case oracle::occi::OCCI_SQLT_RSET:
-               {
+            switch (type_oid)
+            {
+                case oracle::occi::OCCIBOOL:
+                case oracle::occi::OCCIINT:
+                case oracle::occi::OCCIUNSIGNED_INT:
+                case oracle::occi::OCCIROWID:
+                    boost::put(*feature,fld_name,rs_->getInt (i + 1));
+                    break;
+                case oracle::occi::OCCIFLOAT:
+                case oracle::occi::OCCIBFLOAT:
+                case oracle::occi::OCCIDOUBLE:
+                case oracle::occi::OCCIBDOUBLE:
+                case oracle::occi::OCCINUMBER:
+                case oracle::occi::OCCI_SQLT_NUM:
+                    boost::put(*feature,fld_name,rs_->getDouble (i + 1));
+                    break;
+                case oracle::occi::OCCICHAR:
+                case oracle::occi::OCCISTRING:
+                case oracle::occi::OCCI_SQLT_AFC:
+                case oracle::occi::OCCI_SQLT_AVC:
+                case oracle::occi::OCCI_SQLT_CHR:
+                case oracle::occi::OCCI_SQLT_LVC:
+                case oracle::occi::OCCI_SQLT_RDD:
+                case oracle::occi::OCCI_SQLT_STR:
+                case oracle::occi::OCCI_SQLT_VCS:
+                case oracle::occi::OCCI_SQLT_VNU:
+                case oracle::occi::OCCI_SQLT_VBI:
+                case oracle::occi::OCCI_SQLT_VST:
+                    boost::put(*feature,fld_name,(UnicodeString) tr_->transcode (rs_->getString (i + 1).c_str()));
+                    break;
+                case oracle::occi::OCCIDATE:
+                case oracle::occi::OCCITIMESTAMP:
+                case oracle::occi::OCCIINTERVALDS:
+                case oracle::occi::OCCIINTERVALYM:
+                case oracle::occi::OCCI_SQLT_DAT:
+                case oracle::occi::OCCI_SQLT_DATE:
+                case oracle::occi::OCCI_SQLT_TIME:
+                case oracle::occi::OCCI_SQLT_TIME_TZ:
+                case oracle::occi::OCCI_SQLT_TIMESTAMP:
+                case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
+                case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
+                case oracle::occi::OCCI_SQLT_INTERVAL_YM:
+                case oracle::occi::OCCI_SQLT_INTERVAL_DS:
+                case oracle::occi::OCCIANYDATA:
+                case oracle::occi::OCCIBLOB:
+                case oracle::occi::OCCIBFILE:
+                case oracle::occi::OCCIBYTES:
+                case oracle::occi::OCCICLOB:
+                case oracle::occi::OCCIVECTOR:
+                case oracle::occi::OCCIMETADATA:
+                case oracle::occi::OCCIPOBJECT:
+                case oracle::occi::OCCIREF:
+                case oracle::occi::OCCIREFANY:
+                case oracle::occi::OCCISTREAM:
+                case oracle::occi::OCCICURSOR:
+                case oracle::occi::OCCI_SQLT_FILE:
+                case oracle::occi::OCCI_SQLT_CFILE:
+                case oracle::occi::OCCI_SQLT_REF:
+                case oracle::occi::OCCI_SQLT_CLOB:
+                case oracle::occi::OCCI_SQLT_BLOB:
+                case oracle::occi::OCCI_SQLT_RSET:
 #ifdef MAPNIK_DEBUG
-                  clog << "unsupported datatype " << occi_enums::resolve_datatype(type_oid)
-                       << " (type_oid=" << type_oid << ")" << endl;
+                    std::clog << "OCCI Plugin: unsupported datatype " << occi_enums::resolve_datatype(type_oid)
+                        << " (type_oid=" << type_oid << ")" << std::endl;
 #endif
-                  break;
-               }
-
-               default: // shouldn't get here
-               {
+                    break;
+                default: // shouldn't get here
 #ifdef MAPNIK_DEBUG
-                  clog << "unknown datatype " << occi_enums::resolve_datatype(type_oid)
-                       << " (type_oid=" << type_oid << ")" << endl;
+                    std::clog << "OCCI Plugin: unknown datatype (type_oid=" << type_oid << ")" << std::endl;
 #endif
-                  break;
-               }
-           }	  
+                    break;
+            }	  
         }
         
         ++count_;
@@ -216,200 +202,150 @@ feature_ptr occi_featureset::next()
 
 void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature, bool multiple_geometries)
 {
-   int gtype = (int) geom->getSdo_gtype();
-   int dimensions = gtype / 1000;
-   int lrsvalue = (gtype - dimensions * 1000) / 100;
-   int geomtype = (gtype - dimensions * 1000 - lrsvalue * 100); 
+    int gtype = (int) geom->getSdo_gtype();
+    int dimensions = gtype / 1000;
+    int lrsvalue = (gtype - dimensions * 1000) / 100;
+    int geomtype = (gtype - dimensions * 1000 - lrsvalue * 100); 
 
 #if 0
-   clog << "-----------Geometry Object ------------" << endl;
-   clog << "SDO GTYPE = " << gtype << endl;
-   clog << "SDO DIMENSIONS = " << dimensions << endl;
-   clog << "SDO LRS = " << lrsvalue << endl;
-   clog << "SDO GEOMETRY TYPE = " << geomtype << endl;
+    clog << "-----------Geometry Object ------------" << endl;
+    clog << "SDO GTYPE = " << gtype << endl;
+    clog << "SDO DIMENSIONS = " << dimensions << endl;
+    clog << "SDO LRS = " << lrsvalue << endl;
+    clog << "SDO GEOMETRY TYPE = " << geomtype << endl;
 
-   Number sdo_srid = geom->getSdo_srid();
-   if (sdo_srid.isNull())
-      clog << "SDO SRID = " << "Null" << endl;
-   else
-      clog << "SDO SRID = " << (int) sdo_srid << endl;
+    Number sdo_srid = geom->getSdo_srid();
+    if (sdo_srid.isNull())
+        clog << "SDO SRID = " << "Null" << endl;
+    else
+        clog << "SDO SRID = " << (int) sdo_srid << endl;
 #endif
 
-   switch (geomtype)
-   {
-   case SDO_GTYPE_POINT:
-       convert_point (geom, feature, dimensions);
-       break;
-   case SDO_GTYPE_LINE:
-       convert_linestring (geom, feature, dimensions);
-       break;
-   case SDO_GTYPE_POLYGON:
-       convert_polygon (geom, feature, dimensions);
-       break;
-   case SDO_GTYPE_MULTIPOINT:
-       // Todo - using convert_multipoint_2 until we have proper multipoint handling in convert_multipoint
-       // http://trac.mapnik.org/ticket/458
-       //convert_multipoint (geom, feature, dimensions, multiple_geometries);
-       convert_multipoint (geom, feature, dimensions, true);
-       break;
-   case SDO_GTYPE_MULTILINE:
-       convert_multilinestring (geom, feature, dimensions, multiple_geometries);
-       break;
-   case SDO_GTYPE_MULTIPOLYGON:
-       convert_multipolygon (geom, feature, dimensions, multiple_geometries);
-       break;
-   case SDO_GTYPE_COLLECTION:
-       convert_collection (geom, feature, dimensions, multiple_geometries);
-       break;
-   case SDO_GTYPE_UNKNOWN:
-   default:
+    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
+    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
+    const int ordinates_size = (int) ordinates.size();
+
+    switch (geomtype)
+    {
+    case SDO_GTYPE_POINT:
+        {
+            SDOPointType* sdopoint = geom->getSdo_point();
+            if (sdopoint && ! sdopoint->isNull())
+            {
+                geometry_type* point = new geometry_type(mapnik::Point);
+                point->move_to (sdopoint->getX(), sdopoint->getY());
+                feature->add_geometry (point);
+            }
+        }
+        break;
+    case SDO_GTYPE_LINE:
+        {
+            if (ordinates_size >= dimensions)
+            {
+                convert_ordinates (feature,
+                                   mapnik::LineString,
+                                   elem_info,
+                                   ordinates,
+                                   dimensions,
+                                   true,   // is_single_geom
+                                   false,  // is_point_type
+                                   false); // multiple_geometries
+            }
+        }
+        break;
+    case SDO_GTYPE_POLYGON:
+        {
+            if (ordinates_size >= dimensions)
+            {
+                convert_ordinates (feature,
+                                   mapnik::Polygon,
+                                   elem_info,
+                                   ordinates,
+                                   dimensions,
+                                   true,   // is_single_geom
+                                   false,  // is_point_type
+                                   false); // multiple_geometries
+            }
+        }
+        break;
+    case SDO_GTYPE_MULTIPOINT:
+        {
+            if (ordinates_size >= dimensions)
+            {
+                const bool is_single_geom = false;
+                const bool is_point_type = true;
+
+                // Todo - force using true as multiple_geometries until we have proper multipoint handling
+                // http://trac.mapnik.org/ticket/458
+            
+                convert_ordinates (feature,
+                                   mapnik::Point,
+                                   elem_info,
+                                   ordinates,
+                                   dimensions,
+                                   false,  // is_single_geom
+                                   true,   // is_point_type
+                                   true);  // multiple_geometries
+            }
+        }
+        break;
+    case SDO_GTYPE_MULTILINE:
+        {
+            if (ordinates_size >= dimensions)
+            {
+                convert_ordinates (feature,
+                                   mapnik::LineString,
+                                   elem_info,
+                                   ordinates,
+                                   dimensions,
+                                   false,  // is_single_geom
+                                   false,  // is_point_type
+                                   multiple_geometries);
+            }
+
+        }
+        break;
+    case SDO_GTYPE_MULTIPOLYGON:
+        {
+            if (ordinates_size >= dimensions)
+            {
+                convert_ordinates (feature,
+                                   mapnik::Polygon,
+                                   elem_info,
+                                   ordinates,
+                                   dimensions,
+                                   false, // is_single_geom
+                                   false, // is_point_type
+                                   multiple_geometries);
+            }
+        
+        }
+        break;
+    case SDO_GTYPE_COLLECTION:
+        {
+            if (ordinates_size >= dimensions)
+            {
+                const bool is_single_geom = false;
+                const bool is_point_type = false;
+            
+                convert_ordinates (feature,
+                                   mapnik::Polygon,
+                                   elem_info,
+                                   ordinates,
+                                   dimensions,
+                                   false, // is_single_geom,
+                                   false, // is_point_type
+                                   multiple_geometries);
+            }
+        }
+        break;
+    case SDO_GTYPE_UNKNOWN:
+    default:
 #ifdef MAPNIK_DEBUG
-       clog << "unknown <occi> " << occi_enums::resolve_gtype(geomtype)
-            << "(gtype=" << gtype << ")" << endl;
+        std::clog << "OCCI Plugin: unknown <occi> " << occi_enums::resolve_gtype(geomtype)
+            << "(gtype=" << gtype << ")" << std::endl;
 #endif
-       break;
-   }
-}
-
-void occi_featureset::convert_point (SDOGeometry* geom, feature_ptr feature, int dimensions)
-{
-    SDOPointType* sdopoint = geom->getSdo_point();
-    
-    if (sdopoint && ! sdopoint->isNull())
-    {
-        geometry_type* point = new geometry_type(mapnik::Point);
-
-        point->move_to (sdopoint->getX(), sdopoint->getY());
-
-        feature->add_geometry (point);
-    }
-}
-
-void occi_featureset::convert_linestring (SDOGeometry* geom, feature_ptr feature, int dimensions)
-{
-    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
-    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
-
-    if ((int) ordinates.size() >= dimensions)
-    {
-        const bool is_single_geom = true;
-        const bool is_point_type = false;
-        const bool multiple_geometries = false;
-    
-        convert_ordinates (feature,
-                           mapnik::LineString,
-                           elem_info,
-                           ordinates,
-                           dimensions,
-                           is_single_geom,
-                           is_point_type,
-                           multiple_geometries);
-    }
-}
-
-void occi_featureset::convert_polygon (SDOGeometry* geom, feature_ptr feature, int dimensions)
-{
-    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
-    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
-
-    if ((int) ordinates.size() >= dimensions)
-    {
-        const bool is_single_geom = true;
-        const bool is_point_type = false;
-        const bool multiple_geometries = false;
-
-        convert_ordinates (feature,
-                           mapnik::Polygon,
-                           elem_info,
-                           ordinates,
-                           dimensions,
-                           is_single_geom,
-                           is_point_type,
-                           multiple_geometries);
-    }
-}
-
-void occi_featureset::convert_multipoint (SDOGeometry* geom, feature_ptr feature, int dimensions, bool multiple_geometries)
-{
-    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
-    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
-
-    if ((int) ordinates.size() >= dimensions)
-    {
-        const bool is_single_geom = false;
-        const bool is_point_type = true;
-    
-        convert_ordinates (feature,
-                           mapnik::Point,
-                           elem_info,
-                           ordinates,
-                           dimensions,
-                           is_single_geom,
-                           is_point_type,
-                           multiple_geometries);
-    }
-}
-
-void occi_featureset::convert_multilinestring (SDOGeometry* geom, feature_ptr feature, int dimensions, bool multiple_geometries)
-{
-    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
-    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
-
-    if ((int) ordinates.size() >= dimensions)
-    {
-        const bool is_single_geom = false;
-        const bool is_point_type = false;
-    
-        convert_ordinates (feature,
-                           mapnik::LineString,
-                           elem_info,
-                           ordinates,
-                           dimensions,
-                           is_single_geom,
-                           is_point_type,
-                           multiple_geometries);
-    }
-}
-
-void occi_featureset::convert_multipolygon (SDOGeometry* geom, feature_ptr feature, int dimensions, bool multiple_geometries)
-{
-    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
-    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
-
-    if ((int) ordinates.size() >= dimensions)
-    {
-        const bool is_single_geom = false;
-        const bool is_point_type = false;
-    
-        convert_ordinates (feature,
-                           mapnik::Polygon,
-                           elem_info,
-                           ordinates,
-                           dimensions,
-                           is_single_geom,
-                           is_point_type,
-                           multiple_geometries);
-    }
-}
-
-void occi_featureset::convert_collection (SDOGeometry* geom, feature_ptr feature, int dimensions, bool multiple_geometries)
-{
-    const std::vector<Number>& elem_info = geom->getSdo_elem_info();
-    const std::vector<Number>& ordinates = geom->getSdo_ordinates();
-
-    if ((int) ordinates.size() >= dimensions)
-    {
-        const bool is_single_geom = false;
-        const bool is_point_type = false;
-    
-        convert_ordinates (feature,
-                           mapnik::Polygon,
-                           elem_info,
-                           ordinates,
-                           dimensions,
-                           is_single_geom,
-                           is_point_type,
-                           multiple_geometries);
+        break;
     }
 }
 
@@ -552,3 +488,4 @@ void occi_featureset::fill_geometry_type (geometry_type * geom,
             geom->line_to ((double) ordinates[p], (double) ordinates[p + 1]);
     }
 }
+

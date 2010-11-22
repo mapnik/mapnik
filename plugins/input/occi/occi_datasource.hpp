@@ -65,6 +65,7 @@ class occi_datasource : public mapnik::datasource
       bool use_connection_pool_;
       bool multiple_geometries_;
       bool use_spatial_index_;
+      static const std::string METADATA_TABLE;
 };
 
 

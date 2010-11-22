@@ -36,15 +36,13 @@
 
 // check for oracle support
 #if OCCI_MAJOR_VERSION >= 10 && OCCI_MINOR_VERSION >= 1
-  //     Only ORACLE 10g (>= 10.2.0.X) is supported !
+  //     We have at least ORACLE 10g >= 10.2.0.X
 #else
-  #error Only ORACLE 10g (>= 10.2.0.X) is supported !
+  #error Only ORACLE 10g >= 10.2.0.X is supported !
 #endif
 
 
-#define SDO_GEOMETRY_METADATA_TABLE     "USER_SDO_GEOM_METADATA"
-
-
+// geometry types definitions
 enum
 {
     SDO_GTYPE_UNKNOWN                   = 0,
@@ -93,7 +91,7 @@ public:
         if (env_ == 0)
         {
 #ifdef MAPNIK_DEBUG
-            std::clog << "occi_environment constructor" << std::endl;
+            std::clog << "OCCI Plugin: occi_environment constructor" << std::endl;
 #endif
 
             int mode = oracle::occi::Environment::OBJECT
@@ -117,7 +115,7 @@ private:
         if (env_)
         {
 #ifdef MAPNIK_DEBUG
-            std::clog << "occi_environment destructor" << std::endl;
+            std::clog << "OCCI Plugin: occi_environment destructor" << std::endl;
 #endif
 
             oracle::occi::Environment::terminateEnvironment (env_);
