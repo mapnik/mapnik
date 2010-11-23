@@ -158,7 +158,7 @@ pretty_dep_names = {
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
     'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
-    'ltdl':'GNU Libtool | more info: http://www.gnu.org/software/libtool',
+    'ltdl':'GNU Libtool | more info: http://www.gnu.org/software/libtool | configure with LTDL_LIBS & LTDL_INCLUDES',
     'z':'Z compression library | more info: http://www.zlib.net/',
     'm':'Basic math library, part of C++ stlib',
     'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
@@ -254,6 +254,8 @@ opts.AddVariables(
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
+    PathVariable('LTDL_INCLUDES', 'Search path for libtool (ltdl) include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('LTDL_LIBS','Search path for libtool (ltdl) include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
@@ -772,7 +774,7 @@ if not preconfigured:
         
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU'):
+    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU','LTDL'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = inc_path)
