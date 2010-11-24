@@ -46,11 +46,11 @@ osm_datasource::osm_datasource(const parameters &params, bool bind)
    : datasource (params),
      type_(datasource::Vector),
      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")) 
-{    
+{
     if (bind)
     {
         this->bind();
-    }       
+    }
 }
 
 void osm_datasource::bind() const
