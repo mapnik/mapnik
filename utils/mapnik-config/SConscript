@@ -114,6 +114,9 @@ try:
 except: pass
 target_path = os.path.normpath(install_prefix+'/'+LIBDIR_SCHEMA+'/pkgconfig')
 full_target = os.path.join(target_path,source)
-env.Install(target_path,source)
-env.Alias('install',target_path)
+
+if 'install' in COMMAND_LINE_TARGETS:
+    env.Install(target_path,source)
+    env.Alias('install',target_path)
+
 env['create_uninstall_target'](env,full_target)
