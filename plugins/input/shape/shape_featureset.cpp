@@ -57,14 +57,14 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
         {
             std::ostringstream s;
 
-            s << "Shape Plugin: error no attribute by the name of '" << *pos << "'"
-            << ", available attributes are:";
+            s << "error no attribute by the name of '" << *pos << "'"
+                << ", available attributes are:";
             for (int i=0;i<shape_.dbf().num_fields();++i)
             {
                 s << " '" << shape_.dbf().descriptor(i).name_ << "'";
             }
             
-            throw mapnik::datasource_exception( s.str() );
+            throw mapnik::datasource_exception( "Shape Plugin: " + s.str() );
         }
         ++pos;
     }

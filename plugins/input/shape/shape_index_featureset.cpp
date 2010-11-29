@@ -78,14 +78,14 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
         {
             std::ostringstream s;
 
-            s << "Shape Plugin: error no attribute by the name of '" << *pos << "'"
-            << ", available attributes are:";
+            s << "error no attribute by the name of '" << *pos << "'"
+                << ", available attributes are:";
             for (int i=0;i<shape_.dbf().num_fields();++i)
             {
                 s << " '" << shape_.dbf().descriptor(i).name_ << "'";
             }
             
-            throw mapnik::datasource_exception( s.str() );
+            throw mapnik::datasource_exception( "Shape Plugin: " + s.str() );
         }
         ++pos;
     }
@@ -224,7 +224,7 @@ feature_ptr shape_index_featureset<filterT>::next()
                 }
                 catch (...)
                 {
-                    std::clog << "Shape Plugin: exception caught..." << std::endl;
+                    std::clog << "Shape Plugin: error processing attributes" << std::endl;
                 }
                 ++pos;
             }

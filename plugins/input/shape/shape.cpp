@@ -123,12 +123,12 @@ void shape_datasource::bind() const
     }
     catch (datasource_exception& ex)
     {
-        std::clog<<ex.what()<<std::endl;
+        std::clog << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
         throw;
     }
     catch (...)
     {
-        std::clog << "Shape Plugin: got exception... " << std::endl;
+        std::clog << "Shape Plugin: error processing field attributes" << std::endl;
         throw;
     }
     
