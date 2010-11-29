@@ -26,6 +26,7 @@
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/path_expression_grammar.hpp>
+#include "mapnik_svg.hpp"
 
 using mapnik::color;
 using mapnik::shield_symbolizer;
@@ -218,9 +219,9 @@ void export_shield_symbolizer()
         .add_property("filename",
                       get_filename,
                       &shield_symbolizer::set_filename)
-        //.add_property("transform",
-        //              &shield_symbolizer::get_transform,
-        //              &shield_symbolizer::set_transform)
+        .add_property("transform",
+                      mapnik::get_svg_transform<shield_symbolizer>,
+                      mapnik::set_svg_transform<shield_symbolizer>)
 
         ;
 

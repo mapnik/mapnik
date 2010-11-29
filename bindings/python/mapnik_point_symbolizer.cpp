@@ -26,6 +26,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
+#include "mapnik_svg.hpp"
 
 using mapnik::point_symbolizer;
 using mapnik::symbolizer_with_image;
@@ -70,10 +71,11 @@ struct point_symbolizer_pickle_suite : boost::python::pickle_suite
 namespace  
 { 
 using namespace boost::python;
+
 const std::string get_filename(mapnik::point_symbolizer& symbolizer) 
 { 
     return path_processor_type::to_string(*symbolizer.get_filename()); 
-} 
+}
 
 }
 
@@ -99,5 +101,8 @@ void export_point_symbolizer()
         .add_property("ignore_placement",
                       &point_symbolizer::get_ignore_placement,
                       &point_symbolizer::set_ignore_placement)
+        .add_property("transform",
+                      mapnik::get_svg_transform<point_symbolizer>,
+                      mapnik::set_svg_transform<point_symbolizer>)
         ;
 }

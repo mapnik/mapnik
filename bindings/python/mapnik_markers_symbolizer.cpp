@@ -26,6 +26,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
+#include "mapnik_svg.hpp"
 
 using mapnik::markers_symbolizer;
 using mapnik::symbolizer_with_image;
@@ -107,5 +108,8 @@ void export_markers_symbolizer()
                       &markers_symbolizer::get_opacity,
                       &markers_symbolizer::set_opacity,
                       "Set/get the text opacity")
+        .add_property("transform",
+                      mapnik::get_svg_transform<markers_symbolizer>,
+                      mapnik::set_svg_transform<markers_symbolizer>)
         ;
 }

@@ -26,6 +26,7 @@
 #include <mapnik/polygon_pattern_symbolizer.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/parse_path.hpp>
+#include "mapnik_svg.hpp"
 
 using namespace mapnik;
 using mapnik::polygon_pattern_symbolizer;
@@ -82,6 +83,8 @@ void export_polygon_pattern_symbolizer()
               &polygon_pattern_symbolizer::get_alignment,
               &polygon_pattern_symbolizer::set_alignment,
               "Set/get the alignment of the pattern")
-
+        .add_property("transform",
+              mapnik::get_svg_transform<polygon_pattern_symbolizer>,
+              mapnik::set_svg_transform<polygon_pattern_symbolizer>)
         ;    
 }

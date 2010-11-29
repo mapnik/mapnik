@@ -26,6 +26,7 @@
 #include <mapnik/line_pattern_symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/image_util.hpp>
+#include "mapnik_svg.hpp"
 
 using mapnik::line_pattern_symbolizer;
 using mapnik::path_processor_type;
@@ -52,5 +53,8 @@ void export_line_pattern_symbolizer()
                                     init<path_expression_ptr>
                                     ("<image file expression>"))
         //.def_pickle(line_pattern_symbolizer_pickle_suite())
+        .add_property("transform",
+              mapnik::get_svg_transform<line_pattern_symbolizer>,
+              mapnik::set_svg_transform<line_pattern_symbolizer>)
         ;    
 }
