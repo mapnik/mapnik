@@ -220,6 +220,7 @@ opts = Variables()
 opts.AddVariables(
     # Compiler options
     ('CXX', 'The C++ compiler to use (defaults to g++).', 'g++'),
+    ('CC', 'The C compiler used for configure checks of C libs (defaults to gcc).', 'gcc'),
     EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3','4']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
