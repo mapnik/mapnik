@@ -250,7 +250,7 @@ namespace mapnik
       std::vector<int> line_breaks;
       std::vector<double> line_widths;
 
-      if (wrap_at < string_width && p.info.num_characters() > 0)
+      if ((p.info.num_characters() > 0) && ((wrap_at < string_width) || p.info.has_line_breaks()))
       {
          int last_wrap_char = 0;
          int last_wrap_char_width = 0;
@@ -269,7 +269,7 @@ namespace mapnik
             unsigned c = ci.character;
             word_width += cwidth;
 
-            if (c == p.wrap_char)
+            if ((c == p.wrap_char) || (c == '\n'))
             {
                last_wrap_char = ii;
                last_wrap_char_width = cwidth;
@@ -278,8 +278,9 @@ namespace mapnik
             }
 
             // wrap text at first wrap_char after (default) the wrap width or immediately before the current word
-            if (line_width > 0 && (((line_width - character_spacing) > wrap_at && !p.wrap_before) ||
-                                   ((line_width + word_width - character_spacing) > wrap_at && p.wrap_before)) )
+            if ((c == '\n') ||
+                (line_width > 0 && (((line_width - character_spacing) > wrap_at && !p.wrap_before) ||
+                                   ((line_width + word_width - character_spacing) > wrap_at && p.wrap_before)) ))
             {
                // Remove width of breaking space character since it is not rendered and the character_spacing for the last character on the line
                line_width -= (last_wrap_char_width + character_spacing);

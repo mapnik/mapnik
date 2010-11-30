@@ -96,6 +96,11 @@ namespace mapnik
          {
            return text_;
          }
+
+         bool has_line_breaks() const
+         {
+             return (text_.indexOf('\n') >= 0);
+         }
    };
     
    struct text_path : boost::noncopyable
