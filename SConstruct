@@ -735,18 +735,46 @@ int main()
     major_version = version / 100000
     return [major_version,minor_version,patch_level]
 
-conf_tests = { 'prioritize_paths' : prioritize_paths,
-               'CheckPKGConfig' : CheckPKGConfig,
-               'CheckPKG' : CheckPKG,
-               'FindBoost' : FindBoost,
-               'CheckBoost' : CheckBoost,
-               'GetBoostLibVersion' : GetBoostLibVersion,
-               'GetMapnikLibVersion' : GetMapnikLibVersion,
-               'parse_config' : parse_config,
-               'parse_pg_config' : parse_pg_config,
-               'ogr_enabled': ogr_enabled,
-               'get_pkg_lib': get_pkg_lib,
-               'rollback_option': rollback_option
+def icu_at_least_four_two(context):
+    ret = context.TryRun("""
+
+#include <unicode/uversion.h>
+#include <iostream>
+
+int main() 
+{
+    std::cout << U_ICU_VERSION_MAJOR_NUM << "." << U_ICU_VERSION_MINOR_NUM << std::endl;
+    return 0;
+}
+
+""", '.cpp')
+    # hack to avoid printed output
+    context.Message('Checking for ICU version >= 4.2... ')
+    #context.did_show_result=1
+    result = ret[1].strip()
+    if not result:
+        context.Result('error, could not get major and minor version from unicode/uversion.h')
+        return False
+    
+    color_print(4,'\nFound icu version... %s' % result)
+    major, minor = map(int,result.split('.'))
+    if major >= 4 and minor >= 2:
+        return True
+    return False
+    
+conf_tests = { 'prioritize_paths'      : prioritize_paths,
+               'CheckPKGConfig'        : CheckPKGConfig,
+               'CheckPKG'              : CheckPKG,
+               'FindBoost'             : FindBoost,
+               'CheckBoost'            : CheckBoost,
+               'GetBoostLibVersion'    : GetBoostLibVersion,
+               'GetMapnikLibVersion'   : GetMapnikLibVersion,
+               'parse_config'          : parse_config,
+               'parse_pg_config'       : parse_pg_config,
+               'ogr_enabled'           : ogr_enabled,
+               'get_pkg_lib'           : get_pkg_lib,
+               'rollback_option'       : rollback_option,
+               'icu_at_least_four_two' : icu_at_least_four_two
                }
 
 
@@ -903,6 +931,11 @@ if not preconfigured:
                 color_print(4,'Could not find optional header or shared library for %s' % libinfo[0])
                 env['SKIPPED_DEPS'].append(libinfo[0])            
 
+    if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
+        if not conf.icu_at_least_four_two():
+            # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
+            env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
+    
     if env['THREADING'] == 'multi':
         thread_flag = thread_suffix
     else:
