@@ -209,8 +209,14 @@ if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
 
 _mapnik = py_env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
 
+if env['PLATFORM'] == 'SunOS' and env['PYTHON_IS_64BIT']:
+    # http://mail.python.org/pipermail/python-dev/2006-August/068528.html
+    cxx_module_path = os.path.join(target_path,'64')
+else:
+    cxx_module_path = target_path
+    
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    pymapniklib = env.Install(target_path,_mapnik)
+    pymapniklib = env.Install(cxx_module_path,_mapnik)
     py_env.Alias(target='install',source=pymapniklib)
     if 'install' in COMMAND_LINE_TARGETS:
         if is_py3():
