@@ -330,7 +330,8 @@ pickle_store = [# Scons internal variables
         'SVN_REVISION',
         'HAS_CAIRO',
         'HAS_PYCAIRO',
-        'HAS_LIBXML2'
+        'HAS_LIBXML2',
+        'PYTHON_IS_64BIT',
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -1100,6 +1101,16 @@ if not preconfigured:
             else:
                 env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_SITE_PACKAGES']
                
+            if py3:
+                is_64_bit = '''%s -c "import sys; print(sys.maxsize == 9223372036854775807)"''' % env['PYTHON']
+            else:
+                is_64_bit = '''%s -c "import sys; print sys.maxint == 9223372036854775807"''' % env['PYTHON']
+            
+            if is_64_bit:
+                env['PYTHON_IS_64BIT'] = True
+            else:
+                env['PYTHON_IS_64BIT'] = False                
+            
             majver, minver = env['PYTHON_VERSION'].split('.')
 
             # we don't want the includes it in the main environment...
