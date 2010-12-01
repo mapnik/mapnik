@@ -1209,6 +1209,13 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
             text_symbol.set_line_spacing(*line_spacing);
         }
 
+      	// tolerance between label spacing along line
+      	optional<unsigned> label_position_tolerance = get_opt_attr<unsigned>(sym, "label_position_tolerance");
+      	if (label_position_tolerance)
+      	{
+            text_symbol.set_label_position_tolerance(*label_position_tolerance);
+      	}
+
         // spacing between characters in text
         optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing");
         if (character_spacing)
