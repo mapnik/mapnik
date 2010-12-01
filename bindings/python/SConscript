@@ -179,5 +179,12 @@ if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
         sources.insert(0,env2.SharedObject(cpp))
 
 _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
-pymapniklib = env.Install(env['PYTHON_INSTALL_LOCATION'] + '/mapnik',_mapnik)
+
+if env['PLATFORM'] == 'SunOS' and env['PYTHON_IS_64BIT']:
+    # http://mail.python.org/pipermail/python-dev/2006-August/068528.html
+    cxx_module_path = os.path.join(env['PYTHON_INSTALL_LOCATION'],'mapnik','64')
+else:
+    cxx_module_path = os.path.join(env['PYTHON_INSTALL_LOCATION'],'mapnik')
+
+pymapniklib = env.Install(cxx_module_path,_mapnik)
 env.Alias(target='install',source=pymapniklib)
