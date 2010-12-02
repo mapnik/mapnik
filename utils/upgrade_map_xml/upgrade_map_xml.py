@@ -107,7 +107,7 @@ if __name__ == "__main__":
         root.attrib.pop('bgcolor')
     
     # set new minimum_version
-    root.set('minimum_version','0.8.0')
+    root.set('minimum_version','0.7.2')
     
     styles = root.findall('Style')
     if not len(styles):
