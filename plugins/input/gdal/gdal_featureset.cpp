@@ -144,7 +144,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #ifdef MAPNIK_DEBUG         
     std::clog << "GDAL Plugin: Raster extent=" << raster_extent << "\n";
     std::clog << "GDAL Plugin: View extent=" << intersect << "\n";
-    std::clog << "GDAL Plugin: Query resolution=" << boost::get<0>(q.resolution()) << "," << boost::get<1>(q.resolution()) << "\n";
+    std::clog << "GDAL Plugin: Query resolution=" << q.resolution()) << "\n";
     std::clog << boost::format("GDAL Plugin: StartX=%d StartY=%d Width=%d Height=%d \n") % x_off % y_off % width % height;
 #endif
    
