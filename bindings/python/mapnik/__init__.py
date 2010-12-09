@@ -468,6 +468,7 @@ def Gdal(**keywords):
     Optional keyword arguments:
       base -- path prefix (default None)
       shared -- boolean, open GdalDataset in shared mode (default: False)
+      bbox -- tuple (minx, miny, maxx, maxy). If specified, overrides the bbox detected by GDAL.
 
     >>> from mapnik import Gdal, Layer
     >>> dataset = Gdal(base='/home/mapnik/data',file='elevation.tif')
@@ -476,6 +477,9 @@ def Gdal(**keywords):
 
     """
     keywords['type'] = 'gdal'
+    if 'bbox' in keywords:
+        if isinstance(keywords['bbox'], (tuple, list)):
+            keywords['bbox'] = ','.join([str(item) for item in keywords['bbox']])
     return CreateDatasource(keywords)
 
 def Occi(**keywords):

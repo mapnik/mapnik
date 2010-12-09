@@ -107,7 +107,40 @@ void gdal_datasource::bind() const
 
 
     double tr[6];
-    dataset->GetGeoTransform(tr);
+    bool bbox_override = false;
+    boost::optional<std::string> bbox_s = params_.get<std::string>("bbox");
+    if (bbox_s)
+    {
+#ifdef MAPNIK_DEBUG
+        std::clog << "GDAL Plugin: bbox parameter=" << *bbox_s << std::endl;
+#endif
+        bbox_override = extent_.from_string(*bbox_s);
+        if (!bbox_override)
+        {
+            throw datasource_exception("GDAL Plugin: bbox parameter '" + *bbox_s + "' invalid");
+        }
+    }
+    
+    if (bbox_override)
+    {
+        tr[0] = extent_.minx();
+        tr[1] = extent_.width() / (double)width_;
+        tr[2] = 0;
+        tr[3] = extent_.maxy();
+        tr[4] = 0;
+        tr[5] = -extent_.height() / (double)height_;
+    }
+    else
+    {
+        dataset->GetGeoTransform(tr);
+    }
+    
+#ifdef MAPNIK_DEBUG
+    std::clog << "GDAL Plugin: geotransform=" << tr[0] << "," << tr[1] << ","
+                                              << tr[2] << "," << tr[3] << ","
+                                              << tr[4] << "," << tr[5] << std::endl;
+#endif
+    
     if (tr[2] !=0 || tr[4] != 0)
     {
         throw datasource_exception("GDAL Plugin: only 'north up' images are supported");
@@ -116,20 +149,23 @@ void gdal_datasource::bind() const
     dx_ = tr[1];
     dy_ = tr[5];
     
-    double x0 = tr[0];
-    double y0 = tr[3];
-    double x1 = tr[0] + width_ * dx_ + height_ *tr[2];
-    double y1 = tr[3] + width_ *tr[4] + height_ * dy_;
-     
-    /*
-    double x0 = tr[0] + (height_) * tr[2]; // minx
-    double y0 = tr[3] + (height_) * tr[5]; // miny
-    
-    double x1 = tr[0] + (width_) * tr[1]; // maxx
-    double y1 = tr[3] + (width_) * tr[4]; // maxy
-    */
-    
-    extent_.init(x0,y0,x1,y1);
+    if (!bbox_override)
+    {
+        double x0 = tr[0];
+        double y0 = tr[3];
+        double x1 = tr[0] + width_ * dx_ + height_ *tr[2];
+        double y1 = tr[3] + width_ *tr[4] + height_ * dy_;
+         
+        /*
+        double x0 = tr[0] + (height_) * tr[2]; // minx
+        double y0 = tr[3] + (height_) * tr[5]; // miny
+        
+        double x1 = tr[0] + (width_) * tr[1]; // maxx
+        double y1 = tr[3] + (width_) * tr[4]; // maxy
+        */
+        
+        extent_.init(x0,y0,x1,y1);
+    }
     GDALClose(dataset);
    
 #ifdef MAPNIK_DEBUG
