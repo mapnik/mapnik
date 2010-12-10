@@ -58,4 +58,32 @@ def test_feature_attributes():
     eq_(feat.attributes, attrs)
     eq_(lyr.datasource.fields(),['AREA', 'EAS_ID', 'PRFEDEA'])
     eq_(lyr.datasource.field_types(),[float,int,str])
-    
+
+def test_hit_grid():
+    import os
+    from itertools import groupby
+
+    def rle_encode(l):
+        """ encode a list of strings with run-length compression """
+        return ["%d:%s" % (len(list(group)), name) for name, group in groupby(l)]
+
+    m = mapnik2.Map(256,256);
+    mapnik2.load_map(m,'../data/good_maps/agg_poly_gamma_map.xml');
+    m.zoom_all()
+    join_field = 'NAME'
+    fg = [] # feature grid
+    for y in range(0, 256, 4):
+        for x in range(0, 256, 4):
+            featureset = m.query_map_point(0,x,y)
+            added = False
+            for feature in featureset.features:
+                fg.append(feature[join_field])
+                added = True
+            if not added:
+                fg.append('')
+    hit_list = '|'.join(rle_encode(fg))
+    eq_(hit_list[:16],'730:|2:Greenland')
+    eq_(hit_list[-12:],'1:Chile|812:')
+
+if __name__ == '__main__':
+    test_hit_grid()
