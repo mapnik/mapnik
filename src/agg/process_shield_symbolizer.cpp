@@ -371,7 +371,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 int px=int(floor(lx - (0.5*w)));
                                 int py=int(floor(ly - (0.5*h)));
                                 
-                                pixmap_.set_rectangle_alpha(px,py,*(*data));
+                                //pixmap_.set_rectangle_alpha(px,py,*data);
+                                pixmap_.set_rectangle_alpha2(*(*data),px,py,sym.get_opacity());
                                 if (writer.first) writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
                                 
                                 box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
