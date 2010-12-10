@@ -30,6 +30,8 @@ def test_shieldsymbolizer_init():
     eq_(s.vertical_alignment, mapnik2.vertical_alignment.MIDDLE)
     eq_(s.label_spacing, 0)
     eq_(s.label_position_tolerance, 0)
+    # 25.0 * M_PI/180.0 initialized by default
+    assert_almost_equal(s.max_char_angle_delta, 0.43633231299858238)
     
     eq_(s.wrap_character, ' ')
     eq_(s.text_transform, mapnik2.text_transform.NONE)
@@ -42,6 +44,11 @@ def test_shieldsymbolizer_init():
     eq_(s.justify_alignment, mapnik2.justify_alignment.MIDDLE)
     eq_(s.opacity, 1.0)
     
+    # r2300
+    eq_(s.minimum_padding, 0.0)
+    
+    # was mixed with s.opacity
+    eq_(s.text_opacity, 1.0)
         
     raise Todo("FontSet pickling support needed: http://trac.mapnik2.org/ticket/348")
     eq_(s.fontset, '')
