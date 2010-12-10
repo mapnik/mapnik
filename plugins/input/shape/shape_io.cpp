@@ -33,7 +33,7 @@ const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
 
-shape_io::shape_io(const std::string& shape_name)
+shape_io::shape_io(const std::string& shape_name, bool open_index)
    : type_(shape_null),
      shp_(shape_name + SHP),
      dbf_(shape_name + DBF),
@@ -45,18 +45,22 @@ shape_io::shape_io(const std::string& shape_name)
     { 
         throw datasource_exception("Shape Plugin: cannot read shape file '" + shape_name + "'");
     }
-    try 
+    if (open_index)
     {
-        if (!boost::filesystem::exists(shape_name + INDEX))
+        try 
         {
-            throw datasource_exception("Shape Plugin: could not open index: '" + shape_name + INDEX + "' does not exist");
+            
+            if (!boost::filesystem::exists(shape_name + INDEX))
+            {
+                throw datasource_exception("Shape Plugin: could not open index: '" + shape_name + INDEX + "' does not exist");
+            }
+    
+            index_= boost::shared_ptr<shape_file>(new shape_file(shape_name + INDEX));
         }
-
-        index_= boost::shared_ptr<shape_file>(new shape_file(shape_name + INDEX));
-    }
-    catch (...)
-    {
-        std::cerr << "Shape Plugin: warning - could not open index: '" + shape_name + INDEX + "'" << std::endl;
+        catch (...)
+        {
+            std::cerr << "Shape Plugin: warning - could not open index: '" + shape_name + INDEX + "'" << std::endl;
+        }
     }
 }
 

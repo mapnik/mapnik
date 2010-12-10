@@ -69,7 +69,7 @@ public:
         shape_multipatch = 31
     };
 
-    shape_io(const std::string& shape_name);
+    shape_io(const std::string& shape_name, bool open_index=true);
     ~shape_io();
     shape_file& shp();
     shape_file& shx();
