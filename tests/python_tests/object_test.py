@@ -272,6 +272,8 @@ def test_textsymbolizer_pickle():
     eq_(ts.vertical_alignment, ts2.vertical_alignment)
     eq_(ts.label_spacing, ts2.label_spacing)
     eq_(ts.label_position_tolerance, ts2.label_position_tolerance)
+    # 25.0 * M_PI/180.0 initialized by default
+    assert_almost_equal(s.max_char_angle_delta, 0.43633231299858238)
     
     eq_(ts.wrap_character, ts2.wrap_character)
     eq_(ts.text_transform, ts2.text_transform)
@@ -283,6 +285,9 @@ def test_textsymbolizer_pickle():
     eq_(ts.horizontal_alignment, ts2.horizontal_alignment)
     eq_(ts.justify_alignment, ts2.justify_alignment)
     eq_(ts.opacity, ts2.opacity)
+
+    # r2300
+    eq_(s.minimum_padding, 0.0)
         
     raise Todo("FontSet pickling support needed: http://trac.mapnik2.org/ticket/348")
     eq_(ts.fontset, ts2.fontset)
