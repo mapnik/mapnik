@@ -130,14 +130,14 @@ Mapnik 0.7.0 Release
   to gap artifacts or "ghost lines" between adjacent polygons and allows for slight sharpening of
   the edges of non overlapping polygons. Accepts any values but 0-1 is the recommended range.
    
-- TextSymbolizer: Large set of new attributes: 'text_convert', 'line_spacing', 'character_spacing', 
+- TextSymbolizer: Large set of new attributes: 'text_transform', 'line_spacing', 'character_spacing', 
   'wrap_character', 'wrap_before', 'horizontal_alignment', 'justify_alignment', and 'opacity'.
 
     * More details at changesets: r1254 and r1341
 
 - SheildSymbolizer: Added special new attributes: 'unlock_image', 'VERTEX' placement, 'no_text' and many
   attributes previously only supported in the TextSymbolizer: 'allow_overlap', 'vertical_alignment', 
-  'horizontal_alignment', 'justify_alignment', 'wrap_width', 'wrap_character', 'wrap_before', 'text_convert',
+  'horizontal_alignment', 'justify_alignment', 'wrap_width', 'wrap_character', 'wrap_before', 'text_transform',
   'line_spacing', 'character_spacing', and 'opacity'.
 
     * More details at changeset r1341
