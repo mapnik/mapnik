@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map  >
+<Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum_version="0.7.0">
+    <Style name="1">
+        <Rule>
+            <ShieldSymbolizer
+             name="[label]"
+             file="../svg/rect.svg"
+             face_name="DejaVu Sans Book"
+             size="10"
+             transform="scale(5) translate(15, 15) rotate(20) skewX(20) skewY(5)"
+             halo_radius="1"
+             dy="-5"
+             dx="-5"
+             shield_dx="10"
+             shield_dy="10"
+             no_text="false"
+             opacity=".5"
+             text-opacity=".3"
+            />
+        </Rule>
+        
+    </Style>
+
+    <Layer name="point" srs="+init=epsg:4326">
+        <StyleName>1</StyleName>
+        <Datasource>
+            <Parameter name="file">../json/points.json</Parameter>
+            <Parameter name="layer_by_index">0</Parameter>
+            <Parameter name="type">ogr</Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>
