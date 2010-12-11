@@ -10,8 +10,8 @@ import mapnik2, pickle
 # ShieldSymbolizer initialization
 def test_shieldsymbolizer_init():
     s = mapnik2.ShieldSymbolizer(mapnik2.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik2.Color('#000000'), mapnik2.PathExpression('../data/images/dummy.png'))
-    eq_(s.get_anchor(), [0.0,0.5])
-    eq_(s.get_displacement(), [0.0,0.0])
+    eq_(s.anchor, (0.0,0.5,))
+    eq_(s.displacement, (0.0,0.0))
     eq_(s.allow_overlap, False)
     eq_(s.avoid_edges, False)
     eq_(s.character_spacing,0)
@@ -49,6 +49,14 @@ def test_shieldsymbolizer_init():
     
     # was mixed with s.opacity
     eq_(s.text_opacity, 1.0)
+
+    eq_(s.shield_displacement, (0.0,0.0))
+    # TODO - the pattern in bindings seems to be to get/set
+    # strings for PathExpressions... should we pass objects?
+    eq_(s.filename, '../data/images/dummy.png')
+
+    #eq_(s.transform, 'matrix(1, 0, 0, 1, 0, 0)')
+    eq_(s.transform, 'matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)')
         
     raise Todo("FontSet pickling support needed: http://trac.mapnik2.org/ticket/348")
     eq_(s.fontset, '')
@@ -258,8 +266,8 @@ def test_textsymbolizer_pickle():
     eq_(ts.name, ts2.name)
     eq_(ts.face_name, ts2.face_name)
     eq_(ts.allow_overlap, ts2.allow_overlap)
-    eq_(ts.get_displacement(), ts2.get_displacement())
-    eq_(ts.get_anchor(), ts2.get_anchor())
+    eq_(ts.displacement, ts2.displacement)
+    eq_(ts.anchor, ts2.anchor)
     eq_(ts.fill, ts2.fill)
     eq_(ts.force_odd_labels, ts2.force_odd_labels)
     eq_(ts.halo_fill, ts2.halo_fill)
