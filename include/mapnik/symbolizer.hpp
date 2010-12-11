@@ -83,6 +83,7 @@ public:
     void set_filename(path_expression_ptr filename);
     void set_transform(transform_type const& );
     transform_type const& get_transform() const;
+    std::string const& get_transform_string() const;
     void set_opacity(float opacity);
     float get_opacity() const;
 protected:

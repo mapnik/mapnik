@@ -27,9 +27,6 @@
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/value_error.hpp>
 
-// boost
-#include <boost/format.hpp>
-
 // agg
 #include "agg_trans_affine.h"
 
@@ -39,9 +36,7 @@ using namespace boost::python;
 template <class T>
 const std::string get_svg_transform(T& symbolizer)
 {
-    mapnik::transform_type matrix = symbolizer.get_transform();
-    std::string s = (boost::format("matrix(%f, %f, %f, %f, %f, %f)") % matrix[0] % matrix[1] % matrix[2] % matrix[3] % matrix[4] % matrix[5]).str();
-    return s;
+    return symbolizer.get_transform_string();
 };
 
 template <class T>

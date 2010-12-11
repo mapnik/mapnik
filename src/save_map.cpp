@@ -194,18 +194,31 @@ public:
         // repeating the default values here.
         // maybe add a real, explicit default-ctor?
 
-        //FIXME pls
-        /*
-          shield_symbolizer sym_dfl("<no default>", "<no default>", 0, color(0,0,0), "<no default>", "<no default>");
-          if (sym.get_unlock_image() != sym_dfl.get_unlock_image() || explicit_defaults_ )
-          {
-          set_attr( sym_node, "unlock_image", sym.get_unlock_image() );
-          }
-          if (sym.get_no_text() != sym_dfl.get_no_text() || explicit_defaults_ )
-          {
-          set_attr( sym_node, "no_text", sym.get_no_text() );
-          }
-        */
+        
+        shield_symbolizer dfl(expression_ptr(), "<no default>", 0, color(0,0,0), path_expression_ptr());
+        
+        if (sym.get_unlock_image() != dfl.get_unlock_image() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "unlock_image", sym.get_unlock_image() );
+        }
+        if (sym.get_no_text() != dfl.get_no_text() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "no_text", sym.get_no_text() );
+        }
+        if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "text-opacity", sym.get_text_opacity() );
+        }
+        position displacement = sym.get_shield_displacement();
+        if ( displacement.get<0>() != dfl.get_shield_displacement().get<0>() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "shield_dx", displacement.get<0>() );
+        }
+        if ( displacement.get<1>() != dfl.get_shield_displacement().get<1>() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "shield_dy", displacement.get<1>() );
+        }
+
     }
 
     void operator () ( const text_symbolizer & sym )
@@ -373,8 +386,17 @@ private:
         if ( ! filename.empty() ) {
             set_attr( node, "file", filename );
         }
+        if (sym.get_opacity() != 1.0 || explicit_defaults_ )
+        {
+            set_attr( node, "opacity", sym.get_opacity() );
+        }
         
-        // TODO !!! 
+        std::string tr_str = sym.get_transform_string();
+        if (tr_str != "matrix(1, 0, 0, 1, 0, 0)" || explicit_defaults_ )
+        {
+            set_attr( node, "transform", tr_str );
+        }
+
     }
     void add_font_attributes(ptree & node, const text_symbolizer & sym)
     {
@@ -481,6 +503,7 @@ private:
         {
             set_attr( node, "avoid_edges", sym.get_avoid_edges() );
         }
+        // for shield_symbolizer this is later overridden
         if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_ )
         {
             set_attr( node, "opacity", sym.get_text_opacity() );
