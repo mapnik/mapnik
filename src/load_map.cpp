@@ -801,7 +801,15 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
                 if (transform_wkt)
                 {
                     agg::trans_affine tr;
-                    mapnik::svg::parse_transform(*transform_wkt,tr);
+                    if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+                    {
+                        std::stringstream ss;
+                        ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                        if (strict_)
+                            throw config_error(ss.str()); // value_error here?
+                        else
+                            clog << "### WARNING: " << ss << endl;         
+                    }
                     boost::array<double,6> matrix;
                     tr.store_to(&matrix[0]);
                     symbol.set_transform(matrix);
@@ -908,7 +916,15 @@ void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
         if (transform_wkt)
         {
             agg::trans_affine tr;
-            mapnik::svg::parse_transform(*transform_wkt,tr);
+            if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+            {
+                std::stringstream ss;
+                ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                if (strict_)
+                    throw config_error(ss.str()); // value_error here?
+                else
+                    clog << "### WARNING: " << ss << endl;         
+            }
             boost::array<double,6> matrix;
             tr.store_to(&matrix[0]);
             symbol.set_transform(matrix);
@@ -1503,7 +1519,15 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
             if (transform_wkt)
             {
                 agg::trans_affine tr;
-                mapnik::svg::parse_transform(*transform_wkt,tr);
+                if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+                {
+                    std::stringstream ss;
+                    ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                    if (strict_)
+                        throw config_error(ss.str()); // value_error here?
+                    else
+                        clog << "### WARNING: " << ss << endl;         
+                }
                 boost::array<double,6> matrix;
                 tr.store_to(&matrix[0]);
                 shield_symbol.set_transform(matrix);
