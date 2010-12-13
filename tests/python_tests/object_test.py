@@ -55,8 +55,7 @@ def test_shieldsymbolizer_init():
     # strings for PathExpressions... should we pass objects?
     eq_(s.filename, '../data/images/dummy.png')
 
-    #eq_(s.transform, 'matrix(1, 0, 0, 1, 0, 0)')
-    eq_(s.transform, 'matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)')
+    eq_(s.transform, 'matrix(1, 0, 0, 1, 0, 0)')
         
     raise Todo("FontSet pickling support needed: http://trac.mapnik2.org/ticket/348")
     eq_(s.fontset, '')
