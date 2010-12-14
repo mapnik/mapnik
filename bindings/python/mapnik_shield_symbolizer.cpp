@@ -36,36 +36,54 @@ using mapnik::path_processor_type;
 using mapnik::path_expression_ptr;
 using mapnik::guess_type;
 using mapnik::expression_ptr;
+using mapnik::parse_path;
+
 
 namespace {
 using namespace boost::python;
 
-list get_shield_displacement_list(const shield_symbolizer& t)
+tuple get_shield_displacement(const shield_symbolizer& s)
 {
-    boost::tuple<double,double> pos = t.get_shield_displacement();
-    double dx = boost::get<0>(pos);
-    double dy = boost::get<1>(pos);
-    boost::python::list disp;
-    disp.append(dx);
-    disp.append(dy);
-    return disp;
-}
-  
-list get_anchor_list(const shield_symbolizer& t)
-{
-    boost::tuple<double,double> anch = t.get_anchor();
-    double x = boost::get<0>(anch);
-    double y = boost::get<1>(anch);
-    boost::python::list anchor;
-    anchor.append(x);
-    anchor.append(y);
-    return anchor;
+    boost::tuple<double,double> pos = s.get_shield_displacement();
+    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
 }
 
-const std::string get_filename(shield_symbolizer& symbolizer) 
-{ 
-    return path_processor_type::to_string(*symbolizer.get_filename()); 
+void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
+{
+    s.set_shield_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
 }
+
+tuple get_text_displacement(const shield_symbolizer& t)
+{
+    boost::tuple<double,double> pos = t.get_displacement();
+    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+}
+
+void set_text_displacement(shield_symbolizer & t, boost::python::tuple arg)
+{
+    t.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
+}
+  
+tuple get_anchor(const shield_symbolizer& t)
+{
+    boost::tuple<double,double> pos = t.get_anchor();
+    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+}
+
+void set_anchor(shield_symbolizer & t, boost::python::tuple arg)
+{
+    t.set_anchor(extract<double>(arg[0]),extract<double>(arg[1]));
+}
+
+const std::string get_filename(shield_symbolizer const& t) 
+{ 
+    return path_processor_type::to_string(*t.get_filename()); 
+}
+
+void set_filename(shield_symbolizer & t, std::string const& file_expr) 
+{ 
+    t.set_filename(parse_path(file_expr)); 
+} 
 
 }
 
@@ -119,10 +137,9 @@ void export_shield_symbolizer()
                 path_expression_ptr>("TODO")
         )
         //.def_pickle(shield_symbolizer_pickle_suite())
-        .def("anchor",&shield_symbolizer::set_anchor)
-        .def("displacement",&shield_symbolizer::set_shield_displacement)
-        .def("get_anchor",get_anchor_list)
-        .def("get_displacement",get_shield_displacement_list)
+        .add_property("anchor",
+                      &get_anchor,
+                      &set_anchor)
         .add_property("allow_overlap",
                       &shield_symbolizer::get_allow_overlap,
                       &shield_symbolizer::set_allow_overlap,
@@ -135,6 +152,9 @@ void export_shield_symbolizer()
                       &shield_symbolizer::get_character_spacing,
                       &shield_symbolizer::set_character_spacing,
                       "Set/get the character_spacing property of the label")
+        .add_property("displacement",
+                      &get_text_displacement,
+                      &set_text_displacement)
         .add_property("face_name",
                       make_function(&shield_symbolizer::get_face_name,return_value_policy<copy_const_reference>()),
                       &shield_symbolizer::set_face_name,
@@ -184,6 +204,13 @@ void export_shield_symbolizer()
         .add_property("name",&shield_symbolizer::get_name,
                       &shield_symbolizer::set_name)
         .add_property("opacity",
+                      &shield_symbolizer::get_opacity,
+                      &shield_symbolizer::set_opacity,
+                      "Set/get the shield opacity")
+        .add_property("shield_displacement",
+                      get_shield_displacement,
+                      set_shield_displacement)
+        .add_property("text_opacity",
                       &shield_symbolizer::get_text_opacity,
                       &shield_symbolizer::set_text_opacity,
                       "Set/get the text opacity")
@@ -217,14 +244,10 @@ void export_shield_symbolizer()
                       &shield_symbolizer::get_unlock_image,
                       &shield_symbolizer::set_unlock_image)
         .add_property("filename",
-                      get_filename,
-                      &shield_symbolizer::set_filename)
+                      &get_filename,
+                      &set_filename)
         .add_property("transform",
                       mapnik::get_svg_transform<shield_symbolizer>,
                       mapnik::set_svg_transform<shield_symbolizer>)
-
         ;
-
-
-    
 }

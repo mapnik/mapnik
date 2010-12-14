@@ -12,15 +12,20 @@ using mapnik::AZIMUTH;
 using mapnik::TRIGONOMETRIC;
 using namespace boost::python;
 
-list get_displacement_list(const glyph_symbolizer& t)
+namespace {
+using namespace boost::python;
+
+tuple get_displacement(const glyph_symbolizer& s)
 {
-    position pos = t.get_displacement();
-    double dx = boost::get<0>(pos);
-    double dy = boost::get<1>(pos);
-    boost::python::list disp;
-    disp.append(dx);
-    disp.append(dy);
-    return disp;
+    boost::tuple<double,double> pos = s.get_displacement();
+    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+}
+
+void set_displacement(glyph_symbolizer & s, boost::python::tuple arg)
+{
+    s.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
+}
+
 }
 
 void export_glyph_symbolizer()
@@ -58,20 +63,25 @@ void export_glyph_symbolizer()
                       "Get/Set the flag which controls if glyphs should be "
                       "partially drawn beside the edge of a tile."
             )
-        .def("get_displacement", get_displacement_list)
-        .def("set_displacement", &glyph_symbolizer::set_displacement)
+        .add_property("displacement",
+                      &get_displacement,
+                      &set_displacement)
+
         .add_property("halo_fill",
                       make_function(&glyph_symbolizer::get_halo_fill,
                                     return_value_policy<copy_const_reference>()),
                       &glyph_symbolizer::set_halo_fill)
+
         .add_property("halo_radius",
                       &glyph_symbolizer::get_halo_radius, 
                       &glyph_symbolizer::set_halo_radius)
+
         .add_property("size",
                       &glyph_symbolizer::get_size,
                       &glyph_symbolizer::set_size,
                       "Get/Set the size expression used to size the glyph."
             )
+
         .add_property("angle",
                       &glyph_symbolizer::get_angle,
                       &glyph_symbolizer::set_angle,

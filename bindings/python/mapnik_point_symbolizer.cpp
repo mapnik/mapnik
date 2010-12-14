@@ -31,6 +31,23 @@
 using mapnik::point_symbolizer;
 using mapnik::symbolizer_with_image;
 using mapnik::path_processor_type;
+using mapnik::parse_path;
+
+
+namespace {
+using namespace boost::python;
+
+const std::string get_filename(point_symbolizer const& t) 
+{ 
+    return path_processor_type::to_string(*t.get_filename()); 
+}
+
+void set_filename(point_symbolizer & t, std::string const& file_expr) 
+{ 
+    t.set_filename(parse_path(file_expr)); 
+}
+
+}
 
 struct point_symbolizer_pickle_suite : boost::python::pickle_suite
 {
@@ -68,16 +85,6 @@ struct point_symbolizer_pickle_suite : boost::python::pickle_suite
 
 };
 
-namespace  
-{ 
-using namespace boost::python;
-
-const std::string get_filename(mapnik::point_symbolizer& symbolizer) 
-{ 
-    return path_processor_type::to_string(*symbolizer.get_filename()); 
-}
-
-}
 
 void export_point_symbolizer()
 {
@@ -88,10 +95,8 @@ void export_point_symbolizer()
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
         //.def_pickle(point_symbolizer_pickle_suite())
         .add_property("filename",
-                      // DS - Using workaround as the normal make_function does not work for unknown reasons...
-                      //make_function(&point_symbolizer::get_filename,return_value_policy<copy_const_reference>()),
-                      get_filename,
-                      &point_symbolizer::set_filename)   
+                      &get_filename,
+                      &set_filename)
         .add_property("allow_overlap",
                       &point_symbolizer::get_allow_overlap,
                       &point_symbolizer::set_allow_overlap)
