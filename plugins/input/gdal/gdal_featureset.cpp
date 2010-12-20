@@ -373,29 +373,24 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
     return feature_ptr();
 }
 
+#ifdef MAPNIK_DEBUG
 void gdal_featureset::get_overview_meta(GDALRasterBand * band)
 {
     int band_overviews = band->GetOverviewCount();    
     if (band_overviews > 0)
     {
-#ifdef MAPNIK_DEBUG
         std::clog << "GDAL Plugin: "<< band_overviews << " overviews found!" << std::endl;
-#endif
 
         for (int b = 0; b < band_overviews; b++)
         {
             GDALRasterBand * overview = band->GetOverview (b);
-#ifdef MAPNIK_DEBUG
             std::clog << boost::format("GDAL Plugin: Overview=%d Width=%d Height=%d")
                 % b % overview->GetXSize() % overview->GetYSize() << std::endl;
-#endif
         }
     }
     else
     {
-#ifdef MAPNIK_DEBUG
         std::clog << "GDAL Plugin: No overviews found!" << std::endl; 
-#endif
     }
     
     int bsx,bsy;
@@ -403,10 +398,9 @@ void gdal_featureset::get_overview_meta(GDALRasterBand * band)
     band->GetBlockSize(&bsx,&bsy);
     scale = band->GetScale();
 
-#ifdef MAPNIK_DEBUG
     std::clog << boost::format("GDAL Plugin: Block=%dx%d Scale=%f Type=%s Color=%s") % bsx % bsy % scale
         % GDALGetDataTypeName(band->GetRasterDataType())
         % GDALGetColorInterpretationName(band->GetColorInterpretation()) << std::endl; 
-#endif
 }
+#endif
 
