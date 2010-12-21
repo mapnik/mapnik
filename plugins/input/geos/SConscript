@@ -25,6 +25,8 @@ Import ('env')
 prefix = env['PREFIX']
 install_prefix = env['DESTDIR'] + '/' + prefix
 
+plugin_env = env.Clone()
+
 geos_src = Split(
 	"""
 	    geos_datasource.cpp
@@ -41,11 +43,12 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
-input_plugin = env.SharedLibrary('../geos', source=geos_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+input_plugin = plugin_env.SharedLibrary('../geos', source=geos_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if env['PLATFORM'] == 'Darwin':
     # if the plugin links to libmapnik2 ensure it is built first
     Depends(input_plugin,'../../../src/libmapnik2.dylib')
 
-env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)
-env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')
+if 'uninstall' not in COMMAND_LINE_TARGETS:
+    env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)
+    env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')
