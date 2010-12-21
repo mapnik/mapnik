@@ -197,7 +197,7 @@ pretty_dep_names = {
     'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: http://trac.mapnik.org/wiki/OCCI',
     'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/GDAL',
     'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/OGR',
-    'geos':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: http://trac.mapnik.org/wiki/GEOS',
+    'geos_c':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: http://trac.mapnik.org/wiki/GEOS',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
@@ -399,7 +399,8 @@ pickle_store = [# Scons internal variables
         'HAS_PYCAIRO',
         'HAS_LIBXML2',
         'LIBTOOL_SUPPORTS_ADVISE',
-        'PYTHON_IS_64BIT'
+        'PYTHON_IS_64BIT',
+        'SAMPLE_INPUT_PLUGINS',
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -1412,4 +1413,3 @@ if not HELP_REQUESTED:
     # if requested, build the sample input plugins
     if env['SAMPLE_INPUT_PLUGINS']:
         SConscript('plugins/input/templates/helloworld/build.py')
-        
