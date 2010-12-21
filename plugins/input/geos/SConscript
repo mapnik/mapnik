@@ -41,7 +41,11 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
-geos_inputdriver = env.SharedLibrary('../geos', source=geos_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
+input_plugin = env.SharedLibrary('../geos', source=geos_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
-env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', geos_inputdriver)
+if env['PLATFORM'] == 'Darwin':
+    # if the plugin links to libmapnik2 ensure it is built first
+    Depends(input_plugin,'../../../src/libmapnik2.dylib')
+
+env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)
 env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')

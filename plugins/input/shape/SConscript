@@ -49,8 +49,12 @@ if env['PLATFORM'] == 'Darwin':
 if env['SHAPE_MEMORY_MAPPED_FILE']:
     plugin_env.Append(CXXFLAGS = '-DSHAPE_MEMORY_MAPPED_FILE')
 
-shape_inputdriver = plugin_env.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+input_plugin = plugin_env.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+
+if env['PLATFORM'] == 'Darwin':
+    # if the plugin links to libmapnik2 ensure it is built first
+    Depends(input_plugin,'../../../src/libmapnik2.dylib')
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', shape_inputdriver)
+    env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)
     env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')
