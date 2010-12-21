@@ -364,7 +364,7 @@ opts.AddVariables(
     
 # variables to pickle after successful configure step
 # these include all scons core variables as well as custom
-# env variables needed in Sconscript files
+# env variables needed in SConscript files
 pickle_store = [# Scons internal variables
         'CC', # compiler user to check if c deps compile during configure
         'CXX', # C++ compiler to compile mapnik
@@ -751,13 +751,13 @@ int main()
 """, '.cpp')
     # hack to avoid printed output
     context.Message('Checking for ICU version >= 4.2... ')
-    #context.did_show_result=1
+    context.did_show_result=1
     result = ret[1].strip()
     if not result:
         context.Result('error, could not get major and minor version from unicode/uversion.h')
         return False
     
-    color_print(4,'\nFound icu version... %s' % result)
+    color_print(4,'\nFound icu version... %s\n' % result)
     major, minor = map(int,result.split('.'))
     if major >= 4 and minor >= 2:
         return True
@@ -996,45 +996,46 @@ if not preconfigured:
     
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
     
-    color_print(4,'Checking for requested plugins dependencies...')
-    for plugin in env['REQUESTED_PLUGINS']:
-        details = env['PLUGINS'][plugin]
-        if plugin == 'gdal':
-            if conf.parse_config('GDAL_CONFIG',checks='--libs'):
-                conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
-                if libname:
-                    details['lib'] = libname
-        elif plugin == 'postgis':
-            conf.parse_pg_config('PG_CONFIG')
-        elif plugin == 'ogr':
-            if conf.ogr_enabled():
-                if not 'gdal' in env['REQUESTED_PLUGINS']:
-                    conf.parse_config('GDAL_CONFIG',checks='--libs')
+    if len(env['REQUESTED_PLUGINS']):
+        color_print(4,'Checking for requested plugins dependencies...')
+        for plugin in env['REQUESTED_PLUGINS']:
+            details = env['PLUGINS'][plugin]
+            if plugin == 'gdal':
+                if conf.parse_config('GDAL_CONFIG',checks='--libs'):
                     conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
-                if libname:
-                    details['lib'] = libname
-                
-        elif details['path'] and details['lib'] and details['inc']:
-            backup = env.Clone().Dictionary()
-            # Note, the 'delete_existing' keyword makes sure that these paths are prepended
-            # to the beginning of the path list even if they already exist
-            incpath = env['%s_INCLUDES' % details['path']]
-            env.PrependUnique(CPPPATH = incpath,delete_existing=True)
-            env.PrependUnique(LIBPATH = env['%s_LIBS' % details['path']],delete_existing=True)
-            if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
-                env.Replace(**backup)
-                env['SKIPPED_DEPS'].append(details['lib'])
-        elif details['lib'] and details['inc']:
-            if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
-                env['SKIPPED_DEPS'].append(details['lib'])        
-
-    # re-append the local paths for mapnik sources to the beginning of the list
-    # to make sure they come before any plugins that were 'prepended'
-    env.PrependUnique(CPPPATH = '#include', delete_existing=True)
-    env.PrependUnique(CPPPATH = '#', delete_existing=True)
-    env.PrependUnique(LIBPATH = '#src', delete_existing=True)
+                    libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
+                    if libname:
+                        details['lib'] = libname
+            elif plugin == 'postgis':
+                conf.parse_pg_config('PG_CONFIG')
+            elif plugin == 'ogr':
+                if conf.ogr_enabled():
+                    if not 'gdal' in env['REQUESTED_PLUGINS']:
+                        conf.parse_config('GDAL_CONFIG',checks='--libs')
+                        conf.parse_config('GDAL_CONFIG',checks='--cflags')
+                    libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
+                    if libname:
+                        details['lib'] = libname
+                    
+            elif details['path'] and details['lib'] and details['inc']:
+                backup = env.Clone().Dictionary()
+                # Note, the 'delete_existing' keyword makes sure that these paths are prepended
+                # to the beginning of the path list even if they already exist
+                incpath = env['%s_INCLUDES' % details['path']]
+                env.PrependUnique(CPPPATH = incpath,delete_existing=True)
+                env.PrependUnique(LIBPATH = env['%s_LIBS' % details['path']],delete_existing=True)
+                if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
+                    env.Replace(**backup)
+                    env['SKIPPED_DEPS'].append(details['lib'])
+            elif details['lib'] and details['inc']:
+                if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
+                    env['SKIPPED_DEPS'].append(details['lib'])        
+    
+        # re-append the local paths for mapnik sources to the beginning of the list
+        # to make sure they come before any plugins that were 'prepended'
+        env.PrependUnique(CPPPATH = '#include', delete_existing=True)
+        env.PrependUnique(CPPPATH = '#', delete_existing=True)
+        env.PrependUnique(LIBPATH = '#src', delete_existing=True)
 
     # Decide which libagg to use
     # if we are using internal agg, then prepend to make sure
