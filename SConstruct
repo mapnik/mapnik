@@ -215,6 +215,7 @@ pretty_dep_names = {
     'pg_config':'pg_config program | try setting PG_CONFIG SCons option',
     'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option',
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
+    'geos-config':'geos-config program | try setting GEOS_CONFIG SCons option',
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
     'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
     'curl':'libcurl is required for the "osm" plugin - more info: http://trac.mapnik.org/wiki/OsmPlugin',
@@ -245,13 +246,15 @@ BOOST_MIN_VERSION = '1.41'
 # Core plugin build configuration
 # opts.AddVariables still hardcoded however...
 PLUGINS = { # plugins with external dependencies
-            'postgis': {'default':True,'path':'PGSQL','inc':'libpq-fe.h','lib':'pq','lang':'C'},
+            # configured by calling project, henche 'path':None
+            'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
             'gdal':    {'default':False,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
             'ogr':     {'default':False,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
+            'geos':    {'default':False,'path':None,'inc':'geos_c.h','lib':'geos_c','lang':'C'},
+            # configured with custom paths, hence 'path': PREFIX/INCLUDES/LIBS
             'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
             'sqlite':  {'default':False,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
-            'geos':    {'default':False,'path':None,'inc':'geos_c.h','lib':'geos_c','lang':'C'},
             
             # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
             'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
@@ -309,6 +312,7 @@ opts.AddVariables(
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
+    ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
@@ -340,8 +344,6 @@ opts.AddVariables(
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
-    PathVariable('GEOS_INCLUDES', 'Search path for GEOS include files', '/usr/include/', PathVariable.PathAccept),
-    PathVariable('GEOS_LIBS', 'Search path for GEOS library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -510,7 +512,7 @@ def parse_config(context, config, checks='--libs --cflags'):
     env = context.env
     tool = config.lower().replace('_','-')
     toolname = tool
-    if config == 'GDAL_CONFIG':
+    if config in ('GDAL_CONFIG','GEOS_CONFIG'):
         toolname += ' %s' % checks
     context.Message( 'Checking for %s... ' % toolname)
     cmd = '%s %s' % (env[config],checks)
@@ -524,10 +526,11 @@ def parse_config(context, config, checks='--libs --cflags'):
             ret = False
             print ' (xml2-config not found!)'
     if not parsed:
-        if config == 'GDAL_CONFIG':
+        if config in ('GDAL_CONFIG','GEOS_CONFIG'):
+            # optional deps...
             env['SKIPPED_DEPS'].append(tool)
-            conf.rollback_option('GDAL_CONFIG')
-        else:
+            conf.rollback_option(config)
+        else: # freetype and libxml2, not optional
             env['MISSING_DEPS'].append(tool)        
     context.Result( ret )
     return ret
@@ -1017,7 +1020,11 @@ if not preconfigured:
                     libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
                     if libname:
                         details['lib'] = libname
-                    
+            elif plugin == 'geos':
+                if conf.parse_config('GEOS_CONFIG',checks='--ldflags --cflags'):
+                    lgeos_c = env['PLUGINS']['geos']['lib']
+                    env.Append(LIBS = lgeos_c)
+
             elif details['path'] and details['lib'] and details['inc']:
                 backup = env.Clone().Dictionary()
                 # Note, the 'delete_existing' keyword makes sure that these paths are prepended
@@ -1352,6 +1359,8 @@ if not HELP_REQUESTED:
         elif not details['lib']:
             # build internal shape and raster plugins
             SConscript('plugins/input/%s/SConscript' % plugin)
+        else:
+            color_print(1,"Notice: depedencies not met for plugin '%s', not building..." % plugin)
     
     
     # todo - generalize this path construction, also used in plugin SConscript...
