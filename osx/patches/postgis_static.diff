@@ -1,0 +1,26 @@
+Index: plugins/input/postgis/SConscript
+===================================================================
+--- plugins/input/postgis/SConscript	(revision 2476)
++++ plugins/input/postgis/SConscript	(working copy)
+@@ -33,7 +33,11 @@
+ 	"""
+         )
+ 
+-libraries = ['pq']
++static = '-lintl -liconv -lxml2 -lpam -lssl -lcrypto -lkrb5 -lldap -lreadline -lz'
++libraries = ['pq_s']
++libraries.extend(static.split(' '))
++ldflags = env['CUSTOM_LDFLAGS']
++ldflags += ' -framework CoreFoundation'
+ 
+ if env['PLATFORM'] == 'Darwin':
+     libraries.append('mapnik2')
+@@ -41,7 +45,7 @@
+     if env['THREADING'] == 'multi':
+         libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+ 
+-input_plugin = plugin_env.SharedLibrary('../postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
++input_plugin = plugin_env.SharedLibrary('../postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=ldflags)
+ 
+ if env['PLATFORM'] == 'Darwin':
+     # if the plugin links to libmapnik2 ensure it is built first
