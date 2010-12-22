@@ -18,10 +18,10 @@ tar xvf icu4c-4_6-src.tgz
 cd icu/source
 
 # universal flags
-export CFLAGS="-Os -arch i386 -arch x86_64"
-export CXXFLAGS="-Os -arch i386 -arch x86_64"
+export CFLAGS="-O3 -arch i386 -arch x86_64"
+export CXXFLAGS="-O3 -arch i386 -arch x86_64"
 export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
-./runConfigureICU MacOSX --prefix=$PREFIX --disable-static --enable-shared --disable-extras --disable-samples --with-library-bits=64
+./runConfigureICU MacOSX --prefix=$PREFIX --disable-static --enable-shared --disable-samples --disable-icuio --disable-layout --disable-tests --disable-extras --with-library-bits=64
 make install -j4
 # note -R is needed to preserve the symlinks
 #cp -R lib/libicuuc.* ../../../sources/lib/
@@ -95,3 +95,33 @@ install_name_tool -id $INSTALL/libboost_thread.dylib libboost_thread.dylib
 install_name_tool -change libboost_system.dylib $INSTALL/libboost_system.dylib libboost_filesystem.dylib
 
 #install_name_tool -change libicui18n.46.dylib $INSTALL/libicui18n.46.dylib libboost_regex.dylib
+
+
+# rasterlite we must bundle as it is not available in the SQLite.framework
+cd ../../deps
+svn co https://www.gaia-gis.it/svn/librasterlite
+export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names -L/Library/Frameworks/SQLite3.framework/unix/lib -L/Library/Frameworks/UnixImageIO.framework/unix/lib -L/Library/Frameworks/PROJ.framework/unix/lib"
+export CFLAGS="-Os -arch i386 -arch x86_64 -I/Library/Frameworks/SQLite3.framework/unix/include -I/Library/Frameworks/UnixImageIO.framework/unix/include -I/Library/Frameworks/PROJ.framework/unix/include"
+export CXXFLAGS=$CFLAGS
+cd librasterlite
+./configure --disable-dependency-tracking --prefix=$PREFIX
+make clean
+make -j4
+make install
+
+cd ../../sources/lib
+
+install_name_tool -id $INSTALL/librasterlite.0.dylib librasterlite.0.dylib
+
+# freetype2
+cd ../../deps
+wget http://download.savannah.gnu.org/releases/freetype/freetype-2.4.4.tar.gz
+tar xvf freetype-2.4.4.tar.gz
+export CFLAGS="-O3 -arch i386 -arch x86_64"
+export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
+cd freetype-2.4.4
+./configure --prefix=$PREFIX
+make -j4
+make install
+cd ../../sources/lib
+install_name_tool -id $INSTALL/libfreetype.6.dylib libfreetype.6.dylib

@@ -54,16 +54,33 @@ if __name__ == "__main__":
     # point top level 'unix' to active one
     sym(join(active,'unix'),join(framework,'unix'))
     
-    # install boost and icu...
-    # recursive to preserve symlinks
+    # install icu libs
     copy_all_items('sources/lib/libicuu*dylib',join(active,'unix/lib'),recursive=True)
     copy_all_items('sources/lib/libicud*dylib',join(active,'unix/lib'),recursive=True)
     copy_all_items('sources/lib/libicui1*dylib',join(active,'unix/lib'),recursive=True)
-    copy_all_items('sources/lib/libboost*dylib',join(active,'unix/lib'),recursive=True)
-    
-    # move over headers
-    #TODO
 
+    # install icu includes
+    os.mkdir(join(active,'unix/include/unicode'))
+    copy_all_items('sources/include/unicode/*',join(active,'unix/include/unicode'),recursive=True)
+
+    # install boost libs
+    copy_all_items('sources/lib/libboost*dylib',join(active,'unix/lib'),recursive=True)
+
+    # install boost includes
+    os.mkdir(join(active,'unix/include/boost'))
+    copy_all_items('sources/include/boost/*',join(active,'unix/include/boost'),recursive=True)
+
+    # install rasterlite lib
+    copy_all_items('sources/lib/librasterlite*dylib',join(active,'unix/lib'),recursive=True)
+
+    # install freetype2 libs
+    copy_all_items('sources/lib/libfreetype*dylib',join(active,'unix/lib'),recursive=True)
+
+    # install freetype2 includes
+    os.mkdir(join(active,'unix/include/freetype2'))
+    copy_all_items('sources/include/freetype2/*',join(active,'unix/include/freetype2'),recursive=True)
+    copy_all_items('sources/include/ft2build.h',join(active,'unix/include/'),recursive=True)
+    
     # Resources
     os.mkdir(join(active,'Resources'))
     # TODO - put docs and other stuff here...
@@ -128,5 +145,5 @@ fontscollectionpath = '%(install_path)s/Mapnik.framework/Fonts'
     open('/Library/Python/2.6/site-packages/mapnik.pth','w').write(pth)
 
     # Stash in resources as well
-    open(join(active,'mapnik.pth'),'w').write(pth)
+    open(join(active,'Resources/mapnik.pth'),'w').write(pth)
     
