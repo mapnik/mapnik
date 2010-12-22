@@ -28,11 +28,11 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 LIBDIR_SCHEMA = env['LIBDIR_SCHEMA']
 version = env['MAPNIK_VERSION_STRING']
 mapnik_libname = 'mapnik2'
-input_plugins = os.path.normpath(env['DESTDIR'] + '/' + env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + "/input" )
+input_plugins = os.path.normpath(env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + "/input" )
 if env['SYSTEM_FONTS']:
     fonts = os.path.normpath(env['SYSTEM_FONTS'])
 else:
-    fonts = os.path.normpath(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/fonts')
+    fonts = os.path.normpath(prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/fonts')
 svn_revision = env['SVN_REVISION']
 
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
