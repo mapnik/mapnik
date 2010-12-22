@@ -173,4 +173,6 @@ scons install PYTHON=/Library/Frameworks/Python.framework/Versions/2.7/bin/pytho
 
 # 3.1
 # needs patch: http://trac.mapnik.org/wiki/Python3k
+rm bindings/python/*os
+rm bindings/python/mapnik/_mapnik2.so
 PYTHON=/usr/local/bin/python3 BOOST_PYTHON_LIB=boost_python31

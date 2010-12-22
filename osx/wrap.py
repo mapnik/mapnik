@@ -11,6 +11,8 @@ def sym(target,link):
     if relative.startswith('../'):
         relative = relative.replace('../','',1)
     try:
+        if os.path.exists(link):
+            os.unlink(link)
         os.symlink(relative,link)
     except OSError, e:
         raise OSError('%s: %s' % (e,link))
@@ -60,14 +62,16 @@ if __name__ == "__main__":
     copy_all_items('sources/lib/libicui1*dylib',join(active,'unix/lib'),recursive=True)
 
     # install icu includes
-    os.mkdir(join(active,'unix/include/unicode'))
+    if not os.path.exists(join(active,'unix/include/unicode')):
+        os.mkdir(join(active,'unix/include/unicode'))
     copy_all_items('sources/include/unicode/*',join(active,'unix/include/unicode'),recursive=True)
 
     # install boost libs
     copy_all_items('sources/lib/libboost*dylib',join(active,'unix/lib'),recursive=True)
 
     # install boost includes
-    os.mkdir(join(active,'unix/include/boost'))
+    if not os.path.exists(join(active,'unix/include/boost')):
+        os.mkdir(join(active,'unix/include/boost'))
     copy_all_items('sources/include/boost/*',join(active,'unix/include/boost'),recursive=True)
 
     # install rasterlite lib
@@ -77,19 +81,22 @@ if __name__ == "__main__":
     copy_all_items('sources/lib/libfreetype*dylib',join(active,'unix/lib'),recursive=True)
 
     # install freetype2 includes
-    os.mkdir(join(active,'unix/include/freetype2'))
+    if not os.path.exists(join(active,'unix/include/freetype2')):
+        os.mkdir(join(active,'unix/include/freetype2'))
     copy_all_items('sources/include/freetype2/*',join(active,'unix/include/freetype2'),recursive=True)
     copy_all_items('sources/include/ft2build.h',join(active,'unix/include/'),recursive=True)
     
     # Node-mapnik bindings snapshot
-    os.mkdir(join(active,'unix/lib/node'))
-    os.mkdir(join(active,'unix/lib/node/mapnik'))
+    if not os.path.exists(join(active,'unix/lib/node')):
+        os.mkdir(join(active,'unix/lib/node'))
+        os.mkdir(join(active,'unix/lib/node/mapnik'))
     sym(join(active,'unix/lib/node'),join(active,'Node'))
     sym(join(active,'Node'),join(framework,'Node'))
     copy_all_items('/usr/local/lib/node/mapnik/*',join(active,'unix/lib/node/mapnik/'),recursive=True)
     
     # Resources
-    os.mkdir(join(active,'Resources'))
+    if not os.path.exists(join(active,'Resources')):
+        os.mkdir(join(active,'Resources'))
     # TODO - put docs and other stuff here...
     # or link to /share
     sym(join(active,'Resources'),join(framework,'Resources'))
@@ -125,8 +132,9 @@ if __name__ == "__main__":
     #python_versions =  glob.glob('unix/lib/python*')
     #for py in python_versions:
     #    py_dir = join(active,'%s/site-packages' % py)
-    os.mkdir(join(active,'Python'))
-    os.mkdir(join(active,'Python/mapnik2'))
+    if not os.path.exists(join(active,'Python')):
+        os.mkdir(join(active,'Python'))
+        os.mkdir(join(active,'Python/mapnik2'))
     shutil.copy('python/__init__.py',join(active,'Python/mapnik2/'))
     #sym(py_dir,join(active,'Python'))
     sym(join(active,'Python'),join(framework,'Python'))
