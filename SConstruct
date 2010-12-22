@@ -312,7 +312,6 @@ opts.AddVariables(
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
-    ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
@@ -329,10 +328,11 @@ opts.AddVariables(
     
     # Variables affecting rendering back-ends
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
-    
+
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
     
     # Variables for optional dependencies
+    ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),
     # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
     # Therefore, we use a single boolean for whether to attempt to build cairo support.
     BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'False'),

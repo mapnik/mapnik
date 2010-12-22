@@ -4,6 +4,8 @@
 # local install location
 PREFIX=/Users/dane/projects/mapnik-dev/trunk-build/osx/sources
 mkdir /Users/dane/projects/mapnik-dev/trunk-build/osx/sources
+export DYLD_LIBRARY_PATH=$PREFIX/lib
+
 
 # final resting place
 INSTALL=/Library/Frameworks/Mapnik.framework/unix/lib
@@ -80,20 +82,38 @@ cd boost_1_45_0
   architecture=x86 \
   install
 
+# boost python for various versions are done in python script
+python ../../scripts/build_boost_pythons.py 2.5 32_64
+cp stage/lib/libboost_python.dylib ../../sources/lib/libboost_python25.dylib
+
+python ../../scripts/build_boost_pythons.py 2.6 32_64
+cp stage/lib/libboost_python.dylib ../../sources/lib/libboost_python26.dylib
+
+python ../../scripts/build_boost_pythons.py 2.7 32_64
+cp stage/lib/libboost_python.dylib ../../sources/lib/libboost_python27.dylib
+
+python ../../scripts/build_boost_pythons.py 3.1 32_64
+cp stage/lib/libboost_python3.dylib ../../sources/lib/libboost_python31.dylib
+
+
 #cp stage/lib/libboost_*dylib ../../sources/lib/
 
 cd ../../sources/lib
 
-install_name_tool -id $INSTALL/libboost_python.dylib libboost_python.dylib
+# fix boost pythons
+install_name_tool -id $INSTALL/libboost_python25.dylib libboost_python25.dylib
+install_name_tool -id $INSTALL/libboost_python26.dylib libboost_python26.dylib
+install_name_tool -id $INSTALL/libboost_python27.dylib libboost_python27.dylib
+install_name_tool -id $INSTALL/libboost_python31.dylib libboost_python31.dylib
+
+# fix boost libs
 install_name_tool -id $INSTALL/libboost_system.dylib libboost_system.dylib
 install_name_tool -id $INSTALL/libboost_filesystem.dylib libboost_filesystem.dylib
 install_name_tool -id $INSTALL/libboost_regex.dylib libboost_regex.dylib
 install_name_tool -id $INSTALL/libboost_program_options.dylib libboost_program_options.dylib
 install_name_tool -id $INSTALL/libboost_iostreams.dylib libboost_iostreams.dylib
 install_name_tool -id $INSTALL/libboost_thread.dylib libboost_thread.dylib
-
 install_name_tool -change libboost_system.dylib $INSTALL/libboost_system.dylib libboost_filesystem.dylib
-
 #install_name_tool -change libicui18n.46.dylib $INSTALL/libicui18n.46.dylib libboost_regex.dylib
 
 
@@ -125,3 +145,32 @@ make -j4
 make install
 cd ../../sources/lib
 install_name_tool -id $INSTALL/libfreetype.6.dylib libfreetype.6.dylib
+
+### MAPNIK ###
+
+# make sure we set DYLD path so we can link to libs without installing
+export DYLD_LIBRARY_PATH=$PREFIX/lib
+
+# compile mapnik using osx/config.py
+
+
+# then compile each python version..
+
+# 2.5
+rm bindings/python/*os
+rm bindings/python/mapnik/_mapnik2.so
+scons install PYTHON=/usr/bin/python2.5 BOOST_PYTHON_LIB=boost_python25
+
+# 2.6
+rm bindings/python/*os
+rm bindings/python/mapnik/_mapnik2.so
+scons install PYTHON=/usr/bin/python2.6 BOOST_PYTHON_LIB=boost_python26
+
+# 2.7
+rm bindings/python/*os
+rm bindings/python/mapnik/_mapnik2.so
+scons install PYTHON=/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 BOOST_PYTHON_LIB=boost_python27
+
+# 3.1
+# needs patch: http://trac.mapnik.org/wiki/Python3k
+PYTHON=/usr/local/bin/python3 BOOST_PYTHON_LIB=boost_python31

@@ -122,8 +122,13 @@ if __name__ == "__main__":
     sym(join(active,'Mapnik'),join(framework,'Mapnik'))
     
     # Python
-    py_dir = join(active,'unix/lib/python2.6/site-packages')
-    sym(py_dir,join(active,'Python'))
+    #python_versions =  glob.glob('unix/lib/python*')
+    #for py in python_versions:
+    #    py_dir = join(active,'%s/site-packages' % py)
+    os.mkdir(join(active,'Python'))
+    os.mkdir(join(active,'Python/mapnik2'))
+    shutil.copy('python/__init__.py',join(active,'Python/mapnik2/'))
+    #sym(py_dir,join(active,'Python'))
     sym(join(active,'Python'),join(framework,'Python'))
     
     # try to start using relative paths..
@@ -133,23 +138,25 @@ if __name__ == "__main__":
     #fontscollectionpath = os.path.normpath(os.path.join(os.path.dirname(__file__),'../../../../Fonts'))
     #'''
     
-    paths_py = '''
-inputpluginspath = '%(install_path)s/Mapnik.framework/Datasources'
-fontscollectionpath = '%(install_path)s/Mapnik.framework/Fonts'
-'''
+    #paths_py = '''
+    #inputpluginspath = '%(install_path)s/Mapnik.framework/Datasources'
+    #fontscollectionpath = '%(install_path)s/Mapnik.framework/Fonts'
+    #'''
     
     # TODO - consider making _mapnik.so import dependent on version
     # so we can simplify install..
-    # py26
-    mapnik_module = join(py_dir,'mapnik2')
-    open(mapnik_module+'/paths.py','w').write(paths_py % locals())
-    shutil.copy('../bindings/python/mapnik/__init__.py',mapnik_module)
     
-    # write pth
+    # done via scons install...
+    #mapnik_module = join(py_dir,'mapnik2')
+    #open(mapnik_module+'/paths.py','w').write(paths_py % locals())
+    #shutil.copy('../bindings/python/mapnik/__init__.py',mapnik_module)
+    
+    # pth file
     pth ='''import sys; sys.path.insert(0,'%(install_path)s/Mapnik.framework/Python')
     ''' % locals()
+    
     # TODO - testing hack, will add this local python binding to sys path for snow leopard
-    open('/Library/Python/2.6/site-packages/mapnik.pth','w').write(pth)
+    #open('/Library/Python/2.6/site-packages/mapnik.pth','w').write(pth)
 
     # Stash in resources as well
     open(join(active,'Resources/mapnik.pth'),'w').write(pth)
