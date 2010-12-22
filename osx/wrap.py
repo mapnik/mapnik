@@ -81,6 +81,13 @@ if __name__ == "__main__":
     copy_all_items('sources/include/freetype2/*',join(active,'unix/include/freetype2'),recursive=True)
     copy_all_items('sources/include/ft2build.h',join(active,'unix/include/'),recursive=True)
     
+    # Node-mapnik bindings snapshot
+    os.mkdir(join(active,'unix/lib/node'))
+    os.mkdir(join(active,'unix/lib/node/mapnik'))
+    sym(join(active,'unix/lib/node'),join(active,'Node'))
+    sym(join(active,'Node'),join(framework,'Node'))
+    copy_all_items('/usr/local/lib/node/mapnik/*',join(active,'unix/lib/node/mapnik/'),recursive=True)
+    
     # Resources
     os.mkdir(join(active,'Resources'))
     # TODO - put docs and other stuff here...
