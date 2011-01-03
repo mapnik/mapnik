@@ -40,9 +40,9 @@ Several things happen when you do:
 """
 
 import os
+import sys
 import warnings
 
-from sys import getdlopenflags, setdlopenflags
 try:
     from ctypes import RTLD_NOW, RTLD_GLOBAL
 except ImportError:
@@ -52,8 +52,8 @@ except ImportError:
         RTLD_NOW = 2
         RTLD_GLOBAL = 256
 
-flags = getdlopenflags()
-setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
+flags = sys.getdlopenflags()
+sys.setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
 
 from _mapnik2 import *
 from paths import inputpluginspath, fontscollectionpath
@@ -675,7 +675,7 @@ register_plugins()
 register_fonts()
 
 #set dlopen flags back to the original
-setdlopenflags(flags)
+sys.setdlopenflags(flags)
 
 # Explicitly export API members to avoid namespace pollution
 # and ensure correct documentation processing
