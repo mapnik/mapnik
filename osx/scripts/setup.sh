@@ -159,7 +159,7 @@ export DYLD_LIBRARY_PATH=$PREFIX/lib
 # 2.5
 rm bindings/python/*os
 rm bindings/python/mapnik/_mapnik2.so
-scons install PYTHON=/usr/bin/python2.5 BOOST_PYTHON_LIB=boost_python25
+scons install BINDINGS=python PYTHON=/usr/bin/python2.5 BOOST_PYTHON_LIB=boost_python25
 
 # 2.6
 rm bindings/python/*os
@@ -175,4 +175,4 @@ scons install PYTHON=/Library/Frameworks/Python.framework/Versions/2.7/bin/pytho
 # needs patch: http://trac.mapnik.org/wiki/Python3k
 rm bindings/python/*os
 rm bindings/python/mapnik/_mapnik2.so
-PYTHON=/usr/local/bin/python3 BOOST_PYTHON_LIB=boost_python31
+scons install PYTHON=/Library/Frameworks/Python.framework/Versions/3.1/bin/python3.1 BOOST_PYTHON_LIB=boost_python31
