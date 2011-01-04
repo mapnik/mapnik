@@ -1,0 +1,14 @@
+Index: tests/run_tests.py
+===================================================================
+--- tests/run_tests.py	(revision 2488)
++++ tests/run_tests.py	(working copy)
+@@ -46,7 +46,8 @@
+ 
+     if not quiet:
+         print "- mapnik2 path: %s" % mapnik2.__file__
+-        print "- _mapnik2.so path: %s" % mapnik2._mapnik2.__file__
++        if hasattr(mapnik2,'_mapnik2'):
++           print "- _mapnik2.so path: %s" % mapnik2._mapnik2.__file__
+         print "- Input plugins path: %s" % mapnik2.inputpluginspath
+         print "- Font path: %s" % mapnik2.fontscollectionpath
+         print
