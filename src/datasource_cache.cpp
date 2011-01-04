@@ -40,8 +40,8 @@
 
 namespace mapnik
 {
-using namespace std;
-using namespace boost;
+//using namespace std;
+//using namespace boost;
    
 bool is_input_plugin (std::string const& filename)
 {
@@ -73,7 +73,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
     }
 
     datasource_ptr ds;
-    map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
+    std::map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
     if ( itr == plugins_.end() )
     {
         throw config_error(string("Could not create datasource. No plugin ") +
@@ -137,19 +137,23 @@ void datasource_cache::register_datasources(const std::string& str)
     mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache,
                             mapnik::CreateStatic>::mutex_);
 #endif
-    filesystem::path path(str);
+    boost::filesystem::path path(str);
     plugin_directories_.push_back(str);
-    filesystem::directory_iterator end_itr;
+    boost::filesystem::directory_iterator end_itr;
  
     if (exists(path) && is_directory(path))
     {
-        for (filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
+        for (boost::filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
         {
 
 #if BOOST_VERSION < 103400 
             if (!is_directory( *itr )  && is_input_plugin(itr->leaf()))
 #else
-            if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
+#if (BOOST_FILESYSTEM_VERSION == 3)      
+            if (!is_directory( *itr )  && is_input_plugin(itr->path().filename().string()))
+#else // v2
+            if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf())) 
+#endif 
 #endif
             {
                 try 
@@ -181,11 +185,21 @@ void datasource_cache::register_datasources(const std::string& str)
                     if (ret != 0) {
                         std::clog << "Datasource loader: could not intialize dynamic loading of global symbols: " << lt_dlerror() << "\n";
                     }
-                    
+#if (BOOST_FILESYSTEM_VERSION == 3)                    
+                    module = lt_dlopenadvise (itr->path().string().c_str(), advise);
+#else // v2
                     module = lt_dlopenadvise (itr->string().c_str(), advise);
+#endif 
+
                     lt_dladvise_destroy(&advise);
 #else
+
+#if (BOOST_FILESYSTEM_VERSION == 3)   
+                    lt_dlhandle module = lt_dlopen(itr->path().string().c_str());
+#else // v2
                     lt_dlhandle module = lt_dlopen(itr->string().c_str());
+#endif
+
 #endif
                     if (module)
                     {
@@ -201,7 +215,13 @@ void datasource_cache::register_datasources(const std::string& str)
                     }
                     else
                     {
-                        std::clog << "Problem loading plugin library: " << itr->string().c_str() << " (dlopen failed - plugin likely has an unsatified dependency or incompatible ABI)" << std::endl;
+#if (BOOST_FILESYSTEM_VERSION == 3) 
+                        std::clog << "Problem loading plugin library: " << itr->path().string() 
+                                  << " (dlopen failed - plugin likely has an unsatified dependency or incompatible ABI)" << std::endl;
+#else // v2
+                        std::clog << "Problem loading plugin library: " << itr->string() 
+                                  << " (dlopen failed - plugin likely has an unsatified dependency or incompatible ABI)" << std::endl;    
+#endif
                     }
                 }
                 catch (...) {}

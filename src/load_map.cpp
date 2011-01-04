@@ -256,7 +256,7 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             ex.append_context("(in node Map)");
             throw;
         }
-	
+        
         parse_map_include( map, map_node );
     }
     catch (const boost::property_tree::ptree_bad_path &)
@@ -264,76 +264,76 @@ void map_parser::parse_map( Map & map, ptree const & pt )
         throw config_error("Not a map file. Node 'Map' not found.");
     }
 }
-	
+        
 void map_parser::parse_map_include( Map & map, ptree const & include )
 {
-	ptree::const_iterator itr = include.begin();
-	ptree::const_iterator end = include.end();
+    ptree::const_iterator itr = include.begin();
+    ptree::const_iterator end = include.end();
 
-        for (; itr != end; ++itr)
+    for (; itr != end; ++itr)
+    {
+        ptree::value_type const& v = *itr;
+
+        if (v.first == "Include")
         {
-            ptree::value_type const& v = *itr;
-
-            if (v.first == "Include")
-            {
-                parse_map_include( map, v.second );
-            }
-            else if (v.first == "Style")
-            {
-                parse_style( map, v.second );
-            }
-            else if (v.first == "Layer")
-            {
-                parse_layer(map, v.second );
-            }
-            else if (v.first == "FontSet")
-            {
-                parse_fontset(map, v.second);
-            }
-            else if (v.first == "MetaWriter")
-            {
-                parse_metawriter(map, v.second);
-            }
-            else if (v.first == "FileSource")
-            {
-                std::string name = get_attr<string>( v.second, "name");
-                std::string value = get_value<string>( v.second, "");
-                file_sources_[name] = value;
-            }
-            else if (v.first == "Datasource")
-            {
-                std::string name = get_attr(v.second, "name", string("Unnamed"));
-                parameters params;
-                ptree::const_iterator paramIter = v.second.begin();
-                ptree::const_iterator endParam = v.second.end();
-                for (; paramIter != endParam; ++paramIter)
-                {
-                    ptree const& param = paramIter->second;
-
-                    if (paramIter->first == "Parameter")
-                    {
-                        std::string name = get_attr<string>(param, "name");
-                        std::string value = get_value<string>( param,
-                                                               "datasource parameter");
-                        params[name] = value;
-                    }
-                    else if( paramIter->first != "<xmlattr>" &&
-                             paramIter->first != "<xmlcomment>" )
-                    {
-                        throw config_error(std::string("Unknown child node in ") +
-                                           "'Datasource'. Expected 'Parameter' but got '" +
-                                           paramIter->first + "'");
-                    }
-                }
-                datasource_templates_[name] = params;
-            }
-            else if (v.first != "<xmlcomment>" &&
-                     v.first != "<xmlattr>")
-            {
-                throw config_error(std::string("Unknown child node in 'Map': '") +
-                                   v.first + "'");
-            }
+            parse_map_include( map, v.second );
         }
+        else if (v.first == "Style")
+        {
+            parse_style( map, v.second );
+        }
+        else if (v.first == "Layer")
+        {
+            parse_layer(map, v.second );
+        }
+        else if (v.first == "FontSet")
+        {
+            parse_fontset(map, v.second);
+        }
+        else if (v.first == "MetaWriter")
+        {
+            parse_metawriter(map, v.second);
+        }
+        else if (v.first == "FileSource")
+        {
+            std::string name = get_attr<string>( v.second, "name");
+            std::string value = get_value<string>( v.second, "");
+            file_sources_[name] = value;
+        }
+        else if (v.first == "Datasource")
+        {
+            std::string name = get_attr(v.second, "name", string("Unnamed"));
+            parameters params;
+            ptree::const_iterator paramIter = v.second.begin();
+            ptree::const_iterator endParam = v.second.end();
+            for (; paramIter != endParam; ++paramIter)
+            {
+                ptree const& param = paramIter->second;
+
+                if (paramIter->first == "Parameter")
+                {
+                    std::string name = get_attr<string>(param, "name");
+                    std::string value = get_value<string>( param,
+                                                           "datasource parameter");
+                    params[name] = value;
+                }
+                else if( paramIter->first != "<xmlattr>" &&
+                         paramIter->first != "<xmlcomment>" )
+                {
+                    throw config_error(std::string("Unknown child node in ") +
+                                       "'Datasource'. Expected 'Parameter' but got '" +
+                                       paramIter->first + "'");
+                }
+            }
+            datasource_templates_[name] = params;
+        }
+        else if (v.first != "<xmlcomment>" &&
+                 v.first != "<xmlattr>")
+        {
+            throw config_error(std::string("Unknown child node in 'Map': '") +
+                               v.first + "'");
+        }
+    }
     
 
     map.init_metawriters();
@@ -614,8 +614,11 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
 
         map.addLayer(lyr);
 
-    } catch (const config_error & ex) {
-        if ( ! name.empty() ) {
+    } 
+    catch (const config_error & ex) 
+    {
+        if ( ! name.empty() ) 
+        {
             ex.append_context(std::string("(encountered during parsing of layer '") + name + "' in map '" + filename_ + "')");
         }
         throw;
@@ -1225,12 +1228,12 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
             text_symbol.set_line_spacing(*line_spacing);
         }
 
-      	// tolerance between label spacing along line
-      	optional<unsigned> label_position_tolerance = get_opt_attr<unsigned>(sym, "label_position_tolerance");
-      	if (label_position_tolerance)
-      	{
+        // tolerance between label spacing along line
+        optional<unsigned> label_position_tolerance = get_opt_attr<unsigned>(sym, "label_position_tolerance");
+        if (label_position_tolerance)
+        {
             text_symbol.set_label_position_tolerance(*label_position_tolerance);
-      	}
+        }
 
         // spacing between characters in text
         optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing");
@@ -1921,8 +1924,14 @@ std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt
 {
     boost::filesystem::path xml_path = filename_;
     boost::filesystem::path rel_path = *opt_path;
-    if ( !rel_path.has_root_path() ) {
+    if ( !rel_path.has_root_path() ) 
+    {
+#if (BOOST_FILESYSTEM_VERSION == 3)
+        boost::filesystem::path full = boost::filesystem::absolute(xml_path.branch_path()/rel_path).normalize();
+#else // v2
         boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
+#endif
+
 #ifdef MAPNIK_DEBUG
         std::clog << "\nModifying relative paths to be relative to xml...\n";
         std::clog << "original base path: " << *opt_path << "\n";
