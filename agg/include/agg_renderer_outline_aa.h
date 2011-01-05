@@ -1365,7 +1365,10 @@ namespace agg
         //---------------------------------------------------------------------
         void profile(const line_profile_aa& prof) { m_profile = &prof; }
         const line_profile_aa& profile() const { return *m_profile; }
-        line_profile_aa& profile() { return const_cast<line_profile_aa&>(*m_profile); }
+        
+        // clang error: binding of reference to type 'agg::line_profile_aa' to a value of type
+        // 'const agg::line_profile_aa' drops qualifiers        
+        //line_profile_aa& profile() { return *m_profile; }
 
         //---------------------------------------------------------------------
         int subpixel_width() const { return m_profile->subpixel_width(); }
