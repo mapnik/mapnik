@@ -10,7 +10,6 @@ shape_la_SOURCES = \
 	shape.hpp\
 	shape_featureset.cpp\
 	shape_featureset.hpp\
-	shapefile.cpp\
 	shapefile.hpp\
 	shape_index_featureset.cpp\
 	shape_index_featureset.hpp\

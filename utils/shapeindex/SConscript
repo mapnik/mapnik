@@ -32,7 +32,6 @@ source = Split(
     """
     shapeindex.cpp
     #src/box2d.cpp
-    #plugins/input/shape/shapefile.cpp
     """
     )
 

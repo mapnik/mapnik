@@ -5,8 +5,7 @@ bin_PROGRAMS = \
 
 shapeindex_SOURCES = \
 	quadtree.hpp\
-	shapeindex.cpp \
-	../../plugins/input/shape/shapefile.cpp
+	shapeindex.cpp
 
 shapeindex_LDFLAGS = \
 	$(BOOST_PROGRAM_OPTIONS_LIB) \
