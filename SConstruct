@@ -1170,7 +1170,9 @@ if not preconfigured:
                 env.Append(CXXFLAGS = common_cxx_flags + '-O %s' % ndebug_flags)
         else:
             # Common flags for GCC.
-            gcc_cxx_flags = '-ansi -Wall %s -ftemplate-depth-200 %s' % (pthread, common_cxx_flags)
+            # note: starting with boost 1.46 boost filesystem v3 is default so force to be v2
+            # by using BOOST_FILESYSTEM_VERSION=2 (until we upgrade)
+            gcc_cxx_flags = '-ansi -Wall %s -ftemplate-depth-200 -DBOOST_FILESYSTEM_VERSION=2 %s' % (pthread, common_cxx_flags)
         
             if env['DEBUG']:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
