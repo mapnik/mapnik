@@ -77,7 +77,6 @@ SOURCES += \
   $$PWD/../plugins/input/shape/dbffile.cpp \
   $$PWD/../plugins/input/shape/shape.cpp \
   $$PWD/../plugins/input/shape/shape_featureset.cpp \
-  $$PWD/../plugins/input/shape/shapefile.cpp \
   $$PWD/../plugins/input/shape/shape_index_featureset.cpp \
   $$PWD/../plugins/input/shape/shape_io.cpp \
   $$PWD/../plugins/input/sqlite/sqlite_featureset.cpp \
