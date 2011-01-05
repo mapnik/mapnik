@@ -56,17 +56,14 @@ while test $# -gt 0; do
 
     -v)
       echo $version
-      exit 0
       ;;
 
     --version)
       echo $version
-      exit 0
       ;;
 
     --svn-revision)
       echo ${svn_revision}
-      exit 0
       ;;
 
     --help)
@@ -85,17 +82,13 @@ while test $# -gt 0; do
       echo -I${includedir} ${other_includes}
       ;;
 
-#
-#    --modules)
-#       	echo 1
-#       	;;
-
     --libs)
       echo -L${libdir} -l${mapnik_libname} ${other_libs}
       ;;
 
     *)
-  usage
+  # if no matches, return 'usage 1' meaning usage + 1 (error return type)
+  usage 1
   exit 1
   ;;
     esac
