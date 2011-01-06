@@ -99,11 +99,19 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     {
         if (boost::filesystem::is_directory(*itr) && recurse)
         {
+#if (BOOST_FILESYSTEM_VERSION == 3) 
+          if (!register_fonts(itr->path().string(), true)) return false;
+#else // v2
             if (!register_fonts(itr->string(), true)) return false;
+#endif
         }
         else 
         {
+#if (BOOST_FILESYSTEM_VERSION == 3) 
+            mapnik::freetype_engine::register_font(itr->path().string());
+#else // v2
             mapnik::freetype_engine::register_font(itr->string());
+#endif
         }
     }
     return true;

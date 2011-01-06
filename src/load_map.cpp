@@ -534,8 +534,11 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
 
 	map.addLayer(lyr);
 
-    } catch (const config_error & ex) {
-	if ( ! name.empty() ) {
+    } 
+    catch (const config_error & ex) 
+    {
+        if ( ! name.empty() ) 
+        {
             ex.append_context(string("(encountered during parsing of layer '") + name + "' in map '" + filename_ + "')");
 	}
 	throw;
@@ -1712,8 +1715,14 @@ std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt
 {
     boost::filesystem::path xml_path = filename_;
     boost::filesystem::path rel_path = *opt_path;
-    if ( !rel_path.has_root_path() ) {
+    if ( !rel_path.has_root_path() ) 
+    {
+#if (BOOST_FILESYSTEM_VERSION == 3)
+        boost::filesystem::path full = boost::filesystem::absolute(xml_path.branch_path()/rel_path).normalize();
+#else // v2
 	boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
+#endif
+
 #ifdef MAPNIK_DEBUG
 	std::clog << "\nModifying relative paths to be relative to xml...\n";
 	std::clog << "original base path: " << *opt_path << "\n";
