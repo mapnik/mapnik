@@ -121,48 +121,6 @@ install_name_tool -id $INSTALL/libboost_thread.dylib libboost_thread.dylib
 install_name_tool -change libboost_system.dylib $INSTALL/libboost_system.dylib libboost_filesystem.dylib
 #install_name_tool -change libicui18n.46.dylib $INSTALL/libicui18n.46.dylib libboost_regex.dylib
 
-# build a few versions of node
-cd ../../deps
-
-cd ../
-wget http://nodejs.org/dist/node-v0.2.0.tar.gz
-tar xvf node-v0.2.0.tar.gz
-cd node-v0.2.0
-./configure --prefix=$PREFIX/node20
-make
-make install
-
-wget http://nodejs.org/dist/node-v0.2.6.tar.gz
-tar xvf node-v0.2.6.tar.gz
-cd node-v0.2.6
-./configure --prefix=$PREFIX/node26
-make
-make install
-
-cd ../
-wget http://nodejs.org/dist/node-v0.3.0.tar.gz
-tar xvf node-v0.3.0.tar.gz
-cd node-v0.3.0
-./configure --prefix=$PREFIX/node30
-make
-make install
-
-cd ../
-wget http://nodejs.org/dist/node-v0.3.3.tar.gz
-tar xvf node-v0.3.3.tar.gz
-cd node-v0.3.3
-./configure --prefix=$PREFIX/node33
-make
-make install
-
-# HEAD (master)
-cd ../
-git clone git://github.com/ry/node.git node-master
-cd node-master
-./configure --prefix=$PREFIX/node-34
-make
-make install
-
 # rasterlite we must bundle as it is not available in the SQLite.framework
 cd ../../deps
 svn co https://www.gaia-gis.it/svn/librasterlite
@@ -233,6 +191,29 @@ scons -j2 install
 cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_31.so
 
 
+# build a ton of versions of node (just to be safe about ABI)
+cd ../../deps
+
+for VER in {"0.2.4","0.2.5","0.2.6","0.3.0","0.3.1","0.3.2","0.3.3"}
+do
+  wget http://nodejs.org/dist/node-v$VER.tar.gz
+  tar xvf node-v$VER.tar.gz
+  cd node-v$VER
+  ./configure --prefix=$PREFIX/node$VER
+  make
+  make install
+  cd ../
+done
+
+# HEAD (master)
+VER="0.3.4"
+git clone git://github.com/ry/node.git node-master
+cd node-master
+./configure --prefix=$PREFIX/node$VER
+make
+make install
+cd ../
+
 # node-mapnik
 cd ../../deps
 git clone git://github.com/mapnik/node-mapnik.git
@@ -241,13 +222,19 @@ export PATH=../../Library/Frameworks/Mapnik.framework/Programs:$PATH
 
 CXXFLAGS=" -g -DNDEBUG -O3 -Wall -DBOOST_SPIRIT_THREADSAFE -DMAPNIK_THREADSAFE -ansi -finline-functions -Wno-inline -fPIC -arch x86_64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DEV_MULTIPLICITY=0 -I/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/include -I/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/include/freetype2 "
 
-VER="33"
-mkdir build/default/src/$VER
-mkdir mapnik/$VER
-NODE_PREFIX="$PREFIX/node$VER"
-export PATH=$NODE_PREFIX/bin:$PATH
-OBJ="build/default/src/$VER/_mapnik_1.o"
-TARGET="mapnik/$VER/_mapnik.node"
-g++ $CXXFLAGS -I$NODE_PREFIX/include/node src/_mapnik.cc -c -o $OBJ
-LDFLAGS="-L/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/lib -lmapnik2 -bundle -undefined dynamic_lookup"
-g++ $OBJ -o $TARGET $LDFLAGS
+for VER in {"0.2.4","0.2.5","0.2.6","0.3.0","0.3.1","0.3.2","0.3.3","0.3.4"}
+for VER in {"0.3.4",}
+do
+  mkdir build/default/src/$VER
+  mkdir mapnik/$VER
+  NODE_PREFIX="$PREFIX/node$VER"
+  export PATH=$NODE_PREFIX/bin:$PATH
+  OBJ="build/default/src/$VER/_mapnik_1.o"
+  TARGET="mapnik/$VER/_mapnik.node"
+  g++ $CXXFLAGS -I$NODE_PREFIX/include/node src/_mapnik.cc -c -o $OBJ
+  LDFLAGS="-L/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/lib -lmapnik2 -bundle -undefined dynamic_lookup"
+  g++ $OBJ -o $TARGET $LDFLAGS
+done
+
+
+# then re-run wrap.py

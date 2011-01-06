@@ -17,7 +17,7 @@ def sym(target,link):
     except OSError, e:
         raise OSError('%s: %s' % (e,link))
 
-def copy_all_items(pattern,place,recursive=False):
+def copy_all_items(pattern,place,recursive=True):
     items = glob.glob(pattern)
     for i in items:
        if recursive:
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     
     # include headers for a full SDK?
-    INCLUDE_HEADERS = False
+    INCLUDE_HEADERS = True
 
     
     # final resting place
@@ -59,6 +59,19 @@ if __name__ == "__main__":
     
     # point top level 'unix' to active one
     sym(join(active,'unix'),join(framework,'unix'))
+
+    # create headers directory if needed
+    if INCLUDE_HEADERS:
+        if not os.path.exists(join(active,'unix/include')):
+            os.mkdir(join(active,'unix/include'))
+
+    # Mapnik Headers
+    if INCLUDE_HEADERS:
+        sym(join(active,'unix/include'),join(active,'Headers'))
+        sym(join(active,'Headers'),join(framework,'Headers'))
+    else:
+        # purge the installed headers of mapnik
+        os.system('rm -rf %s' % join(active,'unix/include'))
     
     # install icu libs
     copy_all_items('sources/lib/libicuu*dylib',join(active,'unix/lib'),recursive=True)
@@ -93,13 +106,15 @@ if __name__ == "__main__":
         copy_all_items('sources/include/freetype2/*',join(active,'unix/include/freetype2'),recursive=True)
         copy_all_items('sources/include/ft2build.h',join(active,'unix/include/'),recursive=True)
     
-    # Node-mapnik bindings snapshot
+    # Node-mapnik bindings location
     if not os.path.exists(join(active,'unix/lib/node')):
         os.mkdir(join(active,'unix/lib/node'))
         os.mkdir(join(active,'unix/lib/node/mapnik'))
     sym(join(active,'unix/lib/node'),join(active,'Node'))
     sym(join(active,'Node'),join(framework,'Node'))
-    copy_all_items('sources/lib/node/mapnik/*',join(active,'unix/lib/node/mapnik/'),recursive=True)
+    
+    # do this later...
+    copy_all_items('deps/node-mapnik/mapnik/*',join(active,'unix/lib/node/mapnik/'),recursive=True)
     
     # Resources
     if not os.path.exists(join(active,'Resources')):
@@ -108,15 +123,7 @@ if __name__ == "__main__":
     # or link to /share
     sym(join(active,'Resources'),join(framework,'Resources'))
     shutil.copy('Info.plist',join(active,'Resources'))
-    
-    # Mapnik Headers
-    if INCLUDE_HEADERS:
-        sym(join(active,'unix/include'),join(active,'Headers'))
-        sym(join(active,'Headers'),join(framework,'Headers'))
-    else:
-        # purge the installed headers of mapnik
-        os.system('rm -rf %s' % join(active,'unix/include'))
-    
+        
     # Programs
     sym(join(active,'unix/bin'),join(active,'Programs'))
     sym(join(active,'Programs'),join(framework,'Programs'))
