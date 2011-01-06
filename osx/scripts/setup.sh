@@ -71,6 +71,7 @@ cd boost_1_45_0
   toolset=darwin \
   address-model=32_64 \
   architecture=x86 \
+  link=shared \
   stage
 
 ./bjam --prefix=$PREFIX --with-python --with-thread --with-filesystem \
@@ -80,17 +81,21 @@ cd boost_1_45_0
   toolset=darwin \
   address-model=32_64 \
   architecture=x86 \
+  link=shared \
   install
 
 # boost python for various versions are done in python script
 python ../../scripts/build_boost_pythons.py 2.5 32_64
-cp stage/lib/libboost_python.dylib ../../sources/lib/libboost_python25.dylib
+mv stage/lib/libboost_python.dylib stage/lib/libboost_python25.dylib
+cp stage/lib/libboost_python25.dylib ../../sources/lib/libboost_python25.dylib
 
 python ../../scripts/build_boost_pythons.py 2.6 32_64
-cp stage/lib/libboost_python.dylib ../../sources/lib/libboost_python26.dylib
+mv stage/lib/libboost_python.dylib stage/lib/libboost_python26.dylib
+cp stage/lib/libboost_python26.dylib ../../sources/lib/libboost_python26.dylib
 
 python ../../scripts/build_boost_pythons.py 2.7 32_64
-cp stage/lib/libboost_python.dylib ../../sources/lib/libboost_python27.dylib
+mv stage/lib/libboost_python.dylib stage/lib/libboost_python27.dylib
+cp stage/lib/libboost_python27.dylib ../../sources/lib/libboost_python27.dylib
 
 python ../../scripts/build_boost_pythons.py 3.1 32_64
 cp stage/lib/libboost_python3.dylib ../../sources/lib/libboost_python31.dylib
