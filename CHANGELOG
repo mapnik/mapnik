@@ -89,13 +89,21 @@ Mapnik 0.7.0 Release
   in cases where the subquery limits results, provide a faster and more accurate layer extent. It will have
   no effect if the 'table' parameter is simply an existing table. This parameter is false by default. (#456)
 
-- PostGIS Plugin: Added 'bbox' token substitution ability in sql query string. This opens the door for various
+- PostGIS Plugin: Added '!bbox!' token substitution ability in sql query string. This opens the door for various
   complex queries that may aggregate geometries to be kept fast by allowing proper placement of the bbox
   query to be used by indexes. (#415)
 
     * Pass the bbox token inside a subquery like: !bbox!
+    
+    * Valid Usages include:
 
-    * e.g. (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
+      <Parameter name="table">
+        (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
+      </Parameter>
+
+      <Parameter name="table">
+        (Select * from table where geom &amp;&amp; !bbox!) as map
+      </Parameter>
 
 - PostGIS Plugin: Added 'scale_denominator' substitution ability in sql query string (#415/#465)
 
