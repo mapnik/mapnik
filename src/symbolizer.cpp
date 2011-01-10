@@ -94,7 +94,7 @@ transform_type const& symbolizer_with_image::get_transform() const
     return matrix_;
 }
 
-std::string const& symbolizer_with_image::get_transform_string() const
+std::string const symbolizer_with_image::get_transform_string() const
 {
     std::stringstream ss;
     ss << "matrix(" << matrix_[0] << ", " << matrix_[1] << ", "

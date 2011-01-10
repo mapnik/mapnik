@@ -39,6 +39,12 @@ class Map;
 
 class MAPNIK_DECL symbolizer_base {
     public:
+        symbolizer_base():
+            properties_(),
+            properties_complete_(),
+            writer_name_(),
+            writer_ptr_() {}
+            
         /** Add a metawriter to this symbolizer.
           *
           * expression can be empty the default expression of
@@ -83,7 +89,7 @@ public:
     void set_filename(path_expression_ptr filename);
     void set_transform(transform_type const& );
     transform_type const& get_transform() const;
-    std::string const& get_transform_string() const;
+    std::string const get_transform_string() const;
     void set_opacity(float opacity);
     float get_opacity() const;
 protected:
