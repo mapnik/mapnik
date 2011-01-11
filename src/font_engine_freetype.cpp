@@ -88,7 +88,13 @@ bool freetype_engine::register_font(std::string const& file_name)
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
     boost::filesystem::path path(dir);
-    if (!boost::filesystem::exists(path) || !boost::filesystem::is_directory(path)) return false;
+    
+    if (!boost::filesystem::exists(path))
+      return false;
+
+    if (!boost::filesystem::is_directory(path))
+      return mapnik::freetype_engine::register_font(dir); 
+    
     boost::filesystem::directory_iterator end_itr;
     for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
     {
