@@ -21,6 +21,9 @@
  *****************************************************************************/
 
 //$Id$
+#ifndef MAPNIK_SCALE_DENOMINATOR_HPP
+#define MAPNIK_SCALE_DENOMINATOR_HPP
+
 #include <mapnik/config.hpp>
 
 namespace mapnik {
@@ -28,3 +31,5 @@ namespace mapnik {
 class Map;
 MAPNIK_DECL double scale_denominator(Map const& map, bool geographic);
 }
+
+#endif // MAPNIK_SCALE_DENOMINATOR_HPP

@@ -21,6 +21,10 @@
  *****************************************************************************/
 
 //$Id$
+
+#ifndef MAPNIK_JPEG_IO_HPP
+#define MAPNIK_JPEG_IO_HPP
+
 #if defined(HAVE_JPEG)
 
 #include <mapnik/global.hpp>
@@ -128,3 +132,6 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
 }
 
 #endif
+
+#endif // MAPNIK_JPEG_IO_HPP
+

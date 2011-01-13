@@ -21,6 +21,10 @@
  *****************************************************************************/
 
 //$Id$
+
+#ifndef MAPNIK_PNG_IO_HPP
+#define MAPNIK_PNG_IO_HPP
+
 #include <mapnik/global.hpp>
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
@@ -532,3 +536,5 @@ void save_as_png256_hex(T1 & file, T2 const& image, int colors = 256, int trans_
     }
 }   
 }
+
+#endif // MAPNIK_PNG_IO_HPP

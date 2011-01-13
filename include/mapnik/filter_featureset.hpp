@@ -22,6 +22,9 @@
 
 //$Id$
 
+#ifndef MAPNIK_FILTER_FEATURESET_HPP
+#define MAPNIK_FILTER_FEATURESET_HPP
+
 #include <mapnik/datasource.hpp>
 
 namespace mapnik {
@@ -50,3 +53,5 @@ private:
     filter_type filter_;
 };
 }
+
+#endif //MAPNIK_FILTER_FEATURESET_HPP
