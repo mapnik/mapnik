@@ -34,14 +34,14 @@ mapnik::feature_ptr hello_featureset::next()
         // add the geometry to the feature
         feature->add_geometry(pt);
         
-        // increment to count so that we only return one feature
+        // increment the count so that we only return one feature
         ++count_;
         
         // return the feature!
         return feature;
     }
     
-    // otherwise return an empty feature_ptr
+    // otherwise return an empty feature
     return mapnik::feature_ptr();
 }
 
