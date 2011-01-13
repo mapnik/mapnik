@@ -241,7 +241,7 @@ public:
 class rule_node
 {
 public:
-    rule_node(QString name,mapnik::rule_type const & r)
+    rule_node(QString name,mapnik::rule const & r)
 	: name_(name),
 	  rule_(r) {}
     ~rule_node() {}
@@ -259,7 +259,7 @@ public:
       
 private:
     QString name_;
-    mapnik::rule_type const& rule_;
+    mapnik::rule const& rule_;
 };
 
 class style_node
@@ -323,7 +323,7 @@ StyleModel::StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent)
 	for ( ; itr2 != rules.end();++itr2)
 	{
 	    node* rule_n = style_n->add_child(new node(rule_node(QString("Rule"),*itr2),style_n));
-	    mapnik::rule_type::symbolizers::const_iterator itr3 = (*itr2).begin();
+	    mapnik::rule::symbolizers::const_iterator itr3 = (*itr2).begin();
 	    for ( ; itr3 !=itr2->end();++itr3)
 	    {
 		rule_n->add_child(new node(symbolizer_node(*itr3),rule_n));

@@ -32,7 +32,7 @@
 
 namespace mapnik
 {
-typedef std::vector<rule_type> rules;
+typedef std::vector<rule> rules;
 class feature_type_style
 {
 private:
@@ -50,7 +50,7 @@ public:
         return *this;
     }
         
-    void add_rule(rule_type const& rule)
+    void add_rule(rule const& rule)
     {
         rules_.push_back(rule);
     } 

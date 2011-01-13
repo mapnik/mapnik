@@ -28,7 +28,7 @@
 
 using mapnik::symbolizer;
 
-using mapnik::rule_type;
+using mapnik::rule;
 using mapnik::point_symbolizer;
 using mapnik::line_symbolizer;
 using mapnik::line_pattern_symbolizer;

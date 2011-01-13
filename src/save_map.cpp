@@ -574,22 +574,22 @@ private:
     bool explicit_defaults_;
 };
 
-void serialize_rule( ptree & style_node, const rule_type & rule, bool explicit_defaults)
+void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
 {
     ptree & rule_node = style_node.push_back(
         ptree::value_type("Rule", ptree() ))->second;
 
-    rule_type dfl;
-    if ( rule.get_name() != dfl.get_name() )
+    rule dfl;
+    if ( r.get_name() != dfl.get_name() )
     {
-        set_attr(rule_node, "name", rule.get_name());
+        set_attr(rule_node, "name", r.get_name());
     }
-    if ( rule.get_title() != dfl.get_title() )
+    if ( r.get_title() != dfl.get_title() )
     {
-        set_attr(rule_node, "title", rule.get_title());
+        set_attr(rule_node, "title", r.get_title());
     }
 
-    if ( rule.has_else_filter() )
+    if ( r.has_else_filter() )
     {
         rule_node.push_back( ptree::value_type(
                                  "ElseFilter", ptree()));
@@ -597,7 +597,7 @@ void serialize_rule( ptree & style_node, const rule_type & rule, bool explicit_d
     else
     {
         // filters were not comparable, perhaps should now compare expressions?
-        expression_ptr const& expr = rule.get_filter();
+        expression_ptr const& expr = r.get_filter();
         std::string filter = mapnik::to_expression_string(*expr);
         std::string default_filter = mapnik::to_expression_string(*dfl.get_filter());
             
@@ -608,22 +608,22 @@ void serialize_rule( ptree & style_node, const rule_type & rule, bool explicit_d
         }
     }
 
-    if (rule.get_min_scale() != dfl.get_min_scale() )
+    if (r.get_min_scale() != dfl.get_min_scale() )
     {
         ptree & min_scale = rule_node.push_back( ptree::value_type(
                                                      "MinScaleDenominator", ptree()))->second;
-        min_scale.put_value( rule.get_min_scale() );
+        min_scale.put_value( r.get_min_scale() );
     }
 
-    if (rule.get_max_scale() != dfl.get_max_scale() )
+    if (r.get_max_scale() != dfl.get_max_scale() )
     {
         ptree & max_scale = rule_node.push_back( ptree::value_type(
                                                      "MaxScaleDenominator", ptree()))->second;
-        max_scale.put_value( rule.get_max_scale() );
+        max_scale.put_value( r.get_max_scale() );
     }
 
-    rule_type::symbolizers::const_iterator begin = rule.get_symbolizers().begin();
-    rule_type::symbolizers::const_iterator end = rule.get_symbolizers().end();
+    rule::symbolizers::const_iterator begin = r.get_symbolizers().begin();
+    rule::symbolizers::const_iterator end = r.get_symbolizers().end();
     serialize_symbolizer serializer( rule_node, explicit_defaults);
     std::for_each( begin, end , boost::apply_visitor( serializer ));
 }

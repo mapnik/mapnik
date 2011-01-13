@@ -107,7 +107,7 @@ public:
     void process(glyph_symbolizer const& sym,
                  Feature const& feature,
                  proj_transform const& prj_trans);
-    inline bool process(rule_type::symbolizers const& syms,
+    inline bool process(rule::symbolizers const& syms,
 			Feature const& feature,
 			proj_transform const& prj_trans)
     {

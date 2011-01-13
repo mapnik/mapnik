@@ -121,8 +121,6 @@ typedef boost::variant<point_symbolizer,
                        glyph_symbolizer> symbolizer;
     
         
-    
-template <typename FeatureT>
 class rule
 {    
 public:
@@ -308,8 +306,6 @@ private:
         else_filter_=rhs.else_filter_;
     }
 };
-
-typedef rule<Feature> rule_type;
 
 }
 

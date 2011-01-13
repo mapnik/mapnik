@@ -28,7 +28,7 @@
 
 using mapnik::feature_type_style;
 using mapnik::rules;
-using mapnik::rule_type;
+using mapnik::rule;
 
 struct style_pickle_suite : boost::python::pickle_suite
 {
@@ -63,7 +63,7 @@ struct style_pickle_suite : boost::python::pickle_suite
         boost::python::list rules = extract<boost::python::list>(state[0]);
         for (int i=0; i<len(rules); ++i)
         {
-            s.add_rule(extract<rule_type>(rules[i]));
+            s.add_rule(extract<rule>(rules[i]));
         }
     }
    

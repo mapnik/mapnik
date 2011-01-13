@@ -208,17 +208,17 @@ private:
                     continue;
                 }
                 
-                const std::vector<rule_type>& rules=(*style).get_rules();
+                const std::vector<rule>& rules=(*style).get_rules();
                 bool active_rules=false;
                 
-                BOOST_FOREACH(rule_type const& rule, rules)
+                BOOST_FOREACH(rule const& r, rules)
                 {
-                    if (rule.active(scale_denom))
+                    if (r.active(scale_denom))
                     {
                         active_rules = true;
                         if (ds->type() == datasource::Vector)
                         {
-                            collector(rule);
+                            collector(r);
                         }
                         // TODO - in the future rasters should be able to be filtered.
                     }
@@ -241,22 +241,22 @@ private:
             
             BOOST_FOREACH (feature_type_style * style, active_styles)
             {
-                std::vector<rule_type*> if_rules;
-                std::vector<rule_type*> else_rules;
+                std::vector<rule*> if_rules;
+                std::vector<rule*> else_rules;
 
-                std::vector<rule_type> const& rules=style->get_rules();
+                std::vector<rule> const& rules=style->get_rules();
                 
-                BOOST_FOREACH(rule_type const& rule, rules)
+                BOOST_FOREACH(rule const& r, rules)
                 {
-                    if (rule.active(scale_denom))
+                    if (r.active(scale_denom))
                     {
-                        if (rule.has_else_filter())
+                        if (r.has_else_filter())
                         {
-                            else_rules.push_back(const_cast<rule_type*>(&rule));
+                            else_rules.push_back(const_cast<rule*>(&r));
                         }
                         else
                         {
-                            if_rules.push_back(const_cast<rule_type*>(&rule));
+                            if_rules.push_back(const_cast<rule*>(&r));
                         }
                         
                         if (ds->type() == datasource::Raster )
@@ -265,9 +265,9 @@ private:
                             
                             if (ds->params().get<double>("filter_factor",0.0) == 0.0)
                             {
-                                rule_type::symbolizers const& symbols = rule.get_symbolizers();
-                                rule_type::symbolizers::const_iterator symIter = symbols.begin();
-                                rule_type::symbolizers::const_iterator symEnd = symbols.end();
+                                rule::symbolizers const& symbols = r.get_symbolizers();
+                                rule::symbolizers::const_iterator symIter = symbols.begin();
+                                rule::symbolizers::const_iterator symEnd = symbols.end();
                                 for (;symIter != symEnd;++symIter)
                                 {   
                                     try
@@ -315,14 +315,14 @@ private:
                             cache.push(feature);
                         }
                         
-                        BOOST_FOREACH(rule_type * rule, if_rules )
+                        BOOST_FOREACH(rule * r, if_rules )
                         {
-                            expression_ptr const& expr=rule->get_filter();    
+                            expression_ptr const& expr=r->get_filter();    
                             value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
                             if (result.to_bool())
                             {   
                                 do_else=false;
-                                rule_type::symbolizers const& symbols = rule->get_symbolizers();
+                                rule::symbolizers const& symbols = r->get_symbolizers();
 
                                 // if the underlying renderer is not able to process the complete set of symbolizers,
                                 // process one by one.
@@ -340,9 +340,9 @@ private:
                         }
                         if (do_else)
                         {
-                            BOOST_FOREACH( rule_type * rule, else_rules )
+                            BOOST_FOREACH( rule * r, else_rules )
                             {
-                                rule_type::symbolizers const& symbols = rule->get_symbolizers();
+                                rule::symbolizers const& symbols = r->get_symbolizers();
                                 // if the underlying renderer is not able to process the complete set of symbolizers,
                                 // process one by one.
 #ifdef SVG_RENDERER

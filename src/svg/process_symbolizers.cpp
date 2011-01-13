@@ -27,7 +27,7 @@
 namespace mapnik { 
 
 template <typename OutputIterator>
-bool svg_renderer<OutputIterator>::process(rule_type::symbolizers const& syms,
+bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
                                            Feature const& feature,
                                            proj_transform const& prj_trans)
 {
@@ -61,7 +61,7 @@ bool svg_renderer<OutputIterator>::process(rule_type::symbolizers const& syms,
     return true;
 };
 
-template bool svg_renderer<std::ostream_iterator<char> >::process(rule_type::symbolizers const& syms,
+template bool svg_renderer<std::ostream_iterator<char> >::process(rule::symbolizers const& syms,
                                                                   Feature const& feature,
                                                                   proj_transform const& prj_trans);
 

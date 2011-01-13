@@ -94,17 +94,17 @@ private:
 
     void parse_rule(feature_type_style & style, ptree const & r);
 
-    void parse_point_symbolizer(rule_type & rule, ptree const & sym);
-    void parse_line_pattern_symbolizer(rule_type & rule, ptree const & sym);
-    void parse_polygon_pattern_symbolizer(rule_type & rule, ptree const & sym);
-    void parse_text_symbolizer(rule_type & rule, ptree const & sym);
-    void parse_shield_symbolizer(rule_type & rule, ptree const & sym);
-    void parse_line_symbolizer(rule_type & rule, ptree const & sym);
-    void parse_polygon_symbolizer(rule_type & rule, ptree const & sym);
-    void parse_building_symbolizer(rule_type & rule, ptree const & sym );
-    void parse_raster_symbolizer(rule_type & rule, ptree const & sym );
-    void parse_markers_symbolizer(rule_type & rule, ptree const & sym );
-    void parse_glyph_symbolizer(rule_type & rule, ptree const & sym );
+    void parse_point_symbolizer(rule & rule, ptree const & sym);
+    void parse_line_pattern_symbolizer(rule & rule, ptree const & sym);
+    void parse_polygon_pattern_symbolizer(rule & rule, ptree const & sym);
+    void parse_text_symbolizer(rule & rule, ptree const & sym);
+    void parse_shield_symbolizer(rule & rule, ptree const & sym);
+    void parse_line_symbolizer(rule & rule, ptree const & sym);
+    void parse_polygon_symbolizer(rule & rule, ptree const & sym);
+    void parse_building_symbolizer(rule & rule, ptree const & sym );
+    void parse_raster_symbolizer(rule & rule, ptree const & sym );
+    void parse_markers_symbolizer(rule & rule, ptree const & sym );
+    void parse_glyph_symbolizer(rule & rule, ptree const & sym );
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
     void parse_stroke(stroke & strk, ptree const & sym);
@@ -633,7 +633,7 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
         name = get_attr( r, "name", string());
         std::string title = get_attr( r, "title", string());
 
-        rule_type rule(name,title);
+        rule rule(name,title);
 
         optional<std::string> filter_expr =
             get_opt_child<string>( r, "Filter");
@@ -749,7 +749,7 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, ptree cons
     sym.add_metawriter(*writer, output);
 }
 
-void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
@@ -865,7 +865,7 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
 }
 
 
-void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
@@ -986,7 +986,7 @@ void map_parser::parse_markers_symbolizer( rule_type & rule, ptree const & sym )
     }
 }
 
-void map_parser::parse_line_pattern_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_line_pattern_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
@@ -1040,7 +1040,7 @@ void map_parser::parse_line_pattern_symbolizer( rule_type & rule, ptree const & 
     }
 }
 
-void map_parser::parse_polygon_pattern_symbolizer( rule_type & rule,
+void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
                                                    ptree const & sym )
 {
     try
@@ -1098,7 +1098,7 @@ void map_parser::parse_polygon_pattern_symbolizer( rule_type & rule,
     }
 }
 
-void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
@@ -1315,7 +1315,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
     }
 }
 
-void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
@@ -1638,7 +1638,7 @@ void map_parser::parse_stroke(stroke & strk, ptree const & sym)
     }
 }
 
-void map_parser::parse_line_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
@@ -1657,7 +1657,7 @@ void map_parser::parse_line_symbolizer( rule_type & rule, ptree const & sym )
 }
 
     
-void map_parser::parse_polygon_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_polygon_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
@@ -1683,7 +1683,7 @@ void map_parser::parse_polygon_symbolizer( rule_type & rule, ptree const & sym )
 }
 
 
-void map_parser::parse_building_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
 {
     try {
         building_symbolizer building_sym;
@@ -1708,7 +1708,7 @@ void map_parser::parse_building_symbolizer( rule_type & rule, ptree const & sym 
     }
 }
 
-void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
+void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
@@ -1756,7 +1756,7 @@ void map_parser::parse_raster_symbolizer( rule_type & rule, ptree const & sym )
     }
 }
 
-void map_parser::parse_glyph_symbolizer(rule_type & rule, ptree const &sym)
+void map_parser::parse_glyph_symbolizer(rule & rule, ptree const &sym)
 {
     try
     {

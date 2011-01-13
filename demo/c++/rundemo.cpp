@@ -65,12 +65,12 @@ int main ( int argc , char** argv)
         // Provinces (polygon)
         feature_type_style provpoly_style;
        
-        rule_type provpoly_rule_on;
+        rule provpoly_rule_on;
         provpoly_rule_on.set_filter(parse_expression("[NAME_EN] = 'Ontario'"));
         provpoly_rule_on.append(polygon_symbolizer(color(250, 190, 183)));
         provpoly_style.add_rule(provpoly_rule_on);
         
-        rule_type provpoly_rule_qc;
+        rule provpoly_rule_qc;
         provpoly_rule_qc.set_filter(parse_expression("[NOM_FR] = 'Québec'"));
         provpoly_rule_qc.append(polygon_symbolizer(color(217, 235, 203)));
         provpoly_style.add_rule(provpoly_rule_qc);
@@ -85,7 +85,7 @@ int main ( int argc , char** argv)
         provlines_stk.add_dash(2, 2);
         provlines_stk.add_dash(2, 2);
         
-        rule_type provlines_rule;
+        rule provlines_rule;
         provlines_rule.append(line_symbolizer(provlines_stk));
         provlines_style.add_rule(provlines_rule);
         
@@ -94,7 +94,7 @@ int main ( int argc , char** argv)
         // Drainage 
         feature_type_style qcdrain_style;
         
-        rule_type qcdrain_rule;
+        rule qcdrain_rule;
         qcdrain_rule.set_filter(parse_expression("[HYC] = 8"));
         qcdrain_rule.append(polygon_symbolizer(color(153, 204, 255)));
         qcdrain_style.add_rule(qcdrain_rule);
@@ -103,7 +103,7 @@ int main ( int argc , char** argv)
         
         // Roads 3 and 4 (The "grey" roads)
         feature_type_style roads34_style;    
-        rule_type roads34_rule;
+        rule roads34_rule;
         roads34_rule.set_filter(parse_expression("[CLASS] = 3 or [CLASS] = 4"));
         stroke roads34_rule_stk(color(171,158,137),2.0);
         roads34_rule_stk.set_line_cap(ROUND_CAP);
@@ -116,7 +116,7 @@ int main ( int argc , char** argv)
 
         // Roads 2 (The thin yellow ones)
         feature_type_style roads2_style_1;
-        rule_type roads2_rule_1;
+        rule roads2_rule_1;
         roads2_rule_1.set_filter(parse_expression("[CLASS] = 2"));
         stroke roads2_rule_stk_1(color(171,158,137),4.0);
         roads2_rule_stk_1.set_line_cap(ROUND_CAP);
@@ -127,7 +127,7 @@ int main ( int argc , char** argv)
         m.insert_style("road-border", roads2_style_1);
         
         feature_type_style roads2_style_2;
-        rule_type roads2_rule_2;
+        rule roads2_rule_2;
         roads2_rule_2.set_filter(parse_expression("[CLASS] = 2"));
         stroke roads2_rule_stk_2(color(255,250,115),2.0);
         roads2_rule_stk_2.set_line_cap(ROUND_CAP);
@@ -139,7 +139,7 @@ int main ( int argc , char** argv)
         
         // Roads 1 (The big orange ones, the highways)
         feature_type_style roads1_style_1;
-        rule_type roads1_rule_1;
+        rule roads1_rule_1;
         roads1_rule_1.set_filter(parse_expression("[CLASS] = 1"));
         stroke roads1_rule_stk_1(color(188,149,28),7.0);
         roads1_rule_stk_1.set_line_cap(ROUND_CAP);
@@ -149,7 +149,7 @@ int main ( int argc , char** argv)
         m.insert_style("highway-border", roads1_style_1);
         
         feature_type_style roads1_style_2;
-        rule_type roads1_rule_2;
+        rule roads1_rule_2;
         roads1_rule_2.set_filter(parse_expression("[CLASS] = 1"));
         stroke roads1_rule_stk_2(color(242,191,36),5.0);
         roads1_rule_stk_2.set_line_cap(ROUND_CAP);
@@ -161,7 +161,7 @@ int main ( int argc , char** argv)
         // Populated Places
         
         feature_type_style popplaces_style;
-        rule_type popplaces_rule;
+        rule popplaces_rule;
         text_symbolizer popplaces_text_symbolizer(parse_expression("GEONAME"),"DejaVu Sans Book",10,color(0,0,0));
         popplaces_text_symbolizer.set_halo_fill(color(255,255,200));
         popplaces_text_symbolizer.set_halo_radius(1);

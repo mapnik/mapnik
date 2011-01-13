@@ -601,12 +601,12 @@ void Map::init_metawriters()
     Map::style_iterator styIter = begin_styles();
     Map::style_iterator styEnd = end_styles();
     for (; styIter!=styEnd; ++styIter) {
-        std::vector<rule_type>& rules = styIter->second.get_rules_nonconst();
-        std::vector<rule_type>::iterator ruleIter = rules.begin();
-        std::vector<rule_type>::iterator ruleEnd = rules.end();
+        std::vector<rule>& rules = styIter->second.get_rules_nonconst();
+        std::vector<rule>::iterator ruleIter = rules.begin();
+        std::vector<rule>::iterator ruleEnd = rules.end();
         for (; ruleIter!=ruleEnd; ++ruleIter) {
-            rule_type::symbolizers::iterator symIter = ruleIter->begin();
-            rule_type::symbolizers::iterator symEnd = ruleIter->end();
+            rule::symbolizers::iterator symIter = ruleIter->begin();
+            rule::symbolizers::iterator symEnd = ruleIter->end();
             for (; symIter!=symEnd; ++symIter) {
                 boost::apply_visitor(d, *symIter);
             }
