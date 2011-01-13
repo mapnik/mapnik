@@ -192,14 +192,16 @@ if env['SVN_REVISION']:
     sources.insert(0,env2.SharedObject('mapnik_python.cpp'))
 
 if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
+    # attach libs to _mapnik.so linking environment
+    py_env.ParseConfig('pkg-config --libs cairomm-1.0')
     env2 = py_env.Clone()
-    env2.ParseConfig('pkg-config --libs --cflags cairomm-1.0')
     fixup = ['mapnik_image.cpp','python_cairo.cpp']
     for cpp in fixup:
         if cpp in sources:
             sources.remove(cpp)
     if env['HAS_CAIRO']:
         env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
+        env2.ParseConfig('pkg-config --cflags cairomm-1.0')
     if env['HAS_PYCAIRO']:
         env2.ParseConfig('pkg-config --cflags pycairo')
         env2.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
