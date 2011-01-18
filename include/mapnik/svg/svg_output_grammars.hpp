@@ -34,7 +34,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/repository/include/karma_confix.hpp>
 #include <boost/spirit/home/phoenix/bind/bind_member_function.hpp>
-#include <boost/fusion/include/adapt_class.hpp>
+#include <boost/fusion/include/adapted.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 
 // std
@@ -50,13 +50,13 @@
  * original value (in map coordinates) and once to generate them
  * with their value in user coordinates (after conversion).
  */
-BOOST_FUSION_ADAPT_CLASS(
-    mapnik::vertex_vector2<mapnik::vertex2d>::vertex_type,
-    (unsigned, unsigned, obj.get<2>(), /**/)
-    (double, double, obj.get<0>(), /**/)
-    (double, double, obj.get<1>(), /**/)
-    (double, double, obj.get<0>(), /**/)
-    (double, double, obj.get<1>(), /**/)
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::vertex2d,
+    (unsigned, cmd)
+    (double, x)
+    (double, y)
+    (double, x)
+    (double, y)
 )
 
 /*!
@@ -66,41 +66,41 @@ BOOST_FUSION_ADAPT_CLASS(
  * This adaptation is the primary reason why the attributes are stored in
  * this structure before being passed to the generate_path method.
  */
-BOOST_FUSION_ADAPT_CLASS(
+BOOST_FUSION_ADAPT_STRUCT(
     mapnik::svg::path_output_attributes,
-    (std::string, std::string, obj.fill_color(), /**/)
-    (double, double, obj.fill_opacity(), /**/)
-    (std::string, std::string, obj.stroke_color(), /**/)
-    (double, double, obj.stroke_opacity(), /**/)
-    (double, double, obj.stroke_width(), /**/)
-    (std::string, std::string, obj.stroke_linecap(), /**/)
-    (std::string, std::string, obj.stroke_linejoin(), /**/)
-    (double, double, obj.stroke_dashoffset(), /**/)
+    (std::string, fill_color_)
+    (double, fill_opacity_)
+    (std::string, stroke_color_)
+    (double, stroke_opacity_)
+    (double, stroke_width_)
+    (std::string, stroke_linecap_)
+    (std::string, stroke_linejoin_)
+    (double, stroke_dashoffset_)
 )
 
 /*!
  * mapnik::svg::rect_output_attributes is adapted as a fusion sequence
  * in order to be used directly by the svg_rect_attributes_grammar (below).
  */
-BOOST_FUSION_ADAPT_CLASS(
+BOOST_FUSION_ADAPT_STRUCT(
     mapnik::svg::rect_output_attributes,
-    (int, int, obj.x(), /**/)
-    (int, int, obj.y(), /**/)
-    (unsigned, unsigned, obj.width(), /**/)
-    (unsigned, unsigned, obj.height(), /**/)
-    (std::string, std::string, obj.fill_color(), /**/)
+    (int, x_)
+    (int, y_)
+    (unsigned, width_)
+    (unsigned, height_)
+    (std::string, fill_color_)
 )
 
 /*!
  * mapnik::svg::root_output_attributes is adapted as a fusion sequence
  * in order to be used directly by the svg_root_attributes_grammar (below).
  */
-BOOST_FUSION_ADAPT_CLASS(
+BOOST_FUSION_ADAPT_STRUCT(
     mapnik::svg::root_output_attributes,
-    (unsigned, unsigned, obj.width(), /**/)
-    (unsigned, unsigned, obj.height(), /**/)
-    (double, double, obj.svg_version(), /**/)
-    (std::string, std::string, obj.svg_namespace_url(), /**/)
+    (unsigned, width_)
+    (unsigned, height_)
+    (double, svg_version_)
+    (std::string, svg_namespace_url_)
 )
 
 /*!

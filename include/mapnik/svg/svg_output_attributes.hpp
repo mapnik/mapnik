@@ -85,7 +85,7 @@ namespace mapnik { namespace svg {
 	 */
 	void reset();
 
-    private:
+    //private:
 	// polygon symbolizer attributes.
 	std::string fill_color_;
 	double fill_opacity_;
@@ -147,7 +147,7 @@ namespace mapnik { namespace svg {
 	 */
 	void reset();
 
-    private:
+    //private:
 	int x_;
 	int y_;
 	unsigned width_;
@@ -192,7 +192,7 @@ namespace mapnik { namespace svg {
 	// SVG XML namespace url.
 	static const std::string SVG_NAMESPACE_URL;
 
-    private:
+    //private:
 	unsigned width_;
 	unsigned height_;
 	double svg_version_;
