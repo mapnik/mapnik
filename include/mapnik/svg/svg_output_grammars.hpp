@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/vertex.hpp>
 #include <mapnik/geometry.hpp>
+//#include <mapnik/geometry_iter.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/svg/svg_output_attributes.hpp>
 
@@ -108,7 +109,7 @@ BOOST_FUSION_ADAPT_STRUCT(
  * required by Karma to be recognized as a container of
  * attributes for output generation.
  */
-namespace boost { namespace spirit { namespace traits {
+/*namespace boost { namespace spirit { namespace traits {
 
     template <>
     struct is_container<mapnik::geometry_type const>
@@ -118,29 +119,33 @@ namespace boost { namespace spirit { namespace traits {
     template <>
     struct container_iterator<mapnik::geometry_type const>
     {
-	typedef mapnik::geometry_type::iterator type;
+	typedef mapnik::geometry_iterator type;
     };
 
     template <>
     struct begin_container<mapnik::geometry_type const>
     {
-	static mapnik::geometry_type::iterator 
+	static mapnik::geometry_iterator 
 	call(mapnik::geometry_type const& g)
 	{
-	    return g.begin();
+	  double* x;
+	  double* y;
+	  unsigned cmd = g.vertex(x, y);
+	  
+	  return mapnik::geometry_iterator(g, mapnik::geometry_iterator::iter_value(*x, *y, cmd));
 	}
     };
 
     template <>
     struct end_container<mapnik::geometry_type const>
     {
-	static mapnik::geometry_type::iterator 
+	static mapnik::geometry_iterator 
 	call(mapnik::geometry_type const& g)
 	{
-	    return g.end();
+	  return mapnik::geometry_iterator(g);
 	}
     };
-}}}
+    }}}*/
 
 namespace mapnik { namespace svg {
 
@@ -194,15 +199,17 @@ namespace mapnik { namespace svg {
     struct svg_path_data_grammar : karma::grammar<OutputIterator, mapnik::geometry_type()>
     {
 	typedef path_coordinate_transformer<PathType> coordinate_transformer;
-	typedef mapnik::vertex_vector2<mapnik::vertex2d>::vertex_type vertex_type;
-	typedef mapnik::vertex_vector2<mapnik::vertex2d>::value_type vertex_component_type;
+      //typedef mapnik::vertex_vector2<mapnik::vertex2d>::vertex_type vertex_type;
+        typedef mapnik::geometry_type::vertex_type vertex_type;
+      //typedef mapnik::vertex_vector2<mapnik::vertex2d>::value_type vertex_component_type;
+        typedef mapnik::geometry_type::value_type vertex_component_type;
 
 	explicit svg_path_data_grammar(PathType const& path_type)
 	    : svg_path_data_grammar::base_type(svg_path),
 	      path_type_(path_type),
 	      ct_(path_type)
 	{
-	    using karma::int_;
+	  /*	    using karma::int_;
 	    using karma::double_;
 	    using karma::_1;
 	    using karma::_a;
@@ -231,7 +238,7 @@ namespace mapnik { namespace svg {
 
 	    path_vertex_transformed_x = double_[_1 = _a][bind(&coordinate_transformer::current_x, &ct_, _a)];
 
-	    path_vertex_transformed_y = double_[_1 = _a][bind(&coordinate_transformer::current_y, &ct_, _a)];
+	    path_vertex_transformed_y = double_[_1 = _a][bind(&coordinate_transformer::current_y, &ct_, _a)];*/
 	}
 
 	karma::rule<OutputIterator, mapnik::geometry_type()> svg_path;
@@ -242,7 +249,7 @@ namespace mapnik { namespace svg {
 
 	PathType const& path_type_;
 	coordinate_transformer ct_;
-    };
+	};
 
     template <typename OutputIterator>
     struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::path_output_attributes()>
