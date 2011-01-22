@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/vertex.hpp>
 #include <mapnik/geometry.hpp>
-//#include <mapnik/geometry_iter.hpp>
+#include <mapnik/geometry_iterator.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/svg/svg_output_attributes.hpp>
 
@@ -118,31 +118,27 @@ BOOST_FUSION_ADAPT_STRUCT(
 
     template <>
     struct container_iterator<mapnik::geometry_type const>
-    {
-	typedef mapnik::geometry_iterator type;
+    {       
+        typedef mapnik::geometry_type::iterator type; 
     };
 
     template <>
     struct begin_container<mapnik::geometry_type const>
     {
-	static mapnik::geometry_iterator 
+        static mapnik::geometry_type::iterator  	
 	call(mapnik::geometry_type const& g)
 	{
-	  double* x;
-	  double* y;
-	  unsigned cmd = g.vertex(x, y);
-	  
-	  return mapnik::geometry_iterator(g, mapnik::geometry_iterator::iter_value(*x, *y, cmd));
+            return g.begin();
 	}
     };
 
     template <>
     struct end_container<mapnik::geometry_type const>
     {
-	static mapnik::geometry_iterator 
+        static mapnik::geometry_type::iterator  	
 	call(mapnik::geometry_type const& g)
 	{
-	  return mapnik::geometry_iterator(g);
+            return g.end(); 
 	}
     };
     }}}*/
@@ -249,7 +245,7 @@ namespace mapnik { namespace svg {
 
 	PathType const& path_type_;
 	coordinate_transformer ct_;
-	};
+    };
 
     template <typename OutputIterator>
     struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::path_output_attributes()>
