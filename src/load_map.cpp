@@ -1101,6 +1101,13 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
     {
 	std::string name =  get_attr<string>(sym, "name");
 
+        // mapnik2 forward compatibility
+        if (boost::algorithm::istarts_with(name,"[") && boost::algorithm::iends_with(name,"]"))
+        {
+            boost::algorithm::ireplace_first(name,"[","");
+            boost::algorithm::ireplace_last(name,"]","");
+        }
+
 	optional<std::string> face_name =
             get_opt_attr<std::string>(sym, "face_name");
 
