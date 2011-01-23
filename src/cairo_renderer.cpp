@@ -1217,7 +1217,20 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                         geom.label_position(&label_x, &label_y);
                         prj_trans.backward(label_x, label_y, z);
                         t_.forward(&label_x, &label_y);
-                        finder.find_point_placement(text_placement, label_x, label_y);
+
+                        double angle = 0.0;
+                        expression_ptr angle_expr = sym.get_orientation();
+                        if (angle_expr)
+                        {
+                            // apply rotation
+                            value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*angle_expr);
+                            angle = result.to_double();
+                        }
+
+                        finder.find_point_placement(text_placement,label_x,label_y, 
+                                                    angle, sym.get_vertical_alignment(),sym.get_line_spacing(),
+                                                    sym.get_character_spacing(),sym.get_horizontal_alignment(),
+                                                    sym.get_justify_alignment());
                         finder.update_detector(text_placement);
                     }
                     else //LINE_PLACEMENT
