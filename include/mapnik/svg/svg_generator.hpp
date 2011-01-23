@@ -48,7 +48,7 @@ namespace mapnik { namespace svg {
 
 	typedef svg::svg_root_attributes_grammar<OutputIterator> root_attributes_grammar;
 	typedef svg::svg_rect_attributes_grammar<OutputIterator> rect_attributes_grammar;
-      //	typedef svg::svg_path_data_grammar<OutputIterator, path_type> path_data_grammar;
+        typedef svg::svg_path_data_grammar<OutputIterator, path_type> path_data_grammar;
 	typedef svg::svg_path_attributes_grammar<OutputIterator> path_attributes_grammar;
 	typedef svg::svg_path_dash_array_grammar<OutputIterator> path_dash_array_grammar;
 
