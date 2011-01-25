@@ -5,6 +5,7 @@
             <PointSymbolizer />
             <!-- the hello world sample hardcodes 'key' as the hypothetical field name -->
             <TextSymbolizer name="[key]" face_name="DejaVu Sans Book" size="10" dx="5" dy="5"/>
+            <LineSymbolizer stroke="green" stroke-width="3"/>
         </Rule>
     </Style>
     <!-- this example only works in EPSG:4326 -->

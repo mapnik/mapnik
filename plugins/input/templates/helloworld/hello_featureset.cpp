@@ -34,6 +34,17 @@ mapnik::feature_ptr hello_featureset::next()
         // add the geometry to the feature
         feature->add_geometry(pt);
         
+        // A feature usually will have just one geometry of a given type
+        // but mapnik does support many geometries per feature of any type
+        // so here we draw a line around the point
+        mapnik::geometry_type * line = new mapnik::geometry_type(mapnik::LineString);
+        line->move_to(box_.minx(),box_.miny());
+        line->line_to(box_.minx(),box_.maxy());
+        line->line_to(box_.maxx(),box_.maxy());
+        line->line_to(box_.maxx(),box_.miny());
+        line->line_to(box_.minx(),box_.miny());
+        feature->add_geometry(line);
+        
         // increment the count so that we only return one feature
         ++count_;
         
