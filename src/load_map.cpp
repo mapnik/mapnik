@@ -174,6 +174,14 @@ void map_parser::parse_map( Map & map, ptree const & pt )
         {
             parameters extra_attr;
 
+            // Check if relative paths should be interpreted as relative to/from XML location
+            // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
+            optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
+            if (paths_from_xml)
+            {
+                relative_to_xml_ = *paths_from_xml;
+            }
+
             optional<color> bgcolor = get_opt_attr<color>(map_node, "background-color");
             if (bgcolor) 
             {
@@ -183,7 +191,7 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             optional<std::string> image_filename = get_opt_attr<string>(map_node, "background-image");
             if (image_filename)
             {                
-                map.set_background_image(*image_filename);
+                map.set_background_image(ensure_relative_to_xml(image_filename));
             }
             
             map.set_srs( get_attr(map_node, "srs", map.srs() ));
@@ -199,14 +207,6 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             {
                 extra_attr["font_directory"] = *font_directory;
                 freetype_engine::register_fonts( ensure_relative_to_xml(font_directory), false);
-            }
-
-            // Check if relative paths should be interpreted as relative to/from XML location
-            // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
-            optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
-            if (paths_from_xml)
-            {
-                relative_to_xml_ = *paths_from_xml;
             }
 
             optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum_version");
@@ -560,23 +560,16 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
                     }
                 }
 
-                if ( relative_to_xml_ ) {
-                    boost::optional<std::string> base_param = params.get<std::string>("base");
-                    boost::optional<std::string> file_param = params.get<std::string>("file");
+                boost::optional<std::string> base_param = params.get<std::string>("base");
+                boost::optional<std::string> file_param = params.get<std::string>("file");
 
-                    if (base_param){
-                        params["base"] = ensure_relative_to_xml(base_param);
-                    }
+                if (base_param){
+                    params["base"] = ensure_relative_to_xml(base_param);
+                }
 
-                    else if (file_param){
-                        params["file"] = ensure_relative_to_xml(file_param);
-                    }
+                else if (file_param){
+                    params["file"] = ensure_relative_to_xml(file_param);
                 }
-#ifdef MAPNIK_DEBUG
-                else {
-                    std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
-                }
-#endif
 
                 //now we are ready to create datasource
                 try
@@ -777,15 +770,7 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
                     }
                 }
 
-                if ( relative_to_xml_ )
-                {
-                    *file = ensure_relative_to_xml(file);
-                }
-#ifdef MAPNIK_DEBUG
-                else {
-                    std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
-                }
-#endif
+                *file = ensure_relative_to_xml(file);
                    
                 point_symbolizer symbol(parse_path(*file));
 
@@ -887,16 +872,7 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
                     }
                 }
 
-                if ( relative_to_xml_ )
-                {
-                    *file = ensure_relative_to_xml(file);
-                }
-#ifdef MAPNIK_DEBUG
-                else {
-                    std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
-                }
-#endif
-                filename = *file;
+                filename = ensure_relative_to_xml(file);
             }
             catch (...)
             {
@@ -1003,16 +979,8 @@ void map_parser::parse_line_pattern_symbolizer( rule & rule, ptree const & sym )
                     file = itr->second + "/" + file;
                 }
             }
-            if ( relative_to_xml_ )
-            {
-                file = ensure_relative_to_xml(file);
-            }
-#ifdef MAPNIK_DEBUG
-            else {
-                std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
-            }
-#endif
 
+            file = ensure_relative_to_xml(file);
 
             line_pattern_symbolizer symbol(parse_path(file));
 
@@ -1058,15 +1026,8 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
                     file = itr->second + "/" + file;
                 }
             }
-            if ( relative_to_xml_ )
-            {
-                file = ensure_relative_to_xml(file);
-            }
-#ifdef MAPNIK_DEBUG
-            else {
-                std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
-            }
-#endif
+
+            file = ensure_relative_to_xml(file);
 
             polygon_pattern_symbolizer symbol(parse_path(file));
 
@@ -1345,15 +1306,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
                 }
             }
 
-            if ( relative_to_xml_ )
-            {
-                image_file = ensure_relative_to_xml(image_file);
-            }
-#ifdef MAPNIK_DEBUG
-            else {
-                std::clog << "\nFound relative paths in xml, leaving unchanged...\n";
-            }
-#endif
+            image_file = ensure_relative_to_xml(image_file);
 
             shield_symbolizer shield_symbol(parse_expression(name, "utf8"),size,fill,parse_path(image_file));
                 
@@ -1922,22 +1875,25 @@ void map_parser::ensure_font_face( const std::string & face_name )
 
 std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt_path )
 {
-    boost::filesystem::path xml_path = filename_;
-    boost::filesystem::path rel_path = *opt_path;
-    if ( !rel_path.has_root_path() ) 
+    if (relative_to_xml_)
     {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-        boost::filesystem::path full = boost::filesystem::absolute(xml_path.branch_path()/rel_path).normalize();
-#else // v2
-        boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
-#endif
-
-#ifdef MAPNIK_DEBUG
-        std::clog << "\nModifying relative paths to be relative to xml...\n";
-        std::clog << "original base path: " << *opt_path << "\n";
-        std::clog << "relative base path: " << full.string() << "\n";
-#endif
-        return full.string();
+        boost::filesystem::path xml_path = filename_;
+        boost::filesystem::path rel_path = *opt_path;
+        if ( !rel_path.has_root_path() ) 
+        {
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+            boost::filesystem::path full = boost::filesystem::absolute(xml_path.branch_path()/rel_path).normalize();
+    #else // v2
+            boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
+    #endif
+    
+    #ifdef MAPNIK_DEBUG
+            std::clog << "\nModifying relative paths to be relative to xml...\n";
+            std::clog << "original base path: " << *opt_path << "\n";
+            std::clog << "relative base path: " << full.string() << "\n";
+    #endif
+            return full.string();
+        }
     }
     return *opt_path;
 }
