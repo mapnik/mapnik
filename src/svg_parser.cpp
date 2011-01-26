@@ -224,9 +224,9 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     {
         parse_gradient_stop(reader);
     }
-    else
+    else if (!xmlStrEqual(name, BAD_CAST "svg"))
     {
-        std::clog << "unhandled element: " << name << "\n";
+        std::clog << "notice: unhandled svg element: " << name << "\n";
     }
 }
 
@@ -675,7 +675,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
 
     temporary_gradient_.second.add_stop(offset, stop_color);
 
-    std::cerr << "\tFound Stop: " << offset << " " << (unsigned)stop_color.red() << " " << (unsigned)stop_color.green() << " " << (unsigned)stop_color.blue() << " " << (unsigned)stop_color.alpha() << std::endl;
+    //std::cerr << "\tFound Stop: " << offset << " " << (unsigned)stop_color.red() << " " << (unsigned)stop_color.green() << " " << (unsigned)stop_color.blue() << " " << (unsigned)stop_color.alpha() << std::endl;
 
 }
 
@@ -705,7 +705,7 @@ bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
         std::string linkid = (const char *) &value[1];
         if (gradient_map_.count(linkid))
         {
-            std::cerr << "\tLoading linked gradient properties from " << linkid << std::endl;
+            //std::cerr << "\tLoading linked gradient properties from " << linkid << std::endl;
             temporary_gradient_.second = gradient_map_[linkid];
         }
         else
@@ -792,7 +792,7 @@ void svg_parser::parse_radial_gradient(xmlTextReaderPtr reader)
     // add this here in case we have no end tag, will be replaced if we do
     gradient_map_[temporary_gradient_.first] = temporary_gradient_.second;
 
-    std::cerr << "Found Radial Gradient: " << " " << cx << " " << cy << " " << fx << " " << fy << " " << r << std::endl;
+    //std::cerr << "Found Radial Gradient: " << " " << cx << " " << cy << " " << fx << " " << fy << " " << r << std::endl;
 }
 
 void svg_parser::parse_linear_gradient(xmlTextReaderPtr reader)
@@ -830,7 +830,7 @@ void svg_parser::parse_linear_gradient(xmlTextReaderPtr reader)
     // add this here in case we have no end tag, will be replaced if we do
     gradient_map_[temporary_gradient_.first] = temporary_gradient_.second;
 
-    std::cerr << "Found Linear Gradient: " << "(" << x1 << " " << y1 << "),(" << x2 << " " << y2 << ")" << std::endl;
+    //std::cerr << "Found Linear Gradient: " << "(" << x1 << " " << y1 << "),(" << x2 << " " << y2 << ")" << std::endl;
 }
 
 void svg_parser::parse_pattern(xmlTextReaderPtr reader)

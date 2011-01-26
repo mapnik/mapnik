@@ -309,7 +309,6 @@ public:
 
             if (attr.stroke_flag || attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
             {
-                std::clog << "stroking\n";
                 curved_stroked_.width(attr.stroke_width);
                 //m_curved_stroked.line_join((attr.line_join == miter_join) ? miter_join_round : attr.line_join);
                 curved_stroked_.line_join(attr.line_join);
