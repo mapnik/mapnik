@@ -1390,6 +1390,7 @@ if not HELP_REQUESTED:
     # Build shapeindex and remove its dependency from the LIBS
     if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
         SConscript('utils/shapeindex/SConscript')
+        SConscript('utils/svg2png/SConscript')
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
         color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
