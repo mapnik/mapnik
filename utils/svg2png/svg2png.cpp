@@ -135,7 +135,7 @@ int main (int argc,char** argv)
                                      (*marker.get_vector_data())->attributes());
                 agg::trans_affine tr;
                 
-                boost::array<double,6> matrix_;
+                /*boost::array<double,6> matrix_;
                 matrix_[0] = 1.0;
                 matrix_[1] = 0.0;
                 matrix_[2] = 0.0;
@@ -143,12 +143,13 @@ int main (int argc,char** argv)
                 matrix_[4] = 0.0;
                 matrix_[5] = 0.0;
                 tr.load_from(&matrix_[0]);
+                */
 
                 agg::trans_affine mtx = recenter * tr;
                 double scale_factor_ = 1;
                 double opacity = 1;
                 mtx *= agg::trans_affine_scaling(scale_factor_);
-                mtx *= agg::trans_affine_translation(width_/2, height_/2);
+                //mtx *= agg::trans_affine_translation(width_/2, height_/2);
         
                 svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
                 
