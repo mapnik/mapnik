@@ -36,7 +36,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/map.hpp>
-#include <mapnik/marker.hpp>
+//#include <mapnik/marker.hpp>
 
 // cairo
 #include <cairomm/context.h>
@@ -46,7 +46,17 @@
 #include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
 
+// FIXME
+// forward declare so that
+// apps using mapnik do not
+// need agg headers
+namespace agg {
+  class trans_affine;
+}
+
 namespace mapnik {
+
+class marker;
 
 class cairo_face;
 

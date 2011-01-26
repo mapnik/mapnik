@@ -31,6 +31,10 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
+
 
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
@@ -65,6 +69,7 @@
 #include "agg_renderer_outline_image.h"
 #include "agg_vpgen_clip_polyline.h"
 #include "agg_arrowhead.h"
+
 
 // boost
 #include <boost/utility.hpp>
@@ -191,6 +196,51 @@ void agg_renderer<T>::end_layer_processing(layer const&)
 #ifdef MAPNIK_DEBUG
     std::clog << "end layer processing\n";
 #endif
+}
+
+template <typename T>
+void agg_renderer<T>::render_marker(const int x, const int y, marker &marker, const agg::trans_affine & tr, double opacity)
+{
+    if (marker.is_vector())
+    {
+        typedef agg::pixfmt_rgba32_plain pixfmt;
+        typedef agg::renderer_base<pixfmt> renderer_base;
+
+        ras_ptr->reset();
+        ras_ptr->gamma(agg::gamma_linear());
+        agg::scanline_u8 sl;
+        agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+        pixfmt pixf(buf);
+        renderer_base renb(pixf);
+
+        box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
+        double x1 = bbox.minx();
+        double y1 = bbox.miny();
+        double x2 = bbox.maxx();
+        double y2 = bbox.maxy();
+
+        agg::trans_affine recenter = agg::trans_affine_translation(0.5*(marker.width()-(x1+x2)),0.5*(marker.height()-(y1+y2)));
+
+        vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_renderer<svg_path_adapter,
+                     agg::pod_bvector<path_attributes> > svg_renderer(svg_path,
+                             (*marker.get_vector_data())->attributes());
+        agg::trans_affine mtx = recenter * tr;
+        mtx *= agg::trans_affine_scaling(scale_factor_);
+        mtx *= agg::trans_affine_translation(x, y);
+
+        svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
+
+
+    }
+    else
+    {
+        //int px = int(floor(x - 0.5 * marker.width()));
+       // int py = int(floor(y - 0.5 * marker.height()));
+
+        pixmap_.set_rectangle_alpha2(**marker.get_bitmap_data(), x, y, opacity);
+    }
 }
 
 template class agg_renderer<image_32>;
