@@ -36,6 +36,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/marker.hpp>
 
 // cairo
 #include <cairomm/context.h>
@@ -115,6 +116,8 @@ public:
 	return false;
     };
 protected:
+    void render_marker(const int x, const int y, marker &marker, const agg::trans_affine & mtx, double opacity=1.0);
+
     Map const& m_;
     Cairo::RefPtr<Cairo::Context> context_;
     CoordTransform t_;

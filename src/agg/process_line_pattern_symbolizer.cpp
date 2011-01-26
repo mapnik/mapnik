@@ -25,7 +25,7 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_pattern_source.hpp>
-#include <mapnik/image_cache.hpp>
+#include <mapnik/marker_cache.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -58,7 +58,11 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     agg::pixfmt_rgba32_plain pixf(buf);
     
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<image_ptr> pat = image_cache::instance()->find(filename,true);
+
+    boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
+    if (!mark || !(*mark)->is_bitmap()) return;
+
+    boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
 
     if (!pat) return;
       

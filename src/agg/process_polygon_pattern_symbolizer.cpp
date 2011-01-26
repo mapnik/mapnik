@@ -24,7 +24,7 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/image_cache.hpp>
+#include <mapnik/marker_cache.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -73,7 +73,15 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     ras_ptr->gamma(agg::gamma_linear());
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<image_ptr> pat = image_cache::instance()->find(filename,true);
+    boost::optional<mapnik::marker_ptr> marker;
+    if ( !filename.empty() )
+    {
+        marker = marker_cache::instance()->find(filename, true);
+    }
+
+    if (!marker || !(*marker)->is_bitmap()) return;
+
+    boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
 
     if (!pat) return;
     

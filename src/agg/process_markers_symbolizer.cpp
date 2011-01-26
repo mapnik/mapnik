@@ -24,8 +24,7 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_cache.hpp>
-#include <mapnik/svg/marker_cache.hpp>
+#include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/markers_placement.hpp>
@@ -50,7 +49,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::pixfmt_rgba32_plain pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
     
@@ -73,9 +72,10 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     
     if (!filename.empty())
     {
-        boost::optional<path_ptr> marker = mapnik::marker_cache::instance()->find(filename, true);
-        if (marker && *marker)
+        boost::optional<marker_ptr> mark = mapnik::marker_cache::instance()->find(filename, true);
+        if (mark && *mark && (*mark)->is_vector())
         {
+            boost::optional<path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
             double x1 = bbox.minx();
             double y1 = bbox.miny();
@@ -111,7 +111,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 while (placement.get_point(&x, &y, &angle))
                 {
                     agg::trans_affine matrix = recenter * tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
-                    svg_renderer.render(*ras_ptr, sl, ren, matrix, sym.get_opacity());
+                    svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(),bbox);
                     if (writer.first)
                         //writer.first->add_box(label_ext, feature, t_, writer.second);
                         std::clog << "### Warning metawriter not yet supported for LINE placement\n";

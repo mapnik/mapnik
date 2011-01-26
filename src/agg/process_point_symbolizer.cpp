@@ -25,9 +25,8 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_cache.hpp>
 #include <mapnik/metawriter.hpp>
-#include <mapnik/svg/marker_cache.hpp>
+#include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
@@ -44,126 +43,104 @@
 namespace mapnik {
 
 template <typename T>
-void agg_renderer<T>::process(point_symbolizer const& sym,
-                              Feature const& feature,
-                              proj_transform const& prj_trans)
+void agg_renderer<T>::render_marker(const int x, const int y, marker &marker, const agg::trans_affine & tr, double opacity)
 {
-    typedef agg::pixfmt_rgba32 pixfmt;
-    typedef agg::renderer_base<pixfmt> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
-    
-    double x;
-    double y;
-    double z=0;
-    
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
-    boost::optional<mapnik::image_ptr> data;
-    
-    if (is_svg(filename))
+    if (marker.is_vector())
     {
-        // SVG  
-        using namespace mapnik::svg;
-        boost::optional<path_ptr> marker;
+        typedef agg::pixfmt_rgba32_plain pixfmt;
+        typedef agg::renderer_base<pixfmt> renderer_base;
+
         ras_ptr->reset();
         ras_ptr->gamma(agg::gamma_linear());
         agg::scanline_u8 sl;
         agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
         pixfmt pixf(buf);
         renderer_base renb(pixf);
-        renderer_solid ren(renb);
-        box2d<double> extent;
-        
-        marker = marker_cache::instance()->find(filename, true);
 
-        if (marker && *marker)
-        {
-            
-            box2d<double> const& bbox = (*marker)->bounding_box();
-            double x1 = bbox.minx();
-            double y1 = bbox.miny();
-            double x2 = bbox.maxx();
-            double y2 = bbox.maxy();
-        
-            agg::trans_affine recenter = agg::trans_affine_translation(-0.5*(x1+x2),-0.5*(y1+y2));
-            
-            vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
-            svg_path_adapter svg_path(stl_storage);
-            svg_renderer<svg_path_adapter, 
-                         agg::pod_bvector<path_attributes> > svg_renderer(svg_path,
-                                                                          (*marker)->attributes());
-            
-            for (unsigned i=0; i<feature.num_geometries(); ++i)
-            {
-                geometry_type const& geom = feature.get_geometry(i);  
-                geom.label_position(&x,&y);
-                prj_trans.backward(x,y,z);
-                t_.forward(&x,&y);
-                
-                agg::trans_affine tr;
-                boost::array<double,6> const& m = sym.get_transform();
-                tr.load_from(&m[0]);
-                tr = recenter * tr;
-                tr *= agg::trans_affine_scaling(scale_factor_);
-                tr *= agg::trans_affine_translation(x, y);
-                
-                tr.transform(&x1,&y1);
-                tr.transform(&x2,&y2);
-                
-                extent.init(x1,y1,x2,y2);
-                if (sym.get_allow_overlap() ||
-                    detector_.has_placement(extent))
-                {
-                    svg_renderer.render(*ras_ptr, sl, ren, tr, sym.get_opacity());
-                    if (!sym.get_ignore_placement())
-                        detector_.insert(extent);
-                    metawriter_with_properties writer = sym.get_metawriter();
-                    if (writer.first)
-                    {
-                        writer.first->add_box(extent, feature, t_, writer.second);
-                    }
-                }
-            }   
-        }
+        box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
+        double x1 = bbox.minx();
+        double y1 = bbox.miny();
+        double x2 = bbox.maxx();
+        double y2 = bbox.maxy();
+
+        agg::trans_affine recenter = agg::trans_affine_translation(0.5*(marker.width()-(x1+x2)),0.5*(marker.height()-(y1+y2)));
+
+        vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_renderer<svg_path_adapter,
+                     agg::pod_bvector<path_attributes> > svg_renderer(svg_path,
+                             (*marker.get_vector_data())->attributes());
+        agg::trans_affine mtx = recenter * tr;
+        mtx *= agg::trans_affine_scaling(scale_factor_);
+        mtx *= agg::trans_affine_translation(x, y);
+
+        svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
+
+
     }
     else
     {
-        if ( filename.empty() )
-        {
-            // default OGC 4x4 black square
-            data = boost::optional<mapnik::image_ptr>(new image_data_32(4,4));
-            (*data)->set(0xff000000);
-        }
-        else
-        {
-            data = mapnik::image_cache::instance()->find(filename,true);    
-        }
+        //int px = int(floor(x - 0.5 * marker.width()));
+       // int py = int(floor(y - 0.5 * marker.height()));
 
-        if ( data )
+        pixmap_.set_rectangle_alpha2(**marker.get_bitmap_data(), x, y, opacity);
+    }
+}
+
+
+template <typename T>
+void agg_renderer<T>::process(point_symbolizer const& sym,
+                              Feature const& feature,
+                              proj_transform const& prj_trans)
+{
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
+    
+    boost::optional<mapnik::marker_ptr> marker;
+    if ( !filename.empty() )
+    {
+        marker = marker_cache::instance()->find(filename, true);
+    }
+    else
+    {
+        marker.reset(boost::shared_ptr<mapnik::marker> (new mapnik::marker()));
+    }
+
+    if (marker)
+    {
+        for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            for (unsigned i=0; i<feature.num_geometries(); ++i)
+            geometry_type const& geom = feature.get_geometry(i);
+            double x;
+            double y;
+            double z=0;
+
+            geom.label_position(&x,&y);
+            prj_trans.backward(x,y,z);
+            t_.forward(&x,&y);
+
+            int w = (*marker)->width();
+            int h = (*marker)->height();
+
+            int px = int(floor(x - 0.5 * w));
+            int py = int(floor(y - 0.5 * h));
+            box2d<double> label_ext (px, py, px + w, py + h);
+            if (sym.get_allow_overlap() ||
+                detector_.has_placement(label_ext))
             {
-                geometry_type const& geom = feature.get_geometry(i);
-                
-                geom.label_position(&x,&y);
-                prj_trans.backward(x,y,z);
-                t_.forward(&x,&y);
-                int w = (*data)->width();
-                int h = (*data)->height();
-                int px = int(floor(x - 0.5 * w));
-                int py = int(floor(y - 0.5 * h));
-                box2d<double> label_ext (px, py, px + w, py + h);
-                if (sym.get_allow_overlap() ||
-                    detector_.has_placement(label_ext))
-                {
-                    pixmap_.set_rectangle_alpha2(*(*data), px, py, sym.get_opacity());
-                    if (!sym.get_ignore_placement())
-                        detector_.insert(label_ext);
-                    metawriter_with_properties writer = sym.get_metawriter();
-                    if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
-                }
+                agg::trans_affine tr;
+                boost::array<double,6> const& m = sym.get_transform();
+                tr.load_from(&m[0]);
+
+                render_marker(px,py,**marker,tr, sym.get_opacity());
+
+                if (!sym.get_ignore_placement())
+                    detector_.insert(label_ext);
+                metawriter_with_properties writer = sym.get_metawriter();
+                if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
             }
         }
     }
+
 }
 
 template void agg_renderer<image_32>::process(point_symbolizer const&,

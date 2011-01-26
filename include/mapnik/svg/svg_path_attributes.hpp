@@ -30,6 +30,8 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_trans_affine.h"
 
+#include <mapnik/gradient.hpp>
+
 namespace mapnik {
 namespace svg {
 
@@ -42,11 +44,14 @@ struct path_attributes
     bool         fill_flag;
     bool         stroke_flag;
     bool         even_odd_flag;
+    bool         visibility_flag;
     agg::line_join_e  line_join;
     agg::line_cap_e   line_cap;
     double       miter_limit;
     double       stroke_width;
     agg::trans_affine transform;
+    mapnik::gradient fill_gradient;
+    mapnik::gradient stroke_gradient;
     
     // Empty constructor
     path_attributes() :
@@ -57,11 +62,14 @@ struct path_attributes
         fill_flag(true),
         stroke_flag(false),
         even_odd_flag(false),
+        visibility_flag(true),
         line_join(agg::miter_join),
         line_cap(agg::butt_cap),
         miter_limit(4.0),
         stroke_width(1.0),
-        transform()
+        transform(),
+        fill_gradient(),
+        stroke_gradient()
     {
     }
 
@@ -74,11 +82,15 @@ struct path_attributes
           fill_flag(attr.fill_flag),
           stroke_flag(attr.stroke_flag),
           even_odd_flag(attr.even_odd_flag),
+          visibility_flag(attr.visibility_flag),
           line_join(attr.line_join),
           line_cap(attr.line_cap),
           miter_limit(attr.miter_limit),
           stroke_width(attr.stroke_width),
-          transform(attr.transform) {}
+          transform(attr.transform),
+          fill_gradient(attr.fill_gradient),
+          stroke_gradient(attr.stroke_gradient)
+    {}
 
     // Copy constructor with new index value
     path_attributes(path_attributes const& attr, unsigned idx) 
@@ -89,11 +101,15 @@ struct path_attributes
           fill_flag(attr.fill_flag),
           stroke_flag(attr.stroke_flag),
           even_odd_flag(attr.even_odd_flag),
+          visibility_flag(attr.visibility_flag),
           line_join(attr.line_join),
           line_cap(attr.line_cap),
           miter_limit(attr.miter_limit),
           stroke_width(attr.stroke_width),
-          transform(attr.transform) {}
+          transform(attr.transform),
+          fill_gradient(attr.fill_gradient),
+          stroke_gradient(attr.stroke_gradient)
+    {}
 };
 
 }}

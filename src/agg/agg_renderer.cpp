@@ -24,8 +24,7 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/image_util.hpp>
-#include <mapnik/image_cache.hpp>
+#include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/config_error.hpp>
@@ -126,11 +125,12 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
     boost::optional<std::string> const& image_filename = m.background_image();
     if (image_filename)
     {
-        boost::optional<mapnik::image_ptr> bg_image = mapnik::image_cache::instance()->find(*image_filename,true);
-        if (bg_image)
+        boost::optional<mapnik::marker_ptr> bg_marker = mapnik::marker_cache::instance()->find(*image_filename,true);
+        if (bg_marker && (*bg_marker)->is_bitmap())
         {
-            int w = (*bg_image)->width();
-            int h = (*bg_image)->height();
+            mapnik::image_ptr bg_image = *(*bg_marker)->get_bitmap_data();
+            int w = bg_image->width();
+            int h = bg_image->height();
             if ( w > 0 && h > 0)
             {
                 // repeat background-image both vertically and horizontally
@@ -140,7 +140,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        pixmap_.set_rectangle_alpha2(*(*bg_image), x*w, y*h, 1.0f);
+                        pixmap_.set_rectangle_alpha2(*bg_image, x*w, y*h, 1.0f);
                     }
                 }
             }

@@ -32,6 +32,10 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/marker.hpp>
+
+// agg
+#include <agg_trans_affine.h>
 
 // boost
 #include <boost/utility.hpp>
@@ -53,6 +57,8 @@ public:
     void end_map_processing(Map const& map);
     void start_layer_processing(layer const& lay);
     void end_layer_processing(layer const& lay);
+    void render_marker(const int x, const int y, marker &marker, const agg::trans_affine & tr, double opacity);
+
     void process(point_symbolizer const& sym,
                  Feature const& feature,
                  proj_transform const& prj_trans);

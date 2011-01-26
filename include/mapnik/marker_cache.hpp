@@ -22,14 +22,18 @@
 
 //$Id$
 
-#ifndef MAPNIK_IMAGE_CACHE_HPP
-#define MAPNIK_IMAGE_CACHE_HPP
+#ifndef MAPNIK_MARKER_CACHE_HPP
+#define MAPNIK_MARKER_CACHE_HPP
 
 // mapnik
 #include <mapnik/utils.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/image_data.hpp>
-
+#include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/svg/svg_storage.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
+// agg
+#include "agg_path_storage.h"
 // boost
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
@@ -42,22 +46,25 @@
 namespace mapnik
 {
 
-typedef boost::shared_ptr<image_data_32> image_ptr;
+using namespace mapnik::svg;
 
-struct MAPNIK_DECL image_cache :
-        public singleton <image_cache, CreateStatic>,
+typedef boost::shared_ptr<marker> marker_ptr;
+
+
+struct MAPNIK_DECL marker_cache :
+        public singleton <marker_cache, CreateStatic>,
         private boost::noncopyable
 {
 
-    friend class CreateStatic<image_cache>;
+    friend class CreateStatic<marker_cache>;
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif
-    static boost::unordered_map<std::string,image_ptr> cache_;
-    static bool insert(std::string const& key, image_ptr);
-    static boost::optional<image_ptr> find(std::string const& key, bool update_cache = false);
+    static boost::unordered_map<std::string,marker_ptr> cache_;
+    static bool insert(std::string const& key, marker_ptr);
+    static boost::optional<marker_ptr> find(std::string const& key, bool update_cache = false);
 };
 
 }
 
-#endif // MAPNIK_IMAGE_CACHE_HPP
+#endif // MAPNIK_MARKER_CACHE_HPP

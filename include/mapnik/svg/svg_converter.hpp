@@ -201,7 +201,19 @@ public:
         attr.fill_color.opacity(a * f.opacity()); 
         attr.fill_flag = true;
     }
-    
+
+    void add_fill_gradient(mapnik::gradient& grad)
+    {
+        path_attributes& attr = cur_attr();
+        attr.fill_gradient = grad;
+    }
+
+    void add_stroke_gradient(mapnik::gradient& grad)
+    {
+        path_attributes& attr = cur_attr();
+        attr.stroke_gradient = grad;
+    }
+
     void stroke(const agg::rgba8& s)
     {
         path_attributes& attr = cur_attr();
@@ -215,6 +227,12 @@ public:
     {
         cur_attr().even_odd_flag = flag;
     }
+
+    void visibility(bool flag)
+    {
+        cur_attr().visibility_flag = flag;
+    }
+
     
     void stroke_width(double w)
     {

@@ -5,7 +5,7 @@
         <Rule>
             <ShieldSymbolizer
              name="[label]"
-             file="../svg/rect.svg"
+             file="../images/dummy.png"
              face_name="DejaVu Sans Book"
              size="10"
              transform="scale(5) translate(15, 15) rotate(20) skewX(20) skewY(5)"
@@ -17,10 +17,44 @@
              no_text="false"
              opacity=".5"
              text-opacity=".3"
+             allow_overlap="true"
+             avoid_edges="false"
             />
         </Rule>
-        
+        <Rule>
+            <PointSymbolizer
+                allow_overlap="true" />
+        </Rule>
     </Style>
+    <Style name="2">
+        <Rule>
+            <LineSymbolizer></LineSymbolizer>
+        </Rule>
+        <Rule>
+            <ShieldSymbolizer
+             name="[label]"
+             file="../svg/ellipses.svg"
+             allow_overlap="true"
+             face_name="DejaVu Sans Book"
+             size="10"
+             no_text="false"
+             opacity=".5"
+             text-opacity=".3"
+             spacing="50"
+             line_spacing="10"
+             placement="line"
+            />
+        </Rule>
+    </Style>
+
+    <Layer name="line" srs="+init=epsg:4326">
+        <StyleName>2</StyleName>
+        <Datasource>
+            <Parameter name="file">../json/lines.json</Parameter>
+            <Parameter name="layer_by_index">0</Parameter>
+            <Parameter name="type">ogr</Parameter>
+        </Datasource>
+    </Layer>
 
     <Layer name="point" srs="+init=epsg:4326">
         <StyleName>1</StyleName>

@@ -18,7 +18,7 @@
     },
     { "type": "Feature", 
     
-        "properties": { "x": 0, "y": 0, "label": "0,5" },
+        "properties": { "x": 0, "y": 5, "label": "0,5" },
         "geometry"  : { "type": "Point", "coordinates": [ 0, 5 ] }
     },
     { "type": "Feature", 
