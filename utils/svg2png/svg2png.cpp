@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <string>
 
@@ -51,7 +52,7 @@ int main (int argc,char** argv)
     namespace po = boost::program_options;
     
     bool verbose=false;
-    std::string svg;
+    std::vector<std::string> svg_files;
     
     try
     {
@@ -60,7 +61,7 @@ int main (int argc,char** argv)
             ("help,h", "produce usage message")
             ("version,V","print version string")
             ("verbose,v","verbose output")
-            ("svg",po::value<std::string>(),"svg file to read")
+            ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
         
         po::positional_options_description p;
@@ -87,78 +88,76 @@ int main (int argc,char** argv)
         
         if (vm.count("svg"))
         {
-            svg=vm["svg"].as<std::string>();
+            svg_files=vm["svg"].as< std::vector<std::string> >();
         }
         else
         {
             std::clog << "please provide an svg file!" << std::endl;
             return -1;
         }
-        
-        boost::optional<mapnik::marker_ptr> marker_ptr = mapnik::marker_cache::instance()->find(svg, false);
-        if (marker_ptr) {
-        
-            mapnik::marker marker  = **marker_ptr;
-            if (marker.is_vector()) {
 
-                int width_ = 600;//marker.width() + 10;
-                int height_ = 400;//marker.height() + 10;
-                mapnik::image_32 pixmap_(width_,height_);
-                agg::rasterizer_scanline_aa<> ras_ptr;
-                
-                typedef agg::pixfmt_rgba32_plain pixfmt;
-                
-                typedef agg::renderer_base<pixfmt> renderer_base;
+        std::vector<std::string>::const_iterator itr = svg_files.begin();
+        if (itr == svg_files.end())
+        {
+            std::clog << "no svg files to render" << std::endl;
+            return 0;
+        }
+        while (itr != svg_files.end())
+        {
         
+            std::string svg_name (*itr++);
         
-                ras_ptr.reset();
-                ras_ptr.gamma(agg::gamma_linear());
-                agg::scanline_u8 sl;
-                agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
-                pixfmt pixf(buf);
-                renderer_base renb(pixf);
-        
-                mapnik::box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
-                double x1 = bbox.minx();
-                double y1 = bbox.miny();
-                double x2 = bbox.maxx();
-                double y2 = bbox.maxy();
-        
-                
-                agg::trans_affine recenter = agg::trans_affine_translation(0.5*(marker.width()-(x1+x2)),0.5*(marker.height()-(y1+y2)));
-        
-                mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
-                
-                mapnik::svg::svg_path_adapter svg_path(stl_storage);
-                mapnik::svg::svg_renderer<mapnik::svg::svg_path_adapter,
-                             agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer_this(svg_path,
-                                     (*marker.get_vector_data())->attributes());
-                agg::trans_affine tr;
-                
-                /*boost::array<double,6> matrix_;
-                matrix_[0] = 1.0;
-                matrix_[1] = 0.0;
-                matrix_[2] = 0.0;
-                matrix_[3] = 1.0;
-                matrix_[4] = 0.0;
-                matrix_[5] = 0.0;
-                tr.load_from(&matrix_[0]);
-                */
-
-                agg::trans_affine mtx = recenter * tr;
-                double scale_factor_ = 1;
-                double opacity = 1;
-                mtx *= agg::trans_affine_scaling(scale_factor_);
-                //mtx *= agg::trans_affine_translation(width_/2, height_/2);
-        
-                svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
-                
-                mapnik::save_to_file<mapnik::image_data_32>(pixmap_.data(),"test.png","png");
-                system("open test.png");
-         
+            boost::optional<mapnik::marker_ptr> marker_ptr = mapnik::marker_cache::instance()->find(svg_name, false);
+            if (marker_ptr) {
             
+                mapnik::marker marker  = **marker_ptr;
+                if (marker.is_vector()) {
+    
+                    int width_ = marker.width();
+                    int height_ = marker.height();
+                    mapnik::image_32 pixmap_(width_,height_);
+                    agg::rasterizer_scanline_aa<> ras_ptr;
+                    typedef agg::pixfmt_rgba32_plain pixfmt;
+                    typedef agg::renderer_base<pixfmt> renderer_base;
+            
+                    ras_ptr.reset();
+                    ras_ptr.gamma(agg::gamma_linear());
+                    agg::scanline_u8 sl;
+                    agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+                    pixfmt pixf(buf);
+                    renderer_base renb(pixf);
+            
+                    mapnik::box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
+                    double x1 = bbox.minx();
+                    double y1 = bbox.miny();
+                    double x2 = bbox.maxx();
+                    double y2 = bbox.maxy();
+            
+                    agg::trans_affine recenter = agg::trans_affine_translation(0.5*(marker.width()-(x1+x2)),0.5*(marker.height()-(y1+y2)));
+            
+                    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
+                    
+                    mapnik::svg::svg_path_adapter svg_path(stl_storage);
+                    mapnik::svg::svg_renderer<mapnik::svg::svg_path_adapter,
+                                 agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer_this(svg_path,
+                                         (*marker.get_vector_data())->attributes());
+                    agg::trans_affine tr;
+                    
+                    agg::trans_affine mtx = recenter * tr;
+                    double scale_factor_ = 1;
+                    double opacity = 1;
+                    mtx *= agg::trans_affine_scaling(scale_factor_);
+                    svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
+                    
+                    boost::algorithm::ireplace_last(svg_name,".svg",".png");
+                    mapnik::save_to_file<mapnik::image_data_32>(pixmap_.data(),svg_name,"png");
+                    std::ostringstream s;
+                    s << "open " << svg_name;
+                    system(s.str().c_str());
+                }
             }
-        }        
+        }
+     
         
     }
     catch (...)
@@ -166,8 +165,7 @@ int main (int argc,char** argv)
         std::clog << "Exception of unknown type!" << std::endl;
         return -1;
     }
-        
-    std::clog << "done!" << std::endl;
+
     return 0;
 }
 
