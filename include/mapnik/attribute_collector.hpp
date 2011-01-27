@@ -251,7 +251,23 @@ public:
         expression_attributes f_attr(names_);
         boost::apply_visitor(f_attr,*expr);
     }   
-};   
+};
+
+struct directive_collector : public boost::static_visitor<>
+{
+    directive_collector(double * filter_factor)
+        : filter_factor_(filter_factor) {}
+        
+    template <typename T>
+    void operator () (T const&) const {}
+    
+    void operator () (raster_symbolizer const& sym)
+    {
+        *filter_factor_ = sym.calculate_filter_factor();
+    }
+private:
+    double * filter_factor_;
+};
 
 } // namespace mapnik
 
