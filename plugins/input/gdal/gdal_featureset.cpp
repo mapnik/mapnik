@@ -159,6 +159,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         {
             im_width *= filter_factor_;
             im_height *= filter_factor_;
+#ifdef MAPNIK_DEBUG
+            std::clog << "GDAL Plugin: applying layer filter_factor: " << filter_factor_ << "\n";
+#endif
         }
         // otherwise respect symbolizer level factor applied to query, default of 1.0
         else
@@ -299,7 +302,6 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #ifdef MAPNIK_DEBUG
                     std::clog << "GDAL Plugin: processing gray band..." << std::endl;
 #endif
-                    // TODO : apply colormap if present
                 
                     grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 0,
                                    image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
@@ -307,6 +309,24 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                    image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
                     grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 2,
                                    image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
+
+                    GDALColorTable *color_table = grey->GetColorTable();
+                    if (color_table)
+                    {
+                        for (unsigned y = 0; y < image.height(); ++y)
+                        {
+                            unsigned int* row = image.getRow(y);
+                            for (unsigned x = 0; x < image.width(); ++x)
+                            {
+                                unsigned value = row[x] & 0xff;
+                                const GDALColorEntry *ce = color_table->GetColorEntry ( value );
+                                if (ce ){
+                                    // TODO - big endian support
+                                    row[x] = (ce->c4 << 24)| (ce->c3 << 16) |  (ce->c2 << 8) | (ce->c1) ;
+                                }
+                            }
+                        }
+                    }
                 }
     
                 if (alpha)
