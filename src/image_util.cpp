@@ -35,6 +35,9 @@ extern "C"
 #include <mapnik/image_view.hpp>
 #include <mapnik/map.hpp>
 
+// boost
+#include <boost/lexical_cast.hpp>
+
 // jpeg
 #if defined(HAVE_JPEG)
 #include <mapnik/jpeg_io.hpp>
@@ -52,6 +55,22 @@ extern "C"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+// agg
+//#include "agg_conv_transform.h"
+#include "agg_image_accessors.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_rasterizer_scanline_aa.h"
+#include "agg_renderer_scanline.h"
+#include "agg_rendering_buffer.h"
+#include "agg_scanline_u.h"
+//#include "agg_scanline_p.h"
+#include "agg_span_allocator.h"
+#include "agg_span_image_filter_rgba.h"
+#include "agg_span_interpolator_linear.h"
+#include "agg_trans_affine.h"
+#include "agg_image_filters.h"
+
 
 namespace mapnik
 {    
@@ -266,5 +285,307 @@ template void save_to_file<image_view<image_data_32> > (image_view<image_data_32
    
 template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                  std::string const&);
+
+
+
+// Image scaling functions
+
+scaling_method_e get_scaling_method_by_name (std::string name)
+{
+    // TODO - make into proper ENUMS
+    if (name == "fast" || name == "near")
+        return SCALING_NEAR;
+    else if (name == "bilinear")
+        return SCALING_BILINEAR;
+    else if (name == "cubic" || name == "bicubic")
+        return SCALING_BICUBIC;
+    else if (name == "spline16")
+        return SCALING_SPLINE16;
+    else if (name == "spline36")
+        return SCALING_SPLINE36;
+    else if (name == "hanning")
+        return SCALING_HANNING;
+    else if (name == "hamming")
+        return SCALING_HAMMING;
+    else if (name == "hermite")
+        return SCALING_HERMITE;
+    else if (name == "kaiser")
+        return SCALING_KAISER;
+    else if (name == "quadric")
+        return SCALING_QUADRIC;
+    else if (name == "catrom")
+        return SCALING_CATROM;
+    else if (name == "gaussian")
+        return SCALING_GAUSSIAN;
+    else if (name == "bessel")
+        return SCALING_BESSEL;
+    else if (name == "mitchell")
+        return SCALING_MITCHELL;
+    else if (name == "sinc")
+        return SCALING_SINC;
+    else if (name == "lanczos")
+        return SCALING_LANCZOS;
+    else if (name == "blackman")
+        return SCALING_BLACKMAN;
+    else
+        return SCALING_NEAR;
+}
+
+// this has been replaced by agg impl - see https://trac.mapnik.org/ticket/656
+/*
+inline void scale_image_bilinear (Image& target,const Image& source, double x_off_f=0, double y_off_f=0)
+{
+
+    int source_width=source.width();
+    int source_height=source.height();
+
+    int target_width=target.width();
+    int target_height=target.height();
+
+    if (source_width<1 || source_height<1 ||
+        target_width<1 || target_height<1) return;
+    int x=0,y=0,xs=0,ys=0;
+    int tw2 = target_width/2;
+    int th2 = target_height/2;
+    int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
+    int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
+    unsigned yprt, yprt1, xprt, xprt1;
+
+    //no scaling or subpixel offset
+    if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
+        for (y=0;y<target_height;++y)
+            target.setRow(y,source.getRow(y),target_width);
+        return;
+    }
+
+    for (y=0;y<target_height;++y)
+    {
+        ys = (y*source_height+offs_y)/target_height;
+        int ys1 = ys+1;
+        if (ys1>=source_height)
+            ys1--;
+        if (ys<0)
+            ys=ys1=0;
+        if (source_height/2<target_height)
+            yprt = (y*source_height+offs_y)%target_height;
+        else
+            yprt = th2;
+        yprt1 = target_height-yprt;
+        for (x=0;x<target_width;++x)
+        {
+            xs = (x*source_width+offs_x)/target_width;
+            if (source_width/2<target_width)
+                xprt = (x*source_width+offs_x)%target_width;
+            else
+                xprt = tw2;
+            xprt1 = target_width-xprt;
+            int xs1 = xs+1;
+            if (xs1>=source_width)
+                xs1--;
+            if (xs<0)
+                xs=xs1=0;
+
+            unsigned a = source(xs,ys);
+            unsigned b = source(xs1,ys);
+            unsigned c = source(xs,ys1);
+            unsigned d = source(xs1,ys1);
+            unsigned out=0;
+            unsigned t = 0;
+
+            for(int i=0; i<4; i++){
+                unsigned p,r,s;
+                // X axis
+                p = a&0xff;
+                r = b&0xff;
+                if (p!=r)
+                    r = (r*xprt+p*xprt1+tw2)/target_width;
+                p = c&0xff;
+                s = d&0xff;
+                if (p!=s)
+                    s = (s*xprt+p*xprt1+tw2)/target_width;
+                // Y axis
+                if (r!=s)
+                    r = (s*yprt+r*yprt1+th2)/target_height;
+                // channel up
+                out |= r << t;
+                t += 8;
+                a >>= 8;
+                b >>= 8;
+                c >>= 8;
+                d >>= 8;
+            }
+            target(x,y)=out;
+        }
+    }
+}
+*/
+
+template <typename Image>
+void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f, double y_off_f)
+{
+
+    int source_width=source.width();
+    int source_height=source.height();
+
+    int target_width=target.width();
+    int target_height=target.height();
+
+    if (source_width<1 || source_height<1 ||
+        target_width<1 || target_height<1) return;
+    int x=0,y=0,xs=0,ys=0;
+    int tw2 = target_width/2;
+    int th2 = target_height/2;
+    int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
+    int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
+    unsigned yprt, yprt1, xprt, xprt1;
+
+    //no scaling or subpixel offset
+    if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
+        for (y=0;y<target_height;++y)
+            target.setRow(y,source.getRow(y),target_width);
+        return;
+    }
+
+    for (y=0;y<target_height;++y)
+    {
+        ys = (y*source_height+offs_y)/target_height;
+        int ys1 = ys+1;
+        if (ys1>=source_height)
+            ys1--;
+        if (ys<0)
+            ys=ys1=0;
+        if (source_height/2<target_height)
+            yprt = (y*source_height+offs_y)%target_height;
+        else
+            yprt = th2;
+        yprt1 = target_height-yprt;
+        for (x=0;x<target_width;++x)
+        {
+            xs = (x*source_width+offs_x)/target_width;
+            if (source_width/2<target_width)
+                xprt = (x*source_width+offs_x)%target_width;
+            else
+                xprt = tw2;
+            xprt1 = target_width-xprt;
+            int xs1 = xs+1;
+            if (xs1>=source_width)
+                xs1--;
+            if (xs<0)
+                xs=xs1=0;
+
+            unsigned a = source(xs,ys);
+            unsigned b = source(xs1,ys);
+            unsigned c = source(xs,ys1);
+            unsigned d = source(xs1,ys1);
+            unsigned p,r,s;
+            // X axis
+            p = a&0xff;
+            r = b&0xff;
+            if (p!=r)
+                r = (r*xprt+p*xprt1+tw2)/target_width;
+            p = c&0xff;
+            s = d&0xff;
+            if (p!=s)
+                s = (s*xprt+p*xprt1+tw2)/target_width;
+            // Y axis
+            if (r!=s)
+                r = (s*yprt+r*yprt1+th2)/target_height;
+            target(x,y)=(0xff<<24) | (r<<16) | (r<<8) | r;
+        }
+    }
+}
+
+template <typename Image>
+void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius)
+{
+    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::renderer_base<pixfmt> renderer_base;
+    
+    // define some stuff we'll use soon
+    agg::rasterizer_scanline_aa<> ras;
+    agg::scanline_u8 sl;
+    agg::span_allocator<agg::rgba8> sa;
+    agg::image_filter_lut filter;
+    
+    // initialize source AGG buffer
+    agg::rendering_buffer rbuf_src((unsigned char*)source.getBytes(), source.width(), source.height(), source.width() * 4);
+    pixfmt pixf_src(rbuf_src);
+    
+    typedef agg::image_accessor_clone<pixfmt> img_src_type;
+    img_src_type img_src(pixf_src);
+    
+    // initialise destination AGG buffer (with transparency)
+    agg::rendering_buffer rbuf_dst((unsigned char*)target.getBytes(), target.width(), target.height(), target.width() * 4);
+    pixfmt pixf_dst(rbuf_dst);
+    renderer_base rb_dst(pixf_dst);
+    rb_dst.clear(agg::rgba(0, 0, 0, 0));
+    
+    // create a scaling matrix
+    agg::trans_affine img_mtx;
+    img_mtx /= agg::trans_affine_scaling(scale_factor, scale_factor);
+
+    // create a linear interpolator for our scaling matrix
+    typedef agg::span_interpolator_linear<> interpolator_type;
+    interpolator_type interpolator(img_mtx);
+    
+    // draw an anticlockwise polygon to render our image into
+    double scaled_width = source.width() * scale_factor;
+    double scaled_height = source.height() * scale_factor;
+    ras.reset();
+    ras.move_to_d(x_off_f,                y_off_f);
+    ras.line_to_d(x_off_f + scaled_width, y_off_f);
+    ras.line_to_d(x_off_f + scaled_width, y_off_f + scaled_height);
+    ras.line_to_d(x_off_f,                y_off_f + scaled_height);
+    
+    switch(scaling_method)
+    {
+        case SCALING_NEAR:
+        {
+            typedef agg::span_image_filter_rgba_nn<img_src_type, interpolator_type> span_gen_type;
+            span_gen_type sg(img_src, interpolator);
+            agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
+            return;
+        }
+        case SCALING_BILINEAR:
+            filter.calculate(agg::image_filter_bilinear(), true); break;
+        case SCALING_BICUBIC:
+            filter.calculate(agg::image_filter_bicubic(), true); break;
+        case SCALING_SPLINE16:
+            filter.calculate(agg::image_filter_spline16(), true); break;
+        case SCALING_SPLINE36:
+            filter.calculate(agg::image_filter_spline36(), true); break;
+        case SCALING_HANNING:
+            filter.calculate(agg::image_filter_hanning(), true); break;
+        case SCALING_HAMMING:
+            filter.calculate(agg::image_filter_hamming(), true); break;
+        case SCALING_HERMITE:
+            filter.calculate(agg::image_filter_hermite(), true); break;
+        case SCALING_KAISER:
+            filter.calculate(agg::image_filter_kaiser(), true); break;
+        case SCALING_QUADRIC:
+            filter.calculate(agg::image_filter_quadric(), true); break;
+        case SCALING_CATROM:
+            filter.calculate(agg::image_filter_catrom(), true); break;
+        case SCALING_GAUSSIAN:
+            filter.calculate(agg::image_filter_gaussian(), true); break;
+        case SCALING_BESSEL:
+            filter.calculate(agg::image_filter_bessel(), true); break;
+        case SCALING_MITCHELL:
+            filter.calculate(agg::image_filter_mitchell(), true); break;
+        case SCALING_SINC:
+            filter.calculate(agg::image_filter_sinc(filter_radius), true); break;
+        case SCALING_LANCZOS:
+            filter.calculate(agg::image_filter_lanczos(filter_radius), true); break;
+        case SCALING_BLACKMAN:
+            filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
+    }
+    typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
+    span_gen_type sg(img_src, interpolator, filter);
+    agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
+}
+
+template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius);
+
+template void scale_image_bilinear8<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
 
 }

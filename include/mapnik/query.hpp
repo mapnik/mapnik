@@ -103,7 +103,7 @@ public:
         return filter_factor_;
     }
     
-    void filter_factor(double factor)
+    void set_filter_factor(double factor)
     {
         filter_factor_ = factor;
     }

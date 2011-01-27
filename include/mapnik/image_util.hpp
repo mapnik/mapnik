@@ -31,13 +31,10 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 
 // stl
 #include <string>
-
-
 
 namespace mapnik {
 
@@ -167,223 +164,35 @@ void add_border(T & image)
     }
 }
 
-template <typename Image>
-inline void scale_image (Image& target,const Image& source)
+// IMAGE SCALING
+enum scaling_method_e
 {
+    SCALING_NEAR=0,
+    SCALING_BILINEAR=1,
+    SCALING_BICUBIC=2,
+    SCALING_SPLINE16=3,
+    SCALING_SPLINE36=4,
+    SCALING_HANNING=5,
+    SCALING_HAMMING=6,
+    SCALING_HERMITE=7,
+    SCALING_KAISER=8,
+    SCALING_QUADRIC=9,
+    SCALING_CATROM=10,
+    SCALING_GAUSSIAN=11,
+    SCALING_BESSEL=12,
+    SCALING_MITCHELL=13,
+    SCALING_SINC=14,
+    SCALING_LANCZOS=15,
+    SCALING_BLACKMAN=16
+};
 
-    int source_width=source.width();
-    int source_height=source.height();
-
-    int target_width=target.width();
-    int target_height=target.height();
-
-    if (source_width<1 || source_height<1 ||
-        target_width<1 || target_height<1) return;
-    int int_part_y=source_height/target_height;
-    int fract_part_y=source_height%target_height;
-    int err_y=0;
-    int int_part_x=source_width/target_width;
-    int fract_part_x=source_width%target_width;
-    int err_x=0;
-    int x=0,y=0,xs=0,ys=0;
-    int prev_y=-1;
-    for (y=0;y<target_height;++y)
-    {
-        if (ys==prev_y)
-        {
-            target.setRow(y,target.getRow(y-1),target_width);
-        }
-        else
-        {
-            xs=0;
-            for (x=0;x<target_width;++x)
-            {
-                target(x,y)=source(xs,ys);
-                xs+=int_part_x;
-                err_x+=fract_part_x;
-                if (err_x>=target_width)
-                {
-                    err_x-=target_width;
-                    ++xs;
-                }
-            }
-            prev_y=ys;
-        }
-        ys+=int_part_y;
-        err_y+=fract_part_y;
-        if (err_y>=target_height)
-        {
-            err_y-=target_height;
-            ++ys;
-        }
-    }
-
-#ifdef MAPNIK_DEBUG
-    add_border(target);
-#endif
-}
+scaling_method_e get_scaling_method_by_name (std::string name);
 
 template <typename Image>
-inline void scale_image_bilinear (Image& target,const Image& source, double x_off_f=0, double y_off_f=0)
-{
-
-    int source_width=source.width();
-    int source_height=source.height();
-
-    int target_width=target.width();
-    int target_height=target.height();
-
-    if (source_width<1 || source_height<1 ||
-        target_width<1 || target_height<1) return;
-    int x=0,y=0,xs=0,ys=0;
-    int tw2 = target_width/2;
-    int th2 = target_height/2;
-    int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
-    int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
-    unsigned yprt, yprt1, xprt, xprt1;
-
-    //no scaling or subpixel offset
-    if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
-        for (y=0;y<target_height;++y)
-            target.setRow(y,source.getRow(y),target_width);
-        return;
-    }
-
-    for (y=0;y<target_height;++y)
-    {
-        ys = (y*source_height+offs_y)/target_height;
-        int ys1 = ys+1;
-        if (ys1>=source_height)
-            ys1--;
-        if (ys<0)
-            ys=ys1=0;
-        if (source_height/2<target_height)
-            yprt = (y*source_height+offs_y)%target_height;
-        else
-            yprt = th2;
-        yprt1 = target_height-yprt;
-        for (x=0;x<target_width;++x)
-        {
-            xs = (x*source_width+offs_x)/target_width;
-            if (source_width/2<target_width)
-                xprt = (x*source_width+offs_x)%target_width;
-            else
-                xprt = tw2;
-            xprt1 = target_width-xprt;
-            int xs1 = xs+1;
-            if (xs1>=source_width)
-                xs1--;
-            if (xs<0)
-                xs=xs1=0;
-
-            unsigned a = source(xs,ys);
-            unsigned b = source(xs1,ys);
-            unsigned c = source(xs,ys1);
-            unsigned d = source(xs1,ys1);
-            unsigned out=0;
-            unsigned t = 0;
-
-            for(int i=0; i<4; i++){
-                unsigned p,r,s;
-                // X axis
-                p = a&0xff;
-                r = b&0xff;
-                if (p!=r)
-                    r = (r*xprt+p*xprt1+tw2)/target_width;
-                p = c&0xff;
-                s = d&0xff;
-                if (p!=s)
-                    s = (s*xprt+p*xprt1+tw2)/target_width;
-                // Y axis
-                if (r!=s)
-                    r = (s*yprt+r*yprt1+th2)/target_height;
-                // channel up
-                out |= r << t;
-                t += 8;
-                a >>= 8;
-                b >>= 8;
-                c >>= 8;
-                d >>= 8;
-            }
-            target(x,y)=out;
-        }
-    }
-}
+void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f=0, double y_off_f=0, double filter_radius=2);
 
 template <typename Image>
-inline void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f=0, double y_off_f=0)
-{
-
-    int source_width=source.width();
-    int source_height=source.height();
-
-    int target_width=target.width();
-    int target_height=target.height();
-
-    if (source_width<1 || source_height<1 ||
-        target_width<1 || target_height<1) return;
-    int x=0,y=0,xs=0,ys=0;
-    int tw2 = target_width/2;
-    int th2 = target_height/2;
-    int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
-    int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
-    unsigned yprt, yprt1, xprt, xprt1;
-
-    //no scaling or subpixel offset
-    if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
-        for (y=0;y<target_height;++y)
-            target.setRow(y,source.getRow(y),target_width);
-        return;
-    }
-
-    for (y=0;y<target_height;++y)
-    {
-        ys = (y*source_height+offs_y)/target_height;
-        int ys1 = ys+1;
-        if (ys1>=source_height)
-            ys1--;
-        if (ys<0)
-            ys=ys1=0;
-        if (source_height/2<target_height)
-            yprt = (y*source_height+offs_y)%target_height;
-        else
-            yprt = th2;
-        yprt1 = target_height-yprt;
-        for (x=0;x<target_width;++x)
-        {
-            xs = (x*source_width+offs_x)/target_width;
-            if (source_width/2<target_width)
-                xprt = (x*source_width+offs_x)%target_width;
-            else
-                xprt = tw2;
-            xprt1 = target_width-xprt;
-            int xs1 = xs+1;
-            if (xs1>=source_width)
-                xs1--;
-            if (xs<0)
-                xs=xs1=0;
-
-            unsigned a = source(xs,ys);
-            unsigned b = source(xs1,ys);
-            unsigned c = source(xs,ys1);
-            unsigned d = source(xs1,ys1);
-            unsigned p,r,s;
-            // X axis
-            p = a&0xff;
-            r = b&0xff;
-            if (p!=r)
-                r = (r*xprt+p*xprt1+tw2)/target_width;
-            p = c&0xff;
-            s = d&0xff;
-            if (p!=s)
-                s = (s*xprt+p*xprt1+tw2)/target_width;
-            // Y axis
-            if (r!=s)
-                r = (s*yprt+r*yprt1+th2)/target_height;
-            target(x,y)=(0xff<<24) | (r<<16) | (r<<8) | r;
-        }
-    }
-}
+void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f=0, double y_off_f=0);
 
 inline MAPNIK_DECL void save_to_file (image_32 const& image,
                                       std::string const& file,

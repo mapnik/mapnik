@@ -1679,6 +1679,10 @@ void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
         optional<double> opacity = get_opt_attr<double>(sym, "opacity");
         if (opacity) raster_sym.set_opacity(*opacity);
 
+        // filter factor
+        optional<double> filter_factor = get_opt_attr<double>(sym, "filter_factor");
+        if (filter_factor) raster_sym.set_filter_factor(*filter_factor);
+
         ptree::const_iterator cssIter = sym.begin();
         ptree::const_iterator endCss = sym.end();
 

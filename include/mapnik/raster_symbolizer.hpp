@@ -28,6 +28,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/image_util.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -42,14 +43,16 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
         mode_("normal"),
         scaling_("fast"),
         opacity_(1.0),
-        colorizer_() {}
+        colorizer_(),
+        filter_factor_(-1) {}
 
     raster_symbolizer(const raster_symbolizer &rhs)
         : symbolizer_base(rhs),
         mode_(rhs.get_mode()),
         scaling_(rhs.get_scaling()),
         opacity_(rhs.get_opacity()),
-        colorizer_(rhs.colorizer_) {}
+        colorizer_(rhs.colorizer_),
+        filter_factor_(rhs.filter_factor_) {}
     
     std::string const& get_mode() const
     {
@@ -83,11 +86,68 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
     {
         colorizer_ = colorizer;
     }
+    double get_filter_factor() const
+    {
+        return filter_factor_;
+    }
+    void set_filter_factor(double filter_factor)
+    {
+        filter_factor_=filter_factor;
+    }
+    double calculate_filter_factor() const
+    {
+        if (filter_factor_ > 0)
+        {
+            // respect explicitly specified values
+            return filter_factor_;
+        } else {
+            // No filter factor specified, calculate a sensible default value
+            // based on the scaling algorithm being employed.
+            scaling_method_e scaling = get_scaling_method_by_name (scaling_);
+            
+            double ff = 1.0;
+            
+            switch(scaling)
+            {
+                case SCALING_NEAR:
+                    ff = 1.0;
+                    break;
+                
+                // TODO potentially some of these algorithms would use filter_factor >2.0.
+                // Contributions welcome from someone who knows more about them.
+                case SCALING_BILINEAR:
+                case SCALING_BICUBIC:
+                case SCALING_SPLINE16:
+                case SCALING_SPLINE36:
+                case SCALING_HANNING:
+                case SCALING_HAMMING:
+                case SCALING_HERMITE:
+                case SCALING_KAISER:
+                case SCALING_QUADRIC:
+                case SCALING_CATROM:
+                case SCALING_GAUSSIAN:
+                case SCALING_BESSEL:
+                case SCALING_MITCHELL:
+                case SCALING_SINC:
+                case SCALING_LANCZOS:
+                case SCALING_BLACKMAN:
+                    ff = 2.0;
+                    break;
+                default:
+                    ff = 1.0;
+                    break;
+            }
+            return ff;
+        }
+    }
+    
+    
 private:
     std::string mode_;
     std::string scaling_;
     float opacity_;
     raster_colorizer_ptr colorizer_;
+    double filter_factor_;
 };
 }
 
