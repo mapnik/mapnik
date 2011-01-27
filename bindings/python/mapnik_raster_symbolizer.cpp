@@ -39,25 +39,29 @@ struct raster_symbolizer_pickle_suite : boost::python::pickle_suite
     static  boost::python::tuple
     getstate(const raster_symbolizer& r)
     {
-        return boost::python::make_tuple(r.get_mode(),r.get_scaling(),r.get_opacity());
+        return boost::python::make_tuple(r.get_mode(),r.get_scaling(),r.get_opacity(),r.get_filter_factor());
     }
 
     static void
     setstate (raster_symbolizer& r, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 3)
+        if (len(state) != 3 and len(state) != 4)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 3-item tuple in call to __setstate__; got %s"
+                            ("expected 3-item or 4-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
         }
-                
+        
         r.set_mode(extract<std::string>(state[0]));
         r.set_scaling(extract<std::string>(state[1]));
         r.set_opacity(extract<float>(state[2]));
+        if (len(state) == 4)
+        {
+            r.set_filter_factor(extract<float>(state[3]));
+        }
     }
 
 };
@@ -127,6 +131,25 @@ void export_raster_symbolizer()
                       "...     (40, \"#00ff00\"),\n"
                       "... ]:\n"
                       "...      r.colorizer.append_band(value, color)\n"
+            )
+        .add_property("filter_factor",
+                      &raster_symbolizer::get_filter_factor,
+                      &raster_symbolizer::set_filter_factor,
+                      "Get/Set the filter factor used by the datasource.\n"
+                      "\n"
+                      "This is used by the Raster or Gdal datasources to pre-downscale\n"
+                      "images using overviews.\n"
+                      "Higher numbers can sometimes cause much better scaled image\n"
+                      "output, at the cost of speed.\n"
+                      "\n"
+                      "Examples:\n"
+                      " -1.0 : (Default) A suitable value will be determined from the\n"
+                      "        chosen scaling method during rendering.\n"
+                      "  1.0 : The datasource will take care of all the scaling\n"
+                      "        (using nearest neighbor interpolation)\n"
+                      "  2.0 : The datasource will scale the datasource to\n"
+                      "        2.0x the desired size, and mapnik will scale the rest\n"
+                      "        of the way using the interpolation defined in self.scaling.\n"
             )
         ;    
 }
