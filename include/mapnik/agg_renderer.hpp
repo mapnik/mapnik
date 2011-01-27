@@ -46,7 +46,7 @@
 // apps using mapnik do not
 // need agg headers
 namespace agg {
-  class trans_affine;
+  struct trans_affine;
 }
 
 namespace mapnik {
