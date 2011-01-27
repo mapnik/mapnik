@@ -196,6 +196,8 @@ private:
             std::vector<feature_type_style*> active_styles;
             std::set<std::string> names;
             attribute_collector collector(names);
+            double filt_factor = 1;
+            directive_collector d_collector(&filt_factor);
             
             std::vector<std::string> const& style_names = lay.styles();
             // iterate through all named styles collecting active styles and attribute names
@@ -259,34 +261,19 @@ private:
                             if_rules.push_back(const_cast<rule*>(&r));
                         }
                         
-                        if (ds->type() == datasource::Raster )
+                        if ( (ds->type() == datasource::Raster) &&
+                             (ds->params().get<double>("filter_factor",0.0) == 0.0) )
                         {
-                            
-                            
-                            if (ds->params().get<double>("filter_factor",0.0) == 0.0)
+                            rule::symbolizers const& symbols = r.get_symbolizers();
+                            rule::symbolizers::const_iterator symIter = symbols.begin();
+                            rule::symbolizers::const_iterator symEnd = symbols.end();
+                            while (symIter != symEnd)
                             {
-                                rule::symbolizers const& symbols = r.get_symbolizers();
-                                rule::symbolizers::const_iterator symIter = symbols.begin();
-                                rule::symbolizers::const_iterator symEnd = symbols.end();
-                                for (;symIter != symEnd;++symIter)
-                                {   
-                                    try
-                                    {
-                                        raster_symbolizer const& sym = boost::get<raster_symbolizer>(*symIter);
-                                        std::string const& scaling = sym.get_scaling();
-                                        if (scaling == "bilinear" || scaling == "bilinear8" )
-                                        {
-                                            // todo - allow setting custom value in symbolizer property?
-                                            q.filter_factor(2.0);
-                                        }
-                                    }
-                                    catch (const boost::bad_get &v)
-                                    {
-                                        // case where useless symbolizer is attached to raster layer
-                                        //throw config_error("Invalid Symbolizer type supplied, only RasterSymbolizer is supported");
-                                    }
-                                }
+                                // if multiple raster symbolizers, last will be respected
+                                // should we warn or throw?
+                                boost::apply_visitor(d_collector,*symIter++);
                             }
+                            q.set_filter_factor(filt_factor);
                         }
                     }
                 }
