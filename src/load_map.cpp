@@ -1649,7 +1649,7 @@ void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
         if (opacity) building_sym.set_opacity(*opacity);
         // height
         optional<double> height = get_opt_attr<double>(sym, "height");
-        if (opacity) building_sym.set_height(*height);
+        if (height) building_sym.set_height(*height);
 
         parse_metawriter_in_symbolizer(building_sym, sym);
         rule.append(building_sym);
