@@ -50,16 +50,13 @@ shape_io::shape_io(const std::string& shape_name, bool open_index)
         try 
         {
             
-            if (!boost::filesystem::exists(shape_name + INDEX))
-            {
-                throw datasource_exception("Shape Plugin: could not open index: '" + shape_name + INDEX + "' does not exist");
-            }
-    
             index_= boost::shared_ptr<shape_file>(new shape_file(shape_name + INDEX));
         }
         catch (...)
         {
-            std::cerr << "Shape Plugin: warning - could not open index: '" + shape_name + INDEX + "'" << std::endl;
+#ifdef MAPNIK_DEBUG 
+            std::clog << "Shape Plugin: warning - could not open index: '" + shape_name + INDEX + "'" << std::endl;
+#endif
         }
     }
 }
