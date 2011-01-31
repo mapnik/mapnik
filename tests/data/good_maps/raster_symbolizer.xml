@@ -12,7 +12,7 @@
     </Rule>
   </Style>
 
-  <Style name="ramped" opacity=".7">
+  <Style name="ramped">
     <Rule>
       <RasterSymbolizer>
         <RasterColorizer>
