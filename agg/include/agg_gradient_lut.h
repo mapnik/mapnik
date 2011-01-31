@@ -210,7 +210,7 @@ namespace agg
         {
             unsigned i;
             unsigned start = uround(m_color_profile[0].offset * color_lut_size);
-            unsigned end;
+            unsigned end = 0;
             color_type c = m_color_profile[0].color;
             for(i = 0; i < start; i++) 
             {
