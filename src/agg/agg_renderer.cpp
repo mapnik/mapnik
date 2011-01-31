@@ -214,21 +214,20 @@ void agg_renderer<T>::render_marker(const int x, const int y, marker &marker, co
         renderer_base renb(pixf);
 
         box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
-        double x1 = bbox.minx();
-        double y1 = bbox.miny();
-        double x2 = bbox.maxx();
-        double y2 = bbox.maxy();
-
-        agg::trans_affine recenter = agg::trans_affine_translation(0.5*(marker.width()-(x1+x2)),0.5*(marker.height()-(y1+y2)));
+        coord<double,2> c = bbox.center();
+        // center the svg marker on '0,0'
+        agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
+        // apply symbol transformation to get to map space
+        mtx *= tr;
+        mtx *= agg::trans_affine_scaling(scale_factor_);
+        // render the marker at the center of the marker box
+        mtx.translate(x+0.5 * marker.width(), y+0.5 * marker.height());
 
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,
                      agg::pod_bvector<path_attributes> > svg_renderer(svg_path,
                              (*marker.get_vector_data())->attributes());
-        agg::trans_affine mtx = recenter * tr;
-        mtx *= agg::trans_affine_scaling(scale_factor_);
-        mtx *= agg::trans_affine_translation(x, y);
 
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
 
@@ -236,9 +235,6 @@ void agg_renderer<T>::render_marker(const int x, const int y, marker &marker, co
     }
     else
     {
-        //int px = int(floor(x - 0.5 * marker.width()));
-       // int py = int(floor(y - 0.5 * marker.height()));
-
         pixmap_.set_rectangle_alpha2(**marker.get_bitmap_data(), x, y, opacity);
     }
 }

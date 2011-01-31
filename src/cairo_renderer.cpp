@@ -917,11 +917,12 @@ void cairo_renderer_base::render_marker(const int x, const int y, marker &marker
         bbox = (*marker.get_vector_data())->bounding_box();
 
         coord<double,2> c = bbox.center();
-        agg::trans_affine recenter = agg::trans_affine_translation(0.5 * marker.width()-c.x,0.5 * marker.height()-c.y);
-
-        agg::trans_affine mtx = tr;
-        mtx = recenter * mtx;
-        mtx *= agg::trans_affine_translation(x, y);
+        // center the svg marker on '0,0'
+        agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
+        // apply symbol transformation to get to map space
+        mtx *= tr;
+        // render the marker at the center of the marker box
+        mtx.translate(x+0.5 * marker.width(), y+0.5 * marker.height());
 
         typedef coord_transform2<CoordTransform,geometry_type> path_type;
         mapnik::path_ptr vmarker = *marker.get_vector_data();
