@@ -63,17 +63,20 @@ struct point_symbolizer_pickle_suite : boost::python::pickle_suite
     static  boost::python::tuple
     getstate(const point_symbolizer& p)
     {
-        return boost::python::make_tuple(p.get_allow_overlap(),p.get_opacity(),p.get_ignore_placement());
+        return boost::python::make_tuple(p.get_allow_overlap(),
+                                         p.get_opacity(),
+                                         p.get_ignore_placement(),
+                                         p.get_point_placement());
     }
 
     static void
     setstate (point_symbolizer& p, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 3)
+        if (len(state) != 4)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 3-item tuple in call to __setstate__; got %s"
+                            ("expected 4-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
@@ -82,6 +85,7 @@ struct point_symbolizer_pickle_suite : boost::python::pickle_suite
         p.set_allow_overlap(extract<bool>(state[0]));
         p.set_opacity(extract<float>(state[1]));
         p.set_ignore_placement(extract<bool>(state[3]));
+        p.set_point_placement(extract<point_placement_e>(state[4]));
         
     }
 
@@ -113,6 +117,10 @@ void export_point_symbolizer()
         .add_property("ignore_placement",
                       &point_symbolizer::get_ignore_placement,
                       &point_symbolizer::set_ignore_placement)
+        .add_property("placement",
+                      &point_symbolizer::get_point_placement,
+                      &point_symbolizer::set_point_placement,
+                      "Set/get the placement of the point")
         .add_property("transform",
                       mapnik::get_svg_transform<point_symbolizer>,
                       mapnik::set_svg_transform<point_symbolizer>)
