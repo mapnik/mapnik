@@ -64,8 +64,11 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             double x;
             double y;
             double z=0;
+            if (sym.get_point_placement() == POINT_PLACEMENT)
+                geom.label_position(&x, &y);
+            else
+                geom.label_interior_position(&x, &y);
 
-            geom.label_position(&x,&y);
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
 

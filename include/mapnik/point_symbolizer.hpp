@@ -26,9 +26,18 @@
 
 // mapnik
 #include <mapnik/symbolizer.hpp> 
-
+#include <mapnik/enumeration.hpp>
+ 
 namespace mapnik 
-{   
+{
+
+enum point_placement_enum {
+    CENTROID_POINT_PLACEMENT,
+    INTERIOR_POINT_PLACEMENT,
+    point_placement_enum_MAX
+};
+
+DEFINE_ENUM( point_placement_e, point_placement_enum );
 
 struct MAPNIK_DECL point_symbolizer : 
         public symbolizer_with_image, public symbolizer_base
@@ -38,11 +47,14 @@ struct MAPNIK_DECL point_symbolizer :
     point_symbolizer(point_symbolizer const& rhs);
     void set_allow_overlap(bool overlap);
     bool get_allow_overlap() const;
+    void set_point_placement(point_placement_e point_p);
+    point_placement_e get_point_placement() const;
     void set_ignore_placement(bool ignore_placement);
     bool get_ignore_placement() const;
         
 private:
     bool overlap_;
+    point_placement_e point_p_;
     bool ignore_placement_;
 };
 }

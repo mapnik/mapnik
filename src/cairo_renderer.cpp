@@ -1033,7 +1033,11 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             double y;
             double z = 0;
 
-            geom.label_position(&x, &y);
+            if (sym.get_point_placement() == POINT_PLACEMENT)
+                geom.label_position(&x, &y);
+            else
+                geom.label_interior_position(&x, &y);
+
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
 

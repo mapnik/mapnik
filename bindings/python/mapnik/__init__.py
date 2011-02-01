@@ -723,6 +723,7 @@ __all__ = [
     'ViewTransform',
     # enums
     'aspect_fix_mode',
+    'point_placement',
     'label_placement',
     'line_cap',
     'line_join',

@@ -22,12 +22,14 @@
 //$Id$
 
 #include <boost/python.hpp>
+#include "mapnik_enumeration.hpp"
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 #include "mapnik_svg.hpp"
 
+using namespace mapnik;
 using mapnik::point_symbolizer;
 using mapnik::symbolizer_with_image;
 using mapnik::path_processor_type;
@@ -89,6 +91,11 @@ struct point_symbolizer_pickle_suite : boost::python::pickle_suite
 void export_point_symbolizer()
 {
     using namespace boost::python;
+
+    enumeration_<point_placement_e>("point_placement")
+        .value("CENTROID",CENTROID_POINT_PLACEMENT)
+        .value("INTERIOR",INTERIOR_POINT_PLACEMENT)
+        ;
     
     class_<point_symbolizer>("PointSymbolizer",
                              init<>("Default Point Symbolizer - 4x4 black square"))

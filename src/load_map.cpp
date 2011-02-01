@@ -786,6 +786,10 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
                 {
                     symbol.set_ignore_placement( * ignore_placement );            
                 }
+                point_placement_e placement =
+                    get_attr<point_placement_e>(sym, "placement", CENTROID_POINT_PLACEMENT);
+                symbol.set_point_placement( placement );
+
                 if (transform_wkt)
                 {
                     agg::trans_affine tr;
@@ -837,6 +841,9 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
             {
                 symbol.set_ignore_placement( * ignore_placement );            
             }
+            point_placement_e placement =
+                get_attr<point_placement_e>(sym, "placement", CENTROID_POINT_PLACEMENT);
+            symbol.set_point_placement( placement );
 
             parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
