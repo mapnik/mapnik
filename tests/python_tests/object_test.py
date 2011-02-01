@@ -68,6 +68,20 @@ def test_shieldsymbolizer_init():
 #def test_shieldsymbolizer_missing_image():
 #    s = mapnik2.ShieldSymbolizer(mapnik2.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik2.Color('#000000'), mapnik2.PathExpression('../#data/images/broken.png'))
 
+def test_polygonsymbolizer_init():
+    p = mapnik2.PolygonSymbolizer()
+
+    eq_(p.fill, mapnik2.Color('gray'))
+    eq_(p.fill_opacity, 1)
+    eq_(p.placement, mapnik2.point_placement.CENTROID)
+
+    p = mapnik2.PolygonSymbolizer(mapnik2.Color('blue'))
+    p.placement = mapnik2.point_placement.INTERIOR
+
+    eq_(p.fill, mapnik2.Color('blue'))
+    eq_(p.fill_opacity, 1)
+    eq_(p.placement, mapnik2.point_placement.INTERIOR)
+
 # PointSymbolizer initialization
 def test_pointsymbolizer_init():
     p = mapnik2.PointSymbolizer() 
@@ -75,15 +89,18 @@ def test_pointsymbolizer_init():
     eq_(p.opacity,1)
     eq_(p.filename,'')
     eq_(p.ignore_placement,False)
+    eq_(p.placement, mapnik2.point_placement.CENTROID)
 
     p = mapnik2.PointSymbolizer(mapnik2.PathExpression("../data/images/dummy.png"))
     p.allow_overlap = True
     p.opacity = 0.5
     p.ignore_placement = True
+    p.placement = mapnik2.point_placement.INTERIOR
     eq_(p.allow_overlap, True)
     eq_(p.opacity, 0.5)
     eq_(p.filename,'../data/images/dummy.png')
     eq_(p.ignore_placement,True)
+    eq_(p.placement, mapnik2.point_placement.INTERIOR)
 
 # PointSymbolizer missing image file
 # images paths are now PathExpressions are evaluated at runtime
@@ -102,6 +119,7 @@ def test_pointsymbolizer_pickle():
     eq_(p.allow_overlap, p2.allow_overlap)
     eq_(p.opacity, p2.opacity)
     eq_(p.ignore_placement, p2.ignore_placement)
+    eq_(p.placement, p2.placement)
 
 # PolygonSymbolizer initialization
 def test_polygonsymbolizer_init():
@@ -249,6 +267,7 @@ def test_textsymbolizer_init():
     eq_(ts.face_name, 'Font Name')
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik2.Color('black'))
+    eq_(ts.label_placement, mapnik2.label_placement.POINT_PLACEMENT)
 
 # TextSymbolizer pickling
 def test_textsymbolizer_pickle():
