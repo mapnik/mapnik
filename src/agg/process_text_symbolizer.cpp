@@ -95,10 +95,14 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                 {           
                     placement text_placement(info,sym,scale_factor_);
                     text_placement.avoid_edges = sym.get_avoid_edges();
-                    if (sym.get_label_placement() == POINT_PLACEMENT)
+                    if (sym.get_label_placement() == POINT_PLACEMENT ||
+                            sym.get_label_placement() == INTERIOR_PLACEMENT)
                     {
                         double label_x, label_y, z=0.0;
-                        geom.label_position(&label_x, &label_y);
+                        if (sym.get_label_placement() == POINT_PLACEMENT)
+                            geom.label_position(&label_x, &label_y);
+                        else
+                            geom.label_interior_position(&label_x, &label_y);
                         prj_trans.backward(label_x,label_y, z);
                         t_.forward(&label_x,&label_y);
 

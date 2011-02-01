@@ -105,6 +105,75 @@ public:
         }
         return result;
     }
+
+    void label_interior_position(double *x, double *y) const
+    {
+        // start with the default label position
+        label_position(x,y);
+        unsigned size = cont_.size();
+        // if we are not a polygon, or the default is within the polygon we are done
+        if (size < 3 || hit_test(*x,*y,0))
+            return;
+
+        // otherwise we find a horizontal line across the polygon and then return the
+        // center of the widest intersection between the polygon and the line.
+
+        std::vector<double> intersections; // only need to store the X as we know the y
+
+        double x0, y0;
+        rewind(0);
+        unsigned command = vertex(&x0, &y0);
+        double x1,y1;
+        while (SEG_END != (command=vertex(&x1, &y1)))
+        {
+            if (command != SEG_MOVETO)
+            {
+                // if the segments overlap
+                if (y0==y1)
+                {
+                    if (y0==*y)
+                    {
+                        double xi = (x0+x1)/2.0;
+                        intersections.push_back(xi);
+                    }
+                }
+                // if the path segment crosses the bisector
+                else if ((y0 <= *y && y1 >= *y) ||
+                        (y0 >= *y && y1 <= *y))
+                {
+                    // then calculate the intersection
+                    double xi = x0;
+                    if (x0 != x1)
+                    {
+                        double m = (y1-y0)/(x1-x0);
+                        double c = y0 - m*x0;
+                        xi = (*y-c)/m;
+                    }
+
+                    intersections.push_back(xi);
+                }
+            }
+            x0 = x1;
+            y0 = y1;
+        }
+        // no intersections we just return the default
+        if (intersections.empty())
+            return;
+        x0=intersections[0];
+        double max_width = 0;
+        for (unsigned ii = 1; ii < intersections.size(); ++ii)
+        {
+            double x1=intersections[ii];
+            double xc=(x0+x1)/2.0;
+            double width = fabs(x1-x0);
+            if (width > max_width && hit_test(xc,*y,0))
+            {
+                *x=xc;
+                max_width = width;
+            }
+        }
+    }
+
     void label_position(double *x, double *y) const
     {
         unsigned size = cont_.size();

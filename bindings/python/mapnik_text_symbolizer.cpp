@@ -165,6 +165,7 @@ void export_text_symbolizer()
         .value("LINE_PLACEMENT",LINE_PLACEMENT)
         .value("POINT_PLACEMENT",POINT_PLACEMENT)
         .value("VERTEX_PLACEMENT",VERTEX_PLACEMENT)
+        .value("INTERIOR_PLACEMENT",INTERIOR_PLACEMENT)
         ;
     enumeration_<vertical_alignment_e>("vertical_alignment")
         .value("TOP",TOP)

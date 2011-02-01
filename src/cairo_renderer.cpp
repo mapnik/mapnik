@@ -1141,7 +1141,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                     path_type path(t_, geom, prj_trans);
 
                     label_placement_enum how_placed = sym.get_label_placement();
-                    if (how_placed == POINT_PLACEMENT || how_placed == VERTEX_PLACEMENT)
+                    if (how_placed == POINT_PLACEMENT || how_placed == VERTEX_PLACEMENT || how_placed == INTERIOR_PLACEMENT)
                     {
                         // for every vertex, try and place a shield/text
                         geom.rewind(0);
@@ -1158,6 +1158,8 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 
                             if( how_placed == VERTEX_PLACEMENT )
                                 geom.vertex(&label_x,&label_y);  // by vertex
+                            else if( how_placed == INTERIOR_PLACEMENT )
+                                geom.label_interior_position(&label_x,&label_y);
                             else
                                 geom.label_position(&label_x, &label_y);  // by middle of line or by point
                             prj_trans.backward(label_x,label_y, z);
@@ -1550,11 +1552,14 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                     path_type path(t_, geom, prj_trans);
                     placement text_placement(info, sym, 1.0);
 
-                    if (sym.get_label_placement() == POINT_PLACEMENT)
+                    if (sym.get_label_placement() == POINT_PLACEMENT ||
+                            sym.get_label_placement() == INTERIOR_PLACEMENT)
                     {
-                        double label_x, label_y, z = 0.0;
-
-                        geom.label_position(&label_x, &label_y);
+                        double label_x, label_y, z=0.0;
+                        if (sym.get_label_placement() == POINT_PLACEMENT)
+                            geom.label_position(&label_x, &label_y);
+                        else
+                            geom.label_interior_position(&label_x, &label_y);
                         prj_trans.backward(label_x, label_y, z);
                         t_.forward(&label_x, &label_y);
 
