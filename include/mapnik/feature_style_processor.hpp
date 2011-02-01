@@ -323,6 +323,11 @@ private:
                                         boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                                     }
                                 }
+                                if (style->get_filter_mode() == FILTER_FIRST)
+                                {
+                                    // Stop iterating over rules and proceed with next feature.
+                                    break;
+                                }
                             }
                         }
                         if (do_else)

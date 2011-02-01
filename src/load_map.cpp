@@ -347,6 +347,9 @@ void map_parser::parse_style( Map & map, ptree const & sty )
         name = get_attr<string>(sty, "name");
         feature_type_style style;
 
+        filter_mode_e filter_mode = get_attr<filter_mode_e>(sty, "filter-mode", FILTER_ALL);
+        style.set_filter_mode(filter_mode);
+
         ptree::const_iterator ruleIter = sty.begin();
         ptree::const_iterator endRule = sty.end();
 

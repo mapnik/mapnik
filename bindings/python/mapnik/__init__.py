@@ -732,6 +732,7 @@ __all__ = [
     'horizontal_alignment',
     'justify_alignment',
     'pattern_alignment',
+    'filter_mode',
     # functions
     # datasources
     'Datasource',

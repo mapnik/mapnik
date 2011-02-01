@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added support for drawing only first matching rule using filter-mode="first" in Style (#706)
+
 - Added support to PointSymbolizer ('ignore_placement') for skipping adding placed points to collision detector (#564)
 
 - Added ability to register fonts within XML using Map level 'font_directory' parameter (#168)

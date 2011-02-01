@@ -42,6 +42,12 @@ map_ = '''<Map>
         </Rule>
 
     </Style>
+    <Style name="s2" filter-mode="first">
+        <Rule>
+        </Rule>
+        <Rule>
+        </Rule>
+    </Style>
 </Map>'''
 
 def test_filter_init():    
@@ -81,3 +87,7 @@ def test_filter_init():
     first = filters[0]
     for f in filters:
         eq_(str(first),str(f))
+    
+    s = m.find_style('s2')
+    
+    eq_(s.filter_mode,mapnik2.filter_mode.FIRST)

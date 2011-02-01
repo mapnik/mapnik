@@ -632,11 +632,18 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
 {
     const feature_type_style & style = style_it->second;
     const std::string & name = style_it->first;
+    filter_mode_e filter_mode = style.get_filter_mode();
 
     ptree & style_node = map_node.push_back(
         ptree::value_type("Style", ptree()))->second;
 
     set_attr(style_node, "name", name);
+    
+    feature_type_style dfl;
+    if (filter_mode != dfl.get_filter_mode() || explicit_defaults)
+    {
+        set_attr(style_node, "filter-mode", filter_mode);
+    }
 
     rules::const_iterator it = style.get_rules().begin();
     rules::const_iterator end = style.get_rules().end();

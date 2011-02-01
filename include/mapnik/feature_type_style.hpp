@@ -27,44 +27,44 @@
 // mapnik 
 #include <mapnik/rule.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/enumeration.hpp>
 // stl
 #include <vector>
 
 namespace mapnik
 {
+
+enum filter_mode_enum {
+    FILTER_ALL,
+    FILTER_FIRST,
+    filter_mode_enum_MAX
+};
+
+DEFINE_ENUM( filter_mode_e, filter_mode_enum );
+
 typedef std::vector<rule> rules;
 class feature_type_style
 {
 private:
     rules  rules_;
+    filter_mode_e filter_mode_;
 public:
-    feature_type_style() {}
+    feature_type_style();
 
-    feature_type_style(feature_type_style const& rhs)
-        : rules_(rhs.rules_) {}
+    feature_type_style(feature_type_style const& rhs);
         
-    feature_type_style& operator=(feature_type_style const& rhs)
-    {
-        if (this == &rhs) return *this;
-        rules_=rhs.rules_;
-        return *this;
-    }
+    feature_type_style& operator=(feature_type_style const& rhs);
         
-    void add_rule(rule const& rule)
-    {
-        rules_.push_back(rule);
-    } 
+    void add_rule(rule const& rule);
         
-    rules const& get_rules() const
-    {
-        return rules_;
-    }
+    rules const& get_rules() const;
 
-    rules &get_rules_nonconst()
-    {
-        return rules_;
-    }
+    rules &get_rules_nonconst();
         
+    void set_filter_mode(filter_mode_e mode);
+
+    filter_mode_e get_filter_mode() const;
+    
     ~feature_type_style() {}
 };
 }
