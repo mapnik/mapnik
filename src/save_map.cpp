@@ -487,6 +487,10 @@ private:
         {
             set_attr( node, "character_spacing", sym.get_character_spacing() );
         }
+        if (sym.get_label_position_tolerance() != dfl.get_label_position_tolerance() || explicit_defaults_ )
+        {
+            set_attr( node, "label_position_tolerance", sym.get_label_position_tolerance() );
+        }
         if (sym.get_label_spacing() != dfl.get_label_spacing() || explicit_defaults_ )
         {
             set_attr( node, "spacing", sym.get_label_spacing() );
@@ -511,6 +515,10 @@ private:
         if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_ )
         {
             set_attr( node, "opacity", sym.get_text_opacity() );
+        }
+        if (sym.get_max_char_angle_delta() != dfl.get_max_char_angle_delta() || explicit_defaults_ )
+        {
+            set_attr( node, "max_char-angle-delta", sym.get_max_char_angle_delta() );
         }
         if (sym.get_horizontal_alignment() != dfl.get_horizontal_alignment() || explicit_defaults_ )
         {
