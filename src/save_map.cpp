@@ -347,6 +347,10 @@ namespace mapnik
                 {
                     set_attr( node, "opacity", sym.get_opacity() );
                 }
+                if (sym.get_max_char_angle_delta() != dfl.get_max_char_angle_delta() || explicit_defaults_ )
+                {
+                    set_attr( node, "max_char_angle_delta", sym.get_max_char_angle_delta() );
+                }
                 if (sym.get_horizontal_alignment() != dfl.get_horizontal_alignment() || explicit_defaults_ )
                 {
                     set_attr( node, "horizontal_alignment", sym.get_horizontal_alignment() );
