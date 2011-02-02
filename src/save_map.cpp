@@ -281,6 +281,14 @@ public:
         {
             set_attr( sym_node, "fill", sym.get_fill() );
         }
+        if (sym.get_width() != dfl.get_width() || explicit_defaults_)
+        {
+            set_attr( sym_node, "width", sym.get_width() );
+        }
+        if (sym.get_height() != dfl.get_height() || explicit_defaults_)
+        {
+            set_attr( sym_node, "height", sym.get_height() );
+        }
 
         const stroke & strk =  sym.get_stroke();
         add_stroke_attributes(sym_node, strk);
