@@ -65,7 +65,6 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                 scale_image_bilinear8<image_data_32>(target,raster->data_, err_offs_x, err_offs_y);
             } else {
                 scaling_method_e scaling_method = get_scaling_method_by_name(sym.get_scaling());
-                std::clog << "scaling: " << scaling_method << "\n";
                 scale_image_agg<image_data_32>(target,raster->data_, (scaling_method_e)scaling_method, scale_factor, err_offs_x, err_offs_y, sym.calculate_filter_factor());
             }
             
