@@ -73,11 +73,11 @@ public:
         Raster
     };
 
-    datasource (parameters const& params, bool bind=true)
+    datasource (parameters const& params)
         : params_(params),
           is_bound_(false)
         {}
-
+    
     /*!
      * @brief Get the configuration parameters of the data source.
      *
