@@ -34,7 +34,7 @@
 
 namespace mapnik {
 
-// TODO - consider merging with text_symbolizer label_placment_e
+// TODO - consider merging with text_symbolizer label_placement_e
 enum marker_placement_enum {
     MARKER_POINT_PLACEMENT,
     MARKER_LINE_PLACEMENT,
