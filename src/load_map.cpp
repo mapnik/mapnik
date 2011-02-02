@@ -1557,6 +1557,9 @@ void map_parser::parse_stroke(stroke & strk, ptree const & sym)
     // stroke-linecap
     optional<line_cap_e> line_cap = get_opt_attr<line_cap_e>(sym, "stroke-linecap");
     if (line_cap) strk.set_line_cap(*line_cap);
+    // stroke-gamma
+    optional<double> gamma = get_opt_attr<double>(sym, "stroke-gamma");
+    if (gamma) strk.set_gamma(*gamma);
     // stroke-dashaffset
     optional<double> offset = get_opt_attr<double>(sym, "stroke-dashoffet");
     if (offset) strk.set_dash_offset(*offset);

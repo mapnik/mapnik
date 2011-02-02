@@ -153,12 +153,15 @@ def test_stroke_init():
     eq_(s.color, mapnik2.Color('black'))
     eq_(s.line_cap, mapnik2.line_cap.BUTT_CAP)
     eq_(s.line_join, mapnik2.line_join.MITER_JOIN)
+    eq_(s.gamma,1.0)
 
     s = mapnik2.Stroke(mapnik2.Color('blue'), 5.0)
+    s.gamma = .5
 
     eq_(s.width, 5)
     eq_(s.opacity, 1)
     eq_(s.color, mapnik2.Color('blue'))
+    eq_(s.gamma, .5)
     eq_(s.line_cap, mapnik2.line_cap.BUTT_CAP)
     eq_(s.line_join, mapnik2.line_join.MITER_JOIN)
 

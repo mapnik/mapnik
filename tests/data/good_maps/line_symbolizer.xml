@@ -1,0 +1,22 @@
+<Map background-color="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+
+  <Style name="test">
+    <Rule>
+       <!-- big, thick, aliased lines -->
+      <LineSymbolizer stroke="white" stroke-gamma="0" stroke-width="10"/>
+
+       <!-- small, clean, aliased lines -->
+      <LineSymbolizer stroke="red" stroke-gamma="1" stroke-width=".5"/>
+
+    </Rule>  
+  </Style>
+
+  <Layer name="lay" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+    <StyleName>test</StyleName>
+    <Datasource base="shp">
+      <Parameter name="type">shape</Parameter>
+      <Parameter name="file">../../data/shp/poly.shp</Parameter>
+    </Datasource>
+  </Layer>
+  
+</Map>

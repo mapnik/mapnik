@@ -69,6 +69,7 @@ class MAPNIK_DECL stroke
     line_join_e line_join_;
     dash_array dash_;
     double dash_offset_;
+    double gamma_;
 public:
     explicit stroke();
     stroke(color const& c, double width=1.0);
@@ -76,13 +77,12 @@ public:
     stroke& operator=(const stroke& rhs);
 
     void set_color(const color& c);
-        
     color const& get_color() const;
         
     double get_width() const;
     void set_width(double w);
-    void set_opacity(double opacity);
 
+    void set_opacity(double opacity);
     double get_opacity() const;
         
     void set_line_cap(line_cap_e line_cap);
@@ -90,9 +90,13 @@ public:
         
     void set_line_join(line_join_e line_join);
     line_join_e get_line_join() const;
+
+    void set_gamma(double gamma);
+    double get_gamma() const;
         
     void add_dash(double dash,double gap);
     bool has_dash() const;
+
     void set_dash_offset(double offset);
     double dash_offset() const;
     

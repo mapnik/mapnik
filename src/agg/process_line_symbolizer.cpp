@@ -67,7 +67,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     unsigned a=col.alpha();
     renderer ren(renb);
     ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_linear());
+    ras_ptr->gamma(agg::gamma_linear(0.0, stroke_.get_gamma()));
     
     agg::scanline_p8 sl;
     metawriter_with_properties writer = sym.get_metawriter();

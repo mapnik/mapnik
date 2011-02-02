@@ -544,6 +544,14 @@ private:
         {
             set_attr( node, "stroke-linecap", strk.get_line_cap() );
         }
+        if ( strk.get_gamma() != dfl.get_gamma() || explicit_defaults_ )
+        {
+            set_attr( node, "stroke-gamma", strk.get_gamma());
+        }
+        if ( strk.dash_offset() != dfl.dash_offset() || explicit_defaults_ )
+        {
+            set_attr( node, "stroke-dashoffset", strk.dash_offset());
+        }
         if ( ! strk.get_dash_array().empty() )
         {
             std::ostringstream os;
@@ -553,10 +561,6 @@ private:
                 if ( i + 1 < dashes.size() ) os << ", ";
             }
             set_attr( node, "stroke-dasharray", os.str() );
-        }
-        if ( strk.dash_offset() != dfl.dash_offset() || explicit_defaults_ )
-        {
-            set_attr( node, "stroke-dashoffset", strk.dash_offset());
         }
                 
     }

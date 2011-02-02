@@ -64,17 +64,21 @@ struct stroke_pickle_suite : boost::python::pickle_suite
     getstate(const stroke& s)
     {
         boost::python::list dashes = get_dashes_list(s);
-        return boost::python::make_tuple(s.get_opacity(),dashes,s.get_line_cap(),s.get_line_join());
+        return boost::python::make_tuple(s.get_opacity(),
+                                         dashes,
+                                         s.get_line_cap(),
+                                         s.get_line_join(),
+                                         s.get_gamma());
     }
 
     static void
     setstate (stroke& s, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 4)
+        if (len(state) != 5)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 4-item tuple in call to __setstate__; got %s"
+                            ("expected 5-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
@@ -93,8 +97,8 @@ struct stroke_pickle_suite : boost::python::pickle_suite
         }
 
         s.set_line_cap(extract<line_cap_e>(state[2]));
-
         s.set_line_join(extract<line_join_e>(state[3]));
+        s.set_gamma(extract<double>(state[4]));
 
     }
 
@@ -141,6 +145,11 @@ void export_stroke ()
                       &stroke::get_opacity,
                       &stroke::set_opacity, 
                       "Gets or sets the opacity of this stroke.\n"
+                      "The value is a float between 0 and 1.\n")
+        .add_property("gamma",
+                      &stroke::get_gamma,
+                      &stroke::set_gamma, 
+                      "Gets or sets the gamma of this stroke.\n"
                       "The value is a float between 0 and 1.\n")
         .add_property("line_cap",
                       &stroke::get_line_cap,

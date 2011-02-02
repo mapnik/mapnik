@@ -51,6 +51,7 @@ stroke::stroke()
       opacity_(1.0),
       line_cap_(BUTT_CAP),
       line_join_(MITER_JOIN),
+      gamma_(1.0),
       dash_(),
       dash_offset_(0) {}
 
@@ -60,6 +61,7 @@ stroke::stroke(color const& c, double width)
       opacity_(1.0),
       line_cap_(BUTT_CAP),
       line_join_(MITER_JOIN),
+      gamma_(1.0),
       dash_(),
       dash_offset_(0.0) {}
 
@@ -69,6 +71,7 @@ stroke::stroke(stroke const& other)
       opacity_(other.opacity_),
       line_cap_(other.line_cap_),
       line_join_(other.line_join_),
+      gamma_(other.gamma_),
       dash_(other.dash_), 
       dash_offset_(other.dash_offset_) {}
 
@@ -130,6 +133,16 @@ line_join_e stroke::get_line_join() const
     return line_join_;
 }
 
+void stroke::set_gamma(double gamma)
+{
+    gamma_ = gamma;
+}
+
+double stroke::get_gamma() const
+{
+    return gamma_;
+}
+
 void stroke::add_dash(double dash, double gap)
 {
     dash_.push_back(std::make_pair(dash,gap));
@@ -152,7 +165,7 @@ double stroke::dash_offset() const
 
 dash_array const& stroke::get_dash_array() const
 {
-    return  dash_;
+    return dash_;
 }
 
 void stroke::swap(const stroke& other) throw()
@@ -162,6 +175,8 @@ void stroke::swap(const stroke& other) throw()
     opacity_=other.opacity_;
     line_cap_=other.line_cap_;
     line_join_=other.line_join_;
+    gamma_=other.gamma_;
     dash_ = other.dash_;
+    dash_offset_ = other.dash_offset_;
 }
 }
