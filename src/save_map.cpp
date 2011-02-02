@@ -505,11 +505,11 @@ private:
         }
         if (sym.get_minimum_distance() != dfl.get_minimum_distance() || explicit_defaults_ )
         {
-            set_attr( node, "min_distance", sym.get_minimum_distance() );
+            set_attr( node, "minimum_distance", sym.get_minimum_distance() );
         }
         if (sym.get_minimum_padding() != dfl.get_minimum_padding() || explicit_defaults_ )
         {
-            set_attr( node, "min_padding", sym.get_minimum_padding() );
+            set_attr( node, "minimum_padding", sym.get_minimum_padding() );
         }
         if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
         {

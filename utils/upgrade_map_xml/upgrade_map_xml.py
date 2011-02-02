@@ -44,12 +44,25 @@ def handle_attr_changes(sym):
     # http://www.w3schools.com/css/pr_text_text-transform.asp
     # http://code.google.com/p/mapnik-utils/issues/detail?id=32&colspec=ID%20Type%20Status%20Priority%20Component%20Owner%20Summary
     text_transform = sym.attrib.get('text_convert')
-    # note: css supports text-transform:capitalize but Mapnik does not (yet)
-    t_ = {'tolower':'lowercase','toupper':'uppercase','none':'none'}
     if text_transform:
+        # note: css supports text-transform:capitalize but Mapnik does not (yet)
+        t_ = {'tolower':'lowercase','toupper':'uppercase','none':'none'}
         new = t_.get(text_transform)
         if new:
             sym.attrib['text_transform'] = new
+        else:
+            sym.attrib['text_transform'] = text_transform
+        sym.attrib.pop('text_convert')
+    
+    minimum_distance = sym.attrib.get('min_distance')
+    if minimum_distance:
+        sym.attrib['minimum_distance'] = minimum_distance
+        sym.attrib.pop('min_distance')
+
+    minimum_padding = sym.attrib.get('min_padding')
+    if minimum_padding:
+        sym.attrib['minimum_padding'] = minimum_padding
+        sym.attrib.pop('min_padding')
 
 def fixup_pointsym(sym):
     if sym.attrib.get('width'):
@@ -120,6 +133,7 @@ if __name__ == "__main__":
                     handle_attr_changes(sym)
                 for sym in rule.findall('ShieldSymbolizer') or []:
                     name2expr(sym) 
+                    handle_attr_changes(sym)
                 for sym in rule.findall('PointSymbolizer') or []:
                     fixup_pointsym(sym)
                 for sym in rule.findall('LineSymbolizer') or []:
