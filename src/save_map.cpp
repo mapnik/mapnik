@@ -91,6 +91,10 @@ public:
         {
             set_attr( sym_node, "opacity", sym.get_opacity() );
         }
+        if ( sym.get_point_placement() != dfl.get_point_placement() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "placement", sym.get_point_placement() );
+        }
         add_metawriter_attributes(sym_node, sym);
     }
 
