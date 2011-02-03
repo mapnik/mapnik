@@ -424,10 +424,11 @@ if ('-h' in command_line_args) or ('--help' in command_line_args):
     HELP_REQUESTED = True
     
 
-if 'configure' in command_line_args:
+if 'configure' in command_line_args and not HELP_REQUESTED:
     force_configure = True
 elif HELP_REQUESTED:
-    preconfigured = True # this is just to ensure config gets skipped when help is requested
+    # to ensure config gets skipped when help is requested
+    preconfigured = True
 
 # initially populate environment with defaults and any possible custom arguments
 opts.Update(env)
@@ -442,7 +443,6 @@ if not force_configure:
                 env[key] = value
             preconfigured = True
         except:
-            # unpickling failed, so reconfigure as fallback
             preconfigured = False
     else:
         preconfigured = False
@@ -452,6 +452,7 @@ if not force_configure:
 # rebuilds, e.g. for folks following trunk
 for opt in pickle_store:
     if not opt in env:
+        #print 'missing opt', opt
         preconfigured = False
 
 # if custom arguments are supplied make sure to accept them
@@ -1301,7 +1302,7 @@ Help(opts.GenerateHelpText(env))
 #env.Prepend(LIBPATH = '/usr/local/lib')
 
 #### Builds ####
-if not HELP_REQUESTED:
+if not HELP_REQUESTED and '-c' not in command_line_args:
 
     if 'uninstall' in COMMAND_LINE_TARGETS:
         # dummy action in case there is nothing to uninstall, to avoid phony error..
