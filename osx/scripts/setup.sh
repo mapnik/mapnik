@@ -1,9 +1,12 @@
 
+# start here
+cd osx/sources
+
 # build icu and boost for packaging up within Mapnik Framework
 
 # local install location
 PREFIX=/Users/dane/projects/mapnik-dev/trunk-build/osx/sources
-mkdir /Users/dane/projects/mapnik-dev/trunk-build/osx/sources
+mkdir -p /Users/dane/projects/mapnik-dev/trunk-build/osx/sources
 export DYLD_LIBRARY_PATH=$PREFIX/lib
 
 
@@ -11,7 +14,7 @@ export DYLD_LIBRARY_PATH=$PREFIX/lib
 INSTALL=/Library/Frameworks/Mapnik.framework/unix/lib
 
 # make a directory to hold icu and boost
-mkdir ../deps
+mkdir -p ../deps
 cd ../deps
 
 # ICU

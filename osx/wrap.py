@@ -31,7 +31,10 @@ if __name__ == "__main__":
     
     # include headers for a full SDK?
     INCLUDE_HEADERS = True
+    
+    INCLUDE_NODE = False
 
+    INCLUDE_PYTHON = True
     
     # final resting place
     install_path = '/Library/Frameworks'
@@ -107,14 +110,15 @@ if __name__ == "__main__":
         copy_all_items('sources/include/ft2build.h',join(active,'unix/include/'),recursive=True)
     
     # Node-mapnik bindings location
-    if not os.path.exists(join(active,'unix/lib/node')):
-        os.mkdir(join(active,'unix/lib/node'))
-        os.mkdir(join(active,'unix/lib/node/mapnik'))
-    sym(join(active,'unix/lib/node'),join(active,'Node'))
-    sym(join(active,'Node'),join(framework,'Node'))
+    if INCLUDE_NODE:
+        if not os.path.exists(join(active,'unix/lib/node')):
+            os.mkdir(join(active,'unix/lib/node'))
+            os.mkdir(join(active,'unix/lib/node/mapnik'))
+        sym(join(active,'unix/lib/node'),join(active,'Node'))
+        sym(join(active,'Node'),join(framework,'Node'))
     
-    # do this later...
-    copy_all_items('deps/node-mapnik/mapnik/*',join(active,'unix/lib/node/mapnik/'),recursive=True)
+        # do this later...
+        copy_all_items('deps/node-mapnik/mapnik/*',join(active,'unix/lib/node/mapnik/'),recursive=True)
     
     # Resources
     if not os.path.exists(join(active,'Resources')):
@@ -147,43 +151,44 @@ if __name__ == "__main__":
     sym(join(active,'Mapnik'),join(framework,'Mapnik'))
     
     # Python
-    #python_versions =  glob.glob('unix/lib/python*')
-    #for py in python_versions:
-    #    py_dir = join(active,'%s/site-packages' % py)
-    if not os.path.exists(join(active,'Python')):
-        os.mkdir(join(active,'Python'))
-        os.mkdir(join(active,'Python/mapnik2'))
-    shutil.copy('python/__init__.py',join(active,'Python/mapnik2/'))
-    #sym(py_dir,join(active,'Python'))
-    sym(join(active,'Python'),join(framework,'Python'))
+    if INCLUDE_PYTHON:
+        #python_versions =  glob.glob('unix/lib/python*')
+        #for py in python_versions:
+        #    py_dir = join(active,'%s/site-packages' % py)
+        if not os.path.exists(join(active,'Python')):
+            os.mkdir(join(active,'Python'))
+            os.mkdir(join(active,'Python/mapnik2'))
+        shutil.copy('python/__init__.py',join(active,'Python/mapnik2/'))
+        #sym(py_dir,join(active,'Python'))
+        sym(join(active,'Python'),join(framework,'Python'))
+        
+        # try to start using relative paths..
+        #paths_py = '''
+        #import os
+        #inputpluginspath = os.path.normpath(os.path.join(os.path.dirname(__file__),'../../../../Datasources'))
+        #fontscollectionpath = os.path.normpath(os.path.join(os.path.dirname(__file__),'../../../../Fonts'))
+        #'''
+        
+        #paths_py = '''
+        #inputpluginspath = '%(install_path)s/Mapnik.framework/Datasources'
+        #fontscollectionpath = '%(install_path)s/Mapnik.framework/Fonts'
+        #'''
+        
+        # TODO - consider making _mapnik.so import dependent on version
+        # so we can simplify install..
+        
+        # done via scons install...
+        #mapnik_module = join(py_dir,'mapnik2')
+        #open(mapnik_module+'/paths.py','w').write(paths_py % locals())
+        #shutil.copy('../bindings/python/mapnik/__init__.py',mapnik_module)
+        
+        # pth file
+        pth ='''import sys; sys.path.insert(0,'%(install_path)s/Mapnik.framework/Python')
+        ''' % locals()
+        
+        # TODO - testing hack, will add this local python binding to sys path for snow leopard
+        #open('/Library/Python/2.6/site-packages/mapnik.pth','w').write(pth)
     
-    # try to start using relative paths..
-    #paths_py = '''
-    #import os
-    #inputpluginspath = os.path.normpath(os.path.join(os.path.dirname(__file__),'../../../../Datasources'))
-    #fontscollectionpath = os.path.normpath(os.path.join(os.path.dirname(__file__),'../../../../Fonts'))
-    #'''
-    
-    #paths_py = '''
-    #inputpluginspath = '%(install_path)s/Mapnik.framework/Datasources'
-    #fontscollectionpath = '%(install_path)s/Mapnik.framework/Fonts'
-    #'''
-    
-    # TODO - consider making _mapnik.so import dependent on version
-    # so we can simplify install..
-    
-    # done via scons install...
-    #mapnik_module = join(py_dir,'mapnik2')
-    #open(mapnik_module+'/paths.py','w').write(paths_py % locals())
-    #shutil.copy('../bindings/python/mapnik/__init__.py',mapnik_module)
-    
-    # pth file
-    pth ='''import sys; sys.path.insert(0,'%(install_path)s/Mapnik.framework/Python')
-    ''' % locals()
-    
-    # TODO - testing hack, will add this local python binding to sys path for snow leopard
-    #open('/Library/Python/2.6/site-packages/mapnik.pth','w').write(pth)
-
-    # Stash in resources as well
-    open(join(active,'Resources/mapnik.pth'),'w').write(pth)
+        # Stash in resources as well
+        open(join(active,'Resources/mapnik.pth'),'w').write(pth)
     
