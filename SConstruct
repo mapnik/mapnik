@@ -529,6 +529,7 @@ def parse_config(context, config, checks='--libs --cflags'):
                 env.ParseConfig(cmd)
                 if not num_libs > env['LIBS']:
                     env['LIBS'].append('gdal')
+                    env['LIBPATH'].insert(0,'/Library/Frameworks/GDAL.framework/unix/lib')
             else:
                 env.ParseConfig(cmd)
             parsed = True
