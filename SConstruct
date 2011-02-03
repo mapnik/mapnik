@@ -521,7 +521,16 @@ def parse_config(context, config, checks='--libs --cflags'):
     parsed = False
     if ret:
         try:
-            env.ParseConfig(cmd)
+            # hack for potential -framework GDAL syntax
+            # which will not end up being added to env['LIBS']
+            # and thus breaks knowledge below that gdal worked
+            if 'gdal-config' in cmd:
+                num_libs = len(env['LIBS'])
+                env.ParseConfig(cmd)
+                if not num_libs > env['LIBS']:
+                    env['LIBS'].append('gdal')
+            else:
+                env.ParseConfig(cmd)
             parsed = True
         except OSError, e:
             ret = False
@@ -546,9 +555,13 @@ def get_pkg_lib(context, config, lib):
     parsed = False
     if ret:
         try:
-            libnames = re.findall(libpattern,call(cmd,silent=True))
+            value = call(cmd,silent=True)
+            libnames = re.findall(libpattern,value)
             if libnames:
-              libname = libnames[0]
+                libname = libnames[0]
+            else:
+                # osx 1.8 install gives '-framework GDAL'
+                libname = 'gdal'
         except Exception, e:
             ret = False
             print ' unable to determine library name:'# %s' % str(e)
