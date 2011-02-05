@@ -329,7 +329,7 @@ opts.AddVariables(
     # Variables affecting rendering back-ends
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
 
-    BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
+    BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'True'),
     
     # Variables for optional dependencies
     ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),

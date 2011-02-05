@@ -313,9 +313,9 @@ private:
 
                                 // if the underlying renderer is not able to process the complete set of symbolizers,
                                 // process one by one.
-#ifdef SVG_RENDERER
+//#ifdef SVG_RENDERER
                                 if(!p.process(symbols,*feature,prj_trans))
-#endif
+//#endif
                                 {
 
                                     BOOST_FOREACH (symbolizer const& sym, symbols)
@@ -337,9 +337,9 @@ private:
                                 rule::symbolizers const& symbols = r->get_symbolizers();
                                 // if the underlying renderer is not able to process the complete set of symbolizers,
                                 // process one by one.
-#ifdef SVG_RENDERER
+//#ifdef SVG_RENDERER
                                 if(!p.process(symbols,*feature,prj_trans))
-#endif
+//#endif
                                 {
                                     BOOST_FOREACH (symbolizer const& sym, symbols)
                                     {

@@ -90,6 +90,12 @@ private:
         }
     }
 
+    template <typename OtherValue>
+    bool equal(geometry_iterator<OtherValue, Container> const& other) const
+    {
+        return this->base_reference() == other.base();
+    }
+
     Container const& geometry_;
     boost::shared_ptr<Value> first_value_;
 };
