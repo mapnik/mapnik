@@ -1,4 +1,4 @@
-<Map paths_from_xml="false">
+<Map minimum-version="0.7.2" paths-from-xml="false">
 
   <Layer name="lay">
     <Datasource base="shp">

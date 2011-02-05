@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE Map  >
-<Map background-color="red">
+<!DOCTYPE Map>
+<Map background-color="red" minimum-version="0.7.2">
   <Layer name="some_layer" status="on" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs">
     <Datasource>
       <Parameter name="user">some_one</Parameter>

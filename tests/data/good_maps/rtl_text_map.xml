@@ -1,43 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!-- nik2img.py -b 60 46 80 28 rtl_text_map.xml text_styles.png -->
-
-<Map 
-  background-color="#eee"
-  srs="+init=epsg:4326"
-  font_directory="../fonts/"
-  minimum_version="0.1.1"
-  >
+<!-- nik2img.py -b 60 46 80 28 rtl_text_map.xml text_styles.png --><Map background-color="#eee" srs="+init=epsg:4326" minimum-version="0.1.1" font-directory="../fonts/">
   
   <Style name="custom_font">
     <Rule>
-      <TextSymbolizer 
-        name="[NAME_FA]"
-        face_name="XB Zar Regular"
-        fill="#000"
-        size="20"
-        halo_fill="#fff"
-        halo_radius="2"
-        dy="-2"
-        wrap_width="50"
-        line_spacing="3"
-        allow_overlap="true"
-     />
-      <TextSymbolizer 
-        name="[NAME_EN]"
-        face_name="DejaVu Sans Book"
-        text_transform="uppercase" 
-        fill="#000"
-        opacity="0.6"
-        size="10"
-        halo_fill="#fff"
-        halo_radius="2"
-        character_spacing="3"
-        dy="2"
-        wrap_width="50"
-        line_spacing="4"
-        allow_overlap="true"
-      />
+      <TextSymbolizer name="[NAME_FA]" fill="#000" size="20" dy="-2" face-name="XB Zar Regular" halo-fill="#fff" halo-radius="2" wrap-width="50" line-spacing="3" allow-overlap="true"/>
+      <TextSymbolizer name="[NAME_EN]" fill="#000" opacity="0.6" size="10" dy="2" face-name="DejaVu Sans Book" text-transform="uppercase" halo-fill="#fff" halo-radius="2" character-spacing="3" wrap-width="50" line-spacing="4" allow-overlap="true"/>
     </Rule>
   </Style>
 

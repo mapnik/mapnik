@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE Map  >
-<Map>
+<!DOCTYPE Map>
+<Map minimum-version="0.7.2">
     <Style name="some_style">
       <Rule>
         <MaxScaleDenominator>3,141</MaxScaleDenominator>

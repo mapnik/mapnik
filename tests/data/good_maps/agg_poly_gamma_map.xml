@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Map srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" background-color="steelblue">
+<Map srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" background-color="steelblue" minimum-version="0.7.2">
     <Style name="style">
         
         <!-- Asia - default dark color behind light polygon 
@@ -8,34 +7,34 @@
         
         <Rule>
             <Filter>([REGION]=142)</Filter>
-            <PolygonSymbolizer fill="yellow" />
+            <PolygonSymbolizer fill="yellow"/>
         </Rule>
 
         <!-- Europe, using Opacity avoids "ghost lines" 
         -->
         <Rule>
             <Filter>([REGION]=150)</Filter>
-            <PolygonSymbolizer fill="rgb(176,151,238)" fill-opacity=".3" />
+            <PolygonSymbolizer fill="rgb(176,151,238)" fill-opacity=".3"/>
         </Rule>
         
         <!-- Americas, using gamma of .65 to remove blue lines works as well..
         -->
         <Rule>
             <Filter>([REGION]=19)</Filter>
-            <PolygonSymbolizer fill="rgb(136,172,2)" gamma=".6" />
+            <PolygonSymbolizer fill="rgb(136,172,2)" gamma=".6"/>
         </Rule>
 
         <!-- Africa, using gamma of .65 to remove blue lines works as well..
         -->
         <Rule>
             <Filter>([REGION]=2)</Filter>
-            <PolygonSymbolizer fill="rgb(239,98,133)" gamma=".65" />
+            <PolygonSymbolizer fill="rgb(239,98,133)" gamma=".65"/>
         </Rule>
 
         <!-- Oceana, all disjunct polygons so it does not matter -->
         <Rule>
             <Filter>([REGION]=9)</Filter>
-            <PolygonSymbolizer fill="rgb(212,9,14)" />
+            <PolygonSymbolizer fill="rgb(212,9,14)"/>
         </Rule>
     </Style>
     <Layer name="world" srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs">

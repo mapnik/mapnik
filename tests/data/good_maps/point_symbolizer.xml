@@ -1,48 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE Map  >
-<Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum_version="0.8.0">
+<!DOCTYPE Map>
+<Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum-version="0.8.0">
     <Style name="1">
         <Rule title="foo">
             <Filter>([name]='CHILE')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
-            name="[name] + ' (default OGC pixel)'" text_transform="lowercase" wrap_width="10" wrap_character=" " halo_radius="1" dy="5"/>
-            <PointSymbolizer />
+            <TextSymbolizer size="10" name="[name] + ' (default OGC pixel)'" dy="5" face-name="DejaVu Sans Book" text-transform="lowercase" wrap-width="10" wrap-character=" " halo-radius="1"/>
+            <PointSymbolizer/>
         </Rule>
         <Rule title="foo">
             <Filter>([name]='Australia')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
-            name="[name] + ' (png)'"  halo_radius="1" dy="20"/>
-            <PointSymbolizer file="../images/dummy.png" type="png" dy="-10" width="16" height="16" allow_overlap="true"/>
+            <TextSymbolizer size="10" name="[name] + ' (png)'" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
+            <PointSymbolizer file="../images/dummy.png" dy="-10" allow-overlap="true"/>
         </Rule>
         <Rule title="foo1">
             <Filter>([name]='Brazil')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
-            name="[name] + ' (svg &amp; tif)'"  halo_radius="1" dy="20"/>
-            <PointSymbolizer file="../images/dummy.tif" type="tif" allow_overlap="true"/>
-            <PointSymbolizer file="../svg/ellipses.svg" allow_overlap="true"/>
+            <TextSymbolizer size="10" name="[name] + ' (svg &amp; tif)'" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
+            <PointSymbolizer file="../images/dummy.tif" allow-overlap="true"/>
+            <PointSymbolizer file="../svg/ellipses.svg" allow-overlap="true"/>
         </Rule>
         <Rule title="foo">
             <Filter>([name]='Mongolia')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
-            name="[name] + ' (tiff)'"  halo_radius="1" dy="20"/>
-            <PointSymbolizer file="../images/dummy.tiff" width="16" height="16" allow_overlap="true"/>
+            <TextSymbolizer size="10" name="[name] + ' (tiff)'" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
+            <PointSymbolizer file="../images/dummy.tiff" allow-overlap="true"/>
         </Rule>
         <Rule title="foo">
             <Filter>([name]='Sudan')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
-            name="[name] + ' (jpeg)'"  halo_radius="1" dy="20"/>
-            <PointSymbolizer file="../images/dummy.jpeg" type="jpeg" />
+            <TextSymbolizer size="10" name="[name] + ' (jpeg)'" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
+            <PointSymbolizer file="../images/dummy.jpeg"/>
         </Rule>
         <Rule title="foo">
             <Filter>([name]='United States')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
-            name="[name] + ' (jpg)'"  halo_radius="1" dy="20"/>
-            <PointSymbolizer file="../images/dummy.jpg" type="jpg" width="5" height="10" />
+            <TextSymbolizer size="10" name="[name] + ' (jpg)'" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
+            <PointSymbolizer file="../images/dummy.jpg"/>
         </Rule>
         <Rule title="foo">
-            <ElseFilter />
-            <TextSymbolizer face_name="DejaVu Sans Book" size="10" 
-            name="[name]"  halo_radius="1" dy="20"/>
+            <ElseFilter/>
+            <TextSymbolizer size="10" name="[name]" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
             <PointSymbolizer file="../images/bogus_will_fail.png"/>
         </Rule>
     </Style>

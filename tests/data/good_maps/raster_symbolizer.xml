@@ -1,12 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Map background-color="white" srs="+init=epsg:32630">
+<Map background-color="white" srs="+init=epsg:32630" minimum-version="0.7.2">
 
-  <Style name="two-value" >
+  <Style name="two-value">
     <Rule>
-      <RasterSymbolizer opacity="1" >
+      <RasterSymbolizer opacity="1">
         <RasterColorizer>
-          <ColorBand value="0" color="yellow" label="&lt;0"></ColorBand>
-          <ColorBand value="26" color="purple" midpoints="1"></ColorBand>
+          <ColorBand value="0" color="yellow" label="&lt;0"/>
+          <ColorBand value="26" color="purple" midpoints="1"/>
          </RasterColorizer>
       </RasterSymbolizer>
     </Rule>
@@ -16,8 +15,8 @@
     <Rule>
       <RasterSymbolizer>
         <RasterColorizer>
-          <ColorBand value="0" color="red" label="&lt;0"></ColorBand>
-          <ColorBand value="26" color="green" midpoints="100"></ColorBand>
+          <ColorBand value="0" color="red" label="&lt;0"/>
+          <ColorBand value="26" color="green" midpoints="100"/>
          </RasterColorizer>
       </RasterSymbolizer>
     </Rule>

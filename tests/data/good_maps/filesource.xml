@@ -1,12 +1,11 @@
-<!-- see: http://trac.mapnik.org/changeset/574 -->
-<Map background-color="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+<!-- see: http://trac.mapnik.org/changeset/574 --><Map background-color="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs" minimum-version="0.7.2">
 
   <FileSource name="foo">../images/</FileSource>
   
   <Style name="test">
     <Rule>
-      <BuildingSymbolizer fill="darkred" fill-opacity="1" height="30" />
-      <PointSymbolizer base="foo" file="dummy.png" width="16" height="16" type="png" />
+      <BuildingSymbolizer fill="darkred" fill-opacity="1" height="30"/>
+      <PointSymbolizer base="foo" file="dummy.png"/>
     </Rule>  
   </Style>
 

@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE Map  >
-<Map background-color="white" srs="+init=epsg:4326" minimum_version="0.8.0">
+<!DOCTYPE Map>
+<Map background-color="white" srs="+init=epsg:4326" minimum-version="0.8.0">
     <Style name="1">
         <Rule title="foo">
-            <MarkersSymbolizer stroke="green" stroke-width="1.3" fill="yellow" />
-            <LineSymbolizer stroke-width=".2" stroke="grey" />
+            <MarkersSymbolizer stroke="green" stroke-width="1.3" fill="yellow"/>
+            <LineSymbolizer stroke-width=".2" stroke="grey"/>
         </Rule>
     </Style>
 

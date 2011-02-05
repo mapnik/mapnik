@@ -1,25 +1,25 @@
-<Style name="amenity">
+<Style name="amenity" minimum-version="0.7.2">
 <Rule>
   <MaxScaleDenominator>5000</MaxScaleDenominator>
   <Filter>[amenity]='post_box'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/post_box.png" type="png" width="16" height="16" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/post_box.png" type="png" width="16" height="16"/>
 </Rule>
 <Rule>
   <MaxScaleDenominator>5000</MaxScaleDenominator>
   <Filter>[amenity]='post_office'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/post_office.png" type="png" width="16" height="16" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/post_office.png" type="png" width="16" height="16"/>
 </Rule>
 
 <Rule>
   <MaxScaleDenominator>250000</MaxScaleDenominator>
   <MinScaleDenominator>25000</MinScaleDenominator> 
   <Filter>[railway]='station'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/station_small.png" type="png" width="5" height="5" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/station_small.png" type="png" width="5" height="5"/>
 </Rule>
  <Rule>
   <MaxScaleDenominator>25000</MaxScaleDenominator>
   <Filter>[railway]='station'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/station.png" type="png" width="9" height="9" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/station.png" type="png" width="9" height="9"/>
 </Rule>
 <Rule>
   <MaxScaleDenominator>50000</MaxScaleDenominator>
@@ -36,34 +36,34 @@
 <Rule>
   <MaxScaleDenominator>10000</MaxScaleDenominator>
   <Filter>[amenity]='pub'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/pub.png" type="png" width="16" height="16" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/pub.png" type="png" width="16" height="16"/>
 </Rule>
 <Rule>
   <MaxScaleDenominator>100000</MaxScaleDenominator>
   <Filter>[natural]='peak'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/peak.png" type="png" width="8" height="8" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/peak.png" type="png" width="8" height="8"/>
 </Rule>
 <Rule>
   <MaxScaleDenominator>5000</MaxScaleDenominator>
   <Filter>[man_made]='mast'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/tower.png" type="png" width="32" height="32" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/tower.png" type="png" width="32" height="32"/>
 </Rule>
 <Rule>
   <MaxScaleDenominator>10000</MaxScaleDenominator>
   <Filter>[amenity]='recycling'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/recycling.png" type="png" width="20" height="20" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/recycling.png" type="png" width="20" height="20"/>
 </Rule>
 
 <Rule>
   <MaxScaleDenominator>20000</MaxScaleDenominator>
   <Filter>[amenity]='hospital'</Filter>
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/hospital.png" type="png" width="20" height="20" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/hospital.png" type="png" width="20" height="20"/>
 </Rule>
 
 <Rule>
   <MaxScaleDenominator>5000</MaxScaleDenominator>
   <Filter>[amenity]='bus_stop' or [highway]='bus_stop'</Filter>      
-  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/bus_stop.png" type="png" width="30" height="12" />
+  <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/bus_stop.png" type="png" width="30" height="12"/>
 </Rule>
 
 <Rule>
@@ -83,4 +83,3 @@
   <PointSymbolizer file="/Users/david/svn.openstreetmap.org/applications/rendering/mapnik/symbols/airport.png" type="png" width="16" height="16" allow_overlap="false"/>
  </Rule>
 </Style>
-

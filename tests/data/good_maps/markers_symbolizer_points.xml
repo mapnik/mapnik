@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE Map  >
-<Map background-color="white" srs="+init=epsg:4326" minimum_version="0.8.0">
+<!DOCTYPE Map>
+<Map background-color="white" srs="+init=epsg:4326" minimum-version="0.8.0">
 
     <Style name="1">
         <Rule title="foo">
@@ -28,7 +27,7 @@
              <MarkersSymbolizer fill="#cc3344" opacity=".7" width="15" height="10" stroke="#cc3344" stroke-width="7" stroke-opacity=".2" placement="point" marker_type="ellipse"/>
         </Rule>
         <Rule title="foo">
-            <ElseFilter />
+            <ElseFilter/>
             <PointSymbolizer file="../svg/ellipses.svg"/>
         </Rule>
     </Style>

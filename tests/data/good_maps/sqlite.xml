@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Map srs="+init=epsg:4326" background-color="rgb(255,255,255)">
+<Map srs="+init=epsg:4326" background-color="rgb(255,255,255)" minimum-version="0.7.2">
     <Style name="point_style">
         <Rule>
             <PointSymbolizer file="../svg/point.svg"/>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="12" name="[name]" halo_fill="rgba(255,255,255,.5)" halo_radius=".5" dy="-5"/>
+            <TextSymbolizer size="12" name="[name]" dy="-5" face-name="DejaVu Sans Book" halo-fill="rgba(255,255,255,.5)" halo-radius=".5"/>
         </Rule>
     </Style>
     <Style name="world_borders_style">

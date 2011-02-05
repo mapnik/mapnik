@@ -1,41 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Map srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" background-color="steelblue">
+<Map srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" background-color="steelblue" minimum-version="0.7.2">
 
     <Style name="labels">
         <Rule title="foo">
             <Filter>([name]='CHILE')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="15" halo_radius="1"
-            name="'45˚ angle'" orientation="45" />
+            <TextSymbolizer size="15" name="'45&#730; angle'" orientation="45" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
         <Rule title="foo">
             <Filter>([name]='Australia')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="15" halo_radius="1"
-            name="'- 45˚ angle'" orientation="-45" />
+            <TextSymbolizer size="15" name="'- 45&#730; angle'" orientation="-45" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
         <Rule title="foo1">
             <Filter>([name]='Brazil')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="15" halo_radius="1"
-            name="'90˚ angle'" orientation="90" />
+            <TextSymbolizer size="15" name="'90&#730; angle'" orientation="90" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
         <Rule title="foo">
             <Filter>([name]='Mongolia')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="15" halo_radius="1"
-            name="'- 90˚ angle'" orientation="-90" />
+            <TextSymbolizer size="15" name="'- 90&#730; angle'" orientation="-90" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
         <Rule title="foo">
             <Filter>([name]='Sudan')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="15" halo_radius="1"
-            name="'180˚ angle'" orientation="180" />
+            <TextSymbolizer size="15" name="'180&#730; angle'" orientation="180" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
         <Rule title="foo">
             <Filter>([name]='United States')</Filter>
-            <TextSymbolizer face_name="DejaVu Sans Book" size="15" 
-            name="'no rotation of text'"  halo_radius="1" />
+            <TextSymbolizer size="15" name="'no rotation of text'" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
         <Rule title="foo">
-            <ElseFilter />
-            <TextSymbolizer face_name="DejaVu Sans Book" size="15" 
-            name="[name]"  halo_radius="1" />
+            <ElseFilter/>
+            <TextSymbolizer size="15" name="[name]" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
     </Style>
 

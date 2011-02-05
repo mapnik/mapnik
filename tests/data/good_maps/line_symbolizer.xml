@@ -1,4 +1,4 @@
-<Map background-color="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+<Map background-color="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs" minimum-version="0.7.2">
 
   <Style name="test">
     <Rule>

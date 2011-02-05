@@ -1,19 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Map background-color="lightgrey" srs="+init=epsg:4326" minimum_version="0.8.0">
+<Map background-color="lightgrey" srs="+init=epsg:4326" minimum-version="0.8.0">
 
     <Style name="1">
         <Rule>
             <Filter>([name]='CHILE' or [name]='Australia' or [name]='Brazil')</Filter>
              <!-- stacked without outlines -->
-             <MarkersSymbolizer fill="red" width="5"  allow_overlap="true" stroke-width="0"/>
+             <MarkersSymbolizer fill="red" width="5" allow_overlap="true" stroke-width="0"/>
              <MarkersSymbolizer fill="orange" width="4" allow_overlap="true" stroke-width="0"/>
              <MarkersSymbolizer fill="yellow" width="3" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="green" width="2"  allow_overlap="true" stroke-width="0"/>
+             <MarkersSymbolizer fill="green" width="2" allow_overlap="true" stroke-width="0"/>
              <MarkersSymbolizer fill="blue" width="1" allow_overlap="true" stroke-width="0"/>
              <MarkersSymbolizer fill="purple" width=".5" allow_overlap="true" stroke-width="0"/>
         </Rule>
         <Rule>
-             <ElseFilter />
+             <ElseFilter/>
              <!-- single with without outline using stroke params -->
              <MarkersSymbolizer fill="white" allow_overlap="true" stroke-width=".3" stroke="green" stroke-opacity=".5"/>
         </Rule>

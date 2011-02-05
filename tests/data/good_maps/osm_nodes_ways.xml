@@ -1,5 +1,5 @@
 <!DOCTYPE Map>
-<Map srs="+proj=latlong +datum=WGS84" background-color="steelblue" minimum_version="0.7.2">
+<Map srs="+proj=latlong +datum=WGS84" background-color="steelblue" minimum-version="0.7.2">
 
   <Style name="red">
     <Rule>

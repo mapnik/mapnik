@@ -1,9 +1,8 @@
-<!-- see: http://trac.mapnik.org/changeset/574 -->
-<Map background-color="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
+<!-- see: http://trac.mapnik.org/changeset/574 --><Map background-color="steelblue" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs" minimum-version="0.7.2">
 
     <Style name="test">
       <Rule>
-         <PolygonSymbolizer />
+         <PolygonSymbolizer/>
       </Rule>
     </Style>
 
