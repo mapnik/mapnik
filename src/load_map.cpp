@@ -21,7 +21,6 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/load_map.hpp>
-#include <mapnik/geometry.hpp>
 
 #include <mapnik/version.hpp>
 #include <mapnik/image_reader.hpp>
@@ -1377,11 +1376,6 @@ void map_parser::parse_line_symbolizer( rule_type & rule, ptree const & sym )
 		    float opacity = get_css<float>(css, css_name);
 		    strk.set_opacity(opacity);
 		}
-  	else if (css_name == "stroke-offset") 
-    { 
-        float offset = get_css<float>(css, css_name); 
-        strk.set_offset(offset); 
-    } 
 		else if (css_name == "stroke-linejoin")
 		{
 		    line_join_e line_join = get_css<line_join_e>(css, css_name);
@@ -1453,9 +1447,6 @@ void map_parser::parse_line_symbolizer( rule_type & rule, ptree const & sym )
         // stroke-opacity
         optional<double> opacity = get_opt_attr<double>(sym, "stroke-opacity");
         if (opacity) strk.set_opacity(*opacity);
-        // stroke-offset
-        optional<float> offset = get_opt_attr<float>(sym, "stroke-offset");
-        if (offset) strk.set_offset(*offset);
         // stroke-linejoin
         optional<line_join_e> line_join = get_opt_attr<line_join_e>(sym, "stroke-linejoin");
         if (line_join) strk.set_line_join(*line_join);
