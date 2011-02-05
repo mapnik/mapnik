@@ -49,9 +49,13 @@ namespace mapnik {
 
     template <typename T>
     boost::optional<T> get_opt_attr( const boost::property_tree::ptree & node,
-                                      const std::string & name)
+                                      const std::string & name, const std::string & fallback="")
     {
-        return get_optional<T>( node, name, true);
+        if (get_optional<T>( node, name, true))
+        {
+            return get_optional<T>( node, name, true);
+        }
+        return get_optional<T>( node, fallback, true);
     }
 
     template <typename T>

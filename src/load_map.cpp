@@ -155,19 +155,14 @@ void map_parser::parse_map( Map & map, ptree const & pt )
 
         try
         {
-            optional<color> bgcolor = get_opt_attr<color>(map_node, "bgcolor");
-            // mapnik2 forward compatibility
-            if (!bgcolor)
-            {
-                bgcolor = get_opt_attr<color>(map_node, "background-color");
-            }
+            optional<color> bgcolor = get_opt_attr<color>(map_node, "bgcolor","background-color");
             if (bgcolor) {
                 map.set_background( * bgcolor );
             }
 
             map.set_srs( get_attr(map_node, "srs", map.srs() ));
 
-            optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer_size");
+            optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer_size","buffer-size");
             if (buffer_size)
             {
                 map.set_buffer_size(*buffer_size);
@@ -175,13 +170,13 @@ void map_parser::parse_map( Map & map, ptree const & pt )
 
             // Check if relative paths should be interpreted as relative to/from XML location
             // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
-            optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
+            optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml", "paths-from-xml");
             if (paths_from_xml)
             {
                 relative_to_xml_ = *paths_from_xml;
             }
 
-            optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum_version");
+            optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum_version", "minimum-version");
             if (min_version_string)
             {
                 boost::char_separator<char> sep(".");
@@ -371,6 +366,10 @@ void map_parser::parse_font(FontSet & fset, ptree const & f)
 {
     std::string face_name = get_attr(f, "face_name", string());
 
+    // mapnik2 forward compatibility
+    if (face_name.empty())
+        face_name = get_attr(f, "face-name", string());
+
     if ( strict_ )
     {
         ensure_font_face( face_name );
@@ -428,7 +427,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
         }
 
         optional<boolean> clear_cache =
-            get_opt_attr<boolean>(lay, "clear_label_cache");
+            get_opt_attr<boolean>(lay, "clear_label_cache","clear-label-cache");
         if (clear_cache)
         {
             lyr.set_clear_label_cache( * clear_cache );
@@ -631,6 +630,11 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
             {
                 rule.append(markers_symbolizer());
             }
+            // Mapnik2 forward compatibility
+            else if ( sym.first == "MarkerSymbolizer")
+            {
+                rule.append(markers_symbolizer());
+            }
 
             else if ( sym.first != "MinScaleDenominator" &&
                       sym.first != "MaxScaleDenominator" &&
@@ -666,7 +670,7 @@ void map_parser::parse_point_symbolizer( rule_type & rule, ptree const & sym )
         optional<std::string> type =  get_opt_attr<string>(sym, "type");
           
         optional<boolean> allow_overlap =
-            get_opt_attr<boolean>(sym, "allow_overlap");
+            get_opt_attr<boolean>(sym, "allow_overlap","allow-overlap");
         optional<float> opacity =
             get_opt_attr<float>(sym, "opacity");
             
@@ -900,10 +904,10 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         }
 
         optional<std::string> face_name =
-            get_opt_attr<std::string>(sym, "face_name");
+            get_opt_attr<std::string>(sym, "face_name", "face-name");
 
         optional<std::string> fontset_name =
-            get_opt_attr<std::string>(sym, "fontset_name");
+            get_opt_attr<std::string>(sym, "fontset_name", "fontset-name");
 
         unsigned size = get_attr(sym, "size", 10U);
 
@@ -913,7 +917,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 
         if (fontset_name && face_name)
         {
-            throw config_error(std::string("Can't have both face_name and fontset_name"));
+            throw config_error(std::string("Can't have both face-name and fontset-name"));
         }
         else if (fontset_name)
         {
@@ -937,7 +941,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         }
         else
         {
-            throw config_error(std::string("Must have face_name or fontset_name"));
+            throw config_error(std::string("Must have face-name or fontset-name"));
         }
 
         double dx = get_attr(sym, "dx", 0.0);
@@ -960,16 +964,19 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         }
             
         vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", default_vertical_alignment);
+        // mapnik2 forward compatibilty
+        if (valign == default_vertical_alignment)
+            valign = get_attr<vertical_alignment_e>(sym, "vertical-alignment", default_vertical_alignment);
         text_symbol.set_vertical_alignment(valign);
 
         // halo fill and radius
-        optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
+        optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill", "halo-fill");
         if (halo_fill)
         {
             text_symbol.set_halo_fill( * halo_fill );
         }
         optional<unsigned> halo_radius =
-            get_opt_attr<unsigned>(sym, "halo_radius");
+            get_opt_attr<unsigned>(sym, "halo_radius", "halo-radius");
         if (halo_radius)
         {
             text_symbol.set_halo_radius(*halo_radius);
@@ -977,21 +984,21 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 
         // text ratio and wrap width
         optional<unsigned> text_ratio =
-            get_opt_attr<unsigned>(sym, "text_ratio");
+            get_opt_attr<unsigned>(sym, "text_ratio", "text-ratio");
         if (text_ratio)
         {
             text_symbol.set_text_ratio(*text_ratio);
         }
 
         optional<unsigned> wrap_width =
-            get_opt_attr<unsigned>(sym, "wrap_width");
+            get_opt_attr<unsigned>(sym, "wrap_width", "wrap-width");
         if (wrap_width)
         {
             text_symbol.set_wrap_width(*wrap_width);
         }
 
         optional<boolean> wrap_before =
-            get_opt_attr<boolean>(sym, "wrap_before");
+            get_opt_attr<boolean>(sym, "wrap_before", "wrap-before");
         if (wrap_before)
         {
             text_symbol.set_wrap_before(*wrap_before);
@@ -999,7 +1006,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 
         // character used to break long strings
         optional<std::string> wrap_char =
-            get_opt_attr<std::string>(sym, "wrap_character");
+            get_opt_attr<std::string>(sym, "wrap_character", "wrap-character");
         if (wrap_char && (*wrap_char).size() > 0)
         {
             text_symbol.set_wrap_char((*wrap_char)[0]);
@@ -1008,24 +1015,31 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         // text conversion before rendering
         text_convert_e tconvert =
             get_attr<text_convert_e>(sym, "text_convert", NONE);
+        if (tconvert == NONE)
+	        text_convert_e tconvert =
+	            get_attr<text_convert_e>(sym, "text-transform", NONE);
         text_symbol.set_text_convert(tconvert);
 
         // spacing between text lines
-        optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing");
+        optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing", "line-spacing");
         if (line_spacing)
         {
             text_symbol.set_line_spacing(*line_spacing);
         }
 
         // tolerance between label spacing along line
-        optional<unsigned> label_position_tolerance = get_opt_attr<unsigned>(sym, "label_position_tolerance");
+        optional<unsigned> label_position_tolerance = get_opt_attr<unsigned>(sym,
+        		 "label_position_tolerance",
+        		 "label-position-tolerance");
         if (label_position_tolerance)
         {
             text_symbol.set_label_position_tolerance(*label_position_tolerance);
         }
 
         // spacing between characters in text
-        optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing");
+        optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym,
+        		"character_spacing",
+        		"character-spacing");
         if (character_spacing)
         {
             text_symbol.set_character_spacing(*character_spacing);
@@ -1040,7 +1054,8 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 
         // minimum distance between labels
         optional<unsigned> min_distance =
-            get_opt_attr<unsigned>(sym, "min_distance");
+            get_opt_attr<unsigned>(sym, "min_distance","minimum-distance");
+
         if (min_distance)
         {
             text_symbol.set_minimum_distance(*min_distance);
@@ -1048,7 +1063,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 
         // do not render labels around edges
         optional<boolean> avoid_edges =
-            get_opt_attr<boolean>(sym, "avoid_edges");
+            get_opt_attr<boolean>(sym, "avoid_edges", "avoid-edges");
         if (avoid_edges)
         {
             text_symbol.set_avoid_edges( * avoid_edges);
@@ -1056,7 +1071,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 
         // allow_overlap
         optional<boolean> allow_overlap =
-            get_opt_attr<boolean>(sym, "allow_overlap");
+            get_opt_attr<boolean>(sym, "allow_overlap", "allow-overlap");
         if (allow_overlap)
         {
             text_symbol.set_allow_overlap( * allow_overlap );
@@ -1072,7 +1087,7 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 
         // max_char_angle_delta
         optional<double> max_char_angle_delta =
-            get_opt_attr<double>(sym, "max_char_angle_delta");
+            get_opt_attr<double>(sym, "max_char_angle_delta", "max-char-angle-delta");
         if (max_char_angle_delta)
         {
             text_symbol.set_max_char_angle_delta( * max_char_angle_delta);
@@ -1080,10 +1095,14 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
 
         // horizontal alignment
         horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal_alignment", H_MIDDLE);
+        if (halign == H_MIDDLE)
+            halign = get_attr<horizontal_alignment_e>(sym, "horizontal-alignment", H_MIDDLE);
         text_symbol.set_horizontal_alignment(halign);
 
         // justify alignment
         justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify_alignment", J_MIDDLE);
+        if (jalign == J_MIDDLE)
+            jalign = get_attr<justify_alignment_e>(sym, "justify-alignment", J_MIDDLE);
         text_symbol.set_justify_alignment(jalign);
 
         rule.append(text_symbol);
@@ -1109,10 +1128,10 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
         }
 
         optional<std::string> face_name =
-            get_opt_attr<std::string>(sym, "face_name");
+            get_opt_attr<std::string>(sym, "face_name", "face-name");
 
         optional<std::string> fontset_name =
-            get_opt_attr<std::string>(sym, "fontset_name");
+            get_opt_attr<std::string>(sym, "fontset_name", "fontset-name");
 
         unsigned size = get_attr(sym, "size", 10U);
         color fill = get_attr(sym, "fill", color(0,0,0));
@@ -1202,20 +1221,20 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 
             // don't render shields around edges
             optional<boolean> avoid_edges =
-                get_opt_attr<boolean>(sym, "avoid_edges");
+                get_opt_attr<boolean>(sym, "avoid_edges", "avoid-edges");
             if (avoid_edges)
             {
                 shield_symbol.set_avoid_edges( *avoid_edges);
             }
 
             // halo fill and radius
-            optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
+            optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill", "halo-fill");
             if (halo_fill)
             {
                 shield_symbol.set_halo_fill( * halo_fill );
             }
             optional<unsigned> halo_radius =
-                get_opt_attr<unsigned>(sym, "halo_radius");
+                get_opt_attr<unsigned>(sym, "halo_radius", "halo-radius");
             if (halo_radius)
             {
                 shield_symbol.set_halo_radius(*halo_radius);
@@ -1223,7 +1242,7 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 
             // minimum distance between labels
             optional<unsigned> min_distance =
-                get_opt_attr<unsigned>(sym, "min_distance");
+                get_opt_attr<unsigned>(sym, "min_distance","minimum-distance");
             if (min_distance)
             {
                 shield_symbol.set_minimum_distance(*min_distance);
@@ -1238,7 +1257,7 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 
             // allow_overlap
             optional<boolean> allow_overlap =
-                get_opt_attr<boolean>(sym, "allow_overlap");
+                get_opt_attr<boolean>(sym, "allow_overlap", "allow-overlap");
             if (allow_overlap)
             {
                 shield_symbol.set_allow_overlap( * allow_overlap );
@@ -1246,25 +1265,31 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 
             // vertical alignment
             vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", MIDDLE);
+            if (valign == MIDDLE)
+                valign = get_attr<vertical_alignment_e>(sym, "vertical-alignment", MIDDLE);
             shield_symbol.set_vertical_alignment(valign);
 
             // horizontal alignment
             horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal_alignment", H_MIDDLE);
+            if (halign == H_MIDDLE)
+                halign = get_attr<horizontal_alignment_e>(sym, "horizontal-alignment", H_MIDDLE);
             shield_symbol.set_horizontal_alignment(halign);
 
             // justify alignment
             justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify_alignment", J_MIDDLE);
+            if (jalign == J_MIDDLE)
+                jalign = get_attr<justify_alignment_e>(sym, "justify-alignment", J_MIDDLE);
             shield_symbol.set_justify_alignment(jalign);
 
             optional<unsigned> wrap_width =
-                get_opt_attr<unsigned>(sym, "wrap_width");
+                get_opt_attr<unsigned>(sym, "wrap_width", "wrap-width");
             if (wrap_width)
             {
                 shield_symbol.set_wrap_width(*wrap_width);
             }
 
             optional<boolean> wrap_before =
-                get_opt_attr<boolean>(sym, "wrap_before");
+                get_opt_attr<boolean>(sym, "wrap_before", "wrap-before");
             if (wrap_before)
             {
                 shield_symbol.set_wrap_before(*wrap_before);
@@ -1272,7 +1297,7 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 
             // character used to break long strings
             optional<std::string> wrap_char =
-                get_opt_attr<std::string>(sym, "wrap_character");
+                get_opt_attr<std::string>(sym, "wrap_character", "wrap-character");
             if (wrap_char && (*wrap_char).size() > 0)
             {
                 shield_symbol.set_wrap_char((*wrap_char)[0]);
@@ -1281,17 +1306,19 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
             // text conversion before rendering
             text_convert_e tconvert =
                 get_attr<text_convert_e>(sym, "text_convert", NONE);
+            if (tconvert == NONE)
+                tconvert = get_attr<text_convert_e>(sym, "text-transform", NONE);
             shield_symbol.set_text_convert(tconvert);
 
             // spacing between text lines
-            optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing");
+            optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing", "line-spacing");
             if (line_spacing)
             {
                 shield_symbol.set_line_spacing(*line_spacing);
             }
 
             // spacing between characters in text
-            optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing");
+            optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing", "character-spacing");
             if (character_spacing)
             {
                 shield_symbol.set_character_spacing(*character_spacing);
@@ -1307,7 +1334,7 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 
             // unlock_image
             optional<boolean> unlock_image =
-                get_opt_attr<boolean>(sym, "unlock_image");
+                get_opt_attr<boolean>(sym, "unlock_image", "unlock-image");
             if (unlock_image)
             {
                 shield_symbol.set_unlock_image( * unlock_image );
@@ -1315,7 +1342,7 @@ void map_parser::parse_shield_symbolizer( rule_type & rule, ptree const & sym )
 
             // no text
             optional<boolean> no_text =
-                get_opt_attr<boolean>(sym, "no_text");
+                get_opt_attr<boolean>(sym, "no_text", "no-text");
             if (no_text)
             {
                 shield_symbol.set_no_text( * no_text );
