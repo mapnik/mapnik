@@ -14,6 +14,10 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Print warning if invalid XML property names are used (#110)
+
+- Made XML property names use consistent dashes, never underscores (#644)
+
 - Added support for drawing only first matching rule using filter-mode="first" in Style (#706)
 
 - Added support to PointSymbolizer ('ignore_placement') for skipping adding placed points to collision detector (#564)

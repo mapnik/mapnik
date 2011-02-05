@@ -112,6 +112,7 @@ private:
     void ensure_font_face( const std::string & face_name );
 
     std::string ensure_relative_to_xml( boost::optional<std::string> opt_path );
+    void ensure_attrs( ptree const& sym, std::string name, std::string attrs);
 
     bool strict_;
     std::string filename_;
@@ -170,13 +171,23 @@ void map_parser::parse_map( Map & map, ptree const & pt )
     {
         ptree const & map_node = pt.get_child("Map");
 
+        std::ostringstream s("");
+        s << "background-color,"
+          << "background-image,"
+          << "srs,"
+          << "buffer-size,"
+          << "paths-from-xml,"
+          << "minimum-version,"
+          << "font-directory";
+        ensure_attrs(map_node, "Map", s.str());
+        
         try
         {
             parameters extra_attr;
 
             // Check if relative paths should be interpreted as relative to/from XML location
             // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
-            optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths_from_xml");
+            optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths-from-xml");
             if (paths_from_xml)
             {
                 relative_to_xml_ = *paths_from_xml;
@@ -196,24 +207,24 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             
             map.set_srs( get_attr(map_node, "srs", map.srs() ));
 
-            optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer_size");
+            optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer-size");
             if (buffer_size)
             {
                 map.set_buffer_size(*buffer_size);
             }
 
-            optional<std::string> font_directory = get_opt_attr<std::string>(map_node,"font_directory");
+            optional<std::string> font_directory = get_opt_attr<std::string>(map_node,"font-directory");
             if (font_directory)
             {
-                extra_attr["font_directory"] = *font_directory;
+                extra_attr["font-directory"] = *font_directory;
                 freetype_engine::register_fonts( ensure_relative_to_xml(font_directory), false);
             }
 
-            optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum_version");
+            optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum-version");
                 
             if (min_version_string)
             {
-                extra_attr["minimum_version"] = *min_version_string;
+                extra_attr["minimum-version"] = *min_version_string;
                 boost::char_separator<char> sep(".");
                 boost::tokenizer<boost::char_separator<char> > tokens(*min_version_string,sep);
                 unsigned i = 0;
@@ -341,6 +352,11 @@ void map_parser::parse_map_include( Map & map, ptree const & include )
 
 void map_parser::parse_style( Map & map, ptree const & sty )
 {
+    std::ostringstream s("");
+    s << "name,"
+      << "filter-mode";
+    ensure_attrs(sty, "Style", s.str());
+
     string name("<missing name>");
     try
     {
@@ -381,6 +397,7 @@ void map_parser::parse_style( Map & map, ptree const & sty )
 
 void map_parser::parse_metawriter(Map & map, ptree const & pt)
 {
+    ensure_attrs(pt, "MetaWriter", "name,type,file,default-output,output-empty");
     string name("<missing name>");
     metawriter_ptr writer;
     try
@@ -411,6 +428,7 @@ void map_parser::parse_metawriter(Map & map, ptree const & pt)
 
 void map_parser::parse_fontset( Map & map, ptree const & fset )
 {
+    ensure_attrs(fset, "FontSet", "name,Font");
     string name("<missing name>");
     try
     {
@@ -452,7 +470,9 @@ void map_parser::parse_fontset( Map & map, ptree const & fset )
 
 void map_parser::parse_font(font_set & fset, ptree const & f)
 {
-    std::string face_name = get_attr(f, "face_name", string());
+    ensure_attrs(f, "Font", "face-name");
+
+    std::string face_name = get_attr(f, "face-name", string());
 
     if ( strict_ )
     {
@@ -465,6 +485,17 @@ void map_parser::parse_font(font_set & fset, ptree const & f)
 void map_parser::parse_layer( Map & map, ptree const & lay )
 {
     std::string name;
+    std::ostringstream s("");
+    s << "name,"
+      << "srs,"
+      << "status,"
+      << "title,"
+      << "abstract,"
+      << "minzoom,"
+      << "maxzoom,"
+      << "queryable,"
+      << "clear-label-cache";
+    ensure_attrs(lay, "Layer", s.str());
     try
     {
         name = get_attr(lay, "name", string("Unnamed"));
@@ -511,7 +542,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
         }
 
         optional<boolean> clear_cache =
-            get_opt_attr<boolean>(lay, "clear_label_cache");
+            get_opt_attr<boolean>(lay, "clear-label-cache");
         if (clear_cache)
         {
             lyr.set_clear_label_cache( * clear_cache );
@@ -527,11 +558,25 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
 
             if (child.first == "StyleName")
             {
-                // TODO check references [DS]
-                lyr.add_style(child.second.data());
+                ensure_attrs(child.second, "StyleName", "none");
+                std::string style_name = child.second.data();
+                if (style_name.empty())
+                {
+                    std::ostringstream ss;
+                    ss << "StyleName is empty in Layer: '" << lyr.name() << "'";
+                    if (strict_)
+                        throw config_error(ss.str());
+                    else
+                        std::clog << "### WARNING: " << ss.str() << std::endl;
+                }
+                else
+                {
+                    lyr.add_style(style_name);
+                }
             }
             else if (child.first == "Datasource")
             {
+                ensure_attrs(child.second, "Datasource", "base");
                 parameters params;
                 optional<std::string> base = get_opt_attr<std::string>( child.second, "base" );
                 if( base )
@@ -549,6 +594,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
 
                     if (paramIter->first == "Parameter")
                     {
+                        ensure_attrs(param, "Parameter", "name");
                         std::string name = get_attr<string>(param, "name");
                         std::string value = get_value<string>( param,
                                                                "datasource parameter");
@@ -623,6 +669,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
 
 void map_parser::parse_rule( feature_type_style & style, ptree const & r )
 {
+    ensure_attrs(r, "Rule", "name,title");
     std::string name;
     try
     {
@@ -749,12 +796,14 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
 {
     try
     {
+        std::stringstream s;
+        s << "file,base,allow-overlap,ignore-placement,opacity,placement,meta-writer,meta-output";
         optional<std::string> file =  get_opt_attr<string>(sym, "file");
         optional<std::string> base =  get_opt_attr<string>(sym, "base");
         optional<boolean> allow_overlap =
-            get_opt_attr<boolean>(sym, "allow_overlap");
+            get_opt_attr<boolean>(sym, "allow-overlap");
         optional<boolean> ignore_placement =
-            get_opt_attr<boolean>(sym, "ignore_placement");
+            get_opt_attr<boolean>(sym, "ignore-placement");
         optional<float> opacity =
             get_opt_attr<float>(sym, "opacity");
         
@@ -762,6 +811,8 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
 
         if (file)
         {
+            s << "base,transform";
+            ensure_attrs(sym, "PointSymbolizer", s.str());
             try
             {
                 if( base )
@@ -799,7 +850,8 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
                     if (!mapnik::svg::parse_transform(*transform_wkt,tr))
                     {
                         std::stringstream ss;
-                        ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                        ss << "Could not parse transform from '" << transform_wkt 
+                           << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
                         if (strict_)
                             throw config_error(ss.str()); // value_error here?
                         else
@@ -830,6 +882,8 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
         }
         else
         {
+            // transform not supported
+            ensure_attrs(sym, "PointSymbolizer", s.str());
             point_symbolizer symbol;
 
             if (allow_overlap)
@@ -868,9 +922,20 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
         optional<std::string> file =  get_opt_attr<string>(sym, "file");
         optional<std::string> base =  get_opt_attr<string>(sym, "base");
         optional<std::string> transform_wkt = get_opt_attr<string>(sym, "transform");
-        
+
+        std::stringstream s;
+        //s << "file,opacity,spacing,max-error,allow-overlap,placement,";
+        s << "file,base,transform,fill,opacity,"
+          << "spacing,max-error,allow-overlap,"
+          << "width,height,placement,marker-type,"
+          << "meta-writer,meta-output,"
+          << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
+          << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray";
+
         if (file)
         {
+            //s << "base,transform";
+            //ensure_attrs(sym, "MarkersSymbolizer", s.str());
             try
             {
                 if (base)
@@ -897,6 +962,11 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
                 }
             }
         }
+        /*else
+        {
+            //s << "fill,marker-type,width,height";
+            //ensure_attrs(sym, "MarkersSymbolizer", s.str());
+        }*/
 
         markers_symbolizer symbol(parse_path(filename));
         optional<float> opacity = get_opt_attr<float>(sym, "opacity");
@@ -908,7 +978,8 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
             if (!mapnik::svg::parse_transform(*transform_wkt,tr))
             {
                 std::stringstream ss;
-                ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                ss << "Could not parse transform from '" << transform_wkt
+                   << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
                 if (strict_)
                     throw config_error(ss.str()); // value_error here?
                 else
@@ -923,9 +994,9 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
         if (c) symbol.set_fill(*c);
         optional<double> spacing = get_opt_attr<double>(sym, "spacing");
         if (spacing) symbol.set_spacing(*spacing);
-        optional<double> max_error = get_opt_attr<double>(sym, "max_error");
+        optional<double> max_error = get_opt_attr<double>(sym, "max-error");
         if (max_error) symbol.set_max_error(*max_error);
-        optional<boolean> allow_overlap = get_opt_attr<boolean>(sym, "allow_overlap");
+        optional<boolean> allow_overlap = get_opt_attr<boolean>(sym, "allow-overlap");
         if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
 
         optional<double> w = get_opt_attr<double>(sym, "width");
@@ -959,7 +1030,7 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
         if (placement == MARKER_POINT_PLACEMENT)
             dfl_marker_type = ELLIPSE;
 
-        marker_type_e marker_type = get_attr<marker_type_e>(sym, "marker_type", dfl_marker_type);
+        marker_type_e marker_type = get_attr<marker_type_e>(sym, "marker-type", dfl_marker_type);
         symbol.set_marker_type( marker_type );
 
         parse_metawriter_in_symbolizer(symbol, sym);
@@ -974,6 +1045,7 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
 
 void map_parser::parse_line_pattern_symbolizer( rule & rule, ptree const & sym )
 {
+    ensure_attrs(sym, "LinePatternSymbolizer", "file,base,meta-writer,meta-output");
     try
     {
         std::string file = get_attr<string>(sym, "file");
@@ -1021,6 +1093,7 @@ void map_parser::parse_line_pattern_symbolizer( rule & rule, ptree const & sym )
 void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
                                                    ptree const & sym )
 {
+    ensure_attrs(sym, "PolygonPatternSymbolizer", "file,base,alignment,meta-writer,meta-output");
     try
     {
         std::string file = get_attr<string>(sym, "file");
@@ -1071,15 +1144,27 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
 
 void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 {
+    std::stringstream s;
+    s << "name,face-name,fontset-name,size,fill,orientation,"
+      << "dx,dy,placement,vertical-alignment,halo-fill,"
+      << "halo-radius,text-ratio,wrap-width,wrap-before,"
+      << "wrap-character,text-transform,line-spacing,"
+      << "label-position-tolerance,character-spacing,"
+      << "spacing,minimum-distance,minimum-padding,"
+      << "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
+      << "horizontal-alignment,justify-alignment,"
+      << "meta-writer,meta-output";
+    
+    ensure_attrs(sym, "TextSymbolizer", s.str());
     try
     {
         std::string name = get_attr<string>(sym, "name");
         
         optional<std::string> face_name =
-            get_opt_attr<std::string>(sym, "face_name");
+            get_opt_attr<std::string>(sym, "face-name");
 
         optional<std::string> fontset_name =
-            get_opt_attr<std::string>(sym, "fontset_name");
+            get_opt_attr<std::string>(sym, "fontset-name");
 
         unsigned size = get_attr(sym, "size", 10U);
 
@@ -1141,17 +1226,17 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
             default_vertical_alignment = TOP;
         }
             
-        vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", default_vertical_alignment);
+        vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical-alignment", default_vertical_alignment);
         text_symbol.set_vertical_alignment(valign);
 
         // halo fill and radius
-        optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
+        optional<color> halo_fill = get_opt_attr<color>(sym, "halo-fill");
         if (halo_fill)
         {
             text_symbol.set_halo_fill( * halo_fill );
         }
         optional<double> halo_radius =
-            get_opt_attr<double>(sym, "halo_radius");
+            get_opt_attr<double>(sym, "halo-radius");
         if (halo_radius)
         {
             text_symbol.set_halo_radius(*halo_radius);
@@ -1159,21 +1244,21 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         
         // text ratio and wrap width
         optional<unsigned> text_ratio =
-            get_opt_attr<unsigned>(sym, "text_ratio");
+            get_opt_attr<unsigned>(sym, "text-ratio");
         if (text_ratio)
         {
             text_symbol.set_text_ratio(*text_ratio);
         }
 
         optional<unsigned> wrap_width =
-            get_opt_attr<unsigned>(sym, "wrap_width");
+            get_opt_attr<unsigned>(sym, "wrap-width");
         if (wrap_width)
         {
             text_symbol.set_wrap_width(*wrap_width);
         }
 
         optional<boolean> wrap_before =
-            get_opt_attr<boolean>(sym, "wrap_before");
+            get_opt_attr<boolean>(sym, "wrap-before");
         if (wrap_before)
         {
             text_symbol.set_wrap_before(*wrap_before);
@@ -1181,7 +1266,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 
         // character used to break long strings
         optional<std::string> wrap_char =
-            get_opt_attr<std::string>(sym, "wrap_character");
+            get_opt_attr<std::string>(sym, "wrap-character");
         if (wrap_char && (*wrap_char).size() > 0)
         {
             text_symbol.set_wrap_char((*wrap_char)[0]);
@@ -1189,25 +1274,25 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 
         // text conversion before rendering
         text_transform_e tconvert =
-            get_attr<text_transform_e>(sym, "text_transform", NONE);
+            get_attr<text_transform_e>(sym, "text-transform", NONE);
         text_symbol.set_text_transform(tconvert);
 
         // spacing between text lines
-        optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing");
+        optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line-spacing");
         if (line_spacing)
         {
             text_symbol.set_line_spacing(*line_spacing);
         }
 
         // tolerance between label spacing along line
-        optional<unsigned> label_position_tolerance = get_opt_attr<unsigned>(sym, "label_position_tolerance");
+        optional<unsigned> label_position_tolerance = get_opt_attr<unsigned>(sym, "label-position-tolerance");
         if (label_position_tolerance)
         {
             text_symbol.set_label_position_tolerance(*label_position_tolerance);
         }
 
         // spacing between characters in text
-        optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing");
+        optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character-spacing");
         if (character_spacing)
         {
             text_symbol.set_character_spacing(*character_spacing);
@@ -1221,16 +1306,14 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         }
 
         // minimum distance between labels
-        optional<unsigned> min_distance =
-            get_opt_attr<unsigned>(sym, "minimum_distance");
+        optional<unsigned> min_distance = get_opt_attr<unsigned>(sym, "minimum-distance");
         if (min_distance)
         {
             text_symbol.set_minimum_distance(*min_distance);
         }
         
         // minimum distance from edge of the map
-        optional<unsigned> min_padding =
-            get_opt_attr<unsigned>(sym, "minimum_padding");
+        optional<unsigned> min_padding = get_opt_attr<unsigned>(sym, "minimum-padding");
         if (min_padding)
         {
             text_symbol.set_minimum_padding(*min_padding);
@@ -1238,7 +1321,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         
         // do not render labels around edges
         optional<boolean> avoid_edges =
-            get_opt_attr<boolean>(sym, "avoid_edges");
+            get_opt_attr<boolean>(sym, "avoid-edges");
         if (avoid_edges)
         {
             text_symbol.set_avoid_edges( * avoid_edges);
@@ -1246,7 +1329,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 
         // allow_overlap
         optional<boolean> allow_overlap =
-            get_opt_attr<boolean>(sym, "allow_overlap");
+            get_opt_attr<boolean>(sym, "allow-overlap");
         if (allow_overlap)
         {
             text_symbol.set_allow_overlap( * allow_overlap );
@@ -1262,18 +1345,18 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         
         // max_char_angle_delta
         optional<double> max_char_angle_delta =
-            get_opt_attr<double>(sym, "max_char_angle_delta");
+            get_opt_attr<double>(sym, "max-char-angle-delta");
         if (max_char_angle_delta)
         {
             text_symbol.set_max_char_angle_delta( (*max_char_angle_delta)*(M_PI/180));
         }
             
         // horizontal alignment
-        horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal_alignment", H_MIDDLE);
+        horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal-alignment", H_MIDDLE);
         text_symbol.set_horizontal_alignment(halign);
 
         // justify alignment
-        justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify_alignment", J_MIDDLE);
+        justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify-alignment", J_MIDDLE);
         text_symbol.set_justify_alignment(jalign);
 
         parse_metawriter_in_symbolizer(text_symbol, sym);
@@ -1288,15 +1371,33 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 
 void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 {
+
+    std::stringstream s;
+    //std::string a[] = {"a","b"};
+    s << "name,face-name,fontset-name,size,fill,"
+      << "dx,dy,placement,vertical-alignment,halo-fill,"
+      << "halo-radius,text-ratio,wrap-width,wrap-before,"
+      << "wrap-character,text-transform,line-spacing,"
+      << "label-position-tolerance,character-spacing,"
+      << "spacing,minimum-distance,minimum-padding,"
+      << "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
+      << "horizontal-alignment,justify-alignment,"
+      // additional for shield
+      /* transform instead of orientation */ 
+      << "file,transform,shield-dx,shield-dy,"
+      << "text-opacity,unlock-image,no-text,"
+      << "meta-writer,meta-output";      
+    
+    ensure_attrs(sym, "ShieldSymbolizer", s.str());
     try
     {
         std::string name =  get_attr<string>(sym, "name");
 
         optional<std::string> face_name =
-            get_opt_attr<std::string>(sym, "face_name");
+            get_opt_attr<std::string>(sym, "face-name");
 
         optional<std::string> fontset_name =
-            get_opt_attr<std::string>(sym, "fontset_name");
+            get_opt_attr<std::string>(sym, "fontset-name");
 
         unsigned size = get_attr(sym, "size", 10U);
         color fill = get_attr(sym, "fill", color(0,0,0));
@@ -1322,7 +1423,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
                 
             if (fontset_name && face_name)
             {
-                throw config_error(std::string("Can't have both face_name and fontset_name"));
+                throw config_error(std::string("Can't have both face-name and fontset-name"));
             }
             else if (fontset_name)
             {
@@ -1346,15 +1447,15 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             }
             else
             {
-                throw config_error(std::string("Must have face_name or fontset_name"));
+                throw config_error(std::string("Must have face-name or fontset-name"));
             }
             // text displacement (relative to shield_displacement)
             double dx = get_attr(sym, "dx", 0.0);
             double dy = get_attr(sym, "dy", 0.0);
             shield_symbol.set_displacement(dx,dy);
             // shield displacement
-            double shield_dx = get_attr(sym, "shield_dx", 0.0);
-            double shield_dy = get_attr(sym, "shield_dy", 0.0);
+            double shield_dx = get_attr(sym, "shield-dx", 0.0);
+            double shield_dy = get_attr(sym, "shield-dy", 0.0);
             shield_symbol.set_shield_displacement(shield_dx,shield_dy);
             
             label_placement_e placement =
@@ -1363,36 +1464,34 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 
             // don't render shields around edges
             optional<boolean> avoid_edges =
-                get_opt_attr<boolean>(sym, "avoid_edges");
+                get_opt_attr<boolean>(sym, "avoid-edges");
             if (avoid_edges)
             {
                 shield_symbol.set_avoid_edges( *avoid_edges);
             }
 
             // halo fill and radius
-            optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
+            optional<color> halo_fill = get_opt_attr<color>(sym, "halo-fill");
             if (halo_fill)
             {
                 shield_symbol.set_halo_fill( * halo_fill );
             }
             optional<double> halo_radius =
-                get_opt_attr<double>(sym, "halo_radius");
+                get_opt_attr<double>(sym, "halo-radius");
             if (halo_radius)
             {
                 shield_symbol.set_halo_radius(*halo_radius);
             }
 
             // minimum distance between labels
-            optional<unsigned> min_distance =
-                get_opt_attr<unsigned>(sym, "minimum_distance");
+            optional<unsigned> min_distance = get_opt_attr<unsigned>(sym, "minimum-distance");
             if (min_distance)
             {
                 shield_symbol.set_minimum_distance(*min_distance);
             }
 
             // minimum distance from edge of the map
-            optional<unsigned> min_padding =
-                get_opt_attr<unsigned>(sym, "minimum_padding");
+            optional<unsigned> min_padding = get_opt_attr<unsigned>(sym, "minimum-padding");
             if (min_padding)
             {
                 shield_symbol.set_minimum_padding(*min_padding);
@@ -1407,33 +1506,33 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 
             // allow_overlap
             optional<boolean> allow_overlap =
-                get_opt_attr<boolean>(sym, "allow_overlap");
+                get_opt_attr<boolean>(sym, "allow-overlap");
             if (allow_overlap)
             {
                 shield_symbol.set_allow_overlap( * allow_overlap );
             }
 
             // vertical alignment
-            vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical_alignment", MIDDLE);
+            vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical-alignment", MIDDLE);
             shield_symbol.set_vertical_alignment(valign);
 
             // horizontal alignment
-            horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal_alignment", H_MIDDLE);
+            horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal-alignment", H_MIDDLE);
             shield_symbol.set_horizontal_alignment(halign);
 
             // justify alignment
-            justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify_alignment", J_MIDDLE);
+            justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify-alignment", J_MIDDLE);
             shield_symbol.set_justify_alignment(jalign);
 
             optional<unsigned> wrap_width =
-                get_opt_attr<unsigned>(sym, "wrap_width");
+                get_opt_attr<unsigned>(sym, "wrap-width");
             if (wrap_width)
             {
                 shield_symbol.set_wrap_width(*wrap_width);
             }
 
             optional<boolean> wrap_before =
-                get_opt_attr<boolean>(sym, "wrap_before");
+                get_opt_attr<boolean>(sym, "wrap-before");
             if (wrap_before)
             {
                 shield_symbol.set_wrap_before(*wrap_before);
@@ -1441,7 +1540,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 
             // character used to break long strings
             optional<std::string> wrap_char =
-                get_opt_attr<std::string>(sym, "wrap_character");
+                get_opt_attr<std::string>(sym, "wrap-character");
             if (wrap_char && (*wrap_char).size() > 0)
             {
                 shield_symbol.set_wrap_char((*wrap_char)[0]);
@@ -1449,18 +1548,18 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 
             // text conversion before rendering
             text_transform_e tconvert =
-                get_attr<text_transform_e>(sym, "text_transform", NONE);
+                get_attr<text_transform_e>(sym, "text-transform", NONE);
             shield_symbol.set_text_transform(tconvert);
 
             // spacing between text lines
-            optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line_spacing");
+            optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line-spacing");
             if (line_spacing)
             {
                 shield_symbol.set_line_spacing(*line_spacing);
             }
 
             // spacing between characters in text
-            optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character_spacing");
+            optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character-spacing");
             if (character_spacing)
             {
                 shield_symbol.set_character_spacing(*character_spacing);
@@ -1501,7 +1600,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             
             // unlock_image
             optional<boolean> unlock_image =
-                get_opt_attr<boolean>(sym, "unlock_image");
+                get_opt_attr<boolean>(sym, "unlock-image");
             if (unlock_image)
             {
                 shield_symbol.set_unlock_image( * unlock_image );
@@ -1509,7 +1608,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 
             // no text
             optional<boolean> no_text =
-                get_opt_attr<boolean>(sym, "no_text");
+                get_opt_attr<boolean>(sym, "no-text");
             if (no_text)
             {
                 shield_symbol.set_no_text( * no_text );
@@ -1606,6 +1705,11 @@ void map_parser::parse_stroke(stroke & strk, ptree const & sym)
 
 void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
 {
+    std::stringstream s;
+    s << "meta-writer,meta-output,"
+      << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
+      << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray";
+    ensure_attrs(sym, "LineSymbolizer", s.str());
     try
     {
         stroke strk;
@@ -1625,6 +1729,7 @@ void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
     
 void map_parser::parse_polygon_symbolizer( rule & rule, ptree const & sym )
 {
+    ensure_attrs(sym, "PolygonSymbolizer", "fill,fill-opacity,gamma,meta-writer,meta-output");
     try
     {
         polygon_symbolizer poly_sym;
@@ -1651,7 +1756,9 @@ void map_parser::parse_polygon_symbolizer( rule & rule, ptree const & sym )
 
 void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
 {
-    try {
+    ensure_attrs(sym, "PolygonSymbolizer", "fill,fill-opacity,height,meta-writer,meta-output");
+    try 
+    {
         building_symbolizer building_sym;
 
         // fill
@@ -1661,6 +1768,7 @@ void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
         optional<double> opacity = get_opt_attr<double>(sym, "fill-opacity");
         if (opacity) building_sym.set_opacity(*opacity);
         // height
+        // TODO - expression
         optional<double> height = get_opt_attr<double>(sym, "height");
         if (height) building_sym.set_height(*height);
 
@@ -1676,6 +1784,8 @@ void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
 
 void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
 {
+    // no support for meta-writer,meta-output
+    ensure_attrs(sym, "PolygonSymbolizer", "mode,scaling,opacity,filter-factory");
     try
     {
         raster_symbolizer raster_sym;
@@ -1693,7 +1803,7 @@ void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
         if (opacity) raster_sym.set_opacity(*opacity);
 
         // filter factor
-        optional<double> filter_factor = get_opt_attr<double>(sym, "filter_factor");
+        optional<double> filter_factor = get_opt_attr<double>(sym, "filter-factor");
         if (filter_factor) raster_sym.set_filter_factor(*filter_factor);
 
         ptree::const_iterator cssIter = sym.begin();
@@ -1726,12 +1836,13 @@ void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
     }
 }
 
-void map_parser::parse_glyph_symbolizer(rule & rule, ptree const &sym)
+void map_parser::parse_glyph_symbolizer(rule & rule, ptree const & sym)
 {
+    ensure_attrs(sym, "GlyphSymbolizer", "face-name,char,angle,angle-mode,value,size,color,halo-fill,halo-radius,allow-overlap,avoid-edges,dx,dy,meta-writer,meta-output");
     try
     {
         // Parse required constructor args
-        std::string face_name = get_attr<std::string>(sym, "face_name");
+        std::string face_name = get_attr<std::string>(sym, "face-name");
         std::string _char = get_attr<std::string>(sym, "char");
 
         glyph_symbolizer glyph_sym = glyph_symbolizer(
@@ -1750,7 +1861,7 @@ void map_parser::parse_glyph_symbolizer(rule & rule, ptree const &sym)
             glyph_sym.set_angle(parse_expression(*angle, "utf8"));
 
         angle_mode_e angle_mode =
-            get_attr<angle_mode_e>(sym, "angle_mode", TRIGONOMETRIC);
+            get_attr<angle_mode_e>(sym, "angle-mode", TRIGONOMETRIC);
         glyph_sym.set_angle_mode(angle_mode);
                     
         // value
@@ -1771,21 +1882,21 @@ void map_parser::parse_glyph_symbolizer(rule & rule, ptree const &sym)
             glyph_sym.set_color(parse_expression(*_color, "utf8"));
 
         // halo_fill
-        optional<color> halo_fill = get_opt_attr<color>(sym, "halo_fill");
+        optional<color> halo_fill = get_opt_attr<color>(sym, "halo-fill");
         if (halo_fill)
             glyph_sym.set_halo_fill(*halo_fill);
 
         // halo_radius
         optional<double> halo_radius = get_opt_attr<double>(
             sym,
-            "halo_radius");
+            "halo-radius");
         if (halo_radius)
             glyph_sym.set_halo_radius(*halo_radius);
         
         // allow_overlap
         optional<boolean> allow_overlap = get_opt_attr<boolean>(
             sym,
-            "allow_overlap"
+            "allow-overlap"
             );
         if (allow_overlap)
             glyph_sym.set_allow_overlap(*allow_overlap);
@@ -1793,7 +1904,7 @@ void map_parser::parse_glyph_symbolizer(rule & rule, ptree const &sym)
         // avoid_edges
         optional<boolean> avoid_edges = get_opt_attr<boolean>(
             sym,
-            "avoid_edges"
+            "avoid-edges"
             );
         if (avoid_edges)
             glyph_sym.set_avoid_edges(*avoid_edges);
@@ -1851,6 +1962,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
 
             if (cb_tag.first == "ColorBand")
             {
+                ensure_attrs(cb, "ColorBand", "value,color,midpoints,max-value,label");
                 std::string value_s  = get_attr<string>(cb, "value");
                 float value;
                 std::stringstream(value_s) >> value;
@@ -1859,7 +1971,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
                     throw config_error("missing color");
                 }
                 unsigned midpoints = get_attr(cb, "midpoints", 0);
-                optional<float> max_value = get_opt_attr<float>(cb, "max_value");
+                optional<float> max_value = get_opt_attr<float>(cb, "max-value");
                 if (max_value) {
                     rc->append_band(value, *max_value, *c, midpoints);
                 } else {
@@ -1913,6 +2025,47 @@ std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt
         }
     }
     return *opt_path;
+}
+
+void map_parser::ensure_attrs(ptree const& sym, std::string name, std::string attrs)
+{
+
+    typedef ptree::key_type::value_type Ch;
+    //typedef boost::property_tree::xml_parser::xmlattr<Ch> x_att;
+    
+    std::set<std::string> attr_set;
+    boost::split(attr_set, attrs, boost::is_any_of(","));
+    for (ptree::const_iterator itr = sym.begin(); itr != sym.end(); ++itr)
+    {
+       //ptree::value_type const& v = *itr;
+       if (itr->first == boost::property_tree::xml_parser::xmlattr<Ch>())
+       {
+           optional<const ptree &> attribs = sym.get_child_optional( boost::property_tree::xml_parser::xmlattr<Ch>() );
+           if (attribs)
+           {
+               std::ostringstream s("");
+               s << "### " << name << " properties warning: ";
+               int missing = 0;
+               for (ptree::const_iterator it = attribs.get().begin(); it != attribs.get().end(); ++it)
+               {
+                   std::string name = it->first;
+                   bool found = (attr_set.find(name) != attr_set.end());
+                   if (!found)
+                   {
+                       if (missing) s << ",";
+                       s << "'" << name << "'";
+                       ++missing;
+                   }
+               }
+               if (missing) {
+                   if (missing > 1) s << " are";
+                   else s << " is";
+                   s << " invalid, acceptable values are:\n'" << attrs << "'\n";
+                   std::clog << s.str();
+               }
+           }
+       }
+   }
 }
 
 } // end of namespace mapnik
