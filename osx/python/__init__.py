@@ -55,7 +55,7 @@ elif ver_int > 31:
     raise ImportError('Mapnik bindings are only available for python versions <= 3.1')
 else:
     raise ImportError('Mapnik bindings are only available for python versions 2.5, 2.6, 2.7, and 3.1')
-    
+
 
 import os
 import warnings
@@ -739,6 +739,7 @@ __all__ = [
     'ViewTransform',
     # enums
     'aspect_fix_mode',
+    'point_placement',
     'label_placement',
     'line_cap',
     'line_join',
@@ -747,6 +748,7 @@ __all__ = [
     'horizontal_alignment',
     'justify_alignment',
     'pattern_alignment',
+    'filter_mode',
     # functions
     # datasources
     'Datasource',
