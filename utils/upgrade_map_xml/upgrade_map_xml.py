@@ -2,7 +2,10 @@
 import os
 import re
 import sys
+import optparse
 import tempfile
+
+__version__ = '0.1.0'
 
 HAS_LXML = False
 
@@ -14,6 +17,11 @@ except ImportError:
         import elementtree.ElementTree as etree
     except ImportError:
         import xml.etree.ElementTree as etree
+
+def color_text(color, text):
+    if os.name == 'nt':
+        return text
+    return "\033[9%sm%s\033[0m" % (color,text)
 
 def indent(elem, level=0):
     """ http://infix.se/2007/02/06/gentlemen-indent-your-xml
@@ -34,11 +42,15 @@ def indent(elem, level=0):
             
 def name2expr(sym):
     name = sym.attrib['name']
-    if re.match('^\[.*\]',name) is None:
-        #import pdb;pdb.set_trace()
-        print>>sys.stderr,"Fixing %s" % name
-        expression = '[%s]' % name
-        sym.attrib['name'] = expression    
+    if re.match('^\[.*\]',name) is None \
+        and '[' not in name \
+        and ']' not in name \
+        and not name.startswith("'") \
+        and not name.endswith("'") \
+        and re.match("^\'.*\'",name) is None:
+            print>>sys.stderr,"Fixing %s" % name
+            expression = '[%s]' % name
+            sym.attrib['name'] = expression    
 
 def handle_attr_changes(sym):
     # http://www.w3schools.com/css/pr_text_text-transform.asp
@@ -64,7 +76,7 @@ def handle_attr_changes(sym):
         sym.attrib['minimum_padding'] = minimum_padding
         sym.attrib.pop('min_padding')
 
-def fixup_pointsym(sym):
+def fixup_sym_with_image(sym):
     if sym.attrib.get('width'):
         sym.attrib.pop('width')
     if sym.attrib.get('height'):
@@ -73,54 +85,72 @@ def fixup_pointsym(sym):
         sym.attrib.pop('type')
 
 def fixup_sym_attributes(sym):
-    # copy, so we don't loose after clear()
-    attrib = dict(sym.attrib)
-    for css in sym.findall('CssParameter'):
-        key = css.attrib.get('name')
-        value = css.text
-        attrib[key] = value
-    sym.clear() # remove CssParameter elements
-    for k,v in attrib.items(): # insert attributes instead
-        sym.attrib[k] = v
-    
-        
-if __name__ == "__main__":
-    
-    #required parameters:
-    #   input_xml: outdated stylesheet file
-    #   output_file: new stylesheet file
+    if len(sym.findall('CssParameter')):
+        # copy, so we don't loose after clear()
+        attrib = dict(sym.attrib)
+        for css in sym.findall('CssParameter'):
+            key = css.attrib.get('name')
+            value = css.text
+            attrib[key] = value
+        sym.clear() # remove CssParameter elements
+        for k,v in attrib.items(): # insert attributes instead
+            sym.attrib[k] = v
 
-    if len(sys.argv) != 3:
-        sys.stderr.write('Usage: %s <input_xml> <output_xml>\n' % os.path.basename(sys.argv[0]))
+def underscore2dash(elem):
+    for i in elem.attrib.items():
+        if '_' in i[0]:
+           new = i[0].replace('_','-')
+           old = i[0]
+           elem.attrib[new] = i[1]
+           elem.attrib.pop(old)
+           print>>sys.stderr,"Changing %s to %s" % (new,old)
+
+
+def upgrade(input_xml,output_xml=None,indent_xml=True):
+
+    if not os.path.exists(input_xml):
+        sys.stderr.write('input xml "%s" does not exist' % input_xml)
         sys.exit(1)
     
-    input_xml = sys.argv[1]
-    output_xml = sys.argv[2]
-    
-    if input_xml == output_xml:
-        sys.stderr.write('Sorry, this upgrade script does not allow you to overwrite the input xml, please provide a different output name than "%s"\n' % output_xml)
-        sys.exit(1)
-    
-
     pre_read = open(input_xml,'r')
     if '!ENTITY' in pre_read.read() and not HAS_LXML:
         sys.stderr.write('\nSorry, it appears the xml you are trying to upgrade has entities, which requires lxml (python bindings to libxml2)\n')
         sys.stderr.write('Install lxml with: "easy_install lxml" or download from http://codespeak.net/lxml/\n')
 
         sys.exit(1)        
-        
-    tree = etree.parse(input_xml)
+
+    try:
+        tree = etree.parse(input_xml)
+    except:
+        print 'Could not parse "%s" invalid XML' % input_xml
+        return
+    
     if hasattr(tree,'xinclude'):
         tree.xinclude()
     root = tree.getroot()
+
+    root.set('minimum-version','0.7.2')
     
     # rename 'bgcolor' to 'background-color'
     if root.attrib.get('bgcolor'):
         root.attrib['background-color'] = root.attrib.get('bgcolor')
         root.attrib.pop('bgcolor')
     
-    # set new minimum_version
-    root.set('minimum_version','0.7.2')
+    # underscores to spaces for <Map ..>
+    underscore2dash(root)
+    
+    # underscores to spaces for <FontSet ..>
+    fontset = root.findall('FontSet')
+    for f in fontset:
+        font = f.findall('Font')
+        for f_ in font:
+            underscore2dash(f_)
+
+    # underscores to spaces for <Layer ..>
+    layers = root.findall('Layer')
+    for l in layers:
+        underscore2dash(l)
+    
     
     styles = root.findall('Style')
     if not len(styles):
@@ -131,20 +161,107 @@ if __name__ == "__main__":
                 for sym in rule.findall('TextSymbolizer') or []:
                     name2expr(sym)
                     handle_attr_changes(sym)
+                    fixup_sym_attributes(sym)
+                    underscore2dash(sym)
                 for sym in rule.findall('ShieldSymbolizer') or []:
                     name2expr(sym) 
                     handle_attr_changes(sym)
+                    fixup_sym_attributes(sym)
+                    underscore2dash(sym)
+                    fixup_sym_with_image(sym)
                 for sym in rule.findall('PointSymbolizer') or []:
-                    fixup_pointsym(sym)
+                    fixup_sym_with_image(sym)
+                    fixup_sym_attributes(sym)
+                    underscore2dash(sym)
+                for sym in rule.findall('PolygonPatternSymbolizer') or []:
+                    fixup_sym_with_image(sym)
+                    fixup_sym_attributes(sym)
+                    underscore2dash(sym)
+                for sym in rule.findall('LinePatternSymbolizer') or []:
+                    fixup_sym_with_image(sym)
+                    fixup_sym_attributes(sym)
+                    underscore2dash(sym)
                 for sym in rule.findall('LineSymbolizer') or []:
                     fixup_sym_attributes(sym)
+                    underscore2dash(sym)
                 for sym in rule.findall('PolygonSymbolizer') or []:
                     fixup_sym_attributes(sym)
+                    underscore2dash(sym)
                 for sym in rule.findall('RasterSymbolizer') or []:
                     fixup_sym_attributes(sym)
+                    underscore2dash(sym)
                 for sym in rule.findall('BuildingSymbolizer') or []:
                     fixup_sym_attributes(sym)
+                    underscore2dash(sym)
+                for sym in rule.findall('GlyphSymbolizer') or []:
+                    fixup_sym_attributes(sym)
+                    underscore2dash(sym)
 
-    # TODO - make forcing indent an option
-    indent(root)
-    tree.write(output_xml)
+    if indent_xml:
+        indent(root)
+    
+    if output_xml:
+        tree.write(output_xml)
+    else:
+        tree.write(input_xml)
+
+parser = optparse.OptionParser(usage="""%prog <input xml> [options]
+
+Upgrade a Mapnik XML stylesheet to Mapnik 2.0
+
+Full help:
+ $ %prog -h (or --help for possible options)
+
+Read 'map.xml' and write new 'map2.xml'
+ $ %prog map.xml map2.xml
+
+Update 'map.xml' in place (*Careful*)
+ $ %prog map.xml --in-place
+
+""", version='%prog ' + __version__)
+
+parser.add_option('--indent',
+                  dest='indent_xml',
+                  action='store_true',
+                  default=False,
+                  help='Indent the resulting XML')
+
+parser.add_option('--in-place',
+                  dest='update_in_place',
+                  action='store_true',
+                  default=False,
+                  help='Update and overwrite the map in place')
+
+if __name__ == "__main__":
+
+    (options, args) = parser.parse_args()
+    if not len(args) > 0:
+        parser.error("Please provide the path to a map.xml and a new xml to write")
+    
+    input_xml = args[0]
+    output_xml = None
+
+    if len(args) < 3 and not options.update_in_place:
+        if len(args) == 2:
+            output_xml = args[1]
+            
+        if (len(args) == 1) or (input_xml == output_xml):
+            parser.error(color_text(1,'\n\nAre you sure you want to overwrite "%s"?\nIf so, then pass --in-place to confirm.\nOtherwise pass a different filename to write an upgraded copy to.\n' % input_xml))
+
+        print 'Upgrading "%s" to "%s"...' % (input_xml,output_xml)
+        upgrade(input_xml,output_xml=output_xml,indent_xml=options.indent_xml)
+    
+    elif len(args) == 1:
+        print 'Upgrading "%s" to "%s"...' % (input_xml,output_xml)
+        upgrade(input_xml,output_xml=output_xml,indent_xml=options.indent_xml)
+
+    elif len(args) > 1: # assume a list of inputs
+        found = []
+        for input_xml in args:
+            if os.path.exists(input_xml) and input_xml not in found:
+                print 'Upgrading "%s" in place...' % input_xml
+                found.append(input_xml)
+                upgrade(input_xml,output_xml=None,indent_xml=options.indent_xml)
+
+    
+    
