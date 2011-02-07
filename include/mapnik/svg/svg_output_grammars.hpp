@@ -102,18 +102,15 @@ namespace boost { namespace spirit { namespace traits {
     template <>
     struct container_iterator<mapnik::geometry_type const>
     {       
-      //typedef mapnik::geometry_type::iterator type; 
         typedef mapnik::geometry_iterator_type type; 
     };
 
     template <>
     struct begin_container<mapnik::geometry_type const>
     {
-      //static mapnik::geometry_type::iterator  	
         static mapnik::geometry_iterator_type	
 	call(mapnik::geometry_type const& g)
 	{
-	  //return g.begin();
   	    return mapnik::geometry_iterator_type(0, g);
 	}
     };
@@ -121,11 +118,9 @@ namespace boost { namespace spirit { namespace traits {
     template <>
     struct end_container<mapnik::geometry_type const>
     {
-      //static mapnik::geometry_type::iterator  	
         static mapnik::geometry_iterator_type  	
 	call(mapnik::geometry_type const& g)
 	{
-	  //return g.end(); 
             return mapnik::geometry_iterator_type(g);
 	}
     };
