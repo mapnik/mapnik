@@ -36,6 +36,10 @@ if __name__ == "__main__":
 
     INCLUDE_PYTHON = True
     
+    INCLUDE_CAIRO = True
+    
+    INCLUDE_PYCAIRO = True
+    
     # final resting place
     install_path = '/Library/Frameworks'
 
@@ -75,6 +79,28 @@ if __name__ == "__main__":
     else:
         # purge the installed headers of mapnik
         os.system('rm -rf %s' % join(active,'unix/include'))
+    
+    if INCLUDE_CAIRO:
+        
+        # install cairo libs and deps
+        copy_all_items('sources/lib/libcairo*dylib',join(active,'unix/lib'),recursive=True)
+        copy_all_items('sources/lib/libfontconfig*dylib',join(active,'unix/lib'),recursive=True)
+        copy_all_items('sources/lib/libsigc-2.0*dylib',join(active,'unix/lib'),recursive=True)
+        copy_all_items('sources/lib/libpixman*dylib',join(active,'unix/lib'),recursive=True)
+    
+        # install cairo includes
+        if INCLUDE_HEADERS:
+            # what is layout?
+            for group in ['cairo','cairomm-1.0','fontconfig','pixman-1','pycairo','sigc++-2.0','layout']:
+                if not os.path.exists(join(active,'unix/include/%s' % group)):
+                    os.mkdir(join(active,'unix/include/%s' % group))
+                copy_all_items('sources/include/%s/*' % group,join(active,'unix/include/%s' % group),recursive=True)
+
+            # likely uneeded
+            if not os.path.exists(join(active,'unix/lib/sigc++-2.0')):
+                os.mkdir(join(active,'unix/lib/sigc++-2.0'))
+            copy_all_items('sources/lib/sigc++-2.0/*',join(active,'unix/lib/sigc++-2.0'),recursive=True)
+            
     
     # install icu libs
     copy_all_items('sources/lib/libicuu*dylib',join(active,'unix/lib'),recursive=True)
@@ -158,9 +184,27 @@ if __name__ == "__main__":
         if not os.path.exists(join(active,'Python')):
             os.mkdir(join(active,'Python'))
             os.mkdir(join(active,'Python/mapnik2'))
-        shutil.copy('python/__init__.py',join(active,'Python/mapnik2/'))
+            if INCLUDE_PYCAIRO:
+                os.mkdir(join(active,'Python/cairo'))
+        shutil.copy('python/mapnik.py',join(active,'Python/mapnik2/__init__.py'))
+        if INCLUDE_PYCAIRO:
+            if not os.path.exists(join(active,'Python/cairo/')):
+                os.mkdir(join(active,'Python/cairo/'))
+            shutil.copy('python/cairo.py',join(active,'Python/cairo/__init__.py'))
         #sym(py_dir,join(active,'Python'))
         sym(join(active,'Python'),join(framework,'Python'))
+                    
+
+        # pycairo module
+        if INCLUDE_PYCAIRO:
+            for pyver in glob.glob('sources/lib/python*'):
+                ver = os.path.basename(pyver)
+                assert os.path.exists(join(active,'unix/lib/%s' % ver))
+                assert os.path.exists(join(active,'unix/lib/%s/site-packages' % ver))
+                to = join(active,'unix/lib/%s/site-packages/cairo/' % ver)
+                if not os.path.exists(to):
+                    os.mkdir(to)
+                copy_all_items('sources/lib/%s/site-packages/cairo/*' % ver,to,recursive=True)
         
         # try to start using relative paths..
         #paths_py = '''
