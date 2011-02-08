@@ -1324,12 +1324,15 @@ if not HELP_REQUESTED and '-c' not in command_line_args:
         # dummy action in case there is nothing to uninstall, to avoid phony error..
         env.Alias("uninstall", "")
     env['create_uninstall_target'] = create_uninstall_target
+
+    if env['PKG_CONFIG_PATH']:
+        env['ENV']['PKG_CONFIG_PATH'] = env['PKG_CONFIG_PATH']
+        # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
     
     # export env so it is available in Sconscript files
     Export('env')
 
 
-    
     # clear the '_CPPDEFFLAGS' variable
     # for unknown reasons this variable puts -DNone
     # in the g++ args prompting unnecessary recompiles
