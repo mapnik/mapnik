@@ -8,8 +8,6 @@ cd osx/sources
 PREFIX=/Users/dane/projects/mapnik-dev/trunk-build/osx/sources
 mkdir -p /Users/dane/projects/mapnik-dev/trunk-build/osx/sources
 export DYLD_LIBRARY_PATH=$PREFIX/lib
-
-
 # final resting place
 INSTALL=/Library/Frameworks/Mapnik.framework/unix/lib
 
@@ -43,6 +41,108 @@ install_name_tool -id $INSTALL/libicudata.46.dylib libicudata.46.0.dylib
 install_name_tool -id $INSTALL/libicui18n.46.dylib libicui18n.46.0.dylib
 install_name_tool -change ../lib/libicudata.46.0.dylib $INSTALL/libicudata.46.dylib libicui18n.46.0.dylib
 install_name_tool -change libicuuc.46.dylib $INSTALL/libicuuc.46.dylib libicui18n.46.0.dylib
+
+
+wget http://cairographics.org/releases/pixman-0.21.4.tar.gz
+tar xvf pixman-0.21.4.tar.gz
+cd pixman-0.21.4
+./configure --disable-dependency-tracking --prefix=$PREFIX
+make -j4
+make install
+
+install_name_tool -id $INSTALL/libpixman-1.0.dylib ../../sources/lib/libpixman-1.0.dylib
+
+
+# fontconfig
+wget http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.8.0.tar.gz
+tar xvf fontconfig-2.8.0.tar.gz
+cd fontconfig-2.8.0
+./configure --disable-dependency-tracking --prefix=$PREFIX \
+    --with-freetype-config=$PREFIX/bin/freetype-config
+make -j4
+make install
+install_name_tool -id $INSTALL/libfontconfig.1.dylib ../../sources/lib/libfontconfig.1.dylib
+
+
+# Cairo
+wget http://cairographics.org/releases/cairo-1.10.2.tar.gz
+tar xvf cairo-1.10.2.tar.gz
+cd cairo-1.10.2
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+export LDFLAGS="-L/Library/Frameworks/UnixImageIO.framework/unix/lib "$LDFLAGS
+export CFLAGS="-I/Library/Frameworks/UnixImageIO.framework/unix/include "$CFLAGS
+export png_CFLAGS="-I/Library/Frameworks/UnixImageIO.framework/unix/include"
+export png_LIBS="-I/Library/Frameworks/UnixImageIO.framework/unix/lib -lpng14"
+./configure \
+  --disable-valgrind \
+  --enable-gobject=no \
+  --enable-static=no \
+  --enable-xlib=no \
+  --enable-xlib-xrender=no \
+  --enable-xcb=no \
+  --enable-xlib-xcb=no \
+  --enable-xcb-shm=no \
+  --enable-xcb-drm=no \
+  --disable-dependency-tracking \
+  --prefix=$PREFIX
+  
+make -j4
+make install
+
+install_name_tool -id $INSTALL/libcairo.2.dylib ../../sources/lib/libcairo.2.dylib
+
+# libsigcxx
+wget http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/libsigc++-2.2.8.tar.gz
+tar xvf libsigc++-2.2.8.tar.gz
+cd libsigc++-2.2.8
+./configure --disable-dependency-tracking --prefix=$PREFIX
+make
+make install
+
+install_name_tool -id $INSTALL/libsigc-2.0.dylib ../../sources/lib/libsigc-2.0.dylib
+
+wget http://cairographics.org/releases/cairomm-1.9.8.tar.gz
+tar xvf cairomm-1.9.8.tar.gz
+cd cairomm-1.9.8
+export PKG_CONFIG_PATH=../../sources/lib/pkgconfig/
+export LDFLAGS="-L$PREFIX/lib -lcairo -lsigc-2.0 "$LDFLAGS
+export CFLAGS="-I$PREFIX/include -I$PREFIX/include/cairo -I$PREFIX/include/freetype2 -I$PREFIX/lib/sigc++-2.0/include -I$PREFIX/include/sigc++-2.0 -I$PREFIX/include/sigc++-2.0/sigc++ "$CFLAGS
+export CXXFLAGS="-I$PREFIX/include "$CFLAGS
+
+./configure --disable-dependency-tracking --prefix=$PREFIX
+make -j4
+make install
+
+install_name_tool -id $INSTALL/libcairomm-1.0.1.dylib ../../sources/lib/libcairomm-1.0.1.dylib
+
+# pycairo
+# >= python 3.1
+#wget http://cairographics.org/releases/pycairo-1.8.10.tar.bz2
+#tar xvf pycairo-1.8.10.tar.bz2
+#./waf configure
+
+wget http://cairographics.org/releases/pycairo-1.8.8.tar.gz
+tar xvf pycairo-1.8.8.tar.gz
+cd pycairo-1.8.8
+export PKG_CONFIG_PATH=../../sources/lib/pkgconfig/
+
+# py25
+# line 35 of configure.ac AM_PATH_PYTHON(2.5)
+export PATH=/Library/Frameworks/Python.framework/Versions/2.5/bin/:$PATH
+./configure --prefix=$PREFIX
+make -j4 install
+
+# py26
+export PATH=/Library/Frameworks/Python.framework/Versions/2.6/bin/:$PATH
+./configure --prefix=$PREFIX
+make -j4 install
+
+#py27
+export PATH=/Library/Frameworks/Python.framework/Versions/2.7/bin/:$PATH
+make clean
+./configure --prefix=$PREFIX
+make -j4 install
+
 
 # boost
 cd ../../deps
@@ -159,7 +259,7 @@ install_name_tool -id $INSTALL/libfreetype.6.dylib libfreetype.6.dylib
 export DYLD_LIBRARY_PATH=$PREFIX/lib
 
 # compile mapnik using osx/config.py
-
+scons PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
 # then compile each python version..
 
@@ -173,14 +273,14 @@ cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_25.so
 # 2.6
 rm bindings/python/*os
 rm bindings/python/mapnik/_mapnik2.so
-scons configure PYTHON=/usr/bin/python2.6 BOOST_PYTHON_LIB=boost_python26
+scons configure BINDINGS=python PYTHON=/usr/bin/python2.6 BOOST_PYTHON_LIB=boost_python26
 scons -j2 install
 cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_26.so
 
 # 2.7
 rm bindings/python/*os
 rm bindings/python/mapnik/_mapnik2.so
-scons configure PYTHON=/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 BOOST_PYTHON_LIB=boost_python27
+scons configure BINDINGS=python PYTHON=/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 BOOST_PYTHON_LIB=boost_python27
 scons -j2 install
 cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_27.so
 
@@ -189,7 +289,7 @@ cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_27.so
 # needs patch: http://trac.mapnik.org/wiki/Python3k
 rm bindings/python/*os
 rm bindings/python/mapnik/_mapnik2.so
-scons configure PYTHON=/Library/Frameworks/Python.framework/Versions/3.1/bin/python3.1 BOOST_PYTHON_LIB=boost_python31
+scons configure BINDINGS=python PYTHON=/Library/Frameworks/Python.framework/Versions/3.1/bin/python3.1 BOOST_PYTHON_LIB=boost_python31
 scons -j2 install
 cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_31.so
 
@@ -197,7 +297,7 @@ cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_31.so
 # build a ton of versions of node (just to be safe about ABI)
 cd ../../deps
 
-for VER in {"0.2.4","0.2.5","0.2.6","0.3.0","0.3.1","0.3.2","0.3.3"}
+for VER in {"0.2.4","0.2.5","0.2.6","0.3.0","0.3.1","0.3.2","0.3.3","0.3.4","0.3.5","0.3.6","0.3.7"}
 do
   wget http://nodejs.org/dist/node-v$VER.tar.gz
   tar xvf node-v$VER.tar.gz
@@ -208,36 +308,35 @@ do
   cd ../
 done
 
-# HEAD (master)
-VER="0.3.4"
-git clone git://github.com/ry/node.git node-master
-cd node-master
-./configure --prefix=$PREFIX/node$VER
-make
-make install
-cd ../
-
 # node-mapnik
 cd ../../deps
 git clone git://github.com/mapnik/node-mapnik.git
 cd node-mapnik
-export PATH=../../Library/Frameworks/Mapnik.framework/Programs:$PATH
+#export PATH=../../Library/Frameworks/Mapnik.framework/Programs:$PATH
+export PATH=/Library/Frameworks/Mapnik.framework/Programs:$PATH
 
-CXXFLAGS=" -g -DNDEBUG -O3 -Wall -DBOOST_SPIRIT_THREADSAFE -DMAPNIK_THREADSAFE -ansi -finline-functions -Wno-inline -fPIC -arch x86_64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DEV_MULTIPLICITY=0 -I/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/include -I/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/include/freetype2 "
+# TODO - needs work
+# only 64 bit
+# versioned module
+# all targets
+# custom node prefix
+# cairo support
 
-for VER in {"0.2.4","0.2.5","0.2.6","0.3.0","0.3.1","0.3.2","0.3.3","0.3.4"}
-for VER in {"0.3.4",}
-do
-  mkdir build/default/src/$VER
-  mkdir mapnik/$VER
-  NODE_PREFIX="$PREFIX/node$VER"
-  export PATH=$NODE_PREFIX/bin:$PATH
-  OBJ="build/default/src/$VER/_mapnik_1.o"
-  TARGET="mapnik/$VER/_mapnik.node"
-  g++ $CXXFLAGS -I$NODE_PREFIX/include/node src/_mapnik.cc -c -o $OBJ
-  LDFLAGS="-L/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/lib -lmapnik2 -bundle -undefined dynamic_lookup"
-  g++ $OBJ -o $TARGET $LDFLAGS
-done
+#CXXFLAGS=" -g -DNDEBUG -O3 -Wall -DBOOST_SPIRIT_THREADSAFE -DMAPNIK_THREADSAFE -ansi -finline-functions -Wno-inline -fPIC -arch x86_64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DEV_MULTIPLICITY=0 -I/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/include -I/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/include/freetype2 "
+
+#for VER in {"0.2.4","0.2.5","0.2.6","0.3.0","0.3.1","0.3.2","0.3.3","0.3.4"}
+#for VER in {"0.3.4","0.3.5","0.3.6","0.3.7"}
+#do
+#  mkdir build/default/src/$VER
+#  mkdir lib/$VER
+#  NODE_PREFIX="$PREFIX/node$VER"
+#  export PATH=$NODE_PREFIX/bin:$PATH
+#  OBJ="build/default/src/$VER/_mapnik_1.o"
+#  TARGET="lib/$VER/_mapnik.node"
+#  g++ $CXXFLAGS -I$NODE_PREFIX/include/node src/_mapnik.cc -c -o $OBJ
+#  LDFLAGS="-L/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/lib -lmapnik2 -bundle -#undefined dynamic_lookup"
+#  g++ $OBJ -o $TARGET $LDFLAGS
+#done
 
 
 # then re-run wrap.py
