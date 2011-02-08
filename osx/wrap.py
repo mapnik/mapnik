@@ -38,7 +38,7 @@ if __name__ == "__main__":
     
     INCLUDE_CAIRO = True
     
-    INCLUDE_PYCAIRO = True
+    INCLUDE_PYCAIRO = False
     
     # final resting place
     install_path = '/Library/Frameworks'
@@ -95,6 +95,9 @@ if __name__ == "__main__":
                 if not os.path.exists(join(active,'unix/include/%s' % group)):
                     os.mkdir(join(active,'unix/include/%s' % group))
                 copy_all_items('sources/include/%s/*' % group,join(active,'unix/include/%s' % group),recursive=True)
+            
+            if not INCLUDE_PYCAIRO:
+                os.system('rm -rf %s' % join(active,'unix/include/pycairo'))
 
             # likely uneeded
             if not os.path.exists(join(active,'unix/lib/sigc++-2.0')):
@@ -191,20 +194,26 @@ if __name__ == "__main__":
             if not os.path.exists(join(active,'Python/cairo/')):
                 os.mkdir(join(active,'Python/cairo/'))
             shutil.copy('python/cairo.py',join(active,'Python/cairo/__init__.py'))
+        else:
+            if os.path.exists(join(active,'Python/cairo')):
+                os.system('rm -rf %s' % join(active,'Python/cairo'))
+            
         #sym(py_dir,join(active,'Python'))
         sym(join(active,'Python'),join(framework,'Python'))
                     
 
         # pycairo module
-        if INCLUDE_PYCAIRO:
-            for pyver in glob.glob('sources/lib/python*'):
-                ver = os.path.basename(pyver)
+        for pyver in glob.glob('sources/lib/python*'):
+            ver = os.path.basename(pyver)
+            to = join(active,'unix/lib/%s/site-packages/cairo/' % ver)
+            if INCLUDE_PYCAIRO:
                 assert os.path.exists(join(active,'unix/lib/%s' % ver))
                 assert os.path.exists(join(active,'unix/lib/%s/site-packages' % ver))
-                to = join(active,'unix/lib/%s/site-packages/cairo/' % ver)
                 if not os.path.exists(to):
                     os.mkdir(to)
                 copy_all_items('sources/lib/%s/site-packages/cairo/*' % ver,to,recursive=True)
+            else:
+                os.system('rm -r %s' % to)
         
         # try to start using relative paths..
         #paths_py = '''
