@@ -86,11 +86,11 @@ void shape_datasource::bind() const
 
     try
     {  
-        shape_ = boost::shared_ptr<shape_io>(new shape_io(shape_name_));
-        init(*shape_);
-        for (int i=0;i<shape_->dbf().num_fields();++i)
+        boost::shared_ptr<shape_io> shape_ref = boost::shared_ptr<shape_io>(new shape_io(shape_name_));
+        init(*shape_ref);
+        for (int i=0;i<shape_ref->dbf().num_fields();++i)
         {
-            field_descriptor const& fd=shape_->dbf().descriptor(i);
+            field_descriptor const& fd=shape_ref->dbf().descriptor(i);
             std::string fld_name=fd.name_;
             switch (fd.type_)
             {
@@ -120,13 +120,18 @@ void shape_datasource::bind() const
                 break;
             }
         }
+        // for indexed shapefiles we keep open the file descriptor for fast reads
+        if (indexed_) {
+            shape_ = shape_ref;
+        }
+
     }
     catch (datasource_exception& ex)
     {
         std::clog << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
         throw;
     }
-    catch (...)
+    catch (...) // exception: pipe_select_interrupter: Too many open files
     {
         std::clog << "Shape Plugin: error processing field attributes" << std::endl;
         throw;
@@ -180,6 +185,7 @@ void  shape_datasource::init(shape_io& shape) const
     // check if we have an index file around
     
     indexed_ = shape.has_index();
+    
     //std::string index_name(shape_name_+".index");
     //std::ifstream file(index_name.c_str(),std::ios::in | std::ios::binary);
     //if (file)
