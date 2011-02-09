@@ -1,0 +1,82 @@
+Index: demo/viewer/viewer.pro
+===================================================================
+--- demo/viewer/viewer.pro	(revision 2594)
++++ demo/viewer/viewer.pro	(working copy)
+@@ -5,14 +5,33 @@
+ TEMPLATE = app
+ 
+ INCLUDEPATH += /usr/local/include/
+-INCLUDEPATH += /usr/boost/include/
+-INCLUDEPATH += /usr/X11/include/
+-INCLUDEPATH += /usr/X11/include/freetype2
++INCLUDEPATH += /Library/Frameworks/Mapnik.framework/unix/include
++INCLUDEPATH += /Library/Frameworks/Mapnik.framework/unix/include/cairo
++INCLUDEPATH += /Library/Frameworks/Mapnik.framework/unix/include/cairomm-1.0
++INCLUDEPATH += /Library/Frameworks/Mapnik.framework/unix/include/sigc++-2.0
++INCLUDEPATH += /Library/Frameworks/Mapnik.framework/unix/lib/sigc++-2.0/include/
++INCLUDEPATH += /Library/Frameworks/Mapnik.framework/unix/include/freetype2
++INCLUDEPATH += /Library/Frameworks/UnixImageIO.framework/unix/include
++INCLUDEPATH += /Library/Frameworks/PROJ.framework/unix/include
++INCLUDEPATH += /usr/include/libxml2
+ INCLUDEPATH += .
+ 
+-QMAKE_CXXFLAGS +=' -DDARWIN -Wno-missing-field-initializers -ansi'
+-unix:LIBS =  -L/usr/local/lib -L/usr/X11/lib -lmapnik2 -lfreetype
+-unix:LIBS += -lboost_system -licuuc -lboost_filesystem -lboost_regex
++QMAKE_CXXFLAGS +=' -arch i386 -arch x86_64 -DDARWIN -Wno-missing-field-initializers -ansi'
++unix:LIBS =  -arch i386
++unix:LIBS += -arch x86_64
++unix:LIBS += -headerpad_max_install_names
++unix:LIBS += -L/Library/Frameworks/Mapnik.framework/unix/lib
++unix:LIBS += -lmapnik2
++unix:LIBS += -L/Library/Frameworks/UnixImageIO.framework/unix/lib
++unix:LIBS += -L/Library/Frameworks/PROJ.framework/unix/lib
++unix:LIBS += -lfreetype
++unix:LIBS += -licuuc
++unix:LIBS += -lboost_filesystem
++unix:LIBS += -lboost_regex
++unix:LIBS += -lboost_thread
++unix:LIBS += -lboost_system
++unix:LIBS += -lcairomm-1.0
++unix:LIBS += -lcairo
+ 
+ # Input
+ 
+Index: demo/viewer/main.cpp
+===================================================================
+--- demo/viewer/main.cpp	(revision 2594)
++++ demo/viewer/main.cpp	(working copy)
+@@ -43,22 +43,24 @@
+     
+     // register input plug-ins
+     QString plugins_dir = settings.value("mapnik/plugins_dir",
+-                                         QVariant("/usr/local/lib/mapnik2/input/")).toString();
++                                         QVariant("/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/lib/mapnik2/input/")).toString();
+     datasource_cache::instance()->register_datasources(plugins_dir.toStdString());
+     // register fonts
+-    int count = settings.beginReadArray("mapnik/fonts");
+-    for (int index=0; index < count; ++index)
+-    {
+-        settings.setArrayIndex(index);
+-        QString font_dir = settings.value("dir").toString();
+-        freetype_engine::register_fonts(font_dir.toStdString());
+-    }
++    //int count = settings.beginReadArray("mapnik/fonts");
++    //for (int index=0; index < count; ++index)
++    //{
++    //    settings.setArrayIndex(index);
++     //   QString font_dir = settings.value("dir").toString();
++        freetype_engine::register_fonts("/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/lib/mapnik2/fonts");
++    //}
+     settings.endArray();
+     
+     QApplication app( argc, argv ); 
+     MainWindow window;
+     window.show();
+-    if (argc > 1) window.open(argv[1]);
++    if (argc > 1) {
++        window.open(argv[1]);
++    }
+     if (argc >= 3)
+     {
+         QStringList list = QString(argv[2]).split(",");

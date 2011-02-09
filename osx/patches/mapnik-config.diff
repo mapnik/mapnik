@@ -1,0 +1,15 @@
+Index: utils/mapnik-config/SConscript
+===================================================================
+--- utils/mapnik-config/SConscript	(revision 2594)
++++ utils/mapnik-config/SConscript	(working copy)
+@@ -64,8 +64,8 @@
+ version='%(version)s'
+ mapnik_libname=%(mapnik_libname)s
+ private_libs='%(private_libs)s'
+-other_libs='%(other_libs)s'
+-other_includes='%(other_includes)s'
++other_libs='-arch i386 -arch x86_64 -headerpad_max_install_names -L/Library/Frameworks/Mapnik.framework/unix/lib -L/Library/Frameworks/UnixImageIO.framework/unix/lib -L/Library/Frameworks/PROJ.framework/unix/lib -lfreetype -licuuc -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lcairomm-1.0 -lcairo'
++other_includes='-arch i386 -arch x86_64 -I/Library/Frameworks/Mapnik.framework/unix/include -I/Library/Frameworks/Mapnik.framework/unix/include/cairo -I/Library/Frameworks/Mapnik.framework/unix/include/cairomm-1.0 -I/Library/Frameworks/Mapnik.framework/unix/include/sigc++-2.0 -I/Library/Frameworks/Mapnik.framework/unix/lib/sigc++-2.0/include/ -I/Library/Frameworks/Mapnik.framework/unix/include/freetype2 -I/Library/Frameworks/UnixImageIO.framework/unix/include -I/Library/Frameworks/PROJ.framework/unix/include -I/usr/include/libxml2'
+ fonts='%(fonts)s'
+ input_plugins='%(input_plugins)s'
+ svn_revision='%(svn_revision)s'
