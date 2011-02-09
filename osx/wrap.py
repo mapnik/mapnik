@@ -26,6 +26,13 @@ def copy_all_items(pattern,place,recursive=True):
        else:
            shutil.copy(i,place)
 
+def drop(path):
+    if os.path.islink(path) or os.path.lexists(path):
+        if os.path.isabs(path):
+            print 'not deleting item as it is an absolute path: %' % path
+        else:
+            os.system('rm -r %s' % path)
+
 if __name__ == "__main__":
 
     
@@ -61,7 +68,7 @@ if __name__ == "__main__":
     # set up symlinks
     # from existing directory, to link
     active = join(framework,'Versions/Current')
-    #os.system('rm -rf %s' % active)
+    #drop('rm -rf %s' % active)
     sym(current,active)
     
     # point top level 'unix' to active one
@@ -78,7 +85,7 @@ if __name__ == "__main__":
         sym(join(active,'Headers'),join(framework,'Headers'))
     else:
         # purge the installed headers of mapnik
-        os.system('rm -rf %s' % join(active,'unix/include'))
+        drop('rm -rf %s' % join(active,'unix/include'))
     
     if INCLUDE_CAIRO:
         
@@ -97,7 +104,7 @@ if __name__ == "__main__":
                 copy_all_items('sources/include/%s/*' % group,join(active,'unix/include/%s' % group),recursive=True)
             
             if not INCLUDE_PYCAIRO:
-                os.system('rm -rf %s' % join(active,'unix/include/pycairo'))
+                drop('rm -rf %s' % join(active,'unix/include/pycairo'))
 
             # likely uneeded
             if not os.path.exists(join(active,'unix/lib/sigc++-2.0')):
@@ -148,6 +155,10 @@ if __name__ == "__main__":
     
         # do this later...
         copy_all_items('deps/node-mapnik/mapnik/*',join(active,'unix/lib/node/mapnik/'),recursive=True)
+    else:
+        drop('rm -r %s' % join(active,'Node'))
+        drop('rm -r %s' % join(framework,'Node'))
+        drop('rm -r %s' % join(active,'unix/lib/node/'))
     
     # Resources
     if not os.path.exists(join(active,'Resources')):
@@ -195,8 +206,7 @@ if __name__ == "__main__":
                 os.mkdir(join(active,'Python/cairo/'))
             shutil.copy('python/cairo.py',join(active,'Python/cairo/__init__.py'))
         else:
-            if os.path.exists(join(active,'Python/cairo')):
-                os.system('rm -rf %s' % join(active,'Python/cairo'))
+            drop('rm -rf %s' % join(active,'Python/cairo'))
             
         #sym(py_dir,join(active,'Python'))
         sym(join(active,'Python'),join(framework,'Python'))
@@ -213,7 +223,7 @@ if __name__ == "__main__":
                     os.mkdir(to)
                 copy_all_items('sources/lib/%s/site-packages/cairo/*' % ver,to,recursive=True)
             else:
-                os.system('rm -r %s' % to)
+                drop('rm -r %s' % to)
         
         # try to start using relative paths..
         #paths_py = '''
@@ -243,5 +253,5 @@ if __name__ == "__main__":
         #open('/Library/Python/2.6/site-packages/mapnik.pth','w').write(pth)
     
         # Stash in resources as well
-        open(join(active,'Resources/mapnik.pth'),'w').write(pth)
+        open(join(active,'Resources/mapnik2.pth'),'w').write(pth)
     

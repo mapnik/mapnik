@@ -18,24 +18,14 @@
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
 \b \cf0 \'95 
-\b0 Install the "Mapnik.pkg" and "GDAL_Complete.dmg".\
-\
-
-\b \'95 
-\b0 Then enable the Mapnik python and node bindings by simply adding these lines to your ~/.bash_profile or /etc/profile:\
-\
+\b0 Install the "Mapnik.pkg".\
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
-\f1 \cf0   MAPNIK=/Library/Frameworks/Mapnik.framework\
-  export PATH=$MAPNIK/Programs:$PATH\
-  export NODE_PATH=$MAPNIK/Node:$NODE_PATH\
-  export PYTHONPATH=$MAPNIK/Python:$PYTHONPATH
-\f0\b\fs22 \
-\
+\b\fs22 \cf0 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
 \fs24 \cf0 \'95 
-\b0 Finally, test your installation via Python:\
+\b0 Test your installation via Python:\
 \
    Open the Terminal.app and confirm that below command returns 'True':\
 \
@@ -48,10 +38,18 @@
 \fs26 \cf0 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
-\fs24 \cf0    If it does then Mapnik is installed correctly and you can head to {\field{\*\fldinst{HYPERLINK "http://mapnik.org"}}{\fldrslt http://mapnik.org}} for documentation.
+\fs24 \cf0    If it does then Mapnik is installed correctly! You can now head along to {\field{\*\fldinst{HYPERLINK "http://mapnik.org"}}{\fldrslt http://mapnik.org}} for documentation.
 \b\fs22 \
 
 \b0\fs24 \
+   If it does not then you may need to add this line to your environment settings:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f1 \cf0 \
+    export PYTHONPATH=/Library/Frameworks/Mapnik.framework/Python:$PYTHONPATH\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0 \cf0 \
 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
@@ -61,10 +59,25 @@
 \b0\fs24 \cf0 \
 This installer only works for Snow Leopard (10.6).\
 \
-You need to provide your own version of Python or NodeJS to use the Mapnik bindings to these languages.\
-\
 This install should play nicely with any existing installations of Mapnik.\
 \
+It automatically puts the following lines in your ~/.bash_profile to enable Mapnik:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f1 \cf0   export PATH=/Library/Frameworks/Mapnik.framework/Programs:$PATH\
+  export PYTHONPATH=/Library/Frameworks/Mapnik.framework/Python:$PYTHONPATH\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0 \cf0 \
+It also enables the Mapnik python bindings for QGIS/Python2.6 by putting a 'mapnik2.pth' file in:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f1 \cf0   /Library/Python/2.6/site_packages\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0 \cf0 \
 This Mapnik installer includes:\
 \
  * 
@@ -75,10 +88,6 @@ This Mapnik installer includes:\
 \b0  compatible with versions:\
     - 2.5, 2.6, 2.7, and 3.1\
  * 
-\b NodeJS bindings
-\b0  (node-mapnik) compatible with versions:\
-    - 0.2.4, 0.2.5, 0.2.6, 0.3.0, 0.3.1, 0.3.2, 0.3.3, and 0.3.4-pre\
- * 
 \b Datasources
 \b0  (aka "input plugins"):\
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
@@ -87,13 +96,42 @@ This Mapnik installer includes:\
        GEOS, SQLite, Rasterlite, OSM, Kismet\
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
-\fs26 \cf0  * GDAL_Complete-1.7.dmg from:\
+\fs26 \cf0  * 
+\b GDAL_Complete-1.8.dmg
+\b0  from:\
     
 \fs24 - http://www.kyngchaos.com/software/frameworks
 \fs26 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 
 \fs24 \cf0 \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\b\fs28 \cf0 Uninstalling\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\b0\fs24 \cf0 \
+To disable this installation remove the lines including '
+\f1 /Library/Frameworks/Mapnik.framework'
+\f0  from your ~/.bash_profile\
+\
+And remove this file\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f1 \cf0 \
+  /Library/Python/2.6/site_packages/mapnik2.pth\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0 \cf0 \
+To fully remove the Installation remove this folder:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f1 \cf0   /Library/Frameworks/Mapnik.framework\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0 \cf0 \
 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
 

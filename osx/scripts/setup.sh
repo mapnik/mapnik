@@ -10,6 +10,8 @@ mkdir -p /Users/dane/projects/mapnik-dev/trunk-build/osx/sources
 export DYLD_LIBRARY_PATH=$PREFIX/lib
 # final resting place
 INSTALL=/Library/Frameworks/Mapnik.framework/unix/lib
+export DYLD_LIBRARY_PATH=$PREFIX/lib
+
 
 # make a directory to hold icu and boost
 mkdir -p ../deps
