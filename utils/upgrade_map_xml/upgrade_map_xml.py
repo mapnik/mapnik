@@ -140,19 +140,19 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
     underscore2dash(root)
     
     # underscores to spaces for <FontSet ..>
-    fontset = root.findall('FontSet')
+    fontset = root.findall('FontSet') or root.findall('*/FontSet')
     for f in fontset:
         font = f.findall('Font')
         for f_ in font:
             underscore2dash(f_)
 
     # underscores to spaces for <Layer ..>
-    layers = root.findall('Layer')
+    layers = root.findall('Layer') or root.findall('*/Layer')
     for l in layers:
         underscore2dash(l)
     
     
-    styles = root.findall('Style')
+    styles = root.findall('Style') or root.findall('*/Style')
     if not len(styles):
         sys.stderr.write('### Warning, no styles encountered and nothing able to be upgraded!\n')
     else:
