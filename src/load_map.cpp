@@ -931,6 +931,7 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
           << "meta-writer,meta-output,"
           << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
           << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray";
+        ensure_attrs(sym, "MarkersSymbolizer", s.str());
 
         if (file)
         {
