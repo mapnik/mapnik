@@ -67,9 +67,9 @@ class MAPNIK_DECL stroke
     double opacity_; // 0.0 - 1.0
     line_cap_e  line_cap_;
     line_join_e line_join_;
+    double gamma_;
     dash_array dash_;
     double dash_offset_;
-    double gamma_;
 public:
     explicit stroke();
     stroke(color const& c, double width=1.0);
