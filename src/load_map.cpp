@@ -1181,7 +1181,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         
         if (fontset_name && face_name)
         {
-            throw config_error(std::string("Can't have both face_name and fontset_name"));
+            throw config_error(std::string("Can't have both face-name and fontset-name"));
         }
         else if (fontset_name)
         {
@@ -1205,7 +1205,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         }
         else
         {
-            throw config_error(std::string("Must have face_name or fontset_name"));
+            throw config_error(std::string("Must have face-name or fontset-name"));
         }
 
         double dx = get_attr(sym, "dx", 0.0);
