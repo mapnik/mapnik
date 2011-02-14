@@ -60,6 +60,9 @@ private:
 template <typename Transform,typename Geometry>
 struct MAPNIK_DECL coord_transform2
 {
+    typedef std::size_t size_type;
+    typedef typename Geometry::value_type value_type;
+
     coord_transform2(Transform const& t, 
                      Geometry const& geom, 
                      proj_transform const& prj_trans)

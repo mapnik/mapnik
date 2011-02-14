@@ -73,7 +73,7 @@ namespace mapnik { namespace svg {
 	path_attributes_grammar attributes_grammar;
 	path_dash_array_grammar dash_array_grammar;
 
-	karma::generate(output_iterator_, lit("<path ")	<< data_grammar, path.geom());
+	karma::generate(output_iterator_, lit("<path ")	<< data_grammar, path);
 	karma::generate(output_iterator_, lit(" ") << dash_array_grammar, path_attributes.stroke_dasharray());
 	karma::generate(output_iterator_, lit(" ") << attributes_grammar << lit("/>\n"), path_attributes);
     }

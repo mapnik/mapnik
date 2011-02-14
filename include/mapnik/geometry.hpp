@@ -48,7 +48,6 @@ class geometry
 {
 public:
     typedef T vertex_type;
-    typedef std::size_t size_type;
     typedef typename vertex_type::type value_type;
     typedef Container<vertex_type> container_type;   
 private:

@@ -172,7 +172,7 @@ void prepare_map(Map& m)
 	lyr.add_style("provlines");    
 	m.addLayer(lyr);
     }
-        
+    
     // Roads
     {
 	parameters p;

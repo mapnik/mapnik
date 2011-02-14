@@ -25,9 +25,9 @@
 
 // mapnik
 #include <mapnik/vertex.hpp>
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_iterator.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/svg/svg_path_iterator.hpp>
 #include <mapnik/svg/svg_output_attributes.hpp>
 
 // boost
@@ -94,34 +94,36 @@ BOOST_FUSION_ADAPT_STRUCT(
  */
 namespace boost { namespace spirit { namespace traits {
 
+    typedef mapnik::coord_transform2<mapnik::CoordTransform, mapnik::geometry_type> path_type;
+
     template <>
-    struct is_container<mapnik::geometry_type const>
+    struct is_container<path_type const>
 	: mpl::true_
     {};
 
     template <>
-    struct container_iterator<mapnik::geometry_type const>
+    struct container_iterator<path_type const>
     {       
-        typedef mapnik::geometry_iterator_type type; 
+        typedef mapnik::svg::path_iterator_type type; 
     };
 
     template <>
-    struct begin_container<mapnik::geometry_type const>
+    struct begin_container<path_type const>
     {
-        static mapnik::geometry_iterator_type	
-	call(mapnik::geometry_type const& g)
+        static mapnik::svg::path_iterator_type
+	call(path_type const& path)
 	{
-  	    return mapnik::geometry_iterator_type(0, g);
+	    return mapnik::svg::path_iterator_type(0, path);
 	}
     };
 
     template <>
-    struct end_container<mapnik::geometry_type const>
+    struct end_container<path_type const>
     {
-        static mapnik::geometry_iterator_type  	
-	call(mapnik::geometry_type const& g)
+        static mapnik::svg::path_iterator_type  	
+	call(path_type const& path)
 	{
-            return mapnik::geometry_iterator_type(g);
+	    return mapnik::svg::path_iterator_type(path);
 	}
     };
  }}}
@@ -131,67 +133,17 @@ namespace mapnik { namespace svg {
     using namespace boost::spirit;
     using namespace boost::phoenix;
 
-    /*!
-     * @brief Structure that performs the conversion from map to user coordinates.
-     * It's methods and functions are meant to be used by svg_path_data_grammar as
-     * semantic actions to convert the value of vertex coordinates inside the grammar.
-     *
-     * It (kind of) works like a state machine, setting the value of x and y and then
-     * making the conversion just after y has been set.
-     */
-    template <typename PathType>
-    struct path_coordinate_transformer
-    {
-	explicit path_coordinate_transformer(PathType const& path_type)
-	    : path_type_(path_type),
-	      current_x_(0.0),
-	      current_y_(0.0)
-	{}
-
-	void set_current_x(double& x)
-	{
-	    current_x_ = x;
-	}
-
-	void set_current_y(double& y)
-	{
-	    current_y_ = y;
-	    path_type_.vertex(&current_x_, &current_y_);
-	}
-
-	void current_x(double& x) const
-	{
-	    x = current_x_;
-	}
-
-	void current_y(double& y) const
-	{
-	    y = current_y_;
-	}
-
-	PathType const& path_type_;
-	double current_x_;
-	double current_y_;	
-    };
-
     template <typename OutputIterator, typename PathType>
-    struct svg_path_data_grammar : karma::grammar<OutputIterator, mapnik::geometry_type&()>
+    struct svg_path_data_grammar : karma::grammar<OutputIterator, PathType&()>
     {
-	typedef path_coordinate_transformer<PathType> coordinate_transformer;
-        typedef mapnik::geometry_iterator_type::value_type vertex_type;
-        typedef mapnik::geometry_type::value_type& vertex_component_type;
+        typedef path_iterator_type::value_type vertex_type;
 
 	explicit svg_path_data_grammar(PathType const& path_type)
 	    : svg_path_data_grammar::base_type(svg_path),
-	      path_type_(path_type),
-	      ct_(path_type)
+	      path_type_(path_type)
 	{
 	    using karma::int_;
 	    using karma::double_;
-	    using karma::_1;
-	    using karma::_a;
-	    using karma::eol;
-	    using karma::omit;
 	    using repository::confix;
 
 	    svg_path = 
@@ -201,31 +153,18 @@ namespace mapnik { namespace svg {
 
 	    path_vertex = 
 		path_vertex_command
-		<< omit[path_vertex_component_x]
-		<< omit[path_vertex_component_y]
-		<< path_vertex_transformed_x
+	        << double_
 		<< lit(' ')
-		<< path_vertex_transformed_y;
+	        << double_;
 
 	    path_vertex_command = &int_(1) << lit('M') | lit('L');
-	    
-	    path_vertex_component_x = double_[_1 = _a][bind(&coordinate_transformer::set_current_x, &ct_, _a)][_a = _val];
-
-	    path_vertex_component_y = double_[_1 = _a][bind(&coordinate_transformer::set_current_y, &ct_, _a)][_a = _val];
-
-	    path_vertex_transformed_x = double_[_1 = _a][bind(&coordinate_transformer::current_x, &ct_, _a)];
-
-	    path_vertex_transformed_y = double_[_1 = _a][bind(&coordinate_transformer::current_y, &ct_, _a)];
 	}
 
-	karma::rule<OutputIterator, mapnik::geometry_type&()> svg_path;
+	karma::rule<OutputIterator, PathType&()> svg_path;
 	karma::rule<OutputIterator, vertex_type()> path_vertex;
 	karma::rule<OutputIterator, int()> path_vertex_command;
-	karma::rule<OutputIterator, vertex_component_type(), karma::locals<double> > path_vertex_component_x, path_vertex_component_y;
-	karma::rule<OutputIterator, vertex_component_type(), karma::locals<double> > path_vertex_transformed_x, path_vertex_transformed_y;
 
 	PathType const& path_type_;
-	coordinate_transformer ct_;
     };
 
     template <typename OutputIterator>
