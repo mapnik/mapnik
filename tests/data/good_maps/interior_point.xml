@@ -23,7 +23,7 @@
         <StyleName>multipolygon_style</StyleName>
         <Datasource>
             <Parameter name="extent">-120.714996709,-60.7304861311,140.581413391,86.9753066091</Parameter>
-            <Parameter name="file">/Users/dane/projects/mapnik-dev/trunk-devseed/tests/data/sqlite/qgis_spatiallite.sqlite</Parameter>
+            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
             <Parameter name="geometry_field">geometry</Parameter>
             <Parameter name="key_field">pkuid</Parameter>
             <Parameter name="table">multipolygon</Parameter>
