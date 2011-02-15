@@ -103,7 +103,7 @@ def underscore2dash(elem):
            old = i[0]
            elem.attrib[new] = i[1]
            elem.attrib.pop(old)
-           print>>sys.stderr,"Changing %s to %s" % (new,old)
+           print>>sys.stderr,"Changing %s to %s" % (old,new)
 
 
 def upgrade(input_xml,output_xml=None,indent_xml=True):
@@ -194,6 +194,9 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
                     fixup_sym_attributes(sym)
                     underscore2dash(sym)
                 for sym in rule.findall('GlyphSymbolizer') or []:
+                    fixup_sym_attributes(sym)
+                    underscore2dash(sym)
+                for sym in rule.findall('MarkersSymbolizer') or []:
                     fixup_sym_attributes(sym)
                     underscore2dash(sym)
 
