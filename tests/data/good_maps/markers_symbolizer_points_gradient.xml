@@ -1,17 +1,17 @@
-<Map srs="+init=epsg:4326" minimum-version="0.8.0">
+<Map srs="+init=epsg:4326" minimum-version="2.0.0">
 
     <Style name="1">
         <Rule>
-             <MarkersSymbolizer fill="black" opacity=".01" width="10" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity=".05" width="9" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity="0.1" width="8" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity="0.1" width="7" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity="0.1" width="6" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity="0.1" width="5" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity="0.1" width="4" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity="0.1" width="3" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity="0.2" width="2" allow_overlap="true" stroke-width="0"/>
-             <MarkersSymbolizer fill="black" opacity="0.2" width="1" allow_overlap="true" stroke-width="0"/>
+             <MarkersSymbolizer fill="black" opacity=".01" width="10" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity=".05" width="9" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity="0.1" width="8" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity="0.1" width="7" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity="0.1" width="6" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity="0.1" width="5" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity="0.1" width="4" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity="0.1" width="3" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity="0.2" width="2" stroke-width="0" allow-overlap="true"/>
+             <MarkersSymbolizer fill="black" opacity="0.2" width="1" stroke-width="0" allow-overlap="true"/>
         </Rule>
     </Style>
     
