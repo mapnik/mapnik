@@ -49,9 +49,9 @@ inline void to_utf8(UnicodeString const& input, std::string & target)
 {
     if (input.length() == 0) return;
       
-    const int BUF_SIZE = 256;
+    const int32_t BUF_SIZE = 256;
     char  buf [BUF_SIZE];
-    int len;
+    int32_t len;
       
     UErrorCode err = U_ZERO_ERROR;
     u_strToUTF8(buf, BUF_SIZE, &len, input.getBuffer(), input.length(), &err);

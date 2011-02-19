@@ -100,7 +100,8 @@ public:
 
     bool has_line_breaks() const
     {
-       return (text_.indexOf('\n') >= 0);
+       UChar break_char = '\n';
+       return (text_.indexOf(break_char) >= 0);
     }
 };
     
