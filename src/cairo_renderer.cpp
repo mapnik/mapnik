@@ -1093,6 +1093,10 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
     {
         text = text.toLower();
     }
+    else if ( sym.get_text_transform() == CAPITALIZE)
+    {
+        text = text.toTitle(NULL);
+    }
     
     agg::trans_affine tr;
     boost::array<double,6> const& m = sym.get_transform();
@@ -1522,6 +1526,10 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     else if ( sym.get_text_transform() == LOWERCASE)
     {
         text = text.toLower();
+    }
+    else if ( sym.get_text_transform() == CAPITALIZE)
+    {
+        text = text.toTitle(NULL);
     }
 
     if (text.length() > 0)
