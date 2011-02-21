@@ -55,6 +55,10 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
     {
         text = text.toLower();
     }
+    else if ( sym.get_text_transform() == CAPITALIZE)
+    {
+        text = text.toTitle(NULL);
+    }
 
     if ( text.length() > 0 )
     {

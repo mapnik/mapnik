@@ -61,6 +61,10 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
     {
         text = text.toLower();
     }
+    else if ( sym.get_text_transform() == CAPITALIZE)
+    {
+        text = text.toTitle(NULL);
+    }
     
     agg::trans_affine tr;
     boost::array<double,6> const& m = sym.get_transform();

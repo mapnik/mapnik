@@ -86,6 +86,7 @@ enum text_transform
     NONE = 0,
     UPPERCASE,
     LOWERCASE,
+    CAPITALIZE,
     text_transform_MAX
 };
 

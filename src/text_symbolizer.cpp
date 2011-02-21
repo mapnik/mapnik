@@ -75,6 +75,7 @@ static const char * text_transform_strings[] = {
     "none",
     "uppercase",
     "lowercase",
+    "capitalize",
     ""
 };
 

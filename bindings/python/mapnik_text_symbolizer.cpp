@@ -189,6 +189,7 @@ void export_text_symbolizer()
         .value("NONE",NONE)
         .value("UPPERCASE",UPPERCASE)
         .value("LOWERCASE",LOWERCASE)
+        .value("CAPITALIZE",CAPITALIZE)
         ;
 
     class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
