@@ -521,17 +521,20 @@ def parse_config(context, config, checks='--libs --cflags'):
     parsed = False
     if ret:
         try:
-            # hack for potential -framework GDAL syntax
-            # which will not end up being added to env['LIBS']
-            # and thus breaks knowledge below that gdal worked
             if 'gdal-config' in cmd:
-                num_libs = len(env['LIBS'])
                 env.ParseConfig(cmd)
-                if not num_libs > env['LIBS']:
-                    env['LIBS'].append('gdal')
-                    env['LIBPATH'].insert(0,'/Library/Frameworks/GDAL.framework/unix/lib')
-                if 'GDAL' in env.get('FRAMEWORKS',[]):
-                    env["FRAMEWORKS"].remove("GDAL")
+                # hack for potential -framework GDAL syntax
+                # which will not end up being added to env['LIBS']
+                # and thus breaks knowledge below that gdal worked
+                # TODO - upgrade our scons logic to support Framework linking
+                if env['PLATFORM'] == 'Darwin':
+                    value = call(cmd,silent=True)
+                    if value and '-framework GDAL' in value:
+                        env['LIBS'].append('gdal')
+                        if os.path.exists('/Library/Frameworks/GDAL.framework/unix/lib'):
+                            env['LIBPATH'].insert(0,'/Library/Frameworks/GDAL.framework/unix/lib')
+                    if 'GDAL' in env.get('FRAMEWORKS',[]):
+                        env["FRAMEWORKS"].remove("GDAL")
             else:
                 env.ParseConfig(cmd)
             parsed = True
