@@ -277,16 +277,21 @@ public:
         }  
     }
     
+    void push_vertex(value_type x, value_type y, CommandType c) 
+    {
+        cont_.push_back(x,y,c);
+    }
+
     void line_to(value_type x,value_type y)
     {
-        cont_.push_back(x,y,SEG_LINETO);
+        push_vertex(x,y,SEG_LINETO);
     }
          
     void move_to(value_type x,value_type y)
     {
-        cont_.push_back(x,y,SEG_MOVETO);
+        push_vertex(x,y,SEG_MOVETO);
     }
-         
+    
     unsigned num_points() const
     {
         return cont_.size();
