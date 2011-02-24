@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#include "wkt_factory.hpp"
-#include "wkt_grammar.hpp"
+#include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/wkt/wkt_grammar.hpp>
 
 #include <string>
 

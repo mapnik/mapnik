@@ -138,6 +138,7 @@ source = Split(
     glyph_symbolizer.cpp
     markers_symbolizer.cpp
     metawriter.cpp
+    wkt/wkt_factory.cpp
     """   
     )
 
