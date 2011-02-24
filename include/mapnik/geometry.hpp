@@ -38,8 +38,11 @@ namespace mapnik {
 
 enum eGeomType {
     Point = 1,
-    LineString = 2,
-    Polygon = 3
+    LineString,
+    Polygon,
+    MultiPoint,
+    MultiLineString,
+    MultiPolygon
 };
 
 

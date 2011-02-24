@@ -224,7 +224,7 @@ private:
          
     void read_multipoint_2(Feature & feature)
     {
-        geometry_type * pt = new geometry_type(Point);
+        geometry_type * pt = new geometry_type(MultiPoint);
         int num_points = read_integer(); 
         for (int i=0;i<num_points;++i) 
         {
@@ -263,7 +263,7 @@ private:
 
     void read_multilinestring_2(Feature & feature)
     {
-        geometry_type * line = new geometry_type(LineString);
+        geometry_type * line = new geometry_type(MultiLineString);
         int num_lines=read_integer();
         unsigned capacity = 0;
         for (int i=0;i<num_lines;++i)
@@ -313,10 +313,10 @@ private:
             read_polygon(feature);
         }
     }
-
+    
     void read_multipolygon_2(Feature & feature)
     {
-        geometry_type * poly = new geometry_type(Polygon);
+        geometry_type * poly = new geometry_type(MultiPolygon);
         int num_polys=read_integer();
         unsigned capacity = 0;
         for (int i=0;i<num_polys;++i)
