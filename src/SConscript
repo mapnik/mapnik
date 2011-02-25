@@ -288,8 +288,18 @@ else:
     env['create_uninstall_target'](env, os.path.join(target_path,mapnik_libname))
 
 includes = glob.glob('../include/mapnik/*.hpp')
+svg_includes = glob.glob('../include/mapnik/svg/*.hpp')
+wkt_includes = glob.glob('../include/mapnik/wkt/*.hpp')
 
 inc_target = os.path.normpath(install_prefix+'/include/mapnik')
+svg_inc_target = os.path.normpath(install_prefix+'/include/mapnik/svg')
+wkt_inc_target = os.path.normpath(install_prefix+'/include/mapnik/wkt')
+
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Alias(target='install', source=env.Install(inc_target, includes))
+    env.Alias(target='install', source=env.Install(svg_inc_target, svg_includes))
+    env.Alias(target='install', source=env.Install(wkt_inc_target, wkt_includes))
+
 env['create_uninstall_target'](env, inc_target)
+env['create_uninstall_target'](env, svg_inc_target)
+env['create_uninstall_target'](env, wkt_inc_target)

@@ -99,8 +99,8 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
         }
         else
         {
-            try
-            {
+            //try
+            //{
                 std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(uri));
                 if (reader.get())
                 {
@@ -116,12 +116,12 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                         cache_.insert(std::make_pair(uri,*result));
                     }
                 }
-            }
+            //}
 
-            catch (...)
+            /*catch (...)
             {
                 std::cerr << "Exception caught while loading image: " << uri << std::endl;
-            }
+            }*/
         }
     }
     else
