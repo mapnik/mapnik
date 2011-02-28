@@ -84,6 +84,12 @@ void shape_datasource::bind() const
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
     }
 
+    if (!boost::filesystem::exists(shape_name_ + ".dbf"))
+    {
+        throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".dbf' does not exist");
+    }
+
+
     try
     {  
         boost::shared_ptr<shape_io> shape_ref = boost::shared_ptr<shape_io>(new shape_io(shape_name_));
@@ -126,7 +132,12 @@ void shape_datasource::bind() const
         }
 
     }
-    catch (datasource_exception& ex)
+    catch (const datasource_exception& ex)
+    {
+        std::clog << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
+        throw;
+    }
+    catch (const std::exception& ex)
     {
         std::clog << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
         throw;
