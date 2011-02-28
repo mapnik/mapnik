@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from nose.tools import *
 from utilities import Todo
@@ -91,3 +92,31 @@ def test_filter_init():
     s = m.find_style('s2')
     
     eq_(s.filter_mode,mapnik2.filter_mode.FIRST)
+
+
+def test_regex_match():
+    f = mapnik2.Feature(0)
+    f["name"] = 'test'
+    expr = mapnik2.Expression("[name].match('test')")
+    eq_(expr.evaluate(f),1) # 1 == True
+
+def test_unicode_regex_match():
+    f = mapnik2.Feature(0)
+    f["name"] = 'Québec'
+    expr = mapnik2.Expression("[name].match('Québec')")
+    eq_(expr.evaluate(f),1) # 1 == True
+
+def test_regex_replace():
+    f = mapnik2.Feature(0)
+    f["name"] = 'test'
+    expr = mapnik2.Expression("[name].replace('(\B)|( )','$1 ')")
+    eq_(expr.evaluate(f),'t e s t')
+
+def test_unicode_regex_replace():
+    f = mapnik2.Feature(0)
+    f["name"] = 'Québec'
+    expr = mapnik2.Expression("[name].replace('(\B)|( )','$1 ')")
+    eq_(expr.evaluate(f),'Q u é b e c')
+
+
+
