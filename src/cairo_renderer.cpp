@@ -386,7 +386,8 @@ public:
     template <typename T>
     void add_agg_path(T& path, unsigned start_index = 0)
     {
-        double x, y;
+        double x=0;
+        double y=0;
 
         path.rewind(start_index);
 
@@ -400,8 +401,8 @@ public:
             {
                 if (agg::is_curve3(cm))
                 {
-                    double end_x;
-                    double end_y;
+                    double end_x=0;
+                    double end_y=0;
                     std::cerr << "Curve 3 not implemented" << std::endl;
                     path.vertex(&end_x, &end_y);
 
@@ -409,10 +410,10 @@ public:
                 }
                 else if (agg::is_curve4(cm))
                 {
-                    double ct2_x;
-                    double ct2_y;
-                    double end_x;
-                    double end_y;
+                    double ct2_x=0;
+                    double ct2_y=0;
+                    double end_x=0;
+                    double end_y=0;
 
                     path.vertex(&ct2_x, &ct2_y);
                     path.vertex(&end_x, &end_y);
@@ -796,7 +797,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
 
             for (unsigned j = 1; j < geom.num_points(); ++j)
             {
-                double x,y;
+                double x=0;
+                double y=0;
 
                 cm = geom.vertex(&x,&y);
 

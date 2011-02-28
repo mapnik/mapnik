@@ -123,7 +123,8 @@ public:
 
         std::vector<double> intersections; // only need to store the X as we know the y
 
-        double x0, y0;
+        double x0=0;
+        double y0=0;
         rewind(0);
         unsigned command = vertex(&x0, &y0);
         double x1,y1;
@@ -316,7 +317,8 @@ public:
             return distance(x, y, x0, y0) <= abs(tol);
         } else if (cont_.size() > 1) {
             bool inside=false;
-            double x0, y0;
+            double x0=0;
+            double y0=0;
             rewind(0);
             vertex(&x0, &y0);
                 
