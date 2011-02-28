@@ -50,11 +50,12 @@ namespace mapnik
 {
 placement::placement(string_info & info_, 
                      shield_symbolizer const& sym, 
+                     text_placement_info_ptr placement_options,
                      double scale_factor,
                      unsigned w, unsigned h, 
                      bool has_dimensions_)
     : info(info_),
-      displacement_(sym.get_displacement()),
+      displacement_(placement_options->displacement),
       scale_factor_(scale_factor),
       label_placement(sym.get_label_placement()),
       wrap_width(sym.get_wrap_width()),
@@ -71,13 +72,15 @@ placement::placement(string_info & info_,
       has_dimensions(has_dimensions_),
       allow_overlap(false),
       dimensions(std::make_pair(w,h)),
-      text_size(sym.get_text_size()) {}
+      text_size(placement_options->text_size)
+{}
 
 placement::placement(string_info & info_,
-                     text_symbolizer const& sym, 
+                     text_symbolizer const& sym,
+                     text_placement_info_ptr placement_options,
                      double scale_factor)
     : info(info_),
-      displacement_(sym.get_displacement()),
+      displacement_(placement_options->displacement),
       scale_factor_(scale_factor),
       label_placement(sym.get_label_placement()),
       wrap_width(sym.get_wrap_width()),
@@ -94,7 +97,7 @@ placement::placement(string_info & info_,
       has_dimensions(false),
       allow_overlap(sym.get_allow_overlap()),
       dimensions(),
-      text_size(sym.get_text_size())
+      text_size(placement_options->text_size)
 {}
 
 
@@ -322,28 +325,48 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
     // if needed, adjust for desired vertical alignment
     current_placement->starting_y = label_y;  // no adjustment, default is MIDDLE
 
-    if (valign == TOP)
+    vertical_alignment_e real_valign = valign;
+    if (real_valign == V_AUTO) {
+        if (p.displacement_.get<1>() > 0.0)
+            real_valign = V_BOTTOM;
+        else if (p.displacement_.get<1>() < 0.0)
+            real_valign = V_TOP;
+        else
+            real_valign = V_MIDDLE;
+    }
+
+    horizontal_alignment_e real_halign = halign;
+    if (real_halign == H_AUTO) {
+        if (p.displacement_.get<0>() > 0.0)
+            real_halign = H_RIGHT;
+        else if (p.displacement_.get<0>() < 0.0)
+            real_halign = H_LEFT;
+        else
+            real_halign = H_MIDDLE;
+    }
+
+    if (real_valign == V_TOP)
         current_placement->starting_y -= 0.5 * (string_height + (line_spacing * (total_lines-1)));  // move center up by 1/2 the total height
 
-    else if (valign == BOTTOM)
+    else if (real_valign == V_BOTTOM)
         current_placement->starting_y += 0.5 * (string_height + (line_spacing * (total_lines-1)));  // move center down by the 1/2 the total height
 
     // correct placement for error, but BOTTOM does not need to be adjusted
     // (text rendering is at text_size, but line placement is by line_height (max_character_height),
     //  and the rendering adds the extra space below the characters)
-    if (valign == TOP )
+    if (real_valign == V_TOP )
         current_placement->starting_y -= (p.text_size - max_character_height);  // move up by the error
 
-    else if (valign == MIDDLE)
+    else if (real_valign == V_MIDDLE)
         current_placement->starting_y -= ((p.text_size - max_character_height) / 2.0); // move up by 1/2 the error
 
     // set horizontal position to middle of text
     current_placement->starting_x = label_x;  // no adjustment, default is MIDDLE
 
-    if (halign == H_LEFT)
+    if (real_halign == H_LEFT)
         current_placement->starting_x -= 0.5 * string_width;  // move center left by 1/2 the string width
 
-    else if (halign == H_RIGHT)
+    else if (real_halign == H_RIGHT)
         current_placement->starting_x += 0.5 * string_width;  // move center right by 1/2 the string width
 
     // adjust text envelope position by user's x-y displacement (dx, dy)

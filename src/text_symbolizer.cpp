@@ -45,6 +45,7 @@ static const char * vertical_alignment_strings[] = {
     "top",
     "middle",
     "bottom",
+    "auto",
     ""
 };
 
@@ -55,6 +56,7 @@ static const char * horizontal_alignment_strings[] = {
     "left",
     "middle",
     "right",
+    "auto",
     ""
 };
 
@@ -84,12 +86,13 @@ IMPLEMENT_ENUM( text_transform_e, text_transform_strings );
 
 
 
-text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name, unsigned size, color const& fill)
+text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name,
+                                 unsigned size, color const& fill,
+                                 text_placements_ptr placements)
     : symbolizer_base(),
       name_(name),
       face_name_(face_name),
       //fontset_(default_fontset),
-      size_(size),
       text_ratio_(0),
       wrap_width_(0),
       wrap_char_(' '),
@@ -104,9 +107,8 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       halo_fill_(color(255,255,255)),
       halo_radius_(0),
       label_p_(POINT_PLACEMENT),
-      valign_(MIDDLE),
+      valign_(V_MIDDLE),
       anchor_(0.0,0.5),
-      displacement_(0.0,0.0),
       avoid_edges_(false),
       minimum_distance_(0.0),
       minimum_padding_(0.0),
@@ -114,14 +116,18 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       text_opacity_(1.0),
       wrap_before_(false),
       halign_(H_MIDDLE),
-      jalign_(J_MIDDLE) {}
+      jalign_(J_MIDDLE),
+      placement_options_(placements)
+{
+    set_text_size(size);
+}
 
-text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const& fill)
+text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const& fill,
+                                 text_placements_ptr placements)
     : symbolizer_base(),
       name_(name),
       //face_name_(""),
       //fontset_(default_fontset),
-      size_(size),
       text_ratio_(0),
       wrap_width_(0),
       wrap_char_(' '),
@@ -136,9 +142,8 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       halo_fill_(color(255,255,255)),
       halo_radius_(0),
       label_p_(POINT_PLACEMENT),
-      valign_(MIDDLE),
+      valign_(V_MIDDLE),
       anchor_(0.0,0.5),
-      displacement_(0.0,0.0),
       avoid_edges_(false),
       minimum_distance_(0.0),
       minimum_padding_(0.0),
@@ -146,7 +151,11 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       text_opacity_(1.0),
       wrap_before_(false),
       halign_(H_MIDDLE),
-      jalign_(J_MIDDLE) {}
+      jalign_(J_MIDDLE),
+      placement_options_(placements)
+{
+    set_text_size(size);
+}
 
 text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
     : symbolizer_base(rhs),
@@ -154,7 +163,6 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       orientation_(rhs.orientation_),
       face_name_(rhs.face_name_),
       fontset_(rhs.fontset_),
-      size_(rhs.size_),
       text_ratio_(rhs.text_ratio_),
       wrap_width_(rhs.wrap_width_),
       wrap_char_(rhs.wrap_char_),
@@ -171,7 +179,6 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       label_p_(rhs.label_p_),
       valign_(rhs.valign_),
       anchor_(rhs.anchor_),
-      displacement_(rhs.displacement_),
       avoid_edges_(rhs.avoid_edges_),
       minimum_distance_(rhs.minimum_distance_),
       minimum_padding_(rhs.minimum_padding_),
@@ -179,7 +186,8 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       text_opacity_(rhs.text_opacity_),
       wrap_before_(rhs.wrap_before_),
       halign_(rhs.halign_),
-      jalign_(rhs.jalign_) {}
+      jalign_(rhs.jalign_),
+      placement_options_(rhs.placement_options_) {}
 
 text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
 {
@@ -189,7 +197,6 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     orientation_ = other.orientation_;
     face_name_ = other.face_name_;
     fontset_ = other.fontset_;
-    size_ = other.size_;
     text_ratio_ = other.text_ratio_;
     wrap_width_ = other.wrap_width_;
     wrap_char_ = other.wrap_char_;
@@ -206,7 +213,6 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     label_p_ = other.label_p_;
     valign_ = other.valign_;
     anchor_ = other.anchor_;
-    displacement_ = other.displacement_;
     avoid_edges_ = other.avoid_edges_;
     minimum_distance_ = other.minimum_distance_;
     minimum_padding_ = other.minimum_padding_;
@@ -215,6 +221,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     wrap_before_ = other.wrap_before_;
     halign_ = other.halign_;
     jalign_ = other.jalign_;
+    placement_options_ = other.placement_options_;
     std::cout << "TODO: Metawriter (text_symbolizer::operator=)\n";
     return *this;
 }
@@ -381,12 +388,12 @@ void text_symbolizer::set_max_char_angle_delta(double angle)
 
 void text_symbolizer::set_text_size(unsigned size)
 {
-    size_ = size;
+    placement_options_->set_default_text_size(size);
 }
 
 unsigned  text_symbolizer::get_text_size() const
 {
-    return size_;
+    return placement_options_->get_default_text_size();
 }
 
 void text_symbolizer::set_fill(color const& fill)
@@ -451,12 +458,12 @@ position const& text_symbolizer::get_anchor() const
 
 void  text_symbolizer::set_displacement(double x, double y)
 {
-    displacement_ = boost::make_tuple(x,y);
+    placement_options_->set_default_displacement(boost::make_tuple(x,y));
 }
 
 position const& text_symbolizer::get_displacement() const
 {
-    return displacement_;
+    return placement_options_->get_default_displacement();
 }
 
 bool text_symbolizer::get_avoid_edges() const
@@ -489,7 +496,6 @@ void text_symbolizer::set_minimum_padding(double distance)
     minimum_padding_ = distance;
 }
  
-
 void text_symbolizer::set_allow_overlap(bool overlap)
 {
     overlap_ = overlap;
@@ -529,4 +535,16 @@ justify_alignment_e text_symbolizer::get_justify_alignment() const
 {
     return jalign_;
 }
+
+text_placements_ptr text_symbolizer::get_placement_options() const
+{
+    return placement_options_;
+}
+
+void text_symbolizer::set_placement_options(text_placements_ptr placement_options)
+{
+    placement_options_ = placement_options;
+}
+
+
 }

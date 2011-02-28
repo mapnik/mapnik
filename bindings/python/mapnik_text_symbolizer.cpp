@@ -168,9 +168,10 @@ void export_text_symbolizer()
         .value("INTERIOR_PLACEMENT",INTERIOR_PLACEMENT)
         ;
     enumeration_<vertical_alignment_e>("vertical_alignment")
-        .value("TOP",TOP)
-        .value("MIDDLE",MIDDLE)
-        .value("BOTTOM",BOTTOM)
+        .value("TOP",V_TOP)
+        .value("MIDDLE",V_MIDDLE)
+        .value("BOTTOM",V_BOTTOM)
+        .value("AUTO",V_AUTO)
         ;
 
     enumeration_<horizontal_alignment_e>("horizontal_alignment")

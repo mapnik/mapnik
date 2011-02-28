@@ -24,14 +24,6 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-/*
-#include <mapnik/unicode.hpp>
-#include <mapnik/placement_finder.hpp>
-#include <mapnik/config_error.hpp>
-#include <mapnik/font_set.hpp>
-#include <mapnik/parse_path.hpp>
-#include <mapnik/text_path.hpp>
-*/
 
 namespace mapnik {
 
@@ -42,6 +34,9 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 {
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
 
+    bool placement_found = false;
+    text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
+    while (!placement_found && placement_options->next()) {
     expression_ptr name_expr = sym.get_name();
     if (!name_expr) return;
     value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
@@ -79,7 +74,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
         if (faces->size() > 0 && strk)
         {
             text_renderer<T> ren(pixmap_, faces, *strk);
-            ren.set_pixel_size(sym.get_text_size() * scale_factor_);
+            ren.set_pixel_size(placement_options->text_size * scale_factor_);
             ren.set_fill(fill);
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
@@ -95,9 +90,9 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             for (unsigned i=0;i<num_geom;++i)
             {
                 geometry_type const& geom = feature.get_geometry(i);
-                if (geom.num_points() > 0) // don't bother with empty geometries
-                {           
-                    placement text_placement(info,sym,scale_factor_);
+                if (geom.num_points() == 0) continue; // don't bother with empty geometries
+                while (!placement_found && placement_options->next_position_only()) {
+                    placement text_placement(info, sym, placement_options, scale_factor_);
                     text_placement.avoid_edges = sym.get_avoid_edges();
                     if (sym.get_label_placement() == POINT_PLACEMENT ||
                             sym.get_label_placement() == INTERIOR_PLACEMENT)
@@ -132,12 +127,14 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                         finder.find_line_placements<path_type>(text_placement,path);
                     }
 
+                    if (!text_placement.placements.size()) continue;
+                    placement_found = true;
 
                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
                     {
                         double x = text_placement.placements[ii].starting_x;
                         double y = text_placement.placements[ii].starting_y;
-                        box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
+                        ren.prepare_glyphs(&text_placement.placements[ii]);
                         ren.render(x,y);    
                     }
 
@@ -150,6 +147,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
         {
             throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
         }
+    }
     }
 }
 

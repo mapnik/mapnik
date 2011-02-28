@@ -1074,6 +1074,10 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
+    text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
+    placement_options->next();
+    placement_options->next_position_only();
+
     UnicodeString text;
     if( sym.get_no_text() )
         text = UnicodeString( " " );  // TODO: fix->use 'space' as the text to render
@@ -1133,7 +1137,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 
             placement_finder<label_collision_detector4> finder(detector_);
 
-            faces->set_pixel_sizes(sym.get_text_size());
+            faces->set_pixel_sizes(placement_options->text_size);
             faces->get_string_info(info);
 
             int w = (*marker)->width();
@@ -1153,7 +1157,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                     {
                         // for every vertex, try and place a shield/text
                         geom.rewind(0);
-                        placement text_placement(info, sym, 1.0, w, h, false);
+                        placement text_placement(info, sym, placement_options, 1.0, w, h, false);
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         text_placement.allow_overlap = sym.get_allow_overlap();
                         position const& pos = sym.get_displacement();
@@ -1216,7 +1220,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                                     context.add_text(text_placement.placements[ii],
                                                      face_manager_,
                                                      faces,
-                                                     sym.get_text_size(),
+                                                     placement_options->text_size,
                                                      sym.get_fill(),
                                                      sym.get_halo_radius(),
                                                      sym.get_halo_fill()
@@ -1234,7 +1238,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                     }
                     else if (geom.num_points() > 1 && how_placed == LINE_PLACEMENT)
                     {
-                        placement text_placement(info, sym, 1.0, w, h, true);
+                        placement text_placement(info, sym, placement_options, 1.0, w, h, true);
 
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         finder.find_point_placements<path_type>(text_placement, path);
@@ -1254,7 +1258,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                             context.add_text(text_placement.placements[ii],
                                              face_manager_,
                                              faces,
-                                             sym.get_text_size(),
+                                             placement_options->text_size,
                                              sym.get_fill(),
                                              sym.get_halo_radius(),
                                              sym.get_halo_fill()
@@ -1514,6 +1518,11 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                   proj_transform const& prj_trans)
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
+
+    bool placement_found = false;
+    text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
+    while (!placement_found && placement_options->next()) {
+
     expression_ptr name_expr = sym.get_name();
     if (!name_expr) return;
     value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
@@ -1532,8 +1541,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
         text = text.toTitle(NULL);
     }
 
-    if (text.length() > 0)
-    {
+    if (text.length() <= 0) continue;
         face_set_ptr faces;
 
         if (sym.get_fontset().size() > 0)
@@ -1550,7 +1558,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
             cairo_context context(context_);
             string_info info(text);
 
-            faces->set_pixel_sizes(sym.get_text_size());
+            faces->set_pixel_sizes(placement_options->text_size);
             faces->get_string_info(info);
 
             placement_finder<label_collision_detector4> finder(detector_);
@@ -1559,10 +1567,11 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
             {
                 geometry_type const& geom = feature.get_geometry(i);
 
-                if (geom.num_points() > 0) // don't bother with empty geometries
+                if (geom.num_points() == 0) continue;// don't bother with empty geometries
+                while (!placement_found && placement_options->next_position_only())
                 {
                     path_type path(t_, geom, prj_trans);
-                    placement text_placement(info, sym, 1.0);
+                    placement text_placement(info, sym, placement_options, 1.0);
 
                     if (sym.get_label_placement() == POINT_PLACEMENT ||
                             sym.get_label_placement() == INTERIOR_PLACEMENT)
@@ -1594,13 +1603,15 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                     {
                         finder.find_line_placements<path_type>(text_placement, path);
                     }
+                    if (!text_placement.placements.size()) continue;
+                    placement_found = true;
 
                     for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
                     {
                         context.add_text(text_placement.placements[ii],
                                          face_manager_,
                                          faces,
-                                         sym.get_text_size(),
+                                         placement_options->text_size,
                                          sym.get_fill(),
                                          sym.get_halo_radius(),
                                          sym.get_halo_fill()

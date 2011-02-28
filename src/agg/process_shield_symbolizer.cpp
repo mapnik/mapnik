@@ -42,6 +42,11 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 {
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
 
+
+    text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
+    placement_options->next();
+    placement_options->next_position_only();
+
     UnicodeString text;
     if( sym.get_no_text() )
         text = UnicodeString( " " );  // TODO: fix->use 'space' as the text to render
@@ -129,7 +134,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                     {
                         // for every vertex, try and place a shield/text
                         geom.rewind(0);
-                        placement text_placement(info, sym, scale_factor_, w, h, false);
+                        placement text_placement(info, sym, placement_options, scale_factor_, w, h, false);
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         text_placement.allow_overlap = sym.get_allow_overlap();
                         position const& pos = sym.get_displacement();
@@ -204,7 +209,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
                     else if (geom.num_points() > 1 && how_placed == LINE_PLACEMENT)
                     {
-                        placement text_placement(info, sym, scale_factor_, w, h, true);
+                        placement text_placement(info, sym, placement_options, scale_factor_, w, h, true);
 
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         finder.find_point_placements<path_type>(text_placement,path);

@@ -32,6 +32,7 @@
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/text_placements.hpp>
 
 #include <queue>
 
@@ -41,9 +42,9 @@ typedef text_path placement_element;
 
 struct placement : boost::noncopyable
 {
-    placement(string_info & info_, shield_symbolizer const& sym, double scale_factor,  unsigned w, unsigned h, bool has_dimensions_= false);
+    placement(string_info & info_, shield_symbolizer const& sym, text_placement_info_ptr placement_option, double scale_factor,  unsigned w, unsigned h, bool has_dimensions_= false);
 
-    placement(string_info & info_, text_symbolizer const& sym, double scale_factor);
+    placement(string_info & info_, text_symbolizer const& sym, text_placement_info_ptr placement_option, double scale_factor);
 
     ~placement();
 
@@ -87,7 +88,7 @@ public:
     placement_finder(DetectorT & detector, box2d<double> const& extent);
     
     //Try place a single label at the given point
-    void find_point_placement(placement & p, double pos_x, double pos_y, double angle=0.0, vertical_alignment_e = MIDDLE, unsigned line_spacing=0, unsigned character_spacing=0, horizontal_alignment_e = H_MIDDLE, justify_alignment_e = J_MIDDLE);
+    void find_point_placement(placement & p, double pos_x, double pos_y, double angle=0.0, vertical_alignment_e = V_MIDDLE, unsigned line_spacing=0, unsigned character_spacing=0, horizontal_alignment_e = H_MIDDLE, justify_alignment_e = J_MIDDLE);
 
     //Iterate over the given path, placing point labels with respect to label_spacing
     template <typename T>

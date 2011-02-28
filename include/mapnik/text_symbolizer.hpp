@@ -32,9 +32,9 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/filter_factory.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/text_placements.hpp>
 
 // boost
-#include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
 // stl
 #include <string>
@@ -53,9 +53,10 @@ DEFINE_ENUM( label_placement_e, label_placement_enum );
 
 enum vertical_alignment
 {
-    TOP = 0,
-    MIDDLE,
-    BOTTOM,
+    V_TOP = 0,
+    V_MIDDLE,
+    V_BOTTOM,
+    V_AUTO,
     vertical_alignment_MAX
 };
 
@@ -66,6 +67,7 @@ enum horizontal_alignment
     H_LEFT = 0,
     H_MIDDLE,
     H_RIGHT,
+    H_AUTO,
     horizontal_alignment_MAX
 };
 
@@ -92,13 +94,14 @@ enum text_transform
 
 DEFINE_ENUM( text_transform_e, text_transform );
 
-typedef boost::tuple<double,double> position;
 
 struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 {
     text_symbolizer(expression_ptr name, std::string const& face_name,
-                    unsigned size, color const& fill);
-    text_symbolizer(expression_ptr name, unsigned size, color const& fill);
+                    unsigned size, color const& fill,
+                    text_placements_ptr placements = text_placements_ptr(new text_placements_dummy()));
+    text_symbolizer(expression_ptr name, unsigned size, color const& fill,
+                    text_placements_ptr placements = text_placements_ptr(new text_placements_dummy()));
     text_symbolizer(text_symbolizer const& rhs);
     text_symbolizer& operator=(text_symbolizer const& rhs);
     expression_ptr get_name() const;
@@ -165,13 +168,14 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     horizontal_alignment_e get_horizontal_alignment() const;
     void set_justify_alignment(justify_alignment_e valign);
     justify_alignment_e get_justify_alignment() const;
+    text_placements_ptr get_placement_options() const;
+    void set_placement_options(text_placements_ptr placement_options);
 
 private:
     expression_ptr name_;
     expression_ptr orientation_;
     std::string face_name_;
     font_set fontset_;
-    unsigned size_;
     unsigned text_ratio_;
     unsigned wrap_width_;
     unsigned char wrap_char_;
@@ -188,7 +192,6 @@ private:
     label_placement_e label_p_;
     vertical_alignment_e valign_;
     position anchor_;
-    position displacement_;
     bool avoid_edges_;
     double minimum_distance_;
     double minimum_padding_;
@@ -197,6 +200,7 @@ private:
     bool wrap_before_;
     horizontal_alignment_e halign_;
     justify_alignment_e jalign_;
+    text_placements_ptr placement_options_;
 };
 }
 

@@ -45,6 +45,8 @@
 
 #include <mapnik/metawriter_json.hpp>
 
+#include <mapnik/text_placements_simple.hpp>
+
 // boost
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
@@ -1154,11 +1156,25 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
       << "spacing,minimum-distance,minimum-padding,"
       << "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
       << "horizontal-alignment,justify-alignment,"
-      << "meta-writer,meta-output";
+      << "meta-writer,meta-output,"
+      << "placements,placement-type";
     
     ensure_attrs(sym, "TextSymbolizer", s.str());
     try
     {
+        text_placements_ptr placement_finder;
+        optional<std::string> placement_type = get_opt_attr<std::string>(sym, "placement-type");
+        if (placement_type) {
+            if (*placement_type == "simple") {
+                placement_finder = text_placements_ptr(
+                    new text_placements_simple(
+                        get_attr<std::string>(sym, "placements", "X")));
+            }
+        }
+        if (!placement_finder) {
+            placement_finder = text_placements_ptr(new text_placements_dummy());
+        }
+
         std::string name = get_attr<string>(sym, "name");
         
         optional<std::string> face_name =
@@ -1171,7 +1187,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 
         color c = get_attr(sym, "fill", color(0,0,0));
 
-        text_symbolizer text_symbol = text_symbolizer(parse_expression(name, "utf8"), size, c);
+        text_symbolizer text_symbol = text_symbolizer(parse_expression(name, "utf8"), size, c, placement_finder);
 
         optional<std::string> orientation = get_opt_attr<std::string>(sym, "orientation");
         if (orientation)
@@ -1217,15 +1233,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         text_symbol.set_label_placement( placement );
 
         // vertical alignment
-        vertical_alignment_e default_vertical_alignment = MIDDLE;
-        if (dy > 0.0 )
-        {
-            default_vertical_alignment = BOTTOM;
-        }
-        else if( dy < 0.0 )
-        {
-            default_vertical_alignment = TOP;
-        }
+        vertical_alignment_e default_vertical_alignment = V_AUTO;
             
         vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical-alignment", default_vertical_alignment);
         text_symbol.set_vertical_alignment(valign);
@@ -1353,7 +1361,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         }
             
         // horizontal alignment
-        horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal-alignment", H_MIDDLE);
+        horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal-alignment", H_AUTO);
         text_symbol.set_horizontal_alignment(halign);
 
         // justify alignment
@@ -1514,7 +1522,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             }
 
             // vertical alignment
-            vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical-alignment", MIDDLE);
+            vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical-alignment", V_MIDDLE);
             shield_symbol.set_vertical_alignment(valign);
 
             // horizontal alignment
