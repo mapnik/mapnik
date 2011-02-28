@@ -219,6 +219,7 @@ pretty_dep_names = {
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
     'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
     'curl':'libcurl is required for the "osm" plugin - more info: http://trac.mapnik.org/wiki/OsmPlugin',
+    'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     }
     
 def pretty_dep(dep):
@@ -786,6 +787,27 @@ int main()
     if major >= 4 and minor >= 2:
         return True
     return False
+
+def boost_regex_has_icu(context):
+    ret = context.TryRun("""
+
+#include <boost/regex/icu.hpp>
+#include <unicode/unistr.h>
+
+int main() 
+{
+    UnicodeString ustr; 
+    boost::u32regex pattern = boost::make_u32regex(ustr);
+    return 0;
+}
+
+""", '.cpp')
+    # hack to avoid printed output
+    context.Message('Checking if boost_regex was built with ICU unicode support... ')
+    context.Result(ret[0])
+    if ret[0]:
+        return True
+    return False
     
 conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGConfig'        : CheckPKGConfig,
@@ -799,7 +821,8 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'ogr_enabled'           : ogr_enabled,
                'get_pkg_lib'           : get_pkg_lib,
                'rollback_option'       : rollback_option,
-               'icu_at_least_four_two' : icu_at_least_four_two
+               'icu_at_least_four_two' : icu_at_least_four_two,
+               'boost_regex_has_icu'   : boost_regex_has_icu,
                }
 
 
@@ -880,7 +903,7 @@ if not preconfigured:
     
     # set any custom cxxflags to come first
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
-    
+
     # Solaris & Sun Studio settings (the `SUNCC` flag will only be
     # set if the `CXX` option begins with `CC`)
     SOLARIS = env['PLATFORM'] == 'SunOS'
@@ -924,6 +947,7 @@ if not preconfigured:
         env.Append(CXXFLAGS = '-DU_HIDE_DRAFT_API')
         env.Append(CXXFLAGS = '-DUDISABLE_RENAMING')
         if os.path.exists(env['ICU_LIB_NAME']):
+            #-sICU_LINK=" -L/usr/lib -licucore
             env['ICU_LIB_NAME'] = os.path.basename(env['ICU_LIB_NAME']).replace('.dylib','').replace('lib','')
 
     LIBSHEADERS = [
@@ -1017,6 +1041,14 @@ if not preconfigured:
             else:
                 color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
                 env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
+
+    if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
+        # http://lists.boost.org/Archives/boost/2009/03/150076.php
+        if conf.boost_regex_has_icu():
+            # TODO - should avoid having this be globally defined...
+            env.Append(CXXFLAGS = '-DBOOST_REGEX_HAS_ICU')
+        else:
+            env['SKIPPED_DEPS'].append('boost_regex_icu')
     
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
     

@@ -30,7 +30,9 @@
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
+#if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
+#endif
 #include <boost/function.hpp>
 
 namespace mapnik
@@ -225,6 +227,7 @@ struct binary_node
     expr_node left,right;
 };
 
+#if defined(BOOST_REGEX_HAS_ICU)
 struct regex_match_node
 {
     regex_match_node (expr_node const& a, UnicodeString const& ustr)
@@ -234,6 +237,7 @@ struct regex_match_node
     expr_node expr;
     boost::u32regex pattern;
 };
+
 
 struct regex_replace_node
 {
@@ -246,7 +250,30 @@ struct regex_replace_node
     boost::u32regex pattern;
     UnicodeString format;
 };
+#else
+struct regex_match_node
+{
+    regex_match_node (expr_node const& a, std::string const& str)
+        : expr(a),
+          pattern(str) {}
+    
+    expr_node expr;
+    boost::regex pattern;
+};
 
+
+struct regex_replace_node
+{
+    regex_replace_node (expr_node const& a, std::string const& str, std::string const& f)
+        : expr(a),
+          pattern(str),
+          format(f) {}
+    
+    expr_node expr;
+    boost::regex pattern;
+    std::string format;
+};
+#endif
 
 struct function_call
 {

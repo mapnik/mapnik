@@ -27,7 +27,10 @@
 
 // boost
 #include <boost/regex.hpp>
+//#include <boost/regex/config.hpp>
+#if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
+#endif
 
 namespace mapnik
 {
@@ -76,13 +79,24 @@ struct evaluate : boost::static_visitor<T1>
     value_type operator() (regex_match_node const& x) const
     {
         value_type v = boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr);
+#if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_match(v.to_unicode(),x.pattern);
+#else
+        return boost::regex_match(v.to_string(),x.pattern);
+#endif 
+
     }
     
     value_type operator() (regex_replace_node const& x) const
     {
         value_type v = boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr);
+#if defined(BOOST_REGEX_HAS_ICU)
         return boost::u32regex_replace(v.to_unicode(),x.pattern,x.format);
+#else
+        std::string repl = boost::regex_replace(v.to_string(),x.pattern,x.format);
+        mapnik::transcoder tr_("utf8");
+        return tr_.transcode(repl.c_str());
+#endif 
     }
     
     feature_type const& feature_;

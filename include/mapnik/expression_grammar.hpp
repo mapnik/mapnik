@@ -87,7 +87,11 @@ struct regex_match_impl
     template <typename T0,typename T1>
     expr_node operator() (T0 & node, T1 const& pattern) const
     {
+#if defined(BOOST_REGEX_HAS_ICU)
         return regex_match_node(node,tr_.transcode(pattern.c_str()));
+#else
+        return regex_match_node(node,pattern);
+#endif
     }
     
     mapnik::transcoder const& tr_;
@@ -107,7 +111,11 @@ struct regex_replace_impl
     template <typename T0,typename T1,typename T2>
     expr_node operator() (T0 & node, T1 const& pattern, T2 const& format) const
     {
+#if defined(BOOST_REGEX_HAS_ICU)
         return regex_replace_node(node,tr_.transcode(pattern.c_str()),tr_.transcode(format.c_str()));
+#else
+        return regex_replace_node(node,pattern,format);
+#endif
     }
     
     mapnik::transcoder const& tr_;
