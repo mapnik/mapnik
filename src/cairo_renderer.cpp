@@ -1521,111 +1521,110 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
 
     bool placement_found = false;
     text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
-    while (!placement_found && placement_options->next()) {
+    while (!placement_found && placement_options->next())
+    {
+        expression_ptr name_expr = sym.get_name();
+        if (!name_expr) return;
+        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
+        UnicodeString text = result.to_unicode();
 
-    expression_ptr name_expr = sym.get_name();
-    if (!name_expr) return;
-    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
-    UnicodeString text = result.to_unicode();
-    
-    if ( sym.get_text_transform() == UPPERCASE)
-    {
-        text = text.toUpper();
-    }
-    else if ( sym.get_text_transform() == LOWERCASE)
-    {
-        text = text.toLower();
-    }
-    else if ( sym.get_text_transform() == CAPITALIZE)
-    {
-        text = text.toTitle(NULL);
-    }
+        if ( sym.get_text_transform() == UPPERCASE)
+        {
+            text = text.toUpper();
+        }
+        else if ( sym.get_text_transform() == LOWERCASE)
+        {
+            text = text.toLower();
+        }
+        else if ( sym.get_text_transform() == CAPITALIZE)
+        {
+            text = text.toTitle(NULL);
+        }
 
-    if (text.length() <= 0) continue;
+        if (text.length() <= 0) continue;
+
         face_set_ptr faces;
 
         if (sym.get_fontset().size() > 0)
         {
             faces = font_manager_.get_face_set(sym.get_fontset());
         }
-        else 
+        else
         {
             faces = font_manager_.get_face_set(sym.get_face_name());
         }
 
-        if (faces->size() > 0)
-        {
-            cairo_context context(context_);
-            string_info info(text);
-
-            faces->set_pixel_sizes(placement_options->text_size);
-            faces->get_string_info(info);
-
-            placement_finder<label_collision_detector4> finder(detector_);
-
-            for (unsigned i = 0; i < feature.num_geometries(); ++i)
-            {
-                geometry_type const& geom = feature.get_geometry(i);
-
-                if (geom.num_points() == 0) continue;// don't bother with empty geometries
-                while (!placement_found && placement_options->next_position_only())
-                {
-                    path_type path(t_, geom, prj_trans);
-                    placement text_placement(info, sym, placement_options, 1.0);
-
-                    if (sym.get_label_placement() == POINT_PLACEMENT ||
-                            sym.get_label_placement() == INTERIOR_PLACEMENT)
-                    {
-                        double label_x, label_y, z=0.0;
-                        if (sym.get_label_placement() == POINT_PLACEMENT)
-                            geom.label_position(&label_x, &label_y);
-                        else
-                            geom.label_interior_position(&label_x, &label_y);
-                        prj_trans.backward(label_x, label_y, z);
-                        t_.forward(&label_x, &label_y);
-
-                        double angle = 0.0;
-                        expression_ptr angle_expr = sym.get_orientation();
-                        if (angle_expr)
-                        {
-                            // apply rotation
-                            value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*angle_expr);
-                            angle = result.to_double();
-                        }
-
-                        finder.find_point_placement(text_placement,label_x,label_y, 
-                                                    angle, sym.get_vertical_alignment(),sym.get_line_spacing(),
-                                                    sym.get_character_spacing(),sym.get_horizontal_alignment(),
-                                                    sym.get_justify_alignment());
-                        finder.update_detector(text_placement);
-                    }
-                    else //LINE_PLACEMENT
-                    {
-                        finder.find_line_placements<path_type>(text_placement, path);
-                    }
-                    if (!text_placement.placements.size()) continue;
-                    placement_found = true;
-
-                    for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
-                    {
-                        context.add_text(text_placement.placements[ii],
-                                         face_manager_,
-                                         faces,
-                                         placement_options->text_size,
-                                         sym.get_fill(),
-                                         sym.get_halo_radius(),
-                                         sym.get_halo_fill()
-                            );
-                    }
-
-                    metawriter_with_properties writer = sym.get_metawriter();
-                    if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
-                }
-            }
-        }
-        else
+        if (faces->size() == 0)
         {
             throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
+        }
+        cairo_context context(context_);
+        string_info info(text);
+
+        faces->set_pixel_sizes(placement_options->text_size);
+        faces->get_string_info(info);
+
+        placement_finder<label_collision_detector4> finder(detector_);
+
+        for (unsigned i = 0; i < feature.num_geometries(); ++i)
+        {
+            geometry_type const& geom = feature.get_geometry(i);
+
+            if (geom.num_points() == 0) continue;// don't bother with empty geometries
+            while (!placement_found && placement_options->next_position_only())
+            {
+                path_type path(t_, geom, prj_trans);
+                placement text_placement(info, sym, placement_options, 1.0);
+
+                if (sym.get_label_placement() == POINT_PLACEMENT ||
+                        sym.get_label_placement() == INTERIOR_PLACEMENT)
+                {
+                    double label_x, label_y, z=0.0;
+                    if (sym.get_label_placement() == POINT_PLACEMENT)
+                        geom.label_position(&label_x, &label_y);
+                    else
+                        geom.label_interior_position(&label_x, &label_y);
+                    prj_trans.backward(label_x, label_y, z);
+                    t_.forward(&label_x, &label_y);
+
+                    double angle = 0.0;
+                    expression_ptr angle_expr = sym.get_orientation();
+                    if (angle_expr)
+                    {
+                        // apply rotation
+                        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*angle_expr);
+                        angle = result.to_double();
+                    }
+
+                    finder.find_point_placement(text_placement,label_x,label_y,
+                                                angle, sym.get_vertical_alignment(),sym.get_line_spacing(),
+                                                sym.get_character_spacing(),sym.get_horizontal_alignment(),
+                                                sym.get_justify_alignment());
+                    finder.update_detector(text_placement);
+                }
+                else //LINE_PLACEMENT
+                {
+                    finder.find_line_placements<path_type>(text_placement, path);
+                }
+
+                if (!text_placement.placements.size()) continue;
+                placement_found = true;
+
+                for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
+                {
+                    context.add_text(text_placement.placements[ii],
+                                     face_manager_,
+                                     faces,
+                                     placement_options->text_size,
+                                     sym.get_fill(),
+                                     sym.get_halo_radius(),
+                                     sym.get_halo_fill()
+                                     );
+                }
+
+                metawriter_with_properties writer = sym.get_metawriter();
+                if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
+            }
         }
     }
 }
