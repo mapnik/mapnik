@@ -294,12 +294,7 @@ class _Feature(Feature, _injector):
         #XXX Returns a copy! changes to it won't affect feat.'s attrs.
         #    maybe deprecate?
         return dict(self)
-
-    @property
-    def geometry(self):
-        if self.num_geometries() > 0:
-            return self.get_geometry(0)
-
+    
     @property
     def geometries(self):
         return [self.get_geometry(i) for i in xrange(self.num_geometries())]
@@ -310,25 +305,7 @@ class _Feature(Feature, _injector):
             self.add_geometry(geometry)
         for k, v in properties.iteritems():
             self[k] = v
-
-    def add_geometry(self, geometry):
-        geometry = self._as_wkb(geometry)
-        Feature._c_add_geometry(self, geometry)
-
-    def _as_wkb(self, geometry):
-        if hasattr(geometry, 'wkb'):
-            # a shapely.geometry.Geometry
-            geometry = geometry.wkb
-        if isinstance(geometry, str):
-            # ignoring unicode un purpose
-            for type_ in ('POINT', 'POLYGON', 'LINE'):
-                if type_ in geometry:
-                    # A WKT encoded string 
-                    from shapely import wkt
-                    geometry = wkt.loads(geometry).wkb
-            return geometry
-        raise TypeError("%r (%s) not supported" % (geometry, type(geometry)))
-
+    
 class _Color(Color,_injector):
 
     def __repr__(self):
