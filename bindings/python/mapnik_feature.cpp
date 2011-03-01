@@ -40,10 +40,12 @@ namespace {
 using mapnik::Feature;
 using mapnik::geometry_utils;
 
+/*
 void feature_add_wkb_geometry(Feature &feature, std::string wkb)
 {
     geometry_utils::from_wkb(feature, wkb.c_str(), wkb.size(), true);
 }
+*/
 
 void add_geometry(Feature & feature, std::auto_ptr<mapnik::geometry_type> geom)
 {
