@@ -54,63 +54,44 @@ struct layer_pickle_suite : boost::python::pickle_suite
         {
             s.append(style_names[i]);
         }      
-        return boost::python::make_tuple(l.abstract(),l.title(),l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource()->params(),s);
+        return boost::python::make_tuple(l.abstract(),l.title(),l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource()->params(),l.cache_features(),s);
     }
 
     static void
     setstate (layer& l, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 8)
+        if (len(state) != 9)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 8-item tuple in call to __setstate__; got %s"
+                            ("expected 9-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
         }
 
-        if (state[0])
-        {
-            l.set_abstract(extract<std::string>(state[0]));
-        }
+        l.set_abstract(extract<std::string>(state[0]));
 
-        if (state[1])
-        {
-            l.set_title(extract<std::string>(state[1]));
-        }
+        l.set_title(extract<std::string>(state[1]));
 
-        if (state[2])
-        {
-            l.set_clear_label_cache(extract<bool>(state[2]));
-        }
+        l.set_clear_label_cache(extract<bool>(state[2]));
 
-        if (state[3])
-        {
-            l.setMinZoom(extract<double>(state[3]));
-        }
+        l.setMinZoom(extract<double>(state[3]));
 
-        if (state[4])
-        {
-            l.setMaxZoom(extract<double>(state[4]));
-        }
+        l.setMaxZoom(extract<double>(state[4]));
 
-        if (state[5])
-        {
-            l.setQueryable(extract<bool>(state[5]));
-        }
+        l.setQueryable(extract<bool>(state[5]));
 
-        if (state[6])
-        {
-            mapnik::parameters params = extract<parameters>(state[6]);
-            l.set_datasource(datasource_cache::instance()->create(params));
-        }
+        mapnik::parameters params = extract<parameters>(state[6]);
+        l.set_datasource(datasource_cache::instance()->create(params));
         
         boost::python::list s = extract<boost::python::list>(state[7]);
         for (int i=0;i<len(s);++i)
         {
             l.add_style(extract<std::string>(s[i]));
         }
+
+        l.set_cache_features(extract<bool>(state[8]));
     }
 };
 
@@ -204,10 +185,23 @@ void export_layer()
         .add_property("clear_label_cache",
                       &layer::clear_label_cache,
                       &layer::set_clear_label_cache,
-                      "Get/Set whether this layer's labels are cached.\n"
+                      "Get/Set whether to clear the label collision detector cache for this layer during rendering\n"
                       "\n"
                       "Usage:\n"
-                      "TODO\n" 
+                      ">>> lyr.clear_label_cache\n"
+                      "False # False by default, meaning label positions from other layers will impact placement \n"
+                      ">>> lyr.clear_label_cache = True # set to True to clear the label collision detector cache\n" 
+            )
+
+        .add_property("cache_features",
+                      &layer::cache_features,
+                      &layer::set_cache_features,
+                      "Get/Set whether features should be cached during rendering if used between multiple styles\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> lyr.cache_features\n"
+                      "False # False by default\n"
+                      ">>> lyr.cache_features = True # set to True to enable feature caching\n" 
             )
         
         .add_property("datasource",

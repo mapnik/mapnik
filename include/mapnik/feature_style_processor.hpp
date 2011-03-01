@@ -238,7 +238,7 @@ private:
             }
             
             memory_datasource cache;
-            bool cache_features = style_names.size()>1?true:false;
+            bool cache_features = lay.cache_features() && style_names.size()>1?true:false;
             bool first = true;
             
             BOOST_FOREACH (feature_type_style * style, active_styles)
@@ -282,7 +282,8 @@ private:
                 featureset_ptr fs;
                 if (first)
                 {
-                    first = false;
+                    if (cache_features)
+                        first = false;
                     fs = ds->features(q);
                 }
                 else

@@ -170,6 +170,16 @@ public:
      * @return whether this layer's labels are cached.
      */
     bool clear_label_cache() const; 
+
+    /*!
+     * @param clear_cache Set whether this layer's features should be cached if used by multiple styles.
+     */
+    void set_cache_features(bool cache_features);
+        
+    /*!
+     * @return whether this layer's features will be cached if used by multiple styles
+     */
+    bool cache_features() const; 
         
     /*!
      * @brief Attach a datasource for this layer.
@@ -202,6 +212,7 @@ private:
     bool active_;
     bool queryable_;
     bool clear_label_cache_;
+    bool cache_features_;
     std::vector<std::string>  styles_;
     datasource_ptr ds_;
 };

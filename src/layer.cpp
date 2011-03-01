@@ -49,6 +49,7 @@ layer::layer(std::string const& name, std::string const& srs)
       active_(true),
       queryable_(false),
       clear_label_cache_(false),
+      cache_features_(false),
       ds_() {}
     
 layer::layer(const layer& rhs)
@@ -61,6 +62,7 @@ layer::layer(const layer& rhs)
       active_(rhs.active_),
       queryable_(rhs.queryable_),
       clear_label_cache_(rhs.clear_label_cache_),
+      cache_features_(rhs.cache_features_),
       styles_(rhs.styles_),
       ds_(rhs.ds_) {}
     
@@ -87,6 +89,7 @@ void layer::swap(const layer& rhs)
     active_=rhs.active_;
     queryable_=rhs.queryable_;
     clear_label_cache_ = rhs.clear_label_cache_;
+    cache_features_ = rhs.cache_features_;
     styles_=rhs.styles_;
     ds_=rhs.ds_;
 }
@@ -218,4 +221,15 @@ bool layer::clear_label_cache() const
 {
     return clear_label_cache_;
 }
+
+void layer::set_cache_features(bool cache_features)
+{
+    cache_features_ = cache_features;
+}
+
+bool layer::cache_features() const
+{
+    return cache_features_;
+}
+
 }

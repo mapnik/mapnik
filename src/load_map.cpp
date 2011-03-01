@@ -550,6 +550,13 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
             lyr.set_clear_label_cache( * clear_cache );
         }
 
+        optional<boolean> cache_features =
+            get_opt_attr<boolean>(lay, "cache-features");
+        if (cache_features)
+        {
+            lyr.set_cache_features( * cache_features );
+        }
+
 
         ptree::const_iterator itr2 = lay.begin();
         ptree::const_iterator end2 = lay.end();
