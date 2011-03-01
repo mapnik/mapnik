@@ -1353,7 +1353,7 @@ Help(opts.GenerateHelpText(env))
 #env.Prepend(LIBPATH = '/usr/local/lib')
 
 #### Builds ####
-if not HELP_REQUESTED and '-c' not in command_line_args:
+if not HELP_REQUESTED:
 
     if 'uninstall' in COMMAND_LINE_TARGETS:
         # dummy action in case there is nothing to uninstall, to avoid phony error..
