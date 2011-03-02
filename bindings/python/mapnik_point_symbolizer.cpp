@@ -84,8 +84,8 @@ struct point_symbolizer_pickle_suite : boost::python::pickle_suite
                 
         p.set_allow_overlap(extract<bool>(state[0]));
         p.set_opacity(extract<float>(state[1]));
-        p.set_ignore_placement(extract<bool>(state[3]));
-        p.set_point_placement(extract<point_placement_e>(state[4]));
+        p.set_ignore_placement(extract<bool>(state[2]));
+        p.set_point_placement(extract<point_placement_e>(state[3]));
         
     }
 
@@ -104,7 +104,7 @@ void export_point_symbolizer()
     class_<point_symbolizer>("PointSymbolizer",
                              init<>("Default Point Symbolizer - 4x4 black square"))
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
-        //.def_pickle(point_symbolizer_pickle_suite())
+        .def_pickle(point_symbolizer_pickle_suite())
         .add_property("filename",
                       &get_filename,
                       &set_filename)
