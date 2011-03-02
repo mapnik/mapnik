@@ -323,6 +323,21 @@ def test_textsymbolizer_pickle():
 
 
 # Map initialization
+def test_layer_init():
+    l = mapnik2.Layer('test')
+    eq_(l.name,'test')
+    eq_(l.envelope(),mapnik2.Box2d())
+    eq_(l.clear_label_cache,False)
+    eq_(l.cache_features,False)
+    eq_(l.visible(),True)
+    eq_(l.abstract,'')
+    eq_(l.active,True)
+    eq_(l.datasource,None)
+    eq_(l.queryable,False)
+    eq_(l.srs,'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+    eq_(l.title,'')
+
+# Map initialization
 def test_map_init():
     m = mapnik2.Map(256, 256)
    
