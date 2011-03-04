@@ -38,7 +38,17 @@ svn_revision = env['SVN_REVISION']
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 
+# todo - refine this list
+other_includes = env['CUSTOM_CXXFLAGS'] + env['CXXFLAGS'] + ''.join([' -I%s' % i for i in env['CPPPATH'] if not i.startswith('#')])
+
 private_libs = ' -lfreetype -l%s -l%s -l%s' % (env['ICU_LIB_NAME'],filesystem,regex)
+
+if env['HAS_CAIRO']:
+    private_libs += ' -lcairomm-1.0 -lcairo'
+    other_includes.append('-DHAVE_CAIRO')
+
+if env['XMLPARSER'] == 'libxml2':
+    private_libs += ' -lxml2'
 
 if env['THREADING'] == 'multi':
     private_libs += ' -lboost_thread%s' % env['BOOST_APPEND']
@@ -46,14 +56,20 @@ if env['THREADING'] == 'multi':
 if env['HAS_BOOST_SYSTEM']:
     private_libs += ' -lboost_system%s' % env['BOOST_APPEND']
 
-if env['HAS_CAIRO']:
-    private_libs += ' -lcairomm-1.0 -lcairo'
+if not env['INTERNAL_LIBAGG']:
+    for lib in env['LIBS']:
+        if lib.startswith('agg'):
+            private_libs += ' -l%s' % lib
+
+if env['SVG_RENDERER']:
+    other_includes.append('-DSVG_RENDERER')
+    
+if env['LIBTOOL_SUPPORTS_ADVISE']:
+    other_includes.append('-DLIBTOOL_SUPPORTS_ADVISE')
 
 other_libs = env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in env['LIBPATH'] if not i.startswith('#')])
 other_libs += private_libs
 
-# todo - refine this list
-other_includes = env['CUSTOM_CXXFLAGS'] + ''.join([' -I%s' % i for i in env['CPPPATH'] if not i.startswith('#')])
 
 top = '''#!/bin/sh
 
