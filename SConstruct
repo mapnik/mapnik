@@ -336,7 +336,7 @@ opts.AddVariables(
     ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),
     # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
     # Therefore, we use a single boolean for whether to attempt to build cairo support.
-    BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'False'),
+    BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'),
     ('GDAL_CONFIG', 'The path to the gdal-config executable for finding gdal and ogr details.', 'gdal-config'),
     ('PG_CONFIG', 'The path to the pg_config executable.', 'pg_config'),
     PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept),
