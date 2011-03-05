@@ -435,9 +435,19 @@ featureset_ptr postgis_datasource::features(const query& q) const
             if (!geometryColumn_.length() > 0)
             {
                 std::ostringstream s_error;
-                s_error << "PostGIS: geometry name lookup failed for table '" << schema_ << "." << geometry_table_
+                s_error << "PostGIS: geometry name lookup failed for table '";
+                if (!schema_.length() > 0)
+                {
+                    s_error << schema_ << ".";
+                }
+                s_error << geometry_table_
                         << "'. Please manually provide the 'geometry_field' parameter or add an entry "
-                        << "in the geometry_columns for '" << schema_ << "." << geometry_table_ << "'.";
+                        << "in the geometry_columns for '";
+                if (!schema_.length() > 0)
+                {
+                    s_error << schema_ << ".";
+                }
+                s_error << "." << geometry_table_ << "'.";
                 throw mapnik::datasource_exception("Postgis Plugin: " + s_error.str());
             }
 
@@ -495,9 +505,19 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             if (!geometryColumn_.length() > 0)
             {
                 std::ostringstream s_error;
-                s_error << "PostGIS: geometry name lookup failed for table '" << schema_ << "." << geometry_table_
+                s_error << "PostGIS: geometry name lookup failed for table '";
+                if (!schema_.length() > 0)
+                {
+                    s_error << schema_ << ".";
+                }
+                s_error << "." << geometry_table_
                         << "'. Please manually provide the 'geometry_field' parameter or add an entry "
-                        << "in the geometry_columns for '" << schema_ << "." << geometry_table_ << "'.";
+                        << "in the geometry_columns for '";
+                if (!schema_.length() > 0)
+                {
+                    s_error << schema_ << ".";
+                }
+                s_error << geometry_table_ << "'.";
                 throw mapnik::datasource_exception(s_error.str());
             }
                     
@@ -555,10 +575,14 @@ box2d<double> postgis_datasource::envelope() const
             if (!geometryColumn_.length() > 0)
             {
                 std::ostringstream s_error;
-                s_error << "PostGIS: unable to query the layer extent of table '"
-                        << schema_ << "." << geometry_table_ << "' because we cannot determine the geometry field name."
-                        << "\nPlease provide either 1) an 'extent' parameter to skip this query, "
-                        << "2) a 'geometry_field' and/or 'geometry_table' parameter, or 3) add a "
+                s_error << "PostGIS: unable to query the layer extent of table '";
+                if (!schema_.length() > 0)
+                {
+                    s_error << schema_ << ".";
+                }
+                s_error << geometry_table_ << "' because we cannot determine the geometry field name."
+                        << "\nPlease provide either an 'extent' parameter to skip this query, "
+                        << "a 'geometry_field' and/or 'geometry_table' parameter, or add a "
                         << "record to the 'geometry_columns' for your table.";
                 throw mapnik::datasource_exception("Postgis Plugin: " + s_error.str());
             }
