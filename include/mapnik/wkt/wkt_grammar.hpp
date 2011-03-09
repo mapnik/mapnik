@@ -80,7 +80,11 @@ struct wkt_grammar : qi::grammar<Iterator, geometry_type*(), ascii::space_type>
     wkt_grammar()
         : wkt_grammar::base_type(start)
     {       
+        using qi::_1;   
+        using qi::_2;
+        using qi::_val;
         using qi::no_case;   
+        
         start %= point | linestring | polygon | multipoint | multilinestring | multipolygon | eps[cleanup_(_val)][_pass = false];
         
         // <point tagged text> ::= point <point text>
@@ -136,6 +140,8 @@ struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<mapnik::
     wkt_collection_grammar()
         :  wkt_collection_grammar::base_type(start)
     {
+        using qi::_1;   
+        using qi::_val;
         using qi::no_case; 
         using boost::phoenix::push_back;
         start = wkt [push_back(_val,_1)] | no_case[lit("GEOMETRYCOLLECTION")] 
