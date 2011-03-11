@@ -127,10 +127,10 @@ text_placement_info_ptr text_placements_simple::get_placement_info() const
 
 /** Positiion string: [POS][SIZE]
   * [POS] is any combination of
-  * N, E, S, W, NE, SE, NW, SW, X (exact position) (seprated by commas)
-  * [SIZE] is a list of font sizes, seprated by commas. First fontsize
-  * is always the one given in the TextSymbolizer parameters.
-  * First all directions are tried, then font size is reduced by 1pt
+  * N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
+  * [SIZE] is a list of font sizes, separated by commas. The first font size
+  * is always the one given in the TextSymbolizer's parameters.
+  * First all directions are tried, then font size is reduced
   * and all directions are tried again. The process ends when a placement is
   * found or the last fontsize is tried without success.
   * Example: N,S,15,10,8 (tries placement above, then below and if

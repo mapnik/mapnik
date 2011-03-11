@@ -1176,6 +1176,8 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
                 placement_finder = text_placements_ptr(
                     new text_placements_simple(
                         get_attr<std::string>(sym, "placements", "X")));
+            } else if (*placement_type != "dummy" && *placement_type != "") {
+                throw config_error(std::string("Unknown placement type '"+*placement_type+"'"));
             }
         }
         if (!placement_finder) {
