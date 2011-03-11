@@ -290,19 +290,69 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #ifdef MAPNIK_DEBUG
                     std::clog << "GDAL Plugin: processing rgb bands..." << std::endl;
 #endif
+                    int hasNoData;
+                    float nodata = red->GetNoDataValue(&hasNoData);
+                    GDALColorTable *color_table = red->GetColorTable();
+
+                    if (!alpha && hasNoData && !color_table)
+                    {
+                        // first read the data in and create an alpha channel from the nodata values
+                        float *imageData = (float*)image.getBytes();
+                        red->RasterIO(GF_Read, x_off, y_off, width, height,
+                                imageData, image.width(), image.height(),
+                                GDT_Float32, 0, 0);
+
+                        int len = image.width() * image.height();
+
+                        for (int i=0; i<len; ++i)
+                        {
+                            if (nodata == imageData[i])
+                                *reinterpret_cast<unsigned *> (&imageData[i]) = 0;
+                            else
+                                *reinterpret_cast<unsigned *> (&imageData[i]) = 0xFFFFFFFF;
+                        }
+
+                    }
+
                     red->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 0,
                                   image.width(),image.height(),GDT_Byte,4,4*image.width());
                     green->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 1,
                                     image.width(),image.height(),GDT_Byte,4,4*image.width());
                     blue->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 2,
                                    image.width(),image.height(),GDT_Byte,4,4*image.width());
+
                 }
                 else if (grey)
                 {
 #ifdef MAPNIK_DEBUG
                     std::clog << "GDAL Plugin: processing gray band..." << std::endl;
 #endif
-                
+                    int hasNoData;
+                    float nodata = grey->GetNoDataValue(&hasNoData);
+                    GDALColorTable *color_table = grey->GetColorTable();
+
+                    if (hasNoData && !color_table)
+                    {
+#ifdef MAPNIK_DEBUG
+                        std::clog << "\tno data value for layer: " << nodata << std::endl;
+#endif
+                        // first read the data in and create an alpha channel from the nodata values
+                        float *imageData = (float*)image.getBytes();
+                        grey->RasterIO(GF_Read, x_off, y_off, width, height,
+                                imageData, image.width(), image.height(),
+                                GDT_Float32, 0, 0);
+
+                        int len = image.width() * image.height();
+
+                        for (int i=0; i<len; ++i)
+                        {
+                            if (nodata == imageData[i])
+                                *reinterpret_cast<unsigned *> (&imageData[i]) = 0;
+                            else
+                                *reinterpret_cast<unsigned *> (&imageData[i]) = 0xFFFFFFFF;
+                        }
+                    }
+
                     grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 0,
                                    image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
                     grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 1,
@@ -310,9 +360,11 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     grey->RasterIO(GF_Read,x_off,y_off,width,height,image.getBytes() + 2,
                                    image.width(),image.height(),GDT_Byte, 4, 4 * image.width());
 
-                    GDALColorTable *color_table = grey->GetColorTable();
                     if (color_table)
                     {
+#ifdef MAPNIK_DEBUG
+                        std::clog << "GDAL Plugin: Loading colour table..." << std::endl;
+#endif
                         for (unsigned y = 0; y < image.height(); ++y)
                         {
                             unsigned int* row = image.getRow(y);

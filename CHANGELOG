@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Support for NODATA values with grey and rgb images in GDAL plugin (#727)
+
 - Print warning if invalid XML property names are used (#110)
 
 - Made XML property names use consistent dashes, never underscores (#644)
