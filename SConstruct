@@ -796,8 +796,15 @@ def boost_regex_has_icu(context):
 
 int main() 
 {
-    UnicodeString ustr; 
-    boost::u32regex pattern = boost::make_u32regex(ustr);
+    UnicodeString ustr;
+    try { 
+        boost::u32regex pattern = boost::make_u32regex(ustr);
+    }
+    // an exception is fine, still indicates support is
+    // likely compiled into regex
+    catch (...) {
+        return 0;
+    }
     return 0;
 }
 
