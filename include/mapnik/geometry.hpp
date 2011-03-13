@@ -314,7 +314,7 @@ public:
             // Handle points
             double x0, y0;
             cont_.get_vertex(0, &x0, &y0);
-            return distance(x, y, x0, y0) <= abs(tol);
+            return distance(x, y, x0, y0) <= fabs(tol);
         } else if (cont_.size() > 1) {
             bool inside=false;
             double x0=0;
