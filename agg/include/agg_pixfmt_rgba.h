@@ -157,9 +157,9 @@ namespace agg
                     {
                         cover = base_mask;
                     }
-                    p[Order::R] = (value_type)((cr * cover / alpha) + (r * a * (base_mask - alpha) / base_mask / p[Order::A]));
-                    p[Order::G] = (value_type)((cg * cover / alpha) + (g * a * (base_mask - alpha) / base_mask / p[Order::A]));
-                    p[Order::B] = (value_type)((cb * cover / alpha) + (b * a * (base_mask - alpha) / base_mask / p[Order::A]));
+                    p[Order::R] = (value_type)((cr * alpha / cover) + (r * a * (base_mask - alpha) / base_mask / p[Order::A]));
+                    p[Order::G] = (value_type)((cg * alpha / cover) + (g * a * (base_mask - alpha) / base_mask / p[Order::A]));
+                    p[Order::B] = (value_type)((cb * alpha / cover) + (b * a * (base_mask - alpha) / base_mask / p[Order::A]));
                 }
             }
         }
