@@ -217,10 +217,10 @@ void datasource_cache::register_datasources(const std::string& str)
                     {
 #if (BOOST_FILESYSTEM_VERSION == 3) 
                         std::clog << "Problem loading plugin library: " << itr->path().string() 
-                                  << " (dlopen failed - plugin likely has an unsatified dependency or incompatible ABI)" << std::endl;
+                                  << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;
 #else // v2
                         std::clog << "Problem loading plugin library: " << itr->string() 
-                                  << " (dlopen failed - plugin likely has an unsatified dependency or incompatible ABI)" << std::endl;    
+                                  << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;    
 #endif
                     }
                 }
