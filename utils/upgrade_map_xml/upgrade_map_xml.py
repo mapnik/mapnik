@@ -129,8 +129,6 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
         tree.xinclude()
     root = tree.getroot()
 
-    root.set('minimum-version','0.7.2')
-    
     # rename 'bgcolor' to 'background-color'
     if root.attrib.get('bgcolor'):
         root.attrib['background-color'] = root.attrib.get('bgcolor')
@@ -138,6 +136,8 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
     
     # underscores to spaces for <Map ..>
     underscore2dash(root)
+    
+    root.set('minimum-version', '0.7.2')
     
     # underscores to spaces for <FontSet ..>
     fontset = root.findall('FontSet') or root.findall('*/FontSet')
