@@ -1255,7 +1255,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                             int px=int(floor(lx - (0.5*w)));
                             int py=int(floor(ly - (0.5*h)));
 
-                            render_marker(x,y,**marker, tr, sym.get_opacity());
+                            render_marker(px,py,**marker, tr, sym.get_opacity());
 
                             context.add_text(text_placement.placements[ii],
                                              face_manager_,
