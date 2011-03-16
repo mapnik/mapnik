@@ -140,6 +140,8 @@ source = Split(
     metawriter.cpp
     text_placements.cpp
     wkt/wkt_factory.cpp
+    metawriter_inmem.cpp
+    metawriter_factory.cpp
     """   
     )
 

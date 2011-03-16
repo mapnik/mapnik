@@ -30,6 +30,7 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/feature_type_style.hpp>
+#include <mapnik/metawriter_inmem.hpp>
 
 #include "mapnik_enumeration.hpp"
 #include "python_optional.hpp"
@@ -129,6 +130,19 @@ bool has_metawriter(mapnik::Map const& m)
     if (m.metawriters().size() >=1)
         return true;
     return false;
+}
+
+// returns empty shared_ptr when the metawriter isn't found, or is 
+// of the wrong type. empty pointers make it back to Python as a None.
+mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map &m, const std::string &name) {
+  mapnik::metawriter_ptr metawriter = m.find_metawriter(name);
+  mapnik::metawriter_inmem_ptr inmem;
+
+  if (metawriter) {
+    inmem = boost::dynamic_pointer_cast<mapnik::metawriter_inmem>(metawriter);
+  }
+ 
+  return inmem;
 }
 
 // TODO - we likely should allow indexing by negative number from python
@@ -421,6 +435,13 @@ void export_map()
             "\n"
             "Use a path like \"[z]/[x]/[y].json\" to create filenames.\n"
         )
+        .def("find_inmem_metawriter", find_inmem_metawriter,
+            (arg("name")),
+            "Gets an inmem metawriter, or None if no such metawriter "
+            "exists.\n"
+            "Use this after the map has been rendered to retrieve information "
+            "about the hit areas rendered on the map.\n"
+          )
         
         .def("extra_attributes",&Map::get_extra_attributes,return_value_policy<copy_const_reference>(),"TODO")
 

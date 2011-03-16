@@ -27,7 +27,7 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/raster_colorizer.hpp>
-#include <mapnik/metawriter_json.hpp>
+#include <mapnik/metawriter_factory.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -796,19 +796,7 @@ void serialize_metawriter(ptree & map_node, Map::const_metawriter_iterator metaw
         ptree::value_type("MetaWriter", ptree()))->second;
 
     set_attr(metawriter_node, "name", name);
-
-    metawriter_json *json = dynamic_cast<metawriter_json *>(metawriter.get());
-    if (json) {
-        set_attr(metawriter_node, "type", "json");
-        std::string const& filename = path_processor_type::to_string(*(json->get_filename()));
-        if (!filename.empty() || explicit_defaults) {
-            set_attr(metawriter_node, "file", filename);
-        }
-    }
-    if (!metawriter->get_default_properties().empty() || explicit_defaults) {
-        set_attr(metawriter_node, "default-output", metawriter->get_default_properties().to_string());
-    }
-
+    metawriter_save(metawriter, metawriter_node, explicit_defaults);
 }
 
 void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)

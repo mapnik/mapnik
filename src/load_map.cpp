@@ -43,7 +43,7 @@
 
 #include <mapnik/svg/svg_path_parser.hpp>
 
-#include <mapnik/metawriter_json.hpp>
+#include <mapnik/metawriter_factory.hpp>
 
 #include <mapnik/text_placements_simple.hpp>
 
@@ -405,20 +405,9 @@ void map_parser::parse_metawriter(Map & map, ptree const & pt)
     try
     {
         name = get_attr<string>(pt, "name");
-        string type = get_attr<string>(pt, "type");
-        if (type == "json") {
-            string file = get_attr<string>(pt, "file");
-            optional<string> properties = get_opt_attr<string>(pt, "default-output");
-            metawriter_json_ptr json = metawriter_json_ptr(new metawriter_json(properties, parse_path(file)));
-            optional<boolean> output_empty = get_opt_attr<boolean>(pt, "output-empty");
-            if (output_empty) {
-                json->set_output_empty(*output_empty);
-            }
-            writer = json;
-        } else {
-            throw config_error(string("Unknown type '") + type + "'");
-        }
+        writer = metawriter_create(pt);
         map.insert_metawriter(name, writer);
+
     } catch (const config_error & ex) {
         if (!name.empty()) {
             ex.append_context(string("in meta writer '") + name + "'");
