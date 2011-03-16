@@ -31,15 +31,17 @@
 #include <unicode/ucnv.h>
 // boost
 #include <boost/utility.hpp>
+#include <boost/cstdint.hpp>
 // stl
 #include <string>
 
 namespace mapnik {
+
 class MAPNIK_DECL transcoder : private boost::noncopyable
 {
 public:
     explicit transcoder (std::string const& encoding);
-    UnicodeString transcode(const char* data) const;  
+    UnicodeString transcode(const char* data, boost::int32_t length = -1) const;  
     ~transcoder(); 
 private:
     bool ok_;

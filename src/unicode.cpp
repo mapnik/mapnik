@@ -43,12 +43,11 @@ transcoder::transcoder (std::string const& encoding)
     // TODO ??
 }
 
-UnicodeString transcoder::transcode(const char* data) const
+UnicodeString transcoder::transcode(const char* data, boost::int32_t length) const
 {
-    
     UErrorCode err = U_ZERO_ERROR;
     
-    UnicodeString ustr(data,-1,conv_,err); 
+    UnicodeString ustr(data,length,conv_,err); 
     if (ustr.isBogus())
     {
         ustr.remove();
