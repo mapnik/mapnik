@@ -250,7 +250,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
            std::ostringstream spatial_sql;
            spatial_sql << std::setprecision(16);
            // TODO - rowid must be explicitly included in subselects
-           // should we used primary key here instead?
+           // should we use primary key here instead?
            spatial_sql << " WHERE rowid IN (SELECT pkid FROM idx_" << geometry_table_ << "_" << geometry_field_;
            spatial_sql << "  WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
            spatial_sql << "    AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
