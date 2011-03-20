@@ -46,6 +46,7 @@ public:
       * If this functions returns false the placement data should be considered invalid!
       */
     virtual bool next_position_only()=0;
+    virtual ~text_placement_info() {}
 
     /* NOTE: Values are public and non-virtual to avoid any performance problems. */
     position displacement;
@@ -63,6 +64,7 @@ public:
     unsigned get_default_text_size() const { return text_size_; }
     virtual void set_default_displacement(position const& displacement) { displacement_ = displacement;}
     position const& get_default_displacement() { return displacement_; }
+    virtual ~text_placements() {}
 protected:
     unsigned text_size_;
     position displacement_;
