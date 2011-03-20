@@ -77,7 +77,7 @@ private:
 
         for (unsigned i = 0; i < EnumWrapper::MAX; ++i)
         {
-            // Register the strings allready defined for this enum.
+            // Register the strings already defined for this enum.
             base_type::value( EnumWrapper::get_string( i ), native_type( i ) );
         }
     }
