@@ -79,7 +79,8 @@ public:
         double ys = y;
         for (unsigned i=0;i<num_points();++i)
         {
-            double x0,y0;
+            double x0(0);
+            double y0(0);
             vertex(&x0,&y0);
             sum += x * y0 - y * x0;
             x = x0;
