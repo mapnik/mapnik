@@ -314,21 +314,15 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
  * @relates mapnik::enumeration
  */
 #define DEFINE_ENUM( name, e)                           \
-    typedef mapnik::enumeration<e, e ## _MAX> name
+    typedef enumeration<e, e ## _MAX> name
 
 /** Helper macro. Runs the verify() method during static initialization.
  * @relates mapnik::enumeration
  */
-#if defined __clang__
-#define IMPLEMENT_ENUM( name, strings )                                 \
-    const char ** name ::our_strings_ = strings;                        \
-    std::string name ::our_name_ = #name;                               \
-    bool name ::our_verified_flag_( name ::verify(__FILE__, __LINE__));
-#else
+
 #define IMPLEMENT_ENUM( name, strings )                                 \
     template <> const char ** name ::our_strings_ = strings;            \
     template <> std::string name ::our_name_ = #name;                   \
     template <> bool name ::our_verified_flag_( name ::verify(__FILE__, __LINE__));
-#endif
 
 #endif // MAPNIK_ENUMERATION_INCLUDED
