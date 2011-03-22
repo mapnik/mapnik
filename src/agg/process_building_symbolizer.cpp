@@ -24,9 +24,9 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/segment.hpp>
 
 // boost
-#include <boost/tuple/tuple.hpp>
 #include <boost/scoped_ptr.hpp>
 
 // agg
@@ -40,14 +40,6 @@
 
 namespace mapnik 
 {
-
-typedef boost::tuple<double,double,double,double> segment_t;
-bool y_order(segment_t const& first,segment_t const& second)
-{
-    double miny0 = std::min(first.get<1>(),first.get<3>());
-    double miny1 = std::min(second.get<1>(),second.get<3>());
-    return  miny0 > miny1;
-}
 
 template <typename T>
 void agg_renderer<T>::process(building_symbolizer const& sym,

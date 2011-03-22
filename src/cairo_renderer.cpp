@@ -35,6 +35,7 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/segment.hpp>
 
 // cairo
 #include <cairomm/context.h>
@@ -43,7 +44,6 @@
 
 // boost
 #include <boost/utility.hpp>
-#include <boost/tuple/tuple.hpp>
 
 // stl
 #ifdef MAPNIK_DEBUG
@@ -762,14 +762,6 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
     }
 }
 
-typedef boost::tuple<double,double,double,double> segment_t;
-bool cairo_y_order(segment_t const& first,segment_t const& second)
-{
-    double miny0 = std::min(first.get<1>(), first.get<3>());
-    double miny1 = std::min(second.get<1>(), second.get<3>());
-    return miny0 > miny1;
-}
-
 void cairo_renderer_base::process(building_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
@@ -820,7 +812,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                 y0 = y;
             }
 
-            std::sort(face_segments.begin(), face_segments.end(), cairo_y_order);
+            std::sort(face_segments.begin(), face_segments.end(), y_order);
             std::deque<segment_t>::const_iterator itr = face_segments.begin();
             for (; itr != face_segments.end(); ++itr)
             {
