@@ -61,7 +61,8 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
      metadata_(*params_.get<std::string>("metadata","")),
      geometry_table_(*params_.get<std::string>("geometry_table","")),
      geometry_field_(*params_.get<std::string>("geometry_field","the_geom")),
-     key_field_(*params_.get<std::string>("key_field","OGC_FID")),
+     // http://www.sqlite.org/lang_createtable.html#rowid
+     key_field_(*params_.get<std::string>("key_field","rowid")),
      row_offset_(*params_.get<int>("row_offset",0)),
      row_limit_(*params_.get<int>("row_limit",0)),
      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
@@ -69,6 +70,8 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
 {
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (!file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
+
+    if (table_.empty()) throw mapnik::datasource_exception("Sqlite Plugin: missing <table> parameter");
 
     boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
     if (wkb)
@@ -109,6 +112,23 @@ void sqlite_datasource::bind() const
         geometry_table_ = mapnik::table_from_sql(table_);
     }
     
+
+    if (use_spatial_index_)
+    {
+        std::ostringstream s;
+        s << "SELECT COUNT (*) FROM sqlite_master";
+        s << " WHERE LOWER(name) = LOWER('idx_" << geometry_table_ << "_" << geometry_field_ << "')";
+        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+        if (rs->is_valid () && rs->step_next())
+        {
+            use_spatial_index_ = rs->column_integer (0) == 1;
+        }
+
+        if (!use_spatial_index_)
+           std::clog << "Sqlite Plugin: spatial index not found for table '"
+             << geometry_table_ << "'" << std::endl;
+    }
+
     if (metadata_ != "" && !extent_initialized_)
     {
         std::ostringstream s;
@@ -126,22 +146,23 @@ void sqlite_datasource::bind() const
             extent_initialized_ = true;
         }
     }
-
-    if (use_spatial_index_)
+    
+    if (!extent_initialized_ && use_spatial_index_)
     {
         std::ostringstream s;
-        s << "SELECT COUNT (*) FROM sqlite_master";
-        s << " WHERE LOWER(name) = LOWER('idx_" << geometry_table_ << "_" << geometry_field_ << "')";
+        s << "SELECT xmin, ymin, xmax, ymax FROM " 
+        << "idx_" << geometry_table_ << "_" << geometry_field_;
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
-            use_spatial_index_ = rs->column_integer (0) == 1;
-        }
+            double xmin = rs->column_double (0);
+            double ymin = rs->column_double (1);
+            double xmax = rs->column_double (2);
+            double ymax = rs->column_double (3);
 
-#ifdef MAPNIK_DEBUG
-        if (! use_spatial_index_)
-           std::clog << "Sqlite Plugin: cannot use the spatial index " << std::endl;
-#endif
+            extent_.init (xmin,ymin,xmax,ymax);
+            extent_initialized_ = true;
+        }    
     }
     
     {
@@ -152,7 +173,7 @@ void sqlite_datasource::bind() const
         */
 
         std::ostringstream s;
-        s << "SELECT " << fields_ << " FROM (" << geometry_table_ << ") LIMIT 1";
+        s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
 
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
@@ -237,9 +258,9 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         std::set<std::string>::const_iterator end = props.end();
         while (pos != end)
         {
-           s << "," << *pos << "";
-           ++pos;
-        }
+            s << ",\"" << *pos << "\"";
+            ++pos;
+        }       
         
         s << " FROM "; 
         
@@ -249,11 +270,9 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         {
            std::ostringstream spatial_sql;
            spatial_sql << std::setprecision(16);
-           // TODO - rowid must be explicitly included in subselects
-           // should we use primary key here instead?
-           spatial_sql << " WHERE rowid IN (SELECT pkid FROM idx_" << geometry_table_ << "_" << geometry_field_;
-           spatial_sql << "  WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
-           spatial_sql << "    AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
+           spatial_sql << " WHERE " << key_field_ << " IN (SELECT pkid FROM idx_" << geometry_table_ << "_" << geometry_field_;
+           spatial_sql << " WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
+           spatial_sql << " AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
            if (boost::algorithm::ifind_first(query, "WHERE"))
            {
               boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
