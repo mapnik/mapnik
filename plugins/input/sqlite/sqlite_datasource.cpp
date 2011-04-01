@@ -150,7 +150,7 @@ void sqlite_datasource::bind() const
     if (!extent_initialized_ && use_spatial_index_)
     {
         std::ostringstream s;
-        s << "SELECT xmin, ymin, xmax, ymax FROM " 
+        s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM " 
         << "idx_" << geometry_table_ << "_" << geometry_field_;
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
