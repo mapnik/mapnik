@@ -33,8 +33,8 @@
 #include "agg_scanline_u.h"
 // for line_symbolizer
 #include "agg_renderer_scanline.h"
-#include "agg_renderer_outline_aa.h"
-#include "agg_rasterizer_outline_aa.h"
+//#include "agg_renderer_outline_aa.h"
+//#include "agg_rasterizer_outline_aa.h"
 #include "agg_scanline_p.h"
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
@@ -51,8 +51,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 {
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
-    typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
+    //typedef agg::renderer_outline_aa<ren_base> renderer_oaa;
+    //typedef agg::rasterizer_outline_aa<renderer_oaa> rasterizer_outline_aa;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
