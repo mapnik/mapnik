@@ -155,7 +155,6 @@ public:
             xmlFreeDoc(doc);
             throw config_error("XML XInclude error.  One or more files failed to load.");
         }
-				
 
         xmlNode * root = xmlDocGetRootElement( doc );
         if ( ! root ) {

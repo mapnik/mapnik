@@ -31,14 +31,14 @@ namespace mapnik
      */
     template <typename T>
     void svg_renderer<T>::process(polygon_symbolizer const& sym,
-				  Feature const& feature,
-				  proj_transform const& prj_trans)
+          Feature const& feature,
+          proj_transform const& prj_trans)
     {
-	path_attributes_.set_fill_color(sym.get_fill());
-	path_attributes_.set_fill_opacity(sym.get_opacity());
+        path_attributes_.set_fill_color(sym.get_fill());
+        path_attributes_.set_fill_opacity(sym.get_opacity());
     }
 
     template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,
-								      Feature const& feature,
-								      proj_transform const& prj_trans);
+                      Feature const& feature,
+                      proj_transform const& prj_trans);
 }

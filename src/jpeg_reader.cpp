@@ -56,7 +56,7 @@ namespace mapnik
         ~JpegReader();
         unsigned width() const;
         unsigned height() const;
-        void read(unsigned x,unsigned y,image_data_32& image);	
+        void read(unsigned x,unsigned y,image_data_32& image);
     private:
         void init();
     };
