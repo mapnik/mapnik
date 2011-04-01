@@ -123,8 +123,11 @@ public:
         : db_(0)
     {
         if (sqlite3_open (file.c_str(), &db_))
+        {
+            std::ostringstream s;
+            s << "Sqlite Plugin: ";
             throw mapnik::datasource_exception (sqlite3_errmsg (db_));
-
+        }
         //sqlite3_enable_load_extension(db_, 1);
     }
 
@@ -134,14 +137,22 @@ public:
             sqlite3_close (db_);
     }
 
-    sqlite_resultset* execute_query (const std::string& sql)
+    sqlite_resultset* execute_query(const std::string& sql)
     {
         sqlite3_stmt* stmt = 0;
 
         int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
         if (rc != SQLITE_OK)
         {
-            std::clog << "Sqlite Plugin: " << sqlite3_errmsg(db_) << std::endl;
+            std::ostringstream s;
+            s << "Sqlite Plugin: ";
+            if (db_)
+                s << "'" << sqlite3_errmsg(db_) << "'";
+            else
+                s << "unknown error, lost connection";
+            
+            s << "\nFull sql was: '" <<  sql << "'\n";
+            throw mapnik::datasource_exception( s.str() );
         }
 
         return new sqlite_resultset (stmt);
