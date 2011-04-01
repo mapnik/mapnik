@@ -146,7 +146,7 @@ int main (int argc,char** argv)
                     mapnik::save_to_file<mapnik::image_data_32>(im.data(),svg_name,"png");
                     std::ostringstream s;
                     s << "open " << svg_name;
-                    system(s.str().c_str());
+                    return system(s.str().c_str());
                 }
             }
         }
