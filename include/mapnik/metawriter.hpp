@@ -135,6 +135,6 @@ typedef boost::shared_ptr<metawriter> metawriter_ptr;
 /** Metawriter object + properties. */
 typedef std::pair<metawriter_ptr, metawriter_properties> metawriter_with_properties;
 
-};
+}
 
 #endif

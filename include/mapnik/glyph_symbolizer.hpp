@@ -188,6 +188,6 @@ private:
     angle_mode_e angle_mode_;
 };
 
-};  // end mapnik namespace
+}  // end mapnik namespace
 
 #endif

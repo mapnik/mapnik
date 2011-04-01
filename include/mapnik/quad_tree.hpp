@@ -202,7 +202,7 @@ private:
         
     void split_box(box2d<double> const& node_extent,box2d<double> * ext)
     {
-        coord2d c=node_extent.center();
+        //coord2d c=node_extent.center();
 
         double width=node_extent.width();
         double height=node_extent.height();
