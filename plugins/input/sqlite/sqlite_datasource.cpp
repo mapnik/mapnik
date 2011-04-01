@@ -183,15 +183,7 @@ void sqlite_datasource::bind() const
             s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
     
             boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-            if (!rs->is_valid () && !rs->step_next())
-            {
-                // if we do not have at least a row,
-                // we cannot determine the right columns types and names 
-                // as all column_type are SQLITE_NULL
-                // so we fallback to using PRAGMA table_info
-                use_pragma_table_info = true;
-            }
-            else
+            if (rs->is_valid () && rs->step_next())
             {
                 for (int i = 0; i < rs->column_count (); ++i)
                 {
@@ -228,6 +220,14 @@ void sqlite_datasource::bind() const
                     }
                 }
             }
+            else
+            {
+                // if we do not have at least a row and
+                // we cannot determine the right columns types and names 
+                // as all column_type are SQLITE_NULL
+                // so we fallback to using PRAGMA table_info
+                use_pragma_table_info = true;
+            }
         }
 
         if (use_pragma_table_info)
@@ -239,14 +239,36 @@ void sqlite_datasource::bind() const
             {
                 const char* fld_name = rs->column_text(1);
                 std::string fld_type(rs->column_text(2));
-                if (fld_type == "integer")
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
-                else if (fld_type == "real")
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                else if (fld_type == "text")
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-                //else if (fld_name == "blob")
-                //else if (fld_name == "null")
+                boost::algorithm::to_lower(fld_type);
+
+                // see 2.1 "Column Affinity" at http://www.sqlite.org/datatype3.html
+                
+                if (boost::algorithm::contains(fld_type,"int"))
+                {
+                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+                }
+                else if (boost::algorithm::contains(fld_type,"text") ||
+                         boost::algorithm::contains(fld_type,"char") ||
+                         boost::algorithm::contains(fld_type,"clob"))
+                {
+                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                }
+                else if (boost::algorithm::contains(fld_type,"real") ||
+                         boost::algorithm::contains(fld_type,"float") ||
+                         boost::algorithm::contains(fld_type,"double"))
+                {
+                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                }
+                //else if (boost::algorithm::contains(fld_type,"blob")
+                //     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+#ifdef MAPNIK_DEBUG
+                else
+                {
+                    // "Column Affinity" says default to "Numeric" but for now we pass..
+                    //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                    std::clog << "Sqlite Plugin: unknown type_oid=" << fld_type << std::endl;
+                }
+#endif
             }
         }
     }
