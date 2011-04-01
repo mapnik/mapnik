@@ -230,6 +230,9 @@ void sqlite_datasource::bind() const
             }
         }
 
+        // TODO - ensure that the supplied key_field is a valid "integer primary key"
+        desc_.add_descriptor(attribute_descriptor("rowid",mapnik::Integer));
+        
         if (use_pragma_table_info)
         {
             std::ostringstream s;
