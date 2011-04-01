@@ -436,18 +436,18 @@ featureset_ptr postgis_datasource::features(const query& q) const
             {
                 std::ostringstream s_error;
                 s_error << "PostGIS: geometry name lookup failed for table '";
-                if (!schema_.length() > 0)
+                if (schema_.length() > 0)
                 {
                     s_error << schema_ << ".";
                 }
                 s_error << geometry_table_
                         << "'. Please manually provide the 'geometry_field' parameter or add an entry "
                         << "in the geometry_columns for '";
-                if (!schema_.length() > 0)
+                if (schema_.length() > 0)
                 {
                     s_error << schema_ << ".";
                 }
-                s_error << "." << geometry_table_ << "'.";
+                s_error << geometry_table_ << "'.";
                 throw mapnik::datasource_exception("Postgis Plugin: " + s_error.str());
             }
 
@@ -506,14 +506,14 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             {
                 std::ostringstream s_error;
                 s_error << "PostGIS: geometry name lookup failed for table '";
-                if (!schema_.length() > 0)
+                if (schema_.length() > 0)
                 {
                     s_error << schema_ << ".";
                 }
                 s_error << "." << geometry_table_
                         << "'. Please manually provide the 'geometry_field' parameter or add an entry "
                         << "in the geometry_columns for '";
-                if (!schema_.length() > 0)
+                if (schema_.length() > 0)
                 {
                     s_error << schema_ << ".";
                 }
@@ -576,7 +576,7 @@ box2d<double> postgis_datasource::envelope() const
             {
                 std::ostringstream s_error;
                 s_error << "PostGIS: unable to query the layer extent of table '";
-                if (!schema_.length() > 0)
+                if (schema_.length() > 0)
                 {
                     s_error << schema_ << ".";
                 }
