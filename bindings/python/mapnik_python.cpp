@@ -310,11 +310,11 @@ bool has_pycairo()
 }
 
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3);
-BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 4);
-BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3);
-BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string, 1, 2);
-BOOST_PYTHON_FUNCTION_OVERLOADS(render_overloads, render, 2, 5);
+BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 4)
+BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(render_overloads, render, 2, 5)
 
 BOOST_PYTHON_MODULE(_mapnik2)
 {

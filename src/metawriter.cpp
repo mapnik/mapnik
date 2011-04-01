@@ -358,4 +358,4 @@ path_expression_ptr metawriter_json::get_filename() const
    return fn_;
 }
 
-};
+}

@@ -49,7 +49,7 @@ void metawriter_save(
   boost::property_tree::ptree &pt,
   bool explicit_defaults);
 
-};
+}
 
 #endif /* METAWRITER_FACTORY_HPP */
 

@@ -37,7 +37,7 @@ template <class T>
 const std::string get_svg_transform(T& symbolizer)
 {
     return symbolizer.get_transform_string();
-};
+}
 
 template <class T>
 void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
@@ -52,7 +52,7 @@ void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
     mapnik::transform_type matrix;
     tr.store_to(&matrix[0]);
     symbolizer.set_transform(matrix);
-};
+}
 
 } // end of namespace mapnik
 

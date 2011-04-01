@@ -33,7 +33,7 @@ static const char * gradient_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( gradient_e, gradient_strings );
+IMPLEMENT_ENUM( gradient_e, gradient_strings )
 
 
 gradient::gradient() 

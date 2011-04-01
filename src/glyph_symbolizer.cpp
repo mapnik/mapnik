@@ -10,7 +10,7 @@ static const char * angle_mode_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( angle_mode_e, angle_mode_strings );
+IMPLEMENT_ENUM( angle_mode_e, angle_mode_strings )
 
 text_path_ptr glyph_symbolizer::get_text_path(face_set_ptr const& faces,
                                               Feature const& feature) const

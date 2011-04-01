@@ -40,7 +40,7 @@ static const char * point_placement_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( point_placement_e, point_placement_strings );
+IMPLEMENT_ENUM( point_placement_e, point_placement_strings )
 
 point_symbolizer::point_symbolizer()
     : symbolizer_with_image(path_expression_ptr(new path_expression)), // FIXME

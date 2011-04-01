@@ -39,7 +39,7 @@ static const char * label_placement_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( label_placement_e, label_placement_strings );
+IMPLEMENT_ENUM( label_placement_e, label_placement_strings )
 
 static const char * vertical_alignment_strings[] = {
     "top",
@@ -50,7 +50,7 @@ static const char * vertical_alignment_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( vertical_alignment_e, vertical_alignment_strings );
+IMPLEMENT_ENUM( vertical_alignment_e, vertical_alignment_strings )
 
 static const char * horizontal_alignment_strings[] = {
     "left",
@@ -61,7 +61,7 @@ static const char * horizontal_alignment_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( horizontal_alignment_e, horizontal_alignment_strings );
+IMPLEMENT_ENUM( horizontal_alignment_e, horizontal_alignment_strings )
 
 static const char * justify_alignment_strings[] = {
     "left",
@@ -71,7 +71,7 @@ static const char * justify_alignment_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( justify_alignment_e, justify_alignment_strings );
+IMPLEMENT_ENUM( justify_alignment_e, justify_alignment_strings )
 
 static const char * text_transform_strings[] = {
     "none",
@@ -82,7 +82,7 @@ static const char * text_transform_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( text_transform_e, text_transform_strings );
+IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
 
 
 

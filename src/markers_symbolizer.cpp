@@ -32,7 +32,7 @@ static const char * marker_placement_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( marker_placement_e, marker_placement_strings );
+IMPLEMENT_ENUM( marker_placement_e, marker_placement_strings )
 
 
 static const char * marker_type_strings[] = {
@@ -41,7 +41,7 @@ static const char * marker_type_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( marker_type_e, marker_type_strings );
+IMPLEMENT_ENUM( marker_type_e, marker_type_strings )
 
 markers_symbolizer::markers_symbolizer()
     : symbolizer_with_image(path_expression_ptr(new path_expression)),

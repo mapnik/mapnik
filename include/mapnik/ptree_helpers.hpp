@@ -215,15 +215,15 @@ struct name_trait
     };
 
 #define DEFINE_NAME_TRAIT( type )               \
-    DEFINE_NAME_TRAIT_WITH_NAME( type, #type );
+    DEFINE_NAME_TRAIT_WITH_NAME( type, #type )
 
-DEFINE_NAME_TRAIT( double );
-DEFINE_NAME_TRAIT( float );
-DEFINE_NAME_TRAIT( unsigned );
-DEFINE_NAME_TRAIT( boolean );
-DEFINE_NAME_TRAIT_WITH_NAME( int, "integer" );
-DEFINE_NAME_TRAIT_WITH_NAME( std::string, "string" );
-DEFINE_NAME_TRAIT_WITH_NAME( color, "color" );
+DEFINE_NAME_TRAIT( double )
+DEFINE_NAME_TRAIT( float )
+DEFINE_NAME_TRAIT( unsigned )
+DEFINE_NAME_TRAIT( boolean )
+DEFINE_NAME_TRAIT_WITH_NAME( int, "integer" )
+DEFINE_NAME_TRAIT_WITH_NAME( std::string, "string" )
+DEFINE_NAME_TRAIT_WITH_NAME( color, "color" )
 
 template <typename ENUM, int MAX>
 struct name_trait< mapnik::enumeration<ENUM, MAX> >

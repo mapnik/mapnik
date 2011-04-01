@@ -72,7 +72,7 @@ protected:
     enum {
     HEADER_NOT_WRITTEN = -1,
     STOPPED = -2,
-    STARTED = 0,
+    STARTED = 0
     };
     /** Features written. */
     int count_;
@@ -140,6 +140,6 @@ protected:
 /** Shared pointer to metawriter_json object. */
 typedef boost::shared_ptr<metawriter_json> metawriter_json_ptr;
 
-};
+}
 
 #endif

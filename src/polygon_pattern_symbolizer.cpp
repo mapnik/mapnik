@@ -33,7 +33,7 @@ static const char * pattern_alignment_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( pattern_alignment_e, pattern_alignment_strings );
+IMPLEMENT_ENUM( pattern_alignment_e, pattern_alignment_strings )
       
 polygon_pattern_symbolizer::polygon_pattern_symbolizer(path_expression_ptr file)                                                         
     : symbolizer_with_image(file), symbolizer_base(),

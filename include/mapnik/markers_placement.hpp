@@ -242,5 +242,5 @@ template <typename Locator, typename Detector> box2d<double> markers_placement<L
 
     return box2d<double>(x1_, y1_, x2_, y2_);
 }
-}; /* end namespace */
+} /* end namespace */
 #endif // MARKERS_PLACEMENT_HPP

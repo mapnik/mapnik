@@ -36,7 +36,7 @@ typedef enum {
     SOUTHEAST,
     NORTHWEST,
     SOUTHWEST,
-    EXACT_POSITION,
+    EXACT_POSITION
 } directions_t;
 
 /** Simple placement strategy.
