@@ -33,6 +33,9 @@ static const char * line_cap_strings[] = {
 };
 
 
+IMPLEMENT_ENUM( line_cap_e, line_cap_strings )
+
+
 static const char * line_join_strings[] = {
     "miter",
     "miter_revert",
@@ -41,8 +44,7 @@ static const char * line_join_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( line_cap_e, line_cap_strings );
-IMPLEMENT_ENUM( line_join_e, line_join_strings );
+IMPLEMENT_ENUM( line_join_e, line_join_strings )
 
 
 stroke::stroke() 

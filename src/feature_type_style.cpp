@@ -31,7 +31,7 @@ static const char * filter_mode_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings );
+IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 
 
 feature_type_style::feature_type_style()

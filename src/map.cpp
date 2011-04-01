@@ -58,7 +58,7 @@ static const char * aspect_fix_mode_strings[] = {
     ""
 };
    
-IMPLEMENT_ENUM( aspect_fix_mode_e, aspect_fix_mode_strings );
+IMPLEMENT_ENUM( aspect_fix_mode_e, aspect_fix_mode_strings )
 
 Map::Map()
     : width_(400),
