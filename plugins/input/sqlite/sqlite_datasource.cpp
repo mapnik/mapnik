@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2010 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -166,47 +166,88 @@ void sqlite_datasource::bind() const
     }
     
     {
-        /*
-            XXX - This is problematic, if we do not have at least a row,
-                  we cannot determine the right columns types and names 
-                  as all column_type are SQLITE_NULL
-        */
 
-        std::ostringstream s;
-        s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
-
-        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-        if (rs->is_valid () && rs->step_next())
+        // should we deduce column names and types using PRAGMA?
+        bool use_pragma_table_info = true;
+        
+        if (table_ != geometry_table_)
         {
-            for (int i = 0; i < rs->column_count (); ++i)
+            // if 'table_' is a subquery then we try to deduce names
+            // and types from the first row returned from that query
+            use_pragma_table_info = false;
+        }
+
+        if (!use_pragma_table_info)
+        {
+            std::ostringstream s;
+            s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
+    
+            boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+            if (!rs->is_valid () && !rs->step_next())
             {
-               const int type_oid = rs->column_type (i);
-               const char* fld_name = rs->column_name (i);
-               switch (type_oid)
-               {
-                  case SQLITE_INTEGER:
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
-                     break;
-                     
-                  case SQLITE_FLOAT:
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                     break;
-                     
-                  case SQLITE_TEXT:
-                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-                     break;
-                     
-                  case SQLITE_NULL:
-                  case SQLITE_BLOB:
-                     break;
-                     
-                  default:
-#ifdef MAPNIK_DEBUG
-                     std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
-                     break;
+                // if we do not have at least a row,
+                // we cannot determine the right columns types and names 
+                // as all column_type are SQLITE_NULL
+                // so we fallback to using PRAGMA table_info
+                use_pragma_table_info = true;
+            }
+            else
+            {
+                for (int i = 0; i < rs->column_count (); ++i)
+                {
+                   const int type_oid = rs->column_type (i);
+                   const char* fld_name = rs->column_name (i);
+                   switch (type_oid)
+                   {
+                      case SQLITE_INTEGER:
+                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+                         break;
+                         
+                      case SQLITE_FLOAT:
+                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                         break;
+                         
+                      case SQLITE_TEXT:
+                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                         break;
+                         
+                      case SQLITE_NULL:
+                         // sqlite reports based on value, not actual column type unless
+                         // PRAGMA table_info is used so here we assume the column is a string
+                         // which is a lesser evil than altogether dropping the column
+                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+    
+                      case SQLITE_BLOB:
+                         break;
+                         
+                      default:
+    #ifdef MAPNIK_DEBUG
+                         std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
+    #endif
+                         break;
+                    }
                 }
-            }    
+            }
+        }
+
+        if (use_pragma_table_info)
+        {
+            std::ostringstream s;
+            s << "PRAGMA table_info(" << geometry_table_ << ")";
+            boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+            while (rs->is_valid () && rs->step_next())
+            {
+                const char* fld_name = rs->column_text(1);
+                std::string fld_type(rs->column_text(2));
+                if (fld_type == "integer")
+                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+                else if (fld_type == "real")
+                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                else if (fld_type == "text")
+                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                //else if (fld_name == "blob")
+                //else if (fld_name == "null")
+            }
         }
     }
     

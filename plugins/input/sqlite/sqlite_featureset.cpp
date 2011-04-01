@@ -96,9 +96,15 @@ feature_ptr sqlite_featureset::next()
                  boost::put(*feature,fld_name,ustr);
                  break;
               }
+
+              case SQLITE_NULL:
+              {
+                 UnicodeString ustr = tr_->transcode ("");
+                 boost::put(*feature,fld_name,ustr);
+                 break;                 
+              }
               
               case SQLITE_BLOB:
-              case SQLITE_NULL:
                  break;
                  
               default:
