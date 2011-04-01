@@ -555,8 +555,10 @@ namespace agg
             if(len > 0)
             {
                 m_loaded_font.resize(len);
-                fread(&m_loaded_font[0], 1, len, fd);
-                m_font = &m_loaded_font[0];
+                if (fread(&m_loaded_font[0], 1, len, fd) == 1)
+                {
+                    m_font = &m_loaded_font[0];
+                }
             }
             fclose(fd);
         }

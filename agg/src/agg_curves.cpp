@@ -252,8 +252,10 @@ namespace agg
         return m_scale;
     }
 
+#if defined(_MSC_VER) && _MSC_VER <= 1200
     //------------------------------------------------------------------------
     static double MSC60_fix_ICE(double v) { return v; }
+#endif
 
     //------------------------------------------------------------------------
     void curve4_inc::init(double x1, double y1, 
@@ -296,7 +298,7 @@ namespace agg
         double pre2 = 3.0 * subdivide_step2;
         double pre4 = 6.0 * subdivide_step2;
         double pre5 = 6.0 * subdivide_step3;
-	
+
         double tmp1x = x1 - x2 * 2.0 + x3;
         double tmp1y = y1 - y2 * 2.0 + y3;
 
