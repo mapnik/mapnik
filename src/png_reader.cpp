@@ -97,7 +97,11 @@ void png_reader::init()
     if (!fp) throw image_reader_exception("cannot open image file "+fileName_);
     png_byte header[8];
     memset(header,0,8);
-    fread(header,1,8,fp);
+    if ( fread(header,1,8,fp) != 8)
+    {
+        fclose(fp);
+        throw image_reader_exception("Could not read " + fileName_);
+    }
     int is_png=!png_sig_cmp(header,0,8);
     if (!is_png)
     {
