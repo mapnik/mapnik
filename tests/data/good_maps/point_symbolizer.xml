@@ -9,7 +9,7 @@
         <Rule title="foo">
             <Filter>([name]='Australia')</Filter>
             <TextSymbolizer size="10" name="[name] + ' (png)'" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
-            <PointSymbolizer file="../images/dummy.png" dy="-10" allow-overlap="true"/>
+            <PointSymbolizer file="../images/dummy.png" allow-overlap="true"/>
         </Rule>
         <Rule title="foo1">
             <Filter>([name]='Brazil')</Filter>
