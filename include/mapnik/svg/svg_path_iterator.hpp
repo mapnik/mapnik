@@ -104,7 +104,7 @@ public:
     template <typename OtherValue>
     path_iterator(path_iterator<OtherValue, Container> const& other,
                       typename boost::enable_if<boost::is_convertible<OtherValue*, Value*>,
-		      enabler>::type = enabler())   
+          enabler>::type = enabler())   
       : path_iterator::iterator_adaptor_(other.base()) {}
 
 private:
@@ -125,29 +125,29 @@ private:
         unsigned cmd = path_.vertex(&x, &y);
 
         if(cmd == SEG_END)
-	{
-	    // if the end of the sequence is reached, set the reference
-	    // to the current element to null, so it matches the value
-	    // that marks the end of the sequence as defined in the 
-	    // "end_iterator" constructor.
+        {
+            // if the end of the sequence is reached, set the reference
+            // to the current element to null, so it matches the value
+            // that marks the end of the sequence as defined in the 
+            // "end_iterator" constructor.
             this->base_reference() = 0;
         }
-	else if(this->base_reference() == 0)
-	{
-	    // the first element of the container is stored in the 
-	    // member variable 'first_value_' and later assigned
-	    // to the reference that boost::iterator_adaptor stores
-	    // to track the current element.
-	    //
-	    // 'first_value_' is used as intermediate storage
-	    // because the compiler prohibits the assignment of the
-	    // address of a temporary object (&Value(...)).
+        else if(this->base_reference() == 0)
+        {
+            // the first element of the container is stored in the 
+            // member variable 'first_value_' and later assigned
+            // to the reference that boost::iterator_adaptor stores
+            // to track the current element.
+            //
+            // 'first_value_' is used as intermediate storage
+            // because the compiler prohibits the assignment of the
+            // address of a temporary object (&Value(...)).
             *first_value_ = Value(cmd, x, y);
-	    this->base_reference() = first_value_.get();
+            this->base_reference() = first_value_.get();
         }
         else
-	{
-	    // point the reference to the current element to the next.
+        {
+            // point the reference to the current element to the next.
             *(this->base_reference()) = Value(cmd, x, y);
         }
     }

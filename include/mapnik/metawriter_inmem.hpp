@@ -60,21 +60,21 @@ public:
   ~metawriter_inmem();
   
   virtual void add_box(box2d<double> const& box, Feature const& feature,
-		       CoordTransform const& t,
-		       metawriter_properties const& properties);
+          CoordTransform const& t,
+          metawriter_properties const& properties);
   virtual void add_text(placement const& p,
-			face_set_ptr face,
-			Feature const& feature,
-			CoordTransform const& t,
-			metawriter_properties const& properties);
+          face_set_ptr face,
+          Feature const& feature,
+          CoordTransform const& t,
+          metawriter_properties const& properties);
   virtual void add_polygon(path_type & path,
-			   Feature const& feature,
-			   CoordTransform const& t,
-			   metawriter_properties const& properties);
+          Feature const& feature,
+          CoordTransform const& t,
+          metawriter_properties const& properties);
   virtual void add_line(path_type & path,
-			Feature const& feature,
-			CoordTransform const& t,
-			metawriter_properties const& properties);
+          Feature const& feature,
+          CoordTransform const& t,
+          metawriter_properties const& properties);
   
   virtual void start(metawriter_property_map const& properties);
   virtual void stop();

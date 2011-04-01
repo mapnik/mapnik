@@ -86,7 +86,7 @@ struct MAPNIK_DECL coord_transform2
 
     Geometry const& geom() const
     {
-	return geom_;
+        return geom_;
     }
         
 private:

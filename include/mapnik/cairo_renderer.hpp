@@ -119,11 +119,11 @@ public:
                  Feature const& feature,
                  proj_transform const& prj_trans);
     inline bool process(rule::symbolizers const& syms,
-			Feature const& feature,
-			proj_transform const& prj_trans)
+      Feature const& feature,
+      proj_transform const& prj_trans)
     {
-	// cairo renderer doesn't support processing of multiple symbolizers.
-	return false;
+  // cairo renderer doesn't support processing of multiple symbolizers.
+  return false;
     };
 protected:
     void render_marker(const int x, const int y, marker &marker, const agg::trans_affine & mtx, double opacity=1.0);
