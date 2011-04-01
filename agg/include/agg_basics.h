@@ -229,7 +229,7 @@ namespace agg
     {
         poly_subpixel_shift = 8,                      //----poly_subpixel_shift
         poly_subpixel_scale = 1<<poly_subpixel_shift, //----poly_subpixel_scale 
-        poly_subpixel_mask  = poly_subpixel_scale-1,  //----poly_subpixel_mask 
+        poly_subpixel_mask  = poly_subpixel_scale-1  //----poly_subpixel_mask 
     };
 
     //----------------------------------------------------------filling_rule_e
