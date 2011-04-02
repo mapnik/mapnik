@@ -146,7 +146,7 @@ namespace mapnik
         unsigned w = std::min(unsigned(image.width()),width_);
         unsigned h = std::min(unsigned(image.height()),height_);
         
-        unsigned int out_row[w];
+        boost::scoped_array<unsigned int> out_row(new unsigned int[w]);
         for (unsigned i=0;i<h;++i)
         {
             jpeg_read_scanlines(&cinfo, buffer, 1);
@@ -166,7 +166,7 @@ namespace mapnik
                     }
                     out_row[x] = color(r, g, b, a).rgba();
                 }
-                image.setRow(i-y0, out_row, w);
+                image.setRow(i-y0, out_row.get(), w);
             } 
         }
         //jpeg_finish_decompress(&cinfo);

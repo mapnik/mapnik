@@ -31,6 +31,8 @@
 #include <cairomm/surface.h>
 #endif
 
+#include <boost/scoped_array.hpp>
+
 #include <iostream>
 
 namespace mapnik
@@ -59,7 +61,7 @@ image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
 
     int stride = rhs->get_stride() / 4;
 
-    unsigned int out_row[width_];
+    boost::scoped_array<unsigned int> out_row(new unsigned int[width_]);
     const unsigned int *in_row = (const unsigned int *)rhs->get_data();
 
     for (unsigned int row = 0; row < height_; row++, in_row += stride)
@@ -84,7 +86,7 @@ image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
 
             out_row[column] = color(r, g, b, a).rgba();
         }
-        data_.setRow(row, out_row, width_);
+        data_.setRow(row, out_row.get(), width_);
     }
 }
 #endif
