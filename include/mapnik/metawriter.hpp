@@ -72,7 +72,10 @@ class metawriter
 {
 public:
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    metawriter(metawriter_properties dflt_properties) : dflt_properties_(dflt_properties) {}
+    metawriter(metawriter_properties dflt_properties) :
+      dflt_properties_(dflt_properties),
+      width_(0),
+      height_(0) {}
     virtual ~metawriter() {};
     /** Output a rectangular area.
      * \param box Area (in pixel coordinates)
