@@ -63,7 +63,7 @@ public:
     metawriter_properties(boost::optional<std::string> str);
     metawriter_properties() {};
     template <class InputIterator> metawriter_properties(
-        InputIterator first, InputIterator last) : std::set<std::string>(first, last) {};
+        InputIterator first, InputIterator last) : std::set<std::string>(first, last) {}
     std::string to_string() const;
 };
 
