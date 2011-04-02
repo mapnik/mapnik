@@ -4,18 +4,18 @@
  
   <Style name="coast-poly">
      <Rule>
-	 	<PolygonSymbolizer>
-			<CssParameter name="fill">#f2efe9</CssParameter>
-		</PolygonSymbolizer>
-	</Rule>
+     <PolygonSymbolizer>
+      <CssParameter name="fill">#f2efe9</CssParameter>
+    </PolygonSymbolizer>
+  </Rule>
   </Style>
 
   <Style name="coast-line">
      <Rule>
-	 	<LineSymbolizer>
-			<CssParameter name="stroke">skyblue</CssParameter>
-		</LineSymbolizer>
-	</Rule>
+     <LineSymbolizer>
+      <CssParameter name="stroke">skyblue</CssParameter>
+    </LineSymbolizer>
+  </Rule>
   </Style>
 
   <Style name="leisure">
@@ -39,7 +39,7 @@
     </Rule>
      <Rule>
       <Filter>[leisure] = 'park' or [leisure] = 'common' or
-	  	[leisure] = 'golf_course'</Filter>
+      [leisure] = 'golf_course'</Filter>
       <PolygonSymbolizer>
         <CssParameter name="fill">#d8e8d0</CssParameter>
      </PolygonSymbolizer>
@@ -91,12 +91,12 @@
       <Filter>[natural] = 'peak'</Filter>
       <TextSymbolizer name="name" face_name="Bitstream Vera Sans Roman" size="11" fill="#000" halo_radius="1" wrap_width="0"/>
     </Rule>
-	<Rule>
-	  <Filter>[natural] = 'wood' or [natural] = 'water' or [natural] = 'heath'
-	  or [leisure] = 'golf_course' </Filter>
-	  <TextSymbolizer name="name" face_name="Bitstream Vera Sans Roman" 
-	  size="10" fill="#000" halo_radius="2" wrap_width="0" />
-	</Rule>
+  <Rule>
+    <Filter>[natural] = 'wood' or [natural] = 'water' or [natural] = 'heath'
+    or [leisure] = 'golf_course' </Filter>
+    <TextSymbolizer name="name" face_name="Bitstream Vera Sans Roman" 
+    size="10" fill="#000" halo_radius="2" wrap_width="0" />
+  </Rule>
   </Style>
   
    <Style name="river">
@@ -193,7 +193,7 @@
       <Filter>[highway] = 'unsurfaced' or [highway] = 'track'</Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#999</CssParameter>
-		<CssParameter name="stroke-dasharray">6,4</CssParameter>
+    <CssParameter name="stroke-dasharray">6,4</CssParameter>
         <CssParameter name="stroke-width">4</CssParameter>
         <CssParameter name="stroke-linejoin">round</CssParameter>
         <CssParameter name="stroke-linecap">round</CssParameter>
@@ -211,7 +211,7 @@
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
+  </Style>
   <Style name="trunk">
     <Rule>
       <Filter>[highway] = 'trunk' or [highway] = 'trunk_link'</Filter>
@@ -275,7 +275,7 @@
    <Style name="residential">
     <Rule>
       <Filter>[highway] = 'residential' or [highway] = 'service' or
-	  	[highway] = 'unsurfaced' or [highway] = 'track'</Filter> 
+      [highway] = 'unsurfaced' or [highway] = 'track'</Filter> 
       <LineSymbolizer>
         <CssParameter name="stroke">#fff</CssParameter>
         <CssParameter name="stroke-width">2</CssParameter>
@@ -283,9 +283,9 @@
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
+  </Style>
     
-	<Style name="bridleway">
+  <Style name="bridleway">
     <Rule>
       <Filter>[highway] = 'bridleway' and [newforest_pathtype] = ''</Filter>
       <LineSymbolizer>
@@ -305,7 +305,7 @@
     </Rule>
     <Rule>
       <Filter>[highway] = 'bridleway' and [foot] = 'yes' and [horse] = 'yes'
-	  and [bicycle] = 'yes'</Filter>
+    and [bicycle] = 'yes'</Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#fff</CssParameter>
         <CssParameter name="stroke-width">6</CssParameter>
@@ -323,7 +323,7 @@
     </Rule>
     <Rule>
       <Filter>[highway] = 'bridleway' and [newforest_pathtype] = 'narrow'
-	  </Filter>
+    </Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#00c000</CssParameter>
         <CssParameter name="stroke-width">1.0</CssParameter>
@@ -351,7 +351,7 @@
     </Rule>
     <Rule>
       <Filter>[highway] = 'bridleway' and [newforest_pathtype] = 'gravel'
-	  </Filter>
+    </Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#fff</CssParameter>
         <CssParameter name="stroke-width">6</CssParameter>
@@ -361,7 +361,7 @@
       </LineSymbolizer>
       <LineSymbolizer>
         <CssParameter name="stroke">brown</CssParameter>
-		<CssParameter name="stroke-dasharray">6,4</CssParameter>
+    <CssParameter name="stroke-dasharray">6,4</CssParameter>
         <CssParameter name="stroke-width">2</CssParameter>
         <CssParameter name="stroke-linejoin">round</CssParameter>
         <CssParameter name="stroke-linecap">round</CssParameter>
@@ -369,17 +369,17 @@
     </Rule>
     <Rule>
       <Filter>[highway] = 'bridleway' and [newforest_pathtype] = 'track'
-	  </Filter>
+    </Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">brown</CssParameter>
-		<CssParameter name="stroke-dasharray">2,4</CssParameter>
+    <CssParameter name="stroke-dasharray">2,4</CssParameter>
         <CssParameter name="stroke-width">2</CssParameter>
         <CssParameter name="stroke-linejoin">round</CssParameter>
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
-	<Style name="footway">
+  </Style>
+  <Style name="footway">
     <Rule>
       <Filter>[highway] = 'footway'</Filter>
       <LineSymbolizer>
@@ -414,8 +414,8 @@
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
-	<Style name="cycleway">
+  </Style>
+  <Style name="cycleway">
     <Rule>
       <Filter>[highway] = 'cycleway'</Filter>
       <LineSymbolizer>
@@ -433,8 +433,8 @@
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
-	<Style name="byway">
+  </Style>
+  <Style name="byway">
     <Rule>
       <Filter>[highway] = 'byway'</Filter>
       <LineSymbolizer>
@@ -454,16 +454,16 @@
   </Style>
 
   <Style name="contours">
-  	<Rule>
-  	<Filter>[major] = 1</Filter>
+    <Rule>
+    <Filter>[major] = 1</Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#fb9b67</CssParameter>
         <CssParameter name="stroke-width">1.0</CssParameter>
         <CssParameter name="stroke-linejoin">round</CssParameter>
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
-  	</Rule>
-	<Rule>
+    </Rule>
+  <Rule>
       <ElseFilter/>
       <LineSymbolizer>
         <CssParameter name="stroke">#fb9b67</CssParameter>
@@ -477,7 +477,7 @@
   <Style name="contours-text">
     <Rule>
       <TextSymbolizer name="height" face_name="Bitstream Vera Sans Roman" 
-	  	size="8" fill="#fb9b67" halo_radius="0" placement="line"/>
+      size="8" fill="#fb9b67" halo_radius="0" placement="line"/>
     </Rule>
   </Style>
 

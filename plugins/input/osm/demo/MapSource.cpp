@@ -132,23 +132,23 @@ void MapSource::generateMaps()
         bottomRight.x /= 256;
         bottomRight.y /= 256;
 
-		int x_fetch_freq, y_fetch_freq, x_fetches, y_fetches;
+    int x_fetch_freq, y_fetch_freq, x_fetches, y_fetches;
 
-		if(multirqst)
-		{
-        	// Gives a value approx equal to 0.1 lat/lon in southern UK
-        	x_fetch_freq = (int)(pow(2.0,zoom_start-11));
-        	y_fetch_freq = (int)(pow(2.0,zoom_start-11));
-        	x_fetches = ((bottomRight.x-topLeft.x) / x_fetch_freq)+1, 
+    if(multirqst)
+    {
+          // Gives a value approx equal to 0.1 lat/lon in southern UK
+          x_fetch_freq = (int)(pow(2.0,zoom_start-11));
+          y_fetch_freq = (int)(pow(2.0,zoom_start-11));
+          x_fetches = ((bottomRight.x-topLeft.x) / x_fetch_freq)+1, 
             y_fetches = ((bottomRight.y-topLeft.y) / y_fetch_freq)+1; 
-		}
-		else
-		{
-			x_fetch_freq = bottomRight.x - topLeft.x;
-			y_fetch_freq = bottomRight.y - topLeft.y;
-			x_fetches = 1;
-			y_fetches = 1;
-		}
+    }
+    else
+    {
+      x_fetch_freq = bottomRight.x - topLeft.x;
+      y_fetch_freq = bottomRight.y - topLeft.y;
+      x_fetches = 1;
+      y_fetches = 1;
+    }
 
         fprintf(stderr,"topLeft: %d %d\n",topLeft.x,topLeft.y);
         fprintf(stderr,"bottomRight: %d %d\n",bottomRight.x,bottomRight.y);
@@ -170,7 +170,7 @@ void MapSource::generateMaps()
                                                 *256, zoom_start),
                  bottomR_LL =
                     proj.fromPixelToLL( ((topLeft.x+xfetch*x_fetch_freq)+
-							x_fetch_freq)*256,
+              x_fetch_freq)*256,
                                     ((topLeft.y+yfetch*y_fetch_freq)
                                     +y_fetch_freq)*256, zoom_start),
                            topL_LL = 
@@ -179,10 +179,10 @@ void MapSource::generateMaps()
                                         (topLeft.y+yfetch*y_fetch_freq)
                                                 *256, zoom_start);
 
-				double w1 = min(bottomL_LL.x-0.01,topL_LL.x-0.01),
-					   s1 = min(bottomL_LL.y-0.01,bottomR_LL.y-0.01),
-					   e1 = max(bottomR_LL.x+0.01,topR_LL.x+0.01),
-					   n1 = max(topL_LL.y+0.01,topR_LL.y+0.01);
+        double w1 = min(bottomL_LL.x-0.01,topL_LL.x-0.01),
+             s1 = min(bottomL_LL.y-0.01,bottomR_LL.y-0.01),
+             e1 = max(bottomR_LL.x+0.01,topR_LL.x+0.01),
+             n1 = max(topL_LL.y+0.01,topR_LL.y+0.01);
 
                 parameters p;
                 if(getSource()=="api")

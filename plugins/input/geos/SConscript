@@ -28,10 +28,10 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 plugin_env = env.Clone()
 
 geos_src = Split(
-	"""
-	    geos_datasource.cpp
-	    geos_featureset.cpp      
-	"""
+  """
+      geos_datasource.cpp
+      geos_featureset.cpp      
+  """
         )
 
 libraries = [env['PLUGINS']['geos']['lib']]

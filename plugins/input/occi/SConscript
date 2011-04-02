@@ -27,13 +27,13 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 plugin_env = env.Clone()
 
 occi_src = Split(
-	"""
-	occi_types.cpp
-	occi_datasource.cpp
-	occi_featureset.cpp      
-	spatial_classesm.cpp      
-	spatial_classeso.cpp      
-	"""
+  """
+  occi_types.cpp
+  occi_datasource.cpp
+  occi_featureset.cpp      
+  spatial_classesm.cpp      
+  spatial_classeso.cpp      
+  """
         )
 
 libraries = [ 'occi', 'ociei' ]

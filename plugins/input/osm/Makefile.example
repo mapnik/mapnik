@@ -3,7 +3,7 @@ LDFLAGS = `xml2-config --libs` -L/usr/local/lib
 LDFLAGS5 = `xml2-config --libs` -L/usr/local/lib -lmapnik 
 OBJ = test.o osm.o osmparser.o
 test: $(OBJ) 
-	g++ -o test $(OBJ) $(LDFLAGS) 
+  g++ -o test $(OBJ) $(LDFLAGS) 
 render: render.o
-	g++ -o render render.o $(LDFLAGS5) 
+  g++ -o render render.o $(LDFLAGS5) 
 

@@ -27,10 +27,10 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 plugin_env = env.Clone()
 
 rasterlite_src = Split(
-	"""
-	rasterlite_datasource.cpp
-	rasterlite_featureset.cpp      
-	"""
+  """
+  rasterlite_datasource.cpp
+  rasterlite_featureset.cpp      
+  """
         )
 
 libraries = [env['PLUGINS']['rasterlite']['lib']]

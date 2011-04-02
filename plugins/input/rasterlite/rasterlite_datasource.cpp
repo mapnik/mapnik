@@ -59,7 +59,7 @@ inline void *rasterlite_datasource::open_dataset() const
     {
         std::string error (rasterliteGetLastError(dataset));
 
-	    rasterliteClose (dataset);
+        rasterliteClose (dataset);
    
         throw datasource_exception(error);
     }
@@ -110,7 +110,7 @@ void rasterlite_datasource::bind() const
     {
         std::string error (rasterliteGetLastError(dataset));
 
-	    rasterliteClose (dataset);
+        rasterliteClose (dataset);
    
         throw datasource_exception(error);
     }
@@ -131,7 +131,7 @@ void rasterlite_datasource::bind() const
     { 
         std::string error (rasterliteGetLastError(dataset));
 
-	    rasterliteClose (dataset);
+        rasterliteClose (dataset);
    
         throw datasource_exception(error);
     }

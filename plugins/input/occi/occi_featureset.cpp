@@ -189,7 +189,7 @@ feature_ptr occi_featureset::next()
                     std::clog << "OCCI Plugin: unknown datatype (type_oid=" << type_oid << ")" << std::endl;
 #endif
                     break;
-            }	  
+            }    
         }
         
         ++count_;

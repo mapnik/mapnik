@@ -5,22 +5,22 @@
     <Rule>
       <Filter>[amenity]='pub'</Filter>
       <PointSymbolizer file="/home/nick/images/pub.png" type="png" 
-	  		width="16" height="16" />
+        width="16" height="16" />
     </Rule>
     <Rule>
       <Filter>[man_made]='mast'</Filter>
       <PointSymbolizer file="/home/nick/images/mast.png" type="png" 
-	  	width="16" height="16" />
+      width="16" height="16" />
     </Rule>
      <Rule>
       <Filter>[amenity]='parking'</Filter>
       <PointSymbolizer file="/home/nick/images/carpark.png" type="png" 
-	  	width="16" height="16"/>
+      width="16" height="16"/>
      </Rule>
      <Rule>
       <Filter>[residence]='farm'</Filter>
       <PointSymbolizer file="/home/nick/images/farm.png" type="png" 
-	  	width="16" height="16"/>
+      width="16" height="16"/>
      </Rule>
   </Style>
   
@@ -46,7 +46,7 @@
     </Rule>
      <Rule>
       <Filter>[leisure] = 'park' or [leisure] = 'common' or
-	  	[leisure] = 'golf_course'</Filter>
+      [leisure] = 'golf_course'</Filter>
       <PolygonSymbolizer>
         <CssParameter name="fill">#d8e8d0</CssParameter>
      </PolygonSymbolizer>
@@ -98,12 +98,12 @@
       <Filter>[natural] = 'peak'</Filter>
       <TextSymbolizer name="name" face_name="DejaVu Sans Book" size="11" fill="#000" halo_radius="1" wrap_width="0"/>
     </Rule>
-	<Rule>
-	  <Filter>[natural] = 'wood' or [natural] = 'water' or [natural] = 'heath'
-	  or [leisure] = 'golf_course' </Filter>
-	  <TextSymbolizer name="name" face_name="DejaVu Sans Book" 
-	  size="10" fill="#000" halo_radius="2" wrap_width="0" />
-	</Rule>
+  <Rule>
+    <Filter>[natural] = 'wood' or [natural] = 'water' or [natural] = 'heath'
+    or [leisure] = 'golf_course' </Filter>
+    <TextSymbolizer name="name" face_name="DejaVu Sans Book" 
+    size="10" fill="#000" halo_radius="2" wrap_width="0" />
+  </Rule>
   </Style>
   
    <Style name="river">
@@ -200,7 +200,7 @@
       <Filter>[highway] = 'unsurfaced' or [highway] = 'track'</Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#999</CssParameter>
-		<CssParameter name="stroke-dasharray">6,4</CssParameter>
+    <CssParameter name="stroke-dasharray">6,4</CssParameter>
         <CssParameter name="stroke-width">4</CssParameter>
         <CssParameter name="stroke-linejoin">round</CssParameter>
         <CssParameter name="stroke-linecap">round</CssParameter>
@@ -218,7 +218,7 @@
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
+  </Style>
   <Style name="trunk">
     <Rule>
       <Filter>[highway] = 'trunk' or [highway] = 'trunk_link'</Filter>
@@ -282,7 +282,7 @@
    <Style name="residential">
     <Rule>
       <Filter>[highway] = 'residential' or [highway] = 'service' or
-	  	[highway] = 'unsurfaced' or [highway] = 'track'</Filter> 
+      [highway] = 'unsurfaced' or [highway] = 'track'</Filter> 
       <LineSymbolizer>
         <CssParameter name="stroke">#fff</CssParameter>
         <CssParameter name="stroke-width">2</CssParameter>
@@ -290,9 +290,9 @@
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
+  </Style>
     
-	<Style name="bridleway">
+  <Style name="bridleway">
     <Rule>
       <Filter>[highway] = 'bridleway' and [newforest_pathtype] = ''</Filter>
       <LineSymbolizer>
@@ -312,7 +312,7 @@
     </Rule>
     <Rule>
       <Filter>[highway] = 'bridleway' and [foot] = 'yes' and [horse] = 'yes'
-	  and [bicycle] = 'yes'</Filter>
+    and [bicycle] = 'yes'</Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#fff</CssParameter>
         <CssParameter name="stroke-width">6</CssParameter>
@@ -330,7 +330,7 @@
     </Rule>
     <Rule>
       <Filter>[highway] = 'bridleway' and [newforest_pathtype] = 'narrow'
-	  </Filter>
+    </Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#00c000</CssParameter>
         <CssParameter name="stroke-width">1.0</CssParameter>
@@ -358,7 +358,7 @@
     </Rule>
     <Rule>
       <Filter>[highway] = 'bridleway' and [newforest_pathtype] = 'gravel'
-	  </Filter>
+    </Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">#fff</CssParameter>
         <CssParameter name="stroke-width">6</CssParameter>
@@ -368,7 +368,7 @@
       </LineSymbolizer>
       <LineSymbolizer>
         <CssParameter name="stroke">brown</CssParameter>
-		<CssParameter name="stroke-dasharray">6,4</CssParameter>
+    <CssParameter name="stroke-dasharray">6,4</CssParameter>
         <CssParameter name="stroke-width">2</CssParameter>
         <CssParameter name="stroke-linejoin">round</CssParameter>
         <CssParameter name="stroke-linecap">round</CssParameter>
@@ -376,17 +376,17 @@
     </Rule>
     <Rule>
       <Filter>[highway] = 'bridleway' and [newforest_pathtype] = 'track'
-	  </Filter>
+    </Filter>
       <LineSymbolizer>
         <CssParameter name="stroke">brown</CssParameter>
-		<CssParameter name="stroke-dasharray">2,4</CssParameter>
+    <CssParameter name="stroke-dasharray">2,4</CssParameter>
         <CssParameter name="stroke-width">2</CssParameter>
         <CssParameter name="stroke-linejoin">round</CssParameter>
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
-	<Style name="footway">
+  </Style>
+  <Style name="footway">
     <Rule>
       <Filter>[highway] = 'footway'</Filter>
       <LineSymbolizer>
@@ -421,8 +421,8 @@
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
-	<Style name="cycleway">
+  </Style>
+  <Style name="cycleway">
     <Rule>
       <Filter>[highway] = 'cycleway'</Filter>
       <LineSymbolizer>
@@ -440,8 +440,8 @@
         <CssParameter name="stroke-linecap">round</CssParameter>
       </LineSymbolizer>
     </Rule>
-	</Style>
-	<Style name="byway">
+  </Style>
+  <Style name="byway">
     <Rule>
       <Filter>[highway] = 'byway'</Filter>
       <LineSymbolizer>

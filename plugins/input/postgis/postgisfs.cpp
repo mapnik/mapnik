@@ -67,44 +67,50 @@ std::string numeric2string(const char* buf)
 
    while ( i >= 0)
    {
-      if (i <= weight && d < ndigits) {
+      if (i <= weight && d < ndigits)
+      {
          // All digits after the first must be padded to make the field 4 characters long
-         if (d != 0) {
+         if (d != 0) 
+         {
 #ifdef _WINDOWS
-	     int dig = digits[d];
-	     if (dig < 10)
-	     {
-		 ss << "000"; // 0000 - 0009
-	     }
-	     else if (dig < 100)
-	     {
-		 ss << "00";  // 0010 - 0099
-	     }
-	     else
-	     {
-		 ss << "0";   // 0100 - 0999;
-	     }
+             int dig = digits[d];
+             if (dig < 10)
+             {
+                 ss << "000"; // 0000 - 0009
+             }
+             else if (dig < 100)
+             {
+                 ss << "00";  // 0010 - 0099
+             }
+             else
+             {
+                 ss << "0";   // 0100 - 0999;
+             }
 #else
-	     switch(digits[d]) {
-	     case 0 ... 9:
-		 ss << "000"; // 0000 - 0009
-		 break;
-	     case 10 ... 99:
-		 ss << "00";  // 0010 - 0099
-		 break;
-	     case 100 ... 999:
-		 ss << "0";   // 0100 - 0999
-		 break;
-	     }
+             switch(digits[d])
+             {
+                 case 0 ... 9:
+                     ss << "000"; // 0000 - 0009
+                     break;
+                 case 10 ... 99:
+                     ss << "00";  // 0010 - 0099
+                     break;
+                 case 100 ... 999:
+                     ss << "0";   // 0100 - 0999
+                     break;
+             }
 #endif
          }
-         ss <<  digits[d++];
-      } else {
-         if (d == 0)
-            ss <<  "0";
-         else
-            ss <<  "0000";
+         ss << digits[d++];
       }
+      else
+      {
+         if (d == 0)
+             ss <<  "0";
+         else
+             ss <<  "0000";
+      }
+      
       i--;
    }
    if (dscale > 0)
@@ -115,29 +121,29 @@ std::string numeric2string(const char* buf)
       {
          int value;
          if (i <= weight && d < ndigits)
-            value = digits[d++];
+              value = digits[d++];
          else
-            value = 0;
+              value = 0;
 
          // Output up to 4 decimal digits for this value
          if (dscale > 0) {
-            ss << (value / 1000);
-            value %= 1000;
-            dscale--;
+              ss << (value / 1000);
+              value %= 1000;
+              dscale--;
          }
          if (dscale > 0) {
-            ss << (value / 100);
-            value %= 100;
-            dscale--;
+              ss << (value / 100);
+              value %= 100;
+              dscale--;
          }
          if (dscale > 0) {
-            ss << (value / 10);
-            value %= 10;
-            dscale--;
+              ss << (value / 10);
+              value %= 10;
+              dscale--;
          }
          if (dscale > 0) {
-            ss << value;
-            dscale--;
+              ss << value;
+              dscale--;
          }
 
          i--;
@@ -166,7 +172,7 @@ feature_ptr postgis_featureset::next()
         const char *data = rs_->getValue(0);
         geometry_utils::from_wkb(*feature,data,size,multiple_geometries_);
         totalGeomSize_+=size;
-	        
+          
         for (unsigned pos=1;pos<num_attrs_+1;++pos)
         {
            std::string name = rs_->getFieldName(pos);

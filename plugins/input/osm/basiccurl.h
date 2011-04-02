@@ -7,8 +7,8 @@
 
 typedef struct
 {
-	char *data;
-	int nbytes;
+  char *data;
+  int nbytes;
 } CURL_LOAD_DATA;
 
 CURL_LOAD_DATA *grab_http_response(const char *url);

@@ -71,7 +71,7 @@ void osm_datasource::bind() const
     {
         // otherwise if we supplied a url and a bounding box, load from the url
 #ifdef MAPNIK_DEBUG
-		cerr<<"loading_from_url: url="<<url << " bbox="<<bbox<<endl;
+    cerr<<"loading_from_url: url="<<url << " bbox="<<bbox<<endl;
 #endif
         if((osm_data_=dataset_deliverer::load_from_url
             (url,bbox,parser))==NULL)

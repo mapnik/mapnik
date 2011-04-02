@@ -300,7 +300,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
         {
            s <<",\""<<*pos<<"\"";
            ++pos;
-        }	 
+        }   
         s << " from " << layerName_ ;
 
         // execute existing SQL
@@ -353,8 +353,8 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
         else
         {
             OGRPoint point;
-	        point.setX (pt.x);
-	        point.setY (pt.y);
+            point.setX (pt.x);
+            point.setY (pt.y);
 
             return featureset_ptr(new ogr_featureset (*dataset_,
                                                       *layer_,

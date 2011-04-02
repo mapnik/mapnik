@@ -45,22 +45,22 @@ class osm_datasource : public datasource
       osm_datasource(const parameters &params, bool bind=true);
       virtual ~osm_datasource();
     
-	  // these must be overridden
+    // these must be overridden
       int type() const;
       featureset_ptr features(const query& q) const;
       featureset_ptr features_at_point(coord2d const& pt) const;
       box2d<double> envelope() const;
       layer_descriptor get_descriptor() const;   
-	  static std::string name();
-	  void bind() const;
+    static std::string name();
+    void bind() const;
    private:
       osm_datasource(const osm_datasource&);
       osm_datasource& operator=(const osm_datasource&);
    private:
       mutable box2d<double> extent_;
       mutable osm_dataset * osm_data_;
-	  int type_;
-	  mutable layer_descriptor desc_;
+    int type_;
+    mutable layer_descriptor desc_;
 };
 
 #endif //OSM_DATASOURCE_HPP

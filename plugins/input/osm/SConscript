@@ -27,14 +27,14 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 plugin_env = env.Clone()
 
 osm_src = Split(
-	"""
-	osmparser.cpp
-	osm.cpp
-	osm_datasource.cpp
-	osm_featureset.cpp 
-	dataset_deliverer.cpp
-	basiccurl.cpp
-	"""
+  """
+  osmparser.cpp
+  osm.cpp
+  osm_datasource.cpp
+  osm_featureset.cpp 
+  dataset_deliverer.cpp
+  basiccurl.cpp
+  """
         )
 
 libraries = [ 'xml2' ]

@@ -27,10 +27,10 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 plugin_env = env.Clone()
 
 sqlite_src = Split(
-	"""
-	sqlite_datasource.cpp
-	sqlite_featureset.cpp      
-	"""
+  """
+  sqlite_datasource.cpp
+  sqlite_featureset.cpp      
+  """
         )
 
 libraries = [ 'sqlite3' ]

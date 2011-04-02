@@ -17,7 +17,7 @@ private:
     static std::string error;
     static std::map<long,osm_node*> tmp_node_store;
 
-	static int do_parse(xmlTextReaderPtr);
+  static int do_parse(xmlTextReaderPtr);
 
 public:
     static void processNode(xmlTextReaderPtr reader);

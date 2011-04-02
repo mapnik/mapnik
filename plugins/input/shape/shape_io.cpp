@@ -204,11 +204,11 @@ geometry_type * shape_io::read_polylinem()
             end=num_points;
          else
             end=parts[k+1];
-	    
+      
          double x=record.read_double();
          double y=record.read_double();
          line->move_to(x,y);
-	    
+      
          for (int j=start+1;j<end;++j)
          {
             x=record.read_double();
@@ -284,7 +284,7 @@ geometry_type * shape_io::read_polylinez()
    //double z1=record.read_double();
    //for (int i=0;i<num_points;++i)
    // {
-   //	double z=record.read_double();
+   //  double z=record.read_double();
    // }
     
    // m-range
@@ -428,7 +428,7 @@ geometry_type * shape_io::read_polygonz()
    //double z1=record.read_double();
    //for (int i=0;i<num_points;++i)
    //{
-   //	double z=record.read_double();
+   //  double z=record.read_double();
    //}
     
    // m-range

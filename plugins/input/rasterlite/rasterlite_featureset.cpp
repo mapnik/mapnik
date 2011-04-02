@@ -99,7 +99,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     std::clog << "Rasterlite Plugin: View extent=" << q.get_bbox() << std::endl;
     std::clog << "Rasterlite Plugin: Intersect extent=" << intersect << std::endl;
     std::clog << "Rasterlite Plugin: Query resolution=" << boost::get<0>(q.resolution()) 
-	      << "," << boost::get<1>(q.resolution())  << std::endl;
+        << "," << boost::get<1>(q.resolution())  << std::endl;
     std::clog << "Rasterlite Plugin: Size=" << width << " " << height << std::endl;
     std::clog << "Rasterlite Plugin: Pixel Size=" << pixel_size << std::endl;
 #endif

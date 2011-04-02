@@ -17,43 +17,43 @@ using namespace std;
 
 int main(int argc,char *argv[])
 {
-	if(argc < 6)
-	{
-		std::cerr<<"Usage: render XMLfile w s e n [OSMfile]" << std::endl;
-		exit(0);
-	}
+  if(argc < 6)
+  {
+    std::cerr<<"Usage: render XMLfile w s e n [OSMfile]" << std::endl;
+    exit(0);
+  }
 
-	datasource_cache::instance()->register_datasources
-		("/usr/local/lib/mapnik/input");
-	freetype_engine::register_font
-		("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
+  datasource_cache::instance()->register_datasources
+    ("/usr/local/lib/mapnik/input");
+  freetype_engine::register_font
+    ("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
 
-	Map m (800,800);
-	load_map(m,argv[1]);
-	
-	if(argc>6)
-	{
-		parameters p;
-		p["type"] = "osm";
-		p["file"] = argv[6];
-		for(int count=0; count<m.layer_count(); count++)
-		{
-			parameters q = m.getLayer(count).datasource()->params();
-			m.getLayer(count).set_datasource(datasource_cache::instance()->
-				create(p));
-		}
-	}
+  Map m (800,800);
+  load_map(m,argv[1]);
+  
+  if(argc>6)
+  {
+    parameters p;
+    p["type"] = "osm";
+    p["file"] = argv[6];
+    for(int count=0; count<m.layer_count(); count++)
+    {
+      parameters q = m.getLayer(count).datasource()->params();
+      m.getLayer(count).set_datasource(datasource_cache::instance()->
+        create(p));
+    }
+  }
 
-	box2d<double> bbox (atof(argv[2]),atof(argv[3]),
-							atof(argv[4]),atof(argv[5]));
-										
-	m.zoom_to_box(bbox);
+  box2d<double> bbox (atof(argv[2]),atof(argv[3]),
+              atof(argv[4]),atof(argv[5]));
+                    
+  m.zoom_to_box(bbox);
 
-	image_32 buf (m.width(), m.height());
-	agg_renderer<image_32> r(m,buf);
-	r.apply();
+  image_32 buf (m.width(), m.height());
+  agg_renderer<image_32> r(m,buf);
+  r.apply();
 
-	save_to_file<image_data_32>(buf.data(),"blah.png","png");
+  save_to_file<image_data_32>(buf.data(),"blah.png","png");
 
-	return 0;
+  return 0;
 }

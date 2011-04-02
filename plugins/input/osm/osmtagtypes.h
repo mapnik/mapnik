@@ -9,20 +9,20 @@
 class osm_tag_types
 {
 private:
-	std::map<std::string,mapnik::eAttributeType> types;
+  std::map<std::string,mapnik::eAttributeType> types;
 
 public:
-	void add_type(std::string tag, mapnik::eAttributeType type)
-	{
-		types[tag]=type;
-	}
+  void add_type(std::string tag, mapnik::eAttributeType type)
+  {
+    types[tag]=type;
+  }
 
-	mapnik::eAttributeType get_type(std::string tag)
-	{
-		std::map<std::string,mapnik::eAttributeType>::iterator i = 
-									types.find(tag);
-		return (i==types.end()) ? mapnik::String: i->second;
-	}
+  mapnik::eAttributeType get_type(std::string tag)
+  {
+    std::map<std::string,mapnik::eAttributeType>::iterator i = 
+                  types.find(tag);
+    return (i==types.end()) ? mapnik::String: i->second;
+  }
 };
-	
+  
 #endif // OSMTAGTYPES_H

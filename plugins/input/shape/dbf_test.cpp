@@ -46,7 +46,7 @@ int main(int argc,char** argv)
             {
                 int width=dbf.descriptor(j).length_;
                 string name=dbf.descriptor(j).name_;
-		char type=dbf.descriptor(j).type_;
+                char type=dbf.descriptor(j).type_;
                 cout<<setw(width)<<name<<"("<<type<<")""|";
             }
             cout<<endl;

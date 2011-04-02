@@ -156,7 +156,7 @@ public:
         }
 
         return new sqlite_resultset (stmt);
-	}
+  }
 
     sqlite3* operator*()
     {

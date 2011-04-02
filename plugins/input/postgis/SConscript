@@ -27,10 +27,10 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 plugin_env = env.Clone()
 
 postgis_src = Split(
-	"""
+  """
         postgis.cpp
         postgisfs.cpp
-	"""
+  """
         )
 
 libraries = ['pq']

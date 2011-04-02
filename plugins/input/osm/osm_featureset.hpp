@@ -47,8 +47,8 @@ class osm_featureset : public Featureset
       mutable box2d<double> feature_ext_;
       mutable int total_geom_size;
       mutable int count_;
-	  osm_dataset *dataset_;
-	  std::set<std::string> attribute_names_;
+    osm_dataset *dataset_;
+    std::set<std::string> attribute_names_;
 
    public:
       osm_featureset(const filterT& filter, 

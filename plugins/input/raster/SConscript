@@ -27,11 +27,11 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 plugin_env = env.Clone()
 
 raster_src = Split(
-	"""
-	raster_datasource.cpp
-	raster_featureset.cpp
-	raster_info.cpp      
-	"""
+  """
+  raster_datasource.cpp
+  raster_featureset.cpp
+  raster_info.cpp      
+  """
         )
 
 libraries = []

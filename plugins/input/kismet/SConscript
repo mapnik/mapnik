@@ -27,10 +27,10 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 plugin_env = env.Clone()
 
 kismet_src = Split(
-	"""
-	kismet_datasource.cpp
-	kismet_featureset.cpp      
-	"""
+  """
+  kismet_datasource.cpp
+  kismet_featureset.cpp      
+  """
         )
 
 libraries = []
