@@ -375,6 +375,65 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
 {
    if (!is_bound_) bind();
 
+   if (dataset_)
+   {
+        // TODO - need tolerance
+        mapnik::box2d<double> const e(pt.x,pt.y,pt.x,pt.y);
+
+        std::ostringstream s;
+
+        
+        s << "SELECT " << geometry_field_ << "," << key_field_;
+        std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
+        std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
+        while (itr != end)
+        {
+            std::string fld_name = itr->get_name();
+            if (fld_name != key_field_)
+                s << ",\"" << itr->get_name() << "\"";
+            ++itr;
+        }
+        
+        s << " FROM "; 
+        
+        std::string query (table_); 
+        
+        if (use_spatial_index_)
+        {
+           std::ostringstream spatial_sql;
+           spatial_sql << std::setprecision(16);
+           spatial_sql << " WHERE " << key_field_ << " IN (SELECT pkid FROM idx_" << geometry_table_ << "_" << geometry_field_;
+           spatial_sql << " WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
+           spatial_sql << " AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
+           if (boost::algorithm::ifind_first(query, "WHERE"))
+           {
+              boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
+           }
+           else if (boost::algorithm::ifind_first(query, geometry_table_))  
+           {
+              boost::algorithm::ireplace_first(query, table_, table_ + " " + spatial_sql.str());
+           }
+        }
+        
+        s << query ;
+        
+        if (row_limit_ > 0) {
+            s << " LIMIT " << row_limit_;
+        }
+
+        if (row_offset_ > 0) {
+            s << " OFFSET " << row_offset_;
+        }
+
+#ifdef MAPNIK_DEBUG
+        std::clog << "Sqlite Plugin: " << s.str() << std::endl;
+#endif
+
+        boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+
+        return featureset_ptr (new sqlite_featureset(rs, desc_.get_encoding(), format_, multiple_geometries_));
+   }
+      
    return featureset_ptr();
 }
 
