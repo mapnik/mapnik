@@ -183,12 +183,16 @@ if env['SVN_REVISION']:
     env2 = py_env.Clone()
     env2.Append(CXXFLAGS='-DSVN_REVISION=%s' % env['SVN_REVISION'])
     if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
-        if env['HAS_CAIRO']:
-            env2.ParseConfig('pkg-config --cflags cairomm-1.0')
-            env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
-        if env['HAS_PYCAIRO']:
-            env2.ParseConfig('pkg-config --cflags pycairo')
-            env2.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
+        try:
+            if env['HAS_CAIRO']:
+                env2.ParseConfig('pkg-config --cflags cairomm-1.0')
+                env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
+            if env['HAS_PYCAIRO']:
+                env2.ParseConfig('pkg-config --cflags pycairo')
+                env2.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
+        except OSError, e:
+            print '\nFailed to detect cairo/cairomm configuration, please re-run "python scons/scons.py configure"'
+            sys.exit(1)        
     sources.insert(0,env2.SharedObject('mapnik_python.cpp'))
 
 if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
