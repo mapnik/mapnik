@@ -84,9 +84,12 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
         throw std::runtime_error(string("Cannot load library: ") +
                                  lt_dlerror());
     }
-
+    // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
+    #ifdef __GNUC__
+    __extension__
+    #endif
     create_ds* create_datasource = 
-        (create_ds*) lt_dlsym(itr->second->handle(), "create");
+        reinterpret_cast<create_ds*>(lt_dlsym(itr->second->handle(), "create"));
 
     if ( ! create_datasource)
     {
@@ -203,8 +206,12 @@ void datasource_cache::register_datasources(const std::string& str)
 #endif
                     if (module)
                     {
+                        // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
+                        #ifdef __GNUC__
+                        __extension__
+                        #endif
                         datasource_name* ds_name = 
-                            (datasource_name*) lt_dlsym(module, "datasource_name");
+                            reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
                         if (ds_name && insert(ds_name(),module))
                         {            
 #ifdef MAPNIK_DEBUG
