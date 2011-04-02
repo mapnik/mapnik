@@ -21,6 +21,7 @@
 
 
 import os
+import sys
 import glob
 from subprocess import Popen, PIPE
 
@@ -185,16 +186,20 @@ if True : # agg backend
 
 if env['HAS_CAIRO']:
     # attach libs to library linking environment
-    lib_env.ParseConfig('pkg-config --libs cairomm-1.0')
-    env2 = lib_env.Clone()
-    env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
-    # attach cflags to specific compile environment
-    env2.ParseConfig('pkg-config --cflags cairomm-1.0')  
-    fixup = ['cairo_renderer.cpp','graphics.cpp','image_util.cpp']
-    for cpp in fixup:
-        if cpp in source:
-            source.remove(cpp)
-        source.insert(0,env2.SharedObject(cpp))
+    try:
+        lib_env.ParseConfig('pkg-config --libs cairomm-1.0')
+        env2 = lib_env.Clone()
+        env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
+        # attach cflags to specific compile environment
+        env2.ParseConfig('pkg-config --cflags cairomm-1.0')  
+        fixup = ['cairo_renderer.cpp','graphics.cpp','image_util.cpp']
+        for cpp in fixup:
+            if cpp in source:
+                source.remove(cpp)
+            source.insert(0,env2.SharedObject(cpp))
+    except OSError, e:
+        print '\nFailed to detect cairo/cairomm configuration, please re-run "python scons/scons.py configure"'
+        sys.exit(1)        
 
 if env['XMLPARSER'] == 'tinyxml':
     source += Split(

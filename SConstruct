@@ -281,7 +281,7 @@ opts.AddVariables(
     ('CC', 'The C compiler used for configure checks of C libs (defaults to gcc).', 'gcc'),
     ('CUSTOM_CXXFLAGS', 'Custom C++ flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir>', ''),
     ('CUSTOM_LDFLAGS', 'Custom linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>', ''),
-    EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3','4']),
+    EnumVariable('OPTIMIZATION','Set g++ optimization level','2', ['0','1','2','3','4','s']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
     BoolVariable('XML_DEBUG', 'Compile a XML verbose debug version of mapnik', 'False'),
