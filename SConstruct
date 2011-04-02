@@ -220,6 +220,8 @@ pretty_dep_names = {
     'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
     'curl':'libcurl is required for the "osm" plugin - more info: http://trac.mapnik.org/wiki/OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
+    'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
+    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
     }
     
 def pretty_dep(dep):
@@ -809,13 +811,32 @@ int main()
 }
 
 """, '.cpp')
-    # hack to avoid printed output
     context.Message('Checking if boost_regex was built with ICU unicode support... ')
     context.Result(ret[0])
     if ret[0]:
         return True
     return False
-    
+
+def sqlite_has_rtree(context):
+    ret = context.TryRun("""
+
+extern "C" {
+  #include <sqlite3.h>
+}
+
+int main() 
+{
+    sqlite3_rtree_geometry *p;
+    return 0;
+}
+
+""", '.cpp')
+    context.Message('Checking if SQLite supports RTREE... ')
+    context.Result(ret[0])
+    if ret[0]:
+        return True
+    return False
+        
 conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGConfig'        : CheckPKGConfig,
                'CheckPKG'              : CheckPKG,
@@ -830,6 +851,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'rollback_option'       : rollback_option,
                'icu_at_least_four_two' : icu_at_least_four_two,
                'boost_regex_has_icu'   : boost_regex_has_icu,
+               'sqlite_has_rtree'      : sqlite_has_rtree,
                }
 
 
@@ -1094,15 +1116,27 @@ if not preconfigured:
                 if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
                     env.Replace(**backup)
                     env['SKIPPED_DEPS'].append(details['lib'])
+                if plugin == 'sqlite':
+                    if not conf.sqlite_has_rtree():
+                        env.Replace(**backup)
+                        if details['lib'] in env['LIBS']:
+                            env['LIBS'].remove(details['lib'])
+                        env['SKIPPED_DEPS'].append('sqlite_rtree')
+
             elif details['lib'] and details['inc']:
                 if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
-                    env['SKIPPED_DEPS'].append(details['lib'])        
+                    env['SKIPPED_DEPS'].append(details['lib'])
     
         # re-append the local paths for mapnik sources to the beginning of the list
         # to make sure they come before any plugins that were 'prepended'
         env.PrependUnique(CPPPATH = '#include', delete_existing=True)
         env.PrependUnique(CPPPATH = '#', delete_existing=True)
         env.PrependUnique(LIBPATH = '#src', delete_existing=True)
+
+    if env['PGSQL2SQLITE']:
+        if not conf.sqlite_has_rtree():
+            env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
+            env['PGSQL2SQLITE'] = False
 
     # Decide which libagg to use
     # if we are using internal agg, then prepend to make sure
