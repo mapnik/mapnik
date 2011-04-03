@@ -886,7 +886,7 @@ public:
     {
         return m_vertices.size() ? 
             m_vertices[m_vertices.size() - 1].cmd : 
-            path_cmd_stop;
+            (unsigned)path_cmd_stop;
     }
 
     unsigned last_vertex(double* x, double* y) const

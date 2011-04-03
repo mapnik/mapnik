@@ -204,7 +204,7 @@ void reduce_4 (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned li
 
 // 1-bit but only one color.
 template <typename T>
-void reduce_1(T const&, image_data_8 & out, octree<rgb> trees[], unsigned limits[], std::vector<unsigned> & alpha)
+void reduce_1(T const&, image_data_8 & out, octree<rgb> /*trees*/[], unsigned /*limits*/[], std::vector<unsigned> & /*alpha*/)
 {
     out.set(0); // only one color!!!
 }

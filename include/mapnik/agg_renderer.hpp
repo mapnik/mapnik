@@ -102,9 +102,9 @@ public:
     void process(glyph_symbolizer const& sym,
                  Feature const& feature,
                  proj_transform const& prj_trans);    
-    inline bool process(rule::symbolizers const& syms,
-                        Feature const& feature,
-                        proj_transform const& prj_trans)
+    inline bool process(rule::symbolizers const& /*syms*/,
+                        Feature const& /*feature*/,
+                        proj_transform const& /*prj_trans*/)
     {
         // agg renderer doesn't support processing of multiple symbolizers.
         return false;

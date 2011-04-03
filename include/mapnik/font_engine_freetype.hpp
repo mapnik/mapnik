@@ -492,6 +492,8 @@ struct text_renderer : private boost::noncopyable
 
 private:
 
+    // unused currently, stroker is the new method for drawing halos
+    /*
     void render_halo(FT_Bitmap *bitmap,unsigned rgba,int x,int y,int radius)
     {
         int x_max=x+bitmap->width;
@@ -512,6 +514,7 @@ private:
             }
         }
     }
+    */
 
     void render_bitmap(FT_Bitmap *bitmap,unsigned rgba,int x,int y)
     {
