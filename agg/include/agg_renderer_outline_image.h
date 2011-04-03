@@ -924,11 +924,11 @@ namespace agg
                                                   m_start, m_scale_x);
             if(li.vertical())
             {
-                while(li.step_ver());
+                while(li.step_ver()) ;
             }
             else
             {
-                while(li.step_hor());
+                while(li.step_hor()) ;
             }
             m_start += uround(lp.len / m_scale_x);
         }
