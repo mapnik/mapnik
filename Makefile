@@ -11,6 +11,9 @@ clean:
 	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 
+check:
+	cppcheck --enable=all -I include */*.cpp
+
 uninstall:
 	python scons/scons.py uninstall
 
