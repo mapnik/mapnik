@@ -23,11 +23,14 @@
 
 #include "sqlite.hpp"
 
+// mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/sql_utils.hpp>
 
 #include "connection_manager.hpp"
 #include "cursorresultset.hpp"
+
 // boost
 #include <boost/cstdint.hpp>
 #include <boost/optional.hpp>
@@ -44,46 +47,7 @@
 
 namespace mapnik {
 
-std::string numeric2string(const char* buf)
-{
-    int16_t ndigits = int2net(buf);
-    int16_t weight  = int2net(buf+2);
-    int16_t sign    = int2net(buf+4);
-    int16_t dscale  = int2net(buf+6);
-      
-    boost::scoped_array<int16_t> digits(new int16_t[ndigits]); 
-    for (int n=0; n < ndigits ;++n)
-    {
-        digits[n] = int2net(buf+8+n*2);
-    }
-      
-    std::ostringstream ss;
-      
-    if (sign == 0x4000) ss << "-";
-      
-    int i = std::max(weight,int16_t(0));
-    int d = 0;
-    while ( i >= 0)
-    {
-        if (i <= weight && d < ndigits)
-            ss <<  digits[d++];
-        else
-            ss <<  '0';
-        i--;
-    }
-    if (dscale > 0)
-    {
-        ss << '.';
-        while ( i >= -dscale)
-        {
-            if (i <= weight && d < ndigits)
-                ss <<  digits[d++];
-            i--;
-        }
-    }
-    return ss.str();
-}
-   
+/*
 struct blob_to_hex
 {
     std::string operator() (const char* blob, unsigned size)
@@ -102,36 +66,8 @@ struct blob_to_hex
         return s.str();
     }
 };
-
-bool valid_envelope(mapnik::box2d<double> const& e)
-{
-    return (e.minx() <= e.maxx() && e.miny() <= e.maxy()) ;
-}
-   
-std::string table_from_sql(std::string const& sql)
-{
-    std::string table_name = boost::algorithm::to_lower_copy(sql);
-    boost::algorithm::replace_all(table_name,"\n"," ");
-      
-    std::string::size_type idx = table_name.rfind("from");
-    if (idx!=std::string::npos)
-    {
-         
-        idx=table_name.find_first_not_of(" ",idx+4);
-        if (idx != std::string::npos)
-        {
-            table_name=table_name.substr(idx);
-        }
-        idx=table_name.find_first_of(" ),");
-        if (idx != std::string::npos)
-        {
-            table_name = table_name.substr(0,idx);
-        }
-    }
-    return table_name;
-}
-   
-   
+*/
+ 
 template <typename Connection>
 void pgsql2sqlite(Connection conn, 
                   std::string const& query, 
@@ -156,7 +92,7 @@ void pgsql2sqlite(Connection conn,
    
     select_sql << " from (" << query << ") as query";
    
-    std::string table_name = table_from_sql(query);
+    std::string table_name = mapnik::table_from_sql(query);
       
     std::string schema_name="";
     std::string::size_type idx=table_name.find_last_of('.');
@@ -343,7 +279,7 @@ void pgsql2sqlite(Connection conn,
                 }
                 case 1700:
                 {
-                    std::string str = numeric2string(buf);
+                    std::string str = mapnik::numeric2string(buf);
                     try 
                     {
                         double val = boost::lexical_cast<double>(str);
@@ -366,7 +302,7 @@ void pgsql2sqlite(Connection conn,
                         {
                             geometry_type const& geom=feat.get_geometry(0);
                             box2d<double> bbox = geom.envelope();
-                            if (valid_envelope(bbox))
+                            if (bbox.valid())
                             {
                                 sqlite::record_type rec;
                              
@@ -414,6 +350,8 @@ void pgsql2sqlite(Connection conn,
     // commit
     db.execute("commit;");
     std::cout << "\r processed " << pkid << " features";
+    db.execute("VACUUM;");
+    std::cout << "\r vacumming";
     std::cout << "\n Done!" << std::endl;
 }
 }
