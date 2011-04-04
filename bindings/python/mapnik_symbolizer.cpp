@@ -46,57 +46,57 @@ struct get_symbolizer_type : public boost::static_visitor<std::string>
 public:
     get_symbolizer_type() {}
         
-    std::string operator () ( const  point_symbolizer & sym )
+    std::string operator () ( const  point_symbolizer & /*sym*/ )
     {
         return "point";
     }
     
-    std::string operator () ( const line_symbolizer & sym )
+    std::string operator () ( const line_symbolizer & /*sym*/ )
     {
         return "line";
     }
     
-    std::string operator () ( const line_pattern_symbolizer & sym )
+    std::string operator () ( const line_pattern_symbolizer & /*sym*/ )
     {
         return "line_pattern";
     }
     
-    std::string operator () ( const polygon_symbolizer & sym )
+    std::string operator () ( const polygon_symbolizer & /*sym*/ )
     {
         return "polygon";
     }
     
-    std::string operator () ( const polygon_pattern_symbolizer & sym )
+    std::string operator () ( const polygon_pattern_symbolizer & /*sym*/ )
     {
         return "polygon_pattern";
     }
     
-    std::string operator () ( const raster_symbolizer & sym )
+    std::string operator () ( const raster_symbolizer & /*sym*/ )
     {
         return "raster";
     }
     
-    std::string operator () ( const shield_symbolizer & sym )
+    std::string operator () ( const shield_symbolizer & /*sym*/ )
     {
         return "shield";
     }
     
-    std::string operator () ( const text_symbolizer & sym )
+    std::string operator () ( const text_symbolizer & /*sym*/ )
     {
         return "text";
     }
     
-    std::string operator () ( const building_symbolizer & sym )
+    std::string operator () ( const building_symbolizer & /*sym*/ )
     {
         return "building";
     }
     
-    std::string operator () ( const markers_symbolizer & sym )
+    std::string operator () ( const markers_symbolizer & /*sym*/ )
     {
         return "markers";
     }
 
-    std::string operator () ( const glyph_symbolizer & sym )
+    std::string operator () ( const glyph_symbolizer & /*sym*/ )
     {
         return "glyph";
     }
