@@ -114,9 +114,9 @@ void image_32::set_grayscale_to_alpha()
     }
 }
 
-void image_32::set_color_to_alpha(const color& c)
+void image_32::set_color_to_alpha(const color& /*c*/)
 {
-
+    // TODO - function to set all pixels to a % alpha based on distance to a given color
 }
 
 void image_32::set_alpha(float opacity)

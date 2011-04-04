@@ -160,7 +160,7 @@ void tiff_reader::read(unsigned x,unsigned y,image_data_32& image)
 }
 
 
-void tiff_reader::read_generic(unsigned x,unsigned y,image_data_32& image)
+void tiff_reader::read_generic(unsigned /*x*/,unsigned /*y*/,image_data_32& /*image*/)
 {
     TIFF* tif = load_if_exists(file_name_);
     if (tif)

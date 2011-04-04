@@ -57,7 +57,7 @@ std::string metawriter_properties::to_string() const
 
 /********************************************************************************************/
 
-void metawriter_json_stream::start(metawriter_property_map const& properties)
+void metawriter_json_stream::start(metawriter_property_map const& /*properties*/)
 {
     assert(trans_);
     if (output_empty_) {
@@ -277,7 +277,7 @@ void metawriter_json_stream::add_line(path_type & path,
     write_properties(feature, properties);
 }
 
-void metawriter_json_stream::write_line_polygon(path_type & path, CoordTransform const& t, bool polygon){
+void metawriter_json_stream::write_line_polygon(path_type & path, CoordTransform const& t, bool /*polygon*/){
     *f_ << " [";
     double x, y, last_x=0.0, last_y=0.0;
     unsigned cmd, last_cmd = SEG_END;

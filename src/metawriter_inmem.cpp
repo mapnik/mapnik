@@ -65,7 +65,7 @@ metawriter_inmem::~metawriter_inmem() {
 
 void 
 metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
-                          CoordTransform const& t,
+                          CoordTransform const& /*t*/,
                           metawriter_properties const& properties) {
   meta_instance inst;
   inst.box = box;
@@ -75,9 +75,9 @@ metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
 
 void 
 metawriter_inmem::add_text(placement const& p,
-                           face_set_ptr face,
+                           face_set_ptr /*face*/,
                            Feature const& feature,
-                           CoordTransform const& t,
+                           CoordTransform const& /*t*/,
                            metawriter_properties const& properties) {
   // there's more than one bbox for the text (one for each char), so keeping it
   // simple for the moment and merging them all together...
@@ -116,7 +116,7 @@ metawriter_inmem::add_line(path_type & path,
 void 
 metawriter_inmem::add_vertices(path_type & path,
                                Feature const& feature,
-                               CoordTransform const& t,
+                               CoordTransform const& /*t*/,
                                metawriter_properties const& properties) {
   box2d<double> box;
   unsigned cmd;
@@ -136,7 +136,7 @@ metawriter_inmem::add_vertices(path_type & path,
 }
 
 void 
-metawriter_inmem::start(metawriter_property_map const& properties) {
+metawriter_inmem::start(metawriter_property_map const& /*properties*/) {
   instances_.clear();
 }
 
@@ -145,7 +145,7 @@ metawriter_inmem::stop() {
 }
 
 void 
-metawriter_inmem::set_map_srs(projection const& proj) {
+metawriter_inmem::set_map_srs(projection const& /*proj*/) {
   // currently unused, since the inmem metawriter keeps everything in
   // image coordinates.
 }

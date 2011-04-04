@@ -680,11 +680,14 @@ cairo_renderer<Cairo::Surface>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo
 
 cairo_renderer_base::~cairo_renderer_base() {}
 
+#ifdef MAPNIK_DEBUG
 void cairo_renderer_base::start_map_processing(Map const& map)
 {
-#ifdef MAPNIK_DEBUG
     std::clog << "start map processing bbox="
               << map.get_current_extent() << "\n";
+#else
+void cairo_renderer_base::start_map_processing(Map const& /*map*/)
+{
 #endif
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
@@ -1370,7 +1373,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
 
 void cairo_renderer_base::process(raster_symbolizer const& sym,
                                   Feature const& feature,
-                                  proj_transform const& prj_trans)
+                                  proj_transform const& /*prj_trans*/)
 {
     // TODO -- at the moment raster_symbolizer is an empty class
     // used for type dispatching, but we can have some fancy raster

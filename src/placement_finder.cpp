@@ -255,7 +255,7 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
     if (p.wrap_width && string_width > p.wrap_width)
     {
         if (p.text_ratio)
-            for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > p.text_ratio && (string_width/i) > p.wrap_width; i += 1.0);
+            for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > p.text_ratio && (string_width/i) > p.wrap_width; i += 1.0) ;
         else
             wrap_at = p.wrap_width;
     }

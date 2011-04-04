@@ -160,11 +160,14 @@ template <typename T>
 agg_renderer<T>::~agg_renderer() {}
 
 template <typename T>
+#ifdef MAPNIK_DEBUG
 void agg_renderer<T>::start_map_processing(Map const& map)
 {
-#ifdef MAPNIK_DEBUG
     std::clog << "start map processing bbox="
               << map.get_current_extent() << "\n";
+#else
+void agg_renderer<T>::start_map_processing(Map const& /*map*/)
+{
 #endif
     ras_ptr->clip_box(0,0,width_,height_);
 }
