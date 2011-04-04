@@ -97,6 +97,7 @@ namespace mapnik
         jpeg_start_decompress(&cinfo);        
         width_ = cinfo.output_width;
         height_ = cinfo.output_height;
+        // if enabled: "Application transferred too few scanlines"
         //jpeg_finish_decompress(&cinfo);
         jpeg_destroy_decompress(&cinfo);
         fclose(fp);
@@ -112,7 +113,7 @@ namespace mapnik
         return height_;
     }
     
-    void JpegReader::read(unsigned x0, unsigned y0,image_data_32& image) 
+    void JpegReader::read(unsigned x0, unsigned y0, image_data_32& image) 
     {
         struct jpeg_decompress_struct cinfo;
 
@@ -147,6 +148,7 @@ namespace mapnik
         unsigned h = std::min(unsigned(image.height()),height_);
         
         boost::scoped_array<unsigned int> out_row(new unsigned int[w]);
+        // TODO - handle x0
         for (unsigned i=0;i<h;++i)
         {
             jpeg_read_scanlines(&cinfo, buffer, 1);
@@ -169,7 +171,7 @@ namespace mapnik
                 image.setRow(i-y0, out_row.get(), w);
             } 
         }
-        //jpeg_finish_decompress(&cinfo);
+        jpeg_finish_decompress(&cinfo);
         jpeg_destroy_decompress(&cinfo);
         fclose(fp);
     }
