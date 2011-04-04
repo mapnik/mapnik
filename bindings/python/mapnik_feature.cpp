@@ -81,7 +81,7 @@ namespace boost { namespace python {
             return obj;
         }
             
-        PyObject * operator() (mapnik::value_null const& s) const
+        PyObject * operator() (mapnik::value_null const& /*s*/) const
         {
             return NULL;
         }
@@ -131,7 +131,7 @@ namespace boost { namespace python {
 
         template <class Class>
         static void
-        extension_def(Class& cl)
+        extension_def(Class& /*cl*/)
         {
                
         }
