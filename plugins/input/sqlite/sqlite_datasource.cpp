@@ -60,7 +60,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
      fields_(*params_.get<std::string>("fields","*")),
      metadata_(*params_.get<std::string>("metadata","")),
      geometry_table_(*params_.get<std::string>("geometry_table","")),
-     geometry_field_(*params_.get<std::string>("geometry_field","the_geom")),
+     geometry_field_(*params_.get<std::string>("geometry_field","")),
      // http://www.sqlite.org/lang_createtable.html#rowid
      key_field_(*params_.get<std::string>("key_field","rowid")),
      row_offset_(*params_.get<int>("row_offset",0)),
@@ -68,11 +68,19 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
      format_(mapnik::wkbGeneric)
 {
+    // TODO
+    // - change param from 'file' to 'dbname'
+    // - be able to calculate extent manually - like ogr?
+    // - require wkb_format?
+    // - split plugin into sqlite vs spatialite?
+    // - conversion/sqlite initialization tool
+    // - sync code with rasterlite
+
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (!file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
 
     if (table_.empty()) throw mapnik::datasource_exception("Sqlite Plugin: missing <table> parameter");
-
+    
     boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
     if (wkb)
     {
@@ -113,6 +121,144 @@ void sqlite_datasource::bind() const
     }
     
 
+    // should we deduce column names and types using PRAGMA?
+    bool use_pragma_table_info = true;
+    
+    if (table_ != geometry_table_)
+    {
+        // if 'table_' is a subquery then we try to deduce names
+        // and types from the first row returned from that query
+        use_pragma_table_info = false;
+    }
+
+    if (!use_pragma_table_info)
+    {
+        std::ostringstream s;
+        s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
+
+        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+        if (rs->is_valid () && rs->step_next())
+        {
+            for (int i = 0; i < rs->column_count (); ++i)
+            {
+               const int type_oid = rs->column_type (i);
+               const char* fld_name = rs->column_name (i);
+               switch (type_oid)
+               {
+                  case SQLITE_INTEGER:
+                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+                     break;
+                     
+                  case SQLITE_FLOAT:
+                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                     break;
+                     
+                  case SQLITE_TEXT:
+                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                     break;
+                     
+                  case SQLITE_NULL:
+                     // sqlite reports based on value, not actual column type unless
+                     // PRAGMA table_info is used so here we assume the column is a string
+                     // which is a lesser evil than altogether dropping the column
+                     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+
+                  case SQLITE_BLOB:
+                        if (geometry_field_.empty() && 
+                             (boost::algorithm::icontains(fld_name,"geom") ||
+                              boost::algorithm::icontains(fld_name,"point") ||
+                              boost::algorithm::icontains(fld_name,"linestring") ||
+                              boost::algorithm::icontains(fld_name,"polygon"))
+                            )
+                            geometry_field_ = std::string(fld_name);
+                     break;
+                     
+                  default:
+#ifdef MAPNIK_DEBUG
+                     std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
+#endif
+                     break;
+                }
+            }
+        }
+        else
+        {
+            // if we do not have at least a row and
+            // we cannot determine the right columns types and names 
+            // as all column_type are SQLITE_NULL
+            // so we fallback to using PRAGMA table_info
+            use_pragma_table_info = true;
+        }
+    }
+
+    // TODO - ensure that the supplied key_field is a valid "integer primary key"
+    desc_.add_descriptor(attribute_descriptor("rowid",mapnik::Integer));
+    
+    if (use_pragma_table_info)
+    {
+        std::ostringstream s;
+        s << "PRAGMA table_info(" << geometry_table_ << ")";
+        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+        bool found_table = false;
+        while (rs->is_valid () && rs->step_next())
+        {
+            found_table = true;
+            const char* fld_name = rs->column_text(1);
+            std::string fld_type(rs->column_text(2));
+            boost::algorithm::to_lower(fld_type);
+
+            // see 2.1 "Column Affinity" at http://www.sqlite.org/datatype3.html
+            if (geometry_field_.empty() && 
+                       (
+                       (boost::algorithm::icontains(fld_name,"geom") ||
+                        boost::algorithm::icontains(fld_name,"point") ||
+                        boost::algorithm::icontains(fld_name,"linestring") ||
+                        boost::algorithm::icontains(fld_name,"polygon"))
+                       ||
+                       (boost::algorithm::contains(fld_type,"geom") ||
+                        boost::algorithm::contains(fld_type,"point") ||
+                        boost::algorithm::contains(fld_type,"linestring") ||
+                        boost::algorithm::contains(fld_type,"polygon"))
+                       )
+                    )
+                    geometry_field_ = std::string(fld_name);
+            else if (boost::algorithm::contains(fld_type,"int"))
+            {
+                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+            }
+            else if (boost::algorithm::contains(fld_type,"text") ||
+                     boost::algorithm::contains(fld_type,"char") ||
+                     boost::algorithm::contains(fld_type,"clob"))
+            {
+                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+            }
+            else if (boost::algorithm::contains(fld_type,"real") ||
+                     boost::algorithm::contains(fld_type,"float") ||
+                     boost::algorithm::contains(fld_type,"double"))
+            {
+                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+            }
+            else if (boost::algorithm::contains(fld_type,"blob") && !geometry_field_.empty())
+                 desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+#ifdef MAPNIK_DEBUG
+            else
+            {
+                // "Column Affinity" says default to "Numeric" but for now we pass..
+                //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                std::clog << "Sqlite Plugin: column '" << std::string(fld_name) << "' unhandled due to unknown type: " << fld_type << std::endl;
+            }
+#endif
+        }
+        if (!found_table)
+        {
+            throw datasource_exception("Sqlite Plugin: could not query table '" + geometry_table_ + "' using pragma table_info(" + geometry_table_  + ");");
+        }
+    }
+
+    if (geometry_field_.empty()) {
+        throw datasource_exception("Sqlite Plugin: cannot detect geometry_field, please supply the name of the geometry_field to use.");
+    }
+    
     if (use_spatial_index_)
     {
         std::ostringstream s;
@@ -165,115 +311,13 @@ void sqlite_datasource::bind() const
         }    
     }
     
-    {
-
-        // should we deduce column names and types using PRAGMA?
-        bool use_pragma_table_info = true;
-        
-        if (table_ != geometry_table_)
-        {
-            // if 'table_' is a subquery then we try to deduce names
-            // and types from the first row returned from that query
-            use_pragma_table_info = false;
-        }
-
-        if (!use_pragma_table_info)
-        {
-            std::ostringstream s;
-            s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
-    
-            boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-            if (rs->is_valid () && rs->step_next())
-            {
-                for (int i = 0; i < rs->column_count (); ++i)
-                {
-                   const int type_oid = rs->column_type (i);
-                   const char* fld_name = rs->column_name (i);
-                   switch (type_oid)
-                   {
-                      case SQLITE_INTEGER:
-                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
-                         break;
-                         
-                      case SQLITE_FLOAT:
-                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                         break;
-                         
-                      case SQLITE_TEXT:
-                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-                         break;
-                         
-                      case SQLITE_NULL:
-                         // sqlite reports based on value, not actual column type unless
-                         // PRAGMA table_info is used so here we assume the column is a string
-                         // which is a lesser evil than altogether dropping the column
-                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-    
-                      case SQLITE_BLOB:
-                         break;
-                         
-                      default:
-    #ifdef MAPNIK_DEBUG
-                         std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
-    #endif
-                         break;
-                    }
-                }
-            }
-            else
-            {
-                // if we do not have at least a row and
-                // we cannot determine the right columns types and names 
-                // as all column_type are SQLITE_NULL
-                // so we fallback to using PRAGMA table_info
-                use_pragma_table_info = true;
-            }
-        }
-
-        // TODO - ensure that the supplied key_field is a valid "integer primary key"
-        desc_.add_descriptor(attribute_descriptor("rowid",mapnik::Integer));
-        
-        if (use_pragma_table_info)
-        {
-            std::ostringstream s;
-            s << "PRAGMA table_info(" << geometry_table_ << ")";
-            boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-            while (rs->is_valid () && rs->step_next())
-            {
-                const char* fld_name = rs->column_text(1);
-                std::string fld_type(rs->column_text(2));
-                boost::algorithm::to_lower(fld_type);
-
-                // see 2.1 "Column Affinity" at http://www.sqlite.org/datatype3.html
-                
-                if (boost::algorithm::contains(fld_type,"int"))
-                {
-                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
-                }
-                else if (boost::algorithm::contains(fld_type,"text") ||
-                         boost::algorithm::contains(fld_type,"char") ||
-                         boost::algorithm::contains(fld_type,"clob"))
-                {
-                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-                }
-                else if (boost::algorithm::contains(fld_type,"real") ||
-                         boost::algorithm::contains(fld_type,"float") ||
-                         boost::algorithm::contains(fld_type,"double"))
-                {
-                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                }
-                //else if (boost::algorithm::contains(fld_type,"blob")
-                //     desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-#ifdef MAPNIK_DEBUG
-                else
-                {
-                    // "Column Affinity" says default to "Numeric" but for now we pass..
-                    //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                    std::clog << "Sqlite Plugin: unknown type_oid=" << fld_type << std::endl;
-                }
-#endif
-            }
-        }
+    if (!extent_initialized_) {
+        std::ostringstream s;
+        s << "Sqlite Plugin: extent could not be determined for table|geometry '" 
+          << geometry_table_ << "|" << geometry_field_ << "'"
+          << " because an rtree spatial index is missing."
+          << " - either set the table 'extent' or create an rtree spatial index";
+        throw datasource_exception(s.str());
     }
     
     is_bound_ = true;
@@ -381,8 +425,6 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         mapnik::box2d<double> const e(pt.x,pt.y,pt.x,pt.y);
 
         std::ostringstream s;
-
-        
         s << "SELECT " << geometry_field_ << "," << key_field_;
         std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
