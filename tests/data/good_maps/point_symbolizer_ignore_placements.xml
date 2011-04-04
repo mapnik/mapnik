@@ -3,25 +3,23 @@
     <Style name="1">
         <Rule title="foo1">
             <Filter>([name]='Brazil' or [name]='Mongolia' or [name]='Sudan')</Filter>
-            <PointSymbolizer file="../svg/ellipses.svg" allow-overlap="true"/>
+            <PointSymbolizer file="../svg/point_sm.svg" allow-overlap="true"/>
         </Rule>
         <Rule title="foo">
             <ElseFilter/>
-            <PointSymbolizer file="../svg/ellipses.svg" ignore-placement="true"/>
+            <PointSymbolizer file="../svg/point_sm.svg" ignore-placement="true"/>
             <PointSymbolizer/>
+            <TextSymbolizer size="10" name="'should be a black square on top of this symbol'" dy="10" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="15" allow-overlap="true"/>
+
         </Rule>
     </Style>
 
     <Layer name="point" srs="+init=epsg:4326">
         <StyleName>1</StyleName>
         <Datasource>
-            <Parameter name="extent">-180,-70,180,70</Parameter>
-            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
-            <Parameter name="geometry_field">geometry</Parameter>
-            <Parameter name="key_field">pkuid</Parameter>
-            <Parameter name="table">point</Parameter>
             <Parameter name="type">sqlite</Parameter>
-            <Parameter name="use_spatial_index">1</Parameter>
+            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
+            <Parameter name="table">point</Parameter>
             <Parameter name="wkb_format">spatialite</Parameter>
         </Datasource>
     </Layer>

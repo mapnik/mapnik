@@ -1,32 +1,54 @@
 <Map srs="+init=epsg:4326" background-color="rgb(255,255,255)" minimum-version="0.7.2">
+
+    <Style name="world_borders_style1">
+        <Rule>
+            <!-- glow underneath continents -->
+            <LineSymbolizer stroke="green" stroke-width="1.5"/>
+        </Rule>
+    </Style>
+
+    <!-- layer created by ogr like: ogr2ogr -t_srs EPSG:4326 -f SQLite ../sqlite/world.sqlite world_merc.shp -->
+    <!-- here we read with the ogr plugin -->
+    <Layer name="world_borders1" srs="+init=epsg:4326">
+        <StyleName>world_borders_style1</StyleName>
+        <Datasource>
+            <Parameter name="type">ogr</Parameter>
+            <Parameter name="file">../sqlite/world.sqlite</Parameter>
+            <Parameter name="layer">world_merc</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="world_borders_style2">
+        <Rule>
+            <PolygonSymbolizer fill="yellow" gamma="0.5"/>
+        </Rule>
+    </Style>
+
+    <!-- here we read with native sqlite plugin -->
+    <Layer name="world_borders2" srs="+init=epsg:4326">
+        <StyleName>world_borders_style2</StyleName>
+        <Datasource>
+            <Parameter name="type">sqlite</Parameter>
+            <Parameter name="extent">-179,-60,179,60</Parameter>
+            <Parameter name="file">../sqlite/world.sqlite</Parameter>
+            <Parameter name="table">world_merc</Parameter>
+        </Datasource>
+    </Layer>
+
     <Style name="point_style">
         <Rule>
-            <PointSymbolizer file="../svg/point.svg"/>
+            <PointSymbolizer file="../svg/point_sm.svg"/>
             <TextSymbolizer size="12" name="[name]" dy="-5" face-name="DejaVu Sans Book" halo-fill="rgba(255,255,255,.5)" halo-radius=".5"/>
         </Rule>
     </Style>
-    <Style name="world_borders_style">
-        <Rule>
-            <PolygonSymbolizer fill="grey" gamma="0.7"/>
-        </Rule>
-    </Style>
-    <Layer name="world_borders" srs="+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs">
-        <StyleName>world_borders_style</StyleName>
-        <Datasource>
-            <Parameter name="file">../shp/world_merc.shp</Parameter>
-            <Parameter name="type">shape</Parameter>
-        </Datasource>
-    </Layer>
+
+    <!-- file created by QGIS read with native sqlite plugin -->
     <Layer name="point" srs="+init=epsg:4326">
         <StyleName>point_style</StyleName>
         <Datasource>
-            <Parameter name="extent">-100.276283619,-23.5207203374,136.782396088,45.7946830856</Parameter>
-            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
-            <Parameter name="geometry_field">geometry</Parameter>
-            <Parameter name="key_field">pkuid</Parameter>
-            <Parameter name="table">point</Parameter>
             <Parameter name="type">sqlite</Parameter>
-            <Parameter name="use_spatial_index">1</Parameter>
+            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
+            <Parameter name="table">point</Parameter>
             <Parameter name="wkb_format">spatialite</Parameter>
         </Datasource>
     </Layer>

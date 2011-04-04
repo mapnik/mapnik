@@ -34,13 +34,11 @@
     <Layer name="point" srs="+init=epsg:4326">
         <StyleName>labels</StyleName>
         <Datasource>
+            <Parameter name="type">sqlite</Parameter>
             <Parameter name="extent">-180,-70,180,70</Parameter>
             <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
             <Parameter name="geometry_field">geometry</Parameter>
-            <Parameter name="key_field">pkuid</Parameter>
             <Parameter name="table">point</Parameter>
-            <Parameter name="type">sqlite</Parameter>
-            <Parameter name="use_spatial_index">1</Parameter>
             <Parameter name="wkb_format">spatialite</Parameter>
         </Datasource>
     </Layer>
