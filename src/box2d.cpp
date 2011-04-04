@@ -348,20 +348,31 @@ bool box2d<T>::from_string(const std::string& s)
     
     return success;
 }
-    
+
+template <typename T>
+#if !defined(__SUNPRO_CC)
+inline
+#endif
+bool box2d<T>::valid() const
+{
+    return (minx_ <= maxx_ && miny_ <= maxy_) ;
+}
+
 template <typename T>
 box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
 {
     expand_to_include(other);
     return *this;
 }
-    
+
+/*
 template <typename T>    
 box2d<T>& box2d<T>::operator-=(box2d<T> const& other)
 {
     // not sure what to do here. intersect?
     return *this;
 }
+*/
     
 template <typename T>    
 box2d<T>& box2d<T>::operator*=(T t)
