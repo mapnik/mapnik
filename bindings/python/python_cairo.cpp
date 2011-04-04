@@ -56,8 +56,7 @@ static void *extract_context(PyObject* op)
 
 void register_cairo()
 {
-    Pycairo_IMPORT;
-   
+    Pycairo_CAPI = (Pycairo_CAPI_t*) PyCObject_Import(const_cast<char *>("cairo"), const_cast<char *>("CAPI"));
     if (Pycairo_CAPI == NULL) return;
 
     boost::python::converter::registry::insert(&extract_surface, boost::python::type_id<PycairoSurface>());

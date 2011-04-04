@@ -295,14 +295,16 @@ bool has_cairo()
 bool has_pycairo()
 {
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-    Pycairo_IMPORT;
-    /*!
-      Case where pycairo support has been compiled into
-      mapnik but at runtime the cairo python module 
-      is unable to be imported and therefore Pycairo surfaces 
-      and contexts cannot be passed to mapnik.render() 
-    */ 
-    if (Pycairo_CAPI == NULL) return false;
+    Pycairo_CAPI = (Pycairo_CAPI_t*) PyCObject_Import(const_cast<char *>("cairo"), const_cast<char *>("CAPI"));
+    if (Pycairo_CAPI == NULL){
+        /*
+          Case where pycairo support has been compiled into
+          mapnik but at runtime the cairo python module 
+          is unable to be imported and therefore Pycairo surfaces 
+          and contexts cannot be passed to mapnik.render() 
+        */ 
+        return false;
+    }
     return true;
 #else
     return false;
