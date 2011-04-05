@@ -46,6 +46,10 @@ boost_system = 'boost_system%s' % env['BOOST_APPEND']
 if env['HAS_BOOST_SYSTEM']:
     libraries.append(boost_system)
 
+if env['INTERNAL_LIBAGG']:
+    libraries.insert(0, 'agg')
+else:
+    libraries.append([lib for lib in env['LIBS'] if lib.startswith('agg')])
 
 svg2png = program_env.Program('svg2png', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
