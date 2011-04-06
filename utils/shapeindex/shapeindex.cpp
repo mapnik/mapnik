@@ -217,8 +217,7 @@ int main (int argc,char** argv)
                 break;
             }  
         } 
-        shp.close();
-  
+        
         clog << " number shapes=" << count << endl;  
     
         std::fstream file((shapename+".index").c_str(),

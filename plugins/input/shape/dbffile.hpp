@@ -25,9 +25,13 @@
 
 #include <mapnik/feature.hpp>
 // boost
+#include <boost/utility.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
+//
+#include <boost/interprocess/streams/bufferstream.hpp>
+//#include <boost/iostreams/device/mapped_file.hpp>
+
 // stl
 #include <vector>
 #include <string>
@@ -49,7 +53,7 @@ struct field_descriptor
 };
 
 
-class dbf_file
+class dbf_file : private boost::noncopyable
 {
 private:
     int num_records_;
@@ -57,7 +61,8 @@ private:
     stream_offset record_length_;
     std::vector<field_descriptor> fields_;
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    stream<mapped_file_source> file_;
+    //stream<mapped_file_source> file_;
+    boost::interprocess::ibufferstream file_;
 #else
     stream<file_source> file_;
 #endif
@@ -67,7 +72,6 @@ public:
     dbf_file(const std::string& file_name);
     ~dbf_file();
     bool is_open();
-    void close();
     int num_records() const;
     int num_fields() const;
     field_descriptor const& descriptor(int col) const;
@@ -75,8 +79,6 @@ public:
     std::string string_value(int col) const;
     void add_attribute(int col, transcoder const& tr, Feature const& f) const throw();
 private:
-    dbf_file(const dbf_file&);
-    dbf_file& operator=(const dbf_file&);
     void read_header();
     int read_short();
     int read_int();

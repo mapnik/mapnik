@@ -24,7 +24,7 @@
 
 #include <mapnik/feature_factory.hpp>
 // boost
-
+#include <boost/interprocess/streams/bufferstream.hpp>
 
 #include "shape_index_featureset.hpp"
 
@@ -47,7 +47,8 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
     if (index)
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-        shp_index<filterT,stream<mapped_file_source> >::query(filter,index->file(),ids_);
+        //shp_index<filterT,stream<mapped_file_source> >::query(filter,index->file(),ids_);
+        shp_index<filterT,boost::interprocess::ibufferstream>::query(filter,index->file(),ids_);
 #else
         shp_index<filterT,stream<file_source> >::query(filter,index->file(),ids_);
 #endif

@@ -61,12 +61,7 @@ shape_io::shape_io(const std::string& shape_name, bool open_index)
     }
 }
 
-shape_io::~shape_io()
-{
-   shp_.close();
-   dbf_.close();
-   if (index_) (*index_).close();
-}
+shape_io::~shape_io() {}
 
 void shape_io::move_to (int pos)
 {

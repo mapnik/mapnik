@@ -27,13 +27,19 @@
 
 #include <mapnik/global.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
 // boost
 #include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
-#include <boost/iostreams/stream.hpp>
 
+#include <boost/interprocess/streams/bufferstream.hpp>
+
+//#include <boost/interprocess/file_mapping.hpp>
+//#include <boost/interprocess/mapped_region.hpp>
+
+#include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
+//#include <boost/iostreams/device/mapped_file.hpp>
 
 #include <cstring>
 
@@ -128,14 +134,18 @@ struct shape_record
 };
 
 using namespace boost::iostreams;
+using namespace boost::interprocess;
 
 class shape_file : boost::noncopyable
 {  
 public:
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    typedef stream<mapped_file_source> file_source_type;
+    //typedef stream<mapped_file_source> file_source_type;
+    typedef ibufferstream file_source_type;
     typedef shape_record<MappedRecordTag> record_type;
+    //typedef boost::shared_ptr<mapped_region> mapped_region_ptr;    
+    //mapped_region_ptr region_;
 #else
     typedef stream<file_source> file_source_type;
     typedef shape_record<RecordTag> record_type;
@@ -145,13 +155,23 @@ public:
     shape_file() {}
     
     shape_file(std::string  const& file_name)
-        : 
+        :
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-        file_(file_name)
-#else
+        file_()
+#else  
         file_(file_name,std::ios::in | std::ios::binary)
 #endif
-    {}
+    {
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+        //file_mapping mapping(file_name.c_str(),read_only);
+        //region_ = mapped_region_ptr(new mapped_region(mapping, read_only));
+        boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(file_name.c_str(),true);
+        if (memory)
+        {
+            file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+        }
+#endif        
+    }
     
     ~shape_file() {}
 
@@ -162,19 +182,17 @@ public:
     
     inline bool is_open()
     {
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+        return (file_.buffer().second > 0);
+#else
         return file_.is_open();
-    }
- 
-    inline void close()
-    {
-        if (file_ && file_.is_open())
-            file_.close();
+#endif
     }
     
     inline void read_record(record_type& rec)
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-        rec.set_data(file_->data() + file_.tellg());
+        rec.set_data(file_.buffer().first + file_.tellg());
         file_.seekg(rec.size,std::ios::cur);
 #else
         file_.read(rec.get_data(),rec.size);

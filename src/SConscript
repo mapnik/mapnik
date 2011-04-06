@@ -143,6 +143,7 @@ source = Split(
     wkt/wkt_factory.cpp
     metawriter_inmem.cpp
     metawriter_factory.cpp
+    mapped_memory_cache.cpp
     """   
     )
 

@@ -27,7 +27,9 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
-
+//#include <boost/interprocess/file_mapping.hpp>
+//#include <boost/interprocess/mapped_region.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
 // stl
 #include <string>
 
@@ -43,13 +45,21 @@ dbf_file::dbf_file(std::string const& file_name)
      num_fields_(0),
      record_length_(0),
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-     file_(file_name),
+     file_(),
 #else
      file_(file_name,std::ios::in | std::ios::binary),
 #endif
      record_(0)
 {
-    if (file_.is_open())
+
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(file_name.c_str(),true);
+    if (memory)
+    {
+        file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+    }
+#endif 
+    if (file_)
     {
         read_header();
     }
@@ -64,16 +74,12 @@ dbf_file::~dbf_file()
 
 bool dbf_file::is_open()
 {
-    return file_.is_open();
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+        return (file_.buffer().second > 0);
+#else
+        return file_.is_open();
+#endif
 }
-
-
-void dbf_file::close()
-{
-    if (file_ && file_.is_open())
-        file_.close();
-}
-
 
 int dbf_file::num_records() const
 {
