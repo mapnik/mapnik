@@ -24,7 +24,7 @@
 #define SHAPE_IO_HPP
 
 // mapnik
-#include "dbffile.hpp"
+#include "dbfile.hpp"
 #include "shapefile.hpp"
 #include "shp_index.hpp"
 // boost

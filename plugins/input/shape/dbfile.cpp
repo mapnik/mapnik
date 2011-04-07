@@ -23,7 +23,9 @@
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/unicode.hpp>
-#include "dbffile.hpp"
+
+#include "dbfile.hpp"
+
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
