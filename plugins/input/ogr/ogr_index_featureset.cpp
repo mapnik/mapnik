@@ -30,11 +30,10 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
 
 // boost
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/interprocess/streams/bufferstream.hpp>
 
 // ogr
 #include "ogr_index_featureset.hpp"
@@ -49,9 +48,6 @@ using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
-
-using namespace boost::iostreams;
-
 
 template <typename filterT>
 ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
@@ -69,12 +65,14 @@ ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
      multiple_geometries_(multiple_geometries),
      count_(0)
 {
-    stream<mapped_file_source> file (index_file);
-    if (file)
+    
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(index_file.c_str(),true);
+    if (memory)
     {
-       ogr_index<filterT,stream<mapped_file_source> >::query(filter,file,ids_);
-       file.close();
+        boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()),(*memory)->get_size()); 
+        ogr_index<filterT,boost::interprocess::ibufferstream >::query(filter,file,ids_);
     }
+    
     std::sort(ids_.begin(),ids_.end());    
     
 #ifdef MAPNIK_DEBUG
