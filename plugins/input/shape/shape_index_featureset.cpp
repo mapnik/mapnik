@@ -27,8 +27,7 @@
 #include <boost/interprocess/streams/bufferstream.hpp>
 
 #include "shape_index_featureset.hpp"
-
-using namespace boost::iostreams;
+#include <fstream>
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
@@ -50,7 +49,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
         //shp_index<filterT,stream<mapped_file_source> >::query(filter,index->file(),ids_);
         shp_index<filterT,boost::interprocess::ibufferstream>::query(filter,index->file(),ids_);
 #else
-        shp_index<filterT,stream<file_source> >::query(filter,index->file(),ids_);
+        shp_index<filterT,std::ifstream>::query(filter,index->file(),ids_);
 #endif
     }
     std::sort(ids_.begin(),ids_.end());    

@@ -56,7 +56,7 @@ void shp_index<filterT, IStream>::query(const filterT& filter,IStream & file,std
 }
 
 template <typename filterT, typename IStream>
-void shp_index<filterT,IStream>::query_node(const filterT& filter,IStream &  file,std::vector<int>& ids)
+void shp_index<filterT,IStream>::query_node(const filterT& filter,IStream & file,std::vector<int>& ids)
 {
     int offset=read_ndr_integer(file);
 
