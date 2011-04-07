@@ -38,9 +38,8 @@ source = Split(
 headers = ['#plugins/input/shape'] + env['CPPPATH'] 
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-boost_iostreams  = 'boost_iostreams%s' % env['BOOST_APPEND']
 boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-libraries =  [boost_program_options,boost_iostreams,boost_filesystem]
+libraries =  [boost_program_options, boost_filesystem]
 
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
 
