@@ -31,10 +31,6 @@
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
-
 struct shape_io : boost::noncopyable
 {
     static const std::string SHP;
