@@ -31,17 +31,10 @@
 // boost
 #include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
-
 #include <boost/interprocess/streams/bufferstream.hpp>
-
-//#include <boost/interprocess/file_mapping.hpp>
-//#include <boost/interprocess/mapped_region.hpp>
-
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file.hpp>
-//#include <boost/iostreams/device/mapped_file.hpp>
-
+// stl
 #include <cstring>
+#include <fstream>
 
 using mapnik::box2d;
 using mapnik::read_int32_ndr;
@@ -133,7 +126,6 @@ struct shape_record
  
 };
 
-using namespace boost::iostreams;
 using namespace boost::interprocess;
 
 class shape_file : boost::noncopyable
@@ -141,13 +133,10 @@ class shape_file : boost::noncopyable
 public:
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    //typedef stream<mapped_file_source> file_source_type;
     typedef ibufferstream file_source_type;
     typedef shape_record<MappedRecordTag> record_type;
-    //typedef boost::shared_ptr<mapped_region> mapped_region_ptr;    
-    //mapped_region_ptr region_;
 #else
-    typedef stream<file_source> file_source_type;
+    typedef std::ifstream file_source_type;
     typedef shape_record<RecordTag> record_type;
 #endif
     
@@ -159,12 +148,11 @@ public:
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         file_()
 #else  
-        file_(file_name,std::ios::in | std::ios::binary)
+        file_(file_name.c_str(), std::ios::in | std::ios::binary)
 #endif
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-        //file_mapping mapping(file_name.c_str(),read_only);
-        //region_ = mapped_region_ptr(new mapped_region(mapping, read_only));
+        
         boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(file_name.c_str(),true);
         if (memory)
         {

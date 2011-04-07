@@ -26,21 +26,16 @@
 #include <mapnik/feature.hpp>
 // boost
 #include <boost/utility.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file.hpp>
-//
 #include <boost/interprocess/streams/bufferstream.hpp>
-//#include <boost/iostreams/device/mapped_file.hpp>
 
 // stl
 #include <vector>
 #include <string>
 #include <cassert>
-
+#include <fstream>
 
 using mapnik::transcoder;
 using mapnik::Feature;
-using namespace boost::iostreams;
 
 struct field_descriptor
 {
@@ -49,7 +44,7 @@ struct field_descriptor
     char type_;
     int length_;
     int dec_;
-    stream_offset offset_;
+    std::streampos offset_;
 };
 
 
@@ -58,13 +53,12 @@ class dbf_file : private boost::noncopyable
 private:
     int num_records_;
     int num_fields_;
-    stream_offset record_length_;
+    std::size_t record_length_;
     std::vector<field_descriptor> fields_;
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    //stream<mapped_file_source> file_;
     boost::interprocess::ibufferstream file_;
 #else
-    stream<file_source> file_;
+    std::ifstream file_;
 #endif
     char* record_;
 public:

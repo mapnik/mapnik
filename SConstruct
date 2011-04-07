@@ -1035,7 +1035,7 @@ if not preconfigured:
         ['system', 'boost/system/system_error.hpp', env['HAS_BOOST_SYSTEM']],
         ['filesystem', 'boost/filesystem/operations.hpp', True],
         ['regex', 'boost/regex.hpp', True],
-        ['iostreams','boost/iostreams/device/mapped_file.hpp',True],
+        #['iostreams','boost/iostreams/device/mapped_file.hpp',True],
         ['program_options', 'boost/program_options.hpp', False]
     ]
         
@@ -1263,7 +1263,7 @@ if not preconfigured:
                 env.Append(CXXFLAGS = common_cxx_flags + '-O %s' % ndebug_flags)
         else:
             # Common flags for GCC.
-            gcc_cxx_flags = '-ansi -Wall %s -ftemplate-depth-200 %s' % (pthread, common_cxx_flags)
+            gcc_cxx_flags = '-ansi -Wall -Wno-parentheses -Wno-unused-function -Wno-char-subscripts %s -ftemplate-depth-200 %s' % (pthread, common_cxx_flags)
         
             if env['DEBUG']:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)

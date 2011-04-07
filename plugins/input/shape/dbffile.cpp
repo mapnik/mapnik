@@ -27,8 +27,6 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
-//#include <boost/interprocess/file_mapping.hpp>
-//#include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 // stl
 #include <string>
@@ -47,7 +45,7 @@ dbf_file::dbf_file(std::string const& file_name)
 #ifdef SHAPE_MEMORY_MAPPED_FILE
      file_(),
 #else
-     file_(file_name,std::ios::in | std::ios::binary),
+     file_(file_name.c_str() ,std::ios::in | std::ios::binary),
 #endif
      record_(0)
 {
@@ -97,7 +95,7 @@ void dbf_file::move_to(int index)
 {
     if (index>0 && index<=num_records_)
     {
-        stream_offset pos=(num_fields_<<5)+34+(index-1)*(record_length_+1);
+        std::streampos pos=(num_fields_<<5)+34+(index-1)*(record_length_+1);
         file_.seekg(pos,std::ios::beg);
         file_.read(record_,record_length_);
     }
@@ -136,9 +134,9 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
         case 'M':
         case 'L':
         {
-            // FIXME - avoid constructing std::string in stack
+            // FIXME - avoid constructing std::string on stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
-            boost::trim(str); 
+            boost::trim(str);
             f[name] = tr.transcode(str.c_str()); 
             break;
         }
@@ -185,7 +183,7 @@ void dbf_file::read_header()
         assert(num_fields_>0);
         num_fields_=(num_fields_-33)/32;
         skip(22);
-        stream_offset offset=0;
+        std::streampos offset=0;
         char name[11];
         memset(&name,0,11);
         fields_.reserve(num_fields_);
