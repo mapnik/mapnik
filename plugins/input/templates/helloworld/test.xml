@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Map srs="+init=epsg:4326" background-color="white">
+<Map srs="+init=epsg:4326" background-color="white" minimum-version="0.7.2">
     <Style name="style">
         <Rule>
-            <PointSymbolizer />
+            <PointSymbolizer/>
             <!-- the hello world sample hardcodes 'key' as the hypothetical field name -->
-            <TextSymbolizer name="[key]" face_name="DejaVu Sans Book" size="10" dx="5" dy="5"/>
+            <TextSymbolizer name="[key]" size="10" dx="5" dy="5" face-name="DejaVu Sans Book"/>
             <LineSymbolizer stroke="green" stroke-width="3"/>
         </Rule>
     </Style>
