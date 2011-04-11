@@ -97,7 +97,7 @@ void raster_datasource::bind() const
    
     if (! boost::filesystem::exists(filename_))
         throw datasource_exception("Raster Plugin: " + filename_ + " does not exist");
-
+    
     try
     {         
         std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
@@ -111,11 +111,17 @@ void raster_datasource::bind() const
 #endif
         }
     }
+    catch (mapnik::image_reader_exception const& ex)
+    {
+        std::cerr << "Raster Plugin: image reader exception caught:" << ex.what() << std::endl;
+        throw;
+    }
     catch (...)
     {
         std::cerr << "Raster Plugin: exception caught" << std::endl;
+        throw;
     }
-   
+    
     is_bound_ = true;
 }
 

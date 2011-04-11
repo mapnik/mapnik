@@ -97,10 +97,10 @@ void tiff_reader::init()
     // TODO: error handling
     TIFFSetWarningHandler(0);
     TIFF* tif = load_if_exists(file_name_);
-    if (!tif) return;
-        
+    if (!tif) throw image_reader_exception ("Can't load tiff file");
+    
     char msg[1024];
-
+    
     if (TIFFRGBAImageOK(tif,msg))
     {
         TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
