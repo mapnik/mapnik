@@ -93,7 +93,9 @@ class Connection
                  }
                  
                  s << "\nFull sql was: '" <<  sql << "'\n";
-             } 
+             }
+             if (result)
+                 PQclear(result);
              throw mapnik::datasource_exception( s.str() );
          }
 
