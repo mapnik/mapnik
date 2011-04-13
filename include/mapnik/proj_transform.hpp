@@ -27,6 +27,8 @@
 
 // mapnik
 #include <mapnik/projection.hpp>
+#include <mapnik/box2d.hpp>
+
 // boost
 #include <boost/utility.hpp>
 
@@ -47,8 +49,8 @@ public:
     mapnik::projection const& dest() const;
         
 private:
-    projection const& source_;
-    projection const& dest_;
+    projection const source_;
+    projection const dest_;
     bool is_source_longlat_;
     bool is_dest_longlat_;
     bool is_source_equal_dest_;
