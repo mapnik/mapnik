@@ -92,10 +92,15 @@ public:
     {
         return scale_denominator_;
     }
-         
+
     box2d<double> const& get_bbox() const
     {
         return bbox_;
+    }
+
+    void set_bbox(const box2d<double>& bbox)
+    {
+        bbox_ = bbox;
     }
 
     double get_filter_factor() const
