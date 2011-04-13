@@ -31,9 +31,6 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 
-// boost
-#include <boost/shared_array.hpp>
-
 // ogr
 #include "occi_featureset.hpp"
 
