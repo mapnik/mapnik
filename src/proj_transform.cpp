@@ -105,6 +105,37 @@ bool proj_transform::backward (double & x, double & y , double & z) const
     return true;
 }
 
+bool proj_transform::forward (box2d<double> & box) const
+{
+    if (is_source_equal_dest_)
+        return true;
+    double minx = box.minx();
+    double miny = box.miny();
+    double maxx = box.maxx();
+    double maxy = box.maxy();
+    double z = 0.0;
+    bool ok0 = forward(minx,miny,z);
+    bool ok1 = forward(maxx,maxy,z);
+    box.init(minx,miny,maxx,maxy);
+    return ok0 & ok1;
+} 
+        
+bool proj_transform::backward (box2d<double> & box) const
+{
+    if (is_source_equal_dest_)
+        return true;
+
+    double minx = box.minx();
+    double miny = box.miny();
+    double maxx = box.maxx();
+    double maxy = box.maxy();
+    double z = 0.0;
+    bool ok0 = backward(minx,miny,z);
+    bool ok1 = backward(maxx,maxy,z);
+    box.init(minx,miny,maxx,maxy);
+    return ok0 & ok1;
+}
+
 mapnik::projection const& proj_transform::source() const
 {
     return source_;

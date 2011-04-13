@@ -61,26 +61,16 @@ mapnik::coord2d backward_transform_c(mapnik::proj_transform& t, mapnik::coord2d 
 
 mapnik::box2d<double> forward_transform_env(mapnik::proj_transform& t, mapnik::box2d<double> const & box)
 {
-    double minx = box.minx();
-    double miny = box.miny();
-    double maxx = box.maxx();
-    double maxy = box.maxy();
-    double z = 0.0;
-    t.forward(minx,miny,z);
-    t.forward(maxx,maxy,z);
-    return mapnik::box2d<double>(minx,miny,maxx,maxy);
+    mapnik::box2d<double> new_box = box;
+    t.forward(new_box);
+    return new_box;
 }
 
 mapnik::box2d<double> backward_transform_env(mapnik::proj_transform& t, mapnik::box2d<double> const & box)
 {
-    double minx = box.minx();
-    double miny = box.miny();
-    double maxx = box.maxx();
-    double maxy = box.maxy();
-    double z = 0.0;
-    t.backward(minx,miny,z);
-    t.backward(maxx,maxy,z);
-    return mapnik::box2d<double>(minx,miny,maxx,maxy);
+    mapnik::box2d<double> new_box = box;
+    t.backward(new_box);
+    return new_box;
 }   
 }
 
