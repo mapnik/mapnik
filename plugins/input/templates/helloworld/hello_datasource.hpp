@@ -35,7 +35,7 @@ class hello_datasource : public mapnik::datasource
       // mandatory: return the layer descriptor
       mapnik::layer_descriptor get_descriptor() const;
       
-      // mandatory: whether to bind the datasource or delay
+      // mandatory: will bind the datasource given params
       void bind() const;
 
    private:
