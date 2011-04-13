@@ -674,3 +674,23 @@ def test_envelope_multiplication():
 
     eq_(c.x, 150)
     eq_(c.y, 150)
+
+# Box2d clipping
+def test_envelope_pickle():
+    e1 = mapnik2.Box2d(-180,-90,180,90)
+    e2 = mapnik2.Box2d(-120,40,-110,48)
+    e1.clip(e2)
+    eq_(e1,e2)
+    
+    # madagascar in merc
+    e1 = mapnik2.Box2d(4772116.5490, -2744395.0631, 5765186.4203, -1609458.0673)
+    e2 = mapnik2.Box2d(5124338.3753, -2240522.1727, 5207501.8621, -2130452.8520)
+    e1.clip(e2)
+    eq_(e1,e2)
+    
+    # nz in lon/lat
+    e1 = mapnik2.Box2d(163.8062, -47.1897, 179.3628, -33.9069)
+    e2 = mapnik2.Box2d(173.7378, -39.6395, 174.4849, -38.9252)
+    e1.clip(e2)
+    eq_(e1,e2)
+    

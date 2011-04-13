@@ -311,6 +311,19 @@ template <typename T>
 #if !defined(__SUNPRO_CC)
 inline
 #endif
+void box2d<T>::clip(const box2d_type& other)
+{
+        minx_ = std::max(minx_,other.minx());
+        miny_ = std::max(miny_,other.miny());
+        maxx_ = std::min(maxx_,other.maxx());
+        maxy_ = std::min(maxy_,other.maxy());
+}
+
+
+template <typename T>
+#if !defined(__SUNPRO_CC)
+inline
+#endif
 bool box2d<T>::from_string(const std::string& s)
 {
     bool success = false;

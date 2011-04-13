@@ -84,6 +84,9 @@ box2d<double> (box2d<double>::*intersect)(box2d<double> const&) const = &box2d<d
 void (box2d<double>::*re_center_p1)(double,double) = &box2d<double>::re_center;
 void (box2d<double>::*re_center_p2)(coord<double,2> const& ) = &box2d<double>::re_center;
 
+// clip
+void (box2d<double>::*clip)(box2d<double> const&) = &box2d<double>::clip;
+
 void export_envelope()
 {
     using namespace boost::python;
@@ -133,6 +136,20 @@ void export_envelope()
              (arg("Coord")),
              "Moves the envelope so that the given coordinates become its new center.\n"
              "The width and the height are preserved.\n"
+             "\n "
+             "Example:\n"
+             ">>> e = Box2d(0, 0, 100, 100)\n"
+             ">>> e.center(Coord60, 60)\n"
+             ">>> e.center()\n"
+             "Coord(60.0,60.0)\n"
+             ">>> (e.width(), e.height())\n"
+             "(100.0, 100.0)\n"
+             ">>> e\n"
+             "Box2d(10.0, 10.0, 110.0, 110.0)\n"
+            )
+        .def("clip", clip,
+             (arg("other")),
+             "Clip the envelope based on the bounds of another envelope.\n"
              "\n "
              "Example:\n"
              ">>> e = Box2d(0, 0, 100, 100)\n"
