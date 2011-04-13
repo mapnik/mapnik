@@ -78,10 +78,10 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
             std::cerr << "Exception caught while loading mapping memory file: " << uri << std::endl;
         }
     }
-    else
+    /*else
     {
-        std::cerr << "### WARNING Memory region does not exist file:" << uri << std::endl;
-    }
+        std::cerr << "### WARNING Memory region does not exist file: " << uri << std::endl;
+    }*/
     return result;
 }
 
