@@ -83,7 +83,7 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
     }
 
     if (! extent_initialized_)
-        throw datasource_exception("Raster Plugin: valid <lox> <loy> <hix> <hiy>, or <extent> are required");
+        throw datasource_exception("Raster Plugin: valid <extent> or <lox> <loy> <hix> <hiy> are required");
 
     if (bind) 
     {
@@ -113,7 +113,7 @@ void raster_datasource::bind() const
     }
     catch (mapnik::image_reader_exception const& ex)
     {
-        std::cerr << "Raster Plugin: image reader exception caught:" << ex.what() << std::endl;
+        std::cerr << "Raster Plugin: image reader exception caught: " << ex.what() << std::endl;
         throw;
     }
     catch (...)
