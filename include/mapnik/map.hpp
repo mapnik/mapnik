@@ -72,7 +72,7 @@ private:
     static const unsigned MAX_MAPSIZE=MIN_MAPSIZE<<10;
     unsigned width_;
     unsigned height_;
-    std::string  srs_;
+    std::string srs_;
     int buffer_size_;
     boost::optional<color> background_;
     boost::optional<std::string> background_image_;
@@ -81,7 +81,8 @@ private:
     std::map<std::string,font_set> fontsets_;
     std::vector<layer> layers_;
     aspect_fix_mode aspectFixMode_;
-    box2d<double> currentExtent_;
+    box2d<double> current_extent_;
+    boost::optional<box2d<double> > maximum_extent_;
     parameters extra_attr_;
         
 public:
@@ -330,7 +331,16 @@ public:
      *  @return Buffer size as int
      */
     int buffer_size() const;
+
+    /*! \brief Set the map maximum extent.
+     *  @param box The bounding box for the maximum extent.
+     */
+    void set_maximum_extent(box2d<double>const& box);
         
+    /*! \brief Get the map maximum extent as box2d<double>
+    */
+    boost::optional<box2d<double> > const& maximum_extent() const;
+
     /*! \brief Zoom the map at the current position.
      *  @param factor The factor how much the map is zoomed in or out.
      */

@@ -14,6 +14,11 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added optional 'maximum-extent' parameter to map object. If set will be used, instead of combined
+  layer extents, for return value of map.zoom_all(). Useful in cases where the combined layer extents
+  cannot possibly be projected into the map srs or the user wishes to control map bounds without
+  modifying the extents of each layer.
+
 - Support for NODATA values with grey and rgb images in GDAL plugin (#727)
 
 - Print warning if invalid XML property names are used (#110)

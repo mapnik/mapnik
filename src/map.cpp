@@ -85,7 +85,8 @@ Map::Map(const Map& rhs)
       metawriters_(rhs.metawriters_),
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
-      currentExtent_(rhs.currentExtent_),
+      current_extent_(rhs.current_extent_),
+      maximum_extent_(rhs.maximum_extent_),
       extra_attr_(rhs.extra_attr_) {}
     
 Map& Map::operator=(const Map& rhs)
@@ -101,6 +102,7 @@ Map& Map::operator=(const Map& rhs)
     metawriters_ = rhs.metawriters_;
     layers_=rhs.layers_;
     aspectFixMode_=rhs.aspectFixMode_;
+    maximum_extent_=rhs.maximum_extent_;
     extra_attr_=rhs.extra_attr_;
     return *this;
 }
@@ -333,12 +335,22 @@ void Map::set_background_image(std::string const& image_filename)
     background_image_ = image_filename;
 }
 
+void Map::set_maximum_extent(box2d<double> const& box)
+{
+    maximum_extent_ = box;
+}
+        
+boost::optional<box2d<double> > const& Map::maximum_extent() const
+{
+    return maximum_extent_;
+}
+
 void Map::zoom(double factor)
 {
-    coord2d center = currentExtent_.center();
-    double w = factor * currentExtent_.width();
-    double h = factor * currentExtent_.height();
-    currentExtent_ = box2d<double>(center.x - 0.5 * w, 
+    coord2d center = current_extent_.center();
+    double w = factor * current_extent_.width();
+    double h = factor * current_extent_.height();
+    current_extent_ = box2d<double>(center.x - 0.5 * w, 
                                    center.y - 0.5 * h,
                                    center.x + 0.5 * w, 
                                    center.y + 0.5 * h);
@@ -347,75 +359,86 @@ void Map::zoom(double factor)
     
 void Map::zoom_all() 
 {
-    try 
-    {
-        projection proj0(srs_);
-        box2d<double> ext;
-        bool first = true;
-        std::vector<layer>::const_iterator itr = layers_.begin();
-        std::vector<layer>::const_iterator end = layers_.end();
-        while (itr != end)
-        {
-            if (itr->isActive())
-            {
-                std::string const& layer_srs = itr->srs();
-                projection proj1(layer_srs);
-                proj_transform prj_trans(proj0,proj1);
-                    
-                box2d<double> layerExt = itr->envelope();
-                double x0 = layerExt.minx();
-                double y0 = layerExt.miny();
-                double z0 = 0.0;
-                double x1 = layerExt.maxx();
-                double y1 = layerExt.maxy();
-                double z1 = 0.0;
-                prj_trans.backward(x0,y0,z0);
-                prj_trans.backward(x1,y1,z1);
-                    
-                box2d<double> layerExt2(x0,y0,x1,y1);
-    #ifdef MAPNIK_DEBUG
-                std::clog << " layer1 - > " << layerExt << "\n";
-                std::clog << " layer2 - > " << layerExt2 << "\n";
-    #endif                
-                if (first)
-                {
-                    ext = layerExt2;
-                    first = false;
-                }
-                else 
-                {
-                    ext.expand_to_include(layerExt2);
-                }
-            }
-            ++itr;
-        }
-        zoom_to_box(ext);
+    if (maximum_extent_) {
+        zoom_to_box(*maximum_extent_);
     }
-    catch (proj_init_error & ex)
+    else
     {
-        std::clog << "proj_init_error:" << ex.what() << '\n';
+        try 
+        {
+            projection proj0(srs_);
+            box2d<double> ext;
+            bool success = false;
+            bool first = true;
+            std::vector<layer>::const_iterator itr = layers_.begin();
+            std::vector<layer>::const_iterator end = layers_.end();
+            while (itr != end)
+            {
+                if (itr->isActive())
+                {
+                    std::string const& layer_srs = itr->srs();
+                    projection proj1(layer_srs);
+                    
+                    proj_transform prj_trans(proj0,proj1);
+                        
+                    box2d<double> layer_ext = itr->envelope();
+                    if (prj_trans.backward(layer_ext))
+                    {
+                        success = true;
+            #ifdef MAPNIK_DEBUG
+                        std::clog << " layer " << itr->name() << " original ext: " << itr->envelope() << "\n";
+                        std::clog << " layer " << itr->name() << " transformed to map srs: " << layer_ext << "\n";
+            #endif                
+                        if (first)
+                        {
+                            ext = layer_ext;
+                            first = false;
+                        }
+                        else 
+                        {
+                            ext.expand_to_include(layer_ext);
+                        }
+                    }
+                }
+                ++itr;
+            }
+            if (success) {
+                zoom_to_box(ext);
+            } else {
+                std::ostringstream s;
+                s << "could not zoom to combined layer extents "
+                  << "using zoom_all because proj4 could not "
+                  << "back project any layer extents into the map srs "
+                  << "(set map 'maximum-extent' to override)";
+                throw std::runtime_error(s.str());
+            }
+        }
+        catch (proj_init_error & ex)
+        {
+            std::clog << "proj_init_error:" << ex.what() << "\n";
+        }    
     }
 }
 
 void Map::zoom_to_box(const box2d<double> &box)
 {
-    currentExtent_=box;
+    current_extent_=box;
     fixAspectRatio();
 }
 
 void Map::fixAspectRatio()
 {
     double ratio1 = (double) width_ / (double) height_;
-    double ratio2 = currentExtent_.width() / currentExtent_.height();
+    double ratio2 = current_extent_.width() / current_extent_.height();
     if (ratio1 == ratio2) return;
 
     switch(aspectFixMode_) 
     {
     case ADJUST_BBOX_HEIGHT:
-        currentExtent_.height(currentExtent_.width() / ratio1);
+        current_extent_.height(current_extent_.width() / ratio1);
         break;
     case ADJUST_BBOX_WIDTH:
-        currentExtent_.width(currentExtent_.height() * ratio1);
+        current_extent_.width(current_extent_.height() * ratio1);
         break;
     case ADJUST_CANVAS_HEIGHT:
         height_ = int (width_ / ratio2 + 0.5); 
@@ -425,15 +448,15 @@ void Map::fixAspectRatio()
         break;
     case GROW_BBOX:
         if (ratio2 > ratio1)
-            currentExtent_.height(currentExtent_.width() / ratio1);
+            current_extent_.height(current_extent_.width() / ratio1);
         else 
-            currentExtent_.width(currentExtent_.height() * ratio1);
+            current_extent_.width(current_extent_.height() * ratio1);
         break;  
     case SHRINK_BBOX:
         if (ratio2 < ratio1)
-            currentExtent_.height(currentExtent_.width() / ratio1);
+            current_extent_.height(current_extent_.width() / ratio1);
         else 
-            currentExtent_.width(currentExtent_.height() * ratio1);
+            current_extent_.width(current_extent_.height() * ratio1);
         break;  
     case GROW_CANVAS:
         if (ratio2 > ratio1)
@@ -449,24 +472,24 @@ void Map::fixAspectRatio()
         break;
     default:
         if (ratio2 > ratio1)
-            currentExtent_.height(currentExtent_.width() / ratio1);
+            current_extent_.height(current_extent_.width() / ratio1);
         else 
-            currentExtent_.width(currentExtent_.height() * ratio1);
+            current_extent_.width(current_extent_.height() * ratio1);
         break;  
     }
 }
    
 const box2d<double>& Map::get_current_extent() const
 {
-    return currentExtent_;
+    return current_extent_;
 }
 
 box2d<double> Map::get_buffered_extent() const
 {
     double extra = 2.0 * scale() * buffer_size_;
-    box2d<double> ext(currentExtent_);
-    ext.width(currentExtent_.width() + extra);
-    ext.height(currentExtent_.height() + extra);
+    box2d<double> ext(current_extent_);
+    ext.width(current_extent_.width() + extra);
+    ext.height(current_extent_.height() + extra);
     return ext;
 }
    
@@ -474,12 +497,12 @@ void Map::pan(int x,int y)
 {
     int dx = x - int(0.5 * width_);
     int dy = int(0.5 * height_) - y;
-    double s = width_/currentExtent_.width();
-    double minx  = currentExtent_.minx() + dx/s;
-    double maxx  = currentExtent_.maxx() + dx/s;
-    double miny  = currentExtent_.miny() + dy/s;
-    double maxy  = currentExtent_.maxy() + dy/s;
-    currentExtent_.init(minx,miny,maxx,maxy);
+    double s = width_/current_extent_.width();
+    double minx  = current_extent_.minx() + dx/s;
+    double maxx  = current_extent_.maxx() + dx/s;
+    double miny  = current_extent_.miny() + dy/s;
+    double maxy  = current_extent_.maxy() + dy/s;
+    current_extent_.init(minx,miny,maxx,maxy);
 }
 
 void Map::pan_and_zoom(int x,int y,double factor)
@@ -491,8 +514,8 @@ void Map::pan_and_zoom(int x,int y,double factor)
 double Map::scale() const
 {
     if (width_>0)
-        return currentExtent_.width()/width_;
-    return currentExtent_.width();
+        return current_extent_.width()/width_;
+    return current_extent_.width();
 }
 
 double Map::scale_denominator() const 
@@ -503,7 +526,7 @@ double Map::scale_denominator() const
 
 CoordTransform Map::view_transform() const
 {
-    return CoordTransform(width_,height_,currentExtent_);
+    return CoordTransform(width_,height_,current_extent_);
 }
     
 featureset_ptr Map::query_point(unsigned index, double x, double y) const
@@ -519,10 +542,10 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             proj_transform prj_trans(source,dest);
             prj_trans.backward(x,y,z);
                 
-            double minx = currentExtent_.minx();
-            double miny = currentExtent_.miny();
-            double maxx = currentExtent_.maxx();
-            double maxy = currentExtent_.maxy();
+            double minx = current_extent_.minx();
+            double miny = current_extent_.miny();
+            double maxx = current_extent_.maxx();
+            double maxy = current_extent_.maxy();
                 
             prj_trans.backward(minx,miny,z);
             prj_trans.backward(maxx,maxy,z);
@@ -564,10 +587,10 @@ featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
             double z = 0;
             prj_trans.backward(x,y,z);
                 
-            double minx = currentExtent_.minx();
-            double miny = currentExtent_.miny();
-            double maxx = currentExtent_.maxx();
-            double maxy = currentExtent_.maxy();
+            double minx = current_extent_.minx();
+            double miny = current_extent_.miny();
+            double maxx = current_extent_.maxx();
+            double maxy = current_extent_.maxy();
                 
             prj_trans.backward(minx,miny,z);
             prj_trans.backward(maxx,maxy,z);

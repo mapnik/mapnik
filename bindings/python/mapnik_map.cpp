@@ -503,6 +503,15 @@ void export_map()
                       "<mapnik._mapnik.layer object at 0x5fe130>\n"
             )
 
+        .add_property("maximum_extent",make_function
+                      (&Map::maximum_extent,return_value_policy<copy_const_reference>()),
+                      &Map::set_maximum_extent,
+                      "The maximum extent of the map.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.maximum_extent = Box2d(-180,-90,180,90)\n"
+            )
+
         .add_property("srs",
                       make_function(&Map::srs,return_value_policy<copy_const_reference>()),
                       &Map::set_srs,
