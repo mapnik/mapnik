@@ -825,6 +825,16 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         set_attr( map_node, "buffer-size", buffer_size ); 
     }
 
+    optional<box2d<double> > const& maximum_extent = map.maximum_extent();
+    if ( maximum_extent)
+    {
+        std::ostringstream s;
+        s << std::setprecision(16)
+          << maximum_extent->minx() << "," << maximum_extent->miny() << ","
+          << maximum_extent->maxx() << "," << maximum_extent->maxy();
+        set_attr( map_node, "maximum-extent", s.str() ); 
+    }
+
     {
         Map::const_fontset_iterator it = map.fontsets().begin();
         Map::const_fontset_iterator end = map.fontsets().end();

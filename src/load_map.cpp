@@ -180,7 +180,8 @@ void map_parser::parse_map( Map & map, ptree const & pt )
           << "buffer-size,"
           << "paths-from-xml,"
           << "minimum-version,"
-          << "font-directory";
+          << "font-directory,"
+          << "maximum-extent";
         ensure_attrs(map_node, "Map", s.str());
         
         try
@@ -213,6 +214,25 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             if (buffer_size)
             {
                 map.set_buffer_size(*buffer_size);
+            }
+
+            optional<std::string> maximum_extent = get_opt_attr<std::string>(map_node,"maximum-extent");
+            if (maximum_extent)
+            {
+                box2d<double> box;
+                if (box.from_string(*maximum_extent))
+                {
+                    map.set_maximum_extent(box);
+                }
+                else
+                {
+                    std::ostringstream s;
+                    s << "failed to parse 'maximum-extent'";
+                    if ( strict_ )
+                        throw config_error(s.str());
+                    else
+                        std::clog << "### WARNING: " << s.str() << std::endl;
+                }
             }
 
             optional<std::string> font_directory = get_opt_attr<std::string>(map_node,"font-directory");
