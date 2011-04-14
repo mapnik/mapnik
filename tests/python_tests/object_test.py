@@ -329,7 +329,7 @@ def test_layer_init():
     eq_(l.envelope(),mapnik2.Box2d())
     eq_(l.clear_label_cache,False)
     eq_(l.cache_features,False)
-    eq_(l.visible(),True)
+    eq_(l.visible(1),True)
     eq_(l.abstract,'')
     eq_(l.active,True)
     eq_(l.datasource,None)
