@@ -46,7 +46,12 @@ mapnik::coord2d forward_transform_c(mapnik::proj_transform& t, mapnik::coord2d c
     double x = c.x;
     double y = c.y;
     double z = 0.0;
-    t.forward(x,y,z);
+    if (!t.forward(x,y,z)) {
+        std::ostringstream s;
+        s << "Failed to forward project "
+          << c << " from " << t.source().params() << " to: " << t.dest().params();
+        throw std::runtime_error(s.str());
+    }
     return mapnik::coord2d(x,y);
 }
    
@@ -55,23 +60,39 @@ mapnik::coord2d backward_transform_c(mapnik::proj_transform& t, mapnik::coord2d 
     double x = c.x;
     double y = c.y;
     double z = 0.0;
-    t.backward(x,y,z);
+    if (!t.backward(x,y,z)) {
+        std::ostringstream s;
+        s << "Failed to back project "
+          << c << " from " <<  t.dest().params() << " to: " << t.source().params();
+        throw std::runtime_error(s.str());
+    }
     return mapnik::coord2d(x,y);
 }
 
 mapnik::box2d<double> forward_transform_env(mapnik::proj_transform& t, mapnik::box2d<double> const & box)
 {
     mapnik::box2d<double> new_box = box;
-    t.forward(new_box);
+    if (!t.forward(new_box)) {
+        std::ostringstream s;
+        s << "Failed to forward project "
+          << box << " from " << t.source().params() << " to: " << t.dest().params();
+        throw std::runtime_error(s.str());
+    }
     return new_box;
 }
 
 mapnik::box2d<double> backward_transform_env(mapnik::proj_transform& t, mapnik::box2d<double> const & box)
 {
     mapnik::box2d<double> new_box = box;
-    t.backward(new_box);
+    if (!t.backward(new_box)){
+        std::ostringstream s;
+        s << "Failed to back project "
+          << box << " from " <<  t.dest().params() << " to: " << t.source().params();
+        throw std::runtime_error(s.str());
+    }
     return new_box;
-}   
+}
+
 }
 
 void export_proj_transform ()
