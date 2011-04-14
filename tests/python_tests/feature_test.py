@@ -14,14 +14,10 @@ class FeatureTest(unittest.TestCase):
         self.failUnless(f is not None)
 
     def test_python_extended_constructor(self):
-        try:
-            from shapely.geometry import Point
-        except ImportError:
-            raise Todo("Make this test not dependant on shapely")
-
-        f = self.makeOne(1, Point(3,6), foo="bar")
+        from mapnik2 import Geometry2d
+        f = self.makeOne(1, Geometry2d.from_wkt('Point(3 6)'), foo="bar")
         self.failUnlessEqual(f['foo'], 'bar')
-        env = f.geometry.envelope()
+        env = f.get_geometry(0).envelope()
         self.failUnlessEqual(env.minx, 3)
         self.failUnlessEqual(env.miny, 6)
 
@@ -40,22 +36,17 @@ class FeatureTest(unittest.TestCase):
 
 
     def test_add_wkb_geometry(self):
-        try:
-            from shapely.geometry import Point
-        except ImportError:
-            raise Todo("Make this test not dependant on shapely")
+        from mapnik2 import Geometry2d
 
         def add_it(geometry):
             f = self.makeOne(1)
             self.failUnlessEqual(len(f.geometries), 0)
             f.add_geometry(geometry)
             self.failUnlessEqual(len(f.geometries), 1)
-            env = f.geometry.envelope()
+            env = f.get_geometry(0).envelope()
             self.failUnlessEqual(env.minx, 3)
             self.failUnlessEqual(env.minx, env.maxx)
             self.failUnlessEqual(env.miny, 6)
             self.failUnlessEqual(env.miny, env.maxy)
-
-        geometries = (Point(3,6), 'POINT(3 6)', Point(3,6).wkb)
-        for geom in geometries:
-            add_it(geom)
+        
+        add_it(Geometry2d.from_wkt('Point(3 6)'))

@@ -14,7 +14,7 @@ class MemoryDatasource(unittest.TestCase):
     def makeFeature(self, geom, **properties):
         from mapnik2 import Feature
         f = Feature(self.ids.next())
-        f.add_geometry(geom.wkb)
+        f.add_geometry(geom)
         for k,v in properties.iteritems():
             f[k] = v
         return f
@@ -24,14 +24,10 @@ class MemoryDatasource(unittest.TestCase):
         self.failUnless(f is not None)
 
     def test_add_feature(self):
-        try:
-            from shapely.geometry import Point
-        except ImportError:
-            raise Todo("Make this test not dependant on shapely")
-
         md = self.makeOne()
         self.failUnlessEqual(md.num_features(), 0)
-        md.add_feature(self.makeFeature(Point(2,3), foo='bar'))
+        from mapnik2 import Geometry2d
+        md.add_feature(self.makeFeature(Geometry2d.from_wkt('Point(2 3)'), foo='bar'))
         self.failUnlessEqual(md.num_features(), 1)
 
         from mapnik2 import Coord
