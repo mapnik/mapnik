@@ -154,14 +154,6 @@ private:
         if (ds)
         {
             
-            box2d<double> ext = m_.get_buffered_extent();
-
-            // clip buffered extent by maximum extent, if supplied
-            boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
-            if (maximum_extent) {
-                ext.clip(*maximum_extent);
-            }
-
             projection proj1(lay.srs());
             proj_transform prj_trans(proj0,proj1);
 
@@ -169,43 +161,46 @@ private:
             // todo: add raster re-projection as an optional feature 
             if (ds->type() == datasource::Raster && !prj_trans.equal())
             {
-                std::clog << "WARNING: Map srs does not match layer srs, skipping raster layer '" << lay.name() << "' as raster re-projection is not currently supported (http://trac.mapnik.org/ticket/663)\n";
-                std::clog << "map srs: '" << m_.srs() << "'\nlayer srs: '" << lay.srs() << "' \n";       
+                std::clog << "WARNING: Map srs does not match layer srs, skipping raster layer '" << lay.name() 
+                    << "' as raster re-projection is not currently supported (http://trac.mapnik.org/ticket/663)\n"
+                    << "map srs: '" << m_.srs() << "'\nlayer srs: '" << lay.srs() << "' \n";       
                 return;
             }
             
-            // 
+            box2d<double> map_ext = m_.get_buffered_extent();
+
+            // clip buffered extent by maximum extent, if supplied
+            boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
+            if (maximum_extent) {
+                map_ext.clip(*maximum_extent);
+            }
             
             box2d<double> layer_ext = lay.envelope();
                
-            double lx0 = layer_ext.minx();
-            double ly0 = layer_ext.miny();
-            double lz0 = 0.0;
-            double lx1 = layer_ext.maxx();
-            double ly1 = layer_ext.maxy();
-            double lz1 = 0.0;
-            // back project layers extent into main map projection
-            prj_trans.backward(lx0,ly0,lz0);
-            prj_trans.backward(lx1,ly1,lz1);
-               
-            // if no intersection then nothing to do for layer
-            if ( lx0 > ext.maxx() || lx1 < ext.minx() || ly0 > ext.maxy() || ly1 < ext.miny() )
+            // first, try to forward project map ext into layer srs
+            if (prj_trans.forward(map_ext) && map_ext.intersects(layer_ext))
+             {
+                layer_ext.clip(map_ext);
+            } 
+            // fallback to back projecting layer into map srs
+            else if (prj_trans.backward(layer_ext) && map_ext.intersects(map_ext))
             {
-                return;
+                layer_ext.clip(map_ext);
+                // forward project layer extent back into native projection
+                if (!prj_trans.forward(layer_ext))
+                    std::clog << "WARNING: layer " << lay.name()
+                      << " extent " << layer_ext << " in map projection "
+                      << " did not reproject properly back to layer projection\n";
             }
-            
-            // clip query bbox
-            lx0 = std::max(ext.minx(),lx0);
-            ly0 = std::max(ext.miny(),ly0);
-            lx1 = std::min(ext.maxx(),lx1);
-            ly1 = std::min(ext.maxy(),ly1);
-            
-            prj_trans.forward(lx0,ly0,lz0);
-            prj_trans.forward(lx1,ly1,lz1);
-            box2d<double> bbox(lx0,ly0,lx1,ly1);
-            
-            query::resolution_type res(m_.width()/m_.get_current_extent().width(),m_.height()/m_.get_current_extent().height());
-            query q(bbox,res,scale_denom); //BBOX query
+            else
+            {
+                 // if no intersection then nothing to do for layer
+                 return;
+            }
+                        
+            query::resolution_type res(m_.width()/m_.get_current_extent().width(),
+                                       m_.height()/m_.get_current_extent().height());
+            query q(layer_ext,res,scale_denom); //BBOX query
                            
             std::vector<feature_type_style*> active_styles;
             std::set<std::string> names;
