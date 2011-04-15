@@ -28,6 +28,7 @@
 #include <algorithm>
 
 #include <mapnik/box2d.hpp>
+#include <mapnik/vertex.hpp>
 #include <mapnik/coord_array.hpp>
 #include <mapnik/proj_transform.hpp>
 
@@ -70,14 +71,37 @@ struct MAPNIK_DECL coord_transform2
         geom_(geom), 
         prj_trans_(prj_trans)  {}
         
-    unsigned  vertex(double * x , double  * y) const
+    unsigned vertex(double * x , double  * y) const
+    {
+        unsigned command;
+        bool ok = false;
+        bool skipped_points = false;
+        while (!ok)
+        {
+            command = geom_.vertex(x,y);
+            double z=0;
+            ok = prj_trans_.backward(*x,*y,z);
+            if (!ok) {
+                skipped_points = true;
+            }
+            ok = ok || (command == SEG_END);
+        }
+        if (skipped_points && (command == SEG_LINETO))
+        {
+            command = SEG_MOVETO;
+        }
+        t_.forward(x,y);
+        return command;
+    }
+
+    /*unsigned  vertex(double * x , double  * y) const
     {
         unsigned command = geom_.vertex(x,y);
         double z=0;
         prj_trans_.backward(*x,*y,z);
         t_.forward(x,y);
         return command;
-    }
+    }*/
         
     void rewind (unsigned pos)
     {
@@ -94,6 +118,7 @@ private:
     Geometry const& geom_;
     proj_transform const& prj_trans_;
 };
+
     
 template <typename Transform,typename Geometry>
 struct MAPNIK_DECL coord_transform3
