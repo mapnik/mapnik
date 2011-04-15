@@ -135,7 +135,14 @@ private:
 #ifdef MAPNIK_DEBUG
         //wall_clock_progress_timer timer(clog, "end layer rendering: ");
 #endif
-        boost::shared_ptr<datasource> ds = lay.datasource();
+
+        std::vector<std::string> const& style_names = lay.styles();
+        
+        unsigned int num_styles = style_names.size();
+        if (!num_styles)
+            return;
+        
+        mapnik::datasource_ptr ds = lay.datasource();
         if (!ds) 
         {
             std::clog << "WARNING: No datasource for layer '" << lay.name() << "'\n";
@@ -206,14 +213,14 @@ private:
             double filt_factor = 1;
             directive_collector d_collector(&filt_factor);
             
-            std::vector<std::string> const& style_names = lay.styles();
             // iterate through all named styles collecting active styles and attribute names
             BOOST_FOREACH(std::string const& style_name, style_names)
             {
                 boost::optional<feature_type_style const&> style=m_.find_style(style_name);
                 if (!style) 
                 {
-                    std::clog << "WARNING: style '" << style_name << "' required for layer '" << lay.name() << "' does not exist.\n";
+                    std::clog << "WARNING: style '" << style_name << "' required for layer '"
+                        << lay.name() << "' does not exist.\n";
                     continue;
                 }
                 
@@ -245,7 +252,7 @@ private:
             }
             
             memory_datasource cache;
-            bool cache_features = lay.cache_features() && style_names.size()>1?true:false;
+            bool cache_features = lay.cache_features() && num_styles>1?true:false;
             bool first = true;
             
             BOOST_FOREACH (feature_type_style * style, active_styles)
