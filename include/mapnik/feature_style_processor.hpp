@@ -148,6 +148,13 @@ private:
         {
             
             box2d<double> ext = m_.get_buffered_extent();
+
+            // clip buffered extent by maximum extent, if supplied
+            boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
+            if (maximum_extent) {
+                ext.clip(*maximum_extent);
+            }
+
             projection proj1(lay.srs());
             proj_transform prj_trans(proj0,proj1);
 
