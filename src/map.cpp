@@ -409,7 +409,7 @@ void Map::zoom_all()
                 s << "could not zoom to combined layer extents "
                   << "using zoom_all because proj4 could not "
                   << "back project any layer extents into the map srs "
-                  << "(set map 'maximum-extent' to override)";
+                  << "(set map 'maximum-extent' to override layer extents)";
                 throw std::runtime_error(s.str());
             }
         }
