@@ -16,3 +16,6 @@ wget http://www.python.org/ftp/python/3.1.3/python-3.1.3-macosx10.3.dmg
 
 # 3.1.2 sources
 wget http://www.python.org/ftp/python/3.1.2/Python-3.1.2.tar.bz2
+
+# 3.2
+wget http://www.python.org/ftp/python/3.2/python-3.2-macosx10.6.dmg
