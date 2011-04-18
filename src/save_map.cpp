@@ -281,6 +281,10 @@ public:
         {
             set_attr( sym_node, "fill", sym.get_fill() );
         }
+        if (sym.get_opacity() != dfl.get_opacity() || explicit_defaults_)
+        {
+            set_attr( sym_node, "opacity", sym.get_opacity() );
+        }
         if (sym.get_width() != dfl.get_width() || explicit_defaults_)
         {
             set_attr( sym_node, "width", sym.get_width() );
@@ -288,6 +292,19 @@ public:
         if (sym.get_height() != dfl.get_height() || explicit_defaults_)
         {
             set_attr( sym_node, "height", sym.get_height() );
+        }
+        if (sym.get_marker_type() != dfl.get_marker_type() || explicit_defaults_)
+        {
+            set_attr( sym_node, "marker-type", sym.get_marker_type() );
+        }
+        if (sym.get_marker_placement() != dfl.get_marker_placement() || explicit_defaults_)
+        {
+            set_attr( sym_node, "placement", sym.get_marker_placement() );
+        }
+        std::string tr_str = sym.get_transform_string();
+        if (tr_str != "matrix(1, 0, 0, 1, 0, 0)" || explicit_defaults_ )
+        {
+            set_attr( sym_node, "transform", tr_str );
         }
 
         const stroke & strk =  sym.get_stroke();
