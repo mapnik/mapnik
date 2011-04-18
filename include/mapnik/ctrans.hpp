@@ -73,7 +73,7 @@ struct MAPNIK_DECL coord_transform2
         
     unsigned vertex(double * x , double  * y) const
     {
-        unsigned command;
+        unsigned command(SEG_MOVETO);
         bool ok = false;
         bool skipped_points = false;
         while (!ok)
