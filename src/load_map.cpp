@@ -816,6 +816,7 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
     {
         std::stringstream s;
         s << "file,base,allow-overlap,ignore-placement,opacity,placement,meta-writer,meta-output";
+        
         optional<std::string> file =  get_opt_attr<string>(sym, "file");
         optional<std::string> base =  get_opt_attr<string>(sym, "base");
         optional<boolean> allow_overlap =
@@ -829,7 +830,7 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
 
         if (file)
         {
-            s << "base,transform";
+            s << "transform";
             ensure_attrs(sym, "PointSymbolizer", s.str());
             try
             {
@@ -946,9 +947,9 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
         s << "file,base,transform,fill,opacity,"
           << "spacing,max-error,allow-overlap,"
           << "width,height,placement,marker-type,"
-          << "meta-writer,meta-output,"
           << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
-          << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray";
+          << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray,"
+          << "meta-writer,meta-output";
         ensure_attrs(sym, "MarkersSymbolizer", s.str());
 
         if (file)
@@ -1172,8 +1173,8 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
       << "spacing,minimum-distance,minimum-padding,"
       << "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
       << "horizontal-alignment,justify-alignment,"
-      << "meta-writer,meta-output,"
-      << "placements,placement-type";
+      << "placements,placement-type,"
+      << "meta-writer,meta-output";
     
     ensure_attrs(sym, "TextSymbolizer", s.str());
     try
@@ -1411,7 +1412,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
       << "horizontal-alignment,justify-alignment,"
       // additional for shield
       /* transform instead of orientation */ 
-      << "file,transform,shield-dx,shield-dy,"
+      << "file,base,transform,shield-dx,shield-dy,"
       << "text-opacity,unlock-image,no-text,"
       << "meta-writer,meta-output";      
     
@@ -1733,9 +1734,10 @@ void map_parser::parse_stroke(stroke & strk, ptree const & sym)
 void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
 {
     std::stringstream s;
-    s << "meta-writer,meta-output,"
-      << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
-      << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray";
+    s << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
+      << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray,"
+      << "meta-writer,meta-output";
+
     ensure_attrs(sym, "LineSymbolizer", s.str());
     try
     {
@@ -1812,7 +1814,7 @@ void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
 void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
 {
     // no support for meta-writer,meta-output
-    ensure_attrs(sym, "PolygonSymbolizer", "mode,scaling,opacity,filter-factory");
+    ensure_attrs(sym, "PolygonSymbolizer", "mode,scaling,opacity,filter-factor");
     try
     {
         raster_symbolizer raster_sym;
