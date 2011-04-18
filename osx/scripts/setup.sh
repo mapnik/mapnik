@@ -11,6 +11,7 @@ export DYLD_LIBRARY_PATH=$PREFIX/lib
 # final resting place
 INSTALL=/Library/Frameworks/Mapnik.framework/unix/lib
 export DYLD_LIBRARY_PATH=$PREFIX/lib
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
 
 # make a directory to hold icu and boost
@@ -26,7 +27,8 @@ cd icu/source
 export CFLAGS="-O3 -arch i386 -arch x86_64"
 export CXXFLAGS="-O3 -arch i386 -arch x86_64"
 export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
-./runConfigureICU MacOSX --prefix=$PREFIX --disable-static --enable-shared --disable-samples --disable-icuio --disable-layout --disable-tests --disable-extras --with-library-bits=64
+#./runConfigureICU MacOSX --prefix=$PREFIX --disable-static --enable-shared --disable-samples --disable-icuio --disable-layout --disable-tests --disable-extras --with-library-bits=64
+./runConfigureICU MacOSX --prefix=$PREFIX --disable-static --enable-shared --with-library-bits=64
 make install -j4
 # note -R is needed to preserve the symlinks
 #cp -R lib/libicuuc.* ../../../sources/lib/
@@ -43,17 +45,31 @@ install_name_tool -id $INSTALL/libicudata.46.dylib libicudata.46.0.dylib
 install_name_tool -id $INSTALL/libicui18n.46.dylib libicui18n.46.0.dylib
 install_name_tool -change ../lib/libicudata.46.0.dylib $INSTALL/libicudata.46.dylib libicui18n.46.0.dylib
 install_name_tool -change libicuuc.46.dylib $INSTALL/libicuuc.46.dylib libicui18n.46.0.dylib
+cd ../
 
 
-wget http://cairographics.org/releases/pixman-0.21.4.tar.gz
-tar xvf pixman-0.21.4.tar.gz
-cd pixman-0.21.4
+# freetype2
+wget http://download.savannah.gnu.org/releases/freetype/freetype-2.4.4.tar.gz
+tar xvf freetype-2.4.4.tar.gz
+export CFLAGS="-O3 -arch i386 -arch x86_64"
+export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
+cd freetype-2.4.4
+./configure --prefix=$PREFIX
+make -j4
+make install
+install_name_tool -id $INSTALL/libfreetype.6.dylib ../../sources/lib/libfreetype.6.dylib
+cd ../
+
+# pixman
+wget http://cairographics.org/releases/pixman-0.20.2.tar.gz
+tar xvf pixman-0.20.2.tar.gz
+cd pixman-0.20.2
 ./configure --disable-dependency-tracking --prefix=$PREFIX
 make -j4
 make install
-
+cd ../../sources/lib/
 install_name_tool -id $INSTALL/libpixman-1.0.dylib ../../sources/lib/libpixman-1.0.dylib
-
+cd ../
 
 # fontconfig
 wget http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.8.0.tar.gz
@@ -64,7 +80,7 @@ cd fontconfig-2.8.0
 make -j4
 make install
 install_name_tool -id $INSTALL/libfontconfig.1.dylib ../../sources/lib/libfontconfig.1.dylib
-
+cd ../
 
 # Cairo
 wget http://cairographics.org/releases/cairo-1.10.2.tar.gz
@@ -90,18 +106,18 @@ export png_LIBS="-I/Library/Frameworks/UnixImageIO.framework/unix/lib -lpng14"
   
 make -j4
 make install
-
 install_name_tool -id $INSTALL/libcairo.2.dylib ../../sources/lib/libcairo.2.dylib
+cd ../
 
 # libsigcxx
 wget http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/libsigc++-2.2.8.tar.gz
 tar xvf libsigc++-2.2.8.tar.gz
 cd libsigc++-2.2.8
 ./configure --disable-dependency-tracking --prefix=$PREFIX
-make
+make -j4
 make install
-
 install_name_tool -id $INSTALL/libsigc-2.0.dylib ../../sources/lib/libsigc-2.0.dylib
+cd ../
 
 wget http://cairographics.org/releases/cairomm-1.9.8.tar.gz
 tar xvf cairomm-1.9.8.tar.gz
@@ -123,34 +139,33 @@ install_name_tool -id $INSTALL/libcairomm-1.0.1.dylib ../../sources/lib/libcairo
 #tar xvf pycairo-1.8.10.tar.bz2
 #./waf configure
 
-wget http://cairographics.org/releases/pycairo-1.8.8.tar.gz
-tar xvf pycairo-1.8.8.tar.gz
-cd pycairo-1.8.8
-export PKG_CONFIG_PATH=../../sources/lib/pkgconfig/
+#wget http://cairographics.org/releases/pycairo-1.8.8.tar.gz
+#tar xvf pycairo-1.8.8.tar.gz
+#cd pycairo-1.8.8
+#export PKG_CONFIG_PATH=../../sources/lib/pkgconfig/
 
 # py25
 # line 35 of configure.ac AM_PATH_PYTHON(2.5)
-export PATH=/Library/Frameworks/Python.framework/Versions/2.5/bin/:$PATH
-./configure --prefix=$PREFIX
-make -j4 install
+#export PATH=/Library/Frameworks/Python.framework/Versions/2.5/bin/:$PATH
+#./configure --prefix=$PREFIX
+#make -j4 install
 
 # py26
-export PATH=/Library/Frameworks/Python.framework/Versions/2.6/bin/:$PATH
-./configure --prefix=$PREFIX
-make -j4 install
+#export PATH=/Library/Frameworks/Python.framework/Versions/2.6/bin/:$PATH
+#./configure --prefix=$PREFIX
+#make -j4 install
 
 #py27
-export PATH=/Library/Frameworks/Python.framework/Versions/2.7/bin/:$PATH
-make clean
-./configure --prefix=$PREFIX
-make -j4 install
+#export PATH=/Library/Frameworks/Python.framework/Versions/2.7/bin/:$PATH
+#make clean
+#./configure --prefix=$PREFIX
+#make -j4 install
 
 
 # boost
-cd ../../deps
-wget http://voxel.dl.sourceforge.net/project/boost/boost/1.45.0/boost_1_45_0.tar.bz2
-tar xjvf boost_1_45_0.tar.bz2
-cd boost_1_45_0
+wget http://voxel.dl.sourceforge.net/project/boost/boost/1.46.1/boost_1_46_1.tar.bz2
+tar xjvf boost_1_46_1.tar.bz2
+cd boost_1_46_1
 
 # edit tools/build/v2/tools/python.jam, line 980, replace with:
     if $(target-os) in windows cygwin
@@ -168,25 +183,24 @@ cd boost_1_45_0
     }
 
 ./bootstrap.sh
-#--prefix-dir
 ./bjam --prefix=$PREFIX --with-python --with-thread --with-filesystem \
-  --with-iostreams --with-regex \
-  --with-program_options --with-system \
+  --with-regex --with-program_options --with-system \
   -sHAVE_ICU=1 -sICU_PATH=$PREFIX \
   toolset=darwin \
   address-model=32_64 \
   architecture=x86 \
   link=shared \
+  variant=release \
   stage
 
 ./bjam --prefix=$PREFIX --with-python --with-thread --with-filesystem \
-  --with-iostreams --with-regex \
-  --with-program_options --with-system \
+  --with-regex --with-program_options --with-system \
   -sHAVE_ICU=1 -sICU_PATH=$PREFIX \
   toolset=darwin \
   address-model=32_64 \
   architecture=x86 \
   link=shared \
+  variant=release \
   install
 
 # boost python for various versions are done in python script
@@ -203,7 +217,12 @@ mv stage/lib/libboost_python.dylib stage/lib/libboost_python27.dylib
 cp stage/lib/libboost_python27.dylib ../../sources/lib/libboost_python27.dylib
 
 python ../../scripts/build_boost_pythons.py 3.1 32_64
-cp stage/lib/libboost_python3.dylib ../../sources/lib/libboost_python31.dylib
+mv stage/lib/libboost_python3.dylib stage/lib/libboost_python31.dylib
+cp stage/lib/libboost_python31.dylib ../../sources/lib/libboost_python31.dylib
+
+python ../../scripts/build_boost_pythons.py 3.2 32_64
+mv stage/lib/libboost_python3.dylib stage/lib/libboost_python32.dylib
+cp stage/lib/libboost_python32.dylib ../../sources/lib/libboost_python32.dylib
 
 
 #cp stage/lib/libboost_*dylib ../../sources/lib/
@@ -215,45 +234,32 @@ install_name_tool -id $INSTALL/libboost_python25.dylib libboost_python25.dylib
 install_name_tool -id $INSTALL/libboost_python26.dylib libboost_python26.dylib
 install_name_tool -id $INSTALL/libboost_python27.dylib libboost_python27.dylib
 install_name_tool -id $INSTALL/libboost_python31.dylib libboost_python31.dylib
+install_name_tool -id $INSTALL/libboost_python32.dylib libboost_python32.dylib
 
 # fix boost libs
 install_name_tool -id $INSTALL/libboost_system.dylib libboost_system.dylib
 install_name_tool -id $INSTALL/libboost_filesystem.dylib libboost_filesystem.dylib
 install_name_tool -id $INSTALL/libboost_regex.dylib libboost_regex.dylib
 install_name_tool -id $INSTALL/libboost_program_options.dylib libboost_program_options.dylib
-install_name_tool -id $INSTALL/libboost_iostreams.dylib libboost_iostreams.dylib
 install_name_tool -id $INSTALL/libboost_thread.dylib libboost_thread.dylib
 install_name_tool -change libboost_system.dylib $INSTALL/libboost_system.dylib libboost_filesystem.dylib
 #install_name_tool -change libicui18n.46.dylib $INSTALL/libicui18n.46.dylib libboost_regex.dylib
 
+# currently broken, waiting on http://www.gaia-gis.it/rasterlite2/
 # rasterlite we must bundle as it is not available in the SQLite.framework
-cd ../../deps
-svn co https://www.gaia-gis.it/svn/librasterlite
-export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names -L/Library/Frameworks/SQLite3.framework/unix/lib -L/Library/Frameworks/UnixImageIO.framework/unix/lib -L/Library/Frameworks/PROJ.framework/unix/lib"
-export CFLAGS="-Os -arch i386 -arch x86_64 -I/Library/Frameworks/SQLite3.framework/unix/include -I/Library/Frameworks/UnixImageIO.framework/unix/include -I/Library/Frameworks/PROJ.framework/unix/include"
-export CXXFLAGS=$CFLAGS
-cd librasterlite
-./configure --disable-dependency-tracking --prefix=$PREFIX
-make clean
-make -j4
-make install
+#cd ../../deps
+#svn co https://www.gaia-gis.it/svn/librasterlite
+#export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names -L/Library/Frameworks/SQLite3.framework/unix/lib -L/Library/Frameworks/UnixImageIO.framework/unix/lib -L/Library/Frameworks/PROJ.framework/unix/lib"
+#export CFLAGS="-Os -arch i386 -arch x86_64 -I/Library/Frameworks/SQLite3.framework/unix/include -I/Library/Frameworks/UnixImageIO.framework/unix/include -I/Library/Frameworks/PROJ.framework/unix/include"
+#export CXXFLAGS=$CFLAGS
+#cd librasterlite
+#./configure --disable-dependency-tracking --prefix=$PREFIX
+#make clean
+#make -j4
+#make install
+#cd ../../sources/lib
+#install_name_tool -id $INSTALL/librasterlite.0.dylib librasterlite.0.dylib
 
-cd ../../sources/lib
-
-install_name_tool -id $INSTALL/librasterlite.0.dylib librasterlite.0.dylib
-
-# freetype2
-cd ../../deps
-wget http://download.savannah.gnu.org/releases/freetype/freetype-2.4.4.tar.gz
-tar xvf freetype-2.4.4.tar.gz
-export CFLAGS="-O3 -arch i386 -arch x86_64"
-export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
-cd freetype-2.4.4
-./configure --prefix=$PREFIX
-make -j4
-make install
-cd ../../sources/lib
-install_name_tool -id $INSTALL/libfreetype.6.dylib libfreetype.6.dylib
 
 ### MAPNIK ###
 
@@ -261,7 +267,7 @@ install_name_tool -id $INSTALL/libfreetype.6.dylib libfreetype.6.dylib
 export DYLD_LIBRARY_PATH=$PREFIX/lib
 
 # compile mapnik using osx/config.py
-scons PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+scons PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig -j2 install BINDINGS=''
 
 # then compile each python version..
 
