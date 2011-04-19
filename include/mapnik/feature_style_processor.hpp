@@ -76,11 +76,16 @@ class feature_style_processor
         Feature const& f_;
         proj_transform const& prj_trans_;
     };
+
 public:
+
     explicit feature_style_processor(Map const& m, double scale_factor = 1.0)
         : m_(m),
           scale_factor_(scale_factor) {}
-    
+
+    /*!
+     * @return apply renderer to all maps layers.
+     */
     void apply()
     {
 #ifdef MAPNIK_DEBUG           
@@ -91,16 +96,9 @@ public:
                        
         try
         {
-            projection proj(m_.srs()); // map projection
+            projection proj(m_.srs());
 
-            Map::const_metawriter_iterator metaItr = m_.begin_metawriters();
-            Map::const_metawriter_iterator metaItrEnd = m_.end_metawriters();
-            for (;metaItr!=metaItrEnd; ++metaItr)
-            {
-                metaItr->second->set_size(m_.width(), m_.height());
-                metaItr->second->set_map_srs(proj);
-                metaItr->second->start(m_.metawriter_output_properties);
-            }
+            start_metawriters(m_,proj);
 
             double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
             scale_denom *= scale_factor_;
@@ -111,15 +109,12 @@ public:
             {
                 if (lyr.isVisible(scale_denom))
                 {
-                    apply_to_layer(lyr, p, proj, scale_denom);
+                    std::set<std::string> names;
+                    apply_to_layer(lyr, p, proj, scale_denom, names);
                 }
             }
 
-            metaItr = m_.begin_metawriters();
-            for (;metaItr!=metaItrEnd; ++metaItr)
-            {
-                metaItr->second->stop();
-            }
+            stop_metawriters(m_);
         }
         catch (proj_init_error& ex)
         {
@@ -128,9 +123,42 @@ public:
         
         p.end_map_processing(m_);
     }   
+
 private:
+    /*!
+     * @return initialize metawriters for a given map and projection.
+     */
+    void start_metawriters(Map const& m_, projection const& proj)
+    {
+        Map::const_metawriter_iterator metaItr = m_.begin_metawriters();
+        Map::const_metawriter_iterator metaItrEnd = m_.end_metawriters();
+        for (;metaItr!=metaItrEnd; ++metaItr)
+        {
+            metaItr->second->set_size(m_.width(), m_.height());
+            metaItr->second->set_map_srs(proj);
+            metaItr->second->start(m_.metawriter_output_properties);
+        }
+    }
+    /*!
+     * @return stop metawriters that were previously initialized.
+     */
+    void stop_metawriters(Map const& m_)
+    {
+        Map::const_metawriter_iterator metaItr = m_.begin_metawriters();
+        Map::const_metawriter_iterator metaItrEnd = m_.end_metawriters();
+        for (;metaItr!=metaItrEnd; ++metaItr)
+        {
+            metaItr->second->stop();
+        }
+    }
+
+    /*!
+     * @return render a layer given a projection and scale
+     */
     void apply_to_layer(layer const& lay, Processor & p, 
-                        projection const& proj0, double scale_denom)
+                        projection const& proj0,
+                        double scale_denom,
+                        std::set<std::string>& names)
     {
 #ifdef MAPNIK_DEBUG
         //wall_clock_progress_timer timer(clog, "end layer rendering: ");
@@ -203,7 +231,6 @@ private:
             query q(layer_ext,res,scale_denom); //BBOX query
                            
             std::vector<feature_type_style*> active_styles;
-            std::set<std::string> names;
             attribute_collector collector(names);
             double filt_factor = 1;
             directive_collector d_collector(&filt_factor);
