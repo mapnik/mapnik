@@ -50,8 +50,8 @@ public:
         }
         else
         {
-            // Backward compatiblity for version pre 0.8.0
-            // To be removed in 0.9.0...
+            // Backward compatiblity for version pre 2.0.0
+            // To be removed in 2.1.0...
             if (!boost::algorithm::icontains(str,"'") 
                 && !boost::algorithm::icontains(str,"[")
                 && !boost::algorithm::icontains(str,"]")
