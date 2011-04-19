@@ -61,7 +61,7 @@ Mapnik Trunk
 - AGG Renderer - Enforced default gamma function on all symbolizers to ensure proper antialiasing
   even when gamma is modified on the PolygonSymbolizer. (#512)
 
-- Added ability to read pre 0.8.0 stylesheets, but prints a warning for deprecated syntax (r1592, #501)
+- Added ability to read pre 2.0.0 stylesheets, but prints a warning for deprecated syntax (r1592, #501)
 
 - Rasterlite Plugin: Experimental support for Rasterlite, to practically use sqlite database with wavelet compressed rasters (#469)
 
