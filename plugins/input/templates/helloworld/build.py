@@ -74,6 +74,12 @@ TARGET = plugin_env.SharedLibrary(
               LINKFLAGS=env.get('CUSTOM_LDFLAGS')
               )
 
+if env['PLATFORM'] == 'Darwin':
+    # if the plugin links to libmapnik2 ensure it is built first
+    # this is optional, but helps to ensure proper compilation
+    # if scons is building with multiple threads (e.g. with -jN)
+    Depends(TARGET,'../../../../src/libmapnik2.dylib')
+
 # if 'uninstall' is not passed on the command line
 # then we actually create the install targets that
 # scons will install if 'install' is passed as an arg
