@@ -14,6 +14,9 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added python function 'render_grid' to allow conversion of grid buffer to python object containing list of grid
+  pixels, list of keys, and a and dictionary of feature attributes.
+
 - Added new rendering backend, grid_renderer, that collects the attributes of rendered features and
   burns their ids into a grid buffer.
 

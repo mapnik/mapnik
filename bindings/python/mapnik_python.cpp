@@ -65,11 +65,13 @@ void export_glyph_symbolizer();
 void export_inmem_metawriter();
 
 #include <mapnik/version.hpp>
+#include <mapnik/value_error.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo_renderer.hpp>
 #endif
+#include "python_grid_utils.hpp"
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
@@ -242,7 +244,6 @@ void render_to_file3(const mapnik::Map& map,
     }
 }
 
-
 double scale_denominator(mapnik::Map const &map, bool geographic)
 {
     return mapnik::scale_denominator(map, geographic);
@@ -327,6 +328,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
     using mapnik::load_map_string;
     using mapnik::save_map;
     using mapnik::save_map_to_string;
+    using mapnik::render_grid;
 
     register_exception_translator<mapnik::config_error>(&config_error_translator);
     register_exception_translator<mapnik::value_error>(&value_error_translator);
@@ -367,6 +369,8 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_glyph_symbolizer();
     export_inmem_metawriter();
 
+    def("render_grid_",&render_grid);
+    
     def("render_to_file",&render_to_file1,
         "\n"
         "Render Map to file using explicit image type.\n"

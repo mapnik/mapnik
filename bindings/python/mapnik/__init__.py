@@ -76,6 +76,9 @@ class _MapnikMetaclass(BoostPythonMetaclass):
 _injector = _MapnikMetaclass('_injector', (object, ), {})
 
 
+def render_grid(m,layer_idx,join_field,step=1,fields=[]):
+    return render_grid_(m,layer_idx,join_field,step,fields)
+
 def Filter(*args,**kwargs):
     warnings.warn("'Filter' is deprecated and will be removed in Mapnik 2.0.1, use 'Expression' instead",
     DeprecationWarning, 2)
@@ -739,6 +742,7 @@ __all__ = [
     'save_map',
     'save_map_to_string',
     'render',
+    'render_grid',
     'render_tile_to_file',
     'render_to_file',
     #   other
