@@ -815,7 +815,7 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
     try
     {
         std::stringstream s;
-        s << "file,base,allow-overlap,ignore-placement,opacity,placement,meta-writer,meta-output";
+        s << "file,base,allow-overlap,ignore-placement,opacity,placement,transform,meta-writer,meta-output";
         
         optional<std::string> file =  get_opt_attr<string>(sym, "file");
         optional<std::string> base =  get_opt_attr<string>(sym, "base");
@@ -830,7 +830,6 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
 
         if (file)
         {
-            s << "transform";
             ensure_attrs(sym, "PointSymbolizer", s.str());
             try
             {
@@ -901,7 +900,6 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
         }
         else
         {
-            // transform not supported
             ensure_attrs(sym, "PointSymbolizer", s.str());
             point_symbolizer symbol;
 
