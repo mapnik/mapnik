@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,31 +19,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+//$Id$
 
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#ifndef MAPNIK_GRID_RASTERIZER_HPP
+#define MAPNIK_GRID_RASTERIZER_HPP
 
-// Windows DLL support
+#include <boost/utility.hpp>
+#include "agg_rasterizer_scanline_aa.h"
 
-#define MAPNIK_SUPPORTS_GRID_RENDERER
+namespace mapnik {
 
-#ifdef _WINDOWS
-#  define MAPNIK_EXP __declspec (dllexport)
-#  define MAPNIK_IMP __declspec (dllimport)
-#  ifdef MAPNIK_EXPORTS
-#    define MAPNIK_DECL __declspec (dllexport)
-#  else
-#    define MAPNIK_DECL __declspec (dllimport)
-#  endif
-#  pragma warning( disable: 4251 )
-#  pragma warning( disable: 4275 )
-#  if (_MSC_VER >= 1400) // vc8
-#    pragma warning(disable : 4996) //_CRT_SECURE_NO_DEPRECATE
-#  endif
-#else
-#  define MAPNIK_EXP
-#  define MAPNIK_IMP
-#  define MAPNIK_DECL
-#endif
+struct grid_rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
 
-#endif // CONFIG_HPP
+}
+
+#endif //MAPNIK_AGG_RASTERIZER_HPP

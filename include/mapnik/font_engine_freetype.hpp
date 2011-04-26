@@ -54,6 +54,7 @@ extern "C"
 #include <vector>
 #include <map>
 #include <iostream>
+#include <algorithm>
 
 // icu
 #include <unicode/ubidi.h>
@@ -490,6 +491,42 @@ struct text_renderer : private boost::noncopyable
         }
     }
 
+    void render_id(int feature_id,double x0, double y0, double min_radius=1.0)
+    {
+        FT_Error  error;
+        FT_Vector start;
+        unsigned height = pixmap_.height();
+
+        start.x =  static_cast<FT_Pos>(x0 * (1 << 6));
+        start.y =  static_cast<FT_Pos>((height - y0) * (1 << 6));
+
+        // now render transformed glyphs
+        typename glyphs_t::iterator pos;
+
+        stroker_.init(std::max(halo_radius_,min_radius));   
+        for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+        {
+            FT_Glyph g;
+            error = FT_Glyph_Copy(pos->image, &g);
+            if (!error)
+            {
+                FT_Glyph_Transform(g,0,&start);
+                FT_Glyph_Stroke(&g,stroker_.get(),1);
+                error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
+                //error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_MONO,0,1);
+                if ( ! error )
+                {
+                    
+                    FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
+                    render_bitmap_id(&bit->bitmap, feature_id,
+                                  bit->left,
+                                  height - bit->top);
+                }
+            }
+            FT_Done_Glyph(g);
+        }    
+    }
+    
 private:
 
     // unused currently, stroker is the new method for drawing halos
@@ -530,6 +567,26 @@ private:
                 if (gray)
                 {
                     pixmap_.blendPixel2(i,j,rgba,gray,opacity_);
+                }
+            }
+        }
+    }
+
+    void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y)
+    {
+        int x_max=x+bitmap->width;
+        int y_max=y+bitmap->rows;
+        int i,p,j,q;
+
+        for (i=x,p=0;i<x_max;++i,++p)
+        {
+            for (j=y,q=0;j<y_max;++j,++q)
+            {
+                int gray=bitmap->buffer[q*bitmap->width+p];
+                if (gray)
+                {
+                    pixmap_.setPixel(i,j,feature_id);
+                    //pixmap_.blendPixel2(i,j,rgba,gray,opacity_);
                 }
             }
         }

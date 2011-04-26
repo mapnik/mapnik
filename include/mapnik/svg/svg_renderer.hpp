@@ -26,6 +26,7 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/grid/grid_pixel.hpp>
 
 #include <boost/utility.hpp>
 
@@ -343,6 +344,93 @@ public:
         }
     }
 
+    template <typename Rasterizer, typename Scanline, typename Renderer>
+    void render_id(Rasterizer& ras, 
+                Scanline& sl,
+                Renderer& ren, 
+                int feature_id,
+                agg::trans_affine const& mtx, 
+                double opacity,
+                const box2d<double> &symbol_bbox)
+    
+    {
+        using namespace agg;
+        
+        trans_affine transform;
+        curved_stroked_trans_type curved_stroked_trans(curved_stroked_,transform);
+        curved_trans_type         curved_trans(curved_,transform);
+        curved_trans_contour_type curved_trans_contour(curved_trans);
+        
+        curved_trans_contour.auto_detect_orientation(true);
+        
+        for(unsigned i = 0; i < attributes_.size(); ++i)
+        {
+            mapnik::svg::path_attributes const& attr = attributes_[i];
+            if (!attr.visibility_flag)
+                continue;
+
+            transform = attr.transform;
+
+            double bx1,by1,bx2,by2;
+            bounding_rect_single(curved_trans, attr.index, &bx1, &by1, &bx2, &by2);
+            box2d<double> path_bbox(bx1,by1,bx2,by2);
+
+            transform *= mtx;
+            double scl = transform.scale();
+            //curved_.approximation_method(curve_inc);
+            curved_.approximation_scale(scl);
+            curved_.angle_tolerance(0.0);
+            
+            mapnik::gray16 color(feature_id);
+
+            if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
+            {
+                ras.reset();
+
+                if(fabs(curved_trans_contour.width()) < 0.0001)
+                {
+                    ras.add_path(curved_trans, attr.index);
+                }
+                else
+                {
+                    curved_trans_contour.miter_limit(attr.miter_limit);
+                    ras.add_path(curved_trans_contour, attr.index);
+                }
+
+                ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
+                renderer_solid ren_s(ren);
+                ren_s.color(color);
+                render_scanlines(ras, sl, ren_s);
+            }
+
+            if (attr.stroke_flag || attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
+            {
+                curved_stroked_.width(attr.stroke_width);
+                //m_curved_stroked.line_join((attr.line_join == miter_join) ? miter_join_round : attr.line_join);
+                curved_stroked_.line_join(attr.line_join);
+                curved_stroked_.line_cap(attr.line_cap);
+                curved_stroked_.miter_limit(attr.miter_limit);
+                curved_stroked_.inner_join(inner_round);
+                curved_stroked_.approximation_scale(scl);
+
+                // If the *visual* line width is considerable we 
+                // turn on processing of curve cusps.
+                //---------------------
+                if(attr.stroke_width * scl > 1.0)
+                {
+                    curved_.angle_tolerance(0.2);
+                }
+                ras.reset();
+                ras.add_path(curved_stroked_trans, attr.index);
+
+                ras.filling_rule(fill_non_zero);
+                renderer_solid ren_s(ren);
+                ren_s.color(color);
+                render_scanlines(ras, sl, ren_s);
+            }
+        }
+    }
+    
 private:
     
     VertexSource &  source_;

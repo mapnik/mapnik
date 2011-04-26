@@ -84,7 +84,7 @@ public:
           scale_factor_(scale_factor) {}
 
     /*!
-     * @return apply renderer to all maps layers.
+     * @return apply renderer to all map layers.
      */
     void apply()
     {
@@ -124,6 +124,30 @@ public:
         p.end_map_processing(m_);
     }   
 
+    /*!
+     * @return apply renderer to a single layer, providing pre-populated set of query attribute names.
+     */
+    void apply(mapnik::layer const& lyr, std::set<std::string>& names)
+    {
+        Processor & p = static_cast<Processor&>(*this);
+        p.start_map_processing(m_);
+        try
+        {
+            projection proj(m_.srs());
+            double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
+            scale_denom *= scale_factor_;
+
+            if (lyr.isVisible(scale_denom))
+            {
+                apply_to_layer(lyr, p, proj, scale_denom, names);
+            }
+        }
+        catch (proj_init_error& ex)
+        {
+            std::clog << "proj_init_error:" << ex.what() << "\n"; 
+        }
+        p.end_map_processing(m_);
+    }
 private:
     /*!
      * @return initialize metawriters for a given map and projection.
@@ -153,7 +177,7 @@ private:
     }
 
     /*!
-     * @return render a layer given a projection and scale
+     * @return render a layer given a projection and scale.
      */
     void apply_to_layer(layer const& lay, Processor & p, 
                         projection const& proj0,

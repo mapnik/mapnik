@@ -144,9 +144,13 @@ source = Split(
     metawriter_inmem.cpp
     metawriter_factory.cpp
     mapped_memory_cache.cpp
+    marker_cache.cpp
+    svg_parser.cpp
+    svg_path_parser.cpp
+    svg_points_parser.cpp 
+    svg_transform_parser.cpp
     """   
     )
-
 
 # add the datasource_cache.cpp with custom LIBTOOL flag if needed
 if env['LIBTOOL_SUPPORTS_ADVISE']:
@@ -162,9 +166,9 @@ if env['JPEG']:
         jpeg_reader.cpp
         """)
         
-if True : # agg backend
-    source += Split(
-        """
+# agg backend
+source += Split(
+    """
     agg/agg_renderer.cpp
     agg/process_building_symbolizer.cpp
     agg/process_glyph_symbolizer.cpp
@@ -177,13 +181,46 @@ if True : # agg backend
     agg/process_raster_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
-    svg_parser.cpp
-    svg_path_parser.cpp
-    svg_points_parser.cpp 
-    svg_transform_parser.cpp
-    marker_cache.cpp
     """ 
-        )
+    )
+
+# grid backend
+source += Split(
+    """
+    grid/grid_renderer.cpp
+    grid/process_building_symbolizer.cpp
+    grid/process_glyph_symbolizer.cpp
+    grid/process_line_pattern_symbolizer.cpp
+    grid/process_line_symbolizer.cpp
+    grid/process_markers_symbolizer.cpp
+    grid/process_point_symbolizer.cpp
+    grid/process_polygon_pattern_symbolizer.cpp
+    grid/process_polygon_symbolizer.cpp
+    grid/process_raster_symbolizer.cpp
+    grid/process_shield_symbolizer.cpp
+    grid/process_text_symbolizer.cpp	
+    """)
+
+if env['SVG_RENDERER']: # svg backend
+    source += Split(
+              """
+      	svg/svg_renderer.cpp
+      	svg/svg_generator.cpp	
+      	svg/svg_output_attributes.cpp
+      	svg/process_symbolizers.cpp
+      	svg/process_building_symbolizer.cpp
+      	svg/process_glyph_symbolizer.cpp
+      	svg/process_line_pattern_symbolizer.cpp
+      	svg/process_line_symbolizer.cpp
+      	svg/process_markers_symbolizer.cpp
+      	svg/process_point_symbolizer.cpp
+      	svg/process_polygon_pattern_symbolizer.cpp
+      	svg/process_polygon_symbolizer.cpp
+      	svg/process_raster_symbolizer.cpp
+      	svg/process_shield_symbolizer.cpp
+      	svg/process_text_symbolizer.cpp	
+      	""")
+    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
 
 if env['HAS_CAIRO']:
     # attach libs to library linking environment
@@ -222,27 +259,6 @@ elif env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
         if cpp in source:
             source.remove(cpp)
         source.insert(0,env2.SharedObject(cpp))
-
-if env['SVG_RENDERER']: # svg backend
-    source += Split(
-          """
-  	svg/svg_renderer.cpp
-  	svg/svg_generator.cpp	
-  	svg/svg_output_attributes.cpp
-  	svg/process_symbolizers.cpp
-  	svg/process_building_symbolizer.cpp
-  	svg/process_glyph_symbolizer.cpp
-  	svg/process_line_pattern_symbolizer.cpp
-  	svg/process_line_symbolizer.cpp
-  	svg/process_markers_symbolizer.cpp
-  	svg/process_point_symbolizer.cpp
-  	svg/process_polygon_pattern_symbolizer.cpp
-  	svg/process_polygon_symbolizer.cpp
-  	svg/process_raster_symbolizer.cpp
-  	svg/process_shield_symbolizer.cpp
-  	svg/process_text_symbolizer.cpp	
-  	""")
-    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
 
 if env['CUSTOM_LDFLAGS']:
     linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], mapnik_lib_link_flag)
@@ -299,16 +315,20 @@ else:
 includes = glob.glob('../include/mapnik/*.hpp')
 svg_includes = glob.glob('../include/mapnik/svg/*.hpp')
 wkt_includes = glob.glob('../include/mapnik/wkt/*.hpp')
+grid_includes = glob.glob('../include/mapnik/grid/*.hpp')
 
 inc_target = os.path.normpath(install_prefix+'/include/mapnik')
 svg_inc_target = os.path.normpath(install_prefix+'/include/mapnik/svg')
 wkt_inc_target = os.path.normpath(install_prefix+'/include/mapnik/wkt')
+grid_inc_target = os.path.normpath(install_prefix+'/include/mapnik/grid')
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Alias(target='install', source=env.Install(inc_target, includes))
     env.Alias(target='install', source=env.Install(svg_inc_target, svg_includes))
     env.Alias(target='install', source=env.Install(wkt_inc_target, wkt_includes))
+    env.Alias(target='install', source=env.Install(grid_inc_target, grid_includes))
 
 env['create_uninstall_target'](env, inc_target)
 env['create_uninstall_target'](env, svg_inc_target)
 env['create_uninstall_target'](env, wkt_inc_target)
+env['create_uninstall_target'](env, grid_inc_target)

@@ -14,6 +14,9 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added new rendering backend, grid_renderer, that collects the attributes of rendered features and
+  burns their ids into a grid buffer.
+
 - Added optional 'maximum-extent' parameter to map object. If set will be used, instead of combined
   layer extents, for return value of map.zoom_all(). Useful in cases where the combined layer extents
   cannot possibly be projected into the map srs or the user wishes to control map bounds without
