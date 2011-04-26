@@ -229,7 +229,7 @@ void agg_renderer<T>::render_marker(const int x, const int y, marker &marker, co
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,
-                     agg::pod_bvector<path_attributes> > svg_renderer(svg_path,
+                     agg::pod_bvector<path_attributes>, agg::pixfmt_rgba32_plain > svg_renderer(svg_path,
                              (*marker.get_vector_data())->attributes());
 
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);

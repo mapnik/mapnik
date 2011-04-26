@@ -100,7 +100,7 @@ private:
 
 };
 
-template <typename VertexSource, typename AttributeSource> 
+template <typename VertexSource, typename AttributeSource, typename PixelFormat> 
 class svg_renderer : boost::noncopyable
 {
     typedef agg::conv_curve<VertexSource>            curved_type;
@@ -108,8 +108,7 @@ class svg_renderer : boost::noncopyable
     typedef agg::conv_transform<curved_stroked_type> curved_stroked_trans_type;    
     typedef agg::conv_transform<curved_type>         curved_trans_type;
     typedef agg::conv_contour<curved_trans_type>     curved_trans_contour_type;
-    typedef agg::pixfmt_rgba32_plain pixfmt;
-    typedef agg::renderer_base<pixfmt> renderer_base;
+    typedef agg::renderer_base<PixelFormat> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
     
 public:

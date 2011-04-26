@@ -137,7 +137,8 @@ int main (int argc,char** argv)
                     mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
                     mapnik::svg::svg_path_adapter svg_path(stl_storage);
                     mapnik::svg::svg_renderer<mapnik::svg::svg_path_adapter,
-                                 agg::pod_bvector<mapnik::svg::path_attributes> > svg_renderer_this(svg_path,
+                                 agg::pod_bvector<mapnik::svg::path_attributes>,
+                                 agg::pixfmt_rgba32_plain > svg_renderer_this(svg_path,
                                          (*marker.get_vector_data())->attributes());
 
                     svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
