@@ -190,7 +190,7 @@ public:
     }
 private:
     std::vector<face_ptr> faces_;
-    std::map<char, dimension_t> dimension_cache_;
+    std::map<unsigned, dimension_t> dimension_cache_;
 };
 
 // FT_Stroker wrapper

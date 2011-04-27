@@ -202,7 +202,7 @@ font_face_set::dimension_t font_face_set::character_dimensions(const unsigned c)
     //std::clog << "glyph: " << glyph_index << " x: " << tempx << " y: " << tempy << std::endl;
     dimension_t dim(tempx, glyph_bbox.yMax, glyph_bbox.yMin);
     //dimension_cache_[c] = dim; would need an default constructor for dimension_t
-    dimension_cache_.insert(std::pair<char, dimension_t>(c, dim));
+    dimension_cache_.insert(std::pair<unsigned, dimension_t>(c, dim));
     return dim;
 }
 
