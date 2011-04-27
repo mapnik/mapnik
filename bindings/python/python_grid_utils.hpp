@@ -122,7 +122,7 @@ void write_features(mapnik::grid::feature_type const& g_features,
                                             it->second.base())));
                         }
                     }
-                    else
+                    else if ( (attributes.find(key) != attributes.end()) )
                     {
                         found = true;
                         feat[it->first] = boost::python::object(
