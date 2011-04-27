@@ -160,7 +160,7 @@ stroker_ptr freetype_engine::create_stroker()
 
 font_face_set::dimension_t font_face_set::character_dimensions(const unsigned c)
 {
-    std::map<char, dimension_t>::const_iterator itr;
+    std::map<unsigned, dimension_t>::const_iterator itr;
     itr = dimension_cache_.find(c);
     if (itr != dimension_cache_.end()) {
         return itr->second;
