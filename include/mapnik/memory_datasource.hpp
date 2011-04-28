@@ -27,6 +27,7 @@
 
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature_factory.hpp> // TODO remove
+#include <mapnik/feature_layer_desc.hpp>
 #include <vector>
 
 namespace mapnik {
@@ -46,6 +47,7 @@ public:
     size_t size() const;
 private:
     std::vector<feature_ptr> features_;
+    mapnik::layer_descriptor desc_;
 }; 
    
 // This class implements a simple way of displaying point-based data
@@ -54,12 +56,12 @@ private:
    
 class MAPNIK_DECL point_datasource : public memory_datasource {
 public:
-    point_datasource() : feat_id(0) {}
+    point_datasource() : feat_id_(0) {}
     void add_point(double x, double y, const char* key, const char* value);  
     inline int type() const { return datasource::Vector; }
       
 private:
-    int feat_id;
+    int feat_id_;
 };   
 }
 

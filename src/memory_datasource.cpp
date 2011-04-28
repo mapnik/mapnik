@@ -55,11 +55,15 @@ struct accumulate_extent
 };
     
 memory_datasource::memory_datasource()
-    : datasource(parameters()) {}
+    : datasource(parameters()),
+      desc_("in-memory datasource","utf-8") {}
+
 memory_datasource::~memory_datasource() {}
     
 void memory_datasource::push(feature_ptr feature)
 {
+    // TODO - collect attribute descriptors?
+    //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
     features_.push_back(feature);
 }
     
@@ -93,7 +97,7 @@ box2d<double> memory_datasource::envelope() const
     
 layer_descriptor memory_datasource::get_descriptor() const
 {
-    return layer_descriptor("in-memory datasource","utf-8");
+    return desc_;
 }
     
 size_t memory_datasource::size() const
@@ -105,7 +109,7 @@ size_t memory_datasource::size() const
 
 void point_datasource::add_point(double x, double y, const char* key, const char* value)
 {
-        feature_ptr feature(feature_factory::create(feat_id++));
+        feature_ptr feature(feature_factory::create(feat_id_++));
         geometry_type * pt = new geometry_type(Point);
         pt->move_to(x,y);
         feature->add_geometry(pt);
