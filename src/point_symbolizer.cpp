@@ -23,13 +23,7 @@
 //$Id$
 // mapnik
 #include <mapnik/point_symbolizer.hpp>
-#include <mapnik/image_data.hpp>
-#include <mapnik/image_reader.hpp>
 #include <mapnik/enumeration.hpp>
-// boost
-#include <boost/scoped_ptr.hpp>
-// stl
-#include <iostream>
 
 namespace mapnik
 {
@@ -50,13 +44,15 @@ point_symbolizer::point_symbolizer()
       ignore_placement_(false) {}
     
 point_symbolizer::point_symbolizer(path_expression_ptr file) 
-    : symbolizer_with_image(file), symbolizer_base(),
+    : symbolizer_with_image(file),
+      symbolizer_base(),
       overlap_(false),
       point_p_(CENTROID_POINT_PLACEMENT),
       ignore_placement_(false) {}
 
 point_symbolizer::point_symbolizer(point_symbolizer const& rhs)
-    : symbolizer_with_image(rhs), symbolizer_base(rhs),
+    : symbolizer_with_image(rhs),
+      symbolizer_base(rhs),
       overlap_(rhs.overlap_),
       point_p_(rhs.point_p_),
       ignore_placement_(rhs.ignore_placement_) {}
