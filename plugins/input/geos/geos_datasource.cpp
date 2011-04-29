@@ -96,7 +96,7 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
      geometry_data_(""),
      geometry_data_name_("name"),
-     geometry_id_(0)
+     geometry_id_(1)
 {
     boost::optional<std::string> geometry = params.get<std::string>("wkt");
     if (!geometry) throw datasource_exception("missing <wkt> parameter");

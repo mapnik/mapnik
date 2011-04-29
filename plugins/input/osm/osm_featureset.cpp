@@ -40,7 +40,7 @@ osm_featureset<filterT>::osm_featureset(const filterT& filter,
     : filter_(filter),
       query_ext_(),
       tr_(new transcoder(encoding)),
-      count_(0),
+      feature_id_(1),
       dataset_ (dataset),
       attribute_names_ (attribute_names)
 {
@@ -58,7 +58,8 @@ feature_ptr osm_featureset<filterT>::next()
     {
         if(dataset_->current_item_is_node())
         {
-            feature= feature_ptr(new Feature(count_++));
+            feature= feature_ptr(new Feature(feature_id_));
+            ++feature_id_;
             double lat = static_cast<osm_node*>(cur_item)->lat;
             double lon = static_cast<osm_node*>(cur_item)->lon;
             geometry_type * point = new geometry_type(mapnik::Point);
@@ -83,7 +84,8 @@ feature_ptr osm_featureset<filterT>::next()
             {
                 if(static_cast<osm_way*>(cur_item)->nodes.size())
                 {
-                    feature=feature_ptr(new Feature(count_++));
+                    feature=feature_ptr(new Feature(feature_id_++));
+                    ++feature_id_;
                     geometry_type *geom;
                     if(static_cast<osm_way*>(cur_item)->is_polygon())
                         geom=new geometry_type(mapnik::Polygon);

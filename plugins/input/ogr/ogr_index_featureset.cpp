@@ -62,8 +62,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
      filter_(filter),
      tr_(new transcoder(encoding)),
      fidcolumn_(layer_.GetFIDColumn ()),
-     multiple_geometries_(multiple_geometries),
-     count_(0)
+     multiple_geometries_(multiple_geometries)
 {
     
     boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(index_file.c_str(),true);
@@ -93,13 +92,16 @@ feature_ptr ogr_index_featureset<filterT>::next()
 {
     if (itr_ != ids_.end())
     {
-       int pos = *itr_++;
-       layer_.SetNextByIndex (pos);
+        int pos = *itr_++;
+        layer_.SetNextByIndex (pos);
 
-       ogr_feature_ptr feat (layer_.GetNextFeature());
+        ogr_feature_ptr feat (layer_.GetNextFeature());
         if ((*feat) != NULL)
         {
-            feature_ptr feature(new Feature((*feat)->GetFID()));
+            // ogr feature ids start at 0, so add one to stay
+            // consistent with other mapnik datasources that start at 1
+            int feature_id = ((*feat)->GetFID() + 1);
+            feature_ptr feature(new Feature(feature_id));
             
             OGRGeometry* geom=(*feat)->GetGeometryRef();
             if (geom && !geom->IsEmpty())
@@ -112,7 +114,6 @@ feature_ptr ogr_index_featureset<filterT>::next()
                 std::clog << "### Warning: feature with null geometry: " << (*feat)->GetFID() << "\n";
             }
     #endif
-            ++count_;
             
             int fld_count = layerdef_->GetFieldCount();
             for (int i = 0; i < fld_count; i++)
@@ -185,10 +186,6 @@ feature_ptr ogr_index_featureset<filterT>::next()
             return feature;
         }
     }
-
-#ifdef MAPNIK_DEBUG
-    std::clog << "OGR Plugin: " << count_ << " features" << std::endl;
-#endif
     
     return feature_ptr();
 }

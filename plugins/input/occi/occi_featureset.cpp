@@ -65,7 +65,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
    : tr_(new transcoder(encoding)),
      multiple_geometries_(multiple_geometries),
      num_attrs_(num_attrs),
-     count_(0)
+     feature_id_(1)
 {
     if (use_connection_pool)
         conn_.set_pool(pool);
@@ -90,7 +90,8 @@ feature_ptr occi_featureset::next()
 {
     if (rs_ && rs_->next())
     {
-        feature_ptr feature(new Feature(count_));
+        feature_ptr feature(new Feature(feature_id_));
+        ++feature_id_;
 
         boost::scoped_ptr<SDOGeometry> geom (dynamic_cast<SDOGeometry*> (rs_->getObject(1)));
         if (geom.get())
@@ -189,7 +190,6 @@ feature_ptr occi_featureset::next()
             }    
         }
         
-        ++count_;
         return feature;
     }
 

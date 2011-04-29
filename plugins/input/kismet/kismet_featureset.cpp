@@ -42,7 +42,7 @@ kismet_featureset::kismet_featureset(const std::list<kismet_network_data> &knd_l
                                      std::string const& encoding)
     : knd_list_(knd_list),
       tr_(new transcoder(encoding)),
-      feature_id (0),
+      feature_id_(1),
       knd_list_it(knd_list_.begin ()),
       source_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 {
@@ -73,7 +73,8 @@ feature_ptr kismet_featureset::next()
             value = "wlan_crypted";
         }
 
-        feature_ptr feature(new Feature(feature_id));
+        feature_ptr feature(new Feature(feature_id_));
+        ++feature_id_;
       
         geometry_type* pt = new geometry_type(mapnik::Point);
         pt->move_to(knd.bestlon_, knd.bestlat_);
@@ -81,7 +82,6 @@ feature_ptr kismet_featureset::next()
       
         boost::put(*feature, key, tr_->transcode(value.c_str()));
       
-        ++feature_id;
         ++knd_list_it;
         
         return feature;

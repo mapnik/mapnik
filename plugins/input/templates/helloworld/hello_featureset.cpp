@@ -3,17 +3,18 @@
 
 hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string const& encoding)
   : box_(box),
-    count_(0),
+    feature_id_(1),
     tr_(new mapnik::transcoder(encoding)) { }
 
 hello_featureset::~hello_featureset() { }
 
 mapnik::feature_ptr hello_featureset::next()
 {
-    if (!count_)
+    if (feature_id_ == 1)
     {
         // create a new feature
-        mapnik::feature_ptr feature(new mapnik::Feature(count_));
+        mapnik::feature_ptr feature(new mapnik::Feature(feature_id_));
+        ++feature_id_;
 
         // create an attribute pair of key:value
         UnicodeString ustr = tr_->transcode("hello world!");

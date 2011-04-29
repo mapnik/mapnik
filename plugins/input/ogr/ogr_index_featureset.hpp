@@ -41,7 +41,6 @@ class ogr_index_featureset : public mapnik::Featureset
       boost::scoped_ptr<mapnik::transcoder> tr_;
       const char* fidcolumn_;
       bool multiple_geometries_;
-      mutable int count_;
 
    public:
       ogr_index_featureset(OGRDataSource & dataset,

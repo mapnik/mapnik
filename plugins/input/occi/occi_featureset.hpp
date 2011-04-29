@@ -71,7 +71,7 @@ class occi_featureset : public mapnik::Featureset
       const char* fidcolumn_;
       bool multiple_geometries_;
       unsigned num_attrs_;
-      mutable int count_;
+      mutable int feature_id_;
 };
 
 #endif // OCCI_FEATURESET_HPP

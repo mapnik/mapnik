@@ -39,7 +39,7 @@ raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
                                                    box2d<double> const& extent,
                                                    query const& q)
    : policy_(policy),
-     id_(1),
+     feature_id_(1),
      extent_(extent),
      bbox_(q.get_bbox()),
      curIter_(policy_.begin()),
@@ -54,7 +54,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 {
    if (curIter_!=endIter_)
    {
-      feature_ptr feature(new Feature(++id_));
+      feature_ptr feature(new Feature(feature_id_));
+      ++feature_id_;
       try
       {         
          std::auto_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));

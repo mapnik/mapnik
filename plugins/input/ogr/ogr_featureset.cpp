@@ -86,7 +86,10 @@ feature_ptr ogr_featureset::next()
     ogr_feature_ptr feat (layer_.GetNextFeature());
     if ((*feat) != NULL)
     {
-        feature_ptr feature(new Feature((*feat)->GetFID()));
+        // ogr feature ids start at 0, so add one to stay
+        // consistent with other mapnik datasources that start at 1
+        int feature_id = ((*feat)->GetFID() + 1);
+        feature_ptr feature(new Feature(feature_id));
         
         OGRGeometry* geom=(*feat)->GetGeometryRef();
         if (geom && !geom->IsEmpty())

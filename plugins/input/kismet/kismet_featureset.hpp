@@ -51,7 +51,7 @@ class kismet_featureset : public mapnik::Featureset
       boost::scoped_ptr<mapnik::transcoder> tr_;
       mapnik::wkbFormat format_;
       bool multiple_geometries_;
-      int feature_id;
+      int feature_id_;
       std::list<kismet_network_data>::const_iterator knd_list_it;
       mapnik::projection source_;
 };

@@ -106,7 +106,7 @@ class postgis_featureset : public mapnik::Featureset
       unsigned num_attrs_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
       mutable int totalGeomSize_;
-      mutable int count_;
+      mutable int feature_id_;
    public:
       postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                          std::string const& encoding,

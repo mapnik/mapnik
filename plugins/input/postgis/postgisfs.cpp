@@ -48,13 +48,15 @@ postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
       num_attrs_(num_attrs),
       tr_(new transcoder(encoding)),
       totalGeomSize_(0),
-      count_(0)  {}
+      feature_id_(1)  {}
 
 feature_ptr postgis_featureset::next()
 {
     if (rs_->next())
     { 
-        feature_ptr feature(new Feature(count_));
+        feature_ptr feature(new Feature(feature_id_));
+        ++feature_id_;
+
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
         geometry_utils::from_wkb(*feature,data,size,multiple_geometries_);
@@ -131,7 +133,6 @@ feature_ptr postgis_featureset::next()
               }
            }
         }
-        ++count_;   
         return feature;
     }
     else

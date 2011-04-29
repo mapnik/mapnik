@@ -23,7 +23,7 @@ class hello_featureset : public mapnik::Featureset
    private:
       // members are up to you, but these are recommended
       mapnik::box2d<double> const& box_;
-      mutable int count_;
+      mutable int feature_id_;
       boost::scoped_ptr<mapnik::transcoder> tr_;
 };
 
