@@ -116,7 +116,7 @@ def test_render_grid():
     ul_lonlat = mapnik2.Coord(142.30,-38.20)
     lr_lonlat = mapnik2.Coord(143.40,-38.80)
     m.zoom_to_box(mapnik2.Box2d(ul_lonlat,lr_lonlat))
-    grid = mapnik2.render_grid(m,0,'Name',4,fields=['Name','__id__'])
+    grid = mapnik2.render_grid(m,0,key='Name',resolution=4,fields=['Name'])
     eq_(grid,grid_correct)    
     
 def test_render_points():
