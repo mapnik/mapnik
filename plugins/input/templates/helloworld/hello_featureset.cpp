@@ -14,6 +14,8 @@ mapnik::feature_ptr hello_featureset::next()
     {
         // create a new feature
         mapnik::feature_ptr feature(new mapnik::Feature(feature_id_));
+
+        // increment the count so that we only return one feature
         ++feature_id_;
 
         // create an attribute pair of key:value
@@ -45,9 +47,6 @@ mapnik::feature_ptr hello_featureset::next()
         line->line_to(box_.maxx(),box_.miny());
         line->line_to(box_.minx(),box_.miny());
         feature->add_geometry(line);
-        
-        // increment the count so that we only return one feature
-        ++count_;
         
         // return the feature!
         return feature;
