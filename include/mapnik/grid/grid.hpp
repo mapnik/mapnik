@@ -79,6 +79,8 @@ public:
          step_(step),
          //feature_count_(0),
          id_name_("__id__") {
+             // this only works if each datasource's 
+             // feature count starts at 1
              f_keys_[0] = "";
          }
     

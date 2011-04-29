@@ -82,6 +82,43 @@ def test_render_from_serialization():
     i,i2 = get_paired_images(100,100,'../data/good_maps/polygon_symbolizer.xml')
     eq_(i.tostring(),i2.tostring())
 
+
+grid_correct = {"keys": ["", "North West", "North East", "South West", "South East"], "data": {"South East": {"Name": "South East"}, "North East": {"Name": "North East"}, "North West": {"Name": "North West"}, "South West": {"Name": "South West"}}, "grid": ["                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "         !!!                                 ###                ", "        !!!!!                               #####               ", "        !!!!!                               #####               ", "         !!!                                 ###                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "        $$$$                                %%%%                ", "        $$$$$                               %%%%%               ", "        $$$$$                               %%%%%               ", "         $$$                                 %%%                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                "]}
+
+def test_render_grid():
+    places_ds = mapnik2.PointDatasource()
+    places_ds.add_point(143.10,-38.60,'Name','South East')
+    places_ds.add_point(142.48,-38.60,'Name','South West')
+    places_ds.add_point(142.48,-38.38,'Name','North West')
+    places_ds.add_point(143.10,-38.38,'Name','North East')
+    s = mapnik2.Style()
+    r = mapnik2.Rule()
+    #symb = mapnik2.PointSymbolizer()
+    symb = mapnik2.MarkersSymbolizer()
+    symb.allow_overlap = True
+    r.symbols.append(symb)
+    label = mapnik2.TextSymbolizer(mapnik2.Expression('[Name]'),
+                'DejaVu Sans Book',
+                10,
+                mapnik2.Color('black')
+                )
+    label.allow_overlap = True
+    label.displacement = (0,-10)
+    #r.symbols.append(label)
+
+    s.rules.append(r)
+    lyr = mapnik2.Layer('Places')
+    lyr.datasource = places_ds
+    lyr.styles.append('places_labels')
+    m = mapnik2.Map(256,256)
+    m.append_style('places_labels',s)
+    m.layers.append(lyr)
+    ul_lonlat = mapnik2.Coord(142.30,-38.20)
+    lr_lonlat = mapnik2.Coord(143.40,-38.80)
+    m.zoom_to_box(mapnik2.Box2d(ul_lonlat,lr_lonlat))
+    grid = mapnik2.render_grid(m,0,'Name',4,fields=['Name','__id__'])
+    eq_(grid,grid_correct)    
+    
 def test_render_points():
 
     if not mapnik2.has_cairo(): return
@@ -123,4 +160,5 @@ def test_render_points():
         svg = open(svg_file,'r').read()
         num_points_rendered = svg.count('<image ')
         eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr)) 
+
 

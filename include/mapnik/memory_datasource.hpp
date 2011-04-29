@@ -56,12 +56,13 @@ private:
    
 class MAPNIK_DECL point_datasource : public memory_datasource {
 public:
-    point_datasource() : feat_id_(0) {}
+    point_datasource() :
+        feature_id_(1) {}
     void add_point(double x, double y, const char* key, const char* value);  
     inline int type() const { return datasource::Vector; }
       
 private:
-    int feat_id_;
+    int feature_id_;
 };   
 }
 

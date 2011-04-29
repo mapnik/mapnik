@@ -109,7 +109,8 @@ size_t memory_datasource::size() const
 
 void point_datasource::add_point(double x, double y, const char* key, const char* value)
 {
-        feature_ptr feature(feature_factory::create(feat_id_++));
+        feature_ptr feature(feature_factory::create(feature_id_));
+        ++feature_id_;
         geometry_type * pt = new geometry_type(Point);
         pt->move_to(x,y);
         feature->add_geometry(pt);
