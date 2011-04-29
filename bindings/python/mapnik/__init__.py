@@ -260,11 +260,19 @@ class _Datasource(Datasource,_injector):
     def field_types(self):
         return map(get_types,self._field_types())
 
-    def all_features(self):
+    def all_features(self,fields=None):
         query = Query(self.envelope())
-        for fld in self.fields():
+        attributes = fields or self.fields()
+        for fld in attributes:
             query.add_property_name(fld)
         return self.features(query).features
+
+    def featureset(self,fields=None):
+        query = Query(self.envelope())
+        attributes = fields or self.fields()
+        for fld in attributes:
+            query.add_property_name(fld)
+        return self.features(query)
 
 class _DeprecatedFeatureProperties(object):
 
