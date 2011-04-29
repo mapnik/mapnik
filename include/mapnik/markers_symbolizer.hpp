@@ -55,7 +55,7 @@ struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image, public symbolizer_base
 {
 public:
-    markers_symbolizer();
+    explicit markers_symbolizer();
     markers_symbolizer(path_expression_ptr filename);
     markers_symbolizer(markers_symbolizer const& rhs);
     void set_allow_overlap(bool overlap);
