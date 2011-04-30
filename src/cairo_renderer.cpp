@@ -1563,15 +1563,19 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
 
         placement_finder<label_collision_detector4> finder(detector_);
 
-        for (unsigned i = 0; i < feature.num_geometries(); ++i)
+        metawriter_with_properties writer = sym.get_metawriter();
+
+        unsigned num_geom = feature.num_geometries();
+        for (unsigned i=0; i<num_geom; ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
-
             if (geom.num_points() == 0) continue;// don't bother with empty geometries
             while (!placement_found && placement_options->next_position_only())
             {
-                path_type path(t_, geom, prj_trans);
                 placement text_placement(info, sym, placement_options, 1.0);
+                text_placement.avoid_edges = sym.get_avoid_edges();
+                if (writer.first)
+                    text_placement.collect_extents = true; // needed for inmem metawriter
 
                 if (sym.get_label_placement() == POINT_PLACEMENT ||
                         sym.get_label_placement() == INTERIOR_PLACEMENT)
@@ -1581,8 +1585,8 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                         geom.label_position(&label_x, &label_y);
                     else
                         geom.label_interior_position(&label_x, &label_y);
-                    prj_trans.backward(label_x, label_y, z);
-                    t_.forward(&label_x, &label_y);
+                    prj_trans.backward(label_x,label_y, z);
+                    t_.forward(&label_x,&label_y);
 
                     double angle = 0.0;
                     expression_ptr angle_expr = sym.get_orientation();
@@ -1599,8 +1603,9 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                                 sym.get_justify_alignment());
                     finder.update_detector(text_placement);
                 }
-                else //LINE_PLACEMENT
+                else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                 {
+                    path_type path(t_, geom, prj_trans);
                     finder.find_line_placements<path_type>(text_placement, path);
                 }
 
@@ -1619,7 +1624,6 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                      );
                 }
 
-                metawriter_with_properties writer = sym.get_metawriter();
                 if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
             }
         }
