@@ -1,0 +1,38 @@
+<Map srs="+init=epsg:4326" background-color="rgb(233,233,233)" minimum-version="0.7.2">
+
+    <Datasource name="sqlite">
+        <Parameter name="type">sqlite</Parameter>
+        <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
+        <Parameter name="wkb_format">spatialite</Parameter>
+        <Parameter name="multiple_geometries">true</Parameter>
+    </Datasource>
+
+    <Style name="polygon_style">
+        <Rule>
+            <MarkersSymbolizer fill="darkgreen" placement="point" allow-overlap="true"/>
+            <PolygonSymbolizer fill="green"/>
+        </Rule>
+    </Style>
+
+    <Layer name="polygons" srs="+init=epsg:4326">
+        <StyleName>polygon_style</StyleName>
+        <Datasource base="sqlite">
+            <Parameter name="table">multipolygon</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="line_style">
+        <Rule>
+            <MarkersSymbolizer fill="darkred" placement="point" allow-overlap="true"/>
+            <LineSymbolizer stroke="red"/>
+        </Rule>
+    </Style>
+    
+    <Layer name="lines" srs="+init=epsg:4326">
+        <StyleName>line_style</StyleName>
+        <Datasource base="sqlite">
+            <Parameter name="table">lines</Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>
