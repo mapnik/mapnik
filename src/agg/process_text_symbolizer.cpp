@@ -88,6 +88,8 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
         string_info info(text);
 
         faces->get_string_info(info);
+        metawriter_with_properties writer = sym.get_metawriter();
+
         unsigned num_geom = feature.num_geometries();
         for (unsigned i=0; i<num_geom; ++i)
         {
@@ -97,6 +99,9 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             {
                 placement text_placement(info, sym, placement_options, scale_factor_);
                 text_placement.avoid_edges = sym.get_avoid_edges();
+                if (writer.first)
+                    text_placement.collect_extents =true; // needed for inmem metawriter
+
                 if (sym.get_label_placement() == POINT_PLACEMENT ||
                         sym.get_label_placement() == INTERIOR_PLACEMENT)
                 {
@@ -121,7 +126,6 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                                                 angle, sym.get_vertical_alignment(),sym.get_line_spacing(),
                                                 sym.get_character_spacing(),sym.get_horizontal_alignment(),
                                                 sym.get_justify_alignment());
-
                     finder.update_detector(text_placement);
                 }
                 else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
@@ -141,7 +145,6 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                     ren.render(x,y);
                 }
 
-                metawriter_with_properties writer = sym.get_metawriter();
                 if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
             }
         }

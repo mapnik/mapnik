@@ -76,6 +76,8 @@ struct placement : boost::noncopyable
     bool allow_overlap;
     std::pair<double, double> dimensions;
     int text_size;
+    bool collect_extents;
+    box2d<double> extents;
 };
 
 
@@ -101,7 +103,7 @@ public:
     void update_detector(placement & p);
 
     void clear();
-
+    
 private:
     ///Helpers for find_line_placement
 

@@ -79,20 +79,10 @@ metawriter_inmem::add_text(placement const& p,
                            Feature const& feature,
                            CoordTransform const& /*t*/,
                            metawriter_properties const& properties) {
-  // there's more than one bbox for the text (one for each char), so keeping it
-  // simple for the moment and merging them all together...
-  if (p.envelopes.size() > 0) {
-    // stupid queue - doesn't expose begin() and end(), so forced to iterate by
-    // taking a copy...
-    std::queue<box2d<double> > env_copy = p.envelopes;
+  if (p.extents.valid()) {
     meta_instance inst;
-    box2d<double> box = env_copy.front();
-    while (env_copy.size() > 1) {
-      env_copy.pop();
-      box.expand_to_include(env_copy.front());
-    }
     inst.properties = intersect_properties(feature, properties);
-    inst.box = box;
+    inst.box = p.extents;
     instances_.push_back(inst);
   }
 }

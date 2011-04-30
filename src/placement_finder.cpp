@@ -72,7 +72,9 @@ placement::placement(string_info & info_,
       has_dimensions(has_dimensions_),
       allow_overlap(false),
       dimensions(std::make_pair(w,h)),
-      text_size(placement_options->text_size)
+      text_size(placement_options->text_size),
+      collect_extents(false),
+      extents()
 {}
 
 placement::placement(string_info & info_,
@@ -97,7 +99,9 @@ placement::placement(string_info & info_,
       has_dimensions(false),
       allow_overlap(sym.get_allow_overlap()),
       dimensions(),
-      text_size(placement_options->text_size)
+      text_size(placement_options->text_size),
+      collect_extents(false),
+      extents()
 {}
 
 
@@ -960,11 +964,27 @@ void placement_finder<DetectorT>::find_line_circle_intersection(
 template <typename DetectorT>
 void placement_finder<DetectorT>::update_detector(placement & p)
 {
+    bool first = true;
+
+    // add the bboxes to the detector and remove from the placement
     while (!p.envelopes.empty())
     {
         box2d<double> e = p.envelopes.front();
         detector_.insert(e, p.info.get_string());
         p.envelopes.pop();
+
+        if (p.collect_extents)
+        {
+            if(first)
+            {
+                first = false;
+                p.extents = e;
+            }
+            else
+            {
+                p.extents.expand_to_include(e);
+            }
+        }
     }
 }
 
@@ -973,7 +993,6 @@ void placement_finder<DetectorT>::clear()
 {
     detector_.clear();
 }
-
 
 typedef coord_transform2<CoordTransform,geometry_type> PathType;
 typedef label_collision_detector4 DetectorType;
