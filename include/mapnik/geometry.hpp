@@ -181,6 +181,12 @@ public:
 
     void label_position(double *x, double *y) const
     {
+        if (type_ == LineString || type_ == MultiLineString)
+        {
+            middle_point(x,y);
+            return;
+        }
+
         unsigned size = cont_.size();
         if (size < 3) 
         {
