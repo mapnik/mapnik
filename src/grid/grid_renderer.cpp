@@ -153,7 +153,19 @@ void grid_renderer<T>::render_marker(Feature const& feature, unsigned int step, 
     }
     else
     {
-        pixmap_.set_rectangle(feature.id(), **marker.get_bitmap_data(), x, y);
+        image_data_32 const& data = **marker.get_bitmap_data();
+        if (step == 1 && scale_factor_ == 1.0)
+        {
+            pixmap_.set_rectangle(feature.id(), data, x, y);    
+        }
+        else
+        {
+            double ratio = (1.0/step);
+            image_data_32 target(ratio * data.width(), ratio * data.height());
+            mapnik::scale_image_agg<image_data_32>(target,data, SCALING_NEAR,
+                scale_factor_, 0.0, 0.0, 1.0, ratio);
+            pixmap_.set_rectangle(feature.id(), target, x, y);
+        }
     }
     pixmap_.add_feature(feature);
 }

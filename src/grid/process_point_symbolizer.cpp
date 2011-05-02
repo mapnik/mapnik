@@ -68,8 +68,8 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
 
-            int w = (*marker)->width();
-            int h = (*marker)->height();
+            int w = (*marker)->width() * (1.0/pixmap_.get_step());
+            int h = (*marker)->height() * (1.0/pixmap_.get_step());
 
             int px = int(floor(x - 0.5 * w));
             int py = int(floor(y - 0.5 * h));
