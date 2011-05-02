@@ -189,7 +189,7 @@ enum scaling_method_e
 scaling_method_e get_scaling_method_by_name (std::string name);
 
 template <typename Image>
-void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f=0, double y_off_f=0, double filter_radius=2);
+void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f=0, double y_off_f=0, double filter_radius=2, double ratio=1);
 
 template <typename Image>
 void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f=0, double y_off_f=0);

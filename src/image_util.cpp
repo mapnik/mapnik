@@ -496,7 +496,7 @@ void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f, d
 }
 
 template <typename Image>
-void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius)
+void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio)
 {
     typedef agg::pixfmt_rgba32 pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
@@ -522,7 +522,7 @@ void scale_image_agg (Image& target,const Image& source, scaling_method_e scalin
     
     // create a scaling matrix
     agg::trans_affine img_mtx;
-    img_mtx /= agg::trans_affine_scaling(scale_factor, scale_factor);
+    img_mtx /= agg::trans_affine_scaling(scale_factor * ratio, scale_factor * ratio);
 
     // create a linear interpolator for our scaling matrix
     typedef agg::span_interpolator_linear<> interpolator_type;
@@ -584,7 +584,7 @@ void scale_image_agg (Image& target,const Image& source, scaling_method_e scalin
     agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
 }
 
-template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius);
+template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio);
 
 template void scale_image_bilinear8<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
 
