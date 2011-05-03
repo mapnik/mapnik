@@ -12,6 +12,8 @@ export DYLD_LIBRARY_PATH=$PREFIX/lib
 INSTALL=/Library/Frameworks/Mapnik.framework/unix/lib
 export DYLD_LIBRARY_PATH=$PREFIX/lib
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+# To ensure things like pkg-config built locally are used
+export PATH=$PREFIX/bin:$PATH
 
 
 # make a directory to hold icu and boost
@@ -38,12 +40,18 @@ cd ../../../sources/lib/
 
 # libicuuc
 install_name_tool -id $INSTALL/libicuuc.46.dylib libicuuc.46.0.dylib
-install_name_tool -change ../lib/libicudata.46.0.dylib $INSTALL/libicudata.46.dylib libicuuc.46.0.dylib
+# --enable-layout
+#install_name_tool -change ../lib/libicudata.46.0.dylib $INSTALL/libicudata.46.dylib libicuuc.46.0.dylib
+#--disable-layout
+install_name_tool -change libicudata.46.dylib $INSTALL/libicudata.46.dylib libicuuc.46.0.dylib
 # libicudata
 install_name_tool -id $INSTALL/libicudata.46.dylib libicudata.46.0.dylib
 # libicui18n - needed by boost_regex
 install_name_tool -id $INSTALL/libicui18n.46.dylib libicui18n.46.0.dylib
-install_name_tool -change ../lib/libicudata.46.0.dylib $INSTALL/libicudata.46.dylib libicui18n.46.0.dylib
+# --enable-layout
+#install_name_tool -change ../lib/libicudata.46.0.dylib $INSTALL/libicudata.46.dylib libicui18n.46.0.dylib
+#--disable-layout
+install_name_tool -change libicudata.46.dylib $INSTALL/libicudata.46.dylib libicui18n.46.0.dylib
 install_name_tool -change libicuuc.46.dylib $INSTALL/libicuuc.46.dylib libicui18n.46.0.dylib
 cd ../
 
@@ -59,6 +67,12 @@ make -j4
 make install
 install_name_tool -id $INSTALL/libfreetype.6.dylib ../../sources/lib/libfreetype.6.dylib
 cd ../
+
+# pkg-config so we get cairo and friends configured correctly
+wget http://pkgconfig.freedesktop.org/releases/pkg-config-0.25.tar.gz
+tar xvf pkg-config-0.25.tar.gz
+cd pkg-config-0.25
+./configure --disable-dependency-tracking --prefix=$PREFIX
 
 # pixman
 wget http://cairographics.org/releases/pixman-0.20.2.tar.gz
@@ -86,7 +100,7 @@ cd ../
 wget http://cairographics.org/releases/cairo-1.10.2.tar.gz
 tar xvf cairo-1.10.2.tar.gz
 cd cairo-1.10.2
-export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+# NOTE: PKG_CONFIG_PATH must be correctly set by this point
 export LDFLAGS="-L/Library/Frameworks/UnixImageIO.framework/unix/lib "$LDFLAGS
 export CFLAGS="-I/Library/Frameworks/UnixImageIO.framework/unix/include "$CFLAGS
 export png_CFLAGS="-I/Library/Frameworks/UnixImageIO.framework/unix/include"
@@ -109,6 +123,22 @@ make install
 install_name_tool -id $INSTALL/libcairo.2.dylib ../../sources/lib/libcairo.2.dylib
 cd ../
 
+# since linking to libpng framework (which does not provide a pkg-config) fake it:
+
+prefix=/Library/Frameworks/UnixImageIO.framework/unix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: cairo-png
+Description: PNG functions for cairo graphics library
+Version: 1.10.2
+
+Requires: cairo libpng
+Libs:  
+Cflags: -I${includedir}/cairo 
+
+
 # libsigcxx
 wget http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/libsigc++-2.2.8.tar.gz
 tar xvf libsigc++-2.2.8.tar.gz
@@ -122,7 +152,7 @@ cd ../
 wget http://cairographics.org/releases/cairomm-1.9.8.tar.gz
 tar xvf cairomm-1.9.8.tar.gz
 cd cairomm-1.9.8
-export PKG_CONFIG_PATH=../../sources/lib/pkgconfig/
+# NOTE: PKG_CONFIG_PATH must be correctly set by this point
 export LDFLAGS="-L$PREFIX/lib -lcairo -lsigc-2.0 "$LDFLAGS
 export CFLAGS="-I$PREFIX/include -I$PREFIX/include/cairo -I$PREFIX/include/freetype2 -I$PREFIX/lib/sigc++-2.0/include -I$PREFIX/include/sigc++-2.0 -I$PREFIX/include/sigc++-2.0/sigc++ "$CFLAGS
 export CXXFLAGS="-I$PREFIX/include "$CFLAGS
@@ -133,6 +163,9 @@ make install
 
 install_name_tool -id $INSTALL/libcairomm-1.0.1.dylib ../../sources/lib/libcairomm-1.0.1.dylib
 
+# also make sure cairo and friends did not link against anything in /opt/local or /usr/local
+otool -L ../../sources/lib/*dylib | grep local
+
 # pycairo
 # >= python 3.1
 #wget http://cairographics.org/releases/pycairo-1.8.10.tar.bz2
@@ -142,7 +175,6 @@ install_name_tool -id $INSTALL/libcairomm-1.0.1.dylib ../../sources/lib/libcairo
 #wget http://cairographics.org/releases/pycairo-1.8.8.tar.gz
 #tar xvf pycairo-1.8.8.tar.gz
 #cd pycairo-1.8.8
-#export PKG_CONFIG_PATH=../../sources/lib/pkgconfig/
 
 # py25
 # line 35 of configure.ac AM_PATH_PYTHON(2.5)
@@ -300,6 +332,13 @@ rm bindings/python/mapnik/_mapnik2.so
 scons configure BINDINGS=python PYTHON=/Library/Frameworks/Python.framework/Versions/3.1/bin/python3.1 BOOST_PYTHON_LIB=boost_python31
 scons -j2 install
 cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_31.so
+
+# 3.2
+rm bindings/python/*os
+rm bindings/python/mapnik/_mapnik2.so
+scons configure BINDINGS=python PYTHON=/Library/Frameworks/Python.framework/Versions/3.2/bin/python3.2m BOOST_PYTHON_LIB=boost_python32
+scons -j2 install
+cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_32.so
 
 
 # build a ton of versions of node (just to be safe about ABI)
