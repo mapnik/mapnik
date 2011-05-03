@@ -105,7 +105,9 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                 if (sym.get_label_placement() == POINT_PLACEMENT ||
                         sym.get_label_placement() == INTERIOR_PLACEMENT)
                 {
-                    double label_x, label_y, z=0.0;
+                    double label_x=0.0;
+                    double label_y=0.0;
+                    double z=0.0;
                     if (sym.get_label_placement() == POINT_PLACEMENT)
                         geom.label_position(&label_x, &label_y);
                     else
