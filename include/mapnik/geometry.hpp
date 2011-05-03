@@ -179,6 +179,9 @@ public:
         }
     }
 
+    /* center of gravity centroid
+      - best visually but does not work with multipolygons
+    */
     void label_position(double *x, double *y) const
     {
         if (type_ == LineString || type_ == MultiLineString)
@@ -232,7 +235,48 @@ public:
         *x=x0;
         *y=y0;            
     }
-         
+
+    /* center of bounding box centroid */
+    void label_position2(double *x, double *y) const
+    {
+
+        box2d<double> box = envelope();
+        *x = box.center().x;
+        *y = box.center().y; 
+    }
+
+    /* summarized distance centroid */
+    void label_position3(double *x, double *y) const
+    {
+        if (type_ == LineString || type_ == MultiLineString)
+        {
+            middle_point(x,y);
+            return;
+        }
+
+        unsigned i = 0;
+        double l = 0.0;
+        double tl = 0.0;
+        double cx = 0.0;
+        double cy = 0.0;
+        double x0 = 0.0;
+        double y0 = 0.0;
+        double x1 = 0.0;
+        double y1 = 0.0;
+        unsigned size = cont_.size();   
+        for (i = 0; i < size-1; i++)
+        {
+            cont_.get_vertex(i,&x0,&y0);
+            cont_.get_vertex(i+1,&x1,&y1);
+            l = distance(x0,y0,x1,y1);
+            cx += l * (x1 + x0)/2;
+            cy += l * (y1 + y0)/2;
+            tl += l;
+        }
+        *x = cx / tl;
+        *y = cy / tl;
+    }
+                 
     void middle_point(double *x, double *y) const
     {
         // calculate mid point on path
@@ -308,6 +352,11 @@ public:
     unsigned vertex(double* x, double* y) const
     {
         return cont_.get_vertex(itr_++,x,y);
+    }         
+
+    unsigned get_vertex(unsigned pos, double* x, double* y) const
+    {
+        return cont_.get_vertex(pos, x, y);
     }         
 
     void rewind(unsigned ) const
