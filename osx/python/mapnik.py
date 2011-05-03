@@ -39,25 +39,8 @@ Several things happen when you do:
 
 """
 
-import sys
-
-ver_int = int('%s%s' % (sys.version_info[0],sys.version_info[1]))
-ver_str = '%s.%s' % (sys.version_info[0],sys.version_info[1])
-
-path_insert = '/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/lib/python%s/site-packages/mapnik2'
-
-if ver_int < 25:
-    raise ImportError('Mapnik bindings are only available for python versions >= 2.5')
-elif ver_int in (25,26,27,31):
-    sys.path.insert(0, path_insert % ver_str)
-    from _mapnik2 import *
-elif ver_int > 31:
-    raise ImportError('Mapnik bindings are only available for python versions <= 3.1')
-else:
-    raise ImportError('Mapnik bindings are only available for python versions 2.5, 2.6, 2.7, and 3.1')
-
-
 import os
+import sys
 import warnings
 
 try:
@@ -71,6 +54,21 @@ except ImportError:
 
 flags = sys.getdlopenflags()
 sys.setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
+
+ver_int = int('%s%s' % (sys.version_info[0],sys.version_info[1]))
+ver_str = '%s.%s' % (sys.version_info[0],sys.version_info[1])
+
+path_insert = '/Library/Frameworks/Mapnik.framework/Versions/2.0/unix/lib/python%s/site-packages/mapnik2'
+
+if ver_int < 25:
+    raise ImportError('Mapnik bindings are only available for python versions >= 2.5')
+elif ver_int in (25,26,27,31,32):
+    sys.path.insert(0, path_insert % ver_str)
+    from _mapnik2 import *
+elif ver_int > 32:
+    raise ImportError('Mapnik bindings are only available for python versions <= 3.1')
+else:
+    raise ImportError('Mapnik bindings are only available for python versions 2.5, 2.6, 2.7, and 3.1')
 
 from paths import inputpluginspath, fontscollectionpath
 
@@ -91,6 +89,8 @@ class _MapnikMetaclass(BoostPythonMetaclass):
 # http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
 _injector = _MapnikMetaclass('_injector', (object, ), {})
 
+def render_grid(m,layer,key,resolution=4,fields=[]):
+    return render_grid_(m,layer,key,resolution,fields)
 
 def Filter(*args,**kwargs):
     warnings.warn("'Filter' is deprecated and will be removed in Mapnik 2.0.1, use 'Expression' instead",
@@ -274,11 +274,19 @@ class _Datasource(Datasource,_injector):
     def field_types(self):
         return map(get_types,self._field_types())
 
-    def all_features(self):
+    def all_features(self,fields=None):
         query = Query(self.envelope())
-        for fld in self.fields():
+        attributes = fields or self.fields()
+        for fld in attributes:
             query.add_property_name(fld)
         return self.features(query).features
+
+    def featureset(self,fields=None):
+        query = Query(self.envelope())
+        attributes = fields or self.fields()
+        for fld in attributes:
+            query.add_property_name(fld)
+        return self.features(query)
 
 class _DeprecatedFeatureProperties(object):
 
@@ -310,12 +318,7 @@ class _Feature(Feature, _injector):
         #XXX Returns a copy! changes to it won't affect feat.'s attrs.
         #    maybe deprecate?
         return dict(self)
-
-    @property
-    def geometry(self):
-        if self.num_geometries() > 0:
-            return self.get_geometry(0)
-
+    
     @property
     def geometries(self):
         return [self.get_geometry(i) for i in xrange(self.num_geometries())]
@@ -326,25 +329,7 @@ class _Feature(Feature, _injector):
             self.add_geometry(geometry)
         for k, v in properties.iteritems():
             self[k] = v
-
-    def add_geometry(self, geometry):
-        geometry = self._as_wkb(geometry)
-        Feature._c_add_geometry(self, geometry)
-
-    def _as_wkb(self, geometry):
-        if hasattr(geometry, 'wkb'):
-            # a shapely.geometry.Geometry
-            geometry = geometry.wkb
-        if isinstance(geometry, str):
-            # ignoring unicode un purpose
-            for type_ in ('POINT', 'POLYGON', 'LINE'):
-                if type_ in geometry:
-                    # A WKT encoded string 
-                    from shapely import wkt
-                    geometry = wkt.loads(geometry).wkb
-            return geometry
-        raise TypeError("%r (%s) not supported" % (geometry, type(geometry)))
-
+    
 class _Color(Color,_injector):
 
     def __repr__(self):
@@ -778,6 +763,7 @@ __all__ = [
     'save_map',
     'save_map_to_string',
     'render',
+    'render_grid',
     'render_tile_to_file',
     'render_to_file',
     #   other
