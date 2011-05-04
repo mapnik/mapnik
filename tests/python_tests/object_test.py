@@ -30,8 +30,8 @@ def test_shieldsymbolizer_init():
     eq_(s.vertical_alignment, mapnik2.vertical_alignment.MIDDLE)
     eq_(s.label_spacing, 0)
     eq_(s.label_position_tolerance, 0)
-    # 25.0 * M_PI/180.0 initialized by default
-    assert_almost_equal(s.max_char_angle_delta, 0.43633231299858238)
+    # 22.5 * M_PI/180.0 initialized by default
+    assert_almost_equal(s.max_char_angle_delta, 0.39269908169872414)
     
     eq_(s.wrap_character, ' ')
     eq_(s.text_transform, mapnik2.text_transform.NONE)
@@ -301,8 +301,8 @@ def test_textsymbolizer_pickle():
     eq_(ts.vertical_alignment, ts2.vertical_alignment)
     eq_(ts.label_spacing, ts2.label_spacing)
     eq_(ts.label_position_tolerance, ts2.label_position_tolerance)
-    # 25.0 * M_PI/180.0 initialized by default
-    assert_almost_equal(s.max_char_angle_delta, 0.43633231299858238)
+    # 22.5 * M_PI/180.0 initialized by default
+    assert_almost_equal(s.max_char_angle_delta, 0.39269908169872414)
     
     eq_(ts.wrap_character, ts2.wrap_character)
     eq_(ts.text_transform, ts2.text_transform)
