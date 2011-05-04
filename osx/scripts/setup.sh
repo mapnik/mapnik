@@ -128,15 +128,15 @@ cd ../
 prefix=/Library/Frameworks/UnixImageIO.framework/unix
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
-includedir=${prefix}/include
+includedir=${prefix}/include/libpng14
 
-Name: cairo-png
-Description: PNG functions for cairo graphics library
-Version: 1.10.2
+Name: libpng
+Description: Loads and saves PNG files
+Version: 1.4
+Libs: -L${libdir} -lpng14
+Libs.private: -lz 
+Cflags: -I${includedir} 
 
-Requires: cairo libpng
-Libs:  
-Cflags: -I${includedir}/cairo 
 
 
 # libsigcxx
