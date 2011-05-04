@@ -24,13 +24,13 @@ BOOST_AUTO_TEST_CASE(compile_test_case)
 
     try
     {
-	std::ostringstream output_stream;
-	std::ostream_iterator<char> output_stream_iterator(output_stream);
-	svg_renderer<std::ostream_iterator<char> > renderer(map, output_stream_iterator);
-	renderer.apply();
+        std::ostringstream output_stream;
+        std::ostream_iterator<char> output_stream_iterator(output_stream);
+        svg_renderer<std::ostream_iterator<char> > renderer(map, output_stream_iterator);
+        renderer.apply();
     }
     catch(...)
     {
-	BOOST_FAIL("Empty implementation throws exception.");
+        BOOST_FAIL("Empty implementation throws exception.");
     }
 }

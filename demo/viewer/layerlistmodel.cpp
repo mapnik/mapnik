@@ -40,33 +40,33 @@ int LayerListModel::rowCount(QModelIndex const&) const
 QVariant LayerListModel::data(QModelIndex const& index,int role) const
 {
     if (!index.isValid() || !map_)
-	return QVariant();
+        return QVariant();
     if (index.row() < 0 || index.row() >= int(map_->layers().size()))
-	return QVariant();
+        return QVariant();
     if (role == Qt::DisplayRole)
-	return QString(map_->layers().at(index.row()).name().c_str());
+        return QString(map_->layers().at(index.row()).name().c_str());
     else if (role == Qt::DecorationRole)
     {
-	double scale = map_->scale();
-	if (map_->layers().at(index.row()).isVisible(scale))
-	{
-	    return QIcon(":/images/globe.png");
-	}
-	else
-	{
-	    return QIcon(":/images/globe_bw.png");
-	}
+        double scale = map_->scale();
+        if (map_->layers().at(index.row()).isVisible(scale))
+        {
+            return QIcon(":/images/globe.png");
+        }
+        else
+        {
+            return QIcon(":/images/globe_bw.png");
+        }
     }
     else if (role == Qt::CheckStateRole)
     {
-	if (map_->layers().at(index.row()).isActive())
+        if (map_->layers().at(index.row()).isActive())
            return QVariant(Qt::Checked);
-	else 
+        else 
            return QVariant(Qt::Unchecked);
     }
     else
     {
-	return QVariant();
+        return QVariant();
     }
 }
 
@@ -74,16 +74,16 @@ QVariant LayerListModel::headerData(int section, Qt::Orientation orientation,
                                          int role) const
 {
     if (role != Qt::DisplayRole)
-	return QVariant();
+        return QVariant();
     
     if (orientation == Qt::Horizontal)
-	return QString("TODO Column %1").arg(section);
+        return QString("TODO Column %1").arg(section);
     else
-	return QString("TODO Row %1").arg(section);
+        return QString("TODO Row %1").arg(section);
 }
 
 bool LayerListModel::setData(const QModelIndex &index,
-			     const QVariant &value, int role)
+                             const QVariant &value, int role)
 {
    if (!map_) return false;
    
@@ -113,7 +113,7 @@ boost::optional<mapnik::layer&> LayerListModel::map_layer(int i)
    {
       std::vector<mapnik::layer> & layers = const_cast<std::vector<mapnik::layer>& >(map_->layers());
       if (i < int(layers.size()))
-	  return boost::optional<mapnik::layer&>(layers[i]);
+          return boost::optional<mapnik::layer&>(layers[i]);
    }
    return boost::optional<mapnik::layer&>();
 }

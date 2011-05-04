@@ -28,13 +28,13 @@ using namespace karma;
 struct F 
 {
     F() :
-	x(0),
-	y(0),
-	width(100),
-	height(100),
-	bgcolor("#ffffff"),
-	expected_output("<rect x=\"0\" y=\"0\" width=\"100px\" height=\"100px\" style=\"fill: #ffffff\"/>") {}
-	
+    x(0),
+    y(0),
+    width(100),
+    height(100),
+    bgcolor("#ffffff"),
+    expected_output("<rect x=\"0\" y=\"0\" width=\"100px\" height=\"100px\" style=\"fill: #ffffff\"/>") {}
+    
     ~F() {}
 
     const int x;
@@ -61,14 +61,14 @@ struct F
 BOOST_FIXTURE_TEST_CASE(bgcolor_stream_test_case, F)
 {
     actual_output
-	<< format(
-	    "<rect x=\"" << int_ << "\" "
-	    << "y=\"" << int_ << "\" "
-	    << "width=\"" << int_ << string << "\" "
-	    << "height=\"" << int_ << string << "\" "
-	    << "style=\"fill: " << string << "\""
-	    << "/>",
-	    x, y, width, "px", height, "px", bgcolor);
+    << format(
+        "<rect x=\"" << int_ << "\" "
+        << "y=\"" << int_ << "\" "
+        << "width=\"" << int_ << string << "\" "
+        << "height=\"" << int_ << string << "\" "
+        << "style=\"fill: " << string << "\""
+        << "/>",
+        x, y, width, "px", height, "px", bgcolor);
 
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }
@@ -92,14 +92,14 @@ BOOST_FIXTURE_TEST_CASE(bgcolor_stream_confix_test_case, F)
     using fusion::tuple;
 
     actual_output
-	<< format(
-	    "<rect x=" << confix('"', '"')[int_]
-	    << " y=" << confix('"', '"')[int_]
-	    << " width=" << confix('"', '"')[int_ << string]
-	    << " height=" << confix('"', '"')[int_ << string]
-	    << " style=" << confix('"', '"')["fill: " << string]
-	    << "/>",
-	    x, y, tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), bgcolor); 
+    << format(
+        "<rect x=" << confix('"', '"')[int_]
+        << " y=" << confix('"', '"')[int_]
+        << " width=" << confix('"', '"')[int_ << string]
+        << " height=" << confix('"', '"')[int_ << string]
+        << " style=" << confix('"', '"')["fill: " << string]
+        << "/>",
+        x, y, tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), bgcolor); 
     
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }
@@ -122,14 +122,14 @@ BOOST_FIXTURE_TEST_CASE(bgcolor_stream_confix_complete_test_case, F)
     using fusion::tuple;
 
     actual_output
-	<< format(
-	    confix('<', "/>")[
-		"rect x=" << confix('"', '"')[int_]
-		<< " y=" << confix('"', '"')[int_]
-		<< " width=" << confix('"', '"')[int_ << string]
-		<< " height=" << confix('"', '"')[int_ << string]
-		<< " style=" << confix('"', '"')["fill: " << string]],
-		x, y, tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), bgcolor); 
+    << format(
+        confix('<', "/>")[
+        "rect x=" << confix('"', '"')[int_]
+        << " y=" << confix('"', '"')[int_]
+        << " width=" << confix('"', '"')[int_ << string]
+        << " height=" << confix('"', '"')[int_ << string]
+        << " style=" << confix('"', '"')["fill: " << string]],
+        x, y, tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), bgcolor); 
     
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }
@@ -152,14 +152,14 @@ BOOST_FIXTURE_TEST_CASE(bgcolor_stream_iterator_test_case, F)
     std::ostream_iterator<char> actual_output_iterator(actual_output);
 
     generate(
-	actual_output_iterator,
-	confix("<", "/>")[
-	    "rect x=" << confix('"', '"')[int_]
-	    << " y=" << confix('"', '"')[int_]
-	    << " width=" << confix('"', '"')[int_ << string]
-	    << " height=" << confix('"', '"')[int_ << string]
-	    << " style=" << confix('"', '"')["fill: " << string]],
-	x, y, tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), bgcolor);
+    actual_output_iterator,
+    confix("<", "/>")[
+        "rect x=" << confix('"', '"')[int_]
+        << " y=" << confix('"', '"')[int_]
+        << " width=" << confix('"', '"')[int_ << string]
+        << " height=" << confix('"', '"')[int_ << string]
+        << " style=" << confix('"', '"')["fill: " << string]],
+    x, y, tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), bgcolor);
 
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }

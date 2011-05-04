@@ -36,7 +36,7 @@ class LayerDelegate : public QAbstractItemDelegate
 public:
     LayerDelegate(QObject *parent = 0);
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
-	       const QModelIndex &index) const;    
+    const QModelIndex &index) const;    
     QSize sizeHint(const QStyleOptionViewItem &option,
                        const QModelIndex &index ) const;
 };

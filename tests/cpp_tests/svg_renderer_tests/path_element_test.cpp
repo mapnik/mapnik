@@ -130,63 +130,63 @@ void prepare_map(Map& m)
     // layers
     // Provincial  polygons
     {
-	parameters p;
-	p["type"]="shape";
-	p["file"]=mapnik_dir+"/demo/data/boundaries";
-            
-	layer lyr("Provinces"); 
-	lyr.set_datasource(datasource_cache::instance()->create(p));
-	lyr.add_style("provinces");    
-	m.addLayer(lyr);
+        parameters p;
+        p["type"]="shape";
+        p["file"]=mapnik_dir+"/demo/data/boundaries";
+                
+        layer lyr("Provinces"); 
+        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.add_style("provinces");    
+        m.addLayer(lyr);
     }
         
     // Drainage
     {
-	parameters p;
-	p["type"]="shape";
-	p["file"]=mapnik_dir+"/demo/data/qcdrainage";
-	layer lyr("Quebec Hydrography");
-	lyr.set_datasource(datasource_cache::instance()->create(p));
-	lyr.add_style("drainage");    
-	m.addLayer(lyr);
+        parameters p;
+        p["type"]="shape";
+        p["file"]=mapnik_dir+"/demo/data/qcdrainage";
+        layer lyr("Quebec Hydrography");
+        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.add_style("drainage");    
+        m.addLayer(lyr);
     }
         
     {
-	parameters p;
-	p["type"]="shape";
-	p["file"]=mapnik_dir+"/demo/data/ontdrainage";
-            
-	layer lyr("Ontario Hydrography"); 
-	lyr.set_datasource(datasource_cache::instance()->create(p));
-	lyr.add_style("drainage");    
-	m.addLayer(lyr);
+        parameters p;
+        p["type"]="shape";
+        p["file"]=mapnik_dir+"/demo/data/ontdrainage";
+                
+        layer lyr("Ontario Hydrography"); 
+        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.add_style("drainage");    
+        m.addLayer(lyr);
     }
         
     // Provincial boundaries
     {
-	parameters p;
-	p["type"]="shape";
-	p["file"]=mapnik_dir+"/demo/data/boundaries_l";
-	layer lyr("Provincial borders"); 
-	lyr.set_datasource(datasource_cache::instance()->create(p));
-	lyr.add_style("provlines");    
-	m.addLayer(lyr);
+        parameters p;
+        p["type"]="shape";
+        p["file"]=mapnik_dir+"/demo/data/boundaries_l";
+        layer lyr("Provincial borders"); 
+        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.add_style("provlines");    
+        m.addLayer(lyr);
     }
     
     // Roads
     {
-	parameters p;
-	p["type"]="shape";
-	p["file"]=mapnik_dir+"/demo/data/roads";        
-	layer lyr("Roads"); 
-	lyr.set_datasource(datasource_cache::instance()->create(p));
-	lyr.add_style("smallroads");
-	lyr.add_style("road-border");
-	lyr.add_style("road-fill");
-	lyr.add_style("highway-border");
-	lyr.add_style("highway-fill");
-
-	m.addLayer(lyr);        
+        parameters p;
+        p["type"]="shape";
+        p["file"]=mapnik_dir+"/demo/data/roads";        
+        layer lyr("Roads"); 
+        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.add_style("smallroads");
+        lyr.add_style("road-border");
+        lyr.add_style("road-fill");
+        lyr.add_style("highway-border");
+        lyr.add_style("highway-fill");
+    
+        m.addLayer(lyr);        
     }
 }
 
@@ -196,35 +196,36 @@ void render_to_file(Map const& m, const std::string output_filename)
 
     if(output_stream)
     {
-	typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
-
-	std::ostream_iterator<char> output_stream_iterator(output_stream);
-
-	svg_ren renderer(m, output_stream_iterator);
-	renderer.apply();
-
-	output_stream.close();
-
-	filesystem::path output_filename_path = 
-	    filesystem::system_complete(filesystem::path(".")) / filesystem::path(output_filename);
-
-	BOOST_CHECK_MESSAGE(filesystem::exists(output_filename_path), "File '"+output_filename_path.string()+"' was created.");
+        typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
+    
+        std::ostream_iterator<char> output_stream_iterator(output_stream);
+    
+        svg_ren renderer(m, output_stream_iterator);
+        renderer.apply();
+    
+        output_stream.close();
+    
+        filesystem::path output_filename_path = 
+            filesystem::system_complete(filesystem::path(".")) / filesystem::path(output_filename);
+    
+        BOOST_CHECK_MESSAGE(filesystem::exists(output_filename_path), 
+           "File '"+output_filename_path.string()+"' was created.");
     }
     else
     {
-	BOOST_FAIL("Could not create create/open file '"+output_filename+"'.");
+        BOOST_FAIL("Could not create create/open file '"+output_filename+"'.");
     }
 }
 
 BOOST_AUTO_TEST_CASE(path_element_test_case_1)
 {
     Map m(800,600);
-    m.set_background(color_factory::from_string("white"));      
+    m.set_background(color_factory::from_string("steelblue"));      
 
     prepare_map(m);
         
-    m.zoom_to_box(box2d<double>(1405120.04127408, -247003.813399447,
-				1706357.31328276, -25098.593149577));
-        
+    //m.zoom_to_box(box2d<double>(1405120.04127408, -247003.813399447,
+                //1706357.31328276, -25098.593149577));
+    m.zoom_all();    
     render_to_file(m, "path_element_test_case_1.svg");
 }

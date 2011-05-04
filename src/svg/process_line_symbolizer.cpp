@@ -34,13 +34,13 @@ namespace mapnik
           Feature const& feature,
           proj_transform const& prj_trans)
     {
-  path_attributes_.set_stroke_color(sym.get_stroke().get_color());
-  path_attributes_.set_stroke_opacity(sym.get_stroke().get_opacity());
-  path_attributes_.set_stroke_width(sym.get_stroke().get_width());
-  path_attributes_.set_stroke_linecap(sym.get_stroke().get_line_cap());
-  path_attributes_.set_stroke_linejoin(sym.get_stroke().get_line_join());
-  path_attributes_.set_stroke_dasharray(sym.get_stroke().get_dash_array());
-  path_attributes_.set_stroke_dashoffset(sym.get_stroke().dash_offset());
+        path_attributes_.set_stroke_color(sym.get_stroke().get_color());
+        path_attributes_.set_stroke_opacity(sym.get_stroke().get_opacity());
+        path_attributes_.set_stroke_width(sym.get_stroke().get_width());
+        path_attributes_.set_stroke_linecap(sym.get_stroke().get_line_cap());
+        path_attributes_.set_stroke_linejoin(sym.get_stroke().get_line_join());
+        path_attributes_.set_stroke_dasharray(sym.get_stroke().get_dash_array());
+        path_attributes_.set_stroke_dashoffset(sym.get_stroke().dash_offset());
     }
 
     template void svg_renderer<std::ostream_iterator<char> >::process(line_symbolizer const& sym,

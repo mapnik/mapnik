@@ -5,7 +5,7 @@ API_DOCS_DIR="../api_docs/python"
 if [ ! -d $API_DOCS_DIR ]
     then 
         echo "creating $API_DOCS_DIR"
-	mkdir -p $API_DOCS_DIR
+    mkdir -p $API_DOCS_DIR
 fi
 
 epydoc --no-private \

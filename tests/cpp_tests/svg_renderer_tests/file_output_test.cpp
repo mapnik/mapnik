@@ -50,20 +50,20 @@ BOOST_AUTO_TEST_CASE(file_output_test_case)
 
     if(output_stream)
     {
-	std::ostream_iterator<char> output_stream_iterator(output_stream);
-
-	svg_ren renderer(map, output_stream_iterator);
-	renderer.apply();
-
-	output_stream.close();
-
-	filesystem::path output_filename_path = 
-	    filesystem::system_complete(filesystem::path(".")) / filesystem::path(output_filename);
-
-	BOOST_CHECK_MESSAGE(filesystem::exists(output_filename_path), "File '"+output_filename_path.string()+"' was created.");
+        std::ostream_iterator<char> output_stream_iterator(output_stream);
+    
+        svg_ren renderer(map, output_stream_iterator);
+        renderer.apply();
+    
+        output_stream.close();
+    
+        filesystem::path output_filename_path = 
+            filesystem::system_complete(filesystem::path(".")) / filesystem::path(output_filename);
+    
+        BOOST_CHECK_MESSAGE(filesystem::exists(output_filename_path), "File '"+output_filename_path.string()+"' was created.");
     }
     else
     {
-	BOOST_FAIL("Could not create create/open file '"+output_filename+"'.");
+        BOOST_FAIL("Could not create create/open file '"+output_filename+"'.");
     }
 }

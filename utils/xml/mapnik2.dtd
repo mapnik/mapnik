@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!ELEMENT Map (Datasource | FileSource | FontSet | Layer | Style)* >
 <!ATTLIST Map
-	bgcolor			CDATA	"transparent"
-	srs 			CDATA	"+proj=latlong +datum=WGS84"
-	buffer_size 	CDATA	"0"
-	minimum_version CDATA	#IMPLIED
-	paths_from_xml	(true|false) "true"
+    bgcolor         CDATA    "transparent"
+    srs             CDATA    "+proj=latlong +datum=WGS84"
+    buffer_size     CDATA    "0"
+    minimum_version CDATA    #IMPLIED
+    paths_from_xml    (true|false) "true"
 >
 
 <!ELEMENT Datasource (Parameter)*>
 <!-- Template Variant -->
 <!-- name defaults to "Unnamed" -->
 <!ATTLIST Datasource
-	name			ID 		#IMPLIED
+    name            ID         #IMPLIED
 >
 
 <!-- General Form -->
 <!ATTLIST Datasource
-	base			IDREF	#IMPLIED
+    base            IDREF    #IMPLIED
 >
 
 <!ELEMENT Parameter (#PCDATA)>
@@ -36,61 +36,61 @@
                   multiple_geometries?, row_offset?, row_limit?, table?, wkb_format?, use_spatial_index?
   -->
 <!ATTLIST Parameter
-	name			(type|encoding|band|file|shared|estimate_extent|extent|host|port|
-			geometry_field|initial_size|max_size|multiple_geometries|password|row_limit|
-			row_prefetch|table|use_spatial_index|user|
-			layer|
-			bbox|parser|url|
-			cursor_size|dbname|extent_from_subquery|geometry_table|persist_connection|srid|
-			base|format|lox|loy|hix|hiy|
-			key_field|metadata|row_offset|wkb_format)	#REQUIRED
+    name            (type|encoding|band|file|shared|estimate_extent|extent|host|port|
+            geometry_field|initial_size|max_size|multiple_geometries|password|row_limit|
+            row_prefetch|table|use_spatial_index|user|
+            layer|
+            bbox|parser|url|
+            cursor_size|dbname|extent_from_subquery|geometry_table|persist_connection|srid|
+            base|format|lox|loy|hix|hiy|
+            key_field|metadata|row_offset|wkb_format)    #REQUIRED
 >
 
 <!ELEMENT FileSource (#PCDATA)>
 <!ATTLIST FileSource
-  		name		CDATA	#IMPLIED
+          name        CDATA    #IMPLIED
 >
 
 <!ELEMENT FontSet (Font)*>
 <!ATTLIST FontSet
-  		name		CDATA	#IMPLIED
+          name        CDATA    #IMPLIED
 >
 
 <!ELEMENT Font EMPTY>
 <!ATTLIST Font
-  		face_name		CDATA	#REQUIRED
+          face_name        CDATA    #REQUIRED
 >
 
 <!ELEMENT Style (Rule)+>
 <!ATTLIST Style
-  		name		ID		#REQUIRED
+          name        ID        #REQUIRED
 >
 
 <!ELEMENT Layer (StyleName|Datasource)*>
 <!-- FIXME: queryable true/false ? -->
 <!ATTLIST Layer
-		abstract			CDATA	#IMPLIED
-		clear_label_cache	(yes|1|no|0)	#IMPLIED
-		minzoom				CDATA	"0"
-		maxzoom				CDATA	#IMPLIED
-  		name				CDATA	#IMPLIED
-  		queryable			(true|on|1|false|off|0)	"0"
-  		srs					CDATA	#IMPLIED
-  		status				(on|1|off|0)	"1"
-  		title				CDATA	""
-  		tolerance			CDATA	#IMPLIED
-  		toleranceunits		CDATA	#IMPLIED
+        abstract            CDATA    #IMPLIED
+        clear_label_cache    (yes|1|no|0)    #IMPLIED
+        minzoom                CDATA    "0"
+        maxzoom                CDATA    #IMPLIED
+        name                CDATA    #IMPLIED
+        queryable            (true|on|1|false|off|0)    "0"
+        srs                    CDATA    #IMPLIED
+        status                (on|1|off|0)    "1"
+        title                CDATA    ""
+        tolerance            CDATA    #IMPLIED
+        toleranceunits        CDATA    #IMPLIED
 >
 
 <!ELEMENT StyleName (#PCDATA)>
 
 <!ELEMENT Rule ((Filter|ElseFilter)|MaxScaleDenominator|MinScaleDenominator|
-  				BuildingSymbolizer|PointSymbolizer|LineSymbolizer|PolygonSymbolizer|PolygonPatternSymbolizer|
-  				LinePatternSymbolizer|MarkersSymbolizer|RasterSymbolizer|ShieldSymbolizer|TextSymbolizer)*>
+                  BuildingSymbolizer|PointSymbolizer|LineSymbolizer|PolygonSymbolizer|PolygonPatternSymbolizer|
+                  LinePatternSymbolizer|MarkersSymbolizer|RasterSymbolizer|ShieldSymbolizer|TextSymbolizer)*>
 <!-- FIXME: MapnikXMLDescription.pdf specified name is required?  -->
 <!ATTLIST Rule
-  		name		CDATA	#IMPLIED
-  		title		CDATA	#IMPLIED
+          name        CDATA    #IMPLIED
+          title        CDATA    #IMPLIED
 >
 
 <!ELEMENT Filter (#PCDATA)>
@@ -101,32 +101,32 @@
 <!ELEMENT BuildingSymbolizer (CssParameter)*>
 <!ELEMENT CssParameter (#PCDATA)>
 <!ATTLIST CssParameter
-  		name	(fill|fill-opacity|height
-  				|stroke|stroke-width|stroke-opacity|stroke-linejoin|stroke-linecap|stroke-dasharray
-  				|gamma
-  				|mode|opacity|scaling)	#IMPLIED
+          name    (fill|fill-opacity|height
+                  |stroke|stroke-width|stroke-opacity|stroke-linejoin|stroke-linecap|stroke-dasharray
+                  |gamma
+                  |mode|opacity|scaling)    #IMPLIED
 >
 
 <!ELEMENT PointSymbolizer EMPTY>
 <!ATTLIST PointSymbolizer
-  		allow_overlap	(yes|true|1|no|false|0) 	"0"
-  		base			IDREF	#IMPLIED
-  		file			CDATA	#IMPLIED
-  		height			CDATA	#IMPLIED
-  		opacity			CDATA	#IMPLIED
-  		type			(tiff|png)	#IMPLIED
-  		width			CDATA	#IMPLIED
+          allow_overlap    (yes|true|1|no|false|0)     "0"
+          base            IDREF    #IMPLIED
+          file            CDATA    #IMPLIED
+          height            CDATA    #IMPLIED
+          opacity            CDATA    #IMPLIED
+          type            (tiff|png)    #IMPLIED
+          width            CDATA    #IMPLIED
 >
 
 <!ELEMENT LineSymbolizer (CssParameter)*>
 
 <!ELEMENT LinePatternSymbolizer EMPTY>
 <!ATTLIST LinePatternSymbolizer
-		base	IDREF		#IMPLIED
-		file	CDATA		#REQUIRED
-		height	CDATA		#REQUIRED
-		type	(tiff|png)	#REQUIRED
-		width	CDATA		#REQUIRED
+        base    IDREF        #IMPLIED
+        file    CDATA        #REQUIRED
+        height    CDATA        #REQUIRED
+        type    (tiff|png)    #REQUIRED
+        width    CDATA        #REQUIRED
 >
 
 <!ELEMENT TextSymbolizer EMPTY>
@@ -134,39 +134,39 @@
 <!-- FIXME: label_position_tolerance not available in XML -->
 <!-- FIXME: text_ratio not available in XML -->
 <!ATTLIST TextSymbolizer
-		avoid_edges			(true|false)	"false"
-		allow_overlap		(true|false) 	"false"
-		character_spacing	CDATA			"0"
-		dx					CDATA			"0"
-		dy					CDATA			"0"
-		face_name			CDATA			#IMPLIED
-		fontset_name		IDREF			#IMPLIED
-		fill				CDATA			"black"
-		force_odd_labels	(true|false)	"false"
-		halo_fill			CDATA			"white"
-		halo_radius			CDATA			"0"
-		horizontal_alignment	(left|middle|right)	"left"
-		justify_alignment		(left|middle|right)	"middle"
-		label_position_tolerance	CDATA	"0"
-		line_spacing		CDATA			"0"
-		max_char_angle_delta	CDATA		#IMPLIED
-		min_distance		CDATA			"0"
-		name				CDATA			#IMPLIED
-		opacity				CDATA			"1.0"
-		placement			(point|line)		"point"
-		size				CDATA			"10"
-		spacing				CDATA			"0"
-		text_convert		(none|toupper|tolower)	"none"
-		text_ratio			CDATA			#IMPLIED
-		vertical_alignment	(top|middle|bottom)	"middle"
-		wrap_before			(true|false)	"false"
-		wrap_character		CDATA			" "
-		wrap_width			CDATA			"0"
+        avoid_edges            (true|false)    "false"
+        allow_overlap        (true|false)     "false"
+        character_spacing    CDATA            "0"
+        dx                    CDATA            "0"
+        dy                    CDATA            "0"
+        face_name            CDATA            #IMPLIED
+        fontset_name        IDREF            #IMPLIED
+        fill                CDATA            "black"
+        force_odd_labels    (true|false)    "false"
+        halo_fill            CDATA            "white"
+        halo_radius            CDATA            "0"
+        horizontal_alignment    (left|middle|right)    "left"
+        justify_alignment        (left|middle|right)    "middle"
+        label_position_tolerance    CDATA    "0"
+        line_spacing        CDATA            "0"
+        max_char_angle_delta    CDATA        #IMPLIED
+        min_distance        CDATA            "0"
+        name                CDATA            #IMPLIED
+        opacity                CDATA            "1.0"
+        placement            (point|line)        "point"
+        size                CDATA            "10"
+        spacing                CDATA            "0"
+        text_convert        (none|toupper|tolower)    "none"
+        text_ratio            CDATA            #IMPLIED
+        vertical_alignment    (top|middle|bottom)    "middle"
+        wrap_before            (true|false)    "false"
+        wrap_character        CDATA            " "
+        wrap_width            CDATA            "0"
 >
 
 <!ELEMENT MarkersSymbolizer EMPTY>
 <!ATTLIST MarkersSymbolizer
-		allow_overlap	(yes|true|1|no|false|0) 	"0"
+        allow_overlap    (yes|true|1|no|false|0)     "0"
 >
 
 <!ELEMENT PolygonSymbolizer (CssParameter)*>
@@ -176,46 +176,46 @@
 <!-- FIXME: MapnikXMLDescription: horizontal_alignment "bottom" -> "middle"? -->
 <!ELEMENT ShieldSymbolizer EMPTY>
 <!ATTLIST ShieldSymbolizer
-		allow_overlap	(true|false) 	"false"
-		avoid_edges		(true|false)	"false"
-		unlock_image	(true|false)	"false"
-		opacity			CDATA			"1.0"
-		
-		base			IDREF			#IMPLIED
-		file			CDATA			#REQUIRED
-		height			CDATA			#REQUIRED
-		type			(tiff|png)		#REQUIRED
-		width			CDATA			#REQUIRED
+        allow_overlap    (true|false)     "false"
+        avoid_edges        (true|false)    "false"
+        unlock_image    (true|false)    "false"
+        opacity            CDATA            "1.0"
+        
+        base            IDREF            #IMPLIED
+        file            CDATA            #REQUIRED
+        height            CDATA            #REQUIRED
+        type            (tiff|png)        #REQUIRED
+        width            CDATA            #REQUIRED
 
-		character_spacing	CDATA		"0"
-		dx				CDATA			#IMPLIED
-		dy				CDATA			#IMPLIED
-		face_name		CDATA			#IMPLIED
-		fontset_name	IDREF			#IMPLIED
-		fill			CDATA			"black"
-		halo_fill		CDATA			"white"
-		halo_radius		CDATA			"0"
-		horizontal_alignment	(left|middle|right)	"middle"
-		justify_alignment		(left|middle|right)	"middle"
-		line_spacing	CDATA			"0"
-		min_distance	CDATA			"0"
-		name			CDATA			#IMPLIED
-		no_text			(true|false)	"false"
-		placement		(point|line|vertex)		"point"
-		size			CDATA			"10"
-		spacing			CDATA			"0"
-		text_convert	(none|toupper|tolower)	"none"
-		vertical_alignment	(top|middle|bottom)	"middle"
-		wrap_before		(true|false)	"false"
-		wrap_character	CDATA			" "
-		wrap_width		CDATA			"0"
+        character_spacing    CDATA        "0"
+        dx                CDATA            #IMPLIED
+        dy                CDATA            #IMPLIED
+        face_name        CDATA            #IMPLIED
+        fontset_name    IDREF            #IMPLIED
+        fill            CDATA            "black"
+        halo_fill        CDATA            "white"
+        halo_radius        CDATA            "0"
+        horizontal_alignment    (left|middle|right)    "middle"
+        justify_alignment        (left|middle|right)    "middle"
+        line_spacing    CDATA            "0"
+        min_distance    CDATA            "0"
+        name            CDATA            #IMPLIED
+        no_text            (true|false)    "false"
+        placement        (point|line|vertex)        "point"
+        size            CDATA            "10"
+        spacing            CDATA            "0"
+        text_convert    (none|toupper|tolower)    "none"
+        vertical_alignment    (top|middle|bottom)    "middle"
+        wrap_before        (true|false)    "false"
+        wrap_character    CDATA            " "
+        wrap_width        CDATA            "0"
 >
 
 <!ELEMENT PolygonPatternSymbolizer EMPTY>
 <!ATTLIST PolygonPatternSymbolizer
-		base			IDREF	#IMPLIED
-  		file			CDATA	#IMPLIED
-  		height			CDATA	#IMPLIED
-  		type			(tiff|png)	#IMPLIED
-  		width			CDATA	#IMPLIED
+        base            IDREF    #IMPLIED
+          file            CDATA    #IMPLIED
+          height            CDATA    #IMPLIED
+          type            (tiff|png)    #IMPLIED
+          width            CDATA    #IMPLIED
 >

@@ -27,11 +27,11 @@ using namespace karma;
 struct F 
 {
     F() :
-	width(100),
-	height(100),
-	version(1.1),
-	xmlns("http://www.w3.org/2000/svg"),
-	expected_output("<svg width=\"100px\" height=\"100px\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">") {}
+    width(100),
+    height(100),
+    version(1.1),
+    xmlns("http://www.w3.org/2000/svg"),
+    expected_output("<svg width=\"100px\" height=\"100px\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">") {}
 
     ~F() {}
 
@@ -58,13 +58,13 @@ struct F
 BOOST_FIXTURE_TEST_CASE(bgcolor_stream_test_case, F)
 {
     actual_output
-	<< format(
-	    "<svg width=\"" << int_ << string << "\" "
-	    << "height=\"" << int_ << string << "\" "
-	    << "version=\"" << float_ << "\" "
-	    << "xmlns=\"" << string << "\""
-	    << ">",
-	    width, "px", height, "px", version, xmlns);
+    << format(
+        "<svg width=\"" << int_ << string << "\" "
+        << "height=\"" << int_ << string << "\" "
+        << "version=\"" << float_ << "\" "
+        << "xmlns=\"" << string << "\""
+        << ">",
+        width, "px", height, "px", version, xmlns);
 
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }
@@ -88,13 +88,13 @@ BOOST_FIXTURE_TEST_CASE(bgcolor_stream_confix_test_case, F)
     using fusion::tuple;
 
     actual_output
-	<< format(
-	    "<svg width=" << confix('"', '"')[int_ << string]
-	    << " height=" << confix('"', '"')[int_ << string]
-	    << " version=" << confix('"', '"')[float_]
-	    << " xmlns=" << confix('"', '"')[string]
-	    << ">",
-	    tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), version, xmlns); 
+    << format(
+        "<svg width=" << confix('"', '"')[int_ << string]
+        << " height=" << confix('"', '"')[int_ << string]
+        << " version=" << confix('"', '"')[float_]
+        << " xmlns=" << confix('"', '"')[string]
+        << ">",
+        tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), version, xmlns); 
     
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }
@@ -117,13 +117,13 @@ BOOST_FIXTURE_TEST_CASE(bgcolor_stream_confix_complete_test_case, F)
     using fusion::tuple;
 
     actual_output
-	<< format(
-	    confix('<', ">")[
-		"svg width=" << confix('"', '"')[int_ << string]
-		<< " height=" << confix('"', '"')[int_ << string]
-		<< " version=" << confix('"', '"')[float_]
-		<< " xmlns=" << confix('"', '"')[string]],
-	    tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), version, xmlns); 
+    << format(
+        confix('<', ">")[
+        "svg width=" << confix('"', '"')[int_ << string]
+        << " height=" << confix('"', '"')[int_ << string]
+        << " version=" << confix('"', '"')[float_]
+        << " xmlns=" << confix('"', '"')[string]],
+        tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), version, xmlns); 
     
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }
@@ -146,13 +146,13 @@ BOOST_FIXTURE_TEST_CASE(bgcolor_stream_iterator_test_case, F)
     std::ostream_iterator<char> actual_output_iterator(actual_output);
 
     generate(
-	actual_output_iterator,
-	confix("<", ">")[
-	    "svg width=" << confix('"', '"')[int_ << string]
-	    << " height=" << confix('"', '"')[int_ << string]
-	    << " version=" << confix('"', '"')[float_]
-	    << " xmlns=" << confix('"', '"')[string]],
-	tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), version, xmlns);
+    actual_output_iterator,
+    confix("<", ">")[
+        "svg width=" << confix('"', '"')[int_ << string]
+        << " height=" << confix('"', '"')[int_ << string]
+        << " version=" << confix('"', '"')[float_]
+        << " xmlns=" << confix('"', '"')[string]],
+    tuple<int, std::string>(width, "px"), tuple<int, std::string>(height, "px"), version, xmlns);
 
     BOOST_CHECK_EQUAL(actual_output.str(), expected_output);
 }

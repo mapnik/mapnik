@@ -32,7 +32,7 @@ public:
         ptypes.push_back(std::pair<std::string,std::string>("natural","heath"));
         ptypes.push_back(std::pair<std::string,std::string>("natural","marsh"));
         ptypes.push_back(std::pair<std::string,std::string>("military",
-			  "danger_area"));
+        "danger_area"));
         ptypes.push_back(std::pair<std::string,std::string>
                 ("landuse","forest"));
         ptypes.push_back(std::pair<std::string,std::string>
@@ -45,7 +45,7 @@ struct osm_item
     long id;
     std::map<std::string,std::string> keyvals;    
     virtual std::string to_string();
-	virtual ~osm_item() { }
+    virtual ~osm_item() { }
 };
 
 

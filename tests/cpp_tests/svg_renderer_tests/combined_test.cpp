@@ -38,17 +38,17 @@ BOOST_AUTO_TEST_CASE(combined_test_case)
     renderer.apply();
 
     std::string expected_output = 
-	svg_ren::XML_DECLARATION 
-	+ "\n" 
-	+ svg_ren::SVG_DTD 
-	+ "\n" 
-	+ "<svg width=\"800px\" height=\"600px\" version=\"1.1\" xmlns=\"" 
-	+ svg_ren::SVG_NAMESPACE_URL 
-	+ "\">"
-	+"\n"
-	+"<rect x=\"0\" y=\"0\" width=\"800px\" height=\"600px\" style=\"fill: #ffffff\"/>"
-	+"\n"
-	+"</svg>";
+        svg_ren::XML_DECLARATION 
+        + "\n" 
+        + svg_ren::SVG_DTD 
+        + "\n" 
+        + "<svg width=\"800px\" height=\"600px\" version=\"1.1\" xmlns=\"" 
+        + svg_ren::SVG_NAMESPACE_URL 
+        + "\">"
+        +"\n"
+        +"<rect x=\"0\" y=\"0\" width=\"800px\" height=\"600px\" style=\"fill: #ffffff\"/>"
+        +"\n"
+        +"</svg>";
 
     std::string actual_output = output_stream.str();
     BOOST_CHECK_EQUAL(actual_output, expected_output);
