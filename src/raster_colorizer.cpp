@@ -24,11 +24,9 @@
 
 #include <mapnik/raster_colorizer.hpp>
 #include <limits>
-#include <arpa/inet.h>
 
-using namespace std;
-using namespace mapnik;
-
+namespace mapnik
+{
 
 //! \brief Strings for the colorizer_mode enumeration
 static const char *colorizer_mode_strings[] = {
@@ -86,7 +84,7 @@ std::string colorizer_stop::to_string() const
 raster_colorizer::raster_colorizer(colorizer_mode mode/* = COLORIZER_LINEAR*/, const color& _color/* = color(0,0,0,0)*/)
     : default_mode_(mode)
     , default_color_(_color)
-    , epsilon_(numeric_limits<float>::epsilon())
+    , epsilon_(std::numeric_limits<float>::epsilon())
 {
     
 }
@@ -253,4 +251,6 @@ color raster_colorizer::get_color(float value) const {
     return outputColor;
 }
 
+
+}
 
