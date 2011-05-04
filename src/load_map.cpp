@@ -1812,7 +1812,7 @@ void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
 void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
 {
     // no support for meta-writer,meta-output
-    ensure_attrs(sym, "PolygonSymbolizer", "mode,scaling,opacity,filter-factor");
+    ensure_attrs(sym, "RasterSymbolizer", "mode,scaling,opacity,filter-factor");
     try
     {
         raster_symbolizer raster_sym;
@@ -1979,6 +1979,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
 {
     try
     {
+        ensure_attrs(node, "RasterColorizer", "default-mode,default-color,epsilon");
         // mode
         colorizer_mode default_mode =
             get_attr<colorizer_mode>(node, "default-mode", COLORIZER_LINEAR);
@@ -2018,6 +2019,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
 
             if (stop_tag.first == "stop")
             {
+                ensure_attrs(stop_tag.second, "stop", "color,mode,value");
                 // colour is optional.
                 optional<color> stopcolor = get_opt_attr<color>(stop, "color");
                 if (!stopcolor) {

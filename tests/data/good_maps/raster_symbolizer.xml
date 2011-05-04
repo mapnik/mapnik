@@ -3,7 +3,7 @@
   <Style name="two-value">
     <Rule>
       <RasterSymbolizer opacity="1">
-        <RasterColorizer default_mode="discrete" default_color="#000000">
+        <RasterColorizer default-mode="discrete" default-color="#000000">
           <stop value="0" color="yellow"></stop>
           <stop value="26" color="purple"></stop>
          </RasterColorizer>
@@ -14,7 +14,7 @@
   <Style name="ramped">
     <Rule>
       <RasterSymbolizer>
-        <RasterColorizer default_mode="linear" default_color="#000000">
+        <RasterColorizer default-mode="linear" default-color="#000000">
           <stop value="0" color="red"></stop>
           <stop value="26" color="green"></stop>
          </RasterColorizer>
