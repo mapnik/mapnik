@@ -58,6 +58,9 @@ sys.setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
 from _mapnik2 import *
 from paths import inputpluginspath, fontscollectionpath
 
+import printing
+printing.renderer = render
+
 # The base Boost.Python class
 BoostPythonMetaclass = Coord.__class__
 
