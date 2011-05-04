@@ -139,6 +139,7 @@ source = Split(
     glyph_symbolizer.cpp
     markers_symbolizer.cpp
     metawriter.cpp
+    raster_colorizer.cpp
     text_placements.cpp
     wkt/wkt_factory.cpp
     metawriter_inmem.cpp

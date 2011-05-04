@@ -194,13 +194,18 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             {
                 if (band_ > nbands_)
                     throw datasource_exception((boost::format("GDAL Plugin: '%d' is an invalid band, dataset only has '%d' bands\n") % band_ % nbands_).str());
+
                 float *imageData = (float*)image.getBytes();
                 GDALRasterBand * band = dataset_.GetRasterBand(band_);
+                int hasNoData;
+                double nodata = band->GetNoDataValue(&hasNoData);
                 band->RasterIO(GF_Read, x_off, y_off, width, height,
                                imageData, image.width(), image.height(),
                                GDT_Float32, 0, 0);
     
                 feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
+                if (hasNoData)
+                    feature->props()["NODATA"]=nodata;
             }
           
             else // working with all bands

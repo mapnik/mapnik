@@ -22,6 +22,20 @@
  *****************************************************************************/
 //$Id$
 
+/** \brief Raster Colouriser
+ * 
+ * This class allows GDAL raster bands to be colourised. It only works with single
+ * band GDAL rasters, not greyscale, alpha, or rgb  (due to the GDAL featureset loading
+ * single channel GDAL rasters as FLOAT32, and the others as BYTE, and not having a method
+ * of figuring out which).
+ * 
+ * Every input value is translated to an output value. The output value is determined by
+ * what 'stop' the input value is in. Each stop covers the range of input values from its
+ * 'value' parameter, up to the 'value' parameter of the next stop.  
+ * 
+ */
+
+
 #ifndef RASTER_COLORIZER_HPP
 #define RASTER_COLORIZER_HPP
 
@@ -29,192 +43,170 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/enumeration.hpp>
 
 #include <vector>
 
 namespace mapnik
 {
-struct MAPNIK_DECL color_band
+
+//! \brief Enumerates the modes of interpolation
+enum colorizer_mode_enum
 {
-    float value_;
-    float max_value_;
-    color color_;
-    unsigned midpoints_;
-    bool is_interpolated_;
-    color_band(float value, color c)
-        : value_(value),
-        max_value_(value),
-        color_(c),
-        midpoints_(0),
-        is_interpolated_(false) {}
-    color_band(float value, float max_value, color c)
-        : value_(value),
-        max_value_(max_value),
-        color_(c),
-        midpoints_(0),
-        is_interpolated_(false) {}
-    bool is_interpolated() const
-    {
-        return is_interpolated_;
-    }
-    unsigned get_midpoints() const
-    {
-        return midpoints_;
-    }
-    float get_value() const
-    {
-        return value_;
-    }
-    float get_max_value() const
-    {
-        return max_value_;
-    }
-    const color& get_color() const
-    {
-        return color_;
-    }
-    bool operator==(color_band const& other) const
-    {
-        return value_ == other.value_ && color_ == other.color_ && max_value_ == other.max_value_;
-    }
-    std::string to_string() const
-    {
-        std::stringstream ss;
-        ss << color_.to_string() << " " << value_ << " " << max_value_;
-        return ss.str();
-    }
-};
+    COLORIZER_INHERIT = 0,    //!< The stop inherits the mode from the colorizer
+    COLORIZER_LINEAR = 1,     //!< Linear interpolation between colors
+    COLORIZER_DISCRETE = 2,   //!< Single color for stop
+    COLORIZER_EXACT = 3,      //!< Only the exact value specified for the stop gets translated, others use the default
+    colorizer_mode_enum_MAX
+}; 
 
-typedef std::vector<color_band> color_bands;
-
-struct MAPNIK_DECL raster_colorizer
-{
-    explicit raster_colorizer()
-        : colors_() {}
-
-    raster_colorizer(const raster_colorizer &ps)
-        : colors_(ps.colors_) {}
-
-    raster_colorizer(color_bands &colors)
-        : colors_(colors) {}
-
-    const color_bands& get_color_bands() const
-    {
-        return colors_;
-    }
-    void append_band (color_band band)
-    {
-        if (colors_.size() > 0 && colors_.back().value_ > band.value_) {
-#ifdef MAPNIK_DEBUG
-            std::clog << "prev.v=" << colors_.back().value_ << ". band.v=" << band.value_ << "\n";
-#endif
-            throw config_error(
-                "Bands must be appended in ascending value order"
-                );
-        }
-        colors_.push_back(band);
-        if (colors_.size() > 0 && colors_.back().value_ == colors_.back().max_value_)
-            colors_.back().max_value_ = band.value_;
-    }
-    void append_band (color_band band, unsigned midpoints)
-    {
-        band.midpoints_ = midpoints;
-        if (colors_.size() > 0 && midpoints > 0) {
-            color_band lo = colors_.back();
-            color_band const &hi = band;
-            int steps = midpoints+1;
-            float dv = (hi.value_ - lo.value_)/steps;
-            float da = (float(hi.color_.alpha()) - lo.color_.alpha())/steps;
-            float dr = (float(hi.color_.red()) - lo.color_.red())/steps;
-            float dg = (float(hi.color_.green()) - lo.color_.green())/steps;
-            float db = (float(hi.color_.blue()) - lo.color_.blue())/steps;
-
-#ifdef MAPNIK_DEBUG
-            std::clog << "lo.v=" << lo.value_ << ", hi.v=" << hi.value_ << ", dv="<<dv<<"\n";
-#endif
-            // interpolate intermediate values and colors
-            int j;
-            for (j=1; j<steps; j++) {
-                color_band b(
-                    lo.get_value() + dv*j,
-                    color(int(float(lo.color_.red()) + dr*j),
-                          int(float(lo.color_.green()) + dg*j),
-                          int(float(lo.color_.blue()) + db*j),
-                          int(float(lo.color_.alpha()) + da*j)
-                        )
-                    );
-                b.is_interpolated_ = true;
-                append_band(b);
-            }
-        }
-        append_band(band);
-    }
-
-    void append_band (float value, color c)
-    {
-        append_band(color_band(value, c));
-    }
-
-    void append_band (float value, float max_value, color c)
-    {
-        append_band(color_band(value, max_value, c));
-    }
-
-    void append_band (float value, color c, unsigned midpoints)
-    {
-        append_band(color_band(value, c), midpoints);
-    }
-
-    void append_band (float value, float max_value, color c, unsigned midpoints)
-    {
-        append_band(color_band(value, max_value, c), midpoints);
-    }
+DEFINE_ENUM( colorizer_mode, colorizer_mode_enum );
+    
+//! \brief Structure to represent a stop position.    
+class colorizer_stop {
+public:
+    
+    //! \brief Constructor
+    //!
+    //! \param[in] value The stop value
+    //! \param[in] mode The stop mode
+    //! \param[in] color The stop color
+    colorizer_stop(const float value = 0, const colorizer_mode mode = COLORIZER_INHERIT, const color& _color = color(0,0,0,0) );
+    
+    //! \brief Copy constructor
+    colorizer_stop(const colorizer_stop& stop);
+    
+    //! \brief Destructor
+    ~colorizer_stop();
 
 
-    /* rgba = 
-     *   if cs[pos].value <= value < cs[pos+1].value: cs[pos].color
-     *   otherwise: transparent
-     *     where 0 <= pos < length(bands)-1
-     *   Last band is special, its value represents the upper bound and its
-     *   color will only be used if the value matches its value exactly.
-     */
-    color get_color(float value) const {
-        int pos=-1, last=(int)colors_.size()-1, lo=0, hi=last;
-        while (lo<=hi) {
-            pos = (lo+hi)/2;
-            if (colors_[pos].value_<value) {
-                lo = pos+1;
-            } else if (colors_[pos].value_>value) {
-                hi = pos-1;
-            } else {
-                lo = pos+1;
-                break;
-            }
-        }
-        lo--;
-        if ((0 <= lo && lo < last) ||
-            (lo==last && (colors_[last].value_==value || value<colors_[last].max_value_)))
-            return colors_[lo].color_;
-        else
-            return color(0,0,0,0);
-    }
+    //! \brief Set the stop value
+    //! \param[in] value The stop value
+    inline void set_value(const float value) { value_ = value; }; 
+    
+    //! \brief Get the stop value
+    //! \return The stop value
+    inline float get_value(void) const {return value_; };
+    
+    
+    //! \brief Set the stop mode
+    //! \param[in] mode The stop mode
+    inline void set_mode(const colorizer_mode mode) { mode_ = mode; };
+    inline void set_mode_enum(const colorizer_mode_enum mode) { set_mode(mode); };
+    
+    //! \brief Get the stop mode
+    //! \return The stop mode
+    inline colorizer_mode get_mode(void) const { return mode_; };
+    inline colorizer_mode_enum get_mode_enum(void) const { return get_mode(); };
+    
+    
+    //! \brief set the stop color
+    //! \param[in] the stop color
+    inline void set_color(const color& _color) { color_ = _color; };
+    
+    //! \brief get the stop color
+    //! \return The stop color
+    inline const color& get_color(void) const {return color_; };
+    
 
-    void colorize(raster_ptr const& raster) const 
-    {
-        float *rasterData = reinterpret_cast<float*>(raster->data_.getBytes());
-        unsigned *imageData = raster->data_.getData();
-        unsigned i;
-        for (i=0; i<raster->data_.width()*raster->data_.height(); i++)
-        {
-            imageData[i] = get_color(rasterData[i]).rgba();
-        }
-    }
-      
+    //! \brief Equality operator
+    //! \return True if equal, false otherwise
+    bool operator==(colorizer_stop const& other) const;
+
+    //! \brief Print the stop to a string
+    //! \return A string representing this stop.
+    std::string to_string() const;
+    
 private:
-    color_bands colors_;
+    float value_;   //!< The stop value
+    colorizer_mode mode_; //!< The stop mode
+    color color_;   //!< The stop color
 };
+
+
+typedef std::vector<colorizer_stop> colorizer_stops;
+
+
+//! \brief Class representing the raster colorizer
+class raster_colorizer {
+public:
+    //! \brief Constructor
+    raster_colorizer(colorizer_mode mode = COLORIZER_LINEAR, const color& _color = color(0,0,0,0));
+    
+    //! \brief Destructor
+    ~raster_colorizer();
+
+
+    //! \brief Set the default mode
+    //!
+    //! This can not be set as INHERIT, if you do, LINEAR will be used instead.
+    //! \param[in] mode The default mode
+    void set_default_mode(const colorizer_mode mode) { default_mode_ = (mode == COLORIZER_INHERIT) ? COLORIZER_LINEAR:(colorizer_mode_enum)mode; };
+    void set_default_mode_enum(const colorizer_mode_enum mode) { set_default_mode(mode); };
+    
+    //! \brief Get the default mode
+    //! \return The default mode
+    colorizer_mode get_default_mode(void) const {return default_mode_; };
+    colorizer_mode_enum get_default_mode_enum(void) const {return get_default_mode(); };
+    
+    //! \brief Set the default color
+    //! \param[in] color The default color
+    void set_default_color(const color& color) { default_color_ = color; };
+    
+    //! \brief Get the default color
+    //! \return The default color
+    const color& get_default_color(void) const {return default_color_; };
+
+
+    //! \brief Add a stop
+    //!
+    //! \param[in] stop The stop to add
+    //! \return True if added, false if error
+    bool add_stop(const colorizer_stop & stop);
+
+    //! \brief Get the list of stops
+    //! \return The list of stops
+    const colorizer_stops& get_stops(void) const {return stops_; };
+
+
+    //! \brief Colorize a raster
+    //!
+    //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
+    //! \param[in] properties belonging to the feature, used to find 'NODATA' information if available
+    void colorize(raster_ptr const& raster,const std::map<std::string,value> &Props) const;
+
+
+    //! \brief Perform the translation of input to output
+    //!
+    //! \param[in] value Input value
+    //! \return color associated with the value
+    color get_color(float value) const;
+
+
+    //! \brief Set the epsilon value for exact mode
+    //! \param[in] e The epsilon value
+    inline void set_epsilon(const float e) { if(e > 0) epsilon_ = e; };
+    
+    //! \brief Get the epsilon value for exact mode
+    //! \return The epsilon value
+    inline float get_epsilon(void) const { return epsilon_; };
+
+private:
+    colorizer_stops stops_;         //!< The vector of stops
+    
+    colorizer_mode default_mode_;   //!< The default mode inherited by stops
+    color default_color_;           //!< The default color
+    float epsilon_;                 //!< The epsilon value for exact mode
+};
+
+
+
+
+
+
 
 typedef boost::shared_ptr<raster_colorizer> raster_colorizer_ptr;
+
 
 } // mapnik namespace
 

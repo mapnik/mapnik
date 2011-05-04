@@ -1979,37 +1979,82 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
 {
     try
     {
-        ptree::const_iterator cbIter = node.begin();
-        ptree::const_iterator endCb = node.end();
+        // mode
+        colorizer_mode default_mode =
+            get_attr<colorizer_mode>(node, "default-mode", COLORIZER_LINEAR);
+            
+        if(default_mode == COLORIZER_INHERIT) {
+            throw config_error("RasterColorizer mode must not be INHERIT. ");
+        }
+        rc->set_default_mode( default_mode );
 
-        for(; cbIter != endCb; ++cbIter)
+        // default colour
+        optional<color> default_color = get_opt_attr<color>(node, "default-color");
+        if (default_color) 
         {
-            ptree::value_type const& cb_tag = *cbIter;
-            ptree const & cb = cbIter->second;
+            rc->set_default_color( *default_color );
+        }
+        
 
-            if (cb_tag.first == "ColorBand")
-            {
-                ensure_attrs(cb, "ColorBand", "value,color,midpoints,max-value,label");
-                std::string value_s  = get_attr<string>(cb, "value");
-                float value;
-                std::stringstream(value_s) >> value;
-                optional<color> c = get_opt_attr<color>(cb, "color");
-                if (!c) {
-                    throw config_error("missing color");
-                }
-                unsigned midpoints = get_attr(cb, "midpoints", 0);
-                optional<float> max_value = get_opt_attr<float>(cb, "max-value");
-                if (max_value) {
-                    rc->append_band(value, *max_value, *c, midpoints);
-                } else {
-                    rc->append_band(value, *c, midpoints);
-                }
+        // epsilon
+        optional<float> eps = get_opt_attr<float>(node, "epsilon");
+        if (eps) 
+        {
+            if(*eps < 0) {
+                throw config_error("RasterColorizer epsilon must be > 0. ");
             }
-            else if (cb_tag.first != "<xmlcomment>" &&
-                     cb_tag.first != "<xmlattr>" )
+            rc->set_epsilon( *eps );
+        }
+
+        
+        ptree::const_iterator stopIter = node.begin();
+        ptree::const_iterator endStop = node.end();
+        float maximumValue = -std::numeric_limits<float>::max();
+
+        for(; stopIter != endStop; ++stopIter)
+        {
+            ptree::value_type const& stop_tag = *stopIter;
+            ptree const & stop = stopIter->second;
+
+            if (stop_tag.first == "stop")
+            {
+                // colour is optional.
+                optional<color> stopcolor = get_opt_attr<color>(stop, "color");
+                if (!stopcolor) {
+                    *stopcolor = *default_color;
+                }
+
+                // mode default to INHERIT
+                colorizer_mode mode =
+                    get_attr<colorizer_mode>(stop, "mode", COLORIZER_INHERIT);
+
+                // value is required, and it must be bigger than the previous
+                optional<float> value =
+                    get_opt_attr<float>(stop, "value");
+                    
+                if(!value) {
+                    throw config_error("stop tag missing value");
+                }
+                
+                if(value < maximumValue) {
+                    throw config_error("stop tag values must be in ascending order");
+                }
+                maximumValue = *value;
+
+
+                //append the stop
+                colorizer_stop tmpStop;
+                tmpStop.set_color(*stopcolor);
+                tmpStop.set_mode(mode);
+                tmpStop.set_value(*value);
+                
+                rc->add_stop(tmpStop);
+            }
+            else if (stop_tag.first != "<xmlcomment>" &&
+                     stop_tag.first != "<xmlattr>" )
             {
                 throw config_error(std::string("Unknown child node. ") +
-                                   "Expected 'ColorBand' but got '" + cb_tag.first + "'");
+                                   "Expected 'stop' but got '" + stop_tag.first + "'");
             }
         }
     }

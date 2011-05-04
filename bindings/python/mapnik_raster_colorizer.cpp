@@ -27,38 +27,40 @@
 
 using mapnik::raster_colorizer;
 using mapnik::raster_colorizer_ptr;
-using mapnik::color_band;
-using mapnik::color_bands;
+using mapnik::colorizer_stop;
+using mapnik::colorizer_stops;
+using mapnik::colorizer_mode_enum;
 using mapnik::color;
+using mapnik::COLORIZER_INHERIT;
+using mapnik::COLORIZER_LINEAR;
+using mapnik::COLORIZER_DISCRETE;
+using mapnik::COLORIZER_EXACT;
+
 
 namespace {
-void append_band1(raster_colorizer_ptr & rc, color_band b)
+void add_stop(raster_colorizer_ptr & rc, colorizer_stop & stop)
 {
-    rc->append_band(b);
+    rc->add_stop(stop);
 }
-void append_band2(raster_colorizer_ptr & rc, color_band b, unsigned m)
-{
-    rc->append_band(b, m);
+void add_stop2(raster_colorizer_ptr & rc, float v) {
+    colorizer_stop stop(v, rc->get_default_mode(), rc->get_default_color());
+    rc->add_stop(stop);
 }
-void append_band3(raster_colorizer_ptr & rc, float v, color c)
-{
-    rc->append_band(v, c);
+void add_stop3(raster_colorizer_ptr &rc, float v, color c) {
+    colorizer_stop stop(v, rc->get_default_mode(), c);
+    rc->add_stop(stop);
 }
-void append_band4(raster_colorizer_ptr & rc, float v, color c, unsigned m)
-{
-    rc->append_band(v, c, m);
+void add_stop4(raster_colorizer_ptr &rc, float v, colorizer_mode_enum m) {
+    colorizer_stop stop(v, m, rc->get_default_color());
+    rc->add_stop(stop);
 }
-void append_band5(raster_colorizer_ptr & rc, float v, float vm, color c, unsigned m)
-{
-    rc->append_band(v, vm, c, m);
+void add_stop5(raster_colorizer_ptr &rc, float v, colorizer_mode_enum m, color c) {
+    colorizer_stop stop(v, m, c);
+    rc->add_stop(stop);
 }
-void append_band6(raster_colorizer_ptr & rc, float v, float vm, color c)
+colorizer_stops const& get_stops(raster_colorizer_ptr & rc)
 {
-    rc->append_band(v, vm, c);
-}
-color_bands const& get_color_bands(raster_colorizer_ptr & rc)
-{
-    return rc->get_color_bands();
+    return rc->get_stops();
 }
 }
 
@@ -66,121 +68,135 @@ void export_raster_colorizer()
 {
     using namespace boost::python;
 
-    class_<raster_colorizer,raster_colorizer_ptr>("RasterColorizer", init<>("Default ctor."))
-                                    
-        .add_property("bands",make_function
-                      (get_color_bands,
-                       return_value_policy<reference_existing_object>()))
-        .def("append_band", append_band1,
-            (arg("color_band")),
-            "Append a color band to the raster colorizer.\n"
-            "\n"
-            "Usage:\n"
-            ">>> colorizer = mapnik.ColorBand()\n"
-            ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> color_band = mapnik.ColorBand(3, color)\n"
-            ">>> colorizer.append_band(color_band)\n"
+    class_<raster_colorizer,raster_colorizer_ptr>("RasterColorizer",
+            "A Raster Colorizer object.",
+            init<colorizer_mode_enum, color>(args("default_mode","default_color"))
             )
-        .def("append_band", append_band2,
-            (arg("color_band"), arg("midpoints")),
-            "Append a color band to the raster colorizer with midpoints "
-            "lineally interpolated color bands between this one and the "
-            "previous one.\n"
-            "\n"
-            "Usage:\n"
-            ">>> colorizer = mapnik.ColorBand()\n"
-            ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> color_band = mapnik.ColorBand(3, color)\n"
-            ">>> colorizer.append_band(color_band, 1)\n"
-            )
-        .def("append_band", append_band3, 
-            (arg("value"), arg("color")),
-            "Create and append a color band to color the range "
-            "[value, next_val) where next_val is the next band's color or "
-            "inifinity if there is no next band.\n"
-            "Usage:\n"
-            ">>> colorizer = mapnik.RasterColorizer()\n"
-            ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer.append_band(30, color)\n"
-            )
-        .def("append_band", append_band4, 
-            (arg("value"), arg("color"), arg("midpoints")),
-            "Create and append a color band to the raster colorizer with "
-            "midpoints lineally interpolated color bands between this one and "
-            "the previous one.\n"
-            "color will be applied to all values in the "
-            "range [value, next_val) where next_val is the next band's color "
-            "or infinity if there is no next band\n"
+        .def(init<>())
+        .add_property("default_color", 
+                        make_function(&raster_colorizer::get_default_color, return_value_policy<reference_existing_object>()), 
+                        &raster_colorizer::set_default_color,
+                        "The default color for stops added without a color (mapnik.Color).\n")
+        .add_property("default_mode", 
+                        &raster_colorizer::get_default_mode_enum,
+                        &raster_colorizer::set_default_mode_enum,
+                        "The default mode (mapnik.ColorizerMode).\n"
+                        "\n"
+                        "If a stop is added without a mode, then it will inherit this default mode\n")
+        .add_property("stops",
+                        make_function(get_stops,return_value_policy<reference_existing_object>()),
+                        "The list of stops this RasterColorizer contains\n")
+        .add_property("epsilon",
+                        &raster_colorizer::get_epsilon,
+                        &raster_colorizer::set_epsilon,
+                        "Comparison epsilon value for exact mode\n"
+                        "\n"
+                        "When comparing values in exact mode, values need only be within epsilon to match.\n")
+                        
+                        
+        .def("add_stop", add_stop,
+            (arg("ColorizerStop")),
+            "Add a colorizer stop to the raster colorizer.\n"
             "\n"
             "Usage:\n"
             ">>> colorizer = mapnik.RasterColorizer()\n"
             ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer.append_band(30, color, 4)\n"
+            ">>> stop = mapnik.ColorizerStop(3, mapnik.COLORIZER_INHERIT, color)\n"
+            ">>> colorizer.add_stop(stop)\n"
             )
-        .def("append_band", append_band5, 
-            (arg("value"), arg("value_max"), arg("color"), arg("midpoints")),
-            "Create and append a color band to the raster colorizer with "
-            "midpoints lineally interpolated color bands between this one and "
-            "the previous one.\n"
-            "color will be applied to all values in the "
-            "range [value, next_val) where next_val is the next band's color "
-            "or value_max if there is no next band\n"
-            "\n"
+        .def("add_stop", add_stop2,
+            (arg("value")),
+            "Add a colorizer stop to the raster colorizer, using the default mode and color.\n"
             "\n"
             "Usage:\n"
-            ">>> colorizer = mapnik.RasterColorizer()\n"
-            ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer.append_band(30, 40, color, 4)\n"
+            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+            ">>> colorizer.add_stop(100)\n"
             )
-        .def("append_band", append_band6, 
-            (arg("value"), arg("value_max"), arg("color")),
-            "Create and append a color band to color the range "
-            "[value, next_val) where next_val is the next band's color or "
-            "value_max if there is no next band.\n"
+        .def("add_stop", add_stop3,
+            (arg("value")),
+            "Add a colorizer stop to the raster colorizer, using the default mode.\n"
+            "\n"
             "Usage:\n"
-            ">>> colorizer = mapnik.RasterColorizer()\n"
-            ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer.append_band(30, 40, color)\n"
+            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+            ">>> colorizer.add_stop(100, mapnik.Color(\"#123456\"))\n"
+            )
+        .def("add_stop", add_stop4,
+            (arg("value")),
+            "Add a colorizer stop to the raster colorizer, using the default color.\n"
+            "\n"
+            "Usage:\n"
+            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+            ">>> colorizer.add_stop(100, mapnik2.COLORIZER_EXACT)\n"
+            )
+        .def("add_stop", add_stop5,
+            (arg("value")),
+            "Add a colorizer stop to the raster colorizer.\n"
+            "\n"
+            "Usage:\n"
+            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+            ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#112233\"))\n"
             )
         .def("get_color", &raster_colorizer::get_color, 
             "Get the color assigned to a certain value in raster data.\n"
-            "By default, returns Color(\"transparent\")\n"
             "\n"
             "Usage:\n"
             ">>> colorizer = mapnik.RasterColorizer()\n"
             ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer.append_band(30, 40, color)\n"
-            ">>> colorizer.get_color(35)\n"
-            "Color('#0044cc')\n"
+            ">>> colorizer.add_stop(0, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#000000\"))\n"
+            ">>> colorizer.add_stop(100, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#0E0A06\"))\n"
+            ">>> colorizer.get_color(50)\n"
+            "Color('#070503')\n"
             )
         ;    
 
 
 
-    class_<color_bands>("ColorBands",
-        "A RasterColorizer's collection of ordered color bands.\n"
+    class_<colorizer_stops>("ColorizerStops",
+        "A RasterColorizer's collection of ordered color stops.\n"
         "This class is not meant to be instantiated from python. However, "
-        "it can be accessed at a RasterColorizer's \"bands\" attribute for "
+        "it can be accessed at a RasterColorizer's \"stops\" attribute for "
         "introspection purposes",
         no_init)
-        .def(vector_indexing_suite<color_bands>())
+        .def(vector_indexing_suite<colorizer_stops>())
+        ;
+
+    enum_<colorizer_mode_enum>("ColorizerMode")
+        .value("COLORIZER_INHERIT", COLORIZER_INHERIT)
+        .value("COLORIZER_LINEAR", COLORIZER_LINEAR)
+        .value("COLORIZER_DISCRETE", COLORIZER_DISCRETE)
+        .value("COLORIZER_EXACT", COLORIZER_EXACT)
+        .export_values()
         ;
 
 
-    class_<color_band>("ColorBand",init<float,color const&>(
-                       "A Color Band object.\n"
-                       "Create with a value and color\n"
+    class_<colorizer_stop>("ColorizerStop",init<float, colorizer_mode_enum, color const&>(
+                       "A Colorizer Stop object.\n"
+                       "Create with a value, ColorizerMode, and Color\n"
                        "\n"
                        "Usage:"
                        ">>> color = mapnik.Color(\"#fff000\")\n"
-                       ">>> color_band = mapnik.ColorBand(4, color)\n"
+                       ">>> stop= mapnik.ColorizerStop(42.42, mapnik.COLORIZER_LINEAR, color)\n"
           ))
-        .add_property("color", make_function
-                      (&color_band::get_color,
-                       return_value_policy<reference_existing_object>()))
-        .add_property("value", &color_band::get_value)
-        .add_property("max_value", &color_band::get_max_value)
+        .add_property("color", 
+                        make_function(&colorizer_stop::get_color, return_value_policy<reference_existing_object>()), 
+                        &colorizer_stop::set_color,
+                        "The stop color (mapnik.Color).\n")
+        .add_property("value", 
+                        &colorizer_stop::get_value, 
+                        &colorizer_stop::set_value,
+                        "The stop value.\n")
+        .add_property("mode", 
+                        &colorizer_stop::get_mode_enum,
+                        &colorizer_stop::set_mode_enum,
+                        "The stop mode (mapnik.ColorizerMode).\n"
+                        "\n"
+                        "If this is COLORIZER_INHERIT then it will inherit the default mode\n"
+                        " from the RasterColorizer it is added to.\n")
         .def(self == self)
-        .def("__str__",&color_band::to_string)
+        .def("__str__",&colorizer_stop::to_string)
         ;
 }

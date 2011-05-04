@@ -25,7 +25,8 @@ def test_dataraster_coloring():
     sym = mapnik2.RasterSymbolizer()
     # Assigning a colorizer to the RasterSymbolizer tells the later
     # that it should use it to colorize the raw data raster
-    sym.colorizer = mapnik2.RasterColorizer()
+    sym.colorizer = mapnik2.RasterColorizer(mapnik2.COLORIZER_DISCRETE, mapnik2.Color("transparent"))
+    
     for value, color in [
         (  0, "#0044cc"),
         ( 10, "#00cc00"),
@@ -39,7 +40,7 @@ def test_dataraster_coloring():
         ( 90, "#660066"),
         ( 200, "transparent"),
     ]:
-        sym.colorizer.append_band(value, mapnik2.Color(color))
+        sym.colorizer.add_stop(value, mapnik2.Color(color))
     rule.symbols.append(sym)
     style.rules.append(rule)
     _map.append_style('foo', style)
@@ -92,4 +93,4 @@ def test_load_save_map():
     out_map = mapnik2.save_map_to_string(map)
     assert 'RasterSymbolizer' in out_map
     assert 'RasterColorizer' in out_map
-    assert 'ColorBand' in out_map
+    assert 'stop' in out_map

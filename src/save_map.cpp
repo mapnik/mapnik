@@ -43,30 +43,6 @@ namespace mapnik
 using boost::property_tree::ptree;
 using boost::optional;
 
-void serialize_raster_colorizer(ptree & sym_node,
-                                raster_colorizer_ptr const& colorizer,
-                                bool explicit_defaults)
-{
-    ptree & col_node = sym_node.push_back(
-        ptree::value_type("RasterColorizer", ptree() ))->second;
-
-    unsigned i;
-    color_bands const &cb = colorizer->get_color_bands();
-    for (i=0; i<cb.size(); i++) {
-        if (!cb[i].is_interpolated()) {
-            ptree & band_node = col_node.push_back(
-                ptree::value_type("ColorBand", ptree())
-                )->second;
-            set_attr(band_node, "value", cb[i].get_value());    
-            if (cb[i].get_value() != cb[i].get_max_value())
-                set_attr(band_node, "max-value", cb[i].get_max_value());    
-            set_attr(band_node, "midpoints", cb[i].get_midpoints());    
-            optional<color> c = cb[i].get_color();
-            if (c) set_attr(band_node, "color", * c);    
-        }
-    }
-
-}
 
 class serialize_symbolizer : public boost::static_visitor<>
 {
@@ -409,6 +385,29 @@ public:
 
 private:
     serialize_symbolizer();
+    
+    void serialize_raster_colorizer(ptree & sym_node,
+                                    raster_colorizer_ptr const& colorizer,
+                                    bool explicit_defaults)
+    {
+        ptree & col_node = sym_node.push_back(
+            ptree::value_type("RasterColorizer", ptree() ))->second;
+
+        set_attr(col_node, "default-mode", colorizer->get_default_mode());
+        set_attr(col_node, "default-color", colorizer->get_default_color());
+        set_attr(col_node, "epsilon", colorizer->get_epsilon());
+
+        unsigned i;
+        colorizer_stops const &stops = colorizer->get_stops();
+        for (i=0; i<stops.size(); i++) {
+            ptree &stop_node = col_node.push_back( ptree::value_type("stop", ptree()) )->second;
+            set_attr(stop_node, "value", stops[i].get_value());
+            set_attr(stop_node, "color", stops[i].get_color());
+            set_attr(stop_node, "mode", stops[i].get_mode().as_string());
+        }
+
+    }
+    
     void add_image_attributes(ptree & node, const symbolizer_with_image & sym)
     {
         std::string const& filename = path_processor_type::to_string( *sym.get_filename());

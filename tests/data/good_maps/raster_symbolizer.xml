@@ -3,9 +3,9 @@
   <Style name="two-value">
     <Rule>
       <RasterSymbolizer opacity="1">
-        <RasterColorizer>
-          <ColorBand value="0" color="yellow" label="&lt;0"/>
-          <ColorBand value="26" color="purple" midpoints="1"/>
+        <RasterColorizer default_mode="discrete" default_color="#000000">
+          <stop value="0" color="yellow"></stop>
+          <stop value="26" color="purple"></stop>
          </RasterColorizer>
       </RasterSymbolizer>
     </Rule>
@@ -14,9 +14,9 @@
   <Style name="ramped">
     <Rule>
       <RasterSymbolizer>
-        <RasterColorizer>
-          <ColorBand value="0" color="red" label="&lt;0"/>
-          <ColorBand value="26" color="green" midpoints="100"/>
+        <RasterColorizer default_mode="linear" default_color="#000000">
+          <stop value="0" color="red"></stop>
+          <stop value="26" color="green"></stop>
          </RasterColorizer>
       </RasterSymbolizer>
     </Rule>
