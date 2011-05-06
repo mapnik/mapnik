@@ -137,6 +137,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                         placement text_placement(info, sym, placement_options, scale_factor_, w, h, false);
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         text_placement.allow_overlap = sym.get_allow_overlap();
+                        if (writer.first)
+                            text_placement.collect_extents =true; // needed for inmem metawriter
                         position const& pos = sym.get_displacement();
                         position const& shield_pos = sym.get_shield_displacement();
                         for( unsigned jj = 0; jj < geom.num_points(); jj++ )
