@@ -28,16 +28,18 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/sql_utils.hpp>
+#include <mapnik/feature_factory.hpp>
+
 #include "postgis.hpp"
 #include <sstream>
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using boost::trim_copy;
-using mapnik::Feature;
 using mapnik::geometry_type;
 using mapnik::byte;
 using mapnik::geometry_utils;
+using mapnik::feature_factory;
 
 postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                                        std::string const& encoding,
@@ -54,7 +56,7 @@ feature_ptr postgis_featureset::next()
 {
     if (rs_->next())
     { 
-        feature_ptr feature(new Feature(feature_id_));
+        feature_ptr feature(feature_factory::create(feature_id_));
         ++feature_id_;
 
         int size = rs_->getFieldLength(0);
