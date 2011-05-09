@@ -26,15 +26,20 @@
 #define FEATURE_FACTORY_HPP
 
 #include <mapnik/feature.hpp>
+#include <boost/make_shared.hpp>
+//#include <boost/pool/pool_alloc.hpp>
 
 namespace mapnik
 {
 struct feature_factory
 {
-    static Feature* create (int fid)
+    static boost::shared_ptr<Feature> create (int fid)
     {
-        return new Feature(fid);
+        //return boost::allocate_shared<Feature>(boost::pool_allocator<Feature>(),fid);
+        //return boost::allocate_shared<Feature>(boost::fast_pool_allocator<Feature>(),fid);
+        return boost::make_shared<Feature>(fid);
     }
+
 }; 
 }
 
