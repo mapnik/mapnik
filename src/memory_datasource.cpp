@@ -21,9 +21,11 @@
  *****************************************************************************/
 
 //$Id$
+// mapnik
 #include <mapnik/memory_datasource.hpp>
-
 #include <mapnik/memory_featureset.hpp>
+#include <mapnik/feature_factory.hpp>
+// stl
 #include <algorithm>
 
 namespace mapnik {
@@ -117,5 +119,6 @@ void point_datasource::add_point(double x, double y, const char* key, const char
         transcoder tr("utf-8");
         (*feature)[key] = tr.transcode(value);
         this->push(feature);
-    }
+}
+
 }

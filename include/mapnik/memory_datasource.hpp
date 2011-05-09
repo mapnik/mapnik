@@ -26,7 +26,6 @@
 #define MEMORY_DATASOURCE_HPP
 
 #include <mapnik/datasource.hpp>
-#include <mapnik/feature_factory.hpp> // TODO remove
 #include <mapnik/feature_layer_desc.hpp>
 #include <vector>
 
