@@ -673,7 +673,7 @@ __all__ = [
     # classes
     'Color',
     'Coord',
-    'ColorBand',
+    #'ColorBand',
     'CompositeOp',
     'DatasourceCache',
     'Box2d',
