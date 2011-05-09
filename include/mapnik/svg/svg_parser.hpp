@@ -40,10 +40,9 @@ namespace  mapnik { namespace svg {
 class svg_parser : private boost::noncopyable
 {
 public:
-explicit svg_parser(svg_converter_type & path);
-~svg_parser();
- 
-void parse(std::string const& filename);
+    explicit svg_parser(svg_converter_type & path);
+    ~svg_parser();
+    void parse(std::string const& filename);
 private:
     void process_node(xmlTextReaderPtr reader);
     void start_element(xmlTextReaderPtr reader);

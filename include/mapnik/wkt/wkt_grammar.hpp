@@ -135,7 +135,7 @@ struct wkt_grammar : qi::grammar<Iterator, geometry_type*(), ascii::space_type>
 };
 
 template <typename Iterator>
-struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<mapnik::geometry_type>(), ascii::space_type>
+struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<geometry_type>(), ascii::space_type>
 {
     wkt_collection_grammar()
         :  wkt_collection_grammar::base_type(start)
@@ -148,7 +148,7 @@ struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<mapnik::
             >> (lit("(") >> *wkt[push_back(_val,_1)] % lit(",") >> lit(")"));
     }
     
-    qi::rule<Iterator,boost::ptr_vector<mapnik::geometry_type>(),ascii::space_type> start;
+    qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> start;
     wkt_grammar<Iterator> wkt;
 };
 
