@@ -37,7 +37,7 @@ shape_src = Split(
   """
         )
 
-libraries = [] #['boost_iostreams%s' % env['BOOST_APPEND']]    
+libraries = []
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik2')

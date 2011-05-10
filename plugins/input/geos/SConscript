@@ -35,7 +35,6 @@ geos_src = Split(
         )
 
 libraries = [env['PLUGINS']['geos']['lib']]
-libraries.append(['boost_iostreams%s' % env['BOOST_APPEND']])
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append('mapnik2')

@@ -63,7 +63,6 @@ First, here is a quick list of the required software dependencies:
     - thread
     - filesystem
     - regex (built against libicu >= 4.2)
-    - iostreams
     - python - required only for python bindings (see below)
 - libicu >= 4.2 - International Components for Unicode
 - libpng - PNG Graphics

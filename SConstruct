@@ -1042,7 +1042,6 @@ if not preconfigured:
         ['system', 'boost/system/system_error.hpp', env['HAS_BOOST_SYSTEM']],
         ['filesystem', 'boost/filesystem/operations.hpp', True],
         ['regex', 'boost/regex.hpp', True],
-        #['iostreams','boost/iostreams/device/mapped_file.hpp',True],
         ['program_options', 'boost/program_options.hpp', False]
     ]
         
