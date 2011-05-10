@@ -20,16 +20,22 @@
  *
  *****************************************************************************/
 
-#ifndef SHAPE_FS_HH
-#define SHAPE_FS_HH
+#ifndef SHAPE_FEATURESET_HPP
+#define SHAPE_FEATURESET_HPP
 
-#include <boost/scoped_ptr.hpp>
+//mapnik
 #include <mapnik/geom_util.hpp>
-#include "shape.hpp"
+#include <mapnik/datasource.hpp>
+
+#include "shape_io.hpp"
+
+//boost
+#include <boost/scoped_ptr.hpp>
 
 using mapnik::Featureset;
 using mapnik::box2d;
 using mapnik::feature_ptr;
+using mapnik::transcoder;
 
 template <typename filterT>
 class shape_featureset : public Featureset
@@ -58,4 +64,4 @@ class shape_featureset : public Featureset
       
 };
 
-#endif //SHAPE_FS_HH
+#endif //SHAPE_FEATURESET_HPP

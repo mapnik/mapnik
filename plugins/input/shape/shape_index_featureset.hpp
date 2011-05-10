@@ -26,7 +26,7 @@
 #include <mapnik/geom_util.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "shape.hpp"
+#include "shape_datasource.hpp"
 #include "shape_io.hpp"
 #include <set>
 #include <vector>

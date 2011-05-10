@@ -23,7 +23,9 @@
 //$Id: shape_io.cc 26 2005-03-29 19:18:59Z pavlenko $
 
 #include "shape_io.hpp"
-#include "shape.hpp"
+
+#include <mapnik/datasource.hpp>
+// boost
 #include <boost/filesystem/operations.hpp>
 
 using mapnik::datasource_exception;

@@ -30,7 +30,7 @@ plugin_env = env.Clone()
 shape_src = Split(
   """
         dbfile.cpp
-        shape.cpp
+        shape_datasource.cpp
         shape_featureset.cpp
         shape_index_featureset.cpp
         shape_io.cpp

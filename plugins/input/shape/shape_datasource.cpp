@@ -32,9 +32,9 @@
 #include <boost/filesystem/operations.hpp>
 
 
+#include "shape_datasource.hpp"
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
-#include "shape.hpp"
 
 DATASOURCE_PLUGIN(shape_datasource)
 
