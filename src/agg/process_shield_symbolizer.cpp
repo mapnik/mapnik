@@ -180,8 +180,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     // remove displacement from image label
                                     double lx = x - boost::get<0>(pos);
                                     double ly = y - boost::get<1>(pos);
-                                    px=int(floor(lx - (0.5 * w)));
-                                    py=int(floor(ly - (0.5 * h)));
+                                    px=int(floor(lx - (0.5 * w))) + 1;
+                                    py=int(floor(ly - (0.5 * h))) + 1;
                                     label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
                                 }
                                 else
@@ -223,8 +223,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
                             double lx = x - boost::get<0>(pos);
                             double ly = y - boost::get<1>(pos);
-                            int px=int(floor(lx - (0.5*w)));
-                            int py=int(floor(ly - (0.5*h)));
+                            int px=int(floor(lx - (0.5*w))) + 1;
+                            int py=int(floor(ly - (0.5*h))) + 1;
 
                             render_marker(px,py,**marker,tr,sym.get_opacity());
 
