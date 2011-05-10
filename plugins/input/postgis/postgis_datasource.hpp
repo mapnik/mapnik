@@ -22,17 +22,17 @@
 
 //$Id: postgis.hpp 44 2005-04-22 18:53:54Z pavlenko $
 
-#ifndef POSTGIS_HPP
-#define POSTGIS_HPP
+#ifndef POSTGIS_DATASOURCE_HPP
+#define POSTGIS_DATASOURCE_HPP
 
-
+// mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+
+// boost
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <set>
 
 #include "connection_manager.hpp"
 #include "resultset.hpp"
@@ -48,7 +48,6 @@ using mapnik::query;
 using mapnik::parameters;
 using mapnik::coord2d;
 
-//class transcoder;
 class postgis_datasource : public datasource
 {
       static const std::string GEOMETRY_COLUMNS;
@@ -98,25 +97,4 @@ class postgis_datasource : public datasource
       postgis_datasource& operator=(const postgis_datasource&);
 };
 
-class postgis_featureset : public mapnik::Featureset
-{
-   private:
-      boost::shared_ptr<IResultSet> rs_;
-      bool multiple_geometries_;
-      unsigned num_attrs_;
-      boost::scoped_ptr<mapnik::transcoder> tr_;
-      mutable int totalGeomSize_;
-      mutable int feature_id_;
-   public:
-      postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
-                         std::string const& encoding,
-                         bool multiple_geometries,
-                         unsigned num_attrs);
-      feature_ptr next();
-      ~postgis_featureset();
-   private:
-      postgis_featureset(const postgis_featureset&);
-      const postgis_featureset& operator=(const postgis_featureset&);
-};
-
-#endif                                            //POSTGIS_HPP
+#endif //POSTGIS_DATASOURCE_HPP

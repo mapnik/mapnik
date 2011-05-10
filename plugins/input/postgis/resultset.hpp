@@ -26,7 +26,10 @@
 #ifndef RESULTSET_HPP
 #define RESULTSET_HPP
 
-#include "connection.hpp"
+extern "C" 
+{
+#include "libpq-fe.h"
+}
 
 class IResultSet
 {

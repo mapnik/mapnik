@@ -28,8 +28,8 @@ plugin_env = env.Clone()
 
 postgis_src = Split(
   """
-        postgis.cpp
-        postgisfs.cpp
+        postgis_datasource.cpp
+        postgis_featureset.cpp
   """
         )
 

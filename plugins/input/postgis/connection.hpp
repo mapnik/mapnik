@@ -34,7 +34,6 @@ extern "C"
 
 #include "resultset.hpp"
 
-class ResultSet;
 class Connection
 {
    private:

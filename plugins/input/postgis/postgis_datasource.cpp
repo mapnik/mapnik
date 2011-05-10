@@ -32,7 +32,8 @@
 #endif
 
 #include "connection_manager.hpp"
-#include "postgis.hpp"
+#include "postgis_datasource.hpp"
+#include "postgis_featureset.hpp"
 
 // boost
 #include <boost/algorithm/string.hpp>
