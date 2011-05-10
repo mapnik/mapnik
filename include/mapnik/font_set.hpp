@@ -24,10 +24,10 @@
 
 #ifndef FONT_SET_HPP
 #define FONT_SET_HPP
+
 // mapnik
 #include <mapnik/config.hpp>
-// boost
-#include <boost/shared_ptr.hpp>
+
 // stl
 #include <string>
 #include <vector>

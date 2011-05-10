@@ -28,14 +28,11 @@
 #include <mapnik/style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
-// boost
-#include <boost/shared_ptr.hpp>
+
 // stl
 #include <string>
 #include <iostream>
 
-using namespace std;
-using boost::shared_ptr;
 
 namespace mapnik
 {   

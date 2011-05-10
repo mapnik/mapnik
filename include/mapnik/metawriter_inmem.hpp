@@ -24,10 +24,13 @@
 #ifndef METAWRITER_INMEM_HPP
 #define METAWRITER_INMEM_HPP
 
-// Mapnik
+// mapnik
 #include <mapnik/metawriter.hpp>
 
-// STL
+// boost
+#include <boost/shared_ptr.hpp>
+
+// stl
 #include <list>
 
 namespace mapnik {

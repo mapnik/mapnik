@@ -30,9 +30,6 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/image_util.hpp>
 
-// boost
-#include <boost/shared_ptr.hpp>
-
 namespace mapnik
 {
 struct MAPNIK_DECL raster_symbolizer : public symbolizer_base 

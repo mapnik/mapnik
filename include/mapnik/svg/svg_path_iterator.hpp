@@ -31,6 +31,7 @@
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik {
 namespace svg {
@@ -73,7 +74,7 @@ public:
     path_iterator(Container const& path)
       : path_iterator::iterator_adaptor_(0),
         path_(path),
-        first_value_(new Value(0,0,0))
+        first_value_(boost::make_shared<Value>(0,0,0))
     {}
 
     /*!
@@ -90,7 +91,7 @@ public:
     explicit path_iterator(Value* first_element, Container const& path) 
       : path_iterator::iterator_adaptor_(first_element),
         path_(path),
-        first_value_(new Value(0,0,0))
+        first_value_(boost::make_shared<Value>(0,0,0))
     {
         this->increment();
     }

@@ -28,6 +28,7 @@
 
 // boost
 #include <boost/version.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -40,8 +41,6 @@
 
 namespace mapnik
 {
-//using namespace std;
-//using namespace boost;
    
 bool is_input_plugin (std::string const& filename)
 {
@@ -114,8 +113,8 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 
 bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
 {
-    return plugins_.insert(make_pair(type,boost::shared_ptr<PluginInfo>
-                                     (new PluginInfo(type,module)))).second;
+    return plugins_.insert(make_pair(type,boost::make_shared<PluginInfo>
+                                     (type,module))).second;
 }
 
 std::string datasource_cache::plugin_directories()

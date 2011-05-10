@@ -37,6 +37,9 @@
 // stl
 #include <string>
 
+// boost
+#include <boost/make_shared.hpp>
+
 namespace mapnik {
 
 template <typename T>
@@ -53,7 +56,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     }
     else
     {
-        marker.reset(boost::shared_ptr<mapnik::marker> (new mapnik::marker()));
+        marker.reset(boost::make_shared<mapnik::marker>());
     }
 
     if (marker)

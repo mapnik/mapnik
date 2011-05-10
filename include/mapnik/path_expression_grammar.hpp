@@ -31,7 +31,6 @@
 #include <mapnik/feature.hpp>
 // boost
 #include <boost/variant.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/concept_check.hpp>
 
 //spirit2

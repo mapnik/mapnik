@@ -37,6 +37,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/make_shared.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -58,7 +59,7 @@ public:
     marker()
     {
         // create default OGC 4x4 black pixel
-        bitmap_data_ = boost::optional<mapnik::image_ptr>(new image_data_32(4,4));
+        bitmap_data_ = boost::optional<mapnik::image_ptr>(boost::make_shared<image_data_32>(4,4));
         (*bitmap_data_)->set(0xff000000);
     }
 

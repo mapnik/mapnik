@@ -24,11 +24,14 @@
 #ifndef METAWRITER_JSON_HPP
 #define METAWRITER_JSON_HPP
 
-// Mapnik
+// mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/parse_path.hpp>
 
-// STL
+// boost
+#include <boost/shared_ptr.hpp>
+
+// stl
 #include <fstream>
 
 namespace mapnik {

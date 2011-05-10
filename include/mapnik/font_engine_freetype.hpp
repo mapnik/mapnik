@@ -43,11 +43,13 @@ extern "C"
 
 // boost
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
+
 
 // stl
 #include <string>
@@ -170,11 +172,11 @@ public:
         {
             FT_UInt g = (*face)->get_char(c);
 
-            if (g) return glyph_ptr(new font_glyph(*face, g));
+            if (g) return boost::make_shared<font_glyph>(*face, g);
         }
 
         // Final fallback to empty square if nothing better in any font
-        return glyph_ptr(new font_glyph(*faces_.begin(), 0));
+        return boost::make_shared<font_glyph>(*faces_.begin(), 0);
     }
 
     dimension_t character_dimensions(const unsigned c);
@@ -280,7 +282,7 @@ public:
 
     face_set_ptr get_face_set(std::string const& name)
     {
-        face_set_ptr face_set(new font_face_set);
+        face_set_ptr face_set = boost::make_shared<font_face_set>();
         if (face_ptr face = get_face(name))
         {
             face_set->add(face);
@@ -291,7 +293,7 @@ public:
     face_set_ptr get_face_set(font_set const& fset)
     {
         std::vector<std::string> const& names = fset.get_face_names();
-        face_set_ptr face_set(new font_face_set);
+        face_set_ptr face_set = boost::make_shared<font_face_set>();
         for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
         {
             if (face_ptr face = get_face(*name))

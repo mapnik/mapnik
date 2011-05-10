@@ -39,12 +39,17 @@
 #ifndef RASTER_COLORIZER_HPP
 #define RASTER_COLORIZER_HPP
 
+// mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>
 
+// boost
+#include <boost/shared_ptr.hpp>
+
+// stl
 #include <vector>
 
 namespace mapnik

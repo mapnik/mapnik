@@ -22,6 +22,7 @@
 
 #ifndef RULE_HPP
 #define RULE_HPP
+
 // mapnik
 #include <mapnik/line_symbolizer.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
@@ -38,7 +39,9 @@
 
 // boost
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/variant.hpp>
+
 // stl
 #include <string>
 #include <vector>
@@ -143,7 +146,7 @@ public:
           min_scale_(0),
           max_scale_(std::numeric_limits<double>::infinity()),
           syms_(),
-          filter_(new mapnik::expr_node(true)),
+          filter_(boost::make_shared<mapnik::expr_node>(true)),
           else_filter_(false) {}
     
     rule(const std::string& name,
@@ -155,7 +158,7 @@ public:
           min_scale_(min_scale_denominator),
           max_scale_(max_scale_denominator),
           syms_(),
-          filter_(new mapnik::expr_node(true)),
+          filter_(boost::make_shared<mapnik::expr_node>(true)),
           else_filter_(false) {}
     
     rule(const rule& rhs)    

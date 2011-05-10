@@ -44,6 +44,7 @@
 
 // boost
 #include <boost/utility.hpp>
+#include <boost/make_shared.hpp>
 
 // stl
 #ifdef MAPNIK_DEBUG
@@ -1018,7 +1019,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
     }
     else
     {
-        marker.reset(boost::shared_ptr<mapnik::marker> (new mapnik::marker()));
+        marker.reset(boost::make_shared<mapnik::marker>());
     }
 
     if (marker)
