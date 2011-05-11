@@ -25,7 +25,6 @@
 // mapnik
 #include <mapnik/layer.hpp>
 
-#include <mapnik/style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 

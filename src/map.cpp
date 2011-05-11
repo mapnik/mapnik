@@ -23,7 +23,6 @@
 //$Id: map.cpp 17 2005-03-08 23:58:43Z pavlenko $,
 #include <mapnik/map.hpp>
 
-#include <mapnik/style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/filter_featureset.hpp>
