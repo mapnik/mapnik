@@ -100,7 +100,6 @@ source = Split(
     """
     color.cpp
     box2d.cpp
-    expression_node.cpp
     expression_string.cpp
     filter_factory.cpp
     feature_type_style.cpp
@@ -115,7 +114,6 @@ source = Split(
     map.cpp
     load_map.cpp
     memory.cpp
-    params.cpp
     parse_path.cpp
     placement_finder.cpp
     plugin.cpp
