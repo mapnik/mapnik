@@ -94,3 +94,41 @@ def test_load_save_map():
     assert 'RasterSymbolizer' in out_map
     assert 'RasterColorizer' in out_map
     assert 'stop' in out_map
+
+def test_raster_with_alpha_blends_correctly_with_background():
+    WIDTH = 500
+    HEIGHT = 500
+
+    map = mapnik2.Map(WIDTH, HEIGHT)
+    WHITE = mapnik2.Color(255, 255, 255)
+    map.background = WHITE
+
+    style = mapnik2.Style()
+    rule = mapnik2.Rule()
+    symbolizer = mapnik2.RasterSymbolizer()
+    #XXX: This fixes it, see http://trac.mapnik.org/ticket/759#comment:3
+    #     (and remove comment when this test passes)
+    #symbolizer.scaling="bilinear_old"
+
+    rule.symbols.append(symbolizer)
+    style.rules.append(rule)
+
+    map.append_style('raster_style', style)
+
+    map_layer = mapnik2.Layer('test_layer')
+    filepath = '../data/raster/white-alpha.png'
+    map_layer.datasource = mapnik2.Gdal(file=filepath)
+    map_layer.styles.append('raster_style')
+    map.layers.append(map_layer)
+
+    map.zoom_all()
+
+    mim = mapnik2.Image(WIDTH, HEIGHT)
+
+    mapnik2.render(map, mim)
+    save_data('test_raster_with_alpha_blends_correctly_with_background.png',
+              mim.tostring('png'))
+    imdata = mim.tostring()
+    # All white is expected
+    assert contains_word('\xff\xff\xff\xff', imdata)
+    
