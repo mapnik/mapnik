@@ -332,8 +332,9 @@ scaling_method_e get_scaling_method_by_name (std::string name)
 }
 
 // this has been replaced by agg impl - see https://trac.mapnik.org/ticket/656
-/*
-inline void scale_image_bilinear (Image& target,const Image& source, double x_off_f=0, double y_off_f=0)
+
+template <typename Image>
+void scale_image_bilinear_old (Image& target,const Image& source, double x_off_f, double y_off_f)
 {
 
     int source_width=source.width();
@@ -418,7 +419,7 @@ inline void scale_image_bilinear (Image& target,const Image& source, double x_of
         }
     }
 }
-*/
+
 
 template <typename Image>
 void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f, double y_off_f)
@@ -585,6 +586,8 @@ void scale_image_agg (Image& target,const Image& source, scaling_method_e scalin
 }
 
 template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio);
+
+template void scale_image_bilinear_old<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
 
 template void scale_image_bilinear8<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
 

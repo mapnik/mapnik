@@ -192,6 +192,9 @@ template <typename Image>
 void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f=0, double y_off_f=0, double filter_radius=2, double ratio=1);
 
 template <typename Image>
+void scale_image_bilinear_old (Image& target,const Image& source, double x_off_f=0, double y_off_f=0);
+
+template <typename Image>
 void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f=0, double y_off_f=0);
 
 inline MAPNIK_DECL void save_to_file (image_32 const& image,
