@@ -72,6 +72,9 @@ else:
 
 from paths import inputpluginspath, fontscollectionpath
 
+#import printing
+#printing.renderer = render
+
 # The base Boost.Python class
 BoostPythonMetaclass = Coord.__class__
 
@@ -684,7 +687,7 @@ __all__ = [
     # classes
     'Color',
     'Coord',
-    'ColorBand',
+    #'ColorBand',
     'CompositeOp',
     'DatasourceCache',
     'Box2d',
