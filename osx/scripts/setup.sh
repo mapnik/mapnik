@@ -215,7 +215,7 @@ cd boost_1_46_1
     }
 
 ./bootstrap.sh
-./bjam --prefix=$PREFIX --with-python --with-thread --with-filesystem \
+./bjam --prefix=$PREFIX --with-thread --with-filesystem \
   --with-regex --with-program_options --with-system \
   -sHAVE_ICU=1 -sICU_PATH=$PREFIX \
   toolset=darwin \
@@ -225,9 +225,19 @@ cd boost_1_46_1
   variant=release \
   stage
 
-./bjam --prefix=$PREFIX --with-python --with-thread --with-filesystem \
+./bjam --prefix=$PREFIX --with-thread --with-filesystem \
   --with-regex --with-program_options --with-system \
   -sHAVE_ICU=1 -sICU_PATH=$PREFIX \
+  toolset=darwin \
+  address-model=32_64 \
+  architecture=x86 \
+  link=shared \
+  variant=release \
+  install
+
+# if needed, rebuild regex without icu..
+./bjam --prefix=$PREFIX --with-regex \
+  --disable-icu -a \
   toolset=darwin \
   address-model=32_64 \
   architecture=x86 \
