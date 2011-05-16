@@ -32,6 +32,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/make_shared.hpp>
 
 // stl
 #include <string>
@@ -547,14 +548,14 @@ featureset_ptr occi_datasource::features(query const& q) const
     std::clog << "OCCI Plugin: " << s.str() << std::endl;
 #endif
 
-    return featureset_ptr (new occi_featureset (pool_,
+    return boost::make_shared<occi_featureset>(pool_,
                                                 conn_,
                                                 s.str(),
                                                 desc_.get_encoding(),
                                                 multiple_geometries_,
                                                 use_connection_pool_,
                                                 row_prefetch_,
-                                                props.size()));
+                                                props.size());
 }
 
 featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
@@ -630,13 +631,13 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     std::clog << "OCCI Plugin: " << s.str() << std::endl;
 #endif
 
-    return featureset_ptr (new occi_featureset (pool_,
+    return boost::make_shared<occi_featureset>(pool_,
                                                 conn_,
                                                 s.str(),
                                                 desc_.get_encoding(),
                                                 multiple_geometries_,
                                                 use_connection_pool_,
                                                 row_prefetch_,
-                                                size));
+                                                size);
 }
 

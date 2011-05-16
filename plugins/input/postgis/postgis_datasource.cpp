@@ -40,6 +40,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
+#include <boost/make_shared.hpp>
 
 // stl
 #include <string>
@@ -396,7 +397,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
         if (!conn->execute(csql.str()))
             throw mapnik::datasource_exception("Postgis Plugin: error creating cursor for data select." );
 
-        return shared_ptr<CursorResultSet>(new CursorResultSet(conn, cursor_name, cursor_fetch_size_));
+        return boost::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
 
     }
     else
@@ -479,7 +480,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }
          
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),multiple_geometries_,props.size()));
+            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,props.size());
         }
         else 
         {
@@ -551,7 +552,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             }
          
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return featureset_ptr(new postgis_featureset(rs,desc_.get_encoding(),multiple_geometries_, size));
+            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_, size);
         }
     }
     return featureset_ptr();

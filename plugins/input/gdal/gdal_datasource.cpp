@@ -207,6 +207,7 @@ featureset_ptr gdal_datasource::features(query const& q) const
     if (!is_bound_) bind();
 
     gdal_query gq = q;
+    // TODO - move to boost::make_shared, but must reduce # of args to <= 9
     return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, extent_, width_, height_, nbands_, dx_, dy_, filter_factor_));
 }
 

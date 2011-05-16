@@ -33,6 +33,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/make_shared.hpp>
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
@@ -409,7 +410,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
 
-        return featureset_ptr (new sqlite_featureset(rs, desc_.get_encoding(), format_, multiple_geometries_));
+        return boost::make_shared<sqlite_featureset>(rs, desc_.get_encoding(), format_, multiple_geometries_);
    }
 
    return featureset_ptr();
@@ -473,7 +474,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
 
         boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
 
-        return featureset_ptr (new sqlite_featureset(rs, desc_.get_encoding(), format_, multiple_geometries_));
+        return boost::make_shared<sqlite_featureset>(rs, desc_.get_encoding(), format_, multiple_geometries_);
    }
       
    return featureset_ptr();

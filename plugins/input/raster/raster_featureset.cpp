@@ -19,9 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
 // mapnik
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/feature_factory.hpp>
 
 #include "raster_featureset.hpp"
 
@@ -33,6 +35,7 @@ using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::image_data_32;
 using mapnik::raster;
+using mapnik::feature_factory;
 
 template <typename LookupPolicy>
 raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
@@ -54,7 +57,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 {
    if (curIter_!=endIter_)
    {
-      feature_ptr feature(new Feature(feature_id_));
+      feature_ptr feature(feature_factory::create(feature_id_));
       ++feature_id_;
       try
       {         
@@ -98,7 +101,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 
                   image_data_32 image(width,height);
                   reader->read(x_off,y_off,image);
-                  feature->set_raster(mapnik::raster_ptr(new raster(intersect,image)));
+                  feature->set_raster(boost::make_shared<raster>(intersect,image));
                }
             }
          }

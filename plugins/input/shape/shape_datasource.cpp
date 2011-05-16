@@ -20,9 +20,7 @@
  *
  *****************************************************************************/
 
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
+// mapnik
 #include <mapnik/geom_util.hpp>
 
 // boost
@@ -30,7 +28,12 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/make_shared.hpp>
 
+// stl
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
 
 #include "shape_datasource.hpp"
 #include "shape_featureset.hpp"
@@ -92,7 +95,7 @@ void shape_datasource::bind() const
 
     try
     {  
-        boost::shared_ptr<shape_io> shape_ref = boost::shared_ptr<shape_io>(new shape_io(shape_name_));
+        boost::shared_ptr<shape_io> shape_ref = boost::make_shared<shape_io>(shape_name_);
         init(*shape_ref);
         for (int i=0;i<shape_ref->dbf().num_fields();++i)
         {
@@ -241,6 +244,7 @@ featureset_ptr shape_datasource::features(const query& q) const
     if (indexed_)
     {
         shape_->shp().seek(0);
+        // TODO - use boost::make_shared - #760
         return featureset_ptr
             (new shape_index_featureset<filter_in_box>(filter,
                                                        *shape_,
@@ -249,12 +253,11 @@ featureset_ptr shape_datasource::features(const query& q) const
     }
     else
     {
-        return featureset_ptr
-            (new shape_featureset<filter_in_box>(filter,
+        return boost::make_shared<shape_featureset<filter_in_box> >(filter,
                                                  shape_name_,
                                                  q.property_names(),
                                                  desc_.get_encoding(),
-                                                 file_length_));
+                                                 file_length_);
     }
 }
 
@@ -278,6 +281,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
     if (indexed_)
     {
         shape_->shp().seek(0);
+        // TODO - use boost::make_shared - #760
         return featureset_ptr
             (new shape_index_featureset<filter_at_point>(filter,
                                                          *shape_,
@@ -286,12 +290,11 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
     }
     else
     {
-        return featureset_ptr
-            (new shape_featureset<filter_at_point>(filter,
+        return boost::make_shared<shape_featureset<filter_at_point> >(filter,
                                                    shape_name_,
                                                    names,
                                                    desc_.get_encoding(),
-                                                   file_length_));
+                                                   file_length_);
     }
 }
 

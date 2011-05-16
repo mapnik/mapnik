@@ -25,6 +25,11 @@
 
 // mapnik
 #include <mapnik/image_util.hpp>
+#include <mapnik/feature_factory.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
+
 
 using mapnik::query;
 using mapnik::coord2d;
@@ -34,6 +39,7 @@ using mapnik::feature_ptr;
 using mapnik::CoordTransform;
 using mapnik::geometry_type;
 using mapnik::query;
+using mapnik::feature_factory;
 
 
 rasterlite_featureset::rasterlite_featureset(void* dataset, rasterlite_query q)
@@ -80,7 +86,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     std::clog << "Rasterlite Plugin: get_feature" << std::endl;
 #endif
 
-    feature_ptr feature(new Feature(1));
+    feature_ptr feature(feature_factory::create(1));
 
     double x0, y0, x1, y1;
     rasterliteGetExtent (dataset_, &x0, &y0, &x1, &y1);
@@ -123,7 +129,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
 
                 memcpy (image_data, raster_data, size);
 
-                feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
+                feature->set_raster(boost::make_shared<mapnik::raster>(intersect,image));
 
                 free (raster);
 

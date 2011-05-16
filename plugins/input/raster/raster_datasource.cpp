@@ -24,6 +24,7 @@
 // boost
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/image_reader.hpp>
@@ -171,7 +172,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 #endif
 
         tiled_file_policy policy(filename_, format_, 256, extent_, q.get_bbox(), width_, height_);
-        return featureset_ptr(new raster_featureset<tiled_file_policy>(policy, extent_, q));
+        return boost::make_shared<raster_featureset<tiled_file_policy> >(policy, extent_, q);
     }
     else
     {
@@ -181,12 +182,13 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         raster_info info(filename_, format_, extent_, width_, height_);
         single_file_policy policy(info);
-        return featureset_ptr(new raster_featureset<single_file_policy>(policy, extent_, q));
+        return boost::make_shared<raster_featureset<single_file_policy> >(policy, extent_, q);
     }
 }
 
 featureset_ptr raster_datasource::features_at_point(coord2d const&) const
 {
+    std::clog << "Raster Plugin: ##WARNING: feature_at_point not supported for raster.input" << std::endl;
     return featureset_ptr();
 }
 

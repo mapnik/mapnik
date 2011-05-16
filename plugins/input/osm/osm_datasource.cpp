@@ -20,17 +20,24 @@
  *
  *****************************************************************************/
 
+// mapnik
+#include <mapnik/geom_util.hpp>
+#include <mapnik/query.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
+
+// stl
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-#include <mapnik/geom_util.hpp>
-#include <mapnik/query.hpp>
+#include <set>
+
 #include "osm_datasource.hpp"
 #include "osm_featureset.hpp"
 #include "dataset_deliverer.h"
 #include "osmtagtypes.h"
 #include "osmparser.h"
-#include <set>
 
 DATASOURCE_PLUGIN(osm_datasource)
 
@@ -142,11 +149,10 @@ featureset_ptr osm_datasource::features(const query& q) const
     filter_in_box filter(q.get_bbox());
     // so we need to filter osm features by bbox here...
     
-    return featureset_ptr
-         (new osm_featureset<filter_in_box>(filter,
+    return boost::make_shared<osm_featureset<filter_in_box> >(filter,
                                               osm_data_,
                                               q.property_names(),
-                                              desc_.get_encoding()));
+                                              desc_.get_encoding());
 }
 
 featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
@@ -167,11 +173,10 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
       ++itr;
    }
     
-    return featureset_ptr
-         (new osm_featureset<filter_at_point>(filter,
+    return boost::make_shared<osm_featureset<filter_at_point> >(filter,
                                                 osm_data_,
                                                 names,
-                                                desc_.get_encoding()));
+                                                desc_.get_encoding());
 }
 
 box2d<double> osm_datasource::envelope() const

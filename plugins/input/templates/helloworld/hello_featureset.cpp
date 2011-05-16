@@ -1,5 +1,8 @@
-#include "hello_featureset.hpp"
+// mapnik
+#include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry.hpp>
+
+#include "hello_featureset.hpp"
 
 hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string const& encoding)
   : box_(box),
@@ -13,7 +16,7 @@ mapnik::feature_ptr hello_featureset::next()
     if (feature_id_ == 1)
     {
         // create a new feature
-        mapnik::feature_ptr feature(new mapnik::Feature(feature_id_));
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(feature_id_));
 
         // increment the count so that we only return one feature
         ++feature_id_;

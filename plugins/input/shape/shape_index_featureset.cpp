@@ -22,12 +22,20 @@
 
 //$Id: shape_index_featureset.cc 36 2005-04-05 14:32:18Z pavlenko $
 
+// mapnik
 #include <mapnik/feature_factory.hpp>
+
 // boost
 #include <boost/interprocess/streams/bufferstream.hpp>
 
-#include "shape_index_featureset.hpp"
+// stl
 #include <fstream>
+
+#include "shape_index_featureset.hpp"
+
+using mapnik::feature_factory;
+using mapnik::geometry_type;
+
 
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
@@ -94,8 +102,6 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 template <typename filterT>
 feature_ptr shape_index_featureset<filterT>::next()
 {   
-    using mapnik::feature_factory;
-    using mapnik::geometry_type;
     if (itr_!=ids_.end())
     {
         int pos=*itr_++;

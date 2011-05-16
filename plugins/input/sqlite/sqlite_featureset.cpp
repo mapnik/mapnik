@@ -21,6 +21,7 @@
  *****************************************************************************/
 //$Id$
 
+// mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
@@ -29,6 +30,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/feature_factory.hpp>
 
 // ogr
 #include "sqlite_featureset.hpp"
@@ -40,6 +42,7 @@ using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
+using mapnik::feature_factory;
 
 sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                                      std::string const& encoding,
@@ -68,7 +71,7 @@ feature_ptr sqlite_featureset::next()
         // std::clog << "Sqlite Plugin: feature_oid=" << feature_id << std::endl;
 #endif
 
-        feature_ptr feature(new Feature(feature_id));
+        feature_ptr feature(feature_factory::create(feature_id));
         geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,format_);
         
         for (int i = 2; i < rs_->column_count (); ++i)

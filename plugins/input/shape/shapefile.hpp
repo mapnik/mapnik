@@ -25,13 +25,16 @@
 #ifndef SHAPEFILE_HPP
 #define SHAPEFILE_HPP
 
+// mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
+
 // stl
 #include <cstring>
 #include <fstream>

@@ -21,6 +21,7 @@
  *****************************************************************************/
 //$Id$
 
+// mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
@@ -29,6 +30,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/feature_factory.hpp>
 
 #include "kismet_featureset.hpp"
 
@@ -37,6 +39,7 @@ using mapnik::feature_ptr;
 using mapnik::geometry_type;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
+using mapnik::feature_factory;
 
 kismet_featureset::kismet_featureset(const std::list<kismet_network_data> &knd_list,
                                      std::string const& encoding)
@@ -73,7 +76,7 @@ feature_ptr kismet_featureset::next()
             value = "wlan_crypted";
         }
 
-        feature_ptr feature(new Feature(feature_id_));
+        feature_ptr feature(feature_factory::create(feature_id_));
         ++feature_id_;
       
         geometry_type* pt = new geometry_type(mapnik::Point);

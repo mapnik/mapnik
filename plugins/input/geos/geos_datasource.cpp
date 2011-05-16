@@ -39,6 +39,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/make_shared.hpp>
 
 // geos
 #include <geos_c.h>
@@ -267,13 +268,13 @@ featureset_ptr geos_datasource::features(query const& q) const
     clog << "GEOS Plugin: using extent: " << s.str() << endl;
 #endif
 
-    return featureset_ptr(new geos_featureset (*geometry_,
+    return boost::make_shared<geos_featureset>(*geometry_,
                                                GEOSGeomFromWKT(s.str().c_str()),
                                                geometry_id_,
                                                geometry_data_,
                                                geometry_data_name_,
                                                desc_.get_encoding(),
-                                               multiple_geometries_));
+                                               multiple_geometries_);
 }
 
 featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
@@ -287,12 +288,12 @@ featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
     clog << "GEOS Plugin: using point: " << s.str() << endl;
 #endif
 
-    return featureset_ptr(new geos_featureset (*geometry_,
+    return boost::make_shared<geos_featureset>(*geometry_,
                                                GEOSGeomFromWKT(s.str().c_str()),
                                                geometry_id_,
                                                geometry_data_,
                                                geometry_data_name_,
                                                desc_.get_encoding(),
-                                               multiple_geometries_));
+                                               multiple_geometries_);
 }
 

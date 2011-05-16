@@ -25,8 +25,10 @@
 #include "shape_io.hpp"
 
 #include <mapnik/datasource.hpp>
+
 // boost
 #include <boost/filesystem/operations.hpp>
+#include <boost/make_shared.hpp>
 
 using mapnik::datasource_exception;
 using mapnik::geometry_type;
@@ -52,7 +54,7 @@ shape_io::shape_io(const std::string& shape_name, bool open_index)
         try 
         {
             
-            index_= boost::shared_ptr<shape_file>(new shape_file(shape_name + INDEX));
+            index_= boost::make_shared<shape_file>(shape_name + INDEX);
         }
         catch (...)
         {
@@ -390,7 +392,7 @@ geometry_type * shape_io::read_polygonz()
    int num_parts=record.read_ndr_integer();
    int num_points=record.read_ndr_integer();
    std::vector<int> parts(num_parts);
-   geometry_type * poly=new geometry_type(mapnik::Polygon);
+   geometry_type * poly = new geometry_type(mapnik::Polygon);
    poly->set_capacity(num_points + num_parts);
    for (int i=0;i<num_parts;++i)
    {

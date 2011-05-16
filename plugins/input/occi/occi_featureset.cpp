@@ -30,6 +30,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/feature_factory.hpp>
 
 // ogr
 #include "occi_featureset.hpp"
@@ -43,6 +44,7 @@ using mapnik::geometry_type;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::datasource_exception;
+using mapnik::feature_factory
 
 using oracle::occi::Connection;
 using oracle::occi::Statement;
@@ -90,7 +92,7 @@ feature_ptr occi_featureset::next()
 {
     if (rs_ && rs_->next())
     {
-        feature_ptr feature(new Feature(feature_id_));
+        feature_ptr feature(feature_factory::create(feature_id_));
         ++feature_id_;
 
         boost::scoped_ptr<SDOGeometry> geom (dynamic_cast<SDOGeometry*> (rs_->getObject(1)));

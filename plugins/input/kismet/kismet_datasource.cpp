@@ -40,6 +40,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 #include "kismet_datasource.hpp"
 #include "kismet_featureset.hpp"
@@ -90,7 +91,7 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
     boost::optional<std::string> ext = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
-    kismet_thread.reset (new boost::thread (boost::bind (&kismet_datasource::run, this, host_, port_)));
+    kismet_thread.reset (boost::make_shared<boost::thread>(boost::bind (&kismet_datasource::run, this, host_, port_)));
   
     if (bind)
     {
@@ -140,7 +141,7 @@ featureset_ptr kismet_datasource::features(query const& q) const
     //mapnik::box2d<double> const& e = q.get_bbox();
 
     boost::mutex::scoped_lock lock(knd_list_mutex);
-    return featureset_ptr (new kismet_featureset(knd_list, desc_.get_encoding()));
+    return boost::make_shared<kismet_featureset>(knd_list, desc_.get_encoding());
 
     // TODO: if illegal:
     // return featureset_ptr();

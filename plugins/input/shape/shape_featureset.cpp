@@ -21,8 +21,16 @@
  *
  *****************************************************************************/
 
+// mapnik
+#include <mapnik/feature_factory.hpp>
+
+// stl
 #include <iostream>
+
 #include "shape_featureset.hpp"
+
+using mapnik::geometry_type;
+using mapnik::feature_factory;
 
 template <typename filterT>
 shape_featureset<filterT>::shape_featureset(const filterT& filter, 
@@ -74,14 +82,13 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
 template <typename filterT>
 feature_ptr shape_featureset<filterT>::next()
 {
-    using mapnik::geometry_type;
     std::streampos pos=shape_.shp().pos();
     
     if (pos < std::streampos(file_length_ * 2))
     {
         shape_.move_to(pos);
         int type=shape_.type();
-        feature_ptr feature(new Feature(shape_.id_));
+        feature_ptr feature(feature_factory::create(shape_.id_));
         if (type == shape_io::shape_point)
         {
             double x=shape_.shp().read_double();
@@ -113,7 +120,7 @@ feature_ptr shape_featureset<filterT>::next()
             {
                 shape_.shp().skip(8);
             }
-            geometry_type * point=new geometry_type(mapnik::Point);
+            geometry_type * point = new geometry_type(mapnik::Point);
             point->move_to(x,y);
             feature->add_geometry(point);
             ++count_;

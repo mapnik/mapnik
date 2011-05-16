@@ -21,13 +21,19 @@
  *
  *****************************************************************************/
 
-#include <iostream>
-#include "osm_featureset.hpp"
+// mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/feature_factory.hpp>
+
+#include "osm_featureset.hpp"
+
+// stl
+#include <iostream>
 
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_type;
+using mapnik::feature_factory;
 using std::cerr;
 using std::endl;
 
@@ -58,14 +64,14 @@ feature_ptr osm_featureset<filterT>::next()
     {
         if(dataset_->current_item_is_node())
         {
-            feature= feature_ptr(new Feature(feature_id_));
+            feature = feature_factory::create(feature_id_);
             ++feature_id_;
             double lat = static_cast<osm_node*>(cur_item)->lat;
             double lon = static_cast<osm_node*>(cur_item)->lon;
             geometry_type * point = new geometry_type(mapnik::Point);
             point->move_to(lon,lat);
             feature->add_geometry(point);
-            success=true;
+            success = true;
         } 
         else if (dataset_->current_item_is_way())
         {
@@ -84,13 +90,13 @@ feature_ptr osm_featureset<filterT>::next()
             {
                 if(static_cast<osm_way*>(cur_item)->nodes.size())
                 {
-                    feature=feature_ptr(new Feature(feature_id_++));
+                    feature = feature_factory::create(feature_id_);
                     ++feature_id_;
                     geometry_type *geom;
                     if(static_cast<osm_way*>(cur_item)->is_polygon())
-                        geom=new geometry_type(mapnik::Polygon);
+                        geom = new geometry_type(mapnik::Polygon);
                     else
-                        geom=new geometry_type(mapnik::LineString);
+                        geom = new geometry_type(mapnik::LineString);
                     
                     geom->set_capacity(static_cast<osm_way*>(cur_item)->
                                        nodes.size());
@@ -108,7 +114,7 @@ feature_ptr osm_featureset<filterT>::next()
                                       ->nodes[count]->lat);
                     }
                     feature->add_geometry(geom);
-                    success=true;
+                    success = true;
                 }
             }
         }

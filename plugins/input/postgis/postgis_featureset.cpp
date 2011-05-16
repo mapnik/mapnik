@@ -28,6 +28,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/feature_factory.hpp>
+
 #include "postgis_featureset.hpp"
 #include "resultset.hpp"
 #include "cursorresultset.hpp"
@@ -35,6 +36,7 @@
 // boost
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+
 // stl
 #include <sstream>
 #include <string>

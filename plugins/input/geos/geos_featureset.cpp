@@ -33,6 +33,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/feature_factory.hpp>
 
 // ogr
 #include "geos_featureset.hpp"
@@ -48,6 +49,7 @@ using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
+using mapnik::feature_factory;
 
 
 geos_featureset::geos_featureset(GEOSGeometry* geometry,
@@ -116,7 +118,7 @@ feature_ptr geos_featureset::next()
                 geos_wkb_ptr wkb(geometry_);
                 if (wkb.is_valid())
                 {
-                    feature_ptr feature(new Feature(identifier_));
+                    feature_ptr feature(feature_factory::create(identifier_));
 
                     geometry_utils::from_wkb(*feature,
                                              wkb.data(),
