@@ -1,4 +1,4 @@
-#include <boost/config/warning_disable.hpp>
+//#include <boost/config/warning_disable.hpp>
 
 #include <boost/filesystem/convenience.hpp>
 namespace fs = boost::filesystem;
@@ -6,8 +6,8 @@ using fs::path;
 namespace sys = boost::system;
 
 #include <boost/detail/lightweight_test.hpp>
-#include <boost/bind.hpp>
-#include <fstream>
+//#include <boost/bind.hpp>
+//#include <fstream>
 #include <iostream>
 #include <mapnik/font_engine_freetype.hpp>
 
