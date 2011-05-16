@@ -31,7 +31,7 @@ struct raster
 {
     box2d<double> ext_;
     image_data_32 data_;
-    raster(box2d<double> const& ext,image_data_32& data)
+    raster(box2d<double> const& ext,image_data_32 const& data)
         : ext_(ext),
           data_(data) {}
 };

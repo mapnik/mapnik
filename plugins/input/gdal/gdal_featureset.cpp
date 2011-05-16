@@ -21,6 +21,9 @@
  *****************************************************************************/
 //$Id$
 
+// mapnik
+#include <mapnik/feature_factory.hpp>
+
 #include "gdal_featureset.hpp"
 #include <gdal_priv.h>
 
@@ -35,6 +38,7 @@ using mapnik::feature_ptr;
 using mapnik::CoordTransform;
 using mapnik::geometry_type;
 using mapnik::datasource_exception;
+using mapnik::feature_factory;
 
 
 gdal_featureset::gdal_featureset(GDALDataset & dataset, int band, gdal_query q, 
@@ -87,7 +91,7 @@ feature_ptr gdal_featureset::next()
 
 feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 {
-    feature_ptr feature(new Feature(1));
+    feature_ptr feature(feature_factory::create(1));
 
     GDALRasterBand * red = 0;
     GDALRasterBand * green = 0;
@@ -203,7 +207,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                imageData, image.width(), image.height(),
                                GDT_Float32, 0, 0);
     
-                feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect,image)));
+                feature->set_raster(mapnik::raster_ptr(boost::make_shared<mapnik::raster>(intersect,image)));
                 if (hasNoData)
                     feature->props()["NODATA"]=nodata;
             }
