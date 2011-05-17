@@ -31,7 +31,7 @@
 // agg
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
-#include "agg_scanline_u.h"
+#include "agg_scanline_bin.h"
 
 // stl
 #include <string>
@@ -46,8 +46,8 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
-    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-    agg::scanline_u8 sl;
+    typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+    agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
     mapnik::pixfmt_gray16 pixf(buf);
@@ -56,7 +56,6 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     renderer ren(renb);
 
     ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_linear(0.0, 0.0));
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
         geometry_type const& geom = feature.get_geometry(i);
@@ -73,9 +72,6 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
 
     // add feature properties to grid cache
     pixmap_.add_feature(feature);
-
-    // increment feature count
-    //++pixmap_.feature_count_;
 }
 
 

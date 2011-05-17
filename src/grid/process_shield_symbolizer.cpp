@@ -34,9 +34,7 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 
 // agg
-#include "agg_rasterizer_scanline_aa.h"
-#include "agg_renderer_scanline.h"
-#include "agg_scanline_u.h"
+#include "agg_trans_affine.h"
 
 namespace mapnik {
 
