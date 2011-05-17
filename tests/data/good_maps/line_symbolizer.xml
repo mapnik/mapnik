@@ -5,7 +5,7 @@
        <!-- big, thick, aliased lines -->
       <LineSymbolizer stroke="white" stroke-gamma="0" stroke-width="10"/>
 
-       <!-- small, clean, aliased lines -->
+       <!-- small, clean, anti-aliased lines -->
       <LineSymbolizer stroke="red" stroke-gamma="1" stroke-width=".5"/>
 
     </Rule>  
