@@ -90,7 +90,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
             svg_path_adapter svg_path(stl_storage);
             svg_renderer<svg_path_adapter, 
-                         agg::pod_bvector<path_attributes>, agg::pixfmt_rgba32_plain > svg_renderer(svg_path,(*marker)->attributes());
+                         agg::pod_bvector<path_attributes>,
+                         renderer_solid,
+                         agg::pixfmt_rgba32_plain > svg_renderer(svg_path,(*marker)->attributes());
 
             for (unsigned i=0; i<feature.num_geometries(); ++i)
             {

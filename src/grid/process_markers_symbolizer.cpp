@@ -37,8 +37,7 @@
 // agg
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
-#include "agg_scanline_u.h"
-#include "agg_scanline_p.h"
+#include "agg_scanline_bin.h"
 #include "agg_path_storage.h"
 #include "agg_ellipse.h"
 #include "agg_conv_stroke.h"
@@ -57,9 +56,8 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
-    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-    agg::scanline_u8 sl;
-    agg::scanline_p8 sl_line;
+    typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+    agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
     mapnik::pixfmt_gray16 pixf(buf);
@@ -68,7 +66,6 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     renderer ren(renb);
 
     ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_linear(0.0, 0.0));
 
     agg::trans_affine tr;
     boost::array<double,6> const& m = sym.get_transform();
@@ -98,7 +95,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
             svg_path_adapter svg_path(stl_storage);
             svg_renderer<svg_path_adapter, 
-                         agg::pod_bvector<path_attributes>, mapnik::pixfmt_gray16 > svg_renderer(svg_path,(*marker)->attributes());
+                         agg::pod_bvector<path_attributes>,
+                         renderer,
+                         mapnik::pixfmt_gray16 > svg_renderer(svg_path,(*marker)->attributes());
 
             bool placed = false;
             for (unsigned i=0; i<feature.num_geometries(); ++i)

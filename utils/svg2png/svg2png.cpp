@@ -113,6 +113,7 @@ int main (int argc,char** argv)
     
                     typedef agg::pixfmt_rgba32_plain pixfmt;
                     typedef agg::renderer_base<pixfmt> renderer_base;
+                    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
                     agg::rasterizer_scanline_aa<> ras_ptr;
                     agg::scanline_u8 sl;
 
@@ -138,6 +139,7 @@ int main (int argc,char** argv)
                     mapnik::svg::svg_path_adapter svg_path(stl_storage);
                     mapnik::svg::svg_renderer<mapnik::svg::svg_path_adapter,
                                  agg::pod_bvector<mapnik::svg::path_attributes>,
+                                 renderer_solid,
                                  agg::pixfmt_rgba32_plain > svg_renderer_this(svg_path,
                                          (*marker.get_vector_data())->attributes());
 

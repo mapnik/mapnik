@@ -23,28 +23,29 @@
 #ifndef MAPNIK_SVG_RENDERER_HPP
 #define MAPNIK_SVG_RENDERER_HPP
 
+// mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 
+// boost
 #include <boost/utility.hpp>
+#include <boost/foreach.hpp>
 
+// agg
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_stroke.h"
 #include "agg_conv_contour.h"
 #include "agg_conv_curve.h"
 #include "agg_color_rgba.h"
-#include "agg_renderer_scanline.h"
 #include "agg_bounding_rect.h"
-#include "agg_rasterizer_scanline_aa.h"
-
-
 #include "agg_rendering_buffer.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 #include "agg_scanline_p.h"
+#include "agg_scanline_bin.h"
 #include "agg_renderer_scanline.h"
 #include "agg_span_allocator.h"
 #include "agg_span_gradient.h"
@@ -52,10 +53,6 @@
 #include "agg_gamma_lut.h"
 #include "agg_span_interpolator_linear.h"
 #include "agg_pixfmt_rgba.h"
-#include "agg_path_storage.h"
-#include "agg_ellipse.h"
-
-#include <boost/foreach.hpp>
 
 namespace mapnik  {
 namespace svg {
@@ -101,7 +98,7 @@ private:
 
 };
 
-template <typename VertexSource, typename AttributeSource, typename PixelFormat> 
+template <typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat> 
 class svg_renderer : boost::noncopyable
 {
     typedef agg::conv_curve<VertexSource>            curved_type;
@@ -110,7 +107,6 @@ class svg_renderer : boost::noncopyable
     typedef agg::conv_transform<curved_type>         curved_trans_type;
     typedef agg::conv_contour<curved_trans_type>     curved_trans_contour_type;
     typedef agg::renderer_base<PixelFormat> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
     
 public:
     svg_renderer(VertexSource & source, AttributeSource const& attributes)
@@ -301,7 +297,7 @@ public:
                     ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
                     color = attr.fill_color;
                     color.opacity(color.opacity() * attr.opacity * opacity);
-                    renderer_solid ren_s(ren);
+                    ScanlineRenderer ren_s(ren);
                     ren_s.color(color);
                     render_scanlines(ras, sl, ren_s);
                 }
@@ -336,7 +332,7 @@ public:
                     ras.filling_rule(fill_non_zero);
                     color = attr.stroke_color;
                     color.opacity(color.opacity() * attr.opacity * opacity);
-                    renderer_solid ren_s(ren);
+                    ScanlineRenderer ren_s(ren);
                     ren_s.color(color);
                     render_scanlines(ras, sl, ren_s);
                 }
@@ -398,7 +394,7 @@ public:
                 }
 
                 ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
-                renderer_solid ren_s(ren);
+                ScanlineRenderer ren_s(ren);
                 ren_s.color(color);
                 render_scanlines(ras, sl, ren_s);
             }
@@ -424,7 +420,7 @@ public:
                 ras.add_path(curved_stroked_trans, attr.index);
 
                 ras.filling_rule(fill_non_zero);
-                renderer_solid ren_s(ren);
+                ScanlineRenderer ren_s(ren);
                 ren_s.color(color);
                 render_scanlines(ras, sl, ren_s);
             }
