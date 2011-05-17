@@ -946,7 +946,8 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
           << "spacing,max-error,allow-overlap,"
           << "width,height,placement,marker-type,"
           << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
-          << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray,"
+          << "stroke-linecap,stroke-dash-offset,stroke-dasharray,"
+          // note: stroke-gamma intentionally left off here as markers do not support them
           << "meta-writer,meta-output";
         ensure_attrs(sym, "MarkersSymbolizer", s.str());
 
@@ -1670,24 +1671,31 @@ void map_parser::parse_stroke(stroke & strk, ptree const & sym)
     // stroke color
     optional<color> c = get_opt_attr<color>(sym, "stroke");
     if (c) strk.set_color(*c);
+
     // stroke-width
     optional<double> width =  get_opt_attr<double>(sym, "stroke-width");
     if (width) strk.set_width(*width);
+
     // stroke-opacity
     optional<double> opacity = get_opt_attr<double>(sym, "stroke-opacity");
     if (opacity) strk.set_opacity(*opacity);
+
     // stroke-linejoin
     optional<line_join_e> line_join = get_opt_attr<line_join_e>(sym, "stroke-linejoin");
     if (line_join) strk.set_line_join(*line_join);
+
     // stroke-linecap
     optional<line_cap_e> line_cap = get_opt_attr<line_cap_e>(sym, "stroke-linecap");
     if (line_cap) strk.set_line_cap(*line_cap);
+
     // stroke-gamma
     optional<double> gamma = get_opt_attr<double>(sym, "stroke-gamma");
     if (gamma) strk.set_gamma(*gamma);
-    // stroke-dashaffset
-    optional<double> offset = get_opt_attr<double>(sym, "stroke-dashoffet");
-    if (offset) strk.set_dash_offset(*offset);
+
+    // stroke-dash-offset
+    optional<double> dash_offset = get_opt_attr<double>(sym, "stroke-dash-offset");
+    if (dash_offset) strk.set_dash_offset(*dash_offset);
+
     // stroke-dasharray
     optional<string> str = get_opt_attr<string>(sym,"stroke-dasharray");
     if (str) 
@@ -1733,7 +1741,7 @@ void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
 {
     std::stringstream s;
     s << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
-      << "stroke-linecap,stroke-gamma,stroke-dashoffet,stroke-dasharray,"
+      << "stroke-linecap,stroke-gamma,stroke-dash-offset,stroke-dasharray,"
       << "meta-writer,meta-output";
 
     ensure_attrs(sym, "LineSymbolizer", s.str());

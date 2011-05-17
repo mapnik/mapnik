@@ -586,7 +586,7 @@ private:
         }
         if ( strk.dash_offset() != dfl.dash_offset() || explicit_defaults_ )
         {
-            set_attr( node, "stroke-dashoffset", strk.dash_offset());
+            set_attr( node, "stroke-dash-offset", strk.dash_offset());
         }
         if ( ! strk.get_dash_array().empty() )
         {
