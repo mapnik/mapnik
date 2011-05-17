@@ -25,6 +25,10 @@
 // mapnik
 #include <mapnik/projection.hpp>
 #include <mapnik/utils.hpp>
+
+// boost
+#include <boost/algorithm/string.hpp>
+
 // proj4
 #include <proj_api.h>
 
@@ -138,6 +142,16 @@ void projection::init()
 #endif
     if (!proj_) throw proj_init_error(params_);
     is_geographic_ = pj_is_latlong(proj_) ? true : false;
+}
+
+std::string projection::expanded() const
+{
+    if (proj_) {
+        std::string def(pj_get_def( proj_, 0 ));
+        //boost::algorithm::ireplace_first(def,params_,"");
+        return boost::trim_copy(def);
+    }
+    return std::string("");
 }
     
 void projection::swap (projection& rhs)

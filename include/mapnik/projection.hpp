@@ -68,6 +68,8 @@ public:
       
     void forward(double & x, double &y ) const;
     void inverse(double & x,double & y) const;
+
+    std::string expanded() const;
         
 private:
     void init(); 

@@ -104,6 +104,8 @@ void export_projection ()
         .def ("params", make_function(&projection::params,
                                       return_value_policy<copy_const_reference>()),
               "Returns the PROJ.4 string for this projection.\n")
+        .def ("expanded",&projection::expanded,
+              "normalize PROJ.4 definition by expanding +init= syntax\n")
         .add_property ("geographic", &projection::is_geographic,
                        "This property is True if the projection is a geographic projection\n"
                        "(i.e. it uses lon/lat coordinates)\n")
