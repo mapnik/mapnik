@@ -42,6 +42,9 @@
 // boost
 #include <boost/utility.hpp>
 
+// agg
+#include "agg_trans_affine.h"
+
 // stl
 #ifdef MAPNIK_DEBUG
 #include <iostream>
@@ -119,8 +122,8 @@ void grid_renderer<T>::render_marker(Feature const& feature, unsigned int step, 
     {
         typedef coord_transform2<CoordTransform,geometry_type> path_type;
         typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
-        typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-        agg::scanline_u8 sl;
+        typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+        agg::scanline_bin sl;
     
         grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
         mapnik::pixfmt_gray16 pixf(buf);
@@ -129,8 +132,6 @@ void grid_renderer<T>::render_marker(Feature const& feature, unsigned int step, 
         renderer ren(renb);
     
         ras_ptr->reset();
-        ras_ptr->gamma(agg::gamma_linear(0.0, 0.0));
-
 
         box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
         coord<double,2> c = bbox.center();
@@ -145,7 +146,9 @@ void grid_renderer<T>::render_marker(Feature const& feature, unsigned int step, 
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,
-                     agg::pod_bvector<path_attributes>, mapnik::pixfmt_gray16 > svg_renderer(svg_path,
+                     agg::pod_bvector<path_attributes>,
+                     renderer,
+                     mapnik::pixfmt_gray16> svg_renderer(svg_path,
                              (*marker.get_vector_data())->attributes());
 
         svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), mtx, opacity, bbox);
