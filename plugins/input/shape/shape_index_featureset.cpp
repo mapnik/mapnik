@@ -107,7 +107,6 @@ feature_ptr shape_index_featureset<filterT>::next()
         int pos=*itr_++;
         shape_.move_to(pos);
         int type=shape_.type();
-        
         feature_ptr feature(feature_factory::create(shape_.id_));
         if (type == shape_io::shape_point)
         {
@@ -222,7 +221,8 @@ feature_ptr shape_index_featureset<filterT>::next()
         {
             shape_.dbf().move_to(shape_.id_);
             std::set<int>::const_iterator pos=attr_ids_.begin();
-            while (pos!=attr_ids_.end())
+            std::set<int>::const_iterator end=attr_ids_.end();
+            while (pos!=end)
             {
                 try 
                 {
