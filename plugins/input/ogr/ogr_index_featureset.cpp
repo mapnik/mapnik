@@ -31,6 +31,7 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+#include <mapnik/feature_factory.hpp>
 
 // boost
 #include <boost/interprocess/streams/bufferstream.hpp>
@@ -48,6 +49,7 @@ using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
+using mapnik::feature_factory;
 
 template <typename filterT>
 ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
@@ -61,7 +63,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
      layerdef_(layer.GetLayerDefn()),
      filter_(filter),
      tr_(new transcoder(encoding)),
-     fidcolumn_(layer_.GetFIDColumn ()),
+     fidcolumn_(layer_.GetFIDColumn()),
      multiple_geometries_(multiple_geometries)
 {
     
@@ -101,7 +103,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
             // ogr feature ids start at 0, so add one to stay
             // consistent with other mapnik datasources that start at 1
             int feature_id = ((*feat)->GetFID() + 1);
-            feature_ptr feature(new Feature(feature_id));
+            feature_ptr feature(feature_factory::create(feature_id));
             
             OGRGeometry* geom=(*feat)->GetGeometryRef();
             if (geom && !geom->IsEmpty())

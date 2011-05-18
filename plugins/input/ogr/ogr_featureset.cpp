@@ -29,6 +29,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/feature_factory.hpp>
 
 // ogr
 #include "ogr_featureset.hpp"
@@ -42,6 +43,7 @@ using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
+using mapnik::feature_factory;
 
 
 ogr_featureset::ogr_featureset(OGRDataSource & dataset,
@@ -69,7 +71,7 @@ ogr_featureset::ogr_featureset(OGRDataSource & dataset,
      layer_(layer),
      layerdef_(layer.GetLayerDefn()),
      tr_(new transcoder(encoding)),
-     fidcolumn_(layer_.GetFIDColumn ()),
+     fidcolumn_(layer_.GetFIDColumn()),
      multiple_geometries_(multiple_geometries),
      count_(0)
 {
@@ -89,7 +91,7 @@ feature_ptr ogr_featureset::next()
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1
         int feature_id = ((*feat)->GetFID() + 1);
-        feature_ptr feature(new Feature(feature_id));
+        feature_ptr feature(feature_factory::create(feature_id));
         
         OGRGeometry* geom=(*feat)->GetGeometryRef();
         if (geom && !geom->IsEmpty())
