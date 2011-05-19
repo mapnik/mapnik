@@ -158,11 +158,9 @@ void  shape_datasource::init(shape_io& shape)
         throw datasource_exception((boost::format("invalid version number: %d") % version).str());
     }
 
-#ifdef MAPNIK_DEBUG
     int shape_type = shape.shp().read_ndr_integer();
-#else
-    shape.shp().skip(4);
-#endif
+    if (shape_type == shape_io::shape_multipatch)
+        throw datasource_exception("Shape Plugin: shapefile multipatch type is not supported");
     shape.shp().read_envelope(extent_);
 
 #ifdef MAPNIK_DEBUG
