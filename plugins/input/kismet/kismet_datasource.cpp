@@ -91,8 +91,8 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
     boost::optional<std::string> ext = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
-    kismet_thread.reset (boost::make_shared<boost::thread>(boost::bind (&kismet_datasource::run, this, host_, port_)));
-  
+    kismet_thread.reset (new boost::thread (boost::bind (&kismet_datasource::run, this, host_, port_)));
+
     if (bind)
     {
         this->bind();
