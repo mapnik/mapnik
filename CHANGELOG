@@ -11,6 +11,11 @@ Developers: Please commit along with changes.
 For a complete change history, see the SVN log.
 
 
+Mapnik 0.7.2 Release
+--------------------
+ 
+- Added forward compatibility to Mapnik 2.0 (https://trac.mapnik.org/wiki/Mapnik2/Changes)
+
 
 Mapnik 0.7.1 Release
 --------------------
