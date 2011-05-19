@@ -11,34 +11,51 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-def test_shapefile_feature_id():
-
-    ds = mapnik2.Shapefile(file='../data/shp/polylines.shp')
-    fs = ds.featureset()
-    eq_(1, fs.next().id())
-    eq_(2, fs.next().id())
-    count = 0
-    while True:
-        feature = fs.next()
-        if not feature:
+def compare_shape_between_mapnik_and_ogr(shapefile,query=None):
+    ds1 = mapnik2.Ogr(file=shapefile,layer_by_index=0)
+    ds2 = mapnik2.Shapefile(file=shapefile)
+    if query:
+        fs1 = ds1.features(query)
+        fs2 = ds2.features(query)
+    else:
+        fs1 = ds1.featureset()
+        fs2 = ds2.featureset()
+    count = 0;
+    while(True):
+        count += 1
+        feat1 = fs1.next()
+        feat2 = fs2.next()
+        if not feat1:
             break
-        count = feature.id()
-    eq_(count,11)
+        #import pdb;pdb.set_trace()
+        eq_(feat1.id(),feat2.id(),
+            '%s : ogr feature id %s "%s" does not equal shapefile feature id %s "%s"' 
+              % (count,feat1.id(),str(feat1.attributes), feat2.id(),str(feat2.attributes)) )
+        
+    return True
+    
 
-    ds = mapnik2.Ogr(file='../data/shp/polylines.shp',layer_by_index=0)
-    fs = ds.featureset()
-    eq_(1, fs.next().id())
-    eq_(2, fs.next().id())
-    count = 0
-    while True:
-        feature = fs.next()
-        if not feature:
-            break
-        count = feature.id()
-    eq_(count,11)
+
+def test_shapefile_line_featureset_id():
+    compare_shape_between_mapnik_and_ogr('../data/shp/polylines.shp')
+
+def test_shapefile_polygon_featureset_id():
+    compare_shape_between_mapnik_and_ogr('../data/shp/poly.shp')
+
+def test_shapefile_polygon_feature_query_id():
+    # results in different results between shp and ogr!
+    #bbox = (-14284551.8434, 2074195.1992, -7474929.8687, 8140237.7628)
+    bbox = (15523428.2632, 4110477.6323, -11218494.8310, 7495720.7404)
+    query = mapnik2.Query(mapnik2.Box2d(*bbox))
+    ds = mapnik2.Ogr(file='../data/shp/world_merc.shp',layer_by_index=0)
+    for fld in ds.fields():
+        query.add_property_name(fld)
+    compare_shape_between_mapnik_and_ogr('../data/shp/world_merc.shp',query)
 
 
 
 if __name__ == "__main__":
     setup()
-    test_shapefile_feature_id()
+    test_shapefile_line_featureset_id()
+    test_shapefile_polygon_featureset_id()
+    test_shapefile_polygon_feature_query_id()
