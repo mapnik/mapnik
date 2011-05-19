@@ -41,7 +41,7 @@ template <typename filterT>
 class shape_featureset : public Featureset
 {
       filterT filter_;
-      int shape_type_;
+      //int shape_type_;
       shape_io shape_;
       box2d<double> query_ext_;
       boost::scoped_ptr<transcoder> tr_;

@@ -39,7 +39,7 @@ template <typename filterT>
 class shape_index_featureset : public Featureset
 {
       filterT filter_;
-      int shape_type_;      
+      //int shape_type_;      
       shape_io & shape_;
       boost::scoped_ptr<transcoder> tr_;
       std::vector<int> ids_;

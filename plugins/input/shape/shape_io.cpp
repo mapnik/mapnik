@@ -101,10 +101,10 @@ shape_file& shape_io::shp()
    return shp_;
 }
 
-shape_file& shape_io::shx()
+/*shape_file& shape_io::shx()
 {
    return shx_;
-}
+}*/
 
 
 dbf_file& shape_io::dbf()

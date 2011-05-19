@@ -39,7 +39,7 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
                                             std::string const& encoding,
                                             long file_length )
     : filter_(filter),
-      shape_type_(shape_io::shape_null),
+      //shape_type_(shape_io::shape_null),
       shape_(shape_file, false),
       query_ext_(),
       tr_(new transcoder(encoding)),

@@ -43,7 +43,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
                                                         const std::set<std::string>& attribute_names,
                                                         std::string const& encoding)
     : filter_(filter),
-      shape_type_(0),
+      //shape_type_(0),
       shape_(shape),
       tr_(new transcoder(encoding)),
       count_(0)

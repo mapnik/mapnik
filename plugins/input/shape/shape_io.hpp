@@ -34,12 +34,12 @@
 struct shape_io : boost::noncopyable
 {
     static const std::string SHP;
-    static const std::string SHX;
+    //static const std::string SHX;
     static const std::string DBF;
     static const std::string INDEX;
     unsigned type_;
     shape_file shp_;
-    shape_file shx_;
+    //shape_file shx_;
     dbf_file   dbf_;
     boost::shared_ptr<shape_file>  index_;
     unsigned reclength_;
@@ -68,7 +68,7 @@ public:
     shape_io(const std::string& shape_name, bool open_index=true);
     ~shape_io();
     shape_file& shp();
-    shape_file& shx();
+    //shape_file& shx();
     dbf_file& dbf();
     
     inline boost::shared_ptr<shape_file>& index()
