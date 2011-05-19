@@ -150,8 +150,14 @@ feature_ptr shape_index_featureset<filterT>::next()
             while(!filter_.pass(shape_.current_extent()) && 
                   itr_!=ids_.end())
             {
-                pos=*itr_++;
-                shape_.move_to(pos);
+                if (shape_.type() != shape_io::shape_null) {
+                    pos=*itr_++;
+                    shape_.move_to(pos);
+                }
+                else
+                {
+                    return feature_ptr();
+                }
             }
             
             switch (type)
