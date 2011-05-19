@@ -244,7 +244,6 @@ feature_ptr shape_featureset<filterT>::next()
                     ++count_;
                     break;
                 }
-    
             }
         }
         if (attr_ids_.size())
