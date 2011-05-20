@@ -76,6 +76,11 @@ public:
     {
         return id_;
     }
+
+    void set_id(int id)
+    {
+        id_ = id;
+    }
        
     void add_geometry(geometry_type * geom)
     {

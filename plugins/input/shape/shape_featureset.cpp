@@ -246,6 +246,8 @@ feature_ptr shape_featureset<filterT>::next()
                 }
             }
         }
+        
+        feature->set_id(shape_.id_);
         if (attr_ids_.size())
         {
             shape_.dbf().move_to(shape_.id_);
