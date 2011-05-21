@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from nose.tools import *
 
@@ -85,6 +86,30 @@ def test_render_from_serialization():
 
 grid_correct = {"keys": ["", "North West", "North East", "South West", "South East"], "data": {"South East": {"Name": "South East"}, "North East": {"Name": "North East"}, "North West": {"Name": "North West"}, "South West": {"Name": "South West"}}, "grid": ["                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "         !!!                                 ###                ", "        !!!!!                               #####               ", "        !!!!!                               #####               ", "         !!!                                 ###                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "        $$$$                                %%%%                ", "        $$$$$                               %%%%%               ", "        $$$$$                               %%%%%               ", "         $$$                                 %%%                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                "]}
 
+
+def resolve(grid,x,y):
+    """ Resolve the attributes for a given pixel in a grid.
+    
+    js version: 
+      https://github.com/mapbox/mbtiles-spec/blob/master/1.1/utfgrid.md
+    spec:
+      https://github.com/mapbox/wax/blob/master/control/lib/gridutil.js
+    
+    """
+    utf_val = grid['grid'][x][y]
+    if utf_val == ' ':
+        return None
+    #http://docs.python.org/library/functions.html#ord
+    codepoint = ord(utf_val)
+    if (codepoint >= 93):
+        codepoint-=1
+    if (codepoint >= 35):
+        codepoint-=1
+    codepoint -= 32
+    key = grid['keys'][codepoint]
+    return grid['data'][key]
+
+
 def test_render_grid():
     places_ds = mapnik2.PointDatasource()
     places_ds.add_point(143.10,-38.60,'Name','South East')
@@ -117,7 +142,33 @@ def test_render_grid():
     lr_lonlat = mapnik2.Coord(143.40,-38.80)
     m.zoom_to_box(mapnik2.Box2d(ul_lonlat,lr_lonlat))
     grid = mapnik2.render_grid(m,0,key='Name',resolution=4,fields=['Name'])
-    eq_(grid,grid_correct)    
+    eq_(grid,grid_correct)
+    eq_(resolve(grid,0,0),None)
+    
+    # check every pixel of the nw symbol
+    expected = {"Name": "North West"}
+    
+    # top row
+    eq_(resolve(grid,23,9),expected)
+    eq_(resolve(grid,23,10),expected)
+    eq_(resolve(grid,23,11),expected)
+
+    # core
+    eq_(resolve(grid,24,8),expected)
+    eq_(resolve(grid,24,9),expected)
+    eq_(resolve(grid,24,10),expected)
+    eq_(resolve(grid,24,11),expected)
+    eq_(resolve(grid,24,12),expected)
+    eq_(resolve(grid,25,8),expected)
+    eq_(resolve(grid,25,9),expected)
+    eq_(resolve(grid,25,10),expected)
+    eq_(resolve(grid,25,11),expected)
+    eq_(resolve(grid,25,12),expected)
+    
+    # bottom row
+    eq_(resolve(grid,26,9),expected)
+    eq_(resolve(grid,26,10),expected)
+    eq_(resolve(grid,26,11),expected)
     
 def test_render_points():
 
