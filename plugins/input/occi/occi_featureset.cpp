@@ -44,7 +44,7 @@ using mapnik::geometry_type;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::datasource_exception;
-using mapnik::feature_factory
+using mapnik::feature_factory;
 
 using oracle::occi::Connection;
 using oracle::occi::Statement;
