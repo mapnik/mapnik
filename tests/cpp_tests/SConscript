@@ -9,14 +9,13 @@ boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
 boost_regex = 'boost_regex%s' % env['BOOST_APPEND']
 
-libraries =  [boost_system, boost_filesystem, boost_regex, 'mapnik2']
+libraries = [boost_filesystem, boost_regex, 'mapnik2']
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])
 
 if env['HAS_BOOST_SYSTEM']:
     libraries.append(boost_system)
-    libraries.append(boost_regex)
 
 for cpp_test in glob.glob('*_test.cpp'):
-    env.Program(cpp_test.replace('.cpp',''), [cpp_test], CPPPATH=headers, LIBS=libraries)
+    env.Program(cpp_test.replace('.cpp',''), [cpp_test], CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
