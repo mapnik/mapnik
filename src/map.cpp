@@ -64,6 +64,7 @@ Map::Map()
       height_(400),
       srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
       buffer_size_(0),
+      base_path_(""),
       aspectFixMode_(GROW_BBOX) {}
     
 Map::Map(int width,int height, std::string const& srs)
@@ -71,6 +72,7 @@ Map::Map(int width,int height, std::string const& srs)
       height_(height),
       srs_(srs),
       buffer_size_(0),
+      base_path_(""),
       aspectFixMode_(GROW_BBOX) {}
    
 Map::Map(const Map& rhs)
@@ -86,6 +88,7 @@ Map::Map(const Map& rhs)
       aspectFixMode_(rhs.aspectFixMode_),
       current_extent_(rhs.current_extent_),
       maximum_extent_(rhs.maximum_extent_),
+      base_path_(rhs.base_path_),
       extra_attr_(rhs.extra_attr_) {}
     
 Map& Map::operator=(const Map& rhs)
@@ -102,6 +105,7 @@ Map& Map::operator=(const Map& rhs)
     layers_=rhs.layers_;
     aspectFixMode_=rhs.aspectFixMode_;
     maximum_extent_=rhs.maximum_extent_;
+    base_path_=rhs.base_path_;
     extra_attr_=rhs.extra_attr_;
     return *this;
 }
@@ -344,6 +348,16 @@ boost::optional<box2d<double> > const& Map::maximum_extent() const
     return maximum_extent_;
 }
 
+std::string const&  Map::base_path() const
+{
+    return base_path_;
+}
+
+void Map::set_base_path(std::string const& base)
+{
+    base_path_ = base;
+}
+
 void Map::zoom(double factor)
 {
     coord2d center = current_extent_.center();
@@ -381,6 +395,7 @@ void Map::zoom_all()
                     proj_transform prj_trans(proj0,proj1);
                         
                     box2d<double> layer_ext = itr->envelope();
+                    // TODO - consider using more robust method: http://trac.mapnik.org/ticket/751
                     if (prj_trans.backward(layer_ext))
                     {
                         success = true;

@@ -118,18 +118,18 @@ public:
         load(doc, pt);
     }
 
-    void load_string( const std::string & buffer, ptree & pt, std::string const & base_url )
+    void load_string( const std::string & buffer, ptree & pt, std::string const & base_path )
     {
-        if (!base_url.empty())
+        if (!base_path.empty())
         {
-            boost::filesystem::path path(base_url);
+            boost::filesystem::path path(base_path);
             if ( ! boost::filesystem::exists( path ) ) {
-                throw config_error(string("Could not locate base_url '") +
-                                   base_url + "': file or directory does not exist");
+                throw config_error(string("Could not locate base_path '") +
+                                   base_path + "': file or directory does not exist");
             }                    
         }
 
-        xmlDocPtr doc = xmlCtxtReadMemory(ctx_, buffer.data(), buffer.length(), base_url.c_str(), encoding_, options_);
+        xmlDocPtr doc = xmlCtxtReadMemory(ctx_, buffer.data(), buffer.length(), base_path.c_str(), encoding_, options_);
 
         load(doc, pt);
     }
@@ -227,10 +227,10 @@ void read_xml2( std::string const & filename, boost::property_tree::ptree & pt)
     libxml2_loader loader;
     loader.load( filename, pt );
 }
-void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_url)
+void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_path)
 {
     libxml2_loader loader;
-    loader.load_string( str, pt, base_url );
+    loader.load_string( str, pt, base_path );
 }
 
 } // end of namespace mapnik
