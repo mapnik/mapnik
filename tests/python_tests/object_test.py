@@ -344,16 +344,14 @@ def test_map_init():
     eq_(m.width, 256)
     eq_(m.height, 256)
     eq_(m.srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+    eq_(m.base, '')
 
     m = mapnik2.Map(256, 256, '+proj=latlong')
-    
-    eq_(m.width, 256)
-    eq_(m.height, 256)
     eq_(m.srs, '+proj=latlong')
 
 # Map initialization from string
 def test_map_init_from_string():
-    map_string = '''<Map background-color="steelblue" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    map_string = '''<Map background-color="steelblue" base="./" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
      <Style name="My Style">
       <Rule>
        <PolygonSymbolizer>
@@ -375,10 +373,19 @@ def test_map_init_from_string():
     </Map>'''
 
     m = mapnik2.Map(600, 300)
-    
+    eq_(m.base, '')
     mapnik2.load_map_from_string(m, map_string)
-    mapnik2.load_map_from_string(m, map_string, False, "")
-    mapnik2.load_map_from_string(m, map_string, True, "")
+    eq_(m.base, './')
+    mapnik2.load_map_from_string(m, map_string, False, "") # this "" will have no effect
+    eq_(m.base, './')
+    try:
+        mapnik2.load_map_from_string(m, map_string, False, "/tmp")
+    except RuntimeError:
+        pass # runtime error expected because shapefile path should be wrong and datasource will throw
+    eq_(m.base, '/tmp') # /tmp will be set despite the exception because load_map mostly worked
+    m.base = 'foo'
+    mapnik2.load_map_from_string(m, map_string, True, ".")
+    eq_(m.base, '.')
     raise(Todo("Need to write more map property tests in 'object_test.py'..."))
 
 # Map pickling
