@@ -69,17 +69,17 @@ struct map_pickle_suite : boost::python::pickle_suite
             s.append(style_pair);
         }
 
-        return boost::python::make_tuple(m.get_current_extent(),m.background(),l,s);
+        return boost::python::make_tuple(m.get_current_extent(),m.background(),l,s,m.base_path());
     }
 
     static void
     setstate (Map& m, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 4)
+        if (len(state) != 5)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 4-item tuple in call to __setstate__; got %s"
+                            ("expected 5-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
@@ -107,6 +107,12 @@ struct map_pickle_suite : boost::python::pickle_suite
             mapnik::feature_type_style style = extract<mapnik::feature_type_style>(style_pair[1]);
             m.insert_style(name, style);
         }
+
+        if (state[4])
+        {
+            std::string base_path = extract<std::string>(state[4]);
+            m.set_base_path(base_path);
+        }    
     }
 };
 
@@ -463,6 +469,16 @@ void export_map()
                       "\n"
                       "Usage:\n"
                       ">>> m.background = Color('steelblue')\n"
+            )
+
+        .add_property("base",
+                      make_function(&Map::base_path,return_value_policy<copy_const_reference>()),
+                      &Map::set_base_path,
+                      "The base path of the map where any files using relative \n"
+                      "paths will be interpreted as relative to.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.base_path = '.'\n"
             )
         
         .add_property("buffer_size",

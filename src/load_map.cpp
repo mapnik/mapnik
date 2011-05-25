@@ -83,7 +83,7 @@ public:
         relative_to_xml_(true),
         font_manager_(font_engine_) {}
 
-    void parse_map(Map & map, ptree const & sty);
+    void parse_map(Map & map, ptree const & sty, std::string const& base_path="");
 private:
     void parse_map_include( Map & map, ptree const & include);
     void parse_style(Map & map, ptree const & sty);
@@ -146,15 +146,19 @@ void load_map(Map & map, std::string const& filename, bool strict)
     parser.parse_map(map, pt);
 }
 
-void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_url)
+void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_path)
 {
     ptree pt;
 #ifdef HAVE_LIBXML2
-    read_xml2_string(str, pt, base_url);
+    if (!base_path.empty())
+        read_xml2_string(str, pt, base_path); // accept base_path passed into function
+    else
+        read_xml2_string(str, pt, map.base_path()); // default to map base_path
 #else
     try
     {
         std::istringstream s(str);
+        // TODO - support base_path?
         read_xml(s,pt);
     }
     catch (const boost::property_tree::xml_parser_error & ex)
@@ -163,11 +167,11 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     }
 #endif
 
-    map_parser parser( strict, base_url);
-    parser.parse_map(map, pt);
+    map_parser parser( strict, base_path);
+    parser.parse_map(map, pt, base_path);
 }
 
-void map_parser::parse_map( Map & map, ptree const & pt )
+void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base_path )
 {
     try
     {
@@ -181,7 +185,8 @@ void map_parser::parse_map( Map & map, ptree const & pt )
           << "paths-from-xml,"
           << "minimum-version,"
           << "font-directory,"
-          << "maximum-extent";
+          << "maximum-extent,"
+          << "base";
         ensure_attrs(map_node, "Map", s.str());
         
         try
@@ -194,6 +199,28 @@ void map_parser::parse_map( Map & map, ptree const & pt )
             if (paths_from_xml)
             {
                 relative_to_xml_ = *paths_from_xml;
+            }
+
+            optional<std::string> base_path_from_xml = get_opt_attr<std::string>(map_node, "base");
+            if (!base_path.empty())
+            {
+                map.set_base_path( base_path );
+            }
+            else if (base_path_from_xml)
+            {
+                map.set_base_path( *base_path_from_xml );
+            }
+            else
+            {
+                boost::filesystem::path xml_path(filename_);
+                // TODO - should we make this absolute?
+                #if (BOOST_FILESYSTEM_VERSION == 3)
+                    std::string const& base = xml_path.parent_path().string();
+                #else // v2
+                    std::string const& base = xml_path.branch_path().string();
+                #endif
+
+                map.set_base_path( base ); 
             }
 
             optional<color> bgcolor = get_opt_attr<color>(map_node, "background-color");
@@ -2093,7 +2120,8 @@ std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt
         if ( !rel_path.has_root_path() ) 
         {
     #if (BOOST_FILESYSTEM_VERSION == 3)
-            boost::filesystem::path full = boost::filesystem::absolute(xml_path.branch_path()/rel_path).normalize();
+            // TODO - normalize is now deprecated, use make_preferred?
+            boost::filesystem::path full = boost::filesystem::absolute(xml_path.parent_path()/rel_path);
     #else // v2
             boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
     #endif

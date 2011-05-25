@@ -83,6 +83,7 @@ private:
     aspect_fix_mode aspectFixMode_;
     box2d<double> current_extent_;
     boost::optional<box2d<double> > maximum_extent_;
+    std::string base_path_;
     parameters extra_attr_;
         
 public:
@@ -340,6 +341,15 @@ public:
     /*! \brief Get the map maximum extent as box2d<double>
     */
     boost::optional<box2d<double> > const& maximum_extent() const;
+
+    /*! \brief Get the map base path where paths should be relative to.
+     */
+    std::string const& base_path() const;
+
+    /*! \brief Set the map base path where paths should be releative to.
+     *  @param srs Map base_path.
+     */
+    void set_base_path(std::string const& base);
 
     /*! \brief Zoom the map at the current position.
      *  @param factor The factor how much the map is zoomed in or out.

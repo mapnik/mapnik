@@ -834,11 +834,16 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         set_attr( map_node, "background-image", *image_filename );
     }
     
-    
     unsigned buffer_size = map.buffer_size();
     if ( buffer_size || explicit_defaults)
     {
         set_attr( map_node, "buffer-size", buffer_size ); 
+    }
+
+    std::string const& base_path = map.base_path();
+    if ( !base_path.empty() || explicit_defaults)
+    {
+        set_attr( map_node, "base", base_path ); 
     }
 
     optional<box2d<double> > const& maximum_extent = map.maximum_extent();
