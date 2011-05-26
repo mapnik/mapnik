@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2009 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,46 +38,17 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 // fusion
 #include <boost/fusion/include/adapt_struct.hpp>
-
-// not in boost 1.41 
-//#include <boost/fusion/include/adapt_class.hpp>
+#include <boost/fusion/include/adapt_adt.hpp>
 
 // stl
 #include <string>
 
-
-//BOOST_FUSION_ADAPT_CLASS(
-//    mapnik::color,
-//   (unsigned, unsigned, obj.red(), obj.set_red(val))
-//   (unsigned, unsigned, obj.green(), obj.set_green(val))
-//   (unsigned, unsigned, obj.blue(), obj.set_blue(val))
-//   (unsigned, unsigned, obj.alpha(), obj.set_alpha(val))
-//   )
-
-namespace mapnik
-{
-// temp workaround . TODO: adapt mapnik::color
-struct css
-{
-    css () 
-        : r(255),g(255),b(255),a(255) {}
-    css(unsigned r_,unsigned g_, unsigned b_,unsigned a_ = 0xff)
-        : r(r_),g(g_),b(b_),a(a_) {}
-    
-    unsigned r;
-    unsigned g;
-    unsigned b;
-    unsigned a;
-};
-
-}
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::css,
-    (unsigned, r)
-    (unsigned, g)
-    (unsigned, b)
-    (unsigned, a)
+BOOST_FUSION_ADAPT_ADT(
+    mapnik::color,
+    (unsigned, unsigned, obj.red(), obj.set_red(val))
+    (unsigned, unsigned, obj.green(), obj.set_green(val))
+    (unsigned, unsigned, obj.blue(), obj.set_blue(val))
+    (unsigned, unsigned, obj.alpha(), obj.set_alpha(val))
     )
 
 namespace mapnik
@@ -89,158 +60,158 @@ namespace phoenix = boost::phoenix;
 
 typedef boost::spirit::ascii::space_type ascii_space_type;
 
-struct named_colors_ : qi::symbols<char,css>
+struct named_colors_ : qi::symbols<char,color>
 {
     named_colors_()
     {
         add
-            ("aliceblue", css(240, 248, 255))
-            ("antiquewhite", css(250, 235, 215))
-            ("aqua", css(0, 255, 255))
-            ("aquamarine", css(127, 255, 212))
-            ("azure", css(240, 255, 255))
-            ("beige", css(245, 245, 220))
-            ("bisque", css(255, 228, 196))
-            ("black", css(0, 0, 0))
-            ("blanchedalmond", css(255,235,205))
-            ("blue", css(0, 0, 255))
-            ("blueviolet", css(138, 43, 226))
-            ("brown", css(165, 42, 42))
-            ("burlywood", css(222, 184, 135))
-            ("cadetblue", css(95, 158, 160))
-            ("chartreuse", css(127, 255, 0))
-            ("chocolate", css(210, 105, 30))
-            ("coral", css(255, 127, 80))
-            ("cornflowerblue", css(100, 149, 237))
-            ("cornsilk", css(255, 248, 220))
-            ("crimson", css(220, 20, 60))
-            ("cyan", css(0, 255, 255))
-            ("darkblue", css(0, 0, 139))
-            ("darkcyan", css(0, 139, 139))
-            ("darkgoldenrod", css(184, 134, 11))
-            ("darkgray", css(169, 169, 169))
-            ("darkgreen", css(0, 100, 0))
-            ("darkgrey", css(169, 169, 169))
-            ("darkkhaki", css(189, 183, 107))
-            ("darkmagenta", css(139, 0, 139))
-            ("darkolivegreen", css(85, 107, 47))
-            ("darkorange", css(255, 140, 0))
-            ("darkorchid", css(153, 50, 204))
-            ("darkred", css(139, 0, 0))
-            ("darksalmon", css(233, 150, 122))
-            ("darkseagreen", css(143, 188, 143))
-            ("darkslateblue", css(72, 61, 139))
-            ("darkslategrey", css(47, 79, 79))
-            ("darkturquoise", css(0, 206, 209))
-            ("darkviolet", css(148, 0, 211))
-            ("deeppink", css(255, 20, 147))
-            ("deepskyblue", css(0, 191, 255))
-            ("dimgray", css(105, 105, 105))
-            ("dimgrey", css(105, 105, 105))
-            ("dodgerblue", css(30, 144, 255))
-            ("firebrick", css(178, 34, 34))
-            ("floralwhite", css(255, 250, 240))
-            ("forestgreen", css(34, 139, 34))
-            ("fuchsia", css(255, 0, 255))
-            ("gainsboro", css(220, 220, 220))
-            ("ghostwhite", css(248, 248, 255))
-            ("gold", css(255, 215, 0))
-            ("goldenrod", css(218, 165, 32))
-            ("gray", css(128, 128, 128))
-            ("grey", css(128, 128, 128))
-            ("green", css(0, 128, 0))
-            ("greenyellow", css(173, 255, 47))
-            ("honeydew", css(240, 255, 240))
-            ("hotpink", css(255, 105, 180))
-            ("indianred", css(205, 92, 92))
-            ("indigo", css(75, 0, 130))
-            ("ivory", css(255, 255, 240))
-            ("khaki", css(240, 230, 140))
-            ("lavender", css(230, 230, 250))
-            ("lavenderblush", css(255, 240, 245))
-            ("lawngreen", css(124, 252, 0))
-            ("lemonchiffon", css(255, 250, 205))
-            ("lightblue", css(173, 216, 230))
-            ("lightcoral", css(240, 128, 128))
-            ("lightcyan", css(224, 255, 255))
-            ("lightgoldenrodyellow", css(250, 250, 210))
-            ("lightgray", css(211, 211, 211))
-            ("lightgreen", css(144, 238, 144))
-            ("lightgrey", css(211, 211, 211))
-            ("lightpink", css(255, 182, 193))
-            ("lightsalmon", css(255, 160, 122))
-            ("lightseagreen", css(32, 178, 170))
-            ("lightskyblue", css(135, 206, 250))
-            ("lightslategray", css(119, 136, 153))
-            ("lightslategrey", css(119, 136, 153))
-            ("lightsteelblue", css(176, 196, 222))
-            ("lightyellow", css(255, 255, 224))
-            ("lime", css(0, 255, 0))
-            ("limegreen", css(50, 205, 50))
-            ("linen", css(250, 240, 230))
-            ("magenta", css(255, 0, 255))
-            ("maroon", css(128, 0, 0))
-            ("mediumaquamarine", css(102, 205, 170))
-            ("mediumblue", css(0, 0, 205))
-            ("mediumorchid", css(186, 85, 211))
-            ("mediumpurple", css(147, 112, 219))
-            ("mediumseagreen", css(60, 179, 113))
-            ("mediumslateblue", css(123, 104, 238))
-            ("mediumspringgreen", css(0, 250, 154))
-            ("mediumturquoise", css(72, 209, 204))
-            ("mediumvioletred", css(199, 21, 133))
-            ("midnightblue", css(25, 25, 112))
-            ("mintcream", css(245, 255, 250))
-            ("mistyrose", css(255, 228, 225))
-            ("moccasin", css(255, 228, 181))
-            ("navajowhite", css(255, 222, 173))
-            ("navy", css(0, 0, 128))
-            ("oldlace", css(253, 245, 230))
-            ("olive", css(128, 128, 0))
-            ("olivedrab", css(107, 142, 35))
-            ("orange", css(255, 165, 0))
-            ("orangered", css(255, 69, 0))
-            ("orchid", css(218, 112, 214))
-            ("palegoldenrod", css(238, 232, 170))
-            ("palegreen", css(152, 251, 152))
-            ("paleturquoise", css(175, 238, 238))
-            ("palevioletred", css(219, 112, 147))
-            ("papayawhip", css(255, 239, 213))
-            ("peachpuff", css(255, 218, 185))
-            ("peru", css(205, 133, 63))
-            ("pink", css(255, 192, 203))
-            ("plum", css(221, 160, 221))
-            ("powderblue", css(176, 224, 230))
-            ("purple", css(128, 0, 128))
-            ("red", css(255, 0, 0))
-            ("rosybrown", css(188, 143, 143))
-            ("royalblue", css(65, 105, 225))
-            ("saddlebrown", css(139, 69, 19))
-            ("salmon", css(250, 128, 114))
-            ("sandybrown", css(244, 164, 96))
-            ("seagreen", css(46, 139, 87))
-            ("seashell", css(255, 245, 238))
-            ("sienna", css(160, 82, 45))
-            ("silver", css(192, 192, 192))
-            ("skyblue", css(135, 206, 235))
-            ("slateblue", css(106, 90, 205))
-            ("slategray", css(112, 128, 144))
-            ("slategrey", css(112, 128, 144))
-            ("snow", css(255, 250, 250))
-            ("springgreen", css(0, 255, 127))
-            ("steelblue", css(70, 130, 180))
-            ("tan", css(210, 180, 140))
-            ("teal", css(0, 128, 128))
-            ("thistle", css(216, 191, 216))
-            ("tomato", css(255, 99, 71))
-            ("turquoise", css(64, 224, 208))
-            ("violet", css(238, 130, 238))
-            ("wheat", css(245, 222, 179))
-            ("white", css(255, 255, 255))
-            ("whitesmoke", css(245, 245, 245))
-            ("yellow", css(255, 255, 0))
-            ("yellowgreen", css(154, 205, 50))
-            ("transparent", css(0, 0, 0, 0))
+            ("aliceblue", color(240, 248, 255))
+            ("antiquewhite", color(250, 235, 215))
+            ("aqua", color(0, 255, 255))
+            ("aquamarine", color(127, 255, 212))
+            ("azure", color(240, 255, 255))
+            ("beige", color(245, 245, 220))
+            ("bisque", color(255, 228, 196))
+            ("black", color(0, 0, 0))
+            ("blanchedalmond", color(255,235,205))
+            ("blue", color(0, 0, 255))
+            ("blueviolet", color(138, 43, 226))
+            ("brown", color(165, 42, 42))
+            ("burlywood", color(222, 184, 135))
+            ("cadetblue", color(95, 158, 160))
+            ("chartreuse", color(127, 255, 0))
+            ("chocolate", color(210, 105, 30))
+            ("coral", color(255, 127, 80))
+            ("cornflowerblue", color(100, 149, 237))
+            ("cornsilk", color(255, 248, 220))
+            ("crimson", color(220, 20, 60))
+            ("cyan", color(0, 255, 255))
+            ("darkblue", color(0, 0, 139))
+            ("darkcyan", color(0, 139, 139))
+            ("darkgoldenrod", color(184, 134, 11))
+            ("darkgray", color(169, 169, 169))
+            ("darkgreen", color(0, 100, 0))
+            ("darkgrey", color(169, 169, 169))
+            ("darkkhaki", color(189, 183, 107))
+            ("darkmagenta", color(139, 0, 139))
+            ("darkolivegreen", color(85, 107, 47))
+            ("darkorange", color(255, 140, 0))
+            ("darkorchid", color(153, 50, 204))
+            ("darkred", color(139, 0, 0))
+            ("darksalmon", color(233, 150, 122))
+            ("darkseagreen", color(143, 188, 143))
+            ("darkslateblue", color(72, 61, 139))
+            ("darkslategrey", color(47, 79, 79))
+            ("darkturquoise", color(0, 206, 209))
+            ("darkviolet", color(148, 0, 211))
+            ("deeppink", color(255, 20, 147))
+            ("deepskyblue", color(0, 191, 255))
+            ("dimgray", color(105, 105, 105))
+            ("dimgrey", color(105, 105, 105))
+            ("dodgerblue", color(30, 144, 255))
+            ("firebrick", color(178, 34, 34))
+            ("floralwhite", color(255, 250, 240))
+            ("forestgreen", color(34, 139, 34))
+            ("fuchsia", color(255, 0, 255))
+            ("gainsboro", color(220, 220, 220))
+            ("ghostwhite", color(248, 248, 255))
+            ("gold", color(255, 215, 0))
+            ("goldenrod", color(218, 165, 32))
+            ("gray", color(128, 128, 128))
+            ("grey", color(128, 128, 128))
+            ("green", color(0, 128, 0))
+            ("greenyellow", color(173, 255, 47))
+            ("honeydew", color(240, 255, 240))
+            ("hotpink", color(255, 105, 180))
+            ("indianred", color(205, 92, 92))
+            ("indigo", color(75, 0, 130))
+            ("ivory", color(255, 255, 240))
+            ("khaki", color(240, 230, 140))
+            ("lavender", color(230, 230, 250))
+            ("lavenderblush", color(255, 240, 245))
+            ("lawngreen", color(124, 252, 0))
+            ("lemonchiffon", color(255, 250, 205))
+            ("lightblue", color(173, 216, 230))
+            ("lightcoral", color(240, 128, 128))
+            ("lightcyan", color(224, 255, 255))
+            ("lightgoldenrodyellow", color(250, 250, 210))
+            ("lightgray", color(211, 211, 211))
+            ("lightgreen", color(144, 238, 144))
+            ("lightgrey", color(211, 211, 211))
+            ("lightpink", color(255, 182, 193))
+            ("lightsalmon", color(255, 160, 122))
+            ("lightseagreen", color(32, 178, 170))
+            ("lightskyblue", color(135, 206, 250))
+            ("lightslategray", color(119, 136, 153))
+            ("lightslategrey", color(119, 136, 153))
+            ("lightsteelblue", color(176, 196, 222))
+            ("lightyellow", color(255, 255, 224))
+            ("lime", color(0, 255, 0))
+            ("limegreen", color(50, 205, 50))
+            ("linen", color(250, 240, 230))
+            ("magenta", color(255, 0, 255))
+            ("maroon", color(128, 0, 0))
+            ("mediumaquamarine", color(102, 205, 170))
+            ("mediumblue", color(0, 0, 205))
+            ("mediumorchid", color(186, 85, 211))
+            ("mediumpurple", color(147, 112, 219))
+            ("mediumseagreen", color(60, 179, 113))
+            ("mediumslateblue", color(123, 104, 238))
+            ("mediumspringgreen", color(0, 250, 154))
+            ("mediumturquoise", color(72, 209, 204))
+            ("mediumvioletred", color(199, 21, 133))
+            ("midnightblue", color(25, 25, 112))
+            ("mintcream", color(245, 255, 250))
+            ("mistyrose", color(255, 228, 225))
+            ("moccasin", color(255, 228, 181))
+            ("navajowhite", color(255, 222, 173))
+            ("navy", color(0, 0, 128))
+            ("oldlace", color(253, 245, 230))
+            ("olive", color(128, 128, 0))
+            ("olivedrab", color(107, 142, 35))
+            ("orange", color(255, 165, 0))
+            ("orangered", color(255, 69, 0))
+            ("orchid", color(218, 112, 214))
+            ("palegoldenrod", color(238, 232, 170))
+            ("palegreen", color(152, 251, 152))
+            ("paleturquoise", color(175, 238, 238))
+            ("palevioletred", color(219, 112, 147))
+            ("papayawhip", color(255, 239, 213))
+            ("peachpuff", color(255, 218, 185))
+            ("peru", color(205, 133, 63))
+            ("pink", color(255, 192, 203))
+            ("plum", color(221, 160, 221))
+            ("powderblue", color(176, 224, 230))
+            ("purple", color(128, 0, 128))
+            ("red", color(255, 0, 0))
+            ("rosybrown", color(188, 143, 143))
+            ("royalblue", color(65, 105, 225))
+            ("saddlebrown", color(139, 69, 19))
+            ("salmon", color(250, 128, 114))
+            ("sandybrown", color(244, 164, 96))
+            ("seagreen", color(46, 139, 87))
+            ("seashell", color(255, 245, 238))
+            ("sienna", color(160, 82, 45))
+            ("silver", color(192, 192, 192))
+            ("skyblue", color(135, 206, 235))
+            ("slateblue", color(106, 90, 205))
+            ("slategray", color(112, 128, 144))
+            ("slategrey", color(112, 128, 144))
+            ("snow", color(255, 250, 250))
+            ("springgreen", color(0, 255, 127))
+            ("steelblue", color(70, 130, 180))
+            ("tan", color(210, 180, 140))
+            ("teal", color(0, 128, 128))
+            ("thistle", color(216, 191, 216))
+            ("tomato", color(255, 99, 71))
+            ("turquoise", color(64, 224, 208))
+            ("violet", color(238, 130, 238))
+            ("wheat", color(245, 222, 179))
+            ("white", color(255, 255, 255))
+            ("whitesmoke", color(245, 245, 245))
+            ("yellow", color(255, 255, 0))
+            ("yellowgreen", color(154, 205, 50))
+            ("transparent", color(0, 0, 0, 0))
             ;
     }
 } ;
@@ -285,7 +256,7 @@ struct alpha_conv_impl
 
 
 template <typename Iterator>
-struct css_color_grammar : qi::grammar<Iterator, css(), ascii_space_type>
+struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
 {
     
     css_color_grammar()
@@ -305,11 +276,11 @@ struct css_color_grammar : qi::grammar<Iterator, css(), ascii_space_type>
             | hex_color_small 
             | no_case[named];
         
-        hex_color %= lit('#') 
-            >> hex2 
-            >> hex2 
-            >> hex2 
-            >> -hex2 
+        hex_color = lit('#') 
+            >> hex2 [ at_c<0>(_val) = _1 ]
+            >> hex2 [ at_c<1>(_val) = _1 ]
+            >> hex2 [ at_c<2>(_val) = _1 ]
+            >>-hex2 [ at_c<3>(_val) = _1 ]
             ;
         
         hex_color_small = lit('#')
@@ -341,11 +312,11 @@ struct css_color_grammar : qi::grammar<Iterator, css(), ascii_space_type>
     qi::uint_parser< unsigned, 16, 2, 2 > hex2 ;
     qi::uint_parser< unsigned, 16, 1, 1 > hex1 ;
     qi::uint_parser< unsigned, 10, 1, 3 > dec3 ;
-    qi::rule<Iterator, css(), ascii_space_type> rgba_color;
-    qi::rule<Iterator, css(), ascii_space_type> rgba_percent_color;
-    qi::rule<Iterator, css(), ascii_space_type> hex_color;
-    qi::rule<Iterator, css(), ascii_space_type> hex_color_small;
-    qi::rule<Iterator, css(), ascii_space_type> css_color;
+    qi::rule<Iterator, color(), ascii_space_type> rgba_color;
+    qi::rule<Iterator, color(), ascii_space_type> rgba_percent_color;
+    qi::rule<Iterator, color(), ascii_space_type> hex_color;
+    qi::rule<Iterator, color(), ascii_space_type> hex_color_small;
+    qi::rule<Iterator, color(), ascii_space_type> css_color;
     named_colors_ named;
     phoenix::function<percent_conv_impl> percent_converter;
     phoenix::function<alpha_conv_impl>   alpha_converter; 

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,23 +48,17 @@ public:
         css_color_grammar g;
         iterator_type first = css_color;
         iterator_type last =  css_color + std::strlen(css_color);
-        mapnik::css css_;
         bool result =
             boost::spirit::qi::phrase_parse(first,
                                             last,
                                             g,
                                             boost::spirit::ascii::space,
-                                            css_);
+                                            c);
         if (!result) 
         {
             throw config_error(std::string("Failed to parse color value: ") +
-                               "Expected a color, but got '" + css_color + "'");
+                               "Expected a CSS color, but got '" + css_color + "'");
         }
-        // TODO: adapt mapnik::color into boost::fusion sequence
-        c.set_red(css_.r);
-        c.set_green(css_.g);
-        c.set_blue(css_.b);
-        c.set_alpha(css_.a);
     }    
     
     static color from_string(char const* css_color)
