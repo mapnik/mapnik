@@ -289,6 +289,10 @@ featureset_ptr ogr_datasource::features(query const& q) const
    
    if (dataset_ && layer_)
    {
+
+        // TODO - actually filter fields!
+        // http://trac.osgeo.org/gdal/wiki/rfc29_desired_fields
+        // http://trac.osgeo.org/gdal/wiki/rfc28_sqlfunc
 #if 0
         std::ostringstream s;
             
