@@ -26,12 +26,14 @@
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/image_view.hpp>
+//#include <mapnik/grid/grid_view.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/feature.hpp>
 
 // stl
 #include <map>
+#include <set>
 #include <cmath>
 #include <string>
 #include <cassert>
@@ -58,8 +60,6 @@ private:
     unsigned width_;
     unsigned height_;
     std::string join_field_;
-    key_type keys_;
-    std::vector<std::string> key_order_;
     feature_key_type f_keys_;
     feature_type features_;
     data_type data_;
@@ -68,7 +68,6 @@ private:
     
 public:
 
-    //value_type feature_count_;
     std::string id_name_;
 
     hit_grid(int width, int height, std::string const& join_field, unsigned step)
@@ -77,7 +76,6 @@ public:
          join_field_(join_field),
          data_(width,height),
          step_(step),
-         //feature_count_(0),
          id_name_("__id__") {
              // this only works if each datasource's 
              // feature count starts at 1
@@ -89,7 +87,6 @@ public:
          height_(rhs.height_),
          join_field_(rhs.join_field_),
          data_(rhs.data_),
-         //feature_count_(0),
          step_(rhs.step_),
          id_name_("__id__")  {
              f_keys_[0] = "";     
@@ -97,7 +94,7 @@ public:
     
     ~hit_grid() {}
 
-    void add_feature(Feature const& feature)
+    void add_feature(mapnik::Feature const& feature)
     {
 
         // copies feature props
@@ -204,11 +201,12 @@ public:
         return data_.getData();
     }
 
-    // TODO - make 'views' generic
-    inline image_view<data_type> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
+    /*
+    inline mapnik::grid_view<data_type> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
     {
-        return image_view<data_type>(x,y,w,h,data_);
+        return mapnik::grid_view<data_type>(x,y,w,h,data_,join_field_,step_,names_,f_keys_,features_);
     }
+    */
 
 private:
 
@@ -271,8 +269,6 @@ public:
 
 };
 
-//typedef uint16_t value_type;
-//typedef unsigned char value_type;
 typedef hit_grid<uint16_t> grid;
 
 }
