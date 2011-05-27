@@ -84,93 +84,104 @@ void export_inmem_metawriter();
 static Pycairo_CAPI_t *Pycairo_CAPI;
 #endif
 
-void render(const mapnik::Map& map,mapnik::image_32& image, double scale_factor = 1.0 , unsigned offset_x = 0u , unsigned offset_y = 0u)
+void render(const mapnik::Map& map,
+    mapnik::image_32& image,
+    double scale_factor = 1.0,
+    unsigned offset_x = 0u,
+    unsigned offset_y = 0u)
 {
     Py_BEGIN_ALLOW_THREADS
-        try
-        {
-            mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
-            ren.apply();
-        }
-        catch (...)
-        {
-            Py_BLOCK_THREADS
-                throw;
-        }
+    try
+    {
+        mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
-        }
+}
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
-void render3(const mapnik::Map& map,PycairoSurface* surface, unsigned offset_x = 0, unsigned offset_y = 0)
+void render3(const mapnik::Map& map,
+    PycairoSurface* surface,
+    unsigned offset_x = 0,
+    unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-        try
-        {
-            Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-            mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
-            ren.apply();
-        }
-        catch (...)
-        {
-            Py_BLOCK_THREADS
-                throw;
-        }
+    try
+    {
+        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+        mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
-        }
+}
 
-void render4(const mapnik::Map& map,PycairoSurface* surface)
+void render4(const mapnik::Map& map, PycairoSurface* surface)
 {
     Py_BEGIN_ALLOW_THREADS
-        try
-        {
-            Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-            mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
-            ren.apply();
-        }
-        catch (...)
-        {
-            Py_BLOCK_THREADS
-                throw;
-        }
+    try
+    {
+        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+        mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
-        }
+}
 
-void render5(const mapnik::Map& map,PycairoContext* context, unsigned offset_x = 0, unsigned offset_y = 0)
+void render5(const mapnik::Map& map,
+    PycairoContext* context,
+    unsigned offset_x = 0,
+    unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-        try
-        {
-            Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-            mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
-            ren.apply();
-        }
-        catch (...)
-        {
-            Py_BLOCK_THREADS
-                throw;
-        }
+    try
+    {
+        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+        mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
-        }
+}
 
-void render6(const mapnik::Map& map,PycairoContext* context)
+void render6(const mapnik::Map& map, PycairoContext* context)
 {
     Py_BEGIN_ALLOW_THREADS
-        try
-        {
-            Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-            mapnik::cairo_renderer<Cairo::Context> ren(map,c);
-            ren.apply();
-        }
-        catch (...)
-        {
-            Py_BLOCK_THREADS
-                throw;
-        }
+    try
+    {
+        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+        mapnik::cairo_renderer<Cairo::Context> ren(map,c);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
     Py_END_ALLOW_THREADS
-        }
+}
 
 #endif
+
 
 void render_tile_to_file(const mapnik::Map& map, 
                          unsigned offset_x, unsigned offset_y,
