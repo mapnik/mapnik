@@ -37,10 +37,19 @@ using phoenix::push_back;
 using phoenix::ref;
 using qi::_1;
 
+
+/************************************************************************/
+
+text_placement_info::text_placement_info(text_placements const* parent):
+    displacement(parent->displacement_),
+    text_size(parent->text_size_), halign(parent->halign_), jalign(parent->jalign_),
+    valign(parent->valign_)
+{
+
+}
+
 bool text_placement_info_dummy::next()
 {
-    displacement = parent_->displacement_;
-    text_size = parent_->text_size_;
     if (state) return false;
     state++;
     return true;
@@ -70,7 +79,6 @@ bool text_placement_info_simple::next()
         if (state > parent_->text_sizes_.size()) return false;
         text_size = parent_->text_sizes_[state-1];
     }
-    std::cerr << "Trying text_size=" << text_size << "\n";
     state++;
     return true;
 }

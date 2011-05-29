@@ -107,7 +107,6 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       halo_fill_(color(255,255,255)),
       halo_radius_(0),
       label_p_(POINT_PLACEMENT),
-      valign_(V_MIDDLE),
       anchor_(0.0,0.5),
       avoid_edges_(false),
       minimum_distance_(0.0),
@@ -115,8 +114,6 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       overlap_(false),
       text_opacity_(1.0),
       wrap_before_(false),
-      halign_(H_MIDDLE),
-      jalign_(J_MIDDLE),
       placement_options_(placements)
 {
     set_text_size(size);
@@ -142,7 +139,6 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       halo_fill_(color(255,255,255)),
       halo_radius_(0),
       label_p_(POINT_PLACEMENT),
-      valign_(V_MIDDLE),
       anchor_(0.0,0.5),
       avoid_edges_(false),
       minimum_distance_(0.0),
@@ -150,8 +146,6 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       overlap_(false),
       text_opacity_(1.0),
       wrap_before_(false),
-      halign_(H_MIDDLE),
-      jalign_(J_MIDDLE),
       placement_options_(placements)
 {
     set_text_size(size);
@@ -177,7 +171,6 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       halo_fill_(rhs.halo_fill_),
       halo_radius_(rhs.halo_radius_),
       label_p_(rhs.label_p_),
-      valign_(rhs.valign_),
       anchor_(rhs.anchor_),
       avoid_edges_(rhs.avoid_edges_),
       minimum_distance_(rhs.minimum_distance_),
@@ -185,9 +178,7 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       overlap_(rhs.overlap_),
       text_opacity_(rhs.text_opacity_),
       wrap_before_(rhs.wrap_before_),
-      halign_(rhs.halign_),
-      jalign_(rhs.jalign_),
-      placement_options_(rhs.placement_options_) {}
+      placement_options_(rhs.placement_options_) /*TODO: Copy options! */ {}
 
 text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
 {
@@ -211,7 +202,6 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     halo_fill_ = other.halo_fill_;
     halo_radius_ = other.halo_radius_;
     label_p_ = other.label_p_;
-    valign_ = other.valign_;
     anchor_ = other.anchor_;
     avoid_edges_ = other.avoid_edges_;
     minimum_distance_ = other.minimum_distance_;
@@ -219,9 +209,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     overlap_ = other.overlap_;
     text_opacity_ = other.text_opacity_;
     wrap_before_ = other.wrap_before_;
-    halign_ = other.halign_;
-    jalign_ = other.jalign_;
-    placement_options_ = other.placement_options_;
+    placement_options_ = other.placement_options_; /*TODO?*/
     std::cout << "TODO: Metawriter (text_symbolizer::operator=)\n";
     return *this;
 }
@@ -436,16 +424,6 @@ label_placement_e  text_symbolizer::get_label_placement() const
     return label_p_;
 }
 
-void text_symbolizer::set_vertical_alignment(vertical_alignment_e valign)
-{
-    valign_ = valign;
-}
-
-vertical_alignment_e text_symbolizer::get_vertical_alignment() const
-{
-    return valign_;
-}
-
 void  text_symbolizer::set_anchor(double x, double y)
 {
     anchor_ = boost::make_tuple(x,y);
@@ -516,24 +494,34 @@ double text_symbolizer::get_text_opacity() const
     return text_opacity_;
 }
 
+void text_symbolizer::set_vertical_alignment(vertical_alignment_e valign)
+{
+    placement_options_->set_default_valign(valign);
+}
+
+vertical_alignment_e text_symbolizer::get_vertical_alignment() const
+{
+    return placement_options_->get_default_valign();
+}
+
 void text_symbolizer::set_horizontal_alignment(horizontal_alignment_e halign)
 {
-    halign_ = halign;
+    placement_options_->set_default_halign(halign);
 }
 
 horizontal_alignment_e text_symbolizer::get_horizontal_alignment() const
 {
-    return halign_;
+    return placement_options_->get_default_halign();
 }
 
 void text_symbolizer::set_justify_alignment(justify_alignment_e jalign)
 {
-    jalign_ = jalign;
+    placement_options_->set_default_jalign(jalign);
 }
 
 justify_alignment_e text_symbolizer::get_justify_alignment() const
 {
-    return jalign_;
+    return placement_options_->get_default_jalign();
 }
 
 text_placements_ptr text_symbolizer::get_placement_options() const

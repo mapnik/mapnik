@@ -25,7 +25,7 @@
 
 namespace mapnik {
 
-class text_placements_simple;
+class text_placement_info_simple;
 
 typedef enum {
     NORTH,
@@ -38,20 +38,6 @@ typedef enum {
     SOUTHWEST,
     EXACT_POSITION
 } directions_t;
-
-/** Simple placement strategy.
-  * See parent class for documentation of each function. */
-class text_placement_info_simple : public text_placement_info
-{
-public:
-    text_placement_info_simple(text_placements_simple const* parent) : state(0), position_state(0), parent_(parent) {}
-    bool next();
-    bool next_position_only();
-private:
-    unsigned state;
-    unsigned position_state;
-    text_placements_simple const* parent_;
-};
 
 
 /** Automatically generates placement options from a user selected list of directions and text sizes. */
@@ -68,6 +54,22 @@ private:
     std::vector<int> text_sizes_;
     friend class text_placement_info_simple;
 };
+
+/** Simple placement strategy.
+  * See parent class for documentation of each function. */
+class text_placement_info_simple : public text_placement_info
+{
+public:
+    text_placement_info_simple(text_placements_simple const* parent) :
+        text_placement_info(parent), state(0), position_state(0), parent_(parent) {}
+    bool next();
+    bool next_position_only();
+private:
+    unsigned state;
+    unsigned position_state;
+    text_placements_simple const* parent_;
+};
+
 
 } //namespace
 #endif

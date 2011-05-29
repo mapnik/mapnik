@@ -26,7 +26,6 @@
 #define MAPNIK_TEXT_SYMBOLIZER_HPP
 
 // mapnik
-#include <mapnik/enumeration.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/graphics.hpp>
@@ -43,59 +42,6 @@
 
 namespace mapnik
 {
-enum label_placement_enum {
-    POINT_PLACEMENT,
-    LINE_PLACEMENT,
-    VERTEX_PLACEMENT,
-    INTERIOR_PLACEMENT,
-    label_placement_enum_MAX
-};
-
-DEFINE_ENUM( label_placement_e, label_placement_enum );
-
-enum vertical_alignment
-{
-    V_TOP = 0,
-    V_MIDDLE,
-    V_BOTTOM,
-    V_AUTO,
-    vertical_alignment_MAX
-};
-
-DEFINE_ENUM( vertical_alignment_e, vertical_alignment );
-
-enum horizontal_alignment
-{
-    H_LEFT = 0,
-    H_MIDDLE,
-    H_RIGHT,
-    H_AUTO,
-    horizontal_alignment_MAX
-};
-
-DEFINE_ENUM( horizontal_alignment_e, horizontal_alignment );
-
-enum justify_alignment
-{
-    J_LEFT = 0,
-    J_MIDDLE,
-    J_RIGHT,
-    justify_alignment_MAX
-};
-
-DEFINE_ENUM( justify_alignment_e, justify_alignment );
-
-enum text_transform
-{
-    NONE = 0,
-    UPPERCASE,
-    LOWERCASE,
-    CAPITALIZE,
-    text_transform_MAX
-};
-
-DEFINE_ENUM( text_transform_e, text_transform );
-
 
 struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 {
@@ -196,7 +142,6 @@ private:
     color halo_fill_;
     double halo_radius_;
     label_placement_e label_p_;
-    vertical_alignment_e valign_;
     position anchor_;
     bool avoid_edges_;
     double minimum_distance_;
@@ -204,8 +149,6 @@ private:
     bool overlap_;
     double text_opacity_;
     bool wrap_before_;
-    horizontal_alignment_e halign_;
-    justify_alignment_e jalign_;
     text_placements_ptr placement_options_;
 };
 }
