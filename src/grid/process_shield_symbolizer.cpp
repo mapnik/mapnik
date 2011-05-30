@@ -137,7 +137,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                     {
                         // for every vertex, try and place a shield/text
                         geom.rewind(0);
-                        placement text_placement(info, sym, placement_options, scale_factor_, w, h, false);
+                        placement text_placement(info, sym, scale_factor_, w, h, false);
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         text_placement.allow_overlap = sym.get_allow_overlap();
                         position const& pos = sym.get_displacement();
@@ -160,12 +160,9 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                             label_x += boost::get<0>(shield_pos);
                             label_y += boost::get<1>(shield_pos);
 
-                            finder.find_point_placement( text_placement,label_x,label_y,0.0,
-                                                         sym.get_vertical_alignment(),
+                            finder.find_point_placement( text_placement, placement_options, label_x, label_y, 0.0,
                                                          sym.get_line_spacing(),
-                                                         sym.get_character_spacing(),
-                                                         sym.get_horizontal_alignment(),
-                                                         sym.get_justify_alignment() );
+                                                         sym.get_character_spacing());
 
                             // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
                             if( text_placement.placements.size() > 0)
@@ -209,10 +206,10 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 
                     else if (geom.num_points() > 1 && how_placed == LINE_PLACEMENT)
                     {
-                        placement text_placement(info, sym, placement_options, scale_factor_, w, h, true);
+                        placement text_placement(info, sym, scale_factor_, w, h, true);
 
                         text_placement.avoid_edges = sym.get_avoid_edges();
-                        finder.find_point_placements<path_type>(text_placement,path);
+                        finder.find_point_placements<path_type>(text_placement, placement_options, path);
 
                         position const&  pos = sym.get_displacement();
                         for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)

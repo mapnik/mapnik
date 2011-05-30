@@ -32,6 +32,7 @@
 //boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/utility.hpp>
 
 namespace mapnik {
 
@@ -92,7 +93,7 @@ DEFINE_ENUM( text_transform_e, text_transform );
 
 class text_placements;
 
-class text_placement_info
+class text_placement_info : boost::noncopyable
 {
 public:
     text_placement_info(text_placements const* parent);

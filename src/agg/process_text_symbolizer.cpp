@@ -97,7 +97,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             if (geom.num_points() == 0) continue; // don't bother with empty geometries
             while (!placement_found && placement_options->next_position_only())
             {
-                placement text_placement(info, sym, placement_options, scale_factor_);
+                placement text_placement(info, sym, scale_factor_);
                 text_placement.avoid_edges = sym.get_avoid_edges();
                 if (writer.first)
                     text_placement.collect_extents =true; // needed for inmem metawriter
@@ -124,16 +124,15 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                         angle = result.to_double();
                     }
 
-                    finder.find_point_placement(text_placement,label_x,label_y,
-                                                angle, sym.get_vertical_alignment(),sym.get_line_spacing(),
-                                                sym.get_character_spacing(),sym.get_horizontal_alignment(),
-                                                sym.get_justify_alignment());
+                    finder.find_point_placement(text_placement, placement_options, label_x,label_y,
+                                                angle, sym.get_line_spacing(),
+                                                sym.get_character_spacing());
                     finder.update_detector(text_placement);
                 }
                 else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                 {
                     path_type path(t_,geom,prj_trans);
-                    finder.find_line_placements<path_type>(text_placement,path);
+                    finder.find_line_placements<path_type>(text_placement, placement_options, path);
                 }
 
                 if (!text_placement.placements.size()) continue;

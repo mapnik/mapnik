@@ -50,12 +50,10 @@ namespace mapnik
 {
 placement::placement(string_info & info_, 
                      shield_symbolizer const& sym, 
-                     text_placement_info_ptr placement_options,
                      double scale_factor,
                      unsigned w, unsigned h, 
                      bool has_dimensions_)
     : info(info_),
-      displacement_(placement_options->displacement),
       scale_factor_(scale_factor),
       label_placement(sym.get_label_placement()),
       wrap_width(sym.get_wrap_width()),
@@ -72,17 +70,14 @@ placement::placement(string_info & info_,
       has_dimensions(has_dimensions_),
       allow_overlap(false),
       dimensions(std::make_pair(w,h)),
-      text_size(placement_options->text_size),
       collect_extents(false),
       extents()
 {}
 
 placement::placement(string_info & info_,
                      text_symbolizer const& sym,
-                     text_placement_info_ptr placement_options,
                      double scale_factor)
     : info(info_),
-      displacement_(placement_options->displacement),
       scale_factor_(scale_factor),
       label_placement(sym.get_label_placement()),
       wrap_width(sym.get_wrap_width()),
@@ -99,7 +94,6 @@ placement::placement(string_info & info_,
       has_dimensions(false),
       allow_overlap(sym.get_allow_overlap()),
       dimensions(),
-      text_size(placement_options->text_size),
       collect_extents(false),
       extents()
 {}
@@ -169,7 +163,7 @@ placement_finder<DetectorT>::placement_finder(DetectorT & detector, box2d<double
 
 template <typename DetectorT>
 template <typename T>
-void placement_finder<DetectorT>::find_point_placements(placement & p, T & shape_path)
+void placement_finder<DetectorT>::find_point_placements(placement & p, text_placement_info_ptr po, T & shape_path)
 {
     unsigned cmd;
     double new_x = 0.0;
@@ -185,7 +179,7 @@ void placement_finder<DetectorT>::find_point_placements(placement & p, T & shape
     {
         double x, y;
         shape_path.vertex(&x,&y);
-        find_point_placement(p, x, y);
+        find_point_placement(p, po, x, y);
         return;
     }
 
@@ -220,7 +214,7 @@ void placement_finder<DetectorT>::find_point_placements(placement & p, T & shape
             {
                 //Try place at the specified place
                 double new_weight = (segment_length - (distance - target_distance))/segment_length;
-                find_point_placement(p, old_x + (new_x-old_x)*new_weight, old_y + (new_y-old_y)*new_weight);
+                find_point_placement(p, po, old_x + (new_x-old_x)*new_weight, old_y + (new_y-old_y)*new_weight);
 
                 distance -= target_distance; //Consume the spacing gap we have used up
                 target_distance = spacing; //Need to reset the target_distance as it is spacing/2 for the first label.
@@ -235,14 +229,12 @@ void placement_finder<DetectorT>::find_point_placements(placement & p, T & shape
 
 template <typename DetectorT>
 void placement_finder<DetectorT>::find_point_placement(placement & p,
+                                                       text_placement_info_ptr po,
                                                        double label_x,
                                                        double label_y,
                                                        double angle,
-                                                       vertical_alignment_e valign,
                                                        unsigned line_spacing,
-                                                       unsigned character_spacing,
-                                                       horizontal_alignment_e halign,
-                                                       justify_alignment_e jalign)
+                                                       unsigned character_spacing)
 {
     double x, y;
     std::auto_ptr<placement_element> current_placement(new placement_element);
@@ -329,21 +321,21 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
     // if needed, adjust for desired vertical alignment
     current_placement->starting_y = label_y;  // no adjustment, default is MIDDLE
 
-    vertical_alignment_e real_valign = valign;
+    vertical_alignment_e real_valign = po->valign;
     if (real_valign == V_AUTO) {
-        if (p.displacement_.get<1>() > 0.0)
+        if (po->displacement.get<1>() > 0.0)
             real_valign = V_BOTTOM;
-        else if (p.displacement_.get<1>() < 0.0)
+        else if (po->displacement.get<1>() < 0.0)
             real_valign = V_TOP;
         else
             real_valign = V_MIDDLE;
     }
 
-    horizontal_alignment_e real_halign = halign;
+    horizontal_alignment_e real_halign = po->halign;
     if (real_halign == H_AUTO) {
-        if (p.displacement_.get<0>() > 0.0)
+        if (po->displacement.get<0>() > 0.0)
             real_halign = H_RIGHT;
-        else if (p.displacement_.get<0>() < 0.0)
+        else if (po->displacement.get<0>() < 0.0)
             real_halign = H_LEFT;
         else
             real_halign = H_MIDDLE;
@@ -359,10 +351,10 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
     // (text rendering is at text_size, but line placement is by line_height (max_character_height),
     //  and the rendering adds the extra space below the characters)
     if (real_valign == V_TOP )
-        current_placement->starting_y -= (p.text_size - max_character_height);  // move up by the error
+        current_placement->starting_y -= (po->text_size - max_character_height);  // move up by the error
 
     else if (real_valign == V_MIDDLE)
-        current_placement->starting_y -= ((p.text_size - max_character_height) / 2.0); // move up by 1/2 the error
+        current_placement->starting_y -= ((po->text_size - max_character_height) / 2.0); // move up by 1/2 the error
 
     // set horizontal position to middle of text
     current_placement->starting_x = label_x;  // no adjustment, default is MIDDLE
@@ -374,8 +366,8 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
         current_placement->starting_x += 0.5 * string_width;  // move center right by 1/2 the string width
 
     // adjust text envelope position by user's x-y displacement (dx, dy)
-    current_placement->starting_x += p.scale_factor_ * boost::tuples::get<0>(p.displacement_);
-    current_placement->starting_y += p.scale_factor_ * boost::tuples::get<1>(p.displacement_);
+    current_placement->starting_x += p.scale_factor_ * boost::tuples::get<0>(po->displacement);
+    current_placement->starting_y += p.scale_factor_ * boost::tuples::get<1>(po->displacement);
 
     // presets for first line
     unsigned int line_number = 0;
@@ -387,10 +379,10 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
     y = (0.5 * (string_height + (line_spacing * (total_lines-1)))) - max_character_height;
 
     // if needed, adjust for desired justification (J_MIDDLE is the default)
-    if( jalign == J_LEFT )
+    if( po->jalign == J_LEFT )
         x = -(string_width / 2.0);
 
-    else if (jalign == J_RIGHT)
+    else if (po->jalign == J_RIGHT)
         x = (string_width / 2.0) - line_width;
 
     // save each character rendering position and build envelope as go thru loop
@@ -412,7 +404,7 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
             y -= (max_character_height + line_spacing);  // move position down to line start
 
             // reset to begining of line position
-            x = ((jalign == J_LEFT)? -(string_width / 2.0): ((jalign == J_RIGHT)? ((string_width /2.0) - line_width): -(line_width / 2.0)));
+            x = ((po->jalign == J_LEFT)? -(string_width / 2.0): ((po->jalign == J_RIGHT)? ((string_width /2.0) - line_width): -(line_width / 2.0)));
             continue;
         }
         else
@@ -486,7 +478,7 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
 
 template <typename DetectorT>
 template <typename PathT>
-void placement_finder<DetectorT>::find_line_placements(placement & p, PathT & shape_path)
+void placement_finder<DetectorT>::find_line_placements(placement & p, text_placement_info_ptr po, PathT & shape_path)
 {
     unsigned cmd;
     double new_x = 0.0;
@@ -530,7 +522,7 @@ void placement_finder<DetectorT>::find_line_placements(placement & p, PathT & sh
 
     double string_width = string_dimensions.first;
 
-    double displacement = boost::tuples::get<1>(p.displacement_); // displace by dy
+    double displacement = boost::tuples::get<1>(po->displacement); // displace by dy
 
     //Calculate a target_distance that will place the labels centered evenly rather than offset from the start of the linestring
     if (total_distance < string_width) //Can't place any strings
@@ -998,7 +990,7 @@ typedef coord_transform2<CoordTransform,geometry_type> PathType;
 typedef label_collision_detector4 DetectorType;
 
 template class placement_finder<DetectorType>;
-template void placement_finder<DetectorType>::find_point_placements<PathType> (placement&, PathType & );
-template void placement_finder<DetectorType>::find_line_placements<PathType> (placement&, PathType & );
+template void placement_finder<DetectorType>::find_point_placements<PathType> (placement&, text_placement_info_ptr po, PathType & );
+template void placement_finder<DetectorType>::find_line_placements<PathType> (placement&, text_placement_info_ptr po, PathType & );
 
 }  // namespace
