@@ -45,6 +45,8 @@ public:
     bool backward (double& x, double& y , double& z) const;
     bool forward (box2d<double> & box) const;
     bool backward (box2d<double> & box) const;
+    bool forward (box2d<double> & box, int points) const;
+    bool backward (box2d<double> & box, int points) const;
     mapnik::projection const& source() const;
     mapnik::projection const& dest() const;
         
