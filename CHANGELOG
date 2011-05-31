@@ -14,6 +14,9 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Added alternative, more robust proj_transform functions to project a bbox using more points than just the four
+  corners to ensure an optimally sized bbox despite proj4 out of bounds conditions. (olt)
+
 - Added map.base parameter that can be set to control where files with relative paths should be interpreted
   from when a map is loaded from a string or saved to a string. It defaults to an empty string which means
   that the base path will be the current working directory of the mapnik process. When a stylesheet is read
