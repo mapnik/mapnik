@@ -64,16 +64,16 @@ Map::Map()
       height_(400),
       srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
       buffer_size_(0),
-      base_path_(""),
-      aspectFixMode_(GROW_BBOX) {}
+      aspectFixMode_(GROW_BBOX),
+      base_path_("") {}
     
 Map::Map(int width,int height, std::string const& srs)
     : width_(width),
       height_(height),
       srs_(srs),
       buffer_size_(0),
-      base_path_(""),
-      aspectFixMode_(GROW_BBOX) {}
+      aspectFixMode_(GROW_BBOX),
+      base_path_("") {}
    
 Map::Map(const Map& rhs)
     : width_(rhs.width_),
