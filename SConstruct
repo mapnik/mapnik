@@ -34,6 +34,79 @@ try:
 except:
     HAS_DISTUTILS = False
 
+
+# local file to hold custom user configuration variables
+# Todo check timestamp, reload if changed?
+SCONS_LOCAL_CONFIG = 'config.py'
+# build log
+SCONS_LOCAL_LOG = 'config.log'
+# local pickled file to cache configured environment
+SCONS_CONFIGURE_CACHE = 'config.cache'
+# directory SCons uses to stash build tests
+SCONF_TEMP_DIR = '.sconf_temp'
+# auto-search directories for boost libs/headers
+BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
+BOOST_MIN_VERSION = '1.41'
+CAIROMM_MIN_VERSION = '1.8.0'
+
+DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
+
+
+pretty_dep_names = {
+    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: http://trac.mapnik.org/wiki/OCCI',
+    'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/GDAL',
+    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/OGR',
+    'geos_c':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: http://trac.mapnik.org/wiki/GEOS',
+    'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
+    'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
+    'cairomm-version':'Cairomm version is too old (so cairo renderer will not be built), you need at least %s' % CAIROMM_MIN_VERSION,
+    'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
+    'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
+    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: http://trac.mapnik.org/wiki/PostGIS',
+    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: http://trac.mapnik.org/wiki/SQLite',
+    'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
+    'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
+    'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
+    'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
+    'ltdl':'GNU Libtool | more info: http://www.gnu.org/software/libtool',
+    'z':'Z compression library | more info: http://www.zlib.net/',
+    'm':'Basic math library, part of C++ stlib',
+    'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
+    'pg_config':'pg_config program | try setting PG_CONFIG SCons option',
+    'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option',
+    'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
+    'geos-config':'geos-config program | try setting GEOS_CONFIG SCons option',
+    'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
+    'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
+    'curl':'libcurl is required for the "osm" plugin - more info: http://trac.mapnik.org/wiki/OsmPlugin',
+    'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
+    'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
+    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
+    }
+    
+# Core plugin build configuration
+# opts.AddVariables still hardcoded however...
+PLUGINS = { # plugins with external dependencies
+            # configured by calling project, henche 'path':None
+            'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
+            'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
+            'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
+            'geos':    {'default':False,'path':None,'inc':'geos_c.h','lib':'geos_c','lang':'C'},
+            # configured with custom paths, hence 'path': PREFIX/INCLUDES/LIBS
+            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
+            'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
+            'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
+            
+            # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
+            'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
+
+            # plugins without external dependencies requiring CheckLibWithHeader...
+            'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'kismet':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            }
+
+
 #### SCons build options and initial setup ####
 env = Environment(ENV=os.environ)
 
@@ -115,7 +188,6 @@ def shortest_name(libs):
             name = lib
     return name
 
-DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
 
 def sort_paths(items,priority):
     """Sort paths such that compiling and linking will globally prefer custom or local libs
@@ -193,36 +265,7 @@ elif platform.uname()[4] == 'ppc64':
 else:
     LIBDIR_SCHEMA='lib'
 
-pretty_dep_names = {
-    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: http://trac.mapnik.org/wiki/OCCI',
-    'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/GDAL',
-    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/OGR',
-    'geos_c':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: http://trac.mapnik.org/wiki/GEOS',
-    'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
-    'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
-    'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
-    'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
-    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: http://trac.mapnik.org/wiki/PostGIS',
-    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: http://trac.mapnik.org/wiki/SQLite',
-    'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
-    'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
-    'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
-    'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
-    'ltdl':'GNU Libtool | more info: http://www.gnu.org/software/libtool',
-    'z':'Z compression library | more info: http://www.zlib.net/',
-    'm':'Basic math library, part of C++ stlib',
-    'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
-    'pg_config':'pg_config program | try setting PG_CONFIG SCons option',
-    'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option',
-    'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
-    'geos-config':'geos-config program | try setting GEOS_CONFIG SCons option',
-    'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
-    'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
-    'curl':'libcurl is required for the "osm" plugin - more info: http://trac.mapnik.org/wiki/OsmPlugin',
-    'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
-    'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
-    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
-    }
+
     
 def pretty_dep(dep):
     pretty = pretty_dep_names.get(dep)
@@ -232,41 +275,6 @@ def pretty_dep(dep):
         return '%s (%s)' % (dep,'more info see: http://trac.mapnik.org/wiki/MapnikInstallation & http://www.boost.org')
     return dep
 
-# local file to hold custom user configuration variables
-# Todo check timestamp, reload if changed?
-SCONS_LOCAL_CONFIG = 'config.py'
-# build log
-SCONS_LOCAL_LOG = 'config.log'
-# local pickled file to cache configured environment
-SCONS_CONFIGURE_CACHE = 'config.cache'
-# directory SCons uses to stash build tests
-SCONF_TEMP_DIR = '.sconf_temp'
-# auto-search directories for boost libs/headers
-BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
-BOOST_MIN_VERSION = '1.41'
-
-
-# Core plugin build configuration
-# opts.AddVariables still hardcoded however...
-PLUGINS = { # plugins with external dependencies
-            # configured by calling project, henche 'path':None
-            'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
-            'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
-            'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
-            'geos':    {'default':False,'path':None,'inc':'geos_c.h','lib':'geos_c','lang':'C'},
-            # configured with custom paths, hence 'path': PREFIX/INCLUDES/LIBS
-            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'ociei','lang':'C++'},
-            'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
-            'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
-            
-            # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
-            'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
-
-            # plugins without external dependencies requiring CheckLibWithHeader...
-            'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'kismet':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            }
 
 DEFAULT_PLUGINS = []
 for k,v in PLUGINS.items():
@@ -509,6 +517,12 @@ def CheckPKGConfig(context, version):
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
     ret = context.TryAction('pkg-config --exists \'%s\'' % name)[0]
+    context.Result( ret )
+    return ret
+
+def CheckPKGVersion(context, name, version):
+    context.Message( 'Checking for at least version %s for %s... ' % (version,name) )
+    ret = context.TryAction('pkg-config --atleast-version=%s \'%s\'' % (version,name))[0]
     context.Result( ret )
     return ret
 
@@ -847,6 +861,7 @@ int main()
 conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGConfig'        : CheckPKGConfig,
                'CheckPKG'              : CheckPKG,
+               'CheckPKGVersion'       : CheckPKGVersion,
                'FindBoost'             : FindBoost,
                'CheckBoost'            : CheckBoost,
                'GetBoostLibVersion'    : GetBoostLibVersion,
@@ -1154,10 +1169,20 @@ if not preconfigured:
         env.ParseConfig('pkg-config --libs --cflags libagg')
 
     if env['CAIRO']:
-        if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('cairomm-1.0'):
-            env['HAS_CAIRO'] = True
+        if not conf.CheckPKGConfig('0.15.0'):
+            env['HAS_CAIRO'] = False
+            env['SKIPPED_DEPS'].append('pkg-config')
+        elif not conf.CheckPKG('cairo'):
+            env['HAS_CAIRO'] = False
+            env['SKIPPED_DEPS'].append('cairo')
+        elif not conf.CheckPKG('cairomm-1.0'):
+            env['HAS_CAIRO'] = False
+            env['SKIPPED_DEPS'].append('cairomm')
+        elif not conf.CheckPKGVersion('cairomm-1.0',CAIROMM_MIN_VERSION):
+            env['HAS_CAIRO'] = False
+            env['SKIPPED_DEPS'].append('cairomm-version')
         else:
-            env['SKIPPED_DEPS'].extend(['cairo','cairomm'])
+            env['HAS_CAIRO'] = True
     else:
         color_print(4,'Not building with cairo support, pass CAIRO=True to enable')
     
