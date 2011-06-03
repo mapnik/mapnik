@@ -74,19 +74,10 @@ public:
           features_(features)
           
     {
-        std::clog << "w,h" << width_ << " " << height_ << "\n";
-        if (x_ >= data_.width())
-            x_=data_.width()-1;
-        
-        if (y_ >= data_.height())
-            x_=data_.height()-1;
-        
-        if (x_ + width_ > data_.width())
-            width_= data_.width() - x_;
-        
-        if (y_ + height_ > data_.height())
-            height_= data_.height() - y_;
-        std::clog << "w,h" << width_ << " " << height_ << "\n";
+        if (x_ >= data_.width()) x_=data_.width()-1;
+        if (y_ >= data_.height()) x_=data_.height()-1;
+        if (x_ + width_ > data_.width()) width_= data_.width() - x_;
+        if (y_ + height_ > data_.height()) height_= data_.height() - y_;
     }
         
     ~hit_grid_view() {}
