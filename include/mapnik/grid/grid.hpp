@@ -49,7 +49,7 @@ public:
     typedef T value_type;
     typedef mapnik::ImageData<value_type> data_type;
     typedef std::string lookup_type;
-    // mapping between pixel id and join_field
+    // mapping between pixel id and key
     typedef std::map<value_type, lookup_type> feature_key_type;
     typedef std::map<lookup_type, value_type> key_type;
     typedef std::map<std::string, mapnik::value> feature_properties_type;
@@ -59,23 +59,23 @@ public:
 private:
     unsigned width_;
     unsigned height_;
-    std::string join_field_;
+    std::string key_;
     feature_key_type f_keys_;
     feature_type features_;
     data_type data_;
     std::set<std::string> names_;
-    unsigned int step_;
+    unsigned int resolution_;
     
 public:
 
     std::string id_name_;
 
-    hit_grid(int width, int height, std::string const& join_field, unsigned step)
+    hit_grid(int width, int height, std::string const& key, unsigned int resolution)
         :width_(width),
          height_(height),
-         join_field_(join_field),
+         key_(key),
          data_(width,height),
-         step_(step),
+         resolution_(resolution),
          id_name_("__id__") {
              // this only works if each datasource's 
              // feature count starts at 1
@@ -85,9 +85,9 @@ public:
     hit_grid(const hit_grid<T>& rhs)
         :width_(rhs.width_),
          height_(rhs.height_),
-         join_field_(rhs.join_field_),
+         key_(rhs.key_),
          data_(rhs.data_),
-         step_(rhs.step_),
+         resolution_(rhs.resolution_),
          id_name_("__id__")  {
              f_keys_[0] = "";     
          }
@@ -100,7 +100,7 @@ public:
         // copies feature props
         std::map<std::string,value> fprops = feature.props();
         lookup_type lookup_value;
-        if (join_field_ == id_name_)
+        if (key_ == id_name_)
         {
             // TODO - this will break if lookup_type is not a string
             std::stringstream s;
@@ -112,14 +112,14 @@ public:
         }
         else
         {
-            std::map<std::string,value>::const_iterator const& itr = fprops.find(join_field_);
+            std::map<std::string,value>::const_iterator const& itr = fprops.find(key_);
             if (itr != fprops.end())
             {
                 lookup_value = itr->second.to_string();
             }
             else
             {
-                std::clog << "should not get here: join_field '" << join_field_ << "' not found in feature properties\n";
+                std::clog << "should not get here: key '" << key_ << "' not found in feature properties\n";
             }    
         }
 
@@ -127,7 +127,7 @@ public:
         if (!lookup_value.empty())
         {
             // TODO - consider shortcutting f_keys if feature_id == lookup_value
-            // create a mapping between the pixel id and the feature join_field
+            // create a mapping between the pixel id and the feature key
             f_keys_.insert(std::make_pair(feature.id(),lookup_value));
             // if extra fields have been supplied, push them into grid memory
             if (!names_.empty()) {
@@ -137,7 +137,7 @@ public:
         }
         else
         {
-            std::clog << "### Warning: join_field '" << join_field_ << "' was blank for " << feature << "\n";
+            std::clog << "### Warning: key '" << key_ << "' was blank for " << feature << "\n";
         }
     } 
     
@@ -171,14 +171,36 @@ public:
         return f_keys_;
     }
 
-    inline const std::string& get_join_field() const
+    inline const std::string& get_key() const
     {
-        return join_field_;
+        return key_;
     }
 
+    inline void set_key(std::string const& key)
+    {
+        key_ = key;
+    }
+
+    // compatibility
+    inline const std::string& get_join_field() const
+    {
+        return key_;
+    }
+
+    // compatibility
     inline unsigned int get_step() const
     {
-        return step_;
+        return resolution_;
+    }
+
+    inline unsigned int get_resolution() const
+    {
+        return resolution_;
+    }
+
+    inline void set_resolution(unsigned int res) const
+    {
+        resolution_ = res;
     }
         
     inline const data_type& data() const
@@ -201,12 +223,13 @@ public:
         return data_.getData();
     }
 
-    /*
+    
+/*
     inline mapnik::grid_view<data_type> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
     {
-        return mapnik::grid_view<data_type>(x,y,w,h,data_,join_field_,step_,names_,f_keys_,features_);
+        return mapnik::grid_view<data_type>(x,y,w,h,data_,key_,resolution_,names_,f_keys_,features_);
     }
-    */
+*/    
 
 private:
 
