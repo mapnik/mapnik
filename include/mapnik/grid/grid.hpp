@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
-//#include <mapnik/grid/grid_view.hpp>
+#include <mapnik/grid/grid_view.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
@@ -223,13 +223,17 @@ public:
         return data_.getData();
     }
 
-    
-/*
-    inline mapnik::grid_view<data_type> get_view(unsigned x,unsigned y, unsigned w,unsigned h)
+    inline const value_type* getRow(unsigned row) const
     {
-        return mapnik::grid_view<data_type>(x,y,w,h,data_,key_,resolution_,names_,f_keys_,features_);
+        return data_.getRow(row);
     }
-*/    
+    
+    inline mapnik::grid_view get_view(unsigned x, unsigned y, unsigned w, unsigned h)
+    {
+        return mapnik::grid_view(x,y,w,h,
+            data_,key_,resolution_,names_,f_keys_,features_);
+    }
+    
 
 private:
 
