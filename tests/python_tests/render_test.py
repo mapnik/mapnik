@@ -97,8 +97,6 @@ def resolve(grid,x,y):
     
     """
     utf_val = grid['grid'][x][y]
-    if utf_val == ' ':
-        return None
     #http://docs.python.org/library/functions.html#ord
     codepoint = ord(utf_val)
     if (codepoint >= 93):
@@ -107,7 +105,7 @@ def resolve(grid,x,y):
         codepoint-=1
     codepoint -= 32
     key = grid['keys'][codepoint]
-    return grid['data'][key]
+    return grid['data'].get(key)
 
 
 def test_render_grid():
@@ -213,3 +211,5 @@ def test_render_points():
         eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr)) 
 
 
+if __name__ == "__main__":
+    test_render_grid()
