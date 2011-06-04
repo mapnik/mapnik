@@ -109,7 +109,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
         {
             text_renderer<T> ren(pixmap_, faces, *strk);
 
-            ren.set_pixel_size(sym.get_text_size() * scale_factor_ * (1.0/pixmap_.get_step()));
+            ren.set_pixel_size(sym.get_text_size() * scale_factor_ * (1.0/pixmap_.get_resolution()));
             ren.set_fill(sym.get_fill());
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
@@ -122,8 +122,8 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
             faces->get_string_info(info);
 
             // TODO- clamp to at least 4 px otherwise interactivity is too small
-            int w = (*marker)->width()/pixmap_.get_step();
-            int h = (*marker)->height()/pixmap_.get_step();
+            int w = (*marker)->width()/pixmap_.get_resolution();
+            int h = (*marker)->height()/pixmap_.get_resolution();
 
             for (unsigned i = 0; i < feature.num_geometries(); ++i)
             {
@@ -193,7 +193,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 
                                 if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                                 {
-                                    render_marker(feature,pixmap_.get_step(),px,py,**marker,tr,sym.get_opacity());
+                                    render_marker(feature,pixmap_.get_resolution(),px,py,**marker,tr,sym.get_opacity());
 
                                     box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
                                     ren.render_id(feature.id(),x,y,2);
@@ -223,7 +223,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                             int px=int(floor(lx - (0.5*w)));
                             int py=int(floor(ly - (0.5*h)));
 
-                            render_marker(feature,pixmap_.get_step(),px,py,**marker,tr,sym.get_opacity());
+                            render_marker(feature,pixmap_.get_resolution(),px,py,**marker,tr,sym.get_opacity());
 
                             box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
                             ren.render_id(feature.id(),x,y,2);

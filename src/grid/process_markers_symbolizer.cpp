@@ -70,7 +70,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     agg::trans_affine tr;
     boost::array<double,6> const& m = sym.get_transform();
     tr.load_from(&m[0]);
-    tr = agg::trans_affine_scaling(scale_factor_*(1.0/pixmap_.get_step())) * tr;
+    tr = agg::trans_affine_scaling(scale_factor_*(1.0/pixmap_.get_resolution())) * tr;
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
     marker_placement_e placement_method = sym.get_marker_placement();
     marker_type_e marker_type = sym.get_marker_type();
@@ -133,9 +133,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
         double strk_width = stroke_.get_width();
         
         // clamp to at least 4 px otherwise interactive pixels can be too small
-        double min = static_cast<double>(4/pixmap_.get_step());
-        double w = std::max(sym.get_width()/pixmap_.get_step(),min);
-        double h = std::max(sym.get_height()/pixmap_.get_step(),min);
+        double min = static_cast<double>(4/pixmap_.get_resolution());
+        double w = std::max(sym.get_width()/pixmap_.get_resolution(),min);
+        double h = std::max(sym.get_height()/pixmap_.get_resolution(),min);
     
         arrow arrow_;
         box2d<double> extent;
