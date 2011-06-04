@@ -36,6 +36,8 @@ void export_query();
 void export_geometry();
 void export_image();
 void export_image_view();
+void export_grid();
+void export_grid_view();
 void export_map();
 void export_python();
 void export_expression();
@@ -71,13 +73,13 @@ void export_inmem_metawriter();
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo_renderer.hpp>
 #endif
-#include "python_grid_utils.hpp"
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
+#include "python_grid_utils.hpp"
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <pycairo.h>
@@ -95,6 +97,35 @@ void render(const mapnik::Map& map,
     {
         mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
         ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
+    Py_END_ALLOW_THREADS
+}
+
+void render_layer2(const mapnik::Map& map,
+    mapnik::image_32& image,
+    unsigned layer_idx)
+{
+    std::vector<mapnik::layer> const& layers = map.layers();
+    std::size_t layer_num = layers.size();
+    if (layer_idx >= layer_num) {
+        std::ostringstream s;
+        s << "Zero-based layer index '" << layer_idx << "' not valid, only '"
+          << layer_num << "' layers are in map\n";
+        throw std::runtime_error(s.str());
+    }
+
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+        mapnik::layer const& layer = layers[layer_idx];
+        mapnik::agg_renderer<mapnik::image_32> ren(map,image,1.0,0,0);
+        std::set<std::string> names;
+        ren.apply(layer,names);
     }
     catch (...)
     {
@@ -354,6 +385,8 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_envelope();   
     export_image();
     export_image_view();
+    export_grid();
+    export_grid_view();
     export_expression();
     export_rule();
     export_style();    
@@ -380,7 +413,14 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_glyph_symbolizer();
     export_inmem_metawriter();
 
-    def("render_grid_",&render_grid);
+    def("render_grid",&render_grid,
+      ( arg("map"),
+        arg("layer"),
+        args("key")="__id__",
+        arg("resolution")=4,
+        arg("fields")=boost::python::list()
+      )
+    );
     
     def("render_to_file",&render_to_file1,
         "\n"
@@ -447,6 +487,14 @@ BOOST_PYTHON_MODULE(_mapnik2)
             ">>> render(m,im,scale_factor,offset[0],offset[1])\n"
             "\n"
             )); 
+
+    def("render_layer", &render_layer2,
+      (arg("map"),arg("image"),args("layer"))
+    ); 
+
+    def("render_layer", &mapnik::render_layer_for_grid,
+      (arg("map"),arg("grid"),args("layer"),arg("fields")=boost::python::list())
+    ); 
     
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
     def("render",&render3,

@@ -78,9 +78,6 @@ class _MapnikMetaclass(BoostPythonMetaclass):
 # http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
 _injector = _MapnikMetaclass('_injector', (object, ), {})
 
-def render_grid(m,layer,key,resolution=4,fields=[]):
-    return render_grid_(m,layer,key,resolution,fields)
-
 def Filter(*args,**kwargs):
     warnings.warn("'Filter' is deprecated and will be removed in Mapnik 2.0.1, use 'Expression' instead",
     DeprecationWarning, 2)
