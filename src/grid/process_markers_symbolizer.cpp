@@ -132,10 +132,18 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
         stroke const& stroke_ = sym.get_stroke();
         double strk_width = stroke_.get_width();
         
-        // clamp to at least 4 px otherwise interactive pixels can be too small
-        double min = static_cast<double>(4/pixmap_.get_resolution());
-        double w = std::max(sym.get_width()/pixmap_.get_resolution(),min);
-        double h = std::max(sym.get_height()/pixmap_.get_resolution(),min);
+        double w;
+        double h;
+        unsigned int res = pixmap_.get_resolution();
+        if (res != 1) {
+            // clamp to at least 4 px otherwise interactive pixels can be too small
+            double min = static_cast<double>(4/pixmap_.get_resolution());
+            w = std::max(sym.get_width()/res,min);
+            h = std::max(sym.get_height()/res,min);
+        } else {
+            w = sym.get_width()/res;
+            h = sym.get_height()/res;
+        }
     
         arrow arrow_;
         box2d<double> extent;
