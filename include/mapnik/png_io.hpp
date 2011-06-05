@@ -88,7 +88,8 @@ void save_as_png(T1 & file , T2 const& image)
         png_destroy_write_struct(&png_ptr,(png_infopp)0);
         return;
     }
-    if (setjmp(png_jmpbuf(png_ptr)))
+    jmp_buf* jmp_context = (jmp_buf*) png_get_error_ptr(png_ptr);
+    if (jmp_context)
     {
         png_destroy_write_struct(&png_ptr, &info_ptr);
         return;
@@ -237,7 +238,8 @@ void save_as_png(T & file, std::vector<mapnik::rgb> & palette,
         png_destroy_write_struct(&png_ptr,(png_infopp)0);
         return;
     }
-    if (setjmp(png_jmpbuf(png_ptr)))
+    jmp_buf* jmp_context = (jmp_buf*) png_get_error_ptr(png_ptr);
+    if (jmp_context)
     {
         png_destroy_write_struct(&png_ptr, &info_ptr);
         return;
