@@ -44,14 +44,14 @@ class MAPNIK_DECL color_factory : boost::noncopyable
 {
 public:
     
-    static void init_from_string(color & c, char const* css_color)
+    static void init_from_string(color & c, std::string const& css_color)
     {   
-        typedef char const* iterator_type;
+        typedef std::string::const_iterator iterator_type;
         typedef mapnik::css_color_grammar<iterator_type> css_color_grammar; 
-
+        
         css_color_grammar g;
-        iterator_type first = css_color;
-        iterator_type last =  css_color + std::strlen(css_color);
+        iterator_type first = css_color.begin();
+        iterator_type last =  css_color.end();
         bool result =
             boost::spirit::qi::phrase_parse(first,
                                             last,
@@ -65,7 +65,7 @@ public:
         }
     }    
     
-    static color from_string(char const* css_color)
+    static color from_string(std::string const& css_color)
     {   
         color c;
         init_from_string(c,css_color);
@@ -83,14 +83,14 @@ class MAPNIK_DECL color_factory : boost::noncopyable
 {
 public:
     
-    static void init_from_string(color & c, char const* css_color)
+    static void init_from_string(color & c, std::string const& css_color)
     {   
-        typedef char const* iterator_type;
+        typedef std::string::const_iterator iterator_type;
         typedef mapnik::css_color_grammar<iterator_type> css_color_grammar; 
 
         css_color_grammar g;
-        iterator_type first = css_color;
-        iterator_type last =  css_color + std::strlen(css_color);
+        iterator_type first = css_color.begin();
+        iterator_type last =  css_color.end();
         mapnik::css css_;
         bool result =
             boost::spirit::qi::phrase_parse(first,
@@ -109,7 +109,7 @@ public:
         c.set_alpha(css_.a);
     }    
     
-    static color from_string(char const* css_color)
+    static color from_string(std::string const& css_color)
     {   
         color c;
         init_from_string(c,css_color);
