@@ -316,10 +316,9 @@ class _Feature(Feature, _injector):
         for k, v in properties.iteritems():
             self[k] = v
     
-class _Color(Color,_injector):
-
-    def __repr__(self):
-        return "Color(%r)" % self.to_hex_string()
+    class _Color(Color,_injector):
+        def __repr__(self):
+            return "Color(R=%d,G=%d,B=%d,A=%d)" % (self.r,self.g,self.b,self.a)
 
 class _Symbolizers(Symbolizers,_injector):
 
