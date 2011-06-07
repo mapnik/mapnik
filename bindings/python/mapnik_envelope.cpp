@@ -262,6 +262,7 @@ void export_envelope()
              "Box2d(50.0, 50.0, 100.0, 100.0)\n"     
             )
         .def(self == self) // __eq__
+        .def(self != self) // __neq__
         .def(self + self)  // __add__
         //.def(self - self)  // __sub__
         .def(self * float()) // __mult__
