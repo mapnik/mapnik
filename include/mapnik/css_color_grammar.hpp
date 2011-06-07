@@ -254,6 +254,54 @@ struct alpha_conv_impl
     }
 };
 
+// http://www.w3.org/TR/css3-color/#hsl-color
+inline double hue_to_rgb( double m1, double m2, double h)
+{
+    if (h < 0.0) h = h + 1.0;
+    else if (h > 1) h = h - 1.0;
+    
+    if (h * 6 < 1.0) 
+        return m1 + (m2 - m1) * h * 6.0;
+    if (h * 2 < 1.0)
+        return m2;
+    if (h * 3 < 2.0)
+        return m1 + (m2 - m1)* (2.0/3.0 - h) * 6.0;
+    return m1;
+}
+
+struct hsl_conv_impl
+{
+    template<typename T0,typename T1, typename T2, typename T3>
+    struct result
+    {
+        typedef void type;
+    };
+    
+    template <typename T0,typename T1, typename T2, typename T3>
+    void operator() (T0 & c, T1 h, T2 s, T3 l) const
+    {
+        double m1,m2;
+        // normalize values
+        h /= 360.0;
+        s /= 100.0;
+        l /= 100.0;
+        
+        if (l <= 0.5)
+            m2 = l * (s + 1.0);
+        else
+            m2 = l + s - l*s;        
+        m1 = l * 2 - m2;
+        
+        double r = hue_to_rgb(m1, m2, h + 1.0/3.0);
+        double g = hue_to_rgb(m1, m2, h);
+        double b = hue_to_rgb(m1, m2, h - 1.0/3.0);
+        
+        c.set_red(clip_int<0,255>(int((255.0 * r) + 0.5)));
+        c.set_green(clip_int<0,255>(int((255.0 * g) + 0.5)));
+        c.set_blue(clip_int<0,255>(int((255.0 * b) + 0.5)));
+    }
+};
+
 
 template <typename Iterator>
 struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
@@ -267,11 +315,15 @@ struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
         using qi::_val;
         using qi::double_;
         using qi::_1;
+        using qi::_a;
+        using qi::_b;
+        using qi::_c;
         using ascii::no_case;        
         using phoenix::at_c;
         
         css_color %= rgba_color
             | rgba_percent_color 
+            | hsl_percent_color
             | hex_color 
             | hex_color_small 
             | no_case[named];
@@ -287,7 +339,7 @@ struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
             >> hex1 [ at_c<0>(_val) = _1 | _1 << 4 ]
             >> hex1 [ at_c<1>(_val) = _1 | _1 << 4 ]
             >> hex1 [ at_c<2>(_val) = _1 | _1 << 4 ]
-            >> -hex1[ at_c<3>(_val) = _1 | _1 << 4 ]
+            >>-hex1 [ at_c<3>(_val) = _1 | _1 << 4 ]
             ;
         
         rgba_color = lit("rgb") >> -lit('a')
@@ -307,6 +359,15 @@ struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
                                         >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)])
                                         >> lit(')')
             ;
+        
+        hsl_percent_color = lit("hsl") >> -lit('a')
+                                       >> lit('(') 
+                                       >> double_ [ _a = _1] >> ','        // hue 0..360            
+                                       >> double_ [ _b = _1] >> '%' >> ',' // saturation 0..100%
+                                       >> double_ [ _c = _1] >> '%'        // lightness  0..100%
+                                       >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)]) // opacity 0...1
+                                       >> lit (')') [ hsl_converter(_val,_a,_b,_c)]
+            ;
     }
     
     qi::uint_parser< unsigned, 16, 2, 2 > hex2 ;
@@ -314,12 +375,14 @@ struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
     qi::uint_parser< unsigned, 10, 1, 3 > dec3 ;
     qi::rule<Iterator, color(), ascii_space_type> rgba_color;
     qi::rule<Iterator, color(), ascii_space_type> rgba_percent_color;
+    qi::rule<Iterator, qi::locals<double,double,double>,color(), ascii_space_type> hsl_percent_color;
     qi::rule<Iterator, color(), ascii_space_type> hex_color;
     qi::rule<Iterator, color(), ascii_space_type> hex_color_small;
     qi::rule<Iterator, color(), ascii_space_type> css_color;
     named_colors_ named;
     phoenix::function<percent_conv_impl> percent_converter;
     phoenix::function<alpha_conv_impl>   alpha_converter; 
+    phoenix::function<hsl_conv_impl>  hsl_converter; 
 };
 
 }
