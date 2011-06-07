@@ -33,30 +33,33 @@
 namespace mapnik {
 
 color::color( std::string const& css_string)
+    : red_(0),
+      green_(0),
+      blue_(0),
+      alpha_(0xff)
 {
     try
     {
-        color_factory::init_from_string(*this,css_string.c_str());   
+        color_factory::init_from_string(*this,css_string);   
     }
     catch (config_error const& err)
     {
         std::cerr << err.what() << std::endl;
-        red_ = 0;
-        green_ = 0;
-        blue_ = 0;
-        alpha_ = 255;
     }
 }
 
 std::string color::to_string() const
 {
     std::stringstream ss;
-    if (alpha() == 255) {
+    if (alpha_ == 255) 
+    {
         ss << "rgb("
            << red()   << ","
            << green() << ","
            << blue()  << ")";
-    } else {
+    } 
+    else 
+    {
         ss << "rgba("
            << red()   << ","
            << green() << ","
@@ -65,13 +68,25 @@ std::string color::to_string() const
     }
     return ss.str();
 }
-   
+
 std::string color::to_hex_string() const
 {
-    return (boost::format("#%1$02x%2$02x%3$02x") 
-            % red() 
-            % green() 
-            % blue() ).str();
+    if (alpha_ == 255 )
+    {
+        return (boost::format("#%1$02x%2$02x%3$02x") 
+                % red() 
+                % green() 
+                % blue() ).str();
+    }
+    else
+    {
+        return (boost::format("#%1$02x%2$02x%3$02x%4$02x") 
+                % red() 
+                % green() 
+                % blue()
+                % alpha()).str();
+    }
 }
+
 }
 
