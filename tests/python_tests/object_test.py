@@ -446,7 +446,7 @@ def test_color_init():
     eq_(c.g, 64)
     eq_(c.b, 128)
 
-    eq_(c.to_hex_string(), '#004080')
+    eq_(c.to_hex_string(), '#004080c0')
 
 # Color equality
 def test_color_equality():
