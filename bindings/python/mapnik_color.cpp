@@ -81,6 +81,7 @@ void export_color ()
                       "Gets or sets the alpha component.\n"
                       "The value is between 0 and 255.\n")
         .def(self == self)
+        .def(self != self)
         .def_pickle(color_pickle_suite())
         .def("__str__",&color::to_string)
         .def("to_hex_string",&color::to_hex_string,
