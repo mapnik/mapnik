@@ -450,8 +450,9 @@ def test_color_init():
 
 # Color equality
 def test_color_equality():
+    
     c1 = mapnik2.Color('blue')
-    c2 = mapnik2.Color('blue')
+    c2 = mapnik2.Color(0,0,255)
     c3 = mapnik2.Color('black')
     
     
