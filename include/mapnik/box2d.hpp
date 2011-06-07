@@ -38,11 +38,12 @@ namespace mapnik {
 /*!
  * A spatial envelope (i.e. bounding box) which also defines some basic operators.
  */
-template <typename T> class MAPNIK_DECL box2d 
-: boost::addable<box2d<T>, 
-                 boost::subtractable<box2d<T>, 
-                                     boost::dividable2<box2d<T>, T,
-                                                       boost::multipliable2<box2d<T>, T > > > >
+template <typename T> class MAPNIK_DECL box2d  
+: boost::equality_comparable<box2d<T> ,
+                             boost::addable<box2d<T>, 
+                                            boost::subtractable<box2d<T>, 
+                                                                boost::dividable2<box2d<T>, T,
+                                                                                  boost::multipliable2<box2d<T>, T > > > > >
 {
 public:
     typedef box2d<T> box2d_type;
