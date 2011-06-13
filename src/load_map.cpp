@@ -215,9 +215,9 @@ void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base
                 boost::filesystem::path xml_path(filename_);
                 // TODO - should we make this absolute?
                 #if (BOOST_FILESYSTEM_VERSION == 3)
-                    std::string const& base = xml_path.parent_path().string();
+                    std::string base = xml_path.parent_path().string();
                 #else // v2
-                    std::string const& base = xml_path.branch_path().string();
+                    std::string base = xml_path.branch_path().string();
                 #endif
 
                 map.set_base_path( base ); 
