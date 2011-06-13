@@ -49,10 +49,12 @@ private:
     boost::scoped_ptr<mapnik::transcoder> tr_;
     int totalGeomSize_;
     int feature_id_;
+    bool key_field_;
 public:
     postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                        std::string const& encoding,
                        bool multiple_geometries,
+                       bool key_field,
                        unsigned num_attrs);
     mapnik::feature_ptr next();
     ~postgis_featureset();

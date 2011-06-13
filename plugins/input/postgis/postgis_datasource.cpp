@@ -69,6 +69,7 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
       schema_(""),
       geometry_table_(*params_.get<std::string>("geometry_table","")),
       geometry_field_(*params_.get<std::string>("geometry_field","")),
+      key_field_(*params_.get<std::string>("key_field","")),
       cursor_fetch_size_(*params_.get<int>("cursor_size",0)),
       row_limit_(*params_.get<int>("row_limit",0)),
       type_(datasource::Vector),
@@ -150,13 +151,13 @@ void postgis_datasource::bind() const
             {
                 std::ostringstream s;
                 s << "SELECT f_geometry_column, srid FROM ";
-                s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << unquote(geometry_table_) <<"'";
+                s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << mapnik::unquote_sql(geometry_table_) <<"'";
              
                 if (schema_.length() > 0) 
-                    s << " AND f_table_schema='" << unquote(schema_) << "'";
+                    s << " AND f_table_schema='" << mapnik::unquote_sql(schema_) << "'";
             
                 if (geometry_field_.length() > 0)
-                    s << " AND f_geometry_column='" << unquote(geometry_field_) << "'";
+                    s << " AND f_geometry_column='" << mapnik::unquote_sql(geometry_field_) << "'";
 
                 /*
                 if (show_queries_)
@@ -371,13 +372,6 @@ std::string postgis_datasource::populate_tokens(const std::string& sql, double c
 }
 
 
-std::string postgis_datasource::unquote(const std::string& sql)
-{
-    std::string table_name = boost::algorithm::to_lower_copy(sql);  
-    boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\""));
-    return table_name;
-}
-
 boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const
 {
     if (cursor_fetch_size_ > 0)
@@ -463,12 +457,15 @@ featureset_ptr postgis_datasource::features(const query& q) const
             else
                 s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
+            if (!key_field_.empty())
+                mapnik::quote_attr(s,key_field_);
+
             std::set<std::string> const& props=q.property_names();
             std::set<std::string>::const_iterator pos=props.begin();
             std::set<std::string>::const_iterator end=props.end();
             while (pos != end)
             {
-                s << ",\"" << *pos << "\"";
+                mapnik::quote_attr(s,*pos);
                 ++pos;
             }       
 
@@ -481,7 +478,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }
          
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,props.size());
+            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,!key_field_.empty(),props.size());
         }
         else 
         {
@@ -533,12 +530,15 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             else
                 s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
             
+            if (!key_field_.empty())
+                mapnik::quote_attr(s,key_field_);
+
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
             unsigned size=0;
             while (itr != end)
             {
-                s << ",\"" << itr->get_name() << "\"";
+                mapnik::quote_attr(s,itr->get_name());
                 ++itr;
                 ++size;
             }
@@ -553,7 +553,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             }
          
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_, size);
+            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_, !key_field_.empty(), size);
         }
     }
     return featureset_ptr();
@@ -597,11 +597,11 @@ box2d<double> postgis_datasource::envelope() const
 
                 if (schema_.length() > 0)
                 {
-                    s << unquote(schema_) << "','";
+                    s << mapnik::unquote_sql(schema_) << "','";
                 }
 
-                s << unquote(geometry_table_) << "','"
-                  << unquote(geometryColumn_) << "') as ext) as tmp";
+                s << mapnik::unquote_sql(geometry_table_) << "','"
+                  << mapnik::unquote_sql(geometryColumn_) << "') as ext) as tmp";
             }
             else
             {

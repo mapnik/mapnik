@@ -52,33 +52,65 @@ using mapnik::feature_factory;
 postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                                        std::string const& encoding,
                                        bool multiple_geometries,
+                                       bool key_field=false,
                                        unsigned num_attrs=0)
     : rs_(rs),
       multiple_geometries_(multiple_geometries),
       num_attrs_(num_attrs),
       tr_(new transcoder(encoding)),
       totalGeomSize_(0),
-      feature_id_(1)  {}
+      feature_id_(1),
+      key_field_(key_field)  {}
 
 feature_ptr postgis_featureset::next()
 {
     if (rs_->next())
     { 
-        feature_ptr feature(feature_factory::create(feature_id_));
-        ++feature_id_;
+        // new feature
+        feature_ptr feature;
 
+        unsigned pos = 1;
+
+        if (key_field_) {
+            // create feature with user driven id from attribute
+            int oid = rs_->getTypeOID(pos);
+            if (oid == 20 || oid == 21 || oid == 23) {
+                const char* buf = rs_->getValue(pos);
+                int val;
+                if (oid == 20)
+                    val = int8net(buf);
+                else if (oid == 21)
+                    val = int4net(buf);
+                else if (oid == 23)
+                    val = int2net(buf);
+                feature = feature_factory::create(val);
+            } else {
+                std::ostringstream s;
+                s << "invalid type for key_field '" << oid << "'";
+                std::string name = rs_->getFieldName(pos);
+                s << " for " << name;
+                throw mapnik::datasource_exception( s.str() );
+            }
+            ++pos;
+        } else {
+            // fallback to auto-incrementing id
+            feature = feature_factory::create(feature_id_);
+            ++feature_id_;
+        }
+
+        // parse geometry
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
         geometry_utils::from_wkb(*feature,data,size,multiple_geometries_);
         totalGeomSize_+=size;
           
-        for (unsigned pos=1;pos<num_attrs_+1;++pos)
+        for ( ;pos<num_attrs_+1;++pos)
         {
             std::string name = rs_->getFieldName(pos);
 
             if (!rs_->isNull(pos))
             {
-                const char* buf=rs_->getValue(pos);
+                const char* buf = rs_->getValue(pos);
                 int oid = rs_->getTypeOID(pos);
            
                 if (oid==16) //bool

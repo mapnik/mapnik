@@ -59,6 +59,7 @@ class postgis_datasource : public datasource
       mutable std::string schema_;
       mutable std::string geometry_table_;
       const std::string geometry_field_;
+      const std::string key_field_;
       const int cursor_fetch_size_;
       const int row_limit_;
       mutable std::string geometryColumn_;
