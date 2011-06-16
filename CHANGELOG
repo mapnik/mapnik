@@ -14,6 +14,10 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Fixed quoting syntax for "table"."attribute" in PostGIS plugin (previously if table aliases were used quoting like "table.attribute" would cause query failure) (r2979).
+
+- Added the ability to control the PostGIS feature id by suppling a key_field to reference and integer attribute name (r2979).
+
 - Added alternative, more robust proj_transform functions to project a bbox using more points than just the four
   corners to ensure an optimally sized bbox despite proj4 out of bounds conditions. (olt)
 
