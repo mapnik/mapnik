@@ -27,6 +27,7 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <sstream>
 
 namespace mapnik
 {
@@ -78,10 +79,22 @@ bool freetype_engine::register_font(std::string const& file_name)
         FT_Done_FreeType(library);
         return false;
     }
-    std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-    name2file_.insert(std::make_pair(name,file_name));
-    FT_Done_Face(face );   
-    FT_Done_FreeType(library);
+    // some fonts can lack names, skip them
+    // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
+    if (face->family_name && face->style_name) {
+        std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
+        name2file_.insert(std::make_pair(name,file_name));
+        FT_Done_Face(face);
+        FT_Done_FreeType(library);
+        return true;
+    } else {
+        FT_Done_Face(face);
+        FT_Done_FreeType(library);
+        std::ostringstream s;
+        s << "Error: unable to load invalid font file which lacks identifiable family and style name: '"
+          << file_name << "'";
+        throw std::runtime_error(s.str());
+    }
     return true;
 }
 
