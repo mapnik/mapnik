@@ -73,8 +73,12 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     if (!filename.empty())
     {
         boost::optional<marker_ptr> mark = mapnik::marker_cache::instance()->find(filename, true);
-        if (mark && *mark && (*mark)->is_vector())
+        if (mark && *mark)
         {
+            if (!(*mark)->is_vector()) {
+                std::clog << "### Warning only svg markers are supported in the markers_symbolizer\n";
+                return;
+            }
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
             double x1 = bbox.minx();
