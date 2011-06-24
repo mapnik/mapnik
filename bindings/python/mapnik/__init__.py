@@ -680,6 +680,8 @@ __all__ = [
     'GlyphSymbolizer',
     'Image',
     'ImageView',
+    'Grid',
+    'GridView',
     'Layer',
     'Layers',
     'LinePatternSymbolizer',
