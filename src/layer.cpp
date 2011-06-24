@@ -97,7 +97,7 @@ void layer::set_name( std::string const& name)
     name_ = name;
 }
  
-string const& layer::name() const
+std::string const& layer::name() const
 {
     return name_;
 }
@@ -107,7 +107,7 @@ void layer::set_title( std::string const& title)
     title_ = title;
 }
  
-string const& layer::title() const
+std::string const& layer::title() const
 {
     return title_;
 }
@@ -117,7 +117,7 @@ void layer::set_abstract( std::string const& abstract)
     abstract_ = abstract;
 }
  
-string const& layer::abstract() const
+std::string const& layer::abstract() const
 {
     return abstract_;
 }

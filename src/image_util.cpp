@@ -116,7 +116,7 @@ void save_to_stream(T const& image,
             if (type.length() > 6){
                 boost::char_separator<char> sep(":");
                 boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-                BOOST_FOREACH(string t, tokens)
+                BOOST_FOREACH(std::string t, tokens)
                 {
                     if (t == "m=h")
                     {

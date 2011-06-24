@@ -37,6 +37,7 @@
 
 // stl
 #include <algorithm>
+#include <iostream>
 #include <stdexcept>
 
 namespace mapnik
@@ -58,7 +59,7 @@ datasource_cache::~datasource_cache()
     lt_dlexit();
 }
 
-std::map<string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
+std::map<std::string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
 bool datasource_cache::registered_=false;
 std::vector<std::string> datasource_cache::plugin_directories_;
     
@@ -67,20 +68,20 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
     boost::optional<std::string> type = params.get<std::string>("type");
     if ( ! type)
     {
-        throw config_error(string("Could not create datasource. Required ") +
+        throw config_error(std::string("Could not create datasource. Required ") +
                            "parameter 'type' is missing");
     }
 
     datasource_ptr ds;
-    std::map<string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
+    std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
     if ( itr == plugins_.end() )
     {
-        throw config_error(string("Could not create datasource. No plugin ") +
+        throw config_error(std::string("Could not create datasource. No plugin ") +
                            "found for type '" + * type + "' (searched in: " + plugin_directories() + ")");
     }
     if ( ! itr->second->handle())
     {
-        throw std::runtime_error(string("Cannot load library: ") +
+        throw std::runtime_error(std::string("Cannot load library: ") +
                                  lt_dlerror());
     }
     // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
@@ -92,7 +93,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 
     if ( ! create_datasource)
     {
-        throw std::runtime_error(string("Cannot load symbols: ") +
+        throw std::runtime_error(std::string("Cannot load symbols: ") +
                                  lt_dlerror());
     }
 #ifdef MAPNIK_DEBUG
