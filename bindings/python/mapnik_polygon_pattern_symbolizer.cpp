@@ -96,7 +96,7 @@ void export_polygon_pattern_symbolizer()
     class_<polygon_pattern_symbolizer>("PolygonPatternSymbolizer",
                                        init<path_expression_ptr>("<path_expression_ptr>"))
         .def_pickle(polygon_pattern_symbolizer_pickle_suite())
-        .add_property("pattern_alignment",
+        .add_property("alignment",
               &polygon_pattern_symbolizer::get_alignment,
               &polygon_pattern_symbolizer::set_alignment,
               "Set/get the alignment of the pattern")
