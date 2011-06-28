@@ -47,9 +47,12 @@ struct MAPNIK_DECL polygon_pattern_symbolizer :
     polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs);
     pattern_alignment_e get_alignment() const;
     void set_alignment(pattern_alignment_e align);
+    void set_gamma(double gamma);
+    double get_gamma() const;
 
 private:
     pattern_alignment_e alignment_;
+    double gamma_;
 
 };
 }

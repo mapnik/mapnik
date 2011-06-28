@@ -37,11 +37,13 @@ IMPLEMENT_ENUM( pattern_alignment_e, pattern_alignment_strings )
       
 polygon_pattern_symbolizer::polygon_pattern_symbolizer(path_expression_ptr file)                                                         
     : symbolizer_with_image(file), symbolizer_base(),
-      alignment_(LOCAL_ALIGNMENT) {}
+      alignment_(LOCAL_ALIGNMENT),
+      gamma_(1.0) {}
 
 polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)
     : symbolizer_with_image(rhs), symbolizer_base(rhs),
-      alignment_(rhs.alignment_) {}
+      alignment_(rhs.alignment_),
+      gamma_(rhs.gamma_) {}
 
 pattern_alignment_e polygon_pattern_symbolizer::get_alignment() const
 {
@@ -51,6 +53,16 @@ pattern_alignment_e polygon_pattern_symbolizer::get_alignment() const
 void polygon_pattern_symbolizer::set_alignment(pattern_alignment_e align)
 {
     alignment_ = align;
+}
+
+double polygon_pattern_symbolizer::get_gamma() const
+{
+    return gamma_;
+}
+
+void polygon_pattern_symbolizer::set_gamma(double gamma)
+{
+    gamma_ = gamma;
 }
 
 }

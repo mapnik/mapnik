@@ -1139,7 +1139,7 @@ void map_parser::parse_line_pattern_symbolizer( rule & rule, ptree const & sym )
 void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
                                                    ptree const & sym )
 {
-    ensure_attrs(sym, "PolygonPatternSymbolizer", "file,base,alignment,meta-writer,meta-output");
+    ensure_attrs(sym, "PolygonPatternSymbolizer", "file,base,alignment,gamma,meta-writer,meta-output");
     try
     {
         std::string file = get_attr<std::string>(sym, "file");
@@ -1163,6 +1163,10 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
             // pattern alignment
             pattern_alignment_e p_alignment = get_attr<pattern_alignment_e>(sym, "alignment",LOCAL_ALIGNMENT);
             symbol.set_alignment(p_alignment);
+
+            // gamma
+            optional<double> gamma = get_opt_attr<double>(sym, "gamma");
+            if (gamma)  symbol.set_gamma(*gamma);
 
             parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);

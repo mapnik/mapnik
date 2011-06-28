@@ -127,6 +127,11 @@ public:
             set_attr( sym_node, "alignment", sym.get_alignment() );
         }
 
+        if ( sym.get_gamma() != dfl.get_gamma() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "gamma", sym.get_gamma() );
+        }
+
         add_image_attributes( sym_node, sym );
         add_metawriter_attributes(sym_node, sym);
     }

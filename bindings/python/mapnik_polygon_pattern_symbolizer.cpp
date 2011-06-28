@@ -62,23 +62,24 @@ struct polygon_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getstate(const polygon_pattern_symbolizer& p)
     {
-        return boost::python::make_tuple(p.get_alignment());
+        return boost::python::make_tuple(p.get_alignment(),p.get_gamma());
     }
 
     static void
     setstate (polygon_pattern_symbolizer& p, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 1)
+        if (len(state) != 2)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 1-item tuple in call to __setstate__; got %s"
+                            ("expected 2-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
         }
                 
         p.set_alignment(extract<pattern_alignment_e>(state[0]));
+        p.set_gamma(extract<float>(state[1]));
     }
 
 };
@@ -105,5 +106,8 @@ void export_polygon_pattern_symbolizer()
         .add_property("filename",
                       &get_filename,
                       &set_filename)
+        .add_property("gamma",
+                      &polygon_pattern_symbolizer::get_gamma,
+                      &polygon_pattern_symbolizer::set_gamma)
         ;    
 }

@@ -70,7 +70,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     
     agg::scanline_u8 sl;
     ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_linear());
+    ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
     boost::optional<mapnik::marker_ptr> marker;
@@ -78,8 +78,13 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     {
         marker = marker_cache::instance()->find(filename, true);
     }
+    else
+    {
+        std::clog << "### Warning: file not found: " << filename << "\n";
+    }
 
     if (!marker || !(*marker)->is_bitmap()) return;
+    
 
     boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
 
