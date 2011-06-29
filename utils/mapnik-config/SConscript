@@ -19,55 +19,71 @@
 #
 # $Id$
 
-Import ('env')
 import re
 import os
 
-prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
-LIBDIR_SCHEMA = env['LIBDIR_SCHEMA']
-version = env['MAPNIK_VERSION_STRING']
-mapnik_libname = 'mapnik2'
-input_plugins = os.path.normpath(env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + "/input" )
-if env['SYSTEM_FONTS']:
-    fonts = os.path.normpath(env['SYSTEM_FONTS'])
-else:
-    fonts = os.path.normpath(prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/fonts')
-svn_revision = env['SVN_REVISION']
+# clone the environment so changes
+# here to no affect the main build env
+Import('env')
+config_env = env.Clone()
 
-filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-regex = 'boost_regex%s' % env['BOOST_APPEND']
+mapnik_libname = 'mapnik2'
+
+# recreate a few dynamic path additions
+if config_env['HAS_CAIRO']:
+    # attach libs to library linking environment
+    try:
+        config_env.ParseConfig('pkg-config --libs cairomm-1.0')
+        config_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+        config_env.ParseConfig('pkg-config --cflags cairomm-1.0')  
+    except OSError, e:
+        print '\nFailed to detect cairo/cairomm configuration, please re-run "python scons/scons.py configure"'
+        sys.exit(1)  
+        
+prefix = config_env['PREFIX']
+install_prefix = config_env['DESTDIR'] + '/' + prefix
+LIBDIR_SCHEMA = config_env['LIBDIR_SCHEMA']
+version = config_env['MAPNIK_VERSION_STRING']
+input_plugins = os.path.normpath(config_env['PREFIX'] + '/' + config_env['LIBDIR_SCHEMA'] + config_env['LIB_DIR_NAME'] + "/input" )
+if config_env['SYSTEM_FONTS']:
+    fonts = os.path.normpath(config_env['SYSTEM_FONTS'])
+else:
+    fonts = os.path.normpath(prefix + '/' + config_env['LIBDIR_SCHEMA'] + config_env['LIB_DIR_NAME'] + '/fonts')
+svn_revision = config_env['SVN_REVISION']
+
+filesystem = 'boost_filesystem%s' % config_env['BOOST_APPEND']
+regex = 'boost_regex%s' % config_env['BOOST_APPEND']
 
 # todo - refine this list
-other_includes = env['CUSTOM_CXXFLAGS'] + env['CXXFLAGS'] + ''.join([' -I%s' % i for i in env['CPPPATH'] if not i.startswith('#')])
+other_includes = config_env['CUSTOM_CXXFLAGS'] + config_env['CXXFLAGS'] + ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
 
-private_libs = ' -lfreetype -l%s -l%s -l%s' % (env['ICU_LIB_NAME'],filesystem,regex)
+private_libs = ' -lfreetype -l%s -l%s -l%s' % (config_env['ICU_LIB_NAME'],filesystem,regex)
 
-if env['HAS_CAIRO']:
-    private_libs += ' -lcairomm-1.0 -lcairo'
-    other_includes.append('-DHAVE_CAIRO')
+#if config_env['HAS_CAIRO']:
+#    private_libs += ' -lcairomm-1.0 -lcairo'
+#    other_includes.append('-DHAVE_CAIRO')
 
-if env['XMLPARSER'] == 'libxml2':
-    private_libs += ' -lxml2'
+if config_env['XMLPARSER'] == 'libxml2' and config_env['HAS_LIBXML2']:
+    config_env.Append(CXXFLAGS = '-DHAVE_LIBXML2')
 
-if env['THREADING'] == 'multi':
-    private_libs += ' -lboost_thread%s' % env['BOOST_APPEND']
+if config_env['THREADING'] == 'multi':
+    private_libs += ' -lboost_thread%s' % config_env['BOOST_APPEND']
 
-if env['HAS_BOOST_SYSTEM']:
-    private_libs += ' -lboost_system%s' % env['BOOST_APPEND']
+if config_env['HAS_BOOST_SYSTEM']:
+    private_libs += ' -lboost_system%s' % config_env['BOOST_APPEND']
 
-if not env['INTERNAL_LIBAGG']:
-    for lib in env['LIBS']:
+if not config_env['INTERNAL_LIBAGG']:
+    for lib in config_env['LIBS']:
         if lib.startswith('agg'):
             private_libs += ' -l%s' % lib
 
-if env['SVG_RENDERER']:
+if config_env['SVG_RENDERER']:
     other_includes.append('-DSVG_RENDERER')
     
-if env['LIBTOOL_SUPPORTS_ADVISE']:
+if config_env['LIBTOOL_SUPPORTS_ADVISE']:
     other_includes.append('-DLIBTOOL_SUPPORTS_ADVISE')
 
-other_libs = env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in env['LIBPATH'] if not i.startswith('#')])
+other_libs = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
 other_libs += private_libs
 
 
@@ -121,7 +137,7 @@ if 'install' in COMMAND_LINE_TARGETS:
        Chmod("$TARGET", 0755),
        ])
 
-env['create_uninstall_target'](env,os.path.join(target_path,source))
+config_env['create_uninstall_target'](env,os.path.join(target_path,source))
 
 source = 'mapnik2.pc'
 open(source,'w').write(top+pkg_config)
@@ -135,4 +151,4 @@ if 'install' in COMMAND_LINE_TARGETS:
     env.Install(target_path,source)
     env.Alias('install',target_path)
 
-env['create_uninstall_target'](env,full_target)
+config_env['create_uninstall_target'](env,full_target)
