@@ -48,7 +48,7 @@ class proj_init_error : public std::runtime_error
 {
 public:
     proj_init_error(std::string const& params)
-        : std::runtime_error("failed to initialize projection with:" + params) {}
+        : std::runtime_error("failed to initialize projection with: '" + params + "'") {}
 };
     
 class MAPNIK_DECL projection
