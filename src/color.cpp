@@ -38,14 +38,7 @@ color::color( std::string const& css_string)
       blue_(0),
       alpha_(0xff)
 {
-    try
-    {
-        color_factory::init_from_string(*this,css_string);   
-    }
-    catch (config_error const& err)
-    {
-        std::cerr << err.what() << std::endl;
-    }
+    color_factory::init_from_string(*this,css_string);   
 }
 
 std::string color::to_string() const

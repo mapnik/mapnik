@@ -402,6 +402,15 @@ def test_map_pickle():
     eq_(pickle.loads(pickle.dumps(m)), m)
 
 # Color initialization
+
+@raises(Exception) # Boost.Python.ArgumentError
+def test_color_init_errors():
+    c = mapnik2.Color()
+
+@raises(RuntimeError)
+def test_color_init_errors():
+    c = mapnik2.Color('foo') # mapnik config 
+
 def test_color_init():
     c = mapnik2.Color('blue')
 
