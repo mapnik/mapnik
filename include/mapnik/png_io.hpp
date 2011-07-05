@@ -20,6 +20,9 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_PNG_IO_HPP
+#define MAPNIK_PNG_IO_HPP
+
 //$Id$
 #include <mapnik/global.hpp>
 #include <mapnik/octree.hpp>
@@ -82,9 +85,11 @@ namespace mapnik {
       if (!info_ptr)
       {
          png_destroy_write_struct(&png_ptr,(png_infopp)0);
+         std::clog << "error writing png\n";
          return;
       }
-      if (setjmp(png_jmpbuf(png_ptr)))
+      jmp_buf* jmp_context = (jmp_buf*) png_get_error_ptr(png_ptr);
+      if (jmp_context)
       {
          png_destroy_write_struct(&png_ptr, &info_ptr);
          return;
@@ -233,7 +238,8 @@ namespace mapnik {
          png_destroy_write_struct(&png_ptr,(png_infopp)0);
          return;
       }
-      if (setjmp(png_jmpbuf(png_ptr)))
+      jmp_buf* jmp_context = (jmp_buf*) png_get_error_ptr(png_ptr);
+      if (jmp_context)
       {
          png_destroy_write_struct(&png_ptr, &info_ptr);
          return;
@@ -532,3 +538,5 @@ namespace mapnik {
       }
    }   
 }
+
+#endif // MAPNIK_PNG_IO_HPP
