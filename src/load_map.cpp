@@ -1015,9 +1015,9 @@ void map_parser::parse_text_symbolizer( rule_type & rule, ptree const & sym )
         // text conversion before rendering
         text_convert_e tconvert =
             get_attr<text_convert_e>(sym, "text_convert", NONE);
-        if (tconvert == NONE)
-	        text_convert_e tconvert =
-	            get_attr<text_convert_e>(sym, "text-transform", NONE);
+        if (tconvert == NONE) {
+	        tconvert = get_attr<text_convert_e>(sym, "text-transform", NONE);
+        }
         text_symbol.set_text_convert(tconvert);
 
         // spacing between text lines
