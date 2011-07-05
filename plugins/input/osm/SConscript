@@ -39,15 +39,13 @@ osm_src = Split(
 
 libraries = [ 'xml2' ]
 libraries.append('curl')
-if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik2')
-    libraries.append(env['ICU_LIB_NAME'])
+libraries.append('mapnik2')
+libraries.append(env['ICU_LIB_NAME'])
 
 input_plugin = plugin_env.SharedLibrary('../osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
-if env['PLATFORM'] == 'Darwin':
-    # if the plugin links to libmapnik2 ensure it is built first
-    Depends(input_plugin,'../../../src/libmapnik2.dylib')
+# if the plugin links to libmapnik2 ensure it is built first
+Depends(input_plugin, env.subst('../../../src/${SHLIBPREFIX}mapnik2${SHLIBSUFFIX}'))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)

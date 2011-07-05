@@ -35,17 +35,16 @@ postgis_src = Split(
 
 libraries = ['pq']
 
-if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik2')
-    libraries.append(env['ICU_LIB_NAME'])
-    if env['THREADING'] == 'multi':
-        libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+# Link Library to Dependencies
+libraries.append('mapnik2')
+libraries.append(env['ICU_LIB_NAME'])
+if env['THREADING'] == 'multi':
+	libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
 input_plugin = plugin_env.SharedLibrary('../postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
-if env['PLATFORM'] == 'Darwin':
-    # if the plugin links to libmapnik2 ensure it is built first
-    Depends(input_plugin,'../../../src/libmapnik2.dylib')
+# if the plugin links to libmapnik2 ensure it is built first
+Depends(input_plugin, env.subst('../../../src/${SHLIBPREFIX}mapnik2${SHLIBSUFFIX}'))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)

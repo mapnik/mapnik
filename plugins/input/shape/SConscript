@@ -39,20 +39,19 @@ shape_src = Split(
 
 libraries = []
 
-if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik2')
-    libraries.append(env['ICU_LIB_NAME'])
-    libraries.append('boost_system%s' % env['BOOST_APPEND'])
-    libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
+# Link Library to Dependencies
+libraries.append('mapnik2')
+libraries.append(env['ICU_LIB_NAME'])
+libraries.append('boost_system%s' % env['BOOST_APPEND'])
+libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 if env['SHAPE_MEMORY_MAPPED_FILE']:
     plugin_env.Append(CXXFLAGS = '-DSHAPE_MEMORY_MAPPED_FILE')
 
 input_plugin = plugin_env.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
-if env['PLATFORM'] == 'Darwin':
-    # if the plugin links to libmapnik2 ensure it is built first
-    Depends(input_plugin,'../../../src/libmapnik2.dylib')
+# if the plugin links to libmapnik2 ensure it is built first
+Depends(input_plugin, env.subst('../../../src/${SHLIBPREFIX}mapnik2${SHLIBSUFFIX}'))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)

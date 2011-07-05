@@ -43,18 +43,6 @@ import os
 import sys
 import warnings
 
-try:
-    from ctypes import RTLD_NOW, RTLD_GLOBAL
-except ImportError:
-    try:
-        from DLFCN import RTLD_NOW, RTLD_GLOBAL
-    except ImportError:
-        RTLD_NOW = 2
-        RTLD_GLOBAL = 256
-
-flags = sys.getdlopenflags()
-sys.setdlopenflags(RTLD_NOW | RTLD_GLOBAL)
-
 from _mapnik2 import *
 from paths import inputpluginspath, fontscollectionpath
 
@@ -659,9 +647,6 @@ def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.tt
 # auto-register known plugins and fonts
 register_plugins()
 register_fonts()
-
-#set dlopen flags back to the original
-sys.setdlopenflags(flags)
 
 # Explicitly export API members to avoid namespace pollution
 # and ensure correct documentation processing
