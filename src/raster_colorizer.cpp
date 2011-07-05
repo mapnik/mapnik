@@ -37,7 +37,7 @@ static const char *colorizer_mode_strings[] = {
     ""
 };
 
-IMPLEMENT_ENUM( colorizer_mode, colorizer_mode_strings );
+IMPLEMENT_ENUM( colorizer_mode, colorizer_mode_strings )
 
 
 colorizer_stop::colorizer_stop(const float value/* = 0*/, const colorizer_mode mode/* = COLORIZER_INHERIT*/, const color& _color/* = color(0,0,0,0)*/ )
