@@ -162,6 +162,10 @@ void datasource_cache::register_datasources(const std::string& str)
                 try 
                 {
 #ifdef LIBTOOL_SUPPORTS_ADVISE
+                    /* Note: the below was added as a workaround pre http://trac.mapnik.org/ticket/790
+                       It could now be removed, but also is not doing any harm AFAICT.
+                    */
+                    
                     // with ltdl >=2.2 we can actually pass RTDL_GLOBAL to dlopen via the
                     // ltdl advise trick which is required on linux unless plugins are directly
                     // linked to libmapnik (and deps) at build time. The only other approach is to
