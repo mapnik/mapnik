@@ -74,6 +74,8 @@ static const char * text_convert_strings[] = {
     "none",
     "toupper",
     "tolower",
+    "uppercase",
+    "lowercase",
     ""
 };
 

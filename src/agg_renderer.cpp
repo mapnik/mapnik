@@ -823,11 +823,11 @@ namespace mapnik
       typedef  coord_transform2<CoordTransform,geometry2d> path_type;
 
       UnicodeString text = feature[sym.get_name()].to_unicode();
-      if ( sym.get_text_convert() == TOUPPER)
+      if ( sym.get_text_convert() == TOUPPER || sym.get_text_convert() == TOUPPER2) // mapnik2 compatibility
       {
          text = text.toUpper();
       }
-      else if ( sym.get_text_convert() == TOLOWER)
+      else if ( sym.get_text_convert() == TOLOWER || sym.get_text_convert() == TOLOWER2) // mapnik2 compatibility
       {
          text = text.toLower();
       }

@@ -81,6 +81,8 @@ namespace mapnik
       NONE = 0,
       TOUPPER,
       TOLOWER,
+      TOUPPER2,
+      TOLOWER2,
       text_convert_MAX
    };
 
