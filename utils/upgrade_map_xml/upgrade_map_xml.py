@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import os
 import re
 import sys
@@ -55,25 +56,28 @@ def name2expr(sym):
 def handle_attr_changes(sym):
     # http://www.w3schools.com/css/pr_text_text-transform.asp
     # http://code.google.com/p/mapnik-utils/issues/detail?id=32&colspec=ID%20Type%20Status%20Priority%20Component%20Owner%20Summary
-    text_transform = sym.attrib.get('text_convert')
-    if text_transform:
+    text_convert = sym.attrib.get('text_convert',sym.attrib.get('text_transform',sym.attrib.get('text_transform')))
+    if text_convert:
         # note: css supports text-transform:capitalize but Mapnik does not (yet)
         t_ = {'tolower':'lowercase','toupper':'uppercase','none':'none'}
-        new = t_.get(text_transform)
+        new = t_.get(text_convert)
         if new:
-            sym.attrib['text_transform'] = new
+            sym.attrib['text-transform'] = new
         else:
-            sym.attrib['text_transform'] = text_transform
-        sym.attrib.pop('text_convert')
+            sym.attrib['text-transform'] = text_convert
+        if sym.attrib.get('text_convert'):
+            sym.attrib.pop('text_convert')
+        if sym.attrib.get('text_transform'):
+            sym.attrib.pop('text_transform')
     
     minimum_distance = sym.attrib.get('min_distance')
     if minimum_distance:
-        sym.attrib['minimum_distance'] = minimum_distance
+        sym.attrib['minimum-distance'] = minimum_distance
         sym.attrib.pop('min_distance')
 
     minimum_padding = sym.attrib.get('min_padding')
     if minimum_padding:
-        sym.attrib['minimum_padding'] = minimum_padding
+        sym.attrib['minimum-padding'] = minimum_padding
         sym.attrib.pop('min_padding')
 
 def fixup_sym_with_image(sym):
@@ -265,6 +269,3 @@ if __name__ == "__main__":
                 print 'Upgrading "%s" in place...' % input_xml
                 found.append(input_xml)
                 upgrade(input_xml,output_xml=None,indent_xml=options.indent_xml)
-
-    
-    
