@@ -99,6 +99,7 @@ double parse_double_optional_percent(const char* str, bool &percent)
 {
     using namespace boost::spirit::qi;
     using boost::phoenix::ref;
+    using qi::_1;
 
     double val = 0.0;
     char unit='\0';
