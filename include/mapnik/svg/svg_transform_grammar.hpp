@@ -164,6 +164,8 @@ namespace mapnik { namespace svg {
         TransformType & tr_;    
     };
 
+    // commented as this does not appear used and crashes clang when used with pch
+    /*
     struct print_action
     {
         template <typename T>
@@ -172,6 +174,7 @@ namespace mapnik { namespace svg {
             std::cerr << typeid(c).name() << std::endl;
         }
     };
+    */
 
     template <typename Iterator, typename SkipType, typename TransformType>
     struct svg_transform_grammar : qi::grammar<Iterator,SkipType>
