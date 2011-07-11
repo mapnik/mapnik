@@ -25,101 +25,20 @@
 #ifndef FEATURE_LAYER_DESC_HPP
 #define FEATURE_LAYER_DESC_HPP
 
+// mapnik
+#include <mapnik/attribute_descriptor.hpp>
+
 #include <string>
 #include <vector>
 #include <iostream>
 
 namespace mapnik
 {
-    
-using std::string;
-using std::vector;
-using std::clog;
-    
-enum eAttributeType {
-    Integer=1,
-    Float  =2,
-    Double =3,
-    String =4,
-    Geometry=5,
-    Object=6 
-};
-    
-class attribute_descriptor
+
+class layer_descriptor
 {
 public:
-    attribute_descriptor(string const& name,unsigned type,
-                         bool primary_key=false,
-                         int size=-1,
-                         int precision=-1)
-        : name_(name),
-          type_(type),
-          primary_key_(primary_key),
-          size_(size),
-          precision_(precision) {}
-              
-    attribute_descriptor(attribute_descriptor const& other)
-        : name_(other.name_),
-          type_(other.type_),
-          primary_key_(other.primary_key_),
-          size_(other.size_),
-          precision_(other.precision_) {}
-
-    attribute_descriptor& operator=(attribute_descriptor const& other)
-    {
-        if (this == &other)
-            return *this;           
-        name_=other.name_;
-        type_=other.type_;
-        primary_key_=other.primary_key_;
-        size_=other.size_;
-        precision_=other.precision_;
-        return *this;
-    }
-    string const& get_name() const
-    {
-        return name_;
-    }
-    unsigned  get_type() const
-    {
-        return type_;
-    }
-    bool is_primary_key() const
-    {
-        return primary_key_;
-    }
-    int get_size() const
-    {
-        return size_;
-    } 
-        
-    int get_precision() const
-    {
-        return precision_;
-    }
-private:
-    string name_;
-    int type_;
-    bool primary_key_;
-    int size_;
-    int precision_;
-};
-     
-template <typename charT,typename traits>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             attribute_descriptor const& ad)
-{
-    out << "name=" << ad.get_name() << "\n";
-    out << "type=" << ad.get_type() << "\n";
-    out << "size=" << ad.get_size() << "\n";
-    return out;
-}
-
-class layer_descriptor 
-{
-public:
-    layer_descriptor(string const& name,string const& encoding)
+    layer_descriptor(std::string const& name, std::string const& encoding)
         : name_(name),
           encoding_(encoding) {}
 
@@ -128,12 +47,12 @@ public:
           encoding_(other.encoding_),
           desc_ar_(other.desc_ar_) {}
         
-    void set_name(string const& name)
+    void set_name(std::string const& name)
     {
         name_=name;
     }
          
-    string const& get_name() const
+    std::string const& get_name() const
     {
         return name_;
     }
@@ -153,18 +72,20 @@ public:
         desc_ar_.push_back(desc);
     }
         
-    vector<attribute_descriptor> const& get_descriptors() const
+    std::vector<attribute_descriptor> const& get_descriptors() const
     {
         return desc_ar_;
     }   
-    vector<attribute_descriptor>& get_descriptors()
+    
+    std::vector<attribute_descriptor>& get_descriptors()
     {
         return desc_ar_;
     }
+
 private:
-    string name_;
-    string encoding_;
-    vector<attribute_descriptor> desc_ar_;
+    std::string name_;
+    std::string encoding_;
+    std::vector<attribute_descriptor> desc_ar_;
 };
     
 template <typename charT,typename traits>
@@ -174,8 +95,8 @@ operator << (std::basic_ostream<charT,traits>& out,
 {
     out << "name=" << ld.get_name() << "\n";
     out << "encoding=" << ld.get_encoding() << "\n";
-    vector<attribute_descriptor> const& desc_ar=ld.get_descriptors();
-    vector<attribute_descriptor>::const_iterator pos=desc_ar.begin();
+    std::vector<attribute_descriptor> const& desc_ar=ld.get_descriptors();
+    std::vector<attribute_descriptor>::const_iterator pos=desc_ar.begin();
     while (pos != desc_ar.end())
     {
         out << *pos++ << "\n";
