@@ -34,8 +34,9 @@ enum eAttributeType {
     Float  =2,
     Double =3,
     String =4,
-    Geometry=5,
-    Object=6 
+    Boolean =5,
+    Geometry=6,
+    Object=7 
 };
 
 class attribute_descriptor
