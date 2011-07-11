@@ -54,7 +54,7 @@ namespace boost { namespace python {
             
         PyObject * operator() (mapnik::value_null const& /*s*/) const
         {
-            return NULL;
+            return Py_None;
         }
     };
 
