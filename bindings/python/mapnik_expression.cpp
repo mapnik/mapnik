@@ -43,10 +43,10 @@ expression_ptr parse_expression_(std::string const& wkt)
     return parse_expression(wkt,"utf8");
 }
 
-std::string expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature const& f)
+bool expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature const& f)
 {
     mapnik::value result = boost::apply_visitor(mapnik::evaluate<mapnik::Feature,mapnik::value>(f),expr);
-    return result.to_string();
+    return result.to_bool();
 }
 
 // path expression
