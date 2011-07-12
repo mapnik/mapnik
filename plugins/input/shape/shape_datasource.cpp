@@ -103,14 +103,16 @@ void shape_datasource::bind() const
             std::string fld_name=fd.name_;
             switch (fd.type_)
             {
-            case 'C':
-            case 'D':
-            case 'M':
-            case 'L':
+            case 'C': // character
+            case 'D': // Date
+            case 'M': // Memo, a string
+            case 'L': // logical
+            case '@': // timestamp
                 desc_.add_descriptor(attribute_descriptor(fld_name, String));
                 break;
             case 'N':
-            case 'F':
+            case 'O': // double
+            case 'F': // float
             {
                 if (fd.dec_>0)
                 {   
@@ -123,7 +125,10 @@ void shape_datasource::bind() const
                 break;
             }
             default:
-#ifdef MAPNIK_DEBUG                
+#ifdef MAPNIK_DEBUG
+                // I - long
+                // G - ole
+                // + - autoincrement
                 std::clog << "Shape Plugin: unknown type " << fd.type_ << std::endl;
 #endif 
                 break;
