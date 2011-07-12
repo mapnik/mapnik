@@ -6,14 +6,14 @@ from nose.plugins.doctests import Doctest
 import nose, sys, os, getopt
 
 def usage():
-    print "test.py -h | --help"
-    print "test.py [-q | -v] [-p | --prefix <path>]"
+    print("test.py -h | --help")
+    print("test.py [-q | -v] [-p | --prefix <path>]")
 
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hvqp:", ["help", "prefix="])
-    except getopt.GetoptError, err:
-        print str(err)
+    except getopt.GetoptError as err:
+        print(str(err))
         usage()
         sys.exit(2)
 
@@ -45,13 +45,14 @@ def main():
     import mapnik2
 
     if not quiet:
-        print "- mapnik2 path: %s" % mapnik2.__file__
-        print "- _mapnik2.so path: %s" % mapnik2._mapnik2.__file__
-        print "- Input plugins path: %s" % mapnik2.inputpluginspath
-        print "- Font path: %s" % mapnik2.fontscollectionpath
-        print
-        print "- Running nosetests:"
-        print
+        print("- mapnik2 path: %s" % mapnik2.__file__)
+        if hasattr(mapnik2,'_mapnik2'):
+           print("- _mapnik2.so path: %s" % mapnik2._mapnik2.__file__)
+        print("- Input plugins path: %s" % mapnik2.inputpluginspath)
+        print("- Font path: %s" % mapnik2.fontscollectionpath)
+        print()
+        print("- Running nosetests:")
+        print()
 
     argv = [__file__, '--exe', '--with-todo', '--with-doctest', '--doctest-tests']
 
