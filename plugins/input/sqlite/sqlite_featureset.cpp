@@ -102,8 +102,7 @@ feature_ptr sqlite_featureset::next()
 
               case SQLITE_NULL:
               {
-                 UnicodeString ustr = tr_->transcode ("");
-                 boost::put(*feature,fld_name,ustr);
+                 boost::put(*feature,fld_name,mapnik::value_null());
                  break;                 
               }
               
