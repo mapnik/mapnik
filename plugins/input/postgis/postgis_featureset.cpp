@@ -108,7 +108,11 @@ feature_ptr postgis_featureset::next()
         {
             std::string name = rs_->getFieldName(pos);
 
-            if (!rs_->isNull(pos))
+            if (rs_->isNull(pos))
+            {
+                boost::put(*feature,name,mapnik::value_null());
+            }
+            else
             {
                 const char* buf = rs_->getValue(pos);
                 int oid = rs_->getTypeOID(pos);
