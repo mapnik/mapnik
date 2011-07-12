@@ -136,7 +136,24 @@ boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
         for (; it != end; ++it)
         {  
             unsigned type = it->get_type();
-            fld_types.append(type);
+            if (type == mapnik::Integer)
+                // this crashes, so send back strings instead
+                //fld_types.append(boost::python::object(boost::python::handle<>(&PyInt_Type)));
+                fld_types.append(boost::python::str("int"));
+            else if (type == mapnik::Float)
+                fld_types.append(boost::python::str("float"));
+            else if (type == mapnik::Double)
+                fld_types.append(boost::python::str("float"));
+            else if (type == mapnik::String)
+                fld_types.append(boost::python::str("str"));
+            else if (type == mapnik::Boolean)
+                fld_types.append(boost::python::str("bool"));
+            else if (type == mapnik::Geometry)
+                fld_types.append(boost::python::str("geometry"));
+            else if (type == mapnik::Object)
+                fld_types.append(boost::python::str("object"));
+            else
+                fld_types.append(boost::python::str("unknown"));
         }
     }
     return fld_types;
@@ -153,7 +170,7 @@ void export_datasource()
         .def("features",&datasource::features)
         .def("bind",&datasource::bind)
         .def("fields",&fields)
-        .def("_field_types",&field_types)
+        .def("field_types",&field_types)
         .def("encoding",&encoding) //todo expose as property
         .def("name",&name)
         .def("features_at_point",&datasource::features_at_point)
