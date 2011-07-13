@@ -114,6 +114,9 @@ void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float op
     im.set_rectangle_alpha2(im2.data(),x,y,opacity);
 }
 
+// Compositing modes 
+// http://www.w3.org/TR/2009/WD-SVGCompositing-20090430/
+
 enum composite_mode_e
 {
     clear = 1,
@@ -125,7 +128,25 @@ enum composite_mode_e
     dst_in,
     src_out,
     dst_out,
-    multiply
+    src_atop,
+    dst_atop,
+    _xor,
+    plus,
+    minus,
+    multiply,
+    screen,
+    overlay,
+    darken,
+    lighten,
+    color_dodge,
+    color_burn,
+    hard_light,
+    soft_light,
+    difference,
+    exclusion,
+    contrast,
+    invert,
+    invert_rgb
 };
 
 void composite(image_32 & im, image_32 & im2, composite_mode_e mode)
@@ -139,14 +160,29 @@ void composite(image_32 & im, image_32 & im2, composite_mode_e mode)
     typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
     typedef agg::renderer_base<pixfmt_type> renderer_type;
     
-    
     agg::rendering_buffer source(im.raw_data(),im.width(),im.height(),im.width() * 4);
     agg::rendering_buffer mask(im2.raw_data(),im2.width(),im2.height(),im2.width() * 4);
 
     agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf(source);
     agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
+    
     switch(mode)
     {
+    case clear :
+        pixf.comp_op(agg::comp_op_clear);
+        break;
+    case src:
+        pixf.comp_op(agg::comp_op_src);
+        break;
+    case dst:
+        pixf.comp_op(agg::comp_op_dst);
+        break;
+    case src_over:
+        pixf.comp_op(agg::comp_op_src_over);
+        break;
+    case dst_over:
+        pixf.comp_op(agg::comp_op_dst_over);
+        break;
     case src_in:
         pixf.comp_op(agg::comp_op_src_in);
         break;
@@ -159,11 +195,66 @@ void composite(image_32 & im, image_32 & im2, composite_mode_e mode)
     case dst_out:
         pixf.comp_op(agg::comp_op_dst_out);
         break;
+    case src_atop:
+        pixf.comp_op(agg::comp_op_src_atop);
+        break;
+    case dst_atop:
+        pixf.comp_op(agg::comp_op_dst_atop);
+        break;
+    case _xor:
+        pixf.comp_op(agg::comp_op_xor);
+        break;
+    case plus:
+        pixf.comp_op(agg::comp_op_plus);
+        break;
+    case minus:
+        pixf.comp_op(agg::comp_op_minus);
+        break;
     case multiply:
         pixf.comp_op(agg::comp_op_multiply);
+        break;     
+    case screen:
+        pixf.comp_op(agg::comp_op_screen);
+        break;
+    case overlay:
+        pixf.comp_op(agg::comp_op_overlay);
+        break;
+    case darken:
+        pixf.comp_op(agg::comp_op_darken);
+        break;    
+    case lighten:
+        pixf.comp_op(agg::comp_op_lighten);
+        break;
+    case color_dodge:
+        pixf.comp_op(agg::comp_op_color_dodge);
+        break;
+    case color_burn:
+        pixf.comp_op(agg::comp_op_color_burn);
+        break;
+    case hard_light:
+        pixf.comp_op(agg::comp_op_hard_light);
+        break;
+    case soft_light:
+        pixf.comp_op(agg::comp_op_soft_light);
+        break;
+    case difference:
+        pixf.comp_op(agg::comp_op_difference);
+        break;
+    case exclusion:
+        pixf.comp_op(agg::comp_op_exclusion);
+        break;
+    case contrast:
+        pixf.comp_op(agg::comp_op_contrast);
+        break;
+    case invert:
+        pixf.comp_op(agg::comp_op_invert);
+        break;
+    case invert_rgb:
+        pixf.comp_op(agg::comp_op_invert_rgb);
         break;
     default:
         break;
+    
     }
     renderer_type ren(pixf);
     agg::renderer_base<pixfmt_type> rb(pixf);
@@ -183,11 +274,34 @@ void export_image()
 {
     using namespace boost::python;
     enum_<composite_mode_e>("CompositeOp")
+        .value("clear",clear)
+        .value("src",src)
+        .value("dst",dst)
+        .value("src_over",src_over)
+        .value("dst_over",dst_over)        
         .value("src_in",src_in)
         .value("dst_in",dst_in)
         .value("src_out",src_out)
         .value("dst_out",dst_out)
+        .value("src_atop",src_atop)
+        .value("dst_atop",dst_atop)
+        .value("xor",_xor)
+        .value("plus",plus)
+        .value("minus",minus)
         .value("multiply",multiply)
+        .value("screen",screen)
+        .value("overlay",overlay)
+        .value("darken",darken)
+        .value("lighten",lighten)
+        .value("color_dodge",color_dodge)
+        .value("color_burn",color_burn)
+        .value("hard_light",hard_light)
+        .value("soft_light",soft_light)
+        .value("difference",difference)
+        .value("exclusion",exclusion)
+        .value("contrast",contrast)
+        .value("invert",invert)
+        .value("invert_rgb",invert_rgb)
         ;
     
     class_<image_32,boost::shared_ptr<image_32> >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
