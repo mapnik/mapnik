@@ -308,7 +308,9 @@ void sqlite_datasource::bind() const
                 desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
             }
             else if (boost::algorithm::contains(fld_type,"blob") && !geometry_field_.empty())
+            {
                  desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+            }
 #ifdef MAPNIK_DEBUG
             else
             {
@@ -320,7 +322,7 @@ void sqlite_datasource::bind() const
         }
         if (!found_table)
         {
-            throw datasource_exception("Sqlite Plugin: could not query table '" + geometry_table_ + "' using pragma table_info(" + geometry_table_  + ");");
+            throw datasource_exception("Sqlite Plugin: could not query table '" + geometry_table_ + "' using 'pragma table_info(" + geometry_table_  + ")';");
         }
     }
 
