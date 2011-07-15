@@ -499,7 +499,7 @@ void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f, d
 template <typename Image>
 void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio)
 {
-    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::pixfmt_rgba32_plain pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     
     // define some stuff we'll use soon

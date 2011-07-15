@@ -144,24 +144,14 @@ namespace agg
                                          unsigned alpha, 
                                          unsigned cover=0)
         {
-            if (alpha)
-            {
-                calc_type r = p[Order::R];
-                calc_type g = p[Order::G];
-                calc_type b = p[Order::B];
-                calc_type a = p[Order::A];
-                
-                p[Order::A] = (value_type)(alpha + a - ((alpha * a + base_mask) >> base_shift));
-                if (p[Order::A]) {
-                    if (!cover)
-                    {
-                        cover = base_mask;
-                    }
-                    p[Order::R] = (value_type)((cr * alpha / cover) + (r * a * (base_mask - alpha) / base_mask / p[Order::A]));
-                    p[Order::G] = (value_type)((cg * alpha / cover) + (g * a * (base_mask - alpha) / base_mask / p[Order::A]));
-                    p[Order::B] = (value_type)((cb * alpha / cover) + (b * a * (base_mask - alpha) / base_mask / p[Order::A]));
-                }
-            }
+            calc_type r = p[Order::R];
+            calc_type g = p[Order::G];
+            calc_type b = p[Order::B];
+            calc_type a = p[Order::A];
+            p[Order::R] = (value_type)(((cr - r) * alpha + (r << base_shift)) >> base_shift);
+            p[Order::G] = (value_type)(((cg - g) * alpha + (g << base_shift)) >> base_shift);
+            p[Order::B] = (value_type)(((cb - b) * alpha + (b << base_shift)) >> base_shift);
+            p[Order::A] = (value_type)((alpha + a) - ((alpha * a + base_mask) >> base_shift));
         }
     };
 

@@ -51,7 +51,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::wrap_mode_repeat wrap_x_type;
     typedef agg::wrap_mode_repeat wrap_y_type;
-    typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
+    typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_plain,
         agg::row_accessor<agg::int8u>, agg::pixel32_type> rendering_buffer;
     typedef agg::image_accessor_wrap<rendering_buffer,
         wrap_x_type,
@@ -94,7 +94,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     unsigned h=(*pat)->height();
     agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
     agg::span_allocator<agg::rgba8> sa;
-    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
+    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_plain,
         agg::row_accessor<agg::int8u>, agg::pixel32_type> pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
     
