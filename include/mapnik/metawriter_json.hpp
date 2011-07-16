@@ -70,6 +70,8 @@ public:
     void set_output_empty(bool output_empty) { output_empty_ = output_empty; }
     /** See set_output_empty(). */
     bool get_output_empty() { return output_empty_; }
+    void set_pixel_coordinates(bool on) { pixel_coordinates_ = on; }
+    bool get_pixel_coordinates() { return pixel_coordinates_; }
     virtual void set_map_srs(projection const& proj);
 protected:
     enum {
@@ -80,6 +82,7 @@ protected:
     /** Features written. */
     int count_;
     bool output_empty_;
+    bool pixel_coordinates_;
     /** Transformation from map srs to output srs. */
     proj_transform *trans_;
     projection output_srs_;
@@ -94,15 +97,17 @@ protected:
         if (count_ == HEADER_NOT_WRITTEN) write_header();
         if (count_++) *f_ << ",\n";
 
-        *f_  << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \""<<type<<"\",\n    \"coordinates\":";
+        *f_  << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"" << type << "\",\n    \"coordinates\":";
     }
     void write_properties(Feature const& feature, metawriter_properties const& properties);
     inline void write_point(CoordTransform const& t, double x, double y, bool last = false)
     {
         double z = 0.0;
-        t.backward(&x, &y);
-        trans_->forward(x, y, z);
-        *f_ << "["<<x<<","<<y<<"]";
+        if (!pixel_coordinates_) {
+            t.backward(&x, &y);
+            trans_->forward(x, y, z);
+        }
+        *f_ << "[" << x << "," << y << "]";
         if (!last) {
             *f_ << ",";
         }

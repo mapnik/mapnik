@@ -57,7 +57,6 @@ namespace mapnik {
 
 metawriter_inmem::metawriter_inmem(metawriter_properties dflt_properties) 
   : metawriter(dflt_properties) {
-  // ???
 }
 
 metawriter_inmem::~metawriter_inmem() {
@@ -128,16 +127,6 @@ metawriter_inmem::add_vertices(path_type & path,
 void 
 metawriter_inmem::start(metawriter_property_map const& /*properties*/) {
   instances_.clear();
-}
-
-void 
-metawriter_inmem::stop() {
-}
-
-void 
-metawriter_inmem::set_map_srs(projection const& /*proj*/) {
-  // currently unused, since the inmem metawriter keeps everything in
-  // image coordinates.
 }
 
 const std::list<metawriter_inmem::meta_instance> &

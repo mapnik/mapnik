@@ -41,9 +41,9 @@ metawriter_create(const boost::property_tree::ptree &pt) {
   metawriter_ptr writer;
   string type = get_attr<string>(pt, "type");
 
+  optional<string> properties = get_opt_attr<string>(pt, "default-output");
   if (type == "json") {
     string file = get_attr<string>(pt, "file");
-    optional<string> properties = get_opt_attr<string>(pt, "default-output");
     metawriter_json_ptr json = metawriter_json_ptr(new metawriter_json(properties, parse_path(file)));
     optional<boolean> output_empty = get_opt_attr<boolean>(pt, "output-empty");
     if (output_empty) {
@@ -52,10 +52,8 @@ metawriter_create(const boost::property_tree::ptree &pt) {
     writer = json;
     
   } else if (type == "inmem") {
-    optional<string> properties = get_opt_attr<string>(pt, "default-output");
     metawriter_inmem_ptr inmem = metawriter_inmem_ptr(new metawriter_inmem(properties));
     writer = inmem;
-    
   } else {
     throw config_error(string("Unknown type '") + type + "'");
   }

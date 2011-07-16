@@ -81,7 +81,7 @@ public:
      * \param box Area (in pixel coordinates)
      * \param feature The feature being processed
      * \param prj_trans Projection transformation
-     * \param t Cooridnate transformation
+     * \param t Coordinate transformation
      * \param properties List of properties to output
      */
     virtual void add_box(box2d<double> const& box, Feature const& feature,
@@ -107,7 +107,6 @@ public:
      * \param properties metawriter_property_map object with userdefined values.
      *        Useful for setting filename etc.
      */
-    
     virtual void start(metawriter_property_map const& properties) 
     {
         boost::ignore_unused_variable_warning(properties);
@@ -122,7 +121,7 @@ public:
      */
     void set_size(int width, int height) { width_ = width; height_ = height; }
     /** Set Map object's srs. */
-    virtual void set_map_srs(projection const& proj) = 0;
+    virtual void set_map_srs(projection const& proj) { /* Not required when working with image coordinates. */ }
     /** Return the list of default properties. */
     metawriter_properties const& get_default_properties() const { return dflt_properties_;}
 protected:

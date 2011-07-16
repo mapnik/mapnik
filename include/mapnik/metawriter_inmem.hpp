@@ -80,8 +80,6 @@ public:
           metawriter_properties const& properties);
   
   virtual void start(metawriter_property_map const& properties);
-  virtual void stop();
-  virtual void set_map_srs(projection const& proj);
 
   /**
    * An instance of a rendered feature. The box represents the image
