@@ -122,8 +122,12 @@ public:
     sqlite_connection (const std::string& file)
         : db_(0)
     {
+        #ifdef sqlite3_open_v2
         sqlite3_enable_shared_cache(1);
         if (sqlite3_open_v2 (file.c_str(), &db_, SQLITE_OPEN_NOMUTEX|SQLITE_OPEN_SHAREDCACHE, 0))
+        #else
+        if (sqlite3_open (file.c_str(), &db_))
+        #endif
         {
             std::ostringstream s;
             s << "Sqlite Plugin: ";
