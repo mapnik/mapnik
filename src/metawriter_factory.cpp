@@ -49,6 +49,11 @@ metawriter_create(const boost::property_tree::ptree &pt) {
     if (output_empty) {
       json->set_output_empty(*output_empty);
     }
+
+    optional<boolean> pixel_coordinates = get_opt_attr<boolean>(pt, "pixel-coordinates");
+    if (pixel_coordinates) {
+      json->set_pixel_coordintates(*pixel_coordinates);
+    }
     writer = json;
     
   } else if (type == "inmem") {
