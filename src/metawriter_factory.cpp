@@ -52,7 +52,7 @@ metawriter_create(const boost::property_tree::ptree &pt) {
 
     optional<boolean> pixel_coordinates = get_opt_attr<boolean>(pt, "pixel-coordinates");
     if (pixel_coordinates) {
-      json->set_pixel_coordintates(*pixel_coordinates);
+      json->set_pixel_coordinates(*pixel_coordinates);
     }
     writer = json;
     
