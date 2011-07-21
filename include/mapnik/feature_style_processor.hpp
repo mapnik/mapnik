@@ -228,14 +228,19 @@ private:
             }
             
             box2d<double> layer_ext = lay.envelope();
-               
+            
             // first, try to forward project map ext into layer srs
             if (prj_trans.forward(map_ext) && map_ext.intersects(layer_ext))
-             {
+            {
                 layer_ext.clip(map_ext);
-            } 
+            }
+            // if no intersection and projections are also equal, early return
+            else if (prj_trans.equal())
+            {
+                 return;
+            }
             // fallback to back projecting layer into map srs
-            else if (prj_trans.backward(layer_ext) && map_ext.intersects(map_ext))
+            else if (prj_trans.backward(layer_ext) && map_ext.intersects(layer_ext))
             {
                 layer_ext.clip(map_ext);
                 // forward project layer extent back into native projection
@@ -249,11 +254,11 @@ private:
                  // if no intersection then nothing to do for layer
                  return;
             }
-                        
+            
             query::resolution_type res(m_.width()/m_.get_current_extent().width(),
                                        m_.height()/m_.get_current_extent().height());
             query q(layer_ext,res,scale_denom); //BBOX query
-                           
+            
             std::vector<feature_type_style*> active_styles;
             attribute_collector collector(names);
             double filt_factor = 1;
