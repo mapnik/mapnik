@@ -229,7 +229,7 @@ private:
             
             box2d<double> layer_ext = lay.envelope();
             
-            // first, try to forward project map ext into layer srs
+            // first, try intersection of map extent forward projected into layer srs
             if (prj_trans.forward(map_ext) && map_ext.intersects(layer_ext))
             {
                 layer_ext.clip(map_ext);
@@ -239,7 +239,7 @@ private:
             {
                  return;
             }
-            // fallback to back projecting layer into map srs
+            // next try intersection of layer extent back projected into map srs
             else if (prj_trans.backward(layer_ext) && map_ext.intersects(layer_ext))
             {
                 layer_ext.clip(map_ext);
