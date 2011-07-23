@@ -70,7 +70,7 @@ void metawriter_json_stream::start(metawriter_property_map const& /*properties*/
 void metawriter_json_stream::write_header()
 {
     assert(f_);
-    *f_ << "{ \"type\": \"FeatureCollection\", \"features\": [\n" << std::fixed << std::setprecision(8);
+    *f_ << "{ \"type\": \"FeatureCollection\", \"features\": [\n" << std::fixed << std::setprecision(pixel_coordinates_ ? 0 : 8);
     count_ = STARTED;
 }
 
@@ -96,7 +96,7 @@ metawriter_json_stream::~metawriter_json_stream()
 
 metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
     : metawriter(dflt_properties), count_(-1), output_empty_(true),
-      trans_(0), output_srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"), f_(0), pixel_coordinates_(false)
+      trans_(0), output_srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"), pixel_coordinates_(false), f_(0)
 {
 }
 
@@ -112,6 +112,9 @@ void metawriter_json_stream::write_properties(Feature const& feature, metawriter
         std::string text;
         if (itr != fprops.end())
         {
+            // Skip empty props
+            if(itr->second.to_string().size() == 0) continue; // ignore empty
+            
             //Property found
             text = boost::replace_all_copy(boost::replace_all_copy(itr->second.to_string(), "\\", "\\\\"), "\"", "\\\"");
             if (i++) *f_ << ",";

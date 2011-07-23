@@ -446,7 +446,7 @@ void map_parser::parse_style( Map & map, ptree const & sty )
 
 void map_parser::parse_metawriter(Map & map, ptree const & pt)
 {
-    ensure_attrs(pt, "MetaWriter", "name,type,file,default-output,output-empty");
+    ensure_attrs(pt, "MetaWriter", "name,type,file,default-output,output-empty,pixel-coordinates");
     std::string name("<missing name>");
     metawriter_ptr writer;
     try
