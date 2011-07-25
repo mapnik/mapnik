@@ -57,7 +57,7 @@ def test_feature_attributes():
     attrs = {'PRFEDEA': u'35043411', 'EAS_ID': 168, 'AREA': 215229.266}
     eq_(feat.attributes, attrs)
     eq_(lyr.datasource.fields(),['AREA', 'EAS_ID', 'PRFEDEA'])
-    eq_(lyr.datasource.field_types(),[float,int,str])
+    eq_(lyr.datasource.field_types(),['float','int','str'])
 
 def test_hit_grid():
     import os
