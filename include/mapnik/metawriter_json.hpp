@@ -82,10 +82,10 @@ protected:
     /** Features written. */
     int count_;
     bool output_empty_;
-    bool pixel_coordinates_;
     /** Transformation from map srs to output srs. */
     proj_transform *trans_;
     projection output_srs_;
+    bool pixel_coordinates_;
     virtual void write_header();
     inline void write_feature_header(std::string type) {
 #ifdef MAPNIK_DEBUG
