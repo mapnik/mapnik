@@ -28,6 +28,7 @@
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/value.hpp>
 
 #include <boost/variant.hpp>
 
@@ -37,16 +38,17 @@ using mapnik::parse_expression;
 using mapnik::to_expression_string;
 using mapnik::path_expression_ptr;
 
+
 // expression
 expression_ptr parse_expression_(std::string const& wkt)
 {
     return parse_expression(wkt,"utf8");
 }
 
-bool expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature const& f)
+mapnik::value expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature const& f)
 {
-    mapnik::value result = boost::apply_visitor(mapnik::evaluate<mapnik::Feature,mapnik::value>(f),expr);
-    return result.to_bool();
+    // will be auto-converted to proper python type by `mapnik_value_to_python`
+    return boost::apply_visitor(mapnik::evaluate<mapnik::Feature,mapnik::value>(f),expr);
 }
 
 // path expression

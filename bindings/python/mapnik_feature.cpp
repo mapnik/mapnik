@@ -59,14 +59,6 @@ void add_geometry(Feature & feature, std::auto_ptr<mapnik::geometry_type> geom)
 
 namespace boost { namespace python {
 
-    struct mapnik_value_to_python
-    {
-        static PyObject* convert(mapnik::value const& v)
-        {
-            return boost::apply_visitor(value_converter(),v.base());
-        }
-    };
-      
 // Forward declaration
     template <class Container, bool NoProxy, class DerivedPolicies>
     class map_indexing_suite2;
@@ -260,7 +252,6 @@ void export_feature()
     implicitly_convertible<bool,mapnik::value>();
 
     std_pair_to_python_converter<std::string const,mapnik::value>();
-    to_python_converter<mapnik::value,mapnik_value_to_python>();
     UnicodeString_from_python_str();
    
     class_<Feature,boost::shared_ptr<Feature>,
