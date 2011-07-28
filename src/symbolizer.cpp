@@ -33,6 +33,20 @@ void symbolizer_base::add_metawriter(std::string const& name, metawriter_propert
     properties_ = properties;
 }
 
+void symbolizer_base::add_metawriter(metawriter_ptr writer_ptr, metawriter_properties const& properties,
+                    std::string const& name)
+{
+    writer_ptr_ = writer_ptr;
+    properties_ = properties;
+    writer_name_ = name;
+    if (writer_ptr) {
+        properties_complete_ = writer_ptr->get_default_properties();
+        properties_complete_.insert(properties_.begin(), properties_.end());
+    } else {
+        properties_complete_.clear();
+    }
+}
+
 void symbolizer_base::cache_metawriters(Map const &m)
 {
     if (writer_name_.empty()) {
