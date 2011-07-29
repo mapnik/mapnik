@@ -162,7 +162,7 @@ void postgis_datasource::bind() const
                 /*
                 if (show_queries_)
                 {
-                    clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+                    std::clog << boost::format("PostGIS: sending query: %s\n") % s.str();
                 }
                 */
                  
@@ -197,7 +197,7 @@ void postgis_datasource::bind() const
                     /*
                     if (show_queries_)
                     {
-                        clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+                        std::clog << boost::format("PostGIS: sending query: %s\n") % s.str();
                     }
                     */
 
@@ -234,63 +234,101 @@ void postgis_datasource::bind() const
             std::ostringstream s;
             s << "SELECT * FROM " << populate_tokens(table_) << " LIMIT 0";
 
+            
             /*
             if (show_queries_)
             {
-                clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+                std::clog << boost::format("PostGIS: sending query: %s\n") % s.str();
             }
             */
+            
 
             shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
             int count = rs->getNumFields();
+            bool found_key_field = false;
             for (int i=0;i<count;++i)
             {
                 std::string fld_name=rs->getFieldName(i);
                 int type_oid = rs->getTypeOID(i);
-                switch (type_oid)
+
+                // validate type of key_field
+                if (!found_key_field && !key_field_.empty() && fld_name == key_field_)
                 {
-                case 16:    // bool
-                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Boolean));
-                    break;
-                case 20:    // int8
-                case 21:    // int2
-                case 23:    // int4
-                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
-                    break;
-                case 700:   // float4 
-                case 701:   // float8
-                case 1700:  // numeric ??
-                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                case 1042:  // bpchar
-                case 1043:  // varchar
-                case 25:    // text
-                    desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-                    break;
-                default: // should not get here
-#ifdef MAPNIK_DEBUG
-                    s.str("");
-                    s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
-
-                    /*
-                    if (show_queries_)
+                    found_key_field = true;
+                    if (type_oid == 20 || type_oid == 21 || type_oid == 23)
                     {
-                        clog << boost::format("PostGIS: sending query: %s\n") % s.str();
-                    }
-                    */
-
-                    shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
-                    if (rs_oid->next())
-                    {
-                        std::clog << "Postgis Plugin: unknown type = " << rs_oid->getValue("typname")
-                            << " (oid:" << rs_oid->getValue("oid") << ")" << std::endl;
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
                     }
                     else
                     {
-                        std::clog << "Postgis Plugin: unknown oid type =" << type_oid << std::endl;              
+                        std::ostringstream error_s;
+                        error_s << "invalid type '";
+                        std::ostringstream type_s;
+                        type_s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
+                        shared_ptr<ResultSet> rs_oid = conn->executeQuery(type_s.str());
+                        if (rs_oid->next())
+                        {
+                            error_s << rs_oid->getValue("typname")
+                              << "' (oid:" << rs_oid->getValue("oid") << ")";
+                        }
+                        else
+                        {
+                            error_s << "oid:" << type_oid << "'";           
+                        }
+                        rs_oid->close();
+                        error_s << " for key_field '" << fld_name << "' - "
+                          << "must be an integer primary key";
+                        rs->close();
+                        throw mapnik::datasource_exception( error_s.str() );
                     }
-                    rs_oid->close();
-#endif
-                    break;
+                }
+                else
+                {
+                    switch (type_oid)
+                    {
+                    case 16:    // bool
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Boolean));
+                        break;
+                    case 20:    // int8
+                    case 21:    // int2
+                    case 23:    // int4
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+                        break;
+                    case 700:   // float4 
+                    case 701:   // float8
+                    case 1700:  // numeric ??
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                    case 1042:  // bpchar
+                    case 1043:  // varchar
+                    case 25:    // text
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                        break;
+                    default: // should not get here
+    #ifdef MAPNIK_DEBUG
+                        s.str("");
+                        s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
+    
+                        /*
+                        if (show_queries_)
+                        {
+                            std::clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+                        }
+                        */
+    
+                        shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
+                        if (rs_oid->next())
+                        {
+                            std::clog << "Postgis Plugin: unknown type = " << rs_oid->getValue("typname")
+                                << " (oid:" << rs_oid->getValue("oid") << ")" << std::endl;
+                        }
+                        else
+                        {
+                            std::clog << "Postgis Plugin: unknown oid type =" << type_oid << std::endl;              
+                        }
+                        rs_oid->close();
+    #endif
+                        break;
+                    }
                 }
             }
             rs->close();
@@ -387,7 +425,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
         /*
         if (show_queries_)
         {
-            clog << boost::format("PostGIS: sending query: %s\n") % csql.str();
+            std::clog << boost::format("PostGIS: sending query: %s\n") % csql.str();
         }
         */
 
@@ -404,7 +442,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
         /*
         if (show_queries_)
         {
-            clog << boost::format("PostGIS: sending query: %s\n") % sql;
+            std::clog << boost::format("PostGIS: sending query: %s\n") % sql;
         }
         */
 
@@ -459,7 +497,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             else
                 s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
-            if (!key_field_.empty())
+            if (!key_field_.empty()) 
                 mapnik::quote_attr(s,key_field_);
 
             std::set<std::string> const& props=q.property_names();
@@ -480,6 +518,9 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }
          
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
+            unsigned num_attr = props.size();
+            if (!key_field_.empty())
+                ++num_attr;
             return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,!key_field_.empty(),props.size());
         }
         else 
@@ -631,7 +672,7 @@ box2d<double> postgis_datasource::envelope() const
             /*
             if (show_queries_)
             {
-                clog << boost::format("PostGIS: sending query: %s\n") % s.str();
+                std::clog << boost::format("PostGIS: sending query: %s\n") % s.str();
             }
             */
             

@@ -74,23 +74,23 @@ feature_ptr postgis_featureset::next()
         if (key_field_) {
             // create feature with user driven id from attribute
             int oid = rs_->getTypeOID(pos);
-            if (oid == 20 || oid == 21 || oid == 23) {
-                const char* buf = rs_->getValue(pos);
-                int val;
-                if (oid == 20)
-                    val = int8net(buf);
-                else if (oid == 21)
-                    val = int4net(buf);
-                else if (oid == 23)
-                    val = int2net(buf);
-                feature = feature_factory::create(val);
-            } else {
-                std::ostringstream s;
-                s << "invalid type for key_field '" << oid << "'";
-                std::string name = rs_->getFieldName(pos);
-                s << " for " << name;
-                throw mapnik::datasource_exception( s.str() );
+            const char* buf = rs_->getValue(pos);
+            std::string name = rs_->getFieldName(pos);
+            // validation happens of this type at bind()
+            int val;
+            if (oid == 20)
+            {
+                val = int8net(buf);
             }
+            else if (oid == 21)
+            {
+                val = int2net(buf);
+            }
+            else
+            {
+                val = int4net(buf);
+            }
+            feature = feature_factory::create(val);
             ++pos;
         } else {
             // fallback to auto-incrementing id
