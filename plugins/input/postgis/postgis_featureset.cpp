@@ -91,6 +91,10 @@ feature_ptr postgis_featureset::next()
                 val = int4net(buf);
             }
             feature = feature_factory::create(val);
+            // TODO - extend feature class to know
+            // that its id is also an attribute to avoid
+            // this duplication
+            boost::put(*feature,name,val);
             ++pos;
         } else {
             // fallback to auto-incrementing id
