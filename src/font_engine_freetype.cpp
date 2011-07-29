@@ -143,6 +143,12 @@ std::vector<std::string> freetype_engine::face_names ()
     return names;
 }
 
+std::map<std::string,std::string> const& freetype_engine::get_mapping()
+{
+    return name2file_;
+}
+
+
 face_ptr freetype_engine::create_face(std::string const& family_name)
 {
     std::map<std::string,std::string>::iterator itr;
