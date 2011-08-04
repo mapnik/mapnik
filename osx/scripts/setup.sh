@@ -5,15 +5,16 @@ cd osx/sources
 # build icu and boost for packaging up within Mapnik Framework
 
 # local install location
-PREFIX=/Users/dane/projects/mapnik-dev/trunk-build/osx/sources
-mkdir -p /Users/dane/projects/mapnik-dev/trunk-build/osx/sources
+PREFIX=/Users/dane/projects/mapnik-dev/trunk-build-static/osx/sources
+mkdir -p $PREFIX
 export DYLD_LIBRARY_PATH=$PREFIX/lib
 # final resting place
 INSTALL=/Library/Frameworks/Mapnik.framework/unix/lib
 export DYLD_LIBRARY_PATH=$PREFIX/lib
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
-# To ensure things like pkg-config built locally are used
-export PATH=$PREFIX/bin:$PATH
+export CFLAGS="-O3 -arch i386 -arch x86_64"
+export CXXFLAGS="-O3 -arch i386 -arch x86_64"
+export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
 
 
 # make a directory to hold icu and boost
@@ -26,9 +27,6 @@ tar xvf icu4c-4_6-src.tgz
 cd icu/source
 
 # universal flags
-export CFLAGS="-O3 -arch i386 -arch x86_64"
-export CXXFLAGS="-O3 -arch i386 -arch x86_64"
-export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
 #./runConfigureICU MacOSX --prefix=$PREFIX --disable-static --enable-shared --disable-samples --disable-icuio --disable-layout --disable-tests --disable-extras --with-library-bits=64
 ./runConfigureICU MacOSX --prefix=$PREFIX --disable-static --enable-shared --with-library-bits=64
 make install -j4
@@ -69,15 +67,17 @@ install_name_tool -id $INSTALL/libfreetype.6.dylib ../../sources/lib/libfreetype
 cd ../
 
 # pkg-config so we get cairo and friends configured correctly
-wget http://pkgconfig.freedesktop.org/releases/pkg-config-0.25.tar.gz
-tar xvf pkg-config-0.25.tar.gz
-cd pkg-config-0.25
+wget http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz
+tar xvf pkg-config-0.26.tar.gz
+cd pkg-config-0.26
 ./configure --disable-dependency-tracking --prefix=$PREFIX
+make -j4
+make install
 
 # pixman
-wget http://cairographics.org/releases/pixman-0.20.2.tar.gz
-tar xvf pixman-0.20.2.tar.gz
-cd pixman-0.20.2
+wget http://cairographics.org/releases/pixman-0.22.2.tar.gz
+tar xvf pixman-0.22.2.tar.gz
+cd pixman-0.22.2
 ./configure --disable-dependency-tracking --prefix=$PREFIX
 make -j4
 make install
@@ -140,9 +140,9 @@ Cflags: -I${includedir}
 
 
 # libsigcxx
-wget http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/libsigc++-2.2.8.tar.gz
-tar xvf libsigc++-2.2.8.tar.gz
-cd libsigc++-2.2.8
+wget http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/libsigc++-2.2.10.tar.bz2
+tar xvf libsigc++-2.2.10.tar.bz2
+cd libsigc++-2.2.10
 ./configure --disable-dependency-tracking --prefix=$PREFIX
 make -j4
 make install
@@ -195,9 +195,10 @@ otool -L ../../sources/lib/*dylib | grep local
 
 
 # boost
-wget http://voxel.dl.sourceforge.net/project/boost/boost/1.46.1/boost_1_46_1.tar.bz2
-tar xjvf boost_1_46_1.tar.bz2
-cd boost_1_46_1
+cd ../../deps
+wget http://voxel.dl.sourceforge.net/project/boost/boost/1.47.0/boost_1_47_0.tar.bz2
+tar xjvf boost_1_47_0.tar.bz2
+cd boost_1_47_0
 
 # edit tools/build/v2/tools/python.jam, line 980, replace with:
     if $(target-os) in windows cygwin
@@ -216,7 +217,7 @@ cd boost_1_46_1
 
 ./bootstrap.sh
 ./bjam --prefix=$PREFIX --with-thread --with-filesystem \
-  --with-regex --with-program_options --with-system \
+  --with-regex --with-program_options --with-system --with-chrono \
   -sHAVE_ICU=1 -sICU_PATH=$PREFIX \
   toolset=darwin \
   address-model=32_64 \
@@ -226,7 +227,7 @@ cd boost_1_46_1
   stage
 
 ./bjam --prefix=$PREFIX --with-thread --with-filesystem \
-  --with-regex --with-program_options --with-system \
+  --with-regex --with-program_options --with-system --with-chrono \
   -sHAVE_ICU=1 -sICU_PATH=$PREFIX \
   toolset=darwin \
   address-model=32_64 \
@@ -244,6 +245,8 @@ cd boost_1_46_1
   link=shared \
   variant=release \
   install
+
+# toolset=clang-darwin cxxflags="-fPIC" linkflags="-undefined dynamic_lookup"
 
 # boost python for various versions are done in python script
 python ../../scripts/build_boost_pythons.py 2.5 32_64
@@ -302,6 +305,13 @@ install_name_tool -change libboost_system.dylib $INSTALL/libboost_system.dylib l
 #cd ../../sources/lib
 #install_name_tool -id $INSTALL/librasterlite.0.dylib librasterlite.0.dylib
 
+# sqlite with rtree
+cd ../../deps
+wget http://www.sqlite.org/sqlite-autoconf-3070701.tar.gz
+tar xvf sqlite-autoconf-3070701.tar.gz
+cd sqlite-autoconf-3070701
+export CFLAGS="-DSQLITE_ENABLE_RTREE=1 -O3 "$CFLAGS
+./configure --prefix=$PREFIX --enable-static=yes --enable-shared=no --disable-dependency-tracking
 
 ### MAPNIK ###
 
