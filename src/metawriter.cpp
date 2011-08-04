@@ -96,7 +96,8 @@ metawriter_json_stream::~metawriter_json_stream()
 
 metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
     : metawriter(dflt_properties), count_(-1), output_empty_(true),
-      pixel_coordinates_(false), trans_(0), output_srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"), f_(0)
+      trans_(0), output_srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
+      pixel_coordinates_(false), f_(0)
 {
 }
 
