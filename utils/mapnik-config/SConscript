@@ -59,9 +59,9 @@ other_includes = config_env['CUSTOM_CXXFLAGS'] + config_env['CXXFLAGS'] + ''.joi
 
 private_libs = ' -lfreetype -l%s -l%s -l%s' % (config_env['ICU_LIB_NAME'],filesystem,regex)
 
-#if config_env['HAS_CAIRO']:
-#    private_libs += ' -lcairomm-1.0 -lcairo'
-#    other_includes.append('-DHAVE_CAIRO')
+if config_env['HAS_CAIRO']:
+    private_libs += ' -lcairomm-1.0 -lcairo'
+    other_includes.append('-DHAVE_CAIRO')
 
 if config_env['XMLPARSER'] == 'libxml2' and config_env['HAS_LIBXML2']:
     config_env.Append(CXXFLAGS = '-DHAVE_LIBXML2')
@@ -121,7 +121,7 @@ source = 'mapnik-config'
 open(source,'w').write(top+template)
 
 try:
-    os.chmod(source,0666)
+    os.chmod(source,0755)
 except: pass
 
 target_path = os.path.normpath(install_prefix+'/bin')
