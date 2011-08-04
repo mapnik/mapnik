@@ -52,12 +52,16 @@ if __name__ == '__main__':
     if not os.path.exists('installer'):
         sys.exit("must be run from directory below 'installer' dir")
     
-    os.system('rm installer/pkg/Mapnik.pkg')
+    print 'removing old files'
+    #os.system('rm installer/pkg/Mapnik.pkg')
     os.system('rm installer/*dmg')
     
+    print 'writing build log'
     open('installer/pkg/build_log.txt','w').write(identifier)
 
-    os.system('packagemaker --doc installer/mapnik.pmdoc --out installer/pkg/Mapnik.pkg')
+    cmd = 'packagemaker --doc installer/mapnik.pmdoc --out installer/pkg/Mapnik.pkg'
+    print cmd
+    #os.system(cmd)
 
     cmd = 'hdiutil create "installer/mapnik_%s_%s_%s_%s_%s.dmg" -volname "Mapnik %s" -fs HFS+ -srcfolder installer/pkg' % (version,short_plat,arch,date,svn,version)
     print cmd
