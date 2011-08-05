@@ -252,7 +252,8 @@ featureset_ptr shape_datasource::features(const query& q) const
             (new shape_index_featureset<filter_in_box>(filter,
                                                        *shape_,
                                                        q.property_names(),
-                                                       desc_.get_encoding()));
+                                                       desc_.get_encoding(),
+                                                       shape_name_));
     }
     else
     {
@@ -289,7 +290,8 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
             (new shape_index_featureset<filter_at_point>(filter,
                                                          *shape_,
                                                          names,
-                                                         desc_.get_encoding()));
+                                                         desc_.get_encoding(),
+                                                         shape_name_));
     }
     else
     {

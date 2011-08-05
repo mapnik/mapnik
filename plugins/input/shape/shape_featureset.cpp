@@ -24,6 +24,9 @@
 // mapnik
 #include <mapnik/feature_factory.hpp>
 
+// boost
+#include <boost/algorithm/string.hpp>
+
 // stl
 #include <iostream>
 
@@ -34,13 +37,13 @@ using mapnik::feature_factory;
 
 template <typename filterT>
 shape_featureset<filterT>::shape_featureset(const filterT& filter, 
-                                            const std::string& shape_file,
+                                            const std::string& shape_name,
                                             const std::set<std::string>& attribute_names,
                                             std::string const& encoding,
                                             long file_length )
     : filter_(filter),
       //shape_type_(shape_io::shape_null),
-      shape_(shape_file, false),
+      shape_(shape_name, false),
       query_ext_(),
       tr_(new transcoder(encoding)),
       file_length_(file_length),
@@ -65,12 +68,14 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
         {
             std::ostringstream s;
 
-            s << "error no attribute by the name of '" << *pos << "'"
-                << ", available attributes are:";
+            s << "no attribute '" << *pos << "' in '"
+              << shape_name << "'. Valid attributes are: ";
+            std::vector<std::string> list;
             for (int i=0;i<shape_.dbf().num_fields();++i)
             {
-                s << " '" << shape_.dbf().descriptor(i).name_ << "'";
+                list.push_back(shape_.dbf().descriptor(i).name_);
             }
+            s << boost::algorithm::join(list, ",") << ".";
             
             throw mapnik::datasource_exception( "Shape Plugin: " + s.str() );
         }

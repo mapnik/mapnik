@@ -80,6 +80,7 @@ public:
     {
         return (index_ && index_->is_open());
     }
+    
     void move_to(int id);
     int type() const;
     const box2d<double>& current_extent() const;

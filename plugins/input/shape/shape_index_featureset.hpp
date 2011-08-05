@@ -53,7 +53,8 @@ class shape_index_featureset : public Featureset
       shape_index_featureset(const filterT& filter,
                              shape_io& shape,
                              const std::set<std::string>& attribute_names,
-                             std::string const& encoding);
+                             std::string const& encoding,
+                             std::string const& shape_name);
       virtual ~shape_index_featureset();
       feature_ptr next();
    private:

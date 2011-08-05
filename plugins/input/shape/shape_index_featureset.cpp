@@ -26,6 +26,7 @@
 #include <mapnik/feature_factory.hpp>
 
 // boost
+#include <boost/algorithm/string.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 
 // stl
@@ -41,7 +42,8 @@ template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
                                                         shape_io& shape,
                                                         const std::set<std::string>& attribute_names,
-                                                        std::string const& encoding)
+                                                        std::string const& encoding,
+                                                        std::string const& shape_name)
     : filter_(filter),
       //shape_type_(0),
       shape_(shape),
@@ -86,12 +88,14 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
         {
             std::ostringstream s;
 
-            s << "error no attribute by the name of '" << *pos << "'"
-                << ", available attributes are:";
+            s << "no attribute '" << *pos << "' in '"
+              << shape_name << "'. Valid attributes are: ";
+            std::vector<std::string> list;
             for (int i=0;i<shape_.dbf().num_fields();++i)
             {
-                s << " '" << shape_.dbf().descriptor(i).name_ << "'";
+                list.push_back(shape_.dbf().descriptor(i).name_);
             }
+            s << boost::algorithm::join(list, ",") << ".";
             
             throw mapnik::datasource_exception( "Shape Plugin: " + s.str() );
         }
