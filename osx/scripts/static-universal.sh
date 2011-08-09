@@ -19,6 +19,14 @@ mkdir -p deps
 cd deps
 
 
+# icucore headers - temporary workaround until I can get more recent icu versions working
+wget http://www.opensource.apple.com/tarballs/ICU/ICU-400.38.tar.gz
+tar xvf ICU-400.38.tar.gz
+cd ICU-400.38
+make install
+cp -R build/usr/local/include/unicode/ ../../sources/include/unicode
+cd ../
+
 # boost
 wget http://voxel.dl.sourceforge.net/project/boost/boost/1.47.0/boost_1_47_0.tar.bz2
 tar xjvf boost_1_47_0.tar.bz2
@@ -119,6 +127,13 @@ cd tiff-3.9.5
 make -j4
 make install
 cd ../
+
+
+# postgis
+# install postgres 9.x client from http://www.kyngchaos.com/software/postgres
+# then copy the static libpq.a to a prioritized directory:
+cp /usr/local/pgsql/lib/libpq.a osx/sources/lib/
+
 
 # gdal 1.8.1
 wget http://download.osgeo.org/gdal/gdal-1.8.1.tar.gz
@@ -263,3 +278,4 @@ export CXXFLAGS="-I$PREFIX/include "$CFLAGS
     --disable-dependency-tracking --prefix=$PREFIX
 make -j4
 make install
+cd ../
