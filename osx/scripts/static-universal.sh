@@ -128,11 +128,25 @@ make -j4
 make install
 cd ../
 
+# gettext which provides libintl for libpq
+wget http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.1.1.tar.gz
+tar xvf gettext-0.18.1.1.tar.gz
+cd gettext-0.18.1.1
+export CC=gcc
+export CXX=g++
+./configure --prefix=$PREFIX --enable-static --disable-shared --disable-dependency-tracking \
+--without-included-gettext --disable-debug --without-included-glib \
+--without-included-libcroco  --without-included-libxml \
+--without-emacs --without-git --without-cvs
+make -j4
+make install
+cd ../
+
 
 # postgis
 # install postgres 9.x client from http://www.kyngchaos.com/software/postgres
 # then copy the static libpq.a to a prioritized directory:
-cp /usr/local/pgsql/lib/libpq.a osx/sources/lib/
+cp /usr/local/pgsql/lib/libpq.a osx/sources/lib/libpq_s.a
 
 
 # gdal 1.8.1
