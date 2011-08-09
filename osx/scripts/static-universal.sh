@@ -279,3 +279,32 @@ export CXXFLAGS="-I$PREFIX/include "$CFLAGS
 make -j4
 make install
 cd ../
+
+# mapnik
+
+# config.py
+
+CXX = 'clang++'
+CC = 'clang++'
+CUSTOM_CXXFLAGS = '-arch x86_64 -arch i386 -mmacosx-version-min=10.6 -isysroot /Developer/SDKs/MacOSX10.6.sdk'
+CUSTOM_LDFLAGS = '-Wl,-search_paths_first -arch x86_64 -arch i386 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.6.sdk'
+INPUT_PLUGINS = 'gdal,ogr,postgis,shape'
+DESTDIR = './osx/sources/'
+BOOST_INCLUDES = './osx/sources/include'
+BOOST_LIBS = './osx/sources/lib'
+FREETYPE_CONFIG = './osx/sources/bin/freetype-config'
+ICU_INCLUDES = './osx/sources/include'
+ICU_LIB_NAME = 'icucore'
+PNG_INCLUDES = './osx/sources/include'
+PNG_LIBS = './osx/sources/lib'
+JPEG_INCLUDES = './osx/sources/include'
+JPEG_LIBS = './osx/sources/lib'
+TIFF_INCLUDES = './osx/sources/include'
+TIFF_LIBS = './osx/sources/lib'
+PROJ_INCLUDES = './osx/sources/include'
+PROJ_LIBS = './osx/sources/lib'
+PKG_CONFIG_PATH = './osx/sources/lib/pkgconfig'
+SQLITE_INCLUDES = './osx/sources/include'
+SQLITE_LIBS = './osx/sources/lib'
+BINDINGS = 'none'
+
