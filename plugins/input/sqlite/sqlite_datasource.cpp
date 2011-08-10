@@ -336,7 +336,7 @@ void sqlite_datasource::bind() const
             // Generate implicit index_table name - need to do this after
             // we have discovered meta-data or else we don't know the column
             // name
-            index_table_ = "idx_" + geometry_table_ + "_" + geometry_field_;
+            index_table_ = "idx_" + mapnik::unquote_sql(geometry_table_) + "_" + geometry_field_;
         }
         
         std::ostringstream s;
@@ -386,10 +386,18 @@ void sqlite_datasource::bind() const
         }    
     }
     
+    /* TODO - instead of throwing here we should:
+      - perhaps warn to std::clog, then..
+      - form up a query of the whole table
+      - loop over geoms, assuming wkb format
+      - parse geoms and collect cumulative extent using box2d::expand_to_include
+      - this would match the postgis behavior
+    */
+
     if (!extent_initialized_) {
         std::ostringstream s;
-        s << "Sqlite Plugin: extent could not be determined for table|geometry '" 
-          << geometry_table_ << "|" << geometry_field_ << "'"
+        s << "Sqlite Plugin: extent could not be determined for table '" 
+          << geometry_table_ << "' and geometry field '" << geometry_field_ << "'"
           << " because an rtree spatial index is missing."
           << " - either set the table 'extent' or create an rtree spatial index";
         throw datasource_exception(s.str());
