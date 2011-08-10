@@ -31,6 +31,7 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
@@ -345,8 +346,8 @@ void sqlite_datasource::bind() const
         if (dataset_->execute_with_code(s.str()) != SQLITE_OK)
         {
             use_spatial_index_ = false;
-            std::clog << "Sqlite Plugin: No suitable spatial index found for "
-                << geometry_table_ << " (checked " << s.str() << ")" << std::endl;
+            std::clog << "Sqlite Plugin: Warning, no suitable spatial index found for "
+                << geometry_table_ << " (checked " << s.str() << "). Rendering will work but will be slow: set 'use_spatial_index' to false to silence this warning." << std::endl;
         }
     }
 
@@ -376,13 +377,22 @@ void sqlite_datasource::bind() const
         boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
         if (rs->is_valid () && rs->step_next())
         {
-            double xmin = rs->column_double (0);
-            double ymin = rs->column_double (1);
-            double xmax = rs->column_double (2);
-            double ymax = rs->column_double (3);
-
-            extent_.init (xmin,ymin,xmax,ymax);
-            extent_initialized_ = true;
+            if (!rs->column_isnull(0)) {
+                try 
+                {
+                    double xmin = lexical_cast<double>(rs->column_double(0));
+                    double ymin = lexical_cast<double>(rs->column_double(1));
+                    double xmax = lexical_cast<double>(rs->column_double(2));
+                    double ymax = lexical_cast<double>(rs->column_double(3));
+                    extent_.init (xmin,ymin,xmax,ymax);
+                    extent_initialized_ = true;
+    
+                }
+                catch (bad_lexical_cast &ex)
+                {
+                    std::clog << boost::format("SQLite Plugin: warning: could not determine extent from query: %s\nError was: '%s'\n") % s.str() % ex.what() << std::endl;
+                }
+            }
         }    
     }
     
@@ -398,7 +408,7 @@ void sqlite_datasource::bind() const
         std::ostringstream s;
         s << "Sqlite Plugin: extent could not be determined for table '" 
           << geometry_table_ << "' and geometry field '" << geometry_field_ << "'"
-          << " because an rtree spatial index is missing."
+          << " because an rtree spatial index is missing or empty."
           << " - either set the table 'extent' or create an rtree spatial index";
         throw datasource_exception(s.str());
     }
