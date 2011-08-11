@@ -809,7 +809,7 @@ int main()
         return False
     
     major, minor = map(int,result.split('.'))
-    if major >= 4 and minor >= 2:
+    if major >= 4 and minor >= 0:
         color_print(4,'\nFound icu version... %s\n' % result)
         return True
     

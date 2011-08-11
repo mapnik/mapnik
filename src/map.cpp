@@ -29,6 +29,9 @@
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/scale_denominator.hpp>
 
+// icu
+#include <unicode/uversion.h>
+
 namespace mapnik
 {
 
@@ -653,7 +656,11 @@ void Map::init_metawriters()
 
 void Map::set_metawriter_property(std::string name, std::string value)
 {
+#if (U_ICU_VERSION_MAJOR_NUM > 4) || (U_ICU_VERSION_MAJOR_NUM == 4 && U_ICU_VERSION_MINOR_NUM >=2)
     metawriter_output_properties[name] = UnicodeString::fromUTF8(value);
+#else
+    metawriter_output_properties[name] = UnicodeString(value.c_str());
+#endif
 }
 
 std::string Map::get_metawriter_property(std::string name) const
