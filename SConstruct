@@ -798,10 +798,12 @@ int main()
         context.Result('error, could not get major and minor version from unicode/uversion.h')
         return False
     
-    color_print(4,'\nFound icu version... %s\n' % result)
     major, minor = map(int,result.split('.'))
     if major >= 4 and minor >= 2:
+        color_print(4,'\nFound icu version... %s\n' % result)
         return True
+    
+    color_print(1,'\nFound insufficient icu version... %s\n' % result)
     return False
 
 def boost_regex_has_icu(context):
