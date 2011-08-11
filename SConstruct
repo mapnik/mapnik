@@ -1297,7 +1297,7 @@ if not preconfigured:
                 env.Append(CXXFLAGS = common_cxx_flags + '-O %s' % ndebug_flags)
         else:
             # Common flags for GCC.
-            gcc_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-200 %s' % (pthread, env['WARNING_CXXFLAGS'], common_cxx_flags)        
+            gcc_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-200 %s' % (env['WARNING_CXXFLAGS'], pthread, common_cxx_flags)        
             if env['DEBUG']:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
             else: 
