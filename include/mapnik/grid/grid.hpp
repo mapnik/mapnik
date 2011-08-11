@@ -198,7 +198,7 @@ public:
         return resolution_;
     }
 
-    inline void set_resolution(unsigned int res) const
+    inline void set_resolution(unsigned int res)
     {
         resolution_ = res;
     }
