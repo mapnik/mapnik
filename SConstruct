@@ -310,6 +310,7 @@ opts.AddVariables(
     ('PREFIX', 'The install path "prefix"', '/usr/local'),
     ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
+    ('PATH_INSERT', 'A custom path to append to the $PATH env to prioritize usage of shell programs like pkg-config will be used if multiple are present on the system', ''),
     
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -415,6 +416,8 @@ pickle_store = [# Scons internal variables
         'LIBTOOL_SUPPORTS_ADVISE',
         'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
+        'PKG_CONFIG_PATH',
+        'PATH_INSERT',
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -938,8 +941,10 @@ if not preconfigured:
     env['PLUGINS'] = PLUGINS
         
     if env['PKG_CONFIG_PATH']:
-        env['ENV']['PKG_CONFIG_PATH'] = env['PKG_CONFIG_PATH']
+        env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
+    if env['PATH_INSERT']:
+        env['ENV']['PATH'] = os.path.realpath(env['PATH_INSERT']) + ':' + env['ENV']['PATH']
 
     thread_suffix = 'mt'
     if env['PLATFORM'] == 'FreeBSD':
@@ -1423,9 +1428,6 @@ if not preconfigured:
 # autogenerate help on default/current SCons options
 Help(opts.GenerateHelpText(env))
 
-#env.Prepend(CPPPATH = '/usr/local/include')
-#env.Prepend(LIBPATH = '/usr/local/lib')
-
 #### Builds ####
 if not HELP_REQUESTED:
 
@@ -1435,9 +1437,12 @@ if not HELP_REQUESTED:
     env['create_uninstall_target'] = create_uninstall_target
 
     if env['PKG_CONFIG_PATH']:
-        env['ENV']['PKG_CONFIG_PATH'] = env['PKG_CONFIG_PATH']
+        env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
     
+    if env['PATH_INSERT']:
+        env['ENV']['PATH'] = os.path.realpath(env['PATH_INSERT']) + ':' + env['ENV']['PATH']
+
     # export env so it is available in Sconscript files
     Export('env')
 
