@@ -466,10 +466,6 @@ void MapWidget::updateMap()
           
           QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
           pix_=QPixmap::fromImage(image.rgbSwapped());
-          update();
-          // emit signal to interested widgets
-          emit mapViewChanged();
-          
           projection prj(map_->srs()); // map projection
           
           box2d<double> ext = map_->get_current_extent();
@@ -480,6 +476,9 @@ void MapWidget::updateMap()
           prj.inverse(x0,y0);
           prj.inverse(x1,y1);
           std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
+          update();
+          // emit signal to interested widgets
+          emit mapViewChanged();
       }
       catch (mapnik::config_error & ex)
       {
