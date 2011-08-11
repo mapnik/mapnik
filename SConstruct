@@ -296,6 +296,7 @@ opts.AddVariables(
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
     BoolVariable('XML_DEBUG', 'Compile a XML verbose debug version of mapnik', 'False'),
     ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
+    ('WARNING_CXXFLAGS', 'Compiler flags you can set to reduce warning levels which are placed after -Wall.', ''),
     
     # SCons build behavior options
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
@@ -1296,7 +1297,7 @@ if not preconfigured:
                 env.Append(CXXFLAGS = common_cxx_flags + '-O %s' % ndebug_flags)
         else:
             # Common flags for GCC.
-            gcc_cxx_flags = '-ansi -Wall %s -ftemplate-depth-200 %s' % (pthread, common_cxx_flags)        
+            gcc_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-200 %s' % (pthread, env['WARNING_CXXFLAGS'], common_cxx_flags)        
             if env['DEBUG']:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
             else: 
