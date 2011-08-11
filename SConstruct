@@ -302,8 +302,8 @@ opts.AddVariables(
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     # http://www.scons.org/wiki/GoFastButton
-    BoolVariable('FAST', "Make scons faster at the cost of less precise dependency tracking", 'False'),
-    BoolVariable('PRIORITIZE_LINKING', 'Sort list of lib and inc directories to ensure preferencial compiling and linking (useful when duplicate libs)', 'True'),
+    BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'True'),
+    BoolVariable('PRIORITIZE_LINKING', 'Sort list of lib and inc directories to ensure preferential compiling and linking (useful when duplicate libs)', 'True'),
     ('LINK_PRIORITY','Priority list in which to sort library and include paths (default order is internal, other, frameworks, user, then system - see source of `sort_paths` function for more detail)',','.join(DEFAULT_LINK_PRIORITY)),    
     
     # Install Variables
