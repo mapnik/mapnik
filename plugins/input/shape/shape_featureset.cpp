@@ -133,15 +133,19 @@ feature_ptr shape_featureset<filterT>::next()
         else
         {
             while (!filter_.pass(shape_.current_extent()))
-            {        
-                if (!shape_.shp().is_eof())
-                {
-                    std::streampos pos = shape_.shp().pos();
+            {       
+                std::streampos pos = shape_.shp().pos();
+                if (pos > 0 && pos < std::streampos(file_length_ * 2))
+                {                    
                     if (shape_.type() != shape_io::shape_null)
                     {
                        pos += std::streampos(2 * shape_.reclength_ - 36);
+                    }                    
+                    else
+                    {
+                        pos += std::streampos(8 * 3);
                     }
-                    shape_.move_to(pos);                    
+                    shape_.move_to(pos);
                 }
                 else
                 {
@@ -256,20 +260,18 @@ feature_ptr shape_featureset<filterT>::next()
         if (attr_ids_.size())
         {
             shape_.dbf().move_to(shape_.id_);
-            std::vector<int>::const_iterator pos=attr_ids_.begin();
+            std::vector<int>::const_iterator itr=attr_ids_.begin();
             std::vector<int>::const_iterator end=attr_ids_.end();
-             
-            while (pos!=end)
+            try 
             {
-                try 
-                {
-                    shape_.dbf().add_attribute(*pos,*tr_,*feature);//TODO optimize!!!
+                for (;itr!=end;++itr)
+                {                    
+                    shape_.dbf().add_attribute(*itr,*tr_,*feature);//TODO optimize!!!
                 }
-                catch (...)
-                {
-                    std::clog << "Shape Plugin: error processing attributes " << std::endl;
-                }
-                ++pos;
+            }
+            catch (...)
+            {
+                std::clog << "Shape Plugin: error processing attributes " << std::endl;
             }
         }
         return feature;
