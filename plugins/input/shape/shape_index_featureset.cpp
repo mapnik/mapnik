@@ -37,7 +37,6 @@
 using mapnik::feature_factory;
 using mapnik::geometry_type;
 
-
 template <typename filterT>
 shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
                                                         shape_io& shape,
@@ -154,7 +153,8 @@ feature_ptr shape_index_featureset<filterT>::next()
             while(!filter_.pass(shape_.current_extent()) && 
                   itr_!=ids_.end())
             {
-                if (shape_.type() != shape_io::shape_null) {
+                if (shape_.type() != shape_io::shape_null) 
+                {
                     pos=*itr_++;
                     shape_.move_to(pos);
                 }
@@ -232,19 +232,18 @@ feature_ptr shape_index_featureset<filterT>::next()
         if (attr_ids_.size())
         {
             shape_.dbf().move_to(shape_.id_);
-            std::set<int>::const_iterator pos=attr_ids_.begin();
+            std::set<int>::const_iterator itr=attr_ids_.begin();
             std::set<int>::const_iterator end=attr_ids_.end();
-            while (pos!=end)
+            try 
             {
-                try 
-                {
-                    shape_.dbf().add_attribute(*pos,*tr_,*feature);
+                for ( ; itr!=end; ++itr)
+                {                
+                    shape_.dbf().add_attribute(*itr,*tr_,*feature);
                 }
-                catch (...)
-                {
-                    std::clog << "Shape Plugin: error processing attributes" << std::endl;
-                }
-                ++pos;
+            }
+            catch (...)
+            {
+                std::clog << "Shape Plugin: error processing attributes" << std::endl;
             }
         }
         return feature;
