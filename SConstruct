@@ -291,6 +291,8 @@ opts.AddVariables(
     ('CC', 'The C compiler used for configure checks of C libs (defaults to gcc).', 'gcc'),
     ('CUSTOM_CXXFLAGS', 'Custom C++ flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir>', ''),
     ('CUSTOM_LDFLAGS', 'Custom linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>', ''),
+    EnumVariable('LINKING', "Set library format for libmapnik",'shared', ['shared','static']),
+    EnumVariable('RUNTIME_LINK', "Set preference for linking dependecies",'shared', ['shared','static']),
     EnumVariable('OPTIMIZATION','Set g++ optimization level','3', ['0','1','2','3','4','s']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
@@ -393,6 +395,9 @@ pickle_store = [# Scons internal variables
         'LINKFLAGS',
         'CUSTOM_LDFLAGS', # user submitted
         'CUSTOM_CXXFLAGS', # user submitted
+        'MAPNIK_LIB_NAME',
+        'LINK',
+        'RUNTIME_LINK',
         # Mapnik's SConstruct build variables
         'PLUGINS',
         'ABI_VERSION',
@@ -597,6 +602,7 @@ def get_pkg_lib(context, config, lib):
     return libname
 
 def parse_pg_config(context, config):
+    # TODO - leverage `LDFLAGS_SL` if RUNTIME_LINK==static
     env = context.env
     tool = config.lower()
     context.Message( 'Checking for %s... ' % tool)
@@ -604,8 +610,8 @@ def parse_pg_config(context, config):
     if ret:
         lib_path = call('%s --libdir' % env[config])
         inc_path = call('%s --includedir' % env[config])
-        env.AppendUnique(CPPPATH = inc_path)
-        env.AppendUnique(LIBPATH = lib_path)
+        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
         lpq = env['PLUGINS']['postgis']['lib']
         env.Append(LIBS = lpq)
     else:
@@ -936,6 +942,11 @@ if not preconfigured:
     env['HAS_PYCAIRO'] = False
     env['HAS_LIBXML2'] = False
     env['SVN_REVISION'] = None
+    if env['LINKING'] == 'static':
+       env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}mapnik2${LIBSUFFIX}'
+    else:
+       env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}mapnik2${SHLIBSUFFIX}'
+
     
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
@@ -984,8 +995,8 @@ if not preconfigured:
     for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
-        env.AppendUnique(CPPPATH = inc_path)
-        env.AppendUnique(LIBPATH = lib_path)
+        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
 
     conf.parse_config('FREETYPE_CONFIG')
 
@@ -1140,7 +1151,7 @@ if not preconfigured:
                 # Note, the 'delete_existing' keyword makes sure that these paths are prepended
                 # to the beginning of the path list even if they already exist
                 incpath = env['%s_INCLUDES' % details['path']]
-                env.PrependUnique(CPPPATH = incpath,delete_existing=True)
+                env.PrependUnique(CPPPATH = os.path.realpath(incpath),delete_existing=True)
                 env.PrependUnique(LIBPATH = env['%s_LIBS' % details['path']],delete_existing=True)
                 if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
                     env.Replace(**backup)
@@ -1369,7 +1380,7 @@ if not preconfigured:
             # as they are later set in the python SConscript
             # ugly hack needed until we have env specific conf
             backup = env.Clone().Dictionary()
-            env.AppendUnique(CPPPATH = env['PYTHON_INCLUDES'])
+            env.AppendUnique(CPPPATH = os.path.realpath(env['PYTHON_INCLUDES']))
             
             if not conf.CheckHeader(header='Python.h',language='C'):
                 color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION'])

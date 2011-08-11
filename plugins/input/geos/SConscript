@@ -45,7 +45,7 @@ libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 input_plugin = plugin_env.SharedLibrary('../geos', source=geos_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 # if the plugin links to libmapnik2 ensure it is built first
-Depends(input_plugin, env.subst('../../../src/${SHLIBPREFIX}mapnik2${SHLIBSUFFIX}'))
+Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)

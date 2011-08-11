@@ -224,7 +224,10 @@ if env['SVG_RENDERER']: # svg backend
 if env['HAS_CAIRO']:
     # attach libs to library linking environment
     try:
-        lib_env.ParseConfig('pkg-config --libs cairomm-1.0')
+        cmd = 'pkg-config --libs cairomm-1.0'
+        if lib_env['RUNTIME_LINK'] == 'static':
+            cmd += ' --static'
+        lib_env.ParseConfig(cmd)
         env2 = lib_env.Clone()
         env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
         # attach cflags to specific compile environment
@@ -264,7 +267,13 @@ if env['CUSTOM_LDFLAGS']:
 else:
     linkflags = mapnik_lib_link_flag
 
-mapnik = lib_env.SharedLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
+if env['LIBMAPNIK_LINKFLAGS']:
+    linkflags = '%s %s' % (env['LIBMAPNIK_LINKFLAGS'],linkflags)
+
+if env['LINKING'] == 'static':
+    mapnik = lib_env.StaticLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
+else:
+    mapnik = lib_env.SharedLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
 
 if env['PLATFORM'] != 'Darwin':
     # Symlink command, only works if both files are in same directory

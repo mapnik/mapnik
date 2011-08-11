@@ -33,16 +33,21 @@ gdal_src = Split(
   """
         )
 
-libraries = [env['PLUGINS']['gdal']['lib']]
+# clear out and rebuild libs
+plugin_env['LIBS'] = [env['PLUGINS']['gdal']['lib']]
 
 # Link Library to Dependencies
-libraries.append('mapnik2')
-libraries.append(env['ICU_LIB_NAME'])
+plugin_env['LIBS'].append('mapnik2')
+plugin_env['LIBS'].append(env['ICU_LIB_NAME'])
 
-input_plugin = plugin_env.SharedLibrary('../gdal', source=gdal_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+if env['RUNTIME_LINK'] == 'static':
+    cmd = 'gdal-config --dep-libs'
+    plugin_env.ParseConfig(cmd)
+
+input_plugin = plugin_env.SharedLibrary('../gdal', source=gdal_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 # if the plugin links to libmapnik2 ensure it is built first
-Depends(input_plugin, env.subst('../../../src/${SHLIBPREFIX}mapnik2${SHLIBSUFFIX}'))
+Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)
