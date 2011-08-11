@@ -36,21 +36,13 @@ source = Split(
 
 headers = env['CPPPATH'] 
 
+libraries =  env['LIBMAPNIK_LIBS']
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-libraries =  [boost_program_options,boost_filesystem,'mapnik2']
-
-boost_system = 'boost_system%s' % env['BOOST_APPEND']
-
-if env['HAS_BOOST_SYSTEM']:
-    libraries.append(boost_system)
-
-if env['INTERNAL_LIBAGG']:
-    libraries.insert(0, 'agg')
-else:
-    libraries.append([lib for lib in env['LIBS'] if lib.startswith('agg')])
+libraries.extend([boost_program_options,'mapnik2'])
 
 svg2png = program_env.Program('svg2png', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+
+Depends(svg2png, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_prefix + '/bin', svg2png)

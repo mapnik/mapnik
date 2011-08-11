@@ -942,6 +942,7 @@ if not preconfigured:
     env['HAS_PYCAIRO'] = False
     env['HAS_LIBXML2'] = False
     env['SVN_REVISION'] = None
+    env['LIBMAPNIK_LIBS'] = []
     if env['LINKING'] == 'static':
        env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}mapnik2${LIBSUFFIX}'
     else:

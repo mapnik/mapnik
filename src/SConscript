@@ -52,27 +52,28 @@ install_prefix = env['DESTDIR'] + '/' + prefix
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 
-libraries = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,regex]
+# clear out and re-set libs for this env
+lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,regex]
 
 if env['HAS_CAIRO']:
     # add cairo and cairomm-1.0 to libs
-    libraries.append('cairomm-1.0')
-    libraries.append('cairo')
+    lib_env['LIBS'].append('cairomm-1.0')
+    lib_env['LIBS'].append('cairo')
 
 if env['XMLPARSER'] == 'libxml2':
-    libraries.append('xml2')
+    lib_env['LIBS'].append('xml2')
 
 if env['THREADING'] == 'multi':
-    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+    lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
         
 if env['PLATFORM'] in ('Darwin','SunOS'):
     if env['HAS_BOOST_SYSTEM']:
-        libraries.append('boost_system%s' % env['BOOST_APPEND'])
+        lib_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
     
 if env['INTERNAL_LIBAGG']:
-    libraries.insert(0, 'agg')
+    lib_env['LIBS'].insert(0, 'agg')
 else:
-    libraries.append([lib for lib in env['LIBS'] if lib.startswith('agg')])
+    lib_env['LIBS'].append([lib for lib in env['LIBS'] if lib.startswith('agg')])
     
 
 if env['PLATFORM'] == 'Darwin':
@@ -155,7 +156,11 @@ source = Split(
 if env['LIBTOOL_SUPPORTS_ADVISE']:
     env3 = lib_env.Clone()
     env3.Append(CXXFLAGS='-DLIBTOOL_SUPPORTS_ADVISE')
-    source.insert(0,env3.SharedObject('datasource_cache.cpp'))
+    cpp = 'datasource_cache.cpp'
+    if env['LINKING'] == 'static':
+        source.insert(0,env3.StaticObject(cpp))
+    else:
+        source.insert(0,env3.SharedObject(cpp))
 else:
     source.insert(0,'datasource_cache.cpp')
 
@@ -236,7 +241,10 @@ if env['HAS_CAIRO']:
         for cpp in fixup:
             if cpp in source:
                 source.remove(cpp)
-            source.insert(0,env2.SharedObject(cpp))
+            if env['LINKING'] == 'static':
+                source.insert(0,env2.StaticObject(cpp))
+            else:
+                source.insert(0,env2.SharedObject(cpp))
     except OSError, e:
         print '\nFailed to detect cairo/cairomm configuration, please re-run "python scons/scons.py configure"'
         sys.exit(1)        
@@ -260,20 +268,23 @@ elif env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     for cpp in fixup:
         if cpp in source:
             source.remove(cpp)
-        source.insert(0,env2.SharedObject(cpp))
+        if env['LINKING'] == 'static':
+            source.insert(0,env2.StaticObject(cpp))
+        else:
+            source.insert(0,env2.SharedObject(cpp))
 
 if env['CUSTOM_LDFLAGS']:
     linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], mapnik_lib_link_flag)
 else:
     linkflags = mapnik_lib_link_flag
 
-if env['LIBMAPNIK_LINKFLAGS']:
-    linkflags = '%s %s' % (env['LIBMAPNIK_LINKFLAGS'],linkflags)
-
 if env['LINKING'] == 'static':
-    mapnik = lib_env.StaticLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
+    mapnik = lib_env.StaticLibrary('mapnik2', source, LINKFLAGS=linkflags)
 else:
-    mapnik = lib_env.SharedLibrary('mapnik2', source, LIBS=libraries, LINKFLAGS=linkflags)
+    mapnik = lib_env.SharedLibrary('mapnik2', source, LINKFLAGS=linkflags)
+
+# cache libraries value for other builds to use
+env['LIBMAPNIK_LIBS'] = lib_env['LIBS']
 
 if env['PLATFORM'] != 'Darwin':
     # Symlink command, only works if both files are in same directory
