@@ -21,15 +21,9 @@ Import ('env')
 # the below install details are also pulled from the
 # main SConstruct file where configuration happens
 
-# DESTDIR is default None, PREFIX is default '/usr/local/'
-install_prefix = os.path.join(env['DESTDIR'],env['PREFIX'])
-
-# LIBDIR_SCHEMA is likely either 'lib' or 'lib64', LIB_DIR_NAME is default None
-lib_name = '%s%s' % (env['LIBDIR_SCHEMA'],env['LIB_DIR_NAME'])
-
 # plugins can go anywhere, and be registered in custom locations by Mapnik
 # but the standard location is '/usr/local/lib/mapnik2/input'
-install_dest = os.path.join(install_prefix,lib_name,'input')
+install_dest = env['MAPNIK_INPUT_PLUGINS_DEST']
 
 # clone the environment here
 # so that if we modify the env it in this file
@@ -48,12 +42,10 @@ plugin_sources = Split(
 # directly link to
 libraries = [ '' ] # eg 'libfoo'
 
-# on mac os x we need to directly link to mapnik and libicu*
-if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik2')
-    # link libicuuc, but ICU_LIB_NAME is used custom builds of icu can
-    # have different library names like osx which offers /usr/lib/libicucore.dylib
-    libraries.append(env['ICU_LIB_NAME'])
+libraries.append('mapnik2')
+# link libicuuc, but ICU_LIB_NAME is used custom builds of icu can
+# have different library names like osx which offers /usr/lib/libicucore.dylib
+libraries.append(env['ICU_LIB_NAME'])
     
 TARGET = plugin_env.SharedLibrary(
               # the name of the target to build, eg 'sqlite.input'
@@ -73,12 +65,6 @@ TARGET = plugin_env.SharedLibrary(
               # not need it
               LINKFLAGS=env.get('CUSTOM_LDFLAGS')
               )
-
-if env['PLATFORM'] == 'Darwin':
-    # if the plugin links to libmapnik2 ensure it is built first
-    # this is optional, but helps to ensure proper compilation
-    # if scons is building with multiple threads (e.g. with -jN)
-    Depends(TARGET,'../../../../src/libmapnik2.dylib')
 
 # if 'uninstall' is not passed on the command line
 # then we actually create the install targets that

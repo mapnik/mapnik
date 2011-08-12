@@ -17,12 +17,10 @@
 # 
 # $Id$
 
+import os
 import glob
 
 Import('env')
-
-prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
 
 # grab all the deja vu fonts
 includes = glob.glob('*/*/*.ttf')
@@ -30,7 +28,5 @@ includes = glob.glob('*/*/*.ttf')
 # grab single unifont ttf (available at http://unifoundry.com/unifont.html)
 includes.extend(glob.glob('unifont*.ttf'))
 
-fontscollectionpath = install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/fonts'
-
 if 'uninstall' not in COMMAND_LINE_TARGETS and not env['SYSTEM_FONTS']:
-    env.Alias(target='install', source=env.Install(fontscollectionpath, includes))
+    env.Alias(target='install', source=env.Install(env['MAPNIK_FONTS_DEST'], includes))

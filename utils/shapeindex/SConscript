@@ -19,12 +19,10 @@
 #
 # $Id$
 
+import os
 import glob
 
 Import ('env')
-
-prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
 
 program_env = env.Clone()
 
@@ -47,11 +45,10 @@ boost_system = 'boost_system%s' % env['BOOST_APPEND']
 if env['HAS_BOOST_SYSTEM']:
     libraries.append(boost_system)
 
-
 shapeindex = program_env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(install_prefix + '/bin', shapeindex)
-    env.Alias('install', install_prefix + '/bin')
+    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), shapeindex)
+    env.Alias('install', os.path.join(env['INSTALL_PREFIX'],'bin'))
 
-env['create_uninstall_target'](env, install_prefix + '/bin/' + 'shapeindex')
+env['create_uninstall_target'](env, os.path.join(env['INSTALL_PREFIX'],'bin','shapeindex'))

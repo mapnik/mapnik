@@ -363,7 +363,7 @@ opts.AddVariables(
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
-    ('LIB_DIR_NAME','Name to use for the "lib" folder where fonts and plugins are installed','/mapnik2/'),
+    ('LIB_DIR_NAME','Name to use for the "lib" folder where fonts and plugins are installed','mapnik2/'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
     BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OS X', 'True'),
     BoolVariable('PYTHON_DYNAMIC_LOOKUP', 'On OSX, do not directly link python lib, but rather dynamically lookup symbols', 'False'),
@@ -951,7 +951,7 @@ if not preconfigured:
     env['LIBMAPNIK_LIBS'] = []
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
-    env['MAPNIK_LIB_DIR'] = os.path.normpath(env['PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
+    env['MAPNIK_LIB_DIR'] = os.path.normpath(env['PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + os.path.sep + env['LIB_DIR_NAME'])
     env['INSTALL_PREFIX'] = os.path.normpath(os.path.realpath(env['DESTDIR'])) + \
         os.path.realpath(env['PREFIX'])
     env['MAPNIK_LIB_BASE_DEST'] = os.path.normpath(env['INSTALL_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'])
@@ -964,7 +964,7 @@ if not preconfigured:
         env['MAPNIK_FONTS_DEST'] = os.path.normpath(env['SYSTEM_FONTS'])
     else:
         env['MAPNIK_FONTS'] = os.path.join(env['MAPNIK_LIB_DIR'],'fonts')
-        env['MAPNIK_FONTS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR'],'fonts')
+        env['MAPNIK_FONTS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR_DEST'],'fonts')
     
     if env['LINKING'] == 'static':
        env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}mapnik2${LIBSUFFIX}'

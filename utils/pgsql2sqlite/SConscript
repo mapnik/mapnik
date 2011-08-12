@@ -19,12 +19,12 @@
 #
 # $Id$
 
+import os
 from copy import copy
 
 Import ('env')
 
 prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
 
 program_env = env.Clone()
 
@@ -45,7 +45,7 @@ libraries.extend([boost_program_options,'sqlite3','pq','mapnik2'])
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     pgsql2sqlite = program_env.Program('pgsql2sqlite', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
     Depends(pgsql2sqlite, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
-    env.Install(install_prefix + '/bin', pgsql2sqlite)
-    env.Alias('install', install_prefix + '/bin')
+    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), pgsql2sqlite)
+    env.Alias('install', os.path.join(env['INSTALL_PREFIX'],'bin'))
 
-env['create_uninstall_target'](env, install_prefix + '/bin/' + 'pgsql2sqlite')
+env['create_uninstall_target'](env, os.path.join(env['INSTALL_PREFIX'],'bin','pgsql2sqlite'))

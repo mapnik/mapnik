@@ -19,12 +19,10 @@
 #
 # $Id$
 
+import os
 from copy import copy
 
 Import ('env')
-
-prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
 
 source = Split(
     """

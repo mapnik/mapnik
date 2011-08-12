@@ -22,7 +22,6 @@
 Import ('env')
 
 prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
 
 plugin_env = env.Clone()
 
@@ -45,5 +44,5 @@ input_plugin = plugin_env.SharedLibrary('../kismet', source=kismet_src, SHLIBPRE
 Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input', input_plugin)
-    env.Alias('install', install_prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'] + '/input')
+    env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], input_plugin)
+    env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])

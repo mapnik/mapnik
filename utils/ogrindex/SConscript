@@ -19,12 +19,10 @@
 #
 # $Id$
 
+import os
 import glob
 
 Import ('env')
-
-prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
 
 program_env = env.Clone()
 
@@ -48,9 +46,8 @@ if env['HAS_BOOST_SYSTEM']:
 if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])
 
-
 ogrindex = program_env.Program('ogrindex', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(install_prefix + '/bin', ogrindex)
-    env.Alias('install', install_prefix + '/bin')
+    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), ogrindex)
+    env.Alias('install', os.path.join(env['INSTALL_PREFIX'],'bin'))

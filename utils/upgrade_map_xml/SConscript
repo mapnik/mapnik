@@ -19,13 +19,13 @@
 #
 # $Id$
 
+import os
 Import ('env')
 
-prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
+target = os.path.join(env['INSTALL_PREFIX'],'bin')
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(install_prefix + '/bin', "upgrade_map_xml.py")
-    env.Alias('install', install_prefix + '/bin')
+    env.Install(target,'upgrade_map_xml.py')
+    env.Alias('install', os.path.join(env['INSTALL_PREFIX'],'bin'))
 
-env['create_uninstall_target'](env, install_prefix + '/bin/' + 'upgrade_map_xml.py')
+env['create_uninstall_target'](env, os.path.join(target,'upgrade_map_xml.py'))
