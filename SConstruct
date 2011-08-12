@@ -304,6 +304,7 @@ opts.AddVariables(
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     # http://www.scons.org/wiki/GoFastButton
+    # http://stackoverflow.com/questions/1318863/how-to-optimize-an-scons-script
     BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'True'),
     BoolVariable('PRIORITIZE_LINKING', 'Sort list of lib and inc directories to ensure preferential compiling and linking (useful when duplicate libs)', 'True'),
     ('LINK_PRIORITY','Priority list in which to sort library and include paths (default order is internal, other, frameworks, user, then system - see source of `sort_paths` function for more detail)',','.join(DEFAULT_LINK_PRIORITY)),    
@@ -709,8 +710,8 @@ def FindBoost(context, prefixes, thread_flag):
             env['BOOST_APPEND'] = '-'.join(append_params)
         msg += '\n  *using boost lib naming: %s' % env['BOOST_APPEND']
 
-    env.AppendUnique(CPPPATH = env['BOOST_INCLUDES'])
-    env.AppendUnique(LIBPATH = env['BOOST_LIBS'])    
+    env.AppendUnique(CPPPATH = os.path.realpath(env['BOOST_INCLUDES']))
+    env.AppendUnique(LIBPATH = os.path.realpath(env['BOOST_LIBS']))    
     if env['COLOR_PRINT']:
         msg = "\033[94m%s\033[0m" % (msg)
     ret = context.Result(msg)
@@ -993,7 +994,7 @@ if not preconfigured:
         
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU'):
+    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU', 'SQLITE'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
