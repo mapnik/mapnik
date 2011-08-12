@@ -137,8 +137,6 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) {
          beg != tok.end(); ++beg)
     {
         std::string const& spec(*beg);
-        std::string dbname;
-        std::string filename;
         size_t atpos=spec.find('@');
         
         // See if it contains an @ sign
@@ -147,17 +145,18 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) {
         }
         
         // Break out the dbname and the filename
-        dbname=boost::trim_copy(spec.substr(0, atpos));
-        filename=boost::trim_copy(spec.substr(atpos+1));
+        std::string dbname = boost::trim_copy(spec.substr(0, atpos));
+        std::string filename = boost::trim_copy(spec.substr(atpos+1));
         
         // Normalize the filename and make it relative to dataset_name_
-        if (filename.compare(":memory:")!=0) {
+        if (filename.compare(":memory:") != 0) {
+
             boost::filesystem::path child_path(filename);
+            
+            // It is a relative path.  Fix it.
             if (!child_path.has_root_directory() && !child_path.has_root_name()) {
-                // It is a relative path.  Fix it.
                 boost::filesystem::path absolute_path(dataset_name_);
-                absolute_path.remove_filename();
-                filename=absolute_path.string() + filename;
+                filename = boost::filesystem::absolute(absolute_path.parent_path()/filename).string();
             }
         }
         
