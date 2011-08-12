@@ -21,13 +21,10 @@
 
 Import ('env')
 
-prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
-
 TARGET = 'howfast.py'
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(install_prefix + '/bin', TARGET)
-    env.Alias('install', install_prefix + '/bin')
+    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), TARGET)
+    env.Alias('install', os.path.join(env['INSTALL_PREFIX'],'bin'))
 
-env['create_uninstall_target'](env, install_prefix + '/bin/' + TARGET)
+env['create_uninstall_target'](env, os.path.join(env['INSTALL_PREFIX'],'bin',TARGET))

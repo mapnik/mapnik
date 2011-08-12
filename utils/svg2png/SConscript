@@ -19,13 +19,11 @@
 #
 # $Id$
 
+import os
 import glob
 from copy import copy
 
 Import ('env')
-
-prefix = env['PREFIX']
-install_prefix = env['DESTDIR'] + '/' + prefix
 
 program_env = env.Clone()
 
@@ -46,7 +44,7 @@ svg2png = program_env.Program('svg2png', source, CPPPATH=headers, LIBS=libraries
 Depends(svg2png, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(install_prefix + '/bin', svg2png)
-    env.Alias('install', install_prefix + '/bin')
+    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), svg2png)
+    env.Alias('install', os.path.join(env['INSTALL_PREFIX'],'bin'))
 
-env['create_uninstall_target'](env, install_prefix + '/bin/' + 'svg2png')
+env['create_uninstall_target'](env, os.path.join(env['INSTALL_PREFIX'],'bin','svg2png'))
