@@ -19,6 +19,8 @@
 #
 # $Id$
 
+from copy import copy
+
 Import ('env')
 
 prefix = env['PREFIX']
@@ -36,7 +38,7 @@ source = Split(
 headers = ['#plugins/input/postgis'] + env['CPPPATH'] 
 
 
-libraries =  env['LIBMAPNIK_LIBS']
+libraries =  copy(env['LIBMAPNIK_LIBS'])
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 libraries.extend([boost_program_options,'sqlite3','pq','mapnik2'])
 
