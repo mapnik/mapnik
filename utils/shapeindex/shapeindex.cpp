@@ -161,15 +161,13 @@ int main (int argc,char** argv)
             long offset=shp.pos();
             int record_number=shp.read_xdr_integer();
             int content_length=shp.read_xdr_integer();
-            
-            //std::clog << "rec number = "<< record_number << "\n";
-            //std::clog << "content length = "<< content_length << "\n";
-           
-            shp.skip(4);
-            //std::clog << "offset= "<< offset << std::endl;
-                
+            shape_type = shp.read_ndr_integer();    
             box2d<double> item_ext;
-            if (shape_type==shape_io::shape_point)
+            if (shape_type==shape_io::shape_null)
+            {
+                continue;
+            }
+            else if (shape_type==shape_io::shape_point)
             {
                 double x=shp.read_double();
                 double y=shp.read_double();
