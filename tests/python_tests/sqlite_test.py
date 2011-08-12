@@ -27,7 +27,8 @@ def test_attachdb_with_multiple_files():
         table='attachedtest',
         attachdb='scratch1@:memory:,scratch2@:memory:',
         initdb='create table scratch1.attachedtest (the_geom);\n' +
-            'create virtual table scratch2.idx_attachedtest_the_geom using rtree(pkid,xmin,xmax,ymin,ymax);\n'
+            'create virtual table scratch2.idx_attachedtest_the_geom using rtree(pkid,xmin,xmax,ymin,ymax);\n' +
+            'insert into scratch2.idx_attachedtest_the_geom values (1,-7799225.5,-7778571.0,1393264.125,1417719.375)\n'
         )
 
 def test_attachdb_with_absolute_file():
@@ -43,7 +44,8 @@ def test_attachdb_with_index():
         table='attachedtest',
         attachdb='scratch@:memory:',
         initdb='create table scratch.attachedtest (the_geom);\n' +
-            'create virtual table scratch.idx_attachedtest_the_geom using rtree(pkid,xmin,xmax,ymin,ymax);\n'
+            'create virtual table scratch.idx_attachedtest_the_geom using rtree(pkid,xmin,xmax,ymin,ymax);\n' +
+            'insert into scratch.idx_attachedtest_the_geom values (1,-7799225.5,-7778571.0,1393264.125,1417719.375)\n'
         )
     
 def test_attachdb_with_explicit_index():
@@ -52,7 +54,12 @@ def test_attachdb_with_explicit_index():
         index_table='myindex',
         attachdb='scratch@:memory:',
         initdb='create table scratch.attachedtest (the_geom);\n' +
-            'create virtual table scratch.myindex using rtree(pkid,xmin,xmax,ymin,ymax);\n'
+            'create virtual table scratch.myindex using rtree(pkid,xmin,xmax,ymin,ymax);\n' +
+            'insert into scratch.myindex values (1,-7799225.5,-7778571.0,1393264.125,1417719.375)\n'
         )
-    
+
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]
     
