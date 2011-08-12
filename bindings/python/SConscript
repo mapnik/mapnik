@@ -198,7 +198,7 @@ if env['SVN_REVISION']:
 if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
     # attach libs to _mapnik.so linking environment
     cmd = 'pkg-config --libs cairomm-1.0'
-    if lib_env['RUNTIME_LINK'] == 'static':
+    if env['RUNTIME_LINK'] == 'static':
         cmd += ' --static'
     py_env.ParseConfig(cmd)
     env2 = py_env.Clone()
