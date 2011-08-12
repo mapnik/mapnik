@@ -19,6 +19,7 @@
 #
 # $Id$
 
+import os
 Import ('env')
 
 TARGET = 'howfast.py'
