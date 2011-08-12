@@ -40,7 +40,7 @@ def is_py3():
 
 
 prefix = env['PREFIX']
-target_path = env['PYTHON_INSTALL_LOCATION'] + '/mapnik2'
+target_path = env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2'
 
 libraries = ['mapnik2','png','jpeg']
 
@@ -57,16 +57,6 @@ else:
         libraries.append('boost_python3%s' % env['BOOST_APPEND'])
     else:
         libraries.append('boost_python%s' % env['BOOST_APPEND'])
-
-
-# set up an understanding of where libmapnik is being installed
-# so that the python module can locate it at runtime
-# and so that we can add its runpath to _mapnik.so if needed (e.g. solaris)
-# Note: we use prefix rather than install_prefix here since install_prefix is for package building
-# and we intend for python to look to the standard prefix location to find the fonts and plugins
-mapnik_lib_path  = os.path.normpath(prefix + '/' + env['LIBDIR_SCHEMA'])
-mapnik_lib_dir_path  = os.path.normpath(prefix + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
-
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])
@@ -124,7 +114,7 @@ if env['PLATFORM'] == 'Darwin':
 elif env['PLATFORM'] == 'SunOS':
     # make sure to explicitly link mapnik.so against
     # libmapnik in its installed location
-    python_link_flag = '-R%s' % mapnik_lib_path
+    python_link_flag = '-R%s' % env['MAPNIK_LIB_BASE']
 else:
     # all other platforms we don't directly link python
     python_link_flag = ''
@@ -152,7 +142,7 @@ else:
 
 if not os.path.exists('mapnik'):
     os.mkdir('mapnik')
-file('mapnik/paths.py','w').write(paths % (mapnik_lib_dir_path))
+file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
 
 try:
     os.chmod('mapnik/paths.py',0666)
@@ -219,6 +209,8 @@ if env['HAS_CAIRO'] or env['HAS_PYCAIRO']:
 
 
 _mapnik = py_env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
+
+Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if env['PLATFORM'] == 'SunOS' and env['PYTHON_IS_64BIT']:
     # http://mail.python.org/pipermail/python-dev/2006-August/068528.html
