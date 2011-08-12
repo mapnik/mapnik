@@ -292,11 +292,10 @@ opts.AddVariables(
     ('CUSTOM_CXXFLAGS', 'Custom C++ flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir>', ''),
     ('CUSTOM_LDFLAGS', 'Custom linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>', ''),
     EnumVariable('LINKING', "Set library format for libmapnik",'shared', ['shared','static']),
-    EnumVariable('RUNTIME_LINK', "Set preference for linking dependecies",'shared', ['shared','static']),
+    EnumVariable('RUNTIME_LINK', "Set preference for linking dependencies",'shared', ['shared','static']),
     EnumVariable('OPTIMIZATION','Set g++ optimization level','3', ['0','1','2','3','4','s']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
-    BoolVariable('XML_DEBUG', 'Compile a XML verbose debug version of mapnik', 'False'),
     ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
     ('WARNING_CXXFLAGS', 'Compiler flags you can set to reduce warning levels which are placed after -Wall.', ''),
     
@@ -379,7 +378,7 @@ opts.AddVariables(
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
     )
-    
+
 # variables to pickle after successful configure step
 # these include all scons core variables as well as custom
 # env variables needed in SConscript files
@@ -424,6 +423,15 @@ pickle_store = [# Scons internal variables
         'SAMPLE_INPUT_PLUGINS',
         'PKG_CONFIG_PATH',
         'PATH_INSERT',
+        'MAPNIK_LIB_DIR',
+        'MAPNIK_LIB_DIR_DEST',
+        'INSTALL_PREFIX',
+        'MAPNIK_INPUT_PLUGINS',
+        'MAPNIK_INPUT_PLUGINS_DEST',
+        'MAPNIK_FONTS',
+        'MAPNIK_FONTS_DEST',
+        'MAPNIK_LIB_BASE',
+        'MAPNIK_LIB_BASE_DEST'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -928,9 +936,6 @@ if not preconfigured:
         mode = 'debug mode'
     else:
         mode = 'release mode'
-
-    if env['XML_DEBUG']:
-        mode += ' (with XML debug on)'
         
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
@@ -944,14 +949,27 @@ if not preconfigured:
     env['HAS_LIBXML2'] = False
     env['SVN_REVISION'] = None
     env['LIBMAPNIK_LIBS'] = []
+    env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
+    env['PLUGINS'] = PLUGINS
+    env['MAPNIK_LIB_DIR'] = os.path.normpath(env['PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
+    env['INSTALL_PREFIX'] = os.path.normpath(os.path.realpath(env['DESTDIR'])) + \
+        os.path.realpath(env['PREFIX'])
+    env['MAPNIK_LIB_BASE_DEST'] = os.path.normpath(env['INSTALL_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'])
+    env['MAPNIK_LIB_DIR_DEST'] =  os.path.join(env['MAPNIK_LIB_BASE_DEST'],env['LIB_DIR_NAME'])
+    env['MAPNIK_LIB_BASE'] = os.path.join(env['PREFIX'],env['LIBDIR_SCHEMA'])
+    env['MAPNIK_INPUT_PLUGINS'] = os.path.join(env['MAPNIK_LIB_DIR'],"input")
+    env['MAPNIK_INPUT_PLUGINS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR_DEST'],"input")
+    if env['SYSTEM_FONTS']:
+        env['MAPNIK_FONTS'] = os.path.normpath(env['SYSTEM_FONTS'])
+        env['MAPNIK_FONTS_DEST'] = os.path.normpath(env['SYSTEM_FONTS'])
+    else:
+        env['MAPNIK_FONTS'] = os.path.join(env['MAPNIK_LIB_DIR'],'fonts')
+        env['MAPNIK_FONTS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR'],'fonts')
+    
     if env['LINKING'] == 'static':
        env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}mapnik2${LIBSUFFIX}'
     else:
        env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}mapnik2${SHLIBSUFFIX}'
-
-    
-    env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
-    env['PLUGINS'] = PLUGINS
         
     if env['PKG_CONFIG_PATH']:
         env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
@@ -1183,6 +1201,7 @@ if not preconfigured:
     # Decide which libagg to use
     # if we are using internal agg, then prepend to make sure
     # we link locally
+    
     if env['INTERNAL_LIBAGG']:
         env.Prepend(CPPPATH = '#agg/include')
         env.Prepend(LIBPATH = '#agg')
@@ -1301,10 +1320,7 @@ if not preconfigured:
         # Common debugging flags.
         debug_flags  = '-g -DDEBUG -DMAPNIK_DEBUG'
         ndebug_flags = '-DNDEBUG'
-        
-        if env['XML_DEBUG']: 
-            common_cxx_flags += '-DMAPNIK_XML_DEBUG '
-        
+       
         # Customizing the C++ compiler flags depending on: 
         #  (1) the C++ compiler used; and
         #  (2) whether debug binaries are requested.
@@ -1357,14 +1373,14 @@ if not preconfigured:
                 env['PYTHON_SYS_PREFIX'] = os.popen('''%s -c "import sys; print sys.prefix"''' % env['PYTHON']).read().strip()
                 env['PYTHON_VERSION'] = os.popen('''%s -c "import sys; print sys.version"''' % env['PYTHON']).read()[0:3]
                 env['PYTHON_INCLUDES'] = env['PYTHON_SYS_PREFIX'] + '/include/python' + env['PYTHON_VERSION']
-                env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + '/' + env['PYTHON_SYS_PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
+                env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SYS_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
         
             # if user-requested custom prefix fall back to manual concatenation for building subdirectories       
             if env['PYTHON_PREFIX']:
                 py_relative_install = env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/' 
-                env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_PREFIX'] + '/' +  py_relative_install            
+                env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_PREFIX'] + os.path.sep +  py_relative_install            
             else:
-                env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + '/' + env['PYTHON_SITE_PACKAGES']
+                env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SITE_PACKAGES']
 
             if py3:
                 is_64_bit = '''%s -c "import sys; print(sys.maxsize == 9223372036854775807)"''' % env['PYTHON']
@@ -1483,7 +1499,7 @@ if not HELP_REQUESTED:
         SetOption("num_jobs", env['JOBS'])  
         
     # Build agg first, doesn't need anything special
-    if env['INTERNAL_LIBAGG']:
+    if env['RUNTIME_LINK'] == 'shared' and env['INTERNAL_LIBAGG']:
         SConscript('agg/SConscript')
     
     # Build the core library
@@ -1507,20 +1523,18 @@ if not HELP_REQUESTED:
             # build internal shape and raster plugins
             SConscript('plugins/input/%s/SConscript' % plugin)
         else:
-            color_print(1,"Notice: depedencies not met for plugin '%s', not building..." % plugin)
+            color_print(1,"Notice: dependencies not met for plugin '%s', not building..." % plugin)
     
-    # todo - generalize this path construction, also used in plugin SConscript...
-    plugin_dir = os.path.normpath(env['DESTDIR'] + '/' + env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + env['LIB_DIR_NAME'])
-    create_uninstall_target(env, plugin_dir, False)
-    create_uninstall_target(env, plugin_dir + '/input' , False)
-    create_uninstall_target(env, plugin_dir + '/fonts' , False)
+    create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'], False)
+    create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'] + '/input' , False)
+    create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'] + '/fonts' , False)
 
     # before installing plugins, wipe out any previously
     # installed plugins that we are no longer building
     if 'install' in COMMAND_LINE_TARGETS:
         for plugin in PLUGINS.keys():
             if plugin not in env['REQUESTED_PLUGINS']:
-                plugin_path = os.path.join(plugin_dir,'input','%s.input' % plugin)
+                plugin_path = os.path.join(env['MAPNIK_LIB_DIR_DEST'],'input','%s.input' % plugin)
                 if os.path.exists(plugin_path):
                     color_print(1,"Notice: removing out of date plugin: '%s'" % plugin_path)
                     os.unlink(plugin_path)

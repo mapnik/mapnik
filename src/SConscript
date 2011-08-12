@@ -23,6 +23,7 @@
 import os
 import sys
 import glob
+from copy import copy
 from subprocess import Popen, PIPE
 
 Import('env')
@@ -39,15 +40,13 @@ def call(cmd, silent=True):
 def ldconfig(*args,**kwargs):
     call('ldconfig')
 
+
+if env['LINKING'] == 'static':
+    lib_env.Append(CXXFLAGS="-fPIC")
+
 mapnik_lib_link_flag = ''
 
 ABI_VERSION = env['ABI_VERSION']
-
-prefix = env['PREFIX']
-
-lib_dir = os.path.normpath(prefix + '/' + env['LIBDIR_SCHEMA'])
-
-install_prefix = env['DESTDIR'] + '/' + prefix
 
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
@@ -70,10 +69,12 @@ if env['PLATFORM'] in ('Darwin','SunOS'):
     if env['HAS_BOOST_SYSTEM']:
         lib_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
     
-if env['INTERNAL_LIBAGG']:
-    lib_env['LIBS'].insert(0, 'agg')
-else:
-    lib_env['LIBS'].append([lib for lib in env['LIBS'] if lib.startswith('agg')])
+
+if not env['LINKING'] == 'static':
+    if env['INTERNAL_LIBAGG']:
+          lib_env['LIBS'].insert(0, 'agg')
+    else:
+        lib_env['LIBS'].append([lib for lib in env['LIBS'] if lib.startswith('agg')])
     
 
 if env['PLATFORM'] == 'Darwin':
@@ -83,7 +84,7 @@ else:
 
 if env['PLATFORM'] == 'Darwin':
     if env['FULL_LIB_PATH']:
-        lib_path = '%s/%s' % (lib_dir,mapnik_libname)
+        lib_path = '%s/%s' % (env['MAPNIK_LIB_BASE'],mapnik_libname)
     else:
         lib_path = mapnik_libname
     mapnik_lib_link_flag += ' -Wl,-install_name,%s' % lib_path
@@ -188,6 +189,10 @@ source += Split(
     """ 
     )
 
+if env['RUNTIME_LINK'] == "static":
+    source += glob.glob('../agg/src/' + '*.cpp')
+    #source.append(File('../agg/libagg.a'))
+
 # grid backend
 source += Split(
     """
@@ -284,7 +289,7 @@ else:
     mapnik = lib_env.SharedLibrary('mapnik2', source, LINKFLAGS=linkflags)
 
 # cache libraries value for other builds to use
-env['LIBMAPNIK_LIBS'] = lib_env['LIBS']
+env['LIBMAPNIK_LIBS'] = copy(lib_env['LIBS'])
 
 if env['PLATFORM'] != 'Darwin':
     # Symlink command, only works if both files are in same directory
@@ -299,8 +304,7 @@ if env['PLATFORM'] != 'Darwin':
     major, minor, micro = ABI_VERSION
     
     soFile = "%s.%d.%d.%d" % (os.path.basename(str(mapnik[0])), major, minor, micro)
-    libDir = install_prefix + '/' + env['LIBDIR_SCHEMA']
-    target = os.path.join(libDir, soFile)
+    target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], soFile)
     
     if 'uninstall' not in COMMAND_LINE_TARGETS:
       result = env.InstallAs(target=target, source=mapnik)
@@ -310,8 +314,8 @@ if env['PLATFORM'] != 'Darwin':
 
     
     # Install symlinks
-    target1 = os.path.join(libDir, "%s.%d.%d" % (os.path.basename(str(mapnik[0])),major, minor))
-    target2 = os.path.join(libDir, os.path.basename(str(mapnik[0])))
+    target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % (os.path.basename(str(mapnik[0])),major, minor))
+    target2 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], os.path.basename(str(mapnik[0])))
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if 'install' in COMMAND_LINE_TARGETS:
             link1 = env.Command(target1, target, symlink)
@@ -324,7 +328,7 @@ if env['PLATFORM'] != 'Darwin':
     env['create_uninstall_target'](env, target)
 
 else:
-    target_path = os.path.normpath(install_prefix + '/' + env['LIBDIR_SCHEMA'])
+    target_path = env['MAPNIK_LIB_BASE_DEST']
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         result = env.Install(target_path, mapnik)
         env.Alias(target='install', source=result)
@@ -336,10 +340,10 @@ svg_includes = glob.glob('../include/mapnik/svg/*.hpp')
 wkt_includes = glob.glob('../include/mapnik/wkt/*.hpp')
 grid_includes = glob.glob('../include/mapnik/grid/*.hpp')
 
-inc_target = os.path.normpath(install_prefix+'/include/mapnik')
-svg_inc_target = os.path.normpath(install_prefix+'/include/mapnik/svg')
-wkt_inc_target = os.path.normpath(install_prefix+'/include/mapnik/wkt')
-grid_inc_target = os.path.normpath(install_prefix+'/include/mapnik/grid')
+inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik')
+svg_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/svg')
+wkt_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/wkt')
+grid_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/grid')
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Alias(target='install', source=env.Install(inc_target, includes))
