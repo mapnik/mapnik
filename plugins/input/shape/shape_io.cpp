@@ -74,12 +74,6 @@ void shape_io::move_to (int pos)
    reclength_ = shp_.read_xdr_integer();
    type_ = shp_.read_ndr_integer();
    
-   if (shp_.is_eof()) {
-       id_ = 0;
-       reclength_ = 0;
-       type_ = shape_null;
-   }
-
    if (type_!= shape_null && type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
    {
       shp_.read_envelope(cur_extent_);
