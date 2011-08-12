@@ -98,13 +98,13 @@ def test_regex_match():
     f = mapnik2.Feature(0)
     f["name"] = 'test'
     expr = mapnik2.Expression("[name].match('test')")
-    eq_(expr.evaluate(f),'1') # 1 == True
+    eq_(expr.evaluate(f),True) # 1 == True
 
 def test_unicode_regex_match():
     f = mapnik2.Feature(0)
     f["name"] = 'Québec'
     expr = mapnik2.Expression("[name].match('Québec')")
-    eq_(expr.evaluate(f),'1') # 1 == True
+    eq_(expr.evaluate(f),True) # 1 == True
 
 def test_regex_replace():
     f = mapnik2.Feature(0)
