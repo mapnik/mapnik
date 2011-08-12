@@ -31,9 +31,10 @@ program_env = env.Clone()
 source = Split(
     """
     shapeindex.cpp
-    #src/box2d.cpp
     """
     )
+
+source += program_env.Object('box2d-static', '#src/box2d.cpp')
 
 headers = ['#plugins/input/shape'] + env['CPPPATH'] 
 
