@@ -88,12 +88,22 @@ template <typename filterT>
 feature_ptr shape_featureset<filterT>::next()
 {
     std::streampos pos=shape_.shp().pos();
+    // skip null shapes
+    while (pos > 0 && pos < std::streampos(file_length_ * 2))
+    {
+        shape_.move_to(pos);
+        if (shape_.type() ==  shape_io::shape_null)
+        {
+            pos += std::streampos(12);
+        }
+        else break;        
+    }
     
     if (pos < std::streampos(file_length_ * 2))
     {
-        shape_.move_to(pos);
         int type=shape_.type();
         feature_ptr feature(feature_factory::create(shape_.id_));
+        
         if (type == shape_io::shape_point)
         {
             double x=shape_.shp().read_double();
@@ -132,23 +142,26 @@ feature_ptr shape_featureset<filterT>::next()
         }
         else
         {
-            while (!filter_.pass(shape_.current_extent()))
-            {       
+            // skip shapes 
+            for (;;)
+            {
                 std::streampos pos = shape_.shp().pos();
+                if (shape_.type() == shape_io::shape_null)
+                {
+                    pos += std::streampos(12);                    
+                    std::cerr << "NULL SHAPE len=" << shape_.reclength_ << std::endl;
+                }                    
+                else if (filter_.pass(shape_.current_extent())) break;
+                else pos += std::streampos(2 * shape_.reclength_ - 36);                
                 if (pos > 0 && pos < std::streampos(file_length_ * 2))
-                {                    
-                    if (shape_.type() != shape_io::shape_null)
-                    {
-                       pos += std::streampos(2 * shape_.reclength_ - 36);
-                    }                    
-                    else
-                    {
-                        pos += std::streampos(8 * 3);
-                    }
+                {
                     shape_.move_to(pos);
                 }
                 else
                 {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "Shape Plugin: total shapes read=" << count_ << std::endl;
+#endif
                     return feature_ptr();
                 }
             }
