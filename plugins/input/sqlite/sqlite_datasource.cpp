@@ -156,7 +156,11 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) {
             // It is a relative path.  Fix it.
             if (!child_path.has_root_directory() && !child_path.has_root_name()) {
                 boost::filesystem::path absolute_path(dataset_name_);
+                #if (BOOST_FILESYSTEM_VERSION == 3)
                 filename = boost::filesystem::absolute(absolute_path.parent_path()/filename).string();
+                #else
+                filename = boost::filesystem::complete(absolute_path.branch_path()/filename).normalize().string();
+                #endif
             }
         }
         
