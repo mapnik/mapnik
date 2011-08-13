@@ -1,33 +1,55 @@
-#
-# This file is part of Mapnik (c++ mapping toolkit)
-#
-# Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
-#
-# Mapnik is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-#
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# $Id$
 
 import re
 import os
+import sys
 
-# clone the environment so changes
-# here to no affect the main build env
 Import('env')
+
 config_env = env.Clone()
 
-mapnik_libname = 'mapnik2'
+# TODO
+# major/minor versions
+# git hash
+
+config_variables = '''#!/bin/sh
+
+## variables
+
+CONFIG_PREFIX=%(prefix)s
+CONFIG_MAPNIK_LIBNAME=%(mapnik_libname)s
+CONFIG_MAPNIK_INCLUDE=${CONFIG_PREFIX}/include
+CONFIG_MAPNIK_LIB=${CONFIG_PREFIX}/%(libdir_schema)s
+CONFIG_MAPNIK_VERSION='%(version)s'
+CONFIG_MAPNIK_LDFLAGS='%(ldflags)s'
+CONFIG_DEP_LIBS='%(dep_libs)s'
+CONFIG_OTHER_INCLUDES='%(other_includes)s'
+CONFIG_FONTS='%(fonts)s'
+CONFIG_INPUT_PLUGINS='%(input_plugins)s'
+CONFIG_SVN_REVISION='%(svn_revision)s'
+
+CONFIG_JSON="{
+  \\"prefix\\": \\"${CONFIG_PREFIX}\\",
+  \\"mapnik_libname\\": \\"${CONFIG_MAPNIK_LIBNAME}\\",
+  \\"mapnik_include\\": \\"${CONFIG_MAPNIK_INCLUDE}\\",
+  \\"mapnik_lib\\": \\"${CONFIG_MAPNIK_LIB}\\",
+  \\"version\\": \\"${CONFIG_MAPNIK_VERSION}\\",
+  \\"ldflags\\": \\"${CONFIG_MAPNIK_LDFLAGS}\\",
+  \\"dep_libs\\": \\"${CONFIG_DEP_LIBS}\\",
+  \\"other_includes\\": \\"${CONFIG_OTHER_INCLUDES}\\",
+  \\"fonts\\": \\"${CONFIG_FONTS}\\",
+  \\"input_plugins\\": \\"${CONFIG_INPUT_PLUGINS}\\",
+  \\"svn_revision\\": ${CONFIG_SVN_REVISION}
+}"
+
+'''
+
+def write_config(configuration,template,config_file):
+    template = open(template,'r').read()
+    open(config_file,'w').write(config_variables  % configuration + template)
+    try:
+        os.chmod(config_file,0755)
+    except: pass
+
 
 # recreate a few dynamic path additions
 if config_env['HAS_CAIRO']:
@@ -39,43 +61,15 @@ if config_env['HAS_CAIRO']:
     except OSError, e:
         print '\nFailed to detect cairo/cairomm configuration, please re-run "python scons/scons.py configure"'
         sys.exit(1)  
-        
-prefix = config_env['PREFIX']
-install_prefix = config_env['DESTDIR'] + '/' + prefix
-LIBDIR_SCHEMA = config_env['LIBDIR_SCHEMA']
-version = config_env['MAPNIK_VERSION_STRING']
-input_plugins = os.path.normpath(config_env['PREFIX'] + '/' + config_env['LIBDIR_SCHEMA'] + config_env['LIB_DIR_NAME'] + "/input" )
-if config_env['SYSTEM_FONTS']:
-    fonts = os.path.normpath(config_env['SYSTEM_FONTS'])
-else:
-    fonts = os.path.normpath(prefix + '/' + config_env['LIBDIR_SCHEMA'] + config_env['LIB_DIR_NAME'] + '/fonts')
-svn_revision = config_env['SVN_REVISION']
 
-filesystem = 'boost_filesystem%s' % config_env['BOOST_APPEND']
-regex = 'boost_regex%s' % config_env['BOOST_APPEND']
 
 # todo - refine this list
-other_includes = config_env['CUSTOM_CXXFLAGS'] + config_env['CXXFLAGS'] + ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
-
-private_libs = ' -lfreetype -l%s -l%s -l%s' % (config_env['ICU_LIB_NAME'],filesystem,regex)
-
-if config_env['HAS_CAIRO']:
-    private_libs += ' -lcairomm-1.0 -lcairo'
-    other_includes.append('-DHAVE_CAIRO')
+# todo - custom_cxxflags are being duplicated somewhere
+cpp_paths = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
+other_includes = config_env['CUSTOM_CXXFLAGS'] + config_env['CXXFLAGS'] + cpp_paths
 
 if config_env['XMLPARSER'] == 'libxml2' and config_env['HAS_LIBXML2']:
-    config_env.Append(CXXFLAGS = '-DHAVE_LIBXML2')
-
-if config_env['THREADING'] == 'multi':
-    private_libs += ' -lboost_thread%s' % config_env['BOOST_APPEND']
-
-if config_env['HAS_BOOST_SYSTEM']:
-    private_libs += ' -lboost_system%s' % config_env['BOOST_APPEND']
-
-if not config_env['INTERNAL_LIBAGG']:
-    for lib in config_env['LIBS']:
-        if lib.startswith('agg'):
-            private_libs += ' -l%s' % lib
+    other_includes.append('-DHAVE_LIBXML2')
 
 if config_env['SVG_RENDERER']:
     other_includes.append('-DSVG_RENDERER')
@@ -83,72 +77,46 @@ if config_env['SVG_RENDERER']:
 if config_env['LIBTOOL_SUPPORTS_ADVISE']:
     other_includes.append('-DLIBTOOL_SUPPORTS_ADVISE')
 
-other_libs = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
-other_libs += private_libs
+ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
+
+dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
+
+configuration = {
+    "prefix": config_env['PREFIX'],
+    "mapnik_libname": 'mapnik2',
+    "libdir_schema": config_env['LIBDIR_SCHEMA'],
+    "ldflags": ldflags,
+    "dep_libs": dep_libs,
+    "other_includes": other_includes,
+    "fonts": config_env['MAPNIK_FONTS'],
+    "input_plugins": config_env['MAPNIK_INPUT_PLUGINS'],
+    "svn_revision": config_env['SVN_REVISION'],
+    "version": config_env['MAPNIK_VERSION_STRING'],
+}
 
 
-top = '''#!/bin/sh
-
-prefix=%(prefix)s
-exec_prefix=${prefix}
-includedir=${prefix}/include
-libdir=${exec_prefix}/%(LIBDIR_SCHEMA)s
-version='%(version)s'
-mapnik_libname=%(mapnik_libname)s
-private_libs='%(private_libs)s'
-other_libs='%(other_libs)s'
-other_includes='%(other_includes)s'
-fonts='%(fonts)s'
-input_plugins='%(input_plugins)s'
-svn_revision='%(svn_revision)s'
-''' % locals()
-
-
-# TODO - add fonts and input_plugins to pkg-config?
-pkg_config = '''
-Name: libmapnik
-Version: ${version}
-Description: libmapnik library.
-Requires:
-Libs: -L${libdir} -l${mapnik_libname}
-Libs.private: ${private_libs} 
-Cflags: -I${includedir}
-'''
-
-template = open('mapnik-config.template','r').read()
-
-source = 'mapnik-config'
-open(source,'w').write(top+template)
-
-try:
-    os.chmod(source,0755)
-except: pass
-
-target_path = os.path.normpath(install_prefix+'/bin')
-full_target = os.path.join(target_path,source)
+template = 'mapnik-config.template.sh'
+config_file = 'mapnik-config'
+source = config_file
+write_config(configuration,template,config_file)
+target_path = os.path.normpath(os.path.join(config_env['INSTALL_PREFIX'],'bin'))
+full_target = os.path.join(target_path,config_file)
 
 if 'install' in COMMAND_LINE_TARGETS:
     # we must add 'install' catch here because otherwise
     # custom command will be run when not installing
     env.Alias('install',full_target)
-    env.Command(full_target, source,
+    #Depends(t, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+    env.Command(full_target, config_file,
        [
        Copy("$TARGET","$SOURCE"),
        Chmod("$TARGET", 0755),
        ])
 
-config_env['create_uninstall_target'](env,os.path.join(target_path,source))
+config_env['create_uninstall_target'](env,os.path.join(target_path,config_file))
 
-source = 'mapnik2.pc'
-open(source,'w').write(top+pkg_config)
-try:
-    os.chmod(source,0666)
-except: pass
-target_path = os.path.normpath(install_prefix+'/'+LIBDIR_SCHEMA+'/pkgconfig')
-full_target = os.path.join(target_path,source)
 
-if 'install' in COMMAND_LINE_TARGETS:
-    env.Install(target_path,source)
-    env.Alias('install',target_path)
 
-config_env['create_uninstall_target'](env,full_target)
+
+
+

@@ -12,8 +12,9 @@ def test():
     mc = 'mapnik-config'
     valid = ['--help',
              '--prefix',
-             '--exec-prefix',
              '--libs',
+             '--dep-libs',
+             '--ldflags',
              '--cflags',
              '--fonts',
              '--input-plugins',
