@@ -29,7 +29,6 @@
         <StyleName>world_borders_style2</StyleName>
         <Datasource>
             <Parameter name="type">sqlite</Parameter>
-            <Parameter name="extent">-179,-60,179,60</Parameter>
             <Parameter name="file">../sqlite/world.sqlite</Parameter>
             <Parameter name="table">world_merc</Parameter>
         </Datasource>

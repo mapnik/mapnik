@@ -43,7 +43,6 @@
         <StyleName>1</StyleName>
         <Datasource>
             <Parameter name="type">sqlite</Parameter>
-            <Parameter name="extent">-180,-70,180,70</Parameter>
             <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
             <Parameter name="table">point</Parameter>
             <Parameter name="wkb_format">spatialite</Parameter>

@@ -28,6 +28,9 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/sql_utils.hpp>
 
+// to enable extent fallback hack
+#include <mapnik/feature_factory.hpp>
+
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -74,7 +77,6 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
 {
     // TODO
     // - change param from 'file' to 'dbname'
-    // - be able to calculate extent manually - like ogr?
     // - require wkb_format?
     // - split plugin into sqlite vs spatialite?
     // - conversion/sqlite initialization tool
@@ -399,13 +401,47 @@ void sqlite_datasource::bind() const
         }    
     }
     
-    /* TODO - instead of throwing here we should:
-      - perhaps warn to std::clog, then..
-      - form up a query of the whole table
-      - loop over geoms, assuming wkb format
-      - parse geoms and collect cumulative extent using box2d::expand_to_include
-      - this would match the postgis behavior
-    */
+    // final fallback to gather extent
+    if (!extent_initialized_) {
+        std::ostringstream s;
+        
+        s << "SELECT " 
+          << geometry_field_ 
+          << " FROM " << table_;
+        if (row_limit_ > 0) {
+            s << " LIMIT " << row_limit_;
+        }
+        if (row_offset_ > 0) {
+            s << " OFFSET " << row_offset_;
+        }
+
+#ifdef MAPNIK_DEBUG
+        std::clog << "Sqlite Plugin: " << s.str() << std::endl;
+#endif
+
+        boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+
+        bool first = true;
+        while (rs->is_valid() && rs->step_next())
+        {
+            int size;
+            const char* data = (const char *) rs->column_blob (0, size);
+            if (data) {
+                extent_initialized_ = true;
+                // create a tmp feature to be able to parse geometry
+                // ideally we would not have to do this.
+                // see: http://trac.mapnik.org/ticket/745
+                mapnik::feature_ptr feature(mapnik::feature_factory::create(0));
+                mapnik::geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,format_);
+                if (first) {
+                    first = false;
+                    extent_ = feature->envelope();
+                } else {
+                    extent_.expand_to_include(feature->envelope());
+                }
+            }
+        }
+    }
 
     if (!extent_initialized_) {
         std::ostringstream s;

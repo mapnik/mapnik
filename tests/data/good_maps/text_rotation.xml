@@ -35,7 +35,6 @@
         <StyleName>labels</StyleName>
         <Datasource>
             <Parameter name="type">sqlite</Parameter>
-            <Parameter name="extent">-180,-70,180,70</Parameter>
             <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
             <Parameter name="geometry_field">geometry</Parameter>
             <Parameter name="table">point</Parameter>
