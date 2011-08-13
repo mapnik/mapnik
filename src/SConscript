@@ -70,7 +70,7 @@ if env['PLATFORM'] in ('Darwin','SunOS'):
         lib_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
     
 
-if not env['LINKING'] == 'static':
+if not env['RUNTIME_LINK'] == 'static':
     if env['INTERNAL_LIBAGG']:
           lib_env['LIBS'].insert(0, 'agg')
     else:
