@@ -68,6 +68,7 @@ class sqlite_datasource : public mapnik::datasource
       mapnik::wkbFormat format_;
       bool multiple_geometries_;
       mutable bool use_spatial_index_;
+      mutable bool has_spatial_index_;
       std::vector<std::string> init_statements_;
       
       // Fill init_statements with any statements

@@ -96,6 +96,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
+    has_spatial_index_ = false;
 
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
@@ -335,24 +336,27 @@ void sqlite_datasource::bind() const
     if (geometry_field_.empty()) {
         throw datasource_exception("Sqlite Plugin: cannot detect geometry_field, please supply the name of the geometry_field to use.");
     }
+
+    if (index_table_.size() == 0) {
+        // Generate implicit index_table name - need to do this after
+        // we have discovered meta-data or else we don't know the column
+        // name
+        index_table_ = "idx_" + mapnik::unquote_sql(geometry_table_) + "_" + geometry_field_;
+    }
     
     if (use_spatial_index_)
     {
-        if (index_table_.size() == 0) {
-            // Generate implicit index_table name - need to do this after
-            // we have discovered meta-data or else we don't know the column
-            // name
-            index_table_ = "idx_" + mapnik::unquote_sql(geometry_table_) + "_" + geometry_field_;
-        }
-        
         std::ostringstream s;
         s << "SELECT pkid,xmin,xmax,ymin,ymax FROM " << index_table_;
         s << " LIMIT 0";
         if (dataset_->execute_with_code(s.str()) != SQLITE_OK)
         {
-            use_spatial_index_ = false;
             std::clog << "Sqlite Plugin: Warning, no suitable spatial index found for "
                 << geometry_table_ << " (checked " << s.str() << "). Rendering will work but will be slow: set 'use_spatial_index' to false to silence this warning." << std::endl;
+        }
+        else
+        {
+            has_spatial_index_ = true;
         }
     }
 
@@ -374,7 +378,7 @@ void sqlite_datasource::bind() const
         }
     }
     
-    if (!extent_initialized_ && use_spatial_index_)
+    if (!extent_initialized_ && has_spatial_index_)
     {
         std::ostringstream s;
         s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM " 
@@ -405,8 +409,7 @@ void sqlite_datasource::bind() const
     if (!extent_initialized_) {
         std::ostringstream s;
         
-        s << "SELECT " 
-          << geometry_field_ 
+        s << "SELECT " << geometry_field_ << "," << key_field_
           << " FROM " << table_;
         if (row_limit_ > 0) {
             s << " LIMIT " << row_limit_;
@@ -420,6 +423,22 @@ void sqlite_datasource::bind() const
 #endif
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+        
+        // spatial index sql
+        std::string spatial_index_sql = "create virtual table " + index_table_ 
+            + " using rtree(pkid, xmin, xmax, ymin, ymax)";
+        std::string spatial_index_insert_sql = "insert into " + index_table_
+            + " values (?,?,?,?,?)" ;
+        sqlite3_stmt* stmt = 0;
+
+        if (use_spatial_index_) {    
+            dataset_->execute_with_code(spatial_index_sql);
+            int rc = sqlite3_prepare_v2 (*(*dataset_), spatial_index_insert_sql.c_str(), -1, &stmt, 0);
+            if (rc != SQLITE_OK)
+            {
+               throw datasource_exception("failed");
+            }
+        }
 
         bool first = true;
         while (rs->is_valid() && rs->step_next())
@@ -427,20 +446,52 @@ void sqlite_datasource::bind() const
             int size;
             const char* data = (const char *) rs->column_blob (0, size);
             if (data) {
-                extent_initialized_ = true;
                 // create a tmp feature to be able to parse geometry
                 // ideally we would not have to do this.
                 // see: http://trac.mapnik.org/ticket/745
                 mapnik::feature_ptr feature(mapnik::feature_factory::create(0));
                 mapnik::geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,format_);
-                if (first) {
-                    first = false;
-                    extent_ = feature->envelope();
-                } else {
-                    extent_.expand_to_include(feature->envelope());
+                mapnik::box2d<double> const& bbox = feature->envelope();
+                if (bbox.valid()) {
+                    extent_initialized_ = true;
+                    if (first) {
+                        first = false;
+                        extent_ = bbox;
+                    } else {
+                        extent_.expand_to_include(bbox);
+                    }
+
+                    // index creation
+                    if (use_spatial_index_) {
+                        const int type_oid = rs->column_type(1);
+                        if (type_oid != SQLITE_INTEGER)
+                            throw datasource_exception("invalid type for key field");
+    
+                        int pkid = rs->column_integer(1);
+                        if (sqlite3_bind_int(stmt, 1 , pkid ) != SQLITE_OK)
+                        {
+                            throw datasource_exception("invalid value for for key field while generating index");
+                        }
+                        if ((sqlite3_bind_double(stmt, 2 , bbox.minx() ) != SQLITE_OK) ||
+                           (sqlite3_bind_double(stmt, 3 , bbox.maxx() ) != SQLITE_OK) ||
+                           (sqlite3_bind_double(stmt, 4 , bbox.miny() ) != SQLITE_OK) ||
+                           (sqlite3_bind_double(stmt, 5 , bbox.maxy() ) != SQLITE_OK)) {
+                               throw datasource_exception("invalid value for for extent while generating index");
+                           }
+                        
+                        sqlite3_step(stmt);
+                        sqlite3_reset(stmt);
+                    }
                 }
             }
         }
+        
+        int res = sqlite3_finalize(stmt);
+        if (res != SQLITE_OK)
+        {
+            throw datasource_exception("auto-indexing failed: set use_spatial_index=false to disable auto-indexing and avoid this error");
+        }
+        
     }
 
     if (!extent_initialized_) {
@@ -508,7 +559,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         
         std::string query (table_); 
         
-        if (use_spatial_index_)
+        if (has_spatial_index_)
         {
            std::ostringstream spatial_sql;
            spatial_sql << std::setprecision(16);
@@ -572,7 +623,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         
         std::string query (table_); 
         
-        if (use_spatial_index_)
+        if (has_spatial_index_)
         {
            std::ostringstream spatial_sql;
            spatial_sql << std::setprecision(16);
