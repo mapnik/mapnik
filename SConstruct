@@ -134,6 +134,11 @@ def call(cmd, silent=False):
     elif not silent:
         color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
 
+def strip_first(string,find,replace=''):
+    if string.startswith(find):
+        return string.replace(find,replace,1)
+    return string
+
 def get_libtool_major_version():
     """libtool >= 2.1b support lt_dlopenadvise and the previous
     release appears to be 1.9f (based on NEWS) so checking for 
@@ -363,7 +368,7 @@ opts.AddVariables(
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
-    ('LIB_DIR_NAME','Name to use for the "lib" folder where fonts and plugins are installed','mapnik2/'),
+    ('LIB_DIR_NAME','Name to use for the subfolder beside libmapnik where fonts and plugins are installed','mapnik2'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
     BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OS X', 'True'),
     BoolVariable('PYTHON_DYNAMIC_LOOKUP', 'On OSX, do not directly link python lib, but rather dynamically lookup symbols', 'False'),
@@ -951,19 +956,37 @@ if not preconfigured:
     env['LIBMAPNIK_LIBS'] = []
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
-    env['MAPNIK_LIB_DIR'] = os.path.normpath(env['PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + os.path.sep + env['LIB_DIR_NAME'])
-    env['INSTALL_PREFIX'] = os.path.normpath(os.path.realpath(env['DESTDIR'])) + \
-        os.path.realpath(env['PREFIX'])
-    env['MAPNIK_LIB_BASE_DEST'] = os.path.normpath(env['INSTALL_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'])
-    env['MAPNIK_LIB_DIR_DEST'] =  os.path.join(env['MAPNIK_LIB_BASE_DEST'],env['LIB_DIR_NAME'])
+
+    # previously a leading / was expected for LIB_DIR_NAME
+    # now strip it to ensure expected behavior
+    if env['LIB_DIR_NAME'].startswith(os.path.sep):
+        env['LIB_DIR_NAME'] = strip_first(['LIB_DIR_NAME'],os.path.sep)
+    
+    # base install location
     env['MAPNIK_LIB_BASE'] = os.path.join(env['PREFIX'],env['LIBDIR_SCHEMA'])
-    env['MAPNIK_INPUT_PLUGINS'] = os.path.join(env['MAPNIK_LIB_DIR'],"input")
-    env['MAPNIK_INPUT_PLUGINS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR_DEST'],"input")
+    # directory for plugins and fonts
+    env['MAPNIK_LIB_DIR'] = os.path.join(env['MAPNIK_LIB_BASE'],env['LIB_DIR_NAME'])
+    # input plugins sub directory
+    env['MAPNIK_INPUT_PLUGINS'] = os.path.join(env['MAPNIK_LIB_DIR'],'input')
+    # fonts sub directory
     if env['SYSTEM_FONTS']:
         env['MAPNIK_FONTS'] = os.path.normpath(env['SYSTEM_FONTS'])
-        env['MAPNIK_FONTS_DEST'] = os.path.normpath(env['SYSTEM_FONTS'])
     else:
         env['MAPNIK_FONTS'] = os.path.join(env['MAPNIK_LIB_DIR'],'fonts')
+    
+    # install prefix is a pre-pended base location to 
+    # re-route the install and only intended for package building
+    # we normalize to ensure no trailing slash and proper pre-pending to the absolute prefix
+    install_prefix = os.path.normpath(os.path.realpath(env['DESTDIR'])) + os.path.realpath(env['PREFIX'])
+    env['INSTALL_PREFIX'] = strip_first(install_prefix,'//','/')
+    # all values from above based on install_prefix
+    # if env['DESTDIR'] == '/' these should be unchanged
+    env['MAPNIK_LIB_BASE_DEST'] = os.path.join(env['INSTALL_PREFIX'],env['LIBDIR_SCHEMA'])
+    env['MAPNIK_LIB_DIR_DEST'] =  os.path.join(env['MAPNIK_LIB_BASE_DEST'],env['LIB_DIR_NAME'])
+    env['MAPNIK_INPUT_PLUGINS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR_DEST'],'input')
+    if env['SYSTEM_FONTS']:
+        env['MAPNIK_FONTS_DEST'] = os.path.normpath(env['SYSTEM_FONTS'])
+    else:
         env['MAPNIK_FONTS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR_DEST'],'fonts')
     
     if env['LINKING'] == 'static':
@@ -976,11 +999,6 @@ if not preconfigured:
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
     if env['PATH_INSERT']:
         env['ENV']['PATH'] = os.path.realpath(env['PATH_INSERT']) + ':' + env['ENV']['PATH']
-
-    thread_suffix = 'mt'
-    if env['PLATFORM'] == 'FreeBSD':
-        thread_suffix = ''
-        env.Append(LIBS = 'pthread')
     
     if env['SYSTEM_FONTS']:
         if not os.path.isdir(env['SYSTEM_FONTS']):
@@ -994,11 +1012,17 @@ if not preconfigured:
     # set any custom cxxflags to come first
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
 
+    ### platform specific bits
+
+    thread_suffix = 'mt'
+    if env['PLATFORM'] == 'FreeBSD':
+        thread_suffix = ''
+        env.Append(LIBS = 'pthread')
+
     # Solaris & Sun Studio settings (the `SUNCC` flag will only be
     # set if the `CXX` option begins with `CC`)
     SOLARIS = env['PLATFORM'] == 'SunOS'
     env['SUNCC'] = SOLARIS and env['CXX'].startswith('CC')
-    
     
     # If the Sun Studio C++ compiler (`CC`) is used instead of GCC.
     if env['SUNCC']:
@@ -1009,6 +1033,19 @@ if not preconfigured:
         env['CXX'] = 'CC -library=stlport4'
         if env['THREADING'] == 'multi':
             env.Append(CXXFLAGS = '-mt')
+
+    # allow for mac osx /usr/lib/libicucore.dylib compatibility
+    # requires custom supplied headers since Apple does not include them
+    # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
+    # To use system lib download and make && make install one of these:
+    # http://www.opensource.apple.com/tarballs/ICU/
+    # then copy the headers to a location that mapnik will find
+    if 'core' in env['ICU_LIB_NAME']:
+        env.Append(CXXFLAGS = '-DU_HIDE_DRAFT_API')
+        env.Append(CXXFLAGS = '-DUDISABLE_RENAMING')
+        if os.path.exists(env['ICU_LIB_NAME']):
+            #-sICU_LINK=" -L/usr/lib -licucore
+            env['ICU_LIB_NAME'] = os.path.basename(env['ICU_LIB_NAME']).replace('.dylib','').replace('lib','')
         
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
@@ -1026,19 +1063,6 @@ if not preconfigured:
     elif env['XMLPARSER'] == 'libxml2':
         if conf.parse_config('XML2_CONFIG'):
             env['HAS_LIBXML2'] = True
-            
-    # allow for mac osx /usr/lib/libicucore.dylib compatibility
-    # requires custom supplied headers since Apple does not include them
-    # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
-    # To use system lib download and make && make install one of these:
-    # http://www.opensource.apple.com/tarballs/ICU/
-    # then copy the headers to a location that mapnik will find
-    if 'core' in env['ICU_LIB_NAME']:
-        env.Append(CXXFLAGS = '-DU_HIDE_DRAFT_API')
-        env.Append(CXXFLAGS = '-DUDISABLE_RENAMING')
-        if os.path.exists(env['ICU_LIB_NAME']):
-            #-sICU_LINK=" -L/usr/lib -licucore
-            env['ICU_LIB_NAME'] = os.path.basename(env['ICU_LIB_NAME']).replace('.dylib','').replace('lib','')
 
     LIBSHEADERS = [
         ['m', 'math.h', True,'C'],
@@ -1055,7 +1079,6 @@ if not preconfigured:
         LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], True,'C'])
     else:
         env['SKIPPED_DEPS'].extend(['jpeg'])
-
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
@@ -1107,7 +1130,6 @@ if not preconfigured:
         # of attaching to cxxflags after configure
         if env['PLATFORM'] == 'SunOS':
             env.Append(CXXFLAGS = '-pthreads')
-
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
@@ -1526,15 +1548,15 @@ if not HELP_REQUESTED:
             color_print(1,"Notice: dependencies not met for plugin '%s', not building..." % plugin)
     
     create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'], False)
-    create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'] + '/input' , False)
-    create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'] + '/fonts' , False)
+    create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
+    create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
 
     # before installing plugins, wipe out any previously
     # installed plugins that we are no longer building
     if 'install' in COMMAND_LINE_TARGETS:
         for plugin in PLUGINS.keys():
             if plugin not in env['REQUESTED_PLUGINS']:
-                plugin_path = os.path.join(env['MAPNIK_LIB_DIR_DEST'],'input','%s.input' % plugin)
+                plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'%s.input' % plugin)
                 if os.path.exists(plugin_path):
                     color_print(1,"Notice: removing out of date plugin: '%s'" % plugin_path)
                     os.unlink(plugin_path)
