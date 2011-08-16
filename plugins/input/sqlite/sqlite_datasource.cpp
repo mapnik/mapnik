@@ -410,10 +410,16 @@ void sqlite_datasource::bind() const
     
     // final fallback to gather extent
     if (!extent_initialized_ || !has_spatial_index_) {
+        
+        /*if (use_spatial_index_ && key_field_ == "rowid" && boost::algorithm::icontains(geometry_table_,"from")) {
+           // this is an impossible situation because rowid will be null via a subquery
+           throw datasource_exception("Sqlite Plugin: Using a spatial index will require creating one on the fly which is not possible unless you supply a 'key_field' value that references the primary key of your spatial table. To avoid using a spatial index set 'use_spatial_index'=false");
+        }*/
+        
         std::ostringstream s;
         
         s << "SELECT " << geometry_field_ << "," << key_field_
-          << " FROM " << table_;
+          << " FROM " << geometry_table_;
         if (row_limit_ > 0) {
             s << " LIMIT " << row_limit_;
         }
