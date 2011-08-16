@@ -357,12 +357,7 @@ void sqlite_datasource::bind() const
         std::ostringstream s;
         s << "SELECT pkid,xmin,xmax,ymin,ymax FROM " << index_table_;
         s << " LIMIT 0";
-        if (dataset_->execute_with_code(s.str()) != SQLITE_OK)
-        {
-            std::clog << "Sqlite Plugin: Warning, no suitable spatial index found for "
-                << geometry_table_ << " (checked " << s.str() << "). Rendering will work but will be slow: set 'use_spatial_index' to false to silence this warning." << std::endl;
-        }
-        else
+        if (dataset_->execute_with_code(s.str()) == SQLITE_OK)
         {
             has_spatial_index_ = true;
         }
@@ -414,7 +409,7 @@ void sqlite_datasource::bind() const
     }
     
     // final fallback to gather extent
-    if (!extent_initialized_) {
+    if (!extent_initialized_ || !has_spatial_index_) {
         std::ostringstream s;
         
         s << "SELECT " << geometry_field_ << "," << key_field_
