@@ -69,7 +69,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
      // index_table_ defaults to "idx_{geometry_table_}_{geometry_field_}"
      index_table_(*params_.get<std::string>("index_table","")),
      // http://www.sqlite.org/lang_createtable.html#rowid
-     key_field_(*params_.get<std::string>("key_field","rowid")),
+     key_field_(*params_.get<std::string>("key_field","")),
      row_offset_(*params_.get<int>("row_offset",0)),
      row_limit_(*params_.get<int>("row_limit",0)),
      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
@@ -86,6 +86,14 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     if (!file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
 
     if (table_.empty()) throw mapnik::datasource_exception("Sqlite Plugin: missing <table> parameter");
+
+    boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
+    if (key_field_name) {
+        if (key_field_name->empty())
+            key_field_ = "rowid";
+        else
+            key_field_ = *key_field_name;
+    }
     
     boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
     if (wkb)
@@ -436,7 +444,7 @@ void sqlite_datasource::bind() const
             int rc = sqlite3_prepare_v2 (*(*dataset_), spatial_index_insert_sql.c_str(), -1, &stmt, 0);
             if (rc != SQLITE_OK)
             {
-               throw datasource_exception("failed");
+               throw datasource_exception("Sqlite Plugin: auto-index table creation failed");
             }
         }
 
@@ -464,8 +472,13 @@ void sqlite_datasource::bind() const
                     // index creation
                     if (use_spatial_index_) {
                         const int type_oid = rs->column_type(1);
-                        if (type_oid != SQLITE_INTEGER)
-                            throw datasource_exception("invalid type for key field");
+                        if (type_oid != SQLITE_INTEGER) {
+                            std::ostringstream type_error;
+                            type_error << "Sqlite Plugin: invalid type for key field '"
+                                << key_field_ << "' when creating index '" << index_table_ 
+                                << "' type was: " << type_oid << "";
+                            throw datasource_exception(type_error.str());
+                        }
     
                         int pkid = rs->column_integer(1);
                         if (sqlite3_bind_int(stmt, 1 , pkid ) != SQLITE_OK)
