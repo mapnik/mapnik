@@ -355,7 +355,7 @@ void sqlite_datasource::bind() const
         // Generate implicit index_table name - need to do this after
         // we have discovered meta-data or else we don't know the column
         // name
-        index_table_ = "idx_" + mapnik::unquote_sql(geometry_table_) + "_" + geometry_field_;
+        index_table_ = "idx_" + mapnik::unquote_sql2(geometry_table_) + "_" + geometry_field_;
     }
     
     if (use_spatial_index_)

@@ -80,7 +80,7 @@ feature_ptr sqlite_featureset::next()
            const int type_oid = rs_->column_type (i);
            // TODO - avoid copying string
            // TODO - handle single quotes
-           const char* fld_name = mapnik::unquote_sql(rs_->column_name(i)).c_str();
+           const char* fld_name = mapnik::unquote_sql2(rs_->column_name(i)).c_str();
            
            switch (type_oid)
            {

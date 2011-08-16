@@ -39,6 +39,13 @@ inline std::string unquote_sql(const std::string& sql)
     return table_name;
 }
 
+inline std::string unquote_sql2(const std::string& sql)
+{
+    std::string table_name = boost::algorithm::to_lower_copy(sql);  
+    boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\"\'"));
+    return table_name;
+}
+
 inline void quote_attr(std::ostringstream& s, const std::string& field)
 {
     if (boost::algorithm::icontains(field,".")) {
