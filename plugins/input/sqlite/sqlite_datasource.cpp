@@ -89,10 +89,16 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
 
     boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
     if (key_field_name) {
-        if (key_field_name->empty())
+        std::string const& key_field_string = *key_field_name;
+        if (key_field_string.empty()) {
             key_field_ = "rowid";
-        else
-            key_field_ = *key_field_name;
+        } else {
+            key_field_ = key_field_string;
+        }
+    }
+    else
+    {
+        key_field_ = "rowid";
     }
     
     boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
@@ -571,7 +577,12 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         
         s << " FROM "; 
         
-        std::string query (table_); 
+        std::string query (table_);
+        
+        /* todo
+          throw if select * and key_field == rowid?
+          or add schema support so sqlite throws
+        */
         
         if (has_spatial_index_)
         {
