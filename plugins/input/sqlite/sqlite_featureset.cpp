@@ -31,6 +31,7 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/sql_utils.hpp>
 
 // ogr
 #include "sqlite_featureset.hpp"
@@ -77,7 +78,9 @@ feature_ptr sqlite_featureset::next()
         for (int i = 2; i < rs_->column_count (); ++i)
         {
            const int type_oid = rs_->column_type (i);
-           const char* fld_name = rs_->column_name (i);
+           // TODO - avoid copying string
+           // TODO - handle single quotes
+           const char* fld_name = mapnik::unquote_sql(rs_->column_name(i)).c_str();
            
            switch (type_oid)
            {
