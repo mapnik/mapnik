@@ -960,7 +960,7 @@ if not preconfigured:
     # previously a leading / was expected for LIB_DIR_NAME
     # now strip it to ensure expected behavior
     if env['LIB_DIR_NAME'].startswith(os.path.sep):
-        env['LIB_DIR_NAME'] = strip_first(['LIB_DIR_NAME'],os.path.sep)
+        env['LIB_DIR_NAME'] = strip_first(env['LIB_DIR_NAME'],os.path.sep)
     
     # base install location
     env['MAPNIK_LIB_BASE'] = os.path.join(env['PREFIX'],env['LIBDIR_SCHEMA'])
