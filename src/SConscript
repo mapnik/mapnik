@@ -65,9 +65,8 @@ if env['XMLPARSER'] == 'libxml2':
 if env['THREADING'] == 'multi':
     lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
         
-if env['PLATFORM'] in ('Darwin','SunOS'):
-    if env['HAS_BOOST_SYSTEM']:
-        lib_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
+if env['HAS_BOOST_SYSTEM']:
+    lib_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
     
 
 if not env['RUNTIME_LINK'] == 'static':
