@@ -111,6 +111,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
     has_spatial_index_ = false;
+    using_subquery_ = false;
 
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
@@ -218,6 +219,7 @@ void sqlite_datasource::bind() const
     {
         // if 'table_' is a subquery then we try to deduce names
         // and types from the first row returned from that query
+        using_subquery_ = true;
         use_pragma_table_info = false;
     }
 
@@ -343,7 +345,13 @@ void sqlite_datasource::bind() const
         }
         if (!found_table)
         {
-            throw datasource_exception("Sqlite Plugin: could not query table '" + geometry_table_ + "' using 'pragma table_info(" + geometry_table_  + ")';");
+            std::ostringstream s;
+            s << "Sqlite Plugin: could not query table '" << geometry_table_ << "' ";
+            if (using_subquery_)
+                s << " from subquery '" << table_ << "' ";
+            s << "using 'PRAGMA table_info(" << geometry_table_  << ")' ";
+            s << sqlite3_errmsg(*(*dataset_));
+            throw datasource_exception(s.str());
         }
     }
 
@@ -487,8 +495,8 @@ void sqlite_datasource::bind() const
                             throw datasource_exception(type_error.str());
                         }
     
-                        int pkid = rs->column_integer(1);
-                        if (sqlite3_bind_int(stmt, 1 , pkid ) != SQLITE_OK)
+                        sqlite_int64 pkid = rs->column_integer64(1);
+                        if (sqlite3_bind_int64(stmt, 1 , pkid ) != SQLITE_OK)
                         {
                             throw datasource_exception("invalid value for for key field while generating index");
                         }
@@ -586,6 +594,10 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         
         if (has_spatial_index_)
         {
+           /* 
+              Use rtree to limit record id's to a given bbox
+              then a btree to pull the records for those ids.        
+           */
            std::ostringstream spatial_sql;
            spatial_sql << std::setprecision(16);
            spatial_sql << " WHERE " << key_field_ << " IN (SELECT pkid FROM " << index_table_;
@@ -612,7 +624,8 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         }
 
 #ifdef MAPNIK_DEBUG
-        std::clog << "Sqlite Plugin: " << s.str() << std::endl;
+        std::clog << "Sqlite Plugin: table_: " << table_ << "\n\n";
+        std::clog << "Sqlite Plugin: query:" << s.str() << "\n\n";
 #endif
 
         boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));

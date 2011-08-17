@@ -86,6 +86,11 @@ public:
         return sqlite3_column_int (stmt_, col);
     }
 
+    int column_integer64 (int col)
+    {
+        return sqlite3_column_int64 (stmt_, col);
+    }
+
     double column_double (int col)
     {
         return sqlite3_column_double (stmt_, col);
