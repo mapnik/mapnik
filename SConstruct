@@ -230,7 +230,7 @@ def sort_paths(items,priority):
             else:
                 path_types['user'].append(i)
         # key system libs (likely others will fall into 'other')
-        elif '/usr/' in i or '/System' in i or i.startswith('/lib'):
+        elif '/usr/' in i or '/System' in i or '/lib' in i:
             path_types['system'].append(i)
         # anything not yet matched...
         # likely a combo of rare system lib paths and
