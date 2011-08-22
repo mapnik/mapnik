@@ -81,6 +81,10 @@ ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_en
 
 dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 
+if env['INTERNAL_LIBAGG']:
+    dep_libs = dep_libs.replace('-lagg','')
+          
+
 configuration = {
     "prefix": config_env['PREFIX'],
     "mapnik_libname": 'mapnik2',
