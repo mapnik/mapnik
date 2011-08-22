@@ -184,10 +184,15 @@ cd ../
 # cairo and friends
 
 # pkg-config so we get cairo and friends configured correctly
-wget http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz
-tar xvf pkg-config-0.26.tar.gz
-cd pkg-config-0.26
-./configure --disable-dependency-tracking --prefix=$PREFIX
+# note: we use 0.25 because >= 0.26 no long bundles glib and we don't
+# want to have to depend on an external glib dep
+wget http://pkgconfig.freedesktop.org/releases/pkg-config-0.25.tar.gz
+tar xvf pkg-config-0.25.tar.gz
+cd pkg-config-0.25
+# patch glib.h
+# change line 198 to:
+#      ifndef G_INLINE_FUNC inline
+./configure --disable-debug --disable-dependency-tracking --prefix=$PREFIX
 make -j4
 make install
 cd ../
