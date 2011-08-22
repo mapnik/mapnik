@@ -324,3 +324,11 @@ SQLITE_INCLUDES = './osx/sources/include'
 SQLITE_LIBS = './osx/sources/lib'
 BINDINGS = 'none'
 
+
+# fixup the mapnik-config
+# we need to remove the local paths so that 'other-libs' and 'other-includes' look something like:
+
+other_libs='-Wl,-search_paths_first -arch x86_64 -arch i386 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.6.sdk -L/usr/lib -lfreetype -licucore -lboost_filesystem -lboost_regex -lcairomm-1.0 -lcairo -lboost_thread -lboost_system'
+
+other_includes='-arch x86_64 -arch i386 -mmacosx-version-min=10.6 -isysroot /Developer/SDKs/MacOSX10.6.sdk -arch x86_64 -arch i386 -mmacosx-version-min=10.6 -isysroot /Developer/SDKs/MacOSX10.6.sdk -DU_HIDE_DRAFT_API -DUDISABLE_RENAMING -DHAVE_JPEG -ansi -Wall -ftemplate-depth-200 -DDARWIN -DBOOST_SPIRIT_THREADSAFE -DMAPNIK_THREADSAFE -O3 -finline-functions -Wno-inline -DNDEBUG -DHAVE_CAIRO -I/usr/include/libxml2 -DHAVE_CAIRO -DLIBTOOL_SUPPORTS_ADVISE'
+
