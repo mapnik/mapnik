@@ -144,9 +144,11 @@ cd ../
 
 
 # postgis
-# install postgres 9.x client from http://www.kyngchaos.com/software/postgres
-# then copy the static libpq.a to a prioritized directory:
-cp /usr/local/pgsql/lib/libpq.a osx/sources/lib/libpq_s.a
+# install postgres 9.x client from somewhere. 
+# http://www.kyngchaos.com/software/postgres works nicely
+# then copy the clients static libpq.a to a prioritized directory:
+cp /usr/local/pgsql/lib/libpq.a osx/sources/lib/libpq.a
+# then edit plugins/input/postgis/SConscript adding more libs to link to
 
 
 # gdal 1.8.1
