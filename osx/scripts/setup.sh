@@ -5,7 +5,7 @@ cd osx/sources
 # build icu and boost for packaging up within Mapnik Framework
 
 # local install location
-PREFIX=/Users/dane/projects/mapnik-dev/trunk-build-static/osx/sources
+PREFIX=/Users/dane/projects/mapnik-dev/trunk-build/osx/sources
 mkdir -p $PREFIX
 export DYLD_LIBRARY_PATH=$PREFIX/lib
 # final resting place
@@ -320,6 +320,8 @@ tar xvf sqlite-autoconf-3070701.tar.gz
 cd sqlite-autoconf-3070701
 export CFLAGS="-DSQLITE_ENABLE_RTREE=1 -O3 "$CFLAGS
 ./configure --prefix=$PREFIX --enable-static=yes --enable-shared=no --disable-dependency-tracking
+make -j4 && make install
+
 
 ### MAPNIK ###
 
