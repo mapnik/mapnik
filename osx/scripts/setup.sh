@@ -15,6 +15,10 @@ export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 export CFLAGS="-O3 -arch i386 -arch x86_64"
 export CXXFLAGS="-O3 -arch i386 -arch x86_64"
 export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
+# universal flags
+export CFLAGS="-O3 -arch i386 -arch x86_64"
+export CXXFLAGS="-O3 -arch i386 -arch x86_64"
+export LDFLAGS="-arch i386 -arch x86_64 -headerpad_max_install_names"
 
 
 # make a directory to hold icu and boost
@@ -104,7 +108,7 @@ cd cairo-1.10.2
 export LDFLAGS="-L/Library/Frameworks/UnixImageIO.framework/unix/lib "$LDFLAGS
 export CFLAGS="-I/Library/Frameworks/UnixImageIO.framework/unix/include "$CFLAGS
 export png_CFLAGS="-I/Library/Frameworks/UnixImageIO.framework/unix/include"
-export png_LIBS="-I/Library/Frameworks/UnixImageIO.framework/unix/lib -lpng14"
+export png_LIBS="-I/Library/Frameworks/UnixImageIO.framework/unix/lib -lpng15"
 ./configure \
   --disable-valgrind \
   --enable-gobject=no \
@@ -124,19 +128,20 @@ install_name_tool -id $INSTALL/libcairo.2.dylib ../../sources/lib/libcairo.2.dyl
 cd ../
 
 # since linking to libpng framework (which does not provide a pkg-config) fake it:
+# match to /Library/Frameworks/UnixImageIO.framework/unix/
+# vim ../sources/lib/pkgconfig/libpng.pc
 
 prefix=/Library/Frameworks/UnixImageIO.framework/unix
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
-includedir=${prefix}/include/libpng14
+includedir=${prefix}/include/libpng15
 
 Name: libpng
 Description: Loads and saves PNG files
-Version: 1.4
-Libs: -L${libdir} -lpng14
+Version: 1.5
+Libs: -L${libdir} -lpng15
 Libs.private: -lz 
 Cflags: -I${includedir} 
-
 
 
 # libsigcxx
@@ -165,6 +170,9 @@ install_name_tool -id $INSTALL/libcairomm-1.0.1.dylib ../../sources/lib/libcairo
 
 # also make sure cairo and friends did not link against anything in /opt/local or /usr/local
 otool -L ../../sources/lib/*dylib | grep local
+
+# ensure we're linking to the right image libs
+otool -L ../../sources/lib/*dylib | grep UnixImageIO
 
 # pycairo
 # >= python 3.1
@@ -359,6 +367,8 @@ rm bindings/python/mapnik/_mapnik2.so
 scons configure BINDINGS=python PYTHON=/Library/Frameworks/Python.framework/Versions/3.2/bin/python3.2m BOOST_PYTHON_LIB=boost_python32
 scons -j2 install
 cp bindings/python/mapnik/_mapnik2.so osx/python/_mapnik2_32.so
+
+
 
 
 # build a ton of versions of node (just to be safe about ABI)
