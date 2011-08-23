@@ -1,7 +1,7 @@
 CXX = 'clang++'
 CC = 'clang'
 CUSTOM_CXXFLAGS = '-arch i386 -arch x86_64 -mmacosx-version-min=10.6 -isysroot /Developer/SDKs/MacOSX10.6.sdk -isystem osx/sources/include'
-CUSTOM_LDFLAGS = '-arch i386 -arch x86_64 -Wl,-search_paths_first -Wl,-syslibroot,/Developer/SDKs/MacOSX10.6.sdk'
+CUSTOM_LDFLAGS = '-arch i386 -arch x86_64 -Wl,-search_paths_first -Wl,-syslibroot,/Developer/SDKs/MacOSX10.6.sdk -Losx/sources/lib '
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'gdal,ogr,postgis,shape,sqlite'
 DESTDIR = './osx/sources/'
