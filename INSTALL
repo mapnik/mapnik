@@ -1,188 +1,146 @@
-# $Id$
-
-INSTALLATION INSTRUCTIONS
+# Mapnik Installation
 
 
-Quick Start
------------
+## Quick Start
 
-For platform specific install guides see:
+To configure and build mapnik do:
 
-  http://trac.mapnik.org/wiki/MapnikInstallation
+    ./configure
+    make
+    sudo make install
 
-Install needed dependencies::
+If you need to uninstall do:
 
-  $ sudo apt-get install libboost* libicu* libfreetype* proj # see below for full list
-  $ cd ~/src/mapnik
+    sudo make uninstall
 
-Configure the build setup::
+For more details see the 'Building' Section below.
 
-  $ python scons/scons.py configure
+Platform specific install guides at http://trac.mapnik.org/wiki/MapnikInstallation
 
-Build Mapnik source code::
-
-  $ python scons/scons.py
-
-Install Mapnik library and python bindings::
-
-  $ sudo python scons/scons.py install
-
-If on Linux then run:
-
-  $ sudo ldconfig
-
-Run python interpreter and check installation::
-
-  >>> import mapnik
-  Traceback (most recent call last):
-   File "<stdin>", line 1, in <module>
-  ImportError: No module named mapnik
-  >>>
-
-If you get this error ensure that Mapnik in is your PYTHONPATH.
-
-Otherwise your setup is ready. You can now visit
-http://trac.mapnik.org/wiki/GettingStarted for a basic tutorial.
-
-For help with using SCons see: http://trac.mapnik.org/wiki/UsingScons
-
-For troubleshooting errors see:
-http://trac.mapnik.org/wiki/InstallationTroubleshooting.
+For troubleshooting help see http://trac.mapnik.org/wiki/InstallationTroubleshooting
 
 
-Prerequisites
--------------
+## Depends
 
-First, here is a quick list of the required software dependencies:
+Mapnik is cross platform and runs on Linux, Mac OSX, Solaris, *BSD, and Windows.
 
-- Linux/UNIX with g++ compiler
-- Python 2.2 or greater to build Mapnik
-    - Python 2.4 for python bindings (see below)
-- libboost >= 1.41.0 or greater with the following libraries included:
-    - system
-    - thread
+The build system should work for all posix/unix systems but for windows see:
+
+    http://trac.mapnik.org/wiki/BuildingOnWindows
+
+Build dependencies are:
+
+ * C++ compiler (like g++ or clang++)
+ * Python >= 2.4
+ * >= 2 GB RAM
+
+Mapnik Core depends on:
+
+ * Boost >= 1.42.x (>= 1.45.x if using clang++) with these libraries:
     - filesystem
+    - system
+    - thread (if mapnik threadsafe support is required, default on)
     - regex (optionally built with icu regex support)
-    - python - required only for python bindings (see below)
-- libicu >= 4.0 - International Components for Unicode
-- libpng - PNG Graphics
-- libjpeg - JPEG Graphics
-- libtiff - TIFF Graphics 
-- libz - Compression
-- libfreetype2 - Font support (Install requires freetype-config)
-- libxml2 - XML parsing (Install requires xml2-config)
-- proj - PROJ.4 Projection library
+    - program_options (optionally for mapnik command line programs)
 
-Second, here are the optional software dependencies:
+ * libicuuc >= 4.0 (ideally >= 4.2) - International Components for Unicode
+ * libpng >= 1.2.x - PNG Graphics
+ * libjpeg - JPEG Graphics
+ * libtiff - TIFF Graphics 
+ * libz - Zlib Compression
+ * libfreetype - Freetype2 for Font support (Install requires freetype-config)
+ * libxml2 - XML parsing (Install requires xml2-config)
+ * libproj - PROJ.4 Projection library
 
-- Python 2.4 or greater for Python language bindings
-- Boost 'python', required for binding Python language bindings
-- Boost 'program_options' for shapeindex executable support
-- Cairo - Graphics library for PDF, PS, and SVG formats
+Mapnik Python binding depend on:
+
+ * Python >= 2.4
+ * Boost python
+
+Optional dependencies:
+
+ * Cairo - Graphics library for PDF, PS, and SVG formats
     - pkg-config - Required for building with cairo support
+    - libsigc++ - C++ support for cairomm
     - cairomm - C++ bindings for cairo
     - pycairo - Python bindings for cairo
-- libpq - PostgreSQL libraries (For PostGIS plugin support)
-- libgdal - GDAL/OGR input (For gdal and ogr plugin support)
-- libsqlite3 - SQLite input (needs RTree support) (sqlite plugin support)
-- libocci - Oracle input plugin support
-- libcurl - OSM input plugin support
-
-If your system does NOT have one of these installed, you will need to
-install the mandatory ones at the very least before proceeding further.
+ * libpq - PostgreSQL libraries (For PostGIS plugin support)
+ * libgdal - GDAL/OGR input (For gdal and ogr plugin support)
+ * libsqlite3 - SQLite input (needs RTree support) (sqlite plugin support)
+ * libocci - Oracle input plugin support
+ * libcurl - OSM input plugin support
 
 Instructions for installing many of these dependencies on
 various platforms can be found at the Mapnik Community Wiki
 (http://trac.mapnik.org/wiki/MapnikInstallation).
 
-On Linux and Mac OS, package management systems (such as apt for debian
-or macports for darwin) can be used to install most or all dependencies,
-but source installs may be preferrable. This is particularly true for
-libraries that a required for the Python bindings, where source installs
-may be the best way to ensure that the same python version us linked to
-Boost, Cairo, and Mapnik.
-
-Note: a minimum of 256MB of RAM is recommended for the build process.
 
 
-Building
---------
+## Building
 
-Once you've installed the required software packages, the simplest way to
-build Mapnik is to run SCons (The software builder) without any options::
+The build system uses SCons, a pure python equivalent to autotools or cmake.
 
-  $ cd ~/src/mapnik
-  $ python scons/scons.py configure
-  $ python scons/scons.py # will build sources
+We provide a simple Makefile wrapper that can be used like:
 
-This should compile and link the mapnik library as well as the input
-plugins and the python language binding (if possible).  If any mandatory
-dependencies are not found the build will fail, and you will need to
-specify custom paths to your libraries and include files.
+    ./configure && make && make install
 
-SCons accepts a variety of options to customize your build.  This allows
-you to specify which components are compiled, where to find dependencies,
-where to install mapnik, and so on.
+To interact with the local copy of scons directly you can do:
 
-To see the list of available options, from the root of the source
-distribution, run::
+    python scons/scons.py configure
 
-  $ python scons/scons.py -h
+You can also use a globally installed scons:
 
-For example, if you compiled your own set of Boost libraries, you might use::
+    scons configure
 
-  $ python scons/scons.py configure BOOST_INCLUDES=/usr/local/include/ BOOST_LIBS=/usr/local/lib
+If you want to clean your build do:
 
-Or if you installed ICU from source and you'd like to build Mapnik in
-Debug mode you might use::
+    make clean
 
-  $ python scons/scons.py configure DEBUG=True ICU_INCLUDES=/usr/local/include ICU_LIBS=/usr/local/lib
+If you experience odd configure errors, try resetting the SCons caches:
+
+    make reset
+
+To install in a custom location do:
+
+    ./configure PREFIX=/opt/mapnik
+
+To pass custom CXXFLAGS or LDFLAGS do:
+
+    ./configure CUSTOM_CXXFLAGS="-g -I/usr/include" CUSTOM_LDFLAGS="-L/usr/lib"
+
+To pass custom paths to a dependency, like boost, do:
+
+    ./configure BOOST_INCLUDES=/opt/boost/include BOOST_LIBS=/opt/boost/lib
+
+To pass custom paths to a dependency, like icu, do:
+
+    ./configure ICU_INCLUDES=/usr/local/include ICU_LIBS=/usr/local/include
+
+If you want to see configure options do:
+
+    ./configure --help
 
 For more details on all the options see:
-http://trac.mapnik.org/wiki/UsingScons
 
-Note: the Python used to run SCons does NOT have to be the same as the
-one used for the python bindings.
+    http://trac.mapnik.org/wiki/UsingScons
 
 
-Installation
-------------
-
-Once the build has successfully completed, you can install the various
-files on your system by executing::
-
-  $ sudo python scons/scons.py install
-
-By default, everything will be installed under the PREFIX '/usr/local'
-as such::
-
-  $PREFIX/lib: libmapnik.so (.dylib on mac os)
-  $PREFIX/lib/mapnik/input: input plug-ins
-  $PREFIX/include: mapnik include files
-  $PREFIX/bin: shapeindex utility
-  $PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages/mapnik: Python bindings
-
-If you're using the default PREFIX, you will most likely need to be root
-to perform the install.
-
-
-Testing Installation
---------------------
+## Testing Installation
 
 First, try importing the Mapnik python module in a python interpreter,
-and make sure it does so without errors::
+and make sure it does so without errors:
 
-  $ python
-  Python 2.5.1 (r251:54863, Jan 17 2008, 19:35:17) 
-  [GCC 4.0.1 (Apple Inc. build 5465)] on darwin
-  Type "help", "copyright", "credits" or "license" for more information.
-  >>> import mapnik
-  >>> 
+    $ python
+    Python 2.5.1 (r251:54863, Jan 17 2008, 19:35:17) 
+    [GCC 4.0.1 (Apple Inc. build 5465)] on darwin
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import mapnik
+    >>> 
 
 Then, try rendering the demo map, included in the Mapnik source code::
 
-  $ cd demo/python
-  $ python rundemo.py 
+    cd demo/python
+    python rundemo.py 
 
 If the resulting maps look good, this indicates the core components of
 Mapnik are installed properly, as well as the Shapefile plugin, Unicode
@@ -191,20 +149,19 @@ text support (ICU), and re-projection support using Proj.
 For further tests see the `tests` folder within the Mapnik source code.
 
 
-Learning Mapnik
----------------
+## Learning Mapnik
 
-For Users:
-  - Visit http://trac.mapnik.org/wiki/LearningMapnik for basic tutorials
-    on making maps with Mapnik using the Python bindings.
+### Users
 
-For Developers:
-  - Visit http://trac.mapnik.org/#DevelopersCorner for resources for
-    getting involved with Mapnik development.
+Visit http://trac.mapnik.org/wiki/LearningMapnik for basic tutorials on making maps with Mapnik using the Python bindings.
+
+### Developers
+
+Visit http://trac.mapnik.org/#DevelopersCorner for resources for getting involved with Mapnik development.
 
 
-Mapnik Community
-----------------
+## Mapnik Community
+
 
 Mapnik has an active community of talented users and developers making
 amazing maps.
@@ -216,29 +173,15 @@ find what you are looking for from searching the users list archives
 introduce yourself.
 
 You can get involved by:
-  - Subscribing to the mapnik-users list:
+
+ * Subscribing to the mapnik-users list:
+
     http://lists.berlios.de/mailman/listinfo/mapnik-users
-  - Subscribing to the mapnik-developers list:
+
+ * Subscribing to the mapnik-developers list:
+
     http://lists.berlios.de/mailman/listinfo/mapnik-devel
-  - Joining the #mapnik channel on irc://irc.freenode.net/mapnik
-  - Signing up as a user or contributer at http://www.ohloh.net/p/mapnik/  
 
+ * Joining the #mapnik channel on irc://irc.freenode.net/mapnik
 
-A note on projection support
-----------------------------
-
-Mapnik's core C++ library and map rendering engine support on-the-fly
-cartographic reprojections.
-
-Here is an example on how to use it::
-
-  >>> import mapnik
-  >>> p = mapnik.Projection('+init=epsg:27700') # British National Grid
-  >>> p.forward(mapnik.Coord(-1.125,51.75))
-  Coord(460396.920899,206113.214203) # reprojected coordinate x, y pair
-  >>> p.forward(mapnik.Envelope(-1.125,51.75,-1.0,50.75))
-  Envelope(461721.365661,94917.0749406,469024.861457,206224.090767) # reprojected extent
-
-
-The Projection() instance provides inverse() and forward() methods.
-For details on the possible parameters, see the PROJ.4 documentation.
+ * Signing up as a user or contributor at http://www.ohloh.net/p/mapnik/  
