@@ -87,7 +87,10 @@ public:
             os_ << s.str();
         }
         catch (...) {} // eat any exceptions
-    
+    }
+
+    void discard() {
+        stopped_ = true;
     }
 
 private:
