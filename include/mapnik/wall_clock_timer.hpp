@@ -24,6 +24,7 @@
 #define MAPNIK_WALL_CLOCK_TIMER_INCLUDED
 
 #include <cstdlib>
+#include <string>
 #include <sys/time.h> 
 
 namespace mapnik {
@@ -62,30 +63,37 @@ private:
 class wall_clock_progress_timer : public wall_clock_timer
 {
 public:
-    wall_clock_progress_timer(std::ostream & os = std::cout, const char * base_message = "") : _os(os), _base_message(base_message) {}
+    wall_clock_progress_timer(std::ostream & os,
+                              std::string const& base_message):
+      os_(os),
+      base_message_(base_message),
+      stopped_(false) {}
+
     ~wall_clock_progress_timer()
     {
-        //  A) Throwing an exception from a destructor is a Bad Thing.
-        //  B) The progress_timer destructor does output which may throw.
-        //  C) A progress_timer is usually not critical to the application.
-        //  Therefore, wrap the I/O in a try block, catch and ignore all exceptions.
+        if (!stopped_)
+            stop();
+    }
+    
+    void stop() {
+        stopped_ = true;
         try
         {
-            // use istream instead of ios_base to workaround GNU problem (Greg Chicares)
-            std::istream::fmtflags old_flags = _os.setf( std::istream::fixed,
-                                                         std::istream::floatfield );
-            std::streamsize old_prec = _os.precision( 2 );
-            _os << _base_message << elapsed() << " ms\n" // "s" is System International d'Unites std
-                << std::endl;
-            _os.flags( old_flags );
-            _os.precision( old_prec );
+            std::ostringstream s;
+            s.precision(2);
+            s << std::fixed; 
+            s << elapsed() << " ms";
+            s << std::setw(15 - (int)s.tellp()) << std::right << "| " << base_message_ << "\n"; 
+            os_ << s.str();
         }
         catch (...) {} // eat any exceptions
+    
     }
 
 private:
-    std::ostream & _os;
-    const char * _base_message;
+    std::ostream & os_;
+    std::string base_message_;
+    bool stopped_;
 };
     
 };
