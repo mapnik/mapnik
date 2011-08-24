@@ -77,15 +77,15 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
 {
     // TODO
     // - change param from 'file' to 'dbname'
-    // - require wkb_format?
-    // - split plugin into sqlite vs spatialite?
-    // - conversion/sqlite initialization tool
-    // - sync code with rasterlite
+    // - ensure that the supplied key_field is a valid "integer primary key"
+    // - move all intialization code to bind()
 
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (!file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
 
-    if (table_.empty()) throw mapnik::datasource_exception("Sqlite Plugin: missing <table> parameter");
+    if (table_.empty()) {
+        throw mapnik::datasource_exception("Sqlite Plugin: missing <table> parameter");
+    } 
 
     boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
     if (key_field_name) {
@@ -283,8 +283,8 @@ void sqlite_datasource::bind() const
         }
     }
 
-    // TODO - ensure that the supplied key_field is a valid "integer primary key"
-    desc_.add_descriptor(attribute_descriptor("rowid",mapnik::Integer));
+    if (key_field_ == "rowid")
+        desc_.add_descriptor(attribute_descriptor("rowid",mapnik::Integer));
     
     if (use_pragma_table_info)
     {
@@ -295,6 +295,7 @@ void sqlite_datasource::bind() const
         while (rs->is_valid () && rs->step_next())
         {
             found_table = true;
+            // TODO - support unicode strings?
             const char* fld_name = rs->column_text(1);
             std::string fld_type(rs->column_text(2));
             boost::algorithm::to_lower(fld_type);
@@ -425,7 +426,7 @@ void sqlite_datasource::bind() const
     // final fallback to gather extent
     if (!extent_initialized_ || !has_spatial_index_) {
         
-        /*if (use_spatial_index_ && key_field_ == "rowid" && boost::algorithm::icontains(geometry_table_,"from")) {
+        /*if (use_spatial_index_ && key_field_ == "rowid" && using_subquery_) {
            // this is an impossible situation because rowid will be null via a subquery
            throw datasource_exception("Sqlite Plugin: Using a spatial index will require creating one on the fly which is not possible unless you supply a 'key_field' value that references the primary key of your spatial table. To avoid using a spatial index set 'use_spatial_index'=false");
         }*/
@@ -630,7 +631,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
 
-        return boost::make_shared<sqlite_featureset>(rs, desc_.get_encoding(), format_, multiple_geometries_);
+        return boost::make_shared<sqlite_featureset>(rs, desc_.get_encoding(), format_, multiple_geometries_, using_subquery_);
    }
 
    return featureset_ptr();
@@ -694,7 +695,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
 
         boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
 
-        return boost::make_shared<sqlite_featureset>(rs, desc_.get_encoding(), format_, multiple_geometries_);
+        return boost::make_shared<sqlite_featureset>(rs, desc_.get_encoding(), format_, multiple_geometries_, using_subquery_);
    }
       
    return featureset_ptr();

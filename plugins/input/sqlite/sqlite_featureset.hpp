@@ -43,7 +43,8 @@ class sqlite_featureset : public mapnik::Featureset
       sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                         std::string const& encoding,
                         mapnik::wkbFormat format,
-                        bool multiple_geometries);
+                        bool multiple_geometries,
+                        bool using_subquery);
       virtual ~sqlite_featureset();
       mapnik::feature_ptr next();
    private:
@@ -51,6 +52,7 @@ class sqlite_featureset : public mapnik::Featureset
       boost::scoped_ptr<mapnik::transcoder> tr_;
       mapnik::wkbFormat format_;
       bool multiple_geometries_;
+      bool using_subquery_;
 };
 
 #endif // SQLITE_FEATURESET_HPP

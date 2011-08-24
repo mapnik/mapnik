@@ -96,6 +96,12 @@ public:
         return sqlite3_column_double (stmt_, col);
     }
 
+    const char* column_text (int col, int& len)
+    {
+        len = sqlite3_column_bytes (stmt_, col);
+        return (const char*) sqlite3_column_text (stmt_, col);
+    }
+
     const char* column_text (int col)
     {
         return (const char*) sqlite3_column_text (stmt_, col);
@@ -104,7 +110,6 @@ public:
     const void* column_blob (int col, int& bytes)
     {
         bytes = sqlite3_column_bytes (stmt_, col);
-    
         return sqlite3_column_blob (stmt_, col);
     }
 
