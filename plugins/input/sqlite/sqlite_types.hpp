@@ -136,6 +136,7 @@ public:
         sqlite3_enable_shared_cache(1);
         if (sqlite3_open_v2 (file.c_str(), &db_, SQLITE_OPEN_NOMUTEX|SQLITE_OPEN_SHAREDCACHE, 0))
         #else
+        #warning "Mapnik's sqlite plugin is compiling against an old version of sqlite that does no support sqlite3_open_v2 which may make rendering slow..."
         if (sqlite3_open (file.c_str(), &db_))
         #endif
         {
