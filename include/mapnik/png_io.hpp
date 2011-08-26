@@ -30,6 +30,8 @@
 #include <mapnik/hextree.hpp>
 #include <mapnik/global.hpp>
 
+#include <zlib.h>
+
 extern "C"
 {
 #include <png.h>
@@ -66,7 +68,7 @@ void flush_data (png_structp png_ptr)
 }
 
 template <typename T1, typename T2>
-void save_as_png(T1 & file , T2 const& image)
+void save_as_png(T1 & file , T2 const& image, int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY)
 {        
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
@@ -81,7 +83,7 @@ void save_as_png(T1 & file , T2 const& image)
     mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
     png_set_asm_flags(png_ptr, flags | mask);
 #endif
-    png_set_filter (png_ptr, 0, PNG_FILTER_NONE);
+    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, PNG_FILTER_NONE);
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
@@ -95,9 +97,11 @@ void save_as_png(T1 & file , T2 const& image)
         return;
     }
     png_set_write_fn (png_ptr, &file, &write_data<T1>, &flush_data<T1>);
-        
-    //png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
-    //png_set_compression_strategy(png_ptr, Z_FILTERED);
+
+    png_set_compression_level(png_ptr, compression);
+    png_set_compression_strategy(png_ptr, strategy);
+    png_set_compression_buffer_size(png_ptr, 32768);
+
     png_set_IHDR(png_ptr, info_ptr,image.width(),image.height(),8,
                  PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
@@ -216,6 +220,8 @@ void save_as_png(T & file, std::vector<mapnik::rgb> & palette,
                  unsigned width,
                  unsigned height,
                  unsigned color_depth,
+                 int compression,
+                 int strategy,
                  std::vector<unsigned> &alpha)
 {
     png_voidp error_ptr=0;
@@ -231,7 +237,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> & palette,
     mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
     png_set_asm_flags(png_ptr, flags | mask);
 #endif
-    png_set_filter (png_ptr, 0, PNG_FILTER_NONE);
+    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, PNG_FILTER_NONE);
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
@@ -245,6 +251,10 @@ void save_as_png(T & file, std::vector<mapnik::rgb> & palette,
         return;
     }
     png_set_write_fn (png_ptr, &file, &write_data<T>, &flush_data<T>);
+
+    png_set_compression_level(png_ptr, compression);
+    png_set_compression_strategy(png_ptr, strategy);
+    png_set_compression_buffer_size(png_ptr, 32768);
 
     png_set_IHDR(png_ptr, info_ptr,width,height,color_depth,
                  PNG_COLOR_TYPE_PALETTE,PNG_INTERLACE_NONE,
@@ -278,7 +288,8 @@ void save_as_png(T & file, std::vector<mapnik::rgb> & palette,
 }
 
 template <typename T1,typename T2>
-void save_as_png256(T1 & file, T2 const& image, const unsigned max_colors = 256, int trans_mode = -1)
+void save_as_png256(T1 & file, T2 const& image, const unsigned max_colors = 256,
+    int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY, int trans_mode = -1)
 {
     // number of alpha ranges in png256 format; 2 results in smallest image with binary transparency
     // 3 is minimum for semitransparency, 4 is recommended, anything else is worse
@@ -423,7 +434,7 @@ void save_as_png256(T1 & file, T2 const& image, const unsigned max_colors = 256,
         // >16 && <=256 colors -> write 8-bit color depth
         image_data_8 reduced_image(width,height);
         reduce_8(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
-        save_as_png(file,palette,reduced_image,width,height,8,alphaTable);
+        save_as_png(file,palette,reduced_image,width,height,8,compression,strategy,alphaTable);
     }
     else if (palette.size() == 1)
     {
@@ -436,7 +447,7 @@ void save_as_png256(T1 & file, T2 const& image, const unsigned max_colors = 256,
             alphaTable.resize(1);
             alphaTable[0] = meanAlpha;
         }
-        save_as_png(file,palette,reduced_image,width,height,1,alphaTable);
+        save_as_png(file,palette,reduced_image,width,height,1,compression,strategy,alphaTable);
     }
     else
     {
@@ -445,12 +456,14 @@ void save_as_png256(T1 & file, T2 const& image, const unsigned max_colors = 256,
         unsigned image_height = height;
         image_data_8 reduced_image(image_width,image_height);
         reduce_4(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
-        save_as_png(file,palette,reduced_image,width,height,4,alphaTable);
+        save_as_png(file,palette,reduced_image,width,height,4,compression,strategy,alphaTable);
     }
 }
 
 template <typename T1,typename T2>
-void save_as_png256_hex(T1 & file, T2 const& image, int colors = 256, int trans_mode = -1, double gamma = 2.0)
+void save_as_png256_hex(T1 & file, T2 const& image, int colors = 256,
+        int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY,
+        int trans_mode = -1, double gamma = 2.0)
 {
     unsigned width = image.width();
     unsigned height = image.height();
@@ -502,7 +515,7 @@ void save_as_png256_hex(T1 & file, T2 const& image, int colors = 256, int trans_
                 row_out[x] = tree.quantize(c);
             }
         }
-        save_as_png(file, palette, reduced_image, width, height, 8, alphaTable);
+        save_as_png(file, palette, reduced_image, width, height, 8, compression, strategy, alphaTable);
     }
     else if (palette.size() == 1)
     {
@@ -511,7 +524,7 @@ void save_as_png256_hex(T1 & file, T2 const& image, int colors = 256, int trans_
         unsigned image_height = height;
         image_data_8 reduced_image(image_width, image_height);
         reduced_image.set(0);
-        save_as_png(file, palette, reduced_image, width, height, 1, alphaTable);
+        save_as_png(file, palette, reduced_image, width, height, 1, compression, strategy, alphaTable);
     }
     else
     {
@@ -534,7 +547,7 @@ void save_as_png256_hex(T1 & file, T2 const& image, int colors = 256, int trans_
                 row_out[x>>1] |= index;
             }
         }
-        save_as_png(file, palette, reduced_image, width, height, 4, alphaTable);
+        save_as_png(file, palette, reduced_image, width, height, 4, compression, strategy, alphaTable);
     }
 }   
 }
