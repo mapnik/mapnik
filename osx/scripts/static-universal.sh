@@ -71,6 +71,7 @@ export LDFLAGS=$CORE_LDFLAGS
 wget http://www.sqlite.org/sqlite-autoconf-3070701.tar.gz
 tar xvf sqlite-autoconf-3070701.tar.gz
 cd sqlite-autoconf-3070701
+export CFLAGS="-DSQLITE_ENABLE_RTREE=1 -O3 "$CFLAGS
 ./configure --prefix=$PREFIX --enable-static --disable-shared --disable-dependency-tracking
 make -j4
 make install
