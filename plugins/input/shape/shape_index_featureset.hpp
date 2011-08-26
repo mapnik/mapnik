@@ -48,15 +48,18 @@ class shape_index_featureset : public Featureset
       mutable box2d<double> feature_ext_;
       mutable int total_geom_size;
       mutable int count_;
+      const int row_limit_;
 
    public:
       shape_index_featureset(const filterT& filter,
                              shape_io& shape,
                              const std::set<std::string>& attribute_names,
                              std::string const& encoding,
-                             std::string const& shape_name);
+                             std::string const& shape_name,
+                             int row_limit);
       virtual ~shape_index_featureset();
       feature_ptr next();
+
    private:
       //no copying
       shape_index_featureset(const shape_index_featureset&);

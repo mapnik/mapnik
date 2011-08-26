@@ -50,14 +50,18 @@ class shape_featureset : public Featureset
       mutable box2d<double> feature_ext_;
       mutable int total_geom_size;
       mutable int count_;
+      const int row_limit_;
+
    public:
       shape_featureset(const filterT& filter, 
                        const std::string& shape_file,
                        const std::set<std::string>& attribute_names,
                        std::string const& encoding,
-                       long file_length);
+                       long file_length,
+                       int row_limit);
       virtual ~shape_featureset();
       feature_ptr next();
+
    private:
       shape_featureset(const shape_featureset&);
       const shape_featureset& operator=(const shape_featureset&);

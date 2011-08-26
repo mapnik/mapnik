@@ -54,6 +54,7 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
       type_(datasource::Vector),
       file_length_(0),
       indexed_(false),
+      row_limit_(*params_.get<int>("row_limit",0)),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
     boost::optional<std::string> file = params.get<std::string>("file");
@@ -253,7 +254,8 @@ featureset_ptr shape_datasource::features(const query& q) const
                                                        *shape_,
                                                        q.property_names(),
                                                        desc_.get_encoding(),
-                                                       shape_name_));
+                                                       shape_name_,
+                                                       row_limit_));
     }
     else
     {
@@ -261,7 +263,8 @@ featureset_ptr shape_datasource::features(const query& q) const
                                                  shape_name_,
                                                  q.property_names(),
                                                  desc_.get_encoding(),
-                                                 file_length_);
+                                                 file_length_,
+                                                 row_limit_);
     }
 }
 
@@ -291,7 +294,8 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
                                                          *shape_,
                                                          names,
                                                          desc_.get_encoding(),
-                                                         shape_name_));
+                                                         shape_name_,
+                                                         row_limit_));
     }
     else
     {
@@ -299,7 +303,8 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
                                                    shape_name_,
                                                    names,
                                                    desc_.get_encoding(),
-                                                   file_length_);
+                                                   file_length_,
+                                                   row_limit_);
     }
 }
 

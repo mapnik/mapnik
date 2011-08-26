@@ -42,12 +42,14 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
                                                         shape_io& shape,
                                                         const std::set<std::string>& attribute_names,
                                                         std::string const& encoding,
-                                                        std::string const& shape_name)
+                                                        std::string const& shape_name,
+                                                        int row_limit)
     : filter_(filter),
       //shape_type_(0),
       shape_(shape),
       tr_(new transcoder(encoding)),
-      count_(0)
+      count_(0),
+      row_limit_(row_limit)
 
 {
     shape_.shp().skip(100);
@@ -105,6 +107,9 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 template <typename filterT>
 feature_ptr shape_index_featureset<filterT>::next()
 {   
+    if (row_limit_ && count_ > row_limit_)
+        return feature_ptr();
+
     if (itr_!=ids_.end())
     {
         int pos=*itr_++;

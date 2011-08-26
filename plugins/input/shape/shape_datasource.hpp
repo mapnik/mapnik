@@ -63,6 +63,7 @@ private:
     mutable long file_length_;
     mutable box2d<double> extent_;
     mutable bool indexed_;
+    const int row_limit_;
     mutable layer_descriptor desc_;
 };
 

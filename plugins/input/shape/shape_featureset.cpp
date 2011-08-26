@@ -40,14 +40,16 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
                                             const std::string& shape_name,
                                             const std::set<std::string>& attribute_names,
                                             std::string const& encoding,
-                                            long file_length )
+                                            long file_length,
+                                            int row_limit)
     : filter_(filter),
       //shape_type_(shape_io::shape_null),
       shape_(shape_name, false),
       query_ext_(),
       tr_(new transcoder(encoding)),
       file_length_(file_length),
-      count_(0)
+      count_(0),
+      row_limit_(row_limit)
 {
     shape_.shp().skip(100);
     //attributes
@@ -87,6 +89,9 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
 template <typename filterT>
 feature_ptr shape_featureset<filterT>::next()
 {
+    if (row_limit_ && count_ > row_limit_)
+        return feature_ptr();
+
     std::streampos pos=shape_.shp().pos();
     // skip null shapes
     while (pos > 0 && pos < std::streampos(file_length_ * 2))
