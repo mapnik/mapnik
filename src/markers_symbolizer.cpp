@@ -53,8 +53,8 @@ markers_symbolizer::markers_symbolizer()
       width_(5.0),
       height_(5.0),
       stroke_(),
-      marker_p_(),
-      marker_type_() {}
+      marker_p_(MARKER_LINE_PLACEMENT),
+      marker_type_(ARROW) {}
     
 markers_symbolizer::markers_symbolizer(path_expression_ptr filename) 
     : symbolizer_with_image(filename), 
@@ -66,8 +66,8 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
       width_(5.0),
       height_(5.0),
       stroke_(),
-      marker_p_(),
-      marker_type_() {}
+      marker_p_(MARKER_LINE_PLACEMENT),
+      marker_type_(ARROW) {}
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs) 
     : symbolizer_with_image(rhs), 
