@@ -26,6 +26,8 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
+#include <mapnik/symbolizer.hpp>
+#include <mapnik/feature_type_style.hpp>
 
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
