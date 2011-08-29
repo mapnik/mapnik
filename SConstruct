@@ -1641,7 +1641,10 @@ if not HELP_REQUESTED:
     # Build shapeindex and remove its dependency from the LIBS
     if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
         SConscript('utils/shapeindex/SConscript')
-        SConscript('utils/svg2png/SConscript')
+        
+        # devtools not ready for public 
+        #SConscript('utils/ogrindex/SConscript')
+        #SConscript('utils/svg2png/SConscript')
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
         color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
@@ -1660,10 +1663,12 @@ if not HELP_REQUESTED:
     SConscript('fonts/SConscript')
     
     # build C++ tests
-    SConscript('tests/cpp_tests/SConscript')
+    # not ready for release
+    #SConscript('tests/cpp_tests/SConscript')
     
-    if env['SVG_RENDERER']:
-        SConscript('tests/cpp_tests/svg_renderer_tests/SConscript')
+    # not ready for release
+    #if env['SVG_RENDERER']:
+    #    SConscript('tests/cpp_tests/svg_renderer_tests/SConscript')
 
     # install pkg-config script and mapnik-config script
     SConscript('utils/mapnik-config/SConscript')
