@@ -959,6 +959,7 @@ if not preconfigured:
     env['SKIPPED_DEPS'] = []
     env['HAS_CAIRO'] = False
     env['CAIROMM_LIBPATHS'] = []
+    env['CAIROMM_LINKFLAGS'] = []
     env['CAIROMM_CPPPATHS'] = []
     env['HAS_PYCAIRO'] = False
     env['HAS_LIBXML2'] = False
