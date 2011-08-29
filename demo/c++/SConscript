@@ -32,8 +32,12 @@ source = Split(
 
 demo_env = env.Clone()
 
+
 demo_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
-demo_env.PrependUnique(CPPPATH=copy(env['CAIROMM_CPPPATHS']))
+
+if env['HAS_CAIRO']:
+    demo_env.PrependUnique(CPPPATH=copy(env['CAIROMM_CPPPATHS']))
+    demo_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
 
 libraries =  copy(env['LIBMAPNIK_LIBS'])
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']

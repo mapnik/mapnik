@@ -44,7 +44,10 @@ if env['LINKING'] == 'static':
     lib_env.Append(CXXFLAGS="-fPIC")
 
 mapnik_lib_link_flag = ''
-libmapnik_cxxflags = copy(lib_env['CXXFLAGS'])
+
+# note: .data gets the actual list to allow a true copy
+# and avoids unintended pollution of other environments
+libmapnik_cxxflags = copy(lib_env['CXXFLAGS'].data)
 
 ABI_VERSION = env['ABI_VERSION']
 

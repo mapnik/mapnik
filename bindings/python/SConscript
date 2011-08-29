@@ -66,9 +66,6 @@ if env['PLATFORM'] == 'Darwin':
     libraries.append('boost_regex%s' % env['BOOST_APPEND'])
     if env['THREADING'] == 'multi':
         libraries.append('boost_thread%s' % env['BOOST_APPEND'])
-    if env['HAS_CAIRO']:
-        libraries.append('cairomm-1.0')
-        libraries.append('cairo')
 
     ##### Python linking on OS X is tricky ### 
     # Confounding problems are:
@@ -173,6 +170,9 @@ py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
 
 if env['HAS_CAIRO']:
     py_env.Append(CPPPATH = env['CAIROMM_CPPPATHS'])
+    py_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    if env['PLATFORM'] == 'Darwin':
+        py_env.Append(LIBS=env['CAIROMM_LINKFLAGS'])
 
 if env['HAS_PYCAIRO']:
     py_env.ParseConfig('pkg-config --cflags pycairo')
