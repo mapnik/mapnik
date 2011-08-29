@@ -34,19 +34,22 @@ source = Split(
 
 headers = ['#plugins/input/ogr'] + env['CPPPATH'] 
 
-boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-libraries =  [boost_program_options,boost_filesystem,env['PLUGINS']['ogr']['lib'],'mapnik2']
+program_env['LIBS'] = [env['PLUGINS']['ogr']['lib']]
 
-boost_system = 'boost_system%s' % env['BOOST_APPEND']
+# Link Library to Dependencies
+program_env['LIBS'].append('mapnik2')
+program_env['LIBS'].append(env['ICU_LIB_NAME'])
+program_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
+program_env['LIBS'].append('boost_filesystem%s' % env['BOOST_APPEND'])
+program_env['LIBS'].append('boost_program_options%s' % env['BOOST_APPEND'])
 
-if env['HAS_BOOST_SYSTEM']:
-    libraries.append(boost_system)
-    
-if env['PLATFORM'] == 'Darwin':
-    libraries.append(env['ICU_LIB_NAME'])
+if env['RUNTIME_LINK'] == 'static':
+    cmd = 'gdal-config --dep-libs'
+    program_env.ParseConfig(cmd)
 
-ogrindex = program_env.Program('ogrindex', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+ogrindex = program_env.Program('ogrindex', source, CPPPATH=headers, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+
+Depends(ogrindex, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), ogrindex)

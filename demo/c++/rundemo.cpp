@@ -43,7 +43,7 @@ int main ( int argc , char** argv)
 {    
     if (argc != 2)
     {
-        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local/lib/mapnik\n";
+        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local/lib/mapnik2\n";
         std::cout << "Warning: ./rundemo looks for data in ../data/,\nTherefore must be run from within the demo/c++ folder.\n";
         return EXIT_SUCCESS;
     }

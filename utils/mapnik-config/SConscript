@@ -2,6 +2,7 @@
 import re
 import os
 import sys
+from copy import copy
 
 Import('env')
 
@@ -51,31 +52,10 @@ def write_config(configuration,template,config_file):
     except: pass
 
 
-# recreate a few dynamic path additions
-if config_env['HAS_CAIRO']:
-    # attach libs to library linking environment
-    try:
-        config_env.ParseConfig('pkg-config --libs cairomm-1.0')
-        config_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
-        config_env.ParseConfig('pkg-config --cflags cairomm-1.0')  
-    except OSError, e:
-        print '\nFailed to detect cairo/cairomm configuration, please re-run "python scons/scons.py configure"'
-        sys.exit(1)  
-
-
 # todo - refine this list
-# todo - custom_cxxflags are being duplicated somewhere
 cpp_paths = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
-other_includes = config_env['CUSTOM_CXXFLAGS'] + config_env['CXXFLAGS'] + cpp_paths
 
-if config_env['XMLPARSER'] == 'libxml2' and config_env['HAS_LIBXML2']:
-    other_includes.append('-DHAVE_LIBXML2')
-
-if config_env['SVG_RENDERER']:
-    other_includes.append('-DSVG_RENDERER')
-    
-if config_env['LIBTOOL_SUPPORTS_ADVISE']:
-    other_includes.append('-DLIBTOOL_SUPPORTS_ADVISE')
+other_includes = config_env['LIBMAPNIK_CXXFLAGS'] + cpp_paths
 
 ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
 
@@ -83,7 +63,6 @@ dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 
 if env['INTERNAL_LIBAGG']:
     dep_libs = dep_libs.replace('-lagg','')
-          
 
 configuration = {
     "prefix": config_env['PREFIX'],
@@ -106,11 +85,13 @@ write_config(configuration,template,config_file)
 target_path = os.path.normpath(os.path.join(config_env['INSTALL_PREFIX'],'bin'))
 full_target = os.path.join(target_path,config_file)
 
+Depends(full_target, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+
 if 'install' in COMMAND_LINE_TARGETS:
     # we must add 'install' catch here because otherwise
     # custom command will be run when not installing
     env.Alias('install',full_target)
-    #Depends(t, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+    
     env.Command(full_target, config_file,
        [
        Copy("$TARGET","$SOURCE"),
@@ -118,9 +99,3 @@ if 'install' in COMMAND_LINE_TARGETS:
        ])
 
 config_env['create_uninstall_target'](env,os.path.join(target_path,config_file))
-
-
-
-
-
-

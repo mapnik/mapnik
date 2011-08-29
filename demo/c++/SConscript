@@ -32,13 +32,16 @@ source = Split(
 
 demo_env = env.Clone()
 
-headers = env['CPPPATH'] 
+demo_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
+demo_env.PrependUnique(CPPPATH=copy(env['CAIROMM_CPPPATHS']))
 
 libraries =  copy(env['LIBMAPNIK_LIBS'])
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 libraries.extend([boost_program_options,'mapnik2'])
-   
-rundemo = demo_env.Program('rundemo', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env["CUSTOM_LDFLAGS"])
+
+rundemo = demo_env.Program('rundemo', source, LIBS=libraries, LINKFLAGS=env["CUSTOM_LDFLAGS"])
+
+Depends(rundemo, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 # we don't install this app because the datasource paths are relative
 # and we're not going to install the sample data.

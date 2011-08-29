@@ -40,11 +40,11 @@ def call(cmd, silent=True):
 def ldconfig(*args,**kwargs):
     call('ldconfig')
 
-
 if env['LINKING'] == 'static':
     lib_env.Append(CXXFLAGS="-fPIC")
 
 mapnik_lib_link_flag = ''
+libmapnik_cxxflags = copy(lib_env['CXXFLAGS'])
 
 ABI_VERSION = env['ABI_VERSION']
 
@@ -54,10 +54,8 @@ regex = 'boost_regex%s' % env['BOOST_APPEND']
 # clear out and re-set libs for this env
 lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,regex]
 
-if env['HAS_CAIRO']:
-    # add cairo and cairomm-1.0 to libs
-    lib_env['LIBS'].append('cairomm-1.0')
-    lib_env['LIBS'].append('cairo')
+if len(env['EXTRA_FREETYPE_LIBS']):
+    lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
 
 if env['XMLPARSER'] == 'libxml2':
     lib_env['LIBS'].append('xml2')
@@ -156,6 +154,7 @@ source = Split(
 if env['LIBTOOL_SUPPORTS_ADVISE']:
     env3 = lib_env.Clone()
     env3.Append(CXXFLAGS='-DLIBTOOL_SUPPORTS_ADVISE')
+    libmapnik_cxxflags.append('-DLIBTOOL_SUPPORTS_ADVISE')
     cpp = 'datasource_cache.cpp'
     if env['LINKING'] == 'static':
         source.insert(0,env3.StaticObject(cpp))
@@ -190,7 +189,6 @@ source += Split(
 
 if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../agg/src/' + '*.cpp')
-    #source.append(File('../agg/libagg.a'))
 
 # grid backend
 source += Split(
@@ -229,29 +227,28 @@ if env['SVG_RENDERER']: # svg backend
       	svg/process_text_symbolizer.cpp	
       	""")
     lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
+    libmapnik_cxxflags.append('-DSVG_RENDERER')
 
 if env['HAS_CAIRO']:
-    # attach libs to library linking environment
-    try:
-        cmd = 'pkg-config --libs cairomm-1.0'
-        if lib_env['RUNTIME_LINK'] == 'static':
-            cmd += ' --static'
-        lib_env.ParseConfig(cmd)
-        env2 = lib_env.Clone()
-        env2.Append(CXXFLAGS = '-DHAVE_CAIRO')
-        # attach cflags to specific compile environment
-        env2.ParseConfig('pkg-config --cflags cairomm-1.0')  
-        fixup = ['cairo_renderer.cpp','graphics.cpp','image_util.cpp']
-        for cpp in fixup:
-            if cpp in source:
-                source.remove(cpp)
-            if env['LINKING'] == 'static':
-                source.insert(0,env2.StaticObject(cpp))
-            else:
-                source.insert(0,env2.SharedObject(cpp))
-    except OSError, e:
-        print '\nFailed to detect cairo/cairomm configuration, please re-run "python scons/scons.py configure"'
-        sys.exit(1)        
+    lib_env.PrependUnique(LIBPATH=env['CAIROMM_LIBPATHS'])
+    lib_env.Append(LIBS=env['CAIROMM_LINKFLAGS'])
+    lib_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    libmapnik_cxxflags.append('-DHAVE_CAIRO')
+    lib_env.PrependUnique(CPPPATH=copy(env['CAIROMM_CPPPATHS']))
+    source.insert(0,'cairo_renderer.cpp')
+    #cairo_env.PrependUnique(CPPPATH=env['CAIROMM_CPPPATHS'])
+    # not safe, to much depends on graphics.hpp
+    #cairo_env = lib_env.Clone()
+    #cairo_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    #fixup = ['feature_type_style.cpp','load_map.cpp','cairo_renderer.cpp','graphics.cpp','image_util.cpp']
+    #for cpp in fixup:
+    #    if cpp in source:
+    #        source.remove(cpp)
+    #    if env['LINKING'] == 'static':
+    #        source.insert(0,cairo_env.StaticObject(cpp))
+    #    else:
+    #        source.insert(0,cairo_env.SharedObject(cpp))
+
 
 if env['XMLPARSER'] == 'tinyxml':
     source += Split(
@@ -268,6 +265,7 @@ elif env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
         """)
     env2 = lib_env.Clone()
     env2.Append(CXXFLAGS = '-DHAVE_LIBXML2')
+    libmapnik_cxxflags.append('-DHAVE_LIBXML2')
     fixup = ['load_map.cpp','libxml2_loader.cpp']
     for cpp in fixup:
         if cpp in source:
@@ -287,8 +285,9 @@ if env['LINKING'] == 'static':
 else:
     mapnik = lib_env.SharedLibrary('mapnik2', source, LINKFLAGS=linkflags)
 
-# cache libraries value for other builds to use
+# cache library values for other builds to use
 env['LIBMAPNIK_LIBS'] = copy(lib_env['LIBS'])
+env['LIBMAPNIK_CXXFLAGS'] = libmapnik_cxxflags
 
 if env['PLATFORM'] != 'Darwin':
     # Symlink command, only works if both files are in same directory
