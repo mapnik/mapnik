@@ -675,21 +675,14 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
                     lyr.set_datasource(ds);
                 }
 
-                // catch problem at datasource registration
-                catch (const mapnik::config_error & ex )
-                {
-                    throw config_error( ex.what() );
-                }
-
-                // catch problem at the datasource creation
-                catch (const mapnik::datasource_exception & ex )
+                catch (const std::exception & ex )
                 {
                     throw config_error( ex.what() );
                 }
 
                 catch (...)
                 {
-                    //throw config_error("exception...");
+                    throw config_error("Unknown exception occured attempting to create datasoure for layer '" + lyr.name() + "'");
                 }
             }
             else if (child.first != "<xmlattr>" &&
