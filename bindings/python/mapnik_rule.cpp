@@ -102,7 +102,7 @@ struct rule_pickle_suite : boost::python::pickle_suite
         // We serialize filter expressions AST as strings
         std::string filter_expr = to_expression_string(*r.get_filter());
         
-        return boost::python::make_tuple(r.get_abstract(),filter_expr,r.has_else_filter(),syms);
+        return boost::python::make_tuple(r.get_abstract(),filter_expr,r.has_else_filter(),r.has_also_filter(),syms);
     }
 
     static void
@@ -138,8 +138,13 @@ struct rule_pickle_suite : boost::python::pickle_suite
         {
             r.set_else(true);
         }    
+
+        if (state[3])
+        {
+            r.set_also(true);
+        }
         
-        boost::python::list syms=extract<boost::python::list>(state[3]);
+        boost::python::list syms=extract<boost::python::list>(state[4]);
         extract_symbolizer serializer( r );
         for (int i=0;i<len(syms);++i)
         {
@@ -190,6 +195,8 @@ void export_rule()
         .add_property("max_scale",&rule::get_max_scale,&rule::set_max_scale)
         .def("set_else",&rule::set_else)
         .def("has_else",&rule::has_else_filter)
+        .def("set_also",&rule::set_also)
+        .def("has_also",&rule::has_also_filter)
         .def("active",&rule::active)
         .add_property("symbols",make_function
                       (&rule::get_symbolizers,return_value_policy<reference_existing_object>()))

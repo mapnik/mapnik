@@ -639,6 +639,11 @@ void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
         rule_node.push_back( ptree::value_type(
                                  "ElseFilter", ptree()));
     }
+    else if ( r.has_also_filter() )
+    {
+        rule_node.push_back( ptree::value_type(
+                                 "AlsoFilter", ptree()));
+    }
     else
     {
         // filters were not comparable, perhaps should now compare expressions?

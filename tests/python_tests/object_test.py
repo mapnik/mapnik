@@ -539,6 +539,20 @@ def test_rule_init():
     eq_(r.title, '')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
+    eq_(r.has_else(), False)
+    eq_(r.has_also(), False)
+    
+    r = mapnik2.Rule()
+    
+    r.set_else(True)
+    eq_(r.has_else(), True)
+    eq_(r.has_also(), False)
+    
+    r = mapnik2.Rule()
+    
+    r.set_also(True)
+    eq_(r.has_else(), False)
+    eq_(r.has_also(), True)
     
     r = mapnik2.Rule("Name")
     
@@ -546,6 +560,8 @@ def test_rule_init():
     eq_(r.title, '')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
+    eq_(r.has_else(), False)
+    eq_(r.has_also(), False)
     
     r = mapnik2.Rule("Name", "Title")
     
@@ -553,6 +569,8 @@ def test_rule_init():
     eq_(r.title, 'Title')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
+    eq_(r.has_else(), False)
+    eq_(r.has_also(), False)
     
     r = mapnik2.Rule("Name", "Title", min_scale)
     
@@ -560,6 +578,8 @@ def test_rule_init():
     eq_(r.title, 'Title')
     eq_(r.min_scale, min_scale)
     eq_(r.max_scale, float('inf'))
+    eq_(r.has_else(), False)
+    eq_(r.has_also(), False)
     
     r = mapnik2.Rule("Name", "Title", min_scale, max_scale)
     
@@ -567,6 +587,8 @@ def test_rule_init():
     eq_(r.title, 'Title')
     eq_(r.min_scale, min_scale)
     eq_(r.max_scale, max_scale)
+    eq_(r.has_else(), False)
+    eq_(r.has_also(), False)
     
 # Coordinate initialization
 def test_coord_init():

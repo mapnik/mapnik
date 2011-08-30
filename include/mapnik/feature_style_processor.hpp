@@ -310,6 +310,7 @@ private:
             {
                 std::vector<rule*> if_rules;
                 std::vector<rule*> else_rules;
+                std::vector<rule*> also_rules;
 
                 std::vector<rule> const& rules=style->get_rules();
                 
@@ -320,6 +321,10 @@ private:
                         if (r.has_else_filter())
                         {
                             else_rules.push_back(const_cast<rule*>(&r));
+                        }
+                        else if (r.has_also_filter())
+                        {
+                            also_rules.push_back(const_cast<rule*>(&r));
                         }
                         else
                         {
@@ -362,6 +367,7 @@ private:
                     while ((feature = fs->next()))
                     {                  
                         bool do_else=true;
+                        bool do_also=false;
                         
                         if (cache_features)
                         {
@@ -375,6 +381,7 @@ private:
                             if (result.to_bool())
                             {   
                                 do_else=false;
+                                do_also=true;
                                 rule::symbolizers const& symbols = r->get_symbolizers();
 
                                 // if the underlying renderer is not able to process the complete set of symbolizers,
@@ -399,6 +406,24 @@ private:
                         if (do_else)
                         {
                             BOOST_FOREACH( rule * r, else_rules )
+                            {
+                                rule::symbolizers const& symbols = r->get_symbolizers();
+                                // if the underlying renderer is not able to process the complete set of symbolizers,
+                                // process one by one.
+#ifdef SVG_RENDERER
+                                if(!p.process(symbols,*feature,prj_trans))
+#endif
+                                {
+                                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                                    {
+                                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                                    }
+                                }
+                            }
+                        }
+                        if (do_also)
+                        {
+                            BOOST_FOREACH( rule * r, also_rules )
                             {
                                 rule::symbolizers const& symbols = r->get_symbolizers();
                                 // if the underlying renderer is not able to process the complete set of symbolizers,

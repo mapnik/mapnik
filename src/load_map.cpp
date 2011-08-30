@@ -733,6 +733,13 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
             rule.set_else(true);
         }
 
+        optional<std::string> also_filter =
+            get_opt_child<std::string>(r, "AlsoFilter");
+        if (also_filter)
+        {
+            rule.set_also(true);
+        }
+
         optional<double> min_scale =
             get_opt_child<double>(r, "MinScaleDenominator");
         if (min_scale)
@@ -803,6 +810,7 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
                       sym.first != "MaxScaleDenominator" &&
                       sym.first != "Filter" &&
                       sym.first != "ElseFilter" &&
+                      sym.first != "AlsoFilter" &&
                       sym.first != "<xmlcomment>" &&
                       sym.first != "<xmlattr>" )
             {
