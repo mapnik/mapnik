@@ -1,6 +1,6 @@
 all: mapnik
 
-install: all
+install:
 	python scons/scons.py install
 
 mapnik:
@@ -21,4 +21,4 @@ test:
 	echo "...running python tests"
 	python tests/run_tests.py
 
-.PHONY: clean reset uninstall test
+.PHONY: clean reset uninstall test install
