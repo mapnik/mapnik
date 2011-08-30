@@ -19,6 +19,6 @@ uninstall:
 test:
 	
 	echo "...running python tests"
-	python tests/run_tests.py
+	nosetests --where tests/
 
 .PHONY: clean reset uninstall test install
