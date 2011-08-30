@@ -1,4 +1,4 @@
-# Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 The SCons Foundation
+# Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 The SCons Foundation
 
                  SCons - a software construction tool
 
@@ -44,7 +44,7 @@ scons-local package, or any SCons package, at the SCons download page:
 EXECUTION REQUIREMENTS
 ======================
 
-Running SCons requires Python version 1.5.2 or later.  There should be
+Running SCons requires Python version 2.4 or later.  There should be
 no other dependencies or requirements to run SCons.
 
 The default SCons configuration assumes use of the Microsoft Visual C++
