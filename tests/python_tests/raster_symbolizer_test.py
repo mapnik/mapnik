@@ -132,3 +132,6 @@ def test_raster_with_alpha_blends_correctly_with_background():
     # All white is expected
     assert contains_word('\xff\xff\xff\xff', imdata)
     
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]

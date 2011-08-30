@@ -2,6 +2,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
+
 from utilities import execution_path, save_data, contains_word
 
 import os, mapnik2
@@ -52,7 +53,6 @@ def test_load_save_load_map():
     map = mapnik2.Map(256,256)
     mapnik2.load_map_from_string(map, out_map.encode('utf8'))
     assert 'GlyphSymbolizer' in out_map
-    assert 'RasterColorizer' in out_map
     # make sure non-ascii characters are well supported since most interesting
     # glyphs for symbology are usually in that range
     assert u'í' in out_map, out_map
@@ -92,4 +92,8 @@ def create_map_and_append_symbolyzer(sym):
     _map.layers.append(lyr)
     _map.zoom_to_box(mapnik2.Box2d(0,0,8,8))
     return _map
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]
 

@@ -1,5 +1,12 @@
+import os
 import mapnik2
+from utilities import execution_path
 from nose.tools import *
+
+def setup():
+    # All of the paths used are relative, if we run the tests
+    # from another directory we need to chdir()
+    os.chdir(execution_path('.'))
 
 def test_gen_map():
     mapxmlfile = '../data/good_maps/raster_colorizer.xml'
@@ -11,10 +18,6 @@ def test_gen_map():
     mapnik2.save_map(m, mapxmloutputfile)
     m.zoom_all()
     mapnik2.render_to_file(m, outputfile)
-
-    
-    
-
 
 #test discrete colorizer mode
 def test_get_color_discrete():
@@ -39,8 +42,6 @@ def test_get_color_discrete():
     #now in stop 2
     eq_(colorizer.get_color(20), mapnik2.Color(200,200,200,200));
     eq_(colorizer.get_color(1000), mapnik2.Color(200,200,200,200));
-    
-
 
 #test exact colorizer mode
 def test_get_color_exact():
@@ -91,5 +92,9 @@ def test_get_color_linear():
 
     #after stop 2
     eq_(colorizer.get_color(100), mapnik2.Color(200,200,200,200));
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]
 
 

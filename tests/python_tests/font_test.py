@@ -11,3 +11,6 @@ import mapnik2, pickle
 #@raises(UserWarning)
 #def test_invalid_font():
 #    ts = mapnik2.TextSymbolizer('Name', 'Invalid Font Name', int(8), mapnik2.Color('black'))
+
+if __name__ == "__main__":
+    [eval(run)() for run in dir() if 'test_' in run]

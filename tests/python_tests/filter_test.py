@@ -118,5 +118,7 @@ def test_unicode_regex_replace():
     expr = mapnik2.Expression("[name].replace('(\B)|( )','$1 ')")
     eq_(expr.evaluate(f),'Q u é b e c')
 
+if __name__ == "__main__":
+    [eval(run)() for run in dir() if 'test_' in run]
 
 

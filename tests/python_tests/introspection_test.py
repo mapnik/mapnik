@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 
+import os
 from nose.tools import *
+from utilities import execution_path
 from utilities import Todo
 
 import mapnik2
+
+def setup():
+    # All of the paths used are relative, if we run the tests
+    # from another directory we need to chdir()
+    os.chdir(execution_path('.'))
 
 def test_introspect_symbolizers():
     # create a symbolizer
@@ -58,3 +65,8 @@ def test_introspect_symbolizers():
     eq_(p2.allow_overlap, True)
     eq_(p2.opacity, 0.5)
     eq_(p2.filename,'../data/images/dummy.png')
+
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]

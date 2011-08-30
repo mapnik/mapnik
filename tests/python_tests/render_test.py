@@ -4,7 +4,16 @@
 from nose.tools import *
 
 import os, mapnik2
+from nose.tools import *
+
+from utilities import execution_path
 from utilities import Todo
+
+def setup():
+    # All of the paths used are relative, if we run the tests
+    # from another directory we need to chdir()
+    os.chdir(execution_path('.'))
+
 
 def test_simplest_render():
     m = mapnik2.Map(256, 256)
@@ -210,6 +219,6 @@ def test_render_points():
         num_points_rendered = svg.count('<image ')
         eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr)) 
 
-
 if __name__ == "__main__":
-    test_render_grid()
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]

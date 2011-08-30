@@ -53,3 +53,7 @@ def test_pycairo_svg_surface():
     
 def test_pycairo_svg_surface():
     return _pycairo_surface('ps','polygon')
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]

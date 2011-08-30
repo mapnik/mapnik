@@ -2,7 +2,15 @@
 
 from nose.tools import *
 
+import os
+from nose.tools import *
+from utilities import execution_path
 import mapnik2
+
+def setup():
+    # All of the paths used are relative, if we run the tests
+    # from another directory we need to chdir()
+    os.chdir(execution_path('.'))
 
 def test_adding_datasource_to_layer():
     map_string = '''<?xml version="1.0" encoding="utf-8"?>
@@ -58,6 +66,9 @@ def test_adding_datasource_to_layer():
     # test that assignment
     eq_(m.layers[0].srs,'+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
     eq_(lyr.srs,'+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
-    
-    
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]
+ 
     

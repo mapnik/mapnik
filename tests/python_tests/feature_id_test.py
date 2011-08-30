@@ -66,7 +66,4 @@ def test_feature_hit_count():
 
 if __name__ == "__main__":
     setup()
-    test_shapefile_line_featureset_id()
-    test_shapefile_polygon_featureset_id()
-    test_shapefile_polygon_feature_query_id()
-    test_feature_hit_count()
+    [eval(run)() for run in dir() if 'test_' in run]

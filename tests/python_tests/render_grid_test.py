@@ -143,5 +143,4 @@ def test_render_grid2():
     eq_(resolve(utf5,38,46),{"Name": "South East"})
     
 if __name__ == "__main__":
-    test_render_grid()
-    test_render_grid2()
+    [eval(run)() for run in dir() if 'test_' in run]

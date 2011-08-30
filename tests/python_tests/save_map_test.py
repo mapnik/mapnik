@@ -55,3 +55,7 @@ def test():
     
     for m in glob.glob("../data/good_maps/*.xml"):
         compare_map(m)
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]

@@ -38,3 +38,6 @@ class MemoryDatasource(unittest.TestCase):
 
         retrieved = md.features_at_point(Coord(20,30)).features
         self.failUnlessEqual(len(retrieved), 0)
+
+if __name__ == "__main__":
+    [eval(run)() for run in dir() if 'test_' in run]

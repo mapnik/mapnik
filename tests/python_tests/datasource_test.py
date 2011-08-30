@@ -86,4 +86,5 @@ def test_hit_grid():
     eq_(hit_list[-12:],'1:Chile|812:')
 
 if __name__ == '__main__':
-    test_hit_grid()
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]

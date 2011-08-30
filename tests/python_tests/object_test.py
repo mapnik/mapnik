@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 
+import os
 from nose.tools import *
+from utilities import execution_path
 from utilities import Todo
 
 import mapnik2, pickle
+
+def setup():
+    # All of the paths used are relative, if we run the tests
+    # from another directory we need to chdir()
+    os.chdir(execution_path('.'))
 
 # Tests that exercise the functionality of Mapnik classes.
 
@@ -742,4 +749,8 @@ def test_envelope_pickle():
     e2 = mapnik2.Box2d(173.7378, -39.6395, 174.4849, -38.9252)
     e1.clip(e2)
     eq_(e1,e2)
-    
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]
+

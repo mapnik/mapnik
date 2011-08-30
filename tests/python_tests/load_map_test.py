@@ -48,3 +48,7 @@ def test_good_files():
 
     for file in good_files:
         yield assert_loads_successfully, file
+
+if __name__ == "__main__":
+    setup()
+    [eval(run)() for run in dir() if 'test_' in run]

@@ -50,3 +50,6 @@ class FeatureTest(unittest.TestCase):
             self.failUnlessEqual(env.miny, env.maxy)
         
         add_it(Geometry2d.from_wkt('Point(3 6)'))
+
+if __name__ == "__main__":
+    [eval(run)() for run in dir() if 'test_' in run]
