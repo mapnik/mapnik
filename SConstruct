@@ -1372,7 +1372,7 @@ if not preconfigured:
             print
 
         # fetch the mapnik version header in order to set the
-        # ABI version used to build libmapnik.so on linux in src/SConscript
+        # ABI version used to build libmapnik.so on linux in src/build.py
         abi = conf.GetMapnikLibVersion()
         abi_fallback = [2,0,0]
         if not abi:
@@ -1487,7 +1487,7 @@ if not preconfigured:
             majver, minver = env['PYTHON_VERSION'].split('.')
  
             # we don't want the includes it in the main environment...
-            # as they are later set in the python SConscript
+            # as they are later set in the python build.py
             # ugly hack needed until we have env specific conf
             backup = env.Clone().Dictionary()
             env.AppendUnique(CPPPATH = os.path.realpath(env['PYTHON_INCLUDES']))
@@ -1564,7 +1564,7 @@ if not HELP_REQUESTED:
     if env['PATH_INSERT']:
         env['ENV']['PATH'] = os.path.realpath(env['PATH_INSERT']) + ':' + env['ENV']['PATH']
 
-    # export env so it is available in Sconscript files
+    # export env so it is available in build.py files
     Export('env')
 
 
@@ -1592,10 +1592,10 @@ if not HELP_REQUESTED:
         
     # Build agg first, doesn't need anything special
     if env['RUNTIME_LINK'] == 'shared' and env['INTERNAL_LIBAGG']:
-        SConscript('agg/SConscript')
+        SConscript('agg/build.py')
     
     # Build the core library
-    SConscript('src/SConscript')
+    SConscript('src/build.py')
     
     # Build the requested and able-to-be-compiled input plug-ins
     GDAL_BUILT = False
@@ -1603,7 +1603,7 @@ if not HELP_REQUESTED:
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS']:
-            SConscript('plugins/input/%s/SConscript' % plugin)
+            SConscript('plugins/input/%s/build.py' % plugin)
             if plugin == 'ogr': OGR_BUILT = True
             if plugin == 'gdal': GDAL_BUILT = True
             if plugin == 'ogr' or plugin == 'gdal':
@@ -1613,7 +1613,7 @@ if not HELP_REQUESTED:
                 env['LIBS'].remove(details['lib'])
         elif not details['lib']:
             # build internal shape and raster plugins
-            SConscript('plugins/input/%s/SConscript' % plugin)
+            SConscript('plugins/input/%s/build.py' % plugin)
         else:
             color_print(1,"Notice: dependencies not met for plugin '%s', not building..." % plugin)
     
@@ -1633,49 +1633,49 @@ if not HELP_REQUESTED:
     
     # Build the c++ rundemo app if requested
     if env['DEMO']:
-        SConscript('demo/c++/SConscript')
+        SConscript('demo/c++/build.py')
     
     # Build the pgsql2psqlite app if requested
     if env['PGSQL2SQLITE']:
-        SConscript('utils/pgsql2sqlite/SConscript')
+        SConscript('utils/pgsql2sqlite/build.py')
     
     # Build shapeindex and remove its dependency from the LIBS
     if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
-        SConscript('utils/shapeindex/SConscript')
+        SConscript('utils/shapeindex/build.py')
         
         # devtools not ready for public 
-        #SConscript('utils/ogrindex/SConscript')
-        #SConscript('utils/svg2png/SConscript')
+        #SConscript('utils/ogrindex/build.py')
+        #SConscript('utils/svg2png/build.py')
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
         color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
         
     # Build the Python bindings
     if 'python' in env['BINDINGS']:
-        SConscript('bindings/python/SConscript')
+        SConscript('bindings/python/build.py')
         
         # Install the python speed testing scripts if python bindings will be available
-        SConscript('utils/performance/SConscript')
+        SConscript('utils/performance/build.py')
 
     # Install the mapnik2 upgrade script
-    SConscript('utils/upgrade_map_xml/SConscript')
+    SConscript('utils/upgrade_map_xml/build.py')
     
     # Configure fonts and if requested install the bundled DejaVu fonts
-    SConscript('fonts/SConscript')
+    SConscript('fonts/build.py')
     
     # build C++ tests
     # not ready for release
-    #SConscript('tests/cpp_tests/SConscript')
+    #SConscript('tests/cpp_tests/build.py')
     
     # not ready for release
     #if env['SVG_RENDERER']:
-    #    SConscript('tests/cpp_tests/svg_renderer_tests/SConscript')
+    #    SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 
     # install pkg-config script and mapnik-config script
-    SConscript('utils/mapnik-config/SConscript')
+    SConscript('utils/mapnik-config/build.py')
 
     # write the viewer.ini file
-    SConscript('demo/viewer/SConscript')
+    SConscript('demo/viewer/build.py')
     
     # if requested, build the sample input plugins
     if env['SAMPLE_INPUT_PLUGINS']:

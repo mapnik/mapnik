@@ -32,7 +32,7 @@ postgis_src = Split(
   """
         )
 
-libraries = ['pq']
+libraries = ['pq','intl','ssl','crypto']
 
 # Link Library to Dependencies
 libraries.append('mapnik2')
@@ -40,7 +40,13 @@ libraries.append(env['ICU_LIB_NAME'])
 if env['THREADING'] == 'multi':
 	libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
-input_plugin = plugin_env.SharedLibrary('../postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+linkflags = env['CUSTOM_LDFLAGS']
+linkflags += ' -framework Kerberos '
+linkflags += ' -framework Foundation '
+linkflags += ' -framework LDAP '
+linkflags += ' -liconv '
+
+input_plugin = plugin_env.SharedLibrary('../postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=linkflags)
 
 # if the plugin links to libmapnik2 ensure it is built first
 Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
