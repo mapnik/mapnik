@@ -57,6 +57,9 @@ other_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.st
 
 other_includes += ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
 
+if config_env['HAS_CAIRO']:
+    other_includes += ''.join([' -I%s' % i for i in env['CAIROMM_CPPPATHS'] if not i.startswith('#')])    
+
 ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
 
 dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
