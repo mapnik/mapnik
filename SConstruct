@@ -1073,11 +1073,12 @@ if not preconfigured:
     conf.parse_config('FREETYPE_CONFIG')
 
     # check if freetype links to bz2
-    temp_env = env.Clone()
-    temp_env['LIBS'] = []
-    temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
-    if 'bz2' in temp_env['LIBS']:
-        env['EXTRA_FREETYPE_LIBS'].append('bz2')
+    if env['RUNTIME_LINK'] == 'static':
+        temp_env = env.Clone()
+        temp_env['LIBS'] = []
+        temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
+        if 'bz2' in temp_env['LIBS']:
+            env['EXTRA_FREETYPE_LIBS'].append('bz2')
 
     if env['XMLPARSER'] == 'tinyxml':
         env['CPPPATH'].append('#tinyxml')
