@@ -117,6 +117,7 @@ source = Split(
     load_map.cpp
     memory.cpp
     parse_path.cpp
+    palette.cpp
     placement_finder.cpp
     plugin.cpp
     png_reader.cpp

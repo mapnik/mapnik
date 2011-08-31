@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/palette.hpp>
 
 // boost
 #include <boost/utility.hpp>
@@ -39,30 +40,6 @@
 #include <cmath>
 
 namespace mapnik {
-
-typedef boost::uint8_t byte;
-struct rgba
-{
-    byte r;
-    byte g;
-    byte b;
-    byte a;
-    rgba(byte r_, byte g_, byte b_, byte a_)
-        : r(r_), g(g_), b(b_), a(a_) {}
-    bool operator==(const rgba& y) const
-    {
-        return r==y.r && g==y.g && b==y.b && a==y.a;
-    }
-};
-
-#define HASH_RGBA(p) (((std::size_t)p.r * 33023 + (std::size_t)p.g * 30013 + (std::size_t)p.b * 27011 + (std::size_t)p.a * 24007) % 21001)
-struct rgba_hash_func : public std::unary_function<rgba, std::size_t>
-{
-    std::size_t operator()(rgba const&p) const
-    {
-        return HASH_RGBA(p);
-    }
-};
 
 struct RGBAPolicy
 {
@@ -130,24 +107,6 @@ class hextree : private boost::noncopyable
         }
     };
 
-    // ordering by mean(a,r,g,b), a, r, g, b
-    struct rgba_mean_sort_cmp
-    {
-        bool operator() (const rgba& x, const rgba& y) const
-        {
-            int t1 = (int)x.a+x.r+x.g+x.b;
-            int t2 = (int)y.a+y.r+y.g+y.b;
-            if (t1!=t2)
-                return t1<t2;
-
-            return  (((int)x.a-y.a) >> 24) +
-                (((int)x.r-y.r) >> 16) +
-                (((int)x.g-y.g) >> 8) +
-                ((int)x.b-y.b);
-        }
-    };
-
-
     unsigned max_colors_;
     unsigned colors_;
     // flag indicating existance of invisible pixels (a < InsertPolicy::MIN_ALPHA)
@@ -158,7 +117,7 @@ class hextree : private boost::noncopyable
     // index remaping of sorted_pal_ indexes to indexes of returned image palette
     std::vector<unsigned> pal_remap_;
     // rgba hashtable for quantization
-    typedef boost::unordered_map<rgba, int, rgba_hash_func> rgba_hash_table;
+    typedef boost::unordered_map<rgba, int, rgba::hash_func> rgba_hash_table;
     rgba_hash_table color_hashmap_;
     // gamma correction to prioritize dark colors (>1.0)
     double gamma_;
@@ -276,7 +235,7 @@ public:
 
             // find closest match based on mean of r,g,b,a
             std::vector<rgba>::iterator pit = 
-                std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba_mean_sort_cmp());
+                std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba::mean_sort_cmp());
             ind = pit-sorted_pal_.begin();
             if (ind == sorted_pal_.size())
                 ind--;
@@ -345,7 +304,7 @@ public:
         root_ = new node();
 
         // sort palette for binary searching in quantization
-        std::sort(sorted_pal_.begin(), sorted_pal_.end(),rgba_mean_sort_cmp());
+        std::sort(sorted_pal_.begin(), sorted_pal_.end(),rgba::mean_sort_cmp());
 
         // returned palette is rearanged, so that colors with a<255 are at the begining
         pal_remap_.resize(sorted_pal_.size());

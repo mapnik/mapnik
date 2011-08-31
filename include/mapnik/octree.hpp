@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/palette.hpp>
 
 // boost
 #include <boost/utility.hpp>
@@ -36,16 +37,6 @@
 #include <deque>
 
 namespace mapnik {
-        
-typedef boost::uint8_t byte ;
-struct rgb      
-{
-    byte r;
-    byte g;
-    byte b;
-    rgb(byte r_, byte g_, byte b_)
-        : r(r_), g(g_), b(b_) {}
-};
 
 struct RGBPolicy
 {
