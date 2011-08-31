@@ -534,7 +534,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
       << "minzoom,"
       << "maxzoom,"
       << "queryable,"
-      << "clear-label-cache,";
+      << "clear-label-cache,"
       << "cache-features";
     ensure_attrs(lay, "Layer", s.str());
     try
