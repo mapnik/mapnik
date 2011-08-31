@@ -642,6 +642,7 @@ __all__ = [
     # classes
     'Color',
     'Coord',
+    'Palette',
     #'ColorBand',
     'CompositeOp',
     'DatasourceCache',

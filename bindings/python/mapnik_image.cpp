@@ -30,9 +30,11 @@ extern "C"
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
+#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/graphics.hpp>
+#include <mapnik/palette.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/png_io.hpp>
 #include <mapnik/image_reader.hpp>
@@ -89,8 +91,29 @@ PyObject* tostring2(image_32 const & im, std::string const& format)
     (s.data(),s.size());
 }
 
-void (*save_to_file1)( mapnik::image_32 const&, std::string const&,std::string const&) = mapnik::save_to_file;
-void (*save_to_file2)( mapnik::image_32 const&, std::string const&) = mapnik::save_to_file;
+PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba_palette& pal)
+{
+    std::string s = save_to_string(im, format, pal);
+    return
+#if PY_VERSION_HEX >= 0x03000000 
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+    (s.data(),s.size());
+}
+
+void save_to_file1(mapnik::image_32 const& im, std::string const& filename, std::string const& type)
+{
+    boost::shared_ptr<mapnik::rgba_palette> palette_ptr;
+    mapnik::save_to_file(im,filename,type,*palette_ptr);
+}
+
+void save_to_file2(mapnik::image_32 const& im, std::string const& filename)
+{
+    mapnik::save_to_file(im,filename);
+}
+
 
 boost::shared_ptr<image_32> open_from_file(std::string const& filename)
 {
@@ -100,7 +123,8 @@ boost::shared_ptr<image_32> open_from_file(std::string const& filename)
         std::auto_ptr<image_reader> reader(get_image_reader(filename,*type));
         if (reader.get())
         {
-            boost::shared_ptr<image_32> image_ptr(new image_32(reader->width(),reader->height()));
+            
+            boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(reader->width(),reader->height());
             reader->read(0,0,image_ptr->data());
             return image_ptr;
         }
@@ -265,7 +289,7 @@ void composite(image_32 & im, image_32 & im2, composite_mode_e mode)
 boost::shared_ptr<image_32> from_cairo(PycairoSurface* surface)
 {
     Cairo::RefPtr<Cairo::ImageSurface> s(new Cairo::ImageSurface(surface->surface));
-    boost::shared_ptr<image_32> image_ptr(new image_32(s));
+    boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(s);
     return image_ptr;
 }
 #endif
@@ -319,8 +343,9 @@ void export_image()
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
         .def("tostring",&tostring1)
         .def("tostring",&tostring2)
-        .def("save", save_to_file1)
-        .def("save", save_to_file2)
+        .def("tostring",&tostring3)
+        .def("save", &save_to_file1)
+        .def("save", &save_to_file2)
         .def("open",open_from_file)
         .staticmethod("open")
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)

@@ -28,6 +28,7 @@ extern "C"
 
 #include <boost/python.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/palette.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/png_io.hpp>
 #include <sstream>
@@ -72,8 +73,29 @@ PyObject* view_tostring2(image_view<image_data_32> const & view, std::string con
         (s.data(),s.size());
 }
 
-void (*save_view1)(image_view<image_data_32> const&, std::string const&,std::string const&) = mapnik::save_to_file;
-void (*save_view2)(image_view<image_data_32> const&, std::string const&) = mapnik::save_to_file;
+PyObject* view_tostring3(image_view<image_data_32> const & view, std::string const& format, mapnik::rgba_palette& pal)
+{
+    std::string s = save_to_string(view, format, pal);
+    return 
+#if PY_VERSION_HEX >= 0x03000000
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+        (s.data(),s.size());
+}
+
+void save_view1(image_view<image_data_32> const& view, std::string const& filename, std::string const& type)
+{
+    boost::shared_ptr<mapnik::rgba_palette> palette_ptr;
+    mapnik::save_to_file(view,filename,type,*palette_ptr);
+}
+
+void save_view2(image_view<image_data_32> const& view, std::string const& filename)
+{
+    mapnik::save_to_file(view,filename);
+}
+
 
 void export_image_view()
 {
@@ -83,7 +105,8 @@ void export_image_view()
         .def("height",&image_view<image_data_32>::height)
         .def("tostring",&view_tostring1)
         .def("tostring",&view_tostring2)
-        .def("save",save_view1)
-        .def("save",save_view2)
+        .def("tostring",&view_tostring3)
+        .def("save",&save_view1)
+        .def("save",&save_view2)
         ;
 }

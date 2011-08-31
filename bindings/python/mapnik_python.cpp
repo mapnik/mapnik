@@ -34,6 +34,7 @@ void export_parameters();
 void export_envelope();
 void export_query();
 void export_geometry();
+void export_palette();
 void export_image();
 void export_image_view();
 void export_grid();
@@ -395,6 +396,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_parameters();
     export_color(); 
     export_envelope();   
+    export_palette();
     export_image();
     export_image_view();
     export_grid();
