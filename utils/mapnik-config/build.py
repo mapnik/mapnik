@@ -53,12 +53,18 @@ def write_config(configuration,template,config_file):
 
 
 # todo - refine this list
+
 other_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
+
+other_includes += ' '
 
 other_includes += ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
 
+other_includes += ' '
+
 if config_env['HAS_CAIRO']:
     other_includes += ''.join([' -I%s' % i for i in env['CAIROMM_CPPPATHS'] if not i.startswith('#')])    
+
 
 ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
 
