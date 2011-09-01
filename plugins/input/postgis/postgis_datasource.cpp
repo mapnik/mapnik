@@ -116,6 +116,9 @@ void postgis_datasource::bind() const
         shared_ptr<Connection> conn = pool->borrowObject();
         if (conn && conn->isOK())
         {
+
+            is_bound_ = true;
+
             PoolGuard<shared_ptr<Connection>,
                       shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
          
@@ -330,8 +333,6 @@ void postgis_datasource::bind() const
             rs->close();
         }
     }
-    
-    is_bound_ = true;
 }
 
 std::string postgis_datasource::name()
@@ -464,7 +465,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             if (!geometryColumn_.length() > 0)
             {
                 std::ostringstream s_error;
-                s_error << "PostGIS: geometry name lookup failed for table '";
+                s_error << "geometry name lookup failed for table '";
                 if (schema_.length() > 0)
                 {
                     s_error << schema_ << ".";
