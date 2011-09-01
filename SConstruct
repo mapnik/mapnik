@@ -347,6 +347,9 @@ opts.AddVariables(
     ('PKG_CONFIG_PATH', 'Use this path to point pkg-config to .pc files instead of the PKG_CONFIG_PATH environment setting',''),
     
     # Variables affecting rendering back-ends
+    
+    BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
+    
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
 
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),

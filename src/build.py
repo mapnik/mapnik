@@ -104,7 +104,6 @@ source = Split(
     box2d.cpp
     expression_string.cpp
     filter_factory.cpp
-    feature_style_processor.cpp
     feature_type_style.cpp
     font_engine_freetype.cpp
     font_set.cpp
@@ -154,6 +153,20 @@ source = Split(
     svg_transform_parser.cpp
     """   
     )
+
+processor_cpp = 'feature_style_processor.cpp'
+
+if env['RENDERING_STATS']:
+    env3 = lib_env.Clone()
+    env3.Append(CXXFLAGS='-DRENDERING_STATS')
+    if env['LINKING'] == 'static':
+        source.insert(0,env3.StaticObject(processor_cpp))
+    else:
+        source.insert(0,env3.SharedObject(processor_cpp))
+else:
+    source.insert(0,processor_cpp);
+
+    
 
 # add the datasource_cache.cpp with custom LIBTOOL flag if needed
 if env['LIBTOOL_SUPPORTS_ADVISE']:
