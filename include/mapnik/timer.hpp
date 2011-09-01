@@ -40,15 +40,14 @@ public:
 
     void restart() 
     {   
-        _wall_clock_end = NULL;
-        _cpu_end = NULL;
-
+        _stopped = false;
         gettimeofday(&_wall_clock_start, NULL);
         _cpu_start = clock();
     }
 
-    virtual void stop()
+    virtual void stop() const
     {
+        _stopped = true;
         _cpu_end = clock();
         gettimeofday(&_wall_clock_end, NULL);
     }
@@ -56,7 +55,7 @@ public:
     double cpu_elapsed() const
     {
         // return elapsed CPU time in ms
-        if (!_cpu_end)
+        if (!_stopped)
             stop();
 
         return ((double) (_cpu_end - _cpu_start)) / CLOCKS_PER_SEC * 1000.0;
@@ -65,7 +64,7 @@ public:
     double wall_clock_elapsed() const
     {
         // return elapsed wall clock time in ms
-        if (!_wall_clock_end)
+        if (!_stopped)
             stop();
 
         long seconds  = _wall_clock_end.tv_sec  - _wall_clock_start.tv_sec;
@@ -73,9 +72,10 @@ public:
 
         return ((seconds) * 1000 + useconds / 1000.0) + 0.5;
     }
-private:
-    timeval _wall_clock_start, _wall_clock_end;
-    clock_t _cpu_start, _cpu_end;
+protected:
+    mutable timeval _wall_clock_start, _wall_clock_end;
+    mutable clock_t _cpu_start, _cpu_end;
+    mutable bool _stopped;
 };
 
 //  A progress_timer behaves like a timer except that the destructor displays
@@ -85,25 +85,24 @@ class progress_timer : public timer
 public:
     progress_timer(std::ostream & os, std::string const& base_message):
       os_(os),
-      base_message_(base_message),
-      stopped_(false) {}
+      base_message_(base_message)
+      {}
 
     ~progress_timer()
     {
-        if (!stopped_)
+        if (!_stopped)
             stop();
     }
     
-    void stop() {
+    void stop() const
+    {
         timer::stop();
-
-        stopped_ = true;
         try
         {
             std::ostringstream s;
             s.precision(2);
             s << std::fixed; 
-            s << wall_clock_elapsed() << "ms (cpu " << cpu_elapsed() << "ms)"
+            s << wall_clock_elapsed() << "ms (cpu " << cpu_elapsed() << "ms)";
             s << std::setw(30 - (int)s.tellp()) << std::right << "| " << base_message_ << "\n"; 
             os_ << s.str();
         }
@@ -111,13 +110,12 @@ public:
     }
 
     void discard() {
-        stopped_ = true;
+        _stopped = true;
     }
 
 private:
     std::ostream & os_;
     std::string base_message_;
-    bool stopped_;
 };
     
 };
