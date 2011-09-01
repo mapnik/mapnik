@@ -154,6 +154,27 @@ source = Split(
     """   
     )
 
+if env['HAS_CAIRO']:
+    lib_env.PrependUnique(LIBPATH=env['CAIROMM_LIBPATHS'])
+    lib_env.Append(LIBS=env['CAIROMM_LINKFLAGS'])
+    lib_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    libmapnik_cxxflags.append('-DHAVE_CAIRO')
+    lib_env.PrependUnique(CPPPATH=copy(env['CAIROMM_CPPPATHS']))
+    source.insert(0,'cairo_renderer.cpp')
+    #cairo_env.PrependUnique(CPPPATH=env['CAIROMM_CPPPATHS'])
+    # not safe, to much depends on graphics.hpp
+    #cairo_env = lib_env.Clone()
+    #cairo_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    #fixup = ['feature_type_style.cpp','load_map.cpp','cairo_renderer.cpp','graphics.cpp','image_util.cpp']
+    #for cpp in fixup:
+    #    if cpp in source:
+    #        source.remove(cpp)
+    #    if env['LINKING'] == 'static':
+    #        source.insert(0,cairo_env.StaticObject(cpp))
+    #    else:
+    #        source.insert(0,cairo_env.SharedObject(cpp))
+
+
 processor_cpp = 'feature_style_processor.cpp'
 
 if env['RENDERING_STATS']:
@@ -167,7 +188,6 @@ else:
     source.insert(0,processor_cpp);
 
     
-
 # add the datasource_cache.cpp with custom LIBTOOL flag if needed
 if env['LIBTOOL_SUPPORTS_ADVISE']:
     env3 = lib_env.Clone()
@@ -246,27 +266,6 @@ if env['SVG_RENDERER']: # svg backend
       	""")
     lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
     libmapnik_cxxflags.append('-DSVG_RENDERER')
-
-if env['HAS_CAIRO']:
-    lib_env.PrependUnique(LIBPATH=env['CAIROMM_LIBPATHS'])
-    lib_env.Append(LIBS=env['CAIROMM_LINKFLAGS'])
-    lib_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
-    libmapnik_cxxflags.append('-DHAVE_CAIRO')
-    lib_env.PrependUnique(CPPPATH=copy(env['CAIROMM_CPPPATHS']))
-    source.insert(0,'cairo_renderer.cpp')
-    #cairo_env.PrependUnique(CPPPATH=env['CAIROMM_CPPPATHS'])
-    # not safe, to much depends on graphics.hpp
-    #cairo_env = lib_env.Clone()
-    #cairo_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
-    #fixup = ['feature_type_style.cpp','load_map.cpp','cairo_renderer.cpp','graphics.cpp','image_util.cpp']
-    #for cpp in fixup:
-    #    if cpp in source:
-    #        source.remove(cpp)
-    #    if env['LINKING'] == 'static':
-    #        source.insert(0,cairo_env.StaticObject(cpp))
-    #    else:
-    #        source.insert(0,cairo_env.SharedObject(cpp))
-
 
 if env['XMLPARSER'] == 'tinyxml':
     source += Split(
