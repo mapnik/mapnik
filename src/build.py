@@ -104,6 +104,7 @@ source = Split(
     box2d.cpp
     expression_string.cpp
     filter_factory.cpp
+    feature_style_processor.cpp
     feature_type_style.cpp
     font_engine_freetype.cpp
     font_set.cpp
