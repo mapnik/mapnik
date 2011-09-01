@@ -25,6 +25,8 @@
 
 #include <cstdlib>
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include <sys/time.h> 
 
 namespace mapnik {
