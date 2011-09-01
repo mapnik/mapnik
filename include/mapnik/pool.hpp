@@ -100,7 +100,7 @@ public:
         mutex::scoped_lock lock(mutex_);
 #endif
         typename ContType::iterator itr=unusedPool_.begin();
-        if (itr!=unusedPool_.end())
+        for ( ;itr!=unusedPool_.end(); ++itr)
         { 
 #ifdef MAPNIK_DEBUG
             std::clog<<"borrow "<<(*itr).get()<<"\n";
@@ -119,7 +119,7 @@ public:
                 unusedPool_.erase(itr);
             }
         }
-        if (unusedPool_.size() < maxSize_)
+        if (usedPool_.size() < maxSize_)
         {
             HolderType conn(creator_());
             if (conn->isOK())
