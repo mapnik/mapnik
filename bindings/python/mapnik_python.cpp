@@ -78,6 +78,7 @@ void export_inmem_metawriter();
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/scale_denominator.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
 #include "python_grid_utils.hpp"
