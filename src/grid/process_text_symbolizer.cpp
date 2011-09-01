@@ -24,6 +24,7 @@
 // mapnik
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/expression_evaluator.hpp>
 
 namespace mapnik {
 

@@ -27,6 +27,7 @@
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/expression_evaluator.hpp>
 
 #include <mapnik/marker_cache.hpp>
 
