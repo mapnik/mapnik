@@ -19,9 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#include <mapnik/feature_style_processor.hpp>
 
 //mapnik
+#include <mapnik/feature_style_processor.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
@@ -36,9 +36,6 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 
-#ifdef MAPNIK_DEBUG
-//#include <mapnik/wall_clock_timer.hpp>
-#endif
 // boost
 #include <boost/foreach.hpp>
 //stl
@@ -87,9 +84,7 @@ feature_style_processor<Processor>::feature_style_processor(Map const& m, double
 template <typename Processor>
 void feature_style_processor<Processor>::apply()
 {
-#ifdef MAPNIK_DEBUG
-    //mapnik::wall_clock_progress_timer t(std::clog, "map rendering took: ");
-#endif
+
     Processor & p = static_cast<Processor&>(*this);
     p.start_map_processing(m_);
 
@@ -101,9 +96,7 @@ void feature_style_processor<Processor>::apply()
 
         double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
         scale_denom *= scale_factor_;
-#ifdef MAPNIK_DEBUG
-        std::clog << "scale denominator = " << scale_denom << "\n";
-#endif
+
         BOOST_FOREACH ( layer const& lyr, m_.layers() )
         {
             if (lyr.isVisible(scale_denom))
@@ -176,9 +169,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                     double scale_denom,
                     std::set<std::string>& names)
 {
-#ifdef MAPNIK_DEBUG
-    //wall_clock_progress_timer timer(clog, "end layer rendering: ");
-#endif
 
     std::vector<std::string> const& style_names = lay.styles();
 
@@ -195,221 +185,217 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     p.start_layer_processing(lay);
 
-    if (ds)
+    projection proj1(lay.srs());
+    proj_transform prj_trans(proj0,proj1);
+
+    // todo: only display raster if src and dest proj are matched
+    // todo: add raster re-projection as an optional feature
+    if (ds->type() == datasource::Raster && !prj_trans.equal())
     {
+        std::clog << "WARNING: Map srs does not match layer srs, skipping raster layer '" << lay.name()
+                  << "' as raster re-projection is not currently supported (http://trac.mapnik.org/ticket/663)\n"
+                  << "map srs: '" << m_.srs() << "'\nlayer srs: '" << lay.srs() << "' \n";
+        return;
+    }
 
-        projection proj1(lay.srs());
-        proj_transform prj_trans(proj0,proj1);
+    box2d<double> map_ext = m_.get_buffered_extent();
 
-        // todo: only display raster if src and dest proj are matched
-        // todo: add raster re-projection as an optional feature
-        if (ds->type() == datasource::Raster && !prj_trans.equal())
+    // clip buffered extent by maximum extent, if supplied
+    boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
+    if (maximum_extent) {
+        map_ext.clip(*maximum_extent);
+    }
+
+    box2d<double> layer_ext = lay.envelope();
+
+    // first, try intersection of map extent forward projected into layer srs
+    if (prj_trans.forward(map_ext) && map_ext.intersects(layer_ext))
+    {
+        layer_ext.clip(map_ext);
+    }
+    // if no intersection and projections are also equal, early return
+    else if (prj_trans.equal())
+    {
+        return;
+    }
+    // next try intersection of layer extent back projected into map srs
+    else if (prj_trans.backward(layer_ext) && map_ext.intersects(layer_ext))
+    {
+        layer_ext.clip(map_ext);
+        // forward project layer extent back into native projection
+        if (!prj_trans.forward(layer_ext))
+            std::clog << "WARNING: layer " << lay.name()
+                      << " extent " << layer_ext << " in map projection "
+                      << " did not reproject properly back to layer projection\n";
+    }
+    else
+    {
+        // if no intersection then nothing to do for layer
+        return;
+    }
+
+    query::resolution_type res(m_.width()/m_.get_current_extent().width(),
+                               m_.height()/m_.get_current_extent().height());
+    query q(layer_ext,res,scale_denom); //BBOX query
+
+    std::vector<feature_type_style*> active_styles;
+    attribute_collector collector(names);
+    double filt_factor = 1;
+    directive_collector d_collector(&filt_factor);
+
+    // iterate through all named styles collecting active styles and attribute names
+    BOOST_FOREACH(std::string const& style_name, style_names)
+    {
+        boost::optional<feature_type_style const&> style=m_.find_style(style_name);
+        if (!style)
         {
-            std::clog << "WARNING: Map srs does not match layer srs, skipping raster layer '" << lay.name()
-                      << "' as raster re-projection is not currently supported (http://trac.mapnik.org/ticket/663)\n"
-                      << "map srs: '" << m_.srs() << "'\nlayer srs: '" << lay.srs() << "' \n";
-            return;
+            std::clog << "WARNING: style '" << style_name << "' required for layer '"
+                      << lay.name() << "' does not exist.\n";
+            continue;
         }
 
-        box2d<double> map_ext = m_.get_buffered_extent();
+        const std::vector<rule>& rules=(*style).get_rules();
+        bool active_rules=false;
 
-        // clip buffered extent by maximum extent, if supplied
-        boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
-        if (maximum_extent) {
-            map_ext.clip(*maximum_extent);
+        BOOST_FOREACH(rule const& r, rules)
+        {
+            if (r.active(scale_denom))
+            {
+                active_rules = true;
+                if (ds->type() == datasource::Vector)
+                {
+                    collector(r);
+                }
+                // TODO - in the future rasters should be able to be filtered.
+            }
+        }
+        if (active_rules)
+        {
+            active_styles.push_back(const_cast<feature_type_style*>(&(*style)));
+        }
+    }
+
+    // push all property names
+    BOOST_FOREACH(std::string const& name, names)
+    {
+        q.add_property_name(name);
+    }
+
+    memory_datasource cache;
+    bool cache_features = lay.cache_features() && num_styles>1?true:false;
+    bool first = true;
+
+    BOOST_FOREACH (feature_type_style * style, active_styles)
+    {
+        std::vector<rule*> if_rules;
+        std::vector<rule*> else_rules;
+
+        std::vector<rule> const& rules=style->get_rules();
+
+        BOOST_FOREACH(rule const& r, rules)
+        {
+            if (r.active(scale_denom))
+            {
+                if (r.has_else_filter())
+                {
+                    else_rules.push_back(const_cast<rule*>(&r));
+                }
+                else
+                {
+                    if_rules.push_back(const_cast<rule*>(&r));
+                }
+
+                if ( (ds->type() == datasource::Raster) &&
+                        (ds->params().get<double>("filter_factor",0.0) == 0.0) )
+                {
+                    rule::symbolizers const& symbols = r.get_symbolizers();
+                    rule::symbolizers::const_iterator symIter = symbols.begin();
+                    rule::symbolizers::const_iterator symEnd = symbols.end();
+                    while (symIter != symEnd)
+                    {
+                        // if multiple raster symbolizers, last will be respected
+                        // should we warn or throw?
+                        boost::apply_visitor(d_collector,*symIter++);
+                    }
+                    q.set_filter_factor(filt_factor);
+                }
+            }
         }
 
-        box2d<double> layer_ext = lay.envelope();
-
-        // first, try intersection of map extent forward projected into layer srs
-        if (prj_trans.forward(map_ext) && map_ext.intersects(layer_ext))
+        // process features
+        featureset_ptr fs;
+        if (first)
         {
-            layer_ext.clip(map_ext);
-        }
-        // if no intersection and projections are also equal, early return
-        else if (prj_trans.equal())
-        {
-            return;
-        }
-        // next try intersection of layer extent back projected into map srs
-        else if (prj_trans.backward(layer_ext) && map_ext.intersects(layer_ext))
-        {
-            layer_ext.clip(map_ext);
-            // forward project layer extent back into native projection
-            if (!prj_trans.forward(layer_ext))
-                std::clog << "WARNING: layer " << lay.name()
-                          << " extent " << layer_ext << " in map projection "
-                          << " did not reproject properly back to layer projection\n";
+            if (cache_features)
+                first = false;
+            fs = ds->features(q);
         }
         else
         {
-            // if no intersection then nothing to do for layer
-            return;
+            fs = cache.features(q);
         }
 
-        query::resolution_type res(m_.width()/m_.get_current_extent().width(),
-                                   m_.height()/m_.get_current_extent().height());
-        query q(layer_ext,res,scale_denom); //BBOX query
-
-        std::vector<feature_type_style*> active_styles;
-        attribute_collector collector(names);
-        double filt_factor = 1;
-        directive_collector d_collector(&filt_factor);
-
-        // iterate through all named styles collecting active styles and attribute names
-        BOOST_FOREACH(std::string const& style_name, style_names)
+        if (fs)
         {
-            boost::optional<feature_type_style const&> style=m_.find_style(style_name);
-            if (!style)
+            feature_ptr feature;
+            while ((feature = fs->next()))
             {
-                std::clog << "WARNING: style '" << style_name << "' required for layer '"
-                          << lay.name() << "' does not exist.\n";
-                continue;
-            }
+                bool do_else=true;
 
-            const std::vector<rule>& rules=(*style).get_rules();
-            bool active_rules=false;
-
-            BOOST_FOREACH(rule const& r, rules)
-            {
-                if (r.active(scale_denom))
-                {
-                    active_rules = true;
-                    if (ds->type() == datasource::Vector)
-                    {
-                        collector(r);
-                    }
-                    // TODO - in the future rasters should be able to be filtered.
-                }
-            }
-            if (active_rules)
-            {
-                active_styles.push_back(const_cast<feature_type_style*>(&(*style)));
-            }
-        }
-
-        // push all property names
-        BOOST_FOREACH(std::string const& name, names)
-        {
-            q.add_property_name(name);
-        }
-
-        memory_datasource cache;
-        bool cache_features = lay.cache_features() && num_styles>1?true:false;
-        bool first = true;
-
-        BOOST_FOREACH (feature_type_style * style, active_styles)
-        {
-            std::vector<rule*> if_rules;
-            std::vector<rule*> else_rules;
-
-            std::vector<rule> const& rules=style->get_rules();
-
-            BOOST_FOREACH(rule const& r, rules)
-            {
-                if (r.active(scale_denom))
-                {
-                    if (r.has_else_filter())
-                    {
-                        else_rules.push_back(const_cast<rule*>(&r));
-                    }
-                    else
-                    {
-                        if_rules.push_back(const_cast<rule*>(&r));
-                    }
-
-                    if ( (ds->type() == datasource::Raster) &&
-                            (ds->params().get<double>("filter_factor",0.0) == 0.0) )
-                    {
-                        rule::symbolizers const& symbols = r.get_symbolizers();
-                        rule::symbolizers::const_iterator symIter = symbols.begin();
-                        rule::symbolizers::const_iterator symEnd = symbols.end();
-                        while (symIter != symEnd)
-                        {
-                            // if multiple raster symbolizers, last will be respected
-                            // should we warn or throw?
-                            boost::apply_visitor(d_collector,*symIter++);
-                        }
-                        q.set_filter_factor(filt_factor);
-                    }
-                }
-            }
-
-            // process features
-            featureset_ptr fs;
-            if (first)
-            {
                 if (cache_features)
-                    first = false;
-                fs = ds->features(q);
-            }
-            else
-            {
-                fs = cache.features(q);
-            }
-
-            if (fs)
-            {
-                feature_ptr feature;
-                while ((feature = fs->next()))
                 {
-                    bool do_else=true;
+                    cache.push(feature);
+                }
 
-                    if (cache_features)
+                BOOST_FOREACH(rule * r, if_rules )
+                {
+                    expression_ptr const& expr=r->get_filter();
+                    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
+                    if (result.to_bool())
                     {
-                        cache.push(feature);
-                    }
+                        do_else=false;
+                        rule::symbolizers const& symbols = r->get_symbolizers();
 
-                    BOOST_FOREACH(rule * r, if_rules )
-                    {
-                        expression_ptr const& expr=r->get_filter();
-                        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
-                        if (result.to_bool())
-                        {
-                            do_else=false;
-                            rule::symbolizers const& symbols = r->get_symbolizers();
-
-                            // if the underlying renderer is not able to process the complete set of symbolizers,
-                            // process one by one.
+                        // if the underlying renderer is not able to process the complete set of symbolizers,
+                        // process one by one.
 #ifdef SVG_RENDERER
-                            if(!p.process(symbols,*feature,prj_trans))
+                        if(!p.process(symbols,*feature,prj_trans))
 #endif
-                            {
+                        {
 
-                                BOOST_FOREACH (symbolizer const& sym, symbols)
-                                {
-                                    boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
-                                }
-                            }
-                            if (style->get_filter_mode() == FILTER_FIRST)
+                            BOOST_FOREACH (symbolizer const& sym, symbols)
                             {
-                                // Stop iterating over rules and proceed with next feature.
-                                break;
+                                boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                             }
                         }
-                    }
-                    if (do_else)
-                    {
-                        BOOST_FOREACH( rule * r, else_rules )
+                        if (style->get_filter_mode() == FILTER_FIRST)
                         {
-                            rule::symbolizers const& symbols = r->get_symbolizers();
-                            // if the underlying renderer is not able to process the complete set of symbolizers,
-                            // process one by one.
+                            // Stop iterating over rules and proceed with next feature.
+                            break;
+                        }
+                    }
+                }
+                if (do_else)
+                {
+                    BOOST_FOREACH( rule * r, else_rules )
+                    {
+                        rule::symbolizers const& symbols = r->get_symbolizers();
+                        // if the underlying renderer is not able to process the complete set of symbolizers,
+                        // process one by one.
 #ifdef SVG_RENDERER
-                            if(!p.process(symbols,*feature,prj_trans))
+                        if(!p.process(symbols,*feature,prj_trans))
 #endif
+                        {
+                            BOOST_FOREACH (symbolizer const& sym, symbols)
                             {
-                                BOOST_FOREACH (symbolizer const& sym, symbols)
-                                {
-                                    boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
-                                }
+                                boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                             }
                         }
                     }
                 }
             }
-            cache_features = false;
         }
+        cache_features = false;
     }
 
     p.end_layer_processing(lay);
