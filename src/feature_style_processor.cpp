@@ -222,7 +222,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     
 #if defined(RENDERING_STATS)
     if (!prj_trans.equal())
-        std::clog << "notice: reprojecting layer: '" << lay.name() << "' (may be slow!)\n";
+        std::clog << "notice: reprojecting layer: '" << lay.name() << "' from/to:\n\t'" 
+            << lay.srs() << "'\n\t'"
+            << m_.srs() << "'\n";
 #endif
 
     box2d<double> map_ext = m_.get_buffered_extent();
