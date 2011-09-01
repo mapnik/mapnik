@@ -27,10 +27,6 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/sql_utils.hpp>
 
-#ifdef MAPNIK_DEBUG
-//#include <mapnik/wall_clock_timer.hpp>
-#endif
-
 #include "connection_manager.hpp"
 #include "postgis_datasource.hpp"
 #include "postgis_featureset.hpp"
@@ -454,10 +450,6 @@ featureset_ptr postgis_datasource::features(const query& q) const
 {
     if (!is_bound_) bind();
     
-#ifdef MAPNIK_DEBUG
-    //mapnik::wall_clock_progress_timer timer(clog, "end feature query: ");
-#endif
-
     box2d<double> const& box = q.get_bbox();
     double scale_denom = q.scale_denominator();
     ConnectionManager *mgr=ConnectionManager::instance();
