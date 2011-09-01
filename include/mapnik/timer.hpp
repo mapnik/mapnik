@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_WALL_CLOCK_TIMER_INCLUDED
-#define MAPNIK_WALL_CLOCK_TIMER_INCLUDED
+#ifndef MAPNIK_TIMER_INCLUDED
+#define MAPNIK_TIMER_INCLUDED
 
 #include <cstdlib>
 #include <string>
@@ -29,61 +29,82 @@
 
 namespace mapnik {
 
-// This is a class with a similar signature to boost::timer, but which measures
-// times in wall clock time. Results are returned in milliseconds.
-class wall_clock_timer
+// Measure times in both wall clock time and CPU times. Results are returned in milliseconds.
+class timer
 {
 public:
-    wall_clock_timer()
-    { 
-        gettimeofday(&_start_time, NULL);
+    timer()
+    {
+        restart();
     }
 
     void restart() 
     {   
-        gettimeofday(&_start_time, NULL);
+        _wall_clock_end = NULL;
+        _cpu_end = NULL;
+
+        gettimeofday(&_wall_clock_start, NULL);
+        _cpu_start = clock();
     }
 
-    double elapsed() const
-    { 
-        timeval end;
-        gettimeofday(&end, NULL);
+    virtual void stop()
+    {
+        _cpu_end = clock();
+        gettimeofday(&_wall_clock_end, NULL);
+    }
 
-        long seconds  = end.tv_sec  - _start_time.tv_sec;
-        long useconds = end.tv_usec - _start_time.tv_usec;
+    double cpu_elapsed() const
+    {
+        // return elapsed CPU time in ms
+        if (!_cpu_end)
+            stop();
+
+        return ((double) (_cpu_end - _cpu_start)) / CLOCKS_PER_SEC * 1000.0;
+    }
+
+    double wall_clock_elapsed() const
+    {
+        // return elapsed wall clock time in ms
+        if (!_wall_clock_end)
+            stop();
+
+        long seconds  = _wall_clock_end.tv_sec  - _wall_clock_start.tv_sec;
+        long useconds = _wall_clock_end.tv_usec - _wall_clock_start.tv_usec;
 
         return ((seconds) * 1000 + useconds / 1000.0) + 0.5;
     }
 private:
-    timeval _start_time;
+    timeval _wall_clock_start, _wall_clock_end;
+    clock_t _cpu_start, _cpu_end;
 };
 
 //  A progress_timer behaves like a timer except that the destructor displays
 //  an elapsed time message at an appropriate place in an appropriate form.
-class wall_clock_progress_timer : public wall_clock_timer
+class progress_timer : public timer
 {
 public:
-    wall_clock_progress_timer(std::ostream & os,
-                              std::string const& base_message):
+    progress_timer(std::ostream & os, std::string const& base_message):
       os_(os),
       base_message_(base_message),
       stopped_(false) {}
 
-    ~wall_clock_progress_timer()
+    ~progress_timer()
     {
         if (!stopped_)
             stop();
     }
     
     void stop() {
+        timer::stop();
+
         stopped_ = true;
         try
         {
             std::ostringstream s;
             s.precision(2);
             s << std::fixed; 
-            s << elapsed() << " ms";
-            s << std::setw(15 - (int)s.tellp()) << std::right << "| " << base_message_ << "\n"; 
+            s << wall_clock_elapsed() << "ms (cpu " << cpu_elapsed() << "ms)"
+            s << std::setw(30 - (int)s.tellp()) << std::right << "| " << base_message_ << "\n"; 
             os_ << s.str();
         }
         catch (...) {} // eat any exceptions
@@ -100,4 +121,4 @@ private:
 };
     
 };
-#endif // MAPNIK_WALL_CLOCK_TIMER_INCLUDED
+#endif // MAPNIK_TIMER_INCLUDED
