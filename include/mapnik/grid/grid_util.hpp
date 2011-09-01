@@ -32,7 +32,7 @@ namespace mapnik {
  * Nearest neighbor resampling for grids
  */
 
-static void scale_grid(mapnik::grid::data_type & target,
+static inline void scale_grid(mapnik::grid::data_type & target,
                         const mapnik::grid::data_type & source,
                         double x_off_f, double y_off_f)
 {
