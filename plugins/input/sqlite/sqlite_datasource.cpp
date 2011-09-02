@@ -176,15 +176,23 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) {
                 boost::filesystem::path absolute_path(dataset_name_);
 
                 // support symlinks
+                #if (BOOST_FILESYSTEM_VERSION == 3)
                 if (boost::filesystem::is_symlink(absolute_path))
                 {
                     absolute_path = boost::filesystem::read_symlink(absolute_path);
                 }
 
-                #if (BOOST_FILESYSTEM_VERSION == 3)
                 filename = boost::filesystem::absolute(absolute_path.parent_path()/filename).string();
+
                 #else
+                if (boost::filesystem::is_symlink(absolute_path))
+                {
+                    //cannot figure out how to resolve on in v2 so just print a warning
+                    std::clog << "###Warning: '" << absolute_path.string() << "' is a symlink which is not supported in attachdb\n";
+                }
+
                 filename = boost::filesystem::complete(absolute_path.branch_path()/filename).normalize().string();
+
                 #endif
             }
         }
