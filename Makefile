@@ -17,8 +17,6 @@ uninstall:
 	python scons/scons.py uninstall
 
 test:
-	
-	echo "...running python tests"
-	nosetests --where tests/
+	@python tests/run_tests.py -q
 
 .PHONY: clean reset uninstall test install

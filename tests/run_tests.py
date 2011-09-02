@@ -50,9 +50,9 @@ def main():
            print("- _mapnik2.so path: %s" % mapnik2._mapnik2.__file__)
         print("- Input plugins path: %s" % mapnik2.inputpluginspath)
         print("- Font path: %s" % mapnik2.fontscollectionpath)
-        print()
+        print('')
         print("- Running nosetests:")
-        print()
+        print('')
 
     argv = [__file__, '--exe', '--with-todo', '--with-doctest', '--doctest-tests']
 
@@ -63,6 +63,8 @@ def main():
         # 3 * '-v' gets us debugging information from nose
         argv.append('-v')
         argv.append('-v')
+    
+    argv.extend(['-w','./tests/python_tests'])
 
     if not nose.run(argv=argv, plugins=[TodoPlugin(), Doctest()]):
         sys.exit(1)
