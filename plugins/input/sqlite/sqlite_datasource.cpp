@@ -79,7 +79,6 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     // TODO
     // - change param from 'file' to 'dbname'
     // - ensure that the supplied key_field is a valid "integer primary key"
-    // - move all intialization code to bind()
     
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (!file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
@@ -88,65 +87,14 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
         throw mapnik::datasource_exception("Sqlite Plugin: missing <table> parameter");
     }
     
-    boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
-    if (key_field_name) {
-        std::string const& key_field_string = *key_field_name;
-        if (key_field_string.empty()) {
-            key_field_ = "rowid";
-        } else {
-            key_field_ = key_field_string;
-        }
-    }
-    else
-    {
-        key_field_ = "rowid";
-    }
-    
-    boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
-    if (wkb)
-    {
-        if (*wkb == "spatialite")
-            format_ = mapnik::wkbSpatiaLite;  
-    }
-
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
-    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
-    has_spatial_index_ = false;
-    using_subquery_ = false;
-
-    boost::optional<std::string> ext  = params_.get<std::string>("extent");
-    if (ext) extent_initialized_ = extent_.from_string(*ext);
-
-    boost::optional<std::string> base = params_.get<std::string>("base");
-    if (base)
-        dataset_name_ = *base + "/" + *file;
-    else
-        dataset_name_ = *file;
-
-    // Populate init_statements_
-    //   1. Build attach database statements from the "attachdb" parameter
-    //   2. Add explicit init statements from "initdb" parameter
-    // Note that we do some extra work to make sure that any attached
-    // databases are relative to directory containing dataset_name_.  Sqlite
-    // will default to attaching from cwd.  Typicaly usage means that the
-    // map loader will produce full paths here.
-    boost::optional<std::string> attachdb = params_.get<std::string>("attachdb");
-    if (attachdb) {
-       parse_attachdb(*attachdb);
-    }
-    
-    boost::optional<std::string> initdb = params_.get<std::string>("initdb");
-    if (initdb) {
-       init_statements_.push_back(*initdb);
-    }
-    
     if (bind)
     {
         this->bind();
     }
 }
 
-void sqlite_datasource::parse_attachdb(std::string const& attachdb) {
+void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
+{
     boost::char_separator<char> sep(",");
     boost::tokenizer<boost::char_separator<char> > tok(attachdb, sep);
     
@@ -207,6 +155,61 @@ void sqlite_datasource::bind() const
 {
     if (is_bound_) return;
     
+    boost::optional<std::string> file = params_.get<std::string>("file");
+    if (!file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
+    
+    boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
+    if (key_field_name) {
+        std::string const& key_field_string = *key_field_name;
+        if (key_field_string.empty()) {
+            key_field_ = "rowid";
+        } else {
+            key_field_ = key_field_string;
+        }
+    }
+    else
+    {
+        key_field_ = "rowid";
+    }
+    
+    boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
+    if (wkb)
+    {
+        if (*wkb == "spatialite")
+            format_ = mapnik::wkbSpatiaLite;  
+    }
+
+    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
+    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
+    has_spatial_index_ = false;
+    using_subquery_ = false;
+
+    boost::optional<std::string> ext  = params_.get<std::string>("extent");
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
+
+    boost::optional<std::string> base = params_.get<std::string>("base");
+    if (base)
+        dataset_name_ = *base + "/" + *file;
+    else
+        dataset_name_ = *file;
+
+    // Populate init_statements_
+    //   1. Build attach database statements from the "attachdb" parameter
+    //   2. Add explicit init statements from "initdb" parameter
+    // Note that we do some extra work to make sure that any attached
+    // databases are relative to directory containing dataset_name_.  Sqlite
+    // will default to attaching from cwd.  Typicaly usage means that the
+    // map loader will produce full paths here.
+    boost::optional<std::string> attachdb = params_.get<std::string>("attachdb");
+    if (attachdb) {
+       parse_attachdb(*attachdb);
+    }
+    
+    boost::optional<std::string> initdb = params_.get<std::string>("initdb");
+    if (initdb) {
+       init_statements_.push_back(*initdb);
+    }
+
     if (!boost::filesystem::exists(dataset_name_))
         throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
           

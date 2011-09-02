@@ -53,7 +53,7 @@ class sqlite_datasource : public mapnik::datasource
       mutable mapnik::box2d<double> extent_;
       mutable bool extent_initialized_;
       int type_;
-      std::string dataset_name_;
+      mutable std::string dataset_name_;
       mutable sqlite_connection* dataset_;
       std::string table_;
       std::string fields_;
@@ -61,20 +61,20 @@ class sqlite_datasource : public mapnik::datasource
       mutable std::string geometry_table_;
       mutable std::string geometry_field_;
       mutable std::string index_table_;
-      std::string key_field_;
-      const int row_offset_;
-      const int row_limit_;
+      mutable std::string key_field_;
+      mutable int row_offset_;
+      mutable int row_limit_;
       mutable mapnik::layer_descriptor desc_;
-      mapnik::wkbFormat format_;
-      bool multiple_geometries_;
+      mutable mapnik::wkbFormat format_;
+      mutable bool multiple_geometries_;
       mutable bool use_spatial_index_;
       mutable bool has_spatial_index_;
       mutable bool using_subquery_;
-      std::vector<std::string> init_statements_;
+      mutable std::vector<std::string> init_statements_;
       
       // Fill init_statements with any statements
       // needed to attach auxillary databases
-      void parse_attachdb(std::string const& attachdb);
+      void parse_attachdb(std::string const& attachdb) const;
 };
 
 
