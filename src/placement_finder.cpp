@@ -729,7 +729,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         else
         {
             //If there isn't enough distance left on this segment
-            // then we need to search untill we find the line segment that ends further than ci.width away
+            // then we need to search until we find the line segment that ends further than ci.width away
             do
             {
                 old_x = new_x;
@@ -779,19 +779,21 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         }
 
         double render_angle = angle;
+        double cosa = cos(angle);
+        double sina = sin(angle);
 
         double render_x = start_x;
         double render_y = start_y;
 
         //Center the text on the line
-        render_x -= (((double)string_height/2.0) - 1.0)*cos(render_angle+M_PI/2);
-        render_y += (((double)string_height/2.0) - 1.0)*sin(render_angle+M_PI/2);
+        render_x += (((double)string_height/2.0) - 1.0)*sina;
+        render_y += (((double)string_height/2.0) - 1.0)*cosa;
 
         if (orientation < 0)
         {
             // rotate in place
-            render_x += ci.width*cos(render_angle) - (string_height-2)*sin(render_angle);
-            render_y -= ci.width*sin(render_angle) + (string_height-2)*cos(render_angle);
+            render_x += ci.width*cosa - (string_height-2)*sina;
+            render_y -= ci.width*sina + (string_height-2)*cosa;
             render_angle += M_PI;
         }
         current_placement->add_node(c,render_x - current_placement->starting_x,
