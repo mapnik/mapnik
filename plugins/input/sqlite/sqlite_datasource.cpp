@@ -39,6 +39,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
+
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 
@@ -79,7 +80,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     // - change param from 'file' to 'dbname'
     // - ensure that the supplied key_field is a valid "integer primary key"
     // - move all intialization code to bind()
-
+    
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (!file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
 
@@ -241,8 +242,8 @@ void sqlite_datasource::bind() const
         std::ostringstream s;
         s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
 
-        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-        if (rs->is_valid () && rs->step_next())
+        boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+        if (rs->is_valid() && rs->step_next())
         {
             for (int i = 0; i < rs->column_count (); ++i)
             {
@@ -303,9 +304,9 @@ void sqlite_datasource::bind() const
     {
         std::ostringstream s;
         s << "PRAGMA table_info(" << geometry_table_ << ")";
-        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+        boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
         bool found_table = false;
-        while (rs->is_valid () && rs->step_next())
+        while (rs->is_valid() && rs->step_next())
         {
             found_table = true;
             // TODO - support unicode strings?
@@ -364,7 +365,9 @@ void sqlite_datasource::bind() const
             if (using_subquery_)
                 s << " from subquery '" << table_ << "' ";
             s << "using 'PRAGMA table_info(" << geometry_table_  << ")' ";
-            s << sqlite3_errmsg(*(*dataset_));
+            std::string sq_err = std::string(sqlite3_errmsg(*(*dataset_)));
+            if (sq_err != "unknown error")
+                s << ": " << sq_err;
             throw datasource_exception(s.str());
         }
     }
@@ -375,8 +378,7 @@ void sqlite_datasource::bind() const
 
     if (index_table_.size() == 0) {
         // Generate implicit index_table name - need to do this after
-        // we have discovered meta-data or else we don't know the column
-        // name
+        // we have discovered meta-data or else we don't know the column name
         index_table_ = "\"idx_" + mapnik::unquote_sql2(geometry_table_) + "_" + geometry_field_ + "\"";
     }
     
@@ -389,6 +391,12 @@ void sqlite_datasource::bind() const
         {
             has_spatial_index_ = true;
         }
+        #ifdef MAPNIK_DEBUG
+        else
+        {
+            std::clog << "SQLite Plugin: rtree index lookup did not succeed: '" << sqlite3_errmsg(*(*dataset_)) << "'\n";
+        }
+        #endif
     }
 
     if (metadata_ != "" && !extent_initialized_)
@@ -396,8 +404,8 @@ void sqlite_datasource::bind() const
         std::ostringstream s;
         s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata_;
         s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table_ << "')";
-        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-        if (rs->is_valid () && rs->step_next())
+        boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+        if (rs->is_valid() && rs->step_next())
         {
             double xmin = rs->column_double (0);
             double ymin = rs->column_double (1);
@@ -414,8 +422,8 @@ void sqlite_datasource::bind() const
         std::ostringstream s;
         s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM " 
         << index_table_;
-        boost::scoped_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
-        if (rs->is_valid () && rs->step_next())
+        boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+        if (rs->is_valid() && rs->step_next())
         {
             if (!rs->column_isnull(0)) {
                 try 
@@ -435,15 +443,21 @@ void sqlite_datasource::bind() const
             }
         }    
     }
+
+#ifdef MAPNIK_DEBUG
+    if (!has_spatial_index_
+        && use_spatial_index_ 
+        && using_subquery_
+        && key_field_ == "rowid"
+        && !boost::algorithm::icontains(table_,"rowid")) {
+       // this is an impossible situation because rowid will be null via a subquery
+       std::clog << "Sqlite Plugin: WARNING: spatial index usage will fail because rowid is not present in your subquery. You have 4 options: 1) Add rowid into your select statement, 2) alias your primary key as rowid, 3) supply a 'key_field' value that references the primary key of your spatial table, or 4) avoid using a spatial index by setting 'use_spatial_index'=false";
+    }
+#endif
     
     // final fallback to gather extent
     if (!extent_initialized_ || !has_spatial_index_) {
-        
-        /*if (use_spatial_index_ && key_field_ == "rowid" && using_subquery_) {
-           // this is an impossible situation because rowid will be null via a subquery
-           throw datasource_exception("Sqlite Plugin: Using a spatial index will require creating one on the fly which is not possible unless you supply a 'key_field' value that references the primary key of your spatial table. To avoid using a spatial index set 'use_spatial_index'=false");
-        }*/
-        
+                
         std::ostringstream s;
         
         s << "SELECT " << geometry_field_ << "," << key_field_
@@ -645,7 +659,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         std::clog << "Sqlite Plugin: query:" << s.str() << "\n\n";
 #endif
 
-        boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+        boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
         return boost::make_shared<sqlite_featureset>(rs, desc_.get_encoding(), format_, multiple_geometries_, using_subquery_);
    }
@@ -709,7 +723,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         std::clog << "Sqlite Plugin: " << s.str() << std::endl;
 #endif
 
-        boost::shared_ptr<sqlite_resultset> rs (dataset_->execute_query (s.str()));
+        boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
         return boost::make_shared<sqlite_featureset>(rs, desc_.get_encoding(), format_, multiple_geometries_, using_subquery_);
    }
