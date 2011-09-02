@@ -105,6 +105,9 @@ feature_ptr sqlite_featureset::next()
             const int type_oid = rs_->column_type (i);
             const char* fld_name = rs_->column_name(i);
 
+            if (!fld_name)
+                continue;
+
             if (!using_subquery_)
             {
                 switch (type_oid)
