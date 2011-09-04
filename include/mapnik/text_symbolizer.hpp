@@ -110,6 +110,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     double get_minimum_distance() const;
     void set_minimum_padding(double distance);
     double get_minimum_padding() const;
+    void set_minimum_path_length(double size);
+    double get_minimum_path_length() const;
     void set_allow_overlap(bool overlap);
     bool get_allow_overlap() const;
     void set_text_opacity(double opacity);
@@ -146,6 +148,7 @@ private:
     bool avoid_edges_;
     double minimum_distance_;
     double minimum_padding_;
+    double minimum_path_length_;
     bool overlap_;
     double text_opacity_;
     bool wrap_before_;

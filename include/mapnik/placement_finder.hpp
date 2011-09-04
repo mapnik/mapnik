@@ -70,6 +70,7 @@ struct placement : boost::noncopyable
     double max_char_angle_delta;
     double minimum_distance;
     double minimum_padding;
+    double minimum_path_length;
     bool avoid_edges;
     bool has_dimensions;
     bool allow_overlap;

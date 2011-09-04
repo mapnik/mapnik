@@ -532,6 +532,10 @@ private:
         {
             set_attr( node, "minimum-padding", sym.get_minimum_padding() );
         }
+        if (sym.get_minimum_path_length() != dfl.get_minimum_path_length() || explicit_defaults_ )
+        {
+            set_attr( node, "minimum-path-length", sym.get_minimum_path_length() );
+        }
         if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
         {
             set_attr( node, "allow-overlap", sym.get_allow_overlap() );

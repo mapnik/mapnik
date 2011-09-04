@@ -66,6 +66,7 @@ placement::placement(string_info & info_,
       max_char_angle_delta(sym.get_max_char_angle_delta()),
       minimum_distance(scale_factor_ * sym.get_minimum_distance()),
       minimum_padding(scale_factor_ * sym.get_minimum_padding()),
+      minimum_path_length(0),
       avoid_edges(sym.get_avoid_edges()),
       has_dimensions(has_dimensions_),
       allow_overlap(false),
@@ -90,6 +91,7 @@ placement::placement(string_info & info_,
       max_char_angle_delta(sym.get_max_char_angle_delta()),
       minimum_distance(scale_factor_ * sym.get_minimum_distance()),
       minimum_padding(scale_factor_ * sym.get_minimum_padding()),
+      minimum_path_length(scale_factor_ * sym.get_minimum_path_length()),
       avoid_edges(sym.get_avoid_edges()),
       has_dimensions(false),
       allow_overlap(sym.get_allow_overlap()),
@@ -516,6 +518,10 @@ void placement_finder<DetectorT>::find_line_placements(placement & p, text_place
     }
     //Now path_positions is full and total_distance is correct
     //shape_path shouldn't be used from here
+
+    // Ensure lines have a minimum length.
+    if (total_distance < p.minimum_path_length)
+        return;
 
     double distance = 0.0;
     std::pair<double, double> string_dimensions = p.info.get_dimensions();

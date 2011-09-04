@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik Trunk
 ------------
 
+- Add minimum-path-length property to text_symbolizer to allow labels to be placed only on lines of a certain length (#865)
+
 - Add support for png quantization using fixed palettes (#843)
 
 - Add AlsoFilter functionality - http://trac.mapnik.org/wiki/AlsoFilter

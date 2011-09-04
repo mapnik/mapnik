@@ -1204,7 +1204,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
       << "halo-radius,text-ratio,wrap-width,wrap-before,"
       << "wrap-character,text-transform,line-spacing,"
       << "label-position-tolerance,character-spacing,"
-      << "spacing,minimum-distance,minimum-padding,"
+      << "spacing,minimum-distance,minimum-padding,minimum-path-length,"
       << "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
       << "horizontal-alignment,justify-alignment,"
       << "placements,placement-type,"
@@ -1381,6 +1381,13 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
             text_symbol.set_minimum_padding(*min_padding);
         }
         
+        // minimum path length
+        optional<unsigned> min_path_length = get_opt_attr<unsigned>(sym, "minimum-path-length");
+        if (min_path_length)
+        {
+            text_symbol.set_minimum_path_length(*min_path_length);
+        }
+
         // do not render labels around edges
         optional<boolean> avoid_edges =
             get_opt_attr<boolean>(sym, "avoid-edges");
