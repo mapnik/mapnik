@@ -191,6 +191,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     unsigned int num_styles = style_names.size();
     if (!num_styles) {
+        std::clog << "WARNING: No style for layer '" << lay.name() << "'\n";
         return;
     }
 
