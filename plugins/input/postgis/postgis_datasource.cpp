@@ -514,7 +514,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             unsigned num_attr = props.size();
             if (!key_field_.empty())
                 ++num_attr;
-            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,!key_field_.empty(),props.size());
+            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,!key_field_.empty(),num_attr);
         }
         else 
         {
@@ -589,7 +589,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             }
          
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_, !key_field_.empty(), size);
+            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,!key_field_.empty(),size);
         }
     }
     return featureset_ptr();
