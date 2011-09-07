@@ -161,8 +161,6 @@ private:
     std::vector<unsigned> alpha_pal_;
 };
 
-static rgba_palette _rgba_palette;
-
 } // namespace mapnik
 
 #endif // _PALETTE_HPP_
