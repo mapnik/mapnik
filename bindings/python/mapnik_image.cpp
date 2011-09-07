@@ -105,8 +105,8 @@ PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba
 
 void save_to_file1(mapnik::image_32 const& im, std::string const& filename, std::string const& type)
 {
-    boost::shared_ptr<mapnik::rgba_palette> palette_ptr;
-    mapnik::save_to_file(im,filename,type,*palette_ptr);
+    mapnik::rgba_palette pal;
+    mapnik::save_to_file(im,filename,type,pal);
 }
 
 void save_to_file2(mapnik::image_32 const& im, std::string const& filename)
