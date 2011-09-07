@@ -87,6 +87,15 @@ std::string save_to_string(T const& image,
 }
 
 template <typename T>
+std::string save_to_string(T const& image,
+                           std::string const& type)
+{
+    std::ostringstream ss(std::ios::out|std::ios::binary);
+    save_to_stream(image, ss, type);
+    return ss.str();
+}
+
+template <typename T>
 void save_to_file(T const& image,
                   std::string const& filename,
                   std::string const& type,
@@ -429,6 +438,9 @@ template void save_to_file<image_data_32>(image_data_32 const&,
                                           rgba_palette const& palette);
 
 template std::string save_to_string<image_data_32>(image_data_32 const&,
+                                                   std::string const&);
+
+template std::string save_to_string<image_data_32>(image_data_32 const&,
                                                    std::string const&,
                                                    rgba_palette const& palette);
 
@@ -447,6 +459,9 @@ template void save_to_file<image_view<image_data_32> > (image_view<image_data_32
 template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                         std::string const&,
                                                         rgba_palette const& palette);
+   
+template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+                                                                 std::string const&);
    
 template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                  std::string const&,
