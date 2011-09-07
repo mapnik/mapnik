@@ -79,7 +79,7 @@ namespace mapnik
 template <typename T>
 std::string save_to_string(T const& image,
                            std::string const& type,
-                           rgba_palette& palette)
+                           rgba_palette const& palette)
 {
     std::ostringstream ss(std::ios::out|std::ios::binary);
     save_to_stream(image, ss, type, palette);
@@ -90,7 +90,7 @@ template <typename T>
 void save_to_file(T const& image,
                   std::string const& filename,
                   std::string const& type,
-                  rgba_palette& palette)
+                  rgba_palette const& palette)
 {
     std::ofstream file (filename.c_str(), std::ios::out| std::ios::trunc|std::ios::binary);
     if (file)
@@ -235,7 +235,7 @@ template <typename T>
 void save_to_stream(T const& image,
                     std::ostream & stream,
                     std::string const& type,
-                    rgba_palette& palette)
+                    rgba_palette const& palette)
 {
     if (stream)
     {
@@ -257,7 +257,7 @@ void save_to_stream(T const& image,
                               &gamma,
                               &use_octree);
 
-            if (&palette != NULL && palette.valid())
+            if (palette.valid())
                 save_as_png8_pal(stream, image, palette, compression, strategy);
             else if (colors < 0)
                 save_as_png(stream, image, compression, strategy);
@@ -346,7 +346,7 @@ void save_to_file(T const& image, std::string const& filename)
 }
 
 template <typename T>
-void save_to_file(T const& image, std::string const& filename, rgba_palette& palette)
+void save_to_file(T const& image, std::string const& filename, rgba_palette const& palette)
 {
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
@@ -419,18 +419,18 @@ template void save_to_file<image_data_32>(image_data_32 const&,
 template void save_to_file<image_data_32>(image_data_32 const&,
                                           std::string const&,
                                           std::string const&,
-                                          rgba_palette& palette);
+                                          rgba_palette const& palette);
 
 template void save_to_file<image_data_32>(image_data_32 const&,
                                           std::string const&);
 
 template void save_to_file<image_data_32>(image_data_32 const&,
                                           std::string const&,
-                                          rgba_palette& palette);
+                                          rgba_palette const& palette);
 
 template std::string save_to_string<image_data_32>(image_data_32 const&,
                                                    std::string const&,
-                                                   rgba_palette& palette);
+                                                   rgba_palette const& palette);
 
 template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                         std::string const&,
@@ -439,18 +439,18 @@ template void save_to_file<image_view<image_data_32> > (image_view<image_data_32
 template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                         std::string const&,
                                                         std::string const&,
-                                                        rgba_palette& palette);
+                                                        rgba_palette const& palette);
 
 template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                         std::string const&);
    
 template void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                         std::string const&,
-                                                        rgba_palette& palette);
+                                                        rgba_palette const& palette);
    
 template std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                  std::string const&,
-                                                                 rgba_palette& palette);
+                                                                 rgba_palette const& palette);
 
 
 

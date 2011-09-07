@@ -118,7 +118,7 @@ class hextree : private boost::noncopyable
     std::vector<unsigned> pal_remap_;
     // rgba hashtable for quantization
     typedef boost::unordered_map<rgba, int, rgba::hash_func> rgba_hash_table;
-    rgba_hash_table color_hashmap_;
+    mutable rgba_hash_table color_hashmap_;
     // gamma correction to prioritize dark colors (>1.0)
     double gamma_;
     // look up table for gamma correction
@@ -218,7 +218,7 @@ public:
     }
 
     // return color index in returned earlier palette
-    int quantize(rgba const& c)
+    int quantize(rgba const& c) const
     {
         byte a = preprocessAlpha(c.a);
         unsigned ind=0;
@@ -234,7 +234,7 @@ public:
             int dist, newdist;
 
             // find closest match based on mean of r,g,b,a
-            std::vector<rgba>::iterator pit = 
+            std::vector<rgba>::const_iterator pit = 
                 std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba::mean_sort_cmp());
             ind = pit-sorted_pal_.begin();
             if (ind == sorted_pal_.size())

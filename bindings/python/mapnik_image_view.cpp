@@ -63,7 +63,8 @@ PyObject* view_tostring1(image_view<image_data_32> const& view)
 // encode (png,jpeg)
 PyObject* view_tostring2(image_view<image_data_32> const & view, std::string const& format)
 {
-    std::string s = save_to_string(view, format);
+    mapnik::rgba_palette pal;
+    std::string s = save_to_string(view, format, pal);
     return 
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
@@ -87,13 +88,14 @@ PyObject* view_tostring3(image_view<image_data_32> const & view, std::string con
 
 void save_view1(image_view<image_data_32> const& view, std::string const& filename, std::string const& type)
 {
-    boost::shared_ptr<mapnik::rgba_palette> palette_ptr;
-    mapnik::save_to_file(view,filename,type,*palette_ptr);
+    mapnik::rgba_palette pal;
+    mapnik::save_to_file(view,filename,type,pal);
 }
 
 void save_view2(image_view<image_data_32> const& view, std::string const& filename)
 {
-    mapnik::save_to_file(view,filename);
+    mapnik::rgba_palette pal;
+    mapnik::save_to_file(view,filename,pal);
 }
 
 

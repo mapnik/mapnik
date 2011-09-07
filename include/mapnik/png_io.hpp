@@ -451,8 +451,8 @@ void save_as_png8_oct(T1 & file, T2 const& image, const unsigned max_colors = 25
 
 
 template <typename T1, typename T2, typename T3>
-void save_as_png8(T1 & file, T2 const& image, T3& tree,
-        std::vector<mapnik::rgb> palette, std::vector<unsigned> alphaTable,
+void save_as_png8(T1 & file, T2 const& image, T3 const & tree,
+        std::vector<mapnik::rgb> const& palette, std::vector<unsigned> const& alphaTable,
         int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY)
 {
     unsigned width = image.width();
@@ -550,7 +550,7 @@ void save_as_png8_hex(T1 & file, T2 const& image, int colors = 256,
 }
 
 template <typename T1, typename T2>
-void save_as_png8_pal(T1 & file, T2 const& image, rgba_palette& pal,
+void save_as_png8_pal(T1 & file, T2 const& image, rgba_palette const& pal,
         int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY)
 {
     save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alphaTable(), compression, strategy);

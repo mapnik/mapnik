@@ -67,13 +67,13 @@ const std::vector<unsigned>& rgba_palette::alphaTable() const
     return alpha_pal_;
 }
 
-bool rgba_palette::valid()
+bool rgba_palette::valid() const
 {
     return colors_ > 0;
 }
 
 // return color index in returned earlier palette
-unsigned rgba_palette::quantize(rgba const& c)
+unsigned rgba_palette::quantize(rgba const& c) const
 {
     unsigned index = 0;
     if (colors_ == 1) return index;
@@ -89,7 +89,7 @@ unsigned rgba_palette::quantize(rgba const& c)
         int dist, newdist;
 
         // find closest match based on mean of r,g,b,a
-        std::vector<rgba>::iterator pit =
+        std::vector<rgba>::const_iterator pit =
             std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba::mean_sort_cmp());
         index = pit - sorted_pal_.begin();
         if (index == sorted_pal_.size()) index--;

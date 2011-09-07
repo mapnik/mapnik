@@ -236,7 +236,8 @@ void render_tile_to_file(const mapnik::Map& map,
 {
     mapnik::image_32 image(width,height);
     render(map,image,1.0,offset_x, offset_y);
-    mapnik::save_to_file(image.data(),file,format);
+    mapnik::rgba_palette pal;
+    mapnik::save_to_file(image.data(),file,format,pal);
 }
 
 void render_to_file1(const mapnik::Map& map,
@@ -255,7 +256,8 @@ void render_to_file1(const mapnik::Map& map,
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image,filename,format); 
+        mapnik::rgba_palette pal;
+        mapnik::save_to_file(image,filename,format,pal); 
     }
 }
 
@@ -274,7 +276,8 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image,filename); 
+        mapnik::rgba_palette pal;
+        mapnik::save_to_file(image,filename,pal); 
     }
 }
 
@@ -296,7 +299,8 @@ void render_to_file3(const mapnik::Map& map,
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,scale_factor,0,0);
-        mapnik::save_to_file(image,filename,format); 
+        mapnik::rgba_palette pal;
+        mapnik::save_to_file(image,filename,format,pal); 
     }
 }
 

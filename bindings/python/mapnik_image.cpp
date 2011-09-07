@@ -62,8 +62,10 @@ using mapnik::image_32;
 using mapnik::image_reader;
 using mapnik::get_image_reader;
 using mapnik::type_from_filename;
-using namespace boost::python;
 using mapnik::save_to_file;
+using mapnik::save_to_string;
+
+using namespace boost::python;
 
 // output 'raw' pixels
 PyObject* tostring1( image_32 const& im)
@@ -81,7 +83,8 @@ PyObject* tostring1( image_32 const& im)
 // encode (png,jpeg)
 PyObject* tostring2(image_32 const & im, std::string const& format)
 {
-    std::string s = save_to_string(im, format);
+    mapnik::rgba_palette pal;
+    std::string s = save_to_string(im, format, pal);
     return
 #if PY_VERSION_HEX >= 0x03000000 
         ::PyBytes_FromStringAndSize
@@ -111,7 +114,8 @@ void save_to_file1(mapnik::image_32 const& im, std::string const& filename, std:
 
 void save_to_file2(mapnik::image_32 const& im, std::string const& filename)
 {
-    mapnik::save_to_file(im,filename);
+    mapnik::rgba_palette pal;
+    mapnik::save_to_file(im,filename,pal);
 }
 
 
