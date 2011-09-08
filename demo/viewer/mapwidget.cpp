@@ -25,6 +25,7 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/scale_denominator.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include "mapwidget.hpp"
@@ -39,6 +40,7 @@ using mapnik::feature_ptr;
 using mapnik::geometry_ptr;
 using mapnik::CoordTransform;
 using mapnik::projection;
+using mapnik::scale_denominator;
 
 double scales [] = {279541132.014,
                     139770566.007,
