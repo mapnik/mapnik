@@ -61,6 +61,7 @@ extern "C"
 // icu
 #include <unicode/ubidi.h>
 #include <unicode/ushape.h>
+#include <unicode/schriter.h>
 
 namespace mapnik
 {
