@@ -664,6 +664,7 @@ __all__ = [
     'Map',
     'MarkersSymbolizer',
     'Names',
+    'Path',
     'Parameter',
     'Parameters',
     'PointDatasource',
