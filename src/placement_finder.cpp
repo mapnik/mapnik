@@ -27,6 +27,7 @@
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/fastmath.hpp>
 
 // agg
 #include "agg_path_length.h"
@@ -413,8 +414,8 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
         {
             // place the character relative to the center of the string envelope
             double rad = M_PI * angle/180.0;
-            double cosa = std::cos(rad);
-            double sina = std::sin(rad);
+            double cosa = fast_cos(rad);
+            double sina = fast_sin(rad);
             
             double dx = x * cosa - y*sina;
             double dy = x * sina + y*cosa;
@@ -607,11 +608,13 @@ void placement_finder<DetectorT>::find_line_placements(placement & p, text_place
                             }
                             anglesum /= current_placement->nodes_.size(); //Now it is angle average
 
+                            double disp_x = p.scale_factor_ * displacement*fast_cos(anglesum+M_PI/2);
+                            double disp_y = p.scale_factor_ * displacement*fast_sin(anglesum+M_PI/2);
                             //Offset all the characters by this angle
                             for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
                             {
-                                current_placement->nodes_[i].x += p.scale_factor_ * displacement*cos(anglesum+M_PI/2);
-                                current_placement->nodes_[i].y += p.scale_factor_ * displacement*sin(anglesum+M_PI/2);
+                                current_placement->nodes_[i].x += disp_x;
+                                current_placement->nodes_[i].y += disp_y;
                             }
                         }
 
@@ -694,7 +697,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
 
     current_placement->starting_x = old_x + dx*distance/segment_length;
     current_placement->starting_y = old_y + dy*distance/segment_length;
-    double angle = atan2(-dy, dx);
+    double angle = fast_atan2(-dy, dx);
 
     bool orientation_forced = (orientation != 0); //Wether the orientation was set by the caller
     if (!orientation_forced)
@@ -766,7 +769,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         }
 
         //Calculate angle from the start of the character to the end based on start_/end_ position
-        angle = atan2(start_y-end_y, end_x-start_x);
+        angle = fast_atan2(start_y-end_y, end_x-start_x);
 
         //Test last_character_angle vs angle
         // since our rendering angle has changed then check against our
@@ -785,8 +788,8 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         }
 
         double render_angle = angle;
-        double cosa = cos(angle);
-        double sina = sin(angle);
+        double cosa = fast_cos(angle);
+        double sina = fast_sin(angle);
 
         double render_x = start_x;
         double render_y = start_y;
@@ -857,9 +860,11 @@ bool placement_finder<DetectorT>::test_placement(placement & p, const std::auto_
         y = current_placement->starting_y - y;
         if (orientation < 0)
         {
+            double sina = fast_sin(angle);
+            double cosa = fast_cos(angle);
             // rotate in place
-            x += ci.width*cos(angle) - (string_height-2)*sin(angle);
-            y -= ci.width*sin(angle) + (string_height-2)*cos(angle);
+            x += ci.width*cosa - (string_height-2)*sina;
+            y -= ci.width*sina + (string_height-2)*cosa;
             angle += M_PI;
         }
 
@@ -870,13 +875,15 @@ bool placement_finder<DetectorT>::test_placement(placement & p, const std::auto_
         }
         else
         {
+            double sina = fast_sin(angle);
+            double cosa = fast_cos(angle);
             // put four corners of the letter into envelope
-            e.init(x, y, x + ci.width*cos(angle),
-                   y - ci.width*sin(angle));
-            e.expand_to_include(x - ci.height*sin(angle),
-                                y - ci.height*cos(angle));
-            e.expand_to_include(x + (ci.width*cos(angle) - ci.height*sin(angle)),
-                                y - (ci.width*sin(angle) + ci.height*cos(angle)));
+            e.init(x, y, x + ci.width*cosa,
+                   y - ci.width*sina);
+            e.expand_to_include(x - ci.height*sina,
+                                y - ci.height*cosa);
+            e.expand_to_include(x + (ci.width*cosa - ci.height*sina),
+                                y - (ci.width*sina + ci.height*cosa));
         }
 
         if (!detector_.extent().intersects(e) ||
