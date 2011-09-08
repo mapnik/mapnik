@@ -27,7 +27,7 @@
 
 namespace mapnik
 {
-struct layer;
+class layer;
 }
 
 class layer_info_dialog : public QDialog
