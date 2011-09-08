@@ -25,10 +25,11 @@
 
 #include <string>
 #include <mapnik/geometry.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace mapnik { 
 
-std::pair<bool,geometry_type*> from_wkt(std::string const& wkt);
+bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
 
 }
 

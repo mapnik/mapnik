@@ -20,24 +20,23 @@
  *
  *****************************************************************************/
 
+// mapnik
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
-
+// stl
 #include <string>
 
 namespace mapnik
 {
 
-std::pair<bool,geometry_type*> from_wkt(std::string const& wkt)
+bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
 {
     using namespace boost::spirit;
     typedef std::string::const_iterator iterator_type;
     iterator_type first = wkt.begin();
     iterator_type last =  wkt.end();
-    geometry_type * path = 0;
-    mapnik::wkt::wkt_grammar<iterator_type> grammar;
-    bool result =  qi::phrase_parse(first, last, grammar, ascii::space,path);
-    return std::make_pair(result, path); 
+    mapnik::wkt::wkt_collection_grammar<iterator_type> grammar;
+    return qi::phrase_parse(first, last, grammar, ascii::space, paths);
 }
 
 }

@@ -70,86 +70,160 @@ struct cleanup
     template <typename T0>
     void operator() (T0 & path) const
     {        
-        if (path) delete path,path=0;
+        if (path)  delete path,path=0;
     }
 };
 
 template <typename Iterator>
-struct wkt_grammar : qi::grammar<Iterator, geometry_type*(), ascii::space_type>
+struct wkt_grammar : qi::grammar<Iterator,  boost::ptr_vector<mapnik::geometry_type>() , ascii::space_type>
 {
     wkt_grammar()
-        : wkt_grammar::base_type(start)
+        : wkt_grammar::base_type(geometry_tagged_text)
     {       
-        using qi::_1;   
-        using qi::_2;
-        using qi::_val;
         using qi::no_case;   
+        using boost::phoenix::push_back;
         
-        start %= point | linestring | polygon | multipoint | multilinestring | multipolygon | eps[cleanup_(_val)][_pass = false];
+        geometry_tagged_text = point_tagged_text
+            | linestring_tagged_text
+            | polygon_tagged_text
+            | multipoint_tagged_text 
+            | multilinestring_tagged_text 
+            | multipolygon_tagged_text 
+            ;
         
         // <point tagged text> ::= point <point text>
-        point = no_case[lit("POINT")] [ _val = new_<geometry_type>(Point) ]
-            >> (empty_set | lit('(') >> coord(SEG_MOVETO,_val) >> lit(')'));
+        point_tagged_text = no_case[lit("POINT")] [ _a = new_<geometry_type>(Point) ]
+            >> ( point_text(_a) [push_back(_val,_a)] 
+                 | eps[cleanup_(_a)][_pass = false])
+            ;
+        
+        // <point text> ::= <empty set> | <left paren> <point> <right paren>
+        point_text = (lit("(") >> point(SEG_MOVETO,_r1) >> lit(')')) 
+            | empty_set
+            ;
         
         // <linestring tagged text> ::= linestring <linestring text>
-        linestring = no_case[lit("LINESTRING")]  [ _val = new_<geometry_type>(LineString) ] >> (empty_set | points(_val));
+        linestring_tagged_text = no_case[lit("LINESTRING")] [ _a = new_<geometry_type>(LineString) ]  
+            >> (linestring_text(_a)[push_back(_val,_a)] 
+                | eps[cleanup_(_a)][_pass = false])
+            ;
+                
+        // <linestring text> ::= <empty set> | <left paren> <point> {<comma> <point>}* <right paren>
+        linestring_text = points(_r1) | empty_set
+            ;
         
         // <polygon tagged text> ::= polygon <polygon text>
-        polygon = no_case[lit("POLYGON")] [ _val = new_<geometry_type>(Polygon) ] >> 
-            (empty_set | lit('(') >> points(_val) % lit(',') >> lit(')'));
+        polygon_tagged_text = no_case[lit("POLYGON")] [ _a = new_<geometry_type>(Polygon) ]
+            >> ( polygon_text(_a)[push_back(_val,_a)] 
+                 | eps[cleanup_(_a)][_pass = false])
+            ;
         
-        // multi point
-        multipoint = no_case[lit("MULTIPOINT")]  [ _val = new_<geometry_type>(MultiPoint) ]
-            >> (empty_set | lit('(') >> coord(SEG_MOVETO,_val) % lit(',') >> ')');
+        // <polygon text> ::= <empty set> | <left paren> <linestring text> {<comma> <linestring text>}* <right paren>
+        polygon_text = (lit('(') >> linestring_text(_r1) % lit(',') >> lit(')')) | empty_set;
         
-        // multi linestring
-        multilinestring = no_case[lit("MULTILINESTRING")] [ _val = new_<geometry_type>(MultiLineString) ]>> 
-            (empty_set | lit('(') >> points(_val) % lit(',') >> ')');
         
-        // multi polygon
-        multipolygon = no_case[lit("MULTIPOLYGON")] [ _val = new_<geometry_type>(MultiPolygon)] >> 
-            (empty_set | lit('(') >> (lit('(') >> 
-                                      points(_val) % ',' >> ')') % ',' >> ')');
+        //<multipoint tagged text> ::= multipoint <multipoint text>
+        multipoint_tagged_text = no_case[lit("MULTIPOINT")] 
+            >>  multipoint_text
+            ;
+        
+        // <multipoint text> ::= <empty set> | <left paren> <point text> {<comma> <point text>}* <right paren>
+        multipoint_text = (lit('(') 
+                           >> ((eps[_a = new_<geometry_type>(Point)] 
+                                >> (point_text(_a) | empty_set) [push_back(_val,_a)] 
+                                | eps[cleanup_(_a)][_pass = false]) % lit(',')) 
+                           >> lit(')')) | empty_set
+            ;
+        
+        // <multilinestring tagged text> ::= multilinestring <multilinestring text>
+        multilinestring_tagged_text = no_case[lit("MULTILINESTRING")] 
+            >> multilinestring_text ;
+        
+        // <multilinestring text> ::= <empty set> | <left paren> <linestring text> {<comma> <linestring text>}* <right paren>
+        multilinestring_text = (lit('(') 
+                                >> ((eps[_a = new_<geometry_type>(LineString)] 
+                                    >> ( points(_a)[push_back(_val,_a)] 
+                                         | eps[cleanup_(_a)][_pass = false]))
+                                    % lit(',')) 
+                                >> lit(')')) | empty_set;
+        
+        // <multipolygon tagged text> ::= multipolygon <multipolygon text>
+        multipolygon_tagged_text = no_case[lit("MULTIPOLYGON")] 
+            >> multipolygon_text ;
+        
+        // <multipolygon text> ::= <empty set> | <left paren> <polygon text> {<comma> <polygon text>}* <right paren>
+        
+        multipolygon_text = (lit('(') 
+                             >> ((eps[_a = new_<geometry_type>(Polygon)] 
+                                 >> ( polygon_text(_a)[push_back(_val,_a)] 
+                                      | eps[cleanup_(_a)][_pass = false]))
+                                 % lit(',')) 
+                             >> lit(')')) | empty_set;
         
         // points
-        points = lit('(')[_a = SEG_MOVETO] >> coord (_a,_r1) % lit(',') [_a = SEG_LINETO]  >> ')';
-        coord = (double_ >> double_) [push_vertex_(_r1,_r2,_1,_2)];
+        points = lit('(')[_a = SEG_MOVETO] >> point (_a,_r1) % lit(',') [_a = SEG_LINETO]  >> lit(')');
+        // point 
+        point = (double_ >> double_) [push_vertex_(_r1,_r2,_1,_2)];
         
         // <empty set>
         empty_set = no_case[lit("EMPTY")];
 
     }
+
+    // start
+    qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> geometry_tagged_text;
     
-    qi::rule<Iterator,geometry_type*(),ascii::space_type> start;
-    qi::rule<Iterator,geometry_type*(),ascii::space_type> point;
-    qi::rule<Iterator,geometry_type*(),ascii::space_type> multipoint;
-    qi::rule<Iterator,geometry_type*(),ascii::space_type> linestring;
-    qi::rule<Iterator,geometry_type*(),ascii::space_type> multilinestring;
-    qi::rule<Iterator,geometry_type*(),ascii::space_type> polygon;
-    qi::rule<Iterator,geometry_type*(),ascii::space_type> multipolygon;
-    qi::rule<Iterator,void(CommandType,geometry_type*),ascii::space_type> coord;
+    qi::rule<Iterator,qi::locals<geometry_type*>,boost::ptr_vector<geometry_type>(),ascii::space_type> point_tagged_text;
+    qi::rule<Iterator,qi::locals<geometry_type*>,boost::ptr_vector<geometry_type>(),ascii::space_type> linestring_tagged_text;
+    qi::rule<Iterator,qi::locals<geometry_type*>,boost::ptr_vector<geometry_type>(),ascii::space_type> polygon_tagged_text;
+    qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> multipoint_tagged_text;
+    qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> multilinestring_tagged_text;
+    qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> multipolygon_tagged_text;
+    // 
+    qi::rule<Iterator,void(geometry_type*),ascii::space_type> point_text;
+    qi::rule<Iterator,void(geometry_type*),ascii::space_type> linestring_text;
+    qi::rule<Iterator,void(geometry_type*),ascii::space_type> polygon_text;
+    qi::rule<Iterator, qi::locals<geometry_type*>, boost::ptr_vector<geometry_type>(),ascii::space_type> multipoint_text;
+    qi::rule<Iterator, qi::locals<geometry_type*>, boost::ptr_vector<geometry_type>(),ascii::space_type> multilinestring_text;
+    qi::rule<Iterator, qi::locals<geometry_type*>, boost::ptr_vector<geometry_type>(),ascii::space_type> multipolygon_text;
+    //
+    qi::rule<Iterator,void(CommandType,geometry_type*),ascii::space_type> point;
     qi::rule<Iterator,qi::locals<CommandType>,void(geometry_type*),ascii::space_type> points;
     qi::rule<Iterator,ascii::space_type> empty_set;
     boost::phoenix::function<push_vertex> push_vertex_;
     boost::phoenix::function<cleanup> cleanup_;
 };
 
+
 template <typename Iterator>
-struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<geometry_type>(), ascii::space_type>
+struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<mapnik::geometry_type>(), ascii::space_type>
 {
     wkt_collection_grammar()
         :  wkt_collection_grammar::base_type(start)
     {
         using qi::_1;   
         using qi::_val;
-        using qi::no_case; 
+        using qi::no_case;
         using boost::phoenix::push_back;
-        start = wkt [push_back(_val,_1)] | no_case[lit("GEOMETRYCOLLECTION")] 
-            >> (lit("(") >> *wkt[push_back(_val,_1)] % lit(",") >> lit(")"));
+        start = wkt | no_case[lit("GEOMETRYCOLLECTION")] 
+            >> (lit("(") >> wkt % lit(",") >> lit(")"));
     }
     
-    qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> start;
+    qi::rule<Iterator,boost::ptr_vector<mapnik::geometry_type>(),ascii::space_type> start;
     wkt_grammar<Iterator> wkt;
+};
+
+template <typename Iterator>
+struct wkt_stream_grammar : qi::grammar<Iterator, boost::ptr_vector<mapnik::geometry_type>(), ascii::space_type>
+{
+    wkt_stream_grammar()
+        :  wkt_stream_grammar::base_type(start)
+    {
+        start = *wkt_collection;
+    }
+    
+    qi::rule<Iterator,boost::ptr_vector<mapnik::geometry_type>(),ascii::space_type> start;
+    wkt_collection_grammar<Iterator> wkt_collection;
 };
 
 }}
