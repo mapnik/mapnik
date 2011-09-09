@@ -23,9 +23,9 @@ def test():
     TOTAL_TIME += (time.time() - start)
 
 def f_(set):
-    min_ = str(min(set))[:6]
-    avg = str(sum(set)/len(set))[:6]
-    print 'min: %s | avg: %s | total: %s' % (min_,avg,str(TOTAL_TIME)[:6])
+    min_ = str(min(set*1000))[:6]
+    avg = str(sum(set*1000)/len(set))[:6]
+    print 'min: %sms | avg: %sms | total: %ss' % (min_,avg,str(TOTAL_TIME)[:6])
 
 if __name__=='__main__':
     
