@@ -20,23 +20,36 @@
  *
  *****************************************************************************/
 
+// boost
+#include <boost/version.hpp>
+
 // mapnik
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
+
 // stl
 #include <string>
+#include <sstream>
 
 namespace mapnik
 {
 
 bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
 {
+#if BOOST_VERSION >= 104700
     using namespace boost::spirit;
     typedef std::string::const_iterator iterator_type;
     iterator_type first = wkt.begin();
     iterator_type last =  wkt.end();
     mapnik::wkt::wkt_collection_grammar<iterator_type> grammar;
     return qi::phrase_parse(first, last, grammar, ascii::space, paths);
+#else
+    // TODO - remove this after mapnik 2.0.0 release
+    std::ostringstream s;
+    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+    throw std::runtime_error("mapnik::from_wkt() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+    return false;
+#endif
 }
 
 }
