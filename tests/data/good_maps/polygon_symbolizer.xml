@@ -9,7 +9,7 @@
     </Rule>  
   </Style>
 
-  <Layer name="lay" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs ">
+  <Layer name="lay" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
     <StyleName>test</StyleName>
     <Datasource>
       <Parameter name="type">shape</Parameter>
