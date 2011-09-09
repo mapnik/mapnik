@@ -1784,6 +1784,7 @@ void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
     std::stringstream s;
     s << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
       << "stroke-linecap,stroke-gamma,stroke-dash-offset,stroke-dasharray,"
+      << "rasterizer,"
       << "meta-writer,meta-output";
 
     ensure_attrs(sym, "LineSymbolizer", s.str());
@@ -1792,6 +1793,11 @@ void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
         stroke strk;
         parse_stroke(strk,sym);
         line_symbolizer symbol = line_symbolizer(strk);
+
+        // rasterizer method
+        line_rasterizer_e rasterizer = get_attr<line_rasterizer_e>(sym, "rasterizer", RASTERIZER_FULL);
+        //optional<line_rasterizer_e> rasterizer_method = get_opt_attr<line_rasterizer_e>(sym, "full");
+        symbol.set_rasterizer(rasterizer);
 
         parse_metawriter_in_symbolizer(symbol, sym);
         rule.append(symbol);

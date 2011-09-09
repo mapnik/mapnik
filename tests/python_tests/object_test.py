@@ -14,6 +14,12 @@ def setup():
 
 # Tests that exercise the functionality of Mapnik classes.
 
+# LineSymbolizer initialization
+def test_line_symbolizer_init():
+    s = mapnik2.LineSymbolizer()
+    eq_(s.stroke, mapnik2.Stroke())
+    eq_(s.rasterizer, mapnik2.line_rasterizer.FULL)
+
 # ShieldSymbolizer initialization
 def test_shieldsymbolizer_init():
     s = mapnik2.ShieldSymbolizer(mapnik2.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik2.Color('#000000'), mapnik2.PathExpression('../data/images/dummy.png'))
