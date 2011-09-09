@@ -216,6 +216,21 @@ void scale_image_bilinear_old (Image& target,const Image& source, double x_off_f
 template <typename Image>
 void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f=0, double y_off_f=0);
 
+/////////// save_to_file ////////////////////////////////////////////////    
+
+inline MAPNIK_DECL void save_to_file(image_32 const& image,
+                                     std::string const& file)
+{
+    save_to_file<image_data_32>(image.data(), file);
+}
+
+inline MAPNIK_DECL void save_to_file (image_32 const& image,
+                                      std::string const& file,
+                                      std::string const& type)
+{
+    save_to_file<image_data_32>(image.data(), file, type);
+}
+
 inline MAPNIK_DECL void save_to_file (image_32 const& image,
                                       std::string const& file,
                                       std::string const& type,
@@ -223,13 +238,9 @@ inline MAPNIK_DECL void save_to_file (image_32 const& image,
 {
     save_to_file<image_data_32>(image.data(), file, type, palette);
 }
-   
-inline MAPNIK_DECL void save_to_file(image_32 const& image,
-                                     std::string const& file,
-                                     rgba_palette const& palette)
-{
-    save_to_file<image_data_32>(image.data(), file, palette);
-}
+
+//////////////////////////////////////////////////////////////////////////
+
 
 inline MAPNIK_DECL std::string save_to_string(image_32 const& image,
                                               std::string const& type)

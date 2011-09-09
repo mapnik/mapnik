@@ -94,7 +94,7 @@ PyObject* tostring2(image_32 const & im, std::string const& format)
     (s.data(),s.size());
 }
 
-PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba_palette& pal)
+PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba_palette const& pal)
 {
     std::string s = save_to_string(im, format, pal);
     return
@@ -106,16 +106,20 @@ PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba
     (s.data(),s.size());
 }
 
-void save_to_file1(mapnik::image_32 const& im, std::string const& filename, std::string const& type)
+
+void save_to_file1(mapnik::image_32 const& im, std::string const& filename)
 {
-    mapnik::rgba_palette pal;
-    mapnik::save_to_file(im,filename,type,pal);
+    save_to_file(im,filename);
 }
 
-void save_to_file2(mapnik::image_32 const& im, std::string const& filename)
+void save_to_file2(mapnik::image_32 const& im, std::string const& filename, std::string const& type)
 {
-    mapnik::rgba_palette pal;
-    mapnik::save_to_file(im,filename,pal);
+    save_to_file(im,filename,type);
+}
+
+void save_to_file3(mapnik::image_32 const& im, std::string const& filename, std::string const& type, mapnik::rgba_palette const& pal)
+{
+    save_to_file(im,filename,type,pal);
 }
 
 
@@ -350,6 +354,7 @@ void export_image()
         .def("tostring",&tostring3)
         .def("save", &save_to_file1)
         .def("save", &save_to_file2)
+        .def("save", &save_to_file3)
         .def("open",open_from_file)
         .staticmethod("open")
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)

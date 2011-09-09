@@ -236,8 +236,7 @@ void render_tile_to_file(const mapnik::Map& map,
 {
     mapnik::image_32 image(width,height);
     render(map,image,1.0,offset_x, offset_y);
-    mapnik::rgba_palette pal;
-    mapnik::save_to_file(image.data(),file,format,pal);
+    mapnik::save_to_file(image.data(),file,format);
 }
 
 void render_to_file1(const mapnik::Map& map,
@@ -256,8 +255,7 @@ void render_to_file1(const mapnik::Map& map,
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::rgba_palette pal;
-        mapnik::save_to_file(image,filename,format,pal); 
+        mapnik::save_to_file(image,filename,format); 
     }
 }
 
@@ -276,8 +274,7 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::rgba_palette pal;
-        mapnik::save_to_file(image,filename,pal); 
+        mapnik::save_to_file(image,filename); 
     }
 }
 
@@ -299,8 +296,7 @@ void render_to_file3(const mapnik::Map& map,
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,scale_factor,0,0);
-        mapnik::rgba_palette pal;
-        mapnik::save_to_file(image,filename,format,pal); 
+        mapnik::save_to_file(image,filename,format); 
     }
 }
 
@@ -389,7 +385,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
     using mapnik::save_map;
     using mapnik::save_map_to_string;
     using mapnik::render_grid;
-
+    
     register_exception_translator<mapnik::config_error>(&config_error_translator);
     register_exception_translator<mapnik::value_error>(&value_error_translator);
     register_cairo();

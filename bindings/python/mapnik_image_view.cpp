@@ -74,7 +74,7 @@ PyObject* view_tostring2(image_view<image_data_32> const & view, std::string con
         (s.data(),s.size());
 }
 
-PyObject* view_tostring3(image_view<image_data_32> const & view, std::string const& format, mapnik::rgba_palette& pal)
+PyObject* view_tostring3(image_view<image_data_32> const & view, std::string const& format, mapnik::rgba_palette const& pal)
 {
     std::string s = save_to_string(view, format, pal);
     return 
@@ -86,16 +86,25 @@ PyObject* view_tostring3(image_view<image_data_32> const & view, std::string con
         (s.data(),s.size());
 }
 
-void save_view1(image_view<image_data_32> const& view, std::string const& filename, std::string const& type)
+void save_view1(image_view<image_data_32> const& view, 
+                std::string const& filename)
 {
-    mapnik::rgba_palette pal;
-    mapnik::save_to_file(view,filename,type,pal);
+    save_to_file(view,filename);
 }
 
-void save_view2(image_view<image_data_32> const& view, std::string const& filename)
+void save_view2(image_view<image_data_32> const& view, 
+                std::string const& filename, 
+                std::string const& type)
 {
-    mapnik::rgba_palette pal;
-    mapnik::save_to_file(view,filename,pal);
+    save_to_file(view,filename,type);
+}
+
+void save_view3(image_view<image_data_32> const& view, 
+                std::string const& filename, 
+                std::string const& type, 
+                mapnik::rgba_palette const& pal)
+{
+    save_to_file(view,filename,type,pal);
 }
 
 
@@ -110,5 +119,6 @@ void export_image_view()
         .def("tostring",&view_tostring3)
         .def("save",&save_view1)
         .def("save",&save_view2)
+        .def("save",&save_view3)
         ;
 }
