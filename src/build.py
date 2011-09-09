@@ -112,6 +112,7 @@ source = Split(
     image_reader.cpp
     image_util.cpp
     layer.cpp
+    line_symbolizer.cpp
     line_pattern_symbolizer.cpp
     map.cpp
     load_map.cpp
