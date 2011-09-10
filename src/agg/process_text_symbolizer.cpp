@@ -33,6 +33,32 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
+
+
+    std::vector<geometry_type*> geometries_to_process;
+    unsigned num_geom = feature.num_geometries();
+    for (unsigned i=0; i<num_geom; ++i)
+    {
+        geometry_type const& geom = feature.get_geometry(i);
+        
+        if (geom.num_points() == 0) continue; // don't bother with empty geometries
+        
+        if ((geom.type() == Polygon || geom.type() == MultiPolygon) && sym.get_minimum_path_length() > 0)
+        {
+            // TODO - find less costly method than fetching full envelope
+            box2d<double> gbox = t_.forward(geom.envelope(),prj_trans);
+            if (gbox.width() < sym.get_minimum_path_length())
+            {
+                continue;
+            }
+        }
+        // TODO - calculate length here as well
+        geometries_to_process.push_back(const_cast<geometry_type*>(&geom));
+    }
+    
+    if (!geometries_to_process.size() > 0)
+        return; // early return to avoid significant overhead of rendering setup
+
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
 
     bool placement_found = false;
@@ -91,11 +117,8 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
         faces->get_string_info(info);
         metawriter_with_properties writer = sym.get_metawriter();
 
-        unsigned num_geom = feature.num_geometries();
-        for (unsigned i=0; i<num_geom; ++i)
+        BOOST_FOREACH( geometry_type * geom, geometries_to_process )
         {
-            geometry_type const& geom = feature.get_geometry(i);
-            if (geom.num_points() == 0) continue; // don't bother with empty geometries
             while (!placement_found && placement_options->next_position_only())
             {
                 placement text_placement(info, sym, scale_factor_);
@@ -110,9 +133,9 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                     double label_y=0.0;
                     double z=0.0;
                     if (sym.get_label_placement() == POINT_PLACEMENT)
-                        geom.label_position(&label_x, &label_y);
+                        geom->label_position(&label_x, &label_y);
                     else
-                        geom.label_interior_position(&label_x, &label_y);
+                        geom->label_interior_position(&label_x, &label_y);
                     prj_trans.backward(label_x,label_y, z);
                     t_.forward(&label_x,&label_y);
 
@@ -130,9 +153,9 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                                                 sym.get_character_spacing());
                     finder.update_detector(text_placement);
                 }
-                else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
+                else if ( geom->num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
                 {
-                    path_type path(t_,geom,prj_trans);
+                    path_type path(t_,*geom,prj_trans);
                     finder.find_line_placements<path_type>(text_placement, placement_options, path);
                 }
 
