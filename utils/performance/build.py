@@ -22,7 +22,7 @@
 import os
 Import ('env')
 
-TARGET = 'howfast.py'
+TARGET = 'mapnik-speed-check'
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), TARGET)

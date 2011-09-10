@@ -6,7 +6,7 @@ import mapnik2 as mapnik
 from timeit import Timer, time
 
 if not len(sys.argv) >= 3:
-    sys.exit('usage: howfast.py <stylesheet> <iterations> [minx,miny,maxx,maxy]')
+    sys.exit('usage: mapnik-speed-check <stylesheet> <iterations> [minx,miny,maxx,maxy]')
 
 m = mapnik.Map(256,256)
 mapnik.load_map(m,sys.argv[1])
