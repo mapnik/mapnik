@@ -84,7 +84,9 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
       extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery",false)),
       // params below are for testing purposes only (will likely be removed at any time)
       force2d_(*params_.get<mapnik::boolean>("force_2d",false)),
-      st_(*params_.get<mapnik::boolean>("st_prefix",false))
+      st_(*params_.get<mapnik::boolean>("st_prefix",false)),
+      intersect_min_scale_(*params_.get<int>("intersect_min_scale",0)),
+      intersect_max_scale_(*params_.get<int>("intersect_max_scale",0))
       //show_queries_(*params_.get<mapnik::boolean>("show_queries",false))
 {   
     if (table_.empty()) throw mapnik::datasource_exception("Postgis Plugin: missing <table> parameter");
@@ -403,7 +405,18 @@ std::string postgis_datasource::populate_tokens(const std::string& sql, double c
     else
     {
         std::ostringstream s;
-        s << " WHERE \"" << geometryColumn_ << "\" && " << box;
+        if (intersect_min_scale_ > 0 && (scale_denom <= intersect_min_scale_ ))
+        {
+                s << " WHERE ST_Intersects(\"" << geometryColumn_ << "\"," << box << ")";
+        }
+        else if (intersect_max_scale_ > 0 && (scale_denom >= intersect_max_scale_ ))
+        {
+             // do no bbox restriction
+        }
+        else
+        {
+            s << " WHERE \"" << geometryColumn_ << "\" && " << box;
+        }
         return populated_sql + s.str();    
     }
 }
