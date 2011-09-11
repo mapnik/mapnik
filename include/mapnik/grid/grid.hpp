@@ -65,6 +65,7 @@ private:
     data_type data_;
     std::set<std::string> names_;
     unsigned int resolution_;
+    bool painted_;
     
 public:
 
@@ -93,6 +94,16 @@ public:
          }
     
     ~hit_grid() {}
+
+    void painted(bool painted)
+    {
+        painted_ = painted;
+    }
+
+    bool painted() const
+    {
+        return painted_;
+    }
 
     void add_feature(mapnik::Feature const& feature)
     {

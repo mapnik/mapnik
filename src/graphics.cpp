@@ -40,12 +40,14 @@ namespace mapnik
 image_32::image_32(int width,int height)
     :width_(width),
      height_(height),
-     data_(width,height) {}
+     data_(width,height),
+     painted_(false) {}
 
 image_32::image_32(const image_32& rhs)
     :width_(rhs.width_),
      height_(rhs.height_),
-     data_(rhs.data_)  {}
+     data_(rhs.data_),
+     painted_(rhs.painted_)  {}
 
 #ifdef HAVE_CAIRO
 image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
@@ -53,6 +55,7 @@ image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
      height_(rhs->get_height()),
      data_(rhs->get_width(),rhs->get_height())
 {
+    painted_ = true;
     if (rhs->get_format() != Cairo::FORMAT_ARGB32)
     {
         std::cerr << "Unable to convert this Cairo format\n";
@@ -159,14 +162,15 @@ void image_32::set_alpha(float opacity)
 
 }
 
-void image_32::set_background(const color& background)
+void image_32::set_background(const color& c)
 {
-    background_=background;
-    data_.set(background_.rgba());
+    background_=c;
+    data_.set(background_->rgba());
 }
 
-const color& image_32::get_background() const
+boost::optional<color> const& image_32::get_background() const
 {
     return background_;
 }
+
 }

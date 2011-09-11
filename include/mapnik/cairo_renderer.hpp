@@ -125,6 +125,11 @@ public:
         // cairo renderer doesn't support processing of multiple symbolizers.
         return false;
     };
+    void painted(bool /*painted*/)
+    {
+        // nothing to do
+    }
+
 protected:
     void render_marker(const int x, const int y, marker &marker, const agg::trans_affine & mtx, double opacity=1.0);
 

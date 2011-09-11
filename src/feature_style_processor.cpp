@@ -423,6 +423,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         #if defined(RENDERING_STATS)
                         feat_processed = true;
                         #endif
+                        
+                        p.painted(true);
 
                         do_else=false;
                         do_also=true;
@@ -454,6 +456,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         #if defined(RENDERING_STATS)
                         feat_processed = true;
                         #endif
+
+                        p.painted(true);
  
                         rule::symbolizers const& symbols = r->get_symbolizers();
                         // if the underlying renderer is not able to process the complete set of symbolizers,
@@ -476,6 +480,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         #if defined(RENDERING_STATS)
                         feat_processed = true;
                         #endif
+
+                        p.painted(true);
  
                         rule::symbolizers const& symbols = r->get_symbolizers();
                         // if the underlying renderer is not able to process the complete set of symbolizers,

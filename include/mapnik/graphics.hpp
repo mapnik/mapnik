@@ -24,6 +24,7 @@
 
 #ifndef GRAPHICS_HPP
 #define GRAPHICS_HPP
+
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/gamma.hpp>
@@ -41,6 +42,9 @@
 #ifdef HAVE_CAIRO
 #include <cairomm/surface.h>
 #endif
+
+// boost
+#include <boost/optional/optional.hpp>
 
 namespace mapnik
 {
@@ -140,8 +144,9 @@ class MAPNIK_DECL image_32
 private:
     unsigned width_;
     unsigned height_;
-    color background_;
+    boost::optional<color> background_;
     image_data_32 data_;
+    bool painted_;
 public:
     image_32(int width,int height);
     image_32(image_32 const& rhs);
@@ -149,10 +154,20 @@ public:
     image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs);
 #endif
     ~image_32();
-    
-    void set_background(color const& background);
 
-    const color& get_background() const;
+    void painted(bool painted)
+    {
+        painted_ = painted;
+    }
+
+    bool painted() const
+    {
+        return painted_;
+    }
+
+    boost::optional<color> const& get_background() const;
+    
+    void set_background(const color& c);
 
     void set_grayscale_to_alpha();
 
