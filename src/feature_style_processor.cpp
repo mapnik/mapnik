@@ -211,16 +211,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     projection proj1(lay.srs());
     proj_transform prj_trans(proj0,proj1);
 
-    // todo: only display raster if src and dest proj are matched
-    // todo: add raster re-projection as an optional feature
-    if (ds->type() == datasource::Raster && !prj_trans.equal())
-    {
-        std::clog << "WARNING: Map srs does not match layer srs, skipping raster layer '" << lay.name()
-                  << "' as raster re-projection is not currently supported (http://trac.mapnik.org/ticket/663)\n"
-                  << "map srs: '" << m_.srs() << "'\nlayer srs: '" << lay.srs() << "' \n";
-        return;
-    }
-    
 #if defined(RENDERING_STATS)
     if (!prj_trans.equal())
         std::clog << "notice: reprojecting layer: '" << lay.name() << "' from/to:\n\t'" 
@@ -246,6 +236,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     // if no intersection and projections are also equal, early return
     else if (prj_trans.equal())
     {
+        #if defined(RENDERING_STATS)
+        layer_timer.discard();
+        #endif
         return;
     }
     // next try intersection of layer extent back projected into map srs
@@ -255,8 +248,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         // forward project layer extent back into native projection
         if (!prj_trans.forward(layer_ext))
             std::clog << "WARNING: layer " << lay.name()
-                      << " extent " << layer_ext << " in map projection "
-                      << " did not reproject properly back to layer projection\n";
+                << " extent " << layer_ext << " in map projection "
+                << " did not reproject properly back to layer projection\n";
     }
     else
     {
@@ -266,10 +259,13 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         #endif
         return;
     }
+    
+    box2d<double> const & query_ext = m_.get_current_extent();
 
-    query::resolution_type res(m_.width()/m_.get_current_extent().width(),
-                               m_.height()/m_.get_current_extent().height());
-    query q(layer_ext,res,scale_denom); //BBOX query
+    query::resolution_type res(m_.width()/query_ext.width(),
+                               m_.height()/query_ext.height());
+
+    query q(layer_ext,res,scale_denom);
 
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
