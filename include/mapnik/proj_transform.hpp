@@ -43,6 +43,8 @@ public:
     bool equal() const;
     bool forward (double& x, double& y , double& z) const;
     bool backward (double& x, double& y , double& z) const;
+    bool forward (double *x, double *y , double *z, int point_count) const;
+    bool backward (double *x, double *y , double *z, int point_count) const;
     bool forward (box2d<double> & box) const;
     bool backward (box2d<double> & box) const;
     bool forward (box2d<double> & box, int points) const;
