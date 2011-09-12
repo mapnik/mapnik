@@ -131,6 +131,36 @@ def test_raster_with_alpha_blends_correctly_with_background():
     imdata = mim.tostring()
     # All white is expected
     assert contains_word('\xff\xff\xff\xff', imdata)
+
+def test_raster_warping():
+    lyrSrs = "+init=epsg:32630"
+    mapSrs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+    lyr = mapnik2.Layer('dataraster', lyrSrs)
+    lyr.datasource = mapnik2.Gdal(
+        file = '../data/raster/dataraster.tif',
+        band = 1,
+        )
+    sym = mapnik2.RasterSymbolizer()
+    sym.colorizer = mapnik2.RasterColorizer(mapnik2.COLORIZER_DISCRETE, mapnik2.Color(255,255,0))
+    rule = mapnik2.Rule()
+    rule.symbols.append(sym)
+    style = mapnik2.Style()
+    style.rules.append(rule)
+    _map = mapnik2.Map(256,256, mapSrs)
+    _map.append_style('foo', style)
+    lyr.styles.append('foo')
+    _map.layers.append(lyr)
+    prj_trans = mapnik2.ProjTransform(mapnik2.Projection(mapSrs),
+                                      mapnik2.Projection(lyrSrs)) 
+    _map.zoom_to_box(prj_trans.backward(lyr.envelope()))
+
+    im = mapnik2.Image(_map.width,_map.height)
+    mapnik2.render(_map, im)
+    #print mapnik2.save_map_to_string(_map)
+    # save a png somewhere so we can see it
+    save_data('test_raster_warping.png', im.tostring('png'))
+    imdata = im.tostring()
+    assert contains_word('\xff\xff\x00\xff', imdata)
     
 if __name__ == "__main__":
     setup()

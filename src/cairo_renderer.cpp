@@ -1373,6 +1373,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     }
 }
 
+//FIXME: Port reprojection code from agg/process_raster_symbolizer.cpp
 void cairo_renderer_base::process(raster_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& /*prj_trans*/)
