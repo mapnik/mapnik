@@ -33,16 +33,31 @@
 // stl
 #include <vector>
 
+static const float MAXEXTENT = 20037508.34;
+static const float M_PI_by2 = M_PI / 2;
+static const float D2R = M_PI / 180;
+static const float R2D = 180 / M_PI;
+static const float M_PIby360 = M_PI / 360;
+static const float MAXEXTENTby180 = MAXEXTENT/180;
+
 namespace mapnik {
     
 proj_transform::proj_transform(projection const& source, 
                                projection const& dest)
     : source_(source),
-      dest_(dest) 
+      dest_(dest)
 {
     is_source_longlat_ = source_.is_geographic();
     is_dest_longlat_ = dest_.is_geographic();
     is_source_equal_dest_ = (source_ == dest_);
+    if (source.params() == "+init=epsg:3857" && dest.params() == "+init=epsg:4326")
+    {
+        wgs84_to_merc_ = true;
+    }
+    else
+    {
+        wgs84_to_merc_ = false;
+    }
 }
 
 bool proj_transform::equal() const
@@ -52,9 +67,21 @@ bool proj_transform::equal() const
 
 bool proj_transform::forward (double & x, double & y , double & z) const
 {
+
     if (is_source_equal_dest_)
         return true;
 
+    if (wgs84_to_merc_) {
+        x = (x / MAXEXTENT) * 180;
+        y = (y / MAXEXTENT) * 180;
+        y = R2D * (2 * atan(exp(y * D2R)) - M_PI_by2);
+        if (x > 180) x = 180;
+        if (x < -180) x = -180;
+        if (y > 85.0511) y = 85.0511;
+        if (y < -85.0511) y = -85.0511;
+        return true;
+    }
+    
     if (is_source_longlat_)
     {
         x *= DEG_TO_RAD;
@@ -84,6 +111,17 @@ bool proj_transform::backward (double & x, double & y , double & z) const
 {
     if (is_source_equal_dest_)
         return true;
+
+    if (wgs84_to_merc_) {
+        x = x * MAXEXTENTby180;
+        y = log(tan((90 + y) * M_PIby360)) / D2R;
+        y = y * MAXEXTENTby180;
+        if (x > MAXEXTENT) x = MAXEXTENT;
+        if (x < -MAXEXTENT) x = -MAXEXTENT;
+        if (y > MAXEXTENT) y = MAXEXTENT;
+        if (y < -MAXEXTENT) y = -MAXEXTENT;
+        return true;
+    }
 
     if (is_dest_longlat_)
     {

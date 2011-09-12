@@ -56,6 +56,7 @@ private:
     bool is_source_longlat_;
     bool is_dest_longlat_;
     bool is_source_equal_dest_;
+    bool wgs84_to_merc_;
 };
 }
 
