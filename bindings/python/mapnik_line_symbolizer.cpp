@@ -35,7 +35,7 @@ struct line_symbolizer_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getinitargs(const line_symbolizer& l)
     {
-        return boost::python::make_tuple(l.get_stroke(),l.get_rasterizer());
+        return boost::python::make_tuple(l.get_stroke());
     }
 
 };

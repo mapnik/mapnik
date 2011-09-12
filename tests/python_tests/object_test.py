@@ -17,7 +17,6 @@ def setup():
 # LineSymbolizer initialization
 def test_line_symbolizer_init():
     s = mapnik2.LineSymbolizer()
-    eq_(s.stroke, mapnik2.Stroke())
     eq_(s.rasterizer, mapnik2.line_rasterizer.FULL)
 
 # ShieldSymbolizer initialization
