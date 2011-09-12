@@ -42,12 +42,10 @@ namespace {
 using mapnik::Feature;
 using mapnik::geometry_utils;
 
-/*
-void feature_add_wkb_geometry(Feature &feature, std::string wkb)
+void feature_add_geometry_from_wkb(Feature &feature, std::string wkb)
 {
     geometry_utils::from_wkb(feature, wkb.c_str(), wkb.size(), true);
 }
-*/
 
 void add_geometry(Feature & feature, std::auto_ptr<mapnik::geometry_type> geom)
 {
@@ -258,7 +256,7 @@ void export_feature()
         boost::noncopyable>("Feature",init<int>("Default ctor."))
         .def("id",&Feature::id)
         .def("__str__",&Feature::to_string)
-//        .def("add_geometry", &feature_add_wkb_geometry)
+        .def("add_geometry_from_wkb", &feature_add_geometry_from_wkb)
         .def("add_geometry", add_geometry)
         .def("num_geometries",&Feature::num_geometries)
         .def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
