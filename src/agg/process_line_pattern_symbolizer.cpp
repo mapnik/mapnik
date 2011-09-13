@@ -72,6 +72,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     pattern_source source(*(*pat));
     pattern_type pattern (filter,source);
     renderer_type ren(ren_base, pattern);
+    // TODO - should be sensitive to buffer size
     ren.clip_box(0,0,width_,height_);
     rasterizer_type ras(ren);
     metawriter_with_properties writer = sym.get_metawriter();

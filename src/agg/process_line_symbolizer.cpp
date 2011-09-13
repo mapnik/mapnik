@@ -73,7 +73,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         ren_base base_ren(pixf);
         renderer_type ren(base_ren, profile);
         ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
-        ren.clip_box(0,0,width_,height_);
+        //ren.clip_box(0,0,width_,height_);
         rasterizer_type ras(ren);
         ras.line_join(agg::outline_miter_accurate_join);
         ras.round_cap(true);
