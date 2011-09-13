@@ -11,10 +11,10 @@ class MemoryDatasource(unittest.TestCase):
         from mapnik2 import MemoryDatasource
         return MemoryDatasource(*args, **kw)
 
-    def makeFeature(self, geom, **properties):
+    def makeFeature(self, wkt, **properties):
         from mapnik2 import Feature
         f = Feature(self.ids.next())
-        f.add_geometry(geom)
+        f.add_geometries_from_wkt(wkt)
         for k,v in properties.iteritems():
             f[k] = v
         return f
@@ -26,8 +26,7 @@ class MemoryDatasource(unittest.TestCase):
     def test_add_feature(self):
         md = self.makeOne()
         self.failUnlessEqual(md.num_features(), 0)
-        from mapnik2 import Geometry2d
-        md.add_feature(self.makeFeature(Geometry2d.from_wkt('Point(2 3)'), foo='bar'))
+        md.add_feature(self.makeFeature('Point(2 3)', foo='bar'))
         self.failUnlessEqual(md.num_features(), 1)
 
         from mapnik2 import Coord
