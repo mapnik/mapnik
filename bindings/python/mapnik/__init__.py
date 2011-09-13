@@ -281,20 +281,16 @@ class _Feature(Feature, _injector):
         #    maybe deprecate?
         return dict(self)
     
-    @property
-    def geometries(self):
-        return [self.get_geometry(i) for i in xrange(self.num_geometries())]
-
-    def __init__(self, id, geometry=None, **properties):
+    def __init__(self, id, wkt=None, **properties):
         Feature._c___init__(self, id)
-        if geometry is not None:
-            self.add_geometry(geometry)
+        if wkt is not None:
+            self.add_geometries_from_wkt(wkt)
         for k, v in properties.iteritems():
             self[k] = v
     
-    class _Color(Color,_injector):
-        def __repr__(self):
-            return "Color(R=%d,G=%d,B=%d,A=%d)" % (self.r,self.g,self.b,self.a)
+class _Color(Color,_injector):
+    def __repr__(self):
+        return "Color(R=%d,G=%d,B=%d,A=%d)" % (self.r,self.g,self.b,self.a)
 
 class _Symbolizers(Symbolizers,_injector):
 
