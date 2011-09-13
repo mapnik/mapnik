@@ -977,7 +977,7 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
           << "spacing,max-error,allow-overlap,"
           << "width,height,placement,marker-type,"
           << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
-          << "stroke-linecap,stroke-dash-offset,stroke-dasharray,"
+          << "stroke-linecap,stroke-dashoffset,stroke-dasharray,"
           // note: stroke-gamma intentionally left off here as markers do not support them
           << "meta-writer,meta-output";
         ensure_attrs(sym, "MarkersSymbolizer", s.str());
@@ -1734,8 +1734,8 @@ void map_parser::parse_stroke(stroke & strk, ptree const & sym)
     optional<double> gamma = get_opt_attr<double>(sym, "stroke-gamma");
     if (gamma) strk.set_gamma(*gamma);
 
-    // stroke-dash-offset
-    optional<double> dash_offset = get_opt_attr<double>(sym, "stroke-dash-offset");
+    // stroke-dashoffset
+    optional<double> dash_offset = get_opt_attr<double>(sym, "stroke-dashoffset");
     if (dash_offset) strk.set_dash_offset(*dash_offset);
 
     // stroke-dasharray
