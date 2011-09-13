@@ -81,8 +81,8 @@ static inline void resample_raster(raster &target, raster const& source,
         // Precalculate reprojected mesh
         for(j=0; j<mesh_ny; j++) {
             for (i=0; i<mesh_nx; i++) {
-                xs(i,j) = i*mesh_size+.5;
-                ys(i,j) = j*mesh_size+.5;
+                xs(i,j) = i*mesh_size;
+                ys(i,j) = j*mesh_size;
                 ts.backward(&xs(i,j), &ys(i,j));
             }
         }
