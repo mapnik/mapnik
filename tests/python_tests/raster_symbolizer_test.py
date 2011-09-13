@@ -156,7 +156,6 @@ def test_raster_warping():
 
     im = mapnik2.Image(_map.width,_map.height)
     mapnik2.render(_map, im)
-    #print mapnik2.save_map_to_string(_map)
     # save a png somewhere so we can see it
     save_data('test_raster_warping.png', im.tostring('png'))
     imdata = im.tostring()

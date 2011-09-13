@@ -230,9 +230,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     // first, try intersection of map extent forward projected into layer srs
     if (prj_trans.forward(map_ext) && map_ext.intersects(layer_ext))
-    {
+     {
         layer_ext.clip(map_ext);
-    }
+    } 
     // if no intersection and projections are also equal, early return
     else if (prj_trans.equal())
     {

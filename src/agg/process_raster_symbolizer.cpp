@@ -33,6 +33,21 @@
 // stl
 #include <cmath>
 
+// agg
+#include "agg_image_filters.h"
+#include "agg_trans_bilinear.h"
+#include "agg_span_interpolator_linear.h"
+#include "agg_span_image_filter_rgba.h"
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_rasterizer_scanline_aa.h"
+#include "agg_basics.h"
+#include "agg_scanline_u.h"
+#include "agg_renderer_scanline.h"
+#include "agg_span_allocator.h"
+#include "agg_image_accessors.h"
+#include "agg_renderer_scanline.h"
+
 namespace mapnik {
 
 static inline void resample_raster(raster &target, raster const& source,
@@ -59,6 +74,9 @@ static inline void resample_raster(raster &target, raster const& source,
         unsigned i, j, mesh_size=16;
         unsigned mesh_nx = ceil(target.data_.width()/double(mesh_size)+1);
         unsigned mesh_ny = ceil(target.data_.height()/double(mesh_size)+1);
+        double source_dx = source.data_.width()/double(mesh_nx-1);
+        double source_dy = source.data_.height()/double(mesh_ny-1);
+
         ImageData<double> xs(mesh_nx, mesh_ny);
         ImageData<double> ys(mesh_nx, mesh_ny);
 
@@ -72,25 +90,72 @@ static inline void resample_raster(raster &target, raster const& source,
         }
         prj_trans.forward(xs.getData(), ys.getData(), NULL, mesh_nx*mesh_ny);
 
-        // Interpolate. TODO: Use AGG for this
+        // warp image using projected mesh points using bilinear interpolation
+        // inside mesh cell
+        typedef agg::pixfmt_rgba32 pixfmt;
+        typedef pixfmt::color_type color_type;
+        typedef agg::renderer_base<pixfmt> renderer_base;
+        typedef agg::pixfmt_rgba32_pre pixfmt_pre;
+        typedef agg::renderer_base<pixfmt_pre> renderer_base_pre;
+
+        agg::rasterizer_scanline_aa<> rasterizer;
+        agg::scanline_u8  scanline;
+        agg::rendering_buffer buf((unsigned char*)target.data_.getData(),
+                                  target.data_.width(),
+                                  target.data_.height(),
+                                  target.data_.width()*4);
+        pixfmt_pre pixf_pre(buf);
+        renderer_base_pre rb_pre(pixf_pre);
+        rasterizer.clip_box(0, 0, target.data_.width(), target.data_.height());
+
         for(j=0; j<mesh_ny-1; j++) {
             for (i=0; i<mesh_nx-1; i++) {
-                box2d<double> win(xs(i,j), ys(i,j), xs(i+1,j+1), ys(i+1,j+1));
-                win = ts.forward(win);
-                CoordTransform tw(mesh_size, mesh_size, win);
-                unsigned x, y;
-                for (y=0; y<mesh_size; y++) {
-                    for (x=0; x<mesh_size; x++) {
-                        double x2=x, y2=y;
-                        tw.backward(&x2,&y2);
-                        if (x2>=0 && x2<source.data_.width() &&
-                            y2>=0 && y2<source.data_.height())
-                        {
-                            target.data_(i*mesh_size+x,(j+1)*mesh_size-y) =\
-                                source.data_((unsigned)x2,(unsigned)y2);
-                        }
-                    }
+                double polygon[8] = {xs(i,j), ys(i,j),
+                                     xs(i+1,j+1), ys(i,j),
+                                     xs(i+1,j+1), ys(i+1,j+1),
+                                     xs(i,j), ys(i+1,j+1)}; 
+                rasterizer.reset();
+                rasterizer.move_to_d(polygon[0]-1, polygon[1]-1);
+                rasterizer.line_to_d(polygon[2]+1, polygon[3]-1);
+                rasterizer.line_to_d(polygon[4]+1, polygon[5]+1);
+                rasterizer.line_to_d(polygon[6]-1, polygon[7]+1);
+
+                agg::span_allocator<color_type> sa;
+                agg::image_filter_bilinear filter_kernel;
+                agg::image_filter_lut filter(filter_kernel, false);
+
+                agg::rendering_buffer buf_tile(
+                    (unsigned char*)source.data_.getData(),
+                    source.data_.width(),
+                    source.data_.height(),
+                    source.data_.width() * 4);
+
+                pixfmt pixf_tile(buf_tile);
+
+                typedef agg::image_accessor_clone<pixfmt> img_accessor_type;
+                img_accessor_type ia(pixf_tile);
+
+                unsigned x0 = i * source_dx;
+                unsigned y0 = j * source_dy;
+                unsigned x1 = (i+1) * source_dx;
+                unsigned y2 = (j+1) * source_dy;
+
+                agg::trans_bilinear tr(polygon, x0, y0, x1, y1);
+
+                if (tr.is_valid())
+                {
+                    typedef agg::span_interpolator_linear<agg::trans_bilinear>
+                        interpolator_type;
+                    interpolator_type interpolator(tr);
+
+                    typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
+                        interpolator_type> span_gen_type;
+
+                    span_gen_type sg(ia, interpolator, filter);
+                    agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
+                                             sa, sg);
                 }
+
             }
         }
     }

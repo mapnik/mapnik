@@ -46,4 +46,5 @@
 #  define MAPNIK_DECL
 #endif
 
+#define PROJ_ENVELOPE_POINTS 20
 #endif // CONFIG_HPP

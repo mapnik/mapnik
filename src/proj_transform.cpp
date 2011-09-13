@@ -66,6 +66,11 @@ bool proj_transform::equal() const
 }
 
 
+bool proj_transform::forward (double & x, double & y , double & z) const
+{
+    return forward(&x, &y, &z, 1);
+}
+
 bool proj_transform::forward (double * x, double * y , double * z, int point_count) const
 {
 
@@ -108,7 +113,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
 
     if (is_dest_longlat_)
     {
-        long i;
+        int i;
         for(i=0; i<point_count; i++) {
             x[i] *= RAD_TO_DEG;
             y[i] *= RAD_TO_DEG;
@@ -116,11 +121,6 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     }
 
     return true;
-}
-
-bool proj_transform::forward (double & x, double & y , double & z) const
-{
-    return forward(&x, &y, &z, 1);
 }
 
 bool proj_transform::backward (double * x, double * y , double * z, int point_count) const
