@@ -90,6 +90,28 @@ static inline void resample_raster(raster &target, raster const& source,
         }
         prj_trans.forward(xs.getData(), ys.getData(), NULL, mesh_nx*mesh_ny);
 
+        for(j=0; j<mesh_ny-1; j++) {
+            for (i=0; i<mesh_nx-1; i++) {
+                box2d<double> win(xs(i,j), ys(i,j), xs(i+1,j+1), ys(i+1,j+1));
+                win = ts.forward(win);
+                CoordTransform tw(mesh_size, mesh_size, win);
+                unsigned x, y;
+                for (y=0; y<mesh_size; y++) {
+                    for (x=0; x<mesh_size; x++) {
+                        double x2=x, y2=y;
+                        tw.backward(&x2,&y2);
+                        if (x2>=0 && x2<source.data_.width() &&
+                            y2>=0 && y2<source.data_.height())
+                        {
+                            target.data_(i*mesh_size+x,(j+1)*mesh_size-y) =\
+                                source.data_((unsigned)x2,(unsigned)y2);
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
         // warp image using projected mesh points using bilinear interpolation
         // inside mesh cell
         typedef agg::pixfmt_rgba32 pixfmt;
@@ -110,10 +132,12 @@ static inline void resample_raster(raster &target, raster const& source,
 
         for(j=0; j<mesh_ny-1; j++) {
             for (i=0; i<mesh_nx-1; i++) {
-                double polygon[8] = {xs(i,j), ys(i,j),
-                                     xs(i+1,j+1), ys(i,j),
-                                     xs(i+1,j+1), ys(i+1,j+1),
-                                     xs(i,j), ys(i+1,j+1)}; 
+                box2d<double> win(xs(i,j), ys(i,j), xs(i+1,j+1), ys(i+1,j+1));
+                win = ts.forward(win);
+                double polygon[8] = {win.minx(), win.miny(),
+                                     win.maxx(), win.miny(),
+                                     win.maxx(), win.maxy(),
+                                     win.minx(), win.maxy()};
                 rasterizer.reset();
                 rasterizer.move_to_d(polygon[0]-1, polygon[1]-1);
                 rasterizer.line_to_d(polygon[2]+1, polygon[3]-1);
@@ -158,6 +182,7 @@ static inline void resample_raster(raster &target, raster const& source,
 
             }
         }
+        */
     }
 }
 

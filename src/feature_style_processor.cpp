@@ -260,8 +260,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         return;
     }
     
-    box2d<double> const & query_ext = m_.get_current_extent();
-
+    box2d<double> query_ext = m_.get_current_extent();
+    prj_trans.forward(query_ext);
     query::resolution_type res(m_.width()/query_ext.width(),
                                m_.height()/query_ext.height());
 
