@@ -84,6 +84,7 @@ void export_geometry()
     
     class_<path_type,boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
+        .def("__len__", &path_type::size)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)
         ;
