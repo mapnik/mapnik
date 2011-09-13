@@ -18,7 +18,7 @@
             <TextSymbolizer size="15" name="'- 90&#730; angle'" orientation="-90" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
         <Rule title="foo">
-            <Filter>([name]='Sudan')</Filter>
+            <Filter>([name]='South Sudan')</Filter>
             <TextSymbolizer size="15" name="'180&#730; angle'" orientation="180" face-name="DejaVu Sans Book" halo-radius="1"/>
         </Rule>
         <Rule title="foo">
