@@ -36,11 +36,9 @@ class FeatureTest(unittest.TestCase):
         for v in (1, True, 1.4, "foo", u"avión"):
             test_val(v)
 
-
     def test_add_wkt_geometry(self):
-        from mapnik2 import Geometry2d
         from mapnik2 import Box2d
-        def add_geom(wkt):
+        def add_geom_wkt(wkt):
             f = self.makeOne(1)
             self.failUnlessEqual(len(f.geometries()), 0)
             f.add_geometries_from_wkt(wkt)
@@ -54,8 +52,25 @@ class FeatureTest(unittest.TestCase):
                     e +=g.envelope()
                     
             self.failUnlessEqual(e, f.envelope())
-            
-        add_geom('GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10),POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10)))')
-
+        from binascii import unhexlify
+        def add_geom_wkb(wkb):
+            f = self.makeOne(1)
+            self.failUnlessEqual(len(f.geometries()), 0)
+            f.add_geometries_from_wkb(unhexlify(wkb))
+            self.failUnlessEqual(len(f.geometries()), 1)
+            e = Box2d()
+            self.failUnlessEqual(e.valid(), False)
+            for g in f.geometries():
+                if not e.valid():
+                    e = g.envelope()
+                else:
+                    e +=g.envelope()
+                    
+            self.failUnlessEqual(e, f.envelope())
+        def run() :
+            add_geom_wkt('GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10),POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10)))')
+            add_geom_wkb('010300000001000000050000000000000000003e4000000000000024400000000000002440000000000000344000000000000034400000000000004440000000000000444000000000000044400000000000003e400000000000002440') # POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))
+        run()
+        
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]
