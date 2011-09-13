@@ -116,7 +116,7 @@ def test_unicode_regex_replace():
     f = mapnik2.Feature(0)
     f["name"] = 'Québec'
     expr = mapnik2.Expression("[name].replace('(\B)|( )','$1 ')")
-    eq_(expr.evaluate(f),'Q u é b e c')
+    eq_(expr.evaluate(f), u'Q u é b e c')
 
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]
