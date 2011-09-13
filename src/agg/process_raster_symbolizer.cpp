@@ -72,10 +72,8 @@ static inline void resample_raster(raster &target, raster const& source,
         CoordTransform tt(target.data_.width(), target.data_.height(),
                           target.ext_, offset_x, offset_y);
         unsigned i, j, mesh_size=16;
-        unsigned mesh_nx = ceil(target.data_.width()/double(mesh_size)+1);
-        unsigned mesh_ny = ceil(target.data_.height()/double(mesh_size)+1);
-        double source_dx = source.data_.width()/double(mesh_nx-1);
-        double source_dy = source.data_.height()/double(mesh_ny-1);
+        unsigned mesh_nx = ceil(source.data_.width()/double(mesh_size)+1);
+        unsigned mesh_ny = ceil(source.data_.height()/double(mesh_size)+1);
 
         ImageData<double> xs(mesh_nx, mesh_ny);
         ImageData<double> ys(mesh_nx, mesh_ny);
@@ -85,33 +83,11 @@ static inline void resample_raster(raster &target, raster const& source,
             for (i=0; i<mesh_nx; i++) {
                 xs(i,j) = i*mesh_size+.5;
                 ys(i,j) = j*mesh_size+.5;
-                tt.backward(&xs(i,j), &ys(i,j));
+                ts.backward(&xs(i,j), &ys(i,j));
             }
         }
-        prj_trans.forward(xs.getData(), ys.getData(), NULL, mesh_nx*mesh_ny);
+        prj_trans.backward(xs.getData(), ys.getData(), NULL, mesh_nx*mesh_ny);
 
-        for(j=0; j<mesh_ny-1; j++) {
-            for (i=0; i<mesh_nx-1; i++) {
-                box2d<double> win(xs(i,j), ys(i,j), xs(i+1,j+1), ys(i+1,j+1));
-                win = ts.forward(win);
-                CoordTransform tw(mesh_size, mesh_size, win);
-                unsigned x, y;
-                for (y=0; y<mesh_size; y++) {
-                    for (x=0; x<mesh_size; x++) {
-                        double x2=x, y2=y;
-                        tw.backward(&x2,&y2);
-                        if (x2>=0 && x2<source.data_.width() &&
-                            y2>=0 && y2<source.data_.height())
-                        {
-                            target.data_(i*mesh_size+x,(j+1)*mesh_size-y) =\
-                                source.data_((unsigned)x2,(unsigned)y2);
-                        }
-                    }
-                }
-            }
-        }
-
-        /*
         // warp image using projected mesh points using bilinear interpolation
         // inside mesh cell
         typedef agg::pixfmt_rgba32 pixfmt;
@@ -133,7 +109,7 @@ static inline void resample_raster(raster &target, raster const& source,
         for(j=0; j<mesh_ny-1; j++) {
             for (i=0; i<mesh_nx-1; i++) {
                 box2d<double> win(xs(i,j), ys(i,j), xs(i+1,j+1), ys(i+1,j+1));
-                win = ts.forward(win);
+                win = tt.forward(win);
                 double polygon[8] = {win.minx(), win.miny(),
                                      win.maxx(), win.miny(),
                                      win.maxx(), win.maxy(),
@@ -159,10 +135,10 @@ static inline void resample_raster(raster &target, raster const& source,
                 typedef agg::image_accessor_clone<pixfmt> img_accessor_type;
                 img_accessor_type ia(pixf_tile);
 
-                unsigned x0 = i * source_dx;
-                unsigned y0 = j * source_dy;
-                unsigned x1 = (i+1) * source_dx;
-                unsigned y1 = (j+1) * source_dy;
+                unsigned x0 = i * mesh_size;
+                unsigned y0 = j * mesh_size;
+                unsigned x1 = (i+1) * mesh_size;
+                unsigned y1 = (j+1) * mesh_size;
 
                 agg::trans_bilinear tr(polygon, x0, y0, x1, y1);
 
@@ -182,7 +158,6 @@ static inline void resample_raster(raster &target, raster const& source,
 
             }
         }
-        */
     }
 }
 
