@@ -33,6 +33,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/wkt/wkt_factory.hpp>
 #include "mapnik_value_converter.hpp"
 
 mapnik::geometry_type & (mapnik::Feature::*get_geom1)(unsigned) = &mapnik::Feature::get_geometry;
@@ -41,16 +42,17 @@ namespace {
 
 using mapnik::Feature;
 using mapnik::geometry_utils;
+using mapnik::from_wkt;
 
-void feature_add_geometry_from_wkb(Feature &feature, std::string wkb)
+void feature_add_geometries_from_wkb(Feature &feature, std::string wkb)
 {
-    geometry_utils::from_wkb(feature, wkb.c_str(), wkb.size(), true);
+    geometry_utils::from_wkb(feature.paths(), wkb.c_str(), wkb.size(), true);
 }
 
-void add_geometry(Feature & feature, std::auto_ptr<mapnik::geometry_type> geom)
+void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
 {
-    feature.add_geometry(geom.get());
-    geom.release();
+    bool result = mapnik::from_wkt(wkt, feature.paths());
+    if (!result) throw std::runtime_error("Failed to parse WKT");
 }
 
 } // end anonymous namespace
@@ -256,10 +258,12 @@ void export_feature()
         boost::noncopyable>("Feature",init<int>("Default ctor."))
         .def("id",&Feature::id)
         .def("__str__",&Feature::to_string)
-        .def("add_geometry_from_wkb", &feature_add_geometry_from_wkb)
-        .def("add_geometry", add_geometry)
-        .def("num_geometries",&Feature::num_geometries)
-        .def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
+        .def("add_geometries_from_wkb", &feature_add_geometries_from_wkb)
+        .def("add_geometries_from_wkt", &feature_add_geometries_from_wkt)
+        //.def("add_geometry", add_geometry)
+        //.def("num_geometries",&Feature::num_geometries)
+        //.def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
+        .def("geometries",make_function(&Feature::paths,return_value_policy<reference_existing_object>()))
         .def("envelope", &Feature::envelope)
         .def(map_indexing_suite2<Feature, true >())
         .def("iteritems",iterator<Feature> ())

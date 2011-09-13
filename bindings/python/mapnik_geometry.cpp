@@ -24,13 +24,13 @@
 #include <boost/python/def.hpp>
 #include <boost/python/exception_translator.hpp>
 #include <boost/python/manage_new_object.hpp>
-//#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/wkb.hpp>
 
 namespace {
 
@@ -51,6 +51,11 @@ void from_wkt_impl(path_type& p, std::string const& wkt)
 {
     bool result = mapnik::from_wkt(wkt, p);
     if (!result) throw std::runtime_error("Failed to parse WKT");
+}
+
+void from_wkb_impl(path_type& p, std::string const& wkb)
+{
+    mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size(), true);
 }
 
 }
@@ -80,7 +85,7 @@ void export_geometry()
     class_<path_type,boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
         .def("from_wkt",from_wkt_impl)
-
+        .def("from_wkb",from_wkb_impl)
         ;
     
 }
