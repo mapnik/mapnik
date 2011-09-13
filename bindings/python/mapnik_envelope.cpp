@@ -269,6 +269,7 @@ void export_envelope()
         .def(float() * self) 
         .def(self / float()) // __div__
         .def("__getitem__",&box2d<double>::operator[])
+        .def("valid",&box2d<double>::valid)
         .def_pickle(envelope_pickle_suite())
         ;
 }
