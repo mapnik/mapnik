@@ -53,7 +53,7 @@ class MAPNIK_DECL geometry_utils
 {
 public:
 
-    static void from_wkb (Feature & feature,
+    static void from_wkb (boost::ptr_vector<geometry_type>& paths,
                           const char* wkb,
                           unsigned size,
                           bool multiple_geometries = false,

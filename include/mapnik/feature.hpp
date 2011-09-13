@@ -81,17 +81,23 @@ public:
     {
         id_ = id;
     }
-       
+    
+    boost::ptr_vector<geometry_type> & paths() 
+    {
+        return geom_cont_;
+    }
+    
+    
     void add_geometry(geometry_type * geom)
     {
-        geom_cont_.push_back(geom);
+       geom_cont_.push_back(geom);
     }
        
     unsigned num_geometries() const
     {
         return geom_cont_.size();
     }
-       
+    
     geometry_type const& get_geometry(unsigned index) const
     {
         return geom_cont_[index];
