@@ -38,7 +38,7 @@ source = Split(
 headers = ['#plugins/input/postgis'] + env['CPPPATH'] 
 
 
-libraries =  copy(env['LIBMAPNIK_LIBS'])
+libraries = []
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 libraries.extend([boost_program_options,'sqlite3','pq','mapnik2'])
 
