@@ -120,7 +120,7 @@ feature_ptr geos_featureset::next()
                 {
                     feature_ptr feature(feature_factory::create(identifier_));
 
-                    geometry_utils::from_wkb(*feature,
+                    geometry_utils::from_wkb(feature->paths(),
                                              wkb.data(),
                                              wkb.size(),
                                              multiple_geometries_);

@@ -105,7 +105,7 @@ feature_ptr postgis_featureset::next()
         // parse geometry
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
-        geometry_utils::from_wkb(*feature,data,size,multiple_geometries_);
+        geometry_utils::from_wkb(feature->paths(),data,size,multiple_geometries_);
         totalGeomSize_+=size;
           
         for ( ;pos<num_attrs_+1;++pos)

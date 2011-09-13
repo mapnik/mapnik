@@ -507,7 +507,7 @@ void sqlite_datasource::bind() const
                 // ideally we would not have to do this.
                 // see: http://trac.mapnik.org/ticket/745
                 mapnik::feature_ptr feature(mapnik::feature_factory::create(0));
-                mapnik::geometry_utils::from_wkb(*feature,data,size,multiple_geometries_,format_);
+                mapnik::geometry_utils::from_wkb(feature->paths(),data,size,multiple_geometries_,format_);
                 mapnik::box2d<double> const& bbox = feature->envelope();
                 if (bbox.valid()) {
                     extent_initialized_ = true;
