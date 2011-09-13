@@ -138,7 +138,7 @@ static inline void resample_raster(raster &target, raster const& source,
                 unsigned x0 = i * source_dx;
                 unsigned y0 = j * source_dy;
                 unsigned x1 = (i+1) * source_dx;
-                unsigned y2 = (j+1) * source_dy;
+                unsigned y1 = (j+1) * source_dy;
 
                 agg::trans_bilinear tr(polygon, x0, y0, x1, y1);
 
