@@ -130,10 +130,10 @@ static inline void resample_raster(raster &target, raster const& source,
                                      win.maxx(), win.maxy(),
                                      win.minx(), win.maxy()};
                 rasterizer.reset();
-                rasterizer.move_to_d(polygon[0]-1, polygon[1]-1);
-                rasterizer.line_to_d(polygon[2]+1, polygon[3]-1);
-                rasterizer.line_to_d(polygon[4]+1, polygon[5]+1);
-                rasterizer.line_to_d(polygon[6]-1, polygon[7]+1);
+                rasterizer.move_to_d(polygon[0]-2, polygon[1]-2);
+                rasterizer.line_to_d(polygon[2]+2, polygon[3]-2);
+                rasterizer.line_to_d(polygon[4]+2, polygon[5]+2);
+                rasterizer.line_to_d(polygon[6]-2, polygon[7]+2);
 
                 unsigned x0 = i * mesh_size;
                 unsigned y0 = j * mesh_size;
