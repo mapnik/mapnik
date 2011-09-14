@@ -174,7 +174,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
             colorizer->colorize(source,feature.props());
 
         box2d<double> target_ext = box2d<double>(source->ext_);
-        prj_trans.backward(target_ext, 20);
+        prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
 
         box2d<double> ext=t_.forward(target_ext);
         int start_x = (int)ext.minx();

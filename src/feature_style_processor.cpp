@@ -229,7 +229,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     box2d<double> layer_ext = lay.envelope();
 
     // first, try intersection of map extent forward projected into layer srs
-    if (prj_trans.forward(map_ext, 20) && map_ext.intersects(layer_ext))
+    if (prj_trans.forward(map_ext, PROJ_ENVELOPE_POINTS) && map_ext.intersects(layer_ext))
      {
         layer_ext.clip(map_ext);
     } 
@@ -242,7 +242,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         return;
     }
     // next try intersection of layer extent back projected into map srs
-    else if (prj_trans.backward(layer_ext, 20) && map_ext.intersects(layer_ext))
+    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && map_ext.intersects(layer_ext))
     {
         layer_ext.clip(map_ext);
         // forward project layer extent back into native projection
@@ -261,7 +261,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     }
     
     box2d<double> query_ext = m_.get_current_extent();
-    prj_trans.forward(query_ext, 20);
+    prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS);
     query::resolution_type res(m_.width()/query_ext.width(),
                                m_.height()/query_ext.height());
 
