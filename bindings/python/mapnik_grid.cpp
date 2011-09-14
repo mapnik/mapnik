@@ -35,6 +35,11 @@ using namespace boost::python;
 // help compiler see template definitions
 static dict (*encode)( mapnik::grid const&, std::string, bool, unsigned int) = mapnik::grid_encode;
 
+bool painted(mapnik::grid const& grid)
+{
+    return grid.painted();
+}
+
 void export_grid()
 {
     class_<mapnik::grid,boost::shared_ptr<mapnik::grid> >(
@@ -44,6 +49,7 @@ void export_grid()
               ( arg("width"),arg("height"),arg("key")="__id__",arg("resolution")=1 ),
             "Create a mapnik.Grid object\n"
             ))
+        .def("painted",&painted)
         .def("width",&mapnik::grid::width)
         .def("height",&mapnik::grid::height)
         .def("view",&mapnik::grid::get_view)

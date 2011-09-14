@@ -118,6 +118,11 @@ void save_to_file3(mapnik::image_32 const& im, std::string const& filename, std:
     save_to_file(im,filename,type,pal);
 }
 
+bool painted(mapnik::image_32 const& im)
+{
+    return im.painted();
+}
+
 
 boost::shared_ptr<image_32> open_from_file(std::string const& filename)
 {
@@ -195,6 +200,7 @@ void export_image()
         .def("width",&image_32::width)
         .def("height",&image_32::height)
         .def("view",&image_32::get_view)
+        .def("painted",&painted)
         .add_property("background",make_function
                       (&image_32::get_background,return_value_policy<copy_const_reference>()),
                       &image_32::set_background, "The background color of the image.")
@@ -204,6 +210,7 @@ void export_image()
         .def("blend",&blend)
         .def("composite",&composite)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
+        
         .def("tostring",&tostring1)
         .def("tostring",&tostring2)
         .def("tostring",&tostring3)
