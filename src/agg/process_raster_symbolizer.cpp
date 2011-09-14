@@ -54,6 +54,7 @@ static inline void resample_raster(raster &target, raster const& source,
                                    proj_transform const& prj_trans,
                                    double offset_x, double offset_y,
                                    double filter_factor,
+                                   double scale_factor,
                                    std::string scaling_method_name)
 {
     if (prj_trans.equal()) {
@@ -62,7 +63,6 @@ static inline void resample_raster(raster &target, raster const& source,
             scale_image_bilinear8<image_data_32>(target.data_,source.data_,
                                                  offset_x, offset_y);
         } else {
-            double scale_factor = target.data_.width() / source.data_.width();
             scaling_method_e scaling_method = get_scaling_method_by_name(scaling_method_name);
             scale_image_agg<image_data_32>(target.data_,source.data_, (scaling_method_e)scaling_method, scale_factor, offset_x, offset_y, filter_factor);
         }
@@ -188,11 +188,13 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
         
         if (raster_width > 0 && raster_height > 0)
         {
+            double scale_factor = ext.width() / source->data_.width();
             image_data_32 target_data(raster_width,raster_height);
             raster target(target_ext, target_data);
 
             resample_raster(target, *source, prj_trans, err_offs_x, err_offs_y,
                             sym.calculate_filter_factor(),
+                            scale_factor,
                             sym.get_scaling());
             
             if (sym.get_mode() == "normal"){
