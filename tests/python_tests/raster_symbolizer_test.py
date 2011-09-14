@@ -160,6 +160,34 @@ def test_raster_warping():
     save_data('test_raster_warping.png', im.tostring('png'))
     imdata = im.tostring()
     assert contains_word('\xff\xff\x00\xff', imdata)
+
+def test_raster_warping_does_not_overclip_source():
+    lyrSrs = "+init=epsg:32630"
+    mapSrs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+    lyr = mapnik2.Layer('dataraster', lyrSrs)
+    lyr.datasource = mapnik2.Gdal(
+        file = '../data/raster/dataraster.tif',
+        band = 1,
+        )
+    sym = mapnik2.RasterSymbolizer()
+    sym.colorizer = mapnik2.RasterColorizer(mapnik2.COLORIZER_DISCRETE, mapnik2.Color(255,255,0))
+    rule = mapnik2.Rule()
+    rule.symbols.append(sym)
+    style = mapnik2.Style()
+    style.rules.append(rule)
+    _map = mapnik2.Map(256,256, mapSrs)
+    _map.background=mapnik2.Color('white')
+    _map.append_style('foo', style)
+    lyr.styles.append('foo')
+    _map.layers.append(lyr)
+    _map.zoom_to_box(mapnik2.Box2d(3,42,4,43))
+
+    im = mapnik2.Image(_map.width,_map.height)
+    mapnik2.render(_map, im)
+    # save a png somewhere so we can see it
+    save_data('test_raster_warping_does_not_overclip_source.png',
+              im.tostring('png'))
+    assert im.view(0,200,1,1).tostring()=='\xff\xff\x00\xff'
     
 if __name__ == "__main__":
     setup()
