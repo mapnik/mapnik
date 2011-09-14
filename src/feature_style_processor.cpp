@@ -230,7 +230,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     // first, try intersection of map extent forward projected into layer srs
     if (prj_trans.forward(map_ext, PROJ_ENVELOPE_POINTS) && map_ext.intersects(layer_ext))
-     {
+    {
         layer_ext.clip(map_ext);
     } 
     // if no intersection and projections are also equal, early return
@@ -501,7 +501,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
             #if defined(RENDERING_STATS)
             style_timer.stop();
-            layer_timer.stop();
             
             // done with style
             std::ostringstream s;
@@ -527,6 +526,11 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         #endif
         cache_features = false;
     }
+    
+    #if defined(RENDERING_STATS)
+        layer_timer.stop();
+    #endif
+
 
     p.end_layer_processing(lay);
 }
