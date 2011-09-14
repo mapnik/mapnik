@@ -110,6 +110,10 @@ static inline void resample_raster(raster &target, raster const& source,
             for (i=0; i<mesh_nx-1; i++) {
                 box2d<double> win(xs(i,j), ys(i,j), xs(i+1,j+1), ys(i+1,j+1));
                 win = tt.forward(win);
+                if (!(win.maxx() < target.data_.width() &&
+                      win.maxy() < target.data_.height())
+                ) continue;
+
                 double polygon[8] = {win.minx(), win.miny(),
                                      win.maxx(), win.miny(),
                                      win.maxx(), win.maxy(),
@@ -140,8 +144,10 @@ static inline void resample_raster(raster &target, raster const& source,
                 unsigned x1 = (i+1) * mesh_size;
                 unsigned y1 = (j+1) * mesh_size;
 
-                agg::trans_bilinear tr(polygon, x0, y0, x1, y1);
+                if (!(x1 < source.data_.width() &&
+                      y1 < source.data_.height())) continue;
 
+                agg::trans_bilinear tr(polygon, x0, y0, x1, y1);
                 if (tr.is_valid())
                 {
                     typedef agg::span_interpolator_linear<agg::trans_bilinear>
