@@ -105,14 +105,25 @@ static inline void resample_raster(raster &target, raster const& source,
         pixfmt_pre pixf_pre(buf);
         renderer_base_pre rb_pre(pixf_pre);
         rasterizer.clip_box(0, 0, target.data_.width(), target.data_.height());
+        agg::rendering_buffer buf_tile(
+            (unsigned char*)source.data_.getData(),
+            source.data_.width(),
+            source.data_.height(),
+            source.data_.width() * 4);
+
+        pixfmt pixf_tile(buf_tile);
+
+        typedef agg::image_accessor_clone<pixfmt> img_accessor_type;
+        img_accessor_type ia(pixf_tile);
+
+        agg::span_allocator<color_type> sa;
+        agg::image_filter_bilinear filter_kernel;
+        agg::image_filter_lut filter(filter_kernel, false);
 
         for(j=0; j<mesh_ny-1; j++) {
             for (i=0; i<mesh_nx-1; i++) {
                 box2d<double> win(xs(i,j), ys(i,j), xs(i+1,j+1), ys(i+1,j+1));
                 win = tt.forward(win);
-                if (!(win.maxx() < target.data_.width() &&
-                      win.maxy() < target.data_.height())
-                ) continue;
 
                 double polygon[8] = {win.minx(), win.miny(),
                                      win.maxx(), win.miny(),
@@ -124,28 +135,10 @@ static inline void resample_raster(raster &target, raster const& source,
                 rasterizer.line_to_d(polygon[4]+1, polygon[5]+1);
                 rasterizer.line_to_d(polygon[6]-1, polygon[7]+1);
 
-                agg::span_allocator<color_type> sa;
-                agg::image_filter_bilinear filter_kernel;
-                agg::image_filter_lut filter(filter_kernel, false);
-
-                agg::rendering_buffer buf_tile(
-                    (unsigned char*)source.data_.getData(),
-                    source.data_.width(),
-                    source.data_.height(),
-                    source.data_.width() * 4);
-
-                pixfmt pixf_tile(buf_tile);
-
-                typedef agg::image_accessor_clone<pixfmt> img_accessor_type;
-                img_accessor_type ia(pixf_tile);
-
                 unsigned x0 = i * mesh_size;
                 unsigned y0 = j * mesh_size;
                 unsigned x1 = (i+1) * mesh_size;
                 unsigned y1 = (j+1) * mesh_size;
-
-                if (!(x1 < source.data_.width() &&
-                      y1 < source.data_.height())) continue;
 
                 agg::trans_bilinear tr(polygon, x0, y0, x1, y1);
                 if (tr.is_valid())
