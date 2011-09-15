@@ -29,11 +29,18 @@ dummy_map = """
 """
 
 def name2expr(sym):
+    if 'name' not in sym.attrib: return
     name = sym.attrib['name']
-    if re.match('^\[.*\]$',name) is None:
-        print >> sys.stderr,"Fixing %s" % name
-        expression = '[%s]' % name
-        sym.attrib['name'] = expression    
+    if re.match('^\[.*\]$',name) is None \
+        and '[' not in name \
+        and ']' not in name \
+        and not name.startswith("'") \
+        and not name.endswith("'") \
+        and re.match("^\'.*\'",name) is None:
+            print >> sys.stderr,"Fixing %s" % name
+            name = '[%s]' % name
+    sym.attrib.pop('name')
+    sym._setText(name)
     
 def fixup_pointsym(sym):
     if sym.attrib.get('width'):
@@ -76,7 +83,10 @@ if __name__ == "__main__":
     file = open(xml, 'r')
     xml_string = file.read()
     file.close()
-    good_doctype = re.match(r'(?ims).*DOCTYPE.*\[.*\]\>', xml_string).group()
+    match = re.match(r'(?ims).*DOCTYPE.*\[.*\]\>', xml_string)
+    good_doctype = ""
+    if match:
+        good_doctype = match.group()
 
     # Two trees. One with the unresolved entities...
     parser = objectify.makeparser(resolve_entities=False)    
@@ -95,7 +105,10 @@ if __name__ == "__main__":
                                           pretty_print=True,
                                           xml_declaration=True,
                                           encoding="utf-8")
-    resolved_doctype = re.match(r'(?ims).*DOCTYPE.*\[.*\]\>', expanded_tree_string).group()
+    match = re.match(r'(?ims).*DOCTYPE.*\[.*\]\>', expanded_tree_string)
+    resolved_doctype = ""
+    if match:
+        resolved_doctype = match.group()
 
     doctype_entities = {}
     # e.g.:

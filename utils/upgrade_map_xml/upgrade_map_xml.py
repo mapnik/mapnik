@@ -42,6 +42,7 @@ def indent(elem, level=0):
             elem.tail = i
             
 def name2expr(sym):
+    if 'name' not in sym.attrib: return
     name = sym.attrib['name']
     if re.match('^\[.*\]',name) is None \
         and '[' not in name \
@@ -50,8 +51,9 @@ def name2expr(sym):
         and not name.endswith("'") \
         and re.match("^\'.*\'",name) is None:
             print>>sys.stderr,"Fixing %s" % name
-            expression = '[%s]' % name
-            sym.attrib['name'] = expression    
+            name = '[%s]' % name
+    sym.attrib.pop('name')
+    sym.text = name
 
 def handle_attr_changes(sym):
     # http://www.w3schools.com/css/pr_text_text-transform.asp
