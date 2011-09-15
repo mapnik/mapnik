@@ -309,7 +309,7 @@ opts.AddVariables(
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     # http://www.scons.org/wiki/GoFastButton
     # http://stackoverflow.com/questions/1318863/how-to-optimize-an-scons-script
-    BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'True'),
+    BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'False'),
     BoolVariable('PRIORITIZE_LINKING', 'Sort list of lib and inc directories to ensure preferential compiling and linking (useful when duplicate libs)', 'True'),
     ('LINK_PRIORITY','Priority list in which to sort library and include paths (default order is internal, other, frameworks, user, then system - see source of `sort_paths` function for more detail)',','.join(DEFAULT_LINK_PRIORITY)),    
     
