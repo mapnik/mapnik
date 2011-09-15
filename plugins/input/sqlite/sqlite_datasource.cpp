@@ -540,10 +540,23 @@ void sqlite_datasource::bind() const
                            (sqlite3_bind_double(stmt, 5 , bbox.maxy() ) != SQLITE_OK)) {
                                throw datasource_exception("invalid value for for extent while generating index");
                            }
-                        
-                        sqlite3_step(stmt);
+
+                        int res = sqlite3_step(stmt);
+                        if (res != SQLITE_DONE) {
+                            std::ostringstream s;
+                            s << "SQLite Plugin: inserting bbox into rtree index failed: "
+                                 << "error code " << sqlite3_errcode(*(*dataset_)) << ": '"
+                                 << sqlite3_errmsg(*(*dataset_)) << "' query was: " << spatial_index_insert_sql;
+                            throw datasource_exception(s.str());
+                        }
                         sqlite3_reset(stmt);
                     }
+                }
+                else {
+                    std::ostringstream index_error;
+                    index_error << "SQLite Plugin: encountered invalid bbox at '"
+                        << key_field_ << "' == " << rs->column_integer64(1);
+                    throw datasource_exception(index_error.str());
                 }
             }
         }

@@ -58,7 +58,15 @@ public:
 
     bool step_next ()
     {
-        return (sqlite3_step (stmt_) == SQLITE_ROW);
+        int status = sqlite3_step (stmt_);
+        if (status != SQLITE_ROW && status != SQLITE_DONE) {
+            std::ostringstream s;
+            s << "SQLite Plugin: retrieving next row failed";
+            std::string msg(sqlite3_errmsg(sqlite3_db_handle(stmt_)));
+            if (msg != "unknown error") s << ": " << msg;
+            throw mapnik::datasource_exception(s.str());
+        }
+        return status == SQLITE_ROW;
     }
 
     int column_count ()
