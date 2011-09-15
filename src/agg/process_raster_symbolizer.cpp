@@ -122,18 +122,20 @@ static inline void resample_raster(raster &target, raster const& source,
 
         for(j=0; j<mesh_ny-1; j++) {
             for (i=0; i<mesh_nx-1; i++) {
-                box2d<double> win(xs(i,j), ys(i,j), xs(i+1,j+1), ys(i+1,j+1));
-                win = tt.forward(win);
+                double polygon[8] = {xs(i,j), ys(i,j),
+                                     xs(i+1,j), ys(i+1,j),
+                                     xs(i+1,j+1), ys(i+1,j+1),
+                                     xs(i,j+1), ys(i,j+1)};
+                tt.forward(polygon+0, polygon+1);
+                tt.forward(polygon+2, polygon+3);
+                tt.forward(polygon+4, polygon+5);
+                tt.forward(polygon+6, polygon+7);
 
-                double polygon[8] = {win.minx(), win.miny(),
-                                     win.maxx(), win.miny(),
-                                     win.maxx(), win.maxy(),
-                                     win.minx(), win.maxy()};
                 rasterizer.reset();
-                rasterizer.move_to_d(polygon[0]-2, polygon[1]-2);
-                rasterizer.line_to_d(polygon[2]+2, polygon[3]-2);
-                rasterizer.line_to_d(polygon[4]+2, polygon[5]+2);
-                rasterizer.line_to_d(polygon[6]-2, polygon[7]+2);
+                rasterizer.move_to_d(polygon[0]-1, polygon[1]-1);
+                rasterizer.line_to_d(polygon[2]+1, polygon[3]-1);
+                rasterizer.line_to_d(polygon[4]+1, polygon[5]+1);
+                rasterizer.line_to_d(polygon[6]-1, polygon[7]+1);
 
                 unsigned x0 = i * mesh_size;
                 unsigned y0 = j * mesh_size;
