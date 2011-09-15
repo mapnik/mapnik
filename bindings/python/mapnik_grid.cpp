@@ -54,7 +54,7 @@ void export_grid()
         .def("height",&mapnik::grid::height)
         .def("view",&mapnik::grid::get_view)
         .def("encode",encode,
-            ( arg("encoding")="utf",arg("add_features")=true,arg("resolution")=4 ),
+            ( arg("encoding")="utf",arg("features")=true,arg("resolution")=4 ),
             "Encode the grid as as optimized json\n"
             )
         .add_property("key",
@@ -64,11 +64,6 @@ void export_grid()
             "The value should either be __id__ to refer to the feature.id()\n"
             "or some globally unique integer or string attribute field\n"
          )
-/*
-        // TODO - will require json generator
-        .def("save", save_to_file1)
-        .def("save", save_to_file2)
-*/
         ;
 
 }
