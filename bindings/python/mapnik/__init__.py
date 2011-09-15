@@ -625,7 +625,7 @@ def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.tt
     """Recursively register fonts using path argument as base directory"""
     for dirpath, _, filenames in os.walk(path):
         for filename in filenames:
-            if os.path.splitext(filename)[1] in valid_extensions:
+            if os.path.splitext(filename.lower())[1] in valid_extensions:
                 FontEngine.instance().register_font(os.path.join(dirpath, filename))
 
 # auto-register known plugins and fonts
