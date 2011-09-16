@@ -82,8 +82,7 @@ void reproject_raster(raster &target, raster const& source,
         }
         prj_trans.backward(xs.getData(), ys.getData(), NULL, mesh_nx*mesh_ny);
 
-        // warp image using projected mesh points using bilinear interpolation
-        // inside mesh cell
+        // Initialize AGG objects
         typedef agg::pixfmt_rgba32 pixfmt;
         typedef pixfmt::color_type color_type;
         typedef agg::renderer_base<pixfmt> renderer_base;
@@ -111,6 +110,8 @@ void reproject_raster(raster &target, raster const& source,
         img_accessor_type ia(pixf_tile);
 
         agg::span_allocator<color_type> sa;
+
+        // Initialize filter
         agg::image_filter_lut filter;
         scaling_method_e scaling_method = get_scaling_method_by_name(
             scaling_method_name);
@@ -151,6 +152,7 @@ void reproject_raster(raster &target, raster const& source,
                 filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
         }
 
+        // Project mesh cells into target interpolating raster inside each one
         for(j=0; j<mesh_ny-1; j++) {
             for (i=0; i<mesh_nx-1; i++) {
                 double polygon[8] = {xs(i,j), ys(i,j),
