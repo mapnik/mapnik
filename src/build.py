@@ -152,6 +152,7 @@ source = Split(
     svg_path_parser.cpp
     svg_points_parser.cpp 
     svg_transform_parser.cpp
+    warp.cpp
     """   
     )
 

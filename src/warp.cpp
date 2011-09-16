@@ -27,6 +27,7 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/ctrans.hpp>
 
 // agg
 #include "agg_image_filters.h"
@@ -42,6 +43,8 @@
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_renderer_scanline.h"
+
+namespace mapnik {
 
 void reproject_raster(raster &target, raster const& source,
                       proj_transform const& prj_trans,
@@ -204,3 +207,4 @@ void reproject_raster(raster &target, raster const& source,
         }
     }
 }
+}// namespace mapnik
