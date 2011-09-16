@@ -2096,7 +2096,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
 
             if (stop_tag.first == "stop")
             {
-                ensure_attrs(stop_tag.second, "stop", "color,mode,value");
+                ensure_attrs(stop_tag.second, "stop", "color,mode,value,label");
                 // colour is optional.
                 optional<color> stopcolor = get_opt_attr<color>(stop, "color");
                 if (!stopcolor) {
@@ -2120,12 +2120,16 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
                 }
                 maximumValue = *value;
 
+                optional<std::string> label =
+                    get_opt_attr<std::string>(stop, "label");
 
                 //append the stop
                 colorizer_stop tmpStop;
                 tmpStop.set_color(*stopcolor);
                 tmpStop.set_mode(mode);
                 tmpStop.set_value(*value);
+                if (label)
+                    tmpStop.set_label(*label);
                 
                 rc->add_stop(tmpStop);
             }

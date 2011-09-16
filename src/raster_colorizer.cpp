@@ -40,10 +40,11 @@ static const char *colorizer_mode_strings[] = {
 IMPLEMENT_ENUM( colorizer_mode, colorizer_mode_strings )
 
 
-colorizer_stop::colorizer_stop(const float value/* = 0*/, const colorizer_mode mode/* = COLORIZER_INHERIT*/, const color& _color/* = color(0,0,0,0)*/ )
+colorizer_stop::colorizer_stop(const float value/* = 0*/, const colorizer_mode mode/* = COLORIZER_INHERIT*/, const color& _color/* = color(0,0,0,0)*/, const std::string& label/* ) ""*/)
     : value_(value)
     , mode_(mode)
     , color_(_color)
+    , label_(label)
 {
     
 }
@@ -52,6 +53,7 @@ colorizer_stop::colorizer_stop(const colorizer_stop& stop)
     : value_(stop.value_)
     , mode_(stop.mode_)
     , color_(stop.color_)
+    , label_(stop.label_)
 {
 }
 
@@ -67,6 +69,7 @@ bool colorizer_stop::operator==(colorizer_stop const& other) const
     return  (value_ == other.value_) && 
             (color_ == other.color_) &&
             (mode_ == other.mode_);
+            (label_ == other.label_);
 }
 
 

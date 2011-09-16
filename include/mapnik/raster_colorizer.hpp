@@ -76,7 +76,7 @@ public:
     //! \param[in] value The stop value
     //! \param[in] mode The stop mode
     //! \param[in] color The stop color
-    colorizer_stop(const float value = 0, const colorizer_mode mode = COLORIZER_INHERIT, const color& _color = color(0,0,0,0) );
+    colorizer_stop(const float value = 0, const colorizer_mode mode = COLORIZER_INHERIT, const color& _color = color(0,0,0,0), const std::string& label="");
     
     //! \brief Copy constructor
     colorizer_stop(const colorizer_stop& stop);
@@ -112,6 +112,14 @@ public:
     //! \brief get the stop color
     //! \return The stop color
     inline const color& get_color(void) const {return color_; };
+
+    //! \brief set the stop label
+    //! \param[in] the stop label
+    inline void set_label(const std::string& label) { label_ = label; };
+    
+    //! \brief get the stop label
+    //! \return The stop label
+    inline const std::string& get_label(void) const {return label_; };
     
 
     //! \brief Equality operator
@@ -126,6 +134,7 @@ private:
     float value_;   //!< The stop value
     colorizer_mode mode_; //!< The stop mode
     color color_;   //!< The stop color
+    std::string label_; //!< The stop label for use in legends
 };
 
 

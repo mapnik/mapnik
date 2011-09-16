@@ -1,3 +1,4 @@
+#coding=utf8
 import os
 import mapnik2
 from utilities import execution_path
@@ -92,6 +93,14 @@ def test_get_color_linear():
 
     #after stop 2
     eq_(colorizer.get_color(100), mapnik2.Color(200,200,200,200));
+
+
+def test_stop_label():
+    stop = mapnik2.ColorizerStop(1, mapnik2.COLORIZER_LINEAR, mapnik2.Color('red'))
+    assert not stop.label
+    label = u"32º C".encode('utf8')
+    stop.label = label
+    assert stop.label == label, stop.label
 
 if __name__ == "__main__":
     setup()

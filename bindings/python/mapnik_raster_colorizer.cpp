@@ -189,6 +189,10 @@ void export_raster_colorizer()
                         &colorizer_stop::get_value, 
                         &colorizer_stop::set_value,
                         "The stop value.\n")
+        .add_property("label", 
+                        make_function(&colorizer_stop::get_label, return_value_policy<copy_const_reference>()),
+                        &colorizer_stop::set_label,
+                        "The stop label.\n")
         .add_property("mode", 
                         &colorizer_stop::get_mode_enum,
                         &colorizer_stop::set_mode_enum,

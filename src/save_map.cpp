@@ -420,6 +420,8 @@ private:
             set_attr(stop_node, "value", stops[i].get_value());
             set_attr(stop_node, "color", stops[i].get_color());
             set_attr(stop_node, "mode", stops[i].get_mode().as_string());
+            if (stops[i].get_label()!=std::string(""))
+                set_attr(stop_node, "label", stops[i].get_label());
         }
 
     }
