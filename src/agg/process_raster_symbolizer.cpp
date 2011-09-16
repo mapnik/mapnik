@@ -53,7 +53,8 @@ namespace mapnik {
 static inline void resample_raster(raster &target, raster const& source,
                                    proj_transform const& prj_trans,
                                    double offset_x, double offset_y,
-                                   double filter_factor,
+                                   unsigned mesh_size,
+                                   double filter_radius,
                                    double scale_factor,
                                    std::string scaling_method_name)
 {
@@ -64,14 +65,14 @@ static inline void resample_raster(raster &target, raster const& source,
                                                  offset_x, offset_y);
         } else {
             scaling_method_e scaling_method = get_scaling_method_by_name(scaling_method_name);
-            scale_image_agg<image_data_32>(target.data_,source.data_, (scaling_method_e)scaling_method, scale_factor, offset_x, offset_y, filter_factor);
+            scale_image_agg<image_data_32>(target.data_,source.data_, (scaling_method_e)scaling_method, scale_factor, offset_x, offset_y, filter_radius);
         }
     } else {
         CoordTransform ts(source.data_.width(), source.data_.height(),
                           source.ext_);
         CoordTransform tt(target.data_.width(), target.data_.height(),
                           target.ext_, offset_x, offset_y);
-        unsigned i, j, mesh_size=16;
+        unsigned i, j;
         unsigned mesh_nx = ceil(source.data_.width()/double(mesh_size)+1);
         unsigned mesh_ny = ceil(source.data_.height()/double(mesh_size)+1);
 
@@ -122,6 +123,7 @@ static inline void resample_raster(raster &target, raster const& source,
             scaling_method_name);
         switch(scaling_method)
         {
+            case SCALING_NEAR: break;
             case SCALING_BILINEAR:
                 filter.calculate(agg::image_filter_bilinear(), true); break;
             case SCALING_BICUBIC:
@@ -149,11 +151,11 @@ static inline void resample_raster(raster &target, raster const& source,
             case SCALING_MITCHELL:
                 filter.calculate(agg::image_filter_mitchell(), true); break;
             case SCALING_SINC:
-                filter.calculate(agg::image_filter_sinc(filter_factor), true); break;
+                filter.calculate(agg::image_filter_sinc(filter_radius), true); break;
             case SCALING_LANCZOS:
-                filter.calculate(agg::image_filter_lanczos(filter_factor), true); break;
+                filter.calculate(agg::image_filter_lanczos(filter_radius), true); break;
             case SCALING_BLACKMAN:
-                filter.calculate(agg::image_filter_blackman(filter_factor), true); break;
+                filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
         }
 
         for(j=0; j<mesh_ny-1; j++) {
@@ -241,6 +243,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
             raster target(target_ext, target_data);
 
             resample_raster(target, *source, prj_trans, err_offs_x, err_offs_y,
+                            sym.get_mesh_size(),
                             sym.calculate_filter_factor(),
                             scale_factor,
                             sym.get_scaling());

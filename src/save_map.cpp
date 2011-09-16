@@ -163,6 +163,11 @@ public:
             set_attr( sym_node, "opacity", sym.get_opacity() );
         }
 
+        if ( sym.get_mesh_size() != dfl.get_mesh_size() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "mesh-size", sym.get_mesh_size() );
+        }
+
         if (sym.get_colorizer()) {
             serialize_raster_colorizer(sym_node, sym.get_colorizer(),
                                        explicit_defaults_);

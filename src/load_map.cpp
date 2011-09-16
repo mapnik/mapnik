@@ -1884,7 +1884,7 @@ void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
 void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
 {
     // no support for meta-writer,meta-output
-    ensure_attrs(sym, "RasterSymbolizer", "mode,scaling,opacity,filter-factor");
+    ensure_attrs(sym, "RasterSymbolizer", "mode,scaling,opacity,filter-factor,mesh-size");
     try
     {
         raster_symbolizer raster_sym;
@@ -1904,6 +1904,11 @@ void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
         // filter factor
         optional<double> filter_factor = get_opt_attr<double>(sym, "filter-factor");
         if (filter_factor) raster_sym.set_filter_factor(*filter_factor);
+
+        // mesh-size
+        optional<unsigned> mesh_size = get_opt_attr<unsigned>(sym, "mesh-size");
+        if (mesh_size) raster_sym.set_mesh_size(*mesh_size);
+
 
         ptree::const_iterator cssIter = sym.begin();
         ptree::const_iterator endCss = sym.end();

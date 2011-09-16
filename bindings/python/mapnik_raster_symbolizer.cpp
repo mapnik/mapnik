@@ -39,17 +39,17 @@ struct raster_symbolizer_pickle_suite : boost::python::pickle_suite
     static  boost::python::tuple
     getstate(const raster_symbolizer& r)
     {
-        return boost::python::make_tuple(r.get_mode(),r.get_scaling(),r.get_opacity(),r.get_filter_factor());
+        return boost::python::make_tuple(r.get_mode(),r.get_scaling(),r.get_opacity(),r.get_filter_factor(),r.get_mesh_size());
     }
 
     static void
     setstate (raster_symbolizer& r, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 3 and len(state) != 4)
+        if (len(state) != 5)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 3-item or 4-item tuple in call to __setstate__; got %s"
+                            ("expected 5-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
@@ -58,10 +58,8 @@ struct raster_symbolizer_pickle_suite : boost::python::pickle_suite
         r.set_mode(extract<std::string>(state[0]));
         r.set_scaling(extract<std::string>(state[1]));
         r.set_opacity(extract<float>(state[2]));
-        if (len(state) == 4)
-        {
-            r.set_filter_factor(extract<float>(state[3]));
-        }
+        r.set_filter_factor(extract<float>(state[3]));
+        r.set_mesh_size(extract<unsigned>(state[4]));
     }
 
 };
@@ -150,6 +148,19 @@ void export_raster_symbolizer()
                       "  2.0 : The datasource will scale the datasource to\n"
                       "        2.0x the desired size, and mapnik will scale the rest\n"
                       "        of the way using the interpolation defined in self.scaling.\n"
+            )
+        .add_property("mesh_size",
+                      &raster_symbolizer::get_mesh_size,
+                      &raster_symbolizer::set_mesh_size,
+                      "Get/Set warping mesh size.\n"
+                      "Larger values result in faster warping times but might "
+                      "result in distorted maps.\n"
+                      "\n"
+                      "Usage:\n"
+                      "\n"
+                      ">>> from mapnik import RasterSymbolizer\n"
+                      ">>> r = RasterSymbolizer()\n"
+                      ">>> r.mesh_size = 32\n"
             )
         ;    
 }

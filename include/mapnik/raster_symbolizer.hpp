@@ -41,7 +41,8 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
         scaling_("fast"),
         opacity_(1.0),
         colorizer_(),
-        filter_factor_(-1) {}
+        filter_factor_(-1),
+        mesh_size_(16) {}
 
     raster_symbolizer(const raster_symbolizer &rhs)
         : symbolizer_base(rhs),
@@ -49,7 +50,8 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
         scaling_(rhs.get_scaling()),
         opacity_(rhs.get_opacity()),
         colorizer_(rhs.colorizer_),
-        filter_factor_(rhs.filter_factor_) {}
+        filter_factor_(rhs.filter_factor_),
+        mesh_size_(rhs.mesh_size_) {}
     
     std::string const& get_mode() const
     {
@@ -137,6 +139,14 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
             return ff;
         }
     }
+    unsigned get_mesh_size() const
+    {
+        return mesh_size_;
+    }
+    void set_mesh_size(unsigned mesh_size)
+    {
+        mesh_size_=mesh_size;
+    }
     
     
 private:
@@ -145,6 +155,7 @@ private:
     float opacity_;
     raster_colorizer_ptr colorizer_;
     double filter_factor_;
+    unsigned mesh_size_;
 };
 }
 
