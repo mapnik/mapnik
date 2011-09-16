@@ -1228,7 +1228,15 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
             placement_finder = text_placements_ptr(new text_placements_dummy());
         }
 
-        std::string name = get_attr<std::string>(sym, "name");
+        std::string name;
+        optional<std::string> old_name = get_opt_attr<std::string>(sym, "name");
+        if (old_name) {
+            std::clog << ": ### WARNING: Using 'name' in TextSymbolizer is deprecated (http://trac.mapnik.org/wiki/TextSymbolizer)\n";
+            name = *old_name;
+        } else {
+            name = get_value<std::string>(sym, "TextSymbolizer");
+            if (name.empty()) throw config_error(std::string("TextSymbolizer needs a non-empty text"));
+        }
         
         optional<std::string> face_name =
             get_opt_attr<std::string>(sym, "face-name");
@@ -1460,7 +1468,17 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
     ensure_attrs(sym, "ShieldSymbolizer", s.str());
     try
     {
-        std::string name =  get_attr<std::string>(sym, "name");
+        optional<boolean> no_text =
+            get_opt_attr<boolean>(sym, "no-text");
+        std::string name;
+        optional<std::string> old_name = get_opt_attr<std::string>(sym, "name");
+        if (old_name) {
+            std::clog << ": ### WARNING: Using 'name' in ShieldSymbolizer is deprecated (http://trac.mapnik.org/wiki/TextSymbolizer)\n";
+            name = *old_name;
+        } else {
+            name = get_value<std::string>(sym, "ShieldSymbolizer");
+            if (name.empty() && (!no_text || !*no_text) ) throw config_error(std::string("ShieldSymbolizer needs a non-empty text"));
+        }
 
         optional<std::string> face_name =
             get_opt_attr<std::string>(sym, "face-name");
@@ -1676,8 +1694,6 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             }
 
             // no text
-            optional<boolean> no_text =
-                get_opt_attr<boolean>(sym, "no-text");
             if (no_text)
             {
                 shield_symbol.set_no_text( * no_text );

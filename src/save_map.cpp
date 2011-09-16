@@ -442,8 +442,9 @@ private:
         expression_ptr const& expr = sym.get_name();
         const std::string & name = to_expression_string(*expr);
                 
-        if ( ! name.empty() ) {
-            set_attr( node, "name", name );
+        if (!name.empty()) {
+            ptree& text_node = node.push_back(ptree::value_type("<xmltext>", ptree()))->second;
+            text_node.put_value(name);
         }
         const std::string & face_name = sym.get_face_name();
         if ( ! face_name.empty() ) {
