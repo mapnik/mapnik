@@ -117,8 +117,44 @@ static inline void resample_raster(raster &target, raster const& source,
         img_accessor_type ia(pixf_tile);
 
         agg::span_allocator<color_type> sa;
-        agg::image_filter_bilinear filter_kernel;
-        agg::image_filter_lut filter(filter_kernel, false);
+        agg::image_filter_lut filter;
+        scaling_method_e scaling_method = get_scaling_method_by_name(
+            scaling_method_name);
+        switch(scaling_method)
+        {
+            case SCALING_BILINEAR:
+                filter.calculate(agg::image_filter_bilinear(), true); break;
+            case SCALING_BICUBIC:
+                filter.calculate(agg::image_filter_bicubic(), true); break;
+            case SCALING_SPLINE16:
+                filter.calculate(agg::image_filter_spline16(), true); break;
+            case SCALING_SPLINE36:
+                filter.calculate(agg::image_filter_spline36(), true); break;
+            case SCALING_HANNING:
+                filter.calculate(agg::image_filter_hanning(), true); break;
+            case SCALING_HAMMING:
+                filter.calculate(agg::image_filter_hamming(), true); break;
+            case SCALING_HERMITE:
+                filter.calculate(agg::image_filter_hermite(), true); break;
+            case SCALING_KAISER:
+                filter.calculate(agg::image_filter_kaiser(), true); break;
+            case SCALING_QUADRIC:
+                filter.calculate(agg::image_filter_quadric(), true); break;
+            case SCALING_CATROM:
+                filter.calculate(agg::image_filter_catrom(), true); break;
+            case SCALING_GAUSSIAN:
+                filter.calculate(agg::image_filter_gaussian(), true); break;
+            case SCALING_BESSEL:
+                filter.calculate(agg::image_filter_bessel(), true); break;
+            case SCALING_MITCHELL:
+                filter.calculate(agg::image_filter_mitchell(), true); break;
+            case SCALING_SINC:
+                filter.calculate(agg::image_filter_sinc(filter_factor), true); break;
+            case SCALING_LANCZOS:
+                filter.calculate(agg::image_filter_lanczos(filter_factor), true); break;
+            case SCALING_BLACKMAN:
+                filter.calculate(agg::image_filter_blackman(filter_factor), true); break;
+        }
 
         for(j=0; j<mesh_ny-1; j++) {
             for (i=0; i<mesh_nx-1; i++) {
@@ -142,19 +178,29 @@ static inline void resample_raster(raster &target, raster const& source,
                 unsigned x1 = (i+1) * mesh_size;
                 unsigned y1 = (j+1) * mesh_size;
 
-                agg::trans_bilinear tr(polygon, x0, y0, x1, y1);
+                agg::trans_affine tr(polygon, x0, y0, x1, y1);
                 if (tr.is_valid())
                 {
-                    typedef agg::span_interpolator_linear<agg::trans_bilinear>
+                    typedef agg::span_interpolator_linear<agg::trans_affine>
                         interpolator_type;
                     interpolator_type interpolator(tr);
 
-                    typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
-                        interpolator_type> span_gen_type;
+                    if (scaling_method == SCALING_NEAR) {
+                        typedef agg::span_image_filter_rgba_nn
+                            <img_accessor_type, interpolator_type>
+                            span_gen_type;
+                        span_gen_type sg(ia, interpolator);
+                        agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
+                                                 sa, sg);
+                    } else {
+                        typedef agg::span_image_filter_rgba_2x2
+                            <img_accessor_type, interpolator_type>
+                            span_gen_type;
 
-                    span_gen_type sg(ia, interpolator, filter);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
-                                             sa, sg);
+                        span_gen_type sg(ia, interpolator, filter);
+                        agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
+                                                 sa, sg);
+                    }
                 }
 
             }
