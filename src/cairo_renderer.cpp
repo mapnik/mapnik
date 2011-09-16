@@ -37,6 +37,7 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
+#include <mapnik/warp.hpp>
 
 // cairo
 #include <cairomm/context.h>
@@ -1373,23 +1374,22 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     }
 }
 
-//FIXME: Port reprojection code from agg/process_raster_symbolizer.cpp
 void cairo_renderer_base::process(raster_symbolizer const& sym,
                                   Feature const& feature,
-                                  proj_transform const& /*prj_trans*/)
+                                  proj_transform const& prj_trans)
 {
-    // TODO -- at the moment raster_symbolizer is an empty class
-    // used for type dispatching, but we can have some fancy raster
-    // processing in a future (filters??). Just copy raster into pixmap for now.
-    raster_ptr const& raster = feature.get_raster();
-    if (raster)
+    raster_ptr const& source = feature.get_raster();
+    if (source)
     {
         // If there's a colorizer defined, use it to color the raster in-place
         raster_colorizer_ptr colorizer = sym.get_colorizer();
         if (colorizer)
-            colorizer->colorize(raster,feature.props());
+            colorizer->colorize(source,feature.props());
 
-        box2d<double> ext = t_.forward(raster->ext_);
+        box2d<double> target_ext = box2d<double>(source->ext_);
+        prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
+
+        box2d<double> ext=t_.forward(target_ext);
         int start_x = (int)ext.minx();
         int start_y = (int)ext.miny();
         int end_x = (int)ceil(ext.maxx());
@@ -1401,18 +1401,19 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
 
         if (raster_width > 0 && raster_height > 0)
         {
-            double scale_factor = ext.width() / raster->data_.width();
-            image_data_32 target(raster_width, raster_height);
-            //TODO -- use cairo matrix transformation for scaling
-            if (sym.get_scaling() == "bilinear8"){
-                scale_image_bilinear8<image_data_32>(target,raster->data_, err_offs_x, err_offs_y);
-            } else {
-                scaling_method_e scaling_method = get_scaling_method_by_name(sym.get_scaling());
-                scale_image_agg<image_data_32>(target,raster->data_, scaling_method, scale_factor, err_offs_x, err_offs_y, sym.calculate_filter_factor());
-            }
+            double scale_factor = ext.width() / source->data_.width();
+            image_data_32 target_data(raster_width,raster_height);
+            raster target(target_ext, target_data);
+
+            reproject_raster(target, *source, prj_trans, err_offs_x, err_offs_y,
+                             sym.get_mesh_size(),
+                             sym.calculate_filter_factor(),
+                             scale_factor,
+                             sym.get_scaling());
+            
             cairo_context context(context_);
             //TODO -- support for advanced image merging
-            context.add_image(start_x, start_y, target, sym.get_opacity());
+            context.add_image(start_x, start_y, target.data_, sym.get_opacity());
         }
     }
 }
