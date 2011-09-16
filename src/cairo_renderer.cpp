@@ -38,6 +38,7 @@
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/warp.hpp>
+#include <mapnik/config.hpp>
 
 // cairo
 #include <cairomm/context.h>

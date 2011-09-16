@@ -29,6 +29,7 @@
 #include <mapnik/raster.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/warp.hpp>
+#include <mapnik/config.hpp>
 
 // stl
 #include <cmath>
