@@ -27,6 +27,8 @@
 
 // mapnik
 #include <mapnik/feature_style_processor.hpp>
+#include <mapnik/map.hpp>
+
 #include <mapnik/svg/svg_generator.hpp>
 #include <mapnik/svg/svg_output_attributes.hpp>
 
@@ -96,6 +98,11 @@ namespace mapnik
                Feature const& feature,
                proj_transform const& prj_trans);
         
+        void painted(bool painted)
+        {
+            // nothing to do
+        }
+
         inline OutputIterator& get_output_iterator() 
         {
             return output_iterator_;
@@ -113,6 +120,7 @@ namespace mapnik
         CoordTransform t_;
         svg::svg_generator<OutputIterator> generator_;
         svg::path_output_attributes path_attributes_;
+        bool painted_;
       
         /*!
          * @brief Visitor that makes the calls to process each symbolizer when stored in a boost::variant.

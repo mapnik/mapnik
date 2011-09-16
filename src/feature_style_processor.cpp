@@ -46,6 +46,10 @@
 #include <mapnik/cairo_renderer.hpp>
 #endif
 
+#if defined(SVG_RENDERER)
+#include <mapnik/svg_renderer.hpp>
+#endif
+
 #if defined(RENDERING_STATS)
 #include <mapnik/timer.hpp>
 #include <iomanip>
@@ -428,7 +432,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
                         // if the underlying renderer is not able to process the complete set of symbolizers,
                         // process one by one.
-#ifdef SVG_RENDERER
+#if defined(SVG_RENDERER)
                         if(!p.process(symbols,*feature,prj_trans))
 #endif
                         {
@@ -458,7 +462,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         rule::symbolizers const& symbols = r->get_symbolizers();
                         // if the underlying renderer is not able to process the complete set of symbolizers,
                         // process one by one.
-#ifdef SVG_RENDERER
+#if defined(SVG_RENDERER)
                         if(!p.process(symbols,*feature,prj_trans))
 #endif
                         {
@@ -482,7 +486,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         rule::symbolizers const& symbols = r->get_symbolizers();
                         // if the underlying renderer is not able to process the complete set of symbolizers,
                         // process one by one.
-#ifdef SVG_RENDERER
+#if defined(SVG_RENDERER)
                         if(!p.process(symbols,*feature,prj_trans))
 #endif
                         {
@@ -538,6 +542,10 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 #if defined(HAVE_CAIRO)
 template class feature_style_processor<cairo_renderer<Cairo::Context> >;
 template class feature_style_processor<cairo_renderer<Cairo::Surface> >;
+#endif
+
+#if defined(SVG_RENDERER)
+template class feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
 #endif
 
 template class feature_style_processor<grid_renderer<grid> >;

@@ -23,6 +23,7 @@
 
 // mapnik
 #include <mapnik/svg_renderer.hpp>
+#include <mapnik/map.hpp>
 
 // stl
 #ifdef MAPNIK_DEBUG
