@@ -262,6 +262,11 @@ void font_face_set::get_string_info(string_info & info)
         }
     }
 
+	if (ubidi_getBaseDirection(ustr.getBuffer(), length) == UBIDI_RTL)
+	{
+		info.set_rtl(true);
+	}
+
     ubidi_close(bidi);
     info.set_dimensions(width, height);
 }

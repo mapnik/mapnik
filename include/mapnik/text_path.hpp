@@ -56,11 +56,13 @@ protected:
     UnicodeString const& text_;
     double width_;
     double height_;
+    bool is_rtl;
 public:
     string_info(UnicodeString const& text)
         : text_(text),
           width_(0),
-          height_(0) {}
+          height_(0),
+          is_rtl(false) {}
 
     void add_info(int c, double width, double height)
     {
@@ -71,6 +73,9 @@ public:
     {
         return characters_.size();
     }
+    
+    void set_rtl(bool value) {is_rtl = value;}
+    bool get_rtl() const {return is_rtl;}    
       
     character_info at(unsigned i) const
     {

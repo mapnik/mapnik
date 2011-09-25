@@ -379,7 +379,14 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
 
     // set for upper left corner of text envelope for the first line, bottom left of first character
     x = -(line_width / 2.0);
-    y = (0.5 * (string_height + (line_spacing * (total_lines-1)))) - max_character_height;
+    if (p.info.get_rtl()==false)
+    {
+		y = (0.5 * (string_height + (line_spacing * (total_lines-1)))) - max_character_height;
+	}
+	else
+	{
+		y = -(0.5 * (string_height + (line_spacing * (total_lines-1)))) + max_character_height;
+	}
 
     // if needed, adjust for desired justification (J_MIDDLE is the default)
     if( po->jalign == J_LEFT )
@@ -404,7 +411,14 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
             index_to_wrap_at = line_breaks[++line_number];
             line_width = line_widths[line_number];
 
-            y -= (max_character_height + line_spacing);  // move position down to line start
+			if (p.info.get_rtl()==false)
+			{
+				y -= (max_character_height + line_spacing);  // move position down to line start
+			}
+			else
+			{
+				y += (max_character_height + line_spacing);  // move position up to line start
+			}            
 
             // reset to begining of line position
             x = ((po->jalign == J_LEFT)? -(string_width / 2.0): ((po->jalign == J_RIGHT)? ((string_width /2.0) - line_width): -(line_width / 2.0)));
