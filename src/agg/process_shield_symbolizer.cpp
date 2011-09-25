@@ -91,8 +91,28 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         marker.reset(boost::make_shared<mapnik::marker>());
     }
     
+    
     if (text.length() > 0 && marker)
     {
+        int w = (*marker)->width();
+        int h = (*marker)->height();
+        
+        double px0 = - 0.5 * w;
+        double py0 = - 0.5 * h;
+        double px1 = 0.5 * w;
+        double py1 = 0.5 * h;
+        double px2 = px1;
+        double py2 = py0;
+        double px3 = px0;
+        double py3 = py1;
+        tr.transform(&px0,&py0);
+        tr.transform(&px1,&py1);
+        tr.transform(&px2,&py2);
+        tr.transform(&px3,&py3);
+        box2d<double> label_ext (px0, py0, px1, py1);
+        label_ext.expand_to_include(px2, py2);
+        label_ext.expand_to_include(px3, py3);
+        
         face_set_ptr faces;
 
         if (sym.get_fontset().size() > 0)
@@ -120,9 +140,6 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             string_info info(text);
 
             faces->get_string_info(info);
-
-            int w = (*marker)->width();
-            int h = (*marker)->height();
 
             metawriter_with_properties writer = sym.get_metawriter();
 
@@ -175,8 +192,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 double y = floor(text_placement.placements[0].starting_y);
                                 int px;
                                 int py;
-                                box2d<double> label_ext;
-
+                                
                                 if( !sym.get_unlock_image() )
                                 {
                                     // center image at text center position
@@ -185,15 +201,15 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     double ly = y - boost::get<1>(pos);
                                     px=int(floor(lx - (0.5 * w))) + 1;
                                     py=int(floor(ly - (0.5 * h))) + 1;
-                                    label_ext.init( floor(lx - 0.5 * w), floor(ly - 0.5 * h), ceil (lx + 0.5 * w), ceil (ly + 0.5 * h) );
+                                    label_ext.re_center(lx,ly);
                                 }
                                 else
                                 {  // center image at reference location
                                     px=int(floor(label_x - 0.5 * w));
                                     py=int(floor(label_y - 0.5 * h));
-                                    label_ext.init( floor(label_x - 0.5 * w), floor(label_y - 0.5 * h), ceil (label_x + 0.5 * w), ceil (label_y + 0.5 * h));
+                                    label_ext.re_center(label_x,label_y);
                                 }
-
+                                
                                 if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
                                 {
                                     render_marker(px,py,**marker,tr,sym.get_opacity());
@@ -203,7 +219,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     detector_.insert(label_ext);
                                     finder.update_detector(text_placement);
                                     if (writer.first) {
-                                        writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
+                                        writer.first->add_box(label_ext, feature, t_, writer.second);
                                         writer.first->add_text(text_placement, faces, feature, t_, writer.second);
                                     }
                                 }
@@ -213,8 +229,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
                     else if (geom.num_points() > 1 && how_placed == LINE_PLACEMENT)
                     {
-                        placement text_placement(info, sym, scale_factor_, w, h, true);
-
+                        placement text_placement(info, sym, scale_factor_, label_ext.width(), label_ext.height(), true);
+                        
                         text_placement.avoid_edges = sym.get_avoid_edges();
                         finder.find_point_placements<path_type>(text_placement, placement_options, path);
 
@@ -231,7 +247,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
                             render_marker(px,py,**marker,tr,sym.get_opacity());
 
-                            if (writer.first) writer.first->add_box(box2d<double>(px,py,px+w,py+h), feature, t_, writer.second);
+                            if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
 
                             box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
                             ren.render(x,y);
