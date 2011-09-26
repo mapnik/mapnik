@@ -11,8 +11,10 @@ Developers: Please commit along with changes.
 For a complete change history, see the SVN log.
 
 
-Mapnik Trunk
+Mapnik 2.0.0 Release
 ------------
+
+(Packaged from r3368)
 
 - Add minimum-path-length property to text_symbolizer to allow labels to be placed only on lines of a certain length (#865)
 
