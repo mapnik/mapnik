@@ -23,7 +23,7 @@ Boost Python bindings to the Mapnik C++ shared library.
 
 Several things happen when you do:
 
-    >>> import mapnik
+    >>> import mapnik2
 
  1) Mapnik C++ objects are imported via the '__init__.py' from the '_mapnik.so' shared object
     (_mapnik.pyd on win) which references libmapnik.so (linux), libmapnik.dylib (mac), or
