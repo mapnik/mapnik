@@ -29,6 +29,12 @@
 #include <boost/filesystem.hpp>
 #include <sstream>
 
+// icu
+#include <unicode/ubidi.h>
+#include <unicode/ushape.h>
+#include <unicode/schriter.h>
+#include <unicode/uversion.h> 
+
 namespace mapnik
 {
 freetype_engine::freetype_engine()
@@ -103,10 +109,10 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     boost::filesystem::path path(dir);
     
     if (!boost::filesystem::exists(path))
-      return false;
+        return false;
 
     if (!boost::filesystem::is_directory(path))
-      return mapnik::freetype_engine::register_font(dir); 
+        return mapnik::freetype_engine::register_font(dir); 
     
     boost::filesystem::directory_iterator end_itr;
     for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
@@ -114,9 +120,9 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
         if (boost::filesystem::is_directory(*itr) && recurse)
         {
 #if (BOOST_FILESYSTEM_VERSION == 3) 
-          if (!register_fonts(itr->path().string(), true)) return false;
+            if (!register_fonts(itr->path().string(), true)) return false;
 #else // v2
-          if (!register_fonts(itr->string(), true)) return false;
+            if (!register_fonts(itr->string(), true)) return false;
 #endif
         }
         else 
@@ -262,10 +268,13 @@ void font_face_set::get_string_info(string_info & info)
         }
     }
 
-	if (ubidi_getBaseDirection(ustr.getBuffer(), length) == UBIDI_RTL)
-	{
-		info.set_rtl(true);
-	}
+
+#if (U_ICU_VERSION_MAJOR_NUM*100 + U_ICU_VERSION_MINOR_NUM >= 406)
+    if (ubidi_getBaseDirection(ustr.getBuffer(), length) == UBIDI_RTL)
+    {
+        info.set_rtl(true);
+    }
+#endif
 
     ubidi_close(bidi);
     info.set_dimensions(width, height);

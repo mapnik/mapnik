@@ -58,11 +58,6 @@ extern "C"
 #include <iostream>
 #include <algorithm>
 
-// icu
-#include <unicode/ubidi.h>
-#include <unicode/ushape.h>
-#include <unicode/schriter.h>
-
 namespace mapnik
 {
 class font_face;
