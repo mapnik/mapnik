@@ -2,7 +2,7 @@
 <Map background-color="#b5d0d0" srs="+proj=merc +datum=WGS84  +k=1.0 +units=m +over +no_defs" minimum-version="0.7.2">
     <Style name="some_style">
         <Rule>
-            <TextSymbolizer name="[foo.ttf]" size="-5" face-name="bold"/>
+            <TextSymbolizer size="-5" face-name="bold">[foo.ttf]</TextSymbolizer>
         </Rule>
     </Style>
 </Map>
