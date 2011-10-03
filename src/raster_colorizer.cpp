@@ -68,7 +68,7 @@ bool colorizer_stop::operator==(colorizer_stop const& other) const
 {
     return  (value_ == other.value_) && 
             (color_ == other.color_) &&
-            (mode_ == other.mode_);
+            (mode_ == other.mode_) &&
             (label_ == other.label_);
 }
 
