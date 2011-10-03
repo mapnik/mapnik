@@ -8,13 +8,13 @@
         <Rule>
             <!-- Text using interior point -->
             <!-- Using normal centroid algorithm -->
-            <TextSymbolizer dy="2" name="'interior point'" placement="interior" face-name="DejaVu Sans Book" halo-radius="2" allow-overlap="true"/>
+            <TextSymbolizer dy="2" placement="interior" face-name="DejaVu Sans Book" halo-radius="2" allow-overlap="true">'interior point'</TextSymbolizer>
             <PointSymbolizer placement="interior" allow-overlap="true"/>
         </Rule>
         <Rule>
             <!-- Text using interior point -->
             <!-- Using normal centroid algorithm -->
-            <TextSymbolizer dy="-2" name="'centroid'" face-name="DejaVu Sans Book" halo-radius="2" allow-overlap="true"/>
+            <TextSymbolizer dy="-2" face-name="DejaVu Sans Book" halo-radius="2" allow-overlap="true">'centroid'</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
     </Style>

@@ -37,7 +37,7 @@
     <Style name="point_style">
         <Rule>
             <PointSymbolizer file="../svg/point_sm.svg"/>
-            <TextSymbolizer size="12" name="[name]" dy="-5" face-name="DejaVu Sans Book" halo-fill="rgba(255,255,255,.5)" halo-radius=".5"/>
+            <TextSymbolizer size="12" dy="-5" face-name="DejaVu Sans Book" halo-fill="rgba(255,255,255,.5)" halo-radius=".5">[name]</TextSymbolizer>
         </Rule>
     </Style>
 

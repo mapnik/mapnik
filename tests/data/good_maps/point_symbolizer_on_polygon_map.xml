@@ -1,5 +1,5 @@
 <!DOCTYPE Map>
-<Map background-color="#b5d0d0" minimum-version="0.8.0">
+<Map background-color="#b5d0d0" minimum-version="0.7.2">
     <Style name="test">
         <Rule title="asia">
             <Filter>([REGION]=142)</Filter>
@@ -17,7 +17,7 @@
         </Rule>
         <Rule title="Africa">
             <Filter>([REGION]=2)</Filter>
-            <ShieldSymbolizer name="[NAME]" placement="vertex" size="10" fill="#000000" file="../images/dummy.png" face-name="DejaVu Sans Bold"/>
+            <ShieldSymbolizer placement="vertex" size="10" fill="#000000" file="../images/dummy.png" face-name="DejaVu Sans Bold">[NAME]</ShieldSymbolizer>
         </Rule>
 
         <Rule title="rest">

@@ -1,14 +1,16 @@
 <!DOCTYPE Map>
-<Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum-version="0.7.0">
+<Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum-version="0.7.2">
     <Style name="1">
         <Rule>
             <Filter>([label]='center')</Filter>
-            <TextSymbolizer name="'one&#10;two&#10;three'" size="10" dy="-5" face-name="DejaVu Sans Book" wrap-character="," wrap-width="1" halo-radius="1"/>
+            <TextSymbolizer size="10" dy="-5" face-name="DejaVu Sans Book" wrap-character="," wrap-width="1" halo-radius="1">'one
+two
+three'</TextSymbolizer>
             <PointSymbolizer/>
         </Rule>
         <Rule>
             <ElseFilter/>
-            <TextSymbolizer name="[label]" size="10" dy="-5" face-name="DejaVu Sans Book" wrap-character="," wrap-width="1" halo-radius="1"/>
+            <TextSymbolizer size="10" dy="-5" face-name="DejaVu Sans Book" wrap-character="," wrap-width="1" halo-radius="1">[label]</TextSymbolizer>
             <PointSymbolizer/>
         </Rule>        
     </Style>

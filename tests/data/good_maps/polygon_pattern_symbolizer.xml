@@ -8,13 +8,13 @@
         <!-- alignment="local" is default -->
         <PolygonPatternSymbolizer alignment="local" file="../images/checker.jpg"/>
         <LineSymbolizer stroke="green" stroke-width="2"/>
-        <TextSymbolizer size="10" name="'local'" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
+        <TextSymbolizer size="10" dy="20" face-name="DejaVu Sans Book" halo-radius="1">'local'</TextSymbolizer>
     </Rule>
     <Rule>
         <ElseFilter/>
         <PolygonPatternSymbolizer alignment="global" file="../images/checker.jpg"/>
         <LineSymbolizer stroke="yellow" stroke-width=".5"/>
-        <TextSymbolizer size="10" name="'global'" dy="20" face-name="DejaVu Sans Book" halo-radius="1"/>
+        <TextSymbolizer size="10" dy="20" face-name="DejaVu Sans Book" halo-radius="1">'global'</TextSymbolizer>
     </Rule>
   </Style>
 

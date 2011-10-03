@@ -1,9 +1,9 @@
-<!-- nik2img.py -b 60 46 80 28 rtl_text_map.xml text_styles.png --><Map background-color="#eee" srs="+init=epsg:4326" minimum-version="0.1.1" font-directory="../fonts/">
+<!-- nik2img.py -b 60 46 80 28 rtl_text_map.xml text_styles.png --><Map background-color="#eee" srs="+init=epsg:4326" minimum-version="0.7.2" font-directory="../fonts/">
   
   <Style name="custom_font">
     <Rule>
-      <TextSymbolizer name="[NAME_FA]" fill="#000" size="20" dy="-2" face-name="XB Zar Regular" halo-fill="#fff" halo-radius="2" wrap-width="50" line-spacing="3" allow-overlap="true"/>
-      <TextSymbolizer name="[NAME_EN]" fill="#000" opacity="0.6" size="10" dy="2" face-name="DejaVu Sans Book" text-transform="uppercase" halo-fill="#fff" halo-radius="2" character-spacing="3" wrap-width="50" line-spacing="4" allow-overlap="true"/>
+      <TextSymbolizer fill="#000" size="20" dy="-2" face-name="XB Zar Regular" halo-fill="#fff" halo-radius="2" wrap-width="50" line-spacing="3" allow-overlap="true">[NAME_FA]</TextSymbolizer>
+      <TextSymbolizer fill="#000" opacity="0.6" size="10" dy="2" face-name="DejaVu Sans Book" text-transform="uppercase" halo-fill="#fff" halo-radius="2" character-spacing="3" wrap-width="50" line-spacing="4" allow-overlap="true">[NAME_EN]</TextSymbolizer>
     </Rule>
   </Style>
 

@@ -4,7 +4,7 @@
     <Rule>
       <Filter>[leisure] &lt;&gt; '' or [landuse] &lt;&gt; '' </Filter>
       <MaxScaleDenominator>20000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="10"/>
+      <TextSymbolizer size="10" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="10">[name]</TextSymbolizer>
     </Rule>
   </Style>
 </Map>

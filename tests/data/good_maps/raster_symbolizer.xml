@@ -4,8 +4,8 @@
     <Rule>
       <RasterSymbolizer opacity="1">
         <RasterColorizer default-mode="discrete" default-color="#000000">
-          <stop value="0" color="yellow"></stop>
-          <stop value="26" color="purple"></stop>
+          <stop value="0" color="yellow"/>
+          <stop value="26" color="purple"/>
          </RasterColorizer>
       </RasterSymbolizer>
     </Rule>
@@ -15,8 +15,8 @@
     <Rule>
       <RasterSymbolizer>
         <RasterColorizer default-mode="linear" default-color="#000000">
-          <stop value="0" color="red"></stop>
-          <stop value="26" color="green"></stop>
+          <stop value="0" color="red"/>
+          <stop value="26" color="green"/>
          </RasterColorizer>
       </RasterSymbolizer>
     </Rule>

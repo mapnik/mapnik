@@ -53,7 +53,7 @@
     <Rule>
       <MaxScaleDenominator>50000000</MaxScaleDenominator>
       <MinScaleDenominator>10000000</MinScaleDenominator>
-      <TextSymbolizer name="[place_name]" size="10" fill="#444" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="0"/>
+      <TextSymbolizer size="10" fill="#444" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="0">[place_name]</TextSymbolizer>
     </Rule>
   </Style>
   <Style name="text">
@@ -61,85 +61,85 @@
       <Filter>[place] = 'city'</Filter>
       <MaxScaleDenominator>10000000</MaxScaleDenominator>
       <MinScaleDenominator>2000000</MinScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="#000" dy="0" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="0"/>
+      <TextSymbolizer size="10" fill="#000" dy="0" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="0">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[place] = 'city'</Filter>
       <MaxScaleDenominator>2000000</MaxScaleDenominator>
       <MinScaleDenominator>20000</MinScaleDenominator>
-      <TextSymbolizer name="[name]" size="14" fill="#000" dy="0" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="0"/>
+      <TextSymbolizer size="14" fill="#000" dy="0" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="0">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[place] = 'town'</Filter>
       <MaxScaleDenominator>2000000</MaxScaleDenominator>
       <MinScaleDenominator>50000</MinScaleDenominator>
-      <TextSymbolizer name="[name]" size="11" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="20"/>
+      <TextSymbolizer size="11" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="20">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[place] = 'town'</Filter>
       <MaxScaleDenominator>50000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="14" fill="#777777" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="20"/>
+      <TextSymbolizer size="14" fill="#777777" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="20">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[place] = 'village'</Filter>
       <MaxScaleDenominator>250000</MaxScaleDenominator>
       <MinScaleDenominator>50000</MinScaleDenominator>
-      <TextSymbolizer name="[name]" size="8" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="0"/>
+      <TextSymbolizer size="8" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="0">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[place] = 'village'</Filter>
       <MaxScaleDenominator>50000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="11" fill="#777777" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="0"/>
+      <TextSymbolizer size="11" fill="#777777" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="0">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[place] = 'hamlet'</Filter>
       <MaxScaleDenominator>125000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="8" fill="#000" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="0"/>
+      <TextSymbolizer size="8" fill="#000" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="0">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[amenity] = 'pub'</Filter>
       <MaxScaleDenominator>5000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="brown" dy="16" face-name="DejaVu Sans Bold" halo-radius="1" wrap-width="0"/>
+      <TextSymbolizer size="10" fill="brown" dy="16" face-name="DejaVu Sans Bold" halo-radius="1" wrap-width="0">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[amenity] = 'place_of_worship'</Filter>
       <MaxScaleDenominator>5000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="#000033" dy="12" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="20"/>
+      <TextSymbolizer size="10" fill="#000033" dy="12" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="20">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[leisure] &lt;&gt; '' or [landuse] &lt;&gt; '' </Filter>
       <MaxScaleDenominator>20000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="10"/>
+      <TextSymbolizer size="10" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="10">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[natural] = 'wood'</Filter>
       <MaxScaleDenominator>20000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="10"/>
+      <TextSymbolizer size="10" fill="#000" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="10">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[natural] = 'peak'</Filter>
       <MaxScaleDenominator>100000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="brown" dy="10" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="20"/>
+      <TextSymbolizer size="10" fill="brown" dy="10" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="20">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[natural] = 'water' or [natural] = 'lake' or [landuse] = 'reservoir'</Filter>
       <MaxScaleDenominator>20000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="#6699cc" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="20"/>
+      <TextSymbolizer size="10" fill="#6699cc" face-name="DejaVu Sans Book" halo-radius="1" wrap-width="20">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[tourism] &lt;&gt; ''</Filter>
       <MaxScaleDenominator>10000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="#660033" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="10"/>
+      <TextSymbolizer size="10" fill="#660033" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="10">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[amenity] = 'school' or [amenity] = 'university'</Filter>
       <MaxScaleDenominator>25000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="8" fill="#000033" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="12"/>
+      <TextSymbolizer size="8" fill="#000033" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="12">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[amenity] = 'hospital'</Filter>
       <MaxScaleDenominator>25000</MaxScaleDenominator>
-      <TextSymbolizer name="[name]" size="8" fill="#000033" dy="12" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="12"/>
+      <TextSymbolizer size="8" fill="#000033" dy="12" face-name="DejaVu Sans Book" halo-radius="2" wrap-width="12">[name]</TextSymbolizer>
     </Rule>
   </Style>
   <Style name="water">
@@ -175,7 +175,7 @@
       <MaxScaleDenominator>100000</MaxScaleDenominator>
       <MinScaleDenominator>50000</MinScaleDenominator>
       <LineSymbolizer stroke-linejoin="round" stroke="#b5d0d0" stroke-width="4" stroke-linecap="round"/>
-      <TextSymbolizer name="[name]" size="8" fill="#6699cc" placement="line" face-name="DejaVu Sans Book" halo-radius="1"/>
+      <TextSymbolizer size="8" fill="#6699cc" placement="line" face-name="DejaVu Sans Book" halo-radius="1">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <ElseFilter/>
@@ -188,21 +188,21 @@
       <MaxScaleDenominator>25000</MaxScaleDenominator>
       <MinScaleDenominator>1000</MinScaleDenominator>
       <LineSymbolizer stroke-linejoin="round" stroke="#b5d0d0" stroke-width="10" stroke-linecap="round"/>
-      <TextSymbolizer name="[name]" size="10" fill="#6699cc" placement="line" face-name="DejaVu Sans Book" halo-radius="1"/>
+      <TextSymbolizer size="10" fill="#6699cc" placement="line" face-name="DejaVu Sans Book" halo-radius="1">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[waterway]='canal'</Filter>
       <MaxScaleDenominator>50000</MaxScaleDenominator>
       <MinScaleDenominator>1000</MinScaleDenominator>
       <LineSymbolizer stroke-linejoin="round" stroke="#b5d0d0" stroke-width="7" stroke-linecap="round"/>
-      <TextSymbolizer name="[name]" size="9" fill="#6699cc" placement="line" face-name="DejaVu Sans Book" halo-radius="1"/>
+      <TextSymbolizer size="9" fill="#6699cc" placement="line" face-name="DejaVu Sans Book" halo-radius="1">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <ElseFilter/>
       <MaxScaleDenominator>25000</MaxScaleDenominator>
       <MinScaleDenominator>1000</MinScaleDenominator>
       <LineSymbolizer stroke="#b5d0d0" stroke-width="2"/>
-      <TextSymbolizer name="[name]" size="8" fill="#6699cc" placement="line" face-name="DejaVu Sans Book" halo-radius="1"/>
+      <TextSymbolizer size="8" fill="#6699cc" placement="line" face-name="DejaVu Sans Book" halo-radius="1">[name]</TextSymbolizer>
     </Rule>
   </Style>
   <Style name="minor-roads-casing">
@@ -728,25 +728,25 @@
       <Filter>[highway] = 'trunk' or [highway] = 'primary' or [highway] = 'secondary'</Filter>
       <MaxScaleDenominator>75000</MaxScaleDenominator>
       <MinScaleDenominator>50000</MinScaleDenominator>
-      <TextSymbolizer name="[name]" size="8" fill="black" placement="line" face-name="DejaVu Sans Book" halo-radius="0"/>
+      <TextSymbolizer size="8" fill="black" placement="line" face-name="DejaVu Sans Book" halo-radius="0">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <Filter>[highway] = 'trunk' or [highway] = 'primary' or [highway] = 'secondary'</Filter>
       <MaxScaleDenominator>50000</MaxScaleDenominator>
       <MinScaleDenominator>1000</MinScaleDenominator>
-      <TextSymbolizer name="[name]" size="10" fill="black" placement="line" face-name="DejaVu Sans Book" halo-radius="0"/>
+      <TextSymbolizer size="10" fill="black" placement="line" face-name="DejaVu Sans Book" halo-radius="0">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <ElseFilter/>
       <MaxScaleDenominator>25000</MaxScaleDenominator>
       <MinScaleDenominator>5000</MinScaleDenominator>
-      <TextSymbolizer name="[name]" size="9" fill="#000" placement="line" face-name="DejaVu Sans Book" halo-radius="1"/>
+      <TextSymbolizer size="9" fill="#000" placement="line" face-name="DejaVu Sans Book" halo-radius="1">[name]</TextSymbolizer>
     </Rule>
     <Rule>
       <ElseFilter/>
       <MaxScaleDenominator>5000</MaxScaleDenominator>
       <MinScaleDenominator>100</MinScaleDenominator>
-      <TextSymbolizer name="[name]" size="11" fill="#000" placement="line" face-name="DejaVu Sans Book" halo-radius="1"/>
+      <TextSymbolizer size="11" fill="#000" placement="line" face-name="DejaVu Sans Book" halo-radius="1">[name]</TextSymbolizer>
     </Rule>
   </Style>
 </Map>
