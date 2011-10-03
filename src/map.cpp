@@ -382,6 +382,8 @@ void Map::zoom_all()
     {
         try 
         {
+            if (!layers_.size() > 0)
+                return;
             projection proj0(srs_);
             box2d<double> ext;
             bool success = false;
