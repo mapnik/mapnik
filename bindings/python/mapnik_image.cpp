@@ -79,8 +79,7 @@ PyObject* tostring1( image_32 const& im)
 // encode (png,jpeg)
 PyObject* tostring2(image_32 const & im, std::string const& format)
 {
-    mapnik::rgba_palette pal;
-    std::string s = save_to_string(im, format, pal);
+    std::string s = save_to_string(im, format);
     return
 #if PY_VERSION_HEX >= 0x03000000 
         ::PyBytes_FromStringAndSize

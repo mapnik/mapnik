@@ -63,8 +63,7 @@ PyObject* view_tostring1(image_view<image_data_32> const& view)
 // encode (png,jpeg)
 PyObject* view_tostring2(image_view<image_data_32> const & view, std::string const& format)
 {
-    mapnik::rgba_palette pal;
-    std::string s = save_to_string(view, format, pal);
+    std::string s = save_to_string(view, format);
     return 
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
