@@ -103,9 +103,9 @@ make install
 cd ../
 
 # libpng
-wget ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.4.tar.gz
-tar xvf libpng-1.5.4.tar.gz
-cd libpng-1.5.4
+wget ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-1.5.5.tar.gz
+tar xvf libpng-1.5.5.tar.gz
+cd libpng-1.5.5
 ./configure --prefix=$PREFIX --enable-static --disable-shared --disable-dependency-tracking
 make -j4
 make install
