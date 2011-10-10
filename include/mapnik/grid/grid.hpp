@@ -284,7 +284,7 @@ public:
         {
 
 #ifdef MAPNIK_BIG_ENDIAN
-            unsigned a1 = (int)((rgba1 & 0xff) * opacity) & 0xff; // adjust for desired opacity
+            unsigned a = (int)((rgba1 & 0xff) * opacity) & 0xff; // adjust for desired opacity
 #else
             unsigned a = (int)(((rgba1 >> 24) & 0xff) * opacity) & 0xff; // adjust for desired opacity
 #endif                    
