@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
 from nose.tools import *
@@ -266,7 +267,9 @@ def test_shapefile_properties():
     eq_(f['COUNTRY'], u'CAN')
     eq_(f['F_CODE'], u'FA001')
     eq_(f['NAME_EN'], u'Quebec')
+    # this seems to break if icu data linking is not working
     eq_(f['NOM_FR'], u'Qu\xe9bec')
+    eq_(f['NOM_FR'], u'Québec')
     eq_(f['Shape_Area'], 1512185733150.0)
     eq_(f['Shape_Leng'], 19218883.724300001)
 
@@ -758,4 +761,3 @@ def test_envelope_pickle():
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
-
