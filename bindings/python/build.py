@@ -40,7 +40,7 @@ def is_py3():
 
 
 prefix = env['PREFIX']
-target_path = env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2'
+target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
 libraries = ['mapnik2','png']
 
@@ -144,16 +144,32 @@ if not os.path.exists('mapnik'):
     os.mkdir('mapnik')
 file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
 
+# force open perms temporarily so that `sudo scons install`
+# does not later break simple non-install non-sudo rebuild
 try:
     os.chmod('mapnik/paths.py',0666)
 except: pass
 
-# install the core mapnik python files, including '__init__.py' and 'paths.py'
+# install the core mapnik python files, including '__init__.py'
 if 'install' in COMMAND_LINE_TARGETS:
     init_files = glob.glob('mapnik/*.py')
+    if 'mapnik/paths.py' in init_files:
+        init_files.remove('mapnik/paths.py') 
     init_module = env.Install(target_path, init_files)
     env.Alias(target='install', source=init_module)
 
+# fix perms and install the custom generated 'paths.py' 
+if 'install' in COMMAND_LINE_TARGETS:
+    targetp = os.path.join(target_path,'paths.py')
+    env.Alias("install", targetp)
+    # use env.Command rather than env.Install
+    # to enable setting proper perms on `paths.py`
+    env.Command( targetp, 'mapnik/paths.py',
+        [
+        Copy("$TARGET","$SOURCE"),
+        Chmod("$TARGET", 0644),
+        ])
+    
 # install the ogcserver module code
 if 'install' in COMMAND_LINE_TARGETS:
     ogcserver_files = glob.glob('mapnik/ogcserver/*.py')
