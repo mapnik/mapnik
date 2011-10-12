@@ -5,14 +5,13 @@
 *.a
 *.dylib
 plugins/input/*.input
-
+demo/c++/rundemo
 bindings/python/mapnik/paths.py
 config.cache
 config.log
 config.py
 .sconf_temp/
 .sconsign.dblite
-
 demo/viewer/viewer.ini
 tests/cpp_tests/font_registration_test
 utils/mapnik-config/mapnik-config
@@ -21,4 +20,3 @@ utils/shapeindex/shapeindex
 utils/svg2png/svg2png
 demo/python/demo*
 demo/python/map.xml
-
