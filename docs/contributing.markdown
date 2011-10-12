@@ -67,6 +67,9 @@ If you see bits of code around that do not follow these please don't hesitate to
 
 * Indentation is four spaces, unless 2 works better for a given case
 
+* Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/
+make_shared.html) where possible
+
 * Function definitions should not be separated from their arguments:
 
     void foo(int a) { ... } // please
