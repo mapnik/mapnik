@@ -63,32 +63,31 @@ Mapnik is written in C++, and we try to follow general coding guidelines.
 
 If you see bits of code around that do not follow these please don't hesitate to flag the issue or correct it yourself.
 
-* Spaces not tabs, and avoid trailing whitespace
+#### Spaces not tabs, and avoid trailing whitespace
 
-* Indentation is four spaces, unless 2 works better for a given case
+#### Indentation is four spaces
 
-* Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/
-make_shared.html) where possible
+#### Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/make_shared.html) where possible
 
-* Function definitions should not be separated from their arguments:
+#### Function definitions should not be separated from their arguments:
 
     void foo(int a) { ... } // please
     
     void foo (int a) { ... } // no
 
-* Separate arguments by a single space:
+#### Separate arguments by a single space:
 
     void foo(int a, float b) // please
-
+  
     void foo(int a,float b) // no
 
-* Space between operators:
+#### Space between operators:
 
     if (a == b) // please
     
     if(a==b) // no
 
-* Braces should ideally be on a separate line:
+#### Braces should ideally be on a separate line:
 
     if (a == b)
     {
