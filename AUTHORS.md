@@ -1,4 +1,4 @@
-## Mapnik Contibutors
+## Mapnik Contributors
 
 Mapnik is written by Artem Pavlenko with contributions from:
 
