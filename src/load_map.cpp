@@ -535,7 +535,8 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
       << "maxzoom,"
       << "queryable,"
       << "clear-label-cache,"
-      << "cache-features";
+      << "cache-features,"
+      << "group-by";
     ensure_attrs(lay, "Layer", s.str());
     try
     {
@@ -596,6 +597,12 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
             lyr.set_cache_features( * cache_features );
         }
 
+        optional<std::string> group_by =
+            get_opt_attr<std::string>(lay, "group-by");
+        if (group_by)
+        {
+            lyr.set_group_by( * group_by );
+        }
 
         ptree::const_iterator itr2 = lay.begin();
         ptree::const_iterator end2 = lay.end();

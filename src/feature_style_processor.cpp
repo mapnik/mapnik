@@ -25,13 +25,10 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/map.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/utils.hpp>
-#include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
-#include <mapnik/memory_datasource.hpp>
 
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
@@ -308,65 +305,23 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
     }
 
-    // push all property names
-    BOOST_FOREACH(std::string const& name, names)
+    // Don't even try to do more work if there are no active styles.
+    if (active_styles.size() > 0)
     {
-        q.add_property_name(name);
-    }
-
-    memory_datasource cache;
-    bool cache_features = lay.cache_features() && num_styles>1?true:false;
-    bool first = true;
-
-    #if defined(RENDERING_STATS)
-    int style_index = 0;
-    if (!active_styles.size() > 0) {
-        layer_timer.discard();
-    }
-    #endif
-    BOOST_FOREACH (feature_type_style * style, active_styles)
-    {
-        #if defined(RENDERING_STATS)
-        std::string s_name = style_names[style_index];
-        std::ostringstream s1;
-        s1 << "rendering style #" << style_index+1
-          << " for layer: '" << lay.name() << "' and style '" << s_name << "'";
-        mapnik::progress_timer style_timer(std::clog, s1.str());
-        if (!num_styles>1)
-            style_timer.discard();
-        style_index++;
-        #endif
-
-        std::vector<rule*> if_rules;
-        std::vector<rule*> else_rules;
-        std::vector<rule*> also_rules;
-
-        std::vector<rule> const& rules=style->get_rules();
-
-        #if defined(RENDERING_STATS)
-        int feature_count = 0;
-        int feature_processed_count = 0;
-        #endif
-
-        BOOST_FOREACH(rule const& r, rules)
+        // push all property names
+        BOOST_FOREACH(std::string const& name, names)
         {
-            if (r.active(scale_denom))
-            {
-                if (r.has_else_filter())
-                {
-                    else_rules.push_back(const_cast<rule*>(&r));
-                }
-                else if (r.has_also_filter())
-                {
-                    also_rules.push_back(const_cast<rule*>(&r));
-                }
-                else
-                {
-                    if_rules.push_back(const_cast<rule*>(&r));
-                }
+            q.add_property_name(name);
+        }
 
-                if ( (ds->type() == datasource::Raster) &&
-                        (ds->params().get<double>("filter_factor",0.0) == 0.0) )
+        // Update filter_factor for all enabled raster layers.
+        BOOST_FOREACH (feature_type_style * style, active_styles)
+        {
+            BOOST_FOREACH(rule const& r, style->get_rules())
+            {
+                if (r.active(scale_denom) &&
+                    ds->type() == datasource::Raster &&
+                    ds->params().get<double>("filter_factor",0.0) == 0.0)
                 {
                     rule::symbolizers const& symbols = r.get_symbolizers();
                     rule::symbolizers::const_iterator symIter = symbols.begin();
@@ -382,162 +337,234 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             }
         }
 
-        // process features
-        featureset_ptr fs;
-        if (first)
+        // Also query the group by attribute
+        std::string group_by = lay.group_by();
+        if (group_by != "")
         {
-            if (cache_features)
-                first = false;
-            fs = ds->features(q);
-        }
-        else
-        {
-            fs = cache.features(q);
+            q.add_property_name(group_by);
         }
 
-        if (fs)
+        bool cache_features = lay.cache_features() && active_styles.size() > 1;
+
+        // Render incrementally when the column that we group by
+        // changes value.
+        if (group_by != "")
         {
-            feature_ptr feature;
-            while ((feature = fs->next()))
-            {
+            featureset_ptr features = ds->features(q);
+            if (features) {
+                // Cache all features into the memory_datasource before rendering.
+                memory_datasource cache;
+                feature_ptr feature, prev;
 
-                #if defined(RENDERING_STATS)
-                feature_count++;
-                bool feat_processed = false;
-                #endif
+                while ((feature = features->next()))
+                {
+                    if (prev && prev->props()[group_by] != feature->props()[group_by])
+                    {
+                        // We're at a value boundary, so render what we have
+                        // up to this point.
+                        int i = 0;
+                        BOOST_FOREACH (feature_type_style * style, active_styles)
+                        {
+                            render_style(lay, p, style, style_names[i++],
+                                cache.features(q), prj_trans, scale_denom);
+                        }
+                        cache.clear();
+                    }
+                    cache.push(feature);
+                    prev = feature;
+                }
 
-                bool do_else=true;
-                bool do_also=false;
-
-                if (cache_features)
+                int i = 0;
+                BOOST_FOREACH (feature_type_style * style, active_styles)
+                {
+                    render_style(lay, p, style, style_names[i++],
+                        cache.features(q), prj_trans, scale_denom);
+                }
+            }
+        }
+        else if (cache_features)
+        {
+            featureset_ptr features = ds->features(q);
+            if (features) {
+                // Cache all features into the memory_datasource before rendering.
+                memory_datasource cache;
+                feature_ptr feature;
+                while ((feature = features->next()))
                 {
                     cache.push(feature);
                 }
 
-                BOOST_FOREACH(rule * r, if_rules )
+                int i = 0;
+                BOOST_FOREACH (feature_type_style * style, active_styles)
                 {
-                    expression_ptr const& expr=r->get_filter();
-                    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
-                    if (result.to_bool())
-                    {
-                        #if defined(RENDERING_STATS)
-                        feat_processed = true;
-                        #endif
-                        
-                        p.painted(true);
-
-                        do_else=false;
-                        do_also=true;
-                        rule::symbolizers const& symbols = r->get_symbolizers();
-
-                        // if the underlying renderer is not able to process the complete set of symbolizers,
-                        // process one by one.
-#if defined(SVG_RENDERER)
-                        if(!p.process(symbols,*feature,prj_trans))
-#endif
-                        {
-
-                            BOOST_FOREACH (symbolizer const& sym, symbols)
-                            {
-                                boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
-                            }
-                        }
-                        if (style->get_filter_mode() == FILTER_FIRST)
-                        {
-                            // Stop iterating over rules and proceed with next feature.
-                            break;
-                        }
-                    }
+                    render_style(lay, p, style, style_names[i++],
+                        cache.features(q), prj_trans, scale_denom);
                 }
-                if (do_else)
-                {
-                    BOOST_FOREACH( rule * r, else_rules )
-                    {
-                        #if defined(RENDERING_STATS)
-                        feat_processed = true;
-                        #endif
-
-                        p.painted(true);
- 
-                        rule::symbolizers const& symbols = r->get_symbolizers();
-                        // if the underlying renderer is not able to process the complete set of symbolizers,
-                        // process one by one.
-#if defined(SVG_RENDERER)
-                        if(!p.process(symbols,*feature,prj_trans))
-#endif
-                        {
-                            BOOST_FOREACH (symbolizer const& sym, symbols)
-                            {
-                                boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
-                            }
-                        }
-                    }
-                }
-                if (do_also)
-                {
-                    BOOST_FOREACH( rule * r, also_rules )
-                    {
-                        #if defined(RENDERING_STATS)
-                        feat_processed = true;
-                        #endif
-
-                        p.painted(true);
- 
-                        rule::symbolizers const& symbols = r->get_symbolizers();
-                        // if the underlying renderer is not able to process the complete set of symbolizers,
-                        // process one by one.
-#if defined(SVG_RENDERER)
-                        if(!p.process(symbols,*feature,prj_trans))
-#endif
-                        {
-                            BOOST_FOREACH (symbolizer const& sym, symbols)
-                            {
-                                boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
-                            }
-                        }
-                    }
-                }
-                #if defined(RENDERING_STATS)
-                if (feat_processed)
-                    feature_processed_count++;
-                #endif
             }
-
-            #if defined(RENDERING_STATS)
-            style_timer.stop();
-            
-            // done with style
-            std::ostringstream s;
-            if (feature_count > 0) {
-                double perc_processed = ((double)feature_processed_count/(double)feature_count)*100.0;
-                
-                s << "percent rendered: " << perc_processed << "% - " << feature_processed_count 
-                  << " rendered for " << feature_count << " queried for ";
-                s << std::setw(15 - (int)s.tellp()) << " layer '" << lay.name() << "' and style '" << s_name << "'\n";
-        
-            } else {
-                s << "" << std::setw(15) << "- no features returned from query for layer '" << lay.name() << "' and style '" << s_name << "'\n";
+        }
+        // We only have a single style and no grouping.
+        else
+        {
+            int i = 0;
+            BOOST_FOREACH (feature_type_style * style, active_styles)
+            {
+                featureset_ptr features = ds->features(q);
+                if (features) {
+                    render_style(lay, p, style, style_names[i++],
+                        features, prj_trans, scale_denom);
+                }
             }
-            std::clog << s.str();
-            #endif
-
         }
-        #if defined(RENDERING_STATS)
-        else {
-            style_timer.discard();
-            layer_timer.discard();
-        }
-        #endif
-        cache_features = false;
     }
-    
+
     #if defined(RENDERING_STATS)
         layer_timer.stop();
     #endif
 
-
     p.end_layer_processing(lay);
 }
+
+
+template <typename Processor>
+void feature_style_processor<Processor>::render_style(
+                    layer const& lay,
+                    Processor & p,
+                    feature_type_style* style,
+                    std::string const& style_name,
+                    featureset_ptr features,
+                    proj_transform const& prj_trans,
+                    double scale_denom)
+{
+    #if defined(RENDERING_STATS)
+    std::ostringstream s1;
+    s1 << "rendering style for layer: '" << lay.name()
+       << "' and style '" << style_name << "'";
+    mapnik::progress_timer style_timer(std::clog, s1.str());
+
+    int feature_processed_count = 0;
+    int feature_count = 0;
+    #endif
+
+    feature_ptr feature;
+    while ((feature = features->next()))
+    {
+        #if defined(RENDERING_STATS)
+        feature_count++;
+        bool feat_processed = false;
+        #endif
+
+        bool do_else = true;
+        bool do_also = false;
+
+        BOOST_FOREACH(rule * r, style->get_if_rules(scale_denom) )
+        {
+            expression_ptr const& expr=r->get_filter();
+            value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
+            if (result.to_bool())
+            {
+                #if defined(RENDERING_STATS)
+                feat_processed = true;
+                #endif
+
+                p.painted(true);
+
+                do_else=false;
+                do_also=true;
+                rule::symbolizers const& symbols = r->get_symbolizers();
+
+                // if the underlying renderer is not able to process the complete set of symbolizers,
+                // process one by one.
+#if defined(SVG_RENDERER)
+                if(!p.process(symbols,*feature,prj_trans))
+#endif
+                {
+
+                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                    {
+                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                    }
+                }
+                if (style->get_filter_mode() == FILTER_FIRST)
+                {
+                    // Stop iterating over rules and proceed with next feature.
+                    break;
+                }
+            }
+        }
+        if (do_else)
+        {
+            BOOST_FOREACH( rule * r, style->get_else_rules(scale_denom) )
+            {
+                #if defined(RENDERING_STATS)
+                feat_processed = true;
+                #endif
+
+                p.painted(true);
+
+                rule::symbolizers const& symbols = r->get_symbolizers();
+                // if the underlying renderer is not able to process the complete set of symbolizers,
+                // process one by one.
+#if defined(SVG_RENDERER)
+                if(!p.process(symbols,*feature,prj_trans))
+#endif
+                {
+                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                    {
+                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                    }
+                }
+            }
+        }
+        if (do_also)
+        {
+            BOOST_FOREACH( rule * r, style->get_also_rules(scale_denom) )
+            {
+                #if defined(RENDERING_STATS)
+                feat_processed = true;
+                #endif
+
+                p.painted(true);
+
+                rule::symbolizers const& symbols = r->get_symbolizers();
+                // if the underlying renderer is not able to process the complete set of symbolizers,
+                // process one by one.
+#if defined(SVG_RENDERER)
+                if(!p.process(symbols,*feature,prj_trans))
+#endif
+                {
+                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                    {
+                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                    }
+                }
+            }
+        }
+        #if defined(RENDERING_STATS)
+        if (feat_processed)
+            feature_processed_count++;
+        #endif
+    }
+
+    #if defined(RENDERING_STATS)
+    style_timer.stop();
+
+    // done with style
+    std::ostringstream s;
+    if (feature_count > 0) {
+        double perc_processed = ((double)feature_processed_count/(double)feature_count)*100.0;
+
+        s << "percent rendered: " << perc_processed << "% - " << feature_processed_count 
+          << " rendered for " << feature_count << " queried for ";
+        s << std::setw(15 - (int)s.tellp()) << " layer '" << lay.name() << "' and style '" << s_name << "'\n";
+
+    } else {
+        s << "" << std::setw(15) << "- no features returned from query for layer '" << lay.name() << "' and style '" << s_name << "'\n";
+    }
+    std::clog << s.str();
+    style_timer.discard();
+    #endif
+}
+
 
 #if defined(HAVE_CAIRO)
 template class feature_style_processor<cairo_renderer<Cairo::Context> >;

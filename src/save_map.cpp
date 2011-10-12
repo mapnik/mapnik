@@ -815,6 +815,11 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         set_attr/*<bool>*/( layer_node, "cache-features", layer.cache_features() );
     }
 
+    if ( layer.group_by() != "" || explicit_defaults )
+    {
+        set_attr( layer_node, "group-by", layer.group_by() );
+    }
+
     std::vector<std::string> const& style_names = layer.styles();
     for (unsigned i = 0; i < style_names.size(); ++i)
     {

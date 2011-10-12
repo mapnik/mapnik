@@ -181,6 +181,16 @@ public:
     bool cache_features() const; 
         
     /*!
+     * @param group_by Set the field rendering of this layer is grouped by.
+     */
+    void set_group_by(std::string column);
+
+    /*!
+     * @return The field rendering of this layer is grouped by.
+     */
+    std::string group_by() const;
+
+    /*!
      * @brief Attach a datasource for this layer.
      *
      * @param ds The datasource to attach.
@@ -212,6 +222,7 @@ private:
     bool queryable_;
     bool clear_label_cache_;
     bool cache_features_;
+    std::string group_by_;
     std::vector<std::string>  styles_;
     datasource_ptr ds_;
 };

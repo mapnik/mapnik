@@ -44,6 +44,7 @@ public:
     box2d<double> envelope() const;
     layer_descriptor get_descriptor() const;
     size_t size() const;
+    void clear();
 private:
     std::vector<feature_ptr> features_;
     mapnik::layer_descriptor desc_;
