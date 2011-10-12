@@ -37,6 +37,13 @@ public:
           pos_(ds.features_.begin()),
           end_(ds.features_.end())
     {}
+
+    memory_featureset(box2d<double> const& bbox, std::vector<feature_ptr> const& features)
+        : bbox_(bbox),
+          pos_(features.begin()),
+          end_(features.end())
+    {}
+
     virtual ~memory_featureset() {}
         
     feature_ptr next()
