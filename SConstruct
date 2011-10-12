@@ -381,7 +381,7 @@ opts.AddVariables(
     BoolVariable('FULL_LIB_PATH', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'True'),
     ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
-    EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spirit','libxml2']),
+    EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
     BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
@@ -1072,7 +1072,6 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
         env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
 
-    
     conf.parse_config('FREETYPE_CONFIG')
 
     # check if freetype links to bz2
@@ -1083,12 +1082,10 @@ if not preconfigured:
         if 'bz2' in temp_env['LIBS']:
             env['EXTRA_FREETYPE_LIBS'].append('bz2')
 
-    if env['XMLPARSER'] == 'tinyxml':
-        env['CPPPATH'].append('#tinyxml')
-        env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
-    elif env['XMLPARSER'] == 'libxml2':
-        if conf.parse_config('XML2_CONFIG'):
-            env['HAS_LIBXML2'] = True
+    # libxml2 should be optional but is currently not
+    # https://github.com/mapnik/mapnik/issues/913
+    if conf.parse_config('XML2_CONFIG'):
+        env['HAS_LIBXML2'] = True
 
     LIBSHEADERS = [
         ['m', 'math.h', True,'C'],
@@ -1252,8 +1249,8 @@ if not preconfigured:
     # we link locally
     
     if env['INTERNAL_LIBAGG']:
-        env.Prepend(CPPPATH = '#agg/include')
-        env.Prepend(LIBPATH = '#agg')
+        env.Prepend(CPPPATH = '#deps/agg/include')
+        env.Prepend(LIBPATH = '#deps/agg')
     else:
         env.ParseConfig('pkg-config --libs --cflags libagg')
 
@@ -1596,7 +1593,7 @@ if not HELP_REQUESTED:
         
     # Build agg first, doesn't need anything special
     if env['RUNTIME_LINK'] == 'shared' and env['INTERNAL_LIBAGG']:
-        SConscript('agg/build.py')
+        SConscript('deps/agg/build.py')
     
     # Build the core library
     SConscript('src/build.py')
