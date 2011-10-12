@@ -110,7 +110,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
         ren.set_opacity(sym.get_text_opacity());
 
         box2d<double> dims(0,0,width_,height_);
-        placement_finder<label_collision_detector4> finder(detector_,dims);
+        placement_finder<label_collision_detector4> finder(*detector_,dims);
 
         string_info info(text);
 
