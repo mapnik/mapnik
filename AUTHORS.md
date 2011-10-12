@@ -1,9 +1,10 @@
 ## Mapnik Contibutors
 
-Mapnik was written by Artem Pavlenko with contributions from:
+Mapnik is written by Artem Pavlenko with contributions from:
 
 Andy Allen
 AJ Ashton
+Matt Amos
 Lucio Asnaghi
 Justin Bronn
 Christopher Brown
@@ -31,7 +32,6 @@ Dennis Luxen
 Tom MacWright
 Michal Migurski
 Andrii Mishkovskyi
-Ben Moores
 Ben Moores
 Dražen Odobašić
 Cameron Patrick
