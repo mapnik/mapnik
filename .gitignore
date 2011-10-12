@@ -14,6 +14,8 @@ config.py
 .sconsign.dblite
 demo/viewer/viewer.ini
 tests/cpp_tests/font_registration_test
+tests/python_tests/raster_colorizer_test.png
+tests/python_tests/raster_colorizer_test_save.xml
 utils/mapnik-config/mapnik-config
 utils/mapnik-config/mapnik2.pc
 utils/shapeindex/shapeindex
