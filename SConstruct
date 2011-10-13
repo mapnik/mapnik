@@ -102,6 +102,7 @@ PLUGINS = { # plugins with external dependencies
 
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'csv':   {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'kismet':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             }
@@ -317,7 +318,8 @@ opts.AddVariables(
     ('PREFIX', 'The install path "prefix"', '/usr/local'),
     ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
-    ('PATH_INSERT', 'A custom path to append to the $PATH env to prioritize usage of shell programs like pkg-config will be used if multiple are present on the system', ''),
+    ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
+    ('PATH_REMOVE', 'A path prefix to exclude from all know command and compile paths', ''),
     
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -432,7 +434,8 @@ pickle_store = [# Scons internal variables
         'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
         'PKG_CONFIG_PATH',
-        'PATH_INSERT',
+        'PATH',
+        'PATH_REMOVE',
         'MAPNIK_LIB_DIR',
         'MAPNIK_LIB_DIR_DEST',
         'INSTALL_PREFIX',
@@ -1014,9 +1017,10 @@ if not preconfigured:
     if env['PKG_CONFIG_PATH']:
         env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
-    if env['PATH_INSERT']:
-        env['ENV']['PATH'] = os.path.realpath(env['PATH_INSERT']) + ':' + env['ENV']['PATH']
-    
+
+    if env['PATH']:
+        env['ENV']['PATH'] = os.path.realpath(env['PATH']) + ':' + env['ENV']['PATH']
+
     if env['SYSTEM_FONTS']:
         if not os.path.isdir(env['SYSTEM_FONTS']):
             color_print(1,'Warning: Directory specified for SYSTEM_FONTS does not exist!')
@@ -1562,8 +1566,19 @@ if not HELP_REQUESTED:
         env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
     
-    if env['PATH_INSERT']:
-        env['ENV']['PATH'] = os.path.realpath(env['PATH_INSERT']) + ':' + env['ENV']['PATH']
+    if env['PATH']:
+        env['ENV']['PATH'] = os.path.realpath(env['PATH']) + ':' + env['ENV']['PATH']
+
+    if env['PATH_REMOVE']:
+        p = env['PATH_REMOVE']
+        if p in env['ENV']['PATH']:
+            env['ENV']['PATH'].replace(p,'')
+        def rm_path(set):
+            for i in env[set]:
+                if p in i:
+                    env[set].remove(i)
+        rm_path('LIBPATH')
+        rm_path('CPPPATH')
 
     # export env so it is available in build.py files
     Export('env')
