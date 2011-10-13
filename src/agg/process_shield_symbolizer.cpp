@@ -229,12 +229,17 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
                     else if (geom.num_points() > 1 && how_placed == LINE_PLACEMENT)
                     {
-                        placement text_placement(info, sym, scale_factor_, label_ext.width(), label_ext.height(), true);
-                        
+                        placement text_placement(info, sym, scale_factor_, w, h, false);
+                        position const& pos = sym.get_displacement();
+
                         text_placement.avoid_edges = sym.get_avoid_edges();
+                        text_placement.additional_boxes.push_back(
+                           box2d<double>(-0.5 * label_ext.width() - boost::get<0>(pos),
+                                         -0.5 * label_ext.height() - boost::get<1>(pos),
+                                         0.5 * label_ext.width() - boost::get<0>(pos),
+                                         0.5 * label_ext.height() - boost::get<1>(pos)));
                         finder.find_point_placements<path_type>(text_placement, placement_options, path);
 
-                        position const&  pos = sym.get_displacement();
                         for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ ii)
                         {
                             double x = floor(text_placement.placements[ii].starting_x);
@@ -244,13 +249,13 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                             double ly = y - boost::get<1>(pos);
                             int px=int(floor(lx - (0.5*w))) + 1;
                             int py=int(floor(ly - (0.5*h))) + 1;
+                            label_ext.re_center(lx, ly);
 
                             render_marker(px,py,**marker,tr,sym.get_opacity());
 
-                            if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
-
                             box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
                             ren.render(x,y);
+                            if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                         }
                         finder.update_detector(text_placement);
                         if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
