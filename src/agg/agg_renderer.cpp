@@ -73,7 +73,7 @@
 
 // boost
 #include <boost/utility.hpp>
-
+#include <boost/make_shared.hpp>
 
 // stl
 #ifdef MAPNIK_DEBUG
@@ -121,7 +121,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(new label_collision_detector4(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
+      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
       ras_ptr(new rasterizer)
 {
    setup(m);

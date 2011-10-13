@@ -23,6 +23,7 @@
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
+#include <boost/make_shared.hpp>
 
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
@@ -32,6 +33,7 @@
 using mapnik::label_collision_detector4;
 using mapnik::box2d;
 using mapnik::Map;
+using boost::make_shared;
 
 namespace
 {
@@ -39,8 +41,7 @@ namespace
 boost::shared_ptr<label_collision_detector4> 
 create_label_collision_detector_from_extent(box2d<double> const &extent)
 {
-   return boost::shared_ptr<label_collision_detector4>(
-      new label_collision_detector4(extent));
+   return make_shared<label_collision_detector4>(extent);
 }
 
 boost::shared_ptr<label_collision_detector4> 
@@ -48,8 +49,7 @@ create_label_collision_detector_from_map(Map const &m)
 {
    double buffer = m.buffer_size();
    box2d<double> extent(-buffer, -buffer, m.width() + buffer, m.height() + buffer);
-   return boost::shared_ptr<label_collision_detector4>(
-      new label_collision_detector4(extent));
+   return make_shared<label_collision_detector4>(extent);
 }
 
 boost::python::list
