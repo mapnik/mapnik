@@ -154,7 +154,7 @@ public:
         int mode = SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
         if (sqlite3_open_v2 (file.c_str(), &db_, mode, NULL))
         #else
-        #warning "Mapnik's sqlite plugin is compiling against an version of sqlite older than 3.6.18 which may make rendering slow..."
+        #warning "Mapnik's sqlite plugin is compiling against a version of sqlite older than 3.6.18 which may make rendering slow..."
         if (sqlite3_open (file.c_str(), &db_))
         #endif
         {
