@@ -30,6 +30,7 @@
 #include <mapnik/utils.hpp>
 #include "connection.hpp"
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 
 #ifdef MAPNIK_THREADSAFE
@@ -111,7 +112,7 @@ public:
         if (pools_.find(creator.id())==pools_.end())
         {
             return pools_.insert(std::make_pair(creator.id(),
-                                                boost::shared_ptr<PoolType>(new PoolType(creator,initialSize,maxSize)))).second;
+                                                boost::make_shared<PoolType>(creator,initialSize,maxSize))).second;
         }
 
         return false;
