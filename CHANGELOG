@@ -11,7 +11,7 @@ Developers: Please commit along with changes.
 For a complete change history, see the SVN log.
 
 
-Mapnik 2.1.0
+Mapnik 2.0.1
 ------------
 
 - Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
