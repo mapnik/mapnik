@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik 2.1.0
 ------------
 
+- New CSV plugin - reads tabular files - autodetecting geo columns, newlines, and delimiters. Uses in-memory featureset for fast rendering and is not designed for large files (#902)
+
 - Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
 
 
