@@ -39,6 +39,7 @@ class csv_datasource : public mapnik::datasource
       mutable std::string manual_headers_;
       mutable bool strict_;
       mutable bool quiet_;
+      mutable double filesize_max_;
 };
 
 

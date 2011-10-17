@@ -47,7 +47,8 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
       headers_(),
       manual_headers_(boost::trim_copy(*params_.get<std::string>("headers",""))),
       strict_(*params_.get<mapnik::boolean>("strict",false)),
-      quiet_(*params_.get<mapnik::boolean>("quiet",false))
+      quiet_(*params_.get<mapnik::boolean>("quiet",false)),
+      filesize_max_(*params_.get<float>("filesize_max",20.0)) // MB
 {
     /* TODO:
       general:
@@ -125,11 +126,25 @@ void csv_datasource::parse_csv(T& stream,
                                std::string const& separator,
                                std::string const& quote) const
 {
-    // TODO - throw if file is to big to read into memory
-    //stream.seekg (0, std::ios::end);
-    //file_length_ = stream.tellg();
-    // set back to start
-    //stream.seekg (0, std::ios::beg);
+    if (filesize_max_ > 0)
+    {
+        stream.seekg (0, std::ios::end);
+        int file_length_ = stream.tellg();
+        double file_mb = static_cast<double>(file_length_)/1048576;
+        
+        // throw if this is an unreasonably large file to read into memory
+        if (file_mb > filesize_max_)
+        {
+            std::ostringstream s;
+            s << "CSV Plugin: csv file is greater than " << filesize_max_ << "MB "
+              << " - you should use a more efficient data format like sqlite, postgis or a shapefile "
+              << " to render this data (set 'filesize_max=0' to disable this restriction if you have lots of memory)";
+            throw mapnik::datasource_exception(s.str());
+        }
+        
+        // set back to start
+        stream.seekg (0, std::ios::beg);
+    }
 
     char newline;
     std::string csv_line;
@@ -332,6 +347,15 @@ void csv_datasource::parse_csv(T& stream,
             break;
         }
 
+        // skip blank lines
+        if (csv_line.empty()){
+            ++line_number;
+            continue;
+#ifdef MAPNIK_DEBUG
+            std::clog << "CSV Plugin: empty row encountered at line: " << line_number << "\n";
+#endif
+        }
+
         try
         {
             ETokenizer tok(csv_line, grammer);
@@ -349,18 +373,6 @@ void csv_datasource::parse_csv(T& stream,
                 }
             }
     
-            std::string val = boost::trim_copy(*beg);
-    
-            // skip lines with leading blanks (assume whole line is empty)
-            // TODO - test this more!
-            if (val.empty()){
-                ++line_number;
-                continue;
-    #ifdef MAPNIK_DEBUG
-                std::clog << "CSV Plugin: empty row encountered at line: " << line_number << "\n";
-    #endif
-            }
-            
             mapnik::feature_ptr feature(mapnik::feature_factory::create(feature_count));
             double x(0);
             double y(0);
