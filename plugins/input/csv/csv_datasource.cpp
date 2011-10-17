@@ -54,7 +54,6 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
       general:
         - refactor parser into generic class
         - tests
-        - clean up double usage of Tokenizer types
       alternate large file pipeline:
         - stat file, detect > 15 MB
         - build up csv line-by-line iterator
@@ -192,7 +191,6 @@ void csv_datasource::parse_csv(T& stream,
     }
     
     typedef boost::escaped_list_separator<char> escape_type;
-    typedef boost::char_separator<char> separator_type;
 
     std::string esc = boost::trim_copy(escape);
     if (esc.empty()) esc = "\\";
@@ -217,8 +215,7 @@ void csv_datasource::parse_csv(T& stream,
         throw mapnik::datasource_exception(s.str());
     }
     
-    typedef boost::tokenizer< separator_type > Tokenizer;
-    typedef boost::tokenizer< escape_type > ETokenizer;
+    typedef boost::tokenizer< escape_type > Tokenizer;
 
     int line_number(1);
     bool has_wkt_field = false;
@@ -230,9 +227,7 @@ void csv_datasource::parse_csv(T& stream,
 
     if (!manual_headers_.empty())
     {
-        //escape_type grammer2(esc, ",", quo);
-        separator_type sep(",");
-        Tokenizer tok(manual_headers_, sep);
+        Tokenizer tok(manual_headers_, grammer);
         Tokenizer::iterator beg = tok.begin();
         unsigned idx(0);
         for (; beg != tok.end(); ++beg)
@@ -264,8 +259,7 @@ void csv_datasource::parse_csv(T& stream,
         {
             try
             {
-                separator_type sep(",","",boost::keep_empty_tokens);
-                Tokenizer tok(csv_line, sep);
+                Tokenizer tok(csv_line, grammer);
                 Tokenizer::iterator beg = tok.begin();
                 std::string val = boost::trim_copy(*beg);
                 
@@ -358,8 +352,8 @@ void csv_datasource::parse_csv(T& stream,
 
         try
         {
-            ETokenizer tok(csv_line, grammer);
-            ETokenizer::iterator beg = tok.begin();
+            Tokenizer tok(csv_line, grammer);
+            Tokenizer::iterator beg = tok.begin();
     
             // early return for strict mode
             if (strict_)
