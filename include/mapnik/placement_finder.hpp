@@ -77,6 +77,10 @@ struct placement : boost::noncopyable
     std::pair<double, double> dimensions;
     bool collect_extents;
     box2d<double> extents;
+
+    // additional boxes attached to the text labels which must also be
+    // placed in order for the text placement to succeed. e.g: shields.
+    std::vector<box2d<double> > additional_boxes;
 };
 
 

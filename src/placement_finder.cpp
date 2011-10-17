@@ -38,6 +38,7 @@
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/foreach.hpp>
 
 //stl
 #include <string>
@@ -480,6 +481,23 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
             c_envelopes.push(e);  // add character's envelope to temp storage
         }
         x += cwidth;  // move position to next character
+    }
+
+    // check the placement of any additional envelopes
+    if (!p.allow_overlap && !p.additional_boxes.empty())
+    {
+       BOOST_FOREACH(box2d<double> box, p.additional_boxes) 
+       {
+          box2d<double> pt(box.minx() + current_placement->starting_x,
+                           box.miny() + current_placement->starting_y,
+                           box.maxx() + current_placement->starting_x,
+                           box.maxy() + current_placement->starting_y);
+
+          // abort the whole placement if the additional envelopes can't be placed.
+          if (!detector_.has_point_placement(pt, p.minimum_distance)) return;
+
+          c_envelopes.push(pt);
+       }
     }
 
     // since there was no early exit, add the character envelopes to the placements' envelopes
