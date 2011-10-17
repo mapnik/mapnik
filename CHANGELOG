@@ -11,7 +11,14 @@ Developers: Please commit along with changes.
 For a complete change history, see the SVN log.
 
 
-Mapnik Trunk
+Mapnik 2.1.0
+------------
+
+- Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
+
+
+
+Mapnik 2.0.0
 ------------
 
 - Add minimum-path-length property to text_symbolizer to allow labels to be placed only on lines of a certain length (#865)
