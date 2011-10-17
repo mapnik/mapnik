@@ -26,6 +26,7 @@
 #define CONNECTION_HPP
 
 #include <mapnik/datasource.hpp>
+#include <boost/make_shared.hpp>
 
 extern "C" 
 {
@@ -98,7 +99,7 @@ class Connection
              throw mapnik::datasource_exception( s.str() );
          }
 
-         return boost::shared_ptr<ResultSet>(new ResultSet(result));
+         return boost::make_shared<ResultSet>(result);
       }
       
       std::string client_encoding() const
