@@ -45,8 +45,9 @@ namespace mapnik
  */
 enum wkbFormat
 {
-    wkbGeneric=1,
-    wkbSpatiaLite=2
+    wkbAuto=1,
+    wkbGeneric=2,
+    wkbSpatiaLite=3
 };
 
 class MAPNIK_DECL geometry_utils 
