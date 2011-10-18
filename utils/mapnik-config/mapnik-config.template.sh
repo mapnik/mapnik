@@ -48,11 +48,11 @@ while test $# -gt 0; do
       ;;
 
     -v)
-      echo $CONFIG_VERSION
+      echo $CONFIG_MAPNIK_VERSION
       ;;
 
     --version)
-      echo $CONFIG_VERSION
+      echo $CONFIG_MAPNIK_VERSION
       ;;
 
     --json)
