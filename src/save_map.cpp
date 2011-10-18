@@ -249,7 +249,10 @@ namespace mapnik
             {
                 const std::string & name = sym.get_name();
                 if ( ! name.empty() ) {
-                    set_attr( node, "name", name );
+                    //set_attr( node, "name", name );
+                    // mapnik2 forward compatibility
+                    ptree& text_node = node.push_back(ptree::value_type("<xmltext>", ptree()))->second;
+                    text_node.put_own(name);
                 }
                 const std::string & face_name = sym.get_face_name();
                 if ( ! face_name.empty() ) {
