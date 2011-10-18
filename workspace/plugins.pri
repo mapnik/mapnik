@@ -1,5 +1,6 @@
 
 HEADERS += \
+  $$PWD/../plugins/input/csv/csv_datasource.hpp \
   $$PWD/../plugins/input/gdal/gdal_featureset.hpp \
   $$PWD/../plugins/input/gdal/gdal_datasource.hpp \
   $$PWD/../plugins/input/kismet/kismet_featureset.hpp \
@@ -47,6 +48,7 @@ HEADERS += \
   $$PWD/../plugins/input/sqlite/sqlite_types.hpp
 
 SOURCES += \
+  $$PWD/../plugins/input/csv/csv_datasource.cpp \
   $$PWD/../plugins/input/gdal/gdal_featureset.cpp \
   $$PWD/../plugins/input/gdal/gdal_datasource.cpp \
   $$PWD/../plugins/input/kismet/kismet_featureset.cpp \
