@@ -287,11 +287,18 @@ void sqlite_datasource::bind() const
             }
 
             // see 2.1 "Column Affinity" at http://www.sqlite.org/datatype3.html
+            // TODO - refactor this somehow ?
             if (geometry_field_.empty()
-                && (boost::algorithm::contains(fld_type, "geom") ||
-                    boost::algorithm::contains(fld_type, "point") ||
-                    boost::algorithm::contains(fld_type, "linestring") ||
-                    boost::algorithm::contains(fld_type, "polygon")))
+                && ((boost::algorithm::contains(fld_type, "geom") ||
+                     boost::algorithm::contains(fld_type, "point") ||
+                     boost::algorithm::contains(fld_type, "linestring") ||
+                     boost::algorithm::contains(fld_type, "polygon"))
+                ||
+                    (boost::algorithm::icontains(fld_name, "geom") ||
+                     boost::algorithm::icontains(fld_name, "point") ||
+                     boost::algorithm::icontains(fld_name, "linestring") ||
+                     boost::algorithm::icontains(fld_name, "polygon")))
+               )
             {
                 geometry_field_ = std::string(fld_name);
             }
