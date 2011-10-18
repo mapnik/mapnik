@@ -8,7 +8,7 @@
 
   <Layer name="lay" srs="+proj=longlat +ellps=airy +datum=OSGB36 +no_defs">
     <StyleName>test</StyleName>
-    <Datasource base="shp">
+    <Datasource>
       <Parameter name="type">shape</Parameter>
       <Parameter name="file">../../data/shp/poly.shp</Parameter>
     </Datasource>

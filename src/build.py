@@ -60,8 +60,9 @@ lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
 
-if env['XMLPARSER'] == 'libxml2':
-    lib_env['LIBS'].append('xml2')
+# libxml2 should be optional but is currently not
+# https://github.com/mapnik/mapnik/issues/913
+lib_env['LIBS'].append('xml2')
 
 if env['THREADING'] == 'multi':
     lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
@@ -228,7 +229,7 @@ source += Split(
     )
 
 if env['RUNTIME_LINK'] == "static":
-    source += glob.glob('../agg/src/' + '*.cpp')
+    source += glob.glob('../deps/agg/src/' + '*.cpp')
 
 # grid backend
 source += Split(
@@ -269,15 +270,7 @@ if env['SVG_RENDERER']: # svg backend
     lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
     libmapnik_cxxflags.append('-DSVG_RENDERER')
 
-if env['XMLPARSER'] == 'tinyxml':
-    source += Split(
-        """
-        ../tinyxml/tinystr.cpp
-        ../tinyxml/tinyxml.cpp
-        ../tinyxml/tinyxmlerror.cpp
-        ../tinyxml/tinyxmlparser.cpp
-        """)
-elif env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
+if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     source += Split(
         """
         libxml2_loader.cpp

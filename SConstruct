@@ -102,7 +102,9 @@ PLUGINS = { # plugins with external dependencies
 
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'csv':   {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'csv':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'kismet':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             }
 
@@ -317,7 +319,8 @@ opts.AddVariables(
     ('PREFIX', 'The install path "prefix"', '/usr/local'),
     ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
-    ('PATH_INSERT', 'A custom path to append to the $PATH env to prioritize usage of shell programs like pkg-config will be used if multiple are present on the system', ''),
+    ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
+    ('PATH_REMOVE', 'A path prefix to exclude from all know command and compile paths', ''),
     
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -381,7 +384,7 @@ opts.AddVariables(
     BoolVariable('FULL_LIB_PATH', 'Use the full path for the libmapnik.dylib "install_name" when linking on Mac OS X', 'True'),
     ListVariable('BINDINGS','Language bindings to build','all',['python']),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
-    EnumVariable('XMLPARSER','Set xml parser ','libxml2', ['tinyxml','spirit','libxml2']),
+    EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
     BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
@@ -432,7 +435,8 @@ pickle_store = [# Scons internal variables
         'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
         'PKG_CONFIG_PATH',
-        'PATH_INSERT',
+        'PATH',
+        'PATH_REMOVE',
         'MAPNIK_LIB_DIR',
         'MAPNIK_LIB_DIR_DEST',
         'INSTALL_PREFIX',
@@ -1014,9 +1018,10 @@ if not preconfigured:
     if env['PKG_CONFIG_PATH']:
         env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
-    if env['PATH_INSERT']:
-        env['ENV']['PATH'] = os.path.realpath(env['PATH_INSERT']) + ':' + env['ENV']['PATH']
-    
+
+    if env['PATH']:
+        env['ENV']['PATH'] = os.path.realpath(env['PATH']) + ':' + env['ENV']['PATH']
+
     if env['SYSTEM_FONTS']:
         if not os.path.isdir(env['SYSTEM_FONTS']):
             color_print(1,'Warning: Directory specified for SYSTEM_FONTS does not exist!')
@@ -1072,7 +1077,6 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
         env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
 
-    
     conf.parse_config('FREETYPE_CONFIG')
 
     # check if freetype links to bz2
@@ -1083,12 +1087,10 @@ if not preconfigured:
         if 'bz2' in temp_env['LIBS']:
             env['EXTRA_FREETYPE_LIBS'].append('bz2')
 
-    if env['XMLPARSER'] == 'tinyxml':
-        env['CPPPATH'].append('#tinyxml')
-        env.Append(CXXFLAGS = '-DBOOST_PROPERTY_TREE_XML_PARSER_TINYXML -DTIXML_USE_STL')
-    elif env['XMLPARSER'] == 'libxml2':
-        if conf.parse_config('XML2_CONFIG'):
-            env['HAS_LIBXML2'] = True
+    # libxml2 should be optional but is currently not
+    # https://github.com/mapnik/mapnik/issues/913
+    if conf.parse_config('XML2_CONFIG'):
+        env['HAS_LIBXML2'] = True
 
     LIBSHEADERS = [
         ['m', 'math.h', True,'C'],
@@ -1252,8 +1254,8 @@ if not preconfigured:
     # we link locally
     
     if env['INTERNAL_LIBAGG']:
-        env.Prepend(CPPPATH = '#agg/include')
-        env.Prepend(LIBPATH = '#agg')
+        env.Prepend(CPPPATH = '#deps/agg/include')
+        env.Prepend(LIBPATH = '#deps/agg')
     else:
         env.ParseConfig('pkg-config --libs --cflags libagg')
 
@@ -1565,8 +1567,19 @@ if not HELP_REQUESTED:
         env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
         # otherwise this variable == os.environ["PKG_CONFIG_PATH"]
     
-    if env['PATH_INSERT']:
-        env['ENV']['PATH'] = os.path.realpath(env['PATH_INSERT']) + ':' + env['ENV']['PATH']
+    if env['PATH']:
+        env['ENV']['PATH'] = os.path.realpath(env['PATH']) + ':' + env['ENV']['PATH']
+
+    if env['PATH_REMOVE']:
+        p = env['PATH_REMOVE']
+        if p in env['ENV']['PATH']:
+            env['ENV']['PATH'].replace(p,'')
+        def rm_path(set):
+            for i in env[set]:
+                if p in i:
+                    env[set].remove(i)
+        rm_path('LIBPATH')
+        rm_path('CPPPATH')
 
     # export env so it is available in build.py files
     Export('env')
@@ -1596,7 +1609,7 @@ if not HELP_REQUESTED:
         
     # Build agg first, doesn't need anything special
     if env['RUNTIME_LINK'] == 'shared' and env['INTERNAL_LIBAGG']:
-        SConscript('agg/build.py')
+        SConscript('deps/agg/build.py')
     
     # Build the core library
     SConscript('src/build.py')
