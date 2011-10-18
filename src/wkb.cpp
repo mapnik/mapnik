@@ -71,8 +71,7 @@ public:
           if (size > 38
               && wkb_[0] == 0x00
               && (wkb_[1] == 0x00 || wkb_[1] == 0x01)
-              && wkb_[38] == 0x7C
-              && wkb_[size - 1] == 0xFE)
+              && wkb_[38] == 0x7C)
           {
               format_ = wkbSpatiaLite;
           }
