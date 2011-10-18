@@ -280,10 +280,10 @@ void sqlite_datasource::bind() const
             boost::algorithm::to_lower(fld_type);
 
             // TODO - how to handle primary keys on multiple columns ?
-            if (! found_pk && fld_pk != 0 && key_field_.empty())
+            if (key_field_.empty() && ! found_pk && fld_pk != 0)
             {
-              key_field_ = fld_name;
-              found_pk = true;
+                key_field_ = fld_name;
+                found_pk = true;
             }
 
             // see 2.1 "Column Affinity" at http://www.sqlite.org/datatype3.html
