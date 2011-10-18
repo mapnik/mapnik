@@ -24,6 +24,9 @@
 #ifndef SQLITE_TYPES_HPP
 #define SQLITE_TYPES_HPP
 
+// stdc++
+#include <string.h>
+
 // mapnik
 #include <mapnik/datasource.hpp>
 
@@ -34,6 +37,22 @@
 extern "C" {
   #include <sqlite3.h>
 }
+
+
+//==============================================================================
+
+class sqlite_utils
+{
+public:
+
+    static void dequote(std::string& s)
+    {
+        if (s[0] == '[' || s[0] == '\'' || s[0] == '"' || s[0] == '`')
+        {
+            s = s.substr(1, s.length() - 1);
+        }
+    }
+};
 
 
 //==============================================================================

@@ -67,9 +67,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
      metadata_(*params_.get<std::string>("metadata","")),
      geometry_table_(*params_.get<std::string>("geometry_table","")),
      geometry_field_(*params_.get<std::string>("geometry_field","")),
-     // index_table_ defaults to "idx_{geometry_table_}_{geometry_field_}"
      index_table_(*params_.get<std::string>("index_table","")),
-     // http://www.sqlite.org/lang_createtable.html#rowid
      key_field_(*params_.get<std::string>("key_field","")),
      row_offset_(*params_.get<int>("row_offset",0)),
      row_limit_(*params_.get<int>("row_limit",0)),
@@ -94,65 +92,6 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     }
 }
 
-void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
-{
-    boost::char_separator<char> sep(",");
-    boost::tokenizer<boost::char_separator<char> > tok(attachdb, sep);
-    
-    // The attachdb line is a comma sparated list of [dbname@]filename
-    for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin(); 
-         beg != tok.end(); ++beg)
-    {
-        std::string const& spec(*beg);
-        size_t atpos = spec.find('@');
-        
-        // See if it contains an @ sign
-        if (atpos == spec.npos)
-        {
-            throw datasource_exception("attachdb parameter has syntax dbname@filename[,...]");
-        }
-        
-        // Break out the dbname and the filename
-        std::string dbname = boost::trim_copy(spec.substr(0, atpos));
-        std::string filename = boost::trim_copy(spec.substr(atpos+1));
-        
-        // Normalize the filename and make it relative to dataset_name_
-        if (filename.compare(":memory:") != 0)
-        {
-            boost::filesystem::path child_path(filename);
-            
-            // It is a relative path.  Fix it.
-            if (! child_path.has_root_directory() && ! child_path.has_root_name())
-            {
-                boost::filesystem::path absolute_path(dataset_name_);
-
-                // support symlinks
-            #if (BOOST_FILESYSTEM_VERSION == 3)
-                if (boost::filesystem::is_symlink(absolute_path))
-                {
-                    absolute_path = boost::filesystem::read_symlink(absolute_path);
-                }
-
-                filename = boost::filesystem::absolute(absolute_path.parent_path() / filename).string();
-
-            #else
-                if (boost::filesystem::is_symlink(absolute_path))
-                {
-                    //cannot figure out how to resolve on in v2 so just print a warning
-                    std::clog << "###Warning: '" << absolute_path.string() << "' is a symlink which is not supported in attachdb\n";
-                }
-
-                filename = boost::filesystem::complete(absolute_path.branch_path() / filename).normalize().string();
-
-            #endif
-            }
-        }
-        
-        // And add an init_statement_
-        init_statements_.push_back("attach database '" + filename + "' as " + dbname);
-    }
-}
-
 void sqlite_datasource::bind() const
 {
     if (is_bound_) return;
@@ -160,6 +99,10 @@ void sqlite_datasource::bind() const
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (! file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
     
+    // Be careful, automatically using rowid as key field of the table can lead
+    // to misleading results http://www.gaia-gis.it/spatialite-2.4.0-5/SpatialIndex-Update.pdf
+    // TODO - We should try to avoid this and eventually force to specify a valid table primary key
+
     boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
     if (key_field_name)
     {
@@ -231,9 +174,9 @@ void sqlite_datasource::bind() const
     for (std::vector<std::string>::const_iterator iter = init_statements_.begin();
          iter!=init_statements_.end(); ++iter)
     {
-#ifdef MAPNIK_DEBUG
+    #ifdef MAPNIK_DEBUG
         std::clog << "Sqlite Plugin: Execute init sql: " << *iter << std::endl;
-#endif
+    #endif
         dataset_->execute(*iter);
     }
     
@@ -297,9 +240,9 @@ void sqlite_datasource::bind() const
                     break;
                      
                 default:
-#ifdef MAPNIK_DEBUG
+                #ifdef MAPNIK_DEBUG
                     std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
+                #endif
                     break;
                 }
             }
@@ -365,7 +308,7 @@ void sqlite_datasource::bind() const
                     desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
                 }
             }
-#ifdef MAPNIK_DEBUG
+        #ifdef MAPNIK_DEBUG
             else
             {
                 // "Column Affinity" says default to "Numeric" but for now we pass..
@@ -378,7 +321,7 @@ void sqlite_datasource::bind() const
                           << "' unhandled due to unknown type: "
                           << fld_type << std::endl;
             }
-#endif
+        #endif
         }
 
         if (! found_table)
@@ -414,23 +357,25 @@ void sqlite_datasource::bind() const
         std::ostringstream s;
         s << "SELECT pkid,xmin,xmax,ymin,ymax FROM " << index_table_;
         s << " LIMIT 0";
+
         if (dataset_->execute_with_code(s.str()) == SQLITE_OK)
         {
             has_spatial_index_ = true;
         }
-        #ifdef MAPNIK_DEBUG
+    #ifdef MAPNIK_DEBUG
         else
         {
             std::clog << "SQLite Plugin: rtree index lookup did not succeed: '" << sqlite3_errmsg(*(*dataset_)) << "'\n";
         }
-        #endif
+    #endif
     }
 
-    if (metadata_ != "" && ! extent_initialized_)
+    if (! metadata_.empty() && ! extent_initialized_)
     {
         std::ostringstream s;
         s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata_;
         s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table_ << "')";
+
         boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
         if (rs->is_valid() && rs->step_next())
         {
@@ -449,10 +394,11 @@ void sqlite_datasource::bind() const
         std::ostringstream s;
         s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM " 
         << index_table_;
+
         boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
         if (rs->is_valid() && rs->step_next())
         {
-            if (!rs->column_isnull(0))
+            if (! rs->column_isnull(0))
             {
                 try 
                 {
@@ -473,11 +419,8 @@ void sqlite_datasource::bind() const
     }
 
 #ifdef MAPNIK_DEBUG
-    if (! has_spatial_index_
-        && use_spatial_index_ 
-        && using_subquery_
-        && key_field_ == "rowid"
-        && ! boost::algorithm::icontains(table_,"rowid"))
+    if (! has_spatial_index_ && use_spatial_index_ && using_subquery_
+        && key_field_ == "rowid" && ! boost::algorithm::icontains(table_, "rowid"))
     {
        // this is an impossible situation because rowid will be null via a subquery
        std::clog << "Sqlite Plugin: WARNING: spatial index usage will fail because rowid "
@@ -493,7 +436,6 @@ void sqlite_datasource::bind() const
     if (! extent_initialized_ || ! has_spatial_index_)
     {
         std::ostringstream s;
-        
         s << "SELECT " << geometry_field_ << "," << key_field_
           << " FROM " << geometry_table_;
 
@@ -514,22 +456,31 @@ void sqlite_datasource::bind() const
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
         
         // spatial index sql
-        std::string spatial_index_sql = "create virtual table " + index_table_ 
-            + " using rtree(pkid, xmin, xmax, ymin, ymax)";
-        std::string spatial_index_insert_sql = "insert into " + index_table_
-            + " values (?,?,?,?,?)" ;
-        sqlite3_stmt* stmt = 0;
+        std::ostringstream spatial_index_sql;
+        spatial_index_sql << "create virtual table " << index_table_
+                          << " using rtree(pkid, xmin, xmax, ymin, ymax)";
 
+        std::ostringstream spatial_index_insert_sql;
+        spatial_index_insert_sql << "insert into " << index_table_
+                                 << " values (?,?,?,?,?)";
+
+        sqlite3_stmt* stmt = 0;
         if (use_spatial_index_)
         {
-            dataset_->execute(spatial_index_sql);
-            int rc = sqlite3_prepare_v2 (*(*dataset_), spatial_index_insert_sql.c_str(), -1, &stmt, 0);
+            dataset_->execute(spatial_index_sql.str());
+
+            const int rc = sqlite3_prepare_v2 (*(*dataset_),
+                                               spatial_index_insert_sql.str().c_str(),
+                                               -1,
+                                               &stmt,
+                                               0);
             if (rc != SQLITE_OK)
             {
                 std::ostringstream index_error;
                 index_error << "Sqlite Plugin: auto-index table creation failed: '"
                             << sqlite3_errmsg(*(*dataset_)) << "' query was: "
                             << spatial_index_insert_sql;
+
                 throw datasource_exception(index_error.str());
             }
         }
@@ -547,6 +498,7 @@ void sqlite_datasource::bind() const
                 mapnik::feature_ptr feature(mapnik::feature_factory::create(0));
                 mapnik::geometry_utils::from_wkb(feature->paths(), data, size, multiple_geometries_, format_);
                 mapnik::box2d<double> const& bbox = feature->envelope();
+
                 if (bbox.valid())
                 {
                     extent_initialized_ = true;
@@ -570,19 +522,20 @@ void sqlite_datasource::bind() const
                             type_error << "Sqlite Plugin: invalid type for key field '"
                                 << key_field_ << "' when creating index '" << index_table_ 
                                 << "' type was: " << type_oid << "";
+
                             throw datasource_exception(type_error.str());
                         }
     
-                        sqlite_int64 pkid = rs->column_integer64(1);
-                        if (sqlite3_bind_int64(stmt, 1 , pkid ) != SQLITE_OK)
+                        const sqlite_int64 pkid = rs->column_integer64(1);
+                        if (sqlite3_bind_int64(stmt, 1, pkid) != SQLITE_OK)
                         {
                             throw datasource_exception("invalid value for for key field while generating index");
                         }
 
-                        if ((sqlite3_bind_double(stmt, 2 , bbox.minx() ) != SQLITE_OK) ||
-                            (sqlite3_bind_double(stmt, 3 , bbox.maxx() ) != SQLITE_OK) ||
-                            (sqlite3_bind_double(stmt, 4 , bbox.miny() ) != SQLITE_OK) ||
-                            (sqlite3_bind_double(stmt, 5 , bbox.maxy() ) != SQLITE_OK))
+                        if ((sqlite3_bind_double(stmt, 2, bbox.minx()) != SQLITE_OK) ||
+                            (sqlite3_bind_double(stmt, 3, bbox.maxx()) != SQLITE_OK) ||
+                            (sqlite3_bind_double(stmt, 4, bbox.miny()) != SQLITE_OK) ||
+                            (sqlite3_bind_double(stmt, 5, bbox.maxy()) != SQLITE_OK))
                         {
                             throw datasource_exception("invalid value for for extent while generating index");
                         }
@@ -613,20 +566,21 @@ void sqlite_datasource::bind() const
             }
         }
         
-        int res = sqlite3_finalize(stmt);
+        const int res = sqlite3_finalize(stmt);
         if (res != SQLITE_OK)
         {
             throw datasource_exception("auto-indexing failed: set use_spatial_index=false to disable auto-indexing and avoid this error");
         }
     }
 
-    if (!extent_initialized_)
+    if (! extent_initialized_)
     {
         std::ostringstream s;
         s << "Sqlite Plugin: extent could not be determined for table '" 
           << geometry_table_ << "' and geometry field '" << geometry_field_ << "'"
           << " because an rtree spatial index is missing or empty."
           << " - either set the table 'extent' or create an rtree spatial index";
+
         throw datasource_exception(s.str());
     }
     
@@ -638,6 +592,65 @@ sqlite_datasource::~sqlite_datasource()
     if (is_bound_) 
     {
         delete dataset_;
+    }
+}
+
+void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
+{
+    boost::char_separator<char> sep(",");
+    boost::tokenizer<boost::char_separator<char> > tok(attachdb, sep);
+
+    // The attachdb line is a comma sparated list of [dbname@]filename
+    for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
+         beg != tok.end(); ++beg)
+    {
+        std::string const& spec(*beg);
+        size_t atpos = spec.find('@');
+
+        // See if it contains an @ sign
+        if (atpos == spec.npos)
+        {
+            throw datasource_exception("attachdb parameter has syntax dbname@filename[,...]");
+        }
+
+        // Break out the dbname and the filename
+        std::string dbname = boost::trim_copy(spec.substr(0, atpos));
+        std::string filename = boost::trim_copy(spec.substr(atpos + 1));
+
+        // Normalize the filename and make it relative to dataset_name_
+        if (filename.compare(":memory:") != 0)
+        {
+            boost::filesystem::path child_path(filename);
+
+            // It is a relative path.  Fix it.
+            if (! child_path.has_root_directory() && ! child_path.has_root_name())
+            {
+                boost::filesystem::path absolute_path(dataset_name_);
+
+                // support symlinks
+            #if (BOOST_FILESYSTEM_VERSION == 3)
+                if (boost::filesystem::is_symlink(absolute_path))
+                {
+                    absolute_path = boost::filesystem::read_symlink(absolute_path);
+                }
+
+                filename = boost::filesystem::absolute(absolute_path.parent_path() / filename).string();
+
+            #else
+                if (boost::filesystem::is_symlink(absolute_path))
+                {
+                    //cannot figure out how to resolve on in v2 so just print a warning
+                    std::clog << "###Warning: '" << absolute_path.string() << "' is a symlink which is not supported in attachdb\n";
+                }
+
+                filename = boost::filesystem::complete(absolute_path.branch_path() / filename).normalize().string();
+
+            #endif
+            }
+        }
+
+        // And add an init_statement_
+        init_statements_.push_back("attach database '" + filename + "' as " + dbname);
     }
 }
 
@@ -725,10 +738,10 @@ featureset_ptr sqlite_datasource::features(query const& q) const
             s << " OFFSET " << row_offset_;
         }
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Sqlite Plugin: table_: " << table_ << "\n\n";
+    #ifdef MAPNIK_DEBUG
+        std::clog << "Sqlite Plugin: table: " << table_ << "\n\n";
         std::clog << "Sqlite Plugin: query:" << s.str() << "\n\n";
-#endif
+    #endif
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
@@ -799,9 +812,9 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
             s << " OFFSET " << row_offset_;
         }
 
-#ifdef MAPNIK_DEBUG
+    #ifdef MAPNIK_DEBUG
         std::clog << "Sqlite Plugin: " << s.str() << std::endl;
-#endif
+    #endif
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
