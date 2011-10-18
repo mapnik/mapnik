@@ -402,7 +402,7 @@ void sqlite_datasource::bind() const
         throw datasource_exception("Sqlite Plugin: cannot detect geometry_field, please supply the name of the geometry_field to use.");
     }
 
-    if (index_table_.size() == 0)
+    if (index_table_.empty())
     {
         // Generate implicit index_table name - need to do this after
         // we have discovered meta-data or else we don't know the column name
@@ -426,7 +426,7 @@ void sqlite_datasource::bind() const
         #endif
     }
 
-    if (metadata_ != "" && !extent_initialized_)
+    if (metadata_ != "" && ! extent_initialized_)
     {
         std::ostringstream s;
         s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata_;
