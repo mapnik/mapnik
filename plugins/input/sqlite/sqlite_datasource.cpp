@@ -106,19 +106,7 @@ void sqlite_datasource::bind() const
     boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
     if (key_field_name)
     {
-        std::string const& key_field_string = *key_field_name;
-        if (key_field_string.empty())
-        {
-            key_field_ = "rowid";
-        }
-        else
-        {
-            key_field_ = key_field_string;
-        }
-    }
-    else
-    {
-        key_field_ = "rowid";
+        key_field_ = *key_field_name;
     }
     
     boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
@@ -132,8 +120,8 @@ void sqlite_datasource::bind() const
             format_ = mapnik::wkbAuto;
     }
 
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
-    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
+    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries", false);
+    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index", true);
     has_spatial_index_ = false;
     using_subquery_ = false;
 
@@ -172,7 +160,7 @@ void sqlite_datasource::bind() const
 
     // Execute init_statements_
     for (std::vector<std::string>::const_iterator iter = init_statements_.begin();
-         iter!=init_statements_.end(); ++iter)
+         iter != init_statements_.end(); ++iter)
     {
     #ifdef MAPNIK_DEBUG
         std::clog << "Sqlite Plugin: Execute init sql: " << *iter << std::endl;
@@ -194,6 +182,11 @@ void sqlite_datasource::bind() const
         // and types from the first row returned from that query
         using_subquery_ = true;
         use_pragma_table_info = false;
+
+        if (key_field_.empty())
+        {
+          key_field_ = "rowid";
+        }
     }
 
     if (! use_pragma_table_info)
@@ -257,8 +250,16 @@ void sqlite_datasource::bind() const
         }
     }
 
-    if (key_field_ == "rowid")
-        desc_.add_descriptor(attribute_descriptor("rowid", mapnik::Integer));
+    if (key_field_.empty())
+    {
+      use_pragma_table_info = true;
+    }
+    else
+    {
+      // TODO - we can't trust so much the rowid here
+      if (key_field_ == "rowid")
+          desc_.add_descriptor(attribute_descriptor("rowid", mapnik::Integer));
+    }
     
     if (use_pragma_table_info)
     {
@@ -267,6 +268,7 @@ void sqlite_datasource::bind() const
 
         boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
         bool found_table = false;
+        bool found_pk = false;
         while (rs->is_valid() && rs->step_next())
         {
             found_table = true;
@@ -274,7 +276,15 @@ void sqlite_datasource::bind() const
             // TODO - support unicode strings
             const char* fld_name = rs->column_text(1);
             std::string fld_type(rs->column_text(2));
+            int fld_pk = rs->column_integer(5);
             boost::algorithm::to_lower(fld_type);
+
+            // TODO - how to handle primary keys on multiple columns ?
+            if (! found_pk && fld_pk != 0 && key_field_.empty())
+            {
+              key_field_ = fld_name;
+              found_pk = true;
+            }
 
             // see 2.1 "Column Affinity" at http://www.sqlite.org/datatype3.html
             if (geometry_field_.empty()
@@ -328,13 +338,11 @@ void sqlite_datasource::bind() const
         {
             std::ostringstream s;
             s << "Sqlite Plugin: could not query table '" << geometry_table_ << "' ";
-            if (using_subquery_)
-                s << " from subquery '" << table_ << "' ";
+            if (using_subquery_) s << " from subquery '" << table_ << "' ";
             s << "using 'PRAGMA table_info(" << geometry_table_  << ")' ";
 
             std::string sq_err = std::string(sqlite3_errmsg(*(*dataset_)));
-            if (sq_err != "unknown error")
-                s << ": " << sq_err;
+            if (sq_err != "unknown error") s << ": " << sq_err;
 
             throw datasource_exception(s.str());
         }
@@ -408,7 +416,6 @@ void sqlite_datasource::bind() const
                     double ymax = lexical_cast<double>(rs->column_double(3));
                     extent_.init (xmin,ymin,xmax,ymax);
                     extent_initialized_ = true;
-    
                 }
                 catch (bad_lexical_cast &ex)
                 {
