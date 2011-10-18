@@ -1,3 +1,14 @@
+
+```                                                          
+    _/      _/                                _/  _/      
+   _/_/  _/_/    _/_/_/  _/_/_/    _/_/_/        _/  _/   
+  _/  _/  _/  _/    _/  _/    _/  _/    _/  _/  _/_/      
+ _/      _/  _/    _/  _/    _/  _/    _/  _/  _/  _/     
+_/      _/    _/_/_/  _/_/_/    _/    _/  _/  _/    _/    
+                     _/                                   
+                    _/                                    
+```
+
 Mapnik is an open source toolkit for developing mapping applications.
 At the core is a C++ shared library providing algorithms/patterns 
 for spatial data access and visualization.
