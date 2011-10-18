@@ -66,8 +66,8 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
        filename_ = *file;
 
     multi_tiles_ = *params_.get<bool>("multi", false);
-    tile_size_ = *params_.get<unsigned>("tile-size", 256);
-    tile_stride_ = *params_.get<unsigned>("tile-stride", 1);
+    tile_size_ = *params_.get<unsigned>("tile_size", 256);
+    tile_stride_ = *params_.get<unsigned>("tile_stride", 1);
 
     format_=*params_.get<std::string>("format","tiff");
    
@@ -102,8 +102,8 @@ void raster_datasource::bind() const
    
     if (multi_tiles_)
     {
-       boost::optional<unsigned> x_width = params_.get<unsigned>("x-width");
-       boost::optional<unsigned> y_width = params_.get<unsigned>("y-width");
+       boost::optional<unsigned> x_width = params_.get<unsigned>("x_width");
+       boost::optional<unsigned> y_width = params_.get<unsigned>("y_width");
 
        if (!x_width)
           throw datasource_exception("Raster Plugin: x-width parameter not supplied for multi-tiled data source.");
