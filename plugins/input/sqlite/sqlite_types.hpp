@@ -36,6 +36,8 @@ extern "C" {
 }
 
 
+//==============================================================================
+
 class sqlite_resultset
 {
 public:
@@ -48,7 +50,9 @@ public:
     ~sqlite_resultset ()
     {
         if (stmt_)
+        {
             sqlite3_finalize (stmt_);
+        }
     }
 
     bool is_valid ()
@@ -58,12 +62,18 @@ public:
 
     bool step_next ()
     {
-        int status = sqlite3_step (stmt_);
-        if (status != SQLITE_ROW && status != SQLITE_DONE) {
+        const int status = sqlite3_step (stmt_);
+        if (status != SQLITE_ROW && status != SQLITE_DONE)
+        {
             std::ostringstream s;
             s << "SQLite Plugin: retrieving next row failed";
+
             std::string msg(sqlite3_errmsg(sqlite3_db_handle(stmt_)));
-            if (msg != "unknown error") s << ": " << msg;
+            if (msg != "unknown error")
+            {
+                s << ": " << msg;
+            }
+
             throw mapnik::datasource_exception(s.str());
         }
         return status == SQLITE_ROW;
@@ -134,6 +144,7 @@ private:
 };
 
 
+//==============================================================================
 
 class sqlite_connection
 {
@@ -144,54 +155,56 @@ public:
     {
         // sqlite3_open_v2 is available earlier but 
         // shared cache not available until >= 3.6.18
-        #if SQLITE_VERSION_NUMBER >= 3006018
-        int rc = sqlite3_enable_shared_cache(1);
+    #if SQLITE_VERSION_NUMBER >= 3006018
+        const int rc = sqlite3_enable_shared_cache(1);
         if (rc != SQLITE_OK)
         {
-           throw mapnik::datasource_exception (sqlite3_errmsg (db_));
+            throw mapnik::datasource_exception (sqlite3_errmsg (db_));
         }
         
         int mode = SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
         if (sqlite3_open_v2 (file.c_str(), &db_, mode, NULL))
-        #else
+    #else
         #warning "Mapnik's sqlite plugin is compiling against a version of sqlite older than 3.6.18 which may make rendering slow..."
         if (sqlite3_open (file.c_str(), &db_))
-        #endif
+    #endif
         {
             std::ostringstream s;
-            s << "Sqlite Plugin: ";
-            throw mapnik::datasource_exception (sqlite3_errmsg (db_));
+            s << "Sqlite Plugin: " << sqlite3_errmsg (db_);
+
+            throw mapnik::datasource_exception (s.str());
         }
-        //sqlite3_enable_load_extension(db_, 1);
     }
 
-    ~sqlite_connection ()
+    virtual ~sqlite_connection ()
     {
         if (db_)
+        {
             sqlite3_close (db_);
+        }
     }
 
     void throw_sqlite_error(const std::string& sql)
     {
-      std::ostringstream s;
-      s << "Sqlite Plugin: ";
-      if (db_)
-          s << "'" << sqlite3_errmsg(db_) << "'";
-      else
-          s << "unknown error, lost connection";
-      
-      s << "\nFull sql was: '" <<  sql << "'\n";
-      throw mapnik::datasource_exception( s.str() ); 
+        std::ostringstream s;
+        s << "Sqlite Plugin: ";
+        if (db_)
+            s << "'" << sqlite3_errmsg(db_) << "'";
+        else
+            s << "unknown error, lost connection";
+        s << "\nFull sql was: '" <<  sql << "'\n";
+
+        throw mapnik::datasource_exception (s.str());
     }
     
     sqlite_resultset* execute_query(const std::string& sql)
     {
         sqlite3_stmt* stmt = 0;
 
-        int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
+        const int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
         if (rc != SQLITE_OK)
         {
-           throw_sqlite_error(sql);
+            throw_sqlite_error(sql);
         }
 
         return new sqlite_resultset (stmt);
@@ -199,7 +212,7 @@ public:
   
     void execute(const std::string& sql)
     {
-        int rc=sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
+        const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         if (rc != SQLITE_OK)
         {
             throw_sqlite_error(sql);
@@ -208,7 +221,7 @@ public:
 
     int execute_with_code(const std::string& sql)
     {
-        int rc=sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
+        const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         return rc;
     }
    
@@ -222,5 +235,5 @@ private:
     sqlite3* db_;
 };
 
-#endif //SQLITE_TYPES_HPP
 
+#endif //SQLITE_TYPES_HPP

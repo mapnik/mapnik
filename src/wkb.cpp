@@ -39,6 +39,7 @@ private:
         wkbXDR=0,
         wkbNDR=1
     };
+
     const char* wkb_;
     unsigned size_;
     unsigned pos_;
@@ -64,6 +65,23 @@ public:
           pos_(0),
           format_(format)
     {
+        // try to determine WKB format automatically
+        if (format_ == wkbAuto)
+        {
+          if (size > 38
+              && wkb_[0] == 0x00
+              && (wkb_[1] == 0x00 || wkb_[1] == 0x01)
+              && wkb_[38] == 0x7C
+              && wkb_[size - 1] == 0xFE)
+          {
+              format_ = wkbSpatiaLite;
+          }
+          else
+          {
+              format_ = wkbGeneric;
+          }
+        }
+
         switch (format_)
         {
         case wkbSpatiaLite:

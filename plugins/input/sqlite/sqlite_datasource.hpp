@@ -37,6 +37,9 @@
 // sqlite
 #include "sqlite_types.hpp"
 
+
+//==============================================================================
+
 class sqlite_datasource : public mapnik::datasource 
 {
    public:

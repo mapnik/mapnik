@@ -37,6 +37,8 @@
 #include "sqlite_types.hpp"
   
   
+//==============================================================================
+
 class sqlite_featureset : public mapnik::Featureset
 {
    public:
@@ -54,5 +56,6 @@ class sqlite_featureset : public mapnik::Featureset
       bool multiple_geometries_;
       bool using_subquery_;
 };
+
 
 #endif // SQLITE_FEATURESET_HPP
