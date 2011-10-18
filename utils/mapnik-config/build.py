@@ -10,7 +10,7 @@ config_env = env.Clone()
 
 # TODO
 # major/minor versions
-# git hash
+# git rev-list --max-count=1 HEAD
 
 config_variables = '''#!/bin/sh
 
@@ -26,6 +26,7 @@ CONFIG_DEP_LIBS='%(dep_libs)s'
 CONFIG_OTHER_INCLUDES='%(other_includes)s'
 CONFIG_FONTS='%(fonts)s'
 CONFIG_INPUT_PLUGINS='%(input_plugins)s'
+CONFIG_GIT_REVISION='%(git_revision)s'
 CONFIG_SVN_REVISION='%(svn_revision)s'
 
 CONFIG_JSON="{
@@ -39,7 +40,8 @@ CONFIG_JSON="{
   \\"other_includes\\": \\"${CONFIG_OTHER_INCLUDES}\\",
   \\"fonts\\": \\"${CONFIG_FONTS}\\",
   \\"input_plugins\\": \\"${CONFIG_INPUT_PLUGINS}\\",
-  \\"svn_revision\\": ${CONFIG_SVN_REVISION}
+  \\"git_revision\\": \\"${CONFIG_GIT_REVISION}\\",
+  \\"svn_revision\\": ${CONFIG_SVN_REVISION},
 }"
 
 '''
@@ -63,7 +65,7 @@ other_includes += ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
 other_includes += ' '
 
 if config_env['HAS_CAIRO']:
-    other_includes += ''.join([' -I%s' % i for i in env['CAIROMM_CPPPATHS'] if not i.startswith('#')])    
+    other_includes += ''.join([' -I%s' % i for i in env['CAIROMM_CPPPATHS'] if not i.startswith('#')])
 
 
 ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
@@ -72,6 +74,8 @@ dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 
 if env['INTERNAL_LIBAGG']:
     dep_libs = dep_libs.replace('-lagg','')
+
+git_revision = os.popen("git rev-list --max-count=1 HEAD").read()
 
 configuration = {
     "prefix": config_env['PREFIX'],
@@ -83,6 +87,7 @@ configuration = {
     "fonts": config_env['MAPNIK_FONTS'],
     "input_plugins": config_env['MAPNIK_INPUT_PLUGINS'],
     "svn_revision": config_env['SVN_REVISION'],
+    "git_revision": git_revision,
     "version": config_env['MAPNIK_VERSION_STRING'],
 }
 
@@ -100,7 +105,7 @@ if 'install' in COMMAND_LINE_TARGETS:
     # we must add 'install' catch here because otherwise
     # custom command will be run when not installing
     env.Alias('install',full_target)
-    
+
     env.Command(full_target, config_file,
        [
        Copy("$TARGET","$SOURCE"),
