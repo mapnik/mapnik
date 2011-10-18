@@ -206,6 +206,5 @@ include(plugins.pri)
 
 unix {
     DEFINES += LINUX=1
-    INCLUDEPATH += /usr/include/freetype
 }
 
