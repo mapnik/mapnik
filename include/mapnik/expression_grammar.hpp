@@ -50,6 +50,7 @@
 namespace mapnik
 {
 
+using namespace boost;
 namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
@@ -217,7 +218,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             | lit("false") [_val = false]
             | lit("null") [_val = value_null() ]
             | ustring [_val = unicode_(_1) ]
-            | attr [_val = construct<attribute>( _1 ) ]
+            | attr [_val = construct<mapnik::attribute>( _1 ) ]
             | '(' >> expr [_val = _1 ] >> ')'
             ;
         
