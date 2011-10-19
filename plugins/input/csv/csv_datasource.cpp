@@ -125,10 +125,11 @@ void csv_datasource::parse_csv(T& stream,
                                std::string const& separator,
                                std::string const& quote) const
 {
+    stream.seekg (0, std::ios::end);
+    int file_length_ = stream.tellg();
+    
     if (filesize_max_ > 0)
     {
-        stream.seekg (0, std::ios::end);
-        int file_length_ = stream.tellg();
         double file_mb = static_cast<double>(file_length_)/1048576;
         
         // throw if this is an unreasonably large file to read into memory
@@ -140,35 +141,49 @@ void csv_datasource::parse_csv(T& stream,
               << " to render this data (set 'filesize_max=0' to disable this restriction if you have lots of memory)";
             throw mapnik::datasource_exception(s.str());
         }
-        
-        // set back to start
-        stream.seekg (0, std::ios::beg);
     }
 
-    char newline;
-    std::string csv_line;
+    // set back to start
+    stream.seekg (0, std::ios::beg);
 
     // autodetect newlines
-    bool found_break = false;
-    if (std::getline(stream,csv_line,'\n'))
+    char newline = '\n';
+    int newline_count = 0;
+    int carriage_count = 0;
+    for(std::size_t idx = 0; idx < file_length_; idx++)
     {
-        found_break = true;
-        newline = '\n';    
+        char c = static_cast<char>(stream.get());
+        if (c == '\n')
+        {
+            ++newline_count;
+        }
+        else if (c == '\r')
+        {
+            ++carriage_count;
+        }
+        // read at least 2000 bytes before testing
+        if (idx == file_length_-1 || idx > 4000)
+        {
+            if (newline_count > carriage_count)
+            {
+                break;
+            }
+            else if (carriage_count > newline_count)
+            {
+                newline = '\r';
+                break;
+            }
+        }
     }
-    else if (std::getline(stream,csv_line,'\r'))
-    {
-        found_break = true;
-        newline = '\r';
-    }
-    else
-    {
-        throw mapnik::datasource_exception("CSV Plugin: could not detect any line breaks in this csv (http://en.wikipedia.org/wiki/Newline)\n");
-    }
-    
+
     // set back to start
     stream.seekg (0, std::ios::beg);
     
-    // if user has not passed separator manuall
+    // get first line
+    std::string csv_line;
+    std::getline(stream,csv_line,newline);
+
+    // if user has not passed a separator manually
     // then attempt to detect by reading first line
     std::string sep = boost::trim_copy(separator);
     if (sep.empty())
@@ -189,6 +204,9 @@ void csv_datasource::parse_csv(T& stream,
             }
         }
     }
+
+    // set back to start
+    stream.seekg (0, std::ios::beg);
     
     typedef boost::escaped_list_separator<char> escape_type;
 
@@ -322,7 +340,7 @@ void csv_datasource::parse_csv(T& stream,
     if (!has_wkt_field && (!has_lon_field || !has_lat_field) )
     {
         std::ostringstream s;
-        s << "CSV Plugin: could not detect column headers with the name of 'wkt' or lat/lon - this is required for reading geometry data";
+        s << "CSV Plugin: could not detect column headers with the name of wkt ,x/y, or latitude/longitude - this is required for reading geometry data";
         throw mapnik::datasource_exception(s.str());
     }
 
@@ -373,7 +391,6 @@ void csv_datasource::parse_csv(T& stream,
             bool parsed_x = false;
             bool parsed_y = false;
             bool parsed_wkt = false;
-            bool first_feature = true;
             bool skip = false;
             bool null_geom = false;
             std::vector<std::string> collected;
@@ -433,7 +450,20 @@ void csv_datasource::parse_csv(T& stream,
                               }
                               else
                               {
-                                 std::clog << "could not parse: " << value << "\n";
+                                  std::ostringstream s;
+                                  s << "CSV Plugin: expected well known text geometry: could not parse row "
+                                    << line_number
+                                    << ",column "
+                                    << i << " - found: '"
+                                    << value << "'";
+                                  if (strict_)
+                                  {
+                                      throw mapnik::datasource_exception(s.str());                    
+                                  }
+                                  else
+                                  {
+                                      if (!quiet_) std::clog << s.str() << "\n";
+                                  }
                               }
                           }
                           else
@@ -538,11 +568,16 @@ void csv_datasource::parse_csv(T& stream,
                     boost::put(*feature,fld_name,mapnik::value_null());
                 }
                 // only true strings are this long
-                else if (value_length > 20)
+                else if (value_length > 20 
+                         // TODO - clean up this messiness which is here temporarily
+                         // to protect against the improperly working spirit parsing below
+                         || value.find(",") != std::string::npos
+                         || value.find(":") != std::string::npos
+                         || (std::count(value.begin(), value.end(), '-') > 1))
                 {
                     UnicodeString ustr = tr.transcode(value.c_str());
                     boost::put(*feature,fld_name,ustr);
-                    if (first_feature)
+                    if (!feature_count)
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                 
                 }
@@ -557,14 +592,14 @@ void csv_datasource::parse_csv(T& stream,
                         if (value.find(".") != std::string::npos)
                         {
                             boost::put(*feature,fld_name,float_val);
-                            if (first_feature)
+                            if (!feature_count)
                                 desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Double));
                         }
                         else
                         {
                             int val = static_cast<int>(float_val);
                             boost::put(*feature,fld_name,val);
-                            if (first_feature)
+                            if (!feature_count)
                                 desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Integer));
                         }
                     }
@@ -573,22 +608,23 @@ void csv_datasource::parse_csv(T& stream,
                         // fallback to normal string
                         UnicodeString ustr = tr.transcode(value.c_str());
                         boost::put(*feature,fld_name,ustr);
-                        if (first_feature)
-                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                        if (!feature_count)
+                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
                 }
                 else
                 {
-                    if (value == "true")
+                    std::string value_lower = boost::algorithm::to_lower_copy(value);
+                    if (value_lower == "true")
                     {
                         boost::put(*feature,fld_name,true);
-                        if (first_feature)
+                        if (!feature_count)
                             desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Boolean));
                     }
-                    else if(value == "false")
+                    else if(value_lower == "false")
                     {
                         boost::put(*feature,fld_name,false);
-                        if (first_feature)
+                        if (!feature_count)
                             desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Boolean));
                     }
                     else
@@ -596,14 +632,12 @@ void csv_datasource::parse_csv(T& stream,
                         // fallback to normal string
                         UnicodeString ustr = tr.transcode(value.c_str());
                         boost::put(*feature,fld_name,ustr);
-                        if (first_feature)
+                        if (!feature_count)
                             desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
                 }
             }
     
-            first_feature = false;
-
             if (skip)
             {
                 ++line_number;
