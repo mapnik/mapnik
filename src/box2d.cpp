@@ -384,14 +384,6 @@ box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
     return *this;
 }
 
-/*
-template <typename T>    
-box2d<T>& box2d<T>::operator-=(box2d<T> const& other)
-{
-    // not sure what to do here. intersect?
-    return *this;
-}
-*/
     
 template <typename T>    
 box2d<T>& box2d<T>::operator*=(T t)
