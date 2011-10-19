@@ -115,7 +115,6 @@ void csv_datasource::bind() const
         parse_csv(in,escape_, separator_, quote_);
         in.close();
     }
-    
     is_bound_ = true;
 }
 
@@ -257,12 +256,17 @@ void csv_datasource::parse_csv(T& stream,
                 wkt_idx = idx;
                 has_wkt_field = true;
             }
-            if (lower_val == "x" || (lower_val.find("longitude") != std::string::npos))
+            if (lower_val == "x"
+                || lower_val == "lon"
+                || lower_val == "long"
+                || (lower_val.find("longitude") != std::string::npos))
             {
                 lon_idx = idx;
                 has_lon_field = true;
             }
-            if (lower_val == "y" || (lower_val.find("latitude") != std::string::npos))
+            if (lower_val == "y"
+                || lower_val == "lat"
+                || (lower_val.find("latitude") != std::string::npos))
             {
                 lat_idx = idx;
                 has_lat_field = true;
@@ -311,12 +315,17 @@ void csv_datasource::parse_csv(T& stream,
                                 wkt_idx = idx;
                                 has_wkt_field = true;
                             }
-                            if (lower_val == "x" || (lower_val.find("longitude") != std::string::npos))
+                            if (lower_val == "x"
+                                || lower_val == "lon"
+                                || lower_val == "long"
+                                || (lower_val.find("longitude") != std::string::npos))
                             {
                                 lon_idx = idx;
                                 has_lon_field = true;
                             }
-                            if (lower_val == "y" || (lower_val.find("latitude") != std::string::npos))
+                            if (lower_val == "y"
+                                || lower_val == "lat"
+                                || (lower_val.find("latitude") != std::string::npos))
                             {
                                 lat_idx = idx;
                                 has_lat_field = true;
