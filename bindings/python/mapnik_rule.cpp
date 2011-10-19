@@ -148,8 +148,8 @@ struct rule_pickle_suite : boost::python::pickle_suite
         extract_symbolizer serializer( r );
         for (int i=0;i<len(syms);++i)
         {
-            symbolizer symbol = extract<symbolizer>(syms[i]);
-            boost::apply_visitor( serializer, symbol );
+            //symbolizer symbol = extract<symbolizer>(syms[i]);
+            //boost::apply_visitor( serializer, symbol );
         }        
     }
 

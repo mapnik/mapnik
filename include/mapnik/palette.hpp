@@ -26,6 +26,7 @@
 
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/config_error.hpp>
 
@@ -124,7 +125,7 @@ struct rgba
 typedef boost::unordered_map<unsigned, unsigned> rgba_hash_table;
 
 
-class rgba_palette : private boost::noncopyable {
+class MAPNIK_DECL rgba_palette : private boost::noncopyable {
 public:
     enum palette_type { PALETTE_RGBA = 0, PALETTE_RGB = 1, PALETTE_ACT = 2 };
 

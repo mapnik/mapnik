@@ -49,7 +49,7 @@ geometry_type const& getitem_impl(path_type & p, int key)
 
 void from_wkt_impl(path_type& p, std::string const& wkt)
 {
-    bool result = mapnik::from_wkt(wkt, p);
+    bool result = mapnik::from_wkt(wkt , p);
     if (!result) throw std::runtime_error("Failed to parse WKT");
 }
 

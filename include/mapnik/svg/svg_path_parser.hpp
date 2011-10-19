@@ -23,6 +23,7 @@
 #ifndef SVG_PATH_PARSER_HPP
 #define SVG_PATH_PARSER_HPP
 
+#include <mapnik/config.hpp>
 #include <string>
 
 namespace mapnik { namespace svg {
@@ -34,10 +35,10 @@ template <typename PathType>
 bool parse_points(const char * wkt, PathType & p);
 
 template <typename TransformType>
-bool parse_transform(const char * wkt, TransformType & tr);
+bool MAPNIK_DECL parse_transform(const char * wkt, TransformType & tr);
 
-template <typename TransformType>
-bool parse_transform(std::string const&  wkt, TransformType & tr);
+//template <typename TransformType>
+//bool MAPNIK_DECL parse_transform(std::string const&  wkt, TransformType & tr);
 
 }}
 

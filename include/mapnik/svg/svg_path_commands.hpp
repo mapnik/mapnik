@@ -28,6 +28,11 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
+#ifdef _WINDOWS
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
+
 namespace mapnik { namespace svg {
 
     using namespace boost::fusion;

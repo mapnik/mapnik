@@ -35,6 +35,10 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/home/phoenix/object/construct.hpp>
 
+#ifdef _WINDOWS
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
 
 namespace mapnik { namespace svg {
 
