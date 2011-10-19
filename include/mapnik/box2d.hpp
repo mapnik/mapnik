@@ -41,9 +41,8 @@ namespace mapnik {
 template <typename T> class MAPNIK_DECL box2d  
 : boost::equality_comparable<box2d<T> ,
                              boost::addable<box2d<T>, 
-                                            boost::subtractable<box2d<T>, 
-                                                                boost::dividable2<box2d<T>, T,
-                                                                                  boost::multipliable2<box2d<T>, T > > > > >
+					    boost::dividable2<box2d<T>, T,
+							      boost::multipliable2<box2d<T>, T > > > >
 {
 public:
     typedef box2d<T> box2d_type;
@@ -86,7 +85,6 @@ public:
         
     // define some operators 
     box2d_type& operator+=(box2d_type const& other);
-    box2d_type& operator-=(box2d_type const& other);
     box2d_type& operator*=(T);
     box2d_type& operator/=(T);
     T operator[](int index) const;
