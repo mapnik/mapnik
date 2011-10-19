@@ -135,9 +135,8 @@ public:
 
     const char* column_text (int col, int& len)
     {
-        const char* text = (const char*) sqlite3_column_text (stmt_, col);
         len = sqlite3_column_bytes (stmt_, col);
-        return text;
+        return (const char*) sqlite3_column_text (stmt_, col);
     }
 
     const char* column_text (int col)
@@ -147,9 +146,8 @@ public:
 
     const void* column_blob (int col, int& bytes)
     {
-        const char* blob = (const char*) sqlite3_column_blob (stmt_, col);
         bytes = sqlite3_column_bytes (stmt_, col);
-        return blob;
+        return (const char*) sqlite3_column_blob (stmt_, col);
     }
 
     sqlite3_stmt* get_statement()
