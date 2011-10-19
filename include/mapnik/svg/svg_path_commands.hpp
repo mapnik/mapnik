@@ -23,15 +23,14 @@
 #ifndef SVG_COMMANDS_HPP
 #define SVG_COMMANDS_HPP
 
+// mapnik
+#include <mapnik/global.hpp>
+//
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 
-#ifdef _WINDOWS
-#define _USE_MATH_DEFINES
-#include <math.h>
-#endif
 
 namespace mapnik { namespace svg {
 
