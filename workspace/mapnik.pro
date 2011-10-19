@@ -201,8 +201,13 @@ SOURCES += \
     ../src/unicode.cpp \
     ../src/warp.cpp \
     ../src/wkb.cpp
-    
+
+OTHER_FILES += \
+    ../SConstruct \
+    ../config.py
+
 include(plugins.pri)
+include(bindings.pri)
 
 unix {
     DEFINES += LINUX=1
