@@ -241,14 +241,18 @@ void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature, 
         {
             if (ordinates_size >= dimensions)
             {
+                const bool is_single_geom = true;
+                const bool is_point_type = false;
+                const bool multiple_geoms = false;
+
                 convert_ordinates (feature,
                                    mapnik::LineString,
                                    elem_info,
                                    ordinates,
                                    dimensions,
-                                   true,   // is_single_geom
-                                   false,  // is_point_type
-                                   false); // multiple_geometries
+                                   is_single_geom,
+                                   is_point_type,
+                                   multiple_geoms);
             }
         }
         break;
@@ -256,14 +260,18 @@ void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature, 
         {
             if (ordinates_size >= dimensions)
             {
+                const bool is_single_geom = true;
+                const bool is_point_type = false;
+                const bool multiple_geoms = false;
+
                 convert_ordinates (feature,
                                    mapnik::Polygon,
                                    elem_info,
                                    ordinates,
                                    dimensions,
-                                   true,   // is_single_geom
-                                   false,  // is_point_type
-                                   false); // multiple_geometries
+                                   is_single_geom,
+                                   is_point_type,
+                                   multiple_geoms);
             }
         }
         break;
@@ -273,6 +281,7 @@ void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature, 
             {
                 const bool is_single_geom = false;
                 const bool is_point_type = true;
+                const bool multiple_geoms = true;
 
                 // Todo - force using true as multiple_geometries until we have proper multipoint handling
                 // http://trac.mapnik.org/ticket/458
@@ -282,9 +291,9 @@ void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature, 
                                    elem_info,
                                    ordinates,
                                    dimensions,
-                                   false,  // is_single_geom
-                                   true,   // is_point_type
-                                   true);  // multiple_geometries
+                                   is_single_geom,
+                                   is_point_type,
+                                   multiple_geoms);
             }
         }
         break;
@@ -292,13 +301,16 @@ void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature, 
         {
             if (ordinates_size >= dimensions)
             {
+                const bool is_single_geom = false;
+                const bool is_point_type = false;
+
                 convert_ordinates (feature,
                                    mapnik::LineString,
                                    elem_info,
                                    ordinates,
                                    dimensions,
-                                   false,  // is_single_geom
-                                   false,  // is_point_type
+                                   is_single_geom,
+                                   is_point_type,
                                    multiple_geometries);
             }
 
@@ -308,13 +320,16 @@ void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature, 
         {
             if (ordinates_size >= dimensions)
             {
+                const bool is_single_geom = false;
+                const bool is_point_type = false;
+
                 convert_ordinates (feature,
                                    mapnik::Polygon,
                                    elem_info,
                                    ordinates,
                                    dimensions,
-                                   false, // is_single_geom
-                                   false, // is_point_type
+                                   is_single_geom,
+                                   is_point_type,
                                    multiple_geometries);
             }
         
@@ -332,8 +347,8 @@ void occi_featureset::convert_geometry (SDOGeometry* geom, feature_ptr feature, 
                                    elem_info,
                                    ordinates,
                                    dimensions,
-                                   false, // is_single_geom,
-                                   false, // is_point_type
+                                   is_single_geom,
+                                   is_point_type,
                                    multiple_geometries);
             }
         }
