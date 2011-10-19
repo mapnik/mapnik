@@ -896,7 +896,7 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
                 if (transform_wkt)
                 {
                     agg::trans_affine tr;
-                    if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+                    if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
                     {
                         std::stringstream ss;
                         ss << "Could not parse transform from '" << transform_wkt 
@@ -1025,7 +1025,7 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
         if (transform_wkt)
         {
             agg::trans_affine tr;
-            if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+            if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
             {
                 std::stringstream ss;
                 ss << "Could not parse transform from '" << transform_wkt
@@ -1671,7 +1671,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             if (transform_wkt)
             {
                 agg::trans_affine tr;
-                if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+                if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
                 {
                     std::stringstream ss;
                     ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";

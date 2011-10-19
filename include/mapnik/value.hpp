@@ -25,9 +25,12 @@
 #define VALUE_HPP
 
 // mapnik
+#include <mapnik/global.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/config_error.hpp>
+
 // boost
+
 #include <boost/variant.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp>
@@ -49,9 +52,9 @@ inline void to_utf8(UnicodeString const& input, std::string & target)
 {
     if (input.length() == 0) return;
       
-    const int32_t BUF_SIZE = 256;
+    const int BUF_SIZE = 256;
     char  buf [BUF_SIZE];
-    int32_t len;
+    int len;
       
     UErrorCode err = U_ZERO_ERROR;
     u_strToUTF8(buf, BUF_SIZE, &len, input.getBuffer(), input.length(), &err);
@@ -106,10 +109,8 @@ struct equals
 
     bool operator() (value_null, value_null) const
     {
-        // this changed from false to true - see http://trac.mapnik.org/ticket/794
-        return true;
+        return false;
     }
-
 };
       
 struct not_equals
@@ -145,21 +146,18 @@ struct not_equals
 
     bool operator() (value_null, value_null) const
     {
-        // TODO - needs review http://trac.mapnik.org/ticket/794
         return false;
     }
 
     template <typename T>
     bool operator() (value_null, const T &) const
     {
-        // TODO - needs review http://trac.mapnik.org/ticket/794
         return false;
     }
 
     template <typename T>
     bool operator() (const T &, value_null) const
     {
-        // TODO - needs review http://trac.mapnik.org/ticket/794
         return false;
     }
 };
@@ -533,7 +531,7 @@ struct to_bool : public boost::static_visitor<bool>
     template <typename T>
     bool operator() (T val) const
     {
-        return bool(val);
+        return val > 0 ? true : false;
     }
 };
 

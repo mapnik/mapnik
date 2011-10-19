@@ -200,7 +200,7 @@ public:
     
     void init(double radius)
     {
-        FT_Stroker_Set(s_,radius * (1<<6), 
+        FT_Stroker_Set(s_, (FT_Fixed) radius * (1<<6), 
                        FT_STROKER_LINECAP_ROUND, 
                        FT_STROKER_LINEJOIN_ROUND, 
                        0);    

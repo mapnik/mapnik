@@ -35,7 +35,7 @@ using mapnik::metawriter_inmem_ptr;
 namespace {
 std::map<std::string, mapnik::value>::const_iterator 
 mapnik_value_map_begin(const std::map<std::string, mapnik::value> &m) {
-  return m.begin();
+    return m.begin();
 }
 
 std::map<std::string, mapnik::value>::const_iterator 
