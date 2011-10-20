@@ -109,7 +109,8 @@ struct equals
 
     bool operator() (value_null, value_null) const
     {
-        return false;
+        // this changed from false to true - https://github.com/mapnik/mapnik/issues/794
+        return true;    
     }
 };
       
@@ -146,18 +147,21 @@ struct not_equals
 
     bool operator() (value_null, value_null) const
     {
+        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
         return false;
     }
 
     template <typename T>
     bool operator() (value_null, const T &) const
     {
+        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
         return false;
     }
 
     template <typename T>
     bool operator() (const T &, value_null) const
     {
+        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
         return false;
     }
 };
