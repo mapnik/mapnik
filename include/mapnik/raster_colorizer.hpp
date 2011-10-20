@@ -178,6 +178,10 @@ public:
     //! \return True if added, false if error
     bool add_stop(const colorizer_stop & stop);
 
+    //! \brief Set the list of stops
+    //! \param[in] stops The list of stops
+    void set_stops(colorizer_stops const& stops) { stops_ = stops; };
+
     //! \brief Get the list of stops
     //! \return The list of stops
     const colorizer_stops& get_stops(void) const {return stops_; };
