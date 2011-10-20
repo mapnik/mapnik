@@ -36,6 +36,7 @@
 #include <mapnik/glyph_symbolizer.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/filter_factory.hpp>
+#include <mapnik/expression_string.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -164,7 +165,7 @@ public:
           else_filter_(false), 
           also_filter_(false)  {}
     
-    rule(const rule& rhs)    
+    rule(const rule& rhs, bool deep_copy = false)
         : name_(rhs.name_),
           title_(rhs.title_),
           abstract_(rhs.abstract_),
@@ -173,7 +174,54 @@ public:
           syms_(rhs.syms_),
           filter_(rhs.filter_),
           else_filter_(rhs.else_filter_), 
-          also_filter_(rhs.also_filter_) {}
+          also_filter_(rhs.also_filter_) 
+    {
+        if (deep_copy) {
+            //std::string expr = to_expression_string(rhs.filter_);
+            //filter_ = parse_expression(expr,"utf8");
+            
+            symbolizers::iterator it  = syms_.begin(),
+                                  end = syms_.end();
+            
+            // FIXME - metawriter_ptr?
+            
+            for(; it != end; ++it) {
+                
+                /*if (polygon_symbolizer *sym = boost::get<polygon_symbolizer>(&(*it))) {
+                    // no shared pointers
+                } else if (line_symbolizer *sym = boost::get<line_symbolizer>(&(*it))) {
+                    // no shared pointers
+                } else if (building_symbolizer *sym = boost::get<building_symbolizer>(&(*it))) {
+                    // no shared pointers
+                }*/
+                
+                if (markers_symbolizer *sym = boost::get<markers_symbolizer>(&(*it))) {
+                    copy_path_ptr(sym);
+                } else if (point_symbolizer *sym = boost::get<point_symbolizer>(&(*it))) {
+                    copy_path_ptr(sym);
+                } else if (polygon_pattern_symbolizer *sym = boost::get<polygon_pattern_symbolizer>(&(*it))) {
+                    copy_path_ptr(sym);
+                } else if (line_pattern_symbolizer *sym = boost::get<line_pattern_symbolizer>(&(*it))) {
+                    copy_path_ptr(sym);
+                } else if (raster_symbolizer *sym = boost::get<raster_symbolizer>(&(*it))) {
+                    raster_colorizer_ptr old_colorizer = sym->get_colorizer(),
+                                         new_colorizer = raster_colorizer_ptr();
+                    
+                    new_colorizer->set_stops( old_colorizer->get_stops());
+                    new_colorizer->set_default_mode( old_colorizer->get_default_mode() );
+                    new_colorizer->set_default_color( old_colorizer->get_default_color() );
+                    new_colorizer->set_epsilon( old_colorizer->get_epsilon() );
+                    
+                    sym->set_colorizer(new_colorizer);
+                } else if (shield_symbolizer *sym = boost::get<shield_symbolizer>(&(*it))) {
+                    copy_path_ptr(sym);
+                    copy_text_ptr(sym);
+                } else if (text_symbolizer *sym = boost::get<text_symbolizer>(&(*it))) {
+                    copy_text_ptr(sym);
+                }
+            }
+        }
+    }
     
     rule& operator=(rule const& rhs) 
     {
@@ -322,6 +370,39 @@ private:
         filter_=rhs.filter_;
         else_filter_=rhs.else_filter_;
         also_filter_=rhs.also_filter_;
+    }
+    
+    template <class T>
+    void copy_path_ptr(T* sym)
+    {
+        std::string path = path_processor_type::to_string(*sym->get_filename());
+        sym->set_filename( parse_path(path) );
+    }
+    
+    template <class T>
+    void copy_text_ptr(T* sym)
+    {
+        std::string name = to_expression_string(*sym->get_name());
+        sym->set_name( parse_expression(name) );
+        
+        // FIXME - orientation doesn't appear to be initialized in constructor?
+        //std::string orientation = to_expression_string(*sym->get_orientation());
+        //sym->set_orientation( parse_expression(orientation) );
+        
+        unsigned text_size = sym->get_text_size();
+        position displace = sym->get_displacement();
+        vertical_alignment_e valign = sym->get_vertical_alignment();
+        horizontal_alignment_e halign = sym->get_horizontal_alignment();
+        justify_alignment_e jalign = sym->get_justify_alignment();
+        
+        text_placements_ptr placements = text_placements_ptr(boost::make_shared<text_placements_dummy>());
+        sym->set_placement_options( placements );
+        
+        sym->set_text_size(text_size);
+        sym->set_displacement(displace);
+        sym->set_vertical_alignment(valign);
+        sym->set_horizontal_alignment(halign);
+        sym->set_justify_alignment(jalign);
     }
 };
 
