@@ -525,19 +525,13 @@ if sys.platform == "win32":
 
 color_print(4,'\nWelcome to Mapnik...\n')
 
-color_print(1,'*'*45)
-color_print(1,'You are compiling Mapnik trunk (aka Mapnik2)')
-color_print(1,'See important details at:\nhttp://trac.mapnik.org/wiki/Mapnik2')
-color_print(1,('*'*45)+'\n')
-
-
 #### Custom Configure Checks ###
 
 def prioritize_paths(context,silent=True):    
     env = context.env
     prefs = env['LINK_PRIORITY'].split(',')
     if not silent:
-        context.Message( 'Sorting lib and inc compiler paths by priority... %s' % ','.join(prefs) )
+        context.Message( 'Sorting lib and inc compiler paths...')
     env['LIBPATH'] = sort_paths(env['LIBPATH'],prefs)
     env['CPPPATH'] = sort_paths(env['CPPPATH'],prefs)
     if silent:
@@ -838,10 +832,10 @@ int main()
     
     major, minor = map(int,result.split('.'))
     if major >= 4 and minor >= 0:
-        color_print(4,'\nFound icu version... %s\n' % result)
+        color_print(4,'found: icu %s' % result)
         return True
     
-    color_print(1,'\nFound insufficient icu version... %s\n' % result)
+    color_print(1,'\nFound insufficient icu version... %s' % result)
     return False
 
 def boost_regex_has_icu(context):
@@ -936,7 +930,7 @@ if not preconfigured:
                     opts.files.append(conf)
                     color_print(4,"SCons CONFIG found: '%s', variables will be inherited..." % conf)
                     optfile = file(conf)
-                    print optfile.read().replace("\n", " ").replace("'","").replace(" = ","=")
+                    #print optfile.read().replace("\n", " ").replace("'","").replace(" = ","=")
                     optfile.close()
                     
                 elif not conf == SCONS_LOCAL_CONFIG:
@@ -1304,21 +1298,29 @@ if not preconfigured:
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('cairomm-version')
             else:
+                print 'Checking for cairo/cairomm lib and include paths... ',
                 cmd = 'pkg-config --libs --cflags cairomm-1.0'
                 if env['RUNTIME_LINK'] == 'static':
                     cmd += ' --static'
                 cairo_env = env.Clone()
-                cairo_env.ParseConfig(cmd)
-                for lib in cairo_env['LIBS']:
-                    if not lib in env['LIBS']:
-                        env["CAIROMM_LINKFLAGS"].append(lib)
-                for lpath in cairo_env['LIBPATH']:
-                    if not lpath in env['LIBPATH']:
-                        env["CAIROMM_LIBPATHS"].append(lpath)
-                for inc in cairo_env['CPPPATH']:
-                    if not inc in env['CPPPATH']:
-                        env["CAIROMM_CPPPATHS"].append(inc)
-                env['HAS_CAIRO'] = True
+                try:
+                    cairo_env.ParseConfig(cmd)
+                    for lib in cairo_env['LIBS']:
+                        if not lib in env['LIBS']:
+                            env["CAIROMM_LINKFLAGS"].append(lib)
+                    for lpath in cairo_env['LIBPATH']:
+                        if not lpath in env['LIBPATH']:
+                            env["CAIROMM_LIBPATHS"].append(lpath)
+                    for inc in cairo_env['CPPPATH']:
+                        if not inc in env['CPPPATH']:
+                            env["CAIROMM_CPPPATHS"].append(inc)
+                    env['HAS_CAIRO'] = True
+                    print 'yes'
+                except OSError,e:
+                    color_print(1,'no')
+                    env['SKIPPED_DEPS'].append('cairo')
+                    env['SKIPPED_DEPS'].append('cairomm')
+                    color_print(1,'pkg-config reported: %s' % e)
             
     else:
         color_print(4,'Not building with cairo support, pass CAIRO=True to enable')
@@ -1547,7 +1549,7 @@ if not preconfigured:
         except: pass
 
         if 'configure' in command_line_args:
-            color_print(4,'\n*Configure complete*\nNow run "python scons/scons.py" to build or "python scons/scons.py install" to install')
+            color_print(4,'\nConfigure completed: run `make` to build or `make install`')
             if not HELP_REQUESTED:
                 Exit(0)
 
