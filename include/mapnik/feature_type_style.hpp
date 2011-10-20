@@ -51,7 +51,7 @@ private:
 public:
     feature_type_style();
 
-    feature_type_style(feature_type_style const& rhs);
+    feature_type_style(feature_type_style const& rhs, bool deep_copy = false);
         
     feature_type_style& operator=(feature_type_style const& rhs);
         
