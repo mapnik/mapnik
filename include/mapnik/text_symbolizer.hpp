@@ -101,6 +101,7 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     void set_anchor(double x, double y);
     position const& get_anchor() const;
     void set_displacement(double x, double y);
+    void set_displacement(position const& p);
     position const& get_displacement() const;
     void set_avoid_edges(bool avoid);
     bool get_avoid_edges() const;

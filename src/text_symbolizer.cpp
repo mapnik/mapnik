@@ -438,9 +438,14 @@ position const& text_symbolizer::get_anchor() const
     return anchor_;
 }
 
-void  text_symbolizer::set_displacement(double x, double y)
+void text_symbolizer::set_displacement(double x, double y)
 {
     placement_options_->set_default_displacement(boost::make_tuple(x,y));
+}
+
+void text_symbolizer::set_displacement(position const& p)
+{
+    placement_options_->set_default_displacement(p);
 }
 
 position const& text_symbolizer::get_displacement() const
