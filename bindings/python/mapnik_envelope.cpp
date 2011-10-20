@@ -264,7 +264,6 @@ void export_envelope()
         .def(self == self) // __eq__
         .def(self != self) // __neq__
         .def(self + self)  // __add__
-        //.def(self - self)  // __sub__
         .def(self * float()) // __mult__
         .def(float() * self) 
         .def(self / float()) // __div__
