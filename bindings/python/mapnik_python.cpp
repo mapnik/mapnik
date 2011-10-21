@@ -66,6 +66,7 @@ void export_view_transform();
 void export_raster_colorizer();
 void export_glyph_symbolizer();
 void export_inmem_metawriter();
+void export_label_collision_detector();
 
 #include <mapnik/version.hpp>
 #include <mapnik/value_error.hpp>
@@ -119,6 +120,28 @@ void render(const mapnik::Map& map,
     }
     Py_END_ALLOW_THREADS
 }
+
+void render_with_detector(
+   const mapnik::Map &map,
+   mapnik::image_32 &image,
+   boost::shared_ptr<mapnik::label_collision_detector4> detector,
+   double scale_factor = 1.0,
+   unsigned offset_x = 0u,
+   unsigned offset_y = 0u)
+{
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+        mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector);
+        ren.apply();
+    }
+    catch (...)
+    {
+        Py_BLOCK_THREADS
+        throw;
+    }
+    Py_END_ALLOW_THREADS
+}   
 
 void render_layer2(const mapnik::Map& map,
     mapnik::image_32& image,
@@ -374,6 +397,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 4
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(render_overloads, render, 2, 5)
+BOOST_PYTHON_FUNCTION_OVERLOADS(render_with_detector_overloads, render_with_detector, 3, 6)
 
 BOOST_PYTHON_MODULE(_mapnik2)
 {
@@ -427,6 +451,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_raster_colorizer();
     export_glyph_symbolizer();
     export_inmem_metawriter();
+    export_label_collision_detector();
 
     def("render_grid",&render_grid,
       ( arg("map"),
@@ -502,6 +527,19 @@ BOOST_PYTHON_MODULE(_mapnik2)
             ">>> render(m,im,scale_factor,offset[0],offset[1])\n"
             "\n"
             )); 
+
+    def("render_with_detector", &render_with_detector, render_with_detector_overloads(
+           "\n"
+           "Render Map to an AGG image_32 using a pre-constructed detector.\n"
+           "\n"
+           "Usage:\n"
+           ">>> from mapnik import Map, Image, LabelCollisionDetector, render_with_detector, load_map\n"
+           ">>> m = Map(256,256)\n"
+           ">>> load_map(m,'mapfile.xml')\n"
+           ">>> im = Image(m.width,m.height)\n"
+           ">>> detector = LabelCollisionDetector(m)\n"
+           ">>> render_with_detector(m, im, detector)\n"
+           ));
 
     def("render_layer", &render_layer2,
       (arg("map"),arg("image"),args("layer"))
