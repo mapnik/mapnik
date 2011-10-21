@@ -45,13 +45,39 @@ class sqlite_utils
 {
 public:
 
-    static void dequote(std::string& s)
+    static void dequote(std::string & z)
     {
-        if (s[0] == '[' || s[0] == '\'' || s[0] == '"' || s[0] == '`')
+        char quote = z[0];
+    
+        if (quote=='[' || quote=='\'' || quote=='"' || quote=='`')
         {
-            s = s.substr(1, s.length() - 1);
+            int iIn = 1;   // Index of next byte to read from input
+            int iOut = 0;  // Index of next byte to write to output
+    
+            // If the first byte was a '[', then the close-quote character is a ']'
+            if (quote == '[')
+            {
+                quote = ']';
+            }
+    
+            while (z[iIn])
+            {
+                if (z[iIn] == quote)
+                {
+                    if (z[iIn+1] != quote) break;
+                    z[iOut++] = quote;
+                    iIn += 2;
+                }
+                else
+                {
+                    z[iOut++] = z[iIn++];
+                }
+            }
+    
+            z[iOut] = '\0';
         }
     }
+
 };
 
 
