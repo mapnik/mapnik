@@ -167,8 +167,8 @@ public:
         : width_(width), height_(height), extent_(extent),
         offset_x_(offset_x), offset_y_(offset_y)
     {
-        sx_ = double(width_) / extent_.width();
-        sy_ = double(height_) / extent_.height();
+        sx_ = static_cast<double>(width_) / extent_.width();
+        sy_ = static_cast<double>(height_) / extent_.height();
     }
 
     inline int width() const
