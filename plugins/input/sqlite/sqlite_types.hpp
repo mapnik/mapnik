@@ -32,6 +32,7 @@
 
 // boost
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 
 // sqlite
 extern "C" {
@@ -47,35 +48,7 @@ public:
 
     static void dequote(std::string & z)
     {
-        char quote = z[0];
-    
-        if (quote=='[' || quote=='\'' || quote=='"' || quote=='`')
-        {
-            int iIn = 1;   // Index of next byte to read from input
-            int iOut = 0;  // Index of next byte to write to output
-    
-            // If the first byte was a '[', then the close-quote character is a ']'
-            if (quote == '[')
-            {
-                quote = ']';
-            }
-    
-            while (z[iIn])
-            {
-                if (z[iIn] == quote)
-                {
-                    if (z[iIn+1] != quote) break;
-                    z[iOut++] = quote;
-                    iIn += 2;
-                }
-                else
-                {
-                    z[iOut++] = z[iIn++];
-                }
-            }
-    
-            z[iOut] = '\0';
-        }
+        boost::algorithm::trim_if(z,boost::algorithm::is_any_of("[]'\"`"));
     }
 
 };
