@@ -40,6 +40,7 @@
 // boost
 #include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 // FIXME
 // forward declare so that
@@ -61,7 +62,11 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> 
 {
      
 public:
+    // create with default, empty placement detector
     agg_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    // create with external placement detector, possibly non-empty
+    agg_renderer(Map const &m, T & pixmap, boost::shared_ptr<label_collision_detector4> detector,
+                 double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~agg_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
@@ -122,8 +127,10 @@ private:
     CoordTransform t_;
     freetype_engine font_engine_;
     face_manager<freetype_engine> font_manager_;
-    label_collision_detector4 detector_;
+    boost::shared_ptr<label_collision_detector4> detector_;
     boost::scoped_ptr<rasterizer> ras_ptr;
+
+    void setup(Map const &m);
 };
 }
 
