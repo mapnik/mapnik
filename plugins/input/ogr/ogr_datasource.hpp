@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,28 +37,29 @@
 
 class ogr_datasource : public mapnik::datasource 
 {
-   public:
-      ogr_datasource(mapnik::parameters const& params, bool bind=true);
-      virtual ~ogr_datasource ();
-      int type() const;
-      static std::string name();
-      mapnik::featureset_ptr features(mapnik::query const& q) const;
-      mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
-      mapnik::box2d<double> envelope() const;
-      mapnik::layer_descriptor get_descriptor() const;
-      void bind() const;
-   private:
-      mutable mapnik::box2d<double> extent_;
-      int type_;
-      std::string dataset_name_;
-      mutable std::string index_name_;
-      mutable OGRDataSource* dataset_;
-      mutable OGRLayer* layer_;
-      mutable std::string layerName_;
-      mutable mapnik::layer_descriptor desc_;
-      bool multiple_geometries_;
-      mutable bool indexed_;
-};
+public:
+    ogr_datasource(mapnik::parameters const& params, bool bind=true);
+    virtual ~ogr_datasource ();
 
+    int type() const;
+    static std::string name();
+    mapnik::featureset_ptr features(mapnik::query const& q) const;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+    mapnik::box2d<double> envelope() const;
+    mapnik::layer_descriptor get_descriptor() const;
+    void bind() const;
+
+private:
+    mutable mapnik::box2d<double> extent_;
+    int type_;
+    std::string dataset_name_;
+    mutable std::string index_name_;
+    mutable OGRDataSource* dataset_;
+    mutable OGRLayer* layer_;
+    mutable std::string layerName_;
+    mutable mapnik::layer_descriptor desc_;
+    bool multiple_geometries_;
+    mutable bool indexed_;
+};
 
 #endif // OGR_DATASOURCE_HPP
