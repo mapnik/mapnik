@@ -32,6 +32,7 @@
 
 // boost
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 
 // sqlite
 extern "C" {
@@ -45,13 +46,11 @@ class sqlite_utils
 {
 public:
 
-    static void dequote(std::string& s)
+    static void dequote(std::string & z)
     {
-        if (s[0] == '[' || s[0] == '\'' || s[0] == '"' || s[0] == '`')
-        {
-            s = s.substr(1, s.length() - 1);
-        }
+        boost::algorithm::trim_if(z,boost::algorithm::is_any_of("[]'\"`"));
     }
+
 };
 
 

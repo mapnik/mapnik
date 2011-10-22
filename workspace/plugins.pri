@@ -69,8 +69,8 @@ SOURCES += \
   $$PWD/../plugins/input/osm/osm_featureset.cpp \
   $$PWD/../plugins/input/osm/osm_datasource.cpp \
   $$PWD/../plugins/input/osm/render.cpp \
-  $$PWD/../plugins/input/postgis/postgis.cpp \
-  $$PWD/../plugins/input/postgis/postgisfs.cpp \
+  $$PWD/../plugins/input/postgis/postgis_datasource.cpp \
+  $$PWD/../plugins/input/postgis/postgis_featureset.cpp \
   $$PWD/../plugins/input/raster/raster_info.cpp \
   $$PWD/../plugins/input/raster/raster_featureset.cpp \
   $$PWD/../plugins/input/raster/raster_datasource.cpp \

@@ -18,10 +18,6 @@ class FeatureTest(unittest.TestCase):
         f = self.makeOne(1, 'POLYGON ((35 10, 10 20, 15 40, 45 45, 35 10),(20 30, 35 35, 30 20, 20 30))', foo="bar")
         self.failUnlessEqual(f['foo'], 'bar')
         self.failUnlessEqual(f.envelope(),Box2d(10.0,10.0,45.0,45.0))
-        area = 0.0
-        for g in f.geometries():
-            area += g.area()
-        self.failUnlessEqual(area,-450.0)
     
     def test_set_get_properties(self):
         f = self.makeOne(1)

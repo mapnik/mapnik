@@ -78,7 +78,6 @@ void export_geometry()
         .def("envelope",&geometry_type::envelope)
         // .def("__str__",&geometry_type::to_string)
         .def("type",&geometry_type::type)
-        .def("area",&geometry_type::area)
         // TODO add other geometry_type methods
         ;
     

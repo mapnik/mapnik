@@ -410,6 +410,13 @@ def Raster(**keywords):
 
     Optional keyword arguments:
       base -- path prefix (default None)
+      multi -- whether the image is in tiles on disk (default False)
+
+    Multi-tiled keyword arguments:
+      x_width -- virtual image number of tiles in X direction (required)
+      y_width -- virtual image number of tiles in Y direction (required)
+      tile_size -- if an image is in tiles, how large are the tiles (default 256)
+      tile_stride -- if an image is in tiles, what's the increment between rows/cols (default 1)
 
     >>> from mapnik import Raster, Layer
     >>> raster = Raster(base='/home/mapnik/data',file='elevation.tif',lox=-122.8,loy=48.5,hix=-122.7,hiy=48.6) 
