@@ -247,7 +247,7 @@ opts.AddVariables(
     ('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False),
     ('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False),
     ('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False),
-    ('BOOST_PYTHON_LIB','Specify library name or full path to boost_python lib (e.g. "boost_python-py26" or "/usr/lib/libboost_python.dylib")',''),
+    ('BOOST_PYTHON_LIB','Specify library name to specific Boost Python lib (e.g. "boost_python-py26")',''),
     
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
@@ -840,14 +840,14 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=False)    
     
-    for libinfo in LIBSHEADERS:
-        if not conf.CheckLibWithHeader(libinfo[0], libinfo[1], libinfo[3]):
-            if libinfo[2]:
-                color_print(1,'Could not find required header or shared library for %s' % libinfo[0])
-                env['MISSING_DEPS'].append(libinfo[0])
+    for libname, headers, required, lang in LIBSHEADERS:
+        if not conf.CheckLibWithHeader(libname, headers, lang):
+            if required:
+                color_print(1, 'Could not find required header or shared library for %s' % libname)
+                env['MISSING_DEPS'].append(libname)
             else:
-                color_print(4,'Could not find optional header or shared library for %s' % libinfo[0])
-                env['SKIPPED_DEPS'].append(libinfo[0])            
+                color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                env['SKIPPED_DEPS'].append(libname)
 
     if env['THREADING'] == 'multi':
         thread_flag = thread_suffix
@@ -1138,14 +1138,23 @@ if not preconfigured:
             if not conf.CheckHeader(header='Python.h',language='C'):
                 color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION'])
                 env.Replace(**backup)
-                env['MISSING_DEPS'].append('python %s development headers' % env['PYTHON_VERSION'])
+                Exit(1)
             else:
                 env.Replace(**backup)
 
             if (int(majver), int(minver)) < (2, 2):
                 color_print(1,"Python version 2.2 or greater required")
                 Exit(1)
-        
+
+            if env['BOOST_PYTHON_LIB']:
+                env.Append(LIBS='python%s' % env['PYTHON_VERSION'])
+                if not conf.CheckLibWithHeader(libs=[env['BOOST_PYTHON_LIB']], header='boost/python/detail/config.hpp', language='C++'):
+                    color_print(1, 'Could not find library %s for boost python' % env['BOOST_PYTHON_LIB'])
+                    env.Replace(**backup)
+                    Exit(1)
+                else:
+                    env.Replace(**backup)
+
             color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
             color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
             color_print(4,'Python bindings will install in... %s' % os.path.normpath(env['PYTHON_INSTALL_LOCATION']))
