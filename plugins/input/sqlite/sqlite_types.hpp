@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,13 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef SQLITE_TYPES_HPP
 #define SQLITE_TYPES_HPP
 
-// stdc++
-#include <string.h>
+// stl
+#include <cstring>
 
 // mapnik
 #include <mapnik/datasource.hpp>
@@ -40,32 +39,25 @@ extern "C" {
 }
 
 
-//==============================================================================
-
 class sqlite_utils
 {
 public:
-
-    static void dequote(std::string & z)
+    static void dequote(std::string& z)
     {
-        boost::algorithm::trim_if(z,boost::algorithm::is_any_of("[]'\"`"));
+        boost::algorithm::trim_if(z, boost::algorithm::is_any_of("[]'\"`"));
     }
-
 };
 
-
-//==============================================================================
 
 class sqlite_resultset
 {
 public:
-
-    sqlite_resultset (sqlite3_stmt* stmt)
+    sqlite_resultset(sqlite3_stmt* stmt)
         : stmt_(stmt)
     {
     }
 
-    ~sqlite_resultset ()
+    virtual ~sqlite_resultset()
     {
         if (stmt_)
         {
@@ -73,14 +65,14 @@ public:
         }
     }
 
-    bool is_valid ()
+    bool is_valid()
     {
         return stmt_ != 0;
     }
 
-    bool step_next ()
+    bool step_next()
     {
-        const int status = sqlite3_step (stmt_);
+        const int status = sqlite3_step(stmt_);
         if (status != SQLITE_ROW && status != SQLITE_DONE)
         {
             std::ostringstream s;
@@ -97,56 +89,56 @@ public:
         return status == SQLITE_ROW;
     }
 
-    int column_count ()
+    int column_count()
     {
-        return sqlite3_column_count (stmt_);
+        return sqlite3_column_count(stmt_);
     }
 
-    int column_type (int col)
+    int column_type(int col)
     {
-        return sqlite3_column_type (stmt_, col);
+        return sqlite3_column_type(stmt_, col);
     }
     
-    const char* column_name (int col)
+    const char* column_name(int col)
     {
-        return sqlite3_column_name (stmt_, col);
+        return sqlite3_column_name(stmt_, col);
     }
 
-    bool column_isnull (int col)
+    bool column_isnull(int col)
     {
-        return sqlite3_column_type (stmt_, col) == SQLITE_NULL;
+        return sqlite3_column_type(stmt_, col) == SQLITE_NULL;
     }
 
-    int column_integer (int col)
+    int column_integer(int col)
     {
-        return sqlite3_column_int (stmt_, col);
+        return sqlite3_column_int(stmt_, col);
     }
 
-    int column_integer64 (int col)
+    int column_integer64(int col)
     {
-        return sqlite3_column_int64 (stmt_, col);
+        return sqlite3_column_int64(stmt_, col);
     }
 
-    double column_double (int col)
+    double column_double(int col)
     {
-        return sqlite3_column_double (stmt_, col);
+        return sqlite3_column_double(stmt_, col);
     }
 
-    const char* column_text (int col, int& len)
+    const char* column_text(int col, int& len)
     {
-        len = sqlite3_column_bytes (stmt_, col);
-        return (const char*) sqlite3_column_text (stmt_, col);
+        len = sqlite3_column_bytes(stmt_, col);
+        return (const char*) sqlite3_column_text(stmt_, col);
     }
 
-    const char* column_text (int col)
+    const char* column_text(int col)
     {
-        return (const char*) sqlite3_column_text (stmt_, col);
+        return (const char*) sqlite3_column_text(stmt_, col);
     }
 
-    const void* column_blob (int col, int& bytes)
+    const void* column_blob(int col, int& bytes)
     {
-        bytes = sqlite3_column_bytes (stmt_, col);
-        return (const char*) sqlite3_column_blob (stmt_, col);
+        bytes = sqlite3_column_bytes(stmt_, col);
+        return (const char*) sqlite3_column_blob(stmt_, col);
     }
 
     sqlite3_stmt* get_statement()
@@ -160,13 +152,11 @@ private:
 };
 
 
-//==============================================================================
-
 class sqlite_connection
 {
 public:
 
-    sqlite_connection (const std::string& file)
+    sqlite_connection(const std::string& file)
         : db_(0)
     {
         // sqlite3_open_v2 is available earlier but 
@@ -175,28 +165,28 @@ public:
         const int rc = sqlite3_enable_shared_cache(1);
         if (rc != SQLITE_OK)
         {
-            throw mapnik::datasource_exception (sqlite3_errmsg (db_));
+            throw mapnik::datasource_exception(sqlite3_errmsg (db_));
         }
         
         int mode = SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
-        if (sqlite3_open_v2 (file.c_str(), &db_, mode, NULL))
+        if (sqlite3_open_v2(file.c_str(), &db_, mode, NULL))
     #else
         #warning "Mapnik's sqlite plugin is compiling against a version of sqlite older than 3.6.18 which may make rendering slow..."
-        if (sqlite3_open (file.c_str(), &db_))
+        if (sqlite3_open(file.c_str(), &db_))
     #endif
         {
             std::ostringstream s;
-            s << "Sqlite Plugin: " << sqlite3_errmsg (db_);
+            s << "Sqlite Plugin: " << sqlite3_errmsg(db_);
 
-            throw mapnik::datasource_exception (s.str());
+            throw mapnik::datasource_exception(s.str());
         }
     }
 
-    virtual ~sqlite_connection ()
+    virtual ~sqlite_connection()
     {
         if (db_)
         {
-            sqlite3_close (db_);
+            sqlite3_close(db_);
         }
     }
 
@@ -204,10 +194,16 @@ public:
     {
         std::ostringstream s;
         s << "Sqlite Plugin: ";
+
         if (db_)
+        {
             s << "'" << sqlite3_errmsg(db_) << "'";
+        }
         else
+        {
             s << "unknown error, lost connection";
+        }
+
         s << "\nFull sql was: '" <<  sql << "'\n";
 
         throw mapnik::datasource_exception (s.str());
@@ -217,7 +213,7 @@ public:
     {
         sqlite3_stmt* stmt = 0;
 
-        const int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
+        const int rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, 0);
         if (rc != SQLITE_OK)
         {
             throw_sqlite_error(sql);
@@ -251,5 +247,4 @@ private:
     sqlite3* db_;
 };
 
-
-#endif //SQLITE_TYPES_HPP
+#endif // SQLITE_TYPES_HPP
