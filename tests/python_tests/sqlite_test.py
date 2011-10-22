@@ -58,6 +58,37 @@ def test_attachdb_with_explicit_index():
             'insert into scratch.myindex values (1,-7799225.5,-7778571.0,1393264.125,1417719.375)\n'
         )
 
+def test_dequoting_of_subqueries():
+    # The point table and index is in the qgis_spatiallite.sqlite
+    # database.  If either is not found, then this fails
+    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+        table='world_merc',
+        )
+    fs = ds.featureset()
+    feature = fs.next()
+    eq_(feature['OGC_FID'],1)
+    eq_(feature['fips'],u'AC')
+
+    # TODO:
+    # select * from world_merc fails
+    # as rowid is dropped
+    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+        table='(select *,rowid from world_merc)',
+        )
+    fs = ds.featureset()
+    feature = fs.next()
+    print feature
+    eq_(feature['OGC_FID'],1)
+    eq_(feature['fips'],u'AC')
+
+    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+        table='(select GEOMETRY,OGC_FID as rowid,fips from world_merc)',
+        )
+    fs = ds.featureset()
+    feature = fs.next()
+    print feature
+    eq_(feature['rowid'],1)
+    eq_(feature['fips'],u'AC')
 
 if __name__ == "__main__":
     setup()

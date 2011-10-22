@@ -118,12 +118,15 @@ void raster_colorizer::colorize(raster_ptr const& raster,const std::map<std::str
     bool hasNoData = false;
     float noDataValue = 0;
 
-    if (Props.count("NODATA")>0)
+    const std::map<std::string,value>::const_iterator fi = Props.find("NODATA");
+    if (fi != Props.end())
+	//if (Props.count("NODATA")>0)
     {
         hasNoData = true;
-        noDataValue = Props.at("NODATA").to_double();
+        //noDataValue = Props.at("NODATA").to_double();
+	noDataValue = fi->second.to_double();
     }
-
+    
     for (int i=0; i<len; ++i)
     {
         // the GDAL plugin reads single bands as floats

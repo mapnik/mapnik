@@ -27,6 +27,7 @@
 
 #include "raster_featureset.hpp"
 
+#include <boost/algorithm/string/replace.hpp>
 
 using mapnik::query;
 using mapnik::CoordTransform;
@@ -67,16 +68,18 @@ feature_ptr raster_featureset<LookupPolicy>::next()
          std::clog << "Raster Plugin: READER = " << curIter_->format() << " " << curIter_->file() 
                    << " size(" << curIter_->width() << "," << curIter_->height() << ")" << std::endl;
 #endif
+
          if (reader.get())
          {
-            int image_width=reader->width();
-            int image_height=reader->height();
+            int image_width = policy_.img_width(reader->width());
+            int image_height = policy_.img_height(reader->height());
             
             if (image_width>0 && image_height>0)
             {
                CoordTransform t(image_width,image_height,extent_,0,0);
                box2d<double> intersect=bbox_.intersect(curIter_->envelope());
                box2d<double> ext=t.forward(intersect);
+               box2d<double> rem=policy_.transform(ext);
                if ( ext.width()>0.5 && ext.height()>0.5 )
                {
                   //select minimum raster containing whole ext
@@ -96,7 +99,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                   int width = end_x - x_off;
                   int height = end_y - y_off;
                   //calculate actual box2d of returned raster
-                  box2d<double> feature_raster_extent(x_off, y_off, x_off+width, y_off+height); 
+                  box2d<double> feature_raster_extent(rem.minx() + x_off, rem.miny() + y_off, 
+                                                      rem.maxx() + x_off + width, rem.maxy() + y_off + height); 
                   intersect = t.backward(feature_raster_extent);
 
                   image_data_32 image(width,height);
@@ -121,5 +125,20 @@ feature_ptr raster_featureset<LookupPolicy>::next()
    return feature_ptr();
 }
 
+std::string
+tiled_multi_file_policy::interpolate(std::string const &pattern, int x, int y) const
+{
+   // TODO: make from some sort of configurable interpolation
+   int tms_y = tile_stride_ * ((image_height_ / tile_size_) - y - 1);
+   int tms_x = tile_stride_ * x;
+   std::string xs = (boost::format("%03d/%03d/%03d") % (tms_x / 1000000) % ((tms_x / 1000) % 1000) % (tms_x % 1000)).str();
+   std::string ys = (boost::format("%03d/%03d/%03d") % (tms_y / 1000000) % ((tms_y / 1000) % 1000) % (tms_y % 1000)).str();
+   std::string rv(pattern);
+   boost::algorithm::replace_all(rv, "${x}", xs);
+   boost::algorithm::replace_all(rv, "${y}", ys);
+   return rv;
+}
+
 template class raster_featureset<single_file_policy>;
 template class raster_featureset<tiled_file_policy>;
+template class raster_featureset<tiled_multi_file_policy>;

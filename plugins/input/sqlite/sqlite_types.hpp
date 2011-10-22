@@ -32,6 +32,7 @@
 
 // boost
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 
 // sqlite
 extern "C" {
@@ -45,13 +46,11 @@ class sqlite_utils
 {
 public:
 
-    static void dequote(std::string& s)
+    static void dequote(std::string & z)
     {
-        if (s[0] == '[' || s[0] == '\'' || s[0] == '"' || s[0] == '`')
-        {
-            s = s.substr(1, s.length() - 1);
-        }
+        boost::algorithm::trim_if(z,boost::algorithm::is_any_of("[]'\"`"));
     }
+
 };
 
 
@@ -135,9 +134,8 @@ public:
 
     const char* column_text (int col, int& len)
     {
-        const char* text = (const char*) sqlite3_column_text (stmt_, col);
         len = sqlite3_column_bytes (stmt_, col);
-        return text;
+        return (const char*) sqlite3_column_text (stmt_, col);
     }
 
     const char* column_text (int col)
@@ -147,9 +145,8 @@ public:
 
     const void* column_blob (int col, int& bytes)
     {
-        const char* blob = (const char*) sqlite3_column_blob (stmt_, col);
         bytes = sqlite3_column_bytes (stmt_, col);
-        return blob;
+        return (const char*) sqlite3_column_blob (stmt_, col);
     }
 
     sqlite3_stmt* get_statement()

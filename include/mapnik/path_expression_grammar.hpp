@@ -51,7 +51,7 @@
 
 namespace mapnik
 {
-
+using namespace boost;
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace standard_wide =  boost::spirit::standard_wide;
@@ -79,7 +79,7 @@ struct path_expression_grammar : qi::grammar<Iterator, std::vector<path_componen
             * (
                 str [ push_back(_val, _1)]
                 |
-                ( '[' >> attr [ push_back(_val, construct<attribute>( _1 )) ] >> ']')
+                ( '[' >> attr [ push_back(_val, construct<mapnik::attribute>( _1 )) ] >> ']')
                 )
             ;
         

@@ -22,7 +22,7 @@
     <Layer name="point" srs="+init=epsg:4326">
         <StyleName>1</StyleName>
         <Datasource>
-            <Parameter name="file">../csv/points.vrt</Parameter>
+            <Parameter name="file">../vrt/points.vrt</Parameter>
             <Parameter name="layer_by_index">0</Parameter>
             <Parameter name="type">ogr</Parameter>
         </Datasource>

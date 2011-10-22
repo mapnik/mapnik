@@ -168,8 +168,8 @@ void text_placements_simple::set_positions(std::string positions)
 
     std::string::iterator first = positions.begin(),  last = positions.end();
     qi::phrase_parse(first, last,
-        (direction_name[push_back(ref(direction_), _1)] % ',') >> *(',' >> qi::int_[push_back(ref(text_sizes_), _1)]),
-        space
+		     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> qi::int_[push_back(phoenix::ref(text_sizes_), _1)]),
+		     space
     );
     if (first != last) {
         std::cerr << "WARNING: Could not parse text_placement_simple placement string ('" << positions << "').\n";
