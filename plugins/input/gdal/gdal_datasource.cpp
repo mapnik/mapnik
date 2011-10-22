@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,7 +45,7 @@ using mapnik::datasource_exception;
  * Opens a GDALDataset and returns a pointer to it.
  * Caller is responsible for calling GDALClose on it
  */
-inline GDALDataset *gdal_datasource::open_dataset() const
+inline GDALDataset* gdal_datasource::open_dataset() const
 {
 
 #ifdef MAPNIK_DEBUG
@@ -55,21 +55,28 @@ inline GDALDataset *gdal_datasource::open_dataset() const
     GDALDataset *dataset;
 #if GDAL_VERSION_NUM >= 1600
     if (shared_dataset_)
-        dataset = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(),GA_ReadOnly));
+    {
+        dataset = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(), GA_ReadOnly));
+    }
     else
 #endif
-        dataset = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(),GA_ReadOnly));
+    {
+        dataset = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(), GA_ReadOnly));
+    }
 
-    if (! dataset) throw datasource_exception(CPLGetLastErrorMsg());
+    if (! dataset)
+    {
+        throw datasource_exception(CPLGetLastErrorMsg());
+    }
+
     return dataset;
 }
 
 
-
 gdal_datasource::gdal_datasource(parameters const& params, bool bind)
-    : datasource(params),
-      desc_(*params.get<std::string>("type"),"utf-8"),
-      filter_factor_(*params_.get<double>("filter_factor",0.0))
+  : datasource(params),
+    desc_(*params.get<std::string>("type"), "utf-8"),
+    filter_factor_(*params_.get<double>("filter_factor", 0.0))
 {
 #ifdef MAPNIK_DEBUG
     std::clog << "GDAL Plugin: Initializing..." << std::endl;
@@ -78,13 +85,17 @@ gdal_datasource::gdal_datasource(parameters const& params, bool bind)
     GDALAllRegister();
 
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file) throw datasource_exception("missing <file> parameter");
+    if (! file) throw datasource_exception("missing <file> parameter");
 
     boost::optional<std::string> base = params_.get<std::string>("base");
     if (base)
+    {
         dataset_name_ = *base + "/" + *file;
+    }
     else
+    {
         dataset_name_ = *file;
+    }
    
     if (bind)
     {
@@ -96,7 +107,7 @@ void gdal_datasource::bind() const
 {
     if (is_bound_) return;
     
-    shared_dataset_ = *params_.get<mapnik::boolean>("shared",false);
+    shared_dataset_ = *params_.get<mapnik::boolean>("shared", false);
     band_ = *params_.get<int>("band", -1);
 
     GDALDataset *dataset = open_dataset();
@@ -104,7 +115,6 @@ void gdal_datasource::bind() const
     nbands_ = dataset->GetRasterCount();
     width_ = dataset->GetRasterXSize();
     height_ = dataset->GetRasterYSize();
-
 
     double tr[6];
     bool bbox_override = false;
@@ -114,8 +124,9 @@ void gdal_datasource::bind() const
 #ifdef MAPNIK_DEBUG
         std::clog << "GDAL Plugin: bbox parameter=" << *bbox_s << std::endl;
 #endif
+
         bbox_override = extent_.from_string(*bbox_s);
-        if (!bbox_override)
+        if (! bbox_override)
         {
             throw datasource_exception("GDAL Plugin: bbox parameter '" + *bbox_s + "' invalid");
         }
@@ -141,7 +152,7 @@ void gdal_datasource::bind() const
                                               << tr[4] << "," << tr[5] << std::endl;
 #endif
     
-    if (tr[2] !=0 || tr[4] != 0)
+    if (tr[2] != 0 || tr[4] != 0)
     {
         throw datasource_exception("GDAL Plugin: only 'north up' images are supported");
     }
@@ -149,7 +160,7 @@ void gdal_datasource::bind() const
     dx_ = tr[1];
     dy_ = tr[5];
     
-    if (!bbox_override)
+    if (! bbox_override)
     {
         double x0 = tr[0];
         double y0 = tr[3];
@@ -164,8 +175,9 @@ void gdal_datasource::bind() const
         double y1 = tr[3] + (width_) * tr[4]; // maxy
         */
         
-        extent_.init(x0,y0,x1,y1);
+        extent_.init(x0, y0, x1, y1);
     }
+
     GDALClose(dataset);
    
 #ifdef MAPNIK_DEBUG
@@ -192,7 +204,7 @@ std::string gdal_datasource::name()
 
 box2d<double> gdal_datasource::envelope() const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
     
     return extent_;
 }
@@ -204,18 +216,38 @@ layer_descriptor gdal_datasource::get_descriptor() const
 
 featureset_ptr gdal_datasource::features(query const& q) const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
 
     gdal_query gq = q;
+
     // TODO - move to boost::make_shared, but must reduce # of args to <= 9
-    return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, extent_, width_, height_, nbands_, dx_, dy_, filter_factor_));
+    return featureset_ptr(new gdal_featureset(*open_dataset(),
+                                              band_,
+                                              gq,
+                                              extent_,
+                                              width_,
+                                              height_,
+                                              nbands_,
+                                              dx_,
+                                              dy_,
+                                              filter_factor_));
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
 
     gdal_query gq = pt;
-    return featureset_ptr(new gdal_featureset(*open_dataset(), band_, gq, extent_, width_, height_, nbands_, dx_, dy_,  filter_factor_));
-}
 
+    // TODO - move to boost::make_shared, but must reduce # of args to <= 9
+    return featureset_ptr(new gdal_featureset(*open_dataset(),
+                                              band_,
+                                              gq,
+                                              extent_,
+                                              width_,
+                                              height_,
+                                              nbands_,
+                                              dx_,
+                                              dy_,
+                                              filter_factor_));
+}
