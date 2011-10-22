@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -49,35 +48,37 @@ sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                                      mapnik::wkbFormat format,
                                      bool multiple_geometries,
                                      bool using_subquery)
-   : rs_(rs),
-     tr_(new transcoder(encoding)),
-     format_(format),
-     multiple_geometries_(multiple_geometries),
-     using_subquery_(using_subquery)
+  : rs_(rs),
+    tr_(new transcoder(encoding)),
+    format_(format),
+    multiple_geometries_(multiple_geometries),
+    using_subquery_(using_subquery)
 {
 }
 
-sqlite_featureset::~sqlite_featureset() {}
+sqlite_featureset::~sqlite_featureset()
+{
+}
 
 feature_ptr sqlite_featureset::next()
 {
     if (rs_->is_valid () && rs_->step_next ())
     {
         int size;
-        const char* data = (const char *) rs_->column_blob (0, size);
+        const char* data = (const char*) rs_->column_blob(0, size);
         if (! data)
         {
             return feature_ptr();
         }
 
-        int feature_id = rs_->column_integer (1);   
+        int feature_id = rs_->column_integer(1);
 
         feature_ptr feature(feature_factory::create(feature_id));
         geometry_utils::from_wkb(feature->paths(), data, size, multiple_geometries_, format_);
         
-        for (int i = 2; i < rs_->column_count (); ++i)
+        for (int i = 2; i < rs_->column_count(); ++i)
         {
-            const int type_oid = rs_->column_type (i);
+            const int type_oid = rs_->column_type(i);
             const char* fld_name = rs_->column_name(i);
 
             if (! fld_name)
@@ -95,13 +96,13 @@ feature_ptr sqlite_featureset::next()
             {
             case SQLITE_INTEGER:
                 {
-                    boost::put(*feature, fld_name_str, rs_->column_integer (i));
+                    boost::put(*feature, fld_name_str, rs_->column_integer(i));
                     break;
                 }
 
             case SQLITE_FLOAT:
                 {
-                    boost::put(*feature, fld_name_str, rs_->column_double (i));
+                    boost::put(*feature, fld_name_str, rs_->column_double(i));
                     break;
                 }
 
