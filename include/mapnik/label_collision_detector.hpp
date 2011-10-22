@@ -69,7 +69,7 @@ class label_collision_detector2 : boost::noncopyable
     typedef quad_tree<box2d<double> > tree_t;
     tree_t tree_;
 public:
-         
+
     explicit label_collision_detector2(box2d<double> const& extent)
         : tree_(extent) {}
         
@@ -138,6 +138,7 @@ public:
 //quad tree based label collission detector so labels dont appear within a given distance
 class label_collision_detector4 : boost::noncopyable
 {
+public:
     struct label
     {
         label(box2d<double> const& b) : box(b) {}
@@ -146,11 +147,13 @@ class label_collision_detector4 : boost::noncopyable
         box2d<double> box;
         UnicodeString text;
     };
-         
+    
+private:     
     typedef quad_tree< label > tree_t;
     tree_t tree_;
          
 public:
+    typedef tree_t::query_iterator query_iterator;
         
     explicit label_collision_detector4(box2d<double> const& extent)
         : tree_(extent) {}
@@ -224,6 +227,9 @@ public:
     {
         return tree_.extent();
     }
+
+   query_iterator begin() { return tree_.query_in_box(extent()); }
+   query_iterator end() { return tree_.query_end(); }
 };
 }
 

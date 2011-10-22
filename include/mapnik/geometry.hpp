@@ -68,27 +68,7 @@ public:
     {
         return type_;
     }
-    
-    double area() const 
-    {
-        double sum = 0.0;
-        double x(0);
-        double y(0);
-        rewind(0);
-        double xs = x;
-        double ys = y;
-        for (unsigned i=0;i<num_points();++i)
-        {
-            double x0(0);
-            double y0(0);
-            vertex(&x0,&y0);
-            sum += x * y0 - y * x0;
-            x = x0;
-            y = y0;
-        }
-        return (sum + x * ys - y * xs) * 0.5;
-    }
-    
+        
     box2d<double> envelope() const
     {
         box2d<double> result;
