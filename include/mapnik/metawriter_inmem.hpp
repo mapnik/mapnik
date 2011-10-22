@@ -25,6 +25,7 @@
 #define METAWRITER_INMEM_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/metawriter.hpp>
 
 // boost
@@ -50,7 +51,7 @@ namespace mapnik {
  * very common in the rendered image will increase memory usage, especially if
  * many attributes are also kept.
  */
-class metawriter_inmem
+class MAPNIK_DECL metawriter_inmem
   : public metawriter, private boost::noncopyable {
 public:
   /**
@@ -59,8 +60,8 @@ public:
    * then the name attribute of rendered features referencing this metawriter
    * will be kept in memory.
    */
-  metawriter_inmem(metawriter_properties dflt_properties);
-  ~metawriter_inmem();
+    metawriter_inmem(metawriter_properties dflt_properties);
+    ~metawriter_inmem();
   
   virtual void add_box(box2d<double> const& box, Feature const& feature,
           CoordTransform const& t,
@@ -87,7 +88,7 @@ public:
    * are the intersection of the features' properties and the "kept"
    * properties of the metawriter.
    */
-  struct meta_instance {
+  struct MAPNIK_DECL meta_instance {
     box2d<double> box;
     std::map<std::string, value> properties;
   };

@@ -25,7 +25,8 @@
 #ifndef SVG_TRANSFORM_GRAMMAR_HPP
 #define SVG_TRANSFORM_GRAMMAR_HPP
 
-
+// mapnik
+#include <mapnik/global.hpp>
 // agg
 #include <agg_trans_affine.h>
 // spirit
@@ -34,7 +35,6 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/home/phoenix/object/construct.hpp>
-
 
 namespace mapnik { namespace svg {
 

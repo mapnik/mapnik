@@ -23,6 +23,7 @@
 //$Id$
 
 // mapnik
+#include <mapnik/global.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/coord.hpp> 
 #include <mapnik/utils.hpp>

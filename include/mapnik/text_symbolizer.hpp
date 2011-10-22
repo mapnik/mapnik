@@ -47,12 +47,10 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 {
     text_symbolizer(expression_ptr name, std::string const& face_name,
                     unsigned size, color const& fill,
-                    text_placements_ptr placements = text_placements_ptr(
-                        boost::make_shared<text_placements_dummy>())
+                    text_placements_ptr placements = boost::make_shared<text_placements_dummy>()
                     );
     text_symbolizer(expression_ptr name, unsigned size, color const& fill,
-                    text_placements_ptr placements = text_placements_ptr(
-                        boost::make_shared<text_placements_dummy>())
+                    text_placements_ptr placements = boost::make_shared<text_placements_dummy>()
                     );
     text_symbolizer(text_symbolizer const& rhs);
     text_symbolizer& operator=(text_symbolizer const& rhs);

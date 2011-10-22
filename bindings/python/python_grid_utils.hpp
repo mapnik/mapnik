@@ -50,12 +50,12 @@ static void grid2utf(T const& grid_type,
     typename T::key_type::const_iterator key_pos;
     typename T::feature_key_type::const_iterator feature_pos;
     // start counting at utf8 codepoint 32, aka space character
-    uint16_t codepoint = 32;
+    boost::uint16_t codepoint = 32;
     
     unsigned array_size = data.width();
     for (unsigned y = 0; y < data.height(); ++y)
     {
-        uint16_t idx = 0;
+	boost::uint16_t idx = 0;
         boost::scoped_array<Py_UNICODE> line(new Py_UNICODE[array_size]);
         typename T::value_type const* row = data.getRow(y);
         for (unsigned x = 0; x < data.width(); ++x)
@@ -103,13 +103,13 @@ static void grid2utf(T const& grid_type,
     typename T::key_type::const_iterator key_pos;
     typename T::feature_key_type::const_iterator feature_pos;
     // start counting at utf8 codepoint 32, aka space character
-    uint16_t codepoint = 32;
+    boost::uint16_t codepoint = 32;
 
     // TODO - use double?
     unsigned array_size = static_cast<unsigned int>(grid_type.width()/resolution);
     for (unsigned y = 0; y < grid_type.height(); y=y+resolution)
     {
-        uint16_t idx = 0;
+	boost::uint16_t idx = 0;
         boost::scoped_array<Py_UNICODE> line(new Py_UNICODE[array_size]);
         mapnik::grid::value_type const* row = grid_type.getRow(y);
         for (unsigned x = 0; x < grid_type.width(); x=x+resolution)

@@ -45,8 +45,8 @@ void export_grid_view()
         .def("width",&mapnik::grid_view::width)
         .def("height",&mapnik::grid_view::height)
         .def("encode",encode,
-            ( arg("encoding")="utf",arg("add_features")=true,arg("resolution")=4 ),
-            "Encode the grid as as optimized json\n"
+	     ( boost::python::arg("encoding")="utf",boost::python::arg("add_features")=true,boost::python::arg("resolution")=4 ),
+	     "Encode the grid as as optimized json\n"
             )
         ;
 }

@@ -166,8 +166,21 @@ inline int rint( double val)
 {
     return int(floor(val + 0.5));
 }
+
+inline double round (double val)
+{
+    return floor(val);
+} 
+
+#define  _USE_MATH_DEFINES
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #endif
 
 }
+
+
 
 #endif //GLOBAL_HPP

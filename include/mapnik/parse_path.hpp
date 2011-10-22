@@ -24,6 +24,7 @@
 #define MAPNIK_PARSE_PATH_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
@@ -41,7 +42,7 @@ typedef boost::variant<std::string, attribute> path_component;
 typedef std::vector<path_component> path_expression;
 typedef boost::shared_ptr<path_expression> path_expression_ptr;
 
-path_expression_ptr parse_path(std::string const & str);
+MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
 
 template <typename T>
 struct path_processor

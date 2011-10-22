@@ -173,5 +173,7 @@ void grid_renderer<T>::render_marker(Feature const& feature, unsigned int step, 
     pixmap_.add_feature(feature);
 }
 
+template class hit_grid<boost::uint16_t>;
 template class grid_renderer<grid>;
+
 }

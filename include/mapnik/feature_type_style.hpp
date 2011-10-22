@@ -43,7 +43,7 @@ enum filter_mode_enum {
 DEFINE_ENUM( filter_mode_e, filter_mode_enum );
 
 typedef std::vector<rule> rules;
-class feature_type_style
+class MAPNIK_DECL feature_type_style
 {
 private:
     rules  rules_;

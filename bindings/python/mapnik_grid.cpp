@@ -46,7 +46,7 @@ void export_grid()
             "Grid",
             "This class represents a feature hitgrid.",
             init<int,int,std::string,unsigned>(
-              ( arg("width"),arg("height"),arg("key")="__id__",arg("resolution")=1 ),
+		( boost::python::arg("width"), boost::python::arg("height"),boost::python::arg("key")="__id__", boost::python::arg("resolution")=1 ),
             "Create a mapnik.Grid object\n"
             ))
         .def("painted",&painted)
@@ -54,7 +54,7 @@ void export_grid()
         .def("height",&mapnik::grid::height)
         .def("view",&mapnik::grid::get_view)
         .def("encode",encode,
-            ( arg("encoding")="utf",arg("features")=true,arg("resolution")=4 ),
+	     ( boost::python::arg("encoding")="utf", boost::python::arg("features")=true,boost::python::arg("resolution")=4 ),
             "Encode the grid as as optimized json\n"
             )
         .add_property("key",

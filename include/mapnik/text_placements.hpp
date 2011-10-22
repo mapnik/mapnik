@@ -23,6 +23,7 @@
 #define TEXT_PLACEMENTS_HPP
 
 //mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/enumeration.hpp>
 
 //stl
@@ -154,14 +155,14 @@ typedef boost::shared_ptr<text_placements> text_placements_ptr;
 
 class text_placements_info_dummy;
 
-class text_placements_dummy: public text_placements
+class MAPNIK_DECL text_placements_dummy: public text_placements
 {
 public:
     text_placement_info_ptr get_placement_info() const;
     friend class text_placement_info_dummy;
 };
 
-class text_placement_info_dummy : public text_placement_info
+class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
 {
 public:
     text_placement_info_dummy(text_placements_dummy const* parent) : text_placement_info(parent),
