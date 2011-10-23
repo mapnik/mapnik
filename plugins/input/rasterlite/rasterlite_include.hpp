@@ -24,8 +24,8 @@
 #define RASTERLITE_INCLUDE_HPP
 
 extern "C" {
-    #include <sqlite3.h>
-    #include <rasterlite.h>
+  #include <sqlite3.h>
+  #include <rasterlite.h>
 }
 
 #endif // RASTERLITE_INCLUDE_HPP
