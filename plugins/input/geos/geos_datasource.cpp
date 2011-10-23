@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,15 +19,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// $Id$
 
+#include "geos_datasource.hpp"
+#include "geos_featureset.hpp"
+
+// stl
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
 #include <cstdarg>
-
-#include "geos_datasource.hpp"
-#include "geos_featureset.hpp"
 
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
@@ -44,16 +44,8 @@
 // geos
 #include <geos_c.h>
 
-using std::clog;
-using std::endl;
-
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
-
-using mapnik::datasource;
-using mapnik::parameters;
-
-DATASOURCE_PLUGIN(geos_datasource)
 
 using mapnik::box2d;
 using mapnik::coord2d;
@@ -62,9 +54,12 @@ using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
 using mapnik::attribute_descriptor;
 using mapnik::datasource_exception;
+using mapnik::datasource;
+using mapnik::parameters;
 using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 
+DATASOURCE_PLUGIN(geos_datasource)
 
 void geos_notice(const char* fmt, ...)
 {
@@ -90,17 +85,17 @@ void geos_error(const char* fmt, ...)
 
 
 geos_datasource::geos_datasource(parameters const& params, bool bind)
-   : datasource(params),
-     extent_(),
-     extent_initialized_(false),
-     type_(datasource::Vector),
-     desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
-     geometry_data_(""),
-     geometry_data_name_("name"),
-     geometry_id_(1)
+  : datasource(params),
+    extent_(),
+    extent_initialized_(false),
+    type_(datasource::Vector),
+    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
+    geometry_data_(""),
+    geometry_data_name_("name"),
+    geometry_id_(1)
 {
     boost::optional<std::string> geometry = params.get<std::string>("wkt");
-    if (!geometry) throw datasource_exception("missing <wkt> parameter");
+    if (! geometry) throw datasource_exception("missing <wkt> parameter");
     geometry_string_ = *geometry;
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
@@ -153,7 +148,7 @@ void geos_datasource::bind() const
     if (! extent_initialized_)
     {
 #ifdef MAPNIK_DEBUG
-        clog << "GEOS Plugin: initializing extent from geometry" << endl;
+        std::clog << "GEOS Plugin: initializing extent from geometry" << std::endl;
 #endif
 
         if (GEOSGeomTypeId(*geometry_) == GEOS_POINT)
@@ -167,7 +162,7 @@ void geos_datasource::bind() const
             GEOSCoordSeq_getX(cs, 0, &x);
             GEOSCoordSeq_getY(cs, 0, &y);
         
-            extent_.init(x,y,x,y);
+            extent_.init(x, y, x, y);
             extent_initialized_ = true;
         }
         else
@@ -177,7 +172,7 @@ void geos_datasource::bind() const
             {
 #ifdef MAPNIK_DEBUG
                 char* wkt = GEOSGeomToWKT(*envelope);
-                clog << "GEOS Plugin: getting coord sequence from: " << wkt << endl;
+                std::clog << "GEOS Plugin: getting coord sequence from: " << wkt << std::endl;
                 GEOSFree(wkt);
 #endif
 
@@ -188,7 +183,7 @@ void geos_datasource::bind() const
                     if (cs != NULL)
                     {
 #ifdef MAPNIK_DEBUG
-                        clog << "GEOS Plugin: iterating boundary points" << endl;
+                        std::clog << "GEOS Plugin: iterating boundary points" << std::endl;
 #endif
 
                         double x, y;
@@ -196,8 +191,8 @@ void geos_datasource::bind() const
                                miny = std::numeric_limits<float>::max(),
                                maxx = -std::numeric_limits<float>::max(),
                                maxy = -std::numeric_limits<float>::max();
-                        unsigned int num_points;
 
+                        unsigned int num_points;
                         GEOSCoordSeq_getSize(cs, &num_points);
 
                         for (unsigned int i = 0; i < num_points; ++i)
@@ -211,7 +206,7 @@ void geos_datasource::bind() const
                             if (y > maxy) maxy = y;
                         }
 
-                        extent_.init(minx,miny,maxx,maxy);
+                        extent_.init(minx, miny, maxx, maxy);
                         extent_initialized_ = true;
                     }
                 }
@@ -220,7 +215,9 @@ void geos_datasource::bind() const
     }
 
     if (! extent_initialized_)
+    {
         throw datasource_exception("GEOS Plugin: cannot determine extent for <wkt> geometry");
+    }
    
     is_bound_ = true;
 }
@@ -237,21 +234,21 @@ int geos_datasource::type() const
 
 box2d<double> geos_datasource::envelope() const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
     
     return extent_;
 }
 
 layer_descriptor geos_datasource::get_descriptor() const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
     
     return desc_;
 }
 
 featureset_ptr geos_datasource::features(query const& q) const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
 
     const mapnik::box2d<double> extent = q.get_bbox();
 
@@ -265,7 +262,7 @@ featureset_ptr geos_datasource::features(query const& q) const
       << "))";
 
 #ifdef MAPNIK_DEBUG
-    clog << "GEOS Plugin: using extent: " << s.str() << endl;
+    std::clog << "GEOS Plugin: using extent: " << s.str() << std::endl;
 #endif
 
     return boost::make_shared<geos_featureset>(*geometry_,
@@ -279,13 +276,13 @@ featureset_ptr geos_datasource::features(query const& q) const
 
 featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
 
     std::ostringstream s;
     s << "POINT(" << pt.x << " " << pt.y << ")";
 
 #ifdef MAPNIK_DEBUG
-    clog << "GEOS Plugin: using point: " << s.str() << endl;
+    std::clog << "GEOS Plugin: using point: " << s.str() << std::endl;
 #endif
 
     return boost::make_shared<geos_featureset>(*geometry_,
@@ -296,4 +293,3 @@ featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
                                                desc_.get_encoding(),
                                                multiple_geometries_);
 }
-
