@@ -3,6 +3,8 @@ HEADERS += \
   $$PWD/../plugins/input/csv/csv_datasource.hpp \
   $$PWD/../plugins/input/gdal/gdal_featureset.hpp \
   $$PWD/../plugins/input/gdal/gdal_datasource.hpp \
+  $$PWD/../plugins/input/geos/geos_datasource.hpp \
+  $$PWD/../plugins/input/geos/geos_featureset.hpp \
   $$PWD/../plugins/input/kismet/kismet_featureset.hpp \
   $$PWD/../plugins/input/kismet/kismet_datasource.hpp \
   $$PWD/../plugins/input/kismet/kismet_types.hpp \
@@ -51,6 +53,8 @@ SOURCES += \
   $$PWD/../plugins/input/csv/csv_datasource.cpp \
   $$PWD/../plugins/input/gdal/gdal_featureset.cpp \
   $$PWD/../plugins/input/gdal/gdal_datasource.cpp \
+  $$PWD/../plugins/input/geos/geos_datasource.cpp \
+  $$PWD/../plugins/input/geos/geos_featureset.cpp \
   $$PWD/../plugins/input/kismet/kismet_featureset.cpp \
   $$PWD/../plugins/input/kismet/kismet_datasource.cpp \
   $$PWD/../plugins/input/occi/occi_featureset.cpp \

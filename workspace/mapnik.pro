@@ -211,5 +211,8 @@ include(bindings.pri)
 
 unix {
     DEFINES += LINUX=1
+    INCLUDEPATH = \
+        ../deps/agg/include \
+        ../include/mapnik2 \
+        /usr/include
 }
-
