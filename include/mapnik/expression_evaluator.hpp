@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_EXPRESSION_EVALUATOR_HPP
 #define MAPNIK_EXPRESSION_EVALUATOR_HPP
 
@@ -104,4 +102,4 @@ struct evaluate : boost::static_visitor<T1>
 
 }
 
-#endif //MAPNIK_EXPRESSION_EVALUATOR_HPP
+#endif // MAPNIK_EXPRESSION_EVALUATOR_HPP

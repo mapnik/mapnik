@@ -20,13 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_TEXT_PATH_HPP
+#define MAPNIK_TEXT_PATH_HPP
 
-#ifndef __TEXT_PATH_H__
-#define __TEXT_PATH_H__
-
+// boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+
+// uci
 #include <unicode/unistr.h>
 
 namespace mapnik
@@ -179,6 +180,4 @@ struct text_path : boost::noncopyable
 typedef boost::shared_ptr<text_path> text_path_ptr;
 }
 
-#endif
-
-
+#endif // MAPNIK_TEXT_PATH_HPP

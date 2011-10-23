@@ -20,11 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_PLACEMENT_FINDER_HPP
+#define MAPNIK_PLACEMENT_FINDER_HPP
 
-#ifndef __PLACEMENT_FINDER__
-#define __PLACEMENT_FINDER__
-
+// mapnik
 #include <mapnik/ctrans.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/text_symbolizer.hpp>
@@ -33,6 +32,7 @@
 #include <mapnik/text_path.hpp>
 #include <mapnik/text_placements.hpp>
 
+// stl
 #include <queue>
 
 namespace mapnik
@@ -144,7 +144,7 @@ private:
     DetectorT & detector_;
     box2d<double> const& dimensions_;
 };
+
 }
 
-#endif
-
+#endif // MAPNIK_PLACEMENT_FINDER_HPP

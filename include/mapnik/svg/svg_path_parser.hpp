@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef SVG_PATH_PARSER_HPP
-#define SVG_PATH_PARSER_HPP
+#ifndef MAPNIK_SVG_PATH_PARSER_HPP
+#define MAPNIK_SVG_PATH_PARSER_HPP
 
 #include <mapnik/config.hpp>
 #include <string>
@@ -42,5 +42,4 @@ bool MAPNIK_DECL parse_transform(const char * wkt, TransformType & tr);
 
 }}
 
-
-#endif // SVG_PATH_PARSER_HPP
+#endif // MAPNIK_SVG_PATH_PARSER_HPP

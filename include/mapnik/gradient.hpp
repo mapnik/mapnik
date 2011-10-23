@@ -19,11 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef GRADIENT_HPP
-#define GRADIENT_HPP
+#ifndef MAPNIK_GRADIENT_HPP
+#define MAPNIK_GRADIENT_HPP
 
+// agg
 #include <agg_trans_affine.h>
 
 // mapnik
@@ -104,4 +104,4 @@ private:
 };
 }
 
-#endif //GRADIENT_HPP
+#endif // MAPNIK_GRADIENT_HPP

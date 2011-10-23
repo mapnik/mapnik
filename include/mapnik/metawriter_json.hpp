@@ -20,9 +20,8 @@
  *
  *****************************************************************************/
 
-
-#ifndef METAWRITER_JSON_HPP
-#define METAWRITER_JSON_HPP
+#ifndef MAPNIK_METAWRITER_JSON_HPP
+#define MAPNIK_METAWRITER_JSON_HPP
 
 // mapnik
 #include <mapnik/metawriter.hpp>
@@ -150,4 +149,4 @@ typedef boost::shared_ptr<metawriter_json> metawriter_json_ptr;
 
 }
 
-#endif
+#endif // MAPNIK_METAWRITER_JSON_HPP

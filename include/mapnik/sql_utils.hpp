@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: sql_utils.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef SQL_UTILS_HPP
-#define SQL_UTILS_HPP
+#ifndef MAPNIK_SQL_UTILS_HPP
+#define MAPNIK_SQL_UTILS_HPP
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -196,4 +194,4 @@ inline std::string numeric2string(const char* buf)
 
 }
 
-#endif //SQL_UTILS_HPP
+#endif // MAPNIK_SQL_UTILS_HPP

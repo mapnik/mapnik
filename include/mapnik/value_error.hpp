@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_VALUE_ERROR_INCLUDED
-#define MAPNIK_VALUE_ERROR_INCLUDED
+#ifndef MAPNIK_VALUE_ERROR_HPP
+#define MAPNIK_VALUE_ERROR_HPP
 
 #include <iostream>
 #include <sstream>
@@ -54,4 +54,4 @@ protected:
 };
 }
 
-#endif // MAPNIK_VALUE_ERROR_INCLUDED
+#endif // MAPNIK_VALUE_ERROR_HPP

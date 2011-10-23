@@ -19,10 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: style_factory.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef STYLE_FACTORY_HPP
-#define STYLE_FACTORY_HPP
+#ifndef MAPNIK_STYLE_FACTORY_HPP
+#define MAPNIK_STYLE_FACTORY_HPP
 
 //#include <mapnik/style.hpp>
 
@@ -34,4 +33,4 @@ class style_factory
 }
 
 
-#endif //STYLE_FACTORY_HPP
+#endif // MAPNIK_STYLE_FACTORY_HPP

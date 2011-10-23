@@ -20,11 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id$
-#ifndef MEMORY_FEATURESET_HPP
-#define MEMORY_FEATURESET_HPP
+#ifndef MAPNIK_MEMORY_FEATURESET_HPP
+#define MAPNIK_MEMORY_FEATURESET_HPP
 
+// mapnik
 #include <mapnik/memory_datasource.hpp>
+
+// boost
 #include <boost/utility.hpp>
 
 namespace mapnik {
@@ -73,4 +75,4 @@ private:
 };
 }
 
-#endif // MEMORY_FEATURESET_HPP
+#endif // MAPNIK_MEMORY_FEATURESET_HPP

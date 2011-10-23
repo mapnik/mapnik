@@ -20,17 +20,16 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef FILL_HPP
-#define FILL_HPP
+#ifndef MAPNIK_FILL_HPP
+#define MAPNIK_FILL_HPP
 
 namespace mapnik
 {
+
 class fill 
 {
-        
 };
+
 }
 
-#endif //FILL_HPP
+#endif // MAPNIK_FILL_HPP

@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-// $Id$
-
 #ifndef MAPNIK_SVG_STORAGE_HPP
 #define MAPNIK_SVG_STORAGE_HPP
 
+// mapnik
 #include <mapnik/box2d.hpp>
+
+// boost
 #include <boost/utility.hpp>
 
 namespace mapnik {

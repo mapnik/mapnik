@@ -20,13 +20,19 @@
  *
  *****************************************************************************/
 
-#ifndef MARKERS_PLACEMENT_HPP
-#define MARKERS_PLACEMENT_HPP
+#ifndef MAPNIK_MARKERS_PLACEMENT_HPP
+#define MAPNIK_MARKERS_PLACEMENT_HPP
 
+// agg
 #include "agg_basics.h"
+
+// mapnik
 #include <mapnik/box2d.hpp>
 
+// boost
 #include <boost/utility.hpp>
+
+// stl
 #include <cmath>
 
 namespace mapnik {
@@ -242,5 +248,7 @@ template <typename Locator, typename Detector> box2d<double> markers_placement<L
 
     return box2d<double>(x1_, y1_, x2_, y2_);
 }
-} /* end namespace */
-#endif // MARKERS_PLACEMENT_HPP
+
+}
+
+#endif // MAPNIK_MARKERS_PLACEMENT_HPP

@@ -28,10 +28,12 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <boost/foreach.hpp>
+
 // stl
 #include <string>
 #include <vector>
@@ -140,4 +142,4 @@ typedef mapnik::path_processor<Feature> path_processor_type;
 
 }
 
-#endif //MAPNIK_PARSE_PATH_HPP
+#endif // MAPNIK_PARSE_PATH_HPP

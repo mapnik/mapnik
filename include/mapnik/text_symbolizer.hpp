@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_TEXT_SYMBOLIZER_HPP
 #define MAPNIK_TEXT_SYMBOLIZER_HPP
 
@@ -154,4 +152,4 @@ private:
 };
 }
 
-#endif //MAPNIK_TEXT_SYMBOLIZER_HPP
+#endif // MAPNIK_TEXT_SYMBOLIZER_HPP

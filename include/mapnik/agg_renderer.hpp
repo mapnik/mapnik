@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef AGG_RENDERER_HPP
-#define AGG_RENDERER_HPP
+#ifndef MAPNIK_AGG_RENDERER_HPP
+#define MAPNIK_AGG_RENDERER_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -134,4 +132,4 @@ private:
 };
 }
 
-#endif //AGG_RENDERER_HPP
+#endif // MAPNIK_AGG_RENDERER_HPP

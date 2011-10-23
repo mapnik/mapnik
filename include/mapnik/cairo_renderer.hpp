@@ -20,14 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #if defined(HAVE_CAIRO)
 
-#ifndef CAIRO_RENDERER_HPP
-#define CAIRO_RENDERER_HPP
-
-
+#ifndef MAPNIK_CAIRO_RENDERER_HPP
+#define MAPNIK_CAIRO_RENDERER_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -152,6 +148,6 @@ public:
 };
 }
 
-#endif
+#endif // MAPNIK_CAIRO_RENDERER_HPP
 
-#endif //CAIRO_RENDERER_HPP
+#endif

@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: polygon_symbolizer.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef POLYGON_SYMBOLIZER_HPP
-#define POLYGON_SYMBOLIZER_HPP
+#ifndef MAPNIK_POLYGON_SYMBOLIZER_HPP
+#define MAPNIK_POLYGON_SYMBOLIZER_HPP
 
 // mapnik
 #include <mapnik/color.hpp>
@@ -122,4 +120,4 @@ private:
 };  
 }
 
-#endif // POLYGON_SYMBOLIZER_HPP
+#endif // MAPNIK_POLYGON_SYMBOLIZER_HPP

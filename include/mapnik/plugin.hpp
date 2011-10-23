@@ -20,14 +20,15 @@
  *
  *****************************************************************************/
 
-//$Id: plugin.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef MAPNIK_PLUGIN_HPP
+#define MAPNIK_PLUGIN_HPP
 
-#ifndef PLUGIN_HPP
-#define PLUGIN_HPP
 // boost
 #include <boost/utility.hpp>
+
 // stl
 #include <string>
+
 // ltdl
 #include <ltdl.h>
 
@@ -46,4 +47,4 @@ public:
 };
 }
 
-#endif //PLUGIN_HPP
+#endif // MAPNIK_PLUGIN_HPP

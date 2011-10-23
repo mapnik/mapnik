@@ -20,13 +20,12 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef LABEL_COLLISION_DETECTOR_HPP
-#define LABEL_COLLISION_DETECTOR_HPP
+#ifndef MAPNIK_LABEL_COLLISION_DETECTOR_HPP
+#define MAPNIK_LABEL_COLLISION_DETECTOR_HPP
 
 // mapnik
 #include <mapnik/quad_tree.hpp>
+
 // stl
 #include <vector>
 #include <unicode/unistr.h>
@@ -233,4 +232,4 @@ public:
 };
 }
 
-#endif // LABEL_COLLISION_DETECTOR_HPP
+#endif // MAPNIK_LABEL_COLLISION_DETECTOR_HPP

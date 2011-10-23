@@ -20,14 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef MAPNIK_GLOBAL_HPP
+#define MAPNIK_GLOBAL_HPP
 
 // boost
 #include <boost/cstdint.hpp>
 #include <boost/detail/endian.hpp>
+
 // stl
 #include <cstring>
 
@@ -183,4 +182,4 @@ inline double round (double val)
 
 
 
-#endif //GLOBAL_HPP
+#endif // MAPNIK_GLOBAL_HPP

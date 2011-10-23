@@ -19,14 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef MAPNIK_VERSION_HPP
 #define MAPNIK_VERSION_HPP
 
 #define MAPNIK_VERSION 200000
 
-#endif //MAPNIK_VERSION_HPP
-
-
-
+#endif // MAPNIK_VERSION_HPP

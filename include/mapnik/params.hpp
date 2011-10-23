@@ -19,15 +19,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: params.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef PARAMS_HPP
-#define PARAMS_HPP
+#ifndef MAPNIK_PARAMS_HPP
+#define MAPNIK_PARAMS_HPP
 
+// mapnik
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
 #include <boost/none.hpp>
 #include <boost/lexical_cast.hpp>
+
+// stl
 #include <string>
 #include <map>
 
@@ -100,4 +102,4 @@ public:
 };
 }
 
-#endif //PARAMS_HPP
+#endif // MAPNIK_PARAMS_HPP

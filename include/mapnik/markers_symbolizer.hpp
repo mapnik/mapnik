@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef MARKERS_SYMBOLIZER_HPP
-#define MARKERS_SYMBOLIZER_HPP
+#ifndef MAPNIK_MARKERS_SYMBOLIZER_HPP
+#define MAPNIK_MARKERS_SYMBOLIZER_HPP
 
 //mapnik
 #include <mapnik/symbolizer.hpp>
@@ -92,4 +90,4 @@ private:
 
 }
 
-#endif // MARKERS_SYMBOLIZER_HPP
+#endif // MAPNIK_MARKERS_SYMBOLIZER_HPP

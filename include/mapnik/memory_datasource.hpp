@@ -20,13 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_MEMORY_DATASOURCE_HPP
+#define MAPNIK_MEMORY_DATASOURCE_HPP
 
-#ifndef MEMORY_DATASOURCE_HPP
-#define MEMORY_DATASOURCE_HPP
-
+// mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+
+// stl
 #include <vector>
 
 namespace mapnik {
@@ -65,4 +66,4 @@ private:
 };   
 }
 
-#endif // MEMORY_DATASOURCE_HPP
+#endif // MAPNIK_MEMORY_DATASOURCE_HPP

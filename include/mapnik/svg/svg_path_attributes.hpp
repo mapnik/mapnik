@@ -20,16 +20,16 @@
  *
  *****************************************************************************/
 
-// $Id$
-
 #ifndef MAPNIK_SVG_PATH_ATTRIBUTES_HPP
 #define MAPNIK_SVG_PATH_ATTRIBUTES_HPP
 
+// agg
 #include "agg_math_stroke.h"
 #include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_trans_affine.h"
 
+// mapnik
 #include <mapnik/gradient.hpp>
 
 namespace mapnik {

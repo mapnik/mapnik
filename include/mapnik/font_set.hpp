@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef FONT_SET_HPP
-#define FONT_SET_HPP
+#ifndef MAPNIK_FONT_SET_HPP
+#define MAPNIK_FONT_SET_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -52,4 +50,4 @@ private:
 };
 }
 
-#endif //FONT_SET_HPP
+#endif // MAPNIK_FONT_SET_HPP

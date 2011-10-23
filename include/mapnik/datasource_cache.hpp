@@ -20,18 +20,18 @@
  *
  *****************************************************************************/
 
-//$Id: datasource_cache.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef DATASOURCE_CACHE_HPP
-#define DATASOURCE_CACHE_HPP
+#ifndef MAPNIK_DATASOURCE_CACHE_HPP
+#define MAPNIK_DATASOURCE_CACHE_HPP
 
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
 #include <mapnik/datasource.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
+
 // stl
 #include <map>
 
@@ -57,4 +57,4 @@ public:
 };
 }
 
-#endif   //DATASOURCE_CACHE_HPP
+#endif // MAPNIK_DATASOURCE_CACHE_HPP
