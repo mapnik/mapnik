@@ -3,7 +3,6 @@
     <Datasource name="sqlite">
         <Parameter name="type">sqlite</Parameter>
         <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
-        <Parameter name="wkb_format">spatialite</Parameter>
         <Parameter name="multiple_geometries">true</Parameter>
     </Datasource>
 
