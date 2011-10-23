@@ -89,4 +89,4 @@ struct view_transform<box2d<double>,box2d<double>,Trans>
 };
 }
 
-#endif //VERTEX_TRANSFORM_HPP
+#endif // MAPNIK_VERTEX_TRANSFORM_HPP
