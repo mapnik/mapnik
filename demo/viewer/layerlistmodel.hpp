@@ -1,4 +1,5 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
+ *
  * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
@@ -36,10 +37,10 @@ class LayerListModel : public QAbstractListModel
       int rowCount(const QModelIndex &parent = QModelIndex()) const;
       QVariant data(const QModelIndex &index, int role) const;
       QVariant headerData(int section, Qt::Orientation orientation,
-                          int role = Qt::DisplayRole) const;  
+                          int role = Qt::DisplayRole) const;
       bool setData(const QModelIndex &index, const QVariant &value,
                    int role = Qt::EditRole);
-      Qt::ItemFlags flags(QModelIndex const& index) const; 
+      Qt::ItemFlags flags(QModelIndex const& index) const;
       boost::optional<mapnik::layer&> map_layer(int i);
 
    private:

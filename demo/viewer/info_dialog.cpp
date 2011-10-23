@@ -1,4 +1,5 @@
- /* This file is part of Mapnik (c++ mapping toolkit)
+/* This file is part of Mapnik (c++ mapping toolkit)
+ *
  * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
@@ -35,6 +36,6 @@ info_dialog::info_dialog(QVector<QPair<QString,QString> > const& info, QWidget *
      QTableWidgetItem *keyItem = new QTableWidgetItem(info[i].first);
      QTableWidgetItem *valueItem = new QTableWidgetItem(info[i].second);
      ui.tableWidget->setItem(i,0,keyItem);
-     ui.tableWidget->setItem(i,1,valueItem); 
+     ui.tableWidget->setItem(i,1,valueItem);
   }
 }
