@@ -20,13 +20,12 @@
  *
  *****************************************************************************/
 
-//$Id: factory.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef FACTORY_HPP
-#define FACTORY_HPP
+#ifndef MAPNIK_FACTORY_HPP
+#define MAPNIK_FACTORY_HPP
 
 // mapnik
 #include <mapnik/utils.hpp>
+
 // stl
 #include <stdexcept>
 #include <map>
@@ -89,4 +88,4 @@ public:
 };
 }
 
-#endif //FACTORY_HPP
+#endif // MAPNIK_FACTORY_HPP

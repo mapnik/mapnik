@@ -20,16 +20,16 @@
  *
  *****************************************************************************/
 
-//$Id: box2d.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
 #ifndef MAPNIK_BOX2D_HPP
 #define MAPNIK_BOX2D_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/coord.hpp>
+
 // boost
 #include <boost/operators.hpp>
+
 // stl
 #include <iomanip>
 

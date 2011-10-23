@@ -33,6 +33,7 @@
 #include <boost/utility.hpp>
 #include <libxml/xmlreader.h>
 
+// stl
 #include <map>
 
 namespace  mapnik { namespace svg {

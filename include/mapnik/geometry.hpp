@@ -20,15 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id: geometry.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef GEOMETRY_HPP
-#define GEOMETRY_HPP
+#ifndef MAPNIK_GEOMETRY_HPP
+#define MAPNIK_GEOMETRY_HPP
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geom_util.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
@@ -392,4 +391,4 @@ typedef boost::ptr_vector<geometry_type> geometry_containter;
 
 }
 
-#endif //GEOMETRY_HPP
+#endif // MAPNIK_GEOMETRY_HPP

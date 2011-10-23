@@ -20,11 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_ENUMERATION_INCLUDED
-#define MAPNIK_ENUMERATION_INCLUDED
+#ifndef MAPNIK_ENUMERATION_HPP
+#define MAPNIK_ENUMERATION_HPP
 
+// mapnik
 #include <mapnik/config.hpp>
 
+// stl
 #include <vector>
 #include <bitset>
 #include <iostream>
@@ -325,4 +327,4 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
     template <> std::string name ::our_name_ = #name;                   \
     template <> bool name ::our_verified_flag_( name ::verify(__FILE__, __LINE__));
 
-#endif // MAPNIK_ENUMERATION_INCLUDED
+#endif // MAPNIK_ENUMERATION_HPP

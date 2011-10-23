@@ -20,10 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id$
 #ifndef MAPNIK_SCALE_DENOMINATOR_HPP
 #define MAPNIK_SCALE_DENOMINATOR_HPP
 
+// mapnik
 #include <mapnik/config.hpp>
 
 namespace mapnik {

@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef ATTRIBUTE_DESCRIPTOR
-#define ATTRIBUTE_DESCRIPTOR
+#ifndef MAPNIK_ATTRIBUTE_DESCRIPTOR_HPP
+#define MAPNIK_ATTRIBUTE_DESCRIPTOR_HPP
 
 #include <string>
 
@@ -118,4 +116,4 @@ operator << (std::basic_ostream<charT,traits>& out,
 
 }
 
-#endif // ATTRIBUTE_DESCRIPTOR_HPP
+#endif // MAPNIK_ATTRIBUTE_DESCRIPTOR_HPP

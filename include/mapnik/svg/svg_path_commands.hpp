@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef SVG_COMMANDS_HPP
-#define SVG_COMMANDS_HPP
+#ifndef MAPNIK_SVG_PATH_COMMANDS_HPP
+#define MAPNIK_SVG_PATH_COMMANDS_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
-//
+
+// boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -262,4 +263,4 @@ namespace mapnik { namespace svg {
     }}
 
 
-#endif // SVG_COMMANDS_HPP
+#endif // MAPNIK_SVG_COMMANDS_HPP

@@ -20,11 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_HIT_TEST_FILTER_HPP
+#define MAPNIK_HIT_TEST_FILTER_HPP
 
-#ifndef HIT_TEST_FILTER_HPP
-#define HIT_TEST_FILTER_HPP
-
+// mapnik
 #include <mapnik/feature.hpp>
 
 namespace mapnik {
@@ -54,4 +53,4 @@ private:
 };
 }
 
-#endif // HIT_TEST_FILTER_HPP
+#endif // MAPNIK_HIT_TEST_FILTER_HPP

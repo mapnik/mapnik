@@ -20,15 +20,15 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef SVG_TRANSFORM_GRAMMAR_HPP
-#define SVG_TRANSFORM_GRAMMAR_HPP
+#ifndef MAPNIK_SVG_TRANSFORM_GRAMMAR_HPP
+#define MAPNIK_SVG_TRANSFORM_GRAMMAR_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
+
 // agg
 #include <agg_trans_affine.h>
+
 // spirit
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
@@ -260,4 +260,4 @@ namespace mapnik { namespace svg {
 
     }}
 
-#endif // SVG_TRANSFORM_GRAMMAR_HPP
+#endif // MAPNIK_SVG_TRANSFORM_GRAMMAR_HPP

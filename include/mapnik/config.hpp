@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#ifndef MAPNIK_CONFIG_HPP
+#define MAPNIK_CONFIG_HPP
 
 // Windows DLL support
 
@@ -47,4 +47,5 @@
 #endif
 
 #define PROJ_ENVELOPE_POINTS 20
-#endif // CONFIG_HPP
+
+#endif // MAPNIK_CONFIG_HPP

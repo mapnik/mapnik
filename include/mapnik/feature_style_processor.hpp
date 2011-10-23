@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef FEATURE_STYLE_PROCESSOR_HPP
-#define FEATURE_STYLE_PROCESSOR_HPP
+#ifndef MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
+#define MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
 
 #include <set>
 #include <string>
@@ -74,4 +72,4 @@ private:
 };
 }
 
-#endif //FEATURE_STYLE_PROCESSOR_HPP
+#endif // MAPNIK_FEATURE_STYLE_PROCESSOR_HPP

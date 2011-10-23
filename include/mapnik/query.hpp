@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef QUERY_HPP
-#define QUERY_HPP
+#ifndef MAPNIK_QUERY_HPP
+#define MAPNIK_QUERY_HPP
 
 //mapnik
 #include <mapnik/box2d.hpp>
@@ -123,7 +121,7 @@ public:
         return names_;
     }
 };
+
 }
 
-
-#endif //QUERY_HPP
+#endif // MAPNIK_QUERY_HPP

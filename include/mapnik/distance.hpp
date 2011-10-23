@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef DISTANCE_HPP
-#define DISTANCE_HPP
+#ifndef MAPNIK_DISTANCE_HPP
+#define MAPNIK_DISTANCE_HPP
 
 #include <mapnik/coord.hpp>
 
@@ -52,4 +50,4 @@ public:
 */
 }
 
-#endif // GEO_UTILS_HPP
+#endif // MAPNIK_DISTANCE_HPP

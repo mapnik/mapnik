@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef  MAPNIK_EXPRESSION_NODE_HPP
-#define  MAPNIK_EXPRESSION_NODE_HPP
+#ifndef MAPNIK_EXPRESSION_NODE_HPP
+#define MAPNIK_EXPRESSION_NODE_HPP
 
 // mapnik
 #include <mapnik/value.hpp>
 #include <mapnik/attribute.hpp>
+
 // boost
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>

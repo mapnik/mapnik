@@ -20,13 +20,12 @@
  *
  *****************************************************************************/
 
-//$Id: coord_array.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef COORD_ARRAY_HPP
-#define COORD_ARRAY_HPP
+#ifndef MAPNIK_COORD_ARRAY_HPP
+#define MAPNIK_COORD_ARRAY_HPP
 
 //mapnik
 #include <mapnik/coord.hpp>
+
 // stl
 #include <cassert>
 
@@ -89,4 +88,4 @@ private:
 }
 
 
-#endif //COORD_ARRAY_HPP
+#endif // MAPNIK_COORD_ARRAY_HPP

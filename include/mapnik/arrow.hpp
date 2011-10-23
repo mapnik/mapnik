@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef ARROW_HPP
-#define ARROW_HPP
+#ifndef MAPNIK_ARROW_HPP
+#define MAPNIK_ARROW_HPP
 
 #include <mapnik/box2d.hpp>
 
@@ -44,4 +42,4 @@ private:
 };   
 }
 
-#endif // ARROW_HPP
+#endif // MAPNIK_ARROW_HPP

@@ -19,11 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef WARP_HPP
-#define WARP_HPP
+#ifndef MAPNIK_WARP_HPP
+#define MAPNIK_WARP_HPP
 
+// mapnik
 #include <mapnik/raster.hpp>
 #include <mapnik/proj_transform.hpp>
 
@@ -38,4 +38,5 @@ void reproject_raster(raster &target, raster const& source,
                       std::string scaling_method_name);
 
 }
-#endif //WARP_HPP
+
+#endif // MAPNIK_WARP_HPP

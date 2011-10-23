@@ -20,14 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_FEATURE_TYPE_STYLE_HPP
+#define MAPNIK_FEATURE_TYPE_STYLE_HPP
 
-#ifndef FEATURE_TYPE_STYLE_HPP
-#define FEATURE_TYPE_STYLE_HPP
 // mapnik 
 #include <mapnik/rule.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>
+
 // stl
 #include <vector>
 
@@ -69,4 +69,4 @@ public:
 };
 }
 
-#endif //FEATURE_TYPE_STYLE_HPP
+#endif // MAPNIK_FEATURE_TYPE_STYLE_HPP

@@ -20,9 +20,8 @@
  *
  *****************************************************************************/
 
-
-#ifndef METAWRITER_FACTORY_HPP
-#define METAWRITER_FACTORY_HPP
+#ifndef MAPNIK_METAWRITER_FACTORY_HPP
+#define MAPNIK_METAWRITER_FACTORY_HPP
 
 // mapnik
 #include <mapnik/metawriter.hpp>
@@ -51,5 +50,5 @@ void metawriter_save(
 
 }
 
-#endif /* METAWRITER_FACTORY_HPP */
+#endif // MAPNIK_METAWRITER_FACTORY_HPP
 

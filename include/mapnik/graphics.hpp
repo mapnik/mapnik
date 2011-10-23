@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: graphics.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef GRAPHICS_HPP
-#define GRAPHICS_HPP
+#ifndef MAPNIK_GRAPHICS_HPP
+#define MAPNIK_GRAPHICS_HPP
 
 // mapnik
 #include <mapnik/color.hpp>
@@ -520,4 +518,5 @@ public:
     }
 };
 }
-#endif //GRAPHICS_HPP
+
+#endif // MAPNIK_GRAPHICS_HPP

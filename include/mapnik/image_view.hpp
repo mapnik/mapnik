@@ -20,11 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef IMAGE_VIEW_HPP
-#define IMAGE_VIEW_HPP
-
+#ifndef MAPNIK_IMAGE_VIEW_HPP
+#define MAPNIK_IMAGE_VIEW_HPP
 
 namespace mapnik {
     
@@ -107,5 +104,5 @@ private:
 };
 }
 
-#endif // IMAGE_VIEW_HPP
+#endif // MAPNIK_IMAGE_VIEW_HPP
 

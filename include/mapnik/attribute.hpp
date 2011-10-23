@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_ATTRIBUTE_HPP
 #define MAPNIK_ATTRIBUTE_HPP
 

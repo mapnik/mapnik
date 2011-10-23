@@ -20,11 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_FILTER_FEATURESET_HPP
 #define MAPNIK_FILTER_FEATURESET_HPP
 
+// mapnik
 #include <mapnik/datasource.hpp>
 
 namespace mapnik {
@@ -54,4 +53,4 @@ private:
 };
 }
 
-#endif //MAPNIK_FILTER_FEATURESET_HPP
+#endif // MAPNIK_FILTER_FEATURESET_HPP

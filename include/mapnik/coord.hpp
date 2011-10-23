@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id: coord.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef MAPNIK_COORD_HPP
+#define MAPNIK_COORD_HPP
 
-#ifndef COORD_HPP
-#define COORD_HPP
-
+// boost
 #include <boost/operators.hpp>
+
+// stl
 #include <iomanip>
 #include <sstream>
 
@@ -187,4 +188,4 @@ operator << (std::basic_ostream<charT,traits>& out,
 } 
 }
 
-#endif // COORD_HPP
+#endif // MAPNIK_COORD_HPP

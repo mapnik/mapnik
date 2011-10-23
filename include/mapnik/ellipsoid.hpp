@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_ELLIPSOID_HPP
 #define MAPNIK_ELLIPSOID_HPP
 

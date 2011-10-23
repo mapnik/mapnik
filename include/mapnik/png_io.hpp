@@ -20,16 +20,16 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_PNG_IO_HPP
 #define MAPNIK_PNG_IO_HPP
 
+// mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
 
+// zlib
 #include <zlib.h>
 
 extern "C"

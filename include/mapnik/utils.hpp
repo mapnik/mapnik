@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: utils.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef MAPNIK_UTILS_HPP
+#define MAPNIK_UTILS_HPP
 
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
@@ -165,9 +163,8 @@ template <typename T,
 template <typename T,
           template <typename U> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
 template <typename T,
-          template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
-   
+          template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;  
+
 }
 
-
-#endif //UTILS_HPP
+#endif // MAPNIK_UTILS_HPP

@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef MAPNIK_SHIELD_SYMBOLIZER_HPP
 #define MAPNIK_SHIELD_SYMBOLIZER_HPP
@@ -61,4 +60,4 @@ private:
 };
 }
 
-#endif // SHIELD_SYMBOLIZER_HPP
+#endif // MAPNIK_SHIELD_SYMBOLIZER_HPP

@@ -20,14 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_EXPRESSION_STRING_HPP
 #define MAPNIK_EXPRESSION_STRING_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/expression_node.hpp>
+
 // stl
 #include <string>
 

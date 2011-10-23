@@ -20,14 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_FILTER_FACTORY_HPP
 #define MAPNIK_FILTER_FACTORY_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/expression_node.hpp>
+
 // stl
 #include <string>
 
@@ -41,4 +40,4 @@ MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt);
    
 }
 
-#endif //MAPNIK_FILTER_FACTORY_HPP
+#endif // MAPNIK_FILTER_FACTORY_HPP

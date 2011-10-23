@@ -19,10 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: vertex_transform.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef VERTEX_TRANSFORM_HPP
-#define VERTEX_TRANSFORM_HPP
+#ifndef MAPNIK_VERTEX_TRANSFORM_HPP
+#define MAPNIK_VERTEX_TRANSFORM_HPP
 
 // mapnik
 #include <mapnik/box2d.hpp>

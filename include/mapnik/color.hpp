@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: color.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef COLOR_HPP
-#define COLOR_HPP
+#ifndef MAPNIK_COLOR_HPP
+#define MAPNIK_COLOR_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -32,6 +30,7 @@
 //boost
 #include <boost/cstdint.hpp>
 #include <boost/operators.hpp>
+
 // stl
 #include <sstream>
 
@@ -141,4 +140,4 @@ public:
 
 }
 
-#endif //COLOR_HPP
+#endif // MAPNIK_COLOR_HPP

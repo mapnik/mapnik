@@ -20,10 +20,9 @@
  *
  *****************************************************************************/
 
-//$Id: feature.hpp 40 2005-04-13 20:20:46Z pavlenko $
+#ifndef MAPNIK_FEATURE_HPP
+#define MAPNIK_FEATURE_HPP
 
-#ifndef FEATURE_HPP
-#define FEATURE_HPP
 // mapnik
 #include <mapnik/value.hpp>
 #include <mapnik/geometry.hpp>
@@ -36,9 +35,9 @@
 #else
 #include <boost/property_map.hpp>
 #endif
-
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+
 // stl
 #include <map>
 
@@ -181,4 +180,4 @@ inline std::ostream& operator<< (std::ostream & out,Feature const& f)
 }
 }
 
-#endif //FEATURE_HPP
+#endif // MAPNIK_FEATURE_HPP

@@ -19,15 +19,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef QUAD_TREE_HPP
-#define QUAD_TREE_HPP
+#ifndef MAPNIK_QUAD_TREE_HPP
+#define MAPNIK_QUAD_TREE_HPP
+
 // mapnik
 #include <mapnik/box2d.hpp>
+
 // boost
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/noncopyable.hpp>
+
 // stl
 #include <vector>
 #include <cstring>
@@ -220,4 +222,4 @@ private:
 };    
 } 
 
-#endif
+#endif // MAPNIK_QUAD_TREE_HPP

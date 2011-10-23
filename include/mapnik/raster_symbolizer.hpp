@@ -19,10 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef RASTER_SYMBOLIZER_HPP
-#define RASTER_SYMBOLIZER_HPP
+#ifndef MAPNIK_RASTER_SYMBOLIZER_HPP
+#define MAPNIK_RASTER_SYMBOLIZER_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -159,4 +158,4 @@ private:
 };
 }
 
-#endif //RASTER_SYMBOLIZER_HPP
+#endif // MAPNIK_RASTER_SYMBOLIZER_HPP

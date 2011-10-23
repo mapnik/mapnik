@@ -20,17 +20,15 @@
  *
  *****************************************************************************/
 
-//$Id: pool.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef POOL_HPP
-#define POOL_HPP
+#ifndef MAPNIK_POOL_HPP
+#define MAPNIK_POOL_HPP
 
 // mapnik
 #include <mapnik/utils.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
-
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
@@ -164,5 +162,7 @@ public:
         return size;
     }
 };
+
 }
-#endif //POOL_HPP
+
+#endif // MAPNIK_POOL_HPP
