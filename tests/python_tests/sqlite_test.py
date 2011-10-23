@@ -10,10 +10,6 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-# Note that without an extent or a spatial index, a sqlite
-# datasource will error on creation.  We use this fact to test
-# database attachdb and initdb options
-
 def test_attachdb_with_relative_file():
     # The point table and index is in the qgis_spatiallite.sqlite
     # database.  If either is not found, then this fails
@@ -21,15 +17,24 @@ def test_attachdb_with_relative_file():
         table='point',
         attachdb='scratch@qgis_spatiallite.sqlite'
         )
+    fs = ds.featureset()
+    feature = fs.next()
+    eq_(feature['pkuid'],1)
 
 def test_attachdb_with_multiple_files():
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
         table='attachedtest',
         attachdb='scratch1@:memory:,scratch2@:memory:',
-        initdb='create table scratch1.attachedtest (the_geom);\n' +
-            'create virtual table scratch2.idx_attachedtest_the_geom using rtree(pkid,xmin,xmax,ymin,ymax);\n' +
-            'insert into scratch2.idx_attachedtest_the_geom values (1,-7799225.5,-7778571.0,1393264.125,1417719.375)\n'
+        initdb='''
+            create table scratch1.attachedtest (the_geom);
+            create virtual table scratch2.idx_attachedtest_the_geom using rtree(pkid,xmin,xmax,ymin,ymax);
+            insert into scratch2.idx_attachedtest_the_geom values (1,-7799225.5,-7778571.0,1393264.125,1417719.375);
+            '''
         )
+    fs = ds.featureset()
+    feature = fs.next()
+    # the above should not throw but will result in no features
+    eq_(feature,None)
 
 def test_attachdb_with_absolute_file():
     # The point table and index is in the qgis_spatiallite.sqlite
@@ -38,29 +43,40 @@ def test_attachdb_with_absolute_file():
         table='point',
         attachdb='scratch@qgis_spatiallite.sqlite'
         )
+    fs = ds.featureset()
+    feature = fs.next()
+    eq_(feature['pkuid'],1)
 
 def test_attachdb_with_index():
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
         table='attachedtest',
         attachdb='scratch@:memory:',
-        initdb='create table scratch.attachedtest (the_geom);\n' +
-            'create virtual table scratch.idx_attachedtest_the_geom using rtree(pkid,xmin,xmax,ymin,ymax);\n' +
-            'insert into scratch.idx_attachedtest_the_geom values (1,-7799225.5,-7778571.0,1393264.125,1417719.375)\n'
+        initdb='''
+            create table scratch.attachedtest (the_geom);
+            create virtual table scratch.idx_attachedtest_the_geom using rtree(pkid,xmin,xmax,ymin,ymax);
+            insert into scratch.idx_attachedtest_the_geom values (1,-7799225.5,-7778571.0,1393264.125,1417719.375);
+            '''
         )
+    fs = ds.featureset()
+    feature = fs.next()
+    eq_(feature,None)
     
 def test_attachdb_with_explicit_index():
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
         table='attachedtest',
         index_table='myindex',
         attachdb='scratch@:memory:',
-        initdb='create table scratch.attachedtest (the_geom);\n' +
-            'create virtual table scratch.myindex using rtree(pkid,xmin,xmax,ymin,ymax);\n' +
-            'insert into scratch.myindex values (1,-7799225.5,-7778571.0,1393264.125,1417719.375)\n'
+        initdb='''
+            create table scratch.attachedtest (the_geom);
+            create virtual table scratch.myindex using rtree(pkid,xmin,xmax,ymin,ymax);
+            insert into scratch.myindex values (1,-7799225.5,-7778571.0,1393264.125,1417719.375);
+            '''
         )
+    fs = ds.featureset()
+    feature = fs.next()
+    eq_(feature,None)
 
-def test_dequoting_of_subqueries():
-    # The point table and index is in the qgis_spatiallite.sqlite
-    # database.  If either is not found, then this fails
+def test_subqueries():
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
         table='world_merc',
         )
@@ -69,24 +85,36 @@ def test_dequoting_of_subqueries():
     eq_(feature['OGC_FID'],1)
     eq_(feature['fips'],u'AC')
 
-    # TODO:
-    # select * from world_merc fails
-    # as rowid is dropped
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
-        table='(select *,rowid from world_merc)',
+        table='(select * from world_merc)',
         )
     fs = ds.featureset()
     feature = fs.next()
-    print feature
     eq_(feature['OGC_FID'],1)
     eq_(feature['fips'],u'AC')
 
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
-        table='(select GEOMETRY,OGC_FID as rowid,fips from world_merc)',
+        table='(select GEOMETRY,OGC_FID,fips from world_merc)',
         )
     fs = ds.featureset()
     feature = fs.next()
-    print feature
+    eq_(feature['OGC_FID'],1)
+    eq_(feature['fips'],u'AC')
+
+    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+        table='(select GEOMETRY,rowid as aliased_id,fips from world_merc)',
+        key_field='aliased_id'
+        )
+    fs = ds.featureset()
+    feature = fs.next()
+    eq_(feature['aliased_id'],1)
+    eq_(feature['fips'],u'AC')
+
+    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+        table='(select GEOMETRY,OGC_FID,OGC_FID as rowid,fips from world_merc)',
+        )
+    fs = ds.featureset()
+    feature = fs.next()
     eq_(feature['rowid'],1)
     eq_(feature['fips'],u'AC')
 
