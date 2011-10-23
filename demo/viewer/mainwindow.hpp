@@ -1,4 +1,5 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
+ *
  * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
@@ -67,7 +68,7 @@ private:
     void createToolBars();
     void createContextMenu();
     void load_map_file(QString const& filename);
-     
+
 
     QString currentPath;
     QString filename_;
