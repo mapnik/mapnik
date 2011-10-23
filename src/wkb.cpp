@@ -67,7 +67,7 @@ public:
         wkbGeometryCollectionZ=1007
     };
 
-    wkb_reader(const char* wkb,unsigned size, wkbFormat format)
+    wkb_reader(const char* wkb, unsigned size, wkbFormat format)
         : wkb_(wkb),
           size_(size),
           pos_(0),
@@ -76,16 +76,16 @@ public:
         // try to determine WKB format automatically
         if (format_ == wkbAuto)
         {
-          if (size >= 44
-              && (unsigned char)(wkb_[0]) == (unsigned char)(0x00)
-              && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C))
-          {
-              format_ = wkbSpatiaLite;
-          }
-          else
-          {
-              format_ = wkbGeneric;
-          }
+            if (size >= 44
+                && (unsigned char)(wkb_[0]) == (unsigned char)(0x00)
+                && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C))
+            {
+                format_ = wkbSpatiaLite;
+            }
+            else
+            {
+                format_ = wkbGeneric;
+            }
         }
 
         switch (format_)
