@@ -145,7 +145,7 @@ void ogr_datasource::bind() const
     if (layer_by_name)
     {
         layer_name_ = *layer_by_name;
-        layer_.layer_from_name(dataset_, layer_name_);
+        layer_.layer_by_name(dataset_, layer_name_);
     }
     else if (layer_by_index)
     {
@@ -160,12 +160,12 @@ void ogr_datasource::bind() const
             throw datasource_exception(s.str());
         }
 
-        layer_.layer_from_index(dataset_, *layer_by_index);
+        layer_.layer_by_index(dataset_, *layer_by_index);
         layer_name_ = layer_.layer_name();
     }
     else if (layer_by_sql)
     {
-        layer_.layer_from_sql(dataset_, *layer_by_sql);
+        layer_.layer_by_sql(dataset_, *layer_by_sql);
         layer_name_ = layer_.layer_name();
     }
     else
