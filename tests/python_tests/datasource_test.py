@@ -59,6 +59,13 @@ def test_feature_attributes():
     eq_(lyr.datasource.fields(),['AREA', 'EAS_ID', 'PRFEDEA'])
     eq_(lyr.datasource.field_types(),['float','int','str'])
 
+def test_ogr_layer_by_sql():
+    lyr = mapnik2.Layer('test')
+    lyr.datasource = mapnik2.Ogr(file='../data/shp/poly.shp', layer_by_sql='SELECT * FROM poly WHERE EAS_ID = 168')
+    features = lyr.datasource.all_features()
+    num_feats = len(features)
+    eq_(num_feats, 1)
+
 def test_hit_grid():
     import os
     from itertools import groupby
