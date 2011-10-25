@@ -76,6 +76,54 @@ def test_attachdb_with_explicit_index():
     feature = fs.next()
     eq_(feature,None)
 
+def test_attachdb_with_sql_join():
+    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+        table='(select * from world_merc INNER JOIN business on world_merc.iso3 = business.ISO3 limit 100)',
+        attachdb='busines@business.sqlite'
+        )
+    fs = ds.featureset()
+    feature = fs.next()
+    eq_(feature.id(),1)
+    expected = {
+      1995:0,
+      1996:0,
+      1997:0,
+      1998:0,
+      1999:0,
+      2000:0,
+      2001:0,
+      2002:0,
+      2003:0,
+      2004:0,
+      2005:0,
+      2006:0,
+      2007:0,
+      2008:0,
+      2009:0,
+      2010:0,
+      # this appears to be sqlites way of
+      # automatically handling clashing column names
+      'ISO3:1':'ATG',
+      'OGC_FID':1,
+      'area':44,
+      'fips':u'AC',
+      'iso2':u'AG',
+      'iso3':u'ATG',
+      'lat':17.078,
+      'lon':-61.783,
+      'name':u'Antigua and Barbuda',
+      'pop2005':83039,
+      'region':19,
+      'subregion':29,
+      'un':28
+    }
+    for k,v in expected.items():
+        try:
+            eq_(feature[str(k)],v)
+        except:
+            #import pdb;pdb.set_trace()
+            print 'invalid key/v %s/%s for: %s' % (k,v,feature) 
+
 def test_subqueries():
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
         table='world_merc',
@@ -84,6 +132,16 @@ def test_subqueries():
     feature = fs.next()
     eq_(feature['OGC_FID'],1)
     eq_(feature['fips'],u'AC')
+    eq_(feature['iso2'],u'AG')
+    eq_(feature['iso3'],u'ATG')
+    eq_(feature['un'],28)
+    eq_(feature['name'],u'Antigua and Barbuda')
+    eq_(feature['area'],44)
+    eq_(feature['pop2005'],83039)
+    eq_(feature['region'],19)
+    eq_(feature['subregion'],29)
+    eq_(feature['lon'],-61.783)
+    eq_(feature['lat'],17.078)
 
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
         table='(select * from world_merc)',
@@ -92,6 +150,24 @@ def test_subqueries():
     feature = fs.next()
     eq_(feature['OGC_FID'],1)
     eq_(feature['fips'],u'AC')
+    eq_(feature['iso2'],u'AG')
+    eq_(feature['iso3'],u'ATG')
+    eq_(feature['un'],28)
+    eq_(feature['name'],u'Antigua and Barbuda')
+    eq_(feature['area'],44)
+    eq_(feature['pop2005'],83039)
+    eq_(feature['region'],19)
+    eq_(feature['subregion'],29)
+    eq_(feature['lon'],-61.783)
+    eq_(feature['lat'],17.078)
+    
+    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+        table='(select OGC_FID,GEOMETRY as geom from world_merc)',
+        )
+    fs = ds.featureset()
+    feature = fs.next()
+    eq_(feature['OGC_FID'],1)
+    eq_(len(feature),1)
 
     ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
         table='(select GEOMETRY,OGC_FID,fips from world_merc)',
