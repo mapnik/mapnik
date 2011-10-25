@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2007 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,11 +33,11 @@ class QPainter;
 class LayerDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
-    
+
 public:
     LayerDelegate(QObject *parent = 0);
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const;    
+    const QModelIndex &index) const;
     QSize sizeHint(const QStyleOptionViewItem &option,
                        const QModelIndex &index ) const;
 };

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2009 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_EXPRESSIONS_GRAMMAR_HPP
 #define MAPNIK_EXPRESSIONS_GRAMMAR_HPP
 
@@ -34,12 +32,15 @@
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/concept_check.hpp>
-//spirit2
+
+// spirit2
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_action.hpp>
-//fusion
+
+// fusion
 #include <boost/fusion/include/adapt_struct.hpp>
-//phoenix
+
+// phoenix
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>

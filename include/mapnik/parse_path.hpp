@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,10 +28,12 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 #include <boost/foreach.hpp>
+
 // stl
 #include <string>
 #include <vector>
@@ -140,4 +142,4 @@ typedef mapnik::path_processor<Feature> path_processor_type;
 
 }
 
-#endif //MAPNIK_PARSE_PATH_HPP
+#endif // MAPNIK_PARSE_PATH_HPP

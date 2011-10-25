@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2009 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
-//$Id$
 
 #ifndef MAPNIK_EXPRESSION_EVALUATOR_HPP
 #define MAPNIK_EXPRESSION_EVALUATOR_HPP
@@ -104,4 +102,4 @@ struct evaluate : boost::static_visitor<T1>
 
 }
 
-#endif //MAPNIK_EXPRESSION_EVALUATOR_HPP
+#endif // MAPNIK_EXPRESSION_EVALUATOR_HPP

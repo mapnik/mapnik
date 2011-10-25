@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,16 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id: postgis.cc 44 2005-04-22 18:53:54Z pavlenko $
+#include "connection_manager.hpp"
+#include "postgis_datasource.hpp"
+#include "postgis_featureset.hpp"
 
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/sql_utils.hpp>
-
-#include "connection_manager.hpp"
-#include "postgis_datasource.hpp"
-#include "postgis_featureset.hpp"
 
 // boost
 #include <boost/algorithm/string.hpp>

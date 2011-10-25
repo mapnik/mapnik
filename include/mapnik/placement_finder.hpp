@@ -2,8 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
- * Copyright (C) 2006 10East Corp.
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,11 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_PLACEMENT_FINDER_HPP
+#define MAPNIK_PLACEMENT_FINDER_HPP
 
-#ifndef __PLACEMENT_FINDER__
-#define __PLACEMENT_FINDER__
-
+// mapnik
 #include <mapnik/ctrans.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/text_symbolizer.hpp>
@@ -34,6 +32,7 @@
 #include <mapnik/text_path.hpp>
 #include <mapnik/text_placements.hpp>
 
+// stl
 #include <queue>
 
 namespace mapnik
@@ -145,7 +144,7 @@ private:
     DetectorT & detector_;
     box2d<double> const& dimensions_;
 };
+
 }
 
-#endif
-
+#endif // MAPNIK_PLACEMENT_FINDER_HPP

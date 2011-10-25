@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,12 @@
  *
  *****************************************************************************/
 
-//$Id: factory.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef FACTORY_HPP
-#define FACTORY_HPP
+#ifndef MAPNIK_FACTORY_HPP
+#define MAPNIK_FACTORY_HPP
 
 // mapnik
 #include <mapnik/utils.hpp>
+
 // stl
 #include <stdexcept>
 #include <map>
@@ -89,4 +88,4 @@ public:
 };
 }
 
-#endif //FACTORY_HPP
+#endif // MAPNIK_FACTORY_HPP

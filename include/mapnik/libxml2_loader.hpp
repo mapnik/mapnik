@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,11 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef LIBXML2_LOADER_INCLUDED
-#define LIBXML2_LOADER_INCLUDED
+#ifndef MAPNIK_LIBXML2_LOADER_HPP
+#define MAPNIK_LIBXML2_LOADER_HPP
 
+// boost
 #include <boost/property_tree/ptree.hpp>
 
+// stl
 #include <string>
 
 namespace mapnik 
@@ -33,4 +35,4 @@ void read_xml2( std::string const & filename, boost::property_tree::ptree & pt);
 void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_path="");
 }
 
-#endif // LIBXML2_LOADER_INCLUDED
+#endif // MAPNIK_LIBXML2_LOADER_HPP

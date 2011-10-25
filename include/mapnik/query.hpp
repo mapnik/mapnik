@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef QUERY_HPP
-#define QUERY_HPP
+#ifndef MAPNIK_QUERY_HPP
+#define MAPNIK_QUERY_HPP
 
 //mapnik
 #include <mapnik/box2d.hpp>
@@ -123,7 +121,7 @@ public:
         return names_;
     }
 };
+
 }
 
-
-#endif //QUERY_HPP
+#endif // MAPNIK_QUERY_HPP

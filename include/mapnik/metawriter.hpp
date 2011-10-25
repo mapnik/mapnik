@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Hermann Kraus
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,21 +20,21 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_METAWRITER_HPP
+#define MAPNIK_METAWRITER_HPP
 
-#ifndef METAWRITER_HPP
-#define METAWRITER_HPP
-
-// Mapnik
+// mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
-// Boost
+// boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 #include <boost/concept_check.hpp>
-// STL
+
+// stl
 #include <set>
 #include <string>
 
@@ -139,4 +139,4 @@ typedef std::pair<metawriter_ptr, metawriter_properties> metawriter_with_propert
 
 }
 
-#endif
+#endif // MAPNIK_METAWRITER_HPP

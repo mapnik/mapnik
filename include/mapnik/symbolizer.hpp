@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: symbolizer.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
 #ifndef MAPNIK_SYMBOLIZER_HPP
 #define MAPNIK_SYMBOLIZER_HPP
@@ -105,4 +104,4 @@ protected:
 };
 }
 
-#endif //MAPNIK_SYMBOLIZER_HPP
+#endif // MAPNIK_SYMBOLIZER_HPP

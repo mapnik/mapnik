@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,9 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_FONT_ENGINE_FREETYPE_HPP
+#define MAPNIK_FONT_ENGINE_FREETYPE_HPP
 
-#ifndef FONT_ENGINE_FREETYPE_HPP
-#define FONT_ENGINE_FREETYPE_HPP
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/utils.hpp>
@@ -49,7 +48,6 @@ extern "C"
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
-
 
 // stl
 #include <string>
@@ -602,4 +600,4 @@ private:
 };
 }
 
-#endif // FONT_ENGINE_FREETYPE_HPP
+#endif // MAPNIK_FONT_ENGINE_FREETYPE_HPP

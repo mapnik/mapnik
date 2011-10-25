@@ -3,7 +3,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 /** \brief Raster Colouriser
  * 
@@ -35,9 +34,8 @@
  * 
  */
 
-
-#ifndef RASTER_COLORIZER_HPP
-#define RASTER_COLORIZER_HPP
+#ifndef MAPNIK_RASTER_COLORIZER_HPP
+#define MAPNIK_RASTER_COLORIZER_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -214,14 +212,9 @@ private:
 };
 
 
-
-
-
-
-
 typedef boost::shared_ptr<raster_colorizer> raster_colorizer_ptr;
 
 
 } // mapnik namespace
 
-#endif //RASTER_COLORIZER_HPP
+#endif // MAPNIK_RASTER_COLORIZER_HPP

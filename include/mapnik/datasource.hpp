@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,9 @@
  *
  *****************************************************************************/
 
-//$Id: datasource.hpp 43 2005-04-22 18:52:47Z pavlenko $
+#ifndef MAPNIK_DATASOURCE_HPP
+#define MAPNIK_DATASOURCE_HPP
 
-#ifndef DATASOURCE_HPP
-#define DATASOURCE_HPP
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/ctrans.hpp>
@@ -31,9 +30,11 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+
 // stl
 #include <map>
 #include <string>
@@ -142,6 +143,7 @@ typedef boost::shared_ptr<datasource> datasource_ptr;
         delete ds;                                                      \
     }                                                                   \
     //
+
 }
 
-#endif //DATASOURCE_HPP
+#endif // MAPNIK_DATASOURCE_HPP
