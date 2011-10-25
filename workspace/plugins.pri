@@ -16,6 +16,7 @@ HEADERS += \
   $$PWD/../plugins/input/ogr/ogr_converter.hpp \
   $$PWD/../plugins/input/ogr/ogr_featureset.hpp \
   $$PWD/../plugins/input/ogr/ogr_datasource.hpp \
+  $$PWD/../plugins/input/ogr/ogr_layer_ptr.hpp \
   $$PWD/../plugins/input/ogr/ogr_feature_ptr.hpp \
   $$PWD/../plugins/input/ogr/ogr_index.hpp \
   $$PWD/../plugins/input/ogr/ogr_index_featureset.hpp \

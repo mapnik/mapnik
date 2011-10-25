@@ -29,15 +29,17 @@
 class ogr_feature_ptr
 {
 public:
-    ogr_feature_ptr (OGRFeature* const feat)
-        : feat_ (feat)
+    ogr_feature_ptr(OGRFeature* const feat)
+        : feat_(feat)
     {
     }
     
-    ~ogr_feature_ptr ()
+    ~ogr_feature_ptr()
     {
         if (feat_ != NULL)
-            OGRFeature::DestroyFeature (feat_);
+        {
+            OGRFeature::DestroyFeature(feat_);
+        }
     }
 
     OGRFeature* operator*()
