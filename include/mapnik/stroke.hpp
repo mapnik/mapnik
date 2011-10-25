@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,13 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef STROKE_HPP
-#define STROKE_HPP
+#ifndef MAPNIK_STROKE_HPP
+#define MAPNIK_STROKE_HPP
+
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/enumeration.hpp>
+
 // stl
 #include <vector>
  
@@ -107,4 +108,4 @@ private:
 };
 }
 
-#endif //STROKE_HPP
+#endif // MAPNIK_STROKE_HPP

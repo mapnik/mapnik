@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,15 +20,12 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef SVG_RENDERER_HPP
-#define SVG_RENDERER_HPP
+#ifndef MAPNIK_SVG_RENDERER_HPP
+#define MAPNIK_SVG_RENDERER_HPP
 
 // mapnik
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/map.hpp>
-
 #include <mapnik/svg/svg_generator.hpp>
 #include <mapnik/svg/svg_output_attributes.hpp>
 
@@ -150,4 +147,4 @@ namespace mapnik
     };
 }
 
-#endif //SVG_RENDERER_HPP
+#endif // MAPNIK_SVG_RENDERER_HPP

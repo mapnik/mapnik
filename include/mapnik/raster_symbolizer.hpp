@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,10 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef RASTER_SYMBOLIZER_HPP
-#define RASTER_SYMBOLIZER_HPP
+#ifndef MAPNIK_RASTER_SYMBOLIZER_HPP
+#define MAPNIK_RASTER_SYMBOLIZER_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -159,4 +158,4 @@ private:
 };
 }
 
-#endif //RASTER_SYMBOLIZER_HPP
+#endif // MAPNIK_RASTER_SYMBOLIZER_HPP

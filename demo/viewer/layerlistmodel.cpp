@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2007 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -61,7 +62,7 @@ QVariant LayerListModel::data(QModelIndex const& index,int role) const
     {
         if (map_->layers().at(index.row()).isActive())
            return QVariant(Qt::Checked);
-        else 
+        else
            return QVariant(Qt::Unchecked);
     }
     else
@@ -75,7 +76,7 @@ QVariant LayerListModel::headerData(int section, Qt::Orientation orientation,
 {
     if (role != Qt::DisplayRole)
         return QVariant();
-    
+
     if (orientation == Qt::Horizontal)
         return QString("TODO Column %1").arg(section);
     else
@@ -86,22 +87,22 @@ bool LayerListModel::setData(const QModelIndex &index,
                              const QVariant &value, int role)
 {
    if (!map_) return false;
-   
+
    if (index.isValid() && role == Qt::CheckStateRole)
    {
-      int status = value.toInt(); 
+      int status = value.toInt();
       std::vector<mapnik::layer> & layers = const_cast<std::vector<mapnik::layer>& >(map_->layers());
       layers.at(index.row()).setActive(status);
       emit dataChanged(index, index);
       return true;
-   } 
+   }
    return false;
 }
 
 Qt::ItemFlags LayerListModel::flags(QModelIndex const& index) const
 {
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
-    
+
     if (index.isValid())
        flags |= Qt::ItemIsUserCheckable;
     return flags;
@@ -121,4 +122,4 @@ boost::optional<mapnik::layer&> LayerListModel::map_layer(int i)
 
 
 
- 
+

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,17 +24,17 @@
 //  author of Anti-Grain Geometry (http://www.antigrain.com). I have used 
 //  the datastructure from AGG as a template for my own. 
 
+#ifndef MAPNIK_VERTEX_VECTOR_HPP
+#define MAPNIK_VERTEX_VECTOR_HPP
 
-//$Id: vertex_vector.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef VERTEX_VECTOR_HPP
-#define VERTEX_VECTOR_HPP
 // mapnik
 #include <mapnik/vertex.hpp>
 #include <mapnik/ctrans.hpp>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/tuple/tuple.hpp>
+
 // stl
 #include <vector>
 #include <cstring>
@@ -143,4 +143,4 @@ private:
 
 }
 
-#endif //VERTEX_VECTOR_HPP
+#endif // MAPNIK_VERTEX_VECTOR_HPP

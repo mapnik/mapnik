@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// stl
 #include <iostream>
 #include <fstream>
 
@@ -35,11 +35,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_factory.hpp>
 
-// ogr
 #include "geos_featureset.hpp"
-
-using std::clog;
-using std::endl;
 
 using mapnik::query;
 using mapnik::box2d;
@@ -59,14 +55,14 @@ geos_featureset::geos_featureset(GEOSGeometry* geometry,
                                  const std::string& field_name,
                                  const std::string& encoding,
                                  bool multiple_geometries)
-   : geometry_(geometry),
-     tr_(new transcoder(encoding)),
-     extent_(extent),
-     identifier_(identifier),
-     field_(field),
-     field_name_(field_name),
-     multiple_geometries_(multiple_geometries),
-     already_rendered_(false)
+  : geometry_(geometry),
+    tr_(new transcoder(encoding)),
+    extent_(extent),
+    identifier_(identifier),
+    field_(field),
+    field_name_(field_name),
+    multiple_geometries_(multiple_geometries),
+    already_rendered_(false)
 {
 }
 
@@ -84,12 +80,12 @@ feature_ptr geos_featureset::next()
         {
             bool render_geometry = true;
             
-            if (*extent_ != NULL && GEOSisValid(*extent_) && !GEOSisEmpty(*extent_))
+            if (*extent_ != NULL && GEOSisValid(*extent_) && ! GEOSisEmpty(*extent_))
             {
                 const int type = GEOSGeomTypeId(*extent_);
                 render_geometry = false;
 
-                switch ( type )
+                switch (type)
                 {
                 case GEOS_POINT:
                     if (GEOSIntersects(*extent_, geometry_))
@@ -97,6 +93,7 @@ feature_ptr geos_featureset::next()
                         render_geometry = true;
                     }
                     break;
+
                 case GEOS_POLYGON:
                     if (GEOSContains(*extent_, geometry_)
                         || GEOSWithin(geometry_, *extent_)
@@ -105,9 +102,10 @@ feature_ptr geos_featureset::next()
                         render_geometry = true;
                     }
                     break;
-               default:
+
+                default:
 #ifdef MAPNIK_DEBUG
-                    clog << "GEOS Plugin: unknown extent geometry_type=" << type << endl;
+                    std::clog << "GEOS Plugin: unknown extent geometry_type=" << type << std::endl;
 #endif
                     break;
                }
@@ -138,4 +136,3 @@ feature_ptr geos_featureset::next()
 
     return feature_ptr();
 }
-

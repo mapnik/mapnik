@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 MapQuest
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,9 +20,8 @@
  *
  *****************************************************************************/
 
-
-#ifndef METAWRITER_INMEM_HPP
-#define METAWRITER_INMEM_HPP
+#ifndef MAPNIK_METAWRITER_INMEM_HPP
+#define MAPNIK_METAWRITER_INMEM_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -117,4 +116,4 @@ typedef boost::shared_ptr<metawriter_inmem> metawriter_inmem_ptr;
 
 }
 
-#endif /* METAWRITER_INMEM_HPP */
+#endif // MAPNIK_METAWRITER_INMEM_HPP

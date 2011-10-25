@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,11 +20,12 @@
  *
  *****************************************************************************/
 
-#ifndef SVG_PATH_GRAMMAR_HPP
-#define SVG_PATH_GRAMMAR_HPP
+#ifndef MAPNIK_SVG_PATH_GRAMMAR_HPP
+#define MAPNIK_SVG_PATH_GRAMMAR_HPP
 
 // mapnik
 #include <mapnik/svg/svg_path_commands.hpp>
+
 // spirit
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
@@ -152,4 +153,4 @@ namespace mapnik { namespace svg {
     }}
 
 
-#endif // SVG_PATH_GRAMMAR_HPP
+#endif // MAPNIK_SVG_PATH_GRAMMAR_HPP

@@ -1,10 +1,15 @@
 # -------------------------------------------------
 # QtCreator Project For Mapnik2
 # -------------------------------------------------
-QT -= core gui
+QT =
 
 TARGET = mapnik2
 TEMPLATE = lib
+
+INCLUDEPATH = \
+    ../deps/agg/include \
+    ../include/mapnik2 \
+    /usr/include
 
 HEADERS += \
     ../include/mapnik/svg/marker_cache.hpp \
@@ -212,4 +217,3 @@ include(bindings.pri)
 unix {
     DEFINES += LINUX=1
 }
-

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef RULE_HPP
-#define RULE_HPP
+#ifndef MAPNIK_RULE_HPP
+#define MAPNIK_RULE_HPP
 
 // mapnik
 #include <mapnik/line_symbolizer.hpp>
@@ -327,4 +327,4 @@ private:
 
 }
 
-#endif //RULE_HPP
+#endif // MAPNIK_RULE_HPP

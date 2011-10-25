@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,15 +20,16 @@
  *
  *****************************************************************************/
 
-//$Id: geom_util.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef MAPNIK_GEOM_UTIL_HPP
+#define MAPNIK_GEOM_UTIL_HPP
 
-#ifndef GEOM_UTIL_HPP
-#define GEOM_UTIL_HPP
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
+
 // boost
 #include <boost/tuple/tuple.hpp>
+
 // stl
 #include <cmath>
 
@@ -217,4 +218,4 @@ struct filter_at_point
 };
 }
 
-#endif //GEOM_UTIL_HPP
+#endif // MAPNIK_GEOM_UTIL_HPP

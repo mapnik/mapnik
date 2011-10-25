@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: image_util.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef IMAGE_UTIL_HPP
-#define IMAGE_UTIL_HPP
+#ifndef MAPNIK_IMAGE_UTIL_HPP
+#define MAPNIK_IMAGE_UTIL_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -298,4 +296,4 @@ template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (ima
 
 }
 
-#endif //IMAGE_UTIL_HPP
+#endif // MAPNIK_IMAGE_UTIL_HPP

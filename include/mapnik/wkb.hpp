@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,11 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id: wkb.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef MAPNIK_WKB_HPP
+#define MAPNIK_WKB_HPP
 
-#ifndef WKB_HPP
-#define WKB_HPP
-
+// mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature.hpp>
@@ -66,4 +65,4 @@ private:
 };
 }
 
-#endif //WKB_HPP
+#endif // MAPNIK_WKB_HPP
