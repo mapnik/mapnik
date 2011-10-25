@@ -15,6 +15,9 @@ Look through the code to get an idea, and do not hesitate to ask questions.
 
 Also read the design philosophy page for the motivations that lead to code decisions.
 
+Templates are good, within reason. We seek to use templates were possible for flexible code, but not in cases where functional
+patterns would be just as concise and clear.
+
 In general we use Boost, it makes more possible in C++. It is a big build time dependency (as in time to compile against and # of headers) but ultimately compiles to small object code and is very fast (particularly spirit). It also has no dependencies itself (it's really an extension to the C++ language) so requiring it is much easier than requiring a hard dependency that itself has other dependencies. This is a big reason that we prefer AGG to Cairo as our primary renderer. Also AGG, besides producing the best visual output, strikes an excellent balance between speed and thread safety by using very lightweight objects. Cairo not so much.
 
 You will also notice that we don't use many of the standard geo libraries when we could. For instance we don't use GDAL, OGR, or GEOS anywhere in core, and only leverage them in optional plugins. We feel we can often write code that is faster and more thread safe than these libraries but that still does the job. If this ever changes we can adapt and start using these libraries or others as dependencies - nothing is nicer than standing on the shoulders of giants when it makes sense.
@@ -66,6 +69,12 @@ If you see bits of code around that do not follow these please don't hesitate to
 #### Spaces not tabs, and avoid trailing whitespace
 
 #### Indentation is four spaces
+
+#### Use C++ style casts
+
+    static_cast<int>(value); // yes
+    
+    (int)value; // no
 
 #### Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/make_shared.html) where possible
 
