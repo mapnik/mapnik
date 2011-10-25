@@ -25,6 +25,10 @@ You will also notice that we don't use many of the standard geo libraries when w
 
 ## Code commits best practices.
 
+#### Big changes - awesome as pull requests
+
+We love big, aggressive refactoring - but ideally in branches. Even if the changes should go directly into the mainline code and are stable, very big changes are useful to see as a group and branches are cheap. So, branch and commit then create a pull request against master so that other developers can take a quick look. This is a great way for informal code review when a full issue is not warrented.
+
 #### Commits that fix issues should note the issue #
 
     git commit plugins/input/ogr/ -m "implemented sql query in OGR plugin (closes #472)"
