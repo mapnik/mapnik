@@ -34,12 +34,13 @@
 // ogr
 #include <ogrsf_frmts.h>
 
+#include "ogr_layer_ptr.hpp"
+
 class ogr_datasource : public mapnik::datasource 
 {
 public:
     ogr_datasource(mapnik::parameters const& params, bool bind=true);
     virtual ~ogr_datasource ();
-
     int type() const;
     static std::string name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
@@ -54,8 +55,8 @@ private:
     std::string dataset_name_;
     mutable std::string index_name_;
     mutable OGRDataSource* dataset_;
-    mutable OGRLayer* layer_;
-    mutable std::string layerName_;
+    mutable ogr_layer_ptr layer_;
+    mutable std::string layer_name_;
     mutable mapnik::layer_descriptor desc_;
     bool multiple_geometries_;
     mutable bool indexed_;

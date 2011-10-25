@@ -485,10 +485,11 @@ def Ogr(**keywords):
 
     Required keyword arguments:
       file -- path to OGR supported dataset
-      layer -- name of layer to use within datasource (optional if layer_by_index is used)
+      layer -- name of layer to use within datasource (optional if layer_by_index or layer_by_sql is used)
 
     Optional keyword arguments:
-      layer_by_index -- choose layer by index number instead of by layer name.
+      layer_by_index -- choose layer by index number instead of by layer name or sql.
+      layer_by_sql -- choose layer by sql query number instead of by layer name or index.
       base -- path prefix (default None)
       encoding -- file encoding (default 'utf-8')
       multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)

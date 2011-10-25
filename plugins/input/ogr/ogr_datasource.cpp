@@ -56,7 +56,7 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
   : datasource(params),
     extent_(),
     type_(datasource::Vector),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
     indexed_(false)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
@@ -66,7 +66,7 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
         throw datasource_exception("missing <file> or <string> parameter");
     }
 
-    multiple_geometries_ = *params.get<mapnik::boolean>("multiple_geometries",false);
+    multiple_geometries_ = *params.get<mapnik::boolean>("multiple_geometries", false);
 
     if (string)
     {
@@ -95,6 +95,9 @@ ogr_datasource::~ogr_datasource()
 {
     if (is_bound_) 
     {
+        // free layer before destroying the datasource
+        layer_.free_layer();
+
         OGRDataSource::DestroyDataSource (dataset_);
     }
 }
@@ -122,19 +125,27 @@ void ogr_datasource::bind() const
     }
 
     // initialize layer
-
     boost::optional<std::string> layer_by_name = params_.get<std::string>("layer");
     boost::optional<unsigned> layer_by_index = params_.get<unsigned>("layer_by_index");
+    boost::optional<std::string> layer_by_sql = params_.get<std::string>("layer_by_sql");
 
-    if (layer_by_name && layer_by_index)
+    int passed_parameters = 0;
+    passed_parameters += layer_by_name ? 1 : 0;
+    passed_parameters += layer_by_index ? 1 : 0;
+    passed_parameters += layer_by_sql ? 1 : 0;
+
+    if (passed_parameters > 1)
     {
-        throw datasource_exception("OGR Plugin: you can only select an ogr layer by name ('layer' parameter) or by number ('layer_by_index' parameter), do not supply both parameters" );
+        throw datasource_exception("OGR Plugin: you can only select an ogr layer by name "
+                                   "('layer' parameter), by number ('layer_by_index' parameter), "
+                                   "or by sql ('layer_by_sql' parameter), "
+                                   "do not supply 2 or more of them at the same time" );
     }
 
     if (layer_by_name)
     {
-        layerName_ = *layer_by_name;
-        layer_ = dataset_->GetLayerByName(layerName_.c_str());
+        layer_name_ = *layer_by_name;
+        layer_.layer_by_name(dataset_, layer_name_);
     }
     else if (layer_by_index)
     {
@@ -149,21 +160,19 @@ void ogr_datasource::bind() const
             throw datasource_exception(s.str());
         }
 
-        OGRLayer* ogr_layer = dataset_->GetLayer(*layer_by_index);
-        if (ogr_layer)
-        {
-            OGRFeatureDefn* def = ogr_layer->GetLayerDefn();
-            if (def != 0)
-            {
-                layerName_ = def->GetName();
-                layer_ = ogr_layer;
-            }
-        }
+        layer_.layer_by_index(dataset_, *layer_by_index);
+        layer_name_ = layer_.layer_name();
+    }
+    else if (layer_by_sql)
+    {
+        layer_.layer_by_sql(dataset_, *layer_by_sql);
+        layer_name_ = layer_.layer_name();
     }
     else
     {
         std::ostringstream s;
-        s << "OGR Plugin: missing <layer> or <layer_by_index> parameter, available layers are: ";
+        s << "OGR Plugin: missing <layer> or <layer_by_index> or <layer_by_sql> "
+          << "parameter, available layers are: ";
 
         unsigned num_layers = dataset_->GetLayerCount();
         bool layer_found = false;
@@ -186,7 +195,7 @@ void ogr_datasource::bind() const
         throw datasource_exception(s.str());
     }
 
-    if (! layer_)
+    if (! layer_.is_valid())
     {
         std::string s("OGR Plugin: ");
 
@@ -198,15 +207,22 @@ void ogr_datasource::bind() const
         {
             s += "cannot find layer by index number '" + *layer_by_index;
         }
+        else if (layer_by_sql)
+        {
+            s += "cannot find layer by sql query '" + *layer_by_sql;
+        }
 
         s += "' in dataset '" + dataset_name_ + "'";
 
         throw datasource_exception(s);
     }
 
+    // work with real OGR layer
+    OGRLayer* layer = layer_.layer();
+
     // initialize envelope
     OGREnvelope envelope;
-    layer_->GetExtent(&envelope);
+    layer->GetExtent(&envelope);
     extent_.init(envelope.MinX, envelope.MinY, envelope.MaxX, envelope.MaxY);
 
     // scan for index file
@@ -220,7 +236,7 @@ void ogr_datasource::bind() const
     }
     index_name_ = dataset_name_.substr(0, breakpoint) + ".ogrindex";
 
-    std::ifstream index_file (index_name_.c_str(), std::ios::in | std::ios::binary);
+    std::ifstream index_file(index_name_.c_str(), std::ios::in | std::ios::binary);
     if (index_file)
     {
         indexed_ = true;
@@ -237,7 +253,7 @@ void ogr_datasource::bind() const
 #endif
 
     // deal with attributes descriptions
-    OGRFeatureDefn* def = layer_->GetLayerDefn();
+    OGRFeatureDefn* def = layer->GetLayerDefn();
     if (def != 0)
     {
         const int fld_count = def->GetFieldCount();
@@ -323,39 +339,16 @@ featureset_ptr ogr_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();
    
-    if (dataset_ && layer_)
+    if (dataset_ && layer_.is_valid())
     {
-#if 0
-        // TODO - actually filter fields!
-        // http://trac.osgeo.org/gdal/wiki/rfc29_desired_fields
-        // http://trac.osgeo.org/gdal/wiki/rfc28_sqlfunc
-
-        std::ostringstream s;
-            
-        s << "select ";
-        std::set<std::string> const& props = q.property_names();
-        std::set<std::string>::const_iterator pos = props.begin();
-        std::set<std::string>::const_iterator end = props.end();
-        while (pos != end)
-        {
-           s << ",\"" << *pos << "\"";
-           ++pos;
-        }   
-        s << " from " << layerName_ ;
-
-        // execute existing SQL
-        OGRLayer* layer = dataset_->ExecuteSQL(s.str(), poly);
-
-        // layer must be freed
-        dataset_->ReleaseResultSet(layer);
-#endif
+        OGRLayer* layer = layer_.layer();
 
         if (indexed_)
         {
             filter_in_box filter(q.get_bbox());
             
             return featureset_ptr(new ogr_index_featureset<filter_in_box>(*dataset_,
-                                                                          *layer_,
+                                                                          *layer,
                                                                           filter,
                                                                           index_name_,
                                                                           desc_.get_encoding(),
@@ -364,12 +357,13 @@ featureset_ptr ogr_datasource::features(query const& q) const
         else
         {
             return featureset_ptr(new ogr_featureset (*dataset_,
-                                                      *layer_,
+                                                      *layer,
                                                       q.get_bbox(),
                                                       desc_.get_encoding(),
                                                       multiple_geometries_));
         }
     }
+
     return featureset_ptr();
 }
 
@@ -377,14 +371,16 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
 {
     if (!is_bound_) bind();
    
-    if (dataset_ && layer_)
+    if (dataset_ && layer_.is_valid())
     {
+        OGRLayer* layer = layer_.layer();
+
         if (indexed_)
         {
             filter_at_point filter(pt);
             
             return featureset_ptr(new ogr_index_featureset<filter_at_point> (*dataset_,
-                                                                             *layer_,
+                                                                             *layer,
                                                                              filter,
                                                                              index_name_,
                                                                              desc_.get_encoding(),
@@ -397,11 +393,12 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
             point.setY (pt.y);
 
             return featureset_ptr(new ogr_featureset (*dataset_,
-                                                      *layer_,
+                                                      *layer,
                                                       point,
                                                       desc_.get_encoding(),
                                                       multiple_geometries_));
         }
     }
+
     return featureset_ptr();
 }

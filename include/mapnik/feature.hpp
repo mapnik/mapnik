@@ -159,8 +159,8 @@ public:
     std::string to_string() const
     {
         std::stringstream ss;
-        ss << "feature (" << std::endl;
-        ss << "  id:" << id_ << std::endl;
+        ss << "feature " 
+           << id_ << " (" << std::endl;
         for (std::map<std::string,value>::const_iterator itr=props_.begin();
              itr != props_.end();++itr)
         {
