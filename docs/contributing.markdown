@@ -80,9 +80,9 @@ If you see bits of code around that do not follow these please don't hesitate to
 
 #### Function definitions should not be separated from their arguments:
 
-    void foo(int a) { ... } // please
+    void foo(int a) // please
     
-    void foo (int a) { ... } // no
+    void foo (int a) // no
 
 #### Separate arguments by a single space:
 
@@ -96,7 +96,18 @@ If you see bits of code around that do not follow these please don't hesitate to
     
     if(a==b) // no
 
-#### Braces should ideally be on a separate line:
+#### Braces should always be used:
+
+    if (!file)
+    {
+        throw mapnik::datasource_exception("not found"); // please    
+    }
+
+    if (!file)
+        throw mapnik::datasource_exception("not found"); // no
+        
+
+#### Braces should be on a separate line:
 
     if (a == b)
     {
