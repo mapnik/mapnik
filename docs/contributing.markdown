@@ -23,6 +23,21 @@ In general we use Boost, it makes more possible in C++. It is a big build time d
 You will also notice that we don't use many of the standard geo libraries when we could. For instance we don't use GDAL, OGR, or GEOS anywhere in core, and only leverage them in optional plugins. We feel we can often write code that is faster and more thread safe than these libraries but that still does the job. If this ever changes we can adapt and start using these libraries or others as dependencies - nothing is nicer than standing on the shoulders of giants when it makes sense.
 
 
+## Code commits best practices.
+
+#### Commits that fix issues should note the issue #
+
+    git commit plugins/input/ogr/ -m "implemented sql query in OGR plugin (closes #472)"
+
+#### Commits that relate to issues should reference them:
+
+    git commit tests/python_tests/sqlite_test.py -m "more robust sqlite tests - refs #928"
+
+#### Commits that add a new feature or fix should be added to the CHANGELOG
+
+Ideally the CHANGELOG can be a very concise place to look for the most important recent development and should not read like a full commit log. So, some developers may prefer to weekly or monthly look back over their commits and summarize all at once with additions to the CHANGELOG. Other developers may prefer to add as they go.
+
+
 ## License
 
 Mapnik is licensed LGPL, which means that you are a free to use the code in any of your applications whether they be open source or not. It also means that if you contribute code to Mapnik that others are free to continue using Mapnik in the same way, even with your new additions. If you choose to redistribute an application using Mapnik just make sure to provide any source code modifications you make back to the community. For the actual details see the full LGPL license in the COPYING doc.
