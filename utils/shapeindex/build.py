@@ -38,12 +38,8 @@ headers = ['#plugins/input/shape'] + env['CPPPATH']
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-libraries =  [boost_program_options, boost_filesystem]
-
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
-
-if env['HAS_BOOST_SYSTEM']:
-    libraries.append(boost_system)
+libraries =  [boost_program_options, boost_filesystem, boost_system]
 
 shapeindex = program_env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
