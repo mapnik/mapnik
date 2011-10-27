@@ -39,7 +39,7 @@ struct attribute
         : name_(name) {}
     
     template <typename V ,typename F>
-    V const& value(F const& f) const
+    V value(F const& f) const
     {
         typedef typename F::const_iterator const_iterator;
         const_iterator itr = f.find(name_);
