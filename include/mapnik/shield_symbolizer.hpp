@@ -38,11 +38,11 @@ struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
 {
     shield_symbolizer(expression_ptr name,
                       std::string const& face_name,
-                      unsigned size,
+                      float size,
                       color const& fill,
                       path_expression_ptr file);
     shield_symbolizer(expression_ptr name,
-                      unsigned size,
+                      float size,
                       color const& fill,
                       path_expression_ptr file);
     

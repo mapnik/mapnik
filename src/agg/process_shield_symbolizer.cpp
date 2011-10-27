@@ -129,7 +129,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         {
             text_renderer<T> ren(pixmap_, faces, *strk);
 
-            ren.set_pixel_size(sym.get_text_size() * scale_factor_);
+            ren.set_character_size(sym.get_text_size() * scale_factor_);
             ren.set_fill(sym.get_fill());
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);

@@ -119,7 +119,13 @@ public:
     {
         if (! FT_Set_Pixel_Sizes( face_, 0, size ))
             return true;
+        return false;
+    }
 
+    bool set_character_sizes(float size)
+    {
+        if ( !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0))
+            return true;
         return false;
     }
 
@@ -184,6 +190,14 @@ public:
             (*face)->set_pixel_sizes(size);
         }
     }
+    
+    void set_character_sizes(float size)
+    {
+        for (std::vector<face_ptr>::iterator face = faces_.begin(); face != faces_.end(); ++face)
+        {
+            (*face)->set_character_sizes(size);
+        }
+    }
 private:
     std::vector<face_ptr> faces_;
     std::map<unsigned, dimension_t> dimension_cache_;
@@ -198,7 +212,7 @@ public:
     
     void init(double radius)
     {
-        FT_Stroker_Set(s_, (FT_Fixed) radius * (1<<6), 
+        FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)), 
                        FT_STROKER_LINECAP_ROUND, 
                        FT_STROKER_LINEJOIN_ROUND, 
                        0);    
@@ -332,11 +346,17 @@ struct text_renderer : private boost::noncopyable
           halo_radius_(0.0),
           opacity_(1.0) {}
 
+
     void set_pixel_size(unsigned size)
     {
         faces_->set_pixel_sizes(size);
     }
-
+    
+    void set_character_size(float size)
+    {
+        faces_->set_character_sizes(size);
+    }
+    
     void set_fill(mapnik::color const& fill)
     {
         fill_=fill;
