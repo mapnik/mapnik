@@ -37,7 +37,7 @@ namespace mapnik
 shield_symbolizer::shield_symbolizer(
     expression_ptr name,
     std::string const& face_name,
-    unsigned size,
+    float size,
     color const& fill,
     path_expression_ptr file)
     : text_symbolizer(name, face_name, size, fill),
@@ -50,7 +50,7 @@ shield_symbolizer::shield_symbolizer(
 
 shield_symbolizer::shield_symbolizer(
     expression_ptr name,
-    unsigned size,
+    float size,
     color const& fill,
     path_expression_ptr file)
     : text_symbolizer(name, size, fill),

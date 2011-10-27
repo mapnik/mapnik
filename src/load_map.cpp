@@ -1244,10 +1244,10 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         optional<std::string> fontset_name =
             get_opt_attr<std::string>(sym, "fontset-name");
 
-        unsigned size = get_attr(sym, "size", 10U);
-
+        float size = get_attr(sym, "size", 10.0f);
+        
         color c = get_attr(sym, "fill", color(0,0,0));
-
+        
         text_symbolizer text_symbol = text_symbolizer(parse_expression(name, "utf8"), size, c, placement_finder);
 
         optional<std::string> orientation = get_opt_attr<std::string>(sym, "orientation");
@@ -1486,7 +1486,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
         optional<std::string> fontset_name =
             get_opt_attr<std::string>(sym, "fontset-name");
 
-        unsigned size = get_attr(sym, "size", 10U);
+        float size = get_attr(sym, "size", 10.0f);
         color fill = get_attr(sym, "fill", color(0,0,0));
 
         std::string image_file = get_attr<std::string>(sym, "file");
