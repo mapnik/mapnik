@@ -65,6 +65,7 @@ private:
     std::map<std::string,value> props_;
 public:
     typedef std::map<std::string,value>::iterator iterator;
+    typedef std::map<std::string,value>::const_iterator const_iterator;
     explicit feature(int id)
         : properties(props_),
           id_(id),
@@ -145,7 +146,7 @@ public:
     {
         return props_;
     }
-    
+
     iterator begin()
     {
         return props_.begin();
@@ -155,7 +156,22 @@ public:
     {
         return props_.end();
     }
+
+    const_iterator begin() const
+    {
+        return props_.begin();
+    }
        
+    const_iterator end() const
+    {
+        return props_.end();
+    }
+    
+    const_iterator find(std::string const& key) const
+    {
+        return props_.find(key);
+    }
+    
     std::string to_string() const
     {
         std::stringstream ss;

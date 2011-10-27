@@ -47,11 +47,22 @@ struct placement;
 class metawriter_property_map
 {
 public:
+    typedef std::map<std::string, UnicodeString> property_map;
+    typedef property_map::const_iterator const_iterator;
+    
     metawriter_property_map() {}
     UnicodeString const& operator[](std::string const& key) const;
     UnicodeString& operator[](std::string const& key) {return m_[key];}
+    std::map<std::string, UnicodeString>::const_iterator find(std::string const& key) const
+    {
+        return m_.find(key);
+    }
+    std::map<std::string, UnicodeString>::const_iterator end() const
+    {
+        return m_.end();
+    }
 private:
-    std::map<std::string, UnicodeString> m_;
+    property_map m_;
     UnicodeString not_found_;
 };
 
