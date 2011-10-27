@@ -1138,7 +1138,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 
             placement_finder<label_collision_detector4> finder(detector_);
 
-            faces->set_pixel_sizes(placement_options->text_size);
+            faces->set_character_sizes(placement_options->text_size);
             faces->get_string_info(info);
 
             int w = (*marker)->width();
@@ -1466,7 +1466,7 @@ void cairo_renderer_base::process(glyph_symbolizer const& sym,
 
         // set font size
         unsigned size = sym.eval_size(feature);
-        faces->set_pixel_sizes(size);
+        faces->set_character_sizes(size);
 
         // Get and render text path
         //
@@ -1563,7 +1563,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
         cairo_context context(context_);
         string_info info(text);
 
-        faces->set_pixel_sizes(placement_options->text_size);
+        faces->set_character_sizes(placement_options->text_size);
         faces->get_string_info(info);
 
         placement_finder<label_collision_detector4> finder(detector_);
