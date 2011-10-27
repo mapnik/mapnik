@@ -25,9 +25,14 @@
 #ifndef MAPNIK_ATTRIBUTE_HPP
 #define MAPNIK_ATTRIBUTE_HPP
 
+// mapnik
+#include <mapnik/value.hpp>
+// stl
 #include <string>
 
 namespace mapnik {
+
+static mapnik::value _null_value;
 
 struct attribute
 {
@@ -36,9 +41,15 @@ struct attribute
         : name_(name) {}
     
     template <typename V ,typename F>
-    V value(F const& f) const
+    V const& value(F const& f) const
     {
-        return f[name_];
+        typedef typename F::const_iterator const_iterator;
+        const_iterator itr = f.find(name_);
+        if (itr != f.end())
+        {
+            return itr->second;
+        }
+        return _null_value;
     }
     std::string const& name() const { return name_;}
 };
