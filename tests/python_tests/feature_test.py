@@ -73,6 +73,7 @@ class FeatureTest(unittest.TestCase):
 def test_feature_expression_evaluation():
     f = mapnik2.Feature(1)
     f['name'] = 'a'
+    eq_(f['name'],u'a')
     expr = mapnik2.Expression("[name]='a'")
     evaluated = expr.evaluate(f)
     eq_(evaluated,True)
@@ -83,10 +84,11 @@ def test_feature_expression_evaluation():
 # https://github.com/mapnik/mapnik/issues/933
 def test_feature_expression_evaluation_missing_attr():
     f = mapnik2.Feature(1)
-    f['name'] = 'a'
+    f['name'] = u'a'
+    eq_(f['name'],u'a')
     expr = mapnik2.Expression("[fielddoesnotexist]='a'")
     evaluated = expr.evaluate(f)
-    eq_(evaluated,True)
+    eq_(evaluated,False)
     num_attributes = len(f)
     eq_(num_attributes,1)
     eq_(f.id(),1)
@@ -94,8 +96,10 @@ def test_feature_expression_evaluation_missing_attr():
 # https://github.com/mapnik/mapnik/issues/934
 def test_feature_expression_evaluation_attr_with_spaces():
     f = mapnik2.Feature(1)
-    f['name with space'] = 'a'
+    f['name with space'] = u'a'
+    eq_(f['name with space'],u'a')
     expr = mapnik2.Expression("[name with space]='a'")
+    eq_(str(expr),"[name with space]='a'")
     eq_(expr.evaluate(f),True)
 
 if __name__ == "__main__":
