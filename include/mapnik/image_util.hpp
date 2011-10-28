@@ -290,7 +290,10 @@ template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 con
                                                                rgba_palette const&);
    
 template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
-                                                                             std::string const&,
+									     std::string const&);
+
+template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+									     std::string const&,
                                                                              rgba_palette const&);
 #endif
 

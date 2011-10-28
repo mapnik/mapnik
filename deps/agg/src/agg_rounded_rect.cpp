@@ -78,8 +78,8 @@ namespace agg
     //--------------------------------------------------------------------
     void rounded_rect::normalize_radius()
     {
-        double dx = fabs(m_y2 - m_y1);
-        double dy = fabs(m_x2 - m_x1);
+        double dx = fabs(m_x2 - m_x1);
+        double dy = fabs(m_y2 - m_y1);
 
         double k = 1.0;
         double t;

@@ -425,7 +425,6 @@ pickle_store = [# Scons internal variables
         'PYTHON_INSTALL_LOCATION',
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
-        'HAS_BOOST_SYSTEM',
         'SVN_REVISION',
         'HAS_CAIRO',
         'HAS_PYCAIRO',
@@ -1126,18 +1125,14 @@ if not preconfigured:
         
     conf.FindBoost(BOOST_SEARCH_PREFIXES,thread_flag)
     
-    # boost system is used in boost 1.35 and greater
-    env['HAS_BOOST_SYSTEM'] = False
     boost_lib_version_from_header = conf.GetBoostLibVersion()
     if boost_lib_version_from_header:
         boost_version_from_header = int(boost_lib_version_from_header.split('_')[1])
-        if boost_version_from_header >= 35:
-            env['HAS_BOOST_SYSTEM'] = True
             
     
     # The other required boost headers.
     BOOST_LIBSHEADERS = [
-        ['system', 'boost/system/system_error.hpp', env['HAS_BOOST_SYSTEM']],
+        ['system', 'boost/system/system_error.hpp', True],
         ['filesystem', 'boost/filesystem/operations.hpp', True],
         ['regex', 'boost/regex.hpp', True],
         ['program_options', 'boost/program_options.hpp', False]
