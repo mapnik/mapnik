@@ -223,11 +223,13 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             | '(' >> expr [_val = _1 ] >> ')'
             ;
         
-        attr %= '[' >> +(char_ - ']') >> ']';
+       
 #if BOOST_VERSION > 104200
         ustring %= '\'' >> no_skip[*~char_('\'')] >> '\'';
+        attr %= '[' >> no_skip[+~char_(']')] >> ']';
 #else
         ustring %= '\'' >> lexeme[*(char_-'\'')] >> '\'';
+        attr %= '[' >> lexeme[+(char_ - ']')] >> ']';
 #endif
     }
     
