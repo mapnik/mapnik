@@ -8,22 +8,35 @@ TEMPLATE = lib
 
 INCLUDEPATH = \
     ../deps/agg/include \
-    ../include/mapnik2 \
-    /usr/include
+    ../deps/threadpool \
+    ../include/mapnik2
 
 HEADERS += \
-    ../include/mapnik/svg/marker_cache.hpp \
+    ../include/mapnik/grid/grid.hpp \
+    ../include/mapnik/grid/grid_pixel.hpp \
+    ../include/mapnik/grid/grid_pixfmt.hpp \
+    ../include/mapnik/grid/grid_rasterizer.hpp \
+    ../include/mapnik/grid/grid_renderer.hpp \
+    ../include/mapnik/grid/grid_rendering_buffer.hpp \
+    ../include/mapnik/grid/grid_util.hpp \
+    ../include/mapnik/grid/grid_view.hpp \
     ../include/mapnik/svg/svg_converter.hpp \
+    ../include/mapnik/svg/svg_generator.hpp \
+    ../include/mapnik/svg/svg_output_attributes.hpp \
+    ../include/mapnik/svg/svg_output_grammars.hpp \
     ../include/mapnik/svg/svg_parser.hpp \
     ../include/mapnik/svg/svg_path_adapter.hpp \
     ../include/mapnik/svg/svg_path_attributes.hpp \
     ../include/mapnik/svg/svg_path_commands.hpp \
     ../include/mapnik/svg/svg_path_grammar.hpp \
+    ../include/mapnik/svg/svg_path_iterator.hpp \
     ../include/mapnik/svg/svg_path_parser.hpp \
     ../include/mapnik/svg/svg_points_grammar.hpp \
     ../include/mapnik/svg/svg_renderer.hpp \
     ../include/mapnik/svg/svg_storage.hpp \
     ../include/mapnik/svg/svg_transform_grammar.hpp \
+    ../include/mapnik/wkt/wkt_factory.hpp \
+    ../include/mapnik/wkt/wkt_grammar.hpp \
     ../include/mapnik/agg_pattern_source.hpp \
     ../include/mapnik/agg_rasterizer.hpp \
     ../include/mapnik/agg_renderer.hpp \
@@ -146,9 +159,43 @@ HEADERS += \
 
 
 SOURCES += \
+    ../src/agg/agg_renderer.cpp \
+    ../src/agg/process_building_symbolizer.cpp \
+    ../src/agg/process_glyph_symbolizer.cpp \
+    ../src/agg/process_line_pattern_symbolizer.cpp \
+    ../src/agg/process_line_symbolizer.cpp \
     ../src/agg/process_markers_symbolizer.cpp \
     ../src/agg/process_point_symbolizer.cpp \
+    ../src/agg/process_polygon_symbolizer.cpp \
+    ../src/agg/process_raster_symbolizer.cpp \
     ../src/agg/process_shield_symbolizer.cpp \
+    ../src/agg/process_text_symbolizer.cpp \
+    ../src/grid/grid_renderer.cpp \
+    ../src/grid/process_building_symbolizer.cpp \
+    ../src/grid/process_glyph_symbolizer.cpp \
+    ../src/grid/process_line_pattern_symbolizer.cpp \
+    ../src/grid/process_line_symbolizer.cpp \
+    ../src/grid/process_markers_symbolizer.cpp \
+    ../src/grid/process_point_symbolizer.cpp \
+    ../src/grid/process_polygon_symbolizer.cpp \
+    ../src/grid/process_raster_symbolizer.cpp \
+    ../src/grid/process_shield_symbolizer.cpp \
+    ../src/grid/process_text_symbolizer.cpp \
+    ../src/svg/svg_renderer.cpp \
+    ../src/svg/svg_generator.cpp \
+    ../src/svg/svg_output_attributes.cpp \
+    ../src/svg/process_symbolizers.cpp \
+    ../src/svg/process_building_symbolizer.cpp \
+    ../src/svg/process_glyph_symbolizer.cpp \
+    ../src/svg/process_line_pattern_symbolizer.cpp \
+    ../src/svg/process_line_symbolizer.cpp \
+    ../src/svg/process_markers_symbolizer.cpp \
+    ../src/svg/process_point_symbolizer.cpp \
+    ../src/svg/process_polygon_symbolizer.cpp \
+    ../src/svg/process_raster_symbolizer.cpp \
+    ../src/svg/process_shield_symbolizer.cpp \
+    ../src/svg/process_text_symbolizer.cpp \
+    ../src/wkt/wkt_factory.cpp \
     ../src/arrow.cpp \
     ../src/box2d.cpp \
     ../src/cairo_renderer.cpp \
