@@ -56,7 +56,7 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
   : datasource(params),
     extent_(),
     type_(datasource::Vector),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
+    desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
     indexed_(false)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
@@ -108,9 +108,24 @@ void ogr_datasource::bind() const
 
     // initialize ogr formats
     OGRRegisterAll();
+    
+    std::string driver = *params_.get<std::string>("driver","");
 
-    // open ogr driver
-    dataset_ = OGRSFDriverRegistrar::Open((dataset_name_).c_str(), FALSE);
+    if (! driver.empty())
+    {
+        OGRSFDriver * ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver.c_str());
+        if (ogr_driver && ogr_driver != NULL)
+        {
+            dataset_ = ogr_driver->Open((dataset_name_).c_str(), FALSE);
+        }
+    
+    }
+    else
+    {
+        // open ogr driver
+        dataset_ = OGRSFDriverRegistrar::Open((dataset_name_).c_str(), FALSE);
+    }
+
     if (! dataset_)
     {
         const std::string err = CPLGetLastErrorMsg();
