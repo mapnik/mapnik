@@ -99,7 +99,7 @@ def test_feature_expression_evaluation_attr_with_spaces():
     f['name with space'] = u'a'
     eq_(f['name with space'],u'a')
     expr = mapnik2.Expression("[name with space]='a'")
-    eq_(str(expr),"[name with space]='a'")
+    eq_(str(expr),"([name with space]='a')")
     eq_(expr.evaluate(f),True)
 
 if __name__ == "__main__":
