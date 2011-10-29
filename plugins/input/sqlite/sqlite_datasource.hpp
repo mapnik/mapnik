@@ -55,7 +55,7 @@ private:
     mutable bool extent_initialized_;
     int type_;
     mutable std::string dataset_name_;
-    mutable sqlite_connection* dataset_;
+    mutable boost::shared_ptr<sqlite_connection> dataset_;
     std::string table_;
     std::string fields_;
     std::string metadata_;
