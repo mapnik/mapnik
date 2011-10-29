@@ -247,35 +247,6 @@ def test_linesymbolizer_pickle():
     eq_(s.line_cap, s2.line_cap)
     eq_(s.line_join, s2.line_join)
 
-# Shapefile initialization
-def test_shapefile_init():
-    s = mapnik2.Shapefile(file='../../demo/data/boundaries')
-
-    e = s.envelope()
-   
-    assert_almost_equal(e.minx, -11121.6896651, places=7)
-    assert_almost_equal(e.miny, -724724.216526, places=6)
-    assert_almost_equal(e.maxx, 2463000.67866, places=5)
-    assert_almost_equal(e.maxy, 1649661.267, places=3)
-
-# Shapefile properties
-def test_shapefile_properties():
-    s = mapnik2.Shapefile(file='../../demo/data/boundaries', encoding='latin1')
-    f = s.features_at_point(s.envelope().center()).features[0]
-
-    eq_(f['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
-    eq_(f['COUNTRY'], u'CAN')
-    eq_(f['F_CODE'], u'FA001')
-    eq_(f['NAME_EN'], u'Quebec')
-    # this seems to break if icu data linking is not working
-    eq_(f['NOM_FR'], u'Qu\xe9bec')
-    eq_(f['NOM_FR'], u'Québec')
-    eq_(f['Shape_Area'], 1512185733150.0)
-    eq_(f['Shape_Leng'], 19218883.724300001)
-
-    # Check that the deprecated interface still works,
-    # remove me once the deprecated code is cleaned up
-    eq_(f.properties['Shape_Leng'], 19218883.724300001)
 
 # TextSymbolizer initialization
 def test_textsymbolizer_init():
@@ -389,19 +360,24 @@ def test_map_init_from_string():
 
     m = mapnik2.Map(600, 300)
     eq_(m.base, '')
-    mapnik2.load_map_from_string(m, map_string)
-    eq_(m.base, './')
-    mapnik2.load_map_from_string(m, map_string, False, "") # this "" will have no effect
-    eq_(m.base, './')
     try:
-        mapnik2.load_map_from_string(m, map_string, False, "/tmp")
-    except RuntimeError:
-        pass # runtime error expected because shapefile path should be wrong and datasource will throw
-    eq_(m.base, '/tmp') # /tmp will be set despite the exception because load_map mostly worked
-    m.base = 'foo'
-    mapnik2.load_map_from_string(m, map_string, True, ".")
-    eq_(m.base, '.')
-    raise(Todo("Need to write more map property tests in 'object_test.py'..."))
+        mapnik2.load_map_from_string(m, map_string)
+        eq_(m.base, './')
+        mapnik2.load_map_from_string(m, map_string, False, "") # this "" will have no effect
+        eq_(m.base, './')
+        try:
+            mapnik2.load_map_from_string(m, map_string, False, "/tmp")
+        except RuntimeError:
+            pass # runtime error expected because shapefile path should be wrong and datasource will throw
+        eq_(m.base, '/tmp') # /tmp will be set despite the exception because load_map mostly worked
+        m.base = 'foo'
+        mapnik2.load_map_from_string(m, map_string, True, ".")
+        eq_(m.base, '.')
+        raise(Todo("Need to write more map property tests in 'object_test.py'..."))
+    except RuntimeError, e:
+        # only test datasources that we have installed
+        if not 'Could not create datasource' in str(e):
+            raise RuntimeError(e)
 
 # Map pickling
 def test_map_pickle():
