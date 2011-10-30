@@ -15,6 +15,7 @@ page.render_map(m,"my_output_file.pdf")
 see the documentation of mapnik2.printing.PDFPrinter() for options
 
 """
+from __future__ import absolute_import
 
 from . import render, Map, Box2d, MemoryDatasource, Layer, Feature, Projection, ProjTransform, Coord, Style, Rule, Geometry2d
 import math
