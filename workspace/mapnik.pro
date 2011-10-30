@@ -258,6 +258,7 @@ OTHER_FILES += \
     ../SConstruct \
     ../config.py
 
+include(agg.pri)
 include(plugins.pri)
 include(bindings.pri)
 
