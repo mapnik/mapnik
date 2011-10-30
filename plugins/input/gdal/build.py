@@ -42,6 +42,7 @@ plugin_env['LIBS'].append(env['ICU_LIB_NAME'])
 if env['RUNTIME_LINK'] == 'static':
     cmd = 'gdal-config --dep-libs'
     plugin_env.ParseConfig(cmd)
+    plugin_env['LIBS'].append('proj')
 
 input_plugin = plugin_env.SharedLibrary('../gdal', source=gdal_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
