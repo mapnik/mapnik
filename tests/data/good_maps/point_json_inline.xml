@@ -62,6 +62,7 @@
             }
             
             </Parameter>
+            <Parameter name="driver">GeoJson</Parameter>
             <Parameter name="layer_by_index">0</Parameter>
             <Parameter name="type">ogr</Parameter>
         </Datasource>

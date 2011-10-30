@@ -425,7 +425,6 @@ pickle_store = [# Scons internal variables
         'PYTHON_INSTALL_LOCATION',
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
-        'HAS_BOOST_SYSTEM',
         'SVN_REVISION',
         'HAS_CAIRO',
         'HAS_PYCAIRO',
@@ -1070,15 +1069,17 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
         env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
 
-    conf.parse_config('FREETYPE_CONFIG')
-
-    # check if freetype links to bz2
-    if env['RUNTIME_LINK'] == 'static':
-        temp_env = env.Clone()
-        temp_env['LIBS'] = []
-        temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
-        if 'bz2' in temp_env['LIBS']:
-            env['EXTRA_FREETYPE_LIBS'].append('bz2')
+    if conf.parse_config('FREETYPE_CONFIG'):
+        # check if freetype links to bz2
+        if env['RUNTIME_LINK'] == 'static':
+            temp_env = env.Clone()
+            temp_env['LIBS'] = []
+            try:
+                temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
+                if 'bz2' in temp_env['LIBS']:
+                    env['EXTRA_FREETYPE_LIBS'].append('bz2')
+            except OSError,e:
+                pass
 
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
@@ -1126,18 +1127,14 @@ if not preconfigured:
         
     conf.FindBoost(BOOST_SEARCH_PREFIXES,thread_flag)
     
-    # boost system is used in boost 1.35 and greater
-    env['HAS_BOOST_SYSTEM'] = False
     boost_lib_version_from_header = conf.GetBoostLibVersion()
     if boost_lib_version_from_header:
         boost_version_from_header = int(boost_lib_version_from_header.split('_')[1])
-        if boost_version_from_header >= 35:
-            env['HAS_BOOST_SYSTEM'] = True
             
     
     # The other required boost headers.
     BOOST_LIBSHEADERS = [
-        ['system', 'boost/system/system_error.hpp', env['HAS_BOOST_SYSTEM']],
+        ['system', 'boost/system/system_error.hpp', True],
         ['filesystem', 'boost/filesystem/operations.hpp', True],
         ['regex', 'boost/regex.hpp', True],
         ['program_options', 'boost/program_options.hpp', False]

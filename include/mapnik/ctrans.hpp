@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,10 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef CTRANS_HPP
-#define CTRANS_HPP
+#ifndef MAPNIK_CTRANS_HPP
+#define MAPNIK_CTRANS_HPP
 
 // mapnik
 #include <mapnik/box2d.hpp>
@@ -518,4 +517,4 @@ public:
 };
 }
 
-#endif //CTRANS_HPP
+#endif // MAPNIK_CTRANS_HPP

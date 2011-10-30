@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: gamma.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef GAMMA_HPP
-#define GAMMA_HPP
+#ifndef MAPNIK_GAMMA_HPP
+#define MAPNIK_GAMMA_HPP
 
 #include <cmath>
 
@@ -50,4 +48,4 @@ struct MAPNIK_DECL gamma
 };
 }
 
-#endif  //GAMMA_HPP
+#endif // MAPNIK_GAMMA_HPP

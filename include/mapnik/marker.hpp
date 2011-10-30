@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,18 +20,19 @@
  *
  *****************************************************************************/
 
-//$Id: image_data.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef MAPNIK_MARKER_HPP
+#define MAPNIK_MARKER_HPP
 
-#ifndef MARKER_HPP
-#define MARKER_HPP
-
+// mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 
+// agg
 #include "agg_path_storage.h"
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
@@ -39,6 +40,7 @@
 #include <boost/optional.hpp>
 #include <boost/make_shared.hpp>
 
+// stl
 #include <cassert>
 #include <cstring>
 
@@ -125,4 +127,4 @@ private:
 
 }
 
-#endif //MARKER_HPP
+#endif // MAPNIK_MARKER_HPP

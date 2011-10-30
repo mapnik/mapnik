@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: sql_utils.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef SQL_UTILS_HPP
-#define SQL_UTILS_HPP
+#ifndef MAPNIK_SQL_UTILS_HPP
+#define MAPNIK_SQL_UTILS_HPP
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -196,4 +194,4 @@ inline std::string numeric2string(const char* buf)
 
 }
 
-#endif //SQL_UTILS_HPP
+#endif // MAPNIK_SQL_UTILS_HPP

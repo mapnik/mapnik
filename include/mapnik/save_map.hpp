@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,22 +19,22 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// $Id$
 
-#ifndef SAVE_MAP_HPP
-#define SAVE_MAP_HPP
+#ifndef MAPNIK_SAVE_MAP_HPP
+#define MAPNIK_SAVE_MAP_HPP
+
 // mapnik
 #include <mapnik/config.hpp>
+
 // stl
 #include <string>
 
 namespace mapnik
 {
 class Map;
+
 MAPNIK_DECL void save_map(Map const& map, std::string const& filename, bool explicit_defaults = false);
-
 MAPNIK_DECL std::string save_map_to_string(Map const& map, bool explicit_defaults = false);
-
 }
 
-#endif // SAVE_MAP_HPP
+#endif // MAPNIK_SAVE_MAP_HPP

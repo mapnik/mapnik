@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-// $Id$
-
 #ifndef MAPNIK_SVG_STORAGE_HPP
 #define MAPNIK_SVG_STORAGE_HPP
 
+// mapnik
 #include <mapnik/box2d.hpp>
+
+// boost
 #include <boost/utility.hpp>
 
 namespace mapnik {

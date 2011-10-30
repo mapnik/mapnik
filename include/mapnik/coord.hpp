@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id: coord.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef MAPNIK_COORD_HPP
+#define MAPNIK_COORD_HPP
 
-#ifndef COORD_HPP
-#define COORD_HPP
-
+// boost
 #include <boost/operators.hpp>
+
+// stl
 #include <iomanip>
 #include <sstream>
 
@@ -187,4 +188,4 @@ operator << (std::basic_ostream<charT,traits>& out,
 } 
 }
 
-#endif // COORD_HPP
+#endif // MAPNIK_COORD_HPP

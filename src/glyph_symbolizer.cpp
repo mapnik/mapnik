@@ -97,7 +97,7 @@ unsigned glyph_symbolizer::eval_size(Feature const& feature) const
 #ifdef MAPNIK_DEBUG
     std::clog << "size_result=" << result.to_string() << "\n";
 #endif
-    unsigned size = static_cast<unsigned>(result.to_int());
+    float size = static_cast<float>(result.to_double());
 #ifdef MAPNIK_DEBUG
     std::clog << "size=" << size << "\n";
 #endif

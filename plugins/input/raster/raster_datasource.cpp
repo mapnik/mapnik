@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: raster_datasource.cc 44 2005-04-22 18:53:54Z pavlenko $
 
 // boost
 #include <boost/lexical_cast.hpp>
@@ -33,12 +32,6 @@
 #include "raster_info.hpp"
 #include "raster_datasource.hpp"
 
-using mapnik::datasource;
-using mapnik::parameters;
-using mapnik::image_reader;
-
-DATASOURCE_PLUGIN(raster_datasource)
-
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using mapnik::layer_descriptor;
@@ -46,11 +39,16 @@ using mapnik::featureset_ptr;
 using mapnik::query;
 using mapnik::coord2d;
 using mapnik::datasource_exception;
+using mapnik::datasource;
+using mapnik::parameters;
+using mapnik::image_reader;
+
+DATASOURCE_PLUGIN(raster_datasource)
 
 raster_datasource::raster_datasource(const parameters& params, bool bind)
-    : datasource(params),
-      desc_(*params.get<std::string>("type"),"utf-8"),
-      extent_initialized_(false)
+  : datasource(params),
+    desc_(*params.get<std::string>("type"), "utf-8"),
+    extent_initialized_(false)
 {
 #ifdef MAPNIK_DEBUG
     std::clog << "Raster Plugin: Initializing..." << std::endl;
@@ -69,7 +67,7 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
     tile_size_ = *params_.get<unsigned>("tile_size", 256);
     tile_stride_ = *params_.get<unsigned>("tile_stride", 1);
 
-    format_=*params_.get<std::string>("format","tiff");
+    format_ = *params_.get<std::string>("format","tiff");
    
     boost::optional<double> lox = params_.get<double>("lox");
     boost::optional<double> loy = params_.get<double>("loy");
@@ -88,7 +86,9 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
     }
 
     if (! extent_initialized_)
+    {
         throw datasource_exception("Raster Plugin: valid <extent> or <lox> <loy> <hix> <hiy> are required");
+    }
 
     if (bind) 
     {
@@ -102,42 +102,46 @@ void raster_datasource::bind() const
    
     if (multi_tiles_)
     {
-       boost::optional<unsigned> x_width = params_.get<unsigned>("x_width");
-       boost::optional<unsigned> y_width = params_.get<unsigned>("y_width");
+        boost::optional<unsigned> x_width = params_.get<unsigned>("x_width");
+        boost::optional<unsigned> y_width = params_.get<unsigned>("y_width");
 
-       if (!x_width)
-          throw datasource_exception("Raster Plugin: x-width parameter not supplied for multi-tiled data source.");
+        if (! x_width)
+        {
+            throw datasource_exception("Raster Plugin: x-width parameter not supplied for multi-tiled data source.");
+        }
 
-       if (!y_width)
-          throw datasource_exception("Raster Plugin: y-width parameter not supplied for multi-tiled data source.");
+        if (! y_width)
+        {
+            throw datasource_exception("Raster Plugin: y-width parameter not supplied for multi-tiled data source.");
+        }
 
-       width_ = x_width.get() * tile_size_;
-       height_ = y_width.get() * tile_size_;
+        width_ = x_width.get() * tile_size_;
+        height_ = y_width.get() * tile_size_;
     }
     else
     {
-       if (! boost::filesystem::exists(filename_))
-          throw datasource_exception("Raster Plugin: " + filename_ + " does not exist");
+        if (! boost::filesystem::exists(filename_))
+        {
+            throw datasource_exception("Raster Plugin: " + filename_ + " does not exist");
+        }
     
-       try
-       {
-          std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
-          if (reader.get())
-          {
-             width_ = reader->width();
-             height_ = reader->height();
-          }
-       }
-       catch (mapnik::image_reader_exception const& ex)
-       {
-          std::cerr << "Raster Plugin: image reader exception caught: " << ex.what() << std::endl;
-          throw;
-       }
-       catch (...)
-       {
-          std::cerr << "Raster Plugin: exception caught" << std::endl;
-          throw;
-       }
+        try
+        {
+            std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
+            if (reader.get())
+            {
+                width_ = reader->width();
+                height_ = reader->height();
+            }
+        }
+        catch (mapnik::image_reader_exception const& ex)
+        {
+            throw datasource_exception("Raster Plugin: image reader exception: " + std::string(ex.what()));
+        }
+        catch (...)
+        {
+            throw datasource_exception("Raster Plugin: image reader unknown exception caught");
+        }
     }
     
 #ifdef MAPNIK_DEBUG
@@ -193,6 +197,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 #endif
 
         tiled_multi_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_, tile_stride_);
+
         return boost::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
     }
     else if (width * height > 512*512)
@@ -202,6 +207,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 #endif
 
         tiled_file_policy policy(filename_, format_, 256, extent_, q.get_bbox(), width_, height_);
+
         return boost::make_shared<raster_featureset<tiled_file_policy> >(policy, extent_, q);
     }
     else
@@ -212,13 +218,16 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         raster_info info(filename_, format_, extent_, width_, height_);
         single_file_policy policy(info);
+
         return boost::make_shared<raster_featureset<single_file_policy> >(policy, extent_, q);
     }
 }
 
 featureset_ptr raster_datasource::features_at_point(coord2d const&) const
 {
-    std::clog << "Raster Plugin: ##WARNING: feature_at_point not supported for raster.input" << std::endl;
+#ifdef MAPNIK_DEBUG
+    std::clog << "Raster Plugin: feature_at_point not supported for raster.input" << std::endl;
+#endif
+
     return featureset_ptr();
 }
-

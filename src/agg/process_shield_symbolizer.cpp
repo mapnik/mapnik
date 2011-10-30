@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -129,7 +129,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         {
             text_renderer<T> ren(pixmap_, faces, *strk);
 
-            ren.set_pixel_size(sym.get_text_size() * scale_factor_);
+            ren.set_character_size(sym.get_text_size() * scale_factor_);
             ren.set_fill(sym.get_fill());
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
