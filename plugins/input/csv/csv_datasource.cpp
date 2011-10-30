@@ -53,7 +53,8 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
     /* TODO:
       general:
         - refactor parser into generic class
-        - tests
+        - tests of grid_renderer output
+        - ensure that the attribute desc_ matches the first feature added
       alternate large file pipeline:
         - stat file, detect > 15 MB
         - build up csv line-by-line iterator
@@ -353,7 +354,7 @@ void csv_datasource::parse_csv(T& stream,
         throw mapnik::datasource_exception(s.str());
     }
 
-    int feature_count(0);
+    int feature_count(1);
     bool extent_initialized = false;
     int num_headers = headers_.size();
     mapnik::transcoder tr(desc_.get_encoding());
@@ -586,7 +587,7 @@ void csv_datasource::parse_csv(T& stream,
                 {
                     UnicodeString ustr = tr.transcode(value.c_str());
                     boost::put(*feature,fld_name,ustr);
-                    if (!feature_count)
+                    if (feature_count == 1)
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                 
                 }
@@ -601,14 +602,14 @@ void csv_datasource::parse_csv(T& stream,
                         if (value.find(".") != std::string::npos)
                         {
                             boost::put(*feature,fld_name,float_val);
-                            if (!feature_count)
+                            if (feature_count == 1)
                                 desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Double));
                         }
                         else
                         {
                             int val = static_cast<int>(float_val);
                             boost::put(*feature,fld_name,val);
-                            if (!feature_count)
+                            if (feature_count == 1)
                                 desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Integer));
                         }
                     }
@@ -617,7 +618,7 @@ void csv_datasource::parse_csv(T& stream,
                         // fallback to normal string
                         UnicodeString ustr = tr.transcode(value.c_str());
                         boost::put(*feature,fld_name,ustr);
-                        if (!feature_count)
+                        if (feature_count == 1)
                             desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
                 }
@@ -627,13 +628,13 @@ void csv_datasource::parse_csv(T& stream,
                     if (value_lower == "true")
                     {
                         boost::put(*feature,fld_name,true);
-                        if (!feature_count)
+                        if (feature_count == 1)
                             desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Boolean));
                     }
                     else if(value_lower == "false")
                     {
                         boost::put(*feature,fld_name,false);
-                        if (!feature_count)
+                        if (feature_count == 1)
                             desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Boolean));
                     }
                     else
@@ -641,7 +642,7 @@ void csv_datasource::parse_csv(T& stream,
                         // fallback to normal string
                         UnicodeString ustr = tr.transcode(value.c_str());
                         boost::put(*feature,fld_name,ustr);
-                        if (!feature_count)
+                        if (feature_count == 1)
                             desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
                 }
@@ -696,6 +697,7 @@ void csv_datasource::parse_csv(T& stream,
                         extent_.expand_to_include(feature->envelope());
                     }
                     features_.push_back(feature);
+                    ++feature_count;
                 }
                 else
                 {
@@ -782,6 +784,10 @@ void csv_datasource::parse_csv(T& stream,
                 if (!quiet_) std::clog << s.str() << "\n";
             }
         }
+    }
+    if (!feature_count > 0)
+    {
+        if (!quiet_) std::clog << "CSV Plugin: could not parse any lines of data\n";
     }
 }
 
