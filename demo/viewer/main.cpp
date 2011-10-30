@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2006 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -34,13 +35,13 @@ int main( int argc, char **argv )
 {
     using mapnik::datasource_cache;
     using mapnik::freetype_engine;
-       
+
     QCoreApplication::setOrganizationName("Mapnik");
     QCoreApplication::setOrganizationDomain("mapnik.org");
     QCoreApplication::setApplicationName("Viewer");
-    
+
     QSettings settings("viewer.ini",QSettings::IniFormat);
-    
+
     // register input plug-ins
     QString plugins_dir = settings.value("mapnik/plugins_dir",
                                          QVariant("/usr/local/lib/mapnik2/input/")).toString();
@@ -54,8 +55,8 @@ int main( int argc, char **argv )
         freetype_engine::register_fonts(font_dir.toStdString());
     }
     settings.endArray();
-    
-    QApplication app( argc, argv ); 
+
+    QApplication app( argc, argv );
     MainWindow window;
     window.show();
     if (argc > 1) window.open(argv[1]);
@@ -82,5 +83,5 @@ int main( int argc, char **argv )
         double scaling_factor = QString(argv[3]).toDouble(&ok);
         if (ok) window.set_scaling_factor(scaling_factor);
     }
-    return app.exec(); 
+    return app.exec();
 }

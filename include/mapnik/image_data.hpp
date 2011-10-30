@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id: image_data.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef MAPNIK_IMAGE_DATA_HPP
+#define MAPNIK_IMAGE_DATA_HPP
 
-#ifndef IMAGE_DATA_HPP
-#define IMAGE_DATA_HPP
-
+// mapnik
 #include <mapnik/global.hpp>
+
+// stl
 #include <cassert>
 #include <cstring>
 
@@ -139,4 +140,4 @@ typedef ImageData<unsigned> image_data_32;
 typedef ImageData<byte>  image_data_8;
 }
 
-#endif //IMAGE_DATA_HPP
+#endif // MAPNIK_IMAGE_DATA_HPP

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id: image_reader.hpp 39 2005-04-10 20:39:53Z pavlenko $
+#ifndef MAPNIK_IMAGE_READER_HPP
+#define MAPNIK_IMAGE_READER_HPP
 
-#ifndef IMAGE_READER_HPP
-#define IMAGE_READER_HPP
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/config.hpp>
+
 // stl
 #include <stdexcept>
 #include <string>
@@ -63,4 +63,4 @@ MAPNIK_DECL image_reader* get_image_reader(const std::string& file);
    
 }
 
-#endif //IMAGE_READER_HPP
+#endif // MAPNIK_IMAGE_READER_HPP

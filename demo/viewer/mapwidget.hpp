@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2007 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,19 +33,19 @@
 #include <boost/scoped_ptr.hpp>
 #include <mapnik/map.hpp>
 
-class MapWidget : public QWidget 
+class MapWidget : public QWidget
 {
     Q_OBJECT
-      
-    public:   
-    enum eTool 
+
+    public:
+    enum eTool
     {
         ZoomToBox = 1,
         Pan,
         Info,
     };
-      
-private: 
+
+private:
     boost::shared_ptr<mapnik::Map> map_;
     int selected_;
     QPixmap pix_;
@@ -64,7 +65,7 @@ public:
     void setTool(eTool tool);
     boost::shared_ptr<mapnik::Map> getMap();
     inline QPixmap const& pixmap() const { return pix_;}
-    void setMap(boost::shared_ptr<mapnik::Map> map);    
+    void setMap(boost::shared_ptr<mapnik::Map> map);
     void defaultView();
     void zoomToBox(mapnik::box2d<double> const& box);
     void zoomIn();
@@ -80,7 +81,7 @@ public slots:
     void layerSelected(int);
 signals:
     void mapViewChanged();
-protected:    
+protected:
     void paintEvent(QPaintEvent* ev);
     void resizeEvent(QResizeEvent* ev);
     void mousePressEvent(QMouseEvent* e);
@@ -89,8 +90,8 @@ protected:
     void keyPressEvent(QKeyEvent *e);
     void export_to_file(unsigned width,
                         unsigned height,
-                        std::string const& filename, 
-                        std::string const& type);    
+                        std::string const& filename,
+                        std::string const& type);
 };
 
 #endif // MAP_WIDGET_HPP

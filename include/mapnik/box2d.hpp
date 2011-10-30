@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,16 +20,16 @@
  *
  *****************************************************************************/
 
-//$Id: box2d.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
 #ifndef MAPNIK_BOX2D_HPP
 #define MAPNIK_BOX2D_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/coord.hpp>
+
 // boost
 #include <boost/operators.hpp>
+
 // stl
 #include <iomanip>
 

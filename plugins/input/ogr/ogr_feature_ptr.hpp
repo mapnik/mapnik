@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef OGR_FEATURE_PTR_HPP
 #define OGR_FEATURE_PTR_HPP
@@ -30,15 +29,17 @@
 class ogr_feature_ptr
 {
 public:
-    ogr_feature_ptr (OGRFeature* const feat)
-        : feat_ (feat)
+    ogr_feature_ptr(OGRFeature* const feat)
+        : feat_(feat)
     {
     }
     
-    ~ogr_feature_ptr ()
+    ~ogr_feature_ptr()
     {
         if (feat_ != NULL)
-            OGRFeature::DestroyFeature (feat_);
+        {
+            OGRFeature::DestroyFeature(feat_);
+        }
     }
 
     OGRFeature* operator*()

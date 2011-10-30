@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,18 +20,20 @@
  *
  *****************************************************************************/
 
-//$Id$
-#ifndef UNICODE_HPP
-#define UNICODE_HPP
+#ifndef MAPNIK_UNICODE_HPP
+#define MAPNIK_UNICODE_HPP
 
 //mapnik
 #include <mapnik/config.hpp>
+
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ucnv.h>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
+
 // stl
 #include <string>
 
@@ -49,4 +51,4 @@ private:
 };
 }
 
-#endif // UNICODE_HPP
+#endif // MAPNIK_UNICODE_HPP

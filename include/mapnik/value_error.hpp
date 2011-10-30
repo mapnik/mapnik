@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_VALUE_ERROR_INCLUDED
-#define MAPNIK_VALUE_ERROR_INCLUDED
+#ifndef MAPNIK_VALUE_ERROR_HPP
+#define MAPNIK_VALUE_ERROR_HPP
 
 #include <iostream>
 #include <sstream>
@@ -54,4 +54,4 @@ protected:
 };
 }
 
-#endif // MAPNIK_VALUE_ERROR_INCLUDED
+#endif // MAPNIK_VALUE_ERROR_HPP

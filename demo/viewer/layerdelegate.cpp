@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2007 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -37,7 +38,7 @@ void LayerDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     else
         painter->setBrush(QBrush(QColor(255, 0, 0, 64)));
 
-    
+
     painter->drawRoundRect(option.rect,4,4);
 
     if (option.state & QStyle::State_Selected)

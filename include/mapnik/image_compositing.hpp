@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef IMAGE_COMPOSITING_HPP
-#define IMAGE_COMPOSITING_HPP
+#ifndef MAPNIK_IMAGE_COMPOSITING_HPP
+#define MAPNIK_IMAGE_COMPOSITING_HPP
 
 // agg
 #include "agg_rendering_buffer.h"
@@ -186,4 +184,4 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
 
 }
 
-#endif // IMAGE_COMPOSITING_HPP
+#endif // MAPNIK_IMAGE_COMPOSITING_HPP

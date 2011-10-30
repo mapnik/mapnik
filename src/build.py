@@ -53,9 +53,11 @@ ABI_VERSION = env['ABI_VERSION']
 
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
+system = 'boost_system%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,regex]
+lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,system,regex]
+
 
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
@@ -67,8 +69,6 @@ lib_env['LIBS'].append('xml2')
 if env['THREADING'] == 'multi':
     lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
         
-if env['HAS_BOOST_SYSTEM']:
-    lib_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
     
 
 if not env['RUNTIME_LINK'] == 'static':

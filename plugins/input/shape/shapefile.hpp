@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,12 @@
  *
  *****************************************************************************/
 
-//$Id: shapefile.hpp 33 2005-04-04 13:01:03Z pavlenko $
-
 #ifndef SHAPEFILE_HPP
 #define SHAPEFILE_HPP
+
+// stl
+#include <cstring>
+#include <fstream>
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -34,10 +36,6 @@
 #include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
-
-// stl
-#include <cstring>
-#include <fstream>
 
 using mapnik::box2d;
 using mapnik::read_int32_ndr;
@@ -63,7 +61,7 @@ struct RecordTag
 struct MappedRecordTag
 {
     typedef const char* data_type;
-    static data_type alloc(unsigned) { return 0;}
+    static data_type alloc(unsigned) { return 0; }
     static void dealloc(data_type ) {}
 };
 
@@ -73,12 +71,18 @@ struct shape_record
     typename Tag::data_type data;
     size_t size;
     mutable size_t pos;
+
     explicit shape_record(size_t size)
-        : 
-        data(Tag::alloc(size)),
+      : data(Tag::alloc(size)),
         size(size),
-        pos(0) {} 
-      
+        pos(0)
+    {}
+
+    ~shape_record()
+    {
+        Tag::dealloc(data);
+    }
+
     void set_data(typename Tag::data_type data_)
     {
         data = data_;
@@ -91,42 +95,37 @@ struct shape_record
     
     void skip(unsigned n)
     {
-        pos+=n;
+        pos += n;
     }
       
     int read_ndr_integer()
     {
         boost::int32_t val;
-        read_int32_ndr(&data[pos],val);
-        pos+=4;
+        read_int32_ndr(&data[pos], val);
+        pos += 4;
         return val;
     }
       
     int read_xdr_integer()
     {
         boost::int32_t val;
-        read_int32_xdr(&data[pos],val);
-        pos+=4;
+        read_int32_xdr(&data[pos], val);
+        pos += 4;
         return val;
     }
       
     double read_double()
     {
         double val;        
-        read_double_ndr(&data[pos],val);
-        pos+=8;
+        read_double_ndr(&data[pos], val);
+        pos += 8;
         return val;
     }
+
     long remains() 
     {
-        return (size-pos);
-    }
-  
-    ~shape_record() 
-    {
-        Tag::dealloc(data);
-    }
- 
+        return (size - pos);
+    } 
 };
 
 using namespace boost::interprocess;
@@ -144,10 +143,10 @@ public:
 #endif
     
     file_source_type file_;
+
     shape_file() {}
     
-    shape_file(std::string  const& file_name)
-        :
+    shape_file(std::string  const& file_name) :
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         file_()
 #else  
@@ -155,18 +154,19 @@ public:
 #endif
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-        
-        boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(file_name.c_str(),true);
+        boost::optional<mapnik::mapped_region_ptr> memory =
+            mapnik::mapped_memory_cache::find(file_name.c_str(),true);
+
         if (memory)
         {
-            file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+            file_.buffer(static_cast<char*>((*memory)->get_address()), (*memory)->get_size());
         }
 #endif        
     }
     
     ~shape_file() {}
 
-    inline file_source_type & file()
+    inline file_source_type& file()
     {
         return file_;
     }
@@ -184,9 +184,9 @@ public:
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         rec.set_data(file_.buffer().first + file_.tellg());
-        file_.seekg(rec.size,std::ios::cur);
+        file_.seekg(rec.size, std::ios::cur);
 #else
-        file_.read(rec.get_data(),rec.size);
+        file_.read(rec.get_data(), rec.size);
 #endif
     }
     
@@ -195,16 +195,16 @@ public:
         char b[4];
         file_.read(b, 4);
         boost::int32_t val;
-        read_int32_xdr(b,val);
+        read_int32_xdr(b, val);
         return val;
     }
       
     inline int read_ndr_integer()
     {
         char b[4];
-        file_.read(b,4);
+        file_.read(b, 4);
         boost::int32_t val;
-        read_int32_ndr(b,val);
+        read_int32_ndr(b, val);
         return val;
     }
       
@@ -212,11 +212,11 @@ public:
     {
         double val;
 #ifndef MAPNIK_BIG_ENDIAN
-        file_.read(reinterpret_cast<char*>(&val),8);
+        file_.read(reinterpret_cast<char*>(&val), 8);
 #else
         char b[8];
-        file_.read(b,8);
-        read_double_ndr(b,val);
+        file_.read(b, 8);
+        read_double_ndr(b, val);
 #endif
         return val;
     }
@@ -224,22 +224,22 @@ public:
     inline void read_envelope(box2d<double>& envelope)
     {
 #ifndef MAPNIK_BIG_ENDIAN
-        file_.read(reinterpret_cast<char*>(&envelope),sizeof(envelope));
+        file_.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
 #else
-        char data[4*8];
-        file_.read(data,4*8);
-        double minx,miny,maxx,maxy;
-        read_double_ndr(data + 0*8,minx);
-        read_double_ndr(data + 1*8,miny);
-        read_double_ndr(data + 2*8,maxx);
-        read_double_ndr(data + 3*8,maxy);
-        envelope.init(minx,miny,maxx,maxy);
+        char data[4 * 8];
+        file_.read(data,4 * 8);
+        double minx, miny, maxx, maxy;
+        read_double_ndr(data + 0 * 8, minx);
+        read_double_ndr(data + 1 * 8, miny);
+        read_double_ndr(data + 2 * 8, maxx);
+        read_double_ndr(data + 3 * 8, maxy);
+        envelope.init(minx, miny, maxx, maxy);
 #endif  
     }
       
     inline void skip(std::streampos bytes)
     {
-        file_.seekg(bytes,std::ios::cur);
+        file_.seekg(bytes, std::ios::cur);
     }
       
     inline void rewind()
@@ -249,7 +249,7 @@ public:
       
     inline void seek(std::streampos pos)
     {
-        file_.seekg(pos,std::ios::beg);
+        file_.seekg(pos, std::ios::beg);
     }
       
     inline std::streampos pos()
@@ -263,4 +263,4 @@ public:
     }
 };
 
-#endif //SHAPEFILE_HPP
+#endif // SHAPEFILE_HPP

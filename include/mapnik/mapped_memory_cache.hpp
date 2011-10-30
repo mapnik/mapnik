@@ -20,21 +20,19 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef MEMORY_REGION_CACHE_HPP
-#define MEMORY_REGION_CACHE_HPP
+#ifndef MAPNIK_MAPPED_MEMORY_CACHE_HPP
+#define MAPNIK_MAPPED_MEMORY_CACHE_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/utils.hpp>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
-
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
@@ -61,5 +59,5 @@ struct MAPNIK_DECL mapped_memory_cache :
 
 }
 
-#endif // MAPNIK_MARKER_CACHE_HPP
+#endif // MAPNIK_MAPPED_MEMORY_CACHE_HPP
 
