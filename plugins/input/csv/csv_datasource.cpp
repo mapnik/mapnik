@@ -579,12 +579,7 @@ void csv_datasource::parse_csv(T& stream,
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                 }
                 // only true strings are this long
-                else if (value_length > 20 
-                         // TODO - clean up this messiness which is here temporarily
-                         // to protect against the improperly working spirit parsing below
-                         || value.find(",") != std::string::npos
-                         || value.find(":") != std::string::npos
-                         || (std::count(value.begin(), value.end(), '-') > 1))
+                else if (value_length > 20)
                 {
                     UnicodeString ustr = tr.transcode(value.c_str());
                     boost::put(*feature,fld_name,ustr);
