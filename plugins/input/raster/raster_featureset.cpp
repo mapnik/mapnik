@@ -121,7 +121,11 @@ feature_ptr raster_featureset<LookupPolicy>::next()
         }
         catch (mapnik::image_reader_exception const& ex)
         {
-            std::cerr << "Raster Plugin: image reader exception caught:" << ex.what() << std::endl;
+            std::cerr << "Raster Plugin: image reader exception caught: " << ex.what() << std::endl;
+        }
+        catch (std::exception const& ex)
+        {
+            std::cerr << "Raster Plugin: " << ex.what() << std::endl;
         }
         catch (...)
         {
