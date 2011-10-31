@@ -138,6 +138,10 @@ void raster_datasource::bind() const
         {
             throw datasource_exception("Raster Plugin: image reader exception: " + std::string(ex.what()));
         }
+        catch (std::exception const& ex)
+        {
+            throw datasource_exception("Raster Plugin: " + std::string(ex.what()));
+        }
         catch (...)
         {
             throw datasource_exception("Raster Plugin: image reader unknown exception caught");
