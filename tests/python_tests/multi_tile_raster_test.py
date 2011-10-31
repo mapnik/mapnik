@@ -43,28 +43,28 @@ def test_multi_tile_policy():
         save_data('test_multi_tile_policy.png', im.tostring('png'))
     
         # test green chunk
-        assert im.view(0,64,1,1).tostring() == '\x00\xff\x00\xff'
-        assert im.view(127,64,1,1).tostring() == '\x00\xff\x00\xff'
-        assert im.view(0,127,1,1).tostring() == '\x00\xff\x00\xff'
-        assert im.view(127,127,1,1).tostring() == '\x00\xff\x00\xff'
+        eq_(im.view(0,64,1,1).tostring(), '\x00\xff\x00\xff')
+        eq_(im.view(127,64,1,1).tostring(), '\x00\xff\x00\xff')
+        eq_(im.view(0,127,1,1).tostring(), '\x00\xff\x00\xff')
+        eq_(im.view(127,127,1,1).tostring(), '\x00\xff\x00\xff')
     
         # test blue chunk
-        assert im.view(128,64,1,1).tostring() == '\x00\x00\xff\xff'
-        assert im.view(255,64,1,1).tostring() == '\x00\x00\xff\xff'
-        assert im.view(128,127,1,1).tostring() == '\x00\x00\xff\xff'
-        assert im.view(255,127,1,1).tostring() == '\x00\x00\xff\xff'
+        eq_(im.view(128,64,1,1).tostring(), '\x00\x00\xff\xff')
+        eq_(im.view(255,64,1,1).tostring(), '\x00\x00\xff\xff')
+        eq_(im.view(128,127,1,1).tostring(), '\x00\x00\xff\xff')
+        eq_(im.view(255,127,1,1).tostring(), '\x00\x00\xff\xff')
     
         # test red chunk
-        assert im.view(0,128,1,1).tostring() == '\xff\x00\x00\xff'
-        assert im.view(127,128,1,1).tostring() == '\xff\x00\x00\xff'
-        assert im.view(0,191,1,1).tostring() == '\xff\x00\x00\xff'
-        assert im.view(127,191,1,1).tostring() == '\xff\x00\x00\xff'
+        eq_(im.view(0,128,1,1).tostring(), '\xff\x00\x00\xff')
+        eq_(im.view(127,128,1,1).tostring(), '\xff\x00\x00\xff')
+        eq_(im.view(0,191,1,1).tostring(), '\xff\x00\x00\xff')
+        eq_(im.view(127,191,1,1).tostring(), '\xff\x00\x00\xff')
     
         # test magenta chunk
-        assert im.view(128,128,1,1).tostring() == '\xff\x00\xff\xff'
-        assert im.view(255,128,1,1).tostring() == '\xff\x00\xff\xff'
-        assert im.view(128,191,1,1).tostring() == '\xff\x00\xff\xff'
-        assert im.view(255,191,1,1).tostring() == '\xff\x00\xff\xff'
+        eq_(im.view(128,128,1,1).tostring(), '\xff\x00\xff\xff')
+        eq_(im.view(255,128,1,1).tostring(), '\xff\x00\xff\xff')
+        eq_(im.view(128,191,1,1).tostring(), '\xff\x00\xff\xff')
+        eq_(im.view(255,191,1,1).tostring(), '\xff\x00\xff\xff')
 
 if __name__ == "__main__":
     setup()
