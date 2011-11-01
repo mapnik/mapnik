@@ -29,7 +29,7 @@ class csv_datasource : public mapnik::datasource
       mutable mapnik::box2d<double> extent_;
       mutable std::string filename_;
       mutable std::string inline_string_;
-      mutable int file_length_;
+      mutable unsigned file_length_;
       mutable int row_limit_;
       mutable std::vector<mapnik::feature_ptr> features_;
       mutable std::string escape_;

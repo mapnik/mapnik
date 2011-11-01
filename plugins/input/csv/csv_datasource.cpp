@@ -127,7 +127,7 @@ void csv_datasource::parse_csv(T& stream,
                                std::string const& quote) const
 {
     stream.seekg (0, std::ios::end);
-    int file_length_ = stream.tellg();
+    file_length_ = stream.tellg();
     
     if (filesize_max_ > 0)
     {
@@ -151,7 +151,7 @@ void csv_datasource::parse_csv(T& stream,
     char newline = '\n';
     int newline_count = 0;
     int carriage_count = 0;
-    for(std::size_t idx = 0; idx < file_length_; idx++)
+    for(unsigned idx = 0; idx < file_length_; idx++)
     {
         char c = static_cast<char>(stream.get());
         if (c == '\n')
@@ -357,7 +357,7 @@ void csv_datasource::parse_csv(T& stream,
 
     int feature_count(1);
     bool extent_initialized = false;
-    int num_headers = headers_.size();
+    unsigned num_headers = headers_.size();
     mapnik::transcoder tr(desc_.get_encoding());
 
     while (std::getline(stream,csv_line,newline))
@@ -387,7 +387,7 @@ void csv_datasource::parse_csv(T& stream,
             // early return for strict mode
             if (strict_)
             {
-                int num_fields = std::distance(beg,tok.end());
+                unsigned num_fields = std::distance(beg,tok.end());
                 if (num_fields != num_headers)
                 {
                     std::ostringstream s;
@@ -405,7 +405,7 @@ void csv_datasource::parse_csv(T& stream,
             bool null_geom = false;
             std::vector<std::string> collected;
             
-            for (int i = 0; i < num_headers; ++i)
+            for (unsigned i = 0; i < num_headers; ++i)
             {
                 std::string fld_name(headers_.at(i));
                 collected.push_back(fld_name);
