@@ -302,12 +302,22 @@ void csv_datasource::parse_csv(T& stream,
                         val = boost::trim_copy(*beg);
                         if (val.empty())
                         {
-                            std::ostringstream s;
-                            s << "CSV Plugin: expected a column header at line "
-                              << line_number << ", column " << idx
-                              << " - ensure this row contains valid header fields: '"
-                              << csv_line << "'\n";
-                            throw mapnik::datasource_exception(s.str());
+                            if (strict_)
+                            {
+                                std::ostringstream s;
+                                s << "CSV Plugin: expected a column header at line "
+                                  << line_number << ", column " << idx
+                                  << " - ensure this row contains valid header fields: '"
+                                  << csv_line << "'\n";
+                                throw mapnik::datasource_exception(s.str());
+                            }
+                            else
+                            {
+                                // create a placeholder for the empty header
+                                std::ostringstream s;
+                                s << "_" << idx;
+                                headers_.push_back(s.str());
+                            }
                         }
                         else
                         {    
