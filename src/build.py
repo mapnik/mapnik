@@ -72,6 +72,8 @@ if env['THREADING'] == 'multi':
     
 
 if not env['RUNTIME_LINK'] == 'static':
+    if 'icuuc' in env['ICU_LIB_NAME']:
+        lib_env['LIBS'].append('icudata')
     if env['INTERNAL_LIBAGG']:
           lib_env['LIBS'].insert(0, 'agg')
     else:
