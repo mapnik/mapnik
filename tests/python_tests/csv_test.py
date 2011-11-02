@@ -100,6 +100,8 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(len(fs[3].geometries()),1) # one geometry, two parts
         eq_(fs[3].geometries()[0].type(),mapnik2.GeometryType.Polygon)
         # tests assuming we want to flatten geometries
+        # ideally we should not have to:
+        # https://github.com/mapnik/mapnik/issues?labels=multigeom+robustness&sort=created&direction=desc&state=open&page=1
         eq_(len(fs[4].geometries()),4)
         eq_(fs[4].geometries()[0].type(),mapnik2.GeometryType.Point)
         eq_(len(fs[5].geometries()),2)
@@ -109,8 +111,15 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(len(fs[7].geometries()),2)
         eq_(fs[7].geometries()[0].type(),mapnik2.GeometryType.Polygon)
         
-        # ideally we should not have to:
-        # https://github.com/mapnik/mapnik/issues?labels=multigeom+robustness&sort=created&direction=desc&state=open&page=1
+
+    def test_handline_of_missing_header(**kwargs):
+        ds = get_csv_ds('missing_header.csv')
+        eq_(len(ds.fields()),6)
+        eq_(ds.fields(),['one','two','x','y','_4','aftermissing'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['_4'],'missing')
+        
 
 if __name__ == "__main__":
     setup()
