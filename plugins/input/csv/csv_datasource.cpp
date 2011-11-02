@@ -603,9 +603,12 @@ void csv_datasource::parse_csv(T& stream,
                 }
     
                 // add all values as attributes
+                // here we detect numbers and treat everything else as pure strings
+                // this is intentional since boolean and null types are not common in csv editors
                 if (value.empty())
                 {
-                    boost::put(*feature,fld_name,mapnik::value_null());
+                    UnicodeString ustr = tr.transcode(value.c_str());
+                    boost::put(*feature,fld_name,ustr);
                     if (feature_count == 1)
                     {
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
@@ -661,32 +664,12 @@ void csv_datasource::parse_csv(T& stream,
                 }
                 else
                 {
-                    std::string value_lower = boost::algorithm::to_lower_copy(value);
-                    if (value_lower == "true")
+                    // fallback to normal string
+                    UnicodeString ustr = tr.transcode(value.c_str());
+                    boost::put(*feature,fld_name,ustr);
+                    if (feature_count == 1)
                     {
-                        boost::put(*feature,fld_name,true);
-                        if (feature_count == 1)
-                        {
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Boolean));
-                        }
-                    }
-                    else if(value_lower == "false")
-                    {
-                        boost::put(*feature,fld_name,false);
-                        if (feature_count == 1)
-                        {
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Boolean));
-                        }
-                    }
-                    else
-                    {
-                        // fallback to normal string
-                        UnicodeString ustr = tr.transcode(value.c_str());
-                        boost::put(*feature,fld_name,ustr);
-                        if (feature_count == 1)
-                        {
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
-                        }
+                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
                 }
             }

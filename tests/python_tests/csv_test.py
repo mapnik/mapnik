@@ -66,14 +66,14 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(len(ds.fields()),10)
         eq_(len(ds.field_types()),10)
         eq_(ds.fields(),['x', 'y', 'text', 'date', 'integer', 'boolean', 'float', 'time', 'datetime', 'empty_column'])
-        eq_(ds.field_types(),['int', 'int', 'str', 'str', 'int', 'bool', 'float', 'str', 'str', 'str'])
+        eq_(ds.field_types(),['int', 'int', 'str', 'str', 'int', 'str', 'float', 'str', 'str', 'str'])
         fs = ds.featureset()
         feat = fs.next()
-        attr = {'x': 0, 'empty_column': None, 'text': u'a b', 'float': 1.0, 'datetime': u'1971-01-01T04:14:00', 'y': 0, 'boolean': True, 'time': u'04:14:00', 'date': u'1971-01-01', 'integer': 40}
+        attr = {'x': 0, 'empty_column': u'', 'text': u'a b', 'float': 1.0, 'datetime': u'1971-01-01T04:14:00', 'y': 0, 'boolean': u'True', 'time': u'04:14:00', 'date': u'1971-01-01', 'integer': 40}
         eq_(feat.attributes,attr)
         while feat:
             eq_(len(feat),10)
-            eq_(feat['empty_column'],None)
+            eq_(feat['empty_column'],u'')
             feat = fs.next()
     
     def test_slashes(**kwargs):
@@ -196,6 +196,23 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(feat['x'],0)
         eq_(feat['y'],0)
         eq_(feat['z'],'hello')
+
+    def test_that_null_and_bool_keywords_are_empty_strings(**kwargs):
+        ds = get_csv_ds('nulls_and_booleans_as_strings.csv')
+        eq_(len(ds.fields()),4)
+        eq_(ds.fields(),['x','y','null','boolean'])
+        eq_(ds.field_types(),['int','int','str','str'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['null'],'null')
+        eq_(feat['boolean'],'true')
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['null'],'')
+        eq_(feat['boolean'],'false')
 
 if __name__ == "__main__":
     setup()
