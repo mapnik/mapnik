@@ -112,14 +112,27 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(fs[7].geometries()[0].type(),mapnik2.GeometryType.Polygon)
         
 
-    def test_handline_of_missing_header(**kwargs):
+    def test_handling_of_missing_header(**kwargs):
         ds = get_csv_ds('missing_header.csv')
         eq_(len(ds.fields()),6)
         eq_(ds.fields(),['one','two','x','y','_4','aftermissing'])
         fs = ds.featureset()
         feat = fs.next()
         eq_(feat['_4'],'missing')
+
+    def test_handling_of_headers_that_are_numbers(**kwargs):
+        ds = get_csv_ds('numbers_for_headers.csv')
+        eq_(len(ds.fields()),5)
+        eq_(ds.fields(),['x','y','1990','1991','1992'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['1990'],1)
+        eq_(feat['1991'],2)
+        eq_(feat['1992'],3)
         
+        eq_(mapnik2.Expression("[1991]=2").evaluate(feat),True)
 
 if __name__ == "__main__":
     setup()
