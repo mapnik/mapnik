@@ -133,6 +133,69 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(feat['1992'],3)
         
         eq_(mapnik2.Expression("[1991]=2").evaluate(feat),True)
+    
+    def test_quoted_numbers(**kwargs):
+        ds = get_csv_ds('points.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','label'])
+        fs = ds.all_features()
+        eq_(fs[0]['label'],"0,0")
+        eq_(fs[1]['label'],"5,5")
+        eq_(fs[2]['label'],"0,5")
+        eq_(fs[3]['label'],"5,0")
+        eq_(fs[4]['label'],"2.5,2.5")
+
+    def test_windows_newlines(**kwargs):
+        ds = get_csv_ds('windows_newlines.csv')
+        eq_(len(ds.fields()),3)
+        feats = ds.all_features()
+        eq_(len(feats),1)
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],1)
+        eq_(feat['y'],10)
+        eq_(feat['z'],9999.9999)
+
+    def test_mac_newlines(**kwargs):
+        ds = get_csv_ds('windows_newlines.csv')
+        eq_(len(ds.fields()),3)
+        feats = ds.all_features()
+        eq_(len(feats),1)
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],1)
+        eq_(feat['y'],10)
+        eq_(feat['z'],9999.9999)
+
+    def test_tabs(**kwargs):
+        ds = get_csv_ds('tabs_in_csv.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','z'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],-122)
+        eq_(feat['y'],48)
+        eq_(feat['z'],0)
+
+    def test_separator_pipes(**kwargs):
+        ds = get_csv_ds('pipe_delimiters.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','z'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['z'],'hello')
+
+    def test_separator_semicolon(**kwargs):
+        ds = get_csv_ds('semicolon_delimiters.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','z'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['z'],'hello')
 
 if __name__ == "__main__":
     setup()
