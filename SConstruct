@@ -450,6 +450,7 @@ pickle_store = [# Scons internal variables
         'CAIROMM_LIBPATHS',
         'CAIROMM_LINKFLAGS',
         'CAIROMM_CPPPATHS',
+        'SVG_RENDERER',
         ]
 
 # Add all other user configurable options to pickle pickle_store
