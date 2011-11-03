@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef SQLITE_FEATURESET_HPP
-#define SQLITE_FEATURESET_HPP
+#ifndef MAPNIK_SQLITE_FEATURESET_HPP
+#define MAPNIK_SQLITE_FEATURESET_HPP
 
 // mapnik
 #include <mapnik/datasource.hpp>
@@ -33,7 +33,7 @@
 #include <boost/shared_ptr.hpp>
 
 // sqlite
-#include "sqlite_types.hpp"
+#include "sqlite_resultset.hpp"
   
 
 class sqlite_featureset : public mapnik::Featureset
@@ -55,4 +55,4 @@ private:
     bool using_subquery_;
 };
 
-#endif // SQLITE_FEATURESET_HPP
+#endif // MAPNIK_SQLITE_FEATURESET_HPP
