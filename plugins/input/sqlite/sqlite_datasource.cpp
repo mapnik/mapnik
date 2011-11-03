@@ -22,6 +22,8 @@
 
 #include "sqlite_datasource.hpp"
 #include "sqlite_featureset.hpp"
+#include "sqlite_resultset.hpp"
+#include "sqlite_utils.hpp"
 
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
@@ -64,8 +66,8 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     format_(mapnik::wkbAuto)
 {
     /* TODO
-      - auto detect primary key - https://github.com/mapnik/mapnik/issues/82
       - throw if no primary key but spatial index is present?
+      - remove auto-indexing
     */
     
     boost::optional<std::string> file = params_.get<std::string>("file");
@@ -95,33 +97,36 @@ void sqlite_datasource::bind() const
     else
         dataset_name_ = *file;
 
-    if (!boost::filesystem::exists(dataset_name_))
+    if ((dataset_name_.compare(":memory:") != 0) && (!boost::filesystem::exists(dataset_name_)))
     {
         throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
     }    
+
+    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries", false);
+    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index", true);
     
-    boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
-    if (key_field_name)
-    {
-        key_field_ = *key_field_name;
-    }
-    
+    // TODO - remove this option once all datasources have an indexing api
+    bool auto_index = *params_.get<mapnik::boolean>("auto_index", true);
+
+    boost::optional<std::string> ext  = params_.get<std::string>("extent");
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
+        
     boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
     if (wkb)
     {
         if (*wkb == "spatialite")
+        {
             format_ = mapnik::wkbSpatiaLite;  
+        }
         else if (*wkb == "generic")
+        {
             format_ = mapnik::wkbGeneric;
+        }
         else
+        {
             format_ = mapnik::wkbAuto;
+        }
     }
-
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries", false);
-    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index", true);
-
-    boost::optional<std::string> ext  = params_.get<std::string>("extent");
-    if (ext) extent_initialized_ = extent_.from_string(*ext);
 
     // Populate init_statements_
     //   1. Build attach database statements from the "attachdb" parameter
@@ -144,7 +149,7 @@ void sqlite_datasource::bind() const
 
     if (geometry_table_.empty())
     {
-        geometry_table_ = mapnik::table_from_sql(table_);
+        geometry_table_ = mapnik::sql_utils::table_from_sql(table_);
     }
 
     // if 'table_' is a subquery then we try to deduce names
@@ -154,8 +159,6 @@ void sqlite_datasource::bind() const
     {
         using_subquery_ = true;
     }
-
-    std::string index_db = sqlite_utils::get_index_db_name(dataset_name_);
 
     // now actually create the connection and start executing setup sql
     dataset_ = boost::make_shared<sqlite_connection>(dataset_name_);
@@ -175,7 +178,7 @@ void sqlite_datasource::bind() const
     {
         std::ostringstream s;
         s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
-        found_types_via_subquery = dataset_->detect_types_from_subquery(s.str(),geometry_field_,desc_);
+        found_types_via_subquery = sqlite_utils::detect_types_from_subquery(s.str(),geometry_field_,desc_,dataset_);
     }
 
     // TODO - consider removing this
@@ -184,11 +187,12 @@ void sqlite_datasource::bind() const
         desc_.add_descriptor(attribute_descriptor("rowid", mapnik::Integer));
     }
     
-    bool found_table = dataset_->table_info(key_field_,
+    bool found_table = sqlite_utils::table_info(key_field_,
                                             found_types_via_subquery,
                                             geometry_field_,
                                             geometry_table_,
-                                            desc_);
+                                            desc_,
+                                            dataset_);
 
     if (! found_table)
     {
@@ -214,20 +218,52 @@ void sqlite_datasource::bind() const
         // we have discovered meta-data or else we don't know the column name
         index_table_ = sqlite_utils::index_for_table(geometry_table_,geometry_field_);
     }
+
+    std::string index_db = sqlite_utils::index_for_db(dataset_name_);
  
     has_spatial_index_ = false;
     if (use_spatial_index_)
     {
-        /*if (boost::filesystem::exists(index_db))
+        if (boost::filesystem::exists(index_db))
         {
             dataset_->execute("attach database '" + index_db + "' as " + index_table_);
         }
-        */
-        has_spatial_index_ = dataset_->has_rtree(index_table_);
+        
+        has_spatial_index_ = sqlite_utils::has_rtree(index_table_,dataset_);
+    }
+
+
+    if (! extent_initialized_ 
+        && !has_spatial_index_
+        && auto_index)
+    {
+            if (! key_field_.empty())
+            {
+                std::ostringstream query;
+                query << "SELECT " 
+                      << geometry_field_
+                      << "," << key_field_
+                      << " FROM ("
+                      << geometry_table_ << ")";
+                boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
+                sqlite_utils::create_spatial_index(index_db,index_table_,rs,extent_);
+                extent_initialized_ = true;
+            }
+            else
+            {
+                std::ostringstream s;
+                s << "Sqlite Plugin: key_field is empty for " 
+                  << geometry_field_
+                  << " and "
+                  << geometry_table_;
+                throw datasource_exception(s.str());
+            }
     }
 
     if (! extent_initialized_)
     {
+
+        // TODO - clean this up - reducing arguments
         if (!sqlite_utils::detect_extent(dataset_,
                                          has_spatial_index_,
                                          extent_,
@@ -262,7 +298,7 @@ namespace filesystem {
     path symlink_path;
 
 #ifdef BOOST_POSIX_API
-    for (std::size_t path_max = 64;; path_max *= 2)// loop 'til buffer large enough
+    for (std::size_t path_max = 64;; path_max *= 2)// loop 'til buffer is large enough
     {
       boost::scoped_array<char> buf(new char[path_max]);
       ssize_t result;
