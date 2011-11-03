@@ -262,8 +262,6 @@ private:
     {
         if (node && node->ext_.contains(item_ext))
         {
-            coord2d c=node->ext_.center();
-
             double width=node->ext_.width();
             double height=node->ext_.height();
 
