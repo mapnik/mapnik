@@ -33,6 +33,7 @@
 
 // ogr
 #include "sqlite_featureset.hpp"
+#include "sqlite_utils.hpp"
 
 using mapnik::query;
 using mapnik::box2d;
