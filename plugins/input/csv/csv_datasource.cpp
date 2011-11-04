@@ -274,7 +274,8 @@ void csv_datasource::parse_csv(T& stream,
         {
             std::string val = boost::trim_copy(*beg);
             std::string lower_val = boost::algorithm::to_lower_copy(val);
-            if (lower_val == "wkt")
+            if (lower_val == "wkt"
+                || (lower_val.find("geom") != std::string::npos))
             {
                 wkt_idx = idx;
                 has_wkt_field = true;
@@ -343,7 +344,8 @@ void csv_datasource::parse_csv(T& stream,
                         else
                         {    
                             std::string lower_val = boost::algorithm::to_lower_copy(val);
-                            if (lower_val == "wkt")
+                            if (lower_val == "wkt"
+                                || (lower_val.find("geom") != std::string::npos))
                             {
                                 wkt_idx = idx;
                                 has_wkt_field = true;
@@ -400,14 +402,21 @@ void csv_datasource::parse_csv(T& stream,
 #endif
             break;
         }
+        
+        unsigned line_length = csv_line.length();
 
         // skip blank lines
-        if (csv_line.empty()){
-            ++line_number;
-            continue;
+        if (line_length < 5)
+        {
+            std::string trimmed = csv_line;
+            boost::trim_if(trimmed,boost::algorithm::is_any_of("\",'\r\n"));
+            if (trimmed.empty()){
+                ++line_number;
+                continue;
 #ifdef MAPNIK_DEBUG
-            std::clog << "CSV Plugin: empty row encountered at line: " << line_number << "\n";
+                std::clog << "CSV Plugin: empty row encountered at line: " << line_number << "\n";
 #endif
+            }
         }
 
         try
@@ -443,7 +452,14 @@ void csv_datasource::parse_csv(T& stream,
                 std::string value;
                 if (beg == tok.end())
                 {
-                    boost::put(*feature,fld_name,mapnik::value_null());
+                    UnicodeString ustr = tr.transcode(value.c_str());
+                    boost::put(*feature,fld_name,ustr);
+                    //boost::put(*feature,fld_name,mapnik::value_null());
+                    null_geom = true;
+                    if (feature_count == 1)
+                    {
+                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                    }
                     continue;
                 }
                 else
@@ -452,7 +468,6 @@ void csv_datasource::parse_csv(T& stream,
                     ++beg;
                 }
 
-                
                 int value_length = value.length();
                 
                 // parse wkt
