@@ -48,6 +48,9 @@ public:
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
+    bool index_on(std::string const& field) const;
+    bool create_index(std::string const& field, mapnik::parameters const& params) const;
+    std::string geometry_field() const { return geometry_field_; }
     void bind() const;
 
 private:

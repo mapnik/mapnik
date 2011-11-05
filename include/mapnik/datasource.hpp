@@ -90,6 +90,11 @@ public:
     {
         return params_;
     }
+
+    void set_param(parameter const& p)
+    {
+        params_[p.first] = p.second;
+    }
         
     /*!
      * @brief Get the type of the datasource
@@ -106,6 +111,9 @@ public:
     virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
     virtual box2d<double> envelope() const=0;
     virtual layer_descriptor get_descriptor() const=0;
+    virtual bool index_on(std::string const& field) const=0;
+    virtual bool create_index(std::string const& field, mapnik::parameters const& params) const=0;
+    virtual std::string geometry_field() const=0;
     virtual ~datasource() {};
 protected:
     parameters params_;

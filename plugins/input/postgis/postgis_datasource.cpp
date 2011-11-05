@@ -357,6 +357,7 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
     std::ostringstream b;
     if (srid_ > 0)
         b << "SetSRID(";
+    //ST_MakeBox2D(ST_Point(),ST_Point())
     b << "'BOX3D(";
     b << std::setprecision(16);
     b << env.minx() << " " << env.miny() << ",";

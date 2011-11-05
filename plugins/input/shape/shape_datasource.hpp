@@ -51,6 +51,9 @@ public:
     featureset_ptr features_at_point(coord2d const& pt) const;
     box2d<double> envelope() const;
     layer_descriptor get_descriptor() const;
+    bool index_on(std::string field) const { return false };
+    bool create_index(std::string const& field, mapnik::parameters const& params) const { return false; }
+    std::string geometry_field() const { return ""; }
     void bind() const;   
 private:
     shape_datasource(const shape_datasource&);

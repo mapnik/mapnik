@@ -110,10 +110,9 @@ public:
         }
     }
     
-    static void create_spatial_index(std::string const& index_db,
+    static void create_rtree(std::string const& index_db,
                                      std::string const& index_table,
-                                     boost::shared_ptr<sqlite_resultset> rs,
-                                     mapnik::box2d<double>& extent)
+                                     boost::shared_ptr<sqlite_resultset> rs)
     {
         /* TODO
           - speedups
@@ -153,10 +152,8 @@ public:
                    << " values (?,?,?,?,?)";
 
         ds->execute(create_idx.str());
-        
         prepared_index_statement ps(ds,insert_idx.str());
 
-        bool first = true;
         while (rs->is_valid() && rs->step_next())
         {
             int size;
@@ -172,16 +169,6 @@ public:
                     mapnik::box2d<double> const& bbox = paths[i].envelope();
                     if (bbox.valid())
                     {
-                        if (first)
-                        {
-                            first = false;
-                            extent = bbox;
-                        }
-                        else
-                        {
-                            extent.expand_to_include(bbox);
-                        }
-
                         ps.bind(bbox);
     
                         const int type_oid = rs->column_type(1);

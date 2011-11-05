@@ -67,7 +67,6 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
 {
     /* TODO
       - throw if no primary key but spatial index is present?
-      - remove auto-indexing
     */
     
     boost::optional<std::string> file = params_.get<std::string>("file");
@@ -82,6 +81,52 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     {
         this->bind();
     }
+}
+
+bool sqlite_datasource::index_on(std::string const& field) const
+{
+    if (! is_bound_) bind();
+
+    if (field == geometry_field_)
+    {
+        if (use_spatial_index_ && !index_table_.empty())
+        {
+            std::string index_db = sqlite_utils::index_for_db(dataset_name_);
+            if (boost::filesystem::exists(index_db))
+            {
+                dataset_->execute("attach database '" + index_db + "' as " + index_table_);
+            }
+            
+            return sqlite_utils::has_rtree(index_table_,dataset_);
+        }
+    }
+    // else check or attribute index?
+    return false;
+}
+
+bool sqlite_datasource::create_index(std::string const& field, mapnik::parameters const& params) const
+{
+    if (! is_bound_) bind();
+    if (field == geometry_field_)
+    {
+        if (!key_field_.empty() && !index_table_.empty())
+        {
+            std::string index_db = sqlite_utils::index_for_db(dataset_name_);
+            std::ostringstream query;
+            query << "SELECT " 
+                  << geometry_field_
+                  << "," << key_field_
+                  << " FROM ("
+                  << geometry_table_ << ")";
+            boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
+            sqlite_utils::create_rtree(index_db,index_table_,rs);
+            use_spatial_index_ = sqlite_utils::has_rtree(index_table_,dataset_);
+            return use_spatial_index_;
+        }
+    }
+    // else create attribute index
+    return false;
+
 }
 
 void sqlite_datasource::bind() const
@@ -104,9 +149,6 @@ void sqlite_datasource::bind() const
 
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries", false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index", true);
-    
-    // TODO - remove this option once all datasources have an indexing api
-    bool auto_index = *params_.get<mapnik::boolean>("auto_index", true);
 
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
@@ -230,34 +272,6 @@ void sqlite_datasource::bind() const
         }
         
         has_spatial_index_ = sqlite_utils::has_rtree(index_table_,dataset_);
-    }
-
-
-    if (! extent_initialized_ 
-        && !has_spatial_index_
-        && auto_index)
-    {
-            if (! key_field_.empty())
-            {
-                std::ostringstream query;
-                query << "SELECT " 
-                      << geometry_field_
-                      << "," << key_field_
-                      << " FROM ("
-                      << geometry_table_ << ")";
-                boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
-                sqlite_utils::create_spatial_index(index_db,index_table_,rs,extent_);
-                extent_initialized_ = true;
-            }
-            else
-            {
-                std::ostringstream s;
-                s << "Sqlite Plugin: key_field is empty for " 
-                  << geometry_field_
-                  << " and "
-                  << geometry_table_;
-                throw datasource_exception(s.str());
-            }
     }
 
     if (! extent_initialized_)

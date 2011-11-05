@@ -174,6 +174,8 @@ void export_datasource()
         .def("encoding",&encoding) //todo expose as property
         .def("name",&name)
         .def("features_at_point",&datasource::features_at_point)
+        .def("index_on",&datasource::index_on)
+        .def("create_index",&datasource::create_index)
         .def("params",&datasource::params,return_value_policy<copy_const_reference>(), 
              "The configuration parameters of the data source. "  
              "These vary depending on the type of data source.")
