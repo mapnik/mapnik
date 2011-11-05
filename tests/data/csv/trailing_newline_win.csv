@@ -1,0 +1,12 @@
+FID,wkt,REGIONNAME,RID
+Eth_Region_Boundary.1,"POINT (0 0)",Addis Ababa,14
+Eth_Region_Boundary.2,"POINT (0 0)",Tigray,01
+Eth_Region_Boundary.3,"POINT (0 0)",Somali,05
+Eth_Region_Boundary.4,"POINT (0 0)",Dire Dawa,15
+Eth_Region_Boundary.5,"POINT (0 0)",Hareri,13
+Eth_Region_Boundary.6,"POINT (0 0)",SNNPR,07
+Eth_Region_Boundary.7,"POINT (0 0)",Gambela,12
+Eth_Region_Boundary.8,"POINT (0 0)",Beneshangul Gumu,06
+Eth_Region_Boundary.9,"POINT (0 0)",Amhara,03
+Eth_Region_Boundary.10,"POINT (0 0)",Afar,02
+Eth_Region_Boundary.11,"POINT (0 0)",Oromia,04
