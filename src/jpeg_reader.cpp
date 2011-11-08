@@ -36,8 +36,8 @@ extern "C"
 #include <boost/scoped_array.hpp>
 #include <boost/utility.hpp>
 
-// stl
-#include <stdio.h>
+// std
+#include <cstdio>
 
 #ifdef MAPNIK_DEBUG
 #include <iostream>
