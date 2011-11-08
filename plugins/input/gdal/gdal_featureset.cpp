@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/global.hpp>
 #include <mapnik/feature_factory.hpp>
 
 #include "gdal_featureset.hpp"
@@ -39,6 +40,9 @@ using mapnik::geometry_type;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
 
+#ifdef _WINDOWS 
+using mapnik::rint;
+#endif 
 
 gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int band,
