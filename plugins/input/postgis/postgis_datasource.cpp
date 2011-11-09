@@ -126,7 +126,7 @@ void postgis_datasource::bind() const
 
             if(geometry_table_.empty())
             {
-                geometry_table_ = mapnik::table_from_sql(table_);
+                geometry_table_ = mapnik::sql_utils::table_from_sql(table_);
             }
             std::string::size_type idx = geometry_table_.find_last_of('.');
             if (idx!=std::string::npos)
@@ -150,13 +150,13 @@ void postgis_datasource::bind() const
             {
                 std::ostringstream s;
                 s << "SELECT f_geometry_column, srid FROM ";
-                s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << mapnik::unquote_sql(geometry_table_) <<"'";
+                s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << mapnik::sql_utils::unquote_double(geometry_table_) <<"'";
              
                 if (schema_.length() > 0) 
-                    s << " AND f_table_schema='" << mapnik::unquote_sql(schema_) << "'";
+                    s << " AND f_table_schema='" << mapnik::sql_utils::unquote_double(schema_) << "'";
             
                 if (geometry_field_.length() > 0)
-                    s << " AND f_geometry_column='" << mapnik::unquote_sql(geometry_field_) << "'";
+                    s << " AND f_geometry_column='" << mapnik::sql_utils::unquote_double(geometry_field_) << "'";
 
                 /*
                 if (show_queries_)
@@ -502,14 +502,14 @@ featureset_ptr postgis_datasource::features(const query& q) const
                 s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
             if (!key_field_.empty()) 
-                mapnik::quote_attr(s,key_field_);
+                mapnik::sql_utils::quote_attr(s,key_field_);
 
             std::set<std::string> const& props=q.property_names();
             std::set<std::string>::const_iterator pos=props.begin();
             std::set<std::string>::const_iterator end=props.end();
             while (pos != end)
             {
-                mapnik::quote_attr(s,*pos);
+                mapnik::sql_utils::quote_attr(s,*pos);
                 ++pos;
             }       
 
@@ -578,14 +578,14 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
                 s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
             
             if (!key_field_.empty())
-                mapnik::quote_attr(s,key_field_);
+                mapnik::sql_utils::quote_attr(s,key_field_);
 
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
             unsigned size=0;
             while (itr != end)
             {
-                mapnik::quote_attr(s,itr->get_name());
+                mapnik::sql_utils::quote_attr(s,itr->get_name());
                 ++itr;
                 ++size;
             }
@@ -644,11 +644,11 @@ box2d<double> postgis_datasource::envelope() const
 
                 if (schema_.length() > 0)
                 {
-                    s << mapnik::unquote_sql(schema_) << "','";
+                    s << mapnik::sql_utils::unquote_double(schema_) << "','";
                 }
 
-                s << mapnik::unquote_sql(geometry_table_) << "','"
-                  << mapnik::unquote_sql(geometryColumn_) << "') as ext) as tmp";
+                s << mapnik::sql_utils::unquote_double(geometry_table_) << "','"
+                  << mapnik::sql_utils::unquote_double(geometryColumn_) << "') as ext) as tmp";
             }
             else
             {

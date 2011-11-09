@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef SQLITE_DATASOURCE_HPP
-#define SQLITE_DATASOURCE_HPP
+#ifndef MAPNIK_SQLITE_DATASOURCE_HPP
+#define MAPNIK_SQLITE_DATASOURCE_HPP
 
 // mapnik
 #include <mapnik/datasource.hpp>
@@ -34,7 +34,7 @@
 #include <boost/scoped_ptr.hpp>
 
 // sqlite
-#include "sqlite_types.hpp"
+#include "sqlite_connection.hpp"
 
 
 class sqlite_datasource : public mapnik::datasource 
@@ -55,7 +55,7 @@ private:
     mutable bool extent_initialized_;
     int type_;
     mutable std::string dataset_name_;
-    mutable sqlite_connection* dataset_;
+    mutable boost::shared_ptr<sqlite_connection> dataset_;
     std::string table_;
     std::string fields_;
     std::string metadata_;
@@ -78,4 +78,4 @@ private:
     void parse_attachdb(std::string const& attachdb) const;
 };
 
-#endif // SQLITE_DATASOURCE_HPP
+#endif // MAPNIK_SQLITE_DATASOURCE_HPP
