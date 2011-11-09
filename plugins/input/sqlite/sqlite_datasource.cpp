@@ -22,22 +22,19 @@
 
 #include "sqlite_datasource.hpp"
 #include "sqlite_featureset.hpp"
+#include "sqlite_resultset.hpp"
+#include "sqlite_utils.hpp"
 
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/sql_utils.hpp>
-#include <mapnik/feature_factory.hpp> // to enable extent fallback hack
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
-
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
+#include <boost/scoped_array.hpp>
 
 using mapnik::box2d;
 using mapnik::coord2d;
@@ -68,9 +65,10 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
     format_(mapnik::wkbAuto)
 {
-    // TODO
-    // - change param from 'file' to 'dbname'
-    // - ensure that the supplied key_field is a valid "integer primary key"
+    /* TODO
+      - throw if no primary key but spatial index is present?
+      - remove auto-indexing
+    */
     
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (! file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
@@ -92,41 +90,43 @@ void sqlite_datasource::bind() const
     
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (! file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
-    
-    // Be careful, automatically using rowid as key field of the table can lead
-    // to misleading results http://www.gaia-gis.it/spatialite-2.4.0-5/SpatialIndex-Update.pdf
-    // TODO - We should try to avoid this and eventually force to specify a valid table primary key
-
-    boost::optional<std::string> key_field_name = params_.get<std::string>("key_field");
-    if (key_field_name)
-    {
-        key_field_ = *key_field_name;
-    }
-    
-    boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
-    if (wkb)
-    {
-        if (*wkb == "spatialite")
-            format_ = mapnik::wkbSpatiaLite;  
-        else if (*wkb == "generic")
-            format_ = mapnik::wkbGeneric;
-        else
-            format_ = mapnik::wkbAuto;
-    }
-
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries", false);
-    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index", true);
-    has_spatial_index_ = false;
-    using_subquery_ = false;
-
-    boost::optional<std::string> ext  = params_.get<std::string>("extent");
-    if (ext) extent_initialized_ = extent_.from_string(*ext);
 
     boost::optional<std::string> base = params_.get<std::string>("base");
     if (base)
         dataset_name_ = *base + "/" + *file;
     else
         dataset_name_ = *file;
+
+    if ((dataset_name_.compare(":memory:") != 0) && (!boost::filesystem::exists(dataset_name_)))
+    {
+        throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
+    }    
+
+    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries", false);
+    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index", true);
+    
+    // TODO - remove this option once all datasources have an indexing api
+    bool auto_index = *params_.get<mapnik::boolean>("auto_index", true);
+
+    boost::optional<std::string> ext  = params_.get<std::string>("extent");
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
+        
+    boost::optional<std::string> wkb = params_.get<std::string>("wkb_format");
+    if (wkb)
+    {
+        if (*wkb == "spatialite")
+        {
+            format_ = mapnik::wkbSpatiaLite;  
+        }
+        else if (*wkb == "generic")
+        {
+            format_ = mapnik::wkbGeneric;
+        }
+        else
+        {
+            format_ = mapnik::wkbAuto;
+        }
+    }
 
     // Populate init_statements_
     //   1. Build attach database statements from the "attachdb" parameter
@@ -147,10 +147,21 @@ void sqlite_datasource::bind() const
         init_statements_.push_back(*initdb);
     }
 
-    if (!boost::filesystem::exists(dataset_name_))
-        throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
-          
-    dataset_ = new sqlite_connection(dataset_name_);
+    if (geometry_table_.empty())
+    {
+        geometry_table_ = mapnik::sql_utils::table_from_sql(table_);
+    }
+
+    // if 'table_' is a subquery then we try to deduce names
+    // and types from the first row returned from that query
+    using_subquery_ = false;
+    if (table_ != geometry_table_)
+    {
+        using_subquery_ = true;
+    }
+
+    // now actually create the connection and start executing setup sql
+    dataset_ = boost::make_shared<sqlite_connection>(dataset_name_);
 
     // Execute init_statements_
     for (std::vector<std::string>::const_iterator iter = init_statements_.begin();
@@ -162,193 +173,38 @@ void sqlite_datasource::bind() const
         dataset_->execute(*iter);
     }
     
-    if (geometry_table_.empty())
-    {
-        geometry_table_ = mapnik::table_from_sql(table_);
-    }
-
-    // should we deduce column names and types using PRAGMA?
-    bool use_pragma_table_info = true;
-    
-    if (table_ != geometry_table_)
-    {
-        // if 'table_' is a subquery then we try to deduce names
-        // and types from the first row returned from that query
-        using_subquery_ = true;
-        use_pragma_table_info = false;
-
-        if (key_field_.empty())
-        {
-          key_field_ = "rowid";
-        }
-    }
-
-    if (! use_pragma_table_info)
+    bool found_types_via_subquery = false;
+    if (using_subquery_)
     {
         std::ostringstream s;
         s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
-
-        boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
-        if (rs->is_valid() && rs->step_next())
-        {
-            for (int i = 0; i < rs->column_count(); ++i)
-            {
-                const int type_oid = rs->column_type(i);
-                const char* fld_name = rs->column_name(i);
-                switch (type_oid)
-                {
-                case SQLITE_INTEGER:
-                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
-                    break;
-                     
-                case SQLITE_FLOAT:
-                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Double));
-                    break;
-                     
-                case SQLITE_TEXT:
-                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
-                    break;
-                     
-                case SQLITE_NULL:
-                    // sqlite reports based on value, not actual column type unless
-                    // PRAGMA table_info is used so here we assume the column is a string
-                    // which is a lesser evil than altogether dropping the column
-                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
-
-                case SQLITE_BLOB:
-                    if (geometry_field_.empty()
-                        && (boost::algorithm::icontains(fld_name, "geom") ||
-                            boost::algorithm::icontains(fld_name, "point") ||
-                            boost::algorithm::icontains(fld_name, "linestring") ||
-                            boost::algorithm::icontains(fld_name, "polygon")))
-                    {
-                        geometry_field_ = std::string(fld_name);
-                    }
-                    break;
-                     
-                default:
-#ifdef MAPNIK_DEBUG
-                    std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
-                    break;
-                }
-            }
-        }
-        else
-        {
-            // if we do not have at least a row and
-            // we cannot determine the right columns types and names 
-            // as all column_type are SQLITE_NULL
-            // so we fallback to using PRAGMA table_info
-            use_pragma_table_info = true;
-        }
+        found_types_via_subquery = sqlite_utils::detect_types_from_subquery(s.str(),geometry_field_,desc_,dataset_);
     }
 
-    if (key_field_.empty())
+    // TODO - consider removing this
+    if (key_field_ == "rowid")
     {
-        use_pragma_table_info = true;
-    }
-    else
-    {
-        // TODO - we can't trust so much the rowid here
-        if (key_field_ == "rowid")
-        {
-            desc_.add_descriptor(attribute_descriptor("rowid", mapnik::Integer));
-        }
+        desc_.add_descriptor(attribute_descriptor("rowid", mapnik::Integer));
     }
     
-    if (use_pragma_table_info)
+    bool found_table = sqlite_utils::table_info(key_field_,
+                                            found_types_via_subquery,
+                                            geometry_field_,
+                                            geometry_table_,
+                                            desc_,
+                                            dataset_);
+
+    if (! found_table)
     {
         std::ostringstream s;
-        s << "PRAGMA table_info(" << geometry_table_ << ")";
+        s << "Sqlite Plugin: could not query table '" << geometry_table_ << "' ";
+        if (using_subquery_) s << " from subquery '" << table_ << "' ";
+        s << "using 'PRAGMA table_info(" << geometry_table_  << ")' ";
 
-        boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
-        bool found_table = false;
-        bool found_pk = false;
-        while (rs->is_valid() && rs->step_next())
-        {
-            found_table = true;
+        std::string sq_err = std::string(sqlite3_errmsg(*(*dataset_)));
+        if (sq_err != "unknown error") s << ": " << sq_err;
 
-            // TODO - support unicode strings
-            const char* fld_name = rs->column_text(1);
-            std::string fld_type(rs->column_text(2));
-            int fld_pk = rs->column_integer(5);
-            boost::algorithm::to_lower(fld_type);
-
-            // TODO - how to handle primary keys on multiple columns ?
-            if (key_field_.empty() && ! found_pk && fld_pk != 0)
-            {
-                key_field_ = fld_name;
-                found_pk = true;
-            }
-
-            // see 2.1 "Column Affinity" at http://www.sqlite.org/datatype3.html
-            // TODO - refactor this somehow ?
-            if (geometry_field_.empty()
-                && ((boost::algorithm::contains(fld_type, "geom") ||
-                     boost::algorithm::contains(fld_type, "point") ||
-                     boost::algorithm::contains(fld_type, "linestring") ||
-                     boost::algorithm::contains(fld_type, "polygon"))
-                ||
-                    (boost::algorithm::icontains(fld_name, "geom") ||
-                     boost::algorithm::icontains(fld_name, "point") ||
-                     boost::algorithm::icontains(fld_name, "linestring") ||
-                     boost::algorithm::icontains(fld_name, "polygon")))
-               )
-            {
-                geometry_field_ = std::string(fld_name);
-            }
-            else if (boost::algorithm::contains(fld_type, "int"))
-            {
-                desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
-            }
-            else if (boost::algorithm::contains(fld_type, "text") ||
-                     boost::algorithm::contains(fld_type, "char") ||
-                     boost::algorithm::contains(fld_type, "clob"))
-            {
-                desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
-            }
-            else if (boost::algorithm::contains(fld_type, "real") ||
-                     boost::algorithm::contains(fld_type, "float") ||
-                     boost::algorithm::contains(fld_type, "double"))
-            {
-                desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Double));
-            }
-            else if (boost::algorithm::contains(fld_type, "blob"))
-            {
-                if (! geometry_field_.empty())
-                {
-                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
-                }
-            }
-#ifdef MAPNIK_DEBUG
-            else
-            {
-                // "Column Affinity" says default to "Numeric" but for now we pass..
-                //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-
-                // TODO - this should not fail when we specify geometry_field in XML file
-
-                std::clog << "Sqlite Plugin: column '"
-                          << std::string(fld_name)
-                          << "' unhandled due to unknown type: "
-                          << fld_type << std::endl;
-            }
-#endif
-        }
-
-        if (! found_table)
-        {
-            std::ostringstream s;
-            s << "Sqlite Plugin: could not query table '" << geometry_table_ << "' ";
-            if (using_subquery_) s << " from subquery '" << table_ << "' ";
-            s << "using 'PRAGMA table_info(" << geometry_table_  << ")' ";
-
-            std::string sq_err = std::string(sqlite3_errmsg(*(*dataset_)));
-            if (sq_err != "unknown error") s << ": " << sq_err;
-
-            throw datasource_exception(s.str());
-        }
+        throw datasource_exception(s.str());
     }
 
     if (geometry_field_.empty())
@@ -360,250 +216,111 @@ void sqlite_datasource::bind() const
     {
         // Generate implicit index_table name - need to do this after
         // we have discovered meta-data or else we don't know the column name
-        index_table_ = "\"idx_" + mapnik::unquote_sql2(geometry_table_) + "_" + geometry_field_ + "\"";
+        index_table_ = sqlite_utils::index_for_table(geometry_table_,geometry_field_);
     }
-    
+
+    std::string index_db = sqlite_utils::index_for_db(dataset_name_);
+ 
+    has_spatial_index_ = false;
     if (use_spatial_index_)
     {
-        std::ostringstream s;
-        s << "SELECT pkid,xmin,xmax,ymin,ymax FROM " << index_table_;
-        s << " LIMIT 0";
-
-        if (dataset_->execute_with_code(s.str()) == SQLITE_OK)
+        if (boost::filesystem::exists(index_db))
         {
-            has_spatial_index_ = true;
-        }
-#ifdef MAPNIK_DEBUG
-        else
-        {
-            std::clog << "SQLite Plugin: rtree index lookup did not succeed: '" << sqlite3_errmsg(*(*dataset_)) << "'\n";
-        }
-#endif
-    }
-
-    if (! metadata_.empty() && ! extent_initialized_)
-    {
-        std::ostringstream s;
-        s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata_;
-        s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table_ << "')";
-
-        boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
-        if (rs->is_valid() && rs->step_next())
-        {
-            double xmin = rs->column_double (0);
-            double ymin = rs->column_double (1);
-            double xmax = rs->column_double (2);
-            double ymax = rs->column_double (3);
-
-            extent_.init (xmin, ymin, xmax, ymax);
-            extent_initialized_ = true;
-        }
-    }
-    
-    if (! extent_initialized_ && has_spatial_index_)
-    {
-        std::ostringstream s;
-        s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM " 
-        << index_table_;
-
-        boost::scoped_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
-        if (rs->is_valid() && rs->step_next())
-        {
-            if (! rs->column_isnull(0))
-            {
-                try 
-                {
-                    double xmin = lexical_cast<double>(rs->column_double(0));
-                    double ymin = lexical_cast<double>(rs->column_double(1));
-                    double xmax = lexical_cast<double>(rs->column_double(2));
-                    double ymax = lexical_cast<double>(rs->column_double(3));
-                    extent_.init(xmin, ymin, xmax, ymax);
-                    extent_initialized_ = true;
-                }
-                catch (bad_lexical_cast& ex)
-                {
-                    std::clog << boost::format("SQLite Plugin: warning: could not determine extent from query: %s\nError was: '%s'\n") % s.str() % ex.what() << std::endl;
-                }
-            }
-        }    
-    }
-
-#ifdef MAPNIK_DEBUG
-    if (! has_spatial_index_ && use_spatial_index_ && using_subquery_
-        && key_field_ == "rowid" && ! boost::algorithm::icontains(table_, "rowid"))
-    {
-       // this is an impossible situation because rowid will be null via a subquery
-       std::clog << "Sqlite Plugin: WARNING: spatial index usage will fail because rowid "
-                 << "is not present in your subquery. You have 4 options: "
-                 << "1) Add rowid into your select statement, "
-                 << "2) alias your primary key as rowid, "
-                 << "3) supply a 'key_field' value that references the primary key of your spatial table, or "
-                 << "4) avoid using a spatial index by setting 'use_spatial_index'=false" << std::endl;
-    }
-#endif
-    
-    // final fallback to gather extent
-    if (! extent_initialized_ || ! has_spatial_index_)
-    {
-        std::ostringstream s;
-        s << "SELECT " << geometry_field_ << "," << key_field_
-          << " FROM " << geometry_table_;
-
-        if (row_limit_ > 0)
-        {
-            s << " LIMIT " << row_limit_;
-        }
-
-        if (row_offset_ > 0)
-        {
-            s << " OFFSET " << row_offset_;
-        }
-
-#ifdef MAPNIK_DEBUG
-        std::clog << "Sqlite Plugin: " << s.str() << std::endl;
-#endif
-
-        boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
-        
-        // spatial index sql
-        std::ostringstream spatial_index_sql;
-        spatial_index_sql << "create virtual table " << index_table_
-                          << " using rtree(pkid, xmin, xmax, ymin, ymax)";
-
-        std::ostringstream spatial_index_insert_sql;
-        spatial_index_insert_sql << "insert into " << index_table_
-                                 << " values (?,?,?,?,?)";
-
-        sqlite3_stmt* stmt = 0;
-        if (use_spatial_index_)
-        {
-            dataset_->execute(spatial_index_sql.str());
-
-            const int rc = sqlite3_prepare_v2 (*(*dataset_),
-                                               spatial_index_insert_sql.str().c_str(),
-                                               -1,
-                                               &stmt,
-                                               0);
-            if (rc != SQLITE_OK)
-            {
-                std::ostringstream index_error;
-                index_error << "Sqlite Plugin: auto-index table creation failed: '"
-                            << sqlite3_errmsg(*(*dataset_)) << "' query was: "
-                            << spatial_index_insert_sql;
-
-                throw datasource_exception(index_error.str());
-            }
-        }
-
-        bool first = true;
-        while (rs->is_valid() && rs->step_next())
-        {
-            int size;
-            const char* data = (const char*) rs->column_blob(0, size);
-            if (data)
-            {
-                // create a tmp feature to be able to parse geometry
-                // ideally we would not have to do this.
-                // see: http://trac.mapnik.org/ticket/745
-                mapnik::feature_ptr feature(mapnik::feature_factory::create(0));
-                mapnik::geometry_utils::from_wkb(feature->paths(), data, size, multiple_geometries_, format_);
-                mapnik::box2d<double> const& bbox = feature->envelope();
-
-                if (bbox.valid())
-                {
-                    extent_initialized_ = true;
-                    if (first)
-                    {
-                        first = false;
-                        extent_ = bbox;
-                    }
-                    else
-                    {
-                        extent_.expand_to_include(bbox);
-                    }
-
-                    // index creation
-                    if (use_spatial_index_)
-                    {
-                        const int type_oid = rs->column_type(1);
-                        if (type_oid != SQLITE_INTEGER)
-                        {
-                            std::ostringstream type_error;
-                            type_error << "Sqlite Plugin: invalid type for key field '"
-                                       << key_field_ << "' when creating index '" << index_table_
-                                       << "' type was: " << type_oid << "";
-
-                            throw datasource_exception(type_error.str());
-                        }
-    
-                        const sqlite_int64 pkid = rs->column_integer64(1);
-                        if (sqlite3_bind_int64(stmt, 1, pkid) != SQLITE_OK)
-                        {
-                            throw datasource_exception("invalid value for for key field while generating index");
-                        }
-
-                        if ((sqlite3_bind_double(stmt, 2, bbox.minx()) != SQLITE_OK) ||
-                            (sqlite3_bind_double(stmt, 3, bbox.maxx()) != SQLITE_OK) ||
-                            (sqlite3_bind_double(stmt, 4, bbox.miny()) != SQLITE_OK) ||
-                            (sqlite3_bind_double(stmt, 5, bbox.maxy()) != SQLITE_OK))
-                        {
-                            throw datasource_exception("invalid value for for extent while generating index");
-                        }
-
-                        const int res = sqlite3_step(stmt);
-                        if (res != SQLITE_DONE)
-                        {
-                            std::ostringstream s;
-                            s << "SQLite Plugin: inserting bbox into rtree index failed: "
-                                 << "error code " << sqlite3_errcode(*(*dataset_)) << ": '"
-                                 << sqlite3_errmsg(*(*dataset_)) << "' query was: "
-                                 << spatial_index_insert_sql;
-
-                            throw datasource_exception(s.str());
-                        }
-
-                        sqlite3_reset(stmt);
-                    }
-                }
-                else
-                {
-                    std::ostringstream index_error;
-                    index_error << "SQLite Plugin: encountered invalid bbox at '"
-                                << key_field_ << "' == " << rs->column_integer64(1);
-
-                    throw datasource_exception(index_error.str());
-                }
-            }
+            dataset_->execute("attach database '" + index_db + "' as " + index_table_);
         }
         
-        const int res = sqlite3_finalize(stmt);
-        if (res != SQLITE_OK)
-        {
-            throw datasource_exception("auto-indexing failed: set use_spatial_index=false to disable auto-indexing and avoid this error");
-        }
+        has_spatial_index_ = sqlite_utils::has_rtree(index_table_,dataset_);
+    }
+
+
+    if (! extent_initialized_ 
+        && !has_spatial_index_
+        && auto_index)
+    {
+            if (! key_field_.empty())
+            {
+                std::ostringstream query;
+                query << "SELECT " 
+                      << geometry_field_
+                      << "," << key_field_
+                      << " FROM ("
+                      << geometry_table_ << ")";
+                boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
+                sqlite_utils::create_spatial_index(index_db,index_table_,rs,extent_);
+                extent_initialized_ = true;
+            }
+            else
+            {
+                std::ostringstream s;
+                s << "Sqlite Plugin: key_field is empty for " 
+                  << geometry_field_
+                  << " and "
+                  << geometry_table_;
+                throw datasource_exception(s.str());
+            }
     }
 
     if (! extent_initialized_)
     {
-        std::ostringstream s;
-        s << "Sqlite Plugin: extent could not be determined for table '" 
-          << geometry_table_ << "' and geometry field '" << geometry_field_ << "'"
-          << " because an rtree spatial index is missing or empty."
-          << " - either set the table 'extent' or create an rtree spatial index";
 
-        throw datasource_exception(s.str());
-    }
+        // TODO - clean this up - reducing arguments
+        if (!sqlite_utils::detect_extent(dataset_,
+                                         has_spatial_index_,
+                                         extent_,
+                                         index_table_,
+                                         metadata_,
+                                         geometry_field_,
+                                         geometry_table_,
+                                         key_field_,
+                                         table_))
+        {
+            std::ostringstream s;
+            s << "Sqlite Plugin: extent could not be determined for table '" 
+              << geometry_table_ << "' and geometry field '" << geometry_field_ << "'"
+              << " because an rtree spatial index is missing or empty."
+              << " - either set the table 'extent' or create an rtree spatial index";
     
+            throw datasource_exception(s.str());
+        }
+    }
     is_bound_ = true;
 }
 
 sqlite_datasource::~sqlite_datasource()
 {
-    if (is_bound_) 
-    {
-        delete dataset_;
-    }
 }
+
+#if (BOOST_FILESYSTEM_VERSION <= 2)
+namespace boost {
+namespace filesystem {
+  path read_symlink(const path& p)
+  {
+    path symlink_path;
+
+#ifdef BOOST_POSIX_API
+    for (std::size_t path_max = 64;; path_max *= 2)// loop 'til buffer is large enough
+    {
+      boost::scoped_array<char> buf(new char[path_max]);
+      ssize_t result;
+      if ((result=::readlink(p.string().c_str(), buf.get(), path_max))== -1)
+      {
+        throw std::runtime_error("could not read symlink");
+      }
+      else
+      {
+        if(result != static_cast<ssize_t>(path_max))
+        {
+          symlink_path.assign(buf.get(), buf.get() + result);
+          break;
+        }
+      }
+    }
+#endif
+    return symlink_path;
+  }
+}
+}
+#endif
 
 void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
 {
@@ -638,23 +355,15 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
                 boost::filesystem::path absolute_path(dataset_name_);
 
                 // support symlinks
-            #if (BOOST_FILESYSTEM_VERSION == 3)
                 if (boost::filesystem::is_symlink(absolute_path))
                 {
                     absolute_path = boost::filesystem::read_symlink(absolute_path);
                 }
 
+            #if (BOOST_FILESYSTEM_VERSION == 3)
                 filename = boost::filesystem::absolute(absolute_path.parent_path() / filename).string();
-
             #else
-                if (boost::filesystem::is_symlink(absolute_path))
-                {
-                    //cannot figure out how to resolve on in v2 so just print a warning
-                    std::clog << "###Warning: '" << absolute_path.string() << "' is a symlink which is not supported in attachdb\n";
-                }
-
                 filename = boost::filesystem::complete(absolute_path.branch_path() / filename).normalize().string();
-
             #endif
             }
         }
@@ -698,7 +407,9 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         std::ostringstream s;
         
-        s << "SELECT " << geometry_field_ << "," << key_field_;
+        s << "SELECT " << geometry_field_;
+        if (!key_field_.empty())
+            s << "," << key_field_;
         std::set<std::string> const& props = q.property_names();
         std::set<std::string>::const_iterator pos = props.begin();
         std::set<std::string>::const_iterator end = props.end();
@@ -712,15 +423,8 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         
         std::string query (table_);
         
-        // TODO
-        // throw if select * and key_field == rowid?
-        // or add schema support so sqlite throws
-
-        if (has_spatial_index_)
+        if (! key_field_.empty() && has_spatial_index_)
         {
-            // Use rtree to limit record id's to a given bbox
-            // then a btree to pull the records for those ids.
-
             std::ostringstream spatial_sql;
             spatial_sql << std::setprecision(16);
             spatial_sql << " WHERE " << key_field_ << " IN (SELECT pkid FROM " << index_table_;
@@ -775,7 +479,9 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         mapnik::box2d<double> const e(pt.x, pt.y, pt.x, pt.y);
 
         std::ostringstream s;
-        s << "SELECT " << geometry_field_ << "," << key_field_;
+        s << "SELECT " << geometry_field_;
+        if (!key_field_.empty())
+            s << "," << key_field_;
         std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
         while (itr != end)
@@ -793,7 +499,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         
         std::string query(table_);
         
-        if (has_spatial_index_)
+        if (! key_field_.empty() && has_spatial_index_)
         {
             std::ostringstream spatial_sql;
             spatial_sql << std::setprecision(16);
