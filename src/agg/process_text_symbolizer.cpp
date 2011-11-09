@@ -35,6 +35,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 {
 
 
+    // Use a boost::ptr_vector here instread of std::vector?
     std::vector<geometry_type*> geometries_to_process;
     unsigned num_geom = feature.num_geometries();
     for (unsigned i=0; i<num_geom; ++i)

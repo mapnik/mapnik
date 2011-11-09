@@ -27,17 +27,16 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_array.hpp>
 
-namespace mapnik
-{
+namespace mapnik { namespace sql_utils {
 
-inline std::string unquote_sql(const std::string& sql)
+inline std::string unquote_double(const std::string& sql)
 {
     std::string table_name = boost::algorithm::to_lower_copy(sql);  
     boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\""));
     return table_name;
 }
 
-inline std::string unquote_sql2(const std::string& sql)
+inline std::string unquote(const std::string& sql)
 {
     std::string table_name = boost::algorithm::to_lower_copy(sql);  
     boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\"\'"));
@@ -65,7 +64,6 @@ inline std::string table_from_sql(const std::string& sql)
     std::string::size_type idx = table_name.rfind(" from ");
     if (idx!=std::string::npos)
     {
-      
         idx = table_name.find_first_not_of(" ",idx+5);
         if (idx != std::string::npos)
         {
@@ -190,6 +188,7 @@ inline std::string numeric2string(const char* buf)
       }
    }
    return ss.str();
+}
 }
 
 }

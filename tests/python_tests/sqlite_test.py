@@ -164,7 +164,7 @@ if 'sqlite' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(feature['lat'],17.078)
         
         ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
-            table='(select OGC_FID,GEOMETRY as geom from world_merc)',
+            table='(select OGC_FID,GEOMETRY from world_merc)',
             )
         fs = ds.featureset()
         feature = fs.next()

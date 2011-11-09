@@ -162,7 +162,7 @@ feature_ptr postgis_featureset::next()
                 }
                 else if (oid == 1700) // numeric
                 {
-                    std::string str = mapnik::numeric2string(buf);
+                    std::string str = mapnik::sql_utils::numeric2string(buf);
                     try 
                     {
                         double val = boost::lexical_cast<double>(str);
