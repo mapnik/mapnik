@@ -6,6 +6,7 @@
   (setq c-basic-offset 4)
   (indent-region (point-min) (point-max) nil)
   (untabify (point-min) (point-max))
+  (delete-trailing-whitespace)
   (save-buffer)
 )
 
