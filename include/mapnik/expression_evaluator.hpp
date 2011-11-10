@@ -25,7 +25,6 @@
 
 // boost
 #include <boost/regex.hpp>
-//#include <boost/regex/config.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #endif
