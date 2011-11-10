@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: raster_datasource.hh 44 2005-04-22 18:53:54Z pavlenko $
 
 #ifndef RASTER_DATASOURCE_HPP
 #define RASTER_DATASOURCE_HPP
@@ -31,28 +30,30 @@
 
 class raster_datasource : public mapnik::datasource
 {
-    private:
-       mapnik::layer_descriptor     desc_;
-       std::string                  filename_;
-       std::string                  format_;
-       mapnik::box2d<double>        extent_;
-       bool                         extent_initialized_;
-       mutable unsigned             width_;
-       mutable unsigned             height_;
-    public:
-       raster_datasource(const mapnik::parameters& params, bool bind=true);
-       virtual ~raster_datasource();
-       int type() const;
-       static std::string name();
-       mapnik::featureset_ptr features(const mapnik::query& q) const;
-       mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
-       mapnik::box2d<double> envelope() const;
-       mapnik::layer_descriptor get_descriptor() const;
-       void bind() const;
-    private:
-       //no copying
-       raster_datasource(const raster_datasource&);
-       raster_datasource& operator=(const raster_datasource&);
+public:
+    raster_datasource(const mapnik::parameters& params, bool bind=true);
+    virtual ~raster_datasource();
+    int type() const;
+    static std::string name();
+    mapnik::featureset_ptr features(const mapnik::query& q) const;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+    mapnik::box2d<double> envelope() const;
+    mapnik::layer_descriptor get_descriptor() const;
+    void bind() const;
+private:
+    mapnik::layer_descriptor desc_;
+    std::string filename_;
+    std::string format_;
+    mapnik::box2d<double> extent_;
+    bool extent_initialized_;
+    bool multi_tiles_;
+    unsigned tile_size_;
+    unsigned tile_stride_;
+    mutable unsigned width_;
+    mutable unsigned height_;
+    //no copying
+    raster_datasource(const raster_datasource&);
+    raster_datasource& operator=(const raster_datasource&);
 };
 
-#endif //RASTER_DATASOURCE_HPP
+#endif // RASTER_DATASOURCE_HPP

@@ -410,6 +410,13 @@ def Raster(**keywords):
 
     Optional keyword arguments:
       base -- path prefix (default None)
+      multi -- whether the image is in tiles on disk (default False)
+
+    Multi-tiled keyword arguments:
+      x_width -- virtual image number of tiles in X direction (required)
+      y_width -- virtual image number of tiles in Y direction (required)
+      tile_size -- if an image is in tiles, how large are the tiles (default 256)
+      tile_stride -- if an image is in tiles, what's the increment between rows/cols (default 1)
 
     >>> from mapnik import Raster, Layer
     >>> raster = Raster(base='/home/mapnik/data',file='elevation.tif',lox=-122.8,loy=48.5,hix=-122.7,hiy=48.6) 
@@ -478,10 +485,11 @@ def Ogr(**keywords):
 
     Required keyword arguments:
       file -- path to OGR supported dataset
-      layer -- name of layer to use within datasource (optional if layer_by_index is used)
+      layer -- name of layer to use within datasource (optional if layer_by_index or layer_by_sql is used)
 
     Optional keyword arguments:
-      layer_by_index -- choose layer by index number instead of by layer name.
+      layer_by_index -- choose layer by index number instead of by layer name or sql.
+      layer_by_sql -- choose layer by sql query number instead of by layer name or index.
       base -- path prefix (default None)
       encoding -- file encoding (default 'utf-8')
       multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)

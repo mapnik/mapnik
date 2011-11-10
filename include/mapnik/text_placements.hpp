@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Hermann Kraus
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,18 +19,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef TEXT_PLACEMENTS_HPP
-#define TEXT_PLACEMENTS_HPP
 
-//mapnik
+#ifndef MAPNIK_TEXT_PLACEMENTS_HPP
+#define MAPNIK_TEXT_PLACEMENTS_HPP
+
+// mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/enumeration.hpp>
 
-//stl
+// stl
 #include <vector>
 #include <string>
 
-//boost
+// boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
@@ -111,7 +112,7 @@ public:
 
     /* NOTE: Values are public and non-virtual to avoid any performance problems. */
     position displacement;
-    unsigned text_size;
+    float text_size;
     horizontal_alignment_e halign;
     justify_alignment_e jalign;
     vertical_alignment_e valign;
@@ -126,9 +127,9 @@ public:
         text_size_(10), halign_(H_MIDDLE), jalign_(J_MIDDLE), valign_(V_MIDDLE) {}
     virtual text_placement_info_ptr get_placement_info() const =0;
 
-    virtual void set_default_text_size(unsigned size) { text_size_ = size; }
-    unsigned get_default_text_size() const { return text_size_; }
-
+    virtual void set_default_text_size(float size) { text_size_ = size; }
+    float get_default_text_size() const { return text_size_; }
+    
     virtual void set_default_displacement(position const& displacement) { displacement_ = displacement;}
     position const& get_default_displacement() { return displacement_; }
 
@@ -143,7 +144,7 @@ public:
 
     virtual ~text_placements() {}
 protected:
-    unsigned text_size_;
+    float text_size_;
     position displacement_;
     horizontal_alignment_e halign_;
     justify_alignment_e jalign_;
@@ -176,7 +177,6 @@ private:
 };
 
 
-
 } //namespace
 
-#endif // TEXT_PLACEMENTS_HPP
+#endif // MAPNIK_TEXT_PLACEMENTS_HPP

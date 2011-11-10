@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software, you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef OCCI_TYPES_HPP
 #define OCCI_TYPES_HPP
@@ -40,7 +39,6 @@
 #else
   #error Only ORACLE 10g >= 10.2.0.X is supported !
 #endif
-
 
 // geometry types definitions
 enum
@@ -79,14 +77,13 @@ enum
     SDO_INTERPRETATION_CIRCULAR         = 2
 };
 
-
-class occi_environment : public mapnik::singleton<occi_environment,mapnik::CreateStatic>
+class occi_environment : public mapnik::singleton<occi_environment, mapnik::CreateStatic>
 {
     friend class mapnik::CreateStatic<occi_environment>;
 
 public:
 
-    static oracle::occi::Environment* get_environment ()
+    static oracle::occi::Environment* get_environment()
     {
         if (env_ == 0)
         {
@@ -94,11 +91,11 @@ public:
             std::clog << "OCCI Plugin: occi_environment constructor" << std::endl;
 #endif
 
-            int mode = oracle::occi::Environment::OBJECT
-                     | oracle::occi::Environment::THREADED_MUTEXED;
+            const int mode = oracle::occi::Environment::OBJECT
+                           | oracle::occi::Environment::THREADED_MUTEXED;
 
-            env_ = oracle::occi::Environment::createEnvironment ((oracle::occi::Environment::Mode) mode);
-            RegisterClasses (env_);
+            env_ = oracle::occi::Environment::createEnvironment((oracle::occi::Environment::Mode) mode);
+            RegisterClasses(env_);
         }
 
         return env_;
@@ -118,7 +115,7 @@ private:
             std::clog << "OCCI Plugin: occi_environment destructor" << std::endl;
 #endif
 
-            oracle::occi::Environment::terminateEnvironment (env_);
+            oracle::occi::Environment::terminateEnvironment(env_);
             env_ = 0;
         }
     }
@@ -126,28 +123,27 @@ private:
     static oracle::occi::Environment* env_;
 };
 
-
 class occi_connection_ptr
 {
 public:
-    explicit occi_connection_ptr ()
-        : env_ (occi_environment::get_environment()),
-          pool_ (0),
-          conn_ (0),
-          stmt_ (0),
-          rs_ (0),
-          owns_connection_ (false)
+    explicit occi_connection_ptr()
+        : env_(occi_environment::get_environment()),
+          pool_(0),
+          conn_(0),
+          stmt_(0),
+          rs_(0),
+          owns_connection_(false)
     {
     }
 
-    ~occi_connection_ptr ()
+    ~occi_connection_ptr()
     {
-        close_query (true);
+        close_query(true);
     }
 
     void set_pool(oracle::occi::StatelessConnectionPool* pool)
     {
-        close_query (true);
+        close_query(true);
     
         pool_ = pool;
         conn_ = pool_->getConnection();
@@ -156,26 +152,26 @@ public:
 
     void set_connection(oracle::occi::Connection* conn, bool owns_connection)
     {
-        close_query (true);
+        close_query(true);
     
         pool_ = 0;
         conn_ = conn;
         owns_connection_ = owns_connection;
     }
 
-    oracle::occi::ResultSet* execute_query (const std::string& s, const unsigned prefetch = 0)
+    oracle::occi::ResultSet* execute_query(const std::string& s, const unsigned prefetch = 0)
     {
-        close_query (false);
+        close_query(false);
 
-        stmt_ = conn_->createStatement (s);
+        stmt_ = conn_->createStatement(s);
 
         if (prefetch > 0)
         {
-            stmt_->setPrefetchMemorySize (0);
-            stmt_->setPrefetchRowCount (prefetch);
+            stmt_->setPrefetchMemorySize(0);
+            stmt_->setPrefetchRowCount(prefetch);
         }
 
-        rs_ = stmt_->executeQuery ();
+        rs_ = stmt_->executeQuery();
         
         return rs_;
     }
@@ -186,8 +182,7 @@ public:
     }
 
 private:
-
-    void close_query (const bool release_connection)
+    void close_query(const bool release_connection)
     {
         if (conn_)
         {
@@ -195,11 +190,11 @@ private:
             {
                 if (rs_)
                 { 
-                    stmt_->closeResultSet (rs_);
+                    stmt_->closeResultSet(rs_);
                     rs_ = 0;
                 }
 
-                conn_->terminateStatement (stmt_);
+                conn_->terminateStatement(stmt_);
                 stmt_ = 0;
             }
             
@@ -207,7 +202,7 @@ private:
             {
                 if (pool_)
                 {
-                    pool_->releaseConnection (conn_);
+                    pool_->releaseConnection(conn_);
                 }
                 else
                 {
@@ -230,7 +225,6 @@ private:
     bool owns_connection_;
 };
 
-
 class occi_enums
 {
 public:
@@ -239,6 +233,5 @@ public:
     static std::string resolve_etype(int etype);
     static std::string resolve_datatype(int type_id);
 };
-
 
 #endif // OCCI_TYPES_HPP

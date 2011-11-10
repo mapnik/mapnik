@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -129,13 +129,13 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         {
             text_renderer<T> ren(pixmap_, faces, *strk);
 
-            ren.set_pixel_size(sym.get_text_size() * scale_factor_);
+            ren.set_character_size(sym.get_text_size() * scale_factor_);
             ren.set_fill(sym.get_fill());
             ren.set_halo_fill(sym.get_halo_fill());
             ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
             ren.set_opacity(sym.get_text_opacity());
 
-            placement_finder<label_collision_detector4> finder(detector_);
+            placement_finder<label_collision_detector4> finder(*detector_);
 
             string_info info(text);
 
@@ -210,13 +210,13 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                     label_ext.re_center(label_x,label_y);
                                 }
                                 
-                                if ( sym.get_allow_overlap() || detector_.has_placement(label_ext) )
+                                if ( sym.get_allow_overlap() || detector_->has_placement(label_ext) )
                                 {
                                     render_marker(px,py,**marker,tr,sym.get_opacity());
 
                                     box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
                                     ren.render(x,y);
-                                    detector_.insert(label_ext);
+                                    detector_->insert(label_ext);
                                     finder.update_detector(text_placement);
                                     if (writer.first) {
                                         writer.first->add_box(label_ext, feature, t_, writer.second);

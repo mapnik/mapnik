@@ -1,4 +1,4 @@
-<Map srs="+init=epsg:4326" minimum-version="0.7.2">
+<Map srs="+init=epsg:4326" background-color="white" minimum-version="0.7.2">
 
     <Style name="1">
         <Rule>

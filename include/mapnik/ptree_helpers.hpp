@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,17 +20,20 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CONFIG_HELPERS_INCLUDED
-#define MAPNIK_CONFIG_HELPERS_INCLUDED
+#ifndef MAPNIK_PTREE_HELPERS_HPP
+#define MAPNIK_PTREE_HELPERS_HPP
 
+// mapnik
 #include <mapnik/enumeration.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/color_factory.hpp>
 
+// boost
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 
+// stl
 #include <iostream>
 #include <sstream>
 
@@ -422,6 +425,7 @@ inline boost::optional<color> get_optional(const boost::property_tree::ptree & n
         
     return result;
 }
+
 } // end of namespace mapnik
 
-#endif // MAPNIK_CONFIG_HELPERS_INCLUDED
+#endif // MAPNIK_PTREE_HELPERS_HPP

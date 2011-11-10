@@ -48,13 +48,7 @@ if env['JPEG']:
     libraries.append('jpeg')
 
 if env['BOOST_PYTHON_LIB']:
-    if os.path.sep in env['BOOST_PYTHON_LIB']:
-        pylib_dir = os.path.dirname(env['BOOST_PYTHON_LIB'])
-        env.Prepend(LIBPATH = pylib_dir)
-        pylib_name = os.path.splitext(os.path.basename(env['BOOST_PYTHON_LIB']))[0].replace('lib','',1)
-        libraries.append(pylib_name)
-    else:
-        libraries.append(env['BOOST_PYTHON_LIB'].replace('lib','',1))
+    libraries.append(env['BOOST_PYTHON_LIB'])
 else:
     if is_py3():
         libraries.append('boost_python3%s' % env['BOOST_APPEND'])

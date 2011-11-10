@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,14 +23,20 @@
 #ifndef OSM_FS_HH
 #define OSM_FS_HH
 
+// stl
+#include <set>
+
+// boost
 #include <boost/scoped_ptr.hpp>
+
+// mapnik
 #include <mapnik/geom_util.hpp>
-#include "osm.h"
 #include <mapnik/feature.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/datasource.hpp>
-#include <set>
+
+#include "osm.h"
 
 using mapnik::Featureset;
 using mapnik::box2d;
@@ -40,27 +46,26 @@ using mapnik::transcoder;
 template <typename filterT>
 class osm_featureset : public Featureset
 {
-      filterT filter_;
-      box2d<double> query_ext_;
-      boost::scoped_ptr<transcoder> tr_;
-      std::vector<int> attr_ids_;
-      mutable box2d<double> feature_ext_;
-      mutable int total_geom_size;
-      mutable int feature_id_;
-      osm_dataset *dataset_;
-      std::set<std::string> attribute_names_;
-
-   public:
-      osm_featureset(const filterT& filter, 
-                       osm_dataset *dataset, 
-                       const std::set<std::string>& attribute_names,
-                       std::string const& encoding);
-      virtual ~osm_featureset();
-      feature_ptr next();
-   private:
-      osm_featureset(const osm_featureset&);
-      const osm_featureset& operator=(const osm_featureset&);
-      
+public:
+    osm_featureset(const filterT& filter,
+                   osm_dataset* dataset,
+                   const std::set<std::string>& attribute_names,
+                   std::string const& encoding);
+    virtual ~osm_featureset();
+    feature_ptr next();
+private:
+    filterT filter_;
+    box2d<double> query_ext_;
+    boost::scoped_ptr<transcoder> tr_;
+    std::vector<int> attr_ids_;
+    mutable box2d<double> feature_ext_;
+    mutable int total_geom_size;
+    mutable int feature_id_;
+    osm_dataset *dataset_;
+    std::set<std::string> attribute_names_;
+    // no copying
+    osm_featureset(const osm_featureset&);
+    const osm_featureset& operator=(const osm_featureset&);
 };
 
-#endif //OSM_FS_HH
+#endif // OSM_FS_HH

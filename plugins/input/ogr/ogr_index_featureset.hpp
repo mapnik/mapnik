@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef OGR_INDEX_FEATURESET_HPP
 #define OGR_INDEX_FEATURESET_HPP
@@ -32,29 +31,29 @@
 template <typename filterT>
 class ogr_index_featureset : public mapnik::Featureset
 {
-      OGRDataSource & dataset_;
-      OGRLayer & layer_;
-      OGRFeatureDefn * layerdef_;
-      filterT filter_;
-      std::vector<int> ids_;
-      std::vector<int>::iterator itr_;
-      boost::scoped_ptr<mapnik::transcoder> tr_;
-      const char* fidcolumn_;
-      bool multiple_geometries_;
+public:
+    ogr_index_featureset(OGRDataSource& dataset,
+                         OGRLayer& layer,
+                         const filterT& filter,
+                         const std::string& index_file,
+                         const std::string& encoding,
+                         const bool multiple_geometries);
+    virtual ~ogr_index_featureset();
+    mapnik::feature_ptr next();
 
-   public:
-      ogr_index_featureset(OGRDataSource & dataset,
-                           OGRLayer & layer,
-                           const filterT& filter,
-                           const std::string& index_file,
-                           const std::string& encoding,
-                           const bool multiple_geometries);
-      virtual ~ogr_index_featureset();
-      mapnik::feature_ptr next();
-   private:
-      //no copying
-      ogr_index_featureset(const ogr_index_featureset&);
-      ogr_index_featureset& operator=(const ogr_index_featureset&);
+private:
+    ogr_index_featureset(const ogr_index_featureset&);
+    ogr_index_featureset& operator=(const ogr_index_featureset&);
+
+    OGRDataSource& dataset_;
+    OGRLayer& layer_;
+    OGRFeatureDefn* layerdef_;
+    filterT filter_;
+    std::vector<int> ids_;
+    std::vector<int>::iterator itr_;
+    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const char* fidcolumn_;
+    bool multiple_geometries_;
 };
 
-#endif // OGR_FEATURESET_HPP
+#endif // OGR_INDEX_FEATURESET_HPP

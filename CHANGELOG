@@ -3,7 +3,7 @@
 ----------------
 Mapnik Changelog
 ----------------
- 
+
 A simple log of core changes affecting Mapnik usage.
 
 Developers: Please commit along with changes.
@@ -18,6 +18,7 @@ Mapnik 2.1.0
 
 - Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
 
+- Added <layer_by_sql> parameter in OGR plugin to select a layer by SQL query (besides name or index): see http://www.gdal.org/ogr/ogr_sql.html for specifications (kunitoki) (#472)
 
 
 Mapnik 2.0.0
@@ -45,7 +46,7 @@ Mapnik 2.0.0
 - Added map.base parameter that can be set to control where files with relative paths should be interpreted
   from when a map is loaded from a string or saved to a string. It defaults to an empty string which means
   that the base path will be the current working directory of the mapnik process. When a stylesheet is read
-  from a file that files directory is used. And a custom value can still be passed as an argument to 
+  from a file that files directory is used. And a custom value can still be passed as an argument to
   load_map_from_string().
 
 - Added python function 'render_grid' to allow conversion of grid buffer to python object containing list of grid
@@ -112,7 +113,7 @@ Mapnik 2.0.0
 
 Mapnik 0.7.2 Release
 --------------------
- 
+
 - Added forward compatibility for Mapnik 2.0 XML syntax (https://trac.mapnik.org/wiki/Mapnik2/Changes)
 
 - Build fixes to ensure boost_threads are not used unless THREADING=multi build option is used
@@ -167,9 +168,9 @@ Mapnik 0.7.0 Release
 
     * Use the gdaladdo utility to add overviews to existing GDAL datasets
 
-- PostGIS: Added an optional 'geometry_table' parameter. The 'geometry_table' used by Mapnik to look up 
+- PostGIS: Added an optional 'geometry_table' parameter. The 'geometry_table' used by Mapnik to look up
   metadata in the geometry_columns and calculate extents (when the 'geometry_field' and 'srid' parameters
-  are not supplied). If 'geometry_table' is not specified Mapnik will attempt to determine the name of the 
+  are not supplied). If 'geometry_table' is not specified Mapnik will attempt to determine the name of the
   table to query based on parsing the 'table' parameter, which may fail for complex queries with more than
   one 'from' keyword. Using this parameter should allow for existing metadata and table indexes to be used
   while opening the door to much more complicated subqueries being passed to the 'table' parameter without
@@ -191,7 +192,7 @@ Mapnik 0.7.0 Release
   query to be used by indexes. (#415)
 
     * Pass the bbox token inside a subquery like: !bbox!
-    
+
     * Valid Usages include:
 
       <Parameter name="table">
@@ -210,7 +211,7 @@ Mapnik 0.7.0 Release
 
 - PostGIS Plugin: Added support for quoted table names (r1454) (#393)
 
-- PostGIS: Add a 'persist_connection' option (default true), that when false will release 
+- PostGIS: Add a 'persist_connection' option (default true), that when false will release
   the idle psql connection after datasource goes out of scope (r1337) (#433,#434)
 
 - PostGIS: Added support for BigInt (int8) postgres type (384)
@@ -234,14 +235,14 @@ Mapnik 0.7.0 Release
 - PolygonSymbolizer: Added 'gamma' attribute to allow for dilation of polygon edges - a solution
   to gap artifacts or "ghost lines" between adjacent polygons and allows for slight sharpening of
   the edges of non overlapping polygons. Accepts any values but 0-1 is the recommended range.
-   
-- TextSymbolizer: Large set of new attributes: 'text_transform', 'line_spacing', 'character_spacing', 
+
+- TextSymbolizer: Large set of new attributes: 'text_transform', 'line_spacing', 'character_spacing',
   'wrap_character', 'wrap_before', 'horizontal_alignment', 'justify_alignment', and 'opacity'.
 
     * More details at changesets: r1254 and r1341
 
 - SheildSymbolizer: Added special new attributes: 'unlock_image', 'VERTEX' placement, 'no_text' and many
-  attributes previously only supported in the TextSymbolizer: 'allow_overlap', 'vertical_alignment', 
+  attributes previously only supported in the TextSymbolizer: 'allow_overlap', 'vertical_alignment',
   'horizontal_alignment', 'justify_alignment', 'wrap_width', 'wrap_character', 'wrap_before', 'text_transform',
   'line_spacing', 'character_spacing', and 'opacity'.
 
@@ -281,7 +282,7 @@ Mapnik 0.7.0 Release
 
 - Python: Ensured mapnik::config_errors now throw RuntimeError exception instead of UserWarning exception (#442)
 
-- Filters: Added support for '!=' as an alias to '<>' for not-equals filters (avoids &lt;&gt;) (r1326) (#427)  
+- Filters: Added support for '!=' as an alias to '<>' for not-equals filters (avoids &lt;&gt;) (r1326) (#427)
 
 - SCons: Improved boost auto-detection (r1255,r1279)
 
@@ -303,7 +304,7 @@ Mapnik 0.6.1 Release
 
 (Packaged from r1247)
 
-- Plugins: expose list of registered plugins as a 'plugin_names()' method of DatasourceCache (r1180) 
+- Plugins: expose list of registered plugins as a 'plugin_names()' method of DatasourceCache (r1180)
 
 - XML: Fixed serialization and parsing bugs related to handling of integers and Enums (#328,#353)
 

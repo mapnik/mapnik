@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef MAPNIK_GLOBAL_HPP
+#define MAPNIK_GLOBAL_HPP
 
 // boost
 #include <boost/cstdint.hpp>
 #include <boost/detail/endian.hpp>
+
 // stl
 #include <cstring>
 
@@ -183,4 +182,4 @@ inline double round (double val)
 
 
 
-#endif //GLOBAL_HPP
+#endif // MAPNIK_GLOBAL_HPP

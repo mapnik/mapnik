@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,9 @@
  *
  *****************************************************************************/
 
-//$Id: feature.hpp 40 2005-04-13 20:20:46Z pavlenko $
+#ifndef MAPNIK_FEATURE_HPP
+#define MAPNIK_FEATURE_HPP
 
-#ifndef FEATURE_HPP
-#define FEATURE_HPP
 // mapnik
 #include <mapnik/value.hpp>
 #include <mapnik/geometry.hpp>
@@ -36,9 +35,9 @@
 #else
 #include <boost/property_map.hpp>
 #endif
-
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+
 // stl
 #include <map>
 
@@ -66,6 +65,7 @@ private:
     std::map<std::string,value> props_;
 public:
     typedef std::map<std::string,value>::iterator iterator;
+    typedef std::map<std::string,value>::const_iterator const_iterator;
     explicit feature(int id)
         : properties(props_),
           id_(id),
@@ -146,7 +146,7 @@ public:
     {
         return props_;
     }
-    
+
     iterator begin()
     {
         return props_.begin();
@@ -156,12 +156,27 @@ public:
     {
         return props_.end();
     }
+
+    const_iterator begin() const
+    {
+        return props_.begin();
+    }
        
+    const_iterator end() const
+    {
+        return props_.end();
+    }
+    
+    const_iterator find(std::string const& key) const
+    {
+        return props_.find(key);
+    }
+    
     std::string to_string() const
     {
         std::stringstream ss;
-        ss << "feature (" << std::endl;
-        ss << "  id:" << id_ << std::endl;
+        ss << "feature " 
+           << id_ << " (" << std::endl;
         for (std::map<std::string,value>::const_iterator itr=props_.begin();
              itr != props_.end();++itr)
         {
@@ -181,4 +196,4 @@ inline std::ostream& operator<< (std::ostream & out,Feature const& f)
 }
 }
 
-#endif //FEATURE_HPP
+#endif // MAPNIK_FEATURE_HPP

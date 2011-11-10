@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -73,7 +73,7 @@
 
 // boost
 #include <boost/utility.hpp>
-
+#include <boost/make_shared.hpp>
 
 // stl
 #ifdef MAPNIK_DEBUG
@@ -121,8 +121,31 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size())),
+      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
       ras_ptr(new rasterizer)
+{
+   setup(m);
+}
+
+template <typename T>
+agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_collision_detector4> detector,
+                              double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<agg_renderer>(m, scale_factor),
+      pixmap_(pixmap),
+      width_(pixmap_.width()),
+      height_(pixmap_.height()),
+      scale_factor_(scale_factor),
+      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
+      font_engine_(),
+      font_manager_(font_engine_),
+      detector_(detector),
+      ras_ptr(new rasterizer)
+{
+   setup(m);
+}
+
+template <typename T>
+void agg_renderer<T>::setup(Map const &m) 
 {
     boost::optional<color> const& bg = m.background();
     if (bg) pixmap_.set_background(*bg);
@@ -189,7 +212,7 @@ void agg_renderer<T>::start_layer_processing(layer const& lay)
 #endif
     if (lay.clear_label_cache())
     {
-        detector_.clear();
+        detector_->clear();
     }
 }
 

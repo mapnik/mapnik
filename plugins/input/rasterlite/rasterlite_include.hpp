@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,14 +19,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef RASTERLITE_INCLUDE_HPP
 #define RASTERLITE_INCLUDE_HPP
 
 extern "C" {
-    #include <sqlite3.h>
-    #include <rasterlite.h>
+  #include <sqlite3.h>
+  #include <rasterlite.h>
 }
 
-#endif // RASTERLITE_FEATURESET_HPP
+#endif // RASTERLITE_INCLUDE_HPP

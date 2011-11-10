@@ -2,8 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
- * Copyright (C) 2006 10East Corp.
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,7 +37,7 @@ namespace mapnik
 shield_symbolizer::shield_symbolizer(
     expression_ptr name,
     std::string const& face_name,
-    unsigned size,
+    float size,
     color const& fill,
     path_expression_ptr file)
     : text_symbolizer(name, face_name, size, fill),
@@ -51,7 +50,7 @@ shield_symbolizer::shield_symbolizer(
 
 shield_symbolizer::shield_symbolizer(
     expression_ptr name,
-    unsigned size,
+    float size,
     color const& fill,
     path_expression_ptr file)
     : text_symbolizer(name, size, fill),

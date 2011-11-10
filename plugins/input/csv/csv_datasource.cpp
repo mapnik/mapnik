@@ -3,7 +3,6 @@
 // boost
 #include <boost/make_shared.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -18,13 +17,9 @@
 
 // stl
 #include <sstream>
-#include <fstream>      // fstream
+#include <fstream>
+#include <iostream>
 #include <string>
-#include <iterator>     // ostream_operator
-
-// std lib
-#include <stdio.h>
-#include <stdlib.h>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -53,7 +48,8 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
     /* TODO:
       general:
         - refactor parser into generic class
-        - tests
+        - tests of grid_renderer output
+        - ensure that the attribute desc_ matches the first feature added
       alternate large file pipeline:
         - stat file, detect > 15 MB
         - build up csv line-by-line iterator
@@ -125,7 +121,7 @@ void csv_datasource::parse_csv(T& stream,
                                std::string const& quote) const
 {
     stream.seekg (0, std::ios::end);
-    int file_length_ = stream.tellg();
+    file_length_ = stream.tellg();
     
     if (filesize_max_ > 0)
     {
@@ -149,7 +145,7 @@ void csv_datasource::parse_csv(T& stream,
     char newline = '\n';
     int newline_count = 0;
     int carriage_count = 0;
-    for(std::size_t idx = 0; idx < file_length_; idx++)
+    for(unsigned idx = 0; idx < file_length_; idx++)
     {
         char c = static_cast<char>(stream.get());
         if (c == '\n')
@@ -189,17 +185,39 @@ void csv_datasource::parse_csv(T& stream,
     {
         // default to ','
         sep = ",";
+        int num_commas = std::count(csv_line.begin(), csv_line.end(), ',');
         // detect tabs
         int num_tabs = std::count(csv_line.begin(), csv_line.end(), '\t');
         if (num_tabs > 0)
         {
-            int num_commas = std::count(csv_line.begin(), csv_line.end(), ',');
             if (num_tabs > num_commas)
             {
                 sep = "\t";
 #ifdef MAPNIK_DEBUG
                 std::clog << "CSV Plugin: auto detected tab separator\n";
 #endif
+            }
+        }
+        else // pipes
+        {
+            int num_pipes = std::count(csv_line.begin(), csv_line.end(), '|');
+            if (num_pipes > num_commas)
+            {
+                sep = "|";
+#ifdef MAPNIK_DEBUG
+                std::clog << "CSV Plugin: auto detected '|' separator\n";
+#endif
+            }
+            else // semicolons
+            {
+                int num_semicolons = std::count(csv_line.begin(), csv_line.end(), ';');
+                if (num_semicolons > num_commas)
+                {
+                    sep = ";";
+    #ifdef MAPNIK_DEBUG
+                    std::clog << "CSV Plugin: auto detected ';' separator\n";
+    #endif
+                }
             }
         }
     }
@@ -251,7 +269,8 @@ void csv_datasource::parse_csv(T& stream,
         {
             std::string val = boost::trim_copy(*beg);
             std::string lower_val = boost::algorithm::to_lower_copy(val);
-            if (lower_val == "wkt")
+            if (lower_val == "wkt"
+                || (lower_val.find("geom") != std::string::npos))
             {
                 wkt_idx = idx;
                 has_wkt_field = true;
@@ -300,17 +319,28 @@ void csv_datasource::parse_csv(T& stream,
                         val = boost::trim_copy(*beg);
                         if (val.empty())
                         {
-                            std::ostringstream s;
-                            s << "CSV Plugin: expected a column header at line "
-                              << line_number << ", column " << idx
-                              << " - ensure this row contains valid header fields: '"
-                              << csv_line << "'\n";
-                            throw mapnik::datasource_exception(s.str());
+                            if (strict_)
+                            {
+                                std::ostringstream s;
+                                s << "CSV Plugin: expected a column header at line "
+                                  << line_number << ", column " << idx
+                                  << " - ensure this row contains valid header fields: '"
+                                  << csv_line << "'\n";
+                                throw mapnik::datasource_exception(s.str());
+                            }
+                            else
+                            {
+                                // create a placeholder for the empty header
+                                std::ostringstream s;
+                                s << "_" << idx;
+                                headers_.push_back(s.str());
+                            }
                         }
                         else
                         {    
                             std::string lower_val = boost::algorithm::to_lower_copy(val);
-                            if (lower_val == "wkt")
+                            if (lower_val == "wkt"
+                                || (lower_val.find("geom") != std::string::npos))
                             {
                                 wkt_idx = idx;
                                 has_wkt_field = true;
@@ -353,9 +383,9 @@ void csv_datasource::parse_csv(T& stream,
         throw mapnik::datasource_exception(s.str());
     }
 
-    int feature_count(0);
+    int feature_count(1);
     bool extent_initialized = false;
-    int num_headers = headers_.size();
+    unsigned num_headers = headers_.size();
     mapnik::transcoder tr(desc_.get_encoding());
 
     while (std::getline(stream,csv_line,newline))
@@ -367,14 +397,21 @@ void csv_datasource::parse_csv(T& stream,
 #endif
             break;
         }
+        
+        unsigned line_length = csv_line.length();
 
         // skip blank lines
-        if (csv_line.empty()){
-            ++line_number;
-            continue;
+        if (line_length < 5)
+        {
+            std::string trimmed = csv_line;
+            boost::trim_if(trimmed,boost::algorithm::is_any_of("\",'\r\n"));
+            if (trimmed.empty()){
+                ++line_number;
+                continue;
 #ifdef MAPNIK_DEBUG
-            std::clog << "CSV Plugin: empty row encountered at line: " << line_number << "\n";
+                std::clog << "CSV Plugin: empty row encountered at line: " << line_number << "\n";
 #endif
+            }
         }
 
         try
@@ -385,7 +422,7 @@ void csv_datasource::parse_csv(T& stream,
             // early return for strict mode
             if (strict_)
             {
-                int num_fields = std::distance(beg,tok.end());
+                unsigned num_fields = std::distance(beg,tok.end());
                 if (num_fields != num_headers)
                 {
                     std::ostringstream s;
@@ -400,28 +437,32 @@ void csv_datasource::parse_csv(T& stream,
             bool parsed_x = false;
             bool parsed_y = false;
             bool parsed_wkt = false;
-            bool skip = false;
             bool null_geom = false;
             std::vector<std::string> collected;
             
-            int i = -1;
-            for (;beg != tok.end(); ++beg)
+            for (unsigned i = 0; i < num_headers; ++i)
             {
-                ++i;
-                std::string value = boost::trim_copy(*beg);
-                
-                // avoid range error if trailing separator
-                if (i >= num_headers)
-                {
-    #ifdef MAPNIK_DEBUG
-                    std::clog << "CSV Plugin: messed up line encountered where # values > # column headers at: " << line_number << "\n";
-    #endif
-                    skip = true;
-                    break;
-                }
-                
                 std::string fld_name(headers_.at(i));
                 collected.push_back(fld_name);
+                std::string value;
+                if (beg == tok.end())
+                {
+                    UnicodeString ustr = tr.transcode(value.c_str());
+                    boost::put(*feature,fld_name,ustr);
+                    //boost::put(*feature,fld_name,mapnik::value_null());
+                    null_geom = true;
+                    if (feature_count == 1)
+                    {
+                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                    }
+                    continue;
+                }
+                else
+                {
+                    value = boost::trim_copy(*beg);
+                    ++beg;
+                }
+
                 int value_length = value.length();
                 
                 // parse wkt
@@ -450,7 +491,7 @@ void csv_datasource::parse_csv(T& stream,
                                 ),
                                 ascii::space);
                                 
-                              if (r /*&& (str_beg != str_end)*/)
+                              if (r && (str_beg == str_end))
                               {
                                   mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::Point);
                                   pt->move_to(x,y);
@@ -572,22 +613,26 @@ void csv_datasource::parse_csv(T& stream,
                 }
     
                 // add all values as attributes
+                // here we detect numbers and treat everything else as pure strings
+                // this is intentional since boolean and null types are not common in csv editors
                 if (value.empty())
-                {
-                    boost::put(*feature,fld_name,mapnik::value_null());
-                }
-                // only true strings are this long
-                else if (value_length > 20 
-                         // TODO - clean up this messiness which is here temporarily
-                         // to protect against the improperly working spirit parsing below
-                         || value.find(",") != std::string::npos
-                         || value.find(":") != std::string::npos
-                         || (std::count(value.begin(), value.end(), '-') > 1))
                 {
                     UnicodeString ustr = tr.transcode(value.c_str());
                     boost::put(*feature,fld_name,ustr);
-                    if (!feature_count)
+                    if (feature_count == 1)
+                    {
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                    }
+                }
+                // only true strings are this long
+                else if (value_length > 20)
+                {
+                    UnicodeString ustr = tr.transcode(value.c_str());
+                    boost::put(*feature,fld_name,ustr);
+                    if (feature_count == 1)
+                    {
+                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                    }
                 
                 }
                 else if ((value[0] >= '0' && value[0] <= '9') || value[0] == '-')
@@ -596,20 +641,24 @@ void csv_datasource::parse_csv(T& stream,
                     std::string::const_iterator str_beg = value.begin();
                     std::string::const_iterator str_end = value.end();
                     bool r = qi::phrase_parse(str_beg,str_end,qi::double_,ascii::space,float_val);
-                    if (r)
+                    if (r && (str_beg == str_end))
                     {
                         if (value.find(".") != std::string::npos)
                         {
                             boost::put(*feature,fld_name,float_val);
-                            if (!feature_count)
+                            if (feature_count == 1)
+                            {
                                 desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Double));
+                            }
                         }
                         else
                         {
                             int val = static_cast<int>(float_val);
                             boost::put(*feature,fld_name,val);
-                            if (!feature_count)
+                            if (feature_count == 1)
+                            {
                                 desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Integer));
+                            }
                         }
                     }
                     else
@@ -617,55 +666,25 @@ void csv_datasource::parse_csv(T& stream,
                         // fallback to normal string
                         UnicodeString ustr = tr.transcode(value.c_str());
                         boost::put(*feature,fld_name,ustr);
-                        if (!feature_count)
+                        if (feature_count == 1)
+                        {
                             desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                        }
                     }
                 }
                 else
                 {
-                    std::string value_lower = boost::algorithm::to_lower_copy(value);
-                    if (value_lower == "true")
+                    // fallback to normal string
+                    UnicodeString ustr = tr.transcode(value.c_str());
+                    boost::put(*feature,fld_name,ustr);
+                    if (feature_count == 1)
                     {
-                        boost::put(*feature,fld_name,true);
-                        if (!feature_count)
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Boolean));
-                    }
-                    else if(value_lower == "false")
-                    {
-                        boost::put(*feature,fld_name,false);
-                        if (!feature_count)
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Boolean));
-                    }
-                    else
-                    {
-                        // fallback to normal string
-                        UnicodeString ustr = tr.transcode(value.c_str());
-                        boost::put(*feature,fld_name,ustr);
-                        if (!feature_count)
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
                 }
             }
     
-            if (skip)
-            {
-                ++line_number;
-                std::ostringstream s;
-                s << "CSV Plugin: # values > # column headers"
-                  << "for line " << line_number << " - found " <<  headers_.size() 
-                  << " with values like: " << csv_line << "\n";
-                  //<< "for: " << boost::algorithm::join(collected, ",") << "\n";
-                if (strict_)
-                {
-                    throw mapnik::datasource_exception(s.str());
-                }
-                else
-                {
-                    if (!quiet_) std::clog << s.str() << "\n";
-                    continue;
-                }
-            }
-            else if (null_geom)
+            if (null_geom)
             {
                 ++line_number;
                 std::ostringstream s;
@@ -696,6 +715,7 @@ void csv_datasource::parse_csv(T& stream,
                         extent_.expand_to_include(feature->envelope());
                     }
                     features_.push_back(feature);
+                    ++feature_count;
                 }
                 else
                 {
@@ -767,6 +787,17 @@ void csv_datasource::parse_csv(T& stream,
             }
             ++line_number;
         }
+        catch (const mapnik::datasource_exception & ex )
+        {
+            if (strict_)
+            {
+                throw mapnik::datasource_exception(ex.what());
+            }
+            else
+            {
+                if (!quiet_) std::clog << ex.what() << "\n";
+            }
+        }
         catch (const std::exception & ex )
         {
             std::ostringstream s;
@@ -782,6 +813,10 @@ void csv_datasource::parse_csv(T& stream,
                 if (!quiet_) std::clog << s.str() << "\n";
             }
         }
+    }
+    if (!feature_count > 0)
+    {
+        if (!quiet_) std::clog << "CSV Plugin: could not parse any lines of data\n";
     }
 }
 

@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2006 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,10 +34,10 @@ class LayerTab : public QListView
       void paintEvent(QPaintEvent *e);
    signals:
       void update_mapwidget();
-      void layerSelected(int) const;                       
+      void layerSelected(int) const;
    public slots:
-      void layerInfo();   
-      void layerInfo2(QModelIndex const&);     
+      void layerInfo();
+      void layerInfo2(QModelIndex const&);
    protected slots:
       void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
       void selectionChanged(const QItemSelection & selected, const QItemSelection &);
@@ -51,4 +52,4 @@ protected:
       void contextMenuEvent(QContextMenuEvent * event );
 };
 
-#endif 
+#endif

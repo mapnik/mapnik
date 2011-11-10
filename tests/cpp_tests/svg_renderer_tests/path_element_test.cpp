@@ -26,9 +26,9 @@ using namespace mapnik;
 
 void prepare_map(Map& m)
 {      
-    const std::string mapnik_dir("../../..");
-    std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "/plugins/input/" << "\n";
-    datasource_cache::instance()->register_datasources(mapnik_dir + "/plugins/input/"); 
+    const std::string mapnik_dir("/usr/local/lib/mapnik2/");
+    std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "input/" << "\n";
+    datasource_cache::instance()->register_datasources(mapnik_dir + "input/"); 
 
     // create styles
 
@@ -132,7 +132,7 @@ void prepare_map(Map& m)
     {
         parameters p;
         p["type"]="shape";
-        p["file"]=mapnik_dir+"/demo/data/boundaries";
+        p["file"]="../../../demo/data/boundaries";
                 
         layer lyr("Provinces"); 
         lyr.set_datasource(datasource_cache::instance()->create(p));
@@ -144,7 +144,7 @@ void prepare_map(Map& m)
     {
         parameters p;
         p["type"]="shape";
-        p["file"]=mapnik_dir+"/demo/data/qcdrainage";
+        p["file"]="../../../demo/data/qcdrainage";
         layer lyr("Quebec Hydrography");
         lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("drainage");    
@@ -154,7 +154,7 @@ void prepare_map(Map& m)
     {
         parameters p;
         p["type"]="shape";
-        p["file"]=mapnik_dir+"/demo/data/ontdrainage";
+        p["file"]="../../../demo/data/ontdrainage";
                 
         layer lyr("Ontario Hydrography"); 
         lyr.set_datasource(datasource_cache::instance()->create(p));
@@ -166,7 +166,7 @@ void prepare_map(Map& m)
     {
         parameters p;
         p["type"]="shape";
-        p["file"]=mapnik_dir+"/demo/data/boundaries_l";
+        p["file"]="../../../demo/data/boundaries_l";
         layer lyr("Provincial borders"); 
         lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("provlines");    
@@ -177,7 +177,7 @@ void prepare_map(Map& m)
     {
         parameters p;
         p["type"]="shape";
-        p["file"]=mapnik_dir+"/demo/data/roads";        
+        p["file"]="../../../demo/data/roads";        
         layer lyr("Roads"); 
         lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("smallroads");

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,15 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id: geometry.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef GEOMETRY_HPP
-#define GEOMETRY_HPP
+#ifndef MAPNIK_GEOMETRY_HPP
+#define MAPNIK_GEOMETRY_HPP
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geom_util.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
@@ -68,27 +67,7 @@ public:
     {
         return type_;
     }
-    
-    double area() const 
-    {
-        double sum = 0.0;
-        double x(0);
-        double y(0);
-        rewind(0);
-        double xs = x;
-        double ys = y;
-        for (unsigned i=0;i<num_points();++i)
-        {
-            double x0(0);
-            double y0(0);
-            vertex(&x0,&y0);
-            sum += x * y0 - y * x0;
-            x = x0;
-            y = y0;
-        }
-        return (sum + x * ys - y * xs) * 0.5;
-    }
-    
+        
     box2d<double> envelope() const
     {
         box2d<double> result;
@@ -412,4 +391,4 @@ typedef boost::ptr_vector<geometry_type> geometry_containter;
 
 }
 
-#endif //GEOMETRY_HPP
+#endif // MAPNIK_GEOMETRY_HPP
