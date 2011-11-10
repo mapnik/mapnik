@@ -37,6 +37,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem/operations.hpp>
 
 // sqlite
 extern "C" {
@@ -130,15 +131,16 @@ public:
         int flags;
 #endif
 
+        bool existed = boost::filesystem::exists(index_db);
         boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
-    
+
+        ds->execute("PRAGMA synchronous=OFF");
+        ds->execute("BEGIN TRANSACTION");
+
         // first drop the index if it already exists
         std::ostringstream spatial_index_drop_sql;
         spatial_index_drop_sql << "DROP TABLE IF EXISTS " << index_table;
         ds->execute(spatial_index_drop_sql.str());
-
-        ds->execute("PRAGMA synchronous=OFF");
-        ds->execute("BEGIN TRANSACTION");
 
         // create the spatial index
         std::ostringstream create_idx;
@@ -156,60 +158,91 @@ public:
         
         prepared_index_statement ps(ds,insert_idx.str());
 
-        bool first = true;
-        while (rs->is_valid() && rs->step_next())
+        bool one_success = false;
+        try
         {
-            int size;
-            const char* data = (const char*) rs->column_blob(0, size);
-            if (data)
+            bool first = true;
+            while (rs->is_valid() && rs->step_next())
             {
-                boost::ptr_vector<mapnik::geometry_type> paths;
-                // TODO - contraint fails if multiple_geometries = true
-                bool multiple_geometries = false;
-                mapnik::geometry_utils::from_wkb(paths, data, size, multiple_geometries, mapnik::wkbAuto);
-                for (unsigned i=0; i<paths.size(); ++i)
+                int size;
+                const char* data = (const char*) rs->column_blob(0, size);
+                if (data)
                 {
-                    mapnik::box2d<double> const& bbox = paths[i].envelope();
-                    if (bbox.valid())
+                    boost::ptr_vector<mapnik::geometry_type> paths;
+                    // TODO - contraint fails if multiple_geometries = true
+                    bool multiple_geometries = false;
+                    mapnik::geometry_utils::from_wkb(paths, data, size, multiple_geometries, mapnik::wkbAuto);
+                    for (unsigned i=0; i<paths.size(); ++i)
                     {
-                        if (first)
+                        mapnik::box2d<double> const& bbox = paths[i].envelope();
+                        if (bbox.valid())
                         {
-                            first = false;
-                            extent = bbox;
+                            if (first)
+                            {
+                                first = false;
+                                extent = bbox;
+                            }
+                            else
+                            {
+                                extent.expand_to_include(bbox);
+                            }
+    
+                            ps.bind(bbox);
+        
+                            const int type_oid = rs->column_type(1);
+                            if (type_oid != SQLITE_INTEGER)
+                            {
+                                std::ostringstream error_msg;
+                                error_msg << "Sqlite Plugin: invalid type for key field '"
+                                          << rs->column_name(1) << "' when creating index '" << index_table
+                                          << "' type was: " << type_oid << "";
+                                throw mapnik::datasource_exception(error_msg.str());
+                            }
+        
+                            const sqlite_int64 pkid = rs->column_integer64(1);
+                            ps.bind(pkid);
                         }
                         else
                         {
-                            extent.expand_to_include(bbox);
-                        }
-
-                        ps.bind(bbox);
-    
-                        const int type_oid = rs->column_type(1);
-                        if (type_oid != SQLITE_INTEGER)
-                        {
                             std::ostringstream error_msg;
-                            error_msg << "Sqlite Plugin: invalid type for key field '"
-                                      << rs->column_name(1) << "' when creating index '" << index_table
-                                      << "' type was: " << type_oid << "";
+                            error_msg << "SQLite Plugin: encountered invalid bbox at '"
+                                        << rs->column_name(1) << "' == " << rs->column_integer64(1);
                             throw mapnik::datasource_exception(error_msg.str());
                         }
     
-                        const sqlite_int64 pkid = rs->column_integer64(1);
-                        ps.bind(pkid);
+                        ps.step_next();
+                        one_success = true;
                     }
-                    else
-                    {
-                        std::ostringstream error_msg;
-                        error_msg << "SQLite Plugin: encountered invalid bbox at '"
-                                    << rs->column_name(1) << "' == " << rs->column_integer64(1);
-                        throw mapnik::datasource_exception(error_msg.str());
-                    }
-
-                    ps.step_next();
                 }
             }
         }
-        ds->execute("COMMIT");
+        catch (mapnik::datasource_exception const& ex)
+        {
+            ds->execute("ROLLBACK");
+            if (!existed)
+            {
+                try
+                {
+                    boost::filesystem::remove(index_db);
+                }
+                catch (...) {};
+            }
+            throw mapnik::datasource_exception(ex.what());
+        }
+
+        if (one_success)
+        {
+            ds->execute("COMMIT");
+        }
+        else if (!existed)
+        {
+            ds->execute("ROLLBACK");
+            try
+            {
+                boost::filesystem::remove(index_db);
+            }
+            catch (...) {};
+        }
     }
 
     static bool detect_extent(boost::shared_ptr<sqlite_connection> ds,
