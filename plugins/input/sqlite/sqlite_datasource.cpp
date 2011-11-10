@@ -197,12 +197,19 @@ void sqlite_datasource::bind() const
     if (! found_table)
     {
         std::ostringstream s;
-        s << "Sqlite Plugin: could not query table '" << geometry_table_ << "' ";
-        if (using_subquery_) s << " from subquery '" << table_ << "' ";
-        s << "using 'PRAGMA table_info(" << geometry_table_  << ")' ";
+        s << "Sqlite Plugin: could not query table '" << geometry_table_ << "'";
+        if (using_subquery_)
+        {
+            s << " from subquery '" << table_ << "'";
+        }
 
-        std::string sq_err = std::string(sqlite3_errmsg(*(*dataset_)));
-        if (sq_err != "unknown error") s << ": " << sq_err;
+        // report get available tables
+        std::vector<std::string> tables;
+        sqlite_utils::get_tables(dataset_,tables);
+        if (tables.size() > 0)
+        {
+            s << " (available tables for " << dataset_name_ << " are: '" << boost::algorithm::join(tables, ", ") << "')";
+        }
 
         throw datasource_exception(s.str());
     }
@@ -228,7 +235,6 @@ void sqlite_datasource::bind() const
         {
             dataset_->execute("attach database '" + index_db + "' as " + index_table_);
         }
-        
         has_spatial_index_ = sqlite_utils::has_rtree(index_table_,dataset_);
     }
 
@@ -246,8 +252,10 @@ void sqlite_datasource::bind() const
                       << " FROM ("
                       << geometry_table_ << ")";
                 boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
-                sqlite_utils::create_spatial_index(index_db,index_table_,rs,extent_);
-                extent_initialized_ = true;
+                if (sqlite_utils::create_spatial_index(index_db,index_table_,rs,extent_))
+                {
+                    extent_initialized_ = true;
+                }
             }
             else
             {

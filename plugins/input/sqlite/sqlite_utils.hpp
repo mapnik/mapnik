@@ -75,6 +75,47 @@ public:
         //{
             return file + ".index";
         //}
+    }
+    
+    static void get_tables(boost::shared_ptr<sqlite_connection> ds,
+                           std::vector<std::string> & tables)
+    {
+        std::ostringstream sql;
+        // todo handle finding tables from attached db's
+        sql << " SELECT name FROM sqlite_master"
+            << " WHERE type IN ('table','view')"
+            << " AND name NOT LIKE 'sqlite_%'"
+            << " AND name NOT LIKE 'idx_%'"
+            << " AND name NOT LIKE '%geometry_columns%'"
+            << " AND name NOT LIKE '%ref_sys%'"
+            << " UNION ALL"
+            << " SELECT name FROM sqlite_temp_master"
+            << " WHERE type IN ('table','view')"
+            << " ORDER BY 1";
+        sqlite3_stmt* stmt = 0;
+        const int rc = sqlite3_prepare_v2 (*(*ds), sql.str().c_str(), -1, &stmt, 0);
+        std::clog << "hey\n";
+        if (rc == SQLITE_OK)
+        {
+            std::clog << "a\n";
+            boost::shared_ptr<sqlite_resultset> rs = boost::make_shared<sqlite_resultset>(stmt);
+            while (rs->is_valid() && rs->step_next())
+            {
+            std::clog << "b\n";
+                const int type_oid = rs->column_type(0);
+                if (type_oid == SQLITE_TEXT)
+                {
+            std::clog << "c\n";
+                    const char * data = rs->column_text(0);
+                    if (data)
+                    {
+
+            std::clog << "d\n";
+                        tables.push_back(std::string(data));
+                    }
+                }
+            }
+        }
     }    
     
     static void query_extent(boost::shared_ptr<sqlite_resultset> rs,
@@ -111,7 +152,7 @@ public:
         }
     }
     
-    static void create_spatial_index(std::string const& index_db,
+    static bool create_spatial_index(std::string const& index_db,
                                      std::string const& index_table,
                                      boost::shared_ptr<sqlite_resultset> rs,
                                      mapnik::box2d<double>& extent)
@@ -123,7 +164,7 @@ public:
         */
         
         if (!rs->is_valid())
-            return;
+            return false;
         
 #if SQLITE_VERSION_NUMBER >= 3005000
         int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX;
@@ -233,6 +274,7 @@ public:
         if (one_success)
         {
             ds->execute("COMMIT");
+            return true;
         }
         else if (!existed)
         {
@@ -243,6 +285,7 @@ public:
             }
             catch (...) {};
         }
+        return false;
     }
 
     static bool detect_extent(boost::shared_ptr<sqlite_connection> ds,
