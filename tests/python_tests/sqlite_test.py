@@ -196,6 +196,15 @@ if 'sqlite' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(feature['rowid'],1)
         eq_(feature['fips'],u'AC')
 
+
+    def test_empty_db():
+        ds = mapnik2.SQLite(file='../data/sqlite/empty.db', 
+            table='empty',
+            )
+        fs = ds.featureset()
+        feature = fs.next()
+        eq_(feature,None)
+
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
