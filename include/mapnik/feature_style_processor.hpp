@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef FEATURE_STYLE_PROCESSOR_HPP
-#define FEATURE_STYLE_PROCESSOR_HPP
+#ifndef MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
+#define MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
 
 #include <set>
 #include <string>
@@ -74,4 +72,4 @@ private:
 };
 }
 
-#endif //FEATURE_STYLE_PROCESSOR_HPP
+#endif // MAPNIK_FEATURE_STYLE_PROCESSOR_HPP

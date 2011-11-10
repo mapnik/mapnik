@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -99,13 +99,13 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             label_ext.re_center(x,y);
             
             if (sym.get_allow_overlap() ||
-                detector_.has_placement(label_ext))
+                detector_->has_placement(label_ext))
             {
                 
                 render_marker(floor(x - 0.5 * w),floor(y - 0.5 * h) ,**marker,tr, sym.get_opacity());
 
                 if (!sym.get_ignore_placement())
-                    detector_.insert(label_ext);
+                    detector_->insert(label_ext);
                 metawriter_with_properties writer = sym.get_metawriter();
                 if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
             }

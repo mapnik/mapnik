@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,10 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef SQLITE_FEATURESET_HPP
-#define SQLITE_FEATURESET_HPP
+#ifndef MAPNIK_SQLITE_FEATURESET_HPP
+#define MAPNIK_SQLITE_FEATURESET_HPP
 
 // mapnik
 #include <mapnik/datasource.hpp>
@@ -34,28 +33,26 @@
 #include <boost/shared_ptr.hpp>
 
 // sqlite
-#include "sqlite_types.hpp"
+#include "sqlite_resultset.hpp"
   
-  
-//==============================================================================
 
 class sqlite_featureset : public mapnik::Featureset
 {
-   public:
-      sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
-                        std::string const& encoding,
-                        mapnik::wkbFormat format,
-                        bool multiple_geometries,
-                        bool using_subquery);
-      virtual ~sqlite_featureset();
-      mapnik::feature_ptr next();
-   private:
-      boost::shared_ptr<sqlite_resultset> rs_;
-      boost::scoped_ptr<mapnik::transcoder> tr_;
-      mapnik::wkbFormat format_;
-      bool multiple_geometries_;
-      bool using_subquery_;
+public:
+    sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
+                      std::string const& encoding,
+                      mapnik::wkbFormat format,
+                      bool multiple_geometries,
+                      bool using_subquery);
+    virtual ~sqlite_featureset();
+    mapnik::feature_ptr next();
+
+private:
+    boost::shared_ptr<sqlite_resultset> rs_;
+    boost::scoped_ptr<mapnik::transcoder> tr_;
+    mapnik::wkbFormat format_;
+    bool multiple_geometries_;
+    bool using_subquery_;
 };
 
-
-#endif // SQLITE_FEATURESET_HPP
+#endif // MAPNIK_SQLITE_FEATURESET_HPP

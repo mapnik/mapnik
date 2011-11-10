@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_FEATURE_TYPE_STYLE_HPP
+#define MAPNIK_FEATURE_TYPE_STYLE_HPP
 
-#ifndef FEATURE_TYPE_STYLE_HPP
-#define FEATURE_TYPE_STYLE_HPP
 // mapnik 
 #include <mapnik/rule.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>
+
 // stl
 #include <vector>
 
@@ -69,4 +69,4 @@ public:
 };
 }
 
-#endif //FEATURE_TYPE_STYLE_HPP
+#endif // MAPNIK_FEATURE_TYPE_STYLE_HPP

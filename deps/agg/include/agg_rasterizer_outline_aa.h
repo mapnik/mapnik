@@ -323,68 +323,65 @@ namespace agg
         int y2;
         int lprev;
 
-        if(close_polygon)
+        if(close_polygon && (m_src_vertices.size() >= 3))
         {
-            if(m_src_vertices.size() >= 3)
+            dv.idx = 2;
+
+            v     = &m_src_vertices[m_src_vertices.size() - 1];
+            x1    = v->x;
+            y1    = v->y;
+            lprev = v->len;
+
+            v  = &m_src_vertices[0];
+            x2 = v->x;
+            y2 = v->y;
+            dv.lcurr = v->len;
+            line_parameters prev(x1, y1, x2, y2, lprev);
+
+            v = &m_src_vertices[1];
+            dv.x1    = v->x;
+            dv.y1    = v->y;
+            dv.lnext = v->len;
+            dv.curr = line_parameters(x2, y2, dv.x1, dv.y1, dv.lcurr);
+
+            v = &m_src_vertices[dv.idx];
+            dv.x2 = v->x;
+            dv.y2 = v->y;
+            dv.next = line_parameters(dv.x1, dv.y1, dv.x2, dv.y2, dv.lnext);
+
+            dv.xb1 = 0;
+            dv.yb1 = 0;
+            dv.xb2 = 0;
+            dv.yb2 = 0;
+
+            switch(m_line_join)
             {
-                dv.idx = 2;
+            case outline_no_join:
+                dv.flags = 3;
+                break;
 
-                v     = &m_src_vertices[m_src_vertices.size() - 1];
-                x1    = v->x;
-                y1    = v->y;
-                lprev = v->len;
+            case outline_miter_join:
+            case outline_round_join:
+                dv.flags = 
+                        (prev.diagonal_quadrant() == dv.curr.diagonal_quadrant()) |
+                    ((dv.curr.diagonal_quadrant() == dv.next.diagonal_quadrant()) << 1);
+                break;
 
-                v  = &m_src_vertices[0];
-                x2 = v->x;
-                y2 = v->y;
-                dv.lcurr = v->len;
-                line_parameters prev(x1, y1, x2, y2, lprev);
-
-                v = &m_src_vertices[1];
-                dv.x1    = v->x;
-                dv.y1    = v->y;
-                dv.lnext = v->len;
-                dv.curr = line_parameters(x2, y2, dv.x1, dv.y1, dv.lcurr);
-
-                v = &m_src_vertices[dv.idx];
-                dv.x2 = v->x;
-                dv.y2 = v->y;
-                dv.next = line_parameters(dv.x1, dv.y1, dv.x2, dv.y2, dv.lnext);
-
-                dv.xb1 = 0;
-                dv.yb1 = 0;
-                dv.xb2 = 0;
-                dv.yb2 = 0;
-
-                switch(m_line_join)
-                {
-                case outline_no_join:
-                    dv.flags = 3;
-                    break;
-
-                case outline_miter_join:
-                case outline_round_join:
-                    dv.flags = 
-                            (prev.diagonal_quadrant() == dv.curr.diagonal_quadrant()) |
-                        ((dv.curr.diagonal_quadrant() == dv.next.diagonal_quadrant()) << 1);
-                    break;
-
-                case outline_miter_accurate_join:
-                    dv.flags = 0;
-                    break;
-                }
-
-                if((dv.flags & 1) == 0 && m_line_join != outline_round_join)
-                {
-                    bisectrix(prev, dv.curr, &dv.xb1, &dv.yb1);
-                }
-
-                if((dv.flags & 2) == 0 && m_line_join != outline_round_join)
-                {
-                    bisectrix(dv.curr, dv.next, &dv.xb2, &dv.yb2);
-                }
-                draw(dv, 0, m_src_vertices.size());
+            case outline_miter_accurate_join:
+                dv.flags = 0;
+                break;
             }
+
+            if((dv.flags & 1) == 0 && m_line_join != outline_round_join)
+            {
+                bisectrix(prev, dv.curr, &dv.xb1, &dv.yb1);
+            }
+
+            if((dv.flags & 2) == 0 && m_line_join != outline_round_join)
+            {
+                bisectrix(dv.curr, dv.next, &dv.xb2, &dv.yb2);
+            }
+            draw(dv, 0, m_src_vertices.size());
         }
         else
         {

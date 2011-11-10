@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef OGR_CONVERTER_HPP
 #define OGR_CONVERTER_HPP
@@ -32,19 +31,19 @@
   
 class ogr_converter
 {
-    public:
+public:
 
-      static void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
-      static void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature, bool multiple_geometries);
-      static void convert_point (OGRPoint* geom, mapnik::feature_ptr feature);
-      static void convert_linestring (OGRLineString* geom, mapnik::feature_ptr feature);
-      static void convert_polygon (OGRPolygon* geom, mapnik::feature_ptr feature);
-      static void convert_multipoint (OGRMultiPoint* geom, mapnik::feature_ptr feature);
-      static void convert_multipoint_2 (OGRMultiPoint* geom, mapnik::feature_ptr feature);
-      static void convert_multilinestring (OGRMultiLineString* geom, mapnik::feature_ptr feature);
-      static void convert_multilinestring_2 (OGRMultiLineString* geom, mapnik::feature_ptr feature);
-      static void convert_multipolygon (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
-      static void convert_multipolygon_2 (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
+    static void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
+    static void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature, bool multiple_geometries);
+    static void convert_point (OGRPoint* geom, mapnik::feature_ptr feature);
+    static void convert_linestring (OGRLineString* geom, mapnik::feature_ptr feature);
+    static void convert_polygon (OGRPolygon* geom, mapnik::feature_ptr feature);
+    static void convert_multipoint (OGRMultiPoint* geom, mapnik::feature_ptr feature);
+    static void convert_multipoint_2 (OGRMultiPoint* geom, mapnik::feature_ptr feature);
+    static void convert_multilinestring (OGRMultiLineString* geom, mapnik::feature_ptr feature);
+    static void convert_multilinestring_2 (OGRMultiLineString* geom, mapnik::feature_ptr feature);
+    static void convert_multipolygon (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
+    static void convert_multipolygon_2 (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
 };
 
-#endif // OGR_FEATURESET_HPP
+#endif // OGR_CONVERTER_HPP

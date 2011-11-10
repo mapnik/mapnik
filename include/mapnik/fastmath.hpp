@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef FASTMATH_HPP
-#define FASTMATH_HPP
+#ifndef MAPNIK_FASTMATH_HPP
+#define MAPNIK_FASTMATH_HPP
 
 /* Timings:
  * fast_sin(not inlined) 8.95s
@@ -109,4 +109,4 @@ static inline double fast_atan2(double y, double x)
     return result;
 }
 
-#endif // FASTMATH_HPP
+#endif // MAPNIK_FASTMATH_HPP

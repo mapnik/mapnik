@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef ATTRIBUTE_DESCRIPTOR
-#define ATTRIBUTE_DESCRIPTOR
+#ifndef MAPNIK_ATTRIBUTE_DESCRIPTOR_HPP
+#define MAPNIK_ATTRIBUTE_DESCRIPTOR_HPP
 
 #include <string>
 
@@ -118,4 +116,4 @@ operator << (std::basic_ostream<charT,traits>& out,
 
 }
 
-#endif // ATTRIBUTE_DESCRIPTOR_HPP
+#endif // MAPNIK_ATTRIBUTE_DESCRIPTOR_HPP

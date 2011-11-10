@@ -46,6 +46,7 @@ plugin_env['LIBS'].append('boost_filesystem%s' % env['BOOST_APPEND'])
 if env['RUNTIME_LINK'] == 'static':
     cmd = 'gdal-config --dep-libs'
     plugin_env.ParseConfig(cmd)
+    plugin_env['LIBS'].append('proj')
 
 input_plugin = plugin_env.SharedLibrary('../ogr', source=ogr_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LINKFLAGS=env['CUSTOM_LDFLAGS'])
 

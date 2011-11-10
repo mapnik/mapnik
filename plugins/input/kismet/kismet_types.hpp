@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef KISMET_TYPES_HPP
 #define KISMET_TYPES_HPP
@@ -57,21 +56,56 @@ enum crypt_type
 
 class kismet_network_data
 {
-    public:
-      kismet_network_data() : bestlat_(0), bestlon_(0), crypt_ (crypt_none) {}
-      kismet_network_data(std::string ssid, std::string bssid, 
-                          double bestlat, double bestlon, int crypt) :
-                          ssid_(ssid), bssid_(bssid), 
-                          bestlat_(bestlat), bestlon_(bestlon),
-                          crypt_ (crypt)
-     {}
-    
-      std::string ssid_;
-      std::string bssid_;
-      double bestlat_;
-      double bestlon_;
-      int crypt_;
+public:
+    kismet_network_data()
+      : bestlat_(0), bestlon_(0), crypt_(crypt_none)
+    {
+    }
+
+    kismet_network_data(std::string ssid,
+                        std::string bssid,
+                        double bestlat,
+                        double bestlon,
+                        int crypt)
+      : ssid_(ssid),
+        bssid_(bssid),
+        bestlat_(bestlat),
+        bestlon_(bestlon),
+        crypt_(crypt)
+    {
+    }
+
+    const std::string& ssid() const
+    {
+        return ssid_;
+    }
+
+    const std::string& bssid() const
+    {
+        return bssid_;
+    }
+
+    double bestlat() const
+    {
+        return bestlat_;
+    }
+
+    double bestlon() const
+    {
+        return bestlon_;
+    }
+
+    int crypt() const
+    {
+        return crypt_;
+    }
+
+protected:
+    std::string ssid_;
+    std::string bssid_;
+    double bestlat_;
+    double bestlon_;
+    int crypt_;
 };
 
-#endif //KISMET_TYPES_HPP
-
+#endif // KISMET_TYPES_HPP

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
-//$Id$
 
 #ifndef MAPNIK_TEXT_SYMBOLIZER_HPP
 #define MAPNIK_TEXT_SYMBOLIZER_HPP
@@ -46,10 +44,10 @@ namespace mapnik
 struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 {
     text_symbolizer(expression_ptr name, std::string const& face_name,
-                    unsigned size, color const& fill,
+                    float size, color const& fill,
                     text_placements_ptr placements = boost::make_shared<text_placements_dummy>()
                     );
-    text_symbolizer(expression_ptr name, unsigned size, color const& fill,
+    text_symbolizer(expression_ptr name, float size, color const& fill,
                     text_placements_ptr placements = boost::make_shared<text_placements_dummy>()
                     );
     text_symbolizer(text_symbolizer const& rhs);
@@ -82,8 +80,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     void set_force_odd_labels(bool force);
     double get_max_char_angle_delta() const; // maximum change in angle between adjacent characters
     void set_max_char_angle_delta(double angle);
-    unsigned get_text_size() const;
-    void set_text_size(unsigned size);
+    float get_text_size() const;
+    void set_text_size(float size);
     std::string const& get_face_name() const;
     void set_face_name(std::string face_name);
     font_set const& get_fontset() const;
@@ -155,4 +153,4 @@ private:
 };
 }
 
-#endif //MAPNIK_TEXT_SYMBOLIZER_HPP
+#endif // MAPNIK_TEXT_SYMBOLIZER_HPP

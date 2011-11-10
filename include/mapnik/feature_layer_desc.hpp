@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef FEATURE_LAYER_DESC_HPP
-#define FEATURE_LAYER_DESC_HPP
+#ifndef MAPNIK_FEATURE_LAYER_DESC_HPP
+#define MAPNIK_FEATURE_LAYER_DESC_HPP
 
 // mapnik
 #include <mapnik/attribute_descriptor.hpp>
 
+// stl
 #include <string>
 #include <vector>
 #include <iostream>
@@ -106,4 +105,4 @@ operator << (std::basic_ostream<charT,traits>& out,
 }
 }
 
-#endif //FEATURE_LAYER_DESC_HPP
+#endif // MAPNIK_FEATURE_LAYER_DESC_HPP

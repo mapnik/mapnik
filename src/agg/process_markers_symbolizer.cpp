@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -109,7 +109,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 } 
                 
                 path_type path(t_,geom,prj_trans);
-                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
+                markers_placement<path_type, label_collision_detector4> placement(path, extent, *detector_, 
                                                                                   sym.get_spacing() * scale_factor_, 
                                                                                   sym.get_max_error(), 
                                                                                   sym.get_allow_overlap());        
@@ -194,7 +194,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 box2d<double> label_ext (px, py, px + dx +1, py + dy +1);
 
                 if (sym.get_allow_overlap() ||
-                    detector_.has_placement(label_ext))
+                    detector_->has_placement(label_ext))
                 {
                     agg::ellipse c(x, y, w, h);
                     marker.concat_path(c);
@@ -215,7 +215,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
                         agg::render_scanlines(*ras_ptr, sl_line, ren);
                     }
-                    detector_.insert(label_ext);
+                    detector_->insert(label_ext);
                     if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                 }
             }
@@ -226,7 +226,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     marker.concat_path(arrow_);
 
                 path_type path(t_,geom,prj_trans);
-                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
+                markers_placement<path_type, label_collision_detector4> placement(path, extent, *detector_, 
                                                                                   sym.get_spacing() * scale_factor_, 
                                                                                   sym.get_max_error(), 
                                                                                   sym.get_allow_overlap());        

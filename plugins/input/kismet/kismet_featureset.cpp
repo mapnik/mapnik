@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -41,13 +40,14 @@ using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::feature_factory;
 
-kismet_featureset::kismet_featureset(const std::list<kismet_network_data> &knd_list,
+kismet_featureset::kismet_featureset(const std::list<kismet_network_data>& knd_list,
+                                     std::string const& srs,
                                      std::string const& encoding)
     : knd_list_(knd_list),
       tr_(new transcoder(encoding)),
       feature_id_(1),
-      knd_list_it(knd_list_.begin ()),
-      source_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+      knd_list_it(knd_list_.begin()),
+      source_(srs)
 {
 }
 
@@ -63,11 +63,11 @@ feature_ptr kismet_featureset::next()
         const std::string key = "internet_access";
 
         std::string value;
-        if (knd.crypt_ == crypt_none)
+        if (knd.crypt() == crypt_none)
         {
             value = "wlan_uncrypted";
         }
-        else if (knd.crypt_ == crypt_wep)
+        else if (knd.crypt() == crypt_wep)
         {
             value = "wlan_wep";
         }
@@ -80,7 +80,7 @@ feature_ptr kismet_featureset::next()
         ++feature_id_;
       
         geometry_type* pt = new geometry_type(mapnik::Point);
-        pt->move_to(knd.bestlon_, knd.bestlat_);
+        pt->move_to(knd.bestlon(), knd.bestlat());
         feature->add_geometry(pt);
       
         boost::put(*feature, key, tr_->transcode(value.c_str()));
@@ -92,4 +92,3 @@ feature_ptr kismet_featureset::next()
     
     return feature_ptr();
 }
-

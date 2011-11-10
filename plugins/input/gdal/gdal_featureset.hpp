@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef GDAL_FEATURESET_HPP
 #define GDAL_FEATURESET_HPP
@@ -33,33 +32,40 @@
 class GDALDataset;
 class GDALRasterBand;
 
-typedef boost::variant<mapnik::query,mapnik::coord2d> gdal_query;
+typedef boost::variant<mapnik::query, mapnik::coord2d> gdal_query;
 
 class gdal_featureset : public mapnik::Featureset
 {
-    public:
-        gdal_featureset(GDALDataset & dataset, int band, gdal_query q, 
-        mapnik::box2d<double> extent, double width, double height, int nbands, 
-        double dx, double dy, double filter_factor);
-        virtual ~gdal_featureset();
-        mapnik::feature_ptr next();
-    private:
-        mapnik::feature_ptr get_feature(mapnik::query const& q);
-        mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
+public:
+    gdal_featureset(GDALDataset& dataset,
+                    int band,
+                    gdal_query q,
+                    mapnik::box2d<double> extent,
+                    double width,
+                    double height,
+                    int nbands,
+                    double dx,
+                    double dy,
+                    double filter_factor);
+    virtual ~gdal_featureset();
+    mapnik::feature_ptr next();
+private:
+    mapnik::feature_ptr get_feature(mapnik::query const& q);
+    mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
 #ifdef MAPNIK_DEBUG
-        void get_overview_meta(GDALRasterBand * band);
+    void get_overview_meta(GDALRasterBand * band);
 #endif
-        GDALDataset & dataset_;
-        int band_;
-        gdal_query gquery_;
-        mapnik::box2d<double> raster_extent_;
-        unsigned raster_width_;
-        unsigned raster_height_;
-        double dx_;
-        double dy_;
-        int nbands_;
-        double filter_factor_;
-        bool first_;
+    GDALDataset & dataset_;
+    int band_;
+    gdal_query gquery_;
+    mapnik::box2d<double> raster_extent_;
+    unsigned raster_width_;
+    unsigned raster_height_;
+    double dx_;
+    double dy_;
+    int nbands_;
+    double filter_factor_;
+    bool first_;
 };
 
 #endif // GDAL_FEATURESET_HPP

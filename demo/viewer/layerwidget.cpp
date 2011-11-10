@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2007 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -41,7 +42,7 @@ LayerTab::LayerTab(QWidget* parent)
 
 void LayerTab::paintEvent(QPaintEvent *e)
 {
-    QListView::paintEvent(e); 
+    QListView::paintEvent(e);
 }
 
 void LayerTab::dataChanged(const QModelIndex &topLeft,
@@ -55,7 +56,7 @@ void LayerTab::dataChanged(const QModelIndex &topLeft,
 void LayerTab::selectionChanged(const QItemSelection & selected, const QItemSelection &)
 {
    QModelIndexList list = selected.indexes();
-   if (list.size() != 0) 
+   if (list.size() != 0)
    {
       std::cout << "SELECTED LAYER ->" << list[0].row() << "\n";
       emit layerSelected(list[0].row());
@@ -69,7 +70,7 @@ void LayerTab::layerInfo()
    if (indexes.size() > 0)
    {
       qDebug("id = %d",indexes[0].row());
-      
+
    }
 }
 
@@ -81,7 +82,7 @@ void LayerTab::layerInfo2(QModelIndex const& index)
    unsigned i = index.row();
    LayerListModel * model = static_cast<LayerListModel*>(this->model());
    boost::optional<mapnik::layer&> layer = model->map_layer(i);
-   
+
    if (layer)
    {
        layer_info_dialog dlg(*layer,this);
@@ -91,7 +92,7 @@ void LayerTab::layerInfo2(QModelIndex const& index)
 
 StyleTab::StyleTab(QWidget*)
 {
-    
+
 }
 
 void StyleTab::contextMenuEvent(QContextMenuEvent * event )

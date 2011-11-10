@@ -20,22 +20,23 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_CSS_COLOR_GRAMMAR_HPP
 #define MAPNIK_CSS_COLOR_GRAMMAR_HPP
 
 // mapnik
 #include <mapnik/color.hpp>
+
 // spirit2
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_action.hpp>
+
 // phoenix 
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
+
 // fusion
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/adapt_adt.hpp>
@@ -387,4 +388,4 @@ struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
 
 }
 
-#endif //MAPNIK_CSS_COLOR_GRAMMAR_HPP 
+#endif // MAPNIK_CSS_COLOR_GRAMMAR_HPP

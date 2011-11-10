@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -110,7 +110,9 @@ unsigned rgba_palette::quantize(rgba const& c) const
             da = sorted_pal_[i].a - c.a;
             // stop criteria based on properties of used sorting
             if ((dr+db+dg+da) * (dr+db+dg+da) / 4 > dist)
+            {
                 break;
+            }
             newdist = dr*dr + dg*dg + db*db + da*da;
             if (newdist < dist)
             {
@@ -118,6 +120,7 @@ unsigned rgba_palette::quantize(rgba const& c) const
                 dist = newdist;
             }
         }
+
         for (unsigned i = poz + 1; i < sorted_pal_.size(); i++)
         {
             dr = sorted_pal_[i].r - c.r;
@@ -126,7 +129,9 @@ unsigned rgba_palette::quantize(rgba const& c) const
             da = sorted_pal_[i].a - c.a;
             // stop criteria based on properties of used sorting
             if ((dr+db+dg+da) * (dr+db+dg+da) / 4 > dist)
+            {
                 break;
+            }
             newdist = dr*dr + dg*dg + db*db + da*da;
             if (newdist < dist)
             {
@@ -144,7 +149,7 @@ unsigned rgba_palette::quantize(rgba const& c) const
 
 void rgba_palette::parse(std::string const& pal, palette_type type)
 {
-    int length = pal.length();
+    unsigned length = pal.length();
 
     if ((type == PALETTE_RGBA && length % 4 > 0) ||
         (type == PALETTE_RGB && length % 3 > 0) ||
@@ -163,18 +168,26 @@ void rgba_palette::parse(std::string const& pal, palette_type type)
     rgb_pal_.clear();
     alpha_pal_.clear();
 
-    if (type == PALETTE_RGBA) for (unsigned i = 0; i < length; i += 4)
+    if (type == PALETTE_RGBA)
     {
-        sorted_pal_.push_back(rgba(pal[i], pal[i + 1], pal[i + 2], pal[i + 3]));
+        for (unsigned i = 0; i < length; i += 4)
+        {
+            sorted_pal_.push_back(rgba(pal[i], pal[i + 1], pal[i + 2], pal[i + 3]));
+        }
     }
-    else for (unsigned i = 0; i < length; i += 3)
+    else
     {
-        sorted_pal_.push_back(rgba(pal[i], pal[i + 1], pal[i + 2], 0xFF));
+        for (unsigned i = 0; i < length; i += 3)
+        {
+            sorted_pal_.push_back(rgba(pal[i], pal[i + 1], pal[i + 2], 0xFF));
+        }
     }
 
     // Make sure we have at least one entry in the palette.
     if (sorted_pal_.size() == 0)
+    {
         sorted_pal_.push_back(rgba(0, 0, 0, 0));
+    }
 
     colors_ = sorted_pal_.size();
 
@@ -187,7 +200,10 @@ void rgba_palette::parse(std::string const& pal, palette_type type)
         rgba c = sorted_pal_[i];
         color_hashmap_[c] = i;
         rgb_pal_.push_back(rgb(c));
-        if (c.a < 0xFF) alpha_pal_.push_back(c.a);
+        if (c.a < 0xFF)
+        {
+            alpha_pal_.push_back(c.a);
+        }
     }
 }
 

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2009 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,11 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_EXPRESSION_EVALUATOR_HPP
 #define MAPNIK_EXPRESSION_EVALUATOR_HPP
 
 // boost
 #include <boost/regex.hpp>
-//#include <boost/regex/config.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #endif
@@ -43,7 +40,11 @@ struct evaluate : boost::static_visitor<T1>
     explicit evaluate(feature_type const& f)
         : feature_(f) {}
     
-    value_type operator() (value_type x) const { return x; }
+    value_type operator() (value_type x) const
+    {
+        return x;
+    }
+    
     value_type operator() (attribute const& attr) const
     {
         return attr.value<value_type,feature_type>(feature_);
@@ -104,4 +105,4 @@ struct evaluate : boost::static_visitor<T1>
 
 }
 
-#endif //MAPNIK_EXPRESSION_EVALUATOR_HPP
+#endif // MAPNIK_EXPRESSION_EVALUATOR_HPP

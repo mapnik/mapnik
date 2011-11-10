@@ -20,7 +20,9 @@
  *
  *****************************************************************************/
 
-//$Id$
+#include "postgis_featureset.hpp"
+#include "resultset.hpp"
+#include "cursorresultset.hpp"
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -28,10 +30,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/feature_factory.hpp>
-
-#include "postgis_featureset.hpp"
-#include "resultset.hpp"
-#include "cursorresultset.hpp"
 
 // boost
 #include <boost/lexical_cast.hpp>
@@ -164,7 +162,7 @@ feature_ptr postgis_featureset::next()
                 }
                 else if (oid == 1700) // numeric
                 {
-                    std::string str = mapnik::numeric2string(buf);
+                    std::string str = mapnik::sql_utils::numeric2string(buf);
                     try 
                     {
                         double val = boost::lexical_cast<double>(str);

@@ -2,8 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
- * Copyright (C) 2006 10East Corp.
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef MAPNIK_SHIELD_SYMBOLIZER_HPP
 #define MAPNIK_SHIELD_SYMBOLIZER_HPP
@@ -40,11 +38,11 @@ struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
 {
     shield_symbolizer(expression_ptr name,
                       std::string const& face_name,
-                      unsigned size,
+                      float size,
                       color const& fill,
                       path_expression_ptr file);
     shield_symbolizer(expression_ptr name,
-                      unsigned size,
+                      float size,
                       color const& fill,
                       path_expression_ptr file);
     
@@ -62,4 +60,4 @@ private:
 };
 }
 
-#endif // SHIELD_SYMBOLIZER_HPP
+#endif // MAPNIK_SHIELD_SYMBOLIZER_HPP

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,12 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef MAPNIK_AGG_RASTERIZER_HPP
 #define MAPNIK_AGG_RASTERIZER_HPP
 
+// boost
 #include <boost/utility.hpp>
+
+// agg
 #include "agg_rasterizer_scanline_aa.h"
 
 namespace mapnik {
@@ -33,4 +35,4 @@ struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
 
 }
 
-#endif //MAPNIK_AGG_RASTERIZER_HPP
+#endif // MAPNIK_AGG_RASTERIZER_HPP
