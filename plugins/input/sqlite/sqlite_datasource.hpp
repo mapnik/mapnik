@@ -56,7 +56,7 @@ private:
     int type_;
     mutable std::string dataset_name_;
     mutable boost::shared_ptr<sqlite_connection> dataset_;
-    std::string table_;
+    mutable std::string table_;
     std::string fields_;
     std::string metadata_;
     mutable std::string geometry_table_;

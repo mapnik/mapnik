@@ -159,6 +159,15 @@ void sqlite_datasource::bind() const
     {
         using_subquery_ = true;
     }
+    else
+    {
+        // attempt to auto-quote table if needed
+        if (sqlite_utils::needs_quoting(table_))
+        {
+            table_ = std::string("[") + table_ + "]";
+            geometry_table_ = table_;
+        }
+    }
 
     // now actually create the connection and start executing setup sql
     dataset_ = boost::make_shared<sqlite_connection>(dataset_name_);

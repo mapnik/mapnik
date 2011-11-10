@@ -55,6 +55,34 @@ class sqlite_utils
 {
 public:
 
+    static bool needs_quoting(std::string const& name)
+    {
+        if (name.size() > 0)
+        {
+            const char first = name[0];
+            if (is_quote_char(first))
+            {
+                return false;
+            }
+            if ((first >= '0' && first <= '9') ||
+                (name.find("-") != std::string::npos)
+               )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool is_quote_char(const char z)
+    {
+        if (z == '"' || z == '\'' || z == '[' || z == '`')
+        {
+            return true;
+        }
+        return false;
+    }
+
     static void dequote(std::string & z)
     {
         boost::algorithm::trim_if(z,boost::algorithm::is_any_of("[]'\"`"));
