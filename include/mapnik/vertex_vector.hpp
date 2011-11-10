@@ -29,7 +29,6 @@
 
 // mapnik
 #include <mapnik/vertex.hpp>
-#include <mapnik/ctrans.hpp>
 
 // boost
 #include <boost/utility.hpp>
