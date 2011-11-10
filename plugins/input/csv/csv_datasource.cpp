@@ -3,7 +3,6 @@
 // boost
 #include <boost/make_shared.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -18,13 +17,9 @@
 
 // stl
 #include <sstream>
-#include <fstream>      // fstream
+#include <fstream>
+#include <iostream>
 #include <string>
-#include <iterator>     // ostream_operator
-
-// std lib
-#include <stdio.h>
-#include <stdlib.h>
 
 using mapnik::datasource;
 using mapnik::parameters;

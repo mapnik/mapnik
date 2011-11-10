@@ -24,8 +24,8 @@
 #define BASICCURL_H
 
 #include <curl/curl.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 typedef struct
 {
