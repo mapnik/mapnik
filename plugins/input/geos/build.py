@@ -20,11 +20,12 @@
 # $Id$
 
 
+Import ('plugin_base')
 Import ('env')
 
 prefix = env['PREFIX']
 
-plugin_env = env.Clone()
+plugin_env = plugin_base.Clone()
 
 geos_src = Split(
   """

@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import os
+Import ('plugin_base')
 Import ('env')
 
 PLUGIN_NAME = 'csv'
 
 install_dest = env['MAPNIK_INPUT_PLUGINS_DEST']
-plugin_env = env.Clone()
+plugin_env = plugin_base.Clone()
 
 plugin_sources = Split(
   """
