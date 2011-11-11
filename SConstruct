@@ -1591,7 +1591,12 @@ if not HELP_REQUESTED:
 
     # export env so it is available in build.py files
     Export('env')
+    
+    plugin_base = env.Clone()
+    plugin_base.Append(CXXFLAGS='-fvisibility=hidden')
+    plugin_base.Append(CXXFLAGS='-fvisibility-inlines-hidden')
 
+    Export('plugin_base')
 
     # clear the '_CPPDEFFLAGS' variable
     # for unknown reasons this variable puts -DNone
