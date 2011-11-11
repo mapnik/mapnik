@@ -27,6 +27,9 @@ TARGET = plugin_env.SharedLibrary(
               LINKFLAGS=env.get('CUSTOM_LDFLAGS')
               )
 
+# if the plugin links to libmapnik2 ensure it is built first
+Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(install_dest, TARGET)
     env.Alias('install', install_dest)
