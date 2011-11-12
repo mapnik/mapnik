@@ -9,6 +9,10 @@ def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
+
+def test_that_datasources_exist():
+    if len(mapnik2.DatasourceCache.instance().plugin_names()) == 0:
+        print '***NOTICE*** - no datasource plugins have been loaded'
     
 def test_field_listing():
     lyr = mapnik2.Layer('test')
