@@ -1593,8 +1593,11 @@ if not HELP_REQUESTED:
     Export('env')
     
     plugin_base = env.Clone()
-    plugin_base.Append(CXXFLAGS='-fvisibility=hidden')
-    plugin_base.Append(CXXFLAGS='-fvisibility-inlines-hidden')
+    # for this to work you need:
+    # if __GNUC__ >= 4
+    # define MAPNIK_EXP __attribute__ ((visibility ("default")))
+    #plugin_base.Append(CXXFLAGS='-fvisibility=hidden')
+    #plugin_base.Append(CXXFLAGS='-fvisibility-inlines-hidden')
 
     Export('plugin_base')
 
