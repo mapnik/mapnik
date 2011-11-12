@@ -16,6 +16,7 @@ import os
 PLUGIN_NAME = 'hello'
 
 # Here we pull from the SCons environment exported from the main instance
+Import ('plugin_base')
 Import ('env')
 
 # the below install details are also pulled from the
@@ -28,7 +29,7 @@ install_dest = env['MAPNIK_INPUT_PLUGINS_DEST']
 # clone the environment here
 # so that if we modify the env it in this file
 # those changes to not pollute other builds later on...
-plugin_env = env.Clone()
+plugin_env = plugin_base.Clone()
 
 # Add the cpp files that need to be compiled
 plugin_sources = Split(
