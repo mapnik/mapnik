@@ -874,18 +874,34 @@ def sqlite_has_rtree(context):
      
     ret = context.TryRun("""
 
-extern "C" {
-  #include <sqlite3.h>
-}
+#include <sqlite3.h>
+#include <stdio.h>
 
 int main() 
 {
-    sqlite3_rtree_geometry *p;
-    //sqlite3_compileoption_used("ENABLE_RTREE");
-    return 0;
+    sqlite3* db;
+    int rc;
+    rc = sqlite3_open(":memory:", &db);
+    if (rc != SQLITE_OK)
+    {
+        printf("error 1: %s\\n", sqlite3_errmsg(db));
+    }
+    const char * sql = "create virtual table foo using rtree(pkid, xmin, xmax, ymin, ymax)";
+    rc = sqlite3_exec(db, sql, 0, 0, 0);
+    if (rc != SQLITE_OK)
+    {
+        printf("error 2: %s\\n", sqlite3_errmsg(db));
+    }
+    else
+    {
+        printf("yes, has rtree!\\n");
+        return 0;
+    }
+    
+    return -1;
 }
 
-""", '.cpp')
+""", '.c')
     context.Message('Checking if SQLite supports RTREE... ')
     context.Result(ret[0])
     if ret[0]:
