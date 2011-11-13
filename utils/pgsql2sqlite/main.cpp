@@ -100,7 +100,7 @@ int main ( int argc, char** argv)
             boost::shared_ptr<Connection> conn(creator());
     
             std::string query = vm["query"].as<std::string>();      
-            std::string output_table_name = vm.count("table") ? vm["table"].as<std::string>() : mapnik::table_from_sql(query);
+            std::string output_table_name = vm.count("table") ? vm["table"].as<std::string>() : mapnik::sql_utils::table_from_sql(query);
             std::string output_file = vm["file"].as<std::string>();
           
             std::cout << "output_table : " << output_table_name << "\n";

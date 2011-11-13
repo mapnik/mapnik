@@ -92,7 +92,7 @@ void pgsql2sqlite(Connection conn,
    
     select_sql << " from (" << query << ") as query";
    
-    std::string table_name = mapnik::table_from_sql(query);
+    std::string table_name = mapnik::sql_utils::table_from_sql(query);
       
     std::string schema_name="";
     std::string::size_type idx=table_name.find_last_of('.');
@@ -279,7 +279,7 @@ void pgsql2sqlite(Connection conn,
                 }
                 case 1700:
                 {
-                    std::string str = mapnik::numeric2string(buf);
+                    std::string str = mapnik::sql_utils::numeric2string(buf);
                     try 
                     {
                         double val = boost::lexical_cast<double>(str);
