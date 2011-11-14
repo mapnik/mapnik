@@ -65,7 +65,7 @@ osm_dataset* dataset_deliverer::load_from_url(const string& url, const string& b
         }
 
         atexit(dataset_deliverer::release);
-       last_bbox = bbox;
+        last_bbox = bbox;
     }
     else if (bbox != last_bbox)
     {

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -71,7 +71,7 @@ void shp_index<filterT, IStream>::query_node(const filterT& filter, IStream& fil
         file.seekg(offset + num_shapes * 4 + 4, std::ios::cur);
         return;
     }
-    
+
     for (int i = 0; i < num_shapes; ++i)
     {
         int id = read_ndr_integer(file);

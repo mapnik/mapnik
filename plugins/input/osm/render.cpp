@@ -48,7 +48,7 @@ int main(int argc,char *argv[])
 
     mapnik::Map m(800, 800);
     mapnik::load_map(m, argv[1]);
-  
+
     if (argc > 6)
     {
         mapnik::parameters p;
@@ -62,7 +62,7 @@ int main(int argc,char *argv[])
     }
 
     mapnik::box2d<double> bbox (atof(argv[2]), atof(argv[3]), atof(argv[4]), atof(argv[5]));
-                    
+
     m.zoom_to_box(bbox);
 
     mapnik::image_32 buf (m.width(), m.height());

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -28,7 +28,7 @@
 
 // ogr
 #include <ogrsf_frmts.h>
-  
+
 class ogr_converter
 {
 public:

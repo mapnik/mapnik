@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -51,7 +51,7 @@ struct RecordTag
     {
         return static_cast<data_type>(::operator new(sizeof(char)*size));
     }
-    
+
     static void dealloc(data_type data)
     {
         ::operator delete(data);
@@ -73,9 +73,9 @@ struct shape_record
     mutable size_t pos;
 
     explicit shape_record(size_t size)
-      : data(Tag::alloc(size)),
-        size(size),
-        pos(0)
+        : data(Tag::alloc(size)),
+          size(size),
+          pos(0)
     {}
 
     ~shape_record()
@@ -88,16 +88,16 @@ struct shape_record
         data = data_;
     }
 
-    typename Tag::data_type get_data() 
+    typename Tag::data_type get_data()
     {
-        return data; 
+        return data;
     }
-    
+
     void skip(unsigned n)
     {
         pos += n;
     }
-      
+
     int read_ndr_integer()
     {
         boost::int32_t val;
@@ -105,7 +105,7 @@ struct shape_record
         pos += 4;
         return val;
     }
-      
+
     int read_xdr_integer()
     {
         boost::int32_t val;
@@ -113,25 +113,25 @@ struct shape_record
         pos += 4;
         return val;
     }
-      
+
     double read_double()
     {
-        double val;        
+        double val;
         read_double_ndr(&data[pos], val);
         pos += 8;
         return val;
     }
 
-    long remains() 
+    long remains()
     {
         return (size - pos);
-    } 
+    }
 };
 
 using namespace boost::interprocess;
 
 class shape_file : boost::noncopyable
-{  
+{
 public:
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
@@ -141,15 +141,15 @@ public:
     typedef std::ifstream file_source_type;
     typedef shape_record<RecordTag> record_type;
 #endif
-    
+
     file_source_type file_;
 
     shape_file() {}
-    
+
     shape_file(std::string  const& file_name) :
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         file_()
-#else  
+#else
         file_(file_name.c_str(), std::ios::in | std::ios::binary)
 #endif
     {
@@ -161,16 +161,16 @@ public:
         {
             file_.buffer(static_cast<char*>((*memory)->get_address()), (*memory)->get_size());
         }
-#endif        
+#endif
     }
-    
+
     ~shape_file() {}
 
     inline file_source_type& file()
     {
         return file_;
     }
-    
+
     inline bool is_open()
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
@@ -179,7 +179,7 @@ public:
         return file_.is_open();
 #endif
     }
-    
+
     inline void read_record(record_type& rec)
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
@@ -189,7 +189,7 @@ public:
         file_.read(rec.get_data(), rec.size);
 #endif
     }
-    
+
     inline int read_xdr_integer()
     {
         char b[4];
@@ -198,7 +198,7 @@ public:
         read_int32_xdr(b, val);
         return val;
     }
-      
+
     inline int read_ndr_integer()
     {
         char b[4];
@@ -207,7 +207,7 @@ public:
         read_int32_ndr(b, val);
         return val;
     }
-      
+
     inline double read_double()
     {
         double val;
@@ -220,7 +220,7 @@ public:
 #endif
         return val;
     }
-    
+
     inline void read_envelope(box2d<double>& envelope)
     {
 #ifndef MAPNIK_BIG_ENDIAN
@@ -234,29 +234,29 @@ public:
         read_double_ndr(data + 2 * 8, maxx);
         read_double_ndr(data + 3 * 8, maxy);
         envelope.init(minx, miny, maxx, maxy);
-#endif  
+#endif
     }
-      
+
     inline void skip(std::streampos bytes)
     {
         file_.seekg(bytes, std::ios::cur);
     }
-      
+
     inline void rewind()
     {
         seek(100);
     }
-      
+
     inline void seek(std::streampos pos)
     {
         file_.seekg(pos, std::ios::beg);
     }
-      
+
     inline std::streampos pos()
     {
         return file_.tellg();
     }
-      
+
     inline bool is_eof()
     {
         return file_.eof();

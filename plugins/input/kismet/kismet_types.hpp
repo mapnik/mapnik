@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -30,7 +30,7 @@
 #include <boost/shared_ptr.hpp>
 
 // this is a copy from packet.h from kismet 2007.10.R1
-enum crypt_type 
+enum crypt_type
 {
     crypt_none = 0,
     crypt_unknown = 1,
@@ -58,7 +58,7 @@ class kismet_network_data
 {
 public:
     kismet_network_data()
-      : bestlat_(0), bestlon_(0), crypt_(crypt_none)
+        : bestlat_(0), bestlon_(0), crypt_(crypt_none)
     {
     }
 
@@ -67,11 +67,11 @@ public:
                         double bestlat,
                         double bestlon,
                         int crypt)
-      : ssid_(ssid),
-        bssid_(bssid),
-        bestlat_(bestlat),
-        bestlon_(bestlon),
-        crypt_(crypt)
+        : ssid_(ssid),
+          bssid_(bssid),
+          bestlat_(bestlat),
+          bestlon_(bestlon),
+          crypt_(crypt)
     {
     }
 

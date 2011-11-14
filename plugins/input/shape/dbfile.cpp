@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -58,7 +58,7 @@ dbf_file::dbf_file(std::string const& file_name)
     {
         file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
     }
-#endif 
+#endif
     if (file_)
     {
         read_header();
@@ -75,9 +75,9 @@ dbf_file::~dbf_file()
 bool dbf_file::is_open()
 {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-        return (file_.buffer().second > 0);
+    return (file_.buffer().second > 0);
 #else
-        return file_.is_open();
+    return file_.is_open();
 #endif
 }
 
@@ -128,7 +128,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
     if (col>=0 && col<num_fields_)
     {
         std::string name=fields_[col].name_;
-        
+
         switch (fields_[col].type_)
         {
         case 'C':
@@ -139,33 +139,33 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
             // FIXME - avoid constructing std::string on stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
             boost::trim(str);
-            f[name] = tr.transcode(str.c_str()); 
+            f[name] = tr.transcode(str.c_str());
             break;
         }
         case 'N':
         case 'F':
         {
-            
+
             if (record_[fields_[col].offset_] == '*')
             {
                 boost::put(f,name,0);
                 break;
             }
             if ( fields_[col].dec_>0 )
-            {   
+            {
                 double val = 0.0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
                 qi::phrase_parse(itr,end,double_,ascii::space,val);
-                boost::put(f,name,val); 
+                boost::put(f,name,val);
             }
             else
             {
-                int val = 0; 
+                int val = 0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
                 qi::phrase_parse(itr,end,int_,ascii::space,val);
-                boost::put(f,name,val); 
+                boost::put(f,name,val);
             }
             break;
         }
@@ -225,7 +225,7 @@ int dbf_file::read_short()
 
 
 int dbf_file::read_int()
-{    
+{
     char b[4];
     file_.read(b,4);
     boost::int32_t val;

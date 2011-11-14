@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/unicode.hpp> 
+#include <mapnik/unicode.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
@@ -34,7 +34,7 @@
 
 // oci
 #include "occi_types.hpp"
-  
+
 class occi_featureset : public mapnik::Featureset
 {
 public:

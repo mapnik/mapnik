@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -53,11 +53,11 @@ using mapnik::filter_at_point;
 
 
 ogr_datasource::ogr_datasource(parameters const& params, bool bind)
-  : datasource(params),
-    extent_(),
-    type_(datasource::Vector),
-    desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
-    indexed_(false)
+    : datasource(params),
+      extent_(),
+      type_(datasource::Vector),
+      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
+      indexed_(false)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
@@ -70,7 +70,7 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
 
     if (string)
     {
-       dataset_name_ = *string;
+        dataset_name_ = *string;
     }
     else
     {
@@ -93,7 +93,7 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
 
 ogr_datasource::~ogr_datasource()
 {
-    if (is_bound_) 
+    if (is_bound_)
     {
         // free layer before destroying the datasource
         layer_.free_layer();
@@ -108,7 +108,7 @@ void ogr_datasource::bind() const
 
     // initialize ogr formats
     OGRRegisterAll();
-    
+
     std::string driver = *params_.get<std::string>("driver","");
 
     if (! driver.empty())
@@ -118,7 +118,7 @@ void ogr_datasource::bind() const
         {
             dataset_ = ogr_driver->Open((dataset_name_).c_str(), FALSE);
         }
-    
+
     }
     else
     {
@@ -261,9 +261,9 @@ void ogr_datasource::bind() const
     // TODO - enable this warning once the ogrindex tool is a bit more stable/mature
     else
     {
-      std::clog << "### Notice: no ogrindex file found for " << dataset_name_
-                << ", use the 'ogrindex' program to build an index for faster rendering"
-                << std::endl;
+        std::clog << "### Notice: no ogrindex file found for " << dataset_name_
+                  << ", use the 'ogrindex' program to build an index for faster rendering"
+                  << std::endl;
     }
 #endif
 
@@ -353,7 +353,7 @@ layer_descriptor ogr_datasource::get_descriptor() const
 featureset_ptr ogr_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();
-   
+
     if (dataset_ && layer_.is_valid())
     {
         OGRLayer* layer = layer_.layer();
@@ -361,7 +361,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
         if (indexed_)
         {
             filter_in_box filter(q.get_bbox());
-            
+
             return featureset_ptr(new ogr_index_featureset<filter_in_box>(*dataset_,
                                                                           *layer,
                                                                           filter,
@@ -385,7 +385,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
 featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
 {
     if (!is_bound_) bind();
-   
+
     if (dataset_ && layer_.is_valid())
     {
         OGRLayer* layer = layer_.layer();
@@ -393,7 +393,7 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
         if (indexed_)
         {
             filter_at_point filter(pt);
-            
+
             return featureset_ptr(new ogr_index_featureset<filter_at_point> (*dataset_,
                                                                              *layer,
                                                                              filter,

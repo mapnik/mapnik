@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -25,8 +25,8 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp> 
-#include <mapnik/wkb.hpp> 
+#include <mapnik/unicode.hpp>
+#include <mapnik/wkb.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
@@ -34,7 +34,7 @@
 
 // sqlite
 #include "sqlite_resultset.hpp"
-  
+
 
 class sqlite_featureset : public mapnik::Featureset
 {

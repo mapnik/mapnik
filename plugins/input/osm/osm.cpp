@@ -41,7 +41,7 @@ bool osm_dataset::load(const char* filename,const std::string& parser)
     return false;
 }
 
-bool osm_dataset::load_from_url(const std::string& url, 
+bool osm_dataset::load_from_url(const std::string& url,
                                 const std::string& bbox,
                                 const std::string& parser)
 {
@@ -168,7 +168,7 @@ osm_way* osm_dataset::next_way()
     }
     return NULL;
 }
-    
+
 osm_item* osm_dataset::next_item()
 {
     osm_item* item = NULL;
@@ -188,7 +188,7 @@ osm_item* osm_dataset::next_item()
     }
     return item;
 }
-  
+
 std::set<std::string> osm_dataset::get_keys()
 {
     std::set<std::string> keys;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,9 +35,9 @@
 
 // check for oracle support
 #if OCCI_MAJOR_VERSION >= 10 && OCCI_MINOR_VERSION >= 1
-  //     We have at least ORACLE 10g >= 10.2.0.X
+//     We have at least ORACLE 10g >= 10.2.0.X
 #else
-  #error Only ORACLE 10g >= 10.2.0.X is supported !
+#error Only ORACLE 10g >= 10.2.0.X is supported !
 #endif
 
 // geometry types definitions
@@ -92,7 +92,7 @@ public:
 #endif
 
             const int mode = oracle::occi::Environment::OBJECT
-                           | oracle::occi::Environment::THREADED_MUTEXED;
+                | oracle::occi::Environment::THREADED_MUTEXED;
 
             env_ = oracle::occi::Environment::createEnvironment((oracle::occi::Environment::Mode) mode);
             RegisterClasses(env_);
@@ -144,7 +144,7 @@ public:
     void set_pool(oracle::occi::StatelessConnectionPool* pool)
     {
         close_query(true);
-    
+
         pool_ = pool;
         conn_ = pool_->getConnection();
         owns_connection_ = true;
@@ -153,7 +153,7 @@ public:
     void set_connection(oracle::occi::Connection* conn, bool owns_connection)
     {
         close_query(true);
-    
+
         pool_ = 0;
         conn_ = conn;
         owns_connection_ = owns_connection;
@@ -172,7 +172,7 @@ public:
         }
 
         rs_ = stmt_->executeQuery();
-        
+
         return rs_;
     }
 
@@ -189,7 +189,7 @@ private:
             if (stmt_)
             {
                 if (rs_)
-                { 
+                {
                     stmt_->closeResultSet(rs_);
                     rs_ = 0;
                 }
@@ -197,7 +197,7 @@ private:
                 conn_->terminateStatement(stmt_);
                 stmt_ = 0;
             }
-            
+
             if (release_connection)
             {
                 if (pool_)
@@ -211,7 +211,7 @@ private:
                         env_->terminateConnection(conn_);
                     }
                 }
-                
+
                 conn_ = 0;
             }
         }

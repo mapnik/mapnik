@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -39,7 +39,7 @@ public:
         : feat_ (feat)
     {
     }
-    
+
     ~geos_feature_ptr ()
     {
         if (feat_ != NULL)
@@ -50,7 +50,7 @@ public:
     {
         if (feat_ != NULL)
             GEOSGeom_destroy(feat_);
-            
+
         feat_ = feat;
     }
 

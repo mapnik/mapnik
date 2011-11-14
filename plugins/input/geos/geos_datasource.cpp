@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -65,7 +65,7 @@ void geos_notice(const char* fmt, ...)
 {
     va_list ap;
     fprintf( stdout, "GEOS Plugin: (GEOS NOTICE) ");
-    
+
     va_start (ap, fmt);
     vfprintf( stdout, fmt, ap);
     va_end(ap);
@@ -85,14 +85,14 @@ void geos_error(const char* fmt, ...)
 
 
 geos_datasource::geos_datasource(parameters const& params, bool bind)
-  : datasource(params),
-    extent_(),
-    extent_initialized_(false),
-    type_(datasource::Vector),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
-    geometry_data_(""),
-    geometry_data_name_("name"),
-    geometry_id_(1)
+    : datasource(params),
+      extent_(),
+      extent_initialized_(false),
+      type_(datasource::Vector),
+      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
+      geometry_data_(""),
+      geometry_data_name_("name"),
+      geometry_id_(1)
 {
     boost::optional<std::string> geometry = params.get<std::string>("wkt");
     if (! geometry) throw datasource_exception("missing <wkt> parameter");
@@ -122,7 +122,7 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
 
 geos_datasource::~geos_datasource()
 {
-    if (is_bound_) 
+    if (is_bound_)
     {
         geometry_.set_feature(0);
 
@@ -132,7 +132,7 @@ geos_datasource::~geos_datasource()
 
 void geos_datasource::bind() const
 {
-    if (is_bound_) return;   
+    if (is_bound_) return;
 
     // open geos driver
     initGEOS(geos_notice, geos_error);
@@ -161,7 +161,7 @@ void geos_datasource::bind() const
             GEOSCoordSeq_getSize(cs, &size);
             GEOSCoordSeq_getX(cs, 0, &x);
             GEOSCoordSeq_getY(cs, 0, &y);
-        
+
             extent_.init(x, y, x, y);
             extent_initialized_ = true;
         }
@@ -188,9 +188,9 @@ void geos_datasource::bind() const
 
                         double x, y;
                         double minx = std::numeric_limits<float>::max(),
-                               miny = std::numeric_limits<float>::max(),
-                               maxx = -std::numeric_limits<float>::max(),
-                               maxy = -std::numeric_limits<float>::max();
+                            miny = std::numeric_limits<float>::max(),
+                            maxx = -std::numeric_limits<float>::max(),
+                            maxy = -std::numeric_limits<float>::max();
 
                         unsigned int num_points;
                         GEOSCoordSeq_getSize(cs, &num_points);
@@ -199,7 +199,7 @@ void geos_datasource::bind() const
                         {
                             GEOSCoordSeq_getX(cs, i, &x);
                             GEOSCoordSeq_getY(cs, i, &y);
-                            
+
                             if (x < minx) minx = x;
                             if (x > maxx) maxx = x;
                             if (y < miny) miny = y;
@@ -218,7 +218,7 @@ void geos_datasource::bind() const
     {
         throw datasource_exception("GEOS Plugin: cannot determine extent for <wkt> geometry");
     }
-   
+
     is_bound_ = true;
 }
 
@@ -235,14 +235,14 @@ int geos_datasource::type() const
 box2d<double> geos_datasource::envelope() const
 {
     if (! is_bound_) bind();
-    
+
     return extent_;
 }
 
 layer_descriptor geos_datasource::get_descriptor() const
 {
     if (! is_bound_) bind();
-    
+
     return desc_;
 }
 

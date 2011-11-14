@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -42,9 +42,9 @@ using mapnik::feature_factory;
 
 
 rasterlite_featureset::rasterlite_featureset(void* dataset, rasterlite_query q)
-  : dataset_(dataset),
-    gquery_(q),
-    first_(true)
+    : dataset_(dataset),
+      gquery_(q),
+      first_(true)
 {
     rasterliteSetBackgroundColor(dataset_, 255, 0, 255);
     rasterliteSetTransparentColor(dataset_, 255, 0, 255);
@@ -103,7 +103,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     const double pixel_size = (intersect.width() >= intersect.height()) ?
         (intersect.width() / (double) width) : (intersect.height() / (double) height);
 
-#ifdef MAPNIK_DEBUG         
+#ifdef MAPNIK_DEBUG
     std::clog << "Rasterlite Plugin: Raster extent=" << raster_extent << std::endl;
     std::clog << "Rasterlite Plugin: View extent=" << q.get_bbox() << std::endl;
     std::clog << "Rasterlite Plugin: Intersect extent=" << intersect << std::endl;
@@ -144,18 +144,18 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
 
                 free (raster);
 
-#ifdef MAPNIK_DEBUG         
+#ifdef MAPNIK_DEBUG
                 std::clog << "Rasterlite Plugin: done" << std::endl;
 #endif
             }
             else
             {
-#ifdef MAPNIK_DEBUG         
+#ifdef MAPNIK_DEBUG
                 std::clog << "Rasterlite Plugin: error=" << rasterliteGetLastError (dataset_) << std::endl;
 #endif
             }
         }
-      
+
         return feature;
     }
     return feature_ptr();

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -129,7 +129,7 @@ void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
     {
         OGRLinearRing* interior = geom->getInteriorRing(r);
         capacity += interior->getNumPoints();
-    }    
+    }
     geometry_type* poly = new geometry_type(mapnik::Polygon);
     poly->set_capacity(num_points + capacity);
     poly->move_to(exterior->getX(0), exterior->getY(0));
@@ -154,14 +154,14 @@ void ogr_converter::convert_multipoint(OGRMultiPoint* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
     geometry_type* point = new geometry_type(mapnik::Point);
-    
+
     for (int i = 0; i < num_geometries; i++)
     {
         OGRPoint* ogrpoint = static_cast<OGRPoint*>(geom->getGeometryRef(i));
         point->move_to(ogrpoint->getX(), ogrpoint->getY());
         //Todo - need to accept multiple points per mapnik::Point
     }
-    
+
     // Todo - this only gets last point
     feature->add_geometry(point);
 }
@@ -188,7 +188,7 @@ void ogr_converter::convert_multilinestring(OGRMultiLineString* geom, feature_pt
 
     geometry_type* line = new geometry_type(mapnik::LineString);
     line->set_capacity(num_points);
-    
+
     for (int i = 0; i < num_geometries; i++)
     {
         OGRLineString* ls = static_cast<OGRLineString*>(geom->getGeometryRef(i));
@@ -226,7 +226,7 @@ void ogr_converter::convert_multipolygon(OGRMultiPolygon* geom, feature_ptr feat
         {
             OGRLinearRing* interior = p->getInteriorRing(r);
             capacity += interior->getNumPoints();
-        }    
+        }
     }
 
     geometry_type* poly = new geometry_type(mapnik::Polygon);

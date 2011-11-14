@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -31,7 +31,7 @@
 
 #include "rasterlite_include.hpp"
 
-class rasterlite_datasource : public mapnik::datasource 
+class rasterlite_datasource : public mapnik::datasource
 {
 public:
     rasterlite_datasource(mapnik::parameters const& params, bool bind = true);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -41,7 +41,7 @@
 
 // sqlite
 extern "C" {
-  #include <sqlite3.h>
+#include <sqlite3.h>
 }
 
 #include "sqlite_resultset.hpp"
@@ -66,7 +66,7 @@ public:
             }
             if ((first >= '0' && first <= '9') ||
                 (name.find("-") != std::string::npos)
-               )
+                )
             {
                 return true;
             }
@@ -87,7 +87,7 @@ public:
     {
         boost::algorithm::trim_if(z,boost::algorithm::is_any_of("[]'\"`"));
     }
-    
+
     static std::string index_for_table(std::string const& table, std::string const& field)
     {
         std::string table_trimmed = table;
@@ -103,10 +103,10 @@ public:
         //}
         //else
         //{
-            return file + ".index";
+        return file + ".index";
         //}
     }
-    
+
     static void get_tables(boost::shared_ptr<sqlite_connection> ds,
                            std::vector<std::string> & tables)
     {
@@ -131,23 +131,23 @@ public:
             boost::shared_ptr<sqlite_resultset> rs = boost::make_shared<sqlite_resultset>(stmt);
             while (rs->is_valid() && rs->step_next())
             {
-            std::clog << "b\n";
+                std::clog << "b\n";
                 const int type_oid = rs->column_type(0);
                 if (type_oid == SQLITE_TEXT)
                 {
-            std::clog << "c\n";
+                    std::clog << "c\n";
                     const char * data = rs->column_text(0);
                     if (data)
                     {
 
-            std::clog << "d\n";
+                        std::clog << "d\n";
                         tables.push_back(std::string(data));
                     }
                 }
             }
         }
-    }    
-    
+    }
+
     static void query_extent(boost::shared_ptr<sqlite_resultset> rs,
                              mapnik::box2d<double>& extent)
     {
@@ -164,7 +164,7 @@ public:
                 for (unsigned i=0; i<paths.size(); ++i)
                 {
                     mapnik::box2d<double> const& bbox = paths[i].envelope();
-    
+
                     if (bbox.valid())
                     {
                         if (first)
@@ -181,20 +181,20 @@ public:
             }
         }
     }
-    
+
     static bool create_spatial_index(std::string const& index_db,
                                      std::string const& index_table,
                                      boost::shared_ptr<sqlite_resultset> rs)
     {
         /* TODO
-          - speedups
-          - return early/recover from failure
-          - allow either in db or in separate
+           - speedups
+           - return early/recover from failure
+           - allow either in db or in separate
         */
-        
+
         if (!rs->is_valid())
             return false;
-        
+
 #if SQLITE_VERSION_NUMBER >= 3005000
         int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX;
 #else
@@ -203,7 +203,7 @@ public:
 
         bool existed = boost::filesystem::exists(index_db);
         boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
-        
+
         bool one_success = false;
         try
         {
@@ -212,31 +212,31 @@ public:
             ds->execute("BEGIN IMMEDIATE TRANSACTION");
 
             /*
-            ds->execute("PRAGMA journal_mode=WAL");
-            ds->execute("PRAGMA fullfsync=1");
-            ds->execute("PRAGMA locking_mode = EXCLUSIVE");
-            ds->execute("BEGIN EXCLUSIVE TRANSACTION");
+              ds->execute("PRAGMA journal_mode=WAL");
+              ds->execute("PRAGMA fullfsync=1");
+              ds->execute("PRAGMA locking_mode = EXCLUSIVE");
+              ds->execute("BEGIN EXCLUSIVE TRANSACTION");
             */
 
             // first drop the index if it already exists
             std::ostringstream spatial_index_drop_sql;
             spatial_index_drop_sql << "DROP TABLE IF EXISTS " << index_table;
             ds->execute(spatial_index_drop_sql.str());
-    
+
             // create the spatial index
             std::ostringstream create_idx;
-            create_idx << "create virtual table " 
+            create_idx << "create virtual table "
                        << index_table
                        << " using rtree(pkid, xmin, xmax, ymin, ymax)";
-    
+
             // insert for prepared statement
             std::ostringstream insert_idx;
             insert_idx << "insert into "
                        << index_table
                        << " values (?,?,?,?,?)";
-    
+
             ds->execute(create_idx.str());
-            
+
             prepared_index_statement ps(ds,insert_idx.str());
 
             while (rs->is_valid() && rs->step_next())
@@ -254,9 +254,9 @@ public:
                         mapnik::box2d<double> const& bbox = paths[i].envelope();
                         if (bbox.valid())
                         {
-    
+
                             ps.bind(bbox);
-        
+
                             const int type_oid = rs->column_type(1);
                             if (type_oid != SQLITE_INTEGER)
                             {
@@ -266,7 +266,7 @@ public:
                                           << "' type was: " << type_oid << "";
                                 throw mapnik::datasource_exception(error_msg.str());
                             }
-        
+
                             const sqlite_int64 pkid = rs->column_integer64(1);
                             ps.bind(pkid);
                         }
@@ -274,10 +274,10 @@ public:
                         {
                             std::ostringstream error_msg;
                             error_msg << "SQLite Plugin: encountered invalid bbox at '"
-                                        << rs->column_name(1) << "' == " << rs->column_integer64(1);
+                                      << rs->column_name(1) << "' == " << rs->column_integer64(1);
                             throw mapnik::datasource_exception(error_msg.str());
                         }
-    
+
                         ps.step_next();
                         one_success = true;
                     }
@@ -322,20 +322,20 @@ public:
                               std::string const& geometry_table,
                               std::string const& key_field,
                               std::string const& table
-                              )
+        )
     {
         if (has_spatial_index)
         {
             std::ostringstream s;
-            s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM " 
-            << index_table;
-    
+            s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM "
+              << index_table;
+
             boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             if (rs->is_valid() && rs->step_next())
             {
                 if (! rs->column_isnull(0))
                 {
-                    try 
+                    try
                     {
                         double xmin = boost::lexical_cast<double>(rs->column_double(0));
                         double ymin = boost::lexical_cast<double>(rs->column_double(1));
@@ -403,9 +403,9 @@ public:
     }
 
     static bool detect_types_from_subquery(std::string const& query,
-                                    std::string & geometry_field,
-                                    mapnik::layer_descriptor & desc,
-                                    boost::shared_ptr<sqlite_connection> ds)
+                                           std::string & geometry_field,
+                                           mapnik::layer_descriptor & desc,
+                                           boost::shared_ptr<sqlite_connection> ds)
     {
         bool found = false;
         boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(query));
@@ -421,15 +421,15 @@ public:
                 case SQLITE_INTEGER:
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::Integer));
                     break;
-                     
+
                 case SQLITE_FLOAT:
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::Double));
                     break;
-                     
+
                 case SQLITE_TEXT:
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
                     break;
-                     
+
                 case SQLITE_NULL:
                     // sqlite reports based on value, not actual column type unless
                     // PRAGMA table_info is used so here we assume the column is a string
@@ -446,7 +446,7 @@ public:
                         geometry_field = std::string(fld_name);
                     }
                     break;
-                     
+
                 default:
 #ifdef MAPNIK_DEBUG
                     std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
@@ -455,21 +455,21 @@ public:
                 }
             }
         }
-        
+
         return found;
     }
 
     static bool table_info(std::string & key_field,
-                    bool detected_types,
-                    std::string & field,
-                    std::string & table,
-                    mapnik::layer_descriptor & desc,
-                    boost::shared_ptr<sqlite_connection> ds)
+                           bool detected_types,
+                           std::string & field,
+                           std::string & table,
+                           mapnik::layer_descriptor & desc,
+                           boost::shared_ptr<sqlite_connection> ds)
     {
 
         // http://www.sqlite.org/pragma.html#pragma_table_info
         // use pragma table_info to detect primary key
-        // and to detect types if no subquery is used or 
+        // and to detect types if no subquery is used or
         // if the subquery-based type detection failed
         std::ostringstream s;
         s << "PRAGMA table_info(" << table << ")";
@@ -483,7 +483,7 @@ public:
             std::string fld_type(rs->column_text(2));
             int fld_pk = rs->column_integer(5);
             boost::algorithm::to_lower(fld_type);
-    
+
             // TODO - how to handle primary keys on multiple columns ?
             if (key_field.empty() && ! found_pk && fld_pk != 0)
             {
@@ -499,12 +499,12 @@ public:
                          boost::algorithm::contains(fld_type, "point") ||
                          boost::algorithm::contains(fld_type, "linestring") ||
                          boost::algorithm::contains(fld_type, "polygon"))
-                    ||
+                        ||
                         (boost::algorithm::icontains(fld_name, "geom") ||
                          boost::algorithm::icontains(fld_name, "point") ||
                          boost::algorithm::icontains(fld_name, "linestring") ||
                          boost::algorithm::icontains(fld_name, "polygon")))
-                   )
+                    )
                 {
                     field = std::string(fld_name);
                 }
@@ -531,23 +531,23 @@ public:
                         desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
                     }
                 }
-        #ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_DEBUG
                 else
                 {
                     // "Column Affinity" says default to "Numeric" but for now we pass..
                     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-        
+
                     // TODO - this should not fail when we specify geometry_field in XML file
-        
+
                     std::clog << "Sqlite Plugin: column '"
                               << std::string(fld_name)
                               << "' unhandled due to unknown type: "
                               << fld_type << std::endl;
                 }
-        #endif
+#endif
             }
         }
-        
+
         return found_table;
     }
 };

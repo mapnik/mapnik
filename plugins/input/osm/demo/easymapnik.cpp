@@ -22,7 +22,7 @@ int main(int argc,char *argv[])
     }
 
 
-    MapSource s ; 
+    MapSource s ;
     s.process_cmd_line_args(argc,argv);
 
     if(!s.isValid())
@@ -49,25 +49,25 @@ void usage()
 {
     cerr << "Usage: easymapnik -s source [-w width] [-h height] -x xmlfile "
          << endl <<
-         "[-i InOSMFile] [-o OutPNGFile] [-t] [-z startzoom] [-Z endzoom] "
+        "[-i InOSMFile] [-o OutPNGFile] [-t] [-z startzoom] [-Z endzoom] "
          << endl <<
-         "[-b bbox] [-u serverURL] [-m]" << endl << endl;
+        "[-b bbox] [-u serverURL] [-m]" << endl << endl;
 }
 
 
 void help()
 {
-    cerr << "Source should be 'osm' or 'api', indicating OSM files and "    
-        << endl << "retrieval direct from a server (e.g. OSMXAPI) respectively."
-        << endl <<
+    cerr << "Source should be 'osm' or 'api', indicating OSM files and "
+         << endl << "retrieval direct from a server (e.g. OSMXAPI) respectively."
+         << endl <<
         "-t indicates tiled mode (generate 'Google' style tiles); you must "
-        << endl <<
-         "supply at least a start zoom, and a bounding box, for this."
-        << endl <<
-         "-m means 'multirequest'; if you're requesting a relatively large "
-        << endl <<
-         "area from the server (e.g. OSMXAPI), it will fetch it in "
-        << "0.1x0.1 degree tiles. "
-        << endl << "This speeds up processing considerably." << endl;
+         << endl <<
+        "supply at least a start zoom, and a bounding box, for this."
+         << endl <<
+        "-m means 'multirequest'; if you're requesting a relatively large "
+         << endl <<
+        "area from the server (e.g. OSMXAPI), it will fetch it in "
+         << "0.1x0.1 degree tiles. "
+         << endl << "This speeds up processing considerably." << endl;
     exit(1);
 }

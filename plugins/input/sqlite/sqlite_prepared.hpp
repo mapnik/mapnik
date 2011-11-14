@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -38,10 +38,10 @@
 
 // sqlite
 extern "C" {
-  #include <sqlite3.h>
+#include <sqlite3.h>
 }
 
-class prepared_index_statement : boost::noncopyable 
+class prepared_index_statement : boost::noncopyable
 {
 
 public:
@@ -51,10 +51,10 @@ public:
     {
 
         const int rc = sqlite3_prepare_v2(*(*ds_),
-                                           sql.c_str(),
-                                           -1,
-                                           &stmt_,
-                                           0);
+                                          sql.c_str(),
+                                          -1,
+                                          &stmt_,
+                                          0);
 
         if (rc != SQLITE_OK)
         {
@@ -66,7 +66,7 @@ public:
             throw mapnik::datasource_exception(index_error.str());
         }
     }
-     
+
     ~prepared_index_statement()
     {
         if (stmt_)
@@ -85,14 +85,14 @@ public:
             }
         }
     }
-    
+
     void bind(sqlite_int64 const pkid)
     {
         if (sqlite3_bind_int64(stmt_, 1, pkid) != SQLITE_OK)
         {
             throw mapnik::datasource_exception("SQLite Plugin: invalid value for for key field while generating index");
         }
-        
+
     }
 
     void bind(mapnik::box2d<double> const& bbox)
@@ -105,7 +105,7 @@ public:
             throw mapnik::datasource_exception("SQLite Plugin: invalid value for for extent while generating index");
         }
     }
-    
+
     bool step_next ()
     {
         const int status = sqlite3_step(stmt_);

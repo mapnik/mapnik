@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -36,7 +36,7 @@
 
 #include "ogr_layer_ptr.hpp"
 
-class ogr_datasource : public mapnik::datasource 
+class ogr_datasource : public mapnik::datasource
 {
 public:
     ogr_datasource(mapnik::parameters const& params, bool bind=true);

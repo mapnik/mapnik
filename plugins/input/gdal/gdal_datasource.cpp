@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -74,9 +74,9 @@ inline GDALDataset* gdal_datasource::open_dataset() const
 
 
 gdal_datasource::gdal_datasource(parameters const& params, bool bind)
-  : datasource(params),
-    desc_(*params.get<std::string>("type"), "utf-8"),
-    filter_factor_(*params_.get<double>("filter_factor", 0.0))
+    : datasource(params),
+      desc_(*params.get<std::string>("type"), "utf-8"),
+      filter_factor_(*params_.get<double>("filter_factor", 0.0))
 {
 #ifdef MAPNIK_DEBUG
     std::clog << "GDAL Plugin: Initializing..." << std::endl;
@@ -96,7 +96,7 @@ gdal_datasource::gdal_datasource(parameters const& params, bool bind)
     {
         dataset_name_ = *file;
     }
-   
+
     if (bind)
     {
         this->bind();
@@ -106,12 +106,12 @@ gdal_datasource::gdal_datasource(parameters const& params, bool bind)
 void gdal_datasource::bind() const
 {
     if (is_bound_) return;
-    
+
     shared_dataset_ = *params_.get<mapnik::boolean>("shared", false);
     band_ = *params_.get<int>("band", -1);
 
     GDALDataset *dataset = open_dataset();
-   
+
     nbands_ = dataset->GetRasterCount();
     width_ = dataset->GetRasterXSize();
     height_ = dataset->GetRasterYSize();
@@ -131,7 +131,7 @@ void gdal_datasource::bind() const
             throw datasource_exception("GDAL Plugin: bbox parameter '" + *bbox_s + "' invalid");
         }
     }
-    
+
     if (bbox_override)
     {
         tr[0] = extent_.minx();
@@ -145,13 +145,13 @@ void gdal_datasource::bind() const
     {
         dataset->GetGeoTransform(tr);
     }
-    
+
 #ifdef MAPNIK_DEBUG
     std::clog << "GDAL Plugin: geotransform=" << tr[0] << "," << tr[1] << ","
-                                              << tr[2] << "," << tr[3] << ","
-                                              << tr[4] << "," << tr[5] << std::endl;
+              << tr[2] << "," << tr[3] << ","
+              << tr[4] << "," << tr[5] << std::endl;
 #endif
-    
+
     if (tr[2] != 0 || tr[4] != 0)
     {
         throw datasource_exception("GDAL Plugin: only 'north up' images are supported");
@@ -159,27 +159,27 @@ void gdal_datasource::bind() const
 
     dx_ = tr[1];
     dy_ = tr[5];
-    
+
     if (! bbox_override)
     {
         double x0 = tr[0];
         double y0 = tr[3];
         double x1 = tr[0] + width_ * dx_ + height_ *tr[2];
         double y1 = tr[3] + width_ *tr[4] + height_ * dy_;
-         
+
         /*
-        double x0 = tr[0] + (height_) * tr[2]; // minx
-        double y0 = tr[3] + (height_) * tr[5]; // miny
-        
-        double x1 = tr[0] + (width_) * tr[1]; // maxx
-        double y1 = tr[3] + (width_) * tr[4]; // maxy
+          double x0 = tr[0] + (height_) * tr[2]; // minx
+          double y0 = tr[3] + (height_) * tr[5]; // miny
+
+          double x1 = tr[0] + (width_) * tr[1]; // maxx
+          double y1 = tr[3] + (width_) * tr[4]; // maxy
         */
-        
+
         extent_.init(x0, y0, x1, y1);
     }
 
     GDALClose(dataset);
-   
+
 #ifdef MAPNIK_DEBUG
     std::clog << "GDAL Plugin: Raster Size=" << width_ << "," << height_ << std::endl;
     std::clog << "GDAL Plugin: Raster Extent=" << extent_ << std::endl;
@@ -205,7 +205,7 @@ std::string gdal_datasource::name()
 box2d<double> gdal_datasource::envelope() const
 {
     if (! is_bound_) bind();
-    
+
     return extent_;
 }
 

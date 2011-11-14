@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -68,7 +68,7 @@ const std::string occi_datasource::METADATA_TABLE = "USER_SDO_GEOM_METADATA";
 DATASOURCE_PLUGIN(occi_datasource)
 
 occi_datasource::occi_datasource(parameters const& params, bool bind)
-  : datasource (params),
+: datasource (params),
     type_(datasource::Vector),
     fields_(*params_.get<std::string>("fields", "*")),
     geometry_field_(*params_.get<std::string>("geometry_field", "")),
@@ -93,11 +93,11 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
     {
         table_ = *table;
     }
-    
+
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
     use_connection_pool_ = *params_.get<mapnik::boolean>("use_connection_pool",true);
-    
+
     boost::optional<std::string> ext = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
@@ -149,13 +149,13 @@ void occi_datasource::bind() const
             Environment* env = occi_environment::get_environment();
 
             pool_ = env->createStatelessConnectionPool(
-                        *params_.get<std::string>("user"),
-                        *params_.get<std::string>("password"),
-                        *params_.get<std::string>("host"),
-                        *params_.get<int>("max_size", 10),
-                        *params_.get<int>("initial_size", 1),
-                        1,
-                        StatelessConnectionPool::HOMOGENEOUS);
+                *params_.get<std::string>("user"),
+                *params_.get<std::string>("password"),
+                *params_.get<std::string>("host"),
+                *params_.get<int>("max_size", 10),
+                *params_.get<int>("initial_size", 1),
+                1,
+                StatelessConnectionPool::HOMOGENEOUS);
         }
         catch (SQLException& ex)
         {
@@ -167,11 +167,11 @@ void occi_datasource::bind() const
         try
         {
             Environment* env = occi_environment::get_environment();
-            
+
             conn_ = env->createConnection(
-                        *params_.get<std::string>("user"),
-                        *params_.get<std::string>("password"),
-                        *params_.get<std::string>("host"));
+                *params_.get<std::string>("user"),
+                *params_.get<std::string>("password"),
+                *params_.get<std::string>("host"));
         }
         catch (SQLException& ex)
         {
@@ -187,7 +187,7 @@ void occi_datasource::bind() const
         std::ostringstream s;
         s << "SELECT srid, column_name FROM " << METADATA_TABLE << " WHERE";
         s << " LOWER(table_name) = LOWER('" << table_name << "')";
-        
+
         if (geometry_field_ != "")
         {
             s << " AND LOWER(column_name) = LOWER('" << geometry_field_ << "')";
@@ -211,7 +211,7 @@ void occi_datasource::bind() const
                     srid_ = rs->getInt(1);
                     srid_initialized_ = true;
                 }
-                
+
                 if (geometry_field_ == "")
                 {
                     geometry_field_ = rs->getString(2);
@@ -252,12 +252,12 @@ void occi_datasource::bind() const
                     int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
 
                     /*
-                    int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
-                    if (type_code == OCCI_TYPECODE_OBJECT)
-                    {
-                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
-                        continue;
-                    }
+                      int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
+                      if (type_code == OCCI_TYPECODE_OBJECT)
+                      {
+                      desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
+                      continue;
+                      }
                     */
 
                     switch (type_oid)
@@ -444,7 +444,7 @@ box2d<double> occi_datasource::envelope() const
                         std::clog << "OCCI Plugin: " << ex.what() << std::endl;
                     }
                 }
-                
+
                 if (rs->next())
                 {
                     try
@@ -479,7 +479,7 @@ box2d<double> occi_datasource::envelope() const
 layer_descriptor occi_datasource::get_descriptor() const
 {
     if (! is_bound_) bind();
-    
+
     return desc_;
 }
 

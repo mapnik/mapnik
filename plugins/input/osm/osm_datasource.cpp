@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -50,7 +50,7 @@ using mapnik::attribute_descriptor;
 DATASOURCE_PLUGIN(osm_datasource)
 
 osm_datasource::osm_datasource(const parameters& params, bool bind)
-  : datasource (params),
+: datasource (params),
     type_(datasource::Vector),
     desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8"))
 {
@@ -69,7 +69,7 @@ void osm_datasource::bind() const
     std::string parser = *params_.get<std::string>("parser", "libxml2");
     std::string url = *params_.get<std::string>("url", "");
     std::string bbox = *params_.get<std::string>("bbox", "");
-    
+
     bool do_process = false;
 
     // load the data
@@ -119,14 +119,14 @@ void osm_datasource::bind() const
         bounds b = osm_data_->get_bounds();
         extent_ =  box2d<double>(b.w, b.s, b.e, b.n);
     }
-    
+
     is_bound_ = true;
 }
 
-osm_datasource::~osm_datasource() 
-{ 
+osm_datasource::~osm_datasource()
+{
     // Do not do as is now static variable and cleaned up at exit
-    //delete osm_data_; 
+    //delete osm_data_;
 }
 
 std::string osm_datasource::name()
@@ -147,10 +147,10 @@ layer_descriptor osm_datasource::get_descriptor() const
 featureset_ptr osm_datasource::features(const query& q) const
 {
     if (! is_bound_) bind();
-    
+
     filter_in_box filter(q.get_bbox());
     // so we need to filter osm features by bbox here...
-    
+
     return boost::make_shared<osm_featureset<filter_in_box> >(filter,
                                                               osm_data_,
                                                               q.property_names(),
@@ -160,20 +160,20 @@ featureset_ptr osm_datasource::features(const query& q) const
 featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
 {
     if (! is_bound_) bind();
-    
+
     filter_at_point filter(pt);
     // collect all attribute names
     std::vector<attribute_descriptor> const& desc_vector = desc_.get_descriptors();
     std::vector<attribute_descriptor>::const_iterator itr = desc_vector.begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_vector.end();
     std::set<std::string> names;
-    
+
     while (itr != end)
     {
         names.insert(itr->get_name());
         ++itr;
     }
-    
+
     return boost::make_shared<osm_featureset<filter_at_point> >(filter,
                                                                 osm_data_,
                                                                 names,
@@ -182,7 +182,7 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
 
 box2d<double> osm_datasource::envelope() const
 {
-   if (! is_bound_) bind();
-   
-   return extent_;
+    if (! is_bound_) bind();
+
+    return extent_;
 }

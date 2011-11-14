@@ -1,6 +1,6 @@
 
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -36,17 +36,17 @@ using mapnik::geometry_type;
 using mapnik::feature_factory;
 
 template <typename filterT>
-osm_featureset<filterT>::osm_featureset(const filterT& filter, 
+osm_featureset<filterT>::osm_featureset(const filterT& filter,
                                         osm_dataset* dataset,
-                                        const std::set<std::string>& 
+                                        const std::set<std::string>&
                                         attribute_names,
                                         std::string const& encoding)
-  : filter_(filter),
-    query_ext_(),
-    tr_(new transcoder(encoding)),
-    feature_id_(1),
-    dataset_ (dataset),
-    attribute_names_ (attribute_names)
+    : filter_(filter),
+      query_ext_(),
+      tr_(new transcoder(encoding)),
+      feature_id_(1),
+      dataset_ (dataset),
+      attribute_names_ (attribute_names)
 {
     dataset_->rewind();
 }
@@ -70,11 +70,11 @@ feature_ptr osm_featureset<filterT>::next()
             point->move_to(lon, lat);
             feature->add_geometry(point);
             success = true;
-        } 
+        }
         else if (dataset_->current_item_is_way())
         {
             bounds b = static_cast<osm_way*>(cur_item)->get_bounds();
-                
+
             // Loop until we find a feature which passes the filter
             while (cur_item != NULL &&
                    ! filter_.pass(box2d<double>(b.w, b.s, b.e, b.n)))
@@ -84,8 +84,8 @@ feature_ptr osm_featureset<filterT>::next()
                 {
                     b = static_cast<osm_way*>(cur_item)->get_bounds();
                 }
-            }   
-                                
+            }
+
             if (cur_item != NULL)
             {
                 if (static_cast<osm_way*>(cur_item)->nodes.size())
@@ -101,11 +101,11 @@ feature_ptr osm_featureset<filterT>::next()
                     {
                         geom = new geometry_type(mapnik::LineString);
                     }
-                    
+
                     geom->set_capacity(static_cast<osm_way*>(cur_item)->nodes.size());
                     geom->move_to(static_cast<osm_way*>(cur_item)->nodes[0]->lon,
                                   static_cast<osm_way*>(cur_item)->nodes[0]->lat);
-                                
+
                     for (unsigned int count = 1;
                          count < static_cast<osm_way*>(cur_item)->nodes.size();
                          count++)
@@ -118,8 +118,8 @@ feature_ptr osm_featureset<filterT>::next()
                 }
             }
         }
-        
-        // can feature_ptr be compared to NULL? - no 
+
+        // can feature_ptr be compared to NULL? - no
         if (success)
         {
             std::map<std::string,std::string>::iterator i = cur_item->keyvals.begin();
@@ -127,7 +127,7 @@ feature_ptr osm_featureset<filterT>::next()
             // add the keyvals to the feature. the feature seems to be a map
             // of some sort so this should work - see dbf_file::add_attribute()
             while (i != cur_item->keyvals.end())
-            {   
+            {
                 // only add if in the specified set of attribute names
                 if (attribute_names_.find(i->first) != attribute_names_.end())
                 {
@@ -139,7 +139,7 @@ feature_ptr osm_featureset<filterT>::next()
 
             return feature;
         }
-    }   
+    }
     return feature_ptr();
 }
 
