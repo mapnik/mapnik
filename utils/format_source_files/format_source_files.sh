@@ -2,8 +2,8 @@
 
 # batch format *.{hpp,cpp} files
 
-MAPNIK_DIR="/Users/artem/projects/mapnik" 
-DIRS="$MAPNIK_DIR/src $MAPNIK_DIR/include $MAPNIK_DIR/bindings $MAPNIK_DIR/utils"
+MAPNIK_DIR=`pwd`
+DIRS="$MAPNIK_DIR/plugins $MAPNIK_DIR/demo/c++ $MAPNIK_DIR/src $MAPNIK_DIR/include $MAPNIK_DIR/bindings $MAPNIK_DIR/utils"
 EMACS="emacs"
 
 for file in $(find $DIRS -name '*.cpp' -o -name '*.hpp')
