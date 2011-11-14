@@ -109,7 +109,7 @@ public:
     bool step_next ()
     {
         const int status = sqlite3_step(stmt_);
-        if (status != SQLITE_ROW && status != SQLITE_DONE)
+        if (status != SQLITE_DONE)
         {
             std::ostringstream s;
             s << "SQLite Plugin: inserting bbox into rtree index failed";
@@ -120,8 +120,12 @@ public:
             }
             throw mapnik::datasource_exception(s.str());
         }
-        sqlite3_reset(stmt_);
-        return status == SQLITE_ROW;
+        sqlite3_clear_bindings(stmt_);
+        if (sqlite3_reset(stmt_) != SQLITE_OK)
+        {
+            throw mapnik::datasource_exception("sqlite3_reset failed");
+        }
+        return true;
     }
 
 private:
