@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -76,7 +76,7 @@ void export_expression()
         .def("evaluate", &expression_evaluate_)
         .def("__str__",&to_expression_string);
     ;
-    
+
     def("Expression",&parse_expression_,(arg("expr")),"Expression string");
 
     class_<mapnik::path_expression ,boost::noncopyable>("PathExpression",
@@ -85,6 +85,6 @@ void export_expression()
         .def("evaluate", &path_evaluate_) // note: "pass" is a reserved word in Python
         .def("__str__",&path_to_string_);
     ;
-    
+
     def("PathExpression",&parse_path_,(arg("expr")),"PathExpression string");
 }

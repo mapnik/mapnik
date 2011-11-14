@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -47,23 +47,23 @@ namespace boost { namespace python {
         {
             return ::PyBool_FromLong(val);
         }
-            
+
         PyObject * operator() (UnicodeString const& s) const
         {
             std::string buffer;
             mapnik::to_utf8(s,buffer);
             PyObject *obj = Py_None;
-            obj = ::PyUnicode_DecodeUTF8(buffer.c_str(),implicit_cast<ssize_t>(buffer.length()),0);                
+            obj = ::PyUnicode_DecodeUTF8(buffer.c_str(),implicit_cast<ssize_t>(buffer.length()),0);
             return obj;
         }
-            
+
         PyObject * operator() (mapnik::value_null const& /*s*/) const
         {
             return Py_None;
         }
     };
 
-}
+    }
 }
 
 #endif // MAPNIK_PYTHON_BINDING_VALUE_CONVERTER_INCLUDED

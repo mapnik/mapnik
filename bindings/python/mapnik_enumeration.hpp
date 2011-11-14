@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -26,7 +26,7 @@ namespace mapnik {
 
 template <typename EnumWrapper>
 class enumeration_ :
-        public boost::python::enum_<typename EnumWrapper::native_type> 
+        public boost::python::enum_<typename EnumWrapper::native_type>
 {
     // some short cuts
     typedef boost::python::enum_<typename EnumWrapper::native_type> base_type;
@@ -46,7 +46,7 @@ public:
     enumeration_(const char * python_alias, const char * doc) :
         base_type( python_alias, doc )
 #else
-    enumeration_(const char * python_alias, const char * /*doc*/) :
+        enumeration_(const char * python_alias, const char * /*doc*/) :
         // Boost.Python < 1.35.0 doesn't support
         // docstrings for enums so we ignore it.
         base_type( python_alias )

@@ -114,11 +114,11 @@ feature_ptr occi_featureset::next()
             int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
 
             /*
-                 int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
-                 if (type_code == OCCI_TYPECODE_OBJECT)
-                 {
-                 continue;
-                 }
+              int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
+              if (type_code == OCCI_TYPECODE_OBJECT)
+              {
+              continue;
+              }
             */
 
             switch (type_oid)

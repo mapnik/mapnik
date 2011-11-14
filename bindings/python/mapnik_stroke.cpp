@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c+mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -57,7 +57,7 @@ struct stroke_pickle_suite : boost::python::pickle_suite
     {
 
         return boost::python::make_tuple(s.get_color(),s.get_width());
-      
+
     }
 
     static  boost::python::tuple
@@ -140,15 +140,15 @@ void export_stroke ()
         .add_property("width",
                       &stroke::get_width,
                       &stroke::set_width,
-                      "Gets or sets the stroke width in pixels.\n") 
+                      "Gets or sets the stroke width in pixels.\n")
         .add_property("opacity",
                       &stroke::get_opacity,
-                      &stroke::set_opacity, 
+                      &stroke::set_opacity,
                       "Gets or sets the opacity of this stroke.\n"
                       "The value is a float between 0 and 1.\n")
         .add_property("gamma",
                       &stroke::get_gamma,
-                      &stroke::set_gamma, 
+                      &stroke::set_gamma,
                       "Gets or sets the gamma of this stroke.\n"
                       "The value is a float between 0 and 1.\n")
         .add_property("line_cap",

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -33,14 +33,14 @@ using mapnik::parameters;
 struct pickle_value : public boost::static_visitor<>
 {
 public:
-    pickle_value( boost::python::list vals): 
+    pickle_value( boost::python::list vals):
         vals_(vals) {}
-            
+
     void operator () ( int val )
     {
         vals_.append(val);
     }
-        
+
     void operator () ( double val )
     {
         vals_.append(val);
@@ -50,7 +50,7 @@ public:
     {
         vals_.append(val);
     }
-        
+
 private:
     boost::python::list vals_;
 
@@ -97,7 +97,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
                 );
             throw_error_already_set();
         }
-        
+
         dict d = extract<dict>(state[0]);
         boost::python::list keys = d.keys();
         for (int i=0; i<len(keys); ++i)
@@ -107,7 +107,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             extract<std::string> ex0(obj);
             extract<int> ex1(obj);
             extract<double> ex2(obj);
-            
+
             if (ex0.check())
             {
                 p[key] = ex0();
@@ -119,14 +119,14 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             else if (ex2.check())
             {
                 p[key] = ex2();
-            }           
-            
+            }
+
             /*
               extract_value serializer( p, key );
               mapnik::value_holder val = extract<mapnik::value_holder>(d[key]);
               boost::apply_visitor( serializer, val );
             */
-        }        
+        }
     }
 };
 

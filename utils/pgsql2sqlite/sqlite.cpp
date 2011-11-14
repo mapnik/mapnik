@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2009 Artem Pavlenko
@@ -33,17 +33,17 @@ namespace mapnik { namespace sqlite {
         {
             sqlite3_close(db);
             throw;
-        } 
-         
+        }
+
         db_ = sqlite_db(db,database_closer());
 #ifdef MAPNIK_DEBUG
         std::cerr << "Open database " << name << "\n";
 #endif
     }
-      
+
     database::~database() {}
-      
-    bool database::execute(std::string const& sql)   
+
+    bool database::execute(std::string const& sql)
     {
         char * err_msg;
         int res = sqlite3_exec(db_.get(),sql.c_str(),0,0,&err_msg);

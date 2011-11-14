@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2010 Artem Pavlenko
@@ -33,18 +33,18 @@ using mapnik::symbolizer_with_image;
 using mapnik::path_processor_type;
 using mapnik::parse_path;
 
-namespace  { 
+namespace  {
 using namespace boost::python;
 
-std::string get_filename(mapnik::markers_symbolizer const& symbolizer) 
-{ 
-    return path_processor_type::to_string(*symbolizer.get_filename()); 
-} 
+std::string get_filename(mapnik::markers_symbolizer const& symbolizer)
+{
+    return path_processor_type::to_string(*symbolizer.get_filename());
+}
 
-void set_filename(mapnik::markers_symbolizer & symbolizer, std::string const& file_expr) 
-{ 
-    symbolizer.set_filename(parse_path(file_expr)); 
-} 
+void set_filename(mapnik::markers_symbolizer & symbolizer, std::string const& file_expr)
+{
+    symbolizer.set_filename(parse_path(file_expr));
+}
 
 }
 
@@ -75,10 +75,10 @@ struct markers_symbolizer_pickle_suite : boost::python::pickle_suite
                 );
             throw_error_already_set();
         }
-                
+
         p.set_allow_overlap(extract<bool>(state[0]));
         //p.set_opacity(extract<float>(state[1]));
-        
+
     }
 
 };
@@ -87,14 +87,14 @@ struct markers_symbolizer_pickle_suite : boost::python::pickle_suite
 void export_markers_symbolizer()
 {
     using namespace boost::python;
-    
+
     class_<markers_symbolizer>("MarkersSymbolizer",
-                             init<>("Default Markers Symbolizer - blue arrow"))
+                               init<>("Default Markers Symbolizer - blue arrow"))
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
         //.def_pickle(markers_symbolizer_pickle_suite())
         .add_property("filename",
                       &get_filename,
-                      &set_filename)   
+                      &set_filename)
         .add_property("allow_overlap",
                       &markers_symbolizer::get_allow_overlap,
                       &markers_symbolizer::set_allow_overlap)

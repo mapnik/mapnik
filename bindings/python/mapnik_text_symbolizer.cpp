@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -69,7 +69,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
 
         return boost::python::make_tuple("TODO",//t.get_name(),
                                          t.get_face_name(),t.get_text_size(),t.get_fill());
-       
+
     }
 
     static  boost::python::tuple
@@ -77,7 +77,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
     {
         boost::python::tuple disp = get_text_displacement(t);
         boost::python::tuple anchor = get_anchor(t);
-        
+
         // so we do not exceed max args accepted by make_tuple,
         // lets put the increasing list of parameters in a list
         boost::python::list extras;
@@ -91,11 +91,11 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         extras.append(t.get_text_opacity());
         extras.append(t.get_minimum_padding());
         extras.append(t.get_minimum_path_length());
-                
+
         return boost::python::make_tuple(disp,t.get_label_placement(),
-               t.get_vertical_alignment(),t.get_halo_radius(),t.get_halo_fill(),t.get_text_ratio(),
-               t.get_wrap_width(),t.get_label_spacing(),t.get_minimum_distance(),t.get_allow_overlap(),
-               anchor,t.get_force_odd_labels(),t.get_max_char_angle_delta(),extras
+                                         t.get_vertical_alignment(),t.get_halo_radius(),t.get_halo_fill(),t.get_text_ratio(),
+                                         t.get_wrap_width(),t.get_label_spacing(),t.get_minimum_distance(),t.get_allow_overlap(),
+                                         anchor,t.get_force_odd_labels(),t.get_max_char_angle_delta(),extras
             );
     }
 
@@ -103,7 +103,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
     setstate (text_symbolizer& t, boost::python::tuple state)
     {
         using namespace boost::python;
-        
+
         if (len(state) != 14)
         {
             PyErr_SetObject(PyExc_ValueError,
@@ -112,16 +112,16 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
                 );
             throw_error_already_set();
         }
-        
+
         tuple disp = extract<tuple>(state[0]);
         double dx = extract<double>(disp[0]);
         double dy = extract<double>(disp[1]);
         t.set_displacement(dx,dy);
-        
+
         t.set_label_placement(extract<label_placement_e>(state[1]));
 
         t.set_vertical_alignment(extract<vertical_alignment_e>(state[2]));
-        
+
         t.set_halo_radius(extract<unsigned>(state[3]));
 
         t.set_halo_fill(extract<color>(state[4]));
@@ -135,14 +135,14 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         t.set_minimum_distance(extract<double>(state[8]));
 
         t.set_allow_overlap(extract<bool>(state[9]));
-        
+
         tuple anch = extract<tuple>(state[10]);
         double x = extract<double>(anch[0]);
         double y = extract<double>(anch[1]);
         t.set_anchor(x,y);
-        
+
         t.set_force_odd_labels(extract<bool>(state[11]));
-        
+
         t.set_max_char_angle_delta(extract<double>(state[12]));
         list extras = extract<list>(state[13]);
         t.set_wrap_char_from_string(extract<std::string>(extras[0]));
@@ -187,7 +187,7 @@ void export_text_symbolizer()
         .value("MIDDLE",J_MIDDLE)
         .value("RIGHT",J_RIGHT)
         ;
-                
+
     enumeration_<text_transform_e>("text_transform")
         .value("NONE",NONE)
         .value("UPPERCASE",UPPERCASE)
@@ -196,19 +196,19 @@ void export_text_symbolizer()
         ;
 
     class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
-    /*
-    // todo - all python classes can have kwargs and default constructors
-    class_<text_symbolizer>("TextSymbolizer",
+        /*
+        // todo - all python classes can have kwargs and default constructors
+        class_<text_symbolizer>("TextSymbolizer",
         init<expression_ptr,std::string const&, unsigned,color const&>(
-          (
-            arg("name"),
-            arg("font_face")="DejaVu Sans Book",
-            arg("size")=10,
-            arg("color")=color("black")
-          ),
+        (
+        arg("name"),
+        arg("font_face")="DejaVu Sans Book",
+        arg("size")=10,
+        arg("color")=color("black")
+        ),
         "Create a TextSymbolizer\n"
         ))
-    */
+        */
 
         //.def_pickle(text_symbolizer_pickle_suite())
         .add_property("anchor",
@@ -233,7 +233,7 @@ void export_text_symbolizer()
                       make_function(&text_symbolizer::get_face_name,return_value_policy<copy_const_reference>()),
                       &text_symbolizer::set_face_name,
                       "Set/get the face_name property of the label")
-        .add_property("fill",              
+        .add_property("fill",
                       make_function(&text_symbolizer::get_fill,return_value_policy<copy_const_reference>()),
                       &text_symbolizer::set_fill)
         .add_property("fontset",
@@ -246,7 +246,7 @@ void export_text_symbolizer()
                       make_function(&text_symbolizer::get_halo_fill,return_value_policy<copy_const_reference>()),
                       &text_symbolizer::set_halo_fill)
         .add_property("halo_radius",
-                      &text_symbolizer::get_halo_radius, 
+                      &text_symbolizer::get_halo_radius,
                       &text_symbolizer::set_halo_radius)
         .add_property("horizontal_alignment",
                       &text_symbolizer::get_horizontal_alignment,
