@@ -1234,12 +1234,12 @@ if not preconfigured:
                 if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
                     env.Replace(**backup)
                     env['SKIPPED_DEPS'].append(details['lib'])
-                #if plugin == 'sqlite':
-                #    if not conf.sqlite_has_rtree():
-                #        env.Replace(**backup)
-                #        if details['lib'] in env['LIBS']:
-                #            env['LIBS'].remove(details['lib'])
-                #        env['SKIPPED_DEPS'].append('sqlite_rtree')
+                if plugin == 'sqlite':
+                    if not conf.sqlite_has_rtree():
+                        env.Replace(**backup)
+                        if details['lib'] in env['LIBS']:
+                            env['LIBS'].remove(details['lib'])
+                        env['SKIPPED_DEPS'].append('sqlite_rtree')
 
             elif details['lib'] and details['inc']:
                 if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
@@ -1251,10 +1251,10 @@ if not preconfigured:
         env.PrependUnique(CPPPATH = '#', delete_existing=True)
         env.PrependUnique(LIBPATH = '#src', delete_existing=True)
 
-    #if env['PGSQL2SQLITE']:
-    #    if not conf.sqlite_has_rtree():
-    #        env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
-    #        env['PGSQL2SQLITE'] = False
+    if env['PGSQL2SQLITE']:
+        if not conf.sqlite_has_rtree():
+            env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
+            env['PGSQL2SQLITE'] = False
 
     # Decide which libagg to use
     # if we are using internal agg, then prepend to make sure
