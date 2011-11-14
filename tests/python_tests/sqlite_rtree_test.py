@@ -15,6 +15,7 @@ def setup():
 
 NUM_THREADS = 10
 
+TOTAL = 245
 DB = '../data/sqlite/world.sqlite'
 
 def create_ds():
@@ -38,25 +39,22 @@ if 'sqlite' in mapnik2.DatasourceCache.instance().plugin_names():
         for i in threads:
             i.join()
         
-        if os.path.exists(index):
-            conn = sqlite3.connect(index)
-            cur = conn.cursor()
-            cur.execute("Select count(*) from idx_world_merc_GEOMETRY")
-            conn.commit()
-            eq_(cur.fetchone()[0],245)
-            cur.close()
-        else:
-            print 'index does not exist!'
+        eq_(os.path.exists(index),True)
+        conn = sqlite3.connect(index)
+        cur = conn.cursor()
+        cur.execute("Select count(*) from idx_world_merc_GEOMETRY")
+        conn.commit()
+        eq_(cur.fetchone()[0],TOTAL)
+        cur.close()
 
-        if os.path.exists(index):
-            ds = mapnik2.SQLite(file=DB,table='world_merc')
-            fs = ds.all_features()
-            eq_(len(fs),245)
-            os.unlink(index)
-            ds = mapnik2.SQLite(file=DB,table='world_merc',use_spatial_index=False)
-            fs = ds.all_features()
-            eq_(len(fs),245)
-            eq_(os.path.exists(index),False)
+        ds = mapnik2.SQLite(file=DB,table='world_merc')
+        fs = ds.all_features()
+        eq_(len(fs),TOTAL)
+        os.unlink(index)
+        ds = mapnik2.SQLite(file=DB,table='world_merc',use_spatial_index=False)
+        fs = ds.all_features()
+        eq_(len(fs),TOTAL)
+        eq_(os.path.exists(index),False)
 
 if __name__ == "__main__":
     setup()
