@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -43,12 +43,12 @@ template <typename LookupPolicy>
 raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
                                                    box2d<double> const& extent,
                                                    query const& q)
-  : policy_(policy),
-    feature_id_(1),
-    extent_(extent),
-    bbox_(q.get_bbox()),
-    curIter_(policy_.begin()),
-    endIter_(policy_.end())
+    : policy_(policy),
+      feature_id_(1),
+      extent_(extent),
+      bbox_(q.get_bbox()),
+      curIter_(policy_.begin()),
+      endIter_(policy_.end())
 {
 }
 
@@ -69,7 +69,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
         {
             std::auto_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
 
-#ifdef MAPNIK_DEBUG         
+#ifdef MAPNIK_DEBUG
             std::clog << "Raster Plugin: READER = " << curIter_->format() << " " << curIter_->file()
                       << " size(" << curIter_->width() << "," << curIter_->height() << ")" << std::endl;
 #endif
@@ -78,7 +78,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
             {
                 int image_width = policy_.img_width(reader->width());
                 int image_height = policy_.img_height(reader->height());
-            
+
                 if (image_width > 0 && image_height > 0)
                 {
                     CoordTransform t(image_width, image_height, extent_, 0, 0);
@@ -131,7 +131,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
         {
             std::cerr << "Raster Plugin: exception caught" << std::endl;
         }
-      
+
         ++curIter_;
         return feature;
     }

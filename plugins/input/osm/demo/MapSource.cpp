@@ -19,70 +19,70 @@ void MapSource::process_cmd_line_args(int argc,char *argv[])
         {
             switch(argv[0][1])
             {
-                case 's':    setSource(argv[1]);
-                            argv+=2;
-                            argc-=2;
-                            break;
+            case 's':    setSource(argv[1]);
+                argv+=2;
+                argc-=2;
+                break;
 
-                case 'w':    width=atoi(argv[1]);
-                            argv+=2;
-                            argc-=2;
-                            break;
-                
-                case 'h':     height=atoi(argv[1]);
-                            argv+=2;
-                            argc-=2;
-                            break;
+            case 'w':    width=atoi(argv[1]);
+                argv+=2;
+                argc-=2;
+                break;
 
-                case 'x':     xmlfile=argv[1];
-                            argv+=2;
-                            argc-=2;
-                            break;
+            case 'h':     height=atoi(argv[1]);
+                argv+=2;
+                argc-=2;
+                break;
 
-                case 'i':    osmfile=argv[1];
-                            argv+=2;
-                            argc-=2;
-                            break;
+            case 'x':     xmlfile=argv[1];
+                argv+=2;
+                argc-=2;
+                break;
 
-                case 'b':   bbox=argv[1];
-                            argv+=2;
-                            argc-=2;
-                            break;
+            case 'i':    osmfile=argv[1];
+                argv+=2;
+                argc-=2;
+                break;
 
-                case 'z':   zoom_start=atoi(argv[1]);
-                            argv+=2;
-                            argc-=2;
-                            break;
+            case 'b':   bbox=argv[1];
+                argv+=2;
+                argc-=2;
+                break;
 
-                case 'Z':   zoom_end=atoi(argv[1]);
-                            argv+=2;
-                            argc-=2;
-                            break;
+            case 'z':   zoom_start=atoi(argv[1]);
+                argv+=2;
+                argc-=2;
+                break;
 
-                case 't':   tiled=true;
-                            argv+=1;
-                            argc-=1;
-                            break;
+            case 'Z':   zoom_end=atoi(argv[1]);
+                argv+=2;
+                argc-=2;
+                break;
 
-                case 'm':   multirqst=true;
-                            argv+=1;
-                            argc-=1;
-                            break;
+            case 't':   tiled=true;
+                argv+=1;
+                argc-=1;
+                break;
 
-                case 'u':   url=argv[1];
-                            argv+=2;
-                            argc-=2;
-                            break;
-                            
-                case 'o':   outfile=argv[1];
-                            argv+=2;
-                            argc-=2;
-                            break;
+            case 'm':   multirqst=true;
+                argv+=1;
+                argc-=1;
+                break;
 
-                case 'r':   srtm=true;
-                            argv++;
-                            argc--;
-                            break;
+            case 'u':   url=argv[1];
+                argv+=2;
+                argc-=2;
+                break;
+
+            case 'o':   outfile=argv[1];
+                argv+=2;
+                argc-=2;
+                break;
+
+            case 'r':   srtm=true;
+                argv++;
+                argc--;
+                break;
             }
         }
         else
@@ -90,7 +90,7 @@ void MapSource::process_cmd_line_args(int argc,char *argv[])
             argv++;
             argc--;
         }
-    }            
+    }
 
 
     if(bbox!="")
@@ -125,30 +125,30 @@ void MapSource::generateMaps()
     if(tiled)
     {
         ScreenPos topLeft = (proj.fromLLToPixel(w,n,zoom_start)) ,
-                  bottomRight = (proj.fromLLToPixel(e,s,zoom_start)) ;
+            bottomRight = (proj.fromLLToPixel(e,s,zoom_start)) ;
 
         topLeft.x /= 256;
         topLeft.y /= 256;
         bottomRight.x /= 256;
         bottomRight.y /= 256;
 
-    int x_fetch_freq, y_fetch_freq, x_fetches, y_fetches;
+        int x_fetch_freq, y_fetch_freq, x_fetches, y_fetches;
 
-    if(multirqst)
-    {
-          // Gives a value approx equal to 0.1 lat/lon in southern UK
-          x_fetch_freq = (int)(pow(2.0,zoom_start-11));
-          y_fetch_freq = (int)(pow(2.0,zoom_start-11));
-          x_fetches = ((bottomRight.x-topLeft.x) / x_fetch_freq)+1, 
-            y_fetches = ((bottomRight.y-topLeft.y) / y_fetch_freq)+1; 
-    }
-    else
-    {
-      x_fetch_freq = bottomRight.x - topLeft.x;
-      y_fetch_freq = bottomRight.y - topLeft.y;
-      x_fetches = 1;
-      y_fetches = 1;
-    }
+        if(multirqst)
+        {
+            // Gives a value approx equal to 0.1 lat/lon in southern UK
+            x_fetch_freq = (int)(pow(2.0,zoom_start-11));
+            y_fetch_freq = (int)(pow(2.0,zoom_start-11));
+            x_fetches = ((bottomRight.x-topLeft.x) / x_fetch_freq)+1,
+                y_fetches = ((bottomRight.y-topLeft.y) / y_fetch_freq)+1;
+        }
+        else
+        {
+            x_fetch_freq = bottomRight.x - topLeft.x;
+            y_fetch_freq = bottomRight.y - topLeft.y;
+            x_fetches = 1;
+            y_fetches = 1;
+        }
 
         fprintf(stderr,"topLeft: %d %d\n",topLeft.x,topLeft.y);
         fprintf(stderr,"bottomRight: %d %d\n",bottomRight.x,bottomRight.y);
@@ -156,33 +156,33 @@ void MapSource::generateMaps()
 
         for(int xfetch=0; xfetch<x_fetches; xfetch++)
         {
-               for (int yfetch=0; yfetch<y_fetches; yfetch++) 
+            for (int yfetch=0; yfetch<y_fetches; yfetch++)
             {
                 cerr<<"XFETCH="<<xfetch<<" YFETCH="<<yfetch<<endl;
                 EarthPoint bottomL_LL =
                     proj.fromPixelToLL( (topLeft.x+xfetch*x_fetch_freq)*256,
-                                    ((topLeft.y+yfetch*y_fetch_freq)
-                                    +y_fetch_freq)*256, zoom_start),
-                           topR_LL = 
+                                        ((topLeft.y+yfetch*y_fetch_freq)
+                                         +y_fetch_freq)*256, zoom_start),
+                    topR_LL =
                     proj.fromPixelToLL( (
-                (topLeft.x+xfetch*x_fetch_freq)+x_fetch_freq)*256,
+                                            (topLeft.x+xfetch*x_fetch_freq)+x_fetch_freq)*256,
                                         (topLeft.y+yfetch*y_fetch_freq)
-                                                *256, zoom_start),
-                 bottomR_LL =
+                                        *256, zoom_start),
+                    bottomR_LL =
                     proj.fromPixelToLL( ((topLeft.x+xfetch*x_fetch_freq)+
-              x_fetch_freq)*256,
-                                    ((topLeft.y+yfetch*y_fetch_freq)
-                                    +y_fetch_freq)*256, zoom_start),
-                           topL_LL = 
-                    proj.fromPixelToLL( 
-                (topLeft.x+xfetch*x_fetch_freq)*256,
-                                        (topLeft.y+yfetch*y_fetch_freq)
-                                                *256, zoom_start);
+                                         x_fetch_freq)*256,
+                                        ((topLeft.y+yfetch*y_fetch_freq)
+                                         +y_fetch_freq)*256, zoom_start),
+                    topL_LL =
+                    proj.fromPixelToLL(
+                        (topLeft.x+xfetch*x_fetch_freq)*256,
+                        (topLeft.y+yfetch*y_fetch_freq)
+                        *256, zoom_start);
 
-        double w1 = min(bottomL_LL.x-0.01,topL_LL.x-0.01),
-             s1 = min(bottomL_LL.y-0.01,bottomR_LL.y-0.01),
-             e1 = max(bottomR_LL.x+0.01,topR_LL.x+0.01),
-             n1 = max(topL_LL.y+0.01,topR_LL.y+0.01);
+                double w1 = min(bottomL_LL.x-0.01,topL_LL.x-0.01),
+                    s1 = min(bottomL_LL.y-0.01,bottomR_LL.y-0.01),
+                    e1 = max(bottomR_LL.x+0.01,topR_LL.x+0.01),
+                    n1 = max(topL_LL.y+0.01,topR_LL.y+0.01);
 
                 parameters p;
                 if(getSource()=="api")
@@ -199,7 +199,7 @@ void MapSource::generateMaps()
                 {
                     p["file"] = osmfile;
                 }
-                
+
                 Map m (width, height);
                 p["type"] ="osm";
                 load_map(m,xmlfile);
@@ -211,14 +211,14 @@ void MapSource::generateMaps()
 
                 // lonToX() and latToY() give *pixel* coordinates
 
-                   // See email Chris Schmidt 12/02/09
+                // See email Chris Schmidt 12/02/09
                 double metres_per_pixel = (20037508.34/pow(2.0,
-                        7+zoom_start));
+                                                           7+zoom_start));
 
                 for(int z=zoom_start; z<=zoom_end; z++)
                 {
                     EarthPoint bl,tr;
-            
+
                     int ZOOM_FCTR = (int)(pow(2.0,z-zoom_start));
                     for(int tileX=
                             (topLeft.x+xfetch*x_fetch_freq)*ZOOM_FCTR;
@@ -228,39 +228,39 @@ void MapSource::generateMaps()
                         tileX++)
                     {
                         for(int tileY=(topLeft.y+yfetch*y_fetch_freq)
-                                    *ZOOM_FCTR;
+                                *ZOOM_FCTR;
                             tileY<(topLeft.y+yfetch*y_fetch_freq+y_fetch_freq)
-                                    *ZOOM_FCTR;
+                                *ZOOM_FCTR;
                             tileY++)
                         {
                             cerr<<"x: " << tileX << " y: " << tileY
                                 <<" z: " << z << endl;
 
-                           image_32 buf(m.width(),m.height());
-                           double metres_w =( (tileX*256.0) *
-                            metres_per_pixel ) -
+                            image_32 buf(m.width(),m.height());
+                            double metres_w =( (tileX*256.0) *
+                                               metres_per_pixel ) -
                                 20037814.088;
-                           double metres_s = 20034756.658 - 
-                          ((tileY*256.0) * metres_per_pixel );
-                        
-                           double metres_e = metres_w + (metres_per_pixel*256);
-                           double metres_n = metres_s + (metres_per_pixel*256);
-   
-                            box2d<double> bb
-                            (metres_w-32*metres_per_pixel,
-                             metres_s-32*metres_per_pixel,
-                             metres_e+32*metres_per_pixel,
-                             metres_n+32*metres_per_pixel); 
+                            double metres_s = 20034756.658 -
+                                ((tileY*256.0) * metres_per_pixel );
 
-                           m.zoom_to_box(bb);
-                           agg_renderer<image_32> r(m,buf);
-                           r.apply();
-                
-                           string filename="";
-                           std::ostringstream str;
-                           str<< z<< "."<<tileX<<"." << tileY << ".png";
-                           save_to_file<image_data_32>(buf.data(),
-                            "tmp.png","png");
+                            double metres_e = metres_w + (metres_per_pixel*256);
+                            double metres_n = metres_s + (metres_per_pixel*256);
+
+                            box2d<double> bb
+                                (metres_w-32*metres_per_pixel,
+                                 metres_s-32*metres_per_pixel,
+                                 metres_e+32*metres_per_pixel,
+                                 metres_n+32*metres_per_pixel);
+
+                            m.zoom_to_box(bb);
+                            agg_renderer<image_32> r(m,buf);
+                            r.apply();
+
+                            string filename="";
+                            std::ostringstream str;
+                            str<< z<< "."<<tileX<<"." << tileY << ".png";
+                            save_to_file<image_data_32>(buf.data(),
+                                                        "tmp.png","png");
                             FILE *in=fopen("tmp.png","r");
                             FILE *out=fopen(str.str().c_str(),"w");
 
@@ -291,17 +291,17 @@ void MapSource::generateMaps()
         setOSMLayers(m,p);
 
         box2d<double> latlon=
-            (hasBbox()) ? 
+            (hasBbox()) ?
             box2d<double>(w,s,e,n):
             m.getLayer(0).envelope();
-        
-        EarthPoint bottomL_LL = 
+
+        EarthPoint bottomL_LL =
             GoogleProjection::fromLLToGoog(latlon.minx(),latlon.miny()),
-                   topR_LL =
+            topR_LL =
             GoogleProjection::fromLLToGoog(latlon.maxx(),latlon.maxy());
         box2d<double> bb =
-                box2d<double>(bottomL_LL.x,bottomL_LL.y,
-                                topR_LL.x,topR_LL.y);    
+            box2d<double>(bottomL_LL.x,bottomL_LL.y,
+                          topR_LL.x,topR_LL.y);
         m.zoom_to_box(bb);
         image_32 buf (m.width(), m.height());
         agg_renderer<image_32> r(m,buf);
@@ -320,7 +320,7 @@ void MapSource::setOSMLayers(Map& m, const parameters &p)
         if(boost::get<std::string>(q["type"])=="osm")
         {
             m.getLayer(count).set_datasource
-                    (datasource_cache::instance()->create(p));
+                (datasource_cache::instance()->create(p));
         }
     }
 }
@@ -343,14 +343,14 @@ void MapSource::addSRTMLayers(Map& m,double w,double s,double e,double n)
 
     // Set the specific latlon shapefile for the first SRTM layer
 
-    parameters p;    
+    parameters p;
     p["type"] = "shape";
     std::stringstream str;
     int lon=floor(w),lat=floor(s);
     str<<(lat<0 ? "S":"N")<<setw(2)<<setfill('0')<<
-                        (lat<0 ? -lat:lat)<<
-                        (lon>=0 ? "E":"W") << setw(3)<<setfill('0')
-                        <<(lon>=0 ? lon:-lon)<<"c10";
+        (lat<0 ? -lat:lat)<<
+        (lon>=0 ? "E":"W") << setw(3)<<setfill('0')
+       <<(lon>=0 ? lon:-lon)<<"c10";
     p["file"] = str.str();
     cerr<<"ADDING SRTM LAYER: " << p["file"] << endl;
     m.getLayer(i).set_datasource(datasource_cache::instance()->create(p));
@@ -372,13 +372,13 @@ void MapSource::addSRTMLayers(Map& m,double w,double s,double e,double n)
                 // SRTM layer for it
                 if(lon!=floor(w) || lat!=floor(s))
                 {
-                    parameters p;    
+                    parameters p;
                     p["type"] = "shape";
                     std::stringstream str;
                     str<<(lat<0 ? "S":"N")<<setw(2)<<setfill('0')<<
                         (lat<0 ? -lat:lat)<<
                         (lon>=0 ? "E":"W") << setw(3)<<setfill('0')
-                        <<(lon>=0 ? lon:-lon)<<"c10";
+                       <<(lon>=0 ? lon:-lon)<<"c10";
                     p["file"] = str.str();
                     cerr<<"ADDING SRTM LAYER: " << p["file"] << endl;
                     layer lyr("srtm_" + str.str());

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -38,7 +38,7 @@
 
 // sqlite
 extern "C" {
-  #include <sqlite3.h>
+#include <sqlite3.h>
 }
 
 #include "sqlite_resultset.hpp"
@@ -56,13 +56,13 @@ public:
     {
 #if SQLITE_VERSION_NUMBER >= 3005000
         int mode = SQLITE_OPEN_READWRITE;
-        #if SQLITE_VERSION_NUMBER >= 3006018
-            // shared cache flag not available until >= 3.6.18
-            mode |= SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
-        #endif
+#if SQLITE_VERSION_NUMBER >= 3006018
+        // shared cache flag not available until >= 3.6.18
+        mode |= SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
+#endif
         const int rc = sqlite3_open_v2 (file_.c_str(), &db_, mode, 0);
 #else
-        #warning "Mapnik's sqlite plugin is compiling against a version of sqlite older than 3.5.x which may make rendering slow..."
+#warning "Mapnik's sqlite plugin is compiling against a version of sqlite older than 3.5.x which may make rendering slow..."
         const int rc = sqlite3_open (file_.c_str(), &db_);
 #endif
         if (rc != SQLITE_OK)
@@ -72,7 +72,7 @@ public:
 
             throw mapnik::datasource_exception (s.str());
         }
-        
+
         sqlite3_busy_timeout(db_,5000);
     }
 
@@ -83,7 +83,7 @@ public:
 #if SQLITE_VERSION_NUMBER >= 3005000
         const int rc = sqlite3_open_v2 (file_.c_str(), &db_, flags, 0);
 #else
-        #warning "Mapnik's sqlite plugin is compiling against a version of sqlite older than 3.5.x which may make rendering slow..."
+#warning "Mapnik's sqlite plugin is compiling against a version of sqlite older than 3.5.x which may make rendering slow..."
         const int rc = sqlite3_open (file_.c_str(), &db_);
 #endif
         if (rc != SQLITE_OK)
@@ -112,12 +112,12 @@ public:
         else
             s << "unknown error, lost connection";
         s << " (" << file_ << ")"
-          << "\nFull sql was: '" 
+          << "\nFull sql was: '"
           <<  sql << "'";
 
         throw mapnik::datasource_exception (s.str());
     }
-    
+
     boost::shared_ptr<sqlite_resultset> execute_query(const std::string& sql)
     {
         sqlite3_stmt* stmt = 0;
@@ -130,7 +130,7 @@ public:
 
         return boost::make_shared<sqlite_resultset>(stmt);
     }
-  
+
     void execute(const std::string& sql)
     {
         const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
@@ -145,13 +145,13 @@ public:
         const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         return rc;
     }
-   
+
     sqlite3* operator*()
     {
         return db_;
     }
 
-    
+
 private:
 
     sqlite3* db_;

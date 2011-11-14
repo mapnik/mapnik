@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -63,10 +63,10 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
                                  bool use_connection_pool,
                                  unsigned prefetch_rows,
                                  unsigned num_attrs)
-  : tr_(new transcoder(encoding)),
-    multiple_geometries_(multiple_geometries),
-    num_attrs_(num_attrs),
-    feature_id_(1)
+    : tr_(new transcoder(encoding)),
+      multiple_geometries_(multiple_geometries),
+      num_attrs_(num_attrs),
+      feature_id_(1)
 {
     if (use_connection_pool)
     {
@@ -113,12 +113,12 @@ feature_ptr occi_featureset::next()
             std::string fld_name = columnObj.getString(MetaData::ATTR_NAME);
             int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
 
-            /*   
-            int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
-            if (type_code == OCCI_TYPECODE_OBJECT)
-            {
-                continue;
-            }
+            /*
+                 int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
+                 if (type_code == OCCI_TYPECODE_OBJECT)
+                 {
+                 continue;
+                 }
             */
 
             switch (type_oid)
@@ -194,9 +194,9 @@ feature_ptr occi_featureset::next()
                           << "(type_oid=" << type_oid << ")" << std::endl;
 #endif
                 break;
-            }    
+            }
         }
-        
+
         return feature;
     }
 
@@ -209,7 +209,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature, b
     int gtype = (int)geom->getSdo_gtype();
     int dimensions = gtype / 1000;
     int lrsvalue = (gtype - dimensions * 1000) / 100;
-    int geomtype = (gtype - dimensions * 1000 - lrsvalue * 100); 
+    int geomtype = (gtype - dimensions * 1000 - lrsvalue * 100);
 
 #if 0
     std::clog << "-----------Geometry Object ------------" << std::endl;
@@ -232,131 +232,131 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature, b
     switch (geomtype)
     {
     case SDO_GTYPE_POINT:
+    {
+        SDOPointType* sdopoint = geom->getSdo_point();
+        if (sdopoint && ! sdopoint->isNull())
         {
-            SDOPointType* sdopoint = geom->getSdo_point();
-            if (sdopoint && ! sdopoint->isNull())
-            {
-                geometry_type* point = new geometry_type(mapnik::Point);
-                point->move_to(sdopoint->getX(), sdopoint->getY());
-                feature->add_geometry(point);
-            }
+            geometry_type* point = new geometry_type(mapnik::Point);
+            point->move_to(sdopoint->getX(), sdopoint->getY());
+            feature->add_geometry(point);
         }
-        break;
+    }
+    break;
     case SDO_GTYPE_LINE:
+    {
+        if (ordinates_size >= dimensions)
         {
-            if (ordinates_size >= dimensions)
-            {
-                const bool is_single_geom = true;
-                const bool is_point_type = false;
-                const bool multiple_geoms = false;
+            const bool is_single_geom = true;
+            const bool is_point_type = false;
+            const bool multiple_geoms = false;
 
-                convert_ordinates(feature,
-                                  mapnik::LineString,
-                                  elem_info,
-                                  ordinates,
-                                  dimensions,
-                                  is_single_geom,
-                                  is_point_type,
-                                  multiple_geoms);
-            }
+            convert_ordinates(feature,
+                              mapnik::LineString,
+                              elem_info,
+                              ordinates,
+                              dimensions,
+                              is_single_geom,
+                              is_point_type,
+                              multiple_geoms);
         }
-        break;
+    }
+    break;
     case SDO_GTYPE_POLYGON:
+    {
+        if (ordinates_size >= dimensions)
         {
-            if (ordinates_size >= dimensions)
-            {
-                const bool is_single_geom = true;
-                const bool is_point_type = false;
-                const bool multiple_geoms = false;
+            const bool is_single_geom = true;
+            const bool is_point_type = false;
+            const bool multiple_geoms = false;
 
-                convert_ordinates(feature,
-                                  mapnik::Polygon,
-                                  elem_info,
-                                  ordinates,
-                                  dimensions,
-                                  is_single_geom,
-                                  is_point_type,
-                                  multiple_geoms);
-            }
+            convert_ordinates(feature,
+                              mapnik::Polygon,
+                              elem_info,
+                              ordinates,
+                              dimensions,
+                              is_single_geom,
+                              is_point_type,
+                              multiple_geoms);
         }
-        break;
+    }
+    break;
     case SDO_GTYPE_MULTIPOINT:
+    {
+        if (ordinates_size >= dimensions)
         {
-            if (ordinates_size >= dimensions)
-            {
-                const bool is_single_geom = false;
-                const bool is_point_type = true;
-                const bool multiple_geoms = true;
+            const bool is_single_geom = false;
+            const bool is_point_type = true;
+            const bool multiple_geoms = true;
 
-                // Todo - force using true as multiple_geometries until we have proper multipoint handling
-                // http://trac.mapnik.org/ticket/458
-            
-                convert_ordinates(feature,
-                                  mapnik::Point,
-                                  elem_info,
-                                  ordinates,
-                                  dimensions,
-                                  is_single_geom,
-                                  is_point_type,
-                                  multiple_geoms);
-            }
+            // Todo - force using true as multiple_geometries until we have proper multipoint handling
+            // http://trac.mapnik.org/ticket/458
+
+            convert_ordinates(feature,
+                              mapnik::Point,
+                              elem_info,
+                              ordinates,
+                              dimensions,
+                              is_single_geom,
+                              is_point_type,
+                              multiple_geoms);
         }
-        break;
+    }
+    break;
     case SDO_GTYPE_MULTILINE:
+    {
+        if (ordinates_size >= dimensions)
         {
-            if (ordinates_size >= dimensions)
-            {
-                const bool is_single_geom = false;
-                const bool is_point_type = false;
+            const bool is_single_geom = false;
+            const bool is_point_type = false;
 
-                convert_ordinates(feature,
-                                  mapnik::LineString,
-                                  elem_info,
-                                  ordinates,
-                                  dimensions,
-                                  is_single_geom,
-                                  is_point_type,
-                                  multiple_geometries);
-            }
+            convert_ordinates(feature,
+                              mapnik::LineString,
+                              elem_info,
+                              ordinates,
+                              dimensions,
+                              is_single_geom,
+                              is_point_type,
+                              multiple_geometries);
         }
-        break;
+    }
+    break;
     case SDO_GTYPE_MULTIPOLYGON:
+    {
+        if (ordinates_size >= dimensions)
         {
-            if (ordinates_size >= dimensions)
-            {
-                const bool is_single_geom = false;
-                const bool is_point_type = false;
+            const bool is_single_geom = false;
+            const bool is_point_type = false;
 
-                convert_ordinates(feature,
-                                  mapnik::Polygon,
-                                  elem_info,
-                                  ordinates,
-                                  dimensions,
-                                  is_single_geom,
-                                  is_point_type,
-                                  multiple_geometries);
-            }
-        
+            convert_ordinates(feature,
+                              mapnik::Polygon,
+                              elem_info,
+                              ordinates,
+                              dimensions,
+                              is_single_geom,
+                              is_point_type,
+                              multiple_geometries);
         }
-        break;
+
+    }
+    break;
     case SDO_GTYPE_COLLECTION:
+    {
+        if (ordinates_size >= dimensions)
         {
-            if (ordinates_size >= dimensions)
-            {
-                const bool is_single_geom = false;
-                const bool is_point_type = false;
-            
-                convert_ordinates(feature,
-                                  mapnik::Polygon,
-                                  elem_info,
-                                  ordinates,
-                                  dimensions,
-                                  is_single_geom,
-                                  is_point_type,
-                                  multiple_geometries);
-            }
+            const bool is_single_geom = false;
+            const bool is_point_type = false;
+
+            convert_ordinates(feature,
+                              mapnik::Polygon,
+                              elem_info,
+                              ordinates,
+                              dimensions,
+                              is_single_geom,
+                              is_point_type,
+                              multiple_geometries);
         }
-        break;
+    }
+    break;
     case SDO_GTYPE_UNKNOWN:
     default:
 #ifdef MAPNIK_DEBUG
@@ -379,7 +379,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
 {
     const int elem_size = elem_info.size();
     const int ord_size = ordinates.size();
-    
+
     if (elem_size >= 0)
     {
         int offset = elem_info[0];
@@ -390,7 +390,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
         {
             geometry_type* geom = multiple_geometries ? 0 : new geometry_type(geom_type);
             if (geom) geom->set_capacity(ord_size);
-        
+
             for (int i = SDO_ELEM_INFO_SIZE; i < elem_size; i+=3)
             {
                 int next_offset = elem_info[i];
@@ -407,7 +407,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                     if (interp > SDO_INTERPRETATION_POINT)      {}
                     gtype = mapnik::Point;
                     break;
-                
+
                 case SDO_ETYPE_LINESTRING:
                     if (interp == SDO_INTERPRETATION_STRAIGHT)  {}
                     if (interp == SDO_INTERPRETATION_CIRCULAR)  {}
@@ -450,7 +450,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                         {
                             feature->add_geometry(geom);
                         }
-                            
+
                         geom = new geometry_type(gtype);
                         geom->set_capacity((next_offset - 1) - (offset - 1 - dimensions));
                     }
@@ -467,7 +467,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                 etype = next_etype;
                 interp = next_interp;
             }
-            
+
             if (geom)
             {
                 feature->add_geometry(geom);
@@ -478,7 +478,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
         {
             geometry_type * geom = new geometry_type(geom_type);
             geom->set_capacity(ord_size);
-        
+
             fill_geometry_type(geom,
                                offset - 1,
                                ord_size,

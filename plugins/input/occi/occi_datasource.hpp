@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,7 +35,7 @@
 // oci
 #include "occi_types.hpp"
 
-class occi_datasource : public mapnik::datasource 
+class occi_datasource : public mapnik::datasource
 {
 public:
     occi_datasource(mapnik::parameters const& params, bool bind = true);

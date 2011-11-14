@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -78,17 +78,17 @@ feature_ptr kismet_featureset::next()
 
         feature_ptr feature(feature_factory::create(feature_id_));
         ++feature_id_;
-      
+
         geometry_type* pt = new geometry_type(mapnik::Point);
         pt->move_to(knd.bestlon(), knd.bestlat());
         feature->add_geometry(pt);
-      
+
         boost::put(*feature, key, tr_->transcode(value.c_str()));
-      
+
         ++knd_list_it;
-        
+
         return feature;
     }
-    
+
     return feature_ptr();
 }

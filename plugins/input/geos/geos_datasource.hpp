@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -33,7 +33,7 @@
 
 #include "geos_feature_ptr.hpp"
 
-class geos_datasource : public mapnik::datasource 
+class geos_datasource : public mapnik::datasource
 {
 public:
     geos_datasource(mapnik::parameters const& params, bool bind = true);

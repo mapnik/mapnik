@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -25,8 +25,8 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp> 
-#include <mapnik/wkb.hpp> 
+#include <mapnik/unicode.hpp>
+#include <mapnik/wkb.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
@@ -36,7 +36,7 @@
 #include <list>
 
 #include "kismet_types.hpp"
-  
+
 class kismet_featureset : public mapnik::Featureset
 {
 public:

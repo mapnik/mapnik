@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -31,7 +31,7 @@
 
 // sqlite
 extern "C" {
-  #include <sqlite3.h>
+#include <sqlite3.h>
 }
 
 
@@ -87,7 +87,7 @@ public:
     {
         return sqlite3_column_type (stmt_, col);
     }
-    
+
     const char* column_name (int col)
     {
         return sqlite3_column_name (stmt_, col);

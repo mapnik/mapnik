@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -58,17 +58,17 @@ public:
           user_(user),
           pass_(pass),
           connect_timeout_(connect_timeout) {}
-      
+
     T* operator()() const
     {
         return new T(connection_string());
     }
-      
-    inline std::string id() const 
+
+    inline std::string id() const
     {
         return connection_string();
     }
-      
+
     inline std::string connection_string() const
     {
         std::string connect_str;
@@ -77,11 +77,11 @@ public:
         if (dbname_ && (*dbname_).size()) connect_str += " dbname=" + *dbname_;
         if (user_   && (*user_).size()) connect_str += " user=" + *user_;
         if (pass_   && (*pass_).size()) connect_str += " password=" + *pass_;
-        if (connect_timeout_ && (*connect_timeout_).size()) 
+        if (connect_timeout_ && (*connect_timeout_).size())
             connect_str +=" connect_timeout=" + *connect_timeout_;
         return connect_str;
     }
-      
+
 private:
     boost::optional<string> host_;
     boost::optional<string> port_;
@@ -97,13 +97,13 @@ class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
     friend class CreateStatic<ConnectionManager>;
     typedef Pool<Connection,ConnectionCreator> PoolType;
     typedef std::map<std::string,boost::shared_ptr<PoolType> > ContType;
-    typedef boost::shared_ptr<Connection> HolderType;   
+    typedef boost::shared_ptr<Connection> HolderType;
     ContType pools_;
 
 public:
-        
-    bool registerPool(const ConnectionCreator<Connection>& creator,unsigned initialSize,unsigned maxSize) 
-    {       
+
+    bool registerPool(const ConnectionCreator<Connection>& creator,unsigned initialSize,unsigned maxSize)
+    {
 #ifdef MAPNIK_THREADSAFE
         //mutex::scoped_lock lock(mutex_);
 #endif
@@ -114,14 +114,14 @@ public:
         }
 
         return false;
-                     
+
     }
-    
-    boost::shared_ptr<PoolType> getPool(std::string const& key) 
+
+    boost::shared_ptr<PoolType> getPool(std::string const& key)
     {
 #ifdef MAPNIK_THREADSAFE
         //mutex::scoped_lock lock(mutex_);
-#endif 
+#endif
         ContType::const_iterator itr=pools_.find(key);
         if (itr!=pools_.end())
         {
@@ -130,14 +130,14 @@ public:
         static const boost::shared_ptr<PoolType> emptyPool;
         return emptyPool;
     }
-        
+
     HolderType get(std::string const& key)
     {
 #ifdef MAPNIK_THREADSAFE
         //mutex::scoped_lock lock(mutex_);
-#endif 
+#endif
         ContType::const_iterator itr=pools_.find(key);
-        if (itr!=pools_.end()) 
+        if (itr!=pools_.end())
         {
             boost::shared_ptr<PoolType> pool=itr->second;
             return pool->borrowObject();
@@ -148,6 +148,6 @@ public:
 private:
     ConnectionManager(const ConnectionManager&);
     ConnectionManager& operator=(const ConnectionManager);
-};    
+};
 
 #endif //CONNECTION_MANAGER_HPP

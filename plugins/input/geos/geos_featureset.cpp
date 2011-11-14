@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -55,18 +55,18 @@ geos_featureset::geos_featureset(GEOSGeometry* geometry,
                                  const std::string& field_name,
                                  const std::string& encoding,
                                  bool multiple_geometries)
-  : geometry_(geometry),
-    tr_(new transcoder(encoding)),
-    extent_(extent),
-    identifier_(identifier),
-    field_(field),
-    field_name_(field_name),
-    multiple_geometries_(multiple_geometries),
-    already_rendered_(false)
+    : geometry_(geometry),
+      tr_(new transcoder(encoding)),
+      extent_(extent),
+      identifier_(identifier),
+      field_(field),
+      field_name_(field_name),
+      multiple_geometries_(multiple_geometries),
+      already_rendered_(false)
 {
 }
 
-geos_featureset::~geos_featureset() 
+geos_featureset::~geos_featureset()
 {
 }
 
@@ -75,11 +75,11 @@ feature_ptr geos_featureset::next()
     if (! already_rendered_)
     {
         already_rendered_ = true;
-        
+
         if (GEOSisValid(geometry_) && ! GEOSisEmpty(geometry_))
         {
             bool render_geometry = true;
-            
+
             if (*extent_ != NULL && GEOSisValid(*extent_) && ! GEOSisEmpty(*extent_))
             {
                 const int type = GEOSGeomTypeId(*extent_);
@@ -108,7 +108,7 @@ feature_ptr geos_featureset::next()
                     std::clog << "GEOS Plugin: unknown extent geometry_type=" << type << std::endl;
 #endif
                     break;
-               }
+                }
             }
 
             if (render_geometry)
@@ -127,7 +127,7 @@ feature_ptr geos_featureset::next()
                     {
                         boost::put(*feature, field_name_, tr_->transcode(field_.c_str()));
                     }
-                    
+
                     return feature;
                 }
             }

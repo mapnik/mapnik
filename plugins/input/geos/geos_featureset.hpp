@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp> 
+#include <mapnik/unicode.hpp>
 #include <mapnik/geom_util.hpp>
 
 // boost
@@ -35,7 +35,7 @@
 #include <geos_c.h>
 
 #include "geos_feature_ptr.hpp"
-  
+
 class geos_featureset : public mapnik::Featureset
 {
 public:

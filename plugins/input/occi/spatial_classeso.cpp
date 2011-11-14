@@ -9,72 +9,72 @@
 
 oracle::occi::Number SDOPointType::getX() const
 {
-  return X;
+    return X;
 }
 
 void SDOPointType::setX(const oracle::occi::Number &value)
 {
-  X = value;
+    X = value;
 }
 
 oracle::occi::Number SDOPointType::getY() const
 {
-  return Y;
+    return Y;
 }
 
 void SDOPointType::setY(const oracle::occi::Number &value)
 {
-  Y = value;
+    Y = value;
 }
 
 oracle::occi::Number SDOPointType::getZ() const
 {
-  return Z;
+    return Z;
 }
 
 void SDOPointType::setZ(const oracle::occi::Number &value)
 {
-  Z = value;
+    Z = value;
 }
 
 void *SDOPointType::operator new(size_t size)
 {
-  return oracle::occi::PObject::operator new(size);
+    return oracle::occi::PObject::operator new(size);
 }
 
 void *SDOPointType::operator new(size_t size, const oracle::occi::Connection * sess,
-  const OCCI_STD_NAMESPACE::string& table)
+                                 const OCCI_STD_NAMESPACE::string& table)
 {
-  return oracle::occi::PObject::operator new(size, sess, table, 
-            (char *) "MDSYS.SDO_POINT_TYPE");
+    return oracle::occi::PObject::operator new(size, sess, table,
+                                               (char *) "MDSYS.SDO_POINT_TYPE");
 }
 
 void *SDOPointType::operator new(size_t size, void *ctxOCCI_)
 {
- return oracle::occi::PObject::operator new(size, ctxOCCI_);
+    return oracle::occi::PObject::operator new(size, ctxOCCI_);
 }
 
 void *SDOPointType::operator new(size_t size,
-    const oracle::occi::Connection *sess,
-    const OCCI_STD_NAMESPACE::string &tableName, 
-    const OCCI_STD_NAMESPACE::string &typeName,
-    const OCCI_STD_NAMESPACE::string &tableSchema, 
-    const OCCI_STD_NAMESPACE::string &typeSchema)
+                                 const oracle::occi::Connection *sess,
+                                 const OCCI_STD_NAMESPACE::string &tableName,
+                                 const OCCI_STD_NAMESPACE::string &typeName,
+                                 const OCCI_STD_NAMESPACE::string &tableSchema,
+                                 const OCCI_STD_NAMESPACE::string &typeSchema)
 {
-  return oracle::occi::PObject::operator new(size, sess, tableName,
-        typeName, tableSchema, typeSchema);
+    return oracle::occi::PObject::operator new(size, sess, tableName,
+                                               typeName, tableSchema, typeSchema);
 }
 
 OCCI_STD_NAMESPACE::string SDOPointType::getSQLTypeName() const
 {
-  return OCCI_STD_NAMESPACE::string("MDSYS.SDO_POINT_TYPE");
+    return OCCI_STD_NAMESPACE::string("MDSYS.SDO_POINT_TYPE");
 }
 
 void SDOPointType::getSQLTypeName(oracle::occi::Environment *env, void **schemaName,
-    unsigned int &schemaNameLen, void **typeName, unsigned int &typeNameLen) const
+                                  unsigned int &schemaNameLen, void **typeName, unsigned int &typeNameLen) const
 {
-  PObject::getSQLTypeName(env, &SDOPointType::readSQL, schemaName,
-        schemaNameLen, typeName, typeNameLen);
+    PObject::getSQLTypeName(env, &SDOPointType::readSQL, schemaName,
+                            schemaNameLen, typeName, typeNameLen);
 }
 
 SDOPointType::SDOPointType()
@@ -83,61 +83,61 @@ SDOPointType::SDOPointType()
 
 void *SDOPointType::readSQL(void *ctxOCCI_)
 {
-  SDOPointType *objOCCI_ = new(ctxOCCI_) SDOPointType(ctxOCCI_);
-  oracle::occi::AnyData streamOCCI_(ctxOCCI_);
+    SDOPointType *objOCCI_ = new(ctxOCCI_) SDOPointType(ctxOCCI_);
+    oracle::occi::AnyData streamOCCI_(ctxOCCI_);
 
-  try
-  {
-    if (streamOCCI_.isNull())
-      objOCCI_->setNull();
-    else
-      objOCCI_->readSQL(streamOCCI_);
-  }
-  catch (oracle::occi::SQLException& excep)
-  {
-    delete objOCCI_;
-    excep.setErrorCtx(ctxOCCI_);
-    return (void *)NULL;
-  }
-  return (void *)objOCCI_;
+    try
+    {
+        if (streamOCCI_.isNull())
+            objOCCI_->setNull();
+        else
+            objOCCI_->readSQL(streamOCCI_);
+    }
+    catch (oracle::occi::SQLException& excep)
+    {
+        delete objOCCI_;
+        excep.setErrorCtx(ctxOCCI_);
+        return (void *)NULL;
+    }
+    return (void *)objOCCI_;
 }
 
 void SDOPointType::readSQL(oracle::occi::AnyData& streamOCCI_)
 {
-   X = streamOCCI_.getNumber();
-   Y = streamOCCI_.getNumber();
-   Z = streamOCCI_.getNumber();
+    X = streamOCCI_.getNumber();
+    Y = streamOCCI_.getNumber();
+    Z = streamOCCI_.getNumber();
 }
 
 void SDOPointType::writeSQL(void *objectOCCI_, void *ctxOCCI_)
 {
-  SDOPointType *objOCCI_ = (SDOPointType *) objectOCCI_;
-  oracle::occi::AnyData streamOCCI_(ctxOCCI_);
+    SDOPointType *objOCCI_ = (SDOPointType *) objectOCCI_;
+    oracle::occi::AnyData streamOCCI_(ctxOCCI_);
 
-  try
-  {
-    if (objOCCI_->isNull())
-      streamOCCI_.setNull();
-    else
-      objOCCI_->writeSQL(streamOCCI_);
-  }
-  catch (oracle::occi::SQLException& excep)
-  {
-    excep.setErrorCtx(ctxOCCI_);
-  }
-  return;
+    try
+    {
+        if (objOCCI_->isNull())
+            streamOCCI_.setNull();
+        else
+            objOCCI_->writeSQL(streamOCCI_);
+    }
+    catch (oracle::occi::SQLException& excep)
+    {
+        excep.setErrorCtx(ctxOCCI_);
+    }
+    return;
 }
 
 void SDOPointType::writeSQL(oracle::occi::AnyData& streamOCCI_)
 {
-   streamOCCI_.setNumber(X);
-   streamOCCI_.setNumber(Y);
-   streamOCCI_.setNumber(Z);
+    streamOCCI_.setNumber(X);
+    streamOCCI_.setNumber(Y);
+    streamOCCI_.setNumber(Z);
 }
 
 SDOPointType::~SDOPointType()
 {
-  int i;
+    int i;
 }
 
 /*****************************************************************/
@@ -146,169 +146,169 @@ SDOPointType::~SDOPointType()
 
 oracle::occi::Number SDOGeometry::getSdo_gtype() const
 {
-  return SDO_GTYPE;
+    return SDO_GTYPE;
 }
 
 void SDOGeometry::setSdo_gtype(const oracle::occi::Number &value)
 {
-  SDO_GTYPE = value;
+    SDO_GTYPE = value;
 }
 
 oracle::occi::Number SDOGeometry::getSdo_srid() const
 {
-  return SDO_SRID;
+    return SDO_SRID;
 }
 
 void SDOGeometry::setSdo_srid(const oracle::occi::Number &value)
 {
-  SDO_SRID = value;
+    SDO_SRID = value;
 }
 
 SDOPointType * SDOGeometry::getSdo_point() const
 {
-  return SDO_POINT;
+    return SDO_POINT;
 }
 
 void SDOGeometry::setSdo_point(SDOPointType * value)
 {
-  SDO_POINT = value;
+    SDO_POINT = value;
 }
 
-OCCI_STD_NAMESPACE::vector< oracle::occi::Number >& SDOGeometry::getSdo_elem_info() 
+OCCI_STD_NAMESPACE::vector< oracle::occi::Number >& SDOGeometry::getSdo_elem_info()
 {
-  return SDO_ELEM_INFO;
+    return SDO_ELEM_INFO;
 }
 
 const OCCI_STD_NAMESPACE::vector< oracle::occi::Number >& SDOGeometry::getSdo_elem_info() const
 {
-  return SDO_ELEM_INFO;
+    return SDO_ELEM_INFO;
 }
 
 void SDOGeometry::setSdo_elem_info(const OCCI_STD_NAMESPACE::vector< oracle::occi::Number > &value)
 {
-  SDO_ELEM_INFO = value;
+    SDO_ELEM_INFO = value;
 }
 
-OCCI_STD_NAMESPACE::vector< oracle::occi::Number >& SDOGeometry::getSdo_ordinates() 
+OCCI_STD_NAMESPACE::vector< oracle::occi::Number >& SDOGeometry::getSdo_ordinates()
 {
-  return SDO_ORDINATES;
+    return SDO_ORDINATES;
 }
 
 const OCCI_STD_NAMESPACE::vector< oracle::occi::Number >& SDOGeometry::getSdo_ordinates() const
 {
-  return SDO_ORDINATES;
+    return SDO_ORDINATES;
 }
 
 void SDOGeometry::setSdo_ordinates(const OCCI_STD_NAMESPACE::vector< oracle::occi::Number > &value)
 {
-  SDO_ORDINATES = value;
+    SDO_ORDINATES = value;
 }
 
 void *SDOGeometry::operator new(size_t size)
 {
-  return oracle::occi::PObject::operator new(size);
+    return oracle::occi::PObject::operator new(size);
 }
 
 void *SDOGeometry::operator new(size_t size, const oracle::occi::Connection * sess,
-  const OCCI_STD_NAMESPACE::string& table)
+                                const OCCI_STD_NAMESPACE::string& table)
 {
-  return oracle::occi::PObject::operator new(size, sess, table, 
-            (char *) "MDSYS.SDO_GEOMETRY");
+    return oracle::occi::PObject::operator new(size, sess, table,
+                                               (char *) "MDSYS.SDO_GEOMETRY");
 }
 
 void *SDOGeometry::operator new(size_t size, void *ctxOCCI_)
 {
- return oracle::occi::PObject::operator new(size, ctxOCCI_);
+    return oracle::occi::PObject::operator new(size, ctxOCCI_);
 }
 
 void *SDOGeometry::operator new(size_t size,
-    const oracle::occi::Connection *sess,
-    const OCCI_STD_NAMESPACE::string &tableName, 
-    const OCCI_STD_NAMESPACE::string &typeName,
-    const OCCI_STD_NAMESPACE::string &tableSchema, 
-    const OCCI_STD_NAMESPACE::string &typeSchema)
+                                const oracle::occi::Connection *sess,
+                                const OCCI_STD_NAMESPACE::string &tableName,
+                                const OCCI_STD_NAMESPACE::string &typeName,
+                                const OCCI_STD_NAMESPACE::string &tableSchema,
+                                const OCCI_STD_NAMESPACE::string &typeSchema)
 {
-  return oracle::occi::PObject::operator new(size, sess, tableName,
-        typeName, tableSchema, typeSchema);
+    return oracle::occi::PObject::operator new(size, sess, tableName,
+                                               typeName, tableSchema, typeSchema);
 }
 
 OCCI_STD_NAMESPACE::string SDOGeometry::getSQLTypeName() const
 {
-  return OCCI_STD_NAMESPACE::string("MDSYS.SDO_GEOMETRY");
+    return OCCI_STD_NAMESPACE::string("MDSYS.SDO_GEOMETRY");
 }
 
 void SDOGeometry::getSQLTypeName(oracle::occi::Environment *env, void **schemaName,
-    unsigned int &schemaNameLen, void **typeName, unsigned int &typeNameLen) const
+                                 unsigned int &schemaNameLen, void **typeName, unsigned int &typeNameLen) const
 {
-  PObject::getSQLTypeName(env, &SDOGeometry::readSQL, schemaName,
-        schemaNameLen, typeName, typeNameLen);
+    PObject::getSQLTypeName(env, &SDOGeometry::readSQL, schemaName,
+                            schemaNameLen, typeName, typeNameLen);
 }
 
 SDOGeometry::SDOGeometry()
 {
-   SDO_POINT = (SDOPointType *) 0;
+    SDO_POINT = (SDOPointType *) 0;
 }
 
 void *SDOGeometry::readSQL(void *ctxOCCI_)
 {
-  SDOGeometry *objOCCI_ = new(ctxOCCI_) SDOGeometry(ctxOCCI_);
-  oracle::occi::AnyData streamOCCI_(ctxOCCI_);
+    SDOGeometry *objOCCI_ = new(ctxOCCI_) SDOGeometry(ctxOCCI_);
+    oracle::occi::AnyData streamOCCI_(ctxOCCI_);
 
-  try
-  {
-    if (streamOCCI_.isNull())
-      objOCCI_->setNull();
-    else
-      objOCCI_->readSQL(streamOCCI_);
-  }
-  catch (oracle::occi::SQLException& excep)
-  {
-    delete objOCCI_;
-    excep.setErrorCtx(ctxOCCI_);
-    return (void *)NULL;
-  }
-  return (void *)objOCCI_;
+    try
+    {
+        if (streamOCCI_.isNull())
+            objOCCI_->setNull();
+        else
+            objOCCI_->readSQL(streamOCCI_);
+    }
+    catch (oracle::occi::SQLException& excep)
+    {
+        delete objOCCI_;
+        excep.setErrorCtx(ctxOCCI_);
+        return (void *)NULL;
+    }
+    return (void *)objOCCI_;
 }
 
 void SDOGeometry::readSQL(oracle::occi::AnyData& streamOCCI_)
 {
-   SDO_GTYPE = streamOCCI_.getNumber();
-   SDO_SRID = streamOCCI_.getNumber();
-   SDO_POINT = (SDOPointType *) streamOCCI_.getObject(&SDOPointType::readSQL);
-   oracle::occi::getVector(streamOCCI_, SDO_ELEM_INFO);
-   oracle::occi::getVector(streamOCCI_, SDO_ORDINATES);
+    SDO_GTYPE = streamOCCI_.getNumber();
+    SDO_SRID = streamOCCI_.getNumber();
+    SDO_POINT = (SDOPointType *) streamOCCI_.getObject(&SDOPointType::readSQL);
+    oracle::occi::getVector(streamOCCI_, SDO_ELEM_INFO);
+    oracle::occi::getVector(streamOCCI_, SDO_ORDINATES);
 }
 
 void SDOGeometry::writeSQL(void *objectOCCI_, void *ctxOCCI_)
 {
-  SDOGeometry *objOCCI_ = (SDOGeometry *) objectOCCI_;
-  oracle::occi::AnyData streamOCCI_(ctxOCCI_);
+    SDOGeometry *objOCCI_ = (SDOGeometry *) objectOCCI_;
+    oracle::occi::AnyData streamOCCI_(ctxOCCI_);
 
-  try
-  {
-    if (objOCCI_->isNull())
-      streamOCCI_.setNull();
-    else
-      objOCCI_->writeSQL(streamOCCI_);
-  }
-  catch (oracle::occi::SQLException& excep)
-  {
-    excep.setErrorCtx(ctxOCCI_);
-  }
-  return;
+    try
+    {
+        if (objOCCI_->isNull())
+            streamOCCI_.setNull();
+        else
+            objOCCI_->writeSQL(streamOCCI_);
+    }
+    catch (oracle::occi::SQLException& excep)
+    {
+        excep.setErrorCtx(ctxOCCI_);
+    }
+    return;
 }
 
 void SDOGeometry::writeSQL(oracle::occi::AnyData& streamOCCI_)
 {
-   streamOCCI_.setNumber(SDO_GTYPE);
-   streamOCCI_.setNumber(SDO_SRID);
-   streamOCCI_.setObject(SDO_POINT);
-   oracle::occi::setVector(streamOCCI_, SDO_ELEM_INFO);
-   oracle::occi::setVector(streamOCCI_, SDO_ORDINATES);
+    streamOCCI_.setNumber(SDO_GTYPE);
+    streamOCCI_.setNumber(SDO_SRID);
+    streamOCCI_.setObject(SDO_POINT);
+    oracle::occi::setVector(streamOCCI_, SDO_ELEM_INFO);
+    oracle::occi::setVector(streamOCCI_, SDO_ORDINATES);
 }
 
 SDOGeometry::~SDOGeometry()
 {
-  int i;
-  delete SDO_POINT;
+    int i;
+    delete SDO_POINT;
 }

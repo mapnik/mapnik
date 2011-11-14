@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -46,7 +46,7 @@ using mapnik::image_reader;
 DATASOURCE_PLUGIN(raster_datasource)
 
 raster_datasource::raster_datasource(const parameters& params, bool bind)
-  : datasource(params),
+: datasource(params),
     desc_(*params.get<std::string>("type"), "utf-8"),
     extent_initialized_(false)
 {
@@ -56,19 +56,19 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
 
     boost::optional<std::string> file = params.get<std::string>("file");
     if (! file) throw datasource_exception("Raster Plugin: missing <file> parameter ");
-   
+
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
-       filename_ = *base + "/" + *file;
+        filename_ = *base + "/" + *file;
     else
-       filename_ = *file;
+        filename_ = *file;
 
     multi_tiles_ = *params_.get<bool>("multi", false);
     tile_size_ = *params_.get<unsigned>("tile_size", 256);
     tile_stride_ = *params_.get<unsigned>("tile_stride", 1);
 
     format_ = *params_.get<std::string>("format","tiff");
-   
+
     boost::optional<double> lox = params_.get<double>("lox");
     boost::optional<double> loy = params_.get<double>("loy");
     boost::optional<double> hix = params_.get<double>("hix");
@@ -90,7 +90,7 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
         throw datasource_exception("Raster Plugin: valid <extent> or <lox> <loy> <hix> <hiy> are required");
     }
 
-    if (bind) 
+    if (bind)
     {
         this->bind();
     }
@@ -99,7 +99,7 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
 void raster_datasource::bind() const
 {
     if (is_bound_) return;
-   
+
     if (multi_tiles_)
     {
         boost::optional<unsigned> x_width = params_.get<unsigned>("x_width");
@@ -124,7 +124,7 @@ void raster_datasource::bind() const
         {
             throw datasource_exception("Raster Plugin: " + filename_ + " does not exist");
         }
-    
+
         try
         {
             std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
@@ -147,7 +147,7 @@ void raster_datasource::bind() const
             throw datasource_exception("Raster Plugin: image reader unknown exception caught");
         }
     }
-    
+
 #ifdef MAPNIK_DEBUG
     std::clog << "Raster Plugin: RASTER SIZE(" << width_ << "," << height_ << ")" << std::endl;
 #endif
@@ -182,11 +182,11 @@ layer_descriptor raster_datasource::get_descriptor() const
 featureset_ptr raster_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();
-   
+
     mapnik::CoordTransform t(width_, height_, extent_, 0, 0);
     mapnik::box2d<double> intersect = extent_.intersect(q.get_bbox());
     mapnik::box2d<double> ext = t.forward(intersect);
-   
+
     const int width  = int(ext.maxx() + 0.5) - int(ext.minx() + 0.5);
     const int height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
 

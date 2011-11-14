@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -58,17 +58,17 @@ public:
     shape_file& shp();
     //shape_file& shx();
     dbf_file& dbf();
-    
+
     inline boost::shared_ptr<shape_file>& index()
     {
         return index_;
     }
-    
+
     inline bool has_index() const
     {
         return (index_ && index_->is_open());
     }
-    
+
     void move_to(int id);
     int type() const;
     const box2d<double>& current_extent() const;

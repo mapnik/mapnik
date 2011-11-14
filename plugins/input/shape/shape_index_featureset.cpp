@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -42,12 +42,12 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
                                                         std::string const& encoding,
                                                         std::string const& shape_name,
                                                         int row_limit)
-  : filter_(filter),
-    //shape_type_(0),
-    shape_(shape),
-    tr_(new transcoder(encoding)),
-    count_(0),
-    row_limit_(row_limit)
+    : filter_(filter),
+      //shape_type_(0),
+      shape_(shape),
+      tr_(new transcoder(encoding)),
+      count_(0),
+      row_limit_(row_limit)
 {
     shape_.shp().skip(100);
 
@@ -63,7 +63,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
     }
 
     std::sort(ids_.begin(), ids_.end());
-    
+
 #ifdef MAPNIK_DEBUG
     std::clog << "Shape Plugin: query size=" << ids_.size() << std::endl;
 #endif
@@ -97,7 +97,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
             }
 
             s << boost::algorithm::join(list, ",") << ".";
-            
+
             throw mapnik::datasource_exception("Shape Plugin: " + s.str());
         }
 
@@ -107,7 +107,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 
 template <typename filterT>
 feature_ptr shape_index_featureset<filterT>::next()
-{   
+{
     if (row_limit_ && count_ > row_limit_)
     {
         return feature_ptr();
@@ -155,13 +155,13 @@ feature_ptr shape_index_featureset<filterT>::next()
             point->move_to(x, y);
             feature->add_geometry(point);
             ++count_;
-        }       
+        }
         else
         {
             while(! filter_.pass(shape_.current_extent()) &&
                   itr_ != ids_.end())
             {
-                if (shape_.type() != shape_io::shape_null) 
+                if (shape_.type() != shape_io::shape_null)
                 {
                     pos = *itr_++;
                     shape_.move_to(pos);
@@ -171,7 +171,7 @@ feature_ptr shape_index_featureset<filterT>::next()
                     return feature_ptr();
                 }
             }
-            
+
             switch (type)
             {
             case shape_io::shape_multipoint:
@@ -180,14 +180,14 @@ feature_ptr shape_index_featureset<filterT>::next()
             {
                 int num_points = shape_.shp().read_ndr_integer();
                 for (int i = 0; i < num_points; ++i)
-                { 
+                {
                     double x = shape_.shp().read_double();
                     double y = shape_.shp().read_double();
                     geometry_type* point = new geometry_type(mapnik::Point);
                     point->move_to(x, y);
                     feature->add_geometry(point);
                 }
-                // ignore m and z for now 
+                // ignore m and z for now
                 ++count_;
                 break;
             }
@@ -217,7 +217,7 @@ feature_ptr shape_index_featureset<filterT>::next()
             }
 
             case shape_io::shape_polygon:
-            { 
+            {
                 geometry_type* poly = shape_.read_polygon();
                 feature->add_geometry(poly);
                 ++count_;
@@ -225,7 +225,7 @@ feature_ptr shape_index_featureset<filterT>::next()
             }
 
             case shape_io::shape_polygonm:
-            { 
+            {
                 geometry_type* poly = shape_.read_polygonm();
                 feature->add_geometry(poly);
                 ++count_;
@@ -241,17 +241,17 @@ feature_ptr shape_index_featureset<filterT>::next()
             }
             }
         }
-        
+
         feature->set_id(shape_.id_);
         if (attr_ids_.size())
         {
             shape_.dbf().move_to(shape_.id_);
             std::set<int>::const_iterator itr = attr_ids_.begin();
             std::set<int>::const_iterator end = attr_ids_.end();
-            try 
+            try
             {
                 for (; itr!=end; ++itr)
-                {                
+                {
                     shape_.dbf().add_attribute(*itr, *tr_, *feature);
                 }
             }

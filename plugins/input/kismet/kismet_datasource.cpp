@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -72,12 +72,12 @@ std::list<kismet_network_data> knd_list;
 const unsigned int queue_size = 20;
 
 kismet_datasource::kismet_datasource(parameters const& params, bool bind)
-  : datasource(params),
-    extent_(),
-    extent_initialized_(false),
-    type_(datasource::Vector),
-    srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
+    : datasource(params),
+      extent_(),
+      extent_initialized_(false),
+      type_(datasource::Vector),
+      srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
+      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
     boost::optional<std::string> host = params_.get<std::string>("host");
     if (host)
@@ -88,7 +88,7 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
     {
         throw datasource_exception("Kismet Plugin: missing <host> parameter");
     }
-  
+
     boost::optional<unsigned int> port = params_.get<unsigned int>("port", 2501);
     if (port)
     {
@@ -118,7 +118,7 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
 void kismet_datasource::bind() const
 {
     if (is_bound_) return;
-       
+
     is_bound_ = true;
 }
 
@@ -150,9 +150,9 @@ layer_descriptor kismet_datasource::get_descriptor() const
 featureset_ptr kismet_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();
-    
+
     // std::clog << "kismet_datasource::features()" << endl;
-    
+
     // TODO: use box2d to filter bbox before adding to featureset_ptr
     // mapnik::box2d<double> const& e = q.get_bbox();
 
@@ -168,7 +168,7 @@ featureset_ptr kismet_datasource::features(query const& q) const
 featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
 {
     if (! is_bound_) bind();
-    
+
     // std::clog << "kismet_datasource::features_at_point()" << endl;
 
     return featureset_ptr();
@@ -179,7 +179,7 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
 #ifdef MAPNIK_DEBUG
     std::clog << "Kismet Plugin: enter run" << std::endl;
 #endif
-  
+
     int sockfd, n;
     struct sockaddr_in sock_addr;
     struct in_addr inadr;
@@ -190,7 +190,7 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
     if (inet_aton(ip_host.c_str(), &inadr))
     {
         host = gethostbyaddr((char*)&inadr, sizeof(inadr), AF_INET);
-    }  
+    }
     else
     {
         host = gethostbyname(ip_host.c_str());
@@ -233,24 +233,24 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
     double bestlat = 0;
     double bestlon = 0;
     int crypt = crypt_none;
-  
-    // BUG: if kismet_server is active sending after mapnik was killed and then restarted the 
+
+    // BUG: if kismet_server is active sending after mapnik was killed and then restarted the
     // assert is called. Needs to be analyzed!
     while ((n = read(sockfd, buffer, sizeof(buffer))) > 0)
     {
         assert(n < MAX_TCP_BUFFER);
-    
+
         buffer[n] = '\0';
         std::string bufferObj(buffer); // TCP data send from kismet_server as STL string
-    
+
 #ifdef MAPNIK_DEBUG
         std::clog << "Kismet Plugin: buffer_obj=" << bufferObj << "[END]" << std::endl;
 #endif
-    
+
         std::string::size_type found = 0;
         std::string::size_type search_start = 0;
         std::string kismet_line; // contains a line from kismet_server
-        do 
+        do
         {
             found = bufferObj.find('\n', search_start);
             if (found != std::string::npos)
@@ -260,9 +260,9 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
 #ifdef MAPNIK_DEBUG
                 std::clog << "Kismet Plugin: line=" << kismet_line << " [ENDL]" << std::endl;
 #endif
-        
+
                 int param_number = 5; // the number of parameters to parse
-        
+
                 // Attention: string length specified to the constant!
                 if (sscanf (kismet_line.c_str(),
                             KISMET_COMMAND,
@@ -278,23 +278,23 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
 #endif
 
                     kismet_network_data knd(ssid, bssid, bestlat, bestlon, crypt);
-          
+
                     boost::mutex::scoped_lock lock(knd_list_mutex);
-                      
+
                     // the queue only grows to a max size
                     if (knd_list.size () >= queue_size)
                     {
                         knd_list.pop_front();
                     }
-          
+
                     knd_list.push_back(knd);
-                }  
+                }
                 else
                 {
                     // do nothing if not matched!
                 }
 
-                search_start = found + 1;      
+                search_start = found + 1;
             }
         }
         while (found != std::string::npos);

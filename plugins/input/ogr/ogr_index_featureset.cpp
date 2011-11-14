@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -58,31 +58,31 @@ ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
                                                     const std::string& index_file,
                                                     const std::string& encoding,
                                                     const bool multiple_geometries)
-   : dataset_(dataset),
-     layer_(layer),
-     layerdef_(layer.GetLayerDefn()),
-     filter_(filter),
-     tr_(new transcoder(encoding)),
-     fidcolumn_(layer_.GetFIDColumn()),
-     multiple_geometries_(multiple_geometries)
+    : dataset_(dataset),
+      layer_(layer),
+      layerdef_(layer.GetLayerDefn()),
+      filter_(filter),
+      tr_(new transcoder(encoding)),
+      fidcolumn_(layer_.GetFIDColumn()),
+      multiple_geometries_(multiple_geometries)
 {
-    
+
     boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(index_file.c_str(),true);
     if (memory)
     {
-        boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()),(*memory)->get_size()); 
+        boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
         ogr_index<filterT,boost::interprocess::ibufferstream >::query(filter,file,ids_);
     }
-    
-    std::sort(ids_.begin(),ids_.end());    
-    
+
+    std::sort(ids_.begin(),ids_.end());
+
 #ifdef MAPNIK_DEBUG
     std::clog << "OGR Plugin: query size=" << ids_.size() << std::endl;
 #endif
 
     itr_ = ids_.begin();
 
-    // reset reading            
+    // reset reading
     layer_.ResetReading();
 }
 
@@ -104,91 +104,91 @@ feature_ptr ogr_index_featureset<filterT>::next()
             // consistent with other mapnik datasources that start at 1
             int feature_id = ((*feat)->GetFID() + 1);
             feature_ptr feature(feature_factory::create(feature_id));
-            
+
             OGRGeometry* geom=(*feat)->GetGeometryRef();
             if (geom && !geom->IsEmpty())
             {
                 ogr_converter::convert_geometry (geom, feature, multiple_geometries_);
             }
-    #ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_DEBUG
             else
             {
                 std::clog << "### Warning: feature with null geometry: " << (*feat)->GetFID() << "\n";
             }
-    #endif
-            
+#endif
+
             int fld_count = layerdef_->GetFieldCount();
             for (int i = 0; i < fld_count; i++)
             {
                 OGRFieldDefn* fld = layerdef_->GetFieldDefn (i);
                 OGRFieldType type_oid = fld->GetType ();
                 std::string fld_name = fld->GetNameRef ();
-            
+
                 switch (type_oid)
                 {
-                    case OFTInteger:
-                    {
-                       boost::put(*feature,fld_name,(*feat)->GetFieldAsInteger (i));
-                       break;
-                    }
-                    
-                    case OFTReal:
-                    {
-                       boost::put(*feature,fld_name,(*feat)->GetFieldAsDouble (i));
-                       break;
-                    }
-                           
-                    case OFTString:
-                    case OFTWideString:     // deprecated !
-                    {
-                       UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString (i));
-                       boost::put(*feature,fld_name,ustr);
-                       break;
-                    }
-                    
-                    case OFTIntegerList:
-                    case OFTRealList:
-                    case OFTStringList:
-                    case OFTWideStringList: // deprecated !
-                    {
-                    #ifdef MAPNIK_DEBUG
-                       std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-                    #endif
-                       break;
-                    }
-                    
-                    case OFTBinary:
-                    {
-                    #ifdef MAPNIK_DEBUG
-                       std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-                    #endif
-                       //boost::put(*feature,name,feat->GetFieldAsBinary (i, size));
-                       break;
-                    }
-                       
-                    case OFTDate:
-                    case OFTTime:
-                    case OFTDateTime:       // unhandled !
-                    {
-                    #ifdef MAPNIK_DEBUG
-                       std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-                    #endif
-                       break;
-                    }
-                    
-                    default: // unknown
-                    {
-                    #ifdef MAPNIK_DEBUG
-                       std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
-                    #endif
-                       break;
-                    }
+                case OFTInteger:
+                {
+                    boost::put(*feature,fld_name,(*feat)->GetFieldAsInteger (i));
+                    break;
+                }
+
+                case OFTReal:
+                {
+                    boost::put(*feature,fld_name,(*feat)->GetFieldAsDouble (i));
+                    break;
+                }
+
+                case OFTString:
+                case OFTWideString:     // deprecated !
+                {
+                    UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString (i));
+                    boost::put(*feature,fld_name,ustr);
+                    break;
+                }
+
+                case OFTIntegerList:
+                case OFTRealList:
+                case OFTStringList:
+                case OFTWideStringList: // deprecated !
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+#endif
+                    break;
+                }
+
+                case OFTBinary:
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+#endif
+                    //boost::put(*feature,name,feat->GetFieldAsBinary (i, size));
+                    break;
+                }
+
+                case OFTDate:
+                case OFTTime:
+                case OFTDateTime:       // unhandled !
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+#endif
+                    break;
+                }
+
+                default: // unknown
+                {
+#ifdef MAPNIK_DEBUG
+                    std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
+#endif
+                    break;
+                }
                 }
             }
             return feature;
         }
     }
-    
+
     return feature_ptr();
 }
 

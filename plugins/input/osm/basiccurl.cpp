@@ -43,7 +43,7 @@ CURL_LOAD_DATA* do_grab(CURL* curl,const char* url)
     CURL_LOAD_DATA* data = (CURL_LOAD_DATA*)malloc(sizeof(CURL_LOAD_DATA));
     data->data = NULL;
     data->nbytes = 0;
-  
+
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, response_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);

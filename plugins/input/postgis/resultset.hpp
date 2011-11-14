@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -24,7 +24,7 @@
 #define RESULTSET_HPP
 
 extern "C" {
-  #include "libpq-fe.h"
+#include "libpq-fe.h"
 }
 
 class IResultSet
@@ -151,12 +151,12 @@ public:
             return PQftype(res_,col);
         return 0;
     }
-    
+
     virtual bool isNull(int index) const
     {
         return PQgetisnull(res_,pos_,index);
     }
-    
+
     virtual const char* getValue(int index) const
     {
         return PQgetvalue(res_,pos_,index);

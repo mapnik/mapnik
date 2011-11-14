@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -117,9 +117,9 @@ public:
 class tiled_file_policy
 {
 public:
-   
+
     typedef std::vector<raster_info>::const_iterator const_iterator;
-   
+
     tiled_file_policy(std::string const& file,
                       std::string const& format,
                       unsigned tile_size,
@@ -130,19 +130,19 @@ public:
     {
         double lox = extent.minx();
         double loy = extent.miny();
-   
+
         int max_x = int(std::ceil(double(width) / double(tile_size)));
         int max_y = int(std::ceil(double(height) / double(tile_size)));
 
         double pixel_x = extent.width() / double(width);
         double pixel_y = extent.height() / double(height);
 
-#ifdef MAPNIK_DEBUG 
+#ifdef MAPNIK_DEBUG
         std::clog << "Raster Plugin: PIXEL SIZE("<< pixel_x << "," << pixel_y << ")" << std::endl;
 #endif
 
         box2d<double> e = bbox.intersect(extent);
-      
+
         for (int x = 0; x < max_x; ++x)
         {
             for (int y = 0; y < max_y; ++y)
@@ -151,7 +151,7 @@ public:
                 double y0 = loy + y * tile_size * pixel_y;
                 double x1 = x0 + tile_size * pixel_x;
                 double y1 = y0 + tile_size * pixel_y;
-            
+
                 if (e.intersects(box2d<double>(x0, y0, x1, y1)))
                 {
                     box2d<double> tile_box = e.intersect(box2d<double>(x0,y0,x1,y1));
@@ -160,21 +160,21 @@ public:
                 }
             }
         }
-#ifdef MAPNIK_DEBUG 
+#ifdef MAPNIK_DEBUG
         std::clog << "Raster Plugin: INFO SIZE=" << infos_.size() << " " << file << std::endl;
 #endif
     }
-   
+
     const_iterator begin()
     {
         return infos_.begin();
     }
-      
+
     const_iterator end()
     {
         return infos_.end();
     }
-   
+
     inline int img_width(int reader_width) const
     {
         return reader_width;
@@ -198,9 +198,9 @@ private:
 class tiled_multi_file_policy
 {
 public:
-   
+
     typedef std::vector<raster_info>::const_iterator const_iterator;
-   
+
     tiled_multi_file_policy(std::string const& file_pattern,
                             std::string const& format,
                             unsigned tile_size,
@@ -209,27 +209,27 @@ public:
                             unsigned width,
                             unsigned height,
                             unsigned tile_stride)
-      : image_width_(width),
-        image_height_(height),
-        tile_size_(tile_size),
-        tile_stride_(tile_stride)
+        : image_width_(width),
+          image_height_(height),
+          tile_size_(tile_size),
+          tile_stride_(tile_stride)
     {
         double lox = extent.minx();
         double loy = extent.miny();
-   
+
         //int max_x = int(std::ceil(double(width) / double(tile_size)));
         //int max_y = int(std::ceil(double(height) / double(tile_size)));
 
         double pixel_x = extent.width() / double(width);
         double pixel_y = extent.height() / double(height);
 
-#ifdef MAPNIK_DEBUG 
+#ifdef MAPNIK_DEBUG
         std::clog << "Raster Plugin: PIXEL SIZE("<< pixel_x << "," << pixel_y << ")" << std::endl;
 #endif
 
         // intersection of query with extent => new query
         box2d<double> e = bbox.intersect(extent);
-      
+
         const int x_min = int(std::floor((e.minx() - lox) / (tile_size * pixel_x)));
         const int y_min = int(std::floor((e.miny() - loy) / (tile_size * pixel_y)));
         const int x_max = int(std::ceil((e.maxx() - lox) / (tile_size * pixel_x)));
@@ -244,7 +244,7 @@ public:
                 double y0 = loy + y*tile_size*pixel_y;
                 double x1 = x0 + tile_size*pixel_x;
                 double y1 = y0 + tile_size*pixel_y;
-            
+
                 // check if it intersects the query
                 if (e.intersects(box2d<double>(x0,y0,x1,y1)))
                 {
@@ -256,11 +256,11 @@ public:
                 }
             }
         }
-#ifdef MAPNIK_DEBUG 
+#ifdef MAPNIK_DEBUG
         std::clog << "Raster Plugin: INFO SIZE=" << infos_.size() << " " << file_pattern << std::endl;
 #endif
     }
-   
+
     const_iterator begin()
     {
         return infos_.begin();
@@ -270,7 +270,7 @@ public:
     {
         return infos_.end();
     }
-   
+
     inline int img_width(int) const
     {
         return image_width_;

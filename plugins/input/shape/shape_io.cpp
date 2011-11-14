@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -37,27 +37,27 @@ const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
 
 shape_io::shape_io(const std::string& shape_name, bool open_index)
-  : type_(shape_null),
-    shp_(shape_name + SHP),
-    dbf_(shape_name + DBF),
-    reclength_(0),
-    id_(0)
+    : type_(shape_null),
+      shp_(shape_name + SHP),
+      dbf_(shape_name + DBF),
+      reclength_(0),
+      id_(0)
 {
     bool ok = (shp_.is_open() && dbf_.is_open());
     if (! ok)
-    { 
+    {
         throw datasource_exception("Shape Plugin: cannot read shape file '" + shape_name + "'");
     }
 
     if (open_index)
     {
-        try 
+        try
         {
             index_= boost::make_shared<shape_file>(shape_name + INDEX);
         }
         catch (...)
         {
-#ifdef MAPNIK_DEBUG 
+#ifdef MAPNIK_DEBUG
             std::clog << "Shape Plugin: warning - could not open index: '" + shape_name + INDEX + "'" << std::endl;
 #endif
         }
@@ -72,7 +72,7 @@ void shape_io::move_to(int pos)
     id_ = shp_.read_xdr_integer();
     reclength_ = shp_.read_xdr_integer();
     type_ = shp_.read_ndr_integer();
-   
+
     if (type_ != shape_null && type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
     {
         shp_.read_envelope(cur_extent_);
@@ -107,7 +107,7 @@ dbf_file& shape_io::dbf()
 }
 
 geometry_type* shape_io::read_polyline()
-{    
+{
     shape_file::record_type record(reclength_ * 2 - 36);
     shp_.read_record(record);
 
@@ -149,11 +149,11 @@ geometry_type* shape_io::read_polyline()
             {
                 end = parts[k + 1];
             }
-         
+
             double x = record.read_double();
             double y = record.read_double();
             line->move_to(x, y);
-         
+
             for (int j = start + 1; j < end; ++j)
             {
                 x = record.read_double();
@@ -166,7 +166,7 @@ geometry_type* shape_io::read_polyline()
 }
 
 geometry_type* shape_io::read_polylinem()
-{    
+{
     shape_file::record_type record(reclength_ * 2 - 36);
     shp_.read_record(record);
 
@@ -178,7 +178,7 @@ geometry_type* shape_io::read_polylinem()
     {
         record.skip(4);
         double x = record.read_double();
-         double y = record.read_double();
+        double y = record.read_double();
         line->move_to(x, y);
         for (int i = 1; i < num_points; ++i)
         {
@@ -207,11 +207,11 @@ geometry_type* shape_io::read_polylinem()
             {
                 end = parts[k + 1];
             }
-      
+
             double x = record.read_double();
             double y = record.read_double();
             line->move_to(x, y);
-      
+
             for (int j = start + 1; j < end; ++j)
             {
                 x = record.read_double();
@@ -224,48 +224,48 @@ geometry_type* shape_io::read_polylinem()
     // m-range
     //double m0=record.read_double();
     //double m1=record.read_double();
-    
+
     //for (int i=0;i<num_points;++i)
     //{
     //   double m=record.read_double();
     //}
-    
+
     return line;
 }
 
 geometry_type* shape_io::read_polylinez()
 {
-   shape_file::record_type record(reclength_ * 2 - 36);
-   shp_.read_record(record);
+    shape_file::record_type record(reclength_ * 2 - 36);
+    shp_.read_record(record);
 
-   int num_parts = record.read_ndr_integer();
-   int num_points = record.read_ndr_integer();
-   geometry_type* line = new geometry_type(mapnik::LineString);
-   line->set_capacity(num_points + num_parts);
-   if (num_parts == 1)
-   {
-      record.skip(4);
-      double x = record.read_double();
-      double y = record.read_double();
-      line->move_to(x, y);
-      for (int i = 1; i < num_points; ++i)
-      {
-         x = record.read_double();
-         y = record.read_double();
-         line->line_to(x, y);
-      }
-   }
-   else
-   {
-      std::vector<int> parts(num_parts);
-      for (int i = 0; i < num_parts; ++i)
-      {
-         parts[i] = record.read_ndr_integer();
-      }
+    int num_parts = record.read_ndr_integer();
+    int num_points = record.read_ndr_integer();
+    geometry_type* line = new geometry_type(mapnik::LineString);
+    line->set_capacity(num_points + num_parts);
+    if (num_parts == 1)
+    {
+        record.skip(4);
+        double x = record.read_double();
+        double y = record.read_double();
+        line->move_to(x, y);
+        for (int i = 1; i < num_points; ++i)
+        {
+            x = record.read_double();
+            y = record.read_double();
+            line->line_to(x, y);
+        }
+    }
+    else
+    {
+        std::vector<int> parts(num_parts);
+        for (int i = 0; i < num_parts; ++i)
+        {
+            parts[i] = record.read_ndr_integer();
+        }
 
-      int start, end;
-      for (int k = 0; k < num_parts; ++k)
-      {
+        int start, end;
+        for (int k = 0; k < num_parts; ++k)
+        {
             start = parts[k];
             if (k == num_parts - 1)
             {
@@ -275,11 +275,11 @@ geometry_type* shape_io::read_polylinez()
             {
                 end = parts[k + 1];
             }
-         
+
             double x = record.read_double();
             double y = record.read_double();
             line->move_to(x, y);
-         
+
             for (int j = start + 1; j < end; ++j)
             {
                 x = record.read_double();
@@ -296,11 +296,11 @@ geometry_type* shape_io::read_polylinez()
     // {
     //  double z=record.read_double();
     // }
-    
+
     // m-range
     //double m0=record.read_double();
     //double m1=record.read_double();
-    
+
     //for (int i=0;i<num_points;++i)
     //{
     //   double m=record.read_double();
@@ -340,7 +340,7 @@ geometry_type* shape_io::read_polygon()
         double x = record.read_double();
         double y = record.read_double();
         poly->move_to(x, y);
-   
+
         for (int j=start+1;j<end;j++)
         {
             x = record.read_double();
@@ -365,7 +365,7 @@ geometry_type* shape_io::read_polygonm()
     {
         parts[i] = record.read_ndr_integer();
     }
-    
+
     for (int k = 0; k < num_parts; k++)
     {
         int start = parts[k];
@@ -382,7 +382,7 @@ geometry_type* shape_io::read_polygonm()
         double x = record.read_double();
         double y = record.read_double();
         poly->move_to(x, y);
-   
+
         for (int j = start + 1; j < end; j++)
         {
             x = record.read_double();
@@ -416,7 +416,7 @@ geometry_type* shape_io::read_polygonz()
     {
         parts[i] = record.read_ndr_integer();
     }
-    
+
     for (int k = 0; k < num_parts; k++)
     {
         int start = parts[k];
@@ -433,7 +433,7 @@ geometry_type* shape_io::read_polygonz()
         double x = record.read_double();
         double y = record.read_double();
         poly->move_to(x, y);
-   
+
         for (int j = start + 1; j < end; j++)
         {
             x = record.read_double();

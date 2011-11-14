@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -32,7 +32,7 @@
 // gdal
 #include <gdal_priv.h>
 
-class gdal_datasource : public mapnik::datasource 
+class gdal_datasource : public mapnik::datasource
 {
 public:
     gdal_datasource(mapnik::parameters const& params, bool bind = true);

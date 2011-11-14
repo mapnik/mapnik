@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -59,7 +59,7 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("Shape Plugin: missing <file> parameter");
-      
+
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
         shape_name_ = *base + "/" + *file;
@@ -67,7 +67,7 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
         shape_name_ = *file;
 
     boost::algorithm::ireplace_last(shape_name_,".shp","");
-    
+
     if (bind)
     {
         this->bind();
@@ -77,7 +77,7 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
 void shape_datasource::bind() const
 {
     if (is_bound_) return;
-    
+
     if (!boost::filesystem::exists(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
@@ -95,7 +95,7 @@ void shape_datasource::bind() const
 
 
     try
-    {  
+    {
         boost::shared_ptr<shape_io> shape_ref = boost::make_shared<shape_io>(shape_name_);
         init(*shape_ref);
         for (int i=0;i<shape_ref->dbf().num_fields();++i)
@@ -116,7 +116,7 @@ void shape_datasource::bind() const
             case 'F': // float
             {
                 if (fd.dec_>0)
-                {   
+                {
                     desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,8));
                 }
                 else
@@ -131,7 +131,7 @@ void shape_datasource::bind() const
                 // G - ole
                 // + - autoincrement
                 std::clog << "Shape Plugin: unknown type " << fd.type_ << std::endl;
-#endif 
+#endif
                 break;
             }
         }
@@ -156,7 +156,7 @@ void shape_datasource::bind() const
         std::clog << "Shape Plugin: error processing field attributes" << std::endl;
         throw;
     }
-    
+
     is_bound_ = true;
 }
 
@@ -171,23 +171,23 @@ void  shape_datasource::init(shape_io& shape) const
         //invalid file code
         throw datasource_exception("Shape Plugin: " + (boost::format("wrong file code : %d") % file_code).str());
     }
-    
+
     shape.shp().skip(5*4);
     file_length_=shape.shp().read_xdr_integer();
     int version=shape.shp().read_ndr_integer();
-   
+
     if (version!=1000)
     {
         //invalid version number
         throw datasource_exception("Shape Plugin: " + (boost::format("invalid version number: %d") % version).str());
     }
-   
+
     int shape_type = shape.shp().read_ndr_integer();
     if (shape_type == shape_io::shape_multipatch)
         throw datasource_exception("Shape Plugin: shapefile multipatch type is not supported");
-   
+
     shape.shp().read_envelope(extent_);
-   
+
 #ifdef MAPNIK_DEBUG
     double zmin = shape.shp().read_double();
     double zmax = shape.shp().read_double();
@@ -201,9 +201,9 @@ void  shape_datasource::init(shape_io& shape) const
 #endif
 
     // check if we have an index file around
-    
+
     indexed_ = shape.has_index();
-    
+
     //std::string index_name(shape_name_+".index");
     //std::ifstream file(index_name.c_str(),std::ios::in | std::ios::binary);
     //if (file)
@@ -215,7 +215,7 @@ void  shape_datasource::init(shape_io& shape) const
     //{
     //    std::clog << "### Notice: no .index file found for " + shape_name_ + ".shp, use the 'shapeindex' program to build an index for faster rendering\n";
     //}
-    
+
 #ifdef MAPNIK_DEBUG
     std::clog << "Shape Plugin: extent=" << extent_ << std::endl;
     std::clog << "Shape Plugin: file_length=" << file_length_ << std::endl;
@@ -243,7 +243,7 @@ layer_descriptor shape_datasource::get_descriptor() const
 featureset_ptr shape_datasource::features(const query& q) const
 {
     if (!is_bound_) bind();
-    
+
     filter_in_box filter(q.get_bbox());
     if (indexed_)
     {
@@ -260,11 +260,11 @@ featureset_ptr shape_datasource::features(const query& q) const
     else
     {
         return boost::make_shared<shape_featureset<filter_in_box> >(filter,
-                                                 shape_name_,
-                                                 q.property_names(),
-                                                 desc_.get_encoding(),
-                                                 file_length_,
-                                                 row_limit_);
+                                                                    shape_name_,
+                                                                    q.property_names(),
+                                                                    desc_.get_encoding(),
+                                                                    file_length_,
+                                                                    row_limit_);
     }
 }
 
@@ -278,13 +278,13 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
     std::vector<attribute_descriptor>::const_iterator itr = desc_vector.begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_vector.end();
     std::set<std::string> names;
-    
+
     while (itr != end)
-    {    
+    {
         names.insert(itr->get_name());
         ++itr;
     }
-    
+
     if (indexed_)
     {
         shape_->shp().seek(0);
@@ -300,17 +300,17 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
     else
     {
         return boost::make_shared<shape_featureset<filter_at_point> >(filter,
-                                                   shape_name_,
-                                                   names,
-                                                   desc_.get_encoding(),
-                                                   file_length_,
-                                                   row_limit_);
+                                                                      shape_name_,
+                                                                      names,
+                                                                      desc_.get_encoding(),
+                                                                      file_length_,
+                                                                      row_limit_);
     }
 }
 
 box2d<double> shape_datasource::envelope() const
 {
     if (!is_bound_) bind();
-    
+
     return extent_;
 }

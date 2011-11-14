@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -27,118 +27,118 @@
 #include <boost/make_shared.hpp>
 
 extern "C" {
-  #include "libpq-fe.h"
+#include "libpq-fe.h"
 }
 
 #include "resultset.hpp"
 
 class Connection
 {
-   private:
-      PGconn *conn_;
-      int cursorId;
-      bool closed_;
-   public:
-      Connection(std::string const& connection_str)
-         :cursorId(0),
+private:
+    PGconn *conn_;
+    int cursorId;
+    bool closed_;
+public:
+    Connection(std::string const& connection_str)
+        :cursorId(0),
          closed_(false)
-      {
-         conn_=PQconnectdb(connection_str.c_str());
-         if (PQstatus(conn_) != CONNECTION_OK)
-         {
-             std::ostringstream s("Postgis Plugin: PSQL error");
-             if (conn_ )
-             {
-                 std::string msg = PQerrorMessage( conn_ );
-                 if ( ! msg.empty() )
-                 {
-                     s << ":\n" << msg.substr( 0, msg.size() - 1 );
-                 }
-             } 
-             throw mapnik::datasource_exception( s.str() );
-         }
-      }
-      
-      bool execute(const std::string& sql) const
-      {
-         PGresult *result=PQexec(conn_,sql.c_str());
-         bool ok=(result && PQresultStatus(result)==PGRES_COMMAND_OK);
-         PQclear(result);
-         return ok;
-      }
-      
-      boost::shared_ptr<ResultSet> executeQuery(const std::string& sql,int type=0) const
-      {
-         PGresult *result=0;
-         if (type==1)
-         {
-             result=PQexecParams(conn_,sql.c_str(),0,0,0,0,0,1);
-         }
-         else
-         {
-             result=PQexec(conn_,sql.c_str());
-         }
-         if(!result || PQresultStatus(result) != PGRES_TUPLES_OK)
-         {
-             std::ostringstream s("Postgis Plugin: PSQL error");
-             if (conn_ )
-             {
-                 std::string msg = PQerrorMessage( conn_ );
-                 if ( ! msg.empty() )
-                 {
-                     s << ":\n" <<  msg.substr( 0, msg.size() - 1 );
-                 }
-                 
-                 s << "\nFull sql was: '" <<  sql << "'\n";
-             }
-             if (result)
-                 PQclear(result);
-             throw mapnik::datasource_exception( s.str() );
-         }
+    {
+        conn_=PQconnectdb(connection_str.c_str());
+        if (PQstatus(conn_) != CONNECTION_OK)
+        {
+            std::ostringstream s("Postgis Plugin: PSQL error");
+            if (conn_ )
+            {
+                std::string msg = PQerrorMessage( conn_ );
+                if ( ! msg.empty() )
+                {
+                    s << ":\n" << msg.substr( 0, msg.size() - 1 );
+                }
+            }
+            throw mapnik::datasource_exception( s.str() );
+        }
+    }
 
-         return boost::make_shared<ResultSet>(result);
-      }
-      
-      std::string client_encoding() const
-      {
-         return PQparameterStatus(conn_,"client_encoding");
-      }
-      
-      bool isOK() const
-      {
-         return (PQstatus(conn_)!=CONNECTION_BAD);
-      }
-      
-      void close()
-      {
-         if (!closed_)
-         {
-             PQfinish(conn_);
+    bool execute(const std::string& sql) const
+    {
+        PGresult *result=PQexec(conn_,sql.c_str());
+        bool ok=(result && PQresultStatus(result)==PGRES_COMMAND_OK);
+        PQclear(result);
+        return ok;
+    }
+
+    boost::shared_ptr<ResultSet> executeQuery(const std::string& sql,int type=0) const
+    {
+        PGresult *result=0;
+        if (type==1)
+        {
+            result=PQexecParams(conn_,sql.c_str(),0,0,0,0,0,1);
+        }
+        else
+        {
+            result=PQexec(conn_,sql.c_str());
+        }
+        if(!result || PQresultStatus(result) != PGRES_TUPLES_OK)
+        {
+            std::ostringstream s("Postgis Plugin: PSQL error");
+            if (conn_ )
+            {
+                std::string msg = PQerrorMessage( conn_ );
+                if ( ! msg.empty() )
+                {
+                    s << ":\n" <<  msg.substr( 0, msg.size() - 1 );
+                }
+
+                s << "\nFull sql was: '" <<  sql << "'\n";
+            }
+            if (result)
+                PQclear(result);
+            throw mapnik::datasource_exception( s.str() );
+        }
+
+        return boost::make_shared<ResultSet>(result);
+    }
+
+    std::string client_encoding() const
+    {
+        return PQparameterStatus(conn_,"client_encoding");
+    }
+
+    bool isOK() const
+    {
+        return (PQstatus(conn_)!=CONNECTION_BAD);
+    }
+
+    void close()
+    {
+        if (!closed_)
+        {
+            PQfinish(conn_);
 #ifdef MAPNIK_DEBUG
-             std::clog << "PostGIS: datasource closed, also closing connection - " << conn_ << std::endl;
+            std::clog << "PostGIS: datasource closed, also closing connection - " << conn_ << std::endl;
 #endif
-             closed_ = true;
-         }
-      }
-      
-      std::string new_cursor_name()
-      {
-          std::ostringstream s;
-          s << "mapnik_" << (cursorId++);
-          return s.str();
-      }
-      
-      ~Connection()
-      {
-         if (!closed_)
-         {
-             PQfinish(conn_);
+            closed_ = true;
+        }
+    }
+
+    std::string new_cursor_name()
+    {
+        std::ostringstream s;
+        s << "mapnik_" << (cursorId++);
+        return s.str();
+    }
+
+    ~Connection()
+    {
+        if (!closed_)
+        {
+            PQfinish(conn_);
 #ifdef MAPNIK_DEBUG
-             std::clog << "PostGIS: postgresql connection closed - " << conn_ << std::endl;
+            std::clog << "PostGIS: postgresql connection closed - " << conn_ << std::endl;
 #endif
-             closed_ = true;
-         }
-      }
+            closed_ = true;
+        }
+    }
 };
 
 #endif //CONNECTION_HPP

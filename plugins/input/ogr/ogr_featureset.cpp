@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -51,13 +51,13 @@ ogr_featureset::ogr_featureset(OGRDataSource & dataset,
                                OGRGeometry & extent,
                                const std::string& encoding,
                                const bool multiple_geometries)
-  : dataset_(dataset),
-    layer_(layer),
-    layerdef_(layer.GetLayerDefn()),
-    tr_(new transcoder(encoding)),
-    fidcolumn_(layer_.GetFIDColumn ()),
-    multiple_geometries_(multiple_geometries),
-    count_(0)
+    : dataset_(dataset),
+      layer_(layer),
+      layerdef_(layer.GetLayerDefn()),
+      tr_(new transcoder(encoding)),
+      fidcolumn_(layer_.GetFIDColumn ()),
+      multiple_geometries_(multiple_geometries),
+      count_(0)
 {
     layer_.SetSpatialFilter (&extent);
 }
@@ -67,13 +67,13 @@ ogr_featureset::ogr_featureset(OGRDataSource & dataset,
                                const mapnik::box2d<double> & extent,
                                const std::string& encoding,
                                const bool multiple_geometries)
-  : dataset_(dataset),
-    layer_(layer),
-    layerdef_(layer.GetLayerDefn()),
-    tr_(new transcoder(encoding)),
-    fidcolumn_(layer_.GetFIDColumn()),
-    multiple_geometries_(multiple_geometries),
-    count_(0)
+    : dataset_(dataset),
+      layer_(layer),
+      layerdef_(layer.GetLayerDefn()),
+      tr_(new transcoder(encoding)),
+      fidcolumn_(layer_.GetFIDColumn()),
+      multiple_geometries_(multiple_geometries),
+      count_(0)
 {
     layer_.SetSpatialFilterRect (extent.minx(),
                                  extent.miny(),
@@ -95,7 +95,7 @@ feature_ptr ogr_featureset::next()
         // consistent with other mapnik datasources that start at 1
         const int feature_id = ((*feat)->GetFID() + 1);
         feature_ptr feature(feature_factory::create(feature_id));
-        
+
         OGRGeometry* geom = (*feat)->GetGeometryRef();
         if (geom && ! geom->IsEmpty())
         {
@@ -109,80 +109,80 @@ feature_ptr ogr_featureset::next()
         }
 #endif
         ++count_;
-        
+
         int fld_count = layerdef_->GetFieldCount();
         for (int i = 0; i < fld_count; i++)
         {
             OGRFieldDefn* fld = layerdef_->GetFieldDefn(i);
             const OGRFieldType type_oid = fld->GetType();
             const std::string fld_name = fld->GetNameRef();
-        
+
             switch (type_oid)
             {
-                case OFTInteger:
-                {
-                    boost::put(*feature, fld_name, (*feat)->GetFieldAsInteger(i));
-                    break;
-                }
-                
-                case OFTReal:
-                {
-                    boost::put(*feature, fld_name, (*feat)->GetFieldAsDouble(i));
-                    break;
-                }
-                       
-                case OFTString:
-                case OFTWideString:     // deprecated !
-                {
-                    UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString(i));
-                    boost::put(*feature, fld_name, ustr);
-                    break;
-                }
-                
-                case OFTIntegerList:
-                case OFTRealList:
-                case OFTStringList:
-                case OFTWideStringList: // deprecated !
-                {
+            case OFTInteger:
+            {
+                boost::put(*feature, fld_name, (*feat)->GetFieldAsInteger(i));
+                break;
+            }
+
+            case OFTReal:
+            {
+                boost::put(*feature, fld_name, (*feat)->GetFieldAsDouble(i));
+                break;
+            }
+
+            case OFTString:
+            case OFTWideString:     // deprecated !
+            {
+                UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString(i));
+                boost::put(*feature, fld_name, ustr);
+                break;
+            }
+
+            case OFTIntegerList:
+            case OFTRealList:
+            case OFTStringList:
+            case OFTWideStringList: // deprecated !
+            {
 #ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
-                    break;
-                }
-                
-                case OFTBinary:
-                {
+                break;
+            }
+
+            case OFTBinary:
+            {
 #ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
-                    //boost::put(*feature,name,feat->GetFieldAsBinary (i, size));
-                    break;
-                }
-                   
-                case OFTDate:
-                case OFTTime:
-                case OFTDateTime:       // unhandled !
-                {
+                //boost::put(*feature,name,feat->GetFieldAsBinary (i, size));
+                break;
+            }
+
+            case OFTDate:
+            case OFTTime:
+            case OFTDateTime:       // unhandled !
+            {
 #ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
-                    break;
-                }
-                
-                default: // unknown
-                {
+                break;
+            }
+
+            default: // unknown
+            {
 #ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
+                std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
 #endif
-                    break;
-                }
+                break;
+            }
             }
         }
         return feature;
     }
 
 #ifdef MAPNIK_DEBUG
-   std::clog << "OGR Plugin: " << count_ << " features" << std::endl;
+    std::clog << "OGR Plugin: " << count_ << " features" << std::endl;
 #endif
-   return feature_ptr();
+    return feature_ptr();
 }

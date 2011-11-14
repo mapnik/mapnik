@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -49,11 +49,11 @@ sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                                      mapnik::wkbFormat format,
                                      bool multiple_geometries,
                                      bool using_subquery)
-  : rs_(rs),
-    tr_(new transcoder(encoding)),
-    format_(format),
-    multiple_geometries_(multiple_geometries),
-    using_subquery_(using_subquery)
+    : rs_(rs),
+      tr_(new transcoder(encoding)),
+      format_(format),
+      multiple_geometries_(multiple_geometries),
+      using_subquery_(using_subquery)
 {
 }
 
@@ -76,7 +76,7 @@ feature_ptr sqlite_featureset::next()
 
         feature_ptr feature(feature_factory::create(feature_id));
         geometry_utils::from_wkb(feature->paths(), data, size, multiple_geometries_, format_);
-        
+
         for (int i = 2; i < rs_->column_count(); ++i)
         {
             const int type_oid = rs_->column_type(i);
@@ -96,40 +96,40 @@ feature_ptr sqlite_featureset::next()
             switch (type_oid)
             {
             case SQLITE_INTEGER:
-                {
-                    boost::put(*feature, fld_name_str, rs_->column_integer(i));
-                    break;
-                }
+            {
+                boost::put(*feature, fld_name_str, rs_->column_integer(i));
+                break;
+            }
 
             case SQLITE_FLOAT:
-                {
-                    boost::put(*feature, fld_name_str, rs_->column_double(i));
-                    break;
-                }
+            {
+                boost::put(*feature, fld_name_str, rs_->column_double(i));
+                break;
+            }
 
             case SQLITE_TEXT:
-                {
-                    int text_size;
-                    const char * data = rs_->column_text(i, text_size);
-                    UnicodeString ustr = tr_->transcode(data, text_size);
-                    boost::put(*feature, fld_name_str, ustr);
-                    break;
-                }
+            {
+                int text_size;
+                const char * data = rs_->column_text(i, text_size);
+                UnicodeString ustr = tr_->transcode(data, text_size);
+                boost::put(*feature, fld_name_str, ustr);
+                break;
+            }
 
             case SQLITE_NULL:
-                {
-                    boost::put(*feature, fld_name_str, mapnik::value_null());
-                    break;
-                }
+            {
+                boost::put(*feature, fld_name_str, mapnik::value_null());
+                break;
+            }
 
             case SQLITE_BLOB:
                 break;
 
             default:
-            #ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_DEBUG
                 std::clog << "Sqlite Plugin: field " << fld_name_str
                           << " unhandled type_oid=" << type_oid << std::endl;
-            #endif
+#endif
                 break;
             }
         }

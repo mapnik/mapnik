@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -30,7 +30,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
-#include <mapnik/wkb.hpp> 
+#include <mapnik/wkb.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -40,7 +40,7 @@
 // sqlite
 #include "kismet_types.hpp"
 
-class kismet_datasource : public mapnik::datasource 
+class kismet_datasource : public mapnik::datasource
 {
 public:
     kismet_datasource(mapnik::parameters const& params, bool bind = true);
