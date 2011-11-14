@@ -90,7 +90,9 @@ public:
     
     static std::string index_for_table(std::string const& table, std::string const& field)
     {
-        return "\"idx_" + mapnik::sql_utils::unquote(table) + "_" + field + "\"";
+        std::string table_trimmed = table;
+        dequote(table_trimmed);
+        return "\"idx_" + table_trimmed + "_" + field + "\"";
     }
 
     static std::string index_for_db(std::string const& file)
