@@ -1621,6 +1621,7 @@ if not HELP_REQUESTED:
     # for unknown reasons this variable puts -DNone
     # in the g++ args prompting unnecessary recompiles
     env['_CPPDEFFLAGS'] = None
+    plugin_base['_CPPDEFFLAGS'] = None
 
     
     if env['FAST']:
