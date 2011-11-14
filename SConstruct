@@ -302,6 +302,7 @@ opts.AddVariables(
     EnumVariable('OPTIMIZATION','Set g++ optimization level','3', ['0','1','2','3','4','s']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
+    BoolVariable('DEBUG_UNDEFINED', 'Compile a version of Mapnik using clang/llvm undefined behavior asserts', 'False'),
     ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
     ('WARNING_CXXFLAGS', 'Compiler flags you can set to reduce warning levels which are placed after -Wall.', ''),
     
@@ -1434,6 +1435,7 @@ if not preconfigured:
         debug_flags  = '-g -DDEBUG -DMAPNIK_DEBUG'
         ndebug_flags = '-DNDEBUG'
        
+        
         # Customizing the C++ compiler flags depending on: 
         #  (1) the C++ compiler used; and
         #  (2) whether debug binaries are requested.
@@ -1449,6 +1451,8 @@ if not preconfigured:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
             else: 
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts %s' % (env['OPTIMIZATION'],ndebug_flags))
+            if env['DEBUG_UNDEFINED']:
+                env.Append(CXXFLAGS = '-fcatch-undefined-behavior') #-ftrapv -fwrapv 
 
         if 'python' in env['BINDINGS']:
             if not os.access(env['PYTHON'], os.X_OK):
