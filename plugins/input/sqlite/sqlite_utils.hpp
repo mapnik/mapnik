@@ -182,8 +182,7 @@ public:
     
     static bool create_spatial_index(std::string const& index_db,
                                      std::string const& index_table,
-                                     boost::shared_ptr<sqlite_resultset> rs,
-                                     mapnik::box2d<double>& extent)
+                                     boost::shared_ptr<sqlite_resultset> rs)
     {
         /* TODO
           - speedups
@@ -203,34 +202,33 @@ public:
         bool existed = boost::filesystem::exists(index_db);
         boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
 
-        ds->execute("PRAGMA synchronous=OFF");
-        ds->execute("BEGIN TRANSACTION");
-
-        // first drop the index if it already exists
-        std::ostringstream spatial_index_drop_sql;
-        spatial_index_drop_sql << "DROP TABLE IF EXISTS " << index_table;
-        ds->execute(spatial_index_drop_sql.str());
-
-        // create the spatial index
-        std::ostringstream create_idx;
-        create_idx << "create virtual table " 
-                   << index_table
-                   << " using rtree(pkid, xmin, xmax, ymin, ymax)";
-
-        // insert for prepared statement
-        std::ostringstream insert_idx;
-        insert_idx << "insert into "
-                   << index_table
-                   << " values (?,?,?,?,?)";
-
-        ds->execute(create_idx.str());
-        
-        prepared_index_statement ps(ds,insert_idx.str());
-
         bool one_success = false;
         try
         {
-            bool first = true;
+            ds->execute("PRAGMA synchronous=OFF");
+            ds->execute("BEGIN IMMEDIATE TRANSACTION");
+    
+            // first drop the index if it already exists
+            std::ostringstream spatial_index_drop_sql;
+            spatial_index_drop_sql << "DROP TABLE IF EXISTS " << index_table;
+            ds->execute(spatial_index_drop_sql.str());
+    
+            // create the spatial index
+            std::ostringstream create_idx;
+            create_idx << "create virtual table " 
+                       << index_table
+                       << " using rtree(pkid, xmin, xmax, ymin, ymax)";
+    
+            // insert for prepared statement
+            std::ostringstream insert_idx;
+            insert_idx << "insert into "
+                       << index_table
+                       << " values (?,?,?,?,?)";
+    
+            ds->execute(create_idx.str());
+            
+            prepared_index_statement ps(ds,insert_idx.str());
+
             while (rs->is_valid() && rs->step_next())
             {
                 int size;
@@ -246,15 +244,6 @@ public:
                         mapnik::box2d<double> const& bbox = paths[i].envelope();
                         if (bbox.valid())
                         {
-                            if (first)
-                            {
-                                first = false;
-                                extent = bbox;
-                            }
-                            else
-                            {
-                                extent.expand_to_include(bbox);
-                            }
     
                             ps.bind(bbox);
         
@@ -397,8 +386,9 @@ public:
                 return true;
             }
         }
-        catch (...)
+        catch (std::exception const& ex)
         {
+            //std::clog << "no: " << ex.what() << "\n";
             return false;
         }
         return false;
