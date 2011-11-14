@@ -303,7 +303,9 @@ void csv_datasource::parse_csv(T& stream,
             {
                 Tokenizer tok(csv_line, grammer);
                 Tokenizer::iterator beg = tok.begin();
-                std::string val = boost::trim_copy(*beg);
+                std::string val;
+                if (beg != tok.end())
+                    val = boost::trim_copy(*beg);
 
                 // skip blank lines
                 if (val.empty())
