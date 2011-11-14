@@ -203,13 +203,21 @@ public:
 
         bool existed = boost::filesystem::exists(index_db);
         boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
-
+        
         bool one_success = false;
         try
         {
+
             ds->execute("PRAGMA synchronous=OFF");
             ds->execute("BEGIN IMMEDIATE TRANSACTION");
-    
+
+            /*
+            ds->execute("PRAGMA journal_mode=WAL");
+            ds->execute("PRAGMA fullfsync=1");
+            ds->execute("PRAGMA locking_mode = EXCLUSIVE");
+            ds->execute("BEGIN EXCLUSIVE TRANSACTION");
+            */
+
             // first drop the index if it already exists
             std::ostringstream spatial_index_drop_sql;
             spatial_index_drop_sql << "DROP TABLE IF EXISTS " << index_table;
@@ -278,7 +286,6 @@ public:
         }
         catch (mapnik::datasource_exception const& ex)
         {
-            ds->execute("ROLLBACK");
             if (!existed)
             {
                 try
@@ -297,7 +304,6 @@ public:
         }
         else if (!existed)
         {
-            ds->execute("ROLLBACK");
             try
             {
                 boost::filesystem::remove(index_db);
