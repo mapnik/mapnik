@@ -245,13 +245,9 @@ void sqlite_datasource::bind() const
             dataset_->execute("attach database '" + index_db + "' as " + index_table_);
         }
         has_spatial_index_ = sqlite_utils::has_rtree(index_table_,dataset_);
-    }
 
-
-    if (! extent_initialized_ 
-        && !has_spatial_index_
-        && auto_index)
-    {
+        if (!has_spatial_index_ && auto_index)
+        {
             if (! key_field_.empty())
             {
                 std::ostringstream query;
@@ -261,9 +257,14 @@ void sqlite_datasource::bind() const
                       << " FROM ("
                       << geometry_table_ << ")";
                 boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
-                if (sqlite_utils::create_spatial_index(index_db,index_table_,rs,extent_))
+                if (sqlite_utils::create_spatial_index(index_db,index_table_,rs))
                 {
-                    extent_initialized_ = true;
+                    //extent_initialized_ = true;
+                    has_spatial_index_ = true;
+                    if (boost::filesystem::exists(index_db))
+                    {
+                        dataset_->execute("attach database '" + index_db + "' as " + index_table_);
+                    }
                 }
             }
             else
@@ -275,6 +276,7 @@ void sqlite_datasource::bind() const
                   << geometry_table_;
                 throw datasource_exception(s.str());
             }
+        }
     }
 
     if (! extent_initialized_)
