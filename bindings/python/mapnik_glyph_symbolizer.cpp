@@ -73,7 +73,7 @@ void export_glyph_symbolizer()
                       &glyph_symbolizer::set_halo_fill)
 
         .add_property("halo_radius",
-                      &glyph_symbolizer::get_halo_radius, 
+                      &glyph_symbolizer::get_halo_radius,
                       &glyph_symbolizer::set_halo_radius)
 
         .add_property("size",
@@ -117,5 +117,5 @@ void export_glyph_symbolizer()
                       "defined).\n"
                       "Only needed if no explicit color is provided"
             )
-        ;    
+        ;
 }

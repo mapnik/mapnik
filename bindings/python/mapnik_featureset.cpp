@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -65,21 +65,21 @@ void export_featureset()
     using namespace boost::python;
     using mapnik::Feature;
     using mapnik::Featureset;
-    
+
     class_<Featureset,boost::shared_ptr<Featureset>,
         boost::noncopyable>("Featureset",no_init)
         .def("__iter__",pass_through)
         .def("next",next)
         .add_property("features",features,
-            "The list of features.\n"
-            "\n"
-            "Usage:\n"
-            ">>> m.query_map_point(0, 10, 10)\n"
-            "<mapnik2._mapnik2.Featureset object at 0x1004d2938>\n"
-            ">>> fs = m.query_map_point(0, 10, 10)\n"
-            ">>> for f in fs.features:\n"
-            ">>>     print f\n"
-            "<mapnik2.Feature object at 0x105e64140>\n"
+                      "The list of features.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.query_map_point(0, 10, 10)\n"
+                      "<mapnik2._mapnik2.Featureset object at 0x1004d2938>\n"
+                      ">>> fs = m.query_map_point(0, 10, 10)\n"
+                      ">>> for f in fs.features:\n"
+                      ">>>     print f\n"
+                      "<mapnik2.Feature object at 0x105e64140>\n"
             )
         ;
 }

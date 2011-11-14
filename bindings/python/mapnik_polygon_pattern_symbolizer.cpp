@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -38,14 +38,14 @@ using mapnik::guess_type;
 namespace {
 using namespace boost::python;
 
-const std::string get_filename(polygon_pattern_symbolizer const& t) 
-{ 
-    return path_processor_type::to_string(*t.get_filename()); 
+const std::string get_filename(polygon_pattern_symbolizer const& t)
+{
+    return path_processor_type::to_string(*t.get_filename());
 }
 
-void set_filename(polygon_pattern_symbolizer & t, std::string const& file_expr) 
-{ 
-    t.set_filename(parse_path(file_expr)); 
+void set_filename(polygon_pattern_symbolizer & t, std::string const& file_expr)
+{
+    t.set_filename(parse_path(file_expr));
 }
 
 }
@@ -77,7 +77,7 @@ struct polygon_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
                 );
             throw_error_already_set();
         }
-                
+
         p.set_alignment(extract<pattern_alignment_e>(state[0]));
         p.set_gamma(extract<float>(state[1]));
     }
@@ -92,22 +92,22 @@ void export_polygon_pattern_symbolizer()
         .value("LOCAL",LOCAL_ALIGNMENT)
         .value("GLOBAL",GLOBAL_ALIGNMENT)
         ;
-    
+
     class_<polygon_pattern_symbolizer>("PolygonPatternSymbolizer",
                                        init<path_expression_ptr>("<path_expression_ptr>"))
         .def_pickle(polygon_pattern_symbolizer_pickle_suite())
         .add_property("alignment",
-              &polygon_pattern_symbolizer::get_alignment,
-              &polygon_pattern_symbolizer::set_alignment,
-              "Set/get the alignment of the pattern")
+                      &polygon_pattern_symbolizer::get_alignment,
+                      &polygon_pattern_symbolizer::set_alignment,
+                      "Set/get the alignment of the pattern")
         .add_property("transform",
-              mapnik::get_svg_transform<polygon_pattern_symbolizer>,
-              mapnik::set_svg_transform<polygon_pattern_symbolizer>)
+                      mapnik::get_svg_transform<polygon_pattern_symbolizer>,
+                      mapnik::set_svg_transform<polygon_pattern_symbolizer>)
         .add_property("filename",
                       &get_filename,
                       &set_filename)
         .add_property("gamma",
                       &polygon_pattern_symbolizer::get_gamma,
                       &polygon_pattern_symbolizer::set_gamma)
-        ;    
+        ;
 }

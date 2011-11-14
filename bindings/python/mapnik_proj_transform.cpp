@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2009 Artem Pavlenko
@@ -25,7 +25,7 @@
 #include <mapnik/proj_transform.hpp>
 // boost
 #include <boost/python.hpp>
- 
+
 using mapnik::proj_transform;
 using mapnik::projection;
 
@@ -54,7 +54,7 @@ mapnik::coord2d forward_transform_c(mapnik::proj_transform& t, mapnik::coord2d c
     }
     return mapnik::coord2d(x,y);
 }
-   
+
 mapnik::coord2d backward_transform_c(mapnik::proj_transform& t, mapnik::coord2d const& c)
 {
     double x = c.x;
@@ -122,7 +122,7 @@ mapnik::box2d<double> backward_transform_env_p(mapnik::proj_transform& t, mapnik
 void export_proj_transform ()
 {
     using namespace boost::python;
-    
+
     class_<proj_transform, boost::noncopyable>("ProjTransform", init< projection const&, projection const& >())
         .def_pickle(proj_transform_pickle_suite())
         .def("forward", forward_transform_c)
@@ -132,5 +132,5 @@ void export_proj_transform ()
         .def("forward", forward_transform_env_p)
         .def("backward",backward_transform_env_p)
         ;
-    
+
 }

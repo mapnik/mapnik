@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -68,7 +68,7 @@ PyObject* tostring1( image_32 const& im)
 {
     int size = im.width() * im.height() * 4;
     return
-#if PY_VERSION_HEX >= 0x03000000 
+#if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
 #else
         ::PyString_FromStringAndSize
@@ -81,24 +81,24 @@ PyObject* tostring2(image_32 const & im, std::string const& format)
 {
     std::string s = save_to_string(im, format);
     return
-#if PY_VERSION_HEX >= 0x03000000 
+#if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
 #else
         ::PyString_FromStringAndSize
 #endif
-    (s.data(),s.size());
+        (s.data(),s.size());
 }
 
 PyObject* tostring3(image_32 const & im, std::string const& format, mapnik::rgba_palette const& pal)
 {
     std::string s = save_to_string(im, format, pal);
     return
-#if PY_VERSION_HEX >= 0x03000000 
+#if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
 #else
         ::PyString_FromStringAndSize
 #endif
-    (s.data(),s.size());
+        (s.data(),s.size());
 }
 
 
@@ -131,16 +131,16 @@ boost::shared_ptr<image_32> open_from_file(std::string const& filename)
         std::auto_ptr<image_reader> reader(get_image_reader(filename,*type));
         if (reader.get())
         {
-            
+
             boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(reader->width(),reader->height());
             reader->read(0,0,image_ptr->data());
             return image_ptr;
         }
-        throw mapnik::image_reader_exception("Failed to load: " + filename);  
+        throw mapnik::image_reader_exception("Failed to load: " + filename);
     }
     throw mapnik::image_reader_exception("Unsupported image format:" + filename);
 }
-    
+
 void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float opacity)
 {
     im.set_rectangle_alpha2(im2.data(),x,y,opacity);
@@ -169,7 +169,7 @@ void export_image()
         .value("src", mapnik::src)
         .value("dst", mapnik::dst)
         .value("src_over", mapnik::src_over)
-        .value("dst_over", mapnik::dst_over)        
+        .value("dst_over", mapnik::dst_over)
         .value("src_in", mapnik::src_in)
         .value("dst_in", mapnik::dst_in)
         .value("src_out", mapnik::src_out)
@@ -194,7 +194,7 @@ void export_image()
         .value("invert", mapnik::invert)
         .value("invert_rgb", mapnik::invert_rgb)
         ;
-    
+
     class_<image_32,boost::shared_ptr<image_32> >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
         .def("width",&image_32::width)
         .def("height",&image_32::height)
@@ -209,7 +209,7 @@ void export_image()
         .def("blend",&blend)
         .def("composite",&composite)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
-        
+
         .def("tostring",&tostring1)
         .def("tostring",&tostring2)
         .def("tostring",&tostring3)
@@ -222,6 +222,6 @@ void export_image()
         .def("from_cairo",&from_cairo)
         .staticmethod("from_cairo")
 #endif
-        ;    
-    
+        ;
+
 }

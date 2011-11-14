@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -32,7 +32,7 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getinitargs(const polygon_symbolizer& p)
     {
-        return boost::python::make_tuple(p.get_fill());  
+        return boost::python::make_tuple(p.get_fill());
     }
 
     static  boost::python::tuple
@@ -53,7 +53,7 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
                 );
             throw_error_already_set();
         }
-                
+
         p.set_opacity(extract<float>(state[0]));
         p.set_gamma(extract<float>(state[1]));
     }
@@ -63,7 +63,7 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
 void export_polygon_symbolizer()
 {
     using namespace boost::python;
-        
+
     class_<polygon_symbolizer>("PolygonSymbolizer",
                                init<>("Default PolygonSymbolizer - solid fill grey"))
         .def(init<color const&>("TODO"))
@@ -78,6 +78,6 @@ void export_polygon_symbolizer()
         .add_property("gamma",
                       &polygon_symbolizer::get_gamma,
                       &polygon_symbolizer::set_gamma)
-        ;    
+        ;
 
 }

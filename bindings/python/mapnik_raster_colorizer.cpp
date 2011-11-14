@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2010 Artem Pavlenko
@@ -69,98 +69,98 @@ void export_raster_colorizer()
     using namespace boost::python;
 
     class_<raster_colorizer,raster_colorizer_ptr>("RasterColorizer",
-            "A Raster Colorizer object.",
-            init<colorizer_mode_enum, color>(args("default_mode","default_color"))
-            )
+                                                  "A Raster Colorizer object.",
+                                                  init<colorizer_mode_enum, color>(args("default_mode","default_color"))
+        )
         .def(init<>())
-        .add_property("default_color", 
-                        make_function(&raster_colorizer::get_default_color, return_value_policy<reference_existing_object>()), 
-                        &raster_colorizer::set_default_color,
-                        "The default color for stops added without a color (mapnik.Color).\n")
-        .add_property("default_mode", 
-                        &raster_colorizer::get_default_mode_enum,
-                        &raster_colorizer::set_default_mode_enum,
-                        "The default mode (mapnik.ColorizerMode).\n"
-                        "\n"
-                        "If a stop is added without a mode, then it will inherit this default mode\n")
+        .add_property("default_color",
+                      make_function(&raster_colorizer::get_default_color, return_value_policy<reference_existing_object>()),
+                      &raster_colorizer::set_default_color,
+                      "The default color for stops added without a color (mapnik.Color).\n")
+        .add_property("default_mode",
+                      &raster_colorizer::get_default_mode_enum,
+                      &raster_colorizer::set_default_mode_enum,
+                      "The default mode (mapnik.ColorizerMode).\n"
+                      "\n"
+                      "If a stop is added without a mode, then it will inherit this default mode\n")
         .add_property("stops",
-                        make_function(get_stops,return_value_policy<reference_existing_object>()),
-                        "The list of stops this RasterColorizer contains\n")
+                      make_function(get_stops,return_value_policy<reference_existing_object>()),
+                      "The list of stops this RasterColorizer contains\n")
         .add_property("epsilon",
-                        &raster_colorizer::get_epsilon,
-                        &raster_colorizer::set_epsilon,
-                        "Comparison epsilon value for exact mode\n"
-                        "\n"
-                        "When comparing values in exact mode, values need only be within epsilon to match.\n")
-                        
-                        
+                      &raster_colorizer::get_epsilon,
+                      &raster_colorizer::set_epsilon,
+                      "Comparison epsilon value for exact mode\n"
+                      "\n"
+                      "When comparing values in exact mode, values need only be within epsilon to match.\n")
+
+
         .def("add_stop", add_stop,
-            (arg("ColorizerStop")),
-            "Add a colorizer stop to the raster colorizer.\n"
-            "\n"
-            "Usage:\n"
-            ">>> colorizer = mapnik.RasterColorizer()\n"
-            ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> stop = mapnik.ColorizerStop(3, mapnik.COLORIZER_INHERIT, color)\n"
-            ">>> colorizer.add_stop(stop)\n"
+             (arg("ColorizerStop")),
+             "Add a colorizer stop to the raster colorizer.\n"
+             "\n"
+             "Usage:\n"
+             ">>> colorizer = mapnik.RasterColorizer()\n"
+             ">>> color = mapnik.Color(\"#0044cc\")\n"
+             ">>> stop = mapnik.ColorizerStop(3, mapnik.COLORIZER_INHERIT, color)\n"
+             ">>> colorizer.add_stop(stop)\n"
             )
         .def("add_stop", add_stop2,
-            (arg("value")),
-            "Add a colorizer stop to the raster colorizer, using the default mode and color.\n"
-            "\n"
-            "Usage:\n"
-            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-            ">>> colorizer.add_stop(100)\n"
+             (arg("value")),
+             "Add a colorizer stop to the raster colorizer, using the default mode and color.\n"
+             "\n"
+             "Usage:\n"
+             ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100)\n"
             )
         .def("add_stop", add_stop3,
-            (arg("value")),
-            "Add a colorizer stop to the raster colorizer, using the default mode.\n"
-            "\n"
-            "Usage:\n"
-            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-            ">>> colorizer.add_stop(100, mapnik.Color(\"#123456\"))\n"
+             (arg("value")),
+             "Add a colorizer stop to the raster colorizer, using the default mode.\n"
+             "\n"
+             "Usage:\n"
+             ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100, mapnik.Color(\"#123456\"))\n"
             )
         .def("add_stop", add_stop4,
-            (arg("value")),
-            "Add a colorizer stop to the raster colorizer, using the default color.\n"
-            "\n"
-            "Usage:\n"
-            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-            ">>> colorizer.add_stop(100, mapnik2.COLORIZER_EXACT)\n"
+             (arg("value")),
+             "Add a colorizer stop to the raster colorizer, using the default color.\n"
+             "\n"
+             "Usage:\n"
+             ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100, mapnik2.COLORIZER_EXACT)\n"
             )
         .def("add_stop", add_stop5,
-            (arg("value")),
-            "Add a colorizer stop to the raster colorizer.\n"
-            "\n"
-            "Usage:\n"
-            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-            ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#112233\"))\n"
+             (arg("value")),
+             "Add a colorizer stop to the raster colorizer.\n"
+             "\n"
+             "Usage:\n"
+             ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#112233\"))\n"
             )
-        .def("get_color", &raster_colorizer::get_color, 
-            "Get the color assigned to a certain value in raster data.\n"
-            "\n"
-            "Usage:\n"
-            ">>> colorizer = mapnik.RasterColorizer()\n"
-            ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer.add_stop(0, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#000000\"))\n"
-            ">>> colorizer.add_stop(100, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#0E0A06\"))\n"
-            ">>> colorizer.get_color(50)\n"
-            "Color('#070503')\n"
+        .def("get_color", &raster_colorizer::get_color,
+             "Get the color assigned to a certain value in raster data.\n"
+             "\n"
+             "Usage:\n"
+             ">>> colorizer = mapnik.RasterColorizer()\n"
+             ">>> color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer.add_stop(0, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#000000\"))\n"
+             ">>> colorizer.add_stop(100, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#0E0A06\"))\n"
+             ">>> colorizer.get_color(50)\n"
+             "Color('#070503')\n"
             )
-        ;    
+        ;
 
 
 
     class_<colorizer_stops>("ColorizerStops",
-        "A RasterColorizer's collection of ordered color stops.\n"
-        "This class is not meant to be instantiated from python. However, "
-        "it can be accessed at a RasterColorizer's \"stops\" attribute for "
-        "introspection purposes",
-        no_init)
+                            "A RasterColorizer's collection of ordered color stops.\n"
+                            "This class is not meant to be instantiated from python. However, "
+                            "it can be accessed at a RasterColorizer's \"stops\" attribute for "
+                            "introspection purposes",
+                            no_init)
         .def(vector_indexing_suite<colorizer_stops>())
         ;
 
@@ -174,32 +174,32 @@ void export_raster_colorizer()
 
 
     class_<colorizer_stop>("ColorizerStop",init<float, colorizer_mode_enum, color const&>(
-                       "A Colorizer Stop object.\n"
-                       "Create with a value, ColorizerMode, and Color\n"
-                       "\n"
-                       "Usage:"
-                       ">>> color = mapnik.Color(\"#fff000\")\n"
-                       ">>> stop= mapnik.ColorizerStop(42.42, mapnik.COLORIZER_LINEAR, color)\n"
-          ))
-        .add_property("color", 
-                        make_function(&colorizer_stop::get_color, return_value_policy<reference_existing_object>()), 
-                        &colorizer_stop::set_color,
-                        "The stop color (mapnik.Color).\n")
-        .add_property("value", 
-                        &colorizer_stop::get_value, 
-                        &colorizer_stop::set_value,
-                        "The stop value.\n")
-        .add_property("label", 
-                        make_function(&colorizer_stop::get_label, return_value_policy<copy_const_reference>()),
-                        &colorizer_stop::set_label,
-                        "The stop label.\n")
-        .add_property("mode", 
-                        &colorizer_stop::get_mode_enum,
-                        &colorizer_stop::set_mode_enum,
-                        "The stop mode (mapnik.ColorizerMode).\n"
-                        "\n"
-                        "If this is COLORIZER_INHERIT then it will inherit the default mode\n"
-                        " from the RasterColorizer it is added to.\n")
+                               "A Colorizer Stop object.\n"
+                               "Create with a value, ColorizerMode, and Color\n"
+                               "\n"
+                               "Usage:"
+                               ">>> color = mapnik.Color(\"#fff000\")\n"
+                               ">>> stop= mapnik.ColorizerStop(42.42, mapnik.COLORIZER_LINEAR, color)\n"
+                               ))
+        .add_property("color",
+                      make_function(&colorizer_stop::get_color, return_value_policy<reference_existing_object>()),
+                      &colorizer_stop::set_color,
+                      "The stop color (mapnik.Color).\n")
+        .add_property("value",
+                      &colorizer_stop::get_value,
+                      &colorizer_stop::set_value,
+                      "The stop value.\n")
+        .add_property("label",
+                      make_function(&colorizer_stop::get_label, return_value_policy<copy_const_reference>()),
+                      &colorizer_stop::set_label,
+                      "The stop label.\n")
+        .add_property("mode",
+                      &colorizer_stop::get_mode_enum,
+                      &colorizer_stop::set_mode_enum,
+                      "The stop mode (mapnik.ColorizerMode).\n"
+                      "\n"
+                      "If this is COLORIZER_INHERIT then it will inherit the default mode\n"
+                      " from the RasterColorizer it is added to.\n")
         .def(self == self)
         .def("__str__",&colorizer_stop::to_string)
         ;

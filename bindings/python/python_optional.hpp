@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2007 Artem Pavlenko
@@ -68,7 +68,7 @@ struct python_optional : public boost::noncopyable
 
             const registration& converters(registered<T>::converters);
 
-            if (implicit_rvalue_convertible_from_python(source,  
+            if (implicit_rvalue_convertible_from_python(source,
                                                         converters)) {
                 rvalue_from_python_stage1_data data =
                     rvalue_from_python_stage1(source, converters);
@@ -82,7 +82,7 @@ struct python_optional : public boost::noncopyable
         {
             using namespace boost::python::converter;
 
-            void * const storage = ((rvalue_from_python_storage<T> *)  
+            void * const storage = ((rvalue_from_python_storage<T> *)
                                     data)->storage.bytes;
 
             if (data->convertible == source)        // == None

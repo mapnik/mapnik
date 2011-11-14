@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2009 Artem Pavlenko
@@ -30,7 +30,7 @@
 
 //stl
 //#ifdef MAPNIK_DEBUG
-#include <iostream>         
+#include <iostream>
 //#endif
 #include <string>
 #include <vector>
@@ -40,7 +40,7 @@ namespace mapnik {  namespace sqlite {
     class database : private boost::noncopyable
     {
         friend class prepared_statement;
-         
+
         struct database_closer
         {
             void operator () (sqlite3 * db)
@@ -51,10 +51,10 @@ namespace mapnik {  namespace sqlite {
                 sqlite3_close(db);
             }
         };
-         
-        typedef boost::shared_ptr<sqlite3> sqlite_db;    
+
+        typedef boost::shared_ptr<sqlite3> sqlite_db;
         sqlite_db db_;
-         
+
     public:
         database(std::string const& name);
         ~database();
@@ -62,25 +62,25 @@ namespace mapnik {  namespace sqlite {
     };
 
     struct null_type {};
-    struct blob 
+    struct blob
     {
         blob(const char* buf, unsigned size)
             : buf_(buf), size_(size) {}
-         
+
         const char * buf_;
         unsigned size_;
     };
 
     typedef boost::variant<int,double,std::string, blob,null_type> value_type;
     typedef std::vector<value_type> record_type;
-      
-    class prepared_statement : boost::noncopyable 
+
+    class prepared_statement : boost::noncopyable
     {
         struct binder : public boost::static_visitor<bool>
         {
             binder(sqlite3_stmt * stmt, unsigned index)
                 : stmt_(stmt), index_(index) {}
-  
+
             bool operator() (null_type )
             {
                 if (sqlite3_bind_null(stmt_, index_) != SQLITE_OK)
@@ -90,7 +90,7 @@ namespace mapnik {  namespace sqlite {
                 }
                 return true;
             }
-            
+
             bool operator() (int val)
             {
                 if (sqlite3_bind_int(stmt_, index_ , val ) != SQLITE_OK)
@@ -100,7 +100,7 @@ namespace mapnik {  namespace sqlite {
                 }
                 return true;
             }
-            
+
             bool operator() (double val)
             {
                 if (sqlite3_bind_double(stmt_, index_ , val ) != SQLITE_OK)
@@ -110,7 +110,7 @@ namespace mapnik {  namespace sqlite {
                 }
                 return true;
             }
-            
+
             bool operator() (std::string const& val)
             {
                 if (sqlite3_bind_text(stmt_, index_, val.c_str(), val.length(), SQLITE_STATIC) != SQLITE_OK)
@@ -120,7 +120,7 @@ namespace mapnik {  namespace sqlite {
                 }
                 return true;
             }
-            
+
             bool operator() (blob const& val)
             {
                 if (sqlite3_bind_blob(stmt_, index_, val.buf_, val.size_, SQLITE_STATIC) != SQLITE_OK)
@@ -130,7 +130,7 @@ namespace mapnik {  namespace sqlite {
                 }
                 return true;
             }
-            
+
             sqlite3_stmt * stmt_;
             unsigned index_;
         };
@@ -143,22 +143,22 @@ namespace mapnik {  namespace sqlite {
             int res = sqlite3_prepare_v2(db_, sql.c_str(),-1, &stmt_,&tail);
             if (res != SQLITE_OK)
             {
-                std::cerr << "ERR:"<< res << "\n";   
+                std::cerr << "ERR:"<< res << "\n";
                 throw;
             }
         }
-         
+
         ~prepared_statement()
         {
             int res = sqlite3_finalize(stmt_);
             if (res != SQLITE_OK)
             {
-                std::cerr << "ERR:" << res << "\n";     
+                std::cerr << "ERR:" << res << "\n";
             }
         }
-         
+
         bool insert_record(record_type const& rec) const
-        {  
+        {
 #ifdef MAPNIK_DEBUG
             assert( unsigned(sqlite3_bind_parameter_count(stmt_)) == rec.size());
 #endif
@@ -173,7 +173,7 @@ namespace mapnik {  namespace sqlite {
                     return false;
                 }
             }
-            
+
             sqlite3_step(stmt_);
             sqlite3_reset(stmt_);
 

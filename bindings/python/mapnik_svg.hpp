@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2010 Robert Coup
@@ -47,7 +47,7 @@ void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
     {
         std::stringstream ss;
         ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
-        throw mapnik::value_error(ss.str());    
+        throw mapnik::value_error(ss.str());
     }
     mapnik::transform_type matrix;
     tr.store_to(&matrix[0]);

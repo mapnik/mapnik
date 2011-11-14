@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * This library is free software; you can redistribute it and/or
@@ -63,7 +63,7 @@ void from_wkb_impl(path_type& p, std::string const& wkb)
 void export_geometry()
 {
     using namespace boost::python;
-    
+
     enum_<mapnik::eGeomType>("GeometryType")
         .value("Point",mapnik::Point)
         .value("LineString",mapnik::LineString)
@@ -72,7 +72,7 @@ void export_geometry()
         .value("MultiLineString",mapnik::MultiLineString)
         .value("MultiPolygon",mapnik::MultiPolygon)
         ;
-    
+
     using mapnik::geometry_type;
     class_<geometry_type, std::auto_ptr<geometry_type>,boost::noncopyable>("Geometry2d",no_init)
         .def("envelope",&geometry_type::envelope)
@@ -80,12 +80,12 @@ void export_geometry()
         .def("type",&geometry_type::type)
         // TODO add other geometry_type methods
         ;
-    
+
     class_<path_type,boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
         .def("__len__", &path_type::size)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)
         ;
-    
+
 }

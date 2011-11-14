@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -32,7 +32,7 @@ struct raster_symbolizer_pickle_suite : boost::python::pickle_suite
       static boost::python::tuple
       getinitargs(const raster_symbolizer& r)
       {
-      return boost::python::make_tuple();  
+      return boost::python::make_tuple();
       }
     */
 
@@ -54,7 +54,7 @@ struct raster_symbolizer_pickle_suite : boost::python::pickle_suite
                 );
             throw_error_already_set();
         }
-        
+
         r.set_mode(extract<std::string>(state[0]));
         r.set_scaling(extract<std::string>(state[1]));
         r.set_opacity(extract<float>(state[2]));
@@ -70,9 +70,9 @@ void export_raster_symbolizer()
 
     class_<raster_symbolizer>("RasterSymbolizer",
                               init<>("Default ctor"))
-                                    
+
         .def_pickle(raster_symbolizer_pickle_suite())
-    
+
         .add_property("mode",
                       make_function(&raster_symbolizer::get_mode,return_value_policy<copy_const_reference>()),
                       &raster_symbolizer::set_mode,
@@ -87,7 +87,7 @@ void export_raster_symbolizer()
                       ">>> r = RasterSymbolizer()\n"
                       ">>> r.mode = 'grain_merge2'\n"
             )
-            
+
         .add_property("scaling",
                       make_function(&raster_symbolizer::get_scaling,return_value_policy<copy_const_reference>()),
                       &raster_symbolizer::set_scaling,
@@ -101,7 +101,7 @@ void export_raster_symbolizer()
                       ">>> r = RasterSymbolizer()\n"
                       ">>> r.scaling = 'bilinear8'\n"
             )
-            
+
         .add_property("opacity",
                       &raster_symbolizer::get_opacity,
                       &raster_symbolizer::set_opacity,
@@ -162,5 +162,5 @@ void export_raster_symbolizer()
                       ">>> r = RasterSymbolizer()\n"
                       ">>> r.mesh_size = 32\n"
             )
-        ;    
+        ;
 }
