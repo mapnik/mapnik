@@ -452,6 +452,7 @@ pickle_store = [# Scons internal variables
         'CAIROMM_LINKFLAGS',
         'CAIROMM_CPPPATHS',
         'SVG_RENDERER',
+        'SQLITE_LINKFLAGS'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -987,7 +988,7 @@ if not preconfigured:
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
-
+    env['SQLITE_LINKFLAGS'] = []
     # previously a leading / was expected for LIB_DIR_NAME
     # now strip it to ensure expected behavior
     if env['LIB_DIR_NAME'].startswith(os.path.sep):
@@ -1236,11 +1237,29 @@ if not preconfigured:
                     env.Replace(**backup)
                     env['SKIPPED_DEPS'].append(details['lib'])
                 if plugin == 'sqlite':
+                    sqlite_backup = env.Clone().Dictionary()
+
+                    # if statically linking, on linux we likely
+                    # need to link sqlite to pthreads and dl
+                    if env['RUNTIME_LINK'] == 'static':
+                        if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('sqlite3'):
+                            sqlite_env = env.Clone()
+                            try:
+                                sqlite_env.ParseConfig('pkg-config --static --libs sqlite3')
+                                for lib in sqlite_env['LIBS']:
+                                    if not lib in env['LIBS']:
+                                        env["SQLITE_LINKFLAGS"].append(lib)
+                                        env.Append(LIBS=lib)
+                            except OSError,e:
+                                pass
+
                     if not conf.sqlite_has_rtree():
-                        env.Replace(**backup)
+                        env.Replace(**sqlite_backup)
                         if details['lib'] in env['LIBS']:
                             env['LIBS'].remove(details['lib'])
                         env['SKIPPED_DEPS'].append('sqlite_rtree')
+                    else:
+                        env.Replace(**sqlite_backup)
 
             elif details['lib'] and details['inc']:
                 if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
