@@ -51,6 +51,7 @@ public:
 private:
     int type_;
     mutable std::string table_;
+    mutable std::string table_name_;
     mutable std::string fields_;
     mutable std::string geometry_field_;
     mutable int srid_;
