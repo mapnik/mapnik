@@ -320,7 +320,8 @@ opts.AddVariables(
     ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
     ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
-    ('PATH_REMOVE', 'A path prefix to exclude from all know command and compile paths', ''),
+    ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths', ''),
+    ('PATH_REPLACE', 'Two path prefixes (divided with a :) to search/replace from all known command and compile paths', ''),
     
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -436,6 +437,7 @@ pickle_store = [# Scons internal variables
         'PKG_CONFIG_PATH',
         'PATH',
         'PATH_REMOVE',
+        'PATH_REPLACE',
         'MAPNIK_LIB_DIR',
         'MAPNIK_LIB_DIR_DEST',
         'INSTALL_PREFIX',
@@ -1627,7 +1629,27 @@ if not HELP_REQUESTED:
                     env[set].remove(i)
         rm_path('LIBPATH')
         rm_path('CPPPATH')
+        rm_path('CXXFLAGS')
+        rm_path('CAIROMM_LIBPATHS')
+        rm_path('CAIROMM_CPPPATHS')
 
+    if env['PATH_REPLACE']:
+        searches,replace = env['PATH_REPLACE'].split(':')
+        for search in searches.split(','):
+            if search in env['ENV']['PATH']:
+                env['ENV']['PATH'] = os.path.abspath(env['ENV']['PATH'].replace(search,replace))
+            def replace_path(set,s,r):
+                idx = 0
+                for i in env[set]:
+                    if s in i:
+                        env[set][idx] = os.path.abspath(env[set][idx].replace(s,r))
+                    idx +=1
+            replace_path('LIBPATH',search,replace)
+            replace_path('CPPPATH',search,replace)
+            replace_path('CXXFLAGS',search,replace)
+            replace_path('CAIROMM_LIBPATHS',search,replace)
+            replace_path('CAIROMM_CPPPATHS',search,replace)
+        
     # export env so it is available in build.py files
     Export('env')
     
