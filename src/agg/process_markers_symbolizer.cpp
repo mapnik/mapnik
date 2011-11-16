@@ -86,6 +86,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             double y1 = bbox.miny();
             double x2 = bbox.maxx();
             double y2 = bbox.maxy();
+            int w = (*mark)->width();
+            int h = (*mark)->height();    
             
             agg::trans_affine recenter = agg::trans_affine_translation(-0.5*(x1+x2),-0.5*(y1+y2));
             tr.transform(&x1,&y1);
@@ -102,26 +104,47 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
                 geometry_type const& geom = feature.get_geometry(i);
-                if (geom.num_points() <= 1)
+                // TODO - merge this code with point_symbolizer rendering
+                if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
                 {
-                    std::clog << "### Warning svg markers not supported yet for points within markers_symbolizer\n";
-                    continue;
-                } 
+                    double x;
+                    double y;
+                    double z=0;
+                    geom.label_interior_position(&x, &y);
+                    prj_trans.backward(x,y,z);
+                    t_.forward(&x,&y);
+                    extent.re_center(x,y);
+                    
+                    if (sym.get_allow_overlap() ||
+                        detector_->has_placement(extent))
+                    {
+                        
+                        render_marker(floor(x - 0.5 * w),floor(y - 0.5 * h) ,**mark,tr, sym.get_opacity());
+        
+                        // TODO - impl this for markers?
+                        //if (!sym.get_ignore_placement())
+                        //    detector_->insert(label_ext);
+                        metawriter_with_properties writer = sym.get_metawriter();
+                        if (writer.first) writer.first->add_box(extent, feature, t_, writer.second);
+                    }
+                }
+                else
+                {
+                    path_type path(t_,geom,prj_trans);
+                    markers_placement<path_type, label_collision_detector4> placement(path, extent, *detector_, 
+                                                                                      sym.get_spacing() * scale_factor_, 
+                                                                                      sym.get_max_error(), 
+                                                                                      sym.get_allow_overlap());        
+                    double x, y, angle;
                 
-                path_type path(t_,geom,prj_trans);
-                markers_placement<path_type, label_collision_detector4> placement(path, extent, *detector_, 
-                                                                                  sym.get_spacing() * scale_factor_, 
-                                                                                  sym.get_max_error(), 
-                                                                                  sym.get_allow_overlap());        
-                double x, y, angle;
-            
-                while (placement.get_point(&x, &y, &angle))
-                {
-                    agg::trans_affine matrix = recenter * tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
-                    svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(),bbox);
-                    if (writer.first)
-                        //writer.first->add_box(label_ext, feature, t_, writer.second);
-                        std::clog << "### Warning metawriter not yet supported for LINE placement\n";
+                    while (placement.get_point(&x, &y, &angle))
+                    {
+                        agg::trans_affine matrix = recenter * tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
+                        svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(),bbox);
+                        if (writer.first)
+                            //writer.first->add_box(label_ext, feature, t_, writer.second);
+                            std::clog << "### Warning metawriter not yet supported for LINE placement\n";
+                    }
                 }
             }
         }
