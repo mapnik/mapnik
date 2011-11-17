@@ -95,7 +95,8 @@ public:
         }
         if(!result || (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
-            std::ostringstream s("Postgis Plugin: PSQL error");
+            std::ostringstream s;
+            s << "Postgis Plugin: PSQL error";
             if (conn_ )
             {
                 std::string msg = PQerrorMessage( conn_ );
@@ -105,6 +106,10 @@ public:
                 }
 
                 s << "\nFull sql was: '" <<  sql << "'\n";
+            }
+            else
+            {
+                s << "unable to connect to database";
             }
             if (result)
                 PQclear(result);
