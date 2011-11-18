@@ -86,7 +86,7 @@ public:
             u = 0;
         else if (u > 1)
             u = 1;
-        return u*d;
+        return static_cast<int>(u*d);
     }
 private:
     double x1_;
