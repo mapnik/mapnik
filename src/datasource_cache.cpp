@@ -244,8 +244,4 @@ void datasource_cache::register_datasources(const std::string& str)
     }
 }
 
-#ifdef MAPNIK_THREADSAFE
-boost::mutex datasource_cache::mutex_;
-#endif
-
 }
