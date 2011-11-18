@@ -29,13 +29,8 @@
 #include <mapnik/plugin.hpp>
 #include <mapnik/datasource.hpp>
 
-#include <boost/utility.hpp>
-#ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
-#endif
-
-
 // boost
+#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 // stl
@@ -56,9 +51,6 @@ private:
     static bool registered_;
     static bool insert(const std::string&  name,const lt_dlhandle module);
     static std::vector<std::string> plugin_directories_;
-#ifdef MAPNIK_THREADSAFE
-    static boost::mutex mutex_;
-#endif
 public:
     static std::vector<std::string> plugin_names();
     static std::string plugin_directories();    

@@ -33,9 +33,6 @@
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
-#ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
-#endif
 
 namespace mapnik
 {
@@ -49,9 +46,6 @@ struct MAPNIK_DECL mapped_memory_cache :
         private boost::noncopyable
 {
     friend class CreateStatic<mapped_memory_cache>;
-#ifdef MAPNIK_THREADSAFE
-    static boost::mutex mutex_;
-#endif
     static boost::unordered_map<std::string,mapped_region_ptr> cache_;
     static bool insert(std::string const& key, mapped_region_ptr);
     static boost::optional<mapped_region_ptr> find(std::string const& key, bool update_cache = false);
