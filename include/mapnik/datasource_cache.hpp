@@ -29,6 +29,12 @@
 #include <mapnik/plugin.hpp>
 #include <mapnik/datasource.hpp>
 
+#include <boost/utility.hpp>
+#ifdef MAPNIK_THREADSAFE
+#include <boost/thread/mutex.hpp>
+#endif
+
+
 // boost
 #include <boost/shared_ptr.hpp>
 
@@ -37,7 +43,8 @@
 
 namespace mapnik {
 class MAPNIK_DECL datasource_cache : 
-        public singleton <datasource_cache,CreateStatic>
+        public singleton <datasource_cache,CreateStatic>,
+        private boost::noncopyable
 {
     friend class CreateStatic<datasource_cache>;
 private:
@@ -49,6 +56,9 @@ private:
     static bool registered_;
     static bool insert(const std::string&  name,const lt_dlhandle module);
     static std::vector<std::string> plugin_directories_;
+#ifdef MAPNIK_THREADSAFE
+    static boost::mutex mutex_;
+#endif
 public:
     static std::vector<std::string> plugin_names();
     static std::string plugin_directories();    

@@ -72,6 +72,9 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
                            "parameter 'type' is missing");
     }
 
+#ifdef MAPNIK_THREADSAFE
+    mutex::scoped_lock lock(mutex_);
+#endif
     datasource_ptr ds;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
     if ( itr == plugins_.end() )
@@ -240,4 +243,9 @@ void datasource_cache::register_datasources(const std::string& str)
         }
     }
 }
+
+#ifdef MAPNIK_THREADSAFE
+boost::mutex datasource_cache::mutex_;
+#endif
+
 }
