@@ -24,6 +24,7 @@
 #define CONNECTION_MANAGER_HPP
 
 #include <string>
+#include <sstream>
 #include <mapnik/pool.hpp>
 #include <mapnik/utils.hpp>
 #include "connection.hpp"
@@ -33,25 +34,24 @@
 
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
-using boost::mutex;
+//using boost::mutex;
 #endif
 
 using mapnik::Pool;
 using mapnik::singleton;
 using mapnik::CreateStatic;
-using std::string;
 
 template <typename T>
 class ConnectionCreator
 {
 
 public:
-    ConnectionCreator(boost::optional<string> const& host,
-                      boost::optional<string> const& port,
-                      boost::optional<string> const& dbname,
-                      boost::optional<string> const& user,
-                      boost::optional<string> const& pass,
-                      boost::optional<string> const& connect_timeout)
+    ConnectionCreator(boost::optional<std::string> const& host,
+                      boost::optional<std::string> const& port,
+                      boost::optional<std::string> const& dbname,
+                      boost::optional<std::string> const& user,
+                      boost::optional<std::string> const& pass,
+                      boost::optional<std::string> const& connect_timeout)
         : host_(host),
           port_(port),
           dbname_(dbname),
@@ -83,12 +83,12 @@ public:
     }
 
 private:
-    boost::optional<string> host_;
-    boost::optional<string> port_;
-    boost::optional<string> dbname_;
-    boost::optional<string> user_;
-    boost::optional<string> pass_;
-    boost::optional<string> connect_timeout_;
+    boost::optional<std::string> host_;
+    boost::optional<std::string> port_;
+    boost::optional<std::string> dbname_;
+    boost::optional<std::string> user_;
+    boost::optional<std::string> pass_;
+    boost::optional<std::string> connect_timeout_;
 };
 
 class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
