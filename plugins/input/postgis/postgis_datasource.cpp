@@ -83,8 +83,6 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
       persist_connection_(*params_.get<mapnik::boolean>("persist_connection",true)),
       extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery",false)),
       // params below are for testing purposes only (will likely be removed at any time)
-      force2d_(*params_.get<mapnik::boolean>("force_2d",false)),
-      st_(*params_.get<mapnik::boolean>("st_prefix",false)),
       intersect_min_scale_(*params_.get<int>("intersect_min_scale",0)),
       intersect_max_scale_(*params_.get<int>("intersect_max_scale",0))
       //show_queries_(*params_.get<mapnik::boolean>("show_queries",false))
@@ -495,13 +493,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }
 
             std::ostringstream s;
-            s << "SELECT ";
-            if (st_)
-                s << "ST_";
-            if (force2d_)
-                s << "AsBinary(ST_Force_2D(\"" << geometryColumn_ << "\")) AS geom";
-            else
-                s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
+            s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
             if (!key_field_.empty()) 
                 mapnik::quote_attr(s,key_field_);
@@ -571,13 +563,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             }
                     
 
-            s << "SELECT ";
-            if (st_)
-                s << "ST_";
-            if (force2d_)
-                s << "AsBinary(ST_Force_2D(\"" << geometryColumn_ << "\")) AS geom";
-            else
-                s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
+            s << "SELECT AsBinary(\"" << geometryColumn_ << "\") AS geom";
             
             if (!key_field_.empty())
                 mapnik::quote_attr(s,key_field_);

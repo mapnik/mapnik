@@ -75,8 +75,6 @@ class postgis_datasource : public datasource
       bool persist_connection_;
       bool extent_from_subquery_;
       // params below are for testing purposes only (will likely be removed at any time)
-      bool force2d_;
-      bool st_;
       int intersect_min_scale_;
       int intersect_max_scale_;
       //bool show_queries_;
