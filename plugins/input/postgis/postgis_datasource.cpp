@@ -665,15 +665,15 @@ box2d<double> postgis_datasource::envelope() const
               }
             */
 
-            shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
-            if (rs->next())
+            shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
+            if (rs->next() && !rs->isNull(0))
             {
                 try
                 {
-                    double lox=lexical_cast<double>(rs->getValue(0));
-                    double loy=lexical_cast<double>(rs->getValue(1));
-                    double hix=lexical_cast<double>(rs->getValue(2));
-                    double hiy=lexical_cast<double>(rs->getValue(3));
+                    double lox = lexical_cast<double>(rs->getValue(0));
+                    double loy = lexical_cast<double>(rs->getValue(1));
+                    double hix = lexical_cast<double>(rs->getValue(2));
+                    double hiy = lexical_cast<double>(rs->getValue(3));
                     extent_.init(lox,loy,hix,hiy);
                     extent_initialized_ = true;
                 }
