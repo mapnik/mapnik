@@ -9,6 +9,7 @@ import os, mapnik2
 
 MAPNIK_TEST_DBNAME = 'mapnik-tmp-postgis-test-db'
 POSTGIS_TEMPLATE_DBNAME = 'template_postgis'
+SHAPEFILE = os.path.join(execution_path('.'),'../data/shp/world_merc.shp')
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -65,8 +66,8 @@ def createdb_and_dropdb_on_path():
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
     call('createdb -T %s %s' % (POSTGIS_TEMPLATE_DBNAME,MAPNIK_TEST_DBNAME),silent=False)
-    call('shp2pgsql -s 3857 -g geom -W LATIN1 ./tests/data/shp/world_merc.shp world_merc | psql -q %s' % MAPNIK_TEST_DBNAME, silent=True)
-    call('''psql %s -c "CREATE TABLE \"empty\" (key serial);SELECT AddGeometryColumn('','empty','geom','0','GEOMETRY',4);"''' % MAPNIK_TEST_DBNAME,silent=True)
+    call('shp2pgsql -s 3857 -g geom -W LATIN1 %s world_merc | psql -q %s' % (SHAPEFILE,MAPNIK_TEST_DBNAME), silent=True)
+    call('''psql %s -c "CREATE TABLE \"empty\" (key serial);SELECT AddGeometryColumn('','empty','geom','-1','GEOMETRY',4);"''' % MAPNIK_TEST_DBNAME,silent=True)
 
 def postgis_takedown():
     pass
