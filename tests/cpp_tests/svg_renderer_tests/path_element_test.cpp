@@ -26,7 +26,7 @@ using namespace mapnik;
 
 void prepare_map(Map& m)
 {      
-    const std::string mapnik_dir("/usr/local/lib/mapnik2/");
+    const std::string mapnik_dir("/usr/local/lib/mapnik/");
     std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "input/" << "\n";
     datasource_cache::instance()->register_datasources(mapnik_dir + "input/"); 
 

@@ -37,7 +37,7 @@ headers = env['CPPPATH']
 
 libraries =  copy(env['LIBMAPNIK_LIBS'])
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-libraries.extend([boost_program_options,'mapnik2'])
+libraries.extend([boost_program_options,'mapnik'])
 
 svg2png = program_env.Program('svg2png', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 

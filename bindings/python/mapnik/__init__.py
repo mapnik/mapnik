@@ -43,7 +43,7 @@ import os
 import sys
 import warnings
 
-from _mapnik2 import *
+from _mapnik import *
 from paths import inputpluginspath, fontscollectionpath
 
 import printing

@@ -72,7 +72,7 @@ class WSGIApp:
             if reqparams.has_key('service'):
                 del reqparams['service']
             try:
-                mapnikmodule = __import__('mapnik2.ogcserver.' + service)
+                mapnikmodule = __import__('mapnik.ogcserver.' + service)
             except:
                 raise OGCException('Unsupported service "%s".' % service)
             ServiceHandlerFactory = getattr(mapnikmodule.ogcserver, service).ServiceHandlerFactory

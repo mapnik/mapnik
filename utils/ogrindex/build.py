@@ -37,7 +37,7 @@ headers = ['#plugins/input/ogr'] + env['CPPPATH']
 program_env['LIBS'] = [env['PLUGINS']['ogr']['lib']]
 
 # Link Library to Dependencies
-program_env['LIBS'].append('mapnik2')
+program_env['LIBS'].append('mapnik')
 program_env['LIBS'].append(env['ICU_LIB_NAME'])
 program_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
 program_env['LIBS'].append('boost_filesystem%s' % env['BOOST_APPEND'])

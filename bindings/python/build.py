@@ -40,9 +40,9 @@ def is_py3():
 
 
 prefix = env['PREFIX']
-target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
+target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik')
 
-libraries = ['mapnik2','png']
+libraries = ['mapnik','png']
 
 if env['JPEG']:
     libraries.append('jpeg')
@@ -151,7 +151,11 @@ if 'install' in COMMAND_LINE_TARGETS:
         init_files.remove('mapnik/paths.py') 
     init_module = env.Install(target_path, init_files)
     env.Alias(target='install', source=init_module)
-
+    # install mapnik2 module which redirects to mapnik and issues DeprecatedWarning
+    path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
+    init_mapnik2 = env.Install(path, 'mapnik2/__init__.py')
+    env.Alias(target='install', source=init_mapnik2)
+      
 # fix perms and install the custom generated 'paths.py' 
 if 'install' in COMMAND_LINE_TARGETS:
     targetp = os.path.join(target_path,'paths.py')
@@ -194,7 +198,7 @@ if env['SVN_REVISION']:
     env2.Append(CXXFLAGS='-DSVN_REVISION=%s' % env['SVN_REVISION'])
     sources.insert(0,env2.SharedObject('mapnik_python.cpp'))
 
-_mapnik = py_env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
+_mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
