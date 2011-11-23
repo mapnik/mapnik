@@ -23,7 +23,7 @@ Import ('env')
 import os
 import platform
 
-lib_dir = os.path.normpath(env['DESTDIR'] + '/' + env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/mapnik2') 
+lib_dir = os.path.normpath(env['DESTDIR'] + '/' + env['PREFIX'] + '/' + env['LIBDIR_SCHEMA'] + '/mapnik') 
 
 fonts = 1
 ini_template = '''

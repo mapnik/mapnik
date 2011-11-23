@@ -8,11 +8,11 @@ class MemoryDatasource(unittest.TestCase):
     ids = itertools.count(0)
 
     def makeOne(self, *args, **kw):
-        from mapnik2 import MemoryDatasource
+        from mapnik import MemoryDatasource
         return MemoryDatasource(*args, **kw)
 
     def makeFeature(self, wkt, **properties):
-        from mapnik2 import Feature
+        from mapnik import Feature
         f = Feature(self.ids.next())
         f.add_geometries_from_wkt(wkt)
         for k,v in properties.iteritems():
@@ -29,7 +29,7 @@ class MemoryDatasource(unittest.TestCase):
         md.add_feature(self.makeFeature('Point(2 3)', foo='bar'))
         self.failUnlessEqual(md.num_features(), 1)
 
-        from mapnik2 import Coord
+        from mapnik import Coord
         retrieved = md.features_at_point(Coord(2,3)).features
         self.failUnlessEqual(len(retrieved), 1)
         f = retrieved[0]

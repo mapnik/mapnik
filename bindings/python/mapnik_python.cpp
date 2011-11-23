@@ -399,7 +399,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string
 BOOST_PYTHON_FUNCTION_OVERLOADS(render_overloads, render, 2, 5)
 BOOST_PYTHON_FUNCTION_OVERLOADS(render_with_detector_overloads, render_with_detector, 3, 6)
 
-BOOST_PYTHON_MODULE(_mapnik2)
+BOOST_PYTHON_MODULE(_mapnik)
 {
 
     using namespace boost::python;

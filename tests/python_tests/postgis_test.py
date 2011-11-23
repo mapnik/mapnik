@@ -5,7 +5,7 @@ import atexit
 import time
 from utilities import execution_path
 from subprocess import Popen, PIPE
-import os, mapnik2
+import os, mapnik
 
 MAPNIK_TEST_DBNAME = 'mapnik-tmp-postgis-test-db'
 POSTGIS_TEMPLATE_DBNAME = 'template_postgis'
@@ -74,7 +74,7 @@ def postgis_takedown():
     # fails as the db is in use: https://github.com/mapnik/mapnik/issues/960
     #call('dropdb %s' % MAPNIK_TEST_DBNAME)
 
-if 'postgis' in mapnik2.DatasourceCache.instance().plugin_names() \
+if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         and createdb_and_dropdb_on_path() \
         and psql_can_connect() \
         and shp2pgsql_on_path():
@@ -83,7 +83,7 @@ if 'postgis' in mapnik2.DatasourceCache.instance().plugin_names() \
     postgis_setup()
 
     def test_feature():
-        ds = mapnik2.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='world_merc')
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='world_merc')
         fs = ds.featureset()
         feature = fs.next()
         eq_(feature['gid'],1)
@@ -100,7 +100,7 @@ if 'postgis' in mapnik2.DatasourceCache.instance().plugin_names() \
         eq_(feature['lat'],17.078)
 
     def test_subquery():
-        ds = mapnik2.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select * from world_merc) as w')
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select * from world_merc) as w')
         fs = ds.featureset()
         feature = fs.next()
         eq_(feature['gid'],1)
@@ -116,7 +116,7 @@ if 'postgis' in mapnik2.DatasourceCache.instance().plugin_names() \
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
 
-        ds = mapnik2.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select gid,geom,fips as _fips from world_merc) as w')
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select gid,geom,fips as _fips from world_merc) as w')
         fs = ds.featureset()
         feature = fs.next()
         eq_(feature['gid'],1)
@@ -124,7 +124,7 @@ if 'postgis' in mapnik2.DatasourceCache.instance().plugin_names() \
         eq_(len(feature),2)
 
     def test_empty_db():
-        ds = mapnik2.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='empty')
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='empty')
         fs = ds.featureset()
         feature = fs.next()
         eq_(feature,None)

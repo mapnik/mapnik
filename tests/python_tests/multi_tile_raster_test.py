@@ -3,7 +3,7 @@
 from nose.tools import *
 from utilities import execution_path, save_data, contains_word
 
-import os, mapnik2
+import os, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -12,9 +12,9 @@ def setup():
 
 def test_multi_tile_policy():
     srs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-    lyr = mapnik2.Layer('raster')
-    if 'raster' in mapnik2.DatasourceCache.instance().plugin_names():
-        lyr.datasource = mapnik2.Raster(
+    lyr = mapnik.Layer('raster')
+    if 'raster' in mapnik.DatasourceCache.instance().plugin_names():
+        lyr.datasource = mapnik.Raster(
             file = '../data/raster_tiles/${x}/${y}.tif',
             lox = -180,
             loy = -90,
@@ -26,10 +26,10 @@ def test_multi_tile_policy():
             y_width = 2
             )
         lyr.srs = srs
-        _map = mapnik2.Map(256, 256, srs)
-        style = mapnik2.Style()
-        rule = mapnik2.Rule()
-        sym = mapnik2.RasterSymbolizer()
+        _map = mapnik.Map(256, 256, srs)
+        style = mapnik.Style()
+        rule = mapnik.Rule()
+        sym = mapnik.RasterSymbolizer()
         rule.symbols.append(sym)
         style.rules.append(rule)
         _map.append_style('foo', style)
@@ -37,8 +37,8 @@ def test_multi_tile_policy():
         _map.layers.append(lyr)
         _map.zoom_to_box(lyr.envelope())
         
-        im = mapnik2.Image(_map.width, _map.height)
-        mapnik2.render(_map, im)
+        im = mapnik.Image(_map.width, _map.height)
+        mapnik.render(_map, im)
         
         save_data('test_multi_tile_policy.png', im.tostring('png'))
     
