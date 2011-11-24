@@ -26,6 +26,10 @@
 #include <mapnik/datasource.hpp>
 #include <boost/make_shared.hpp>
 
+// std
+#include <sstream>
+#include <iostream>
+
 extern "C" {
 #include "libpq-fe.h"
 }
@@ -43,17 +47,28 @@ public:
         :cursorId(0),
          closed_(false)
     {
-        conn_=PQconnectdb(connection_str.c_str());
+        conn_ = PQconnectdb(connection_str.c_str());
         if (PQstatus(conn_) != CONNECTION_OK)
         {
-            std::ostringstream s("Postgis Plugin: PSQL error");
+            // note: empty ctor is intentional here
+            // as somehow constructor string can dissapear
+            std::ostringstream s;
+            s << "Postgis Plugin: ";
             if (conn_ )
             {
                 std::string msg = PQerrorMessage( conn_ );
                 if ( ! msg.empty() )
                 {
-                    s << ":\n" << msg.substr( 0, msg.size() - 1 );
+                    s << msg.substr( 0, msg.size() - 1 );
                 }
+                else
+                {
+                    s << "unable to connect to postgres server";
+                }
+            }
+            else
+            {
+                s << "unable to connect to postgres server";
             }
             throw mapnik::datasource_exception( s.str() );
         }
@@ -61,8 +76,8 @@ public:
 
     bool execute(const std::string& sql) const
     {
-        PGresult *result=PQexec(conn_,sql.c_str());
-        bool ok=(result && PQresultStatus(result)==PGRES_COMMAND_OK);
+        PGresult *result = PQexec(conn_,sql.c_str());
+        bool ok=(result && (PQresultStatus(result) == PGRES_COMMAND_OK));
         PQclear(result);
         return ok;
     }
@@ -72,15 +87,16 @@ public:
         PGresult *result=0;
         if (type==1)
         {
-            result=PQexecParams(conn_,sql.c_str(),0,0,0,0,0,1);
+            result = PQexecParams(conn_,sql.c_str(),0,0,0,0,0,1);
         }
         else
         {
-            result=PQexec(conn_,sql.c_str());
+            result = PQexec(conn_,sql.c_str());
         }
-        if(!result || PQresultStatus(result) != PGRES_TUPLES_OK)
+        if(!result || (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
-            std::ostringstream s("Postgis Plugin: PSQL error");
+            std::ostringstream s;
+            s << "Postgis Plugin: PSQL error";
             if (conn_ )
             {
                 std::string msg = PQerrorMessage( conn_ );
@@ -90,6 +106,10 @@ public:
                 }
 
                 s << "\nFull sql was: '" <<  sql << "'\n";
+            }
+            else
+            {
+                s << "unable to connect to database";
             }
             if (result)
                 PQclear(result);
@@ -106,7 +126,7 @@ public:
 
     bool isOK() const
     {
-        return (PQstatus(conn_)!=CONNECTION_BAD);
+        return (PQstatus(conn_) != CONNECTION_BAD);
     }
 
     void close()

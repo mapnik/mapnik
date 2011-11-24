@@ -1419,6 +1419,7 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
     }
 }
 
+// TODO - this is woefully behind the AGG version.
 void cairo_renderer_base::process(markers_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)

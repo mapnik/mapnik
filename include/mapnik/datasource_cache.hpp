@@ -30,6 +30,7 @@
 #include <mapnik/datasource.hpp>
 
 // boost
+#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 // stl
@@ -37,7 +38,8 @@
 
 namespace mapnik {
 class MAPNIK_DECL datasource_cache : 
-        public singleton <datasource_cache,CreateStatic>
+        public singleton <datasource_cache,CreateStatic>,
+        private boost::noncopyable
 {
     friend class CreateStatic<datasource_cache>;
 private:

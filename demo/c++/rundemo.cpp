@@ -43,7 +43,7 @@ int main ( int argc , char** argv)
 {
     if (argc != 2)
     {
-        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local/lib/mapnik2\n";
+        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local/lib/mapnik\n";
         std::cout << "Warning: ./rundemo looks for data in ../data/,\nTherefore must be run from within the demo/c++ folder.\n";
         return EXIT_SUCCESS;
     }
@@ -71,7 +71,7 @@ int main ( int argc , char** argv)
         provpoly_style.add_rule(provpoly_rule_on);
 
         rule provpoly_rule_qc;
-        provpoly_rule_qc.set_filter(parse_expression("[NOM_FR] = 'QuÃ©bec'"));
+        provpoly_rule_qc.set_filter(parse_expression("[NOM_FR] = 'Québec'"));
         provpoly_rule_qc.append(polygon_symbolizer(color(217, 235, 203)));
         provpoly_style.add_rule(provpoly_rule_qc);
 

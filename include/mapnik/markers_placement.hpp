@@ -106,7 +106,7 @@ template <typename Locator, typename Detector> double markers_placement<Locator,
         }
     }
     unsigned points = round(length / s);
-    if (points == 0) return 0; //Path to short
+    if (points == 0) return 0.0; //Path to short
     return length / points;
 }
 

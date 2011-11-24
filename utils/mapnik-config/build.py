@@ -79,7 +79,7 @@ git_revision = os.popen("git rev-list --max-count=1 HEAD").read()
 
 configuration = {
     "prefix": config_env['PREFIX'],
-    "mapnik_libname": 'mapnik2',
+    "mapnik_libname": 'mapnik',
     "libdir_schema": config_env['LIBDIR_SCHEMA'],
     "ldflags": ldflags,
     "dep_libs": dep_libs,

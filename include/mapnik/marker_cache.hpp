@@ -39,9 +39,6 @@
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
-#ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
-#endif
 
 namespace mapnik
 {
@@ -57,9 +54,6 @@ struct MAPNIK_DECL marker_cache :
 {
 
     friend class CreateStatic<marker_cache>;
-#ifdef MAPNIK_THREADSAFE
-    static boost::mutex mutex_;
-#endif
     static boost::unordered_map<std::string,marker_ptr> cache_;
     static bool insert(std::string const& key, marker_ptr);
     static boost::optional<marker_ptr> find(std::string const& key, bool update_cache = false);

@@ -4,18 +4,18 @@
 from nose.tools import *
 from utilities import execution_path
 
-import os, mapnik2
+import os, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'shape' in mapnik2.DatasourceCache.instance().plugin_names():
+if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
     
     # Shapefile initialization
     def test_shapefile_init():
-        s = mapnik2.Shapefile(file='../../demo/data/boundaries')
+        s = mapnik.Shapefile(file='../../demo/data/boundaries')
     
         e = s.envelope()
        
@@ -26,7 +26,7 @@ if 'shape' in mapnik2.DatasourceCache.instance().plugin_names():
     
     # Shapefile properties
     def test_shapefile_properties():
-        s = mapnik2.Shapefile(file='../../demo/data/boundaries', encoding='latin1')
+        s = mapnik.Shapefile(file='../../demo/data/boundaries', encoding='latin1')
         f = s.features_at_point(s.envelope().center()).features[0]
     
         eq_(f['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')

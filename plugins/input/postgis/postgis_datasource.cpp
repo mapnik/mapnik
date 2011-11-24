@@ -81,8 +81,6 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
       persist_connection_(*params_.get<mapnik::boolean>("persist_connection",true)),
       extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery",false)),
       // params below are for testing purposes only (will likely be removed at any time)
-      force2d_(*params_.get<mapnik::boolean>("force_2d",false)),
-      st_(*params_.get<mapnik::boolean>("st_prefix",false)),
       intersect_min_scale_(*params_.get<int>("intersect_min_scale",0)),
       intersect_max_scale_(*params_.get<int>("intersect_max_scale",0))
       //show_queries_(*params_.get<mapnik::boolean>("show_queries",false))
@@ -219,7 +217,7 @@ void postgis_datasource::bind() const
             if (srid_ == 0)
             {
                 srid_ = -1;
-                std::clog << "Postgis Plugin: SRID warning, using srid=-1" << std::endl;
+                std::clog << "Postgis Plugin: SRID warning, using srid=-1 for '" << table_ << "'" << std::endl;
             }
 
             // At this point the geometry_field may still not be known
@@ -476,7 +474,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             if (!geometryColumn_.length() > 0)
             {
                 std::ostringstream s_error;
-                s_error << "geometry name lookup failed for table '";
+                s_error << "PostGIS: geometry name lookup failed for table '";
                 if (schema_.length() > 0)
                 {
                     s_error << schema_ << ".";
@@ -489,17 +487,11 @@ featureset_ptr postgis_datasource::features(const query& q) const
                     s_error << schema_ << ".";
                 }
                 s_error << geometry_table_ << "'.";
-                throw mapnik::datasource_exception("Postgis Plugin: " + s_error.str());
+                throw mapnik::datasource_exception(s_error.str());
             }
 
             std::ostringstream s;
-            s << "SELECT ";
-            if (st_)
-                s << "ST_";
-            if (force2d_)
-                s << "AsBinary(ST_Force_2D(\"" << geometryColumn_ << "\")) AS geom";
-            else
-                s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
+            s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
             if (!key_field_.empty())
                 mapnik::sql_utils::quote_attr(s,key_field_);
@@ -547,7 +539,6 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
         if (conn && conn->isOK())
         {
             PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
-            std::ostringstream s;
 
             if (!geometryColumn_.length() > 0)
             {
@@ -557,7 +548,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
                 {
                     s_error << schema_ << ".";
                 }
-                s_error << "." << geometry_table_
+                s_error << geometry_table_
                         << "'. Please manually provide the 'geometry_field' parameter or add an entry "
                         << "in the geometry_columns for '";
                 if (schema_.length() > 0)
@@ -568,14 +559,8 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
                 throw mapnik::datasource_exception(s_error.str());
             }
 
-
-            s << "SELECT ";
-            if (st_)
-                s << "ST_";
-            if (force2d_)
-                s << "AsBinary(ST_Force_2D(\"" << geometryColumn_ << "\")) AS geom";
-            else
-                s << "AsBinary(\"" << geometryColumn_ << "\") AS geom";
+            std::ostringstream s;
+            s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
             if (!key_field_.empty())
                 mapnik::sql_utils::quote_attr(s,key_field_);
@@ -680,15 +665,15 @@ box2d<double> postgis_datasource::envelope() const
               }
             */
 
-            shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
-            if (rs->next())
+            shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
+            if (rs->next() && !rs->isNull(0))
             {
                 try
                 {
-                    double lox=lexical_cast<double>(rs->getValue(0));
-                    double loy=lexical_cast<double>(rs->getValue(1));
-                    double hix=lexical_cast<double>(rs->getValue(2));
-                    double hiy=lexical_cast<double>(rs->getValue(3));
+                    double lox = lexical_cast<double>(rs->getValue(0));
+                    double loy = lexical_cast<double>(rs->getValue(1));
+                    double hix = lexical_cast<double>(rs->getValue(2));
+                    double hiy = lexical_cast<double>(rs->getValue(3));
                     extent_.init(lox,loy,hix,hiy);
                     extent_initialized_ = true;
                 }

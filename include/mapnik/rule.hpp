@@ -389,7 +389,7 @@ private:
         //std::string orientation = to_expression_string(*sym->get_orientation());
         //sym->set_orientation( parse_expression(orientation) );
         
-        unsigned text_size = sym->get_text_size();
+        float text_size = sym->get_text_size();
         position displace = sym->get_displacement();
         vertical_alignment_e valign = sym->get_vertical_alignment();
         horizontal_alignment_e halign = sym->get_horizontal_alignment();

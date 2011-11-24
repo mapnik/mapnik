@@ -5,7 +5,7 @@ import glob
 from nose.tools import *
 from utilities import execution_path
 
-import os, mapnik2
+import os, mapnik
 
 
 def setup():
@@ -13,10 +13,10 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
+if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
 
     def get_csv_ds(filename):
-        return mapnik2.Datasource(type='csv',file=os.path.join('../data/csv/',filename),quiet=True)
+        return mapnik.Datasource(type='csv',file=os.path.join('../data/csv/',filename),quiet=True)
 
     def test_broken_files(visual=False):
         broken = glob.glob("../data/csv/fails/*.*")
@@ -29,7 +29,7 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
             throws = False
             if visual:
                 try:
-                    ds = mapnik2.Datasource(type='csv',file=csv,strict=True,quiet=True)
+                    ds = mapnik.Datasource(type='csv',file=csv,strict=True,quiet=True)
                     print '\x1b[33mfailed\x1b[0m',csv
                 except Exception:
                     print '\x1b[1;32m✓ \x1b[0m', csv
@@ -41,7 +41,7 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         for csv in good_files:
             if visual:
                 try:
-                    ds = mapnik2.Datasource(type='csv',file=csv,quiet=True)
+                    ds = mapnik.Datasource(type='csv',file=csv,quiet=True)
                     print '\x1b[1;32m✓ \x1b[0m', csv
                 except Exception:
                     print '\x1b[33mfailed\x1b[0m',csv
@@ -92,24 +92,24 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         fs = ds.all_features()
         #import pdb;pdb.set_trace()
         eq_(len(fs[0].geometries()),1)
-        eq_(fs[0].geometries()[0].type(),mapnik2.GeometryType.Point)
+        eq_(fs[0].geometries()[0].type(),mapnik.GeometryType.Point)
         eq_(len(fs[1].geometries()),1)
-        eq_(fs[1].geometries()[0].type(),mapnik2.GeometryType.LineString)
+        eq_(fs[1].geometries()[0].type(),mapnik.GeometryType.LineString)
         eq_(len(fs[2].geometries()),1)
-        eq_(fs[2].geometries()[0].type(),mapnik2.GeometryType.Polygon)
+        eq_(fs[2].geometries()[0].type(),mapnik.GeometryType.Polygon)
         eq_(len(fs[3].geometries()),1) # one geometry, two parts
-        eq_(fs[3].geometries()[0].type(),mapnik2.GeometryType.Polygon)
+        eq_(fs[3].geometries()[0].type(),mapnik.GeometryType.Polygon)
         # tests assuming we want to flatten geometries
         # ideally we should not have to:
         # https://github.com/mapnik/mapnik/issues?labels=multigeom+robustness&sort=created&direction=desc&state=open&page=1
         eq_(len(fs[4].geometries()),4)
-        eq_(fs[4].geometries()[0].type(),mapnik2.GeometryType.Point)
+        eq_(fs[4].geometries()[0].type(),mapnik.GeometryType.Point)
         eq_(len(fs[5].geometries()),2)
-        eq_(fs[5].geometries()[0].type(),mapnik2.GeometryType.LineString)
+        eq_(fs[5].geometries()[0].type(),mapnik.GeometryType.LineString)
         eq_(len(fs[6].geometries()),2)
-        eq_(fs[6].geometries()[0].type(),mapnik2.GeometryType.Polygon)
+        eq_(fs[6].geometries()[0].type(),mapnik.GeometryType.Polygon)
         eq_(len(fs[7].geometries()),2)
-        eq_(fs[7].geometries()[0].type(),mapnik2.GeometryType.Polygon)
+        eq_(fs[7].geometries()[0].type(),mapnik.GeometryType.Polygon)
         
 
     def test_handling_of_missing_header(**kwargs):
@@ -132,7 +132,7 @@ if 'csv' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(feat['1991'],2)
         eq_(feat['1992'],3)
         
-        eq_(mapnik2.Expression("[1991]=2").evaluate(feat),True)
+        eq_(mapnik.Expression("[1991]=2").evaluate(feat),True)
     
     def test_quoted_numbers(**kwargs):
         ds = get_csv_ds('points.csv')
