@@ -110,7 +110,7 @@ void export_raster_colorizer()
              "\n"
              "Usage:\n"
              ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-             ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
              ">>> colorizer.add_stop(100)\n"
             )
         .def("add_stop", add_stop3,
@@ -119,7 +119,7 @@ void export_raster_colorizer()
              "\n"
              "Usage:\n"
              ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-             ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
              ">>> colorizer.add_stop(100, mapnik.Color(\"#123456\"))\n"
             )
         .def("add_stop", add_stop4,
@@ -128,8 +128,8 @@ void export_raster_colorizer()
              "\n"
              "Usage:\n"
              ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-             ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-             ">>> colorizer.add_stop(100, mapnik2.COLORIZER_EXACT)\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100, mapnik.COLORIZER_EXACT)\n"
             )
         .def("add_stop", add_stop5,
              (arg("value")),
@@ -137,7 +137,7 @@ void export_raster_colorizer()
              "\n"
              "Usage:\n"
              ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-             ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
              ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#112233\"))\n"
             )
         .def("get_color", &raster_colorizer::get_color,
@@ -146,8 +146,8 @@ void export_raster_colorizer()
              "Usage:\n"
              ">>> colorizer = mapnik.RasterColorizer()\n"
              ">>> color = mapnik.Color(\"#0044cc\")\n"
-             ">>> colorizer.add_stop(0, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#000000\"))\n"
-             ">>> colorizer.add_stop(100, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#0E0A06\"))\n"
+             ">>> colorizer.add_stop(0, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#000000\"))\n"
+             ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#0E0A06\"))\n"
              ">>> colorizer.get_color(50)\n"
              "Color('#070503')\n"
             )

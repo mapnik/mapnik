@@ -5,7 +5,7 @@ from nose.tools import *
 from utilities import execution_path
 from utilities import Todo
 
-import mapnik2
+import mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -14,7 +14,7 @@ def setup():
 
 def test_introspect_symbolizers():
     # create a symbolizer
-    p = mapnik2.PointSymbolizer(mapnik2.PathExpression("../data/images/dummy.png"))
+    p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/dummy.png"))
     p.allow_overlap = True
     p.opacity = 0.5
     
@@ -29,11 +29,11 @@ def test_introspect_symbolizers():
     eq_(p.filename,'../data/images/dummy.png')
     
     # contruct objects to hold it
-    r = mapnik2.Rule()
+    r = mapnik.Rule()
     r.symbols.append(p)
-    s = mapnik2.Style()
+    s = mapnik.Style()
     s.rules.append(r)
-    m = mapnik2.Map(0,0)
+    m = mapnik.Map(0,0)
     m.append_style('s',s)
 
     # try to figure out what is
@@ -51,7 +51,7 @@ def test_introspect_symbolizers():
     sym = syms[0]
     # this is hackish at best
     p2 = sym.symbol()
-    assert isinstance(p2,mapnik2.PointSymbolizer)
+    assert isinstance(p2,mapnik.PointSymbolizer)
 
     eq_(p2.allow_overlap, True)
     eq_(p2.opacity, 0.5)
@@ -60,7 +60,7 @@ def test_introspect_symbolizers():
     ## but we need to be able to do:
     p2 = syms[0] # get the actual symbolizer, not the variant object
     # this will throw for now...
-    assert isinstance(p2,mapnik2.PointSymbolizer)
+    assert isinstance(p2,mapnik.PointSymbolizer)
     
     eq_(p2.allow_overlap, True)
     eq_(p2.opacity, 0.5)

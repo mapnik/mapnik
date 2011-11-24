@@ -131,8 +131,4 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
     return result;
 }
 
-#ifdef MAPNIK_THREADSAFE
-boost::mutex marker_cache::mutex_;
-#endif
-
 }

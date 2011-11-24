@@ -3,13 +3,13 @@ import itertools
 import unittest
 from nose.tools import *
 
-import mapnik2
+import mapnik
 from binascii import unhexlify
 from utilities import Todo
 
 class FeatureTest(unittest.TestCase):
     def makeOne(self, *args, **kw):
-        return mapnik2.Feature(*args, **kw)
+        return mapnik.Feature(*args, **kw)
     
     def test_default_constructor(self):
         f = self.makeOne(1)
@@ -18,7 +18,7 @@ class FeatureTest(unittest.TestCase):
     def test_python_extended_constructor(self):
         f = self.makeOne(1, 'POLYGON ((35 10, 10 20, 15 40, 45 45, 35 10),(20 30, 35 35, 30 20, 20 30))', foo="bar")
         self.failUnlessEqual(f['foo'], 'bar')
-        self.failUnlessEqual(f.envelope(),mapnik2.Box2d(10.0,10.0,45.0,45.0))
+        self.failUnlessEqual(f.envelope(),mapnik.Box2d(10.0,10.0,45.0,45.0))
     
     def test_set_get_properties(self):
         f = self.makeOne(1)
@@ -39,7 +39,7 @@ class FeatureTest(unittest.TestCase):
             self.failUnlessEqual(len(f.geometries()), 0)
             f.add_geometries_from_wkt(wkt)
             self.failUnlessEqual(len(f.geometries()), 3)
-            e = mapnik2.Box2d()
+            e = mapnik.Box2d()
             self.failUnlessEqual(e.valid(), False)
             for g in f.geometries():
                 if not e.valid():
@@ -54,7 +54,7 @@ class FeatureTest(unittest.TestCase):
             self.failUnlessEqual(len(f.geometries()), 0)
             f.add_geometries_from_wkb(unhexlify(wkb))
             self.failUnlessEqual(len(f.geometries()), 1)
-            e = mapnik2.Box2d()
+            e = mapnik.Box2d()
             self.failUnlessEqual(e.valid(), False)
             for g in f.geometries():
                 if not e.valid():
@@ -71,10 +71,10 @@ class FeatureTest(unittest.TestCase):
 
 
 def test_feature_expression_evaluation():
-    f = mapnik2.Feature(1)
+    f = mapnik.Feature(1)
     f['name'] = 'a'
     eq_(f['name'],u'a')
-    expr = mapnik2.Expression("[name]='a'")
+    expr = mapnik.Expression("[name]='a'")
     evaluated = expr.evaluate(f)
     eq_(evaluated,True)
     num_attributes = len(f)
@@ -83,10 +83,10 @@ def test_feature_expression_evaluation():
 
 # https://github.com/mapnik/mapnik/issues/933
 def test_feature_expression_evaluation_missing_attr():
-    f = mapnik2.Feature(1)
+    f = mapnik.Feature(1)
     f['name'] = u'a'
     eq_(f['name'],u'a')
-    expr = mapnik2.Expression("[fielddoesnotexist]='a'")
+    expr = mapnik.Expression("[fielddoesnotexist]='a'")
     evaluated = expr.evaluate(f)
     eq_(evaluated,False)
     num_attributes = len(f)
@@ -95,10 +95,10 @@ def test_feature_expression_evaluation_missing_attr():
 
 # https://github.com/mapnik/mapnik/issues/934
 def test_feature_expression_evaluation_attr_with_spaces():
-    f = mapnik2.Feature(1)
+    f = mapnik.Feature(1)
     f['name with space'] = u'a'
     eq_(f['name with space'],u'a')
-    expr = mapnik2.Expression("[name with space]='a'")
+    expr = mapnik.Expression("[name with space]='a'")
     eq_(str(expr),"([name with space]='a')")
     eq_(expr.evaluate(f),True)
 

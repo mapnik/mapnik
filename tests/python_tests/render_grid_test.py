@@ -3,7 +3,7 @@
 
 from nose.tools import *
 
-import os, mapnik2
+import os, mapnik
 from utilities import Todo
 import json
 
@@ -35,31 +35,31 @@ def resolve(grid,x,y):
 
 
 def create_grid_map(width,height):
-    places_ds = mapnik2.PointDatasource()
+    places_ds = mapnik.PointDatasource()
     places_ds.add_point(143.10,-38.60,'Name','South East')
     places_ds.add_point(142.48,-38.60,'Name','South West')
     places_ds.add_point(142.48,-38.38,'Name','North West')
     places_ds.add_point(143.10,-38.38,'Name','North East')
-    s = mapnik2.Style()
-    r = mapnik2.Rule()
-    #symb = mapnik2.PointSymbolizer()
-    symb = mapnik2.MarkersSymbolizer()
+    s = mapnik.Style()
+    r = mapnik.Rule()
+    #symb = mapnik.PointSymbolizer()
+    symb = mapnik.MarkersSymbolizer()
     symb.allow_overlap = True
     r.symbols.append(symb)
-    label = mapnik2.TextSymbolizer(mapnik2.Expression('[Name]'),
+    label = mapnik.TextSymbolizer(mapnik.Expression('[Name]'),
                 'DejaVu Sans Book',
                 10,
-                mapnik2.Color('black')
+                mapnik.Color('black')
                 )
     label.allow_overlap = True
     label.displacement = (0,-10)
     #r.symbols.append(label)
 
     s.rules.append(r)
-    lyr = mapnik2.Layer('Places')
+    lyr = mapnik.Layer('Places')
     lyr.datasource = places_ds
     lyr.styles.append('places_labels')
-    m = mapnik2.Map(width,height)
+    m = mapnik.Map(width,height)
     m.append_style('places_labels',s)
     m.layers.append(lyr)
     return m
@@ -68,10 +68,10 @@ def test_render_grid():
     """ test old method """
     width,height = 256,256
     m = create_grid_map(width,height)
-    ul_lonlat = mapnik2.Coord(142.30,-38.20)
-    lr_lonlat = mapnik2.Coord(143.40,-38.80)
-    m.zoom_to_box(mapnik2.Box2d(ul_lonlat,lr_lonlat))
-    grid = mapnik2.render_grid(m,0,key='Name',resolution=4,fields=['Name'])
+    ul_lonlat = mapnik.Coord(142.30,-38.20)
+    lr_lonlat = mapnik.Coord(143.40,-38.80)
+    m.zoom_to_box(mapnik.Box2d(ul_lonlat,lr_lonlat))
+    grid = mapnik.render_grid(m,0,key='Name',resolution=4,fields=['Name'])
     eq_(grid,grid_correct)
     eq_(resolve(grid,0,0),None)
     
@@ -104,18 +104,18 @@ def test_render_grid2():
     """ test old against new"""
     width,height = 256,256
     m = create_grid_map(width,height)
-    ul_lonlat = mapnik2.Coord(142.30,-38.20)
-    lr_lonlat = mapnik2.Coord(143.40,-38.80)
-    m.zoom_to_box(mapnik2.Box2d(ul_lonlat,lr_lonlat))
+    ul_lonlat = mapnik.Coord(142.30,-38.20)
+    lr_lonlat = mapnik.Coord(143.40,-38.80)
+    m.zoom_to_box(mapnik.Box2d(ul_lonlat,lr_lonlat))
 
     # new method
-    grid = mapnik2.Grid(m.width,m.height,key='Name')
-    mapnik2.render_layer(m,grid,layer=0,fields=['Name'])
+    grid = mapnik.Grid(m.width,m.height,key='Name')
+    mapnik.render_layer(m,grid,layer=0,fields=['Name'])
     utf1 = grid.encode('utf',resolution=4)
     eq_(utf1,grid_correct_new)
 
     # old method - to be removed
-    utf2 = mapnik2.render_grid(m,0,key='Name',resolution=4,fields=['Name'])
+    utf2 = mapnik.render_grid(m,0,key='Name',resolution=4,fields=['Name'])
     eq_(utf2,grid_correct)
 
     # for complex polygons these will not be true

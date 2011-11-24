@@ -4,7 +4,7 @@ from nose.tools import *
 from subprocess import call
 import os
 
-#import os, sys, glob, mapnik2
+#import os, sys, glob, mapnik
 
 #def test():
 #    # mapnik-config program

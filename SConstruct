@@ -320,7 +320,8 @@ opts.AddVariables(
     ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
     ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
-    ('PATH_REMOVE', 'A path prefix to exclude from all know command and compile paths', ''),
+    ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths', ''),
+    ('PATH_REPLACE', 'Two path prefixes (divided with a :) to search/replace from all known command and compile paths', ''),
     
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -376,7 +377,7 @@ opts.AddVariables(
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
-    ('LIB_DIR_NAME','Name to use for the subfolder beside libmapnik where fonts and plugins are installed','mapnik2'),
+    ('LIB_DIR_NAME','Name to use for the subfolder beside libmapnik where fonts and plugins are installed','mapnik'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
     BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OS X', 'True'),
     BoolVariable('PYTHON_DYNAMIC_LOOKUP', 'On OSX, do not directly link python lib, but rather dynamically lookup symbols', 'True'),
@@ -436,6 +437,7 @@ pickle_store = [# Scons internal variables
         'PKG_CONFIG_PATH',
         'PATH',
         'PATH_REMOVE',
+        'PATH_REPLACE',
         'MAPNIK_LIB_DIR',
         'MAPNIK_LIB_DIR_DEST',
         'INSTALL_PREFIX',
@@ -452,6 +454,7 @@ pickle_store = [# Scons internal variables
         'CAIROMM_LINKFLAGS',
         'CAIROMM_CPPPATHS',
         'SVG_RENDERER',
+        'SQLITE_LINKFLAGS'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -987,7 +990,7 @@ if not preconfigured:
     env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
-
+    env['SQLITE_LINKFLAGS'] = []
     # previously a leading / was expected for LIB_DIR_NAME
     # now strip it to ensure expected behavior
     if env['LIB_DIR_NAME'].startswith(os.path.sep):
@@ -1021,9 +1024,9 @@ if not preconfigured:
         env['MAPNIK_FONTS_DEST'] = os.path.join(env['MAPNIK_LIB_DIR_DEST'],'fonts')
     
     if env['LINKING'] == 'static':
-       env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}mapnik2${LIBSUFFIX}'
+       env['MAPNIK_LIB_NAME'] = '${LIBPREFIX}mapnik${LIBSUFFIX}'
     else:
-       env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}mapnik2${SHLIBSUFFIX}'
+       env['MAPNIK_LIB_NAME'] = '${SHLIBPREFIX}mapnik${SHLIBSUFFIX}'
         
     if env['PKG_CONFIG_PATH']:
         env['ENV']['PKG_CONFIG_PATH'] = os.path.realpath(env['PKG_CONFIG_PATH'])
@@ -1236,11 +1239,29 @@ if not preconfigured:
                     env.Replace(**backup)
                     env['SKIPPED_DEPS'].append(details['lib'])
                 if plugin == 'sqlite':
+                    sqlite_backup = env.Clone().Dictionary()
+
+                    # if statically linking, on linux we likely
+                    # need to link sqlite to pthreads and dl
+                    if env['RUNTIME_LINK'] == 'static':
+                        if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('sqlite3'):
+                            sqlite_env = env.Clone()
+                            try:
+                                sqlite_env.ParseConfig('pkg-config --static --libs sqlite3')
+                                for lib in sqlite_env['LIBS']:
+                                    if not lib in env['LIBS']:
+                                        env["SQLITE_LINKFLAGS"].append(lib)
+                                        env.Append(LIBS=lib)
+                            except OSError,e:
+                                pass
+
                     if not conf.sqlite_has_rtree():
-                        env.Replace(**backup)
+                        env.Replace(**sqlite_backup)
                         if details['lib'] in env['LIBS']:
                             env['LIBS'].remove(details['lib'])
                         env['SKIPPED_DEPS'].append('sqlite_rtree')
+                    else:
+                        env.Replace(**sqlite_backup)
 
             elif details['lib'] and details['inc']:
                 if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
@@ -1608,7 +1629,27 @@ if not HELP_REQUESTED:
                     env[set].remove(i)
         rm_path('LIBPATH')
         rm_path('CPPPATH')
+        rm_path('CXXFLAGS')
+        rm_path('CAIROMM_LIBPATHS')
+        rm_path('CAIROMM_CPPPATHS')
 
+    if env['PATH_REPLACE']:
+        searches,replace = env['PATH_REPLACE'].split(':')
+        for search in searches.split(','):
+            if search in env['ENV']['PATH']:
+                env['ENV']['PATH'] = os.path.abspath(env['ENV']['PATH'].replace(search,replace))
+            def replace_path(set,s,r):
+                idx = 0
+                for i in env[set]:
+                    if s in i:
+                        env[set][idx] = os.path.abspath(env[set][idx].replace(s,r))
+                    idx +=1
+            replace_path('LIBPATH',search,replace)
+            replace_path('CPPPATH',search,replace)
+            replace_path('CXXFLAGS',search,replace)
+            replace_path('CAIROMM_LIBPATHS',search,replace)
+            replace_path('CAIROMM_CPPPATHS',search,replace)
+        
     # export env so it is available in build.py files
     Export('env')
     
@@ -1711,7 +1752,7 @@ if not HELP_REQUESTED:
         # Install the python speed testing scripts if python bindings will be available
         SConscript('utils/performance/build.py')
 
-    # Install the mapnik2 upgrade script
+    # Install the mapnik upgrade script
     SConscript('utils/upgrade_map_xml/build.py')
     
     # Configure fonts and if requested install the bundled DejaVu fonts

@@ -16,7 +16,7 @@ plugin_sources = Split(
   )
 
 libraries = []
-libraries.append('mapnik2')
+libraries.append('mapnik')
 libraries.append(env['ICU_LIB_NAME'])
     
 TARGET = plugin_env.SharedLibrary(
@@ -28,7 +28,7 @@ TARGET = plugin_env.SharedLibrary(
               LINKFLAGS=env.get('CUSTOM_LDFLAGS')
               )
 
-# if the plugin links to libmapnik2 ensure it is built first
+# if the plugin links to libmapnik ensure it is built first
 Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:

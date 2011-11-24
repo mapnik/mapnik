@@ -1,15 +1,15 @@
 # -------------------------------------------------
-# QtCreator Project For Mapnik2
+# QtCreator Project For Mapnik
 # -------------------------------------------------
 QT =
 
-TARGET = mapnik2
+TARGET = mapnik
 TEMPLATE = lib
 
 INCLUDEPATH = \
     ../deps/agg/include \
     ../deps/threadpool \
-    ../include/mapnik2
+    ../include/mapnik
 
 HEADERS += \
     ../include/mapnik/grid/grid.hpp \

@@ -5,7 +5,7 @@ from utilities import execution_path
 from Queue import Queue
 import threading
 
-import os, mapnik2
+import os, mapnik
 import sqlite3
 
 def setup():
@@ -14,15 +14,15 @@ def setup():
     os.chdir(execution_path('.'))
 
 NUM_THREADS = 10
-
 TOTAL = 245
 DB = '../data/sqlite/world.sqlite'
+TABLE= 'world_merc'
 
 def create_ds():
-    ds = mapnik2.SQLite(file=DB,table='world_merc')
+    ds = mapnik.SQLite(file=DB,table=TABLE)
     fs = ds.all_features()
 
-if 'sqlite' in mapnik2.DatasourceCache.instance().plugin_names():
+if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
     
     def test_rtree_creation():
 
@@ -42,19 +42,30 @@ if 'sqlite' in mapnik2.DatasourceCache.instance().plugin_names():
         eq_(os.path.exists(index),True)
         conn = sqlite3.connect(index)
         cur = conn.cursor()
-        cur.execute("Select count(*) from idx_world_merc_GEOMETRY")
+        cur.execute("Select count(*) from idx_%s_GEOMETRY" % TABLE.replace("'",""))
         conn.commit()
         eq_(cur.fetchone()[0],TOTAL)
         cur.close()
 
-        ds = mapnik2.SQLite(file=DB,table='world_merc')
+        ds = mapnik.SQLite(file=DB,table=TABLE)
         fs = ds.all_features()
         eq_(len(fs),TOTAL)
         os.unlink(index)
-        ds = mapnik2.SQLite(file=DB,table='world_merc',use_spatial_index=False)
+        ds = mapnik.SQLite(file=DB,table=TABLE,use_spatial_index=False)
         fs = ds.all_features()
         eq_(len(fs),TOTAL)
         eq_(os.path.exists(index),False)
+
+        ds = mapnik.SQLite(file=DB,table=TABLE,use_spatial_index=True)
+        fs = ds.all_features()
+        for feat in fs:
+            query = mapnik.Query(feat.envelope())
+            selected = ds.features(query)
+            eq_(len(selected.features)>=1,True)
+
+        eq_(os.path.exists(index),True)
+        os.unlink(index)
+
 
 if __name__ == "__main__":
     setup()

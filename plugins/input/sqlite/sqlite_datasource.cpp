@@ -256,6 +256,25 @@ void sqlite_datasource::bind() const
                       << "," << key_field_
                       << " FROM ("
                       << geometry_table_ << ")";
+
+                /*
+                std::vector<sqlite_utils::rtree_type> rtree_list;
+                {
+                    boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
+                    sqlite_utils::build_tree(rs,rtree_list);
+                }
+                if (sqlite_utils::create_spatial_index2(index_db,index_table_,rtree_list))
+                {
+                    //extent_initialized_ = true;
+                    has_spatial_index_ = true;
+                    if (boost::filesystem::exists(index_db))
+                    {
+                        dataset_->execute("attach database '" + index_db + "' as " + index_table_);
+                    }
+                }
+
+                
+                */
                 boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
                 if (sqlite_utils::create_spatial_index(index_db,index_table_,rs))
                 {

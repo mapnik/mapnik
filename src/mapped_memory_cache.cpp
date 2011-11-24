@@ -85,8 +85,4 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
     return result;
 }
 
-#ifdef MAPNIK_THREADSAFE
-boost::mutex mapped_memory_cache::mutex_;
-#endif
-
 }
