@@ -167,17 +167,10 @@ if 'install' in COMMAND_LINE_TARGETS:
         Copy("$TARGET","$SOURCE"),
         Chmod("$TARGET", 0644),
         ])
+
     
-# install the ogcserver module code
-if 'install' in COMMAND_LINE_TARGETS:
-    ogcserver_files = glob.glob('mapnik/ogcserver/*.py')
-    ogcserver_module = env.Install(target_path + '/ogcserver', ogcserver_files)
-    env.Alias(target='install', source=ogcserver_module)
-
-
 # install the shared object beside the module directory
 sources = glob.glob('*.cpp')
-
 
 py_env = env.Clone()
 py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
