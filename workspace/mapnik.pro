@@ -167,6 +167,7 @@ SOURCES += \
     ../src/agg/process_markers_symbolizer.cpp \
     ../src/agg/process_point_symbolizer.cpp \
     ../src/agg/process_polygon_symbolizer.cpp \
+    ../src/agg/process_polygon_pattern_symbolizer.cpp \
     ../src/agg/process_raster_symbolizer.cpp \
     ../src/agg/process_shield_symbolizer.cpp \
     ../src/agg/process_text_symbolizer.cpp \
