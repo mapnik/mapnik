@@ -407,10 +407,6 @@ Mapnik 0.6.0 Release
 
 - Python: Added further pickling/copy support to Map, Layers, Datasources, Styles,and Rules (r907,r913,r921)
 
-- OGCServer: Added support for load_map(), allowing reading of XML styles and layers (r901)
-
-- OGCServer: Enabled friendly html output when in debug mode (debug=1 in ogcserver.conf) (r899)
-
 - Plugins: Added Sqlite driver for reading sqlite databases (r881)
 
 - Python: Exposed a number of properties for the Text Symbolizer (r869)
