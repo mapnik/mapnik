@@ -250,7 +250,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     {
         layer_ext.clip(map_ext);
         // forward project layer extent back into native projection
-        if (!prj_trans.forward(layer_ext))
+        if (!prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
             std::clog << "WARNING: layer " << lay.name()
                 << " extent " << layer_ext << " in map projection "
                 << " did not reproject properly back to layer projection\n";
