@@ -30,6 +30,7 @@ extern "C"
 // mapnik
 #include <mapnik/image_util.hpp>
 #include <mapnik/png_io.hpp>
+#include <mapnik/tiff_io.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
@@ -318,6 +319,10 @@ void save_to_stream(T const& image,
                 save_as_png8_oct(stream, image, colors, compression, strategy);
             else
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
+        }
+        else if (boost::algorithm::istarts_with(type,std::string("tif")))
+        {
+            save_as_tiff(stream, image);
         }
 #if defined(HAVE_JPEG)
         else if (boost::algorithm::istarts_with(type,std::string("jpeg")))

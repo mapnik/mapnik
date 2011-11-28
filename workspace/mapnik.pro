@@ -145,6 +145,7 @@ HEADERS += \
     ../include/mapnik/text_placements.hpp \
     ../include/mapnik/text_placements_simple.hpp \
     ../include/mapnik/text_symbolizer.hpp \
+    ../include/mapnik/tiff_io.hpp \
     ../include/mapnik/timer.hpp \
     ../include/mapnik/unicode.hpp \
     ../include/mapnik/utils.hpp \
