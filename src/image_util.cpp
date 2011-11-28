@@ -276,8 +276,12 @@ void save_to_stream(T const& image,
             else
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
         }
+        else if (boost::algorithm::istarts_with(type, std::string("tif")))
+        {
+            throw ImageWriterException("palettes are not currently supported when writing to tiff format (yet)");
+        }
 #if defined(HAVE_JPEG)
-        else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
+        else if (boost::algorithm::istarts_with(type, std::string("jpeg")))
         {
             throw ImageWriterException("palettes are not currently supported when writing to jpeg format");
         }
@@ -320,12 +324,12 @@ void save_to_stream(T const& image,
             else
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
         }
-        else if (boost::algorithm::istarts_with(type,std::string("tif")))
+        else if (boost::algorithm::istarts_with(type, std::string("tif")))
         {
             save_as_tiff(stream, image);
         }
 #if defined(HAVE_JPEG)
-        else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
+        else if (boost::algorithm::istarts_with(type, std::string("jpeg")))
         {
             int quality = 85;
             try 
