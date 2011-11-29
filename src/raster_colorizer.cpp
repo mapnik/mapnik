@@ -120,11 +120,9 @@ void raster_colorizer::colorize(raster_ptr const& raster,const std::map<std::str
 
     const std::map<std::string,value>::const_iterator fi = Props.find("NODATA");
     if (fi != Props.end())
-	//if (Props.count("NODATA")>0)
     {
         hasNoData = true;
-        //noDataValue = Props.at("NODATA").to_double();
-	noDataValue = fi->second.to_double();
+	noDataValue = static_cast<float>(fi->second.to_double());
     }
     
     for (int i=0; i<len; ++i)
@@ -138,9 +136,9 @@ void raster_colorizer::colorize(raster_ptr const& raster,const std::map<std::str
     }
 }
 
-inline float interpolate(float start,float end, float fraction)
+inline unsigned interpolate(unsigned start, unsigned end, float fraction)
 {
-    return fraction * (end - start) + start;
+    return static_cast<unsigned>(fraction * (end - start) + start);
 }
 
 color raster_colorizer::get_color(float value) const {
@@ -213,10 +211,10 @@ color raster_colorizer::get_color(float value) const {
             else {
                 float fraction = (value - stopValue) / (nextStopValue - stopValue);
                 
-                float r = interpolate(stopColor.red(), nextStopColor.red(),fraction);
-                float g = interpolate(stopColor.green(), nextStopColor.green(),fraction);
-                float b = interpolate(stopColor.blue(), nextStopColor.blue(),fraction);
-                float a = interpolate(stopColor.alpha(), nextStopColor.alpha(),fraction);
+                unsigned r = interpolate(stopColor.red(), nextStopColor.red(),fraction);
+                unsigned g = interpolate(stopColor.green(), nextStopColor.green(),fraction);
+                unsigned b = interpolate(stopColor.blue(), nextStopColor.blue(),fraction);
+                unsigned a = interpolate(stopColor.alpha(), nextStopColor.alpha(),fraction);
                 
                 outputColor.set_red(r);
                 outputColor.set_green(g);
