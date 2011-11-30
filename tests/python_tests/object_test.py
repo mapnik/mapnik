@@ -5,6 +5,7 @@ import os
 from nose.tools import *
 from utilities import execution_path
 from utilities import Todo
+import tempfile
 
 import mapnik, pickle
 
@@ -365,11 +366,13 @@ def test_map_init_from_string():
         eq_(m.base, './')
         mapnik.load_map_from_string(m, map_string, False, "") # this "" will have no effect
         eq_(m.base, './')
+        
+        tmp_dir = tempfile.gettempdir()
         try:
-            mapnik.load_map_from_string(m, map_string, False, "/tmp")
+            mapnik.load_map_from_string(m, map_string, False, tmp_dir)
         except RuntimeError:
             pass # runtime error expected because shapefile path should be wrong and datasource will throw
-        eq_(m.base, '/tmp') # /tmp will be set despite the exception because load_map mostly worked
+        eq_(m.base, tmp_dir) # tmp_dir will be set despite the exception because load_map mostly worked
         m.base = 'foo'
         mapnik.load_map_from_string(m, map_string, True, ".")
         eq_(m.base, '.')
