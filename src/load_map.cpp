@@ -255,10 +255,10 @@ void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base
                 }
                 else
                 {
-                    std::ostringstream s;
+                    std::ostringstream s_err;
                     s << "failed to parse 'maximum-extent'";
                     if ( strict_ )
-                        throw config_error(s.str());
+                        throw config_error(s_err.str());
                     else
                         std::clog << "### WARNING: " << s.str() << std::endl;
                 }
@@ -311,6 +311,7 @@ void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base
                 }
                 
             }
+
             map.set_extra_attributes(extra_attr);
         }
         catch (const config_error & ex)
@@ -2185,43 +2186,42 @@ std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt
 
 void map_parser::ensure_attrs(ptree const& sym, std::string name, std::string attrs)
 {
-
     typedef ptree::key_type::value_type Ch;
-    //typedef boost::property_tree::xml_parser::xmlattr<Ch> x_att;
-    
-    std::set<std::string> attr_set;
-    boost::split(attr_set, attrs, boost::is_any_of(","));
-    for (ptree::const_iterator itr = sym.begin(); itr != sym.end(); ++itr)
+    optional<const ptree &> attribs = sym.get_child_optional( boost::property_tree::xml_parser::xmlattr<Ch>() );
+    if (attribs)
     {
-       //ptree::value_type const& v = *itr;
-       if (itr->first == boost::property_tree::xml_parser::xmlattr<Ch>())
-       {
-           optional<const ptree &> attribs = sym.get_child_optional( boost::property_tree::xml_parser::xmlattr<Ch>() );
-           if (attribs)
-           {
-               std::ostringstream s("");
-               s << "### " << name << " properties warning: ";
-               int missing = 0;
-               for (ptree::const_iterator it = attribs.get().begin(); it != attribs.get().end(); ++it)
-               {
-                   std::string name = it->first;
-                   bool found = (attr_set.find(name) != attr_set.end());
-                   if (!found)
-                   {
-                       if (missing) s << ",";
-                       s << "'" << name << "'";
-                       ++missing;
-                   }
-               }
-               if (missing) {
-                   if (missing > 1) s << " are";
-                   else s << " is";
-                   s << " invalid, acceptable values are:\n'" << attrs << "'\n";
-                   std::clog << s.str();
-               }
-           }
-       }
-   }
+        std::set<std::string> attr_set;
+        boost::split(attr_set, attrs, boost::is_any_of(","));
+        std::ostringstream s("");
+        s << "### " << name << " properties warning: ";
+        int missing = 0;
+        for (ptree::const_iterator it = attribs.get().begin(); it != attribs.get().end(); ++it)
+        {
+            std::string name = it->first;
+            bool found = (attr_set.find(name) != attr_set.end());
+            if (!found)
+            {
+                if (missing)
+                {
+                    s << ",";
+                }
+                s << "'" << name << "'";
+                ++missing;
+            }
+        }
+        if (missing) {
+            if (missing > 1)
+            {
+                s << " are";
+            }
+            else
+            {
+                s << " is";
+            }
+            s << " invalid, acceptable values are:\n'" << attrs << "'\n";
+            std::clog << s.str();
+        }
+    }
 }
 
 } // end of namespace mapnik
