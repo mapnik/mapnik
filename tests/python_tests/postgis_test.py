@@ -35,7 +35,7 @@ def psql_can_connect():
         call('psql %s -c "select postgis_version()"' % POSTGIS_TEMPLATE_DBNAME)
         return True
     except RuntimeError, e:
-        print 'Notice: skipping postgis tests as basic auth is not correctly set up. Error was: %s' % e.message
+        print 'Notice: skipping postgis tests (connection)'
         return False
 
 def shp2pgsql_on_path():
@@ -47,7 +47,7 @@ def shp2pgsql_on_path():
         call('shp2pgsql')
         return True
     except RuntimeError, e:
-        print 'Notice: skipping postgis tests because shp2pgsql not found. Error was: %s' % e.message
+        print 'Notice: skipping postgis tests (shp2pgsql)'
         return False
 
 def createdb_and_dropdb_on_path():
@@ -60,7 +60,7 @@ def createdb_and_dropdb_on_path():
         call('dropdb --help')
         return True
     except RuntimeError, e:
-        print 'Notice: skipping postgis tests because createdb or dropdb not found. Error was: %s' % e.message
+        print 'Notice: skipping postgis tests (createdb/dropdb)'
         return False
 
 def postgis_setup():
