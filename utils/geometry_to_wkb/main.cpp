@@ -70,6 +70,12 @@ int main (int argc, char ** argv )
         std::cerr << ds->envelope() << std::endl;        
         
         mapnik::query q(ds->envelope());
+        mapnik::layer_descriptor layer_desc = ds->get_descriptor();
+        BOOST_FOREACH ( mapnik::attribute_descriptor const& attr_desc, layer_desc.get_descriptors())
+        {
+            q.add_property_name(attr_desc.get_name());
+        }
+        
         mapnik::featureset_ptr fs = ds->features(q);
         mapnik::feature_ptr f = fs->next();
         
