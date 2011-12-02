@@ -7,7 +7,7 @@ from utilities import execution_path
 from utilities import Todo
 import tempfile
 
-import mapnik, pickle
+import mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -123,17 +123,6 @@ def test_pointsymbolizer_init():
 #def test_pointsymbolizer_missing_image():
  #   p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/broken.png"))
 
-# PointSymbolizer pickling
-def test_pointsymbolizer_pickle():
-    raise Todo("point_symbolizer pickling currently disabled")
-    p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/dummy.png"))
-    p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
-    # image type, width, and height only used in contructor...
-    eq_(p.filename, p2.filename)
-    eq_(p.allow_overlap, p2.allow_overlap)
-    eq_(p.opacity, p2.opacity)
-    eq_(p.ignore_placement, p2.ignore_placement)
-    eq_(p.placement, p2.placement)
 
 # PolygonSymbolizer initialization
 def test_polygonsymbolizer_init():
@@ -146,17 +135,6 @@ def test_polygonsymbolizer_init():
 
     eq_(p.fill, mapnik.Color('blue'))
     eq_(p.fill_opacity, 1)
-
-# PolygonSymbolizer pickling
-def test_polygonsymbolizer_pickle():
-    p = mapnik.PolygonSymbolizer(mapnik.Color('black'))
-    p.fill_opacity = .5
-    # does not work for some reason...
-    #eq_(pickle.loads(pickle.dumps(p)), p)
-    p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
-    eq_(p.fill, p2.fill)
-    eq_(p.fill_opacity, p2.fill_opacity)
-
 
 # Stroke initialization
 def test_stroke_init():
@@ -188,25 +166,6 @@ def test_stroke_dash_arrays():
 
     eq_(s.get_dashes(), [(1,2),(3,4),(5,6)])
 
-# Stroke pickling
-def test_stroke_pickle():
-    s = mapnik.Stroke(mapnik.Color('black'),4.5)
-
-    eq_(s.width, 4.5)
-    eq_(s.color, mapnik.Color('black'))
-
-    s.add_dash(1,2)
-    s.add_dash(3,4)
-    s.add_dash(5,6)
-
-    s2 = pickle.loads(pickle.dumps(s,pickle.HIGHEST_PROTOCOL))
-    eq_(s.color, s2.color)
-    eq_(s.width, s2.width)
-    eq_(s.opacity, s2.opacity)
-    eq_(s.get_dashes(), s2.get_dashes())
-    eq_(s.line_cap, s2.line_cap)
-    eq_(s.line_join, s2.line_join)
-
     
 # LineSymbolizer initialization
 def test_linesymbolizer_init():
@@ -235,19 +194,6 @@ def test_linesymbolizer_init():
     eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
     eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
 
-# LineSymbolizer pickling
-def test_linesymbolizer_pickle():
-    p = mapnik.LineSymbolizer()
-    p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
-    # line and stroke eq fails, so we compare attributes for now..
-    s,s2 = p.stroke, p2.stroke
-    eq_(s.color, s2.color)
-    eq_(s.opacity, s2.opacity)
-    eq_(s.width, s2.width)
-    eq_(s.get_dashes(), s2.get_dashes())
-    eq_(s.line_cap, s2.line_cap)
-    eq_(s.line_join, s2.line_join)
-
 
 # TextSymbolizer initialization
 def test_textsymbolizer_init():
@@ -258,56 +204,6 @@ def test_textsymbolizer_init():
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik.Color('black'))
     eq_(ts.label_placement, mapnik.label_placement.POINT_PLACEMENT)
-
-# TextSymbolizer pickling
-def test_textsymbolizer_pickle():
-    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
-
-    eq_(str(ts.name), str(mapnik.Expression('[Field_Name]')))
-    eq_(ts.face_name, 'Font Name')
-    eq_(ts.text_size, 8)
-    eq_(ts.fill, mapnik.Color('black'))
-    
-    raise Todo("text_symbolizer pickling currently disabled")
-
-    ts2 = pickle.loads(pickle.dumps(ts,pickle.HIGHEST_PROTOCOL))
-    eq_(ts.name, ts2.name)
-    eq_(ts.face_name, ts2.face_name)
-    eq_(ts.allow_overlap, ts2.allow_overlap)
-    eq_(ts.displacement, ts2.displacement)
-    eq_(ts.anchor, ts2.anchor)
-    eq_(ts.fill, ts2.fill)
-    eq_(ts.force_odd_labels, ts2.force_odd_labels)
-    eq_(ts.halo_fill, ts2.halo_fill)
-    eq_(ts.halo_radius, ts2.halo_radius)
-    eq_(ts.label_placement, ts2.label_placement)
-    eq_(ts.minimum_distance, ts2.minimum_distance)
-    eq_(ts.text_ratio, ts2.text_ratio)
-    eq_(ts.text_size, ts2.text_size)
-    eq_(ts.wrap_width, ts2.wrap_width)
-    eq_(ts.vertical_alignment, ts2.vertical_alignment)
-    eq_(ts.label_spacing, ts2.label_spacing)
-    eq_(ts.label_position_tolerance, ts2.label_position_tolerance)
-    # 22.5 * M_PI/180.0 initialized by default
-    assert_almost_equal(s.max_char_angle_delta, 0.39269908169872414)
-    
-    eq_(ts.wrap_character, ts2.wrap_character)
-    eq_(ts.text_transform, ts2.text_transform)
-    eq_(ts.line_spacing, ts2.line_spacing)
-    eq_(ts.character_spacing, ts2.character_spacing)
-    
-    # r1341
-    eq_(ts.wrap_before, ts2.wrap_before)
-    eq_(ts.horizontal_alignment, ts2.horizontal_alignment)
-    eq_(ts.justify_alignment, ts2.justify_alignment)
-    eq_(ts.opacity, ts2.opacity)
-
-    # r2300
-    eq_(s.minimum_padding, 0.0)
-        
-    raise Todo("FontSet pickling support needed: http://trac.mapnik.org/ticket/348")
-    eq_(ts.fontset, ts2.fontset)
-
 
 # Map initialization
 def test_layer_init():
@@ -381,19 +277,6 @@ def test_map_init_from_string():
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(e)
-
-# Map pickling
-def test_map_pickle():
-    # Fails due to scale() not matching, possibly other things
-    raise(Todo("Map does not support pickling yet (Tickets #345)."))
-
-    m = mapnik.Map(256, 256)
-
-    eq_(pickle.loads(pickle.dumps(m)), m)
-
-    m = mapnik.Map(256, 256, '+proj=latlong')
-
-    eq_(pickle.loads(pickle.dumps(m)), m)
 
 # Color initialization
 
@@ -506,21 +389,7 @@ def test_color_equality():
     eq_(c1, mapnik.Color('red'))
     eq_(c2, mapnik.Color('lime'))
     eq_(c3, mapnik.Color(0,0,255,128))
-    
-    
-# Color pickling
-def test_color_pickle():
-    c = mapnik.Color('blue')
 
-    eq_(pickle.loads(pickle.dumps(c)), c)
-
-    c = mapnik.Color(0, 64, 128)
-
-    eq_(pickle.loads(pickle.dumps(c)), c)
-
-    c = mapnik.Color(0, 64, 128, 192)
-
-    eq_(pickle.loads(pickle.dumps(c)), c)
 
 # Rule initialization
 def test_rule_init():
@@ -681,12 +550,6 @@ def test_envelope_static_init():
     eq_(c.x, 150)
     eq_(c.y, 150)
 
-# Box2d pickling
-def test_envelope_pickle():
-    e = mapnik.Box2d(100, 100, 200, 200)
-
-    eq_(pickle.loads(pickle.dumps(e)), e)
-
 # Box2d multiplication
 def test_envelope_multiplication():
     e = mapnik.Box2d(100, 100, 200, 200)
@@ -719,7 +582,7 @@ def test_envelope_multiplication():
     eq_(c.y, 150)
 
 # Box2d clipping
-def test_envelope_pickle():
+def test_envelope_clipping():
     e1 = mapnik.Box2d(-180,-90,180,90)
     e2 = mapnik.Box2d(-120,40,-110,48)
     e1.clip(e2)
