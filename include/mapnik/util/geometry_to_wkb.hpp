@@ -35,6 +35,7 @@
 #include <boost/foreach.hpp>
 // stl
 #include <vector>
+#include <cstdio>
 
 namespace mapnik { namespace util {
 
