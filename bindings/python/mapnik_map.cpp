@@ -119,6 +119,8 @@ struct map_pickle_suite : boost::python::pickle_suite
 std::vector<layer>& (Map::*layers_nonconst)() =  &Map::layers;
 std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
 
+mapnik::parameters& (Map::*attr_nonconst)() =  &Map::get_extra_attributes;
+mapnik::parameters& (Map::*params_nonconst)() =  &Map::get_extra_parameters;
 
 mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& name)
 {
@@ -172,6 +174,7 @@ mapnik::featureset_ptr query_map_point(mapnik::Map const& m, int index, double x
     unsigned idx = index;
     return m.query_map_point(idx, x, y);
 }
+
 
 void export_map()
 {
@@ -449,7 +452,8 @@ void export_map()
              "about the hit areas rendered on the map.\n"
             )
 
-        .def("extra_attributes",&Map::get_extra_attributes,return_value_policy<copy_const_reference>(),"TODO")
+        .add_property("extra_attributes",make_function(attr_nonconst,return_value_policy<reference_existing_object>()),"TODO")
+        .add_property("params",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
 
         .add_property("aspect_fix_mode",
                       &Map::get_aspect_fix_mode,
