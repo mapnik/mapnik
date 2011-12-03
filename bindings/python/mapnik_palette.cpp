@@ -48,6 +48,6 @@ void export_palette ()
           ( arg("palette"), arg("type")),
           "Creates a new color palette from a file\n"
           )*/
-        .def( "__init__", boost::python::make_constructor( &make_palette))
+        .def( "__init__", boost::python::make_constructor(make_palette))
         ;
 }
