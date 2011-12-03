@@ -226,9 +226,9 @@ void datasource_cache::register_datasources(const std::string& str)
 #endif 
                             registered_=true;
                         }
-                        else
+                        else if (!ds_name)
                         {
-                            std::clog << "Problem loading plugin library '" << itr->path().string() << "' (plugin is lacking compatible interface" << std::endl;                    
+                            std::clog << "Problem loading plugin library '" << itr->path().string() << "' (plugin is lacking compatible interface)" << std::endl;
                         }
                     }
                     else
