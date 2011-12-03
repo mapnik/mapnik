@@ -28,11 +28,10 @@ def test_arbitrary_parameters_attached_to_map():
     attr = m.extra_attributes
     eq_(len(attr),0)
 
-    params = m.extra_parameters
-    eq_(len(params),3)
-    eq_(params['key'],'value2')
-    eq_(params['key3'],'value3')
-    eq_(params['unicode'],u'iván')
+    eq_(len(m.params),3)
+    eq_(m.params['key'],'value2')
+    eq_(m.params['key3'],'value3')
+    eq_(m.params['unicode'],u'iván')
 
 
 if __name__ == "__main__":
