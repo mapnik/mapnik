@@ -23,11 +23,14 @@
 #ifndef MAPNIK_PARAMS_HPP
 #define MAPNIK_PARAMS_HPP
 
-// mapnik
+// boost
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
 #include <boost/none.hpp>
 #include <boost/lexical_cast.hpp>
+
+// mapnik
+#include <mapnik/value.hpp>
 
 // stl
 #include <string>
@@ -35,7 +38,7 @@
 
 namespace mapnik
 {
-typedef boost::variant<int,double,std::string> value_holder;
+typedef boost::variant<value_null,int,double,std::string> value_holder;
 typedef std::pair<const std::string, value_holder> parameter;
 typedef std::map<const std::string, value_holder> param_map;
    
