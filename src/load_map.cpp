@@ -390,6 +390,32 @@ void map_parser::parse_map_include( Map & map, ptree const & include )
             }
             datasource_templates_[name] = params;
         }
+        else if (v.first == "Parameters")
+        {
+            std::string name = get_attr(v.second, "name", std::string("Unnamed"));
+            parameters & params = map.get_extra_parameters();
+            ptree::const_iterator paramIter = v.second.begin();
+            ptree::const_iterator endParam = v.second.end();
+            for (; paramIter != endParam; ++paramIter)
+            {
+                ptree const& param = paramIter->second;
+
+                if (paramIter->first == "Parameter")
+                {
+                    std::string name = get_attr<std::string>(param, "name");
+                    std::string value = get_value<std::string>( param,
+                                                           "parameter");
+                    params[name] = value;
+                }
+                else if( paramIter->first != "<xmlattr>" &&
+                         paramIter->first != "<xmlcomment>" )
+                {
+                    throw config_error(std::string("Unknown child node in ") +
+                                       "'Parameters'. Expected 'Parameter' but got '" +
+                                       paramIter->first + "'");
+                }
+            }
+        }
         else if (v.first != "<xmlcomment>" &&
                  v.first != "<xmlattr>")
         {
