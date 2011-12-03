@@ -84,6 +84,7 @@ private:
     boost::optional<box2d<double> > maximum_extent_;
     std::string base_path_;
     parameters extra_attr_;
+    parameters extra_params_;
         
 public:
 
@@ -444,14 +445,34 @@ public:
     std::string get_metawriter_property(std::string name) const;
 
     /*!
-     * @brief Get extra properties that can be carried on the Map
+     * @brief Get extra valid attributes of the Map that are not true members
      */
     parameters const& get_extra_attributes() const;
 
     /*!
-     * @brief Set extra properties that can be carried on the Map
+     * @brief Get non-const extra valid attributes of the Map that are not true members
      */
-    void set_extra_attributes(parameters& params);
+    parameters& get_extra_attributes();
+
+    /*!
+     * @brief Set extra attributes of the Map
+     */
+    void set_extra_attributes(parameters& attr);
+
+    /*!
+     * @brief Get extra, arbitrary Parameters attached to the Map
+     */
+    parameters const& get_extra_parameters() const;
+
+    /*!
+     * @brief Get non-const extra, arbitrary Parameters attached to the Map
+     */
+    parameters& get_extra_parameters();
+
+    /*!
+     * @brief Set extra, arbitary Parameters of the Map
+     */
+    void set_extra_parameters(parameters& params);
 
 private:
     void fixAspectRatio();
