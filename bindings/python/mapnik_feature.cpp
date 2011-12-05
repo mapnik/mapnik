@@ -34,7 +34,6 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
-#include "mapnik_value_converter.hpp"
 
 mapnik::geometry_type & (mapnik::Feature::*get_geom1)(unsigned) = &mapnik::Feature::get_geometry;
 
@@ -59,7 +58,7 @@ void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
 
 namespace boost { namespace python {
 
-// Forward declaration
+    // Forward declaration
     template <class Container, bool NoProxy, class DerivedPolicies>
     class map_indexing_suite2;
 
@@ -95,9 +94,11 @@ namespace boost { namespace python {
 
         template <class Class>
         static void
-        extension_def(Class& /*cl*/)
+        extension_def(Class& cl)
         {
-
+            cl
+                .def("get", &get)
+            ;
         }
 
         static data_type&
@@ -106,10 +107,23 @@ namespace boost { namespace python {
             typename Container::iterator i = container.props().find(i_);
             if (i == container.end())
             {
-                PyErr_SetString(PyExc_KeyError, "Invalid key");
+                PyErr_SetString(PyExc_KeyError, i_.c_str());
                 throw_error_already_set();
             }
+            // will be auto-converted to proper python type by `mapnik_value_to_python`
             return i->second;
+        }
+
+        static data_type
+        get(Container& container, index_type i_)
+        {
+            typename Container::iterator i = container.props().find(i_);
+            if (i != container.end())
+            {
+                // will be auto-converted to proper python type by `mapnik_value_to_python`
+                return i->second;
+            }
+            return mapnik::value_null();
         }
 
         static void

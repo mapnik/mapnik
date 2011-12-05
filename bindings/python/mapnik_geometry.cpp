@@ -31,6 +31,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/util/geometry_to_wkb.hpp>
 
 namespace {
 
@@ -47,18 +48,46 @@ geometry_type const& getitem_impl(path_type & p, int key)
     throw boost::python::error_already_set();
 }
 
-void from_wkt_impl(path_type& p, std::string const& wkt)
+void add_wkt_impl(path_type& p, std::string const& wkt)
 {
     bool result = mapnik::from_wkt(wkt , p);
     if (!result) throw std::runtime_error("Failed to parse WKT");
 }
 
-void from_wkb_impl(path_type& p, std::string const& wkb)
+void add_wkb_impl(path_type& p, std::string const& wkb)
 {
     mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size(), true);
 }
 
+boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
+{
+    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    bool result = mapnik::from_wkt(wkt, *paths);
+    if (!result) throw std::runtime_error("Failed to parse WKT");
+    return paths;
 }
+
+boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
+{
+    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size(), true);
+    return paths;
+}
+
+}
+
+PyObject* to_wkb( geometry_type const& geom)
+{
+    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::util::wkbXDR);
+    return
+#if PY_VERSION_HEX >= 0x03000000
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+        ((const char*)wkb->buffer(),wkb->size());
+}
+
 
 void export_geometry()
 {
@@ -74,18 +103,23 @@ void export_geometry()
         ;
 
     using mapnik::geometry_type;
-    class_<geometry_type, std::auto_ptr<geometry_type>,boost::noncopyable>("Geometry2d",no_init)
+    class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
         .def("envelope",&geometry_type::envelope)
         // .def("__str__",&geometry_type::to_string)
         .def("type",&geometry_type::type)
+        .def("to_wkb",&to_wkb)
         // TODO add other geometry_type methods
         ;
 
-    class_<path_type,boost::noncopyable>("Path")
+    class_<path_type, boost::shared_ptr<path_type>, boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
         .def("__len__", &path_type::size)
+        .def("add_wkt",add_wkt_impl)
+        .def("add_wkb",add_wkb_impl)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)
+        .staticmethod("from_wkt")
+        .staticmethod("from_wkb")
         ;
 
 }

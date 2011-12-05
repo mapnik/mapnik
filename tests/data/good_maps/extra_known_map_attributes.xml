@@ -1,0 +1,11 @@
+<Map font-directory="." minimum-version="0.0.0">
+
+<!-- 
+     font-directory and minimin-version are extra attributes known
+     to load_map which are and attached to the map object in order to be
+     carried through and respected by save map.
+     
+     They are treated as 'extra' because they have no role during map rendering 
+-->
+
+</Map>

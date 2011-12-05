@@ -322,7 +322,7 @@ m.layers.append(popplaces_lyr)
 # Set the initial extent of the map in 'master' spherical Mercator projection
 m.zoom_to_box(mapnik.Box2d(-8024477.28459,5445190.38849,-7381388.20071,5662941.44855)) 
 
-# Render two maps, two PNGs, one JPEG.
+# Render map
 im = mapnik.Image(m.width,m.height)
 mapnik.render(m, im)
 
@@ -346,6 +346,9 @@ images_.append('demo_high.jpg')
 
 im.save('demo_low.jpg', 'jpeg50')
 images_.append('demo_low.jpg')
+
+im.save('demo.tif', 'tiff')
+images_.append('demo.tif')
 
 # Render cairo examples
 if HAS_PYCAIRO_MODULE and mapnik.has_pycairo():
