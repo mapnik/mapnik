@@ -851,8 +851,31 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
 {
     if (!is_bound_) bind();
 
-    //  TODO - should we check q.property_names() and throw if not found in headers_?
-    //  const std::set<std::string>& attribute_names = q.property_names();
+    const std::set<std::string>& attribute_names = q.property_names();
+    std::set<std::string>::const_iterator pos = attribute_names.begin();
+    while (pos != attribute_names.end())
+    {
+        bool found_name = false;
+        for (int i = 0; i < headers_.size(); ++i)
+        {
+            if (headers_[i] == *pos)
+            {
+                found_name = true;
+                break;
+            }
+        }
+
+        if (! found_name)
+        {
+            std::ostringstream s;
+
+            s << "CSV Plugin: no attribute '" << *pos << "'. Valid attributes are: "
+              << boost::algorithm::join(headers_, ",") << ".";
+
+            throw mapnik::datasource_exception(s.str());
+        }
+        ++pos;
+    }
 
     return boost::make_shared<mapnik::memory_featureset>(q.get_bbox(),features_);
 }
