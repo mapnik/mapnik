@@ -1,0 +1,19 @@
+######################################################################
+
+MAPNIK_INCLUDE_DIR = "/opt/mapnik/include" ;
+MAPNIK_LIB_DIR = "/opt/mapnik/lib" ;
+BOOST_INCLUDE_DIR = "/opt/boost_1_48_0/include" ;
+
+
+lib mapnik : : <name>mapnik <search>$(MAPNIK_LIB_DIR) ;
+lib icu : : <name>icuuc <search>/usr/local/lib ;
+
+exe to_wkb :
+    main.cpp
+    .//mapnik
+    .//icu
+    :
+    <include>$(MAPNIK_INCLUDE_DIR)
+    <include>$(BOOST_INCLUDE_DIR)   
+    ;
+

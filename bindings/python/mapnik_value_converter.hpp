@@ -27,6 +27,7 @@
 #include <boost/implicit_cast.hpp>
 
 namespace boost { namespace python {
+
     struct value_converter : public boost::static_visitor<PyObject*>
     {
         PyObject * operator() (int val) const
@@ -48,6 +49,13 @@ namespace boost { namespace python {
             return ::PyBool_FromLong(val);
         }
 
+        PyObject * operator() (std::string const& s) const
+        {
+            PyObject *obj = Py_None;
+            obj = ::PyUnicode_DecodeUTF8(s.c_str(),implicit_cast<ssize_t>(s.length()),0);
+            return obj;
+        }
+
         PyObject * operator() (UnicodeString const& s) const
         {
             std::string buffer;
@@ -62,6 +70,25 @@ namespace boost { namespace python {
             return Py_None;
         }
     };
+
+
+    struct mapnik_value_to_python
+    {
+        static PyObject* convert(mapnik::value const& v)
+        {
+            return boost::apply_visitor(value_converter(),v.base());
+        }
+
+    };
+
+    struct mapnik_param_to_python
+    {
+        static PyObject* convert(mapnik::value_holder const& v)
+        {
+            return boost::apply_visitor(value_converter(),v);
+        }
+    };
+
 
     }
 }

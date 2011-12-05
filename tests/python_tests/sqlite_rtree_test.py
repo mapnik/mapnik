@@ -42,9 +42,14 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(os.path.exists(index),True)
         conn = sqlite3.connect(index)
         cur = conn.cursor()
-        cur.execute("Select count(*) from idx_%s_GEOMETRY" % TABLE.replace("'",""))
-        conn.commit()
-        eq_(cur.fetchone()[0],TOTAL)
+        try:
+            cur.execute("Select count(*) from idx_%s_GEOMETRY" % TABLE.replace("'",""))
+            conn.commit()
+            eq_(cur.fetchone()[0],TOTAL)
+        except sqlite3.OperationalError:
+            # don't worry about testing # of index records if 
+            # python's sqlite module does not support rtree
+            pass
         cur.close()
 
         ds = mapnik.SQLite(file=DB,table=TABLE)

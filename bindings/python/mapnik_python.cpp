@@ -83,23 +83,12 @@ void export_label_collision_detector();
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
 #include "python_grid_utils.hpp"
+#include "mapnik_value_converter.hpp"
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <pycairo.h>
 static Pycairo_CAPI_t *Pycairo_CAPI;
 #endif
-
-
-namespace boost { namespace python {
-
-    struct mapnik_value_to_python
-    {
-        static PyObject* convert(mapnik::value const& v)
-        {
-            return boost::apply_visitor(value_converter(),v.base());
-        }
-    };
-    }}
 
 void render(const mapnik::Map& map,
             mapnik::image_32& image,
@@ -651,5 +640,6 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     register_ptr_to_python<mapnik::expression_ptr>();
     register_ptr_to_python<mapnik::path_expression_ptr>();
+    to_python_converter<mapnik::value_holder,mapnik_param_to_python>();
     to_python_converter<mapnik::value,mapnik_value_to_python>();
 }

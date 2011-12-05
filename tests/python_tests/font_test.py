@@ -2,7 +2,7 @@
 
 from nose.tools import *
 
-import mapnik, pickle
+import mapnik
 
 # Tests that exercise fonts. 
 

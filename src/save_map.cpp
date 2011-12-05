@@ -761,6 +761,24 @@ void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
     }
 }
 
+void serialize_parameters( ptree & map_node, mapnik::parameters const& params)
+{
+    ptree & params_node = map_node.push_back(
+        ptree::value_type("Parameters", ptree()))->second;
+
+    parameters::const_iterator it = params.begin();
+    parameters::const_iterator end = params.end();
+    for (; it != end; ++it)
+    {
+        boost::property_tree::ptree & param_node = params_node.push_back(
+            boost::property_tree::ptree::value_type("Parameter",
+                                                    boost::property_tree::ptree()))->second;
+        param_node.put("<xmlattr>.name", it->first );
+        param_node.put_value( it->second );
+
+    }
+}
+
 void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defaults )
 {
     ptree & layer_node = map_node.push_back(
@@ -900,6 +918,8 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     {
         set_attr( map_node, p_it->first, p_it->second ); 
     }
+    
+    serialize_parameters( map_node, map.get_extra_parameters());
 
     Map::const_style_iterator it = map.styles().begin();
     Map::const_style_iterator end = map.styles().end();
