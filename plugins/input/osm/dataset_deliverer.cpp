@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include <mapnik/datasource.hpp>
+#include <boost/filesystem/operations.hpp>
 #include "dataset_deliverer.h"
 #include "basiccurl.h"
 #include <sstream>
@@ -33,6 +35,11 @@ osm_dataset* dataset_deliverer::load_from_file(const string& file, const string&
     // Only actually load from file if we haven't done so already
     if (dataset == NULL)
     {
+        if (!boost::filesystem::exists(file))
+        {
+            throw mapnik::datasource_exception("OSM Plugin: '" + file + "' does not exist");
+        }
+
         dataset = new osm_dataset;
         if (dataset->load(file.c_str(), parser) == false)
         {
