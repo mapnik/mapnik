@@ -214,6 +214,19 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['null'],'')
         eq_(feat['boolean'],'false')
 
+    @raises(RuntimeError)
+    def test_that_nonexistant_query_field_throws(**kwargs):
+        ds = get_csv_ds('lon_lat.csv')
+        eq_(len(ds.fields()),2)
+        eq_(ds.fields(),['lon','lat'])
+        eq_(ds.field_types(),['int','int'])
+        query = mapnik.Query(ds.envelope())
+        for fld in ds.fields():
+            query.add_property_name(fld)
+        # also add an invalid one, triggering throw
+        query.add_property_name('bogus')
+        fs = ds.features(query)
+
 if __name__ == "__main__":
     setup()
     [eval(run)(visual=True) for run in dir() if 'test_' in run]
