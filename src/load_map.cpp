@@ -403,9 +403,30 @@ void map_parser::parse_map_include( Map & map, ptree const & include )
                 if (paramIter->first == "Parameter")
                 {
                     std::string name = get_attr<std::string>(param, "name");
-                    std::string value = get_value<std::string>( param,
-                                                           "parameter");
-                    params[name] = value;
+                    bool is_string = true;
+                    boost::optional<std::string> type = get_opt_attr<std::string>(param, "type");
+                    if (type)
+                    {
+                        if (*type == "int")
+                        {
+                            is_string = false;
+                            int value = get_value<int>( param,"parameter");
+                            params[name] = value;
+                        }
+                        else if (*type == "float")
+                        {
+                            is_string = false;
+                            double value = get_value<double>( param,"parameter");
+                            params[name] = value;
+                        }
+                    }
+                    
+                    if (is_string)
+                    {
+                        std::string value = get_value<std::string>( param,
+                                                               "parameter");
+                        params[name] = value;
+                    }
                 }
                 else if( paramIter->first != "<xmlattr>" &&
                          paramIter->first != "<xmlcomment>" )
