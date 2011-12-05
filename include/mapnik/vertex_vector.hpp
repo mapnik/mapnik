@@ -55,7 +55,7 @@ class vertex_vector : private boost::noncopyable
 private:
     unsigned num_blocks_;
     unsigned max_blocks_;
-    value_type** vertexs_;
+    value_type** vertices_;
     unsigned char** commands_;
     unsigned pos_;
 public:
@@ -63,7 +63,7 @@ public:
     vertex_vector() 
         : num_blocks_(0),
           max_blocks_(0),
-          vertexs_(0),
+          vertices_(0),
           commands_(0),
           pos_(0) {}
 
@@ -71,13 +71,13 @@ public:
     {
         if ( num_blocks_ )
         {
-            value_type** vertexs=vertexs_ + num_blocks_ - 1;
+            value_type** vertices=vertices_ + num_blocks_ - 1;
             while ( num_blocks_-- )
             {
-                ::operator delete(*vertexs);
-                --vertexs;
+                ::operator delete(*vertices);
+                --vertices;
             }
-            ::operator delete(vertexs_);
+            ::operator delete(vertices_);
         }
     }
     unsigned size() const 
@@ -92,7 +92,7 @@ public:
         {
             allocate_block(block);
         }
-        value_type* vertex = vertexs_[block] + ((pos_ & block_mask) << 1);
+        value_type* vertex = vertices_[block] + ((pos_ & block_mask) << 1);
         unsigned char* cmd= commands_[block] + (pos_ & block_mask);
             
         *cmd = static_cast<unsigned char>(command);
@@ -104,7 +104,7 @@ public:
     {
         if (pos >= pos_) return SEG_END;
         unsigned block = pos >> block_shift;
-        const value_type* vertex = vertexs_[block] + (( pos & block_mask) << 1);
+        const value_type* vertex = vertices_[block] + (( pos & block_mask) << 1);
         *x = (*vertex++);
         *y = (*vertex);
         return commands_[block] [pos & block_mask];
@@ -120,22 +120,22 @@ private:
     {
         if (block >= max_blocks_)
         {
-            value_type** new_vertexs = 
+            value_type** new_vertices = 
                 static_cast<value_type**>(::operator new (sizeof(value_type*)*((max_blocks_ + grow_by) * 2)));
-            unsigned char** new_commands = (unsigned char**)(new_vertexs + max_blocks_ + grow_by);
-            if (vertexs_)
+            unsigned char** new_commands = (unsigned char**)(new_vertices + max_blocks_ + grow_by);
+            if (vertices_)
             {
-                std::memcpy(new_vertexs,vertexs_,max_blocks_ * sizeof(value_type*));
+                std::memcpy(new_vertices,vertices_,max_blocks_ * sizeof(value_type*));
                 std::memcpy(new_commands,commands_,max_blocks_ * sizeof(unsigned char*));
-                ::operator delete(vertexs_);
+                ::operator delete(vertices_);
             }
-            vertexs_ = new_vertexs;
+            vertices_ = new_vertices;
             commands_ = new_commands;
             max_blocks_ += grow_by;
         }
-        vertexs_[block] = static_cast<value_type*>(::operator new(sizeof(value_type)*(block_size * 2 + block_size / (sizeof(value_type)))));
+        vertices_[block] = static_cast<value_type*>(::operator new(sizeof(value_type)*(block_size * 2 + block_size / (sizeof(value_type)))));
         
-        commands_[block] = (unsigned char*)(vertexs_[block] + block_size*2);
+        commands_[block] = (unsigned char*)(vertices_[block] + block_size*2);
         ++num_blocks_;
     }
 };
