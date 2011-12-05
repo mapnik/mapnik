@@ -22,6 +22,7 @@
 
 // stl
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <stdexcept>
 #include <set>
@@ -91,7 +92,9 @@ void osm_datasource::bind() const
     {
         if ((osm_data_= dataset_deliverer::load_from_file(osm_filename, parser)) == NULL)
         {
-            throw datasource_exception("Error loading from file");
+            std::ostringstream s;
+            s << "OSM Plugin: Error loading from file '" << osm_filename << "'";
+            throw datasource_exception(s.str());
         }
 
         do_process = true;
