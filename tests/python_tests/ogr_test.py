@@ -43,6 +43,18 @@ if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
         # remove me once the deprecated code is cleaned up
         eq_(f.properties['Shape_Leng'], 19218883.724300001)
 
+    @raises(RuntimeError)
+    def test_that_nonexistant_query_field_throws(**kwargs):
+        ds = mapnik.Ogr(file='../data/shp/world_merc.shp',layer_by_index=0)
+        eq_(len(ds.fields()),11)
+        eq_(ds.fields(),['FIPS', 'ISO2', 'ISO3', 'UN', 'NAME', 'AREA', 'POP2005', 'REGION', 'SUBREGION', 'LON', 'LAT'])
+        eq_(ds.field_types(),['str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float'])
+        query = mapnik.Query(ds.envelope())
+        for fld in ds.fields():
+            query.add_property_name(fld)
+        # also add an invalid one, triggering throw
+        query.add_property_name('bogus')
+        fs = ds.features(query)
 
 
 if __name__ == "__main__":
