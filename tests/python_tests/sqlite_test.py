@@ -205,6 +205,21 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         feature = fs.next()
         eq_(feature,None)
 
+    @raises(RuntimeError)
+    def test_that_nonexistant_query_field_throws(**kwargs):
+        ds = mapnik.SQLite(file='../data/sqlite/empty.db', 
+            table='empty',
+            )
+        eq_(len(ds.fields()),25)
+        eq_(ds.fields(),['OGC_FID', 'scalerank', 'labelrank', 'featurecla', 'sovereignt', 'sov_a3', 'adm0_dif', 'level', 'type', 'admin', 'adm0_a3', 'geou_dif', 'name', 'abbrev', 'postal', 'name_forma', 'terr_', 'name_sort', 'map_color', 'pop_est', 'gdp_md_est', 'fips_10_', 'iso_a2', 'iso_a3', 'iso_n3'])
+        eq_(ds.field_types(),['int', 'int', 'int', 'str', 'str', 'str', 'float', 'float', 'str', 'str', 'str', 'float', 'str', 'str', 'str', 'str', 'str', 'str', 'float', 'float', 'float', 'float', 'str', 'str', 'float'])
+        query = mapnik.Query(ds.envelope())
+        for fld in ds.fields():
+            query.add_property_name(fld)
+        # also add an invalid one, triggering throw
+        query.add_property_name('bogus')
+        fs = ds.features(query)
+
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
