@@ -453,7 +453,7 @@ void export_map()
             )
 
         .add_property("extra_attributes",make_function(attr_nonconst,return_value_policy<reference_existing_object>()),"TODO")
-        .add_property("params",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
+        .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
 
         .add_property("aspect_fix_mode",
                       &Map::get_aspect_fix_mode,
