@@ -51,6 +51,11 @@ public:
     void bind() const;
 
 private:
+
+    // FIXME: remove mutable qualifier from data members
+    //        by factoring out bind() logic out from 
+    //        datasource impl !!!
+    
     mutable mapnik::box2d<double> extent_;
     mutable bool extent_initialized_;
     int type_;
@@ -67,7 +72,6 @@ private:
     mutable int row_limit_;
     mutable mapnik::layer_descriptor desc_;
     mutable mapnik::wkbFormat format_;
-    mutable bool multiple_geometries_;
     mutable bool use_spatial_index_;
     mutable bool has_spatial_index_;
     mutable bool using_subquery_;

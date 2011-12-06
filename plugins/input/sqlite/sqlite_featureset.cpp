@@ -47,12 +47,10 @@ using mapnik::feature_factory;
 sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                                      std::string const& encoding,
                                      mapnik::wkbFormat format,
-                                     bool multiple_geometries,
                                      bool using_subquery)
     : rs_(rs),
       tr_(new transcoder(encoding)),
       format_(format),
-      multiple_geometries_(multiple_geometries),
       using_subquery_(using_subquery)
 {
 }
@@ -75,8 +73,8 @@ feature_ptr sqlite_featureset::next()
         int feature_id = rs_->column_integer(1);
 
         feature_ptr feature(feature_factory::create(feature_id));
-        geometry_utils::from_wkb(feature->paths(), data, size, multiple_geometries_, format_);
-
+        geometry_utils::from_wkb(feature->paths(), data, size, format_);
+        
         for (int i = 2; i < rs_->column_count(); ++i)
         {
             const int type_oid = rs_->column_type(i);
