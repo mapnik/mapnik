@@ -41,7 +41,7 @@ enum eGeomType {
 };
 
 template <typename T, template <typename> class Container=vertex_vector>
-class geometry
+class geometry : private::noncopyable
 {
 public:
     typedef T coord_type;
@@ -54,7 +54,7 @@ private:
     mutable unsigned itr_;
 public:
     
-    geometry(eGeomType type)
+    explicit geometry(eGeomType type)
         : type_(type),
           itr_(0)
     {}
