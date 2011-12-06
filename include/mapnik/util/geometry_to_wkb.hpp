@@ -124,7 +124,7 @@ wkb_buffer_ptr to_point_wkb( geometry_type const& g, wkbByteOrder byte_order)
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
     boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
     ss.write(reinterpret_cast<char*>(&byte_order),1); 
-    int type = static_cast<int>(g.type());
+    int type = static_cast<int>(mapnik::Point);
     write(ss,type,4,byte_order);
     double x,y;
     g.get_vertex(0,&x,&y);
@@ -142,7 +142,7 @@ wkb_buffer_ptr to_line_string_wkb( geometry_type const& g, wkbByteOrder byte_ord
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
     boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
     ss.write(reinterpret_cast<char*>(&byte_order),1); 
-    int type = static_cast<int>(g.type());
+    int type = static_cast<int>(mapnik::LineString);
     write(ss,type,4,byte_order);
     write(ss,num_points,4,byte_order);
     double x,y;
@@ -183,7 +183,7 @@ wkb_buffer_ptr to_polygon_wkb( geometry_type const& g, wkbByteOrder byte_order)
     boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
 
     ss.write(reinterpret_cast<char*>(&byte_order),1); 
-    int type = static_cast<int>(g.type());
+    int type = static_cast<int>(mapnik::Polygon);
     write(ss,type,4,byte_order);
     write(ss,num_rings,4,byte_order);
     
