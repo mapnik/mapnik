@@ -23,11 +23,11 @@
 #ifndef MAPNIK_VERTEX_HPP
 #define MAPNIK_VERTEX_HPP
 
-#include <iostream>
 #include <sstream>
 
 namespace mapnik 
 {
+
 enum CommandType {
     SEG_END   =0,
     SEG_MOVETO=1,
@@ -37,25 +37,25 @@ enum CommandType {
     
 template <typename T,int dim>
 struct vertex {
-    typedef T type;
+    typedef T coord_type;
 };
     
 template <typename T>
 struct vertex<T,2> 
 {
-    typedef T type;
-    T x;
-    T y;
+    typedef T coord_type;
+    coord_type x;
+    coord_type y;
     unsigned cmd;
     vertex() 
         : x(0),y(0),cmd(SEG_END) {}
-    vertex(T x,T y,unsigned cmd)
+    vertex(coord_type x,coord_type y,unsigned cmd)
         : x(x),y(y),cmd(cmd) {}
 
     template <typename T2>
     vertex(const vertex<T2,2>& rhs)
-        : x(type(rhs.x)),
-          y(type(rhs.y)),
+        : x(coord_type(rhs.x)),
+          y(coord_type(rhs.y)),
           cmd(rhs.cmd) {}
         
     template <typename T2> vertex<T,2> operator=(const vertex<T2,2>& rhs)
@@ -64,8 +64,8 @@ struct vertex<T,2>
         {
             return *this;
         }
-        x=type(rhs.x);
-        y=type(rhs.y);
+        x=coord_type(rhs.x);
+        y=coord_type(rhs.y);
         cmd=rhs.cmd;
         return *this;
     }   
@@ -73,7 +73,6 @@ struct vertex<T,2>
     
 typedef vertex<double,2> vertex2d;
 typedef vertex<int,2> vertex2i;
-
     
 template <class charT,class traits,class T,int dim>
 inline std::basic_ostream<charT,traits>&
