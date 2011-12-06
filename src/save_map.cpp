@@ -793,19 +793,21 @@ class serialize_type : public boost::static_visitor<>
 
 void serialize_parameters( ptree & map_node, mapnik::parameters const& params)
 {
-    ptree & params_node = map_node.push_back(
-        ptree::value_type("Parameters", ptree()))->second;
-
-    parameters::const_iterator it = params.begin();
-    parameters::const_iterator end = params.end();
-    for (; it != end; ++it)
-    {
-        boost::property_tree::ptree & param_node = params_node.push_back(
-            boost::property_tree::ptree::value_type("Parameter",
-                                                    boost::property_tree::ptree()))->second;
-        param_node.put("<xmlattr>.name", it->first );
-        param_node.put_value( it->second );
-        boost::apply_visitor(serialize_type(param_node),it->second);
+    if (params.size()) {
+        ptree & params_node = map_node.push_back(
+            ptree::value_type("Parameters", ptree()))->second;
+    
+        parameters::const_iterator it = params.begin();
+        parameters::const_iterator end = params.end();
+        for (; it != end; ++it)
+        {
+            boost::property_tree::ptree & param_node = params_node.push_back(
+                boost::property_tree::ptree::value_type("Parameter",
+                                                        boost::property_tree::ptree()))->second;
+            param_node.put("<xmlattr>.name", it->first );
+            param_node.put_value( it->second );
+            boost::apply_visitor(serialize_type(param_node),it->second);
+        }
     }
 }
 
