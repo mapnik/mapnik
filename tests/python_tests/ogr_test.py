@@ -11,11 +11,11 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
+if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
     
     # Shapefile initialization
     def test_shapefile_init():
-        s = mapnik.Shapefile(file='../../demo/data/boundaries')
+        s = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0)
     
         e = s.envelope()
        
@@ -26,7 +26,7 @@ if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
     
     # Shapefile properties
     def test_shapefile_properties():
-        s = mapnik.Shapefile(file='../../demo/data/boundaries', encoding='latin1')
+        s = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0,encoding='latin1')
         f = s.features_at_point(s.envelope().center()).features[0]
     
         eq_(f['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
@@ -45,7 +45,7 @@ if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
 
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
-        ds = mapnik.Shapefile(file='../data/shp/world_merc')
+        ds = mapnik.Ogr(file='../data/shp/world_merc.shp',layer_by_index=0)
         eq_(len(ds.fields()),11)
         eq_(ds.fields(),['FIPS', 'ISO2', 'ISO3', 'UN', 'NAME', 'AREA', 'POP2005', 'REGION', 'SUBREGION', 'LON', 'LAT'])
         eq_(ds.field_types(),['str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float'])

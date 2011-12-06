@@ -356,6 +356,43 @@ featureset_ptr ogr_datasource::features(query const& q) const
 
     if (dataset_ && layer_.is_valid())
     {
+        // First we validate query fields: https://github.com/mapnik/mapnik/issues/792
+        std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
+        std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
+        std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
+        std::vector<std::string> known_fields;
+        for (; it != end; ++it)
+        {
+            known_fields.push_back(it->get_name());
+        }
+
+        const std::set<std::string>& attribute_names = q.property_names();
+        std::set<std::string>::const_iterator pos = attribute_names.begin();
+        while (pos != attribute_names.end())
+        {
+            bool found_name = false;
+            for (int i = 0; i < known_fields.size(); ++i)
+            {
+                if (known_fields[i] == *pos)
+                {
+                    found_name = true;
+                    break;
+                }
+            }
+    
+            if (! found_name)
+            {
+                std::ostringstream s;
+    
+                s << "OGR Plugin: no attribute '" << *pos << "'. Valid attributes are: "
+                  << boost::algorithm::join(known_fields, ",") << ".";
+    
+                throw mapnik::datasource_exception(s.str());
+            }
+            ++pos;
+        }
+
+
         OGRLayer* layer = layer_.layer();
 
         if (indexed_)

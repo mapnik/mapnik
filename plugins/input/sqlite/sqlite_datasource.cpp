@@ -453,7 +453,9 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         std::set<std::string>::const_iterator end = props.end();
         while (pos != end)
         {
-            s << ",\"" << *pos << "\"";
+            // TODO - should we restrict duplicate key query?
+            //if (*pos != key_field_)
+            s << ",[" << *pos << "]";
             ++pos;
         }
 
@@ -492,7 +494,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
 #ifdef MAPNIK_DEBUG
         std::clog << "Sqlite Plugin: table: " << table_ << "\n\n";
-        std::clog << "Sqlite Plugin: query:" << s.str() << "\n\n";
+        std::clog << "Sqlite Plugin: query: " << s.str() << "\n\n";
 #endif
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
@@ -527,7 +529,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
             std::string fld_name = itr->get_name();
             if (fld_name != key_field_)
             {
-                s << ",\"" << itr->get_name() << "\"";
+                s << ",[" << itr->get_name() << "]";
             }
 
             ++itr;
