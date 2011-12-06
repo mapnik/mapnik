@@ -27,7 +27,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/geometry.hpp>
+#include <mapnik/vertex_vector.hpp>
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -35,25 +35,25 @@
 
 namespace mapnik { namespace util {
 
-typedef boost::tuple<unsigned,double,double> vertex_type;
-
+template <typename T>
 class vertex_iterator
-    : public boost::iterator_facade<vertex_iterator,
-                                    vertex_type const,                                   
-                                    boost::forward_traversal_tag,
-                                    vertex_type const&
-                                    >
+    : public boost::iterator_facade< vertex_iterator<T>,
+                                     typename boost::tuple<unsigned,T,T> const, 
+                                     boost::forward_traversal_tag
+                                     >
 {
-
+    
 public:
+    typedef typename boost::tuple<unsigned, T, T> value_type;
+    typedef vertex_vector<T> container_type;
     
     vertex_iterator()
-        : geom_(0),
-          v_(SEG_END,0,0) {}
+        : v_(SEG_END,0,0)
+    {}
     
-    explicit vertex_iterator(geometry_type const& geom)
-        : geom_(&geom),
-          v_(SEG_END,0,0) 
+    explicit vertex_iterator(container_type const& vertices)
+        : vertices_(&vertices),
+          pos_(0)
     {
         increment();
     }
@@ -62,22 +62,23 @@ private:
     friend class boost::iterator_core_access;
 
     void increment() 
-    {
-        v_.get<0>() = geom_->vertex(&v_.get<1>(),&v_.get<2>());
+    {   
+        boost::get<0>(v_) = vertices_->get_vertex(pos_++, &boost::get<1>(v_), &boost::get<2>(v_));
     }
     
     bool equal( vertex_iterator const& other) const
     {
-        return v_.get<0>() == other.v_.get<0>();
+        return boost::get<0>(v_) == boost::get<0>(other.v_);
     }
     
-    vertex_type const& dereference() const
+    value_type const& dereference() const
     {
         return v_; 
     }
     
-    geometry_type const *geom_;
-    vertex_type v_;
+    container_type const *vertices_;
+    value_type v_;
+    unsigned pos_;
 };
                                      
 }}
