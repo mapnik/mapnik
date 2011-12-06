@@ -219,10 +219,6 @@ wkb_buffer_ptr to_wkb(geometry_type const& g, wkbByteOrder byte_order )
     case mapnik::Polygon:
         wkb = to_polygon_wkb(g, byte_order);
         break;
-    case mapnik::MultiPoint:
-    case mapnik::MultiLineString:
-    case mapnik::MultiPolygon:
-        break;
     default:
         break;
     }

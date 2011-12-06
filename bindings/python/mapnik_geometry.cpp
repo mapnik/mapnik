@@ -56,7 +56,7 @@ void add_wkt_impl(path_type& p, std::string const& wkt)
 
 void add_wkb_impl(path_type& p, std::string const& wkb)
 {
-    mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size(), true);
+    mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size());
 }
 
 boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
@@ -70,7 +70,7 @@ boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
 boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
 {
     boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
-    mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size(), true);
+    mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size());
     return paths;
 }
 
@@ -97,11 +97,8 @@ void export_geometry()
         .value("Point",mapnik::Point)
         .value("LineString",mapnik::LineString)
         .value("Polygon",mapnik::Polygon)
-        .value("MultiPoint",mapnik::MultiPoint)
-        .value("MultiLineString",mapnik::MultiLineString)
-        .value("MultiPolygon",mapnik::MultiPolygon)
         ;
-
+    
     using mapnik::geometry_type;
     class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
         .def("envelope",&geometry_type::envelope)

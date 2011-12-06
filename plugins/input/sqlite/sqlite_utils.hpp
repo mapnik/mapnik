@@ -151,11 +151,11 @@ public:
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = (const char*) rs->column_blob(0, size);
+            const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
                 boost::ptr_vector<mapnik::geometry_type> paths;
-                mapnik::geometry_utils::from_wkb(paths, data, size, false, mapnik::wkbAuto);
+                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
                 for (unsigned i=0; i<paths.size(); ++i)
                 {
                     mapnik::box2d<double> const& bbox = paths[i].envelope();
@@ -241,9 +241,7 @@ public:
                 if (data)
                 {
                     boost::ptr_vector<mapnik::geometry_type> paths;
-                    // TODO - contraint fails if multiple_geometries = true
-                    bool multiple_geometries = false;
-                    mapnik::geometry_utils::from_wkb(paths, data, size, multiple_geometries, mapnik::wkbAuto);
+                    mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
                     for (unsigned i=0; i<paths.size(); ++i)
                     {
                         mapnik::box2d<double> const& bbox = paths[i].envelope();
@@ -320,13 +318,11 @@ public:
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = (const char*) rs->column_blob(0, size);
+            const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
                 boost::ptr_vector<mapnik::geometry_type> paths;
-                // TODO - contraint fails if multiple_geometries = true
-                bool multiple_geometries = false;
-                mapnik::geometry_utils::from_wkb(paths, data, size, multiple_geometries, mapnik::wkbAuto);
+                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
                 for (unsigned i=0; i<paths.size(); ++i)
                 {
                     mapnik::box2d<double> const& bbox = paths[i].envelope();

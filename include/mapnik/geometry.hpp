@@ -36,13 +36,9 @@ namespace mapnik {
 
 enum eGeomType {
     Point = 1,
-    LineString,
-    Polygon,
-    MultiPoint,
-    MultiLineString,
-    MultiPolygon
+    LineString = 2,
+    Polygon = 3
 };
-
 
 template <typename T, template <typename> class Container=vertex_vector>
 class geometry
@@ -168,12 +164,12 @@ public:
     */
     void label_position(double *x, double *y) const
     {
-        if (type_ == LineString || type_ == MultiLineString)
+        if (type_ == LineString)
         {
             middle_point(x,y);
             return;
         }
-
+        
         unsigned size = cont_.size();
         if (size < 3) 
         {
@@ -232,7 +228,7 @@ public:
     /* summarized distance centroid */
     void label_position3(double *x, double *y) const
     {
-        if (type_ == LineString || type_ == MultiLineString)
+        if (type_ == LineString)
         {
             middle_point(x,y);
             return;
