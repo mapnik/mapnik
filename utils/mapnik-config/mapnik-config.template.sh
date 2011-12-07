@@ -64,10 +64,6 @@ while test $# -gt 0; do
       echo ${CONFIG_GIT_REVISION}
       ;;
 
-    --svn-revision)
-      echo ${CONFIG_SVN_REVISION}
-      ;;
-
     --help)
       usage 0
       ;;
