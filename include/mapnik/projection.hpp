@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef PROJECTION_HPP
-#define PROJECTION_HPP
+#ifndef MAPNIK_PROJECTION_HPP
+#define MAPNIK_PROJECTION_HPP
 
 // mapnik
 #include <mapnik/box2d.hpp>
@@ -35,8 +33,8 @@
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
 #include <boost/thread/mutex.hpp>
 #endif
-
 #include <boost/utility.hpp>
+
 // stl
 #include <string>
 #include <iostream>
@@ -85,6 +83,7 @@ private:
     static boost::mutex mutex_;
 #endif
 };
+
 }
 
-#endif //PROJECTION_HPP
+#endif // MAPNIK_PROJECTION_HPP

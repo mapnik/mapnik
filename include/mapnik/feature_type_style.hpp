@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_FEATURE_TYPE_STYLE_HPP
+#define MAPNIK_FEATURE_TYPE_STYLE_HPP
 
-#ifndef FEATURE_TYPE_STYLE_HPP
-#define FEATURE_TYPE_STYLE_HPP
 // mapnik
 #include <mapnik/rule.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>
+
 // stl
 #include <vector>
 
@@ -44,7 +44,8 @@ DEFINE_ENUM( filter_mode_e, filter_mode_enum );
 
 typedef std::vector<rule> rules;
 typedef std::vector<rule*> rule_ptrs;
-class feature_type_style
+
+class MAPNIK_DECL feature_type_style
 {
 private:
     rules  rules_;
@@ -58,7 +59,7 @@ private:
 public:
     feature_type_style();
 
-    feature_type_style(feature_type_style const& rhs);
+    feature_type_style(feature_type_style const& rhs, bool deep_copy = false);
 
     feature_type_style& operator=(feature_type_style const& rhs);
 
@@ -82,4 +83,4 @@ private:
 };
 }
 
-#endif //FEATURE_TYPE_STYLE_HPP
+#endif // MAPNIK_FEATURE_TYPE_STYLE_HPP

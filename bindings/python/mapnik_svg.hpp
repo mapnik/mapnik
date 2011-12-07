@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2010 Robert Coup
@@ -43,11 +43,11 @@ template <class T>
 void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
 {
     agg::trans_affine tr;
-    if (!mapnik::svg::parse_transform(transform_wkt, tr))
+    if (!mapnik::svg::parse_transform(transform_wkt.c_str(), tr))
     {
         std::stringstream ss;
         ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
-        throw mapnik::value_error(ss.str());    
+        throw mapnik::value_error(ss.str());
     }
     mapnik::transform_type matrix;
     tr.store_to(&matrix[0]);

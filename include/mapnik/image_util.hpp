@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: image_util.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef IMAGE_UTIL_HPP
-#define IMAGE_UTIL_HPP
+#ifndef MAPNIK_IMAGE_UTIL_HPP
+#define MAPNIK_IMAGE_UTIL_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -255,6 +253,8 @@ inline MAPNIK_DECL std::string save_to_string(image_32 const& image,
     return save_to_string<image_data_32>(image.data(), type, palette);
 }
    
+///////////////////////////////////////////////////////////////////////////
+
 #ifdef _MSC_VER
 template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
                                                       std::string const&,
@@ -263,10 +263,11 @@ template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
 template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
                                                       std::string const&,
                                                       rgba_palette const&);
-template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
-                                                               std::string const&,
-                                                               rgba_palette const&);
-   
+
+template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
+						      std::string const&);
+
+
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                     std::string const&,
                                                                     std::string const&,
@@ -274,13 +275,28 @@ template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<i
  
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                     std::string const&,
+                                                                    std::string const&);
+
+template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+                                                                    std::string const&,
                                                                     rgba_palette const&);
+
+template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
+								    std::string const&);
+								    
+
+template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
+                                                               std::string const&,
+                                                               rgba_palette const&);
    
 template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
-                                                                             std::string const&,
+									     std::string const&);
+
+template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+									     std::string const&,
                                                                              rgba_palette const&);
 #endif
 
 }
 
-#endif //IMAGE_UTIL_HPP
+#endif // MAPNIK_IMAGE_UTIL_HPP

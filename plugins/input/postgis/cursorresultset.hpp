@@ -13,7 +13,7 @@ private:
     int fetch_size_;
     bool is_closed_;
     int *refCount_;
-    
+
     void getNextResultSet()
     {
         std::ostringstream s;
@@ -27,7 +27,7 @@ private:
         std::clog << "Postgis Plugin: FETCH result (" << cursorName_ << "): " << rs_->size() << " rows" << std::endl;
 #endif
     }
-    
+
 public:
     CursorResultSet(boost::shared_ptr<Connection> const &conn, std::string cursorName, int fetch_count)
         : conn_(conn),
@@ -138,7 +138,7 @@ public:
     {
         return rs_->isNull(index);
     }
-    
+
     virtual const char* getValue(int index) const
     {
         return rs_->getValue(index);

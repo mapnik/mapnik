@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,14 +44,14 @@ class shape_datasource : public datasource
 public:
     shape_datasource(const parameters &params, bool bind=true);
     virtual ~shape_datasource();
-    
+
     int type() const;
     static std::string name();
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt) const;
     box2d<double> envelope() const;
     layer_descriptor get_descriptor() const;
-    void bind() const;   
+    void bind() const;
 private:
     shape_datasource(const shape_datasource&);
     shape_datasource& operator=(const shape_datasource&);

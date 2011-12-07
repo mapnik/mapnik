@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2008 Tom Hughes
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #if defined(HAVE_CAIRO)
 
-#ifndef CAIRO_RENDERER_HPP
-#define CAIRO_RENDERER_HPP
-
-
+#ifndef MAPNIK_CAIRO_RENDERER_HPP
+#define MAPNIK_CAIRO_RENDERER_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -152,6 +148,6 @@ public:
 };
 }
 
-#endif
+#endif // MAPNIK_CAIRO_RENDERER_HPP
 
-#endif //CAIRO_RENDERER_HPP
+#endif

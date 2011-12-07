@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2009 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,22 +20,23 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef MAPNIK_CSS_COLOR_GRAMMAR_HPP
-#define MAPNIK_CSS_COLOR_GRAMMAR_HPP
+#ifndef MAPNIK_CSS_COLOR_GRAMMAR_DEPRECATED_HPP
+#define MAPNIK_CSS_COLOR_GRAMMAR_DEPRECATED_HPP
 
 // mapnik
 #include <mapnik/color.hpp>
+
 // spirit2
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_action.hpp>
+
 // phoenix 
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
+
 // fusion
 #include <boost/fusion/include/adapt_struct.hpp>
 
@@ -44,7 +45,6 @@
 
 // stl
 #include <string>
-
 
 //BOOST_FUSION_ADAPT_CLASS(
 //    mapnik::color,
@@ -417,4 +417,4 @@ struct css_color_grammar : qi::grammar<Iterator, css(), ascii_space_type>
 
 }
 
-#endif //MAPNIK_CSS_COLOR_GRAMMAR_HPP 
+#endif // MAPNIK_CSS_COLOR_GRAMMAR_DEPRECATED_HPP

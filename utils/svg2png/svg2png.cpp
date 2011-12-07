@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2010 Artem Pavlenko
@@ -45,13 +45,13 @@
 #include "agg_scanline_u.h"
 
 
-int main (int argc,char** argv) 
+int main (int argc,char** argv)
 {
     namespace po = boost::program_options;
-    
+
     bool verbose=false;
     std::vector<std::string> svg_files;
-    
+
     try
     {
         po::options_description desc("svg2png utility");
@@ -61,10 +61,10 @@ int main (int argc,char** argv)
             ("verbose,v","verbose output")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
-        
+
         po::positional_options_description p;
         p.add("svg",-1);
-        po::variables_map vm;        
+        po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);
 
@@ -74,12 +74,12 @@ int main (int argc,char** argv)
             return 1;
         }
 
-        if (vm.count("help")) 
+        if (vm.count("help"))
         {
             std::clog << desc << std::endl;
             return 1;
         }
-        if (vm.count("verbose")) 
+        if (vm.count("verbose"))
         {
             verbose = true;
         }
@@ -107,10 +107,10 @@ int main (int argc,char** argv)
 
             boost::optional<mapnik::marker_ptr> marker_ptr = mapnik::marker_cache::instance()->find(svg_name, false);
             if (marker_ptr) {
-            
+
                 mapnik::marker marker  = **marker_ptr;
                 if (marker.is_vector()) {
-    
+
                     typedef agg::pixfmt_rgba32_plain pixfmt;
                     typedef agg::renderer_base<pixfmt> renderer_base;
                     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
@@ -138,10 +138,10 @@ int main (int argc,char** argv)
                     mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
                     mapnik::svg::svg_path_adapter svg_path(stl_storage);
                     mapnik::svg::svg_renderer<mapnik::svg::svg_path_adapter,
-                                 agg::pod_bvector<mapnik::svg::path_attributes>,
-                                 renderer_solid,
-                                 agg::pixfmt_rgba32_plain > svg_renderer_this(svg_path,
-                                         (*marker.get_vector_data())->attributes());
+                        agg::pod_bvector<mapnik::svg::path_attributes>,
+                        renderer_solid,
+                        agg::pixfmt_rgba32_plain > svg_renderer_this(svg_path,
+                                                                     (*marker.get_vector_data())->attributes());
 
                     svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 

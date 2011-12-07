@@ -31,7 +31,7 @@ the middle of any map tile and display a "hello world!" label if used like:
 
 Or used in python like:
 
-from mapnik2 import *
+from mapnik import *
 m = Map(600,400)
 m.background = Color('white')
 s = Style()

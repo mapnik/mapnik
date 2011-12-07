@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -32,7 +32,7 @@ struct query_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getinitargs(query const& q)
     {
-        return boost::python::make_tuple(q.get_bbox(),q.resolution());  
+        return boost::python::make_tuple(q.get_bbox(),q.resolution());
     }
 };
 
@@ -40,7 +40,7 @@ void export_query()
 {
     using namespace boost::python;
 
-    class_<query>("Query", "a spatial query data object", 
+    class_<query>("Query", "a spatial query data object",
                   init<box2d<double>,query::resolution_type const&,double>() )
         .def(init<box2d<double> >())
         .def_pickle(query_pickle_suite())

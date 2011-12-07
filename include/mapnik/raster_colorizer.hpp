@@ -3,7 +3,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 /** \brief Raster Colouriser
  * 
@@ -35,9 +34,8 @@
  * 
  */
 
-
-#ifndef RASTER_COLORIZER_HPP
-#define RASTER_COLORIZER_HPP
+#ifndef MAPNIK_RASTER_COLORIZER_HPP
+#define MAPNIK_RASTER_COLORIZER_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
@@ -68,7 +66,7 @@ enum colorizer_mode_enum
 DEFINE_ENUM( colorizer_mode, colorizer_mode_enum );
     
 //! \brief Structure to represent a stop position.    
-class colorizer_stop {
+class MAPNIK_DECL colorizer_stop {
 public:
     
     //! \brief Constructor
@@ -142,7 +140,7 @@ typedef std::vector<colorizer_stop> colorizer_stops;
 
 
 //! \brief Class representing the raster colorizer
-class raster_colorizer {
+class MAPNIK_DECL raster_colorizer {
 public:
     //! \brief Constructor
     raster_colorizer(colorizer_mode mode = COLORIZER_LINEAR, const color& _color = color(0,0,0,0));
@@ -177,6 +175,10 @@ public:
     //! \param[in] stop The stop to add
     //! \return True if added, false if error
     bool add_stop(const colorizer_stop & stop);
+
+    //! \brief Set the list of stops
+    //! \param[in] stops The list of stops
+    void set_stops(colorizer_stops const& stops) { stops_ = stops; };
 
     //! \brief Get the list of stops
     //! \return The list of stops
@@ -214,14 +216,9 @@ private:
 };
 
 
-
-
-
-
-
 typedef boost::shared_ptr<raster_colorizer> raster_colorizer_ptr;
 
 
 } // mapnik namespace
 
-#endif //RASTER_COLORIZER_HPP
+#endif // MAPNIK_RASTER_COLORIZER_HPP

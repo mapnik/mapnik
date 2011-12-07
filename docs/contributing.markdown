@@ -15,9 +15,31 @@ Look through the code to get an idea, and do not hesitate to ask questions.
 
 Also read the design philosophy page for the motivations that lead to code decisions.
 
+Templates are good, within reason. We seek to use templates were possible for flexible code, but not in cases where functional
+patterns would be just as concise and clear.
+
 In general we use Boost, it makes more possible in C++. It is a big build time dependency (as in time to compile against and # of headers) but ultimately compiles to small object code and is very fast (particularly spirit). It also has no dependencies itself (it's really an extension to the C++ language) so requiring it is much easier than requiring a hard dependency that itself has other dependencies. This is a big reason that we prefer AGG to Cairo as our primary renderer. Also AGG, besides producing the best visual output, strikes an excellent balance between speed and thread safety by using very lightweight objects. Cairo not so much.
 
 You will also notice that we don't use many of the standard geo libraries when we could. For instance we don't use GDAL, OGR, or GEOS anywhere in core, and only leverage them in optional plugins. We feel we can often write code that is faster and more thread safe than these libraries but that still does the job. If this ever changes we can adapt and start using these libraries or others as dependencies - nothing is nicer than standing on the shoulders of giants when it makes sense.
+
+
+## Code commits best practices.
+
+#### Big changes - awesome as pull requests
+
+We love big, aggressive refactoring - but ideally in branches. Even if the changes should go directly into the mainline code and are stable, very big changes are useful to see as a group and branches are cheap. So, branch and commit then create a pull request against master so that other developers can take a quick look. This is a great way for informal code review when a full issue is not warrented.
+
+#### Commits that fix issues should note the issue #
+
+    git commit plugins/input/ogr/ -m "implemented sql query in OGR plugin (closes #472)"
+
+#### Commits that relate to issues should reference them:
+
+    git commit tests/python_tests/sqlite_test.py -m "more robust sqlite tests - refs #928"
+
+#### Commits that add a new feature or fix should be added to the CHANGELOG
+
+Ideally the CHANGELOG can be a very concise place to look for the most important recent development and should not read like a full commit log. So, some developers may prefer to weekly or monthly look back over their commits and summarize all at once with additions to the CHANGELOG. Other developers may prefer to add as they go.
 
 
 ## License
@@ -67,13 +89,19 @@ If you see bits of code around that do not follow these please don't hesitate to
 
 #### Indentation is four spaces
 
+#### Use C++ style casts
+
+    static_cast<int>(value); // yes
+    
+    (int)value; // no
+
 #### Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/make_shared.html) where possible
 
 #### Function definitions should not be separated from their arguments:
 
-    void foo(int a) { ... } // please
+    void foo(int a) // please
     
-    void foo (int a) { ... } // no
+    void foo (int a) // no
 
 #### Separate arguments by a single space:
 
@@ -87,7 +115,18 @@ If you see bits of code around that do not follow these please don't hesitate to
     
     if(a==b) // no
 
-#### Braces should ideally be on a separate line:
+#### Braces should always be used:
+
+    if (!file)
+    {
+        throw mapnik::datasource_exception("not found"); // please    
+    }
+
+    if (!file)
+        throw mapnik::datasource_exception("not found"); // no
+        
+
+#### Braces should be on a separate line:
 
     if (a == b)
     {

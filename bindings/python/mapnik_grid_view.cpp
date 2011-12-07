@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -40,13 +40,13 @@ static dict (*encode)( mapnik::grid_view const&, std::string, bool, unsigned int
 void export_grid_view()
 {
     class_<mapnik::grid_view,
-            boost::shared_ptr<mapnik::grid_view> >("GridView",
-            "This class represents a feature hitgrid subset.",no_init)
+        boost::shared_ptr<mapnik::grid_view> >("GridView",
+                                               "This class represents a feature hitgrid subset.",no_init)
         .def("width",&mapnik::grid_view::width)
         .def("height",&mapnik::grid_view::height)
         .def("encode",encode,
-            ( arg("encoding")="utf",arg("add_features")=true,arg("resolution")=4 ),
-            "Encode the grid as as optimized json\n"
+             ( boost::python::arg("encoding")="utf",boost::python::arg("add_features")=true,boost::python::arg("resolution")=4 ),
+             "Encode the grid as as optimized json\n"
             )
         ;
 }

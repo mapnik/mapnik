@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -761,6 +761,56 @@ void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
     }
 }
 
+class serialize_type : public boost::static_visitor<>
+{
+ public:
+    serialize_type( boost::property_tree::ptree & node):
+        node_(node) {}
+
+    void operator () ( int val ) const
+    {
+        node_.put("<xmlattr>.type", "int" );
+    }
+
+    void operator () ( double val ) const
+    {
+        node_.put("<xmlattr>.type", "float" );
+    }
+
+    void operator () ( std::string const& val ) const
+    {
+        node_.put("<xmlattr>.type", "string" );
+    }
+
+    void operator () ( mapnik::value_null val ) const
+    {
+        node_.put("<xmlattr>.type", "string" );
+    }
+
+ private:
+    boost::property_tree::ptree & node_;
+};
+
+void serialize_parameters( ptree & map_node, mapnik::parameters const& params)
+{
+    if (params.size()) {
+        ptree & params_node = map_node.push_back(
+            ptree::value_type("Parameters", ptree()))->second;
+    
+        parameters::const_iterator it = params.begin();
+        parameters::const_iterator end = params.end();
+        for (; it != end; ++it)
+        {
+            boost::property_tree::ptree & param_node = params_node.push_back(
+                boost::property_tree::ptree::value_type("Parameter",
+                                                        boost::property_tree::ptree()))->second;
+            param_node.put("<xmlattr>.name", it->first );
+            param_node.put_value( it->second );
+            boost::apply_visitor(serialize_type(param_node),it->second);
+        }
+    }
+}
+
 void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defaults )
 {
     ptree & layer_node = map_node.push_back(
@@ -905,6 +955,8 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     {
         set_attr( map_node, p_it->first, p_it->second ); 
     }
+    
+    serialize_parameters( map_node, map.get_extra_parameters());
 
     Map::const_style_iterator it = map.styles().begin();
     Map::const_style_iterator end = map.styles().end();

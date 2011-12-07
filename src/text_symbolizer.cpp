@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -87,7 +87,7 @@ IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
 
 
 text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name,
-                                 unsigned size, color const& fill,
+                                 float size, color const& fill,
                                  text_placements_ptr placements)
     : symbolizer_base(),
       name_(name),
@@ -105,7 +105,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       max_char_angle_delta_(22.5 * M_PI/180.0),
       fill_(fill),
       halo_fill_(color(255,255,255)),
-      halo_radius_(0),
+      halo_radius_(0.0),
       label_p_(POINT_PLACEMENT),
       anchor_(0.0,0.5),
       avoid_edges_(false),
@@ -120,7 +120,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
     set_text_size(size);
 }
 
-text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const& fill,
+text_symbolizer::text_symbolizer(expression_ptr name, float size, color const& fill,
                                  text_placements_ptr placements)
     : symbolizer_base(),
       name_(name),
@@ -138,7 +138,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, unsigned size, color const
       max_char_angle_delta_(22.5 * M_PI/180.0),
       fill_(fill),
       halo_fill_(color(255,255,255)),
-      halo_radius_(0),
+      halo_radius_(0.0),
       label_p_(POINT_PLACEMENT),
       anchor_(0.0,0.5),
       avoid_edges_(false),
@@ -378,12 +378,12 @@ void text_symbolizer::set_max_char_angle_delta(double angle)
     max_char_angle_delta_ = angle;
 }
 
-void text_symbolizer::set_text_size(unsigned size)
+void text_symbolizer::set_text_size(float size)
 {
     placement_options_->set_default_text_size(size);
 }
 
-unsigned  text_symbolizer::get_text_size() const
+float text_symbolizer::get_text_size() const
 {
     return placement_options_->get_default_text_size();
 }
@@ -438,9 +438,14 @@ position const& text_symbolizer::get_anchor() const
     return anchor_;
 }
 
-void  text_symbolizer::set_displacement(double x, double y)
+void text_symbolizer::set_displacement(double x, double y)
 {
     placement_options_->set_default_displacement(boost::make_tuple(x,y));
+}
+
+void text_symbolizer::set_displacement(position const& p)
+{
+    placement_options_->set_default_displacement(p);
 }
 
 position const& text_symbolizer::get_displacement() const

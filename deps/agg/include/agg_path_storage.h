@@ -736,7 +736,7 @@ namespace agg
         template<class VertexSource> 
         void join_path(VertexSource& vs, unsigned path_id = 0)
         {
-            double x, y;
+            double x=0.0, y=0.0;
             unsigned cmd;
             vs.rewind(path_id);
             cmd = vs.vertex(&x, &y);

@@ -23,7 +23,6 @@
             <Parameter name="type">sqlite</Parameter>
             <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
             <Parameter name="table">point</Parameter>
-            <Parameter name="wkb_format">spatialite</Parameter>
         </Datasource>
     </Layer>
 </Map>

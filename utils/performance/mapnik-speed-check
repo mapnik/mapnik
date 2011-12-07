@@ -9,13 +9,23 @@ if not len(sys.argv) >= 3:
     sys.exit('usage: mapnik-speed-check <stylesheet> <iterations> [minx,miny,maxx,maxy]')
 
 m = mapnik.Map(256,256)
-mapnik.load_map(m,sys.argv[1])
-m.zoom_all()
+stylesheet = sys.argv[1]
 
 TOTAL_TIME = 0
-BBOX = None
 
-def test():
+def load():
+    global TOTAL_TIME
+    global stylesheet
+    start = time.time()
+    m = mapnik.Map(256,256)
+    mapnik.load_map(m,stylesheet)
+    TOTAL_TIME += (time.time() - start)
+
+def init(stylesheet):
+    mapnik.load_map(m,stylesheet)
+    m.zoom_all()
+
+def render():
     global TOTAL_TIME
     start = time.time()
     im = mapnik.Image(m.width,m.height)
@@ -28,7 +38,6 @@ def f_(set):
     print 'min: %sms | avg: %sms | total: %ss' % (min_,avg,str(TOTAL_TIME)[:6])
 
 if __name__=='__main__':
-    
     # if passed, set up bbox
     if len(sys.argv) == 4:
         bbox = sys.argv[3]
@@ -39,12 +48,15 @@ if __name__=='__main__':
         env = mapnik.Box2d(*map(float,parts))
         m.zoom_to_box(env)
 
+    #test_ = "load()"
+    test_ = "render()"
+    init(stylesheet)
+    
     # load once - making sure mmap'd shapefiles are loaded
-    test_ = "test()"
     eval(test_)
     TOTAL_TIME = 0
     
     # now actually run the test
-    t = Timer(test_, "from __main__ import test")
+    t = Timer(test_, "from __main__ import %s" % test_.replace('()',''))
     iterations = int(sys.argv[2])
     f_(t.repeat(iterations,1))

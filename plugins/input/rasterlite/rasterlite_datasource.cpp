@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,7 +53,7 @@ using mapnik::datasource_exception;
 inline void *rasterlite_datasource::open_dataset() const
 {
     void *dataset = rasterliteOpen (dataset_name_.c_str(), table_name_.c_str());
-   
+
     if (! dataset) throw datasource_exception("Rasterlite Plugin: Error opening dataset");
 
     if (rasterliteIsError (dataset))
@@ -61,7 +61,7 @@ inline void *rasterlite_datasource::open_dataset() const
         std::string error (rasterliteGetLastError(dataset));
 
         rasterliteClose (dataset);
-   
+
         throw datasource_exception(error);
     }
 
@@ -100,24 +100,24 @@ rasterlite_datasource::rasterlite_datasource(parameters const& params, bool bind
 
 void rasterlite_datasource::bind() const
 {
-    if (is_bound_) return;   
-    
+    if (is_bound_) return;
+
     if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
 
     void *dataset = open_dataset();
-   
+
     double x0, y0, x1, y1;
     if (rasterliteGetExtent (dataset, &x0, &y0, &x1, &y1) != RASTERLITE_OK)
     {
         std::string error (rasterliteGetLastError(dataset));
 
         rasterliteClose (dataset);
-   
+
         throw datasource_exception(error);
     }
 
     extent_.init(x0,y0,x1,y1);
-   
+
 #ifdef MAPNIK_DEBUG
     int srid, auth_srid;
     const char *auth_name;
@@ -129,11 +129,11 @@ void rasterlite_datasource::bind() const
     int levels = rasterliteGetLevels (dataset);
 
     if (rasterliteGetSrid(dataset, &srid, &auth_name, &auth_srid, &ref_sys_name, &proj4text) != RASTERLITE_OK)
-    { 
+    {
         std::string error (rasterliteGetLastError(dataset));
 
         rasterliteClose (dataset);
-   
+
         throw datasource_exception(error);
     }
 
@@ -145,19 +145,19 @@ void rasterlite_datasource::bind() const
     std::clog << "Rasterlite Plugin: Proj4Text=" << proj4text << std::endl;
     std::clog << "Rasterlite Plugin: Extent(" << x0 << "," << y0 << " " << x1 << "," << y1 << ")" << std::endl;
     std::clog << "Rasterlite Plugin: Levels=" << levels << std::endl;
-   
+
     for (int i = 0; i < levels; i++)
     {
         if (rasterliteGetResolution(dataset, i, &pixel_x_size, &pixel_y_size, &tile_count) == RASTERLITE_OK)
         {
             std::clog << "Rasterlite Plugin: Level=" << i
-                << " x=" << pixel_x_size << " y=" << pixel_y_size << " tiles=" << tile_count << std::endl;
+                      << " x=" << pixel_x_size << " y=" << pixel_y_size << " tiles=" << tile_count << std::endl;
         }
     }
 #endif
 
     rasterliteClose(dataset);
-   
+
     is_bound_ = true;
 }
 
@@ -178,7 +178,7 @@ int rasterlite_datasource::type() const
 box2d<double> rasterlite_datasource::envelope() const
 {
     if (!is_bound_) bind();
-   
+
     return extent_;
 }
 
@@ -198,7 +198,7 @@ featureset_ptr rasterlite_datasource::features(query const& q) const
 featureset_ptr rasterlite_datasource::features_at_point(coord2d const& pt) const
 {
     if (!is_bound_) bind();
-   
+
     rasterlite_query gq = pt;
     return boost::make_shared<rasterlite_featureset>(open_dataset(), gq);
 }

@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id$
+#ifndef MAPNIK_FEATURE_FACTORY_HPP
+#define MAPNIK_FEATURE_FACTORY_HPP
 
-#ifndef FEATURE_FACTORY_HPP
-#define FEATURE_FACTORY_HPP
-
+// mapnik
 #include <mapnik/feature.hpp>
+
+// boost
 #include <boost/make_shared.hpp>
 //#include <boost/pool/pool_alloc.hpp>
 
@@ -39,8 +40,7 @@ struct feature_factory
         //return boost::allocate_shared<Feature>(boost::fast_pool_allocator<Feature>(),fid);
         return boost::make_shared<Feature>(fid);
     }
-
 }; 
 }
 
-#endif //FEATURE_FACTORY_HPP
+#endif // MAPNIK_FEATURE_FACTORY_HPP

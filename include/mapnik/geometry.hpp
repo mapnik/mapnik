@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,15 +20,13 @@
  *
  *****************************************************************************/
 
-//$Id: geometry.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef GEOMETRY_HPP
-#define GEOMETRY_HPP
+#ifndef MAPNIK_GEOMETRY_HPP
+#define MAPNIK_GEOMETRY_HPP
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
-#include <mapnik/ctrans.hpp>
 #include <mapnik/geom_util.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
@@ -50,9 +48,10 @@ template <typename T, template <typename> class Container=vertex_vector>
 class geometry
 {
 public:
-    typedef T vertex_type;
-    typedef typename vertex_type::type value_type;
-    typedef Container<vertex_type> container_type;   
+    typedef T coord_type;
+    typedef Container<coord_type> container_type;
+    typedef typename container_type::value_type value_type;
+    
 private:
     container_type cont_;
     eGeomType type_;
@@ -68,25 +67,10 @@ public:
     {
         return type_;
     }
-    
-    double area() const 
+        
+    container_type const& data() const
     {
-        double sum = 0.0;
-        double x(0);
-        double y(0);
-        rewind(0);
-        double xs = x;
-        double ys = y;
-        for (unsigned i=0;i<num_points();++i)
-        {
-            double x0(0);
-            double y0(0);
-            vertex(&x0,&y0);
-            sum += x * y0 - y * x0;
-            x = x0;
-            y = y0;
-        }
-        return (sum + x * ys - y * xs) * 0.5;
+        return cont_;
     }
     
     box2d<double> envelope() const
@@ -329,17 +313,17 @@ public:
         }  
     }
     
-    void push_vertex(value_type x, value_type y, CommandType c) 
+    void push_vertex(coord_type x, coord_type y, CommandType c) 
     {
         cont_.push_back(x,y,c);
     }
 
-    void line_to(value_type x,value_type y)
+    void line_to(coord_type x,coord_type y)
     {
         push_vertex(x,y,SEG_LINETO);
     }
          
-    void move_to(value_type x,value_type y)
+    void move_to(coord_type x,coord_type y)
     {
         push_vertex(x,y,SEG_MOVETO);
     }
@@ -364,7 +348,7 @@ public:
         itr_=0;
     }
          
-    bool hit_test(value_type x, value_type y, double tol) const
+    bool hit_test(coord_type x, coord_type y, double tol) const
     {      
         if (cont_.size() == 1) {
             // Handle points
@@ -406,10 +390,10 @@ public:
     }
 };
    
-typedef geometry<vertex2d,vertex_vector> geometry_type; 
+typedef geometry<double,vertex_vector> geometry_type; 
 typedef boost::shared_ptr<geometry_type> geometry_ptr;
 typedef boost::ptr_vector<geometry_type> geometry_containter;
 
 }
 
-#endif //GEOMETRY_HPP
+#endif // MAPNIK_GEOMETRY_HPP

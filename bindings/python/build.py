@@ -40,21 +40,15 @@ def is_py3():
 
 
 prefix = env['PREFIX']
-target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
+target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik')
 
-libraries = ['mapnik2','png']
+libraries = ['mapnik','png']
 
 if env['JPEG']:
     libraries.append('jpeg')
 
 if env['BOOST_PYTHON_LIB']:
-    if os.path.sep in env['BOOST_PYTHON_LIB']:
-        pylib_dir = os.path.dirname(env['BOOST_PYTHON_LIB'])
-        env.Prepend(LIBPATH = pylib_dir)
-        pylib_name = os.path.splitext(os.path.basename(env['BOOST_PYTHON_LIB']))[0].replace('lib','',1)
-        libraries.append(pylib_name)
-    else:
-        libraries.append(env['BOOST_PYTHON_LIB'].replace('lib','',1))
+    libraries.append(env['BOOST_PYTHON_LIB'])
 else:
     if is_py3():
         libraries.append('boost_python3%s' % env['BOOST_APPEND'])
@@ -157,7 +151,11 @@ if 'install' in COMMAND_LINE_TARGETS:
         init_files.remove('mapnik/paths.py') 
     init_module = env.Install(target_path, init_files)
     env.Alias(target='install', source=init_module)
-
+    # install mapnik2 module which redirects to mapnik and issues DeprecatedWarning
+    path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
+    init_mapnik2 = env.Install(path, 'mapnik2/__init__.py')
+    env.Alias(target='install', source=init_mapnik2)
+      
 # fix perms and install the custom generated 'paths.py' 
 if 'install' in COMMAND_LINE_TARGETS:
     targetp = os.path.join(target_path,'paths.py')
@@ -169,17 +167,10 @@ if 'install' in COMMAND_LINE_TARGETS:
         Copy("$TARGET","$SOURCE"),
         Chmod("$TARGET", 0644),
         ])
+
     
-# install the ogcserver module code
-if 'install' in COMMAND_LINE_TARGETS:
-    ogcserver_files = glob.glob('mapnik/ogcserver/*.py')
-    ogcserver_module = env.Install(target_path + '/ogcserver', ogcserver_files)
-    env.Alias(target='install', source=ogcserver_module)
-
-
 # install the shared object beside the module directory
 sources = glob.glob('*.cpp')
-
 
 py_env = env.Clone()
 py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
@@ -194,13 +185,7 @@ if env['HAS_PYCAIRO']:
     py_env.ParseConfig('pkg-config --cflags pycairo')
     py_env.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
 
-if env['SVN_REVISION']:
-    sources.remove('mapnik_python.cpp')
-    env2 = py_env.Clone()
-    env2.Append(CXXFLAGS='-DSVN_REVISION=%s' % env['SVN_REVISION'])
-    sources.insert(0,env2.SharedObject('mapnik_python.cpp'))
-
-_mapnik = py_env.LoadableModule('mapnik/_mapnik2', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
+_mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 

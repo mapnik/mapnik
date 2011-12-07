@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,15 +20,16 @@
  *
  *****************************************************************************/
 
-// $Id$
-
 #ifndef MAPNIK_SVG_CONVERTER_HPP
 #define MAPNIK_SVG_CONVERTER_HPP
+
 // mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+
 // boost
 #include <boost/utility.hpp>
+
 // agg
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
@@ -37,6 +38,7 @@
 #include "agg_conv_curve.h"
 #include "agg_color_rgba.h"
 #include "agg_bounding_rect.h"
+
 // stl
 #include <stdexcept>
 
@@ -327,5 +329,4 @@ typedef svg_converter<svg_path_adapter,agg::pod_bvector<mapnik::svg::path_attrib
 
 }}
 
-
-#endif // #ifndef MAPNIK_SVG_CONVERTER_HPP
+#endif // MAPNIK_SVG_CONVERTER_HPP

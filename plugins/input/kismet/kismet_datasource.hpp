@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef KISMET_DATASOURCE_HPP
 #define KISMET_DATASOURCE_HPP
@@ -31,7 +30,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
-#include <mapnik/wkb.hpp> 
+#include <mapnik/wkb.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -41,29 +40,30 @@
 // sqlite
 #include "kismet_types.hpp"
 
-class kismet_datasource : public mapnik::datasource 
+class kismet_datasource : public mapnik::datasource
 {
-   public:
-      kismet_datasource(mapnik::parameters const& params, bool bind=true);
-      virtual ~kismet_datasource ();
-      int type() const;
-      static std::string name();
-      mapnik::featureset_ptr features(mapnik::query const& q) const;
-      mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
-      mapnik::box2d<double> envelope() const;
-      mapnik::layer_descriptor get_descriptor() const;
-      void bind() const;
-   private:
-      void run (const std::string &host, const unsigned int port);
+public:
+    kismet_datasource(mapnik::parameters const& params, bool bind = true);
+    virtual ~kismet_datasource ();
+    int type() const;
+    static std::string name();
+    mapnik::featureset_ptr features(mapnik::query const& q) const;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+    mapnik::box2d<double> envelope() const;
+    mapnik::layer_descriptor get_descriptor() const;
+    void bind() const;
 
-      mapnik::box2d<double> extent_;
-      bool extent_initialized_;
-      std::string host_;
-      unsigned int port_;
-      int type_;
-      mapnik::layer_descriptor desc_;
-      boost::shared_ptr<boost::thread> kismet_thread;
+private:
+    void run (const std::string& host, const unsigned int port);
+
+    mapnik::box2d<double> extent_;
+    bool extent_initialized_;
+    std::string host_;
+    unsigned int port_;
+    int type_;
+    std::string srs_;
+    mapnik::layer_descriptor desc_;
+    boost::shared_ptr<boost::thread> kismet_thread;
 };
-
 
 #endif // KISMET_DATASOURCE_HPP

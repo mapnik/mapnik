@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2009 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef  MAPNIK_EXPRESSION_NODE_HPP
-#define  MAPNIK_EXPRESSION_NODE_HPP
+#ifndef MAPNIK_EXPRESSION_NODE_HPP
+#define MAPNIK_EXPRESSION_NODE_HPP
 
 // mapnik
 #include <mapnik/value.hpp>
 #include <mapnik/attribute.hpp>
+
 // boost
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>

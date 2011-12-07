@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,26 +20,23 @@
  *
  *****************************************************************************/
 
-//$Id: sql_utils.hpp 39 2005-04-10 20:39:53Z pavlenko $
-
-#ifndef SQL_UTILS_HPP
-#define SQL_UTILS_HPP
+#ifndef MAPNIK_SQL_UTILS_HPP
+#define MAPNIK_SQL_UTILS_HPP
 
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_array.hpp>
 
-namespace mapnik
-{
+namespace mapnik { namespace sql_utils {
 
-inline std::string unquote_sql(const std::string& sql)
+inline std::string unquote_double(const std::string& sql)
 {
     std::string table_name = boost::algorithm::to_lower_copy(sql);  
     boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\""));
     return table_name;
 }
 
-inline std::string unquote_sql2(const std::string& sql)
+inline std::string unquote(const std::string& sql)
 {
     std::string table_name = boost::algorithm::to_lower_copy(sql);  
     boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\"\'"));
@@ -67,7 +64,6 @@ inline std::string table_from_sql(const std::string& sql)
     std::string::size_type idx = table_name.rfind(" from ");
     if (idx!=std::string::npos)
     {
-      
         idx = table_name.find_first_not_of(" ",idx+5);
         if (idx != std::string::npos)
         {
@@ -193,7 +189,8 @@ inline std::string numeric2string(const char* buf)
    }
    return ss.str();
 }
+}
 
 }
 
-#endif //SQL_UTILS_HPP
+#endif // MAPNIK_SQL_UTILS_HPP

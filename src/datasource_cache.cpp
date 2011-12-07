@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,6 @@
 #include <mapnik/config_error.hpp>
 
 // boost
-#include <boost/version.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
@@ -72,6 +71,9 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
                            "parameter 'type' is missing");
     }
 
+#ifdef MAPNIK_THREADSAFE
+    mutex::scoped_lock lock(mutex_);
+#endif
     datasource_ptr ds;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
     if ( itr == plugins_.end() )
@@ -149,64 +151,18 @@ void datasource_cache::register_datasources(const std::string& str)
         for (boost::filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
         {
 
-#if BOOST_VERSION < 103400 
-            if (!is_directory( *itr )  && is_input_plugin(itr->leaf()))
-#else
 #if (BOOST_FILESYSTEM_VERSION == 3)      
             if (!is_directory( *itr )  && is_input_plugin(itr->path().filename().string()))
 #else // v2
             if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf())) 
 #endif 
-#endif
             {
                 try 
                 {
-#ifdef LIBTOOL_SUPPORTS_ADVISE
-                    /* Note: the below was added as a workaround pre http://trac.mapnik.org/ticket/790
-                       It could now be removed, but also is not doing any harm AFAICT.
-                    */
-                    
-                    // with ltdl >=2.2 we can actually pass RTDL_GLOBAL to dlopen via the
-                    // ltdl advise trick which is required on linux unless plugins are directly
-                    // linked to libmapnik (and deps) at build time. The only other approach is to
-                    // set the dlopen flags in the calling process (like in the python bindings)
-
-                    // clear errors
-                    lt_dlerror();
-
-                    lt_dlhandle module = 0;
-                    lt_dladvise advise;
-                    int ret;
-                
-                    ret = lt_dlinit();
-                    if (ret != 0) {
-                        std::clog << "Datasource loader: could not intialize dynamic loading: " << lt_dlerror() << "\n";
-                    }
-                
-                    ret = lt_dladvise_init(&advise);
-                    if (ret != 0) {
-                        std::clog << "Datasource loader: could not intialize dynamic loading: " << lt_dlerror() << "\n";
-                    }
-                
-                    ret = lt_dladvise_global(&advise);
-                    if (ret != 0) {
-                        std::clog << "Datasource loader: could not intialize dynamic loading of global symbols: " << lt_dlerror() << "\n";
-                    }
-#if (BOOST_FILESYSTEM_VERSION == 3)                    
-                    module = lt_dlopenadvise (itr->path().string().c_str(), advise);
-#else // v2
-                    module = lt_dlopenadvise (itr->string().c_str(), advise);
-#endif 
-
-                    lt_dladvise_destroy(&advise);
-#else
-
 #if (BOOST_FILESYSTEM_VERSION == 3)   
                     lt_dlhandle module = lt_dlopen(itr->path().string().c_str());
 #else // v2
                     lt_dlhandle module = lt_dlopen(itr->string().c_str());
-#endif
-
 #endif
                     if (module)
                     {
@@ -222,6 +178,10 @@ void datasource_cache::register_datasources(const std::string& str)
                             std::clog << "Datasource loader: registered: " << ds_name() << std::endl;
 #endif 
                             registered_=true;
+                        }
+                        else if (!ds_name)
+                        {
+                            std::clog << "Problem loading plugin library '" << itr->path().string() << "' (plugin is lacking compatible interface)" << std::endl;
                         }
                     }
                     else
@@ -240,4 +200,5 @@ void datasource_cache::register_datasources(const std::string& str)
         }
     }
 }
+
 }

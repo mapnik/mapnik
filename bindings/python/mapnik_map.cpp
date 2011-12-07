@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -57,7 +57,7 @@ struct map_pickle_suite : boost::python::pickle_suite
         {
             l.append(m.getLayer(i));
         }
-                            
+
         boost::python::list s;
         Map::const_style_iterator it = m.styles().begin();
         Map::const_style_iterator end = m.styles().end();
@@ -91,14 +91,14 @@ struct map_pickle_suite : boost::python::pickle_suite
         {
             color bg = extract<color>(state[1]);
             m.set_background(bg);
-        }    
-        
+        }
+
         boost::python::list l=extract<boost::python::list>(state[2]);
         for (int i=0;i<len(l);++i)
         {
             m.addLayer(extract<layer>(l[i]));
         }
-        
+
         boost::python::list s=extract<boost::python::list>(state[3]);
         for (int i=0;i<len(s);++i)
         {
@@ -112,13 +112,15 @@ struct map_pickle_suite : boost::python::pickle_suite
         {
             std::string base_path = extract<std::string>(state[4]);
             m.set_base_path(base_path);
-        }    
+        }
     }
 };
 
 std::vector<layer>& (Map::*layers_nonconst)() =  &Map::layers;
 std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
 
+mapnik::parameters& (Map::*attr_nonconst)() =  &Map::get_extra_attributes;
+mapnik::parameters& (Map::*params_nonconst)() =  &Map::get_extra_parameters;
 
 mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& name)
 {
@@ -138,17 +140,17 @@ bool has_metawriter(mapnik::Map const& m)
     return false;
 }
 
-// returns empty shared_ptr when the metawriter isn't found, or is 
+// returns empty shared_ptr when the metawriter isn't found, or is
 // of the wrong type. empty pointers make it back to Python as a None.
 mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map &m, const std::string &name) {
-  mapnik::metawriter_ptr metawriter = m.find_metawriter(name);
-  mapnik::metawriter_inmem_ptr inmem;
+    mapnik::metawriter_ptr metawriter = m.find_metawriter(name);
+    mapnik::metawriter_inmem_ptr inmem;
 
-  if (metawriter) {
-    inmem = boost::dynamic_pointer_cast<mapnik::metawriter_inmem>(metawriter);
-  }
- 
-  return inmem;
+    if (metawriter) {
+        inmem = boost::dynamic_pointer_cast<mapnik::metawriter_inmem>(metawriter);
+    }
+
+    return inmem;
 }
 
 // TODO - we likely should allow indexing by negative number from python
@@ -157,7 +159,7 @@ mapnik::featureset_ptr query_point(mapnik::Map const& m, int index, double x, do
 {
     if (index < 0){
         PyErr_SetString(PyExc_IndexError, "Please provide a layer index >= 0");
-        boost::python::throw_error_already_set();    
+        boost::python::throw_error_already_set();
     }
     unsigned idx = index;
     return m.query_point(idx, x, y);
@@ -167,16 +169,17 @@ mapnik::featureset_ptr query_map_point(mapnik::Map const& m, int index, double x
 {
     if (index < 0){
         PyErr_SetString(PyExc_IndexError, "Please provide a layer index >= 0");
-        boost::python::throw_error_already_set();    
+        boost::python::throw_error_already_set();
     }
     unsigned idx = index;
     return m.query_map_point(idx, x, y);
 }
 
-void export_map() 
+
+void export_map()
 {
     using namespace boost::python;
-   
+
     // aspect ratio fix modes
     mapnik::enumeration_<mapnik::aspect_fix_mode_e>("aspect_fix_mode")
         .value("GROW_BBOX", mapnik::Map::GROW_BBOX)
@@ -188,12 +191,12 @@ void export_map()
         .value("ADJUST_CANVAS_WIDTH",mapnik::Map::ADJUST_CANVAS_WIDTH)
         .value("ADJUST_CANVAS_HEIGHT", mapnik::Map::ADJUST_CANVAS_HEIGHT)
         ;
-   
+
     python_optional<mapnik::color> ();
     class_<std::vector<layer> >("Layers")
         .def(vector_indexing_suite<std::vector<layer> >())
         ;
-    
+
     class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(
                     ( arg("width"),arg("height"),arg("srs") ),
                     "Create a Map with a width and height as integers and, optionally,\n"
@@ -209,10 +212,10 @@ void export_map()
                     ">>> m.srs\n"
                     "'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'\n"
                     ))
-        
+
         .def_pickle(map_pickle_suite()
             )
-        
+
         .def("append_style",&Map::insert_style,
              (arg("style_name"),arg("style_object")),
              "Insert a Mapnik Style onto the map by appending it.\n"
@@ -278,7 +281,7 @@ void export_map()
              ">>> m.has_metawriter()\n"
              "False\n"
             )
-        
+
         .def("pan",&Map::pan,
              (arg("x"),arg("y")),
              "Set the Map center at a given x,y location\n"
@@ -292,7 +295,7 @@ void export_map()
              ">>> m.envelope().center()\n"
              "Coord(0.00166666666667,-0.835)\n"
             )
-        
+
         .def("pan_and_zoom",&Map::pan_and_zoom,
              (arg("x"),arg("y"),arg("factor")),
              "Set the Map center at a given x,y location\n"
@@ -308,7 +311,7 @@ void export_map()
              ">>> m.scale()\n"
              "0.00062500000000000001\n"
             )
-        
+
         .def("query_map_point",query_map_point,
              (arg("layer_idx"),arg("pixel_x"),arg("pixel_y")),
              "Query a Map Layer (by layer index) for features \n"
@@ -325,7 +328,7 @@ void export_map()
              ">>> featureset.features\n"
              ">>> [<mapnik.Feature object at 0x3995630>]\n"
             )
-        
+
         .def("query_point",query_point,
              (arg("layer idx"),arg("x"),arg("y")),
              "Query a Map Layer (by layer index) for features \n"
@@ -349,7 +352,7 @@ void export_map()
              "Usage:\n"
              ">>> m.remove_all()\n"
             )
-        
+
         .def("remove_style",&Map::remove_style,
              (arg("style_name")),
              "Remove a Mapnik Style from the map.\n"
@@ -365,7 +368,7 @@ void export_map()
              "Usage:\n"
              ">>> m.resize(64,64)\n"
             )
-        
+
         .def("scale", &Map::scale,
              "Return the Map Scale.\n"
              "Usage:\n"
@@ -379,16 +382,16 @@ void export_map()
              "\n"
              ">>> m.scale_denominator()\n"
             )
-      
+
         .def("view_transform",&Map::view_transform,
              "Return the map ViewTransform object\n"
              "which is used internally to convert between\n"
              "geographic coordinates and screen coordinates.\n"
              "\n"
              "Usage:\n"
-             ">>> m.view_transform()\n"         
+             ">>> m.view_transform()\n"
             )
-      
+
         .def("zoom",&Map::zoom,
              (arg("factor")),
              "Zoom in or out by a given factor.\n"
@@ -399,7 +402,7 @@ void export_map()
              "\n"
              ">>> m.zoom(0.25)\n"
             )
-        
+
         .def("zoom_all",&Map::zoom_all,
              "Set the geographical extent of the map\n"
              "to the combined extents of all active layers.\n"
@@ -407,7 +410,7 @@ void export_map()
              "Usage:\n"
              ">>> m.zoom_all()\n"
             )
-        
+
         .def("zoom_to_box",&Map::zoom_to_box,
              (arg("Boxd2")),
              "Set the geographical extent of the map\n"
@@ -418,38 +421,39 @@ void export_map()
              ">>> m.zoom_to_box(extent)\n"
             )
         .def("get_metawriter_property", &Map::get_metawriter_property,
-            (arg("name")),
-            "Reads a metawriter property.\n"
-            "These properties are completely user-defined and can be used to"
-            "create filenames, etc.\n"
-            "\n"
-            "Usage:\n"
-            ">>> map.set_metawriter_property(\"x\", \"10\")\n"
-            ">>> map.get_metawriter_property(\"x\")\n"
-            "10\n"
-        )
+             (arg("name")),
+             "Reads a metawriter property.\n"
+             "These properties are completely user-defined and can be used to"
+             "create filenames, etc.\n"
+             "\n"
+             "Usage:\n"
+             ">>> map.set_metawriter_property(\"x\", \"10\")\n"
+             ">>> map.get_metawriter_property(\"x\")\n"
+             "10\n"
+            )
         .def("set_metawriter_property", &Map::set_metawriter_property,
-            (arg("name"),arg("value")),
-            "Sets a metawriter property.\n"
-            "These properties are completely user-defined and can be used to"
-            "create filenames, etc.\n"
-            "\n"
-            "Usage:\n"
-            ">>> map.set_metawriter_property(\"x\", str(x))\n"
-            ">>> map.set_metawriter_property(\"y\", str(y))\n"
-            ">>> map.set_metawriter_property(\"z\", str(z))\n"
-            "\n"
-            "Use a path like \"[z]/[x]/[y].json\" to create filenames.\n"
-        )
+             (arg("name"),arg("value")),
+             "Sets a metawriter property.\n"
+             "These properties are completely user-defined and can be used to"
+             "create filenames, etc.\n"
+             "\n"
+             "Usage:\n"
+             ">>> map.set_metawriter_property(\"x\", str(x))\n"
+             ">>> map.set_metawriter_property(\"y\", str(y))\n"
+             ">>> map.set_metawriter_property(\"z\", str(z))\n"
+             "\n"
+             "Use a path like \"[z]/[x]/[y].json\" to create filenames.\n"
+            )
         .def("find_inmem_metawriter", find_inmem_metawriter,
-            (arg("name")),
-            "Gets an inmem metawriter, or None if no such metawriter "
-            "exists.\n"
-            "Use this after the map has been rendered to retrieve information "
-            "about the hit areas rendered on the map.\n"
-          )
-        
-        .def("extra_attributes",&Map::get_extra_attributes,return_value_policy<copy_const_reference>(),"TODO")
+             (arg("name")),
+             "Gets an inmem metawriter, or None if no such metawriter "
+             "exists.\n"
+             "Use this after the map has been rendered to retrieve information "
+             "about the hit areas rendered on the map.\n"
+            )
+
+        .add_property("extra_attributes",make_function(attr_nonconst,return_value_policy<reference_existing_object>()),"TODO")
+        .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
 
         .add_property("aspect_fix_mode",
                       &Map::get_aspect_fix_mode,
@@ -460,8 +464,8 @@ void export_map()
                       "Usage:\n"
                       "\n"
                       ">>> m.aspect_fix_mode = aspect_fix_mode.GROW_BBOX\n"
-            )      
-        
+            )
+
         .add_property("background",make_function
                       (&Map::background,return_value_policy<copy_const_reference>()),
                       &Map::set_background,
@@ -480,7 +484,7 @@ void export_map()
                       "Usage:\n"
                       ">>> m.base_path = '.'\n"
             )
-        
+
         .add_property("buffer_size",
                       &Map::buffer_size,
                       &Map::set_buffer_size,
@@ -493,7 +497,7 @@ void export_map()
                       ">>> m.buffer_size\n"
                       "2\n"
             )
-         
+
         .add_property("height",
                       &Map::height,
                       &Map::set_height,
@@ -507,9 +511,9 @@ void export_map()
                       ">>> m.height\n"
                       "600\n"
             )
-        
+
         .add_property("layers",make_function
-                      (layers_nonconst,return_value_policy<reference_existing_object>()), 
+                      (layers_nonconst,return_value_policy<reference_existing_object>()),
                       "The list of map layers.\n"
                       "\n"
                       "Usage:\n"
@@ -548,7 +552,7 @@ void export_map()
                       "... \n"
                       ">>> m.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'\n"
             )
-        
+
         .add_property("width",
                       &Map::width,
                       &Map::set_width,

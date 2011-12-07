@@ -1,7 +1,10 @@
 
 HEADERS += \
+  $$PWD/../plugins/input/csv/csv_datasource.hpp \
   $$PWD/../plugins/input/gdal/gdal_featureset.hpp \
   $$PWD/../plugins/input/gdal/gdal_datasource.hpp \
+  $$PWD/../plugins/input/geos/geos_datasource.hpp \
+  $$PWD/../plugins/input/geos/geos_featureset.hpp \
   $$PWD/../plugins/input/kismet/kismet_featureset.hpp \
   $$PWD/../plugins/input/kismet/kismet_datasource.hpp \
   $$PWD/../plugins/input/kismet/kismet_types.hpp \
@@ -13,6 +16,7 @@ HEADERS += \
   $$PWD/../plugins/input/ogr/ogr_converter.hpp \
   $$PWD/../plugins/input/ogr/ogr_featureset.hpp \
   $$PWD/../plugins/input/ogr/ogr_datasource.hpp \
+  $$PWD/../plugins/input/ogr/ogr_layer_ptr.hpp \
   $$PWD/../plugins/input/ogr/ogr_feature_ptr.hpp \
   $$PWD/../plugins/input/ogr/ogr_index.hpp \
   $$PWD/../plugins/input/ogr/ogr_index_featureset.hpp \
@@ -47,8 +51,11 @@ HEADERS += \
   $$PWD/../plugins/input/sqlite/sqlite_types.hpp
 
 SOURCES += \
+  $$PWD/../plugins/input/csv/csv_datasource.cpp \
   $$PWD/../plugins/input/gdal/gdal_featureset.cpp \
   $$PWD/../plugins/input/gdal/gdal_datasource.cpp \
+  $$PWD/../plugins/input/geos/geos_datasource.cpp \
+  $$PWD/../plugins/input/geos/geos_featureset.cpp \
   $$PWD/../plugins/input/kismet/kismet_featureset.cpp \
   $$PWD/../plugins/input/kismet/kismet_datasource.cpp \
   $$PWD/../plugins/input/occi/occi_featureset.cpp \
@@ -67,8 +74,8 @@ SOURCES += \
   $$PWD/../plugins/input/osm/osm_featureset.cpp \
   $$PWD/../plugins/input/osm/osm_datasource.cpp \
   $$PWD/../plugins/input/osm/render.cpp \
-  $$PWD/../plugins/input/postgis/postgis.cpp \
-  $$PWD/../plugins/input/postgis/postgisfs.cpp \
+  $$PWD/../plugins/input/postgis/postgis_datasource.cpp \
+  $$PWD/../plugins/input/postgis/postgis_featureset.cpp \
   $$PWD/../plugins/input/raster/raster_info.cpp \
   $$PWD/../plugins/input/raster/raster_featureset.cpp \
   $$PWD/../plugins/input/raster/raster_datasource.cpp \

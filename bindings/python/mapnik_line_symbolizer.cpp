@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -43,7 +43,7 @@ struct line_symbolizer_pickle_suite : boost::python::pickle_suite
 void export_line_symbolizer()
 {
     using namespace boost::python;
-    
+
     enumeration_<line_rasterizer_e>("line_rasterizer")
         .value("FULL",RASTERIZER_FULL)
         .value("FAST",RASTERIZER_FAST)
@@ -62,5 +62,5 @@ void export_line_symbolizer()
                       (&line_symbolizer::get_stroke,
                        return_value_policy<copy_const_reference>()),
                       &line_symbolizer::set_stroke)
-        ;    
+        ;
 }

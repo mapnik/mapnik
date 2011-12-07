@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,7 @@ extern "C"
 // mapnik
 #include <mapnik/image_util.hpp>
 #include <mapnik/png_io.hpp>
+#include <mapnik/tiff_io.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
@@ -275,8 +276,12 @@ void save_to_stream(T const& image,
             else
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
         }
+        else if (boost::algorithm::istarts_with(type, std::string("tif")))
+        {
+            throw ImageWriterException("palettes are not currently supported when writing to tiff format (yet)");
+        }
 #if defined(HAVE_JPEG)
-        else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
+        else if (boost::algorithm::istarts_with(type, std::string("jpeg")))
         {
             throw ImageWriterException("palettes are not currently supported when writing to jpeg format");
         }
@@ -319,8 +324,12 @@ void save_to_stream(T const& image,
             else
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
         }
+        else if (boost::algorithm::istarts_with(type, std::string("tif")))
+        {
+            save_as_tiff(stream, image);
+        }
 #if defined(HAVE_JPEG)
-        else if (boost::algorithm::istarts_with(type,std::string("jpeg")))
+        else if (boost::algorithm::istarts_with(type, std::string("jpeg")))
         {
             int quality = 85;
             try 

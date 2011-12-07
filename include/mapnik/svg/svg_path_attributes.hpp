@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,16 +20,16 @@
  *
  *****************************************************************************/
 
-// $Id$
-
 #ifndef MAPNIK_SVG_PATH_ATTRIBUTES_HPP
 #define MAPNIK_SVG_PATH_ATTRIBUTES_HPP
 
+// agg
 #include "agg_math_stroke.h"
 #include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_trans_affine.h"
 
+// mapnik
 #include <mapnik/gradient.hpp>
 
 namespace mapnik {

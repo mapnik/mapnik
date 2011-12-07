@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,6 +42,7 @@ bool parse_transform(const char * wkt, TransformType & p)
     return qi::phrase_parse(first, last, g, skip_type());
 }
 
+/*
 template <typename TransformType>
 bool parse_transform(std::string const& wkt, TransformType & p)
 {
@@ -53,8 +54,9 @@ bool parse_transform(std::string const& wkt, TransformType & p)
     iterator_type last =  wkt.end();
     return qi::phrase_parse(first, last, g, skip_type());
 }
+*/
 
-template bool parse_transform<agg::trans_affine>(const char*, agg::trans_affine&);
-template bool parse_transform<agg::trans_affine>(std::string const& , agg::trans_affine&);
+template MAPNIK_DECL bool parse_transform<agg::trans_affine>(const char*, agg::trans_affine&);
+//template bool parse_transform<agg::trans_affine>(std::string const& , agg::trans_affine&);
 
 }}

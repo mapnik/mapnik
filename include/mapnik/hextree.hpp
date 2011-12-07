@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,10 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-#ifndef _HEXTREE_HPP_
-#define _HEXTREE_HPP_
+#ifndef MAPNIK_HEXTREE_HPP
+#define MAPNIK_HEXTREE_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -434,7 +433,7 @@ private:
             }
             tries=0;
             // ignore leaves and also nodes with small mean error and not excessive number of pixels
-            if ((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(long(cur_node->pixel_count)) > 15
+            if ((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(double(cur_node->pixel_count)) > 15
                 && cur_node->children_count > 0)
             {
                 colors_--;
@@ -455,4 +454,4 @@ private:
 };
 } // namespace mapnik
 
-#endif // _HEXTREE_HPP_
+#endif // MAPNIK_HEXTREE_HPP

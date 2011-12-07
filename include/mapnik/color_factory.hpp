@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_COLOR_FACTORY_HPP
 #define MAPNIK_COLOR_FACTORY_HPP
 
@@ -120,4 +118,4 @@ public:
 
 #endif
 
-#endif //MAPNIK_COLOR_FACTORY_HPP
+#endif // MAPNIK_COLOR_FACTORY_HPP

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -40,9 +40,9 @@ namespace mapnik {
 
 
 template <typename T>
-static void grid2utf(T const& grid_type, 
-    boost::python::list& l,
-    std::vector<grid::lookup_type>& key_order)
+static void grid2utf(T const& grid_type,
+                     boost::python::list& l,
+                     std::vector<grid::lookup_type>& key_order)
 {
     typename T::data_type const& data = grid_type.data();
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();
@@ -50,12 +50,12 @@ static void grid2utf(T const& grid_type,
     typename T::key_type::const_iterator key_pos;
     typename T::feature_key_type::const_iterator feature_pos;
     // start counting at utf8 codepoint 32, aka space character
-    uint16_t codepoint = 32;
-    
+    boost::uint16_t codepoint = 32;
+
     unsigned array_size = data.width();
     for (unsigned y = 0; y < data.height(); ++y)
     {
-        uint16_t idx = 0;
+        boost::uint16_t idx = 0;
         boost::scoped_array<Py_UNICODE> line(new Py_UNICODE[array_size]);
         typename T::value_type const* row = data.getRow(y);
         for (unsigned x = 0; x < data.width(); ++x)
@@ -71,7 +71,7 @@ static void grid2utf(T const& grid_type,
                     // can't be encoded directly in JSON.
                     if (codepoint == 34) ++codepoint;      // Skip "
                     else if (codepoint == 92) ++codepoint; // Skip backslash
-                
+
                     keys[val] = codepoint;
                     key_order.push_back(val);
                     line[idx++] = static_cast<Py_UNICODE>(codepoint);
@@ -85,17 +85,17 @@ static void grid2utf(T const& grid_type,
             // else, shouldn't get here...
         }
         l.append(boost::python::object(
-                    boost::python::handle<>(
-                        PyUnicode_FromUnicode(line.get(), array_size))));
+                     boost::python::handle<>(
+                         PyUnicode_FromUnicode(line.get(), array_size))));
     }
 }
 
 
 template <typename T>
-static void grid2utf(T const& grid_type, 
-    boost::python::list& l,
-    std::vector<typename T::lookup_type>& key_order,
-    unsigned int resolution)
+static void grid2utf(T const& grid_type,
+                     boost::python::list& l,
+                     std::vector<typename T::lookup_type>& key_order,
+                     unsigned int resolution)
 {
     //typename T::data_type const& data = grid_type.data();
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();
@@ -103,13 +103,13 @@ static void grid2utf(T const& grid_type,
     typename T::key_type::const_iterator key_pos;
     typename T::feature_key_type::const_iterator feature_pos;
     // start counting at utf8 codepoint 32, aka space character
-    uint16_t codepoint = 32;
+    boost::uint16_t codepoint = 32;
 
     // TODO - use double?
     unsigned array_size = static_cast<unsigned int>(grid_type.width()/resolution);
     for (unsigned y = 0; y < grid_type.height(); y=y+resolution)
     {
-        uint16_t idx = 0;
+        boost::uint16_t idx = 0;
         boost::scoped_array<Py_UNICODE> line(new Py_UNICODE[array_size]);
         mapnik::grid::value_type const* row = grid_type.getRow(y);
         for (unsigned x = 0; x < grid_type.width(); x=x+resolution)
@@ -138,17 +138,17 @@ static void grid2utf(T const& grid_type,
             // else, shouldn't get here...
         }
         l.append(boost::python::object(
-                    boost::python::handle<>(
-                        PyUnicode_FromUnicode(line.get(), array_size))));
+                     boost::python::handle<>(
+                         PyUnicode_FromUnicode(line.get(), array_size))));
     }
 }
 
 
 template <typename T>
-static void grid2utf2(T const& grid_type, 
-    boost::python::list& l,
-    std::vector<typename T::lookup_type>& key_order,
-    unsigned int resolution)
+static void grid2utf2(T const& grid_type,
+                      boost::python::list& l,
+                      std::vector<typename T::lookup_type>& key_order,
+                      unsigned int resolution)
 {
     typename T::data_type const& data = grid_type.data();
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();
@@ -194,16 +194,16 @@ static void grid2utf2(T const& grid_type,
             // else, shouldn't get here...
         }
         l.append(boost::python::object(
-                    boost::python::handle<>(
-                        PyUnicode_FromUnicode(line.get(), array_size))));
+                     boost::python::handle<>(
+                         PyUnicode_FromUnicode(line.get(), array_size))));
     }
 }
 
 
 template <typename T>
 static void write_features(T const& grid_type,
-    boost::python::dict& feature_data,
-    std::vector<typename T::lookup_type> const& key_order)
+                           boost::python::dict& feature_data,
+                           std::vector<typename T::lookup_type> const& key_order)
 {
     std::string const& key = grid_type.get_key();
     std::set<std::string> const& attributes = grid_type.property_names();
@@ -218,7 +218,7 @@ static void write_features(T const& grid_type,
         if (itr != props.end())
         {
             typename T::lookup_type const& join_value = itr->second.to_string();
-    
+
             // only serialize features visible in the grid
             if(std::find(key_order.begin(), key_order.end(), join_value) != key_order.end()) {
                 boost::python::dict feat;
@@ -236,7 +236,7 @@ static void write_features(T const& grid_type,
                                 boost::python::handle<>(
                                     boost::apply_visitor(
                                         boost::python::value_converter(),
-                                            it->second.base())));
+                                        it->second.base())));
                         }
                     }
                     else if ( (attributes.find(key_name) != attributes.end()) )
@@ -246,7 +246,7 @@ static void write_features(T const& grid_type,
                             boost::python::handle<>(
                                 boost::apply_visitor(
                                     boost::python::value_converter(),
-                                        it->second.base())));
+                                    it->second.base())));
                     }
                 }
                 if (found)
@@ -264,14 +264,14 @@ static void write_features(T const& grid_type,
 
 template <typename T>
 static void grid_encode_utf(T const& grid_type,
-    boost::python::dict & json,
-    bool add_features,
-    unsigned int resolution)
+                            boost::python::dict & json,
+                            bool add_features,
+                            unsigned int resolution)
 {
     // convert buffer to utf and gather key order
     boost::python::list l;
     std::vector<typename T::lookup_type> key_order;
-    
+
     if (resolution != 1) {
         // resample on the fly - faster, less accurate
         mapnik::grid2utf<T>(grid_type,l,key_order,resolution);
@@ -281,7 +281,7 @@ static void grid_encode_utf(T const& grid_type,
     }
     else
     {
-        mapnik::grid2utf<T>(grid_type,l,key_order);    
+        mapnik::grid2utf<T>(grid_type,l,key_order);
     }
 
     // convert key order to proper python list
@@ -325,9 +325,9 @@ static boost::python::dict grid_encode( T const& grid, std::string format, bool 
  * whether features are dumped is determined by argument not 'fields'
  */
 static void render_layer_for_grid(const mapnik::Map& map,
-    mapnik::grid& grid,
-    unsigned layer_idx, // TODO - layer by name or index
-    boost::python::list const& fields)
+                                  mapnik::grid& grid,
+                                  unsigned layer_idx, // TODO - layer by name or index
+                                  boost::python::list const& fields)
 {
     std::vector<mapnik::layer> const& layers = map.layers();
     std::size_t layer_num = layers.size();
@@ -347,9 +347,9 @@ static void render_layer_for_grid(const mapnik::Map& map,
         }
         else
         {
-          std::stringstream s;
-          s << "list of field names must be strings";
-          throw mapnik::value_error(s.str());    
+            std::stringstream s;
+            s << "list of field names must be strings";
+            throw mapnik::value_error(s.str());
         }
     }
 
@@ -358,10 +358,10 @@ static void render_layer_for_grid(const mapnik::Map& map,
     std::string const& key = grid.get_key();
 
     // if key is special __id__ keyword
-    if (key == grid.id_name_) 
+    if (key == grid.id_name_)
     {
         // TODO - should feature.id() be a first class attribute?
-        
+
         // if __id__ is requested to be dumped out
         // remove it so that datasource queries will not break
         if (attributes.find(key) != attributes.end())
@@ -375,7 +375,7 @@ static void render_layer_for_grid(const mapnik::Map& map,
         // them make sure the datasource query includes this field
         attributes.insert(key);
     }
-    
+
     mapnik::grid_renderer<mapnik::grid> ren(map,grid,1.0,0,0);
     mapnik::layer const& layer = layers[layer_idx];
     ren.apply(layer,attributes);
@@ -385,10 +385,10 @@ static void render_layer_for_grid(const mapnik::Map& map,
  * grid object is created on the fly at potentially reduced size
  */
 static boost::python::dict render_grid(const mapnik::Map& map,
-    unsigned layer_idx, // layer
-    std::string const& key, // key_name
-    unsigned int step, // resolution
-    boost::python::list const& fields)
+                                       unsigned layer_idx, // layer
+                                       std::string const& key, // key_name
+                                       unsigned int step, // resolution
+                                       boost::python::list const& fields)
 {
 
     std::vector<mapnik::layer> const& layers = map.layers();
@@ -405,7 +405,7 @@ static boost::python::dict render_grid(const mapnik::Map& map,
 
     // TODO - no need to pass step here
     mapnik::grid grid(grid_width,grid_height,key,step);
-    
+
     // convert python list to std::vector
     boost::python::ssize_t num_fields = boost::python::len(fields);
     for(boost::python::ssize_t i=0; i<num_fields; i++) {
@@ -415,20 +415,20 @@ static boost::python::dict render_grid(const mapnik::Map& map,
         }
         else
         {
-          std::stringstream s;
-          s << "list of field names must be strings";
-          throw mapnik::value_error(s.str());    
+            std::stringstream s;
+            s << "list of field names must be strings";
+            throw mapnik::value_error(s.str());
         }
     }
 
     // copy property names
     std::set<std::string> attributes = grid.property_names();
-    
+
     // if key is special __id__ keyword
-    if (key == grid.id_name_) 
+    if (key == grid.id_name_)
     {
         // TODO - should feature.id() be a first class attribute?
-        
+
         // if __id__ is requested to be dumped out
         // remove it so that datasource queries will not break
         if (attributes.find(key) != attributes.end())
@@ -442,7 +442,7 @@ static boost::python::dict render_grid(const mapnik::Map& map,
         // them make sure the datasource query includes this field
         attributes.insert(key);
     }
-    
+
     try
     {
         mapnik::grid_renderer<mapnik::grid> ren(map,grid,1.0,0,0);
@@ -453,7 +453,7 @@ static boost::python::dict render_grid(const mapnik::Map& map,
     {
         throw;
     }
-    
+
     bool add_features = false;
     if (num_fields > 0)
         add_features = true;
