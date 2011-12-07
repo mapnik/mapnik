@@ -20,7 +20,6 @@ Known values for OPTION are:
   --help            display this help and exit
   -v --version      output version information
   --git-revision    output git hash
-  --svn-revision    output svn revision information (deprecated)
 EOF
 
     exit $1
