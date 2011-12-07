@@ -40,7 +40,7 @@ feature_type_style::feature_type_style()
 
 feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
     : filter_mode_(rhs.filter_mode_),
-      scale_denom_valicity_(-1)
+      scale_denom_validity_(-1)
 {
     if (!deep_copy) {
         rules_ = rhs.rules_;
