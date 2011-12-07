@@ -41,13 +41,12 @@ enum eGeomType {
 };
 
 template <typename T, template <typename> class Container=vertex_vector>
-class geometry : private::noncopyable
+class geometry : private::boost::noncopyable
 {
 public:
     typedef T coord_type;
     typedef Container<coord_type> container_type;
     typedef typename container_type::value_type value_type;
-    
 private:
     container_type cont_;
     eGeomType type_;
