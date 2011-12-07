@@ -34,6 +34,8 @@
 #include <boost/utility.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include <cstring>  // required for memcpy with linux/g++ 
+
 namespace mapnik
 {
 
