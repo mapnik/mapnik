@@ -185,12 +185,6 @@ if env['HAS_PYCAIRO']:
     py_env.ParseConfig('pkg-config --cflags pycairo')
     py_env.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
 
-if env['SVN_REVISION']:
-    sources.remove('mapnik_python.cpp')
-    env2 = py_env.Clone()
-    env2.Append(CXXFLAGS='-DSVN_REVISION=%s' % env['SVN_REVISION'])
-    sources.insert(0,env2.SharedObject('mapnik_python.cpp'))
-
 _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))

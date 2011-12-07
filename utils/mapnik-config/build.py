@@ -27,7 +27,6 @@ CONFIG_OTHER_INCLUDES='%(other_includes)s'
 CONFIG_FONTS='%(fonts)s'
 CONFIG_INPUT_PLUGINS='%(input_plugins)s'
 CONFIG_GIT_REVISION='%(git_revision)s'
-CONFIG_SVN_REVISION='%(svn_revision)s'
 
 CONFIG_JSON="{
   \\"prefix\\": \\"${CONFIG_PREFIX}\\",
@@ -41,7 +40,6 @@ CONFIG_JSON="{
   \\"fonts\\": \\"${CONFIG_FONTS}\\",
   \\"input_plugins\\": \\"${CONFIG_INPUT_PLUGINS}\\",
   \\"git_revision\\": \\"${CONFIG_GIT_REVISION}\\",
-  \\"svn_revision\\": ${CONFIG_SVN_REVISION},
 }"
 
 '''
@@ -86,7 +84,6 @@ configuration = {
     "other_includes": other_includes,
     "fonts": config_env['MAPNIK_FONTS'],
     "input_plugins": config_env['MAPNIK_INPUT_PLUGINS'],
-    "svn_revision": config_env['SVN_REVISION'],
     "git_revision": git_revision,
     "version": config_env['MAPNIK_VERSION_STRING'],
 }

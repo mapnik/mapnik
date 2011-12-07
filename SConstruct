@@ -427,7 +427,6 @@ pickle_store = [# Scons internal variables
         'PYTHON_INSTALL_LOCATION',
         'PYTHON_SYS_PREFIX',
         'COLOR_PRINT',
-        'SVN_REVISION',
         'HAS_CAIRO',
         'HAS_PYCAIRO',
         'HAS_LIBXML2',
@@ -983,7 +982,6 @@ if not preconfigured:
     env['CAIROMM_CPPPATHS'] = []
     env['HAS_PYCAIRO'] = False
     env['HAS_LIBXML2'] = False
-    env['SVN_REVISION'] = None
     env['LIBMAPNIK_LIBS'] = []
     env['LIBMAPNIK_CPPATHS'] = []
     env['LIBMAPNIK_CXXFLAGS'] = []
@@ -1432,13 +1430,6 @@ if not preconfigured:
         else :
             common_cxx_flags = '-D%s ' % env['PLATFORM'].upper()
 
-        svn_version = call('svnversion')
-        if not svn_version == 'exported':
-            pattern = r'(\d+)(.*)'
-            try:
-                env['SVN_REVISION'] = re.match(pattern,svn_version).groups()[0]
-            except: pass
-            
         # Mac OSX (Darwin) special settings
         if env['PLATFORM'] == 'Darwin':
             pthread = ''
