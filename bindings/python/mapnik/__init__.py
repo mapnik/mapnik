@@ -718,7 +718,6 @@ __all__ = [
     #   version and environment
     'mapnik_version_string',
     'mapnik_version',
-    'mapnik_svn_revision',
     'has_cairo',
     'has_pycairo',
     #   factory methods

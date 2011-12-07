@@ -274,8 +274,6 @@ Mapnik 0.7.0 Release
 
 - Python: Fixed potential crash if pycairo support is enabled but python-cairo module is missing (#392)
 
-- Python: Added 'mapnik.mapnik_svn_revision()' function to svn revision of Mapnik was compiled at.
-
 - Python: Added 'mapnik.has_pycairo()' function to test for pycairo support (r1278) (#284)
 
 - Python: Added 'mapnik.register_plugins()' and 'mapnik.register_fonts()' functions (r1256)

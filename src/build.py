@@ -105,6 +105,7 @@ source = Split(
     """
     color.cpp
     box2d.cpp
+    datasource_cache.cpp
     expression_string.cpp
     filter_factory.cpp
     feature_type_style.cpp
@@ -191,20 +192,6 @@ if env['RENDERING_STATS']:
         source.insert(0,env3.SharedObject(processor_cpp))
 else:
     source.insert(0,processor_cpp);
-
-    
-# add the datasource_cache.cpp with custom LIBTOOL flag if needed
-if env['LIBTOOL_SUPPORTS_ADVISE']:
-    env3 = lib_env.Clone()
-    env3.Append(CXXFLAGS='-DLIBTOOL_SUPPORTS_ADVISE')
-    libmapnik_cxxflags.append('-DLIBTOOL_SUPPORTS_ADVISE')
-    cpp = 'datasource_cache.cpp'
-    if env['LINKING'] == 'static':
-        source.insert(0,env3.StaticObject(cpp))
-    else:
-        source.insert(0,env3.SharedObject(cpp))
-else:
-    source.insert(0,'datasource_cache.cpp')
 
 if env['JPEG']:
     source += Split(
