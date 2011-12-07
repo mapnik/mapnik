@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2008 Tom Hughes
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -1115,7 +1115,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
     }
     else
     {
-        marker.reset(boost::shared_ptr<mapnik::marker> (new mapnik::marker()));
+        marker.reset(boost::make_shared<mapnik::marker>());
     }
 
     if (text.length() > 0 && marker)
@@ -1138,7 +1138,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 
             placement_finder<label_collision_detector4> finder(detector_);
 
-            faces->set_pixel_sizes(placement_options->text_size);
+            faces->set_character_sizes(placement_options->text_size);
             faces->get_string_info(info);
 
             int w = (*marker)->width();
@@ -1419,6 +1419,7 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
     }
 }
 
+// TODO - this is woefully behind the AGG version.
 void cairo_renderer_base::process(markers_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
@@ -1466,7 +1467,7 @@ void cairo_renderer_base::process(glyph_symbolizer const& sym,
 
         // set font size
         unsigned size = sym.eval_size(feature);
-        faces->set_pixel_sizes(size);
+        faces->set_character_sizes(size);
 
         // Get and render text path
         //
@@ -1563,7 +1564,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
         cairo_context context(context_);
         string_info info(text);
 
-        faces->set_pixel_sizes(placement_options->text_size);
+        faces->set_character_sizes(placement_options->text_size);
         faces->get_string_info(info);
 
         placement_finder<label_collision_detector4> finder(detector_);

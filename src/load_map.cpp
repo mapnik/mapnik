@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -255,10 +255,10 @@ void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base
                 }
                 else
                 {
-                    std::ostringstream s;
+                    std::ostringstream s_err;
                     s << "failed to parse 'maximum-extent'";
                     if ( strict_ )
-                        throw config_error(s.str());
+                        throw config_error(s_err.str());
                     else
                         std::clog << "### WARNING: " << s.str() << std::endl;
                 }
@@ -311,6 +311,7 @@ void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base
                 }
                 
             }
+
             map.set_extra_attributes(extra_attr);
         }
         catch (const config_error & ex)
@@ -388,6 +389,53 @@ void map_parser::parse_map_include( Map & map, ptree const & include )
                 }
             }
             datasource_templates_[name] = params;
+        }
+        else if (v.first == "Parameters")
+        {
+            std::string name = get_attr(v.second, "name", std::string("Unnamed"));
+            parameters & params = map.get_extra_parameters();
+            ptree::const_iterator paramIter = v.second.begin();
+            ptree::const_iterator endParam = v.second.end();
+            for (; paramIter != endParam; ++paramIter)
+            {
+                ptree const& param = paramIter->second;
+
+                if (paramIter->first == "Parameter")
+                {
+                    std::string name = get_attr<std::string>(param, "name");
+                    bool is_string = true;
+                    boost::optional<std::string> type = get_opt_attr<std::string>(param, "type");
+                    if (type)
+                    {
+                        if (*type == "int")
+                        {
+                            is_string = false;
+                            int value = get_value<int>( param,"parameter");
+                            params[name] = value;
+                        }
+                        else if (*type == "float")
+                        {
+                            is_string = false;
+                            double value = get_value<double>( param,"parameter");
+                            params[name] = value;
+                        }
+                    }
+                    
+                    if (is_string)
+                    {
+                        std::string value = get_value<std::string>( param,
+                                                               "parameter");
+                        params[name] = value;
+                    }
+                }
+                else if( paramIter->first != "<xmlattr>" &&
+                         paramIter->first != "<xmlcomment>" )
+                {
+                    throw config_error(std::string("Unknown child node in ") +
+                                       "'Parameters'. Expected 'Parameter' but got '" +
+                                       paramIter->first + "'");
+                }
+            }
         }
         else if (v.first != "<xmlcomment>" &&
                  v.first != "<xmlattr>")
@@ -903,7 +951,7 @@ void map_parser::parse_point_symbolizer( rule & rule, ptree const & sym )
                 if (transform_wkt)
                 {
                     agg::trans_affine tr;
-                    if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+                    if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
                     {
                         std::stringstream ss;
                         ss << "Could not parse transform from '" << transform_wkt 
@@ -1032,7 +1080,7 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
         if (transform_wkt)
         {
             agg::trans_affine tr;
-            if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+            if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
             {
                 std::stringstream ss;
                 ss << "Could not parse transform from '" << transform_wkt
@@ -1251,10 +1299,10 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         optional<std::string> fontset_name =
             get_opt_attr<std::string>(sym, "fontset-name");
 
-        unsigned size = get_attr(sym, "size", 10U);
-
+        float size = get_attr(sym, "size", 10.0f);
+        
         color c = get_attr(sym, "fill", color(0,0,0));
-
+        
         text_symbolizer text_symbol = text_symbolizer(parse_expression(name, "utf8"), size, c, placement_finder);
 
         optional<std::string> orientation = get_opt_attr<std::string>(sym, "orientation");
@@ -1493,7 +1541,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
         optional<std::string> fontset_name =
             get_opt_attr<std::string>(sym, "fontset-name");
 
-        unsigned size = get_attr(sym, "size", 10U);
+        float size = get_attr(sym, "size", 10.0f);
         color fill = get_attr(sym, "fill", color(0,0,0));
 
         std::string image_file = get_attr<std::string>(sym, "file");
@@ -1678,7 +1726,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             if (transform_wkt)
             {
                 agg::trans_affine tr;
-                if (!mapnik::svg::parse_transform(*transform_wkt,tr))
+                if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
                 {
                     std::stringstream ss;
                     ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
@@ -2192,43 +2240,42 @@ std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt
 
 void map_parser::ensure_attrs(ptree const& sym, std::string name, std::string attrs)
 {
-
     typedef ptree::key_type::value_type Ch;
-    //typedef boost::property_tree::xml_parser::xmlattr<Ch> x_att;
-    
-    std::set<std::string> attr_set;
-    boost::split(attr_set, attrs, boost::is_any_of(","));
-    for (ptree::const_iterator itr = sym.begin(); itr != sym.end(); ++itr)
+    optional<const ptree &> attribs = sym.get_child_optional( boost::property_tree::xml_parser::xmlattr<Ch>() );
+    if (attribs)
     {
-       //ptree::value_type const& v = *itr;
-       if (itr->first == boost::property_tree::xml_parser::xmlattr<Ch>())
-       {
-           optional<const ptree &> attribs = sym.get_child_optional( boost::property_tree::xml_parser::xmlattr<Ch>() );
-           if (attribs)
-           {
-               std::ostringstream s("");
-               s << "### " << name << " properties warning: ";
-               int missing = 0;
-               for (ptree::const_iterator it = attribs.get().begin(); it != attribs.get().end(); ++it)
-               {
-                   std::string name = it->first;
-                   bool found = (attr_set.find(name) != attr_set.end());
-                   if (!found)
-                   {
-                       if (missing) s << ",";
-                       s << "'" << name << "'";
-                       ++missing;
-                   }
-               }
-               if (missing) {
-                   if (missing > 1) s << " are";
-                   else s << " is";
-                   s << " invalid, acceptable values are:\n'" << attrs << "'\n";
-                   std::clog << s.str();
-               }
-           }
-       }
-   }
+        std::set<std::string> attr_set;
+        boost::split(attr_set, attrs, boost::is_any_of(","));
+        std::ostringstream s("");
+        s << "### " << name << " properties warning: ";
+        int missing = 0;
+        for (ptree::const_iterator it = attribs.get().begin(); it != attribs.get().end(); ++it)
+        {
+            std::string name = it->first;
+            bool found = (attr_set.find(name) != attr_set.end());
+            if (!found)
+            {
+                if (missing)
+                {
+                    s << ",";
+                }
+                s << "'" << name << "'";
+                ++missing;
+            }
+        }
+        if (missing) {
+            if (missing > 1)
+            {
+                s << " are";
+            }
+            else
+            {
+                s << " is";
+            }
+            s << " invalid, acceptable values are:\n'" << attrs << "'\n";
+            std::clog << s.str();
+        }
+    }
 }
 
 } // end of namespace mapnik

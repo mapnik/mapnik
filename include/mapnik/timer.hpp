@@ -20,14 +20,15 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_TIMER_INCLUDED
-#define MAPNIK_TIMER_INCLUDED
+#ifndef MAPNIK_TIMER_HPP
+#define MAPNIK_TIMER_HPP
 
+// stl
 #include <cstdlib>
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <sys/time.h> 
+#include <ctime> 
 
 namespace mapnik {
 
@@ -121,4 +122,4 @@ private:
 };
     
 };
-#endif // MAPNIK_TIMER_INCLUDED
+#endif // MAPNIK_TIMER_HPP

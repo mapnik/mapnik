@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -41,7 +41,7 @@ using mapnik::memory_datasource;
 using mapnik::layer_descriptor;
 using mapnik::attribute_descriptor;
 
-namespace  
+namespace
 {
 //user-friendly wrapper that uses Python dictionary
 using namespace boost::python;
@@ -54,17 +54,17 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
     {
         std::string key = extract<std::string>(keys[i]);
         object obj = d[key];
-        
+
         if (key == "bind")
         {
             bind = extract<bool>(obj)();
             continue;
         }
-        
+
         extract<std::string> ex0(obj);
         extract<int> ex1(obj);
         extract<double> ex2(obj);
-            
+
         if (ex0.check())
         {
             params[key] = ex0();
@@ -78,10 +78,10 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
             params[key] = ex2();
         }
     }
-        
+
     return mapnik::datasource_cache::create(params, bind);
 }
-    
+
 std::string describe(boost::shared_ptr<mapnik::datasource> const& ds)
 {
     std::stringstream ss;
@@ -95,7 +95,7 @@ std::string describe(boost::shared_ptr<mapnik::datasource> const& ds)
     }
     return ss.str();
 }
-    
+
 std::string encoding(boost::shared_ptr<mapnik::datasource> const& ds)
 {
     layer_descriptor ld = ds->get_descriptor();
@@ -134,7 +134,7 @@ boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
         std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
         for (; it != end; ++it)
-        {  
+        {
             unsigned type = it->get_type();
             if (type == mapnik::Integer)
                 // this crashes, so send back strings instead
@@ -162,7 +162,7 @@ boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
 void export_datasource()
 {
     using namespace boost::python;
-    
+
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
         .def("envelope",&datasource::envelope)
@@ -174,11 +174,11 @@ void export_datasource()
         .def("encoding",&encoding) //todo expose as property
         .def("name",&name)
         .def("features_at_point",&datasource::features_at_point)
-        .def("params",&datasource::params,return_value_policy<copy_const_reference>(), 
-             "The configuration parameters of the data source. "  
+        .def("params",&datasource::params,return_value_policy<copy_const_reference>(),
+             "The configuration parameters of the data source. "
              "These vary depending on the type of data source.")
         ;
-    
+
     def("Describe",&describe);
     def("CreateDatasource",&create_datasource);
 

@@ -132,7 +132,7 @@ if __name__ == "__main__":
         fixed_xml_string = re.sub(pattern, '', fixed_xml_string)
         print "removed ", layer
 
-    # Tree to be updated to be mapnik2 compliant
+    # Tree to be updated to be mapnik compliant
     tree = objectify.parse(StringIO.StringIO(fixed_xml_string), parser=parser)
     root = tree.getroot()
             

@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,10 @@
  *
  *****************************************************************************/
 
-//$Id: resultset.hpp 17 2005-03-08 23:58:43Z pavlenko $
-
-
 #ifndef RESULTSET_HPP
 #define RESULTSET_HPP
 
-extern "C" 
-{
+extern "C" {
 #include "libpq-fe.h"
 }
 
@@ -155,12 +151,12 @@ public:
             return PQftype(res_,col);
         return 0;
     }
-    
+
     virtual bool isNull(int index) const
     {
         return PQgetisnull(res_,pos_,index);
     }
-    
+
     virtual const char* getValue(int index) const
     {
         return PQgetvalue(res_,pos_,index);

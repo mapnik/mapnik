@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -384,14 +384,6 @@ box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
     return *this;
 }
 
-/*
-template <typename T>    
-box2d<T>& box2d<T>::operator-=(box2d<T> const& other)
-{
-    // not sure what to do here. intersect?
-    return *this;
-}
-*/
     
 template <typename T>    
 box2d<T>& box2d<T>::operator*=(T t)

@@ -4,17 +4,18 @@
 
 basic usage is along the lines of
 
-import mapnik2
+import mapnik
 
-page = mapnik2.printing.PDFPrinter()
-m = mapnik2.Map(100,100)
-mapnik2.load_map(m, "my_xml_map_description", True)
+page = mapnik.printing.PDFPrinter()
+m = mapnik.Map(100,100)
+mapnik.load_map(m, "my_xml_map_description", True)
 m.zoom_all()
 page.render_map(m,"my_output_file.pdf")
 
-see the documentation of mapnik2.printing.PDFPrinter() for options
+see the documentation of mapnik.printing.PDFPrinter() for options
 
 """
+from __future__ import absolute_import
 
 from . import render, Map, Box2d, MemoryDatasource, Layer, Feature, Projection, ProjTransform, Coord, Style, Rule, Geometry2d
 import math

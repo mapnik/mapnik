@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -40,7 +40,7 @@ struct color_pickle_suite : boost::python::pickle_suite
     }
 };
 
-void export_color () 
+void export_color ()
 {
     using namespace boost::python;
     class_<color>("Color", init<int,int,int,int>(

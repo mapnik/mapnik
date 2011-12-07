@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,14 +19,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef GEOS_FEATURESET_HPP
 #define GEOS_FEATURESET_HPP
 
 // mapnik
 #include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp> 
+#include <mapnik/unicode.hpp>
 #include <mapnik/geom_util.hpp>
 
 // boost
@@ -36,32 +35,32 @@
 #include <geos_c.h>
 
 #include "geos_feature_ptr.hpp"
-  
+
 class geos_featureset : public mapnik::Featureset
 {
 public:
-      geos_featureset(GEOSGeometry* geometry,
-                      GEOSGeometry* extent,
-                      int identifier,
-                      const std::string& field,
-                      const std::string& field_name,
-                      const std::string& encoding,
-                      bool multiple_geometries);
-      virtual ~geos_featureset();
-      mapnik::feature_ptr next();
+    geos_featureset(GEOSGeometry* geometry,
+                    GEOSGeometry* extent,
+                    int identifier,
+                    const std::string& field,
+                    const std::string& field_name,
+                    const std::string& encoding,
+                    bool multiple_geometries);
+    virtual ~geos_featureset();
+    mapnik::feature_ptr next();
 
 private:
-      GEOSGeometry* geometry_;
-      boost::scoped_ptr<mapnik::transcoder> tr_;
-      geos_feature_ptr extent_;
-      int identifier_;
-      std::string field_;
-      std::string field_name_;
-      bool multiple_geometries_;
-      bool already_rendered_;
+    GEOSGeometry* geometry_;
+    boost::scoped_ptr<mapnik::transcoder> tr_;
+    geos_feature_ptr extent_;
+    int identifier_;
+    std::string field_;
+    std::string field_name_;
+    bool multiple_geometries_;
+    bool already_rendered_;
 
-      geos_featureset(const geos_featureset&);
-      const geos_featureset& operator=(const geos_featureset&);
+    geos_featureset(const geos_featureset&);
+    const geos_featureset& operator=(const geos_featureset&);
 };
 
 #endif // GEOS_FEATURESET_HPP

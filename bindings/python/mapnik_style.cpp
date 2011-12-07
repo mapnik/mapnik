@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -42,7 +42,7 @@ struct style_pickle_suite : boost::python::pickle_suite
         rules::const_iterator end = s.get_rules().end();
         for (; it != end; ++it)
         {
-            rule_list.append( *it );    
+            rule_list.append( *it );
         }
 
         return boost::python::make_tuple(rule_list);
@@ -60,14 +60,14 @@ struct style_pickle_suite : boost::python::pickle_suite
                 );
             throw_error_already_set();
         }
-        
+
         boost::python::list rules = extract<boost::python::list>(state[0]);
         for (int i=0; i<len(rules); ++i)
         {
             s.add_rule(extract<rule>(rules[i]));
         }
     }
-   
+
 };
 
 void export_style()
@@ -95,14 +95,14 @@ void export_style()
                       "Usage:\n"
                       ">>> for r in m.find_style('style 1').rules:\n"
                       ">>>    print r\n"
-                      "<mapnik2._mapnik2.Rule object at 0x100549910>\n"
-                      "<mapnik2._mapnik2.Rule object at 0x100549980>\n"
-                   )
+                      "<mapnik._mapnik.Rule object at 0x100549910>\n"
+                      "<mapnik._mapnik.Rule object at 0x100549980>\n"
+            )
         .add_property("filter_mode",
                       &feature_type_style::get_filter_mode,
                       &feature_type_style::set_filter_mode,
                       "Set/get the placement of the label")
         ;
-    
+
 }
 

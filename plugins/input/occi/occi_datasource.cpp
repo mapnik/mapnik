@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -63,30 +63,29 @@ using oracle::occi::SQLException;
 using oracle::occi::Type;
 using oracle::occi::StatelessConnectionPool;
 
-const std::string occi_datasource::METADATA_TABLE="USER_SDO_GEOM_METADATA";
+const std::string occi_datasource::METADATA_TABLE = "USER_SDO_GEOM_METADATA";
 
 DATASOURCE_PLUGIN(occi_datasource)
 
-
 occi_datasource::occi_datasource(parameters const& params, bool bind)
-    : datasource (params),
-      type_(datasource::Vector),
-      fields_(*params_.get<std::string>("fields","*")),
-      geometry_field_(*params_.get<std::string>("geometry_field","")),
-      srid_initialized_(false),
-      extent_initialized_(false),
-      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
-      row_limit_(*params_.get<int>("row_limit",0)),
-      row_prefetch_(*params_.get<int>("row_prefetch",100)),
-      pool_(0),
-      conn_(0)
+: datasource (params),
+    type_(datasource::Vector),
+    fields_(*params_.get<std::string>("fields", "*")),
+    geometry_field_(*params_.get<std::string>("geometry_field", "")),
+    srid_initialized_(false),
+    extent_initialized_(false),
+    desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
+    row_limit_(*params_.get<int>("row_limit", 0)),
+    row_prefetch_(*params_.get<int>("row_prefetch", 100)),
+    pool_(0),
+    conn_(0)
 {
     if (! params_.get<std::string>("user")) throw datasource_exception("OCCI Plugin: no <user> specified");
     if (! params_.get<std::string>("password")) throw datasource_exception("OCCI Plugin: no <password> specified");
     if (! params_.get<std::string>("host")) throw datasource_exception("OCCI Plugin: no <host> string specified");
 
     boost::optional<std::string> table = params_.get<std::string>("table");
-    if (!table)
+    if (! table)
     {
         throw datasource_exception("OCCI Plugin: no <table> parameter specified");
     }
@@ -94,11 +93,11 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
     {
         table_ = *table;
     }
-    
+
     multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
     use_connection_pool_ = *params_.get<mapnik::boolean>("use_connection_pool",true);
-    
+
     boost::optional<std::string> ext = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
@@ -124,12 +123,16 @@ occi_datasource::~occi_datasource()
         if (use_connection_pool_)
         {
             if (pool_ != 0)
-                env->terminateStatelessConnectionPool (pool_, StatelessConnectionPool::SPD_FORCE);
+            {
+                env->terminateStatelessConnectionPool(pool_, StatelessConnectionPool::SPD_FORCE);
+            }
         }
         else
         {
             if (conn_ != 0)
+            {
                 env->terminateConnection(conn_);
+            }
         }
     }
 }
@@ -146,15 +149,15 @@ void occi_datasource::bind() const
             Environment* env = occi_environment::get_environment();
 
             pool_ = env->createStatelessConnectionPool(
-                        *params_.get<std::string>("user"),
-                        *params_.get<std::string>("password"),
-                        *params_.get<std::string>("host"),
-                        *params_.get<int>("max_size",10),
-                        *params_.get<int>("initial_size",1),
-                        1,
-                        StatelessConnectionPool::HOMOGENEOUS);
+                *params_.get<std::string>("user"),
+                *params_.get<std::string>("password"),
+                *params_.get<std::string>("host"),
+                *params_.get<int>("max_size", 10),
+                *params_.get<int>("initial_size", 1),
+                1,
+                StatelessConnectionPool::HOMOGENEOUS);
         }
-        catch (SQLException &ex)
+        catch (SQLException& ex)
         {
             throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
@@ -164,29 +167,32 @@ void occi_datasource::bind() const
         try
         {
             Environment* env = occi_environment::get_environment();
-            
+
             conn_ = env->createConnection(
-                        *params_.get<std::string>("user"),
-                        *params_.get<std::string>("password"),
-                        *params_.get<std::string>("host"));
+                *params_.get<std::string>("user"),
+                *params_.get<std::string>("password"),
+                *params_.get<std::string>("host"));
         }
-        catch (SQLException &ex)
+        catch (SQLException& ex)
         {
             throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
     }
 
-    std::string table_name = mapnik::table_from_sql(table_);
+    // extract real table name
+    table_name_ = mapnik::sql_utils::table_from_sql(table_);
 
     // get SRID and/or GEOMETRY_FIELD from metadata table only if we need to
     if (! srid_initialized_ || geometry_field_ == "")
     {
         std::ostringstream s;
         s << "SELECT srid, column_name FROM " << METADATA_TABLE << " WHERE";
-        s << " LOWER(table_name) = LOWER('" << table_name << "')";
-        
+        s << " LOWER(table_name) = LOWER('" << table_name_ << "')";
+
         if (geometry_field_ != "")
+        {
             s << " AND LOWER(column_name) = LOWER('" << geometry_field_ << "')";
+        }
 
 #ifdef MAPNIK_DEBUG
         std::clog << "OCCI Plugin: " << s.str() << std::endl;
@@ -198,7 +204,7 @@ void occi_datasource::bind() const
             if (use_connection_pool_) conn.set_pool(pool_);
             else                      conn.set_connection(conn_, false);
 
-            ResultSet* rs = conn.execute_query (s.str());
+            ResultSet* rs = conn.execute_query(s.str());
             if (rs && rs->next ())
             {
                 if (! srid_initialized_)
@@ -206,14 +212,14 @@ void occi_datasource::bind() const
                     srid_ = rs->getInt(1);
                     srid_initialized_ = true;
                 }
-                
+
                 if (geometry_field_ == "")
                 {
                     geometry_field_ = rs->getString(2);
                 }
             }
         }
-        catch (SQLException &ex)
+        catch (SQLException& ex)
         {
             throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
@@ -222,7 +228,7 @@ void occi_datasource::bind() const
     // get columns description
     {
         std::ostringstream s;
-        s << "SELECT " << fields_ << " FROM (" << table_name << ") WHERE rownum < 1";
+        s << "SELECT " << fields_ << " FROM (" << table_name_ << ") WHERE rownum < 1";
 
 #ifdef MAPNIK_DEBUG
         std::clog << "OCCI Plugin: " << s.str() << std::endl;
@@ -234,7 +240,7 @@ void occi_datasource::bind() const
             if (use_connection_pool_) conn.set_pool(pool_);
             else                      conn.set_connection(conn_, false);
 
-            ResultSet* rs = conn.execute_query (s.str());
+            ResultSet* rs = conn.execute_query(s.str());
             if (rs)
             {
                 std::vector<MetaData> listOfColumns = rs->getColumnListMetaData();
@@ -247,12 +253,12 @@ void occi_datasource::bind() const
                     int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
 
                     /*
-                    int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
-                    if (type_code == OCCI_TYPECODE_OBJECT)
-                    {
-                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
-                        continue;
-                    }
+                      int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
+                      if (type_code == OCCI_TYPECODE_OBJECT)
+                      {
+                      desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Object));
+                      continue;
+                      }
                     */
 
                     switch (type_oid)
@@ -317,20 +323,22 @@ void occi_datasource::bind() const
                     case oracle::occi::OCCI_SQLT_BLOB:
                     case oracle::occi::OCCI_SQLT_RSET:
 #ifdef MAPNIK_DEBUG
-                        std::clog << "OCCI Plugin: unsupported datatype " << occi_enums::resolve_datatype(type_oid)
-                             << " (type_oid=" << type_oid << ")" << std::endl;
+                        std::clog << "OCCI Plugin: unsupported datatype "
+                                  << occi_enums::resolve_datatype(type_oid)
+                                  << " (type_oid=" << type_oid << ")" << std::endl;
 #endif
                         break;
                     default:
 #ifdef MAPNIK_DEBUG
-                        std::clog << "OCCI Plugin: unknown datatype (type_oid=" << type_oid << ")" << std::endl;
+                        std::clog << "OCCI Plugin: unknown datatype "
+                                  << "(type_oid=" << type_oid << ")" << std::endl;
 #endif
                         break;
                     }
                 }
             }
         }
-        catch (SQLException &ex)
+        catch (SQLException& ex)
         {
             throw datasource_exception(ex.getMessage());
         }
@@ -352,11 +360,12 @@ int occi_datasource::type() const
 box2d<double> occi_datasource::envelope() const
 {
     if (extent_initialized_) return extent_;
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
 
     double lox = 0.0, loy = 0.0, hix = 0.0, hiy = 0.0;
 
-    boost::optional<mapnik::boolean> estimate_extent = params_.get<mapnik::boolean>("estimate_extent",false);
+    boost::optional<mapnik::boolean> estimate_extent =
+        params_.get<mapnik::boolean>("estimate_extent",false);
 
     if (estimate_extent && *estimate_extent)
     {
@@ -375,8 +384,8 @@ box2d<double> occi_datasource::envelope() const
             if (use_connection_pool_) conn.set_pool(pool_);
             else                      conn.set_connection(conn_, false);
 
-            ResultSet* rs = conn.execute_query (s.str());
-            if (rs && rs->next ())
+            ResultSet* rs = conn.execute_query(s.str());
+            if (rs && rs->next())
             {
                 try
                 {
@@ -384,32 +393,30 @@ box2d<double> occi_datasource::envelope() const
                     loy = lexical_cast<double>(rs->getDouble(2));
                     hix = lexical_cast<double>(rs->getDouble(3));
                     hiy = lexical_cast<double>(rs->getDouble(4));
-                    extent_.init (lox,loy,hix,hiy);
+                    extent_.init(lox, loy, hix, hiy);
                     extent_initialized_ = true;
                 }
-                catch (bad_lexical_cast &ex)
+                catch (bad_lexical_cast& ex)
                 {
                     std::clog << "OCCI Plugin: " << ex.what() << std::endl;
                 }
             }
         }
-        catch (SQLException &ex)
+        catch (SQLException& ex)
         {
             throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
     }
     else if (use_spatial_index_)
     {
-        std::string table_name = mapnik::table_from_sql(table_);
-
         std::ostringstream s;
         s << "SELECT dim.sdo_lb, dim.sdo_ub FROM ";
         s << METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
-        s << " WHERE LOWER(m.table_name) = LOWER('" << table_name << "') AND dim.sdo_dimname = 'X'";
+        s << " WHERE LOWER(m.table_name) = LOWER('" << table_name_ << "') AND dim.sdo_dimname = 'X'";
         s << " UNION ";
         s << "SELECT dim.sdo_lb, dim.sdo_ub FROM ";
         s << METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
-        s << " WHERE LOWER(m.table_name) = LOWER('" << table_name << "') AND dim.sdo_dimname = 'Y'";
+        s << " WHERE LOWER(m.table_name) = LOWER('" << table_name_ << "') AND dim.sdo_dimname = 'Y'";
 
 #ifdef MAPNIK_DEBUG
         std::clog << "OCCI Plugin: " << s.str() << std::endl;
@@ -421,63 +428,65 @@ box2d<double> occi_datasource::envelope() const
             if (use_connection_pool_) conn.set_pool(pool_);
             else                      conn.set_connection(conn_, false);
 
-            ResultSet* rs = conn.execute_query (s.str());
+            ResultSet* rs = conn.execute_query(s.str());
             if (rs)
             {
-                if (rs->next ())
+                if (rs->next())
                 {
                     try
                     {
                         lox = lexical_cast<double>(rs->getDouble(1));
                         hix = lexical_cast<double>(rs->getDouble(2));
                     }
-                    catch (bad_lexical_cast &ex)
+                    catch (bad_lexical_cast& ex)
                     {
                         std::clog << "OCCI Plugin: " << ex.what() << std::endl;
                     }
                 }
-                
-                if (rs->next ())
+
+                if (rs->next())
                 {
                     try
                     {
                         loy = lexical_cast<double>(rs->getDouble(1));
                         hiy = lexical_cast<double>(rs->getDouble(2));
                     }
-                    catch (bad_lexical_cast &ex)
+                    catch (bad_lexical_cast& ex)
                     {
                         std::clog << "OCCI Plugin: " << ex.what() << std::endl;
                     }
                 }
 
-                extent_.init (lox,loy,hix,hiy);
+                extent_.init(lox, loy, hix, hiy);
                 extent_initialized_ = true;
             }
         }
-        catch (SQLException &ex)
+        catch (SQLException& ex)
         {
             throw datasource_exception("OCCI Plugin: " + ex.getMessage());
         }
     }
 
     if (! extent_initialized_)
+    {
         throw datasource_exception("OCCI Plugin: unable to determine the extent of a <occi> table");
+    }
 
     return extent_;
 }
 
 layer_descriptor occi_datasource::get_descriptor() const
 {
-    if (!is_bound_) bind();
-    
+    if (! is_bound_) bind();
+
     return desc_;
 }
 
 featureset_ptr occi_datasource::features(query const& q) const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
 
-    box2d<double> const& box=q.get_bbox();
+    box2d<double> const& box = q.get_bbox();
 
     std::ostringstream s;
     s << "SELECT " << geometry_field_;
@@ -492,8 +501,7 @@ featureset_ptr occi_datasource::features(query const& q) const
 
     s << " FROM ";
 
-    std::string query (table_);
-    std::string table_name = mapnik::table_from_sql(query);
+    std::string query(table_);
 
     if (use_spatial_index_)
     {
@@ -510,9 +518,9 @@ featureset_ptr occi_datasource::features(query const& q) const
         {
             boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
         }
-        else if (boost::algorithm::ifind_first(query, table_name))
+        else if (boost::algorithm::ifind_first(query, table_name_))
         {
-            boost::algorithm::ireplace_first(query, table_name, table_name + " " + spatial_sql.str());
+            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + spatial_sql.str());
         }
         else
         {
@@ -530,9 +538,9 @@ featureset_ptr occi_datasource::features(query const& q) const
         {
             boost::algorithm::ireplace_first(query, "WHERE", row_limit_string + " AND ");
         }
-        else if (boost::algorithm::ifind_first(query, table_name))
+        else if (boost::algorithm::ifind_first(query, table_name_))
         {
-            boost::algorithm::ireplace_first(query, table_name, table_name + " " + row_limit_string);
+            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string);
         }
         else
         {
@@ -549,24 +557,24 @@ featureset_ptr occi_datasource::features(query const& q) const
 #endif
 
     return boost::make_shared<occi_featureset>(pool_,
-                                                conn_,
-                                                s.str(),
-                                                desc_.get_encoding(),
-                                                multiple_geometries_,
-                                                use_connection_pool_,
-                                                row_prefetch_,
-                                                props.size());
+                                               conn_,
+                                               s.str(),
+                                               desc_.get_encoding(),
+                                               multiple_geometries_,
+                                               use_connection_pool_,
+                                               row_prefetch_,
+                                               props.size());
 }
 
 featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 {
-    if (!is_bound_) bind();
+    if (! is_bound_) bind();
 
     std::ostringstream s;
     s << "SELECT " << geometry_field_;
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
-    unsigned size=0;
+    unsigned size = 0;
     while (itr != end)
     {
         s << ", " << itr->get_name();
@@ -576,8 +584,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 
     s << " FROM ";
 
-    std::string query (table_);
-    std::string table_name = mapnik::table_from_sql(query);
+    std::string query(table_);
 
     if (use_spatial_index_)
     {
@@ -593,9 +600,9 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         {
             boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
         }
-        else if (boost::algorithm::ifind_first(query,table_name))
+        else if (boost::algorithm::ifind_first(query, table_name_))
         {
-            boost::algorithm::ireplace_first(query, table_name, table_name + " " + spatial_sql.str());
+            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + spatial_sql.str());
         }
         else
         {
@@ -613,9 +620,9 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         {
             boost::algorithm::ireplace_first(query, "WHERE", row_limit_string + " AND ");
         }
-        else if (boost::algorithm::ifind_first(query, table_name))
+        else if (boost::algorithm::ifind_first(query, table_name_))
         {
-            boost::algorithm::ireplace_first(query, table_name, table_name + " " + row_limit_string);
+            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string);
         }
         else
         {
@@ -632,12 +639,11 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 #endif
 
     return boost::make_shared<occi_featureset>(pool_,
-                                                conn_,
-                                                s.str(),
-                                                desc_.get_encoding(),
-                                                multiple_geometries_,
-                                                use_connection_pool_,
-                                                row_prefetch_,
-                                                size);
+                                               conn_,
+                                               s.str(),
+                                               desc_.get_encoding(),
+                                               multiple_geometries_,
+                                               use_connection_pool_,
+                                               row_prefetch_,
+                                               size);
 }
-

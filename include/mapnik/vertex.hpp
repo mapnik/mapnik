@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,16 +19,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: vertex.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef VERTEX_HPP
-#define VERTEX_HPP
+#ifndef MAPNIK_VERTEX_HPP
+#define MAPNIK_VERTEX_HPP
 
-#include <iostream>
 #include <sstream>
 
 namespace mapnik 
 {
+
 enum CommandType {
     SEG_END   =0,
     SEG_MOVETO=1,
@@ -38,25 +37,25 @@ enum CommandType {
     
 template <typename T,int dim>
 struct vertex {
-    typedef T type;
+    typedef T coord_type;
 };
     
 template <typename T>
 struct vertex<T,2> 
 {
-    typedef T type;
-    T x;
-    T y;
+    typedef T coord_type;
+    coord_type x;
+    coord_type y;
     unsigned cmd;
     vertex() 
         : x(0),y(0),cmd(SEG_END) {}
-    vertex(T x,T y,unsigned cmd)
+    vertex(coord_type x,coord_type y,unsigned cmd)
         : x(x),y(y),cmd(cmd) {}
 
     template <typename T2>
     vertex(const vertex<T2,2>& rhs)
-        : x(type(rhs.x)),
-          y(type(rhs.y)),
+        : x(coord_type(rhs.x)),
+          y(coord_type(rhs.y)),
           cmd(rhs.cmd) {}
         
     template <typename T2> vertex<T,2> operator=(const vertex<T2,2>& rhs)
@@ -65,8 +64,8 @@ struct vertex<T,2>
         {
             return *this;
         }
-        x=type(rhs.x);
-        y=type(rhs.y);
+        x=coord_type(rhs.x);
+        y=coord_type(rhs.y);
         cmd=rhs.cmd;
         return *this;
     }   
@@ -74,7 +73,6 @@ struct vertex<T,2>
     
 typedef vertex<double,2> vertex2d;
 typedef vertex<int,2> vertex2i;
-
     
 template <class charT,class traits,class T,int dim>
 inline std::basic_ostream<charT,traits>&
@@ -109,4 +107,4 @@ operator << (std::basic_ostream<charT,traits>& out,
 
 }
 
-#endif // VERTEX_HPP
+#endif // MAPNIK_VERTEX_HPP

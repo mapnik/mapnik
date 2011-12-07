@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Hermann Kraus
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,21 +20,21 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_METAWRITER_HPP
+#define MAPNIK_METAWRITER_HPP
 
-#ifndef METAWRITER_HPP
-#define METAWRITER_HPP
-
-// Mapnik
+// mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
-// Boost
+// boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 #include <boost/concept_check.hpp>
-// STL
+
+// stl
 #include <set>
 #include <string>
 
@@ -47,11 +47,22 @@ struct placement;
 class metawriter_property_map
 {
 public:
+    typedef std::map<std::string, UnicodeString> property_map;
+    typedef property_map::const_iterator const_iterator;
+    
     metawriter_property_map() {}
     UnicodeString const& operator[](std::string const& key) const;
     UnicodeString& operator[](std::string const& key) {return m_[key];}
+    std::map<std::string, UnicodeString>::const_iterator find(std::string const& key) const
+    {
+        return m_.find(key);
+    }
+    std::map<std::string, UnicodeString>::const_iterator end() const
+    {
+        return m_.end();
+    }
 private:
-    std::map<std::string, UnicodeString> m_;
+    property_map m_;
     UnicodeString not_found_;
 };
 
@@ -139,4 +150,4 @@ typedef std::pair<metawriter_ptr, metawriter_properties> metawriter_with_propert
 
 }
 
-#endif
+#endif // MAPNIK_METAWRITER_HPP

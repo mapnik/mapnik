@@ -5,7 +5,7 @@ from utilities import Todo
 from utilities import execution_path
 import tempfile
 
-import os, sys, glob, mapnik2
+import os, sys, glob, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -18,13 +18,13 @@ def test():
     # 2. Save map as XML
     # 3. Load map to a second object
     # 4. Compare both map objects
-    map = mapnik2.Map(256, 256)
+    map = mapnik.Map(256, 256)
 
     raise Todo("map comparison is currently broken due to lacking relative paths support (#324,#340")
 
     def compare_map(in_map):
         
-        mapnik2.load_map(map, in_map)
+        mapnik.load_map(map, in_map)
 
         (handle, test_map) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-temp-map1-')
         os.close(handle)
@@ -35,11 +35,11 @@ def test():
         if os.path.exists(test_map):
             os.remove(test_map)
     
-        mapnik2.save_map(map, test_map)
-        new_map = mapnik2.Map(256, 256)
+        mapnik.save_map(map, test_map)
+        new_map = mapnik.Map(256, 256)
     
-        mapnik2.load_map(new_map, test_map)
-        open(test_map2,'w').write(mapnik2.save_map_to_string(new_map))
+        mapnik.load_map(new_map, test_map)
+        open(test_map2,'w').write(mapnik.save_map_to_string(new_map))
     
         diff = ' diff %s %s' % (os.path.abspath(test_map),os.path.abspath(test_map2))
         try:

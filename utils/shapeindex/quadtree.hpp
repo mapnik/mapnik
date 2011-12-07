@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko
@@ -24,7 +24,7 @@
 #ifndef QUADTREE_HPP
 #define QUADTREE_HPP
 // stl
-#include <cstring> 
+#include <cstring>
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -46,29 +46,29 @@ struct quadtree_node
         memset(children_,0,sizeof(quadtree_node<T>*)*4);
     }
 
-    ~quadtree_node() 
+    ~quadtree_node()
     {
-        for (int i=0;i<4;++i) 
+        for (int i=0;i<4;++i)
         {
-            if (children_[i]) 
+            if (children_[i])
             {
                 delete children_[i],children_[i]=0;
             }
         }
     }
 
-    int num_subnodes() const 
+    int num_subnodes() const
     {
         int count=0;
-        for (int i=0;i<4;++i) 
+        for (int i=0;i<4;++i)
         {
-            if (children_[i]) 
+            if (children_[i])
             {
                 ++count;
             }
         }
         return count;
-    }     
+    }
 };
 
 template <typename T>
@@ -88,34 +88,34 @@ public:
     {
         if (root_) delete root_;
     }
-    
+
     void insert(const T& data,const box2d<double>& item_ext)
     {
         insert(data,item_ext,root_,maxdepth_);
     }
-    
+
     int count() const
     {
         return count_nodes(root_);
     }
-    
-    int count_items() const 
+
+    int count_items() const
     {
         int count=0;
         count_items(root_,count);
         return count;
     }
-    
+
     void print() const
     {
         print(root_);
     }
-    
-    void trim() 
+
+    void trim()
     {
         trim_tree(root_);
-    }     
-    
+    }
+
     void write(std::ostream& out)
     {
         char header[16];
@@ -133,25 +133,25 @@ public:
 private:
 
     void trim_tree(quadtree_node<T>*&  node)
-    {   
-        if (node) 
+    {
+        if (node)
         {
             for (int i=0;i<4;++i)
-            {   
-                trim_tree(node->children_[i]);  
+            {
+                trim_tree(node->children_[i]);
             }
 
             if (node->num_subnodes()==1 && node->data_.size()==0)
             {
-                for (int i=0;i<4;++i) 
+                for (int i=0;i<4;++i)
                 {
                     if (node->children_[i])
-                    {   
+                    {
                         node=node->children_[i];
-                        break;  
+                        break;
                     }
                 }
-            }   
+            }
         }
     }
 
@@ -176,11 +176,11 @@ private:
     {
         if (node)
         {
-            count += node->data_.size();    
+            count += node->data_.size();
             for (int i=0;i<4;++i)
             {
                 count_items(node->children_[i],count);
-            }    
+            }
         }
     }
 
@@ -262,8 +262,6 @@ private:
     {
         if (node && node->ext_.contains(item_ext))
         {
-            coord2d c=node->ext_.center();
-
             double width=node->ext_.width();
             double height=node->ext_.height();
 

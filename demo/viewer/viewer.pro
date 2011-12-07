@@ -11,7 +11,7 @@ INCLUDEPATH += /usr/X11/include/freetype2
 INCLUDEPATH += .
 
 QMAKE_CXXFLAGS +=' -DDARWIN -Wno-missing-field-initializers -ansi'
-unix:LIBS =  -L/usr/local/lib -L/usr/X11/lib -lmapnik2 -lfreetype
+unix:LIBS =  -L/usr/local/lib -L/usr/X11/lib -lmapnik -lfreetype
 unix:LIBS += -lboost_system -licuuc -lboost_filesystem -lboost_regex
 
 # Input

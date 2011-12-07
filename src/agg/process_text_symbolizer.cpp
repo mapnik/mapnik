@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,6 +35,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 {
 
 
+    // Use a boost::ptr_vector here instread of std::vector?
     std::vector<geometry_type*> geometries_to_process;
     unsigned num_geom = feature.num_geometries();
     for (unsigned i=0; i<num_geom; ++i)
@@ -103,14 +104,15 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
         }
         text_renderer<T> ren(pixmap_, faces, *strk);
-        ren.set_pixel_size(placement_options->text_size * scale_factor_);
+        
+        ren.set_character_size(placement_options->text_size * scale_factor_);
         ren.set_fill(fill);
         ren.set_halo_fill(sym.get_halo_fill());
         ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
         ren.set_opacity(sym.get_text_opacity());
-
+        
         box2d<double> dims(0,0,width_,height_);
-        placement_finder<label_collision_detector4> finder(detector_,dims);
+        placement_finder<label_collision_detector4> finder(*detector_,dims);
 
         string_info info(text);
 

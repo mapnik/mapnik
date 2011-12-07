@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GRID_PIXFMT_HPP
 #define MAPNIK_GRID_PIXFMT_HPP
 
-#include <string.h>
+#include <string>
 #include "agg_basics.h"
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid_rendering_buffer.hpp>

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko
@@ -51,18 +51,18 @@ const double MINRATIO=0.5;
 const double MAXRATIO=0.8;
 const double DEFAULT_RATIO=0.55;
 
-int main (int argc,char** argv) 
+int main (int argc,char** argv)
 {
     using namespace mapnik;
     namespace po = boost::program_options;
     using std::string;
     using std::vector;
-    
+
     bool verbose=false;
     unsigned int depth=DEFAULT_DEPTH;
     double ratio=DEFAULT_RATIO;
     vector<string> ogr_files;
-    
+
     try
     {
         po::options_description desc("ogrindex utility");
@@ -70,23 +70,23 @@ int main (int argc,char** argv)
             ("help,h",     "produce usage message")
             ("version,V",  "print version string")
             ("verbose,v",  "verbose output")
-            ("depth,d",    po::value<unsigned int>(), "max tree depth\n(default 8)")   
+            ("depth,d",    po::value<unsigned int>(), "max tree depth\n(default 8)")
             ("ratio,r",    po::value<double>(), "split ratio (default 0.55)")
             ("ogr_files",  po::value<vector<string> >(), "ogr supported files to index: file1 file2 ...fileN")
             ;
-        
+
         po::positional_options_description p;
         p.add("ogr_files",-1);
-        po::variables_map vm;        
+        po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);
-        
+
         if (vm.count("version"))
         {
             std::clog<<"version 0.1.0" <<std::endl;
             return 1;
         }
-        if (vm.count("help")) 
+        if (vm.count("help"))
         {
             std::clog << desc << std::endl;
             return 1;
@@ -109,10 +109,10 @@ int main (int argc,char** argv)
         std::clog << "Exception of unknown type!" << std::endl;
         return -1;
     }
-    
+
     std::clog << "max tree depth:" << depth << std::endl;
     std::clog << "split ratio:" << ratio << std::endl;
-  
+
     vector<string>::const_iterator itr = ogr_files.begin();
     if (itr == ogr_files.end())
     {
@@ -124,7 +124,7 @@ int main (int argc,char** argv)
         std::clog << "processing " << *itr << std::endl;
 
         std::string ogrname (*itr++);
-        
+
         if (! boost::filesystem::exists (ogrname))
         {
             std::clog << "error : file " << ogrname << " doesn't exists" << std::endl;
@@ -148,7 +148,7 @@ int main (int argc,char** argv)
         params["file"] = ogrname;
         //unsigned first = 0;
         params["layer_by_index"] = 0;//ogrlayername;
-        
+
         try
         {
             ogr_datasource ogr (params);
@@ -157,14 +157,14 @@ int main (int argc,char** argv)
             box2d<double> extent = ogr.envelope();
             quadtree<int> tree (extent, depth, ratio);
             int count=0;
-    
+
             std::clog << "file:" << ogrname << std::endl;
             std::clog << "layer:" << ogrlayername << std::endl;
             std::clog << "extent:" << extent << std::endl;
-    
+
             mapnik::query q (extent, 1.0);
             mapnik::featureset_ptr itr = ogr.features (q);
-    
+
             while (true)
             {
                 mapnik::feature_ptr fp = itr->next();
@@ -172,23 +172,23 @@ int main (int argc,char** argv)
                 {
                     break;
                 }
-                
+
                 box2d<double> item_ext = fp->envelope();
-    
+
                 tree.insert (count, item_ext);
                 if (verbose) {
                     std::clog << "record number " << (count + 1) << " box=" << item_ext << std::endl;
                 }
-    
+
                 ++count;
             }
-    
-            std::clog << " number shapes=" << count << std::endl;  
-    
+
+            std::clog << " number shapes=" << count << std::endl;
+
             std::fstream file((ogrlayername+".ogrindex").c_str(),
                               std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
             if (!file) {
-                std::clog << "cannot open ogrindex file for writing file \"" 
+                std::clog << "cannot open ogrindex file for writing file \""
                           << (ogrlayername+".ogrindex") << "\"" << std::endl;
             } else {
                 tree.trim();
@@ -213,7 +213,7 @@ int main (int argc,char** argv)
         }
 
     }
-    
+
     std::clog << "done!" << std::endl;
     return 0;
 }

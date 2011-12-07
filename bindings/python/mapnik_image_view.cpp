@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -48,10 +48,10 @@ PyObject* view_tostring1(image_view<image_data_32> const& view)
     std::ostringstream ss(std::ios::out|std::ios::binary);
     for (unsigned i=0;i<view.height();i++)
     {
-        ss.write(reinterpret_cast<const char*>(view.getRow(i)), 
+        ss.write(reinterpret_cast<const char*>(view.getRow(i)),
                  view.width() * sizeof(image_view<image_data_32>::pixel_type));
     }
-    return 
+    return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
 #else
@@ -64,7 +64,7 @@ PyObject* view_tostring1(image_view<image_data_32> const& view)
 PyObject* view_tostring2(image_view<image_data_32> const & view, std::string const& format)
 {
     std::string s = save_to_string(view, format);
-    return 
+    return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
 #else
@@ -76,7 +76,7 @@ PyObject* view_tostring2(image_view<image_data_32> const & view, std::string con
 PyObject* view_tostring3(image_view<image_data_32> const & view, std::string const& format, mapnik::rgba_palette const& pal)
 {
     std::string s = save_to_string(view, format, pal);
-    return 
+    return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
 #else
@@ -85,22 +85,22 @@ PyObject* view_tostring3(image_view<image_data_32> const & view, std::string con
         (s.data(),s.size());
 }
 
-void save_view1(image_view<image_data_32> const& view, 
+void save_view1(image_view<image_data_32> const& view,
                 std::string const& filename)
 {
     save_to_file(view,filename);
 }
 
-void save_view2(image_view<image_data_32> const& view, 
-                std::string const& filename, 
+void save_view2(image_view<image_data_32> const& view,
+                std::string const& filename,
                 std::string const& type)
 {
     save_to_file(view,filename,type);
 }
 
-void save_view3(image_view<image_data_32> const& view, 
-                std::string const& filename, 
-                std::string const& type, 
+void save_view3(image_view<image_data_32> const& view,
+                std::string const& filename,
+                std::string const& type,
                 mapnik::rgba_palette const& pal)
 {
     save_to_file(view,filename,type,pal);

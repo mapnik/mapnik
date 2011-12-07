@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,10 +38,20 @@ feature_type_style::feature_type_style()
     : filter_mode_(FILTER_ALL),
       scale_denom_validity_(-1) {}
 
-feature_type_style::feature_type_style(feature_type_style const& rhs)
-    : rules_(rhs.rules_),
-      filter_mode_(rhs.filter_mode_),
-      scale_denom_validity_(-1) {}
+feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
+    : filter_mode_(rhs.filter_mode_),
+      scale_denom_valicity_(-1)
+{
+    if (!deep_copy) {
+        rules_ = rhs.rules_;
+    } else {
+        rules::const_iterator it  = rhs.rules_.begin(),
+                        end = rhs.rules_.end();
+        for(; it != end; ++it) {
+            rules_.push_back(rule(*it, deep_copy));
+        }
+    }
+}
     
 feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
 {

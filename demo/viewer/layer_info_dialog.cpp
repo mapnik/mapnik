@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2007 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,15 +29,15 @@ layer_info_dialog::layer_info_dialog(mapnik::layer& lay, QWidget *parent)
   : QDialog(parent)
 {
     ui.setupUi(this);
-    
+
     ui.tableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("Name"));
     ui.tableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Value"));
-    
+
     // Layer name
     ui.layerNameEdit->setText(QString(lay.name().c_str()));
 
     // Named Styles : TODO!!!
-    
+
     // Datasource
     mapnik::datasource_ptr ds = lay.datasource();
     if (ds)
@@ -57,10 +58,10 @@ layer_info_dialog::layer_info_dialog(mapnik::layer& lay, QWidget *parent)
                 QTableWidgetItem *keyItem = new QTableWidgetItem(QString(pos->first.c_str()));
                 QTableWidgetItem *valueItem = new QTableWidgetItem(QString((*result).c_str()));
                 ui.tableWidget->setItem(index,0,keyItem);
-                ui.tableWidget->setItem(index,1,valueItem); 
+                ui.tableWidget->setItem(index,1,valueItem);
                 ++index;
             }
-        }   
+        }
     }
 }
 

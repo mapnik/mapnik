@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -66,6 +66,7 @@ void export_view_transform();
 void export_raster_colorizer();
 void export_glyph_symbolizer();
 void export_inmem_metawriter();
+void export_label_collision_detector();
 
 #include <mapnik/version.hpp>
 #include <mapnik/value_error.hpp>
@@ -82,47 +83,58 @@ void export_inmem_metawriter();
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
 #include "python_grid_utils.hpp"
+#include "mapnik_value_converter.hpp"
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <pycairo.h>
 static Pycairo_CAPI_t *Pycairo_CAPI;
 #endif
 
-
-namespace boost { namespace python {
-
-    struct mapnik_value_to_python
-    {
-        static PyObject* convert(mapnik::value const& v)
-        {
-            return boost::apply_visitor(value_converter(),v.base());
-        }
-    };
-}}
-
 void render(const mapnik::Map& map,
-    mapnik::image_32& image,
+            mapnik::image_32& image,
+            double scale_factor = 1.0,
+            unsigned offset_x = 0u,
+            unsigned offset_y = 0u)
+{
+    Py_BEGIN_ALLOW_THREADS
+        try
+        {
+            mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
+    Py_END_ALLOW_THREADS
+        }
+
+void render_with_detector(
+    const mapnik::Map &map,
+    mapnik::image_32 &image,
+    boost::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 void render_layer2(const mapnik::Map& map,
-    mapnik::image_32& image,
-    unsigned layer_idx)
+                   mapnik::image_32& image,
+                   unsigned layer_idx)
 {
     std::vector<mapnik::layer> const& layers = map.layers();
     std::size_t layer_num = layers.size();
@@ -134,101 +146,101 @@ void render_layer2(const mapnik::Map& map,
     }
 
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        mapnik::layer const& layer = layers[layer_idx];
-        mapnik::agg_renderer<mapnik::image_32> ren(map,image,1.0,0,0);
-        std::set<std::string> names;
-        ren.apply(layer,names);
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            mapnik::layer const& layer = layers[layer_idx];
+            mapnik::agg_renderer<mapnik::image_32> ren(map,image,1.0,0,0);
+            std::set<std::string> names;
+            ren.apply(layer,names);
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
 void render3(const mapnik::Map& map,
-    PycairoSurface* surface,
-    unsigned offset_x = 0,
-    unsigned offset_y = 0)
+             PycairoSurface* surface,
+             unsigned offset_x = 0,
+             unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-        mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+            mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 void render4(const mapnik::Map& map, PycairoSurface* surface)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-        mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+            mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 void render5(const mapnik::Map& map,
-    PycairoContext* context,
-    unsigned offset_x = 0,
-    unsigned offset_y = 0)
+             PycairoContext* context,
+             unsigned offset_x = 0,
+             unsigned offset_y = 0)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-        mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+            mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 void render6(const mapnik::Map& map, PycairoContext* context)
 {
     Py_BEGIN_ALLOW_THREADS
-    try
-    {
-        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-        mapnik::cairo_renderer<Cairo::Context> ren(map,c);
-        ren.apply();
-    }
-    catch (...)
-    {
-        Py_BLOCK_THREADS
-        throw;
-    }
+        try
+        {
+            Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+            mapnik::cairo_renderer<Cairo::Context> ren(map,c);
+            ren.apply();
+        }
+        catch (...)
+        {
+            Py_BLOCK_THREADS
+                throw;
+        }
     Py_END_ALLOW_THREADS
-}
+        }
 
 #endif
 
 
-void render_tile_to_file(const mapnik::Map& map, 
+void render_tile_to_file(const mapnik::Map& map,
                          unsigned offset_x, unsigned offset_y,
                          unsigned width, unsigned height,
                          const std::string& file,
@@ -251,11 +263,11 @@ void render_to_file1(const mapnik::Map& map,
         throw mapnik::ImageWriterException("Cairo backend not available, cannot write to format: " + format);
 #endif
     }
-    else 
+    else
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image,filename,format); 
+        mapnik::save_to_file(image,filename,format);
     }
 }
 
@@ -270,11 +282,11 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
         throw mapnik::ImageWriterException("Cairo backend not available, cannot write to format: " + format);
 #endif
     }
-    else 
+    else
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,1.0,0,0);
-        mapnik::save_to_file(image,filename); 
+        mapnik::save_to_file(image,filename);
     }
 }
 
@@ -282,7 +294,7 @@ void render_to_file3(const mapnik::Map& map,
                      const std::string& filename,
                      const std::string& format,
                      double scale_factor = 1.0
-                     )
+    )
 {
     if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
@@ -292,11 +304,11 @@ void render_to_file3(const mapnik::Map& map,
         throw mapnik::ImageWriterException("Cairo backend not available, cannot write to format: " + format);
 #endif
     }
-    else 
+    else
     {
         mapnik::image_32 image(map.width(),map.height());
         render(map,image,scale_factor,0,0);
-        mapnik::save_to_file(image,filename,format); 
+        mapnik::save_to_file(image,filename,format);
     }
 }
 
@@ -319,22 +331,13 @@ unsigned mapnik_version()
     return MAPNIK_VERSION;
 }
 
-unsigned mapnik_svn_revision()
-{
-#if defined(SVN_REVISION)
-    return SVN_REVISION;
-#else
-    return 0;
-#endif
-}
-
 // indicator for jpeg read/write support within libmapnik
 bool has_jpeg()
 {
 #if defined(HAVE_JPEG)
-  return true;
+    return true;
 #else
-  return false;
+    return false;
 #endif
 }
 
@@ -356,10 +359,10 @@ bool has_pycairo()
     if (Pycairo_CAPI == NULL){
         /*
           Case where pycairo support has been compiled into
-          mapnik but at runtime the cairo python module 
-          is unable to be imported and therefore Pycairo surfaces 
-          and contexts cannot be passed to mapnik.render() 
-        */ 
+          mapnik but at runtime the cairo python module
+          is unable to be imported and therefore Pycairo surfaces
+          and contexts cannot be passed to mapnik.render()
+        */
         return false;
     }
     return true;
@@ -374,10 +377,11 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 4
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(render_overloads, render, 2, 5)
+BOOST_PYTHON_FUNCTION_OVERLOADS(render_with_detector_overloads, render_with_detector, 3, 6)
 
-BOOST_PYTHON_MODULE(_mapnik2)
+BOOST_PYTHON_MODULE(_mapnik)
 {
- 
+
     using namespace boost::python;
 
     using mapnik::load_map;
@@ -385,7 +389,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
     using mapnik::save_map;
     using mapnik::save_map_to_string;
     using mapnik::render_grid;
-    
+
     register_exception_translator<mapnik::config_error>(&config_error_translator);
     register_exception_translator<mapnik::value_error>(&value_error_translator);
     register_cairo();
@@ -395,8 +399,8 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_featureset();
     export_datasource();
     export_parameters();
-    export_color(); 
-    export_envelope();   
+    export_color();
+    export_envelope();
     export_palette();
     export_image();
     export_image_view();
@@ -404,7 +408,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_grid_view();
     export_expression();
     export_rule();
-    export_style();    
+    export_style();
     export_layer();
     export_stroke();
     export_datasource_cache();
@@ -427,16 +431,17 @@ BOOST_PYTHON_MODULE(_mapnik2)
     export_raster_colorizer();
     export_glyph_symbolizer();
     export_inmem_metawriter();
+    export_label_collision_detector();
 
     def("render_grid",&render_grid,
-      ( arg("map"),
-        arg("layer"),
-        args("key")="__id__",
-        arg("resolution")=4,
-        arg("fields")=boost::python::list()
-      )
-    );
-    
+        ( arg("map"),
+          arg("layer"),
+          args("key")="__id__",
+          arg("resolution")=4,
+          arg("fields")=boost::python::list()
+            )
+        );
+
     def("render_to_file",&render_to_file1,
         "\n"
         "Render Map to file using explicit image type.\n"
@@ -478,16 +483,16 @@ BOOST_PYTHON_MODULE(_mapnik2)
         ">>> render_to_file(m,'image.jpeg',scale_factor)\n"
         "\n"
         );
-        
+
     def("render_tile_to_file",&render_tile_to_file,
         "\n"
         "TODO\n"
         "\n"
-        ); 
+        );
 
-    
+
     def("render", &render, render_overloads(
-            "\n" 
+            "\n"
             "Render Map to an AGG image_32 using offsets\n"
             "\n"
             "Usage:\n"
@@ -501,16 +506,29 @@ BOOST_PYTHON_MODULE(_mapnik2)
             ">>> render(m,im,scale_factor)\n"
             ">>> render(m,im,scale_factor,offset[0],offset[1])\n"
             "\n"
-            )); 
+            ));
+
+    def("render_with_detector", &render_with_detector, render_with_detector_overloads(
+            "\n"
+            "Render Map to an AGG image_32 using a pre-constructed detector.\n"
+            "\n"
+            "Usage:\n"
+            ">>> from mapnik import Map, Image, LabelCollisionDetector, render_with_detector, load_map\n"
+            ">>> m = Map(256,256)\n"
+            ">>> load_map(m,'mapfile.xml')\n"
+            ">>> im = Image(m.width,m.height)\n"
+            ">>> detector = LabelCollisionDetector(m)\n"
+            ">>> render_with_detector(m, im, detector)\n"
+            ));
 
     def("render_layer", &render_layer2,
-      (arg("map"),arg("image"),args("layer"))
-    ); 
+        (arg("map"),arg("image"),args("layer"))
+        );
 
     def("render_layer", &mapnik::render_layer_for_grid,
-      (arg("map"),arg("grid"),args("layer"),arg("fields")=boost::python::list())
-    ); 
-    
+        (arg("map"),arg("grid"),args("layer"),arg("fields")=boost::python::list())
+        );
+
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
     def("render",&render3,
         "\n"
@@ -549,7 +567,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
         ">>> from cairo import SVGSurface, Context\n"
         ">>> surface = SVGSurface('image.svg', m.width, m.height)\n"
         ">>> ctx = Context(surface)\n"
-        ">>> load_map(m,'mapfile.xml')\n"  
+        ">>> load_map(m,'mapfile.xml')\n"
         ">>> render(m,context,1,1)\n"
         "\n"
         );
@@ -582,7 +600,7 @@ BOOST_PYTHON_MODULE(_mapnik2)
         ">>> scale_denominator(m,Projection(m.srs).geographic)\n"
         "\n"
         );
-   
+
     def("load_map", &load_map, load_map_overloads());
 
     def("load_map_from_string", &load_map_string, load_map_string_overloads());
@@ -603,15 +621,15 @@ BOOST_PYTHON_MODULE(_mapnik2)
   "\n"
   );
 */
-    
+
     def("save_map_to_string", &save_map_to_string, save_map_to_string_overloads());
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
-    def("mapnik_svn_revision", &mapnik_svn_revision,"Get the Mapnik svn revision");
     def("has_jpeg", &has_jpeg, "Get jpeg read/write support status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
 
     register_ptr_to_python<mapnik::expression_ptr>();
     register_ptr_to_python<mapnik::path_expression_ptr>();
+    to_python_converter<mapnik::value_holder,mapnik_param_to_python>();
     to_python_converter<mapnik::value,mapnik_value_to_python>();
 }

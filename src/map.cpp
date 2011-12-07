@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -92,7 +92,8 @@ Map::Map(const Map& rhs)
       current_extent_(rhs.current_extent_),
       maximum_extent_(rhs.maximum_extent_),
       base_path_(rhs.base_path_),
-      extra_attr_(rhs.extra_attr_) {}
+      extra_attr_(rhs.extra_attr_),
+      extra_params_(rhs.extra_params_) {}
     
 Map& Map::operator=(const Map& rhs)
 {
@@ -110,6 +111,7 @@ Map& Map::operator=(const Map& rhs)
     maximum_extent_=rhs.maximum_extent_;
     base_path_=rhs.base_path_;
     extra_attr_=rhs.extra_attr_;
+    extra_params_=rhs.extra_params_;
     return *this;
 }
    
@@ -677,9 +679,29 @@ parameters const& Map::get_extra_attributes() const
     return extra_attr_;
 }
 
-void Map::set_extra_attributes(parameters& params)
+parameters& Map::get_extra_attributes()
 {
-    extra_attr_ = params;
+    return extra_attr_;
+}
+
+void Map::set_extra_attributes(parameters& attr)
+{
+    extra_attr_ = attr;
+}
+
+parameters const& Map::get_extra_parameters() const
+{
+    return extra_params_;
+}
+
+parameters& Map::get_extra_parameters()
+{
+    return extra_params_;
+}
+
+void Map::set_extra_parameters(parameters& params)
+{
+    extra_params_ = params;
 }
 
 }

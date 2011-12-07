@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,21 +19,26 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: params.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef PARAMS_HPP
-#define PARAMS_HPP
+#ifndef MAPNIK_PARAMS_HPP
+#define MAPNIK_PARAMS_HPP
 
+// boost
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
 #include <boost/none.hpp>
 #include <boost/lexical_cast.hpp>
+
+// mapnik
+#include <mapnik/value.hpp>
+
+// stl
 #include <string>
 #include <map>
 
 namespace mapnik
 {
-typedef boost::variant<int,double,std::string> value_holder;
+typedef boost::variant<value_null,int,double,std::string> value_holder;
 typedef std::pair<const std::string, value_holder> parameter;
 typedef std::map<const std::string, value_holder> param_map;
    
@@ -100,4 +105,4 @@ public:
 };
 }
 
-#endif //PARAMS_HPP
+#endif // MAPNIK_PARAMS_HPP

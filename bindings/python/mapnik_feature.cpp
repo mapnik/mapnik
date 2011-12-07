@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -34,7 +34,6 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
-#include "mapnik_value_converter.hpp"
 
 mapnik::geometry_type & (mapnik::Feature::*get_geom1)(unsigned) = &mapnik::Feature::get_geometry;
 
@@ -59,7 +58,7 @@ void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
 
 namespace boost { namespace python {
 
-// Forward declaration
+    // Forward declaration
     template <class Container, bool NoProxy, class DerivedPolicies>
     class map_indexing_suite2;
 
@@ -70,7 +69,7 @@ namespace boost { namespace python {
         : public map_indexing_suite2<Container,
                                      NoProxy, final_map_derived_policies<Container, NoProxy> > {};
     }
-    
+
     template <class Container,bool NoProxy = false,
               class DerivedPolicies = detail::final_map_derived_policies<Container, NoProxy> >
     class map_indexing_suite2
@@ -95,9 +94,11 @@ namespace boost { namespace python {
 
         template <class Class>
         static void
-        extension_def(Class& /*cl*/)
+        extension_def(Class& cl)
         {
-               
+            cl
+                .def("get", &get)
+            ;
         }
 
         static data_type&
@@ -106,42 +107,55 @@ namespace boost { namespace python {
             typename Container::iterator i = container.props().find(i_);
             if (i == container.end())
             {
-                PyErr_SetString(PyExc_KeyError, "Invalid key");
+                PyErr_SetString(PyExc_KeyError, i_.c_str());
                 throw_error_already_set();
             }
+            // will be auto-converted to proper python type by `mapnik_value_to_python`
             return i->second;
         }
-            
+
+        static data_type
+        get(Container& container, index_type i_)
+        {
+            typename Container::iterator i = container.props().find(i_);
+            if (i != container.end())
+            {
+                // will be auto-converted to proper python type by `mapnik_value_to_python`
+                return i->second;
+            }
+            return mapnik::value_null();
+        }
+
         static void
         set_item(Container& container, index_type i, data_type const& v)
         {
             container[i] = v;
         }
-            
+
         static void
         delete_item(Container& container, index_type i)
         {
             container.props().erase(i);
         }
-          
+
         static size_t
         size(Container& container)
         {
             return container.props().size();
         }
-          
+
         static bool
         contains(Container& container, key_type const& key)
         {
             return container.props().find(key) != container.end();
         }
-            
+
         static bool
         compare_index(Container& container, index_type a, index_type b)
         {
             return container.props().key_comp()(a, b);
         }
-            
+
         static index_type
         convert_index(Container& /*container*/, PyObject* i_)
         {
@@ -156,13 +170,13 @@ namespace boost { namespace python {
                 if (i.check())
                     return i();
             }
-               
+
             PyErr_SetString(PyExc_TypeError, "Invalid index type");
             throw_error_already_set();
             return index_type();
         }
     };
-      
+
 
     template <typename T1, typename T2>
     struct std_pair_to_tuple
@@ -173,7 +187,7 @@ namespace boost { namespace python {
                 boost::python::make_tuple(p.first, p.second).ptr());
         }
     };
-      
+
     template <typename T1, typename T2>
     struct std_pair_to_python_converter
     {
@@ -201,9 +215,9 @@ struct UnicodeString_from_python_str
     {
         if (!(
 #if PY_VERSION_HEX >= 0x03000000
-                PyBytes_Check(obj_ptr) 
+                PyBytes_Check(obj_ptr)
 #else
-                PyString_Check(obj_ptr) 
+                PyString_Check(obj_ptr)
 #endif
                 || PyUnicode_Check(obj_ptr)))
             return 0;
@@ -245,7 +259,7 @@ void export_feature()
 {
     using namespace boost::python;
     using mapnik::Feature;
-      
+
     implicitly_convertible<int,mapnik::value>();
     implicitly_convertible<double,mapnik::value>();
     implicitly_convertible<UnicodeString,mapnik::value>();
@@ -253,7 +267,7 @@ void export_feature()
 
     std_pair_to_python_converter<std::string const,mapnik::value>();
     UnicodeString_from_python_str();
-   
+
     class_<Feature,boost::shared_ptr<Feature>,
         boost::noncopyable>("Feature",init<int>("Default ctor."))
         .def("id",&Feature::id)

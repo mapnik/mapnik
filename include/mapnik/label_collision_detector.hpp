@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,12 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef LABEL_COLLISION_DETECTOR_HPP
-#define LABEL_COLLISION_DETECTOR_HPP
+#ifndef MAPNIK_LABEL_COLLISION_DETECTOR_HPP
+#define MAPNIK_LABEL_COLLISION_DETECTOR_HPP
 
 // mapnik
 #include <mapnik/quad_tree.hpp>
+
 // stl
 #include <vector>
 #include <unicode/unistr.h>
@@ -69,7 +68,7 @@ class label_collision_detector2 : boost::noncopyable
     typedef quad_tree<box2d<double> > tree_t;
     tree_t tree_;
 public:
-         
+
     explicit label_collision_detector2(box2d<double> const& extent)
         : tree_(extent) {}
         
@@ -138,6 +137,7 @@ public:
 //quad tree based label collission detector so labels dont appear within a given distance
 class label_collision_detector4 : boost::noncopyable
 {
+public:
     struct label
     {
         label(box2d<double> const& b) : box(b) {}
@@ -146,11 +146,13 @@ class label_collision_detector4 : boost::noncopyable
         box2d<double> box;
         UnicodeString text;
     };
-         
+    
+private:     
     typedef quad_tree< label > tree_t;
     tree_t tree_;
          
 public:
+    typedef tree_t::query_iterator query_iterator;
         
     explicit label_collision_detector4(box2d<double> const& extent)
         : tree_(extent) {}
@@ -224,7 +226,10 @@ public:
     {
         return tree_.extent();
     }
+
+   query_iterator begin() { return tree_.query_in_box(extent()); }
+   query_iterator end() { return tree_.query_end(); }
 };
 }
 
-#endif // LABEL_COLLISION_DETECTOR_HPP
+#endif // MAPNIK_LABEL_COLLISION_DETECTOR_HPP

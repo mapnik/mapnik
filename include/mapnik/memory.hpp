@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,11 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: memory.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef MEMORY_HPP
-#define MEMORY_HPP
+#ifndef MAPNIK_MEMORY_HPP
+#define MAPNIK_MEMORY_HPP
 
+// stl
 #include <iostream>
 #include <cassert>
 
@@ -85,4 +85,4 @@ public:
 };
 
 }
-#endif //MEMORY_HPP
+#endif // MAPNIK_MEMORY_HPP

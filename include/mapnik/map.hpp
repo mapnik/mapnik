@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,13 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: map.hpp 39 2005-04-10 20:39:53Z pavlenko $
 
-#ifndef MAP_HPP
-#define MAP_HPP
+#ifndef MAPNIK_MAP_HPP
+#define MAPNIK_MAP_HPP
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include <config.hpp>
 #endif
 
 // mapnik
@@ -85,6 +84,7 @@ private:
     boost::optional<box2d<double> > maximum_extent_;
     std::string base_path_;
     parameters extra_attr_;
+    parameters extra_params_;
         
 public:
 
@@ -445,14 +445,34 @@ public:
     std::string get_metawriter_property(std::string name) const;
 
     /*!
-     * @brief Get extra properties that can be carried on the Map
+     * @brief Get extra valid attributes of the Map that are not true members
      */
     parameters const& get_extra_attributes() const;
 
     /*!
-     * @brief Set extra properties that can be carried on the Map
+     * @brief Get non-const extra valid attributes of the Map that are not true members
      */
-    void set_extra_attributes(parameters& params);
+    parameters& get_extra_attributes();
+
+    /*!
+     * @brief Set extra attributes of the Map
+     */
+    void set_extra_attributes(parameters& attr);
+
+    /*!
+     * @brief Get extra, arbitrary Parameters attached to the Map
+     */
+    parameters const& get_extra_parameters() const;
+
+    /*!
+     * @brief Get non-const extra, arbitrary Parameters attached to the Map
+     */
+    parameters& get_extra_parameters();
+
+    /*!
+     * @brief Set extra, arbitary Parameters of the Map
+     */
+    void set_extra_parameters(parameters& params);
 
 private:
     void fixAspectRatio();
@@ -461,4 +481,4 @@ private:
 DEFINE_ENUM(aspect_fix_mode_e,Map::aspect_fix_mode);
 }
 
-#endif //MAP_HPP
+#endif // MAPNIK_MAP_HPP

@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,42 +19,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: mapnik_parameters.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
 // boost
 #include <boost/python.hpp>
+#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/params.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/value.hpp>
 
 using mapnik::parameter;
 using mapnik::parameters;
-
-struct pickle_value : public boost::static_visitor<>
-{
-public:
-    pickle_value( boost::python::list vals): 
-        vals_(vals) {}
-            
-    void operator () ( int val )
-    {
-        vals_.append(val);
-    }
-        
-    void operator () ( double val )
-    {
-        vals_.append(val);
-    }
-
-    void operator () ( std::string val )
-    {
-        vals_.append(val);
-    }
-        
-private:
-    boost::python::list vals_;
-
-};
 
 struct parameter_pickle_suite : boost::python::pickle_suite
 {
@@ -62,7 +38,7 @@ struct parameter_pickle_suite : boost::python::pickle_suite
     getinitargs(const parameter& p)
     {
         using namespace boost::python;
-        return boost::python::make_tuple(p.first,boost::get<std::string>(p.second));
+        return boost::python::make_tuple(p.first,p.second);
     }
 };
 
@@ -76,11 +52,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
         parameters::const_iterator pos=p.begin();
         while(pos!=p.end())
         {
-            boost::python::list vals;
-            pickle_value serializer( vals );
-            mapnik::value_holder val = pos->second;
-            boost::apply_visitor( serializer, val );
-            d[pos->first] = vals[0];
+            d[pos->first] = pos->second;
             ++pos;
         }
         return boost::python::make_tuple(d);
@@ -97,7 +69,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
                 );
             throw_error_already_set();
         }
-        
+
         dict d = extract<dict>(state[0]);
         boost::python::list keys = d.keys();
         for (int i=0; i<len(keys); ++i)
@@ -107,7 +79,9 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             extract<std::string> ex0(obj);
             extract<int> ex1(obj);
             extract<double> ex2(obj);
-            
+            extract<UnicodeString> ex3(obj);
+
+            // TODO - this is never hit - we need proper python string -> std::string to get invoked here
             if (ex0.check())
             {
                 p[key] = ex0();
@@ -119,73 +93,132 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             else if (ex2.check())
             {
                 p[key] = ex2();
-            }           
-            
-            /*
-              extract_value serializer( p, key );
-              mapnik::value_holder val = extract<mapnik::value_holder>(d[key]);
-              boost::apply_visitor( serializer, val );
-            */
-        }        
+            }
+            else if (ex3.check())
+            {
+                std::string buffer;
+                mapnik::to_utf8(ex3(),buffer);
+                p[key] = buffer;
+            }
+            else
+            {
+                std::clog <<  "could not unpickle key: " << key << "\n";
+            }
+        }
     }
 };
 
-boost::python::dict dict_params(parameters& p)
+
+mapnik::value_holder get_params_by_key1(mapnik::parameters const& p, std::string const& key)
 {
-    boost::python::dict d;
-    parameters::const_iterator pos=p.begin();
-    while(pos!=p.end())
+    parameters::const_iterator pos = p.find(key);
+    if (pos != p.end())
     {
-        boost::python::list vals;
-        pickle_value serializer( vals );
-        mapnik::value_holder val = pos->second;
-        boost::apply_visitor( serializer, val );
-        d[pos->first] = vals[0];
-        ++pos;
+        // will be auto-converted to proper python type by `mapnik_params_to_python`
+        return pos->second;
     }
-    return d;
+    return mapnik::value_null();
 }
 
-boost::python::list list_params(parameters& p)
+mapnik::value_holder get_params_by_key2(mapnik::parameters const& p, std::string const& key)
 {
-    boost::python::list l;
-    parameters::const_iterator pos=p.begin();
-    while(pos!=p.end())
+    parameters::const_iterator pos = p.find(key);
+    if (pos == p.end())
     {
-        boost::python::list vals;
-        pickle_value serializer( vals );
-        mapnik::value_holder val = pos->second;
-        boost::apply_visitor( serializer, val );
-        l.append(boost::python::make_tuple(pos->first,vals[0]));
-        ++pos;
+        PyErr_SetString(PyExc_KeyError, key.c_str());
+        boost::python::throw_error_already_set();
     }
-    return l;
+    // will be auto-converted to proper python type by `mapnik_params_to_python`
+    return pos->second;
 }
 
-boost::python::dict dict_param(parameter& p)
+mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
 {
-    boost::python::dict d;
-    d[p.first] = boost::get<std::string>(p.second);
-    return d;
+    if (index < 0 || index > p.size())
+    {
+        PyErr_SetString(PyExc_IndexError, "Index is out of range");
+        throw boost::python::error_already_set();
+    }
+
+    parameters::const_iterator itr = p.begin();
+    parameters::const_iterator end = p.end();
+
+    unsigned idx = 0;
+    while (itr != p.end())
+    {
+        if (idx == index)
+        {
+            return *itr;
+        }
+        ++idx;
+        ++itr;
+    }
+    PyErr_SetString(PyExc_IndexError, "Index is out of range");
+    throw boost::python::error_already_set();
 }
 
-boost::python::tuple tuple_param(parameter& p)
+void add_parameter(mapnik::parameters & p, mapnik::parameter const& param)
 {
-    return boost::python::make_tuple(p.first,boost::get<std::string>(p.second));
+    p[param.first] = param.second; 
 }
+
+mapnik::value_holder get_param(mapnik::parameter const& p, int index)
+{
+    if (index == 0)
+    {
+        return p.first;
+    }
+    else if (index == 1)
+    {
+        return p.second;
+    }
+    else
+    {
+        PyErr_SetString(PyExc_IndexError, "Index is out of range");
+        throw boost::python::error_already_set();
+    }
+}
+
+boost::shared_ptr<mapnik::parameter> create_parameter_from_string(std::string const& key, std::string const& value)
+{
+    return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
+}
+
+boost::shared_ptr<mapnik::parameter> create_parameter_from_int(std::string const& key, int value)
+{
+    return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
+}
+
+boost::shared_ptr<mapnik::parameter> create_parameter_from_float(std::string const& key, double value)
+{
+    return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
+}
+
 
 void export_parameters()
 {
     using namespace boost::python;
-    class_<parameter>("Parameter",init<std::string,std::string>())
+    class_<parameter,boost::shared_ptr<parameter> >("Parameter",no_init)
+        .def("__init__", make_constructor(create_parameter_from_string),
+             "Create a mapnik.Parameter from a pair of values, the first being a string\n"
+             "and the second being either a string, and integer, or a float")
+        .def("__init__", make_constructor(create_parameter_from_int),
+             "Create a mapnik.Parameter from a pair of values, the first being a string\n"
+             "and the second being either a string, and integer, or a float")
+        .def("__init__", make_constructor(create_parameter_from_float),
+             "Create a mapnik.Parameter from a pair of values, the first being a string\n"
+             "and the second being either a string, and integer, or a float")
         .def_pickle(parameter_pickle_suite())
-        .def("as_dict",dict_param)
-        .def("as_tuple",tuple_param)
+        .def("__getitem__",get_param)
         ;
 
     class_<parameters>("Parameters",init<>())
         .def_pickle(parameters_pickle_suite())
-        .def("as_dict",dict_params)
-        .def("as_list",list_params)
+        .def("get",get_params_by_key1)
+        .def("__getitem__",get_params_by_key2)
+        .def("__getitem__",get_params_by_index)
+        .def("__len__",&parameters::size)
+        .def("append",add_parameter)
+        .def("iteritems",iterator<parameters>())
         ;
 }

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -42,7 +42,7 @@ struct coord_pickle_suite : boost::python::pickle_suite
 void export_coord()
 {
     using namespace boost::python;
-    class_<coord<double,2> >("Coord",init<double, double>( 
+    class_<coord<double,2> >("Coord",init<double, double>(
                                  // class docstring is in mapnik/__init__.py, class _Coord
                                  (arg("x"), arg("y")),
                                  "Constructs a new point with the given coordinates.\n")
@@ -59,7 +59,7 @@ void export_coord()
         .def(self - self) // __sub__
         .def(self - float())
         .def(self * float()) //__mult__
-        .def(float() * self) 
+        .def(float() * self)
         .def(self / float()) // __div__
         ;
 }

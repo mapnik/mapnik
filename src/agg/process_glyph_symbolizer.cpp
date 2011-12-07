@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2010 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,9 +59,9 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
         }
 
         // set font size
-        unsigned size = sym.eval_size(feature);
-        ren.set_pixel_size(size * scale_factor_);
-        faces->set_pixel_sizes(size * scale_factor_);
+        float size = sym.eval_size(feature);
+        ren.set_character_size(size * scale_factor_);
+        faces->set_character_sizes(size * scale_factor_);
 
         // Get and render text path
         //
@@ -77,12 +77,12 @@ void agg_renderer<T>::process(glyph_symbolizer const& sym,
         // final box so we can check for a valid placement
         box2d<double> dim = ren.prepare_glyphs(path.get());
         box2d<double> ext(x-dim.width()/2, y-dim.height()/2, x+dim.width()/2, y+dim.height()/2);
-        if ((sym.get_allow_overlap() || detector_.has_placement(ext)) &&
-            (!sym.get_avoid_edges() || detector_.extent().contains(ext)))
+        if ((sym.get_allow_overlap() || detector_->has_placement(ext)) &&
+            (!sym.get_avoid_edges() || detector_->extent().contains(ext)))
         {    
             // Placement is valid, render glyph and update detector.
             ren.render(x, y);
-            detector_.insert(ext);
+            detector_->insert(ext);
             metawriter_with_properties writer = sym.get_metawriter();
             if (writer.first) writer.first->add_box(ext, feature, t_, writer.second);
         }

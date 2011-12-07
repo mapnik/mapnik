@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -20,7 +20,9 @@
  *
  *****************************************************************************/
 
-//$Id$
+#include "postgis_featureset.hpp"
+#include "resultset.hpp"
+#include "cursorresultset.hpp"
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -28,10 +30,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/feature_factory.hpp>
-
-#include "postgis_featureset.hpp"
-#include "resultset.hpp"
-#include "cursorresultset.hpp"
 
 // boost
 #include <boost/lexical_cast.hpp>
@@ -65,7 +63,7 @@ postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
 feature_ptr postgis_featureset::next()
 {
     if (rs_->next())
-    { 
+    {
         // new feature
         feature_ptr feature;
 
@@ -107,7 +105,7 @@ feature_ptr postgis_featureset::next()
         const char *data = rs_->getValue(0);
         geometry_utils::from_wkb(feature->paths(),data,size,multiple_geometries_);
         totalGeomSize_+=size;
-          
+
         for ( ;pos<num_attrs_+1;++pos)
         {
             std::string name = rs_->getFieldName(pos);
@@ -120,7 +118,7 @@ feature_ptr postgis_featureset::next()
             {
                 const char* buf = rs_->getValue(pos);
                 int oid = rs_->getTypeOID(pos);
-           
+
                 if (oid==16) //bool
                 {
                     boost::put(*feature,name,buf[0] != 0);
@@ -164,18 +162,18 @@ feature_ptr postgis_featureset::next()
                 }
                 else if (oid == 1700) // numeric
                 {
-                    std::string str = mapnik::numeric2string(buf);
-                    try 
+                    std::string str = mapnik::sql_utils::numeric2string(buf);
+                    try
                     {
                         double val = boost::lexical_cast<double>(str);
                         boost::put(*feature,name,val);
                     }
                     catch (boost::bad_lexical_cast & ex)
                     {
-                        std::clog << ex.what() << "\n"; 
+                        std::clog << ex.what() << "\n";
                     }
                 }
-                else 
+                else
                 {
 #ifdef MAPNIK_DEBUG
                     std::clog << "Postgis Plugin: uknown OID = " << oid << " FIXME " << std::endl;

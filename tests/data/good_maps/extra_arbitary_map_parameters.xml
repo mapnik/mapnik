@@ -1,0 +1,24 @@
+<Map>
+
+<!-- 
+     totally arbirary Parameters can also be attached to the map
+     which will be respected during serialization.
+     
+     This makes it easier for calling applications that work with mapnik
+     xml, and leverage its serialization, to pass through directives that
+     the calling application needs which describe how to handle the map.
+-->
+
+  <Parameters>
+    <Parameter name="key" type="string"><![CDATA[value]]></Parameter>
+    <!-- this one will override previous key with same name -->
+    <Parameter name="key" type="string"><![CDATA[value2]]></Parameter>
+    <Parameter name="key3" type="string"><![CDATA[value3]]></Parameter>
+    <Parameter name="unicode" type="string"><![CDATA[iván]]></Parameter>
+    <Parameter name="integer" type="int"><![CDATA[10]]></Parameter>
+    <Parameter name="decimal" type="float"><![CDATA[.999]]></Parameter>
+    <!-- without a type attribute numbers are treated as strings -->
+    <Parameter name="number-as-string"><![CDATA[.9998]]></Parameter>
+  </Parameters>
+
+</Map>

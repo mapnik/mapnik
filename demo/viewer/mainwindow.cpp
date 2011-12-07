@@ -1,5 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
- * Copyright (C) 2006 Artem Pavlenko
+ *
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -47,42 +48,42 @@
 MainWindow::MainWindow()
     : filename_(),
       default_extent_(-20037508.3428,-20037508.3428,20037508.3428,20037508.3428)
-{        
+{
     mapWidget_ = new MapWidget(this);
-    QSplitter *splitter = new QSplitter(this); 
+    QSplitter *splitter = new QSplitter(this);
     QTabWidget *tabWidget=new QTabWidget;
     layerTab_ = new LayerTab;
     layerTab_->setFocusPolicy(Qt::NoFocus);
     layerTab_->setIconSize(QSize(16,16));
-      
-    //LayerDelegate *delegate = new LayerDelegate(this);   
+
+    //LayerDelegate *delegate = new LayerDelegate(this);
     //layerTab_->setItemDelegate(delegate);
     //layerTab_->setItemDelegate(new QItemDelegate(this));
     //layerTab_->setViewMode(QListView::IconMode);
-   
+
     layerTab_->setFlow(QListView::TopToBottom);
     tabWidget->addTab(layerTab_,tr("Layers"));
 
     // Styles tab
     styleTab_ = new StyleTab;
-    tabWidget->addTab(styleTab_,tr("Styles"));   
+    tabWidget->addTab(styleTab_,tr("Styles"));
     splitter->addWidget(tabWidget);
     splitter->addWidget(mapWidget_);
     QList<int> list;
     list.push_back(200);
     list.push_back(600);
     splitter->setSizes(list);
-    
+
     mapWidget_->setFocusPolicy(Qt::StrongFocus);
     mapWidget_->setFocus();
-   
+
     //setCentralWidget(mapWidget_);
     setCentralWidget(splitter);
     createActions();
     createMenus();
     createToolBars();
     createContextMenu();
-    
+
     setWindowTitle(tr("Mapnik Viewer"));
     status=new QStatusBar(this);
     status->showMessage(tr(""));
@@ -91,11 +92,11 @@ MainWindow::MainWindow()
 
     //connect mapview to layerlist
     connect(mapWidget_, SIGNAL(mapViewChanged()),layerTab_, SLOT(update()));
-    // slider 
+    // slider
     connect(slider_,SIGNAL(valueChanged(int)),mapWidget_,SLOT(zoomToLevel(int)));
-    // 
+    //
     connect(layerTab_,SIGNAL(update_mapwidget()),mapWidget_,SLOT(updateMap()));
-    connect(layerTab_,SIGNAL(layerSelected(int)), 
+    connect(layerTab_,SIGNAL(layerSelected(int)),
             mapWidget_,SLOT(layerSelected(int)));
 }
 
@@ -128,21 +129,21 @@ void MainWindow::open(QString const& path)
     {
         filename_ = path;
     }
-    
+
     if (!filename_.isEmpty())
     {
-        
+
         load_map_file(filename_);
         setWindowTitle(tr("%1 - Mapnik Viewer").arg(filename_));
     }
-    
+
 }
 
 void MainWindow::reload()
 {
     if (!filename_.isEmpty())
     {
-        
+
         mapnik::box2d<double> bbox = mapWidget_->getMap()->get_current_extent();
         load_map_file(filename_);
         mapWidget_->zoomToBox(bbox);
@@ -157,7 +158,7 @@ void MainWindow::save()
                                                     initialPath,
                                                     tr("%1 Files (*.xml)")
                                                     .arg(QString("Mapnik definition")));
-    if (!filename.isEmpty()) 
+    if (!filename.isEmpty())
     {
         std::cout<<"saving "<< filename.toStdString() << std::endl;
         mapnik::save_map(*mapWidget_->getMap(),filename.toStdString());
@@ -166,16 +167,16 @@ void MainWindow::save()
 
 void MainWindow::load_map_file(QString const& filename)
 {
-    std::cout<<"loading "<< filename.toStdString() << std::endl;    
+    std::cout<<"loading "<< filename.toStdString() << std::endl;
     unsigned width = mapWidget_->width();
     unsigned height = mapWidget_->height();
-    boost::shared_ptr<mapnik::Map> map(new mapnik::Map(width,height)); 
+    boost::shared_ptr<mapnik::Map> map(new mapnik::Map(width,height));
     mapWidget_->setMap(map);
-    try 
-    {  
+    try
+    {
         mapnik::load_map(*map,filename.toStdString());
     }
-    catch (mapnik::config_error & ex) 
+    catch (mapnik::config_error & ex)
     {
         std::cout << ex.what() << "\n";
     }
@@ -195,7 +196,7 @@ void MainWindow::zoom_to_box()
 
 void MainWindow::pan()
 {
-    mapWidget_->setTool(MapWidget::Pan);   
+    mapWidget_->setTool(MapWidget::Pan);
 }
 
 void MainWindow::info()
@@ -240,7 +241,7 @@ void MainWindow::export_as()
                                                     tr("%1 Files (*.%2);;All Files (*)")
                                                     .arg(QString(fileFormat.toUpper()))
                                                     .arg(QString(fileFormat)));
-    if (!fileName.isEmpty()) 
+    if (!fileName.isEmpty())
     {
         QPixmap const& pix = mapWidget_->pixmap();
         pix.save(fileName);
@@ -248,8 +249,8 @@ void MainWindow::export_as()
 }
 
 void MainWindow::print()
-{    
-   
+{
+
     //Q_ASSERT(mapWidget_->pixmap());
     //QPrintDialog dialog(&printer, this);
     //if (dialog.exec()) {
@@ -264,31 +265,31 @@ void MainWindow::print()
 }
 
 void MainWindow::createActions()
-{ 
+{
     //exportAct = new QAction(tr("&Export as ..."),this);
     //exportAct->setShortcut(tr("Ctrl+E"));
     //connect(exportAct, SIGNAL(triggered()), this, SLOT(export_as()));
     zoomAllAct = new QAction(QIcon(":/images/home.png"),tr("Zoom All"),this);
     connect(zoomAllAct, SIGNAL(triggered()), this, SLOT(zoom_all()));
-    
+
     zoomBoxAct = new QAction(QIcon(":/images/zoombox.png"),tr("Zoom To Box"),this);
     zoomBoxAct->setCheckable(true);
     connect(zoomBoxAct, SIGNAL(triggered()), this, SLOT(zoom_to_box()));
-    
+
     panAct = new QAction(QIcon(":/images/pan.png"),tr("Pan"),this);
     panAct->setCheckable(true);
     connect(panAct, SIGNAL(triggered()), this, SLOT(pan()));
-    
+
     infoAct = new QAction(QIcon(":/images/info.png"),tr("Info"),this);
     infoAct->setCheckable(true);
     connect(infoAct, SIGNAL(triggered()), this, SLOT(info()));
-   
+
     toolsGroup=new QActionGroup(this);
     toolsGroup->addAction(zoomBoxAct);
     toolsGroup->addAction(panAct);
     toolsGroup->addAction(infoAct);
     zoomBoxAct->setChecked(true);
-       
+
     openAct=new QAction(tr("Open Map definition"),this);
     connect(openAct,SIGNAL(triggered()),this,SLOT(open()));
     saveAct=new QAction(tr("Save Map definition"),this);
@@ -302,27 +303,27 @@ void MainWindow::createActions()
     connect(panUpAct, SIGNAL(triggered()), this, SLOT(pan_up()));
     panDownAct = new QAction(QIcon(":/images/down.png"),tr("&Pan Down"),this);
     connect(panDownAct, SIGNAL(triggered()), this, SLOT(pan_down()));
-   
+
     reloadAct = new QAction(QIcon(":/images/reload.png"),tr("Reload"),this);
     connect(reloadAct, SIGNAL(triggered()), this, SLOT(reload()));
-   
+
     layerInfo = new QAction(QIcon(":/images/info.png"),tr("&Layer info"),layerTab_);
     connect(layerInfo, SIGNAL(triggered()), layerTab_,SLOT(layerInfo()));
     connect(layerTab_, SIGNAL(doubleClicked(QModelIndex const&)), layerTab_,SLOT(layerInfo2(QModelIndex const&)));
-    foreach (QByteArray format, QImageWriter::supportedImageFormats()) 
+    foreach (QByteArray format, QImageWriter::supportedImageFormats())
     {
         QString text = tr("%1...").arg(QString(format).toUpper());
-      
+
         QAction *action = new QAction(text, this);
         action->setData(format);
         connect(action, SIGNAL(triggered()), this, SLOT(export_as()));
         exportAsActs.append(action);
     }
-   
+
     printAct = new QAction(QIcon(":/images/print.png"),tr("&Print ..."),this);
     printAct->setShortcut(tr("Ctrl+E"));
     connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
-    
+
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcut(tr("Ctrl+Q"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
@@ -335,8 +336,8 @@ void MainWindow::createMenus()
 {
     exportMenu = new QMenu(tr("&Export As"), this);
     foreach (QAction *action, exportAsActs)
-        exportMenu->addAction(action); 
-        
+        exportMenu->addAction(action);
+
     fileMenu = new QMenu(tr("&File"),this);
     fileMenu->addAction(openAct);
     fileMenu->addAction(saveAct);
@@ -345,7 +346,7 @@ void MainWindow::createMenus()
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
     menuBar()->addMenu(fileMenu);
-    
+
     helpMenu = new QMenu(tr("&Help"), this);
     helpMenu->addAction(aboutAct);
     menuBar()->addMenu(helpMenu);
@@ -377,10 +378,10 @@ void MainWindow::createToolBars()
 
 void MainWindow::set_default_extent(double x0,double y0, double x1, double y1)
 {
-    try 
+    try
     {
         boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
-        if (map_ptr) 
+        if (map_ptr)
         {
             mapnik::projection prj(map_ptr->srs());
             prj.forward(x0,y0);
@@ -401,7 +402,7 @@ void MainWindow::set_scaling_factor(double scaling_factor)
 void MainWindow::zoom_all()
 {
     boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
-    if (map_ptr) 
+    if (map_ptr)
     {
         map_ptr->zoom_all();
         mapnik::box2d<double> const& ext = map_ptr->get_current_extent();

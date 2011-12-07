@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
@@ -38,14 +38,14 @@ using mapnik::parse_path;
 namespace {
 using namespace boost::python;
 
-const std::string get_filename(line_pattern_symbolizer const& t) 
-{ 
-    return path_processor_type::to_string(*t.get_filename()); 
+const std::string get_filename(line_pattern_symbolizer const& t)
+{
+    return path_processor_type::to_string(*t.get_filename());
 }
 
-void set_filename(line_pattern_symbolizer & t, std::string const& file_expr) 
-{ 
-    t.set_filename(parse_path(file_expr)); 
+void set_filename(line_pattern_symbolizer & t, std::string const& file_expr)
+{
+    t.set_filename(parse_path(file_expr));
 }
 
 }
@@ -56,7 +56,7 @@ struct line_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
     getinitargs(const line_pattern_symbolizer& l)
     {
         std::string filename = path_processor_type::to_string(*l.get_filename());
-        // FIXME : Do we need "type" parameter at all ?  
+        // FIXME : Do we need "type" parameter at all ?
         return boost::python::make_tuple(filename, guess_type(filename));
     }
 };
@@ -64,16 +64,16 @@ struct line_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
 void export_line_pattern_symbolizer()
 {
     using namespace boost::python;
-    
+
     class_<line_pattern_symbolizer>("LinePatternSymbolizer",
                                     init<path_expression_ptr>
                                     ("<image file expression>"))
         //.def_pickle(line_pattern_symbolizer_pickle_suite())
         .add_property("transform",
-              mapnik::get_svg_transform<line_pattern_symbolizer>,
-              mapnik::set_svg_transform<line_pattern_symbolizer>)
+                      mapnik::get_svg_transform<line_pattern_symbolizer>,
+                      mapnik::set_svg_transform<line_pattern_symbolizer>)
         .add_property("filename",
                       &get_filename,
                       &set_filename)
-        ;    
+        ;
 }

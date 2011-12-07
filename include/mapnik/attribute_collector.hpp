@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,20 +20,20 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef ATTRIBUTE_COLLECTOR_HPP
-#define ATTRIBUTE_COLLECTOR_HPP
+#ifndef MAPNIK_ATTRIBUTE_COLLECTOR_HPP
+#define MAPNIK_ATTRIBUTE_COLLECTOR_HPP
 
 // mapnik
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/path_expression_grammar.hpp>
 #include <mapnik/parse_path.hpp>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/variant.hpp>
 #include <boost/concept_check.hpp>
+
 // stl
 #include <set>
 #include <iostream>
@@ -271,4 +271,4 @@ private:
 
 } // namespace mapnik
 
-#endif //ATTRIBUTE_COLLECTOR_HPP
+#endif // MAPNIK_ATTRIBUTE_COLLECTOR_HPP

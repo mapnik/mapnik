@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2007 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,26 +19,27 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef OGR_FEATURE_PTR_HPP
 #define OGR_FEATURE_PTR_HPP
 
 // ogr
 #include <ogrsf_frmts.h>
-  
+
 class ogr_feature_ptr
 {
 public:
-    ogr_feature_ptr (OGRFeature* const feat)
-        : feat_ (feat)
+    ogr_feature_ptr(OGRFeature* const feat)
+        : feat_(feat)
     {
     }
-    
-    ~ogr_feature_ptr ()
+
+    ~ogr_feature_ptr()
     {
         if (feat_ != NULL)
-            OGRFeature::DestroyFeature (feat_);
+        {
+            OGRFeature::DestroyFeature(feat_);
+        }
     }
 
     OGRFeature* operator*()
@@ -51,4 +52,3 @@ private:
 };
 
 #endif // OGR_FEATURE_PTR_HPP
-

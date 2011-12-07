@@ -2,7 +2,7 @@
  * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,17 +20,16 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#ifndef FILL_HPP
-#define FILL_HPP
+#ifndef MAPNIK_FILL_HPP
+#define MAPNIK_FILL_HPP
 
 namespace mapnik
 {
+
 class fill 
 {
-        
 };
+
 }
 
-#endif //FILL_HPP
+#endif // MAPNIK_FILL_HPP
