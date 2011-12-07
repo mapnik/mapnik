@@ -140,34 +140,6 @@ def strip_first(string,find,replace=''):
         return string.replace(find,replace,1)
     return string
 
-def get_libtool_major_version():
-    """libtool >= 2.1b support lt_dlopenadvise and the previous
-    release appears to be 1.9f (based on NEWS) so checking for 
-    >= 2 seems adequate.
-    """
-    cmd = 'libtool'
-    if platform.uname()[0] == "Darwin":
-        cmd = 'glibtool'
-    version = None
-    fallback_version = 2
-    pattern = r'(.*[^\S])(\d{1}\.\d+\.?\d?)(.*[^\S])'
-    ret = os.popen('%s --version' % cmd).read()
-    match = re.match(pattern,ret)
-    if match:
-        groups = match.groups()
-        if len(groups):
-            version_string = groups[1]
-            if version_string:
-                version_string = version_string.split('.')[0]
-                try:
-                    version = int(version_string)
-                except ValueError:
-                    pass
-    if not version:
-        color_print(1,'Could not detect libtool --version, assuming major version 2')
-        return fallback_version
-    return version
-
 # http://www.scons.org/wiki/InstallTargets
 def create_uninstall_target(env, path, is_glob=False):
     if 'uninstall' in COMMAND_LINE_TARGETS:
@@ -430,7 +402,6 @@ pickle_store = [# Scons internal variables
         'HAS_CAIRO',
         'HAS_PYCAIRO',
         'HAS_LIBXML2',
-        'LIBTOOL_SUPPORTS_ADVISE',
         'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
         'PKG_CONFIG_PATH',
@@ -972,8 +943,6 @@ if not preconfigured:
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
     
-    env['LIBTOOL_SUPPORTS_ADVISE'] = get_libtool_major_version() >= 2
-
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
     env['HAS_CAIRO'] = False
