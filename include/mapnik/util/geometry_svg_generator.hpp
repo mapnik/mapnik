@@ -22,8 +22,8 @@
 
 //$Id$
 
-#ifndef MAPNIK_GEOMETRY_TO_SVG_HPP
-#define MAPNIK_GEOMETRY_TO_SVG_HPP
+#ifndef MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
+#define MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -62,4 +62,4 @@ bool generate_svg (OutputIterator sink, mapnik::geometry_type const& geom)
 
 }}
 
-#endif // MAPNIK_GEOMETRY_TO_SVG_HPP
+#endif // MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
