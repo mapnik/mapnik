@@ -143,7 +143,7 @@ struct wkt_generator :
     karma::rule<OutputIterator, geometry_type const& ()> coords;
     karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> coords2;
     karma::rule<OutputIterator, geometry_type::value_type ()> point_coord;
-    karma::rule<OutputIterator, geometry_type::value_type (unsigned& )> polygon_coord;
+    karma::rule<OutputIterator, geometry_type::value_type const& (unsigned& )> polygon_coord;
     
     // phoenix functions
     phoenix::function<get_type > _type;
