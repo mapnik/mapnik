@@ -32,6 +32,7 @@
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/util/geometry_to_wkb.hpp>
+#include <mapnik/util/geometry_to_wkt.hpp>
 
 namespace {
 
@@ -88,6 +89,16 @@ PyObject* to_wkb( geometry_type const& geom)
         ((const char*)wkb->buffer(),wkb->size());
 }
 
+std::string to_wkt( geometry_type const& geom)
+{
+    std::string wkt; // Use Python String directly ?
+    bool result = mapnik::util::to_wkt(wkt,geom);
+    if (!result) 
+    {
+        throw std::runtime_error("Generate WKT failed");
+    }
+    return wkt;
+}
 
 void export_geometry()
 {
@@ -105,6 +116,7 @@ void export_geometry()
         // .def("__str__",&geometry_type::to_string)
         .def("type",&geometry_type::type)
         .def("to_wkb",&to_wkb)
+        .def("to_wkt",&to_wkt)
         // TODO add other geometry_type methods
         ;
 
