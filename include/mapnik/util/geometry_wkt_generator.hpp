@@ -22,8 +22,8 @@
 
 //$Id$
 
-#ifndef MAPNIK_GEOMETRY_TO_WKT_HPP
-#define MAPNIK_GEOMETRY_TO_WKT_HPP
+#ifndef MAPNIK_GEOMETRY_WKT_GENERATOR_HPP
+#define MAPNIK_GEOMETRY_WKT_GENERATOR_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -89,14 +89,11 @@ struct wkt_generator :
     wkt_generator()
         : wkt_generator::base_type(wkt)
     {
-        using boost::spirit::karma::double_;
         using boost::spirit::karma::uint_;
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
-        using boost::spirit::karma::_2;
         using boost::spirit::karma::lit;
         using boost::spirit::karma::_a;
-        using boost::spirit::karma::_r0;
         using boost::spirit::karma::_r1;
         using boost::spirit::karma::eps;
         
@@ -159,4 +156,4 @@ struct wkt_generator :
 }}
 
 
-#endif // MAPNIK_GEOMETRY_TO_WKT_HPP
+#endif // MAPNIK_GEOMETRY_WKT_GENERATOR_HPP
