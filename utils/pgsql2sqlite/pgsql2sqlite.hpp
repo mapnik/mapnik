@@ -47,27 +47,6 @@
 
 namespace mapnik {
 
-/*
-struct blob_to_hex
-{
-    std::string operator() (const char* blob, unsigned size)
-    {
-        std::string buf;
-        buf.reserve(size*2);
-        std::ostringstream s(buf);
-        s.seekp(0);
-        char hex[3];
-        std::memset(hex,0,3);
-        for ( unsigned pos=0; pos < size; ++pos)
-        {
-            std::sprintf (hex, "%02X", int(blob[pos]) & 0xff);
-            s << hex;
-        }
-        return s.str();
-    }
-};
-*/
-
 template <typename Connection>
 void pgsql2sqlite(Connection conn,
                   std::string const& query,
@@ -316,8 +295,6 @@ void pgsql2sqlite(Connection conn,
                                 empty_geom = false;
                             }
                         }
-
-                        //output_rec.push_back(sqlite::value_type("X'" + hex(buf,size) + "'"));
                         output_rec.push_back(sqlite::blob(buf,size));
                     }
                     else
