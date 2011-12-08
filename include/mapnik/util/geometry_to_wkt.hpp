@@ -29,7 +29,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/vertex_iterator.hpp>
-#include <mapnik/geometry_wkt_generator.hpp>
+#include <mapnik/util/geometry_wkt_generator.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
@@ -42,7 +42,7 @@ bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom)
 {
     typedef std::back_insert_iterator<std::string> sink_type;
     sink_type sink(wkt);
-    mapnik::util::wkt_generator<sink_type> generator;
+    wkt_generator<sink_type> generator;
     bool result = karma::generate(sink, generator, geom);
     return result;
 }
