@@ -26,13 +26,18 @@
 #include <boost/python/manage_new_object.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkb.hpp>
+
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
+#endif
 
 namespace {
 
@@ -79,6 +84,7 @@ boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
 
 PyObject* to_wkb( geometry_type const& geom)
 {
+#if BOOST_VERSION >= 104700
     mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::util::wkbXDR);
     return
 #if PY_VERSION_HEX >= 0x03000000
@@ -87,10 +93,16 @@ PyObject* to_wkb( geometry_type const& geom)
         ::PyString_FromStringAndSize
 #endif
         ((const char*)wkb->buffer(),wkb->size());
+#else
+    std::ostringstream s;
+    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+    throw std::runtime_error("mapnik::to_wkb() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+#endif
 }
 
 std::string to_wkt( geometry_type const& geom)
 {
+#if BOOST_VERSION >= 104700
     std::string wkt; // Use Python String directly ?
     bool result = mapnik::util::to_wkt(wkt,geom);
     if (!result) 
@@ -98,6 +110,11 @@ std::string to_wkt( geometry_type const& geom)
         throw std::runtime_error("Generate WKT failed");
     }
     return wkt;
+#else
+    std::ostringstream s;
+    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+#endif
 }
 
 void export_geometry()
