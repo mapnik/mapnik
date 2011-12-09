@@ -779,7 +779,13 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
     cairo_context context(context_);
 
     color const& fill = sym.get_fill();
-    double height = 0.7071 * sym.height(); // height in meters
+    double height = 0.0;
+	expression_ptr height_expr = sym.height();
+	if (height_expr)
+	{
+		value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
+		height = 0.7071 * result.to_double();
+	}
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
