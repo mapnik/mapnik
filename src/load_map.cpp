@@ -1915,9 +1915,8 @@ void map_parser::parse_building_symbolizer( rule & rule, ptree const & sym )
         optional<double> opacity = get_opt_attr<double>(sym, "fill-opacity");
         if (opacity) building_sym.set_opacity(*opacity);
         // height
-        // TODO - expression
-        optional<double> height = get_opt_attr<double>(sym, "height");
-        if (height) building_sym.set_height(*height);
+        optional<std::string> height = get_opt_attr<std::string>(sym, "height");
+        if (height) building_sym.set_height(parse_expression(*height, "utf8"));
 
         parse_metawriter_in_symbolizer(building_sym, sym);
         rule.append(building_sym);
