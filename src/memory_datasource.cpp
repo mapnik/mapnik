@@ -107,6 +107,11 @@ size_t memory_datasource::size() const
     return features_.size();
 }
 
+void memory_datasource::clear()
+{
+    features_.clear();
+}
+
 // point_datasource
 
 void point_datasource::add_point(double x, double y, const char* key, const char* value)
