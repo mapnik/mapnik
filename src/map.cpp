@@ -87,6 +87,7 @@ Map::Map(const Map& rhs)
       background_image_(rhs.background_image_),
       styles_(rhs.styles_),
       metawriters_(rhs.metawriters_),
+      fontsets_(rhs.fontsets_),
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
       current_extent_(rhs.current_extent_),
@@ -106,6 +107,7 @@ Map& Map::operator=(const Map& rhs)
     background_image_=rhs.background_image_;
     styles_=rhs.styles_;
     metawriters_ = rhs.metawriters_;
+    fontsets_ = rhs.fontsets_;
     layers_=rhs.layers_;
     aspectFixMode_=rhs.aspectFixMode_;
     maximum_extent_=rhs.maximum_extent_;
