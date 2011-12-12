@@ -46,6 +46,7 @@ layer::layer(std::string const& name, std::string const& srs)
       queryable_(false),
       clear_label_cache_(false),
       cache_features_(false),
+      group_by_(""),
       ds_() {}
     
 layer::layer(const layer& rhs)
@@ -59,6 +60,7 @@ layer::layer(const layer& rhs)
       queryable_(rhs.queryable_),
       clear_label_cache_(rhs.clear_label_cache_),
       cache_features_(rhs.cache_features_),
+      group_by_(rhs.group_by_),
       styles_(rhs.styles_),
       ds_(rhs.ds_) {}
     
@@ -86,6 +88,7 @@ void layer::swap(const layer& rhs)
     queryable_=rhs.queryable_;
     clear_label_cache_ = rhs.clear_label_cache_;
     cache_features_ = rhs.cache_features_;
+    group_by_ = rhs.group_by_;
     styles_=rhs.styles_;
     ds_=rhs.ds_;
 }
@@ -226,6 +229,16 @@ void layer::set_cache_features(bool cache_features)
 bool layer::cache_features() const
 {
     return cache_features_;
+}
+
+void layer::set_group_by(std::string column)
+{
+    group_by_ = column;
+}
+
+std::string layer::group_by() const
+{
+    return group_by_;
 }
 
 }
