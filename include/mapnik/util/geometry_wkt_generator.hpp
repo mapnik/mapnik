@@ -78,6 +78,7 @@ struct coordinate_policy : karma::real_policies<T>
 {
     typedef boost::spirit::karma::real_policies<T> base_type;
     static int floatfield(T n) { return base_type::fmtflags::fixed; }
+    static unsigned precision(T n) { return 6u ;}
 };
 
 
