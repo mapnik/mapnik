@@ -89,23 +89,32 @@ struct multi_geometry_
 struct multi_geometry_type
 {
     template <typename T>
-    struct result { typedef unsigned type; };
+    struct result { typedef boost::tuple<unsigned,bool> type; };
     
-    unsigned operator() (geometry_container const& geom) const
+    boost::tuple<unsigned,bool> operator() (geometry_container const& geom) const
     {
         unsigned type = 0u;
+        bool collection = false;
+        
         geometry_container::const_iterator itr = geom.begin();
         geometry_container::const_iterator end = geom.end();
+        
         for ( ; itr != end; ++itr)
-        {
+        {            
+            if (type != 0 && itr->type() != type) 
+            {
+                collection = true;
+                break;
+            }
             type = itr->type();
         }
-        return  type;
+        return boost::tuple<unsigned,bool>(type, collection);
     }
 };
 
+
 template <typename T>
-struct coordinate_policy : karma::real_policies<T>
+struct wkt_coordinate_policy : karma::real_policies<T>
 {
     typedef boost::spirit::karma::real_policies<T> base_type;
     static int floatfield(T n) { return base_type::fmtflags::fixed; }
@@ -187,14 +196,15 @@ struct wkt_generator :
     phoenix::function<get_type > _type;
     phoenix::function<get_first> _first;
     //
-    karma::real_generator<double, coordinate_policy<double> > coord_type;
+    karma::real_generator<double, wkt_coordinate_policy<double> > coord_type;
     
 };
 
 
+
 template <typename OutputIterator>
 struct wkt_multi_generator : 
-        karma::grammar<OutputIterator, geometry_container const& ()>
+        karma::grammar<OutputIterator, karma::locals< boost::tuple<unsigned,bool> >, geometry_container const& ()>
 {
     
     wkt_multi_generator()
@@ -204,6 +214,7 @@ struct wkt_multi_generator :
         using boost::spirit::karma::eps;
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
+        using boost::spirit::karma::_a;
         
         geometry_types.add
             (mapnik::Point,"Point")
@@ -211,27 +222,34 @@ struct wkt_multi_generator :
             (mapnik::Polygon,"Polygon")
             ;
         
-        wkt =  eps(_multi(_val)) << "Multi" << geometry_types[_1 = _type(_val)] 
-                                 << "(" << multi_geometry << ")" | geometry_types[_1 = _type(_val)] 
-                                 << geometry
+        wkt =  eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)] 
+            << lit("GeometryCollection(") << geometry << lit(")")    
+            | eps(is_multi(_val)) << lit("Multi") << geometry_types[_1 = phoenix::at_c<0>(_a)] 
+            << "(" << multi_geometry << ")" 
+            |  geometry
             ;
-
-        geometry = *path  
+        
+        geometry =  -(single_geometry % lit(','))            
             ; 
+        
+        single_geometry = geometry_types[_1 = _type(_val)] << path 
+            ;
         
         multi_geometry = -(path % lit(',')) 
             ; 
         
     }
     // rules
-    karma::rule<OutputIterator, geometry_container const& ()> wkt;
+    karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >, geometry_container const& ()> wkt;
     karma::rule<OutputIterator, geometry_container const& ()> geometry;
+    karma::rule<OutputIterator, geometry_type const& ()> single_geometry;
     karma::rule<OutputIterator, geometry_container const& ()> multi_geometry;
     wkt_generator<OutputIterator>  path;
     // phoenix
-    phoenix::function<multi_geometry_> _multi;
-    phoenix::function<multi_geometry_type> _type;
-    //
+    phoenix::function<multi_geometry_> is_multi;
+    phoenix::function<multi_geometry_type> _multi_type;
+    phoenix::function<get_type > _type;
+    // 
     karma::symbols<unsigned, char const*> geometry_types;
 };
 
