@@ -647,11 +647,7 @@ void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
     {
         set_attr(rule_node, "name", r.get_name());
     }
-    if ( r.get_title() != dfl.get_title() )
-    {
-        set_attr(rule_node, "title", r.get_title());
-    }
-
+    
     if ( r.has_else_filter() )
     {
         rule_node.push_back( ptree::value_type(
