@@ -815,21 +815,12 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
 {
     ptree & layer_node = map_node.push_back(
         ptree::value_type("Layer", ptree()))->second;
+    
     if ( layer.name() != "" )
     {
         set_attr( layer_node, "name", layer.name() );
     }
-
-    if ( layer.abstract() != "" )
-    {
-        set_attr( layer_node, "abstract", layer.abstract() );
-    }
-
-    if ( layer.title() != "" )
-    {
-        set_attr( layer_node, "title", layer.title() );
-    }
-
+    
     if ( layer.srs() != "" )
     {
         set_attr( layer_node, "srs", layer.srs() );

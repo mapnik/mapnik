@@ -600,19 +600,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
         {
             lyr.setActive( * status );
         }
-
-        optional<std::string> title =  get_opt_attr<std::string>(lay, "title");
-        if (title)
-        {
-            lyr.set_title( * title );
-        }
-
-        optional<std::string> abstract =  get_opt_attr<std::string>(lay, "abstract");
-        if (abstract)
-        {
-            lyr.set_abstract( * abstract );
-        }
-
+        
         optional<double> minZoom = get_opt_attr<double>(lay, "minzoom");
         if (minZoom)
         {
