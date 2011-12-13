@@ -41,6 +41,7 @@ def is_py3():
 
 prefix = env['PREFIX']
 target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik')
+target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
 libraries = ['mapnik','png']
 
@@ -152,8 +153,7 @@ if 'install' in COMMAND_LINE_TARGETS:
     init_module = env.Install(target_path, init_files)
     env.Alias(target='install', source=init_module)
     # install mapnik2 module which redirects to mapnik and issues DeprecatedWarning
-    path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
-    init_mapnik2 = env.Install(path, 'mapnik2/__init__.py')
+    init_mapnik2 = env.Install(target_path_deprecated, 'mapnik2/__init__.py')
     env.Alias(target='install', source=init_mapnik2)
       
 # fix perms and install the custom generated 'paths.py' 
@@ -204,4 +204,5 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
 
 
 env['create_uninstall_target'](env, target_path)
+env['create_uninstall_target'](env, target_path_deprecated)
     
