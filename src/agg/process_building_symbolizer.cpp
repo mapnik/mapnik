@@ -71,8 +71,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
     expression_ptr height_expr = sym.height();
     if (height_expr)
     {
-    	value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
-    	height = result.to_double() * scale_factor_;
+        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
+        height = result.to_double() * scale_factor_;
     }
     
     for (unsigned i=0;i<feature.num_geometries();++i)
