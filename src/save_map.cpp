@@ -241,10 +241,9 @@ public:
         {
             set_attr( sym_node, "fill-opacity", sym.get_opacity() );
         }
-        if ( sym.height() != dfl.height() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "height", sym.height() );
-        }
+
+        set_attr( sym_node, "height", to_expression_string(*sym.height()) );
+
         add_metawriter_attributes(sym_node, sym);
     }
 

@@ -227,6 +227,25 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         query.add_property_name('bogus')
         fs = ds.features(query)
 
+    def test_that_leading_zeros_mean_strings(**kwargs):
+        ds = get_csv_ds('leading_zeros.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','fips'])
+        eq_(ds.field_types(),['int','int','str'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['fips'],'001')
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['fips'],'003')
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['fips'],'005')
+
 if __name__ == "__main__":
     setup()
     [eval(run)(visual=True) for run in dir() if 'test_' in run]
