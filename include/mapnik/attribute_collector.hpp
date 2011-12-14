@@ -213,6 +213,12 @@ struct symbolizer_attributes : public boost::static_visitor<>
 
     void operator () (building_symbolizer const& sym)
     {
+    	expression_ptr const& height_expr = sym.height();
+		if (height_expr)
+		{
+			expression_attributes f_attr(names_);
+			boost::apply_visitor(f_attr,*height_expr);
+		}
         collect_metawriter(sym);
     }
     // TODO - support remaining syms
