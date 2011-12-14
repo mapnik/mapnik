@@ -1,3 +1,0 @@
-mapniklibpath = '@PACKAGE_LIB_DIR@'
-inputpluginspath = mapniklibpath + '/input'
-fontscollectionpath = '@SYSTEM_FONTS_DIR@/truetype/ttf-dejavu'
