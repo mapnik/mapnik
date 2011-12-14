@@ -489,10 +489,12 @@ void csv_datasource::parse_csv(T& stream,
                             std::string::const_iterator str_beg = value.begin();
                             std::string::const_iterator str_end = value.end();
                             bool r = qi::phrase_parse(str_beg,str_end,
-                                                      (
-                                                          qi::lit("POINT") >> '(' >> double_[ref(x) = _1] >>  double_[ref(y) = _1] >> ')'
-                                                          ),
-                                                      ascii::space);
+                                      (
+                                          qi::lit("POINT") >> '('
+                                              >> double_[ref(x) = _1]
+                                              >>  double_[ref(y) = _1] >> ')'
+                                      ),
+                                      ascii::space);
 
                             if (r && (str_beg == str_end))
                             {
@@ -615,28 +617,27 @@ void csv_datasource::parse_csv(T& stream,
                     }
                 }
 
-                // add all values as attributes
-                // here we detect numbers and treat everything else as pure strings
-                // this is intentional since boolean and null types are not common in csv editors
-                if (value.empty())
-                {
-                    UnicodeString ustr = tr.transcode(value.c_str());
-                    boost::put(*feature,fld_name,ustr);
-                    if (feature_count == 1)
-                    {
-                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
-                    }
-                }
-                // only true strings are this long
-                else if (value_length > 20)
-                {
-                    UnicodeString ustr = tr.transcode(value.c_str());
-                    boost::put(*feature,fld_name,ustr);
-                    if (feature_count == 1)
-                    {
-                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
-                    }
+                // now, add all values as attributes
+                /* First we detect likely strings, then try parsing likely numbers,
+                   finally falling back to string type
+                   * We intentionally do not try to detect boolean or null types
+                     since they are not common in csv
+                   * Likely strings are either empty values, very long values
+                     or value with leading zeros like 001 (which are not safe
+                     to assume are numbers)
+                */
 
+                bool has_dot = value.find(".") != std::string::npos;
+                if (value.empty() ||
+                   (value_length > 20) ||
+                   (value_length > 1 && !has_dot && value[0] == '0'))
+                {
+                    UnicodeString ustr = tr.transcode(value.c_str());
+                    boost::put(*feature,fld_name,ustr);
+                    if (feature_count == 1)
+                    {
+                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                    }
                 }
                 else if ((value[0] >= '0' && value[0] <= '9') || value[0] == '-')
                 {
@@ -646,12 +647,14 @@ void csv_datasource::parse_csv(T& stream,
                     bool r = qi::phrase_parse(str_beg,str_end,qi::double_,ascii::space,float_val);
                     if (r && (str_beg == str_end))
                     {
-                        if (value.find(".") != std::string::npos)
+                        if (has_dot)
                         {
                             boost::put(*feature,fld_name,float_val);
                             if (feature_count == 1)
                             {
-                                desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Double));
+                                desc_.add_descriptor(
+                                    mapnik::attribute_descriptor(
+                                        fld_name,mapnik::Double));
                             }
                         }
                         else
@@ -660,7 +663,9 @@ void csv_datasource::parse_csv(T& stream,
                             boost::put(*feature,fld_name,val);
                             if (feature_count == 1)
                             {
-                                desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::Integer));
+                                desc_.add_descriptor(
+                                    mapnik::attribute_descriptor(
+                                        fld_name,mapnik::Integer));
                             }
                         }
                     }
@@ -671,7 +676,9 @@ void csv_datasource::parse_csv(T& stream,
                         boost::put(*feature,fld_name,ustr);
                         if (feature_count == 1)
                         {
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                            desc_.add_descriptor(
+                                mapnik::attribute_descriptor(
+                                    fld_name,mapnik::String));
                         }
                     }
                 }
@@ -682,7 +689,9 @@ void csv_datasource::parse_csv(T& stream,
                     boost::put(*feature,fld_name,ustr);
                     if (feature_count == 1)
                     {
-                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
+                        desc_.add_descriptor(
+                            mapnik::attribute_descriptor(
+                                fld_name,mapnik::String));
                     }
                 }
             }
