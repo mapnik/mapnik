@@ -62,6 +62,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     key_field_(*params_.get<std::string>("key_field", "")),
     row_offset_(*params_.get<int>("row_offset", 0)),
     row_limit_(*params_.get<int>("row_limit", 0)),
+    intersects_token_("!intersects!"),
     desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
     format_(mapnik::wkbAuto)
 {
@@ -185,7 +186,8 @@ void sqlite_datasource::bind() const
     if (using_subquery_)
     {
         std::ostringstream s;
-        s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
+        std::string query = populate_tokens(table_);
+        s << "SELECT " << fields_ << " FROM (" << query << ") LIMIT 1";
         found_types_via_subquery = sqlite_utils::detect_types_from_subquery(s.str(),geometry_field_,desc_,dataset_);
     }
 
@@ -306,6 +308,7 @@ void sqlite_datasource::bind() const
     {
 
         // TODO - clean this up - reducing arguments
+        std::string query = populate_tokens(table_);
         if (!sqlite_utils::detect_extent(dataset_,
                                          has_spatial_index_,
                                          extent_,
@@ -314,7 +317,7 @@ void sqlite_datasource::bind() const
                                          geometry_field_,
                                          geometry_table_,
                                          key_field_,
-                                         table_))
+                                         query))
         {
             std::ostringstream s;
             s << "Sqlite Plugin: extent could not be determined for table '"
@@ -326,6 +329,17 @@ void sqlite_datasource::bind() const
         }
     }
     is_bound_ = true;
+}
+
+std::string sqlite_datasource::populate_tokens(const std::string& sql) const
+{
+    std::string populated_sql = sql;
+    if (boost::algorithm::ifind_first(populated_sql, intersects_token_))
+    {
+        // replace with dummy comparison that is true
+        boost::algorithm::ireplace_first(populated_sql, intersects_token_, "1=1");
+    }
+    return populated_sql;
 }
 
 sqlite_datasource::~sqlite_datasource()
@@ -465,12 +479,21 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         s << " FROM ";
 
-        std::string query (table_);
+        std::string query(table_);
 
         if (! key_field_.empty() && has_spatial_index_)
         {
             // TODO - debug warn if fails
-            sqlite_utils::apply_spatial_filter(query,e,table_,key_field_,index_table_,geometry_table_);
+            sqlite_utils::apply_spatial_filter(query,
+                                               e,
+                                               table_,
+                                               key_field_,
+                                               index_table_,
+                                               geometry_table_,
+                                               intersects_token_);        }
+        else
+        {
+            query = populate_tokens(table_);
         }
 
         s << query ;
@@ -534,7 +557,17 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         if (! key_field_.empty() && has_spatial_index_)
         {
             // TODO - debug warn if fails
-            sqlite_utils::apply_spatial_filter(query,e,table_,key_field_,index_table_,geometry_table_);
+            sqlite_utils::apply_spatial_filter(query,
+                                               e,
+                                               table_,
+                                               key_field_,
+                                               index_table_,
+                                               geometry_table_,
+                                               intersects_token_);
+        }
+        else
+        {
+            query = populate_tokens(table_);
         }
 
         s << query ;
