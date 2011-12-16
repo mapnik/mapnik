@@ -1,26 +1,26 @@
 <!DOCTYPE Map>
 <Map background-color="#b5d0d0" minimum-version="0.7.2">
     <Style name="test">
-        <Rule title="asia">
+        <Rule name="asia">
             <Filter>([REGION]=142)</Filter>
             <PointSymbolizer file="../images/dummy.png" allow-overlap="true"/>
         </Rule>
-        <Rule title="europe">
+        <Rule name="europe">
             <Filter>([REGION]=150)</Filter>
             <!-- requires at least Mapnik 0.7.1 to work due to http://trac.mapnik.org/ticket/508 -->
             <PolygonPatternSymbolizer file="../images/dummy.png"/>
         </Rule>
-        <Rule title="americas">
+        <Rule name="americas">
             <Filter>([REGION]=19)</Filter>
             <!-- requires at least Mapnik 0.7.1 to work due to http://trac.mapnik.org/ticket/508 -->
             <LinePatternSymbolizer file="../images/dummy.png"/>
         </Rule>
-        <Rule title="Africa">
+        <Rule name="Africa">
             <Filter>([REGION]=2)</Filter>
             <ShieldSymbolizer placement="vertex" size="10" fill="#000000" file="../images/dummy.png" face-name="DejaVu Sans Bold">[NAME]</ShieldSymbolizer>
         </Rule>
 
-        <Rule title="rest">
+        <Rule name="rest">
             <ElseFilter/>
             <LineSymbolizer stroke-width="1"/>
         </Rule>
