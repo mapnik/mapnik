@@ -469,19 +469,8 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         if (! key_field_.empty() && has_spatial_index_)
         {
-            std::ostringstream spatial_sql;
-            spatial_sql << std::setprecision(16);
-            spatial_sql << " WHERE " << key_field_ << " IN (SELECT pkid FROM " << index_table_;
-            spatial_sql << " WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
-            spatial_sql << " AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
-            if (boost::algorithm::ifind_first(query, "WHERE"))
-            {
-                boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
-            }
-            else if (boost::algorithm::ifind_first(query, geometry_table_))
-            {
-                boost::algorithm::ireplace_first(query, table_, table_ + " " + spatial_sql.str());
-            }
+            // TODO - debug warn if fails
+            sqlite_utils::apply_spatial_filter(query,e,table_,key_field_,index_table_,geometry_table_);
         }
 
         s << query ;
@@ -544,19 +533,8 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
 
         if (! key_field_.empty() && has_spatial_index_)
         {
-            std::ostringstream spatial_sql;
-            spatial_sql << std::setprecision(16);
-            spatial_sql << " WHERE " << key_field_ << " IN (SELECT pkid FROM " << index_table_;
-            spatial_sql << " WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
-            spatial_sql << " AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
-            if (boost::algorithm::ifind_first(query, "WHERE"))
-            {
-                boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
-            }
-            else if (boost::algorithm::ifind_first(query, geometry_table_))
-            {
-                boost::algorithm::ireplace_first(query, table_, table_ + " " + spatial_sql.str());
-            }
+            // TODO - debug warn if fails
+            sqlite_utils::apply_spatial_filter(query,e,table_,key_field_,index_table_,geometry_table_);
         }
 
         s << query ;
