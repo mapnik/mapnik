@@ -45,7 +45,7 @@ using mapnik::from_wkt;
 
 void feature_add_geometries_from_wkb(Feature &feature, std::string wkb)
 {
-    geometry_utils::from_wkb(feature.paths(), wkb.c_str(), wkb.size(), true);
+    geometry_utils::from_wkb(feature.paths(), wkb.c_str(), wkb.size());
 }
 
 void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)

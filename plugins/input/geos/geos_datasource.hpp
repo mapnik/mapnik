@@ -56,7 +56,6 @@ private:
     mutable std::string geometry_data_name_;
     mutable int geometry_id_;
     std::string geometry_string_;
-    bool multiple_geometries_;
 };
 
 #endif // GEOS_DATASOURCE_HPP

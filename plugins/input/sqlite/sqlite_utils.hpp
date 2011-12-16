@@ -151,11 +151,11 @@ public:
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = (const char*) rs->column_blob(0, size);
+            const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
                 boost::ptr_vector<mapnik::geometry_type> paths;
-                mapnik::geometry_utils::from_wkb(paths, data, size, false, mapnik::wkbAuto);
+                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
                 for (unsigned i=0; i<paths.size(); ++i)
                 {
                     mapnik::box2d<double> const& bbox = paths[i].envelope();
@@ -241,41 +241,47 @@ public:
                 if (data)
                 {
                     boost::ptr_vector<mapnik::geometry_type> paths;
-                    // TODO - contraint fails if multiple_geometries = true
-                    bool multiple_geometries = false;
-                    mapnik::geometry_utils::from_wkb(paths, data, size, multiple_geometries, mapnik::wkbAuto);
+                    mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
+                    mapnik::box2d<double> bbox;
                     for (unsigned i=0; i<paths.size(); ++i)
                     {
-                        mapnik::box2d<double> const& bbox = paths[i].envelope();
-                        if (bbox.valid())
+                        if (i==0)
                         {
-
-                            ps.bind(bbox);
-
-                            const int type_oid = rs->column_type(1);
-                            if (type_oid != SQLITE_INTEGER)
-                            {
-                                std::ostringstream error_msg;
-                                error_msg << "Sqlite Plugin: invalid type for key field '"
-                                          << rs->column_name(1) << "' when creating index '" << index_table
-                                          << "' type was: " << type_oid << "";
-                                throw mapnik::datasource_exception(error_msg.str());
-                            }
-
-                            const sqlite_int64 pkid = rs->column_integer64(1);
-                            ps.bind(pkid);
+                            bbox = paths[i].envelope();
                         }
                         else
                         {
+                            bbox.expand_to_include(paths[i].envelope());
+                        }
+                    }
+                    if (bbox.valid())
+                    {
+
+                        ps.bind(bbox);
+
+                        const int type_oid = rs->column_type(1);
+                        if (type_oid != SQLITE_INTEGER)
+                        {
                             std::ostringstream error_msg;
-                            error_msg << "SQLite Plugin: encountered invalid bbox at '"
-                                      << rs->column_name(1) << "' == " << rs->column_integer64(1);
+                            error_msg << "Sqlite Plugin: invalid type for key field '"
+                                      << rs->column_name(1) << "' when creating index '" << index_table
+                                      << "' type was: " << type_oid << "";
                             throw mapnik::datasource_exception(error_msg.str());
                         }
 
-                        ps.step_next();
-                        one_success = true;
+                        const sqlite_int64 pkid = rs->column_integer64(1);
+                        ps.bind(pkid);
                     }
+                    else
+                    {
+                        std::ostringstream error_msg;
+                        error_msg << "SQLite Plugin: encountered invalid bbox at '"
+                                  << rs->column_name(1) << "' == " << rs->column_integer64(1);
+                        throw mapnik::datasource_exception(error_msg.str());
+                    }
+
+                    ps.step_next();
+                    one_success = true;
                 }
             }
         }
@@ -320,13 +326,11 @@ public:
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = (const char*) rs->column_blob(0, size);
+            const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
                 boost::ptr_vector<mapnik::geometry_type> paths;
-                // TODO - contraint fails if multiple_geometries = true
-                bool multiple_geometries = false;
-                mapnik::geometry_utils::from_wkb(paths, data, size, multiple_geometries, mapnik::wkbAuto);
+                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
                 for (unsigned i=0; i<paths.size(); ++i)
                 {
                     mapnik::box2d<double> const& bbox = paths[i].envelope();
