@@ -37,8 +37,6 @@ namespace mapnik
 {   
 layer::layer(std::string const& name, std::string const& srs)
     : name_(name),
-      title_(""),
-      abstract_(""),
       srs_(srs),
       minZoom_(0),
       maxZoom_(std::numeric_limits<double>::max()),
@@ -51,8 +49,6 @@ layer::layer(std::string const& name, std::string const& srs)
     
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
-      title_(rhs.title_),
-      abstract_(rhs.abstract_),
       srs_(rhs.srs_),
       minZoom_(rhs.minZoom_),
       maxZoom_(rhs.maxZoom_),
@@ -79,8 +75,6 @@ bool layer::operator==(layer const& other) const
 void layer::swap(const layer& rhs)
 {
     name_=rhs.name_;
-    title_=rhs.title_;
-    abstract_=rhs.abstract_;
     srs_ = rhs.srs_;
     minZoom_=rhs.minZoom_;
     maxZoom_=rhs.maxZoom_;
@@ -103,26 +97,6 @@ void layer::set_name( std::string const& name)
 std::string const& layer::name() const
 {
     return name_;
-}
-
-void layer::set_title( std::string const& title)
-{
-    title_ = title;
-}
- 
-std::string const& layer::title() const
-{
-    return title_;
-}
-    
-void layer::set_abstract( std::string const& abstract)
-{
-    abstract_ = abstract;
-}
- 
-std::string const& layer::abstract() const
-{
-    return abstract_;
 }
 
 void layer::set_srs(std::string const& srs)

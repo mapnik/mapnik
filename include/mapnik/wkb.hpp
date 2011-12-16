@@ -27,6 +27,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature.hpp>
+// boost
+#include <boost/utility.hpp>
 
 namespace mapnik
 {
@@ -49,19 +51,14 @@ enum wkbFormat
     wkbSpatiaLite=3
 };
 
-class MAPNIK_DECL geometry_utils 
+class MAPNIK_DECL geometry_utils : private boost::noncopyable
 {
 public:
 
     static void from_wkb (boost::ptr_vector<geometry_type>& paths,
                           const char* wkb,
                           unsigned size,
-                          bool multiple_geometries = false,
                           wkbFormat format = wkbGeneric);
-private:
-    geometry_utils();
-    geometry_utils(geometry_utils const&);
-    geometry_utils& operator=(const geometry_utils&);
 };
 }
 

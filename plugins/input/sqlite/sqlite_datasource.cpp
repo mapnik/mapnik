@@ -102,7 +102,6 @@ void sqlite_datasource::bind() const
         throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
     }
 
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries", false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index", true);
 
     // TODO - remove this option once all datasources have an indexing api
@@ -502,7 +501,6 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         return boost::make_shared<sqlite_featureset>(rs,
                                                      desc_.get_encoding(),
                                                      format_,
-                                                     multiple_geometries_,
                                                      using_subquery_);
     }
 
@@ -577,9 +575,8 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         return boost::make_shared<sqlite_featureset>(rs,
                                                      desc_.get_encoding(),
                                                      format_,
-                                                     multiple_geometries_,
                                                      using_subquery_);
     }
-
+    
     return featureset_ptr();
 }

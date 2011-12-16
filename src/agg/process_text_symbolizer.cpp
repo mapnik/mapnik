@@ -44,7 +44,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
         
         if (geom.num_points() == 0) continue; // don't bother with empty geometries
         
-        if ((geom.type() == Polygon || geom.type() == MultiPolygon) && sym.get_minimum_path_length() > 0)
+        if ((geom.type() == Polygon) && sym.get_minimum_path_length() > 0)
         {
             // TODO - find less costly method than fetching full envelope
             box2d<double> gbox = t_.forward(geom.envelope(),prj_trans);

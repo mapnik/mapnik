@@ -53,15 +53,13 @@ geos_featureset::geos_featureset(GEOSGeometry* geometry,
                                  int identifier,
                                  const std::string& field,
                                  const std::string& field_name,
-                                 const std::string& encoding,
-                                 bool multiple_geometries)
+                                 const std::string& encoding)
     : geometry_(geometry),
       tr_(new transcoder(encoding)),
       extent_(extent),
       identifier_(identifier),
       field_(field),
       field_name_(field_name),
-      multiple_geometries_(multiple_geometries),
       already_rendered_(false)
 {
 }
@@ -120,14 +118,12 @@ feature_ptr geos_featureset::next()
 
                     geometry_utils::from_wkb(feature->paths(),
                                              wkb.data(),
-                                             wkb.size(),
-                                             multiple_geometries_);
-
+                                             wkb.size());
                     if (field_ != "")
                     {
                         boost::put(*feature, field_name_, tr_->transcode(field_.c_str()));
                     }
-
+                    
                     return feature;
                 }
             }
