@@ -1,11 +1,11 @@
 <!DOCTYPE Map>
 <Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum-version="0.7.2">
     <Style name="1">
-        <Rule title="foo1">
+        <Rule>
             <Filter>([name]='Brazil' or [name]='Mongolia' or [name]='Sudan')</Filter>
             <PointSymbolizer file="../svg/point_sm.svg" allow-overlap="true"/>
         </Rule>
-        <Rule title="foo">
+        <Rule>
             <ElseFilter/>
             <PointSymbolizer file="../svg/point_sm.svg" ignore-placement="true"/>
             <PointSymbolizer/>

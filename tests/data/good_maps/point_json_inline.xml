@@ -1,17 +1,17 @@
 <!DOCTYPE Map>
 <Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum-version="0.7.2">
     <Style name="1">
-        <Rule title="foo">
+        <Rule>
             <Filter>([x]=0)</Filter>
             <TextSymbolizer size="10" dy="-10" face-name="DejaVu Sans Book" halo-radius="1" allow-overlap="true">[label]</TextSymbolizer>
             <PointSymbolizer/>
         </Rule>
-        <Rule title="foo">
+        <Rule>
             <Filter>([y]=0)</Filter>
             <TextSymbolizer size="10" dy="5" face-name="DejaVu Sans Book" halo-radius="1">[label]</TextSymbolizer>
             <PointSymbolizer/>
         </Rule>
-        <Rule title="foo">
+        <Rule>
             <ElseFilter/>
             <TextSymbolizer size="10" dy="-5" face-name="DejaVu Sans Book" halo-radius="1">[label]</TextSymbolizer>
             <PointSymbolizer/>
