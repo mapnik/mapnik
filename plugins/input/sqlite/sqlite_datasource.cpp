@@ -224,7 +224,12 @@ void sqlite_datasource::bind() const
 
     if (geometry_field_.empty())
     {
-        throw datasource_exception("Sqlite Plugin: cannot detect geometry_field, please supply the name of the geometry_field to use.");
+        std::ostringstream s;
+        s << "Sqlite Plugin: unable to detect the column "
+          << "containing a valid geometry on table '" << geometry_table_ << "'. "
+          << "Please provide a column name by passing the 'geometry_field' option "
+          << "or indicate a different spatial table to use by passing the 'geometry_table' option";
+        throw datasource_exception(s.str());
     }
 
     if (index_table_.empty())
