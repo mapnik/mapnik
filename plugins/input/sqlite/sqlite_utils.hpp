@@ -568,6 +568,7 @@ public:
                     // PRAGMA table_info is used so here we assume the column is a string
                     // which is a lesser evil than altogether dropping the column
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
+                    break;
 
                 case SQLITE_BLOB:
                     if (geometry_field.empty()
