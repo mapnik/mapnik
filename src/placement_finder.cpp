@@ -293,7 +293,7 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
             // wrap text at first wrap_char after (default) the wrap width or immediately before the current word
             if ((c == '\n') ||
                 (line_width > 0 && (((line_width - character_spacing) > wrap_at && !p.wrap_before) ||
-                                   ((line_width + word_width - character_spacing) > wrap_at && p.wrap_before)) ))
+                                    ((line_width + word_width - character_spacing) > wrap_at && p.wrap_before)) ))
             {
                 // Remove width of breaking space character since it is not rendered and the character_spacing for the last character on the line
                 line_width -= (last_wrap_char_width + character_spacing);
@@ -381,12 +381,12 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
     x = -(line_width / 2.0);
     if (p.info.get_rtl()==false)
     {
-		y = (0.5 * (string_height + (line_spacing * (total_lines-1)))) - max_character_height;
-	}
-	else
-	{
-		y = -(0.5 * (string_height + (line_spacing * (total_lines-1)))) + max_character_height;
-	}
+        y = (0.5 * (string_height + (line_spacing * (total_lines-1)))) - max_character_height;
+    }
+    else
+    {
+        y = -(0.5 * (string_height + (line_spacing * (total_lines-1)))) + max_character_height;
+    }
 
     // if needed, adjust for desired justification (J_MIDDLE is the default)
     if( po->jalign == J_LEFT )
@@ -411,14 +411,14 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
             index_to_wrap_at = line_breaks[++line_number];
             line_width = line_widths[line_number];
 
-			if (p.info.get_rtl()==false)
-			{
-				y -= (max_character_height + line_spacing);  // move position down to line start
-			}
-			else
-			{
-				y += (max_character_height + line_spacing);  // move position up to line start
-			}            
+            if (p.info.get_rtl()==false)
+            {
+                y -= (max_character_height + line_spacing);  // move position down to line start
+            }
+            else
+            {
+                y += (max_character_height + line_spacing);  // move position up to line start
+            }            
 
             // reset to begining of line position
             x = ((po->jalign == J_LEFT)? -(string_width / 2.0): ((po->jalign == J_RIGHT)? ((string_width /2.0) - line_width): -(line_width / 2.0)));
@@ -467,9 +467,9 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
             if (p.minimum_padding > 0) 
             {
                 box2d<double> epad(e.minx()-p.minimum_padding,
-                                      e.miny()-p.minimum_padding,
-                                      e.maxx()+p.minimum_padding,
-                                      e.maxy()+p.minimum_padding);
+                                   e.miny()-p.minimum_padding,
+                                   e.maxx()+p.minimum_padding,
+                                   e.maxy()+p.minimum_padding);
                 if (!dimensions_.contains(epad)) 
                 {
                     return;
@@ -485,18 +485,18 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
     // check the placement of any additional envelopes
     if (!p.allow_overlap && !p.additional_boxes.empty())
     {
-       BOOST_FOREACH(box2d<double> box, p.additional_boxes) 
-       {
-          box2d<double> pt(box.minx() + current_placement->starting_x,
-                           box.miny() + current_placement->starting_y,
-                           box.maxx() + current_placement->starting_x,
-                           box.maxy() + current_placement->starting_y);
+        BOOST_FOREACH(box2d<double> box, p.additional_boxes) 
+        {
+            box2d<double> pt(box.minx() + current_placement->starting_x,
+                             box.miny() + current_placement->starting_y,
+                             box.maxx() + current_placement->starting_x,
+                             box.maxy() + current_placement->starting_y);
 
-          // abort the whole placement if the additional envelopes can't be placed.
-          if (!detector_.has_point_placement(pt, p.minimum_distance)) return;
+            // abort the whole placement if the additional envelopes can't be placed.
+            if (!detector_.has_point_placement(pt, p.minimum_distance)) return;
 
-          c_envelopes.push(pt);
-       }
+            c_envelopes.push(pt);
+        }
     }
 
     // since there was no early exit, add the character envelopes to the placements' envelopes
