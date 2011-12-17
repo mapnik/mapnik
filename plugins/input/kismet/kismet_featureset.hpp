@@ -50,7 +50,6 @@ private:
     const std::list<kismet_network_data>& knd_list_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     mapnik::wkbFormat format_;
-    bool multiple_geometries_;
     int feature_id_;
     std::list<kismet_network_data>::const_iterator knd_list_it;
     mapnik::projection source_;

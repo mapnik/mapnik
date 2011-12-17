@@ -64,7 +64,6 @@ private:
     mutable oracle::occi::StatelessConnectionPool* pool_;
     mutable oracle::occi::Connection* conn_;
     bool use_connection_pool_;
-    bool multiple_geometries_;
     bool use_spatial_index_;
     static const std::string METADATA_TABLE;
 };

@@ -49,11 +49,9 @@ using mapnik::feature_factory;
 
 postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                                        std::string const& encoding,
-                                       bool multiple_geometries,
                                        bool key_field=false,
                                        unsigned num_attrs=0)
     : rs_(rs),
-      multiple_geometries_(multiple_geometries),
       num_attrs_(num_attrs),
       tr_(new transcoder(encoding)),
       totalGeomSize_(0),
@@ -103,7 +101,7 @@ feature_ptr postgis_featureset::next()
         // parse geometry
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
-        geometry_utils::from_wkb(feature->paths(),data,size,multiple_geometries_);
+        geometry_utils::from_wkb(feature->paths(), data, size);
         totalGeomSize_+=size;
 
         for ( ;pos<num_attrs_+1;++pos)

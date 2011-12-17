@@ -69,7 +69,6 @@
 <!ELEMENT Layer (StyleName|Datasource)*>
 <!-- FIXME: queryable true/false ? -->
 <!ATTLIST Layer
-        abstract            CDATA    #IMPLIED
         clear_label_cache    (yes|1|no|0)    #IMPLIED
         minzoom                CDATA    "0"
         maxzoom                CDATA    #IMPLIED
@@ -77,7 +76,6 @@
         queryable            (true|on|1|false|off|0)    "0"
         srs                    CDATA    #IMPLIED
         status                (on|1|off|0)    "1"
-        title                CDATA    ""
         tolerance            CDATA    #IMPLIED
         toleranceunits        CDATA    #IMPLIED
 >
@@ -90,7 +88,6 @@
 <!-- FIXME: MapnikXMLDescription.pdf specified name is required?  -->
 <!ATTLIST Rule
           name        CDATA    #IMPLIED
-          title        CDATA    #IMPLIED
 >
 
 <!ELEMENT Filter (#PCDATA)>

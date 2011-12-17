@@ -42,7 +42,6 @@ public:
                     oracle::occi::Connection* conn,
                     std::string const& sqlstring,
                     std::string const& encoding,
-                    bool multiple_geometries,
                     bool use_connection_pool,
                     unsigned prefetch_rows,
                     unsigned num_attrs);
@@ -50,15 +49,14 @@ public:
     mapnik::feature_ptr next();
 
 private:
-    void convert_geometry (SDOGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
+    void convert_geometry (SDOGeometry* geom, mapnik::feature_ptr feature);
     void convert_ordinates (mapnik::feature_ptr feature,
                             const mapnik::eGeomType& geom_type,
                             const std::vector<oracle::occi::Number>& elem_info,
                             const std::vector<oracle::occi::Number>& ordinates,
                             const int dimensions,
                             const bool is_single_geom,
-                            const bool is_point_geom,
-                            const bool multiple_geometries);
+                            const bool is_point_geom);
     void fill_geometry_type (mapnik::geometry_type* geom,
                              const int real_offset,
                              const int next_offset,
@@ -70,7 +68,6 @@ private:
     oracle::occi::ResultSet* rs_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
-    bool multiple_geometries_;
     unsigned num_attrs_;
     mutable int feature_id_;
 };
