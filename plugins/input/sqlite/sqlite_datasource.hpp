@@ -70,6 +70,8 @@ private:
     mutable std::string key_field_;
     mutable int row_offset_;
     mutable int row_limit_;
+    // TODO - also add to postgis.input
+    const std::string intersects_token_;
     mutable mapnik::layer_descriptor desc_;
     mutable mapnik::wkbFormat format_;
     mutable bool use_spatial_index_;
@@ -80,6 +82,7 @@ private:
     // Fill init_statements with any statements
     // needed to attach auxillary databases
     void parse_attachdb(std::string const& attachdb) const;
+    std::string populate_tokens(const std::string& sql) const;
 };
 
 #endif // MAPNIK_SQLITE_DATASOURCE_HPP

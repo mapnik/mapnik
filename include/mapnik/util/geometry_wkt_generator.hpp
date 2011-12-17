@@ -68,7 +68,7 @@ struct get_type
 
     int operator() (geometry_type const& geom) const
     {
-        return (int)geom.type();
+        return static_cast<int>(geom.type());
     }
 };
 
