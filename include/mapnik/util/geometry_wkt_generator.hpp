@@ -43,6 +43,17 @@
 
 //#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
+namespace boost { namespace spirit { namespace traits {
+
+// make gcc and darwin toolsets happy.
+template <>
+struct is_container<mapnik::geometry_container>
+    : mpl::false_
+{};
+                                     
+}}}
+
+
 namespace mapnik { namespace util {
 
 namespace karma = boost::spirit::karma;
