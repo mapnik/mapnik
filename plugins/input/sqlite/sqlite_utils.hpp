@@ -108,6 +108,42 @@ public:
         //}
     }
 
+    static bool apply_spatial_filter(std::string & query,
+                                     mapnik::box2d<double> const& e,
+                                     std::string const& table,
+                                     std::string const& key_field,
+                                     std::string const& index_table,
+                                     std::string const& geometry_table,
+                                     std::string const& intersects_token)
+    {
+        std::ostringstream spatial_sql;
+        spatial_sql << std::setprecision(16);
+        spatial_sql << key_field << " IN (SELECT pkid FROM " << index_table;
+        spatial_sql << " WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
+        spatial_sql << " AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
+        if (boost::algorithm::ifind_first(query,  intersects_token))
+        {
+            boost::algorithm::ireplace_all(query, intersects_token, spatial_sql.str());
+            return true;
+        }
+        // substitute first WHERE found if not using JOIN
+        // (because we can't know the WHERE is on the right table)
+        else if (boost::algorithm::ifind_first(query, "WHERE")
+                 && !boost::algorithm::ifind_first(query, "JOIN"))
+        {
+            std::string replace(" WHERE " + spatial_sql.str() + " AND ");
+            boost::algorithm::ireplace_first(query, "WHERE", replace);
+            return true;
+        }
+        // fallback to appending spatial filter at end of query
+        else if (boost::algorithm::ifind_first(query, geometry_table))
+        {
+            query = table + " WHERE " + spatial_sql.str();
+            return true;
+        }
+        return false;
+    }
+
     static void get_tables(boost::shared_ptr<sqlite_connection> ds,
                            std::vector<std::string> & tables)
     {
@@ -572,6 +608,7 @@ public:
                     // PRAGMA table_info is used so here we assume the column is a string
                     // which is a lesser evil than altogether dropping the column
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
+                    break;
 
                 case SQLITE_BLOB:
                     if (geometry_field.empty()

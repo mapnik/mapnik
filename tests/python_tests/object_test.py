@@ -213,12 +213,10 @@ def test_layer_init():
     eq_(l.clear_label_cache,False)
     eq_(l.cache_features,False)
     eq_(l.visible(1),True)
-    eq_(l.abstract,'')
     eq_(l.active,True)
     eq_(l.datasource,None)
     eq_(l.queryable,False)
     eq_(l.srs,'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-    eq_(l.title,'')
 
 # Map initialization
 def test_map_init():
@@ -399,7 +397,6 @@ def test_rule_init():
     r = mapnik.Rule()
    
     eq_(r.name, '')
-    eq_(r.title, '')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
     eq_(r.has_else(), False)
@@ -420,34 +417,30 @@ def test_rule_init():
     r = mapnik.Rule("Name")
     
     eq_(r.name, 'Name')
-    eq_(r.title, '')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
     
-    r = mapnik.Rule("Name", "Title")
+    r = mapnik.Rule("Name")
     
     eq_(r.name, 'Name')
-    eq_(r.title, 'Title')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
     
-    r = mapnik.Rule("Name", "Title", min_scale)
+    r = mapnik.Rule("Name", min_scale)
     
     eq_(r.name, 'Name')
-    eq_(r.title, 'Title')
     eq_(r.min_scale, min_scale)
     eq_(r.max_scale, float('inf'))
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
     
-    r = mapnik.Rule("Name", "Title", min_scale, max_scale)
+    r = mapnik.Rule("Name", min_scale, max_scale)
     
     eq_(r.name, 'Name')
-    eq_(r.title, 'Title')
     eq_(r.min_scale, min_scale)
     eq_(r.max_scale, max_scale)
     eq_(r.has_else(), False)
