@@ -23,6 +23,8 @@
 #ifndef SHAPE_IO_HPP
 #define SHAPE_IO_HPP
 
+// mapnik
+#include <mapnik/geometry.hpp>
 // boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
@@ -56,9 +58,8 @@ public:
     ~shape_io();
 
     shape_file& shp();
-    //shape_file& shx();
     dbf_file& dbf();
-
+    
     inline boost::shared_ptr<shape_file>& index()
     {
         return index_;
@@ -72,16 +73,10 @@ public:
     void move_to(int id);
     int type() const;
     const box2d<double>& current_extent() const;
-    mapnik::geometry_type* read_polyline();
-    mapnik::geometry_type* read_polylinem();
-    mapnik::geometry_type* read_polylinez();
-    mapnik::geometry_type* read_polygon();
-    mapnik::geometry_type* read_polygonm();
-    mapnik::geometry_type* read_polygonz();
-
+    void read_polyline(mapnik::geometry_container & geom);
+    void read_polygon(mapnik::geometry_container & geom);
     unsigned type_;
     shape_file shp_;
-    //shape_file shx_;
     dbf_file   dbf_;
     boost::shared_ptr<shape_file> index_;
     unsigned reclength_;
@@ -89,7 +84,6 @@ public:
     box2d<double> cur_extent_;
 
     static const std::string SHP;
-    //static const std::string SHX;
     static const std::string DBF;
     static const std::string INDEX;
 };

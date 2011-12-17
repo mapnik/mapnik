@@ -108,6 +108,42 @@ public:
         //}
     }
 
+    static bool apply_spatial_filter(std::string & query,
+                                     mapnik::box2d<double> const& e,
+                                     std::string const& table,
+                                     std::string const& key_field,
+                                     std::string const& index_table,
+                                     std::string const& geometry_table,
+                                     std::string const& intersects_token)
+    {
+        std::ostringstream spatial_sql;
+        spatial_sql << std::setprecision(16);
+        spatial_sql << key_field << " IN (SELECT pkid FROM " << index_table;
+        spatial_sql << " WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
+        spatial_sql << " AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
+        if (boost::algorithm::ifind_first(query,  intersects_token))
+        {
+            boost::algorithm::ireplace_all(query, intersects_token, spatial_sql.str());
+            return true;
+        }
+        // substitute first WHERE found if not using JOIN
+        // (because we can't know the WHERE is on the right table)
+        else if (boost::algorithm::ifind_first(query, "WHERE")
+                 && !boost::algorithm::ifind_first(query, "JOIN"))
+        {
+            std::string replace(" WHERE " + spatial_sql.str() + " AND ");
+            boost::algorithm::ireplace_first(query, "WHERE", replace);
+            return true;
+        }
+        // fallback to appending spatial filter at end of query
+        else if (boost::algorithm::ifind_first(query, geometry_table))
+        {
+            query = table + " WHERE " + spatial_sql.str();
+            return true;
+        }
+        return false;
+    }
+
     static void get_tables(boost::shared_ptr<sqlite_connection> ds,
                            std::vector<std::string> & tables)
     {
@@ -151,11 +187,11 @@ public:
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = (const char*) rs->column_blob(0, size);
+            const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
                 boost::ptr_vector<mapnik::geometry_type> paths;
-                mapnik::geometry_utils::from_wkb(paths, data, size, false, mapnik::wkbAuto);
+                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
                 for (unsigned i=0; i<paths.size(); ++i)
                 {
                     mapnik::box2d<double> const& bbox = paths[i].envelope();
@@ -241,41 +277,47 @@ public:
                 if (data)
                 {
                     boost::ptr_vector<mapnik::geometry_type> paths;
-                    // TODO - contraint fails if multiple_geometries = true
-                    bool multiple_geometries = false;
-                    mapnik::geometry_utils::from_wkb(paths, data, size, multiple_geometries, mapnik::wkbAuto);
+                    mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
+                    mapnik::box2d<double> bbox;
                     for (unsigned i=0; i<paths.size(); ++i)
                     {
-                        mapnik::box2d<double> const& bbox = paths[i].envelope();
-                        if (bbox.valid())
+                        if (i==0)
                         {
-
-                            ps.bind(bbox);
-
-                            const int type_oid = rs->column_type(1);
-                            if (type_oid != SQLITE_INTEGER)
-                            {
-                                std::ostringstream error_msg;
-                                error_msg << "Sqlite Plugin: invalid type for key field '"
-                                          << rs->column_name(1) << "' when creating index '" << index_table
-                                          << "' type was: " << type_oid << "";
-                                throw mapnik::datasource_exception(error_msg.str());
-                            }
-
-                            const sqlite_int64 pkid = rs->column_integer64(1);
-                            ps.bind(pkid);
+                            bbox = paths[i].envelope();
                         }
                         else
                         {
+                            bbox.expand_to_include(paths[i].envelope());
+                        }
+                    }
+                    if (bbox.valid())
+                    {
+
+                        ps.bind(bbox);
+
+                        const int type_oid = rs->column_type(1);
+                        if (type_oid != SQLITE_INTEGER)
+                        {
                             std::ostringstream error_msg;
-                            error_msg << "SQLite Plugin: encountered invalid bbox at '"
-                                      << rs->column_name(1) << "' == " << rs->column_integer64(1);
+                            error_msg << "Sqlite Plugin: invalid type for key field '"
+                                      << rs->column_name(1) << "' when creating index '" << index_table
+                                      << "' type was: " << type_oid << "";
                             throw mapnik::datasource_exception(error_msg.str());
                         }
 
-                        ps.step_next();
-                        one_success = true;
+                        const sqlite_int64 pkid = rs->column_integer64(1);
+                        ps.bind(pkid);
                     }
+                    else
+                    {
+                        std::ostringstream error_msg;
+                        error_msg << "SQLite Plugin: encountered invalid bbox at '"
+                                  << rs->column_name(1) << "' == " << rs->column_integer64(1);
+                        throw mapnik::datasource_exception(error_msg.str());
+                    }
+
+                    ps.step_next();
+                    one_success = true;
                 }
             }
         }
@@ -320,13 +362,11 @@ public:
         while (rs->is_valid() && rs->step_next())
         {
             int size;
-            const char* data = (const char*) rs->column_blob(0, size);
+            const char* data = static_cast<const char*>(rs->column_blob(0, size));
             if (data)
             {
                 boost::ptr_vector<mapnik::geometry_type> paths;
-                // TODO - contraint fails if multiple_geometries = true
-                bool multiple_geometries = false;
-                mapnik::geometry_utils::from_wkb(paths, data, size, multiple_geometries, mapnik::wkbAuto);
+                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
                 for (unsigned i=0; i<paths.size(); ++i)
                 {
                     mapnik::box2d<double> const& bbox = paths[i].envelope();
@@ -568,6 +608,7 @@ public:
                     // PRAGMA table_info is used so here we assume the column is a string
                     // which is a lesser evil than altogether dropping the column
                     desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
+                    break;
 
                 case SQLITE_BLOB:
                     if (geometry_field.empty()

@@ -94,7 +94,6 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
         table_ = *table;
     }
 
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
     use_connection_pool_ = *params_.get<mapnik::boolean>("use_connection_pool",true);
 
@@ -559,8 +558,7 @@ featureset_ptr occi_datasource::features(query const& q) const
     return boost::make_shared<occi_featureset>(pool_,
                                                conn_,
                                                s.str(),
-                                               desc_.get_encoding(),
-                                               multiple_geometries_,
+                                               desc_.get_encoding(),                                              
                                                use_connection_pool_,
                                                row_prefetch_,
                                                props.size());
@@ -642,7 +640,6 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
                                                conn_,
                                                s.str(),
                                                desc_.get_encoding(),
-                                               multiple_geometries_,
                                                use_connection_pool_,
                                                row_prefetch_,
                                                size);

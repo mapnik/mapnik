@@ -42,8 +42,19 @@ bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom)
 {
     typedef std::back_insert_iterator<std::string> sink_type;
     sink_type sink(wkt);
-    wkt_generator<sink_type> generator;
-    bool result = karma::generate(sink, generator, geom);
+    // disable temporarily until compile works with g++
+    //wkt_generator<sink_type> generator(true);
+    bool result = false;//karma::generate(sink, generator, geom);
+    return result;
+}
+
+bool to_wkt(std::string & wkt, mapnik::geometry_container const& geom)
+{
+    typedef std::back_insert_iterator<std::string> sink_type;
+    sink_type sink(wkt);
+    // disable temporarily until compile works with g++
+    //wkt_multi_generator<sink_type> generator;
+    bool result = false;//karma::generate(sink, generator, geom);
     return result;
 }
 

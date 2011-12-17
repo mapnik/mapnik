@@ -132,8 +132,6 @@ public:
 private:
     
     std::string name_;
-    std::string title_;
-    std::string abstract_;
     double min_scale_;
     double max_scale_;
     symbolizers syms_;
@@ -143,8 +141,6 @@ private:
 public:
     rule()
         : name_(),
-          title_(),
-          abstract_(),
           min_scale_(0),
           max_scale_(std::numeric_limits<double>::infinity()),
           syms_(),
@@ -153,11 +149,9 @@ public:
           also_filter_(false) {}
     
     rule(const std::string& name,
-         const std::string& title="",
          double min_scale_denominator=0,
          double max_scale_denominator=std::numeric_limits<double>::infinity())
         : name_(name),
-          title_(title),
           min_scale_(min_scale_denominator),
           max_scale_(max_scale_denominator),
           syms_(),
@@ -167,8 +161,6 @@ public:
     
     rule(const rule& rhs, bool deep_copy = false)
         : name_(rhs.name_),
-          title_(rhs.title_),
-          abstract_(rhs.abstract_),
           min_scale_(rhs.min_scale_),
           max_scale_(rhs.max_scale_),
           syms_(rhs.syms_),
@@ -263,27 +255,7 @@ public:
     {
         return name_;
     }
-    
-    std::string const& get_title() const
-    {
-        return  title_;
-    }
-    
-    void set_title(std::string const& title)
-    {
-        title_=title;
-    }
-    
-    void set_abstract(std::string const& abstract)
-    {
-        abstract_=abstract;
-    }
-    
-    std::string const& get_abstract() const
-    {
-        return abstract_;
-    }
-    
+        
     void append(const symbolizer& sym)
     {
         syms_.push_back(sym);
@@ -362,8 +334,6 @@ private:
     void swap(rule& rhs) throw()
     {
         name_=rhs.name_;
-        title_=rhs.title_;
-        abstract_=rhs.abstract_;
         min_scale_=rhs.min_scale_;
         max_scale_=rhs.max_scale_;
         syms_=rhs.syms_;

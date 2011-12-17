@@ -69,7 +69,6 @@ class postgis_datasource : public datasource
     mutable mapnik::box2d<double> extent_;
     mutable layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
-    bool multiple_geometries_;
     const std::string bbox_token_;
     const std::string scale_denom_token_;
     bool persist_connection_;

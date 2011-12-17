@@ -577,8 +577,6 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
     s << "name,"
       << "srs,"
       << "status,"
-      << "title,"
-      << "abstract,"
       << "minzoom,"
       << "maxzoom,"
       << "queryable,"
@@ -600,19 +598,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
         {
             lyr.setActive( * status );
         }
-
-        optional<std::string> title =  get_opt_attr<std::string>(lay, "title");
-        if (title)
-        {
-            lyr.set_title( * title );
-        }
-
-        optional<std::string> abstract =  get_opt_attr<std::string>(lay, "abstract");
-        if (abstract)
-        {
-            lyr.set_abstract( * abstract );
-        }
-
+        
         optional<double> minZoom = get_opt_attr<double>(lay, "minzoom");
         if (minZoom)
         {
@@ -765,14 +751,12 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
 
 void map_parser::parse_rule( feature_type_style & style, ptree const & r )
 {
-    ensure_attrs(r, "Rule", "name,title");
+    ensure_attrs(r, "Rule", "name");
     std::string name;
     try
     {
         name = get_attr( r, "name", std::string());
-        std::string title = get_attr( r, "title", std::string());
-
-        rule rule(name,title);
+        rule rule(name);
 
         optional<std::string> filter_expr =
             get_opt_child<std::string>( r, "Filter");
