@@ -271,11 +271,10 @@ public:
     {
         if (deep_copy) {
             
-            std::string expr = to_expression_string(rhs.filter_);
+            std::string expr = to_expression_string(*filter_);
             filter_ = parse_expression(expr,"utf8");
-            
-            symbolizers::iterator it  = syms_.begin(),
-                                  end = syms_.end();
+            symbolizers::const_iterator it  = syms_.begin();
+            symbolizers::const_iterator end = syms_.end();
             
             // FIXME - metawriter_ptr?
             
