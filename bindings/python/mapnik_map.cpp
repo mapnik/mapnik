@@ -202,6 +202,7 @@ void export_map()
         ;
 
     python_optional<mapnik::color> ();
+    python_optional<mapnik::box2d<double> > ();
     class_<std::vector<layer> >("Layers")
         .def(vector_indexing_suite<std::vector<layer> >())
         ;
