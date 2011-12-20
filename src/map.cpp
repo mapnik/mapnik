@@ -204,14 +204,14 @@ bool Map::insert_fontset(std::string const& name, font_set const& fontset)
 {
     return fontsets_.insert(make_pair(name, fontset)).second;
 }
-         
-font_set const& Map::find_fontset(std::string const& name) const
+
+boost::optional<font_set const&>  Map::find_fontset(std::string const& name) const
 {
     std::map<std::string,font_set>::const_iterator itr = fontsets_.find(name);
-    if (itr!=fontsets_.end())
-        return itr->second;
-    static font_set default_fontset;
-    return default_fontset;
+    if (itr != fontsets_.end())
+        return boost::optional<font_set const&>(itr->second);
+    else
+        return boost::optional<font_set const&>() ;
 }
 
 std::map<std::string,font_set> const& Map::fontsets() const
