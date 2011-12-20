@@ -71,8 +71,7 @@ def test_shieldsymbolizer_init():
 
     eq_(s.transform, 'matrix(1, 0, 0, 1, 0, 0)')
         
-    raise Todo("FontSet pickling support needed: http://trac.mapnik.org/ticket/348")
-    eq_(s.fontset, '')
+    eq_(len(s.fontset.names), 0)
 
 
 # ShieldSymbolizer missing image file
