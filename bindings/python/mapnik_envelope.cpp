@@ -87,6 +87,14 @@ void (box2d<double>::*re_center_p2)(coord<double,2> const& ) = &box2d<double>::r
 // clip
 void (box2d<double>::*clip)(box2d<double> const&) = &box2d<double>::clip;
 
+// deepcopy
+box2d<double> box2d_deepcopy(box2d<double> & obj, boost::python::dict memo)
+{
+    // FIXME::ignore memo for now
+    box2d<double> result(obj);
+    return result;
+}
+
 void export_envelope()
 {
     using namespace boost::python;
@@ -270,5 +278,7 @@ void export_envelope()
         .def("__getitem__",&box2d<double>::operator[])
         .def("valid",&box2d<double>::valid)
         .def_pickle(envelope_pickle_suite())
+        .def("__deepcopy__", &box2d_deepcopy)
         ;
+        
 }
