@@ -122,7 +122,8 @@ std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
 mapnik::parameters& (Map::*attr_nonconst)() =  &Map::get_extra_attributes;
 mapnik::parameters& (Map::*params_nonconst)() =  &Map::get_extra_parameters;
 
-mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& name)
+
+mapnik::feature_type_style find_style(mapnik::Map const& m, std::string const& name)
 {
     boost::optional<mapnik::feature_type_style const&> style = m.find_style(name);
     if (!style)
@@ -131,6 +132,17 @@ mapnik::feature_type_style find_style (mapnik::Map const& m, std::string const& 
         boost::python::throw_error_already_set();
     }
     return *style;
+}
+
+mapnik::font_set find_fontset(mapnik::Map const& m, std::string const& name)
+{
+    boost::optional<mapnik::font_set const&> fontset = m.find_fontset(name);
+    if (!fontset)
+    {
+        PyErr_SetString(PyExc_KeyError, "Invalid font_set name");
+        boost::python::throw_error_already_set();
+    }
+    return *fontset;
 }
 
 bool has_metawriter(mapnik::Map const& m)
@@ -239,6 +251,11 @@ void export_map()
              "False # you can only append styles with unique names\n"
             )
 
+        .def("append_fontset",&Map::insert_fontset,
+             (arg("fontset")),
+             "Add a FontSet to the map."
+            )
+
         .def("buffered_envelope",
              &Map::get_buffered_extent,
              "Get the Box2d() of the Map given\n"
@@ -271,9 +288,14 @@ void export_map()
              "...'maxy', 'minx', 'miny', 'width'\n"
             )
 
+        .def("find_fontset",find_fontset,
+             (arg("name")),
+             "Find a fontset by name."
+            )
+
         .def("find_style",
              find_style,
-             (arg("style_name")),
+             (arg("name")),
              "Query the Map for a style by name and return\n"
              "a style object if found or raise KeyError\n"
              "style if not found.\n"
