@@ -31,7 +31,7 @@
 #include <mapnik/map.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/metawriter_inmem.hpp>
-
+#include <mapnik/util/deepcopy.hpp>
 #include "mapnik_enumeration.hpp"
 #include "python_optional.hpp"
 
@@ -173,6 +173,15 @@ mapnik::featureset_ptr query_map_point(mapnik::Map const& m, int index, double x
     }
     unsigned idx = index;
     return m.query_map_point(idx, x, y);
+}
+
+// deepcopy
+mapnik::Map map_deepcopy(mapnik::Map & m, boost::python::dict memo)
+{
+    // FIXME: ignore memo for now
+    mapnik::Map result;
+    mapnik::util::deepcopy(m, result);
+    return result;
 }
 
 
@@ -452,6 +461,7 @@ void export_map()
              "about the hit areas rendered on the map.\n"
             )
 
+        .def("__deepcopy__",&map_deepcopy)
         .add_property("extra_attributes",make_function(attr_nonconst,return_value_policy<reference_existing_object>()),"TODO")
         .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
 
