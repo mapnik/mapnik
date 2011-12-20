@@ -560,14 +560,19 @@ void map_parser::parse_font(font_set & fset, ptree const & f)
 {
     ensure_attrs(f, "Font", "face-name");
 
-    std::string face_name = get_attr(f, "face-name", std::string());
-
-    if ( strict_ )
+    optional<std::string> face_name = get_opt_attr<std::string>(f, "face-name");
+    if (face_name)
     {
-        ensure_font_face( face_name );
+        if ( strict_ )
+        {
+            ensure_font_face(*face_name);
+        }
+        fset.add_face_name(*face_name);
     }
-
-    fset.add_face_name(face_name);
+    else
+    {
+        throw config_error(std::string("Must have 'face-name' set"));
+    }
 }
 
 void map_parser::parse_layer( Map & map, ptree const & lay )
