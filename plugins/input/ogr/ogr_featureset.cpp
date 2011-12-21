@@ -49,14 +49,12 @@ using mapnik::feature_factory;
 ogr_featureset::ogr_featureset(OGRDataSource & dataset,
                                OGRLayer & layer,
                                OGRGeometry & extent,
-                               const std::string& encoding,
-                               const bool multiple_geometries)
+                               const std::string& encoding)
     : dataset_(dataset),
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       tr_(new transcoder(encoding)),
       fidcolumn_(layer_.GetFIDColumn ()),
-      multiple_geometries_(multiple_geometries),
       count_(0)
 {
     layer_.SetSpatialFilter (&extent);
@@ -65,14 +63,12 @@ ogr_featureset::ogr_featureset(OGRDataSource & dataset,
 ogr_featureset::ogr_featureset(OGRDataSource & dataset,
                                OGRLayer & layer,
                                const mapnik::box2d<double> & extent,
-                               const std::string& encoding,
-                               const bool multiple_geometries)
+                               const std::string& encoding)
     : dataset_(dataset),
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       tr_(new transcoder(encoding)),
       fidcolumn_(layer_.GetFIDColumn()),
-      multiple_geometries_(multiple_geometries),
       count_(0)
 {
     layer_.SetSpatialFilterRect (extent.minx(),
@@ -99,7 +95,7 @@ feature_ptr ogr_featureset::next()
         OGRGeometry* geom = (*feat)->GetGeometryRef();
         if (geom && ! geom->IsEmpty())
         {
-            ogr_converter::convert_geometry(geom, feature, multiple_geometries_);
+            ogr_converter::convert_geometry(geom, feature);
         }
 #ifdef MAPNIK_DEBUG
         else
