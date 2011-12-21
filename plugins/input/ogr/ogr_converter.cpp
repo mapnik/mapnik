@@ -36,57 +36,34 @@ using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::geometry_type;
 
-void ogr_converter::convert_geometry(OGRGeometry* geom, feature_ptr feature, bool multiple_geometries)
+void ogr_converter::convert_geometry(OGRGeometry* geom, feature_ptr feature)
 {
+    // NOTE: wkbFlatten macro in ogr flattens 2.5d types into base 2d type
     switch (wkbFlatten(geom->getGeometryType()))
     {
     case wkbPoint:
         convert_point(static_cast<OGRPoint*>(geom), feature);
         break;
+    case wkbMultiPoint:
+        convert_multipoint(static_cast<OGRMultiPoint*>(geom), feature);
+        break;
+    case wkbLinearRing:
+        convert_linestring(static_cast<OGRLinearRing*>(geom), feature);
+        break;
     case wkbLineString:
         convert_linestring(static_cast<OGRLineString*>(geom), feature);
+        break;
+    case wkbMultiLineString:
+        convert_multilinestring(static_cast<OGRMultiLineString*>(geom), feature);
         break;
     case wkbPolygon:
         convert_polygon(static_cast<OGRPolygon*>(geom), feature);
         break;
-    case wkbMultiPoint:
-        if (multiple_geometries)
-        {
-            convert_multipoint_2(static_cast<OGRMultiPoint*>(geom), feature);
-        }
-        else
-        {
-            // Todo - using convert_multipoint_2 until we have proper multipoint handling in convert_multipoint
-            // http://trac.mapnik.org/ticket/458
-            //convert_multipoint(static_cast<OGRMultiPoint*>(geom), feature);
-            convert_multipoint_2(static_cast<OGRMultiPoint*>(geom), feature);
-        }
-        break;
-    case wkbMultiLineString:
-        if (multiple_geometries)
-        {
-            convert_multilinestring_2(static_cast<OGRMultiLineString*>(geom), feature);
-        }
-        else
-        {
-            convert_multilinestring(static_cast<OGRMultiLineString*>(geom), feature);
-        }
-        break;
     case wkbMultiPolygon:
-        if (multiple_geometries)
-        {
-            convert_multipolygon_2(static_cast<OGRMultiPolygon*>(geom), feature);
-        }
-        else
-        {
-            convert_multipolygon(static_cast<OGRMultiPolygon*>(geom), feature);
-        }
+        convert_multipolygon(static_cast<OGRMultiPolygon*>(geom), feature);
         break;
     case wkbGeometryCollection:
-        convert_collection(static_cast<OGRGeometryCollection*>(geom), feature, multiple_geometries);
-        break;
-    case wkbLinearRing:
-        convert_linestring(static_cast<OGRLinearRing*>(geom), feature);
+        convert_collection(static_cast<OGRGeometryCollection*>(geom), feature);
         break;
     case wkbNone:
     case wkbUnknown:
@@ -153,22 +130,6 @@ void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
 void ogr_converter::convert_multipoint(OGRMultiPoint* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
-    geometry_type* point = new geometry_type(mapnik::Point);
-
-    for (int i = 0; i < num_geometries; i++)
-    {
-        OGRPoint* ogrpoint = static_cast<OGRPoint*>(geom->getGeometryRef(i));
-        point->move_to(ogrpoint->getX(), ogrpoint->getY());
-        //Todo - need to accept multiple points per mapnik::Point
-    }
-
-    // Todo - this only gets last point
-    feature->add_geometry(point);
-}
-
-void ogr_converter::convert_multipoint_2(OGRMultiPoint* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries();
     for (int i = 0; i < num_geometries; i++)
     {
         convert_point(static_cast<OGRPoint*>(geom->getGeometryRef(i)), feature);
@@ -176,34 +137,6 @@ void ogr_converter::convert_multipoint_2(OGRMultiPoint* geom, feature_ptr featur
 }
 
 void ogr_converter::convert_multilinestring(OGRMultiLineString* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries();
-
-    int num_points = 0;
-    for (int i = 0; i < num_geometries; i++)
-    {
-        OGRLineString* ls = static_cast<OGRLineString*>(geom->getGeometryRef(i));
-        num_points += ls->getNumPoints();
-    }
-
-    geometry_type* line = new geometry_type(mapnik::LineString);
-    line->set_capacity(num_points);
-
-    for (int i = 0; i < num_geometries; i++)
-    {
-        OGRLineString* ls = static_cast<OGRLineString*>(geom->getGeometryRef(i));
-        num_points = ls->getNumPoints();
-        line->move_to(ls->getX(0), ls->getY(0));
-        for (int i = 1; i < num_points; ++i)
-        {
-            line->line_to(ls->getX(i), ls->getY(i));
-        }
-    }
-
-    feature->add_geometry(line);
-}
-
-void ogr_converter::convert_multilinestring_2(OGRMultiLineString* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
     for (int i = 0; i < num_geometries; i++)
@@ -215,59 +148,13 @@ void ogr_converter::convert_multilinestring_2(OGRMultiLineString* geom, feature_
 void ogr_converter::convert_multipolygon(OGRMultiPolygon* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
-
-    int capacity = 0;
-    for (int i = 0; i < num_geometries; i++)
-    {
-        OGRPolygon* p = static_cast<OGRPolygon*>(geom->getGeometryRef(i));
-        OGRLinearRing* exterior = p->getExteriorRing();
-        capacity += exterior->getNumPoints();
-        for (int r = 0; r < p->getNumInteriorRings(); r++)
-        {
-            OGRLinearRing* interior = p->getInteriorRing(r);
-            capacity += interior->getNumPoints();
-        }
-    }
-
-    geometry_type* poly = new geometry_type(mapnik::Polygon);
-    poly->set_capacity(capacity);
-
-    for (int i = 0; i < num_geometries; i++)
-    {
-        OGRPolygon* p = static_cast<OGRPolygon*>(geom->getGeometryRef(i));
-        OGRLinearRing* exterior = p->getExteriorRing();
-        int num_points = exterior->getNumPoints();
-        int num_interior = p->getNumInteriorRings();
-        poly->move_to(exterior->getX(0), exterior->getY(0));
-        for (int i = 1; i < num_points; ++i)
-        {
-            poly->line_to(exterior->getX(i), exterior->getY(i));
-        }
-        for (int r = 0; r < num_interior; r++)
-        {
-            OGRLinearRing* interior = p->getInteriorRing(r);
-            num_points = interior->getNumPoints();
-            poly->move_to(interior->getX(0), interior->getY(0));
-            for (int i = 1; i < num_points; ++i)
-            {
-                poly->line_to(interior->getX(i), interior->getY(i));
-            }
-        }
-    }
-
-    feature->add_geometry(poly);
-}
-
-void ogr_converter::convert_multipolygon_2(OGRMultiPolygon* geom, feature_ptr feature)
-{
-    int num_geometries = geom->getNumGeometries();
     for (int i = 0; i < num_geometries; i++)
     {
         convert_polygon(static_cast<OGRPolygon*>(geom->getGeometryRef(i)), feature);
     }
 }
 
-void ogr_converter::convert_collection(OGRGeometryCollection* geom, feature_ptr feature, bool multiple_geometries)
+void ogr_converter::convert_collection(OGRGeometryCollection* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
     for (int i = 0; i < num_geometries; i++)
@@ -275,7 +162,7 @@ void ogr_converter::convert_collection(OGRGeometryCollection* geom, feature_ptr 
         OGRGeometry* g = geom->getGeometryRef(i);
         if (g != NULL)
         {
-            convert_geometry(g, feature, multiple_geometries);
+            convert_geometry(g, feature);
         }
     }
 }
