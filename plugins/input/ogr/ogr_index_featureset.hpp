@@ -36,8 +36,7 @@ public:
                          OGRLayer& layer,
                          const filterT& filter,
                          const std::string& index_file,
-                         const std::string& encoding,
-                         const bool multiple_geometries);
+                         const std::string& encoding);
     virtual ~ogr_index_featureset();
     mapnik::feature_ptr next();
 
@@ -53,7 +52,6 @@ private:
     std::vector<int>::iterator itr_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
-    bool multiple_geometries_;
 };
 
 #endif // OGR_INDEX_FEATURESET_HPP

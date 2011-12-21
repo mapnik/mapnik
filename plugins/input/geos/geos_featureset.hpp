@@ -55,7 +55,6 @@ private:
     int identifier_;
     std::string field_;
     std::string field_name_;
-    bool multiple_geometries_;
     bool already_rendered_;
 
     geos_featureset(const geos_featureset&);
