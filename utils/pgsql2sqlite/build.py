@@ -46,6 +46,9 @@ linkflags = env['CUSTOM_LDFLAGS']
 if env['SQLITE_LINKFLAGS']:
     linkflags.append(env['SQLITE_LINKFLAGS'])
 
+if env['RUNTIME_LINK'] == 'static':
+    libraries.extend(['ldap','pam','ssl','crypto','krb5'])
+
 pgsql2sqlite = program_env.Program('pgsql2sqlite', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=linkflags)
 Depends(pgsql2sqlite, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
