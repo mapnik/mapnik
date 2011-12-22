@@ -42,7 +42,11 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
     {
         geometry_type const& geom = feature.get_geometry(i);
         
-        if (geom.num_points() == 0) continue; // don't bother with empty geometries
+        if (geom.num_points() == 0)
+        {
+            // don't bother with empty geometries
+            continue;
+        }
         
         if ((geom.type() == Polygon) && sym.get_minimum_path_length() > 0)
         {
@@ -54,70 +58,82 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             }
         }
         // TODO - calculate length here as well
+        // TODO - sort on size to priorize labeling larger geom
+        // https://github.com/mapnik/mapnik/issues/162
         geometries_to_process.push_back(const_cast<geometry_type*>(&geom));
     }
     
     if (!geometries_to_process.size() > 0)
+    {
         return; // early return to avoid significant overhead of rendering setup
+    }
+
+    expression_ptr name_expr = sym.get_name();
+    if (!name_expr)
+    {
+        return;
+    }
+
+    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
+    UnicodeString text = result.to_unicode();
+    if (text.length() <= 0)
+    {
+        // if text is empty no reason to continue
+        return;
+    }
+
+    if (sym.get_text_transform() == UPPERCASE)
+    {
+        text = text.toUpper();
+    }
+    else if (sym.get_text_transform() == LOWERCASE)
+    {
+        text = text.toLower();
+    }
+    else if (sym.get_text_transform() == CAPITALIZE)
+    {
+        text = text.toTitle(NULL);
+    }
+
+    color const& fill = sym.get_fill();
+
+    face_set_ptr faces;
+
+    if (sym.get_fontset().size() > 0)
+    {
+        faces = font_manager_.get_face_set(sym.get_fontset());
+    }
+    else
+    {
+        faces = font_manager_.get_face_set(sym.get_face_name());
+    }
+
+    stroker_ptr strk = font_manager_.get_stroker();
+    if (!(faces->size() > 0 && strk))
+    {
+        throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
+    }
 
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+    metawriter_with_properties writer = sym.get_metawriter();
+    text_renderer<T> ren(pixmap_, faces, *strk);
+    ren.set_fill(fill);
+    ren.set_halo_fill(sym.get_halo_fill());
+    ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
+    ren.set_opacity(sym.get_text_opacity());
+
+    box2d<double> dims(0,0,width_,height_);
+    placement_finder<label_collision_detector4> finder(*detector_,dims);
+
+    string_info info(text);
+
+    faces->get_string_info(info);
 
     bool placement_found = false;
     text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
     while (!placement_found && placement_options->next())
     {
-        expression_ptr name_expr = sym.get_name();
-        if (!name_expr) return;
-        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
-        UnicodeString text = result.to_unicode();
-
-        if ( sym.get_text_transform() == UPPERCASE)
-        {
-            text = text.toUpper();
-        }
-        else if ( sym.get_text_transform() == LOWERCASE)
-        {
-            text = text.toLower();
-        }
-        else if ( sym.get_text_transform() == CAPITALIZE)
-        {
-            text = text.toTitle(NULL);
-        }
-
-        if ( text.length() <= 0 ) continue;
-        color const& fill = sym.get_fill();
-
-        face_set_ptr faces;
-
-        if (sym.get_fontset().size() > 0)
-        {
-            faces = font_manager_.get_face_set(sym.get_fontset());
-        }
-        else
-        {
-            faces = font_manager_.get_face_set(sym.get_face_name());
-        }
-
-        stroker_ptr strk = font_manager_.get_stroker();
-        if (!(faces->size() > 0 && strk))
-        {
-            throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
-        }
-        text_renderer<T> ren(pixmap_, faces, *strk);
-        
         ren.set_character_size(placement_options->text_size * scale_factor_);
-        ren.set_fill(fill);
-        ren.set_halo_fill(sym.get_halo_fill());
-        ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
-        ren.set_opacity(sym.get_text_opacity());
-        
-        box2d<double> dims(0,0,width_,height_);
-        placement_finder<label_collision_detector4> finder(*detector_,dims);
-
-        string_info info(text);
-
-        faces->get_string_info(info);
-        metawriter_with_properties writer = sym.get_metawriter();
 
         BOOST_FOREACH( geometry_type * geom, geometries_to_process )
         {
@@ -146,7 +162,8 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                     if (angle_expr)
                     {
                         // apply rotation
-                        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*angle_expr);
+                        value_type result = boost::apply_visitor(
+                            evaluate<Feature,value_type>(feature),*angle_expr);
                         angle = result.to_double();
                     }
 
