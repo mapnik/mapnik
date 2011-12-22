@@ -650,6 +650,7 @@ __all__ = [
     'Feature',
     'Featureset',
     'FontEngine',
+    'FontSet',
     'Geometry2d',
     'GlyphSymbolizer',
     'Image',

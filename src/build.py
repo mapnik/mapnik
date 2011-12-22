@@ -106,6 +106,7 @@ source = Split(
     color.cpp
     box2d.cpp
     datasource_cache.cpp
+    deepcopy.cpp
     expression_string.cpp
     filter_factory.cpp
     feature_type_style.cpp

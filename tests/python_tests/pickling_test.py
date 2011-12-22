@@ -118,8 +118,7 @@ def test_textsymbolizer_pickle():
     # r2300
     eq_(s.minimum_padding, 0.0)
         
-    raise Todo("FontSet pickling support needed: http://trac.mapnik.org/ticket/348")
-    eq_(ts.fontset, ts2.fontset)
+    eq_(len(ts.fontset.names), 0)
 
 
 def test_map_pickle():
