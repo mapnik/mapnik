@@ -3,7 +3,6 @@
 import os
 from nose.tools import *
 from utilities import execution_path
-from utilities import Todo
 
 import mapnik
 
