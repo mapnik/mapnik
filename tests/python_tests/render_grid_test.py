@@ -6,7 +6,7 @@ from nose.tools import *
 import os, mapnik
 from utilities import Todo
 try:
-    import json3
+    import json
 except ImportError:
     import simplejson
 
