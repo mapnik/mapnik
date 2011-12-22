@@ -218,7 +218,7 @@ public:
      *  @param name The name of the fontset.
      *  @return The fontset if found. If not found return the default map fontset.
      */
-    font_set const& find_fontset(std::string const& name) const;
+    boost::optional<font_set const&> find_fontset(std::string const& name) const;
 
     /*! \brief Get all fontsets
      * @return Const reference to fontsets
