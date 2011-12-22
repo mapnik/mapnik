@@ -4,7 +4,7 @@
 from nose.tools import *
 
 import os, mapnik
-from utilities import Todo
+
 try:
     import json
 except ImportError:
