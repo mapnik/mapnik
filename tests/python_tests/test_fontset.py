@@ -13,10 +13,10 @@ def setup():
 
 def test_loading_fontset_from_map():
     m = mapnik.Map(256,256)
-    mapnik.load_map(m,'../data/good_maps/fontset.xml')
+    mapnik.load_map(m,'../data/good_maps/fontset.xml',True)
     fs = m.find_fontset('book-fonts')
-    eq_(len(fs.names),3)
-    eq_(list(fs.names),['DejaVu Sans Book','DejaVu Sans Oblique', 'does not exist'])
+    eq_(len(fs.names),2)
+    eq_(list(fs.names),['DejaVu Sans Book','DejaVu Sans Oblique'])
 
 
 if __name__ == "__main__":
