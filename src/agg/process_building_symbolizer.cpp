@@ -123,8 +123,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                 frame->move_to(itr->get<0>(),itr->get<1>());
                 frame->line_to(itr->get<0>(),itr->get<1>()+height);
             }
-
             geom.rewind(0);
+            
             for (unsigned j=0;j<geom.num_points();++j)
             {
                 double x,y;
@@ -140,6 +140,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                     roof->line_to(x,y+height);
                 }
             }
+            geom.rewind(0);
+            
             path_type path(t_,*frame,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
             ras_ptr->add_path(stroke);
