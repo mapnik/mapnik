@@ -82,10 +82,17 @@ boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
 
 }
 
-PyObject* to_wkb( geometry_type const& geom)
+inline std::string boost_version()
+{
+    std::ostringstream s;
+    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+    return s.str();
+}
+
+PyObject* to_wkb( geometry_type const& geom, mapnik::util::wkbByteOrder byte_order)
 {
 #if BOOST_VERSION >= 104700
-    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::util::wkbXDR);
+    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,byte_order);
     return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
@@ -94,11 +101,29 @@ PyObject* to_wkb( geometry_type const& geom)
 #endif
         ((const char*)wkb->buffer(),wkb->size());
 #else
-    std::ostringstream s;
-    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-    throw std::runtime_error("mapnik::to_wkb() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+    throw std::runtime_error("mapnik::to_wkb() requires at least boost 1.47 while your build was compiled against boost " 
+                             + boost_version());
 #endif
 }
+
+
+PyObject* to_wkb2( path_type const& p, mapnik::util::wkbByteOrder byte_order)
+{
+#if BOOST_VERSION >= 104700
+    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(p,byte_order);
+    return
+#if PY_VERSION_HEX >= 0x03000000
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+        ((const char*)wkb->buffer(),wkb->size());
+#else
+    throw std::runtime_error("mapnik::to_wkb() requires at least boost 1.47 while your build was compiled against boost " 
+                             + boost_version());
+#endif
+}
+
 
 std::string to_wkt( geometry_type const& geom)
 {
@@ -111,9 +136,8 @@ std::string to_wkt( geometry_type const& geom)
     }
     return wkt;
 #else
-    std::ostringstream s;
-    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost " 
+                             + boost_version());
 #endif
 }
 
@@ -128,9 +152,8 @@ std::string to_wkt2( path_type const& geom)
     }
     return wkt;
 #else
-    std::ostringstream s;
-    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost " 
+                             + boost_version());
 #endif
 }
 
@@ -144,6 +167,12 @@ void export_geometry()
         .value("LineString",mapnik::LineString)
         .value("Polygon",mapnik::Polygon)
         ;
+
+    enum_<mapnik::util::wkbByteOrder>("wkbByteOrder")
+        .value("XDR",mapnik::util::wkbXDR)
+        .value("NDR",mapnik::util::wkbNDR)
+        ;
+    
     
     using mapnik::geometry_type;
     class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
@@ -161,6 +190,7 @@ void export_geometry()
         .def("add_wkt",add_wkt_impl)
         .def("add_wkb",add_wkb_impl)
         .def("to_wkt",&to_wkt2)
+        .def("to_wkb",&to_wkb2)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)
         .staticmethod("from_wkt")
