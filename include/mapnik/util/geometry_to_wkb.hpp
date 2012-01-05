@@ -225,7 +225,7 @@ wkb_buffer_ptr to_wkb(geometry_type const& g, wkbByteOrder byte_order )
     return wkb;
 }
 
-wkb_buffer_ptr to_wkb(geometry_container & paths, wkbByteOrder byte_order )
+wkb_buffer_ptr to_wkb(geometry_container const& paths, wkbByteOrder byte_order )
 {
     if (paths.size() == 1)
     {
@@ -240,16 +240,19 @@ wkb_buffer_ptr to_wkb(geometry_container & paths, wkbByteOrder byte_order )
         bool collection = false;
         int multi_type = 0;
         size_t multi_size = 1 + 4 + 4;
-        BOOST_FOREACH ( geometry_type const& geom, paths)
-        {
-            wkb_buffer_ptr wkb = to_wkb(geom,byte_order);
+        geometry_container::const_iterator itr = paths.begin();
+        geometry_container::const_iterator end = paths.end();
+        for ( ; itr!=end; ++itr)
+        {            
+            wkb_buffer_ptr wkb = to_wkb(*itr,byte_order);
             multi_size += wkb->size();
-            int type = static_cast<int>(geom.type());
-            if (multi_type > 0 && multi_type != geom.type())
-                collection = true;
+            int type = static_cast<int>(itr->type());
+            if (multi_type > 0 && multi_type != itr->type())            
+                collection = true;           
             multi_type = type;
             wkb_cont.push_back(wkb);
         }
+
         wkb_buffer_ptr multi_wkb = boost::make_shared<wkb_buffer>(multi_size);
         boost::interprocess::bufferstream ss(multi_wkb->buffer(), multi_wkb->size(), std::ios::out | std::ios::binary);
         ss.write(reinterpret_cast<char*>(&byte_order),1);
