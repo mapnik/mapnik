@@ -7,6 +7,8 @@ import mapnik
 
 wkts = [
     [1,"POINT(30 10)"],
+    [1,"POINT(30.0 10.0)"],
+    [1,"POINT(30.1 10.1)"],
     [1,"LINESTRING(30 10,10 30,40 40)"],
     [1,"POLYGON((30 10,10 20,20 40,40 40,30 10))"],
     [1,"POLYGON((35 10,10 20,15 40,45 45,35 10),(20 30,35 35,30 20,20 30))"],
@@ -19,51 +21,78 @@ wkts = [
 
 
 def compare_wkb_from_wkt(wkt,num):
+
+    # create a Path from geometry(s)
+    paths = mapnik.Path.from_wkt(wkt)
+
+    # add geometry(s) to feature from wkt
     f = mapnik.Feature(1)
     f.add_geometries_from_wkt(wkt)
-    eq_(len(f.geometries()),num)
 
-    paths = mapnik.Path.from_wkt(wkt)
+    # ensure both have same result
+    # compare number of geometry parts
     eq_(len(paths),num)
+    eq_(len(f.geometries()),num)
+    # compare collection off all geometries
+    eq_(paths.to_wkb(mapnik.wkbByteOrder.XDR),f.geometries().to_wkb(mapnik.wkbByteOrder.XDR))
+    # compare all parts
+    for idx,path in enumerate(paths):
+        eq_(f.geometries()[idx].to_wkb(mapnik.wkbByteOrder.XDR),path.to_wkb(mapnik.wkbByteOrder.XDR))
 
-    eq_(f.geometries()[0].to_wkb(),paths[0].to_wkb())
-
+    # compare round trip
     paths2 = mapnik.Path()
     for path in paths:
-        paths2.add_wkb(path.to_wkb())
+        paths2.add_wkb(path.to_wkb(mapnik.wkbByteOrder.XDR))
 
+    # ensure result
     eq_(len(paths2),num)
-    eq_(f.geometries()[0].to_wkb(),paths2[0].to_wkb())
-
-def test_wkb():
-    for wkt in wkts:
-        try:
-            compare_wkb_from_wkt(wkt[1],wkt[0])
-        except RuntimeError, e:
-            raise RuntimeError('%s %s' % (e, wkt))    
+    eq_(paths2.to_wkb(mapnik.wkbByteOrder.XDR),paths.to_wkb(mapnik.wkbByteOrder.XDR))
+    for idx,path in enumerate(paths2):
+        eq_(f.geometries()[idx].to_wkb(mapnik.wkbByteOrder.XDR),path.to_wkb(mapnik.wkbByteOrder.XDR))
 
 def compare_wkt_from_wkt(wkt,num):
+    # create a Path from geometry(s)
+    paths = mapnik.Path.from_wkt(wkt)
+
+    # add geometry(s) to feature from wkt
     f = mapnik.Feature(1)
     f.add_geometries_from_wkt(wkt)
-    eq_(len(f.geometries()),num)
 
-    paths = mapnik.Path.from_wkt(wkt)
+    # compare to original, which may not have significant digits
+    if '.0' not in wkt:
+        eq_(f.geometries().to_wkt().upper().replace('.0',''),wkt)
+    else:
+        eq_(f.geometries().to_wkt().upper(),wkt)
+
+    # ensure both have same result
     eq_(len(paths),num)
+    eq_(len(f.geometries()),num)
+    eq_(paths.to_wkt(),f.geometries().to_wkt())
+    for idx,path in enumerate(paths):
+        eq_(f.geometries()[idx].to_wkt(),path.to_wkt())
 
-    eq_(f.geometries()[0].to_wkt(),paths[0].to_wkt())
-
+    # compare round trip
     paths2 = mapnik.Path()
     for path in paths:
-        paths2.add_wkb(path.to_wkb())
+        paths2.add_wkt(path.to_wkt())
 
+    # ensure result
     eq_(len(paths2),num)
-    eq_(f.geometries()[0].to_wkt(),paths2[0].to_wkt())
-    eq_(f.geometries().to_wkt().upper().replace('.0',''),wkt)
+    eq_(paths2.to_wkt(),paths.to_wkt())
+    for idx,path in enumerate(paths2):
+        eq_(f.geometries()[idx].to_wkb(mapnik.wkbByteOrder.XDR),path.to_wkb(mapnik.wkbByteOrder.XDR))
 
-def test_wkt():
+def test_wkt_simple():
     for wkt in wkts:
         try:
             compare_wkt_from_wkt(wkt[1],wkt[0])
+        except RuntimeError, e:
+            raise RuntimeError('%s %s' % (e, wkt))
+
+def test_wkb_simple():
+    for wkt in wkts:
+        try:
+            compare_wkb_from_wkt(wkt[1],wkt[0])
         except RuntimeError, e:
             raise RuntimeError('%s %s' % (e, wkt))
 
