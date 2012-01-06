@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, Todo
 
 import os, mapnik
 
@@ -27,6 +27,7 @@ if 'osm' in mapnik.DatasourceCache.instance().plugin_names():
     
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
+        raise Todo("fixme")
         ds = mapnik.Osm(file='../data/osm/nodes.osm')
         # ugh, more odd stuff hardcoded...
         eq_(len(ds.fields()),5)
