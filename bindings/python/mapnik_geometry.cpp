@@ -174,11 +174,12 @@ void export_geometry()
         .value("Polygon",mapnik::Polygon)
         ;
 
+#if BOOST_VERSION >= 104700
     enum_<mapnik::util::wkbByteOrder>("wkbByteOrder")
         .value("XDR",mapnik::util::wkbXDR)
         .value("NDR",mapnik::util::wkbNDR)
         ;
-    
+#endif
     
     using mapnik::geometry_type;
     class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
