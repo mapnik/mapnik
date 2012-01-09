@@ -79,7 +79,7 @@ bool freetype_engine::register_font(std::string const& file_name)
     }
       
     FT_Face face = 0;
-    // fome font files have multiple fonts in a file
+    // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
     for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
