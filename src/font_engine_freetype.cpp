@@ -169,11 +169,18 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
     if (itr != name2file_.end())
     {
         FT_Face face;
-        FT_Error error = FT_New_Face (library_,itr->second.c_str(),0,&face);
-
-        if (!error)
-        {
-            return face_ptr (new font_face(face));
+        // because there may be more than one face per file we have to look for the
+        // face that matches
+        // alternately we could make a map that store the face index
+        for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
+            FT_Error error = FT_New_Face (library_,itr->second.c_str(),i,&face);
+            if (!error)
+            {
+                std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
+                if ( boost::algorithm::equals(name, family_name ) {
+                    return face_ptr (new font_face(face));
+                }
+            }
         }
     }
     return face_ptr();
