@@ -94,7 +94,7 @@ bool freetype_engine::register_font(std::string const& file_name)
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
         if (face->family_name && face->style_name) {
             std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-            name2file_.insert(std::make_pair(name,file_name));
+            name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
             FT_Done_Face(face);
             //FT_Done_FreeType(library);
             //return true;
@@ -148,7 +148,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 std::vector<std::string> freetype_engine::face_names ()
 {
     std::vector<std::string> names;
-    std::map<std::string,std::string>::const_iterator itr;
+    std::map<std::string,std::pair<int,std::string> >::const_iterator itr;
     for (itr = name2file_.begin();itr!=name2file_.end();++itr)
     {
         names.push_back(itr->first);
@@ -156,7 +156,7 @@ std::vector<std::string> freetype_engine::face_names ()
     return names;
 }
 
-std::map<std::string,std::string> const& freetype_engine::get_mapping()
+std::map<std::string,std::pair<int,std::string> > const& freetype_engine::get_mapping()
 {
     return name2file_;
 }
@@ -164,23 +164,18 @@ std::map<std::string,std::string> const& freetype_engine::get_mapping()
 
 face_ptr freetype_engine::create_face(std::string const& family_name)
 {
-    std::map<std::string,std::string>::iterator itr;
+    std::map<std::string, std::pair<int,std::string> >::iterator itr;
     itr = name2file_.find(family_name);
     if (itr != name2file_.end())
     {
-        FT_Face face = 0;
-        // because there may be more than one face per file we have to look for the
-        // face that matches
-        // alternately we could make a map that store the face index
-        for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
-            FT_Error error = FT_New_Face (library_,itr->second.c_str(),i,&face);
-            if (!error)
-            {
-                std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-                if ( boost::algorithm::equals(name, family_name )) {
-                    return face_ptr (new font_face(face));
-                }
-            }
+        FT_Face face;
+        FT_Error error = FT_New_Face (library_, 
+                                      itr->second.second.c_str(), 
+                                      itr->second.first, 
+                                      &face);
+        if (!error)
+        {           
+            return face_ptr (new font_face(face));
         }
     }
     return face_ptr();
@@ -297,5 +292,5 @@ void font_face_set::get_string_info(string_info & info)
 #ifdef MAPNIK_THREADSAFE
 boost::mutex freetype_engine::mutex_;
 #endif
-std::map<std::string,std::string> freetype_engine::name2file_;
+std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 }
