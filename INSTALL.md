@@ -37,7 +37,7 @@ Build dependencies are:
 Mapnik Core depends on:
 
  * Boost
-    - >= 1.47 is recommended
+    - >= 1.46 is recommended
     - >= 1.45.x is required if compiling with clang++
     - >= 1.42.x works on most systems and most compilers
     - These libraries are required:
