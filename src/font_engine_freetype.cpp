@@ -78,7 +78,7 @@ bool freetype_engine::register_font(std::string const& file_name)
         throw std::runtime_error("Failed to initialize FreeType2 library");
     }
       
-    FT_Face face;
+    FT_Face face = 0;
     // fome font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
@@ -168,7 +168,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
     itr = name2file_.find(family_name);
     if (itr != name2file_.end())
     {
-        FT_Face face;
+        FT_Face face = 0;
         // because there may be more than one face per file we have to look for the
         // face that matches
         // alternately we could make a map that store the face index
@@ -177,7 +177,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
             if (!error)
             {
                 std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-                if ( boost::algorithm::equals(name, family_name ) {
+                if ( boost::algorithm::equals(name, family_name )) {
                     return face_ptr (new font_face(face));
                 }
             }
