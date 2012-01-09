@@ -79,28 +79,35 @@ bool freetype_engine::register_font(std::string const& file_name)
     }
       
     FT_Face face;
-    error = FT_New_Face (library,file_name.c_str(),0,&face);
-    if (error)
-    {
-        FT_Done_FreeType(library);
-        return false;
+    // fome font files have multiple fonts in a file
+    // the count is in the 'root' face library[0]
+    // see the FT_FaceRec in freetype.h
+    for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
+        // if face is null then this is the first face
+        error = FT_New_Face (library,file_name.c_str(),i,&face);
+        if (error)
+        {
+            FT_Done_FreeType(library);
+            return false;
+        }
+        // some fonts can lack names, skip them
+        // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
+        if (face->family_name && face->style_name) {
+            std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
+            name2file_.insert(std::make_pair(name,file_name));
+            FT_Done_Face(face);
+            //FT_Done_FreeType(library);
+            //return true;
+        } else {
+            FT_Done_Face(face);
+            FT_Done_FreeType(library);
+            std::ostringstream s;
+            s << "Error: unable to load invalid font file which lacks identifiable family and style name: '"
+            << file_name << "'";
+            throw std::runtime_error(s.str());
+        }
     }
-    // some fonts can lack names, skip them
-    // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
-    if (face->family_name && face->style_name) {
-        std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-        name2file_.insert(std::make_pair(name,file_name));
-        FT_Done_Face(face);
-        FT_Done_FreeType(library);
-        return true;
-    } else {
-        FT_Done_Face(face);
-        FT_Done_FreeType(library);
-        std::ostringstream s;
-        s << "Error: unable to load invalid font file which lacks identifiable family and style name: '"
-          << file_name << "'";
-        throw std::runtime_error(s.str());
-    }
+    FT_Done_FreeType(library);
     return true;
 }
 
@@ -162,11 +169,18 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
     if (itr != name2file_.end())
     {
         FT_Face face;
-        FT_Error error = FT_New_Face (library_,itr->second.c_str(),0,&face);
-
-        if (!error)
-        {
-            return face_ptr (new font_face(face));
+        // because there may be more than one face per file we have to look for the
+        // face that matches
+        // alternately we could make a map that store the face index
+        for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
+            FT_Error error = FT_New_Face (library_,itr->second.c_str(),i,&face);
+            if (!error)
+            {
+                std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
+                if ( boost::algorithm::equals(name, family_name ) {
+                    return face_ptr (new font_face(face));
+                }
+            }
         }
     }
     return face_ptr();
