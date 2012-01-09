@@ -56,15 +56,13 @@ ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
                                                     OGRLayer & layer,
                                                     const filterT& filter,
                                                     const std::string& index_file,
-                                                    const std::string& encoding,
-                                                    const bool multiple_geometries)
+                                                    const std::string& encoding)
     : dataset_(dataset),
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       filter_(filter),
       tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn()),
-      multiple_geometries_(multiple_geometries)
+      fidcolumn_(layer_.GetFIDColumn())
 {
 
     boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(index_file.c_str(),true);
@@ -108,7 +106,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
             OGRGeometry* geom=(*feat)->GetGeometryRef();
             if (geom && !geom->IsEmpty())
             {
-                ogr_converter::convert_geometry (geom, feature, multiple_geometries_);
+                ogr_converter::convert_geometry (geom, feature);
             }
 #ifdef MAPNIK_DEBUG
             else

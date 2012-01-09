@@ -87,6 +87,7 @@ Map::Map(const Map& rhs)
       background_image_(rhs.background_image_),
       styles_(rhs.styles_),
       metawriters_(rhs.metawriters_),
+      fontsets_(rhs.fontsets_),
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
       current_extent_(rhs.current_extent_),
@@ -106,6 +107,7 @@ Map& Map::operator=(const Map& rhs)
     background_image_=rhs.background_image_;
     styles_=rhs.styles_;
     metawriters_ = rhs.metawriters_;
+    fontsets_ = rhs.fontsets_;
     layers_=rhs.layers_;
     aspectFixMode_=rhs.aspectFixMode_;
     maximum_extent_=rhs.maximum_extent_;
@@ -202,14 +204,14 @@ bool Map::insert_fontset(std::string const& name, font_set const& fontset)
 {
     return fontsets_.insert(make_pair(name, fontset)).second;
 }
-         
-font_set const& Map::find_fontset(std::string const& name) const
+
+boost::optional<font_set const&>  Map::find_fontset(std::string const& name) const
 {
     std::map<std::string,font_set>::const_iterator itr = fontsets_.find(name);
-    if (itr!=fontsets_.end())
-        return itr->second;
-    static font_set default_fontset;
-    return default_fontset;
+    if (itr != fontsets_.end())
+        return boost::optional<font_set const&>(itr->second);
+    else
+        return boost::optional<font_set const&>() ;
 }
 
 std::map<std::string,font_set> const& Map::fontsets() const

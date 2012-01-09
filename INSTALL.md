@@ -36,12 +36,17 @@ Build dependencies are:
 
 Mapnik Core depends on:
 
- * Boost >= 1.42.x (>= 1.45.x if using clang++) with these libraries:
-    - filesystem
-    - system
-    - thread (if mapnik threadsafe support is required, default on)
-    - regex (optionally built with icu regex support)
-    - program_options (optionally for mapnik command line programs)
+ * Boost
+    - >= 1.46 is recommended
+    - >= 1.45 is required if compiling with clang++
+    - >= 1.42 works on most systems and most compilers
+    - >= 1.47 is required to support wkt/wkb geometry output (optional)
+    - These libraries are required:
+      - filesystem
+      - system
+      - thread (if mapnik threadsafe support is required, default on)
+      - regex (optionally built with icu regex support)
+      - program_options (optionally for mapnik command line programs)
 
  * libicuuc >= 4.0 (ideally >= 4.2) - International Components for Unicode
  * libpng >= 1.2.x - PNG Graphics

@@ -40,14 +40,12 @@ public:
     ogr_featureset(OGRDataSource & dataset,
                    OGRLayer & layer,
                    OGRGeometry & extent,
-                   const std::string& encoding,
-                   const bool multiple_geometries);
+                   const std::string& encoding);
 
     ogr_featureset(OGRDataSource & dataset,
                    OGRLayer & layer,
                    const mapnik::box2d<double> & extent,
-                   const std::string& encoding,
-                   const bool multiple_geometries);
+                   const std::string& encoding);
     virtual ~ogr_featureset();
     mapnik::feature_ptr next();
 
@@ -60,7 +58,6 @@ private:
     OGRFeatureDefn* layerdef_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
-    bool multiple_geometries_;
     mutable int count_;
 };
 

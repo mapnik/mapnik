@@ -15,7 +15,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
     def test_attachdb_with_relative_file():
         # The point table and index is in the qgis_spatiallite.sqlite
         # database.  If either is not found, then this fails
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='point',
             attachdb='scratch@qgis_spatiallite.sqlite'
             )
@@ -24,7 +24,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feature['pkuid'],1)
     
     def test_attachdb_with_multiple_files():
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='attachedtest',
             attachdb='scratch1@:memory:,scratch2@:memory:',
             initdb='''
@@ -50,7 +50,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feature['pkuid'],1)
     
     def test_attachdb_with_index():
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='attachedtest',
             attachdb='scratch@:memory:',
             initdb='''
@@ -64,7 +64,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feature,None)
         
     def test_attachdb_with_explicit_index():
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='attachedtest',
             index_table='myindex',
             attachdb='scratch@:memory:',
@@ -79,10 +79,13 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feature,None)
     
     def test_attachdb_with_sql_join():
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='(select * from world_merc INNER JOIN business on world_merc.iso3 = business.ISO3 limit 100)',
             attachdb='busines@business.sqlite'
             )
+        eq_(len(ds.fields()),29)
+        eq_(ds.fields(),['OGC_FID', 'fips', 'iso2', 'iso3', 'un', 'name', 'area', 'pop2005', 'region', 'subregion', 'lon', 'lat', 'ISO3:1', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010'])
+        eq_(ds.field_types(),['int', 'str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float', 'str', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'])
         fs = ds.featureset()
         feature = fs.next()
         eq_(feature.id(),1)
@@ -125,9 +128,74 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
             except:
                 #import pdb;pdb.set_trace()
                 print 'invalid key/v %s/%s for: %s' % (k,v,feature) 
+
+    def test_attachdb_with_sql_join_count():
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
+            table='(select * from world_merc INNER JOIN business on world_merc.iso3 = business.ISO3 limit 100)',
+            attachdb='busines@business.sqlite'
+            )
+        eq_(len(ds.fields()),29)
+        eq_(ds.fields(),['OGC_FID', 'fips', 'iso2', 'iso3', 'un', 'name', 'area', 'pop2005', 'region', 'subregion', 'lon', 'lat', 'ISO3:1', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010'])
+        eq_(ds.field_types(),['int', 'str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float', 'str', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'])
+        eq_(len(ds.all_features()),100)
+
+    def test_attachdb_with_sql_join_count2():
+        '''
+        sqlite3 world.sqlite
+        attach database 'business.sqlite' as business;
+        select count(*) from world_merc INNER JOIN business on world_merc.iso3 = business.ISO3;
+        '''
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
+            table='(select * from world_merc INNER JOIN business on world_merc.iso3 = business.ISO3)',
+            attachdb='busines@business.sqlite'
+            )
+        eq_(len(ds.fields()),29)
+        eq_(ds.fields(),['OGC_FID', 'fips', 'iso2', 'iso3', 'un', 'name', 'area', 'pop2005', 'region', 'subregion', 'lon', 'lat', 'ISO3:1', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010'])
+        eq_(ds.field_types(),['int', 'str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float', 'str', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'])
+        eq_(len(ds.all_features()),192)
+
+    def test_attachdb_with_sql_join_count3():
+        '''
+        select count(*) from (select * from world_merc where 1=1) as world_merc INNER JOIN business on world_merc.iso3 = business.ISO3;
+        '''
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
+            table='(select * from (select * from world_merc where !intersects!) as world_merc INNER JOIN business on world_merc.iso3 = business.ISO3)',
+            attachdb='busines@business.sqlite'
+            )
+        eq_(len(ds.fields()),29)
+        eq_(ds.fields(),['OGC_FID', 'fips', 'iso2', 'iso3', 'un', 'name', 'area', 'pop2005', 'region', 'subregion', 'lon', 'lat', 'ISO3:1', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010'])
+        eq_(ds.field_types(),['int', 'str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float', 'str', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'])
+        eq_(len(ds.all_features()),192)
+
+    def test_attachdb_with_sql_join_count4():
+        '''
+        select count(*) from (select * from world_merc where 1=1) as world_merc INNER JOIN business on world_merc.iso3 = business.ISO3;
+        '''
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
+            table='(select * from (select * from world_merc where !intersects! limit 1) as world_merc INNER JOIN business on world_merc.iso3 = business.ISO3)',
+            attachdb='busines@business.sqlite'
+            )
+        eq_(len(ds.fields()),29)
+        eq_(ds.fields(),['OGC_FID', 'fips', 'iso2', 'iso3', 'un', 'name', 'area', 'pop2005', 'region', 'subregion', 'lon', 'lat', 'ISO3:1', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010'])
+        eq_(ds.field_types(),['int', 'str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float', 'str', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'])
+        eq_(len(ds.all_features()),1)
+
+    def test_attachdb_with_sql_join_count5():
+        '''
+        select count(*) from (select * from world_merc where 1=1) as world_merc INNER JOIN business on world_merc.iso3 = business.ISO3;
+        '''
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
+            table='(select * from (select * from world_merc where !intersects! and 1=2) as world_merc INNER JOIN business on world_merc.iso3 = business.ISO3)',
+            attachdb='busines@business.sqlite'
+            )
+        # nothing is able to join to business so we don't pick up business schema
+        eq_(len(ds.fields()),12)
+        eq_(ds.fields(),['OGC_FID', 'fips', 'iso2', 'iso3', 'un', 'name', 'area', 'pop2005', 'region', 'subregion', 'lon', 'lat'])
+        eq_(ds.field_types(),['int', 'str', 'str', 'str', 'int', 'str', 'int', 'int', 'int', 'int', 'float', 'float'])
+        eq_(len(ds.all_features()),0)
     
     def test_subqueries():
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='world_merc',
             )
         fs = ds.featureset()
@@ -145,7 +213,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
     
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='(select * from world_merc)',
             )
         fs = ds.featureset()
@@ -163,7 +231,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
         
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='(select OGC_FID,GEOMETRY from world_merc)',
             )
         fs = ds.featureset()
@@ -171,24 +239,26 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feature['OGC_FID'],1)
         eq_(len(feature),1)
     
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='(select GEOMETRY,OGC_FID,fips from world_merc)',
             )
         fs = ds.featureset()
         feature = fs.next()
         eq_(feature['OGC_FID'],1)
         eq_(feature['fips'],u'AC')
+
+        # same as above, except with alias like postgres requires
+        # TODO - should we try to make this work?
+        #ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
+        #    table='(select GEOMETRY,rowid as aliased_id,fips from world_merc) as table',
+        #    key_field='aliased_id'
+        #    )
+        #fs = ds.featureset()
+        #feature = fs.next()
+        #eq_(feature['aliased_id'],1)
+        #eq_(feature['fips'],u'AC')
     
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
-            table='(select GEOMETRY,rowid as aliased_id,fips from world_merc)',
-            key_field='aliased_id'
-            )
-        fs = ds.featureset()
-        feature = fs.next()
-        eq_(feature['aliased_id'],1)
-        eq_(feature['fips'],u'AC')
-    
-        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
             table='(select GEOMETRY,OGC_FID,OGC_FID as rowid,fips from world_merc)',
             )
         fs = ds.featureset()
@@ -219,6 +289,31 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
         fs = ds.features(query)
+
+    def test_intersects_token1():
+        ds = mapnik.SQLite(file='../data/sqlite/empty.db',
+            table='(select * from empty where !intersects!)',
+            )
+        fs = ds.featureset()
+        feature = fs.next()
+        eq_(feature,None)
+
+    def test_intersects_token1():
+        ds = mapnik.SQLite(file='../data/sqlite/empty.db',
+            table='(select * from empty where "a"!="b" and !intersects!)',
+            )
+        fs = ds.featureset()
+        feature = fs.next()
+        eq_(feature,None)
+
+    def test_intersects_token1():
+        ds = mapnik.SQLite(file='../data/sqlite/empty.db',
+            table='(select * from empty where "a"!="b" and !intersects!)',
+            )
+        fs = ds.featureset()
+        feature = fs.next()
+        eq_(feature,None)
+
 
 if __name__ == "__main__":
     setup()

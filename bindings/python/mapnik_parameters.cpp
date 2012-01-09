@@ -144,7 +144,7 @@ mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
     parameters::const_iterator end = p.end();
 
     unsigned idx = 0;
-    while (itr != p.end())
+    while (itr != end)
     {
         if (idx == index)
         {

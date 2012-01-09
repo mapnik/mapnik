@@ -138,7 +138,7 @@ void raster_colorizer::colorize(raster_ptr const& raster,const std::map<std::str
 
 inline unsigned interpolate(unsigned start, unsigned end, float fraction)
 {
-    return static_cast<unsigned>(fraction * (end - start) + start);
+    return static_cast<unsigned>(fraction * ((float)end - (float)start) + start);
 }
 
 color raster_colorizer::get_color(float value) const {

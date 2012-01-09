@@ -246,7 +246,7 @@ public:
     static bool register_font(std::string const& file_name);
     static bool register_fonts(std::string const& dir, bool recurse = false);
     static std::vector<std::string> face_names();
-    static std::map<std::string,std::string> const& get_mapping();
+    static std::map<std::string,std::pair<int,std::string> > const& get_mapping();
     face_ptr create_face(std::string const& family_name);
     stroker_ptr create_stroker();
     virtual ~freetype_engine();
@@ -256,7 +256,7 @@ private:
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif
-    static std::map<std::string,std::string> name2file_;
+    static std::map<std::string,std::pair<int,std::string> > name2file_;
 };
 
 template <typename T>
