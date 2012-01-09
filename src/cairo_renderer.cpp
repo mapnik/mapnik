@@ -798,6 +798,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             std::deque<segment_t> face_segments;
             double x0(0);
             double y0(0);
+
+            geom.rewind(0);
             unsigned cm = geom.vertex(&x0, &y0);
 
             for (unsigned j = 1; j < geom.num_points(); ++j)
@@ -848,7 +850,6 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             }
 
             geom.rewind(0);
-
             for (unsigned j = 0; j < geom.num_points(); ++j)
             {
                 double x, y;
