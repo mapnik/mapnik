@@ -52,32 +52,13 @@ public:
      * @brief Set the name of the layer.
      */
     void set_name(std::string const& name);
-        
+
     /*!
      * @return the name of the layer.
      */
+    
     const std::string& name() const;
-        
-    /*!
-     * @brief Set the title of the layer.
-     */
-    void set_title(std::string const& title);
-        
-    /*!
-     * @return the title of the layer.
-     */
-    const std::string& title() const;
-        
-    /*!
-     * @brief Set the abstract of the layer.
-     */
-    void set_abstract(std::string const& abstract);
-        
-    /*!
-     * @return the abstract of the layer.
-     */
-    const std::string& abstract() const;
-        
+
     /*!
      * @brief Set the SRS of the layer.
      */
@@ -181,6 +162,16 @@ public:
     bool cache_features() const; 
         
     /*!
+     * @param group_by Set the field rendering of this layer is grouped by.
+     */
+    void set_group_by(std::string column);
+
+    /*!
+     * @return The field rendering of this layer is grouped by.
+     */
+    std::string group_by() const;
+
+    /*!
      * @brief Attach a datasource for this layer.
      *
      * @param ds The datasource to attach.
@@ -202,16 +193,15 @@ private:
     void swap(const layer& other);
 
     std::string name_;
-    std::string title_;
-    std::string abstract_;
     std::string srs_;
-        
+    
     double minZoom_;
     double maxZoom_;
     bool active_;
     bool queryable_;
     bool clear_label_cache_;
     bool cache_features_;
+    std::string group_by_;
     std::vector<std::string>  styles_;
     datasource_ptr ds_;
 };

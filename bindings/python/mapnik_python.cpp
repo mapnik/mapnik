@@ -47,6 +47,7 @@ void export_style();
 void export_stroke();
 void export_feature();
 void export_featureset();
+void export_fontset();
 void export_datasource();
 void export_datasource_cache();
 void export_symbolizer();
@@ -397,6 +398,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_geometry();
     export_feature();
     export_featureset();
+    export_fontset();
     export_datasource();
     export_parameters();
     export_color();

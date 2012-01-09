@@ -26,13 +26,18 @@
 #include <boost/python/manage_new_object.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkb.hpp>
+
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
+#endif
 
 namespace {
 
@@ -57,7 +62,7 @@ void add_wkt_impl(path_type& p, std::string const& wkt)
 
 void add_wkb_impl(path_type& p, std::string const& wkb)
 {
-    mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size(), true);
+    mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size());
 }
 
 boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
@@ -71,15 +76,23 @@ boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
 boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
 {
     boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
-    mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size(), true);
+    mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size());
     return paths;
 }
 
 }
 
-PyObject* to_wkb( geometry_type const& geom)
+inline std::string boost_version()
 {
-    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::util::wkbXDR);
+    std::ostringstream s;
+    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+    return s.str();
+}
+
+#if BOOST_VERSION >= 104700
+PyObject* to_wkb( geometry_type const& geom, mapnik::util::wkbByteOrder byte_order)
+{
+    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,byte_order);
     return
 #if PY_VERSION_HEX >= 0x03000000
         ::PyBytes_FromStringAndSize
@@ -88,9 +101,39 @@ PyObject* to_wkb( geometry_type const& geom)
 #endif
         ((const char*)wkb->buffer(),wkb->size());
 }
+#else
+PyObject* to_wkb( geometry_type const& geom)
+{
+    throw std::runtime_error("mapnik::to_wkb() requires at least boost 1.47 while your build was compiled against boost " 
+                             + boost_version());
+}
+#endif
+
+
+#if BOOST_VERSION >= 104700
+PyObject* to_wkb2( path_type const& p, mapnik::util::wkbByteOrder byte_order)
+{
+    mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(p,byte_order);
+    return
+#if PY_VERSION_HEX >= 0x03000000
+        ::PyBytes_FromStringAndSize
+#else
+        ::PyString_FromStringAndSize
+#endif
+        ((const char*)wkb->buffer(),wkb->size());
+}
+#else
+PyObject* to_wkb2( path_type const& p)
+{
+    throw std::runtime_error("mapnik::to_wkb() requires at least boost 1.47 while your build was compiled against boost " 
+                             + boost_version());
+}
+#endif
+
 
 std::string to_wkt( geometry_type const& geom)
 {
+#if BOOST_VERSION >= 104700
     std::string wkt; // Use Python String directly ?
     bool result = mapnik::util::to_wkt(wkt,geom);
     if (!result) 
@@ -98,7 +141,28 @@ std::string to_wkt( geometry_type const& geom)
         throw std::runtime_error("Generate WKT failed");
     }
     return wkt;
+#else
+    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost " 
+                             + boost_version());
+#endif
 }
+
+std::string to_wkt2( path_type const& geom)
+{
+#if BOOST_VERSION >= 104700
+    std::string wkt; // Use Python String directly ?
+    bool result = mapnik::util::to_wkt(wkt,geom);
+    if (!result) 
+    {
+        throw std::runtime_error("Generate WKT failed");
+    }
+    return wkt;
+#else
+    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost " 
+                             + boost_version());
+#endif
+}
+
 
 void export_geometry()
 {
@@ -108,11 +172,15 @@ void export_geometry()
         .value("Point",mapnik::Point)
         .value("LineString",mapnik::LineString)
         .value("Polygon",mapnik::Polygon)
-        .value("MultiPoint",mapnik::MultiPoint)
-        .value("MultiLineString",mapnik::MultiLineString)
-        .value("MultiPolygon",mapnik::MultiPolygon)
         ;
 
+#if BOOST_VERSION >= 104700
+    enum_<mapnik::util::wkbByteOrder>("wkbByteOrder")
+        .value("XDR",mapnik::util::wkbXDR)
+        .value("NDR",mapnik::util::wkbNDR)
+        ;
+#endif
+    
     using mapnik::geometry_type;
     class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
         .def("envelope",&geometry_type::envelope)
@@ -128,6 +196,8 @@ void export_geometry()
         .def("__len__", &path_type::size)
         .def("add_wkt",add_wkt_impl)
         .def("add_wkb",add_wkb_impl)
+        .def("to_wkt",&to_wkt2)
+        .def("to_wkb",&to_wkb2)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)
         .staticmethod("from_wkt")

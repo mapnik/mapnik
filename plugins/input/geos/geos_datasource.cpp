@@ -97,9 +97,7 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
     boost::optional<std::string> geometry = params.get<std::string>("wkt");
     if (! geometry) throw datasource_exception("missing <wkt> parameter");
     geometry_string_ = *geometry;
-
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
-
+    
     boost::optional<std::string> ext = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
@@ -270,8 +268,7 @@ featureset_ptr geos_datasource::features(query const& q) const
                                                geometry_id_,
                                                geometry_data_,
                                                geometry_data_name_,
-                                               desc_.get_encoding(),
-                                               multiple_geometries_);
+                                               desc_.get_encoding());
 }
 
 featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
@@ -290,6 +287,5 @@ featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
                                                geometry_id_,
                                                geometry_data_,
                                                geometry_data_name_,
-                                               desc_.get_encoding(),
-                                               multiple_geometries_);
+                                               desc_.get_encoding());
 }

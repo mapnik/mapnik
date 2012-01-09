@@ -779,7 +779,13 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
     cairo_context context(context_);
 
     color const& fill = sym.get_fill();
-    double height = 0.7071 * sym.height(); // height in meters
+    double height = 0.0;
+    expression_ptr height_expr = sym.height();
+    if (height_expr)
+    {
+        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
+        height = 0.7071 * result.to_double();
+    }
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
@@ -792,6 +798,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             std::deque<segment_t> face_segments;
             double x0(0);
             double y0(0);
+
+            geom.rewind(0);
             unsigned cm = geom.vertex(&x0, &y0);
 
             for (unsigned j = 1; j < geom.num_points(); ++j)
@@ -842,7 +850,6 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             }
 
             geom.rewind(0);
-
             for (unsigned j = 0; j < geom.num_points(); ++j)
             {
                 double x, y;

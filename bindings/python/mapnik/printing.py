@@ -593,7 +593,7 @@ class PDFPrinter:
         
         for l in m.layers:
             # extract the layer names for naming layers if we use OCG
-            self._layer_names.append(l.title or l.name)
+            self._layer_names.append(l.name)
         
             layer_map = Map(m.width,m.height,m.srs)
             layer_map.layers.append(l)
@@ -884,7 +884,7 @@ class PDFPrinter:
             for l in reversed(m.layers):
                 have_layer_header = False
                 added_styles={}
-                layer_title = l.title or l.name
+                layer_title = l.name
                 if layer_title in processed_layers:
                     continue
                 processed_layers.append(layer_title)
@@ -906,8 +906,8 @@ class PDFPrinter:
                                     if r.filter and str(r.filter) != "true":
                                         if len(rule_text) > 0:
                                             rule_text += " AND "
-                                        if r.title:
-                                            rule_text += r.title
+                                        if r.name:
+                                            rule_text += r.name
                                         else:
                                             rule_text += str(r.filter)
                         active_rules = tuple(active_rules)

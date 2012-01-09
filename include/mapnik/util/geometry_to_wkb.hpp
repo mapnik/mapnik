@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -61,11 +61,11 @@ enum wkbByteOrder {
 };
 
 
-inline void reverse_bytes(char size, char *address) 
+inline void reverse_bytes(char size, char *address)
 {
     char * first = address;
     char * last = first + size - 1;
-    for(;first < last;++first, --last) 
+    for(;first < last;++first, --last)
     {
         char x = *last;
         *last = *first;
@@ -80,7 +80,7 @@ inline void write (S & stream, T val, std::size_t size, wkbByteOrder byte_order)
     bool need_swap =  byte_order ? wkbNDR : wkbXDR;
 #else
     bool need_swap =  byte_order ? wkbXDR : wkbNDR;
-#endif 
+#endif
     char* buf = reinterpret_cast<char*>(&val);
     if (need_swap)
     {
@@ -95,22 +95,22 @@ struct wkb_buffer
         : size_(size),
           data_( (size_!=0) ? static_cast<char*>(::operator new (size_)):0)
     {}
-    
+
     ~wkb_buffer()
     {
         ::operator delete(data_);
     }
-    
+
     inline std::size_t size() const
     {
         return size_;
     }
-    
-    inline char* buffer() 
+
+    inline char* buffer()
     {
         return data_;
     }
-    
+
     std::size_t size_;
     char * data_;
 };
@@ -120,10 +120,10 @@ typedef boost::shared_ptr<wkb_buffer> wkb_buffer_ptr;
 wkb_buffer_ptr to_point_wkb( geometry_type const& g, wkbByteOrder byte_order)
 {
     assert(g.num_points() == 1);
-    std::size_t size = 1 + 4 + 8*2 ; // byteOrder + wkbType + Point 
+    std::size_t size = 1 + 4 + 8*2 ; // byteOrder + wkbType + Point
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
     boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
-    ss.write(reinterpret_cast<char*>(&byte_order),1); 
+    ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::Point);
     write(ss,type,4,byte_order);
     double x,y;
@@ -138,10 +138,10 @@ wkb_buffer_ptr to_line_string_wkb( geometry_type const& g, wkbByteOrder byte_ord
 {
     unsigned num_points = g.num_points();
     assert(num_points > 1);
-    std::size_t size = 1 + 4 + 4 + 8*2*num_points ; // byteOrder + wkbType + numPoints + Point*numPoints 
+    std::size_t size = 1 + 4 + 4 + 8*2*num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
     boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
-    ss.write(reinterpret_cast<char*>(&byte_order),1); 
+    ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::LineString);
     write(ss,type,4,byte_order);
     write(ss,num_points,4,byte_order);
@@ -164,29 +164,29 @@ wkb_buffer_ptr to_polygon_wkb( geometry_type const& g, wkbByteOrder byte_order)
     typedef std::pair<double,double> point_type;
     typedef std::vector<point_type> linear_ring;
     boost::ptr_vector<linear_ring> rings;
-    
+
     double x,y;
     std::size_t size = 1 + 4 + 4 ; // byteOrder + wkbType + numRings
     for (unsigned i=0; i< num_points; ++i)
     {
         unsigned command = g.get_vertex(i,&x,&y);
-        if (command == SEG_MOVETO) 
-        {          
+        if (command == SEG_MOVETO)
+        {
             rings.push_back(new linear_ring); // start new loop
             size += 4; // num_points
         }
         rings.back().push_back(std::make_pair(x,y));
-        size += 2 * 8; // point 
+        size += 2 * 8; // point
     }
     unsigned num_rings = rings.size();
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
     boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
 
-    ss.write(reinterpret_cast<char*>(&byte_order),1); 
+    ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::Polygon);
     write(ss,type,4,byte_order);
     write(ss,num_rings,4,byte_order);
-    
+
     BOOST_FOREACH ( linear_ring const& ring, rings)
     {
         unsigned num_points = ring.size();
@@ -199,7 +199,7 @@ wkb_buffer_ptr to_polygon_wkb( geometry_type const& g, wkbByteOrder byte_order)
             write(ss,y,8,byte_order);
         }
     }
-    
+
     assert(ss.good());
     return wkb;
 }
@@ -207,7 +207,7 @@ wkb_buffer_ptr to_polygon_wkb( geometry_type const& g, wkbByteOrder byte_order)
 wkb_buffer_ptr to_wkb(geometry_type const& g, wkbByteOrder byte_order )
 {
     wkb_buffer_ptr wkb;
-    
+
     switch (g.type())
     {
     case mapnik::Point :
@@ -219,14 +219,55 @@ wkb_buffer_ptr to_wkb(geometry_type const& g, wkbByteOrder byte_order )
     case mapnik::Polygon:
         wkb = to_polygon_wkb(g, byte_order);
         break;
-    case mapnik::MultiPoint:
-    case mapnik::MultiLineString:
-    case mapnik::MultiPolygon:
-        break;
     default:
         break;
     }
     return wkb;
+}
+
+wkb_buffer_ptr to_wkb(geometry_container const& paths, wkbByteOrder byte_order )
+{
+    if (paths.size() == 1)
+    {
+        // single geometry
+        return to_wkb(paths.front(), byte_order);
+    }
+
+    if (paths.size() > 1)
+    {
+        // multi geometry or geometry collection
+        std::vector<wkb_buffer_ptr> wkb_cont;
+        bool collection = false;
+        int multi_type = 0;
+        size_t multi_size = 1 + 4 + 4;
+        geometry_container::const_iterator itr = paths.begin();
+        geometry_container::const_iterator end = paths.end();
+        for ( ; itr!=end; ++itr)
+        {
+            wkb_buffer_ptr wkb = to_wkb(*itr,byte_order);
+            multi_size += wkb->size();
+            int type = static_cast<int>(itr->type());
+            if (multi_type > 0 && multi_type != itr->type())
+                collection = true;
+            multi_type = type;
+            wkb_cont.push_back(wkb);
+        }
+
+        wkb_buffer_ptr multi_wkb = boost::make_shared<wkb_buffer>(multi_size);
+        boost::interprocess::bufferstream ss(multi_wkb->buffer(), multi_wkb->size(), std::ios::out | std::ios::binary);
+        ss.write(reinterpret_cast<char*>(&byte_order),1);
+        multi_type = collection ? 7 : multi_type + 3;
+        write(ss,multi_type, 4, byte_order);
+        write(ss,paths.size(),4,byte_order);
+
+        BOOST_FOREACH ( wkb_buffer_ptr const& wkb, wkb_cont)
+        {
+            ss.write(wkb->buffer(),wkb->size());
+        }
+        return multi_wkb;
+    }
+
+    return wkb_buffer_ptr();
 }
 
 }}

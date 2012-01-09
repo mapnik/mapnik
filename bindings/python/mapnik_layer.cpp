@@ -54,7 +54,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
         {
             s.append(style_names[i]);
         }
-        return boost::python::make_tuple(l.abstract(),l.title(),l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource()->params(),l.cache_features(),s);
+        return boost::python::make_tuple(l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource()->params(),l.cache_features(),s);
     }
 
     static void
@@ -70,28 +70,24 @@ struct layer_pickle_suite : boost::python::pickle_suite
             throw_error_already_set();
         }
 
-        l.set_abstract(extract<std::string>(state[0]));
+        l.set_clear_label_cache(extract<bool>(state[0]));
 
-        l.set_title(extract<std::string>(state[1]));
+        l.setMinZoom(extract<double>(state[1]));
 
-        l.set_clear_label_cache(extract<bool>(state[2]));
+        l.setMaxZoom(extract<double>(state[2]));
 
-        l.setMinZoom(extract<double>(state[3]));
+        l.setQueryable(extract<bool>(state[3]));
 
-        l.setMaxZoom(extract<double>(state[4]));
-
-        l.setQueryable(extract<bool>(state[5]));
-
-        mapnik::parameters params = extract<parameters>(state[6]);
+        mapnik::parameters params = extract<parameters>(state[4]);
         l.set_datasource(datasource_cache::instance()->create(params));
 
-        boost::python::list s = extract<boost::python::list>(state[7]);
+        boost::python::list s = extract<boost::python::list>(state[5]);
         for (int i=0;i<len(s);++i)
         {
             l.add_style(extract<std::string>(s[i]));
         }
 
-        l.set_cache_features(extract<bool>(state[8]));
+        l.set_cache_features(extract<bool>(state[6]));
     }
 };
 
@@ -150,21 +146,6 @@ void export_layer()
              ">>> lyr.active = False\n"
              ">>> lyr.visible(1.0/1000000)\n"
              "False\n"
-            )
-
-        .add_property("abstract",
-                      make_function(&layer::abstract,return_value_policy<copy_const_reference>()),
-                      &layer::set_abstract,
-                      "Get/Set the abstract of the layer.\n"
-                      "\n"
-                      "Usage:\n"
-                      ">>> from mapnik import Layer\n"
-                      ">>> lyr = Layer('My Layer','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')\n"
-                      ">>> lyr.abstract\n"
-                      "'' # default is en empty string\n"
-                      ">>> lyr.abstract = 'My Shapefile rendered with Mapnik'\n"
-                      ">>> lyr.abstract\n"
-                      "'My Shapefile rendered with Mapnik'\n"
             )
 
         .add_property("active",
@@ -308,21 +289,6 @@ void export_layer()
                       "1\n"
                       ">>> lyr.styles[0]\n"
                       "'My Style'\n"
-            )
-
-        .add_property("title",
-                      make_function(&layer::title, return_value_policy<copy_const_reference>()),
-                      &layer::set_title,
-                      "Get/Set the title of the layer.\n"
-                      "\n"
-                      "Usage:\n"
-                      ">>> from mapnik import layer\n"
-                      ">>> lyr = layer('My layer','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')\n"
-                      ">>> lyr.title\n"
-                      "''\n"
-                      ">>> lyr.title = 'My first layer'\n"
-                      ">>> lyr.title\n"
-                      "'My first layer'\n"
             )
 
         ;

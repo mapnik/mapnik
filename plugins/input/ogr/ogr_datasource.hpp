@@ -58,7 +58,6 @@ private:
     mutable ogr_layer_ptr layer_;
     mutable std::string layer_name_;
     mutable mapnik::layer_descriptor desc_;
-    bool multiple_geometries_;
     mutable bool indexed_;
 };
 

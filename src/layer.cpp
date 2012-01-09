@@ -37,8 +37,6 @@ namespace mapnik
 {   
 layer::layer(std::string const& name, std::string const& srs)
     : name_(name),
-      title_(""),
-      abstract_(""),
       srs_(srs),
       minZoom_(0),
       maxZoom_(std::numeric_limits<double>::max()),
@@ -46,12 +44,11 @@ layer::layer(std::string const& name, std::string const& srs)
       queryable_(false),
       clear_label_cache_(false),
       cache_features_(false),
+      group_by_(""),
       ds_() {}
     
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
-      title_(rhs.title_),
-      abstract_(rhs.abstract_),
       srs_(rhs.srs_),
       minZoom_(rhs.minZoom_),
       maxZoom_(rhs.maxZoom_),
@@ -59,6 +56,7 @@ layer::layer(const layer& rhs)
       queryable_(rhs.queryable_),
       clear_label_cache_(rhs.clear_label_cache_),
       cache_features_(rhs.cache_features_),
+      group_by_(rhs.group_by_),
       styles_(rhs.styles_),
       ds_(rhs.ds_) {}
     
@@ -77,8 +75,6 @@ bool layer::operator==(layer const& other) const
 void layer::swap(const layer& rhs)
 {
     name_=rhs.name_;
-    title_=rhs.title_;
-    abstract_=rhs.abstract_;
     srs_ = rhs.srs_;
     minZoom_=rhs.minZoom_;
     maxZoom_=rhs.maxZoom_;
@@ -86,6 +82,7 @@ void layer::swap(const layer& rhs)
     queryable_=rhs.queryable_;
     clear_label_cache_ = rhs.clear_label_cache_;
     cache_features_ = rhs.cache_features_;
+    group_by_ = rhs.group_by_;
     styles_=rhs.styles_;
     ds_=rhs.ds_;
 }
@@ -100,26 +97,6 @@ void layer::set_name( std::string const& name)
 std::string const& layer::name() const
 {
     return name_;
-}
-
-void layer::set_title( std::string const& title)
-{
-    title_ = title;
-}
- 
-std::string const& layer::title() const
-{
-    return title_;
-}
-    
-void layer::set_abstract( std::string const& abstract)
-{
-    abstract_ = abstract;
-}
- 
-std::string const& layer::abstract() const
-{
-    return abstract_;
 }
 
 void layer::set_srs(std::string const& srs)
@@ -226,6 +203,16 @@ void layer::set_cache_features(bool cache_features)
 bool layer::cache_features() const
 {
     return cache_features_;
+}
+
+void layer::set_group_by(std::string column)
+{
+    group_by_ = column;
+}
+
+std::string layer::group_by() const
+{
+    return group_by_;
 }
 
 }
