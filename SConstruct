@@ -1146,7 +1146,7 @@ if not preconfigured:
         if not env['BOOST_VERSION']:
             env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
     else:
-        color_print(4,'Found boost lib version... %s' % boost_lib_version_from_header )
+        color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
     
     for count, libinfo in enumerate(BOOST_LIBSHEADERS):
         if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
