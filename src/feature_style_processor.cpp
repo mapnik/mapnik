@@ -555,10 +555,10 @@ void feature_style_processor<Processor>::render_style(
 
         s << "percent rendered: " << perc_processed << "% - " << feature_processed_count 
           << " rendered for " << feature_count << " queried for ";
-        s << std::setw(15 - (int)s.tellp()) << " layer '" << lay.name() << "' and style '" << s_name << "'\n";
+        s << std::setw(15 - (int)s.tellp()) << " layer '" << lay.name() << "' and style '" << style_name << "'\n";
 
     } else {
-        s << "" << std::setw(15) << "- no features returned from query for layer '" << lay.name() << "' and style '" << s_name << "'\n";
+        s << "" << std::setw(15) << "- no features returned from query for layer '" << lay.name() << "' and style '" << style_name << "'\n";
     }
     std::clog << s.str();
     style_timer.discard();
