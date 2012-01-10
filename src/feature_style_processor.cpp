@@ -262,11 +262,12 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     }
     
     box2d<double> query_ext = m_.get_current_extent();
+    box2d<double> unbuffered_extent = m_.get_current_extent();
     prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS);
     query::resolution_type res(m_.width()/query_ext.width(),
                                m_.height()/query_ext.height());
 
-    query q(layer_ext,res,scale_denom);
+    query q(layer_ext,res,scale_denom,unbuffered_extent);
 
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
