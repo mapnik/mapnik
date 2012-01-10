@@ -57,11 +57,11 @@ namespace mapnik
 {
 
 /** Calls the renderer's process function,
-  * \param output     Renderer
-  * \param f          Feature to process
-  * \param prj_trans  Projection
-  * \param sym        Symbolizer object
-  */
+ * \param output     Renderer
+ * \param f          Feature to process
+ * \param prj_trans  Projection
+ * \param sym        Symbolizer object
+ */
 template <typename Processor>
 struct feature_style_processor<Processor>::symbol_dispatch : public boost::static_visitor<>
 {
@@ -184,9 +184,9 @@ void feature_style_processor<Processor>::stop_metawriters(Map const& m_)
 
 template <typename Processor>
 void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Processor & p,
-                    projection const& proj0,
-                    double scale_denom,
-                    std::set<std::string>& names)
+                                                        projection const& proj0,
+                                                        double scale_denom,
+                                                        std::set<std::string>& names)
 {
     std::vector<std::string> const& style_names = lay.styles();
 
@@ -215,8 +215,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 #if defined(RENDERING_STATS)
     if (!prj_trans.equal())
         std::clog << "notice: reprojecting layer: '" << lay.name() << "' from/to:\n\t'" 
-            << lay.srs() << "'\n\t'"
-            << m_.srs() << "'\n";
+                  << lay.srs() << "'\n\t'"
+                  << m_.srs() << "'\n";
 #endif
 
     box2d<double> map_ext = m_.get_buffered_extent();
@@ -237,9 +237,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     // if no intersection and projections are also equal, early return
     else if (prj_trans.equal())
     {
-        #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
         layer_timer.discard();
-        #endif
+#endif
         return;
     }
     // next try intersection of layer extent back projected into map srs
@@ -249,15 +249,15 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         // forward project layer extent back into native projection
         if (!prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
             std::clog << "WARNING: layer " << lay.name()
-                << " extent " << layer_ext << " in map projection "
-                << " did not reproject properly back to layer projection\n";
+                      << " extent " << layer_ext << " in map projection "
+                      << " did not reproject properly back to layer projection\n";
     }
     else
     {
         // if no intersection then nothing to do for layer
-        #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
         layer_timer.discard();
-        #endif
+#endif
         return;
     }
     
@@ -366,7 +366,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         BOOST_FOREACH (feature_type_style * style, active_styles)
                         {
                             render_style(lay, p, style, style_names[i++],
-                                cache.features(q), prj_trans, scale_denom);
+                                         cache.features(q), prj_trans, scale_denom);
                         }
                         cache.clear();
                     }
@@ -378,7 +378,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 BOOST_FOREACH (feature_type_style * style, active_styles)
                 {
                     render_style(lay, p, style, style_names[i++],
-                        cache.features(q), prj_trans, scale_denom);
+                                 cache.features(q), prj_trans, scale_denom);
                 }
             }
         }
@@ -398,7 +398,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 BOOST_FOREACH (feature_type_style * style, active_styles)
                 {
                     render_style(lay, p, style, style_names[i++],
-                        cache.features(q), prj_trans, scale_denom);
+                                 cache.features(q), prj_trans, scale_denom);
                 }
             }
         }
@@ -411,15 +411,15 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 featureset_ptr features = ds->features(q);
                 if (features) {
                     render_style(lay, p, style, style_names[i++],
-                        features, prj_trans, scale_denom);
+                                 features, prj_trans, scale_denom);
                 }
             }
         }
     }
 
-    #if defined(RENDERING_STATS)
-        layer_timer.stop();
-    #endif
+#if defined(RENDERING_STATS)
+    layer_timer.stop();
+#endif
 
     p.end_layer_processing(lay);
 }
@@ -427,15 +427,15 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
 template <typename Processor>
 void feature_style_processor<Processor>::render_style(
-                    layer const& lay,
-                    Processor & p,
-                    feature_type_style* style,
-                    std::string const& style_name,
-                    featureset_ptr features,
-                    proj_transform const& prj_trans,
-                    double scale_denom)
+    layer const& lay,
+    Processor & p,
+    feature_type_style* style,
+    std::string const& style_name,
+    featureset_ptr features,
+    proj_transform const& prj_trans,
+    double scale_denom)
 {
-    #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
     std::ostringstream s1;
     s1 << "rendering style for layer: '" << lay.name()
        << "' and style '" << style_name << "'";
@@ -443,15 +443,15 @@ void feature_style_processor<Processor>::render_style(
 
     int feature_processed_count = 0;
     int feature_count = 0;
-    #endif
+#endif
 
     feature_ptr feature;
     while ((feature = features->next()))
     {
-        #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
         feature_count++;
         bool feat_processed = false;
-        #endif
+#endif
 
         bool do_else = true;
         bool do_also = false;
@@ -462,9 +462,9 @@ void feature_style_processor<Processor>::render_style(
             value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
             if (result.to_bool())
             {
-                #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
                 feat_processed = true;
-                #endif
+#endif
 
                 p.painted(true);
 
@@ -495,9 +495,9 @@ void feature_style_processor<Processor>::render_style(
         {
             BOOST_FOREACH( rule * r, style->get_else_rules(scale_denom) )
             {
-                #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
                 feat_processed = true;
-                #endif
+#endif
 
                 p.painted(true);
 
@@ -519,9 +519,9 @@ void feature_style_processor<Processor>::render_style(
         {
             BOOST_FOREACH( rule * r, style->get_also_rules(scale_denom) )
             {
-                #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
                 feat_processed = true;
-                #endif
+#endif
 
                 p.painted(true);
 
@@ -539,30 +539,33 @@ void feature_style_processor<Processor>::render_style(
                 }
             }
         }
-        #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
         if (feat_processed)
             feature_processed_count++;
-        #endif
+#endif
     }
 
-    #if defined(RENDERING_STATS)
+#if defined(RENDERING_STATS)
     style_timer.stop();
 
     // done with style
     std::ostringstream s;
-    if (feature_count > 0) {
+    if (feature_count > 0) 
+    {
         double perc_processed = ((double)feature_processed_count/(double)feature_count)*100.0;
 
         s << "percent rendered: " << perc_processed << "% - " << feature_processed_count 
           << " rendered for " << feature_count << " queried for ";
-        s << std::setw(15 - (int)s.tellp()) << " layer '" << lay.name() << "' and style '" << s_name << "'\n";
+        s << std::setw(15 - (int)s.tellp()) << " layer '" << lay.name() << "' and style '" << style_name << "'\n";
 
-    } else {
-        s << "" << std::setw(15) << "- no features returned from query for layer '" << lay.name() << "' and style '" << s_name << "'\n";
+    } 
+    else 
+    {
+        s << "" << std::setw(15) << "- no features returned from query for layer '" << lay.name() << "' and style '" << style_name << "'\n";
     }
     std::clog << s.str();
     style_timer.discard();
-    #endif
+#endif
 }
 
 
