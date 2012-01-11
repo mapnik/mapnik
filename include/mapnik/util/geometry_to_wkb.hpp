@@ -210,7 +210,7 @@ wkb_buffer_ptr to_wkb(geometry_type const& g, wkbByteOrder byte_order )
 
     switch (g.type())
     {
-    case mapnik::Point :
+    case mapnik::Point:
         wkb = to_point_wkb(g, byte_order);
         break;
     case mapnik::LineString:
