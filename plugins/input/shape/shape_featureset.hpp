@@ -50,11 +50,9 @@ class shape_featureset : public Featureset,
     boost::scoped_ptr<transcoder> tr_;
     long file_length_;
     std::vector<int> attr_ids_;
-    mutable box2d<double> feature_ext_;
-    mutable int total_geom_size;
-    mutable int count_;
     const int row_limit_;
-
+    mutable int count_;
+    
 public:
     shape_featureset(filterT const& filter,
                      std::string const& shape_file,

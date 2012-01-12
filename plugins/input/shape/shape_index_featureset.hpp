@@ -47,13 +47,15 @@ class shape_index_featureset : public Featureset,
                                private boost::noncopyable
 {
 public:
-    shape_index_featureset(const filterT& filter,
-                           shape_io& shape,
-                           const std::set<std::string>& attribute_names,
+    shape_index_featureset(filterT const& filter,
+                           shape_io & shape,
+                           std::set<std::string> const& attribute_names,
                            std::string const& encoding,
                            std::string const& shape_name,
                            int row_limit);
+    
     virtual ~shape_index_featureset();
+    
     feature_ptr next();
 
 private:
@@ -64,10 +66,8 @@ private:
     std::vector<int> ids_;
     std::vector<int>::iterator itr_;
     std::vector<int> attr_ids_;
-    mutable box2d<double> feature_ext_;
-    mutable int total_geom_size;
-    mutable int count_;
     const int row_limit_;
+    mutable int count_;
 };
 
 #endif // SHAPE_INDEX_FEATURESET_HPP
