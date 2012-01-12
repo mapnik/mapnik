@@ -20,7 +20,7 @@ def call(cmd,silent=False):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
         return stdin.strip()
-    elif not silent:
+    elif not silent and not 'NOTICE' in stderr:
         raise RuntimeError(stderr.strip())
 
 def psql_can_connect():
@@ -63,12 +63,23 @@ def createdb_and_dropdb_on_path():
         print 'Notice: skipping postgis tests (createdb/dropdb)'
         return False
 
+insert_sql = """
+INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;POINT(-2 2)'));
+INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;MULTIPOINT(2 1,1 2)'));
+INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;LINESTRING(0 0,1 1,1 2)'));
+INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;MULTILINESTRING((1 0,0 1,3 2),(3 2,5 4))'));
+INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))'));
+INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;MULTIPOLYGON(((1 1,3 1,3 3,1 3,1 1),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))'));
+INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POLYGON((1 1, 2 1, 2 2, 1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))'));
+"""
+
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
     call('createdb -T %s %s' % (POSTGIS_TEMPLATE_DBNAME,MAPNIK_TEST_DBNAME),silent=False)
     call('shp2pgsql -s 3857 -g geom -W LATIN1 %s world_merc | psql -q %s' % (SHAPEFILE,MAPNIK_TEST_DBNAME), silent=True)
-    call('''psql %s -c "CREATE TABLE \"empty\" (key serial);SELECT AddGeometryColumn('','empty','geom','-1','GEOMETRY',4);"''' % MAPNIK_TEST_DBNAME,silent=True)
-
+    call('''psql -q %s -c "CREATE TABLE \"empty\" (key serial);SELECT AddGeometryColumn('','empty','geom','-1','GEOMETRY',4);"''' % MAPNIK_TEST_DBNAME,silent=False)
+    call('''psql -q %s -c "create table test(gid serial PRIMARY KEY, geom geometry);%s"''' % (MAPNIK_TEST_DBNAME,insert_sql),silent=False)
 def postgis_takedown():
     pass
     # fails as the db is in use: https://github.com/mapnik/mapnik/issues/960
@@ -98,6 +109,7 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(feature['subregion'],29)
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
+        eq_(ds.describe()['geometry_type'],'polygon')
 
     def test_subquery():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select * from world_merc) as w')
@@ -115,6 +127,7 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(feature['subregion'],29)
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
+        eq_(ds.describe()['geometry_type'],'polygon')
 
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select gid,geom,fips as _fips from world_merc) as w')
         fs = ds.featureset()
@@ -122,12 +135,39 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(feature['gid'],1)
         eq_(feature['_fips'],u'AC')
         eq_(len(feature),2)
+        eq_(ds.describe()['geometry_type'],'polygon')
 
     def test_empty_db():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='empty')
         fs = ds.featureset()
         feature = fs.next()
         eq_(feature,None)
+        eq_(ds.describe()['geometry_type'],'collection')
+
+    def test_geometry_detection():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
+                            geometry_field='geom')
+        eq_(ds.describe()['geometry_type'],'collection')
+
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
+                            geometry_field='geom',
+                            row_limit=1)
+        eq_(ds.describe()['geometry_type'],'point')
+
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
+                            geometry_field='geom',
+                            row_limit=2)
+        eq_(ds.describe()['geometry_type'],'point')
+
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
+                            geometry_field='geom',
+                            row_limit=3)
+        eq_(ds.describe()['geometry_type'],'point')
+
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
+                            geometry_field='geom',
+                            row_limit=4)
+        eq_(ds.describe()['geometry_type'],'collection')
 
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):

@@ -82,30 +82,30 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
     return mapnik::datasource_cache::create(params, bind);
 }
 
-std::string describe(boost::shared_ptr<mapnik::datasource> const& ds)
+boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
 {
-    std::stringstream ss;
-    if (ds)
+    boost::python::dict description;
+    if (ds->type() == mapnik::datasource::Raster)
     {
-        ss << ds->get_descriptor() << "\n";
+        description["type"] = "raster";
     }
     else
     {
-        ss << "Null\n";
+        description["type"] = "vector";
     }
-    return ss.str();
-}
-
-std::string encoding(boost::shared_ptr<mapnik::datasource> const& ds)
-{
-    layer_descriptor ld = ds->get_descriptor();
-    return ld.get_encoding();
-}
-
-std::string name(boost::shared_ptr<mapnik::datasource> const& ds)
-{
-    layer_descriptor ld = ds->get_descriptor();
-    return ld.get_name();
+    mapnik::layer_descriptor ld = ds->get_descriptor();
+    description["name"] = ld.get_name();
+    description["encoding"] = ld.get_encoding();
+    std::string geometry_type = ld.get_geometry_type();
+    if (geometry_type.empty())
+    {
+        description["geometry_type"] = NULL;
+    }
+    else
+    {
+        description["geometry_type"] = geometry_type;
+    }
+    return description;
 }
 
 boost::python::list fields(boost::shared_ptr<mapnik::datasource> const& ds)
@@ -165,21 +165,18 @@ void export_datasource()
 
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
+        .def("describe",&describe)
         .def("envelope",&datasource::envelope)
-        .def("descriptor",&datasource::get_descriptor) //todo
         .def("features",&datasource::features)
         .def("bind",&datasource::bind)
         .def("fields",&fields)
         .def("field_types",&field_types)
-        .def("encoding",&encoding) //todo expose as property
-        .def("name",&name)
         .def("features_at_point",&datasource::features_at_point)
         .def("params",&datasource::params,return_value_policy<copy_const_reference>(),
              "The configuration parameters of the data source. "
              "These vary depending on the type of data source.")
         ;
 
-    def("Describe",&describe);
     def("CreateDatasource",&create_datasource);
 
     class_<point_datasource, bases<datasource>, boost::noncopyable>("PointDatasource", init<>())
