@@ -359,7 +359,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
                 while ((feature = features->next()))
                 {
-                    if (prev && prev->props()[group_by] != feature->props()[group_by])
+                    if (prev && prev->get(group_by) != feature->get(group_by))
                     {
                         // We're at a value boundary, so render what we have
                         // up to this point.
