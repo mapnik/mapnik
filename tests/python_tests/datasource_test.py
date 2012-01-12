@@ -15,65 +15,68 @@ def test_that_datasources_exist():
         print '***NOTICE*** - no datasource plugins have been loaded'
     
 def test_field_listing():
-    lyr = mapnik.Layer('test')
     if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
-        lyr.datasource = mapnik.Shapefile(file='../data/shp/poly.shp')
-        fields = lyr.datasource.fields()
+        ds = mapnik.Shapefile(file='../data/shp/poly.shp')
+        fields = ds.fields()
         eq_(fields, ['AREA', 'EAS_ID', 'PRFEDEA'])
+        eq_(ds.describe(),{'geometry_type': 'polygon', 'type': 'vector', 'name': 'shape', 'encoding': 'utf-8'})
 
 def test_total_feature_count_shp():
-    lyr = mapnik.Layer('test')
     if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
-        lyr.datasource = mapnik.Shapefile(file='../data/shp/poly.shp')
-        features = lyr.datasource.all_features()
+        ds = mapnik.Shapefile(file='../data/shp/poly.shp')
+        features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 10)
 
 def test_total_feature_count_json():
-    lyr = mapnik.Layer('test')
     if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
-        lyr.datasource = mapnik.Ogr(file='../data/json/points.json',layer_by_index=0)
-        features = lyr.datasource.all_features()
+        ds = mapnik.Ogr(file='../data/json/points.json',layer_by_index=0)
+        eq_(ds.describe(),{'geometry_type': 'point', 'type': 'vector', 'name': 'ogr', 'encoding': 'utf-8'})
+        features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 5)
 
+def test_sqlite_reading():
+    if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',table_by_index=0)
+        eq_(ds.describe(),{'geometry_type': 'polygon', 'type': 'vector', 'name': 'sqlite', 'encoding': 'utf-8'})
+        features = ds.all_features()
+        num_feats = len(features)
+        eq_(num_feats, 245)
+
 def test_reading_json_from_string():
     json = open('../data/json/points.json','r').read()
-    lyr = mapnik.Layer('test')
     if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
-        lyr.datasource = mapnik.Ogr(file=json,layer_by_index=0)
-        features = lyr.datasource.all_features()
+        ds = mapnik.Ogr(file=json,layer_by_index=0)
+        features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 5)
     
 def test_feature_envelope():
-    lyr = mapnik.Layer('test')
     if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
-        lyr.datasource = mapnik.Shapefile(file='../data/shp/poly.shp')
-        features = lyr.datasource.all_features()
+        ds = mapnik.Shapefile(file='../data/shp/poly.shp')
+        features = ds.all_features()
         for feat in features:
             env = feat.envelope()
-            contains = lyr.envelope().contains(env)
+            contains = ds.envelope().contains(env)
             eq_(contains, True)
-            intersects = lyr.envelope().contains(env)
+            intersects = ds.envelope().contains(env)
             eq_(intersects, True)
 
 def test_feature_attributes():
-    lyr = mapnik.Layer('test')
     if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
-        lyr.datasource = mapnik.Shapefile(file='../data/shp/poly.shp')
-        features = lyr.datasource.all_features()
+        ds = mapnik.Shapefile(file='../data/shp/poly.shp')
+        features = ds.all_features()
         feat = features[0]
         attrs = {'PRFEDEA': u'35043411', 'EAS_ID': 168, 'AREA': 215229.266}
         eq_(feat.attributes, attrs)
-        eq_(lyr.datasource.fields(),['AREA', 'EAS_ID', 'PRFEDEA'])
-        eq_(lyr.datasource.field_types(),['float','int','str'])
+        eq_(ds.fields(),['AREA', 'EAS_ID', 'PRFEDEA'])
+        eq_(ds.field_types(),['float','int','str'])
 
 def test_ogr_layer_by_sql():
-    lyr = mapnik.Layer('test')
     if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
-        lyr.datasource = mapnik.Ogr(file='../data/shp/poly.shp', layer_by_sql='SELECT * FROM poly WHERE EAS_ID = 168')
-        features = lyr.datasource.all_features()
+        ds = mapnik.Ogr(file='../data/shp/poly.shp', layer_by_sql='SELECT * FROM poly WHERE EAS_ID = 168')
+        features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 1)
 
