@@ -118,6 +118,10 @@ public:
         {
             set_attr( sym_node, "gamma", sym.get_gamma() );
         }
+        if ( sym.get_gamma_method() != dfl.get_gamma_method() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "gamma-method", sym.get_gamma_method() );
+        }
         add_metawriter_attributes(sym_node, sym);
     }
 
