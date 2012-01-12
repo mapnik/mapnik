@@ -61,6 +61,11 @@ public:
     {
         return m_.end();
     }
+    
+    UnicodeString const& get(std::string const& key) const
+    {
+        return (*this)[key];
+    }
 private:
     property_map m_;
     UnicodeString not_found_;

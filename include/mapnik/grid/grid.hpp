@@ -111,8 +111,10 @@ public:
 
     inline void add_feature(mapnik::Feature const& feature)
     {
-
+        
         // copies feature props
+        // FIXME
+        /*
         std::map<std::string,value> fprops = feature.props();
         lookup_type lookup_value;
         if (key_ == id_name_)
@@ -154,6 +156,7 @@ public:
         {
             std::clog << "### Warning: key '" << key_ << "' was blank for " << feature << "\n";
         }
+        */
     } 
     
     inline void add_property_name(std::string const& name)

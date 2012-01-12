@@ -105,6 +105,8 @@ void metawriter_json_stream::write_properties(Feature const& feature, metawriter
 {
     *f_ << "}," << //Close coordinates object
             "\n  \"properties\": {";
+    // FIXME
+    /*
     std::map<std::string, value> const &fprops = feature.props();
     int i = 0;
     BOOST_FOREACH(std::string p, properties)
@@ -122,7 +124,8 @@ void metawriter_json_stream::write_properties(Feature const& feature, metawriter
             *f_ << "\n    \"" << p << "\":\"" << text << "\"";
         }
     }
-
+    */
+    
     *f_ << "\n} }";
 }
 

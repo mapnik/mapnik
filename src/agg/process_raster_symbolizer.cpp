@@ -46,10 +46,11 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
     raster_ptr const& source=feature.get_raster();
     if (source)
     {
+        // FIXME
         // If there's a colorizer defined, use it to color the raster in-place
-        raster_colorizer_ptr colorizer = sym.get_colorizer();
-        if (colorizer)
-            colorizer->colorize(source,feature.props());
+        //raster_colorizer_ptr colorizer = sym.get_colorizer();
+        //if (colorizer)
+        //    colorizer->colorize(source,feature.props());
 
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);

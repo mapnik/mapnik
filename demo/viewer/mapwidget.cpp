@@ -170,6 +170,8 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                   feature_ptr feat  = fs->next();
                   if (feat)
                   {
+                      // FIXME
+                      /* 
                      std::map<std::string,mapnik::value> const& props = feat->props();
                      std::map<std::string,mapnik::value>::const_iterator itr=props.begin();
                      for (; itr!=props.end();++itr)
@@ -180,6 +182,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                  itr->second.to_string().c_str()));
                         }
                      }
+                      */
                      typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry_type> path_type;
 
                      for  (unsigned i=0; i<feat->num_geometries();++i)
