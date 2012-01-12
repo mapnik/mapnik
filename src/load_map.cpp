@@ -1883,7 +1883,7 @@ void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
     
 void map_parser::parse_polygon_symbolizer( rule & rule, ptree const & sym )
 {
-    ensure_attrs(sym, "PolygonSymbolizer", "fill,fill-opacity,gamma,meta-writer,meta-output");
+    ensure_attrs(sym, "PolygonSymbolizer", "fill,fill-opacity,gamma,gamma-method,meta-writer,meta-output");
     try
     {
         polygon_symbolizer poly_sym;
@@ -1896,6 +1896,9 @@ void map_parser::parse_polygon_symbolizer( rule & rule, ptree const & sym )
         // gamma
         optional<double> gamma = get_opt_attr<double>(sym, "gamma");
         if (gamma)  poly_sym.set_gamma(*gamma);
+        // gamma method
+        gamma_method_e gamma_method = get_attr<gamma_method_e>(sym, "gamma-method", GAMMA_POWER);
+        poly_sym.set_gamma_method(gamma_method);
 
         parse_metawriter_in_symbolizer(poly_sym, sym);
         rule.append(poly_sym);
