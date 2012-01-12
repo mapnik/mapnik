@@ -160,8 +160,8 @@ public:
     }
 
 private:
-    context_ptr ctx_;
     int id_;
+    context_ptr ctx_;
     boost::ptr_vector<geometry_type> geom_cont_;
     raster_ptr raster_;
     
