@@ -1,4 +1,3 @@
-
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -27,19 +26,17 @@
 // mapnik
 #include <mapnik/feature_factory.hpp>
 
-// boost
-#include <boost/algorithm/string.hpp>
-
 #include "shape_featureset.hpp"
+#include "shape_utils.hpp"
 
 using mapnik::geometry_type;
 using mapnik::feature_factory;
 using mapnik::context_ptr;
-
+                      
 template <typename filterT>
-shape_featureset<filterT>::shape_featureset(const filterT& filter,
-                                            const std::string& shape_name,
-                                            const std::set<std::string>& attribute_names,
+shape_featureset<filterT>::shape_featureset(filterT const& filter,
+                                            std::string const& shape_name,
+                                            std::set<std::string> const& attribute_names,
                                             std::string const& encoding,
                                             long file_length,
                                             int row_limit)
@@ -53,42 +50,7 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
 {
     ctx_ = boost::make_shared<mapnik::context>();
     shape_.shp().skip(100);
-    
-    //attributes
-    typename std::set<std::string>::const_iterator pos = attribute_names.begin();
-    
-    while (pos != attribute_names.end())
-    {
-        bool found_name = false;
-        for (int i = 0; i < shape_.dbf().num_fields(); ++i)
-        {
-            if (shape_.dbf().descriptor(i).name_ == *pos)
-            {                
-                ctx_->push(*pos);
-                attr_ids_.push_back(i);
-                found_name = true;
-                break;
-            }
-        }
-        
-        if (! found_name)
-        {
-            std::ostringstream s;
-
-            s << "no attribute '" << *pos << "' in '"
-              << shape_name << "'. Valid attributes are: ";
-
-            std::vector<std::string> list;
-            for (int i = 0; i < shape_.dbf().num_fields(); ++i)
-            {
-                list.push_back(shape_.dbf().descriptor(i).name_);
-            }
-            s << boost::algorithm::join(list, ",") << ".";
-
-            throw mapnik::datasource_exception("Shape Plugin: " + s.str());
-        }
-        ++pos;
-    }
+    setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
 }
 
 template <typename filterT>

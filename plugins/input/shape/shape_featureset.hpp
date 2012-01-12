@@ -56,9 +56,9 @@ class shape_featureset : public Featureset,
     const int row_limit_;
 
 public:
-    shape_featureset(const filterT& filter,
-                     const std::string& shape_file,
-                     const std::set<std::string>& attribute_names,
+    shape_featureset(filterT const& filter,
+                     std::string const& shape_file,
+                     std::set<std::string> const& attribute_names,
                      std::string const& encoding,
                      long file_length,
                      int row_limit);
