@@ -26,7 +26,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "feature.hpp"
+#include <mapnik/feature.hpp>
 
 
 namespace mapnik { 
