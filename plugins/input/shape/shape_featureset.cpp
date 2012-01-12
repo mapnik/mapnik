@@ -34,6 +34,7 @@
 
 using mapnik::geometry_type;
 using mapnik::feature_factory;
+using mapnik::context_ptr;
 
 template <typename filterT>
 shape_featureset<filterT>::shape_featureset(const filterT& filter,
@@ -43,7 +44,6 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
                                             long file_length,
                                             int row_limit)
     : filter_(filter),
-      //shape_type_(shape_io::shape_null),
       shape_(shape_name, false),
       query_ext_(),
       tr_(new transcoder(encoding)),
@@ -51,23 +51,26 @@ shape_featureset<filterT>::shape_featureset(const filterT& filter,
       count_(0),
       row_limit_(row_limit)
 {
+    ctx_ = boost::make_shared<mapnik::context>();
     shape_.shp().skip(100);
-
+    
     //attributes
     typename std::set<std::string>::const_iterator pos = attribute_names.begin();
+    
     while (pos != attribute_names.end())
     {
         bool found_name = false;
         for (int i = 0; i < shape_.dbf().num_fields(); ++i)
         {
             if (shape_.dbf().descriptor(i).name_ == *pos)
-            {
+            {                
+                ctx_->push(*pos);
                 attr_ids_.push_back(i);
                 found_name = true;
                 break;
             }
         }
-
+        
         if (! found_name)
         {
             std::ostringstream s;
@@ -115,7 +118,7 @@ feature_ptr shape_featureset<filterT>::next()
     if (pos < std::streampos(file_length_ * 2))
     {
         int type = shape_.type();
-        feature_ptr feature(feature_factory::create(shape_.id_));
+        feature_ptr feature(feature_factory::create(ctx_, shape_.id_));
 
         if (type == shape_io::shape_point)
         {
@@ -266,7 +269,7 @@ feature_ptr shape_featureset<filterT>::next()
             }
             }
         }
-        
+        // FIXME
         feature->set_id(shape_.id_);
         if (attr_ids_.size())
         {

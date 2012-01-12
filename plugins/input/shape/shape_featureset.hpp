@@ -36,12 +36,13 @@ using mapnik::Featureset;
 using mapnik::box2d;
 using mapnik::feature_ptr;
 using mapnik::transcoder;
+using mapnik::context_ptr;
 
 template <typename filterT>
 class shape_featureset : public Featureset
 {
     filterT filter_;
-    //int shape_type_;
+    context_ptr ctx_;
     shape_io shape_;
     box2d<double> query_ext_;
     boost::scoped_ptr<transcoder> tr_;
