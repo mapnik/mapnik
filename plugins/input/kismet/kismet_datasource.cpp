@@ -119,6 +119,8 @@ void kismet_datasource::bind() const
 {
     if (is_bound_) return;
 
+    desc_.set_geometry_type("point");
+
     is_bound_ = true;
 }
 

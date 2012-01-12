@@ -185,6 +185,35 @@ void  shape_datasource::init(shape_io& shape) const
     int shape_type = shape.shp().read_ndr_integer();
     if (shape_type == shape_io::shape_multipatch)
         throw datasource_exception("Shape Plugin: shapefile multipatch type is not supported");
+    switch (shape_type)
+    {
+        case shape_io::shape_point:
+        case shape_io::shape_pointm:
+        case shape_io::shape_pointz:
+        case shape_io::shape_multipoint:
+        case shape_io::shape_multipointm:
+        case shape_io::shape_multipointz:
+        {
+            desc_.set_geometry_type("point");
+            break;
+        }
+        case shape_io::shape_polyline:
+        case shape_io::shape_polylinem:
+        case shape_io::shape_polylinez:
+        {
+            desc_.set_geometry_type("linestring");
+            break;
+        }
+        case shape_io::shape_polygon:
+        case shape_io::shape_polygonm:
+        case shape_io::shape_polygonz:
+        {
+            desc_.set_geometry_type("polygon");
+            break;
+        }
+        default:
+            break;
+    }
 
     shape.shp().read_envelope(extent_);
 
