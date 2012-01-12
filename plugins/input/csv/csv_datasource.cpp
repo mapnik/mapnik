@@ -13,6 +13,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/util/geometry_to_type_str.hpp>
 #include <mapnik/ptree_helpers.hpp>  // mapnik::boolean
 
 // stl
@@ -829,6 +830,24 @@ void csv_datasource::parse_csv(T& stream,
     if (!feature_count > 0)
     {
         if (!quiet_) std::clog << "CSV Plugin: could not parse any lines of data\n";
+    }
+    else
+    {
+        std::string g_type("");
+        std::string prev_type("");
+        boost::ptr_vector<mapnik::geometry_type> paths;
+        unsigned num_features = features_.size();
+        for (int i = 0; i < num_features; ++i)
+        {
+            mapnik::util::to_type_str(features_[i]->paths(),g_type);
+            if (!prev_type.empty() && g_type != prev_type)
+            {
+                g_type = "collection";
+                break;
+            }
+            prev_type = g_type;
+        }
+        desc_.set_geometry_type(g_type);
     }
 }
 

@@ -28,6 +28,8 @@
 #include <mapnik/global.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/sql_utils.hpp>
+#include <mapnik/util/geometry_to_type_str.hpp>
+#include <mapnik/wkb.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -106,14 +108,14 @@ void postgis_datasource::bind() const
     ConnectionManager *mgr=ConnectionManager::instance();
     mgr->registerPool(creator_, *initial_size, *max_size);
 
+    std::string g_type;
+
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
         if (conn && conn->isOK())
         {
-
-            is_bound_ = true;
 
             PoolGuard<shared_ptr<Connection>,
                 shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
@@ -145,7 +147,7 @@ void postgis_datasource::bind() const
             if (!geometryColumn_.length() > 0 || srid_ == 0)
             {
                 std::ostringstream s;
-                s << "SELECT f_geometry_column, srid FROM ";
+                s << "SELECT f_geometry_column, srid, lower(type) as type FROM ";
                 s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << mapnik::sql_utils::unquote_double(geometry_table_) <<"'";
 
                 if (schema_.length() > 0)
@@ -161,7 +163,7 @@ void postgis_datasource::bind() const
                   }
                 */
 
-                shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
+                shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                 if (rs->next())
                 {
                     geometryColumn_ = rs->getValue("f_geometry_column");
@@ -177,6 +179,25 @@ void postgis_datasource::bind() const
                             std::clog << "Postgis Plugin: SRID=" << rs->getValue("srid") << " " << ex.what() << std::endl;
                         }
                     }
+
+                    g_type = rs->getValue("type");
+                    if (boost::algorithm::contains(g_type,"line"))
+                    {
+                        g_type = "linestring";
+                    }
+                    else if (boost::algorithm::contains(g_type,"point"))
+                    {
+                        g_type = "point";
+                    }
+                    else if (boost::algorithm::contains(g_type,"polygon"))
+                    {
+                        g_type = "polygon";
+                    }
+                    else // geometry
+                    {
+                        g_type = "collection";
+                    }
+                    desc_.set_geometry_type(g_type);
                 }
                 rs->close();
 
@@ -196,7 +217,7 @@ void postgis_datasource::bind() const
                       }
                     */
 
-                    shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
+                    shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                     if (rs->next())
                     {
                         try
@@ -238,7 +259,7 @@ void postgis_datasource::bind() const
             */
 
 
-            shared_ptr<ResultSet> rs=conn->executeQuery(s.str());
+            shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
             int count = rs->getNumFields();
             bool found_key_field = false;
             for (int i=0;i<count;++i)
@@ -326,7 +347,55 @@ void postgis_datasource::bind() const
                     }
                 }
             }
+
             rs->close();
+
+            // fallback to querying first several features
+            if (g_type.empty() && !geometryColumn_.empty())
+            {
+                s.str("");
+                std::string g_type("");
+                std::string prev_type("");
+                s << "SELECT ST_GeometryType(\"" << geometryColumn_ << "\") AS geom"
+                  << " FROM " << populate_tokens(table_);
+                if (row_limit_ > 0 && row_limit_ < 5) {
+                    s << " LIMIT " << row_limit_;
+                } else {
+                    s << " LIMIT 5";
+                }
+                shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
+                while (rs->next() && !rs->isNull(0))
+                {
+                    const char *data = rs->getValue(0);
+                    if (boost::algorithm::icontains(data,"line"))
+                    {
+                        g_type = "linestring";
+                    }
+                    else if (boost::algorithm::icontains(data,"point"))
+                    {
+                        g_type = "point";
+                    }
+                    else if (boost::algorithm::icontains(data,"polygon"))
+                    {
+                        g_type = "polygon";
+                    }
+                    else // geometry
+                    {
+                        g_type = "collection";
+                        break;
+                    }
+                    if (!prev_type.empty() && g_type != prev_type)
+                    {
+                        g_type = "collection";
+                        break;
+                    }
+                    prev_type = g_type;
+                }
+                desc_.set_geometry_type(g_type);
+            }
+
+            is_bound_ = true;
+
         }
     }
 }

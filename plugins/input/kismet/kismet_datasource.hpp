@@ -62,7 +62,7 @@ private:
     unsigned int port_;
     int type_;
     std::string srs_;
-    mapnik::layer_descriptor desc_;
+    mutable mapnik::layer_descriptor desc_;
     boost::shared_ptr<boost::thread> kismet_thread;
 };
 

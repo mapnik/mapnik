@@ -123,6 +123,9 @@ void osm_datasource::bind() const
         extent_ =  box2d<double>(b.w, b.s, b.e, b.n);
     }
 
+    // osm data is most likely a collection of geometry types
+    desc_.set_geometry_type("collection");
+
     is_bound_ = true;
 }
 

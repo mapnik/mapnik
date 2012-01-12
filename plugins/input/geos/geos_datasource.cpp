@@ -212,6 +212,31 @@ void geos_datasource::bind() const
         }
     }
 
+    // get geometry type
+    const int type = GEOSGeomTypeId(*geometry_);
+    switch (type)
+    {
+    case GEOS_POINT:
+    case GEOS_MULTIPOINT:
+        desc_.set_geometry_type("point");
+        break;
+    case GEOS_LINESTRING:
+    case GEOS_LINEARRING:
+    case GEOS_MULTILINESTRING:
+        desc_.set_geometry_type("linestring");
+        break;
+    case GEOS_POLYGON:
+    case GEOS_MULTIPOLYGON:
+        desc_.set_geometry_type("polygon");
+        break;
+    case GEOS_GEOMETRYCOLLECTION:
+        desc_.set_geometry_type("collection");
+        break;
+    default:
+        break;
+    }
+
+
     if (! extent_initialized_)
     {
         throw datasource_exception("GEOS Plugin: cannot determine extent for <wkt> geometry");

@@ -34,6 +34,10 @@ void hello_datasource::bind() const
     // see http://spatialreference.org/ref/epsg/4326/ for more details
     extent_.init(-180,-90,180,90);
 
+    // declare that this datasource is going to provide points
+    // options are point,polygon,linestring, and collection
+    desc_.set_geometry_type("point");
+
     is_bound_ = true;
 }
 

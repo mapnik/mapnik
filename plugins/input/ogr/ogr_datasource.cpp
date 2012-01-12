@@ -28,6 +28,7 @@
 #include "ogr_datasource.hpp"
 #include "ogr_featureset.hpp"
 #include "ogr_index_featureset.hpp"
+#include "ogr_feature_ptr.hpp"
 
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
@@ -264,6 +265,70 @@ void ogr_datasource::bind() const
                   << std::endl;
     }
 #endif
+
+    // get geometry type
+    // NOTE: wkbFlatten macro in ogr flattens 2.5d types into base 2d type
+    switch (wkbFlatten(layer->GetGeomType()))
+    {
+    case wkbPoint:
+    case wkbMultiPoint:
+        desc_.set_geometry_type("point");
+        break;
+    case wkbLinearRing:
+    case wkbLineString:
+    case wkbMultiLineString:
+        desc_.set_geometry_type("linestring");
+        break;
+    case wkbPolygon:
+    case wkbMultiPolygon:
+        desc_.set_geometry_type("polygon");
+        break;
+    case wkbGeometryCollection:
+        desc_.set_geometry_type("collection");
+        break;
+    case wkbNone:
+    case wkbUnknown:
+        {
+            // fallback to inspecting first actual geometry
+            // TODO - csv and shapefile inspect first 4 features
+            if (dataset_ && layer_.is_valid())
+            {
+                OGRLayer* layer = layer_.layer();
+                ogr_feature_ptr feat(layer->GetNextFeature());
+                if ((*feat) != NULL)
+                {
+                    OGRGeometry* geom = (*feat)->GetGeometryRef();
+                    if (geom && ! geom->IsEmpty())
+                    {
+                        switch (wkbFlatten(geom->getGeometryType()))
+                        {
+                        case wkbPoint:
+                        case wkbMultiPoint:
+                            desc_.set_geometry_type("point");
+                            break;
+                        case wkbLinearRing:
+                        case wkbLineString:
+                        case wkbMultiLineString:
+                            desc_.set_geometry_type("linestring");
+                            break;
+                        case wkbPolygon:
+                        case wkbMultiPolygon:
+                            desc_.set_geometry_type("polygon");
+                            break;
+                        case wkbGeometryCollection:
+                            desc_.set_geometry_type("collection");
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+    default:
+        break;
+    }
 
     // deal with attributes descriptions
     OGRFeatureDefn* def = layer->GetLayerDefn();
