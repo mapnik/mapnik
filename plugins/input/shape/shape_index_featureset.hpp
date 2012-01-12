@@ -32,6 +32,7 @@
 
 // boost
 #include <boost/scoped_ptr.hpp>
+#include <boost/utility.hpp>
 
 #include "shape_datasource.hpp"
 #include "shape_io.hpp"
@@ -42,7 +43,8 @@ using mapnik::feature_ptr;
 using mapnik::context_ptr;
 
 template <typename filterT>
-class shape_index_featureset : public Featureset
+class shape_index_featureset : public Featureset, 
+                               private boost::noncopyable
 {
 public:
     shape_index_featureset(const filterT& filter,
@@ -66,9 +68,6 @@ private:
     mutable int total_geom_size;
     mutable int count_;
     const int row_limit_;
-    //no copying
-    shape_index_featureset(const shape_index_featureset&);
-    shape_index_featureset& operator=(const shape_index_featureset&);
 };
 
 #endif // SHAPE_INDEX_FEATURESET_HPP

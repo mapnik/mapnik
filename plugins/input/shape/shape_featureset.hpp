@@ -31,6 +31,7 @@
 
 //boost
 #include <boost/scoped_ptr.hpp>
+#include <boost/utility.hpp>
 
 using mapnik::Featureset;
 using mapnik::box2d;
@@ -39,7 +40,8 @@ using mapnik::transcoder;
 using mapnik::context_ptr;
 
 template <typename filterT>
-class shape_featureset : public Featureset
+class shape_featureset : public Featureset,
+                         private boost::noncopyable
 {
     filterT filter_;
     context_ptr ctx_;
@@ -62,11 +64,6 @@ public:
                      int row_limit);
     virtual ~shape_featureset();
     feature_ptr next();
-
-private:
-    shape_featureset(const shape_featureset&);
-    const shape_featureset& operator=(const shape_featureset&);
-
 };
 
 #endif //SHAPE_FEATURESET_HPP
