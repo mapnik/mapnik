@@ -42,6 +42,7 @@ namespace {
 using mapnik::Feature;
 using mapnik::geometry_utils;
 using mapnik::from_wkt;
+using mapnik::context_ptr;
 
 void feature_add_geometries_from_wkb(Feature &feature, std::string wkb)
 {
@@ -269,18 +270,19 @@ void export_feature()
     UnicodeString_from_python_str();
 
     class_<Feature,boost::shared_ptr<Feature>,
-        boost::noncopyable>("Feature",init<int>("Default ctor."))
-        .def("id",&Feature::id)
-        .def("__str__",&Feature::to_string)
-        .def("add_geometries_from_wkb", &feature_add_geometries_from_wkb)
-        .def("add_geometries_from_wkt", &feature_add_geometries_from_wkt)
-        //.def("add_geometry", add_geometry)
-        //.def("num_geometries",&Feature::num_geometries)
-        //.def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
-        .def("geometries",make_function(&Feature::paths,return_value_policy<reference_existing_object>()))
-        .def("envelope", &Feature::envelope)
-        .def(map_indexing_suite2<Feature, true >())
-        .def("iteritems",iterator<Feature> ())
-        // TODO define more mapnik::Feature methods
-        ;
+           boost::noncopyable>("Feature",init<context_ptr, int>("Default ctor."))
+           .def("id",&Feature::id)
+           .def("__str__",&Feature::to_string)
+           .def("add_geometries_from_wkb", &feature_add_geometries_from_wkb)
+           .def("add_geometries_from_wkt", &feature_add_geometries_from_wkt)
+    //.def("add_geometry", add_geometry)
+    //.def("num_geometries",&Feature::num_geometries)
+    //.def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
+           .def("geometries",make_function(&Feature::paths,return_value_policy<reference_existing_object>()))
+    // FIXME
+    //.def("envelope", &Feature::envelope)
+    //     .def(map_indexing_suite2<Feature, true >())
+    //      .def("iteritems",iterator<Feature> ())
+    // TODO define more mapnik::Feature methods
+           ;
 }

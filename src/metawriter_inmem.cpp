@@ -39,16 +39,19 @@ using mapnik::metawriter_properties;
 
 // intersect a set of properties with those in the feature descriptor
 map<string,value> intersect_properties(const Feature &feature, const metawriter_properties &properties) {
-  const map<string, value> &fprops = feature.props();
-  map<string,value> nprops;
 
+    // FIXME
+  //const map<string, value> &fprops = feature.props();
+  
+    map<string,value> nprops;
+    /*
   BOOST_FOREACH(string p, properties) {
-    map<string, value>::const_iterator itr = fprops.find(p);
+  map<string, value>::const_iterator itr = fprops.find(p);
     if (itr != fprops.end()) {
       nprops.insert(*itr);
+      }
     }
-  }
-
+    */
   return nprops;
 }
 } // end anonymous namespace

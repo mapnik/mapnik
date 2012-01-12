@@ -116,14 +116,16 @@ void memory_datasource::clear()
 
 void point_datasource::add_point(double x, double y, const char* key, const char* value)
 {
-        feature_ptr feature(feature_factory::create(feature_id_));
-        ++feature_id_;
-        geometry_type * pt = new geometry_type(Point);
-        pt->move_to(x,y);
-        feature->add_geometry(pt);
-        transcoder tr("utf-8");
-        (*feature)[key] = tr.transcode(value);
-        this->push(feature);
+    // FIXME
+
+    //feature_ptr feature(feature_factory::create(feature_id_));
+    //   ++feature_id_;
+    //   geometry_type * pt = new geometry_type(Point);
+    //   pt->move_to(x,y);
+    //   feature->add_geometry(pt);
+    //   transcoder tr("utf-8");
+    //   (*feature)[key] = tr.transcode(value);
+    //   this->push(feature);
 }
 
 }
