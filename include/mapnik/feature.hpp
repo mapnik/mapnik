@@ -138,7 +138,6 @@ public:
     {
         return raster_;
     }
-
     
     void set_raster(raster_ptr const& raster)
     {

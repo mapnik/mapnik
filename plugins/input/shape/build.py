@@ -34,6 +34,7 @@ shape_src = Split(
         shape_featureset.cpp
         shape_index_featureset.cpp
         shape_io.cpp
+        shape_utils.cpp
   """
         )
 

@@ -63,7 +63,7 @@ private:
     boost::scoped_ptr<transcoder> tr_;
     std::vector<int> ids_;
     std::vector<int>::iterator itr_;
-    std::set<int> attr_ids_;
+    std::vector<int> attr_ids_;
     mutable box2d<double> feature_ext_;
     mutable int total_geom_size;
     mutable int count_;

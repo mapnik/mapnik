@@ -31,19 +31,19 @@
 #include <boost/interprocess/streams/bufferstream.hpp>
 
 #include "shape_index_featureset.hpp"
+#include "shape_utils.hpp"
 
 using mapnik::feature_factory;
 using mapnik::geometry_type;
 
 template <typename filterT>
-shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
+shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
                                                         shape_io& shape,
-                                                        const std::set<std::string>& attribute_names,
+                                                        std::set<std::string> const& attribute_names,
                                                         std::string const& encoding,
                                                         std::string const& shape_name,
                                                         int row_limit)
     : filter_(filter),
-      //shape_type_(0),
       shape_(shape),
       tr_(new transcoder(encoding)),
       count_(0),
@@ -51,7 +51,8 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 {
     ctx_ = boost::make_shared<mapnik::context>();
     shape_.shp().skip(100);
-
+    setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
+    
     boost::shared_ptr<shape_file> index = shape_.index();
     if (index)
     {
@@ -64,47 +65,12 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
     }
 
     std::sort(ids_.begin(), ids_.end());
-
+    
 #ifdef MAPNIK_DEBUG
     std::clog << "Shape Plugin: query size=" << ids_.size() << std::endl;
 #endif
-
-    itr_ = ids_.begin();
     
-    // deal with attributes
-    std::set<std::string>::const_iterator pos = attribute_names.begin();
-    while (pos != attribute_names.end())
-    {
-        bool found_name = false;
-        for (int i = 0; i < shape_.dbf().num_fields(); ++i)
-        {
-            if (shape_.dbf().descriptor(i).name_ == *pos)
-            {
-                ctx_->push(*pos);
-                attr_ids_.insert(i);
-                found_name = true;
-                break;
-            }
-        }
-
-        if (! found_name)
-        {
-            std::ostringstream s;
-            s << "no attribute '" << *pos << "' in '" << shape_name << "'. Valid attributes are: ";
-
-            std::vector<std::string> list;
-            for (int i = 0; i < shape_.dbf().num_fields(); ++i)
-            {
-                list.push_back(shape_.dbf().descriptor(i).name_);
-            }
-
-            s << boost::algorithm::join(list, ",") << ".";
-
-            throw mapnik::datasource_exception("Shape Plugin: " + s.str());
-        }
-
-        ++pos;
-    }
+    itr_ = ids_.begin(); 
 }
 
 template <typename filterT>
@@ -217,8 +183,8 @@ feature_ptr shape_index_featureset<filterT>::next()
         if (attr_ids_.size())
         {
             shape_.dbf().move_to(shape_.id_);
-            std::set<int>::const_iterator itr = attr_ids_.begin();
-            std::set<int>::const_iterator end = attr_ids_.end();
+            std::vector<int>::const_iterator itr = attr_ids_.begin();
+            std::vector<int>::const_iterator end = attr_ids_.end();
             try
             {
                 for (; itr!=end; ++itr)
