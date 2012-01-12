@@ -46,8 +46,8 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     : filter_(filter),
       shape_(shape),
       tr_(new transcoder(encoding)),
-      count_(0),
-      row_limit_(row_limit)
+      row_limit_(row_limit),
+      count_(0)
 {
     ctx_ = boost::make_shared<mapnik::context>();
     shape_.shp().skip(100);
