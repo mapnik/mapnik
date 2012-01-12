@@ -85,9 +85,11 @@ public:
     {}
     
     inline int id() const { return id_;}
-    void set_id(int id) { id_ = id;}
+
+    inline void set_id(int id) { id_ = id;}
+    
     template <typename T>
-    void set(std::string const& key, T const& val)
+    void put(std::string const& key, T const& val)
     {
         map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end())
