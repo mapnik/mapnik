@@ -39,6 +39,7 @@
 using mapnik::Featureset;
 using mapnik::box2d;
 using mapnik::feature_ptr;
+using mapnik::context_ptr;
 
 template <typename filterT>
 class shape_index_featureset : public Featureset
@@ -55,7 +56,7 @@ public:
 
 private:
     filterT filter_;
-    //int shape_type_;
+    context_ptr ctx_;
     shape_io & shape_;
     boost::scoped_ptr<transcoder> tr_;
     std::vector<int> ids_;

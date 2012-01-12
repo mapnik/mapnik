@@ -49,6 +49,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
       count_(0),
       row_limit_(row_limit)
 {
+    ctx_ = boost::make_shared<mapnik::context>();
     shape_.shp().skip(100);
 
     boost::shared_ptr<shape_file> index = shape_.index();
@@ -69,7 +70,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
 #endif
 
     itr_ = ids_.begin();
-
+    
     // deal with attributes
     std::set<std::string>::const_iterator pos = attribute_names.begin();
     while (pos != attribute_names.end())
@@ -79,6 +80,7 @@ shape_index_featureset<filterT>::shape_index_featureset(const filterT& filter,
         {
             if (shape_.dbf().descriptor(i).name_ == *pos)
             {
+                ctx_->push(*pos);
                 attr_ids_.insert(i);
                 found_name = true;
                 break;
@@ -119,7 +121,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         shape_.move_to(pos);
 
         int type = shape_.type();
-        feature_ptr feature(feature_factory::create(shape_.id_));
+        feature_ptr feature(feature_factory::create(ctx_,shape_.id_));
         if (type == shape_io::shape_point)
         {
             double x = shape_.shp().read_double();
@@ -210,7 +212,7 @@ feature_ptr shape_index_featureset<filterT>::next()
             }
             }
         }
-
+        // FIXME
         feature->set_id(shape_.id_);
         if (attr_ids_.size())
         {
