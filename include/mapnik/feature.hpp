@@ -61,9 +61,9 @@ public:
     context()
         : base_type(mapping_) {}
     
-    void insert(std::string const& name,int index)
+    void push(std::string const& name)
     {
-        mapping_.insert(std::make_pair(name,index));
+        mapping_.insert(std::make_pair(name,mapping_.size()));
     }
     
 private:
