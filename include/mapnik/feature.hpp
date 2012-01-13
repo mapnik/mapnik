@@ -62,6 +62,7 @@ public:
     typedef map_type::size_type size_type;
     typedef map_type::difference_type difference_type;
     typedef map_type::iterator iterator;
+    typedef map_type::const_iterator const_iterator;
     
     context()
         : base_type(mapping_) {}
@@ -71,6 +72,9 @@ public:
         mapping_.insert(std::make_pair(name,mapping_.size()));
     }
     
+    const_iterator begin() const { return mapping_.begin();}
+    const_iterator end() const { return mapping_.end();}
+    
 private:
     map_type mapping_;
 };
@@ -79,10 +83,13 @@ typedef boost::shared_ptr<context> context_ptr;
 
 class feature_impl : private boost::noncopyable
 {
+    friend class feature_kv_iterator;
 public:
+        
+    
     typedef mapnik::value value_type;    
     typedef std::vector<value_type> cont_type;
-    
+
     feature_impl(context_ptr const& ctx, int id) 
         : id_(id),
           ctx_(ctx),
