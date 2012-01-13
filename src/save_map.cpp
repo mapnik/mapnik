@@ -650,11 +650,7 @@ void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
     {
         set_attr(rule_node, "name", r.get_name());
     }
-    if ( r.get_title() != dfl.get_title() )
-    {
-        set_attr(rule_node, "title", r.get_title());
-    }
-
+    
     if ( r.has_else_filter() )
     {
         rule_node.push_back( ptree::value_type(
@@ -818,21 +814,12 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
 {
     ptree & layer_node = map_node.push_back(
         ptree::value_type("Layer", ptree()))->second;
+    
     if ( layer.name() != "" )
     {
         set_attr( layer_node, "name", layer.name() );
     }
-
-    if ( layer.abstract() != "" )
-    {
-        set_attr( layer_node, "abstract", layer.abstract() );
-    }
-
-    if ( layer.title() != "" )
-    {
-        set_attr( layer_node, "title", layer.title() );
-    }
-
+    
     if ( layer.srs() != "" )
     {
         set_attr( layer_node, "srs", layer.srs() );

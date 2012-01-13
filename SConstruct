@@ -424,7 +424,8 @@ pickle_store = [# Scons internal variables
         'CAIROMM_LINKFLAGS',
         'CAIROMM_CPPPATHS',
         'SVG_RENDERER',
-        'SQLITE_LINKFLAGS'
+        'SQLITE_LINKFLAGS',
+        'BOOST_LIB_VERSION_FROM_HEADER'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -1115,10 +1116,7 @@ if not preconfigured:
         
     conf.FindBoost(BOOST_SEARCH_PREFIXES,thread_flag)
     
-    boost_lib_version_from_header = conf.GetBoostLibVersion()
-    if boost_lib_version_from_header:
-        boost_version_from_header = int(boost_lib_version_from_header.split('_')[1])
-            
+    env['BOOST_LIB_VERSION_FROM_HEADER'] = conf.GetBoostLibVersion()
     
     # The other required boost headers.
     BOOST_LIBSHEADERS = [
@@ -1148,7 +1146,7 @@ if not preconfigured:
         if not env['BOOST_VERSION']:
             env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
     else:
-        color_print(4,'Found boost lib version... %s' % boost_lib_version_from_header )
+        color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
     
     for count, libinfo in enumerate(BOOST_LIBSHEADERS):
         if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
@@ -1432,8 +1430,9 @@ if not preconfigured:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
             else: 
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts %s' % (env['OPTIMIZATION'],ndebug_flags))
+
             if env['DEBUG_UNDEFINED']:
-                env.Append(CXXFLAGS = '-fcatch-undefined-behavior') #-ftrapv -fwrapv 
+                env.Append(CXXFLAGS = '-fcatch-undefined-behavior') #-ftrapv -fwrapv
 
         if 'python' in env['BINDINGS']:
             if not os.access(env['PYTHON'], os.X_OK):

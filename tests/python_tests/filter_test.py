@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
-from utilities import Todo
-
 import mapnik
 
 if hasattr(mapnik,'Expression'):

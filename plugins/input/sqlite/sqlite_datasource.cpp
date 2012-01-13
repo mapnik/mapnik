@@ -62,6 +62,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     key_field_(*params_.get<std::string>("key_field", "")),
     row_offset_(*params_.get<int>("row_offset", 0)),
     row_limit_(*params_.get<int>("row_limit", 0)),
+    intersects_token_("!intersects!"),
     desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
     format_(mapnik::wkbAuto)
 {
@@ -102,7 +103,6 @@ void sqlite_datasource::bind() const
         throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
     }
 
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries", false);
     use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index", true);
 
     // TODO - remove this option once all datasources have an indexing api
@@ -186,7 +186,8 @@ void sqlite_datasource::bind() const
     if (using_subquery_)
     {
         std::ostringstream s;
-        s << "SELECT " << fields_ << " FROM (" << table_ << ") LIMIT 1";
+        std::string query = populate_tokens(table_);
+        s << "SELECT " << fields_ << " FROM (" << query << ") LIMIT 1";
         found_types_via_subquery = sqlite_utils::detect_types_from_subquery(s.str(),geometry_field_,desc_,dataset_);
     }
 
@@ -225,7 +226,12 @@ void sqlite_datasource::bind() const
 
     if (geometry_field_.empty())
     {
-        throw datasource_exception("Sqlite Plugin: cannot detect geometry_field, please supply the name of the geometry_field to use.");
+        std::ostringstream s;
+        s << "Sqlite Plugin: unable to detect the column "
+          << "containing a valid geometry on table '" << geometry_table_ << "'. "
+          << "Please provide a column name by passing the 'geometry_field' option "
+          << "or indicate a different spatial table to use by passing the 'geometry_table' option";
+        throw datasource_exception(s.str());
     }
 
     if (index_table_.empty())
@@ -302,6 +308,7 @@ void sqlite_datasource::bind() const
     {
 
         // TODO - clean this up - reducing arguments
+        std::string query = populate_tokens(table_);
         if (!sqlite_utils::detect_extent(dataset_,
                                          has_spatial_index_,
                                          extent_,
@@ -310,7 +317,7 @@ void sqlite_datasource::bind() const
                                          geometry_field_,
                                          geometry_table_,
                                          key_field_,
-                                         table_))
+                                         query))
         {
             std::ostringstream s;
             s << "Sqlite Plugin: extent could not be determined for table '"
@@ -322,6 +329,17 @@ void sqlite_datasource::bind() const
         }
     }
     is_bound_ = true;
+}
+
+std::string sqlite_datasource::populate_tokens(const std::string& sql) const
+{
+    std::string populated_sql = sql;
+    if (boost::algorithm::ifind_first(populated_sql, intersects_token_))
+    {
+        // replace with dummy comparison that is true
+        boost::algorithm::ireplace_first(populated_sql, intersects_token_, "1=1");
+    }
+    return populated_sql;
 }
 
 sqlite_datasource::~sqlite_datasource()
@@ -461,23 +479,21 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         s << " FROM ";
 
-        std::string query (table_);
+        std::string query(table_);
 
         if (! key_field_.empty() && has_spatial_index_)
         {
-            std::ostringstream spatial_sql;
-            spatial_sql << std::setprecision(16);
-            spatial_sql << " WHERE " << key_field_ << " IN (SELECT pkid FROM " << index_table_;
-            spatial_sql << " WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
-            spatial_sql << " AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
-            if (boost::algorithm::ifind_first(query, "WHERE"))
-            {
-                boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
-            }
-            else if (boost::algorithm::ifind_first(query, geometry_table_))
-            {
-                boost::algorithm::ireplace_first(query, table_, table_ + " " + spatial_sql.str());
-            }
+            // TODO - debug warn if fails
+            sqlite_utils::apply_spatial_filter(query,
+                                               e,
+                                               table_,
+                                               key_field_,
+                                               index_table_,
+                                               geometry_table_,
+                                               intersects_token_);        }
+        else
+        {
+            query = populate_tokens(table_);
         }
 
         s << query ;
@@ -502,7 +518,6 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         return boost::make_shared<sqlite_featureset>(rs,
                                                      desc_.get_encoding(),
                                                      format_,
-                                                     multiple_geometries_,
                                                      using_subquery_);
     }
 
@@ -541,19 +556,18 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
 
         if (! key_field_.empty() && has_spatial_index_)
         {
-            std::ostringstream spatial_sql;
-            spatial_sql << std::setprecision(16);
-            spatial_sql << " WHERE " << key_field_ << " IN (SELECT pkid FROM " << index_table_;
-            spatial_sql << " WHERE xmax>=" << e.minx() << " AND xmin<=" << e.maxx() ;
-            spatial_sql << " AND ymax>=" << e.miny() << " AND ymin<=" << e.maxy() << ")";
-            if (boost::algorithm::ifind_first(query, "WHERE"))
-            {
-                boost::algorithm::ireplace_first(query, "WHERE", spatial_sql.str() + " AND ");
-            }
-            else if (boost::algorithm::ifind_first(query, geometry_table_))
-            {
-                boost::algorithm::ireplace_first(query, table_, table_ + " " + spatial_sql.str());
-            }
+            // TODO - debug warn if fails
+            sqlite_utils::apply_spatial_filter(query,
+                                               e,
+                                               table_,
+                                               key_field_,
+                                               index_table_,
+                                               geometry_table_,
+                                               intersects_token_);
+        }
+        else
+        {
+            query = populate_tokens(table_);
         }
 
         s << query ;
@@ -577,9 +591,8 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         return boost::make_shared<sqlite_featureset>(rs,
                                                      desc_.get_encoding(),
                                                      format_,
-                                                     multiple_geometries_,
                                                      using_subquery_);
     }
-
+    
     return featureset_ptr();
 }

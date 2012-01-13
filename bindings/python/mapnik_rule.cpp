@@ -86,7 +86,7 @@ struct rule_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getinitargs(const rule& r)
     {
-        return boost::python::make_tuple(r.get_name(),r.get_title(),r.get_min_scale(),r.get_max_scale());
+        return boost::python::make_tuple(r.get_name(),r.get_min_scale(),r.get_max_scale());
     }
 
     static  boost::python::tuple
@@ -102,7 +102,7 @@ struct rule_pickle_suite : boost::python::pickle_suite
         // We serialize filter expressions AST as strings
         std::string filter_expr = to_expression_string(*r.get_filter());
 
-        return boost::python::make_tuple(r.get_abstract(),filter_expr,r.has_else_filter(),r.has_also_filter(),syms);
+        return boost::python::make_tuple(filter_expr,r.has_else_filter(),r.has_also_filter(),syms);
     }
 
     static void
@@ -120,11 +120,6 @@ struct rule_pickle_suite : boost::python::pickle_suite
 
         if (state[0])
         {
-            r.set_title(extract<std::string>(state[0]));
-        }
-
-        if (state[1])
-        {
             rule dfl;
             std::string filter = extract<std::string>(state[1]);
             std::string default_filter = "<TODO>";//dfl.get_filter()->to_string();
@@ -134,12 +129,12 @@ struct rule_pickle_suite : boost::python::pickle_suite
             }
         }
 
-        if (state[2])
+        if (state[1])
         {
             r.set_else(true);
         }
 
-        if (state[3])
+        if (state[2])
         {
             r.set_also(true);
         }
@@ -176,18 +171,12 @@ void export_rule()
 
     class_<rule>("Rule",init<>("default constructor"))
         .def(init<std::string const&,
-             boost::python::optional<std::string const&,double,double> >())
+             boost::python::optional<double,double> >())
         .def_pickle(rule_pickle_suite())
         .add_property("name",make_function
                       (&rule::get_name,
                        return_value_policy<copy_const_reference>()),
                       &rule::set_name)
-        .add_property("title",make_function
-                      (&rule::get_title,return_value_policy<copy_const_reference>()),
-                      &rule::set_title)
-        .add_property("abstract",make_function
-                      (&rule::get_abstract,return_value_policy<copy_const_reference>()),
-                      &rule::set_abstract)
         .add_property("filter",make_function
                       (&rule::get_filter,return_value_policy<copy_const_reference>()),
                       &rule::set_filter)

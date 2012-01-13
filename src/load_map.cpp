@@ -560,14 +560,19 @@ void map_parser::parse_font(font_set & fset, ptree const & f)
 {
     ensure_attrs(f, "Font", "face-name");
 
-    std::string face_name = get_attr(f, "face-name", std::string());
-
-    if ( strict_ )
+    optional<std::string> face_name = get_opt_attr<std::string>(f, "face-name");
+    if (face_name)
     {
-        ensure_font_face( face_name );
+        if ( strict_ )
+        {
+            ensure_font_face(*face_name);
+        }
+        fset.add_face_name(*face_name);
     }
-
-    fset.add_face_name(face_name);
+    else
+    {
+        throw config_error(std::string("Must have 'face-name' set"));
+    }
 }
 
 void map_parser::parse_layer( Map & map, ptree const & lay )
@@ -577,8 +582,6 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
     s << "name,"
       << "srs,"
       << "status,"
-      << "title,"
-      << "abstract,"
       << "minzoom,"
       << "maxzoom,"
       << "queryable,"
@@ -600,19 +603,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
         {
             lyr.setActive( * status );
         }
-
-        optional<std::string> title =  get_opt_attr<std::string>(lay, "title");
-        if (title)
-        {
-            lyr.set_title( * title );
-        }
-
-        optional<std::string> abstract =  get_opt_attr<std::string>(lay, "abstract");
-        if (abstract)
-        {
-            lyr.set_abstract( * abstract );
-        }
-
+        
         optional<double> minZoom = get_opt_attr<double>(lay, "minzoom");
         if (minZoom)
         {
@@ -765,14 +756,12 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
 
 void map_parser::parse_rule( feature_type_style & style, ptree const & r )
 {
-    ensure_attrs(r, "Rule", "name,title");
+    ensure_attrs(r, "Rule", "name");
     std::string name;
     try
     {
         name = get_attr( r, "name", std::string());
-        std::string title = get_attr( r, "title", std::string());
-
-        rule rule(name,title);
+        rule rule(name);
 
         optional<std::string> filter_expr =
             get_opt_child<std::string>( r, "Filter");

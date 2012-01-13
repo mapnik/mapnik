@@ -193,49 +193,18 @@ feature_ptr shape_index_featureset<filterT>::next()
             }
 
             case shape_io::shape_polyline:
-            {
-                geometry_type* line = shape_.read_polyline();
-                feature->add_geometry(line);
-                ++count_;
-                break;
-            }
-
             case shape_io::shape_polylinem:
-            {
-                geometry_type* line = shape_.read_polylinem();
-                feature->add_geometry(line);
-                ++count_;
-                break;
-            }
-
             case shape_io::shape_polylinez:
             {
-                geometry_type* line = shape_.read_polylinez();
-                feature->add_geometry(line);
+                shape_.read_polyline(feature->paths());                
                 ++count_;
                 break;
             }
-
             case shape_io::shape_polygon:
-            {
-                geometry_type* poly = shape_.read_polygon();
-                feature->add_geometry(poly);
-                ++count_;
-                break;
-            }
-
             case shape_io::shape_polygonm:
-            {
-                geometry_type* poly = shape_.read_polygonm();
-                feature->add_geometry(poly);
-                ++count_;
-                break;
-            }
-
             case shape_io::shape_polygonz:
             {
-                geometry_type* poly = shape_.read_polygonz();
-                feature->add_geometry(poly);
+                shape_.read_polygon(feature->paths());
                 ++count_;
                 break;
             }

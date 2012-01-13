@@ -54,7 +54,7 @@ def test_shapefile_polygon_feature_query_id():
         compare_shape_between_mapnik_and_ogr('../data/shp/world_merc.shp',query)
 
 def test_feature_hit_count():
-    raise Todo("need to optimize multigeom bbox handling in shapeindex")
+    raise Todo("need to optimize multigeom bbox handling in shapeindex: https://github.com/mapnik/mapnik/issues/783")
     # results in different results between shp and ogr!
     #bbox = (-14284551.8434, 2074195.1992, -7474929.8687, 8140237.7628)
     bbox = (1113194.91,4512803.085,2226389.82,6739192.905)

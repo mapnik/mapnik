@@ -5,7 +5,6 @@ from nose.tools import *
 
 import mapnik
 from binascii import unhexlify
-from utilities import Todo
 
 class FeatureTest(unittest.TestCase):
     def makeOne(self, *args, **kw):
