@@ -29,6 +29,7 @@
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/memory_datasource.hpp>
+#include <mapnik/feature_kv_iterator.hpp>
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
@@ -42,6 +43,7 @@ using mapnik::geometry_ptr;
 using mapnik::CoordTransform;
 using mapnik::projection;
 using mapnik::scale_denominator;
+using mapnik::feature_kv_iterator;
 
 double scales [] = {279541132.014,
                     139770566.007,
@@ -170,20 +172,17 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                   feature_ptr feat  = fs->next();
                   if (feat)
                   {
-                      // FIXME
-                      /* 
-                     std::map<std::string,mapnik::value> const& props = feat->props();
-                     std::map<std::string,mapnik::value>::const_iterator itr=props.begin();
-                     for (; itr!=props.end();++itr)
-                     {
-                        if (itr->second.to_string().length() > 0)
-                        {
-                           info.push_back(QPair<QString,QString>(QString(itr->first.c_str()),
-                                                                 itr->second.to_string().c_str()));
-                        }
-                     }
-                      */
-                     typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry_type> path_type;
+                      
+                      feature_kv_iterator itr(*feat,true);
+                      feature_kv_iterator end(*feat);
+                      
+                      for ( ;itr!=end; ++itr)
+                      {
+                          info.push_back(QPair<QString,QString>(QString(boost::get<0>(*itr).c_str()),
+                                                                boost::get<1>(*itr).to_string().c_str()));
+                      }
+                      
+                      typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry_type> path_type;
 
                      for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
