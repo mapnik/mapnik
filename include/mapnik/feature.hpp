@@ -98,6 +98,15 @@ public:
         }
     } 
     
+    void put(std::string const& key, value const& val)
+    {
+        map_type::const_iterator itr = ctx_->mapping_.find(key);
+        if (itr != ctx_->mapping_.end())
+        {
+            data_[itr->second] = val;
+        }
+    }
+    
     value_type const& get(std::string const& key) const
     {
         map_type::const_iterator itr = ctx_->mapping_.find(key);
@@ -116,7 +125,7 @@ public:
         
     void add_geometry(geometry_type * geom)
     {
-       geom_cont_.push_back(geom);
+        geom_cont_.push_back(geom);
     }
        
     unsigned num_geometries() const
@@ -133,7 +142,26 @@ public:
     {
         return geom_cont_[index];
     }
-       
+    
+    box2d<double> envelope() const
+    {
+        box2d<double> result;
+        for (unsigned i=0;i<num_geometries();++i)
+        {
+            geometry_type const& geom = get_geometry(i);
+            if (i==0)
+            {
+                box2d<double> box = geom.envelope();
+                result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
+            }
+            else
+            {
+                result.expand_to_include(geom.envelope());
+            }
+        }
+        return result;
+    }       
+    
     const raster_ptr& get_raster() const
     {
         return raster_;
