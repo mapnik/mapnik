@@ -152,10 +152,15 @@ void gdal_datasource::bind() const
               << tr[4] << "," << tr[5] << std::endl;
 #endif
 
+    // TODO - We should throw for true non-north up images, but the check
+    // below is clearly too restrictive.
+    // https://github.com/mapnik/mapnik/issues/970
+    /*
     if (tr[2] != 0 || tr[4] != 0)
     {
         throw datasource_exception("GDAL Plugin: only 'north up' images are supported");
     }
+    */
 
     dx_ = tr[1];
     dy_ = tr[5];

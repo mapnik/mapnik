@@ -381,7 +381,6 @@ def PostGIS(**keywords):
       srid -- specify srid to use (default: auto-detected from geometry_field)
       row_limit -- integer limit of rows to return (default: 0)
       cursor_size -- integer size of binary cursor to use (default: 0, no binary cursor is used)
-      multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
 
     >>> from mapnik import PostGIS, Layer
     >>> params = dict(dbname='mapnik',table='osm',user='postgres',password='gis')
@@ -467,7 +466,6 @@ def Occi(**keywords):
       encoding -- file encoding (default 'utf-8')
       geometry_field -- specify geometry field (default 'GEOLOC')
       use_spatial_index -- boolean, force the use of the spatial index (default True)
-      multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
 
     >>> from mapnik import Occi, Layer
     >>> params = dict(host='myoracle',user='scott',password='tiger',table='test')
@@ -492,7 +490,6 @@ def Ogr(**keywords):
       layer_by_sql -- choose layer by sql query number instead of by layer name or index.
       base -- path prefix (default None)
       encoding -- file encoding (default 'utf-8')
-      multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
 
     >>> from mapnik import Ogr, Layer
     >>> datasource = Ogr(base='/home/mapnik/data',file='rivers.geojson',layer='OGRGeoJSON') 
@@ -520,7 +517,6 @@ def SQLite(**keywords):
       row_offset -- specify a custom integer row offset (default 0)
       row_limit -- specify a custom integer row limit (default 0)
       wkb_format -- specify a wkb type of 'spatialite' (default None)
-      multiple_geometries -- boolean, direct the Mapnik wkb reader to interpret as multigeometries (default False)
       use_spatial_index -- boolean, instruct sqlite plugin to use Rtree spatial index (default True)
 
     >>> from mapnik import SQLite, Layer
@@ -601,7 +597,6 @@ def Geos(**keywords):
       wkt -- inline WKT text of the geometry
 
     Optional keyword arguments:
-      multiple_geometries -- boolean, direct the GEOS wkt reader to interpret as multigeometries (default False)
       extent -- manually specified data extent (comma delimited string, default None)
 
     >>> from mapnik import Geos, Layer
@@ -655,6 +650,7 @@ __all__ = [
     'Feature',
     'Featureset',
     'FontEngine',
+    'FontSet',
     'Geometry2d',
     'GlyphSymbolizer',
     'Image',

@@ -44,10 +44,6 @@ target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'm
 target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
 libraries = ['mapnik']
-libraries.append('png')
-
-if env['JPEG']:
-    libraries.append('jpeg')
 
 if env['BOOST_PYTHON_LIB']:
     libraries.append(env['BOOST_PYTHON_LIB'])
@@ -57,11 +53,16 @@ else:
     else:
         libraries.append('boost_python%s' % env['BOOST_APPEND'])
 
+# TODO - do solaris/fedora need direct linking too?
 if env['PLATFORM'] == 'Darwin':
-    libraries.append(env['ICU_LIB_NAME'])
-    libraries.append('boost_regex%s' % env['BOOST_APPEND'])
-    if env['THREADING'] == 'multi':
-        libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+    if not env['PYTHON_DYNAMIC_LOOKUP']:
+        libraries.append('png')
+        if env['JPEG']:
+            libraries.append('jpeg')
+        libraries.append(env['ICU_LIB_NAME'])
+        libraries.append('boost_regex%s' % env['BOOST_APPEND'])
+        if env['THREADING'] == 'multi':
+            libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
     ##### Python linking on OS X is tricky ### 
     # Confounding problems are:
@@ -107,6 +108,7 @@ if env['PLATFORM'] == 'Darwin':
     else:
         # TODO - do we need to pass -L/?
         python_link_flag = '-lpython%s' % env['PYTHON_VERSION']
+
 elif env['PLATFORM'] == 'SunOS':
     # make sure to explicitly link mapnik.so against
     # libmapnik in its installed location
@@ -140,7 +142,11 @@ paths += "__all__ = [mapniklibpath,inputpluginspath,fontscollectionpath]\n"
 
 if not os.path.exists('mapnik'):
     os.mkdir('mapnik')
-file('mapnik/paths.py','w').write(paths % (os.path.relpath(env['MAPNIK_LIB_DIR'],target_path)))
+
+if hasattr(os.path,'relpath'): # python 2.6 and above
+    file('mapnik/paths.py','w').write(paths % (os.path.relpath(env['MAPNIK_LIB_DIR'],target_path)))
+else:
+    file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
 
 # force open perms temporarily so that `sudo scons install`
 # does not later break simple non-install non-sudo rebuild

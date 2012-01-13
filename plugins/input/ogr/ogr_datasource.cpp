@@ -66,8 +66,6 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
         throw datasource_exception("missing <file> or <string> parameter");
     }
 
-    multiple_geometries_ = *params.get<mapnik::boolean>("multiple_geometries", false);
-
     if (string)
     {
         dataset_name_ = *string;
@@ -403,16 +401,16 @@ featureset_ptr ogr_datasource::features(query const& q) const
                                                                           *layer,
                                                                           filter,
                                                                           index_name_,
-                                                                          desc_.get_encoding(),
-                                                                          multiple_geometries_));
+                                                                          desc_.get_encoding()
+                                                                          ));
         }
         else
         {
             return featureset_ptr(new ogr_featureset (*dataset_,
                                                       *layer,
                                                       q.get_bbox(),
-                                                      desc_.get_encoding(),
-                                                      multiple_geometries_));
+                                                      desc_.get_encoding()
+                                                      ));
         }
     }
 
@@ -435,8 +433,8 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
                                                                              *layer,
                                                                              filter,
                                                                              index_name_,
-                                                                             desc_.get_encoding(),
-                                                                             multiple_geometries_));
+                                                                             desc_.get_encoding()
+                                                                             ));
         }
         else
         {
@@ -447,8 +445,8 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
             return featureset_ptr(new ogr_featureset (*dataset_,
                                                       *layer,
                                                       point,
-                                                      desc_.get_encoding(),
-                                                      multiple_geometries_));
+                                                      desc_.get_encoding()
+                                                      ));
         }
     }
 

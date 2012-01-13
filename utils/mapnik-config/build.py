@@ -28,20 +28,6 @@ CONFIG_FONTS='%(fonts)s'
 CONFIG_INPUT_PLUGINS='%(input_plugins)s'
 CONFIG_GIT_REVISION='%(git_revision)s'
 
-CONFIG_JSON="{
-  \\"prefix\\": \\"${CONFIG_PREFIX}\\",
-  \\"mapnik_libname\\": \\"${CONFIG_MAPNIK_LIBNAME}\\",
-  \\"mapnik_include\\": \\"${CONFIG_MAPNIK_INCLUDE}\\",
-  \\"mapnik_lib\\": \\"${CONFIG_MAPNIK_LIB}\\",
-  \\"version\\": \\"${CONFIG_MAPNIK_VERSION}\\",
-  \\"ldflags\\": \\"${CONFIG_MAPNIK_LDFLAGS}\\",
-  \\"dep_libs\\": \\"${CONFIG_DEP_LIBS}\\",
-  \\"other_includes\\": \\"${CONFIG_OTHER_INCLUDES}\\",
-  \\"fonts\\": \\"${CONFIG_FONTS}\\",
-  \\"input_plugins\\": \\"${CONFIG_INPUT_PLUGINS}\\",
-  \\"git_revision\\": \\"${CONFIG_GIT_REVISION}\\",
-}"
-
 '''
 
 def write_config(configuration,template,config_file):

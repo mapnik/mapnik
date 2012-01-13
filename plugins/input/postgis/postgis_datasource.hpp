@@ -69,7 +69,6 @@ class postgis_datasource : public datasource
     mutable mapnik::box2d<double> extent_;
     mutable layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
-    bool multiple_geometries_;
     const std::string bbox_token_;
     const std::string scale_denom_token_;
     bool persist_connection_;
@@ -90,7 +89,7 @@ public:
     void bind() const;
 private:
     std::string sql_bbox(box2d<double> const& env) const;
-    std::string populate_tokens(const std::string& sql, double const& scale_denom, box2d<double> const& env) const;
+    std::string populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env) const;
     std::string populate_tokens(const std::string& sql) const;
     static std::string unquote(const std::string& sql);
     boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const;

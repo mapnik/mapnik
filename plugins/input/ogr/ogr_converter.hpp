@@ -33,17 +33,14 @@ class ogr_converter
 {
 public:
 
-    static void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature, bool multiple_geometries);
-    static void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature, bool multiple_geometries);
+    static void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature);
+    static void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature);
     static void convert_point (OGRPoint* geom, mapnik::feature_ptr feature);
     static void convert_linestring (OGRLineString* geom, mapnik::feature_ptr feature);
     static void convert_polygon (OGRPolygon* geom, mapnik::feature_ptr feature);
     static void convert_multipoint (OGRMultiPoint* geom, mapnik::feature_ptr feature);
-    static void convert_multipoint_2 (OGRMultiPoint* geom, mapnik::feature_ptr feature);
     static void convert_multilinestring (OGRMultiLineString* geom, mapnik::feature_ptr feature);
-    static void convert_multilinestring_2 (OGRMultiLineString* geom, mapnik::feature_ptr feature);
     static void convert_multipolygon (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
-    static void convert_multipolygon_2 (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
 };
 
 #endif // OGR_CONVERTER_HPP

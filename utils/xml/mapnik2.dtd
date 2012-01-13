@@ -23,21 +23,20 @@
 <!ELEMENT Parameter (#PCDATA)>
 <!-- gdal type: type, encoding?, band?, file, shared?
      kismet type: type, encoding, estimate_extent?, extent?, host, port
-     occi type: type, encoding?, estimate_extent?, extent?, geometry_field?, host, initial_size?, max_size?,
-                multiple_geometries, password?, row_limit?, row_prefetch?, table, use_spatial_index?, user
-     ogr type: type, encoding?, file, layer, multiple_geometries
+     occi type: type, encoding?, estimate_extent?, extent?, geometry_field?, host, initial_size?, max_size?, password?, row_limit?, row_prefetch?, table, use_spatial_index?, user
+     ogr type: type, encoding?, file, layer,
      osm type: type, bbox, encoding?, file, parser?, url
      postgis type: type, cursor_size?, dbname, estimate_extent?, extent?, extent_from_subquery?,
-                   geometry_field?, geometry_table?, host, initial_size?, max_size?, multiple_geometries?,
+                   geometry_field?, geometry_table?, host, initial_size?, max_size?,
                    password, persist_connection?, port, row_limit?, srid?, table, user
      raster type: type, base?, file, format, lox, loy, hix, hiy
      shape type: type, base?, encoding?, file
      sqlite type: type, base, encoding?, extent?, file, geometry_field?, key_field?, metadata?,
-                  multiple_geometries?, row_offset?, row_limit?, table?, wkb_format?, use_spatial_index?
+                  row_offset?, row_limit?, table?, wkb_format?, use_spatial_index?
   -->
 <!ATTLIST Parameter
     name            (type|encoding|band|file|shared|estimate_extent|extent|host|port|
-            geometry_field|initial_size|max_size|multiple_geometries|password|row_limit|
+            geometry_field|initial_size|max_size|password|row_limit|
             row_prefetch|table|use_spatial_index|user|
             layer|
             bbox|parser|url|
@@ -69,7 +68,6 @@
 <!ELEMENT Layer (StyleName|Datasource)*>
 <!-- FIXME: queryable true/false ? -->
 <!ATTLIST Layer
-        abstract            CDATA    #IMPLIED
         clear_label_cache    (yes|1|no|0)    #IMPLIED
         minzoom                CDATA    "0"
         maxzoom                CDATA    #IMPLIED
@@ -77,7 +75,6 @@
         queryable            (true|on|1|false|off|0)    "0"
         srs                    CDATA    #IMPLIED
         status                (on|1|off|0)    "1"
-        title                CDATA    ""
         tolerance            CDATA    #IMPLIED
         toleranceunits        CDATA    #IMPLIED
 >
@@ -90,7 +87,6 @@
 <!-- FIXME: MapnikXMLDescription.pdf specified name is required?  -->
 <!ATTLIST Rule
           name        CDATA    #IMPLIED
-          title        CDATA    #IMPLIED
 >
 
 <!ELEMENT Filter (#PCDATA)>

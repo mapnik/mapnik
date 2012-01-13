@@ -6,7 +6,6 @@ import os, mapnik
 from timeit import Timer, time
 from nose.tools import *
 from utilities import execution_path
-from utilities import Todo
 
 def setup():
     # All of the paths used are relative, if we run the tests

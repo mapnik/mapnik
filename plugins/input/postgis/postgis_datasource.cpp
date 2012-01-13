@@ -87,8 +87,6 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
 {
     if (table_.empty()) throw mapnik::datasource_exception("Postgis Plugin: missing <table> parameter");
 
-    multiple_geometries_ = *params_.get<mapnik::boolean>("multiple_geometries",false);
-
     boost::optional<std::string> ext  = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
@@ -382,7 +380,7 @@ std::string postgis_datasource::populate_tokens(const std::string& sql) const
     return populated_sql;
 }
 
-std::string postgis_datasource::populate_tokens(const std::string& sql, double const& scale_denom, box2d<double> const& env) const
+std::string postgis_datasource::populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env) const
 {
     std::string populated_sql = sql;
     std::string box = sql_bbox(env);
@@ -517,7 +515,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             unsigned num_attr = props.size();
             if (!key_field_.empty())
                 ++num_attr;
-            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,!key_field_.empty(),num_attr);
+            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(), !key_field_.empty(),num_attr);
         }
         else
         {
@@ -585,7 +583,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             }
 
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(),multiple_geometries_,!key_field_.empty(),size);
+            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(), !key_field_.empty(),size);
         }
     }
     return featureset_ptr();

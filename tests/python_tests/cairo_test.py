@@ -3,7 +3,7 @@
 import os
 import mapnik
 from nose.tools import *
-from utilities import execution_path,Todo
+from utilities import execution_path
 
 def setup():
     # All of the paths used are relative, if we run the tests
