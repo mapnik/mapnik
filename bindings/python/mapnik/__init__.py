@@ -281,8 +281,8 @@ class _Feature(Feature, _injector):
         #    maybe deprecate?
         return dict(self)
     
-    def __init__(self, id, wkt=None, **properties):
-        Feature._c___init__(self, id)
+    def __init__(self, ctx, id, wkt=None, **properties):
+        Feature._c___init__(self, ctx, id)
         if wkt is not None:
             self.add_geometries_from_wkt(wkt)
         for k, v in properties.iteritems():
