@@ -58,7 +58,7 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
 
         p.set_opacity(extract<float>(state[0]));
         p.set_gamma(extract<float>(state[1]));
-        p.set_gamma_method(extract<gamma_method_e>(state[2]));
+        p.set_gamma_method(extract<polygon_gamma_method_e>(state[2]));
     }
 
 };
@@ -67,12 +67,12 @@ void export_polygon_symbolizer()
 {
     using namespace boost::python;
 
-    enumeration_<gamma_method_e>("gamma_method")
-        .value("POWER", GAMMA_POWER)
-        .value("LINEAR", GAMMA_LINEAR)
-        .value("NONE", GAMMA_NONE)
-        .value("THRESHOLD", GAMMA_THRESHOLD)
-        .value("MULTIPLY", GAMMA_MULTIPLY)
+    enumeration_<polygon_gamma_method_e>("gamma_method")
+        .value("POWER", POLYGON_GAMMA_POWER)
+        .value("LINEAR", POLYGON_GAMMA_LINEAR)
+        .value("NONE", POLYGON_GAMMA_NONE)
+        .value("THRESHOLD", POLYGON_GAMMA_THRESHOLD)
+        .value("MULTIPLY", POLYGON_GAMMA_MULTIPLY)
         ;
 
     class_<polygon_symbolizer>("PolygonSymbolizer",
