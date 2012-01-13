@@ -57,7 +57,12 @@ class context : private boost::noncopyable,
 {
     friend class feature_impl; 
 public:
-
+    typedef map_type::value_type value_type;
+    typedef map_type::key_type key_type;
+    typedef map_type::size_type size_type;
+    typedef map_type::difference_type difference_type;
+    typedef map_type::iterator iterator;
+    
     context()
         : base_type(mapping_) {}
     
