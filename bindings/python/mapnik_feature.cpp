@@ -42,6 +42,7 @@ namespace {
 using mapnik::Feature;
 using mapnik::geometry_utils;
 using mapnik::from_wkt;
+using mapnik::context;
 using mapnik::context_ptr;
 
 void feature_add_geometries_from_wkb(Feature &feature, std::string wkb)
@@ -53,6 +54,11 @@ void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
 {
     bool result = mapnik::from_wkt(wkt, feature.paths());
     if (!result) throw std::runtime_error("Failed to parse WKT");
+}
+
+void __setitem__(Feature & feature, std::string const& name, mapnik::value const& val)
+{
+    feature.put(name,val);
 }
 
 } // end anonymous namespace
@@ -269,20 +275,27 @@ void export_feature()
     std_pair_to_python_converter<std::string const,mapnik::value>();
     UnicodeString_from_python_str();
 
+    class_<context,context_ptr,boost::noncopyable>
+        ("Context",init<>("Default ctor."))
+        .def("push", &context::push)
+        ;
+    
     class_<Feature,boost::shared_ptr<Feature>,
-           boost::noncopyable>("Feature",init<context_ptr, int>("Default ctor."))
+           boost::noncopyable>("Feature",init<context_ptr,int>("Default ctor."))
            .def("id",&Feature::id)
            .def("__str__",&Feature::to_string)
            .def("add_geometries_from_wkb", &feature_add_geometries_from_wkb)
            .def("add_geometries_from_wkt", &feature_add_geometries_from_wkt)
-    //.def("add_geometry", add_geometry)
-    //.def("num_geometries",&Feature::num_geometries)
-    //.def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
+           .def("add_geometry", &Feature::add_geometry)
+           .def("num_geometries",&Feature::num_geometries)
+           .def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
            .def("geometries",make_function(&Feature::paths,return_value_policy<reference_existing_object>()))
-    // FIXME
-    //.def("envelope", &Feature::envelope)
-    //     .def(map_indexing_suite2<Feature, true >())
-    //      .def("iteritems",iterator<Feature> ())
-    // TODO define more mapnik::Feature methods
+           .def("envelope", &Feature::envelope)
+           .def("__setitem__",&__setitem__)
+        
+        // FIXME
+        // .def(map_indexing_suite2<Feature, true >())
+        // .def("iteritems",iterator<Feature> ())
+        //TODO define more mapnik::Feature methods
            ;
 }
