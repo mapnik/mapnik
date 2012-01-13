@@ -40,8 +40,10 @@ static const char *colorizer_mode_strings[] = {
 IMPLEMENT_ENUM( colorizer_mode, colorizer_mode_strings )
 
 
-colorizer_stop::colorizer_stop(const float value/* = 0*/, const colorizer_mode mode/* = COLORIZER_INHERIT*/, const color& _color/* = color(0,0,0,0)*/, const std::string& label/* ) ""*/)
-    : value_(value)
+colorizer_stop::colorizer_stop(float value, colorizer_mode mode, 
+                               color const& _color, 
+                               std::string const& label)
+: value_(value)
     , mode_(mode)
     , color_(_color)
     , label_(label)
@@ -49,7 +51,7 @@ colorizer_stop::colorizer_stop(const float value/* = 0*/, const colorizer_mode m
     
 }
 
-colorizer_stop::colorizer_stop(const colorizer_stop& stop)
+colorizer_stop::colorizer_stop(colorizer_stop const& stop)
     : value_(stop.value_)
     , mode_(stop.mode_)
     , color_(stop.color_)
@@ -67,9 +69,9 @@ colorizer_stop::~colorizer_stop()
 bool colorizer_stop::operator==(colorizer_stop const& other) const
 {
     return  (value_ == other.value_) && 
-            (color_ == other.color_) &&
-            (mode_ == other.mode_) &&
-            (label_ == other.label_);
+        (color_ == other.color_) &&
+        (mode_ == other.mode_) &&
+        (label_ == other.label_);
 }
 
 
@@ -84,7 +86,7 @@ std::string colorizer_stop::to_string() const
 
 
 
-raster_colorizer::raster_colorizer(colorizer_mode mode/* = COLORIZER_LINEAR*/, const color& _color/* = color(0,0,0,0)*/)
+raster_colorizer::raster_colorizer(colorizer_mode mode, color const& _color)
     : default_mode_(mode)
     , default_color_(_color)
     , epsilon_(std::numeric_limits<float>::epsilon())
@@ -96,10 +98,13 @@ raster_colorizer::~raster_colorizer()
 {
 }
 
-bool raster_colorizer::add_stop(const colorizer_stop & stop) {
+bool raster_colorizer::add_stop(colorizer_stop const& stop) 
+{
     //make sure stops are added in order of value
-    if(stops_.size()) {
-        if(stop.get_value() <= stops_.back().get_value()) {
+    if(stops_.size()) 
+    {
+        if(stop.get_value() <= stops_.back().get_value()) 
+        {
             return false;
         }
     }
@@ -109,7 +114,7 @@ bool raster_colorizer::add_stop(const colorizer_stop & stop) {
     return true;
 }
 
-void raster_colorizer::colorize(raster_ptr const& raster,const std::map<std::string,value> &Props) const
+void raster_colorizer::colorize(raster_ptr const& raster, std::map<std::string,value> const& Props) const
 {
     unsigned *imageData = raster->data_.getData();
     
@@ -118,11 +123,11 @@ void raster_colorizer::colorize(raster_ptr const& raster,const std::map<std::str
     bool hasNoData = false;
     float noDataValue = 0;
 
-    const std::map<std::string,value>::const_iterator fi = Props.find("NODATA");
+    std::map<std::string,value>::const_iterator fi = Props.find("NODATA");
     if (fi != Props.end())
     {
         hasNoData = true;
-	noDataValue = static_cast<float>(fi->second.to_double());
+        noDataValue = static_cast<float>(fi->second.to_double());
     }
     
     for (int i=0; i<len; ++i)
@@ -141,11 +146,13 @@ inline unsigned interpolate(unsigned start, unsigned end, float fraction)
     return static_cast<unsigned>(fraction * ((float)end - (float)start) + start);
 }
 
-color raster_colorizer::get_color(float value) const {
+color raster_colorizer::get_color(float value) const 
+{
     int stopCount = stops_.size();
     
     //use default color if no stops
-    if(stopCount == 0) {
+    if(stopCount == 0) 
+    {
         return default_color_;
     }
     
@@ -153,31 +160,41 @@ color raster_colorizer::get_color(float value) const {
     int stopIdx = -1;
     bool foundStopIdx = false;
     
-    for(int i=0; i<stopCount; i++) {
-        if(value < stops_[i].get_value()) {
+    for(int i=0; i<stopCount; ++i) 
+    {
+        if(value < stops_[i].get_value()) 
+        {
             stopIdx = i-1;
             foundStopIdx = true;
             break;
         }
     }
-    if(!foundStopIdx) {
+    
+    if(!foundStopIdx) 
+    {
         stopIdx = stopCount-1;
     }
     
     //2 - Find the next stop
     int nextStopIdx = stopIdx + 1;
-    if(nextStopIdx >= stopCount) {      //there is no next stop
+    if(nextStopIdx >= stopCount) 
+    {  
+        //there is no next stop
         nextStopIdx = stopCount - 1;
     }
     
     //3 - Work out the mode
     colorizer_mode stopMode;
-    if( stopIdx == -1 ) {       //before the first stop
+    if( stopIdx == -1 ) 
+    { 
+        //before the first stop
         stopMode = default_mode_;
     }
-    else {
+    else 
+    {
         stopMode = stops_[stopIdx].get_mode();
-        if(stopMode == COLORIZER_INHERIT) {
+        if(stopMode == COLORIZER_INHERIT) 
+        {
             stopMode = default_mode_;
         }
     }
@@ -188,69 +205,76 @@ color raster_colorizer::get_color(float value) const {
     float stopValue = 0;
     float nextStopValue = 0;
     color outputColor = get_default_color();
-    if(stopIdx == -1) {
+    if(stopIdx == -1) 
+    {
         stopColor = default_color_;
         nextStopColor = stops_[nextStopIdx].get_color();
         stopValue = value;
         nextStopValue = stops_[nextStopIdx].get_value();
     }
-    else {
+    else 
+    {
         stopColor = stops_[stopIdx].get_color();
         nextStopColor = stops_[nextStopIdx].get_color();
         stopValue = stops_[stopIdx].get_value();
         nextStopValue = stops_[nextStopIdx].get_value();
     }
     
-    switch(stopMode) {
+    switch(stopMode) 
+    {
     case COLORIZER_LINEAR:
+    {
+        //deal with this separately so we don't have to worry about div0
+        if(nextStopValue == stopValue) 
         {
-            //deal with this separately so we don't have to worry about div0
-            if(nextStopValue == stopValue) {
-                outputColor = stopColor;
-            }
-            else {
-                float fraction = (value - stopValue) / (nextStopValue - stopValue);
-                
-                unsigned r = interpolate(stopColor.red(), nextStopColor.red(),fraction);
-                unsigned g = interpolate(stopColor.green(), nextStopColor.green(),fraction);
-                unsigned b = interpolate(stopColor.blue(), nextStopColor.blue(),fraction);
-                unsigned a = interpolate(stopColor.alpha(), nextStopColor.alpha(),fraction);
-                
-                outputColor.set_red(r);
-                outputColor.set_green(g);
-                outputColor.set_blue(b);
-                outputColor.set_alpha(a);
-            }
-            
+            outputColor = stopColor;
         }
-        break;
+        else 
+        {
+            float fraction = (value - stopValue) / (nextStopValue - stopValue);
+            
+            unsigned r = interpolate(stopColor.red(), nextStopColor.red(),fraction);
+            unsigned g = interpolate(stopColor.green(), nextStopColor.green(),fraction);
+            unsigned b = interpolate(stopColor.blue(), nextStopColor.blue(),fraction);
+            unsigned a = interpolate(stopColor.alpha(), nextStopColor.alpha(),fraction);
+                
+            outputColor.set_red(r);
+            outputColor.set_green(g);
+            outputColor.set_blue(b);
+            outputColor.set_alpha(a);
+        }
+        
+    }
+    break;
     case COLORIZER_DISCRETE:
         outputColor = stopColor;
         break;
     case COLORIZER_EXACT:
     default:
         //approximately equal (within epsilon)
-        if(fabs(value - stopValue) < epsilon_) {
+        if(fabs(value - stopValue) < epsilon_) 
+        {
             outputColor = stopColor;
         }
-        else {
+        else 
+        {
             outputColor = default_color_;
         }
         break;
     }
     
-
+    
     /*
-    std::clog << "get_color: " << value << "\n";
-    std::clog << "\tstopIdx: " << stopIdx << "\n";
-    std::clog << "\tnextStopIdx: " << nextStopIdx << "\n";
-    std::clog << "\tstopValue: " << stopValue << "\n";
-    std::clog << "\tnextStopValue: " << nextStopValue << "\n";
-    std::clog << "\tstopColor: " << stopColor.to_string() << "\n";
-    std::clog << "\tnextStopColor: " << nextStopColor.to_string() << "\n";
-    std::clog << "\tstopMode: " << stopMode.as_string() << "\n";
-    std::clog << "\toutputColor: " << outputColor.to_string() << "\n";
-*/
+      std::clog << "get_color: " << value << "\n";
+      std::clog << "\tstopIdx: " << stopIdx << "\n";
+      std::clog << "\tnextStopIdx: " << nextStopIdx << "\n";
+      std::clog << "\tstopValue: " << stopValue << "\n";
+      std::clog << "\tnextStopValue: " << nextStopValue << "\n";
+      std::clog << "\tstopColor: " << stopColor.to_string() << "\n";
+      std::clog << "\tnextStopColor: " << nextStopColor.to_string() << "\n";
+      std::clog << "\tstopMode: " << stopMode.as_string() << "\n";
+      std::clog << "\toutputColor: " << outputColor.to_string() << "\n";
+    */
 
     return outputColor;
 }
