@@ -39,7 +39,7 @@ class feature_kv_iterator :
 public:
     typedef boost::tuple<std::string,value> value_type;
     
-    feature_kv_iterator (feature const& f, bool begin = false)
+    feature_kv_iterator (feature_impl const& f, bool begin = false)
         : f_(f),
           itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
     
@@ -63,7 +63,7 @@ private:
         return kv_;
     }
     
-    feature const& f_;
+    feature_impl const& f_;
     map_type::const_iterator itr_;
     mutable value_type kv_;
     
