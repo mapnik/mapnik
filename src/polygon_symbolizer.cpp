@@ -23,12 +23,11 @@
 //$Id$
 // mapnik
 #include <mapnik/polygon_symbolizer.hpp>
-#include <mapnik/enumeration.hpp>
 
 namespace mapnik
 {
 
-static const char * gamma_method_strings[] = {
+static const char * polygon_gamma_method_strings[] = {
     "power", //agg::gamma_power
     "linear", //agg::gamma_linear
     "none", //agg::gamma_none
@@ -38,7 +37,7 @@ static const char * gamma_method_strings[] = {
 };
 
 
-IMPLEMENT_ENUM( gamma_method_e, gamma_method_strings )
+IMPLEMENT_ENUM( polygon_gamma_method_e, polygon_gamma_method_strings )
 
 }
 
