@@ -96,6 +96,11 @@ box2d<double> memory_datasource::envelope() const
     std::for_each(features_.begin(),features_.end(),func);
     return ext;      
 }
+
+boost::optional<datasource::datasource_geom_t> memory_datasource::get_geometry_type() const
+{
+
+}
     
 layer_descriptor memory_datasource::get_descriptor() const
 {

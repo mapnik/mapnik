@@ -96,15 +96,6 @@ boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
     mapnik::layer_descriptor ld = ds->get_descriptor();
     description["name"] = ld.get_name();
     description["encoding"] = ld.get_encoding();
-    std::string geometry_type = ld.get_geometry_type();
-    if (geometry_type.empty())
-    {
-        description["geometry_type"] = NULL;
-    }
-    else
-    {
-        description["geometry_type"] = geometry_type;
-    }
     return description;
 }
 
@@ -162,6 +153,13 @@ boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
 void export_datasource()
 {
     using namespace boost::python;
+
+    enum_<mapnik::datasource::datasource_geom_t>("DatasourceGeometryType")
+        .value("PointT",mapnik::datasource::PointT)
+        .value("LineStringT",mapnik::datasource::LineStringT)
+        .value("PolygonT",mapnik::datasource::PolygonT)
+        .value("CollectionT",mapnik::datasource::CollectionT)
+        ;
 
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)

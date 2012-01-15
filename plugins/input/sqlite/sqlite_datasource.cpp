@@ -28,7 +28,7 @@
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/sql_utils.hpp>
-#include <mapnik/util/geometry_to_type_str.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/wkb.hpp>
 
 // boost

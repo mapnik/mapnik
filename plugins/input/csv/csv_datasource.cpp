@@ -13,7 +13,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
-#include <mapnik/util/geometry_to_type_str.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/ptree_helpers.hpp>  // mapnik::boolean
 
 // stl
@@ -831,24 +831,6 @@ void csv_datasource::parse_csv(T& stream,
     {
         if (!quiet_) std::clog << "CSV Plugin: could not parse any lines of data\n";
     }
-    else
-    {
-        std::string g_type("");
-        std::string prev_type("");
-        boost::ptr_vector<mapnik::geometry_type> paths;
-        unsigned num_features = features_.size();
-        for (int i = 0; i < num_features; ++i)
-        {
-            mapnik::util::to_type_str(features_[i]->paths(),g_type);
-            if (!prev_type.empty() && g_type != prev_type)
-            {
-                g_type = "collection";
-                break;
-            }
-            prev_type = g_type;
-        }
-        desc_.set_geometry_type(g_type);
-    }
 }
 
 std::string csv_datasource::name()
@@ -866,6 +848,25 @@ mapnik::box2d<double> csv_datasource::envelope() const
     if (!is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::datasource_geom_t> csv_datasource::get_geometry_type() const
+{
+    boost::optional<mapnik::datasource::datasource_geom_t> result;
+    int multi_type = 0;
+    unsigned num_features = features_.size();
+    for (int i = 0; i < num_features || i < 5; ++i)
+    {
+        mapnik::datasource::datasource_geom_t type = mapnik::util::to_ds_type(features_[i]->paths());
+        if (multi_type > 0 && multi_type != type)
+        {
+            result.reset(mapnik::datasource::CollectionT);
+            return result;
+        }
+        result.reset(type);
+        multi_type = type;
+    }
+    return result;
 }
 
 mapnik::layer_descriptor csv_datasource::get_descriptor() const

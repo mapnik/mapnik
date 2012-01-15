@@ -43,6 +43,7 @@ public:
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt) const;
     box2d<double> envelope() const;
+    boost::optional<datasource_geom_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
     size_t size() const;
     void clear();
