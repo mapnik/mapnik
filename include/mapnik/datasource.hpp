@@ -40,7 +40,7 @@
 #include <string>
 
 namespace mapnik {
-   
+
 typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
     
 struct MAPNIK_DECL Featureset
@@ -68,10 +68,17 @@ public:
     
 class MAPNIK_DECL datasource : private boost::noncopyable
 {
-public:        
+public:
     enum datasource_t {
         Vector,
         Raster
+    };
+
+    enum datasource_geom_t {
+        PointT,
+        LineStringT,
+        PolygonT,
+        CollectionT
     };
 
     datasource (parameters const& params)
@@ -105,6 +112,7 @@ public:
     virtual featureset_ptr features(const query& q) const=0;
     virtual featureset_ptr features_at_point(coord2d const& pt) const=0;
     virtual box2d<double> envelope() const=0;
+    virtual boost::optional<datasource_geom_t> get_geometry_type() const=0;
     virtual layer_descriptor get_descriptor() const=0;
     virtual ~datasource() {};
 protected:

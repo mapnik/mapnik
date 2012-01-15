@@ -39,13 +39,11 @@ class layer_descriptor
 public:
     layer_descriptor(std::string const& name, std::string const& encoding)
         : name_(name),
-          encoding_(encoding),
-          geometry_type_("") {}
+          encoding_(encoding) {}
 
     layer_descriptor(layer_descriptor const& other)
         : name_(other.name_),
           encoding_(other.encoding_),
-          geometry_type_(other.geometry_type_),
           desc_ar_(other.desc_ar_) {}
 
     void set_name(std::string const& name)
@@ -68,16 +66,6 @@ public:
         return encoding_;
     }
 
-    void set_geometry_type(std::string const& geometry_type)
-    {
-        geometry_type_ = geometry_type;
-    }
-
-    std::string const& get_geometry_type() const
-    {
-        return geometry_type_;
-    }
-
     void add_descriptor(attribute_descriptor const& desc)
     {
         desc_ar_.push_back(desc);
@@ -96,7 +84,6 @@ public:
 private:
     std::string name_;
     std::string encoding_;
-    std::string geometry_type_;
     std::vector<attribute_descriptor> desc_ar_;
 };
 
@@ -107,7 +94,6 @@ operator << (std::basic_ostream<charT,traits>& out,
 {
     out << "name: " << ld.get_name() << "\n";
     out << "encoding: " << ld.get_encoding() << "\n";
-    out << "geometry_type: " << ld.get_geometry_type() << "\n";
     std::vector<attribute_descriptor> const& desc_ar = ld.get_descriptors();
     std::vector<attribute_descriptor>::const_iterator pos = desc_ar.begin();
     while (pos != desc_ar.end())
