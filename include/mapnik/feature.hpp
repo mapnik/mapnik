@@ -71,7 +71,7 @@ public:
     {
         mapping_.insert(std::make_pair(name,mapping_.size()));
     }
-    
+    std::size_t size() const { return mapping_.size(); }
     const_iterator begin() const { return mapping_.begin();}
     const_iterator end() const { return mapping_.end();}
     
