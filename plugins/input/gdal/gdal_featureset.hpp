@@ -24,6 +24,7 @@
 #define GDAL_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 
 // boost
@@ -56,6 +57,7 @@ private:
     void get_overview_meta(GDALRasterBand * band);
 #endif
     GDALDataset & dataset_;
+    mapnik::context_ptr ctx_;
     int band_;
     gdal_query gquery_;
     mapnik::box2d<double> raster_extent_;
