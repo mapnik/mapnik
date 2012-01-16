@@ -66,6 +66,8 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       filter_factor_(filter_factor),
       first_(true)
 {
+    ctx_ = boost::make_shared<mapnik::context>();
+    ctx_->push("NODATA");
 }
 
 gdal_featureset::~gdal_featureset()
@@ -106,14 +108,14 @@ feature_ptr gdal_featureset::next()
 
 feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 {
-    feature_ptr feature(feature_factory::create(1));
-
+    feature_ptr feature = feature_factory::create(ctx_,1);
+    
     GDALRasterBand * red = 0;
     GDALRasterBand * green = 0;
     GDALRasterBand * blue = 0;
     GDALRasterBand * alpha = 0;
     GDALRasterBand * grey = 0;
-
+    
     /*
       double tr[6];
       dataset_.GetGeoTransform(tr);
@@ -244,10 +246,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                imageData, image.width(), image.height(),
                                GDT_Float32, 0, 0);
 
-                feature->set_raster(mapnik::raster_ptr(boost::make_shared<mapnik::raster>(intersect,image)));
+                feature->set_raster(boost::make_shared<mapnik::raster>(intersect,image));
                 if (hasNoData)
                 {
-                    feature->props()["NODATA"] = nodata;
+                    feature->put("NODATA",nodata);
                 }
             }
             else // working with all bands
@@ -487,12 +489,12 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
 
             if (! hasNoData || value != nodata)
             {
-                // construct feature
-                feature_ptr feature(new Feature(1));
+                // construct feature               
+                feature_ptr feature = feature_factory::create(ctx_,1);
                 geometry_type * point = new geometry_type(mapnik::Point);
                 point->move_to(pt.x, pt.y);
                 feature->add_geometry(point);
-                (*feature)["value"] = value;
+                feature->put("value",value);
                 return feature;
             }
         }
