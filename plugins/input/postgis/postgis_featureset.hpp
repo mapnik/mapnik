@@ -37,28 +37,27 @@ using mapnik::Featureset;
 using mapnik::box2d;
 using mapnik::feature_ptr;
 using mapnik::transcoder;
+using mapnik::context_ptr;
 
 class IResultSet;
 
-class postgis_featureset : public mapnik::Featureset
+class postgis_featureset : public mapnik::Featureset,
+                           private boost::noncopyable
 {
 private:
     boost::shared_ptr<IResultSet> rs_;
-    unsigned num_attrs_;
+    context_ptr ctx_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     int totalGeomSize_;
     int feature_id_;
     bool key_field_;
 public:
     postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
+                       context_ptr const& ctx,
                        std::string const& encoding,
-                       bool key_field,
-                       unsigned num_attrs);
-    mapnik::feature_ptr next();
+                       bool key_field = false);
+    feature_ptr next();
     ~postgis_featureset();
-private:
-    postgis_featureset(const postgis_featureset&);
-    const postgis_featureset& operator=(const postgis_featureset&);
 };
 
 #endif // POSTGIS_FEATURESET_HPP

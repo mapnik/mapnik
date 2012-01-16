@@ -46,13 +46,14 @@ using mapnik::geometry_type;
 using mapnik::byte;
 using mapnik::geometry_utils;
 using mapnik::feature_factory;
+using mapnik::context_ptr;
 
 postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
+                                       context_ptr const& ctx,
                                        std::string const& encoding,
-                                       bool key_field=false,
-                                       unsigned num_attrs=0)
+                                       bool key_field)
     : rs_(rs),
-      num_attrs_(num_attrs),
+      ctx_(ctx),
       tr_(new transcoder(encoding)),
       totalGeomSize_(0),
       feature_id_(1),
@@ -86,15 +87,15 @@ feature_ptr postgis_featureset::next()
             {
                 val = int4net(buf);
             }
-            feature = feature_factory::create(val);
+            feature = feature_factory::create(ctx_, val);
             // TODO - extend feature class to know
             // that its id is also an attribute to avoid
             // this duplication
-            boost::put(*feature,name,val);
+            feature->put(name,val);
             ++pos;
         } else {
             // fallback to auto-incrementing id
-            feature = feature_factory::create(feature_id_);
+            feature = feature_factory::create(ctx_,feature_id_);
             ++feature_id_;
         }
 
@@ -104,59 +105,59 @@ feature_ptr postgis_featureset::next()
         geometry_utils::from_wkb(feature->paths(), data, size);
         totalGeomSize_+=size;
 
-        for ( ;pos<num_attrs_+1;++pos)
+        int num_attrs = ctx_->size() + 1;
+        for ( ; pos < num_attrs; ++pos)
         {
             std::string name = rs_->getFieldName(pos);
-
+            
             if (rs_->isNull(pos))
             {
-                boost::put(*feature,name,mapnik::value_null());
+                feature->put(name,mapnik::value_null());
             }
             else
             {
                 const char* buf = rs_->getValue(pos);
                 int oid = rs_->getTypeOID(pos);
-
+                
                 if (oid==16) //bool
                 {
-                    boost::put(*feature,name,buf[0] != 0);
+                    feature->put(name,(buf[0] != 0));                    
                 }
                 else if (oid==23) //int4
                 {
                     int val = int4net(buf);
-                    boost::put(*feature,name,val);
+                    feature->put(name,val);
                 }
                 else if (oid==21) //int2
                 {
                     int val = int2net(buf);
-                    boost::put(*feature,name,val);
+                    feature->put(name,val);
                 }
                 else if (oid==20) //int8/BigInt
                 {
                     int val = int8net(buf);
-                    boost::put(*feature,name,val);
+                    feature->put(name,val);
                 }
                 else if (oid == 700) // float4
                 {
                     float val;
                     float4net(val,buf);
-                    boost::put(*feature,name,val);
+                    feature->put(name,val);
                 }
                 else if (oid == 701) // float8
                 {
                     double val;
                     float8net(val,buf);
-                    boost::put(*feature,name,val);
+                    feature->put(name,val);
                 }
                 else if (oid==25 || oid==1043) // text or varchar
                 {
-                    UnicodeString ustr = tr_->transcode(buf);
-                    boost::put(*feature,name,ustr);
+                    feature->put(name,tr_->transcode(buf));
                 }
                 else if (oid==1042)
                 {
-                    UnicodeString ustr = tr_->transcode(trim_copy(std::string(buf)).c_str()); // bpchar
-                    boost::put(*feature,name,ustr);
+                    // bpchar
+                    feature->put(name,tr_->transcode(trim_copy(std::string(buf)).c_str()));
                 }
                 else if (oid == 1700) // numeric
                 {
@@ -164,7 +165,7 @@ feature_ptr postgis_featureset::next()
                     try
                     {
                         double val = boost::lexical_cast<double>(str);
-                        boost::put(*feature,name,val);
+                        feature->put(name,val);
                     }
                     catch (boost::bad_lexical_cast & ex)
                     {

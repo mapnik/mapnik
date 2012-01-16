@@ -487,7 +487,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
                 s_error << geometry_table_ << "'.";
                 throw mapnik::datasource_exception(s_error.str());
             }
-
+            
             std::ostringstream s;
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
@@ -497,10 +497,13 @@ featureset_ptr postgis_datasource::features(const query& q) const
             std::set<std::string> const& props=q.property_names();
             std::set<std::string>::const_iterator pos=props.begin();
             std::set<std::string>::const_iterator end=props.end();
-            while (pos != end)
+
+            mapnik::context_ptr ctx = boost::make_shared<mapnik::context>();
+
+            for ( ;pos != end;++pos)
             {
                 mapnik::sql_utils::quote_attr(s,*pos);
-                ++pos;
+                ctx->push(*pos);
             }
 
             std::string table_with_bbox = populate_tokens(table_,scale_denom,box);
@@ -515,7 +518,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             unsigned num_attr = props.size();
             if (!key_field_.empty())
                 ++num_attr;
-            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(), !key_field_.empty(),num_attr);
+            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
         else
         {
@@ -563,13 +566,16 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             if (!key_field_.empty())
                 mapnik::sql_utils::quote_attr(s,key_field_);
 
+            mapnik::context_ptr ctx = boost::make_shared<mapnik::context>();
+            
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
+            
             unsigned size=0;
-            while (itr != end)
+            for ( ; itr != end; ++itr)
             {
                 mapnik::sql_utils::quote_attr(s,itr->get_name());
-                ++itr;
+                ctx->push(itr->get_name());
                 ++size;
             }
 
@@ -583,7 +589,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             }
 
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return boost::make_shared<postgis_featureset>(rs,desc_.get_encoding(), !key_field_.empty(),size);
+            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
     }
     return featureset_ptr();
