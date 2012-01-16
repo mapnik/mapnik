@@ -310,6 +310,7 @@ class raster_featureset : public mapnik::Featureset
     typedef typename LookupPolicy::const_iterator iterator_type;
     LookupPolicy policy_;
     int feature_id_;
+    mapnik::context_ptr ctx_;
     mapnik::box2d<double> extent_;
     mapnik::box2d<double> bbox_;
     iterator_type curIter_;
