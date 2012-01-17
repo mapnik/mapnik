@@ -36,7 +36,6 @@
 
 
 using mapnik::datasource;
-using mapnik::point_datasource;
 using mapnik::memory_datasource;
 using mapnik::layer_descriptor;
 using mapnik::attribute_descriptor;
@@ -181,11 +180,6 @@ void export_datasource()
 
     def("Describe",&describe);
     def("CreateDatasource",&create_datasource);
-
-    class_<point_datasource, bases<datasource>, boost::noncopyable>("PointDatasource", init<>())
-        .def("add_point",&point_datasource::add_point)
-        ;
-
 
     class_<memory_datasource, bases<datasource>, boost::noncopyable>("MemoryDatasource", init<>())
         .def("add_feature",&memory_datasource::push,

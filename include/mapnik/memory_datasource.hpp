@@ -49,22 +49,7 @@ public:
 private:
     std::vector<feature_ptr> features_;
     mapnik::layer_descriptor desc_;
-}; 
-   
-// This class implements a simple way of displaying point-based data
-// TODO -- possible redesign, move into separate file
-//
-   
-class MAPNIK_DECL point_datasource : public memory_datasource {
-public:
-    point_datasource() :
-        feature_id_(1) {}
-    void add_point(double x, double y, const char* key, const char* value);  
-    inline int type() const { return datasource::Vector; }
-      
-private:
-    int feature_id_;
-};   
+};
 }
 
 #endif // MAPNIK_MEMORY_DATASOURCE_HPP
