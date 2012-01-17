@@ -114,7 +114,7 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
     return true;
 }
 
-void raster_colorizer::colorize(raster_ptr const& raster, std::map<std::string,value> const& Props) const
+void raster_colorizer::colorize(raster_ptr const& raster, Feature const& f) const
 {
     unsigned *imageData = raster->data_.getData();
     
@@ -123,11 +123,11 @@ void raster_colorizer::colorize(raster_ptr const& raster, std::map<std::string,v
     bool hasNoData = false;
     float noDataValue = 0;
 
-    std::map<std::string,value>::const_iterator fi = Props.find("NODATA");
-    if (fi != Props.end())
+    //std::map<std::string,value>::const_iterator fi = Props.find("NODATA");
+    if (f.has_key("NODATA"))
     {
         hasNoData = true;
-        noDataValue = static_cast<float>(fi->second.to_double());
+        noDataValue = static_cast<float>(f.get("NODATA").to_double());
     }
     
     for (int i=0; i<len; ++i)
