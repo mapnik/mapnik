@@ -64,9 +64,9 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       dy_(dy),
       nbands_(nbands),
       filter_factor_(filter_factor),
-      first_(true)
+      first_(true),
+      ctx_(boost::make_shared<mapnik::context>())
 {
-    ctx_ = boost::make_shared<mapnik::context>();
     ctx_->push("NODATA");
 }
 
