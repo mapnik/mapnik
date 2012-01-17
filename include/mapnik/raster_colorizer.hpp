@@ -143,7 +143,8 @@ typedef std::vector<colorizer_stop> colorizer_stops;
 
 
 //! \brief Class representing the raster colorizer
-class MAPNIK_DECL raster_colorizer {
+class MAPNIK_DECL raster_colorizer 
+{
 public:
     //! \brief Constructor
     raster_colorizer(colorizer_mode mode = COLORIZER_LINEAR, color const& _color = color(0,0,0,0));
@@ -196,8 +197,8 @@ public:
     //! \brief Colorize a raster
     //!
     //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
-    //! \param[in] properties belonging to the feature, used to find 'NODATA' information if available
-    void colorize(raster_ptr const& raster,std::map<std::string,value> const& Props) const;
+    //! \param[in] feature used to find 'NODATA' information if available
+    void colorize(raster_ptr const& raster, Feature const& f) const;
 
     
     //! \brief Perform the translation of input to output
