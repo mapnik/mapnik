@@ -59,6 +59,11 @@ void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
     if (!result) throw std::runtime_error("Failed to parse WKT");
 }
 
+mapnik::value  __getitem__(Feature & feature, std::string const& name)
+{
+    return feature.get(name);
+}
+
 void __setitem__(Feature & feature, std::string const& name, mapnik::value const& val)
 {
     feature.put(name,val);
@@ -158,11 +163,12 @@ void export_feature()
         .def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
         .def("geometries",make_function(&Feature::paths,return_value_policy<reference_existing_object>()))
         .def("envelope", &Feature::envelope)
+        .def("has_key", &Feature::has_key)
         .def("__setitem__",&__setitem__)
-        
+        .def("__getitem__",&__getitem__)
         // FIXME
         // .def(map_indexing_suite2<Feature, true >())
         // .def("iteritems",iterator<Feature> ())
         //TODO define more mapnik::Feature methods
-           ;
+        ;
 }
