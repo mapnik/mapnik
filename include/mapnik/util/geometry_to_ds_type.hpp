@@ -35,13 +35,6 @@
 
 namespace mapnik { namespace util {
 
-/*
-mapnik::datasource::geometry_t to_ds_type(mapnik::geometry_type const& g)
-{
-    return static_cast<mapnik::datasource::geometry_t>(g.type());
-}
-*/
-
 void to_ds_type(mapnik::geometry_container const& paths,
                 boost::optional<mapnik::datasource::geometry_t> & result)
 {
