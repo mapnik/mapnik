@@ -39,17 +39,19 @@ public:
     memory_datasource();
     virtual ~memory_datasource();
     void push(feature_ptr feature);
-    int type() const;
+    datasource::datasource_t type() const;
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt) const;
     box2d<double> envelope() const;
+    boost::optional<geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
     size_t size() const;
     void clear();
 private:
     std::vector<feature_ptr> features_;
     mapnik::layer_descriptor desc_;
-};
+}; 
+   
 }
 
 #endif // MAPNIK_MEMORY_DATASOURCE_HPP

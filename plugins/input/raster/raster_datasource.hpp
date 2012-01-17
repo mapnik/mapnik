@@ -33,11 +33,12 @@ class raster_datasource : public mapnik::datasource
 public:
     raster_datasource(const mapnik::parameters& params, bool bind=true);
     virtual ~raster_datasource();
-    int type() const;
+    datasource::datasource_t type() const;
     static std::string name();
     mapnik::featureset_ptr features(const mapnik::query& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;
+    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
     void bind() const;
 private:

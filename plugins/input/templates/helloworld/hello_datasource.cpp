@@ -13,7 +13,6 @@ DATASOURCE_PLUGIN(hello_datasource)
 
 hello_datasource::hello_datasource(parameters const& params, bool bind)
 : datasource(params),
-    type_(datasource::Vector),
     desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
     extent_()
 {
@@ -47,9 +46,9 @@ std::string hello_datasource::name()
     return name_;
 }
 
-int hello_datasource::type() const
+mapnik::datasource::datasource_t hello_datasource::type() const
 {
-    return type_;
+    return datasource::Vector;
 }
 
 mapnik::box2d<double> hello_datasource::envelope() const
@@ -57,6 +56,11 @@ mapnik::box2d<double> hello_datasource::envelope() const
     if (!is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> hello_datasource::get_geometry_type() const
+{
+    return mapnik::datasource::Point;
 }
 
 mapnik::layer_descriptor hello_datasource::get_descriptor() const

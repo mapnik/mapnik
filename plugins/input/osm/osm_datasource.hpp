@@ -42,17 +42,18 @@ class osm_datasource : public datasource
 public:
     osm_datasource(const parameters& params, bool bind = true);
     virtual ~osm_datasource();
-    int type() const;
+    mapnik::datasource::datasource_t type() const;
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt) const;
     box2d<double> envelope() const;
+    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
     static std::string name();
     void bind() const;
 private:
     mutable box2d<double> extent_;
     mutable osm_dataset* osm_data_;
-    int type_;
+    mapnik::datasource::datasource_t type_;
     mutable layer_descriptor desc_;
     // no copying
     osm_datasource(const osm_datasource&);

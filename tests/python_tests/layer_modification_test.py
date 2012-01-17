@@ -58,8 +58,8 @@ def test_adding_datasource_to_layer():
         m.layers[0].datasource = ds
         
         # now ensure it is attached
-        eq_(m.layers[0].datasource.name(),"shape")
-        eq_(lyr.datasource.name(),"shape")
+        eq_(m.layers[0].datasource.describe()['name'],"shape")
+        eq_(lyr.datasource.describe()['name'],"shape")
         
         # and since we have now added a shapefile in spherical mercator, adjust the projection
         lyr.srs = '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
