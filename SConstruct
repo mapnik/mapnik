@@ -450,6 +450,7 @@ pickle_store = [# Scons internal variables
         'CAIROMM_LIBPATHS',
         'CAIROMM_LINKFLAGS',
         'CAIROMM_CPPPATHS',
+        'BOOST_LIB_VERSION_FROM_HEADER'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -1133,9 +1134,9 @@ if not preconfigured:
     
     # boost system is used in boost 1.35 and greater
     env['HAS_BOOST_SYSTEM'] = False
-    boost_lib_version_from_header = conf.GetBoostLibVersion()
-    if boost_lib_version_from_header:
-        boost_version_from_header = int(boost_lib_version_from_header.split('_')[1])
+    env['BOOST_LIB_VERSION_FROM_HEADER'] = conf.GetBoostLibVersion()
+    if env['BOOST_LIB_VERSION_FROM_HEADER']:
+        boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
         if boost_version_from_header >= 35:
             env['HAS_BOOST_SYSTEM'] = True
             
@@ -1168,7 +1169,7 @@ if not preconfigured:
         if not env['BOOST_VERSION']:
             env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
     else:
-        color_print(4,'Found boost lib version... %s' % boost_lib_version_from_header )
+        color_print(4,'Found boost lib version... %s' % env['BOOST_LIB_VERSION_FROM_HEADER'] )
     
     for count, libinfo in enumerate(BOOST_LIBSHEADERS):
         if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):

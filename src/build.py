@@ -204,6 +204,20 @@ if env['LIBTOOL_SUPPORTS_ADVISE']:
 else:
     source.insert(0,'datasource_cache.cpp')
 
+if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+    if boost_version_from_header < 46:
+        # avoid ubuntu issue with boost interprocess:
+        # https://github.com/mapnik/mapnik/issues/1001
+        env4 = lib_env.Clone()
+        env4.Append(CXXFLAGS = '-fpermissive')
+        cpp ='mapped_memory_cache.cpp'
+        source.remove(cpp)
+        if env['LINKING'] == 'static':
+            source.insert(0,env4.StaticObject(cpp))
+        else:
+            source.insert(0,env4.SharedObject(cpp))
+
 if env['JPEG']:
     source += Split(
         """
