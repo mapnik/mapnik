@@ -37,7 +37,7 @@ def resolve(grid,x,y):
 
 
 def create_grid_map(width,height):
-    places_ds = mapnik.PointDatasource()
+    places_ds = mapnik.MemoryDatasource()
     places_ds.add_point(143.10,-38.60,'Name','South East')
     places_ds.add_point(142.48,-38.60,'Name','South West')
     places_ds.add_point(142.48,-38.38,'Name','North West')

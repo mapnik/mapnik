@@ -25,6 +25,8 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/datasource.hpp>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
@@ -71,11 +73,11 @@ public:
     }
 
     void move_to(int id);
-    int type() const;
+    shapeType type() const;
     const box2d<double>& current_extent() const;
     void read_polyline(mapnik::geometry_container & geom);
     void read_polygon(mapnik::geometry_container & geom);
-    unsigned type_;
+    shapeType type_;
     shape_file shp_;
     dbf_file   dbf_;
     boost::shared_ptr<shape_file> index_;

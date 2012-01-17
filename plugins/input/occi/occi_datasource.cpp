@@ -351,7 +351,7 @@ std::string occi_datasource::name()
     return "occi";
 }
 
-int occi_datasource::type() const
+mapnik::datasource::datasource_t occi_datasource::type() const
 {
     return type_;
 }
@@ -472,6 +472,14 @@ box2d<double> occi_datasource::envelope() const
     }
 
     return extent_;
+}
+
+
+boost::optional<mapnik::datasource::geometry_t> occi_datasource::get_geometry_type() const
+{
+    // FIXME
+    //if (! is_bound_) bind();
+    return boost::optional<mapnik::datasource::geometry_t>();
 }
 
 layer_descriptor occi_datasource::get_descriptor() const
