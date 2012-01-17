@@ -26,8 +26,9 @@ if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
     
     # Shapefile properties
     def test_shapefile_properties():
-        s = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0,encoding='latin1')
-        f = s.features_at_point(s.envelope().center()).features[0]
+        ds = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0,encoding='latin1')
+        f = ds.features_at_point(ds.envelope().center()).features[0]
+        eq_(ds.geometry_type(),mapnik.DataGeometryType.Polygon)
     
         eq_(f['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
         eq_(f['COUNTRY'], u'CAN')
