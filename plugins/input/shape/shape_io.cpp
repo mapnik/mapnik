@@ -71,7 +71,7 @@ void shape_io::move_to(int pos)
     shp_.seek(pos);
     id_ = shp_.read_xdr_integer();
     reclength_ = shp_.read_xdr_integer();
-    type_ = shp_.read_ndr_integer();
+    type_ = static_cast<shape_io::shapeType>(shp_.read_ndr_integer());
 
     if (type_ != shape_null && type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
     {
@@ -79,7 +79,7 @@ void shape_io::move_to(int pos)
     }
 }
 
-int shape_io::type() const
+shape_io::shapeType shape_io::type() const
 {
     return type_;
 }

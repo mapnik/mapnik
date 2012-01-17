@@ -28,6 +28,8 @@
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/sql_utils.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
+#include <mapnik/wkb.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -69,15 +71,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
     /* TODO
        - throw if no primary key but spatial index is present?
        - remove auto-indexing
+       - if spatialite - leverage more of the metadata for geometry type detection
     */
 
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (! file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
-
-    if (table_.empty())
-    {
-        throw mapnik::datasource_exception("Sqlite Plugin: missing <table> parameter");
-    }
 
     if (bind)
     {
@@ -147,6 +145,44 @@ void sqlite_datasource::bind() const
         init_statements_.push_back(*initdb);
     }
 
+    // now actually create the connection and start executing setup sql
+    dataset_ = boost::make_shared<sqlite_connection>(dataset_name_);
+
+    boost::optional<unsigned> table_by_index = params_.get<unsigned>("table_by_index");
+
+    int passed_parameters = 0;
+    passed_parameters += params_.get<std::string>("table") ? 1 : 0;
+    passed_parameters += table_by_index ? 1 : 0;
+
+    if (passed_parameters > 1)
+    {
+        throw datasource_exception("SQLite Plugin: you can only select an by name "
+                                   "('table' parameter), by number ('table_by_index' parameter), "
+                                   "do not supply 2 or more of them at the same time" );
+    }
+
+    if (table_by_index)
+    {
+        std::vector<std::string> tables;
+        sqlite_utils::get_tables(dataset_,tables);
+        if (*table_by_index >= tables.size())
+        {
+            std::ostringstream s;
+            s << "SQLite Plugin: only "
+              << tables.size()
+              << " table(s) exist, cannot find table by index '" << *table_by_index << "'";
+
+            throw datasource_exception(s.str());
+        }
+        table_ = tables[*table_by_index];
+
+    }
+
+    if (table_.empty())
+    {
+        throw mapnik::datasource_exception("Sqlite Plugin: missing <table> parameter");
+    }
+
     if (geometry_table_.empty())
     {
         geometry_table_ = mapnik::sql_utils::table_from_sql(table_);
@@ -169,9 +205,6 @@ void sqlite_datasource::bind() const
         }
     }
 
-    // now actually create the connection and start executing setup sql
-    dataset_ = boost::make_shared<sqlite_connection>(dataset_name_);
-
     // Execute init_statements_
     for (std::vector<std::string>::const_iterator iter = init_statements_.begin();
          iter != init_statements_.end(); ++iter)
@@ -188,7 +221,11 @@ void sqlite_datasource::bind() const
         std::ostringstream s;
         std::string query = populate_tokens(table_);
         s << "SELECT " << fields_ << " FROM (" << query << ") LIMIT 1";
-        found_types_via_subquery = sqlite_utils::detect_types_from_subquery(s.str(),geometry_field_,desc_,dataset_);
+        found_types_via_subquery = sqlite_utils::detect_types_from_subquery(
+                                       s.str(),
+                                       geometry_field_,
+                                       desc_,
+                                       dataset_);
     }
 
     // TODO - consider removing this
@@ -328,6 +365,7 @@ void sqlite_datasource::bind() const
             throw datasource_exception(s.str());
         }
     }
+
     is_bound_ = true;
 }
 
@@ -434,7 +472,7 @@ std::string sqlite_datasource::name()
     return "sqlite";
 }
 
-int sqlite_datasource::type() const
+mapnik::datasource::datasource_t sqlite_datasource::type() const
 {
     return type_;
 }
@@ -444,6 +482,53 @@ box2d<double> sqlite_datasource::envelope() const
     if (! is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_type() const
+{
+    if (! is_bound_) bind();
+    boost::optional<mapnik::datasource::geometry_t> result;
+
+    if (dataset_)
+    {
+        // finally, get geometry type by querying first feature
+        std::ostringstream s;
+        s << "SELECT " << geometry_field_
+          << " FROM " << geometry_table_;
+        if (row_limit_ > 0 && row_limit_ < 5)
+        {
+            s << " LIMIT " << row_limit_;
+        }
+        else
+        {
+            s << " LIMIT 5";
+        }
+        boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
+        int multi_type = 0;
+        while (rs->is_valid() && rs->step_next())
+        {
+            int size;
+            const char* data = (const char*) rs->column_blob(0, size);
+            if (data)
+            {
+                boost::ptr_vector<mapnik::geometry_type> paths;
+                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
+                mapnik::util::to_ds_type(paths,result);
+                if (result)
+                {
+                    int type = static_cast<int>(*result);
+                    if (multi_type > 0 && multi_type != type)
+                    {
+                        result.reset(mapnik::datasource::Collection);
+                        return result;
+                    }
+                    multi_type = type;
+                }
+            }
+        }
+    }
+    
+    return result;
 }
 
 layer_descriptor sqlite_datasource::get_descriptor() const

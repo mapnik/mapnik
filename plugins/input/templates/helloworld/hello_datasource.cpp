@@ -12,8 +12,7 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(hello_datasource)
 
 hello_datasource::hello_datasource(parameters const& params, bool bind)
-: datasource(params),
-    type_(datasource::Vector),
+: datasource(params)
     desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
     extent_()
 {
@@ -34,6 +33,10 @@ void hello_datasource::bind() const
     // see http://spatialreference.org/ref/epsg/4326/ for more details
     extent_.init(-180,-90,180,90);
 
+    // declare that this datasource is going to provide points
+    // options are point,polygon,linestring, and collection
+    desc_.set_geometry_type("point");
+
     is_bound_ = true;
 }
 
@@ -47,9 +50,9 @@ std::string hello_datasource::name()
     return name_;
 }
 
-int hello_datasource::type() const
+mapnik::datasource::datasource_t hello_datasource::type() const
 {
-    return type_;
+    return datasource::Vector;
 }
 
 mapnik::box2d<double> hello_datasource::envelope() const
@@ -57,6 +60,11 @@ mapnik::box2d<double> hello_datasource::envelope() const
     if (!is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> hello_datasource::get_geometry_type() const
+{
+    boost::optional<mapnik::datasource::geometry_t>(mapnik::datasource::Point);
 }
 
 mapnik::layer_descriptor hello_datasource::get_descriptor() const

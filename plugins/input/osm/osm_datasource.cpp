@@ -137,7 +137,7 @@ std::string osm_datasource::name()
     return "osm";
 }
 
-int osm_datasource::type() const
+mapnik::datasource::datasource_t osm_datasource::type() const
 {
     return type_;
 }
@@ -188,4 +188,10 @@ box2d<double> osm_datasource::envelope() const
     if (! is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> osm_datasource::get_geometry_type() const
+{
+    if (! is_bound_) bind();
+    return boost::optional<mapnik::datasource::geometry_t>(mapnik::datasource::Collection);
 }

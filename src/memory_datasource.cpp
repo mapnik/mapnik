@@ -69,7 +69,7 @@ void memory_datasource::push(feature_ptr feature)
     features_.push_back(feature);
 }
     
-int memory_datasource::type() const
+datasource::datasource_t memory_datasource::type() const
 {
     return datasource::Vector;
 }
@@ -96,6 +96,12 @@ box2d<double> memory_datasource::envelope() const
     std::for_each(features_.begin(),features_.end(),func);
     return ext;      
 }
+
+boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() const
+{
+    // TODO - detect this?
+    return datasource::Collection;
+}
     
 layer_descriptor memory_datasource::get_descriptor() const
 {
@@ -118,7 +124,7 @@ void point_datasource::add_point(double x, double y, const char* key, const char
 {
         feature_ptr feature(feature_factory::create(feature_id_));
         ++feature_id_;
-        geometry_type * pt = new geometry_type(Point);
+        geometry_type * pt = new geometry_type(mapnik::Point);
         pt->move_to(x,y);
         feature->add_geometry(pt);
         transcoder tr("utf-8");

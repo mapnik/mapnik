@@ -45,11 +45,12 @@ public:
     shape_datasource(const parameters &params, bool bind=true);
     virtual ~shape_datasource();
 
-    int type() const;
+    datasource::datasource_t type() const;
     static std::string name();
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt) const;
     box2d<double> envelope() const;
+    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
     void bind() const;
 private:
@@ -57,9 +58,10 @@ private:
     shape_datasource& operator=(const shape_datasource&);
     void init(shape_io& shape) const;
 private:
-    int type_;
+    datasource::datasource_t type_;
     std::string shape_name_;
     mutable boost::shared_ptr<shape_io> shape_;
+    mutable shape_io::shapeType shape_type_;
     mutable long file_length_;
     mutable box2d<double> extent_;
     mutable bool indexed_;
