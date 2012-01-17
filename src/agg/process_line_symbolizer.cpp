@@ -97,7 +97,26 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         ren_base renb(pixf);
         renderer ren(renb);
         ras_ptr->reset();
-        ras_ptr->gamma(agg::gamma_linear(0.0, stroke_.get_gamma()));
+        switch (stroke_.get_gamma_method())
+        {
+            case GAMMA_POWER:
+                ras_ptr->gamma(agg::gamma_power(stroke_.get_gamma()));
+                break;
+            case GAMMA_LINEAR:
+                ras_ptr->gamma(agg::gamma_linear(0.0, stroke_.get_gamma()));
+                break;
+            case GAMMA_NONE:
+                ras_ptr->gamma(agg::gamma_none());
+                break;
+            case GAMMA_THRESHOLD:
+                ras_ptr->gamma(agg::gamma_threshold(stroke_.get_gamma()));
+                break;
+            case GAMMA_MULTIPLY:
+                ras_ptr->gamma(agg::gamma_multiply(stroke_.get_gamma()));
+                break;
+            default:
+                ras_ptr->gamma(agg::gamma_power(stroke_.get_gamma()));
+        }
         
         metawriter_with_properties writer = sym.get_metawriter();
         for (unsigned i=0;i<feature.num_geometries();++i)

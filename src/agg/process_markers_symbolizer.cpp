@@ -55,7 +55,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
     
     ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_linear());
+    ras_ptr->gamma(agg::gamma_power());
     agg::scanline_u8 sl;
     agg::scanline_p8 sl_line;
     agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
