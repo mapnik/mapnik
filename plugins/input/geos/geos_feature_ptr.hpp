@@ -26,6 +26,7 @@
 
 // geos
 #include <geos_c.h>
+#include <cstdlib>
 
 class geos_feature_ptr
 {
@@ -77,7 +78,10 @@ public:
     ~geos_wkb_ptr ()
     {
         if (data_ != NULL)
-            GEOSFree(data_);
+        {
+            // We use std::free here instead of GEOSFree(data_) to support geos 3.1.0
+            std::free(data_);
+        }
     }
 
     bool is_valid() const
