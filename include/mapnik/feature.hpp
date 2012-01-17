@@ -105,7 +105,8 @@ public:
     void put(key_type const& key, T const& val)
     {
         map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end())
+        if (itr != ctx_->mapping_.end() 
+            && itr->second < data_.size())
         {
             data_[itr->second] = value(val);
         }
@@ -116,7 +117,8 @@ public:
     void put(key_type const& key, value const& val)
     {
         map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end())
+        if (itr != ctx_->mapping_.end() 
+            && itr->second < data_.size())
         {
             data_[itr->second] = val;
         }
@@ -132,13 +134,24 @@ public:
     value_type const& get(key_type const& key) const
     {
         map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end())
+        if (itr != ctx_->mapping_.end() 
+            && itr->second < data_.size())
         {
             return data_[itr->second];
         }
         throw std::out_of_range("Key doesn't exist");
     }
     
+    std::size_t size() const
+    {
+        return data_.size();
+    }
+    
+    context_ptr context()
+    {
+        return ctx_;
+    }
+
     boost::ptr_vector<geometry_type> & paths() 
     {
         return geom_cont_;
