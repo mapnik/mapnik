@@ -40,11 +40,11 @@ class occi_featureset : public mapnik::Featureset
 public:
     occi_featureset(oracle::occi::StatelessConnectionPool* pool,
                     oracle::occi::Connection* conn,
+                    mapnik::context_ptr const& ctx,
                     std::string const& sqlstring,
                     std::string const& encoding,
                     bool use_connection_pool,
-                    unsigned prefetch_rows,
-                    unsigned num_attrs);
+                    unsigned prefetch_rows);
     virtual ~occi_featureset();
     mapnik::feature_ptr next();
 
@@ -68,8 +68,8 @@ private:
     oracle::occi::ResultSet* rs_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
-    unsigned num_attrs_;
     mutable int feature_id_;
+    mapnik::context_ptr ctx_;
 };
 
 #endif // OCCI_FEATURESET_HPP

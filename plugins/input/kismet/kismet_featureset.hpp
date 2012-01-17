@@ -40,19 +40,20 @@
 class kismet_featureset : public mapnik::Featureset
 {
 public:
-    kismet_featureset(const std::list<kismet_network_data>& knd_list,
+    kismet_featureset(std::list<kismet_network_data> const& knd_list,
                       std::string const& srs,
                       std::string const& encoding);
     virtual ~kismet_featureset();
     mapnik::feature_ptr next();
 
 private:
-    const std::list<kismet_network_data>& knd_list_;
+    std::list<kismet_network_data> const& knd_list_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     mapnik::wkbFormat format_;
     int feature_id_;
     std::list<kismet_network_data>::const_iterator knd_list_it;
     mapnik::projection source_;
+    mapnik::context_ptr ctx_;
 };
 
 #endif // KISMET_FEATURESET_HPP
