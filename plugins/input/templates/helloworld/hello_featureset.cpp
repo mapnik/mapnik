@@ -7,7 +7,8 @@
 hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string const& encoding)
     : box_(box),
       feature_id_(1),
-      tr_(new mapnik::transcoder(encoding)) { }
+      tr_(new mapnik::transcoder(encoding)),
+      ctx_(boost::make_shared<mapnik::context>()) { }
 
 hello_featureset::~hello_featureset() { }
 
@@ -16,14 +17,14 @@ mapnik::feature_ptr hello_featureset::next()
     if (feature_id_ == 1)
     {
         // create a new feature
-        mapnik::feature_ptr feature(mapnik::feature_factory::create(feature_id_));
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
 
         // increment the count so that we only return one feature
         ++feature_id_;
 
         // create an attribute pair of key:value
         UnicodeString ustr = tr_->transcode("hello world!");
-        boost::put(*feature,"key",ustr);
+        feature->put("key",ustr);
 
         // we need a geometry to display so just for fun here
         // we take the center of the bbox that was used to query
