@@ -94,13 +94,6 @@ shape_file& shape_io::shp()
     return shp_;
 }
 
-#if 0
-shape_file& shape_io::shx()
-{
-    return shx_;
-}
-#endif
-
 dbf_file& shape_io::dbf()
 {
     return dbf_;

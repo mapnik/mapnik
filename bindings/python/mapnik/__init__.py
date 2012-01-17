@@ -667,7 +667,6 @@ __all__ = [
     'Path',
     'Parameter',
     'Parameters',
-    'PointDatasource',
     'PointSymbolizer',
     'PolygonPatternSymbolizer',
     'PolygonSymbolizer',
