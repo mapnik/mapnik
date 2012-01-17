@@ -233,9 +233,6 @@ class _Projection(Projection,_injector):
 
 class _Datasource(Datasource,_injector):
 
-    def describe(self):
-        return Describe(self)
-
     def all_features(self,fields=None):
         query = Query(self.envelope())
         attributes = fields or self.fields()
@@ -710,7 +707,6 @@ __all__ = [
     'SQLite',
     'Osm',
     'Kismet',
-    'Describe',
     #   version and environment
     'mapnik_version_string',
     'mapnik_version',
