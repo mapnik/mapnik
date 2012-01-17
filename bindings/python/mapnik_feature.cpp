@@ -29,11 +29,13 @@
 #include <boost/python/iterator.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/tuple.hpp>
+#include <boost/python/to_python_converter.hpp>
 #include <boost/python.hpp>
 #include <boost/scoped_array.hpp>
 
 // mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
@@ -47,6 +49,7 @@ using mapnik::geometry_utils;
 using mapnik::from_wkt;
 using mapnik::context;
 using mapnik::context_ptr;
+using mapnik::feature_kv_iterator;
 
 void feature_add_geometries_from_wkb(Feature &feature, std::string wkb)
 {
@@ -59,7 +62,7 @@ void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
     if (!result) throw std::runtime_error("Failed to parse WKT");
 }
 
-mapnik::value  __getitem__(Feature & feature, std::string const& name)
+mapnik::value  __getitem__(Feature const& feature, std::string const& name)
 {
     return feature.get(name);
 }
@@ -69,9 +72,27 @@ void __setitem__(Feature & feature, std::string const& name, mapnik::value const
     feature.put(name,val);
 }
 
+feature_kv_iterator feature_kv_begin(Feature const& f)
+{
+    return feature_kv_iterator(f,true);
+}
+
+feature_kv_iterator feature_kv_end(Feature const& f)
+{
+    return feature_kv_iterator(f);
+}
+
 } // end anonymous namespace
 
 namespace boost { namespace python {
+
+struct mapnik_kv_to_python
+{
+    static PyObject* convert(feature_kv_iterator::value_type const& kv)
+    {
+        return boost::python::incref(boost::python::make_tuple(boost::get<0>(kv), boost::get<1>(kv)).ptr());
+    }
+};
 
 // TODO  mapnik.Context : implement vector_indexing_suite - we don't want to expose internal key->index mapping 
 // TODO  mapnik.Feature : implement map_indexing_suite 
@@ -137,19 +158,19 @@ void export_feature()
     using namespace boost::python;
     using mapnik::Feature;
 
-    // Python to mapnik::value convrters
+    // Python to mapnik::value converters
     implicitly_convertible<int,mapnik::value>();
     implicitly_convertible<double,mapnik::value>();
     implicitly_convertible<UnicodeString,mapnik::value>();
     implicitly_convertible<bool,mapnik::value>();
     
-    //std_pair_to_python_converter<std::string const,mapnik::value>();
     UnicodeString_from_python_str();
-
+    to_python_converter<mapnik::feature_kv_iterator::value_type,mapnik_kv_to_python>();
+    
     class_<context,context_ptr,boost::noncopyable>
         ("Context",init<>("Default ctor."))
         .def("push", &context::push)
-        // TODO .def("__iter__", .....)
+        //.def("__iter__",iterator<context>())
         ;
     
     class_<Feature,boost::shared_ptr<Feature>,
@@ -166,9 +187,7 @@ void export_feature()
         .def("has_key", &Feature::has_key)
         .def("__setitem__",&__setitem__)
         .def("__getitem__",&__getitem__)
-        // FIXME
-        // .def(map_indexing_suite2<Feature, true >())
-        // .def("iteritems",iterator<Feature> ())
-        //TODO define more mapnik::Feature methods
+        .def("__len__", &Feature::size)
+        .def("context",&Feature::context)
         ;
 }
