@@ -46,7 +46,7 @@ namespace mapnik {
 
 
 typedef boost::shared_ptr<raster> raster_ptr;    
-typedef std::map<std::string,int> map_type;
+typedef std::map<std::string,std::size_t> map_type;
 typedef boost::associative_property_map<map_type> base_type;
 
 class feature_impl;
@@ -85,8 +85,7 @@ class feature_impl : private boost::noncopyable
 {
     friend class feature_kv_iterator;
 public:
-        
-    
+
     typedef mapnik::value value_type;    
     typedef std::vector<value_type> cont_type;
 
