@@ -40,6 +40,7 @@ private:
     mutable bool strict_;
     mutable bool quiet_;
     mutable double filesize_max_;
+    mutable mapnik::context_ptr ctx_;
 };
 
 
