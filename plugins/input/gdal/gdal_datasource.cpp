@@ -197,7 +197,7 @@ gdal_datasource::~gdal_datasource()
 {
 }
 
-int gdal_datasource::type() const
+datasource::datasource_t gdal_datasource::type() const
 {
     return datasource::Raster;
 }
@@ -212,6 +212,11 @@ box2d<double> gdal_datasource::envelope() const
     if (! is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> gdal_datasource::get_geometry_type() const
+{
+    return boost::optional<mapnik::datasource::geometry_t>();
 }
 
 layer_descriptor gdal_datasource::get_descriptor() const

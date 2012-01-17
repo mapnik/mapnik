@@ -63,7 +63,7 @@ class postgis_datasource : public datasource
     const int cursor_fetch_size_;
     const int row_limit_;
     mutable std::string geometryColumn_;
-    int type_;
+    mapnik::datasource::datasource_t type_;
     mutable int srid_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
@@ -79,10 +79,11 @@ class postgis_datasource : public datasource
     //bool show_queries_;
 public:
     static std::string name();
-    int type() const;
+    mapnik::datasource::datasource_t type() const;
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;
+    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
     postgis_datasource(const parameters &params, bool bind=true);
     ~postgis_datasource();

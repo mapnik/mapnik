@@ -266,70 +266,6 @@ void ogr_datasource::bind() const
     }
 #endif
 
-    // get geometry type
-    // NOTE: wkbFlatten macro in ogr flattens 2.5d types into base 2d type
-    switch (wkbFlatten(layer->GetGeomType()))
-    {
-    case wkbPoint:
-    case wkbMultiPoint:
-        desc_.set_geometry_type("point");
-        break;
-    case wkbLinearRing:
-    case wkbLineString:
-    case wkbMultiLineString:
-        desc_.set_geometry_type("linestring");
-        break;
-    case wkbPolygon:
-    case wkbMultiPolygon:
-        desc_.set_geometry_type("polygon");
-        break;
-    case wkbGeometryCollection:
-        desc_.set_geometry_type("collection");
-        break;
-    case wkbNone:
-    case wkbUnknown:
-        {
-            // fallback to inspecting first actual geometry
-            // TODO - csv and shapefile inspect first 4 features
-            if (dataset_ && layer_.is_valid())
-            {
-                OGRLayer* layer = layer_.layer();
-                ogr_feature_ptr feat(layer->GetNextFeature());
-                if ((*feat) != NULL)
-                {
-                    OGRGeometry* geom = (*feat)->GetGeometryRef();
-                    if (geom && ! geom->IsEmpty())
-                    {
-                        switch (wkbFlatten(geom->getGeometryType()))
-                        {
-                        case wkbPoint:
-                        case wkbMultiPoint:
-                            desc_.set_geometry_type("point");
-                            break;
-                        case wkbLinearRing:
-                        case wkbLineString:
-                        case wkbMultiLineString:
-                            desc_.set_geometry_type("linestring");
-                            break;
-                        case wkbPolygon:
-                        case wkbMultiPolygon:
-                            desc_.set_geometry_type("polygon");
-                            break;
-                        case wkbGeometryCollection:
-                            desc_.set_geometry_type("collection");
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-    default:
-        break;
-    }
-
     // deal with attributes descriptions
     OGRFeatureDefn* def = layer->GetLayerDefn();
     if (def != 0)
@@ -396,7 +332,7 @@ std::string ogr_datasource::name()
     return "ogr";
 }
 
-int ogr_datasource::type() const
+mapnik::datasource::datasource_t ogr_datasource::type() const
 {
     return type_;
 }
@@ -405,6 +341,79 @@ box2d<double> ogr_datasource::envelope() const
 {
     if (! is_bound_) bind();
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_type() const
+{
+    boost::optional<mapnik::datasource::geometry_t> result;
+    if (dataset_ && layer_.is_valid())
+    {
+        OGRLayer* layer = layer_.layer();
+        // NOTE: wkbFlatten macro in ogr flattens 2.5d types into base 2d type
+        switch (wkbFlatten(layer->GetGeomType()))
+        {
+        case wkbPoint:
+        case wkbMultiPoint:
+            result.reset(mapnik::datasource::Point);
+            break;
+        case wkbLinearRing:
+        case wkbLineString:
+        case wkbMultiLineString:
+            result.reset(mapnik::datasource::LineString);
+            break;
+        case wkbPolygon:
+        case wkbMultiPolygon:
+            result.reset(mapnik::datasource::Polygon);
+            break;
+        case wkbGeometryCollection:
+            result.reset(mapnik::datasource::Collection);
+            break;
+        case wkbNone:
+        case wkbUnknown:
+            {
+                // fallback to inspecting first actual geometry
+                // TODO - csv and shapefile inspect first 4 features
+                if (dataset_ && layer_.is_valid())
+                {
+                    OGRLayer* layer = layer_.layer();
+                    ogr_feature_ptr feat(layer->GetNextFeature());
+                    if ((*feat) != NULL)
+                    {
+                        OGRGeometry* geom = (*feat)->GetGeometryRef();
+                        if (geom && ! geom->IsEmpty())
+                        {
+                            switch (wkbFlatten(geom->getGeometryType()))
+                            {
+                            case wkbPoint:
+                            case wkbMultiPoint:
+                                result.reset(mapnik::datasource::Point);
+                                break;
+                            case wkbLinearRing:
+                            case wkbLineString:
+                            case wkbMultiLineString:
+                                result.reset(mapnik::datasource::LineString);
+                                break;
+                            case wkbPolygon:
+                            case wkbMultiPolygon:
+                                result.reset(mapnik::datasource::Polygon);
+                                break;
+                            case wkbGeometryCollection:
+                                result.reset(mapnik::datasource::Collection);
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+        default:
+            break;
+        }
+    }
+    
+    return result;
 }
 
 layer_descriptor ogr_datasource::get_descriptor() const

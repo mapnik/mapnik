@@ -145,14 +145,20 @@ void postgis_datasource::bind() const
             if (!geometryColumn_.length() > 0 || srid_ == 0)
             {
                 std::ostringstream s;
-                s << "SELECT f_geometry_column, srid, lower(type) as type FROM ";
-                s << GEOMETRY_COLUMNS <<" WHERE f_table_name='" << mapnik::sql_utils::unquote_double(geometry_table_) <<"'";
+                s << "SELECT f_geometry_column, srid FROM "
+                  << GEOMETRY_COLUMNS <<" WHERE f_table_name='"
+                  << mapnik::sql_utils::unquote_double(geometry_table_)
+                  << "'";
 
                 if (schema_.length() > 0)
-                    s << " AND f_table_schema='" << mapnik::sql_utils::unquote_double(schema_) << "'";
+                    s << " AND f_table_schema='"
+                      << mapnik::sql_utils::unquote_double(schema_)
+                      << "'";
 
                 if (geometry_field_.length() > 0)
-                    s << " AND f_geometry_column='" << mapnik::sql_utils::unquote_double(geometry_field_) << "'";
+                    s << " AND f_geometry_column='"
+                      << mapnik::sql_utils::unquote_double(geometry_field_)
+                      << "'";
 
                 /*
                   if (show_queries_)
@@ -177,25 +183,6 @@ void postgis_datasource::bind() const
                             std::clog << "Postgis Plugin: SRID=" << rs->getValue("srid") << " " << ex.what() << std::endl;
                         }
                     }
-
-                    g_type = rs->getValue("type");
-                    if (boost::algorithm::contains(g_type,"line"))
-                    {
-                        g_type = "linestring";
-                    }
-                    else if (boost::algorithm::contains(g_type,"point"))
-                    {
-                        g_type = "point";
-                    }
-                    else if (boost::algorithm::contains(g_type,"polygon"))
-                    {
-                        g_type = "polygon";
-                    }
-                    else // geometry
-                    {
-                        g_type = "collection";
-                    }
-                    desc_.set_geometry_type(g_type);
                 }
                 rs->close();
 
@@ -348,50 +335,6 @@ void postgis_datasource::bind() const
 
             rs->close();
 
-            // fallback to querying first several features
-            if (g_type.empty() && !geometryColumn_.empty())
-            {
-                s.str("");
-                std::string g_type("");
-                std::string prev_type("");
-                s << "SELECT ST_GeometryType(\"" << geometryColumn_ << "\") AS geom"
-                  << " FROM " << populate_tokens(table_);
-                if (row_limit_ > 0 && row_limit_ < 5) {
-                    s << " LIMIT " << row_limit_;
-                } else {
-                    s << " LIMIT 5";
-                }
-                shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
-                while (rs->next() && !rs->isNull(0))
-                {
-                    const char *data = rs->getValue(0);
-                    if (boost::algorithm::icontains(data,"line"))
-                    {
-                        g_type = "linestring";
-                    }
-                    else if (boost::algorithm::icontains(data,"point"))
-                    {
-                        g_type = "point";
-                    }
-                    else if (boost::algorithm::icontains(data,"polygon"))
-                    {
-                        g_type = "polygon";
-                    }
-                    else // geometry
-                    {
-                        g_type = "collection";
-                        break;
-                    }
-                    if (!prev_type.empty() && g_type != prev_type)
-                    {
-                        g_type = "collection";
-                        break;
-                    }
-                    prev_type = g_type;
-                }
-                desc_.set_geometry_type(g_type);
-            }
-
             is_bound_ = true;
 
         }
@@ -403,7 +346,7 @@ std::string postgis_datasource::name()
     return "postgis";
 }
 
-int postgis_datasource::type() const
+mapnik::datasource::datasource_t postgis_datasource::type() const
 {
     return type_;
 }
@@ -751,6 +694,118 @@ box2d<double> postgis_datasource::envelope() const
         }
     }
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry_type() const
+{
+    if (! is_bound_) bind();
+    boost::optional<mapnik::datasource::geometry_t> result;
+
+    ConnectionManager *mgr=ConnectionManager::instance();
+    shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
+    if (pool)
+    {
+        shared_ptr<Connection> conn = pool->borrowObject();
+        if (conn && conn->isOK())
+        {
+            PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
+
+            std::ostringstream s;
+            std::string g_type;
+
+            s << "SELECT lower(type) as type FROM "
+              << GEOMETRY_COLUMNS <<" WHERE f_table_name='"
+              << mapnik::sql_utils::unquote_double(geometry_table_)
+              << "'";
+
+            if (schema_.length() > 0)
+                s << " AND f_table_schema='"
+                  << mapnik::sql_utils::unquote_double(schema_)
+                  << "'";
+
+            if (geometry_field_.length() > 0)
+                s << " AND f_geometry_column='"
+                  << mapnik::sql_utils::unquote_double(geometry_field_)
+                  << "'";
+
+            shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
+            if (rs->next())
+            {
+                g_type = rs->getValue("type");
+                if (boost::algorithm::contains(g_type,"line"))
+                {
+                    result.reset(mapnik::datasource::LineString);
+                    return result;
+                }
+                else if (boost::algorithm::contains(g_type,"point"))
+                {
+                    result.reset(mapnik::datasource::Point);
+                    return result;
+                }
+                else if (boost::algorithm::contains(g_type,"polygon"))
+                {
+                    result.reset(mapnik::datasource::Polygon);
+                    return result;
+                }
+                else // geometry
+                {
+                    result.reset(mapnik::datasource::Collection);
+                    return result;
+                }
+            }
+
+            // fallback to querying first several features
+            if (g_type.empty() && !geometryColumn_.empty())
+            {
+                s.str("");
+                std::string prev_type("");
+                s << "SELECT ST_GeometryType(\""
+                  << geometryColumn_ << "\") AS geom"
+                  << " FROM " << populate_tokens(table_);
+                if (row_limit_ > 0 && row_limit_ < 5)
+                {
+                    s << " LIMIT " << row_limit_;
+                }
+                else
+                {
+                    s << " LIMIT 5";
+                }
+                shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
+                while (rs->next() && !rs->isNull(0))
+                {
+                    const char* data = rs->getValue(0);
+                    if (boost::algorithm::icontains(data,"line"))
+                    {
+                        g_type = "linestring";
+                        result.reset(mapnik::datasource::LineString);
+                    }
+                    else if (boost::algorithm::icontains(data,"point"))
+                    {
+                        g_type = "point";
+                        result.reset(mapnik::datasource::Point);
+                    }
+                    else if (boost::algorithm::icontains(data,"polygon"))
+                    {
+                        g_type = "polygon";
+                        result.reset(mapnik::datasource::Polygon);
+                    }
+                    else // geometry
+                    {
+                        result.reset(mapnik::datasource::Collection);
+                        return result;
+                    }
+                    if (!prev_type.empty() && g_type != prev_type)
+                    {
+                        result.reset(mapnik::datasource::Collection);
+                        return result;
+                    }
+                    prev_type = g_type;
+                }
+            }
+        }
+    }
+    
+    return result;
 }
 
 postgis_datasource::~postgis_datasource()

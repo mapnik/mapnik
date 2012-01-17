@@ -182,38 +182,9 @@ void  shape_datasource::init(shape_io& shape) const
         throw datasource_exception("Shape Plugin: " + (boost::format("invalid version number: %d") % version).str());
     }
 
-    int shape_type = shape.shp().read_ndr_integer();
-    if (shape_type == shape_io::shape_multipatch)
+    shape_type_ = static_cast<shape_io::shapeType>(shape.shp().read_ndr_integer());
+    if (shape_type_ == shape_io::shape_multipatch)
         throw datasource_exception("Shape Plugin: shapefile multipatch type is not supported");
-    switch (shape_type)
-    {
-        case shape_io::shape_point:
-        case shape_io::shape_pointm:
-        case shape_io::shape_pointz:
-        case shape_io::shape_multipoint:
-        case shape_io::shape_multipointm:
-        case shape_io::shape_multipointz:
-        {
-            desc_.set_geometry_type("point");
-            break;
-        }
-        case shape_io::shape_polyline:
-        case shape_io::shape_polylinem:
-        case shape_io::shape_polylinez:
-        {
-            desc_.set_geometry_type("linestring");
-            break;
-        }
-        case shape_io::shape_polygon:
-        case shape_io::shape_polygonm:
-        case shape_io::shape_polygonz:
-        {
-            desc_.set_geometry_type("polygon");
-            break;
-        }
-        default:
-            break;
-    }
 
     shape.shp().read_envelope(extent_);
 
@@ -258,7 +229,7 @@ std::string shape_datasource::name()
     return "shape";
 }
 
-int shape_datasource::type() const
+datasource::datasource_t shape_datasource::type() const
 {
     return type_;
 }
@@ -343,3 +314,39 @@ box2d<double> shape_datasource::envelope() const
 
     return extent_;
 }
+
+boost::optional<mapnik::datasource::geometry_t> shape_datasource::get_geometry_type() const
+{
+    boost::optional<mapnik::datasource::geometry_t> result;
+    switch (shape_type_)
+    {
+        case shape_io::shape_point:
+        case shape_io::shape_pointm:
+        case shape_io::shape_pointz:
+        case shape_io::shape_multipoint:
+        case shape_io::shape_multipointm:
+        case shape_io::shape_multipointz:
+        {
+            result.reset(mapnik::datasource::Point);
+            break;
+        }
+        case shape_io::shape_polyline:
+        case shape_io::shape_polylinem:
+        case shape_io::shape_polylinez:
+        {
+            result.reset(mapnik::datasource::LineString);
+            break;
+        }
+        case shape_io::shape_polygon:
+        case shape_io::shape_polygonm:
+        case shape_io::shape_polygonz:
+        {
+            result.reset(mapnik::datasource::Polygon);
+            break;
+        }
+        default:
+            break;
+    }
+    return result;
+}
+

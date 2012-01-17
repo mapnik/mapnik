@@ -109,7 +109,7 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(feature['subregion'],29)
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
-        eq_(ds.describe()['geometry_type'],'polygon')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Polygon)
 
     def test_subquery():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select * from world_merc) as w')
@@ -127,7 +127,7 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(feature['subregion'],29)
         eq_(feature['lon'],-61.783)
         eq_(feature['lat'],17.078)
-        eq_(ds.describe()['geometry_type'],'polygon')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Polygon)
 
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(select gid,geom,fips as _fips from world_merc) as w')
         fs = ds.featureset()
@@ -135,39 +135,39 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(feature['gid'],1)
         eq_(feature['_fips'],u'AC')
         eq_(len(feature),2)
-        eq_(ds.describe()['geometry_type'],'polygon')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Polygon)
 
     def test_empty_db():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='empty')
         fs = ds.featureset()
         feature = fs.next()
         eq_(feature,None)
-        eq_(ds.describe()['geometry_type'],'collection')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Collection)
 
     def test_geometry_detection():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
                             geometry_field='geom')
-        eq_(ds.describe()['geometry_type'],'collection')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Collection)
 
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
                             geometry_field='geom',
                             row_limit=1)
-        eq_(ds.describe()['geometry_type'],'point')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Point)
 
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
                             geometry_field='geom',
                             row_limit=2)
-        eq_(ds.describe()['geometry_type'],'point')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Point)
 
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
                             geometry_field='geom',
                             row_limit=3)
-        eq_(ds.describe()['geometry_type'],'point')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Point)
 
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test',
                             geometry_field='geom',
                             row_limit=4)
-        eq_(ds.describe()['geometry_type'],'collection')
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Collection)
 
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
