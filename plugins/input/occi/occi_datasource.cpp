@@ -492,10 +492,11 @@ featureset_ptr occi_datasource::features(query const& q) const
     std::set<std::string> const& props = q.property_names();
     std::set<std::string>::const_iterator pos = props.begin();
     std::set<std::string>::const_iterator end = props.end();
-    while (pos != end)
+    mapnik::context_ptr ctx = boost::make_shared<mapnik::context>();
+    for ( ;pos != end;++pos)
     {
         s << ", " << *pos;
-        ++pos;
+        ctx->push(*pos);
     }
 
     s << " FROM ";
@@ -557,11 +558,11 @@ featureset_ptr occi_datasource::features(query const& q) const
 
     return boost::make_shared<occi_featureset>(pool_,
                                                conn_,
+                                               ctx,
                                                s.str(),
                                                desc_.get_encoding(),                                              
                                                use_connection_pool_,
-                                               row_prefetch_,
-                                               props.size());
+                                               row_prefetch_);
 }
 
 featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
@@ -572,12 +573,12 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     s << "SELECT " << geometry_field_;
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
-    unsigned size = 0;
+    mapnik::context_ptr ctx = boost::make_shared<mapnik::context>();
     while (itr != end)
     {
         s << ", " << itr->get_name();
+        ctx->push(itr->get_name());
         ++itr;
-        ++size;
     }
 
     s << " FROM ";
@@ -638,9 +639,9 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 
     return boost::make_shared<occi_featureset>(pool_,
                                                conn_,
+                                               ctx,
                                                s.str(),
                                                desc_.get_encoding(),
                                                use_connection_pool_,
-                                               row_prefetch_,
-                                               size);
+                                               row_prefetch_);
 }
