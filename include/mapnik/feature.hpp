@@ -40,13 +40,16 @@
 #include <boost/scoped_ptr.hpp>
 
 // stl
+#include <vector>
 #include <map>
+#include <stdexcept>
 
 namespace mapnik {
 
 
-typedef boost::shared_ptr<raster> raster_ptr;    
-typedef std::map<std::string,int> map_type;
+typedef boost::shared_ptr<raster> raster_ptr; 
+typedef std::string key_type;   
+typedef std::map<key_type,int> map_type;
 typedef boost::associative_property_map<map_type> base_type;
 
 class feature_impl;
@@ -67,7 +70,7 @@ public:
     context()
         : base_type(mapping_) {}
     
-    void push(std::string const& name)
+    void push(key_type const& name)
     {
         mapping_.insert(std::make_pair(name,mapping_.size()));
     }
@@ -101,35 +104,43 @@ public:
     inline void set_id(int id) { id_ = id;}
     
     template <typename T>
-    void put(std::string const& key, T const& val)
+    void put(key_type const& key, T const& val)
     {
         map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end())
         {
             data_[itr->second] = value(val);
         }
+        else 
+            throw std::out_of_range("Key doesn't exist");
     } 
     
-    void put(std::string const& key, value const& val)
+    void put(key_type const& key, value const& val)
     {
         map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end())
         {
             data_[itr->second] = val;
         }
+        else
+            throw std::out_of_range("Key doesn't exist");
     }
     
-    value_type const& get(std::string const& key) const
+    bool has_key(key_type const& key) const
+    {
+        return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
+    }
+    
+    value_type const& get(key_type const& key) const
     {
         map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end())
         {
             return data_[itr->second];
         }
-        static const value_type default_value;
-        return default_value;
+        throw std::out_of_range("Key doesn't exist");
     }
-
+    
     boost::ptr_vector<geometry_type> & paths() 
     {
         return geom_cont_;
