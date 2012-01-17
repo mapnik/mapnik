@@ -57,14 +57,14 @@ using oracle::occi::Blob;
 
 occi_featureset::occi_featureset(StatelessConnectionPool* pool,
                                  Connection* conn,
+                                 mapnik::context_ptr const& ctx,
                                  std::string const& sqlstring,
                                  std::string const& encoding,
                                  bool use_connection_pool,
-                                 unsigned prefetch_rows,
-                                 unsigned num_attrs)
+                                 unsigned prefetch_rows)
     : tr_(new transcoder(encoding)),
-      num_attrs_(num_attrs),
-      feature_id_(1)
+      feature_id_(1),
+      ctx_(ctx)
 {
     if (use_connection_pool)
     {
@@ -93,7 +93,7 @@ feature_ptr occi_featureset::next()
 {
     if (rs_ && rs_->next())
     {
-        feature_ptr feature(feature_factory::create(feature_id_));
+        feature_ptr feature(feature_factory::create(ctx_,feature_id_));
         ++feature_id_;
 
         boost::scoped_ptr<SDOGeometry> geom(dynamic_cast<SDOGeometry*>(rs_->getObject(1)));
@@ -125,7 +125,7 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCIINT:
             case oracle::occi::OCCIUNSIGNED_INT:
             case oracle::occi::OCCIROWID:
-                boost::put(*feature,fld_name,rs_->getInt (i + 1));
+                feature->put(fld_name,rs_->getInt (i + 1));
                 break;
             case oracle::occi::OCCIFLOAT:
             case oracle::occi::OCCIBFLOAT:
@@ -133,7 +133,7 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCIBDOUBLE:
             case oracle::occi::OCCINUMBER:
             case oracle::occi::OCCI_SQLT_NUM:
-                boost::put(*feature,fld_name,rs_->getDouble (i + 1));
+                feature->put(fld_name,rs_->getDouble (i + 1));
                 break;
             case oracle::occi::OCCICHAR:
             case oracle::occi::OCCISTRING:
@@ -147,7 +147,7 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCI_SQLT_VNU:
             case oracle::occi::OCCI_SQLT_VBI:
             case oracle::occi::OCCI_SQLT_VST:
-                boost::put(*feature,fld_name,(UnicodeString) tr_->transcode (rs_->getString (i + 1).c_str()));
+                feature->put(fld_name,(UnicodeString) tr_->transcode (rs_->getString (i + 1).c_str()));
                 break;
             case oracle::occi::OCCIDATE:
             case oracle::occi::OCCITIMESTAMP:
