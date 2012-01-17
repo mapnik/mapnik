@@ -838,7 +838,7 @@ std::string csv_datasource::name()
     return "csv";
 }
 
-int csv_datasource::type() const
+datasource::datasource_t csv_datasource::type() const
 {
     return datasource::Vector;
 }
@@ -850,21 +850,25 @@ mapnik::box2d<double> csv_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource::datasource_geom_t> csv_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource::datasource_geom_t> result;
+    if (! is_bound_) bind();
+    boost::optional<mapnik::datasource::geometry_t> result;
     int multi_type = 0;
     unsigned num_features = features_.size();
-    for (int i = 0; i < num_features || i < 5; ++i)
+    for (int i = 0; i < num_features && i < 5; ++i)
     {
-        mapnik::datasource::datasource_geom_t type = mapnik::util::to_ds_type(features_[i]->paths());
-        if (multi_type > 0 && multi_type != type)
+        mapnik::util::to_ds_type(features_[i]->paths(),result);
+        if (result)
         {
-            result.reset(mapnik::datasource::CollectionT);
-            return result;
+            int type = static_cast<int>(*result);
+            if (multi_type > 0 && multi_type != type)
+            {
+                result.reset(mapnik::datasource::Collection);
+                return result;
+            }
+            multi_type = type;
         }
-        result.reset(type);
-        multi_type = type;
     }
     return result;
 }

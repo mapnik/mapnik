@@ -39,11 +39,11 @@ public:
     memory_datasource();
     virtual ~memory_datasource();
     void push(feature_ptr feature);
-    int type() const;
+    datasource::datasource_t type() const;
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt) const;
     box2d<double> envelope() const;
-    boost::optional<datasource_geom_t> get_geometry_type() const;
+    boost::optional<geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
     size_t size() const;
     void clear();
@@ -60,8 +60,7 @@ class MAPNIK_DECL point_datasource : public memory_datasource {
 public:
     point_datasource() :
         feature_id_(1) {}
-    void add_point(double x, double y, const char* key, const char* value);  
-    inline int type() const { return datasource::Vector; }
+    void add_point(double x, double y, const char* key, const char* value);
       
 private:
     int feature_id_;

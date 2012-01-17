@@ -366,37 +366,6 @@ void sqlite_datasource::bind() const
         }
     }
 
-    // finally, get geometry type by querying first feature
-    std::ostringstream s;
-    std::string g_type("");
-    std::string prev_type("");
-    boost::ptr_vector<mapnik::geometry_type> paths;
-
-    s << "SELECT " << geometry_field_ << " FROM " << geometry_table_;
-    if (row_limit_ > 0 && row_limit_ < 5) {
-        s << " LIMIT " << row_limit_;
-    } else {
-        s << " LIMIT 5";
-    }
-    boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
-    while (rs->is_valid() && rs->step_next())
-    {
-        int size;
-        const char* data = (const char*) rs->column_blob(0, size);
-        if (data)
-        {
-            mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
-            mapnik::util::to_type_str(paths,g_type);
-            if (!prev_type.empty() && g_type != prev_type)
-            {
-                g_type = "collection";
-                break;
-            }
-            prev_type = g_type;
-        }
-    }
-    desc_.set_geometry_type(g_type);
-
     is_bound_ = true;
 }
 
@@ -503,7 +472,7 @@ std::string sqlite_datasource::name()
     return "sqlite";
 }
 
-int sqlite_datasource::type() const
+mapnik::datasource::datasource_t sqlite_datasource::type() const
 {
     return type_;
 }
@@ -513,6 +482,53 @@ box2d<double> sqlite_datasource::envelope() const
     if (! is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_type() const
+{
+    if (! is_bound_) bind();
+    boost::optional<mapnik::datasource::geometry_t> result;
+
+    if (dataset_)
+    {
+        // finally, get geometry type by querying first feature
+        std::ostringstream s;
+        s << "SELECT " << geometry_field_
+          << " FROM " << geometry_table_;
+        if (row_limit_ > 0 && row_limit_ < 5)
+        {
+            s << " LIMIT " << row_limit_;
+        }
+        else
+        {
+            s << " LIMIT 5";
+        }
+        boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
+        int multi_type = 0;
+        while (rs->is_valid() && rs->step_next())
+        {
+            int size;
+            const char* data = (const char*) rs->column_blob(0, size);
+            if (data)
+            {
+                boost::ptr_vector<mapnik::geometry_type> paths;
+                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
+                mapnik::util::to_ds_type(paths,result);
+                if (result)
+                {
+                    int type = static_cast<int>(*result);
+                    if (multi_type > 0 && multi_type != type)
+                    {
+                        result.reset(mapnik::datasource::Collection);
+                        return result;
+                    }
+                    multi_type = type;
+                }
+            }
+        }
+    }
+    
+    return result;
 }
 
 layer_descriptor sqlite_datasource::get_descriptor() const

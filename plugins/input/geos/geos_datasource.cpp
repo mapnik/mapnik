@@ -212,31 +212,6 @@ void geos_datasource::bind() const
         }
     }
 
-    // get geometry type
-    const int type = GEOSGeomTypeId(*geometry_);
-    switch (type)
-    {
-    case GEOS_POINT:
-    case GEOS_MULTIPOINT:
-        desc_.set_geometry_type("point");
-        break;
-    case GEOS_LINESTRING:
-    case GEOS_LINEARRING:
-    case GEOS_MULTILINESTRING:
-        desc_.set_geometry_type("linestring");
-        break;
-    case GEOS_POLYGON:
-    case GEOS_MULTIPOLYGON:
-        desc_.set_geometry_type("polygon");
-        break;
-    case GEOS_GEOMETRYCOLLECTION:
-        desc_.set_geometry_type("collection");
-        break;
-    default:
-        break;
-    }
-
-
     if (! extent_initialized_)
     {
         throw datasource_exception("GEOS Plugin: cannot determine extent for <wkt> geometry");
@@ -250,7 +225,7 @@ std::string geos_datasource::name()
     return "geos";
 }
 
-int geos_datasource::type() const
+mapnik::datasource::datasource_t geos_datasource::type() const
 {
     return type_;
 }
@@ -260,6 +235,38 @@ box2d<double> geos_datasource::envelope() const
     if (! is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> geos_datasource::get_geometry_type() const
+{
+    if (! is_bound_) bind();
+    boost::optional<mapnik::datasource::geometry_t> result;
+
+    // get geometry type
+    const int type = GEOSGeomTypeId(*geometry_);
+    switch (type)
+    {
+    case GEOS_POINT:
+    case GEOS_MULTIPOINT:
+        result.reset(mapnik::datasource::Point);
+        break;
+    case GEOS_LINESTRING:
+    case GEOS_LINEARRING:
+    case GEOS_MULTILINESTRING:
+        result.reset(mapnik::datasource::LineString);
+        break;
+    case GEOS_POLYGON:
+    case GEOS_MULTIPOLYGON:
+        result.reset(mapnik::datasource::Polygon);
+        break;
+    case GEOS_GEOMETRYCOLLECTION:
+        result.reset(mapnik::datasource::Collection);
+        break;
+    default:
+        break;
+    }
+    
+    return result;
 }
 
 layer_descriptor geos_datasource::get_descriptor() const

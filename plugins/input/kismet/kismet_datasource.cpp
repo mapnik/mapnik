@@ -119,8 +119,6 @@ void kismet_datasource::bind() const
 {
     if (is_bound_) return;
 
-    desc_.set_geometry_type("point");
-
     is_bound_ = true;
 }
 
@@ -133,7 +131,7 @@ std::string kismet_datasource::name()
     return "kismet";
 }
 
-int kismet_datasource::type() const
+mapnik::datasource::datasource_t kismet_datasource::type() const
 {
     return type_;
 }
@@ -142,6 +140,11 @@ box2d<double> kismet_datasource::envelope() const
 {
     if (! is_bound_) bind();
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> kismet_datasource::get_geometry_type() const
+{
+    return boost::optional<mapnik::datasource::geometry_t>(mapnik::datasource::Point);
 }
 
 layer_descriptor kismet_datasource::get_descriptor() const

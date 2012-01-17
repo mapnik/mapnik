@@ -85,16 +85,10 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
 boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
 {
     boost::python::dict description;
-    if (ds->type() == mapnik::datasource::Raster)
-    {
-        description["type"] = "raster";
-    }
-    else
-    {
-        description["type"] = "vector";
-    }
     mapnik::layer_descriptor ld = ds->get_descriptor();
+    description["type"] = ds->type();
     description["name"] = ld.get_name();
+    description["geometry_type"] = ds->get_geometry_type();
     description["encoding"] = ld.get_encoding();
     return description;
 }
@@ -154,15 +148,22 @@ void export_datasource()
 {
     using namespace boost::python;
 
-    enum_<mapnik::datasource::datasource_geom_t>("DatasourceGeometryType")
-        .value("PointT",mapnik::datasource::PointT)
-        .value("LineStringT",mapnik::datasource::LineStringT)
-        .value("PolygonT",mapnik::datasource::PolygonT)
-        .value("CollectionT",mapnik::datasource::CollectionT)
+    enum_<mapnik::datasource::datasource_t>("DataType")
+        .value("Vector",mapnik::datasource::Vector)
+        .value("Raster",mapnik::datasource::Raster)
+        ;
+
+    enum_<mapnik::datasource::geometry_t>("DataGeometryType")
+        .value("Point",mapnik::datasource::Point)
+        .value("LineString",mapnik::datasource::LineString)
+        .value("Polygon",mapnik::datasource::Polygon)
+        .value("Collection",mapnik::datasource::Collection)
         ;
 
     class_<datasource,boost::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
+        .def("type",&datasource::type)
+        .def("geometry_type",&datasource::get_geometry_type)
         .def("describe",&describe)
         .def("envelope",&datasource::envelope)
         .def("features",&datasource::features)

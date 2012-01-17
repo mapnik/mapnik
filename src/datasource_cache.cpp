@@ -143,6 +143,7 @@ void datasource_cache::register_datasources(const std::string& str)
                             mapnik::CreateStatic>::mutex_);
 #endif
     boost::filesystem::path path(str);
+    // TODO - only push unique paths
     plugin_directories_.push_back(str);
     boost::filesystem::directory_iterator end_itr;
  
