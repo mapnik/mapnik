@@ -41,17 +41,18 @@ class ogr_datasource : public mapnik::datasource
 public:
     ogr_datasource(mapnik::parameters const& params, bool bind=true);
     virtual ~ogr_datasource ();
-    int type() const;
+    mapnik::datasource::datasource_t type() const;
     static std::string name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;
+    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
     void bind() const;
 
 private:
     mutable mapnik::box2d<double> extent_;
-    int type_;
+    mapnik::datasource::datasource_t type_;
     std::string dataset_name_;
     mutable std::string index_name_;
     mutable OGRDataSource* dataset_;

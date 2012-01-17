@@ -39,8 +39,8 @@
 namespace mapnik
 {
 typedef boost::variant<value_null,int,double,std::string> value_holder;
-typedef std::pair<const std::string, value_holder> parameter;
-typedef std::map<const std::string, value_holder> param_map;
+typedef std::pair<std::string, value_holder> parameter;
+typedef std::map<std::string, value_holder> param_map;
    
 template <typename T>
 struct value_extractor_visitor : public boost::static_visitor<>

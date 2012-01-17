@@ -33,7 +33,6 @@
 #include <mapnik/metawriter_inmem.hpp>
 #include <mapnik/util/deepcopy.hpp>
 #include "mapnik_enumeration.hpp"
-#include "python_optional.hpp"
 
 using mapnik::color;
 using mapnik::coord;
@@ -213,8 +212,6 @@ void export_map()
         .value("ADJUST_CANVAS_HEIGHT", mapnik::Map::ADJUST_CANVAS_HEIGHT)
         ;
 
-    python_optional<mapnik::color> ();
-    python_optional<mapnik::box2d<double> > ();
     class_<std::vector<layer> >("Layers")
         .def(vector_indexing_suite<std::vector<layer> >())
         ;
