@@ -69,7 +69,7 @@ void memory_datasource::push(feature_ptr feature)
     features_.push_back(feature);
 }
     
-int memory_datasource::type() const
+datasource::datasource_t memory_datasource::type() const
 {
     return datasource::Vector;
 }
@@ -95,6 +95,12 @@ box2d<double> memory_datasource::envelope() const
     accumulate_extent func(ext);
     std::for_each(features_.begin(),features_.end(),func);
     return ext;      
+}
+
+boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() const
+{
+    // TODO - detect this?
+    return datasource::Collection;
 }
     
 layer_descriptor memory_datasource::get_descriptor() const

@@ -15,7 +15,7 @@ public:
     virtual ~hello_datasource ();
 
     // mandatory: type of the plugin, used to match at runtime
-    int type() const;
+    mapnik::datasource::datasource_t type() const;
 
     // mandatory: name of the plugin
     static std::string name();
@@ -31,6 +31,9 @@ public:
     // mandatory: return the box2d of the datasource
     // called during rendering to determine if the layer should be processed
     mapnik::box2d<double> envelope() const;
+    
+    // mandatory: optionally return the overal geometry type of the datasource
+    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
 
     // mandatory: return the layer descriptor
     mapnik::layer_descriptor get_descriptor() const;
@@ -42,7 +45,6 @@ private:
     // recommended naming convention of datasource members:
     // name_, type_, extent_, and desc_
     static const std::string name_;
-    int type_;
     mutable mapnik::layer_descriptor desc_;
     mutable mapnik::box2d<double> extent_;
 };
