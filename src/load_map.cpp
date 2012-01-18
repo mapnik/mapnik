@@ -1216,6 +1216,10 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
             optional<double> gamma = get_opt_attr<double>(sym, "gamma");
             if (gamma)  symbol.set_gamma(*gamma);
 
+            // gamma method
+            optional<polygon_pattern_gamma_method_e> gamma_method = get_opt_attr<polygon_pattern_gamma_method_e>(sym, "gamma-method");
+            if (gamma_method) symbol.set_gamma_method(*gamma_method);
+
             parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
         }
@@ -1794,6 +1798,10 @@ void map_parser::parse_stroke(stroke & strk, ptree const & sym)
     optional<double> gamma = get_opt_attr<double>(sym, "stroke-gamma");
     if (gamma) strk.set_gamma(*gamma);
 
+    // stroke-gamma-method
+    optional<gamma_method_e> gamma_method = get_opt_attr<gamma_method_e>(sym, "stroke-gamma-method");
+    if (gamma_method) strk.set_gamma_method(*gamma_method);
+
     // stroke-dashoffset
     optional<double> dash_offset = get_opt_attr<double>(sym, "stroke-dashoffset");
     if (dash_offset) strk.set_dash_offset(*dash_offset);
@@ -1872,7 +1880,7 @@ void map_parser::parse_line_symbolizer( rule & rule, ptree const & sym )
     
 void map_parser::parse_polygon_symbolizer( rule & rule, ptree const & sym )
 {
-    ensure_attrs(sym, "PolygonSymbolizer", "fill,fill-opacity,gamma,meta-writer,meta-output");
+    ensure_attrs(sym, "PolygonSymbolizer", "fill,fill-opacity,gamma,gamma-method,meta-writer,meta-output");
     try
     {
         polygon_symbolizer poly_sym;
@@ -1885,6 +1893,9 @@ void map_parser::parse_polygon_symbolizer( rule & rule, ptree const & sym )
         // gamma
         optional<double> gamma = get_opt_attr<double>(sym, "gamma");
         if (gamma)  poly_sym.set_gamma(*gamma);
+        // gamma method
+        optional<polygon_gamma_method_e> gamma_method = get_opt_attr<polygon_gamma_method_e>(sym, "gamma-method");
+        if (gamma_method) poly_sym.set_gamma_method(*gamma_method);
 
         parse_metawriter_in_symbolizer(poly_sym, sym);
         rule.append(poly_sym);

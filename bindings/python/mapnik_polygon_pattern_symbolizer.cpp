@@ -62,17 +62,17 @@ struct polygon_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
     static boost::python::tuple
     getstate(const polygon_pattern_symbolizer& p)
     {
-        return boost::python::make_tuple(p.get_alignment(),p.get_gamma());
+        return boost::python::make_tuple(p.get_alignment(),p.get_gamma(),p.get_gamma_method());
     }
 
     static void
     setstate (polygon_pattern_symbolizer& p, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 2)
+        if (len(state) != 3)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 2-item tuple in call to __setstate__; got %s"
+                            ("expected 3-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
@@ -80,6 +80,7 @@ struct polygon_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
 
         p.set_alignment(extract<pattern_alignment_e>(state[0]));
         p.set_gamma(extract<float>(state[1]));
+        p.set_gamma_method(extract<polygon_pattern_gamma_method_e>(state[2]));
     }
 
 };
@@ -91,6 +92,13 @@ void export_polygon_pattern_symbolizer()
     enumeration_<pattern_alignment_e>("pattern_alignment")
         .value("LOCAL",LOCAL_ALIGNMENT)
         .value("GLOBAL",GLOBAL_ALIGNMENT)
+        ;
+    enumeration_<polygon_pattern_gamma_method_e>("gamma_method")
+        .value("POWER", POLYGON_PATTERN_GAMMA_POWER)
+        .value("LINEAR", POLYGON_PATTERN_GAMMA_LINEAR)
+        .value("NONE", POLYGON_PATTERN_GAMMA_NONE)
+        .value("THRESHOLD", POLYGON_PATTERN_GAMMA_THRESHOLD)
+        .value("MULTIPLY", POLYGON_PATTERN_GAMMA_MULTIPLY)
         ;
 
     class_<polygon_pattern_symbolizer>("PolygonPatternSymbolizer",
@@ -109,5 +117,9 @@ void export_polygon_pattern_symbolizer()
         .add_property("gamma",
                       &polygon_pattern_symbolizer::get_gamma,
                       &polygon_pattern_symbolizer::set_gamma)
+        .add_property("gamma_method",
+                      &polygon_pattern_symbolizer::get_gamma_method,
+                      &polygon_pattern_symbolizer::set_gamma_method,
+                      "Set/get the gamma correction method of the polygon")
         ;
 }

@@ -234,7 +234,7 @@ void agg_renderer<T>::render_marker(const int x, const int y, marker &marker, co
         typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
 
         ras_ptr->reset();
-        ras_ptr->gamma(agg::gamma_linear());
+        ras_ptr->gamma(agg::gamma_power());
         agg::scanline_u8 sl;
         agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
         pixfmt pixf(buf);
