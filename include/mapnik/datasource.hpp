@@ -43,7 +43,7 @@ namespace mapnik {
 
 typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
     
-struct MAPNIK_DECL Featureset
+struct MAPNIK_DECL Featureset : private boost::noncopyable
 {
     virtual feature_ptr next()=0;
     virtual ~Featureset() {};
