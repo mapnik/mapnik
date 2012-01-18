@@ -30,6 +30,8 @@
 #include "ogr_index_featureset.hpp"
 #include "ogr_feature_ptr.hpp"
 
+#include <gdal_version.h>
+
 // mapnik
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/geom_util.hpp>
@@ -350,7 +352,11 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
     {
         OGRLayer* layer = layer_.layer();
         // NOTE: wkbFlatten macro in ogr flattens 2.5d types into base 2d type
+#if GDAL_VERSION_NUM < 1800
+        switch (wkbFlatten(layer->GetLayerDefn()->GetGeomType()))
+#else
         switch (wkbFlatten(layer->GetGeomType()))
+#endif
         {
         case wkbPoint:
         case wkbMultiPoint:
