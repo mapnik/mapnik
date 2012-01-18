@@ -28,6 +28,8 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/geom_util.hpp>
 
+#include <gdal_version.h>
+
 using mapnik::datasource;
 using mapnik::parameters;
 
