@@ -46,6 +46,17 @@ static const char * line_join_strings[] = {
 
 IMPLEMENT_ENUM( line_join_e, line_join_strings )
 
+static const char * gamma_method_strings[] = {
+    "power", //agg::gamma_power
+    "linear", //agg::gamma_linear
+    "none", //agg::gamma_none
+    "threshold", //agg::gamma_threshold
+    "multiply", //agg::gamma_multiply",
+    ""
+};
+
+IMPLEMENT_ENUM( gamma_method_e, gamma_method_strings )
+
 
 stroke::stroke() 
     : c_(0,0,0),
@@ -54,6 +65,7 @@ stroke::stroke()
       line_cap_(BUTT_CAP),
       line_join_(MITER_JOIN),
       gamma_(1.0),
+      gamma_method_(GAMMA_POWER),
       dash_(),
       dash_offset_(0) {}
 
@@ -64,6 +76,7 @@ stroke::stroke(color const& c, double width)
       line_cap_(BUTT_CAP),
       line_join_(MITER_JOIN),
       gamma_(1.0),
+      gamma_method_(GAMMA_POWER),
       dash_(),
       dash_offset_(0.0) {}
 
@@ -74,6 +87,7 @@ stroke::stroke(stroke const& other)
       line_cap_(other.line_cap_),
       line_join_(other.line_join_),
       gamma_(other.gamma_),
+      gamma_method_(other.gamma_method_),
       dash_(other.dash_), 
       dash_offset_(other.dash_offset_) {}
 
@@ -145,6 +159,16 @@ double stroke::get_gamma() const
     return gamma_;
 }
 
+void stroke::set_gamma_method(gamma_method_e gamma_method)
+{
+    gamma_method_ = gamma_method;
+}
+
+gamma_method_e stroke::get_gamma_method() const
+{
+    return gamma_method_;
+}
+
 void stroke::add_dash(double dash, double gap)
 {
     dash_.push_back(std::make_pair(dash,gap));
@@ -172,12 +196,13 @@ dash_array const& stroke::get_dash_array() const
 
 void stroke::swap(const stroke& other) throw()
 {
-    c_=other.c_;
-    width_=other.width_;
-    opacity_=other.opacity_;
-    line_cap_=other.line_cap_;
-    line_join_=other.line_join_;
-    gamma_=other.gamma_;
+    c_ = other.c_;
+    width_ = other.width_;
+    opacity_ = other.opacity_;
+    line_cap_ = other.line_cap_;
+    line_join_ = other.line_join_;
+    gamma_ = other.gamma_;
+    gamma_method_ = other.gamma_method_;
     dash_ = other.dash_;
     dash_offset_ = other.dash_offset_;
 }
