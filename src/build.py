@@ -109,7 +109,8 @@ source = Split(
     deepcopy.cpp
     expression_string.cpp
     filter_factory.cpp
-    feature_type_style.cpp
+    feature_kv_iterator.cpp
+    feature_type_style.cpp 
     font_engine_freetype.cpp
     font_set.cpp
     gradient.cpp
