@@ -43,8 +43,7 @@ using mapnik::feature_ptr;
 using mapnik::context_ptr;
 
 template <typename filterT>
-class shape_index_featureset : public Featureset, 
-                               private boost::noncopyable
+class shape_index_featureset : public Featureset                             
 {
 public:
     shape_index_featureset(filterT const& filter,

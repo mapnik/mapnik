@@ -219,7 +219,7 @@ void  shape_datasource::init(shape_io& shape) const
 #ifdef MAPNIK_DEBUG
     std::clog << "Shape Plugin: extent=" << extent_ << std::endl;
     std::clog << "Shape Plugin: file_length=" << file_length_ << std::endl;
-    std::clog << "Shape Plugin: shape_type=" << shape_type << std::endl;
+    std::clog << "Shape Plugin: shape_type=" << shape_type_ << std::endl;
 #endif
 
 }

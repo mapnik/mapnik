@@ -41,8 +41,7 @@ using mapnik::context_ptr;
 
 class IResultSet;
 
-class postgis_featureset : public mapnik::Featureset,
-                           private boost::noncopyable
+class postgis_featureset : public mapnik::Featureset
 {
 private:
     boost::shared_ptr<IResultSet> rs_;

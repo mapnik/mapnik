@@ -40,8 +40,7 @@ using mapnik::transcoder;
 using mapnik::context_ptr;
 
 template <typename filterT>
-class shape_featureset : public Featureset,
-                         private boost::noncopyable
+class shape_featureset : public Featureset
 {
     filterT filter_;
     context_ptr ctx_;
