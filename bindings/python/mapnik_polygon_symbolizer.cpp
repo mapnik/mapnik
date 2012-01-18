@@ -22,8 +22,10 @@
 //$Id$
 
 #include <boost/python.hpp>
+#include "mapnik_enumeration.hpp"
 #include <mapnik/polygon_symbolizer.hpp>
 
+using namespace mapnik;
 using mapnik::polygon_symbolizer;
 using mapnik::color;
 
@@ -38,17 +40,17 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
     static  boost::python::tuple
     getstate(const polygon_symbolizer& p)
     {
-        return boost::python::make_tuple(p.get_opacity(),p.get_gamma());
+        return boost::python::make_tuple(p.get_opacity(),p.get_gamma(),p.get_gamma_method());
     }
 
     static void
     setstate (polygon_symbolizer& p, boost::python::tuple state)
     {
         using namespace boost::python;
-        if (len(state) != 2)
+        if (len(state) != 3)
         {
             PyErr_SetObject(PyExc_ValueError,
-                            ("expected 2-item tuple in call to __setstate__; got %s"
+                            ("expected 3-item tuple in call to __setstate__; got %s"
                              % state).ptr()
                 );
             throw_error_already_set();
@@ -56,6 +58,7 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
 
         p.set_opacity(extract<float>(state[0]));
         p.set_gamma(extract<float>(state[1]));
+        p.set_gamma_method(extract<polygon_gamma_method_e>(state[2]));
     }
 
 };
@@ -63,6 +66,14 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
 void export_polygon_symbolizer()
 {
     using namespace boost::python;
+
+    enumeration_<polygon_gamma_method_e>("gamma_method")
+        .value("POWER", POLYGON_GAMMA_POWER)
+        .value("LINEAR", POLYGON_GAMMA_LINEAR)
+        .value("NONE", POLYGON_GAMMA_NONE)
+        .value("THRESHOLD", POLYGON_GAMMA_THRESHOLD)
+        .value("MULTIPLY", POLYGON_GAMMA_MULTIPLY)
+        ;
 
     class_<polygon_symbolizer>("PolygonSymbolizer",
                                init<>("Default PolygonSymbolizer - solid fill grey"))
@@ -78,6 +89,10 @@ void export_polygon_symbolizer()
         .add_property("gamma",
                       &polygon_symbolizer::get_gamma,
                       &polygon_symbolizer::set_gamma)
+        .add_property("gamma_method",
+                    &polygon_symbolizer::get_gamma_method,
+                    &polygon_symbolizer::set_gamma_method,
+                    "Set/get the gamma correction method of the polygon")
         ;
 
 }
