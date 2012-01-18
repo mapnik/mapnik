@@ -25,4 +25,4 @@ See [INSTALL.md](https://github.com/mapnik/mapnik/blob/master/INSTALL.md) for in
 
 # License
 
-Mapnik software is free and is released under LGPL ([GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl.html_). Please (see [COPYING](https://github.com/mapnik/mapnik/blob/master/COPYING)) for more information.
+Mapnik software is free and is released under LGPL ([GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl.html_). Please see [COPYING](https://github.com/mapnik/mapnik/blob/master/COPYING) for more information.
