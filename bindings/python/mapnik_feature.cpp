@@ -24,7 +24,7 @@
 // boost
 
 #include <boost/python/suite/indexing/indexing_suite.hpp>
-#include <boost/python/suite/indexing/map_indexing_suite.hpp>
+//#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 #include <boost/python/iterator.hpp>
 #include <boost/python/call_method.hpp>
@@ -72,30 +72,9 @@ void __setitem__(Feature & feature, std::string const& name, mapnik::value const
     feature.put(name,val);
 }
 
-feature_kv_iterator feature_kv_begin(Feature const& f)
-{
-    return feature_kv_iterator(f,true);
-}
-
-feature_kv_iterator feature_kv_end(Feature const& f)
-{
-    return feature_kv_iterator(f);
-}
-
 } // end anonymous namespace
 
 namespace boost { namespace python {
-
-struct mapnik_kv_to_python
-{
-    static PyObject* convert(feature_kv_iterator::value_type const& kv)
-    {
-        return boost::python::incref(boost::python::make_tuple(boost::get<0>(kv), boost::get<1>(kv)).ptr());
-    }
-};
-
-// TODO  mapnik.Context : implement vector_indexing_suite - we don't want to expose internal key->index mapping 
-// TODO  mapnik.Feature : implement map_indexing_suite 
 
 }}
 
@@ -165,12 +144,10 @@ void export_feature()
     implicitly_convertible<bool,mapnik::value>();
     
     UnicodeString_from_python_str();
-    to_python_converter<mapnik::feature_kv_iterator::value_type,mapnik_kv_to_python>();
     
     class_<context,context_ptr,boost::noncopyable>
         ("Context",init<>("Default ctor."))
         .def("push", &context::push)
-        //.def("__iter__",iterator<context>())
         ;
     
     class_<Feature,boost::shared_ptr<Feature>,
@@ -186,7 +163,7 @@ void export_feature()
         .def("envelope", &Feature::envelope)
         .def("has_key", &Feature::has_key)
         .def("__setitem__",&__setitem__)
-        .def("__getitem__",&__getitem__)
+         .def("__getitem__",&__getitem__)
         .def("__len__", &Feature::size)
         .def("context",&Feature::context)
         ;
