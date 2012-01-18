@@ -1392,8 +1392,8 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
         // If there's a colorizer defined, use it to color the raster in-place
         raster_colorizer_ptr colorizer = sym.get_colorizer();
         if (colorizer)
-            colorizer->colorize(source,feature.props());
-
+            colorizer->colorize(source,feature);
+        
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
 
