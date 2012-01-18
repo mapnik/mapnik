@@ -20,44 +20,32 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_FEATURE_KV_ITERATOR_HPP
-#define MAPNIK_FEATURE_KV_ITERATOR_HPP
+#include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/feature.hpp>
 
-#include <boost/tuple/tuple.hpp>
-#include <boost/iterator/iterator_facade.hpp>
+namespace mapnik {
 
-#include <map>
-//#include <mapnik/feature.hpp>
-#include <mapnik/value.hpp>
 
-namespace mapnik { 
-
-class feature_impl;
-
-class feature_kv_iterator :
-        public boost::iterator_facade<feature_kv_iterator,
-                                      boost::tuple<std::string , value> const,
-                                      boost::forward_traversal_tag>
-{
-public:
-    typedef boost::tuple<std::string,value> value_type;
-    
-    feature_kv_iterator (feature_impl const& f, bool begin = false);
-private:
-    friend class boost::iterator_core_access;    
-    void increment();
-
-    bool equal( feature_kv_iterator const& other) const;
-
-    value_type const& dereference() const;
-    
-    feature_impl const& f_;
-    std::map<std::string,std::size_t>::const_iterator itr_;
-    mutable value_type kv_;
-    
-};
-
+feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
+    : f_(f),
+      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
+  
+     
+void feature_kv_iterator::increment()
+{        
+    ++itr_;
 }
 
-#endif // MAPNIK_FEATURE_KV_ITERATOR_HPP
+bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
+{
+    return ( itr_ == other.itr_);        
+}
+    
+feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
+{
+    boost::get<0>(kv_) = itr_->first;
+    boost::get<1>(kv_) = f_.get(itr_->first);
+    return kv_;
+}
 
+} // endof mapnik namespace

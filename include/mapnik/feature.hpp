@@ -27,7 +27,7 @@
 #include <mapnik/value.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/raster.hpp>
-
+#include <mapnik/feature_kv_iterator.hpp>
 // boost
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 104000
@@ -90,7 +90,8 @@ public:
 
     typedef mapnik::value value_type;    
     typedef std::vector<value_type> cont_type;
-
+    typedef feature_kv_iterator iterator;
+    
     feature_impl(context_ptr const& ctx, int id) 
         : id_(id),
           ctx_(ctx),
@@ -204,6 +205,16 @@ public:
     void set_raster(raster_ptr const& raster)
     {
         raster_ = raster;
+    }
+
+    feature_kv_iterator begin() const
+    {
+        return feature_kv_iterator(*this,true);
+    }
+
+    feature_kv_iterator end() const
+    {
+        return feature_kv_iterator(*this);
     }
 
     std::string to_string() const
