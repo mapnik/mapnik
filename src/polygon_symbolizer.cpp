@@ -27,17 +27,5 @@
 namespace mapnik
 {
 
-static const char * polygon_gamma_method_strings[] = {
-    "power", //agg::gamma_power
-    "linear", //agg::gamma_linear
-    "none", //agg::gamma_none
-    "threshold", //agg::gamma_threshold
-    "multiply", //agg::gamma_multiply",
-    ""
-};
-
-
-IMPLEMENT_ENUM( polygon_gamma_method_e, polygon_gamma_method_strings )
-
 }
 
