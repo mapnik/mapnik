@@ -113,6 +113,7 @@ source = Split(
     feature_type_style.cpp 
     font_engine_freetype.cpp
     font_set.cpp
+    gamma_method.cpp
     gradient.cpp
     graphics.cpp
     image_reader.cpp

@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/gamma_method.hpp>
 #include <mapnik/enumeration.hpp>
 
 // stl
@@ -60,17 +61,6 @@ enum line_join_enum
 };
 
 DEFINE_ENUM( line_join_e, line_join_enum );
-
-enum gamma_method_enum {
-    GAMMA_POWER, //agg::gamma_power
-    GAMMA_LINEAR, //agg::gamma_linear
-    GAMMA_NONE, //agg::gamma_none
-    GAMMA_THRESHOLD, //agg::gamma_threshold
-    GAMMA_MULTIPLY, //agg::gamma_multiply
-    gamma_method_enum_MAX
-};
-
-DEFINE_ENUM( gamma_method_e, gamma_method_enum );
 
 class MAPNIK_DECL stroke
 {
