@@ -51,7 +51,8 @@ sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
     : rs_(rs),
       tr_(new transcoder(encoding)),
       format_(format),
-      using_subquery_(using_subquery)
+      using_subquery_(using_subquery),
+      ctx_(boost::make_shared<mapnik::context>())
 {
 }
 
@@ -70,9 +71,7 @@ feature_ptr sqlite_featureset::next()
             return feature_ptr();
         }
 
-        int feature_id = rs_->column_integer(1);
-
-        feature_ptr feature(feature_factory::create(feature_id));
+        feature_ptr feature(feature_factory::create(ctx_,rs_->column_integer(1)));
         geometry_utils::from_wkb(feature->paths(), data, size, format_);
         
         for (int i = 2; i < rs_->column_count(); ++i)
@@ -95,13 +94,13 @@ feature_ptr sqlite_featureset::next()
             {
             case SQLITE_INTEGER:
             {
-                boost::put(*feature, fld_name_str, rs_->column_integer(i));
+                feature->put(fld_name_str, rs_->column_integer(i));
                 break;
             }
 
             case SQLITE_FLOAT:
             {
-                boost::put(*feature, fld_name_str, rs_->column_double(i));
+                feature->put(fld_name_str, rs_->column_double(i));
                 break;
             }
 
@@ -110,13 +109,13 @@ feature_ptr sqlite_featureset::next()
                 int text_size;
                 const char * data = rs_->column_text(i, text_size);
                 UnicodeString ustr = tr_->transcode(data, text_size);
-                boost::put(*feature, fld_name_str, ustr);
+                feature->put(fld_name_str, ustr);
                 break;
             }
 
             case SQLITE_NULL:
             {
-                boost::put(*feature, fld_name_str, mapnik::value_null());
+                feature->put(fld_name_str, mapnik::value_null());
                 break;
             }
 
