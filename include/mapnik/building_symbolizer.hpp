@@ -20,39 +20,34 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_POLYGON_SYMBOLIZER_HPP
-#define MAPNIK_POLYGON_SYMBOLIZER_HPP
+#ifndef MAPNIK_BUILDING_SYMBOLIZER_HPP
+#define MAPNIK_BUILDING_SYMBOLIZER_HPP
 
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/filter_factory.hpp>
-#include <mapnik/enumeration.hpp>
-#include <mapnik/gamma_method.hpp>
 
 namespace mapnik 
 {
-
-struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
+   
+struct MAPNIK_DECL building_symbolizer : public symbolizer_base
 {
-    polygon_symbolizer();
-    polygon_symbolizer(color const& fill);
+    building_symbolizer();
+    building_symbolizer(color const& fill, expression_ptr height);   
     color const& get_fill() const;
-    void set_fill(color const& fill);
+    void set_fill(color const& fill);    
+    expression_ptr height() const;
+    void set_height(expression_ptr height);
     void set_opacity(double opacity);
     double get_opacity() const;
-    void set_gamma(double gamma);
-    double get_gamma() const;
-    void set_gamma_method(gamma_method_e gamma_method);
-    gamma_method_e get_gamma_method() const;
 
 private:
     color fill_;
+    expression_ptr height_;
     double opacity_;
-    double gamma_;
-    gamma_method_e gamma_method_;
-}; 
+};  
 
 }
 
-#endif // MAPNIK_POLYGON_SYMBOLIZER_HPP
+#endif // MAPNIK_BUILDING_SYMBOLIZER_HPP

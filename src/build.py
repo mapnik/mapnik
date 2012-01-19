@@ -105,6 +105,7 @@ source = Split(
     """
     color.cpp
     box2d.cpp
+    building_symbolizer.cpp
     datasource_cache.cpp
     deepcopy.cpp
     expression_string.cpp
