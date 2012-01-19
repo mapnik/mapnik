@@ -46,7 +46,8 @@ osm_featureset<filterT>::osm_featureset(const filterT& filter,
       tr_(new transcoder(encoding)),
       feature_id_(1),
       dataset_ (dataset),
-      attribute_names_ (attribute_names)
+      attribute_names_ (attribute_names),
+      ctx_(boost::make_shared<mapnik::context>())
 {
     dataset_->rewind();
 }
@@ -62,7 +63,7 @@ feature_ptr osm_featureset<filterT>::next()
     {
         if (dataset_->current_item_is_node())
         {
-            feature = feature_factory::create(feature_id_);
+            feature = feature_factory::create(ctx_,feature_id_);
             ++feature_id_;
             double lat = static_cast<osm_node*>(cur_item)->lat;
             double lon = static_cast<osm_node*>(cur_item)->lon;
@@ -90,7 +91,7 @@ feature_ptr osm_featureset<filterT>::next()
             {
                 if (static_cast<osm_way*>(cur_item)->nodes.size())
                 {
-                    feature = feature_factory::create(feature_id_);
+                    feature = feature_factory::create(ctx_,feature_id_);
                     ++feature_id_;
                     geometry_type* geom;
                     if (static_cast<osm_way*>(cur_item)->is_polygon())
@@ -131,7 +132,7 @@ feature_ptr osm_featureset<filterT>::next()
                 // only add if in the specified set of attribute names
                 if (attribute_names_.find(i->first) != attribute_names_.end())
                 {
-                    (*feature)[i->first] = tr_->transcode(i->second.c_str());
+                    feature->put(i->first,tr_->transcode(i->second.c_str()));
                 }
 
                 i++;

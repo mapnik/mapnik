@@ -63,6 +63,7 @@ private:
     mutable int feature_id_;
     osm_dataset *dataset_;
     std::set<std::string> attribute_names_;
+    mapnik::context_ptr ctx_;
     // no copying
     osm_featureset(const osm_featureset&);
     const osm_featureset& operator=(const osm_featureset&);
