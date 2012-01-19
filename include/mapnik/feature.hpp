@@ -59,6 +59,7 @@ class context : private boost::noncopyable,
 {
     friend class feature_impl; 
 public:
+    
     typedef map_type::value_type value_type;
     typedef map_type::key_type key_type;
     typedef map_type::size_type size_type;
@@ -143,6 +144,13 @@ public:
         throw std::out_of_range("Key doesn't exist");
     }
     
+    value_type const& get(std::size_t index) const
+    {
+        if (index < data_.size())
+            return data_[index];
+        throw std::out_of_range("Index out of range");
+    }
+
     std::size_t size() const
     {
         return data_.size();
@@ -216,7 +224,7 @@ public:
     {
         return feature_kv_iterator(*this);
     }
-
+    
     std::string to_string() const
     {        
         std::stringstream ss;
