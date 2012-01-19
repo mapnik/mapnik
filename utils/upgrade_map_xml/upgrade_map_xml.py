@@ -204,9 +204,6 @@ def upgrade(input_xml,output_xml=None,indent_xml=True):
                 for sym in rule.findall('BuildingSymbolizer') or []:
                     fixup_sym_attributes(sym)
                     underscore2dash(sym)
-                for sym in rule.findall('GlyphSymbolizer') or []:
-                    fixup_sym_attributes(sym)
-                    underscore2dash(sym)
                 for sym in rule.findall('MarkersSymbolizer') or []:
                     fixup_sym_attributes(sym)
                     underscore2dash(sym)

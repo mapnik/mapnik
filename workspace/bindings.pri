@@ -17,7 +17,6 @@ SOURCES += \
 	$$PWD/../bindings/python/mapnik_featureset.cpp \
 	$$PWD/../bindings/python/mapnik_font_engine.cpp \
 	$$PWD/../bindings/python/mapnik_geometry.cpp \
-	$$PWD/../bindings/python/mapnik_glyph_symbolizer.cpp \
 	$$PWD/../bindings/python/mapnik_grid.cpp \
 	$$PWD/../bindings/python/mapnik_grid_view.cpp \
 	$$PWD/../bindings/python/mapnik_image.cpp \

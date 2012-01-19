@@ -145,7 +145,6 @@ source = Split(
     symbolizer.cpp
     arrow.cpp
     unicode.cpp
-    glyph_symbolizer.cpp
     markers_symbolizer.cpp
     metawriter.cpp
     raster_colorizer.cpp
@@ -221,7 +220,6 @@ source += Split(
     """
     agg/agg_renderer.cpp
     agg/process_building_symbolizer.cpp
-    agg/process_glyph_symbolizer.cpp
     agg/process_line_symbolizer.cpp
     agg/process_line_pattern_symbolizer.cpp
     agg/process_text_symbolizer.cpp
@@ -229,7 +227,6 @@ source += Split(
     agg/process_polygon_symbolizer.cpp
     agg/process_polygon_pattern_symbolizer.cpp
     agg/process_raster_symbolizer.cpp
-    agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
     """ 
     )
@@ -242,7 +239,6 @@ source += Split(
     """
     grid/grid_renderer.cpp
     grid/process_building_symbolizer.cpp
-    grid/process_glyph_symbolizer.cpp
     grid/process_line_pattern_symbolizer.cpp
     grid/process_line_symbolizer.cpp
     grid/process_markers_symbolizer.cpp
@@ -262,7 +258,6 @@ if env['SVG_RENDERER']: # svg backend
       	svg/svg_output_attributes.cpp
       	svg/process_symbolizers.cpp
       	svg/process_building_symbolizer.cpp
-      	svg/process_glyph_symbolizer.cpp
       	svg/process_line_pattern_symbolizer.cpp
       	svg/process_line_symbolizer.cpp
       	svg/process_markers_symbolizer.cpp

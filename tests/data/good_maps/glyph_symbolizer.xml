@@ -1,8 +1,0 @@
-<Map minimum-version="0.7.2">
-    <Style name="arrows">
-    <Rule>
-      <GlyphSymbolizer size="10" char="'&#237;'" value="[value]" angle="[azimuth]+90" face-name="DejaVu Sans Condensed" allow-overlap="1" avoid-edges="0" halo-fill="rgba(0%,0%,0%,.1)" halo-radius="1" angle-mode="azimuth">
-      </GlyphSymbolizer>
-    </Rule>
-  </Style>
-</Map>

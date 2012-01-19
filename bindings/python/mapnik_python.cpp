@@ -66,7 +66,6 @@ void export_projection();
 void export_proj_transform();
 void export_view_transform();
 void export_raster_colorizer();
-void export_glyph_symbolizer();
 void export_inmem_metawriter();
 void export_label_collision_detector();
 
@@ -434,7 +433,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_coord();
     export_map();
     export_raster_colorizer();
-    export_glyph_symbolizer();
     export_inmem_metawriter();
     export_label_collision_detector();
 

@@ -649,7 +649,6 @@ __all__ = [
     'FontEngine',
     'FontSet',
     'Geometry2d',
-    'GlyphSymbolizer',
     'Image',
     'ImageView',
     'Grid',

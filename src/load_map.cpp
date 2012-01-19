@@ -108,7 +108,6 @@ private:
     void parse_building_symbolizer(rule & rule, ptree const & sym );
     void parse_raster_symbolizer(rule & rule, ptree const & sym );
     void parse_markers_symbolizer(rule & rule, ptree const & sym );
-    void parse_glyph_symbolizer(rule & rule, ptree const & sym );
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, ptree const& node );
     void parse_stroke(stroke & strk, ptree const & sym);
@@ -845,10 +844,6 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
             else if ( sym.first == "MarkersSymbolizer")
             {
                 parse_markers_symbolizer(rule, sym.second);
-            }
-            else if ( sym.first == "GlyphSymbolizer")
-            {
-                parse_glyph_symbolizer( rule, sym.second );
             }
 
             else if ( sym.first != "MinScaleDenominator" &&
@@ -1990,117 +1985,6 @@ void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
     catch (const config_error & ex)
     {
         ex.append_context("in RasterSymbolizer");
-        throw;
-    }
-}
-
-void map_parser::parse_glyph_symbolizer(rule & rule, ptree const & sym)
-{
-    ensure_attrs(sym, "GlyphSymbolizer", "face-name,char,angle,angle-mode,value,size,color,halo-fill,halo-radius,allow-overlap,avoid-edges,dx,dy,meta-writer,meta-output");
-    try
-    {
-        // Parse required constructor args
-        std::string face_name = get_attr<std::string>(sym, "face-name");
-        std::string _char = get_attr<std::string>(sym, "char");
-
-        glyph_symbolizer glyph_sym = glyph_symbolizer(
-            face_name,
-            parse_expression(_char, "utf8")
-            );
-
-        //
-        // parse and set optional attrs.
-        //
-
-        // angle
-        optional<std::string> angle =
-            get_opt_attr<std::string>(sym, "angle");
-        if (angle)
-            glyph_sym.set_angle(parse_expression(*angle, "utf8"));
-
-        angle_mode_e angle_mode =
-            get_attr<angle_mode_e>(sym, "angle-mode", TRIGONOMETRIC);
-        glyph_sym.set_angle_mode(angle_mode);
-                    
-        // value
-        optional<std::string> value =
-            get_opt_attr<std::string>(sym, "value");
-        if (value)
-            glyph_sym.set_value(parse_expression(*value, "utf8"));
-
-        // size
-        std::string size =
-            get_attr<std::string>(sym, "size");
-        glyph_sym.set_size(parse_expression(size, "utf8"));
-
-        // color
-        optional<std::string> _color =
-            get_opt_attr<std::string>(sym, "color");
-        if (_color)
-            glyph_sym.set_color(parse_expression(*_color, "utf8"));
-
-        // halo_fill
-        optional<color> halo_fill = get_opt_attr<color>(sym, "halo-fill");
-        if (halo_fill)
-            glyph_sym.set_halo_fill(*halo_fill);
-
-        // halo_radius
-        optional<double> halo_radius = get_opt_attr<double>(
-            sym,
-            "halo-radius");
-        if (halo_radius)
-            glyph_sym.set_halo_radius(*halo_radius);
-        
-        // allow_overlap
-        optional<boolean> allow_overlap = get_opt_attr<boolean>(
-            sym,
-            "allow-overlap"
-            );
-        if (allow_overlap)
-            glyph_sym.set_allow_overlap(*allow_overlap);
-
-        // avoid_edges
-        optional<boolean> avoid_edges = get_opt_attr<boolean>(
-            sym,
-            "avoid-edges"
-            );
-        if (avoid_edges)
-            glyph_sym.set_avoid_edges(*avoid_edges);
-
-        // displacement
-        optional<double> dx = get_opt_attr<double>(sym, "dx");
-        optional<double> dy = get_opt_attr<double>(sym, "dy");
-        if (dx && dy)
-            glyph_sym.set_displacement(*dx, *dy);
-
-        // colorizer
-        ptree::const_iterator childIter = sym.begin();
-        ptree::const_iterator endChild = sym.end();
-
-        for (; childIter != endChild; ++childIter)
-        {
-            ptree::value_type const& tag = *childIter;
-
-            if (tag.first == "RasterColorizer")
-            {
-                raster_colorizer_ptr colorizer(new raster_colorizer());
-                glyph_sym.set_colorizer(colorizer);
-                parse_raster_colorizer(colorizer, tag.second);
-            }
-            else if (tag.first!="<xmlcomment>" && tag.first!="<xmlattr>" )
-            {
-                throw config_error(std::string("Unknown child node. ") +
-                                   "Expected 'RasterColorizer' but got '" +
-                                   tag.first + "'");
-            }
-        }
-
-        parse_metawriter_in_symbolizer(glyph_sym, sym);
-        rule.append(glyph_sym);
-    }
-    catch (const config_error & ex)
-    {
-        ex.append_context("in GlyphSymbolizer");
         throw;
     }
 }
