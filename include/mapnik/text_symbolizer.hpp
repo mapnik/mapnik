@@ -98,8 +98,6 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     label_placement_e get_label_placement() const;
     void set_vertical_alignment(vertical_alignment_e valign);
     vertical_alignment_e get_vertical_alignment() const;
-    void set_anchor(double x, double y);
-    position const& get_anchor() const;
     void set_displacement(double x, double y);
     void set_displacement(position const& p);
     position const& get_displacement() const;
@@ -143,7 +141,6 @@ private:
     color halo_fill_;
     double halo_radius_;
     label_placement_e label_p_;
-    position anchor_;
     bool avoid_edges_;
     double minimum_distance_;
     double minimum_padding_;

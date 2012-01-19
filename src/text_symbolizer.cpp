@@ -107,7 +107,6 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
       halo_fill_(color(255,255,255)),
       halo_radius_(0.0),
       label_p_(POINT_PLACEMENT),
-      anchor_(0.0,0.5),
       avoid_edges_(false),
       minimum_distance_(0.0),
       minimum_padding_(0.0),
@@ -140,7 +139,6 @@ text_symbolizer::text_symbolizer(expression_ptr name, float size, color const& f
       halo_fill_(color(255,255,255)),
       halo_radius_(0.0),
       label_p_(POINT_PLACEMENT),
-      anchor_(0.0,0.5),
       avoid_edges_(false),
       minimum_distance_(0.0),
       minimum_padding_(0.0),
@@ -173,7 +171,7 @@ text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
       halo_fill_(rhs.halo_fill_),
       halo_radius_(rhs.halo_radius_),
       label_p_(rhs.label_p_),
-      anchor_(rhs.anchor_),
+
       avoid_edges_(rhs.avoid_edges_),
       minimum_distance_(rhs.minimum_distance_),
       minimum_padding_(rhs.minimum_padding_),
@@ -205,7 +203,6 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     halo_fill_ = other.halo_fill_;
     halo_radius_ = other.halo_radius_;
     label_p_ = other.label_p_;
-    anchor_ = other.anchor_;
     avoid_edges_ = other.avoid_edges_;
     minimum_distance_ = other.minimum_distance_;
     minimum_padding_ = other.minimum_padding_;
@@ -426,16 +423,6 @@ void  text_symbolizer::set_label_placement(label_placement_e label_p)
 label_placement_e  text_symbolizer::get_label_placement() const
 {
     return label_p_;
-}
-
-void  text_symbolizer::set_anchor(double x, double y)
-{
-    anchor_ = boost::make_tuple(x,y);
-}
-
-position const& text_symbolizer::get_anchor() const
-{
-    return anchor_;
 }
 
 void text_symbolizer::set_displacement(double x, double y)
