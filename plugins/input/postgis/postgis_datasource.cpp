@@ -508,7 +508,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             std::set<std::string>::const_iterator pos=props.begin();
             std::set<std::string>::const_iterator end=props.end();
 
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context>();
+            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
 
             for ( ;pos != end;++pos)
             {
@@ -576,7 +576,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             if (!key_field_.empty())
                 mapnik::sql_utils::quote_attr(s,key_field_);
 
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context>();
+            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
             
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();

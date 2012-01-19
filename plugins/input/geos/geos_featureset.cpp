@@ -61,7 +61,7 @@ geos_featureset::geos_featureset(GEOSGeometry* geometry,
       field_(field),
       field_name_(field_name),
       already_rendered_(false),
-      ctx_(boost::make_shared<mapnik::context>())
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
     ctx_->push(field_name);
 }

@@ -47,7 +47,7 @@ namespace {
 using mapnik::Feature;
 using mapnik::geometry_utils;
 using mapnik::from_wkt;
-using mapnik::context;
+using mapnik::context_type;
 using mapnik::context_ptr;
 using mapnik::feature_kv_iterator;
 
@@ -150,9 +150,9 @@ void export_feature()
     
     UnicodeString_from_python_str();
     
-    class_<context,context_ptr,boost::noncopyable>
+    class_<context_type,context_ptr,boost::noncopyable>
         ("Context",init<>("Default ctor."))
-        .def("push", &context::push)
+        .def("push", &context_type::push)
         ;
     
     class_<Feature,boost::shared_ptr<Feature>,

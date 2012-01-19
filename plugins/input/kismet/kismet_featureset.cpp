@@ -48,7 +48,7 @@ kismet_featureset::kismet_featureset(std::list<kismet_network_data> const& knd_l
       feature_id_(1),
       knd_list_it(knd_list_.begin()),
       source_(srs),
-      ctx_(boost::make_shared<mapnik::context>())
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
     ctx_->push("internet_access");
 }

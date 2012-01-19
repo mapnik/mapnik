@@ -56,7 +56,7 @@ ogr_featureset::ogr_featureset(OGRDataSource & dataset,
       tr_(new transcoder(encoding)),
       fidcolumn_(layer_.GetFIDColumn ()),
       count_(0),
-      ctx_(boost::make_shared<mapnik::context>())
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
     layer_.SetSpatialFilter (&extent);
 }
