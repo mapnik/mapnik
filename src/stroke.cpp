@@ -46,18 +46,6 @@ static const char * line_join_strings[] = {
 
 IMPLEMENT_ENUM( line_join_e, line_join_strings )
 
-static const char * gamma_method_strings[] = {
-    "power", //agg::gamma_power
-    "linear", //agg::gamma_linear
-    "none", //agg::gamma_none
-    "threshold", //agg::gamma_threshold
-    "multiply", //agg::gamma_multiply",
-    ""
-};
-
-IMPLEMENT_ENUM( gamma_method_e, gamma_method_strings )
-
-
 stroke::stroke() 
     : c_(0,0,0),
       width_(1.0),

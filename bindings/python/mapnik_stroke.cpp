@@ -126,14 +126,7 @@ void export_stroke ()
         .value("ROUND_JOIN",ROUND_JOIN)
         .value("BEVEL_JOIN",BEVEL_JOIN)
         ;
-    enumeration_<gamma_method_e>("gamma_method")
-        .value("POWER", GAMMA_POWER)
-        .value("LINEAR", GAMMA_LINEAR)
-        .value("NONE", GAMMA_NONE)
-        .value("THRESHOLD", GAMMA_THRESHOLD)
-        .value("MULTIPLY", GAMMA_MULTIPLY)
-        ;
-
+    
     class_<stroke>("Stroke",init<>(
                        "Creates a new default black stroke with the width of 1.\n"))
         .def(init<color,float>(

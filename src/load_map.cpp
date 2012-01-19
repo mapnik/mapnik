@@ -1217,7 +1217,7 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
             if (gamma)  symbol.set_gamma(*gamma);
 
             // gamma method
-            optional<polygon_pattern_gamma_method_e> gamma_method = get_opt_attr<polygon_pattern_gamma_method_e>(sym, "gamma-method");
+            optional<gamma_method_e> gamma_method = get_opt_attr<gamma_method_e>(sym, "gamma-method");
             if (gamma_method) symbol.set_gamma_method(*gamma_method);
 
             parse_metawriter_in_symbolizer(symbol, sym);
@@ -1894,7 +1894,7 @@ void map_parser::parse_polygon_symbolizer( rule & rule, ptree const & sym )
         optional<double> gamma = get_opt_attr<double>(sym, "gamma");
         if (gamma)  poly_sym.set_gamma(*gamma);
         // gamma method
-        optional<polygon_gamma_method_e> gamma_method = get_opt_attr<polygon_gamma_method_e>(sym, "gamma-method");
+        optional<gamma_method_e> gamma_method = get_opt_attr<gamma_method_e>(sym, "gamma-method");
         if (gamma_method) poly_sym.set_gamma_method(*gamma_method);
 
         parse_metawriter_in_symbolizer(poly_sym, sym);
