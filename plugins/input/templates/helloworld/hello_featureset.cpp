@@ -8,7 +8,7 @@ hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string
     : box_(box),
       feature_id_(1),
       tr_(new mapnik::transcoder(encoding)),
-      ctx_(boost::make_shared<mapnik::context>()) { }
+      ctx_(boost::make_shared<mapnik::context_type>()) { }
 
 hello_featureset::~hello_featureset() { }
 

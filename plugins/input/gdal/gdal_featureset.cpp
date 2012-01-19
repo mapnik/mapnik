@@ -55,7 +55,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  double dy,
                                  double filter_factor)
     : dataset_(dataset),
-      ctx_(boost::make_shared<mapnik::context>()),
+      ctx_(boost::make_shared<mapnik::context_type>()),
       band_(band),
       gquery_(q),
       raster_extent_(extent),

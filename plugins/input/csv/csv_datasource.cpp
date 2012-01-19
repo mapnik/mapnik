@@ -391,7 +391,7 @@ void csv_datasource::parse_csv(T& stream,
     bool extent_initialized = false;
     std::size_t num_headers = headers_.size();
 
-    ctx_ = boost::make_shared<mapnik::context>();
+    ctx_ = boost::make_shared<mapnik::context_type>();
     for (std::size_t i = 0; i < headers_.size(); ++i)
     {
         ctx_->push(headers_[i]);

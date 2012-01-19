@@ -63,7 +63,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
       filter_(filter),
       tr_(new transcoder(encoding)),
       fidcolumn_(layer_.GetFIDColumn()),
-      ctx_(boost::make_shared<mapnik::context>())
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
 
     boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(index_file.c_str(),true);

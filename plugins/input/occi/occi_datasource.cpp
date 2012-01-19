@@ -500,7 +500,7 @@ featureset_ptr occi_datasource::features(query const& q) const
     std::set<std::string> const& props = q.property_names();
     std::set<std::string>::const_iterator pos = props.begin();
     std::set<std::string>::const_iterator end = props.end();
-    mapnik::context_ptr ctx = boost::make_shared<mapnik::context>();
+    mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
     for ( ;pos != end;++pos)
     {
         s << ", " << *pos;
@@ -581,7 +581,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
     s << "SELECT " << geometry_field_;
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
-    mapnik::context_ptr ctx = boost::make_shared<mapnik::context>();
+    mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
     while (itr != end)
     {
         s << ", " << itr->get_name();

@@ -47,25 +47,24 @@
 namespace mapnik {
 
 typedef boost::shared_ptr<raster> raster_ptr; 
-typedef std::string key_type;   
-typedef std::map<key_type,std::size_t> map_type;
-typedef boost::associative_property_map<map_type> base_type;
 
 class feature_impl;
 
+template <typename T> 
 class context : private boost::noncopyable, 
-                public base_type
+                public boost::associative_property_map<T>
 
 {
     friend class feature_impl; 
 public:
-    
-    typedef map_type::value_type value_type;
-    typedef map_type::key_type key_type;
-    typedef map_type::size_type size_type;
-    typedef map_type::difference_type difference_type;
-    typedef map_type::iterator iterator;
-    typedef map_type::const_iterator const_iterator;
+    typedef T map_type;
+    typedef typename boost::associative_property_map<map_type> base_type;
+    typedef typename map_type::value_type value_type;
+    typedef typename map_type::key_type key_type;
+    typedef typename map_type::size_type size_type;
+    typedef typename map_type::difference_type difference_type;
+    typedef typename map_type::iterator iterator;
+    typedef typename map_type::const_iterator const_iterator;
     
     context()
         : base_type(mapping_) {}
@@ -74,7 +73,7 @@ public:
     {
         mapping_.insert(std::make_pair(name,mapping_.size()));
     }
-    std::size_t size() const { return mapping_.size(); }
+    size_type size() const { return mapping_.size(); }
     const_iterator begin() const { return mapping_.begin();}
     const_iterator end() const { return mapping_.end();}
     
@@ -82,7 +81,8 @@ private:
     map_type mapping_;
 };
 
-typedef boost::shared_ptr<context> context_ptr;
+typedef context<std::map<std::string,std::size_t> > context_type;
+typedef boost::shared_ptr<context_type> context_ptr;
 
 class feature_impl : private boost::noncopyable
 {
@@ -104,9 +104,9 @@ public:
     inline void set_id(int id) { id_ = id;}
     
     template <typename T>
-    void put(key_type const& key, T const& val)
+    void put(context_type::key_type const& key, T const& val)
     {
-        map_type::const_iterator itr = ctx_->mapping_.find(key);
+        context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end() 
             && itr->second < data_.size())
         {
@@ -116,9 +116,9 @@ public:
             throw std::out_of_range("Key doesn't exist");
     } 
     
-    void put(key_type const& key, value const& val)
+    void put(context_type::key_type const& key, value const& val)
     {
-        map_type::const_iterator itr = ctx_->mapping_.find(key);
+        context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end() 
             && itr->second < data_.size())
         {
@@ -128,14 +128,14 @@ public:
             throw std::out_of_range("Key doesn't exist");
     }
     
-    bool has_key(key_type const& key) const
+    bool has_key(context_type::key_type const& key) const
     {
         return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
     }
     
-    value_type const& get(key_type const& key) const
+    value_type const& get(context_type::key_type const& key) const
     {
-        map_type::const_iterator itr = ctx_->mapping_.find(key);
+        context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end() 
             && itr->second < data_.size())
         {
@@ -229,8 +229,8 @@ public:
     {        
         std::stringstream ss;
         ss << "Feature (" << std::endl;
-        map_type::const_iterator itr = ctx_->mapping_.begin();
-        map_type::const_iterator end = ctx_->mapping_.end();
+        context_type::map_type::const_iterator itr = ctx_->mapping_.begin();
+        context_type::map_type::const_iterator end = ctx_->mapping_.end();
         for ( ;itr!=end; ++itr)
         {
             ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
