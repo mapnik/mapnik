@@ -55,7 +55,8 @@ ogr_featureset::ogr_featureset(OGRDataSource & dataset,
       layerdef_(layer.GetLayerDefn()),
       tr_(new transcoder(encoding)),
       fidcolumn_(layer_.GetFIDColumn ()),
-      count_(0)
+      count_(0),
+      ctx_(boost::make_shared<mapnik::context>())
 {
     layer_.SetSpatialFilter (&extent);
 }
@@ -90,7 +91,7 @@ feature_ptr ogr_featureset::next()
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1
         const int feature_id = ((*feat)->GetFID() + 1);
-        feature_ptr feature(feature_factory::create(feature_id));
+        feature_ptr feature(feature_factory::create(ctx_,feature_id));
 
         OGRGeometry* geom = (*feat)->GetGeometryRef();
         if (geom && ! geom->IsEmpty())
@@ -117,13 +118,13 @@ feature_ptr ogr_featureset::next()
             {
             case OFTInteger:
             {
-                boost::put(*feature, fld_name, (*feat)->GetFieldAsInteger(i));
+                feature->put( fld_name, (*feat)->GetFieldAsInteger(i));
                 break;
             }
 
             case OFTReal:
             {
-                boost::put(*feature, fld_name, (*feat)->GetFieldAsDouble(i));
+                feature->put( fld_name, (*feat)->GetFieldAsDouble(i));
                 break;
             }
 
@@ -131,7 +132,7 @@ feature_ptr ogr_featureset::next()
             case OFTWideString:     // deprecated !
             {
                 UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString(i));
-                boost::put(*feature, fld_name, ustr);
+                feature->put( fld_name, ustr);
                 break;
             }
 
@@ -151,7 +152,7 @@ feature_ptr ogr_featureset::next()
 #ifdef MAPNIK_DEBUG
                 std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
 #endif
-                //boost::put(*feature,name,feat->GetFieldAsBinary (i, size));
+                //feature->put(name,feat->GetFieldAsBinary (i, size));
                 break;
             }
 

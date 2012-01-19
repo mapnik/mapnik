@@ -59,6 +59,7 @@ private:
     boost::scoped_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
     mutable int count_;
+    mapnik::context_ptr ctx_;
 };
 
 #endif // OGR_FEATURESET_HPP
