@@ -67,6 +67,11 @@ mapnik::value  __getitem__(Feature const& feature, std::string const& name)
     return feature.get(name);
 }
 
+mapnik::value  __getitem2__(Feature const& feature, std::size_t index)
+{
+    return feature.get(index);
+}
+
 void __setitem__(Feature & feature, std::string const& name, mapnik::value const& val)
 {
     feature.put(name,val);
@@ -163,7 +168,8 @@ void export_feature()
         .def("envelope", &Feature::envelope)
         .def("has_key", &Feature::has_key)
         .def("__setitem__",&__setitem__)
-         .def("__getitem__",&__getitem__)
+        .def("__getitem__",&__getitem__)
+        .def("__getitem__",&__getitem2__)
         .def("__len__", &Feature::size)
         .def("context",&Feature::context)
         ;
