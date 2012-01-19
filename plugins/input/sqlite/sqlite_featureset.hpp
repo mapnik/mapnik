@@ -51,6 +51,7 @@ private:
     boost::scoped_ptr<mapnik::transcoder> tr_;
     mapnik::wkbFormat format_;
     bool using_subquery_;
+    mapnik::context_ptr ctx_;
 };
 
 #endif // MAPNIK_SQLITE_FEATURESET_HPP
