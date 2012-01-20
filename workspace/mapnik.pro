@@ -91,7 +91,6 @@ HEADERS += \
     ../include/mapnik/image_view.hpp \
     ../include/mapnik/jpeg_io.hpp \
     ../include/mapnik/label_collision_detector.hpp \
-    ../include/mapnik/label_placement.hpp \
     ../include/mapnik/layer.hpp \
     ../include/mapnik/libxml2_loader.hpp \
     ../include/mapnik/line_pattern_symbolizer.hpp \
