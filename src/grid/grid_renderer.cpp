@@ -28,6 +28,7 @@
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
 
+
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/placement_finder.hpp>
@@ -35,9 +36,11 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/map.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+
 
 // boost
 #include <boost/utility.hpp>

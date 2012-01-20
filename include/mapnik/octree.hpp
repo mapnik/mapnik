@@ -34,6 +34,7 @@
 #include <vector>
 #include <iostream>
 #include <deque>
+#include <algorithm>
 
 namespace mapnik {
 

@@ -83,6 +83,7 @@ void export_label_collision_detector();
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
+#include <mapnik/scale_denominator.hpp>
 #include "python_grid_utils.hpp"
 #include "mapnik_value_converter.hpp"
 #include "python_optional.hpp"
