@@ -52,18 +52,19 @@ using mapnik::transcoder;
 using mapnik::feature_factory;
 
 template <typename filterT>
-ogr_index_featureset<filterT>::ogr_index_featureset(OGRDataSource & dataset,
+ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & ctx,
+                                                    OGRDataSource & dataset,                                                   
                                                     OGRLayer & layer,
-                                                    const filterT& filter,
-                                                    const std::string& index_file,
-                                                    const std::string& encoding)
-    : dataset_(dataset),
+                                                    filterT const& filter,
+                                                    std::string const& index_file,
+                                                    std::string const& encoding)
+    : ctx_(ctx),
+      dataset_(dataset),      
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       filter_(filter),
       tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn()),
-      ctx_(boost::make_shared<mapnik::context_type>())
+      fidcolumn_(layer_.GetFIDColumn())
 {
 
     boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(index_file.c_str(),true);
