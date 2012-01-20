@@ -99,7 +99,7 @@ protected:
     symbolizer_with_image(path_expression_ptr filename = path_expression_ptr());
     symbolizer_with_image(symbolizer_with_image const& rhs);
     path_expression_ptr image_filename_;   
-    float opacity_;
+    float image_opacity_;
     transform_type matrix_;
 };
 }
