@@ -24,6 +24,7 @@
 // mapnik
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
+#include <mapnik/params.hpp>
 #include <mapnik/feature_factory.hpp>
 // stl
 #include <algorithm>
@@ -106,6 +107,12 @@ boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() c
 layer_descriptor memory_datasource::get_descriptor() const
 {
     return desc_;
+}
+
+std::map<std::string, mapnik::parameters> memory_datasource::get_statistics() const
+{
+    std::map<std::string, mapnik::parameters> _stats;
+    return _stats;
 }
     
 size_t memory_datasource::size() const
