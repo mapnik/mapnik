@@ -163,6 +163,7 @@ void export_text_symbolizer()
         .value("LEFT",H_LEFT)
         .value("MIDDLE",H_MIDDLE)
         .value("RIGHT",H_RIGHT)
+        .value("AUTO",H_AUTO)
         ;
 
     enumeration_<justify_alignment_e>("justify_alignment")
