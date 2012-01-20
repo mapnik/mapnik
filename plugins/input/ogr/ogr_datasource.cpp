@@ -429,53 +429,62 @@ layer_descriptor ogr_datasource::get_descriptor() const
     return desc_;
 }
 
+void validate_attribute_names(query const& q, std::vector<attribute_descriptor> const& names )
+{
+    std::set<std::string> const& attribute_names = q.property_names();
+    std::set<std::string>::const_iterator pos = attribute_names.begin();
+    std::set<std::string>::const_iterator end_names = attribute_names.end();
+    
+    for ( ;pos != end_names; ++pos)
+    {
+        bool found_name = false;
+        
+        std::vector<attribute_descriptor>::const_iterator itr = names.begin();
+        std::vector<attribute_descriptor>::const_iterator end = names.end();
+            
+        for (; itr!=end; ++itr)
+        {            
+            if (itr->get_name() == *pos)
+            {
+                found_name = true;                    
+                break;
+            }
+        }
+        
+        if (! found_name)
+        {
+            std::ostringstream s;
+            std::vector<attribute_descriptor>::const_iterator itr = names.begin();
+            std::vector<attribute_descriptor>::const_iterator end = names.end();
+            s << "OGR Plugin: no attribute '" << *pos << "'. Valid attributes are: ";
+            for ( ;itr!=end;++itr)
+            {
+                s << itr->get_name() << std::endl;
+            }
+            throw mapnik::datasource_exception(s.str());
+        }
+    }
+}
+
 featureset_ptr ogr_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();
 
     if (dataset_ && layer_.is_valid())
     {
-        // First we validate query fields: https://github.com/mapnik/mapnik/issues/792
+        // First we validate query fields: https://github.com/mapnik/mapnik/issues/792        
+        
         std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
-        std::vector<attribute_descriptor>::const_iterator it = desc_ar.begin();
-        std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
-        std::vector<std::string> known_fields;
+        // feature context (schema)
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-        for (; it != end; ++it)
-        {
-            known_fields.push_back(it->get_name());
-            ctx->push(it->get_name());
-        }
         
-        const std::set<std::string>& attribute_names = q.property_names();
-        std::set<std::string>::const_iterator pos = attribute_names.begin();
+        std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
+        std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
         
-        while (pos != attribute_names.end())
-        {
-            bool found_name = false;
-            for (int i = 0; i < known_fields.size(); ++i)
-            {
-                if (known_fields[i] == *pos)
-                {
-                    found_name = true;
-                    
-                    break;
-                }
-            }
-    
-            if (! found_name)
-            {
-                std::ostringstream s;
-    
-                s << "OGR Plugin: no attribute '" << *pos << "'. Valid attributes are: "
-                  << boost::algorithm::join(known_fields, ",") << ".";
-    
-                throw mapnik::datasource_exception(s.str());
-            }
-            ++pos;
-        }
-
-
+        for (; itr!=end; ++itr) ctx->push(itr->get_name()); // TODO only push query attributes
+                
+        validate_attribute_names(q, desc_ar);        
+        
         OGRLayer* layer = layer_.layer();
 
         if (indexed_)
@@ -510,8 +519,13 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
 
     if (dataset_ && layer_.is_valid())
     {
+        std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
+        // feature context (schema)
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-        // TODO : push all attribute names here
+        
+        std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
+        std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
+        for (; itr!=end; ++itr) ctx->push(itr->get_name());
         
         OGRLayer* layer = layer_.layer();
         
