@@ -258,7 +258,7 @@ T get(const boost::property_tree::ptree & node, const std::string & name, bool i
     }
     else
     {
-        str = node.get_optional<std::string>(name );
+        str = node.get_optional<std::string>(name+".<xmltext>");
     }
 
     if ( str ) {
@@ -289,7 +289,7 @@ inline color get(boost::property_tree::ptree const& node, std::string const& nam
     }
     else
     {
-        str = node.get_optional<std::string>(name );
+        str = node.get_optional<std::string>(name+".<xmltext>");
     }
       
     if ( str ) 
@@ -322,7 +322,7 @@ T get(const boost::property_tree::ptree & node, const std::string & name, bool i
     }
     else
     {
-        str = node.get_optional<std::string>(name);
+        str = node.get_optional<std::string>(name+".<xmltext>");
     }
 
     if ( ! str ) {
@@ -348,7 +348,18 @@ T get_value(const boost::property_tree::ptree & node, const std::string & name)
 {
     try
     {
-        return node.get_value<T>();
+        /* NOTE: get_child works as long as there is only one child with that name.
+           If this function is used this used this condition must always be satisfied.
+         */
+        return node.get_child("<xmltext>").get_value<T>();
+    }
+    catch (boost::property_tree::ptree_bad_path)
+    {
+        /* If the XML parser did not find any non-empty data element the is no
+           <xmltext> node. But we don't want to fail here but simply return a
+           default constructed value of the requested type.
+        */
+        return T();
     }
     catch (...)
     {
@@ -369,7 +380,7 @@ boost::optional<T> get_optional(const boost::property_tree::ptree & node, const 
     }
     else
     {
-        str = node.get_optional<std::string>(name);
+        str = node.get_optional<std::string>(name+".<xmltext>");
     }
         
     boost::optional<T> result;
@@ -403,7 +414,7 @@ inline boost::optional<color> get_optional(const boost::property_tree::ptree & n
     }
     else
     {
-        str = node.get_optional<std::string>(name);
+        str = node.get_optional<std::string>(name+".<xmltext>");
     }
         
     boost::optional<color> result;

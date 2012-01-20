@@ -652,7 +652,7 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
             if (child.first == "StyleName")
             {
                 ensure_attrs(child.second, "StyleName", "none");
-                std::string style_name = child.second.data();
+                std::string style_name = get_value<std::string>(child.second, "style name");
                 if (style_name.empty())
                 {
                     std::ostringstream ss;
