@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/font_engine_freetype.hpp>
@@ -192,9 +191,10 @@ stroker_ptr freetype_engine::create_stroker()
     return stroker_ptr();
 }
 
-font_face_set::dimension_t font_face_set::character_dimensions(const unsigned c)
+char_info font_face_set::character_dimensions(const unsigned c)
 {
-    std::map<unsigned, dimension_t>::const_iterator itr;
+    //Check if char is already in cache
+    std::map<unsigned, char_info>::const_iterator itr;
     itr = dimension_cache_.find(c);
     if (itr != dimension_cache_.end()) {
         return itr->second;
@@ -222,21 +222,18 @@ font_face_set::dimension_t font_face_set::character_dimensions(const unsigned c)
 
     error = FT_Load_Glyph (face, glyph->get_index(), FT_LOAD_NO_HINTING);
     if ( error )
-        return dimension_t(0, 0, 0);
+        return char_info();
 
     error = FT_Get_Glyph(face->glyph, &image);
     if ( error )
-        return dimension_t(0, 0, 0);
+        return char_info();
 
     FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &glyph_bbox);
     FT_Done_Glyph(image);
 
     unsigned tempx = face->glyph->advance.x >> 6;
-
-    //std::clog << "glyph: " << glyph_index << " x: " << tempx << " y: " << tempy << std::endl;
-    dimension_t dim(tempx, glyph_bbox.yMax, glyph_bbox.yMin);
-    //dimension_cache_[c] = dim; would need an default constructor for dimension_t
-    dimension_cache_.insert(std::pair<unsigned, dimension_t>(c, dim));
+    char_info dim(c, tempx, glyph_bbox.yMax, glyph_bbox.yMin, face->size->metrics.height/64.0 /* >> 6 */);
+    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
     return dim;
 }
 
@@ -270,10 +267,10 @@ void font_face_set::get_string_info(string_info & info)
         StringCharacterIterator iter(shaped);
         for (iter.setToStart(); iter.hasNext();) {
             UChar ch = iter.nextPostInc();
-            dimension_t char_dim = character_dimensions(ch);
-            info.add_info(ch, char_dim.width, char_dim.height);
+            char_info char_dim = character_dimensions(ch);
+            info.add_info(ch, char_dim.width, char_dim.height());
             width += char_dim.width;
-            height = (char_dim.height > height) ? char_dim.height : height;
+            height = (char_dim.height() > height) ? char_dim.height() : height;
         }
     }
 

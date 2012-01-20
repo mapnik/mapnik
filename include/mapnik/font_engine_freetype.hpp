@@ -145,13 +145,6 @@ private:
 class MAPNIK_DECL font_face_set : private boost::noncopyable
 {
 public:
-    class dimension_t {
-    public:
-        dimension_t(unsigned width_, int ymax_, int ymin_) :  width(width_), height(ymax_-ymin_), ymin(ymin_) {}
-        unsigned width, height;
-        int ymin;
-    };
-
     font_face_set(void)
         : faces_() {}
 
@@ -179,7 +172,7 @@ public:
         return boost::make_shared<font_glyph>(*faces_.begin(), 0);
     }
 
-    dimension_t character_dimensions(const unsigned c);
+    char_info character_dimensions(const unsigned c);
 
     void get_string_info(string_info & info);
 
@@ -200,7 +193,7 @@ public:
     }
 private:
     std::vector<face_ptr> faces_;
-    std::map<unsigned, dimension_t> dimension_cache_;
+    std::map<unsigned, char_info> dimension_cache_;
 };
 
 // FT_Stroker wrapper

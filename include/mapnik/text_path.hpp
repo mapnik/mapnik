@@ -23,9 +23,13 @@
 #ifndef MAPNIK_TEXT_PATH_HPP
 #define MAPNIK_TEXT_PATH_HPP
 
+// mapnik
+#include <mapnik/char_info.hpp>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 // uci
 #include <unicode/unistr.h>
