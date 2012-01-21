@@ -116,7 +116,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 
         string_info info(text);
 
-        faces->get_string_info(info);
+        faces->get_string_info(info, text, 0);
         metawriter_with_properties writer = sym.get_metawriter();
 
         BOOST_FOREACH( geometry_type * geom, geometries_to_process )

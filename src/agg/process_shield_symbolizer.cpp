@@ -139,7 +139,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
             string_info info(text);
 
-            faces->get_string_info(info);
+            faces->get_string_info(info, text, 0);
 
             metawriter_with_properties writer = sym.get_metawriter();
 

@@ -89,7 +89,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
 
         string_info info(text);
 
-        faces->get_string_info(info);
+        faces->get_string_info(info, text, 0);
         unsigned num_geom = feature.num_geometries();
         for (unsigned i=0; i<num_geom; ++i)
         {

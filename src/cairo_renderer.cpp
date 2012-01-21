@@ -1146,7 +1146,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             placement_finder<label_collision_detector4> finder(detector_);
 
             faces->set_character_sizes(placement_options->text_size);
-            faces->get_string_info(info);
+            faces->get_string_info(info, text, 0);
 
             int w = (*marker)->width();
             int h = (*marker)->height();
@@ -1508,7 +1508,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
         string_info info(text);
 
         faces->set_character_sizes(placement_options->text_size);
-        faces->get_string_info(info);
+        faces->get_string_info(info, text, 0);
 
         placement_finder<label_collision_detector4> finder(detector_);
 
