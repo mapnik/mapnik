@@ -149,6 +149,7 @@ source = Split(
     metawriter.cpp
     raster_colorizer.cpp
     text_placements.cpp
+    text_processing.cpp
     wkt/wkt_factory.cpp
     metawriter_inmem.cpp
     metawriter_factory.cpp
@@ -227,6 +228,7 @@ source += Split(
     agg/process_polygon_symbolizer.cpp
     agg/process_polygon_pattern_symbolizer.cpp
     agg/process_raster_symbolizer.cpp
+    agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
     """ 
     )
