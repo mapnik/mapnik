@@ -241,15 +241,15 @@ char_info font_face_set::character_dimensions(const unsigned c)
     return dim;
 }
 
-void font_face_set::get_string_info(string_info & info, UnicodeString const& ustr_unused, char_properties *format_unused)
+void font_face_set::get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format)
 {
+    double avg_height = character_dimensions('X').height();
     unsigned width = 0;
     unsigned height = 0;
     UErrorCode err = U_ZERO_ERROR;
     UnicodeString reordered;
     UnicodeString shaped;
 
-    UnicodeString const& ustr = info.get_string();
     int32_t length = ustr.length();
 
     UBiDi *bidi = ubidi_openSized(length, 0, &err);
@@ -272,9 +272,11 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
         for (iter.setToStart(); iter.hasNext();) {
             UChar ch = iter.nextPostInc();
             char_info char_dim = character_dimensions(ch);
-            info.add_info(ch, char_dim.width, char_dim.height());
             width += char_dim.width;
             height = (char_dim.height() > height) ? char_dim.height() : height;
+            char_dim.format = format;
+            char_dim.avg_height = avg_height;
+            info.add_info(char_dim);
         }
     }
 
@@ -302,6 +304,17 @@ text_renderer<T>::text_renderer (pixmap_type & pixmap, face_set_ptr faces, strok
 {
 
 }
+
+#if 0
+template <typename T>
+text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s)
+    : pixmap_(pixmap),
+      font_manager_(font_manager_),
+      stroker_(s)
+{
+
+}
+#endif
 
 template <typename T>
 box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)

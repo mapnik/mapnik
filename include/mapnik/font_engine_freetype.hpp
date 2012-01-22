@@ -344,6 +344,7 @@ struct text_renderer : private boost::noncopyable
     typedef T pixmap_type;
 
     text_renderer (pixmap_type & pixmap, face_set_ptr faces, stroker & s);
+    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s);
     box2d<double> prepare_glyphs(text_path *path);
     void render(double x0, double y0);
     void render_id(int feature_id,double x0, double y0, double min_radius=1.0);
@@ -421,6 +422,7 @@ private:
 
     pixmap_type & pixmap_;
     face_set_ptr faces_;
+//    face_manager<freetype_engine> &font_manager_;
     stroker & stroker_;
     color fill_;
     color halo_fill_;
