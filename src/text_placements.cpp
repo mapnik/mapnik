@@ -310,6 +310,23 @@ void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_de
     }
 }
 
+/************************************************************************/
+
+#if 0
+text_placements::text_placements() : properties()
+{
+}
+#endif
+
+std::set<expression_ptr> text_placements::get_all_expressions()
+{
+    std::set<expression_ptr> result, tmp;
+    tmp = properties.processor.get_all_expressions();
+    result.insert(tmp.begin(), tmp.end());
+    result.insert(properties.orientation);
+    return result;
+}
+
 
 /************************************************************************/
 
