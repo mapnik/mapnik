@@ -343,42 +343,10 @@ struct text_renderer : private boost::noncopyable
     typedef boost::ptr_vector<glyph_t> glyphs_t;
     typedef T pixmap_type;
 
-    text_renderer (pixmap_type & pixmap, face_set_ptr faces, stroker & s);
     text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s);
     box2d<double> prepare_glyphs(text_path *path);
     void render(double x0, double y0);
     void render_id(int feature_id,double x0, double y0, double min_radius=1.0);
-
-
-    void set_pixel_size(unsigned size)
-    {
-        faces_->set_pixel_sizes(size);
-    }
-    
-    void set_character_size(float size)
-    {
-        faces_->set_character_sizes(size);
-    }
-    
-    void set_fill(mapnik::color const& fill)
-    {
-        fill_=fill;
-    }
-
-    void set_halo_fill(mapnik::color const& halo)
-    {
-        halo_fill_=halo;
-    }
-
-    void set_halo_radius( double radius=1.0)
-    {
-        halo_radius_=radius;
-    }
-
-    void set_opacity( double opacity=1.0)
-    {
-        opacity_=opacity;
-    }
 
 private:
     void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
@@ -421,14 +389,9 @@ private:
     }
 
     pixmap_type & pixmap_;
-    face_set_ptr faces_;
-//    face_manager<freetype_engine> &font_manager_;
+    face_manager<freetype_engine> &font_manager_;
     stroker & stroker_;
-    color fill_;
-    color halo_fill_;
-    double halo_radius_;
     glyphs_t glyphs_;
-    double opacity_;
 };
 typedef face_manager<freetype_engine> face_manager_freetype;
 }

@@ -45,15 +45,11 @@ protected:
     typedef std::vector<char_info> characters_t;
     characters_t characters_;
     UnicodeString text_;
-    double width_;
-    double height_;
     bool is_rtl;
 public:
     string_info(UnicodeString const& text)
         : characters_(),
           text_(text),
-          width_(0),
-          height_(0),
           is_rtl(false)
     {
 
@@ -75,11 +71,6 @@ public:
     void add_text(UnicodeString text)
     {
         text_ += text;
-    }
-
-    void add_info(int c, double width, double height)
-    {
-        characters_.push_back(char_info(c, width, height, 0, height)); //WARNING: Do not use. Only to keep old code compilable.
     }
       
     unsigned num_characters() const
@@ -105,17 +96,6 @@ public:
     char_info const& operator[](unsigned i) const
     {
         return at(i);
-    }
-      
-    void set_dimensions(double width, double height)
-    {
-        width_ = width;
-        height_ = height;
-    }
-      
-    std::pair<double, double> get_dimensions() const
-    {
-        return std::pair<double, double>(width_, height_);
     }
 
     UnicodeString const&  get_string() const 

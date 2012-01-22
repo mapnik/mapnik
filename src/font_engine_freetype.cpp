@@ -241,11 +241,10 @@ char_info font_face_set::character_dimensions(const unsigned c)
     return dim;
 }
 
+
 void font_face_set::get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format)
 {
     double avg_height = character_dimensions('X').height();
-    unsigned width = 0;
-    unsigned height = 0;
     UErrorCode err = U_ZERO_ERROR;
     UnicodeString reordered;
     UnicodeString shaped;
@@ -272,8 +271,6 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
         for (iter.setToStart(); iter.hasNext();) {
             UChar ch = iter.nextPostInc();
             char_info char_dim = character_dimensions(ch);
-            width += char_dim.width;
-            height = (char_dim.height() > height) ? char_dim.height() : height;
             char_dim.format = format;
             char_dim.avg_height = avg_height;
             info.add_info(char_dim);
@@ -289,23 +286,8 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 #endif
 
     ubidi_close(bidi);
-    info.set_dimensions(width, height);
 }
 
-template <typename T>
-text_renderer<T>::text_renderer (pixmap_type & pixmap, face_set_ptr faces, stroker & s)
-    : pixmap_(pixmap),
-      faces_(faces),
-      stroker_(s),
-      fill_(0,0,0),
-      halo_fill_(255,255,255),
-      halo_radius_(0.0),
-      opacity_(1.0)
-{
-
-}
-
-#if 0
 template <typename T>
 text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s)
     : pixmap_(pixmap),
@@ -314,7 +296,6 @@ text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_eng
 {
 
 }
-#endif
 
 template <typename T>
 box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
@@ -350,7 +331,10 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
         pen.x = int(x * 64);
         pen.y = int(y * 64);
 
-        glyph_ptr glyph = faces_->get_glyph(unsigned(c));
+        face_set_ptr faces = font_manager_.get_face_set(properties->face_name, properties->fontset);
+        faces->set_pixel_sizes(properties->text_size); //TODO: Has to work with floats!
+
+        glyph_ptr glyph = faces->get_glyph(unsigned(c));
         FT_Face face = glyph->get_face()->get_face();
 
         matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
@@ -490,10 +474,10 @@ boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 template void text_renderer<image_32>::render(double, double);
-template text_renderer<image_32>::text_renderer(image_32&, face_set_ptr, stroker&);
+template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path*);
 
 template void text_renderer<grid>::render_id(int, double, double, double);
-template text_renderer<grid>::text_renderer(grid&, face_set_ptr, stroker&);
+template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path*);
 }
