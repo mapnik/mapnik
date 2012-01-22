@@ -388,7 +388,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
         }
 
         // take ownership of the glyph
-        glyphs_.push_back(new glyph_t(image, 0));
+        glyphs_.push_back(new glyph_t(image, properties));
     }
 
     return box2d<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
@@ -406,13 +406,12 @@ void text_renderer<T>::render(double x0, double y0)
 
     // now render transformed glyphs
     typename glyphs_t::iterator pos;
-
-    //make sure we've got reasonable values.
-    if (halo_radius_ > 0.0 && halo_radius_ < 1024.0)
-    {
-        stroker_.init(halo_radius_);
         for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
         {
+            double halo_radius = pos->properties->halo_radius;
+            //make sure we've got reasonable values.
+            if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
+            stroker_.init(halo_radius);
             FT_Glyph g;
             error = FT_Glyph_Copy(pos->image, &g);
             if (!error)
@@ -424,14 +423,13 @@ void text_renderer<T>::render(double x0, double y0)
                 {
 
                     FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                    render_bitmap(&bit->bitmap, halo_fill_.rgba(),
+                    render_bitmap(&bit->bitmap, pos->properties->halo_fill.rgba(),
                                   bit->left,
-                                  height - bit->top, opacity_);
+                                  height - bit->top, pos->properties->text_opacity);
                 }
             }
             FT_Done_Glyph(g);
         }
-    }
     //render actual text
     for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
     {
@@ -443,9 +441,9 @@ void text_renderer<T>::render(double x0, double y0)
         {
 
             FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
-            render_bitmap(&bit->bitmap, fill_.rgba(),
+            render_bitmap(&bit->bitmap, pos->properties->fill.rgba(),
                           bit->left,
-                          height - bit->top, opacity_);
+                          height - bit->top, pos->properties->text_opacity);
         }
     }
 }
@@ -463,10 +461,9 @@ void text_renderer<T>::render_id(int feature_id,double x0, double y0, double min
 
     // now render transformed glyphs
     typename glyphs_t::iterator pos;
-
-    stroker_.init(std::max(halo_radius_,min_radius));
     for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
     {
+        stroker_.init(std::max(pos->properties->halo_radius, min_radius));
         FT_Glyph g;
         error = FT_Glyph_Copy(pos->image, &g);
         if (!error)
