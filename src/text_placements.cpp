@@ -329,9 +329,6 @@ std::set<expression_ptr> text_placements::get_all_expressions()
 /************************************************************************/
 
 text_placement_info::text_placement_info(text_placements const* parent):
-    displacement(parent->displacement_),
-    text_size(parent->text_size_), halign(parent->halign_), jalign(parent->jalign_),
-    valign(parent->valign_),
     properties(parent->properties),
     scale_factor(1),
     has_dimensions(false),
