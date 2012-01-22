@@ -130,7 +130,7 @@ public:
       * Each class has to return at least one position!
       * If this functions returns false the placement data should be considered invalid!
       */
-    virtual bool next_position_only()=0;
+    virtual bool next_position_only() { return false; }
     virtual ~text_placement_info() {}
     void init(double scale_factor_,
               unsigned w = 0, unsigned h = 0, bool has_dimensions_ = false);

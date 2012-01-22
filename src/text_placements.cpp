@@ -492,4 +492,70 @@ text_placements_simple::text_placements_simple(std::string positions)
 {
     set_positions(positions);
 }
+
+/***************************************************************************/
+
+bool text_placement_info_list::next()
+{
+    if (state == 0) {
+        properties = parent_->properties;
+    } else {
+        if (state-1 >= parent_->list_.size()) return false;
+        properties = parent_->list_[state-1];
+    }
+    state++;
+    return true;
+}
+
+text_symbolizer_properties & text_placements_list::add()
+{
+    if (list_.size()) {
+        text_symbolizer_properties &last = list_.back();
+        list_.push_back(last); //Preinitialize with old values
+    } else {
+        list_.push_back(properties);
+    }
+    return list_.back();
+}
+
+text_symbolizer_properties & text_placements_list::get(unsigned i)
+{
+    return list_[i];
+}
+
+/***************************************************************************/
+
+text_placement_info_ptr text_placements_list::get_placement_info() const
+{
+    return text_placement_info_ptr(new text_placement_info_list(this));
+}
+
+text_placements_list::text_placements_list() : text_placements(), list_(0)
+{
+
+}
+
+std::set<expression_ptr> text_placements_list::get_all_expressions()
+{
+    std::set<expression_ptr> result, tmp;
+    tmp = properties.processor.get_all_expressions();
+    result.insert(tmp.begin(), tmp.end());
+    result.insert(properties.orientation);
+
+    std::vector<text_symbolizer_properties>::const_iterator it;
+    for (it=list_.begin(); it != list_.end(); it++)
+    {
+        tmp = it->processor.get_all_expressions();
+        result.insert(tmp.begin(), tmp.end());
+        result.insert(it->orientation);
+    }
+    return result;
+}
+
+unsigned text_placements_list::size() const
+{
+    return list_.size();
+}
+
+
 } //namespace
