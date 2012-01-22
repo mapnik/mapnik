@@ -48,6 +48,10 @@
 #include <mapnik/metawriter_factory.hpp>
 
 #include <mapnik/text_placements_simple.hpp>
+#include <mapnik/text_placements_list.hpp>
+#include <mapnik/text_processing.hpp>
+#include <mapnik/symbolizer.hpp>
+#include <mapnik/rule.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -1241,28 +1245,34 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
 
 void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 {
-    std::stringstream s;
-    s << "name,face-name,fontset-name,size,fill,orientation,"
+    std::stringstream s_common;
+    s_common << "name,face-name,fontset-name,size,fill,orientation,"
       << "dx,dy,placement,vertical-alignment,halo-fill,"
       << "halo-radius,text-ratio,wrap-width,wrap-before,"
       << "wrap-character,text-transform,line-spacing,"
       << "label-position-tolerance,character-spacing,"
       << "spacing,minimum-distance,minimum-padding,minimum-path-length,"
       << "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
-      << "horizontal-alignment,justify-alignment,"
-      << "placements,placement-type,"
+      << "horizontal-alignment,justify-alignment";
+
+    std::stringstream s_symbolizer;
+    s_symbolizer << s_common.str() << ",placements,placement-type,"
       << "meta-writer,meta-output";
     
-    ensure_attrs(sym, "TextSymbolizer", s.str());
+    ensure_attrs(sym, "TextSymbolizer", s_symbolizer.str());
     try
     {
         text_placements_ptr placement_finder;
+        text_placements_list *list = 0;
         optional<std::string> placement_type = get_opt_attr<std::string>(sym, "placement-type");
         if (placement_type) {
             if (*placement_type == "simple") {
                 placement_finder = text_placements_ptr(
                     new text_placements_simple(
                         get_attr<std::string>(sym, "placements", "X")));
+            } else if (*placement_type == "list") {
+                list = new text_placements_list();
+                placement_finder = text_placements_ptr(list);
             } else if (*placement_type != "dummy" && *placement_type != "") {
                 throw config_error(std::string("Unknown placement type '"+*placement_type+"'"));
             }
