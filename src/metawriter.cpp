@@ -23,7 +23,7 @@
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
-#include <mapnik/placement_finder.hpp>
+#include <mapnik/text_placements.hpp>
 
 // Boost
 #include <boost/foreach.hpp>
@@ -175,8 +175,8 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
 
 }
 
-void metawriter_json_stream::add_text(placement const& p,
-    face_set_ptr face,
+void metawriter_json_stream::add_text(text_placement_info const& p,
+    face_manager_freetype &font_manager,
     Feature const& feature,
     CoordTransform const& t,
     metawriter_properties const& properties)
@@ -193,13 +193,13 @@ void metawriter_json_stream::add_text(placement const& p,
        Hightest y = baseline of top line
 
       */
-//    if (p.placements.size()) std::cout << p.info.get_string() << "\n";
     for (unsigned n = 0; n < p.placements.size(); n++) {
         placement_element & current_placement = const_cast<placement_element &>(p.placements[n]);
 
-        bool inside = false;
+        bool inside = false; /* Part of text is inside rendering region */
         bool straight = true;
-        int c; double x, y, angle;
+        int c;
+        double x, y, angle;
         char_properties *format;
         current_placement.rewind();
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
@@ -219,13 +219,12 @@ void metawriter_json_stream::add_text(placement const& p,
             double minx = INT_MAX, miny = INT_MAX, maxx = INT_MIN, maxy = INT_MIN;
             for (int i = 0; i < current_placement.num_nodes(); ++i) {
                 current_placement.vertex(&c, &x, &y, &angle, &format);
+                face_set_ptr face = font_manager.get_face_set(format->face_name, format->fontset);
                 char_info ci = face->character_dimensions(c);
-                if (x < minx) minx = x;
-                if (x+ci.width > maxx) maxx = x+ci.width;
-                if (y+ci.height()+ci.ymin > maxy) maxy = y+ci.height()+ci.ymin;
-                if (y+ci.ymin < miny) miny = y+ci.ymin;
-                //                std::cout << (char) c << " height:" << ci.height() << " ymin:" << ci.ymin << " y:" << y << " miny:"<< miny << " maxy:"<< maxy <<"\n";
-
+                minx = std::min(minx, x);
+                maxx = std::max(maxx, x+ci.width);
+                maxy = std::max(maxy, y+ci.ymax);
+                miny = std::min(miny, y+ci.ymin);
             }
             add_box(box2d<double>(current_placement.starting_x+minx,
                                   current_placement.starting_y-miny,
@@ -243,6 +242,7 @@ void metawriter_json_stream::add_text(placement const& p,
             }
             current_placement.vertex(&c, &x, &y, &angle, &format);
             if (c == ' ') continue;
+            face_set_ptr face = font_manager.get_face_set(format->face_name, format->fontset);
             char_info ci = face->character_dimensions(c);
 
             double x0, y0, x1, y1, x2, y2, x3, y3;
