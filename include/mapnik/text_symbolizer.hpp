@@ -131,31 +131,6 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     void set_placement_options(text_placements_ptr placement_options);
 
 private:
-    expression_ptr name_;
-    expression_ptr orientation_;
-    std::string face_name_;
-    font_set fontset_;
-    unsigned text_ratio_;
-    unsigned wrap_width_;
-    unsigned char wrap_char_;
-    text_transform_e text_transform_;
-    unsigned line_spacing_;
-    unsigned character_spacing_;
-    unsigned label_spacing_;
-    unsigned label_position_tolerance_;
-    bool force_odd_labels_;
-    double max_char_angle_delta_;
-    color fill_;
-    color halo_fill_;
-    double halo_radius_;
-    label_placement_e label_p_;
-    bool avoid_edges_;
-    double minimum_distance_;
-    double minimum_padding_;
-    double minimum_path_length_;
-    bool overlap_;
-    double text_opacity_;
-    bool wrap_before_;
     text_placements_ptr placement_options_;
 };
 }
