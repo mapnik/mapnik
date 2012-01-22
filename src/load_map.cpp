@@ -1300,7 +1300,6 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
                 if (strict_) ensure_font_face(p.processor.defaults.face_name);
             }
         }
-
         parse_metawriter_in_symbolizer(text_symbol, sym);
         rule.append(text_symbol);
     }
@@ -1315,7 +1314,6 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 {
 
     std::stringstream s;
-    //std::string a[] = {"a","b"};
     s << "name,face-name,fontset-name,size,fill,"
       << "dx,dy,placement,vertical-alignment,halo-fill,"
       << "halo-radius,text-ratio,wrap-width,wrap-before,"
@@ -1325,39 +1323,74 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
       << "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
       << "horizontal-alignment,justify-alignment,"
       // additional for shield
-      /* transform instead of orientation */ 
+      /* transform instead of orientation */
       << "file,base,transform,shield-dx,shield-dy,"
       << "text-opacity,unlock-image,no-text,"
-      << "meta-writer,meta-output";      
-    
+      << "meta-writer,meta-output";
+
     ensure_attrs(sym, "ShieldSymbolizer", s.str());
     try
     {
-        optional<boolean> no_text =
-            get_opt_attr<boolean>(sym, "no-text");
-        std::string name;
-        optional<std::string> old_name = get_opt_attr<std::string>(sym, "name");
-        if (old_name) {
-            std::clog << ": ### WARNING: Using 'name' in ShieldSymbolizer is deprecated (http://trac.mapnik.org/wiki/TextSymbolizer)\n";
-            name = *old_name;
-        } else {
-            name = get_value<std::string>(sym, "ShieldSymbolizer");
-            if (name.empty() && (!no_text || !*no_text) ) throw config_error(std::string("ShieldSymbolizer needs a non-empty text"));
+        shield_symbolizer shield_symbol = shield_symbolizer();
+        optional<std::string> transform_wkt = get_opt_attr<std::string>(sym, "transform");
+        if (transform_wkt)
+        {
+            agg::trans_affine tr;
+            if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+            {
+                std::stringstream ss;
+                ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                if (strict_)
+                    throw config_error(ss.str()); // value_error here?
+                else
+                    std::clog << "### WARNING: " << ss << endl;
+            }
+            boost::array<double,6> matrix;
+            tr.store_to(&matrix[0]);
+            shield_symbol.set_transform(matrix);
+        }
+        // shield displacement
+        double shield_dx = get_attr(sym, "shield-dx", 0.0);
+        double shield_dy = get_attr(sym, "shield-dy", 0.0);
+        shield_symbol.set_shield_displacement(shield_dx,shield_dy);
+
+        // opacity
+        optional<double> opacity = get_opt_attr<double>(sym, "opacity");
+        if (opacity)
+        {
+            shield_symbol.set_opacity(*opacity);
         }
 
-        optional<std::string> face_name =
-            get_opt_attr<std::string>(sym, "face-name");
+        // text-opacity
+        // TODO: Could be problematic because it is named opacity in TextSymbolizer but opacity has a diffrent meaning here.
+        optional<double> text_opacity =
+            get_opt_attr<double>(sym, "text-opacity");
+        if (text_opacity)
+        {
+            shield_symbol.set_text_opacity( * text_opacity );
+        }
 
-        optional<std::string> fontset_name =
-            get_opt_attr<std::string>(sym, "fontset-name");
+        // unlock_image
+        optional<boolean> unlock_image =
+            get_opt_attr<boolean>(sym, "unlock-image");
+        if (unlock_image)
+        {
+            shield_symbol.set_unlock_image( * unlock_image );
+        }
 
-        float size = get_attr(sym, "size", 10.0f);
-        color fill = get_attr(sym, "fill", color(0,0,0));
+        // no text
+        optional<boolean> no_text =
+            get_opt_attr<boolean>(sym, "no-text");
+        if (no_text)
+        {
+            shield_symbol.set_no_text( * no_text );
+        }
+
+        parse_metawriter_in_symbolizer(shield_symbol, sym);
 
         std::string image_file = get_attr<std::string>(sym, "file");
         optional<std::string> base = get_opt_attr<std::string>(sym, "base");
-        
-        optional<std::string> transform_wkt = get_opt_attr<std::string>(sym, "transform");
+
         try
         {
             if( base )
@@ -1370,202 +1403,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             }
 
             image_file = ensure_relative_to_xml(image_file);
-
-            shield_symbolizer shield_symbol(parse_expression(name, "utf8"),size,fill,parse_path(image_file));
-                
-            if (fontset_name && face_name)
-            {
-                throw config_error(std::string("Can't have both face-name and fontset-name"));
-            }
-            else if (fontset_name)
-            {
-                std::map<std::string,font_set>::const_iterator itr = fontsets_.find(*fontset_name);
-                if (itr != fontsets_.end())
-                {
-                    shield_symbol.set_fontset(itr->second);
-                }
-                else
-                {
-                    throw config_error("Unable to find any fontset named '" + *fontset_name + "'");
-                }
-            }
-            else if (face_name)
-            {
-                if ( strict_ )
-                {
-                    ensure_font_face(*face_name);
-                }
-                shield_symbol.set_face_name(*face_name);
-            }
-            else
-            {
-                throw config_error(std::string("Must have face-name or fontset-name"));
-            }
-            // text displacement (relative to shield_displacement)
-            double dx = get_attr(sym, "dx", 0.0);
-            double dy = get_attr(sym, "dy", 0.0);
-            shield_symbol.set_displacement(dx,dy);
-            // shield displacement
-            double shield_dx = get_attr(sym, "shield-dx", 0.0);
-            double shield_dy = get_attr(sym, "shield-dy", 0.0);
-            shield_symbol.set_shield_displacement(shield_dx,shield_dy);
-            
-            label_placement_e placement =
-                get_attr<label_placement_e>(sym, "placement", POINT_PLACEMENT);
-            shield_symbol.set_label_placement( placement );
-
-            // don't render shields around edges
-            optional<boolean> avoid_edges =
-                get_opt_attr<boolean>(sym, "avoid-edges");
-            if (avoid_edges)
-            {
-                shield_symbol.set_avoid_edges( *avoid_edges);
-            }
-
-            // halo fill and radius
-            optional<color> halo_fill = get_opt_attr<color>(sym, "halo-fill");
-            if (halo_fill)
-            {
-                shield_symbol.set_halo_fill( * halo_fill );
-            }
-            optional<double> halo_radius =
-                get_opt_attr<double>(sym, "halo-radius");
-            if (halo_radius)
-            {
-                shield_symbol.set_halo_radius(*halo_radius);
-            }
-
-            // minimum distance between labels
-            optional<unsigned> min_distance = get_opt_attr<unsigned>(sym, "minimum-distance");
-            if (min_distance)
-            {
-                shield_symbol.set_minimum_distance(*min_distance);
-            }
-
-            // minimum distance from edge of the map
-            optional<unsigned> min_padding = get_opt_attr<unsigned>(sym, "minimum-padding");
-            if (min_padding)
-            {
-                shield_symbol.set_minimum_padding(*min_padding);
-            }
-            
-            // spacing between repeated labels on lines
-            optional<unsigned> spacing = get_opt_attr<unsigned>(sym, "spacing");
-            if (spacing)
-            {
-                shield_symbol.set_label_spacing(*spacing);
-            }
-
-            // allow_overlap
-            optional<boolean> allow_overlap =
-                get_opt_attr<boolean>(sym, "allow-overlap");
-            if (allow_overlap)
-            {
-                shield_symbol.set_allow_overlap( * allow_overlap );
-            }
-
-            // vertical alignment
-            vertical_alignment_e valign = get_attr<vertical_alignment_e>(sym, "vertical-alignment", V_MIDDLE);
-            shield_symbol.set_vertical_alignment(valign);
-
-            // horizontal alignment
-            horizontal_alignment_e halign = get_attr<horizontal_alignment_e>(sym, "horizontal-alignment", H_MIDDLE);
-            shield_symbol.set_horizontal_alignment(halign);
-
-            // justify alignment
-            justify_alignment_e jalign = get_attr<justify_alignment_e>(sym, "justify-alignment", J_MIDDLE);
-            shield_symbol.set_justify_alignment(jalign);
-
-            optional<unsigned> wrap_width =
-                get_opt_attr<unsigned>(sym, "wrap-width");
-            if (wrap_width)
-            {
-                shield_symbol.set_wrap_width(*wrap_width);
-            }
-
-            optional<boolean> wrap_before =
-                get_opt_attr<boolean>(sym, "wrap-before");
-            if (wrap_before)
-            {
-                shield_symbol.set_wrap_before(*wrap_before);
-            }
-
-            // character used to break long strings
-            optional<std::string> wrap_char =
-                get_opt_attr<std::string>(sym, "wrap-character");
-            if (wrap_char && (*wrap_char).size() > 0)
-            {
-                shield_symbol.set_wrap_char((*wrap_char)[0]);
-            }
-
-            // text conversion before rendering
-            text_transform_e tconvert =
-                get_attr<text_transform_e>(sym, "text-transform", NONE);
-            shield_symbol.set_text_transform(tconvert);
-
-            // spacing between text lines
-            optional<unsigned> line_spacing = get_opt_attr<unsigned>(sym, "line-spacing");
-            if (line_spacing)
-            {
-                shield_symbol.set_line_spacing(*line_spacing);
-            }
-
-            // spacing between characters in text
-            optional<unsigned> character_spacing = get_opt_attr<unsigned>(sym, "character-spacing");
-            if (character_spacing)
-            {
-                shield_symbol.set_character_spacing(*character_spacing);
-            }
-
-            // opacity
-            optional<double> opacity =
-                get_opt_attr<double>(sym, "opacity");
-            if (opacity)
-            {
-                shield_symbol.set_opacity( * opacity );
-            }
-            
-            // text-opacity
-            optional<double> text_opacity =
-                get_opt_attr<double>(sym, "text-opacity");
-            if (text_opacity)
-            {
-                shield_symbol.set_text_opacity( * text_opacity );
-            }
-
-            if (transform_wkt)
-            {
-                agg::trans_affine tr;
-                if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
-                {
-                    std::stringstream ss;
-                    ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
-                    if (strict_)
-                        throw config_error(ss.str()); // value_error here?
-                    else
-                        std::clog << "### WARNING: " << ss << endl;         
-                }
-                boost::array<double,6> matrix;
-                tr.store_to(&matrix[0]);
-                shield_symbol.set_transform(matrix);
-            }
-            
-            // unlock_image
-            optional<boolean> unlock_image =
-                get_opt_attr<boolean>(sym, "unlock-image");
-            if (unlock_image)
-            {
-                shield_symbol.set_unlock_image( * unlock_image );
-            }
-
-            // no text
-            if (no_text)
-            {
-                shield_symbol.set_no_text( * no_text );
-            }
-
-            parse_metawriter_in_symbolizer(shield_symbol, sym);
-            rule.append(shield_symbol);
+            shield_symbol.set_filename(parse_path(image_file));
         }
         catch (image_reader_exception const & ex )
         {
@@ -1580,7 +1418,9 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
                 std::clog << "### WARNING: " << msg << endl;
             }
         }
-
+        text_placements_ptr placement_finder = shield_symbol.get_placement_options();
+        placement_finder->properties.set_values_from_xml(sym, fontsets_);
+        rule.append(shield_symbol);
     }
     catch (const config_error & ex)
     {
