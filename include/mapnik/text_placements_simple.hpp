@@ -51,6 +51,7 @@ public:
     text_placements_simple(std::string positions);
     text_placement_info_ptr get_placement_info() const;
     void set_positions(std::string positions);
+    std::string get_positions();
 private:
     std::string positions_;
     std::vector<directions_t> direction_;

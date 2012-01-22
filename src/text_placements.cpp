@@ -498,6 +498,11 @@ text_placements_simple::text_placements_simple(std::string positions)
     set_positions(positions);
 }
 
+std::string text_placements_simple::get_positions()
+{
+    return positions_; //TODO: Build string from data in direction_ and text_sizes_
+}
+
 /***************************************************************************/
 
 bool text_placement_info_list::next()
