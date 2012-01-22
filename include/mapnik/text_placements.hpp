@@ -24,12 +24,17 @@
 #define MAPNIK_TEXT_PLACEMENTS_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
-#include <mapnik/enumeration.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/font_set.hpp>
+#include <mapnik/text_path.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/text_processing.hpp>
 
 // stl
 #include <vector>
 #include <string>
+#include <queue>
+#include <set>
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -37,6 +42,8 @@
 #include <boost/utility.hpp>
 
 namespace mapnik {
+
+typedef text_path placement_element;
 
 typedef boost::tuple<double,double> position;
 
@@ -82,16 +89,32 @@ enum justify_alignment
 
 DEFINE_ENUM( justify_alignment_e, justify_alignment );
 
-enum text_transform
+struct text_symbolizer_properties
 {
-    NONE = 0,
-    UPPERCASE,
-    LOWERCASE,
-    CAPITALIZE,
-    text_transform_MAX
-};
+    text_symbolizer_properties();
+    void set_values_from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets);
+    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_symbolizer_properties const &dfl=text_symbolizer_properties()) const;
 
-DEFINE_ENUM( text_transform_e, text_transform );
+    //Per symbolizer options
+    expression_ptr orientation;
+    position displacement;
+    label_placement_e label_placement;
+    horizontal_alignment_e halign;
+    justify_alignment_e jalign;
+    vertical_alignment_e valign;
+    unsigned label_spacing; // distance between repeated labels on a single geometry
+    unsigned label_position_tolerance; //distance the label can be moved on the line to fit, if 0 the default is used
+    bool avoid_edges;
+    double minimum_distance;
+    double minimum_padding;
+    double minimum_path_length;
+    double max_char_angle_delta;
+    bool force_odd_labels; //Always try render an odd amount of labels
+    bool allow_overlap;
+    unsigned text_ratio;
+    unsigned wrap_width;
+    text_processor processor; //Contains expressions and text formats
+};
 
 class text_placements;
 
@@ -109,6 +132,24 @@ public:
       */
     virtual bool next_position_only()=0;
     virtual ~text_placement_info() {}
+    void init(double scale_factor_,
+              unsigned w = 0, unsigned h = 0, bool has_dimensions_ = false);
+
+    text_symbolizer_properties properties;
+    double scale_factor;
+    bool has_dimensions;
+    std::pair<double, double> dimensions;
+    void set_scale_factor(double factor) { scale_factor = factor; }
+    double get_scale_factor() { return scale_factor; }
+    double get_actual_label_spacing() { return scale_factor * properties.label_spacing; }
+    double get_actual_minimum_distance() { return scale_factor * properties.minimum_distance; }
+    double get_actual_minimum_padding() { return scale_factor * properties.minimum_padding; }
+
+    bool collect_extents;
+    //Output
+    box2d<double> extents;
+    std::queue< box2d<double> > envelopes;
+    boost::ptr_vector<placement_element> placements;
 
     /* NOTE: Values are public and non-virtual to avoid any performance problems. */
     position displacement;
@@ -142,7 +183,13 @@ public:
     virtual void set_default_valign(vertical_alignment_e const& align) { valign_ = align;}
     vertical_alignment_e const& get_default_valign() { return valign_; }
 
+    /** Get a list of all expressions used in any placement.
+      * This function is used to collect attributes.
+      */
+    virtual std::set<expression_ptr> get_all_expressions();
+
     virtual ~text_placements() {}
+    text_symbolizer_properties properties;
 protected:
     float text_size_;
     position displacement_;
