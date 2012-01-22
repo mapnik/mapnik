@@ -1281,6 +1281,26 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
             placement_finder = text_placements_ptr(new text_placements_dummy());
         }
 
+        text_symbolizer text_symbol = text_symbolizer(placement_finder);
+        placement_finder->properties.set_values_from_xml(sym, fontsets_);
+        if (strict_) ensure_font_face(placement_finder->properties.processor.defaults.face_name);
+        if (list) {
+            ptree::const_iterator symIter = sym.begin();
+            ptree::const_iterator endSym = sym.end();
+            for( ;symIter != endSym; ++symIter) {
+                if (symIter->first.find('<') != std::string::npos) continue;
+                if (symIter->first != "Placement")
+                {
+//                    throw config_error("Unknown element '" + symIter->first + "'"); TODO
+                    continue;
+                }
+                ensure_attrs(symIter->second, "TextSymbolizer/Placement", s_common.str());
+                text_symbolizer_properties & p = list->add();
+                p.set_values_from_xml(symIter->second, fontsets_);
+                if (strict_) ensure_font_face(p.processor.defaults.face_name);
+            }
+        }
+
         parse_metawriter_in_symbolizer(text_symbol, sym);
         rule.append(text_symbol);
     }
