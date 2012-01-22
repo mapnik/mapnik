@@ -435,7 +435,7 @@ string_info &processed_text::get_string_info()
         {
             throw config_error("Unable to find specified font face '" + p.face_name + "'");
         }
-        faces->set_pixel_sizes(p.text_size * scale_factor_);
+        faces->set_character_sizes(p.text_size * scale_factor_);
         faces->get_string_info(info_, itr->str, &(itr->p));
         info_.add_text(itr->str);
     }

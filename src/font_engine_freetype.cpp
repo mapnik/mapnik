@@ -332,7 +332,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
         pen.y = int(y * 64);
 
         face_set_ptr faces = font_manager_.get_face_set(properties->face_name, properties->fontset);
-        faces->set_pixel_sizes(properties->text_size); //TODO: Has to work with floats!
+        faces->set_character_sizes(properties->text_size);
 
         glyph_ptr glyph = faces->get_glyph(unsigned(c));
         FT_Face face = glyph->get_face()->get_face();
