@@ -52,9 +52,7 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 {
     // Note - we do not use boost::make_shared below as VC2008 and VC2010 are
     // not able to compile make_shared used within a constructor
-    text_symbolizer(text_placements_ptr placements = text_placements_ptr(
-                    boost::make_shared<text_placements_dummy>())
-                   );
+    text_symbolizer(text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
     text_symbolizer(expression_ptr name, std::string const& face_name,
                     float size, color const& fill,
                     text_placements_ptr placements = text_placements_ptr(new text_placements_dummy)
