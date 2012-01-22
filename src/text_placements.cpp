@@ -347,13 +347,6 @@ bool text_placement_info_dummy::next()
     return true;
 }
 
-bool text_placement_info_dummy::next_position_only()
-{
-    if (position_state) return false;
-    position_state++;
-    return true;
-}
-
 text_placement_info_ptr text_placements_dummy::get_placement_info() const
 {
     return text_placement_info_ptr(new text_placement_info_dummy(this));

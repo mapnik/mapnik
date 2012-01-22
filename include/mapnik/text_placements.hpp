@@ -129,7 +129,6 @@ public:
       * If this functions returns false the placement data should be considered invalid!
       */
     virtual bool next()=0;
-    virtual bool next_position_only() { return false; }
     virtual ~text_placement_info() {}
     void init(double scale_factor_,
               unsigned w = 0, unsigned h = 0, bool has_dimensions_ = false);
@@ -190,12 +189,10 @@ class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
 {
 public:
     text_placement_info_dummy(text_placements_dummy const* parent) : text_placement_info(parent),
-        state(0), position_state(0), parent_(parent) {}
+        state(0), parent_(parent) {}
     bool next();
-    bool next_position_only();
 private:
     unsigned state;
-    unsigned position_state;
     text_placements_dummy const* parent_;
 };
 
