@@ -28,6 +28,8 @@
 #include <mapnik/expression_string.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/metawriter_factory.hpp>
+#include <mapnik/text_placements_simple.hpp>
+#include <mapnik/text_placements_list.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -357,134 +359,28 @@ private:
     }
     void add_font_attributes(ptree & node, const text_symbolizer & sym)
     {
-        expression_ptr const& expr = sym.get_name();
-        const std::string & name = to_expression_string(*expr);
-                
-        if (!name.empty()) {
-            ptree& text_node = node.push_back(ptree::value_type("<xmltext>", ptree()))->second;
-            text_node.put_value(name);
+        text_placements_ptr p = sym.get_placement_options();
+        p->properties.to_xml(node, explicit_defaults_);
+        /* Known types:
+         - text_placements_dummy: no handling required
+         - text_placements_simple: positions string
+         - text_placements_list: list string
+         */
+        text_placements_simple *simple = dynamic_cast<text_placements_simple *>(p.get());
+        text_placements_list *list = dynamic_cast<text_placements_list *>(p.get());
+        if (simple) {
+            set_attr(node, "placment-type", "simple");
+            set_attr(node, "placements", simple->get_positions());
         }
-        const std::string & face_name = sym.get_face_name();
-        if ( ! face_name.empty() ) {
-            set_attr( node, "face-name", face_name );
-        }
-        const std::string & fontset_name = sym.get_fontset().get_name();
-        if ( ! fontset_name.empty() ) {
-            set_attr( node, "fontset-name", fontset_name );
-        }
-
-        set_attr( node, "size", sym.get_text_size() );
-        set_attr( node, "fill", sym.get_fill() );
-
-        // pseudo-default-construct a text_symbolizer. It is used
-        // to avoid printing ofattributes with default values without
-        // repeating the default values here.
-        // maybe add a real, explicit default-ctor?
-        // FIXME
-        text_symbolizer dfl(expression_ptr(), "<no default>",
-                            0, color(0,0,0) );
-
-        position displacement = sym.get_displacement();
-        if ( displacement.get<0>() != dfl.get_displacement().get<0>() || explicit_defaults_ )
-        {
-            set_attr( node, "dx", displacement.get<0>() );
-        }
-        if ( displacement.get<1>() != dfl.get_displacement().get<1>() || explicit_defaults_ )
-        {
-            set_attr( node, "dy", displacement.get<1>() );
-        }
-
-        if (sym.get_label_placement() != dfl.get_label_placement() || explicit_defaults_ )
-        {
-            set_attr( node, "placement", sym.get_label_placement() );
-        }
-
-        if (sym.get_vertical_alignment() != dfl.get_vertical_alignment() || explicit_defaults_ )
-        {
-            set_attr( node, "vertical-alignment", sym.get_vertical_alignment() );
-        }
-
-        if (sym.get_halo_radius() != dfl.get_halo_radius() || explicit_defaults_ )
-        {
-            set_attr( node, "halo-radius", sym.get_halo_radius() );
-        }
-        const color & c = sym.get_halo_fill();
-        if ( c != dfl.get_halo_fill() || explicit_defaults_ )
-        {
-            set_attr( node, "halo-fill", c );
-        }
-        if (sym.get_text_ratio() != dfl.get_text_ratio() || explicit_defaults_ )
-        {
-            set_attr( node, "text-ratio", sym.get_text_ratio() );
-        }
-        if (sym.get_wrap_width() != dfl.get_wrap_width() || explicit_defaults_ )
-        {
-            set_attr( node, "wrap-width", sym.get_wrap_width() );
-        }
-        if (sym.get_wrap_before() != dfl.get_wrap_before() || explicit_defaults_ )
-        {
-            set_attr( node, "wrap-before", sym.get_wrap_before() );
-        }
-        if (sym.get_wrap_char() != dfl.get_wrap_char() || explicit_defaults_ )
-        {
-            set_attr( node, "wrap-character", std::string(1, sym.get_wrap_char()) );
-        }
-        if (sym.get_text_transform() != dfl.get_text_transform() || explicit_defaults_ )
-        {
-            set_attr( node, "text-transform", sym.get_text_transform() );
-        }
-        if (sym.get_line_spacing() != dfl.get_line_spacing() || explicit_defaults_ )
-        {
-            set_attr( node, "line-spacing", sym.get_line_spacing() );
-        }
-        if (sym.get_character_spacing() != dfl.get_character_spacing() || explicit_defaults_ )
-        {
-            set_attr( node, "character-spacing", sym.get_character_spacing() );
-        }
-        if (sym.get_label_position_tolerance() != dfl.get_label_position_tolerance() || explicit_defaults_ )
-        {
-            set_attr( node, "label-position-tolerance", sym.get_label_position_tolerance() );
-        }
-        if (sym.get_label_spacing() != dfl.get_label_spacing() || explicit_defaults_ )
-        {
-            set_attr( node, "spacing", sym.get_label_spacing() );
-        }
-        if (sym.get_minimum_distance() != dfl.get_minimum_distance() || explicit_defaults_ )
-        {
-            set_attr( node, "minimum-distance", sym.get_minimum_distance() );
-        }
-        if (sym.get_minimum_padding() != dfl.get_minimum_padding() || explicit_defaults_ )
-        {
-            set_attr( node, "minimum-padding", sym.get_minimum_padding() );
-        }
-        if (sym.get_minimum_path_length() != dfl.get_minimum_path_length() || explicit_defaults_ )
-        {
-            set_attr( node, "minimum-path-length", sym.get_minimum_path_length() );
-        }
-        if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_ )
-        {
-            set_attr( node, "allow-overlap", sym.get_allow_overlap() );
-        }
-        if (sym.get_avoid_edges() != dfl.get_avoid_edges() || explicit_defaults_ )
-        {
-            set_attr( node, "avoid-edges", sym.get_avoid_edges() );
-        }
-        // for shield_symbolizer this is later overridden
-        if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_ )
-        {
-            set_attr( node, "opacity", sym.get_text_opacity() );
-        }
-        if (sym.get_max_char_angle_delta() != dfl.get_max_char_angle_delta() || explicit_defaults_ )
-        {
-            set_attr( node, "max-char-angle-delta", sym.get_max_char_angle_delta() );
-        }
-        if (sym.get_horizontal_alignment() != dfl.get_horizontal_alignment() || explicit_defaults_ )
-        {
-            set_attr( node, "horizontal-alignment", sym.get_horizontal_alignment() );
-        }
-        if (sym.get_justify_alignment() != dfl.get_justify_alignment() || explicit_defaults_ )
-        {
-            set_attr( node, "justify-alignment", sym.get_justify_alignment() );
+        if (list) {
+            set_attr(node, "placment-type", "list");
+            unsigned i;
+            text_symbolizer_properties *dfl = &(list->properties);
+            for (i=0; i < list->size(); i++) {
+                ptree &placement_node = node.push_back(ptree::value_type("Placement", ptree()))->second;
+                list->get(i).to_xml(placement_node, explicit_defaults_, *dfl);
+                dfl = &(list->get(i));
+            }
         }
     }
 
