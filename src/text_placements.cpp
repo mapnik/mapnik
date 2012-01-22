@@ -312,11 +312,9 @@ void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_de
 
 /************************************************************************/
 
-#if 0
 text_placements::text_placements() : properties()
 {
 }
-#endif
 
 std::set<expression_ptr> text_placements::get_all_expressions()
 {
@@ -444,7 +442,7 @@ text_placement_info_ptr text_placements_simple::get_placement_info() const
     return text_placement_info_ptr(new text_placement_info_simple(this));
 }
 
-/** Positiion string: [POS][SIZE]
+/** Position string: [POS][SIZE]
   * [POS] is any combination of
   * N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
   * [SIZE] is a list of font sizes, separated by commas. The first font size
