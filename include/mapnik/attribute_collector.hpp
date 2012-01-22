@@ -24,16 +24,11 @@
 #define MAPNIK_ATTRIBUTE_COLLECTOR_HPP
 
 // mapnik
-#include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/rule.hpp>
-#include <mapnik/path_expression_grammar.hpp>
-#include <mapnik/parse_path.hpp>
-
 // boost
 #include <boost/utility.hpp>
 #include <boost/variant.hpp>
 #include <boost/concept_check.hpp>
-
 // stl
 #include <set>
 #include <iostream>
@@ -93,18 +88,12 @@ struct symbolizer_attributes : public boost::static_visitor<>
     
     void operator () (text_symbolizer const& sym)
     {
-        expression_ptr const& name_expr = sym.get_name();
-        if (name_expr)
+        std::set<expression_ptr>::const_iterator it;
+        std::set<expression_ptr> expressions = sym.get_placement_options()->get_all_expressions();
+        expression_attributes f_attr(names_);
+        for (it=expressions.begin(); it != expressions.end(); it++)
         {
-            expression_attributes f_attr(names_);
-            boost::apply_visitor(f_attr,*name_expr);
-        }
-
-        expression_ptr const& orientation_expr = sym.get_orientation();
-        if (orientation_expr)
-        {
-            expression_attributes f_attr(names_);
-            boost::apply_visitor(f_attr,*orientation_expr);
+            if (*it) boost::apply_visitor(f_attr, **it);
         }
         collect_metawriter(sym);
     }
@@ -152,11 +141,12 @@ struct symbolizer_attributes : public boost::static_visitor<>
     
     void operator () (shield_symbolizer const& sym)
     {
-        expression_ptr const& name_expr = sym.get_name();
-        if (name_expr)
+        std::set<expression_ptr>::const_iterator it;
+        std::set<expression_ptr> expressions = sym.get_placement_options()->get_all_expressions();
+        expression_attributes f_attr(names_);
+        for (it=expressions.begin(); it != expressions.end(); it++)
         {
-            expression_attributes name_attr(names_);
-            boost::apply_visitor(name_attr,*name_expr);
+            if (*it) boost::apply_visitor(f_attr, **it);
         }
         
         path_expression_ptr const& filename_expr = sym.get_filename();
