@@ -26,8 +26,6 @@
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
-#include <mapnik/graphics.hpp>
-#include <mapnik/filter_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text_placements.hpp>
 
