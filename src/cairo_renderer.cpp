@@ -1082,11 +1082,11 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
+#if 0
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
     text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
     placement_options->next();
-    placement_options->next_position_only();
 
     UnicodeString text;
     if( sym.get_no_text() )
@@ -1282,6 +1282,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             }
         }
     }
+#endif
 }
 
 void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
