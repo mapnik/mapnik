@@ -274,12 +274,12 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
 
         for (unsigned int ii = 0; ii < p.info.num_characters(); ii++)
         {
-            character_info ci;
+            char_info ci;
             ci = p.info.at(ii);
 
             double cwidth = ci.width + character_spacing;
 
-            unsigned c = ci.character;
+            unsigned c = ci.c;
             word_width += cwidth;
 
             if ((c == p.wrap_char) || (c == '\n'))
@@ -400,12 +400,12 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
 
     for (unsigned i = 0; i < p.info.num_characters(); i++)
     {
-        character_info ci;
+        char_info ci;
         ci = p.info.at(i);
 
         double cwidth = ci.width + character_spacing;
 
-        unsigned c = ci.character;
+        unsigned c = ci.c;
         if (i == index_to_wrap_at)
         {
             index_to_wrap_at = line_breaks[++line_number];
@@ -434,7 +434,7 @@ void placement_finder<DetectorT>::find_point_placement(placement & p,
             double dx = x * cosa - y*sina;
             double dy = x * sina + y*cosa;
 
-            current_placement->add_node(c, dx, dy, rad);        
+            current_placement->add_node(c, dx, dy, rad, ci.format);
             
             // compute the Bounding Box for each character and test for:
             // overlap, minimum distance or edge avoidance - exit if condition occurs
@@ -738,14 +738,14 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
 
     for (unsigned i = 0; i < p.info.num_characters(); ++i)
     {
-        character_info ci;
+        char_info ci;
         unsigned c;
 
         double last_character_angle = angle;
 
         // grab the next character according to the orientation
         ci = orientation > 0 ? p.info.at(i) : p.info.at(p.info.num_characters() - i - 1);
-        c = ci.character;
+        c = ci.c;
 
         //Coordinates this character will start at
         if (segment_length == 0) {
@@ -838,7 +838,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         }
         current_placement->add_node(c,render_x - current_placement->starting_x,
                                     -render_y + current_placement->starting_y,
-                                    render_angle);
+                                    render_angle, ci.format);
 
         //Normalise to 0 <= angle < 2PI
         while (render_angle >= 2*M_PI)
@@ -883,10 +883,11 @@ bool placement_finder<DetectorT>::test_placement(placement & p, const std::auto_
     for (unsigned i = 0; i < p.info.num_characters(); ++i)
     {
         // grab the next character according to the orientation
-        character_info ci = orientation > 0 ? p.info.at(i) : p.info.at(p.info.num_characters() - i - 1);
+        char_info ci = orientation > 0 ? p.info.at(i) : p.info.at(p.info.num_characters() - i - 1);
         int c;
         double x, y, angle;
-        current_placement->vertex(&c, &x, &y, &angle);
+        char_properties *format;
+        current_placement->vertex(&c, &x, &y, &angle, &format);
         x = current_placement->starting_x + x;
         y = current_placement->starting_y - y;
         if (orientation < 0)
@@ -911,10 +912,10 @@ bool placement_finder<DetectorT>::test_placement(placement & p, const std::auto_
             // put four corners of the letter into envelope
             e.init(x, y, x + ci.width*cosa,
                    y - ci.width*sina);
-            e.expand_to_include(x - ci.height*sina,
-                                y - ci.height*cosa);
-            e.expand_to_include(x + (ci.width*cosa - ci.height*sina),
-                                y - (ci.width*sina + ci.height*cosa));
+            e.expand_to_include(x - ci.height()*sina,
+                                y - ci.height()*cosa);
+            e.expand_to_include(x + (ci.width*cosa - ci.height()*sina),
+                                y - (ci.width*sina + ci.height()*cosa));
         }
 
         if (!detector_.extent().intersects(e) ||

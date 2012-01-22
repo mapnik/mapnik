@@ -321,8 +321,9 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
     {
         int c;
         double x, y, angle;
+        char_properties *properties;
 
-        path->vertex(&c, &x, &y, &angle);
+        path->vertex(&c, &x, &y, &angle, &properties);
 
 #ifdef MAPNIK_DEBUG
         // TODO Enable when we have support for setting verbosity

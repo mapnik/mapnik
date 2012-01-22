@@ -587,8 +587,9 @@ public:
         {
             int c;
             double x, y, angle;
+            char_properties *format;
 
-            path.vertex(&c, &x, &y, &angle);
+            path.vertex(&c, &x, &y, &angle, &format);
 
             glyph_ptr glyph = faces->get_glyph(c);
  
@@ -624,8 +625,9 @@ public:
         {
             int c;
             double x, y, angle;
+            char_properties *format;
 
-            path.vertex(&c, &x, &y, &angle);
+            path.vertex(&c, &x, &y, &angle, &format);
 
             glyph_ptr glyph = faces->get_glyph(c);
  

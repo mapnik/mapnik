@@ -26,51 +26,60 @@
 // mapnik
 #include <mapnik/char_info.hpp>
 
+//stl
+#include <vector>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 // uci
 #include <unicode/unistr.h>
 
 namespace mapnik
 {
-struct character_info
-{ 
-    int character;
-    double width, height;
-      
-    character_info() : character(0), width(0), height(0) {}
-    character_info(int c_, double width_, double height_) : character(c_), width(width_), height(height_) {}
-    ~character_info() {}
-        
-    character_info(const character_info &ci)
-        : character(ci.character), width(ci.width), height(ci.height)
-    {
-    }
-          
-};
     
 class string_info : private boost::noncopyable
 {
 protected:
-    typedef boost::ptr_vector<character_info> characters_t;
+    typedef std::vector<char_info> characters_t;
     characters_t characters_;
-    UnicodeString const& text_;
+    UnicodeString text_;
     double width_;
     double height_;
     bool is_rtl;
 public:
     string_info(UnicodeString const& text)
-        : text_(text),
+        : characters_(),
+          text_(text),
           width_(0),
           height_(0),
-          is_rtl(false) {}
+          is_rtl(false)
+    {
+
+    }
+
+    string_info()
+        : characters_(),
+          text_(),
+          is_rtl(false)
+    {
+
+    }
+
+    void add_info(char_info const& info)
+    {
+        characters_.push_back(info);
+    }
+
+    void add_text(UnicodeString text)
+    {
+        text_ += text;
+    }
 
     void add_info(int c, double width, double height)
     {
-        characters_.push_back(new character_info(c, width, height));
+        characters_.push_back(char_info(c, width, height, 0, height)); //WARNING: Do not use. Only to keep old code compilable.
     }
       
     unsigned num_characters() const
@@ -78,15 +87,22 @@ public:
         return characters_.size();
     }
     
-    void set_rtl(bool value) {is_rtl = value;}
-    bool get_rtl() const {return is_rtl;}    
+    void set_rtl(bool value)
+    {
+        is_rtl = value;
+    }
+
+    bool get_rtl() const
+    {
+        return is_rtl;
+    }
       
-    character_info at(unsigned i) const
+    char_info const& at(unsigned i) const
     {
         return characters_[i];
     }
       
-    character_info operator[](unsigned i) const
+    char_info const& operator[](unsigned i) const
     {
         return at(i);
     }
@@ -112,6 +128,13 @@ public:
        UChar break_char = '\n';
        return (text_.indexOf(break_char) >= 0);
     }
+
+    /** Resets object to initial state. */
+    void clear(void)
+    {
+        text_ = "";
+        characters_.clear();
+    }
 };
     
 struct text_path : boost::noncopyable
@@ -120,17 +143,19 @@ struct text_path : boost::noncopyable
     {
         int c;
         double x, y, angle;
+        char_properties *format;
                
-        character_node(int c_, double x_, double y_, double angle_) 
-            : c(c_), x(x_), y(y_), angle(angle_) {}
+        character_node(int c_, double x_, double y_, double angle_, char_properties *format_)
+            : c(c_), x(x_), y(y_), angle(angle_), format(format_) {}
         ~character_node() {}
                
-        void vertex(int *c_, double *x_, double *y_, double *angle_)
+        void vertex(int *c_, double *x_, double *y_, double *angle_, char_properties **format_)
         {
             *c_ = c;
             *x_ = x;
             *y_ = y;
             *angle_ = angle;
+            *format_ = format;
         }
     };
          
@@ -147,22 +172,16 @@ struct text_path : boost::noncopyable
           starting_y(0),
           itr_(0) {} 
          
-    //text_path(text_path const& other) : 
-    //  itr_(0),
-    //  nodes_(other.nodes_),
-    //  string_dimensions(other.string_dimensions)
-    //{}
-         
     ~text_path() {}
           
-    void add_node(int c, double x, double y, double angle)
+    void add_node(int c, double x, double y, double angle, char_properties *format)
     {
-        nodes_.push_back(character_node(c, x, y, angle));
+        nodes_.push_back(character_node(c, x, y, angle, format));
     }
         
-    void vertex(int *c, double *x, double *y, double *angle)
+    void vertex(int *c, double *x, double *y, double *angle, char_properties **format)
     {
-        nodes_[itr_++].vertex(c, x, y, angle);
+        nodes_[itr_++].vertex(c, x, y, angle, format);
     }
          
     void rewind()
