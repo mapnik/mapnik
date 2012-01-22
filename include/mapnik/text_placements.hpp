@@ -40,6 +40,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
 
@@ -118,7 +119,6 @@ struct text_symbolizer_properties
     text_processor processor; //Contains expressions and text formats
 };
 
-
 class text_placement_info : boost::noncopyable
 {
 public:
@@ -148,13 +148,6 @@ public:
     box2d<double> extents;
     std::queue< box2d<double> > envelopes;
     boost::ptr_vector<placement_element> placements;
-
-    /* NOTE: Values are public and non-virtual to avoid any performance problems. */
-    position displacement;
-    float text_size;
-    horizontal_alignment_e halign;
-    justify_alignment_e jalign;
-    vertical_alignment_e valign;
 };
 
 typedef boost::shared_ptr<text_placement_info> text_placement_info_ptr;
@@ -164,7 +157,6 @@ class text_placements
 public:
     text_placements();
     virtual text_placement_info_ptr get_placement_info() const =0;
-
     /** Get a list of all expressions used in any placement.
       * This function is used to collect attributes.
       */
@@ -195,6 +187,7 @@ private:
     unsigned state;
     text_placements_dummy const* parent_;
 };
+
 
 
 } //namespace
