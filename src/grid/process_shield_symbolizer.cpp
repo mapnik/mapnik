@@ -44,6 +44,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                                Feature const& feature,
                                proj_transform const& prj_trans)
 {
+#if 0
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
 
     bool placement_found = false;
@@ -237,7 +238,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
     }
     if (placement_found)
         pixmap_.add_feature(feature);
-    
+#endif
 }
 
 template void grid_renderer<grid>::process(shield_symbolizer const&,

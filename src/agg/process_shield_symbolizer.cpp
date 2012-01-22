@@ -45,6 +45,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                Feature const& feature,
                                proj_transform const& prj_trans)
 {
+#if 0
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
 
 
@@ -264,6 +265,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             }
         }
     }
+#endif
 }
 
 

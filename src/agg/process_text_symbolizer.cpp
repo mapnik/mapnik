@@ -33,8 +33,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-
-
+#if 0
     // Use a boost::ptr_vector here instread of std::vector?
     std::vector<geometry_type*> geometries_to_process;
     unsigned num_geom = feature.num_geometries();
@@ -176,6 +175,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             }
         }
     }
+#endif
 }
 
 template void agg_renderer<image_32>::process(text_symbolizer const&,

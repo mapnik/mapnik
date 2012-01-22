@@ -1465,6 +1465,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
+#if 0
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
     bool placement_found = false;
@@ -1579,6 +1580,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
             }
         }
     }
+#endif
 }
 
 template class cairo_renderer<Cairo::Surface>;
