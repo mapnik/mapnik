@@ -56,7 +56,7 @@ struct char_properties
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl=char_properties()) const;
     std::string face_name;
     font_set fontset;
-    unsigned text_size;
+    float text_size;
     double character_spacing;
     double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
     double text_opacity;
