@@ -43,6 +43,8 @@
 
 namespace mapnik {
 
+class text_placements;
+
 typedef text_path placement_element;
 
 typedef boost::tuple<double,double> position;
@@ -116,7 +118,6 @@ struct text_symbolizer_properties
     text_processor processor; //Contains expressions and text formats
 };
 
-class text_placements;
 
 class text_placement_info : boost::noncopyable
 {
@@ -165,21 +166,6 @@ public:
     text_placements();
     virtual text_placement_info_ptr get_placement_info() const =0;
 
-    virtual void set_default_text_size(float size) { text_size_ = size; }
-    float get_default_text_size() const { return text_size_; }
-    
-    virtual void set_default_displacement(position const& displacement) { displacement_ = displacement;}
-    position const& get_default_displacement() { return displacement_; }
-
-    virtual void set_default_halign(horizontal_alignment_e const& align) { halign_ = align;}
-    horizontal_alignment_e const& get_default_halign() { return halign_; }
-
-    virtual void set_default_jalign(justify_alignment_e const& align) { jalign_ = align;}
-    justify_alignment_e const& get_default_jalign() { return jalign_; }
-
-    virtual void set_default_valign(vertical_alignment_e const& align) { valign_ = align;}
-    vertical_alignment_e const& get_default_valign() { return valign_; }
-
     /** Get a list of all expressions used in any placement.
       * This function is used to collect attributes.
       */
@@ -187,13 +173,6 @@ public:
 
     virtual ~text_placements() {}
     text_symbolizer_properties properties;
-protected:
-    float text_size_;
-    position displacement_;
-    horizontal_alignment_e halign_;
-    justify_alignment_e jalign_;
-    vertical_alignment_e valign_;
-    friend class text_placement_info;
 };
 
 typedef boost::shared_ptr<text_placements> text_placements_ptr;
