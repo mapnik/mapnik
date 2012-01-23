@@ -24,7 +24,7 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
+#include <mapnik/symbolizer_helpers.hpp>
 
 namespace mapnik {
 
@@ -33,33 +33,27 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-#if 0
-    // Use a boost::ptr_vector here instread of std::vector?
-    std::vector<geometry_type*> geometries_to_process;
-    unsigned num_geom = feature.num_geometries();
-    for (unsigned i=0; i<num_geom; ++i)
-    {
-        geometry_type const& geom = feature.get_geometry(i);
-        
-        if (geom.num_points() == 0) continue; // don't bother with empty geometries
-        
-        if ((geom.type() == Polygon) && sym.get_minimum_path_length() > 0)
-        {
-            // TODO - find less costly method than fetching full envelope
-            box2d<double> gbox = t_.forward(geom.envelope(),prj_trans);
-            if (gbox.width() < sym.get_minimum_path_length())
-            {
-                continue;
-            }
-        }
-        // TODO - calculate length here as well
-        geometries_to_process.push_back(const_cast<geometry_type*>(&geom));
-    }
-    
-    if (!geometries_to_process.size() > 0)
-        return; // early return to avoid significant overhead of rendering setup
+    /* This could also be a member of the renderer class, but I would have
+       to check if any of the variables changes and notify the helper.
+       It could be done at a later point, but for now keep the code simple.
+     */
+    text_symbolizer_helper<face_manager<freetype_engine>, boost::shared_ptr<label_collision_detector4> > helper(width_, height_, scale_factor_, t_, font_manager_, detector_);
 
-    typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+    text_placement_info_ptr placement = helper.get_placement(sym, feature, prj_trans);
+
+    if (!placement) return;
+
+    text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
+    for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+    {
+        double x = placement->placements[ii].starting_x;
+        double y = placement->placements[ii].starting_y;
+        ren.prepare_glyphs(&(placement->placements[ii]));
+        ren.render(x, y);
+    }
+
+#if 0
+
 
     bool placement_found = false;
     text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
