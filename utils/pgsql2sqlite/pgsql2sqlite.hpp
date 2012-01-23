@@ -141,9 +141,14 @@ void pgsql2sqlite(Connection conn,
     int geometry_oid = -1;
 
     std::string output_table_insert_sql = "insert into " + output_table_name + " values (?";
+    
+    context_ptr ctx = boost::make_shared<context_type>();
 
     for ( unsigned pos = 0; pos < num_fields ; ++pos)
     {
+        const char* field_name = cursor->getFieldName(pos);
+        ctx->push(field_name);
+        
         if (pos > 0)
         {
             create_sql << ",";
@@ -216,7 +221,7 @@ void pgsql2sqlite(Connection conn,
         sqlite::record_type output_rec;
         output_rec.push_back(sqlite::value_type(pkid));
         bool empty_geom = true;
-        const char * buf = 0;
+        const char * buf = 0;        
         for (unsigned pos=0 ; pos < num_fields; ++pos)
         {
             if (! cursor->isNull(pos))
@@ -275,7 +280,7 @@ void pgsql2sqlite(Connection conn,
                 {
                     if (oid == geometry_oid)
                     {
-                        mapnik::Feature feat(pkid);
+                        mapnik::Feature feat(ctx,pkid);
                         geometry_utils::from_wkb(feat.paths(),buf,size,wkbGeneric);
                         if (feat.num_geometries() > 0)
                         {

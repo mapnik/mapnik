@@ -40,7 +40,7 @@ headers = ['#plugins/input/postgis'] + env['CPPPATH']
 
 libraries = []
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-libraries.extend([boost_program_options,'sqlite3','pq','mapnik'])
+libraries.extend([boost_program_options,'sqlite3','pq','mapnik','icuuc'])
 
 linkflags = env['CUSTOM_LDFLAGS']
 if env['SQLITE_LINKFLAGS']:
