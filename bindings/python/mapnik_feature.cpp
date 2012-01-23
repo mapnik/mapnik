@@ -40,8 +40,6 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 
-mapnik::geometry_type & (mapnik::Feature::*get_geom1)(unsigned) = &mapnik::Feature::get_geometry;
-
 namespace {
 
 using mapnik::Feature;
@@ -50,6 +48,9 @@ using mapnik::from_wkt;
 using mapnik::context_type;
 using mapnik::context_ptr;
 using mapnik::feature_kv_iterator;
+
+mapnik::geometry_type const& (mapnik::Feature::*get_geometry_by_const_ref)(unsigned) const = &mapnik::Feature::get_geometry;
+boost::ptr_vector<mapnik::geometry_type> const& (mapnik::Feature::*get_paths_by_const_ref)() const = &mapnik::Feature::paths;
 
 void feature_add_geometries_from_wkb(Feature &feature, std::string wkb)
 {
@@ -163,8 +164,8 @@ void export_feature()
         .def("add_geometries_from_wkt", &feature_add_geometries_from_wkt)
         .def("add_geometry", &Feature::add_geometry)
         .def("num_geometries",&Feature::num_geometries)
-        .def("get_geometry", make_function(get_geom1,return_value_policy<reference_existing_object>()))
-        .def("geometries",make_function(&Feature::paths,return_value_policy<reference_existing_object>()))
+        .def("get_geometry", make_function(get_geometry_by_const_ref,return_value_policy<reference_existing_object>()))
+        .def("geometries",make_function(get_paths_by_const_ref,return_value_policy<reference_existing_object>()))
         .def("envelope", &Feature::envelope)
         .def("has_key", &Feature::has_key)
         .def("__setitem__",&__setitem__)

@@ -161,11 +161,16 @@ public:
         return ctx_;
     }
 
+    boost::ptr_vector<geometry_type> const& paths() const
+    {
+        return geom_cont_;
+    }
+    
     boost::ptr_vector<geometry_type> & paths() 
     {
         return geom_cont_;
     }
-        
+    
     void add_geometry(geometry_type * geom)
     {
         geom_cont_.push_back(geom);
