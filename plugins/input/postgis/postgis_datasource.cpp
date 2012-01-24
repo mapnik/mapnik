@@ -581,12 +581,10 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
             
-            unsigned size=0;
             for ( ; itr != end; ++itr)
             {
                 mapnik::sql_utils::quote_attr(s,itr->get_name());
                 ctx->push(itr->get_name());
-                ++size;
             }
 
             box2d<double> box(pt.x,pt.y,pt.x,pt.y);
