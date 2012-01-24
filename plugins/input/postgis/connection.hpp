@@ -70,6 +70,7 @@ public:
             {
                 s << "unable to connect to postgres server";
             }
+            s << "\n" << connection_str;
             throw mapnik::datasource_exception( s.str() );
         }
     }
