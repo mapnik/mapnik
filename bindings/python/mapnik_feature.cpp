@@ -78,12 +78,12 @@ void __setitem__(Feature & feature, std::string const& name, mapnik::value const
     feature.put(name,val);
 }
 
-boost::python::dict describe(Feature const& feature)
+boost::python::dict attributes(Feature const& f)
 {
     boost::python::dict attributes;
-    feature_kv_iterator itr(feature,true);
-    feature_kv_iterator end(feature);
-
+    feature_kv_iterator itr = f.begin();
+    feature_kv_iterator end = f.end();
+    
     for ( ;itr!=end; ++itr)
     {
         attributes[boost::get<0>(*itr)] = boost::get<1>(*itr);
@@ -178,7 +178,7 @@ void export_feature()
         .def("geometries",make_function(get_paths_by_const_ref,return_value_policy<reference_existing_object>()))
         .def("envelope", &Feature::envelope)
         .def("has_key", &Feature::has_key)
-        .def("describe",&describe)
+        .add_property("attributes",&attributes)
         .def("__setitem__",&__setitem__)
         .def("__getitem__",&__getitem__)
         .def("__getitem__",&__getitem2__)
