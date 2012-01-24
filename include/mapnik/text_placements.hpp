@@ -93,6 +93,15 @@ enum text_transform
 
 DEFINE_ENUM( text_transform_e, text_transform );
 
+enum placement_type
+{
+    T_SIMPLE = 0,
+    T_DUMMY,
+    placement_type_MAX
+};
+
+DEFINE_ENUM( placement_type_e, placement_type );
+
 class text_placements;
 
 class text_placement_info : boost::noncopyable
