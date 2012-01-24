@@ -86,20 +86,23 @@ void set_anchor(text_symbolizer & t, boost::python::tuple arg)
 placement_type_e get_placement_type(const text_symbolizer& t)
 {
     text_placements_ptr placement_finder = t.get_placement_options();
-    return placement_finder->type;
+    if (dynamic_cast<text_placements_simple *>(placement_finder.get()) != NULL)
+    {
+        return T_SIMPLE;
+    }
+    return T_DUMMY;
 }
 
 std::string get_placements(const text_symbolizer& t)
 {
     text_placements_ptr placement_finder = t.get_placement_options();
-    switch (placement_finder->type)
-    {
-    case T_SIMPLE:
-        return dynamic_cast<text_placements_simple *>(placement_finder.get())->get_positions();
+    text_placements_simple *placements_simple = dynamic_cast<text_placements_simple *>(placement_finder.get());
 
-    default:
-        return "";
+    if (placements_simple != NULL)
+    {
+        return placements_simple->get_positions();
     }
+    return "";
 }
 
 void set_placement_options(text_symbolizer & t, placement_type_e arg, std::string placements)

@@ -62,8 +62,6 @@ bool text_placement_info_dummy::next_position_only()
     return true;
 }
 
-text_placements_dummy::text_placements_dummy() : text_placements(T_DUMMY) { }
-
 text_placement_info_ptr text_placements_dummy::get_placement_info() const
 {
     return text_placement_info_ptr(new text_placement_info_dummy(this));
@@ -184,18 +182,17 @@ void text_placements_simple::set_positions(std::string positions)
     }
 }
 
+text_placements_simple::text_placements_simple()
+{
+    set_positions("X");
+}
+
 std::string text_placements_simple::get_positions() const
 {
     return positions_;
 }
 
-text_placements_simple::text_placements_simple() : text_placements(T_SIMPLE)
-{
-    set_positions("X");
-}
-
-text_placements_simple::text_placements_simple(std::string positions) :
-    text_placements(T_SIMPLE)
+text_placements_simple::text_placements_simple(std::string positions)
 {
     set_positions(positions);
 }
