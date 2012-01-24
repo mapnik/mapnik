@@ -117,7 +117,9 @@ public:
     }
 };
     
-struct text_path : boost::noncopyable
+
+/** List of all characters and their positions and formats for a placement. */
+class text_path : boost::noncopyable
 {
     struct character_node
     {
@@ -139,41 +141,51 @@ struct text_path : boost::noncopyable
         }
     };
          
+    int itr_;
+public:
     typedef std::vector<character_node> character_nodes_t;
+    character_nodes_t nodes_;
     double starting_x;
     double starting_y;
-    character_nodes_t nodes_;
-    int itr_;
           
-    std::pair<unsigned,unsigned> string_dimensions;
+//    std::pair<unsigned,unsigned> string_dimensions;
         
     text_path() 
-        : starting_x(0),
-          starting_y(0),
-          itr_(0) {} 
+        : itr_(0),
+          starting_x(0),
+          starting_y(0)
+
+    {
+
+    }
          
     ~text_path() {}
           
+    /** Adds a new char to the list. */
     void add_node(int c, double x, double y, double angle, char_properties *format)
     {
         nodes_.push_back(character_node(c, x, y, angle, format));
     }
         
+    /** Return node. Always returns a new node. Has no way to report that there are no more nodes. */
     void vertex(int *c, double *x, double *y, double *angle, char_properties **format)
     {
         nodes_[itr_++].vertex(c, x, y, angle, format);
     }
          
+    /** Start again at first node. */
     void rewind()
     {
         itr_ = 0;
     }
          
+    /** Number of nodes. */
     int num_nodes() const
     {
         return nodes_.size();
     }
          
+    /** Delete all nodes. */
     void clear()
     {
         nodes_.clear();

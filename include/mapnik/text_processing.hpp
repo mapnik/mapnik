@@ -68,9 +68,6 @@ struct char_properties
     double halo_radius;
 };
 
-class abstract_token;
-class processed_text;
-
 class processed_expression
 {
 public:
@@ -78,8 +75,7 @@ public:
         p(properties), str(text) {}
     char_properties p;
     UnicodeString str;
-private:
-    friend class processed_text;
+
 };
 
 class processed_text
@@ -101,15 +97,24 @@ private:
     string_info info_;
 };
 
+class abstract_token;
 
+/** Stores formating information and uses this to produce formated text for a given feature. */
 class text_processor
 {
 public:
     text_processor();
+    /** Construct object from XML. */
     void from_xml(boost::property_tree::ptree const& pt, std::map<std::string,font_set> const &fontsets);
+    /** Write object to XML ptree. */
     void to_xml(boost::property_tree::ptree &node,  bool explicit_defaults, text_processor const& dfl) const;
+    
+    /** Takes a feature and produces formated text as output. 
+     * The output object has to be created by the caller and passed in for thread safety.
+     */
     void process(processed_text &output, Feature const& feature);
     void set_old_style_expression(expression_ptr expr);
+    /** Add a new formating token. */
     void push_back(abstract_token *token);
     std::set<expression_ptr> get_all_expressions() const;
     char_properties defaults;
