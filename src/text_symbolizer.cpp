@@ -85,6 +85,15 @@ static const char * text_transform_strings[] = {
 IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
 
 
+static const char * placement_type_strings[] = {
+    "dummy",
+    "simple",
+    ""
+};
+
+
+IMPLEMENT_ENUM( placement_type_e, placement_type_strings )
+
 
 text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name,
                                  float size, color const& fill,

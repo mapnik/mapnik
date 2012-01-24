@@ -24,6 +24,8 @@
 #include <boost/python.hpp>
 
 #include <mapnik/text_symbolizer.hpp>
+#include <mapnik/text_placements.hpp>
+#include <mapnik/text_placements_simple.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/expression_string.hpp>
 
@@ -48,6 +50,28 @@ void set_text_displacement(text_symbolizer & t, boost::python::tuple arg)
     t.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
+double get_text_dx(const text_symbolizer& t)
+{
+    position pos = t.get_displacement();
+    return boost::get<0>(pos);
+}
+
+double get_text_dy(const text_symbolizer& t)
+{
+    position pos = t.get_displacement();
+    return boost::get<1>(pos);
+}
+
+void set_text_dx(text_symbolizer & t, double arg)
+{
+    t.set_displacement(arg, boost::get<1>(t.get_displacement()));
+}
+
+void set_text_dy(text_symbolizer & t, double arg)
+{
+    t.set_displacement(boost::get<0>(t.get_displacement()), arg);
+}
+
 tuple get_anchor(const text_symbolizer& t)
 {
     position pos = t.get_anchor();
@@ -57,6 +81,32 @@ tuple get_anchor(const text_symbolizer& t)
 void set_anchor(text_symbolizer & t, boost::python::tuple arg)
 {
     t.set_anchor(extract<double>(arg[0]),extract<double>(arg[1]));
+}
+
+void set_placement(text_symbolizer & t, placement_type_e arg, std::string placements)
+{
+    text_placements_ptr placement_finder;
+    switch (arg)
+    {
+    case T_SIMPLE:
+        placement_finder = text_placements_ptr(
+            new text_placements_simple(placements));
+        break;
+
+    case T_DUMMY:
+        placement_finder = text_placements_ptr(new text_placements_dummy());
+        break;
+
+    default:
+        throw config_error(std::string("Unknown placement type"));
+        break;
+    }
+    t.set_placement_options(placement_finder);
+}
+
+void set_placement_2(text_symbolizer & t, placement_type_e arg)
+{
+    set_placement(t, arg, "");
 }
 
 }
@@ -195,6 +245,11 @@ void export_text_symbolizer()
         .value("CAPITALIZE",CAPITALIZE)
         ;
 
+    enumeration_<placement_type_e>("placement_type")
+        .value("SIMPLE",T_SIMPLE)
+        .value("DUMMY",T_DUMMY)
+        ;
+
     class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
         /*
         // todo - all python classes can have kwargs and default constructors
@@ -218,9 +273,15 @@ void export_text_symbolizer()
                       &text_symbolizer::get_allow_overlap,
                       &text_symbolizer::set_allow_overlap,
                       "Set/get the allow_overlap property of the label")
-        .add_property("displacement",
+        .add_property("displacement", // deprecated
                       &get_text_displacement,
                       &set_text_displacement)
+        .add_property("dx",
+                      &get_text_dx,
+                      &set_text_dx)
+        .add_property("dy",
+                      &get_text_dy,
+                      &set_text_dy)
         .add_property("avoid_edges",
                       &text_symbolizer::get_avoid_edges,
                       &text_symbolizer::set_avoid_edges,
@@ -256,7 +317,7 @@ void export_text_symbolizer()
                       &text_symbolizer::get_justify_alignment,
                       &text_symbolizer::set_justify_alignment,
                       "Set/get the text justification")
-        .add_property("label_placement",
+        .add_property("label_placement", // deprecated
                       &text_symbolizer::get_label_placement,
                       &text_symbolizer::set_label_placement,
                       "Set/get the placement of the label")
@@ -287,6 +348,10 @@ void export_text_symbolizer()
                       &text_symbolizer::get_text_opacity,
                       &text_symbolizer::set_text_opacity,
                       "Set/get the text opacity")
+        .add_property("placement",
+                      &text_symbolizer::get_label_placement,
+                      &text_symbolizer::set_label_placement,
+                      "Set/get the placement of the label")
         .add_property("text_transform",
                       &text_symbolizer::get_text_transform,
                       &text_symbolizer::set_text_transform,
@@ -310,5 +375,7 @@ void export_text_symbolizer()
         .add_property("wrap_before",
                       &text_symbolizer::get_wrap_before,
                       &text_symbolizer::set_wrap_before)
+        .def("set_placement", set_placement)
+        .def("set_placement", set_placement_2)
         ;
 }
