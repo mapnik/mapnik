@@ -132,8 +132,10 @@ typedef boost::shared_ptr<text_placement_info> text_placement_info_ptr;
 class text_placements
 {
 public:
-    text_placements() :
-        text_size_(10), halign_(H_MIDDLE), jalign_(J_MIDDLE), valign_(V_MIDDLE) {}
+    text_placements(placement_type type) :
+        type(type), text_size_(10), halign_(H_MIDDLE), jalign_(J_MIDDLE), valign_(V_MIDDLE) {}
+    const placement_type type;
+
     virtual text_placement_info_ptr get_placement_info() const =0;
 
     virtual void set_default_text_size(float size) { text_size_ = size; }
@@ -168,6 +170,7 @@ class text_placements_info_dummy;
 class MAPNIK_DECL text_placements_dummy: public text_placements
 {
 public:
+    text_placements_dummy();
     text_placement_info_ptr get_placement_info() const;
     friend class text_placement_info_dummy;
 };

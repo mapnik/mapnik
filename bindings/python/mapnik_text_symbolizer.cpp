@@ -83,7 +83,13 @@ void set_anchor(text_symbolizer & t, boost::python::tuple arg)
     t.set_anchor(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
-void set_placement(text_symbolizer & t, placement_type_e arg, std::string placements)
+placement_type_e get_placement_type(const text_symbolizer& t)
+{
+    text_placements_ptr placement_finder = t.get_placement_options();
+    return placement_finder->type;
+}
+
+void set_placement_options(text_symbolizer & t, placement_type_e arg, std::string placements)
 {
     text_placements_ptr placement_finder;
     switch (arg)
@@ -104,9 +110,9 @@ void set_placement(text_symbolizer & t, placement_type_e arg, std::string placem
     t.set_placement_options(placement_finder);
 }
 
-void set_placement_2(text_symbolizer & t, placement_type_e arg)
+void set_placement_options_2(text_symbolizer & t, placement_type_e arg)
 {
-    set_placement(t, arg, "");
+    set_placement_options(t, arg, "");
 }
 
 }
@@ -375,7 +381,8 @@ void export_text_symbolizer()
         .add_property("wrap_before",
                       &text_symbolizer::get_wrap_before,
                       &text_symbolizer::set_wrap_before)
-        .def("set_placement", set_placement)
-        .def("set_placement", set_placement_2)
+        .add_property("placement_type", get_placement_type)
+        .def("set_placement_options", set_placement_options)
+        .def("set_placement_options", set_placement_options_2)
         ;
 }
