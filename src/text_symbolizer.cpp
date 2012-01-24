@@ -22,8 +22,13 @@
 
 //$Id$
 
+#include <string>
+
 //mapnik
 #include <mapnik/text_symbolizer.hpp>
+#include <mapnik/text_placements.hpp>
+#include <mapnik/text_placements_simple.hpp>
+
 // boost
 #include <boost/scoped_ptr.hpp>
 
@@ -562,5 +567,47 @@ void text_symbolizer::set_placement_options(text_placements_ptr placement_option
     placement_options_ = placement_options;
 }
 
+void text_symbolizer::set_placement_options(placement_type_e arg, std::string const& placements)
+{
+    text_placements_ptr placement_finder;
+    switch (arg)
+    {
+    case T_SIMPLE:
+        placement_finder = text_placements_ptr(
+            new text_placements_simple(placements));
+        break;
+
+    case T_DUMMY:
+        placement_finder = text_placements_ptr(new text_placements_dummy());
+        break;
+
+    default:
+        throw config_error(std::string("Unknown placement type"));
+        break;
+    }
+    this->set_placement_options(placement_finder);
+}
+
+placement_type_e text_symbolizer::get_placement_type() const
+{
+    text_placements_ptr placement_finder = this->get_placement_options();
+    if (dynamic_cast<text_placements_simple *>(placement_finder.get()) != NULL)
+    {
+        return T_SIMPLE;
+    }
+    return T_DUMMY;
+}
+
+std::string text_symbolizer::get_placements() const
+{
+    text_placements_ptr placement_finder = this->get_placement_options();
+    text_placements_simple *placements_simple = dynamic_cast<text_placements_simple *>(placement_finder.get());
+
+    if (placements_simple != NULL)
+    {
+        return placements_simple->get_positions();
+    }
+    return "";
+}
 
 }

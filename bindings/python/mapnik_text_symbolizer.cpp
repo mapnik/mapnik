@@ -24,8 +24,6 @@
 #include <boost/python.hpp>
 
 #include <mapnik/text_symbolizer.hpp>
-#include <mapnik/text_placements.hpp>
-#include <mapnik/text_placements_simple.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/expression_string.hpp>
 
@@ -83,52 +81,14 @@ void set_anchor(text_symbolizer & t, boost::python::tuple arg)
     t.set_anchor(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
-placement_type_e get_placement_type(const text_symbolizer& t)
+void set_placement_options(text_symbolizer & t, placement_type_e arg, std::string const& placements)
 {
-    text_placements_ptr placement_finder = t.get_placement_options();
-    if (dynamic_cast<text_placements_simple *>(placement_finder.get()) != NULL)
-    {
-        return T_SIMPLE;
-    }
-    return T_DUMMY;
-}
-
-std::string get_placements(const text_symbolizer& t)
-{
-    text_placements_ptr placement_finder = t.get_placement_options();
-    text_placements_simple *placements_simple = dynamic_cast<text_placements_simple *>(placement_finder.get());
-
-    if (placements_simple != NULL)
-    {
-        return placements_simple->get_positions();
-    }
-    return "";
-}
-
-void set_placement_options(text_symbolizer & t, placement_type_e arg, std::string placements)
-{
-    text_placements_ptr placement_finder;
-    switch (arg)
-    {
-    case T_SIMPLE:
-        placement_finder = text_placements_ptr(
-            new text_placements_simple(placements));
-        break;
-
-    case T_DUMMY:
-        placement_finder = text_placements_ptr(new text_placements_dummy());
-        break;
-
-    default:
-        throw config_error(std::string("Unknown placement type"));
-        break;
-    }
-    t.set_placement_options(placement_finder);
+    t.set_placement_options(arg, placements);
 }
 
 void set_placement_options_2(text_symbolizer & t, placement_type_e arg)
 {
-    set_placement_options(t, arg, "");
+    t.set_placement_options(arg, "");
 }
 
 }
@@ -397,8 +357,8 @@ void export_text_symbolizer()
         .add_property("wrap_before",
                       &text_symbolizer::get_wrap_before,
                       &text_symbolizer::set_wrap_before)
-        .add_property("placement_type", get_placement_type)
-        .add_property("placements", get_placements)
+        .add_property("placement_type", &text_symbolizer::get_placement_type)
+        .add_property("placements", &text_symbolizer::get_placements)
         .def("set_placement_options", set_placement_options)
         .def("set_placement_options", set_placement_options_2)
         ;
