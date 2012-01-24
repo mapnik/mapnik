@@ -78,11 +78,21 @@ void __setitem__(Feature & feature, std::string const& name, mapnik::value const
     feature.put(name,val);
 }
 
+boost::python::dict describe(Feature const& feature)
+{
+    boost::python::dict attributes;
+    feature_kv_iterator itr(feature,true);
+    feature_kv_iterator end(feature);
+
+    for ( ;itr!=end; ++itr)
+    {
+        attributes[boost::get<0>(*itr)] = boost::get<1>(*itr);
+    }
+    
+    return attributes;
+}
+
 } // end anonymous namespace
-
-namespace boost { namespace python {
-
-}}
 
 struct UnicodeString_from_python_str
 {
@@ -168,6 +178,7 @@ void export_feature()
         .def("geometries",make_function(get_paths_by_const_ref,return_value_policy<reference_existing_object>()))
         .def("envelope", &Feature::envelope)
         .def("has_key", &Feature::has_key)
+        .def("describe",&describe)
         .def("__setitem__",&__setitem__)
         .def("__getitem__",&__getitem__)
         .def("__getitem__",&__getitem2__)
