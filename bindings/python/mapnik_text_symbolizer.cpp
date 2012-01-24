@@ -89,6 +89,19 @@ placement_type_e get_placement_type(const text_symbolizer& t)
     return placement_finder->type;
 }
 
+std::string get_placements(const text_symbolizer& t)
+{
+    text_placements_ptr placement_finder = t.get_placement_options();
+    switch (placement_finder->type)
+    {
+    case T_SIMPLE:
+        return dynamic_cast<text_placements_simple *>(placement_finder.get())->get_positions();
+
+    default:
+        return "";
+    }
+}
+
 void set_placement_options(text_symbolizer & t, placement_type_e arg, std::string placements)
 {
     text_placements_ptr placement_finder;
@@ -382,6 +395,7 @@ void export_text_symbolizer()
                       &text_symbolizer::get_wrap_before,
                       &text_symbolizer::set_wrap_before)
         .add_property("placement_type", get_placement_type)
+        .add_property("placements", get_placements)
         .def("set_placement_options", set_placement_options)
         .def("set_placement_options", set_placement_options_2)
         ;
