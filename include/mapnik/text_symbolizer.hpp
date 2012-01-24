@@ -123,6 +123,9 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     justify_alignment_e get_justify_alignment() const;
     text_placements_ptr get_placement_options() const;
     void set_placement_options(text_placements_ptr placement_options);
+    void set_placement_options(placement_type_e arg, std::string const& placements);
+    placement_type_e get_placement_type() const;
+    std::string get_placements() const;
 
 private:
     expression_ptr name_;
