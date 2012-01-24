@@ -69,7 +69,7 @@ def test_feature_attributes():
         features = ds.all_features()
         feat = features[0]
         attrs = {'PRFEDEA': u'35043411', 'EAS_ID': 168, 'AREA': 215229.266}
-        eq_(feat.attributes, attrs)
+        eq_(feat.describe(), attrs)
         eq_(ds.fields(),['AREA', 'EAS_ID', 'PRFEDEA'])
         eq_(ds.field_types(),['float','int','str'])
 

@@ -120,29 +120,37 @@ def resolve(grid,x,y):
 
 
 def test_render_grid():
-    places_ds = mapnik.MemoryDatasource()
-    places_ds.add_point(143.10,-38.60,'Name','South East')
-    places_ds.add_point(142.48,-38.60,'Name','South West')
-    places_ds.add_point(142.48,-38.38,'Name','North West')
-    places_ds.add_point(143.10,-38.38,'Name','North East')
+    ds = mapnik.MemoryDatasource()
+    context = mapnik.Context()
+    context.push('Name')
+    f = mapnik.Feature(context,1)
+    f['Name'] = 'South East'
+    f.add_geometries_from_wkt('POINT (143.10 -38.60)')
+    ds.add_feature(f)
+
+    f = mapnik.Feature(context,2)
+    f['Name'] = 'South West'
+    f.add_geometries_from_wkt('POINT (142.48 -38.60)')
+    ds.add_feature(f)
+
+    f = mapnik.Feature(context,3)
+    f['Name'] = 'North West'
+    f.add_geometries_from_wkt('POINT (142.48 -38.38)')
+    ds.add_feature(f)
+
+    f = mapnik.Feature(context,4)
+    f['Name'] = 'North East'
+    f.add_geometries_from_wkt('POINT (143.10 -38.38)')
+    ds.add_feature(f)
+
     s = mapnik.Style()
     r = mapnik.Rule()
-    #symb = mapnik.PointSymbolizer()
     symb = mapnik.MarkersSymbolizer()
     symb.allow_overlap = True
     r.symbols.append(symb)
-    label = mapnik.TextSymbolizer(mapnik.Expression('[Name]'),
-                'DejaVu Sans Book',
-                10,
-                mapnik.Color('black')
-                )
-    label.allow_overlap = True
-    label.displacement = (0,-10)
-    #r.symbols.append(label)
-
     s.rules.append(r)
     lyr = mapnik.Layer('Places')
-    lyr.datasource = places_ds
+    lyr.datasource = ds
     lyr.styles.append('places_labels')
     m = mapnik.Map(256,256)
     m.append_style('places_labels',s)
@@ -184,9 +192,19 @@ def test_render_points():
     if not mapnik.has_cairo(): return
 
     # create and populate point datasource (WGS84 lat-lon coordinates)
-    places_ds = mapnik.MemoryDatasource()
-    places_ds.add_point(142.48,-38.38,'Name','Westernmost Point') # westernmost
-    places_ds.add_point(143.10,-38.60,'Name','Southernmost Point') # southernmost
+    ds = mapnik.MemoryDatasource()
+    context = mapnik.Context()
+    context.push('Name')
+    f = mapnik.Feature(context,1)
+    f['Name'] = 'Westernmost Point'
+    f.add_geometries_from_wkt('POINT (142.48 -38.38)')
+    ds.add_feature(f)
+
+    f = mapnik.Feature(context,2)
+    f['Name'] = 'Southernmost Point'
+    f.add_geometries_from_wkt('POINT (143.10,-38.60)')
+    ds.add_feature(f)
+
     # create layer/rule/style
     s = mapnik.Style()
     r = mapnik.Rule()
@@ -195,7 +213,7 @@ def test_render_points():
     r.symbols.append(symb)
     s.rules.append(r)
     lyr = mapnik.Layer('Places','+proj=latlon +datum=WGS84')
-    lyr.datasource = places_ds
+    lyr.datasource = ds
     lyr.styles.append('places_labels')
     # latlon bounding box corners
     ul_lonlat = mapnik.Coord(142.30,-38.20)
@@ -216,7 +234,7 @@ def test_render_points():
         # Render to SVG so that it can be checked how many points are there with string comparison
         svg_file = os.path.join(tempfile.gettempdir(),'%s.svg')
         mapnik.render_to_file(m, svg_file)
-        num_points_present = len(places_ds.all_features())
+        num_points_present = len(ds.all_features())
         svg = open(svg_file,'r').read()
         num_points_rendered = svg.count('<image ')
         eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr)) 

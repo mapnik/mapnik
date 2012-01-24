@@ -52,7 +52,7 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(ds.field_types(),['str','str','str','str','float','float','str'])
         feat = ds.featureset().next()
         attr = {'City': u'New York, NY', 'geo_accuracy': u'house', 'Phone': u'(212) 334-0711', 'Address': u'19 Elizabeth Street', 'Precinct': u'5th Precinct', 'geo_longitude': -70, 'geo_latitude': 40}
-        eq_(feat.attributes,attr)
+        eq_(feat.describe(),attr)
         eq_(len(ds.all_features()),2)
         eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
 
@@ -72,7 +72,7 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         fs = ds.featureset()
         feat = fs.next()
         attr = {'x': 0, 'empty_column': u'', 'text': u'a b', 'float': 1.0, 'datetime': u'1971-01-01T04:14:00', 'y': 0, 'boolean': u'True', 'time': u'04:14:00', 'date': u'1971-01-01', 'integer': 40}
-        eq_(feat.attributes,attr)
+        eq_(feat.describe(),attr)
         while feat:
             eq_(len(feat),10)
             eq_(feat['empty_column'],u'')
@@ -83,9 +83,9 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         ds = get_csv_ds('has_attributes_with_slashes.csv')
         eq_(len(ds.fields()),3)
         fs = ds.all_features()
-        eq_(fs[0].attributes,{'x':0,'y':0,'name':u'a/a'})
-        eq_(fs[1].attributes,{'x':1,'y':4,'name':u'b/b'})
-        eq_(fs[2].attributes,{'x':10,'y':2.5,'name':u'c/c'})
+        eq_(fs[0].describe(),{'x':0,'y':0,'name':u'a/a'})
+        eq_(fs[1].describe(),{'x':1,'y':4,'name':u'b/b'})
+        eq_(fs[2].describe(),{'x':10,'y':2.5,'name':u'c/c'})
         eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
 
     def test_wkt_field(**kwargs):

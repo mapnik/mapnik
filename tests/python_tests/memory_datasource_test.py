@@ -1,40 +1,34 @@
 #encoding: utf8
-import itertools
-import unittest
+import mapnik
+from nose.tools import *
 
-class MemoryDatasource(unittest.TestCase):
-    ids = itertools.count(0)
+def test_add_feature():
+    md = mapnik.MemoryDatasource()
+    eq_(md.num_features(), 0)
+    context = mapnik.Context()
+    context.push('foo')
+    feature = mapnik.Feature(context,1)
+    feature['foo'] = 'bar'
+    feature.add_geometries_from_wkt('POINT(2 3)')
+    md.add_feature(feature)
+    eq_(md.num_features(), 1)
 
-    def makeOne(self, *args, **kw):
-        from mapnik import MemoryDatasource
-        return MemoryDatasource(*args, **kw)
+    featureset = md.features_at_point(mapnik.Coord(2,3))
+    retrieved = []
+    feat = featureset.next()
+    while featureset.next():
+        retrieved.append(feat)
+    
+    eq_(len(retrieved), 1)
+    f = retrieved[0]
+    eq_(f['foo'], 'bar')
 
-    def makeFeature(self, wkt, **properties):
-        from mapnik import Feature
-        f = Feature(self.ids.next())
-        f.add_geometries_from_wkt(wkt)
-        for k,v in properties.iteritems():
-            f[k] = v
-        return f
-
-    def test_default_constructor(self):
-        f = self.makeOne()
-        self.failUnless(f is not None)
-
-    def test_add_feature(self):
-        md = self.makeOne()
-        self.failUnlessEqual(md.num_features(), 0)
-        md.add_feature(self.makeFeature('Point(2 3)', foo='bar'))
-        self.failUnlessEqual(md.num_features(), 1)
-
-        from mapnik import Coord
-        retrieved = md.features_at_point(Coord(2,3)).features
-        self.failUnlessEqual(len(retrieved), 1)
-        f = retrieved[0]
-        self.failUnlessEqual(f['foo'], 'bar')
-
-        retrieved = md.features_at_point(Coord(20,30)).features
-        self.failUnlessEqual(len(retrieved), 0)
+    featureset = md.features_at_point(Coord(20,30)).features
+    retrieved = []
+    feat = featureset.next()
+    while featureset.next():
+        retrieved.append(feat)
+    eq_(len(retrieved), 0)
 
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]

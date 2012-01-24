@@ -45,6 +45,7 @@ using mapnik::transcoder;
 using mapnik::feature_factory;
 
 sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
+                                     mapnik::context_ptr const& ctx,
                                      std::string const& encoding,
                                      mapnik::wkbFormat format,
                                      bool using_subquery)
@@ -52,12 +53,8 @@ sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
       tr_(new transcoder(encoding)),
       format_(format),
       using_subquery_(using_subquery),
-      ctx_(boost::make_shared<mapnik::context_type>())
+      ctx_(ctx)
 {
-    for (int i = 2; i < rs_->column_count(); ++i)
-    {
-        ctx_->push(rs_->column_name(i));
-    }
 }
 
 sqlite_featureset::~sqlite_featureset()
