@@ -11,7 +11,7 @@ dirname = os.path.dirname(sys.argv[0])
 widths = [ 800, 600, 400, 300, 250, 200, 150, 100]
 filenames = ["list", "simple"]
 filenames_one_width = ["simple-E", "simple-NE", "simple-NW", "simple-N",
-    "simple-SE", "simple-SW", "simple-S", "simple-W"]
+    "simple-SE", "simple-SW", "simple-S", "simple-W", "formating"]
     
 def render(filename, width):
     print "Rendering style \"%s\" with width %d" % (filename, width)
@@ -30,3 +30,4 @@ for filename in filenames:
 
 for filename in filenames_one_width:
     render(filename, 500)
+
