@@ -34,7 +34,7 @@ def compare_wkb_from_wkt(wkt,num=None):
     paths = mapnik.Path.from_wkt(wkt)
 
     # add geometry(s) to feature from wkt
-    f = mapnik.Feature(1)
+    f = mapnik.Feature(mapnik.Context(),1)
     f.add_geometries_from_wkt(wkt)
 
     # ensure both have same result
@@ -65,7 +65,7 @@ def compare_wkt_from_wkt(wkt,num=None):
     paths = mapnik.Path.from_wkt(wkt)
 
     # add geometry(s) to feature from wkt
-    f = mapnik.Feature(1)
+    f = mapnik.Feature(mapnik.Context(),1)
     f.add_geometries_from_wkt(wkt)
 
     # compare to original, which may not have significant digits
@@ -113,14 +113,14 @@ def test_geometry_index_error():
     wkt = 'Point (0 0)'
     paths = mapnik.Path.from_wkt(wkt)
     paths[3]
-    f = mapnik.Feature(1)
+    f = mapnik.Feature(mapnik.Context(),1)
     f.add_geometries_from_wkt(wkt)
     f.geometries()[3]
 
 @raises(IndexError)
 def test_geometry_index_error2():
     wkt = 'Point (0 0)'
-    f = mapnik.Feature(1)
+    f = mapnik.Feature(mapnik.Context(),1)
     f.add_geometries_from_wkt(wkt)
     f.geometries()[3]
 
