@@ -67,6 +67,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       filter_factor_(filter_factor),
       first_(true)
 {
+    ctx_->push("value");
     ctx_->push("NODATA");
 }
 
