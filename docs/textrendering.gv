@@ -13,8 +13,12 @@ digraph textrendering {
   text_placements -> text_placement_info [label="get_placement_info()", style=dashed]
   text_placement_info -> text_symbolizer_properties [label="properties"]
   text_placement_info -> text_path [label="placements", style=dashed]
+  text_placement_info -> text_placement_info [label="next()"]
   text_symbolizer_properties -> text_processor [label="processor"]
-  text_path -> Renderer [label="used by"]
+  text_processor ->  processed_text [label="process()", style=dashed]
+  processed_text -> string_info [label="get_string_info()"]
+  text_path -> Renderer [color=red, label="used by"]
   Renderer -> text_placement_info [color=red, label="init()"]
+  Renderer -> processed_text [color=red, label="initializes"]
   
 }

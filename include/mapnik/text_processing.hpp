@@ -52,7 +52,9 @@ DEFINE_ENUM( text_transform_e, text_transform );
 struct char_properties
 {
     char_properties();
+    /** Construct object from XML. */
     void set_values_from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets);
+    /** Write object to XML ptree. */
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl=char_properties()) const;
     std::string face_name;
     font_set fontset;
@@ -75,7 +77,6 @@ public:
         p(properties), str(text) {}
     char_properties p;
     UnicodeString str;
-
 };
 
 class processed_text
@@ -113,10 +114,13 @@ public:
      * The output object has to be created by the caller and passed in for thread safety.
      */
     void process(processed_text &output, Feature const& feature);
+    /** Automatically create processing instructions for a single expression. */
     void set_old_style_expression(expression_ptr expr);
     /** Add a new formating token. */
     void push_back(abstract_token *token);
+    /** Get a list of all expressions used in any placement. This function is used to collect attributes. */
     std::set<expression_ptr> get_all_expressions() const;
+    /** Default values for char_properties. */
     char_properties defaults;
 protected:
     void from_xml_recursive(boost::property_tree::ptree const& pt, std::map<std::string,font_set> const &fontsets);
