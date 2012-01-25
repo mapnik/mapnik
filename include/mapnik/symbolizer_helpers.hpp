@@ -93,10 +93,38 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
     if (writer.first)
         placement->collect_extents = true;
 
+    unsigned num_geom = feature.num_geometries();
+    if (!num_geom) return text_placement_info_ptr(); //Nothing to do
+
     while (placement->next())
     {
         text_processor &processor = placement->properties.processor;
+        text_symbolizer_properties const& p = placement->properties;
+        /* TODO: Simplify this. */
+        text_->clear();
+        processor.process(*text_, feature);
+        string_info &info = text_->get_string_info();
+        /* END TODO */
+        double angle = 0.0;
+        if (p.orientation)
+        {
+            angle = boost::apply_visitor(evaluate<Feature,value_type>(feature),*(p.orientation)).to_double();
+        }
+        placement_finder<DetectorT> finder(*placement, info, detector_, dims);
+
+        unsigned num_geom = feature.num_geometries();
+        for (unsigned i=0; i<num_geom; ++i)
+        {
+            geometry_type const& geom = feature.get_geometry(i);
+            if (geom.num_points() == 0) continue; // don't bother with empty geometries
+            finder.find_placement(angle, geom, t_, prj_trans);
+            if (!placement->placements.size())
+                continue;
+            if (writer.first) writer.first->add_text(*placement, font_manager_, feature, t_, writer.second);
+            return placement;
+        }
     }
+    return text_placement_info_ptr();
 }
 
 template <typename FaceManagerT, typename DetectorT>
