@@ -36,6 +36,7 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/segment.hpp>
+#include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
@@ -572,11 +573,7 @@ public:
 
     void add_text(text_path & path,
                   cairo_face_manager & manager,
-                  face_set_ptr const& faces,
-                  unsigned text_size,
-                  color const& fill,
-                  unsigned halo_radius,
-                  color const& halo_fill)
+                  face_manager<freetype_engine> &font_manager)
     {
         double sx = path.starting_x;
         double sy = path.starting_y;
@@ -590,6 +587,10 @@ public:
             char_properties *format;
 
             path.vertex(&c, &x, &y, &angle, &format);
+
+            face_set_ptr faces = font_manager.get_face_set(format->face_name, format->fontset);
+            float text_size = format->text_size;
+            faces->set_character_sizes(text_size);
 
             glyph_ptr glyph = faces->get_glyph(c);
  
@@ -609,43 +610,11 @@ public:
                 set_font_face(manager, glyph->get_face());
 
                 glyph_path(glyph->get_index(), sx + x, sy - y);
-            }
-        }
-
-        set_line_width(halo_radius);
-        set_line_join(ROUND_JOIN);
-        set_color(halo_fill);
-        stroke();
-
-        set_color(fill);
-
-        path.rewind();
-
-        for (int iii = 0; iii < path.num_nodes(); iii++)
-        {
-            int c;
-            double x, y, angle;
-            char_properties *format;
-
-            path.vertex(&c, &x, &y, &angle, &format);
-
-            glyph_ptr glyph = faces->get_glyph(c);
- 
-            if (glyph)
-            {
-                Cairo::Matrix matrix;
-
-                matrix.xx = text_size * cos(angle);
-                matrix.xy = text_size * sin(angle);
-                matrix.yx = text_size * -sin(angle);
-                matrix.yy = text_size * cos(angle);
-                matrix.x0 = 0;
-                matrix.y0 = 0;
-
-                set_font_matrix(matrix);
-
-                set_font_face(manager, glyph->get_face());
-
+                set_line_width(format->halo_radius);
+                set_line_join(ROUND_JOIN);
+                set_color(format->halo_fill);
+                stroke();
+                set_color(format->fill);
                 show_glyph(glyph->get_index(), sx + x, sy - y);
             }
         }
@@ -1466,122 +1435,18 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-#if 0
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
+    text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_);
 
-    bool placement_found = false;
-    text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
-    while (!placement_found && placement_options->next())
+    text_placement_info_ptr placement = helper.get_placement(sym, feature, prj_trans);
+
+    if (!placement) return;
+
+    cairo_context context(context_);
+
+    for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
     {
-        expression_ptr name_expr = sym.get_name();
-        if (!name_expr) return;
-        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
-        UnicodeString text = result.to_unicode();
-
-        if ( sym.get_text_transform() == UPPERCASE)
-        {
-            text = text.toUpper();
-        }
-        else if ( sym.get_text_transform() == LOWERCASE)
-        {
-            text = text.toLower();
-        }
-        else if ( sym.get_text_transform() == CAPITALIZE)
-        {
-            text = text.toTitle(NULL);
-        }
-
-        if (text.length() <= 0) continue;
-
-        face_set_ptr faces;
-
-        if (sym.get_fontset().size() > 0)
-        {
-            faces = font_manager_.get_face_set(sym.get_fontset());
-        }
-        else
-        {
-            faces = font_manager_.get_face_set(sym.get_face_name());
-        }
-
-        if (faces->size() == 0)
-        {
-            throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
-        }
-        cairo_context context(context_);
-        string_info info(text);
-
-        faces->set_character_sizes(placement_options->text_size);
-        faces->get_string_info(info, text, 0);
-
-        placement_finder<label_collision_detector4> finder(detector_);
-
-        metawriter_with_properties writer = sym.get_metawriter();
-
-        unsigned num_geom = feature.num_geometries();
-        for (unsigned i=0; i<num_geom; ++i)
-        {
-            geometry_type const& geom = feature.get_geometry(i);
-            if (geom.num_points() == 0) continue;// don't bother with empty geometries
-            while (!placement_found && placement_options->next_position_only())
-            {
-                placement text_placement(info, sym, 1.0);
-                text_placement.avoid_edges = sym.get_avoid_edges();
-                if (writer.first)
-                    text_placement.collect_extents = true; // needed for inmem metawriter
-
-                if (sym.get_label_placement() == POINT_PLACEMENT ||
-                        sym.get_label_placement() == INTERIOR_PLACEMENT)
-                {
-                    double label_x, label_y, z=0.0;
-                    if (sym.get_label_placement() == POINT_PLACEMENT)
-                        geom.label_position(&label_x, &label_y);
-                    else
-                        geom.label_interior_position(&label_x, &label_y);
-                    prj_trans.backward(label_x,label_y, z);
-                    t_.forward(&label_x,&label_y);
-
-                    double angle = 0.0;
-                    expression_ptr angle_expr = sym.get_orientation();
-                    if (angle_expr)
-                    {
-                        // apply rotation
-                        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*angle_expr);
-                        angle = result.to_double();
-                    }
-
-                    finder.find_point_placement(text_placement, placement_options,
-                                                label_x, label_y,
-                                                angle, sym.get_line_spacing(),
-                                                sym.get_character_spacing());
-                    finder.update_detector(text_placement);
-                }
-                else if ( geom.num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
-                {
-                    path_type path(t_, geom, prj_trans);
-                    finder.find_line_placements<path_type>(text_placement, placement_options, path);
-                }
-
-                if (!text_placement.placements.size()) continue;
-                placement_found = true;
-
-                for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
-                {
-                    context.add_text(text_placement.placements[ii],
-                                     face_manager_,
-                                     faces,
-                                     placement_options->text_size,
-                                     sym.get_fill(),
-                                     sym.get_halo_radius(),
-                                     sym.get_halo_fill()
-                                     );
-                }
-
-                if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
-            }
-        }
+        context.add_text(placement->placements[ii], face_manager_, font_manager_);
     }
-#endif
 }
 
 template class cairo_renderer<Cairo::Surface>;

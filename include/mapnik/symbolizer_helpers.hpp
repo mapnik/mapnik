@@ -87,7 +87,6 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
 
     box2d<double> dims(0, 0, width_, height_);
 
-//    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info();
     placement->init(scale_factor_, width_, height_);
     if (writer.first)
