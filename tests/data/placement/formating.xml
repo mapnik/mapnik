@@ -13,7 +13,7 @@
     <Style name="My Style">
     <Rule>
       <PointSymbolizer/>
-      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="0" dy="16">
+      <TextSymbolizer placement-type="simple" placements="N,S" face-name="DejaVu Sans Book" size="16" placement="point" dx="0" dy="5">
       [name]+'&#10;'<Format face-name="DejaVu Sans Oblique" size="9">'('+[name]+')'</Format></TextSymbolizer>
     </Rule>
   </Style>
