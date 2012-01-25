@@ -23,10 +23,6 @@
 #ifndef MAPNIK_MAP_HPP
 #define MAPNIK_MAP_HPP
 
-#ifdef HAVE_CONFIG_H
-#include <config.hpp>
-#endif
-
 // mapnik
 #include <mapnik/enumeration.hpp>
 #include <mapnik/feature_type_style.hpp>
