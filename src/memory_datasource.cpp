@@ -72,7 +72,11 @@ void memory_datasource::push(feature_ptr feature)
     std::map<std::string,mapnik::value>::const_iterator it = fprops.begin();
     std::map<std::string,mapnik::value>::const_iterator end = fprops.end();
     for (; it != end; ++it) {
-        accumulators_[it->first](it->second.to_double());
+        try {
+            accumulators_[it->first](it->second.to_double());
+        } catch(boost::bad_lexical_cast &) {
+            // string values are not accumulated.
+        }
     }
     features_.push_back(feature);
 }
