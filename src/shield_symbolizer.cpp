@@ -34,6 +34,15 @@
 namespace mapnik
 {
 
+shield_symbolizer::shield_symbolizer(text_placements_ptr placements)
+    : text_symbolizer(placements),
+      symbolizer_with_image(),
+      unlock_image_(false),
+      no_text_(false),
+      shield_displacement_(boost::make_tuple<double,double>(0,0))
+{
+}
+
 shield_symbolizer::shield_symbolizer(
     expression_ptr name,
     std::string const& face_name,

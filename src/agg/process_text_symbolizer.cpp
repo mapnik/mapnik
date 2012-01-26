@@ -24,231 +24,32 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
+#include <mapnik/symbolizer_helpers.hpp>
 
 namespace mapnik {
-
-struct largest_bbox_comp
-{
-    bool operator() (geometry_type const* g0, geometry_type const* g1) const
-    {
-        box2d<double> b0 = g0->envelope();
-        box2d<double> b1 = g1->envelope();
-        return b0.width()*b0.height() < b1.width()*b1.height();
-    }
-
-};
-
-typedef boost::tuple<double,double> point_type;
-typedef std::vector<point_type> label_points_type;
-
-void get_label_points(label_points_type & labels,
-                      Feature const& feature,
-                      text_symbolizer const& sym,
-                      proj_transform const& prj_trans,
-                      CoordTransform const& t
-                      )
-{
-    std::vector<geometry_type*> geometries_to_process;
-
-    unsigned num_geom = feature.num_geometries();
-    for (unsigned i=0; i<num_geom; ++i)
-    {
-        geometry_type const& geom = feature.get_geometry(i);
-        if (geom.num_points() == 0) continue; // don't bother with empty geometries
-        if ((geom.type() == Polygon) && sym.get_minimum_path_length() > 0)
-        {
-            // TODO - find less costly method than fetching full envelope
-            box2d<double> gbox = t.forward(geom.envelope(),prj_trans);
-            if (gbox.width() < sym.get_minimum_path_length())
-            {
-                continue;
-            }
-        }
-        geometries_to_process.push_back(const_cast<geometry_type*>(&geom));        
-    }
-    
-    vector<geometry_type*>::const_iterator largest = std::max_element(geometries_to_process.begin(), 
-                                                                      geometries_to_process.end(), 
-                                                                      largest_bbox_comp());
-    if (largest != geometries_to_process.end())
-    {
-        double z=0.0;
-        double label_x,label_y;
-        if (sym.get_label_placement() == POINT_PLACEMENT)
-            (*largest)->label_position(&label_x, &label_y);
-        else if (sym.get_label_placement() == INTERIOR_PLACEMENT)
-            (*largest)->label_interior_position(&label_x, &label_y);
-        else // default to bbox center
-        {
-            box2d<double> box = (*largest)->envelope();
-            coord2d c = box.center();
-            label_x = c.x;
-            label_y = c.y;
-        }
-        prj_trans.backward(label_x,label_y, z);
-        t.forward(&label_x,&label_y);
-        
-        labels.push_back(boost::make_tuple(label_x,label_y));
-    }
-    
-    /*
-    std::sort(geometries_to_process.begin(), geometries_to_process.end(), largest_bbox_first());
-    BOOST_FOREACH( geometry_type * g, geometries_to_process)
-    {
-        double z=0.0;
-        double label_x,label_y;
-        if (sym.get_label_placement() == POINT_PLACEMENT)
-            g->label_position(&label_x, &label_y);
-        else
-            g->label_interior_position(&label_x, &label_y);
-        prj_trans.backward(label_x,label_y, z);
-        t.forward(&label_x,&label_y);
-        
-        labels.push_back(boost::make_tuple(label_x,label_y));
-    } 
-    */
-}
 
 template <typename T>
 void agg_renderer<T>::process(text_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-    label_points_type labels;
-    get_label_points(labels, feature, sym, prj_trans, t_);
-    
-    if (labels.size() == 0) return;
-    
-    typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+    /* This could also be a member of the renderer class, but I would have
+       to check if any of the variables changes and notify the helper.
+       It could be done at a later point, but for now keep the code simple.
+     */
+    text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(width_, height_, scale_factor_, t_, font_manager_, *detector_);
 
-//////////////////////////////////////////////////////////////////////
+    text_placement_info_ptr placement = helper.get_placement(sym, feature, prj_trans);
 
-    expression_ptr name_expr = sym.get_name();
-    if (!name_expr) return;
-    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
-    UnicodeString text = result.to_unicode();
-    
-    if ( sym.get_text_transform() == UPPERCASE)
+    if (!placement) return;
+
+    text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
+    for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
     {
-        text = text.toUpper();
-    }
-    else if ( sym.get_text_transform() == LOWERCASE)
-    {
-        text = text.toLower();
-    }
-    else if ( sym.get_text_transform() == CAPITALIZE)
-    {
-        text = text.toTitle(0);
-    }
-    
-    if ( text.length() <= 0 ) return;
-    color const& fill = sym.get_fill();
-    
-    face_set_ptr faces;
-    
-    if (sym.get_fontset().size() > 0)
-    {
-        faces = font_manager_.get_face_set(sym.get_fontset());
-    }
-    else
-    {
-        faces = font_manager_.get_face_set(sym.get_face_name());
-    }
-    
-    stroker_ptr strk = font_manager_.get_stroker();
-    if (!(faces->size() > 0 && strk))
-    {
-        throw config_error("Unable to find specified font face '" + sym.get_face_name() + "'");
-    }
-    
-/////////////////////////
-////////////// renderer
-    text_renderer<T> ren(pixmap_, faces, *strk);        
-    ren.set_fill(fill);
-    ren.set_halo_fill(sym.get_halo_fill());
-    ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
-    ren.set_opacity(sym.get_text_opacity());
-    
-/////////////////////////
-    
-//////
-    box2d<double> dims(0,0,width_,height_);
-    placement_finder<label_collision_detector4> finder(*detector_,dims);
- 
-    
-///////////    
-
-    bool placement_found = false;
-    text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
-    while (!placement_found && placement_options->next())
-    {
-        
-        ren.set_character_size(placement_options->text_size * scale_factor_);
-
-        string_info info(text);    
-        faces->get_string_info(info);
-        metawriter_with_properties writer = sym.get_metawriter();
-
-        //BOOST_FOREACH( geometry_type * geom, geometries_to_process )
-        BOOST_FOREACH (point_type const& pt, labels)  
-        {
-            //while (!placement_found && placement_options->next_position_only())
-            {
-                placement text_placement(info, sym, scale_factor_);
-                text_placement.avoid_edges = sym.get_avoid_edges();
-                if (writer.first)
-                    text_placement.collect_extents =true; // needed for inmem metawriter
-
-                //if (sym.get_label_placement() == POINT_PLACEMENT ||
-                //        sym.get_label_placement() == INTERIOR_PLACEMENT)
-                {
-                    //double label_x=0.0;
-                    //double label_y=0.0;
-                    //double z=0.0;
-                    //if (sym.get_label_placement() == POINT_PLACEMENT)
-                    //    geom->label_position(&label_x, &label_y);
-                    //else
-                    //    geom->label_interior_position(&label_x, &label_y);
-                    //prj_trans.backward(label_x,label_y, z);
-                    //t_.forward(&label_x,&label_y);
-                    
-                    
-                    double angle = 0.0;
-                    expression_ptr angle_expr = sym.get_orientation();
-                    if (angle_expr)
-                    {
-                        // apply rotation
-                        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*angle_expr);
-                        angle = result.to_double();
-                    }
-
-                    finder.find_point_placement(text_placement, placement_options, boost::get<0>(pt),boost::get<1>(pt),
-                                                angle, sym.get_line_spacing(),
-                                                sym.get_character_spacing());
-                    finder.update_detector(text_placement);
-                }
-                
-                //else if ( geom->num_points() > 1 && sym.get_label_placement() == LINE_PLACEMENT)
-                // {
-                //   path_type path(t_,*geom,prj_trans);
-                //   finder.find_line_placements<path_type>(text_placement, placement_options, path);
-                // }
-                
-                if (!text_placement.placements.size()) continue;
-                placement_found = true;
-
-                for (unsigned int ii = 0; ii < text_placement.placements.size(); ++ii)
-                {
-                    double x = text_placement.placements[ii].starting_x;
-                    double y = text_placement.placements[ii].starting_y;
-                    ren.prepare_glyphs(&text_placement.placements[ii]);
-                    ren.render(x,y);
-                }
-
-                if (writer.first) writer.first->add_text(text_placement, faces, feature, t_, writer.second);
-            }
-        }
+        double x = placement->placements[ii].starting_x;
+        double y = placement->placements[ii].starting_y;
+        ren.prepare_glyphs(&(placement->placements[ii]));
+        ren.render(x, y);
     }
 }
 

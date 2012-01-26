@@ -80,7 +80,6 @@ HEADERS += \
     ../include/mapnik/geometry.hpp \
     ../include/mapnik/geom_util.hpp \
     ../include/mapnik/global.hpp \
-    ../include/mapnik/glyph_symbolizer.hpp \
     ../include/mapnik/gradient.hpp \
     ../include/mapnik/graphics.hpp \
     ../include/mapnik/hextree.hpp \
@@ -92,7 +91,6 @@ HEADERS += \
     ../include/mapnik/image_view.hpp \
     ../include/mapnik/jpeg_io.hpp \
     ../include/mapnik/label_collision_detector.hpp \
-    ../include/mapnik/label_placement.hpp \
     ../include/mapnik/layer.hpp \
     ../include/mapnik/libxml2_loader.hpp \
     ../include/mapnik/line_pattern_symbolizer.hpp \
@@ -162,7 +160,6 @@ HEADERS += \
 SOURCES += \
     ../src/agg/agg_renderer.cpp \
     ../src/agg/process_building_symbolizer.cpp \
-    ../src/agg/process_glyph_symbolizer.cpp \
     ../src/agg/process_line_pattern_symbolizer.cpp \
     ../src/agg/process_line_symbolizer.cpp \
     ../src/agg/process_markers_symbolizer.cpp \
@@ -174,7 +171,6 @@ SOURCES += \
     ../src/agg/process_text_symbolizer.cpp \
     ../src/grid/grid_renderer.cpp \
     ../src/grid/process_building_symbolizer.cpp \
-    ../src/grid/process_glyph_symbolizer.cpp \
     ../src/grid/process_line_pattern_symbolizer.cpp \
     ../src/grid/process_line_symbolizer.cpp \
     ../src/grid/process_markers_symbolizer.cpp \
@@ -188,7 +184,6 @@ SOURCES += \
     ../src/svg/svg_output_attributes.cpp \
     ../src/svg/process_symbolizers.cpp \
     ../src/svg/process_building_symbolizer.cpp \
-    ../src/svg/process_glyph_symbolizer.cpp \
     ../src/svg/process_line_pattern_symbolizer.cpp \
     ../src/svg/process_line_symbolizer.cpp \
     ../src/svg/process_markers_symbolizer.cpp \
@@ -210,7 +205,6 @@ SOURCES += \
     ../src/filter_factory.cpp \
     ../src/font_engine_freetype.cpp \
     ../src/font_set.cpp \
-    ../src/glyph_symbolizer.cpp \
     ../src/gradient.cpp \
     ../src/graphics.cpp \
     ../src/image_reader.cpp \

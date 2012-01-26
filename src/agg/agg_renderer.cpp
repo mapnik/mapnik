@@ -31,6 +31,7 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/map.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>

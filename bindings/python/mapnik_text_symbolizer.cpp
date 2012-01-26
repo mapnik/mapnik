@@ -48,27 +48,6 @@ void set_text_displacement(text_symbolizer & t, boost::python::tuple arg)
     t.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
-tuple get_anchor(const text_symbolizer& t)
-{
-    position pos = t.get_anchor();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
-}
-
-void set_anchor(text_symbolizer & t, boost::python::tuple arg)
-{
-    t.set_anchor(extract<double>(arg[0]),extract<double>(arg[1]));
-}
-
-void set_placement_options(text_symbolizer & t, placement_type_e arg, std::string const& placements)
-{
-    t.set_placement_options(arg, placements);
-}
-
-void set_placement_options_2(text_symbolizer & t, placement_type_e arg)
-{
-    t.set_placement_options(arg, "");
-}
-
 }
 
 struct text_symbolizer_pickle_suite : boost::python::pickle_suite
@@ -86,7 +65,6 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
     getstate(const text_symbolizer& t)
     {
         boost::python::tuple disp = get_text_displacement(t);
-        boost::python::tuple anchor = get_anchor(t);
 
         // so we do not exceed max args accepted by make_tuple,
         // lets put the increasing list of parameters in a list
@@ -105,7 +83,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         return boost::python::make_tuple(disp,t.get_label_placement(),
                                          t.get_vertical_alignment(),t.get_halo_radius(),t.get_halo_fill(),t.get_text_ratio(),
                                          t.get_wrap_width(),t.get_label_spacing(),t.get_minimum_distance(),t.get_allow_overlap(),
-                                         anchor,t.get_force_odd_labels(),t.get_max_char_angle_delta(),extras
+                                         t.get_force_odd_labels(),t.get_max_char_angle_delta(),extras
             );
     }
 
@@ -146,15 +124,10 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
 
         t.set_allow_overlap(extract<bool>(state[9]));
 
-        tuple anch = extract<tuple>(state[10]);
-        double x = extract<double>(anch[0]);
-        double y = extract<double>(anch[1]);
-        t.set_anchor(x,y);
+        t.set_force_odd_labels(extract<bool>(state[10]));
 
-        t.set_force_odd_labels(extract<bool>(state[11]));
-
-        t.set_max_char_angle_delta(extract<double>(state[12]));
-        list extras = extract<list>(state[13]);
+        t.set_max_char_angle_delta(extract<double>(state[11]));
+        list extras = extract<list>(state[12]);
         t.set_wrap_char_from_string(extract<std::string>(extras[0]));
         t.set_line_spacing(extract<unsigned>(extras[1]));
         t.set_character_spacing(extract<unsigned>(extras[2]));
@@ -190,6 +163,7 @@ void export_text_symbolizer()
         .value("LEFT",H_LEFT)
         .value("MIDDLE",H_MIDDLE)
         .value("RIGHT",H_RIGHT)
+        .value("AUTO",H_AUTO)
         ;
 
     enumeration_<justify_alignment_e>("justify_alignment")
@@ -203,11 +177,6 @@ void export_text_symbolizer()
         .value("UPPERCASE",UPPERCASE)
         .value("LOWERCASE",LOWERCASE)
         .value("CAPITALIZE",CAPITALIZE)
-        ;
-
-    enumeration_<placement_type_e>("placement_type")
-        .value("SIMPLE",T_SIMPLE)
-        .value("DUMMY",T_DUMMY)
         ;
 
     class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
@@ -226,9 +195,6 @@ void export_text_symbolizer()
         */
 
         //.def_pickle(text_symbolizer_pickle_suite())
-        .add_property("anchor",
-                      &get_anchor,
-                      &set_anchor)
         .add_property("allow_overlap",
                       &text_symbolizer::get_allow_overlap,
                       &text_symbolizer::set_allow_overlap,
@@ -302,10 +268,6 @@ void export_text_symbolizer()
                       &text_symbolizer::get_text_opacity,
                       &text_symbolizer::set_text_opacity,
                       "Set/get the text opacity")
-        .add_property("placement",
-                      &text_symbolizer::get_label_placement,
-                      &text_symbolizer::set_label_placement,
-                      "Set/get the placement of the label")
         .add_property("text_transform",
                       &text_symbolizer::get_text_transform,
                       &text_symbolizer::set_text_transform,
@@ -329,9 +291,5 @@ void export_text_symbolizer()
         .add_property("wrap_before",
                       &text_symbolizer::get_wrap_before,
                       &text_symbolizer::set_wrap_before)
-        .add_property("placement_type", &text_symbolizer::get_placement_type)
-        .add_property("placements", &text_symbolizer::get_placements)
-        .def("set_placement_options", set_placement_options)
-        .def("set_placement_options", set_placement_options_2)
         ;
 }

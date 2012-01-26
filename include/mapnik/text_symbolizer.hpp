@@ -26,8 +26,6 @@
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
-#include <mapnik/graphics.hpp>
-#include <mapnik/filter_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text_placements.hpp>
 
@@ -38,6 +36,13 @@
 // stl
 #include <string>
 
+// Warning disabled for the moment
+#if (0 && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+#define func_deprecated __attribute__ ((deprecated))
+#else
+#define func_deprecated
+#endif
+
 namespace mapnik
 {
 
@@ -45,6 +50,7 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 {
     // Note - we do not use boost::make_shared below as VC2008 and VC2010 are
     // not able to compile make_shared used within a constructor
+    text_symbolizer(text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
     text_symbolizer(expression_ptr name, std::string const& face_name,
                     float size, color const& fill,
                     text_placements_ptr placements = text_placements_ptr(new text_placements_dummy)
@@ -54,73 +60,71 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
                     );
     text_symbolizer(text_symbolizer const& rhs);
     text_symbolizer& operator=(text_symbolizer const& rhs);
-    expression_ptr get_name() const;
+    expression_ptr get_name() const func_deprecated;
     void set_name(expression_ptr expr);
 
-    expression_ptr get_orientation() const; // orienation (rotation angle atm)
+    expression_ptr get_orientation() const func_deprecated; // orienation (rotation angle atm)
     void set_orientation(expression_ptr expr);
          
-    unsigned get_text_ratio() const; // target ratio for text bounding box in pixels
+    unsigned get_text_ratio() const func_deprecated; // target ratio for text bounding box in pixels
     void set_text_ratio(unsigned ratio);
-    unsigned get_wrap_width() const; // width to wrap text at, or trigger ratio
+    unsigned get_wrap_width() const func_deprecated; // width to wrap text at, or trigger ratio
     void set_wrap_width(unsigned ratio);
-    unsigned char get_wrap_char() const; // character used to wrap lines
-    std::string get_wrap_char_string() const; // character used to wrap lines as std::string
+    unsigned char get_wrap_char() const func_deprecated; // character used to wrap lines
+    std::string get_wrap_char_string() const func_deprecated; // character used to wrap lines as std::string
     void set_wrap_char(unsigned char character);
     void set_wrap_char_from_string(std::string const& character);
-    text_transform_e get_text_transform() const; // text conversion on strings before display
+    text_transform_e get_text_transform() const func_deprecated; // text conversion on strings before display
     void set_text_transform(text_transform_e convert);
-    unsigned get_line_spacing() const; // spacing between lines of text
+    unsigned get_line_spacing() const func_deprecated; // spacing between lines of text
     void set_line_spacing(unsigned spacing);
-    unsigned get_character_spacing() const; // spacing between characters in text
+    unsigned get_character_spacing() const func_deprecated; // spacing between characters in text
     void set_character_spacing(unsigned spacing);
-    unsigned get_label_spacing() const; // spacing between repeated labels on lines
+    unsigned get_label_spacing() const func_deprecated; // spacing between repeated labels on lines
     void set_label_spacing(unsigned spacing);
-    unsigned get_label_position_tolerance() const; //distance the label can be moved on the line to fit, if 0 the default is used
+    unsigned get_label_position_tolerance() const func_deprecated; //distance the label can be moved on the line to fit, if 0 the default is used
     void set_label_position_tolerance(unsigned tolerance);
-    bool get_force_odd_labels() const; // try render an odd amount of labels
+    bool get_force_odd_labels() const func_deprecated; // try render an odd amount of labels
     void set_force_odd_labels(bool force);
-    double get_max_char_angle_delta() const; // maximum change in angle between adjacent characters
+    double get_max_char_angle_delta() const func_deprecated; // maximum change in angle between adjacent characters
     void set_max_char_angle_delta(double angle);
-    float get_text_size() const;
+    float get_text_size() const func_deprecated;
     void set_text_size(float size);
-    std::string const& get_face_name() const;
+    std::string const& get_face_name() const func_deprecated;
     void set_face_name(std::string face_name);
-    font_set const& get_fontset() const;
+    font_set const& get_fontset() const func_deprecated;
     void set_fontset(font_set const& fset);
-    color const& get_fill() const;
+    color const& get_fill() const func_deprecated;
     void set_fill(color const& fill);
     void set_halo_fill(color const& fill);
-    color const& get_halo_fill() const;
+    color const& get_halo_fill() const func_deprecated;
     void set_halo_radius(double radius);
-    double get_halo_radius() const;
+    double get_halo_radius() const func_deprecated;
     void set_label_placement(label_placement_e label_p);
-    label_placement_e get_label_placement() const;
+    label_placement_e get_label_placement() const func_deprecated;
     void set_vertical_alignment(vertical_alignment_e valign);
-    vertical_alignment_e get_vertical_alignment() const;
-    void set_anchor(double x, double y);
-    position const& get_anchor() const;
+    vertical_alignment_e get_vertical_alignment() const func_deprecated;
     void set_displacement(double x, double y);
     void set_displacement(position const& p);
-    position const& get_displacement() const;
+    position const& get_displacement() const func_deprecated;
     void set_avoid_edges(bool avoid);
-    bool get_avoid_edges() const;
+    bool get_avoid_edges() const func_deprecated;
     void set_minimum_distance(double distance);
-    double get_minimum_distance() const;
+    double get_minimum_distance() const func_deprecated;
     void set_minimum_padding(double distance);
-    double get_minimum_padding() const;
+    double get_minimum_padding() const func_deprecated;
     void set_minimum_path_length(double size);
-    double get_minimum_path_length() const;
+    double get_minimum_path_length() const func_deprecated;
     void set_allow_overlap(bool overlap);
-    bool get_allow_overlap() const;
+    bool get_allow_overlap() const func_deprecated;
     void set_text_opacity(double opacity);
-    double get_text_opacity() const;
-    bool get_wrap_before() const; // wrap text at wrap_char immediately before current work
+    double get_text_opacity() const func_deprecated;
     void set_wrap_before(bool wrap_before);
+    bool get_wrap_before() const func_deprecated; // wrap text at wrap_char immediately before current work
     void set_horizontal_alignment(horizontal_alignment_e valign);
-    horizontal_alignment_e get_horizontal_alignment() const;
+    horizontal_alignment_e get_horizontal_alignment() const func_deprecated;
     void set_justify_alignment(justify_alignment_e valign);
-    justify_alignment_e get_justify_alignment() const;
+    justify_alignment_e get_justify_alignment() const func_deprecated;
     text_placements_ptr get_placement_options() const;
     void set_placement_options(text_placements_ptr placement_options);
     void set_placement_options(placement_type_e arg, std::string const& placements);
@@ -128,32 +132,6 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     std::string get_placements() const;
 
 private:
-    expression_ptr name_;
-    expression_ptr orientation_;
-    std::string face_name_;
-    font_set fontset_;
-    unsigned text_ratio_;
-    unsigned wrap_width_;
-    unsigned char wrap_char_;
-    text_transform_e text_transform_;
-    unsigned line_spacing_;
-    unsigned character_spacing_;
-    unsigned label_spacing_;
-    unsigned label_position_tolerance_;
-    bool force_odd_labels_;
-    double max_char_angle_delta_;
-    color fill_;
-    color halo_fill_;
-    double halo_radius_;
-    label_placement_e label_p_;
-    position anchor_;
-    bool avoid_edges_;
-    double minimum_distance_;
-    double minimum_padding_;
-    double minimum_path_length_;
-    bool overlap_;
-    double text_opacity_;
-    bool wrap_before_;
     text_placements_ptr placement_options_;
 };
 }

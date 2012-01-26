@@ -44,6 +44,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                                Feature const& feature,
                                proj_transform const& prj_trans)
 {
+#if 0
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
 
     bool placement_found = false;
@@ -120,7 +121,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 
             string_info info(text);
 
-            faces->get_string_info(info);
+            faces->get_string_info(info, text, 0);
 
             // TODO- clamp to at least 4 px otherwise interactivity is too small
             int w = (*marker)->width()/pixmap_.get_resolution();
@@ -237,7 +238,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
     }
     if (placement_found)
         pixmap_.add_feature(feature);
-    
+#endif
 }
 
 template void grid_renderer<grid>::process(shield_symbolizer const&,

@@ -98,9 +98,6 @@ public:
     void process(markers_symbolizer const& sym,
                  Feature const& feature,
                  proj_transform const& prj_trans);
-    void process(glyph_symbolizer const& sym,
-                 Feature const& feature,
-                 proj_transform const& prj_trans);    
     inline bool process(rule::symbolizers const& /*syms*/,
                         Feature const& /*feature*/,
                         proj_transform const& /*prj_trans*/)
