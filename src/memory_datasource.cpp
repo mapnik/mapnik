@@ -26,6 +26,7 @@
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <boost/math/distributions/normal.hpp>
 // stl
 #include <algorithm>
 
@@ -112,6 +113,24 @@ layer_descriptor memory_datasource::get_descriptor() const
 std::map<std::string, mapnik::parameters> memory_datasource::get_statistics() const
 {
     std::map<std::string, mapnik::parameters> _stats;
+
+    // Temporary storage for full values
+    std::map<std::string, std::vector<double> > _values;
+
+    mapnik::query q(envelope());
+    mapnik::featureset_ptr fs;
+    mapnik::feature_ptr fp;
+    fs = features(q);
+
+    while(fp = fs->next()) {
+        std::map<std::string,mapnik::value> const& fprops = fp->props();
+        std::map<std::string,mapnik::value>::const_iterator it = fprops.begin();
+        std::map<std::string,mapnik::value>::const_iterator end = fprops.end();
+        for (; it != end; ++it) {
+            _values[it->first].push_back(it->second.to_double());
+        }
+    }
+
     return _stats;
 }
     
