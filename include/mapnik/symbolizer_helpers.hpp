@@ -29,7 +29,7 @@
 #include <mapnik/feature.hpp>
 
 #include <boost/shared_ptr.hpp>
-
+#include <boost/foreach.hpp>
 
 namespace mapnik {
 
@@ -58,7 +58,8 @@ public:
                                           Feature const& feature,
                                           proj_transform const& prj_trans);
 private:
-    bool initialize_geometries(text_symbolizer const& sym,
+    bool initialize_geometries(std::vector<geometry_type*> & geometries_to_process,
+                               text_symbolizer const& sym,
                                Feature const& feature,
                                proj_transform const& prj_trans);
 
@@ -69,8 +70,6 @@ private:
     FaceManagerT &font_manager_;
     DetectorT &detector_;
     boost::shared_ptr<processed_text> text_; /*TODO: Use shared pointers for text placement so we don't need to keep a reference here! */
-    // Use a boost::ptr_vector here instread of std::vector?
-    std::vector<geometry_type*> geometries_to_process_;
 };
 
 
@@ -80,7 +79,10 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
     Feature const& feature,
     proj_transform const& prj_trans)
 {
-    if (!initialize_geometries(sym, feature, prj_trans)) return text_placement_info_ptr();
+    std::vector<geometry_type*> geometries_to_process;
+    
+    if (!initialize_geometries(geometries_to_process,sym, feature, prj_trans)) 
+        return text_placement_info_ptr();
 
     text_ = boost::shared_ptr<processed_text>(new processed_text(font_manager_, scale_factor_));
     metawriter_with_properties writer = sym.get_metawriter();
@@ -110,13 +112,10 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
             angle = boost::apply_visitor(evaluate<Feature,value_type>(feature),*(p.orientation)).to_double();
         }
         placement_finder<DetectorT> finder(*placement, info, detector_, dims);
-
-        unsigned num_geom = feature.num_geometries();
-        for (unsigned i=0; i<num_geom; ++i)
+        
+        BOOST_FOREACH( geometry_type * geom, geometries_to_process )    
         {
-            geometry_type const& geom = feature.get_geometry(i);
-            if (geom.num_points() == 0) continue; // don't bother with empty geometries
-            finder.find_placement(angle, geom, t_, prj_trans);
+            finder.find_placement(angle, *geom, t_, prj_trans);
             if (!placement->placements.size())
                 continue;
             if (writer.first) writer.first->add_text(*placement, font_manager_, feature, t_, writer.second);
@@ -128,6 +127,7 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
 
 template <typename FaceManagerT, typename DetectorT>
 bool text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries(
+    std::vector<geometry_type*> & geometries_to_process,
     text_symbolizer const& sym,
     Feature const& feature,
     proj_transform const& prj_trans)
@@ -150,10 +150,10 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries(
             }
         }
         // TODO - calculate length here as well
-        geometries_to_process_.push_back(const_cast<geometry_type*>(&geom));
+        geometries_to_process.push_back(const_cast<geometry_type*>(&geom));
     }
-
-    if (!geometries_to_process_.size() > 0)
+    
+    if (!geometries_to_process.size() > 0)
     {
         // early return to avoid significant overhead of rendering setup
         return false;
