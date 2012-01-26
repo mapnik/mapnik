@@ -111,12 +111,10 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
         }
         placement_finder<DetectorT> finder(*placement, info, detector_, dims);
 
-        unsigned num_geom = feature.num_geometries();
-        for (unsigned i=0; i<num_geom; ++i)
+        BOOST_FOREACH(geometry_type * geom, geometries_to_process_)
         {
-            geometry_type const& geom = feature.get_geometry(i);
-            if (geom.num_points() == 0) continue; // don't bother with empty geometries
-            finder.find_placement(angle, geom, t_, prj_trans);
+            if (geom->num_points() == 0) continue; // don't bother with empty geometries
+            finder.find_placement(angle, *geom, t_, prj_trans);
             if (!placement->placements.size())
                 continue;
             if (writer.first) writer.first->add_text(*placement, font_manager_, feature, t_, writer.second);
