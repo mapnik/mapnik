@@ -25,7 +25,6 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
@@ -46,95 +45,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                proj_transform const& prj_trans)
 {
 #if 0
-    typedef  coord_transform2<CoordTransform,geometry_type> path_type;
-
-
-    text_placement_info_ptr placement_options = sym.get_placement_options()->get_placement_info();
-    placement_options->next();
-    placement_options->next_position_only();
-
-    UnicodeString text;
-    if( sym.get_no_text() )
-        text = UnicodeString( " " );  // TODO: fix->use 'space' as the text to render
-    else
-    {
-        expression_ptr name_expr = sym.get_name();
-        if (!name_expr) return;
-        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature),*name_expr);
-        text = result.to_unicode();
-    }
-    
-    if ( sym.get_text_transform() == UPPERCASE)
-    {
-        text = text.toUpper();
-    }
-    else if ( sym.get_text_transform() == LOWERCASE)
-    {
-        text = text.toLower();
-    }
-    else if ( sym.get_text_transform() == CAPITALIZE)
-    {
-        text = text.toTitle(NULL);
-    }
-    
-    agg::trans_affine tr;
-    boost::array<double,6> const& m = sym.get_transform();
-    tr.load_from(&m[0]);
-    
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<mapnik::marker_ptr> marker;
-    if ( !filename.empty() )
-    {
-        marker = marker_cache::instance()->find(filename, true);
-    }
-    else
-    {
-        marker.reset(boost::make_shared<mapnik::marker>());
-    }
-    
-    
-    if (text.length() > 0 && marker)
-    {
-        int w = (*marker)->width();
-        int h = (*marker)->height();
-        
-        double px0 = - 0.5 * w;
-        double py0 = - 0.5 * h;
-        double px1 = 0.5 * w;
-        double py1 = 0.5 * h;
-        double px2 = px1;
-        double py2 = py0;
-        double px3 = px0;
-        double py3 = py1;
-        tr.transform(&px0,&py0);
-        tr.transform(&px1,&py1);
-        tr.transform(&px2,&py2);
-        tr.transform(&px3,&py3);
-        box2d<double> label_ext (px0, py0, px1, py1);
-        label_ext.expand_to_include(px2, py2);
-        label_ext.expand_to_include(px3, py3);
-        
-        face_set_ptr faces;
-
-        if (sym.get_fontset().size() > 0)
-        {
-            faces = font_manager_.get_face_set(sym.get_fontset());
-        }
-        else
-        {
-            faces = font_manager_.get_face_set(sym.get_face_name());
-        }
-
-        stroker_ptr strk = font_manager_.get_stroker();
-        if (strk && faces->size() > 0)
-        {
             text_renderer<T> ren(pixmap_, faces, *strk);
 
-            ren.set_character_size(sym.get_text_size() * scale_factor_);
-            ren.set_fill(sym.get_fill());
-            ren.set_halo_fill(sym.get_halo_fill());
-            ren.set_halo_radius(sym.get_halo_radius() * scale_factor_);
-            ren.set_opacity(sym.get_text_opacity());
 
             placement_finder<label_collision_detector4> finder(*detector_);
 

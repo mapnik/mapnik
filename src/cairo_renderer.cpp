@@ -1435,17 +1435,15 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                   Feature const& feature,
                                   proj_transform const& prj_trans)
 {
-    text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_);
-
-    text_placement_info_ptr placement = helper.get_placement(sym, feature, prj_trans);
-
-    if (!placement) return;
+    text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_);
 
     cairo_context context(context_);
-
-    for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
-    {
-        context.add_text(placement->placements[ii], face_manager_, font_manager_);
+    text_placement_info_ptr placement;
+    while ((placement = helper.get_placement())) {
+        for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+        {
+            context.add_text(placement->placements[ii], face_manager_, font_manager_);
+        }
     }
 }
 
