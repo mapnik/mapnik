@@ -27,10 +27,25 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 
+// boost
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/framework/accumulator_set.hpp>
+
 // stl
 #include <vector>
 
 namespace mapnik {
+
+typedef boost::accumulators::accumulator_set<
+        double, boost::accumulators::features<
+            boost::accumulators::tag::mean,
+            boost::accumulators::tag::min,
+            boost::accumulators::tag::max
+        > > statistics_accumulator;
     
 class MAPNIK_DECL memory_datasource : public datasource
 {
@@ -50,6 +65,7 @@ public:
     void clear();
 private:
     std::vector<feature_ptr> features_;
+    std::map<std::string, statistics_accumulator> accumulators_;
     mapnik::layer_descriptor desc_;
 }; 
    

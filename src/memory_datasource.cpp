@@ -68,6 +68,12 @@ void memory_datasource::push(feature_ptr feature)
 {
     // TODO - collect attribute descriptors?
     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+    std::map<std::string,mapnik::value> const& fprops = feature->props();
+    std::map<std::string,mapnik::value>::const_iterator it = fprops.begin();
+    std::map<std::string,mapnik::value>::const_iterator end = fprops.end();
+    for (; it != end; ++it) {
+        accumulators_[it->first](it->second.to_double());
+    }
     features_.push_back(feature);
 }
     
@@ -113,24 +119,15 @@ layer_descriptor memory_datasource::get_descriptor() const
 std::map<std::string, mapnik::parameters> memory_datasource::get_statistics() const
 {
     std::map<std::string, mapnik::parameters> _stats;
-
-    // Temporary storage for full values
-    std::map<std::string, std::vector<double> > _values;
-
-    mapnik::query q(envelope());
-    mapnik::featureset_ptr fs;
-    mapnik::feature_ptr fp;
-    fs = features(q);
-
-    while(fp = fs->next()) {
-        std::map<std::string,mapnik::value> const& fprops = fp->props();
-        std::map<std::string,mapnik::value>::const_iterator it = fprops.begin();
-        std::map<std::string,mapnik::value>::const_iterator end = fprops.end();
-        for (; it != end; ++it) {
-            _values[it->first].push_back(it->second.to_double());
-        }
+    std::map<std::string, statistics_accumulator>::const_iterator it = accumulators_.begin();
+    std::map<std::string, statistics_accumulator>::const_iterator end = accumulators_.end();
+    for (; it != end; ++it) {
+        mapnik::parameters p;
+        p["mean"] = boost::accumulators::mean(it->second);
+        p["min"] = boost::accumulators::min(it->second);
+        p["max"] = boost::accumulators::max(it->second);
+        _stats[it->first] = p;
     }
-
     return _stats;
 }
     
