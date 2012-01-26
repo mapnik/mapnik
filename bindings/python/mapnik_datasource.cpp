@@ -93,6 +93,24 @@ boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
     return description;
 }
 
+boost::python::dict statistics(boost::shared_ptr<mapnik::datasource> const& ds)
+{
+    boost::python::dict description;
+    std::map<std::string, mapnik::parameters> stats = ds->get_statistics();
+    std::map<std::string, mapnik::parameters>::iterator it;
+
+    for (it = stats.begin(); it != stats.end(); it++) {
+        boost::python::dict field;
+        mapnik::parameters::const_iterator k = it->second.begin();
+        for (; k != it->second.end(); ++k) {
+            field[k->first] = boost::get<double>(k->second);
+        }
+        description[it->first] = field;
+    }
+
+    return description;
+}
+
 boost::python::list fields(boost::shared_ptr<mapnik::datasource> const& ds)
 {
     boost::python::list flds;
@@ -165,6 +183,7 @@ void export_datasource()
         .def("type",&datasource::type)
         .def("geometry_type",&datasource::get_geometry_type)
         .def("describe",&describe)
+        .def("statistics",&statistics)
         .def("envelope",&datasource::envelope)
         .def("features",&datasource::features)
         .def("bind",&datasource::bind)
