@@ -33,6 +33,18 @@
 
 namespace mapnik {
 
+
+struct greater_bbox_comp
+{
+    bool operator() (geometry_type const* g0, geometry_type const* g1) const
+    {
+        box2d<double> b0 = g0->envelope();
+        box2d<double> b1 = g1->envelope();
+        return b0.width()*b0.height() > b1.width()*b1.height();
+    }
+
+};
+
 template <typename FaceManagerT, typename DetectorT>
 class text_symbolizer_helper
 {
@@ -79,7 +91,11 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
     Feature const& feature,
     proj_transform const& prj_trans)
 {
-    std::vector<geometry_type*> geometries_to_process;
+
+    unsigned num_geom = feature.num_geometries();
+    if (!num_geom) return text_placement_info_ptr(); //Nothing to do
+    
+    std::vector<geometry_type*> geometries_to_process(num_geom);
     
     if (!initialize_geometries(geometries_to_process,sym, feature, prj_trans)) 
         return text_placement_info_ptr();
@@ -93,9 +109,8 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
     placement->init(scale_factor_, width_, height_);
     if (writer.first)
         placement->collect_extents = true;
-
-    unsigned num_geom = feature.num_geometries();
-    if (!num_geom) return text_placement_info_ptr(); //Nothing to do
+    
+    
 
     while (placement->next())
     {
@@ -106,6 +121,7 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
         processor.process(*text_, feature);
         string_info &info = text_->get_string_info();
         /* END TODO */
+        // text rotation
         double angle = 0.0;
         if (p.orientation)
         {
@@ -116,11 +132,12 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
         BOOST_FOREACH( geometry_type * geom, geometries_to_process )    
         {
             finder.find_placement(angle, *geom, t_, prj_trans);
-            if (!placement->placements.size())
-                continue;
-            if (writer.first) writer.first->add_text(*placement, font_manager_, feature, t_, writer.second);
-            return placement;
+            //if (!placement->placements.size())
+            //    continue;
+            //if (writer.first) writer.first->add_text(*placement, font_manager_, feature, t_, writer.second);
+            //return placement;
         }
+        return placement;
     }
     return text_placement_info_ptr();
 }
@@ -152,6 +169,8 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries(
         // TODO - calculate length here as well
         geometries_to_process.push_back(const_cast<geometry_type*>(&geom));
     }
+
+    std::sort(geometries_to_process.begin(), geometries_to_process.end(), greater_bbox_comp());
     
     if (!geometries_to_process.size() > 0)
     {
