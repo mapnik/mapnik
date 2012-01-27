@@ -95,7 +95,7 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
     unsigned num_geom = feature.num_geometries();
     if (!num_geom) return text_placement_info_ptr(); //Nothing to do
     
-    std::vector<geometry_type*> geometries_to_process(num_geom);
+    std::vector<geometry_type*> geometries_to_process;
     
     if (!initialize_geometries(geometries_to_process,sym, feature, prj_trans)) 
         return text_placement_info_ptr();
@@ -150,6 +150,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries(
     proj_transform const& prj_trans)
 {
     unsigned num_geom = feature.num_geometries();
+    
     for (unsigned i=0; i<num_geom; ++i)
     {
         geometry_type const& geom = feature.get_geometry(i);
