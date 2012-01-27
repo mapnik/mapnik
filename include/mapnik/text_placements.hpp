@@ -46,8 +46,6 @@ namespace mapnik {
 
 class text_placements;
 
-typedef text_path placement_element;
-
 typedef boost::tuple<double,double> position;
 
 enum label_placement_enum {
@@ -180,7 +178,7 @@ public:
     /* TODO */
     std::queue< box2d<double> > envelopes;
     /* TODO */
-    boost::ptr_vector<placement_element> placements;
+    boost::ptr_vector<text_path> placements;
 };
 
 typedef boost::shared_ptr<text_placement_info> text_placement_info_ptr;

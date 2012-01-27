@@ -310,7 +310,7 @@ void placement_finder<DetectorT>::init_alignment()
 
 
 template <typename DetectorT>
-void placement_finder<DetectorT>::adjust_position(placement_element *current_placement, double label_x, double label_y)
+void placement_finder<DetectorT>::adjust_position(text_path *current_placement, double label_x, double label_y)
 {
     // if needed, adjust for desired vertical alignment
     current_placement->starting_y = label_y;  // no adjustment, default is MIDDLE
@@ -348,7 +348,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
     double sina = std::sin(rad);
 
     double x, y;
-    std::auto_ptr<placement_element> current_placement(new placement_element);
+    std::auto_ptr<text_path> current_placement(new text_path);
 
     adjust_position(current_placement.get(), label_x, label_y);
 
@@ -595,7 +595,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                     {
                         //Record details for the start of the string placement
                         int orientation = 0;
-                        std::auto_ptr<placement_element> current_placement = get_placement_offset(path_positions, path_distances, orientation, index, segment_length - (distance - target_distance) + (diff*dir));
+                        std::auto_ptr<text_path> current_placement = get_placement_offset(path_positions, path_distances, orientation, index, segment_length - (distance - target_distance) + (diff*dir));
 
                         //We were unable to place here
                         if (current_placement.get() == NULL)
@@ -657,7 +657,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 }
 
 template <typename DetectorT>
-std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offset(const std::vector<vertex2d> &path_positions, const std::vector<double> &path_distances, int &orientation, unsigned index, double distance)
+std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const std::vector<vertex2d> &path_positions, const std::vector<double> &path_distances, int &orientation, unsigned index, double distance)
 {
     //Check that the given distance is on the given index and find the correct index and distance if not
     while (distance < 0 && index > 1)
@@ -666,7 +666,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         distance += path_distances[index];
     }
     if (index <= 1 && distance < 0) //We've gone off the start, fail out
-        return std::auto_ptr<placement_element>(NULL);
+        return std::auto_ptr<text_path>(NULL);
 
     //Same thing, checking if we go off the end
     while (index < path_distances.size() && distance > path_distances[index])
@@ -675,13 +675,13 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         index++;
     }
     if (index >= path_distances.size())
-        return std::auto_ptr<placement_element>(NULL);
+        return std::auto_ptr<text_path>(NULL);
 
     //Keep track of the initial index,distance incase we need to re-call get_placement_offset
     const unsigned initial_index = index;
     const double initial_distance = distance;
 
-    std::auto_ptr<placement_element> current_placement(new placement_element);
+    std::auto_ptr<text_path> current_placement(new text_path);
 
     double old_x = path_positions[index-1].x;
     double old_y = path_positions[index-1].y;
@@ -695,7 +695,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
     double segment_length = path_distances[index];
     if (segment_length == 0) {
         // Not allowed to place across on 0 length segments or discontinuities
-        return std::auto_ptr<placement_element>(NULL);
+        return std::auto_ptr<text_path>(NULL);
     }
 
     current_placement->starting_x = old_x + dx*distance/segment_length;
@@ -719,7 +719,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         //Coordinates this character will start at
         if (segment_length == 0) {
             // Not allowed to place across on 0 length segments or discontinuities
-            return std::auto_ptr<placement_element>(NULL);
+            return std::auto_ptr<text_path>(NULL);
         }
         double start_x = old_x + dx*distance/segment_length;
         double start_y = old_y + dy*distance/segment_length;
@@ -747,7 +747,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
                 if (index >= path_positions.size()) //Bail out if we run off the end of the shape
                 {
                     //std::clog << "FAIL: Out of space" << std::endl;
-                    return std::auto_ptr<placement_element>(NULL);
+                    return std::auto_ptr<text_path>(NULL);
                 }
                 new_x = path_positions[index].x;
                 new_y = path_positions[index].y;
@@ -784,7 +784,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
             fabs(angle_delta) > p.max_char_angle_delta)
         {
             //std::clog << "FAIL: Too Bendy!" << std::endl;
-            return std::auto_ptr<placement_element>(NULL);
+            return std::auto_ptr<text_path>(NULL);
         }
 
         double render_angle = angle;
@@ -833,7 +833,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
         {
             //Otherwise we have failed to find a placement
             //std::clog << "FAIL: Double upside-down!" << std::endl;
-            return std::auto_ptr<placement_element>(NULL);
+            return std::auto_ptr<text_path>(NULL);
         }
     }
 
@@ -841,7 +841,7 @@ std::auto_ptr<placement_element> placement_finder<DetectorT>::get_placement_offs
 }
 
 template <typename DetectorT>
-bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<placement_element> & current_placement, const int & orientation)
+bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> & current_placement, const int & orientation)
 {
     //Create and test envelopes
     bool status = true;

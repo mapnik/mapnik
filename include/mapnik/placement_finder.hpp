@@ -65,14 +65,14 @@ private:
     //             otherwise it will autodetect the orientation.
     //             If >= 50% of the characters end up upside down, it will be retried the other way.
     //             RETURN: 1/-1 depending which way up the string ends up being.
-    std::auto_ptr<placement_element> get_placement_offset(const std::vector<vertex2d> & path_positions,
+    std::auto_ptr<text_path> get_placement_offset(const std::vector<vertex2d> & path_positions,
                                                           const std::vector<double> & path_distances,
                                                           int & orientation, unsigned index, double distance);
 
-    ///Tests wether the given placement_element be placed without a collision
+    ///Tests wether the given text_path be placed without a collision
     // Returns true if it can
     // NOTE: This edits p.envelopes so it can be used afterwards (you must clear it otherwise)
-    bool test_placement(const std::auto_ptr<placement_element> & current_placement, const int & orientation);
+    bool test_placement(const std::auto_ptr<text_path> & current_placement, const int & orientation);
 
     ///Does a line-circle intersect calculation
     // NOTE: Follow the strict pre conditions
@@ -87,7 +87,7 @@ private:
     void find_line_breaks();
     void init_string_size();
     void init_alignment();
-    void adjust_position(placement_element *current_placement, double label_x, double label_y);
+    void adjust_position(text_path *current_placement, double label_x, double label_y);
 
     ///General Internals
     DetectorT & detector_;

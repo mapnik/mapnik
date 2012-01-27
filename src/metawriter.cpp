@@ -194,7 +194,7 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
 
       */
     for (unsigned n = 0; n < p.placements.size(); n++) {
-        placement_element & current_placement = const_cast<placement_element &>(p.placements[n]);
+        text_path & current_placement = const_cast<text_path &>(p.placements[n]);
 
         bool inside = false; /* Part of text is inside rendering region */
         bool straight = true;
