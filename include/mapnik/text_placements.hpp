@@ -95,7 +95,7 @@ struct text_symbolizer_properties
 {
     text_symbolizer_properties();
     /** Load all values and also the ```processor``` object from XML ptree. */
-    void set_values_from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets);
+    void from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets);
     /** Save all values to XML ptree (but does not create a new parent node!). */
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_symbolizer_properties const &dfl=text_symbolizer_properties()) const;
 

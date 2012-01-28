@@ -363,7 +363,7 @@ formating::node_ptr text_processor::get_format_tree() const
 
 void text_processor::from_xml(const boost::property_tree::ptree &pt, std::map<std::string,font_set> const &fontsets)
 {
-    defaults.set_values_from_xml(pt, fontsets);
+    defaults.from_xml(pt, fontsets);
     formating::node_ptr n = formating::node::from_xml(pt);
     if (n) set_format_tree(n);
 }
