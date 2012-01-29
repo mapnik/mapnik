@@ -172,9 +172,15 @@ public:
     //Output by placement finder
     /** Bounding box of all texts placed. */
     box2d<double> extents;
+    /** Additional boxes to take into account when finding placement.
+      * Used for finding line placements where multiple placements are returned.
+      * Boxes are relative to starting point of current placement.
+      */
+    std::vector<box2d<double> > additional_boxes;
+
     /* TODO */
     std::queue< box2d<double> > envelopes;
-    /* TODO */
+    /** Used to return all placements found. */
     boost::ptr_vector<text_path> placements;
 };
 

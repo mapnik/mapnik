@@ -262,15 +262,15 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
 template <typename FaceManagerT, typename DetectorT>
 text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement()
 {
-#if 0
-    TODO: Not supported by placement_finder atm
     position const& pos = placement_->properties.displacement;
-    text_placement.additional_boxes.push_back(
-       box2d<double>(-0.5 * label_ext.width() - pos.first,
-                     -0.5 * label_ext.height() - pos.second,
-                     0.5 * label_ext.width() - pos.first,
-                     0.5 * label_ext.height() - pos.second));
-#endif
+    placement_->additional_boxes.push_back(
+    /*TODO: I'm not sure this is correct. It's what the old code did, but
+            I think transfroms can make the marker non-centered.
+    */
+    box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
+                  -0.5 * marker_ext_.height() - pos.second,
+                   0.5 * marker_ext_.width()  - pos.first,
+                   0.5 * marker_ext_.height() - pos.second));
     return text_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement();
 }
 
