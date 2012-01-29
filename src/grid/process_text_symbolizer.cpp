@@ -44,6 +44,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
 
     text_placement_info_ptr placement;
     while ((placement = helper.get_placement())) {
+        placement_found = true;
         for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
         {
             double x = placement->placements[ii].starting_x;
