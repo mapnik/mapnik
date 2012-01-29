@@ -328,11 +328,13 @@ std::set<expression_ptr> text_placements::get_all_expressions()
 
 /************************************************************************/
 
-text_placement_info::text_placement_info(text_placements const* parent):
-    properties(parent->properties),
-    scale_factor(1),
-    has_dimensions(false),
-    collect_extents(false)
+text_placement_info::text_placement_info(text_placements const* parent,
+    double scale_factor_, dimension_type dim, bool has_dimensions_)
+    : properties(parent->properties),
+      scale_factor(scale_factor_),
+      has_dimensions(has_dimensions_),
+      dimensions(dim),
+      collect_extents(false)
 {
 
 }
@@ -344,17 +346,11 @@ bool text_placement_info_dummy::next()
     return true;
 }
 
-text_placement_info_ptr text_placements_dummy::get_placement_info() const
+text_placement_info_ptr text_placements_dummy::get_placement_info(
+    double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_dummy(this));
-}
-
-void text_placement_info::init(double scale_factor_,
-                               unsigned w, unsigned h, bool has_dimensions_)
-{
-    scale_factor = scale_factor_;
-    dimensions = std::make_pair(w, h);
-    has_dimensions = has_dimensions_;
+    return text_placement_info_ptr(new text_placement_info_dummy(
+        this, scale_factor, dim, has_dimensions));
 }
 
 /************************************************************************/
@@ -419,9 +415,11 @@ bool text_placement_info_simple::next_position_only()
     return true;
 }
 
-text_placement_info_ptr text_placements_simple::get_placement_info() const
+text_placement_info_ptr text_placements_simple::get_placement_info(
+    double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_simple(this));
+    return text_placement_info_ptr(new text_placement_info_simple(this,
+        scale_factor, dim, has_dimensions));
 }
 
 /** Position string: [POS][SIZE]
@@ -517,9 +515,11 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
 
 /***************************************************************************/
 
-text_placement_info_ptr text_placements_list::get_placement_info() const
+text_placement_info_ptr text_placements_list::get_placement_info(
+    double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_list(this));
+    return text_placement_info_ptr(new text_placement_info_list(this,
+        scale_factor, dim, has_dimensions));
 }
 
 text_placements_list::text_placements_list() : text_placements(), list_(0)

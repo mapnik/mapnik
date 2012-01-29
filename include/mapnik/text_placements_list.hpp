@@ -33,7 +33,8 @@ class text_placements_list: public text_placements
 {
 public:
     text_placements_list();
-    text_placement_info_ptr get_placement_info() const;
+    text_placement_info_ptr get_placement_info(
+        double scale_factor, dimension_type dim, bool has_dimensions) const;
     virtual std::set<expression_ptr> get_all_expressions();
     text_symbolizer_properties & add();
     text_symbolizer_properties & get(unsigned i);
@@ -48,8 +49,10 @@ private:
 class text_placement_info_list : public text_placement_info
 {
 public:
-    text_placement_info_list(text_placements_list const* parent) :
-        text_placement_info(parent), state(0), parent_(parent) {}
+    text_placement_info_list(text_placements_list const* parent,
+       double scale_factor, dimension_type dim, bool has_dimensions) :
+        text_placement_info(parent, scale_factor, dim, has_dimensions),
+        state(0), parent_(parent) {}
     bool next();
 private:
     unsigned state;

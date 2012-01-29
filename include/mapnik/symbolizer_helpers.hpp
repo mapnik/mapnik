@@ -65,8 +65,9 @@ public:
       {
           initialize_geometries();
           if (!geometries_to_process_.size()) return; //TODO: Test this
-          placement_ = sym_.get_placement_options()->get_placement_info();
-          placement_->init(scale_factor, width, height);
+          placement_ = sym_.get_placement_options()->get_placement_info(
+                      scale_factor, std::make_pair(width, height), false);
+          //TODO: has_dimensions? Why? When?
           if (writer_.first) placement_->collect_extents = true;
           next_placement();
           initialize_points();
