@@ -223,9 +223,6 @@ void export_shield_symbolizer()
         .add_property("wrap_before",
                       &shield_symbolizer::get_wrap_before,
                       &shield_symbolizer::set_wrap_before)
-        .add_property("no_text",
-                      &shield_symbolizer::get_no_text,
-                      &shield_symbolizer::set_no_text)
         .add_property("unlock_image",
                       &shield_symbolizer::get_unlock_image,
                       &shield_symbolizer::set_unlock_image)

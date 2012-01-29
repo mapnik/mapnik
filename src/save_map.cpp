@@ -205,10 +205,6 @@ public:
         {
             set_attr( sym_node, "unlock-image", sym.get_unlock_image() );
         }
-        if (sym.get_no_text() != dfl.get_no_text() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "no-text", sym.get_no_text() );
-        }
         if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_ )
         {
             set_attr( sym_node, "text-opacity", sym.get_text_opacity() );

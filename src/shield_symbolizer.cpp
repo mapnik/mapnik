@@ -38,7 +38,6 @@ shield_symbolizer::shield_symbolizer(text_placements_ptr placements)
     : text_symbolizer(placements),
       symbolizer_with_image(),
       unlock_image_(false),
-      no_text_(false),
       shield_displacement_(boost::make_tuple<double,double>(0,0))
 {
 }
@@ -52,7 +51,6 @@ shield_symbolizer::shield_symbolizer(
     : text_symbolizer(name, face_name, size, fill),
       symbolizer_with_image(file),
       unlock_image_(false),
-      no_text_(false),
       shield_displacement_(boost::make_tuple<double,double>(0,0))
 {
 }
@@ -65,7 +63,6 @@ shield_symbolizer::shield_symbolizer(
     : text_symbolizer(name, size, fill),
       symbolizer_with_image(file),
       unlock_image_(false),
-      no_text_(false),
       shield_displacement_(boost::make_tuple<double,double>(0,0))
 {
 }
@@ -78,16 +75,6 @@ void shield_symbolizer::set_unlock_image(bool unlock_image)
 bool shield_symbolizer::get_unlock_image() const
 {
     return unlock_image_;
-}
-
-void shield_symbolizer::set_no_text(bool no_text)
-{
-    no_text_ = no_text;
-}
-
-bool shield_symbolizer::get_no_text() const
-{
-    return no_text_;
 }
 
 void shield_symbolizer::set_shield_displacement(double shield_dx,double shield_dy)
