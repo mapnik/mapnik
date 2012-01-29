@@ -37,6 +37,7 @@ using mapnik::path_expression_ptr;
 using mapnik::guess_type;
 using mapnik::expression_ptr;
 using mapnik::parse_path;
+using mapnik::position;
 
 
 namespace {
@@ -44,8 +45,8 @@ using namespace boost::python;
 
 tuple get_shield_displacement(const shield_symbolizer& s)
 {
-    boost::tuple<double,double> pos = s.get_shield_displacement();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+    position const& pos = s.get_shield_displacement();
+    return boost::python::make_tuple(pos.first, pos.second);
 }
 
 void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
@@ -55,8 +56,8 @@ void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
 
 tuple get_text_displacement(const shield_symbolizer& t)
 {
-    boost::tuple<double,double> pos = t.get_displacement();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+    position const& pos = t.get_displacement();
+    return boost::python::make_tuple(pos.first, pos.second);
 }
 
 void set_text_displacement(shield_symbolizer & t, boost::python::tuple arg)

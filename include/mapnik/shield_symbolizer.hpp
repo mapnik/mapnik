@@ -51,11 +51,11 @@ struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
     bool get_unlock_image() const;              // image is not locked to the text placement
     void set_unlock_image(bool unlock_image);
     void set_shield_displacement(double shield_dx,double shield_dy);
-    boost::tuple<double,double> const& get_shield_displacement() const;
+    position const& get_shield_displacement() const;
     
 private:
     bool unlock_image_;
-    boost::tuple<double,double> shield_displacement_;
+    position shield_displacement_;
 };
 }
 

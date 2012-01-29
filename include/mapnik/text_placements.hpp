@@ -46,7 +46,7 @@ namespace mapnik {
 
 class text_placements;
 
-typedef boost::tuple<double,double> position;
+typedef std::pair<double,double> position;
 
 enum label_placement_enum {
     POINT_PLACEMENT,

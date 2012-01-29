@@ -291,9 +291,9 @@ void placement_finder<DetectorT>::init_alignment()
 {
     valign_ = p.valign;
     if (valign_ == V_AUTO) {
-        if (p.displacement.get<1>() > 0.0)
+        if (p.displacement.second > 0.0)
             valign_ = V_BOTTOM;
-        else if (p.displacement.get<1>() < 0.0)
+        else if (p.displacement.second < 0.0)
             valign_ = V_TOP;
         else
             valign_ = V_MIDDLE;
@@ -301,9 +301,9 @@ void placement_finder<DetectorT>::init_alignment()
 
     halign_ = p.halign;
     if (halign_ == H_AUTO) {
-        if (p.displacement.get<0>() > 0.0)
+        if (p.displacement.first > 0.0)
             halign_ = H_RIGHT;
-        else if (p.displacement.get<0>() < 0.0)
+        else if (p.displacement.first < 0.0)
             halign_ = H_LEFT;
         else
             halign_ = H_MIDDLE;
@@ -333,8 +333,8 @@ void placement_finder<DetectorT>::adjust_position(text_path *current_placement, 
         current_placement->starting_x += 0.5 * string_width_;  // move center right by 1/2 the string width
 
     // adjust text envelope position by user's x-y displacement (dx, dy)
-    current_placement->starting_x += pi.get_scale_factor() * boost::tuples::get<0>(p.displacement);
-    current_placement->starting_y += pi.get_scale_factor() * boost::tuples::get<1>(p.displacement);
+    current_placement->starting_x += pi.get_scale_factor() * p.displacement.first;
+    current_placement->starting_y += pi.get_scale_factor() * p.displacement.second;
 
 }
 
@@ -537,7 +537,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 
     double distance = 0.0;
 
-    double displacement = boost::tuples::get<1>(p.displacement); // displace by dy
+    double displacement = p.displacement.second; // displace by dy
 
     //Calculate a target_distance that will place the labels centered evenly rather than offset from the start of the linestring
     if (total_distance < string_width_) //Can't place any strings

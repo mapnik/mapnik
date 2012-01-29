@@ -63,7 +63,7 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_poi
         placement_finder<DetectorT> finder(*placement_, *info_, detector_, dims_);
         finder.find_point_placement(point_itr_->first, point_itr_->second, angle_);
         //Keep reference to current object so we can delete it.
-        std::list<point_type>::iterator current_object = point_itr_;
+        std::list<position>::iterator current_object = point_itr_;
         point_itr_++;
         if (placement_->placements.size())
         {
@@ -208,13 +208,13 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
             continue; //Reexecute size check
         }
         position const& pos = placement_->properties.displacement;
-        double label_x = point_itr_->first + boost::get<0>(shield_pos);
-        double label_y = point_itr_->second + boost::get<1>(shield_pos);
+        double label_x = point_itr_->first + shield_pos.first;
+        double label_y = point_itr_->second + shield_pos.second;
 
         placement_finder<DetectorT> finder(*placement_, *info_, detector_, dims_);
         finder.find_point_placement(label_x, label_y, angle_);
         //Keep reference to current object so we can delete it.
-        std::list<point_type>::iterator current_object = point_itr_;
+        std::list<position>::iterator current_object = point_itr_;
         point_itr_++;
         if (!placement_->placements.size())
         {
@@ -229,8 +229,8 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
         {
             // center image at text center position
             // remove displacement from image label
-            double lx = x - boost::get<0>(pos);
-            double ly = y - boost::get<1>(pos);
+            double lx = x - pos.first;
+            double ly = y - pos.second;
             marker_x_ = int(floor(lx - (0.5 * marker_w_))) + 1;
             marker_y_ = int(floor(ly - (0.5 * marker_h_))) + 1;
             marker_ext_.re_center(lx, ly);
@@ -266,10 +266,10 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_l
     TODO: Not supported by placement_finder atm
     position const& pos = placement_->properties.displacement;
     text_placement.additional_boxes.push_back(
-       box2d<double>(-0.5 * label_ext.width() - boost::get<0>(pos),
-                     -0.5 * label_ext.height() - boost::get<1>(pos),
-                     0.5 * label_ext.width() - boost::get<0>(pos),
-                     0.5 * label_ext.height() - boost::get<1>(pos)));
+       box2d<double>(-0.5 * label_ext.width() - pos.first,
+                     -0.5 * label_ext.height() - pos.second,
+                     0.5 * label_ext.width() - pos.first,
+                     0.5 * label_ext.height() - pos.second));
 #endif
     return text_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement();
 }
@@ -319,8 +319,8 @@ std::pair<int, int> shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marke
         double x = floor(p.starting_x);
         double y = floor(p.starting_y);
 
-        double lx = x - boost::get<0>(pos);
-        double ly = y - boost::get<1>(pos);
+        double lx = x - pos.first;
+        double ly = y - pos.second;
         int px = int(floor(lx - (0.5*marker_w_))) + 1;
         int py = int(floor(ly - (0.5*marker_h_))) + 1;
         marker_ext_.re_center(lx, ly);

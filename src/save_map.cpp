@@ -189,8 +189,8 @@ public:
             ptree::value_type("ShieldSymbolizer",
                               ptree()))->second;
 
-        add_font_attributes( sym_node, sym);
-        add_image_attributes( sym_node, sym);
+        add_font_attributes(sym_node, sym);
+        add_image_attributes(sym_node, sym);
         add_metawriter_attributes(sym_node, sym);
 
         // pseudo-default-construct a shield_symbolizer. It is used
@@ -199,24 +199,24 @@ public:
         // maybe add a real, explicit default-ctor?
 
         
-        shield_symbolizer dfl(expression_ptr(), "<no default>", 0, color(0,0,0), path_expression_ptr());
+        shield_symbolizer dfl;
         
-        if (sym.get_unlock_image() != dfl.get_unlock_image() || explicit_defaults_ )
+        if (sym.get_unlock_image() != dfl.get_unlock_image() || explicit_defaults_)
         {
-            set_attr( sym_node, "unlock-image", sym.get_unlock_image() );
+            set_attr(sym_node, "unlock-image", sym.get_unlock_image());
         }
-        if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_ )
+        if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_)
         {
-            set_attr( sym_node, "text-opacity", sym.get_text_opacity() );
+            set_attr(sym_node, "text-opacity", sym.get_text_opacity());
         }
         position displacement = sym.get_shield_displacement();
-        if ( displacement.get<0>() != dfl.get_shield_displacement().get<0>() || explicit_defaults_ )
+        if (displacement.first != dfl.get_shield_displacement().first || explicit_defaults_)
         {
-            set_attr( sym_node, "shield-dx", displacement.get<0>() );
+            set_attr(sym_node, "shield-dx", displacement.first);
         }
-        if ( displacement.get<1>() != dfl.get_shield_displacement().get<1>() || explicit_defaults_ )
+        if (displacement.second != dfl.get_shield_displacement().second || explicit_defaults_)
         {
-            set_attr( sym_node, "shield-dy", displacement.get<1>() );
+            set_attr(sym_node, "shield-dy", displacement.second);
         }
 
     }

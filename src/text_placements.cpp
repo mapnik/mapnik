@@ -95,9 +95,9 @@ void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym
     optional<std::string> orientation_ = get_opt_attr<std::string>(sym, "orientation");
     if (orientation_) orientation = parse_expression(*orientation_, "utf8");
     optional<double> dx = get_opt_attr<double>(sym, "dx");
-    if (dx) displacement.get<0>() = *dx;
+    if (dx) displacement.first = *dx;
     optional<double> dy = get_opt_attr<double>(sym, "dy");
-    if (dy) displacement.get<1>() = *dy;
+    if (dy) displacement.second = *dy;
     optional<double> max_char_angle_delta_ = get_opt_attr<double>(sym, "max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
     processor.from_xml(sym, fontsets);
@@ -118,13 +118,13 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool 
         }
     }
 
-    if (displacement.get<0>() != dfl.displacement.get<0>() || explicit_defaults)
+    if (displacement.first != dfl.displacement.first || explicit_defaults)
     {
-        set_attr(node, "dx", displacement.get<0>());
+        set_attr(node, "dx", displacement.first);
     }
-    if (displacement.get<1>() != dfl.displacement.get<1>() || explicit_defaults)
+    if (displacement.second != dfl.displacement.second || explicit_defaults)
     {
-        set_attr(node, "dy", displacement.get<1>());
+        set_attr(node, "dy", displacement.second);
     }
     if (label_placement != dfl.label_placement || explicit_defaults)
     {
@@ -389,36 +389,28 @@ bool text_placement_info_simple::next_position_only()
         displacement = pdisp;
         break;
     case NORTH:
-        displacement = boost::make_tuple(0, -abs(pdisp.get<1>()));
+        displacement = std::make_pair(0, -abs(pdisp.second));
         break;
     case EAST:
-        displacement = boost::make_tuple(abs(pdisp.get<0>()), 0);
+        displacement = std::make_pair(abs(pdisp.first), 0);
         break;
     case SOUTH:
-        displacement = boost::make_tuple(0, abs(pdisp.get<1>()));
+        displacement = std::make_pair(0, abs(pdisp.second));
         break;
     case WEST:
-        displacement = boost::make_tuple(-abs(pdisp.get<0>()), 0);
+        displacement = std::make_pair(-abs(pdisp.first), 0);
         break;
     case NORTHEAST:
-        displacement = boost::make_tuple(
-                     abs(pdisp.get<0>()),
-                    -abs(pdisp.get<1>()));
+        displacement = std::make_pair(abs(pdisp.first), -abs(pdisp.second));
         break;
     case SOUTHEAST:
-        displacement = boost::make_tuple(
-                     abs(pdisp.get<0>()),
-                     abs(pdisp.get<1>()));
+        displacement = std::make_pair(abs(pdisp.first), abs(pdisp.second));
         break;
     case NORTHWEST:
-        displacement = boost::make_tuple(
-                    -abs(pdisp.get<0>()),
-                    -abs(pdisp.get<1>()));
+        displacement = std::make_pair(-abs(pdisp.first), -abs(pdisp.second));
         break;
     case SOUTHWEST:
-        displacement = boost::make_tuple(
-                    -abs(pdisp.get<0>()),
-                     abs(pdisp.get<1>()));
+        displacement = std::make_pair(-abs(pdisp.first), abs(pdisp.second));
         break;
     default:
         std::cerr << "WARNING: Unknown placement\n";

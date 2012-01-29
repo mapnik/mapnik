@@ -36,8 +36,6 @@
 
 namespace mapnik {
 
-typedef std::pair<double, double> point_type;
-
 /** Helper object that does all the TextSymbolizer placment finding
   * work except actually rendering the object. */
 template <typename FaceManagerT, typename DetectorT>
@@ -100,8 +98,8 @@ protected:
     /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
     std::list<geometry_type*> geometries_to_process_;
     std::list<geometry_type*>::iterator geo_itr_;
-    std::list<point_type> points_;
-    std::list<point_type>::iterator point_itr_;
+    std::list<position> points_;
+    std::list<position>::iterator point_itr_;
     double angle_;
     string_info *info_;
     bool placement_valid_;
