@@ -36,19 +36,16 @@ public:
     placement_finder(text_placement_info &p, string_info &info, DetectorT & detector);
     placement_finder(text_placement_info &p, string_info &info, DetectorT & detector, box2d<double> const& extent);
     
-    //Try place a single label at the given point
+    /** Try place a single label at the given point. */
     void find_point_placement(double pos_x, double pos_y, double angle=0.0);
 
-    //Iterate over the given path, placing point labels with respect to label_spacing
+    /** Iterate over the given path, placing point labels with respect to label_spacing. */
     template <typename T>
     void find_point_placements(T & path);
 
-    //Iterate over the given path, placing line-following labels with respect to label_spacing
+    /** Iterate over the given path, placing line-following labels with respect to label_spacing. */
     template <typename T>
     void find_line_placements(T & path);
-
-    //Find placement, automatically select point or line placement
-    void find_placement(double angle, geometry_type const& geom, CoordTransform const& t, proj_transform const& prj_trans);
 
     void update_detector();
 

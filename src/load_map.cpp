@@ -1281,7 +1281,6 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
             placement_finder = text_placements_ptr(new text_placements_dummy());
         }
 
-        text_symbolizer text_symbol = text_symbolizer(placement_finder);
         placement_finder->properties.from_xml(sym, fontsets_);
         if (strict_) ensure_font_face(placement_finder->properties.processor.defaults.face_name);
         if (list) {
@@ -1300,6 +1299,8 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
                 if (strict_) ensure_font_face(p.processor.defaults.face_name);
             }
         }
+
+        text_symbolizer text_symbol = text_symbolizer(placement_finder);
         parse_metawriter_in_symbolizer(text_symbol, sym);
         rule.append(text_symbol);
     }
@@ -1312,26 +1313,64 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
 
 void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
 {
+    std::string s_common(
+      "name,face-name,fontset-name,size,fill,orientation,"
+      "dx,dy,placement,vertical-alignment,halo-fill,"
+      "halo-radius,text-ratio,wrap-width,wrap-before,"
+      "wrap-character,text-transform,line-spacing,"
+      "label-position-tolerance,character-spacing,"
+      "spacing,minimum-distance,minimum-padding,minimum-path-length,"
+      "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
+      "horizontal-alignment,justify-alignment");
 
-    std::stringstream s;
-    s << "name,face-name,fontset-name,size,fill,"
-      << "dx,dy,placement,vertical-alignment,halo-fill,"
-      << "halo-radius,text-ratio,wrap-width,wrap-before,"
-      << "wrap-character,text-transform,line-spacing,"
-      << "label-position-tolerance,character-spacing,"
-      << "spacing,minimum-distance,minimum-padding,"
-      << "avoid-edges,allow-overlap,opacity,max-char-angle-delta,"
-      << "horizontal-alignment,justify-alignment,"
-      // additional for shield
-      /* transform instead of orientation */
-      << "file,base,transform,shield-dx,shield-dy,"
-      << "text-opacity,unlock-image,no-text,"
-      << "meta-writer,meta-output";
+    std::string s_symbolizer(s_common + ",file,base,"
+      "transform,shield-dx,shield-dy,text-opacity,"
+      "unlock-image"
+      "placements,placement-type,meta-writer,meta-output");
 
-    ensure_attrs(sym, "ShieldSymbolizer", s.str());
+    ensure_attrs(sym, "ShieldSymbolizer", s_symbolizer);
     try
     {
-        shield_symbolizer shield_symbol = shield_symbolizer();
+        text_placements_ptr placement_finder;
+        text_placements_list *list = 0;
+        optional<std::string> placement_type = get_opt_attr<std::string>(sym, "placement-type");
+        if (placement_type) {
+            if (*placement_type == "simple") {
+                placement_finder = text_placements_ptr(
+                    new text_placements_simple(
+                        get_attr<std::string>(sym, "placements", "X")));
+            } else if (*placement_type == "list") {
+                list = new text_placements_list();
+                placement_finder = text_placements_ptr(list);
+            } else if (*placement_type != "dummy" && *placement_type != "") {
+                throw config_error(std::string("Unknown placement type '"+*placement_type+"'"));
+            }
+        }
+        if (!placement_finder) {
+            placement_finder = text_placements_ptr(new text_placements_dummy());
+        }
+
+        placement_finder->properties.from_xml(sym, fontsets_);
+        if (strict_) ensure_font_face(placement_finder->properties.processor.defaults.face_name);
+        if (list) {
+            ptree::const_iterator symIter = sym.begin();
+            ptree::const_iterator endSym = sym.end();
+            for( ;symIter != endSym; ++symIter) {
+                if (symIter->first.find('<') != std::string::npos) continue;
+                if (symIter->first != "Placement")
+                {
+//                    throw config_error("Unknown element '" + symIter->first + "'"); TODO
+                    continue;
+                }
+                ensure_attrs(symIter->second, "TextSymbolizer/Placement", s_common);
+                text_symbolizer_properties & p = list->add();
+                p.from_xml(symIter->second, fontsets_);
+                if (strict_) ensure_font_face(p.processor.defaults.face_name);
+            }
+        }
+
+        shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
+        /* Symbolizer specific attributes. */
         optional<std::string> transform_wkt = get_opt_attr<std::string>(sym, "transform");
         if (transform_wkt)
         {
@@ -1378,14 +1417,6 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             shield_symbol.set_unlock_image( * unlock_image );
         }
 
-        // no text
-        optional<boolean> no_text =
-            get_opt_attr<boolean>(sym, "no-text");
-        if (no_text)
-        {
-            shield_symbol.set_no_text( * no_text );
-        }
-
         parse_metawriter_in_symbolizer(shield_symbol, sym);
 
         std::string image_file = get_attr<std::string>(sym, "file");
@@ -1418,8 +1449,6 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
                 std::clog << "### WARNING: " << msg << endl;
             }
         }
-        text_placements_ptr placement_finder = shield_symbol.get_placement_options();
-        placement_finder->properties.from_xml(sym, fontsets_);
         rule.append(shield_symbol);
     }
     catch (const config_error & ex)

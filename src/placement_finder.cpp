@@ -103,6 +103,7 @@ placement_finder<DetectorT>::placement_finder(text_placement_info &placement_inf
       dimensions_(detector_.extent()),
       info_(info), p(placement_info.properties), pi(placement_info), string_width_(0), string_height_(0), first_line_space_(0), valign_(V_AUTO), halign_(H_AUTO), line_breaks_(), line_sizes_()
 {
+    placement_info.placements.clear(); //Remove left overs
 }
 
 template <typename DetectorT>
@@ -111,6 +112,7 @@ placement_finder<DetectorT>::placement_finder(text_placement_info &placement_inf
       dimensions_(extent),
       info_(info), p(placement_info.properties), pi(placement_info), string_width_(0), string_height_(0), first_line_space_(0), valign_(V_AUTO), halign_(H_AUTO), line_breaks_(), line_sizes_()
 {
+        placement_info.placements.clear(); //Remove left overs
 }
 
 template <typename DetectorT>
@@ -994,53 +996,6 @@ template <typename DetectorT>
 void placement_finder<DetectorT>::clear()
 {
     detector_.clear();
-}
-
-template <typename DetectorT>
-void placement_finder<DetectorT>::find_placement(double angle, geometry_type const& geom, CoordTransform const& t, proj_transform const& prj_trans)
-{
-    double label_x=0.0;
-    double label_y=0.0;
-    double z=0.0;
-    if (p.label_placement == POINT_PLACEMENT ||
-        p.label_placement == VERTEX_PLACEMENT ||
-        p.label_placement == INTERIOR_PLACEMENT)
-    {
-        unsigned iterations = 1;
-        if (p.label_placement == VERTEX_PLACEMENT)
-        {
-            iterations = geom.num_points();
-            geom.rewind(0);
-        }
-        for(unsigned jj = 0; jj < iterations; jj++) {
-            switch (p.label_placement)
-            {
-            case POINT_PLACEMENT:
-                geom.label_position(&label_x, &label_y);
-                break;
-            case INTERIOR_PLACEMENT:
-                geom.label_interior_position(&label_x, &label_y);
-                break;
-            case VERTEX_PLACEMENT:
-                geom.vertex(&label_x, &label_y);
-                break;
-            case LINE_PLACEMENT:
-            case label_placement_enum_MAX:
-                /*not handled here*/
-                break;
-            }
-            prj_trans.backward(label_x, label_y, z);
-            t.forward(&label_x, &label_y);
-
-            find_point_placement(label_x, label_y, angle);
-        }
-        update_detector();
-    } else if (p.label_placement == LINE_PLACEMENT && geom.num_points() > 1)
-    {
-        typedef  coord_transform2<CoordTransform,geometry_type> path_type;
-        path_type path(t, geom, prj_trans);
-        find_line_placements<path_type>(path);
-    }
 }
 
 typedef coord_transform2<CoordTransform,geometry_type> PathType;
