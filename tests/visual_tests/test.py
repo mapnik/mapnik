@@ -12,7 +12,8 @@ widths = [ 800, 600, 400, 300, 250, 200, 150, 100]
 filenames = ["list", "simple"]
 filenames_one_width = ["simple-E", "simple-NE", "simple-NW", "simple-N",
     "simple-SE", "simple-SW", "simple-S", "simple-W",
-    "formating-1", "formating-2", "formating-3", "formating-4"]
+    "formating-1", "formating-2", "formating-3", "formating-4",
+    "shieldsymbolizer-1"]
     
 def render(filename, width):
     print "Rendering style \"%s\" with width %d" % (filename, width)
