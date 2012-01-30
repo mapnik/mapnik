@@ -23,7 +23,7 @@
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
-#include <mapnik/placement_finder.hpp>
+#include <mapnik/text_placements.hpp>
 
 // Boost
 #include <boost/foreach.hpp>
@@ -105,24 +105,23 @@ void metawriter_json_stream::write_properties(Feature const& feature, metawriter
 {
     *f_ << "}," << //Close coordinates object
             "\n  \"properties\": {";
-    std::map<std::string, value> const &fprops = feature.props();
+    
     int i = 0;
-    BOOST_FOREACH(std::string p, properties)
+    BOOST_FOREACH(std::string const& p, properties)
     {
-        std::map<std::string, value>::const_iterator itr = fprops.find(p);
-        std::string text;
-        if (itr != fprops.end())
+        if (feature.has_key(p))
         {
-            // Skip empty props
-            if(itr->second.to_string().size() == 0) continue; // ignore empty
+            mapnik::value const& val = feature.get(p);
+            std::string str = val.to_string();            
+            if (str.size() == 0) continue; // ignore empty attributes
             
             //Property found
-            text = boost::replace_all_copy(boost::replace_all_copy(itr->second.to_string(), "\\", "\\\\"), "\"", "\\\"");
+            std::string text = boost::replace_all_copy(boost::replace_all_copy(str, "\\", "\\\\"), "\"", "\\\"");
             if (i++) *f_ << ",";
             *f_ << "\n    \"" << p << "\":\"" << text << "\"";
         }
     }
-
+    
     *f_ << "\n} }";
 }
 
@@ -175,8 +174,8 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
 
 }
 
-void metawriter_json_stream::add_text(placement const& p,
-    face_set_ptr face,
+void metawriter_json_stream::add_text(text_placement_info const& p,
+    face_manager_freetype &font_manager,
     Feature const& feature,
     CoordTransform const& t,
     metawriter_properties const& properties)
@@ -193,18 +192,19 @@ void metawriter_json_stream::add_text(placement const& p,
        Hightest y = baseline of top line
 
       */
-//    if (p.placements.size()) std::cout << p.info.get_string() << "\n";
     for (unsigned n = 0; n < p.placements.size(); n++) {
         placement_element & current_placement = const_cast<placement_element &>(p.placements[n]);
 
-        bool inside = false;
+        bool inside = false; /* Part of text is inside rendering region */
         bool straight = true;
-        int c; double x, y, angle;
+        int c;
+        double x, y, angle;
+        char_properties *format;
         current_placement.rewind();
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
             int cx = current_placement.starting_x;
             int cy = current_placement.starting_y;
-            current_placement.vertex(&c, &x, &y, &angle);
+            current_placement.vertex(&c, &x, &y, &angle, &format);
             if (cx+x >= 0 && cx+x < width_ && cy-y >= 0 && cy-y < height_) inside = true;
             if (angle > 0.001 || angle < -0.001) straight = false;
             if (inside && !straight) break;
@@ -217,14 +217,13 @@ void metawriter_json_stream::add_text(placement const& p,
             //Reduce number of polygons
             double minx = INT_MAX, miny = INT_MAX, maxx = INT_MIN, maxy = INT_MIN;
             for (int i = 0; i < current_placement.num_nodes(); ++i) {
-                current_placement.vertex(&c, &x, &y, &angle);
-                font_face_set::dimension_t ci = face->character_dimensions(c);
-                if (x < minx) minx = x;
-                if (x+ci.width > maxx) maxx = x+ci.width;
-                if (y+ci.height+ci.ymin > maxy) maxy = y+ci.height+ci.ymin;
-                if (y+ci.ymin < miny) miny = y+ci.ymin;
-                //                std::cout << (char) c << " height:" << ci.height << " ymin:" << ci.ymin << " y:" << y << " miny:"<< miny << " maxy:"<< maxy <<"\n";
-
+                current_placement.vertex(&c, &x, &y, &angle, &format);
+                face_set_ptr face = font_manager.get_face_set(format->face_name, format->fontset);
+                char_info ci = face->character_dimensions(c);
+                minx = std::min(minx, x);
+                maxx = std::max(maxx, x+ci.width);
+                maxy = std::max(maxy, y+ci.ymax);
+                miny = std::min(miny, y+ci.ymin);
             }
             add_box(box2d<double>(current_placement.starting_x+minx,
                                   current_placement.starting_y-miny,
@@ -240,9 +239,10 @@ void metawriter_json_stream::add_text(placement const& p,
             if (c != ' ') {
                 *f_ << ",";
             }
-            current_placement.vertex(&c, &x, &y, &angle);
+            current_placement.vertex(&c, &x, &y, &angle, &format);
             if (c == ' ') continue;
-            font_face_set::dimension_t ci = face->character_dimensions(c);
+            face_set_ptr face = font_manager.get_face_set(format->face_name, format->fontset);
+            char_info ci = face->character_dimensions(c);
 
             double x0, y0, x1, y1, x2, y2, x3, y3;
             double sina = sin(angle);
@@ -251,10 +251,10 @@ void metawriter_json_stream::add_text(placement const& p,
             y0 = current_placement.starting_y - y - cosa*ci.ymin;
             x1 = x0 + ci.width * cosa;
             y1 = y0 - ci.width * sina;
-            x2 = x0 + (ci.width * cosa - ci.height * sina);
-            y2 = y0 - (ci.width * sina + ci.height * cosa);
-            x3 = x0 - ci.height * sina;
-            y3 = y0 - ci.height * cosa;
+            x2 = x0 + (ci.width * cosa - ci.height() * sina);
+            y2 = y0 - (ci.width * sina + ci.height() * cosa);
+            x3 = x0 - ci.height() * sina;
+            y3 = y0 - ci.height() * cosa;
 
             *f_ << "\n     [[";
             write_point(t, x0, y0);
@@ -329,8 +329,7 @@ metawriter_json::metawriter_json(metawriter_properties dflt_properties, path_exp
 
 void metawriter_json::start(metawriter_property_map const& properties)
 {
-    filename_ =
-        path_processor<metawriter_property_map>::evaluate(*fn_, properties);
+    filename_ = path_processor<metawriter_property_map>::evaluate(*fn_, properties);
 #ifdef MAPNIK_DEBUG
     std::clog << "Metawriter JSON: filename=" << filename_ << "\n";
 #endif

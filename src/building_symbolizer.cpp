@@ -1,5 +1,5 @@
 /*****************************************************************************
- *
+ * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -19,23 +19,54 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
 //$Id$
 
 // mapnik
-#include <mapnik/grid/grid_renderer.hpp>
-#include <iostream>
+#include <mapnik/building_symbolizer.hpp>
 
-namespace mapnik {
-
-template <typename T>
-void grid_renderer<T>::process(glyph_symbolizer const& sym,
-                              Feature const& feature,
-                              proj_transform const& prj_trans)
+namespace mapnik
 {
-    std::clog << "grid_renderer does not yet support glyph_symbolizer\n";
+
+building_symbolizer::building_symbolizer() 
+    : symbolizer_base(),
+      fill_(color(128,128,128)),
+      opacity_(1.0)
+{}
+
+building_symbolizer::building_symbolizer(color const& fill, expression_ptr height)
+    : symbolizer_base(),
+      fill_(fill),
+      height_(height),
+      opacity_(1.0) {}
+
+color const& building_symbolizer::get_fill() const
+{
+    return fill_;
 }
 
-template void grid_renderer<grid>::process(glyph_symbolizer const&,
-                                              Feature const&,
-                                              proj_transform const&);
+void building_symbolizer::set_fill(color const& fill)
+{
+    fill_ = fill;
+}
+expression_ptr building_symbolizer::height() const
+{
+    return height_;
+}
+
+void building_symbolizer::set_height(expression_ptr height)
+{
+    height_=height;
+}
+
+void building_symbolizer::set_opacity(double opacity)
+{
+    opacity_ = opacity;
+}
+
+double building_symbolizer::get_opacity() const
+{
+    return opacity_;
+}
+
 }

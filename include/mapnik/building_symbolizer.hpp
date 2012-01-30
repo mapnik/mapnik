@@ -20,34 +20,34 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_LABEL_PLACEMENT_HPP
-#define MAPNIK_LABEL_PLACEMENT_HPP
+#ifndef MAPNIK_BUILDING_SYMBOLIZER_HPP
+#define MAPNIK_BUILDING_SYMBOLIZER_HPP
 
-namespace mapnik
+// mapnik
+#include <mapnik/color.hpp>
+#include <mapnik/symbolizer.hpp>
+#include <mapnik/filter_factory.hpp>
+
+namespace mapnik 
 {
-struct point_
+   
+struct MAPNIK_DECL building_symbolizer : public symbolizer_base
 {
-    double x;
-    double y;
-    point_()
-        : x(0),y(0) {}
-    point_(double x_,double y_)
-        : x(x_),y(y_) {}        
-};
-    
-class label_placement
-{
+    building_symbolizer();
+    building_symbolizer(color const& fill, expression_ptr height);   
+    color const& get_fill() const;
+    void set_fill(color const& fill);    
+    expression_ptr height() const;
+    void set_height(expression_ptr height);
+    void set_opacity(double opacity);
+    double get_opacity() const;
+
 private:
-    point_ anchor_;
-    point_ displacement_;
-    double rotation_;
-public:
-    label_placement() 
-        : anchor_(),
-          displacement_(),
-          rotation_(0.0) {}
-        
-};
+    color fill_;
+    expression_ptr height_;
+    double opacity_;
+};  
+
 }
- 
-#endif // MAPNIK_LABEL_PLACEMENT_HPP
+
+#endif // MAPNIK_BUILDING_SYMBOLIZER_HPP

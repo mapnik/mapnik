@@ -43,11 +43,14 @@ static boost::shared_ptr<mapnik::rgba_palette> make_palette( const std::string& 
 void export_palette ()
 {
     using namespace boost::python;
-    class_<boost::shared_ptr<mapnik::rgba_palette> >("Palette",no_init)
-        /*, init<std::string,std::string>(
-          ( arg("palette"), arg("type")),
-          "Creates a new color palette from a file\n"
-          )*/
-        .def( "__init__", boost::python::make_constructor(make_palette))
+    
+    class_<mapnik::rgba_palette, 
+           boost::shared_ptr<mapnik::rgba_palette>,
+           boost::noncopyable >("Palette",no_init)
+        //, init<std::string,std::string>(
+        // ( arg("palette"), arg("type")),
+        // "Creates a new color palette from a file\n"
+        // )
+           .def( "__init__", boost::python::make_constructor(make_palette))
         ;
 }

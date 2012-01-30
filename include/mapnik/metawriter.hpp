@@ -41,7 +41,7 @@
 
 namespace mapnik {
 
-struct placement;
+class text_placement_info;
 
 /** Implementation of std::map that also returns const& for operator[]. */
 class metawriter_property_map
@@ -60,6 +60,11 @@ public:
     std::map<std::string, UnicodeString>::const_iterator end() const
     {
         return m_.end();
+    }
+    
+    UnicodeString const& get(std::string const& key) const
+    {
+        return (*this)[key];
     }
 private:
     property_map m_;
@@ -98,8 +103,8 @@ public:
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties)=0;
-    virtual void add_text(placement const& placement,
-                          face_set_ptr face,
+    virtual void add_text(text_placement_info const& placement,
+                          face_manager_freetype &font_manager,
                           Feature const& feature,
                           CoordTransform const& t,
                           metawriter_properties const& properties)=0;

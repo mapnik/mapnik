@@ -148,6 +148,8 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
         using qi::lit;
         using qi::int_;
         using qi::double_;
+        using qi::hex;
+        using qi::omit;
         using standard_wide::char_;
         
         expr = logical_expr.alias();
@@ -223,14 +225,23 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             | '(' >> expr [_val = _1 ] >> ')'
             ;
         
-       
+        unesc_char.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
+            ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
+            ("\\\'", '\'')("\\\"", '\"')
+            ;
+        
+        ustring %= omit[quote_char[_a = _1]]
+            >> *(unesc_char | "\\x" >> hex | (char_ - lit(_a)))
+            >> lit(_a);
+        
+        quote_char %= char_('\'') | char_('"');
+        
 #if BOOST_VERSION > 104200
-        ustring %= '\'' >> no_skip[*~char_('\'')] >> '\'';
         attr %= '[' >> no_skip[+~char_(']')] >> ']';
 #else
-        ustring %= '\'' >> lexeme[*(char_-'\'')] >> '\'';
         attr %= '[' >> lexeme[+(char_ - ']')] >> ']';
 #endif
+        
     }
     
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
@@ -250,7 +261,9 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::rule<Iterator, std::string() > regex_match_expr;
     qi::rule<Iterator, expr_node(expr_node), qi::locals<std::string,std::string>, space_type> regex_replace_expr;
     qi::rule<Iterator, std::string() , space_type> attr;
-    qi::rule<Iterator, std::string() > ustring;
+    qi::rule<Iterator, std::string(), qi::locals<char> > ustring;
+    qi::symbols<char const, char const> unesc_char;
+    qi::rule<Iterator, char() > quote_char;
 };
 
 } // namespace

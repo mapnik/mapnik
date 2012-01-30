@@ -24,6 +24,7 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/line_symbolizer.hpp>
 
 // agg
 #include "agg_basics.h"

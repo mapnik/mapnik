@@ -37,11 +37,28 @@ def resolve(grid,x,y):
 
 
 def create_grid_map(width,height):
-    places_ds = mapnik.PointDatasource()
-    places_ds.add_point(143.10,-38.60,'Name','South East')
-    places_ds.add_point(142.48,-38.60,'Name','South West')
-    places_ds.add_point(142.48,-38.38,'Name','North West')
-    places_ds.add_point(143.10,-38.38,'Name','North East')
+    ds = mapnik.MemoryDatasource()
+    context = mapnik.Context()
+    context.push('Name')
+    f = mapnik.Feature(context,1)
+    f['Name'] = 'South East'
+    f.add_geometries_from_wkt('POINT (143.10 -38.60)')
+    ds.add_feature(f)
+
+    f = mapnik.Feature(context,2)
+    f['Name'] = 'South West'
+    f.add_geometries_from_wkt('POINT (142.48 -38.60)')
+    ds.add_feature(f)
+
+    f = mapnik.Feature(context,3)
+    f['Name'] = 'North West'
+    f.add_geometries_from_wkt('POINT (142.48 -38.38)')
+    ds.add_feature(f)
+
+    f = mapnik.Feature(context,4)
+    f['Name'] = 'North East'
+    f.add_geometries_from_wkt('POINT (143.10 -38.38)')
+    ds.add_feature(f)
     s = mapnik.Style()
     r = mapnik.Rule()
     #symb = mapnik.PointSymbolizer()
@@ -59,7 +76,7 @@ def create_grid_map(width,height):
 
     s.rules.append(r)
     lyr = mapnik.Layer('Places')
-    lyr.datasource = places_ds
+    lyr.datasource = ds
     lyr.styles.append('places_labels')
     m = mapnik.Map(width,height)
     m.append_style('places_labels',s)

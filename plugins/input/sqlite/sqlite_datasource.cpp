@@ -553,19 +553,24 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         mapnik::box2d<double> const& e = q.get_bbox();
 
         std::ostringstream s;
+        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
 
         s << "SELECT " << geometry_field_;
         if (!key_field_.empty())
+        {
             s << "," << key_field_;
+            ctx->push(key_field_);
+        }
         std::set<std::string> const& props = q.property_names();
         std::set<std::string>::const_iterator pos = props.begin();
         std::set<std::string>::const_iterator end = props.end();
-        while (pos != end)
+
+        for ( ;pos != end;++pos)
         {
             // TODO - should we restrict duplicate key query?
             //if (*pos != key_field_)
             s << ",[" << *pos << "]";
-            ++pos;
+            ctx->push(*pos);
         }
 
         s << " FROM ";
@@ -607,6 +612,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
         return boost::make_shared<sqlite_featureset>(rs,
+                                                     ctx,
                                                      desc_.get_encoding(),
                                                      format_,
                                                      using_subquery_);
@@ -625,20 +631,26 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         mapnik::box2d<double> const e(pt.x, pt.y, pt.x, pt.y);
 
         std::ostringstream s;
+        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+
         s << "SELECT " << geometry_field_;
         if (!key_field_.empty())
+        {
             s << "," << key_field_;
+            ctx->push(key_field_);
+        }
+        
         std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
-        while (itr != end)
+
+        for ( ; itr != end; ++itr)
         {
             std::string fld_name = itr->get_name();
             if (fld_name != key_field_)
             {
                 s << ",[" << itr->get_name() << "]";
+                ctx->push(itr->get_name());
             }
-
-            ++itr;
         }
 
         s << " FROM ";
@@ -680,6 +692,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
         return boost::make_shared<sqlite_featureset>(rs,
+                                                     ctx,
                                                      desc_.get_encoding(),
                                                      format_,
                                                      using_subquery_);

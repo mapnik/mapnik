@@ -51,6 +51,7 @@ public:
     text_placements_simple(std::string positions);
     text_placement_info_ptr get_placement_info() const;
     void set_positions(std::string positions);
+    std::string const& get_positions() const;
 private:
     std::string positions_;
     std::vector<directions_t> direction_;
@@ -66,8 +67,8 @@ public:
     text_placement_info_simple(text_placements_simple const* parent) :
         text_placement_info(parent), state(0), position_state(0), parent_(parent) {}
     bool next();
+protected:
     bool next_position_only();
-private:
     unsigned state;
     unsigned position_state;
     text_placements_simple const* parent_;

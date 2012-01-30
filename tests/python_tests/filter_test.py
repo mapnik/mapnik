@@ -93,25 +93,33 @@ def test_filter_init():
 
 
 def test_regex_match():
-    f = mapnik.Feature(0)
+    context = mapnik.Context()
+    context.push('name')
+    f = mapnik.Feature(context,0)
     f["name"] = 'test'
     expr = mapnik.Expression("[name].match('test')")
     eq_(expr.evaluate(f),True) # 1 == True
 
 def test_unicode_regex_match():
-    f = mapnik.Feature(0)
+    context = mapnik.Context()
+    context.push('name')
+    f = mapnik.Feature(context,0)
     f["name"] = 'Québec'
     expr = mapnik.Expression("[name].match('Québec')")
     eq_(expr.evaluate(f),True) # 1 == True
 
 def test_regex_replace():
-    f = mapnik.Feature(0)
+    context = mapnik.Context()
+    context.push('name')
+    f = mapnik.Feature(context,0)
     f["name"] = 'test'
     expr = mapnik.Expression("[name].replace('(\B)|( )','$1 ')")
     eq_(expr.evaluate(f),'t e s t')
 
 def test_unicode_regex_replace():
-    f = mapnik.Feature(0)
+    context = mapnik.Context()
+    context.push('name')
+    f = mapnik.Feature(context,0)
     f["name"] = 'Québec'
     expr = mapnik.Expression("[name].replace('(\B)|( )','$1 ')")
     eq_(expr.evaluate(f), u'Q u é b e c')

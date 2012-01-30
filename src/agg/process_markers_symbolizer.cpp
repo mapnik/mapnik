@@ -30,6 +30,7 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/arrow.hpp>
+#include <mapnik/markers_symbolizer.hpp>
 
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"

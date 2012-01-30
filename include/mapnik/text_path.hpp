@@ -23,6 +23,12 @@
 #ifndef MAPNIK_TEXT_PATH_HPP
 #define MAPNIK_TEXT_PATH_HPP
 
+// mapnik
+#include <mapnik/char_info.hpp>
+
+//stl
+#include <vector>
+
 // boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
@@ -32,41 +38,39 @@
 
 namespace mapnik
 {
-struct character_info
-{ 
-    int character;
-    double width, height;
-      
-    character_info() : character(0), width(0), height(0) {}
-    character_info(int c_, double width_, double height_) : character(c_), width(width_), height(height_) {}
-    ~character_info() {}
-        
-    character_info(const character_info &ci)
-        : character(ci.character), width(ci.width), height(ci.height)
-    {
-    }
-          
-};
     
 class string_info : private boost::noncopyable
 {
 protected:
-    typedef boost::ptr_vector<character_info> characters_t;
+    typedef std::vector<char_info> characters_t;
     characters_t characters_;
-    UnicodeString const& text_;
-    double width_;
-    double height_;
+    UnicodeString text_;
     bool is_rtl;
 public:
     string_info(UnicodeString const& text)
-        : text_(text),
-          width_(0),
-          height_(0),
-          is_rtl(false) {}
-
-    void add_info(int c, double width, double height)
+        : characters_(),
+          text_(text),
+          is_rtl(false)
     {
-        characters_.push_back(new character_info(c, width, height));
+
+    }
+
+    string_info()
+        : characters_(),
+          text_(),
+          is_rtl(false)
+    {
+
+    }
+
+    void add_info(char_info const& info)
+    {
+        characters_.push_back(info);
+    }
+
+    void add_text(UnicodeString text)
+    {
+        text_ += text;
     }
       
     unsigned num_characters() const
@@ -74,28 +78,24 @@ public:
         return characters_.size();
     }
     
-    void set_rtl(bool value) {is_rtl = value;}
-    bool get_rtl() const {return is_rtl;}    
+    void set_rtl(bool value)
+    {
+        is_rtl = value;
+    }
+
+    bool get_rtl() const
+    {
+        return is_rtl;
+    }
       
-    character_info at(unsigned i) const
+    char_info const& at(unsigned i) const
     {
         return characters_[i];
     }
       
-    character_info operator[](unsigned i) const
+    char_info const& operator[](unsigned i) const
     {
         return at(i);
-    }
-      
-    void set_dimensions(double width, double height)
-    {
-        width_ = width;
-        height_ = height;
-    }
-      
-    std::pair<double, double> get_dimensions() const
-    {
-        return std::pair<double, double>(width_, height_);
     }
 
     UnicodeString const&  get_string() const 
@@ -108,69 +108,84 @@ public:
        UChar break_char = '\n';
        return (text_.indexOf(break_char) >= 0);
     }
+
+    /** Resets object to initial state. */
+    void clear(void)
+    {
+        text_ = "";
+        characters_.clear();
+    }
 };
     
-struct text_path : boost::noncopyable
+
+/** List of all characters and their positions and formats for a placement. */
+class text_path : boost::noncopyable
 {
     struct character_node
     {
         int c;
         double x, y, angle;
+        char_properties *format;
                
-        character_node(int c_, double x_, double y_, double angle_) 
-            : c(c_), x(x_), y(y_), angle(angle_) {}
+        character_node(int c_, double x_, double y_, double angle_, char_properties *format_)
+            : c(c_), x(x_), y(y_), angle(angle_), format(format_) {}
         ~character_node() {}
                
-        void vertex(int *c_, double *x_, double *y_, double *angle_)
+        void vertex(int *c_, double *x_, double *y_, double *angle_, char_properties **format_)
         {
             *c_ = c;
             *x_ = x;
             *y_ = y;
             *angle_ = angle;
+            *format_ = format;
         }
     };
          
+    int itr_;
+public:
     typedef std::vector<character_node> character_nodes_t;
+    character_nodes_t nodes_;
     double starting_x;
     double starting_y;
-    character_nodes_t nodes_;
-    int itr_;
           
-    std::pair<unsigned,unsigned> string_dimensions;
+//    std::pair<unsigned,unsigned> string_dimensions;
         
     text_path() 
-        : starting_x(0),
-          starting_y(0),
-          itr_(0) {} 
-         
-    //text_path(text_path const& other) : 
-    //  itr_(0),
-    //  nodes_(other.nodes_),
-    //  string_dimensions(other.string_dimensions)
-    //{}
+        : itr_(0),
+          starting_x(0),
+          starting_y(0)
+
+    {
+
+    }
          
     ~text_path() {}
           
-    void add_node(int c, double x, double y, double angle)
+    /** Adds a new char to the list. */
+    void add_node(int c, double x, double y, double angle, char_properties *format)
     {
-        nodes_.push_back(character_node(c, x, y, angle));
+        nodes_.push_back(character_node(c, x, y, angle, format));
     }
         
-    void vertex(int *c, double *x, double *y, double *angle)
+    /** Return node. Always returns a new node. Has no way to report that there are no more nodes. */
+    void vertex(int *c, double *x, double *y, double *angle, char_properties **format)
     {
-        nodes_[itr_++].vertex(c, x, y, angle);
+        nodes_[itr_++].vertex(c, x, y, angle, format);
     }
          
+    /** Start again at first node. */
     void rewind()
     {
         itr_ = 0;
     }
          
+    /** Number of nodes. */
     int num_nodes() const
     {
         return nodes_.size();
     }
          
+    /** Delete all nodes. */
     void clear()
     {
         nodes_.clear();

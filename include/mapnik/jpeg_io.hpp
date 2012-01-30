@@ -27,8 +27,11 @@
 
 #include <mapnik/global.hpp>
 
+#include <ostream>
+
 extern "C"
 {
+#include <stdio.h>
 #include <jpeglib.h>
 }
 

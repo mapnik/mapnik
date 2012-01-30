@@ -39,7 +39,6 @@ using mapnik::shield_symbolizer;
 using mapnik::text_symbolizer;
 using mapnik::building_symbolizer;
 using mapnik::markers_symbolizer;
-using mapnik::glyph_symbolizer;
 
 struct get_symbolizer_type : public boost::static_visitor<std::string>
 {
@@ -95,12 +94,6 @@ public:
     {
         return "markers";
     }
-
-    std::string operator () ( const glyph_symbolizer & /*sym*/ )
-    {
-        return "glyph";
-    }
-
 };
 
 std::string get_symbol_type(const symbolizer& symbol)
@@ -160,11 +153,6 @@ const markers_symbolizer& markers_( const symbolizer& symbol )
     return boost::get<markers_symbolizer>(symbol);
 }
 
-const glyph_symbolizer& glyph_( const symbolizer& symbol )
-{
-    return boost::get<glyph_symbolizer>(symbol);
-}
-
 void export_symbolizer()
 {
     using namespace boost::python;
@@ -202,10 +190,6 @@ void export_symbolizer()
 
         .def("markers",markers_,
              return_value_policy<copy_const_reference>())
-
-        .def("glyph",glyph_,
-             return_value_policy<copy_const_reference>())
-
         ;
 }
 

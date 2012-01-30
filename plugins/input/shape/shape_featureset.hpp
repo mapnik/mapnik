@@ -31,41 +31,36 @@
 
 //boost
 #include <boost/scoped_ptr.hpp>
+#include <boost/utility.hpp>
 
 using mapnik::Featureset;
 using mapnik::box2d;
 using mapnik::feature_ptr;
 using mapnik::transcoder;
+using mapnik::context_ptr;
 
 template <typename filterT>
 class shape_featureset : public Featureset
 {
     filterT filter_;
-    //int shape_type_;
+    context_ptr ctx_;
     shape_io shape_;
     box2d<double> query_ext_;
     boost::scoped_ptr<transcoder> tr_;
     long file_length_;
     std::vector<int> attr_ids_;
-    mutable box2d<double> feature_ext_;
-    mutable int total_geom_size;
-    mutable int count_;
     const int row_limit_;
-
+    mutable int count_;
+    
 public:
-    shape_featureset(const filterT& filter,
-                     const std::string& shape_file,
-                     const std::set<std::string>& attribute_names,
+    shape_featureset(filterT const& filter,
+                     std::string const& shape_file,
+                     std::set<std::string> const& attribute_names,
                      std::string const& encoding,
                      long file_length,
                      int row_limit);
     virtual ~shape_featureset();
     feature_ptr next();
-
-private:
-    shape_featureset(const shape_featureset&);
-    const shape_featureset& operator=(const shape_featureset&);
-
 };
 
 #endif //SHAPE_FEATURESET_HPP

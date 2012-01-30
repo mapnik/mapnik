@@ -247,44 +247,6 @@ class _Datasource(Datasource,_injector):
             query.add_property_name(fld)
         return self.features(query)
 
-class _DeprecatedFeatureProperties(object):
-
-    def __init__(self, feature):
-        self._feature = feature
-
-    def __getitem__(self, name):
-        warnings.warn("indexing feature.properties is deprecated, index the "
-             "feature object itself for the same effect", DeprecationWarning, 2)
-        return self._feature[name]
-
-    def __iter__(self):
-        warnings.warn("iterating feature.properties is deprecated, iterate the "
-             "feature object itself for the same effect", DeprecationWarning, 2)
-        return iter(self._feature)
-
-class _Feature(Feature, _injector):
-    """
-    A Feature.
-
-    TODO: docs
-    """
-    @property
-    def properties(self):
-        return _DeprecatedFeatureProperties(self)
-
-    @property
-    def attributes(self):
-        #XXX Returns a copy! changes to it won't affect feat.'s attrs.
-        #    maybe deprecate?
-        return dict(self)
-    
-    def __init__(self, id, wkt=None, **properties):
-        Feature._c___init__(self, id)
-        if wkt is not None:
-            self.add_geometries_from_wkt(wkt)
-        for k, v in properties.iteritems():
-            self[k] = v
-    
 class _Color(Color,_injector):
     def __repr__(self):
         return "Color(R=%d,G=%d,B=%d,A=%d)" % (self.r,self.g,self.b,self.a)
@@ -649,7 +611,6 @@ __all__ = [
     'FontEngine',
     'FontSet',
     'Geometry2d',
-    'GlyphSymbolizer',
     'Image',
     'ImageView',
     'Grid',
@@ -664,7 +625,6 @@ __all__ = [
     'Path',
     'Parameter',
     'Parameters',
-    'PointDatasource',
     'PointSymbolizer',
     'PolygonPatternSymbolizer',
     'PolygonSymbolizer',

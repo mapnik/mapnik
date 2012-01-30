@@ -40,15 +40,17 @@ using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::feature_factory;
 
-kismet_featureset::kismet_featureset(const std::list<kismet_network_data>& knd_list,
+kismet_featureset::kismet_featureset(std::list<kismet_network_data> const& knd_list,
                                      std::string const& srs,
                                      std::string const& encoding)
     : knd_list_(knd_list),
       tr_(new transcoder(encoding)),
       feature_id_(1),
       knd_list_it(knd_list_.begin()),
-      source_(srs)
+      source_(srs),
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
+    ctx_->push("internet_access");
 }
 
 kismet_featureset::~kismet_featureset()
@@ -76,14 +78,14 @@ feature_ptr kismet_featureset::next()
             value = "wlan_crypted";
         }
 
-        feature_ptr feature(feature_factory::create(feature_id_));
+        feature_ptr feature(feature_factory::create(ctx_,feature_id_));
         ++feature_id_;
 
         geometry_type* pt = new geometry_type(mapnik::Point);
         pt->move_to(knd.bestlon(), knd.bestlat());
         feature->add_geometry(pt);
 
-        boost::put(*feature, key, tr_->transcode(value.c_str()));
+        feature->put(key, tr_->transcode(value.c_str()));
 
         ++knd_list_it;
 

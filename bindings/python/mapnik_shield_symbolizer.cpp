@@ -64,17 +64,6 @@ void set_text_displacement(shield_symbolizer & t, boost::python::tuple arg)
     t.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
-tuple get_anchor(const shield_symbolizer& t)
-{
-    boost::tuple<double,double> pos = t.get_anchor();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
-}
-
-void set_anchor(shield_symbolizer & t, boost::python::tuple arg)
-{
-    t.set_anchor(extract<double>(arg[0]),extract<double>(arg[1]));
-}
-
 const std::string get_filename(shield_symbolizer const& t)
 {
     return path_processor_type::to_string(*t.get_filename());
@@ -137,9 +126,6 @@ void export_shield_symbolizer()
                                                         path_expression_ptr>("TODO")
         )
         //.def_pickle(shield_symbolizer_pickle_suite())
-        .add_property("anchor",
-                      &get_anchor,
-                      &set_anchor)
         .add_property("allow_overlap",
                       &shield_symbolizer::get_allow_overlap,
                       &shield_symbolizer::set_allow_overlap,

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,22 +19,33 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-// mapnik
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/feature.hpp>
 
-namespace mapnik
-{
-    template <typename T>
-    void svg_renderer<T>::process(glyph_symbolizer const& sym,
-          Feature const& feature,
-          proj_transform const& prj_trans)
-    {
-          // nothing yet.
-    }
+namespace mapnik {
 
-    template void svg_renderer<std::ostream_iterator<char> >::process(glyph_symbolizer const& sym,
-                      Feature const& feature,
-                      proj_transform const& prj_trans);
+
+feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
+    : f_(f),
+      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
+  
+     
+void feature_kv_iterator::increment()
+{        
+    ++itr_;
 }
+
+bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
+{
+    return ( itr_ == other.itr_);        
+}
+    
+feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
+{
+    boost::get<0>(kv_) = itr_->first;
+    boost::get<1>(kv_) = f_.get(itr_->first);
+    return kv_;
+}
+
+} // endof mapnik namespace

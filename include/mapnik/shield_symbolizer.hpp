@@ -36,6 +36,8 @@ namespace mapnik
 struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
                                        public symbolizer_with_image
 {
+    shield_symbolizer(text_placements_ptr placements = text_placements_ptr(
+                          boost::make_shared<text_placements_dummy>()));
     shield_symbolizer(expression_ptr name,
                       std::string const& face_name,
                       float size,

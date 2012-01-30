@@ -389,7 +389,14 @@ void csv_datasource::parse_csv(T& stream,
 
     int feature_count(1);
     bool extent_initialized = false;
-    unsigned num_headers = headers_.size();
+    std::size_t num_headers = headers_.size();
+
+    ctx_ = boost::make_shared<mapnik::context_type>();
+    for (std::size_t i = 0; i < headers_.size(); ++i)
+    {
+        ctx_->push(headers_[i]);
+    }
+
     mapnik::transcoder tr(desc_.get_encoding());
 
     while (std::getline(stream,csv_line,newline))
@@ -435,7 +442,7 @@ void csv_datasource::parse_csv(T& stream,
                 }
             }
 
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(feature_count));
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_count));
             double x(0);
             double y(0);
             bool parsed_x = false;
@@ -451,9 +458,7 @@ void csv_datasource::parse_csv(T& stream,
                 std::string value;
                 if (beg == tok.end())
                 {
-                    UnicodeString ustr = tr.transcode(value.c_str());
-                    boost::put(*feature,fld_name,ustr);
-                    //  boost::put(*feature,fld_name,mapnik::value_null());
+                    feature->put(fld_name,tr.transcode(value.c_str()));
                     null_geom = true;
                     if (feature_count == 1)
                     {
@@ -633,8 +638,7 @@ void csv_datasource::parse_csv(T& stream,
                    (value_length > 20) ||
                    (value_length > 1 && !has_dot && value[0] == '0'))
                 {
-                    UnicodeString ustr = tr.transcode(value.c_str());
-                    boost::put(*feature,fld_name,ustr);
+                    feature->put(fld_name,tr.transcode(value.c_str()));
                     if (feature_count == 1)
                     {
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
@@ -650,7 +654,7 @@ void csv_datasource::parse_csv(T& stream,
                     {
                         if (has_dot)
                         {
-                            boost::put(*feature,fld_name,float_val);
+                            feature->put(fld_name,float_val);
                             if (feature_count == 1)
                             {
                                 desc_.add_descriptor(
@@ -660,8 +664,7 @@ void csv_datasource::parse_csv(T& stream,
                         }
                         else
                         {
-                            int val = static_cast<int>(float_val);
-                            boost::put(*feature,fld_name,val);
+                            feature->put(fld_name,static_cast<int>(float_val));
                             if (feature_count == 1)
                             {
                                 desc_.add_descriptor(
@@ -673,8 +676,7 @@ void csv_datasource::parse_csv(T& stream,
                     else
                     {
                         // fallback to normal string
-                        UnicodeString ustr = tr.transcode(value.c_str());
-                        boost::put(*feature,fld_name,ustr);
+                        feature->put(fld_name,tr.transcode(value.c_str()));
                         if (feature_count == 1)
                         {
                             desc_.add_descriptor(
@@ -686,8 +688,7 @@ void csv_datasource::parse_csv(T& stream,
                 else
                 {
                     // fallback to normal string
-                    UnicodeString ustr = tr.transcode(value.c_str());
-                    boost::put(*feature,fld_name,ustr);
+                    feature->put(fld_name,tr.transcode(value.c_str()));
                     if (feature_count == 1)
                     {
                         desc_.add_descriptor(
@@ -889,7 +890,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
     while (pos != attribute_names.end())
     {
         bool found_name = false;
-        for (int i = 0; i < headers_.size(); ++i)
+        for (std::size_t i = 0; i < headers_.size(); ++i)
         {
             if (headers_[i] == *pos)
             {

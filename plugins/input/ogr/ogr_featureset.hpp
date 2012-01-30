@@ -37,28 +37,30 @@
 class ogr_featureset : public mapnik::Featureset
 {
 public:
-    ogr_featureset(OGRDataSource & dataset,
+    ogr_featureset(mapnik::context_ptr const& ctx,
+                   OGRDataSource & dataset,
                    OGRLayer & layer,
                    OGRGeometry & extent,
-                   const std::string& encoding);
+                   std::string const& encoding);
 
-    ogr_featureset(OGRDataSource & dataset,
+    ogr_featureset(mapnik::context_ptr const& ctx,
+                   OGRDataSource & dataset,
                    OGRLayer & layer,
-                   const mapnik::box2d<double> & extent,
-                   const std::string& encoding);
+                   mapnik::box2d<double> const& extent,
+                   std::string const& encoding);
+
     virtual ~ogr_featureset();
     mapnik::feature_ptr next();
 
 private:
-    ogr_featureset(const ogr_featureset&);
-    const ogr_featureset& operator=(const ogr_featureset&);
-
+    mapnik::context_ptr ctx_;
     OGRDataSource& dataset_;
     OGRLayer& layer_;
     OGRFeatureDefn* layerdef_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
     mutable int count_;
+    
 };
 
 #endif // OGR_FEATURESET_HPP

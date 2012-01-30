@@ -35,6 +35,7 @@
 namespace mapnik {
 
 enum eGeomType {
+    Unknown = 0,
     Point = 1,
     LineString = 2,
     Polygon = 3
@@ -53,6 +54,11 @@ private:
     mutable unsigned itr_;
 public:
     
+    geometry()
+        : type_(Unknown),
+          itr_(0)
+    {}
+    
     explicit geometry(eGeomType type)
         : type_(type),
           itr_(0)
@@ -62,7 +68,12 @@ public:
     {
         return type_;
     }
-        
+    
+    void set_type(eGeomType type)
+    {
+        type_ = type;
+    }
+    
     container_type const& data() const
     {
         return cont_;

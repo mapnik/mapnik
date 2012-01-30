@@ -60,8 +60,10 @@ geos_featureset::geos_featureset(GEOSGeometry* geometry,
       identifier_(identifier),
       field_(field),
       field_name_(field_name),
-      already_rendered_(false)
+      already_rendered_(false),
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
+    ctx_->push(field_name);
 }
 
 geos_featureset::~geos_featureset()
@@ -114,14 +116,14 @@ feature_ptr geos_featureset::next()
                 geos_wkb_ptr wkb(geometry_);
                 if (wkb.is_valid())
                 {
-                    feature_ptr feature(feature_factory::create(identifier_));
+                    feature_ptr feature(feature_factory::create(ctx_,identifier_));
 
                     geometry_utils::from_wkb(feature->paths(),
                                              wkb.data(),
                                              wkb.size());
                     if (field_ != "")
                     {
-                        boost::put(*feature, field_name_, tr_->transcode(field_.c_str()));
+                        feature->put(field_name_, tr_->transcode(field_.c_str()));
                     }
                     
                     return feature;

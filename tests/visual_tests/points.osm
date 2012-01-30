@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version='0.6' generator='JOSM'>
+  <node id='-1' lat='0' lon='0'>
+    <tag k='name' v='Test one' />
+    <tag k='nr' v='1' />
+  </node>
+    <node id='-2' lat='0' lon='0.1'>
+    <tag k='name' v='Test two' />
+    <tag k='nr' v='2' />
+  </node>
+    <node id='-3' lat='0' lon='0.2'>
+    <tag k='name' v='Test three' />
+    <tag k='nr' v='3' />
+  </node>
+    <node id='-4' lat='0' lon='0.3'>
+    <tag k='name' v='Test four' />
+    <tag k='nr' v='4' />
+  </node>
+    <node id='-5' lat='0' lon='0.4'>
+    <tag k='name' v='Test five' />
+    <tag k='nr' v='5' />
+  </node>
+    <node id='-6' lat='0' lon='0.5'>
+    <tag k='name' v='Test six' />
+    <tag k='nr' v='6' />
+  </node>
+    <node id='-7' lat='0' lon='0.6'>
+    <tag k='name' v='Test seven' />
+    <tag k='nr' v='7' />
+  </node>
+      <node id='-8' lat='0' lon='0.7'>
+    <tag k='name' v='Test eight' />
+    <tag k='nr' v='8' />
+  </node>
+   <node id='-9' lat='0' lon='0.8'>
+    <tag k='name' v='Test nine' />
+    <tag k='nr' v='9' />
+  </node>
+   <node id='-10' lat='0' lon='0.9'>
+    <tag k='name' v='Test ten' />
+    <tag k='nr' v='10' />
+  </node>
+</osm>

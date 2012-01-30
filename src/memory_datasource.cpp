@@ -27,6 +27,7 @@
 #include <mapnik/params.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <boost/math/distributions/normal.hpp>
+#include <mapnik/feature_kv_iterator.hpp>
 // stl
 #include <algorithm>
 
@@ -66,14 +67,11 @@ memory_datasource::~memory_datasource() {}
     
 void memory_datasource::push(feature_ptr feature)
 {
-    // TODO - collect attribute descriptors?
-    //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
-    std::map<std::string,mapnik::value> const& fprops = feature->props();
-    std::map<std::string,mapnik::value>::const_iterator it = fprops.begin();
-    std::map<std::string,mapnik::value>::const_iterator end = fprops.end();
+    mapnik::feature_kv_iterator::feature_kv_iterator it(*feature, true);
+    mapnik::feature_kv_iterator::feature_kv_iterator end(*feature);
     for (; it != end; ++it) {
         try {
-            accumulators_[it->first](it->second.to_double());
+            accumulators_[boost::get<0>(*it)](boost::get<1>(*it).to_double());
         } catch(boost::bad_lexical_cast &) {
             // string values are not accumulated.
         }
@@ -145,20 +143,6 @@ size_t memory_datasource::size() const
 void memory_datasource::clear()
 {
     features_.clear();
-}
-
-// point_datasource
-
-void point_datasource::add_point(double x, double y, const char* key, const char* value)
-{
-        feature_ptr feature(feature_factory::create(feature_id_));
-        ++feature_id_;
-        geometry_type * pt = new geometry_type(mapnik::Point);
-        pt->move_to(x,y);
-        feature->add_geometry(pt);
-        transcoder tr("utf-8");
-        (*feature)[key] = tr.transcode(value);
-        this->push(feature);
 }
 
 }
