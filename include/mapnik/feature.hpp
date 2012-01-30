@@ -69,10 +69,13 @@ public:
     context()
         : base_type(mapping_) {}
     
-    void push(key_type const& name)
+    size_type push(key_type const& name)
     {
-        mapping_.insert(std::make_pair(name,mapping_.size()));
+        size_type index = mapping_.size();
+        mapping_.insert(std::make_pair(name, index));
+        return index;
     }
+    
     size_type size() const { return mapping_.size(); }
     const_iterator begin() const { return mapping_.begin();}
     const_iterator end() const { return mapping_.end();}
@@ -106,16 +109,16 @@ public:
     template <typename T>
     void put(context_type::key_type const& key, T const& val)
     {
-        context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end() 
-            && itr->second < data_.size())
-        {
-            data_[itr->second] = value(val);
-        }
-        else 
-            throw std::out_of_range("Key doesn't exist");
+        put(key,value(val));
     } 
     
+    template <typename T>
+    void put_new(context_type::key_type const& key, T const& val)
+    {
+        put_new(key,value(val));
+    } 
+    
+
     void put(context_type::key_type const& key, value const& val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
@@ -127,6 +130,23 @@ public:
         else
             throw std::out_of_range("Key doesn't exist");
     }
+
+   
+    void put_new(context_type::key_type const& key, value const& val)
+    {
+        context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
+        if (itr != ctx_->mapping_.end() 
+            && itr->second < data_.size())
+        {
+            data_[itr->second] = val;
+        }
+        else
+        {
+            cont_type::size_type index = ctx_->push(key);
+            data_.push_back(val);
+        }
+    } 
+    
     
     bool has_key(context_type::key_type const& key) const
     {

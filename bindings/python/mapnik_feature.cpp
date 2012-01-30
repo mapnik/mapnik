@@ -75,7 +75,7 @@ mapnik::value  __getitem2__(Feature const& feature, std::size_t index)
 
 void __setitem__(Feature & feature, std::string const& name, mapnik::value const& val)
 {
-    feature.put(name,val);
+    feature.put_new(name,val);
 }
 
 boost::python::dict attributes(Feature const& f)
